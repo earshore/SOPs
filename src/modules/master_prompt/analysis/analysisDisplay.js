@@ -194,6 +194,7 @@ window.openPromptModal = function () {
 
 function renderPromptPreviewArea() {
   const rightPanel = document.querySelector(".lg\\:col-span-3"); // 获取右侧列
+  // 防止重复渲染
   if (!rightPanel || document.getElementById("prompt-preview-container"))
     return;
 
@@ -229,7 +230,6 @@ function renderPromptPreviewArea() {
 
   rightPanel.insertBefore(previewDiv, rightPanel.firstChild);
 }
-
 // ✅ 新增：更新 Prompt 预览内容
 window.updatePromptPreview = function () {
   const prompt = buildDynamicPrompt();
@@ -666,8 +666,8 @@ function renderWidgetContent(key, report, transReport) {
             <div class="flex-shrink-0 flex justify-between items-center px-5 pt-5 pb-2 bg-white select-none drag-handle cursor-move">
                 <h3 class="text-[15px] font-bold text-slate-800 flex items-center gap-2.5 pointer-events-none truncate mr-2">
                     <span class="w-8 h-8 rounded-xl ${style.lightBg} text-${
-    style.color
-  }-600 flex items-center justify-center text-xs flex-shrink-0 shadow-sm transition-transform group-hover/card:scale-105">
+                      style.color
+                    }-600 flex items-center justify-center text-xs flex-shrink-0 shadow-sm transition-transform group-hover/card:scale-105">
                         <i class="fas ${style.icon}"></i>
                     </span>
                     <span class="truncate tracking-tight" title="${title}">${title}</span>
