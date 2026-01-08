@@ -4,10 +4,10 @@ import { showToast, showProgress, getErrorSummary, sleep } from "../../../common
 import { scrapeAsin } from "./scraperService.js";
 // 引入 languageFlagMap
 import { LANGUAGE_HEADERS, languageFlagMap, SITE_NAME_MAP } from "../../../common/constants/constants.js";
-import { renderDataPanel } from "../mp_data_manage/dataDisplay.js";
-import { updateAsinSelectList } from "../mp_analysis/analysisDisplay.js";
+import { renderDataPanel } from "../data_manage/dataDisplay.js";
+import { updateAsinSelectList } from "../analysis/analysisDisplay.js";
 import { HistoryService } from "../../../services/historyService.js";
-import { saveProxyConfig, renderProxyInputUI } from "../../../components/sys_settings/settings.js"
+import { saveProxyConfig, renderProxyInputUI } from "../../../components/settings/systemSettings.js"
 
 // ==========================================
 // 1. 配置管理 (隔离存储)

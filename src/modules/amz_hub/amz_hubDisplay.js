@@ -24,7 +24,7 @@ export async function loadAmzHubView() {
     try {
         // 2. 请求 HTML 文件 (注意路径要根据你的实际目录结构调整)
         // 假设 html 文件在 modules/Amz_Hub/amz_hubDisplay.html
-        const response = await fetch('src/modules/Amz_Hub/amz_hubDisplay.html'); 
+        const response = await fetch('src/modules/amz_hub/amz_hubDisplay.html'); 
         
 if (!response.ok) {
             throw new Error(`路径错误或文件不存在 (Status: ${response.status})`);

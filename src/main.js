@@ -24,13 +24,13 @@ window.addEventListener("unhandledrejection", (event) => {
 });
 
 // 1. 导入各模块的初始化函数和业务函数
-import { initSettingsListeners, updateModelStatus, loadProviderConfig, openSettings, closeSettings, saveProviderConfig, renderProxyInputUI, fetchModels, toggleApiKeyVisibility, testConnection, saveProxyConfig, } from "./components/sys_settings/settings.js";
+import { initSettingsListeners, updateModelStatus, loadProviderConfig, openSettings, closeSettings, saveProviderConfig, renderProxyInputUI, fetchModels, toggleApiKeyVisibility, testConnection, saveProxyConfig, } from "./components/settings/systemSettings.js";
 import { switchTab, renderMegaMenu } from "../src/common/utils/ui.js";
-import { initScraperListeners, selectSite, renderHistory, clearAsins, startScraping, loadHistory, clearHistory, } from "./app_modules/master_prompt/mp_scraper/scraperPanel.js";
-import { renderDataPanel, toggleCardExpand, deleteProduct, deleteReview, triggerImport, handleImportFiles, switchDataTab} from "./app_modules/master_prompt/mp_data_manage/dataDisplay.js";
-import { initAnalysisPanel, updateAsinSelectList, analyzeSelectedAsins, renderReport, } from "./app_modules/master_prompt/mp_analysis/analysisDisplay.js";
-import { initPromptlabModule } from './app_modules/master_prompt/mp_promptlab/promptlabDisplay.js';
-import { initKeywordTracker } from '../src/modules/keyword_tracker/trackerDisplay.js';
+import { initScraperListeners, selectSite, renderHistory, clearAsins, startScraping, loadHistory, clearHistory, } from "./modules/master_prompt/scraper/scraperPanel.js";
+import { renderDataPanel, toggleCardExpand, deleteProduct, deleteReview, triggerImport, handleImportFiles, switchDataTab} from "./modules/master_prompt/data_manage/dataDisplay.js";
+import { initAnalysisPanel, updateAsinSelectList, analyzeSelectedAsins, renderReport, } from "./modules/master_prompt/analysis/analysisDisplay.js";
+import { initPromptlabModule } from './modules/master_prompt/promptlab/promptlabDisplay.js';
+import { initKeywordTracker } from './modules/keyword_tracker/trackerDisplay.js';
 
 // ========================
 // APP STARTUP (程序启动)

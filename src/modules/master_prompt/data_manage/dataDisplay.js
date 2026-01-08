@@ -2,8 +2,8 @@
 import state from "../../../common/state.js";
 import { getErrorSummary, showToast, switchTab } from "../../../common/utils/ui.js";
 import { HistoryService } from "../../../services/historyService.js";
-import { renderHistory } from "../mp_scraper/scraperPanel.js";
-import { updateAsinSelectList } from "../mp_analysis/analysisDisplay.js";
+import { renderHistory } from "../scraper/scraperPanel.js";
+import { updateAsinSelectList } from "../analysis/analysisDisplay.js";
 
 import { languageFlagMap } from "../../../common/constants/constants.js";
 // ==========================================

@@ -2,7 +2,7 @@ console.log("🚀 ui.js 模块 (Config-Driven) 开始加载...");
 
 import state from "../state.js";
 import { ERROR_MESSAGES } from "../constants/constants.js";
-import { loadAmzHubView } from "../../app_modules/amazon_hub/amz_hubDisplay.js";
+import { loadAmzHubView } from "../../modules/amz_hub/amz_hubDisplay.js";
 import { MENU_CONFIG, getRoutesByModule, getRouteFullConfig } from "../config/menuConfig.js";
 
 /**

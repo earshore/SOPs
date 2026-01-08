@@ -4,9 +4,9 @@ import { PROVIDERS, LANGUAGE_HEADERS } from "../../../common/constants/constants
 import { ANALYSIS_MODULES, DYNAMIC_MASTER_TEMPLATE } from "../../../common/constants/prompts.js"; // 导入新配置
 import { showToast, showProgress } from "../../../common/utils/ui.js";
 import { HistoryService } from "../../../services/historyService.js";
-import { renderHistory } from "../mp_scraper/scraperPanel.js";
+import { renderHistory } from "../scraper/scraperPanel.js";
 import { AnalysisService } from "./analysisService.js";
-import { getFieldTitle } from "../mp_promptlab/promptlabDisplay.js";
+import { getFieldTitle } from "../promptlab/promptlabDisplay.js";
 
 // Gridstack 实例
 let grid = null;

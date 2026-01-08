@@ -5,20 +5,20 @@
  */
 const viewsConfig = [
     // 主功能面板 -> 插入到 main 标签
-    { url: './src/app_modules/master_prompt/mp_scraper/scraperPanel.html', target: 'main' },
-    { url: './src/app_modules/master_prompt/mp_data_manage/dataDisplay.html', target: 'main' },
-    { url: './src/app_modules/master_prompt/mp_analysis/analysisDisplay.html', target: 'main' },
-    { url: './src/app_modules/master_prompt/mp_promptlab/promptlabDisplay.html', target: 'main' },
+    { url: './src/modules/master_prompt/scraper/scraperPanel.html', target: 'main' },
+    { url: './src/modules/master_prompt/data_manage/dataDisplay.html', target: 'main' },
+    { url: './src/modules/master_prompt/analysis/analysisDisplay.html', target: 'main' },
+    { url: './src/modules/master_prompt/promptlab/promptlabDisplay.html', target: 'main' },
 
     // Keyword Tracker
-    { url: './src/app_modules/keyword_tracker/trackerDisplay.html', target: 'main' },
+    { url: './src/modules/keyword_tracker/trackerDisplay.html', target: 'main' },
 
     // Amazon 智库
-    { url: './src/app_modules/amazon_hub/amz_hubDisplay.html', target: 'main' },
+    { url: './src/modules/amz_hub/amz_hubDisplay.html', target: 'main' },
 
     // 全局弹窗组件 -> 插入到 modal-container
-    { url: './src/components/sys_settings/settings.html', target: '#modal-container' },
-    { url: './src/components/s_modal/sharedModals.html', target: '#modal-container' }
+    { url: './src/components/settings/systemSettings.html', target: '#modal-container' },
+    { url: './src/components/modal/sharedModals.html', target: '#modal-container' }
 ];
 
 async function loadHtml(url, targetSelector) {
