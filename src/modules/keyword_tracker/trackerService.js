@@ -145,10 +145,16 @@ async function bridgeCallLLM(systemPrompt, userPrompt, options = {}) {
     );
 }
 
+
 /**
  * 执行 AI 深度诊断
  */
 export async function fetchListingAnalysis(copyText, keywords, matchedKeywords, unmatchedKeywords) {
+    // 🔥🔥🔥 新增校验：检查文案是否为空 🔥🔥🔥
+    if (!copyText || !copyText.trim()) {
+        throw new Error("文案内容为空，无法进行AI分析。请先在左侧输入框填入Listing文案。");
+    }
+
     const systemPrompt = ANALYSIS_PROMPT_TEMPLATE;
         
     // 截取部分文案防止 token 超限
@@ -158,20 +164,6 @@ export async function fetchListingAnalysis(copyText, keywords, matchedKeywords, 
     **Matched Keywords:** ${matchedKeywords.map(k => k.keyword).join(', ')}
     **Unmatched Keywords:** ${unmatchedKeywords.join(', ')}
     `;
-    // 文案内容：
-    // ${copyText.substring(0, 3000)}... (截取部分)
-    
-    // 目标关键词 (${keywords.length}个):
-    // ${keywords.join(', ')}
-    
-    // 已匹配: ${matchedKeywords.map(k => k.keyword).join(', ')}
-    // 未匹配: ${unmatchedKeywords.join(', ')}
-    
-    // 请输出：
-    // 1. 整体评分与简评
-    // 2. 关键词埋词建议（特别是未匹配的词）
-    // 3. 文案风险检查（违禁词、过度承诺）
-
 
     return await bridgeCallLLM(systemPrompt, userPrompt, { temperature: 0.5 });
 }
@@ -180,8 +172,11 @@ export async function fetchListingAnalysis(copyText, keywords, matchedKeywords, 
  * 执行沉浸式翻译
  */
 export async function fetchImmersionTranslation(copyText) {
-    // const systemPrompt = "你是一个专业的亚马逊 Listing 翻译助手。请将用户提供的文案翻译成地道的中文，用于运营人员内部分析。保持原意，分段输出。";
-    // const userPrompt = `请翻译以下内容：\n\n${copyText}`;
+    // 🔥🔥🔥 新增校验：检查文案是否为空 🔥🔥🔥
+    if (!copyText || !copyText.trim()) {
+        throw new Error("文案内容为空，无法进行翻译。请先在左侧输入框填入Listing文案。");
+    }
+
     const systemPrompt = TRANSLATE_PROMPT_TEMPLATE2;
     const userPrompt = `## Input：\n\n${copyText}`;
     
