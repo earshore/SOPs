@@ -134,6 +134,13 @@ export const MENU_CONFIG = {
             panelId: 'panel-amz_hub',
             isHub: true
         },
+        amz_marketing_calendar: {   //预留营销日历
+        moduleId: 'amz_hub_core',
+        label: '营销日历',
+        icon: 'fas fa-calendar-alt',
+        panelId: 'panel-amz_hub',
+        isHub: true
+    },
 
     }
 };
