@@ -79,7 +79,7 @@ export const MENU_CONFIG = {
         },
         promptlab: {
             moduleId: 'master_prompt',
-            label: 'Prompt 工场',
+            label: 'Prompt 生成',
             icon: 'fas fa-wand-magic-sparkles',
             panelId: 'panel-promptlab'
         },
