@@ -1,0 +1,82 @@
+<div id="panel-analysis" class="panel hidden fade-in">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div class="glass-card rounded-2xl shadow-lg border border-slate-200 p-6 lg:sticky lg:top-24 max-h-[calc(100vh-8rem)] overflow-y-auto custom-scrollbar">
+            <h3 class="text-lg font-semibold mb-6 flex items-center gap-2 border-b border-slate-100 pb-4">
+                <i class="fas fa-brain text-blue-500"></i>
+                分析配置
+            </h3>
+
+            <div class="flex items-center justify-between mb-2">
+                <label class="text-sm font-bold text-slate-700">选择 ASIN</label>
+                <button onclick="selectAllAsins()"
+                    class="text-xs text-blue-600 hover:text-blue-700 font-medium px-2 py-0.5 rounded hover:bg-blue-50 transition-colors">
+                    全选
+                </button>
+            </div>
+
+            <div id="asin-select-list" class="space-y-2 max-h-64 overflow-y-auto mb-6 custom-scrollbar pr-1">
+                <p class="text-sm text-slate-400 text-center py-4">暂无数据</p>
+            </div>
+
+            <div class="flex items-center justify-between mb-2">
+                <label class="block text-sm font-bold text-slate-700">
+                    分析目标
+                </label>
+                <div class="text-xs space-x-2">
+                    <button onclick="window.toggleAllModules(true)" class="text-blue-600 hover:text-blue-700 font-medium">全选</button>
+                    <span class="text-slate-300">|</span>
+                    <button onclick="window.toggleAllModules(false)" class="text-slate-400 hover:text-slate-600">清空</button>
+                </div>
+            </div>
+            
+            <button id="analyze-btn"
+                class="w-full py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold rounded-xl shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                <i class="fas fa-brain"></i> 分析ASIN
+            </button>
+
+            <div class="mt-6 pt-6 border-t border-slate-200">
+                <h3 class="text-lg font-semibold mb-6 flex items-center gap-2 border-b border-slate-100 pb-4">
+                    <i class="fas fa-earth-europe text-blue-500"></i>翻译配置
+                </h3>
+                <label class="flex items-center justify-between mb-3">
+                    <label class="text-sm font-bold text-slate-700"> 
+                        <span>沉浸式翻译</span>
+                    </label>
+                    <input type="checkbox" id="enable-translation" class="w-4 h-4 text-blue-600 rounded"
+                        onchange="toggleTranslation()" />
+                </label>
+                <select id="translation-model" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg mb-4">
+                    <option value="">选择翻译模型</option>
+                </select>
+
+                <button onclick="translateReport()" id="translate-btn"
+                    class="w-full py-3 bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white font-semibold rounded-xl shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    disabled>
+                    <i class="fas fa-earth-europe"></i> 翻译报告
+                </button>
+            </div>
+        </div>
+
+        <div class="lg:col-span-3 space-y-6">
+            <div class="glass-card rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
+                <div id="report-content" class="p-6">
+                    <div id="no-report-msg" class="text-center py-12">
+                        <div class="mb-4 text-slate-300">
+                            <i class="fas fa-chart-pie text-6xl"></i>
+                        </div>
+                        <p class="text-slate-500">暂无分析报告</p>
+                        <p class="text-sm text-slate-400 mt-2">
+                            请选择ASIN并点击"分析ASIN"生成报告
+                        </p>
+                    </div>
+                    <div id="report-display" class="hidden"></div>
+                </div>
+
+                <div id="report-json" class="p-6 hidden">
+                    <pre id="report-json-display"
+                        class="bg-slate-900 text-slate-100 p-4 rounded-xl overflow-x-auto text-sm max-h-[600px] overflow-y-auto"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

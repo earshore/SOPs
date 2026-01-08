@@ -1,0 +1,197 @@
+<div id="panel-scraper" class="panel hidden fade-in">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 space-y-6">
+            <div class="glass-card rounded-2xl shadow-lg border border-slate-200 p-6">
+                <h2 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-crosshairs text-blue-500"></i> 采集配置
+                </h2>
+
+                <div class="mb-4">
+                    <label class="flex items-center text-sm font-bold text-slate-800 mb-2">
+                        <span>目标站点</span>
+                    </label>
+
+                    <div class="grid grid-cols-5 2xl:grid-cols-10 gap-2">
+                        <button onclick="selectSite('DE')"
+                            class="site-btn selected flex flex-col items-center p-3 border-2 border-blue-500 bg-blue-50 rounded-xl transition-all"
+                            data-site="DE">
+                            <span class="text-2xl">🇩🇪</span><span class="text-xs font-medium mt-1">德国</span>
+                        </button>
+                        <button onclick="selectSite('FR')"
+                            class="site-btn flex flex-col items-center p-3 border-2 border-slate-200 hover:border-blue-300 rounded-xl transition-all"
+                            data-site="FR">
+                            <span class="text-2xl">🇫🇷</span><span class="text-xs font-medium mt-1">法国</span>
+                        </button>
+                        <button onclick="selectSite('IT')"
+                            class="site-btn flex flex-col items-center p-3 border-2 border-slate-200 hover:border-blue-300 rounded-xl transition-all"
+                            data-site="IT">
+                            <span class="text-2xl">🇮🇹</span><span class="text-xs font-medium mt-1">意大利</span>
+                        </button>
+                        <button onclick="selectSite('ES')"
+                            class="site-btn flex flex-col items-center p-3 border-2 border-slate-200 hover:border-blue-300 rounded-xl transition-all"
+                            data-site="ES">
+                            <span class="text-2xl">🇪🇸</span><span class="text-xs font-medium mt-1">西班牙</span>
+                        </button>
+                        <button onclick="selectSite('NL')"
+                            class="site-btn flex flex-col items-center p-3 border-2 border-slate-200 hover:border-blue-300 rounded-xl transition-all"
+                            data-site="NL">
+                            <span class="text-2xl">🇳🇱</span><span class="text-xs font-medium mt-1">荷兰</span>
+                        </button>
+                        <button onclick="selectSite('SE')"
+                            class="site-btn flex flex-col items-center p-3 border-2 border-slate-200 hover:border-blue-300 rounded-xl transition-all"
+                            data-site="SE">
+                            <span class="text-2xl">🇸🇪</span><span class="text-xs font-medium mt-1">瑞典</span>
+                        </button>
+                        <button onclick="selectSite('PL')"
+                            class="site-btn flex flex-col items-center p-3 border-2 border-slate-200 hover:border-blue-300 rounded-xl transition-all"
+                            data-site="PL">
+                            <span class="text-2xl">🇵🇱</span><span class="text-xs font-medium mt-1">波兰</span>
+                        </button>
+                        <button onclick="selectSite('BE')"
+                            class="site-btn flex flex-col items-center p-3 border-2 border-slate-200 hover:border-blue-300 rounded-xl transition-all"
+                            data-site="BE">
+                            <span class="text-2xl">🇧🇪</span><span class="text-xs font-medium mt-1">比利时</span>
+                        </button>
+                        <button onclick="selectSite('IE')"
+                            class="site-btn flex flex-col items-center p-3 border-2 border-slate-200 hover:border-blue-300 rounded-xl transition-all"
+                            data-site="IE">
+                            <span class="text-2xl">🇮🇪</span><span class="text-xs font-medium mt-1">爱尔兰</span>
+                        </button>
+                        <button onclick="selectSite('UK')"
+                            class="site-btn flex flex-col items-center p-3 border-2 border-slate-200 hover:border-blue-300 rounded-xl transition-all"
+                            data-site="UK">
+                            <span class="text-2xl">🇬🇧</span><span class="text-xs font-medium mt-1">英国</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex flex-col md:flex-row items-start gap-8 mb-6">
+                    <div class="flex-1 flex flex-col w-full">
+                        <label for="asin-input" class="block text-sm font-medium text-slate-700 mb-2">
+                            ASIN列表
+                            <span class="text-slate-400 font-normal">(逗号或换行分隔)</span>
+                        </label>
+                        <textarea id="asin-input" rows="4"
+                            class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none shadow-sm"
+                            placeholder="B0FMGTGMK4&#10;B09XBHXKKL&#10;B0FB3M6ZMZ"></textarea>
+
+                        <div class="flex items-center justify-between mt-2 px-1">
+                            <span id="asin-count" class="text-xs text-slate-500">已输入 0 个ASIN</span>
+                            <span id="asin-error" class="text-xs text-red-500 hidden"></span>
+                            <button onclick="clearAsins()"
+                                class="text-xs text-blue-600 hover:text-blue-700 font-medium">
+                                清空
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 w-full md:pt-[28px]">
+                        <div class="bg-transparent border-none p-0">
+                            <!-- <h4 class="text-sm font-semibold text-slate-600 mb-4">
+                                采集设置
+                            </h4> -->
+                            <div class="space-y-4">
+                                <label class="flex items-center gap-2 cursor-pointer group">
+                                    <div class="relative flex items-center">
+                                        <input type="checkbox" id="scrape-reviews" checked
+                                            class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 transition-all cursor-pointer" />
+                                    </div>
+                                    <span class="text-sm text-slate-700 group-hover:text-blue-600 transition-colors">
+                                        采集评论
+                                    </span>
+                                </label>
+                                <div id="network-config-card"
+                                    onclick="document.getElementById('settings-modal').classList.remove('hidden')"
+                                    class="flex items-center justify-between p-3 bg-blue-50 border border-blue-100 rounded-xl cursor-pointer hover:bg-blue-100 transition-colors group">
+                                    <div class="flex items-center gap-2">
+                                        <i class="fas fa-network-wired text-blue-500"></i>
+                                        <div class="flex flex-col">
+                                            <span class="text-sm font-medium text-blue-700">配置采集网络</span>
+                                            <span class="text-[10px] text-blue-500 opacity-80">支持 API Key / 代理</span>
+                                        </div>
+                                    </div>
+                                    <i class="fas fa-chevron-right text-xs text-blue-400 group-hover:text-blue-600"></i>
+                                </div>
+
+                                <div class="flex items-start gap-2 px-1">
+                                    <i class="fas fa-info-circle text-slate-400 mt-0.5 text-sm"></i>
+                                    <p class="text-xs text-slate-400 italic leading-relaxed">
+                                        提示：推荐使用商业 API 模式以获得 99% 的成功率。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="start-scrape-btn"
+                    class="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2">
+                    <i class="fas fa-rocket"></i> <span>开始采集</span>
+                </button>
+            </div>
+
+            <div id="scrape-status-panel" class="glass-card rounded-2xl shadow-lg border border-slate-200 p-6 hidden">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                    <i class="fas fa-map-marker-alt fa-fw mr-2 text-slate-400"></i>采集状态
+                </h3>
+                <div id="scrape-status-list" class="space-y-3"></div>
+                <div id="scrape-summary" class="mt-4 pt-4 border-t border-slate-200 hidden"></div>
+            </div>
+        </div>
+
+        <div class="space-y-6">
+            <div class="glass-card rounded-2xl shadow-lg border border-slate-200 p-6">
+                <h3 class="text-sm font-semibold text-slate-800 mb-4 flex items-center justify-between">
+                    <span class="flex items-center gap-2"><i class="fas fa-history text-slate-500"></i> 最近任务</span>
+                    <button id="clear-history-btn" class="text-xs text-slate-500 hover:text-red-500 cursor-pointer">
+                        清空
+                    </button>
+                </h3>
+                <div id="history-list" class="space-y-2 max-h-112 overflow-y-auto">
+                    <p class="text-sm text-slate-400 text-center py-4">
+                        暂无历史记录
+                    </p>
+                </div>
+            </div>
+            <div class="glass-card rounded-2xl shadow-lg border border-slate-200 p-6">
+                <h3 class="text-sm font-semibold text-slate-800 mb-4 flex items-center justify-between">
+                    <span class="flex items-center gap-2">
+                        <i class="fas fa-puzzle-piece text-indigo-500"></i> 插件/工具下载
+                    </span>
+                </h3>
+
+                <div class="space-y-3">
+                    <div
+                        class="group flex items-center justify-between p-3 bg-white rounded-xl border border-slate-100 hover:border-indigo-200 hover:shadow-md transition-all duration-300">
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-500 flex items-center justify-center group-hover:bg-indigo-500 group-hover:text-white transition-colors">
+                                <i class="fab fa-chrome text-xl"></i>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-sm font-awesome text-slate-700">Amazon Scraper插件</span>
+                                <span class="text-[10px] text-slate-400 font-mono">v1.3.0 • 2026-01-05</span>
+                            </div>
+                        </div>
+
+                        <a href="../assets/plugins/Amazon-Scraper-v1.3.zip" download="Amazon-Scraper-v1.3.zip"
+                            class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 text-slate-400 hover:bg-indigo-600 hover:text-white hover:shadow-lg transition-all active:scale-95"
+                            title="点击下载">
+                            <!-- <i class="fas fa-cloud-download-alt"></i> -->
+                            <i class="fa-solid fa-download"></i>
+                        </a>
+                    </div>
+
+
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-slate-100 flex items-start gap-2">
+                    <i class="fas fa-info-circle text-xs text-slate-400 mt-0.5"></i>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        下载后在浏览器扩展管理页面开启“开发者模式”加载即可。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

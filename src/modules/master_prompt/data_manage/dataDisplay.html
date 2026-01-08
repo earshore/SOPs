@@ -1,0 +1,133 @@
+<div id="panel-data" class="panel hidden fade-in">
+    
+    <div class="bg-white border border-slate-200 rounded-xl shadow-sm mb-6 overflow-hidden transition-all duration-300">
+        
+        <button onclick="document.getElementById('amz_refining_container').classList.toggle('hidden'); this.querySelector('.fa-chevron-down').classList.toggle('rotate-180')" 
+            class="w-full text-left p-5 flex justify-between items-center hover:bg-slate-50 transition-colors group bg-white">
+            
+            <div class="pr-4">
+                <h3 class="font-normal text-slate-600 text-base flex items-center gap-2">
+                    <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 text-blue-500">
+                        <i class="fa-regular fa-lightbulb"></i>
+                    </span>
+                    Ai分析 & 数据结构化策略
+                </h3>
+                <p class="text-xs text-slate-500 mt-1 pl-10">
+                    不要把所有信息都丢给 AI。垃圾进，垃圾出。你需要提取那些能喂饱 Project COSMO（知识图谱）和 Rufus（问答助手）的高价值信息。
+                </p>
+            </div>
+
+            <div class="flex-shrink-0 ml-4">
+                <i class="fas fa-chevron-down text-slate-300 transition-transform duration-300 group-hover:text-slate-500"></i>
+            </div>
+        </button>
+
+        <div id="amz_refining_container" class="hidden border-t border-slate-100 bg-slate-50/50 p-5">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl shadow-sm border border-green-100 overflow-hidden h-full">
+                    <div class="bg-green-50 px-5 py-3 border-b border-green-100">
+                        <h4 class="font-bold text-green-800 text-sm flex items-center">
+                            <span class="mr-2">✅</span> 必须提取 (高价值信号)
+                        </h4>
+                    </div>
+                    <div class="p-5 space-y-4">
+                        <div class="flex items-start">
+                            <div class="bg-green-100 text-green-800 rounded px-2 py-0.5 mr-3 text-xs font-bold flex-shrink-0 mt-0.5">COSMO</div>
+                            <div>
+                                <h5 class="font-bold text-slate-700 text-xs">具体使用场景 (Context)</h5>
+                                <p class="text-xs text-slate-500 mt-1">例如：Review中提到的 "Taking it on a ski trip" 而非单纯的 "Winter coat"。COSMO 依赖场景构建图谱。</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-blue-100 text-blue-800 rounded px-2 py-0.5 mr-3 text-xs font-bold flex-shrink-0 mt-0.5">Rufus</div>
+                            <div>
+                                <h5 class="font-bold text-slate-700 text-xs">具体痛点与解决方案 (QA Pairs)</h5>
+                                <p class="text-xs text-slate-500 mt-1">提取负面 Review 中的具体失效点（如"拉链在零下度数卡住"），转化为 Listing 中的 QA 或属性描述。</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-purple-100 text-purple-800 rounded px-2 py-0.5 mr-3 text-xs font-bold flex-shrink-0 mt-0.5">Intent</div>
+                            <div>
+                                <h5 class="font-bold text-slate-700 text-xs">情感形容词与原生表达</h5>
+                                <p class="text-xs text-slate-500 mt-1">用户用来形容产品的非官方词汇（如 "Game changer for arthritis"）。这是长尾流量的来源。</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-orange-100 text-orange-800 rounded p-1 mr-3 text-xs font-bold">A10</div>
+                            <div>
+                                <h5 class="font-semibold text-sm">变体偏好分布</h5>
+                                <p class="text-xs text-gray-500">分析 Top 竞品哪个颜色/尺寸评论最多，直接决定备货，避免库存积压影响 IPI。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-red-100 overflow-hidden h-full">
+                    <div class="bg-red-50 px-5 py-3 border-b border-red-100">
+                        <h4 class="font-bold text-red-800 text-sm flex items-center">
+                            <span class="mr-2">❌</span> 必须过滤 (噪音)
+                        </h4>
+                    </div>
+                    <div class="p-5 space-y-4">
+                        <div class="opacity-75 hover:opacity-100 transition-opacity">
+                            <h5 class="font-bold text-slate-600 text-xs line-through decoration-red-400">通用的好评</h5>
+                            <p class="text-xs text-slate-500 mt-1">"Great product", "Fast shipping", "Love it". 这些对构建语义图谱毫无价值，会稀释 AI 的注意力。</p>
+                        </div>
+                        <div class="opacity-75 hover:opacity-100 transition-opacity">
+                            <h5 class="font-bold text-slate-600 text-xs line-through decoration-red-400">物流与包装抱怨 (非FBM)</h5>
+                            <p class="text-xs text-slate-500 mt-1">除非你是自发货，否则 FBA 的物流问题不属于产品本身的属性缺陷，会误导 Rufus 对产品质量的判断。</p>
+                        </div>
+                        <div class="opacity-75 hover:opacity-100 transition-opacity">
+                            <h5 class="font-bold text-slate-600 text-xs line-through decoration-red-400">竞品特定的品牌词</h5>
+                            <p class="text-xs text-slate-500 mt-1">虽然可以做 PPC 竞品词，但在 Listing 埋词中应避免，以免造成侵权或相关性降低。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="amz_prompt_box" class="hidden"></div>
+        </div>
+    </div>
+
+    <input type="file" id="import-file-input" accept=".json" multiple class="hidden"
+        onchange="handleImportFiles(event)" />
+    
+    <div class="glass-card rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
+        <div class="border-b border-slate-200 bg-slate-50 px-6 py-3 flex items-center gap-4">
+            <button onclick="switchDataTab('preview')" id="data-tab-preview"
+                class="data-tab px-4 py-2 text-sm font-medium text-blue-600 border-b-2 border-blue-600 flex items-center gap-2">
+                <i class="fas fa-table"></i> 预览模式
+            </button>
+            <button onclick="switchDataTab('json')" id="data-tab-json"
+                class="data-tab px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700 flex items-center gap-2">
+                <i class="fas fa-code"></i> JSON产品数据
+            </button>
+            <div class="flex-1"></div>
+
+            <button onclick="triggerImport()"
+                class="px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-2 shadow-sm hover:shadow">
+                <i class="fas fa-file-import"></i>
+                导入JSON
+            </button>
+        </div>
+
+        <div id="data-preview" class="p-6">
+            <div id="no-data-msg" class="text-center py-12">
+                <div class="mb-4 text-slate-300">
+                    <i class="fas fa-inbox text-6xl"></i>
+                </div>
+                <p class="text-slate-500">暂无采集数据</p>
+                <p class="text-sm text-slate-400 mt-2">
+                    请先在"采集配置"中输入ASIN并开始采集
+                </p>
+            </div>
+            <div id="data-cards" class="space-y-4 hidden"></div>
+        </div>
+
+        <div id="data-json" class="p-6 hidden">
+            <pre id="json-display"
+                class="bg-slate-900 text-slate-100 p-4 rounded-xl overflow-x-auto text-sm max-h-[600px] overflow-y-auto"></pre>
+        </div>
+    </div>
+</div>

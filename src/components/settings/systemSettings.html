@@ -1,0 +1,156 @@
+<!-- 系统设置 -->
+<div id="settings-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-end">
+    <div class="w-full max-w-lg h-full bg-white shadow-2xl slide-in overflow-hidden flex flex-col">
+        <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                <i class="fas fa-sliders-h"></i> 系统设置
+            </h2>
+            <button onclick="closeSettings()" class="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+                <i class="fas fa-times text-lg"></i>
+            </button>
+        </div>
+        <!-- LLM 配置 -->
+        <div class="flex-1 overflow-y-auto p-6">
+            <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                <i class="fas fa-robot text-purple-500"></i> LLM 模型配置
+            </h3>
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-slate-700 mb-2">AI厂商</label>
+                <select id="llm-provider"
+                    class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500"
+                    onchange="loadProviderConfig()">
+                    <option value="openai">OpenAI</option>
+                    <option value="anthropic">Anthropic (Claude)</option>
+                    <option value="Ai大模型">Google Ai大模型</option>
+                    <option value="deepseek">DeepSeek</option>
+                    <option value="moonshot">Moonshot (月之暗面)</option>
+                    <option value="zhipu">智谱 GLM</option>
+                    <option value="qwen">通义千问</option>
+                    <option value="custom">自定义端点</option>
+                </select>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-slate-700 mb-2">API Endpoint</label>
+                <input type="text" id="llm-endpoint"
+                    class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500"
+                    placeholder="https://api.openai.com/v1" />
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-slate-700 mb-2">API Key</label>
+                <div class="relative">
+                    <input type="password" id="llm-apikey"
+                        class="w-full px-4 py-3 pr-12 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500"
+                        placeholder="sk-..." />
+                    <button onclick="toggleApiKeyVisibility()"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label for="llm-model" class="block text-sm font-medium text-slate-700 mb-2">选择模型</label>
+                <div class="flex items-end gap-3">
+                    <div class="flex-[2]">
+                        <select id="llm-model"
+                            class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 transition-all">
+                            <option value="">请先获取模型列表</option>
+                        </select>
+                    </div>
+                    <div class="flex-1">
+                        <button onclick="fetchModels()" id="fetch-models-btn"
+                            class="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl transition-colors flex items-center justify-center gap-2 whitespace-nowrap">
+                            <i class="fas fa-sync-alt"></i>
+                            <span class="hidden md:inline">获取列表</span><span class="md:hidden">刷新</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="model-info" class="p-4 bg-slate-50 rounded-xl mb-6 hidden">
+                <div class="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                        <span class="text-slate-500">上下文长度:</span>
+                        <span id="model-context" class="font-medium">-</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-500">功能特性:</span>
+                        <span id="model-features" class="font-medium">-</span>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 border-t border-slate-200 flex gap-3">
+                <button id="btn-test-connection" onclick="testConnection()"
+                    class="px-6 py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium rounded-xl transition-colors flex items-center gap-2">
+                    <i class="fas fa-link"></i> 测试连接
+                </button>
+                <button onclick="saveProviderConfig()"
+                    class="flex-1 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2">
+                    <i class="fas fa-save"></i> 保存配置
+                </button>
+            </div>
+            <div id="config-status"
+                class="flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-700 mb-4">
+                <i class="fas fa-exclamation-triangle"></i> 配置未保存
+            </div>
+            <!-- 代理设置 -->
+
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <i class="fas fa-shield-alt text-green-500"></i>
+                    采集网络设置
+                </h3>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">连接方式</label>
+                        <select id="proxy-select"
+                            class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white">
+                            <optgroup label="商业 API ">
+                                <option value="scraperapi">ScraperAPI (API Key)</option>
+                                <option value="zenrows">ZenRows (API Key)</option>
+                                <option value="brightdata">Bright Data (API Key)</option>
+                                <option value="custom_api">自定义 Scraping API</option>
+                            </optgroup>
+                            <optgroup label="免费代理 ">
+                                <option value="allorigins">AllOrigins (免费)</option>
+                                <option value="corsproxy">CORS Proxy IO</option>
+                            </optgroup>
+                            <optgroup label="自定义">
+                                <option value="custom_proxy">自定义 HTTP 代理</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <div id="proxy-input-container" class="hidden">
+                        <label id="proxy-input-label" class="block text-sm font-medium text-slate-700 mb-2">API
+                            Key</label>
+                        <div class="relative">
+                            <input type="password" id="custom-proxy"
+                                class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 pr-10"
+                                placeholder="请输入密钥..." />
+                            <button
+                                onclick="const el=document.getElementById('custom-proxy'); el.type = el.type==='password'?'text':'password'"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <p id="proxy-help-text" class="text-xs text-slate-500 mt-2 flex items-start gap-1">
+                            <i class="fas fa-info-circle mt-0.5"></i>
+                            <span>此处填写服务商提供的 API Key。</span>
+                        </p>
+                    </div>
+
+                    <div class="flex justify-end pt-2">
+                        <button onclick="saveProxyConfig()"
+                            class="px-6 py-2 bg-slate-800 hover:bg-slate-900 text-white font-medium rounded-lg transition-colors text-sm">
+                            更新网络配置
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

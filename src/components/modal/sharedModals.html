@@ -1,0 +1,102 @@
+
+<!--JSON导入提醒模态框-->
+<div id="import-conflict-modal"
+    class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm transition-opacity">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden transform transition-all scale-100 p-0">
+        <div class="bg-amber-50 px-6 py-4 border-b border-amber-100 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
+                <i class="fas fa-exclamation-triangle text-lg"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-bold text-slate-800">数据冲突确认</h3>
+                <p class="text-xs text-slate-500">检测到 <span id="conflict-count"
+                        class="font-bold text-amber-600 text-sm">0</span> 个已存在的 ASIN</p>
+            </div>
+        </div>
+
+        <div class="p-6 space-y-4">
+            <p class="text-sm text-slate-600 leading-relaxed">
+                导入文件中包含部分已在当前列表中的商品。请选择如何处理这些重复项：
+            </p>
+
+            <div class="grid grid-cols-1 gap-3">
+                <button id="btn-resolve-merge"
+                    class="group flex items-center justify-between p-4 rounded-xl border-2 border-blue-100 hover:border-blue-500 hover:bg-blue-50 transition-all text-left">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center group-hover:bg-blue-500 group-hover:text-white transition-colors">
+                            <i class="fas fa-code-branch rotate-90"></i>
+                        </div>
+                        <div>
+                            <div class="font-bold text-slate-700 group-hover:text-blue-700">智能合并 (推荐)</div>
+                            <div class="text-xs text-slate-500">保留旧数据，合并新评论，自动去重</div>
+                        </div>
+                    </div>
+                    <i class="fas fa-check text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                </button>
+
+                <button id="btn-resolve-overwrite"
+                    class="group flex items-center justify-between p-4 rounded-xl border border-slate-200 hover:border-red-400 hover:bg-red-50 transition-all text-left">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center group-hover:bg-red-100 group-hover:text-red-500 transition-colors">
+                            <i class="fas fa-sync-alt"></i>
+                        </div>
+                        <div>
+                            <div class="font-bold text-slate-700 group-hover:text-red-700">覆盖旧版</div>
+                            <div class="text-xs text-slate-500">完全使用新导入的数据替换</div>
+                        </div>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+            <button id="btn-resolve-skip"
+                class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-slate-200 rounded-lg transition-colors">
+                跳过重复项
+            </button>
+        </div>
+    </div>
+</div>
+
+<!--dataDisplay删除确认模态框-->
+<div id="delete-confirm-modal"
+    class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/40 backdrop-blur-[2px] transition-opacity duration-200">
+    <div
+        class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden transform scale-100 transition-all border border-slate-100">
+
+        <div class="p-6 text-center">
+            <div
+                class="w-14 h-14 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-100 shadow-sm">
+                <i class="fas fa-trash-alt text-xl"></i>
+            </div>
+
+            <h3 id="del-modal-title" class="text-lg font-bold text-slate-800 mb-2">确认删除？</h3>
+            <p id="del-modal-desc" class="text-sm text-slate-500 leading-relaxed mb-6">
+                删除后数据将无法恢复，确定要继续吗？
+            </p>
+
+            <label class="flex items-center justify-center gap-2 mb-6 cursor-pointer group select-none">
+                <input type="checkbox" id="del-dont-ask"
+                    class="peer w-4 h-4 text-red-600 rounded border-slate-300 focus:ring-red-500 cursor-pointer transition-all">
+
+                <span
+                    class="text-xs text-slate-500 group-hover:text-red-500 peer-checked:text-red-600 transition-colors">
+                    不再提醒我
+                </span>
+            </label>
+
+            <div class="grid grid-cols-2 gap-3">
+                <button id="btn-del-cancel"
+                    class="py-2.5 px-4 bg-white border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 hover:text-slate-900 font-medium transition-colors">
+                    取消
+                </button>
+                <button id="btn-del-confirm"
+                    class="py-2.5 px-4 bg-red-500 text-white rounded-lg hover:bg-red-600 shadow-sm shadow-red-200 font-medium transition-colors flex items-center justify-center gap-2">
+                    <span>确认删除</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
