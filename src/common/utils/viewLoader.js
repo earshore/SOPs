@@ -5,6 +5,7 @@
  */
 const viewsConfig = [
     // 主功能面板 -> 插入到 main 标签
+    { url: './src/modules/home/homeDisplay.html', target: 'main'},
     { url: './src/modules/master_prompt/scraper/scraperPanel.html', target: 'main' },
     { url: './src/modules/master_prompt/data_manage/dataDisplay.html', target: 'main' },
     { url: './src/modules/master_prompt/analysis/analysisDisplay.html', target: 'main' },

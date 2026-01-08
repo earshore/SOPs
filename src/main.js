@@ -26,6 +26,7 @@ window.addEventListener("unhandledrejection", (event) => {
 // 1. 导入各模块的初始化函数和业务函数
 import { initSettingsListeners, updateModelStatus, loadProviderConfig, openSettings, closeSettings, saveProviderConfig, renderProxyInputUI, fetchModels, toggleApiKeyVisibility, testConnection, saveProxyConfig, } from "./components/settings/systemSettings.js";
 import { switchTab, renderMegaMenu } from "../src/common/utils/ui.js";
+import { initHomeSplash } from "./modules/home/homeDisplay.js";
 import { initScraperListeners, selectSite, renderHistory, clearAsins, startScraping, loadHistory, clearHistory, } from "./modules/master_prompt/scraper/scraperPanel.js";
 import { renderDataPanel, toggleCardExpand, deleteProduct, deleteReview, triggerImport, handleImportFiles, switchDataTab} from "./modules/master_prompt/data_manage/dataDisplay.js";
 import { initAnalysisPanel, updateAsinSelectList, analyzeSelectedAsins, renderReport, } from "./modules/master_prompt/analysis/analysisDisplay.js";
@@ -45,6 +46,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ----------------------------------------------------
   try {
     await initViews();
+
+    initHomeSplash();
 
     // 1. 初始化各模块的事件监听器 (现在可以安全运行了，因为 DOM 已经在页面上了)
     initSettingsListeners();
