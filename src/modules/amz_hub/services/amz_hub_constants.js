@@ -1,5 +1,5 @@
-//用户画像与文化深潜
-export const amz_countryData = {
+// 1. 欧洲国家画像数据
+export const AMZ_COUNTRY_DATA = {
     // --- 成熟大站点 ---
     'de': { 
         name: '德国', 
@@ -63,4 +63,36 @@ export const amz_countryData = {
         tips: '退货率通常较高（尤其是时尚类）。紧跟当地流行趋势。注意汇率波动对定价的影响。', 
         radarData: [50, 25, 95, 65, 45] 
     }
+};
+
+
+// 2. A10 图表配置数据 (从原 amz_hubDisplay.js 提取)
+export const A10_CHART_DATA = {
+    labels: ['自然销量 (Organic)', '转化率 (CVR)', '站外/引流 (Off-site)', 'PPC 广告', '点击率 (CTR)', '其他'],
+    datasets: [{
+        data: [35, 25, 20, 10, 5, 5],
+        backgroundColor: ['#1E293B', '#F59E0B', '#10B981', '#6366F1', '#3B82F6', '#94A3B8'],
+        borderWidth: 0,
+        hoverOffset: 4
+    }]
+};
+
+// 3. SEO 关键词雷达图数据
+export const SEO_RADAR_DATA = {
+    labels: ['语义相关性', '流量准确性', '长尾挖掘力', '转化意图', '竞争程度'],
+    datasets: [{
+        label: 'Review/Listing 扒词',
+        data: [95, 40, 90, 85, 30], 
+        fill: true,
+        backgroundColor: 'rgba(234, 88, 12, 0.2)', // Orange
+        borderColor: '#EA580C',
+        pointBackgroundColor: '#EA580C'
+    }, {
+        label: 'ABA 报告数据',
+        data: [60, 95, 50, 70, 90], 
+        fill: true,
+        backgroundColor: 'rgba(59, 130, 246, 0.2)', // Blue
+        borderColor: '#3B82F6',
+        pointBackgroundColor: '#3B82F6'
+    }]
 };
