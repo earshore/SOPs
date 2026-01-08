@@ -99,7 +99,7 @@ export const MENU_CONFIG = {
         },
         kw_analysis: {
             moduleId: 'keyword_tracker',
-            label: '统计分析',
+            label: '分析统计',
             icon: 'fas fa-chart-pie',
             panelId: 'panel-keyword_tracker'
         },

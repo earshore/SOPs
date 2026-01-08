@@ -39,22 +39,22 @@ let state = {
   },
 
   //trackerDisplay
-    keywords: [],
-    processedCopy: '',
-    formattedCopy: '',
-    matchedKeywords: [],
-    unmatchedKeywords: [],
-    wordFrequency: [],
-    paragraphs: [],
-    translationMode: false,
-    keywordLocationIndex: {},
-    settings: {
-        matchPlural: true,
-        matchStem: false,
-        matchCase: false,
-        matchPartial: true
-    },
-    isWindowMinimized: false
+  keywords: [],
+  processedCopy: '',
+  formattedCopy: '',
+  matchedKeywords: [],
+  unmatchedKeywords: [],
+  wordFrequency: [],
+  paragraphs: [],
+  translationMode: false,
+  keywordLocationIndex: {},
+  settings: {
+      matchPlural: true,
+      matchStem: false,
+      matchCase: false,
+      matchPartial: true
+  },
+  isWindowMinimized: false
 
 
 };
