@@ -1,0 +1,111 @@
+    <!-- <div id="amz_eu_insights"  class="amz_tab-content hidden space-y-8 fade-in"> -->
+        <header class="text-center mb-6">
+            <h1 class="text-3xl font-extrabold text-slate-900 mb-2">
+                欧洲各国用户画像与文化深潜
+            </h1>
+            <p class="text-slate-600">
+                不同国家的消费者在关注点、语言习惯及购买动机上存在显著差异。以下为利用 Ai大模型 挖掘非结构化数据（Review/QA），构建的欧洲主要站点的用户画像。
+            </p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-1 space-y-4">
+                <label class="flex items-center text-sm font-bold text-slate-800 mb-2">
+                    <i class="fas fa-location-dot fa-fw mr-2 text-slate-400" style="font-size: 0.9rem;"></i>
+                    <span>选择目标市场</span>
+                </label>
+
+                <select id="amz_countrySelector" onchange="amz_updateCountryInfo(this.value)"
+                    class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md shadow-sm bg-white border">
+                    <optgroup label="核心成熟站点 (Mature Markets)">
+                        <option value="de">🇩🇪 德国 (Germany)</option>
+                        <option value="uk">🇬🇧 英国 (UK)</option>
+                        <option value="fr">🇫🇷 法国 (France)</option>
+                        <option value="it">🇮🇹 意大利 (Italy)</option>
+                        <option value="es">🇪🇸 西班牙 (Spain)</option>
+                    </optgroup>
+
+                    <optgroup label="新兴潜力站点 (Emerging Markets)">
+                        <option value="nl">🇳🇱 荷兰 (Netherlands)</option>
+                        <option value="se">🇸🇪 瑞典 (Sweden)</option>
+                        <option value="pl">🇵🇱 波兰 (Poland)</option>
+                        <option value="be">🇧🇪 比利时 (Belgium)</option>
+                        <option value="tr">🇹🇷 土耳其 (Turkey)</option>
+                    </optgroup>
+                </select>
+
+                <div id="amz_countryDetails" class="bg-white p-6 rounded-xl shadow border-t-4 border-indigo-500"></div>
+            </div>
+
+            <div class="lg:col-span-2 bg-white rounded-xl shadow p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold text-slate-800">
+                        消费者决策因子雷达
+                    </h3>
+                    <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                        基于 Ai大模型 情感分析数据
+                    </span>
+                </div>
+
+                <div class="amz_chart-container">
+                    <canvas id="amz_euRadarChart"></canvas>
+                </div>
+
+                <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-xs text-center">
+                    <div class="p-2 bg-slate-50 rounded">
+                        <span class="block font-bold text-indigo-600">价格敏感度</span>
+                        <span class="text-gray-500">对折扣的反应</span>
+                    </div>
+                    <div class="p-2 bg-slate-50 rounded">
+                        <span class="block font-bold text-indigo-600">质量苛求度</span>
+                        <span class="text-gray-500">退货容忍率</span>
+                    </div>
+                    <div class="p-2 bg-slate-50 rounded">
+                        <span class="block font-bold text-indigo-600">品牌忠诚度</span>
+                        <span class="text-gray-500">复购意愿</span>
+                    </div>
+                    <div class="p-2 bg-slate-50 rounded">
+                        <span class="block font-bold text-indigo-600">环保/可持续</span>
+                        <span class="text-gray-500">社会责任感</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-orange-50 border border-orange-200 rounded-xl p-6">
+            <h3 class="font-bold text-orange-800 mb-4 flex items-center">
+                <span class="text-xl mr-2">💡</span> Ai大模型 本地化运营策略建议
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+                <div>
+                    <h4 class="font-bold text-orange-900 mb-2">
+                        语言微调 (Linguistic Nuances)
+                    </h4>
+                    <p class="text-orange-800/80">
+                        不要直接翻译。利用 Ai大模型 识别当地俚语。例如，英国站使用
+                        "Garden" 而非 "Yard"，形容词偏向
+                        "Lovely/Brilliant"；德国站文案需严谨，多用数据支撑，避免夸大修辞。
+                    </p>
+                </div>
+                <div>
+                    <h4 class="font-bold text-orange-900 mb-2">
+                        未满足需求挖掘 (Gap Analysis)
+                    </h4>
+                    <p class="text-orange-800/80">
+                        将竞品 1-3 星评论输入
+                        Ai大模型，指令分析"具体使用场景中的痛点"。针对 COSMO 算法，在
+                        Listing 中明确提及解决了这些特定场景下的问题。
+                    </p>
+                </div>
+                <div>
+                    <h4 class="font-bold text-orange-900 mb-2">
+                        文化节日营销 (Cultural Events)
+                    </h4>
+                    <p class="text-orange-800/80">
+                        利用 Ai大模型 生成当地营销日历。例如针对意大利的 "Ferragosto"
+                        (八月节) 或德国的 "Oktoberfest" 调整关键词和广告素材。
+                    </p>
+                </div>
+            </div>
+        </div>
+    <!-- </div> -->

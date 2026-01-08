@@ -33,7 +33,8 @@ import { initAnalysisPanel, updateAsinSelectList, analyzeSelectedAsins, renderRe
 import { initPromptlabModule } from './modules/master_prompt/promptlab/promptlabDisplay.js';
 import { initKeywordTracker } from './modules/keyword_tracker/trackerDisplay.js';
 // ✅ 核心修正：仅导入文件，让它自动注册事件监听器
-import './modules/amz_hub/amz_hubDisplay.js';
+// import './modules/amz_hub/amz_hubDisplay.js';
+import './modules/amz_hub/amz_hub.js'; // 新的
 
 // ========================
 // APP STARTUP (程序启动)

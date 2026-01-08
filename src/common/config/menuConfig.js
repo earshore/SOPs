@@ -105,6 +105,14 @@ export const MENU_CONFIG = {
         },
 
         // --- 属于 Hub 智库的页面 ---
+
+        amz_sop_flow: {
+            moduleId: 'amz_hub_core',
+            label: 'SOP 流程',
+            icon: 'fas fa-list-check',
+            panelId: 'panel-amz_hub',
+            isHub: true
+        },
         amz_eu_insights: {
             moduleId: 'amz_hub_core',
             label: '市场洞察',
@@ -126,13 +134,14 @@ export const MENU_CONFIG = {
             panelId: 'panel-amz_hub',
             isHub: true
         },
-        amz_sop_flow: {
-            moduleId: 'amz_hub_core',
-            label: 'SOP 流程',
-            icon: 'fas fa-list-check',
-            panelId: 'panel-amz_hub',
-            isHub: true
-        }
+        amz_marketing_calendar: {   //预留营销日历
+        moduleId: 'amz_hub_core',
+        label: 'EU营销日历',
+        icon: 'fas fa-calendar-alt',
+        panelId: 'panel-amz_hub',
+        isHub: true
+    },
+
     }
 };
 

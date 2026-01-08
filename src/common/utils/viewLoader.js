@@ -15,7 +15,8 @@ const viewsConfig = [
     { url: './src/modules/keyword_tracker/trackerDisplay.html', target: 'main' },
 
     // Amazon 智库
-    { url: './src/modules/amz_hub/amz_hubDisplay.html', target: 'main' },
+    { url: './src/modules/amz_hub/amz_hub.html', target: 'main' },
+    // { url: './src/modules/amz_hub/amz_hubDisplay.html', target: 'main' },
 
     // 全局弹窗组件 -> 插入到 modal-container
     { url: './src/components/settings/systemSettings.html', target: '#modal-container' },

@@ -512,9 +512,14 @@ function renderAnalysisModule() {
 async function runLLMAnalysis() {
     const btn = document.getElementById('kt-analyze-btn');
     
+    // if (!state.processedCopy || !state.processedCopy.trim()) {
+    //     showToast("请先在输入模块提交文案", "warning");
+    //     return;
+    // }
+
+    // 🔥🔥🔥 新增校验：检查文案是否为空 🔥🔥🔥
     if (!state.processedCopy || !state.processedCopy.trim()) {
-        showToast("请先在输入模块提交文案", "warning");
-        return;
+        throw new Error("文案内容为空，无法进行AI分析。请先在左侧输入框填入Listing文案。");
     }
 
     const resultDiv = document.getElementById('kt-llm-analysis-result');
@@ -525,7 +530,7 @@ async function runLLMAnalysis() {
         btn.classList.add('opacity-75', 'cursor-wait');
     }
     
-    if(resultDiv) resultDiv.innerHTML = '<div class="text-center py-10"><i class="fas fa-circle-notch fa-spin text-purple-500 text-2xl"></i><p class="mt-2 text-slate-500">AI 正在深度分析您的 Listing (可能需要 30秒)...</p></div>';
+    if(resultDiv) resultDiv.innerHTML = '<div class="text-center py-10"><i class="fas fa-circle-notch fa-spin text-purple-500 text-2xl"></i><p class="mt-2 text-slate-500">AI 正在深度分析您的 Listing (可能需要 20秒)...</p></div>';
 
     try {
         const response = await KeywordService.fetchListingAnalysis(
@@ -546,8 +551,8 @@ async function runLLMAnalysis() {
         if (btn) {
             btn.disabled = true; 
             btn.innerHTML = '<i class="fas fa-check"></i> 报告已生成';
-            btn.classList.remove('bg-purple-600', 'text-white', 'hover:bg-purple-700', 'opacity-75', 'cursor-wait');
-            btn.classList.add('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+            btn.classList.remove('from-blue-500', 'to-purple-600', 'text-white', 'hover:from-blue-400', 'hover:to-purple-500', 'opacity-75', 'cursor-wait');
+            btn.classList.add('text-gray-500', 'cursor-not-allowed');
         }
         showToast("报告生成成功", "success");
 
