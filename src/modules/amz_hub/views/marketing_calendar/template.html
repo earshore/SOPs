@@ -295,36 +295,30 @@
         font-size: 0.8rem;
         font-weight: 500;
     }
- /* 3. 修复图标颜色问题 */
+/* 箭头旋转动画 */
     .amzf_month_toggle {
-        width: 35px;
-        height: 35px;
-        background: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: var(--amzf-transition);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        /* 关键：强制设置文字颜色，否则在白色背景上看不见白色的字 */
-        color: var(--amzf-primary); 
-        font-size: 0.8rem;
+        transition: transform 0.3s ease;
     }
     /* 旋转动画 */
-    .amzf_expanded .amzf_month_toggle { transform: rotate(180deg); }
-
+    .amzf_expanded .amzf_month_toggle {
+        transform: rotate(180deg);
+    }
     .amzf_month_section.amzf_expanded .amzf_month_toggle {
         transform: rotate(180deg);
     }
-    /* 2. 修复闪烁问题：优化动画，增加 opacity 过渡 */
+    /* 3. 展开/收起的核心过渡 (保持你原有的逻辑，稍作参数优化) */
     .amzf_month_content, .amzf_comparison_content {
         max-height: 0;
         opacity: 0;
         overflow: hidden;
-        transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease-out;
+        /* 贝塞尔曲线优化，让展开动作更有弹性 */
+        transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease-in-out;
+        will-change: max-height, opacity; /* 性能优化：告诉浏览器这俩属性会变 */
     }
-    .amzf_expanded .amzf_month_content, .amzf_expanded .amzf_comparison_content {
-        max-height: 2000px; /* 足够大以容纳内容 */
+    /* 展开状态 */
+    .amzf_expanded .amzf_month_content, 
+    .amzf_expanded .amzf_comparison_content {
+        max-height: 3000px; /* 稍微给大一点，防止内容截断 */
         opacity: 1;
     }
     
@@ -523,11 +517,17 @@
         color: var(--amzf-text-secondary);
     }
     /* Animations */
+    /* 1. 进场动画：只在列表初次加载或筛选时使用 */
     @keyframes amzf_fadeIn {
-        from { opacity: 0; transform: translateY(20px); }
+        from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }
     }
     .amzf_animate {
+        animation: amzf_fadeIn 0.4s ease-out forwards;
+    }
+        /* 2. 移除全局通用的 .amzf_animate，改为由 JS 控制 */
+    .amzf_list_entering .amzf_month_section,
+    .amzf_list_entering .amzf_event_comparison {
         animation: amzf_fadeIn 0.4s ease-out forwards;
     }
     /* Responsive */

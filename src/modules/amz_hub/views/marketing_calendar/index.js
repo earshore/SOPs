@@ -145,6 +145,8 @@ function amzf_renderContent() {
 
 function amzf_renderCountryView(events) {
     const container = document.getElementById('amzf_main');
+    // 添加标记类，触发进场动画
+    container.classList.add('amzf_list_entering');
     const byMonth = {};
     
     events.forEach(event => {
@@ -157,11 +159,15 @@ function amzf_renderCountryView(events) {
     for (let m = 1; m <= 12; m++) {
         if (!byMonth[m]) continue;
         const monthEvents = byMonth[m];
-        const isExpanded = amzf_expandedSections.has(`month_${m}`);
+        // 注意：这里仍然读取 Set 状态来决定初始 HTML 是否包含 expanded 类
+        // 但我们在 ID 上做了手脚，方便后续查找
+        const sectionId = `amzf_group_month_${m}`; 
+        const isExpanded = amzf_expandedSections.has(sectionId);
         
+        // 关键改动：添加 id="${sectionId}"
         html += `
-            <div class="amzf_month_section ${isExpanded ? 'amzf_expanded' : ''} amzf_animate" style="animation-delay: ${(m-1)*0.05}s">
-                <div class="amzf_month_header" onclick="amzf_toggleSection('month_${m}')">
+            <div id="${sectionId}" class="amzf_month_section ${isExpanded ? 'amzf_expanded' : ''}" style="animation-delay: ${(m-1)*0.03}s">
+                <div class="amzf_month_header" onclick="amzf_toggleSection('${sectionId}')"> 
                     <div class="amzf_month_info">
                         <span class="amzf_month_name">${amzf_months[m-1]}</span>
                         <span class="amzf_month_badge">${monthEvents.length} 个活动</span>
@@ -179,6 +185,8 @@ function amzf_renderCountryView(events) {
     
     html += '</div>';
     container.innerHTML = html;
+    // 动画播放完后移除 class，防止干扰后续操作
+    setTimeout(() => container.classList.remove('amzf_list_entering'), 1000);
 }
 
 function amzf_renderEventCard(event) {
@@ -211,7 +219,7 @@ function amzf_renderEventCard(event) {
 
 function amzf_renderEventView(events) {
     const container = document.getElementById('amzf_main');
-    
+    container.classList.add('amzf_list_entering');
     // Group similar events by name pattern
     const eventGroups = {};
     events.forEach(event => {
@@ -227,11 +235,14 @@ function amzf_renderEventView(events) {
     
     Object.keys(eventGroups).forEach((key, idx) => {
         const group = eventGroups[key];
-        const isExpanded = amzf_expandedSections.has(`event_${key}`);
+        // 生成唯一 ID，注意 key 可能包含空格，建议处理一下
+        const safeKey = key.replace(/\s+/g, '_');
+        const sectionId = `amzf_group_event_${safeKey}`;
+        const isExpanded = amzf_expandedSections.has(sectionId);
         
         html += `
-            <div class="amzf_event_comparison ${isExpanded ? 'amzf_expanded' : ''} amzf_animate" style="animation-delay: ${idx*0.05}s">
-                <div class="amzf_comparison_header" onclick="amzf_toggleSection('event_${key}')">
+            <div id="${sectionId}" class="amzf_event_comparison ${isExpanded ? 'amzf_expanded' : ''}" style="animation-delay: ${idx*0.03}s">
+                <div class="amzf_comparison_header" onclick="amzf_toggleSection('${sectionId}')">
                     <div class="amzf_comparison_title">
                         <span>${group.emoji}</span>
                         <span>${key}</span>
@@ -250,6 +261,7 @@ function amzf_renderEventView(events) {
     
     html += '</div>';
     container.innerHTML = html;
+    setTimeout(() => container.classList.remove('amzf_list_entering'), 1000);
 }
 
 // src/modules/amz_hub/views/marketing_calendar/index.js
@@ -276,14 +288,21 @@ function amzf_renderCountryEvent(event) {
 }
 
 function amzf_toggleSection(id) {
+    // 1. DOM 操作：直接切换类名，触发平滑过渡
+    const element = document.getElementById(id);
+    if (element) {
+        element.classList.toggle('amzf_expanded');
+    } else {
+        console.warn('Element not found:', id);
+    }
+
+    // 2. 状态同步：仅在内存中更新，不触发重绘
     if (amzf_expandedSections.has(id)) {
         amzf_expandedSections.delete(id);
     } else {
         amzf_expandedSections.add(id);
     }
-    amzf_renderContent();
 }
-
 // ==================== Module Exports (核心集成点) ====================
 
 export async function mount(container) {
