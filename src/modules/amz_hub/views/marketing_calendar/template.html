@@ -1,7 +1,8 @@
 <style>
     /* 为了防止污染全局，建议保留原本的类名命名空间 amzf_ */
     :root {
-        --amzf-primary: #4285f4;
+        /* --amzf-primary: #4285f4; */
+        --amzf-primary: #667eea; /* 统一主色调 */
         --amzf-secondary: #34a853;
         --amzf-accent: #fbbc04;
         --amzf-danger: #ea4335;
@@ -18,17 +19,21 @@
     }
 
     /* 容器微调：移除 min-height: 100vh，因为是嵌入在 Panel 里的 */
+/* 1. 修复滚动问题：确保容器撑满并允许内部滚动 */
     .amzf_container {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         background: var(--amzf-bg);
         color: var(--amzf-text);
         line-height: 1.6;
-        max-width: 1400px;
-        margin: 0 auto;
+        width: 100%;
+        height: 100%; /* 撑满父容器 */
+        overflow-y: auto; /* 允许垂直滚动 */
         padding: 20px;
+        /* 隐藏滚动条但保留功能 (可选) */
+        scrollbar-width: thin; 
     }
 
-    /* Header */
+/* Header */
     .amzf_header {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         border-radius: var(--amzf-radius);
@@ -37,6 +42,7 @@
         color: white;
         position: relative;
         overflow: hidden;
+        flex-shrink: 0; /* 防止头部在滚动容器中被挤压 */
     }
     .amzf_header::before {
         content: '';
@@ -289,6 +295,7 @@
         font-size: 0.8rem;
         font-weight: 500;
     }
+ /* 3. 修复图标颜色问题 */
     .amzf_month_toggle {
         width: 35px;
         height: 35px;
@@ -299,10 +306,28 @@
         justify-content: center;
         transition: var(--amzf-transition);
         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        /* 关键：强制设置文字颜色，否则在白色背景上看不见白色的字 */
+        color: var(--amzf-primary); 
+        font-size: 0.8rem;
     }
+    /* 旋转动画 */
+    .amzf_expanded .amzf_month_toggle { transform: rotate(180deg); }
+
     .amzf_month_section.amzf_expanded .amzf_month_toggle {
         transform: rotate(180deg);
     }
+    /* 2. 修复闪烁问题：优化动画，增加 opacity 过渡 */
+    .amzf_month_content, .amzf_comparison_content {
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+        transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease-out;
+    }
+    .amzf_expanded .amzf_month_content, .amzf_expanded .amzf_comparison_content {
+        max-height: 2000px; /* 足够大以容纳内容 */
+        opacity: 1;
+    }
+    
     .amzf_month_content {
         max-height: 0;
         overflow: hidden;
@@ -446,14 +471,19 @@
         display: grid;
         gap: 15px;
     }
-    .amzf_country_event {
+.amzf_country_event {
         display: flex;
-        align-items: center;
+        /* ✅ 修改：改为 flex-start (顶对齐)，这样内容变高时，图标和日期固定在顶部，不会跑偏 */
+        align-items: flex-start; 
         gap: 15px;
         padding: 15px;
         background: var(--amzf-bg);
         border-radius: 12px;
         transition: var(--amzf-transition);
+    }
+    /* 增加一点上边距，让单行时图标也能和文字第一行对齐 */
+    .amzf_country_info, .amzf_country_date {
+        margin-top: 2px;
     }
     .amzf_country_event:hover {
         background: #e8ecf0;
