@@ -1,539 +1,542 @@
-<div id="amz_eu_insights"  class="amz_tab-content hidden space-y-8 fade-in">
-    <header class="text-center mb-6">
-        <h1 class="text-3xl font-extrabold text-slate-900 mb-2">
-            欧洲各国用户画像与文化深潜
-        </h1>
-        <p class="text-slate-600">
-            不同国家的消费者在关注点、语言习惯及购买动机上存在显著差异。以下为利用 Ai大模型 挖掘非结构化数据（Review/QA），构建的欧洲主要站点的用户画像。
-        </p>
-    </header>
-
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div class="lg:col-span-1 space-y-4">
-            <label class="flex items-center text-sm font-bold text-slate-800 mb-2">
-                <i class="fas fa-location-dot fa-fw mr-2 text-slate-400" style="font-size: 0.9rem;"></i>
-                <span>选择目标市场</span>
-            </label>
-
-            <select id="amz_countrySelector" onchange="amz_updateCountryInfo(this.value)"
-                class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md shadow-sm bg-white border">
-                <optgroup label="核心成熟站点 (Mature Markets)">
-                    <option value="de">🇩🇪 德国 (Germany)</option>
-                    <option value="uk">🇬🇧 英国 (UK)</option>
-                    <option value="fr">🇫🇷 法国 (France)</option>
-                    <option value="it">🇮🇹 意大利 (Italy)</option>
-                    <option value="es">🇪🇸 西班牙 (Spain)</option>
-                </optgroup>
-
-                <optgroup label="新兴潜力站点 (Emerging Markets)">
-                    <option value="nl">🇳🇱 荷兰 (Netherlands)</option>
-                    <option value="se">🇸🇪 瑞典 (Sweden)</option>
-                    <option value="pl">🇵🇱 波兰 (Poland)</option>
-                    <option value="be">🇧🇪 比利时 (Belgium)</option>
-                    <option value="tr">🇹🇷 土耳其 (Turkey)</option>
-                </optgroup>
-            </select>
-
-            <div id="amz_countryDetails" class="bg-white p-6 rounded-xl shadow border-t-4 border-indigo-500"></div>
-        </div>
-
-        <div class="lg:col-span-2 bg-white rounded-xl shadow p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-bold text-slate-800">
-                    消费者决策因子雷达
-                </h3>
-                <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                    基于 Ai大模型 情感分析数据
-                </span>
-            </div>
-
-            <div class="amz_chart-container">
-                <canvas id="amz_euRadarChart"></canvas>
-            </div>
-
-            <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-xs text-center">
-                <div class="p-2 bg-slate-50 rounded">
-                    <span class="block font-bold text-indigo-600">价格敏感度</span>
-                    <span class="text-gray-500">对折扣的反应</span>
-                </div>
-                <div class="p-2 bg-slate-50 rounded">
-                    <span class="block font-bold text-indigo-600">质量苛求度</span>
-                    <span class="text-gray-500">退货容忍率</span>
-                </div>
-                <div class="p-2 bg-slate-50 rounded">
-                    <span class="block font-bold text-indigo-600">品牌忠诚度</span>
-                    <span class="text-gray-500">复购意愿</span>
-                </div>
-                <div class="p-2 bg-slate-50 rounded">
-                    <span class="block font-bold text-indigo-600">环保/可持续</span>
-                    <span class="text-gray-500">社会责任感</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="bg-orange-50 border border-orange-200 rounded-xl p-6">
-        <h3 class="font-bold text-orange-800 mb-4 flex items-center">
-            <span class="text-xl mr-2">💡</span> Ai大模型 本地化运营策略建议
-        </h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
-            <div>
-                <h4 class="font-bold text-orange-900 mb-2">
-                    语言微调 (Linguistic Nuances)
-                </h4>
-                <p class="text-orange-800/80">
-                    不要直接翻译。利用 Ai大模型 识别当地俚语。例如，英国站使用
-                    "Garden" 而非 "Yard"，形容词偏向
-                    "Lovely/Brilliant"；德国站文案需严谨，多用数据支撑，避免夸大修辞。
-                </p>
-            </div>
-            <div>
-                <h4 class="font-bold text-orange-900 mb-2">
-                    未满足需求挖掘 (Gap Analysis)
-                </h4>
-                <p class="text-orange-800/80">
-                    将竞品 1-3 星评论输入
-                    Ai大模型，指令分析"具体使用场景中的痛点"。针对 COSMO 算法，在
-                    Listing 中明确提及解决了这些特定场景下的问题。
-                </p>
-            </div>
-            <div>
-                <h4 class="font-bold text-orange-900 mb-2">
-                    文化节日营销 (Cultural Events)
-                </h4>
-                <p class="text-orange-800/80">
-                    利用 Ai大模型 生成当地营销日历。例如针对意大利的 "Ferragosto"
-                    (八月节) 或德国的 "Oktoberfest" 调整关键词和广告素材。
-                </p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!--SEO & Keywords-->
-<div id="amz_seo_strategy" class="amz_tab-content hidden space-y-8 fade-in">
-    <header class="text-center mb-6">
-        <h1 class="text-3xl font-extrabold text-slate-900 mb-2">
-            Ai大模型扒词
-            <span class="text-blue-600 mx-1">vs</span>
-            ABA报告数据：谁更靠谱？
-        </h1>
-        <p class="text-slate-600 mt-2">
-            从竞品 Listing 扒词是“存量思维”，看别人已经在用什么。后台 ABA 是“流量思维”，看用户正在搜什么。
-            在 Project COSMO 时代，你需要两者结合。
-        </p>
-    </header>
-
-    <div class="flex flex-col lg:flex-row gap-8 items-center">
-        <div class="w-full lg:w-1/2">
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"
-                style="position: relative; height:400px; width:100%">
-                <canvas id="amz_keywordRadarChart"></canvas>
-            </div>
-            <div class="text-center mt-4 text-xs text-slate-500">
-                图表展示了三种关键词来源在不同维度的表现能力
-            </div>
-        </div>
-
-        <div class="w-full lg:w-1/2 space-y-4">
-            <div
-                class="bg-white p-5 rounded-lg border border-slate-200 hover:border-orange-300 transition-colors shadow-sm">
-                <h4 class="font-bold text-lg text-slate-800">1. Listing/Review 扒词 (Mining)</h4>
-                <div class="flex items-center mt-2 mb-2">
-                    <span class="text-xs font-bold bg-green-100 text-green-800 px-2 py-1 rounded mr-2">语义极强</span>
-                    <span class="text-xs font-bold bg-red-100 text-red-800 px-2 py-1 rounded">流量未知</span>
-                </div>
-                <p class="text-sm text-slate-600">
-                    <span class="font-bold">靠谱吗？</span> 非常靠谱，但仅限于<b>相关性</b>和<b>转化率</b>优化。这是喂给 COSMO 和 Rufus
-                    建立“产品-需求”连接的最佳燃料。Review 里的词往往是用户真实的搜索意图。
-                </p>
-            </div>
-
-            <div
-                class="bg-white p-5 rounded-lg border border-slate-200 hover:border-blue-300 transition-colors shadow-sm">
-                <h4 class="font-bold text-lg text-slate-800">2. ABA / 前台下拉框 (Backend Data)</h4>
-                <div class="flex items-center mt-2 mb-2">
-                    <span class="text-xs font-bold bg-green-100 text-green-800 px-2 py-1 rounded mr-2">流量精准</span>
-                    <span class="text-xs font-bold bg-yellow-100 text-yellow-800 px-2 py-1 rounded">竞争激烈</span>
-                </div>
-                <p class="text-sm text-slate-600">
-                    <span class="font-bold">靠谱吗？</span> 数据绝对真实，但大家都在用。这是<b>红海战场</b>。你必须用它来验证从 Review 扒来的词是否有搜索量。
-                </p>
-            </div>
-
-            <div class="bg-gradient-to-r from-slate-800 to-slate-900 p-5 rounded-lg text-white shadow-md">
-                <h4 class="font-bold text-lg">🚀 关键词的混合策略</h4>
-                <p class="text-sm mt-2 opacity-90">
-                    不要二选一。先用 LLM 从 Top竞品 Review 提取“高频场景词”（Scenario Keywords），再将这些词扔进 ABA 或工具反查搜索频率排名（SFR）。
-                    <br><br>
-                    <b>公式：</b> Review 场景词 + ABA 中长尾修饰词 = COSMO 友好型高转化词。
-                </p>
-            </div>
-        </div>
-    </div>
-</div>
-<!--A10/COSMO/Rufus Ai-->
-<div id="amz_ecosystem" class="amz_tab-content hidden space-y-8 fade-in">
-    <section>
-        <header class="text-center mb-10">
-            <h1 class="text-3xl font-extrabold text-slate-900 mb-4">
-                驱动流量的三大核心引擎：A10, COSMO 与 Rufus
-            </h1>
-            <p class="max-w-3xl mx-auto text-lg text-slate-600">
-                深入解析当前驱动亚马逊流量的三大核心引擎。了解算法如何从单纯的"关键词匹配"进化为对"用户意图"和"语义语境"的深度理解，以及指引你如何利用大模型将杂乱的竞品数据转化为符合“用户意图”的高转化
-                Listing。
-            </p>
-        </header>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div
-                class="bg-white rounded-xl shadow p-6 border-l-4 border-orange-500 amz_card-hover flex flex-col h-full">
-                <div class="flex items-center mb-4 ">
-                    <span class="text-3xl mr-3">🛒</span>
-                    <h2 class="text-xl font-bold">A10 算法</h2>
-                </div>
-                <p class="text-xs font-semibold text-orange-600 uppercase tracking-wide mb-4">Sales Velocity &
-                    External Traffic</p>
-                <p class="text-slate-600 text-sm mb-4">
-                    关注转化率与销售历史。权重大幅向"站外引流"与"自然销售"倾斜，降低了单纯PPC广告的权重。
-                </p>
-                <ul class="text-xs text-slate-500 space-y-2">
-                    <li>• 核心：销售历史 & 转化率</li>
-                    <li>• 趋势：有机流量权重 > 广告流量</li>
-                    <li>• 策略：在 Listing 中埋入适合社交媒体传播的“钩子”（Hook）。利用 Gemini 生成针对不同社媒（TikTok/Insta）的内容，将外部流量导向
-                        Listing，激活 A10 的加权机制。</li>
-                </ul>
-            </div>
-
-            <div class="bg-white rounded-xl shadow p-6 border-l-4 border-indigo-500 amz_card-hover">
-                <div class="flex items-center mb-4">
-                    <span class="text-3xl mr-3">🧠</span>
-                    <h2 class="text-xl font-bold">Project COSMO</h2>
-                </div>
-                <p class="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-4 z-10 relative">Intent
-                    & Knowledge Graph</p>
-                <p class="text-slate-600 text-sm mb-4">
-                    基于知识图谱的意图识别系统。它不仅看用户搜了什么，更分析用户"为什么"搜，挖掘深层需求和多轮搜索意图。
-                </p>
-                <ul class="text-xs text-slate-500 space-y-2">
-                    <li>• 核心：语义理解 & 知识图谱</li>
-                    <li>• 趋势：从关键词匹配转向意图匹配</li>
-                    <li>• 策略：构建场景化 Listing。 不要只写 "Waterproof Shoes"，要写 "Keeps feet dry during muddy dog walks".
-                        告诉 LLM：将结构化的 [Usage Scenarios] 融入五点描述的开头。</li>
-                </ul>
-            </div>
-
-            <div class="bg-white rounded-xl shadow p-6 border-l-4 border-teal-500 amz_card-hover">
-                <div class="flex items-center mb-4">
-                    <span class="text-3xl mr-3">💬</span>
-                    <h2 class="text-xl font-bold">Rufus AI</h2>
-                </div>
-                <p class="text-xs font-semibold text-purple-600 uppercase tracking-wide mb-4">Conversational &
-                    Answers</p>
-                <p class="text-slate-600 text-sm mb-4">
-                    对话式购物助手。通过问答形式引导用户决策，优先展示能解答具体痛点和提供详细信息的Listing。
-                </p>
-                <ul class="text-xs text-slate-500 space-y-2">
-                    <li>• 核心：生成式推荐 & 问答互动</li>
-                    <li>• 趋势：长尾语义搜索流量爆发</li>
-                    <li>• 策略：<b>完善属性字段 & QA。</b> Rufus 极其依赖结构化属性表（Spec Table）。利用提取的 [Specific Pain Points]，在
-                        Listing 描述或 A+ 页面中以 Q&A 形式直接回答，预判 Rufus 的回答素材。</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div class="bg-white rounded-xl shadow p-6">
-                <h3 class="text-lg font-bold text-slate-800 mb-2">
-                    A10 算法权重估算分布
-                </h3>
-                <p class="text-xs text-slate-500 mb-6">
-                    从单纯的 PPC 竞价排名，转向对<b>自然转化</b>和<b>站外引入流量</b>的极度偏好 (A10)。同时，搜索匹配机制正从“字面匹配”进化为“知识图谱意图理解”
-                    (COSMO)。
-                </p>
-                <div class="amz_chart-container">
-                    <canvas id="amz_a10Chart"></canvas>
-                </div>
-            </div>
-            <div class="bg-white rounded-xl shadow p-6 flex flex-col justify-center">
-                <h3 class="text-lg font-bold text-slate-800 mb-4">
-                    流量分发机制的演变
-                </h3>
-                <div class="space-y-4">
-                    <div class="relative pt-1">
-                        <div class="flex mb-2 items-center justify-between">
-                            <div>
-                                <span
-                                    class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-indigo-600 bg-indigo-200">传统搜索
-                                    (关键词匹配)</span>
-                            </div>
-                            <div class="text-right">
-                                <span class="text-xs font-semibold inline-block text-indigo-600">45%
-                                    (下降中)</span>
-                            </div>
-                        </div>
-                        <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-indigo-100">
-                            <div style="width: 45%"
-                                class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-indigo-500">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="relative pt-1">
-                        <div class="flex mb-2 items-center justify-between">
-                            <div>
-                                <span
-                                    class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-teal-600 bg-teal-200">语义推荐
-                                    (COSMO/推荐位)</span>
-                            </div>
-                            <div class="text-right">
-                                <span class="text-xs font-semibold inline-block text-teal-600">35% (上升中)</span>
-                            </div>
-                        </div>
-                        <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-teal-100">
-                            <div style="width: 35%"
-                                class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-teal-500">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="relative pt-1">
-                        <div class="flex mb-2 items-center justify-between">
-                            <div>
-                                <span
-                                    class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-orange-600 bg-orange-200">对话式交互
-                                    (Rufus AI)</span>
-                            </div>
-                            <div class="text-right">
-                                <span class="text-xs font-semibold inline-block text-orange-600">20%
-                                    (爆发潜力)</span>
-                            </div>
-                        </div>
-                        <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-orange-100">
-                            <div style="width: 20%"
-                                class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-orange-500">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-4 p-4 bg-slate-50 rounded border border-slate-200 text-sm">
-                    <strong>Ai大模型 的机会点：</strong> 利用 Ai大模型 分析 COSMO 的潜在关联词，并针对 Rufus 的问答逻辑生成 Listing
-                    文案，可提前布局增量流量。
-                </div>
-            </div>
-        </div>
-    </section>
-    <div class="relative flex py-5 items-center">
-        <div class="flex-grow border-t border-gray-200"></div>
-        <span class="flex-shrink-0 mx-4 text-gray-400 text-sm uppercase tracking-wider">从理论到实操</span>
-        <div class="flex-grow border-t border-gray-200"></div>
-    </div>
-
-    <section class="space-y-8">
-        <header class="text-center mb-8">
+<div id="panel-amz_hub" class="panel hidden w-full h-full flex flex-col relative overflow-hidden">  
+    <div id="amz_eu_insights"  class="amz_tab-content hidden space-y-8 fade-in">
+        <header class="text-center mb-6">
             <h1 class="text-3xl font-extrabold text-slate-900 mb-2">
-                SEO 2.0: 针对 Rufus 与 A10 的优化
+                欧洲各国用户画像与文化深潜
             </h1>
             <p class="text-slate-600">
-                从"堆砌关键词"到"解答问题"。Rufus AI 优先抓取能回答用户自然语言提问的内容。
+                不同国家的消费者在关注点、语言习惯及购买动机上存在显著差异。以下为利用 Ai大模型 挖掘非结构化数据（Review/QA），构建的欧洲主要站点的用户画像。
             </p>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div class="bg-white rounded-xl shadow overflow-hidden">
-                <div class="bg-gray-100 px-6 py-4 border-b border-gray-200 font-bold text-gray-700">
-                    传统 SEO vs. Rufus/Cosmo SEO
-                </div>
-                <div class="p-6 space-y-6">
-                    <div class="flex gap-4">
-                        <div class="w-1/2">
-                            <h4 class="text-red-500 font-bold text-sm mb-2">
-                                ❌ 传统做法
-                            </h4>
-                            <ul class="text-sm text-gray-600 space-y-2 list-disc pl-4">
-                                <li>标题堆砌大量关键词</li>
-                                <li>五点描述仅罗列参数</li>
-                                <li>忽视 Q&A 板块</li>
-                                <li>通用型 A+ 页面</li>
-                            </ul>
-                        </div>
-                        <div class="w-1/2 border-l pl-4 border-gray-200">
-                            <h4 class="text-green-600 font-bold text-sm mb-2">
-                                ✅ AI 时代做法
-                            </h4>
-                            <ul class="text-sm text-gray-600 space-y-2 list-disc pl-4">
-                                <li>标题通顺，包含核心场景</li>
-                                <li>五点描述采用"痛点-解决方案"结构</li>
-                                <li>主动在 Listing 埋入"问题式"语句</li>
-                                <li>A+ 页面包含对比表 (Rufus数据源)</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-1 space-y-4">
+                <label class="flex items-center text-sm font-bold text-slate-800 mb-2">
+                    <i class="fas fa-location-dot fa-fw mr-2 text-slate-400" style="font-size: 0.9rem;"></i>
+                    <span>选择目标市场</span>
+                </label>
+
+                <select id="amz_countrySelector" onchange="amz_updateCountryInfo(this.value)"
+                    class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md shadow-sm bg-white border">
+                    <optgroup label="核心成熟站点 (Mature Markets)">
+                        <option value="de">🇩🇪 德国 (Germany)</option>
+                        <option value="uk">🇬🇧 英国 (UK)</option>
+                        <option value="fr">🇫🇷 法国 (France)</option>
+                        <option value="it">🇮🇹 意大利 (Italy)</option>
+                        <option value="es">🇪🇸 西班牙 (Spain)</option>
+                    </optgroup>
+
+                    <optgroup label="新兴潜力站点 (Emerging Markets)">
+                        <option value="nl">🇳🇱 荷兰 (Netherlands)</option>
+                        <option value="se">🇸🇪 瑞典 (Sweden)</option>
+                        <option value="pl">🇵🇱 波兰 (Poland)</option>
+                        <option value="be">🇧🇪 比利时 (Belgium)</option>
+                        <option value="tr">🇹🇷 土耳其 (Turkey)</option>
+                    </optgroup>
+                </select>
+
+                <div id="amz_countryDetails" class="bg-white p-6 rounded-xl shadow border-t-4 border-indigo-500"></div>
             </div>
 
-            <div class="bg-white rounded-xl shadow overflow-hidden">
-                <div class="bg-indigo-600 px-6 py-4 border-b border-indigo-700 font-bold text-white">
-                    Ai大模型 辅助 SEO 埋词策略
+            <div class="lg:col-span-2 bg-white rounded-xl shadow p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold text-slate-800">
+                        消费者决策因子雷达
+                    </h3>
+                    <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                        基于 Ai大模型 情感分析数据
+                    </span>
                 </div>
-                <div class="p-6">
-                    <div class="space-y-4">
-                        <div class="flex items-start">
-                            <div
-                                class="flex-shrink-0 h-6 w-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold mt-1">
-                                1
-                            </div>
-                            <div class="ml-4">
-                                <h4 class="text-sm font-bold text-gray-900">
-                                    长尾词拓展
-                                </h4>
-                                <p class="text-xs text-gray-500 mt-1">
-                                    使用 Ai大模型 提问："用户在购买 [产品] 时可能会问哪些傻问题？" 将这些自然语言问题转化为长尾词。
-                                </p>
-                            </div>
-                        </div>
-                        <div class="flex items-start">
-                            <div
-                                class="flex-shrink-0 h-6 w-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold mt-1">
-                                2
-                            </div>
-                            <div class="ml-4">
-                                <h4 class="text-sm font-bold text-gray-900">
-                                    语义相关性 (LSI)
-                                </h4>
-                                <p class="text-xs text-gray-500 mt-1">
-                                    不仅是同义词，更是"共现词"。例如卖"瑜伽垫"，Cosmo 会关联 "防滑"、"关节保护"、"初学者"。Ai大模型 可生成此类词云。
-                                </p>
-                            </div>
-                        </div>
-                        <div class="flex items-start">
-                            <div
-                                class="flex-shrink-0 h-6 w-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold mt-1">
-                                3
-                            </div>
-                            <div class="ml-4">
-                                <h4 class="text-sm font-bold text-gray-900">
-                                    结构化数据填充
-                                </h4>
-                                <p class="text-xs text-gray-500 mt-1">
-                                    后台的 "More Details" 属性字段必须填满。Rufus 高度依赖这些结构化数据进行筛选和对比。
-                                </p>
-                            </div>
-                        </div>
+
+                <div class="amz_chart-container">
+                    <canvas id="amz_euRadarChart"></canvas>
+                </div>
+
+                <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-xs text-center">
+                    <div class="p-2 bg-slate-50 rounded">
+                        <span class="block font-bold text-indigo-600">价格敏感度</span>
+                        <span class="text-gray-500">对折扣的反应</span>
+                    </div>
+                    <div class="p-2 bg-slate-50 rounded">
+                        <span class="block font-bold text-indigo-600">质量苛求度</span>
+                        <span class="text-gray-500">退货容忍率</span>
+                    </div>
+                    <div class="p-2 bg-slate-50 rounded">
+                        <span class="block font-bold text-indigo-600">品牌忠诚度</span>
+                        <span class="text-gray-500">复购意愿</span>
+                    </div>
+                    <div class="p-2 bg-slate-50 rounded">
+                        <span class="block font-bold text-indigo-600">环保/可持续</span>
+                        <span class="text-gray-500">社会责任感</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow p-6 mt-8">
-            <h3 class="text-lg font-bold text-slate-800 mb-4 text-center">
-                Rufus 时代的流量漏斗优化
+        <div class="bg-orange-50 border border-orange-200 rounded-xl p-6">
+            <h3 class="font-bold text-orange-800 mb-4 flex items-center">
+                <span class="text-xl mr-2">💡</span> Ai大模型 本地化运营策略建议
             </h3>
-            <div class="relative max-w-3xl mx-auto h-48 flex items-center justify-between px-4">
-                <div class="text-center w-1/3 group cursor-pointer">
-                    <div
-                        class="w-16 h-16 mx-auto bg-gray-200 rounded-full flex items-center justify-center group-hover:bg-indigo-500 group-hover:text-white transition duration-300">
-                        🔍
-                    </div>
-                    <h4 class="mt-2 font-bold text-sm">曝光 (Impression)</h4>
-                    <p class="text-xs text-gray-500 mt-1">COSMO 语义匹配</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+                <div>
+                    <h4 class="font-bold text-orange-900 mb-2">
+                        语言微调 (Linguistic Nuances)
+                    </h4>
+                    <p class="text-orange-800/80">
+                        不要直接翻译。利用 Ai大模型 识别当地俚语。例如，英国站使用
+                        "Garden" 而非 "Yard"，形容词偏向
+                        "Lovely/Brilliant"；德国站文案需严谨，多用数据支撑，避免夸大修辞。
+                    </p>
                 </div>
-                <div class="flex-1 h-1 bg-gray-200 mx-2"></div>
-                <div class="text-center w-1/3 group cursor-pointer">
-                    <div
-                        class="w-16 h-16 mx-auto bg-gray-200 rounded-full flex items-center justify-center group-hover:bg-indigo-500 group-hover:text-white transition duration-300">
-                        💬
-                    </div>
-                    <h4 class="mt-2 font-bold text-sm">交互 (Engagement)</h4>
-                    <p class="text-xs text-gray-500 mt-1">Rufus 问答/对比</p>
+                <div>
+                    <h4 class="font-bold text-orange-900 mb-2">
+                        未满足需求挖掘 (Gap Analysis)
+                    </h4>
+                    <p class="text-orange-800/80">
+                        将竞品 1-3 星评论输入
+                        Ai大模型，指令分析"具体使用场景中的痛点"。针对 COSMO 算法，在
+                        Listing 中明确提及解决了这些特定场景下的问题。
+                    </p>
                 </div>
-                <div class="flex-1 h-1 bg-gray-200 mx-2"></div>
-                <div class="text-center w-1/3 group cursor-pointer">
-                    <div
-                        class="w-16 h-16 mx-auto bg-gray-200 rounded-full flex items-center justify-center group-hover:bg-indigo-500 group-hover:text-white transition duration-300">
-                        💰
-                    </div>
-                    <h4 class="mt-2 font-bold text-sm">转化 (Conversion)</h4>
-                    <p class="text-xs text-gray-500 mt-1">A10 权重积累</p>
+                <div>
+                    <h4 class="font-bold text-orange-900 mb-2">
+                        文化节日营销 (Cultural Events)
+                    </h4>
+                    <p class="text-orange-800/80">
+                        利用 Ai大模型 生成当地营销日历。例如针对意大利的 "Ferragosto"
+                        (八月节) 或德国的 "Oktoberfest" 调整关键词和广告素材。
+                    </p>
                 </div>
-            </div>
-        </div>
-    </section>
-</div>
-
-<!-- SOLO WORKFLOW VIEW -->
-<div id="amz_sop_flow" class="amz_tab-content hidden space-y-8 fade-in">
-    <header class="text-center mb-8">
-        <h1 class="text-3xl font-extrabold text-slate-900 mb-2">
-            标准化作业程序 (SOP)
-        </h1>
-        <p class="text-slate-600">
-            集成 Ai大模型 辅助的高效工作流程，旨在引导标准化作业和最大化单人产出效率。
-        </p>
-    </header>
-
-    <div class="relative border-l-2 border-blue-200 ml-4 space-y-12">
-        <!-- Step 1 -->
-        <div class="relative pl-8">
-            <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-blue-500 border-2 border-white">
-            </div>
-            <h3 class="font-bold text-lg text-gray-900">Step 1: 原始数据获取 (Day 1)</h3>
-            <p class="text-sm text-gray-500 mb-2">工具：前台插件 / 数据采集 / 卖家精灵 (JSON/CSV)</p>
-            <div class="bg-white p-4 rounded shadow-sm border border-gray-100 text-sm">
-                收集 Top 20-50 的竞品 Listing 内容和最近 3 个月的 Review。不要贪多，要精。
-                <br><span class="text-blue-600 font-semibold">目标：</span> 获取竞品Listing和Review。
-            </div>
-        </div>
-
-        <!-- Step 2 -->
-        <div class="relative pl-8">
-            <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-white border-2 border-blue-300">
-            </div>
-            <h3 class="font-bold text-lg text-gray-900">Step 2: LLM 结构化清洗提取 (Day 1)</h3>
-            <p class="text-sm text-gray-500 mb-2">工具：Gemini 1.5 Pro / GPT-5-mini</p>
-            <div class="bg-white p-4 rounded shadow-sm border border-gray-100 text-sm">
-                上传 JSON/CSV，选择合适的分析模板策略，生成 JSON 格式的 使用场景、具体负面痛点、积极的用户原话。
-                <br><span class="text-blue-600 font-semibold">目标：</span> 将非结构化文本转化为 COSMO 可理解的“意图节点”。
-            </div>
-        </div>
-
-        <!-- Step 3 -->
-        <div class="relative pl-8">
-            <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-white border-2 border-blue-300">
-            </div>
-            <h3 class="font-bold text-lg text-gray-900">Step 3: 交叉验证与策略制定 (Day 2)</h3>
-            <p class="text-sm text-gray-500 mb-2">工具：ABA (Amazon Brand Analytics) + Excel</p>
-            <div class="bg-white p-4 rounded shadow-sm border border-gray-100 text-sm">
-                拿着 LLM 提取的“原生词”去 ABA 验证流量。确定主推词（高流量+高相关）和长尾词（高转化+特定场景）。
-                <br><span class="text-blue-600 font-semibold">目标：</span> 确认哪些“意图”是有市场需求的。
-            </div>
-        </div>
-
-        <!-- Step 4 -->
-        <div class="relative pl-8">
-            <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-white border-2 border-blue-300">
-            </div>
-            <h3 class="font-bold text-lg text-gray-900">Step 4: 智能生成 Listing (Day 2)</h3>
-            <p class="text-sm text-gray-500 mb-2">核心动作：融合 Prompting</p>
-            <div class="bg-white p-4 rounded shadow-sm border border-gray-100 text-sm">
-                基于 A10/COSMO/Rufus 的逻辑，让 LLM 撰写 Listing。
-                <ul class="list-disc pl-4 mt-2 text-gray-500 text-xs">
-                    <li>Title: 包含 ABA 核心词 + 核心场景。</li>
-                    <li>Bullets: 前 3 点针对 COSMO 场景化，后 2 点针对 Rufus 解决痛点/参数。</li>
-                    <li>Description/A+: 讲述品牌故事，增加停留时间（A10 因素）。</li>
-                </ul>
-                <span class="text-blue-600 font-semibold">目标：</span> 获取完整Listing文案。
-            </div>
-        </div>
-
-        <!-- Step 5 -->
-        <div class="relative pl-8">
-            <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-white border-2 border-blue-300">
-            </div>
-            <h3 class="font-bold text-lg text-gray-900">Step 5: 站外内容分发 (Ongoing)</h3>
-            <p class="text-sm text-gray-500 mb-2">目标：A10 权重激活</p>
-            <div class="bg-white p-4 rounded shadow-sm border border-gray-100 text-sm">
-                利用 Gemini 根据 Listing 内容生成 Blog Post, Social Media Captions。发布到相关垂直论坛或社媒，带上归因链接。
-                <br><span class="text-blue-600 font-semibold">关键：</span> 哪怕销量不多，站外流量的引入本身就能极大提升 Listing 的自然排名权重。
             </div>
         </div>
     </div>
+
+    <!--SEO & Keywords-->
+    <div id="amz_seo_strategy" class="amz_tab-content hidden space-y-8 fade-in">
+        <header class="text-center mb-6">
+            <h1 class="text-3xl font-extrabold text-slate-900 mb-2">
+                Ai大模型扒词
+                <span class="text-blue-600 mx-1">vs</span>
+                ABA报告数据：谁更靠谱？
+            </h1>
+            <p class="text-slate-600 mt-2">
+                从竞品 Listing 扒词是“存量思维”，看别人已经在用什么。后台 ABA 是“流量思维”，看用户正在搜什么。
+                在 Project COSMO 时代，你需要两者结合。
+            </p>
+        </header>
+
+        <div class="flex flex-col lg:flex-row gap-8 items-center">
+            <div class="w-full lg:w-1/2">
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"
+                    style="position: relative; height:400px; width:100%">
+                    <canvas id="amz_keywordRadarChart"></canvas>
+                </div>
+                <div class="text-center mt-4 text-xs text-slate-500">
+                    图表展示了三种关键词来源在不同维度的表现能力
+                </div>
+            </div>
+
+            <div class="w-full lg:w-1/2 space-y-4">
+                <div
+                    class="bg-white p-5 rounded-lg border border-slate-200 hover:border-orange-300 transition-colors shadow-sm">
+                    <h4 class="font-bold text-lg text-slate-800">1. Listing/Review 扒词 (Mining)</h4>
+                    <div class="flex items-center mt-2 mb-2">
+                        <span class="text-xs font-bold bg-green-100 text-green-800 px-2 py-1 rounded mr-2">语义极强</span>
+                        <span class="text-xs font-bold bg-red-100 text-red-800 px-2 py-1 rounded">流量未知</span>
+                    </div>
+                    <p class="text-sm text-slate-600">
+                        <span class="font-bold">靠谱吗？</span> 非常靠谱，但仅限于<b>相关性</b>和<b>转化率</b>优化。这是喂给 COSMO 和 Rufus
+                        建立“产品-需求”连接的最佳燃料。Review 里的词往往是用户真实的搜索意图。
+                    </p>
+                </div>
+
+                <div
+                    class="bg-white p-5 rounded-lg border border-slate-200 hover:border-blue-300 transition-colors shadow-sm">
+                    <h4 class="font-bold text-lg text-slate-800">2. ABA / 前台下拉框 (Backend Data)</h4>
+                    <div class="flex items-center mt-2 mb-2">
+                        <span class="text-xs font-bold bg-green-100 text-green-800 px-2 py-1 rounded mr-2">流量精准</span>
+                        <span class="text-xs font-bold bg-yellow-100 text-yellow-800 px-2 py-1 rounded">竞争激烈</span>
+                    </div>
+                    <p class="text-sm text-slate-600">
+                        <span class="font-bold">靠谱吗？</span> 数据绝对真实，但大家都在用。这是<b>红海战场</b>。你必须用它来验证从 Review 扒来的词是否有搜索量。
+                    </p>
+                </div>
+
+                <div class="bg-gradient-to-r from-slate-800 to-slate-900 p-5 rounded-lg text-white shadow-md">
+                    <h4 class="font-bold text-lg">🚀 关键词的混合策略</h4>
+                    <p class="text-sm mt-2 opacity-90">
+                        不要二选一。先用 LLM 从 Top竞品 Review 提取“高频场景词”（Scenario Keywords），再将这些词扔进 ABA 或工具反查搜索频率排名（SFR）。
+                        <br><br>
+                        <b>公式：</b> Review 场景词 + ABA 中长尾修饰词 = COSMO 友好型高转化词。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--A10/COSMO/Rufus Ai-->
+    <div id="amz_ecosystem" class="amz_tab-content hidden space-y-8 fade-in">
+        <section>
+            <header class="text-center mb-10">
+                <h1 class="text-3xl font-extrabold text-slate-900 mb-4">
+                    驱动流量的三大核心引擎：A10, COSMO 与 Rufus
+                </h1>
+                <p class="max-w-3xl mx-auto text-lg text-slate-600">
+                    深入解析当前驱动亚马逊流量的三大核心引擎。了解算法如何从单纯的"关键词匹配"进化为对"用户意图"和"语义语境"的深度理解，以及指引你如何利用大模型将杂乱的竞品数据转化为符合“用户意图”的高转化
+                    Listing。
+                </p>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div
+                    class="bg-white rounded-xl shadow p-6 border-l-4 border-orange-500 amz_card-hover flex flex-col h-full">
+                    <div class="flex items-center mb-4 ">
+                        <span class="text-3xl mr-3">🛒</span>
+                        <h2 class="text-xl font-bold">A10 算法</h2>
+                    </div>
+                    <p class="text-xs font-semibold text-orange-600 uppercase tracking-wide mb-4">Sales Velocity &
+                        External Traffic</p>
+                    <p class="text-slate-600 text-sm mb-4">
+                        关注转化率与销售历史。权重大幅向"站外引流"与"自然销售"倾斜，降低了单纯PPC广告的权重。
+                    </p>
+                    <ul class="text-xs text-slate-500 space-y-2">
+                        <li>• 核心：销售历史 & 转化率</li>
+                        <li>• 趋势：有机流量权重 > 广告流量</li>
+                        <li>• 策略：在 Listing 中埋入适合社交媒体传播的“钩子”（Hook）。利用 Gemini 生成针对不同社媒（TikTok/Insta）的内容，将外部流量导向
+                            Listing，激活 A10 的加权机制。</li>
+                    </ul>
+                </div>
+
+                <div class="bg-white rounded-xl shadow p-6 border-l-4 border-indigo-500 amz_card-hover">
+                    <div class="flex items-center mb-4">
+                        <span class="text-3xl mr-3">🧠</span>
+                        <h2 class="text-xl font-bold">Project COSMO</h2>
+                    </div>
+                    <p class="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-4 z-10 relative">Intent
+                        & Knowledge Graph</p>
+                    <p class="text-slate-600 text-sm mb-4">
+                        基于知识图谱的意图识别系统。它不仅看用户搜了什么，更分析用户"为什么"搜，挖掘深层需求和多轮搜索意图。
+                    </p>
+                    <ul class="text-xs text-slate-500 space-y-2">
+                        <li>• 核心：语义理解 & 知识图谱</li>
+                        <li>• 趋势：从关键词匹配转向意图匹配</li>
+                        <li>• 策略：构建场景化 Listing。 不要只写 "Waterproof Shoes"，要写 "Keeps feet dry during muddy dog walks".
+                            告诉 LLM：将结构化的 [Usage Scenarios] 融入五点描述的开头。</li>
+                    </ul>
+                </div>
+
+                <div class="bg-white rounded-xl shadow p-6 border-l-4 border-teal-500 amz_card-hover">
+                    <div class="flex items-center mb-4">
+                        <span class="text-3xl mr-3">💬</span>
+                        <h2 class="text-xl font-bold">Rufus AI</h2>
+                    </div>
+                    <p class="text-xs font-semibold text-purple-600 uppercase tracking-wide mb-4">Conversational &
+                        Answers</p>
+                    <p class="text-slate-600 text-sm mb-4">
+                        对话式购物助手。通过问答形式引导用户决策，优先展示能解答具体痛点和提供详细信息的Listing。
+                    </p>
+                    <ul class="text-xs text-slate-500 space-y-2">
+                        <li>• 核心：生成式推荐 & 问答互动</li>
+                        <li>• 趋势：长尾语义搜索流量爆发</li>
+                        <li>• 策略：<b>完善属性字段 & QA。</b> Rufus 极其依赖结构化属性表（Spec Table）。利用提取的 [Specific Pain Points]，在
+                            Listing 描述或 A+ 页面中以 Q&A 形式直接回答，预判 Rufus 的回答素材。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white rounded-xl shadow p-6">
+                    <h3 class="text-lg font-bold text-slate-800 mb-2">
+                        A10 算法权重估算分布
+                    </h3>
+                    <p class="text-xs text-slate-500 mb-6">
+                        从单纯的 PPC 竞价排名，转向对<b>自然转化</b>和<b>站外引入流量</b>的极度偏好 (A10)。同时，搜索匹配机制正从“字面匹配”进化为“知识图谱意图理解”
+                        (COSMO)。
+                    </p>
+                    <div class="amz_chart-container">
+                        <canvas id="amz_a10Chart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow p-6 flex flex-col justify-center">
+                    <h3 class="text-lg font-bold text-slate-800 mb-4">
+                        流量分发机制的演变
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="relative pt-1">
+                            <div class="flex mb-2 items-center justify-between">
+                                <div>
+                                    <span
+                                        class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-indigo-600 bg-indigo-200">传统搜索
+                                        (关键词匹配)</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-xs font-semibold inline-block text-indigo-600">45%
+                                        (下降中)</span>
+                                </div>
+                            </div>
+                            <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-indigo-100">
+                                <div style="width: 45%"
+                                    class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-indigo-500">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="relative pt-1">
+                            <div class="flex mb-2 items-center justify-between">
+                                <div>
+                                    <span
+                                        class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-teal-600 bg-teal-200">语义推荐
+                                        (COSMO/推荐位)</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-xs font-semibold inline-block text-teal-600">35% (上升中)</span>
+                                </div>
+                            </div>
+                            <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-teal-100">
+                                <div style="width: 35%"
+                                    class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-teal-500">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="relative pt-1">
+                            <div class="flex mb-2 items-center justify-between">
+                                <div>
+                                    <span
+                                        class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-orange-600 bg-orange-200">对话式交互
+                                        (Rufus AI)</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-xs font-semibold inline-block text-orange-600">20%
+                                        (爆发潜力)</span>
+                                </div>
+                            </div>
+                            <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-orange-100">
+                                <div style="width: 20%"
+                                    class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-orange-500">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 p-4 bg-slate-50 rounded border border-slate-200 text-sm">
+                        <strong>Ai大模型 的机会点：</strong> 利用 Ai大模型 分析 COSMO 的潜在关联词，并针对 Rufus 的问答逻辑生成 Listing
+                        文案，可提前布局增量流量。
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="relative flex py-5 items-center">
+            <div class="flex-grow border-t border-gray-200"></div>
+            <span class="flex-shrink-0 mx-4 text-gray-400 text-sm uppercase tracking-wider">从理论到实操</span>
+            <div class="flex-grow border-t border-gray-200"></div>
+        </div>
+
+        <section class="space-y-8">
+            <header class="text-center mb-8">
+                <h1 class="text-3xl font-extrabold text-slate-900 mb-2">
+                    SEO 2.0: 针对 Rufus 与 A10 的优化
+                </h1>
+                <p class="text-slate-600">
+                    从"堆砌关键词"到"解答问题"。Rufus AI 优先抓取能回答用户自然语言提问的内容。
+                </p>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-xl shadow overflow-hidden">
+                    <div class="bg-gray-100 px-6 py-4 border-b border-gray-200 font-bold text-gray-700">
+                        传统 SEO vs. Rufus/Cosmo SEO
+                    </div>
+                    <div class="p-6 space-y-6">
+                        <div class="flex gap-4">
+                            <div class="w-1/2">
+                                <h4 class="text-red-500 font-bold text-sm mb-2">
+                                    ❌ 传统做法
+                                </h4>
+                                <ul class="text-sm text-gray-600 space-y-2 list-disc pl-4">
+                                    <li>标题堆砌大量关键词</li>
+                                    <li>五点描述仅罗列参数</li>
+                                    <li>忽视 Q&A 板块</li>
+                                    <li>通用型 A+ 页面</li>
+                                </ul>
+                            </div>
+                            <div class="w-1/2 border-l pl-4 border-gray-200">
+                                <h4 class="text-green-600 font-bold text-sm mb-2">
+                                    ✅ AI 时代做法
+                                </h4>
+                                <ul class="text-sm text-gray-600 space-y-2 list-disc pl-4">
+                                    <li>标题通顺，包含核心场景</li>
+                                    <li>五点描述采用"痛点-解决方案"结构</li>
+                                    <li>主动在 Listing 埋入"问题式"语句</li>
+                                    <li>A+ 页面包含对比表 (Rufus数据源)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow overflow-hidden">
+                    <div class="bg-indigo-600 px-6 py-4 border-b border-indigo-700 font-bold text-white">
+                        Ai大模型 辅助 SEO 埋词策略
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-4">
+                            <div class="flex items-start">
+                                <div
+                                    class="flex-shrink-0 h-6 w-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold mt-1">
+                                    1
+                                </div>
+                                <div class="ml-4">
+                                    <h4 class="text-sm font-bold text-gray-900">
+                                        长尾词拓展
+                                    </h4>
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        使用 Ai大模型 提问："用户在购买 [产品] 时可能会问哪些傻问题？" 将这些自然语言问题转化为长尾词。
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div
+                                    class="flex-shrink-0 h-6 w-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold mt-1">
+                                    2
+                                </div>
+                                <div class="ml-4">
+                                    <h4 class="text-sm font-bold text-gray-900">
+                                        语义相关性 (LSI)
+                                    </h4>
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        不仅是同义词，更是"共现词"。例如卖"瑜伽垫"，Cosmo 会关联 "防滑"、"关节保护"、"初学者"。Ai大模型 可生成此类词云。
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div
+                                    class="flex-shrink-0 h-6 w-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold mt-1">
+                                    3
+                                </div>
+                                <div class="ml-4">
+                                    <h4 class="text-sm font-bold text-gray-900">
+                                        结构化数据填充
+                                    </h4>
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        后台的 "More Details" 属性字段必须填满。Rufus 高度依赖这些结构化数据进行筛选和对比。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow p-6 mt-8">
+                <h3 class="text-lg font-bold text-slate-800 mb-4 text-center">
+                    Rufus 时代的流量漏斗优化
+                </h3>
+                <div class="relative max-w-3xl mx-auto h-48 flex items-center justify-between px-4">
+                    <div class="text-center w-1/3 group cursor-pointer">
+                        <div
+                            class="w-16 h-16 mx-auto bg-gray-200 rounded-full flex items-center justify-center group-hover:bg-indigo-500 group-hover:text-white transition duration-300">
+                            🔍
+                        </div>
+                        <h4 class="mt-2 font-bold text-sm">曝光 (Impression)</h4>
+                        <p class="text-xs text-gray-500 mt-1">COSMO 语义匹配</p>
+                    </div>
+                    <div class="flex-1 h-1 bg-gray-200 mx-2"></div>
+                    <div class="text-center w-1/3 group cursor-pointer">
+                        <div
+                            class="w-16 h-16 mx-auto bg-gray-200 rounded-full flex items-center justify-center group-hover:bg-indigo-500 group-hover:text-white transition duration-300">
+                            💬
+                        </div>
+                        <h4 class="mt-2 font-bold text-sm">交互 (Engagement)</h4>
+                        <p class="text-xs text-gray-500 mt-1">Rufus 问答/对比</p>
+                    </div>
+                    <div class="flex-1 h-1 bg-gray-200 mx-2"></div>
+                    <div class="text-center w-1/3 group cursor-pointer">
+                        <div
+                            class="w-16 h-16 mx-auto bg-gray-200 rounded-full flex items-center justify-center group-hover:bg-indigo-500 group-hover:text-white transition duration-300">
+                            💰
+                        </div>
+                        <h4 class="mt-2 font-bold text-sm">转化 (Conversion)</h4>
+                        <p class="text-xs text-gray-500 mt-1">A10 权重积累</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- SOLO WORKFLOW VIEW -->
+    <div id="amz_sop_flow" class="amz_tab-content hidden space-y-8 fade-in">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-extrabold text-slate-900 mb-2">
+                标准化作业程序 (SOP)
+            </h1>
+            <p class="text-slate-600">
+                集成 Ai大模型 辅助的高效工作流程，旨在引导标准化作业和最大化单人产出效率。
+            </p>
+        </header>
+
+        <div class="relative border-l-2 border-blue-200 ml-4 space-y-12">
+            <!-- Step 1 -->
+            <div class="relative pl-8">
+                <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-blue-500 border-2 border-white">
+                </div>
+                <h3 class="font-bold text-lg text-gray-900">Step 1: 原始数据获取 (Day 1)</h3>
+                <p class="text-sm text-gray-500 mb-2">工具：前台插件 / 数据采集 / 卖家精灵 (JSON/CSV)</p>
+                <div class="bg-white p-4 rounded shadow-sm border border-gray-100 text-sm">
+                    收集 Top 20-50 的竞品 Listing 内容和最近 3 个月的 Review。不要贪多，要精。
+                    <br><span class="text-blue-600 font-semibold">目标：</span> 获取竞品Listing和Review。
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="relative pl-8">
+                <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-white border-2 border-blue-300">
+                </div>
+                <h3 class="font-bold text-lg text-gray-900">Step 2: LLM 结构化清洗提取 (Day 1)</h3>
+                <p class="text-sm text-gray-500 mb-2">工具：Gemini 1.5 Pro / GPT-5-mini</p>
+                <div class="bg-white p-4 rounded shadow-sm border border-gray-100 text-sm">
+                    上传 JSON/CSV，选择合适的分析模板策略，生成 JSON 格式的 使用场景、具体负面痛点、积极的用户原话。
+                    <br><span class="text-blue-600 font-semibold">目标：</span> 将非结构化文本转化为 COSMO 可理解的“意图节点”。
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="relative pl-8">
+                <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-white border-2 border-blue-300">
+                </div>
+                <h3 class="font-bold text-lg text-gray-900">Step 3: 交叉验证与策略制定 (Day 2)</h3>
+                <p class="text-sm text-gray-500 mb-2">工具：ABA (Amazon Brand Analytics) + Excel</p>
+                <div class="bg-white p-4 rounded shadow-sm border border-gray-100 text-sm">
+                    拿着 LLM 提取的“原生词”去 ABA 验证流量。确定主推词（高流量+高相关）和长尾词（高转化+特定场景）。
+                    <br><span class="text-blue-600 font-semibold">目标：</span> 确认哪些“意图”是有市场需求的。
+                </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="relative pl-8">
+                <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-white border-2 border-blue-300">
+                </div>
+                <h3 class="font-bold text-lg text-gray-900">Step 4: 智能生成 Listing (Day 2)</h3>
+                <p class="text-sm text-gray-500 mb-2">核心动作：融合 Prompting</p>
+                <div class="bg-white p-4 rounded shadow-sm border border-gray-100 text-sm">
+                    基于 A10/COSMO/Rufus 的逻辑，让 LLM 撰写 Listing。
+                    <ul class="list-disc pl-4 mt-2 text-gray-500 text-xs">
+                        <li>Title: 包含 ABA 核心词 + 核心场景。</li>
+                        <li>Bullets: 前 3 点针对 COSMO 场景化，后 2 点针对 Rufus 解决痛点/参数。</li>
+                        <li>Description/A+: 讲述品牌故事，增加停留时间（A10 因素）。</li>
+                    </ul>
+                    <span class="text-blue-600 font-semibold">目标：</span> 获取完整Listing文案。
+                </div>
+            </div>
+
+            <!-- Step 5 -->
+            <div class="relative pl-8">
+                <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-white border-2 border-blue-300">
+                </div>
+                <h3 class="font-bold text-lg text-gray-900">Step 5: 站外内容分发 (Ongoing)</h3>
+                <p class="text-sm text-gray-500 mb-2">目标：A10 权重激活</p>
+                <div class="bg-white p-4 rounded shadow-sm border border-gray-100 text-sm">
+                    利用 Gemini 根据 Listing 内容生成 Blog Post, Social Media Captions。发布到相关垂直论坛或社媒，带上归因链接。
+                    <br><span class="text-blue-600 font-semibold">关键：</span> 哪怕销量不多，站外流量的引入本身就能极大提升 Listing 的自然排名权重。
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>

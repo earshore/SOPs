@@ -1,175 +1,158 @@
-console.log("🚀 ui.js 模块 (Config-Driven) 开始加载...");
+console.log("🚀 ui.js 模块 (Event-Driven Core) 开始加载...");
 
 import state from "../state.js";
 import { ERROR_MESSAGES } from "../constants/constants.js";
-import { loadAmzHubView } from "../../modules/amz_hub/amz_hubDisplay.js";
 import { MENU_CONFIG, getRoutesByModule, getRouteFullConfig } from "../config/menuConfig.js";
 
+// ========================
+// 🛡️ HELPER: 健壮的 DOM 获取器
+// ========================
+const getEl = (id) => document.getElementById(id);
+
 /**
- * 辅助函数：获取某模块下的“默认路由” (通常是配置中的第一个路由)
- * 用于点击一级应用卡片时，自动跳转到该应用的第一个子页面
+ * 辅助函数：获取某模块下的“默认路由”
  */
 function getDefaultRouteForModule(moduleId) {
+    if (!MENU_CONFIG.routes) return null;
     const allRoutes = Object.entries(MENU_CONFIG.routes);
-    // 查找属于该 moduleId 的第一个路由配置
     const entry = allRoutes.find(([_, config]) => config.moduleId === moduleId);
-    return entry ? entry[0] : null; // 返回 routeId (例如 'scraper')
+    return entry ? entry[0] : null;
 }
 
-/**
- * 核心函数：渲染顶部导航的 Mega Menu
- * 需在 main.js 初始化时调用
- */
+// ========================
+// 1. MEGA MENU RENDERER (配置驱动)
+// ========================
 export function renderMegaMenu() {
-    const container = document.getElementById('mega-menu-content');
-    if (!container) return;
+    const container = getEl('mega-menu-content');
+    if (!container) return; // 防御性返回
 
-    // 筛选出属于 'apps' 上下文的模块 (如果不想显示智库，可以在这里过滤)
-    // 这里我们展示所有 modules 以显得丰富
-    const modules = Object.values(MENU_CONFIG.modules);
+    try {
+        const modules = Object.values(MENU_CONFIG.modules || {});
+        
+        const html = modules.map(mod => {
+            const targetRoute = getDefaultRouteForModule(mod.id);
+            if (!targetRoute) return ''; 
 
-    const html = modules.map(mod => {
-        // 获取该模块的入口路由
-        const targetRoute = getDefaultRouteForModule(mod.id);
-        if (!targetRoute) return ''; // 如果该模块没有配置页面，则不显示
-
-        return `
-        <div onclick="switchTab('${targetRoute}')" 
-             class="cursor-pointer group/card p-4 rounded-xl bg-white border border-slate-100 hover:border-blue-200 hover:bg-slate-50 hover:shadow-md hover:shadow-blue-100/50 transition-all duration-200 flex flex-col gap-3">
-            
-            <div class="flex items-start justify-between">
-                <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-lg group-hover/card:scale-110 group-hover/card:bg-blue-600 group-hover/card:text-white transition-all duration-300">
-                    <i class="${mod.icon}"></i>
+            return `
+            <div onclick="switchTab('${targetRoute}')" 
+                 class="cursor-pointer group/card p-4 rounded-xl bg-white border border-slate-100 hover:border-blue-200 hover:bg-slate-50 hover:shadow-md hover:shadow-blue-100/50 transition-all duration-200 flex flex-col gap-3">
+                <div class="flex items-start justify-between">
+                    <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-lg group-hover/card:scale-110 group-hover/card:bg-blue-600 group-hover/card:text-white transition-all duration-300">
+                        <i class="${mod.icon || 'fas fa-cube'}"></i>
+                    </div>
+                    <span class="text-[10px] font-mono font-medium text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 group-hover/card:border-blue-200 group-hover/card:text-blue-500 transition-colors">
+                        ${mod.version || 'v1.0'}
+                    </span>
                 </div>
-                <span class="text-[10px] font-mono font-medium text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 group-hover/card:border-blue-200 group-hover/card:text-blue-500 transition-colors">
-                    ${mod.version}
-                </span>
-            </div>
-            
-            <div class="flex-grow">
-                <h4 class="text-sm font-bold text-slate-800 mb-1 group-hover/card:text-blue-700 transition-colors flex items-center gap-2">
-                    ${mod.title}
-                    <i class="fas fa-arrow-right opacity-0 -translate-x-2 text-xs text-blue-500 group-hover/card:opacity-100 group-hover/card:translate-x-0 transition-all"></i>
-                </h4>
-                <p class="text-xs text-slate-500 leading-relaxed line-clamp-2">
-                    ${mod.description || '暂无描述'}
-                </p>
-            </div>
-        </div>
-        `;
-    }).join('');
+                <div class="flex-grow">
+                    <h4 class="text-sm font-bold text-slate-800 mb-1 group-hover/card:text-blue-700 transition-colors flex items-center gap-2">
+                        ${mod.title || 'Unknown Module'}
+                        <i class="fas fa-arrow-right opacity-0 -translate-x-2 text-xs text-blue-500 group-hover/card:opacity-100 group-hover/card:translate-x-0 transition-all"></i>
+                    </h4>
+                    <p class="text-xs text-slate-500 leading-relaxed line-clamp-2">
+                        ${mod.description || '暂无描述'}
+                    </p>
+                </div>
+            </div>`;
+        }).join('');
 
-    container.innerHTML = html;
+        container.innerHTML = html;
+    } catch (e) {
+        console.error("❌ MegaMenu 渲染失败:", e);
+        container.innerHTML = `<div class="p-4 text-red-500 text-xs">菜单加载失败</div>`;
+    }
 }
-
-// 辅助函数：找到该模块下的第一个路由作为入口
-function getHostRouteForModule(moduleId) {
-    const routes = Object.entries(MENU_CONFIG.routes);
-    const entry = routes.find(([_, cfg]) => cfg.moduleId === moduleId);
-    return entry ? entry[0] : 'home';
-}
-
-function getModuleDescription(moduleId) {
-    // 简单映射，建议后续加到 menuConfig.modules 里
-    const map = {
-        'master_prompt': '集成数据采集、管理与 AI 分析的一站式工作台。',
-        'keyword_tracker': 'ASIN 关键词反查、排名监控与 SEO 优化工具。',
-        'amz_hub_core': '亚马逊运营知识库与 SOP 流程中心。'
-    };
-    return map[moduleId] || '亚马逊运营工具组件';
-}
-
 
 // ========================
-// DYNAMIC SIDEBAR RENDERER
+// 2. DYNAMIC SIDEBAR (无状态与缓存优化)
 // ========================
+let currentSidebarModuleId = null;
 
-// 状态追踪：当前侧边栏显示的组，防止重复渲染
-let currentSidebarModuleId = null; // 状态追踪改为 ModuleId
-
-/**
- * 渲染侧边栏核心函数
- * @param {string} groupId - 'app' | 'hub' | null (null 为隐藏)
- */
 function renderSidebar(moduleId) {
-    const sidebar = document.getElementById("dynamic-sidebar");
+    const sidebar = getEl("dynamic-sidebar");
     if (!sidebar) return;
 
-    // 1. 隐藏逻辑 (Home 页或其他无侧边栏页)
+    // 1. 隐藏逻辑
     if (!moduleId) {
         sidebar.classList.add("hidden", "-ml-64");
-        sidebar.innerHTML = '';
+        sidebar.innerHTML = ''; // 清空内容以防残留
         currentSidebarModuleId = null;
         return;
     }
 
-    // 2. 缓存检查：如果已经是这个模块的侧边栏，无需重绘
+    // 2. 缓存检查
     if (currentSidebarModuleId === moduleId) {
         sidebar.classList.remove("hidden", "-ml-64");
         return;
     }
 
-    // 3. 数据获取
+    // 3. 数据获取与防御
     const moduleConfig = MENU_CONFIG.modules[moduleId];
+    if (!moduleConfig) {
+        console.warn(`⚠️ 未找到 ID 为 [${moduleId}] 的模块配置，侧边栏将隐藏。`);
+        sidebar.classList.add("hidden", "-ml-64");
+        return;
+    }
+
     const routes = getRoutesByModule(moduleId);
 
-    if (!moduleConfig) return;
-
-    console.log(`🎨 切换侧边栏至应用: [${moduleConfig.title}]`);
-
-    // 4. 构建 HTML (支持拓展：不同模块可以有不同颜色的侧边栏头)
-    const html = `
-        <div class="flex flex-col h-full bg-white">
-            <div class="p-6 pb-2">
-                <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    ${moduleConfig.title}
-                </h2>
-                <nav class="space-y-1">
-                    ${routes.map(route => `
-                        <button onclick="switchTab('${route.id}')" id="sidebar-btn-${route.id}" 
-                            class="sidebar-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">
-                            <i class="${route.icon} w-5 text-center"></i> 
-                            ${route.label}
-                        </button>
-                    `).join('')}
-                </nav>
-            </div>  
-            
-            <div class="mt-auto p-6 border-t border-slate-100 bg-slate-50/50">
-                 <div class="flex items-center gap-3 text-slate-400 text-xs">
-                     <i class="${moduleConfig.icon}"></i>
-                     <span>${moduleConfig.version}</span>
-                 </div>
+    // 4. 渲染
+    try {
+        const html = `
+            <div class="flex flex-col h-full bg-white">
+                <div class="p-6 pb-2">
+                    <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        ${moduleConfig.title}
+                    </h2>
+                    <nav class="space-y-1">
+                        ${routes.map(route => `
+                            <button onclick="switchTab('${route.id}')" id="sidebar-btn-${route.id}" 
+                                class="sidebar-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">
+                                <i class="${route.icon} w-5 text-center"></i> 
+                                ${route.label}
+                            </button>
+                        `).join('')}
+                    </nav>
+                </div>  
+                <div class="mt-auto p-6 border-t border-slate-100 bg-slate-50/50">
+                     <div class="flex items-center gap-3 text-slate-400 text-xs">
+                         <i class="${moduleConfig.icon}"></i>
+                         <span>${moduleConfig.version}</span>
+                     </div>
+                </div>
             </div>
-        </div>
-    `;
-
-    sidebar.innerHTML = html;
-    sidebar.classList.remove("hidden", "-ml-64");
-    
-    currentSidebarModuleId = moduleId;
+        `;
+        sidebar.innerHTML = html;
+        sidebar.classList.remove("hidden", "-ml-64");
+        currentSidebarModuleId = moduleId;
+    } catch (e) {
+        console.error(`❌ 侧边栏渲染错误 [${moduleId}]:`, e);
+    }
 }
+
 // ========================
-// ROUTER LOGIC
+// 3. ROUTER LOGIC (核心改动：通用化)
 // ========================
 
 function updateHeaderNav(fullConfig) {
-    // 重置
     document.querySelectorAll(".nav-item").forEach((el) => {
         el.classList.remove("text-blue-600", "border-blue-600");
         el.classList.add("text-slate-600", "border-transparent");
     });
 
+    // 更加智能的 Header 高亮匹配
     let targetId = 'nav-home';
-    
-    // 如果有配置，根据 contextId 高亮顶部导航
     if (fullConfig && fullConfig.context) {
-        // 比如 apps -> nav-apps, hub -> nav-hub
-        if (fullConfig.context.id === 'apps') targetId = 'nav-apps';
-        if (fullConfig.context.id === 'hub') targetId = 'nav-amz_hub';
+        // 尝试匹配 nav-{contextId}，例如 nav-apps, nav-hub
+        const contextBtn = getEl(`nav-${fullConfig.context.id}`);
+        // 兼容旧的特例 (如果有)
+        const specificBtn = fullConfig.context.id === 'hub' ? getEl('nav-amz_hub') : null;
+        
+        if (contextBtn) targetId = `nav-${fullConfig.context.id}`;
+        if (specificBtn) targetId = 'nav-amz_hub';
     }
 
-    const targetBtn = document.getElementById(targetId);
+    const targetBtn = getEl(targetId);
     if (targetBtn) {
         targetBtn.classList.remove("text-slate-600", "border-transparent");
         targetBtn.classList.add("text-blue-600", "border-blue-600");
@@ -177,14 +160,12 @@ function updateHeaderNav(fullConfig) {
 }
 
 function updateSidebarHighlight(activeTabId) {
-    // 移除旧的高亮
     document.querySelectorAll(".sidebar-btn").forEach(btn => {
         btn.classList.remove("bg-blue-50", "text-blue-600");
         btn.classList.add("text-slate-600", "hover:bg-slate-50");
     });
 
-    // 添加新的高亮
-    const activeBtn = document.getElementById(`sidebar-btn-${activeTabId}`);
+    const activeBtn = getEl(`sidebar-btn-${activeTabId}`);
     if (activeBtn) {
         activeBtn.classList.remove("text-slate-600", "hover:bg-slate-50");
         activeBtn.classList.add("bg-blue-50", "text-blue-600");
@@ -192,76 +173,78 @@ function updateSidebarHighlight(activeTabId) {
 }
 
 /**
- * 全能路由切换函数
+ * 👑 全能路由切换函数 (Event-Driven)
+ * 此函数不再包含任何特定业务模块的 if/else 逻辑
  */
 export function switchTab(tab) {
     const cleanTab = String(tab).trim();
 
-    // 1. Hub 快捷重定向 (兼容旧代码习惯)
+    // 1. 处理 Config 中的 redirect (别名)
+    // 建议：在 menuConfig.routes 中添加 redirect 字段，此处即可通用处理
+    // 目前为了兼容性，保留一行硬代码，但建议将其移至 Config
     if (cleanTab === 'amz_hub') {
         switchTab('amz_eu_insights');
         return;
     }
 
+    // 2. 更新全局状态
     state.currentTab = cleanTab;
-
-    // 2. 获取完整配置链
     const fullConfig = getRouteFullConfig(cleanTab);
 
-    // 3. 决定渲染哪个模块的侧边栏
-    // 如果是 Home，fullConfig 为 null，moduleId 为 undefined -> 侧边栏隐藏
+    // 3. 渲染侧边栏 (View Layer)
     const targetModuleId = fullConfig ? fullConfig.module.id : null;
     renderSidebar(targetModuleId);
 
-    // 4. 面板显隐
+    // 4. 面板显隐 (View Layer)
+    // 先隐藏所有 .panel
     document.querySelectorAll(".panel").forEach(p => p.classList.add("hidden"));
     
-    const targetPanelId = fullConfig ? fullConfig.route.panelId : 'panel-home';
-    const targetPanel = document.getElementById(targetPanelId);
+    // 确定目标 Panel ID
+    let targetPanelId = 'panel-home';
+    if (fullConfig && fullConfig.route.panelId) {
+        targetPanelId = fullConfig.route.panelId;
+    }
     
+    const targetPanel = getEl(targetPanelId);
     if (targetPanel) {
         targetPanel.classList.remove("hidden");
     } else {
-        document.getElementById('panel-home')?.classList.remove("hidden");
+        console.warn(`⚠️ 目标面板 [${targetPanelId}] 未找到，回退至 Home`);
+        const home = getEl('panel-home');
+        if (home) home.classList.remove("hidden");
     }
 
-    // 1. 智库 Hub 的联动 (原有逻辑)
-    if (fullConfig && fullConfig.route.isHub) {
-        loadAmzHubView().then(() => {
-             if (typeof window.amz_switchTab === "function") window.amz_switchTab(cleanTab);
-        });
-    }
-    // 2. Keyword Tracker 的联动 (新增逻辑)
-    if (fullConfig && fullConfig.module.id === 'keyword_tracker') {
-        // 确保 JS 已加载且函数已挂载
-        if (typeof window.kt_switchInternalTab === 'function') {
-            // 将路由 ID (如 kw_input) 传给内部切换函数
-            window.kt_switchInternalTab(cleanTab);
-        }
-    }
-
-    // 6. 高亮更新
+    // 5. 更新导航高亮 (View Layer)
     updateHeaderNav(fullConfig);
-    
-    // 高亮侧边栏按钮
-    document.querySelectorAll(".sidebar-btn").forEach(btn => {
-        btn.classList.remove("bg-blue-50", "text-blue-600");
-        btn.classList.add("text-slate-600", "hover:bg-slate-50");
+    updateSidebarHighlight(cleanTab);
+
+    // ============================================================
+    // 🚀 核心解耦：分发事件 (Event Broadcasting)
+    // 任何业务逻辑 (加载数据、内部Tab切换) 都必须监听此事件
+    // ============================================================
+    const event = new CustomEvent('app:route-changed', {
+        detail: {
+            routeId: cleanTab,
+            moduleId: targetModuleId,
+            config: fullConfig,
+            timestamp: Date.now()
+        }
     });
-    const activeBtn = document.getElementById(`sidebar-btn-${cleanTab}`);
-    if (activeBtn) {
-        activeBtn.classList.remove("text-slate-600", "hover:bg-slate-50");
-        activeBtn.classList.add("bg-blue-50", "text-blue-600");
-    }
+    window.dispatchEvent(event);
+
+    console.log(`📡 路由切换事件已广播: ${cleanTab} (Module: ${targetModuleId})`);
 }
 
 // ========================
-// UI HELPERS (通用工具)
+// 4. UTILITIES (保持不变，增加空值检查)
 // ========================
 
 export function showToast(message, type = "info") {
-  const container = document.getElementById("toast-container");
-  if (container) container.style.zIndex = "9999";
+  const container = getEl("toast-container");
+  if (!container) return; // 防御
+
+  // 确保最上层
+  container.style.zIndex = "9999";
 
   const toast = document.createElement("div");
   const config = {
@@ -278,7 +261,7 @@ export function showToast(message, type = "info") {
     rounded-xl shadow-lg shadow-slate-300/50 
     transform transition-all duration-300 ease-out 
     translate-y-2 opacity-0
-    relative z-[9999]
+    relative pointer-events-auto
   `;
   toast.innerHTML = `<i class="fas ${style.icon} text-lg"></i><span class="text-sm font-medium tracking-wide">${message}</span>`;
   
@@ -292,8 +275,10 @@ export function showToast(message, type = "info") {
 }
 
 export function showProgress(show, percent = 0) {
-  const bar = document.getElementById("global-progress");
-  const fill = document.getElementById("progress-fill");
+  const bar = getEl("global-progress");
+  const fill = getEl("progress-fill");
+  if (!bar || !fill) return;
+
   if (show) {
     bar.classList.remove("hidden");
     requestAnimationFrame(() => fill.style.width = percent + "%");
@@ -307,15 +292,19 @@ export function showProgress(show, percent = 0) {
 }
 
 export function getErrorSummary(errorMsg) {
-  for (const [key, msg] of Object.entries(ERROR_MESSAGES)) {
-    if (errorMsg.includes(key)) return msg;
-  }
-  return `未知错误: ${errorMsg}`;
+    if (!errorMsg) return "未知错误";
+    for (const [key, msg] of Object.entries(ERROR_MESSAGES)) {
+        if (errorMsg.includes(key)) return msg;
+    }
+    return `系统错误: ${errorMsg}`;
 }
 
 export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// 暴露给全局
+// Global Exports
 window.switchTab = switchTab;
+window.renderMegaMenu = renderMegaMenu;
+// Utilities also exported for convenience if needed
+window.showToast = showToast;

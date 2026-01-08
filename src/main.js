@@ -32,6 +32,8 @@ import { renderDataPanel, toggleCardExpand, deleteProduct, deleteReview, trigger
 import { initAnalysisPanel, updateAsinSelectList, analyzeSelectedAsins, renderReport, } from "./modules/master_prompt/analysis/analysisDisplay.js";
 import { initPromptlabModule } from './modules/master_prompt/promptlab/promptlabDisplay.js';
 import { initKeywordTracker } from './modules/keyword_tracker/trackerDisplay.js';
+// ✅ 核心修正：仅导入文件，让它自动注册事件监听器
+import './modules/amz_hub/amz_hubDisplay.js';
 
 // ========================
 // APP STARTUP (程序启动)
@@ -51,6 +53,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // 1. 初始化各模块的事件监听器 (现在可以安全运行了，因为 DOM 已经在页面上了)
     initSettingsListeners();
+
     initScraperListeners();
     initAnalysisPanel();
     initPromptlabModule();
@@ -60,6 +63,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     // ===============================================
     // 只有 HTML 存在于页面上时，init 才能找到元素并绑定事件
     initKeywordTracker();
+
+    // 注意：不再需要显式调用 loadAmzHubView()，它会自动监听
+    // loadAmzHubView();
 
     // 2. 渲染顶部 Mega Menu (新增)
     renderMegaMenu();
@@ -101,6 +107,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 // Navigation
 window.switchTab = switchTab;
 window.switchDataTab = switchDataTab;
+
 // window.switchReportTab = switchReportTab;
 window.renderMegaMenu = renderMegaMenu;
 
@@ -136,3 +143,7 @@ window.renderReport = renderReport;
 
 
 // 暴露全局函数供 HTML onclick 使用 (因为 module 作用域隔离)
+
+//amz_hub
+
+// window.loadAmzHubView = loadAmzHubView();
