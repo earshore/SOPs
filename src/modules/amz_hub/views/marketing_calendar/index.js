@@ -202,6 +202,7 @@ function amzf_renderEventCard(event) {
                 <div class="amzf_event_title_wrapper">
                     <span class="amzf_event_emoji">${event.emoji}</span>
                     <span class="amzf_event_title">${event.name}</span>
+                    <span class="amzf_event_subtitle"> | ${event.description}</span>
                 </div>
                 <span class="amzf_event_date">📅 ${event.date}</span>
             </div>
@@ -212,9 +213,10 @@ function amzf_renderEventCard(event) {
                 <div class="amzf_strategy_tags">
                     ${event.tags.map(t => `<span class="amzf_tag">#${t}</span>`).join('')}
                 </div>
-            </div>
+            </div> 
         </div>
     `;
+    // <div class="amzf_event_description">${event.description}</div>
 }
 
 function amzf_renderEventView(events) {
