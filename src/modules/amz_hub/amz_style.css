@@ -1,163 +1,92 @@
-/* * AmzGen Vibrant Theme
- * 关键词: 磨砂 (Glass), 流光 (Glow), Q弹 (Bouncy)
+/* * css/amzstyle.css
+ * AmzGen Hub 独立样式表
+ * 作用域：仅限于 amz_hub 面板内部，所有类名均带 amz_ 前缀
  */
 
 /* =========================================
-   1. 灵动卡片 (Lively Cards)
+   1. 图表容器与布局
    ========================================= */
-/* 基础磨砂玻璃 */
-.glass-card {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(16px); /* 更深度的模糊 */
-  border: 1px solid rgba(255, 255, 255, 0.5); /* 模拟玻璃边缘 */
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-}
-
-/* 悬浮流光卡片 - 你的核心视觉资产 */
-.amz_card-hover {
+.amz_chart-container {
   position: relative;
-  background: white;
-  transition: all 0.4s var(--ease-spring); /* 调用 Core 中的 Q弹变量 */
-  border-radius: 12px;
-  overflow: hidden; /* 防止光晕溢出 */
+  width: 100%;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  height: 350px;
+  max-height: 400px;
 }
 
-/* 伪元素光晕：隐藏在卡片下的彩色渐变 */
-.amz_card-hover::before {
-  content: "";
-  position: absolute;
-  top: 0; left: 0; right: 0; height: 4px; /* 顶部光条 */
-  background: linear-gradient(90deg, #3b82f6, #8b5cf6, #f97316);
-  opacity: 0;
-  transition: opacity 0.3s ease;
+/* =========================================
+   2. 交互与动画
+   ========================================= */
+/* Tab 内容隐藏与显示逻辑 */
+.amz_tab-content {
+  display: none;
+  /* 仅在显示时触发淡入动画 */
+  animation: amz_fadeIn 0.3s ease-in-out;
+}
+
+.amz_tab-content.active {
+  display: block;
+}
+
+/* 淡入动画关键帧 */
+@keyframes amz_fadeIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(10px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+/* 卡片悬浮提升效果 */
+.amz_card-hover {
+  transition: all 0.3s ease;
 }
 
 .amz_card-hover:hover {
-  transform: translateY(-4px) scale(1.005);
-  box-shadow: 
-    0 20px 25px -5px rgba(59, 130, 246, 0.1), 
-    0 8px 10px -6px rgba(59, 130, 246, 0.05);
-}
-
-.amz_card-hover:hover::before,
-.asin-card.selected::before {
-  opacity: 1; /* 激活顶部光条 */
-}
-
-/* 选中状态的 ASIN 卡片 */
-.asin-card.selected {
-  background: #f8fafc;
-  ring: 2px solid #3b82f6;
-  transform: scale(1.01);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 /* =========================================
-   2. 交互式输入 (Fluid Inputs)
+   3. 内部导航状态
    ========================================= */
-/* 编辑区域：未聚焦时像文本，聚焦时像输入框 */
-[contenteditable="true"] {
-  border-bottom: 1px dashed #cbd5e1;
-  padding: 2px 6px;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-  cursor: text;
-}
-
-[contenteditable="true"]:hover {
-  background: rgba(241, 245, 249, 0.8);
-  border-bottom-color: #94a3b8;
-}
-
-/* 聚焦时的呼吸光环 */
-[contenteditable="true"]:focus {
-  outline: none;
-  background: white;
-  border-bottom: 1px solid transparent;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); /* 柔和的蓝色扩散 */
-}
-
-/* 编辑模式下的父容器高亮 */
-.editing-mode .editable-item {
-  background: #fffbeb; /* 极淡的黄色背景提示 */
-  animation: pulse 2s infinite;
+/* 内部二级导航按钮的激活态 */
+/* 激活状态：蓝紫色渐变，白色文字，带阴影 */
+/* 使用 !important 覆盖 JS 可能添加的 bg-slate-700 类 */
+.amz_nav-btn.active, 
+.amz_active_tab {
+  background: linear-gradient(135deg, #2563eb 0%, #9333ea 100%) !important; /* Blue-600 to Purple-600 */
+  color: #ffffff !important;
+  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
 }
 
 /* =========================================
-   3. 导航与按钮 (Nav & Pills)
+   4. 工具类
    ========================================= */
-/* 胶囊导航按钮 */
-.amz_nav-btn {
-  padding: 8px 20px;
-  border-radius: 99px;
-  color: #64748b;
-  font-weight: 600;
-  font-size: 0.875rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid transparent;
+/* 隐藏滚动条 (用于横向滚动的容器等) */
+.amz_no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
-.amz_nav-btn:hover {
-  color: #3b82f6;
-  background: rgba(59, 130, 246, 0.04);
+.amz_no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
 
-/* 激活态：渐变色块 */
-.amz_nav-btn.active, .tab-active {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white !important;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-  border: none;
-  transform: translateY(-1px);
-}
-
-/* 传统的底部线条式 Tab 的增强版 */
-.amz_tab-underline-active {
-  color: #0f172a;
-  position: relative;
-}
-.amz_tab-underline-active::after {
-  content: '';
-  position: absolute;
-  bottom: -6px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 20px;
-  height: 3px;
-  background: #f97316; /* 橙色强调色 */
-  border-radius: 10px;
-  transition: width 0.2s;
-}
-.amz_tab-underline-active:hover::after {
-  width: 32px; /* 悬浮时线条变长 */
-}
 
 /* =========================================
-   4. 业务组件细节 (Business Details)
+   3. 内部导航状态 (配色优化版)
    ========================================= */
-/* 翻译块 - 增加左侧色条的质感 */
-.translation-block {
-  border-left: 4px solid #3b82f6;
-  background: linear-gradient(to right, #eff6ff, transparent); /* 渐变消失，不生硬 */
-  padding: 12px;
-  border-radius: 0 8px 8px 0;
+
+/* 悬浮时的微动效 */
+.amz_nav-btn:hover:not(.active) {
+    transform: translateY(-1px);
 }
 
-/* 强调用的橙色指示器 */
-.amz_indicator-orange {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  background: #f97316;
-  border-radius: 50%;
-  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15);
-  margin-right: 8px;
-}
-
-/* 进度条动画 */
-.progress-bar {
-  background: linear-gradient(90deg, #3b82f6, #60a5fa);
-  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
-  transition: width 0.5s var(--ease-spring); /* 进度条增长带弹性 */
-}
 
 

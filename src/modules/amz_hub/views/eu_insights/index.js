@@ -35,11 +35,22 @@ function updateCountryInfo(code) {
         details.innerHTML = `
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
-                    <span>${getFlagEmoji(code)}</span> ${data.name}
+                    <span class="text-3xl">${getFlagEmoji(code)}</span> ${data.name}
                 </h2>
+                <span class="px-3 py-1 bg-indigo-50 text-indigo-600 text-xs font-bold uppercase rounded-full">Mature Market</span>
             </div>
-            <p>${data.traits}</p>
-            <div class="bg-slate-50 p-3 rounded mt-2 text-sm">${data.tips}</div>
+            <div class="space-y-4">
+                <div>
+                    <h4 class="text-xs font-bold uppercase text-slate-400 mb-1">核心画像 (Persona)</h4>
+                    <p class="text-sm text-slate-700 leading-relaxed">${data.traits}</p>
+                </div>
+                <div>
+                    <h4 class="text-xs font-bold uppercase text-slate-400 mb-1">运营建议 (Strategy)</h4>
+                    <div class="text-sm text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                        ${data.tips}
+                    </div>
+                </div>
+            </div>
         `;
     }
 
