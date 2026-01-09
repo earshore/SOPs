@@ -1,6 +1,6 @@
 /* src/modules/home/homeDisplay.css */
 
-/* 引入字体 - 保持不变 */
+/* 引入字体 */
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;700;900&display=swap');
 
 /* =========================================
@@ -12,13 +12,13 @@
     background: #080825; /* var(--dark) */
     color: #ffffff;      /* var(--light) */
     
-    /* 确保填满父容器 */
+    /* 必须填满父级 */
     width: 100%;
     height: 100%;
-    position: relative; /* 为内部 absolute 元素提供锚点 */
-    overflow: hidden;   /* 关键：防止光晕和粒子撑开滚动条 */
+    position: relative; 
+    overflow: hidden; 
     
-    /* 变量定义 (从原版 :root 提取) */
+    /* 变量定义 */
     --primary: #00f5d4;
     --secondary: #7b2cbf;
     --accent: #ff6b35;
@@ -59,7 +59,7 @@
     z-index: 2;
     animation: gridMove 20s linear infinite;
     pointer-events: none;
-    transform-style: preserve-3d; /* 增强 3D 效果 */
+    transform-style: preserve-3d;
 }
 
 @keyframes gridMove {
@@ -120,7 +120,7 @@
     transform: translate(-50%, -50%);
     width: 800px;
     height: 800px;
-    opacity: 0.15;
+    opacity: 0.25; /* 稍微增加不透明度以恢复细节 */
     z-index: 4;
     pointer-events: none;
 }
@@ -129,7 +129,6 @@
    内容层 (Content Layer)
    ========================================= */
 
-/* 主容器封装 */
 .splash-content-wrapper {
     position: relative;
     z-index: 10;
@@ -156,7 +155,7 @@
     background-size: 300% 300%;
     -webkit-background-clip: text;
     background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: transparent; /* 确保文字填充透明 */
     animation: gradientFlow 4s ease infinite;
     text-shadow: 0 0 60px rgba(0, 245, 212, 0.5);
 }
@@ -188,6 +187,9 @@
     line-height: 1.1;
     margin-bottom: 30px;
     position: relative;
+    display: flex; /* 修复布局 */
+    flex-direction: column;
+    align-items: center;
 }
 
 .slogan-line {
@@ -204,14 +206,18 @@
     background: linear-gradient(90deg, var(--primary), var(--accent));
     -webkit-background-clip: text;
     background-clip: text;
+    color: transparent;
     -webkit-text-fill-color: transparent;
 }
 
+/* 重点修复：空心字效果 */
 .slogan-line.outline {
-    -webkit-text-stroke: 2px var(--primary);
+    color: transparent; /* 兼容性回退 */
     -webkit-text-fill-color: transparent;
-    /* 兼容性增强 */
-    color: transparent; 
+    -webkit-text-stroke: 2px var(--primary); /* 核心艺术效果 */
+    text-stroke: 2px var(--primary);
+    opacity: 0; /* 配合动画 */
+    font-weight: 900; /* 确保字体足够粗，描边才好看 */
 }
 
 @keyframes slideUp {
@@ -256,14 +262,13 @@
     animation: fadeIn 1s ease 1.5s forwards;
 }
 
-/* 复原原版 Pulse 动画逻辑 */
 .status-dot-inner {
     width: 12px;
     height: 12px;
     background: var(--primary);
     border-radius: 50%;
     animation: pulse 2s ease-in-out infinite;
-    box-shadow: 0 0 20px var(--primary); /* 恢复强发光 */
+    box-shadow: 0 0 20px var(--primary);
 }
 
 @keyframes pulse {
@@ -282,7 +287,7 @@
    特效与装饰 (Effects & Decor)
    ========================================= */
 
-/* 数据流 (Data Stream) */
+/* 数据流 */
 .data-stream {
     position: absolute;
     top: 0;
@@ -332,9 +337,10 @@
 .float-icon {
     position: absolute;
     font-size: 1.5rem;
-    opacity: 0.1;
-    color: var(--primary); /* 确保颜色一致 */
+    opacity: 0.3; /* 增加透明度让其更明显一点 */
+    color: var(--primary);
     animation: floatAround 20s ease-in-out infinite;
+    text-shadow: 0 0 10px var(--primary); /* 加一点发光 */
 }
 
 .float-icon:nth-child(1) { top: 20%; left: 10%; animation-delay: 0s; }
@@ -361,29 +367,29 @@
 .corner-decor.top-left {
     top: 30px;
     left: 30px;
-    border-top: 2px solid rgba(0, 245, 212, 0.3);
-    border-left: 2px solid rgba(0, 245, 212, 0.3);
+    border-top: 2px solid rgba(0, 245, 212, 0.5);
+    border-left: 2px solid rgba(0, 245, 212, 0.5);
 }
 
 .corner-decor.top-right {
     top: 30px;
     right: 30px;
-    border-top: 2px solid rgba(0, 245, 212, 0.3);
-    border-right: 2px solid rgba(0, 245, 212, 0.3);
+    border-top: 2px solid rgba(0, 245, 212, 0.5);
+    border-right: 2px solid rgba(0, 245, 212, 0.5);
 }
 
 .corner-decor.bottom-left {
     bottom: 30px;
     left: 30px;
-    border-bottom: 2px solid rgba(0, 245, 212, 0.3);
-    border-left: 2px solid rgba(0, 245, 212, 0.3);
+    border-bottom: 2px solid rgba(0, 245, 212, 0.5);
+    border-left: 2px solid rgba(0, 245, 212, 0.5);
 }
 
 .corner-decor.bottom-right {
     bottom: 30px;
     right: 30px;
-    border-bottom: 2px solid rgba(0, 245, 212, 0.3);
-    border-right: 2px solid rgba(0, 245, 212, 0.3);
+    border-bottom: 2px solid rgba(0, 245, 212, 0.5);
+    border-right: 2px solid rgba(0, 245, 212, 0.5);
 }
 
 /* 底部品牌 */
@@ -398,7 +404,7 @@
     opacity: 0;
     animation: fadeIn 1s ease 2s forwards;
     width: max-content;
-    z-index: 20; /* 提升层级，防止被背景遮挡 */
+    z-index: 20;
 }
 
 .brand-line {
@@ -415,10 +421,10 @@
     font-family: 'Orbitron', sans-serif;
     font-size: 0.7rem;
     letter-spacing: 0.4em;
-    color: rgba(255, 255, 255, 0.4);
+    color: rgba(255, 255, 255, 0.6);
 }
 
-/* 扫描线效果 - 恢复高 Z-Index */
+/* 扫描线效果 - 高层级 */
 .scanline {
     position: absolute;
     top: 0;
@@ -428,27 +434,28 @@
     background: linear-gradient(
         to bottom,
         transparent 50%,
-        rgba(0, 0, 0, 0.02) 50%
+        rgba(0, 0, 0, 0.05) 50% /* 稍微加深一点 */
     );
     background-size: 100% 4px;
     pointer-events: none;
-    z-index: 99; /* 恢复到接近原版的 100，确保覆盖在大部分元素之上 */
+    z-index: 99; 
 }
 
-/* 光标跟随 - 必须是 Fixed，因为 JS 使用的是 Client 坐标 */
+/* 光标跟随 - Fixed 必须保持 */
 .cursor-glow {
-    position: fixed;
+    position: fixed; /* 使用 fixed 保证跟随鼠标而不受父容器 overflow 影响 */
     width: 400px;
     height: 400px;
     background: radial-gradient(circle, rgba(0, 245, 212, 0.15), transparent 70%);
     border-radius: 50%;
     pointer-events: none;
-    z-index: 4; /* 保持在背景之上，内容之下 */
+    z-index: 999; /* 确保在最顶层 */
     transform: translate(-50%, -50%);
     transition: opacity 0.3s;
+    opacity: 0.8;
 }
 
-/* 文字闪烁效果 (Glitch) */
+/* Glitch 效果 */
 .glitch {
     position: relative;
 }
@@ -461,20 +468,19 @@
     left: 0;
     width: 100%;
     height: 100%;
+    background: #080825; /* 重要：必须有背景色才能遮住原字产生错位感 */
 }
 
 .glitch::before {
     animation: glitch-1 2s infinite linear alternate-reverse;
     clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
     -webkit-text-fill-color: var(--primary);
-    background: transparent; /* 修复某些浏览器的渲染问题 */
 }
 
 .glitch::after {
     animation: glitch-2 3s infinite linear alternate-reverse;
     clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
     -webkit-text-fill-color: var(--accent);
-    background: transparent;
 }
 
 @keyframes glitch-1 {
@@ -502,7 +508,7 @@
     right: 50px;
     font-family: 'Orbitron', sans-serif;
     font-size: 0.7rem;
-    color: rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.5);
     letter-spacing: 0.2em;
     z-index: 20;
 }
@@ -514,29 +520,16 @@
     left: 50px;
     font-family: 'Orbitron', sans-serif;
     font-size: 0.8rem;
-    color: rgba(0, 245, 212, 0.6);
+    color: rgba(0, 245, 212, 0.8);
     letter-spacing: 0.1em;
     z-index: 20;
 }
 
-/* =========================================
-   响应式适配 (Responsive)
-   ========================================= */
+/* 响应式适配 */
 @media (max-width: 768px) {
-    .corner-decor {
-        width: 50px;
-        height: 50px;
-    }
-
-    .brand-footer {
-        bottom: 20px;
-    }
-
-    .brand-line {
-        width: 30px;
-    }
-
-    .glow-orb {
-        transform: scale(0.5);
-    }
+    .corner-decor { width: 50px; height: 50px; }
+    .brand-footer { bottom: 20px; }
+    .brand-line { width: 30px; }
+    .glow-orb { transform: scale(0.5); }
+    .slogan-main { font-size: 3rem; }
 }
