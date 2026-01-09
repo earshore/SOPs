@@ -27,7 +27,7 @@ window.addEventListener("unhandledrejection", (event) => {
 import { initSettingsListeners, updateModelStatus, loadProviderConfig, openSettings, closeSettings, toggleApiKeyVisibility, saveProviderConfig, renderProxyInputUI, fetchModels, testConnection, saveProxyConfig, } from "./components/settings/systemSettings.js";
 import { switchTab, renderMegaMenu } from "../src/common/utils/ui.js";
 import { initHomeSplash } from "./modules/home/homeDisplay.js";
-import { initScraperListeners, renderHistory, } from "./modules/master_prompt/scraper/scraperPanel.js";
+import { initScraperListeners, selectSite, renderHistory, } from "./modules/master_prompt/scraper/scraperPanel.js";
 import { renderDataPanel, triggerImport, switchDataTab, toggleCardExpand} from "./modules/master_prompt/data_manage/dataDisplay.js";
 import { initAnalysisPanel, updateAsinSelectList, analyzeSelectedAsins, renderReport, } from "./modules/master_prompt/analysis/analysisDisplay.js";
 import { initPromptlabModule } from './modules/master_prompt/promptlab/promptlabDisplay.js';
@@ -123,7 +123,7 @@ window.testConnection = testConnection;
 window.saveProxyConfig = saveProxyConfig;
 
 // Scraper
-// window.selectSite = selectSite;
+window.selectSite = selectSite;
 // window.startScraping = startScraping;
 // window.loadHistory = loadHistory;
 // window.clearHistory = clearHistory;

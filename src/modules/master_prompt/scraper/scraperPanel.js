@@ -180,7 +180,7 @@ export function initScraperListeners() {
 }
 
 // 选择站点 (样式切换)
-function selectSite(site) {
+export function selectSite(site) {
   state.selectedSite = site;
   document.querySelectorAll(".site-btn").forEach((btn) => {
     const isSel = btn.dataset.site === site;
