@@ -28,7 +28,7 @@ import { initSettingsListeners, updateModelStatus, loadProviderConfig, openSetti
 import { switchTab, renderMegaMenu } from "../src/common/utils/ui.js";
 import { initHomeSplash } from "./modules/home/homeDisplay.js";
 import { initScraperListeners, selectSite, renderHistory, } from "./modules/master_prompt/scraper/scraperPanel.js";
-import { renderDataPanel, triggerImport, switchDataTab, toggleCardExpand} from "./modules/master_prompt/data_manage/dataDisplay.js";
+import { renderDataPanel, triggerImport, switchDataTab, handleImportFiles, toggleCardExpand, deleteProduct, deleteReview } from "./modules/master_prompt/data_manage/dataDisplay.js";
 import { initAnalysisPanel, updateAsinSelectList, analyzeSelectedAsins, renderReport, } from "./modules/master_prompt/analysis/analysisDisplay.js";
 import { initPromptlabModule } from './modules/master_prompt/promptlab/promptlabDisplay.js';
 import { initKeywordTracker } from './modules/keyword_tracker/trackerDisplay.js';
@@ -132,10 +132,10 @@ window.selectSite = selectSite;
 // Data Display
 window.toggleCardExpand = toggleCardExpand;
 window.triggerImport = triggerImport;
-// window.handleImportFiles = handleImportFiles;
-// window.deleteReview = deleteReview;
+window.handleImportFiles = handleImportFiles;
+window.deleteReview = deleteReview;
 window.renderDataPanel = renderDataPanel;
-// window.deleteProduct = deleteProduct;
+window.deleteProduct = deleteProduct;
 
 // Analysis
 window.updateAsinSelectList = updateAsinSelectList;

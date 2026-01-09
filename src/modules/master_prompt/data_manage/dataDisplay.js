@@ -10,9 +10,50 @@ import { languageFlagMap } from "../../../common/constants/constants.js";
 // 1. 基础 UI 交互
 // ==========================================
 
+// 优化后的 toggleCardExpand
 export function toggleCardExpand(asin) {
-    state.expandedAsin = state.expandedAsin === asin ? null : asin;
-    renderDataPanel();
+    // 1. 获取当前点击的元素
+    const cardBody = document.getElementById(`card-body-${asin}`);
+    const cardIcon = document.getElementById(`card-icon-${asin}`);
+    const cardContainer = document.getElementById(`card-${asin}`);
+
+    if (!cardBody) return;
+
+    // 2. 判断当前是否已展开（这里用 DOM 状态判断更直接）
+    // 注意：这里假设 'hidden' 类存在即为收起
+    const isCurrentlyHidden = cardBody.classList.contains("hidden");
+
+    // 3. 核心逻辑：如果是要展开，先关闭之前所有打开的（手风琴模式）
+    if (isCurrentlyHidden) {
+        // --- 关闭上一个 (如果有) ---
+        if (state.expandedAsin && state.expandedAsin !== asin) {
+            const prevBody = document.getElementById(`card-body-${state.expandedAsin}`);
+            const prevIcon = document.getElementById(`card-icon-${state.expandedAsin}`);
+            const prevContainer = document.getElementById(`card-${state.expandedAsin}`);
+            
+            if (prevBody) prevBody.classList.add("hidden");
+            if (prevIcon) prevIcon.classList.remove("rotate-180");
+            if (prevContainer) prevContainer.classList.remove("ring-1", "ring-blue-500", "bg-blue-50/30");
+        }
+
+        // --- 展开当前 ---
+        cardBody.classList.remove("hidden");
+        cardBody.classList.add("fade-in"); 
+        cardContainer.classList.add("ring-1", "ring-blue-500", "bg-blue-50/30");
+        if (cardIcon) cardIcon.classList.add("rotate-180");
+        
+        // 更新状态
+        state.expandedAsin = asin;
+
+    } else {
+        // --- 收起当前 ---
+        cardBody.classList.add("hidden");
+        cardContainer.classList.remove("ring-1", "ring-blue-500", "bg-blue-50/30");
+        if (cardIcon) cardIcon.classList.remove("rotate-180");
+        
+        // 更新状态
+        state.expandedAsin = null;
+    }
 }
 
 export function triggerImport() {
@@ -29,12 +70,13 @@ export function triggerImport() {
 // ==========================================
 
 export function renderDataPanel() {
+    // 1. 安全检查：如果没有数据，直接返回
     if (!state.scrapedData) return;
 
     const noDataMsg = document.getElementById("no-data-msg");
     const cardsEl = document.getElementById("data-cards");
 
-    // 无数据状态处理
+    // 2. 无数据界面处理
     if (!state.scrapedData.products || state.scrapedData.products.length === 0) {
         if (noDataMsg) noDataMsg.classList.remove("hidden");
         if (cardsEl) cardsEl.classList.add("hidden");
@@ -44,44 +86,44 @@ export function renderDataPanel() {
     if (noDataMsg) noDataMsg.classList.add("hidden");
     if (cardsEl) cardsEl.classList.remove("hidden");
 
-    // ✅ 修复：优先从 metadata 获取全局站点代码 (如 "DE", "US")
+    // 3. 获取全局站点代码
     const globalSiteCode = state.scrapedData.metadata?.marketplace || state.selectedSite;
 
+    // 4. 生成 HTML 列表
     cardsEl.innerHTML = state.scrapedData.products
         .map((p) => {
             const isExpanded = state.expandedAsin === p.asin;
 
-            // ✅ 修复：计算国旗逻辑
-            // 1. 优先使用全局站点代码，其次尝试产品自带的 language，最后回退
+            // --- 内部逻辑：计算国旗 ---
             let siteKey = globalSiteCode || p.language || "US";
-            // 2. 修正 UK -> GB 映射
             if (siteKey === 'UK') siteKey = 'GB';
-            // 3. 查表
             const flag = languageFlagMap[siteKey] || "🌐";
 
-
-            // 内部组件：星星渲染
+            // --- 内部逻辑：渲染星星 (完整版) ---
             const renderStars = (rating) => {
                 if (!rating) return "";
                 return `<div class="flex items-center gap-0.5 text-sm" title="${rating} 星">
-            ${[1, 2, 3, 4, 5].map((star) => {
-                    if (rating >= star) return '<i class="fas fa-star text-amber-400"></i>';
-                    if (rating >= star - 0.5) return '<i class="fas fa-star-half-alt text-amber-400"></i>';
-                    return '<i class="far fa-star text-slate-300"></i>';
-                }).join("")}
-            <span class="text-xs text-slate-500 ml-1 font-mono pt-0.5">${rating}</span>
-          </div>`;
+                    ${[1, 2, 3, 4, 5].map((star) => {
+                        if (rating >= star) return '<i class="fas fa-star text-amber-400"></i>';
+                        if (rating >= star - 0.5) return '<i class="fas fa-star-half-alt text-amber-400"></i>';
+                        return '<i class="far fa-star text-slate-300"></i>';
+                    }).join("")}
+                    <span class="text-xs text-slate-500 ml-1 font-mono pt-0.5">${rating}</span>
+                </div>`;
             };
 
+            // --- 内部逻辑：状态配置 (完整版) ---
             const statusConfig = {
                 success: { class: "bg-emerald-100 text-emerald-700 border-emerald-200", icon: "fa-check-circle", text: "成功" },
                 partial: { class: "bg-amber-100 text-amber-700 border-amber-200", icon: "fa-exclamation-circle", text: "部分" },
                 failed: { class: "bg-red-100 text-red-700 border-red-200", icon: "fa-times-circle", text: "失败" },
             };
+            // 这里加了防御性编程：如果没有 scrape_status，默认视为 partial
             const status = statusConfig[p.scrape_status] || statusConfig.partial;
 
             return `
-        <div class="asin-card group relative p-5 border rounded-2xl transition-all cursor-pointer hover:shadow-md 
+        <div id="card-${p.asin}" 
+             class="asin-card group relative p-5 border rounded-2xl transition-all cursor-pointer hover:shadow-md 
             ${isExpanded ? "border-blue-500 bg-blue-50/30 ring-1 ring-blue-500" : "bg-white border-slate-200 hover:border-blue-300"}" 
             onclick="toggleCardExpand('${p.asin}')">
             
@@ -117,7 +159,7 @@ export function renderDataPanel() {
                         </span>
                     </div>
                     <span class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-400 group-hover:bg-blue-100 group-hover:text-blue-500 transition-all">
-                        <i class="fas fa-chevron-down transition-transform duration-300 ${isExpanded ? "rotate-180" : ""}"></i>
+                        <i id="card-icon-${p.asin}" class="fas fa-chevron-down transition-transform duration-300 ${isExpanded ? "rotate-180" : ""}"></i>
                     </span>
                 </div>
             </div>
@@ -136,10 +178,11 @@ export function renderDataPanel() {
                     <i class="fas fa-bug mt-0.5"></i>
                     <span>${getErrorSummary(p.error) || p.error}</span>
                 </div>` : ""
-                }
+            }
             
-            ${isExpanded ? `
-                <div class="mt-4 pt-4 border-t border-slate-200/60 space-y-6 fade-in" onclick="event.stopPropagation()">
+            <div id="card-body-${p.asin}" 
+                 class="mt-4 pt-4 border-t border-slate-200/60 space-y-6 fade-in ${isExpanded ? '' : 'hidden'}" 
+                 onclick="event.stopPropagation()">
                     <div>
                         <h5 class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
                             <i class="fas fa-list-ul text-blue-500"></i> 五点描述
@@ -193,13 +236,12 @@ export function renderDataPanel() {
                             <span>查看原始页面</span> <i class="fas fa-external-link-alt"></i>
                         </a>
                     </div>
-                </div>
-            ` : ""}
+            </div>
         </div>
     `;
         }).join("");
 
-    // 同步更新 JSON 视图
+    // 5. 同步更新 JSON 视图
     const jsonDisplay = document.getElementById("json-display");
     if (jsonDisplay) {
         jsonDisplay.innerHTML = syntaxHighlight(JSON.stringify(state.scrapedData, null, 2));
@@ -225,7 +267,7 @@ function syntaxHighlight(json) {
 // 3. 删除逻辑 (带弹窗 & 关闭图标)
 // ==========================================
 
-async function deleteProduct(asin) {
+export async function deleteProduct(asin) {
     const confirmed = await confirmWithModal(
         "确定删除",
         `ASIN: <span class="font-bold text-red-500">${asin}</span> 及其所有数据吗？`,
@@ -246,7 +288,7 @@ async function deleteProduct(asin) {
     showToast(`ASIN ${asin} 已移除`, "info");
 }
 
-async function deleteReview(asin, index) {
+export async function deleteReview(asin, index) {
     const confirmed = await confirmWithModal(
         "确定要移除这条评论吗？",
         '',
@@ -425,7 +467,7 @@ function confirmSimple(title, content) {
 // 🔥 核心修复：强力导入与校验逻辑
 // ==========================================
 
-async function handleImportFiles(event) {
+export async function handleImportFiles(event) {
     const files = Array.from(event.target.files);
     if (files.length === 0) return;
 
