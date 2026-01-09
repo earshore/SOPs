@@ -61,7 +61,7 @@ window.addEventListener('app:route-changed', async (e) => {
     const { routeId, config } = e.detail;
 
     // 🔍 调试日志：看看究竟收到了什么
-    console.log(`📡 [AmzHub 调试] 收到路由: ${routeId}, 模块ID: ${config?.module?.id}`);
+    console.log(`📡 [amz_hub 调试] 收到路由: ${routeId}, 模块ID: ${config?.module?.id}`);
 
     // 修改判断逻辑：
     // 只要这个路由 ID 在我们的 MODULE_MAP 映射表里存在，我们就处理它

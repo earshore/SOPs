@@ -35,9 +35,13 @@
 
 /* Header */
     .amzf_header {
+        display: flex;
+        justify-content: space-between; /* 两端对齐 */
+        align-items: flex-start;        /* 顶部对齐 */
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         border-radius: var(--amzf-radius);
-        padding: 40px;
+        gap: 30px;
+        padding: 30px;
         margin-bottom: 30px;
         color: white;
         position: relative;
@@ -73,8 +77,18 @@
         border-radius: 50%;
     }
     .amzf_header_content {
-        position: relative;
+        flex: 1;
+        /* width: 100%; */
+        /* position: relative; */
         z-index: 1;
+    }
+    /* 3. 右侧功能容器：负责垂直排列卡片和搜索框 */
+    .amzf_header_right {
+        display: flex;
+        flex-direction: column; /* 纵向排列：上统计，下搜索 */
+        align-items: flex-end;   /* 靠右对齐 */
+        gap: 15px;               /* 统计卡片和搜索框之间的垂直间距 */
+        flex-shrink: 0;          /* 防止被挤压 */
     }
     .amzf_title {
         font-size: 2.5rem;
@@ -100,14 +114,14 @@
         max-width: 600px;
     }
     /* Search Bar */
-    .amzf_search_wrapper {
+    /* .amzf_search_wrapper {
         background: var(--amzf-card);
         border-radius: var(--amzf-radius);
         padding: 20px;
         margin-bottom: 20px;
         box-shadow: var(--amzf-shadow);
-    }
-    .amzf_search_box {
+    } */
+    /* .amzf_search_box {
         display: flex;
         align-items: center;
         gap: 15px;
@@ -116,10 +130,44 @@
         padding: 12px 24px;
         border: 2px solid transparent;
         transition: var(--amzf-transition);
+    } */
+     .amzf_search_box {
+        width: 100%;             /* 宽度填满右侧容器 */
+        max-width: 450px;        /* 限制搜索框最大宽度，防止过长 */
+        padding: 12px 20px;      /* 稍微缩小 padding 使视觉更精致 */
+        /* ✅ 修改：背景改为白色卡片色，替代原本的外框背景 */
+        background: var(--amzf-card); 
+        /* ✅ 修改：增加圆角和阴影，使其看起来像一个独立的悬浮条 */
+        border-radius: var(--amzf-radius);
+        /* padding: 15px 25px; */
+        margin-bottom: 0;
+        box-shadow: var(--amzf-shadow);
+        border: 1px solid transparent; /* 预留边框位 */
+        transition: var(--amzf-transition);
+        align-items: center;
+        /* width: 100%; 确保撑满宽度 */
     }
-    .amzf_search_box:focus-within {
+
+@media (max-width: 768px) {
+    .amzf_header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .amzf_stats, .amzf_search_box {
+        width: 100%;
+        flex: none;
+    }
+}
+
+    /* .amzf_search_box:focus-within {
         border-color: var(--amzf-primary);
         background: white;
+    } */
+    .amzf_search_box:focus-within {
+        border-color: var(--amzf-primary);
+        /* ✅ 修改：聚焦时增加阴影深度 */
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
     }
     .amzf_search_icon {
         color: var(--amzf-text-secondary);
@@ -132,6 +180,8 @@
         font-size: 1rem;
         color: var(--amzf-text);
         outline: none;
+        /* 修复：移除输入框默认高度，让 padding 决定 */
+        height: auto;
     }
     .amzf_search_clear {
         background: none;
@@ -143,6 +193,7 @@
         transition: var(--amzf-transition);
         opacity: 0;
         visibility: hidden;
+        font-size: 1.1rem; /* 稍微调大关闭图标 */
     }
     .amzf_search_clear.amzf_visible {
         opacity: 1;
@@ -222,13 +273,13 @@
     }
     /* Stats Bar */
     .amzf_stats {
-    display: flex;
-    gap: 15px; /* 减小间距 */
-    /* margin-bottom: 25px; */ /* ❌ 删除原本的底部边距 */
-    margin-bottom: 0;          /* ✅ 设为 0 */
-    flex-wrap: wrap;
-    position: relative;        /* ✅ 确保在背景层之上 */
-    z-index: 2;                /* ✅ 确保层级高于背景装饰 */
+        display: flex;
+        gap: 12px; /* 减小间距 */
+        /* margin-bottom: 25px; */ /* ❌ 删除原本的底部边距 */
+        margin-bottom: 0;          /* ✅ 设为 0 */
+        flex-wrap: wrap;
+        position: relative;        /* ✅ 确保在背景层之上 */
+        z-index: 2;                /* ✅ 确保层级高于背景装饰 */
     }
     /* 修改卡片容器样式 */
     .amzf_stat_item {
@@ -577,15 +628,18 @@
             </h1>
             <p class="amzf_subtitle">覆盖德国、意大利、法国、荷兰、西班牙、波兰、英国、瑞典八大站点，精准把握全年营销节点</p>
         </div>
-        <div class="amzf_stats amzf_header_stats" id="amzf_stats"></div>
-    </header>
-    <div class="amzf_search_wrapper">
-        <div class="amzf_search_box">
-            <span class="amzf_search_icon">🔍</span>
-            <input type="text" class="amzf_search_input" id="amzf_search" placeholder="搜索节日、活动或关键词...">
-            <button class="amzf_search_clear" id="amzf_clear" onclick="amzf_clearSearch()">✕</button>
+        <div class="amzf_header_right">
+            <div class="amzf_stats amzf_header_stats" id="amzf_stats"></div>
+            <div class="amzf_search_box">
+                <span class="amzf_search_icon">🔍</span>
+                <input type="text" class="amzf_search_input" id="amzf_search" placeholder="搜索节日、活动或关键词...">
+                <button class="amzf_search_clear" id="amzf_clear" onclick="amzf_clearSearch()">✕</button>
+            </div>
         </div>
-    </div>
+    </header>
+    <!-- <div class="amzf_search_wrapper"> -->
+
+    <!-- </div> -->
     <div class="amzf_controls">
         <div class="amzf_view_toggle">
             <button class="amzf_view_btn amzf_active" id="amzf_btn_country" onclick="amzf_switchView('country')">
@@ -597,6 +651,6 @@
         </div>
         <div class="amzf_country_tabs" id="amzf_country_tabs"></div>
     </div>
-    <div class="amzf_stats" id="amzf_stats"></div>
+    <!-- <div class="amzf_stats" id="amzf_stats"></div> -->
     <main class="amzf_main" id="amzf_main"></main>
 </div>
