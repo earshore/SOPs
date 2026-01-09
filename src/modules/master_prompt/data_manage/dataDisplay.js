@@ -381,10 +381,89 @@ function confirmWithModal(title, content, storageKey) {
 // 4. 导入与合并逻辑 (Import Logic)
 // ==========================================
 
+// 辅助：评论去重签名
 function getReviewSignature(review) {
     if (review.id) return review.id;
-    return `${review.date || ''}_${review.author || ''}_${review.headline || ''}`.trim();
+    // 如果没有ID，用 内容+作者+日期 生成一个哈希指纹
+    return `${review.date || ''}_${review.author || ''}_${(review.headline || '').substring(0,20)}`.trim();
 }
+
+/**
+ * 🔥 新增：多站点冲突选择模态框
+ * 动态生成 HTML 插入页面，用户选择后返回 Promise
+ */
+function showMarketplaceSelectionModal(sites) {
+    return new Promise((resolve) => {
+        // 1. 创建临时的 Modal DOM
+        const modalId = 'site-select-modal-' + Date.now();
+        const backdrop = document.createElement('div');
+        backdrop.id = modalId;
+        backdrop.className = "fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] flex items-center justify-center fade-in";
+        
+        const content = `
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-100 transition-all">
+                <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-5 text-white">
+                    <h3 class="text-lg font-bold flex items-center gap-2">
+                        <i class="fas fa-globe"></i> 检测到多站点数据
+                    </h3>
+                    <p class="text-blue-100 text-xs mt-1">您导入的文件包含多个市场的数据 (${sites.join(", ")})</p>
+                </div>
+                
+                <div class="p-6">
+                    <p class="text-slate-600 text-sm mb-4 font-medium">
+                        请选择一个 <span class="text-blue-600 font-bold">主站点</span>。
+                        <br/><span class="text-xs text-slate-400 font-normal">我们将保留该站点的标题和描述，并自动合并其他站点的评论。</span>
+                    </p>
+                    
+                    <div class="space-y-3 mb-6">
+                        ${sites.map((site, index) => `
+                            <label class="flex items-center p-3 border border-slate-200 rounded-xl cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all group">
+                                <input type="radio" name="site_choice" value="${site}" ${index === 0 ? 'checked' : ''} 
+                                    class="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+                                <span class="ml-3 font-bold text-slate-700 group-hover:text-blue-700">${site}</span>
+                                <span class="ml-auto text-xs text-slate-400 bg-white px-2 py-1 rounded border border-slate-100 shadow-sm">
+                                    ${languageFlagMap[site === 'UK' ? 'GB' : site] || '🏳️'}
+                                </span>
+                            </label>
+                        `).join('')}
+                    </div>
+
+                    <div class="flex justify-end gap-3">
+                        <button id="btn-cancel-${modalId}" class="px-4 py-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg text-sm transition-colors">
+                            取消导入
+                        </button>
+                        <button id="btn-confirm-${modalId}" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold shadow-md transition-transform transform active:scale-95">
+                            确认合并
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        backdrop.innerHTML = content;
+        document.body.appendChild(backdrop);
+
+        // 2. 绑定事件
+        const btnConfirm = document.getElementById(`btn-confirm-${modalId}`);
+        const btnCancel = document.getElementById(`btn-cancel-${modalId}`);
+
+        btnConfirm.onclick = () => {
+            const selected = backdrop.querySelector('input[name="site_choice"]:checked').value;
+            cleanup();
+            resolve(selected);
+        };
+
+        btnCancel.onclick = () => {
+            cleanup();
+            resolve(null);
+        };
+
+        function cleanup() {
+            document.body.removeChild(backdrop);
+        }
+    });
+}
+
 
 function mergeProducts(oldP, newP) {
     const merged = {
@@ -464,7 +543,7 @@ function confirmSimple(title, content) {
 }
 
 // ==========================================
-// 🔥 核心修复：强力导入与校验逻辑
+// 🔥 核心升级：跨站点智能合并导入逻辑
 // ==========================================
 
 export async function handleImportFiles(event) {
@@ -475,185 +554,149 @@ export async function handleImportFiles(event) {
     showToast(`📂 正在解析 ${files.length} 个文件...`, "info");
 
     try {
+        // 1. 读取所有文件内容
         const fileContents = await Promise.all(files.map(f => readFileAsJSON(f)));
         
-        let incomingProducts = [];
-        // 记录本次导入检测到的所有站点（Set去重）
+        // 2. 预处理：将所有文件打平为“待处理产品池”
+        //    结构：Map<ASIN, Array<ProductObject>>
+        const productPool = new Map();
         const detectedSites = new Set();
 
-        // 1. 遍历文件，暴力提取数据和站点信息
-        fileContents.forEach(content => {
-            const json = content.data;
-            if (!json) return;
+        fileContents.forEach(({ data, filename }) => {
+            if (!data) return;
 
-            // 🔥 暴力读取：穷举所有可能存放 marketplace 的位置
+            // 提取站点信息
             let fileSite = null;
-            
-            // 路径1: 标准结构 { metadata: { marketplace: "US" } }
-            if (json.metadata && json.metadata.marketplace) fileSite = json.metadata.marketplace;
-            // 路径2: 根节点 { marketplace: "US" }
-            else if (json.marketplace) fileSite = json.marketplace;
-            // 路径3: 根节点别名 { site: "US" }
-            else if (json.site) fileSite = json.site;
-            // 路径4: 如果是数组，尝试读取第一个元素的 metadata
-            else if (Array.isArray(json) && json.length > 0 && json[0].metadata?.marketplace) {
-                fileSite = json[0].metadata.marketplace;
+            if (data.metadata?.marketplace) fileSite = data.metadata.marketplace;
+            else if (data.marketplace) fileSite = data.marketplace;
+            else if (Array.isArray(data) && data.length > 0 && data[0].metadata?.marketplace) {
+                fileSite = data[0].metadata.marketplace;
             }
-
-            // 调试日志：在控制台打印读取结果，方便排查
-            console.log(`[Import] File: ${content.filename}, Detected Site: ${fileSite}`);
-
+            
+            // 默认归类为 "Unknown" 以便处理
+            const site = fileSite || "Unknown";
             if (fileSite) detectedSites.add(fileSite);
 
-            // 归一化产品列表
-            const list = Array.isArray(json) ? json : (json.products || (json.asin ? [json] : []));
-            
-            incomingProducts.push(...list.map(p => ({
-                ...p,
-                _temp_source_marketplace: fileSite, // 将站点标记挂载到临时字段
-                feature_bullets: Array.isArray(p.feature_bullets) ? p.feature_bullets : [],
-                customer_reviews: Array.isArray(p.customer_reviews) ? p.customer_reviews : []
-            })));
-        });
+            // 提取产品数组
+            const list = Array.isArray(data) ? data : (data.products || (data.asin ? [data] : []));
 
-        if (incomingProducts.length === 0) throw new Error("文件未包含有效产品数据");
-
-        // 2. 判定当前项目的“主权站点”
-        const currentProducts = state.scrapedData?.products || [];
-        const hasExistingData = currentProducts.length > 0;
-        
-        // 关键逻辑：
-        // 如果项目有数据 -> 必须以项目现有站点为准
-        // 如果项目为空 -> 必须以 UI 当前选中的站点为准 (防止空项目被错误污染)
-        const projectMarketplace = hasExistingData 
-            ? state.scrapedData.metadata.marketplace 
-            : state.selectedSite;
-
-        console.log(`[Import] Project Status: ${hasExistingData ? 'Has Data' : 'Empty'}, Target Site: ${projectMarketplace}`);
-
-        // 3. 执行严格校验
-        const currentMap = new Map(currentProducts.map(p => [p.asin, p]));
-        const conflicts = []; 
-        const newEntries = []; 
-        const invalidEntries = []; 
-
-        // 如果检测到了站点，且跟当前不一致，且当前项目是空的 -> 提示用户是否切换
-        // (处理“我在DE界面，导入了US数据”的情况)
-        let autoSwitchSite = null;
-        if (!hasExistingData && detectedSites.size === 1) {
-            const importSite = [...detectedSites][0];
-            if (importSite && importSite !== projectMarketplace) {
-                // 标记需要切换，但在下面循环中暂时以 importSite 为准进行通过
-                autoSwitchSite = importSite; 
-                console.log(`[Import] Empty project mismatch. Will auto-switch to: ${autoSwitchSite}`);
-            }
-        }
-
-        // 确定用于校验的基准站点 (如果是空项目且准备自动切换，就用新站点校验，否则用原站点)
-        const validationTargetSite = autoSwitchSite || projectMarketplace;
-
-        incomingProducts.forEach(p => {
-            const exists = currentMap.has(p.asin);
-            const pSite = p._temp_source_marketplace;
-            
-            // 校验逻辑：
-            // 1. 如果文件没写站点 (pSite为null)，也就是读取失败，暂时放行（此时无法显示站点）
-            // 2. 如果文件有站点，必须等于 validationTargetSite
-            // 3. 或者是已存在的 ASIN (合并例外)
-            
-            const isMatch = !pSite || (pSite === validationTargetSite);
-
-            if (isMatch) {
-                if (exists) conflicts.push(p);
-                else newEntries.push(p);
-            } else {
-                // 站点不匹配
-                if (exists) {
-                    conflicts.push(p); // 允许：已存在的ASIN，允许合并跨站点数据
-                } else {
-                    invalidEntries.push(p); // 拒绝：站点不对的新ASIN
+            list.forEach(p => {
+                if (!p.asin) return;
+                if (!productPool.has(p.asin)) {
+                    productPool.set(p.asin, []);
                 }
-            }
-            delete p._temp_source_marketplace;
+                // 给每个产品对象打上来源标记，方便后续合并
+                productPool.get(p.asin).push({
+                    ...p,
+                    _source_site: site,
+                    _filename: filename
+                });
+            });
         });
 
-        // 4. 阻断警告 (站点不一致)
-        if (invalidEntries.length > 0) {
-            console.warn(`[Import] Blocked ${invalidEntries.length} items due to site mismatch.`);
-            
-            const confirmed = await confirmWithModal( // 复用通用的 confirmWithModal
-                "站点不匹配警告",
-                `<div class="text-slate-600 text-sm">
-                    检测到 <strong>${invalidEntries.length}</strong> 个商品来自不同站点。
-                    <br/>当前项目/界面站点：<span class="font-bold text-blue-600">${validationTargetSite}</span>。
-                    <br/><br/>
-                    由于站点隔离原则，这些不匹配的新商品将被 <span class="text-red-500 font-bold">忽略</span>。
-                    <br/>是否继续？
-                </div>`,
-                null
-            );
-            
-            if (!confirmed) {
-                showToast("已取消导入", "info");
-                return;
+        if (productPool.size === 0) throw new Error("未找到有效的产品数据");
+
+        // 3. 决策阶段：确定“主站点” (Master Marketplace)
+        let targetMarketplace = state.selectedSite; // 默认为当前选择
+        const hasExistingData = state.scrapedData && state.scrapedData.products && state.scrapedData.products.length > 0;
+
+        // 场景 A: 项目为空，且导入了多个站点的数据 -> 让用户选
+        if (!hasExistingData && detectedSites.size > 1) {
+            targetMarketplace = await showMarketplaceSelectionModal([...detectedSites]);
+            if (!targetMarketplace) {
+                showToast("用户取消导入", "info");
+                return; // 用户点击了取消
             }
-            // 用户确认继续，则丢弃 invalidEntries，只处理剩下的
+        } 
+        // 场景 B: 项目为空，只有一个站点 -> 自动使用该站点
+        else if (!hasExistingData && detectedSites.size === 1) {
+            targetMarketplace = [...detectedSites][0];
+        }
+        // 场景 C: 项目已有数据 -> 强制使用项目原有站点 (保持一致性)
+        else if (hasExistingData) {
+            targetMarketplace = state.scrapedData.metadata.marketplace;
         }
 
-        // 5. 处理重复冲突
-        if (conflicts.length > 0) {
-            const strategy = await confirmConflictResolution(conflicts.length);
-            if (strategy === 'merge') {
-                conflicts.forEach(newP => {
-                    const oldP = currentMap.get(newP.asin);
-                    const mergedP = mergeProducts(oldP, newP);
-                    currentMap.set(newP.asin, mergedP);
-                });
-                showToast(`已智能合并 ${conflicts.length} 条数据`, "success");
-            } else if (strategy === 'overwrite') {
-                conflicts.forEach(newP => currentMap.set(newP.asin, newP));
-                showToast(`已覆盖 ${conflicts.length} 条数据`, "warning");
-            } else {
-                showToast(`已跳过 ${conflicts.length} 条重复数据`, "info");
-            }
-        } else {
-            if (newEntries.length > 0) showToast(`成功导入 ${newEntries.length} 条新数据`, "success");
+        console.log(`[Import] Strategy: Merging content based on Master Site: ${targetMarketplace}`);
+
+        // 4. 执行合并 (Merging Phase)
+        const finalProducts = [];
+        const currentProductsMap = new Map((state.scrapedData?.products || []).map(p => [p.asin, p]));
+
+        for (const [asin, versions] of productPool.entries()) {
+            // 4.1 找出“主版本” (用来定标题、五点、图片)
+            // 优先找 targetMarketplace 的版本，找不到则找现有项目里的版本，再找不到就取第一个
+            let masterVersion = versions.find(v => v._source_site === targetMarketplace);
+            const existingVersion = currentProductsMap.get(asin);
+
+            // 如果已有数据存在，通常以已有数据为主（避免覆盖用户修改），除非我们要实现“更新”逻辑
+            // 这里逻辑：如果项目里有，以项目里为基准；如果项目里没有，以导入的主站点为基准；如果都没有，取第一个做兜底。
+            let baseProduct = existingVersion || masterVersion || versions[0];
+
+            // 4.2 深度克隆一个基础对象，准备缝合
+            const mergedProduct = JSON.parse(JSON.stringify(baseProduct));
+            
+            // 确保 metadata 存在
+            if (!mergedProduct.metadata) mergedProduct.metadata = {};
+            
+            // 4.3 评论大一统 (Review Aggregation)
+            // 收集所有版本（包括现有的、导入的各个站点的）的所有评论
+            const allReviewSources = [];
+            if (existingVersion) allReviewSources.push(existingVersion);
+            allReviewSources.push(...versions);
+
+            const uniqueReviewsMap = new Map();
+
+            allReviewSources.forEach(ver => {
+                if (Array.isArray(ver.customer_reviews)) {
+                    ver.customer_reviews.forEach(r => {
+                        // 生成唯一签名防止重复
+                        const sig = getReviewSignature(r);
+                        // 如果 Map 里没有，或者 Map 里的是旧的/短的，可以考虑替换（这里简单处理：有就不加）
+                        if (!uniqueReviewsMap.has(sig)) {
+                            // 可选：给评论标记来源站点
+                            if (ver._source_site && ver._source_site !== "Unknown") {
+                                r._origin_site = ver._source_site; 
+                            }
+                            uniqueReviewsMap.set(sig, r);
+                        }
+                    });
+                }
+            });
+
+            mergedProduct.customer_reviews = Array.from(uniqueReviewsMap.values());
+            
+            // 清理临时字段
+            delete mergedProduct._source_site;
+            delete mergedProduct._filename;
+
+            finalProducts.push(mergedProduct);
         }
 
-        // 6. 保存数据并刷新状态
-        newEntries.forEach(p => currentMap.set(p.asin, p));
-        const finalProducts = Array.from(currentMap.values());
-
-        // 🔥 关键：如果是空项目且检测到了新站点，强制切换 UI 和 State
-        const finalMarketplace = (finalProducts.length > 0) ? (autoSwitchSite || projectMarketplace) : state.selectedSite;
-
-        if (autoSwitchSite) {
-            console.log(`[Import] Switching global state to: ${finalMarketplace}`);
-            state.selectedSite = finalMarketplace;
-            
-            // 强制刷新 UI 下拉框 (假设ID是 site-select)
+        // 5. 保存并更新状态
+        // 如果是空项目，更新全局站点设置
+        if (!hasExistingData) {
+            state.selectedSite = targetMarketplace;
             const siteSelect = document.getElementById("site-select");
             if (siteSelect) {
-                siteSelect.value = finalMarketplace;
-                // 手动触发 change 事件通知其他组件
+                siteSelect.value = targetMarketplace;
                 siteSelect.dispatchEvent(new Event('change'));
             }
-            showToast(`已自动切换至 ${finalMarketplace} 站点`, "success");
         }
 
         state.scrapedData = {
             metadata: {
-                marketplace: finalMarketplace, // 确保存储了正确的站点
+                marketplace: targetMarketplace,
                 scrape_timestamp: new Date().toISOString(),
                 total_asins: finalProducts.length,
-                last_action: "import_merge"
+                last_action: "multi_site_import_merge"
             },
             products: finalProducts
         };
 
-        state.analysisReport = null;
+        state.analysisReport = null; // 数据变了，清空旧报告
         
-        // 保存历史
+        // 持久化
         HistoryService.save(state.scrapedData, null);
 
         // 渲染
@@ -662,6 +705,8 @@ export async function handleImportFiles(event) {
         renderHistory();
         switchTab("data");
 
+        showToast(`✅ 成功导入并合并 ${finalProducts.length} 个ASIN (基准站点: ${targetMarketplace})`, "success");
+
     } catch (error) {
         console.error(error);
         showToast("❌ 导入出错: " + error.message, "error");
@@ -669,7 +714,6 @@ export async function handleImportFiles(event) {
         inputEl.value = '';
     }
 }
-
 function readFileAsJSON(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
