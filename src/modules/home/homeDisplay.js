@@ -96,23 +96,34 @@ export function initHomeSplash() {
         animationFrameId = requestAnimationFrame(animateParticles);
     }
 
-    // 使用 ResizeObserver 监听容器大小变化
-    // 这解决了“初始化时容器 hidden 导致宽度为 0”的问题
+    // =========================================
+    // 修复后的 ResizeObserver
+    // =========================================
     const observer = new ResizeObserver(entries => {
-        for (let entry of entries) {
-            const { width, height } = entry.contentRect;
-            if (width > 0 && height > 0) {
-                canvas.width = width;
-                canvas.height = height;
+        // 【关键修复】：包裹在 requestAnimationFrame 中
+        window.requestAnimationFrame(() => {
+            // 再次检查元素是否存在，防止组件卸载后的报错
+            if (!Array.isArray(entries) || !entries.length) return;
+
+            for (let entry of entries) {
+                const { width, height } = entry.contentRect;
                 
-                // 如果是第一次检测到尺寸，或者尺寸变化大，重新初始化粒子分布
-                if (particles.length === 0 || Math.abs(canvas.width - width) > 50) {
-                    initParticles(width, height);
+                // 增加边界检查，避免无效计算
+                if (width > 0 && height > 0) {
+                    // 在这里修改 canvas 尺寸是安全的，因为它在下一帧执行
+                    canvas.width = width;
+                    canvas.height = height;
+                    
+                    // 如果是第一次检测到尺寸，或者尺寸变化大，重新初始化粒子分布
+                    // 注意：这里建议用 Math.floor 取整比较，避免亚像素差异导致的抖动
+                    if (particles.length === 0 || Math.abs(canvas.width - width) > 50) {
+                        initParticles(width, height);
+                    }
                 }
             }
-        }
+        });
     });
-    
+        
     observer.observe(container);
     animateParticles(); // 启动动画循环
 
