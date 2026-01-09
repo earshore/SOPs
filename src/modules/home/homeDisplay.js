@@ -5,30 +5,28 @@ export function initHomeSplash() {
 
     const container = document.getElementById('home-splash-container');
     const canvas = document.getElementById('particles-canvas');
+    const neuralLines = document.getElementById('neural-lines');
+    const neuralNodes = document.getElementById('neural-nodes');
+
     if (!container || !canvas) return;
 
     const ctx = canvas.getContext('2d');
+    let animationFrameId;
+    let particles = [];
 
-    // 1. 粒子系统
-    function resizeCanvas() {
-        // 使用容器的尺寸而不是 window innerWidth
-        canvas.width = container.clientWidth;
-        canvas.height = container.clientHeight;
-    }
+    // =========================================
+    // 1. 粒子系统 (智能 Resize 版)
+    // =========================================
     
-    // 初始化尺寸
-    resizeCanvas();
-    // 监听 resize
-    window.addEventListener('resize', resizeCanvas);
-
+    // 定义粒子类
     class Particle {
-        constructor() {
-            this.reset();
+        constructor(w, h) {
+            this.reset(w, h);
         }
 
-        reset() {
-            this.x = Math.random() * canvas.width;
-            this.y = Math.random() * canvas.height;
+        reset(w, h) {
+            this.x = Math.random() * w;
+            this.y = Math.random() * h;
             this.size = Math.random() * 2 + 0.5;
             this.speedX = (Math.random() - 0.5) * 0.5;
             this.speedY = (Math.random() - 0.5) * 0.5;
@@ -36,12 +34,12 @@ export function initHomeSplash() {
             this.color = Math.random() > 0.5 ? '#00f5d4' : '#7b2cbf';
         }
 
-        update() {
+        update(w, h) {
             this.x += this.speedX;
             this.y += this.speedY;
 
-            if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
-            if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+            if (this.x < 0 || this.x > w) this.speedX *= -1;
+            if (this.y < 0 || this.y > h) this.speedY *= -1;
         }
 
         draw() {
@@ -54,13 +52,16 @@ export function initHomeSplash() {
         }
     }
 
-    const particles = [];
-    const particleCount = 100;
-
-    for (let i = 0; i < particleCount; i++) {
-        particles.push(new Particle());
+    // 初始化/重置粒子
+    function initParticles(width, height) {
+        particles = [];
+        const particleCount = 100; // 粒子数量
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle(width, height));
+        }
     }
 
+    // 绘制连线
     function connectParticles() {
         for (let i = 0; i < particles.length; i++) {
             for (let j = i + 1; j < particles.length; j++) {
@@ -80,45 +81,73 @@ export function initHomeSplash() {
         }
     }
 
+    // 动画循环
     function animateParticles() {
-        // 如果页面切换了，可能需要停止动画（这里简单处理，如果canvas不在DOM了可能会报错，加个判断）
-        if (!document.getElementById('particles-canvas')) return;
+        if (!canvas.isConnected) return; // 防止内存泄漏
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
         particles.forEach(particle => {
-            particle.update();
+            particle.update(canvas.width, canvas.height);
             particle.draw();
         });
+        
         connectParticles();
-        requestAnimationFrame(animateParticles);
+        animationFrameId = requestAnimationFrame(animateParticles);
     }
 
-    animateParticles();
+    // 使用 ResizeObserver 监听容器大小变化
+    // 这解决了“初始化时容器 hidden 导致宽度为 0”的问题
+    const observer = new ResizeObserver(entries => {
+        for (let entry of entries) {
+            const { width, height } = entry.contentRect;
+            if (width > 0 && height > 0) {
+                canvas.width = width;
+                canvas.height = height;
+                
+                // 如果是第一次检测到尺寸，或者尺寸变化大，重新初始化粒子分布
+                if (particles.length === 0 || Math.abs(canvas.width - width) > 50) {
+                    initParticles(width, height);
+                }
+            }
+        }
+    });
+    
+    observer.observe(container);
+    animateParticles(); // 启动动画循环
 
-    // 2. 光标跟随效果
+    // =========================================
+    // 2. 光标跟随 (Fixed 定位修正)
+    // =========================================
     const cursorGlow = document.getElementById('cursor-glow');
-    let mouseX = 0, mouseY = 0;
-    let glowX = 0, glowY = 0;
+    let mouseX = -100, mouseY = -100; // 初始移出屏幕
+    let glowX = -100, glowY = -100;
 
-    document.addEventListener('mousemove', (e) => {
+    const mouseHandler = (e) => {
         mouseX = e.clientX;
         mouseY = e.clientY;
-    });
+    };
+    document.addEventListener('mousemove', mouseHandler);
 
     function updateCursorGlow() {
-        if (!cursorGlow) return;
+        if (!cursorGlow || !cursorGlow.isConnected) return;
+        
+        // 缓动算法
         glowX += (mouseX - glowX) * 0.1;
         glowY += (mouseY - glowY) * 0.1;
+        
         cursorGlow.style.left = glowX + 'px';
         cursorGlow.style.top = glowY + 'px';
         requestAnimationFrame(updateCursorGlow);
     }
     updateCursorGlow();
 
+    // =========================================
     // 3. 时间显示
+    // =========================================
     function updateTime() {
         const timeDisplay = document.getElementById('time-display');
-        if (!timeDisplay) return;
+        if (!timeDisplay || !timeDisplay.isConnected) return;
         
         const now = new Date();
         const timeStr = now.toLocaleTimeString('en-US', { hour12: false });
@@ -126,18 +155,18 @@ export function initHomeSplash() {
         timeDisplay.textContent = `${dateStr} | ${timeStr}`;
     }
     updateTime();
-    setInterval(updateTime, 1000);
+    const timeInterval = setInterval(updateTime, 1000);
 
-    // 4. 神经网络 SVG 动画
-    const neuralLines = document.getElementById('neural-lines');
-    const neuralNodes = document.getElementById('neural-nodes');
-
-    if (neuralNodes && neuralLines) {
+    // =========================================
+    // 4. 神经网络 SVG 动画 (一次性生成)
+    // =========================================
+    if (neuralNodes && neuralLines && neuralNodes.childElementCount === 0) {
         const nodePositions = [];
+        // 确保分布在 800x800 的容器内
         for (let i = 0; i < 20; i++) {
             nodePositions.push({
-                x: 100 + Math.random() * 600,
-                y: 100 + Math.random() * 600
+                x: 50 + Math.random() * 700,
+                y: 50 + Math.random() * 700
             });
         }
 
@@ -148,7 +177,13 @@ export function initHomeSplash() {
             circle.setAttribute('cy', pos.y);
             circle.setAttribute('r', 4 + Math.random() * 4);
             circle.setAttribute('fill', '#00f5d4');
-            circle.style.animation = `pulseInner ${2 + Math.random() * 2}s ease-in-out infinite`; // Use existing CSS animation
+            // CSS 中定义了 pulse 动画，这里应用它
+            // 注意：CSS中可能定义的是 orbFloat 或 pulse，这里保持简单缩放
+            circle.style.animation = `pulseInner ${2 + Math.random() * 2}s ease-in-out infinite`; 
+            // 如果 CSS 里没有 pulseInner，我们需要在 CSS 补上，或者复用 .status-dot 的 pulse
+            circle.style.animationName = 'pulse'; 
+            circle.style.transformBox = 'fill-box';
+            circle.style.transformOrigin = 'center';
             circle.style.animationDelay = `${Math.random() * 2}s`;
             neuralNodes.appendChild(circle);
         });
@@ -160,7 +195,7 @@ export function initHomeSplash() {
                 const dy = nodePositions[i].y - nodePositions[j].y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
 
-                if (distance < 200) {
+                if (distance < 250) { // 稍微增加连线距离
                     const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
                     line.setAttribute('x1', nodePositions[i].x);
                     line.setAttribute('y1', nodePositions[i].y);

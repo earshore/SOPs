@@ -3,37 +3,51 @@
 /* 引入字体 */
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;700;900&display=swap');
 
-/* 限制样式作用域，防止污染全局 */
+/* =========================================
+   容器作用域 (Scope)
+   ========================================= */
 #home-splash-container {
+    /* 基础重置 */
     font-family: 'Noto Sans SC', sans-serif;
     background: #080825; /* var(--dark) */
-    color: #ffffff;
+    color: #ffffff;      /* var(--light) */
+    
+    /* 必须填满父级 */
     width: 100%;
     height: 100%;
-    position: relative;
-    overflow: hidden; /* 确保粒子不溢出 */
+    position: relative; 
+    overflow: hidden; 
+    
+    /* 变量定义 */
     --primary: #00f5d4;
     --secondary: #7b2cbf;
     --accent: #ff6b35;
+    --dark: #080825;
+    --light: #ffffff;
 }
 
 #home-splash-container * {
     box-sizing: border-box;
 }
 
-/* 粒子画布 */
+/* =========================================
+   背景层 (Background Layers)
+   ========================================= */
+
+/* 1. 粒子画布 */
 #particles-canvas {
-    position: absolute; /* 改为 absolute */
+    position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     z-index: 1;
+    pointer-events: none;
 }
 
-/* 网格背景 */
+/* 2. 网格背景 */
 .grid-bg {
-    position: absolute; /* 改为 absolute */
+    position: absolute;
     top: 0;
     left: 0;
     width: 100%;
@@ -45,6 +59,7 @@
     z-index: 2;
     animation: gridMove 20s linear infinite;
     pointer-events: none;
+    transform-style: preserve-3d;
 }
 
 @keyframes gridMove {
@@ -52,9 +67,9 @@
     100% { transform: perspective(500px) rotateX(60deg) translateY(50px); }
 }
 
-/* 光晕效果 */
+/* 3. 光晕效果 (Glow Orbs) */
 .glow-orb {
-    position: absolute; /* 改为 absolute */
+    position: absolute;
     border-radius: 50%;
     filter: blur(80px);
     z-index: 3;
@@ -97,7 +112,23 @@
     75% { transform: translate(20px, 30px) scale(1.05); }
 }
 
-/* 主容器 */
+/* 4. 神经网络 SVG */
+.neural-network {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 800px;
+    height: 800px;
+    opacity: 0.25; /* 稍微增加不透明度以恢复细节 */
+    z-index: 4;
+    pointer-events: none;
+}
+
+/* =========================================
+   内容层 (Content Layer)
+   ========================================= */
+
 .splash-content-wrapper {
     position: relative;
     z-index: 10;
@@ -109,20 +140,7 @@
     padding: 40px 20px;
 }
 
-/* AI 神经网络动画 */
-.neural-network {
-    position: absolute; /* 改为 absolute */
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 800px;
-    height: 800px;
-    opacity: 0.15;
-    z-index: 4;
-    pointer-events: none;
-}
-
-/* Logo区域 */
+/* Logo 区域 */
 .logo-section {
     text-align: center;
     margin-bottom: 40px;
@@ -136,8 +154,8 @@
     background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
     background-size: 300% 300%;
     -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
     background-clip: text;
+    color: transparent; /* 确保文字填充透明 */
     animation: gradientFlow 4s ease infinite;
     text-shadow: 0 0 60px rgba(0, 245, 212, 0.5);
 }
@@ -156,7 +174,7 @@
     100% { background-position: 0% 50%; }
 }
 
-/* 主标语 */
+/* 主标语 (Hero Section) */
 .hero-section {
     text-align: center;
     max-width: 1200px;
@@ -169,6 +187,9 @@
     line-height: 1.1;
     margin-bottom: 30px;
     position: relative;
+    display: flex; /* 修复布局 */
+    flex-direction: column;
+    align-items: center;
 }
 
 .slogan-line {
@@ -184,13 +205,19 @@
 .slogan-line.highlight {
     background: linear-gradient(90deg, var(--primary), var(--accent));
     -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
     background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
 }
 
+/* 重点修复：空心字效果 */
 .slogan-line.outline {
-    -webkit-text-stroke: 2px var(--primary);
+    color: transparent; /* 兼容性回退 */
     -webkit-text-fill-color: transparent;
+    -webkit-text-stroke: 2px var(--primary); /* 核心艺术效果 */
+    text-stroke: 2px var(--primary);
+    opacity: 0; /* 配合动画 */
+    font-weight: 900; /* 确保字体足够粗，描边才好看 */
 }
 
 @keyframes slideUp {
@@ -221,7 +248,7 @@
     to { opacity: 1; }
 }
 
-/* AI状态指示器 */
+/* AI 状态指示器 */
 .ai-status {
     display: inline-flex;
     align-items: center;
@@ -240,11 +267,11 @@
     height: 12px;
     background: var(--primary);
     border-radius: 50%;
-    animation: pulseInner 2s ease-in-out infinite;
+    animation: pulse 2s ease-in-out infinite;
     box-shadow: 0 0 20px var(--primary);
 }
 
-@keyframes pulseInner {
+@keyframes pulse {
     0%, 100% { transform: scale(1); opacity: 1; }
     50% { transform: scale(1.3); opacity: 0.7; }
 }
@@ -256,9 +283,13 @@
     color: var(--primary);
 }
 
-/* 数据流动画 */
+/* =========================================
+   特效与装饰 (Effects & Decor)
+   ========================================= */
+
+/* 数据流 */
 .data-stream {
-    position: absolute; /* 改为 absolute */
+    position: absolute;
     top: 0;
     width: 2px;
     height: 100%;
@@ -292,9 +323,78 @@
     100% { top: 100%; }
 }
 
+/* 浮动元素 */
+.floating-elements {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 6;
+}
+
+.float-icon {
+    position: absolute;
+    font-size: 1.5rem;
+    opacity: 0.3; /* 增加透明度让其更明显一点 */
+    color: var(--primary);
+    animation: floatAround 20s ease-in-out infinite;
+    text-shadow: 0 0 10px var(--primary); /* 加一点发光 */
+}
+
+.float-icon:nth-child(1) { top: 20%; left: 10%; animation-delay: 0s; }
+.float-icon:nth-child(2) { top: 60%; left: 85%; animation-delay: -5s; }
+.float-icon:nth-child(3) { top: 80%; left: 20%; animation-delay: -10s; }
+.float-icon:nth-child(4) { top: 30%; left: 75%; animation-delay: -15s; }
+
+@keyframes floatAround {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(20px, -30px) rotate(90deg); }
+    50% { transform: translate(-20px, 20px) rotate(180deg); }
+    75% { transform: translate(30px, 10px) rotate(270deg); }
+}
+
+/* 角落装饰 */
+.corner-decor {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    z-index: 15;
+    pointer-events: none;
+}
+
+.corner-decor.top-left {
+    top: 30px;
+    left: 30px;
+    border-top: 2px solid rgba(0, 245, 212, 0.5);
+    border-left: 2px solid rgba(0, 245, 212, 0.5);
+}
+
+.corner-decor.top-right {
+    top: 30px;
+    right: 30px;
+    border-top: 2px solid rgba(0, 245, 212, 0.5);
+    border-right: 2px solid rgba(0, 245, 212, 0.5);
+}
+
+.corner-decor.bottom-left {
+    bottom: 30px;
+    left: 30px;
+    border-bottom: 2px solid rgba(0, 245, 212, 0.5);
+    border-left: 2px solid rgba(0, 245, 212, 0.5);
+}
+
+.corner-decor.bottom-right {
+    bottom: 30px;
+    right: 30px;
+    border-bottom: 2px solid rgba(0, 245, 212, 0.5);
+    border-right: 2px solid rgba(0, 245, 212, 0.5);
+}
+
 /* 底部品牌 */
 .brand-footer {
-    position: absolute; /* 改为 absolute */
+    position: absolute;
     bottom: 40px;
     left: 50%;
     transform: translateX(-50%);
@@ -304,6 +404,7 @@
     opacity: 0;
     animation: fadeIn 1s ease 2s forwards;
     width: max-content;
+    z-index: 20;
 }
 
 .brand-line {
@@ -320,80 +421,12 @@
     font-family: 'Orbitron', sans-serif;
     font-size: 0.7rem;
     letter-spacing: 0.4em;
-    color: rgba(255, 255, 255, 0.4);
+    color: rgba(255, 255, 255, 0.6);
 }
 
-/* 角落装饰 */
-.corner-decor {
-    position: absolute; /* 改为 absolute */
-    width: 100px;
-    height: 100px;
-    z-index: 15;
-    pointer-events: none;
-}
-
-.corner-decor.top-left {
-    top: 30px;
-    left: 30px;
-    border-top: 2px solid rgba(0, 245, 212, 0.3);
-    border-left: 2px solid rgba(0, 245, 212, 0.3);
-}
-
-.corner-decor.top-right {
-    top: 30px;
-    right: 30px;
-    border-top: 2px solid rgba(0, 245, 212, 0.3);
-    border-right: 2px solid rgba(0, 245, 212, 0.3);
-}
-
-.corner-decor.bottom-left {
-    bottom: 30px;
-    left: 30px;
-    border-bottom: 2px solid rgba(0, 245, 212, 0.3);
-    border-left: 2px solid rgba(0, 245, 212, 0.3);
-}
-
-.corner-decor.bottom-right {
-    bottom: 30px;
-    right: 30px;
-    border-bottom: 2px solid rgba(0, 245, 212, 0.3);
-    border-right: 2px solid rgba(0, 245, 212, 0.3);
-}
-
-/* 浮动元素 */
-.floating-elements {
-    position: absolute; /* 改为 absolute */
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 6;
-}
-
-.float-icon {
-    position: absolute;
-    font-size: 1.5rem;
-    opacity: 0.1;
-    animation: floatAround 20s ease-in-out infinite;
-    color: var(--primary);
-}
-
-.float-icon:nth-child(1) { top: 20%; left: 10%; animation-delay: 0s; }
-.float-icon:nth-child(2) { top: 60%; left: 85%; animation-delay: -5s; }
-.float-icon:nth-child(3) { top: 80%; left: 20%; animation-delay: -10s; }
-.float-icon:nth-child(4) { top: 30%; left: 75%; animation-delay: -15s; }
-
-@keyframes floatAround {
-    0%, 100% { transform: translate(0, 0) rotate(0deg); }
-    25% { transform: translate(20px, -30px) rotate(90deg); }
-    50% { transform: translate(-20px, 20px) rotate(180deg); }
-    75% { transform: translate(30px, 10px) rotate(270deg); }
-}
-
-/* 扫描线效果 */
+/* 扫描线效果 - 高层级 */
 .scanline {
-    position: absolute; /* 改为 absolute */
+    position: absolute;
     top: 0;
     left: 0;
     width: 100%;
@@ -401,27 +434,28 @@
     background: linear-gradient(
         to bottom,
         transparent 50%,
-        rgba(0, 0, 0, 0.02) 50%
+        rgba(0, 0, 0, 0.05) 50% /* 稍微加深一点 */
     );
     background-size: 100% 4px;
     pointer-events: none;
-    z-index: 20; /* 降低一点，不要挡住弹窗 */
+    z-index: 99; 
 }
 
-/* 光标跟随效果 */
+/* 光标跟随 - Fixed 必须保持 */
 .cursor-glow {
-    position: fixed; /* 保持 fixed，因为它相对于视口跟随鼠标 */
+    position: fixed; /* 使用 fixed 保证跟随鼠标而不受父容器 overflow 影响 */
     width: 400px;
     height: 400px;
     background: radial-gradient(circle, rgba(0, 245, 212, 0.15), transparent 70%);
     border-radius: 50%;
     pointer-events: none;
-    z-index: 4;
+    z-index: 999; /* 确保在最顶层 */
     transform: translate(-50%, -50%);
     transition: opacity 0.3s;
+    opacity: 0.8;
 }
 
-/* 文字闪烁效果 */
+/* Glitch 效果 */
 .glitch {
     position: relative;
 }
@@ -434,6 +468,7 @@
     left: 0;
     width: 100%;
     height: 100%;
+    background: #080825; /* 重要：必须有背景色才能遮住原字产生错位感 */
 }
 
 .glitch::before {
@@ -468,24 +503,33 @@
 
 /* 版本号 */
 .version {
-    position: absolute; /* 改为 absolute */
+    position: absolute;
     top: 40px;
     right: 50px;
     font-family: 'Orbitron', sans-serif;
     font-size: 0.7rem;
-    color: rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.5);
     letter-spacing: 0.2em;
     z-index: 20;
 }
 
 /* 时间显示 */
 .time-display {
-    position: absolute; /* 改为 absolute */
+    position: absolute;
     top: 40px;
     left: 50px;
     font-family: 'Orbitron', sans-serif;
     font-size: 0.8rem;
-    color: rgba(0, 245, 212, 0.6);
+    color: rgba(0, 245, 212, 0.8);
     letter-spacing: 0.1em;
     z-index: 20;
+}
+
+/* 响应式适配 */
+@media (max-width: 768px) {
+    .corner-decor { width: 50px; height: 50px; }
+    .brand-footer { bottom: 20px; }
+    .brand-line { width: 30px; }
+    .glow-orb { transform: scale(0.5); }
+    .slogan-main { font-size: 3rem; }
 }
