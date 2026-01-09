@@ -16,7 +16,7 @@ export const getRandomUserAgent = () => USER_AGENTS[Math.floor(Math.random() * U
 
 export const PROVIDERS = {
     serverless: {
-    name: "serverless",
+    name: "OpenAI-cn",
     endpoint: "v1",
     models: [
     { id: "gpt-5-mini-ca", context: 128000, features: ["vision", "function"] },
