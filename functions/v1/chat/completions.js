@@ -1,7 +1,7 @@
 // functions/v1/chat/completions.js
 
 export async function onRequest(context) {
-  // 1. 处理预检请求 (CORS Options)
+  // 1. 处理预检请求 (CORS)
   if (context.request.method === "OPTIONS") {
     return new Response(null, {
       headers: {
@@ -12,7 +12,6 @@ export async function onRequest(context) {
     });
   }
 
-  // 2. 仅允许 POST
   if (context.request.method !== "POST") {
     return new Response("Method Not Allowed", { status: 405 });
   }
@@ -20,31 +19,43 @@ export async function onRequest(context) {
   try {
     const requestBody = await context.request.json();
 
-    // 3. 关键：从 Cloudflare 环境变量获取真实 Key
-    // 注意：你需要去 Cloudflare 后台 -> Settings -> Environment Variables 设置这个变量
-    const REAL_API_KEY = context.env.LLM_API_KEY; 
+    // ============================================================
+    // 🚀 核心修改：支持多 Key 负载均衡
+    // ============================================================
+    
+    // 1. 获取环境变量字符串
+    const envKeys = context.env.LLM_API_KEY || "";
+    
+    // 2. 按逗号分割，并去除首尾空格，过滤空项
+    const keyList = envKeys.split(',').map(k => k.trim()).filter(k => k);
 
-    // 可选：支持自定义上游地址（如 DeepSeek），默认 OpenAI
-    const UPSTREAM_API_URL = context.env.LLM_API_BASE_URL || "https://api.openai.com/v1";
-
-    if (!REAL_API_KEY) {
-      return new Response(JSON.stringify({ error: { message: "Server: Missing LLM_API_KEY env var" } }), {
+    if (keyList.length === 0) {
+      return new Response(JSON.stringify({ error: { message: "Server: No API Keys configured" } }), {
         status: 500,
         headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
       });
     }
 
-    // 4. 转发请求给大模型
+    // 3. 🎲 随机抽取一个 Key (简单的负载均衡)
+    const REAL_API_KEY = keyList[Math.floor(Math.random() * keyList.length)];
+    
+    // 打印日志方便调试 (在 Cloudflare 后台日志可看，生产环境可注释掉)
+    // console.log(`Using Key ending in ...${REAL_API_KEY.slice(-4)}`);
+
+    // ============================================================
+
+    const UPSTREAM_API_URL = context.env.LLM_API_BASE_URL || "https://api.openai.com/v1";
+
+    // 4. 转发请求
     const response = await fetch(`${UPSTREAM_API_URL}/chat/completions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${REAL_API_KEY}`,
+        "Authorization": `Bearer ${REAL_API_KEY}`, // 使用抽中的 Key
       },
       body: JSON.stringify(requestBody),
     });
 
-    // 5. 返回结果给前端
     const data = await response.json();
     return new Response(JSON.stringify(data), {
       status: response.status,
