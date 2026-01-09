@@ -10,7 +10,7 @@ import { languageFlagMap } from "../../../common/constants/constants.js";
 // 1. 基础 UI 交互
 // ==========================================
 
-function toggleCardExpand(asin) {
+export function toggleCardExpand(asin) {
     state.expandedAsin = state.expandedAsin === asin ? null : asin;
     renderDataPanel();
 }
