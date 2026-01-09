@@ -15,6 +15,19 @@ export const USER_AGENTS = [
 export const getRandomUserAgent = () => USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
 
 export const PROVIDERS = {
+    serverless: {
+    name: "serverless",
+    endpoint: "v1",
+    models: [
+    { id: "gpt-5-mini-ca", context: 128000, features: ["vision", "function"] },
+    { id: "gpt-5-nano-ca", context: 128000, features: ["vision", "function"] },
+    { id: "gpt-4.1-mini-ca", context: 32768, features: ["function"] },
+    { id: "gpt-4.1-nano-ca", context: 32768, features: ["function"] },
+    { id: "gpt-4o-mini-ca", context: 32768, features: ["vision", "function"] },
+    { id: "gpt-3.5-turbo", context: 16385, features: ["function"] }
+  ]
+  ,
+  },
   openai: {
     name: "OpenAI",
     endpoint: "https://api.openai.com/v1",
