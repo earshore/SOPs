@@ -10,7 +10,7 @@ import { languageFlagMap } from "../../../common/constants/constants.js";
 // 1. 基础 UI 交互
 // ==========================================
 
-export function toggleCardExpand(asin) {
+function toggleCardExpand(asin) {
     state.expandedAsin = state.expandedAsin === asin ? null : asin;
     renderDataPanel();
 }
@@ -206,7 +206,7 @@ export function renderDataPanel() {
     }
 }
 
-export function syntaxHighlight(json) {
+function syntaxHighlight(json) {
     return json.replace(
         /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
         (match) => {
@@ -225,7 +225,7 @@ export function syntaxHighlight(json) {
 // 3. 删除逻辑 (带弹窗 & 关闭图标)
 // ==========================================
 
-export async function deleteProduct(asin) {
+async function deleteProduct(asin) {
     const confirmed = await confirmWithModal(
         "确定删除",
         `ASIN: <span class="font-bold text-red-500">${asin}</span> 及其所有数据吗？`,
@@ -246,7 +246,7 @@ export async function deleteProduct(asin) {
     showToast(`ASIN ${asin} 已移除`, "info");
 }
 
-export async function deleteReview(asin, index) {
+async function deleteReview(asin, index) {
     const confirmed = await confirmWithModal(
         "确定要移除这条评论吗？",
         '',
@@ -425,7 +425,7 @@ function confirmSimple(title, content) {
 // 🔥 核心修复：强力导入与校验逻辑
 // ==========================================
 
-export async function handleImportFiles(event) {
+async function handleImportFiles(event) {
     const files = Array.from(event.target.files);
     if (files.length === 0) return;
 

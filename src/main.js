@@ -24,11 +24,11 @@ window.addEventListener("unhandledrejection", (event) => {
 });
 
 // 1. 导入各模块的初始化函数和业务函数
-import { initSettingsListeners, updateModelStatus, loadProviderConfig, openSettings, closeSettings, saveProviderConfig, renderProxyInputUI, fetchModels, toggleApiKeyVisibility, testConnection, saveProxyConfig, } from "./components/settings/systemSettings.js";
+import { initSettingsListeners, updateModelStatus, loadProviderConfig, openSettings, closeSettings, toggleApiKeyVisibility, saveProviderConfig, renderProxyInputUI, fetchModels, testConnection, saveProxyConfig, } from "./components/settings/systemSettings.js";
 import { switchTab, renderMegaMenu } from "../src/common/utils/ui.js";
 import { initHomeSplash } from "./modules/home/homeDisplay.js";
-import { initScraperListeners, selectSite, renderHistory, clearAsins, startScraping, loadHistory, clearHistory, } from "./modules/master_prompt/scraper/scraperPanel.js";
-import { renderDataPanel, toggleCardExpand, deleteProduct, deleteReview, triggerImport, handleImportFiles, switchDataTab} from "./modules/master_prompt/data_manage/dataDisplay.js";
+import { initScraperListeners, renderHistory, } from "./modules/master_prompt/scraper/scraperPanel.js";
+import { renderDataPanel, triggerImport, switchDataTab} from "./modules/master_prompt/data_manage/dataDisplay.js";
 import { initAnalysisPanel, updateAsinSelectList, analyzeSelectedAsins, renderReport, } from "./modules/master_prompt/analysis/analysisDisplay.js";
 import { initPromptlabModule } from './modules/master_prompt/promptlab/promptlabDisplay.js';
 import { initKeywordTracker } from './modules/keyword_tracker/trackerDisplay.js';
@@ -123,19 +123,19 @@ window.testConnection = testConnection;
 window.saveProxyConfig = saveProxyConfig;
 
 // Scraper
-window.selectSite = selectSite;
-window.startScraping = startScraping;
-window.loadHistory = loadHistory;
-window.clearHistory = clearHistory;
-window.clearAsins = clearAsins;
+// window.selectSite = selectSite;
+// window.startScraping = startScraping;
+// window.loadHistory = loadHistory;
+// window.clearHistory = clearHistory;
+// window.clearAsins = clearAsins;
 
 // Data Display
-window.toggleCardExpand = toggleCardExpand;
+// window.toggleCardExpand = toggleCardExpand;
 window.triggerImport = triggerImport;
-window.handleImportFiles = handleImportFiles;
-window.deleteReview = deleteReview;
+// window.handleImportFiles = handleImportFiles;
+// window.deleteReview = deleteReview;
 window.renderDataPanel = renderDataPanel;
-window.deleteProduct = deleteProduct;
+// window.deleteProduct = deleteProduct;
 
 // Analysis
 window.updateAsinSelectList = updateAsinSelectList;
