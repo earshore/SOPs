@@ -182,7 +182,7 @@ function amzf_renderSearchHistory() {
     if (amzf_searchHistory.length > 0) {
         html += `
             <div class="amzf_history_header">
-                <span class="amzf_history_title">🕐 搜索历史</span>
+                <span class="amzf_history_title"><i class="fas fa-history"></i> 搜索历史</span>
                 <button class="amzf_history_clear_all" onclick="amzf_clearAllHistory(); event.stopPropagation();">清空</button>
             </div>
         `;
@@ -191,9 +191,9 @@ function amzf_renderSearchHistory() {
         amzf_searchHistory.forEach((item, index) => {
             html += `
                 <div class="amzf_history_item" onclick="amzf_selectHistoryItem('${item.replace(/'/g, "\\'")}')">
-                    <span class="amzf_history_item_icon">🔍</span>
+                    <span class="amzf_history_item_icon"><i class="fas fa-search"></i></span>
                     <span class="amzf_history_item_text">${item}</span>
-                    <span class="amzf_history_item_delete" onclick="amzf_deleteHistoryItem(${index}); event.stopPropagation();">✕</span>
+                    <span class="amzf_history_item_delete" onclick="amzf_deleteHistoryItem(${index}); event.stopPropagation();"><i class="fas fa-times"></i></span>
                 </div>
             `;
         });
@@ -201,7 +201,7 @@ function amzf_renderSearchHistory() {
         // Empty state
         html += `
             <div class="amzf_history_empty">
-                <div class="amzf_history_empty_icon">📝</div>
+                <div class="amzf_history_empty_icon"><i class="fas fa-clipboard-list"></i></div>
                 <div>暂无搜索历史</div>
             </div>
         `;
@@ -357,7 +357,7 @@ function amzf_renderCountryTabs() {
     if (!container) return;
 
     let html = `<button class="amzf_country_tab amzf_active" onclick="amzf_selectCountry('ALL')">
-        <span class="amzf_country_flag">🌍</span> 全部
+        <span class="amzf_country_flag"><i class="fas fa-globe"></i></span> 全部
     </button>`;
 
     amzf_countries.forEach(c => {
@@ -426,21 +426,22 @@ function amzf_renderStats() {
 
     container.innerHTML = `
         <div class="amzf_stat_item">
-            <div class="amzf_stat_icon amzf_blue">📊</div>
+            <div class="amzf_stat_icon amzf_blue"><i class="fa-solid fa-timeline text-purple-500"></i></div>
+            
             <div>
                 <div class="amzf_stat_value">${filtered.length}</div>
                 <div class="amzf_stat_label">营销节点</div>
             </div>
         </div>
         <div class="amzf_stat_item">
-            <div class="amzf_stat_icon amzf_green">🎉</div>
+            <div class="amzf_stat_icon amzf_green"><i class="fas fa-gifts text-purple-500"></i></div>
             <div>
                 <div class="amzf_stat_value">${holidays}</div>
                 <div class="amzf_stat_label">重要节日</div>
             </div>
         </div>
         <div class="amzf_stat_item">
-            <div class="amzf_stat_icon amzf_orange">🛒</div>
+            <div class="amzf_stat_icon amzf_orange"><i class="fas fa-shopping-cart text-purple-500"></i></div>
             <div>
                 <div class="amzf_stat_value">${shopping}</div>
                 <div class="amzf_stat_label">电商大促</div>
@@ -459,7 +460,7 @@ function amzf_renderContent() {
     if (filtered.length === 0) {
         container.innerHTML = `
             <div class="amzf_empty amzf_animate">
-                <div class="amzf_empty_icon">🔍</div>
+                <div class="amzf_empty_icon"><i class="fas fa-search"></i></div>
                 <div class="amzf_empty_text">未找到匹配的活动，请尝试关键词如 "圣诞"、"Prime" 或 "德国"</div>
             </div>
         `;
@@ -504,7 +505,7 @@ function amzf_renderCountryView(events) {
                         <span class="amzf_month_name">${amzf_months[m - 1]}</span>
                         <span class="amzf_month_badge">${monthEvents.length} 个活动</span>
                     </div>
-                    <div class="amzf_month_toggle">▼</div>
+                    <div class="amzf_month_toggle"><i class="fas fa-chevron-down"></i></div>
                 </div>
                 <div class="amzf_month_content">
                     <div class="amzf_events_grid">
@@ -553,7 +554,7 @@ function amzf_renderEventView(events) {
                         <span>${key}</span>
                         <span class="amzf_month_badge">${group.events.length} 个站点</span>
                     </div>
-                    <div class="amzf_month_toggle">▼</div>
+                    <div class="amzf_month_toggle"><i class="fas fa-chevron-down"></i></div>
                 </div>
                 <div class="amzf_comparison_content">
                     <div class="amzf_country_list">
@@ -586,11 +587,11 @@ function amzf_renderEventCard(event) {
                         <div style="font-size:0.8rem; color:#666; margin-top:2px;">${event.description}</div>
                     </div>
                 </div>
-                <span class="amzf_event_date">📅 ${event.date}</span>
+                <span class="amzf_event_date"><i class="fas fa-calendar-alt"></i> ${event.date}</span>
             </div>
             <div class="amzf_event_countries">${countryBadges}</div>
             <div class="amzf_event_strategy">
-                <div class="amzf_strategy_title">💡 电商切入策略</div>
+                <div class="amzf_strategy_title"><i class="fas fa-lightbulb"></i> 电商切入策略</div>
                 <div class="amzf_strategy_content">${event.strategy}</div>
                 <div class="amzf_strategy_tags">
                     ${(event.tags || []).map(t => `<span class="amzf_tag">#${t}</span>`).join('')}
@@ -612,11 +613,11 @@ function amzf_renderCountryEvent(event) {
                 <span style="font-size:1.3rem">${flags}</span>
             </div>
             <div class="amzf_country_date">
-                <strong>📅 ${event.date}</strong>
+                <strong><i class="fas fa-calendar-alt"></i> ${event.date}</strong>
             </div>
             <div class="amzf_country_strategy_brief">
                 <div style="margin-bottom:4px;font-weight:600;">${event.name}</div>
-                💡 ${event.strategy}
+                <i class="fas fa-lightbulb"></i> ${event.strategy}
             </div>
         </div>
     `;
