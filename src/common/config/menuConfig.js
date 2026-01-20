@@ -143,7 +143,7 @@ export const MENU_CONFIG = {
         },
         amz_seasons_tools: {
             moduleId: 'amz_hub_core',
-            label: '节日旺季/促销工具',
+            label: '销售活动/促销工具',
             icon: 'fa-solid fa-gift',
             panelId: 'panel-amz_hub',
             isHub: true
