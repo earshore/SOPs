@@ -79,10 +79,29 @@ export function initHomeSplash() {
         }
 
         draw() {
-            // 绘制粒子点
+            // 1. 计算当前速度 (勾股定理)
+            // Math.hypot(x, y) 等同于 Math.sqrt(x*x + y*y)
+            const speed = Math.hypot(this.vx, this.vy);
+
+            // 2. 动态计算不透明度 (Alpha)
+            // - 0.2: 基础不透明度 (静止时的淡色，数值越小越淡)
+            // - speed * 0.1: 速度对颜色的增幅 (数值越大，稍微一动就变深)
+            let alpha = 0.05 + (speed * 0.15);
+
+            // 限制 alpha 最大为 1 (防止颜色过饱和)
+            if (alpha > 1) alpha = 1;
+
             ctx.beginPath();
             ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
-            ctx.fillStyle = "#94a3b8"; // 蓝灰色点
+
+            // 3. 使用 RGBA 赋值
+            // 原色 #94a3b8 转换为 RGB 是 (148, 163, 184)
+            // ctx.fillStyle = `rgba(148, 163, 184, ${alpha})`;
+            if (speed > 2) {
+                ctx.fillStyle = `rgba(37, 99, 235, ${alpha})`; // 运动时变蓝
+            } else {
+                ctx.fillStyle = `rgba(148, 163, 184, ${alpha})`; // 静止时灰
+            }
             ctx.fill();
         }
     }
