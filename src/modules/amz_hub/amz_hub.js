@@ -6,11 +6,12 @@ console.log("📚 AmzHub Core Module Loading...");
 // ================= 路由配置表 =================
 // 键名对应 menuConfig.js 里的 route id
 const MODULE_MAP = {
-    'amz_sop_flow':     () => import('./views/sop_flow/index.js'),
-    'amz_eu_insights':  () => import('./views/eu_insights/index.js'),
+    'amz_sop_flow': () => import('./views/sop_flow/index.js'),
+    'amz_eu_insights': () => import('./views/eu_insights/index.js'),
     'amz_seo_strategy': () => import('./views/seo_strategy/index.js'),
-    'amz_ecosystem':    () => import('./views/ecosystem/index.js'),
+    'amz_ecosystem': () => import('./views/ecosystem/index.js'),
     'amz_marketing_calendar': () => import('./views/marketing_calendar/index.js'),
+    'amz_seasons_tools': () => import('./views/promotions/index.js'),
     // ✨ 未来拓展只需加一行：
     // 'amz_calendar':  () => import('./views/marketing_calendar/index.js'),
 };
@@ -40,7 +41,7 @@ async function loadSubModule(routeId) {
     try {
         // 3. 动态导入模块 (Lazy Load)
         const module = await loader();
-        
+
         // 4. 挂载新模块
         if (module.mount) {
             await module.mount(container);
@@ -68,15 +69,15 @@ window.addEventListener('app:route-changed', async (e) => {
     // 这样就不怕 module.id 改来改去了
     if (MODULE_MAP[routeId]) {
         console.log(`✅ 匹配成功，准备加载子模块: ${routeId}`);
-        
+
         // 1. 确保 Shell 已经存在
         const shell = document.getElementById('panel-amz_hub');
         // 如果 Shell 还没渲染出来（可能是 ViewLoader 还没插进去），稍微等一下
         if (!shell) {
-             console.warn("⚠️ Shell 容器 #panel-amz_hub 未找到，请检查 amz_hub.html 是否已加载");
-             return;
+            console.warn("⚠️ Shell 容器 #panel-amz_hub 未找到，请检查 amz_hub.html 是否已加载");
+            return;
         }
-        
+
         // 2. 加载子视图
         await loadSubModule(routeId);
     }

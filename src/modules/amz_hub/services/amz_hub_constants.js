@@ -269,7 +269,7 @@ export const amzf_events = [
 
     // ==================== June (六月) ====================
     {
-        id: 21, name: '父亲节(法/荷/英)', nameEn: "Father’s Day Global", emoji: '<i class="fas fa-tie" style="color: #3F51B5;"></i>', date: '6月15日', month: 6,
+        id: 21, name: '父亲节(法/荷/英)', nameEn: "Father’s Day Global", emoji: '<i class="fas fa-beer" style="color: #FFC107;"></i>', date: '6月15日', month: 6,
         countries: ['FR', 'NL', 'GB'], type: 'holiday',
         description: '父亲节是赞颂父亲、父爱、父系纽带以及父亲的社会影响力的特殊节日。赠送礼物是常见的庆祝方式。',
         strategy: '主流父亲节日期。电子产品、工具套装、运动手表、男士护理品热销。',
@@ -297,9 +297,9 @@ export const amzf_events = [
         tags: ['服装', '家居', '清仓']
     },
 
-    // ==================== July (七月) ====================
+    // ==================== July (七月) ====================<i class="fa-brands fa-amazon"></i>
     {
-        id: 25, name: 'Prime Day', nameEn: 'Amazon Prime Day', emoji: '<i class="fas fa-box-open" style="color: #00A8E1;"></i>', date: '7月中旬', month: 7,
+        id: 25, name: 'Prime Day', nameEn: 'Amazon Prime Day', emoji: '<i class="fa-brands fa-amazon" style="color: #00A8E1;"></i>', date: '7月中旬', month: 7,
         countries: ['DE', 'FR', 'IT', 'ES', 'NL', 'PL', 'GB', 'SE'], type: 'shopping',
         description: '亚马逊年度盛大的会员购物节，为Prime会员提供涵盖所有品类的独家折扣和限时优惠。',
         strategy: '亚马逊年度大促。全品类参与，建议提前2个月备货，重点关注电子、智能家居、时尚品类。',

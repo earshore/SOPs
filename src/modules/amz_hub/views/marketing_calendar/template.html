@@ -946,14 +946,15 @@
     .amzf_country_list {
         padding: 20px;
         display: grid;
-        gap: 15px;
+        gap: 10px;
     }
 
     .amzf_country_event {
         display: flex;
-        /* ✅ 修改：改为 flex-start (顶对齐)，这样内容变高时，图标和日期固定在顶部，不会跑偏 */
         align-items: flex-start;
-        gap: 15px;
+        /* 顶部对齐 */
+        gap: 20px;
+        /* ✅ 设置三列之间的固定间距 */
         padding: 15px;
         background: var(--amzf-bg);
         border-radius: 12px;
@@ -970,11 +971,17 @@
         background: #e8ecf0;
     }
 
+    /* 第一列：国家旗帜 (设置固定宽) */
     .amzf_country_info {
+        flex: 0 0 160px;
+        /* ✅ 关键：固定宽度 160px，确保竖列对齐 */
+        width: 160px;
+        /* 兼容性写法 */
         display: flex;
         align-items: center;
         gap: 10px;
-        min-width: 150px;
+        margin-top: 2px;
+        /* 微调垂直对齐 */
     }
 
     .amzf_country_name {
@@ -982,15 +989,25 @@
         color: var(--amzf-text);
     }
 
+    /* 第二列：日期 (设置固定宽，移除原本的 flex: 1) */
     .amzf_country_date {
-        flex: 1;
+        flex: 0 0 140px;
+        /* ✅ 关键：固定宽度 100px，紧跟在旗帜后面 */
+        width: 100px;
         color: var(--amzf-text-secondary);
+        margin-top: 2px;
+        /* 微调垂直对齐 */
+        white-space: nowrap;
+        /* 防止日期换行 */
     }
 
+    /* 第三列：策略内容 (占据剩余空间) */
     .amzf_country_strategy_brief {
-        flex: 2;
+        flex: 1;
+        /* ✅ 让内容区域占据剩下的所有空间 */
         font-size: 0.9rem;
         color: var(--amzf-text-secondary);
+        /* 如果希望文字不要太宽，可以加 max-width，例如 max-width: 800px; */
     }
 
     /* Empty State */

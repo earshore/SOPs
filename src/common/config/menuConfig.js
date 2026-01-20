@@ -10,8 +10,8 @@ export const MENU_CONFIG = {
     // ==========================================
     contexts: {
         apps: { id: 'apps', label: '应用中心' }, // 对应 Header 的 "应用"
-        hub:  { id: 'hub',  label: '智库 Hub' }, // 对应 Header 的 "智库"
-        sys:  { id: 'sys',  label: '系统设置' }  // 预留拓展
+        hub: { id: 'hub', label: '智库 Hub' }, // 对应 Header 的 "智库"
+        sys: { id: 'sys', label: '系统设置' }  // 预留拓展
     },
 
     // ==========================================
@@ -29,7 +29,7 @@ export const MENU_CONFIG = {
             // ✅ 新增描述字段
             description: '集成数据采集、管理、AI分析与提示词工程的一站式解决方案。'
         },
-        
+
         // Keyword Tracker 模块配置
         keyword_tracker: {
             id: 'keyword_tracker',
@@ -89,7 +89,7 @@ export const MENU_CONFIG = {
             moduleId: 'keyword_tracker',
             label: '输入模块',
             icon: 'fas fa-keyboard',
-            panelId: 'panel-keyword_tracker' 
+            panelId: 'panel-keyword_tracker'
         },
         kw_process: {
             moduleId: 'keyword_tracker',
@@ -135,12 +135,19 @@ export const MENU_CONFIG = {
             isHub: true
         },
         amz_marketing_calendar: {   //预留营销日历
-        moduleId: 'amz_hub_core',
-        label: 'EU营销日历',
-        icon: 'fas fa-calendar-alt',
-        panelId: 'panel-amz_hub',
-        isHub: true
-    },
+            moduleId: 'amz_hub_core',
+            label: 'EU营销日历',
+            icon: 'fas fa-calendar-alt',
+            panelId: 'panel-amz_hub',
+            isHub: true
+        },
+        amz_seasons_tools: {
+            moduleId: 'amz_hub_core',
+            label: '节日旺季/促销工具',
+            icon: 'fa-solid fa-gift',
+            panelId: 'panel-amz_hub',
+            isHub: true
+        },
 
     }
 };

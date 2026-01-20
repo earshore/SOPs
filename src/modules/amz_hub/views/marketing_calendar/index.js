@@ -583,7 +583,7 @@ function amzf_renderEventCard(event) {
                 <div class="amzf_event_title_wrapper">
                     <span class="amzf_event_emoji">${event.emoji}</span>
                     <div>
-                        <span class="amzf_event_title">${event.name}</span>
+                        <span class="amzf_event_title">${event.name}(${event.nameEn})</span>
                         <div style="font-size:0.8rem; color:#666; margin-top:2px;">${event.description}</div>
                     </div>
                 </div>
@@ -591,7 +591,7 @@ function amzf_renderEventCard(event) {
             </div>
             <div class="amzf_event_countries">${countryBadges}</div>
             <div class="amzf_event_strategy">
-                <div class="amzf_strategy_title"><i class="fas fa-lightbulb"></i> 电商切入策略</div>
+                <div class="amzf_strategy_title"><i class="fas fa-lightbulb text-yellow-500"></i> 电商切入策略</div>
                 <div class="amzf_strategy_content">${event.strategy}</div>
                 <div class="amzf_strategy_tags">
                     ${(event.tags || []).map(t => `<span class="amzf_tag">#${t}</span>`).join('')}
@@ -616,8 +616,8 @@ function amzf_renderCountryEvent(event) {
                 <strong><i class="fas fa-calendar-alt"></i> ${event.date}</strong>
             </div>
             <div class="amzf_country_strategy_brief">
-                <div style="margin-bottom:4px;font-weight:600;">${event.name}</div>
-                <i class="fas fa-lightbulb"></i> ${event.strategy}
+                <div style="margin-bottom:4px;font-weight:600;">${event.name}(${event.nameEn})</div>
+                <i class="fas fa-lightbulb text-yellow-500"></i> ${event.strategy}
             </div>
         </div>
     `;
