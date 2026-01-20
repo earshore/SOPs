@@ -33,6 +33,7 @@ const promoData = [
                 type: 'grid_links',
                 items: [
                     { title: '亚马逊 Prime 会员日', icon: 'fa-box-open', text: 'Prime Day' },
+                    { title: '返校季', icon: 'fa-graduation-cap', text: 'Back to School' },
                     { title: '黑五网一', icon: 'fa-shopping-cart', text: 'BFCM' }
                 ]
             }
@@ -181,6 +182,30 @@ const promoData = [
         ]
     },
     {
+        id: 'back_to_school',
+        title: '返校季 (Back to School) - 欧洲站',
+        icon: 'fa-graduation-cap',
+        content: [
+            {
+                type: 'text',
+                text: '欧洲的返校季高峰通常集中在8月中下旬至9月，这与欧洲主要国家（如英国、法国、意大利、西班牙）通常在9月初开学的节奏一致。不同于美国长达数月的拉锯战，欧洲家长的采购行为更集中在暑假结束前的2-3周。这是欧洲站点下半年流量增长的第一个重要节点，尤其是在英国和德国站点，电子产品、书包、文具以及针对大学新生的宿舍用品是绝对的主角。'
+            },
+            {
+                type: 'stats',
+                items: [
+                    {
+                        icon: 'fa-map-marked-alt',
+                        text: '地域差异显著：德国各州通常采取“错峰开学”制度（8月初至9月中），因此德国站的返校季流量持续时间往往比英法站点更长。'
+                    },
+                    {
+                        icon: 'fa-euro-sign',
+                        text: '调研显示，英国和德国是欧洲返校季支出的主力市场，且欧洲消费者对价格敏感度较高，高性价比的套装（Bundle）商品更受欢迎。'
+                    }
+                ]
+            }
+        ]
+    },
+    {
         id: 'bfcm',
         title: '黑五网一 (BFCM)',
         icon: 'fa-shopping-cart',
@@ -231,6 +256,7 @@ const navStructure = [
         targetId: 'seasons_intro',
         children: [
             { id: 'prime_day', label: 'Prime Day' },
+            { id: 'back_to_school', label: '返校季促销' },
             { id: 'bfcm', label: '黑五网一 (BFCM)' }
         ]
     }
