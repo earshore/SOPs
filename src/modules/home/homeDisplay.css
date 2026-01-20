@@ -1,78 +1,45 @@
 /* src/modules/home/homeDisplay.css */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&family=Noto+Sans+SC:wght@300;500;900&display=swap');
 
 #home-splash-container {
-    /* 核心配色：深空紫黑 + 霓虹青紫 */
-    --bg-dark: #05020a;
-    --neon-cyan: #00F3FF;
-    --neon-purple: #BC13FE;
-    --text-white: #ffffff;
+    /* --- 白底科技风格配色 --- */
+    --bg-white: #ffffff;
+    --text-primary: #0f172a;
+    /* 深蓝灰 */
+    --text-secondary: #64748b;
+    /* 浅灰 */
+    --accent-blue: #2563eb;
+    /* 科技蓝 */
+    --accent-cyan: #06b6d4;
+    /* 水波青 */
 
     font-family: 'Inter', 'Noto Sans SC', sans-serif;
-    background-color: var(--bg-dark);
-    color: var(--text-white);
+    background-color: var(--bg-white);
+    color: var(--text-primary);
     width: 100%;
     height: 100%;
     position: relative;
     overflow: hidden;
-    cursor: default;
-    /* 恢复默认鼠标，通过 div 模拟光晕 */
+    cursor: none;
+    /* 隐藏默认光标 */
 }
 
 /* =========================================
-   1. 高性能背景 (High Performance BG)
+   1. 背景层
    ========================================= */
-
-.static-bg-layer {
+.clean-bg {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    /* 使用 SVG 数据图作为噪点，比外链图片快 */
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+    /* 极其淡雅的网格背景 */
+    background-image:
+        linear-gradient(rgba(15, 23, 42, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(15, 23, 42, 0.03) 1px, transparent 1px);
+    background-size: 100px 100px;
     z-index: 1;
     pointer-events: none;
-}
-
-/* 替代 filter:blur 的高性能光球方案 */
-.light-orb {
-    position: absolute;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 2;
-    opacity: 0.6;
-    /* 强制 GPU 加速 */
-    will-change: transform;
-}
-
-.orb-purple {
-    top: -10%;
-    right: -10%;
-    width: 60vw;
-    height: 60vw;
-    /* 径向渐变模拟模糊，0消耗 */
-    background: radial-gradient(circle, rgba(188, 19, 254, 0.25) 0%, transparent 70%);
-    animation: breathe 10s ease-in-out infinite alternate;
-}
-
-.orb-cyan {
-    bottom: -10%;
-    left: -10%;
-    width: 50vw;
-    height: 50vw;
-    background: radial-gradient(circle, rgba(0, 243, 255, 0.15) 0%, transparent 70%);
-    animation: breathe 12s ease-in-out infinite alternate-reverse;
-}
-
-@keyframes breathe {
-    0% {
-        transform: scale(1);
-    }
-
-    100% {
-        transform: scale(1.1);
-    }
 }
 
 #particles-canvas {
@@ -81,66 +48,73 @@
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 3;
-    pointer-events: none;
+    z-index: 2;
+    /* 粒子在网格之上 */
 }
 
 /* =========================================
-   2. 布局与文字 (Layout & Typography)
+   2. 顶部导航 (Minimal Header)
    ========================================= */
-
 .top-bar {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
-    padding: 30px 40px;
+    padding: 30px 50px;
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
     z-index: 20;
+    /* 保持原样即可，因为 justify-content: space-between 会负责左右两边的元素位置 */
 }
 
 .time-display {
     font-family: monospace;
-    color: var(--neon-cyan);
+    color: var(--text-secondary);
     font-size: 0.9rem;
-    letter-spacing: 0.1em;
-    opacity: 0.8;
+    font-weight: 600;
 }
 
 .logo-section {
-    text-align: center;
     position: absolute;
+    /* 1. 开启绝对定位 */
     left: 50%;
+    /* 2. 移动到父容器宽度的 50% 处 */
     transform: translateX(-50%);
+    /* 3. 向左回退自身宽度的 50%，实现完美居中 */
+    text-align: center;
+    /* 文字内部居中 */
+
+    /*以此保证不管左边的时间多长，它都永远在屏幕正中间*/
 }
 
 .logo-text {
     font-weight: 900;
-    font-size: 1.5rem;
-    letter-spacing: 0.2em;
-    text-shadow: 0 0 15px rgba(188, 19, 254, 0.6);
+    font-size: 1.4rem;
+    letter-spacing: 0.1em;
+    color: var(--text-primary);
 }
 
 .logo-sub {
-    font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.5);
-    letter-spacing: 0.3em;
-    margin-top: 5px;
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    letter-spacing: 0.25em;
     text-transform: uppercase;
+    margin-top: 4px;
 }
 
 .version {
     font-family: monospace;
     font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.3);
+    color: var(--text-secondary);
+    background: rgba(0, 0, 0, 0.05);
+    padding: 4px 8px;
+    border-radius: 4px;
 }
 
 /* =========================================
-   3. 核心标语区 (Hero)
+   3. 主视觉 (Hero) - 干净、锐利
    ========================================= */
-
 .splash-content-wrapper {
     position: relative;
     z-index: 10;
@@ -153,94 +127,114 @@
 
 .hero-container {
     text-align: center;
-    /* 3D 视差准备 */
-    transform-style: preserve-3d;
-    transition: transform 0.1s linear;
-    /* 快速响应鼠标 */
+    transition: transform 0.1s ease-out;
 }
 
 .slogan-main {
-    font-size: clamp(3.5rem, 8vw, 7rem);
+    font-size: clamp(3.5rem, 8vw, 7.5rem);
     font-weight: 900;
-    line-height: 1.1;
-    margin-bottom: 30px;
+    line-height: 1.05;
+    margin-bottom: 2rem;
+    position: relative;
 }
 
-/* 渐变实体字 */
+/* 实体字：蓝青渐变 */
 .slogan-line.highlight {
-    background: linear-gradient(135deg, #fff 20%, var(--neon-cyan) 60%, var(--neon-purple) 90%);
+    background: linear-gradient(120deg, var(--accent-blue), var(--accent-cyan));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    filter: drop-shadow(0 0 10px rgba(0, 243, 255, 0.3));
-    animation: fadeIn 1s ease-out forwards;
+    opacity: 0;
+    animation: fadeUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
-/* 描边空心字 */
+/* 描边字：深色空心 */
 .slogan-line.outline {
     color: transparent;
-    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.3);
-    position: relative;
+    -webkit-text-stroke: 1.5px var(--text-primary);
     opacity: 0;
-    animation: slideUp 1s ease-out 0.2s forwards;
+    animation: fadeUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s forwards;
+    position: relative;
 }
 
-/* 错位效果 - 纯 CSS 实现 */
-.slogan-line.outline::after {
+/* 错位效果 - 灰色 */
+.slogan-line.outline::before {
     content: attr(data-text);
     position: absolute;
-    top: 3px;
-    left: 3px;
+    top: 4px;
+    left: 4px;
     width: 100%;
     height: 100%;
-    -webkit-text-stroke: 1px var(--neon-purple);
-    opacity: 0.4;
+    -webkit-text-stroke: 1.5px rgba(15, 23, 42, 0.1);
     z-index: -1;
 }
 
 .slogan-sub {
-    font-size: clamp(1rem, 2vw, 1.4rem);
-    color: rgba(255, 255, 255, 0.6);
-    margin-bottom: 50px;
+    font-size: clamp(1.1rem, 2vw, 1.4rem);
+    color: var(--text-secondary);
     line-height: 1.8;
+    margin-bottom: 40px;
     opacity: 0;
-    animation: fadeIn 1s ease 0.5s forwards;
+    animation: fadeIn 1s ease 0.6s forwards;
 }
 
 .slogan-sub span {
-    color: #fff;
+    color: var(--accent-blue);
     font-weight: 700;
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
 }
 
-/* 状态栏 */
+/* 状态胶囊 - 极简风格 */
 .ai-status {
     display: inline-flex;
     align-items: center;
     gap: 12px;
-    padding: 10px 25px;
-    background: rgba(255, 255, 255, 0.05);
-    /* 不用 backdrop-filter，用透明度替代 */
-    border: 1px solid rgba(0, 243, 255, 0.3);
-    border-radius: 50px;
+    padding: 10px 24px;
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 100px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    /* 柔和阴影 */
     opacity: 0;
-    animation: fadeIn 1s ease 0.8s forwards;
+    animation: fadeIn 1s ease 0.9s forwards;
 }
 
 .status-dot-inner {
     width: 8px;
     height: 8px;
-    background: var(--neon-cyan);
+    background: var(--accent-cyan);
     border-radius: 50%;
-    box-shadow: 0 0 8px var(--neon-cyan);
-    animation: blink 2s infinite;
+    position: relative;
+}
+
+.status-dot-inner::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--accent-cyan);
+    border-radius: 50%;
+    animation: ripple 2s infinite;
 }
 
 .status-text {
     font-size: 0.75rem;
-    letter-spacing: 0.15em;
-    color: var(--neon-cyan);
     font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--text-primary);
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @keyframes fadeIn {
@@ -249,82 +243,98 @@
     }
 }
 
-@keyframes slideUp {
-    from {
-        transform: translateY(20px);
-        opacity: 0;
-    }
-
-    to {
-        transform: translateY(0);
+@keyframes ripple {
+    0% {
+        transform: scale(0.5);
         opacity: 1;
     }
-}
 
-@keyframes blink {
-    50% {
-        opacity: 0.4;
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
     }
 }
 
 /* =========================================
-   4. 底部品牌 (Footer)
+   4. 底部 & 装饰
    ========================================= */
 .brand-footer {
     position: absolute;
-    bottom: 30px;
-    width: 100%;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
-    justify-content: center;
     align-items: center;
-    gap: 15px;
+    gap: 20px;
     opacity: 0;
-    animation: fadeIn 1s ease 1s forwards;
+    animation: fadeIn 1s ease 1.2s forwards;
     z-index: 20;
 }
 
 .brand-text {
     font-size: 0.7rem;
     letter-spacing: 0.2em;
-    color: rgba(255, 255, 255, 0.4);
-    text-align: center;
+    color: var(--text-secondary);
+    font-weight: 500;
 }
 
 .brand-line {
-    width: 40px;
+    width: 30px;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(188, 19, 254, 0.5), transparent);
+    background: #cbd5e1;
 }
 
-/* =========================================
-   5. 装饰与光标 (Decor & Cursor)
-   ========================================= */
-.neural-network {
+.geometric-decor {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 100%;
-    height: 100%;
-    opacity: 0.4;
-    z-index: 4;
+    width: 800px;
+    height: 800px;
+    z-index: 1;
     pointer-events: none;
-    mix-blend-mode: screen;
-    /* 关键：让线条变亮 */
+    opacity: 0.6;
 }
 
-/* 简单的光标跟随，不做复杂的延迟计算 */
+.pulse-ring {
+    transform-origin: center;
+    animation: breathe 8s ease-in-out infinite;
+}
+
+.delay-1 {
+    animation-delay: -4s;
+}
+
+@keyframes breathe {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+
+    50% {
+        transform: scale(1.05);
+        opacity: 1;
+    }
+}
+
+/* =========================================
+   5. 光标 (深色)
+   ========================================= */
 #cursor-follower {
     position: fixed;
     top: 0;
     left: 0;
-    width: 400px;
-    height: 400px;
-    /* 巨大的光晕代替真实光标 */
-    background: radial-gradient(circle, rgba(0, 243, 255, 0.08) 0%, transparent 60%);
+    width: 20px;
+    height: 20px;
+    border: 1px solid var(--text-primary);
+    border-radius: 50%;
     transform: translate(-50%, -50%);
     pointer-events: none;
     z-index: 999;
-    will-change: transform;
-    /* GPU 加速 */
+    transition: transform 0.1s linear;
+    /* 略微延迟 */
+    background: rgba(15, 23, 42, 0.05);
+    backdrop-filter: blur(2px);
 }

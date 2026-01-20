@@ -2,9 +2,7 @@
 <div id="panel-home" class="panel w-full h-full absolute top-0 left-0 overflow-hidden hidden z-10">
 
     <div id="home-splash-container">
-        <div class="static-bg-layer"></div>
-        <div class="light-orb orb-purple"></div>
-        <div class="light-orb orb-cyan"></div>
+        <div class="clean-bg"></div>
 
         <canvas id="particles-canvas"></canvas>
 
@@ -18,7 +16,7 @@
         </header>
 
         <main class="splash-content-wrapper">
-            <div class="hero-container" id="magnetic-hero">
+            <div class="hero-container" id="hero-content">
                 <h1 class="slogan-main">
                     <div class="slogan-line highlight" data-text="规范流程">规范流程</div>
                     <div class="slogan-line outline" data-text="无限可能">无限可能</div>
@@ -42,15 +40,17 @@
             <div class="brand-line"></div>
         </footer>
 
-        <svg class="neural-network" viewBox="0 0 800 800">
+        <svg class="geometric-decor" viewBox="0 0 800 800">
             <defs>
-                <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style="stop-color:#00F3FF; stop-opacity:0.3" />
-                    <stop offset="100%" style="stop-color:#BC13FE; stop-opacity:0.3" />
+                <linearGradient id="decorGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#2563eb; stop-opacity:0.2" />
+                    <stop offset="100%" style="stop-color:#06b6d4; stop-opacity:0.2" />
                 </linearGradient>
             </defs>
-            <g id="neural-lines"></g>
-            <g id="neural-nodes"></g>
+            <circle cx="400" cy="400" r="300" stroke="url(#decorGrad)" stroke-width="1" fill="none"
+                class="pulse-ring" />
+            <circle cx="400" cy="400" r="250" stroke="url(#decorGrad)" stroke-width="1" fill="none"
+                class="pulse-ring delay-1" />
         </svg>
 
         <div id="cursor-follower"></div>
