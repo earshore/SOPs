@@ -218,7 +218,6 @@
   <script>
     function openUserGuide() {
       document.getElementById('user-guide-modal').classList.remove('hidden');
-      document.getElementById('mega-menu').classList.add('invisible', 'opacity-0');
     }
     function closeUserGuide() {
       document.getElementById('user-guide-modal').classList.add('hidden');
@@ -228,6 +227,7 @@
       if (e.target.id === 'user-guide-modal') closeUserGuide();
     });
   </script>
+
 
   <script type="module" src="src/main.js"></script>
 

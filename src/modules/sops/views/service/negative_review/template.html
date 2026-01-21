@@ -37,198 +37,197 @@
             <div class="text-sm text-slate-600">目标评分</div>
         </div>
         <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
-            <div class="text-2xl font-bold text-amber-600">
-                <5%< /div>
-                    <div class="text-sm text-slate-600">差评率警戒</div>
-            </div>
-            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
-                <div class="text-2xl font-bold text-blue-600">24h</div>
-                <div class="text-sm text-slate-600">响应时效</div>
-            </div>
-            <div class="bg-purple-50 border border-purple-200 rounded-xl p-4 text-center">
-                <div class="text-2xl font-bold text-purple-600">30%</div>
-                <div class="text-sm text-slate-600">删评转化率目标</div>
+            <div class="text-2xl font-bold text-amber-600">&lt;5%</div>
+            <div class="text-sm text-slate-600">差评率警戒</div>
+        </div>
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
+            <div class="text-2xl font-bold text-blue-600">24h</div>
+            <div class="text-sm text-slate-600">响应时效</div>
+        </div>
+        <div class="bg-purple-50 border border-purple-200 rounded-xl p-4 text-center">
+            <div class="text-2xl font-bold text-purple-600">30%</div>
+            <div class="text-sm text-slate-600">删评转化率目标</div>
+        </div>
+    </div>
+
+    <!-- Two Column Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Left: Process Flow -->
+        <div class="bg-white rounded-xl border border-slate-200 p-6">
+            <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <i class="fas fa-route text-blue-500"></i>每日处理流程
+            </h2>
+
+            <div class="sop-timeline">
+                <div class="sop-timeline-item">
+                    <div class="sop-timeline-dot completed"></div>
+                    <div class="bg-blue-50/50 rounded-lg p-4 ml-2 border-l-4 border-blue-400">
+                        <h3 class="font-bold text-slate-800 mb-2">Step 1: 监控新增差评</h3>
+                        <p class="text-sm text-blue-600 mb-2">每日上午9点</p>
+                        <ul class="text-sm text-slate-600 space-y-1">
+                            <li>• 检查所有产品1-3星评价</li>
+                            <li>• 工具：卖家精灵/Helium10/后台筛选</li>
+                            <li>• 记录新增差评ASIN和内容</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="sop-timeline-item">
+                    <div class="sop-timeline-dot"></div>
+                    <div class="bg-amber-50/50 rounded-lg p-4 ml-2 border-l-4 border-amber-400">
+                        <h3 class="font-bold text-slate-800 mb-2">Step 2: 登记VOC分析表</h3>
+                        <ul class="text-sm text-slate-600 space-y-1">
+                            <li>• 记录日期、ASIN、星级</li>
+                            <li>• 摘要差评核心内容</li>
+                            <li>• 归类问题类型(质量/物流/描述)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="sop-timeline-item">
+                    <div class="sop-timeline-dot"></div>
+                    <div class="bg-purple-50/50 rounded-lg p-4 ml-2 border-l-4 border-purple-400">
+                        <h3 class="font-bold text-slate-800 mb-2">Step 3: 联系买家 (合规)</h3>
+                        <ul class="text-sm text-slate-600 space-y-1">
+                            <li>• 通过Buyer-Seller Messages联系</li>
+                            <li>• 提供退款/换货解决方案</li>
+                            <li>• <strong class="text-red-600">禁止诱导修改评价</strong></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="sop-timeline-item">
+                    <div class="sop-timeline-dot pending"></div>
+                    <div class="bg-emerald-50/50 rounded-lg p-4 ml-2 border-l-4 border-emerald-400">
+                        <h3 class="font-bold text-slate-800 mb-2">Step 4: 反馈供应链</h3>
+                        <ul class="text-sm text-slate-600 space-y-1">
+                            <li>• 整理质量类问题清单</li>
+                            <li>• 反馈给供应链/开发部门</li>
+                            <li>• 跟踪产品改进进度</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Two Column Layout -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <!-- Left: Process Flow -->
+        <!-- Right: Classification & Templates -->
+        <div class="space-y-6">
+            <!-- Classification -->
             <div class="bg-white rounded-xl border border-slate-200 p-6">
                 <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <i class="fas fa-route text-blue-500"></i>每日处理流程
+                    <i class="fas fa-tags text-amber-500"></i>差评归类标签
                 </h2>
-
-                <div class="sop-timeline">
-                    <div class="sop-timeline-item">
-                        <div class="sop-timeline-dot completed"></div>
-                        <div class="bg-blue-50/50 rounded-lg p-4 ml-2 border-l-4 border-blue-400">
-                            <h3 class="font-bold text-slate-800 mb-2">Step 1: 监控新增差评</h3>
-                            <p class="text-sm text-blue-600 mb-2">每日上午9点</p>
-                            <ul class="text-sm text-slate-600 space-y-1">
-                                <li>• 检查所有产品1-3星评价</li>
-                                <li>• 工具：卖家精灵/Helium10/后台筛选</li>
-                                <li>• 记录新增差评ASIN和内容</li>
-                            </ul>
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="bg-red-50 rounded-lg p-3 border border-red-200">
+                        <div class="flex items-center gap-2 mb-2">
+                            <i class="fas fa-bug text-red-500"></i>
+                            <h4 class="font-bold text-red-800 text-sm">质量问题</h4>
                         </div>
+                        <ul class="text-xs text-red-700 space-y-1">
+                            <li>• 产品损坏/故障</li>
+                            <li>• 材质不达标</li>
+                            <li>• 配件缺失</li>
+                        </ul>
                     </div>
-
-                    <div class="sop-timeline-item">
-                        <div class="sop-timeline-dot"></div>
-                        <div class="bg-amber-50/50 rounded-lg p-4 ml-2 border-l-4 border-amber-400">
-                            <h3 class="font-bold text-slate-800 mb-2">Step 2: 登记VOC分析表</h3>
-                            <ul class="text-sm text-slate-600 space-y-1">
-                                <li>• 记录日期、ASIN、星级</li>
-                                <li>• 摘要差评核心内容</li>
-                                <li>• 归类问题类型(质量/物流/描述)</li>
-                            </ul>
+                    <div class="bg-amber-50 rounded-lg p-3 border border-amber-200">
+                        <div class="flex items-center gap-2 mb-2">
+                            <i class="fas fa-truck text-amber-500"></i>
+                            <h4 class="font-bold text-amber-800 text-sm">物流问题</h4>
                         </div>
+                        <ul class="text-xs text-amber-700 space-y-1">
+                            <li>• 配送延误</li>
+                            <li>• 包装破损</li>
+                            <li>• 未收到货</li>
+                        </ul>
                     </div>
-
-                    <div class="sop-timeline-item">
-                        <div class="sop-timeline-dot"></div>
-                        <div class="bg-purple-50/50 rounded-lg p-4 ml-2 border-l-4 border-purple-400">
-                            <h3 class="font-bold text-slate-800 mb-2">Step 3: 联系买家 (合规)</h3>
-                            <ul class="text-sm text-slate-600 space-y-1">
-                                <li>• 通过Buyer-Seller Messages联系</li>
-                                <li>• 提供退款/换货解决方案</li>
-                                <li>• <strong class="text-red-600">禁止诱导修改评价</strong></li>
-                            </ul>
+                    <div class="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                        <div class="flex items-center gap-2 mb-2">
+                            <i class="fas fa-file-alt text-blue-500"></i>
+                            <h4 class="font-bold text-blue-800 text-sm">描述不符</h4>
                         </div>
-                    </div>
-
-                    <div class="sop-timeline-item">
-                        <div class="sop-timeline-dot pending"></div>
-                        <div class="bg-emerald-50/50 rounded-lg p-4 ml-2 border-l-4 border-emerald-400">
-                            <h3 class="font-bold text-slate-800 mb-2">Step 4: 反馈供应链</h3>
-                            <ul class="text-sm text-slate-600 space-y-1">
-                                <li>• 整理质量类问题清单</li>
-                                <li>• 反馈给供应链/开发部门</li>
-                                <li>• 跟踪产品改进进度</li>
-                            </ul>
-                        </div>
+                        <ul class="text-xs text-blue-700 space-y-1">
+                            <li>• 尺寸差异</li>
+                            <li>• 颜色不符</li>
+                            <li>• 功能夸大</li>
+                        </ul>
                     </div>
                 </div>
             </div>
 
-            <!-- Right: Classification & Templates -->
-            <div class="space-y-6">
-                <!-- Classification -->
-                <div class="bg-white rounded-xl border border-slate-200 p-6">
-                    <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                        <i class="fas fa-tags text-amber-500"></i>差评归类标签
-                    </h2>
-                    <div class="grid grid-cols-3 gap-3">
-                        <div class="bg-red-50 rounded-lg p-3 border border-red-200">
-                            <div class="flex items-center gap-2 mb-2">
-                                <i class="fas fa-bug text-red-500"></i>
-                                <h4 class="font-bold text-red-800 text-sm">质量问题</h4>
-                            </div>
-                            <ul class="text-xs text-red-700 space-y-1">
-                                <li>• 产品损坏/故障</li>
-                                <li>• 材质不达标</li>
-                                <li>• 配件缺失</li>
-                            </ul>
-                        </div>
-                        <div class="bg-amber-50 rounded-lg p-3 border border-amber-200">
-                            <div class="flex items-center gap-2 mb-2">
-                                <i class="fas fa-truck text-amber-500"></i>
-                                <h4 class="font-bold text-amber-800 text-sm">物流问题</h4>
-                            </div>
-                            <ul class="text-xs text-amber-700 space-y-1">
-                                <li>• 配送延误</li>
-                                <li>• 包装破损</li>
-                                <li>• 未收到货</li>
-                            </ul>
-                        </div>
-                        <div class="bg-blue-50 rounded-lg p-3 border border-blue-200">
-                            <div class="flex items-center gap-2 mb-2">
-                                <i class="fas fa-file-alt text-blue-500"></i>
-                                <h4 class="font-bold text-blue-800 text-sm">描述不符</h4>
-                            </div>
-                            <ul class="text-xs text-blue-700 space-y-1">
-                                <li>• 尺寸差异</li>
-                                <li>• 颜色不符</li>
-                                <li>• 功能夸大</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+            <!-- Seller Comment -->
+            <div class="bg-amber-50 rounded-xl border border-amber-200 p-5">
+                <h3 class="font-bold text-amber-800 mb-3 flex items-center gap-2">
+                    <i class="fas fa-lightbulb"></i>Seller Comment 技巧
+                </h3>
+                <ul class="text-sm text-slate-700 space-y-2">
+                    <li class="flex items-start gap-2">
+                        <i class="fas fa-check text-emerald-500 mt-1"></i>
+                        <span>感谢反馈，承诺改进（展示态度）</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <i class="fas fa-check text-emerald-500 mt-1"></i>
+                        <span>提供联系方式，表示愿意解决</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <i class="fas fa-check text-emerald-500 mt-1"></i>
+                        <span>保持专业，绝不与买家争执</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <i class="fas fa-times text-red-500 mt-1"></i>
+                        <span class="text-red-600">禁止：提及退款/补偿诱导删评</span>
+                    </li>
+                </ul>
+            </div>
 
-                <!-- Seller Comment -->
-                <div class="bg-amber-50 rounded-xl border border-amber-200 p-5">
-                    <h3 class="font-bold text-amber-800 mb-3 flex items-center gap-2">
-                        <i class="fas fa-lightbulb"></i>Seller Comment 技巧
-                    </h3>
-                    <ul class="text-sm text-slate-700 space-y-2">
-                        <li class="flex items-start gap-2">
-                            <i class="fas fa-check text-emerald-500 mt-1"></i>
-                            <span>感谢反馈，承诺改进（展示态度）</span>
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <i class="fas fa-check text-emerald-500 mt-1"></i>
-                            <span>提供联系方式，表示愿意解决</span>
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <i class="fas fa-check text-emerald-500 mt-1"></i>
-                            <span>保持专业，绝不与买家争执</span>
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <i class="fas fa-times text-red-500 mt-1"></i>
-                            <span class="text-red-600">禁止：提及退款/补偿诱导删评</span>
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- VOC Template -->
-                <div class="bg-purple-50 rounded-xl border border-purple-200 p-5">
-                    <h3 class="font-bold text-purple-800 mb-3 flex items-center gap-2">
-                        <i class="fas fa-file-excel text-emerald-600"></i>VOC分析表字段
-                    </h3>
-                    <div class="grid grid-cols-4 gap-2 text-xs">
-                        <div class="bg-white p-2 rounded text-center">日期</div>
-                        <div class="bg-white p-2 rounded text-center">ASIN</div>
-                        <div class="bg-white p-2 rounded text-center">星级</div>
-                        <div class="bg-white p-2 rounded text-center">差评摘要</div>
-                        <div class="bg-white p-2 rounded text-center">问题归类</div>
-                        <div class="bg-white p-2 rounded text-center">是否联系</div>
-                        <div class="bg-white p-2 rounded text-center">处理结果</div>
-                        <div class="bg-white p-2 rounded text-center">反馈状态</div>
-                    </div>
-                </div>
-
-                <!-- Delete Review Methods -->
-                <div class="bg-red-50 rounded-xl border border-red-200 p-5">
-                    <h3 class="font-bold text-red-800 mb-3 flex items-center gap-2">
-                        <i class="fas fa-trash-alt"></i>差评删除合规途径
-                    </h3>
-                    <div class="text-sm text-slate-700 space-y-2">
-                        <div class="flex items-start gap-2">
-                            <span class="font-bold text-red-600 w-16 flex-shrink-0">Report：</span>
-                            <span>违反亚马逊评价政策（辱骂、无关等）</span>
-                        </div>
-                        <div class="flex items-start gap-2">
-                            <span class="font-bold text-red-600 w-16 flex-shrink-0">联系：</span>
-                            <span>解决问题后买家主动删除（不可诱导）</span>
-                        </div>
-                        <div class="flex items-start gap-2">
-                            <span class="font-bold text-red-600 w-16 flex-shrink-0">稀释：</span>
-                            <span>通过增加好评稀释差评影响</span>
-                        </div>
-                    </div>
+            <!-- VOC Template -->
+            <div class="bg-purple-50 rounded-xl border border-purple-200 p-5">
+                <h3 class="font-bold text-purple-800 mb-3 flex items-center gap-2">
+                    <i class="fas fa-file-excel text-emerald-600"></i>VOC分析表字段
+                </h3>
+                <div class="grid grid-cols-4 gap-2 text-xs">
+                    <div class="bg-white p-2 rounded text-center">日期</div>
+                    <div class="bg-white p-2 rounded text-center">ASIN</div>
+                    <div class="bg-white p-2 rounded text-center">星级</div>
+                    <div class="bg-white p-2 rounded text-center">差评摘要</div>
+                    <div class="bg-white p-2 rounded text-center">问题归类</div>
+                    <div class="bg-white p-2 rounded text-center">是否联系</div>
+                    <div class="bg-white p-2 rounded text-center">处理结果</div>
+                    <div class="bg-white p-2 rounded text-center">反馈状态</div>
                 </div>
             </div>
-        </div>
 
-        <!-- Video Resource -->
-        <div class="bg-blue-50 rounded-xl border border-blue-200 p-4">
-            <div class="flex items-center gap-3">
-                <i class="fas fa-video text-blue-500 text-xl"></i>
-                <div>
-                    <h3 class="font-bold text-slate-800">操作视频教程</h3>
-                    <p class="text-sm text-slate-600">访问公司网盘观看详细操作录屏：<a href="http://192.168.1.99"
-                            class="text-blue-600 underline">192.168.1.99</a>（仅限内网访问）→ 培训资料 → 差评处理专题</p>
+            <!-- Delete Review Methods -->
+            <div class="bg-red-50 rounded-xl border border-red-200 p-5">
+                <h3 class="font-bold text-red-800 mb-3 flex items-center gap-2">
+                    <i class="fas fa-trash-alt"></i>差评删除合规途径
+                </h3>
+                <div class="text-sm text-slate-700 space-y-2">
+                    <div class="flex items-start gap-2">
+                        <span class="font-bold text-red-600 w-16 flex-shrink-0">Report：</span>
+                        <span>违反亚马逊评价政策（辱骂、无关等）</span>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <span class="font-bold text-red-600 w-16 flex-shrink-0">联系：</span>
+                        <span>解决问题后买家主动删除（不可诱导）</span>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <span class="font-bold text-red-600 w-16 flex-shrink-0">稀释：</span>
+                        <span>通过增加好评稀释差评影响</span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Video Resource -->
+    <div class="bg-blue-50 rounded-xl border border-blue-200 p-4">
+        <div class="flex items-center gap-3">
+            <i class="fas fa-video text-blue-500 text-xl"></i>
+            <div>
+                <h3 class="font-bold text-slate-800">操作视频教程</h3>
+                <p class="text-sm text-slate-600">访问公司网盘观看详细操作录屏：<a href="http://192.168.1.99"
+                        class="text-blue-600 underline">192.168.1.99</a>（仅限内网访问）→ 培训资料 → 差评处理专题</p>
+            </div>
+        </div>
+    </div>
+</div>

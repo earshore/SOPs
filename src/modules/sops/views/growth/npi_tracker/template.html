@@ -90,79 +90,78 @@
         </div>
     </div>
 
-    <!-- Data Table -->
-    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+    <!-- Data Table - Optimized Layout -->
+    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden mb-6">
         <div class="overflow-x-auto">
-            <table class="w-full text-left">
+            <table class="w-full text-left text-xs">
                 <thead>
                     <!-- Group Headers -->
                     <tr class="bg-slate-100 border-b-2 border-slate-300">
-                        <th colspan="8"
-                            class="px-3 py-2 text-xs font-bold text-slate-600 text-center border-r-2 border-slate-300">
+                        <th colspan="5"
+                            class="px-2 py-2 text-xs font-bold text-blue-700 text-center border-r-2 border-slate-300 bg-blue-50">
                             <i class="fas fa-folder mr-1"></i>基础档案
                         </th>
                         <th colspan="6"
-                            class="px-3 py-2 text-xs font-bold text-slate-600 text-center border-r-2 border-slate-300">
+                            class="px-2 py-2 text-xs font-bold text-purple-700 text-center border-r-2 border-slate-300 bg-purple-50">
                             <i class="fas fa-clipboard-check mr-1"></i>SOP合规
                         </th>
                         <th colspan="6"
-                            class="px-3 py-2 text-xs font-bold text-slate-600 text-center border-r-2 border-slate-300">
+                            class="px-2 py-2 text-xs font-bold text-emerald-700 text-center border-r-2 border-slate-300 bg-emerald-50">
                             <i class="fas fa-euro-sign mr-1"></i>财务模型
                         </th>
                         <th colspan="5"
-                            class="px-3 py-2 text-xs font-bold text-slate-600 text-center border-r-2 border-slate-300">
+                            class="px-2 py-2 text-xs font-bold text-amber-700 text-center border-r-2 border-slate-300 bg-amber-50">
                             <i class="fas fa-chart-line mr-1"></i>流量转化
                         </th>
-                        <th colspan="4" class="px-3 py-2 text-xs font-bold text-slate-600 text-center">
+                        <th colspan="4" class="px-2 py-2 text-xs font-bold text-red-700 text-center bg-red-50">
                             <i class="fas fa-gavel mr-1"></i>决策
                         </th>
                     </tr>
                     <!-- Column Headers -->
-                    <tr class="bg-slate-50 text-xs text-slate-600 border-b">
-                        <!-- 基础档案 (8列) -->
-                        <th class="px-3 py-3 font-semibold sticky left-0 bg-slate-50 z-10 border-r">阶段</th>
-                        <th class="px-3 py-3 font-semibold">SKU</th>
-                        <th class="px-3 py-3 font-semibold">中文名</th>
-                        <th class="px-3 py-3 font-semibold">店铺</th>
-                        <th class="px-3 py-3 font-semibold">ASIN</th>
-                        <th class="px-3 py-3 font-semibold text-center">站点</th>
-                        <th class="px-3 py-3 font-semibold text-center">发货量</th>
-                        <th class="px-3 py-3 font-semibold text-center">库存天数</th>
+                    <tr class="bg-slate-50 text-[10px] text-slate-600 border-b">
+                        <!-- 基础档案 (5列) -->
+                        <th class="px-2 py-2 font-semibold sticky left-0 bg-slate-50 z-10 border-r min-w-[60px]">阶段</th>
+                        <th class="px-2 py-2 font-semibold min-w-[80px]">SKU</th>
+                        <th class="px-2 py-2 font-semibold min-w-[60px]">店铺</th>
+                        <th class="px-2 py-2 font-semibold min-w-[90px]">ASIN</th>
+                        <th class="px-2 py-2 font-semibold text-center border-r-2 border-slate-300 min-w-[40px]">站点</th>
 
-                        <!-- SOP合规 (6列: 泛欧 + 4项检查 + 状态) -->
-                        <th class="px-3 py-3 font-semibold text-center border-l">泛欧</th>
-                        <th class="px-3 py-3 font-semibold text-center" title="五点Rufus+标题">Rufus</th>
-                        <th class="px-3 py-3 font-semibold text-center" title="敏感词规避">敏感词</th>
-                        <th class="px-3 py-3 font-semibold text-center" title="图片+QA">图片QA</th>
-                        <th class="px-3 py-3 font-semibold text-center" title="A+页面">A+</th>
-                        <th class="px-3 py-3 font-semibold text-center">状态</th>
+                        <!-- SOP合规 (6列) -->
+                        <th class="px-2 py-2 font-semibold text-center min-w-[35px]" title="泛欧计划">泛欧</th>
+                        <th class="px-2 py-2 font-semibold text-center min-w-[40px]" title="五点Rufus+标题">Rufus</th>
+                        <th class="px-2 py-2 font-semibold text-center min-w-[45px]" title="敏感词规避">敏感词</th>
+                        <th class="px-2 py-2 font-semibold text-center min-w-[45px]" title="图片+QA">图片QA</th>
+                        <th class="px-2 py-2 font-semibold text-center min-w-[30px]" title="A+页面">A+</th>
+                        <th class="px-2 py-2 font-semibold text-center border-r-2 border-slate-300 min-w-[40px]">状态</th>
 
-                        <!-- 财务模型 (6列: 配送费 + 配送占比 + 清仓线 + 动销价 + 建议价 + 盈亏点) -->
-                        <th class="px-3 py-3 font-semibold text-center border-l">配送费</th>
-                        <th class="px-3 py-3 font-semibold text-center">配送占比</th>
-                        <th class="px-3 py-3 font-semibold text-center text-red-600">清仓线</th>
-                        <th class="px-3 py-3 font-semibold text-center text-amber-600">动销价</th>
-                        <th class="px-3 py-3 font-semibold text-center text-emerald-600">建议价</th>
-                        <th class="px-3 py-3 font-semibold text-center">盈亏点</th>
+                        <!-- 财务模型 (6列) -->
+                        <th class="px-2 py-2 font-semibold text-center min-w-[50px]">配送费</th>
+                        <th class="px-2 py-2 font-semibold text-center min-w-[50px]">配送占比</th>
+                        <th class="px-2 py-2 font-semibold text-center text-red-600 min-w-[50px]">清仓线</th>
+                        <th class="px-2 py-2 font-semibold text-center text-amber-600 min-w-[50px]">动销价</th>
+                        <th class="px-2 py-2 font-semibold text-center text-emerald-600 min-w-[50px]">建议价</th>
+                        <th class="px-2 py-2 font-semibold text-center border-r-2 border-slate-300 min-w-[50px]">盈亏点
+                        </th>
 
-                        <!-- 流量转化 (5列: 流量 + CTR + CVR + ACOAS + 自然占比) -->
-                        <th class="px-3 py-3 font-semibold text-center border-l">流量</th>
-                        <th class="px-3 py-3 font-semibold text-center">CTR</th>
-                        <th class="px-3 py-3 font-semibold text-center">CVR</th>
-                        <th class="px-3 py-3 font-semibold text-center">ACOAS</th>
-                        <th class="px-3 py-3 font-semibold text-center">自然占比</th>
+                        <!-- 流量转化 (5列) -->
+                        <th class="px-2 py-2 font-semibold text-center min-w-[45px]">流量</th>
+                        <th class="px-2 py-2 font-semibold text-center min-w-[40px]">CTR</th>
+                        <th class="px-2 py-2 font-semibold text-center min-w-[40px]">CVR</th>
+                        <th class="px-2 py-2 font-semibold text-center min-w-[50px]">ACOAS</th>
+                        <th class="px-2 py-2 font-semibold text-center border-r-2 border-slate-300 min-w-[50px]">自然占比
+                        </th>
 
-                        <!-- 决策 (4列: Vine进度 + 广告 + 保留 + Next Step) -->
-                        <th class="px-3 py-3 font-semibold text-center border-l">Vine进度</th>
-                        <th class="px-3 py-3 font-semibold text-center">广告</th>
-                        <th class="px-3 py-3 font-semibold text-center">保留</th>
-                        <th class="px-3 py-3 font-semibold">Next Step</th>
+                        <!-- 决策 (4列) -->
+                        <th class="px-2 py-2 font-semibold text-center min-w-[55px]">Vine进度</th>
+                        <th class="px-2 py-2 font-semibold text-center min-w-[35px]">广告</th>
+                        <th class="px-2 py-2 font-semibold text-center min-w-[35px]">保留</th>
+                        <th class="px-2 py-2 font-semibold min-w-[100px]">Next Step</th>
                     </tr>
                 </thead>
                 <tbody id="npi-table-body">
                     <!-- Dynamic content rendered by index.js -->
                     <tr>
-                        <td colspan="29" class="px-6 py-10 text-center text-slate-400">
+                        <td colspan="26" class="px-6 py-10 text-center text-slate-400">
                             <i class="fas fa-spinner fa-spin text-2xl"></i>
                             <p class="mt-2">加载中...</p>
                         </td>
@@ -173,13 +172,34 @@
     </div>
 
     <!-- Legend -->
-    <div class="mt-4 flex flex-wrap items-center gap-6 text-xs text-slate-500">
-        <span><span class="inline-block w-3 h-3 bg-blue-100 rounded mr-1"></span>新品-测款</span>
-        <span><span class="inline-block w-3 h-3 bg-emerald-100 rounded mr-1"></span>成长期</span>
-        <span><span class="inline-block w-3 h-3 bg-purple-100 rounded mr-1"></span>稳定期</span>
-        <span><span class="inline-block w-3 h-3 bg-red-100 rounded mr-1"></span>清仓期</span>
-        <span class="text-red-600">库存>60天 = 滞销预警</span>
-        <span class="text-amber-600">CTR<0.5%=点击预警</span>
+    <div class="bg-white rounded-xl border border-slate-200 p-4 mb-6">
+        <h3 class="font-bold text-slate-700 mb-3 flex items-center gap-2">
+            <i class="fas fa-info-circle text-blue-500"></i>图例说明
+        </h3>
+        <div class="flex flex-wrap items-center gap-6 text-xs text-slate-600">
+            <span class="flex items-center gap-1"><span
+                    class="inline-block w-3 h-3 bg-blue-100 rounded border border-blue-300"></span>新品-测款</span>
+            <span class="flex items-center gap-1"><span
+                    class="inline-block w-3 h-3 bg-emerald-100 rounded border border-emerald-300"></span>成长期</span>
+            <span class="flex items-center gap-1"><span
+                    class="inline-block w-3 h-3 bg-purple-100 rounded border border-purple-300"></span>稳定期</span>
+            <span class="flex items-center gap-1"><span
+                    class="inline-block w-3 h-3 bg-red-100 rounded border border-red-300"></span>清仓期</span>
+            <span class="text-red-600 font-medium"><i class="fas fa-exclamation-triangle mr-1"></i>库存>60天 = 滞销预警</span>
+            <span class="text-amber-600 font-medium"><i class="fas fa-exclamation-circle mr-1"></i>CTR<0.5%=点击预警</span>
+        </div>
+    </div>
+
+    <!-- Video Resource -->
+    <div class="bg-blue-50 rounded-xl border border-blue-200 p-4">
+        <div class="flex items-center gap-3">
+            <i class="fas fa-video text-blue-500 text-xl"></i>
+            <div>
+                <h3 class="font-bold text-slate-800">操作视频教程</h3>
+                <p class="text-sm text-slate-600">访问公司网盘观看详细操作录屏：<a href="http://192.168.1.99"
+                        class="text-blue-600 underline">192.168.1.99</a>（仅限内网访问）→ 培训资料 → NPI新品跟踪专题</p>
+            </div>
+        </div>
     </div>
 
     <!-- Next Step Modal -->
