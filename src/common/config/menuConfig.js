@@ -139,6 +139,13 @@ export const MENU_CONFIG = {
             panelId: 'panel-sops',
             category: 'safety'
         },
+        sops_product_compliance: {
+            moduleId: 'sops',
+            label: '产品Listing合规性',
+            icon: 'fas fa-file-shield',
+            panelId: 'panel-sops',
+            category: 'safety'
+        },
 
         // === 第二模块：供应链与物流体系 (The Backend Layer) ===
         sops_fba_shipping: {
