@@ -75,17 +75,111 @@ export const MENU_CONFIG = {
             icon: 'fas fa-th-large',
             panelId: 'panel-sops'
         },
-        sops_new_product_test: {
+
+        // === 第一模块：账号安全与风控体系 (The Safety Layer) ===
+        sops_account_security: {
             moduleId: 'sops',
-            label: '新品测试',
-            icon: 'fas fa-flask',
-            panelId: 'panel-sops'
+            label: '账号登录与环境安全',
+            icon: 'fas fa-shield-halved',
+            panelId: 'panel-sops',
+            category: 'safety'
         },
-        sops_inventory_clearance: {
+        sops_permission_management: {
             moduleId: 'sops',
-            label: '冗余库存清货',
-            icon: 'fas fa-boxes-stacked',
-            panelId: 'panel-sops'
+            label: '后台权限管理',
+            icon: 'fas fa-user-lock',
+            panelId: 'panel-sops',
+            category: 'safety'
+        },
+        sops_brand_infringement: {
+            moduleId: 'sops',
+            label: '品牌与侵权审核',
+            icon: 'fas fa-trademark',
+            panelId: 'panel-sops',
+            category: 'safety'
+        },
+        sops_performance_notification: {
+            moduleId: 'sops',
+            label: '绩效通知处理',
+            icon: 'fas fa-bell',
+            panelId: 'panel-sops',
+            category: 'safety'
+        },
+
+        // === 第二模块：供应链与物流体系 (The Backend Layer) ===
+        sops_fba_shipping: {
+            moduleId: 'sops',
+            label: 'FBA 发货标准操作',
+            icon: 'fas fa-truck-fast',
+            panelId: 'panel-sops',
+            category: 'backend'
+        },
+        sops_procurement_qc: {
+            moduleId: 'sops',
+            label: '采购与质检 (QC)',
+            icon: 'fas fa-clipboard-check',
+            panelId: 'panel-sops',
+            category: 'backend'
+        },
+        sops_inventory_replenishment: {
+            moduleId: 'sops',
+            label: '库存预警与补货',
+            icon: 'fas fa-cubes',
+            panelId: 'panel-sops',
+            category: 'backend'
+        },
+
+        // === 第三模块：运营与推广体系 (The Growth Layer) ===
+        sops_listing_seo: {
+            moduleId: 'sops',
+            label: 'Listing 极致优化 (SEO)',
+            icon: 'fas fa-magnifying-glass-chart',
+            panelId: 'panel-sops',
+            category: 'growth'
+        },
+        sops_ppc_advertising: {
+            moduleId: 'sops',
+            label: 'PPC 广告投放与优化',
+            icon: 'fas fa-chart-line',
+            panelId: 'panel-sops',
+            category: 'growth'
+        },
+        sops_promotion_submission: {
+            moduleId: 'sops',
+            label: '促销活动提报',
+            icon: 'fas fa-tags',
+            panelId: 'panel-sops',
+            category: 'growth'
+        },
+        sops_competitor_monitoring: {
+            moduleId: 'sops',
+            label: '竞品监控与分析',
+            icon: 'fas fa-binoculars',
+            panelId: 'panel-sops',
+            category: 'growth'
+        },
+
+        // === 第四模块：客服与客户体验体系 (The Service Layer) ===
+        sops_email_templates: {
+            moduleId: 'sops',
+            label: '邮件回复模板',
+            icon: 'fas fa-envelope-open-text',
+            panelId: 'panel-sops',
+            category: 'service'
+        },
+        sops_negative_review: {
+            moduleId: 'sops',
+            label: '差评处理与分析',
+            icon: 'fas fa-comment-dots',
+            panelId: 'panel-sops',
+            category: 'service'
+        },
+        sops_qa_maintenance: {
+            moduleId: 'sops',
+            label: 'QA 问答维护',
+            icon: 'fas fa-comments',
+            panelId: 'panel-sops',
+            category: 'service'
         },
 
         // --- 属于 Master Prompt 应用的页面 ---

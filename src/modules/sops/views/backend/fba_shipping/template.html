@@ -1,0 +1,200 @@
+<!-- FBA 发货标准操作 SOP Template -->
+<div class="max-w-4xl mx-auto">
+    <!-- Back Button & Header -->
+    <div class="mb-6">
+        <button onclick="switchTab('sops_overview')"
+            class="text-sm text-slate-500 hover:text-blue-600 transition-colors mb-4 inline-flex items-center gap-2">
+            <i class="fas fa-arrow-left"></i>返回 SOP 列表
+        </button>
+
+        <div class="sop-detail-header bg-gradient-to-r from-amber-50 to-yellow-50">
+            <div class="flex items-start gap-4">
+                <div class="sop-icon-container bg-amber-100 text-amber-600 w-16 h-16 text-2xl">
+                    <i class="fas fa-truck-fast"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <h1 class="text-2xl font-bold text-slate-900">FBA 发货标准操作 SOP</h1>
+                        <span class="sop-status-badge sop-status-active">已发布</span>
+                    </div>
+                    <p class="text-slate-600 mb-3">
+                        创建货件计划、打印箱标规范、装箱单核对的标准化操作流程。
+                    </p>
+                    <div class="flex items-center gap-6 text-sm text-slate-500">
+                        <span><i class="fas fa-layer-group mr-1"></i>供应链与物流体系</span>
+                        <span><i class="fas fa-warehouse mr-1"></i>入库操作</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+        <h2 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
+            <i class="fas fa-route text-blue-500"></i>标准发货流程
+        </h2>
+
+        <div class="sop-timeline">
+            <!-- Step 1 -->
+            <div class="sop-timeline-item">
+                <div class="sop-timeline-dot completed"></div>
+                <div class="bg-slate-50 rounded-lg p-4 ml-2">
+                    <h3 class="font-bold text-slate-800 mb-1">Step 1: 创建货件计划 (Shipping Plan)</h3>
+                    <div class="text-sm text-slate-600">
+                        <p>进入 Seller Central → Inventory → Manage FBA Shipments → Send to Amazon</p>
+                        <ul class="list-disc ml-4 mt-2 space-y-1">
+                            <li>选择正确的发货地址（Ship from address）</li>
+                            <li>选择包装类型：Individual / Case-packed</li>
+                            <li>确认每个 SKU 的发货数量</li>
+                            <li>选择物流方式：SPD（小包）/ LTL（卡车）</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="sop-timeline-item">
+                <div class="sop-timeline-dot"></div>
+                <div class="bg-slate-50 rounded-lg p-4 ml-2">
+                    <h3 class="font-bold text-slate-800 mb-1">Step 2: 打印产品标签 (FNSKU)</h3>
+                    <div class="text-sm text-slate-600">
+                        <p>产品标签打印规范：</p>
+                        <ul class="list-disc ml-4 mt-2 space-y-1">
+                            <li>使用 <strong>热敏标签纸</strong>，确保清晰可扫描</li>
+                            <li>标签尺寸：1" x 2" 或 1" x 3"</li>
+                            <li>标签需覆盖原有条形码</li>
+                            <li>确保 FNSKU 与系统一致</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="sop-timeline-item">
+                <div class="sop-timeline-dot"></div>
+                <div class="bg-slate-50 rounded-lg p-4 ml-2">
+                    <h3 class="font-bold text-slate-800 mb-1">Step 3: 打印箱标 (Carton Label)</h3>
+                    <div class="text-sm text-slate-600">
+                        <p>箱标打印与张贴规范：</p>
+                        <ul class="list-disc ml-4 mt-2 space-y-1">
+                            <li>使用 A4 纸打印，每箱 <strong>至少贴两张</strong>（相邻面）</li>
+                            <li>使用 <strong>热敏纸或覆膜</strong> 防止磨损</li>
+                            <li>箱标不可折叠、不可遮挡</li>
+                            <li>确保 Shipment ID 与货件一致</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="sop-timeline-item">
+                <div class="sop-timeline-dot"></div>
+                <div class="bg-slate-50 rounded-lg p-4 ml-2">
+                    <h3 class="font-bold text-slate-800 mb-1">Step 4: 装箱与核对</h3>
+                    <div class="text-sm text-slate-600">
+                        <p>装箱检查清单：</p>
+                        <ul class="list-disc ml-4 mt-2 space-y-1">
+                            <li>数量核对：实际装箱数 = 系统申报数</li>
+                            <li>装箱单（Packing List）放入箱内</li>
+                            <li>产品有效封装，防止运输损坏</li>
+                            <li>填充物使用得当</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5 -->
+            <div class="sop-timeline-item">
+                <div class="sop-timeline-dot pending"></div>
+                <div class="bg-slate-50 rounded-lg p-4 ml-2">
+                    <h3 class="font-bold text-slate-800 mb-1">Step 5: 确认并发货</h3>
+                    <div class="text-sm text-slate-600">
+                        <p>最终确认并完成发货：</p>
+                        <ul class="list-disc ml-4 mt-2 space-y-1">
+                            <li>在系统中点击 "Confirm Shipment"</li>
+                            <li>上传物流单号（Tracking Number）</li>
+                            <li>保存发货凭证和照片备查</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Weight Limits -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-weight-hanging text-amber-500"></i>各站点限重规范
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-slate-50 rounded-lg p-4 text-center">
+                <div class="text-2xl mb-2">🇺🇸</div>
+                <h4 class="font-semibold text-slate-800">美国站</h4>
+                <p class="text-lg font-bold text-blue-600">≤ 50 lbs</p>
+                <p class="text-xs text-slate-500">(约 22.7 kg)</p>
+            </div>
+            <div class="bg-slate-50 rounded-lg p-4 text-center">
+                <div class="text-2xl mb-2">🇪🇺</div>
+                <h4 class="font-semibold text-slate-800">欧洲站</h4>
+                <p class="text-lg font-bold text-blue-600">≤ 22 kg</p>
+                <p class="text-xs text-slate-500">(约 48.5 lbs)</p>
+            </div>
+            <div class="bg-slate-50 rounded-lg p-4 text-center">
+                <div class="text-2xl mb-2">🇯🇵</div>
+                <h4 class="font-semibold text-slate-800">日本站</h4>
+                <p class="text-lg font-bold text-blue-600">≤ 15 kg</p>
+                <p class="text-xs text-slate-500">(约 33 lbs)</p>
+            </div>
+        </div>
+        <div class="mt-4 p-3 bg-amber-50 rounded-lg border border-amber-100">
+            <p class="text-sm text-amber-700"><i
+                    class="fas fa-exclamation-triangle mr-1"></i>超重箱件可能被拒收或产生额外费用，请严格遵守限重要求。</p>
+        </div>
+    </div>
+
+    <!-- Checklist -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-clipboard-check text-emerald-500"></i>发货前检查清单
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100">
+                <input type="checkbox" class="w-5 h-5 rounded border-slate-300 text-blue-600">
+                <span class="text-sm text-slate-700">产品 FNSKU 标签已正确粘贴</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100">
+                <input type="checkbox" class="w-5 h-5 rounded border-slate-300 text-blue-600">
+                <span class="text-sm text-slate-700">箱标清晰可读，已贴两面</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100">
+                <input type="checkbox" class="w-5 h-5 rounded border-slate-300 text-blue-600">
+                <span class="text-sm text-slate-700">装箱数量与系统申报一致</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100">
+                <input type="checkbox" class="w-5 h-5 rounded border-slate-300 text-blue-600">
+                <span class="text-sm text-slate-700">单箱重量不超标</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100">
+                <input type="checkbox" class="w-5 h-5 rounded border-slate-300 text-blue-600">
+                <span class="text-sm text-slate-700">装箱单已放入箱内</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100">
+                <input type="checkbox" class="w-5 h-5 rounded border-slate-300 text-blue-600">
+                <span class="text-sm text-slate-700">已上传物流单号</span>
+            </label>
+        </div>
+    </div>
+
+    <!-- Video Resource -->
+    <div class="bg-blue-50 rounded-xl border border-blue-200 p-4">
+        <div class="flex items-center gap-3">
+            <i class="fas fa-video text-blue-500 text-xl"></i>
+            <div>
+                <h3 class="font-bold text-slate-800">操作视频教程</h3>
+                <p class="text-sm text-slate-600">访问公司网盘观看详细操作录屏：<a href="http://192.168.1.99"
+                        class="text-blue-600 underline">192.168.1.99</a>（仅限内网访问）</p>
+            </div>
+        </div>
+    </div>
+</div>

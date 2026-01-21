@@ -1,0 +1,165 @@
+<!-- 后台权限管理 SOP Template -->
+<div class="max-w-4xl mx-auto">
+    <!-- Back Button & Header -->
+    <div class="mb-6">
+        <button onclick="switchTab('sops_overview')"
+            class="text-sm text-slate-500 hover:text-blue-600 transition-colors mb-4 inline-flex items-center gap-2">
+            <i class="fas fa-arrow-left"></i>返回 SOP 列表
+        </button>
+
+        <div class="sop-detail-header bg-gradient-to-r from-red-50 to-rose-50">
+            <div class="flex items-start gap-4">
+                <div class="sop-icon-container bg-red-100 text-red-600 w-16 h-16 text-2xl">
+                    <i class="fas fa-user-lock"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <h1 class="text-2xl font-bold text-slate-900">后台权限管理 SOP</h1>
+                        <span class="sop-status-badge sop-status-active">已发布</span>
+                    </div>
+                    <p class="text-slate-600 mb-3">
+                        User Permission（子账号）的授权范围规范，不同岗位仅开放必要的最小权限。
+                    </p>
+                    <div class="flex items-center gap-6 text-sm text-slate-500">
+                        <span><i class="fas fa-layer-group mr-1"></i>安全风控体系</span>
+                        <span><i class="fas fa-key mr-1"></i>最小权限原则</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Permission Matrix -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-table text-blue-500"></i>岗位权限矩阵
+        </h2>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="bg-slate-50">
+                        <th class="px-4 py-3 text-left font-semibold text-slate-700">权限模块</th>
+                        <th class="px-4 py-3 text-center font-semibold text-slate-700">运营</th>
+                        <th class="px-4 py-3 text-center font-semibold text-slate-700">客服</th>
+                        <th class="px-4 py-3 text-center font-semibold text-slate-700">开发/采购</th>
+                        <th class="px-4 py-3 text-center font-semibold text-slate-700">Boss</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    <tr>
+                        <td class="px-4 py-3 font-medium">Catalog (Listing管理)</td>
+                        <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                        <td class="px-4 py-3 text-center"><i class="fas fa-minus text-slate-300"></i></td>
+                        <td class="px-4 py-3 text-center"><i class="fas fa-eye text-amber-500" title="只读"></i></td>
+                        <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-3 font-medium">Inventory (库存)</td>
+                        <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                        <td class="px-4 py-3 text-center"><i class="fas fa-eye text-amber-500"></i></td>
+                        <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                        <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-3 font-medium">Orders (订单)</td>
+                        <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                        <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                        <td class="px-4 py-3 text-center"><i class="fas fa-eye text-amber-500"></i></td>
+                        <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-3 font-medium">Advertising (广告)</td>
+                        <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                        <td class="px-4 py-3 text-center"><i class="fas fa-minus text-slate-300"></i></td>
+                        <td class="px-4 py-3 text-center"><i class="fas fa-minus text-slate-300"></i></td>
+                        <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-3 font-medium">Reports (报表)</td>
+                        <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                        <td class="px-4 py-3 text-center"><i class="fas fa-eye text-amber-500"></i></td>
+                        <td class="px-4 py-3 text-center"><i class="fas fa-eye text-amber-500"></i></td>
+                        <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-3 font-medium">Messages (买家消息)</td>
+                        <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                        <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                        <td class="px-4 py-3 text-center"><i class="fas fa-minus text-slate-300"></i></td>
+                        <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                    </tr>
+                    <tr class="bg-red-50">
+                        <td class="px-4 py-3 font-medium text-red-700">Payments (结算)</td>
+                        <td class="px-4 py-3 text-center"><i class="fas fa-ban text-red-500"></i></td>
+                        <td class="px-4 py-3 text-center"><i class="fas fa-ban text-red-500"></i></td>
+                        <td class="px-4 py-3 text-center"><i class="fas fa-ban text-red-500"></i></td>
+                        <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                    </tr>
+                    <tr class="bg-red-50">
+                        <td class="px-4 py-3 font-medium text-red-700">Settings (账号设置)</td>
+                        <td class="px-4 py-3 text-center"><i class="fas fa-ban text-red-500"></i></td>
+                        <td class="px-4 py-3 text-center"><i class="fas fa-ban text-red-500"></i></td>
+                        <td class="px-4 py-3 text-center"><i class="fas fa-ban text-red-500"></i></td>
+                        <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-4 flex items-center gap-6 text-xs text-slate-500">
+            <span><i class="fas fa-check text-emerald-500 mr-1"></i>完全权限</span>
+            <span><i class="fas fa-eye text-amber-500 mr-1"></i>只读权限</span>
+            <span><i class="fas fa-minus text-slate-300 mr-1"></i>无权限</span>
+            <span><i class="fas fa-ban text-red-500 mr-1"></i>禁止开放</span>
+        </div>
+    </div>
+
+    <!-- Application Process -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-route text-blue-500"></i>权限申请流程
+        </h2>
+
+        <div class="flex flex-col md:flex-row items-start md:items-center gap-4">
+            <div class="flex-1 bg-slate-50 rounded-lg p-4 text-center">
+                <div class="text-2xl mb-2">📝</div>
+                <h4 class="font-semibold text-slate-800">1. 提交申请</h4>
+                <p class="text-xs text-slate-500">员工填写权限申请表，说明需要权限及理由</p>
+            </div>
+            <i class="fas fa-arrow-right text-slate-300 hidden md:block"></i>
+            <div class="flex-1 bg-slate-50 rounded-lg p-4 text-center">
+                <div class="text-2xl mb-2">👀</div>
+                <h4 class="font-semibold text-slate-800">2. 主管审核</h4>
+                <p class="text-xs text-slate-500">直属主管确认权限必要性</p>
+            </div>
+            <i class="fas fa-arrow-right text-slate-300 hidden md:block"></i>
+            <div class="flex-1 bg-slate-50 rounded-lg p-4 text-center">
+                <div class="text-2xl mb-2">✅</div>
+                <h4 class="font-semibold text-slate-800">3. Boss 审批</h4>
+                <p class="text-xs text-slate-500">最终审批，开放权限</p>
+            </div>
+            <i class="fas fa-arrow-right text-slate-300 hidden md:block"></i>
+            <div class="flex-1 bg-slate-50 rounded-lg p-4 text-center">
+                <div class="text-2xl mb-2">📋</div>
+                <h4 class="font-semibold text-slate-800">4. 登记备案</h4>
+                <p class="text-xs text-slate-500">更新权限登记表，定期复核</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Important Notes -->
+    <div class="bg-amber-50 rounded-xl border border-amber-200 p-4">
+        <div class="flex items-start gap-3">
+            <i class="fas fa-exclamation-triangle text-amber-500 text-xl mt-0.5"></i>
+            <div>
+                <h3 class="font-bold text-slate-800 mb-1">重要提醒</h3>
+                <ul class="text-sm text-slate-600 space-y-1">
+                    <li>• 员工离职时，必须 <strong>第一时间删除其子账号</strong></li>
+                    <li>• 每季度进行一次权限审计，清理不必要的权限</li>
+                    <li>• Payments 和 Settings 权限 <strong>仅限Boss本人</strong>，绝不下放</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

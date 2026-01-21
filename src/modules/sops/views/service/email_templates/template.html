@@ -1,0 +1,186 @@
+<!-- 邮件回复模板 SOP Template -->
+<div class="max-w-4xl mx-auto">
+    <!-- Back Button & Header -->
+    <div class="mb-6">
+        <button onclick="switchTab('sops_overview')"
+            class="text-sm text-slate-500 hover:text-blue-600 transition-colors mb-4 inline-flex items-center gap-2">
+            <i class="fas fa-arrow-left"></i>返回 SOP 列表
+        </button>
+
+        <div class="sop-detail-header bg-gradient-to-r from-blue-50 to-indigo-50">
+            <div class="flex items-start gap-4">
+                <div class="sop-icon-container bg-blue-100 text-blue-600 w-16 h-16 text-2xl">
+                    <i class="fas fa-envelope-open-text"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <h1 class="text-2xl font-bold text-slate-900">邮件回复模板 SOP</h1>
+                        <span class="sop-status-badge sop-status-active">已发布</span>
+                    </div>
+                    <p class="text-slate-600 mb-3">
+                        常见客服场景的标准回复模板，确保响应及时、话术合规。
+                    </p>
+                    <div class="flex items-center gap-6 text-sm text-slate-500">
+                        <span><i class="fas fa-layer-group mr-1"></i>客服与客户体验体系</span>
+                        <span class="text-blue-600 font-semibold"><i class="fas fa-clock mr-1"></i>SLA: 24h内必回复</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLA Warning -->
+    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+        <div class="flex items-start gap-3">
+            <i class="fas fa-clock text-blue-500 text-xl"></i>
+            <div>
+                <h3 class="font-bold text-slate-800 mb-1">响应时效要求 (SLA)</h3>
+                <p class="text-sm text-slate-600">所有买家消息必须在 <strong>24小时内</strong> 回复，超时将影响账号健康度。</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prohibited Actions -->
+    <div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+        <div class="flex items-start gap-3">
+            <i class="fas fa-ban text-red-500 text-xl"></i>
+            <div>
+                <h3 class="font-bold text-red-800 mb-1">禁止话术</h3>
+                <p class="text-sm text-red-700">严禁使用诱导好评的违规话术，如："如果您满意请给我们五星好评"、"留好评可获得返现"等。</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Template Scenarios -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-folder-open text-blue-500"></i>场景模板库
+        </h2>
+
+        <div class="space-y-4">
+            <!-- 物流延误 -->
+            <div class="border rounded-lg overflow-hidden">
+                <div class="bg-slate-50 px-4 py-3 flex items-center gap-2 cursor-pointer"
+                    onclick="this.nextElementSibling.classList.toggle('hidden')">
+                    <i class="fas fa-truck text-amber-500"></i>
+                    <span class="font-semibold text-slate-800">物流延误</span>
+                    <i class="fas fa-chevron-down text-slate-400 ml-auto"></i>
+                </div>
+                <div class="p-4 text-sm text-slate-600 bg-white hidden">
+                    <p class="mb-2 font-medium">英文模板：</p>
+                    <div class="bg-slate-50 p-3 rounded text-xs font-mono">
+                        Dear Customer,<br><br>
+                        Thank you for reaching out. We sincerely apologize for the delay in your shipment. We are
+                        actively working with our logistics partner to expedite the delivery.<br><br>
+                        Your order is expected to arrive within [X] days. We will keep you updated on the
+                        progress.<br><br>
+                        If you have any further questions, please don't hesitate to contact us.<br><br>
+                        Best regards,<br>
+                        [Brand Name] Customer Service
+                    </div>
+                </div>
+            </div>
+
+            <!-- 产品破损 -->
+            <div class="border rounded-lg overflow-hidden">
+                <div class="bg-slate-50 px-4 py-3 flex items-center gap-2 cursor-pointer"
+                    onclick="this.nextElementSibling.classList.toggle('hidden')">
+                    <i class="fas fa-box-open text-red-500"></i>
+                    <span class="font-semibold text-slate-800">产品破损</span>
+                    <i class="fas fa-chevron-down text-slate-400 ml-auto"></i>
+                </div>
+                <div class="p-4 text-sm text-slate-600 bg-white hidden">
+                    <p class="mb-2 font-medium">英文模板：</p>
+                    <div class="bg-slate-50 p-3 rounded text-xs font-mono">
+                        Dear Customer,<br><br>
+                        We are very sorry to hear that your product arrived damaged. This is not the experience we want
+                        you to have.<br><br>
+                        To resolve this issue, we can offer you:<br>
+                        1. A full replacement at no extra cost<br>
+                        2. A full refund<br><br>
+                        Please let us know which option you prefer, and we will process it immediately.<br><br>
+                        Best regards,<br>
+                        [Brand Name] Customer Service
+                    </div>
+                </div>
+            </div>
+
+            <!-- 使用指导 -->
+            <div class="border rounded-lg overflow-hidden">
+                <div class="bg-slate-50 px-4 py-3 flex items-center gap-2 cursor-pointer"
+                    onclick="this.nextElementSibling.classList.toggle('hidden')">
+                    <i class="fas fa-book text-blue-500"></i>
+                    <span class="font-semibold text-slate-800">使用指导</span>
+                    <i class="fas fa-chevron-down text-slate-400 ml-auto"></i>
+                </div>
+                <div class="p-4 text-sm text-slate-600 bg-white hidden">
+                    <p class="mb-2 font-medium">英文模板：</p>
+                    <div class="bg-slate-50 p-3 rounded text-xs font-mono">
+                        Dear Customer,<br><br>
+                        Thank you for your inquiry. Here are the instructions for using [Product Name]:<br><br>
+                        [Insert step-by-step instructions]<br><br>
+                        You can also find a detailed user manual in the product package or watch our video tutorial
+                        here: [Link]<br><br>
+                        If you need any further assistance, please feel free to reach out.<br><br>
+                        Best regards,<br>
+                        [Brand Name] Customer Service
+                    </div>
+                </div>
+            </div>
+
+            <!-- 退换货请求 -->
+            <div class="border rounded-lg overflow-hidden">
+                <div class="bg-slate-50 px-4 py-3 flex items-center gap-2 cursor-pointer"
+                    onclick="this.nextElementSibling.classList.toggle('hidden')">
+                    <i class="fas fa-exchange-alt text-purple-500"></i>
+                    <span class="font-semibold text-slate-800">退换货请求</span>
+                    <i class="fas fa-chevron-down text-slate-400 ml-auto"></i>
+                </div>
+                <div class="p-4 text-sm text-slate-600 bg-white hidden">
+                    <p class="mb-2 font-medium">英文模板：</p>
+                    <div class="bg-slate-50 p-3 rounded text-xs font-mono">
+                        Dear Customer,<br><br>
+                        We understand that you would like to return/exchange your product. We're here to help.<br><br>
+                        Please initiate your return through Amazon's return center, and we will process your
+                        refund/replacement as soon as we receive the item.<br><br>
+                        If you have any questions about the return process, please let us know.<br><br>
+                        Best regards,<br>
+                        [Brand Name] Customer Service
+                    </div>
+                </div>
+            </div>
+
+            <!-- 发票索取 -->
+            <div class="border rounded-lg overflow-hidden">
+                <div class="bg-slate-50 px-4 py-3 flex items-center gap-2 cursor-pointer"
+                    onclick="this.nextElementSibling.classList.toggle('hidden')">
+                    <i class="fas fa-file-invoice text-emerald-500"></i>
+                    <span class="font-semibold text-slate-800">发票索取</span>
+                    <i class="fas fa-chevron-down text-slate-400 ml-auto"></i>
+                </div>
+                <div class="p-4 text-sm text-slate-600 bg-white hidden">
+                    <p class="mb-2 font-medium">英文模板：</p>
+                    <div class="bg-slate-50 p-3 rounded text-xs font-mono">
+                        Dear Customer,<br><br>
+                        Thank you for your request. Please find your invoice attached to this message.<br><br>
+                        If you need any additional information on the invoice, please let us know.<br><br>
+                        Best regards,<br>
+                        [Brand Name] Customer Service
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Resource -->
+    <div class="bg-blue-50 rounded-xl border border-blue-200 p-4">
+        <div class="flex items-center gap-3">
+            <i class="fas fa-video text-blue-500 text-xl"></i>
+            <div>
+                <h3 class="font-bold text-slate-800">操作视频教程</h3>
+                <p class="text-sm text-slate-600">访问公司网盘观看详细操作录屏：<a href="http://192.168.1.99"
+                        class="text-blue-600 underline">192.168.1.99</a>（仅限内网访问）</p>
+            </div>
+        </div>
+    </div>
+</div>

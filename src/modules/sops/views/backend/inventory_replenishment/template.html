@@ -1,0 +1,196 @@
+<!-- 库存预警与补货 SOP Template -->
+<div class="max-w-4xl mx-auto">
+    <!-- Back Button & Header -->
+    <div class="mb-6">
+        <button onclick="switchTab('sops_overview')"
+            class="text-sm text-slate-500 hover:text-blue-600 transition-colors mb-4 inline-flex items-center gap-2">
+            <i class="fas fa-arrow-left"></i>返回 SOP 列表
+        </button>
+
+        <div class="sop-detail-header bg-gradient-to-r from-amber-50 to-yellow-50">
+            <div class="flex items-start gap-4">
+                <div class="sop-icon-container bg-amber-100 text-amber-600 w-16 h-16 text-2xl">
+                    <i class="fas fa-cubes"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <h1 class="text-2xl font-bold text-slate-900">库存预警与补货 SOP</h1>
+                        <span class="sop-status-badge sop-status-active">已发布</span>
+                    </div>
+                    <p class="text-slate-600 mb-3">
+                        基于销量和物流周期的补货公式，确保不断货、不积压。
+                    </p>
+                    <div class="flex items-center gap-6 text-sm text-slate-500">
+                        <span><i class="fas fa-layer-group mr-1"></i>供应链与物流体系</span>
+                        <span><i class="fas fa-chart-line mr-1"></i>库存管理</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core Formula -->
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 mb-6">
+        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-calculator text-blue-500"></i>核心补货公式
+        </h2>
+        <div class="bg-white rounded-lg p-4 border border-blue-100">
+            <div class="text-center">
+                <p class="text-lg font-mono font-bold text-blue-700 mb-2">
+                    安全库存 = (日均销量 × 物流天数) × 1.5
+                </p>
+                <p class="text-sm text-slate-500">Safety Stock = (Daily Sales × Lead Time) × 1.5</p>
+            </div>
+            <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div class="bg-blue-50 rounded-lg p-3">
+                    <h4 class="font-semibold text-blue-800">日均销量</h4>
+                    <p class="text-xs text-blue-600">过去30天销量 ÷ 30</p>
+                </div>
+                <div class="bg-blue-50 rounded-lg p-3">
+                    <h4 class="font-semibold text-blue-800">物流天数</h4>
+                    <p class="text-xs text-blue-600">生产 + 运输 + 入库时间</p>
+                </div>
+                <div class="bg-blue-50 rounded-lg p-3">
+                    <h4 class="font-semibold text-blue-800">安全系数 1.5</h4>
+                    <p class="text-xs text-blue-600">应对销量波动和意外延误</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lead Time Reference -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-clock text-amber-500"></i>物流周期参考
+        </h2>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="bg-slate-50">
+                        <th class="px-4 py-3 text-left font-semibold text-slate-700">物流方式</th>
+                        <th class="px-4 py-3 text-center font-semibold text-slate-700">美国站</th>
+                        <th class="px-4 py-3 text-center font-semibold text-slate-700">欧洲站</th>
+                        <th class="px-4 py-3 text-center font-semibold text-slate-700">日本站</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    <tr>
+                        <td class="px-4 py-3 font-medium">🚢 海运</td>
+                        <td class="px-4 py-3 text-center">30-45天</td>
+                        <td class="px-4 py-3 text-center">35-50天</td>
+                        <td class="px-4 py-3 text-center">10-15天</td>
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-3 font-medium">✈️ 空运</td>
+                        <td class="px-4 py-3 text-center">7-12天</td>
+                        <td class="px-4 py-3 text-center">8-15天</td>
+                        <td class="px-4 py-3 text-center">5-7天</td>
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-3 font-medium">🚄 快递</td>
+                        <td class="px-4 py-3 text-center">5-7天</td>
+                        <td class="px-4 py-3 text-center">5-8天</td>
+                        <td class="px-4 py-3 text-center">3-5天</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="text-xs text-slate-500 mt-3">* 以上时间包含入仓上架时间，实际可能因季节和仓库情况有所变化</p>
+    </div>
+
+    <!-- Weekly Workflow -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-calendar-week text-blue-500"></i>周度执行节奏
+        </h2>
+
+        <div class="space-y-4">
+            <div class="flex items-start gap-4 p-4 bg-slate-50 rounded-lg">
+                <div
+                    class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 font-bold flex-shrink-0">
+                    周一
+                </div>
+                <div>
+                    <h4 class="font-semibold text-slate-800">库存周报输出</h4>
+                    <p class="text-sm text-slate-600">导出 FBA Inventory Report，计算各 SKU 可售天数</p>
+                </div>
+            </div>
+            <div class="flex items-start gap-4 p-4 bg-slate-50 rounded-lg">
+                <div
+                    class="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-600 font-bold flex-shrink-0">
+                    周二
+                </div>
+                <div>
+                    <h4 class="font-semibold text-slate-800">补货建议审核</h4>
+                    <p class="text-sm text-slate-600">根据安全库存公式，输出《库存周报与补货建议表》</p>
+                </div>
+            </div>
+            <div class="flex items-start gap-4 p-4 bg-slate-50 rounded-lg">
+                <div
+                    class="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center text-amber-600 font-bold flex-shrink-0">
+                    周三
+                </div>
+                <div>
+                    <h4 class="font-semibold text-slate-800">采购计划制定</h4>
+                    <p class="text-sm text-slate-600">审批通过后，向供应商下达采购订单</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Thresholds -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-bell text-red-500"></i>库存预警阈值
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-red-50 rounded-lg p-4 border border-red-100 text-center">
+                <i class="fas fa-exclamation-circle text-red-500 text-2xl mb-2"></i>
+                <h4 class="font-bold text-red-700">紧急</h4>
+                <p class="text-2xl font-bold text-red-600">≤ 14天</p>
+                <p class="text-xs text-red-500 mt-1">立即补货 / 空运</p>
+            </div>
+            <div class="bg-amber-50 rounded-lg p-4 border border-amber-100 text-center">
+                <i class="fas fa-exclamation-triangle text-amber-500 text-2xl mb-2"></i>
+                <h4 class="font-bold text-amber-700">警告</h4>
+                <p class="text-2xl font-bold text-amber-600">15-30天</p>
+                <p class="text-xs text-amber-500 mt-1">安排补货计划</p>
+            </div>
+            <div class="bg-emerald-50 rounded-lg p-4 border border-emerald-100 text-center">
+                <i class="fas fa-check-circle text-emerald-500 text-2xl mb-2"></i>
+                <h4 class="font-bold text-emerald-700">健康</h4>
+                <p class="text-2xl font-bold text-emerald-600">> 30天</p>
+                <p class="text-xs text-emerald-500 mt-1">库存充足</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Output Template -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-file-excel text-emerald-500"></i>周报输出模板字段
+        </h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+            <div class="bg-slate-50 rounded p-2 text-center">SKU</div>
+            <div class="bg-slate-50 rounded p-2 text-center">产品名称</div>
+            <div class="bg-slate-50 rounded p-2 text-center">可售库存</div>
+            <div class="bg-slate-50 rounded p-2 text-center">在途库存</div>
+            <div class="bg-slate-50 rounded p-2 text-center">日均销量</div>
+            <div class="bg-slate-50 rounded p-2 text-center">可售天数</div>
+            <div class="bg-slate-50 rounded p-2 text-center">安全库存</div>
+            <div class="bg-slate-50 rounded p-2 text-center">建议补货量</div>
+        </div>
+    </div>
+
+    <!-- Video Resource -->
+    <div class="bg-blue-50 rounded-xl border border-blue-200 p-4">
+        <div class="flex items-center gap-3">
+            <i class="fas fa-video text-blue-500 text-xl"></i>
+            <div>
+                <h3 class="font-bold text-slate-800">操作视频教程</h3>
+                <p class="text-sm text-slate-600">访问公司网盘观看详细操作录屏：<a href="http://192.168.1.99"
+                        class="text-blue-600 underline">192.168.1.99</a>（仅限内网访问）</p>
+            </div>
+        </div>
+    </div>
+</div>

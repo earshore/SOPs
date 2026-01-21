@@ -1,0 +1,184 @@
+<!-- 促销活动提报 SOP Template -->
+<div class="max-w-4xl mx-auto">
+    <!-- Back Button & Header -->
+    <div class="mb-6">
+        <button onclick="switchTab('sops_overview')"
+            class="text-sm text-slate-500 hover:text-blue-600 transition-colors mb-4 inline-flex items-center gap-2">
+            <i class="fas fa-arrow-left"></i>返回 SOP 列表
+        </button>
+
+        <div class="sop-detail-header bg-gradient-to-r from-emerald-50 to-green-50">
+            <div class="flex items-start gap-4">
+                <div class="sop-icon-container bg-emerald-100 text-emerald-600 w-16 h-16 text-2xl">
+                    <i class="fas fa-tags"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <h1 class="text-2xl font-bold text-slate-900">促销活动提报 SOP</h1>
+                        <span class="sop-status-badge sop-status-active">已发布</span>
+                    </div>
+                    <p class="text-slate-600 mb-3">
+                        Coupon、Prime Exclusive Discount、LD/7DD的提报门槛与利润核算规范。
+                    </p>
+                    <div class="flex items-center gap-6 text-sm text-slate-500">
+                        <span><i class="fas fa-layer-group mr-1"></i>运营与推广体系</span>
+                        <span><i class="fas fa-percent mr-1"></i>促销管理</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Promotion Types -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-gift text-blue-500"></i>促销类型与门槛
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Coupon -->
+            <div class="bg-slate-50 rounded-lg p-4">
+                <div class="flex items-center gap-2 mb-3">
+                    <i class="fas fa-ticket text-amber-500"></i>
+                    <h4 class="font-bold text-slate-800">Coupon (优惠券)</h4>
+                </div>
+                <ul class="text-sm text-slate-600 space-y-1">
+                    <li>• 折扣：5%~50% 或固定金额</li>
+                    <li>• 费用：$0.60/次兑换</li>
+                    <li>• 门槛：无特殊要求</li>
+                    <li>• 周期：可随时开启/关闭</li>
+                </ul>
+            </div>
+
+            <!-- Prime Exclusive Discount -->
+            <div class="bg-slate-50 rounded-lg p-4">
+                <div class="flex items-center gap-2 mb-3">
+                    <i class="fas fa-crown text-blue-500"></i>
+                    <h4 class="font-bold text-slate-800">Prime Exclusive Discount</h4>
+                </div>
+                <ul class="text-sm text-slate-600 space-y-1">
+                    <li>• 折扣：至少 10%</li>
+                    <li>• 费用：无额外费用</li>
+                    <li>• 门槛：产品评分 ≥ 3.0</li>
+                    <li>• 周期：设置时长灵活</li>
+                </ul>
+            </div>
+
+            <!-- Lightning Deal -->
+            <div class="bg-slate-50 rounded-lg p-4">
+                <div class="flex items-center gap-2 mb-3">
+                    <i class="fas fa-bolt text-yellow-500"></i>
+                    <h4 class="font-bold text-slate-800">Lightning Deal (LD)</h4>
+                </div>
+                <ul class="text-sm text-slate-600 space-y-1">
+                    <li>• 折扣：通常 15%~25%</li>
+                    <li>• 费用：$150~$500/次</li>
+                    <li>• 门槛：评分 ≥ 3.0，Review 足够</li>
+                    <li>• 周期：4~12小时</li>
+                </ul>
+            </div>
+
+            <!-- 7-Day Deal -->
+            <div class="bg-slate-50 rounded-lg p-4">
+                <div class="flex items-center gap-2 mb-3">
+                    <i class="fas fa-calendar-week text-purple-500"></i>
+                    <h4 class="font-bold text-slate-800">7-Day Deal (7DD)</h4>
+                </div>
+                <ul class="text-sm text-slate-600 space-y-1">
+                    <li>• 折扣：通常 15%~30%</li>
+                    <li>• 费用：$300+</li>
+                    <li>• 门槛：较高，需品牌备案</li>
+                    <li>• 周期：7天</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profit Calculation -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-calculator text-emerald-500"></i>利润核算（确保折后不亏）
+        </h2>
+
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+            <p class="text-sm text-red-700 font-semibold">
+                <i class="fas fa-exclamation-triangle mr-1"></i>重要：任何促销提报前必须完成利润核算，确保折后单品利润 > 0
+            </p>
+        </div>
+
+        <div class="bg-slate-50 rounded-lg p-4">
+            <h4 class="font-semibold text-slate-800 mb-3">核算公式：</h4>
+            <div class="font-mono text-sm text-slate-700 space-y-2">
+                <p>折后利润 = <span class="text-blue-600">折后售价</span> - <span class="text-red-600">成本</span> - <span
+                        class="text-amber-600">FBA费用</span> - <span class="text-purple-600">佣金(15%)</span> - <span
+                        class="text-pink-600">活动费用</span></p>
+            </div>
+            <div class="mt-4 grid grid-cols-2 md:grid-cols-5 gap-2 text-xs">
+                <div class="bg-white rounded p-2 text-center border">
+                    <p class="text-slate-500">原价</p>
+                    <p class="font-bold">$29.99</p>
+                </div>
+                <div class="bg-white rounded p-2 text-center border">
+                    <p class="text-slate-500">折扣 20%</p>
+                    <p class="font-bold text-blue-600">$23.99</p>
+                </div>
+                <div class="bg-white rounded p-2 text-center border">
+                    <p class="text-slate-500">成本+费用</p>
+                    <p class="font-bold text-red-600">-$18.00</p>
+                </div>
+                <div class="bg-white rounded p-2 text-center border">
+                    <p class="text-slate-500">活动费用</p>
+                    <p class="font-bold text-amber-600">-$0.60</p>
+                </div>
+                <div class="bg-white rounded p-2 text-center border">
+                    <p class="text-slate-500">折后利润</p>
+                    <p class="font-bold text-emerald-600">$5.39</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submission Checklist -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-clipboard-check text-blue-500"></i>提报前检查清单
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100">
+                <input type="checkbox" class="w-5 h-5 rounded border-slate-300 text-blue-600">
+                <span class="text-sm text-slate-700">利润核算表已完成</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100">
+                <input type="checkbox" class="w-5 h-5 rounded border-slate-300 text-blue-600">
+                <span class="text-sm text-slate-700">折后利润 > 0</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100">
+                <input type="checkbox" class="w-5 h-5 rounded border-slate-300 text-blue-600">
+                <span class="text-sm text-slate-700">库存充足（活动期间不断货）</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100">
+                <input type="checkbox" class="w-5 h-5 rounded border-slate-300 text-blue-600">
+                <span class="text-sm text-slate-700">产品评分达标</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100">
+                <input type="checkbox" class="w-5 h-5 rounded border-slate-300 text-blue-600">
+                <span class="text-sm text-slate-700">活动档期已确认</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100">
+                <input type="checkbox" class="w-5 h-5 rounded border-slate-300 text-blue-600">
+                <span class="text-sm text-slate-700">主管审批通过</span>
+            </label>
+        </div>
+    </div>
+
+    <!-- Video Resource -->
+    <div class="bg-blue-50 rounded-xl border border-blue-200 p-4">
+        <div class="flex items-center gap-3">
+            <i class="fas fa-video text-blue-500 text-xl"></i>
+            <div>
+                <h3 class="font-bold text-slate-800">操作视频教程</h3>
+                <p class="text-sm text-slate-600">访问公司网盘观看详细操作录屏：<a href="http://192.168.1.99"
+                        class="text-blue-600 underline">192.168.1.99</a>（仅限内网访问）</p>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,162 @@
+<!-- 品牌与侵权审核 SOP Template -->
+<div class="max-w-4xl mx-auto">
+    <!-- Back Button & Header -->
+    <div class="mb-6">
+        <button onclick="switchTab('sops_overview')"
+            class="text-sm text-slate-500 hover:text-blue-600 transition-colors mb-4 inline-flex items-center gap-2">
+            <i class="fas fa-arrow-left"></i>返回 SOP 列表
+        </button>
+
+        <div class="sop-detail-header bg-gradient-to-r from-red-50 to-rose-50">
+            <div class="flex items-start gap-4">
+                <div class="sop-icon-container bg-red-100 text-red-600 w-16 h-16 text-2xl">
+                    <i class="fas fa-trademark"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <h1 class="text-2xl font-bold text-slate-900">品牌与侵权审核 SOP</h1>
+                        <span class="sop-status-badge sop-status-active">已发布</span>
+                    </div>
+                    <p class="text-slate-600 mb-3">
+                        上架前的关键词查重流程、图片版权确认、侵权词库过滤规范。
+                    </p>
+                    <div class="flex items-center gap-6 text-sm text-slate-500">
+                        <span><i class="fas fa-layer-group mr-1"></i>安全风控体系</span>
+                        <span><i class="fas fa-gavel mr-1"></i>法务合规</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Red Line Warning -->
+    <div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+        <div class="flex items-start gap-3">
+            <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600 flex-shrink-0">
+                <i class="fas fa-ban"></i>
+            </div>
+            <div>
+                <h3 class="font-bold text-red-800 mb-1">红线规定</h3>
+                <p class="text-sm text-red-700"><strong>任何 Listing 文案修改必须经过侵权词库过滤</strong>。未经审核擅自上架导致侵权投诉的，追究当事人责任。</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+        <h2 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
+            <i class="fas fa-route text-blue-500"></i>审核流程
+        </h2>
+
+        <div class="sop-timeline">
+            <!-- Step 1 -->
+            <div class="sop-timeline-item">
+                <div class="sop-timeline-dot completed"></div>
+                <div class="bg-slate-50 rounded-lg p-4 ml-2">
+                    <h3 class="font-bold text-slate-800 mb-1">Step 1: 关键词商标查重</h3>
+                    <p class="text-sm text-slate-500 mb-2">工具：USPTO / EUIPO / 第三方工具</p>
+                    <div class="text-sm text-slate-600">
+                        <p>将 Listing 中的所有关键词（尤其是标题中的品牌词、功能词）逐一在商标数据库中查询：</p>
+                        <ul class="list-disc ml-4 mt-2 space-y-1">
+                            <li><a href="https://www.uspto.gov/trademarks" target="_blank"
+                                    class="text-blue-600 underline">USPTO (美国)</a> - 美标查询</li>
+                            <li><a href="https://euipo.europa.eu/" target="_blank" class="text-blue-600 underline">EUIPO
+                                    (欧洲)</a> - 欧标查询</li>
+                            <li>第三方工具：Trademarkia、知元查</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="sop-timeline-item">
+                <div class="sop-timeline-dot"></div>
+                <div class="bg-slate-50 rounded-lg p-4 ml-2">
+                    <h3 class="font-bold text-slate-800 mb-1">Step 2: 侵权词库过滤</h3>
+                    <p class="text-sm text-slate-500 mb-2">公司内部维护的禁用词表</p>
+                    <div class="text-sm text-slate-600">
+                        <p>将文案在公司侵权词库中进行匹配过滤，词库包括：</p>
+                        <div class="mt-2 grid grid-cols-2 gap-2">
+                            <div class="bg-white p-2 rounded border text-xs">品牌侵权词（如 Apple, Nike...）</div>
+                            <div class="bg-white p-2 rounded border text-xs">专利敏感词（如 Patented, ™, ®）</div>
+                            <div class="bg-white p-2 rounded border text-xs">明星/IP名称</div>
+                            <div class="bg-white p-2 rounded border text-xs">认证类误导词（如 FDA Approved）</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="sop-timeline-item">
+                <div class="sop-timeline-dot"></div>
+                <div class="bg-slate-50 rounded-lg p-4 ml-2">
+                    <h3 class="font-bold text-slate-800 mb-1">Step 3: 图片版权确认</h3>
+                    <p class="text-sm text-slate-500 mb-2">确保所有图片来源合法</p>
+                    <div class="text-sm text-slate-600">
+                        <p>图片来源必须为以下之一：</p>
+                        <ul class="list-disc ml-4 mt-2 space-y-1">
+                            <li>✅ 自有摄影/设计</li>
+                            <li>✅ 购买正版授权（保留凭证）</li>
+                            <li>✅ 工厂提供（需书面授权）</li>
+                            <li>❌ 禁止从网络直接下载使用</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="sop-timeline-item">
+                <div class="sop-timeline-dot pending"></div>
+                <div class="bg-slate-50 rounded-lg p-4 ml-2">
+                    <h3 class="font-bold text-slate-800 mb-1">Step 4: 审核签字确认</h3>
+                    <p class="text-sm text-slate-500 mb-2">留档备查</p>
+                    <div class="text-sm text-slate-600">
+                        <p>完成审核后，在《Listing上架审核表》签字确认，包含：</p>
+                        <ul class="list-disc ml-4 mt-2 space-y-1">
+                            <li>审核人签名</li>
+                            <li>审核日期</li>
+                            <li>审核结论（通过/驳回）</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Common Infringement Types -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-exclamation-circle text-amber-500"></i>常见侵权类型速查
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-red-50 rounded-lg p-4 border border-red-100">
+                <h4 class="font-bold text-red-800 mb-2">🚫 商标侵权</h4>
+                <p class="text-sm text-red-700">使用他人注册商标或近似词汇，如 "compatible with iPhone" 需谨慎表述</p>
+            </div>
+            <div class="bg-amber-50 rounded-lg p-4 border border-amber-100">
+                <h4 class="font-bold text-amber-800 mb-2">⚠️ 专利侵权</h4>
+                <p class="text-sm text-amber-700">产品外观或功能涉及他人专利，需提前做专利检索</p>
+            </div>
+            <div class="bg-purple-50 rounded-lg p-4 border border-purple-100">
+                <h4 class="font-bold text-purple-800 mb-2">🎨 版权侵权</h4>
+                <p class="text-sm text-purple-700">使用网络图片、卡通形象、艺术作品等未授权内容</p>
+            </div>
+            <div class="bg-blue-50 rounded-lg p-4 border border-blue-100">
+                <h4 class="font-bold text-blue-800 mb-2">📜 虚假宣传</h4>
+                <p class="text-sm text-blue-700">虚假认证声明如 "FDA Certified"、"CE Approved" 等误导性表述</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Resource -->
+    <div class="bg-blue-50 rounded-xl border border-blue-200 p-4">
+        <div class="flex items-center gap-3">
+            <i class="fas fa-video text-blue-500 text-xl"></i>
+            <div>
+                <h3 class="font-bold text-slate-800">操作视频教程</h3>
+                <p class="text-sm text-slate-600">访问公司网盘观看详细操作录屏：<a href="http://192.168.1.99"
+                        class="text-blue-600 underline">192.168.1.99</a>（仅限内网访问）</p>
+            </div>
+        </div>
+    </div>
+</div>

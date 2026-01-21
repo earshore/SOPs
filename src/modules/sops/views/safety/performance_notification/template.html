@@ -1,0 +1,190 @@
+<!-- 绩效通知处理 SOP Template -->
+<div class="max-w-4xl mx-auto">
+    <!-- Back Button & Header -->
+    <div class="mb-6">
+        <button onclick="switchTab('sops_overview')"
+            class="text-sm text-slate-500 hover:text-blue-600 transition-colors mb-4 inline-flex items-center gap-2">
+            <i class="fas fa-arrow-left"></i>返回 SOP 列表
+        </button>
+
+        <div class="sop-detail-header bg-gradient-to-r from-red-50 to-rose-50">
+            <div class="flex items-start gap-4">
+                <div class="sop-icon-container bg-red-100 text-red-600 w-16 h-16 text-2xl">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <h1 class="text-2xl font-bold text-slate-900">绩效通知处理 SOP</h1>
+                        <span class="sop-status-badge sop-status-active">已发布</span>
+                    </div>
+                    <p class="text-slate-600 mb-3">
+                        遇到"小红旗"或业绩通知（Performance Notification）时的标准上报流程。
+                    </p>
+                    <div class="flex items-center gap-6 text-sm text-slate-500">
+                        <span><i class="fas fa-layer-group mr-1"></i>安全风控体系</span>
+                        <span><i class="fas fa-flag text-red-500 mr-1"></i>紧急响应</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Warning Box -->
+    <div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+        <div class="flex items-start gap-3">
+            <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600 flex-shrink-0">
+                <i class="fas fa-hand"></i>
+            </div>
+            <div>
+                <h3 class="font-bold text-red-800 mb-1">禁止私自处理</h3>
+                <p class="text-sm text-red-700"><strong>禁止员工私自回复或忽视任何 Performance
+                        Notification</strong>。所有绩效通知必须第一时间上报，由主管或Boss统一协调处理。</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+        <h2 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
+            <i class="fas fa-route text-blue-500"></i>标准处理流程
+        </h2>
+
+        <div class="sop-timeline">
+            <!-- Step 1 -->
+            <div class="sop-timeline-item">
+                <div class="sop-timeline-dot completed"></div>
+                <div class="bg-slate-50 rounded-lg p-4 ml-2">
+                    <h3 class="font-bold text-slate-800 mb-1">Step 1: 立即截图保存</h3>
+                    <p class="text-sm text-slate-500 mb-2">时效：发现后立即</p>
+                    <div class="text-sm text-slate-600">
+                        <p>发现小红旗/绩效通知后，立即完整截图保存，包含：</p>
+                        <ul class="list-disc ml-4 mt-2 space-y-1">
+                            <li>通知标题和内容全文</li>
+                            <li>涉及的 ASIN / 订单号</li>
+                            <li>通知时间和截止日期</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="sop-timeline-item">
+                <div class="sop-timeline-dot"></div>
+                <div class="bg-slate-50 rounded-lg p-4 ml-2">
+                    <h3 class="font-bold text-slate-800 mb-1">Step 2: 工作群反馈</h3>
+                    <p class="text-sm text-slate-500 mb-2">时效：5分钟内</p>
+                    <div class="text-sm text-slate-600">
+                        <p>在工作群内发送反馈，格式如下：</p>
+                        <div class="mt-2 bg-white p-3 rounded border text-xs font-mono">
+                            【绩效通知】<br>
+                            店铺：XXX<br>
+                            类型：产品真实性/侵权/安全...<br>
+                            涉及ASIN：BXXXXXXXXXX<br>
+                            截止日期：XXXX-XX-XX<br>
+                            [附截图]
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="sop-timeline-item">
+                <div class="sop-timeline-dot"></div>
+                <div class="bg-slate-50 rounded-lg p-4 ml-2">
+                    <h3 class="font-bold text-slate-800 mb-1">Step 3: 登记表记录</h3>
+                    <p class="text-sm text-slate-500 mb-2">在线文档追踪</p>
+                    <div class="text-sm text-slate-600">
+                        <p>在《绩效通知登记表》中添加记录，字段包括：</p>
+                        <div class="mt-2 grid grid-cols-3 gap-2 text-xs">
+                            <div class="bg-white p-2 rounded border">发现日期</div>
+                            <div class="bg-white p-2 rounded border">通知类型</div>
+                            <div class="bg-white p-2 rounded border">涉及ASIN</div>
+                            <div class="bg-white p-2 rounded border">处理状态</div>
+                            <div class="bg-white p-2 rounded border">负责人</div>
+                            <div class="bg-white p-2 rounded border">截止日期</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="sop-timeline-item">
+                <div class="sop-timeline-dot"></div>
+                <div class="bg-slate-50 rounded-lg p-4 ml-2">
+                    <h3 class="font-bold text-slate-800 mb-1">Step 4: 等待指示</h3>
+                    <p class="text-sm text-slate-500 mb-2">由主管/Boss统一协调</p>
+                    <div class="text-sm text-slate-600">
+                        <p>等待主管或Boss给出处理方案，可能的应对措施：</p>
+                        <ul class="list-disc ml-4 mt-2 space-y-1">
+                            <li>删除/下架问题Listing</li>
+                            <li>准备POA（行动计划）申诉</li>
+                            <li>联系服务商协助处理</li>
+                            <li>收集证据资料</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5 -->
+            <div class="sop-timeline-item">
+                <div class="sop-timeline-dot pending"></div>
+                <div class="bg-slate-50 rounded-lg p-4 ml-2">
+                    <h3 class="font-bold text-slate-800 mb-1">Step 5: 跟进闭环</h3>
+                    <p class="text-sm text-slate-500 mb-2">直至问题解决</p>
+                    <div class="text-sm text-slate-600">
+                        <p>持续跟进处理进度，直至收到亚马逊确认邮件或问题解除。在登记表中更新最终结果。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Common Notification Types -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-flag text-red-500"></i>常见绩效通知类型
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
+                <i class="fas fa-exclamation-triangle text-red-500 mt-0.5"></i>
+                <div>
+                    <h4 class="font-semibold text-slate-800">产品真实性投诉</h4>
+                    <p class="text-xs text-slate-500">Authenticity Complaint</p>
+                </div>
+            </div>
+            <div class="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
+                <i class="fas fa-ban text-red-500 mt-0.5"></i>
+                <div>
+                    <h4 class="font-semibold text-slate-800">知识产权侵权</h4>
+                    <p class="text-xs text-slate-500">IP Infringement</p>
+                </div>
+            </div>
+            <div class="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
+                <i class="fas fa-shield-virus text-amber-500 mt-0.5"></i>
+                <div>
+                    <h4 class="font-semibold text-slate-800">产品安全问题</h4>
+                    <p class="text-xs text-slate-500">Safety Complaint</p>
+                </div>
+            </div>
+            <div class="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
+                <i class="fas fa-file-circle-xmark text-amber-500 mt-0.5"></i>
+                <div>
+                    <h4 class="font-semibold text-slate-800">Listing违规</h4>
+                    <p class="text-xs text-slate-500">Policy Violation</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Resource -->
+    <div class="bg-blue-50 rounded-xl border border-blue-200 p-4">
+        <div class="flex items-center gap-3">
+            <i class="fas fa-video text-blue-500 text-xl"></i>
+            <div>
+                <h3 class="font-bold text-slate-800">操作视频教程</h3>
+                <p class="text-sm text-slate-600">访问公司网盘观看详细操作录屏：<a href="http://192.168.1.99"
+                        class="text-blue-600 underline">192.168.1.99</a>（仅限内网访问）</p>
+            </div>
+        </div>
+    </div>
+</div>
