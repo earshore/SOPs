@@ -1,0 +1,207 @@
+<!-- 亚马逊新品生命周期跟踪 SOP Template -->
+<div class="npi-tracker-container">
+    <!-- Back Button & Header -->
+    <div class="mb-6">
+        <button onclick="switchTab('sops_overview')"
+            class="text-sm text-slate-500 hover:text-blue-600 transition-colors mb-4 inline-flex items-center gap-2">
+            <i class="fas fa-arrow-left"></i>返回 SOP 列表
+        </button>
+
+        <div class="sop-detail-header bg-gradient-to-r from-emerald-50 to-green-50">
+            <div class="flex items-start gap-4">
+                <div class="sop-icon-container bg-emerald-100 text-emerald-600 w-16 h-16 text-2xl">
+                    <i class="fas fa-seedling"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <h1 class="text-2xl font-bold text-slate-900">新品生命周期跟踪 SOP</h1>
+                        <span class="sop-status-badge sop-status-active">已发布</span>
+                    </div>
+                    <p class="text-slate-600 mb-3">
+                        Amazon NPI Tracker - 监控新品从"测款"到"稳定销售"全流程的SOP看板，核心在于自动计算财务红线和强制执行合规检查。
+                    </p>
+                    <div class="flex items-center gap-6 text-sm text-slate-500">
+                        <span><i class="fas fa-layer-group mr-1"></i>运营与推广体系</span>
+                        <span><i class="fas fa-calculator mr-1"></i>自动定价计算</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formula Reference -->
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 mb-6">
+        <div class="flex items-start gap-3">
+            <i class="fas fa-calculator text-blue-500 text-xl"></i>
+            <div class="flex-1">
+                <h3 class="font-bold text-slate-800 mb-2">定价计算公式 (基于DE配送费自动计算)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                    <div class="bg-white rounded-lg p-3 border border-blue-200">
+                        <span class="text-blue-600 font-bold">新品定价</span>
+                        <p class="font-mono text-xs mt-1">= 市场均价 × 0.9</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-3 border border-red-200">
+                        <span class="text-red-600 font-bold">清仓红线</span>
+                        <p class="font-mono text-xs mt-1">= 配送费 ÷ 0.5</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-3 border border-amber-200">
+                        <span class="text-amber-600 font-bold">动销价格</span>
+                        <p class="font-mono text-xs mt-1">= (配送费 ÷ 0.5) + 1</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-3 border border-emerald-200">
+                        <span class="text-emerald-600 font-bold">建议售价</span>
+                        <p class="font-mono text-xs mt-1">= (配送费 ÷ 0.5) + 2</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters & Actions -->
+    <div class="bg-white rounded-xl border border-slate-200 p-4 mb-4">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <label class="text-sm text-slate-600">店铺：</label>
+                    <select onchange="filterByStore(this.value)" class="px-3 py-1.5 border rounded-lg text-sm">
+                        <option value="all">全部</option>
+                        <option value="Store A">Store A</option>
+                        <option value="Store B">Store B</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-2">
+                    <label class="text-sm text-slate-600">阶段：</label>
+                    <select onchange="filterByStage(this.value)" class="px-3 py-1.5 border rounded-lg text-sm">
+                        <option value="all">全部</option>
+                        <option value="new-test">新品-测款</option>
+                        <option value="growth">成长期</option>
+                        <option value="stable">稳定期</option>
+                        <option value="clearance">清仓期</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="exportToExcel()"
+                    class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+                    <i class="fas fa-file-excel"></i>
+                    导出 Excel (带公式)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <!-- Group Headers -->
+                    <tr class="bg-slate-100 border-b-2 border-slate-300">
+                        <th colspan="8"
+                            class="px-3 py-2 text-xs font-bold text-slate-600 text-center border-r-2 border-slate-300">
+                            <i class="fas fa-folder mr-1"></i>基础档案
+                        </th>
+                        <th colspan="6"
+                            class="px-3 py-2 text-xs font-bold text-slate-600 text-center border-r-2 border-slate-300">
+                            <i class="fas fa-clipboard-check mr-1"></i>SOP合规
+                        </th>
+                        <th colspan="6"
+                            class="px-3 py-2 text-xs font-bold text-slate-600 text-center border-r-2 border-slate-300">
+                            <i class="fas fa-euro-sign mr-1"></i>财务模型
+                        </th>
+                        <th colspan="5"
+                            class="px-3 py-2 text-xs font-bold text-slate-600 text-center border-r-2 border-slate-300">
+                            <i class="fas fa-chart-line mr-1"></i>流量转化
+                        </th>
+                        <th colspan="4" class="px-3 py-2 text-xs font-bold text-slate-600 text-center">
+                            <i class="fas fa-gavel mr-1"></i>决策
+                        </th>
+                    </tr>
+                    <!-- Column Headers -->
+                    <tr class="bg-slate-50 text-xs text-slate-600 border-b">
+                        <!-- 基础档案 (8列) -->
+                        <th class="px-3 py-3 font-semibold sticky left-0 bg-slate-50 z-10 border-r">阶段</th>
+                        <th class="px-3 py-3 font-semibold">SKU</th>
+                        <th class="px-3 py-3 font-semibold">中文名</th>
+                        <th class="px-3 py-3 font-semibold">店铺</th>
+                        <th class="px-3 py-3 font-semibold">ASIN</th>
+                        <th class="px-3 py-3 font-semibold text-center">站点</th>
+                        <th class="px-3 py-3 font-semibold text-center">发货量</th>
+                        <th class="px-3 py-3 font-semibold text-center">库存天数</th>
+
+                        <!-- SOP合规 (6列: 泛欧 + 4项检查 + 状态) -->
+                        <th class="px-3 py-3 font-semibold text-center border-l">泛欧</th>
+                        <th class="px-3 py-3 font-semibold text-center" title="五点Rufus+标题">Rufus</th>
+                        <th class="px-3 py-3 font-semibold text-center" title="敏感词规避">敏感词</th>
+                        <th class="px-3 py-3 font-semibold text-center" title="图片+QA">图片QA</th>
+                        <th class="px-3 py-3 font-semibold text-center" title="A+页面">A+</th>
+                        <th class="px-3 py-3 font-semibold text-center">状态</th>
+
+                        <!-- 财务模型 (6列: 配送费 + 配送占比 + 清仓线 + 动销价 + 建议价 + 盈亏点) -->
+                        <th class="px-3 py-3 font-semibold text-center border-l">配送费</th>
+                        <th class="px-3 py-3 font-semibold text-center">配送占比</th>
+                        <th class="px-3 py-3 font-semibold text-center text-red-600">清仓线</th>
+                        <th class="px-3 py-3 font-semibold text-center text-amber-600">动销价</th>
+                        <th class="px-3 py-3 font-semibold text-center text-emerald-600">建议价</th>
+                        <th class="px-3 py-3 font-semibold text-center">盈亏点</th>
+
+                        <!-- 流量转化 (5列: 流量 + CTR + CVR + ACOAS + 自然占比) -->
+                        <th class="px-3 py-3 font-semibold text-center border-l">流量</th>
+                        <th class="px-3 py-3 font-semibold text-center">CTR</th>
+                        <th class="px-3 py-3 font-semibold text-center">CVR</th>
+                        <th class="px-3 py-3 font-semibold text-center">ACOAS</th>
+                        <th class="px-3 py-3 font-semibold text-center">自然占比</th>
+
+                        <!-- 决策 (4列: Vine进度 + 广告 + 保留 + Next Step) -->
+                        <th class="px-3 py-3 font-semibold text-center border-l">Vine进度</th>
+                        <th class="px-3 py-3 font-semibold text-center">广告</th>
+                        <th class="px-3 py-3 font-semibold text-center">保留</th>
+                        <th class="px-3 py-3 font-semibold">Next Step</th>
+                    </tr>
+                </thead>
+                <tbody id="npi-table-body">
+                    <!-- Dynamic content rendered by index.js -->
+                    <tr>
+                        <td colspan="29" class="px-6 py-10 text-center text-slate-400">
+                            <i class="fas fa-spinner fa-spin text-2xl"></i>
+                            <p class="mt-2">加载中...</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="mt-4 flex flex-wrap items-center gap-6 text-xs text-slate-500">
+        <span><span class="inline-block w-3 h-3 bg-blue-100 rounded mr-1"></span>新品-测款</span>
+        <span><span class="inline-block w-3 h-3 bg-emerald-100 rounded mr-1"></span>成长期</span>
+        <span><span class="inline-block w-3 h-3 bg-purple-100 rounded mr-1"></span>稳定期</span>
+        <span><span class="inline-block w-3 h-3 bg-red-100 rounded mr-1"></span>清仓期</span>
+        <span class="text-red-600">库存>60天 = 滞销预警</span>
+        <span class="text-amber-600">CTR<0.5%=点击预警</span>
+    </div>
+
+    <!-- Next Step Modal -->
+    <div id="next-step-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4">
+            <div class="flex items-center justify-between px-4 py-3 border-b">
+                <h3 class="font-bold text-slate-800">编辑 Next Step</h3>
+                <button onclick="closeNextStepModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="p-4">
+                <div id="next-step-checkboxes" class="space-y-2">
+                    <!-- Dynamic checkboxes -->
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 px-4 py-3 border-t bg-slate-50">
+                <button onclick="closeNextStepModal()"
+                    class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg">取消</button>
+                <button onclick="saveNextSteps()"
+                    class="px-4 py-2 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-lg">保存</button>
+            </div>
+        </div>
+    </div>
+</div>

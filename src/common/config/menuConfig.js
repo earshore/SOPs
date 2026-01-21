@@ -130,6 +130,13 @@ export const MENU_CONFIG = {
         },
 
         // === 第三模块：运营与推广体系 (The Growth Layer) ===
+        sops_npi_tracker: {
+            moduleId: 'sops',
+            label: '新品生命周期跟踪',
+            icon: 'fas fa-seedling',
+            panelId: 'panel-sops',
+            category: 'growth'
+        },
         sops_listing_seo: {
             moduleId: 'sops',
             label: 'Listing 极致优化 (SEO)',

@@ -18,6 +18,7 @@ const MODULE_MAP = {
     'sops_inventory_replenishment': () => import('./views/backend/inventory_replenishment/index.js'),
 
     // 第三模块：运营与推广体系 (The Growth Layer)
+    'sops_npi_tracker': () => import('./views/growth/npi_tracker/index.js'),
     'sops_listing_seo': () => import('./views/growth/listing_seo/index.js'),
     'sops_ppc_advertising': () => import('./views/growth/ppc_advertising/index.js'),
     'sops_promotion_submission': () => import('./views/growth/promotion_submission/index.js'),
