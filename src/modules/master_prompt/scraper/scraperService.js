@@ -5,7 +5,7 @@
 import { LANGUAGE_HEADERS, PROXY_URLS } from "../../../common/constants/constants.js";
 import { parseProductPage, parseReviews } from "./parserService.js";
 import { sleep, getErrorSummary } from "../../../common/utils/ui.js";
-import { HistoryService } from "../../../services/historyService.js";
+import { HistoryService } from "../services/historyService.js";
 
 const CACHE_DURATION_MS = 24 * 60 * 60 * 1000;
 
@@ -15,7 +15,7 @@ const REQUEST_TIMEOUT_MS = 15000; // 15秒超时，防止请求永久挂起
 function fetchWithTimeout(url, options = {}, timeout = REQUEST_TIMEOUT_MS) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
-    
+
     return fetch(url, { ...options, signal: controller.signal })
         .finally(() => clearTimeout(timeoutId));
 }
@@ -85,13 +85,13 @@ function constructFetchUrl(targetUrl, proxyConfig) {
 
 // ✅ 优化3: 改进的 fetchWithProxy
 async function fetchWithProxy(url, site, options = {}) {
-    const { 
-        retries = 3, 
+    const {
+        retries = 3,
         delay = 500,        // ✅ 降低基础延迟
         proxyConfig = {},
-        timeout = REQUEST_TIMEOUT_MS 
+        timeout = REQUEST_TIMEOUT_MS
     } = options;
-    
+
     const headers = LANGUAGE_HEADERS[site];
     const separator = url.includes("?") ? "&" : "?";
     const urlWithLang = `${url}${separator}language=${headers.locale}`;
@@ -101,7 +101,7 @@ async function fetchWithProxy(url, site, options = {}) {
     const isFreeProxy = proxyConfig.type === 'allorigins';
 
     let lastError;
-    
+
     for (let i = 0; i < retries; i++) {
         try {
             // ✅ 优化: 使用 jitter 随机化延迟，避免被检测为机器人
@@ -124,7 +124,7 @@ async function fetchWithProxy(url, site, options = {}) {
             }
 
             // ✅ 使用带超时的 fetch + 并发池
-            const res = await requestPool.add(() => 
+            const res = await requestPool.add(() =>
                 fetchWithTimeout(fetchUrl, reqOptions, timeout)
             );
 
@@ -176,7 +176,7 @@ async function fetchReviewsParallel(asin, site, fetchOptions, lang) {
 
     // ✅ 并行请求，取第一个成功的
     const results = await Promise.allSettled(
-        reviewUrls.map(url => 
+        reviewUrls.map(url =>
             fetchWithProxy(url, site, { ...fetchOptions, retries: 2 })
                 .then(html => parseReviews(html))
         )
@@ -256,9 +256,9 @@ export async function scrapeAsin(asin, site, scrapeReviews, updateStatusCallback
             // ✅ 优化: 并行抓取评论
             if (scrapeReviews) {
                 updateStatusCallback(asin, "scraping", "正在分析评论...");
-                
+
                 let reviews = await fetchReviewsParallel(asin, site, fetchOptions, lang);
-                
+
                 // 回退: 从商品页解析
                 if (reviews.length === 0) {
                     reviews = parseReviews(productHtml);
@@ -288,10 +288,10 @@ export async function scrapeAsin(asin, site, scrapeReviews, updateStatusCallback
         }
     }
 
-    const summary = result.scrape_status === "failed" 
-        ? getErrorSummary(result.error) 
+    const summary = result.scrape_status === "failed"
+        ? getErrorSummary(result.error)
         : `标题:✓, 描述:${result.feature_bullets.length}, 评论:${result.customer_reviews.length}`;
-    
+
     updateStatusCallback(asin, result.scrape_status, summary);
     return result;
 }
@@ -300,23 +300,23 @@ export async function scrapeAsin(asin, site, scrapeReviews, updateStatusCallback
 export async function scrapeMultipleAsins(asins, site, scrapeReviews, updateStatusCallback) {
     const BATCH_SIZE = 3;  // 每批3个
     const BATCH_DELAY = 1500; // 批次间隔
-    
+
     const results = [];
-    
+
     for (let i = 0; i < asins.length; i += BATCH_SIZE) {
         const batch = asins.slice(i, i + BATCH_SIZE);
-        
+
         const batchResults = await Promise.all(
             batch.map(asin => scrapeAsin(asin, site, scrapeReviews, updateStatusCallback))
         );
-        
+
         results.push(...batchResults);
-        
+
         // 批次间延迟，避免触发反爬
         if (i + BATCH_SIZE < asins.length) {
             await sleep(BATCH_DELAY + Math.random() * 500);
         }
     }
-    
+
     return results;
 }

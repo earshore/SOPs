@@ -3,7 +3,7 @@ import state from "../../../common/state.js";
 import { PROVIDERS, LANGUAGE_HEADERS } from "../../../common/constants/constants.js";
 import { ANALYSIS_MODULES, DYNAMIC_MASTER_TEMPLATE } from "../../../common/constants/prompts.js";
 import { showToast, showProgress } from "../../../common/utils/ui.js";
-import { HistoryService } from "../../../services/historyService.js";
+import { HistoryService } from "../services/historyService.js";
 import { renderHistory } from "../scraper/scraperPanel.js";
 import { AnalysisService } from "./analysisService.js";
 import { getFieldTitle } from "../promptlab/promptlabDisplay.js";
@@ -537,7 +537,7 @@ function renderWidgetContent(key, report, transReport) {
   const origVal = report[key];
   const showTrans = state.showTranslation;
   const transVal = showTrans && transReport ? transReport[key] : undefined;
-  
+
   // 1. 获取显示数据
   const displayVal = getDisplayValue(origVal, transVal);
 
@@ -563,7 +563,7 @@ function renderWidgetContent(key, report, transReport) {
 
   // 3. 生成内部 View HTML
   const contentHtml = renderViewModeHTML(displayVal, style);
-  
+
   // 4. 调用 Renderer 生成完整卡片
   return renderWidgetCard(key, title, style, showTrans, contentHtml);
 }
@@ -604,23 +604,23 @@ function generateDynamicMarkdown(data, depth = 1) {
   if (!data) return "";
   let md = "";
   Object.keys(data).filter((k) => k !== "meta").forEach((key) => {
-      const val = data[key];
-      const moduleConfig = ANALYSIS_MODULES.find((m) => m.id === key);
-      const title = moduleConfig ? moduleConfig.label_cn : getFieldTitle(key);
+    const val = data[key];
+    const moduleConfig = ANALYSIS_MODULES.find((m) => m.id === key);
+    const title = moduleConfig ? moduleConfig.label_cn : getFieldTitle(key);
 
-      const headerPrefix = "#".repeat(depth + 1);
-      if (val === null || val === undefined) return;
+    const headerPrefix = "#".repeat(depth + 1);
+    if (val === null || val === undefined) return;
 
-      if (typeof val === "string") {
-        md += `${headerPrefix} ${title}\n\n${val}\n\n`;
-      } else if (Array.isArray(val)) {
-        md += `${headerPrefix} ${title}\n\n`;
-        val.forEach((item) => {
-          md += `- ${typeof item === "object" ? JSON.stringify(item) : item}\n`;
-        });
-        md += `\n`;
-      }
-    });
+    if (typeof val === "string") {
+      md += `${headerPrefix} ${title}\n\n${val}\n\n`;
+    } else if (Array.isArray(val)) {
+      md += `${headerPrefix} ${title}\n\n`;
+      val.forEach((item) => {
+        md += `- ${typeof item === "object" ? JSON.stringify(item) : item}\n`;
+      });
+      md += `\n`;
+    }
+  });
   return md;
 }
 
@@ -635,7 +635,7 @@ function refreshWidgetUI(fullPath) {
   if (!gridItem) return;
 
   const newContentHTML = renderWidgetContent(rootKey, state.analysisReport, state.translatedReport);
-  
+
   // Gridstack 的 content 有时是包裹的，为了安全，直接替换 grid-stack-item-content
   const oldContent = gridItem.querySelector(".grid-stack-item-content");
   if (oldContent) {
@@ -786,22 +786,19 @@ export function updateAsinSelectList() {
   list.innerHTML = state.scrapedData.products
     .map(
       (p) => `
-        <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors ${
-          state.selectedAsins.includes(p.asin)
-            ? "bg-blue-50 border border-blue-100"
-            : "border border-transparent"
+        <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors ${state.selectedAsins.includes(p.asin)
+          ? "bg-blue-50 border border-blue-100"
+          : "border border-transparent"
         }">
-            <input type="checkbox" class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" ${
-              state.selectedAsins.includes(p.asin) ? "checked" : ""
-            } onchange="window.toggleAsinSelection('${p.asin}')">
+            <input type="checkbox" class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" ${state.selectedAsins.includes(p.asin) ? "checked" : ""
+        } onchange="window.toggleAsinSelection('${p.asin}')">
             <span class="font-mono text-sm text-slate-700">${p.asin}</span>
-            <span class="status-dot ${
-              p.scrape_status === "success"
-                ? "status-success"
-                : p.scrape_status === "partial"
-                ? "status-pending"
-                : "status-error"
-            } ml-auto"></span>
+            <span class="status-dot ${p.scrape_status === "success"
+          ? "status-success"
+          : p.scrape_status === "partial"
+            ? "status-pending"
+            : "status-error"
+        } ml-auto"></span>
         </label>`
     )
     .join("");
@@ -999,7 +996,7 @@ window.addObjItem = function (key) {
   const container = document.getElementById(`obj-list-container-${key}`);
   const tplContent = document.getElementById(`tpl-${key}`)?.textContent || "{}";
   const templateObj = JSON.parse(tplContent);
-  Object.keys(templateObj).forEach((k) => (templateObj[k] = "")); 
+  Object.keys(templateObj).forEach((k) => (templateObj[k] = ""));
 
   const div = document.createElement("div");
   div.className = "edit-row p-3 bg-slate-50 border border-slate-200 rounded relative group animate-in fade-in slide-in-from-bottom-2";
@@ -1026,7 +1023,7 @@ window.undoLocalEdit = function (key) {
   }
   const prevState = stack.pop();
   const contentDiv = document.getElementById(`widget-content-${key}`);
-  
+
   // ✅ 重新渲染旧状态
   contentDiv.innerHTML = renderEditorForm(key, prevState);
 

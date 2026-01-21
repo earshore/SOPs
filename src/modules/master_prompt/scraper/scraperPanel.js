@@ -6,7 +6,7 @@ import { scrapeAsin } from "./scraperService.js";
 import { LANGUAGE_HEADERS, languageFlagMap, SITE_NAME_MAP } from "../../../common/constants/constants.js";
 import { renderDataPanel } from "../data_manage/dataDisplay.js";
 import { updateAsinSelectList } from "../analysis/analysisDisplay.js";
-import { HistoryService } from "../../../services/historyService.js";
+import { HistoryService } from "../services/historyService.js";
 import { saveProxyConfig, renderProxyInputUI } from "../../../components/settings/systemSettings.js"
 
 // ==========================================
@@ -274,25 +274,25 @@ function updateNetworkUI() {
   // 准备好两种状态的颜色：绿色(Ready) vs 橙/红色(Warning)
   const colorState = isReady
     ? {
-        bg: "bg-emerald-50",
-        border: "border-emerald-200",
-        iconBg: "bg-emerald-100",
-        iconColor: "text-emerald-600",
-        textTitle: "text-slate-700",
-        textSub: "text-emerald-600",
-        dotPing: "bg-emerald-400",
-        dotSolid: "bg-emerald-500",
-      }
+      bg: "bg-emerald-50",
+      border: "border-emerald-200",
+      iconBg: "bg-emerald-100",
+      iconColor: "text-emerald-600",
+      textTitle: "text-slate-700",
+      textSub: "text-emerald-600",
+      dotPing: "bg-emerald-400",
+      dotSolid: "bg-emerald-500",
+    }
     : {
-        bg: "bg-amber-50",
-        border: "border-amber-200",
-        iconBg: "bg-amber-100",
-        iconColor: "text-amber-600",
-        textTitle: "text-slate-800",
-        textSub: "text-rose-500 font-bold", // 未配置时文字变红加粗
-        dotPing: "bg-rose-500",
-        dotSolid: "bg-rose-600",
-      };
+      bg: "bg-amber-50",
+      border: "border-amber-200",
+      iconBg: "bg-amber-100",
+      iconColor: "text-amber-600",
+      textTitle: "text-slate-800",
+      textSub: "text-rose-500 font-bold", // 未配置时文字变红加粗
+      dotPing: "bg-rose-500",
+      dotSolid: "bg-rose-600",
+    };
 
   // 5. 查找并更新 DOM
   // 使用 onclick 属性作为特征来定位那个 div
@@ -389,21 +389,19 @@ function updateScrapeStatus(asin, status, message) {
   const htmlContent = `
     <div class="flex items-center justify-between mb-2 pb-2 border-b border-slate-100 border-dashed">
         <span class="font-mono font-bold text-base text-slate-800">${asin}</span>
-        <div class="w-6 h-6 rounded-full ${
-          cfg.bg
-        } flex items-center justify-center">
+        <div class="w-6 h-6 rounded-full ${cfg.bg
+    } flex items-center justify-center">
             <i class="fas ${cfg.icon} ${cfg.text} text-sm"></i>
         </div>
     </div>
     <div class="text-xs text-slate-600 min-h-[2rem] flex items-center justify-center w-full">
-        ${
-          isRich
-            ? message
-            : `<div class="flex items-center gap-1.5 opacity-90 w-full">
+        ${isRich
+      ? message
+      : `<div class="flex items-center gap-1.5 opacity-90 w-full">
                  <span class="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0"></span>
                  <span class="truncate font-medium w-full" title="${message}">${message}</span>
                </div>`
-        }
+    }
     </div>
   `;
 
@@ -435,17 +433,17 @@ function renderScrapeSummary(products) {
             </div>
             <div class="space-y-1.5">
                 ${failed
-                  .map(
-                    (p) => `
+        .map(
+          (p) => `
                     <div class="flex justify-between items-center text-xs text-rose-600 bg-white/60 px-3 py-1.5 rounded border border-rose-100">
                         <span class="font-mono font-medium">${p.asin}</span>
                         <span class="truncate max-w-[200px] opacity-90">${getErrorSummary(
-                          p.error
-                        )}</span>
+            p.error
+          )}</span>
                     </div>
                 `
-                  )
-                  .join("")}
+        )
+        .join("")}
             </div>
         </div>`;
     summary.classList.remove("hidden");
@@ -523,9 +521,8 @@ async function startScraping() {
                 <div class="grid grid-cols-3 gap-1.5 w-full text-center">
                     <div class="bg-indigo-50 rounded px-1 py-1 border border-indigo-100 flex flex-col justify-center">
                         <div class="text-[10px] text-indigo-400 font-medium">标题</div>
-                        <div class="text-xs font-bold ${
-                          hasTitle ? "text-indigo-600" : "text-slate-300"
-                        }">${hasTitle ? "OK" : "-"}</div>
+                        <div class="text-xs font-bold ${hasTitle ? "text-indigo-600" : "text-slate-300"
+          }">${hasTitle ? "OK" : "-"}</div>
                     </div>
                     <div class="bg-slate-50 rounded px-1 py-1 border border-slate-100 flex flex-col justify-center">
                         <div class="text-[10px] text-slate-400 font-medium">五点</div>
@@ -672,8 +669,8 @@ export function renderHistory() {
       const isToday = new Date().toDateString() === date.toDateString();
       const dateStr = isToday
         ? `${String(date.getHours()).padStart(2, "0")}:${String(
-            date.getMinutes()
-          ).padStart(2, "0")}`
+          date.getMinutes()
+        ).padStart(2, "0")}`
         : `${date.getMonth() + 1}/${date.getDate()}`;
 
       // 兼容国旗
@@ -694,8 +691,8 @@ export function renderHistory() {
         successCount === total
           ? "text-emerald-600"
           : successCount > 0
-          ? "text-amber-500"
-          : "text-rose-500";
+            ? "text-amber-500"
+            : "text-rose-500";
 
       return `<div class="relative p-3 rounded-xl border border-gray-200 bg-white mb-2 group transition-all hover:border-indigo-200 hover:shadow-sm ${containerClass}">
     
@@ -708,17 +705,15 @@ export function renderHistory() {
                     <span class="text-sm font-bold text-gray-800 tracking-tight leading-none">
                         ${cnName}站
                     </span>
-                    ${
-                      h.report
-                        ? '<span class="inline-flex items-center px-1.5 py-[1px] rounded-md text-[9px] font-bold bg-indigo-50 text-indigo-600 border border-indigo-100"><i class="fas fa-magic mr-1"></i>已分析</span>'
-                        : ""
-                    }
+                    ${h.report
+          ? '<span class="inline-flex items-center px-1.5 py-[1px] rounded-md text-[9px] font-bold bg-indigo-50 text-indigo-600 border border-indigo-100"><i class="fas fa-magic mr-1"></i>已分析</span>'
+          : ""
+        }
                 </div>
-                ${
-                  domain
-                    ? `<span class="text-[10px] text-gray-400 font-medium leading-tight">${domain}</span>`
-                    : ""
-                }
+                ${domain
+          ? `<span class="text-[10px] text-gray-400 font-medium leading-tight">${domain}</span>`
+          : ""
+        }
             </div>
         </div>
         
@@ -726,9 +721,8 @@ export function renderHistory() {
             <span class="text-[10px] text-gray-400 font-mono bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100">
                 ${dateStr}
             </span>
-            <button onclick="event.stopPropagation(); window.deleteHistoryItem(${
-              h.id
-            })" 
+            <button onclick="event.stopPropagation(); window.deleteHistoryItem(${h.id
+        })" 
                 class="w-5 h-5 flex items-center justify-center rounded text-gray-300 hover:text-rose-500 hover:bg-rose-50 transition-colors opacity-0 group-hover:opacity-100" title="删除">
                 <i class="fas fa-times text-[10px]"></i>
             </button>
@@ -743,12 +737,10 @@ export function renderHistory() {
               `<span class="text-[10px] font-mono font-medium text-gray-600 bg-gray-50 border border-gray-100 px-1.5 py-0.5 rounded hover:bg-gray-100 transition-colors cursor-default">${asin}</span>`
           )
           .join("")}
-        ${
-          h.asins.length > 3
-            ? `<span class="text-[10px] text-gray-400 font-medium px-1">+${
-                h.asins.length - 3
-              }</span>`
-            : ""
+        ${h.asins.length > 3
+          ? `<span class="text-[10px] text-gray-400 font-medium px-1">+${h.asins.length - 3
+          }</span>`
+          : ""
         }
     </div>
 
@@ -760,9 +752,8 @@ export function renderHistory() {
             </div>
             <div class="flex items-center gap-1.5">
                 <span class="text-[9px] text-gray-400">标题</span>
-                <span class="text-[11px] font-bold text-gray-700 font-mono">${
-                  validProducts.length
-                }</span>
+                <span class="text-[11px] font-bold text-gray-700 font-mono">${validProducts.length
+        }</span>
             </div>
             <div class="flex items-center gap-1.5">
                 <span class="text-[9px] text-gray-400">评论</span>
@@ -776,11 +767,10 @@ export function renderHistory() {
         </button>
     </div>
     
-    ${
-      isActive
-        ? '<div class="absolute left-0 top-2 bottom-2 w-0.5 bg-indigo-500 rounded-r shadow-[0_0_8px_rgba(99,102,241,0.4)]"></div>'
-        : ""
-    }
+    ${isActive
+          ? '<div class="absolute left-0 top-2 bottom-2 w-0.5 bg-indigo-500 rounded-r shadow-[0_0_8px_rgba(99,102,241,0.4)]"></div>'
+          : ""
+        }
 </div>`;
     })
     .join("");

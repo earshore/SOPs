@@ -1,4 +1,4 @@
-// src/modules/amz_hub/services/amz_hub_constants.js
+// src/modules/amz_hub/constants/amz_hub_constants.js
 
 // 1. 欧洲国家画像数据
 export const AMZ_COUNTRY_DATA = {

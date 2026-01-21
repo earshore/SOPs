@@ -1,7 +1,7 @@
 // src/ui/dataDisplay.js
 import state from "../../../common/state.js";
 import { getErrorSummary, showToast, switchTab } from "../../../common/utils/ui.js";
-import { HistoryService } from "../../../services/historyService.js";
+import { HistoryService } from "../services/historyService.js";
 import { renderHistory } from "../scraper/scraperPanel.js";
 import { updateAsinSelectList } from "../analysis/analysisDisplay.js";
 
@@ -30,7 +30,7 @@ export function toggleCardExpand(asin) {
             const prevBody = document.getElementById(`card-body-${state.expandedAsin}`);
             const prevIcon = document.getElementById(`card-icon-${state.expandedAsin}`);
             const prevContainer = document.getElementById(`card-${state.expandedAsin}`);
-            
+
             if (prevBody) prevBody.classList.add("hidden");
             if (prevIcon) prevIcon.classList.remove("rotate-180");
             if (prevContainer) prevContainer.classList.remove("ring-1", "ring-blue-500", "bg-blue-50/30");
@@ -38,10 +38,10 @@ export function toggleCardExpand(asin) {
 
         // --- 展开当前 ---
         cardBody.classList.remove("hidden");
-        cardBody.classList.add("fade-in"); 
+        cardBody.classList.add("fade-in");
         cardContainer.classList.add("ring-1", "ring-blue-500", "bg-blue-50/30");
         if (cardIcon) cardIcon.classList.add("rotate-180");
-        
+
         // 更新状态
         state.expandedAsin = asin;
 
@@ -50,7 +50,7 @@ export function toggleCardExpand(asin) {
         cardBody.classList.add("hidden");
         cardContainer.classList.remove("ring-1", "ring-blue-500", "bg-blue-50/30");
         if (cardIcon) cardIcon.classList.remove("rotate-180");
-        
+
         // 更新状态
         state.expandedAsin = null;
     }
@@ -104,10 +104,10 @@ export function renderDataPanel() {
                 if (!rating) return "";
                 return `<div class="flex items-center gap-0.5 text-sm" title="${rating} 星">
                     ${[1, 2, 3, 4, 5].map((star) => {
-                        if (rating >= star) return '<i class="fas fa-star text-amber-400"></i>';
-                        if (rating >= star - 0.5) return '<i class="fas fa-star-half-alt text-amber-400"></i>';
-                        return '<i class="far fa-star text-slate-300"></i>';
-                    }).join("")}
+                    if (rating >= star) return '<i class="fas fa-star text-amber-400"></i>';
+                    if (rating >= star - 0.5) return '<i class="fas fa-star-half-alt text-amber-400"></i>';
+                    return '<i class="far fa-star text-slate-300"></i>';
+                }).join("")}
                     <span class="text-xs text-slate-500 ml-1 font-mono pt-0.5">${rating}</span>
                 </div>`;
             };
@@ -178,7 +178,7 @@ export function renderDataPanel() {
                     <i class="fas fa-bug mt-0.5"></i>
                     <span>${getErrorSummary(p.error) || p.error}</span>
                 </div>` : ""
-            }
+                }
             
             <div id="card-body-${p.asin}" 
                  class="mt-4 pt-4 border-t border-slate-200/60 space-y-6 fade-in ${isExpanded ? '' : 'hidden'}" 
@@ -221,7 +221,7 @@ export function renderDataPanel() {
                                                 <span class="flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-full">
                                                     <i class="fas fa-check-circle"></i> Verified Purchase
                                                 </span>` : ""
-                                            }
+                    }
                                         </div>
                                         ${review.headline ? `<h6 class="text-sm font-bold text-slate-800 mb-1.5">${review.headline}</h6>` : ""}
                                         <p class="text-sm text-slate-600 leading-relaxed text-justify">${review.body}</p>
@@ -385,7 +385,7 @@ function confirmWithModal(title, content, storageKey) {
 function getReviewSignature(review) {
     if (review.id) return review.id;
     // 如果没有ID，用 内容+作者+日期 生成一个哈希指纹
-    return `${review.date || ''}_${review.author || ''}_${(review.headline || '').substring(0,20)}`.trim();
+    return `${review.date || ''}_${review.author || ''}_${(review.headline || '').substring(0, 20)}`.trim();
 }
 
 /**
@@ -399,7 +399,7 @@ function showMarketplaceSelectionModal(sites) {
         const backdrop = document.createElement('div');
         backdrop.id = modalId;
         backdrop.className = "fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] flex items-center justify-center fade-in";
-        
+
         const content = `
             <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-100 transition-all">
                 <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-5 text-white">
@@ -439,7 +439,7 @@ function showMarketplaceSelectionModal(sites) {
                 </div>
             </div>
         `;
-        
+
         backdrop.innerHTML = content;
         document.body.appendChild(backdrop);
 
@@ -510,21 +510,21 @@ function confirmSimple(title, content) {
         const modal = document.getElementById('delete-confirm-modal');
         const titleEl = document.getElementById('del-modal-title');
         const descEl = document.getElementById('del-modal-desc');
-        const checkboxContainer = document.getElementById('del-dont-ask').parentNode; 
+        const checkboxContainer = document.getElementById('del-dont-ask').parentNode;
         const confirmBtn = document.getElementById('btn-del-confirm');
         const cancelBtn = document.getElementById('btn-del-cancel');
 
         titleEl.textContent = title;
         descEl.innerHTML = content;
-        
+
         checkboxContainer.classList.add('hidden');
         confirmBtn.textContent = "确认继续";
-        
+
         modal.classList.remove('hidden');
 
         const cleanup = () => {
             modal.classList.add('hidden');
-            checkboxContainer.classList.remove('hidden'); 
+            checkboxContainer.classList.remove('hidden');
             confirmBtn.textContent = "确认删除";
             confirmBtn.onclick = null;
             cancelBtn.onclick = null;
@@ -556,7 +556,7 @@ export async function handleImportFiles(event) {
     try {
         // 1. 读取所有文件内容
         const fileContents = await Promise.all(files.map(f => readFileAsJSON(f)));
-        
+
         // 2. 预处理：将所有文件打平为“待处理产品池”
         //    结构：Map<ASIN, Array<ProductObject>>
         const productPool = new Map();
@@ -572,7 +572,7 @@ export async function handleImportFiles(event) {
             else if (Array.isArray(data) && data.length > 0 && data[0].metadata?.marketplace) {
                 fileSite = data[0].metadata.marketplace;
             }
-            
+
             // 默认归类为 "Unknown" 以便处理
             const site = fileSite || "Unknown";
             if (fileSite) detectedSites.add(fileSite);
@@ -607,7 +607,7 @@ export async function handleImportFiles(event) {
                 showToast("用户取消导入", "info");
                 return; // 用户点击了取消
             }
-        } 
+        }
         // 场景 B: 项目为空，只有一个站点 -> 自动使用该站点
         else if (!hasExistingData && detectedSites.size === 1) {
             targetMarketplace = [...detectedSites][0];
@@ -635,10 +635,10 @@ export async function handleImportFiles(event) {
 
             // 4.2 深度克隆一个基础对象，准备缝合
             const mergedProduct = JSON.parse(JSON.stringify(baseProduct));
-            
+
             // 确保 metadata 存在
             if (!mergedProduct.metadata) mergedProduct.metadata = {};
-            
+
             // 4.3 评论大一统 (Review Aggregation)
             // 收集所有版本（包括现有的、导入的各个站点的）的所有评论
             const allReviewSources = [];
@@ -656,7 +656,7 @@ export async function handleImportFiles(event) {
                         if (!uniqueReviewsMap.has(sig)) {
                             // 可选：给评论标记来源站点
                             if (ver._source_site && ver._source_site !== "Unknown") {
-                                r._origin_site = ver._source_site; 
+                                r._origin_site = ver._source_site;
                             }
                             uniqueReviewsMap.set(sig, r);
                         }
@@ -665,7 +665,7 @@ export async function handleImportFiles(event) {
             });
 
             mergedProduct.customer_reviews = Array.from(uniqueReviewsMap.values());
-            
+
             // 清理临时字段
             delete mergedProduct._source_site;
             delete mergedProduct._filename;
@@ -695,7 +695,7 @@ export async function handleImportFiles(event) {
         };
 
         state.analysisReport = null; // 数据变了，清空旧报告
-        
+
         // 持久化
         HistoryService.save(state.scrapedData, null);
 
@@ -733,20 +733,20 @@ function readFileAsJSON(file) {
 
 // 切换数据视图标签
 export function switchDataTab(tab) {
-  state.currentDataTab = tab;
+    state.currentDataTab = tab;
 
-  document
-    .getElementById("data-preview")
-    .classList.toggle("hidden", tab !== "preview");
-  document
-    .getElementById("data-json")
-    .classList.toggle("hidden", tab !== "json");
+    document
+        .getElementById("data-preview")
+        .classList.toggle("hidden", tab !== "preview");
+    document
+        .getElementById("data-json")
+        .classList.toggle("hidden", tab !== "json");
 
-  document.querySelectorAll(".data-tab").forEach((t) => {
-    const isActive = t.id === `data-tab-${tab}`;
-    t.classList.toggle("text-blue-600", isActive);
-    t.classList.toggle("border-b-2", isActive);
-    t.classList.toggle("border-blue-600", isActive);
-    t.classList.toggle("text-slate-500", !isActive);
-  });
+    document.querySelectorAll(".data-tab").forEach((t) => {
+        const isActive = t.id === `data-tab-${tab}`;
+        t.classList.toggle("text-blue-600", isActive);
+        t.classList.toggle("border-b-2", isActive);
+        t.classList.toggle("border-blue-600", isActive);
+        t.classList.toggle("text-slate-500", !isActive);
+    });
 }

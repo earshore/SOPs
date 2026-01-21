@@ -1,5 +1,5 @@
-// src/services/historyService.js
-import state from "../common/state.js";
+// src/modules/master_prompt/services/historyService.js
+import state from "../../../common/state.js";
 
 const STORAGE_KEY = "scrape_history";
 const MAX_HISTORY_ITEMS = 20; // 限制只存最近20条
@@ -75,12 +75,12 @@ export const HistoryService = {
    */
   getByAsin(asin, site) {
     const history = this.getAll();
-    
+
     // 遍历所有历史任务
     for (const record of history) {
       // 1. 站点必须匹配
       if (record.site !== site) continue;
-      
+
       // 2. 检查该任务是否包含此 ASIN 且状态为 success
       if (record.data && record.data.products) {
         const product = record.data.products.find(
