@@ -1,0 +1,425 @@
+<!-- 促销活动提报 SOP Template - 欧洲站 -->
+<div class="sop-widescreen-container">
+    <!-- Back Button & Header -->
+    <div class="mb-6">
+        <button onclick="switchTab('sops_overview')"
+            class="text-sm text-slate-500 hover:text-blue-600 transition-colors mb-4 inline-flex items-center gap-2">
+            <i class="fas fa-arrow-left"></i>返回 SOP 列表
+        </button>
+
+        <div class="sop-detail-header bg-gradient-to-r from-amber-50 to-orange-50">
+            <div class="flex items-start gap-4">
+                <div class="sop-icon-container bg-amber-100 text-amber-600 w-16 h-16 text-2xl">
+                    <i class="fas fa-tags"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <h1 class="text-2xl font-bold text-slate-900">促销活动提报 SOP</h1>
+                        <span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-bold">🇪🇺 欧洲站</span>
+                        <span class="sop-status-badge sop-status-active">已发布</span>
+                    </div>
+                    <p class="text-slate-600 mb-3">
+                        涵盖Coupon、Prime Exclusive、LD/BD的提报门槛、叠加规则及实时利润核算计算器，确保促销不亏损。
+                    </p>
+                    <div class="flex items-center gap-6 text-sm text-slate-500">
+                        <span><i class="fas fa-layer-group mr-1"></i>运营与推广体系</span>
+                        <span><i class="fas fa-percent mr-1"></i>促销管理</span>
+                        <span><i class="fas fa-clock mr-1"></i>更新日期：2024-01</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Warning -->
+    <div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+        <div class="flex items-start gap-3">
+            <i class="fas fa-exclamation-triangle text-red-500 text-xl"></i>
+            <div class="flex-1">
+                <h3 class="font-bold text-red-800 mb-1">欧洲站促销核心规则</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-red-700 mt-2">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-check-circle text-red-500"></i>
+                        <span>所有价格含19% VAT (德国)</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-check-circle text-red-500"></i>
+                        <span>佣金按含税价15%计算</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-check-circle text-red-500"></i>
+                        <span>参考价必须30天内有效销售</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Profit Calculator -->
+    <div class="bg-white rounded-xl border-2 border-emerald-300 p-6 mb-6 shadow-lg">
+        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-calculator text-emerald-500"></i>利润核算计算器 <span
+                class="text-xs text-slate-500 font-normal">(欧洲站 - 支持促销叠加)</span>
+        </h2>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Input Section -->
+            <div class="space-y-4">
+                <h3 class="font-bold text-slate-700 text-sm border-b pb-2">📥 输入参数</h3>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs text-slate-600 mb-1">原售价 (含税) €</label>
+                        <input type="number" id="calc-original-price" value="29.99" step="0.01"
+                            class="w-full px-3 py-2 border rounded-lg text-sm" onchange="calculateProfit()">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-600 mb-1">产品成本 (含头程) €</label>
+                        <input type="number" id="calc-cost" value="8.50" step="0.01"
+                            class="w-full px-3 py-2 border rounded-lg text-sm" onchange="calculateProfit()">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-600 mb-1">FBA配送费 €</label>
+                        <input type="number" id="calc-fba-fee" value="4.50" step="0.01"
+                            class="w-full px-3 py-2 border rounded-lg text-sm" onchange="calculateProfit()">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-600 mb-1">VAT税率 (按站点选择)</label>
+                        <select id="calc-vat-rate" class="w-full px-3 py-2 border rounded-lg text-sm"
+                            onchange="calculateProfit()">
+                            <optgroup label="核心五国">
+                                <option value="19">🇩🇪 德国 (DE) 19%</option>
+                                <option value="20">🇫🇷 法国 (FR) 20%</option>
+                                <option value="22">🇮🇹 意大利 (IT) 22%</option>
+                                <option value="21">🇪🇸 西班牙 (ES) 21%</option>
+                                <option value="20">🇬🇧 英国 (UK) 20%</option>
+                            </optgroup>
+                            <optgroup label="新兴站点">
+                                <option value="21">🇳🇱 荷兰 (NL) 21%</option>
+                                <option value="25">🇸🇪 瑞典 (SE) 25%</option>
+                                <option value="23">🇵🇱 波兰 (PL) 23%</option>
+                                <option value="21">🇧🇪 比利时 (BE) 21%</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Promotion Selection -->
+            <div class="space-y-4">
+                <h3 class="font-bold text-slate-700 text-sm border-b pb-2">🎯 促销叠加选择</h3>
+                <div class="space-y-2">
+                    <label
+                        class="flex items-center gap-2 p-2 bg-amber-50 rounded-lg cursor-pointer hover:bg-amber-100 border border-amber-200">
+                        <input type="checkbox" id="promo-coupon" class="w-4 h-4 rounded" onchange="calculateProfit()">
+                        <div class="flex-1">
+                            <span class="font-medium text-sm text-amber-800">Coupon 优惠券</span>
+                            <div class="flex items-center gap-2 mt-1">
+                                <input type="number" id="coupon-percent" value="10" min="5" max="50"
+                                    class="w-16 px-2 py-1 border rounded text-xs" onchange="calculateProfit()">
+                                <span class="text-xs text-slate-500">% OFF</span>
+                                <span class="text-xs text-red-600 ml-auto">费用: €0.50/兑换</span>
+                            </div>
+                        </div>
+                    </label>
+
+                    <label
+                        class="flex items-center gap-2 p-2 bg-blue-50 rounded-lg cursor-pointer hover:bg-blue-100 border border-blue-200">
+                        <input type="checkbox" id="promo-prime" class="w-4 h-4 rounded" onchange="calculateProfit()">
+                        <div class="flex-1">
+                            <span class="font-medium text-sm text-blue-800">Prime Exclusive Discount</span>
+                            <div class="flex items-center gap-2 mt-1">
+                                <input type="number" id="prime-percent" value="15" min="10" max="30"
+                                    class="w-16 px-2 py-1 border rounded text-xs" onchange="calculateProfit()">
+                                <span class="text-xs text-slate-500">% OFF</span>
+                                <span class="text-xs text-emerald-600 ml-auto">费用: 免费</span>
+                            </div>
+                        </div>
+                    </label>
+
+                    <label
+                        class="flex items-center gap-2 p-2 bg-yellow-50 rounded-lg cursor-pointer hover:bg-yellow-100 border border-yellow-200">
+                        <input type="checkbox" id="promo-ld" class="w-4 h-4 rounded" onchange="calculateProfit()">
+                        <div class="flex-1">
+                            <span class="font-medium text-sm text-yellow-800">Lightning Deal (LD)</span>
+                            <div class="flex items-center gap-2 mt-1">
+                                <input type="number" id="ld-percent" value="20" min="15" max="40"
+                                    class="w-16 px-2 py-1 border rounded text-xs" onchange="calculateProfit()">
+                                <span class="text-xs text-slate-500">% OFF</span>
+                                <span class="text-xs text-red-600 ml-auto">费用: €70-150</span>
+                            </div>
+                        </div>
+                    </label>
+
+                    <label
+                        class="flex items-center gap-2 p-2 bg-purple-50 rounded-lg cursor-pointer hover:bg-purple-100 border border-purple-200">
+                        <input type="checkbox" id="promo-bd" class="w-4 h-4 rounded" onchange="calculateProfit()">
+                        <div class="flex-1">
+                            <span class="font-medium text-sm text-purple-800">Best Deal (7DD)</span>
+                            <div class="flex items-center gap-2 mt-1">
+                                <input type="number" id="bd-percent" value="25" min="15" max="50"
+                                    class="w-16 px-2 py-1 border rounded text-xs" onchange="calculateProfit()">
+                                <span class="text-xs text-slate-500">% OFF</span>
+                                <span class="text-xs text-red-600 ml-auto">费用: €150-300</span>
+                            </div>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="bg-slate-100 rounded-lg p-3 mt-2">
+                    <p class="text-xs text-slate-600"><i class="fas fa-info-circle text-blue-500 mr-1"></i>
+                        <strong>叠加规则：</strong>Coupon可与Prime Exclusive叠加；LD/BD不可与其他Deal叠加，但可与Coupon叠加（先Deal后Coupon）
+                    </p>
+                </div>
+            </div>
+
+            <!-- Result Section -->
+            <div class="space-y-4">
+                <h3 class="font-bold text-slate-700 text-sm border-b pb-2">📊 核算结果</h3>
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center p-2 bg-slate-50 rounded text-sm">
+                        <span class="text-slate-600">原售价 (含税)</span>
+                        <span id="result-original" class="font-bold">€29.99</span>
+                    </div>
+                    <div class="flex justify-between items-center p-2 bg-blue-50 rounded text-sm">
+                        <span class="text-slate-600">总折扣率</span>
+                        <span id="result-discount" class="font-bold text-blue-600">-0%</span>
+                    </div>
+                    <div class="flex justify-between items-center p-2 bg-emerald-50 rounded text-sm">
+                        <span class="text-slate-600">折后售价</span>
+                        <span id="result-sale-price" class="font-bold text-emerald-600">€29.99</span>
+                    </div>
+                    <div class="flex justify-between items-center p-2 bg-slate-50 rounded text-sm">
+                        <span class="text-slate-600">亚马逊佣金 (15%)</span>
+                        <span id="result-commission" class="font-bold text-red-500">-€4.50</span>
+                    </div>
+                    <div class="flex justify-between items-center p-2 bg-slate-50 rounded text-sm">
+                        <span class="text-slate-600">FBA配送费</span>
+                        <span id="result-fba" class="font-bold text-red-500">-€4.50</span>
+                    </div>
+                    <div class="flex justify-between items-center p-2 bg-slate-50 rounded text-sm">
+                        <span class="text-slate-600">VAT应缴</span>
+                        <span id="result-vat" class="font-bold text-red-500">-€4.79</span>
+                    </div>
+                    <div class="flex justify-between items-center p-2 bg-slate-50 rounded text-sm">
+                        <span class="text-slate-600">产品成本</span>
+                        <span id="result-cost" class="font-bold text-red-500">-€8.50</span>
+                    </div>
+                    <div class="flex justify-between items-center p-2 bg-amber-50 rounded text-sm">
+                        <span class="text-slate-600">促销费用</span>
+                        <span id="result-promo-fee" class="font-bold text-amber-600">€0.00</span>
+                    </div>
+                </div>
+                <div id="result-profit-box"
+                    class="p-4 bg-emerald-100 rounded-lg border-2 border-emerald-300 text-center">
+                    <p class="text-xs text-slate-600 mb-1">单品利润</p>
+                    <p id="result-profit" class="text-2xl font-bold text-emerald-700">€7.70</p>
+                    <p id="result-margin" class="text-xs text-slate-500 mt-1">利润率: 25.7%</p>
+                </div>
+                <div id="result-warning" class="hidden p-3 bg-red-100 rounded-lg border border-red-300 text-center">
+                    <p class="text-sm font-bold text-red-700"><i
+                            class="fas fa-exclamation-triangle mr-1"></i>警告：该促销组合将导致亏损！</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Two Column: Promotion Strategy & Calendar -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Left: Promotion Types (EU specific) -->
+        <div class="bg-white rounded-xl border border-slate-200 p-5">
+            <h2 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <i class="fas fa-gift text-blue-500"></i>欧洲站促销类型详解
+            </h2>
+            <div class="space-y-3">
+                <div class="bg-amber-50 rounded-lg p-3 border border-amber-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-ticket text-amber-600"></i>
+                            <h4 class="font-bold text-amber-800 text-sm">Coupon 优惠券</h4>
+                        </div>
+                        <span class="text-xs bg-amber-200 text-amber-800 px-2 py-0.5 rounded">最常用</span>
+                    </div>
+                    <div class="grid grid-cols-4 gap-2 text-xs text-slate-600">
+                        <div>折扣：5%-50%</div>
+                        <div>费用：<strong class="text-amber-700">€0.50/次</strong></div>
+                        <div>门槛：无</div>
+                        <div>叠加：✅可叠加</div>
+                    </div>
+                    <p class="text-[10px] text-slate-500 mt-2">💡 推荐新品期使用，提升点击率和转化率，费用按实际兑换收取</p>
+                </div>
+
+                <div class="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-crown text-blue-600"></i>
+                            <h4 class="font-bold text-blue-800 text-sm">Prime Exclusive Discount</h4>
+                        </div>
+                        <span class="text-xs bg-blue-200 text-blue-800 px-2 py-0.5 rounded">免费</span>
+                    </div>
+                    <div class="grid grid-cols-4 gap-2 text-xs text-slate-600">
+                        <div>折扣：≥10%</div>
+                        <div>费用：<strong class="text-emerald-600">免费</strong></div>
+                        <div>门槛：评分≥3.5</div>
+                        <div>叠加：✅可叠加</div>
+                    </div>
+                    <p class="text-[10px] text-slate-500 mt-2">💡 仅Prime会员可见，搜索结果显示专属标识，可与Coupon叠加</p>
+                </div>
+
+                <div class="bg-yellow-50 rounded-lg p-3 border border-yellow-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-bolt text-yellow-600"></i>
+                            <h4 class="font-bold text-yellow-800 text-sm">Lightning Deal (LD)</h4>
+                        </div>
+                        <span class="text-xs bg-yellow-200 text-yellow-800 px-2 py-0.5 rounded">4-12小时</span>
+                    </div>
+                    <div class="grid grid-cols-4 gap-2 text-xs text-slate-600">
+                        <div>折扣：≥15%</div>
+                        <div>费用：<strong class="text-red-600">€70-150</strong></div>
+                        <div>门槛：评分≥3.5+5评</div>
+                        <div>叠加：❌独占</div>
+                    </div>
+                    <p class="text-[10px] text-slate-500 mt-2">💡 出现在Today's Deals页面，限时限量，大促期间费用翻倍</p>
+                </div>
+
+                <div class="bg-purple-50 rounded-lg p-3 border border-purple-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-calendar-week text-purple-600"></i>
+                            <h4 class="font-bold text-purple-800 text-sm">Best Deal (7-Day Deal)</h4>
+                        </div>
+                        <span class="text-xs bg-purple-200 text-purple-800 px-2 py-0.5 rounded">7天</span>
+                    </div>
+                    <div class="grid grid-cols-4 gap-2 text-xs text-slate-600">
+                        <div>折扣：≥15%</div>
+                        <div>费用：<strong class="text-red-600">€150-300</strong></div>
+                        <div>门槛：品牌备案</div>
+                        <div>叠加：❌独占</div>
+                    </div>
+                    <p class="text-[10px] text-slate-500 mt-2">💡 持续7天曝光，适合清库存或新品冲量，需提前2周提报</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Strategy & Calendar -->
+        <div class="space-y-5">
+            <!-- Stacking Strategy -->
+            <div class="bg-white rounded-xl border border-slate-200 p-5">
+                <h2 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-layer-group text-purple-500"></i>促销叠加策略
+                </h2>
+                <div class="space-y-2 text-sm">
+                    <div class="p-3 bg-emerald-50 rounded-lg border-l-4 border-emerald-400">
+                        <p class="font-bold text-emerald-800">✅ 推荐组合 (最大化曝光)</p>
+                        <p class="text-slate-600 text-xs mt-1">Prime Exclusive 15% + Coupon 10% = 实际折扣约24%</p>
+                    </div>
+                    <div class="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+                        <p class="font-bold text-blue-800">✅ 日常维护组合</p>
+                        <p class="text-slate-600 text-xs mt-1">仅开Coupon 5-10%，低成本保持绿标</p>
+                    </div>
+                    <div class="p-3 bg-amber-50 rounded-lg border-l-4 border-amber-400">
+                        <p class="font-bold text-amber-800">⚠️ 大促冲量组合</p>
+                        <p class="text-slate-600 text-xs mt-1">Lightning Deal 20% + Coupon 5% (先扣Deal再扣Coupon)</p>
+                    </div>
+                    <div class="p-3 bg-red-50 rounded-lg border-l-4 border-red-400">
+                        <p class="font-bold text-red-800">❌ 禁止组合</p>
+                        <p class="text-slate-600 text-xs mt-1">LD + Prime Exclusive (系统不允许)</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EU Calendar -->
+            <div class="bg-purple-50 rounded-xl border border-purple-200 p-5">
+                <h3 class="font-bold text-purple-800 mb-3 flex items-center gap-2">
+                    <i class="fas fa-calendar-alt"></i>欧洲站年度大促档期
+                </h3>
+                <div class="grid grid-cols-3 gap-2 text-xs">
+                    <div class="bg-white rounded p-2 text-center border border-purple-200">
+                        <div class="font-bold text-purple-700">Prime Day</div>
+                        <div class="text-slate-500">7月中旬</div>
+                        <div class="text-[10px] text-red-500">提前4周提报</div>
+                    </div>
+                    <div class="bg-white rounded p-2 text-center border border-purple-200">
+                        <div class="font-bold text-purple-700">Black Friday</div>
+                        <div class="text-slate-500">11月第四周五</div>
+                        <div class="text-[10px] text-red-500">提前6周提报</div>
+                    </div>
+                    <div class="bg-white rounded p-2 text-center border border-purple-200">
+                        <div class="font-bold text-purple-700">Cyber Monday</div>
+                        <div class="text-slate-500">11月最后周一</div>
+                        <div class="text-[10px] text-red-500">同BF一起报</div>
+                    </div>
+                    <div class="bg-white rounded p-2 text-center border border-purple-200">
+                        <div class="font-bold text-purple-700">Easter Sale</div>
+                        <div class="text-slate-500">3-4月</div>
+                        <div class="text-[10px] text-slate-400">欧洲特有</div>
+                    </div>
+                    <div class="bg-white rounded p-2 text-center border border-purple-200">
+                        <div class="font-bold text-purple-700">Back to School</div>
+                        <div class="text-slate-500">8-9月</div>
+                        <div class="text-[10px] text-slate-400">文具品类</div>
+                    </div>
+                    <div class="bg-white rounded p-2 text-center border border-purple-200">
+                        <div class="font-bold text-purple-700">圣诞季</div>
+                        <div class="text-slate-500">12月</div>
+                        <div class="text-[10px] text-red-500">库存要足</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submission Checklist -->
+    <div class="bg-white rounded-xl border border-slate-200 p-5 mb-6">
+        <h2 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-clipboard-check text-emerald-500"></i>提报前检查清单
+        </h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+            <label class="flex items-center gap-2 p-2 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 text-xs">
+                <input type="checkbox" class="w-4 h-4 rounded border-slate-300 text-emerald-600">
+                <span class="text-slate-700">利润核算完成，单品利润>0</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 text-xs">
+                <input type="checkbox" class="w-4 h-4 rounded border-slate-300 text-emerald-600">
+                <span class="text-slate-700">库存充足(活动量×1.5)</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 text-xs">
+                <input type="checkbox" class="w-4 h-4 rounded border-slate-300 text-emerald-600">
+                <span class="text-slate-700">产品评分≥3.5</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 text-xs">
+                <input type="checkbox" class="w-4 h-4 rounded border-slate-300 text-emerald-600">
+                <span class="text-slate-700">30天内有参考价销售</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 text-xs">
+                <input type="checkbox" class="w-4 h-4 rounded border-slate-300 text-emerald-600">
+                <span class="text-slate-700">无与大促时间冲突</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 text-xs">
+                <input type="checkbox" class="w-4 h-4 rounded border-slate-300 text-emerald-600">
+                <span class="text-slate-700">主管审批通过</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 text-xs">
+                <input type="checkbox" class="w-4 h-4 rounded border-slate-300 text-emerald-600">
+                <span class="text-slate-700">五国站点同步(泛欧)</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 text-xs">
+                <input type="checkbox" class="w-4 h-4 rounded border-slate-300 text-emerald-600">
+                <span class="text-slate-700">截图保存核价记录</span>
+            </label>
+        </div>
+    </div>
+
+    <!-- Video Resource -->
+    <div class="bg-blue-50 rounded-xl border border-blue-200 p-4">
+        <div class="flex items-center gap-3">
+            <i class="fas fa-video text-blue-500 text-xl"></i>
+            <div>
+                <h3 class="font-bold text-slate-800">操作视频教程</h3>
+                <p class="text-sm text-slate-600">访问公司网盘观看详细操作录屏：<a href="http://192.168.1.99"
+                        class="text-blue-600 underline">192.168.1.99</a>（仅限内网访问）→ 培训资料 → 促销提报专题</p>
+            </div>
+        </div>
+    </div>
+</div>

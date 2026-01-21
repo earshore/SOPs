@@ -10,8 +10,8 @@ export const MENU_CONFIG = {
     // ==========================================
     contexts: {
         apps: { id: 'apps', label: '应用中心' }, // 对应 Header 的 "应用"
-        hub:  { id: 'hub',  label: '智库 Hub' }, // 对应 Header 的 "智库"
-        sys:  { id: 'sys',  label: '系统设置' }  // 预留拓展
+        hub: { id: 'hub', label: '智库 Hub' }, // 对应 Header 的 "智库"
+        sys: { id: 'sys', label: '系统设置' }  // 预留拓展
     },
 
     // ==========================================
@@ -19,6 +19,16 @@ export const MENU_CONFIG = {
     // 作用：决定侧边栏 (Sidebar) 显示什么标题和哪些菜单
     // ==========================================
     modules: {
+        // [应用 SOPs] 标准作业程序
+        sops: {
+            id: 'sops',
+            contextId: 'apps',
+            title: 'SOPs 流程中心',
+            version: 'v1.0',
+            icon: 'fas fa-clipboard-list',
+            description: '集成所有亚马逊运营标准化流程指引，确保团队执行一致性。'
+        },
+
         // [应用 A] Master Prompt
         master_prompt: {
             id: 'master_prompt',
@@ -29,7 +39,7 @@ export const MENU_CONFIG = {
             // ✅ 新增描述字段
             description: '集成数据采集、管理、AI分析与提示词工程的一站式解决方案。'
         },
-        
+
         // Keyword Tracker 模块配置
         keyword_tracker: {
             id: 'keyword_tracker',
@@ -54,10 +64,172 @@ export const MENU_CONFIG = {
     },
 
     // ==========================================
+    // SOP Categories (用于SOPs模块的侧边栏分组)
+    // ==========================================
+    sopCategories: {
+        growth: {
+            id: 'growth',
+            label: '运营与推广体系',
+            icon: 'fas fa-rocket',
+            color: 'emerald',
+            order: 1
+        },
+        backend: {
+            id: 'backend',
+            label: '供应链与物流体系',
+            icon: 'fas fa-warehouse',
+            color: 'amber',
+            order: 2
+        },
+        safety: {
+            id: 'safety',
+            label: '账号安全与风控体系',
+            icon: 'fas fa-shield-halved',
+            color: 'red',
+            order: 3
+        },
+        service: {
+            id: 'service',
+            label: '客服与客户体验体系',
+            icon: 'fas fa-headset',
+            color: 'blue',
+            order: 4
+        }
+    },
+
+    // ==========================================
     // Tier 3: Routes (具体页面路由)
     // 作用：定义点击行为、图标、目标 Panel
     // ==========================================
     routes: {
+        // --- 属于 SOPs 应用的页面 ---
+        sops_overview: {
+            moduleId: 'sops',
+            label: 'SOP 总览',
+            icon: 'fas fa-th-large',
+            panelId: 'panel-sops'
+        },
+
+        // === 第一模块：账号安全与风控体系 (The Safety Layer) ===
+        sops_account_security: {
+            moduleId: 'sops',
+            label: '账号登录与环境安全',
+            icon: 'fas fa-shield-halved',
+            panelId: 'panel-sops',
+            category: 'safety'
+        },
+        sops_permission_management: {
+            moduleId: 'sops',
+            label: '后台权限管理',
+            icon: 'fas fa-user-lock',
+            panelId: 'panel-sops',
+            category: 'safety'
+        },
+        sops_brand_infringement: {
+            moduleId: 'sops',
+            label: '品牌与侵权审核',
+            icon: 'fas fa-trademark',
+            panelId: 'panel-sops',
+            category: 'safety'
+        },
+        sops_performance_notification: {
+            moduleId: 'sops',
+            label: '绩效通知处理',
+            icon: 'fas fa-bell',
+            panelId: 'panel-sops',
+            category: 'safety'
+        },
+        sops_product_compliance: {
+            moduleId: 'sops',
+            label: '产品Listing合规性',
+            icon: 'fas fa-file-shield',
+            panelId: 'panel-sops',
+            category: 'safety'
+        },
+
+        // === 第二模块：供应链与物流体系 (The Backend Layer) ===
+        sops_fba_shipping: {
+            moduleId: 'sops',
+            label: 'FBA 发货标准操作',
+            icon: 'fas fa-truck-fast',
+            panelId: 'panel-sops',
+            category: 'backend'
+        },
+        sops_procurement_qc: {
+            moduleId: 'sops',
+            label: '采购与质检 (QC)',
+            icon: 'fas fa-clipboard-check',
+            panelId: 'panel-sops',
+            category: 'backend'
+        },
+        sops_inventory_replenishment: {
+            moduleId: 'sops',
+            label: '库存预警与补货',
+            icon: 'fas fa-cubes',
+            panelId: 'panel-sops',
+            category: 'backend'
+        },
+
+        // === 第三模块：运营与推广体系 (The Growth Layer) ===
+        sops_npi_tracker: {
+            moduleId: 'sops',
+            label: '新品生命周期跟踪',
+            icon: 'fas fa-seedling',
+            panelId: 'panel-sops',
+            category: 'growth'
+        },
+        sops_listing_seo: {
+            moduleId: 'sops',
+            label: 'Listing 极致优化 (SEO)',
+            icon: 'fas fa-magnifying-glass-chart',
+            panelId: 'panel-sops',
+            category: 'growth'
+        },
+        sops_ppc_advertising: {
+            moduleId: 'sops',
+            label: 'PPC 广告投放与优化',
+            icon: 'fas fa-chart-line',
+            panelId: 'panel-sops',
+            category: 'growth'
+        },
+        sops_promotion_submission: {
+            moduleId: 'sops',
+            label: '促销活动提报',
+            icon: 'fas fa-tags',
+            panelId: 'panel-sops',
+            category: 'growth'
+        },
+        sops_competitor_monitoring: {
+            moduleId: 'sops',
+            label: '竞品监控与分析',
+            icon: 'fas fa-binoculars',
+            panelId: 'panel-sops',
+            category: 'growth'
+        },
+
+        // === 第四模块：客服与客户体验体系 (The Service Layer) ===
+        sops_email_templates: {
+            moduleId: 'sops',
+            label: '邮件回复模板',
+            icon: 'fas fa-envelope-open-text',
+            panelId: 'panel-sops',
+            category: 'service'
+        },
+        sops_negative_review: {
+            moduleId: 'sops',
+            label: '差评处理与分析',
+            icon: 'fas fa-comment-dots',
+            panelId: 'panel-sops',
+            category: 'service'
+        },
+        sops_qa_maintenance: {
+            moduleId: 'sops',
+            label: 'QA 问答维护',
+            icon: 'fas fa-comments',
+            panelId: 'panel-sops',
+            category: 'service'
+        },
+
         // --- 属于 Master Prompt 应用的页面 ---
         scraper: {
             moduleId: 'master_prompt', // 关键：绑定到模块 A
@@ -89,7 +261,7 @@ export const MENU_CONFIG = {
             moduleId: 'keyword_tracker',
             label: '输入模块',
             icon: 'fas fa-keyboard',
-            panelId: 'panel-keyword_tracker' 
+            panelId: 'panel-keyword_tracker'
         },
         kw_process: {
             moduleId: 'keyword_tracker',
@@ -106,13 +278,6 @@ export const MENU_CONFIG = {
 
         // --- 属于 Hub 智库的页面 ---
 
-        amz_sop_flow: {
-            moduleId: 'amz_hub_core',
-            label: 'SOP 流程',
-            icon: 'fas fa-list-check',
-            panelId: 'panel-amz_hub',
-            isHub: true
-        },
         amz_eu_insights: {
             moduleId: 'amz_hub_core',
             label: '市场洞察',
@@ -135,12 +300,19 @@ export const MENU_CONFIG = {
             isHub: true
         },
         amz_marketing_calendar: {   //预留营销日历
-        moduleId: 'amz_hub_core',
-        label: 'EU营销日历',
-        icon: 'fas fa-calendar-alt',
-        panelId: 'panel-amz_hub',
-        isHub: true
-    },
+            moduleId: 'amz_hub_core',
+            label: 'EU营销日历',
+            icon: 'fas fa-calendar-alt',
+            panelId: 'panel-amz_hub',
+            isHub: true
+        },
+        amz_seasons_tools: {
+            moduleId: 'amz_hub_core',
+            label: '销售活动/促销工具',
+            icon: 'fa-solid fa-gift',
+            panelId: 'panel-amz_hub',
+            isHub: true
+        },
 
     }
 };

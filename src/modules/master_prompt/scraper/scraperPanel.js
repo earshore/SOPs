@@ -211,7 +211,7 @@ function validateAsins(input) {
   return { valid, invalid: asins.filter((a) => !valid.includes(a)) };
 }
 
-export function clearAsins() {
+function clearAsins() {
   document.getElementById("asin-input").value = "";
   document.getElementById("asin-count").textContent = "等待输入...";
   document.getElementById("asin-error").classList.add("hidden");
@@ -461,7 +461,7 @@ function renderScrapeSummary(products) {
 
 // src/ui/scraperPanel.js
 
-export async function startScraping() {
+async function startScraping() {
   // 标记开始
   state.isScraping = true;
   const input = document.getElementById("asin-input").value;
@@ -605,13 +605,13 @@ export async function startScraping() {
 // 6. 历史记录 (字号放大 + 单条删除)
 // ==========================================
 
-export function saveToHistory(data, report) {
+function saveToHistory(data, report) {
   HistoryService.save(data, report);
   renderHistory();
 }
 
 // 单条删除逻辑
-export function deleteHistoryItem(id) {
+function deleteHistoryItem(id) {
   // 阻止冒泡通常由HTML结构控制，这里通过UI交互确认
   if (!confirm("确定要删除这条历史记录吗？")) return;
 
@@ -786,7 +786,7 @@ export function renderHistory() {
     .join("");
 }
 
-export function loadHistory(id) {
+function loadHistory(id) {
   // --- 修正点：依赖业务状态而非 UI 状态 ---
   // 假设你在 state 对象中维护了一个 isScraping 标记
   // 只有当任务真正运行时，才拦截用户
@@ -867,7 +867,7 @@ export function loadHistory(id) {
   }
 }
 
-export function clearHistory() {
+function clearHistory() {
   if (!confirm("确定清空所有历史记录？")) return;
   HistoryService.clear();
   state.currentHistoryId = null;

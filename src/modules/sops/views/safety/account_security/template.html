@@ -1,0 +1,286 @@
+<!-- 账号登录与环境安全 SOP Template -->
+<div class="sop-widescreen-container">
+    <!-- Back Button & Header -->
+    <div class="mb-6">
+        <button onclick="switchTab('sops_overview')"
+            class="text-sm text-slate-500 hover:text-blue-600 transition-colors mb-4 inline-flex items-center gap-2">
+            <i class="fas fa-arrow-left"></i>返回 SOP 列表
+        </button>
+
+        <div class="sop-detail-header bg-gradient-to-r from-red-50 to-rose-50">
+            <div class="flex items-start gap-4">
+                <div class="sop-icon-container bg-red-100 text-red-600 w-16 h-16 text-2xl">
+                    <i class="fas fa-shield-halved"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <h1 class="text-2xl font-bold text-slate-900">账号登录与环境安全 SOP</h1>
+                        <span class="sop-status-badge sop-status-active">已发布</span>
+                    </div>
+                    <p class="text-slate-600 mb-3">
+                        亚马逊账号环境隔离是店铺生存的基石。本SOP涵盖登录设备规范、IP隔离策略、多因子认证管理及日常安全自检流程。
+                    </p>
+                    <div class="flex items-center gap-6 text-sm text-slate-500">
+                        <span><i class="fas fa-layer-group mr-1"></i>安全风控体系</span>
+                        <span><i class="fas fa-exclamation-triangle text-red-500 mr-1"></i>优先级：最高 - 保命层</span>
+                        <span><i class="fas fa-clock mr-1"></i>更新日期：2024-01</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Red Line Warning -->
+    <div class="bg-red-50 border border-red-200 rounded-xl p-5 mb-6">
+        <div class="flex items-start gap-4">
+            <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center text-red-600 flex-shrink-0">
+                <i class="fas fa-skull-crossbones text-xl"></i>
+            </div>
+            <div class="flex-1">
+                <h3 class="font-bold text-red-800 mb-2 text-lg">红线警告 - 零容忍条款</h3>
+                <p class="text-red-700 mb-3">
+                    一经发现违反本SOP规定，<strong>直接清退，并追究经济责任</strong>。亚马逊的关联检测算法持续升级，任何细微的环境泄露都可能导致整批账号被封禁。</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                    <div class="bg-red-100 rounded-lg p-3">
+                        <span class="font-bold text-red-800">关联封号 =</span>
+                        <span class="text-red-700">全店库存冻结 + 资金扣押180天</span>
+                    </div>
+                    <div class="bg-red-100 rounded-lg p-3">
+                        <span class="font-bold text-red-800">IP泄露 =</span>
+                        <span class="text-red-700">多店同时触发二审风险</span>
+                    </div>
+                    <div class="bg-red-100 rounded-lg p-3">
+                        <span class="font-bold text-red-800">设备混用 =</span>
+                        <span class="text-red-700">浏览器指纹关联（最难解除）</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Two Column Layout for Wide Screen -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Left Column: Core Specs -->
+        <div class="bg-white rounded-xl border border-slate-200 p-6">
+            <h2 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
+                <i class="fas fa-desktop text-blue-500"></i>登录环境规范
+            </h2>
+
+            <div class="space-y-5">
+                <!-- 紫鸟浏览器配置 -->
+                <div class="border-l-4 border-blue-400 pl-4 bg-blue-50/50 py-3 pr-3 rounded-r-lg">
+                    <h3 class="font-bold text-slate-800 mb-2 flex items-center gap-2">
+                        <i class="fas fa-fingerprint text-blue-500"></i>紫鸟超级浏览器配置
+                    </h3>
+                    <ul class="text-sm text-slate-600 space-y-2">
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-emerald-500 mt-1 flex-shrink-0"></i>
+                            <span>每个店铺创建<strong>独立浏览器环境</strong>，命名规则：<code
+                                    class="bg-slate-100 px-1 rounded">店铺名_站点_序号</code></span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-emerald-500 mt-1 flex-shrink-0"></i>
+                            <span>指纹设置：<strong>UA/时区/语言/分辨率</strong>需与IP所在地区匹配（德国站用德国IP+德语时区）</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-emerald-500 mt-1 flex-shrink-0"></i>
+                            <span>每月检查一次浏览器指纹唯一性，使用 <a href="https://browserleaks.com" class="text-blue-600 underline"
+                                    target="_blank">browserleaks.com</a> 检测</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-emerald-500 mt-1 flex-shrink-0"></i>
+                            <span>禁止在紫鸟环境内登录任何非亚马逊网站（包括Google、淘宝等）</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- VPS配置 -->
+                <div class="border-l-4 border-purple-400 pl-4 bg-purple-50/50 py-3 pr-3 rounded-r-lg">
+                    <h3 class="font-bold text-slate-800 mb-2 flex items-center gap-2">
+                        <i class="fas fa-server text-purple-500"></i>VPS 远程桌面规范
+                    </h3>
+                    <ul class="text-sm text-slate-600 space-y-2">
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-emerald-500 mt-1 flex-shrink-0"></i>
+                            <span>推荐配置：<strong>Windows Server 2019+</strong>，2核4G内存起步</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-emerald-500 mt-1 flex-shrink-0"></i>
+                            <span>IP类型：<strong>静态住宅IP</strong>（Luminati/Oxylabs）或干净独享机房IP</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-emerald-500 mt-1 flex-shrink-0"></i>
+                            <span>一台VPS只登录一个店铺，<strong>严禁多店共用VPS</strong></span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-emerald-500 mt-1 flex-shrink-0"></i>
+                            <span>每次登录前用 <a href="https://whatismyipaddress.com" class="text-blue-600 underline"
+                                    target="_blank">whatismyipaddress.com</a> 确认IP正确</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: IP & Network -->
+        <div class="bg-white rounded-xl border border-slate-200 p-6">
+            <h2 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
+                <i class="fas fa-network-wired text-amber-500"></i>IP与网络隔离策略
+            </h2>
+
+            <div class="space-y-5">
+                <!-- IP分配原则 -->
+                <div class="border-l-4 border-amber-400 pl-4 bg-amber-50/50 py-3 pr-3 rounded-r-lg">
+                    <h3 class="font-bold text-slate-800 mb-2">IP分配与管理</h3>
+                    <ul class="text-sm text-slate-600 space-y-2">
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-emerald-500 mt-1 flex-shrink-0"></i>
+                            <span>每个店铺绑定<strong>固定独立IP</strong>，记录在《IP资源管理表》</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-emerald-500 mt-1 flex-shrink-0"></i>
+                            <span>IP更换需<strong>提前72小时</strong>向主管报备，填写《IP变更申请单》</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-emerald-500 mt-1 flex-shrink-0"></i>
+                            <span>IP纯净度检测：<a href="https://scamalytics.com" class="text-blue-600 underline"
+                                    target="_blank">scamalytics.com</a> 评分需&gt;50分</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-emerald-500 mt-1 flex-shrink-0"></i>
+                            <span>欧洲站点建议使用<strong>当地国家IP</strong>（德国站用德国IP，法国站用法国IP）</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- 绝对禁止 -->
+                <div class="border-l-4 border-red-400 pl-4 bg-red-50/50 py-3 pr-3 rounded-r-lg">
+                    <h3 class="font-bold text-red-800 mb-2 flex items-center gap-2">
+                        <i class="fas fa-ban text-red-500"></i>绝对禁止行为
+                    </h3>
+                    <ul class="text-sm text-slate-700 space-y-2">
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-times text-red-500 mt-1 flex-shrink-0"></i>
+                            <span><strong>禁止</strong> 在公司办公网络（包括WiFi）登录任何亚马逊账号</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-times text-red-500 mt-1 flex-shrink-0"></i>
+                            <span><strong>禁止</strong> 使用个人手机/平板/家庭电脑登录公司店铺</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-times text-red-500 mt-1 flex-shrink-0"></i>
+                            <span><strong>禁止</strong> 在店铺环境内访问私人邮箱、社交媒体、电商平台</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-times text-red-500 mt-1 flex-shrink-0"></i>
+                            <span><strong>禁止</strong> 截图/录屏店铺后台发送到非公司群组</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-times text-red-500 mt-1 flex-shrink-0"></i>
+                            <span><strong>禁止</strong> 将OTP验证器转移到个人手机或共享给他人</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Two Factor Auth Section -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-lock text-purple-500"></i>双因子认证 (2FA) 管理规范
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                <h4 class="font-bold text-purple-800 mb-2"><i class="fas fa-mobile-alt mr-2"></i>OTP设备管理</h4>
+                <ul class="text-sm text-slate-600 space-y-1">
+                    <li>• 公司统一配置专用OTP手机/设备</li>
+                    <li>• 每个店铺的OTP存储在独立设备</li>
+                    <li>• OTP设备不得带出公司</li>
+                    <li>• 离职交接需移交OTP设备</li>
+                </ul>
+            </div>
+            <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                <h4 class="font-bold text-blue-800 mb-2"><i class="fas fa-key mr-2"></i>密码规范</h4>
+                <ul class="text-sm text-slate-600 space-y-1">
+                    <li>• 密码长度≥16位，含大小写+数字+符号</li>
+                    <li>• 每个店铺使用不同密码</li>
+                    <li>• 密码存储在公司密码管理器</li>
+                    <li>• 每季度强制更换一次密码</li>
+                </ul>
+            </div>
+            <div class="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
+                <h4 class="font-bold text-emerald-800 mb-2"><i class="fas fa-shield-alt mr-2"></i>紧急响应</h4>
+                <ul class="text-sm text-slate-600 space-y-1">
+                    <li>• 发现账号异常立即冻结登录</li>
+                    <li>• 第一时间通知主管和IT部门</li>
+                    <li>• 24小时内更换所有凭证</li>
+                    <li>• 检查同环境其他店铺状态</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Daily Checklist -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-clipboard-check text-emerald-500"></i>每日安全自检清单
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+            <label
+                class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 transition-colors">
+                <input type="checkbox" class="w-5 h-5 rounded border-slate-300 text-blue-600">
+                <span class="text-sm text-slate-700">使用指定紫鸟环境/VPS登录</span>
+            </label>
+            <label
+                class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 transition-colors">
+                <input type="checkbox" class="w-5 h-5 rounded border-slate-300 text-blue-600">
+                <span class="text-sm text-slate-700">确认IP地址与店铺匹配</span>
+            </label>
+            <label
+                class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 transition-colors">
+                <input type="checkbox" class="w-5 h-5 rounded border-slate-300 text-blue-600">
+                <span class="text-sm text-slate-700">未在公司网络登录私人账号</span>
+            </label>
+            <label
+                class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 transition-colors">
+                <input type="checkbox" class="w-5 h-5 rounded border-slate-300 text-blue-600">
+                <span class="text-sm text-slate-700">下班前已安全退出登录</span>
+            </label>
+            <label
+                class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 transition-colors">
+                <input type="checkbox" class="w-5 h-5 rounded border-slate-300 text-blue-600">
+                <span class="text-sm text-slate-700">检查Performance Notifications</span>
+            </label>
+            <label
+                class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 transition-colors">
+                <input type="checkbox" class="w-5 h-5 rounded border-slate-300 text-blue-600">
+                <span class="text-sm text-slate-700">浏览器未打开非亚马逊网站</span>
+            </label>
+            <label
+                class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 transition-colors">
+                <input type="checkbox" class="w-5 h-5 rounded border-slate-300 text-blue-600">
+                <span class="text-sm text-slate-700">OTP设备电量充足</span>
+            </label>
+            <label
+                class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 transition-colors">
+                <input type="checkbox" class="w-5 h-5 rounded border-slate-300 text-blue-600">
+                <span class="text-sm text-slate-700">清除浏览器缓存(每周一次)</span>
+            </label>
+        </div>
+    </div>
+
+    <!-- Video Resource -->
+    <div class="bg-blue-50 rounded-xl border border-blue-200 p-4">
+        <div class="flex items-center gap-3">
+            <i class="fas fa-video text-blue-500 text-xl"></i>
+            <div>
+                <h3 class="font-bold text-slate-800">操作视频教程</h3>
+                <p class="text-sm text-slate-600">访问公司网盘观看详细操作录屏：<a href="http://192.168.1.99"
+                        class="text-blue-600 underline">192.168.1.99</a>（仅限内网访问）→ 培训资料 → 账号安全专题</p>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,134 +1,120 @@
 /* src/modules/home/homeDisplay.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&family=Noto+Sans+SC:wght@300;500;900&display=swap');
 
-/* 引入字体 */
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;700;900&display=swap');
-
-/* =========================================
-   容器作用域 (Scope)
-   ========================================= */
 #home-splash-container {
-    /* 基础重置 */
-    font-family: 'Noto Sans SC', sans-serif;
-    background: #080825; /* var(--dark) */
-    color: #ffffff;      /* var(--light) */
-    
-    /* 必须填满父级 */
+    /* --- 白底科技风格配色 --- */
+    --bg-white: #ffffff;
+    --text-primary: #0f172a;
+    /* 深蓝灰 */
+    --text-secondary: #64748b;
+    /* 浅灰 */
+    --accent-blue: #2563eb;
+    /* 科技蓝 */
+    --accent-cyan: #06b6d4;
+    /* 水波青 */
+
+    font-family: 'Inter', 'Noto Sans SC', sans-serif;
+    background-color: var(--bg-white);
+    color: var(--text-primary);
     width: 100%;
     height: 100%;
-    position: relative; 
-    overflow: hidden; 
-    
-    /* 变量定义 */
-    --primary: #00f5d4;
-    --secondary: #7b2cbf;
-    --accent: #ff6b35;
-    --dark: #080825;
-    --light: #ffffff;
-}
-
-#home-splash-container * {
-    box-sizing: border-box;
+    position: relative;
+    overflow: hidden;
+    cursor: none;
+    /* 隐藏默认光标 */
 }
 
 /* =========================================
-   背景层 (Background Layers)
+   1. 背景层
    ========================================= */
+.clean-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* 极其淡雅的网格背景 */
+    background-image:
+        linear-gradient(rgba(15, 23, 42, 0) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(15, 23, 42, 0) 1px, transparent 1px);
+    background-size: 100px 100px;
+    z-index: 1;
+    pointer-events: none;
+}
 
-/* 1. 粒子画布 */
 #particles-canvas {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 1;
-    pointer-events: none;
+    z-index: 2;
+    /* 粒子在网格之上 */
 }
 
-/* 2. 网格背景 */
-.grid-bg {
+/* =========================================
+   2. 顶部导航 (Minimal Header)
+   ========================================= */
+.top-bar {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
-    background-image: 
-        linear-gradient(rgba(0, 245, 212, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 245, 212, 0.03) 1px, transparent 1px);
-    background-size: 50px 50px;
-    z-index: 2;
-    animation: gridMove 20s linear infinite;
-    pointer-events: none;
-    transform-style: preserve-3d;
+    padding: 30px 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 20;
+    /* 保持原样即可，因为 justify-content: space-between 会负责左右两边的元素位置 */
 }
 
-@keyframes gridMove {
-    0% { transform: perspective(500px) rotateX(60deg) translateY(0); }
-    100% { transform: perspective(500px) rotateX(60deg) translateY(50px); }
+.time-display {
+    font-family: monospace;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 600;
 }
 
-/* 3. 光晕效果 (Glow Orbs) */
-.glow-orb {
+.logo-section {
     position: absolute;
-    border-radius: 50%;
-    filter: blur(80px);
-    z-index: 3;
-    animation: orbFloat 8s ease-in-out infinite;
-    pointer-events: none;
-}
-
-.orb-1 {
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, rgba(0, 245, 212, 0.3), transparent 70%);
-    top: -200px;
-    right: -200px;
-    animation-delay: 0s;
-}
-
-.orb-2 {
-    width: 500px;
-    height: 500px;
-    background: radial-gradient(circle, rgba(123, 44, 191, 0.4), transparent 70%);
-    bottom: -150px;
-    left: -150px;
-    animation-delay: -4s;
-}
-
-.orb-3 {
-    width: 400px;
-    height: 400px;
-    background: radial-gradient(circle, rgba(255, 107, 53, 0.2), transparent 70%);
-    top: 50%;
+    /* 1. 开启绝对定位 */
     left: 50%;
-    transform: translate(-50%, -50%);
-    animation-delay: -2s;
+    /* 2. 移动到父容器宽度的 50% 处 */
+    transform: translateX(-50%);
+    /* 3. 向左回退自身宽度的 50%，实现完美居中 */
+    text-align: center;
+    /* 文字内部居中 */
+
+    /*以此保证不管左边的时间多长，它都永远在屏幕正中间*/
 }
 
-@keyframes orbFloat {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    25% { transform: translate(30px, -30px) scale(1.1); }
-    50% { transform: translate(-20px, 20px) scale(0.95); }
-    75% { transform: translate(20px, 30px) scale(1.05); }
+.logo-text {
+    font-weight: 900;
+    font-size: 1.4rem;
+    letter-spacing: 0.1em;
+    color: var(--text-primary);
 }
 
-/* 4. 神经网络 SVG */
-.neural-network {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 800px;
-    height: 800px;
-    opacity: 0.25; /* 稍微增加不透明度以恢复细节 */
-    z-index: 4;
-    pointer-events: none;
+.logo-sub {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    margin-top: 4px;
+}
+
+.version {
+    font-family: monospace;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    background: rgba(0, 0, 0, 0.05);
+    padding: 4px 8px;
+    border-radius: 4px;
 }
 
 /* =========================================
-   内容层 (Content Layer)
+   3. 主视觉 (Hero) - 干净、锐利
    ========================================= */
-
 .splash-content-wrapper {
     position: relative;
     z-index: 10;
@@ -137,262 +123,141 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 40px 20px;
 }
 
-/* Logo 区域 */
-.logo-section {
+.hero-container {
     text-align: center;
-    margin-bottom: 40px;
-}
-
-.logo-text {
-    font-family: 'Orbitron', sans-serif;
-    font-size: clamp(2rem, 5vw, 3.5rem);
-    font-weight: 900;
-    letter-spacing: 0.3em;
-    background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
-    background-size: 300% 300%;
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent; /* 确保文字填充透明 */
-    animation: gradientFlow 4s ease infinite;
-    text-shadow: 0 0 60px rgba(0, 245, 212, 0.5);
-}
-
-.logo-sub {
-    font-size: 0.9rem;
-    letter-spacing: 0.5em;
-    color: rgba(255, 255, 255, 0.5);
-    margin-top: 10px;
-    text-transform: uppercase;
-}
-
-@keyframes gradientFlow {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
-/* 主标语 (Hero Section) */
-.hero-section {
-    text-align: center;
-    max-width: 1200px;
-    margin: 60px 0;
+    transition: transform 0.1s ease-out;
 }
 
 .slogan-main {
-    font-size: clamp(3rem, 10vw, 8rem);
+    font-size: clamp(3.5rem, 8vw, 7.5rem);
     font-weight: 900;
-    line-height: 1.1;
-    margin-bottom: 30px;
+    line-height: 1.05;
+    margin-bottom: 2rem;
     position: relative;
-    display: flex; /* 修复布局 */
-    flex-direction: column;
-    align-items: center;
 }
 
-.slogan-line {
-    display: block;
-    opacity: 0;
-    transform: translateY(50px);
-    animation: slideUp 1s ease forwards;
-}
-
-.slogan-line:nth-child(1) { animation-delay: 0.3s; }
-.slogan-line:nth-child(2) { animation-delay: 0.6s; }
-
+/* 实体字：蓝青渐变 */
 .slogan-line.highlight {
-    background: linear-gradient(90deg, var(--primary), var(--accent));
+    background: linear-gradient(120deg, var(--accent-blue), var(--accent-cyan));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    -webkit-text-fill-color: transparent;
+    opacity: 0;
+    animation: fadeUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
-/* 重点修复：空心字效果 */
+/* 描边字：深色空心 */
 .slogan-line.outline {
-    color: transparent; /* 兼容性回退 */
-    -webkit-text-fill-color: transparent;
-    -webkit-text-stroke: 2px var(--primary); /* 核心艺术效果 */
-    text-stroke: 2px var(--primary);
-    opacity: 0; /* 配合动画 */
-    font-weight: 900; /* 确保字体足够粗，描边才好看 */
+    color: transparent;
+    -webkit-text-stroke: 1.5px var(--text-primary);
+    opacity: 0;
+    animation: fadeUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s forwards;
+    position: relative;
 }
 
-@keyframes slideUp {
+/* 错位效果 - 灰色 */
+.slogan-line.outline::before {
+    content: attr(data-text);
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 100%;
+    height: 100%;
+    -webkit-text-stroke: 1.5px rgba(15, 23, 42, 0.1);
+    z-index: -1;
+}
+
+.slogan-sub {
+    font-size: clamp(1.1rem, 2vw, 1.4rem);
+    color: var(--text-secondary);
+    line-height: 1.8;
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: fadeIn 1s ease 0.6s forwards;
+}
+
+.slogan-sub span {
+    color: var(--accent-blue);
+    font-weight: 700;
+}
+
+/* 状态胶囊 - 极简风格 */
+.ai-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 24px;
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 100px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    /* 柔和阴影 */
+    opacity: 0;
+    animation: fadeIn 1s ease 0.9s forwards;
+}
+
+.status-dot-inner {
+    width: 8px;
+    height: 8px;
+    background: var(--accent-cyan);
+    border-radius: 50%;
+    position: relative;
+}
+
+.status-dot-inner::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--accent-cyan);
+    border-radius: 50%;
+    animation: ripple 2s infinite;
+}
+
+.status-text {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--text-primary);
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
     to {
         opacity: 1;
         transform: translateY(0);
     }
 }
 
-/* 副标语 */
-.slogan-sub {
-    font-size: clamp(1.2rem, 3vw, 2rem);
-    font-weight: 300;
-    color: rgba(255, 255, 255, 0.7);
-    max-width: 800px;
-    margin: 0 auto 50px;
-    line-height: 1.8;
-    opacity: 0;
-    animation: fadeIn 1s ease 1.2s forwards;
-}
-
-.slogan-sub span {
-    color: var(--primary);
-    font-weight: 700;
-}
-
 @keyframes fadeIn {
-    to { opacity: 1; }
+    to {
+        opacity: 1;
+    }
 }
 
-/* AI 状态指示器 */
-.ai-status {
-    display: inline-flex;
-    align-items: center;
-    gap: 15px;
-    padding: 15px 35px;
-    background: rgba(0, 245, 212, 0.05);
-    border: 1px solid rgba(0, 245, 212, 0.2);
-    border-radius: 50px;
-    backdrop-filter: blur(10px);
-    opacity: 0;
-    animation: fadeIn 1s ease 1.5s forwards;
-}
+@keyframes ripple {
+    0% {
+        transform: scale(0.5);
+        opacity: 1;
+    }
 
-.status-dot-inner {
-    width: 12px;
-    height: 12px;
-    background: var(--primary);
-    border-radius: 50%;
-    animation: pulse 2s ease-in-out infinite;
-    box-shadow: 0 0 20px var(--primary);
-}
-
-@keyframes pulse {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.3); opacity: 0.7; }
-}
-
-.status-text {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.85rem;
-    letter-spacing: 0.2em;
-    color: var(--primary);
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
 }
 
 /* =========================================
-   特效与装饰 (Effects & Decor)
+   4. 底部 & 装饰
    ========================================= */
-
-/* 数据流 */
-.data-stream {
-    position: absolute;
-    top: 0;
-    width: 2px;
-    height: 100%;
-    z-index: 5;
-    overflow: hidden;
-    pointer-events: none;
-}
-
-.data-stream::before {
-    content: '';
-    position: absolute;
-    top: -100%;
-    width: 100%;
-    height: 30%;
-    background: linear-gradient(to bottom, transparent, var(--primary), transparent);
-    animation: streamFlow 3s linear infinite;
-}
-
-.data-stream:nth-child(1) { left: 10%; animation-delay: 0s; }
-.data-stream:nth-child(2) { left: 30%; animation-delay: 1s; }
-.data-stream:nth-child(3) { left: 70%; animation-delay: 0.5s; }
-.data-stream:nth-child(4) { left: 90%; animation-delay: 1.5s; }
-
-.data-stream:nth-child(1)::before { animation-delay: 0s; }
-.data-stream:nth-child(2)::before { animation-delay: 1s; }
-.data-stream:nth-child(3)::before { animation-delay: 0.5s; }
-.data-stream:nth-child(4)::before { animation-delay: 1.5s; }
-
-@keyframes streamFlow {
-    0% { top: -30%; }
-    100% { top: 100%; }
-}
-
-/* 浮动元素 */
-.floating-elements {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 6;
-}
-
-.float-icon {
-    position: absolute;
-    font-size: 1.5rem;
-    opacity: 0.3; /* 增加透明度让其更明显一点 */
-    color: var(--primary);
-    animation: floatAround 20s ease-in-out infinite;
-    text-shadow: 0 0 10px var(--primary); /* 加一点发光 */
-}
-
-.float-icon:nth-child(1) { top: 20%; left: 10%; animation-delay: 0s; }
-.float-icon:nth-child(2) { top: 60%; left: 85%; animation-delay: -5s; }
-.float-icon:nth-child(3) { top: 80%; left: 20%; animation-delay: -10s; }
-.float-icon:nth-child(4) { top: 30%; left: 75%; animation-delay: -15s; }
-
-@keyframes floatAround {
-    0%, 100% { transform: translate(0, 0) rotate(0deg); }
-    25% { transform: translate(20px, -30px) rotate(90deg); }
-    50% { transform: translate(-20px, 20px) rotate(180deg); }
-    75% { transform: translate(30px, 10px) rotate(270deg); }
-}
-
-/* 角落装饰 */
-.corner-decor {
-    position: absolute;
-    width: 100px;
-    height: 100px;
-    z-index: 15;
-    pointer-events: none;
-}
-
-.corner-decor.top-left {
-    top: 30px;
-    left: 30px;
-    border-top: 2px solid rgba(0, 245, 212, 0.5);
-    border-left: 2px solid rgba(0, 245, 212, 0.5);
-}
-
-.corner-decor.top-right {
-    top: 30px;
-    right: 30px;
-    border-top: 2px solid rgba(0, 245, 212, 0.5);
-    border-right: 2px solid rgba(0, 245, 212, 0.5);
-}
-
-.corner-decor.bottom-left {
-    bottom: 30px;
-    left: 30px;
-    border-bottom: 2px solid rgba(0, 245, 212, 0.5);
-    border-left: 2px solid rgba(0, 245, 212, 0.5);
-}
-
-.corner-decor.bottom-right {
-    bottom: 30px;
-    right: 30px;
-    border-bottom: 2px solid rgba(0, 245, 212, 0.5);
-    border-right: 2px solid rgba(0, 245, 212, 0.5);
-}
-
-/* 底部品牌 */
 .brand-footer {
     position: absolute;
     bottom: 40px;
@@ -402,134 +267,74 @@
     align-items: center;
     gap: 20px;
     opacity: 0;
-    animation: fadeIn 1s ease 2s forwards;
-    width: max-content;
+    animation: fadeIn 1s ease 1.2s forwards;
     z-index: 20;
-}
-
-.brand-line {
-    width: 60px;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--primary));
-}
-
-.brand-line:last-child {
-    background: linear-gradient(90deg, var(--primary), transparent);
 }
 
 .brand-text {
-    font-family: 'Orbitron', sans-serif;
     font-size: 0.7rem;
-    letter-spacing: 0.4em;
-    color: rgba(255, 255, 255, 0.6);
-}
-
-/* 扫描线效果 - 高层级 */
-.scanline {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-        to bottom,
-        transparent 50%,
-        rgba(0, 0, 0, 0.05) 50% /* 稍微加深一点 */
-    );
-    background-size: 100% 4px;
-    pointer-events: none;
-    z-index: 99; 
-}
-
-/* 光标跟随 - Fixed 必须保持 */
-.cursor-glow {
-    position: fixed; /* 使用 fixed 保证跟随鼠标而不受父容器 overflow 影响 */
-    width: 400px;
-    height: 400px;
-    background: radial-gradient(circle, rgba(0, 245, 212, 0.15), transparent 70%);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 999; /* 确保在最顶层 */
-    transform: translate(-50%, -50%);
-    transition: opacity 0.3s;
-    opacity: 0.8;
-}
-
-/* Glitch 效果 */
-.glitch {
-    position: relative;
-}
-
-.glitch::before,
-.glitch::after {
-    content: attr(data-text);
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #080825; /* 重要：必须有背景色才能遮住原字产生错位感 */
-}
-
-.glitch::before {
-    animation: glitch-1 2s infinite linear alternate-reverse;
-    clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
-    -webkit-text-fill-color: var(--primary);
-}
-
-.glitch::after {
-    animation: glitch-2 3s infinite linear alternate-reverse;
-    clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
-    -webkit-text-fill-color: var(--accent);
-}
-
-@keyframes glitch-1 {
-    0% { transform: translateX(0); }
-    20% { transform: translateX(-3px); }
-    40% { transform: translateX(3px); }
-    60% { transform: translateX(-1px); }
-    80% { transform: translateX(2px); }
-    100% { transform: translateX(0); }
-}
-
-@keyframes glitch-2 {
-    0% { transform: translateX(0); }
-    20% { transform: translateX(3px); }
-    40% { transform: translateX(-3px); }
-    60% { transform: translateX(1px); }
-    80% { transform: translateX(-2px); }
-    100% { transform: translateX(0); }
-}
-
-/* 版本号 */
-.version {
-    position: absolute;
-    top: 40px;
-    right: 50px;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.7rem;
-    color: rgba(255, 255, 255, 0.5);
     letter-spacing: 0.2em;
-    z-index: 20;
+    color: var(--text-secondary);
+    font-weight: 500;
 }
 
-/* 时间显示 */
-.time-display {
+.brand-line {
+    width: 30px;
+    height: 1px;
+    background: #cbd5e1;
+}
+
+.geometric-decor {
     position: absolute;
-    top: 40px;
-    left: 50px;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.8rem;
-    color: rgba(0, 245, 212, 0.8);
-    letter-spacing: 0.1em;
-    z-index: 20;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 800px;
+    height: 800px;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.6;
 }
 
-/* 响应式适配 */
-@media (max-width: 768px) {
-    .corner-decor { width: 50px; height: 50px; }
-    .brand-footer { bottom: 20px; }
-    .brand-line { width: 30px; }
-    .glow-orb { transform: scale(0.5); }
-    .slogan-main { font-size: 3rem; }
+.pulse-ring {
+    transform-origin: center;
+    animation: breathe 8s ease-in-out infinite;
+}
+
+.delay-1 {
+    animation-delay: -4s;
+}
+
+@keyframes breathe {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+
+    50% {
+        transform: scale(1.05);
+        opacity: 1;
+    }
+}
+
+/* =========================================
+   5. 光标 (深色)
+   ========================================= */
+#cursor-follower {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 20px;
+    height: 20px;
+    border: 1px solid var(--text-primary);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 999;
+    transition: transform 0.1s linear;
+    /* 略微延迟 */
+    background: rgba(15, 23, 42, 0.05);
+    backdrop-filter: blur(2px);
 }

@@ -1,76 +1,58 @@
 <link rel="stylesheet" href="./src/modules/home/homeDisplay.css">
 <div id="panel-home" class="panel w-full h-full absolute top-0 left-0 overflow-hidden hidden z-10">
-    
+
     <div id="home-splash-container">
+        <div class="clean-bg"></div>
+
         <canvas id="particles-canvas"></canvas>
 
-    <div class="grid-bg"></div>
-
-        <div class="glow-orb orb-1"></div>
-        <div class="glow-orb orb-2"></div>
-        <div class="glow-orb orb-3"></div>
-
-        <div class="data-stream"></div>
-        <div class="data-stream"></div>
-        <div class="data-stream"></div>
-        <div class="data-stream"></div>
-
-        <div class="floating-elements">
-            <div class="float-icon">◇</div>
-            <div class="float-icon">○</div>
-            <div class="float-icon">△</div>
-            <div class="float-icon">□</div>
-        </div>
-
-        <div class="corner-decor top-left"></div>
-        <div class="corner-decor top-right"></div>
-        <div class="corner-decor bottom-left"></div>
-        <div class="corner-decor bottom-right"></div>
-
-        <div class="time-display" id="time-display"></div>
-        <div class="version">V 3.0.1</div>
-
-        <div class="cursor-glow" id="cursor-glow"></div>
-
-        <div class="splash-content-wrapper">
+        <header class="top-bar">
+            <div class="time-display" id="time-display"></div>
             <div class="logo-section">
                 <div class="logo-text">AMAZON SOP</div>
                 <div class="logo-sub">Standard Operating Procedure</div>
             </div>
+            <div class="version">V 3.0.1</div>
+        </header>
 
-        <div class="hero-section">
+        <main class="splash-content-wrapper">
+            <div class="hero-container" id="hero-content">
                 <h1 class="slogan-main">
-                    <span class="slogan-line highlight glitch" data-text="规范流程">规范流程</span>
-                    <span class="slogan-line outline">无限可能</span>
+                    <div class="slogan-line highlight" data-text="规范流程">规范流程</div>
+                    <div class="slogan-line outline" data-text="无限可能">无限可能</div>
                 </h1>
+
                 <p class="slogan-sub">
                     把<span>混乱</span>变成<span>秩序</span>，
                     把<span>经验</span>变成<span>指令</span>。
                 </p>
+
                 <div class="ai-status">
                     <div class="status-dot-inner"></div>
                     <span class="status-text">AI SYSTEM ONLINE · READY TO TRANSFORM</span>
                 </div>
             </div>
-        </div>
+        </main>
 
-        <div class="brand-footer">
+        <footer class="brand-footer">
             <div class="brand-line"></div>
             <span class="brand-text">AI DRIVEN | HUMAN CENTERED | PROCESS AS CODE | DECISION AT SPEED</span>
             <div class="brand-line"></div>
-        </div>
+        </footer>
 
-        <div class="scanline"></div>
-
-        <svg class="neural-network" viewBox="0 0 800 800">
+        <svg class="geometric-decor" viewBox="0 0 800 800">
             <defs>
-                <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style="stop-color:#00f5d4;stop-opacity:0.6" />
-                    <stop offset="100%" style="stop-color:#7b2cbf;stop-opacity:0.6" />
+                <linearGradient id="decorGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#2563eb; stop-opacity:0.2" />
+                    <stop offset="100%" style="stop-color:#06b6d4; stop-opacity:0.2" />
                 </linearGradient>
             </defs>
-            <g id="neural-lines"></g>
-            <g id="neural-nodes"></g>
+            <circle cx="400" cy="400" r="300" stroke="url(#decorGrad)" stroke-width="1" fill="none"
+                class="pulse-ring" />
+            <circle cx="400" cy="400" r="250" stroke="url(#decorGrad)" stroke-width="1" fill="none"
+                class="pulse-ring delay-1" />
         </svg>
+
+        <div id="cursor-follower"></div>
     </div>
 </div>

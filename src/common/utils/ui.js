@@ -28,10 +28,10 @@ export function renderMegaMenu() {
 
     try {
         const modules = Object.values(MENU_CONFIG.modules || {});
-        
+
         const html = modules.map(mod => {
             const targetRoute = getDefaultRouteForModule(mod.id);
-            if (!targetRoute) return ''; 
+            if (!targetRoute) return '';
 
             return `
             <div onclick="switchTab('${targetRoute}')" 
@@ -96,7 +96,190 @@ function renderSidebar(moduleId) {
 
     const routes = getRoutesByModule(moduleId);
 
-    // 4. 渲染
+    // 4. 特殊处理 SOPs 模块 - 使用分组显示
+    if (moduleId === 'sops') {
+        renderSopsSidebar(sidebar, moduleConfig, routes);
+    } else {
+        // 普通模块使用平铺列表
+        renderDefaultSidebar(sidebar, moduleConfig, routes);
+    }
+
+    sidebar.classList.remove("hidden", "-ml-64");
+    currentSidebarModuleId = moduleId;
+}
+
+// SOPs模块专用侧边栏渲染（带搜索和可折叠分组）
+function renderSopsSidebar(sidebar, moduleConfig, routes) {
+    const categories = MENU_CONFIG.sopCategories || {};
+    const sortedCategories = Object.values(categories).sort((a, b) => a.order - b.order);
+
+    // 分离总览和分类路由
+    const overviewRoute = routes.find(r => r.id === 'sops_overview');
+    const categoryRoutes = routes.filter(r => r.id !== 'sops_overview' && r.category);
+
+    // 按分类分组
+    const groupedRoutes = {};
+    categoryRoutes.forEach(route => {
+        if (!groupedRoutes[route.category]) {
+            groupedRoutes[route.category] = [];
+        }
+        groupedRoutes[route.category].push(route);
+    });
+
+    const html = `
+        <div class="flex flex-col h-full bg-white">
+            <div class="p-4 pb-2">
+                <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    ${moduleConfig.title}
+                </h2>
+                
+                <!-- 搜索框 -->
+                <div class="relative mb-3">
+                    <input type="text" id="sop-search-input" 
+                        placeholder="搜索 SOP..." 
+                        class="w-full px-3 py-2 pl-9 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                        oninput="searchSOPs(this.value)">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                    <button id="sop-search-clear" onclick="clearSOPSearch()" class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                        <i class="fas fa-times text-xs"></i>
+                    </button>
+                </div>
+                
+                <!-- 搜索结果区域 (默认隐藏) -->
+                <div id="sop-search-results" class="hidden mb-3 max-h-48 overflow-y-auto"></div>
+                
+                <nav id="sop-nav-container" class="space-y-2">
+                    <!-- 总览按钮 -->
+                    ${overviewRoute ? `
+                    <button onclick="switchTab('${overviewRoute.id}')" id="sidebar-btn-${overviewRoute.id}" 
+                        class="sidebar-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">
+                        <i class="${overviewRoute.icon} w-5 text-center"></i> 
+                        ${overviewRoute.label}
+                    </button>
+                    ` : ''}
+                    
+                    <!-- 分组菜单 -->
+                    ${sortedCategories.map(cat => {
+        const catRoutes = groupedRoutes[cat.id] || [];
+        if (catRoutes.length === 0) return '';
+
+        return `
+                        <div class="sop-group" data-category="${cat.id}">
+                            <button onclick="toggleSOPGroup('${cat.id}')" 
+                                class="sop-group-header w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-all duration-200">
+                                <span class="flex items-center gap-2">
+                                    <i class="${cat.icon} w-5 text-center text-${cat.color}-500"></i>
+                                    <span class="truncate">${cat.label}</span>
+                                </span>
+                                <i class="fas fa-chevron-down text-xs text-slate-400 transition-transform duration-200 group-toggle-icon"></i>
+                            </button>
+                            <div class="sop-group-items hidden pl-6 mt-1 space-y-0.5" id="sop-group-${cat.id}">
+                                ${catRoutes.map(route => `
+                                    <button onclick="switchTab('${route.id}')" id="sidebar-btn-${route.id}" 
+                                        class="sidebar-btn w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">
+                                        <i class="${route.icon} w-4 text-center text-slate-400"></i> 
+                                        <span class="truncate">${route.label}</span>
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                        `;
+    }).join('')}
+                </nav>
+            </div>  
+            <div class="mt-auto p-4 border-t border-slate-100 bg-slate-50/50">
+                 <div class="flex items-center gap-3 text-slate-400 text-xs">
+                     <i class="${moduleConfig.icon}"></i>
+                     <span>${moduleConfig.version}</span>
+                 </div>
+            </div>
+        </div>
+    `;
+    sidebar.innerHTML = html;
+
+    // 注册全局函数
+    window.toggleSOPGroup = function (categoryId) {
+        const groupItems = getEl(`sop-group-${categoryId}`);
+        const groupHeader = groupItems?.previousElementSibling;
+        const icon = groupHeader?.querySelector('.group-toggle-icon');
+
+        if (groupItems) {
+            const isHidden = groupItems.classList.contains('hidden');
+            groupItems.classList.toggle('hidden');
+            if (icon) {
+                icon.style.transform = isHidden ? 'rotate(180deg)' : '';
+            }
+        }
+    };
+
+    window.searchSOPs = function (query) {
+        const resultsContainer = getEl('sop-search-results');
+        const navContainer = getEl('sop-nav-container');
+        const clearBtn = getEl('sop-search-clear');
+
+        if (!query.trim()) {
+            resultsContainer.classList.add('hidden');
+            navContainer.classList.remove('hidden');
+            clearBtn.classList.add('hidden');
+            return;
+        }
+
+        clearBtn.classList.remove('hidden');
+        const lowerQuery = query.toLowerCase();
+
+        // 搜索所有 SOP 路由
+        const allRoutes = Object.entries(MENU_CONFIG.routes)
+            .filter(([id, cfg]) => cfg.moduleId === 'sops')
+            .map(([id, cfg]) => ({ id, ...cfg }));
+
+        const matches = allRoutes.filter(route => {
+            const label = (route.label || '').toLowerCase();
+            const category = (route.category || '').toLowerCase();
+
+            // 完全匹配
+            if (label === lowerQuery) return true;
+            // 模糊匹配
+            if (label.includes(lowerQuery)) return true;
+            // 首字母匹配
+            const initials = label.split(/[\s-]+/).map(w => w[0]).join('');
+            if (initials.includes(lowerQuery)) return true;
+            // 分类匹配
+            if (category.includes(lowerQuery)) return true;
+
+            return false;
+        });
+
+        if (matches.length === 0) {
+            resultsContainer.innerHTML = '<div class="text-xs text-slate-400 text-center py-2">未找到匹配的 SOP</div>';
+        } else {
+            resultsContainer.innerHTML = matches.map(route => `
+                <button onclick="switchTab('${route.id}'); clearSOPSearch();" 
+                    class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all">
+                    <i class="${route.icon} w-4 text-center"></i>
+                    <span class="truncate">${route.label}</span>
+                </button>
+            `).join('');
+        }
+
+        resultsContainer.classList.remove('hidden');
+        navContainer.classList.add('hidden');
+    };
+
+    window.clearSOPSearch = function () {
+        const input = getEl('sop-search-input');
+        const resultsContainer = getEl('sop-search-results');
+        const navContainer = getEl('sop-nav-container');
+        const clearBtn = getEl('sop-search-clear');
+
+        if (input) input.value = '';
+        resultsContainer.classList.add('hidden');
+        navContainer.classList.remove('hidden');
+        clearBtn.classList.add('hidden');
+    };
+}
+
+// 默认侧边栏渲染（平铺列表）
+function renderDefaultSidebar(sidebar, moduleConfig, routes) {
     try {
         const html = `
             <div class="flex flex-col h-full bg-white">
@@ -123,10 +306,8 @@ function renderSidebar(moduleId) {
             </div>
         `;
         sidebar.innerHTML = html;
-        sidebar.classList.remove("hidden", "-ml-64");
-        currentSidebarModuleId = moduleId;
     } catch (e) {
-        console.error(`❌ 侧边栏渲染错误 [${moduleId}]:`, e);
+        console.error(`❌ 侧边栏渲染错误:`, e);
     }
 }
 
@@ -147,7 +328,7 @@ function updateHeaderNav(fullConfig) {
         const contextBtn = getEl(`nav-${fullConfig.context.id}`);
         // 兼容旧的特例 (如果有)
         const specificBtn = fullConfig.context.id === 'hub' ? getEl('nav-amz_hub') : null;
-        
+
         if (contextBtn) targetId = `nav-${fullConfig.context.id}`;
         if (specificBtn) targetId = 'nav-amz_hub';
     }
@@ -198,13 +379,13 @@ export function switchTab(tab) {
     // 4. 面板显隐 (View Layer)
     // 先隐藏所有 .panel
     document.querySelectorAll(".panel").forEach(p => p.classList.add("hidden"));
-    
+
     // 确定目标 Panel ID
     let targetPanelId = 'panel-home';
     if (fullConfig && fullConfig.route.panelId) {
         targetPanelId = fullConfig.route.panelId;
     }
-    
+
     const targetPanel = getEl(targetPanelId);
     if (targetPanel) {
         targetPanel.classList.remove("hidden");
@@ -240,22 +421,22 @@ export function switchTab(tab) {
 // ========================
 
 export function showToast(message, type = "info") {
-  const container = getEl("toast-container");
-  if (!container) return; // 防御
+    const container = getEl("toast-container");
+    if (!container) return; // 防御
 
-  // 确保最上层
-  container.style.zIndex = "9999";
+    // 确保最上层
+    container.style.zIndex = "9999";
 
-  const toast = document.createElement("div");
-  const config = {
-    success: { bg: "bg-emerald-600", icon: "fa-check-circle" },
-    error:   { bg: "bg-red-500", icon: "fa-times-circle" },
-    info:    { bg: "bg-blue-500", icon: "fa-info-circle" },
-    warning: { bg: "bg-amber-500", icon: "fa-exclamation-triangle" },
-  };
-  const style = config[type] || config.info;
+    const toast = document.createElement("div");
+    const config = {
+        success: { bg: "bg-emerald-600", icon: "fa-check-circle" },
+        error: { bg: "bg-red-500", icon: "fa-times-circle" },
+        info: { bg: "bg-blue-500", icon: "fa-info-circle" },
+        warning: { bg: "bg-amber-500", icon: "fa-exclamation-triangle" },
+    };
+    const style = config[type] || config.info;
 
-  toast.className = `
+    toast.className = `
     flex items-center gap-3 px-4 py-3 
     ${style.bg} text-white 
     rounded-xl shadow-lg shadow-slate-300/50 
@@ -263,32 +444,32 @@ export function showToast(message, type = "info") {
     translate-y-2 opacity-0
     relative pointer-events-auto
   `;
-  toast.innerHTML = `<i class="fas ${style.icon} text-lg"></i><span class="text-sm font-medium tracking-wide">${message}</span>`;
-  
-  container.appendChild(toast);
-  
-  requestAnimationFrame(() => toast.classList.remove("translate-y-2", "opacity-0"));
-  setTimeout(() => {
-    toast.classList.add("translate-y-2", "opacity-0");
-    setTimeout(() => toast.remove(), 300);
-  }, 3000);
+    toast.innerHTML = `<i class="fas ${style.icon} text-lg"></i><span class="text-sm font-medium tracking-wide">${message}</span>`;
+
+    container.appendChild(toast);
+
+    requestAnimationFrame(() => toast.classList.remove("translate-y-2", "opacity-0"));
+    setTimeout(() => {
+        toast.classList.add("translate-y-2", "opacity-0");
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
 }
 
 export function showProgress(show, percent = 0) {
-  const bar = getEl("global-progress");
-  const fill = getEl("progress-fill");
-  if (!bar || !fill) return;
+    const bar = getEl("global-progress");
+    const fill = getEl("progress-fill");
+    if (!bar || !fill) return;
 
-  if (show) {
-    bar.classList.remove("hidden");
-    requestAnimationFrame(() => fill.style.width = percent + "%");
-  } else {
-    fill.style.width = "100%";
-    setTimeout(() => {
-      bar.classList.add("hidden");
-      fill.style.width = "0%";
-    }, 300);
-  }
+    if (show) {
+        bar.classList.remove("hidden");
+        requestAnimationFrame(() => fill.style.width = percent + "%");
+    } else {
+        fill.style.width = "100%";
+        setTimeout(() => {
+            bar.classList.add("hidden");
+            fill.style.width = "0%";
+        }, 300);
+    }
 }
 
 export function getErrorSummary(errorMsg) {
@@ -300,7 +481,7 @@ export function getErrorSummary(errorMsg) {
 }
 
 export function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 // Global Exports

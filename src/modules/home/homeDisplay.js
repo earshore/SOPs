@@ -1,223 +1,231 @@
 // src/modules/home/homeDisplay.js
 
 export function initHomeSplash() {
-    console.log("🚀 Initializing Home Splash Screen...");
+    console.log("🚀 Initializing Clean Water Ripple Splash...");
 
     const container = document.getElementById('home-splash-container');
     const canvas = document.getElementById('particles-canvas');
-    const neuralLines = document.getElementById('neural-lines');
-    const neuralNodes = document.getElementById('neural-nodes');
+    const cursorFollower = document.getElementById('cursor-follower');
+    const heroContent = document.getElementById('hero-content');
 
     if (!container || !canvas) return;
 
     const ctx = canvas.getContext('2d');
-    let animationFrameId;
+    let width, height;
     let particles = [];
 
+    // 鼠标状态
+    let mouse = { x: -1000, y: -1000 };
+
+    // 配置参数 - 水纹手感调节
+    const CONFIG = {
+        spacing: 50,       // 粒子间距（网格密度）
+        friction: 0.9,     // 摩擦力 (0-1，越小停得越快)
+        spring: 0.1,       // 弹力系数 (越大回弹越快)
+        mouseForce: 60,    // 鼠标斥力强度
+        mouseRadius: 150,  // 鼠标影响范围
+        connectDist: 60    // 连线距离
+    };
+
     // =========================================
-    // 1. 粒子系统 (智能 Resize 版)
+    // 1. 弹性粒子类 (Spring Particle)
     // =========================================
-    
-    // 定义粒子类
     class Particle {
-        constructor(w, h) {
-            this.reset(w, h);
+        constructor(x, y) {
+            this.ox = x; // 原始位置 X (Original X)
+            this.oy = y; // 原始位置 Y
+            this.x = x;  // 当前位置
+            this.y = y;
+            this.vx = 0; // 速度 X
+            this.vy = 0;
+            this.density = Math.random() * 20 + 1; // 随机重量感
+            this.color = '#cbd5e1'; // 默认浅灰色
         }
 
-        reset(w, h) {
-            this.x = Math.random() * w;
-            this.y = Math.random() * h;
-            this.size = Math.random() * 2 + 0.5;
-            this.speedX = (Math.random() - 0.5) * 0.5;
-            this.speedY = (Math.random() - 0.5) * 0.5;
-            this.opacity = Math.random() * 0.5 + 0.2;
-            this.color = Math.random() > 0.5 ? '#00f5d4' : '#7b2cbf';
-        }
+        update() {
+            // 1. 计算鼠标斥力
+            const dx = mouse.x - this.x;
+            const dy = mouse.y - this.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
 
-        update(w, h) {
-            this.x += this.speedX;
-            this.y += this.speedY;
+            // 鼠标交互：推开
+            if (distance < CONFIG.mouseRadius) {
+                const forceDirectionX = dx / distance;
+                const forceDirectionY = dy / distance;
+                const force = (CONFIG.mouseRadius - distance) / CONFIG.mouseRadius;
+                const directionX = forceDirectionX * force * CONFIG.mouseForce;
+                const directionY = forceDirectionY * force * CONFIG.mouseForce;
 
-            if (this.x < 0 || this.x > w) this.speedX *= -1;
-            if (this.y < 0 || this.y > h) this.speedY *= -1;
+                // 施加负向力（推开）
+                this.vx -= directionX;
+                this.vy -= directionY;
+            }
+
+            // 2. 弹簧回弹 (Hooke's Law)
+            // 粒子总是想回到 ox, oy
+            const sx = (this.ox - this.x) * CONFIG.spring;
+            const sy = (this.oy - this.y) * CONFIG.spring;
+
+            this.vx += sx;
+            this.vy += sy;
+
+            // 3. 摩擦力损耗
+            this.vx *= CONFIG.friction;
+            this.vy *= CONFIG.friction;
+
+            // 4. 更新位置
+            this.x += this.vx;
+            this.y += this.vy;
         }
 
         draw() {
+            // 1. 计算当前速度 (勾股定理)
+            // Math.hypot(x, y) 等同于 Math.sqrt(x*x + y*y)
+            const speed = Math.hypot(this.vx, this.vy);
+
+            // 2. 动态计算不透明度 (Alpha)
+            // - 0.2: 基础不透明度 (静止时的淡色，数值越小越淡)
+            // - speed * 0.1: 速度对颜色的增幅 (数值越大，稍微一动就变深)
+            let alpha = 0.05 + (speed * 0.15);
+
+            // 限制 alpha 最大为 1 (防止颜色过饱和)
+            if (alpha > 1) alpha = 1;
+
             ctx.beginPath();
-            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-            ctx.fillStyle = this.color;
-            ctx.globalAlpha = this.opacity;
+            ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+
+            // 3. 使用 RGBA 赋值
+            // 原色 #94a3b8 转换为 RGB 是 (148, 163, 184)
+            // ctx.fillStyle = `rgba(148, 163, 184, ${alpha})`;
+            if (speed > 2) {
+                ctx.fillStyle = `rgba(37, 99, 235, ${alpha})`; // 运动时变蓝
+            } else {
+                ctx.fillStyle = `rgba(148, 163, 184, ${alpha})`; // 静止时灰
+            }
             ctx.fill();
-            ctx.globalAlpha = 1;
         }
     }
 
-    // 初始化/重置粒子
-    function initParticles(width, height) {
+    function initParticles() {
         particles = [];
-        const particleCount = 100; // 粒子数量
-        for (let i = 0; i < particleCount; i++) {
-            particles.push(new Particle(width, height));
+        // 创建网格布局 (Grid Layout)
+        // 稍微扩展出屏幕外，保证边缘也有水纹
+        for (let y = 0; y < height + CONFIG.spacing; y += CONFIG.spacing) {
+            for (let x = 0; x < width + CONFIG.spacing; x += CONFIG.spacing) {
+                particles.push(new Particle(x, y));
+            }
         }
     }
 
-    // 绘制连线
-    function connectParticles() {
+    function drawConnections() {
+        ctx.beginPath();
+        ctx.strokeStyle = "rgba(37, 99, 235, 0.15)"; // 极淡的蓝色连线
+        ctx.lineWidth = 0.5;
+
+        // 仅连接相邻的粒子（为了性能优化，不进行全连接，只检查网格邻居）
+        // 但由于粒子在动，简单的双重循环检查距离更通用
         for (let i = 0; i < particles.length; i++) {
-            for (let j = i + 1; j < particles.length; j++) {
-                const dx = particles[i].x - particles[j].x;
-                const dy = particles[i].y - particles[j].y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
+            const p1 = particles[i];
 
-                if (distance < 150) {
-                    ctx.beginPath();
-                    ctx.strokeStyle = `rgba(0, 245, 212, ${0.1 * (1 - distance / 150)})`;
-                    ctx.lineWidth = 0.5;
-                    ctx.moveTo(particles[i].x, particles[i].y);
-                    ctx.lineTo(particles[j].x, particles[j].y);
-                    ctx.stroke();
-                }
-            }
+            // 优化：只检查部分粒子，或者只画距离近的
+            // 这里为了效果好，检查所有粒子，但只画非常近的
+            // 在网格系统中，我们其实只需要检查右边和下边的粒子即可（如果未乱序）
+            // 但因为粒子会乱动，我们还是用距离判断
+
+            // 为了性能，只在粒子移动速度较快(受干扰)的区域画线，或者画所有线但透明度极低
+            // 简单方案：画所有 < connectDist 的线
+            // 性能优化：只检查数组中附近的索引? 不行，因为是网格。
+            // 回归简单距离检测，但限制检测范围
         }
-    }
 
-    // 动画循环
-    function animateParticles() {
-        if (!canvas.isConnected) return; // 防止内存泄漏
+        // 实际上，网格连线如果用 drawLine 性能消耗巨大。
+        // 我们改为只画粒子点，利用粒子运动产生的“光流感”来模拟水纹，
+        // 或者只连接受鼠标影响区域的粒子。
 
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        particles.forEach(particle => {
-            particle.update(canvas.width, canvas.height);
-            particle.draw();
-        });
-        
-        connectParticles();
-        animationFrameId = requestAnimationFrame(animateParticles);
-    }
-
-    // =========================================
-    // 修复后的 ResizeObserver
-    // =========================================
-    const observer = new ResizeObserver(entries => {
-        // 【关键修复】：包裹在 requestAnimationFrame 中
-        window.requestAnimationFrame(() => {
-            // 再次检查元素是否存在，防止组件卸载后的报错
-            if (!Array.isArray(entries) || !entries.length) return;
-
-            for (let entry of entries) {
-                const { width, height } = entry.contentRect;
-                
-                // 增加边界检查，避免无效计算
-                if (width > 0 && height > 0) {
-                    // 在这里修改 canvas 尺寸是安全的，因为它在下一帧执行
-                    canvas.width = width;
-                    canvas.height = height;
-                    
-                    // 如果是第一次检测到尺寸，或者尺寸变化大，重新初始化粒子分布
-                    // 注意：这里建议用 Math.floor 取整比较，避免亚像素差异导致的抖动
-                    if (particles.length === 0 || Math.abs(canvas.width - width) > 50) {
-                        initParticles(width, height);
+        particles.forEach(p => {
+            // 只在鼠标附近画线，强调交互区域
+            const dToMouse = Math.hypot(p.x - mouse.x, p.y - mouse.y);
+            if (dToMouse < CONFIG.mouseRadius + 50) {
+                particles.forEach(p2 => {
+                    const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+                    if (dist < CONFIG.spacing * 1.2 && dist > 0) { // 只连最近的邻居
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(p2.x, p2.y);
                     }
-                }
+                });
             }
         });
-    });
-        
-    observer.observe(container);
-    animateParticles(); // 启动动画循环
+        ctx.stroke();
+    }
+
+    function animate() {
+        if (!canvas.isConnected) return;
+
+        ctx.clearRect(0, 0, width, height);
+
+        particles.forEach(p => {
+            p.update();
+            p.draw();
+        });
+
+        // 绘制动态连线 (模拟水面张力)
+        drawConnections();
+
+        requestAnimationFrame(animate);
+    }
 
     // =========================================
-    // 2. 光标跟随 (Fixed 定位修正)
+    // 2. 交互与尺寸
     // =========================================
-    const cursorGlow = document.getElementById('cursor-glow');
-    let mouseX = -100, mouseY = -100; // 初始移出屏幕
-    let glowX = -100, glowY = -100;
 
     const mouseHandler = (e) => {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+
+        // 简单的 CSS 光标跟随
+        if (cursorFollower) {
+            cursorFollower.style.transform = `translate(${mouse.x}px, ${mouse.y}px) translate(-50%, -50%)`;
+        }
+
+        // 简单的文字视差 (轻微反向移动)
+        if (heroContent) {
+            const moveX = (window.innerWidth / 2 - mouse.x) * 0.01;
+            const moveY = (window.innerHeight / 2 - mouse.y) * 0.01;
+            heroContent.style.transform = `translate(${moveX}px, ${moveY}px)`;
+        }
     };
     document.addEventListener('mousemove', mouseHandler);
 
-    function updateCursorGlow() {
-        if (!cursorGlow || !cursorGlow.isConnected) return;
-        
-        // 缓动算法
-        glowX += (mouseX - glowX) * 0.1;
-        glowY += (mouseY - glowY) * 0.1;
-        
-        cursorGlow.style.left = glowX + 'px';
-        cursorGlow.style.top = glowY + 'px';
-        requestAnimationFrame(updateCursorGlow);
-    }
-    updateCursorGlow();
+    // Resize
+    const observer = new ResizeObserver(entries => {
+        window.requestAnimationFrame(() => {
+            if (!entries.length) return;
+            const rect = entries[0].contentRect;
+            width = rect.width;
+            height = rect.height;
+            canvas.width = width;
+            canvas.height = height;
+
+            // 尺寸变化重置网格
+            initParticles();
+        });
+    });
+    observer.observe(container);
+    animate();
 
     // =========================================
-    // 3. 时间显示
+    // 3. 时间与功能
     // =========================================
     function updateTime() {
-        const timeDisplay = document.getElementById('time-display');
-        if (!timeDisplay || !timeDisplay.isConnected) return;
-        
-        const now = new Date();
-        const timeStr = now.toLocaleTimeString('en-US', { hour12: false });
-        const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
-        timeDisplay.textContent = `${dateStr} | ${timeStr}`;
+        const el = document.getElementById('time-display');
+        if (el) {
+            const now = new Date();
+            // 格式：2026.01.20 | 14:30
+            const dateStr = now.toLocaleDateString('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/-/g, '.');
+            const timeStr = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+            el.textContent = `${dateStr} | ${timeStr}`;
+        }
     }
+    setInterval(updateTime, 1000);
     updateTime();
-    const timeInterval = setInterval(updateTime, 1000);
-
-    // =========================================
-    // 4. 神经网络 SVG 动画 (一次性生成)
-    // =========================================
-    if (neuralNodes && neuralLines && neuralNodes.childElementCount === 0) {
-        const nodePositions = [];
-        // 确保分布在 800x800 的容器内
-        for (let i = 0; i < 20; i++) {
-            nodePositions.push({
-                x: 50 + Math.random() * 700,
-                y: 50 + Math.random() * 700
-            });
-        }
-
-        // 创建节点
-        nodePositions.forEach((pos) => {
-            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-            circle.setAttribute('cx', pos.x);
-            circle.setAttribute('cy', pos.y);
-            circle.setAttribute('r', 4 + Math.random() * 4);
-            circle.setAttribute('fill', '#00f5d4');
-            // CSS 中定义了 pulse 动画，这里应用它
-            // 注意：CSS中可能定义的是 orbFloat 或 pulse，这里保持简单缩放
-            circle.style.animation = `pulseInner ${2 + Math.random() * 2}s ease-in-out infinite`; 
-            // 如果 CSS 里没有 pulseInner，我们需要在 CSS 补上，或者复用 .status-dot 的 pulse
-            circle.style.animationName = 'pulse'; 
-            circle.style.transformBox = 'fill-box';
-            circle.style.transformOrigin = 'center';
-            circle.style.animationDelay = `${Math.random() * 2}s`;
-            neuralNodes.appendChild(circle);
-        });
-
-        // 创建连接线
-        for (let i = 0; i < nodePositions.length; i++) {
-            for (let j = i + 1; j < nodePositions.length; j++) {
-                const dx = nodePositions[i].x - nodePositions[j].x;
-                const dy = nodePositions[i].y - nodePositions[j].y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-
-                if (distance < 250) { // 稍微增加连线距离
-                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                    line.setAttribute('x1', nodePositions[i].x);
-                    line.setAttribute('y1', nodePositions[i].y);
-                    line.setAttribute('x2', nodePositions[j].x);
-                    line.setAttribute('y2', nodePositions[j].y);
-                    line.setAttribute('stroke', 'url(#lineGrad)');
-                    line.setAttribute('stroke-width', '1');
-                    line.style.opacity = 0.3;
-                    neuralLines.appendChild(line);
-                }
-            }
-        }
-    }
 }

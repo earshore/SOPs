@@ -1,0 +1,392 @@
+<!-- 品牌与侵权审核 SOP Template -->
+<div class="sop-widescreen-container">
+    <!-- Back Button & Header -->
+    <div class="mb-6">
+        <button onclick="switchTab('sops_overview')"
+            class="text-sm text-slate-500 hover:text-blue-600 transition-colors mb-4 inline-flex items-center gap-2">
+            <i class="fas fa-arrow-left"></i>返回 SOP 列表
+        </button>
+
+        <div class="sop-detail-header bg-gradient-to-r from-red-50 to-rose-50">
+            <div class="flex items-start gap-4">
+                <div class="sop-icon-container bg-red-100 text-red-600 w-16 h-16 text-2xl">
+                    <i class="fas fa-trademark"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <h1 class="text-2xl font-bold text-slate-900">品牌与侵权审核 SOP</h1>
+                        <span class="sop-status-badge sop-status-active">已发布</span>
+                    </div>
+                    <p class="text-slate-600 mb-3">
+                        上架前的关键词商标查重、图片版权确认、侵权词库过滤规范，避免因侵权导致Listing下架或账号受限。
+                    </p>
+                    <div class="flex items-center gap-6 text-sm text-slate-500">
+                        <span><i class="fas fa-layer-group mr-1"></i>安全风控体系</span>
+                        <span><i class="fas fa-gavel mr-1"></i>法务合规</span>
+                        <span><i class="fas fa-clock mr-1"></i>更新日期：2024-01</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Red Line Warning -->
+    <div class="bg-red-50 border border-red-200 rounded-xl p-5 mb-6">
+        <div class="flex items-start gap-4">
+            <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center text-red-600 flex-shrink-0">
+                <i class="fas fa-ban text-xl"></i>
+            </div>
+            <div class="flex-1">
+                <h3 class="font-bold text-red-800 mb-2 text-lg">红线规定 - 侵权零容忍</h3>
+                <p class="text-red-700 mb-3">
+                    <strong>任何Listing文案修改必须经过侵权词库过滤</strong>。未经审核擅自上架导致侵权投诉的，追究当事人责任。侵权导致的账号风险将严重影响全店业务。
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                    <div class="bg-red-100 rounded-lg p-3 text-center">
+                        <div class="font-bold text-red-800">商标侵权</div>
+                        <div class="text-red-700 text-xs">→ Listing下架 + 警告</div>
+                    </div>
+                    <div class="bg-red-100 rounded-lg p-3 text-center">
+                        <div class="font-bold text-red-800">专利侵权</div>
+                        <div class="text-red-700 text-xs">→ 法律诉讼 + 赔偿</div>
+                    </div>
+                    <div class="bg-red-100 rounded-lg p-3 text-center">
+                        <div class="font-bold text-red-800">多次侵权</div>
+                        <div class="text-red-700 text-xs">→ 账号停用</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Two Column Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Left: Review Flow -->
+        <div class="bg-white rounded-xl border border-slate-200 p-6">
+            <h2 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
+                <i class="fas fa-route text-blue-500"></i>上架前审核流程
+            </h2>
+
+            <div class="sop-timeline">
+                <!-- Step 1 -->
+                <div class="sop-timeline-item">
+                    <div class="sop-timeline-dot completed"></div>
+                    <div class="bg-blue-50/50 rounded-lg p-4 ml-2 border-l-4 border-blue-400">
+                        <h3 class="font-bold text-slate-800 mb-2">Step 1: 关键词商标查重</h3>
+                        <p class="text-sm text-slate-500 mb-2">工具：USPTO / EUIPO / WIPO</p>
+                        <ul class="text-sm text-slate-600 space-y-1">
+                            <li>• 标题所有关键词逐一查询商标数据库</li>
+                            <li>• <a href="https://www.uspto.gov/trademarks" target="_blank"
+                                    class="text-blue-600 underline">USPTO</a> - 美国商标</li>
+                            <li>• <a href="https://euipo.europa.eu/" target="_blank"
+                                    class="text-blue-600 underline">EUIPO</a> - 欧盟商标</li>
+                            <li>• 第三方工具：Trademarkia、知元查</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="sop-timeline-item">
+                    <div class="sop-timeline-dot"></div>
+                    <div class="bg-amber-50/50 rounded-lg p-4 ml-2 border-l-4 border-amber-400">
+                        <h3 class="font-bold text-slate-800 mb-2">Step 2: 侵权词库过滤</h3>
+                        <p class="text-sm text-slate-500 mb-2">公司内部维护的禁用词表</p>
+                        <ul class="text-sm text-slate-600 space-y-1">
+                            <li>• 品牌侵权词（Apple, Nike, Disney...）</li>
+                            <li>• 专利敏感词（Patented, ™, ®）</li>
+                            <li>• 明星/IP名称（Marvel, Pokemon...）</li>
+                            <li>• 虚假认证词（FDA Approved, CE Certified）</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="sop-timeline-item">
+                    <div class="sop-timeline-dot"></div>
+                    <div class="bg-purple-50/50 rounded-lg p-4 ml-2 border-l-4 border-purple-400">
+                        <h3 class="font-bold text-slate-800 mb-2">Step 3: 图片版权确认</h3>
+                        <p class="text-sm text-slate-500 mb-2">确保所有图片来源合法</p>
+                        <ul class="text-sm text-slate-600 space-y-1">
+                            <li>• ✅ 自有摄影/设计（首选）</li>
+                            <li>• ✅ 购买正版授权（保留凭证）</li>
+                            <li>• ✅ 工厂提供（需书面授权）</li>
+                            <li>• ❌ 禁止网络下载使用</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="sop-timeline-item">
+                    <div class="sop-timeline-dot pending"></div>
+                    <div class="bg-emerald-50/50 rounded-lg p-4 ml-2 border-l-4 border-emerald-400">
+                        <h3 class="font-bold text-slate-800 mb-2">Step 4: 审核签字确认</h3>
+                        <p class="text-sm text-slate-500 mb-2">留档备查</p>
+                        <ul class="text-sm text-slate-600 space-y-1">
+                            <li>• 填写《Listing上架审核表》</li>
+                            <li>• 审核人签名 + 日期</li>
+                            <li>• 审核结论：通过/驳回</li>
+                            <li>• 归档保存（至少2年）</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Infringement Types & Tools -->
+        <div class="space-y-6">
+            <!-- Common Infringement Types -->
+            <div class="bg-white rounded-xl border border-slate-200 p-6">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-exclamation-circle text-amber-500"></i>常见侵权类型速查
+                </h2>
+                <div class="grid grid-cols-1 gap-4">
+                    <div class="bg-red-50 rounded-lg p-4 border border-red-200">
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 bg-red-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-trademark text-red-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-red-800 mb-1">商标侵权 (Trademark)</h4>
+                                <p class="text-sm text-red-700">使用他人注册商标或近似词汇</p>
+                                <p class="text-xs text-slate-600 mt-1">例："compatible with iPhone" → 改为 "compatible with
+                                    i-Phone 14/15"</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-amber-50 rounded-lg p-4 border border-amber-200">
+                        <div class="flex items-start gap-3">
+                            <div
+                                class="w-10 h-10 bg-amber-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-lightbulb text-amber-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-amber-800 mb-1">专利侵权 (Patent)</h4>
+                                <p class="text-sm text-amber-700">产品外观或功能涉及他人专利</p>
+                                <p class="text-xs text-slate-600 mt-1">新品开发前先做专利检索，使用 Google Patents 或专利局网站</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                        <div class="flex items-start gap-3">
+                            <div
+                                class="w-10 h-10 bg-purple-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-image text-purple-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-purple-800 mb-1">版权侵权 (Copyright)</h4>
+                                <p class="text-sm text-purple-700">使用网络图片、卡通形象、艺术作品</p>
+                                <p class="text-xs text-slate-600 mt-1">使用 TinEye 反向搜索检查图片是否有版权</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                        <div class="flex items-start gap-3">
+                            <div
+                                class="w-10 h-10 bg-blue-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-certificate text-blue-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-blue-800 mb-1">虚假宣传 (False Claims)</h4>
+                                <p class="text-sm text-blue-700">虚假认证声明、夸大功效</p>
+                                <p class="text-xs text-slate-600 mt-1">禁用：FDA Certified, CE Approved, Doctor Recommended
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Compatible With表述规范 -->
+            <div class="bg-emerald-50 rounded-xl border border-emerald-200 p-5">
+                <h3 class="font-bold text-emerald-800 mb-3 flex items-center gap-2">
+                    <i class="fas fa-check-circle"></i>"Compatible With" 安全表述
+                </h3>
+                <div class="space-y-2 text-sm">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-check text-emerald-600"></i>
+                        <span class="text-slate-700">"Replacement for [Brand]" → <strong
+                                class="text-emerald-700">安全</strong></span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-check text-emerald-600"></i>
+                        <span class="text-slate-700">"Fits [Model Number]" → <strong
+                                class="text-emerald-700">安全</strong></span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-times text-red-500"></i>
+                        <span class="text-slate-700">"For iPhone" (独立使用) → <strong
+                                class="text-red-600">风险</strong></span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-times text-red-500"></i>
+                        <span class="text-slate-700">"[Brand] Style" → <strong class="text-red-600">禁止</strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Restricted Words Library -->
+<div class="bg-white rounded-xl border border-red-200 p-6 mb-6">
+    <h2 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
+        <i class="fas fa-book-dead text-red-600"></i>欧洲本土化高危词库 (Restricted Words)
+    </h2>
+
+    <div class="space-y-8">
+        <!-- 1. Textiles -->
+        <div>
+            <h3 class="font-bold text-slate-800 mb-3 border-l-4 border-red-500 pl-3">☠️ 一、材质成分“死亡”红线 (纺织品标签法)</h3>
+            <p class="text-xs text-slate-500 mb-2">德国站严查重灾区，一旦抓到直接下架且难申诉。</p>
+            <div class="overflow-x-auto border rounded-lg">
+                <table class="w-full text-xs text-left">
+                    <thead class="bg-slate-50 text-slate-700 font-bold">
+                        <tr>
+                            <th class="px-3 py-2 border-b w-1/4">关键词 (英/德)</th>
+                            <th class="px-3 py-2 border-b w-1/4">常见场景</th>
+                            <th class="px-3 py-2 border-b">风险解读</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <tr class="hover:bg-red-50">
+                            <td class="px-3 py-2 border-r font-bold text-red-600">Bamboo / Bambus</td>
+                            <td class="px-3 py-2 border-r">内裤、袜子、床单</td>
+                            <td class="px-3 py-2 text-slate-600">必须写 <strong>Viscose (粘胶纤维)</strong>。仅写Bamboo会被判定虚假标签。
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-red-50">
+                            <td class="px-3 py-2 border-r font-bold text-red-600">Lycra / Spandex</td>
+                            <td class="px-3 py-2 border-r">弹性面料</td>
+                            <td class="px-3 py-2 text-slate-600">Lycra是商标；欧盟标准术语是 <strong>Elastane
+                                    (Elasthan)</strong>，慎用Spandex。</td>
+                        </tr>
+                        <tr class="hover:bg-red-50">
+                            <td class="px-3 py-2 border-r font-bold text-red-600">PU Leather</td>
+                            <td class="px-3 py-2 border-r">手机壳、包包</td>
+                            <td class="px-3 py-2 text-slate-600">严禁单独使用"Leather"。必须明确 <strong>Synthetic
+                                    leather</strong>。</td>
+                        </tr>
+                        <tr class="hover:bg-red-50">
+                            <td class="px-3 py-2 border-r font-bold text-red-600">Silk / Seide</td>
+                            <td class="px-3 py-2 border-r">丝绸睡衣</td>
+                            <td class="px-3 py-2 text-slate-600">若非100%桑蚕丝，严禁出现Silk，包括Silky描述。</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 2. Compliance Claims -->
+        <div>
+            <h3 class="font-bold text-slate-800 mb-3 border-l-4 border-amber-500 pl-3">⚖️ 二、“自杀式”合规描述 (反不正当竞争法)</h3>
+            <p class="text-xs text-slate-500 mb-2">在德国属于“广告法”违规，竞对一告一个准。</p>
+            <div class="overflow-x-auto border rounded-lg">
+                <table class="w-full text-xs text-left">
+                    <thead class="bg-slate-50 text-slate-700 font-bold">
+                        <tr>
+                            <th class="px-3 py-2 border-b w-1/4">关键词 (英/德)</th>
+                            <th class="px-3 py-2 border-b w-1/4">常见场景</th>
+                            <th class="px-3 py-2 border-b">风险解读</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <tr class="hover:bg-amber-50">
+                            <td class="px-3 py-2 border-r font-bold text-red-600">CE Certified</td>
+                            <td class="px-3 py-2 border-r">电子产品、玩具</td>
+                            <td class="px-3 py-2 text-slate-600"><strong>违法！</strong>CE是法定门槛，不能当卖点宣传(Werbung mit
+                                Selbstverständlichkeiten)。</td>
+                        </tr>
+                        <tr class="hover:bg-amber-50">
+                            <td class="px-3 py-2 border-r font-bold text-red-600">FDA Approved</td>
+                            <td class="px-3 py-2 border-r">厨具、美妆</td>
+                            <td class="px-3 py-2 text-slate-600">欧洲不认FDA，引用无关机构属于误导。应对应 <strong>LFGB</strong> 或
+                                <strong>CPNP</strong>。</td>
+                        </tr>
+                        <tr class="hover:bg-amber-50">
+                            <td class="px-3 py-2 border-r font-bold text-red-600">Warranty / Garantie</td>
+                            <td class="px-3 py-2 border-r">电子产品</td>
+                            <td class="px-3 py-2 text-slate-600">若无完整条款链接，严禁写Warranty。Warranty与法定Garantie是两回事。</td>
+                        </tr>
+                        <tr class="hover:bg-amber-50">
+                            <td class="px-3 py-2 border-r font-bold text-red-600">Patent Pending</td>
+                            <td class="px-3 py-2 border-r">改良品</td>
+                            <td class="px-3 py-2 text-slate-600">严禁将“申请中”作为营销手段，除非可查证，否则视为欺诈。</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 3. Biocides -->
+        <div>
+            <h3 class="font-bold text-slate-800 mb-3 border-l-4 border-emerald-500 pl-3">🧪 三、生物杀灭剂与环保 (BPR & 绿标指令)</h3>
+            <div class="overflow-x-auto border rounded-lg">
+                <table class="w-full text-xs text-left">
+                    <thead class="bg-slate-50 text-slate-700 font-bold">
+                        <tr>
+                            <th class="px-3 py-2 border-b w-1/4">关键词 (英/德)</th>
+                            <th class="px-3 py-2 border-b w-1/4">常见场景</th>
+                            <th class="px-3 py-2 border-b">风险解读</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <tr class="hover:bg-emerald-50">
+                            <td class="px-3 py-2 border-r font-bold text-red-600">Antibakteriell</td>
+                            <td class="px-3 py-2 border-r">砧板、马桶刷</td>
+                            <td class="px-3 py-2 text-slate-600">属 <strong>BPR</strong>
+                                管辖。无欧盟注册号严禁使用Antimicrobial/Anti-mite。</td>
+                        </tr>
+                        <tr class="hover:bg-emerald-50">
+                            <td class="px-3 py-2 border-r font-bold text-red-600">Eco-friendly</td>
+                            <td class="px-3 py-2 border-r">全品类</td>
+                            <td class="px-3 py-2 text-slate-600">泛泛而谈的环保声明属于“漂绿”(Greenwashing)，无特定认证(如OK compost)必下架。
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 4. Electronics -->
+        <div>
+            <h3 class="font-bold text-slate-800 mb-3 border-l-4 border-blue-500 pl-3">🔌 四、电子与能效 (ErP指令)</h3>
+            <div class="overflow-x-auto border rounded-lg">
+                <table class="w-full text-xs text-left">
+                    <thead class="bg-slate-50 text-slate-700 font-bold">
+                        <tr>
+                            <th class="px-3 py-2 border-b w-1/4">关键词 (英/德)</th>
+                            <th class="px-3 py-2 border-b w-1/4">常见场景</th>
+                            <th class="px-3 py-2 border-b">风险解读</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <tr class="hover:bg-blue-50">
+                            <td class="px-3 py-2 border-r font-bold text-red-600">Energy Saving</td>
+                            <td class="px-3 py-2 border-r">灯泡、家电</td>
+                            <td class="px-3 py-2 text-slate-600">未上传欧盟EPREL能效标签(A-G级)前，宣称“节能”违规。</td>
+                        </tr>
+                        <tr class="hover:bg-blue-50">
+                            <td class="px-3 py-2 border-r font-bold text-red-600">40W equivalent</td>
+                            <td class="px-3 py-2 border-r">LED灯泡</td>
+                            <td class="px-3 py-2 text-slate-600">流明/瓦数换算有严格标准，乱标“相当于xx瓦”易被投诉参数造假。</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Video Resource -->
+<div class="bg-blue-50 rounded-xl border border-blue-200 p-4">
+    <div class="flex items-center gap-3">
+        <i class="fas fa-video text-blue-500 text-xl"></i>
+        <div>
+            <h3 class="font-bold text-slate-800">操作视频教程</h3>
+            <p class="text-sm text-slate-600">访问公司网盘观看详细操作录屏：<a href="http://192.168.1.99"
+                    class="text-blue-600 underline">192.168.1.99</a>（仅限内网访问）→ 培训资料 → 侵权审核专题</p>
+        </div>
+    </div>
+</div>
+</div>

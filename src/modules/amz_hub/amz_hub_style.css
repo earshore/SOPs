@@ -8,8 +8,10 @@
 /* 基础磨砂玻璃 */
 .glass-card {
   background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(16px); /* 更深度的模糊 */
-  border: 1px solid rgba(255, 255, 255, 0.5); /* 模拟玻璃边缘 */
+  backdrop-filter: blur(16px);
+  /* 更深度的模糊 */
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  /* 模拟玻璃边缘 */
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
@@ -17,16 +19,22 @@
 .amz_card-hover {
   position: relative;
   background: white;
-  transition: all 0.4s var(--ease-spring); /* 调用 Core 中的 Q弹变量 */
+  transition: all 0.4s var(--ease-spring);
+  /* 调用 Core 中的 Q弹变量 */
   border-radius: 12px;
-  overflow: hidden; /* 防止光晕溢出 */
+  overflow: hidden;
+  /* 防止光晕溢出 */
 }
 
 /* 伪元素光晕：隐藏在卡片下的彩色渐变 */
 .amz_card-hover::before {
   content: "";
   position: absolute;
-  top: 0; left: 0; right: 0; height: 4px; /* 顶部光条 */
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  /* 顶部光条 */
   background: linear-gradient(90deg, #3b82f6, #8b5cf6, #f97316);
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -34,14 +42,15 @@
 
 .amz_card-hover:hover {
   transform: translateY(-4px) scale(1.005);
-  box-shadow: 
-    0 20px 25px -5px rgba(59, 130, 246, 0.1), 
+  box-shadow:
+    0 20px 25px -5px rgba(59, 130, 246, 0.1),
     0 8px 10px -6px rgba(59, 130, 246, 0.05);
 }
 
 .amz_card-hover:hover::before,
 .asin-card.selected::before {
-  opacity: 1; /* 激活顶部光条 */
+  opacity: 1;
+  /* 激活顶部光条 */
 }
 
 /* 选中状态的 ASIN 卡片 */
@@ -73,12 +82,14 @@
   outline: none;
   background: white;
   border-bottom: 1px solid transparent;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); /* 柔和的蓝色扩散 */
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  /* 柔和的蓝色扩散 */
 }
 
 /* 编辑模式下的父容器高亮 */
 .editing-mode .editable-item {
-  background: #fffbeb; /* 极淡的黄色背景提示 */
+  background: #fffbeb;
+  /* 极淡的黄色背景提示 */
   animation: pulse 2s infinite;
 }
 
@@ -102,7 +113,8 @@
 }
 
 /* 激活态：渐变色块 */
-.amz_nav-btn.active, .tab-active {
+.amz_nav-btn.active,
+.tab-active {
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: white !important;
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
@@ -115,6 +127,7 @@
   color: #0f172a;
   position: relative;
 }
+
 .amz_tab-underline-active::after {
   content: '';
   position: absolute;
@@ -123,12 +136,15 @@
   transform: translateX(-50%);
   width: 20px;
   height: 3px;
-  background: #f97316; /* 橙色强调色 */
+  background: #f97316;
+  /* 橙色强调色 */
   border-radius: 10px;
   transition: width 0.2s;
 }
+
 .amz_tab-underline-active:hover::after {
-  width: 32px; /* 悬浮时线条变长 */
+  width: 32px;
+  /* 悬浮时线条变长 */
 }
 
 /* =========================================
@@ -137,7 +153,8 @@
 /* 翻译块 - 增加左侧色条的质感 */
 .translation-block {
   border-left: 4px solid #3b82f6;
-  background: linear-gradient(to right, #eff6ff, transparent); /* 渐变消失，不生硬 */
+  background: linear-gradient(to right, #eff6ff, transparent);
+  /* 渐变消失，不生硬 */
   padding: 12px;
   border-radius: 0 8px 8px 0;
 }
@@ -157,7 +174,6 @@
 .progress-bar {
   background: linear-gradient(90deg, #3b82f6, #60a5fa);
   box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
-  transition: width 0.5s var(--ease-spring); /* 进度条增长带弹性 */
+  transition: width 0.5s var(--ease-spring);
+  /* 进度条增长带弹性 */
 }
-
-

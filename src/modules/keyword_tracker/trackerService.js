@@ -110,19 +110,28 @@ export function calculateWordFrequency(text) {
 // 3. LLM 服务封装
 // ==========================================
 
-/**
- * 内部通用 LLM 调用桥接
- */
+// 修复 src/modules/keyword_tracker/trackerService.js 中的 bridgeCallLLM 函数
+
 async function bridgeCallLLM(systemPrompt, userPrompt, options = {}) {
-    // 1. 获取全局配置 (保留 localStorage 读取，因为这是客户端存储)
-    // const activeProvider = localStorage.getItem('llm_active_provider');
-    // if (!activeProvider) throw new Error("请先在全局设置中选择 LLM 提供商");
+    // 1. 修复：必须先声明 activeProvider 变量
+    const activeProvider = localStorage.getItem('llm_active_provider'); 
+    
+    if (!activeProvider) {
+        throw new Error("请先在全局设置中选择 LLM 提供商");
+    }
 
-    // const config = JSON.parse(localStorage.getItem(`llm_${activeProvider}`) || '{}');
-    // if (!config.apiKey) throw new Error("所选提供商未配置 API Key");
+    // 2. 使用 activeProvider 获取具体的配置对象
+    const config = JSON.parse(localStorage.getItem(`llm_${activeProvider}`) || '{}');
+    
+    // 检查 Key
+    if (!config.apiKey) {
+         // 特殊处理：如果是 serverless 模式，允许前端 key 为空或随意值，但为了通过校验建议前端填个占位符
+         // 这里抛出错误提示用户去设置里检查
+         throw new Error("所选提供商未配置 API Key");
+    }
 
-    // const targetModel = config.model || (config.models && config.models[0] ? config.models[0].id : undefined);
-    // if (!targetModel) throw new Error("未选择模型，请在设置中同步或选择模型");
+    const targetModel = config.model || (config.models && config.models[0] ? config.models[0].id : undefined);
+    if (!targetModel) throw new Error("未选择模型，请在设置中同步或选择模型");
 
     const messages = [
         { role: 'system', content: systemPrompt },
@@ -131,7 +140,7 @@ async function bridgeCallLLM(systemPrompt, userPrompt, options = {}) {
 
     const finalOptions = {
         temperature: 0.3,
-        jsonMode: false, // 默认关闭 JSON Mode
+        jsonMode: false, 
         ...options
     };
 

@@ -366,7 +366,7 @@ export async function analyzeSelectedAsins() {
   }
 }
 
-export function renderReport() {
+export function renderReport() {    //scraperPanel.js有调用
   const report = state.analysisReport;
   if (!report) return;
 

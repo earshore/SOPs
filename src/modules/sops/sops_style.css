@@ -1,0 +1,212 @@
+/* ================================
+   SOPs Module Styles
+   ================================ */
+
+/* SOPs 全宽显示 - 覆盖模板中的 max-w 限制 */
+#sops_content_area .max-w-4xl,
+#sops_content_area .max-w-5xl,
+#sops_content_area .max-w-6xl {
+    max-width: 100% !important;
+}
+
+#sops_content_area>div {
+    max-width: 100%;
+    width: 100%;
+}
+
+/* SOP Card Grid */
+.sop-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+}
+
+/* SOP Card Styles */
+.sop-card {
+    background: white;
+    border-radius: 1rem;
+    border: 1px solid #e2e8f0;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.sop-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(180deg, #3b82f6, #8b5cf6);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.sop-card:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 10px 40px -10px rgba(59, 130, 246, 0.2);
+    transform: translateY(-2px);
+}
+
+.sop-card:hover::before {
+    opacity: 1;
+}
+
+/* SOP Icon Container */
+.sop-icon-container {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    transition: transform 0.3s ease;
+}
+
+.sop-card:hover .sop-icon-container {
+    transform: scale(1.1);
+}
+
+/* Status Badge */
+.sop-status-badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-weight: 500;
+}
+
+.sop-status-active {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.sop-status-draft {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.sop-status-pending {
+    background: #e0e7ff;
+    color: #4f46e5;
+}
+
+/* SOP Detail View */
+.sop-detail-header {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+/* Timeline Styles */
+.sop-timeline {
+    position: relative;
+    padding-left: 2rem;
+}
+
+.sop-timeline::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg, #3b82f6, #8b5cf6);
+}
+
+.sop-timeline-item {
+    position: relative;
+    padding-bottom: 2rem;
+}
+
+.sop-timeline-item:last-child {
+    padding-bottom: 0;
+}
+
+.sop-timeline-dot {
+    position: absolute;
+    left: -25px;
+    top: 0;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #3b82f6;
+    border: 3px solid white;
+    box-shadow: 0 0 0 2px #3b82f6;
+}
+
+.sop-timeline-dot.completed {
+    background: #22c55e;
+    box-shadow: 0 0 0 2px #22c55e;
+}
+
+.sop-timeline-dot.pending {
+    background: white;
+    box-shadow: 0 0 0 2px #94a3b8;
+}
+
+/* Fade in animation */
+.sop-fade-in {
+    animation: sopFadeIn 0.4s ease-out forwards;
+}
+
+@keyframes sopFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Category Filter Tabs */
+.sop-category-tab {
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #64748b;
+    background: transparent;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.sop-category-tab:hover {
+    background: #f1f5f9;
+    color: #334155;
+}
+
+.sop-category-tab.active {
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+}
+
+/* Search Box */
+.sop-search-box {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    transition: all 0.2s ease;
+}
+
+.sop-search-box:focus-within {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.sop-search-box input {
+    border: none;
+    outline: none;
+    width: 100%;
+    background: transparent;
+}

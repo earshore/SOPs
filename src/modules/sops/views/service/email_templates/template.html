@@ -1,0 +1,576 @@
+<!-- 邮件回复模板 SOP Template - 欧洲全站点实战版 -->
+<div class="sop-widescreen-container">
+    <!-- Back Button & Header -->
+    <div class="mb-6">
+        <button onclick="switchTab('sops_overview')"
+            class="text-sm text-slate-500 hover:text-blue-600 transition-colors mb-4 inline-flex items-center gap-2">
+            <i class="fas fa-arrow-left"></i>返回 SOP 列表
+        </button>
+
+        <div class="sop-detail-header bg-gradient-to-r from-blue-50 to-indigo-50">
+            <div class="flex items-start gap-4">
+                <div class="sop-icon-container bg-blue-100 text-blue-600 w-16 h-16 text-2xl">
+                    <i class="fas fa-envelope-open-text"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <h1 class="text-2xl font-bold text-slate-900">邮件回复模板 SOP <span
+                                class="text-base font-normal text-blue-600">(欧洲全站点)</span></h1>
+                        <span class="sop-status-badge sop-status-active">已发布</span>
+                    </div>
+                    <p class="text-slate-600 mb-3">
+                        覆盖欧洲5国 (DE/UK/FR/IT/ES) 的多语言客服邮件模板，高频场景直接复制，AI翻译+人工润色，24小时响应SLA达标。
+                    </p>
+                    <div class="flex items-center gap-6 text-sm text-slate-500">
+                        <span><i class="fas fa-layer-group mr-1"></i>客服与客户体验体系</span>
+                        <span class="text-blue-600 font-semibold"><i class="fas fa-clock mr-1"></i>SLA: 24h内必回复</span>
+                        <span><i class="fas fa-globe-europe mr-1"></i>5语言支持</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Reality Check -->
+    <div class="bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl p-4 mb-6">
+        <div class="flex items-start gap-3">
+            <i class="fas fa-lightbulb text-2xl"></i>
+            <div>
+                <h3 class="font-bold text-lg">💡 客服效率真相</h3>
+                <p class="text-sm opacity-90">你不会5国语言没关系。<strong>80%邮件用模板秒回</strong>，20%复杂问题用ChatGPT翻译。核心是：快速响应 >
+                    完美表达。欧洲客户更在意你是否解决问题，而非语法是否完美。</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alerts Row -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+            <div class="flex items-center gap-2 mb-2">
+                <i class="fas fa-clock text-blue-500"></i>
+                <span class="font-bold text-blue-800">24h SLA</span>
+            </div>
+            <p class="text-xs text-slate-600">所有消息必须24小时内回复，否则影响账号健康度。</p>
+        </div>
+        <div class="bg-red-50 border border-red-200 rounded-xl p-4">
+            <div class="flex items-center gap-2 mb-2">
+                <i class="fas fa-ban text-red-500"></i>
+                <span class="font-bold text-red-800">禁止诱评</span>
+            </div>
+            <p class="text-xs text-red-700">"好评返现"、"满意请五星" 等话术违规必封！</p>
+        </div>
+        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+            <div class="flex items-center gap-2 mb-2">
+                <i class="fas fa-robot text-emerald-500"></i>
+                <span class="font-bold text-emerald-800">AI翻译技巧</span>
+            </div>
+            <p class="text-xs text-slate-600">用ChatGPT翻译时加前缀："Translate to German, keep it formal and polite:"</p>
+        </div>
+    </div>
+
+    <!-- Language Tabs -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-language text-indigo-500"></i>多语言模板库 — 按站点选择
+        </h2>
+
+        <!-- Language Selector -->
+        <div class="flex flex-wrap gap-2 mb-6" id="lang-tabs">
+            <button class="px-4 py-2 rounded-lg bg-slate-800 text-white font-medium text-sm">🇬🇧 UK (English)</button>
+            <button class="px-4 py-2 rounded-lg bg-slate-100 text-slate-700 font-medium text-sm hover:bg-slate-200">🇩🇪
+                DE (Deutsch)</button>
+            <button class="px-4 py-2 rounded-lg bg-slate-100 text-slate-700 font-medium text-sm hover:bg-slate-200">🇫🇷
+                FR (Français)</button>
+            <button class="px-4 py-2 rounded-lg bg-slate-100 text-slate-700 font-medium text-sm hover:bg-slate-200">🇮🇹
+                IT (Italiano)</button>
+            <button class="px-4 py-2 rounded-lg bg-slate-100 text-slate-700 font-medium text-sm hover:bg-slate-200">🇪🇸
+                ES (Español)</button>
+        </div>
+
+        <!-- Template Cards Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+            <!-- Template 1: Delivery Delay -->
+            <div class="border rounded-xl overflow-hidden">
+                <div class="bg-amber-50 px-4 py-3 flex items-center gap-2">
+                    <i class="fas fa-truck text-amber-500"></i>
+                    <span class="font-bold text-slate-800">物流延误 / Delivery Delay</span>
+                    <span class="ml-auto text-xs bg-amber-200 text-amber-800 px-2 py-1 rounded">高频</span>
+                </div>
+                <div class="p-4 bg-white">
+                    <div class="lang-content lang-en">
+                        <div class="bg-slate-50 p-3 rounded text-xs font-mono leading-relaxed">
+                            Dear Customer,<br /><br />
+                            Thank you for your message. We sincerely apologize for the delay in delivery.<br /><br />
+                            Your order is currently in transit and is expected to arrive within [X] business days. We
+                            are monitoring it closely.<br /><br />
+                            If you do not receive it by [Date], please contact us and we will resolve this
+                            immediately.<br /><br />
+                            Best regards,<br />[Brand] Customer Service
+                        </div>
+                    </div>
+                    <div class="lang-content lang-de hidden">
+                        <div class="bg-slate-50 p-3 rounded text-xs font-mono leading-relaxed">
+                            Sehr geehrte/r Kunde/Kundin,<br /><br />
+                            vielen Dank für Ihre Nachricht. Wir entschuldigen uns aufrichtig für die
+                            Verzögerung.<br /><br />
+                            Ihre Bestellung ist unterwegs und sollte innerhalb von [X] Werktagen eintreffen.<br /><br />
+                            Falls Sie die Sendung bis zum [Datum] nicht erhalten, kontaktieren Sie uns bitte
+                            erneut.<br /><br />
+                            Mit freundlichen Grüßen,<br />[Marke] Kundenservice
+                        </div>
+                    </div>
+                    <div class="lang-content lang-fr hidden">
+                        <div class="bg-slate-50 p-3 rounded text-xs font-mono leading-relaxed">
+                            Cher(e) Client(e),<br /><br />
+                            Merci pour votre message. Nous vous présentons nos excuses pour ce retard de
+                            livraison.<br /><br />
+                            Votre commande est en cours d'acheminement et devrait arriver sous [X] jours
+                            ouvrés.<br /><br />
+                            Si vous ne la recevez pas d'ici le [Date], n'hésitez pas à nous recontacter.<br /><br />
+                            Cordialement,<br />[Marque] Service Client
+                        </div>
+                    </div>
+                    <div class="lang-content lang-it hidden">
+                        <div class="bg-slate-50 p-3 rounded text-xs font-mono leading-relaxed">
+                            Gentile Cliente,<br /><br />
+                            Grazie per il suo messaggio. Ci scusiamo sinceramente per il ritardo nella
+                            consegna.<br /><br />
+                            Il suo ordine è in transito e dovrebbe arrivare entro [X] giorni lavorativi.<br /><br />
+                            Se non lo riceve entro il [Data], la preghiamo di ricontattarci.<br /><br />
+                            Cordiali saluti,<br />[Marca] Servizio Clienti
+                        </div>
+                    </div>
+                    <div class="lang-content lang-es hidden">
+                        <div class="bg-slate-50 p-3 rounded text-xs font-mono leading-relaxed">
+                            Estimado/a Cliente,<br /><br />
+                            Gracias por su mensaje. Pedimos disculpas por el retraso en la entrega.<br /><br />
+                            Su pedido está en camino y debería llegar en [X] días hábiles.<br /><br />
+                            Si no lo recibe antes del [Fecha], por favor contáctenos de nuevo.<br /><br />
+                            Saludos cordiales,<br />[Marca] Servicio al Cliente
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Template 2: Product Damaged -->
+            <div class="border rounded-xl overflow-hidden">
+                <div class="bg-red-50 px-4 py-3 flex items-center gap-2">
+                    <i class="fas fa-box-open text-red-500"></i>
+                    <span class="font-bold text-slate-800">产品破损 / Damaged Product</span>
+                    <span class="ml-auto text-xs bg-red-200 text-red-800 px-2 py-1 rounded">关键</span>
+                </div>
+                <div class="p-4 bg-white">
+                    <div class="lang-content lang-en">
+                        <div class="bg-slate-50 p-3 rounded text-xs font-mono leading-relaxed">
+                            Dear Customer,<br /><br />
+                            We are very sorry to hear that your product arrived damaged.<br /><br />
+                            To resolve this, we can offer:<br />
+                            ✅ Option 1: Full replacement (no need to return)<br />
+                            ✅ Option 2: Full refund<br /><br />
+                            Please let us know which you prefer, and we will process it immediately.<br /><br />
+                            Best regards,<br />[Brand] Customer Service
+                        </div>
+                    </div>
+                    <div class="lang-content lang-de hidden">
+                        <div class="bg-slate-50 p-3 rounded text-xs font-mono leading-relaxed">
+                            Sehr geehrte/r Kunde/Kundin,<br /><br />
+                            Es tut uns sehr leid, dass Ihr Produkt beschädigt angekommen ist.<br /><br />
+                            Wir bieten Ihnen folgende Optionen an:<br />
+                            ✅ Option 1: Kostenloser Ersatz (ohne Rücksendung)<br />
+                            ✅ Option 2: Vollständige Rückerstattung<br /><br />
+                            Bitte teilen Sie uns Ihre Präferenz mit.<br /><br />
+                            Mit freundlichen Grüßen,<br />[Marke] Kundenservice
+                        </div>
+                    </div>
+                    <div class="lang-content lang-fr hidden">
+                        <div class="bg-slate-50 p-3 rounded text-xs font-mono leading-relaxed">
+                            Cher(e) Client(e),<br /><br />
+                            Nous sommes navrés d'apprendre que votre produit est arrivé endommagé.<br /><br />
+                            Pour résoudre ce problème, nous vous proposons :<br />
+                            ✅ Option 1 : Remplacement gratuit (sans retour)<br />
+                            ✅ Option 2 : Remboursement intégral<br /><br />
+                            Merci de nous indiquer votre choix.<br /><br />
+                            Cordialement,<br />[Marque] Service Client
+                        </div>
+                    </div>
+                    <div class="lang-content lang-it hidden">
+                        <div class="bg-slate-50 p-3 rounded text-xs font-mono leading-relaxed">
+                            Gentile Cliente,<br /><br />
+                            Ci dispiace molto sapere che il prodotto è arrivato danneggiato.<br /><br />
+                            Per risolvere, le offriamo:<br />
+                            ✅ Opzione 1: Sostituzione gratuita (senza reso)<br />
+                            ✅ Opzione 2: Rimborso completo<br /><br />
+                            La preghiamo di comunicarci la sua preferenza.<br /><br />
+                            Cordiali saluti,<br />[Marca] Servizio Clienti
+                        </div>
+                    </div>
+                    <div class="lang-content lang-es hidden">
+                        <div class="bg-slate-50 p-3 rounded text-xs font-mono leading-relaxed">
+                            Estimado/a Cliente,<br /><br />
+                            Lamentamos mucho que su producto haya llegado dañado.<br /><br />
+                            Para solucionarlo, le ofrecemos:<br />
+                            ✅ Opción 1: Reemplazo gratuito (sin devolución)<br />
+                            ✅ Opción 2: Reembolso completo<br /><br />
+                            Por favor indíquenos su preferencia.<br /><br />
+                            Saludos cordiales,<br />[Marca] Servicio al Cliente
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Template 3: Refund Request -->
+            <div class="border rounded-xl overflow-hidden">
+                <div class="bg-purple-50 px-4 py-3 flex items-center gap-2">
+                    <i class="fas fa-hand-holding-dollar text-purple-500"></i>
+                    <span class="font-bold text-slate-800">退款请求 / Refund Request</span>
+                </div>
+                <div class="p-4 bg-white">
+                    <div class="lang-content lang-en">
+                        <div class="bg-slate-50 p-3 rounded text-xs font-mono leading-relaxed">
+                            Dear Customer,<br /><br />
+                            Thank you for contacting us regarding your refund request.<br /><br />
+                            To process this, please initiate the return through Amazon's Return Center. Once we receive
+                            the item (or if no return is needed), we will issue a full refund within 3-5 business
+                            days.<br /><br />
+                            If you have any questions, please let us know.<br /><br />
+                            Best regards,<br />[Brand] Customer Service
+                        </div>
+                    </div>
+                    <div class="lang-content lang-de hidden">
+                        <div class="bg-slate-50 p-3 rounded text-xs font-mono leading-relaxed">
+                            Sehr geehrte/r Kunde/Kundin,<br /><br />
+                            vielen Dank für Ihre Anfrage zur Rückerstattung.<br /><br />
+                            Bitte starten Sie die Rücksendung über das Amazon-Rücksendeportal. Nach Erhalt (oder falls
+                            keine Rücksendung erforderlich ist) erfolgt die Erstattung innerhalb von 3-5
+                            Werktagen.<br /><br />
+                            Bei Fragen stehen wir Ihnen gerne zur Verfügung.<br /><br />
+                            Mit freundlichen Grüßen,<br />[Marke] Kundenservice
+                        </div>
+                    </div>
+                    <div class="lang-content lang-fr hidden">
+                        <div class="bg-slate-50 p-3 rounded text-xs font-mono leading-relaxed">
+                            Cher(e) Client(e),<br /><br />
+                            Merci de nous avoir contactés concernant votre demande de remboursement.<br /><br />
+                            Veuillez initier le retour via le Centre de Retours Amazon. Après réception (ou si aucun
+                            retour n'est nécessaire), nous procéderons au remboursement sous 3 à 5 jours
+                            ouvrés.<br /><br />
+                            N'hésitez pas à nous contacter pour toute question.<br /><br />
+                            Cordialement,<br />[Marque] Service Client
+                        </div>
+                    </div>
+                    <div class="lang-content lang-it hidden">
+                        <div class="bg-slate-50 p-3 rounded text-xs font-mono leading-relaxed">
+                            Gentile Cliente,<br /><br />
+                            Grazie per averci contattato riguardo alla sua richiesta di rimborso.<br /><br />
+                            La preghiamo di avviare il reso tramite il Centro Resi di Amazon. Dopo la ricezione (o se
+                            non è necessario il reso), emetteremo il rimborso entro 3-5 giorni lavorativi.<br /><br />
+                            Per qualsiasi domanda, non esiti a contattarci.<br /><br />
+                            Cordiali saluti,<br />[Marca] Servizio Clienti
+                        </div>
+                    </div>
+                    <div class="lang-content lang-es hidden">
+                        <div class="bg-slate-50 p-3 rounded text-xs font-mono leading-relaxed">
+                            Estimado/a Cliente,<br /><br />
+                            Gracias por contactarnos sobre su solicitud de reembolso.<br /><br />
+                            Por favor inicie la devolución a través del Centro de Devoluciones de Amazon. Una vez
+                            recibido (o si no es necesaria la devolución), procesaremos el reembolso en 3-5 días
+                            hábiles.<br /><br />
+                            Si tiene alguna pregunta, no dude en contactarnos.<br /><br />
+                            Saludos cordiales,<br />[Marca] Servicio al Cliente
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Template 4: Invoice Request (EU Important!) -->
+            <div class="border rounded-xl overflow-hidden">
+                <div class="bg-emerald-50 px-4 py-3 flex items-center gap-2">
+                    <i class="fas fa-file-invoice text-emerald-500"></i>
+                    <span class="font-bold text-slate-800">发票索取 / Invoice Request</span>
+                    <span class="ml-auto text-xs bg-emerald-200 text-emerald-800 px-2 py-1 rounded">欧洲高频</span>
+                </div>
+                <div class="p-4 bg-white">
+                    <div class="lang-content lang-en">
+                        <div class="bg-slate-50 p-3 rounded text-xs font-mono leading-relaxed">
+                            Dear Customer,<br /><br />
+                            Thank you for your invoice request.<br /><br />
+                            Please find your VAT invoice attached to this message. If you need any modifications
+                            (company name, VAT number, etc.), please let us know the correct details.<br /><br />
+                            Best regards,<br />[Brand] Customer Service
+                        </div>
+                    </div>
+                    <div class="lang-content lang-de hidden">
+                        <div class="bg-slate-50 p-3 rounded text-xs font-mono leading-relaxed">
+                            Sehr geehrte/r Kunde/Kundin,<br /><br />
+                            vielen Dank für Ihre Rechnungsanfrage.<br /><br />
+                            Anbei finden Sie Ihre Rechnung mit ausgewiesener MwSt. Falls Sie Änderungen benötigen
+                            (Firmenname, USt-IdNr. etc.), teilen Sie uns bitte die korrekten Daten mit.<br /><br />
+                            Mit freundlichen Grüßen,<br />[Marke] Kundenservice
+                        </div>
+                    </div>
+                    <div class="lang-content lang-fr hidden">
+                        <div class="bg-slate-50 p-3 rounded text-xs font-mono leading-relaxed">
+                            Cher(e) Client(e),<br /><br />
+                            Merci pour votre demande de facture.<br /><br />
+                            Veuillez trouver ci-joint votre facture avec TVA. Si vous avez besoin de modifications (nom
+                            d'entreprise, numéro de TVA, etc.), merci de nous communiquer les informations
+                            correctes.<br /><br />
+                            Cordialement,<br />[Marque] Service Client
+                        </div>
+                    </div>
+                    <div class="lang-content lang-it hidden">
+                        <div class="bg-slate-50 p-3 rounded text-xs font-mono leading-relaxed">
+                            Gentile Cliente,<br /><br />
+                            Grazie per la sua richiesta di fattura.<br /><br />
+                            In allegato trova la fattura con IVA. Se necessita di modifiche (ragione sociale, partita
+                            IVA, ecc.), la preghiamo di comunicarci i dati corretti.<br /><br />
+                            Cordiali saluti,<br />[Marca] Servizio Clienti
+                        </div>
+                    </div>
+                    <div class="lang-content lang-es hidden">
+                        <div class="bg-slate-50 p-3 rounded text-xs font-mono leading-relaxed">
+                            Estimado/a Cliente,<br /><br />
+                            Gracias por solicitar su factura.<br /><br />
+                            Adjuntamos su factura con IVA. Si necesita alguna modificación (nombre de empresa, número de
+                            IVA, etc.), por favor indíquenos los datos correctos.<br /><br />
+                            Saludos cordiales,<br />[Marca] Servicio al Cliente
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Template 5: Partial Refund Offer -->
+            <div class="border rounded-xl overflow-hidden">
+                <div class="bg-blue-50 px-4 py-3 flex items-center gap-2">
+                    <i class="fas fa-coins text-blue-500"></i>
+                    <span class="font-bold text-slate-800">部分退款 / Partial Refund</span>
+                    <span class="ml-auto text-xs bg-blue-200 text-blue-800 px-2 py-1 rounded">挽留神器</span>
+                </div>
+                <div class="p-4 bg-white">
+                    <div class="lang-content lang-en">
+                        <div class="bg-slate-50 p-3 rounded text-xs font-mono leading-relaxed">
+                            Dear Customer,<br /><br />
+                            We are sorry to hear about the issue with your order.<br /><br />
+                            As a gesture of goodwill, we would like to offer you a partial refund of €[X] while you keep
+                            the product. Alternatively, we can arrange a full replacement or refund.<br /><br />
+                            Please let us know how you would like to proceed.<br /><br />
+                            Best regards,<br />[Brand] Customer Service
+                        </div>
+                    </div>
+                    <div class="lang-content lang-de hidden">
+                        <div class="bg-slate-50 p-3 rounded text-xs font-mono leading-relaxed">
+                            Sehr geehrte/r Kunde/Kundin,<br /><br />
+                            Es tut uns leid von dem Problem zu hören.<br /><br />
+                            Als Entschädigung möchten wir Ihnen eine Teilerstattung von €[X] anbieten, wobei Sie das
+                            Produkt behalten können. Alternativ können wir einen vollständigen Ersatz oder Erstattung
+                            veranlassen.<br /><br />
+                            Bitte teilen Sie uns mit, wie Sie vorgehen möchten.<br /><br />
+                            Mit freundlichen Grüßen,<br />[Marke] Kundenservice
+                        </div>
+                    </div>
+                    <div class="lang-content lang-fr hidden">
+                        <div class="bg-slate-50 p-3 rounded text-xs font-mono leading-relaxed">
+                            Cher(e) Client(e),<br /><br />
+                            Nous sommes navrés d'apprendre ce problème.<br /><br />
+                            En guise de geste commercial, nous vous proposons un remboursement partiel de €[X] tout en
+                            conservant le produit. Sinon, nous pouvons organiser un remplacement ou remboursement
+                            complet.<br /><br />
+                            Merci de nous indiquer votre préférence.<br /><br />
+                            Cordialement,<br />[Marque] Service Client
+                        </div>
+                    </div>
+                    <div class="lang-content lang-it hidden">
+                        <div class="bg-slate-50 p-3 rounded text-xs font-mono leading-relaxed">
+                            Gentile Cliente,<br /><br />
+                            Ci dispiace per il problema riscontrato.<br /><br />
+                            Come gesto di buona volontà, le offriamo un rimborso parziale di €[X] mantenendo il
+                            prodotto. In alternativa, possiamo organizzare una sostituzione o un rimborso
+                            completo.<br /><br />
+                            La preghiamo di comunicarci come preferisce procedere.<br /><br />
+                            Cordiali saluti,<br />[Marca] Servizio Clienti
+                        </div>
+                    </div>
+                    <div class="lang-content lang-es hidden">
+                        <div class="bg-slate-50 p-3 rounded text-xs font-mono leading-relaxed">
+                            Estimado/a Cliente,<br /><br />
+                            Lamentamos el problema con su pedido.<br /><br />
+                            Como gesto de buena voluntad, le ofrecemos un reembolso parcial de €[X] conservando el
+                            producto. Alternativamente, podemos organizar un reemplazo o reembolso completo.<br /><br />
+                            Por favor indíquenos cómo desea proceder.<br /><br />
+                            Saludos cordiales,<br />[Marca] Servicio al Cliente
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Template 6: Product Usage Help -->
+            <div class="border rounded-xl overflow-hidden">
+                <div class="bg-indigo-50 px-4 py-3 flex items-center gap-2">
+                    <i class="fas fa-question-circle text-indigo-500"></i>
+                    <span class="font-bold text-slate-800">使用咨询 / Usage Help</span>
+                </div>
+                <div class="p-4 bg-white">
+                    <div class="lang-content lang-en">
+                        <div class="bg-slate-50 p-3 rounded text-xs font-mono leading-relaxed">
+                            Dear Customer,<br /><br />
+                            Thank you for your question about how to use the product.<br /><br />
+                            Here is a quick guide:<br />
+                            1. [Step 1]<br />
+                            2. [Step 2]<br />
+                            3. [Step 3]<br /><br />
+                            You can also find a detailed manual included in the package. If you have further questions,
+                            please don't hesitate to ask.<br /><br />
+                            Best regards,<br />[Brand] Customer Service
+                        </div>
+                    </div>
+                    <div class="lang-content lang-de hidden">
+                        <div class="bg-slate-50 p-3 rounded text-xs font-mono leading-relaxed">
+                            Sehr geehrte/r Kunde/Kundin,<br /><br />
+                            vielen Dank für Ihre Frage zur Produktnutzung.<br /><br />
+                            Hier eine kurze Anleitung:<br />
+                            1. [Schritt 1]<br />
+                            2. [Schritt 2]<br />
+                            3. [Schritt 3]<br /><br />
+                            Eine ausführliche Anleitung liegt dem Paket bei. Bei weiteren Fragen stehen wir gerne zur
+                            Verfügung.<br /><br />
+                            Mit freundlichen Grüßen,<br />[Marke] Kundenservice
+                        </div>
+                    </div>
+                    <div class="lang-content lang-fr hidden">
+                        <div class="bg-slate-50 p-3 rounded text-xs font-mono leading-relaxed">
+                            Cher(e) Client(e),<br /><br />
+                            Merci pour votre question concernant l'utilisation du produit.<br /><br />
+                            Voici un guide rapide :<br />
+                            1. [Étape 1]<br />
+                            2. [Étape 2]<br />
+                            3. [Étape 3]<br /><br />
+                            Un manuel détaillé est inclus dans l'emballage. N'hésitez pas à nous contacter pour toute
+                            autre question.<br /><br />
+                            Cordialement,<br />[Marque] Service Client
+                        </div>
+                    </div>
+                    <div class="lang-content lang-it hidden">
+                        <div class="bg-slate-50 p-3 rounded text-xs font-mono leading-relaxed">
+                            Gentile Cliente,<br /><br />
+                            Grazie per la sua domanda sull'utilizzo del prodotto.<br /><br />
+                            Ecco una guida rapida:<br />
+                            1. [Passo 1]<br />
+                            2. [Passo 2]<br />
+                            3. [Passo 3]<br /><br />
+                            Un manuale dettagliato è incluso nella confezione. Per ulteriori domande, non esiti a
+                            contattarci.<br /><br />
+                            Cordiali saluti,<br />[Marca] Servizio Clienti
+                        </div>
+                    </div>
+                    <div class="lang-content lang-es hidden">
+                        <div class="bg-slate-50 p-3 rounded text-xs font-mono leading-relaxed">
+                            Estimado/a Cliente,<br /><br />
+                            Gracias por su consulta sobre cómo usar el producto.<br /><br />
+                            Aquí tiene una guía rápida:<br />
+                            1. [Paso 1]<br />
+                            2. [Paso 2]<br />
+                            3. [Paso 3]<br /><br />
+                            También encontrará un manual detallado en el paquete. Si tiene más preguntas, no dude en
+                            contactarnos.<br /><br />
+                            Saludos cordiales,<br />[Marca] Servicio al Cliente
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Common Phrases Quick Reference -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Greeting & Closing -->
+        <div class="bg-white rounded-xl border border-slate-200 p-6">
+            <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <i class="fas fa-quote-left text-purple-500"></i>开头/结尾常用语 (5语速查)
+            </h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-xs">
+                    <thead class="bg-slate-100">
+                        <tr>
+                            <th class="px-2 py-2 text-left">用途</th>
+                            <th class="px-2 py-2 text-left">🇬🇧 EN</th>
+                            <th class="px-2 py-2 text-left">🇩🇪 DE</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y">
+                        <tr>
+                            <td class="px-2 py-2 font-bold">称呼</td>
+                            <td class="px-2 py-2">Dear Customer</td>
+                            <td class="px-2 py-2">Sehr geehrte/r Kunde/Kundin</td>
+                        </tr>
+                        <tr>
+                            <td class="px-2 py-2 font-bold">感谢</td>
+                            <td class="px-2 py-2">Thank you for contacting us</td>
+                            <td class="px-2 py-2">Vielen Dank für Ihre Nachricht</td>
+                        </tr>
+                        <tr>
+                            <td class="px-2 py-2 font-bold">道歉</td>
+                            <td class="px-2 py-2">We sincerely apologize</td>
+                            <td class="px-2 py-2">Wir entschuldigen uns aufrichtig</td>
+                        </tr>
+                        <tr>
+                            <td class="px-2 py-2 font-bold">结尾</td>
+                            <td class="px-2 py-2">Best regards</td>
+                            <td class="px-2 py-2">Mit freundlichen Grüßen</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Response Principles -->
+        <div class="bg-white rounded-xl border border-slate-200 p-6">
+            <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <i class="fas fa-list-check text-emerald-500"></i>回复黄金法则
+            </h2>
+            <div class="space-y-3">
+                <div class="flex items-start gap-3 p-3 bg-emerald-50 rounded-lg">
+                    <span
+                        class="w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">1</span>
+                    <div class="text-xs">
+                        <strong>先道歉后解决</strong>：无论是否你的错，先表达歉意再提供方案。
+                    </div>
+                </div>
+                <div class="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
+                    <span
+                        class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">2</span>
+                    <div class="text-xs">
+                        <strong>给客户选择权</strong>：提供2-3个方案让客户选，而非单一方案。
+                    </div>
+                </div>
+                <div class="flex items-start gap-3 p-3 bg-purple-50 rounded-lg">
+                    <span
+                        class="w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">3</span>
+                    <div class="text-xs">
+                        <strong>主动超预期</strong>：部分退款时主动多给€1-2，换来好评概率大增。
+                    </div>
+                </div>
+                <div class="flex items-start gap-3 p-3 bg-amber-50 rounded-lg">
+                    <span
+                        class="w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">4</span>
+                    <div class="text-xs">
+                        <strong>留证据</strong>：所有承诺的退款/补发，截图保存，避免二次纠纷。
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Resource -->
+    <div class="bg-blue-50 rounded-xl border border-blue-200 p-4">
+        <div class="flex items-center gap-3">
+            <i class="fas fa-video text-blue-500 text-xl"></i>
+            <div>
+                <h3 class="font-bold text-slate-800">操作视频教程</h3>
+                <p class="text-sm text-slate-600">访问公司网盘观看详细操作录屏：<a href="http://192.168.1.99"
+                        class="text-blue-600 underline">192.168.1.99</a>（仅限内网访问）→ 培训资料 → 客服邮件专题</p>
+            </div>
+        </div>
+    </div>
+</div>

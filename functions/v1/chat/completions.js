@@ -1,7 +1,7 @@
 // functions/v1/chat/completions.js
 
 export async function onRequest(context) {
-  // 1. 处理 CORS (允许你的前端访问)
+  // 1. 处理预检请求 (CORS)
   if (context.request.method === "OPTIONS") {
     return new Response(null, {
       headers: {
@@ -17,45 +17,75 @@ export async function onRequest(context) {
   }
 
   try {
-    // 2. 获取请求体
-    const requestBody = await context.request.json();
-
-    // 3. 获取环境变量中的真实 Key (将在 Cloudflare 后台配置)
-    // 假设你使用 OpenAI，也可以根据 requestBody.model 判断切换不同的 Key
-    const REAL_API_KEY = context.env.LLM_API_KEY; 
+    // ============================================================
+    // 🔒 安全鉴权模块 (Gatekeeper)
+    // ============================================================
     
-    // 如果你想支持自定义 API 地址 (例如中转商)，也可以配在环境变量里
-    const UPSTREAM_API_URL = context.env.LLM_API_BASE_URL || "https://api.openai.com/v1";
+    // 获取前端传来的 Token (用户在设置里填写的 API Key)
+    const authHeader = context.request.headers.get("Authorization") || "";
+    // 去掉 "Bearer " 前缀，拿到纯密码
+    const userProvidedPass = authHeader.replace("Bearer ", "").trim();
+    
+    // 获取你在 Cloudflare 后台设置的正确密码
+    const correctPassword = context.env.AUTH_PASSWORD;
 
-    if (!REAL_API_KEY) {
-      return new Response(JSON.stringify({ error: { message: "Server: API Key not configured" } }), {
-        status: 500,
-        headers: { "Content-Type": "application/json" }
+    // 如果设置了密码，就强制检查
+    if (correctPassword && userProvidedPass !== correctPassword) {
+      return new Response(JSON.stringify({ 
+        error: { message: "⛔ 访问被拒绝：请输入正确的访问密码 (Access Password)" } 
+      }), {
+        status: 401, // Unauthorized
+        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
       });
     }
 
-    // 4. 转发请求给大模型服务商
+    // ============================================================
+    // 🚀 多 Key 负载均衡模块
+    // ============================================================
+    
+    // 获取真实的 API Keys (逗号分隔)
+    const envKeys = context.env.LLM_API_KEY || "";
+    const keyList = envKeys.split(',').map(k => k.trim()).filter(k => k);
+
+    if (keyList.length === 0) {
+      return new Response(JSON.stringify({ error: { message: "Server: Configuration Error (No Real API Keys found)" } }), {
+        status: 500,
+        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+      });
+    }
+
+    // 随机抽取一个真实 Key
+    const REAL_API_KEY = keyList[Math.floor(Math.random() * keyList.length)];
+
+    // ============================================================
+    // 📡 转发请求模块
+    // ============================================================
+
+    const requestBody = await context.request.json();
+    const UPSTREAM_API_URL = context.env.LLM_API_BASE_URL || "https://api.openai.com/v1";
+
     const response = await fetch(`${UPSTREAM_API_URL}/chat/completions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${REAL_API_KEY}`,
+        // 这里必须用 REAL_API_KEY，而不是用户传来的密码
+        "Authorization": `Bearer ${REAL_API_KEY}`, 
       },
       body: JSON.stringify(requestBody),
     });
 
-    // 5. 返回结果给前端
+    // 处理流式响应或普通响应
     const data = await response.json();
     return new Response(JSON.stringify(data), {
       status: response.status,
       headers: {
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*", // 允许跨域
+        "Access-Control-Allow-Origin": "*",
       },
     });
 
   } catch (err) {
-    return new Response(JSON.stringify({ error: { message: err.message } }), {
+    return new Response(JSON.stringify({ error: { message: `Server Error: ${err.message}` } }), {
       status: 500,
       headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
     });

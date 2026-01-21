@@ -24,17 +24,18 @@ window.addEventListener("unhandledrejection", (event) => {
 });
 
 // 1. 导入各模块的初始化函数和业务函数
-import { initSettingsListeners, updateModelStatus, loadProviderConfig, openSettings, closeSettings, saveProviderConfig, renderProxyInputUI, fetchModels, toggleApiKeyVisibility, testConnection, saveProxyConfig, } from "./components/settings/systemSettings.js";
+import { initSettingsListeners, updateModelStatus, loadProviderConfig, openSettings, closeSettings, toggleApiKeyVisibility, saveProviderConfig, renderProxyInputUI, fetchModels, testConnection, saveProxyConfig, } from "./components/settings/systemSettings.js";
 import { switchTab, renderMegaMenu } from "../src/common/utils/ui.js";
 import { initHomeSplash } from "./modules/home/homeDisplay.js";
-import { initScraperListeners, selectSite, renderHistory, clearAsins, startScraping, loadHistory, clearHistory, } from "./modules/master_prompt/scraper/scraperPanel.js";
-import { renderDataPanel, toggleCardExpand, deleteProduct, deleteReview, triggerImport, handleImportFiles, switchDataTab} from "./modules/master_prompt/data_manage/dataDisplay.js";
+import { initScraperListeners, selectSite, renderHistory, } from "./modules/master_prompt/scraper/scraperPanel.js";
+import { renderDataPanel, triggerImport, switchDataTab, handleImportFiles, toggleCardExpand, deleteProduct, deleteReview } from "./modules/master_prompt/data_manage/dataDisplay.js";
 import { initAnalysisPanel, updateAsinSelectList, analyzeSelectedAsins, renderReport, } from "./modules/master_prompt/analysis/analysisDisplay.js";
 import { initPromptlabModule } from './modules/master_prompt/promptlab/promptlabDisplay.js';
 import { initKeywordTracker } from './modules/keyword_tracker/trackerDisplay.js';
 // ✅ 核心修正：仅导入文件，让它自动注册事件监听器
 // import './modules/amz_hub/amz_hubDisplay.js';
 import './modules/amz_hub/amz_hub.js'; // 新的
+import './modules/sops/sops.js'; // SOPs 流程中心模块
 
 // ========================
 // APP STARTUP (程序启动)
@@ -124,10 +125,10 @@ window.saveProxyConfig = saveProxyConfig;
 
 // Scraper
 window.selectSite = selectSite;
-window.startScraping = startScraping;
-window.loadHistory = loadHistory;
-window.clearHistory = clearHistory;
-window.clearAsins = clearAsins;
+// window.startScraping = startScraping;
+// window.loadHistory = loadHistory;
+// window.clearHistory = clearHistory;
+// window.clearAsins = clearAsins;
 
 // Data Display
 window.toggleCardExpand = toggleCardExpand;

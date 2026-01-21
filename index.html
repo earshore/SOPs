@@ -21,124 +21,151 @@
 </head>
 
 <body class="bg-slate-50 h-screen flex flex-col overflow-hidden">
-  
-<header class="bg-white border-b border-slate-200 z-[100] relative">
-  <div class="px-6 h-16 flex items-center justify-between">
-    <div class="flex items-center gap-3 w-64">
-      <div
-        class="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20">
-        <i class="fa-brands fa-amazon text-white text-md"></i>
-      </div>
-      <div>
-        <h1 class="text-base font-bold text-slate-800 tracking-tight">Amazing Amazon Architect</h1>
-        <p class="text-[10px] text-slate-400 font-normal tracking-tighter">Architecting Success, Prompt by Prompt.</p>
-      </div>
-    </div>
 
-    <nav class="flex items-center h-full">
-      <button onclick="switchTab('home')" id="nav-home"
-        class="nav-item px-6 h-full text-sm font-medium text-slate-600 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-600 transition-all">
-        首页
-      </button>
+  <header class="bg-white border-b border-slate-200 z-[100] relative">
+    <div class="px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3 w-64">
+        <div
+          class="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20">
+          <i class="fa-brands fa-amazon text-white text-md"></i>
+        </div>
+        <div>
+          <h1 class="text-base font-bold text-slate-800 tracking-tight">Amazing Amazon Architect</h1>
+          <p class="text-[10px] text-slate-400 font-normal tracking-tighter">Architecting Success, Prompt by Prompt.</p>
+        </div>
+      </div>
 
-      <div class="group h-full static"> 
-        
-        <button id="nav-apps"
-          class="nav-item px-6 h-full text-sm font-medium text-slate-600 group-hover:text-blue-600 border-b-2 border-transparent group-hover:border-blue-600 transition-all flex items-center gap-2">
-          应用中心 <i class="fas fa-chevron-down text-xs opacity-50 group-hover:rotate-180 transition-transform duration-300"></i>
+      <nav class="flex items-center h-full">
+        <button onclick="switchTab('home')" id="nav-home"
+          class="nav-item px-6 h-full text-sm font-medium text-slate-600 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-600 transition-all">
+          首页
         </button>
 
-        <div class="absolute top-16 left-0 w-full bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xl shadow-slate-200/50 
+        <div class="group h-full static">
+
+          <button id="nav-apps"
+            class="nav-item px-6 h-full text-sm font-medium text-slate-600 group-hover:text-blue-600 border-b-2 border-transparent group-hover:border-blue-600 transition-all flex items-center gap-2">
+            应用中心 <i
+              class="fas fa-chevron-down text-xs opacity-50 group-hover:rotate-180 transition-transform duration-300"></i>
+          </button>
+
+          <div class="absolute top-16 left-0 w-full bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xl shadow-slate-200/50 
                     transform origin-top scale-y-95 opacity-0 invisible translate-y-2
                     group-hover:scale-y-100 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0
                     transition-all duration-200 ease-out z-50">
-          
-          <div class="max-w-screen-xl mx-auto px-8 py-8">
-            <div class="grid grid-cols-12 gap-8">
-              
-              <div class="col-span-9">
-                <div class="flex items-center gap-2 mb-4">
+
+            <div class="max-w-screen-xl mx-auto px-8 py-8">
+              <div class="grid grid-cols-12 gap-8">
+
+                <div class="col-span-9">
+                  <div class="flex items-center gap-2 mb-4">
                     <i class="fas fa-layer-group text-slate-400 text-xs"></i>
                     <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">核心应用模块</h3>
+                  </div>
+                  <div id="mega-menu-content" class="grid grid-cols-3 gap-5">
+                    <div class="animate-pulse bg-slate-100 h-32 rounded-xl"></div>
+                    <div class="animate-pulse bg-slate-100 h-32 rounded-xl"></div>
+                    <div class="animate-pulse bg-slate-100 h-32 rounded-xl"></div>
+                  </div>
                 </div>
-                <div id="mega-menu-content" class="grid grid-cols-3 gap-5">
-                    <div class="animate-pulse bg-slate-100 h-32 rounded-xl"></div>
-                    <div class="animate-pulse bg-slate-100 h-32 rounded-xl"></div>
-                    <div class="animate-pulse bg-slate-100 h-32 rounded-xl"></div>
-                </div>
-              </div>
 
-              <div class="col-span-3 border-l border-slate-100 pl-8 flex flex-col justify-between">
-                <div>
+                <div class="col-span-3 border-l border-slate-100 pl-8 flex flex-col justify-between">
+                  <div>
                     <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">快速访问</h3>
                     <ul class="space-y-3">
-                        <li>
-                            <button onclick="openSettings()" class="flex items-center gap-3 text-slate-600 hover:text-blue-600 text-sm transition-colors w-full text-left">
-                                <div class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600">
-                                    <i class="fas fa-cog"></i>
-                                </div>
-                                <span>全局设置</span>
-                            </button>
-                        </li>
-                        <li>
-                            <a href="#" class="flex items-center gap-3 text-slate-600 hover:text-blue-600 text-sm transition-colors w-full text-left">
-                                <div class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600">
-                                    <i class="fas fa-book"></i>
-                                </div>
-                                <span>使用指南</span>
-                            </a>
-                        </li>
+                      <li>
+                        <button onclick="openSettings()"
+                          class="flex items-center gap-3 text-slate-600 hover:text-blue-600 text-sm transition-colors w-full text-left">
+                          <div
+                            class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600">
+                            <i class="fas fa-cog"></i>
+                          </div>
+                          <span>全局设置</span>
+                        </button>
+                      </li>
+                      <li>
+                        <button onclick="openUserGuide()"
+                          class="flex items-center gap-3 text-slate-600 hover:text-blue-600 text-sm transition-colors w-full text-left">
+                          <div
+                            class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600">
+                            <i class="fas fa-book"></i>
+                          </div>
+                          <span>使用指南</span>
+                        </button>
+                      </li>
                     </ul>
-                </div>
-                
-                <div class="mt-4 p-3 bg-blue-50/50 rounded-lg border border-blue-100">
-                    <p class="text-[10px] text-blue-600 leading-tight">
-                        <i class="fas fa-lightbulb mr-1"></i>
-                        提示: 切换应用会自动加载对应的侧边栏菜单。
-                    </p>
-                </div>
-              </div>
+                  </div>
 
+                  <div class="mt-4 p-3 bg-blue-50/50 rounded-lg border border-blue-100">
+                    <p class="text-[10px] text-blue-600 leading-tight">
+                      <i class="fas fa-lightbulb mr-1"></i>
+                      提示: 切换应用会自动加载对应的侧边栏菜单。
+                    </p>
+                  </div>
+                </div>
+
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </nav>    
+      </nav>
 
-    <div class="flex items-center gap-3 w-64 justify-end">
-      <div id="model-status"
-        class="flex items-center gap-2 px-3 py-1.5 bg-slate-100 rounded-full text-xs border border-slate-200">
-        <span class="status-dot status-pending pulse-dot"></span>
-        <span class="text-slate-600 font-medium">未配置模型</span>
-      </div>
-      <!-- <button onclick="openSettings()"
+      <div class="flex items-center gap-3 w-64 justify-end">
+        <div id="model-status"
+          class="flex items-center gap-2 px-3 py-1.5 bg-slate-100 rounded-full text-xs border border-slate-200">
+          <span class="status-dot status-pending pulse-dot"></span>
+          <span class="text-slate-600 font-medium">未配置模型</span>
+        </div>
+        <!-- <button onclick="openSettings()"
         class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 transition-colors text-slate-500 hover:text-slate-800">
         <i class="fas fa-cog"></i>
       </button> -->
+      </div>
     </div>
-  </div>
 
-  <div id="global-progress" class="absolute bottom-0 left-0 w-full h-0.5 bg-slate-100 hidden">
-    <div id="progress-fill" class="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300"
-      style="width: 0%"></div>
-  </div>
-</header>
+    <div id="global-progress" class="absolute bottom-0 left-0 w-full h-0.5 bg-slate-100 hidden">
+      <div id="progress-fill" class="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300"
+        style="width: 0%"></div>
+    </div>
+  </header>
   <div class="flex flex-1 overflow-hidden relative">
-    <aside id="dynamic-sidebar" 
-       class="w-64 bg-white border-r border-slate-200 flex flex-col transition-all duration-300 -ml-64 hidden">
+    <aside id="dynamic-sidebar"
+      class="w-64 bg-white border-r border-slate-200 flex flex-col transition-all duration-300 -ml-64 hidden">
     </aside>
 
     <main id="main-content" class="flex-1 overflow-y-auto overflow-x-hidden bg-slate-50/50 p-8 relative scroll-smooth">
 
       <!--main content-->
-      
-        </main>
+
+    </main>
   </div>
 
   <div id="toast-container" class="fixed bottom-6 right-6 z-[9999] space-y-3 pointer-events-none"></div>
   <div id="modal-container"></div>
 
+  <!-- 使用指南模态框容器 -->
+  <div id="user-guide-container"></div>
+
+  <script>
+    // 动态加载使用指南模态框组件
+    fetch('src/components/modal/userGuideModal.html')
+      .then(response => response.text())
+      .then(html => {
+        document.getElementById('user-guide-container').innerHTML = html;
+        // 重新执行脚本
+        const scripts = document.getElementById('user-guide-container').querySelectorAll('script');
+        scripts.forEach(script => {
+          const newScript = document.createElement('script');
+          newScript.textContent = script.textContent;
+          document.body.appendChild(newScript);
+        });
+      })
+      .catch(err => console.warn('Failed to load user guide modal:', err));
+  </script>
+
   <script type="module" src="src/main.js"></script>
 
-  </body>
+
+</body>
+
 </html>

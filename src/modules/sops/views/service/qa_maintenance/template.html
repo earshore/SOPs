@@ -1,0 +1,198 @@
+<!-- QA 问答维护 SOP Template -->
+<div class="sop-widescreen-container">
+    <!-- Back Button & Header -->
+    <div class="mb-6">
+        <button onclick="switchTab('sops_overview')"
+            class="text-sm text-slate-500 hover:text-blue-600 transition-colors mb-4 inline-flex items-center gap-2">
+            <i class="fas fa-arrow-left"></i>返回 SOP 列表
+        </button>
+
+        <div class="sop-detail-header bg-gradient-to-r from-blue-50 to-indigo-50">
+            <div class="flex items-start gap-4">
+                <div class="sop-icon-container bg-blue-100 text-blue-600 w-16 h-16 text-2xl">
+                    <i class="fas fa-comments"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <h1 class="text-2xl font-bold text-slate-900">QA 问答维护 SOP</h1>
+                        <span class="sop-status-badge sop-status-active">已发布</span>
+                    </div>
+                    <p class="text-slate-600 mb-3">
+                        定期检查产品QA页面，以官方身份回复未解答问题，提升SEO价值和转化率。
+                    </p>
+                    <div class="flex items-center gap-6 text-sm text-slate-500">
+                        <span><i class="fas fa-layer-group mr-1"></i>客服与客户体验体系</span>
+                        <span><i class="fas fa-calendar-check mr-1"></i>每周巡检</span>
+                        <span><i class="fas fa-clock mr-1"></i>更新日期：2024-01</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Why QA Matters -->
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-5 mb-6">
+        <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+            <i class="fas fa-lightbulb text-blue-500"></i>为什么 QA 很重要？
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div class="bg-white rounded-lg p-3 border border-blue-200">
+                <div class="font-bold text-blue-700 mb-1">📈 提升转化</div>
+                <div class="text-slate-600 text-xs">解答买家疑虑，降低流失率</div>
+            </div>
+            <div class="bg-white rounded-lg p-3 border border-blue-200">
+                <div class="font-bold text-purple-700 mb-1">🔍 SEO价值</div>
+                <div class="text-slate-600 text-xs">QA被亚马逊索引，增加关键词覆盖</div>
+            </div>
+            <div class="bg-white rounded-lg p-3 border border-blue-200">
+                <div class="font-bold text-emerald-700 mb-1">🏆 建立信任</div>
+                <div class="text-slate-600 text-xs">官方回复展示专业品牌形象</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Two Column Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Left: Workflow -->
+        <div class="bg-white rounded-xl border border-slate-200 p-6">
+            <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <i class="fas fa-calendar-week text-blue-500"></i>每周巡检流程
+            </h2>
+
+            <div class="sop-timeline">
+                <div class="sop-timeline-item">
+                    <div class="sop-timeline-dot completed"></div>
+                    <div class="bg-blue-50/50 rounded-lg p-4 ml-2 border-l-4 border-blue-400">
+                        <h3 class="font-bold text-slate-800 mb-2">Step 1: 检查未回复问题</h3>
+                        <ul class="text-sm text-slate-600 space-y-1">
+                            <li>• 进入产品页面 Q&A 区域</li>
+                            <li>• 筛选没有官方回复的问题</li>
+                            <li>• 优先处理高票问题</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="sop-timeline-item">
+                    <div class="sop-timeline-dot"></div>
+                    <div class="bg-emerald-50/50 rounded-lg p-4 ml-2 border-l-4 border-emerald-400">
+                        <h3 class="font-bold text-slate-800 mb-2">Step 2: 撰写专业回答</h3>
+                        <ul class="text-sm text-slate-600 space-y-1">
+                            <li>• 以品牌官方身份回答</li>
+                            <li>• 内容准确、专业、简洁</li>
+                            <li>• 自然埋入相关关键词</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="sop-timeline-item">
+                    <div class="sop-timeline-dot"></div>
+                    <div class="bg-amber-50/50 rounded-lg p-4 ml-2 border-l-4 border-amber-400">
+                        <h3 class="font-bold text-slate-800 mb-2">Step 3: 处理负面问题</h3>
+                        <ul class="text-sm text-slate-600 space-y-1">
+                            <li>• 谨慎作答负面倾向问题</li>
+                            <li>• 强调产品优势和售后保障</li>
+                            <li>• 必要时举报违规问题</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="sop-timeline-item">
+                    <div class="sop-timeline-dot pending"></div>
+                    <div class="bg-purple-50/50 rounded-lg p-4 ml-2 border-l-4 border-purple-400">
+                        <h3 class="font-bold text-slate-800 mb-2">Step 4: 记录反馈</h3>
+                        <ul class="text-sm text-slate-600 space-y-1">
+                            <li>• 收集高频问题</li>
+                            <li>• 反馈运营优化Listing</li>
+                            <li>• 必要时更新产品说明书</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Guidelines & Template -->
+        <div class="space-y-6">
+            <!-- Answer Guidelines -->
+            <div class="bg-white rounded-xl border border-slate-200 p-6">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-pen text-blue-500"></i>回答撰写规范
+                </h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
+                        <h4 class="font-bold text-emerald-800 mb-2">✅ 正确做法</h4>
+                        <ul class="text-sm text-emerald-700 space-y-1">
+                            <li>• 开头感谢提问</li>
+                            <li>• 直接回答问题</li>
+                            <li>• 提供具体参数</li>
+                            <li>• 自然融入关键词</li>
+                            <li>• 结尾提供支持</li>
+                        </ul>
+                    </div>
+                    <div class="bg-red-50 rounded-lg p-4 border border-red-200">
+                        <h4 class="font-bold text-red-800 mb-2">❌ 禁止事项</h4>
+                        <ul class="text-sm text-red-700 space-y-1">
+                            <li>• 推销话术过重</li>
+                            <li>• 回答模糊敷衍</li>
+                            <li>• 包含外链联系方式</li>
+                            <li>• 与买家争执</li>
+                            <li>• 承诺无法兑现</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Example Template -->
+            <div class="bg-white rounded-xl border border-slate-200 p-6">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-file-alt text-blue-500"></i>回答模板示例
+                </h2>
+                <div class="bg-slate-50 rounded-lg p-4 text-sm">
+                    <p class="text-slate-500 mb-2 text-xs">// Q: Does this product work with [specific device]?</p>
+                    <div class="font-mono text-xs text-slate-700 bg-white p-3 rounded border">
+                        Thank you for your question! Yes, [Product Name] is compatible with [specific device]. It
+                        features [relevant specification] that ensures seamless connectivity.<br><br>
+                        If you have any other questions, please feel free to ask. We're here to help!<br><br>
+                        - [Brand Name] Team
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weekly Checklist -->
+            <div class="bg-purple-50 rounded-xl border border-purple-200 p-5">
+                <h3 class="font-bold text-purple-800 mb-3 flex items-center gap-2">
+                    <i class="fas fa-clipboard-check"></i>周度检查清单
+                </h3>
+                <div class="space-y-2">
+                    <label class="flex items-center gap-3 p-2 bg-white rounded-lg cursor-pointer">
+                        <input type="checkbox" class="w-4 h-4 rounded border-slate-300 text-purple-600">
+                        <span class="text-sm text-slate-700">检查所有产品 QA 页面</span>
+                    </label>
+                    <label class="flex items-center gap-3 p-2 bg-white rounded-lg cursor-pointer">
+                        <input type="checkbox" class="w-4 h-4 rounded border-slate-300 text-purple-600">
+                        <span class="text-sm text-slate-700">回复所有未回答问题</span>
+                    </label>
+                    <label class="flex items-center gap-3 p-2 bg-white rounded-lg cursor-pointer">
+                        <input type="checkbox" class="w-4 h-4 rounded border-slate-300 text-purple-600">
+                        <span class="text-sm text-slate-700">记录高频问题反馈运营</span>
+                    </label>
+                    <label class="flex items-center gap-3 p-2 bg-white rounded-lg cursor-pointer">
+                        <input type="checkbox" class="w-4 h-4 rounded border-slate-300 text-purple-600">
+                        <span class="text-sm text-slate-700">举报违规/竞争对手问题</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Resource -->
+    <div class="bg-blue-50 rounded-xl border border-blue-200 p-4">
+        <div class="flex items-center gap-3">
+            <i class="fas fa-video text-blue-500 text-xl"></i>
+            <div>
+                <h3 class="font-bold text-slate-800">操作视频教程</h3>
+                <p class="text-sm text-slate-600">访问公司网盘观看详细操作录屏：<a href="http://192.168.1.99"
+                        class="text-blue-600 underline">192.168.1.99</a>（仅限内网访问）→ 培训资料 → QA维护专题</p>
+            </div>
+        </div>
+    </div>
+</div>

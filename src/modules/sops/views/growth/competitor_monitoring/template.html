@@ -1,0 +1,246 @@
+<!-- 竞品监控与分析 SOP Template -->
+<div class="sop-widescreen-container">
+    <!-- Back Button & Header -->
+    <div class="mb-6">
+        <button onclick="switchTab('sops_overview')"
+            class="text-sm text-slate-500 hover:text-blue-600 transition-colors mb-4 inline-flex items-center gap-2">
+            <i class="fas fa-arrow-left"></i>返回 SOP 列表
+        </button>
+
+        <div class="sop-detail-header bg-gradient-to-r from-emerald-50 to-green-50">
+            <div class="flex items-start gap-4">
+                <div class="sop-icon-container bg-emerald-100 text-emerald-600 w-16 h-16 text-2xl">
+                    <i class="fas fa-binoculars"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <h1 class="text-2xl font-bold text-slate-900">竞品监控与分析 SOP</h1>
+                        <span class="sop-status-badge sop-status-active">已发布</span>
+                    </div>
+                    <p class="text-slate-600 mb-3">
+                        系统化跟踪核心竞品的价格、BSR排名、Review、Listing变化，及时掌握市场动态并制定应对策略。
+                    </p>
+                    <div class="flex items-center gap-6 text-sm text-slate-500">
+                        <span><i class="fas fa-layer-group mr-1"></i>运营与推广体系</span>
+                        <span><i class="fas fa-eye mr-1"></i>市场情报</span>
+                        <span><i class="fas fa-clock mr-1"></i>更新日期：2024-01</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Two Column Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Left: Workflow & Fields -->
+        <div class="space-y-6">
+            <!-- Daily Workflow -->
+            <div class="bg-white rounded-xl border border-slate-200 p-6">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-calendar-day text-blue-500"></i>每日监控流程
+                </h2>
+                <div class="space-y-3">
+                    <div class="flex items-center gap-4 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+                        <div
+                            class="w-10 h-10 bg-blue-500 text-white rounded-lg flex items-center justify-center font-bold">
+                            1</div>
+                        <div>
+                            <h4 class="font-semibold text-slate-800">确定竞品清单</h4>
+                            <p class="text-xs text-slate-600">选取3-5个直接竞品，长期稳定跟踪</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4 p-3 bg-emerald-50 rounded-lg border-l-4 border-emerald-400">
+                        <div
+                            class="w-10 h-10 bg-emerald-500 text-white rounded-lg flex items-center justify-center font-bold">
+                            2</div>
+                        <div>
+                            <h4 class="font-semibold text-slate-800">记录关键数据</h4>
+                            <p class="text-xs text-slate-600">每日固定时间（上午10点）记录各项指标</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4 p-3 bg-amber-50 rounded-lg border-l-4 border-amber-400">
+                        <div
+                            class="w-10 h-10 bg-amber-500 text-white rounded-lg flex items-center justify-center font-bold">
+                            3</div>
+                        <div>
+                            <h4 class="font-semibold text-slate-800">分析变化趋势</h4>
+                            <p class="text-xs text-slate-600">发现异常波动时深入分析原因</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4 p-3 bg-purple-50 rounded-lg border-l-4 border-purple-400">
+                        <div
+                            class="w-10 h-10 bg-purple-500 text-white rounded-lg flex items-center justify-center font-bold">
+                            4</div>
+                        <div>
+                            <h4 class="font-semibold text-slate-800">制定应对策略</h4>
+                            <p class="text-xs text-slate-600">根据竞品动态调整自身运营策略</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tracking Fields Table -->
+            <div class="bg-white rounded-xl border border-slate-200 p-6">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-table text-blue-500"></i>监控字段
+                </h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-slate-100">
+                                <th class="px-3 py-2 text-left font-bold text-slate-700">字段</th>
+                                <th class="px-3 py-2 text-left font-bold text-slate-700">说明</th>
+                                <th class="px-3 py-2 text-center font-bold text-slate-700">频率</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <tr>
+                                <td class="px-3 py-2 font-medium">售价 (Price)</td>
+                                <td class="px-3 py-2 text-slate-600">当前售价及促销</td>
+                                <td class="px-3 py-2 text-center"><span
+                                        class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">每日</span></td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-2 font-medium">BSR 排名</td>
+                                <td class="px-3 py-2 text-slate-600">大类+小类排名</td>
+                                <td class="px-3 py-2 text-center"><span
+                                        class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">每日</span></td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-2 font-medium">Review 数/评分</td>
+                                <td class="px-3 py-2 text-slate-600">总量及平均分</td>
+                                <td class="px-3 py-2 text-center"><span
+                                        class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">每日</span></td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-2 font-medium">促销活动</td>
+                                <td class="px-3 py-2 text-slate-600">LD/Coupon等</td>
+                                <td class="px-3 py-2 text-center"><span
+                                        class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">每日</span></td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-2 font-medium">库存状态</td>
+                                <td class="px-3 py-2 text-slate-600">是否断货</td>
+                                <td class="px-3 py-2 text-center"><span
+                                        class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs">每周</span></td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-2 font-medium">Listing 变化</td>
+                                <td class="px-3 py-2 text-slate-600">标题/图片更新</td>
+                                <td class="px-3 py-2 text-center"><span
+                                        class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs">每周</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Alerts & Tools -->
+        <div class="space-y-6">
+            <!-- Alert Triggers -->
+            <div class="bg-white rounded-xl border border-slate-200 p-6">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-bell text-amber-500"></i>异常预警触发条件
+                </h2>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-red-50 rounded-lg p-3 border border-red-200">
+                        <h4 class="font-bold text-red-800 mb-1 text-sm">🚨 价格大幅下降</h4>
+                        <p class="text-xs text-red-700">降价 > 15%，可能发起价格战</p>
+                    </div>
+                    <div class="bg-amber-50 rounded-lg p-3 border border-amber-200">
+                        <h4 class="font-bold text-amber-800 mb-1 text-sm">⚠️ BSR快速上升</h4>
+                        <p class="text-xs text-amber-700">排名提升 > 50%，有新推广</p>
+                    </div>
+                    <div class="bg-purple-50 rounded-lg p-3 border border-purple-200">
+                        <h4 class="font-bold text-purple-800 mb-1 text-sm">📈 Review暴增</h4>
+                        <p class="text-xs text-purple-700">单日新增 > 10个，需关注</p>
+                    </div>
+                    <div class="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                        <h4 class="font-bold text-blue-800 mb-1 text-sm">🔄 Listing更新</h4>
+                        <p class="text-xs text-blue-700">标题/图片大改，学习策略</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommended Tools -->
+            <div class="bg-white rounded-xl border border-slate-200 p-6">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-tools text-purple-500"></i>推荐监控工具
+                </h2>
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                        <span class="font-semibold text-slate-800">Keepa</span>
+                        <span class="text-xs text-slate-600">价格/BSR历史曲线</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                        <span class="font-semibold text-slate-800">Helium 10</span>
+                        <span class="text-xs text-slate-600">关键词排名/市场分析</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                        <span class="font-semibold text-slate-800">卖家精灵</span>
+                        <span class="text-xs text-slate-600">竞品监控/利润计算</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                        <span class="font-semibold text-slate-800">Jungle Scout</span>
+                        <span class="text-xs text-slate-600">销量估算/产品库</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Spreadsheet Template -->
+            <div class="bg-purple-50 rounded-xl border border-purple-200 p-5">
+                <h3 class="font-bold text-purple-800 mb-3 flex items-center gap-2">
+                    <i class="fas fa-file-excel text-emerald-600"></i>监控表格字段
+                </h3>
+                <div class="grid grid-cols-4 gap-2 text-xs">
+                    <div class="bg-white p-2 rounded text-center">日期</div>
+                    <div class="bg-white p-2 rounded text-center">竞品ASIN</div>
+                    <div class="bg-white p-2 rounded text-center">售价</div>
+                    <div class="bg-white p-2 rounded text-center">BSR大类</div>
+                    <div class="bg-white p-2 rounded text-center">BSR小类</div>
+                    <div class="bg-white p-2 rounded text-center">Review数</div>
+                    <div class="bg-white p-2 rounded text-center">评分</div>
+                    <div class="bg-white p-2 rounded text-center">备注</div>
+                </div>
+            </div>
+
+            <!-- Weekly Report -->
+            <div class="bg-amber-50 rounded-xl border border-amber-200 p-5">
+                <h3 class="font-bold text-amber-800 mb-3 flex items-center gap-2">
+                    <i class="fas fa-calendar-week"></i>周报输出内容
+                </h3>
+                <ul class="text-sm text-slate-700 space-y-2">
+                    <li class="flex items-start gap-2">
+                        <i class="fas fa-check text-amber-500 mt-1"></i>
+                        <span>竞品价格/排名周度变化趋势</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <i class="fas fa-check text-amber-500 mt-1"></i>
+                        <span>竞品促销活动汇总</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <i class="fas fa-check text-amber-500 mt-1"></i>
+                        <span>竞品Listing优化动向</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <i class="fas fa-check text-amber-500 mt-1"></i>
+                        <span>应对策略建议</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Resource -->
+    <div class="bg-blue-50 rounded-xl border border-blue-200 p-4">
+        <div class="flex items-center gap-3">
+            <i class="fas fa-video text-blue-500 text-xl"></i>
+            <div>
+                <h3 class="font-bold text-slate-800">操作视频教程</h3>
+                <p class="text-sm text-slate-600">访问公司网盘观看详细操作录屏：<a href="http://192.168.1.99"
+                        class="text-blue-600 underline">192.168.1.99</a>（仅限内网访问）→ 培训资料 → 竞品监控专题</p>
+            </div>
+        </div>
+    </div>
+</div>
