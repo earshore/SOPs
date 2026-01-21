@@ -19,6 +19,16 @@ export const MENU_CONFIG = {
     // 作用：决定侧边栏 (Sidebar) 显示什么标题和哪些菜单
     // ==========================================
     modules: {
+        // [应用 SOPs] 标准作业程序
+        sops: {
+            id: 'sops',
+            contextId: 'apps',
+            title: 'SOPs 流程中心',
+            version: 'v1.0',
+            icon: 'fas fa-clipboard-list',
+            description: '集成所有亚马逊运营标准化流程指引，确保团队执行一致性。'
+        },
+
         // [应用 A] Master Prompt
         master_prompt: {
             id: 'master_prompt',
@@ -58,6 +68,26 @@ export const MENU_CONFIG = {
     // 作用：定义点击行为、图标、目标 Panel
     // ==========================================
     routes: {
+        // --- 属于 SOPs 应用的页面 ---
+        sops_overview: {
+            moduleId: 'sops',
+            label: 'SOP 总览',
+            icon: 'fas fa-th-large',
+            panelId: 'panel-sops'
+        },
+        sops_new_product_test: {
+            moduleId: 'sops',
+            label: '新品测试',
+            icon: 'fas fa-flask',
+            panelId: 'panel-sops'
+        },
+        sops_inventory_clearance: {
+            moduleId: 'sops',
+            label: '冗余库存清货',
+            icon: 'fas fa-boxes-stacked',
+            panelId: 'panel-sops'
+        },
+
         // --- 属于 Master Prompt 应用的页面 ---
         scraper: {
             moduleId: 'master_prompt', // 关键：绑定到模块 A

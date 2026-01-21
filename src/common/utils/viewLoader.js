@@ -5,7 +5,7 @@
  */
 const viewsConfig = [
     // 主功能面板 -> 插入到 main 标签
-    { url: './src/modules/home/homeDisplay.html', target: 'main'},
+    { url: './src/modules/home/homeDisplay.html', target: 'main' },
     { url: './src/modules/master_prompt/scraper/scraperPanel.html', target: 'main' },
     { url: './src/modules/master_prompt/data_manage/dataDisplay.html', target: 'main' },
     { url: './src/modules/master_prompt/analysis/analysisDisplay.html', target: 'main' },
@@ -13,6 +13,9 @@ const viewsConfig = [
 
     // Keyword Tracker
     { url: './src/modules/keyword_tracker/trackerDisplay.html', target: 'main' },
+
+    // SOPs 流程中心
+    { url: './src/modules/sops/sops.html', target: 'main' },
 
     // Amazon 智库
     { url: './src/modules/amz_hub/amz_hub.html', target: 'main' },
