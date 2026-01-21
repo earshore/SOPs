@@ -1,5 +1,5 @@
 <!-- Listing 极致优化 (SEO) SOP Template -->
-<div class="max-w-4xl mx-auto">
+<div class="sop-widescreen-container">
     <!-- Back Button & Header -->
     <div class="mb-6">
         <button onclick="switchTab('sops_overview')"
@@ -18,151 +18,214 @@
                         <span class="sop-status-badge sop-status-active">已发布</span>
                     </div>
                     <p class="text-slate-600 mb-3">
-                        标题公式、五点埋词逻辑、A+排版规范、Search Terms填充标准，确保Listing搜索可见性最大化。
+                        基于A10/COSMO/Rufus算法的Listing优化策略，涵盖标题公式、五点埋词、A+排版、Search Terms填充标准。
                     </p>
                     <div class="flex items-center gap-6 text-sm text-slate-500">
                         <span><i class="fas fa-layer-group mr-1"></i>运营与推广体系</span>
                         <span><i class="fas fa-robot mr-1"></i>采集 → 分析 → AI生成</span>
+                        <span><i class="fas fa-clock mr-1"></i>更新日期：2024-01</span>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Workflow -->
+    <!-- Workflow Banner -->
     <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 mb-6">
-        <div class="flex items-center gap-4 justify-center text-sm">
-            <div class="flex items-center gap-2 bg-white rounded-lg px-3 py-2 border border-blue-200">
+        <div class="flex items-center gap-4 justify-center text-sm flex-wrap">
+            <div class="flex items-center gap-2 bg-white rounded-lg px-4 py-2 border border-blue-200 shadow-sm">
                 <i class="fas fa-spider text-blue-500"></i>
-                <span class="font-medium">采集竞品</span>
+                <span class="font-medium">采集竞品Top20</span>
             </div>
             <i class="fas fa-arrow-right text-blue-300"></i>
-            <div class="flex items-center gap-2 bg-white rounded-lg px-3 py-2 border border-blue-200">
+            <div class="flex items-center gap-2 bg-white rounded-lg px-4 py-2 border border-blue-200 shadow-sm">
                 <i class="fas fa-chart-pie text-indigo-500"></i>
-                <span class="font-medium">分析报告</span>
+                <span class="font-medium">LLM结构化分析</span>
             </div>
             <i class="fas fa-arrow-right text-blue-300"></i>
-            <div class="flex items-center gap-2 bg-white rounded-lg px-3 py-2 border border-blue-200">
+            <div class="flex items-center gap-2 bg-white rounded-lg px-4 py-2 border border-blue-200 shadow-sm">
+                <i class="fas fa-check-double text-emerald-500"></i>
+                <span class="font-medium">ABA交叉验证</span>
+            </div>
+            <i class="fas fa-arrow-right text-blue-300"></i>
+            <div class="flex items-center gap-2 bg-white rounded-lg px-4 py-2 border border-blue-200 shadow-sm">
                 <i class="fas fa-robot text-purple-500"></i>
-                <span class="font-medium">AI生成文案</span>
+                <span class="font-medium">AI生成Listing</span>
             </div>
         </div>
     </div>
 
-    <!-- Title Formula -->
-    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <i class="fas fa-heading text-blue-500"></i>标题 (Title) 编写公式
-        </h2>
-        <div class="bg-slate-50 rounded-lg p-4 mb-4">
-            <p class="font-mono text-sm text-slate-700">
-                <span class="text-blue-600">[品牌名]</span> +
-                <span class="text-emerald-600">[核心关键词]</span> +
-                <span class="text-amber-600">[使用场景/人群]</span> +
-                <span class="text-purple-600">[核心卖点/功能]</span> +
-                <span class="text-rose-600">[规格/型号]</span>
-            </p>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div class="border-l-4 border-emerald-400 pl-3">
-                <h4 class="font-semibold text-slate-800">✅ 正确示例</h4>
-                <p class="text-slate-600 text-xs mt-1">BrandX Wireless Bluetooth Headphones for Running, Active Noise
-                    Cancelling, 40H Battery, Black</p>
+    <!-- Two Column Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Left Column -->
+        <div class="space-y-6">
+            <!-- Title Formula -->
+            <div class="bg-white rounded-xl border border-slate-200 p-6">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-heading text-blue-500"></i>标题 (Title) 编写公式
+                </h2>
+                <div class="bg-slate-50 rounded-lg p-4 mb-4">
+                    <p class="font-mono text-sm text-slate-700">
+                        <span class="text-blue-600 font-bold">[品牌]</span> +
+                        <span class="text-emerald-600 font-bold">[核心词]</span> +
+                        <span class="text-amber-600 font-bold">[场景/人群]</span> +
+                        <span class="text-purple-600 font-bold">[卖点]</span> +
+                        <span class="text-rose-600 font-bold">[规格]</span>
+                    </p>
+                </div>
+                <div class="space-y-3">
+                    <div class="border-l-4 border-emerald-400 pl-3 bg-emerald-50/50 py-2 rounded-r">
+                        <h4 class="font-semibold text-emerald-800">✅ 正确示例</h4>
+                        <p class="text-xs text-slate-600 mt-1">BrandX Wireless Bluetooth Headphones for Running, Active
+                            Noise Cancelling, 40H Battery, Black</p>
+                    </div>
+                    <div class="border-l-4 border-red-400 pl-3 bg-red-50/50 py-2 rounded-r">
+                        <h4 class="font-semibold text-red-800">❌ 错误示例</h4>
+                        <p class="text-xs text-slate-600 mt-1">Best Headphones 2024 NEW!!! Amazing Quality Cheap Price
+                            Free Shipping</p>
+                    </div>
+                </div>
+                <div class="mt-4 p-3 bg-amber-50 rounded-lg text-sm">
+                    <strong class="text-amber-800">字符限制：</strong>
+                    <span class="text-slate-600">200字符内，移动端显示前70字符</span>
+                </div>
             </div>
-            <div class="border-l-4 border-red-400 pl-3">
-                <h4 class="font-semibold text-slate-800">❌ 错误示例</h4>
-                <p class="text-slate-600 text-xs mt-1">Best Headphones 2024 NEW!!! Amazing Quality Cheap Price Free
-                    Shipping</p>
-            </div>
-        </div>
-    </div>
 
-    <!-- Bullet Points -->
-    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <i class="fas fa-list-ul text-blue-500"></i>五点描述 (Bullet Points) 埋词逻辑
-        </h2>
-        <div class="space-y-3">
-            <div class="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
-                <span
-                    class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
-                <div>
-                    <h4 class="font-semibold text-slate-800">核心功能 + 主关键词</h4>
-                    <p class="text-xs text-slate-500">开门见山，突出产品最大卖点</p>
-                </div>
-            </div>
-            <div class="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
-                <span
-                    class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
-                <div>
-                    <h4 class="font-semibold text-slate-800">使用场景 (COSMO)</h4>
-                    <p class="text-xs text-slate-500">描述具体使用场景，匹配买家意图</p>
-                </div>
-            </div>
-            <div class="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
-                <span
-                    class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
-                <div>
-                    <h4 class="font-semibold text-slate-800">品质材质 + 长尾词</h4>
-                    <p class="text-xs text-slate-500">强调产品质量和材质</p>
-                </div>
-            </div>
-            <div class="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
-                <span
-                    class="w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold">4</span>
-                <div>
-                    <h4 class="font-semibold text-slate-800">解决痛点 (Rufus)</h4>
-                    <p class="text-xs text-slate-500">针对竞品差评痛点，说明本品如何解决</p>
-                </div>
-            </div>
-            <div class="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
-                <span
-                    class="w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold">5</span>
-                <div>
-                    <h4 class="font-semibold text-slate-800">规格参数 + 售后保障</h4>
-                    <p class="text-xs text-slate-500">具体参数和服务承诺</p>
+            <!-- Bullet Points -->
+            <div class="bg-white rounded-xl border border-slate-200 p-6">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-list-ul text-blue-500"></i>五点描述 (Bullet Points) 埋词逻辑
+                </h2>
+                <div class="space-y-2">
+                    <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                        <span
+                            class="w-7 h-7 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
+                        <div class="flex-1">
+                            <span class="font-semibold text-slate-800">核心功能 + 主关键词</span>
+                            <span class="text-xs text-slate-500 ml-2">→ COSMO意图匹配</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                        <span
+                            class="w-7 h-7 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
+                        <div class="flex-1">
+                            <span class="font-semibold text-slate-800">使用场景描述</span>
+                            <span class="text-xs text-slate-500 ml-2">→ 场景化搜索词</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                        <span
+                            class="w-7 h-7 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
+                        <div class="flex-1">
+                            <span class="font-semibold text-slate-800">品质材质 + 长尾词</span>
+                            <span class="text-xs text-slate-500 ml-2">→ 精准流量</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 bg-amber-50 rounded-lg">
+                        <span
+                            class="w-7 h-7 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold">4</span>
+                        <div class="flex-1">
+                            <span class="font-semibold text-slate-800">解决痛点</span>
+                            <span class="text-xs text-amber-600 ml-2">→ Rufus AI问答</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 bg-amber-50 rounded-lg">
+                        <span
+                            class="w-7 h-7 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold">5</span>
+                        <div class="flex-1">
+                            <span class="font-semibold text-slate-800">规格参数 + 售后</span>
+                            <span class="text-xs text-amber-600 ml-2">→ Rufus参数类问题</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Search Terms -->
-    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <i class="fas fa-search text-blue-500"></i>Search Terms 填充规范
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="bg-emerald-50 rounded-lg p-4 border border-emerald-100">
-                <h4 class="font-bold text-emerald-800 mb-2">✅ 正确做法</h4>
-                <ul class="text-sm text-emerald-700 space-y-1">
-                    <li>• 用空格分隔关键词</li>
-                    <li>• 不重复 Title 中的词</li>
-                    <li>• 包含拼写变体和同义词</li>
-                    <li>• 小写即可，无需大写</li>
-                    <li>• 充分利用 250 字节</li>
-                </ul>
+        <!-- Right Column -->
+        <div class="space-y-6">
+            <!-- Search Terms -->
+            <div class="bg-white rounded-xl border border-slate-200 p-6">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-search text-blue-500"></i>Search Terms 填充规范
+                </h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
+                        <h4 class="font-bold text-emerald-800 mb-2">✅ 正确做法</h4>
+                        <ul class="text-sm text-emerald-700 space-y-1">
+                            <li>• 空格分隔关键词</li>
+                            <li>• 不重复Title中的词</li>
+                            <li>• 包含拼写变体/同义词</li>
+                            <li>• 小写即可</li>
+                            <li>• 用满250字节</li>
+                        </ul>
+                    </div>
+                    <div class="bg-red-50 rounded-lg p-4 border border-red-200">
+                        <h4 class="font-bold text-red-800 mb-2">❌ 禁止事项</h4>
+                        <ul class="text-sm text-red-700 space-y-1">
+                            <li>• 逗号或标点分隔</li>
+                            <li>• 竞品品牌名</li>
+                            <li>• 主观词(best,amazing)</li>
+                            <li>• 重复堆砌</li>
+                            <li>• ASIN或价格</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
-            <div class="bg-red-50 rounded-lg p-4 border border-red-100">
-                <h4 class="font-bold text-red-800 mb-2">❌ 禁止事项</h4>
-                <ul class="text-sm text-red-700 space-y-1">
-                    <li>• 使用逗号或标点分隔</li>
-                    <li>• 填写竞品品牌名</li>
-                    <li>• 使用主观形容词 (best, amazing)</li>
-                    <li>• 重复堆砌同一关键词</li>
-                    <li>• 使用 ASIN 或价格</li>
-                </ul>
-            </div>
-        </div>
-    </div>
 
-    <!-- Mobile Check -->
-    <div class="bg-amber-50 rounded-xl border border-amber-200 p-4 mb-6">
-        <div class="flex items-start gap-3">
-            <i class="fas fa-mobile-screen text-amber-500 text-xl mt-0.5"></i>
-            <div>
-                <h3 class="font-bold text-slate-800 mb-1">移动端显示确认</h3>
-                <p class="text-sm text-slate-600">上架前必须在手机端预览 Listing，检查标题截断位置、图片显示效果、Bullet Points 折叠后可见内容。超过
-                    <strong>70%</strong> 的流量来自移动端！</p>
+            <!-- A+ Content -->
+            <div class="bg-white rounded-xl border border-slate-200 p-6">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-palette text-purple-500"></i>A+ 内容排版规范
+                </h2>
+                <div class="space-y-3 text-sm">
+                    <div class="p-3 bg-purple-50 rounded-lg">
+                        <strong class="text-purple-800">模块1：</strong>
+                        <span class="text-slate-600">品牌Banner + Logo + Slogan</span>
+                    </div>
+                    <div class="p-3 bg-purple-50 rounded-lg">
+                        <strong class="text-purple-800">模块2-3：</strong>
+                        <span class="text-slate-600">产品核心卖点 (图文并茂)</span>
+                    </div>
+                    <div class="p-3 bg-purple-50 rounded-lg">
+                        <strong class="text-purple-800">模块4：</strong>
+                        <span class="text-slate-600">使用场景展示 / 对比表格</span>
+                    </div>
+                    <div class="p-3 bg-purple-50 rounded-lg">
+                        <strong class="text-purple-800">模块5：</strong>
+                        <span class="text-slate-600">产品规格参数一览</span>
+                    </div>
+                </div>
+                <div class="mt-3 p-3 bg-amber-50 rounded-lg text-xs text-amber-800">
+                    <strong>图片规范：</strong>970×600px / 300dpi / 白底 / 文字占比≤20%
+                </div>
+            </div>
+
+            <!-- Mobile Check -->
+            <div class="bg-amber-50 rounded-xl border border-amber-200 p-5">
+                <div class="flex items-start gap-3">
+                    <i class="fas fa-mobile-screen text-amber-500 text-xl mt-0.5"></i>
+                    <div>
+                        <h3 class="font-bold text-amber-800 mb-2">移动端显示确认 (必做)</h3>
+                        <ul class="text-sm text-slate-600 space-y-1">
+                            <li>• 标题前<strong>70字符</strong>表达核心信息</li>
+                            <li>• 主图移动端1:1显示是否聚焦</li>
+                            <li>• Bullet前3条是否包含卖点</li>
+                            <li>• <strong>70%流量来自移动端！</strong></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Algorithm Tips -->
+            <div class="bg-blue-50 rounded-xl border border-blue-200 p-5">
+                <h3 class="font-bold text-blue-800 mb-3 flex items-center gap-2">
+                    <i class="fas fa-brain"></i>A10/COSMO/Rufus 算法要点
+                </h3>
+                <div class="text-sm text-slate-700 space-y-2">
+                    <div><strong class="text-blue-600">A10：</strong>站外流量 + 停留时间 + 转化率</div>
+                    <div><strong class="text-purple-600">COSMO：</strong>场景意图匹配 (前3个Bullet)</div>
+                    <div><strong class="text-amber-600">Rufus：</strong>问答式理解 (后2个Bullet + 参数)</div>
+                </div>
             </div>
         </div>
     </div>
@@ -174,7 +237,7 @@
             <div>
                 <h3 class="font-bold text-slate-800">操作视频教程</h3>
                 <p class="text-sm text-slate-600">访问公司网盘观看详细操作录屏：<a href="http://192.168.1.99"
-                        class="text-blue-600 underline">192.168.1.99</a>（仅限内网访问）</p>
+                        class="text-blue-600 underline">192.168.1.99</a>（仅限内网访问）→ 培训资料 → Listing优化专题</p>
             </div>
         </div>
     </div>

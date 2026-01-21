@@ -1,5 +1,5 @@
 <!-- 采购与质检 (QC) SOP Template -->
-<div class="max-w-4xl mx-auto">
+<div class="sop-widescreen-container">
     <!-- Back Button & Header -->
     <div class="mb-6">
         <button onclick="switchTab('sops_overview')"
@@ -18,182 +18,218 @@
                         <span class="sop-status-badge sop-status-active">已发布</span>
                     </div>
                     <p class="text-slate-600 mb-3">
-                        下单模板、大货验货标准（AQL抽检）、包装跌落测试标准，确保产品质量。
+                        涵盖供应商选择、下单模板、AQL抽检标准、跌落测试、入库前贴标检查的完整质量控制流程。
                     </p>
                     <div class="flex items-center gap-6 text-sm text-slate-500">
                         <span><i class="fas fa-layer-group mr-1"></i>供应链与物流体系</span>
                         <span><i class="fas fa-search mr-1"></i>质量控制</span>
+                        <span><i class="fas fa-clock mr-1"></i>更新日期：2024-01</span>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-        <h2 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
-            <i class="fas fa-route text-blue-500"></i>采购与QC流程
-        </h2>
+    <!-- Key Quality Metrics -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-center">
+            <div class="text-2xl font-bold text-emerald-600">AQL 2.5</div>
+            <div class="text-sm text-slate-600">外观缺陷标准</div>
+        </div>
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
+            <div class="text-2xl font-bold text-amber-600">AQL 1.0</div>
+            <div class="text-sm text-slate-600">功能缺陷标准</div>
+        </div>
+        <div class="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
+            <div class="text-2xl font-bold text-red-600">AQL 0</div>
+            <div class="text-sm text-slate-600">安全缺陷标准</div>
+        </div>
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
+            <div class="text-2xl font-bold text-blue-600">≥98%</div>
+            <div class="text-sm text-slate-600">目标合格率</div>
+        </div>
+    </div>
 
-        <div class="sop-timeline">
-            <!-- Step 1 -->
-            <div class="sop-timeline-item">
-                <div class="sop-timeline-dot completed"></div>
-                <div class="bg-slate-50 rounded-lg p-4 ml-2">
-                    <h3 class="font-bold text-slate-800 mb-1">Step 1: 采购下单</h3>
-                    <div class="text-sm text-slate-600">
-                        <p>使用标准采购模板下单，必填信息：</p>
-                        <div class="mt-2 grid grid-cols-2 gap-2 text-xs">
+    <!-- Two Column Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Left: Process Flow -->
+        <div class="bg-white rounded-xl border border-slate-200 p-6">
+            <h2 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
+                <i class="fas fa-route text-blue-500"></i>采购与QC流程
+            </h2>
+
+            <div class="sop-timeline">
+                <div class="sop-timeline-item">
+                    <div class="sop-timeline-dot completed"></div>
+                    <div class="bg-blue-50/50 rounded-lg p-4 ml-2 border-l-4 border-blue-400">
+                        <h3 class="font-bold text-slate-800 mb-2">Step 1: 采购下单</h3>
+                        <p class="text-sm text-slate-500 mb-2">使用标准采购模板</p>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
                             <div class="bg-white p-2 rounded border">产品名称/SKU</div>
                             <div class="bg-white p-2 rounded border">采购数量</div>
                             <div class="bg-white p-2 rounded border">单价/总价</div>
                             <div class="bg-white p-2 rounded border">交货日期</div>
                             <div class="bg-white p-2 rounded border">包装要求</div>
-                            <div class="bg-white p-2 rounded border">贴标要求</div>
+                            <div class="bg-white p-2 rounded border">贴标说明</div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Step 2 -->
-            <div class="sop-timeline-item">
-                <div class="sop-timeline-dot"></div>
-                <div class="bg-slate-50 rounded-lg p-4 ml-2">
-                    <h3 class="font-bold text-slate-800 mb-1">Step 2: 大货验货 (AQL抽检)</h3>
-                    <div class="text-sm text-slate-600">
-                        <p>按照 AQL (Acceptable Quality Level) 标准进行抽检：</p>
-                        <div class="mt-3 overflow-x-auto">
-                            <table class="w-full text-xs">
-                                <thead>
-                                    <tr class="bg-white">
-                                        <th class="px-3 py-2 text-left border">批次数量</th>
-                                        <th class="px-3 py-2 text-left border">抽检数量</th>
-                                        <th class="px-3 py-2 text-left border">允收数</th>
-                                        <th class="px-3 py-2 text-left border">拒收数</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td class="px-3 py-2 border">2-150</td>
-                                        <td class="px-3 py-2 border">8</td>
-                                        <td class="px-3 py-2 border text-emerald-600 font-medium">0</td>
-                                        <td class="px-3 py-2 border text-red-600 font-medium">1</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="px-3 py-2 border">151-500</td>
-                                        <td class="px-3 py-2 border">20</td>
-                                        <td class="px-3 py-2 border text-emerald-600 font-medium">1</td>
-                                        <td class="px-3 py-2 border text-red-600 font-medium">2</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="px-3 py-2 border">501-1200</td>
-                                        <td class="px-3 py-2 border">32</td>
-                                        <td class="px-3 py-2 border text-emerald-600 font-medium">2</td>
-                                        <td class="px-3 py-2 border text-red-600 font-medium">3</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="px-3 py-2 border">1201-3200</td>
-                                        <td class="px-3 py-2 border">50</td>
-                                        <td class="px-3 py-2 border text-emerald-600 font-medium">3</td>
-                                        <td class="px-3 py-2 border text-red-600 font-medium">4</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Step 3 -->
-            <div class="sop-timeline-item">
-                <div class="sop-timeline-dot"></div>
-                <div class="bg-slate-50 rounded-lg p-4 ml-2">
-                    <h3 class="font-bold text-slate-800 mb-1">Step 3: 包装跌落测试</h3>
-                    <div class="text-sm text-slate-600">
-                        <p>模拟运输过程中的跌落冲击，测试标准：</p>
-                        <ul class="list-disc ml-4 mt-2 space-y-1">
-                            <li>从 <strong>1米高度</strong> 角跌落 x 1次</li>
-                            <li>从 <strong>1米高度</strong> 棱跌落 x 2次</li>
-                            <li>从 <strong>1米高度</strong> 面跌落 x 3次</li>
-                            <li>打开包装检查产品是否完好</li>
+                <div class="sop-timeline-item">
+                    <div class="sop-timeline-dot"></div>
+                    <div class="bg-amber-50/50 rounded-lg p-4 ml-2 border-l-4 border-amber-400">
+                        <h3 class="font-bold text-slate-800 mb-2">Step 2: 大货验货 (AQL抽检)</h3>
+                        <p class="text-sm text-slate-500 mb-2">按AQL标准随机抽检</p>
+                        <ul class="text-sm text-slate-600 space-y-1">
+                            <li>• 外观检查：划痕、变形、色差</li>
+                            <li>• 功能测试：开关、充电、尺寸</li>
+                            <li>• 安全检查：锐边、小零件、警示</li>
                         </ul>
                     </div>
                 </div>
-            </div>
 
-            <!-- Step 4 -->
-            <div class="sop-timeline-item">
-                <div class="sop-timeline-dot"></div>
-                <div class="bg-slate-50 rounded-lg p-4 ml-2">
-                    <h3 class="font-bold text-slate-800 mb-1">Step 4: 入库前贴标检查</h3>
-                    <div class="text-sm text-slate-600">
-                        <p class="font-semibold text-amber-600 mb-2">⚠️ 关键检查点</p>
-                        <ul class="list-disc ml-4 space-y-1">
-                            <li>FNSKU 标签已正确粘贴</li>
-                            <li>标签信息与系统 SKU 一致</li>
-                            <li>原有条形码已被覆盖</li>
-                            <li>标签清晰可扫描</li>
+                <div class="sop-timeline-item">
+                    <div class="sop-timeline-dot"></div>
+                    <div class="bg-purple-50/50 rounded-lg p-4 ml-2 border-l-4 border-purple-400">
+                        <h3 class="font-bold text-slate-800 mb-2">Step 3: 包装跌落测试</h3>
+                        <p class="text-sm text-slate-500 mb-2">模拟运输冲击</p>
+                        <ul class="text-sm text-slate-600 space-y-1">
+                            <li>• 1米高度 角跌落 ×1 次</li>
+                            <li>• 1米高度 棱跌落 ×2 次</li>
+                            <li>• 1米高度 面跌落 ×3 次</li>
+                            <li>• 开箱检查产品完好性</li>
                         </ul>
                     </div>
                 </div>
-            </div>
 
-            <!-- Step 5 -->
-            <div class="sop-timeline-item">
-                <div class="sop-timeline-dot pending"></div>
-                <div class="bg-slate-50 rounded-lg p-4 ml-2">
-                    <h3 class="font-bold text-slate-800 mb-1">Step 5: 配件完整性检查</h3>
-                    <div class="text-sm text-slate-600">
-                        <p class="font-semibold text-amber-600 mb-2">⚠️ 必检项目</p>
-                        <ul class="list-disc ml-4 space-y-1">
-                            <li>主产品 x 1</li>
-                            <li>说明书 x 1</li>
-                            <li>配件(根据产品)齐全</li>
-                            <li>包装盒/袋完好无损</li>
+                <div class="sop-timeline-item">
+                    <div class="sop-timeline-dot"></div>
+                    <div class="bg-emerald-50/50 rounded-lg p-4 ml-2 border-l-4 border-emerald-400">
+                        <h3 class="font-bold text-slate-800 mb-2">Step 4: 入库前检查</h3>
+                        <p class="text-sm text-slate-500 mb-2">贴标与配件检查</p>
+                        <ul class="text-sm text-slate-600 space-y-1">
+                            <li>• FNSKU标签正确且可扫描</li>
+                            <li>• 原有条形码已覆盖</li>
+                            <li>• 配件/说明书齐全</li>
+                            <li>• 包装完好无损</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="sop-timeline-item">
+                    <div class="sop-timeline-dot pending"></div>
+                    <div class="bg-slate-50 rounded-lg p-4 ml-2 border-l-4 border-slate-300">
+                        <h3 class="font-bold text-slate-800 mb-2">Step 5: 出具QC报告</h3>
+                        <p class="text-sm text-slate-500 mb-2">验收结论与归档</p>
+                        <ul class="text-sm text-slate-600 space-y-1">
+                            <li>• 填写QC报告表</li>
+                            <li>• 拍摄产品/缺陷照片</li>
+                            <li>• 给出验收结论</li>
                         </ul>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- QC Report Fields -->
-    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <i class="fas fa-file-lines text-blue-500"></i>QC报告必填字段
-        </h2>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div class="bg-slate-50 rounded-lg p-3 text-center">
-                <i class="fas fa-calendar text-slate-400 mb-1"></i>
-                <p class="text-xs text-slate-600">验货日期</p>
+        <!-- Right: AQL Table & Standards -->
+        <div class="space-y-6">
+            <!-- AQL Sampling Table -->
+            <div class="bg-white rounded-xl border border-slate-200 p-6">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-chart-bar text-amber-500"></i>AQL 2.5 抽样标准表
+                </h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-slate-100">
+                                <th class="px-4 py-3 text-left font-bold text-slate-700">批次数量</th>
+                                <th class="px-4 py-3 text-center font-bold text-slate-700">抽检数</th>
+                                <th class="px-4 py-3 text-center font-bold text-emerald-700">允收数</th>
+                                <th class="px-4 py-3 text-center font-bold text-red-700">拒收数</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <tr class="hover:bg-slate-50">
+                                <td class="px-4 py-2">2 - 150</td>
+                                <td class="px-4 py-2 text-center font-medium">8</td>
+                                <td class="px-4 py-2 text-center text-emerald-600 font-bold">0</td>
+                                <td class="px-4 py-2 text-center text-red-600 font-bold">1</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="px-4 py-2">151 - 500</td>
+                                <td class="px-4 py-2 text-center font-medium">20</td>
+                                <td class="px-4 py-2 text-center text-emerald-600 font-bold">1</td>
+                                <td class="px-4 py-2 text-center text-red-600 font-bold">2</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="px-4 py-2">501 - 1,200</td>
+                                <td class="px-4 py-2 text-center font-medium">32</td>
+                                <td class="px-4 py-2 text-center text-emerald-600 font-bold">2</td>
+                                <td class="px-4 py-2 text-center text-red-600 font-bold">3</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="px-4 py-2">1,201 - 3,200</td>
+                                <td class="px-4 py-2 text-center font-medium">50</td>
+                                <td class="px-4 py-2 text-center text-emerald-600 font-bold">3</td>
+                                <td class="px-4 py-2 text-center text-red-600 font-bold">4</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="px-4 py-2">3,201 - 10,000</td>
+                                <td class="px-4 py-2 text-center font-medium">80</td>
+                                <td class="px-4 py-2 text-center text-emerald-600 font-bold">5</td>
+                                <td class="px-4 py-2 text-center text-red-600 font-bold">6</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="text-xs text-slate-500 mt-3">注：不良品数达到"拒收数"即整批退货或返工</p>
             </div>
-            <div class="bg-slate-50 rounded-lg p-3 text-center">
-                <i class="fas fa-user text-slate-400 mb-1"></i>
-                <p class="text-xs text-slate-600">验货人</p>
+
+            <!-- Defect Classification -->
+            <div class="bg-white rounded-xl border border-slate-200 p-6">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-exclamation-triangle text-red-500"></i>缺陷等级分类
+                </h2>
+                <div class="space-y-3">
+                    <div class="p-3 bg-red-50 rounded-lg border border-red-200">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-bold text-red-800">致命缺陷 (Critical)</span>
+                            <span class="text-xs bg-red-200 px-2 py-1 rounded">AQL 0</span>
+                        </div>
+                        <p class="text-sm text-slate-600">安全隐患、法规不符 → 零容忍，整批拒收</p>
+                    </div>
+                    <div class="p-3 bg-amber-50 rounded-lg border border-amber-200">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-bold text-amber-800">主要缺陷 (Major)</span>
+                            <span class="text-xs bg-amber-200 px-2 py-1 rounded">AQL 1.0</span>
+                        </div>
+                        <p class="text-sm text-slate-600">功能故障、明显外观问题 → 严格控制</p>
+                    </div>
+                    <div class="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-bold text-blue-800">次要缺陷 (Minor)</span>
+                            <span class="text-xs bg-blue-200 px-2 py-1 rounded">AQL 2.5</span>
+                        </div>
+                        <p class="text-sm text-slate-600">轻微外观瑕疵不影响使用 → 允许少量</p>
+                    </div>
+                </div>
             </div>
-            <div class="bg-slate-50 rounded-lg p-3 text-center">
-                <i class="fas fa-box text-slate-400 mb-1"></i>
-                <p class="text-xs text-slate-600">产品SKU</p>
-            </div>
-            <div class="bg-slate-50 rounded-lg p-3 text-center">
-                <i class="fas fa-hashtag text-slate-400 mb-1"></i>
-                <p class="text-xs text-slate-600">批次数量</p>
-            </div>
-            <div class="bg-slate-50 rounded-lg p-3 text-center">
-                <i class="fas fa-vial text-slate-400 mb-1"></i>
-                <p class="text-xs text-slate-600">抽检数量</p>
-            </div>
-            <div class="bg-slate-50 rounded-lg p-3 text-center">
-                <i class="fas fa-bug text-slate-400 mb-1"></i>
-                <p class="text-xs text-slate-600">不良品数</p>
-            </div>
-            <div class="bg-slate-50 rounded-lg p-3 text-center">
-                <i class="fas fa-check-circle text-slate-400 mb-1"></i>
-                <p class="text-xs text-slate-600">验收结论</p>
-            </div>
-            <div class="bg-slate-50 rounded-lg p-3 text-center">
-                <i class="fas fa-camera text-slate-400 mb-1"></i>
-                <p class="text-xs text-slate-600">照片附件</p>
+
+            <!-- QC Report Fields -->
+            <div class="bg-purple-50 rounded-xl border border-purple-200 p-5">
+                <h3 class="font-bold text-purple-800 mb-3 flex items-center gap-2">
+                    <i class="fas fa-file-lines"></i>QC报告必填字段
+                </h3>
+                <div class="grid grid-cols-4 gap-2 text-xs">
+                    <div class="bg-white p-2 rounded text-center">验货日期</div>
+                    <div class="bg-white p-2 rounded text-center">验货人</div>
+                    <div class="bg-white p-2 rounded text-center">产品SKU</div>
+                    <div class="bg-white p-2 rounded text-center">批次数量</div>
+                    <div class="bg-white p-2 rounded text-center">抽检数量</div>
+                    <div class="bg-white p-2 rounded text-center">不良品数</div>
+                    <div class="bg-white p-2 rounded text-center">验收结论</div>
+                    <div class="bg-white p-2 rounded text-center">照片附件</div>
+                </div>
             </div>
         </div>
     </div>
@@ -205,7 +241,7 @@
             <div>
                 <h3 class="font-bold text-slate-800">操作视频教程</h3>
                 <p class="text-sm text-slate-600">访问公司网盘观看详细操作录屏：<a href="http://192.168.1.99"
-                        class="text-blue-600 underline">192.168.1.99</a>（仅限内网访问）</p>
+                        class="text-blue-600 underline">192.168.1.99</a>（仅限内网访问）→ 培训资料 → 采购QC专题</p>
             </div>
         </div>
     </div>

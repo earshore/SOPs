@@ -69,28 +69,28 @@ export const MENU_CONFIG = {
     sopCategories: {
         growth: {
             id: 'growth',
-            label: '第一模块：运营与推广体系',
+            label: '运营与推广体系',
             icon: 'fas fa-rocket',
             color: 'emerald',
             order: 1
         },
         backend: {
             id: 'backend',
-            label: '第二模块：供应链与物流体系',
+            label: '供应链与物流体系',
             icon: 'fas fa-warehouse',
             color: 'amber',
             order: 2
         },
         safety: {
             id: 'safety',
-            label: '第三模块：账号安全与风控体系',
+            label: '账号安全与风控体系',
             icon: 'fas fa-shield-halved',
             color: 'red',
             order: 3
         },
         service: {
             id: 'service',
-            label: '第四模块：客服与客户体验体系',
+            label: '客服与客户体验体系',
             icon: 'fas fa-headset',
             color: 'blue',
             order: 4
@@ -271,13 +271,6 @@ export const MENU_CONFIG = {
 
         // --- 属于 Hub 智库的页面 ---
 
-        amz_sop_flow: {
-            moduleId: 'amz_hub_core',
-            label: 'SOP 流程',
-            icon: 'fas fa-list-check',
-            panelId: 'panel-amz_hub',
-            isHub: true
-        },
         amz_eu_insights: {
             moduleId: 'amz_hub_core',
             label: '市场洞察',

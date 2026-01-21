@@ -1,5 +1,5 @@
 <!-- PPC 广告投放与优化 SOP Template -->
-<div class="max-w-4xl mx-auto">
+<div class="sop-widescreen-container">
     <!-- Back Button & Header -->
     <div class="mb-6">
         <button onclick="switchTab('sops_overview')"
@@ -18,153 +18,211 @@
                         <span class="sop-status-badge sop-status-active">已发布</span>
                     </div>
                     <p class="text-slate-600 mb-3">
-                        广告建组规范、否词筛选标准、根据ACOS目标的竞价调整策略。
+                        涵盖广告命名规范、广告架构设计、否词筛选标准、竞价调整策略及ACOS阶段目标设定。
                     </p>
                     <div class="flex items-center gap-6 text-sm text-slate-500">
                         <span><i class="fas fa-layer-group mr-1"></i>运营与推广体系</span>
                         <span><i class="fas fa-dollar-sign mr-1"></i>广告优化</span>
+                        <span><i class="fas fa-clock mr-1"></i>更新日期：2024-01</span>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Naming Convention -->
-    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <i class="fas fa-tag text-blue-500"></i>广告命名规范
-        </h2>
-        <div class="bg-slate-50 rounded-lg p-4 mb-4">
-            <p class="font-mono text-sm text-center text-slate-700">
-                <span class="text-blue-600">[ASIN]</span>_<span class="text-emerald-600">[开启日期]</span>_<span
-                    class="text-purple-600">[匹配模式]</span>
-            </p>
+    <!-- ACOS Target Quick View -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="bg-emerald-50 rounded-xl p-4 text-center border border-emerald-200">
+            <p class="text-xs text-emerald-600 mb-1">新品期 (0-3月)</p>
+            <p class="text-2xl font-bold text-emerald-700">≤ 50%</p>
+            <p class="text-xs text-slate-500 mt-1">牺牲利润换排名</p>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-            <div class="bg-white border rounded-lg p-3">
-                <h4 class="font-semibold text-slate-800 mb-1">自动广告</h4>
-                <p class="font-mono text-xs text-slate-600">B08XXX_20240115_AUTO</p>
-            </div>
-            <div class="bg-white border rounded-lg p-3">
-                <h4 class="font-semibold text-slate-800 mb-1">手动精准</h4>
-                <p class="font-mono text-xs text-slate-600">B08XXX_20240115_EXACT</p>
-            </div>
-            <div class="bg-white border rounded-lg p-3">
-                <h4 class="font-semibold text-slate-800 mb-1">手动广泛</h4>
-                <p class="font-mono text-xs text-slate-600">B08XXX_20240115_BROAD</p>
-            </div>
+        <div class="bg-blue-50 rounded-xl p-4 text-center border border-blue-200">
+            <p class="text-xs text-blue-600 mb-1">成长期 (3-6月)</p>
+            <p class="text-2xl font-bold text-blue-700">≤ 30%</p>
+            <p class="text-xs text-slate-500 mt-1">逐步收紧</p>
+        </div>
+        <div class="bg-purple-50 rounded-xl p-4 text-center border border-purple-200">
+            <p class="text-xs text-purple-600 mb-1">成熟期 (6月+)</p>
+            <p class="text-2xl font-bold text-purple-700">≤ 20%</p>
+            <p class="text-xs text-slate-500 mt-1">追求盈利</p>
         </div>
     </div>
 
-    <!-- Negative Keywords -->
-    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <i class="fas fa-ban text-red-500"></i>否定关键词 (Negative Keywords) 筛选标准
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="bg-red-50 rounded-lg p-4 border border-red-100">
-                <h4 class="font-bold text-red-800 mb-2">🚫 高曝光低点击</h4>
-                <ul class="text-sm text-red-700 space-y-1">
-                    <li>• 曝光 > 1000</li>
-                    <li>• CTR < 0.2%</li>
-                    <li>• 判断：关键词与产品相关性差</li>
-                </ul>
+    <!-- Two Column Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Left Column -->
+        <div class="space-y-6">
+            <!-- Naming Convention -->
+            <div class="bg-white rounded-xl border border-slate-200 p-6">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-tag text-blue-500"></i>广告命名规范
+                </h2>
+                <div class="bg-slate-50 rounded-lg p-4 mb-4">
+                    <p class="font-mono text-sm text-center text-slate-700">
+                        <span class="text-blue-600 font-bold">[ASIN]</span>_<span
+                            class="text-emerald-600 font-bold">[日期]</span>_<span
+                            class="text-purple-600 font-bold">[匹配类型]</span>
+                    </p>
+                </div>
+                <div class="grid grid-cols-3 gap-3 text-sm">
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
+                        <h4 class="font-semibold text-slate-800 mb-1">自动广告</h4>
+                        <p class="font-mono text-xs text-blue-600">B08XXX_0115_AUTO</p>
+                    </div>
+                    <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-center">
+                        <h4 class="font-semibold text-slate-800 mb-1">手动精准</h4>
+                        <p class="font-mono text-xs text-emerald-600">B08XXX_0115_EXACT</p>
+                    </div>
+                    <div class="bg-purple-50 border border-purple-200 rounded-lg p-3 text-center">
+                        <h4 class="font-semibold text-slate-800 mb-1">手动广泛</h4>
+                        <p class="font-mono text-xs text-purple-600">B08XXX_0115_BROAD</p>
+                    </div>
+                </div>
             </div>
-            <div class="bg-amber-50 rounded-lg p-4 border border-amber-100">
-                <h4 class="font-bold text-amber-800 mb-2">⚠️ 高花费低转化</h4>
-                <ul class="text-sm text-amber-700 space-y-1">
-                    <li>• 花费 > $20</li>
-                    <li>• 订单 = 0</li>
-                    <li>• 判断：流量质量差或价格不匹配</li>
-                </ul>
-            </div>
-            <div class="bg-purple-50 rounded-lg p-4 border border-purple-100">
-                <h4 class="font-bold text-purple-800 mb-2">🎯 ACOS 过高</h4>
-                <ul class="text-sm text-purple-700 space-y-1">
-                    <li>• ACOS > 目标值 x 2</li>
-                    <li>• 观察周期 > 7天</li>
-                    <li>• 判断：关键词转化效率低</li>
-                </ul>
-            </div>
-            <div class="bg-blue-50 rounded-lg p-4 border border-blue-100">
-                <h4 class="font-bold text-blue-800 mb-2">📝 无关词</h4>
-                <ul class="text-sm text-blue-700 space-y-1">
-                    <li>• 明显与产品无关</li>
-                    <li>• 竞品品牌词（视策略）</li>
-                    <li>• 判断：人工识别并否定</li>
-                </ul>
-            </div>
-        </div>
-    </div>
 
-    <!-- Bid Adjustment -->
-    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <i class="fas fa-sliders text-blue-500"></i>竞价调整策略 (Bid Adjustment)
-        </h2>
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead>
-                    <tr class="bg-slate-50">
-                        <th class="px-4 py-3 text-left font-semibold text-slate-700">ACOS 表现</th>
-                        <th class="px-4 py-3 text-center font-semibold text-slate-700">调整方向</th>
-                        <th class="px-4 py-3 text-center font-semibold text-slate-700">调整幅度</th>
-                        <th class="px-4 py-3 text-left font-semibold text-slate-700">说明</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                    <tr>
-                        <td class="px-4 py-3">ACOS < 目标 x 0.5</td>
-                        <td class="px-4 py-3 text-center"><span class="text-emerald-600 font-bold">↑ 加价</span></td>
-                        <td class="px-4 py-3 text-center">+10%~20%</td>
-                        <td class="px-4 py-3 text-xs text-slate-500">表现优秀，争取更多曝光</td>
-                    </tr>
-                    <tr>
-                        <td class="px-4 py-3">ACOS 在目标范围内</td>
-                        <td class="px-4 py-3 text-center"><span class="text-blue-600 font-bold">— 保持</span></td>
-                        <td class="px-4 py-3 text-center">0%</td>
-                        <td class="px-4 py-3 text-xs text-slate-500">维持现状，持续观察</td>
-                    </tr>
-                    <tr>
-                        <td class="px-4 py-3">ACOS > 目标 x 1.3</td>
-                        <td class="px-4 py-3 text-center"><span class="text-amber-600 font-bold">↓ 降价</span></td>
-                        <td class="px-4 py-3 text-center">-10%~15%</td>
-                        <td class="px-4 py-3 text-xs text-slate-500">略高于目标，小幅调整</td>
-                    </tr>
-                    <tr>
-                        <td class="px-4 py-3">ACOS > 目标 x 2</td>
-                        <td class="px-4 py-3 text-center"><span class="text-red-600 font-bold">↓↓ 大降/暂停</span></td>
-                        <td class="px-4 py-3 text-center">-20%~50%</td>
-                        <td class="px-4 py-3 text-xs text-slate-500">严重超标，考虑暂停</td>
-                    </tr>
-                </tbody>
-            </table>
+            <!-- Bid Adjustment Table -->
+            <div class="bg-white rounded-xl border border-slate-200 p-6">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-sliders text-blue-500"></i>竞价调整策略
+                </h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-slate-100">
+                                <th class="px-3 py-2 text-left font-bold text-slate-700">ACOS表现</th>
+                                <th class="px-3 py-2 text-center font-bold text-slate-700">调整</th>
+                                <th class="px-3 py-2 text-center font-bold text-slate-700">幅度</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <tr>
+                                <td class="px-3 py-2">ACOS < 目标×0.5</td>
+                                <td class="px-3 py-2 text-center"><span class="text-emerald-600 font-bold">↑加价</span>
+                                </td>
+                                <td class="px-3 py-2 text-center">+10%~20%</td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-2">ACOS在目标内</td>
+                                <td class="px-3 py-2 text-center"><span class="text-blue-600 font-bold">—保持</span></td>
+                                <td class="px-3 py-2 text-center">0%</td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-2">ACOS > 目标×1.3</td>
+                                <td class="px-3 py-2 text-center"><span class="text-amber-600 font-bold">↓降价</span></td>
+                                <td class="px-3 py-2 text-center">-10%~15%</td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-2">ACOS > 目标×2</td>
+                                <td class="px-3 py-2 text-center"><span class="text-red-600 font-bold">↓↓暂停</span></td>
+                                <td class="px-3 py-2 text-center">-20%~50%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="text-xs text-slate-500 mt-3"><i class="fas fa-lightbulb text-amber-500"></i> 每周调整一次，避免数据波动</p>
+            </div>
         </div>
-        <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
-            <p class="text-sm text-blue-700"><i class="fas fa-lightbulb mr-1"></i>建议：每周进行一次竞价优化，避免频繁调整导致数据波动。</p>
-        </div>
-    </div>
 
-    <!-- ACOS Target -->
-    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <i class="fas fa-bullseye text-emerald-500"></i>ACOS 目标设定参考
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="bg-emerald-50 rounded-lg p-4 text-center">
-                <p class="text-xs text-emerald-600 mb-1">新品期 (0-3月)</p>
-                <p class="text-2xl font-bold text-emerald-700">≤ 50%</p>
-                <p class="text-xs text-slate-500 mt-1">牺牲利润换排名</p>
+        <!-- Right Column -->
+        <div class="space-y-6">
+            <!-- Negative Keywords -->
+            <div class="bg-white rounded-xl border border-slate-200 p-6">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-ban text-red-500"></i>否定关键词筛选标准
+                </h2>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-red-50 rounded-lg p-3 border border-red-200">
+                        <h4 class="font-bold text-red-800 mb-2 text-sm">🚫 高曝光低点击</h4>
+                        <ul class="text-xs text-red-700 space-y-1">
+                            <li>• 曝光 > 1000</li>
+                            <li>• CTR < 0.2%</li>
+                            <li>→ 词与产品不匹配</li>
+                        </ul>
+                    </div>
+                    <div class="bg-amber-50 rounded-lg p-3 border border-amber-200">
+                        <h4 class="font-bold text-amber-800 mb-2 text-sm">⚠️ 高花费低转化</h4>
+                        <ul class="text-xs text-amber-700 space-y-1">
+                            <li>• 花费 > $20</li>
+                            <li>• 订单 = 0</li>
+                            <li>→ 流量质量差</li>
+                        </ul>
+                    </div>
+                    <div class="bg-purple-50 rounded-lg p-3 border border-purple-200">
+                        <h4 class="font-bold text-purple-800 mb-2 text-sm">🎯 ACOS过高</h4>
+                        <ul class="text-xs text-purple-700 space-y-1">
+                            <li>• ACOS > 目标×2</li>
+                            <li>• 观察期 > 7天</li>
+                            <li>→ 转化效率低</li>
+                        </ul>
+                    </div>
+                    <div class="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                        <h4 class="font-bold text-blue-800 mb-2 text-sm">📝 无关词</h4>
+                        <ul class="text-xs text-blue-700 space-y-1">
+                            <li>• 明显不相关</li>
+                            <li>• 竞品品牌词</li>
+                            <li>→ 人工识别否定</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
-            <div class="bg-blue-50 rounded-lg p-4 text-center">
-                <p class="text-xs text-blue-600 mb-1">成长期 (3-6月)</p>
-                <p class="text-2xl font-bold text-blue-700">≤ 30%</p>
-                <p class="text-xs text-slate-500 mt-1">逐步收紧</p>
+
+            <!-- Weekly Workflow -->
+            <div class="bg-white rounded-xl border border-slate-200 p-6">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-calendar-week text-blue-500"></i>周度优化节奏
+                </h2>
+                <div class="space-y-2">
+                    <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                        <div
+                            class="w-12 h-8 bg-blue-500 text-white rounded flex items-center justify-center font-bold text-xs">
+                            周一</div>
+                        <span class="text-sm text-slate-700">下载广告报告，分析上周数据</span>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 bg-emerald-50 rounded-lg">
+                        <div
+                            class="w-12 h-8 bg-emerald-500 text-white rounded flex items-center justify-center font-bold text-xs">
+                            周二</div>
+                        <span class="text-sm text-slate-700">筛选否词，添加否定关键词</span>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 bg-amber-50 rounded-lg">
+                        <div
+                            class="w-12 h-8 bg-amber-500 text-white rounded flex items-center justify-center font-bold text-xs">
+                            周三</div>
+                        <span class="text-sm text-slate-700">调整竞价，优化广告组</span>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
+                        <div
+                            class="w-12 h-8 bg-purple-500 text-white rounded flex items-center justify-center font-bold text-xs">
+                            周五</div>
+                        <span class="text-sm text-slate-700">检查新品广告表现，输出周报</span>
+                    </div>
+                </div>
             </div>
-            <div class="bg-purple-50 rounded-lg p-4 text-center">
-                <p class="text-xs text-purple-600 mb-1">成熟期 (6月+)</p>
-                <p class="text-2xl font-bold text-purple-700">≤ 20%</p>
-                <p class="text-xs text-slate-500 mt-1">追求盈利</p>
+
+            <!-- Key Metrics -->
+            <div class="bg-emerald-50 rounded-xl border border-emerald-200 p-5">
+                <h3 class="font-bold text-emerald-800 mb-3 flex items-center gap-2">
+                    <i class="fas fa-chart-pie"></i>核心指标监控
+                </h3>
+                <div class="grid grid-cols-2 gap-3 text-sm">
+                    <div class="bg-white rounded-lg p-3 text-center">
+                        <div class="font-bold text-emerald-600">ACOS</div>
+                        <div class="text-xs text-slate-600">广告销售成本</div>
+                    </div>
+                    <div class="bg-white rounded-lg p-3 text-center">
+                        <div class="font-bold text-blue-600">CTR</div>
+                        <div class="text-xs text-slate-600">点击率 (目标>0.4%)</div>
+                    </div>
+                    <div class="bg-white rounded-lg p-3 text-center">
+                        <div class="font-bold text-purple-600">CVR</div>
+                        <div class="text-xs text-slate-600">转化率 (目标>10%)</div>
+                    </div>
+                    <div class="bg-white rounded-lg p-3 text-center">
+                        <div class="font-bold text-amber-600">TACOS</div>
+                        <div class="text-xs text-slate-600">总销售广告占比</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -176,7 +234,7 @@
             <div>
                 <h3 class="font-bold text-slate-800">操作视频教程</h3>
                 <p class="text-sm text-slate-600">访问公司网盘观看详细操作录屏：<a href="http://192.168.1.99"
-                        class="text-blue-600 underline">192.168.1.99</a>（仅限内网访问）</p>
+                        class="text-blue-600 underline">192.168.1.99</a>（仅限内网访问）→ 培训资料 → PPC广告专题</p>
             </div>
         </div>
     </div>

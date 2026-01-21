@@ -2,6 +2,18 @@
    SOPs Module Styles
    ================================ */
 
+/* SOPs 全宽显示 - 覆盖模板中的 max-w 限制 */
+#sops_content_area .max-w-4xl,
+#sops_content_area .max-w-5xl,
+#sops_content_area .max-w-6xl {
+    max-width: 100% !important;
+}
+
+#sops_content_area>div {
+    max-width: 100%;
+    width: 100%;
+}
+
 /* SOP Card Grid */
 .sop-card-grid {
     display: grid;
@@ -147,6 +159,7 @@
         opacity: 0;
         transform: translateY(10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
