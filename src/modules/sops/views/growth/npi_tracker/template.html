@@ -18,12 +18,109 @@
                         <span class="sop-status-badge sop-status-active">已发布</span>
                     </div>
                     <p class="text-slate-600 mb-3">
-                        Amazon NPI Tracker - 监控新品从"测款"到"稳定销售"全流程的SOP看板，核心在于自动计算财务红线和强制执行合规检查。
+                        Amazon NPI Tracker - 监控新品从"测款"到"稳定销售"全流程的SOP看板，强制执行上架合规检查，自动计算财务红线确保亏损预警。
                     </p>
                     <div class="flex items-center gap-6 text-sm text-slate-500">
                         <span><i class="fas fa-layer-group mr-1"></i>运营与推广体系</span>
                         <span><i class="fas fa-calculator mr-1"></i>自动定价计算</span>
+                        <span><i class="fas fa-clock mr-1"></i>更新日期：2024-01</span>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SOP Guidance Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+        <!-- NPI 阶段说明 -->
+        <div class="bg-white rounded-xl border border-slate-200 p-4">
+            <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+                <i class="fas fa-road text-blue-500"></i>新品生命周期阶段
+            </h3>
+            <div class="space-y-2 text-xs">
+                <div class="flex items-start gap-2 p-2 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+                    <div class="flex-1">
+                        <span class="font-bold text-blue-700">测款期 (0-30天)</span>
+                        <p class="text-slate-600 mt-0.5">上架后观察期。完成SOP合规检查，启动Vine，测试广告响应。关键指标：CTR>0.5%，CVR有数据。</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-2 p-2 bg-emerald-50 rounded-lg border-l-4 border-emerald-400">
+                    <div class="flex-1">
+                        <span class="font-bold text-emerald-700">成长期 (30-90天)</span>
+                        <p class="text-slate-600 mt-0.5">积累评价、优化广告。目标：评分≥4.0，ACOS<40%，自然单占比提升。< /p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-2 p-2 bg-purple-50 rounded-lg border-l-4 border-purple-400">
+                    <div class="flex-1">
+                        <span class="font-bold text-purple-700">稳定期 (90天+)</span>
+                        <p class="text-slate-600 mt-0.5">稳定出单，控制广告预算。目标：自然单占比>50%，利润率达标。</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-2 p-2 bg-red-50 rounded-lg border-l-4 border-red-400">
+                    <div class="flex-1">
+                        <span class="font-bold text-red-700">清仓期</span>
+                        <p class="text-slate-600 mt-0.5">库存周转>60天或持续亏损触发。降价至动销价或清仓红线止损。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SOP 合规检查项 -->
+        <div class="bg-white rounded-xl border border-slate-200 p-4">
+            <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+                <i class="fas fa-clipboard-check text-purple-500"></i>上架前合规检查 (5项必做)
+            </h3>
+            <div class="space-y-2 text-xs">
+                <div class="flex items-center gap-2 p-2 bg-slate-50 rounded">
+                    <i class="fas fa-globe text-blue-500 w-4"></i>
+                    <span><strong>泛欧计划</strong>：确认是否启用Pan-EU，影响定价策略</span>
+                </div>
+                <div class="flex items-center gap-2 p-2 bg-slate-50 rounded">
+                    <i class="fas fa-robot text-purple-500 w-4"></i>
+                    <span><strong>Rufus优化</strong>：五点+标题包含场景词、解决痛点</span>
+                </div>
+                <div class="flex items-center gap-2 p-2 bg-slate-50 rounded">
+                    <i class="fas fa-ban text-red-500 w-4"></i>
+                    <span><strong>敏感词</strong>：禁用侵权词、医疗声明、夸大宣传</span>
+                </div>
+                <div class="flex items-center gap-2 p-2 bg-slate-50 rounded">
+                    <i class="fas fa-image text-emerald-500 w-4"></i>
+                    <span><strong>图片+QA</strong>：主图白底、6张副图、常见QA预埋</span>
+                </div>
+                <div class="flex items-center gap-2 p-2 bg-slate-50 rounded">
+                    <i class="fas fa-plus-square text-amber-500 w-4"></i>
+                    <span><strong>A+页面</strong>：品牌故事+对比模块+场景展示</span>
+                </div>
+            </div>
+            <div class="mt-3 p-2 bg-amber-50 rounded-lg border border-amber-200">
+                <p class="text-xs text-amber-700"><i class="fas fa-lightbulb mr-1"></i>提示：SOP合规状态显示✓表示全部通过，否则显示完成数/总数
+                </p>
+            </div>
+        </div>
+
+        <!-- 决策判断标准 -->
+        <div class="bg-white rounded-xl border border-slate-200 p-4">
+            <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+                <i class="fas fa-gavel text-red-500"></i>"保留/放弃"决策标准
+            </h3>
+            <div class="space-y-2 text-xs">
+                <div class="p-2 bg-emerald-50 rounded-lg border border-emerald-200">
+                    <span class="font-bold text-emerald-700">✓ 继续保留条件</span>
+                    <ul class="mt-1 text-slate-600 space-y-0.5">
+                        <li>• ACOS < 目标值 (通常40%)</li>
+                        <li>• 评分 ≥ 4.0</li>
+                        <li>• 自然单占比上升趋势</li>
+                        <li>• 库存周转 < 60天</li>
+                    </ul>
+                </div>
+                <div class="p-2 bg-red-50 rounded-lg border border-red-200">
+                    <span class="font-bold text-red-700">✗ 建议放弃条件</span>
+                    <ul class="mt-1 text-slate-600 space-y-0.5">
+                        <li>• 连续30天ACOS>60%且无改善</li>
+                        <li>• 评分 < 3.5 且差评无法解决</li>
+                        <li>• 库存周转 > 90天</li>
+                        <li>• 售价已低于清仓红线仍无销量</li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -34,23 +131,27 @@
         <div class="flex items-start gap-3">
             <i class="fas fa-calculator text-blue-500 text-xl"></i>
             <div class="flex-1">
-                <h3 class="font-bold text-slate-800 mb-2">定价计算公式 (基于DE配送费自动计算)</h3>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                <h3 class="font-bold text-slate-800 mb-2">定价计算公式 (基于配送费自动计算，确保不亏损)</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                     <div class="bg-white rounded-lg p-3 border border-blue-200">
                         <span class="text-blue-600 font-bold">新品定价</span>
                         <p class="font-mono text-xs mt-1">= 市场均价 × 0.9</p>
+                        <p class="text-[10px] text-slate-500">低于市场价10%切入</p>
                     </div>
                     <div class="bg-white rounded-lg p-3 border border-red-200">
                         <span class="text-red-600 font-bold">清仓红线</span>
                         <p class="font-mono text-xs mt-1">= 配送费 ÷ 0.5</p>
+                        <p class="text-[10px] text-red-500">配送占比50%，到此即亏损</p>
                     </div>
                     <div class="bg-white rounded-lg p-3 border border-amber-200">
                         <span class="text-amber-600 font-bold">动销价格</span>
-                        <p class="font-mono text-xs mt-1">= (配送费 ÷ 0.5) + 1</p>
+                        <p class="font-mono text-xs mt-1">= 清仓红线 + €1</p>
+                        <p class="text-[10px] text-slate-500">微利促销价，保本为主</p>
                     </div>
                     <div class="bg-white rounded-lg p-3 border border-emerald-200">
                         <span class="text-emerald-600 font-bold">建议售价</span>
-                        <p class="font-mono text-xs mt-1">= (配送费 ÷ 0.5) + 2</p>
+                        <p class="font-mono text-xs mt-1">= 清仓红线 + €2</p>
+                        <p class="text-[10px] text-slate-500">目标日常售价，利润合理</p>
                     </div>
                 </div>
             </div>
@@ -90,14 +191,14 @@
         </div>
     </div>
 
-    <!-- Data Table - Optimized Layout -->
+    <!-- Data Table -->
     <div class="bg-white rounded-xl border border-slate-200 overflow-hidden mb-6">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
                 <thead>
                     <!-- Group Headers -->
                     <tr class="bg-slate-100 border-b-2 border-slate-300">
-                        <th colspan="5"
+                        <th colspan="8"
                             class="px-2 py-2 text-xs font-bold text-blue-700 text-center border-r-2 border-slate-300 bg-blue-50">
                             <i class="fas fa-folder mr-1"></i>基础档案
                         </th>
@@ -119,49 +220,55 @@
                     </tr>
                     <!-- Column Headers -->
                     <tr class="bg-slate-50 text-[10px] text-slate-600 border-b">
-                        <!-- 基础档案 (5列) -->
-                        <th class="px-2 py-2 font-semibold sticky left-0 bg-slate-50 z-10 border-r min-w-[60px]">阶段</th>
-                        <th class="px-2 py-2 font-semibold min-w-[80px]">SKU</th>
-                        <th class="px-2 py-2 font-semibold min-w-[60px]">店铺</th>
-                        <th class="px-2 py-2 font-semibold min-w-[90px]">ASIN</th>
-                        <th class="px-2 py-2 font-semibold text-center border-r-2 border-slate-300 min-w-[40px]">站点</th>
+                        <!-- 基础档案 (8列) -->
+                        <th class="px-2 py-2 font-semibold sticky left-0 bg-slate-50 z-10 border-r whitespace-nowrap">阶段
+                        </th>
+                        <th class="px-2 py-2 font-semibold whitespace-nowrap">SKU</th>
+                        <th class="px-2 py-2 font-semibold whitespace-nowrap">中文名</th>
+                        <th class="px-2 py-2 font-semibold whitespace-nowrap">店铺</th>
+                        <th class="px-2 py-2 font-semibold whitespace-nowrap">ASIN</th>
+                        <th class="px-2 py-2 font-semibold text-center whitespace-nowrap">站点</th>
+                        <th class="px-2 py-2 font-semibold text-center whitespace-nowrap">发货量</th>
+                        <th class="px-2 py-2 font-semibold text-center border-r-2 border-slate-300 whitespace-nowrap">
+                            库存天数</th>
 
                         <!-- SOP合规 (6列) -->
-                        <th class="px-2 py-2 font-semibold text-center min-w-[35px]" title="泛欧计划">泛欧</th>
-                        <th class="px-2 py-2 font-semibold text-center min-w-[40px]" title="五点Rufus+标题">Rufus</th>
-                        <th class="px-2 py-2 font-semibold text-center min-w-[45px]" title="敏感词规避">敏感词</th>
-                        <th class="px-2 py-2 font-semibold text-center min-w-[45px]" title="图片+QA">图片QA</th>
-                        <th class="px-2 py-2 font-semibold text-center min-w-[30px]" title="A+页面">A+</th>
-                        <th class="px-2 py-2 font-semibold text-center border-r-2 border-slate-300 min-w-[40px]">状态</th>
+                        <th class="px-2 py-2 font-semibold text-center whitespace-nowrap" title="泛欧计划">泛欧</th>
+                        <th class="px-2 py-2 font-semibold text-center whitespace-nowrap" title="五点Rufus+标题">Rufus</th>
+                        <th class="px-2 py-2 font-semibold text-center whitespace-nowrap" title="敏感词规避">敏感词</th>
+                        <th class="px-2 py-2 font-semibold text-center whitespace-nowrap" title="图片+QA">图片QA</th>
+                        <th class="px-2 py-2 font-semibold text-center whitespace-nowrap" title="A+页面">A+</th>
+                        <th class="px-2 py-2 font-semibold text-center border-r-2 border-slate-300 whitespace-nowrap">状态
+                        </th>
 
                         <!-- 财务模型 (6列) -->
-                        <th class="px-2 py-2 font-semibold text-center min-w-[50px]">配送费</th>
-                        <th class="px-2 py-2 font-semibold text-center min-w-[50px]">配送占比</th>
-                        <th class="px-2 py-2 font-semibold text-center text-red-600 min-w-[50px]">清仓线</th>
-                        <th class="px-2 py-2 font-semibold text-center text-amber-600 min-w-[50px]">动销价</th>
-                        <th class="px-2 py-2 font-semibold text-center text-emerald-600 min-w-[50px]">建议价</th>
-                        <th class="px-2 py-2 font-semibold text-center border-r-2 border-slate-300 min-w-[50px]">盈亏点
-                        </th>
+                        <th class="px-2 py-2 font-semibold text-center whitespace-nowrap">配送费</th>
+                        <th class="px-2 py-2 font-semibold text-center whitespace-nowrap">配送占比</th>
+                        <th class="px-2 py-2 font-semibold text-center text-red-600 whitespace-nowrap">清仓线</th>
+                        <th class="px-2 py-2 font-semibold text-center text-amber-600 whitespace-nowrap">动销价</th>
+                        <th class="px-2 py-2 font-semibold text-center text-emerald-600 whitespace-nowrap">建议价</th>
+                        <th class="px-2 py-2 font-semibold text-center border-r-2 border-slate-300 whitespace-nowrap">
+                            盈亏点</th>
 
                         <!-- 流量转化 (5列) -->
-                        <th class="px-2 py-2 font-semibold text-center min-w-[45px]">流量</th>
-                        <th class="px-2 py-2 font-semibold text-center min-w-[40px]">CTR</th>
-                        <th class="px-2 py-2 font-semibold text-center min-w-[40px]">CVR</th>
-                        <th class="px-2 py-2 font-semibold text-center min-w-[50px]">ACOAS</th>
-                        <th class="px-2 py-2 font-semibold text-center border-r-2 border-slate-300 min-w-[50px]">自然占比
-                        </th>
+                        <th class="px-2 py-2 font-semibold text-center whitespace-nowrap">流量</th>
+                        <th class="px-2 py-2 font-semibold text-center whitespace-nowrap">CTR</th>
+                        <th class="px-2 py-2 font-semibold text-center whitespace-nowrap">CVR</th>
+                        <th class="px-2 py-2 font-semibold text-center whitespace-nowrap">ACOAS</th>
+                        <th class="px-2 py-2 font-semibold text-center border-r-2 border-slate-300 whitespace-nowrap">
+                            自然占比</th>
 
                         <!-- 决策 (4列) -->
-                        <th class="px-2 py-2 font-semibold text-center min-w-[55px]">Vine进度</th>
-                        <th class="px-2 py-2 font-semibold text-center min-w-[35px]">广告</th>
-                        <th class="px-2 py-2 font-semibold text-center min-w-[35px]">保留</th>
-                        <th class="px-2 py-2 font-semibold min-w-[100px]">Next Step</th>
+                        <th class="px-2 py-2 font-semibold text-center whitespace-nowrap">Vine进度</th>
+                        <th class="px-2 py-2 font-semibold text-center whitespace-nowrap">广告</th>
+                        <th class="px-2 py-2 font-semibold text-center whitespace-nowrap">保留</th>
+                        <th class="px-2 py-2 font-semibold whitespace-nowrap">Next Step</th>
                     </tr>
                 </thead>
                 <tbody id="npi-table-body">
                     <!-- Dynamic content rendered by index.js -->
                     <tr>
-                        <td colspan="26" class="px-6 py-10 text-center text-slate-400">
+                        <td colspan="29" class="px-6 py-10 text-center text-slate-400">
                             <i class="fas fa-spinner fa-spin text-2xl"></i>
                             <p class="mt-2">加载中...</p>
                         </td>
@@ -171,22 +278,32 @@
         </div>
     </div>
 
-    <!-- Legend -->
-    <div class="bg-white rounded-xl border border-slate-200 p-4 mb-6">
-        <h3 class="font-bold text-slate-700 mb-3 flex items-center gap-2">
-            <i class="fas fa-info-circle text-blue-500"></i>图例说明
-        </h3>
-        <div class="flex flex-wrap items-center gap-6 text-xs text-slate-600">
-            <span class="flex items-center gap-1"><span
-                    class="inline-block w-3 h-3 bg-blue-100 rounded border border-blue-300"></span>新品-测款</span>
-            <span class="flex items-center gap-1"><span
-                    class="inline-block w-3 h-3 bg-emerald-100 rounded border border-emerald-300"></span>成长期</span>
-            <span class="flex items-center gap-1"><span
-                    class="inline-block w-3 h-3 bg-purple-100 rounded border border-purple-300"></span>稳定期</span>
-            <span class="flex items-center gap-1"><span
-                    class="inline-block w-3 h-3 bg-red-100 rounded border border-red-300"></span>清仓期</span>
-            <span class="text-red-600 font-medium"><i class="fas fa-exclamation-triangle mr-1"></i>库存>60天 = 滞销预警</span>
-            <span class="text-amber-600 font-medium"><i class="fas fa-exclamation-circle mr-1"></i>CTR<0.5%=点击预警</span>
+    <!-- Legend & Alerts -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div class="bg-white rounded-xl border border-slate-200 p-4">
+            <h3 class="font-bold text-slate-700 mb-3 flex items-center gap-2">
+                <i class="fas fa-info-circle text-blue-500"></i>图例说明
+            </h3>
+            <div class="flex flex-wrap items-center gap-4 text-xs text-slate-600">
+                <span class="flex items-center gap-1"><span
+                        class="inline-block w-3 h-3 bg-blue-100 rounded border border-blue-300"></span>新品-测款</span>
+                <span class="flex items-center gap-1"><span
+                        class="inline-block w-3 h-3 bg-emerald-100 rounded border border-emerald-300"></span>成长期</span>
+                <span class="flex items-center gap-1"><span
+                        class="inline-block w-3 h-3 bg-purple-100 rounded border border-purple-300"></span>稳定期</span>
+                <span class="flex items-center gap-1"><span
+                        class="inline-block w-3 h-3 bg-red-100 rounded border border-red-300"></span>清仓期</span>
+            </div>
+        </div>
+        <div class="bg-amber-50 rounded-xl border border-amber-200 p-4">
+            <h3 class="font-bold text-amber-800 mb-2 flex items-center gap-2">
+                <i class="fas fa-exclamation-triangle"></i>预警规则
+            </h3>
+            <div class="text-xs text-slate-700 space-y-1">
+                <p><span class="text-red-600 font-bold">库存>60天</span> = 滞销预警，考虑降价或清仓</p>
+                <p><span class="text-amber-600 font-bold">CTR<0.5%< /span> = 点击预警，需优化主图或标题</p>
+                <p><span class="text-red-600 font-bold">建议价<清仓线< /span> = 财务预警，当前定价已亏损</p>
+            </div>
         </div>
     </div>
 

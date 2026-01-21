@@ -18,7 +18,7 @@
                         <span class="sop-status-badge sop-status-active">已发布</span>
                     </div>
                     <p class="text-slate-600 mb-3">
-                        涵盖FBA货件创建、FNSKU/箱标打印、包装规范、限重要求、常见入库问题处理的完整操作指南。
+                        基于亚马逊卖家中心官方指南，涵盖Send to Amazon工作流、产品标签、装箱要求、入库问题处理的完整操作规范。
                     </p>
                     <div class="flex items-center gap-6 text-sm text-slate-500">
                         <span><i class="fas fa-layer-group mr-1"></i>供应链与物流体系</span>
@@ -30,236 +30,312 @@
         </div>
     </div>
 
-    <!-- Key Metrics Alert -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
-            <div class="text-2xl font-bold text-blue-600">7-14天</div>
-            <div class="text-sm text-slate-600">海运入库周期 (EU)</div>
+    <!-- Critical Alerts -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div class="bg-red-50 border border-red-200 rounded-xl p-4">
+            <div class="flex items-start gap-3">
+                <i class="fas fa-exclamation-triangle text-red-500 text-xl"></i>
+                <div>
+                    <h3 class="font-bold text-red-800 mb-1">入库政策警告</h3>
+                    <p class="text-sm text-red-700">违反FBA包装和预处理要求将导致：拒收货件、退回发货地、或收取不合规费用（$0.20-$1.50/件）</p>
+                </div>
+            </div>
         </div>
-        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-center">
-            <div class="text-2xl font-bold text-emerald-600">3-5天</div>
-            <div class="text-sm text-slate-600">空运入库周期 (EU)</div>
-        </div>
-        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
-            <div class="text-2xl font-bold text-amber-600">≤22kg</div>
-            <div class="text-sm text-slate-600">欧洲站单箱限重</div>
-        </div>
-        <div class="bg-purple-50 border border-purple-200 rounded-xl p-4 text-center">
-            <div class="text-2xl font-bold text-purple-600">$0.30</div>
-            <div class="text-sm text-slate-600">FNSKU贴标服务费 (自贴免费)</div>
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+            <div class="flex items-start gap-3">
+                <i class="fas fa-info-circle text-blue-500 text-xl"></i>
+                <div>
+                    <h3 class="font-bold text-blue-800 mb-1">货件拆分说明</h3>
+                    <p class="text-sm text-blue-700">亚马逊会将货件自动分配到多个运营中心(FC)，属于正常操作，无需担心。可付费使用Inventory Placement
+                        Service合并。</p>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Two Column Layout -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <!-- Left: Shipping Flow -->
-        <div class="bg-white rounded-xl border border-slate-200 p-6">
-            <h2 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
-                <i class="fas fa-route text-blue-500"></i>标准发货流程
+    <!-- Key Metrics -->
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 text-center">
+            <div class="text-xl font-bold text-blue-600">≤50 lbs</div>
+            <div class="text-xs text-slate-600">美国站单箱限重</div>
+        </div>
+        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-center">
+            <div class="text-xl font-bold text-emerald-600">≤23 kg</div>
+            <div class="text-xs text-slate-600">欧洲站单箱限重</div>
+        </div>
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-center">
+            <div class="text-xl font-bold text-amber-600">≤15 kg</div>
+            <div class="text-xs text-slate-600">日本站单箱限重</div>
+        </div>
+        <div class="bg-purple-50 border border-purple-200 rounded-xl p-3 text-center">
+            <div class="text-xl font-bold text-purple-600">25" max</div>
+            <div class="text-xs text-slate-600">标准箱最长边</div>
+        </div>
+        <div class="bg-red-50 border border-red-200 rounded-xl p-3 text-center">
+            <div class="text-xl font-bold text-red-600">$0.30</div>
+            <div class="text-xs text-slate-600">亚马逊贴标服务费</div>
+        </div>
+    </div>
+
+    <!-- Three Column Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <!-- Column 1: Send to Amazon Workflow -->
+        <div class="bg-white rounded-xl border border-slate-200 p-5">
+            <h2 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <i class="fas fa-route text-blue-500"></i>Send to Amazon 工作流
             </h2>
 
-            <div class="sop-timeline">
-                <!-- Step 1 -->
-                <div class="sop-timeline-item">
-                    <div class="sop-timeline-dot completed"></div>
-                    <div class="bg-blue-50/50 rounded-lg p-4 ml-2 border-l-4 border-blue-400">
-                        <h3 class="font-bold text-slate-800 mb-2">Step 1: 创建货件计划</h3>
-                        <p class="text-sm text-slate-600 mb-2">Seller Central → Inventory → Send to Amazon</p>
-                        <ul class="text-sm text-slate-600 space-y-1">
-                            <li>• 选择发货地址（海外仓/头程货代地址）</li>
-                            <li>• 包装类型：<strong>Case-packed</strong>（同SKU装箱）/ <strong>Individual</strong>（混装）</li>
-                            <li>• 填写每箱数量、尺寸、重量</li>
-                            <li>• 选择物流：<strong>SPD</strong>（小包）/ <strong>LTL</strong>（卡车托盘）</li>
-                        </ul>
-                    </div>
+            <div class="space-y-3">
+                <div class="bg-blue-50/50 rounded-lg p-3 border-l-4 border-blue-400">
+                    <h4 class="font-bold text-slate-800 text-sm mb-1">Step 1: 选择库存</h4>
+                    <p class="text-xs text-slate-600">Inventory → FBA Inventory → Send to Amazon</p>
+                    <ul class="text-xs text-slate-500 mt-1 space-y-0.5">
+                        <li>• 选择要发货的SKU</li>
+                        <li>• 确认发货地址(Ship from)</li>
+                    </ul>
                 </div>
 
-                <!-- Step 2 -->
-                <div class="sop-timeline-item">
-                    <div class="sop-timeline-dot"></div>
-                    <div class="bg-amber-50/50 rounded-lg p-4 ml-2 border-l-4 border-amber-400">
-                        <h3 class="font-bold text-slate-800 mb-2">Step 2: 打印产品标签 (FNSKU)</h3>
-                        <ul class="text-sm text-slate-600 space-y-1">
-                            <li>• 标签尺寸：<strong>1" x 2-5/8"</strong>（推荐）或 1" x 3"</li>
-                            <li>• 使用热敏标签纸，确保条码黑白对比度</li>
-                            <li>• 必须完全覆盖原厂条码（UPC/EAN）</li>
-                            <li>• <strong class="text-red-600">危险品/易碎品</strong>需额外贴警示标签</li>
-                        </ul>
-                    </div>
+                <div class="bg-amber-50/50 rounded-lg p-3 border-l-4 border-amber-400">
+                    <h4 class="font-bold text-slate-800 text-sm mb-1">Step 2: 确认包装类型</h4>
+                    <ul class="text-xs text-slate-600 space-y-0.5">
+                        <li>• <strong>Individual products</strong>: 混装不同SKU</li>
+                        <li>• <strong>Case-packed</strong>: 每箱单一SKU</li>
+                    </ul>
                 </div>
 
-                <!-- Step 3 -->
-                <div class="sop-timeline-item">
-                    <div class="sop-timeline-dot"></div>
-                    <div class="bg-purple-50/50 rounded-lg p-4 ml-2 border-l-4 border-purple-400">
-                        <h3 class="font-bold text-slate-800 mb-2">Step 3: 打印箱标 (Carton Label)</h3>
-                        <ul class="text-sm text-slate-600 space-y-1">
-                            <li>• A4纸打印，每箱<strong>至少贴2张</strong>（相邻面）</li>
-                            <li>• 覆膜处理防止运输磨损</li>
-                            <li>• 确保 Shipment ID 与系统一致</li>
-                            <li>• 禁止折叠、遮挡、贴在胶带上</li>
-                        </ul>
-                    </div>
+                <div class="bg-purple-50/50 rounded-lg p-3 border-l-4 border-purple-400">
+                    <h4 class="font-bold text-slate-800 text-sm mb-1">Step 3: 标签贴附设置</h4>
+                    <ul class="text-xs text-slate-600 space-y-0.5">
+                        <li>• <strong>Seller</strong>: 自行贴FNSKU(免费)</li>
+                        <li>• <strong>Amazon</strong>: 亚马逊贴标($0.30/件)</li>
+                    </ul>
                 </div>
 
-                <!-- Step 4 -->
-                <div class="sop-timeline-item">
-                    <div class="sop-timeline-dot"></div>
-                    <div class="bg-emerald-50/50 rounded-lg p-4 ml-2 border-l-4 border-emerald-400">
-                        <h3 class="font-bold text-slate-800 mb-2">Step 4: 装箱与核对</h3>
-                        <ul class="text-sm text-slate-600 space-y-1">
-                            <li>• 实际装箱数 = 系统申报数（<strong>误差为0</strong>）</li>
-                            <li>• 装箱单（Packing List）放入箱内</li>
-                            <li>• 气泡膜/填充物保护商品</li>
-                            <li>• 封箱使用H型胶带法</li>
-                        </ul>
-                    </div>
+                <div class="bg-emerald-50/50 rounded-lg p-3 border-l-4 border-emerald-400">
+                    <h4 class="font-bold text-slate-800 text-sm mb-1">Step 4: 填写装箱信息</h4>
+                    <ul class="text-xs text-slate-600 space-y-0.5">
+                        <li>• 箱数、每箱数量</li>
+                        <li>• 箱子尺寸(长x宽x高)</li>
+                        <li>• 实际重量(含包装)</li>
+                    </ul>
                 </div>
 
-                <!-- Step 5 -->
-                <div class="sop-timeline-item">
-                    <div class="sop-timeline-dot pending"></div>
-                    <div class="bg-slate-50 rounded-lg p-4 ml-2 border-l-4 border-slate-300">
-                        <h3 class="font-bold text-slate-800 mb-2">Step 5: 确认并发货</h3>
-                        <ul class="text-sm text-slate-600 space-y-1">
-                            <li>• 系统点击 "Confirm Shipment"</li>
-                            <li>• 上传物流单号（PRO Number / Tracking）</li>
-                            <li>• 保存发货凭证、装箱照片备查</li>
-                            <li>• 货件状态变为 "Shipped" 后监控入库</li>
+                <div class="bg-slate-50 rounded-lg p-3 border-l-4 border-slate-400">
+                    <h4 class="font-bold text-slate-800 text-sm mb-1">Step 5: 选择承运方式</h4>
+                    <ul class="text-xs text-slate-600 space-y-0.5">
+                        <li>• <strong>SPD</strong>: 小包裹(≤6箱)</li>
+                        <li>• <strong>LTL</strong>: 卡车/托盘运输</li>
+                        <li>• 合作承运商可享折扣</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Column 2: Labeling Requirements -->
+        <div class="space-y-5">
+            <div class="bg-white rounded-xl border border-slate-200 p-5">
+                <h2 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-barcode text-amber-500"></i>产品标签 (FNSKU)
+                </h2>
+                <div class="space-y-3 text-sm">
+                    <div class="bg-amber-50 rounded-lg p-3">
+                        <h4 class="font-bold text-amber-800 mb-2">标签规格要求</h4>
+                        <ul class="text-xs text-slate-600 space-y-1">
+                            <li class="flex justify-between"><span>推荐尺寸：</span><strong>1" x 2-5/8" (2.5 x
+                                    6.6cm)</strong></li>
+                            <li class="flex justify-between"><span>备选尺寸：</span><strong>1" x 3" (2.5 x 7.6cm)</strong>
+                            </li>
+                            <li class="flex justify-between"><span>打印方式：</span><strong>热敏标签/激光打印</strong></li>
+                            <li class="flex justify-between"><span>条码类型：</span><strong>Code 128</strong></li>
                         </ul>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="bg-emerald-50 rounded p-2 text-center border border-emerald-200">
+                            <i class="fas fa-check-circle text-emerald-500"></i>
+                            <p class="text-xs text-emerald-700 mt-1">完全覆盖原厂条码</p>
+                        </div>
+                        <div class="bg-emerald-50 rounded p-2 text-center border border-emerald-200">
+                            <i class="fas fa-check-circle text-emerald-500"></i>
+                            <p class="text-xs text-emerald-700 mt-1">黑白高对比度</p>
+                        </div>
+                        <div class="bg-red-50 rounded p-2 text-center border border-red-200">
+                            <i class="fas fa-times-circle text-red-500"></i>
+                            <p class="text-xs text-red-700 mt-1">禁止折叠/遮挡</p>
+                        </div>
+                        <div class="bg-red-50 rounded p-2 text-center border border-red-200">
+                            <i class="fas fa-times-circle text-red-500"></i>
+                            <p class="text-xs text-red-700 mt-1">禁止贴在胶带上</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl border border-slate-200 p-5">
+                <h2 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-box text-purple-500"></i>箱子标签 (Carton Label)
+                </h2>
+                <div class="space-y-2 text-xs">
+                    <div class="flex items-center gap-2 p-2 bg-purple-50 rounded">
+                        <i class="fas fa-print text-purple-500"></i>
+                        <span>A4纸打印，不缩放</span>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 bg-purple-50 rounded">
+                        <i class="fas fa-clone text-purple-500"></i>
+                        <span>每箱贴<strong class="text-purple-700">2张</strong>在相邻面</span>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 bg-purple-50 rounded">
+                        <i class="fas fa-shield-alt text-purple-500"></i>
+                        <span>透明胶带覆膜保护</span>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 bg-red-50 rounded">
+                        <i class="fas fa-ban text-red-500"></i>
+                        <span class="text-red-700">禁止：折叠、遮挡、贴在封箱胶带上</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Right: Weight & Size Specs -->
-        <div class="space-y-6">
-            <!-- Weight Limits -->
-            <div class="bg-white rounded-xl border border-slate-200 p-6">
-                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <i class="fas fa-weight-hanging text-amber-500"></i>各站点限重规范
+        <!-- Column 3: Packaging & Common Issues -->
+        <div class="space-y-5">
+            <div class="bg-white rounded-xl border border-slate-200 p-5">
+                <h2 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-boxes-stacked text-emerald-500"></i>装箱与预处理要求
                 </h2>
-                <div class="grid grid-cols-2 gap-4">
-                    <div
-                        class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 text-center border border-blue-200">
-                        <div class="text-2xl mb-1">🇺🇸</div>
-                        <h4 class="font-semibold text-slate-800">美国站</h4>
-                        <p class="text-xl font-bold text-blue-600">≤50 lbs</p>
-                        <p class="text-xs text-slate-500">(约 22.7 kg)</p>
+                <div class="space-y-2 text-xs">
+                    <div class="bg-slate-50 rounded-lg p-3">
+                        <h4 class="font-bold text-slate-700 mb-2">标准装箱要求</h4>
+                        <ul class="space-y-1 text-slate-600">
+                            <li>✓ 使用6面完好的标准纸箱</li>
+                            <li>✓ 使用足够的填充物(气泡膜/填充纸)</li>
+                            <li>✓ H型封箱法(顶底+四周)</li>
+                            <li>✓ 装箱单(Packing List)放入箱内</li>
+                        </ul>
                     </div>
-                    <div
-                        class="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg p-4 text-center border border-emerald-200">
-                        <div class="text-2xl mb-1">🇪🇺</div>
-                        <h4 class="font-semibold text-slate-800">欧洲站</h4>
-                        <p class="text-xl font-bold text-emerald-600">≤22 kg</p>
-                        <p class="text-xs text-slate-500">(约 48.5 lbs)</p>
-                    </div>
-                    <div
-                        class="bg-gradient-to-br from-rose-50 to-rose-100 rounded-lg p-4 text-center border border-rose-200">
-                        <div class="text-2xl mb-1">🇯🇵</div>
-                        <h4 class="font-semibold text-slate-800">日本站</h4>
-                        <p class="text-xl font-bold text-rose-600">≤15 kg</p>
-                        <p class="text-xs text-slate-500">(约 33 lbs)</p>
-                    </div>
-                    <div
-                        class="bg-gradient-to-br from-amber-50 to-amber-100 rounded-lg p-4 text-center border border-amber-200">
-                        <div class="text-2xl mb-1">🇬🇧</div>
-                        <h4 class="font-semibold text-slate-800">英国站</h4>
-                        <p class="text-xl font-bold text-amber-600">≤22 kg</p>
-                        <p class="text-xs text-slate-500">(约 48.5 lbs)</p>
+                    <div class="bg-amber-50 rounded-lg p-3">
+                        <h4 class="font-bold text-amber-700 mb-2">特殊品类预处理</h4>
+                        <ul class="space-y-1 text-slate-600">
+                            <li><span class="text-amber-600">液体：</span>密封+气泡袋</li>
+                            <li><span class="text-amber-600">易碎：</span>六面防护+易碎标签</li>
+                            <li><span class="text-amber-600">尖锐：</span>裹边保护</li>
+                            <li><span class="text-amber-600">多件套：</span>统一外包装+Set标签</li>
+                        </ul>
                     </div>
                 </div>
             </div>
 
-            <!-- Box Size -->
-            <div class="bg-white rounded-xl border border-slate-200 p-6">
-                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <i class="fas fa-box text-purple-500"></i>纸箱尺寸规范
-                </h2>
-                <div class="space-y-3 text-sm">
-                    <div class="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
-                        <span class="text-slate-700">标准箱 (任意边长)</span>
-                        <span class="font-bold text-purple-600">≤63.5 cm (25")</span>
-                    </div>
-                    <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-                        <span class="text-slate-700">单边最长 (SPD)</span>
-                        <span class="font-bold text-slate-700">≤152.4 cm (60")</span>
-                    </div>
-                    <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-                        <span class="text-slate-700">长+宽+高 总和</span>
-                        <span class="font-bold text-slate-700">≤330 cm (130")</span>
-                    </div>
-                    <div class="flex justify-between items-center p-3 bg-red-50 rounded-lg">
-                        <span class="text-slate-700">超大件 Oversize</span>
-                        <span class="font-bold text-red-600">单独申请处理</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Common Issues -->
             <div class="bg-red-50 rounded-xl border border-red-200 p-5">
                 <h3 class="font-bold text-red-800 mb-3 flex items-center gap-2">
-                    <i class="fas fa-exclamation-triangle"></i>常见入库问题与处理
+                    <i class="fas fa-exclamation-circle"></i>常见入库问题与费用
                 </h3>
-                <div class="space-y-2 text-sm">
-                    <div class="flex items-start gap-2">
-                        <span class="font-bold text-red-600 w-24 flex-shrink-0">数量不符：</span>
-                        <span class="text-slate-700">立即开Case申诉，提供装箱照片、物流POD</span>
+                <div class="space-y-2 text-xs">
+                    <div class="bg-white rounded p-2 flex justify-between items-center">
+                        <span class="text-slate-700">超重(单箱>50lbs)</span>
+                        <span class="font-bold text-red-600">$25-$50/箱</span>
                     </div>
-                    <div class="flex items-start gap-2">
-                        <span class="font-bold text-red-600 w-24 flex-shrink-0">标签无法扫描：</span>
-                        <span class="text-slate-700">产生$0.20/件罚款，需改进打印设置</span>
+                    <div class="bg-white rounded p-2 flex justify-between items-center">
+                        <span class="text-slate-700">标签无法扫描</span>
+                        <span class="font-bold text-red-600">$0.20/件</span>
                     </div>
-                    <div class="flex items-start gap-2">
-                        <span class="font-bold text-red-600 w-24 flex-shrink-0">超重罚款：</span>
-                        <span class="text-slate-700">$25-$50/箱，严重影响利润</span>
+                    <div class="bg-white rounded p-2 flex justify-between items-center">
+                        <span class="text-slate-700">缺少预处理(套袋等)</span>
+                        <span class="font-bold text-red-600">$0.30-$1.50/件</span>
                     </div>
-                    <div class="flex items-start gap-2">
-                        <span class="font-bold text-red-600 w-24 flex-shrink-0">货件分拆：</span>
-                        <span class="text-slate-700">正常现象，分别发往不同FC</span>
+                    <div class="bg-white rounded p-2 flex justify-between items-center">
+                        <span class="text-slate-700">箱内数量不符</span>
+                        <span class="font-bold text-red-600">需开Case申诉</span>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Size Reference Table -->
+    <div class="bg-white rounded-xl border border-slate-200 p-5 mb-6">
+        <h2 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-ruler-combined text-blue-500"></i>各站点尺寸重量限制参考
+        </h2>
+        <div class="overflow-x-auto">
+            <table class="w-full text-xs">
+                <thead>
+                    <tr class="bg-slate-100">
+                        <th class="px-3 py-2 text-left font-bold">站点</th>
+                        <th class="px-3 py-2 text-center font-bold">单箱限重</th>
+                        <th class="px-3 py-2 text-center font-bold">标准箱最长边</th>
+                        <th class="px-3 py-2 text-center font-bold">三边之和上限</th>
+                        <th class="px-3 py-2 text-center font-bold">超大件申请</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    <tr>
+                        <td class="px-3 py-2">🇺🇸 美国站 (US)</td>
+                        <td class="px-3 py-2 text-center font-bold text-blue-600">50 lbs (22.7 kg)</td>
+                        <td class="px-3 py-2 text-center">25" (63.5 cm)</td>
+                        <td class="px-3 py-2 text-center">130" (330 cm)</td>
+                        <td class="px-3 py-2 text-center">需单独申请</td>
+                    </tr>
+                    <tr class="bg-slate-50">
+                        <td class="px-3 py-2">🇪🇺 欧洲站 (EU)</td>
+                        <td class="px-3 py-2 text-center font-bold text-emerald-600">23 kg (50.7 lbs)</td>
+                        <td class="px-3 py-2 text-center">63.5 cm (25")</td>
+                        <td class="px-3 py-2 text-center">175 cm</td>
+                        <td class="px-3 py-2 text-center">需单独申请</td>
+                    </tr>
+                    <tr>
+                        <td class="px-3 py-2">🇬🇧 英国站 (UK)</td>
+                        <td class="px-3 py-2 text-center font-bold text-purple-600">23 kg (50.7 lbs)</td>
+                        <td class="px-3 py-2 text-center">63.5 cm (25")</td>
+                        <td class="px-3 py-2 text-center">175 cm</td>
+                        <td class="px-3 py-2 text-center">需单独申请</td>
+                    </tr>
+                    <tr class="bg-slate-50">
+                        <td class="px-3 py-2">🇯🇵 日本站 (JP)</td>
+                        <td class="px-3 py-2 text-center font-bold text-rose-600">15 kg (33 lbs)</td>
+                        <td class="px-3 py-2 text-center">50 cm (19.7")</td>
+                        <td class="px-3 py-2 text-center">140 cm</td>
+                        <td class="px-3 py-2 text-center">需单独申请</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
     <!-- Checklist -->
-    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <i class="fas fa-clipboard-check text-emerald-500"></i>发货前检查清单
+    <div class="bg-white rounded-xl border border-slate-200 p-5 mb-6">
+        <h2 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-clipboard-check text-emerald-500"></i>发货前检查清单 (Shipment Checklist)
         </h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-            <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100">
-                <input type="checkbox" class="w-5 h-5 rounded border-slate-300 text-blue-600">
-                <span class="text-sm text-slate-700">FNSKU标签正确粘贴</span>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+            <label class="flex items-center gap-2 p-2 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 text-xs">
+                <input type="checkbox" class="w-4 h-4 rounded border-slate-300 text-blue-600">
+                <span class="text-slate-700">FNSKU标签完整可扫描</span>
             </label>
-            <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100">
-                <input type="checkbox" class="w-5 h-5 rounded border-slate-300 text-blue-600">
-                <span class="text-sm text-slate-700">箱标清晰可读 (2面)</span>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 text-xs">
+                <input type="checkbox" class="w-4 h-4 rounded border-slate-300 text-blue-600">
+                <span class="text-slate-700">原厂条码完全覆盖</span>
             </label>
-            <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100">
-                <input type="checkbox" class="w-5 h-5 rounded border-slate-300 text-blue-600">
-                <span class="text-sm text-slate-700">装箱数与申报一致</span>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 text-xs">
+                <input type="checkbox" class="w-4 h-4 rounded border-slate-300 text-blue-600">
+                <span class="text-slate-700">箱标清晰(贴2面)</span>
             </label>
-            <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100">
-                <input type="checkbox" class="w-5 h-5 rounded border-slate-300 text-blue-600">
-                <span class="text-sm text-slate-700">单箱重量不超标</span>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 text-xs">
+                <input type="checkbox" class="w-4 h-4 rounded border-slate-300 text-blue-600">
+                <span class="text-slate-700">装箱数=申报数</span>
             </label>
-            <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100">
-                <input type="checkbox" class="w-5 h-5 rounded border-slate-300 text-blue-600">
-                <span class="text-sm text-slate-700">装箱单放入箱内</span>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 text-xs">
+                <input type="checkbox" class="w-4 h-4 rounded border-slate-300 text-blue-600">
+                <span class="text-slate-700">单箱重量≤限重</span>
             </label>
-            <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100">
-                <input type="checkbox" class="w-5 h-5 rounded border-slate-300 text-blue-600">
-                <span class="text-sm text-slate-700">物流单号已上传</span>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 text-xs">
+                <input type="checkbox" class="w-4 h-4 rounded border-slate-300 text-blue-600">
+                <span class="text-slate-700">填充物保护到位</span>
             </label>
-            <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100">
-                <input type="checkbox" class="w-5 h-5 rounded border-slate-300 text-blue-600">
-                <span class="text-sm text-slate-700">拍照留档完成</span>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 text-xs">
+                <input type="checkbox" class="w-4 h-4 rounded border-slate-300 text-blue-600">
+                <span class="text-slate-700">物流单号已上传</span>
             </label>
-            <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100">
-                <input type="checkbox" class="w-5 h-5 rounded border-slate-300 text-blue-600">
-                <span class="text-sm text-slate-700">危险品标识正确</span>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 text-xs">
+                <input type="checkbox" class="w-4 h-4 rounded border-slate-300 text-blue-600">
+                <span class="text-slate-700">装箱照片已留档</span>
             </label>
         </div>
     </div>
