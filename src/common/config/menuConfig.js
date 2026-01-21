@@ -64,6 +64,40 @@ export const MENU_CONFIG = {
     },
 
     // ==========================================
+    // SOP Categories (用于SOPs模块的侧边栏分组)
+    // ==========================================
+    sopCategories: {
+        growth: {
+            id: 'growth',
+            label: '第一模块：运营与推广体系',
+            icon: 'fas fa-rocket',
+            color: 'emerald',
+            order: 1
+        },
+        backend: {
+            id: 'backend',
+            label: '第二模块：供应链与物流体系',
+            icon: 'fas fa-warehouse',
+            color: 'amber',
+            order: 2
+        },
+        safety: {
+            id: 'safety',
+            label: '第三模块：账号安全与风控体系',
+            icon: 'fas fa-shield-halved',
+            color: 'red',
+            order: 3
+        },
+        service: {
+            id: 'service',
+            label: '第四模块：客服与客户体验体系',
+            icon: 'fas fa-headset',
+            color: 'blue',
+            order: 4
+        }
+    },
+
+    // ==========================================
     // Tier 3: Routes (具体页面路由)
     // 作用：定义点击行为、图标、目标 Panel
     // ==========================================
