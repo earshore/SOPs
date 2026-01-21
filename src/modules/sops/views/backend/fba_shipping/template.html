@@ -249,55 +249,109 @@
         </div>
     </div>
 
-    <!-- Size Reference Table -->
+    <!-- Size Reference Table - EU Sites -->
     <div class="bg-white rounded-xl border border-slate-200 p-5 mb-6">
         <h2 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <i class="fas fa-ruler-combined text-blue-500"></i>各站点尺寸重量限制参考
+            <i class="fas fa-ruler-combined text-blue-500"></i>欧洲各站点规格参考 <span
+                class="text-xs text-slate-500 font-normal">(核心运营站点)</span>
         </h2>
         <div class="overflow-x-auto">
             <table class="w-full text-xs">
                 <thead>
-                    <tr class="bg-slate-100">
-                        <th class="px-3 py-2 text-left font-bold">站点</th>
-                        <th class="px-3 py-2 text-center font-bold">单箱限重</th>
-                        <th class="px-3 py-2 text-center font-bold">标准箱最长边</th>
-                        <th class="px-3 py-2 text-center font-bold">三边之和上限</th>
-                        <th class="px-3 py-2 text-center font-bold">超大件申请</th>
+                    <tr class="bg-blue-50">
+                        <th class="px-2 py-2 text-left font-bold">站点</th>
+                        <th class="px-2 py-2 text-center font-bold">单箱限重</th>
+                        <th class="px-2 py-2 text-center font-bold">VAT税率</th>
+                        <th class="px-2 py-2 text-center font-bold">语言</th>
+                        <th class="px-2 py-2 text-center font-bold">货币</th>
+                        <th class="px-2 py-2 text-center font-bold">泛欧</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                    <tr>
-                        <td class="px-3 py-2">🇺🇸 美国站 (US)</td>
-                        <td class="px-3 py-2 text-center font-bold text-blue-600">50 lbs (22.7 kg)</td>
-                        <td class="px-3 py-2 text-center">25" (63.5 cm)</td>
-                        <td class="px-3 py-2 text-center">130" (330 cm)</td>
-                        <td class="px-3 py-2 text-center">需单独申请</td>
-                    </tr>
-                    <tr class="bg-slate-50">
-                        <td class="px-3 py-2">🇪🇺 欧洲站 (EU)</td>
-                        <td class="px-3 py-2 text-center font-bold text-emerald-600">23 kg (50.7 lbs)</td>
-                        <td class="px-3 py-2 text-center">63.5 cm (25")</td>
-                        <td class="px-3 py-2 text-center">175 cm</td>
-                        <td class="px-3 py-2 text-center">需单独申请</td>
+                    <!-- Core 5 EU Sites -->
+                    <tr class="bg-emerald-50/50">
+                        <td class="px-2 py-2 font-bold">🇩🇪 德国 (DE)</td>
+                        <td class="px-2 py-2 text-center font-bold text-emerald-600">23 kg</td>
+                        <td class="px-2 py-2 text-center">19%</td>
+                        <td class="px-2 py-2 text-center">德语</td>
+                        <td class="px-2 py-2 text-center">EUR €</td>
+                        <td class="px-2 py-2 text-center text-emerald-600">✓ 主站</td>
                     </tr>
                     <tr>
-                        <td class="px-3 py-2">🇬🇧 英国站 (UK)</td>
-                        <td class="px-3 py-2 text-center font-bold text-purple-600">23 kg (50.7 lbs)</td>
-                        <td class="px-3 py-2 text-center">63.5 cm (25")</td>
-                        <td class="px-3 py-2 text-center">175 cm</td>
-                        <td class="px-3 py-2 text-center">需单独申请</td>
+                        <td class="px-2 py-2 font-bold">🇫🇷 法国 (FR)</td>
+                        <td class="px-2 py-2 text-center font-bold text-blue-600">23 kg</td>
+                        <td class="px-2 py-2 text-center">20%</td>
+                        <td class="px-2 py-2 text-center">法语</td>
+                        <td class="px-2 py-2 text-center">EUR €</td>
+                        <td class="px-2 py-2 text-center text-emerald-600">✓</td>
                     </tr>
                     <tr class="bg-slate-50">
-                        <td class="px-3 py-2">🇯🇵 日本站 (JP)</td>
-                        <td class="px-3 py-2 text-center font-bold text-rose-600">15 kg (33 lbs)</td>
-                        <td class="px-3 py-2 text-center">50 cm (19.7")</td>
-                        <td class="px-3 py-2 text-center">140 cm</td>
-                        <td class="px-3 py-2 text-center">需单独申请</td>
+                        <td class="px-2 py-2 font-bold">🇮🇹 意大利 (IT)</td>
+                        <td class="px-2 py-2 text-center font-bold text-blue-600">23 kg</td>
+                        <td class="px-2 py-2 text-center">22%</td>
+                        <td class="px-2 py-2 text-center">意大利语</td>
+                        <td class="px-2 py-2 text-center">EUR €</td>
+                        <td class="px-2 py-2 text-center text-emerald-600">✓</td>
+                    </tr>
+                    <tr>
+                        <td class="px-2 py-2 font-bold">🇪🇸 西班牙 (ES)</td>
+                        <td class="px-2 py-2 text-center font-bold text-blue-600">23 kg</td>
+                        <td class="px-2 py-2 text-center">21%</td>
+                        <td class="px-2 py-2 text-center">西班牙语</td>
+                        <td class="px-2 py-2 text-center">EUR €</td>
+                        <td class="px-2 py-2 text-center text-emerald-600">✓</td>
+                    </tr>
+                    <tr class="bg-purple-50/50">
+                        <td class="px-2 py-2 font-bold">🇬🇧 英国 (UK)</td>
+                        <td class="px-2 py-2 text-center font-bold text-purple-600">23 kg</td>
+                        <td class="px-2 py-2 text-center">20%</td>
+                        <td class="px-2 py-2 text-center">英语</td>
+                        <td class="px-2 py-2 text-center">GBP £</td>
+                        <td class="px-2 py-2 text-center text-red-500">✗ 独立</td>
+                    </tr>
+                    <!-- New EU Sites -->
+                    <tr class="bg-amber-50/30">
+                        <td class="px-2 py-2">🇳🇱 荷兰 (NL)</td>
+                        <td class="px-2 py-2 text-center">23 kg</td>
+                        <td class="px-2 py-2 text-center">21%</td>
+                        <td class="px-2 py-2 text-center">荷兰语</td>
+                        <td class="px-2 py-2 text-center">EUR €</td>
+                        <td class="px-2 py-2 text-center text-emerald-600">✓</td>
+                    </tr>
+                    <tr>
+                        <td class="px-2 py-2">🇸🇪 瑞典 (SE)</td>
+                        <td class="px-2 py-2 text-center">23 kg</td>
+                        <td class="px-2 py-2 text-center">25%</td>
+                        <td class="px-2 py-2 text-center">瑞典语</td>
+                        <td class="px-2 py-2 text-center">SEK kr</td>
+                        <td class="px-2 py-2 text-center text-emerald-600">✓</td>
+                    </tr>
+                    <tr class="bg-amber-50/30">
+                        <td class="px-2 py-2">🇵🇱 波兰 (PL)</td>
+                        <td class="px-2 py-2 text-center">23 kg</td>
+                        <td class="px-2 py-2 text-center">23%</td>
+                        <td class="px-2 py-2 text-center">波兰语</td>
+                        <td class="px-2 py-2 text-center">PLN zł</td>
+                        <td class="px-2 py-2 text-center text-emerald-600">✓</td>
+                    </tr>
+                    <tr>
+                        <td class="px-2 py-2">🇧🇪 比利时 (BE)</td>
+                        <td class="px-2 py-2 text-center">23 kg</td>
+                        <td class="px-2 py-2 text-center">21%</td>
+                        <td class="px-2 py-2 text-center">荷/法/德</td>
+                        <td class="px-2 py-2 text-center">EUR €</td>
+                        <td class="px-2 py-2 text-center text-emerald-600">✓</td>
                     </tr>
                 </tbody>
             </table>
         </div>
+        <div class="mt-3 p-2 bg-blue-50 rounded-lg text-xs text-slate-600">
+            <i class="fas fa-info-circle text-blue-500 mr-1"></i>
+            <strong>泛欧计划(Pan-EU)：</strong>仅需发货到一个欧盟国家FC，亚马逊自动调拨到其他站点。<strong
+                class="text-purple-600">英国(UK)脱欧后独立运营</strong>，需单独发货。
+        </div>
     </div>
+
 
     <!-- Checklist -->
     <div class="bg-white rounded-xl border border-slate-200 p-5 mb-6">

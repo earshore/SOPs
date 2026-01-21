@@ -83,16 +83,25 @@
                             class="w-full px-3 py-2 border rounded-lg text-sm" onchange="calculateProfit()">
                     </div>
                     <div>
-                        <label class="block text-xs text-slate-600 mb-1">VAT税率 %</label>
+                        <label class="block text-xs text-slate-600 mb-1">VAT税率 (按站点选择)</label>
                         <select id="calc-vat-rate" class="w-full px-3 py-2 border rounded-lg text-sm"
                             onchange="calculateProfit()">
-                            <option value="19">🇩🇪 德国 19%</option>
-                            <option value="20">🇫🇷 法国 20%</option>
-                            <option value="21">🇮🇹 意大利 22%</option>
-                            <option value="21">🇪🇸 西班牙 21%</option>
-                            <option value="20">🇬🇧 英国 20%</option>
+                            <optgroup label="核心五国">
+                                <option value="19">🇩🇪 德国 (DE) 19%</option>
+                                <option value="20">🇫🇷 法国 (FR) 20%</option>
+                                <option value="22">🇮🇹 意大利 (IT) 22%</option>
+                                <option value="21">🇪🇸 西班牙 (ES) 21%</option>
+                                <option value="20">🇬🇧 英国 (UK) 20%</option>
+                            </optgroup>
+                            <optgroup label="新兴站点">
+                                <option value="21">🇳🇱 荷兰 (NL) 21%</option>
+                                <option value="25">🇸🇪 瑞典 (SE) 25%</option>
+                                <option value="23">🇵🇱 波兰 (PL) 23%</option>
+                                <option value="21">🇧🇪 比利时 (BE) 21%</option>
+                            </optgroup>
                         </select>
                     </div>
+
                 </div>
             </div>
 
@@ -414,97 +423,3 @@
         </div>
     </div>
 </div>
-
-<script>
-    // Profit Calculator Logic
-    function calculateProfit() {
-        // Get inputs
-        const originalPrice = parseFloat(document.getElementById('calc-original-price').value) || 0;
-        const cost = parseFloat(document.getElementById('calc-cost').value) || 0;
-        const fbaFee = parseFloat(document.getElementById('calc-fba-fee').value) || 0;
-        const vatRate = parseFloat(document.getElementById('calc-vat-rate').value) / 100 || 0.19;
-
-        // Get promotion selections
-        const hasCoupon = document.getElementById('promo-coupon').checked;
-        const hasPrime = document.getElementById('promo-prime').checked;
-        const hasLD = document.getElementById('promo-ld').checked;
-        const hasBD = document.getElementById('promo-bd').checked;
-
-        const couponPercent = parseFloat(document.getElementById('coupon-percent').value) / 100 || 0;
-        const primePercent = parseFloat(document.getElementById('prime-percent').value) / 100 || 0;
-        const ldPercent = parseFloat(document.getElementById('ld-percent').value) / 100 || 0;
-        const bdPercent = parseFloat(document.getElementById('bd-percent').value) / 100 || 0;
-
-        // Calculate stacked discount (EU rules: Deal first, then Coupon)
-        let salePrice = originalPrice;
-        let totalDiscountRate = 0;
-        let promoFee = 0;
-
-        // LD and BD are exclusive (can't stack with each other)
-        if (hasLD) {
-            salePrice = salePrice * (1 - ldPercent);
-            totalDiscountRate = ldPercent;
-            promoFee += 100; // Average LD fee
-        } else if (hasBD) {
-            salePrice = salePrice * (1 - bdPercent);
-            totalDiscountRate = bdPercent;
-            promoFee += 200; // Average BD fee
-        }
-
-        // Prime Exclusive (can stack with Coupon but not with LD/BD)
-        if (hasPrime && !hasLD && !hasBD) {
-            salePrice = salePrice * (1 - primePercent);
-            totalDiscountRate = 1 - (1 - totalDiscountRate) * (1 - primePercent);
-        }
-
-        // Coupon can stack with everything
-        if (hasCoupon) {
-            salePrice = salePrice * (1 - couponPercent);
-            totalDiscountRate = 1 - (1 - totalDiscountRate) * (1 - couponPercent);
-            promoFee += 0.50; // Per redemption
-        }
-
-        // Calculate costs
-        const commission = salePrice * 0.15; // 15% referral fee
-        const vatAmount = salePrice * vatRate / (1 + vatRate); // VAT from gross price
-
-        // Calculate profit
-        const profit = salePrice - commission - fbaFee - vatAmount - cost - (promoFee > 1 ? promoFee / 50 : promoFee); // Amortize deal fee over estimated sales
-        const profitMargin = (profit / salePrice) * 100;
-
-        // Update UI
-        document.getElementById('result-original').textContent = '€' + originalPrice.toFixed(2);
-        document.getElementById('result-discount').textContent = '-' + (totalDiscountRate * 100).toFixed(1) + '%';
-        document.getElementById('result-sale-price').textContent = '€' + salePrice.toFixed(2);
-        document.getElementById('result-commission').textContent = '-€' + commission.toFixed(2);
-        document.getElementById('result-fba').textContent = '-€' + fbaFee.toFixed(2);
-        document.getElementById('result-vat').textContent = '-€' + vatAmount.toFixed(2);
-        document.getElementById('result-cost').textContent = '-€' + cost.toFixed(2);
-        document.getElementById('result-promo-fee').textContent = promoFee > 0 ? '-€' + (promoFee > 1 ? (promoFee / 50).toFixed(2) : promoFee.toFixed(2)) + (promoFee > 1 ? '/单' : '') : '€0.00';
-        document.getElementById('result-profit').textContent = '€' + profit.toFixed(2);
-        document.getElementById('result-margin').textContent = '利润率: ' + profitMargin.toFixed(1) + '%';
-
-        // Show warning if loss
-        const profitBox = document.getElementById('result-profit-box');
-        const warningBox = document.getElementById('result-warning');
-        if (profit < 0) {
-            profitBox.className = 'p-4 bg-red-100 rounded-lg border-2 border-red-300 text-center';
-            document.getElementById('result-profit').className = 'text-2xl font-bold text-red-700';
-            warningBox.classList.remove('hidden');
-        } else {
-            profitBox.className = 'p-4 bg-emerald-100 rounded-lg border-2 border-emerald-300 text-center';
-            document.getElementById('result-profit').className = 'text-2xl font-bold text-emerald-700';
-            warningBox.classList.add('hidden');
-        }
-    }
-
-    // Initialize calculator
-    document.addEventListener('DOMContentLoaded', function () {
-        setTimeout(calculateProfit, 100);
-    });
-
-    // Also run on page load for SPA
-    if (document.getElementById('calc-original-price')) {
-        calculateProfit();
-    }
-</script>

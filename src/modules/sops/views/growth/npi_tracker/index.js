@@ -1,9 +1,9 @@
 /**
  * 亚马逊新品生命周期跟踪 SOP - NPI Tracker
- * Amazon New Product Introduction Tracker
+ * Amazon New Product Introduction Tracker (EU Focus)
  */
 
-// Sample data for demonstration
+// Sample data for demonstration - EU All Sites
 const SAMPLE_DATA = [
     {
         stage: 'new-test',
@@ -11,7 +11,7 @@ const SAMPLE_DATA = [
         product_attr: '明星产品',
         sku: 'DE-WIDGET-001',
         cn_name: '多功能收纳盒',
-        store: 'Store A',
+        store: '1组-Altear',
         asin: 'B0CXXXXXXX1',
         fnsku: 'X001234567',
         site: 'DE',
@@ -39,15 +39,15 @@ const SAMPLE_DATA = [
         stage: 'growth',
         arrival_date: '2024-01-08',
         product_attr: '潜力款',
-        sku: 'DE-GADGET-002',
+        sku: 'FR-GADGET-002',
         cn_name: '便携充电器',
-        store: 'Store A',
+        store: '1组-Altear',
         asin: 'B0CXXXXXXX2',
         fnsku: 'X001234568',
-        site: 'DE',
+        site: 'FR',
         qty_shipped: 300,
         inventory_days: 28,
-        is_pan_eu: false,
+        is_pan_eu: true,
         check_content: true,
         check_sensitive: true,
         check_creative: true,
@@ -66,18 +66,48 @@ const SAMPLE_DATA = [
         break_even: 9.5
     },
     {
+        stage: 'stable',
+        arrival_date: '2023-10-01',
+        product_attr: '稳定款',
+        sku: 'UK-HOME-003',
+        cn_name: '厨房收纳架',
+        store: '1组-Altear',
+        asin: 'B0CXXXXXXX3',
+        fnsku: 'X001234570',
+        site: 'UK',
+        qty_shipped: 800,
+        inventory_days: 35,
+        is_pan_eu: false,
+        check_content: true,
+        check_sensitive: true,
+        check_creative: true,
+        check_ebc: true,
+        delivery_fee: 5.2,
+        market_avg_price: 24.99,
+        sessions: 2100,
+        ctr_7d: 0.85,
+        cvr_7d: 15.2,
+        acoas: 18,
+        organic_ratio: 62,
+        vine_status: '30/30',
+        ads_strategy: 'manual',
+        decision: 'keep',
+        next_step: [],
+        break_even: 14.0
+    },
+    {
         stage: 'clearance',
         arrival_date: '2023-11-20',
         product_attr: '清仓品',
-        sku: 'DE-OLD-003',
+        sku: 'IT-OLD-004',
         cn_name: '旧款手机壳',
-        store: 'Store B',
-        asin: 'B0CXXXXXXX3',
+        store: '1组-Altear',
+        asin: 'B0CXXXXXXX4',
         fnsku: 'X001234569',
-        site: 'DE',
+        site: 'IT',
         qty_shipped: 200,
         inventory_days: 95,
-        is_pan_eu: false,
+        is_pan_eu: true,
         check_content: true,
         check_sensitive: true,
         check_creative: true,
@@ -94,8 +124,39 @@ const SAMPLE_DATA = [
         decision: 'kill',
         next_step: ['清仓 (扶不起)'],
         break_even: 7.0
+    },
+    {
+        stage: 'new-test',
+        arrival_date: '2024-01-20',
+        product_attr: '测款',
+        sku: 'ES-NEW-005',
+        cn_name: '户外背包',
+        store: '10组-Aiacbof Sarl',
+        asin: 'B0CXXXXXXX5',
+        fnsku: 'X001234571',
+        site: 'ES',
+        qty_shipped: 200,
+        inventory_days: 10,
+        is_pan_eu: true,
+        check_content: false,
+        check_sensitive: true,
+        check_creative: false,
+        check_ebc: false,
+        delivery_fee: 6.5,
+        market_avg_price: 39.99,
+        sessions: 450,
+        ctr_7d: 0.52,
+        cvr_7d: 5.8,
+        acoas: 65,
+        organic_ratio: 20,
+        vine_status: '0/30',
+        ads_strategy: 'auto',
+        decision: 'keep',
+        next_step: ['加VINE (0评论)'],
+        break_even: 18.0
     }
 ];
+
 
 // Stage configuration
 const STAGE_CONFIG = {
@@ -131,6 +192,19 @@ const getComplianceStatus = (record) => {
 let tableData = [...SAMPLE_DATA];
 
 // Render the table
+/* Site Configuration */
+const SITE_FLAGS = {
+    'DE': '🇩🇪', 'FR': '🇫🇷', 'IT': '🇮🇹', 'ES': '🇪🇸', 'UK': '🇬🇧',
+    'NL': '🇳🇱', 'SE': '🇸🇪', 'PL': '🇵🇱', 'BE': '🇧🇪',
+    'US': '🇺🇸', 'JP': '🇯🇵'
+};
+
+const SITE_DOMAINS = {
+    'DE': 'amazon.de', 'FR': 'amazon.fr', 'IT': 'amazon.it', 'ES': 'amazon.es', 'UK': 'amazon.co.uk',
+    'NL': 'amazon.nl', 'SE': 'amazon.se', 'PL': 'amazon.pl', 'BE': 'amazon.com.be',
+    'US': 'amazon.com', 'JP': 'amazon.co.jp'
+};
+
 function renderTable() {
     const tbody = document.getElementById('npi-table-body');
     if (!tbody) return;
@@ -145,23 +219,26 @@ function renderTable() {
         const isOverstock = row.inventory_days > 60;
         const isPriceBelowClearance = parseFloat(suggestedPrice) < parseFloat(clearancePrice);
 
+        const domain = SITE_DOMAINS[row.site] || 'amazon.de';
+        const flag = SITE_FLAGS[row.site] || row.site;
+
         return `
         <tr class="hover:bg-slate-50 border-b border-slate-100" data-index="${index}">
             <!-- 基础档案 (8列) -->
             <td class="px-3 py-3 sticky left-0 bg-white z-10 border-r">
                 <span class="px-2 py-1 rounded text-xs font-medium ${stageConfig.color}">${stageConfig.label}</span>
             </td>
-            <td class="px-3 py-3 text-sm font-mono text-blue-600 cursor-pointer hover:underline" onclick="window.open('https://www.amazon.de/dp/${row.asin}', '_blank')">
+            <td class="px-3 py-3 text-sm font-mono text-blue-600 cursor-pointer hover:underline" onclick="window.open('https://www.${domain}/dp/${row.asin}', '_blank')">
                 ${row.sku}
             </td>
             <td class="px-3 py-3 text-sm">${row.cn_name}</td>
             <td class="px-3 py-3 text-sm">${row.store}</td>
             <td class="px-3 py-3 text-sm font-mono">
-                <a href="https://www.amazon.de/dp/${row.asin}" target="_blank" class="text-blue-600 hover:underline">${row.asin}</a>
+                <a href="https://www.${domain}/dp/${row.asin}" target="_blank" class="text-blue-600 hover:underline">${row.asin}</a>
             </td>
             <td class="px-3 py-3 text-sm text-center">
-                <span class="inline-flex items-center gap-1">
-                    ${row.site === 'DE' ? '🇩🇪' : row.site === 'US' ? '🇺🇸' : row.site}
+                <span class="inline-flex items-center gap-1" title="${row.site}">
+                    ${flag}
                 </span>
             </td>
             <td class="px-3 py-3 text-sm text-center">${row.qty_shipped}</td>

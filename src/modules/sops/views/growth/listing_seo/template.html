@@ -55,6 +55,32 @@
         </div>
     </div>
 
+    <!-- EU Localization Strategy -->
+    <div class="bg-white rounded-xl border border-indigo-200 p-5 mb-6">
+        <h2 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-language text-indigo-500"></i>欧洲站本地化 (Localization) 策略
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            <div class="bg-indigo-50 rounded-lg p-3">
+                <h4 class="font-bold text-indigo-800 mb-2">🚫 拒绝机翻 (No Machine Translation)</h4>
+                <p class="text-slate-700 mb-2">直接翻译会导致关键词失效。必须基于当地用户用语习惯埋词。</p>
+                <ul class="space-y-1 text-slate-600">
+                    <li>• <strong>英文：</strong>Mobile Phone Case</li>
+                    <li>• <strong>德文直译：</strong>Mobiltelefon-Fall (错误)</li>
+                    <li>• <strong>德文地道：</strong>Handyhülle (正确流量词)</li>
+                </ul>
+            </div>
+            <div class="bg-purple-50 rounded-lg p-3">
+                <h4 class="font-bold text-purple-800 mb-2">🌍 统一运营 (Pan-EU Listing)</h4>
+                <ul class="space-y-1 text-slate-700">
+                    <li>• <strong>ASIN共享：</strong>使用相同ASIN在5国上架，共享评论(Review)</li>
+                    <li>• <strong>图片文案：</strong>主图/A+尽量使用图标或英语通用词，减少翻译工作量</li>
+                    <li>• <strong>小语种：</strong>雇佣本地人或使用高级AI(ChatGPT-4)进行润色</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
     <!-- Two Column Layout -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <!-- Left Column -->
@@ -139,10 +165,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Right Column -->
-        <div class="space-y-6">
             <!-- Search Terms -->
             <div class="bg-white rounded-xl border border-slate-200 p-6">
                 <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
@@ -171,6 +193,10 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="space-y-6">
 
             <!-- A+ Content -->
             <div class="bg-white rounded-xl border border-slate-200 p-6">
@@ -199,6 +225,66 @@
                     <strong>图片规范：</strong>970×600px / 300dpi / 白底 / 文字占比≤20%
                 </div>
             </div>
+
+            <!-- Brand Story -->
+            <div class="bg-white rounded-xl border border-rose-200 p-6">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-book-open text-rose-500"></i>品牌故事 (Brand Story) 规范
+                </h2>
+
+                <!-- Specs -->
+                <div class="mb-4 bg-rose-50 rounded-lg p-3 border border-rose-100">
+                    <h4 class="font-bold text-rose-800 mb-2">📐 硬性尺寸要求 (背景图)</h4>
+                    <div class="grid grid-cols-2 gap-4 text-xs">
+                        <div>
+                            <span class="block font-bold text-slate-700">🖥️ 电脑端 (Desktop)</span>
+                            <span class="block font-mono text-rose-600 mt-1">1464 x 625 px</span>
+                            <span class="block text-slate-500 mt-1">Logo放极左/极右 (中间会被挡)</span>
+                        </div>
+                        <div>
+                            <span class="block font-bold text-slate-700">📱 移动端 (Mobile)</span>
+                            <span class="block font-mono text-rose-600 mt-1">463 x 625 px</span>
+                            <span class="block text-slate-500 mt-1">独立设计，禁止直接缩放</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Strategy -->
+                <div class="space-y-3 mb-4">
+                    <h4 class="font-bold text-slate-800 text-sm">🃏 卡片组合策略 (精铺版)</h4>
+
+                    <div class="p-3 bg-white border border-slate-200 rounded-lg flex gap-3">
+                        <div
+                            class="w-8 h-8 rounded bg-blue-100 text-blue-500 flex items-center justify-center flex-shrink-0 font-bold">
+                            1</div>
+                        <div>
+                            <div class="font-bold text-sm text-slate-700">品牌起源卡 (About Brand)</div>
+                            <div class="text-xs text-slate-500 mt-1">虚：讲情怀/设计理念。配图：创始人/氛围图 (315x460px)。</div>
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-white border border-slate-200 rounded-lg flex gap-3">
+                        <div
+                            class="w-8 h-8 rounded bg-emerald-100 text-emerald-500 flex items-center justify-center flex-shrink-0 font-bold">
+                            2</div>
+                        <div>
+                            <div class="font-bold text-sm text-slate-700">四图ASIN卡 (Killer)</div>
+                            <div class="text-xs text-slate-500 mt-1">实：免费关联流量位！放互补爆款或新款，交叉引流。</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Checklist -->
+                <div class="p-3 bg-slate-50 rounded-lg text-xs text-slate-600">
+                    <strong class="block text-slate-700 mb-1">⚠️ 美工避坑 Checklist:</strong>
+                    <ul class="space-y-1 list-disc pl-4">
+                        <li>背景图中央区域会被挡住，<span class="text-red-500 font-bold">严禁放文字</span></li>
+                        <li>卡片文字要少，移动端滑动快</li>
+                        <li>移动端背景图必须单独裁剪设计</li>
+                    </ul>
+                </div>
+            </div>
+
 
             <!-- Mobile Check -->
             <div class="bg-amber-50 rounded-xl border border-amber-200 p-5">
