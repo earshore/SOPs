@@ -171,31 +171,92 @@
                 </div>
             </div>
 
-            <!-- Algorithm Tips -->
-            <div class="bg-blue-50 rounded-xl border border-blue-200 p-5">
-                <h3 class="font-bold text-blue-800 mb-3 flex items-center gap-2">
-                    <i class="fas fa-brain"></i>A10/COSMO/Rufus 算法要点
+            <!-- Algorithm Tips (Upgraded) -->
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-5">
+                <h3 class="font-bold text-blue-800 mb-4 flex items-center gap-2 text-base">
+                    <i class="fas fa-brain"></i>A10/COSMO/Rufus 算法底层逻辑
                 </h3>
-                <div class="text-sm text-slate-700 space-y-2">
-                    <div><strong class="text-blue-600">A10：</strong>站外流量 + 停留时间 + 转化率</div>
-                    <div><strong class="text-purple-600">COSMO：</strong>场景意图匹配 (前3个Bullet)</div>
-                    <div><strong class="text-amber-600">Rufus：</strong>问答式理解 (后2个Bullet + 参数)</div>
+                <div class="space-y-4 text-xs">
+                    <!-- A10 -->
+                    <div class="bg-white rounded-lg p-3 border border-blue-100">
+                        <div class="font-bold text-blue-700 mb-1">🎯 A10 (权重核心): "客户体验优先"</div>
+                        <ul class="text-slate-600 space-y-1">
+                            <li>• <strong>CTR+CR：</strong>图片/价格→点击；文案/A+→转化</li>
+                            <li>• <strong>Sales History：</strong>断货恢复权重极慢</li>
+                            <li>• <strong class="text-red-600">退货率：</strong>欧洲站高退货率=直接降权</li>
+                        </ul>
+                    </div>
+                    <!-- COSMO -->
+                    <div class="bg-white rounded-lg p-3 border border-purple-100">
+                        <div class="font-bold text-purple-700 mb-1">🌐 COSMO (意图识别): "关键词→用户意图"</div>
+                        <ul class="text-slate-600 space-y-1">
+                            <li>• <strong>埋词位置：</strong>标题 + 前3点</li>
+                            <li>• <strong>场景化：</strong>告诉AI产品"怎么用" (如: for Gardening)</li>
+                        </ul>
+                    </div>
+                    <!-- Rufus -->
+                    <div class="bg-white rounded-lg p-3 border border-amber-100">
+                        <div class="font-bold text-amber-700 mb-1">🤖 Rufus (AI问答): "生成式引擎"</div>
+                        <ul class="text-slate-600 space-y-1">
+                            <li>• <strong>数据源：</strong>后2点五点 + A+参数表 + 用户评论</li>
+                            <li>• <strong>防守：</strong>避免模糊描述，否则Rufus回答"不确定"</li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Mantra -->
+                <div class="mt-4 p-3 bg-slate-800 rounded-lg text-xs text-white">
+                    <strong class="block mb-1">🎯 算法适配口诀：</strong>
+                    <div class="grid grid-cols-3 gap-2 text-center">
+                        <div class="bg-blue-600/30 rounded p-1">A10抓权重<br />压低退货率</div>
+                        <div class="bg-purple-600/30 rounded p-1">COSMO抓流量<br />前3点写场景</div>
+                        <div class="bg-amber-600/30 rounded p-1">Rufus抓转化<br />后2点填参数</div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Mobile Check -->
-            <div class="bg-amber-50 rounded-xl border border-amber-200 p-5">
-                <div class="flex items-start gap-3">
-                    <i class="fas fa-mobile-screen text-amber-500 text-xl mt-0.5"></i>
-                    <div>
-                        <h3 class="font-bold text-amber-800 mb-2">移动端显示确认 (必做)</h3>
-                        <ul class="text-sm text-slate-600 space-y-1">
-                            <li>• 标题前<strong>70字符</strong>表达核心信息</li>
-                            <li>• 主图移动端1:1显示是否聚焦</li>
-                            <li>• Bullet前3条是否包含卖点</li>
-                            <li>• <strong>70%流量来自移动端！</strong></li>
-                        </ul>
+            <!-- Mobile Check (Upgraded) -->
+            <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border border-amber-200 p-5">
+                <h3 class="font-bold text-amber-800 mb-4 flex items-center gap-2 text-base">
+                    <i class="fas fa-mobile-screen"></i>移动端优化 (70%+流量来源)
+                </h3>
+                <div class="space-y-3 text-xs">
+                    <div class="flex items-start gap-3 p-3 bg-white rounded-lg border border-amber-100">
+                        <span
+                            class="w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">1</span>
+                        <div>
+                            <div class="font-bold text-slate-700">标题首屏法则</div>
+                            <div class="text-slate-500">核心信息在前 <strong class="text-amber-600">70字符</strong>，否则被截断</div>
+                        </div>
                     </div>
+                    <div class="flex items-start gap-3 p-3 bg-white rounded-lg border border-amber-100">
+                        <span
+                            class="w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">2</span>
+                        <div>
+                            <div class="font-bold text-slate-700">主图聚焦度</div>
+                            <div class="text-slate-500">竖屏模式下产品主体占比 <strong class="text-amber-600">&gt;85%</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 p-3 bg-white rounded-lg border border-amber-100">
+                        <span
+                            class="w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">3</span>
+                        <div>
+                            <div class="font-bold text-slate-700">前三点折叠</div>
+                            <div class="text-slate-500">手机默认只显示前3点，最强卖点必须在此</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 p-3 bg-white rounded-lg border border-amber-100">
+                        <span
+                            class="w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">4</span>
+                        <div>
+                            <div class="font-bold text-slate-700">虚拟捆绑</div>
+                            <div class="text-slate-500">检查"经常一起购买"，用自家A+B产品占位</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Mobile Mantra -->
+                <div class="mt-4 p-3 bg-amber-100 rounded-lg text-xs text-amber-900">
+                    <strong>📱 手机端必查：</strong> 前70字符卖点明确？主图小屏C位？前3点抓眼球？
                 </div>
             </div>
 
