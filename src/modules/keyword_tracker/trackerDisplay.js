@@ -1,10 +1,14 @@
 // src/modules/keyword_tracker/trackerDisplay.js
+// ================================================================
+// 🎯 Phase 5: 已集成 ErrorService
+// ================================================================
 
 console.log("📚 Keyword Tracker Module Loading...");
 
 import { showToast } from "../../common/utils/ui.js";
-import * as KeywordService from "./trackerService.js"; 
+import * as KeywordService from "./trackerService.js";
 import state from "../../common/state.js";
+import { ErrorService } from "../../services/errorService.js";
 
 // 1. 定义路由映射表 (Route ID -> Internal Module Name)
 const ROUTE_MAP = {
@@ -17,7 +21,7 @@ const ROUTE_MAP = {
 
 function debounce(func, wait) {
     let timeout;
-    return function(...args) {
+    return function (...args) {
         const context = this;
         clearTimeout(timeout);
         timeout = setTimeout(() => func.apply(context, args), wait);
@@ -66,7 +70,7 @@ export function initKeywordTracker() {
     window.kt_locateKeyword = locateKeywordInCopy;
     window.kt_minimizeKeywordsWindow = minimizeKeywordsWindow;
     window.kt_restoreKeywordsWindow = restoreKeywordsWindow;
-    
+
     // 默认显示输入页
     showModule('input');
 
@@ -94,7 +98,7 @@ function handleInternalTabSwitch(routeId) {
 function setupEventListeners() {
     const kwInput = document.getElementById('kt-keywords-input');
     const copyInput = document.getElementById('kt-copy-input');
-    
+
     // 防抖处理输入事件 (300ms)
     const debouncedKwInput = debounce(() => {
         updateInputStats();
@@ -111,36 +115,36 @@ function setupEventListeners() {
 
     if (copyInput) {
         copyInput.addEventListener('input', () => {
-             // 🛠️ 修复报错：HTML ID 是 copy-char-count，不是 kt-copy-char-count
-             const counter = document.getElementById('copy-char-count'); 
-             if (counter) counter.textContent = copyInput.value.length;
+            // 🛠️ 修复报错：HTML ID 是 copy-char-count，不是 kt-copy-char-count
+            const counter = document.getElementById('copy-char-count');
+            if (counter) counter.textContent = copyInput.value.length;
         });
     }
 
     document.getElementById('kt-btn-clean-kw')?.addEventListener('click', cleanKeywordsUI);
     document.getElementById('kt-btn-dedup-kw')?.addEventListener('click', removeDuplicatesUI);
-    
+
     document.getElementById('kt-btn-clear-copy')?.addEventListener('click', () => {
-        if(copyInput) {
+        if (copyInput) {
             copyInput.value = '';
             // 🛠️ 修复报错：同步修改这里
             const counter = document.getElementById('copy-char-count');
-            if(counter) counter.textContent = '0';
+            if (counter) counter.textContent = '0';
         }
     });
-    
+
     document.getElementById('kt-btn-paste')?.addEventListener('click', async () => {
         try {
             const text = await navigator.clipboard.readText();
-            if(copyInput) {
+            if (copyInput) {
                 copyInput.value = text;
                 const counter = document.getElementById('copy-char-count');
-                if(counter) counter.textContent = text.length;
+                if (counter) counter.textContent = text.length;
             }
             showToast("已粘贴");
-        } catch(e) { showToast("无法访问剪贴板", "error"); }
+        } catch (e) { showToast("无法访问剪贴板", "error"); }
     });
-    
+
     document.getElementById('kt-show-translation')?.addEventListener('change', renderCopyDisplay);
 }
 
@@ -150,7 +154,7 @@ function showModule(moduleName) {
     ['input', 'process', 'analysis'].forEach(m => {
         document.getElementById(`kt-module-${m}`)?.classList.add('hidden'); // 加个 ? 防止报错
         const tab = document.getElementById(`kt-tab-${m}`);
-        if (tab) { 
+        if (tab) {
             tab.classList.remove('kt-tab-active', 'bg-white', 'shadow-sm', 'text-blue-600');
             tab.classList.add('text-slate-600');
         }
@@ -188,12 +192,12 @@ function updateInputStats() {
     const text = inputEl.value;
     const keywords = KeywordService.parseKeywords(text);
     const countEl = document.getElementById('kt-keyword-count');
-    if(countEl) countEl.textContent = keywords.length;
-    
+    if (countEl) countEl.textContent = keywords.length;
+
     const dups = KeywordService.findDuplicateKeywords(text);
     const badge = document.getElementById('kt-duplicate-badge');
     const dupCountEl = document.getElementById('kt-duplicate-count');
-    
+
     if (badge && dupCountEl) {
         if (dups.size > 0) {
             badge.classList.remove('hidden');
@@ -212,7 +216,7 @@ function highlightDuplicatesInInput() {
     const dups = KeywordService.findDuplicateKeywords(input.value);
     const lines = input.value.split('\n');
     let html = '';
-    
+
     lines.forEach((line, i) => {
         const trimmed = line.trim().toLowerCase();
         if (trimmed && dups.has(trimmed)) {
@@ -227,7 +231,7 @@ function highlightDuplicatesInInput() {
 
 function cleanKeywordsUI() {
     const inputEl = document.getElementById('kt-keywords-input');
-    if(!inputEl) return;
+    if (!inputEl) return;
     inputEl.value = KeywordService.cleanKeywordsText(inputEl.value);
     updateInputStats();
     highlightDuplicatesInInput();
@@ -235,7 +239,7 @@ function cleanKeywordsUI() {
 
 function removeDuplicatesUI() {
     const inputEl = document.getElementById('kt-keywords-input');
-    if(!inputEl) return;
+    if (!inputEl) return;
     inputEl.value = KeywordService.deduplicateKeywordsText(inputEl.value);
     updateInputStats();
     highlightDuplicatesInInput();
@@ -254,9 +258,9 @@ function startAnalysis() {
 
     state.keywords = KeywordService.parseKeywords(kwText);
     state.processedCopy = copyText;
-    
+
     state.translationMode = false;
-    state.paragraphs = []; 
+    state.paragraphs = [];
 
     const analysisResult = KeywordService.analyzeKeywordMatching(state.processedCopy, state.keywords);
     state.matchedKeywords = analysisResult.matched;
@@ -264,7 +268,7 @@ function startAnalysis() {
 
     state.wordFrequency = KeywordService.calculateWordFrequency(state.processedCopy);
 
-    state.isWindowMinimized = false; 
+    state.isWindowMinimized = false;
     updateMinimizedBadge();
 
     const reportContainer = document.getElementById('kt-llm-analysis-result');
@@ -278,14 +282,14 @@ function startAnalysis() {
 
     renderProcessModule();
     renderAnalysisModule();
-    
+
     // 跳转逻辑：优先使用 switchTab 保持左侧同步
     if (window.switchTab) {
         window.switchTab('kw_process');
     } else {
         showModule('process');
     }
-    
+
     showToast("分析完成", "success");
 }
 
@@ -327,13 +331,13 @@ function renderProcessModule() {
 
     renderCopyDisplay();
     renderFloatingKeywords();
-    
+
     const matchedCount = document.getElementById('kt-tab-matched-count');
-    if(matchedCount) matchedCount.textContent = state.matchedKeywords.length;
-    
+    if (matchedCount) matchedCount.textContent = state.matchedKeywords.length;
+
     const unmatchedCount = document.getElementById('kt-tab-unmatched-count');
-    if(unmatchedCount) unmatchedCount.textContent = state.unmatchedKeywords.length;
-    
+    if (unmatchedCount) unmatchedCount.textContent = state.unmatchedKeywords.length;
+
     updateMinimizedBadge();
 }
 
@@ -342,17 +346,17 @@ function renderCopyDisplay() {
     if (!display) return;
 
     const showTrans = document.getElementById('kt-show-translation')?.checked;
-    
+
     if (state.translationMode && state.paragraphs.length > 0) {
         let html = '';
         state.paragraphs.forEach(p => {
-             const highlightedOriginal = highlightText(p.original);
-             html += `<div class="mb-4">`;
-             html += `<div class="paragraph-original leading-relaxed">${highlightedOriginal}</div>`;
-             if (showTrans && p.translation) {
-                 html += `<div class="sentence-translation">${escapeHtml(p.translation)}</div>`;
-             }
-             html += `</div>`;
+            const highlightedOriginal = highlightText(p.original);
+            html += `<div class="mb-4">`;
+            html += `<div class="paragraph-original leading-relaxed">${highlightedOriginal}</div>`;
+            if (showTrans && p.translation) {
+                html += `<div class="sentence-translation">${escapeHtml(p.translation)}</div>`;
+            }
+            html += `</div>`;
         });
         display.innerHTML = html;
         return;
@@ -373,7 +377,7 @@ function highlightText(text) {
     const parts = text.split(regex);
 
     const htmlParts = parts.map((part, index) => {
-        if (index % 2 === 1) { 
+        if (index % 2 === 1) {
             const lowerKw = part.toLowerCase();
             return `<span class="keyword-bold highlightable" data-kw="${escapeAttr(lowerKw)}">${escapeHtml(part)}</span>`;
         } else {
@@ -387,8 +391,8 @@ function highlightText(text) {
 function renderFloatingKeywords() {
     const matchedContainer = document.getElementById('kt-matched-keywords');
     const unmatchedContainer = document.getElementById('kt-unmatched-keywords');
-    
-    if(matchedContainer) {
+
+    if (matchedContainer) {
         matchedContainer.innerHTML = state.matchedKeywords.map(item => `
             <div class="bg-green-50 border border-green-200 rounded p-2 flex justify-between items-center cursor-pointer hover:bg-green-100 transition-colors"
                  onclick="window.kt_locateKeyword('${escapeAttr(item.keyword)}')">
@@ -398,7 +402,7 @@ function renderFloatingKeywords() {
         `).join('');
     }
 
-    if(unmatchedContainer) {
+    if (unmatchedContainer) {
         unmatchedContainer.innerHTML = state.unmatchedKeywords.map(kw => `
             <div class="bg-red-50 border border-red-200 rounded p-2 text-sm text-red-800">
                 ${escapeHtml(kw)}
@@ -412,8 +416,8 @@ function showKeywordTab(type) {
     const uBtn = document.getElementById('kt-kw-tab-unmatched');
     const mDiv = document.getElementById('kt-matched-keywords');
     const uDiv = document.getElementById('kt-unmatched-keywords');
-    
-    if(!mBtn || !uBtn) return;
+
+    if (!mBtn || !uBtn) return;
 
     if (type === 'matched') {
         mBtn.className = "flex-1 py-2 text-sm font-medium bg-green-100 text-green-700 shadow-sm rounded-lg smooth-transition";
@@ -430,10 +434,10 @@ function showKeywordTab(type) {
 
 function locateKeywordInCopy(keyword) {
     const container = document.getElementById('kt-copy-display');
-    if(!container) return;
+    if (!container) return;
     const targetKw = keyword.toLowerCase();
-    
-    let spans = Array.from(container.querySelectorAll(`.highlightable`)).filter(el => 
+
+    let spans = Array.from(container.querySelectorAll(`.highlightable`)).filter(el =>
         el.getAttribute('data-kw') === targetKw
     );
 
@@ -455,15 +459,15 @@ function locateKeywordInCopy(keyword) {
     if (idx >= spans.length) idx = 0;
 
     container.querySelectorAll('.highlight-focus').forEach(el => el.classList.remove('highlight-focus'));
-    
+
     const targetSpan = spans[idx];
     targetSpan.classList.add('highlight-focus');
 
     targetSpan.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    
+
     state.keywordLocationIndex[targetKw] = (idx + 1) % spans.length;
-    
-    showToast(`定位: ${keyword} (${idx+1}/${spans.length})`);
+
+    showToast(`定位: ${keyword} (${idx + 1}/${spans.length})`);
 }
 
 function renderAnalysisModule() {
@@ -472,17 +476,17 @@ function renderAnalysisModule() {
     const rate = total === 0 ? 0 : Math.round((matched / total) * 100);
 
     const rateEl = document.getElementById('kt-coverage-rate');
-    if(rateEl) rateEl.textContent = rate + '%';
-    
+    if (rateEl) rateEl.textContent = rate + '%';
+
     const barEl = document.getElementById('kt-coverage-bar');
-    if(barEl) barEl.style.width = rate + '%';
-    
+    if (barEl) barEl.style.width = rate + '%';
+
     document.getElementById('kt-stat-matched').textContent = matched;
     document.getElementById('kt-stat-unmatched').textContent = state.unmatchedKeywords.length;
     document.getElementById('kt-stat-total').textContent = total;
 
     const freqList = document.getElementById('kt-word-frequency-list');
-    if(freqList) {
+    if (freqList) {
         freqList.innerHTML = state.wordFrequency.map(([w, c]) => `
             <span class="px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded-md">
                 ${escapeHtml(w)} <span class="text-slate-400">(${c})</span>
@@ -511,7 +515,7 @@ function renderAnalysisModule() {
 
 async function runLLMAnalysis() {
     const btn = document.getElementById('kt-analyze-btn');
-    
+
     // if (!state.processedCopy || !state.processedCopy.trim()) {
     //     showToast("请先在输入模块提交文案", "warning");
     //     return;
@@ -523,23 +527,23 @@ async function runLLMAnalysis() {
     }
 
     const resultDiv = document.getElementById('kt-llm-analysis-result');
-    
+
     if (btn) {
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> 分析中...';
         btn.classList.add('opacity-75', 'cursor-wait');
     }
-    
-    if(resultDiv) resultDiv.innerHTML = '<div class="text-center py-10"><i class="fas fa-circle-notch fa-spin text-purple-500 text-2xl"></i><p class="mt-2 text-slate-500">AI 正在深度分析您的 Listing (可能需要 20秒)...</p></div>';
+
+    if (resultDiv) resultDiv.innerHTML = '<div class="text-center py-10"><i class="fas fa-circle-notch fa-spin text-purple-500 text-2xl"></i><p class="mt-2 text-slate-500">AI 正在深度分析您的 Listing (可能需要 20秒)...</p></div>';
 
     try {
         const response = await KeywordService.fetchListingAnalysis(
-            state.processedCopy, 
-            state.keywords, 
-            state.matchedKeywords, 
+            state.processedCopy,
+            state.keywords,
+            state.matchedKeywords,
             state.unmatchedKeywords
         );
-        
+
         if (resultDiv) {
             if (window.marked) {
                 resultDiv.innerHTML = window.marked.parse(response);
@@ -549,7 +553,7 @@ async function runLLMAnalysis() {
         }
 
         if (btn) {
-            btn.disabled = true; 
+            btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-check"></i> 报告已生成';
             btn.classList.remove('from-blue-500', 'to-purple-600', 'text-white', 'hover:from-blue-400', 'hover:to-purple-500', 'opacity-75', 'cursor-wait');
             btn.classList.add('text-gray-500', 'cursor-not-allowed');
@@ -557,13 +561,13 @@ async function runLLMAnalysis() {
         showToast("报告生成成功", "success");
 
     } catch (e) {
-        console.error("LLM Analysis Error:", e);
+        ErrorService.handle(e, { action: 'runLLMAnalysis', module: 'keywordTracker', notify: false });
         let errorMsg = e.message;
         if (errorMsg.includes('503')) {
             errorMsg = "服务暂时不可用 (503)。可能是模型过载，请稍后重试。";
         }
 
-        if(resultDiv) {
+        if (resultDiv) {
             resultDiv.innerHTML = `
                 <div class="p-4 bg-red-50 border border-red-100 rounded-lg">
                     <div class="flex items-center gap-2 text-red-600 font-bold mb-2">
@@ -589,34 +593,34 @@ async function translateCopyImmersive() {
     const progress = document.getElementById('kt-translate-progress');
     const btnText = document.getElementById('kt-translate-btn-text');
 
-    if(btn) btn.disabled = true;
-    if(progress) {
+    if (btn) btn.disabled = true;
+    if (progress) {
         progress.classList.remove('hidden');
         progress.style.width = '30%';
     }
-    if(btnText) btnText.textContent = "正在翻译...";
+    if (btnText) btnText.textContent = "正在翻译...";
 
     try {
         const response = await KeywordService.fetchImmersionTranslation(state.processedCopy);
-        
-        const transLines = response.split(/\n+/).filter(t=>t.trim());
-        state.paragraphs = state.processedCopy.split(/\n+/).filter(t=>t.trim()).map((original, i) => ({
+
+        const transLines = response.split(/\n+/).filter(t => t.trim());
+        state.paragraphs = state.processedCopy.split(/\n+/).filter(t => t.trim()).map((original, i) => ({
             original,
-            translation: transLines[i] || "" 
+            translation: transLines[i] || ""
         }));
 
-        state.translationMode = true; 
-        
-        renderProcessModule(); 
-        
-        if(progress) progress.style.width = '100%';
+        state.translationMode = true;
+
+        renderProcessModule();
+
+        if (progress) progress.style.width = '100%';
         setTimeout(() => progress?.classList.add('hidden'), 500);
-        
+
     } catch (e) {
-        showToast("翻译失败: " + e.message, "error");
-        if(progress) progress.classList.add('hidden');
-        if(btnText) btnText.textContent = "AI 沉浸翻译"; 
-        if(btn) btn.disabled = false;
+        ErrorService.handle(e, { action: 'translateCopyImmersive', module: 'keywordTracker' });
+        if (progress) progress.classList.add('hidden');
+        if (btnText) btnText.textContent = "AI 沉浸翻译";
+        if (btn) btn.disabled = false;
     }
 }
 
@@ -625,22 +629,22 @@ async function translateCopyImmersive() {
 
 function setupFloatingWindow() {
     const el = document.getElementById('kt-keywords-floating');
-    if(!el) return;
+    if (!el) return;
     const header = el.querySelector('.floating-header');
-    
+
     header.addEventListener('mousedown', (e) => {
         floatWin.isDragging = true;
         floatWin.offsetX = e.clientX - el.getBoundingClientRect().left;
         floatWin.offsetY = e.clientY - el.getBoundingClientRect().top;
-        
+
         el.style.opacity = '0.9';
-        el.style.transition = 'none'; 
+        el.style.transition = 'none';
         e.preventDefault();
     });
-    
+
     document.addEventListener('mousemove', (e) => {
         if (!floatWin.isDragging) return;
-        
+
         let newX = e.clientX - floatWin.offsetX;
         let newY = e.clientY - floatWin.offsetY;
 
@@ -652,19 +656,19 @@ function setupFloatingWindow() {
 
         el.style.left = newX + 'px';
         el.style.top = newY + 'px';
-        el.style.right = 'auto'; 
+        el.style.right = 'auto';
     });
-    
+
     document.addEventListener('mouseup', () => {
         if (!floatWin.isDragging) return;
         floatWin.isDragging = false;
 
         el.style.opacity = '1';
-        el.style.transition = 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)'; 
+        el.style.transition = 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)';
 
         const rect = el.getBoundingClientRect();
         const screenWidth = window.innerWidth;
-        const threshold = 100; 
+        const threshold = 100;
 
         if (rect.left < threshold) {
             el.style.left = '20px';
@@ -677,41 +681,41 @@ function setupFloatingWindow() {
 function syncToInput() {
     const display = document.getElementById('kt-copy-display');
     const input = document.getElementById('kt-copy-input');
-    
-    if(display && input) {
+
+    if (display && input) {
         const text = display.innerText;
         input.value = text;
         state.processedCopy = text;
         // 修正输入框的计数
         const counter = document.getElementById('copy-char-count');
-        if(counter) counter.textContent = text.length;
+        if (counter) counter.textContent = text.length;
     }
-    
+
     if (window.switchTab) {
         window.switchTab('kw_input');
     } else {
         showModule('input');
     }
-    
+
     showToast("已同步");
 }
 
 function updateMinimizedBadge() {
     const badge = document.getElementById('kt-minimized-badge');
-    if(badge && state.matchedKeywords) badge.textContent = state.matchedKeywords.length;
+    if (badge && state.matchedKeywords) badge.textContent = state.matchedKeywords.length;
 }
 
 function minimizeKeywordsWindow() {
     const floatWinEl = document.getElementById('kt-keywords-floating');
     const minBtn = document.getElementById('kt-keywords-minimized');
-    
-    if(floatWinEl) {
+
+    if (floatWinEl) {
         floatWinEl.classList.add('opacity-0', 'scale-95');
         setTimeout(() => {
             floatWinEl.classList.add('hidden');
-            floatWinEl.classList.remove('opacity-0', 'scale-95'); 
-            
-            if(minBtn) {
+            floatWinEl.classList.remove('opacity-0', 'scale-95');
+
+            if (minBtn) {
                 minBtn.classList.remove('hidden');
                 state.isWindowMinimized = true;
             }
@@ -722,9 +726,9 @@ function minimizeKeywordsWindow() {
 function restoreKeywordsWindow() {
     const floatWinEl = document.getElementById('kt-keywords-floating');
     const minBtn = document.getElementById('kt-keywords-minimized');
-    
-    if(minBtn) minBtn.classList.add('hidden');
-    if(floatWinEl) {
+
+    if (minBtn) minBtn.classList.add('hidden');
+    if (floatWinEl) {
         floatWinEl.classList.remove('hidden');
         floatWinEl.classList.add('opacity-0', 'scale-95');
         requestAnimationFrame(() => {
@@ -732,6 +736,6 @@ function restoreKeywordsWindow() {
             floatWinEl.classList.add('transition-all', 'duration-200');
         });
     }
-    
+
     state.isWindowMinimized = false;
 }

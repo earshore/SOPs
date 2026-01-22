@@ -1,6 +1,7 @@
 // src/modules/master_prompt/analysis/analysisDisplay.js
 // ================================================================
 // 🎯 Phase 3: 已迁移使用 StorageService
+// 🎯 Phase 5: 已集成 ErrorService
 // ================================================================
 
 import state from "../../../common/state.js";
@@ -12,6 +13,7 @@ import { renderHistory } from "../scraper/scraperPanel.js";
 import { AnalysisService } from "./analysisService.js";
 import { getFieldTitle } from "../promptlab/promptlabDisplay.js";
 import { StorageService, STORAGE_KEYS } from "../../../services/storageService.js";
+import { ErrorService } from "../../../services/errorService.js";
 
 // ✅ 引入新的渲染器 (关键改动)
 import { renderWidgetCard, renderViewModeHTML, renderEditorForm } from "./analysisRenderer.js";
@@ -358,8 +360,7 @@ export async function analyzeSelectedAsins() {
     showProgress(false);
     showToast("分析完成", "success");
   } catch (e) {
-    console.error(e);
-    showToast("分析失败: " + e.message, "error");
+    ErrorService.handle(e, { action: 'analyzeSelectedAsins', module: 'analysis' });
     showProgress(false);
   } finally {
     btn.disabled = false;
@@ -698,8 +699,7 @@ window.translateReport = async function () {
     renderReport();
     showToast("翻译完成", "success");
   } catch (e) {
-    console.error(e);
-    showToast("翻译失败: " + e.message, "error");
+    ErrorService.handle(e, { action: 'translateReport', module: 'analysis' });
     state.showTranslation = false;
   } finally {
     if (btn) {

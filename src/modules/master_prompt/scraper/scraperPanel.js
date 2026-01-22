@@ -1,6 +1,7 @@
 // src/ui/scraperPanel.js
 // ================================================================
 // 🎯 Phase 3: 已迁移使用 StorageService
+// 🎯 Phase 5: 已集成 ErrorService
 // ================================================================
 
 import state from "../../../common/state.js";
@@ -12,6 +13,7 @@ import { updateAsinSelectList } from "../analysis/analysisDisplay.js";
 import { HistoryService } from "../services/historyService.js";
 import { saveProxyConfig, renderProxyInputUI } from "../../../components/settings/systemSettings.js"
 import { StorageService, STORAGE_KEYS } from "../../../services/storageService.js";
+import { ErrorService } from "../../../services/errorService.js";
 
 // ==========================================
 // 1. 配置管理 (隔离存储)
@@ -537,7 +539,7 @@ async function startScraping() {
       }
     });
   } catch (error) {
-    console.error("Task Error:", error);
+    ErrorService.handle(error, { action: 'startScraping', module: 'scraper', notify: false });
     showToast("任务异常中断", "error");
   } finally {
     if (!products || products.length === 0) {
@@ -628,8 +630,7 @@ function deleteHistoryItem(id) {
     renderHistory();
     showToast("记录已删除", "success");
   } catch (e) {
-    console.error("Delete failed", e);
-    showToast("删除失败", "error");
+    ErrorService.handle(e, { action: 'deleteHistoryItem', module: 'scraper' });
   }
 }
 
@@ -849,8 +850,7 @@ function loadHistory(id) {
 
     showToast("历史快照已还原", "success");
   } catch (error) {
-    console.error("Load history failed:", error);
-    showToast("加载历史记录时发生错误", "error");
+    ErrorService.handle(error, { action: 'loadHistory', module: 'scraper' });
   }
 }
 

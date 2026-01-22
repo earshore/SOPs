@@ -1,12 +1,14 @@
 // src/ui/settings.js
 // ================================================================
 // 🎯 Phase 3: 已迁移使用 StorageService
+// 🎯 Phase 5: 已集成 ErrorService
 // ================================================================
 
 import { PROVIDERS } from "../../common/constants/constants.js";
 import { fetchModelsFromApi, callLLM } from "../../services/llmService.js";
 import { showToast } from "../../common/utils/ui.js";
 import { StorageService, STORAGE_KEYS } from "../../services/storageService.js";
+import { ErrorService } from "../../services/errorService.js";
 
 // ==========================================
 // 1. 初始化监听器 (新增)
@@ -229,8 +231,7 @@ export async function testConnection() {
     // 可选：测试成功后自动更新状态栏
     // updateConfigStatus(true);
   } catch (error) {
-    console.error("Test Connection Failed:", error);
-    showToast(`连接失败: ${error.message}`, "error");
+    ErrorService.handle(error, { action: 'testConnection', module: 'settings' });
   } finally {
     // 6. 恢复按钮状态
     if (targetBtn) {
@@ -317,8 +318,7 @@ export async function fetchModels() {
 
     showToast(`成功同步 ${models.length} 个模型`, "success");
   } catch (e) {
-    console.error("Fetch Models Error:", e);
-    showToast("同步失败，请检查 Key 或网络", "error");
+    ErrorService.handle(e, { action: 'fetchModels', module: 'settings' });
     // 失败不回退 UI，保留当前状态供用户重试
   } finally {
     btn.disabled = false;

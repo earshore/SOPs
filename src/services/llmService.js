@@ -1,7 +1,10 @@
 // src/services/llmService.js
 // ================================================================
 // 🎯 P2 重构: 添加完整的 JSDoc 类型注释
+// 🎯 Phase 5: 已集成 ErrorService
 // ================================================================
+
+import { ErrorService } from './errorService.js';
 
 // ========================
 // 类型定义
@@ -151,7 +154,7 @@ export async function fetchModelsFromApi(provider, endpoint, apiKey) {
       .map((m) => ({ id: m.id, context: 128000, features: [] }))
       .sort((a, b) => a.id.localeCompare(b.id));
   } catch (error) {
-    console.error("Fetch Models Error:", error);
+    ErrorService.handle(error, { action: 'fetchModelsFromApi', module: 'llm', notify: false });
     return []; // 失败返回空数组，不阻断流程
   }
 }
