@@ -1,19 +1,85 @@
-// src/services/analysisService.js
+// src/modules/master_prompt/analysis/analysisService.js
+// ================================================================
+// 🎯 P2 重构: 添加完整的 JSDoc 类型注释
+// ================================================================
+
 import { callLLM } from "../../../services/llmService.js";
 import { TRANSLATE_PROMPT_TEMPLATE } from "../../../common/constants/prompts.js";
 
+// ========================
+// 类型定义
+// ========================
+
 /**
- * 核心分析服务
+ * 产品数据对象
+ * @typedef {Object} ProductData
+ * @property {string} asin - Amazon 标准识别号
+ * @property {string} [productTitle] - 产品标题
+ * @property {string[]} [feature_bullets] - 五点描述
+ * @property {CustomerReview[]} [customer_reviews] - 客户评论
+ */
+
+/**
+ * 客户评论对象
+ * @typedef {Object} CustomerReview
+ * @property {string} body - 评论正文
+ * @property {number} [rating] - 评分 (1-5)
+ * @property {string} [title] - 评论标题
+ */
+
+/**
+ * 数据维度选项
+ * @typedef {Object} DataOptions
+ * @property {boolean} [includeTitle=true] - 是否包含标题
+ * @property {boolean} [includeBullets=true] - 是否包含五点描述
+ * @property {boolean} [includeReviews=true] - 是否包含评论
+ */
+
+/**
+ * LLM 配置对象
+ * @typedef {Object} LLMConfig
+ * @property {string} provider - 厂商标识
+ * @property {string} endpoint - API 端点
+ * @property {string} apiKey - API 密钥
+ * @property {string} model - 模型名称
+ */
+
+/**
+ * 分析报告对象
+ * @typedef {Object} AnalysisReport
+ * @property {string} [targetMarket] - 目标市场
+ * @property {string} [language] - 语言
+ * @property {Object} [meta] - 元数据
+ * @property {boolean} [parse_error] - 解析是否出错
+ * @property {string} [raw_response] - 原始响应 (解析失败时)
+ */
+
+// ========================
+// 核心分析服务
+// ========================
+
+/**
+ * 分析服务模块
+ * 提供竞品分析和报告翻译功能
  */
 export const AnalysisService = {
   /**
-   * 执行竞品分析
-   * @param {Array} products - 选中的产品数据
-   * @param {string} promptTemplate - 最终使用的 Prompt 模版
-   * @param {string} language - 目标语言
-   * @param {Object} llmConfig - LLM 配置
-   * @param {Object} dataOptions - ✅ 新增：数据维度选项 {includeTitle, includeBullets, includeReviews}
-   * @returns {Promise<Object>} 分析报告对象
+   * 执行竞品分析，生成分析报告
+   *
+   * @param {ProductData[]} products - 选中的产品数据数组
+   * @param {string} promptTemplate - Prompt 模版 (包含 {{language}}, {{rawdataStr}}, {{category}} 占位符)
+   * @param {string} language - 目标语言 (如 "English", "German")
+   * @param {LLMConfig} llmConfig - LLM 配置对象
+   * @param {DataOptions} [dataOptions={}] - 数据维度选项
+   * @returns {Promise<AnalysisReport>} 分析报告对象
+   *
+   * @example
+   * const report = await AnalysisService.generateReport(
+   *   [{ asin: 'B123', productTitle: 'Example Product' }],
+   *   ANALYSIS_PROMPT,
+   *   'English',
+   *   { provider: 'openai', endpoint: '...', apiKey: '...', model: 'gpt-4o' }
+   * );
    */
   async generateReport(
     products,
@@ -22,16 +88,16 @@ export const AnalysisService = {
     llmConfig,
     dataOptions = {}
   ) {
-    // 默认全选，兼容旧代码
     const {
       includeTitle = true,
       includeBullets = true,
       includeReviews = true,
     } = dataOptions;
 
-    // 1. ✅ 动态构建数据字符串
+    // 1. 动态构建数据字符串
     const rawdataStr = products
       .map((p) => {
+        /** @type {string[]} */
         let parts = [`ASIN: ${p.asin}`];
 
         if (includeTitle) {
@@ -49,7 +115,7 @@ export const AnalysisService = {
         if (includeReviews) {
           const reviews = (p.customer_reviews || [])
             .slice(0, 5)
-            .map((r) => r.body.substring(0, 150)) // 稍微增加点截断长度，既然用户特意选了评论
+            .map((r) => r.body.substring(0, 150))
             .join(" | ");
           parts.push(`Top Reviews: ${reviews || "No reviews found"}`);
         }
@@ -58,7 +124,7 @@ export const AnalysisService = {
       })
       .join("\n\n---\n\n");
 
-    // 2. 替换变量
+    // 2. 替换模板变量
     const finalPrompt = promptTemplate
       .replace(/{{language}}/g, language)
       .replace("{{rawdataStr}}", rawdataStr)
@@ -84,9 +150,15 @@ export const AnalysisService = {
   },
 
   /**
-   * 翻译报告
+   * 翻译分析报告
+   *
+   * @param {AnalysisReport} report - 原始分析报告
+   * @param {string} language - 目标翻译语言
+   * @param {LLMConfig} llmConfig - LLM 配置对象
+   * @returns {Promise<AnalysisReport>} 翻译后的报告
    */
   async translateReport(report, language, llmConfig) {
+    // 深拷贝并移除 meta 字段
     const toTranslate = JSON.parse(JSON.stringify(report));
     delete toTranslate.meta;
 

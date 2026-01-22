@@ -1,13 +1,68 @@
 // src/services/llmService.js
+// ================================================================
+// 🎯 P2 重构: 添加完整的 JSDoc 类型注释
+// ================================================================
+
+// ========================
+// 类型定义
+// ========================
+
+/**
+ * 聊天消息对象
+ * @typedef {Object} ChatMessage
+ * @property {'system' | 'user' | 'assistant'} role - 消息角色
+ * @property {string} content - 消息内容
+ */
+
+/**
+ * LLM 调用配置选项
+ * @typedef {Object} LLMOptions
+ * @property {number} [temperature=0.3] - 温度参数 (0-2)，越低越确定性
+ * @property {boolean} [jsonMode=true] - 是否强制 JSON 输出格式
+ * @property {number} [timeout=90000] - 超时时间 (毫秒)
+ */
+
+/**
+ * LLM 配置对象 (用于跨模块传递)
+ * @typedef {Object} LLMConfig
+ * @property {string} provider - 厂商标识 (openai, anthropic, deepseek...)
+ * @property {string} endpoint - API 端点 URL
+ * @property {string} apiKey - API 密钥
+ * @property {string} model - 模型名称
+ */
+
+/**
+ * 模型信息对象
+ * @typedef {Object} ModelInfo
+ * @property {string} id - 模型 ID
+ * @property {number} context - 上下文窗口大小
+ * @property {string[]} features - 支持的特性列表
+ */
+
+// ========================
+// 核心 API 函数
+// ========================
 
 /**
  * 通用大语言模型调用接口
- * @param {Array} messages - 聊天上下文
- * @param {string} provider -厂商 (openai, anthropic...)
- * @param {string} endpoint - API 端点
+ * 
+ * @param {ChatMessage[]} messages - 聊天上下文消息数组
+ * @param {string} provider - 厂商标识 (openai, anthropic, deepseek...)
+ * @param {string} endpoint - API 端点 URL (不含 /chat/completions)
  * @param {string} apiKey - API 密钥
  * @param {string} model - 模型名称
- * @param {Object} options - 可选配置 (temperature, jsonMode, timeout)
+ * @param {LLMOptions} [options={}] - 可选配置
+ * @returns {Promise<string>} 模型返回的文本内容
+ * @throws {Error} 网络错误、超时或 API 返回错误时抛出
+ * 
+ * @example
+ * const response = await callLLM(
+ *   [{ role: 'user', content: '你好' }],
+ *   'openai',
+ *   'https://api.openai.com/v1',
+ *   'sk-xxx',
+ *   'gpt-4o-mini'
+ * );
  */
 export async function callLLM(
   messages,
@@ -22,11 +77,12 @@ export async function callLLM(
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
+  /** @type {Object} */
   const requestBody = {
     model: model,
     messages: messages,
     temperature: temperature,
-    // 只有部分模型支持 response_format，这里做个兼容性处理会更好，但在毕设中强制 JSON 也没问题
+    // 只有部分模型支持 response_format
     ...(jsonMode && { response_format: { type: "json_object" } }),
   };
 
@@ -60,15 +116,25 @@ export async function callLLM(
     const data = await response.json();
     return data.choices[0].message.content;
   } catch (e) {
-    clearTimeout(timeoutId); // 确保异常时也清除定时器
-    if (e.name === "AbortError")
+    clearTimeout(timeoutId);
+    if (e.name === "AbortError") {
       throw new Error(`模型响应超时(${timeout / 1000}秒)，请检查网络或重试`);
+    }
     throw e;
   }
 }
 
 /**
  * 获取模型列表
+ * 
+ * @param {string} provider - 厂商标识
+ * @param {string} endpoint - API 端点 URL
+ * @param {string} apiKey - API 密钥
+ * @returns {Promise<ModelInfo[]>} 模型列表，失败返回空数组
+ * 
+ * @example
+ * const models = await fetchModelsFromApi('openai', 'https://api.openai.com/v1', 'sk-xxx');
+ * // [{ id: 'gpt-4o', context: 128000, features: [] }, ...]
  */
 export async function fetchModelsFromApi(provider, endpoint, apiKey) {
   try {
@@ -88,4 +154,27 @@ export async function fetchModelsFromApi(provider, endpoint, apiKey) {
     console.error("Fetch Models Error:", error);
     return []; // 失败返回空数组，不阻断流程
   }
+}
+
+// ========================
+// 便捷包装函数
+// ========================
+
+/**
+ * 使用 LLMConfig 对象调用 LLM (简化参数传递)
+ * 
+ * @param {ChatMessage[]} messages - 聊天上下文
+ * @param {LLMConfig} config - LLM 配置对象
+ * @param {LLMOptions} [options={}] - 可选配置
+ * @returns {Promise<string>} 模型返回的文本内容
+ */
+export async function callLLMWithConfig(messages, config, options = {}) {
+  return callLLM(
+    messages,
+    config.provider,
+    config.endpoint,
+    config.apiKey,
+    config.model,
+    options
+  );
 }

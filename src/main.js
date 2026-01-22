@@ -1,9 +1,18 @@
 // src/main.js
+// ================================================================
+// 🎯 P1 重构: 使用 ActionRegistry 替代散落的 window.xxx 赋值
+// ================================================================
 
-// ✅ 新增：导入视图加载器 (这是 HTML 拆分重构的核心)
+// ✅ 导入视图加载器 (HTML 拆分重构的核心)
 import { initViews } from './common/utils/viewLoader.js';
 
-// ✅ 新增：全局错误兜底 (放在最前面)
+// ✅ P1: 导入动作注册中心
+import {
+  registerActionsWithLegacy,
+  initGlobalEventDelegation
+} from './common/utils/actionRegistry.js';
+
+// ✅ 全局错误兜底 (放在最前面)
 window.addEventListener("error", (event) => {
   console.error("Global Error:", event.error);
   const msg = `系统错误: ${event.message || "未知错误"}`;
@@ -13,7 +22,7 @@ window.addEventListener("error", (event) => {
   }
 });
 
-// ✅ 新增：Promise 异常兜底
+// ✅ Promise 异常兜底
 window.addEventListener("unhandledrejection", (event) => {
   console.error("Unhandled Rejection:", event.reason);
   const msg = `异步操作失败: ${event.reason?.message || "未知原因"}`;
@@ -24,24 +33,53 @@ window.addEventListener("unhandledrejection", (event) => {
 });
 
 // 1. 导入各模块的初始化函数和业务函数
-import { initSettingsListeners, updateModelStatus, loadProviderConfig, openSettings, closeSettings, toggleApiKeyVisibility, saveProviderConfig, renderProxyInputUI, fetchModels, testConnection, saveProxyConfig, } from "./components/settings/systemSettings.js";
-import { switchTab, renderMegaMenu } from "../src/common/utils/ui.js";
+import {
+  initSettingsListeners,
+  updateModelStatus,
+  loadProviderConfig,
+  openSettings,
+  closeSettings,
+  toggleApiKeyVisibility,
+  saveProviderConfig,
+  renderProxyInputUI,
+  fetchModels,
+  testConnection,
+  saveProxyConfig
+} from "./components/settings/systemSettings.js";
+
+import { switchTab, renderMegaMenu, showToast } from "../src/common/utils/ui.js";
 import { initHomeSplash } from "./modules/home/homeDisplay.js";
-import { initScraperListeners, selectSite, renderHistory, } from "./modules/master_prompt/scraper/scraperPanel.js";
-import { renderDataPanel, triggerImport, switchDataTab, handleImportFiles, toggleCardExpand, deleteProduct, deleteReview } from "./modules/master_prompt/data_manage/dataDisplay.js";
-import { initAnalysisPanel, updateAsinSelectList, analyzeSelectedAsins, renderReport, } from "./modules/master_prompt/analysis/analysisDisplay.js";
+import {
+  initScraperListeners,
+  selectSite,
+  renderHistory
+} from "./modules/master_prompt/scraper/scraperPanel.js";
+import {
+  renderDataPanel,
+  triggerImport,
+  switchDataTab,
+  handleImportFiles,
+  toggleCardExpand,
+  deleteProduct,
+  deleteReview
+} from "./modules/master_prompt/data_manage/dataDisplay.js";
+import {
+  initAnalysisPanel,
+  updateAsinSelectList,
+  analyzeSelectedAsins,
+  renderReport
+} from "./modules/master_prompt/analysis/analysisDisplay.js";
 import { initPromptlabModule } from './modules/master_prompt/promptlab/promptlabDisplay.js';
 import { initKeywordTracker } from './modules/keyword_tracker/trackerDisplay.js';
-// ✅ 核心修正：仅导入文件，让它自动注册事件监听器
-// import './modules/amz_hub/amz_hubDisplay.js';
-import './modules/amz_hub/amz_hub.js'; // 新的
-import './modules/sops/sops.js'; // SOPs 流程中心模块
+
+// ✅ 自动注册事件监听器的模块 (事件驱动模式)
+import './modules/amz_hub/amz_hub.js';
+import './modules/sops/sops.js';
 
 // ========================
 // APP STARTUP (程序启动)
 // ========================
 
-// ⚠️ 注意：这里增加了 async 关键字
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("🚀 System: Application Booting...");
 
@@ -51,32 +89,33 @@ document.addEventListener("DOMContentLoaded", async () => {
   try {
     await initViews();
 
+    // ✅ P1: 初始化全局事件委托 (支持 data-action 模式)
+    initGlobalEventDelegation();
+
     initHomeSplash();
 
-    // 1. 初始化各模块的事件监听器 (现在可以安全运行了，因为 DOM 已经在页面上了)
+    // 1. 初始化各模块的事件监听器
     initSettingsListeners();
-
     initScraperListeners();
     initAnalysisPanel();
     initPromptlabModule();
-
-    // ===============================================
-    // ✅ 新增：在视图加载完成后，启动 Keyword Tracker 逻辑
-    // ===============================================
-    // 只有 HTML 存在于页面上时，init 才能找到元素并绑定事件
     initKeywordTracker();
 
-    // 注意：不再需要显式调用 loadAmzHubView()，它会自动监听
-    // loadAmzHubView();
-
-    // 2. 渲染顶部 Mega Menu (新增)
+    // 2. 渲染顶部 Mega Menu
     renderMegaMenu();
+
+    // ================================================================
+    // 🎯 P3: 广播应用初始化完成事件
+    // 所有模块可以监听此事件实现自注册初始化
+    // ================================================================
+    window.dispatchEvent(new CustomEvent('app:initialized', {
+      detail: { timestamp: Date.now() }
+    }));
 
     console.log("✅ Views loaded successfully");
   } catch (error) {
     console.error("❌ Failed to load views:", error);
-    // 这里可以加一个 toast 提示用户刷新
-    return; // 如果视图加载失败，中止后续逻辑，防止报错
+    return;
   }
 
   // 2. 初始化默认状态
@@ -91,8 +130,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       proxySelect.value = savedProxy.type;
       if (savedProxy.type === "custom") {
         document.getElementById("custom-proxy").classList.remove("hidden");
-        document.getElementById("custom-proxy").value =
-          savedProxy.customUrl || "";
+        document.getElementById("custom-proxy").value = savedProxy.customUrl || "";
       }
     }
   }
@@ -102,50 +140,47 @@ document.addEventListener("DOMContentLoaded", async () => {
   console.log("✅ System: Ready");
 });
 
-// ========================
-// GLOBAL EXPORTS (全局暴露)
-// ========================
+// ================================================================
+// 🎯 P1: 集中注册全局动作 (替代散落的 window.xxx = xxx)
+// ================================================================
+// 使用 registerActionsWithLegacy 在注册到 ActionRegistry 的同时
+// 也挂载到 window，保持向后兼容现有 onclick="xxx()" 调用
 
-// Navigation
-window.switchTab = switchTab;
-window.switchDataTab = switchDataTab;
+registerActionsWithLegacy({
+  // === Navigation 导航 ===
+  switchTab,
+  switchDataTab,
+  renderMegaMenu,
 
-// window.switchReportTab = switchReportTab;
-window.renderMegaMenu = renderMegaMenu;
+  // === Utilities 工具函数 ===
+  showToast,
 
-// Settings
-window.openSettings = openSettings;
-window.closeSettings = closeSettings;
-window.saveProviderConfig = saveProviderConfig;
-window.loadProviderConfig = loadProviderConfig;
-window.fetchModels = fetchModels;
-window.toggleApiKeyVisibility = toggleApiKeyVisibility;
-window.testConnection = testConnection;
-window.saveProxyConfig = saveProxyConfig;
+  // === Settings 设置 ===
+  openSettings,
+  closeSettings,
+  saveProviderConfig,
+  loadProviderConfig,
+  fetchModels,
+  toggleApiKeyVisibility,
+  testConnection,
+  saveProxyConfig,
 
-// Scraper
-window.selectSite = selectSite;
-// window.startScraping = startScraping;
-// window.loadHistory = loadHistory;
-// window.clearHistory = clearHistory;
-// window.clearAsins = clearAsins;
+  // === Scraper 数据采集 ===
+  selectSite,
 
-// Data Display
-window.toggleCardExpand = toggleCardExpand;
-window.triggerImport = triggerImport;
-window.handleImportFiles = handleImportFiles;
-window.deleteReview = deleteReview;
-window.renderDataPanel = renderDataPanel;
-window.deleteProduct = deleteProduct;
+  // === Data Display 数据管理 ===
+  toggleCardExpand,
+  triggerImport,
+  handleImportFiles,
+  deleteReview,
+  renderDataPanel,
+  deleteProduct,
 
-// Analysis
-window.updateAsinSelectList = updateAsinSelectList;
-window.analyzeSelectedAsins = analyzeSelectedAsins;
-window.renderReport = renderReport;
+  // === Analysis AI分析 ===
+  updateAsinSelectList,
+  analyzeSelectedAsins,
+  renderReport,
+});
 
+console.log("✅ [ActionRegistry] 全局动作已注册");
 
-// 暴露全局函数供 HTML onclick 使用 (因为 module 作用域隔离)
-
-//amz_hub
-
-// window.loadAmzHubView = loadAmzHubView();
