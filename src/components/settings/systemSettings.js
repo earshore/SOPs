@@ -509,7 +509,7 @@ export function renderProxyInputUI(type) {
 
   // 获取当前应该显示的值：优先显示全局配置中的（如果是当前类型），否则显示Map中存的
   const savedValue = getSavedKey(type);
-  const savedGlobal = JSON.parse(localStorage.getItem("proxy_config") || "{}");
+  const savedGlobal = StorageService.get(STORAGE_KEYS.PROXY_CONFIG, {});
   // 逻辑优化：如果当前生效的配置类型 == 当前选择的类型，优先显示生效的值
   const currentValue =
     savedGlobal.type === type && savedGlobal.customUrl

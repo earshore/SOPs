@@ -1,7 +1,11 @@
 // src/modules/keyword_tracker/keywordtrackerService.js
+// ================================================================
+// 🎯 Phase 4: 已迁移使用 StorageService
+// ================================================================
 
 import { callLLM } from "../../services/llmService.js";
 import { ANALYSIS_PROMPT_TEMPLATE, TRANSLATE_PROMPT_TEMPLATE2 } from "../../common/constants/prompts.js";
+import { StorageService, STORAGE_KEYS } from "../../services/storageService.js";
 
 // ==========================================
 // 1. 基础文本处理工具
@@ -21,10 +25,10 @@ export function parseKeywords(text) {
 export function cleanKeywordsText(text) {
     if (!text) return '';
     return text.replace(/[^\w\s\-\u00C0-\u024F\u1E00-\u1EFF]/g, ' ') // 允许欧洲字符
-               .split('\n')
-               .map(l => l.trim().replace(/\s+/g, ' '))
-               .filter(l => l)
-               .join('\n');
+        .split('\n')
+        .map(l => l.trim().replace(/\s+/g, ' '))
+        .filter(l => l)
+        .join('\n');
 }
 
 /**
@@ -44,13 +48,13 @@ export function findDuplicateKeywords(text) {
     const keywords = parseKeywords(text);
     const seen = new Set();
     const dups = new Set();
-    
+
     keywords.forEach(k => {
         const lower = k.toLowerCase();
         if (seen.has(lower)) dups.add(lower);
         seen.add(lower);
     });
-    
+
     return dups;
 }
 
@@ -73,7 +77,7 @@ export function analyzeKeywordMatching(copyText, keywordList) {
         const kwLower = kw.toLowerCase();
         let count = 0;
         let pos = textLower.indexOf(kwLower);
-        
+
         while (pos !== -1) {
             count++;
             pos = textLower.indexOf(kwLower, pos + 1);
@@ -110,24 +114,22 @@ export function calculateWordFrequency(text) {
 // 3. LLM 服务封装
 // ==========================================
 
-// 修复 src/modules/keyword_tracker/trackerService.js 中的 bridgeCallLLM 函数
-
 async function bridgeCallLLM(systemPrompt, userPrompt, options = {}) {
-    // 1. 修复：必须先声明 activeProvider 变量
-    const activeProvider = localStorage.getItem('llm_active_provider'); 
-    
+    // 使用 StorageService 获取 LLM 配置
+    const activeProvider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
+
     if (!activeProvider) {
         throw new Error("请先在全局设置中选择 LLM 提供商");
     }
 
-    // 2. 使用 activeProvider 获取具体的配置对象
-    const config = JSON.parse(localStorage.getItem(`llm_${activeProvider}`) || '{}');
-    
+    const config = StorageService.getLLMConfig(activeProvider) || {};
+
+
     // 检查 Key
     if (!config.apiKey) {
-         // 特殊处理：如果是 serverless 模式，允许前端 key 为空或随意值，但为了通过校验建议前端填个占位符
-         // 这里抛出错误提示用户去设置里检查
-         throw new Error("所选提供商未配置 API Key");
+        // 特殊处理：如果是 serverless 模式，允许前端 key 为空或随意值，但为了通过校验建议前端填个占位符
+        // 这里抛出错误提示用户去设置里检查
+        throw new Error("所选提供商未配置 API Key");
     }
 
     const targetModel = config.model || (config.models && config.models[0] ? config.models[0].id : undefined);
@@ -140,7 +142,7 @@ async function bridgeCallLLM(systemPrompt, userPrompt, options = {}) {
 
     const finalOptions = {
         temperature: 0.3,
-        jsonMode: false, 
+        jsonMode: false,
         ...options
     };
 
@@ -165,7 +167,7 @@ export async function fetchListingAnalysis(copyText, keywords, matchedKeywords, 
     }
 
     const systemPrompt = ANALYSIS_PROMPT_TEMPLATE;
-        
+
     // 截取部分文案防止 token 超限
     const userPrompt = `
     # INPUT DATA
@@ -188,6 +190,6 @@ export async function fetchImmersionTranslation(copyText) {
 
     const systemPrompt = TRANSLATE_PROMPT_TEMPLATE2;
     const userPrompt = `## Input：\n\n${copyText}`;
-    
+
     return await bridgeCallLLM(systemPrompt, userPrompt, { jsonMode: false });
 }

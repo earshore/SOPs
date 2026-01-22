@@ -1,10 +1,14 @@
 // src/main.js
 // ================================================================
 // 🎯 P1 重构: 使用 ActionRegistry 替代散落的 window.xxx 赋值
+// 🎯 Phase 4: 使用 StorageService 统一数据访问
 // ================================================================
 
 // ✅ 导入视图加载器 (HTML 拆分重构的核心)
 import { initViews } from './common/utils/viewLoader.js';
+
+// ✅ 导入 StorageService
+import { StorageService, STORAGE_KEYS } from './services/storageService.js';
 
 // ✅ P1: 导入动作注册中心
 import {
@@ -122,8 +126,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   updateModelStatus();
   renderHistory();
 
-  // 3. 恢复用户设置 (代理等)
-  const savedProxy = JSON.parse(localStorage.getItem("proxy_config") || "{}");
+  // 3. 恢复用户设置 (代理等) - 使用 StorageService
+  const savedProxy = StorageService.getProxyConfig();
   if (savedProxy.type) {
     const proxySelect = document.getElementById("proxy-select");
     if (proxySelect) {

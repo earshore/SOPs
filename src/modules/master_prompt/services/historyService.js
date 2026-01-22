@@ -1,7 +1,11 @@
 // src/modules/master_prompt/services/historyService.js
-import state from "../../../common/state.js";
+// ================================================================
+// 🎯 Phase 4: 已迁移使用 StorageService
+// ================================================================
 
-const STORAGE_KEY = "scrape_history";
+import state from "../../../common/state.js";
+import { StorageService, STORAGE_KEYS } from "../../../services/storageService.js";
+
 const MAX_HISTORY_ITEMS = 20; // 限制只存最近20条
 
 export const HistoryService = {
@@ -11,7 +15,7 @@ export const HistoryService = {
    */
   getAll() {
     try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      return StorageService.getScrapeHistory();
     } catch (e) {
       console.error("读取历史记录失败", e);
       return [];
@@ -49,7 +53,7 @@ export const HistoryService = {
 
     // 保持存储空间整洁，只留最新的
     const trimmedHistory = history.slice(0, MAX_HISTORY_ITEMS);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmedHistory));
+    StorageService.setScrapeHistory(trimmedHistory);
 
     return trimmedHistory;
   },
@@ -67,8 +71,9 @@ export const HistoryService = {
    * 清空所有记录
    */
   clear() {
-    localStorage.removeItem(STORAGE_KEY);
+    StorageService.remove(STORAGE_KEYS.SCRAPE_HISTORY);
   },
+
   /**
    * ✅ 新增：根据 ASIN 和站点查找最近的有效缓存
    * 用于 scraperService 在抓取前进行查询

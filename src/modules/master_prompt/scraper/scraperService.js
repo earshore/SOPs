@@ -1,11 +1,13 @@
 // ==========================================
 // 🚀 优化版 scraperService.js
+// 🎯 Phase 4: 已迁移使用 StorageService
 // ==========================================
 
 import { LANGUAGE_HEADERS, PROXY_URLS } from "../../../common/constants/constants.js";
 import { parseProductPage, parseReviews } from "./parserService.js";
 import { sleep, getErrorSummary } from "../../../common/utils/ui.js";
 import { HistoryService } from "../services/historyService.js";
+import { StorageService, STORAGE_KEYS } from "../../../services/storageService.js";
 
 const CACHE_DURATION_MS = 24 * 60 * 60 * 1000;
 
@@ -191,7 +193,9 @@ async function fetchReviewsParallel(asin, site, fetchOptions, lang) {
 }
 
 export async function scrapeAsin(asin, site, scrapeReviews, updateStatusCallback) {
-    const proxyConfig = JSON.parse(localStorage.getItem("proxy_config") || '{"type":"allorigins"}');
+    // 使用 StorageService 获取代理配置
+    const proxyConfig = StorageService.getProxyConfig();
+
 
     if (!site || !LANGUAGE_HEADERS[site]) {
         const errorMsg = `无效的站点参数: ${site || "为空"}`;
