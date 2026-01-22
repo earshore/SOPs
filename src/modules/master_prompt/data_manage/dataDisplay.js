@@ -1,9 +1,14 @@
 // src/ui/dataDisplay.js
+// ================================================================
+// 🎯 Phase 4: 已迁移使用 StorageService
+// ================================================================
+
 import state from "../../../common/state.js";
 import { getErrorSummary, showToast, switchTab } from "../../../common/utils/ui.js";
 import { HistoryService } from "../services/historyService.js";
 import { renderHistory } from "../scraper/scraperPanel.js";
 import { updateAsinSelectList } from "../analysis/analysisDisplay.js";
+import { StorageService } from "../../../services/storageService.js";
 
 import { languageFlagMap } from "../../../common/constants/constants.js";
 // ==========================================
@@ -315,7 +320,8 @@ export async function deleteReview(asin, index) {
  */
 function confirmWithModal(title, content, storageKey) {
     return new Promise((resolve) => {
-        if (storageKey && localStorage.getItem(storageKey) === 'true') {
+        // 使用 StorageService 检查“不再提醒”设置
+        if (storageKey && StorageService.get(storageKey) === true) {
             resolve(true);
             return;
         }
@@ -363,7 +369,7 @@ function confirmWithModal(title, content, storageKey) {
 
         confirmBtn.onclick = () => {
             if (storageKey && checkbox.checked) {
-                localStorage.setItem(storageKey, 'true');
+                StorageService.set(storageKey, true);
                 showToast('已保存设置：以后不再提醒', 'info');
             }
             cleanup();

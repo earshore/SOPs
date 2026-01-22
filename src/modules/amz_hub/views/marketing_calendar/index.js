@@ -1,6 +1,10 @@
 // src/modules/amz_hub/views/marketing_calendar/index.js
+// ================================================================
+// 🎯 Phase 4: 已迁移使用 StorageService
+// ================================================================
 
 import { amzf_countries, amzf_months, amzf_events } from "../../constants/amz_hub_constants.js";
+import { StorageService, STORAGE_KEYS } from "../../../../services/storageService.js";
 
 // ==================== AMZF State ====================
 let amzf_currentView = 'country';
@@ -9,7 +13,7 @@ let amzf_searchTerm = '';
 let amzf_expandedSections = new Set();
 let amzf_debounceTimer = null; // 用于搜索防抖
 let amzf_searchHistory = []; // 搜索历史记录
-const AMZF_HISTORY_KEY = 'amzf_search_history'; // localStorage key
+const AMZF_HISTORY_KEY = 'amzf_search_history'; // 使用 StorageService 键
 const AMZF_MAX_HISTORY = 10; // 最大历史记录数
 const AMZF_QUICK_TAGS = ['圣诞', 'Prime Day', '黑五', '复活节', '情人节', '母亲节']; // 快捷搜索标签
 
@@ -102,14 +106,12 @@ function amzf_init() {
 }
 
 /**
- * 从 localStorage 加载搜索历史
+ * 从 StorageService 加载搜索历史
  */
 function amzf_loadSearchHistory() {
     try {
-        const saved = localStorage.getItem(AMZF_HISTORY_KEY);
-        if (saved) {
-            amzf_searchHistory = JSON.parse(saved);
-        }
+        const saved = StorageService.get(AMZF_HISTORY_KEY, []);
+        amzf_searchHistory = saved;
     } catch (e) {
         console.warn('Failed to load search history:', e);
         amzf_searchHistory = [];
@@ -117,15 +119,16 @@ function amzf_loadSearchHistory() {
 }
 
 /**
- * 保存搜索历史到 localStorage
+ * 保存搜索历史到 StorageService
  */
 function amzf_saveSearchHistory() {
     try {
-        localStorage.setItem(AMZF_HISTORY_KEY, JSON.stringify(amzf_searchHistory));
+        StorageService.set(AMZF_HISTORY_KEY, amzf_searchHistory);
     } catch (e) {
         console.warn('Failed to save search history:', e);
     }
 }
+
 
 /**
  * 添加搜索词到历史记录
