@@ -28,8 +28,7 @@
     .amzp_header {
         position: relative;
         padding: 50px 60px 120px 60px;
-        /* 底部留白给悬浮层 */
-        background: linear-gradient(135deg, #7480e6 0%, #8e5bd8 100%);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
         flex-shrink: 0;
     }
@@ -74,7 +73,6 @@
         width: 100%;
         margin: 0 auto;
         margin-top: -80px;
-        /* 悬浮重叠 */
         padding: 0 40px 60px 40px;
         gap: 40px;
         z-index: 10;
@@ -82,7 +80,7 @@
         position: relative;
     }
 
-    /* 左侧导航 (Sidecar Widget 复刻) */
+    /* 左侧导航 */
     .amzp_sidebar {
         width: var(--amzp-nav-width);
         flex-shrink: 0;
@@ -93,22 +91,19 @@
         border-radius: var(--amzp-radius);
         box-shadow: var(--amzp-shadow);
         padding: 25px 20px;
-        /* 增加内边距 */
         display: flex;
         flex-direction: column;
         gap: 5px;
     }
 
-    /* 导航组 (一级菜单) */
+    /* 导航组 */
     .amzp_nav_group {
         margin-bottom: 5px;
     }
 
-    /* 一级标题样式 */
     .amzp_nav_header {
         font-size: 0.95rem;
         font-weight: 500;
-        /* 默认普通粗细 */
         color: #555;
         padding: 10px 15px;
         cursor: pointer;
@@ -126,40 +121,33 @@
     .amzp_nav_header.active {
         font-weight: 700;
         color: #000;
-        /* 选中时变黑加粗 */
         background-color: transparent;
     }
 
-    /* 二级子菜单容器 (折叠/展开) */
+    /* 二级子菜单容器 */
     .amzp_nav_children {
         max-height: 0;
         opacity: 0;
         overflow: hidden;
         transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
         padding-left: 15px;
-        /* 整体缩进 */
         margin-top: 5px;
         position: relative;
     }
 
-    /* 展开状态 */
     .amzp_nav_group.expanded .amzp_nav_children {
         max-height: 500px;
-        /* 足够大以容纳内容 */
         opacity: 1;
     }
 
-    /* 灰色竖线 (轨道) */
     .amzp_nav_children_track {
         border-left: 2px solid #f0f0f0;
         padding-left: 15px;
-        /* 子项距离竖线的距离 */
         display: flex;
         flex-direction: column;
         gap: 8px;
     }
 
-    /* 子菜单项 */
     .amzp_sub_link {
         font-size: 0.85rem;
         color: #666;
@@ -176,24 +164,19 @@
         color: var(--amzp-primary);
     }
 
-    /* 子菜单选中态 (复刻 Image 2 的左侧竖条指示器) */
     .amzp_sub_link.active {
         color: #000;
         font-weight: 600;
     }
 
-    /* 活动指示条 (伪元素实现覆盖在轨道上) */
     .amzp_sub_link.active::before {
         content: '';
         position: absolute;
         left: -17px;
-        /* 调整位置覆盖住父级的 border-left */
         top: 6px;
         bottom: 6px;
         width: 2px;
-        /* 线条宽度 */
         background-color: #333;
-        /* 深色指示条 */
     }
 
     /* 右侧内容区 */
@@ -236,7 +219,23 @@
         text-align: justify;
     }
 
-    /* Grid & Stats Styles (Keep existing) */
+    /* 分块标题 (新增) */
+    .amzp_section_header {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #333;
+        margin-top: 30px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .amzp_section_header i {
+        color: #566ce8;
+    }
+
+    /* Grid & Stats Styles */
     .amzp_grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -326,6 +325,13 @@
         border-left: 4px solid var(--amzp-primary);
     }
 
+    .amzp_stats_text {
+        font-size: 0.95rem;
+        color: #333;
+        line-height: 1.6;
+    }
+
+    /* 响应式 */
     @media (max-width: 900px) {
         .amzp_layout {
             flex-direction: column;
@@ -350,8 +356,6 @@
         .amzp_nav_children {
             display: none;
         }
-
-        /* Mobile hide children for simplicity */
     }
 </style>
 
@@ -359,9 +363,9 @@
     <header class="amzp_header">
         <h1 class="amzp_title">
             <i class="fas fa-bullhorn"></i>
-            节日旺季 / 促销工具
+            促销工具 / 旺季攻略
         </h1>
-        <p class="amzp_subtitle">掌握旺季节奏和促销工具，增流量促转化！</p>
+        <p class="amzp_subtitle">欧洲站一人公司实战经验 | 工具对比 · ROI分析 · 避坑指南 · 备战清单</p>
     </header>
 
     <div class="amzp_layout">
