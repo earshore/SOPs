@@ -1,13 +1,17 @@
 // src/ui/scraperPanel.js
+// ================================================================
+// 🎯 Phase 3: 已迁移使用 StorageService
+// ================================================================
+
 import state from "../../../common/state.js";
 import { showToast, showProgress, getErrorSummary, sleep } from "../../../common/utils/ui.js";
 import { scrapeAsin } from "./scraperService.js";
-// 引入 languageFlagMap
 import { LANGUAGE_HEADERS, languageFlagMap, SITE_NAME_MAP } from "../../../common/constants/constants.js";
 import { renderDataPanel } from "../data_manage/dataDisplay.js";
 import { updateAsinSelectList } from "../analysis/analysisDisplay.js";
 import { HistoryService } from "../services/historyService.js";
 import { saveProxyConfig, renderProxyInputUI } from "../../../components/settings/systemSettings.js"
+import { StorageService, STORAGE_KEYS } from "../../../services/storageService.js";
 
 // ==========================================
 // 1. 配置管理 (隔离存储)
@@ -18,7 +22,7 @@ const HISTORY_STORAGE_KEY = "scrape_history"; // 与 historyService 保持一致
 
 function getSavedKey(type) {
   try {
-    const map = JSON.parse(localStorage.getItem(CONFIG_MAP_KEY) || "{}");
+    const map = StorageService.get(STORAGE_KEYS.PROXY_KEY_MAP, {});
     return map[type] || "";
   } catch {
     return "";
@@ -26,9 +30,9 @@ function getSavedKey(type) {
 }
 
 function saveKeyToMap(type, key) {
-  const map = JSON.parse(localStorage.getItem(CONFIG_MAP_KEY) || "{}");
+  const map = StorageService.get(STORAGE_KEYS.PROXY_KEY_MAP, {});
   map[type] = key;
-  localStorage.setItem(CONFIG_MAP_KEY, JSON.stringify(map));
+  StorageService.set(STORAGE_KEYS.PROXY_KEY_MAP, map);
 }
 
 function getProxyDisplayName(type) {
@@ -57,16 +61,13 @@ export function initScraperListeners() {
 
   // === 优化1: 默认设置 AllOrigins ===
   // 检查本地是否有配置，如果没有，则初始化为 allorigins
-  if (!localStorage.getItem("proxy_config")) {
-    localStorage.setItem(
-      "proxy_config",
-      JSON.stringify({ type: "allorigins", customUrl: "" })
-    );
+  if (!StorageService.get(STORAGE_KEYS.PROXY_CONFIG)) {
+    StorageService.set(STORAGE_KEYS.PROXY_CONFIG, { type: "allorigins", customUrl: "" });
     // 同步更新 map，防止显示错乱
-    const map = JSON.parse(localStorage.getItem("proxy_key_map") || "{}");
+    const map = StorageService.get(STORAGE_KEYS.PROXY_KEY_MAP, {});
     if (!map.allorigins) {
       map.allorigins = "";
-      localStorage.setItem("proxy_key_map", JSON.stringify(map));
+      StorageService.set(STORAGE_KEYS.PROXY_KEY_MAP, map);
     }
   }
 
@@ -80,7 +81,7 @@ export function initScraperListeners() {
       renderProxyInputUI(newSelect.value);
     });
 
-    const currentConfig = JSON.parse(localStorage.getItem("proxy_config"));
+    const currentConfig = StorageService.get(STORAGE_KEYS.PROXY_CONFIG);
     if (currentConfig && currentConfig.type) {
       newSelect.value = currentConfig.type;
     }
@@ -231,9 +232,7 @@ function updateNetworkUI() {
   // 1. 读取配置
   let config;
   try {
-    config = JSON.parse(
-      localStorage.getItem("proxy_config") || '{"type":"allorigins"}'
-    );
+    config = StorageService.get(STORAGE_KEYS.PROXY_CONFIG, { type: "allorigins" });
   } catch (e) {
     config = { type: "allorigins" };
   }
@@ -612,13 +611,11 @@ function deleteHistoryItem(id) {
   // 阻止冒泡通常由HTML结构控制，这里通过UI交互确认
   if (!confirm("确定要删除这条历史记录吗？")) return;
 
-  // 直接操作 localStorage，因为 HistoryService 没有提供 delete 方法
+  // 使用 StorageService 操作历史记录
   try {
-    const history = JSON.parse(
-      localStorage.getItem(HISTORY_STORAGE_KEY) || "[]"
-    );
+    const history = StorageService.getScrapeHistory();
     const newHistory = history.filter((h) => h.id !== id);
-    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(newHistory));
+    StorageService.setScrapeHistory(newHistory);
 
     // 如果删除的是当前选中的，清空状态
     if (state.currentHistoryId === id) {

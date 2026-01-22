@@ -1,4 +1,8 @@
 // src/modules/master_prompt/analysis/analysisDisplay.js
+// ================================================================
+// 🎯 Phase 3: 已迁移使用 StorageService
+// ================================================================
+
 import state from "../../../common/state.js";
 import { PROVIDERS, LANGUAGE_HEADERS } from "../../../common/constants/constants.js";
 import { ANALYSIS_MODULES, DYNAMIC_MASTER_TEMPLATE } from "../../../common/constants/prompts.js";
@@ -7,6 +11,7 @@ import { HistoryService } from "../services/historyService.js";
 import { renderHistory } from "../scraper/scraperPanel.js";
 import { AnalysisService } from "./analysisService.js";
 import { getFieldTitle } from "../promptlab/promptlabDisplay.js";
+import { StorageService, STORAGE_KEYS } from "../../../services/storageService.js";
 
 // ✅ 引入新的渲染器 (关键改动)
 import { renderWidgetCard, renderViewModeHTML, renderEditorForm } from "./analysisRenderer.js";
@@ -282,12 +287,12 @@ export async function analyzeSelectedAsins() {
   const isListingSelected = document.getElementById("opt-listing")?.checked;
   const isReviewsSelected = document.getElementById("opt-reviews")?.checked;
 
-  const provider = localStorage.getItem("llm_active_provider");
+  const provider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
   if (!provider) {
     showToast("请先配置AI模型", "warning");
     return;
   }
-  const config = JSON.parse(localStorage.getItem(`llm_${provider}`) || "{}");
+  const config = StorageService.getLLMConfig(provider) || {};
   if (!config.apiKey) {
     showToast("API Key 未配置", "warning");
     return;
@@ -467,9 +472,7 @@ function initGridStack(report) {
   );
 
   const templateId = report.meta?.templateId || "default";
-  const savedLayout = JSON.parse(
-    localStorage.getItem(`layout_config_${templateId}`) || "[]"
-  );
+  const savedLayout = StorageService.getLayoutConfig(templateId);
 
   const widgets = [];
   const keys = Object.keys(report).filter((k) => k !== "meta");
@@ -526,7 +529,7 @@ function saveGridLayout(templateId) {
     w: node.w,
     h: node.h,
   }));
-  localStorage.setItem(`layout_config_${templateId}`, JSON.stringify(cleanLayout));
+  StorageService.setLayoutConfig(templateId, cleanLayout);
 }
 
 // ==========================================
@@ -659,12 +662,12 @@ window.translateReport = async function () {
   if (state.showTranslation && state.translatedReport) return;
   if (!state.analysisReport) return;
 
-  const provider = localStorage.getItem("llm_active_provider");
+  const provider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
   if (!provider) {
     showToast("请先配置AI模型", "warning");
     return;
   }
-  const config = JSON.parse(localStorage.getItem(`llm_${provider}`) || "{}");
+  const config = StorageService.getLLMConfig(provider) || {};
   if (!config.apiKey) {
     showToast("API Key 未配置", "warning");
     return;
@@ -829,7 +832,7 @@ function updateTranslationModels() {
   if (!select) return;
   select.innerHTML = '<option value="">选择翻译模型</option>';
   Object.keys(PROVIDERS).forEach((key) => {
-    const config = JSON.parse(localStorage.getItem(`llm_${key}`) || "{}");
+    const config = StorageService.getLLMConfig(key) || {};
     if (config.apiKey && config.model) {
       const opt = document.createElement("option");
       opt.value = key;

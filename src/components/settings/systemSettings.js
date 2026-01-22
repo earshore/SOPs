@@ -1,7 +1,12 @@
 // src/ui/settings.js
+// ================================================================
+// 🎯 Phase 3: 已迁移使用 StorageService
+// ================================================================
+
 import { PROVIDERS } from "../../common/constants/constants.js";
 import { fetchModelsFromApi, callLLM } from "../../services/llmService.js";
 import { showToast } from "../../common/utils/ui.js";
+import { StorageService, STORAGE_KEYS } from "../../services/storageService.js";
 
 // ==========================================
 // 1. 初始化监听器 (新增)
@@ -68,10 +73,8 @@ export function loadProviderConfig() {
   const provider = providerSelect.value;
   const config = PROVIDERS[provider];
 
-  // 读取已保存的配置
-  const savedConfig = JSON.parse(
-    localStorage.getItem(`llm_${provider}`) || "{}"
-  );
+  // 读取已保存的配置 (使用 StorageService)
+  const savedConfig = StorageService.getLLMConfig(provider) || {};
 
   // 填充表单
   document.getElementById("llm-endpoint").value =
@@ -120,13 +123,11 @@ function updateModelInfo(modelId, models) {
     info.classList.remove("hidden");
     document.getElementById(
       "model-context"
-    ).innerHTML = `<i class="fas fa-expand-alt mr-1 text-slate-400"></i>${
-      model.context / 1000
+    ).innerHTML = `<i class="fas fa-expand-alt mr-1 text-slate-400"></i>${model.context / 1000
     }K`;
     document.getElementById(
       "model-features"
-    ).innerHTML = `<i class="fas fa-star mr-1 text-slate-400"></i>${
-      model.features?.length ? model.features.join(", ") : "基础功能"
+    ).innerHTML = `<i class="fas fa-star mr-1 text-slate-400"></i>${model.features?.length ? model.features.join(", ") : "基础功能"
     }`;
   } else {
     info.classList.add("hidden");
@@ -257,9 +258,7 @@ export function saveProviderConfig() {
     return;
   }
 
-  const savedConfig = JSON.parse(
-    localStorage.getItem(`llm_${provider}`) || "{}"
-  );
+  const savedConfig = StorageService.getLLMConfig(provider) || {};
 
   const newConfig = {
     endpoint: endpoint,
@@ -268,8 +267,7 @@ export function saveProviderConfig() {
     models: savedConfig.models || PROVIDERS[provider].models, // 保持现有模型列表
   };
 
-  localStorage.setItem(`llm_${provider}`, JSON.stringify(newConfig));
-  localStorage.setItem("llm_active_provider", provider);
+  StorageService.setLLMConfig(provider, newConfig);
 
   updateConfigStatus(true);
   updateModelStatus(); // 刷新顶栏状态
@@ -310,11 +308,9 @@ export async function fetchModels() {
     if (models.length === 0) throw new Error("未能获取到有效模型列表");
 
     // 保存并重新渲染
-    const savedConfig = JSON.parse(
-      localStorage.getItem(`llm_${provider}`) || "{}"
-    );
+    const savedConfig = StorageService.getLLMConfig(provider) || {};
     savedConfig.models = models;
-    localStorage.setItem(`llm_${provider}`, JSON.stringify(savedConfig));
+    StorageService.setLLMConfig(provider, savedConfig);
 
     // 重新渲染下拉框
     renderModelSelect(savedConfig, PROVIDERS[provider]);
@@ -353,12 +349,12 @@ export function toggleApiKeyVisibility() {
 
 // 顶栏状态指示
 export function updateModelStatus() {
-  const provider = localStorage.getItem("llm_active_provider");
+  const provider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
   const statusEl = document.getElementById("model-status");
   if (!statusEl) return;
 
   if (provider && PROVIDERS[provider]) {
-    const config = JSON.parse(localStorage.getItem(`llm_${provider}`) || "{}");
+    const config = StorageService.getLLMConfig(provider) || {};
     if (config.apiKey && config.model) {
       statusEl.innerHTML = `
                 <span class="status-dot status-success"></span>
@@ -426,9 +422,7 @@ export function handleProxyTypeChange() {
  * 加载代理配置
  */
 export function loadProxyConfig() {
-  const savedConfig = JSON.parse(
-    localStorage.getItem("scraper_proxy_config") || "{}"
-  );
+  const savedConfig = StorageService.get(STORAGE_KEYS.SCRAPER_PROXY_CONFIG, {});
 
   // 1. 设置下拉框的值 (默认 allorigins)
   const select = document.getElementById("proxy-select");
@@ -468,27 +462,27 @@ export function loadProxyConfig() {
 
 // 修正 saveProxyConfig
 export function saveProxyConfig(isSilent = false) {
-    const selectEl = document.getElementById("proxy-select");
-    const inputEl = document.getElementById("custom-proxy");
-    if (!selectEl) return;
+  const selectEl = document.getElementById("proxy-select");
+  const inputEl = document.getElementById("custom-proxy");
+  if (!selectEl) return;
 
-    const proxyType = selectEl.value;
-    const customUrl = inputEl ? inputEl.value.trim() : "";
+  const proxyType = selectEl.value;
+  const customUrl = inputEl ? inputEl.value.trim() : "";
 
-    // 1. 保存 Key 到映射表 (修复未定义报错)
-    saveKeyToMap(proxyType, customUrl);
+  // 1. 保存 Key 到映射表 (修复未定义报错)
+  saveKeyToMap(proxyType, customUrl);
 
-    // 2. 保存当前生效的配置
-    const config = { type: proxyType, customUrl: customUrl };
-    localStorage.setItem("scraper_proxy_config", JSON.stringify(config)); // 统一 Key 名称
+  // 2. 保存当前生效的配置
+  const config = { type: proxyType, customUrl: customUrl };
+  StorageService.set(STORAGE_KEYS.SCRAPER_PROXY_CONFIG, config);
 
-    // 3. 提示用户
-    if (!isSilent) {
-        showToast("网络配置已更新", "success");
-    }
-    
-    // 4. (可选) 重新加载 input UI 以确保状态同步
-    // renderProxyInputUI(proxyType); 
+  // 3. 提示用户
+  if (!isSilent) {
+    showToast("网络配置已更新", "success");
+  }
+
+  // 4. (可选) 重新加载 input UI 以确保状态同步
+  // renderProxyInputUI(proxyType); 
 }
 
 // === 渲染代理输入框 ===
@@ -523,11 +517,11 @@ export function renderProxyInputUI(type) {
       : savedValue;
 
   // 逻辑优化：如果当前生效的配置类型 == 当前选择的类型，优先显示生效的值
-  const currentGlobalConfig = JSON.parse(localStorage.getItem("scraper_proxy_config") || "{}");
-  
+  const currentGlobalConfig = StorageService.get(STORAGE_KEYS.SCRAPER_PROXY_CONFIG, {});
+
   let displayValue = savedValue;
   if (currentGlobalConfig.type === type && currentGlobalConfig.customUrl) {
-      displayValue = currentGlobalConfig.customUrl;
+    displayValue = currentGlobalConfig.customUrl;
   }
 
   let label = "API Key";
@@ -576,12 +570,12 @@ export function renderProxyInputUI(type) {
 
 // 在 settings.js 内部定义一个简单的内存/本地存储映射
 function getSavedKey(type) {
-    const map = JSON.parse(localStorage.getItem("proxy_key_map") || "{}");
-    return map[type] || "";
+  const map = StorageService.get(STORAGE_KEYS.PROXY_KEY_MAP, {});
+  return map[type] || "";
 }
 
 function saveKeyToMap(type, key) {
-    const map = JSON.parse(localStorage.getItem("proxy_key_map") || "{}");
-    map[type] = key;
-    localStorage.setItem("proxy_key_map", JSON.stringify(map));
+  const map = StorageService.get(STORAGE_KEYS.PROXY_KEY_MAP, {});
+  map[type] = key;
+  StorageService.set(STORAGE_KEYS.PROXY_KEY_MAP, map);
 }
