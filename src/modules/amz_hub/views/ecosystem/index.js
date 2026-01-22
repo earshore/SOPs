@@ -1,4 +1,4 @@
-import { A10_CHART_DATA } from "../../services/amz_hub_constants.js";
+import { A10_CHART_DATA } from "../../constants/amz_hub_constants.js";
 
 let chartInstance = null;
 
@@ -24,11 +24,11 @@ function initChart() {
     chartInstance = new Chart(ctx.getContext('2d'), {
         type: 'doughnut',
         data: A10_CHART_DATA,
-        options: { 
-            responsive: true, 
-            maintainAspectRatio: false, 
-            plugins: { 
-                legend: { position: 'right', labels: { usePointStyle: true, boxWidth: 8 } } 
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'right', labels: { usePointStyle: true, boxWidth: 8 } }
             },
             cutout: '70%'
         }

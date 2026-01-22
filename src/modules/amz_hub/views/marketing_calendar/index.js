@@ -1,6 +1,6 @@
 // src/modules/amz_hub/views/marketing_calendar/index.js
 
-import { amzf_countries, amzf_months, amzf_events } from "../../services/amz_hub_constants.js";
+import { amzf_countries, amzf_months, amzf_events } from "../../constants/amz_hub_constants.js";
 
 // ==================== AMZF State ====================
 let amzf_currentView = 'country';

@@ -1,15 +1,15 @@
 // 注意路径，引用新的 constants 文件
-import { AMZ_COUNTRY_DATA } from "../../services/amz_hub_constants.js";
+import { AMZ_COUNTRY_DATA } from "../../constants/amz_hub_constants.js";
 
 let radarChart = null;
 
 export async function mount(container) {
     const response = await fetch('src/modules/amz_hub/views/eu_insights/template.html');
     container.innerHTML = await response.text();
-    
+
     // 绑定 Select 事件
     const selector = document.getElementById('amz_countrySelector');
-    if(selector) {
+    if (selector) {
         selector.addEventListener('change', (e) => updateCountryInfo(e.target.value));
         // 默认初始化
         updateCountryInfo('de');
@@ -29,7 +29,7 @@ function updateCountryInfo(code) {
 
     // 1. 更新文本
     const details = document.getElementById('amz_countryDetails');
-    if(details) {
+    if (details) {
         // ... 原来的 innerHTML 逻辑，直接复制进来 ...
         // 为了省地，这里简写，你需要把原 amz_updateCountryInfo 里的 HTML 模板粘过来
         details.innerHTML = `

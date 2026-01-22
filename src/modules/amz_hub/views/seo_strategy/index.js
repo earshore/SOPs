@@ -1,11 +1,11 @@
-import { SEO_RADAR_DATA } from "../../services/amz_hub_constants.js";
+import { SEO_RADAR_DATA } from "../../constants/amz_hub_constants.js";
 
 let chartInstance = null;
 
 export async function mount(container) {
     const response = await fetch('src/modules/amz_hub/views/seo_strategy/template.html');
     container.innerHTML = await response.text();
-    
+
     initChart();
 }
 
