@@ -30,51 +30,49 @@ export function initAnalysisPanel() {
   }
 }
 
-// 渲染左侧配置区
+// 渲染配置区 (适配新布局)
 function renderModuleSelector() {
-  const container = document.getElementById("asin-select-list")?.parentElement;
-  let selectorDiv = document.getElementById("template-selector-container");
-
-  if (!selectorDiv) {
-    selectorDiv = document.createElement("div");
-    selectorDiv.id = "template-selector-container";
-    selectorDiv.className = "mb-4";
-    const analyzeBtn = document.getElementById("analyze-btn");
-    if (analyzeBtn) container.insertBefore(selectorDiv, analyzeBtn);
-  }
-
-  selectorDiv.innerHTML = `
-    <div class="flex gap-3 mb-5">
-      <label id="lbl-opt-listing" class="flex-1 group relative flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border cursor-pointer transition-all select-none text-sm font-medium text-slate-500 border-slate-200 bg-white hover:border-blue-300">
-          <input type="checkbox" id="opt-listing" checked class="hidden peer" onchange="window.updateSourceVisuals()">
-          <i class="fas fa-file-alt text-xs opacity-70"></i>
-          <span>Listings</span>
-          </label>
-      
-      <label id="lbl-opt-reviews" class="flex-1 group relative flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border cursor-pointer transition-all select-none text-sm font-medium text-slate-500 border-slate-200 bg-white hover:border-blue-300">
-          <input type="checkbox" id="opt-reviews" checked class="hidden peer" onchange="window.updateSourceVisuals()">
-          <i class="fas fa-comments text-xs opacity-70"></i>
-          <span>Reviews</span>
-      </label>
-  </div>
-    <div id="modules-container" class="grid grid-cols-1 gap-2 max-h-[350px] overflow-y-auto pr-1 custom-scrollbar mb-4">
-    </div>
-  `;
-
-  document.getElementById("opt-listing").addEventListener("change", () => {
-    updateModuleListVisibility();
-    updatePromptPreview();
-  });
-  document.getElementById("opt-reviews").addEventListener("change", () => {
-    updateModuleListVisibility();
-    updatePromptPreview();
-  });
-
+  // 渲染数据来源切换按钮
+  renderSourceToggle();
+  // 渲染分析模块复选框
   renderModuleCheckboxes();
+  // 更新模块可见性
   updateModuleListVisibility();
+  // 更新视觉状态
   window.updateSourceVisuals();
+  // 延迟更新Prompt预览
   setTimeout(updatePromptPreview, 100);
 }
+
+// 渲染数据来源切换按钮
+function renderSourceToggle() {
+  const container = document.getElementById("source-toggle-container");
+  if (!container) return;
+
+  container.innerHTML = `
+    <label id="lbl-opt-listing" class="flex-1 group relative flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border cursor-pointer transition-all select-none text-sm font-medium text-slate-500 border-slate-200 bg-white hover:border-blue-300">
+        <input type="checkbox" id="opt-listing" checked class="hidden peer" onchange="window.updateSourceVisuals()">
+        <i class="fas fa-file-alt text-xs opacity-70"></i>
+        <span>Listings</span>
+    </label>
+    
+    <label id="lbl-opt-reviews" class="flex-1 group relative flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border cursor-pointer transition-all select-none text-sm font-medium text-slate-500 border-slate-200 bg-white hover:border-blue-300">
+        <input type="checkbox" id="opt-reviews" checked class="hidden peer" onchange="window.updateSourceVisuals()">
+        <i class="fas fa-comments text-xs opacity-70"></i>
+        <span>Reviews</span>
+    </label>
+  `;
+
+  document.getElementById("opt-listing")?.addEventListener("change", () => {
+    updateModuleListVisibility();
+    updatePromptPreview();
+  });
+  document.getElementById("opt-reviews")?.addEventListener("change", () => {
+    updateModuleListVisibility();
+    updatePromptPreview();
+  });
+}
+
 
 window.updateSourceVisuals = function () {
   const updateStyle = (inputId, labelId) => {
@@ -98,16 +96,13 @@ function renderModuleCheckboxes() {
 
   container.innerHTML = ANALYSIS_MODULES.map(
     (mod) => `
-        <label class="module-item group relative flex items-start gap-3 p-2 rounded-lg border border-slate-100 hover:bg-blue-50/50 hover:border-blue-100 cursor-pointer transition-all" data-category="${mod.category}">
-            <div class="flex h-5 items-center">
+        <label class="module-item group relative flex items-start gap-2.5 p-2.5 rounded-xl border border-slate-100 hover:bg-blue-50/50 hover:border-blue-200 cursor-pointer transition-all bg-white" data-category="${mod.category}">
+            <div class="flex items-center pt-0.5">
                 <input type="checkbox" name="analysis_module" value="${mod.id}" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" onchange="window.updatePromptPreview()">
             </div>
-            <div class="text-sm leading-tight w-full">
-                <div class="flex justify-between items-center">
-                    <div class="font-medium text-slate-700 group-hover:text-blue-700">${mod.label_cn}</div>
-                    <span class="text-[9px] font-mono px-1 py-0.5 bg-slate-50 text-slate-400 rounded uppercase opacity-0 group-hover:opacity-100 transition-opacity">${mod.category}</span>
-                </div>
-                <div class="text-slate-400 text-xs mt-0.5 group-hover:text-slate-500 pr-2">${mod.desc_cn}</div>
+            <div class="text-sm leading-tight flex-1 min-w-0">
+                <div class="font-medium text-slate-700 group-hover:text-blue-700 truncate">${mod.label_cn}</div>
+                <div class="text-slate-400 text-[11px] mt-0.5 group-hover:text-slate-500 line-clamp-2">${mod.desc_cn}</div>
             </div>
         </label>
     `
@@ -177,8 +172,9 @@ window.openPromptModal = function () {
 // ==========================================
 
 function renderPromptPreviewArea() {
-  const rightPanel = document.querySelector(".lg\\:col-span-3");
-  if (!rightPanel || document.getElementById("prompt-preview-container")) return;
+  // 新布局：将预览区域插入到报告内容区域开头
+  const reportContent = document.getElementById("report-content");
+  if (!reportContent || document.getElementById("prompt-preview-container")) return;
 
   const previewDiv = document.createElement("div");
   previewDiv.id = "prompt-preview-container";
@@ -210,7 +206,7 @@ function renderPromptPreviewArea() {
         </details>
     `;
 
-  rightPanel.insertBefore(previewDiv, rightPanel.firstChild);
+  reportContent.insertBefore(previewDiv, reportContent.firstChild);
 }
 
 window.updatePromptPreview = function () {
@@ -371,6 +367,10 @@ export function renderReport() {    //scraperPanel.js有调用
   if (!report) return;
 
   if (!state.translatedReport) state.showTranslation = false;
+
+  // 隐藏欢迎区域，显示报告
+  const welcomeEl = document.getElementById("analysis-welcome");
+  if (welcomeEl) welcomeEl.classList.add("hidden");
 
   document.getElementById("no-report-msg").classList.add("hidden");
   const display = document.getElementById("report-display");

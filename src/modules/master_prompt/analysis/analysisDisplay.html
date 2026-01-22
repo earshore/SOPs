@@ -1,84 +1,176 @@
 <div id="panel-analysis" class="panel hidden fade-in">
-    <div class="flex flex-col lg:flex-row gap-6 items-start">
-        
-        <div class="w-full lg:w-1/4 flex-shrink-0 glass-card rounded-2xl shadow-lg border border-slate-200 p-6 lg:sticky lg:top-24 max-h-[calc(100vh-8rem)] overflow-y-auto custom-scrollbar z-10">
-            <h3 class="text-lg font-semibold mb-6 flex items-center gap-2 border-b border-slate-100 pb-4">
-                <i class="fas fa-brain text-blue-500"></i>
-                分析配置
-            </h3>
-
-            <div class="flex items-center justify-between mb-2">
-                <label class="text-sm font-bold text-slate-700">选择 ASIN</label>
-                <button onclick="selectAllAsins()"
-                    class="text-xs text-blue-600 hover:text-blue-700 font-medium px-2 py-0.5 rounded hover:bg-blue-50 transition-colors">
-                    全选
-                </button>
+    <!-- 页面顶部欢迎区域 (无内容时显示) -->
+    <div id="analysis-welcome" class="mb-6">
+        <div
+            class="bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/30 rounded-2xl border border-slate-200/60 p-8 relative overflow-hidden">
+            <!-- 装饰元素 -->
+            <div
+                class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-100/30 to-purple-100/40 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2">
+            </div>
+            <div
+                class="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-indigo-100/30 to-blue-100/30 rounded-full blur-2xl translate-y-1/3 -translate-x-1/3">
             </div>
 
-            <div id="asin-select-list" class="space-y-2 max-h-64 overflow-y-auto mb-6 custom-scrollbar pr-1">
-                <p class="text-sm text-slate-400 text-center py-4">暂无数据</p>
-            </div>
+            <div class="relative z-10">
+                <div class="flex items-start gap-6">
+                    <div
+                        class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/20 flex-shrink-0">
+                        <i class="fas fa-brain text-2xl text-white"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h2 class="text-xl font-bold text-slate-800 mb-2">AI 智能分析</h2>
+                        <p class="text-slate-500 text-sm leading-relaxed max-w-xl">
+                            选择要分析的 ASIN 和分析目标，AI 将自动提取 Listing 和 Reviews 中的关键洞察，生成结构化分析报告。
+                        </p>
+                    </div>
+                </div>
 
-            <div class="flex items-center justify-between mb-2">
-                <label class="block text-sm font-bold text-slate-700">
-                    分析目标
-                </label>
-                <div class="text-xs space-x-2">
-                    <button onclick="window.toggleAllModules(true)" class="text-blue-600 hover:text-blue-700 font-medium">全选</button>
-                    <span class="text-slate-300">|</span>
-                    <button onclick="window.toggleAllModules(false)" class="text-slate-400 hover:text-slate-600">清空</button>
+                <!-- 快速操作指引 -->
+                <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div
+                        class="flex items-center gap-3 bg-white/60 backdrop-blur-sm rounded-xl px-4 py-3 border border-slate-200/50">
+                        <span
+                            class="w-7 h-7 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">1</span>
+                        <span class="text-sm text-slate-600">选择 ASIN</span>
+                    </div>
+                    <div
+                        class="flex items-center gap-3 bg-white/60 backdrop-blur-sm rounded-xl px-4 py-3 border border-slate-200/50">
+                        <span
+                            class="w-7 h-7 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center text-xs font-bold">2</span>
+                        <span class="text-sm text-slate-600">配置分析目标</span>
+                    </div>
+                    <div
+                        class="flex items-center gap-3 bg-white/60 backdrop-blur-sm rounded-xl px-4 py-3 border border-slate-200/50">
+                        <span
+                            class="w-7 h-7 rounded-lg bg-green-100 text-green-600 flex items-center justify-center text-xs font-bold">3</span>
+                        <span class="text-sm text-slate-600">点击分析按钮</span>
+                    </div>
                 </div>
             </div>
-            
-            <button id="analyze-btn"
-                class="w-full py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-400 hover:to-purple-500 text-white font-bold rounded-lg shadow-md transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2 group cursor-pointer"
-                  >
-                                  <i class="fas fa-brain"></i> 分析ASIN
-            </button>
+        </div>
+    </div>
 
-            <div class="mt-6 pt-6 border-t border-slate-200">
-                <h3 class="text-lg font-semibold mb-6 flex items-center gap-2 border-b border-slate-100 pb-4">
-                    <i class="fas fa-earth-europe text-blue-500"></i>翻译配置
+    <!-- 主配置区域 - 横向排列的配置卡片 -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
+
+        <!-- 左侧：ASIN 选择 + 数据来源 -->
+        <div class="lg:col-span-4">
+            <div class="glass-card rounded-2xl shadow-lg border border-slate-200 p-5 h-full">
+                <h3 class="text-base font-semibold mb-4 flex items-center gap-2 text-slate-800">
+                    <i class="fas fa-boxes text-blue-500"></i>
+                    数据选择
                 </h3>
-                <label class="flex items-center justify-between mb-3">
-                    <label class="text-sm font-bold text-slate-700"> 
-                        <span>沉浸式翻译</span>
-                    </label>
-                    <input type="checkbox" id="enable-translation" class="w-4 h-4 text-blue-600 rounded"
-                        onchange="toggleTranslation()" />
-                </label>
-                <select id="translation-model" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg mb-4">
-                    <option value="">选择翻译模型</option>
-                </select>
 
-                <button onclick="translateReport()" id="translate-btn"
-                    class="w-full py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-400 hover:to-purple-500 text-white font-bold rounded-lg shadow-md transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2 group cursor-pointer"
-                    disabled>
-                    <i class="fas fa-earth-europe"></i> 翻译报告
+                <!-- 数据来源切换 -->
+                <div class="mb-4">
+                    <label class="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2 block">数据来源</label>
+                    <div class="flex gap-2" id="source-toggle-container"></div>
+                </div>
+
+                <!-- ASIN 列表 -->
+                <div class="mb-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">选择 ASIN</label>
+                        <button onclick="selectAllAsins()"
+                            class="text-xs text-blue-600 hover:text-blue-700 font-medium px-2 py-0.5 rounded hover:bg-blue-50 transition-colors">
+                            全选
+                        </button>
+                    </div>
+                    <div id="asin-select-list"
+                        class="space-y-1.5 max-h-48 overflow-y-auto custom-scrollbar pr-1 bg-slate-50/50 rounded-xl p-2 border border-slate-100">
+                        <p class="text-sm text-slate-400 text-center py-6">暂无数据</p>
+                    </div>
+                </div>
+
+                <!-- 分析按钮 -->
+                <button id="analyze-btn"
+                    class="w-full py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-400 hover:to-purple-500 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2 group cursor-pointer">
+                    <i class="fas fa-brain"></i>
+                    <span>开始分析</span>
                 </button>
             </div>
         </div>
 
-        <div class="w-full lg:w-3/4 lg:col-span-3 space-y-6 min-w-0">
-            <div class="glass-card rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
-                <div id="report-content" class="p-6">
-                    <div id="no-report-msg" class="text-center py-12">
-                        <div class="mb-4 text-slate-300">
-                            <i class="fas fa-chart-pie text-6xl"></i>
-                        </div>
-                        <p class="text-slate-500">暂无分析报告</p>
-                        <p class="text-sm text-slate-400 mt-2">
-                            请选择ASIN并点击"分析ASIN"生成报告
-                        </p>
+        <!-- 中间：分析目标选择 -->
+        <div class="lg:col-span-5">
+            <div class="glass-card rounded-2xl shadow-lg border border-slate-200 p-5 h-full">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-base font-semibold flex items-center gap-2 text-slate-800">
+                        <i class="fas fa-crosshairs text-purple-500"></i>
+                        分析目标
+                    </h3>
+                    <div class="text-xs space-x-2">
+                        <button onclick="window.toggleAllModules(true)"
+                            class="text-blue-600 hover:text-blue-700 font-medium px-2 py-1 rounded hover:bg-blue-50 transition-colors">全选</button>
+                        <span class="text-slate-300">|</span>
+                        <button onclick="window.toggleAllModules(false)"
+                            class="text-slate-400 hover:text-slate-600 px-2 py-1 rounded hover:bg-slate-50 transition-colors">清空</button>
                     </div>
-                    <div id="report-display" class="hidden"></div>
                 </div>
 
-                <div id="report-json" class="p-6 hidden">
-                    <pre id="report-json-display"
-                        class="bg-slate-900 text-slate-100 p-4 rounded-xl overflow-x-auto text-sm max-h-[600px] overflow-y-auto"></pre>
+                <div id="modules-container"
+                    class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[280px] overflow-y-auto pr-1 custom-scrollbar">
                 </div>
             </div>
+        </div>
+
+        <!-- 右侧：翻译配置 -->
+        <div class="lg:col-span-3">
+            <div class="glass-card rounded-2xl shadow-lg border border-slate-200 p-5 h-full">
+                <h3 class="text-base font-semibold mb-4 flex items-center gap-2 text-slate-800">
+                    <i class="fas fa-earth-europe text-green-500"></i>
+                    翻译配置
+                </h3>
+
+                <div class="space-y-4">
+                    <label
+                        class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 hover:border-blue-200 transition-colors cursor-pointer group">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-medium text-slate-700 group-hover:text-slate-800">沉浸式翻译</span>
+                        </div>
+                        <input type="checkbox" id="enable-translation"
+                            class="w-5 h-5 text-blue-600 rounded-lg border-slate-300 focus:ring-blue-500 cursor-pointer"
+                            onchange="toggleTranslation()" />
+                    </label>
+
+                    <div>
+                        <label
+                            class="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2 block">翻译模型</label>
+                        <select id="translation-model"
+                            class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-white hover:border-blue-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all">
+                            <option value="">选择翻译模型</option>
+                        </select>
+                    </div>
+
+                    <button onclick="translateReport()" id="translate-btn"
+                        class="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                        disabled>
+                        <i class="fas fa-language"></i>
+                        <span>翻译报告</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 分析结果展示区 -->
+    <div class="glass-card rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
+        <div id="report-content" class="p-6">
+            <div id="no-report-msg" class="text-center py-16">
+                <div class="mb-4 text-slate-200">
+                    <i class="fas fa-chart-pie text-7xl"></i>
+                </div>
+                <p class="text-slate-400 text-lg font-medium">暂无分析报告</p>
+                <p class="text-sm text-slate-400 mt-2">
+                    配置好分析参数后，点击「开始分析」生成报告
+                </p>
+            </div>
+            <div id="report-display" class="hidden"></div>
+        </div>
+
+        <div id="report-json" class="p-6 hidden">
+            <pre id="report-json-display"
+                class="bg-slate-900 text-slate-100 p-4 rounded-xl overflow-x-auto text-sm max-h-[600px] overflow-y-auto custom-scrollbar"></pre>
         </div>
     </div>
 </div>
