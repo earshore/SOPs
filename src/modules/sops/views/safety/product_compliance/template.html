@@ -41,6 +41,149 @@
         </div>
     </div>
 
+    <!-- SOP Workflow Guidelines -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6 shadow-sm">
+        <h2 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
+            <i class="fas fa-list-check text-blue-600"></i>全生命周期标准化作业流程 (SOP)
+        </h2>
+
+        <div class="relative">
+            <!-- Connecting Line -->
+            <div class="hidden lg:block absolute top-[28px] left-0 right-0 h-0.5 bg-slate-200 -z-10"></div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-y-8 gap-x-4">
+                <!-- Step 1: Research -->
+                <div
+                    class="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:border-blue-400 transition-all relative group">
+                    <div
+                        class="w-14 h-14 bg-white border-2 border-blue-500 rounded-full flex items-center justify-center text-xl text-blue-600 font-bold mb-3 shadow-sm mx-auto group-hover:bg-blue-500 group-hover:text-white transition-colors z-10 relative">
+                        <i class="fas fa-magnifying-glass"></i>
+                    </div>
+                    <h3 class="text-center font-bold text-slate-800 mb-2">1. 选品调研</h3>
+                    <ul class="text-xs text-slate-600 space-y-1 list-disc pl-4">
+                        <li>确认目标国准入政策 (如德国BPR)</li>
+                        <li>核算合规成本 (注册费/检测费)</li>
+                        <li>排查敏感词/专利侵权风险</li>
+                        <li><span class="text-red-600">决定是否准入做此品类</span></li>
+                    </ul>
+                </div>
+
+                <!-- Step 2: Listing -->
+                <div
+                    class="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:border-indigo-400 transition-all relative group">
+                    <div
+                        class="w-14 h-14 bg-white border-2 border-indigo-500 rounded-full flex items-center justify-center text-xl text-indigo-600 font-bold mb-3 shadow-sm mx-auto group-hover:bg-indigo-500 group-hover:text-white transition-colors z-10 relative">
+                        <i class="fas fa-pen-nib"></i>
+                    </div>
+                    <h3 class="text-center font-bold text-slate-800 mb-2">2. 文案规避</h3>
+                    <ul class="text-xs text-slate-600 space-y-1 list-disc pl-4">
+                        <li>使用<a href="#" onclick="switchTab('sops_restricted_words')"
+                                class="text-blue-600 underline">高危词库</a>自查标题描述</li>
+                        <li>绝对规避医疗/治愈/抗菌功效词</li>
+                        <li>严禁"FDA认证"/CE认证作为卖点</li>
+                        <li>图片去除非法认证标志</li>
+                    </ul>
+                </div>
+
+                <!-- Step 3: Checklist -->
+                <div
+                    class="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:border-purple-400 transition-all relative group">
+                    <div
+                        class="w-14 h-14 bg-white border-2 border-purple-500 rounded-full flex items-center justify-center text-xl text-purple-600 font-bold mb-3 shadow-sm mx-auto group-hover:bg-purple-500 group-hover:text-white transition-colors z-10 relative">
+                        <i class="fas fa-clipboard-check"></i>
+                    </div>
+                    <h3 class="text-center font-bold text-slate-800 mb-2">3. 合规清单</h3>
+                    <ul class="text-xs text-slate-600 space-y-1 list-disc pl-4">
+                        <li>确认所需证书 (CE/ROHS/EN71)</li>
+                        <li>注册EPR (WEEE/包装法/电池法)</li>
+                        <li>指定欧盟责任人 (EU REP)</li>
+                        <li>获得相关机构授权 (如Apple MFi)</li>
+                    </ul>
+                </div>
+
+                <!-- Step 4: Procurement -->
+                <div
+                    class="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:border-emerald-400 transition-all relative group">
+                    <div
+                        class="w-14 h-14 bg-white border-2 border-emerald-500 rounded-full flex items-center justify-center text-xl text-emerald-600 font-bold mb-3 shadow-sm mx-auto group-hover:bg-emerald-500 group-hover:text-white transition-colors z-10 relative">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h3 class="text-center font-bold text-slate-800 mb-2">4. 采购质检</h3>
+                    <ul class="text-xs text-slate-600 space-y-1 list-disc pl-4">
+                        <li>要求供应商提供全套检测报告</li>
+                        <li><span class="text-emerald-700 font-bold">必须签署合规赔偿协议</span></li>
+                        <li>产前样送第三方实验室复测</li>
+                        <li>大货验货重点查合规标签</li>
+                    </ul>
+                </div>
+
+                <!-- Step 5: Packaging -->
+                <div
+                    class="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:border-amber-400 transition-all relative group mt-4 lg:mt-0">
+                    <div
+                        class="w-14 h-14 bg-white border-2 border-amber-500 rounded-full flex items-center justify-center text-xl text-amber-600 font-bold mb-3 shadow-sm mx-auto group-hover:bg-amber-500 group-hover:text-white transition-colors z-10 relative">
+                        <i class="fas fa-box-open"></i>
+                    </div>
+                    <h3 class="text-center font-bold text-slate-800 mb-2">5. 标签包装</h3>
+                    <ul class="text-xs text-slate-600 space-y-1 list-disc pl-4">
+                        <li>印制CE标志/垃圾桶/回收标志</li>
+                        <li>印制欧代信息 (公司/地址/邮箱)</li>
+                        <li>印制批次号/生产日期 (追溯)</li>
+                        <li>印制必要的警告语 (多语言)</li>
+                    </ul>
+                </div>
+
+                <!-- Step 6: Shipping -->
+                <div
+                    class="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:border-cyan-400 transition-all relative group mt-4 lg:mt-0">
+                    <div
+                        class="w-14 h-14 bg-white border-2 border-cyan-500 rounded-full flex items-center justify-center text-xl text-cyan-600 font-bold mb-3 shadow-sm mx-auto group-hover:bg-cyan-500 group-hover:text-white transition-colors z-10 relative">
+                        <i class="fas fa-truck-fast"></i>
+                    </div>
+                    <h3 class="text-center font-bold text-slate-800 mb-2">6. 发货申报</h3>
+                    <ul class="text-xs text-slate-600 space-y-1 list-disc pl-4">
+                        <li>如实申报海关编码 (HS Code)</li>
+                        <li>随货附带DoC符合性声明文件</li>
+                        <li>确认是否涉及危险品 (电池/液体)</li>
+                        <li>提供MSDS/UN38.3报告</li>
+                    </ul>
+                </div>
+
+                <!-- Step 7: Sales -->
+                <div
+                    class="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:border-rose-400 transition-all relative group mt-4 lg:mt-0">
+                    <div
+                        class="w-14 h-14 bg-white border-2 border-rose-500 rounded-full flex items-center justify-center text-xl text-rose-600 font-bold mb-3 shadow-sm mx-auto group-hover:bg-rose-500 group-hover:text-white transition-colors z-10 relative">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3 class="text-center font-bold text-slate-800 mb-2">7. 销售上传</h3>
+                    <ul class="text-xs text-slate-600 space-y-1 list-disc pl-4">
+                        <li>后台上传EPR注册号并验证</li>
+                        <li>关联网上上传CE DoC文件</li>
+                        <li>上传六面图以供审核</li>
+                        <li>填写GPSR责任人信息</li>
+                    </ul>
+                </div>
+
+                <!-- Step 8: Removal Plan -->
+                <div
+                    class="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:border-red-500 transition-all relative group mt-4 lg:mt-0">
+                    <div
+                        class="w-14 h-14 bg-white border-2 border-red-500 rounded-full flex items-center justify-center text-xl text-red-600 font-bold mb-3 shadow-sm mx-auto group-hover:bg-red-500 group-hover:text-white transition-colors z-10 relative">
+                        <i class="fas fa-fire-extinguisher"></i>
+                    </div>
+                    <h3 class="text-center font-bold text-slate-800 mb-2">8. 下架处理预案</h3>
+                    <ul class="text-xs text-slate-600 space-y-1 list-disc pl-4">
+                        <li><span class="text-red-600 font-bold">立即停止FBA补货</span> (防止库存积压)</li>
+                        <li>删除Listing中所有敏感文案/图片</li>
+                        <li>准备申诉包 (DoC/六面图/发票)</li>
+                        <li>申诉失败则立即创建移除订单 (弃置/移仓)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Category 1: Biocides (BPR) -->
     <div class="bg-white rounded-xl border border-emerald-200 p-6 mb-6">
         <h2 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2">
