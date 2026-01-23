@@ -90,12 +90,15 @@ export function initGlobalEventDelegation() {
 /** 记录已警告的函数名，避免重复警告 */
 const warnedFunctions = new Set();
 
-/** 开发模式下是否启用警告 (可通过 localStorage 控制) */
+/** 
+ * 开发模式下是否启用警告 (默认关闭，减少控制台噪音)
+ * 开启方式: localStorage.setItem('enable_legacy_warnings', 'true')
+ */
 const ENABLE_DEPRECATION_WARNINGS = () => {
     try {
-        return localStorage.getItem('disable_legacy_warnings') !== 'true';
+        return localStorage.getItem('enable_legacy_warnings') === 'true';
     } catch {
-        return true;
+        return false;
     }
 };
 
@@ -123,7 +126,7 @@ export function registerActionWithLegacy(actionName, handler) {
                 console.warn(
                     `⚠️ [Deprecated] window.${actionName}() 即将弃用。\n` +
                     `   请迁移到: <button data-action="${actionName}">...\n` +
-                    `   禁用此警告: localStorage.setItem('disable_legacy_warnings', 'true')`
+                    `   (此警告已手动开启，关闭: localStorage.removeItem('enable_legacy_warnings'))`
                 );
             }
             return currentHandler;
