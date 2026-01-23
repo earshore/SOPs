@@ -2,7 +2,10 @@
 // ================================================================
 // 🎯 Phase 3: 已迁移使用 StorageService
 // 🎯 Phase 5: 已集成 ErrorService
+// 🎯 Phase 4: 迁移 window 全局函数到 ActionRegistry
 // ================================================================
+
+import { registerActionsWithLegacy } from "../../../common/utils/actionRegistry.js";
 
 import state from "../../../common/state.js";
 import { showToast, showProgress, getErrorSummary, sleep } from "../../../common/utils/ui.js";
@@ -862,3 +865,18 @@ function clearHistory() {
   state.analysisReport = null;
   renderHistory();
 }
+
+// ================================================================
+// 🎯 Phase 4: 集中注册所有动作到 ActionRegistry
+// ================================================================
+
+const scraperActions = {
+  saveProxyConfig: window.saveProxyConfig,
+  closeSettings: window.closeSettings,
+  loadHistory: window.loadHistory,
+  deleteHistoryItem: window.deleteHistoryItem,
+};
+
+registerActionsWithLegacy(scraperActions);
+
+console.log("✅ [scraperPanel] 已注册 " + Object.keys(scraperActions).length + " 个动作到 ActionRegistry");

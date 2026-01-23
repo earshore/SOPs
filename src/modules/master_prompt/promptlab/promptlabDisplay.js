@@ -1,9 +1,11 @@
 // src/ui/promptlabDisplay.js
+// 🎯 Phase 4: 迁移 window 全局函数到 ActionRegistry
 import { promptlabService } from "./promptlabService.js";
 import state from "../../../common/state.js";
 import SITE_CONFIGS from "../../../common/constants/constants.js";
 import { ANALYSIS_MODULES } from "../../../common/constants/prompts.js";
 import { showToast } from "../../../common/utils/ui.js";
+import { registerActionsWithLegacy } from "../../../common/utils/actionRegistry.js";
 
 // ================= 辅助：生成语言选项 =================
 function generateLanguageOptions() {
@@ -482,3 +484,19 @@ export function getFieldTitle(key) {
   if (module) return module.label_cn;
   return key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
 }
+
+// ================================================================
+// 🎯 Phase 4: 集中注册所有动作到 ActionRegistry
+// ================================================================
+
+const promptlabActions = {
+  amz_generateMasterPrompt: window.amz_generateMasterPrompt,
+  amz_generateVisualPrompt: window.amz_generateVisualPrompt,
+  amz_toggleConsoleMode: window.amz_toggleConsoleMode,
+  amz_copyMasterPrompt: window.amz_copyMasterPrompt,
+  amz_clearPromptInputs: window.amz_clearPromptInputs,
+};
+
+registerActionsWithLegacy(promptlabActions);
+
+console.log("✅ [promptlabDisplay] 已注册 " + Object.keys(promptlabActions).length + " 个动作到 ActionRegistry");

@@ -2,6 +2,7 @@
 // ================================================================
 // 🎯 Phase 3: 已迁移使用 StorageService
 // 🎯 Phase 5: 已集成 ErrorService
+// 🎯 Phase 4: 迁移 window 全局函数到 ActionRegistry
 // ================================================================
 
 import state from "../../../common/state.js";
@@ -14,6 +15,7 @@ import { AnalysisService } from "./analysisService.js";
 import { getFieldTitle } from "../promptlab/promptlabDisplay.js";
 import { StorageService, STORAGE_KEYS } from "../../../services/storageService.js";
 import { ErrorService } from "../../../services/errorService.js";
+import { registerActionsWithLegacy } from "../../../common/utils/actionRegistry.js";
 
 // ✅ 引入新的渲染器 (关键改动)
 import { renderWidgetCard, renderViewModeHTML, renderEditorForm } from "./analysisRenderer.js";
@@ -1105,3 +1107,50 @@ function clearNestedValue(obj, path) {
   }
   delete target[parts[parts.length - 1]];
 }
+
+// ================================================================
+// 🎯 Phase 4: 集中注册所有动作到 ActionRegistry
+// 替代散落的 window.xxx 赋值，便于追踪和管理
+// ================================================================
+
+// 将模块内定义的 window.xxx 函数引用收集起来
+const analysisActions = {
+  // 数据源与模块选择
+  updateSourceVisuals: window.updateSourceVisuals,
+  toggleAllModules: window.toggleAllModules,
+  openPromptModal: window.openPromptModal,
+  updatePromptPreview: window.updatePromptPreview,
+  copyPromptText: window.copyPromptText,
+
+  // 翻译与视图切换
+  toggleTranslationView: window.toggleTranslationView,
+  toggleTranslation: window.toggleTranslation,
+  translateReport: window.translateReport,
+
+  // 报告导出
+  copyReportMarkdown: window.copyReportMarkdown,
+  copyReportJSON: window.copyReportJSON,
+  exportReport: window.exportReport,
+
+  // 数组操作
+  addArrayItem: window.addArrayItem,
+  removeArrayItem: window.removeArrayItem,
+
+  // ASIN 选择
+  toggleAsinSelection: window.toggleAsinSelection,
+  selectAllAsins: window.selectAllAsins,
+
+  // 卡片编辑
+  toggleCardResize: window.toggleCardResize,
+  startLocalEdit: window.startLocalEdit,
+  addListItem: window.addListItem,
+  deleteRowItem: window.deleteRowItem,
+  addObjItem: window.addObjItem,
+  undoLocalEdit: window.undoLocalEdit,
+  saveLocalEdit: window.saveLocalEdit,
+};
+
+// 注册到 ActionRegistry (同时保持 window.xxx 向后兼容)
+registerActionsWithLegacy(analysisActions);
+
+console.log("✅ [analysisDisplay] 已注册 " + Object.keys(analysisActions).length + " 个动作到 ActionRegistry");

@@ -1,7 +1,10 @@
 /**
  * 亚马逊新品生命周期跟踪 SOP - NPI Tracker
  * Amazon New Product Introduction Tracker (EU Focus)
+ * 🎯 Phase 4: 迁移 window 全局函数到 ActionRegistry
  */
+
+import { registerActionsWithLegacy } from "../../../../../common/utils/actionRegistry.js";
 
 // Sample data for demonstration - EU All Sites
 const SAMPLE_DATA = [
@@ -477,3 +480,23 @@ export async function mount(container) {
 export function unmount() {
     console.log("❌ 新品生命周期跟踪 SOP 模块已卸载");
 }
+
+// ================================================================
+// 🎯 Phase 4: 集中注册所有动作到 ActionRegistry
+// ================================================================
+
+const npiTrackerActions = {
+    updateField: window.updateField,
+    updateDeliveryFee: window.updateDeliveryFee,
+    toggleDecision: window.toggleDecision,
+    openNextStepEditor: window.openNextStepEditor,
+    saveNextSteps: window.saveNextSteps,
+    closeNextStepModal: window.closeNextStepModal,
+    exportToExcel: window.exportToExcel,
+    filterByStore: window.filterByStore,
+    filterByStage: window.filterByStage,
+};
+
+registerActionsWithLegacy(npiTrackerActions);
+
+console.log("✅ [npi_tracker] 已注册 " + Object.keys(npiTrackerActions).length + " 个动作到 ActionRegistry");

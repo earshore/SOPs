@@ -1,10 +1,12 @@
 // 高危词库搜索、筛选、渲染逻辑
+// 🎯 Phase 4: 迁移 window 全局函数到 ActionRegistry
 import {
   RESTRICTED_WORDS_DATABASE,
   RISK_LEVELS,
   WORD_CATEGORIES,
   EU_SITES
 } from './constants/restrictedWordsConstants.js';
+import { registerActionsWithLegacy } from "../../../../../common/utils/actionRegistry.js";
 
 let currentResults = [...RESTRICTED_WORDS_DATABASE];
 let currentSiteContext = 'ALL'; // 当前选中的站点上下文
@@ -460,3 +462,16 @@ function debounce(func, wait) {
     timeout = setTimeout(later, wait);
   };
 }
+
+// ================================================================
+// 🎯 Phase 4: 集中注册所有动作到 ActionRegistry
+// ================================================================
+
+const restrictedWordsActions = {
+  showWordDetail: window.showWordDetail,
+  closeWordDetail: window.closeWordDetail,
+};
+
+registerActionsWithLegacy(restrictedWordsActions);
+
+console.log("✅ [restrictedWordsHandler] 已注册 " + Object.keys(restrictedWordsActions).length + " 个动作到 ActionRegistry");
