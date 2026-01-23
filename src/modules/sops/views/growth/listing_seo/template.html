@@ -22,7 +22,7 @@
                     </p>
                     <div class="flex items-center gap-6 text-sm text-slate-500">
                         <span><i class="fas fa-layer-group mr-1"></i>运营与推广体系</span>
-                        <span><i class="fas fa-robot mr-1"></i>采集 → 分析 → AI生成</span>
+                        <span><i class="fas fa-robot mr-1"></i>采集 → 结构化提取 → 分析 → AI生成</span>
                         <span><i class="fas fa-clock mr-1"></i>更新日期：2024-01</span>
                     </div>
                 </div>
@@ -31,27 +31,106 @@
     </div>
 
     <!-- Workflow Banner -->
-    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 mb-6">
-        <div class="flex items-center gap-4 justify-center text-sm flex-wrap">
-            <div class="flex items-center gap-2 bg-white rounded-lg px-4 py-2 border border-blue-200 shadow-sm">
-                <i class="fas fa-spider text-blue-500"></i>
-                <span class="font-medium">采集竞品Top20</span>
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 mb-6">
+        <div class="flex flex-col md:flex-row items-stretch justify-between gap-4">
+
+            <div class="flex-1 bg-white rounded-lg border border-blue-200 shadow-sm flex flex-col h-full">
+                <div class="p-4 flex-1">
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-spider text-blue-500"></i>
+                        </div>
+                        <h3 class="font-bold text-gray-800">Step 1: 采集竞品原始数据</h3>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-3 bg-gray-50 p-2 rounded border border-gray-100">
+                        <span class="font-semibold">工具：</span>前台插件 / 数据采集 / 卖家精灵 (JSON/CSV)
+                    </p>
+                    <div class="bg-slate-50 p-3 rounded text-sm text-gray-600 leading-relaxed border border-slate-100">
+                        收集 Top 20-50 的竞品 Listing 内容和最近 3 个月的 Review。不要贪多，要精。
+                        <div class="mt-2 pt-2 border-t border-slate-200 text-xs">
+                            <span class="text-blue-600 font-bold">目标：</span> 获取竞品Listing和Review原始语料
+                        </div>
+                    </div>
+                </div>
             </div>
-            <i class="fas fa-arrow-right text-blue-300"></i>
-            <div class="flex items-center gap-2 bg-white rounded-lg px-4 py-2 border border-blue-200 shadow-sm">
-                <i class="fas fa-chart-pie text-indigo-500"></i>
-                <span class="font-medium">LLM结构化分析</span>
+
+            <div class="flex items-center justify-center text-blue-300 md:rotate-0 rotate-90 py-2 md:py-0">
+                <i class="fas fa-chevron-right text-xl"></i>
             </div>
-            <i class="fas fa-arrow-right text-blue-300"></i>
-            <div class="flex items-center gap-2 bg-white rounded-lg px-4 py-2 border border-blue-200 shadow-sm">
-                <i class="fas fa-check-double text-emerald-500"></i>
-                <span class="font-medium">ABA交叉验证</span>
+
+            <div class="flex-1 bg-white rounded-lg border border-blue-200 shadow-sm flex flex-col h-full">
+                <div class="p-4 flex-1">
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-chart-pie text-indigo-500"></i>
+                        </div>
+                        <h3 class="font-bold text-gray-800">Step 2: LLM 结构化清洗提取</h3>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-3 bg-gray-50 p-2 rounded border border-gray-100">
+                        <span class="font-semibold">工具：</span>GPT-5-mini
+                    </p>
+                    <div class="bg-slate-50 p-3 rounded text-sm text-gray-600 leading-relaxed border border-slate-100">
+                        上传 JSON/CSV，选择合适的分析模板策略，生成 JSON 格式的使用场景、负面痛点、积极用户原话。
+                        <div class="mt-2 pt-2 border-t border-slate-200 text-xs">
+                            <span class="text-blue-600 font-bold">目标：</span> 将非结构化文本转化为 COSMO 可理解的"意图节点"。
+                        </div>
+                    </div>
+                </div>
             </div>
-            <i class="fas fa-arrow-right text-blue-300"></i>
-            <div class="flex items-center gap-2 bg-white rounded-lg px-4 py-2 border border-blue-200 shadow-sm">
-                <i class="fas fa-robot text-purple-500"></i>
-                <span class="font-medium">AI生成Listing</span>
+
+            <div class="flex items-center justify-center text-blue-300 md:rotate-0 rotate-90 py-2 md:py-0">
+                <i class="fas fa-chevron-right text-xl"></i>
             </div>
+
+            <div class="flex-1 bg-white rounded-lg border border-blue-200 shadow-sm flex flex-col h-full">
+                <div class="p-4 flex-1">
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-check-double text-emerald-500"></i>
+                        </div>
+                        <h3 class="font-bold text-gray-800">Step 3: ABA 交叉验证</h3>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-3 bg-gray-50 p-2 rounded border border-gray-100">
+                        <span class="font-semibold">工具：</span>ABA (Amazon Brand Analytics) + Excel
+                    </p>
+                    <div class="bg-slate-50 p-3 rounded text-sm text-gray-600 leading-relaxed border border-slate-100">
+                        拿着 LLM 提取的"原生词"去 ABA 验证流量。确定主推词（高流量+高相关）和长尾词（高转化+特定场景），融合 Prompting。
+                        <div class="mt-2 pt-2 border-t border-slate-200 text-xs">
+                            <span class="text-blue-600 font-bold">目标：</span> 确认哪些"意图"是有市场需求的，确认埋词策略。
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-center text-blue-300 md:rotate-0 rotate-90 py-2 md:py-0">
+                <i class="fas fa-chevron-right text-xl"></i>
+            </div>
+
+            <div class="flex-1 bg-white rounded-lg border border-blue-200 shadow-sm flex flex-col h-full">
+                <div class="p-4 flex-1">
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-robot text-purple-500"></i>
+                        </div>
+                        <h3 class="font-bold text-gray-800">Step 4: AI 生成文案</h3>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-3 bg-gray-50 p-2 rounded border border-gray-100">
+                        <span class="font-semibold">工具：</span>Gemini 3 Pro
+                    </p>
+                    <div class="bg-slate-50 p-3 rounded text-sm text-gray-600 leading-relaxed border border-slate-100">
+                        基于 A10/COSMO/Rufus 的逻辑，让 Gemini 撰写 Listing。
+                        <ul class="list-disc pl-4 mt-2 text-gray-500 text-xs">
+                            <li>Title: 包含 ABA 核心词 + 核心场景</li>
+                            <li>Bullets: 前 3 点针对 COSMO 场景化，后 2 点针对 Rufus 解决痛点/参数</li>
+                            <li>Description/A+: 讲述品牌故事，增加停留时间（A10 因素）</li>
+                        </ul>
+                        <div class="mt-2 pt-2 border-t border-slate-200 text-xs">
+                            <span class="text-blue-600 font-bold">目标：</span> 产出Listing成品
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -120,7 +199,7 @@
             <!-- Bullet Points (EU Anti-Return Logic) -->
             <div class="bg-white rounded-xl border border-slate-200 p-6">
                 <h2 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2">
-                    <i class="fas fa-list-ul text-blue-500"></i>五点描述 (Bullet Points) — 欧洲"防退货"逻辑
+                    <i class="fas fa-list-ul text-blue-500"></i>五点描述 (Bullet Points)
                 </h2>
                 <p class="text-xs text-slate-500 mb-4">核心原则：移动端只展示前3点的前70字符，把最硬核信息（尺寸/兼容性/材质）前置。</p>
 
@@ -335,7 +414,7 @@
             <!-- A+ Content (EU Jingpu Strategy) -->
             <div class="bg-white rounded-xl border border-purple-200 p-6">
                 <h2 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2">
-                    <i class="fas fa-palette text-purple-500"></i>A+ 内容排版规范 — 欧洲"精铺"转化逻辑
+                    <i class="fas fa-palette text-purple-500"></i>A+ 内容排版规范
                 </h2>
                 <p class="text-xs text-slate-500 mb-4">核心目的：1. 消除语言障碍；2. 锁住流量（防止跳出到竞品）。采用"模块化积木"思维。</p>
 
