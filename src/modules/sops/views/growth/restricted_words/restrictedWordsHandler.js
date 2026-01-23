@@ -144,7 +144,7 @@ function executeSearch() {
         case 'fuzzy':
           return allKeywords.some(k => k.includes(lowerQuery));
 
-        case 'fulltext':
+        case 'fulltext': {
           const fullText = [
             ...allKeywords,
             word.riskDescription,
@@ -153,6 +153,7 @@ function executeSearch() {
             word.tips
           ].join(' ').toLowerCase();
           return fullText.includes(lowerQuery);
+        }
 
         case 'regex':
           try {

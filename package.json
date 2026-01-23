@@ -10,7 +10,7 @@
         "test": "vitest",
         "test:ui": "vitest --ui",
         "test:coverage": "vitest run --coverage",
-        "lint": "eslint src --ext .js"
+        "lint": "eslint src"
     },
     "devDependencies": {
         "vite": "^5.0.0",

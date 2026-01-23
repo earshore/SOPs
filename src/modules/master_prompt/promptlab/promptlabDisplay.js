@@ -191,16 +191,16 @@ function renderReportAnalysis() {
 
     setTimeout(() => {
       document.getElementById("btn-select-all")?.addEventListener('click', (e) => {
-          e.preventDefault(); e.stopPropagation();
-          document.querySelectorAll('input[name="report-section"]').forEach((cb) => (cb.checked = true));
-          saveInputsToState();
-          if (showToast) showToast("已全选模块", "success");
+        e.preventDefault(); e.stopPropagation();
+        document.querySelectorAll('input[name="report-section"]').forEach((cb) => (cb.checked = true));
+        saveInputsToState();
+        if (showToast) showToast("已全选模块", "success");
       });
       document.getElementById("btn-clear-all")?.addEventListener('click', (e) => {
-          e.preventDefault(); e.stopPropagation();
-          document.querySelectorAll('input[name="report-section"]').forEach((cb) => (cb.checked = false));
-          saveInputsToState();
-          if (showToast) showToast("已清空选择", "success");
+        e.preventDefault(); e.stopPropagation();
+        document.querySelectorAll('input[name="report-section"]').forEach((cb) => (cb.checked = false));
+        saveInputsToState();
+        if (showToast) showToast("已清空选择", "success");
       });
     }, 0);
   }
@@ -210,9 +210,9 @@ function renderReportAnalysis() {
     const reportMarket = state.analysisReport.targetMarket || state.analysisReport.language || "";
     if (reportMarket) {
       const options = Array.from(marketSelect.options);
-      const match = options.find((opt) => 
-         opt.value.toLowerCase().includes(reportMarket.toLowerCase()) || 
-         reportMarket.toLowerCase().includes(opt.value.toLowerCase())
+      const match = options.find((opt) =>
+        opt.value.toLowerCase().includes(reportMarket.toLowerCase()) ||
+        reportMarket.toLowerCase().includes(opt.value.toLowerCase())
       );
       if (match) {
         marketSelect.value = match.value;
@@ -281,7 +281,7 @@ function getPreviewText(val) {
       const str = Object.values(val).join(", ");
       return str.length > 60 ? str.substring(0, 60) + "..." : str;
     }
-    let rawStr = JSON.stringify(val).replace(/[\[\]\{\}"']/g, "").replace(/,/g, ", ");
+    let rawStr = JSON.stringify(val).replace(/[[\]{}"']/g, "").replace(/,/g, ", ");
     return rawStr.length > 60 ? rawStr.substring(0, 60) + "..." : rawStr;
   } catch (e) {
     return "Complex Data...";
@@ -312,7 +312,7 @@ function updateCharCount() {
 window.amz_generateMasterPrompt = function () {
   const btn = document.getElementById("btn-generate-prompt");
   const select = document.getElementById("lab-target-market");
-  
+
   // ✅ 修复 1：在这里正确获取 t1, t2 的值，否则下面判断会报错
   const t1 = document.getElementById("lab-keywords-tier1")?.value.trim();
   const t2 = document.getElementById("lab-keywords-tier2")?.value.trim();
@@ -467,12 +467,12 @@ export function initPromptlabModule() {
     // B. 再执行本模块特有的“视图刷新”逻辑
     // 只有当目标是 promptlab 时才执行，且不再手动操作 DOM 显隐，因为 ui.js 已经做好了
     if (tabName === "promptlab") {
-       const myPanel = document.getElementById("panel-promptlab");
-       if (myPanel) {
-         myPanel.classList.add("fade-in");
-         restoreInputsFromState(); // 恢复数据
-         renderReportAnalysis();   // 渲染复选框
-       }
+      const myPanel = document.getElementById("panel-promptlab");
+      if (myPanel) {
+        myPanel.classList.add("fade-in");
+        restoreInputsFromState(); // 恢复数据
+        renderReportAnalysis();   // 渲染复选框
+      }
     }
   };
 }

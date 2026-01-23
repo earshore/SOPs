@@ -220,10 +220,10 @@ You must map the "Competitor Insights" directly to visual elements:
 # OUTPUT TASK
 Create a structured **A+ Content Blueprint** (Standard 5-Module Layout + Brand Story). 
 For EACH module, provide:
-1.  **Module Type**: (e.g., Standard Header Image, Four Image/Text, Comparison Chart).
-2.  **Visual Goal**: What psychological trigger are we hitting?
-3.  **Art Direction (The Image)**: Detailed description for a photographer or Nano Banana prompt. Describe lighting, angle, props, and models.
-4.  **Overlay Copy**: The minimal text text/headline on the image.
+1.  **Module Type**: (e.g., Standard Header Image, Four Image/Text, Comparison Chart).
+2.  **Visual Goal**: What psychological trigger are we hitting?
+3.  **Art Direction (The Image)**: Detailed description for a photographer or Nano Banana prompt. Describe lighting, angle, props, and models.
+4.  **Overlay Copy**: The minimal text text/headline on the image.
 
 # OUTPUT FORMAT (Strict Markdown)
  
