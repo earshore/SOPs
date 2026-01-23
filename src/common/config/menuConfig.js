@@ -139,9 +139,16 @@ export const MENU_CONFIG = {
             panelId: 'panel-sops',
             category: 'safety'
         },
+        sops_restricted_words: {
+            moduleId: 'sops',
+            label: '欧洲本土化高危词库',
+            icon: 'fas fa-book-dead',
+            panelId: 'panel-sops',
+            category: 'safety'
+        },
         sops_product_compliance: {
             moduleId: 'sops',
-            label: '产品Listing合规性',
+            label: '敏感产品合规销售',
             icon: 'fas fa-file-shield',
             panelId: 'panel-sops',
             category: 'safety'
@@ -192,13 +199,7 @@ export const MENU_CONFIG = {
             panelId: 'panel-sops',
             category: 'growth'
         },
-        sops_restricted_words: {
-            moduleId: 'sops',
-            label: '欧洲本土化高危词库',
-            icon: 'fas fa-book-dead',
-            panelId: 'panel-sops',
-            category: 'growth'
-        },
+
         sops_promotion_submission: {
             moduleId: 'sops',
             label: '促销活动提报',
