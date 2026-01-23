@@ -192,6 +192,13 @@ export const MENU_CONFIG = {
             panelId: 'panel-sops',
             category: 'growth'
         },
+        sops_restricted_words: {
+            moduleId: 'sops',
+            label: '欧洲本土化高危词库',
+            icon: 'fas fa-book-dead',
+            panelId: 'panel-sops',
+            category: 'growth'
+        },
         sops_promotion_submission: {
             moduleId: 'sops',
             label: '促销活动提报',
