@@ -160,10 +160,37 @@ async function bridgeCallLLM(systemPrompt, userPrompt, options = {}) {
 /**
  * 执行 AI 深度诊断
  */
+// ==========================================
+// 4. 辅助校验函数
+// ==========================================
+
+/**
+ * 简单校验是否为有效的 Listing 文案
+ * 规则：
+ * 1. 长度 > 50 字符
+ * 2. 包含空格（说明有分词，不是乱码长串）
+ */
+function isValidListing(text) {
+    if (!text) return false;
+    const cleanText = text.trim();
+    if (cleanText.length < 50) return false;
+    // 检查是否有空格，简单的判断是否为自然语言句子
+    if (!cleanText.includes(' ')) return false;
+    return true;
+}
+
+/**
+ * 执行 AI 深度诊断
+ */
 export async function fetchListingAnalysis(copyText, keywords, matchedKeywords, unmatchedKeywords) {
     // 🔥🔥🔥 新增校验：检查文案是否为空 🔥🔥🔥
     if (!copyText || !copyText.trim()) {
         throw new Error("文案内容为空，无法进行AI分析。请先在左侧输入框填入Listing文案。");
+    }
+
+    // 🔥🔥🔥 新增校验：检查文案有效性 🔥🔥🔥
+    if (!isValidListing(copyText)) {
+        throw new Error("输入内容过短或不具备 Amazon Listing 特征，无法生成有效报告。请输入完整的五点描述或产品具体介绍。");
     }
 
     const systemPrompt = ANALYSIS_PROMPT_TEMPLATE;
@@ -176,7 +203,8 @@ export async function fetchListingAnalysis(copyText, keywords, matchedKeywords, 
     **Unmatched Keywords:** ${unmatchedKeywords.join(', ')}
     `;
 
-    return await bridgeCallLLM(systemPrompt, userPrompt, { temperature: 0.5 });
+    // 🔥 调整：temperature 0.5 -> 0.1 提高稳定性
+    return await bridgeCallLLM(systemPrompt, userPrompt, { temperature: 0.1 });
 }
 
 /**

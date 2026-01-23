@@ -185,7 +185,7 @@ Simplified Chinese language Amazon Listing.
 
 /**
 * keyword_tracker
-* 翻译模板 (保留) 
+* 分析模板 (保留) 
 */
 
 export const ANALYSIS_PROMPT_TEMPLATE = ` 
