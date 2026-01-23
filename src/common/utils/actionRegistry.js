@@ -84,28 +84,78 @@ export function initGlobalEventDelegation() {
 }
 
 // ================================================================
-// 🔄 向后兼容层：暴露到 window (过渡期使用)
+// 🔄 向后兼容层：暴露到 window (带弃用警告)
 // ================================================================
+
+/** 记录已警告的函数名，避免重复警告 */
+const warnedFunctions = new Set();
+
+/** 开发模式下是否启用警告 (可通过 localStorage 控制) */
+const ENABLE_DEPRECATION_WARNINGS = () => {
+    try {
+        return localStorage.getItem('disable_legacy_warnings') !== 'true';
+    } catch {
+        return true;
+    }
+};
 
 /**
  * 将注册的动作同时挂载到 window 对象
  * 用于过渡期兼容现有 onclick="xxx()" 调用
+ * 🆕 添加弃用警告，引导迁移到 data-action 模式
+ * 
  * @param {string} actionName - 动作名称
  * @param {Function} handler - 处理函数
  */
 export function registerActionWithLegacy(actionName, handler) {
     registerAction(actionName, handler);
-    // 向后兼容：同时挂载到 window
-    window[actionName] = handler;
+
+    // 存储当前 handler 用于 getter/setter
+    let currentHandler = handler;
+
+    // 使用 Object.defineProperty 实现带警告的 getter
+    // 同时添加 setter 以兼容现有代码的 window.xxx = xxx 赋值
+    Object.defineProperty(window, actionName, {
+        get() {
+            // 弃用警告 (每个函数只警告一次)
+            if (ENABLE_DEPRECATION_WARNINGS() && !warnedFunctions.has(actionName)) {
+                warnedFunctions.add(actionName);
+                console.warn(
+                    `⚠️ [Deprecated] window.${actionName}() 即将弃用。\n` +
+                    `   请迁移到: <button data-action="${actionName}">...\n` +
+                    `   禁用此警告: localStorage.setItem('disable_legacy_warnings', 'true')`
+                );
+            }
+            return currentHandler;
+        },
+        set(newHandler) {
+            // 允许覆盖以兼容旧代码，但静默忽略（保持注册中心的 handler 不变）
+            // 如果需要真正更新，可以取消下面的注释
+            // currentHandler = newHandler;
+            // ActionRegistry[actionName] = newHandler;
+        },
+        configurable: true, // 允许后续重新定义
+        enumerable: false   // 不出现在 Object.keys(window) 中
+    });
 }
 
 /**
- * 批量注册并挂载到 window
+ * 批量注册并挂载到 window (带弃用警告)
  */
 export function registerActionsWithLegacy(actions) {
     Object.entries(actions).forEach(([name, handler]) => {
         registerActionWithLegacy(name, handler);
     });
+
+    console.log(`✅ [ActionRegistry] 已注册 ${Object.keys(actions).length} 个动作 (含向后兼容)`);
+}
+
+/**
+ * 获取遗留调用统计 (调试用)
+ * @returns {string[]} 被遗留调用的函数名列表
+ */
+export function getLegacyCallStats() {
+    return Array.from(warnedFunctions);
 }
 
 export default ActionRegistry;

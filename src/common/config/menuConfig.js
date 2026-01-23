@@ -348,3 +348,69 @@ export function getRouteFullConfig(routeId) {
         context
     };
 }
+
+// ================================================================
+// 🎯 P2 增强: 模块自注册机制
+// ================================================================
+
+/**
+ * 动态注册路由
+ * 允许模块在运行时注册自己的路由，无需修改此文件
+ * 
+ * @param {string} routeId - 路由 ID
+ * @param {Object} config - 路由配置
+ * @returns {boolean} 是否注册成功
+ * 
+ * @example
+ * registerRoute('sops_new_feature', {
+ *   moduleId: 'sops',
+ *   label: '新功能',
+ *   icon: 'fas fa-star',
+ *   panelId: 'panel-sops',
+ *   category: 'growth'
+ * });
+ */
+export function registerRoute(routeId, config) {
+    if (MENU_CONFIG.routes[routeId]) {
+        console.warn(`[MenuConfig] 路由 "${routeId}" 已存在，跳过注册`);
+        return false;
+    }
+
+    // 校验必填字段
+    if (!config.moduleId || !config.label) {
+        console.error(`[MenuConfig] 路由注册失败: 缺少 moduleId 或 label`);
+        return false;
+    }
+
+    MENU_CONFIG.routes[routeId] = config;
+    console.log(`✅ [MenuConfig] 动态注册路由: ${routeId}`);
+    return true;
+}
+
+/**
+ * 动态注册模块
+ * @param {string} moduleId - 模块 ID
+ * @param {Object} config - 模块配置
+ * @returns {boolean} 是否注册成功
+ */
+export function registerModule(moduleId, config) {
+    if (MENU_CONFIG.modules[moduleId]) {
+        console.warn(`[MenuConfig] 模块 "${moduleId}" 已存在，跳过注册`);
+        return false;
+    }
+
+    MENU_CONFIG.modules[moduleId] = {
+        id: moduleId,
+        ...config
+    };
+    console.log(`✅ [MenuConfig] 动态注册模块: ${moduleId}`);
+    return true;
+}
+
+/**
+ * 获取所有已注册的路由 ID
+ * @returns {string[]}
+ */
+export function getAllRouteIds() {
+    return Object.keys(MENU_CONFIG.routes);
+}

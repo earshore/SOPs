@@ -89,13 +89,105 @@ const stateData = {
 };
 
 // ================================================================
-// 🛡️ Proxy 代理：实现向后兼容
+// 🎯 P0 增强: 响应式订阅系统
+// ================================================================
+
+/**
+ * 订阅者注册表
+ * 键: 属性路径 (如 "currentTab" 或 "ui.currentTab")
+ * 值: Set<callback>
+ */
+const subscribers = new Map();
+
+/**
+ * 订阅状态变化
+ * @param {string} key - 要订阅的属性键名
+ * @param {Function} callback - 变化时的回调函数 (newValue, oldValue) => void
+ * @returns {Function} 取消订阅的函数
+ * 
+ * @example
+ * const unsubscribe = subscribe('currentTab', (newVal, oldVal) => {
+ *   console.log(`Tab changed from ${oldVal} to ${newVal}`);
+ * });
+ * // 取消订阅
+ * unsubscribe();
+ */
+export function subscribe(key, callback) {
+  if (!subscribers.has(key)) {
+    subscribers.set(key, new Set());
+  }
+  subscribers.get(key).add(callback);
+
+  // 返回取消订阅函数
+  return () => {
+    const subs = subscribers.get(key);
+    if (subs) {
+      subs.delete(callback);
+      if (subs.size === 0) subscribers.delete(key);
+    }
+  };
+}
+
+/**
+ * 通知订阅者
+ * @param {string} key - 变化的属性键名
+ * @param {*} newValue - 新值
+ * @param {*} oldValue - 旧值
+ * @private
+ */
+function notifySubscribers(key, newValue, oldValue) {
+  if (newValue === oldValue) return; // 值未变化不通知
+
+  const subs = subscribers.get(key);
+  if (subs) {
+    subs.forEach(callback => {
+      try {
+        callback(newValue, oldValue);
+      } catch (e) {
+        console.error(`[State] 订阅回调执行出错 (key: ${key}):`, e);
+      }
+    });
+  }
+}
+
+/**
+ * 批量更新状态 (减少多次订阅触发)
+ * @param {Object} updates - 要更新的键值对
+ * 
+ * @example
+ * batchUpdate({ currentTab: 'home', isScraping: false });
+ */
+export function batchUpdate(updates) {
+  const notifications = [];
+
+  Object.entries(updates).forEach(([key, value]) => {
+    // 查找属性所在命名空间
+    for (const nsKey of Object.keys(stateData)) {
+      const ns = stateData[nsKey];
+      if (ns && typeof ns === 'object' && key in ns) {
+        const oldValue = ns[key];
+        ns[key] = value;
+        notifications.push({ key, newValue: value, oldValue });
+        break;
+      }
+    }
+  });
+
+  // 批量通知
+  notifications.forEach(({ key, newValue, oldValue }) => {
+    notifySubscribers(key, newValue, oldValue);
+  });
+}
+
+// ================================================================
+// 🛡️ Proxy 代理：实现向后兼容 + 响应式通知
 // ================================================================
 
 /**
  * 创建向后兼容的 Proxy 代理
  * - 支持旧代码直接访问: state.currentTab
  * - 支持新代码命名空间访问: state.ui.currentTab
+ * - 🆕 自动触发订阅者通知
  */
 const state = new Proxy(stateData, {
   /**
@@ -129,11 +221,14 @@ const state = new Proxy(stateData, {
    * SET 拦截器
    * 1. 如果设置的是命名空间，直接赋值
    * 2. 否则遍历所有命名空间，找到属性所在位置并设置（向后兼容）
+   * 3. 🆕 自动通知订阅者
    */
   set(target, prop, value) {
-    // 如果是命名空间键，直接设置
+    // 如果是命名空间键，直接设置（通常不应该替换整个命名空间）
     if (prop in target) {
+      const oldValue = target[prop];
       target[prop] = value;
+      notifySubscribers(String(prop), value, oldValue);
       return true;
     }
 
@@ -141,7 +236,10 @@ const state = new Proxy(stateData, {
     for (const nsKey of Object.keys(target)) {
       const ns = target[nsKey];
       if (ns && typeof ns === "object" && prop in ns) {
+        const oldValue = ns[prop];
         ns[prop] = value;
+        // 🔔 触发订阅者通知
+        notifySubscribers(String(prop), value, oldValue);
         return true;
       }
     }
@@ -152,6 +250,7 @@ const state = new Proxy(stateData, {
       `建议添加到对应命名空间中。`
     );
     target[prop] = value;
+    notifySubscribers(String(prop), value, undefined);
     return true;
   },
 

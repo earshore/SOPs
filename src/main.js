@@ -16,6 +16,9 @@ import {
   initGlobalEventDelegation
 } from './common/utils/actionRegistry.js';
 
+// ✅ P1: 导入事件调试工具
+import { initEventLogger } from './common/utils/eventLogger.js';
+
 // ✅ 全局错误兜底 (放在最前面)
 window.addEventListener("error", (event) => {
   console.error("Global Error:", event.error);
@@ -92,6 +95,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ----------------------------------------------------
   try {
     await initViews();
+
+    // ✅ P1: 初始化事件调试器 (需在广播事件前启用)
+    initEventLogger();
 
     // ✅ P1: 初始化全局事件委托 (支持 data-action 模式)
     initGlobalEventDelegation();

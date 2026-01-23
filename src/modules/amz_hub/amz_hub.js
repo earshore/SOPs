@@ -6,7 +6,6 @@ console.log("📚 AmzHub Core Module Loading...");
 // ================= 路由配置表 =================
 // 键名对应 menuConfig.js 里的 route id
 const MODULE_MAP = {
-    'amz_sop_flow': () => import('./views/sop_flow/index.js'),
     'amz_eu_insights': () => import('./views/eu_insights/index.js'),
     'amz_seo_strategy': () => import('./views/seo_strategy/index.js'),
     'amz_ecosystem': () => import('./views/ecosystem/index.js'),
@@ -20,6 +19,7 @@ let currentModule = null; // 保持对当前子模块的引用，以便卸载
 
 /**
  * 核心：加载子模块视图
+ * 🎯 P2 增强: 错误边界包装
  */
 async function loadSubModule(routeId) {
     const container = document.getElementById('amz_hub_content_area');
@@ -27,7 +27,11 @@ async function loadSubModule(routeId) {
 
     // 1. 卸载旧模块 (清理内存、销毁图表)
     if (currentModule && currentModule.unmount) {
-        currentModule.unmount();
+        try {
+            currentModule.unmount();
+        } catch (unmountErr) {
+            console.warn(`[AmzHub] 卸载模块时出错:`, unmountErr);
+        }
     }
     container.innerHTML = '<div class="p-10 text-center"><i class="fas fa-spinner fa-spin text-2xl text-blue-500"></i></div>';
 
@@ -48,10 +52,31 @@ async function loadSubModule(routeId) {
             currentModule = module; // 保存引用
         } else {
             console.error(`模块 ${routeId} 缺少 export function mount()`);
+            throw new Error(`模块接口不完整: 缺少 mount() 函数`);
         }
     } catch (err) {
         console.error("加载子模块失败:", err);
-        container.innerHTML = `<div class="text-red-500">加载失败: ${err.message}</div>`;
+
+        // 🎯 P2: 错误边界 UI
+        container.innerHTML = `
+            <div class="hub-error-boundary flex flex-col items-center justify-center p-12 text-center">
+                <div class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mb-4">
+                    <i class="fas fa-exclamation-triangle text-2xl text-red-500"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-800 mb-2">智库模块加载失败</h3>
+                <p class="text-sm text-slate-500 mb-4 max-w-md">${err.message || '未知错误'}</p>
+                <div class="flex gap-3">
+                    <button onclick="location.reload()" 
+                        class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-redo mr-2"></i>刷新页面
+                    </button>
+                    <button onclick="switchTab('home')" 
+                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
+                        返回首页
+                    </button>
+                </div>
+            </div>
+        `;
     }
 }
 
