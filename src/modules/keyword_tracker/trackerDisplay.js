@@ -561,20 +561,31 @@ async function runLLMAnalysis() {
         showToast("报告生成成功", "success");
 
     } catch (e) {
-        ErrorService.handle(e, { action: 'runLLMAnalysis', module: 'keywordTracker', notify: false });
+        // 区分验证错误和系统错误
+        const isValidationError = e.message.includes("输入内容过短") || e.message.includes("文案内容为空");
+
+        if (!isValidationError) {
+            ErrorService.handle(e, { action: 'runLLMAnalysis', module: 'keywordTracker', notify: false });
+        }
+
         let errorMsg = e.message;
         if (errorMsg.includes('503')) {
             errorMsg = "服务暂时不可用 (503)。可能是模型过载，请稍后重试。";
         }
 
         if (resultDiv) {
+            // 验证错误显示为黄色警告，系统错误显示为红色报错
+            const colorClass = isValidationError ? "yellow" : "red";
+            const icon = isValidationError ? "fa-exclamation-circle" : "fa-exclamation-triangle";
+            const title = isValidationError ? "无法进行分析" : "分析失败";
+
             resultDiv.innerHTML = `
-                <div class="p-4 bg-red-50 border border-red-100 rounded-lg">
-                    <div class="flex items-center gap-2 text-red-600 font-bold mb-2">
-                        <i class="fas fa-exclamation-triangle"></i> 分析失败
+                <div class="p-4 bg-${colorClass}-50 border border-${colorClass}-200 rounded-lg">
+                    <div class="flex items-center gap-2 text-${colorClass}-700 font-bold mb-2">
+                        <i class="fas ${icon}"></i> ${title}
                     </div>
-                    <p class="text-sm text-red-800">${errorMsg}</p>
-                    <button onclick="window.kt_runLLMAnalysis()" class="mt-3 px-3 py-1 bg-white border border-red-200 text-red-600 text-xs rounded hover:bg-red-50">重试</button>
+                    <p class="text-sm text-${colorClass}-800">${errorMsg}</p>
+                    <button onclick="window.kt_runLLMAnalysis()" class="mt-3 px-3 py-1 bg-white border border-${colorClass}-200 text-${colorClass}-700 text-xs rounded hover:bg-${colorClass}-50">重试</button>
                 </div>
             `;
         }
