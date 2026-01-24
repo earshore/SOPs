@@ -1,10 +1,11 @@
 <div id="panel-data" class="panel hidden fade-in">
-    
+
     <div class="bg-white border border-slate-200 rounded-xl shadow-sm mb-6 overflow-hidden transition-all duration-300">
-        
-        <button onclick="document.getElementById('amz_refining_container').classList.toggle('hidden'); this.querySelector('.fa-chevron-down').classList.toggle('rotate-180')" 
+
+        <button
+            onclick="document.getElementById('amz_refining_container').classList.toggle('hidden'); this.querySelector('.fa-chevron-down').classList.toggle('rotate-180')"
             class="w-full text-left p-5 flex justify-between items-center hover:bg-slate-50 transition-colors group bg-white">
-            
+
             <div class="pr-4">
                 <!-- <h3 class="font-normal text-slate-600 text-base flex items-center gap-2">
                     <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 text-blue-500">
@@ -21,12 +22,13 @@
             </div>
 
             <div class="flex-shrink-0 ml-4">
-                <i class="fas fa-chevron-down text-slate-300 transition-transform duration-300 group-hover:text-slate-500"></i>
+                <i
+                    class="fas fa-chevron-down text-slate-300 transition-transform duration-300 group-hover:text-slate-500"></i>
             </div>
         </button>
 
         <div id="amz_refining_container" class="hidden border-t border-slate-100 bg-slate-50/50 p-5">
-            
+
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="bg-white rounded-xl shadow-sm border border-green-100 overflow-hidden h-full">
                     <div class="bg-green-50 px-5 py-3 border-b border-green-100">
@@ -36,24 +38,33 @@
                     </div>
                     <div class="p-5 space-y-4">
                         <div class="flex items-start">
-                            <div class="bg-green-100 text-green-800 rounded px-2 py-0.5 mr-3 text-xs font-bold flex-shrink-0 mt-0.5">COSMO</div>
+                            <div
+                                class="bg-green-100 text-green-800 rounded px-2 py-0.5 mr-3 text-xs font-bold flex-shrink-0 mt-0.5">
+                                COSMO</div>
                             <div>
                                 <h5 class="font-bold text-slate-700 text-xs">具体使用场景 (Context)</h5>
-                                <p class="text-xs text-slate-500 mt-1">例如：Review中提到的 "Taking it on a ski trip" 而非单纯的 "Winter coat"。COSMO 依赖场景构建图谱。</p>
+                                <p class="text-xs text-slate-500 mt-1">例如：Review中提到的 "Taking it on a ski trip" 而非单纯的
+                                    "Winter coat"。COSMO 依赖场景构建图谱。</p>
                             </div>
                         </div>
                         <div class="flex items-start">
-                            <div class="bg-blue-100 text-blue-800 rounded px-2 py-0.5 mr-3 text-xs font-bold flex-shrink-0 mt-0.5">Rufus</div>
+                            <div
+                                class="bg-blue-100 text-blue-800 rounded px-2 py-0.5 mr-3 text-xs font-bold flex-shrink-0 mt-0.5">
+                                Rufus</div>
                             <div>
                                 <h5 class="font-bold text-slate-700 text-xs">具体痛点与解决方案 (QA Pairs)</h5>
-                                <p class="text-xs text-slate-500 mt-1">提取负面 Review 中的具体失效点（如"拉链在零下度数卡住"），转化为 Listing 中的 QA 或属性描述。</p>
+                                <p class="text-xs text-slate-500 mt-1">提取负面 Review 中的具体失效点（如"拉链在零下度数卡住"），转化为 Listing 中的
+                                    QA 或属性描述。</p>
                             </div>
                         </div>
                         <div class="flex items-start">
-                            <div class="bg-purple-100 text-purple-800 rounded px-2 py-0.5 mr-3 text-xs font-bold flex-shrink-0 mt-0.5">Intent</div>
+                            <div
+                                class="bg-purple-100 text-purple-800 rounded px-2 py-0.5 mr-3 text-xs font-bold flex-shrink-0 mt-0.5">
+                                Intent</div>
                             <div>
                                 <h5 class="font-bold text-slate-700 text-xs">情感形容词与原生表达</h5>
-                                <p class="text-xs text-slate-500 mt-1">用户用来形容产品的非官方词汇（如 "Game changer for arthritis"）。这是长尾流量的来源。</p>
+                                <p class="text-xs text-slate-500 mt-1">用户用来形容产品的非官方词汇（如 "Game changer for
+                                    arthritis"）。这是长尾流量的来源。</p>
                             </div>
                         </div>
                         <div class="flex items-start">
@@ -75,11 +86,14 @@
                     <div class="p-5 space-y-4">
                         <div class="opacity-75 hover:opacity-100 transition-opacity">
                             <h5 class="font-bold text-slate-600 text-xs line-through decoration-red-400">通用的好评</h5>
-                            <p class="text-xs text-slate-500 mt-1">"Great product", "Fast shipping", "Love it". 这些对构建语义图谱毫无价值，会稀释 AI 的注意力。</p>
+                            <p class="text-xs text-slate-500 mt-1">"Great product", "Fast shipping", "Love it".
+                                这些对构建语义图谱毫无价值，会稀释 AI 的注意力。</p>
                         </div>
                         <div class="opacity-75 hover:opacity-100 transition-opacity">
-                            <h5 class="font-bold text-slate-600 text-xs line-through decoration-red-400">物流与包装抱怨 (非FBM)</h5>
-                            <p class="text-xs text-slate-500 mt-1">除非你是自发货，否则 FBA 的物流问题不属于产品本身的属性缺陷，会误导 Rufus 对产品质量的判断。</p>
+                            <h5 class="font-bold text-slate-600 text-xs line-through decoration-red-400">物流与包装抱怨 (非FBM)
+                            </h5>
+                            <p class="text-xs text-slate-500 mt-1">除非你是自发货，否则 FBA 的物流问题不属于产品本身的属性缺陷，会误导 Rufus 对产品质量的判断。
+                            </p>
                         </div>
                         <div class="opacity-75 hover:opacity-100 transition-opacity">
                             <h5 class="font-bold text-slate-600 text-xs line-through decoration-red-400">竞品特定的品牌词</h5>
@@ -88,14 +102,13 @@
                     </div>
                 </div>
             </div>
-            
+
             <div id="amz_prompt_box" class="hidden"></div>
         </div>
     </div>
 
-    <input type="file" id="import-file-input" accept=".json" multiple class="hidden"
-        onchange="handleImportFiles(event)" />
-    
+    <input type="file" id="import-file-input" accept=".json" multiple class="hidden" />
+
     <div class="glass-card rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
         <div class="border-b border-slate-200 bg-slate-50 px-6 py-3 flex items-center gap-4">
             <button onclick="switchDataTab('preview')" id="data-tab-preview"

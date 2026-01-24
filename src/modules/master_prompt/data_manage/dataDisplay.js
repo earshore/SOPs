@@ -551,9 +551,32 @@ class DataModule extends BaseModule {
             const btnCancel = document.getElementById(`btn-cancel-${modalId}`);
 
             btnConfirm.onclick = () => {
-                const selected = backdrop.querySelector('input[name="site_choice"]:checked').value;
-                cleanup();
-                resolve(selected);
+                try {
+                    const selectedInput = backdrop.querySelector('input[name="site_choice"]:checked');
+                    const selected = selectedInput ? selectedInput.value : null;
+
+                    // 1. Force cleanup immediately to ensure modal closes
+                    cleanup();
+
+                    if (selected) {
+                        // 2. Use setTimeout to allow UI to repaint (close modal) before resolving
+                        // which might trigger heavy processing in the main loop
+                        setTimeout(() => {
+                            resolve(selected);
+                        }, 10);
+                    } else {
+                        console.warn("No site selected");
+                        // If nothing selected, maybe we should not resolve or resolve null?
+                        // But for now, let's just log. If we resolved null, it would cancel import.
+                        // Given one radio is always checked (index 0), this is edge case.
+                        // We choose to abort if something is weirdly wrong.
+                        resolve(null);
+                    }
+                } catch (e) {
+                    console.error("Error in modal confirm:", e);
+                    cleanup();
+                    resolve(null);
+                }
             };
 
             btnCancel.onclick = () => {
@@ -562,7 +585,10 @@ class DataModule extends BaseModule {
             };
 
             function cleanup() {
-                document.body.removeChild(backdrop);
+                // Ensure we only try to remove if it's still attached
+                if (backdrop && backdrop.parentNode) {
+                    backdrop.parentNode.removeChild(backdrop);
+                }
             }
         });
     }
@@ -602,11 +628,11 @@ const instance = new DataModule();
 window.addEventListener('app:route-changed', (e) => {
     const { routeId } = e.detail;
     const container = document.getElementById('panel-data');
-    
+
     if (routeId === 'data') {
-         if (!instance._isMounted && container) instance.mount(container);
+        if (!instance._isMounted && container) instance.mount(container);
     } else {
-         if (instance._isMounted) instance.unmount();
+        if (instance._isMounted) instance.unmount();
     }
 });
 
