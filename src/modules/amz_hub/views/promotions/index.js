@@ -1,5 +1,6 @@
 // src/modules/amz_hub/views/promotions/index.js
 // 欧洲站实战版 - 基于头部卖家真实经验
+import BaseModule from "../../../../common/BaseModule.js";
 
 // ==================== 1. 内容数据源 (欧洲站实战版) ====================
 const promoData = [
@@ -426,350 +427,363 @@ const navStructure = [
     }
 ];
 
-// ==================== Logic ====================
+class PromotionsModule extends BaseModule {
+    constructor() {
+        super('amz_promotions');
+        this.observer = null;
+    }
 
-let observer = null;
+    async render() {
+        const response = await fetch('src/modules/amz_hub/views/promotions/template.html');
+        this.container.innerHTML = await response.text();
+    }
 
-function init() {
-    renderNav();
-    renderContent();
-    setupIntersectionObserver();
-}
+    async init() {
+        // 挂载全局方法供 HTML 调用 (需要注意 this 的绑定)
+        // 使用箭头函数包装以保持上下文，或者直接绑定
+        window.amzp_scrollTo = (id) => this.scrollToSection(id);
+        window.amzp_scrollTo_Name = (name) => this.scrollToSectionByName(name);
 
-// 1. 渲染侧边栏 (递归渲染树状结构)
-function renderNav() {
-    const navContainer = document.getElementById('amzp_nav');
-    if (!navContainer) return;
+        this.renderNav();
+        this.renderContent();
+        this.setupIntersectionObserver();
 
-    navContainer.innerHTML = navStructure.map(node => {
-        if (node.type === 'root') {
-            return `
-                <div class="amzp_nav_group" id="nav_group_${node.id}">
-                    <a href="javascript:void(0)" class="amzp_nav_header" 
-                       id="nav_header_${node.id}"
-                       onclick="window.amzp_scrollTo('${node.id}')">
-                       ${node.label}
+        console.log("✅ Promotions Module Loaded (实战版)");
+    }
+
+    onUnmount() {
+        if (this.observer) {
+            this.observer.disconnect();
+            this.observer = null;
+        }
+        delete window.amzp_scrollTo;
+        delete window.amzp_scrollTo_Name;
+        console.log("❌ Promotions Module Unmounted");
+    }
+
+    // ==================== Logic ====================
+
+    // 1. 渲染侧边栏 (递归渲染树状结构)
+    renderNav() {
+        const navContainer = document.getElementById('amzp_nav');
+        if (!navContainer) return;
+
+        navContainer.innerHTML = navStructure.map(node => {
+            if (node.type === 'root') {
+                return `
+                    <div class="amzp_nav_group" id="nav_group_${node.id}">
+                        <a href="javascript:void(0)" class="amzp_nav_header" 
+                           id="nav_header_${node.id}"
+                           onclick="window.amzp_scrollTo('${node.id}')">
+                           ${node.label}
+                        </a>
+                    </div>
+                `;
+            } else if (node.type === 'group') {
+                const childrenHtml = node.children.map(child => `
+                    <a href="javascript:void(0)" class="amzp_sub_link" 
+                       id="nav_link_${child.id}"
+                       onclick="window.amzp_scrollTo('${child.id}')">
+                       ${child.label}
                     </a>
-                </div>
-            `;
-        } else if (node.type === 'group') {
-            const childrenHtml = node.children.map(child => `
-                <a href="javascript:void(0)" class="amzp_sub_link" 
-                   id="nav_link_${child.id}"
-                   onclick="window.amzp_scrollTo('${child.id}')">
-                   ${child.label}
-                </a>
-            `).join('');
+                `).join('');
 
-            return `
-                <div class="amzp_nav_group" id="nav_group_${node.id}">
-                    <a href="javascript:void(0)" class="amzp_nav_header" 
-                       id="nav_header_${node.targetId}"
-                       onclick="window.amzp_scrollTo('${node.targetId}')">
-                       ${node.label}
-                    </a>
-                    <div class="amzp_nav_children">
-                        <div class="amzp_nav_children_track">
-                            ${childrenHtml}
+                return `
+                    <div class="amzp_nav_group" id="nav_group_${node.id}">
+                        <a href="javascript:void(0)" class="amzp_nav_header" 
+                           id="nav_header_${node.targetId}"
+                           onclick="window.amzp_scrollTo('${node.targetId}')">
+                           ${node.label}
+                        </a>
+                        <div class="amzp_nav_children">
+                            <div class="amzp_nav_children_track">
+                                ${childrenHtml}
+                            </div>
                         </div>
                     </div>
-                </div>
-            `;
-        }
-    }).join('');
-}
-
-// 2. 渲染内容区 (扁平渲染)
-function renderContent() {
-    const contentContainer = document.getElementById('amzp_main');
-    if (!contentContainer) return;
-
-    contentContainer.innerHTML = promoData.map(section => `
-        <div id="${section.id}" class="amzp_card">
-            <div class="amzp_card_header">
-                <i class="fas ${section.icon} amzp_card_icon" style="font-size:1.5rem; color: #566ce8;"></i>
-                <h2 class="amzp_card_title">${section.title}</h2>
-            </div>
-            ${renderSectionBody(section.content)}
-        </div>
-    `).join('');
-}
-
-function renderSectionBody(contentArray) {
-    if (!contentArray) return '';
-
-    return contentArray.map(block => {
-        // 1. 文本
-        if (block.type === 'text') return `<div class="amzp_text">${block.text}</div>`;
-
-        // 2. 黄色高亮块 (保留兼容)
-        if (block.type === 'note') return `<div class="amzp_highlight_box">${block.text}</div>`;
-
-        // 3. 分块小标题
-        if (block.type === 'section_header') {
-            return `
-                <div class="amzp_section_header">
-                    <i class="fas fa-caret-right"></i> ${block.text}
-                </div>
-            `;
-        }
-
-        // 4. 多彩呼出框 (新增)
-        if (block.type === 'callout') {
-            const styleMap = {
-                'insight': { bg: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: '#fff', border: 'none' },
-                'core': { bg: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)', color: '#fff', border: 'none' },
-                'warning': { bg: '#fff3cd', color: '#856404', border: '1px solid #ffc107' },
-                'success': { bg: '#d4edda', color: '#155724', border: '1px solid #28a745' },
-                'tip': { bg: '#e7f3ff', color: '#0066cc', border: '1px solid #b3d7ff' },
-                'formula': { bg: 'linear-gradient(135deg, #434343 0%, #000000 100%)', color: '#fff', border: 'none' }
-            };
-            const style = styleMap[block.style] || styleMap['insight'];
-            return `
-                <div class="amzp_callout" style="background: ${style.bg}; color: ${style.color}; border: ${style.border}; border-radius: 12px; padding: 20px 24px; margin-bottom: 24px;">
-                    <div style="font-weight: 700; font-size: 1.1rem; margin-bottom: 8px;">${block.title}</div>
-                    <div style="font-size: 0.95rem; line-height: 1.7;">${block.text}</div>
-                </div>
-            `;
-        }
-
-        // 5. 快捷入口 Grid
-        if (block.type === 'grid_links') {
-            return `
-                <div class="amzp_grid" style="margin-top: 10px;">
-                    ${block.items.map(item => `
-                        <div class="amzp_sub_item" style="cursor: pointer; padding: 20px;" onclick="window.amzp_scrollTo_Name('${item.title}')">
-                            <div class="amzp_sub_header" style="margin-bottom: 8px;">
-                                <div class="amzp_sub_icon"><i class="fas ${item.icon}"></i></div>
-                                <div class="amzp_sub_title" style="font-size: 1rem;">${item.title}</div>
-                            </div>
-                            <div class="amzp_sub_desc" style="font-size: 0.85rem; margin-bottom: 0;">${item.text}</div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-
-        // 6. 详细子项目
-        if (block.type === 'sub_items') {
-            return `
-                <div class="amzp_grid">
-                    ${block.items.map(item => `
-                        <div class="amzp_sub_item">
-                            <div class="amzp_sub_header">
-                                <div class="amzp_sub_icon"><i class="fas ${item.icon}"></i></div>
-                                <div class="amzp_sub_title">${item.title}</div>
-                            </div>
-                            <div class="amzp_sub_desc">${item.desc}</div>
-                            ${item.tags ? `
-                                <div style="margin-top:auto">
-                                    ${item.tags.map(t => `<span class="amzp_tag">${t}</span>`).join('')}
-                                </div>
-                            ` : ''}
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-
-        // 7. 统计数据
-        if (block.type === 'stats') {
-            return `
-                <div class="amzp_grid">
-                    ${block.items.map(item => `
-                        <div class="amzp_stats_box">
-                            <i class="fas ${item.icon}" style="font-size:1.8rem; color: #566ce8;"></i>
-                            <div class="amzp_stats_text">${item.text}</div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-
-        // 8. 对比表格 (新增)
-        if (block.type === 'comparison_table') {
-            return `
-                <div class="amzp_table_wrapper" style="overflow-x: auto; margin: 20px 0;">
-                    <table class="amzp_table" style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
-                        <thead>
-                            <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff;">
-                                ${block.headers.map(h => `<th style="padding: 12px 15px; text-align: left; font-weight: 600;">${h}</th>`).join('')}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${block.rows.map((row, i) => `
-                                <tr style="background: ${i % 2 === 0 ? '#f8f9fa' : '#fff'}; border-bottom: 1px solid #eee;">
-                                    ${row.map((cell, j) => `<td style="padding: 12px 15px; ${j === 0 ? 'font-weight: 600; color: #333;' : ''}">${cell}</td>`).join('')}
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-        }
-
-        // 9. 提示列表 (新增)
-        if (block.type === 'tip_list') {
-            return `
-                <div class="amzp_tip_list" style="margin: 15px 0;">
-                    ${block.items.map(item => {
-                const color = item.style === 'success' ? '#28a745' : (item.style === 'danger' ? '#dc3545' : '#666');
-                const bg = item.style === 'success' ? '#d4edda' : (item.style === 'danger' ? '#f8d7da' : '#f8f9fa');
-                return `
-                            <div style="display: flex; align-items: flex-start; gap: 12px; padding: 10px 15px; margin-bottom: 8px; background: ${bg}; border-radius: 8px;">
-                                <i class="fas ${item.icon}" style="color: ${color}; margin-top: 2px;"></i>
-                                <span style="color: #333; font-size: 0.95rem;">${item.text}</span>
-                            </div>
-                        `;
-            }).join('')}
-                </div>
-            `;
-        }
-
-        // 10. 键值列表 (新增)
-        if (block.type === 'key_value_list') {
-            return `
-                <div class="amzp_kv_list" style="margin: 15px 0; background: #f8f9fa; border-radius: 10px; padding: 5px 0;">
-                    ${block.items.map(item => `
-                        <div style="display: flex; padding: 12px 20px; border-bottom: 1px solid #eee;">
-                            <span style="font-weight: 600; color: #566ce8; min-width: 120px;">${item.key}</span>
-                            <span style="color: #333;">${item.value}</span>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-
-        // 11. 时间线 (新增)
-        if (block.type === 'timeline') {
-            return `
-                <div class="amzp_timeline" style="margin: 20px 0; position: relative; padding-left: 30px;">
-                    <div style="position: absolute; left: 8px; top: 0; bottom: 0; width: 3px; background: linear-gradient(to bottom, #667eea, #764ba2); border-radius: 2px;"></div>
-                    ${block.items.map(item => {
-                const levelColors = {
-                    'peak': '#dc3545',
-                    'high': '#fd7e14',
-                    'medium': '#28a745',
-                    'warning': '#ffc107'
-                };
-                const color = levelColors[item.level] || '#666';
-                return `
-                            <div style="position: relative; margin-bottom: 20px; padding-left: 20px;">
-                                <div style="position: absolute; left: -22px; top: 5px; width: 14px; height: 14px; background: ${color}; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.15);"></div>
-                                <div style="font-weight: 700; color: ${color}; font-size: 0.9rem;">${item.month}</div>
-                                <div style="font-weight: 600; color: #333; font-size: 1rem; margin-top: 2px;">${item.event}</div>
-                                <div style="color: #666; font-size: 0.85rem; margin-top: 2px;">${item.note}</div>
-                            </div>
-                        `;
-            }).join('')}
-                </div>
-            `;
-        }
-
-        // 12. 检查清单 (新增)
-        if (block.type === 'checklist') {
-            return `
-                <div class="amzp_checklist" style="margin: 15px 0;">
-                    ${block.items.map(item => `
-                        <div style="display: flex; align-items: flex-start; gap: 12px; padding: 10px 15px; margin-bottom: 6px; background: ${item.done ? '#d4edda' : '#fff'}; border: 1px solid ${item.done ? '#28a745' : '#ddd'}; border-radius: 8px;">
-                            <i class="fas ${item.done ? 'fa-check-square' : 'fa-square'}" style="color: ${item.done ? '#28a745' : '#ccc'}; font-size: 1.1rem; margin-top: 1px;"></i>
-                            <span style="color: ${item.done ? '#155724' : '#333'}; font-size: 0.95rem; ${item.done ? '' : ''}">${item.text}</span>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-
-        return '';
-    }).join('');
-}
-
-// 3. 滚动与高亮逻辑
-function scrollToSection(id) {
-    const el = document.getElementById(id);
-    if (el) {
-        const container = document.querySelector('.amzp_container');
-        const offset = 20;
-        const top = el.getBoundingClientRect().top + container.scrollTop - offset;
-        container.scrollTo({ top: top, behavior: 'smooth' });
+                `;
+            }
+        }).join('');
     }
-}
 
-function scrollToSectionByName(name) {
-    const target = promoData.find(p => name.includes(p.title.split(' ')[0]) || p.title.includes(name));
-    if (target) scrollToSection(target.id);
-}
+    // 2. 渲染内容区 (扁平渲染)
+    renderContent() {
+        const contentContainer = document.getElementById('amzp_main');
+        if (!contentContainer) return;
 
-// 核心：更新导航状态
-function updateNavState(activeId) {
-    if (!activeId) return;
+        contentContainer.innerHTML = promoData.map(section => `
+            <div id="${section.id}" class="amzp_card">
+                <div class="amzp_card_header">
+                    <i class="fas ${section.icon} amzp_card_icon" style="font-size:1.5rem; color: #566ce8;"></i>
+                    <h2 class="amzp_card_title">${section.title}</h2>
+                </div>
+                ${this.renderSectionBody(section.content)}
+            </div>
+        `).join('');
+    }
 
-    document.querySelectorAll('.amzp_nav_header').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.amzp_sub_link').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.amzp_nav_group').forEach(el => el.classList.remove('expanded'));
+    renderSectionBody(contentArray) {
+        if (!contentArray) return '';
 
-    for (const group of navStructure) {
-        if (group.id === activeId) {
-            document.getElementById(`nav_header_${group.id}`)?.classList.add('active');
-            return;
+        return contentArray.map(block => {
+            // 1. 文本
+            if (block.type === 'text') return `<div class="amzp_text">${block.text}</div>`;
+
+            // 2. 黄色高亮块 (保留兼容)
+            if (block.type === 'note') return `<div class="amzp_highlight_box">${block.text}</div>`;
+
+            // 3. 分块小标题
+            if (block.type === 'section_header') {
+                return `
+                    <div class="amzp_section_header">
+                        <i class="fas fa-caret-right"></i> ${block.text}
+                    </div>
+                `;
+            }
+
+            // 4. 多彩呼出框 (新增)
+            if (block.type === 'callout') {
+                const styleMap = {
+                    'insight': { bg: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: '#fff', border: 'none' },
+                    'core': { bg: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)', color: '#fff', border: 'none' },
+                    'warning': { bg: '#fff3cd', color: '#856404', border: '1px solid #ffc107' },
+                    'success': { bg: '#d4edda', color: '#155724', border: '1px solid #28a745' },
+                    'tip': { bg: '#e7f3ff', color: '#0066cc', border: '1px solid #b3d7ff' },
+                    'formula': { bg: 'linear-gradient(135deg, #434343 0%, #000000 100%)', color: '#fff', border: 'none' }
+                };
+                const style = styleMap[block.style] || styleMap['insight'];
+                return `
+                    <div class="amzp_callout" style="background: ${style.bg}; color: ${style.color}; border: ${style.border}; border-radius: 12px; padding: 20px 24px; margin-bottom: 24px;">
+                        <div style="font-weight: 700; font-size: 1.1rem; margin-bottom: 8px;">${block.title}</div>
+                        <div style="font-size: 0.95rem; line-height: 1.7;">${block.text}</div>
+                    </div>
+                `;
+            }
+
+            // 5. 快捷入口 Grid
+            if (block.type === 'grid_links') {
+                return `
+                    <div class="amzp_grid" style="margin-top: 10px;">
+                        ${block.items.map(item => `
+                            <div class="amzp_sub_item" style="cursor: pointer; padding: 20px;" onclick="window.amzp_scrollTo_Name('${item.title}')">
+                                <div class="amzp_sub_header" style="margin-bottom: 8px;">
+                                    <div class="amzp_sub_icon"><i class="fas ${item.icon}"></i></div>
+                                    <div class="amzp_sub_title" style="font-size: 1rem;">${item.title}</div>
+                                </div>
+                                <div class="amzp_sub_desc" style="font-size: 0.85rem; margin-bottom: 0;">${item.text}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            // 6. 详细子项目
+            if (block.type === 'sub_items') {
+                return `
+                    <div class="amzp_grid">
+                        ${block.items.map(item => `
+                            <div class="amzp_sub_item">
+                                <div class="amzp_sub_header">
+                                    <div class="amzp_sub_icon"><i class="fas ${item.icon}"></i></div>
+                                    <div class="amzp_sub_title">${item.title}</div>
+                                </div>
+                                <div class="amzp_sub_desc">${item.desc}</div>
+                                ${item.tags ? `
+                                    <div style="margin-top:auto">
+                                        ${item.tags.map(t => `<span class="amzp_tag">${t}</span>`).join('')}
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            // 7. 统计数据
+            if (block.type === 'stats') {
+                return `
+                    <div class="amzp_grid">
+                        ${block.items.map(item => `
+                            <div class="amzp_stats_box">
+                                <i class="fas ${item.icon}" style="font-size:1.8rem; color: #566ce8;"></i>
+                                <div class="amzp_stats_text">${item.text}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            // 8. 对比表格 (新增)
+            if (block.type === 'comparison_table') {
+                return `
+                    <div class="amzp_table_wrapper" style="overflow-x: auto; margin: 20px 0;">
+                        <table class="amzp_table" style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                            <thead>
+                                <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff;">
+                                    ${block.headers.map(h => `<th style="padding: 12px 15px; text-align: left; font-weight: 600;">${h}</th>`).join('')}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${block.rows.map((row, i) => `
+                                    <tr style="background: ${i % 2 === 0 ? '#f8f9fa' : '#fff'}; border-bottom: 1px solid #eee;">
+                                        ${row.map((cell, j) => `<td style="padding: 12px 15px; ${j === 0 ? 'font-weight: 600; color: #333;' : ''}">${cell}</td>`).join('')}
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+
+            // 9. 提示列表 (新增)
+            if (block.type === 'tip_list') {
+                return `
+                    <div class="amzp_tip_list" style="margin: 15px 0;">
+                        ${block.items.map(item => {
+                    const color = item.style === 'success' ? '#28a745' : (item.style === 'danger' ? '#dc3545' : '#666');
+                    const bg = item.style === 'success' ? '#d4edda' : (item.style === 'danger' ? '#f8d7da' : '#f8f9fa');
+                    return `
+                                <div style="display: flex; align-items: flex-start; gap: 12px; padding: 10px 15px; margin-bottom: 8px; background: ${bg}; border-radius: 8px;">
+                                    <i class="fas ${item.icon}" style="color: ${color}; margin-top: 2px;"></i>
+                                    <span style="color: #333; font-size: 0.95rem;">${item.text}</span>
+                                </div>
+                            `;
+                }).join('')}
+                    </div>
+                `;
+            }
+
+            // 10. 键值列表 (新增)
+            if (block.type === 'key_value_list') {
+                return `
+                    <div class="amzp_kv_list" style="margin: 15px 0; background: #f8f9fa; border-radius: 10px; padding: 5px 0;">
+                        ${block.items.map(item => `
+                            <div style="display: flex; padding: 12px 20px; border-bottom: 1px solid #eee;">
+                                <span style="font-weight: 600; color: #566ce8; min-width: 120px;">${item.key}</span>
+                                <span style="color: #333;">${item.value}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            // 11. 时间线 (新增)
+            if (block.type === 'timeline') {
+                return `
+                    <div class="amzp_timeline" style="margin: 20px 0; position: relative; padding-left: 30px;">
+                        <div style="position: absolute; left: 8px; top: 0; bottom: 0; width: 3px; background: linear-gradient(to bottom, #667eea, #764ba2); border-radius: 2px;"></div>
+                        ${block.items.map(item => {
+                    const levelColors = {
+                        'peak': '#dc3545',
+                        'high': '#fd7e14',
+                        'medium': '#28a745',
+                        'warning': '#ffc107'
+                    };
+                    const color = levelColors[item.level] || '#666';
+                    return `
+                                <div style="position: relative; margin-bottom: 20px; padding-left: 20px;">
+                                    <div style="position: absolute; left: -22px; top: 5px; width: 14px; height: 14px; background: ${color}; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.15);"></div>
+                                    <div style="font-weight: 700; color: ${color}; font-size: 0.9rem;">${item.month}</div>
+                                    <div style="font-weight: 600; color: #333; font-size: 1rem; margin-top: 2px;">${item.event}</div>
+                                    <div style="color: #666; font-size: 0.85rem; margin-top: 2px;">${item.note}</div>
+                                </div>
+                            `;
+                }).join('')}
+                    </div>
+                `;
+            }
+
+            // 12. 检查清单 (新增)
+            if (block.type === 'checklist') {
+                return `
+                    <div class="amzp_checklist" style="margin: 15px 0;">
+                        ${block.items.map(item => `
+                            <div style="display: flex; align-items: flex-start; gap: 12px; padding: 10px 15px; margin-bottom: 6px; background: ${item.done ? '#d4edda' : '#fff'}; border: 1px solid ${item.done ? '#28a745' : '#ddd'}; border-radius: 8px;">
+                                <i class="fas ${item.done ? 'fa-check-square' : 'fa-square'}" style="color: ${item.done ? '#28a745' : '#ccc'}; font-size: 1.1rem; margin-top: 1px;"></i>
+                                <span style="color: ${item.done ? '#155724' : '#333'}; font-size: 0.95rem; ${item.done ? '' : ''}">${item.text}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            return '';
+        }).join('');
+    }
+
+    // 3. 滚动与高亮逻辑
+    scrollToSection(id) {
+        const el = document.getElementById(id);
+        if (el) {
+            const container = document.querySelector('.amzp_container');
+            if (container) {
+                const offset = 20;
+                const top = el.getBoundingClientRect().top + container.scrollTop - offset;
+                container.scrollTo({ top: top, behavior: 'smooth' });
+            }
         }
+    }
 
-        if (group.targetId === activeId) {
-            document.getElementById(`nav_header_${activeId}`)?.classList.add('active');
-            document.getElementById(`nav_group_${group.id}`)?.classList.add('expanded');
-            return;
-        }
+    scrollToSectionByName(name) {
+        const target = promoData.find(p => name.includes(p.title.split(' ')[0]) || p.title.includes(name));
+        if (target) this.scrollToSection(target.id);
+    }
 
-        if (group.children) {
-            const childMatch = group.children.find(c => c.id === activeId);
-            if (childMatch) {
-                document.getElementById(`nav_link_${activeId}`)?.classList.add('active');
-                document.getElementById(`nav_header_${group.targetId}`)?.classList.add('active');
+    // 核心：更新导航状态
+    updateNavState(activeId) {
+        if (!activeId) return;
+
+        document.querySelectorAll('.amzp_nav_header').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.amzp_sub_link').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.amzp_nav_group').forEach(el => el.classList.remove('expanded'));
+
+        for (const group of navStructure) {
+            if (group.id === activeId) {
+                document.getElementById(`nav_header_${group.id}`)?.classList.add('active');
+                return;
+            }
+
+            if (group.targetId === activeId) {
+                document.getElementById(`nav_header_${activeId}`)?.classList.add('active');
                 document.getElementById(`nav_group_${group.id}`)?.classList.add('expanded');
                 return;
             }
+
+            if (group.children) {
+                const childMatch = group.children.find(c => c.id === activeId);
+                if (childMatch) {
+                    document.getElementById(`nav_link_${activeId}`)?.classList.add('active');
+                    document.getElementById(`nav_header_${group.targetId}`)?.classList.add('active');
+                    document.getElementById(`nav_group_${group.id}`)?.classList.add('expanded');
+                    return;
+                }
+            }
         }
+    }
+
+    setupIntersectionObserver() {
+        const container = document.querySelector('.amzp_container');
+        if (!container) return;
+
+        this.observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    this.updateNavState(entry.target.id);
+                }
+            });
+        }, {
+            root: container,
+            threshold: 0.2,
+            rootMargin: "-10% 0px -60% 0px"
+        });
+
+        promoData.forEach(section => {
+            const el = document.getElementById(section.id);
+            if (el) this.observer.observe(el);
+        });
     }
 }
 
-function setupIntersectionObserver() {
-    const container = document.querySelector('.amzp_container');
-
-    observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                updateNavState(entry.target.id);
-            }
-        });
-    }, {
-        root: container,
-        threshold: 0.2,
-        rootMargin: "-10% 0px -60% 0px"
-    });
-
-    promoData.forEach(section => {
-        const el = document.getElementById(section.id);
-        if (el) observer.observe(el);
-    });
-}
-
-// ==================== Export ====================
-
-export async function mount(container) {
-    const response = await fetch('src/modules/amz_hub/views/promotions/template.html');
-    const html = await response.text();
-    container.innerHTML = html;
-
-    window.amzp_scrollTo = scrollToSection;
-    window.amzp_scrollTo_Name = scrollToSectionByName;
-
-    init();
-    console.log("✅ Promotions Module Loaded (实战版)");
-}
-
-export function unmount() {
-    if (observer) observer.disconnect();
-    delete window.amzp_scrollTo;
-    delete window.amzp_scrollTo_Name;
-    console.log("❌ Promotions Module Unmounted");
-}
+const instance = new PromotionsModule();
+export const mount = (c) => instance.mount(c);
+export const unmount = () => instance.unmount();

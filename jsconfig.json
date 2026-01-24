@@ -1,38 +1,17 @@
 {
-    "compilerOptions": {
-        "checkJs": false,
-        "strict": false,
-        "target": "ES2020",
-        "module": "ES2020",
-        "moduleResolution": "bundler",
-        "allowSyntheticDefaultImports": true,
-        "esModuleInterop": true,
-        "skipLibCheck": true,
-        "noEmit": true,
-        "baseUrl": ".",
-        "paths": {
-            "@/*": [
-                "./src/*"
-            ],
-            "@common/*": [
-                "./src/common/*"
-            ],
-            "@services/*": [
-                "./src/services/*"
-            ],
-            "@modules/*": [
-                "./src/modules/*"
-            ],
-            "@components/*": [
-                "./src/components/*"
-            ]
-        }
-    },
-    "include": [
-        "src/**/*"
-    ],
-    "exclude": [
-        "node_modules",
-        "dist"
-    ]
+  "compilerOptions": {
+    "module": "ESNext",
+    "target": "ES2022",
+    "checkJs": true,
+    "allowJs": true,
+    "moduleResolution": "node",
+    "strict": false,
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }
