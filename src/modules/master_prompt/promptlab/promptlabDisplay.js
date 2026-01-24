@@ -457,26 +457,25 @@ export function initPromptlabModule() {
     if (outEl) outEl.addEventListener("input", updateCharCount);
   }
 
-  // ✅ 修复 2：逻辑无缝接入 Config-Driven 框架
-  // 1. 保存旧的 switchTab (这个旧的其实是 ui.js 里那个全能的新路由)
-  const coreSwitchTab = window.switchTab;
-
-  // 2. 挂载新的包装函数
-  window.switchTab = function (tabName) {
-    // A. 必须先执行核心路由！让 ui.js 去处理侧边栏显隐、Header高亮等
-    if (coreSwitchTab) coreSwitchTab(tabName);
-
-    // B. 再执行本模块特有的“视图刷新”逻辑
-    // 只有当目标是 promptlab 时才执行，且不再手动操作 DOM 显隐，因为 ui.js 已经做好了
-    if (tabName === "promptlab") {
+  // ✅ 修复 2：使用事件监听替代 Monkey Patch
+  // 监听路由切换事件
+  window.addEventListener("app:route-changed", (e) => {
+    const { routeId } = e.detail;
+    if (routeId === "promptlab") {
       const myPanel = document.getElementById("panel-promptlab");
       if (myPanel) {
         myPanel.classList.add("fade-in");
         restoreInputsFromState(); // 恢复数据
-        renderReportAnalysis();   // 渲染复选框
+        renderReportAnalysis();   // 渲染复选框 (包含下拉框生成)
       }
     }
-  };
+  });
+
+  // 如果当前已经是 promptlab (例如刷新页面后)，立即初始化
+  if (state.currentTab === "promptlab") {
+    restoreInputsFromState();
+    renderReportAnalysis();
+  }
 }
 
 export function getFieldTitle(key) {
