@@ -59,7 +59,7 @@ export const MENU_CONFIG = {
             version: 'KB v1.0',
             icon: 'fas fa-book-open',
             // ✅ 新增描述字段
-            description: '亚马逊运营 SOP 流程中心、市场洞察报告与 A10 算法知识库。'
+            description: '亚马逊市场洞察报告、SEO策略、A10 算法知识库、营销日历与旺季攻略。'
         }
     },
 
