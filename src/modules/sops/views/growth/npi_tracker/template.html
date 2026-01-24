@@ -1,4 +1,35 @@
 <!-- 亚马逊新品生命周期跟踪 SOP Template -->
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<style>
+    /* 自定义滚动条，更细更精致，减少视觉干扰 */
+    .custom-scrollbar::-webkit-scrollbar {
+        height: 8px;
+        width: 8px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: #f1f5f9;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+
+    /* 强制表格行高一致，防止跳动 */
+    td,
+    th {
+        white-space: nowrap;
+        /* 核心：防止文字换行导致行高被撑开 */
+    }
+</style>
+
 <div class="npi-tracker-container">
     <!-- Back Button & Header -->
     <div class="mb-6">
@@ -192,85 +223,137 @@
     </div>
 
     <!-- Data Table -->
-    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden mb-6">
+    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden mb-6 shadow-sm">
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
+            <table class="w-full text-left text-xs whitespace-nowrap">
                 <thead>
-                    <!-- Group Headers -->
-                    <tr class="bg-slate-100 border-b-2 border-slate-300">
+                    <tr class="bg-slate-50 border-b border-slate-200">
                         <th colspan="8"
-                            class="px-2 py-2 text-xs font-bold text-blue-700 text-center border-r-2 border-slate-300 bg-blue-50">
-                            <i class="fas fa-folder mr-1"></i>基础档案
+                            class="px-2 py-1.5 text-xs font-bold text-blue-700 text-center border-r border-slate-100 bg-blue-50/50">
+                            <i class="fas fa-folder mr-1 opacity-70"></i>基础档案
                         </th>
                         <th colspan="6"
-                            class="px-2 py-2 text-xs font-bold text-purple-700 text-center border-r-2 border-slate-300 bg-purple-50">
-                            <i class="fas fa-clipboard-check mr-1"></i>合规Checklist
+                            class="px-2 py-1.5 text-xs font-bold text-purple-700 text-center border-r border-slate-100 bg-purple-50/50">
+                            <i class="fas fa-clipboard-check mr-1 opacity-70"></i>合规Checklist
                         </th>
                         <th colspan="6"
-                            class="px-2 py-2 text-xs font-bold text-emerald-700 text-center border-r-2 border-slate-300 bg-emerald-50">
-                            <i class="fas fa-euro-sign mr-1"></i>财务模型
+                            class="px-2 py-1.5 text-xs font-bold text-emerald-700 text-center border-r border-slate-100 bg-emerald-50/50">
+                            <i class="fas fa-euro-sign mr-1 opacity-70"></i>财务模型
                         </th>
                         <th colspan="5"
-                            class="px-2 py-2 text-xs font-bold text-amber-700 text-center border-r-2 border-slate-300 bg-amber-50">
-                            <i class="fas fa-chart-line mr-1"></i>流量转化
+                            class="px-2 py-1.5 text-xs font-bold text-amber-700 text-center border-r border-slate-100 bg-amber-50/50">
+                            <i class="fas fa-chart-line mr-1 opacity-70"></i>流量转化
                         </th>
-                        <th colspan="4" class="px-2 py-2 text-xs font-bold text-red-700 text-center bg-red-50">
-                            <i class="fas fa-gavel mr-1"></i>决策
+                        <th colspan="4" class="px-2 py-1.5 text-xs font-bold text-red-700 text-center bg-red-50/50">
+                            <i class="fas fa-gavel mr-1 opacity-70"></i>决策
                         </th>
                     </tr>
-                    <!-- Column Headers -->
-                    <tr class="bg-slate-50 text-[10px] text-slate-600 border-b">
-                        <!-- 基础档案 (8列) -->
-                        <th class="px-2 py-2 font-semibold sticky left-0 bg-slate-50 z-10 border-r whitespace-nowrap">阶段
-                        </th>
-                        <th class="px-2 py-2 font-semibold whitespace-nowrap">SKU</th>
-                        <th class="px-2 py-2 font-semibold whitespace-nowrap">中文名</th>
-                        <th class="px-2 py-2 font-semibold whitespace-nowrap">店铺</th>
-                        <th class="px-2 py-2 font-semibold whitespace-nowrap">ASIN</th>
-                        <th class="px-2 py-2 font-semibold text-center whitespace-nowrap">站点</th>
-                        <th class="px-2 py-2 font-semibold text-center whitespace-nowrap">发货量</th>
-                        <th class="px-2 py-2 font-semibold text-center border-r-2 border-slate-300 whitespace-nowrap">
-                            库存天数</th>
 
-                        <!-- SOP合规 (6列) -->
-                        <th class="px-2 py-2 font-semibold text-center whitespace-nowrap" title="泛欧计划">泛欧</th>
-                        <th class="px-2 py-2 font-semibold text-center whitespace-nowrap" title="五点Rufus+标题">Rufus</th>
-                        <th class="px-2 py-2 font-semibold text-center whitespace-nowrap" title="敏感词规避">敏感词</th>
-                        <th class="px-2 py-2 font-semibold text-center whitespace-nowrap" title="图片+QA">图片QA</th>
-                        <th class="px-2 py-2 font-semibold text-center whitespace-nowrap" title="A+页面">A+</th>
-                        <th class="px-2 py-2 font-semibold text-center border-r-2 border-slate-300 whitespace-nowrap">状态
-                        </th>
+                    <tr class="bg-white text-[11px] text-slate-500 border-b border-slate-200 font-medium">
+                        <th class="px-2 py-2 sticky left-0 bg-white z-10 border-r border-slate-100">阶段</th>
 
-                        <!-- 财务模型 (6列) -->
-                        <th class="px-2 py-2 font-semibold text-center whitespace-nowrap">配送费</th>
-                        <th class="px-2 py-2 font-semibold text-center whitespace-nowrap">配送占比</th>
-                        <th class="px-2 py-2 font-semibold text-center text-red-600 whitespace-nowrap">清仓线</th>
-                        <th class="px-2 py-2 font-semibold text-center text-amber-600 whitespace-nowrap">动销价</th>
-                        <th class="px-2 py-2 font-semibold text-center text-emerald-600 whitespace-nowrap">建议价</th>
-                        <th class="px-2 py-2 font-semibold text-center border-r-2 border-slate-300 whitespace-nowrap">
-                            盈亏点</th>
+                        <th class="px-2 py-2">SKU</th>
+                        <th class="px-2 py-2">中文名</th>
+                        <th class="px-2 py-2">店铺</th>
+                        <th class="px-2 py-2">ASIN</th>
+                        <th class="px-2 py-2 text-center">站点</th>
+                        <th class="px-2 py-2 text-center">发货量</th>
 
-                        <!-- 流量转化 (5列) -->
-                        <th class="px-2 py-2 font-semibold text-center whitespace-nowrap">流量</th>
-                        <th class="px-2 py-2 font-semibold text-center whitespace-nowrap">CTR</th>
-                        <th class="px-2 py-2 font-semibold text-center whitespace-nowrap">CVR</th>
-                        <th class="px-2 py-2 font-semibold text-center whitespace-nowrap">ACOAS</th>
-                        <th class="px-2 py-2 font-semibold text-center border-r-2 border-slate-300 whitespace-nowrap">
-                            自然占比</th>
+                        <th class="px-2 py-2 text-center border-r border-slate-100">库存天数</th>
 
-                        <!-- 决策 (4列) -->
-                        <th class="px-2 py-2 font-semibold text-center whitespace-nowrap">Vine进度</th>
-                        <th class="px-2 py-2 font-semibold text-center whitespace-nowrap">广告</th>
-                        <th class="px-2 py-2 font-semibold text-center whitespace-nowrap">保留</th>
-                        <th class="px-2 py-2 font-semibold whitespace-nowrap">Next Step</th>
+                        <th class="px-2 py-2 text-center" title="泛欧计划">泛欧</th>
+                        <th class="px-2 py-2 text-center" title="五点Rufus+标题">Rufus</th>
+                        <th class="px-2 py-2 text-center" title="敏感词规避">敏感词</th>
+                        <th class="px-2 py-2 text-center" title="图片+QA">图片QA</th>
+                        <th class="px-2 py-2 text-center" title="A+页面">A+</th>
+                        <th class="px-2 py-2 text-center border-r border-slate-100">状态</th>
+
+                        <th class="px-2 py-2 text-center">配送费</th>
+                        <th class="px-2 py-2 text-center">配送占比</th>
+                        <th class="px-2 py-2 text-center text-red-600">清仓线</th>
+                        <th class="px-2 py-2 text-center text-amber-600">动销价</th>
+                        <th class="px-2 py-2 text-center text-emerald-600">建议价</th>
+                        <th class="px-2 py-2 text-center border-r border-slate-100">盈亏点</th>
+
+                        <th class="px-2 py-2 text-center">流量</th>
+                        <th class="px-2 py-2 text-center">CTR</th>
+                        <th class="px-2 py-2 text-center">CVR</th>
+                        <th class="px-2 py-2 text-center">ACOAS</th>
+                        <th class="px-2 py-2 text-center border-r border-slate-100">自然占比</th>
+
+                        <th class="px-2 py-2 text-center">Vine进度</th>
+                        <th class="px-2 py-2 text-center">广告</th>
+                        <th class="px-2 py-2 text-center">保留</th>
+                        <th class="px-2 py-2">Next Step</th>
                     </tr>
                 </thead>
-                <tbody id="npi-table-body">
-                    <!-- Dynamic content rendered by index.js -->
-                    <tr>
-                        <td colspan="29" class="px-6 py-10 text-center text-slate-400">
-                            <i class="fas fa-spinner fa-spin text-2xl"></i>
-                            <p class="mt-2">加载中...</p>
+                <tbody id="npi-table-body" class="divide-y divide-slate-100">
+                    <tr class="hover:bg-blue-50/50 transition-colors group">
+                        <td class="px-2 py-1 sticky left-0 bg-white group-hover:bg-blue-50 border-r border-slate-100">
+                            <span class="text-blue-600 font-bold text-xs">新品-测款</span>
+                        </td>
+
+                        <td class="px-2 py-1 font-mono text-slate-700">DE-WIDGET-001</td>
+                        <td class="px-2 py-1 text-slate-600 truncate max-w-[100px]" title="多功能收纳盒">多功能收纳盒</td>
+                        <td class="px-2 py-1 text-slate-500">Altear</td>
+                        <td class="px-2 py-1 font-mono text-slate-400 text-[11px]">B0CXXXXXXX1</td>
+                        <td class="px-2 py-1 text-center"><span
+                                class="bg-gray-100 text-gray-600 px-1 rounded text-[10px]">DE</span></td>
+                        <td class="px-2 py-1 text-center font-mono">500</td>
+
+                        <td class="px-2 py-1 text-center font-mono border-r border-slate-100">45天</td>
+
+                        <td class="px-1 py-1 text-center"><input type="checkbox" checked
+                                class="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-offset-0 focus:ring-1">
+                        </td>
+                        <td class="px-1 py-1 text-center"><input type="checkbox" checked
+                                class="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-offset-0 focus:ring-1">
+                        </td>
+                        <td class="px-1 py-1 text-center"><input type="checkbox" checked
+                                class="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-offset-0 focus:ring-1">
+                        </td>
+                        <td class="px-1 py-1 text-center"><input type="checkbox"
+                                class="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-offset-0 focus:ring-1">
+                        </td>
+                        <td class="px-1 py-1 text-center"><input type="checkbox" checked
+                                class="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-offset-0 focus:ring-1">
+                        </td>
+                        <td class="px-1 py-1 text-center font-bold text-amber-500 border-r border-slate-100">3/4</td>
+
+                        <td class="px-1 py-1">
+                            <input type="text" value="4.5"
+                                class="w-full text-center bg-transparent border-none p-0 text-slate-700 font-mono text-xs focus:ring-1 focus:ring-blue-500 focus:bg-white rounded-sm">
+                        </td>
+                        <td class="px-1 py-1 text-center text-slate-400 font-mono text-[11px]">40.9%</td>
+                        <td class="px-1 py-1">
+                            <input type="text" value="€9.00"
+                                class="w-full text-center bg-transparent border-none p-0 text-red-600 font-mono font-bold text-xs focus:ring-1 focus:ring-blue-500 focus:bg-white rounded-sm">
+                        </td>
+                        <td class="px-1 py-1">
+                            <input type="text" value="€10.00"
+                                class="w-full text-center bg-transparent border-none p-0 text-amber-600 font-mono font-bold text-xs focus:ring-1 focus:ring-blue-500 focus:bg-white rounded-sm">
+                        </td>
+                        <td class="px-1 py-1">
+                            <input type="text" value="€11.00"
+                                class="w-full text-center bg-transparent border-none p-0 text-emerald-600 font-mono font-bold text-xs focus:ring-1 focus:ring-blue-500 focus:bg-white rounded-sm">
+                        </td>
+                        <td class="px-2 py-1 text-center font-mono border-r border-slate-100">€12</td>
+
+                        <td class="px-2 py-1 text-center font-mono">1,250</td>
+                        <td class="px-2 py-1 text-center font-mono">0.68%</td>
+                        <td class="px-2 py-1 text-center font-mono">12.5%</td>
+                        <td class="px-2 py-1 text-center font-mono font-bold">35%</td>
+                        <td class="px-2 py-1 text-center font-mono border-r border-slate-100">45%</td>
+
+                        <td class="px-2 py-1 text-center font-mono">15/30</td>
+                        <td class="px-1 py-1 text-center">
+                            <button
+                                class="px-2 py-0.5 rounded border border-slate-200 bg-white text-xs hover:bg-slate-50">混合</button>
+                        </td>
+                        <td class="px-1 py-1 text-center">30/30</td>
+                        <td class="px-1 py-1">
+                            <button
+                                class="px-2 py-0.5 rounded border border-slate-200 bg-white text-xs hover:bg-slate-50">手册</button>
                         </td>
                     </tr>
                 </tbody>
