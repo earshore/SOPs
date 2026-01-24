@@ -871,10 +871,10 @@ function clearHistory() {
 // ================================================================
 
 const scraperActions = {
-  saveProxyConfig: window.saveProxyConfig,
-  closeSettings: window.closeSettings,
-  loadHistory: window.loadHistory,
-  deleteHistoryItem: window.deleteHistoryItem,
+  saveProxyConfig,
+  closeSettings,
+  loadHistory,
+  deleteHistoryItem,
 };
 
 registerActionsWithLegacy(scraperActions);
