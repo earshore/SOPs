@@ -159,7 +159,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 registerActionsWithLegacy({
   // === Navigation 导航 ===
   switchTab,
-  switchDataTab,
+  // switchDataTab, // Owned by DataModule
   renderMegaMenu,
 
   // === Utilities 工具函数 ===
@@ -175,21 +175,7 @@ registerActionsWithLegacy({
   testConnection,
   saveProxyConfig,
 
-  // === Scraper 数据采集 ===
-  selectSite,
-
-  // === Data Display 数据管理 ===
-  toggleCardExpand,
-  triggerImport,
-  handleImportFiles,
-  deleteReview,
-  renderDataPanel,
-  deleteProduct,
-
-  // === Analysis AI分析 ===
-  updateAsinSelectList,
-  analyzeSelectedAsins,
-  renderReport,
+  // Scraper, Data, Analysis actions are now self-registered by their respective modules
 });
 
 console.log("✅ [ActionRegistry] 全局动作已注册");

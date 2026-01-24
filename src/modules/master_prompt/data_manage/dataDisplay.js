@@ -12,6 +12,7 @@ import { registerActionsWithLegacy } from "../../../common/utils/actionRegistry.
 class DataModule extends BaseModule {
     constructor() {
         super('master_prompt_data');
+        this.registerGlobalActions();
     }
 
     async render() {
@@ -21,7 +22,6 @@ class DataModule extends BaseModule {
     async init() {
         console.log("🚀 Data Module Initialized (BaseModule)");
         this.setupEventListeners();
-        this.registerGlobalActions();
 
         if (state.scrapedData) {
             this.renderDataPanel();

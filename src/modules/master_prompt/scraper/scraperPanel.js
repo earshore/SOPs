@@ -20,6 +20,7 @@ class ScraperModule extends BaseModule {
     constructor() {
         super('master_prompt_scraper');
         this.HISTORY_STORAGE_KEY = "scrape_history";
+        this.registerGlobalActions();
     }
 
     async render() {
@@ -29,11 +30,11 @@ class ScraperModule extends BaseModule {
     async init() {
         console.log("🚀 Scraper Module Initialized (BaseModule)");
         this.setupUI();
-        this.registerGlobalActions();
-        
+        // this.registerGlobalActions(); // Moved to constructor
+
         // Restore History View on load
         this.renderHistory();
-        
+
         // Initial Network UI update
         setTimeout(() => this.updateNetworkUI(), 100);
     }
@@ -353,7 +354,7 @@ class ScraperModule extends BaseModule {
             btn.disabled = false;
             btn.innerHTML = `<i class="fas fa-rocket"></i> <span>开始采集</span>`;
             btn.classList.remove("opacity-80");
-            
+
             const inputNow = document.getElementById("asin-input").value;
             if (!inputNow) {
                 btn.disabled = true;
@@ -623,8 +624,6 @@ class ScraperModule extends BaseModule {
 
     registerGlobalActions() {
         registerActionsWithLegacy({
-            saveProxyConfig,
-            closeSettings,
             loadHistory: (id) => this.loadHistory(id),
             deleteHistoryItem: (id) => this.deleteHistoryItem(id),
         });
@@ -639,11 +638,11 @@ export const initScraperListeners = () => {
     window.addEventListener('app:route-changed', (e) => {
         const { routeId } = e.detail;
         const container = document.getElementById('panel-scraper');
-        
+
         if (routeId === 'scraper') {
-             if (!instance._isMounted && container) instance.mount(container);
+            if (!instance._isMounted && container) instance.mount(container);
         } else {
-             if (instance._isMounted) instance.unmount();
+            if (instance._isMounted) instance.unmount();
         }
     });
 };
