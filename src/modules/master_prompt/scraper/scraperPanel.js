@@ -241,6 +241,14 @@ class ScraperModule extends BaseModule {
         });
     }
 
+    clearAsins() {
+        const inputEl = document.getElementById("asin-input");
+        if (inputEl) {
+            inputEl.value = "";
+            inputEl.dispatchEvent(new Event("input"));
+        }
+    }
+
     validateAsins(input) {
         const asins = input.split(/[,\n\s]+/).map((a) => a.trim().toUpperCase()).filter((a) => a);
         const valid = asins.filter((a) => /^B0[A-Z0-9]{8}$/.test(a));
@@ -626,6 +634,8 @@ class ScraperModule extends BaseModule {
         registerActionsWithLegacy({
             loadHistory: (id) => this.loadHistory(id),
             deleteHistoryItem: (id) => this.deleteHistoryItem(id),
+            selectSite: (s) => this.selectSite(s),
+            clearAsins: () => this.clearAsins(),
         });
     }
 }
