@@ -1,9 +1,10 @@
+import { loadTemplate } from "../../../../../common/utils/viewLoader.js";
+
 // 欧洲本土化高危词库 (Restricted Words) SOP
 import { initRestrictedWordsPanel } from './restrictedWordsHandler.js';
 
 export async function mount(container) {
-    const response = await fetch('src/modules/sops/views/growth/restricted_words/template.html');
-    const html = await response.text();
+    const html = await loadTemplate('src/modules/sops/views/growth/restricted_words/template.html');
     container.innerHTML = html;
     container.classList.add('fade-in');
 

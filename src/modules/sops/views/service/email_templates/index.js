@@ -1,7 +1,8 @@
+import { loadTemplate } from "../../../../../common/utils/viewLoader.js";
+
 // 邮件回复模板 SOP
 export async function mount(container) {
-    const response = await fetch('src/modules/sops/views/service/email_templates/template.html');
-    const html = await response.text();
+    const html = await loadTemplate('src/modules/sops/views/service/email_templates/template.html');
     container.innerHTML = html;
     container.classList.add('fade-in');
 

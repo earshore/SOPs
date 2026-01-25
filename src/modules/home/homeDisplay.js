@@ -1,5 +1,6 @@
 // src/modules/home/homeDisplay.js
 import BaseModule from "../../common/BaseModule.js";
+import { loadTemplate } from "../../common/utils/viewLoader.js";
 
 class HomeModule extends BaseModule {
     constructor() {
@@ -12,7 +13,7 @@ class HomeModule extends BaseModule {
         this.ctx = null;
         this.width = 0;
         this.height = 0;
-        
+
         // Animation Config
         this.CONFIG = {
             spacing: 50,       // 粒子间距
@@ -26,19 +27,19 @@ class HomeModule extends BaseModule {
 
     async render() {
         // Home 模块通常是静态 HTML 已经在 index.html 或由 ViewLoader 预加载了
-        // 如果是纯动态加载，这里可以 fetch template
+        // 如果是纯动态加载，这里可以 loadTemplate
         // 但根据现有架构，Home 的 HTML 往往是默认存在的。
         // 为了兼容 BaseModule，我们假设 container 已经有了内容，或者我们什么都不做
         // 如果容器是空的，我们可以尝试加载（可选）
         if (!this.container.innerHTML.trim()) {
-             const response = await fetch('src/modules/home/homeDisplay.html');
-             this.container.innerHTML = await response.text();
+            const html = await loadTemplate('src/modules/home/homeDisplay.html');
+            this.container.innerHTML = html;
         }
     }
 
     async init() {
         console.log("🚀 Initializing Clean Water Ripple Splash (BaseModule)...");
-        
+
         const canvas = document.getElementById('particles-canvas');
         if (!canvas) return;
 
@@ -47,7 +48,7 @@ class HomeModule extends BaseModule {
 
         // 1. 绑定事件 (自动清理)
         this.addEventListener(document, 'mousemove', (e) => this.handleMouseMove(e));
-        
+
         // 2. 初始化尺寸监听 (手动清理)
         this.initResizeObserver();
 
@@ -72,7 +73,7 @@ class HomeModule extends BaseModule {
             this.resizeObserver.disconnect();
             this.resizeObserver = null;
         }
-        
+
         // BaseModule 会自动清理 setInterval 和 addEventListener
     }
 
@@ -89,7 +90,7 @@ class HomeModule extends BaseModule {
                 const rect = entries[0].contentRect;
                 this.width = rect.width;
                 this.height = rect.height;
-                
+
                 if (this.canvas) {
                     this.canvas.width = this.width;
                     this.canvas.height = this.height;
@@ -241,11 +242,11 @@ export const initHomeSplash = () => {
     // 兼容层：如果外部调用 initHomeSplash，我们手动 mount
     // 注意：这意味着我们需要知道 container。
     // 在旧架构中，container 是硬编码的 ID。
-    const container = document.getElementById('home-splash-container'); 
+    const container = document.getElementById('home-splash-container');
     // Home 比较特殊，它的容器 id='home-splash-container' 其实在 panel-home 内部
     // BaseModule 期望传入的是 panel 本身。
     // 这里做个妥协：传入 document.body 或者相关的 wrapper，或者重写 mount
-    if (container) instance.mount(container.parentElement); 
+    if (container) instance.mount(container.parentElement);
 };
 
 // 新架构导出

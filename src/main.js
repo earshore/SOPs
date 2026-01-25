@@ -9,7 +9,7 @@ import { marked } from 'marked';
 import Chart from 'chart.js/auto';
 import 'gridstack/dist/gridstack.min.css';
 import { GridStack } from 'gridstack';
-import '@fortawesome/fontawesome-free/css/all.min.css';
+// import '@fortawesome/fontawesome-free/css/all.min.css'; // Removed: Used CDN in index.html for performance
 import '../css/style.css';
 
 // Expose to window for legacy compatibility

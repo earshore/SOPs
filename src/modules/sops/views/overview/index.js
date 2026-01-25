@@ -1,7 +1,8 @@
+import { loadTemplate } from "../../../../common/utils/viewLoader.js";
+
 // SOPs Overview - 总览页面
 export async function mount(container) {
-    const response = await fetch('src/modules/sops/views/overview/template.html');
-    const html = await response.text();
+    const html = await loadTemplate('src/modules/sops/views/overview/template.html');
     container.innerHTML = html;
     container.classList.add('fade-in');
 

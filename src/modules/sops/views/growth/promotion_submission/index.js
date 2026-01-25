@@ -96,8 +96,7 @@ function calculateProfit() {
 window.calculateProfit = calculateProfit;
 
 export async function mount(container) {
-    const response = await fetch('src/modules/sops/views/growth/promotion_submission/template.html');
-    const html = await response.text();
+    const html = await loadTemplate('src/modules/sops/views/growth/promotion_submission/template.html');
     container.innerHTML = html;
     container.classList.add('fade-in');
 

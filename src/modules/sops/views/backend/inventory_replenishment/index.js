@@ -1,7 +1,8 @@
+import { loadTemplate } from "../../../../../common/utils/viewLoader.js";
+
 // 库存预警与补货 SOP
 export async function mount(container) {
-    const response = await fetch('src/modules/sops/views/backend/inventory_replenishment/template.html');
-    const html = await response.text();
+    const html = await loadTemplate('src/modules/sops/views/backend/inventory_replenishment/template.html');
     container.innerHTML = html;
     container.classList.add('fade-in');
     console.log("✅ 库存预警与补货 SOP 模块已挂载");
