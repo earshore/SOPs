@@ -36,14 +36,46 @@ const MODULE_MAP = {
 let currentModule = null; // 保持对当前子模块的引用，以便卸载
 
 /**
- * 核心：加载子模块视图
- * 🎯 P2 增强: 错误边界包装
+ * 等待容器渲染 (解决 Race Condition)
  */
-async function loadSubModule(routeId) {
-    const container = document.getElementById('sops_content_area');
-    if (!container) return; // 容器还没准备好（Html shell 未加载）
+function waitForContainer(id, timeout = 3000) {
+    return new Promise((resolve) => {
+        const el = document.getElementById(id);
+        if (el) return resolve(el);
 
-    // 1. 卸载旧模块 (清理内存、销毁图表)
+        const startTime = Date.now();
+        const timer = setInterval(() => {
+            const el = document.getElementById(id);
+            if (el) {
+                clearInterval(timer);
+                resolve(el);
+            }
+            if (Date.now() - startTime > timeout) {
+                clearInterval(timer);
+                resolve(null);
+            }
+        }, 50);
+    });
+}
+
+/**
+ * 核心：加载子模块视图
+ * 增强: 等待容器 + 错误重试 + 错误边界
+ */
+async function loadSubModule(routeId, retryCount = 0) {
+    // 1. 等待 Shell 容器 (最多 3 秒)
+    const container = await waitForContainer('sops_content_area');
+
+    if (!container) {
+        console.error(`[SOPs] 容器 #sops_content_area 未找到 (超时)`);
+        // 如果是第一次失败，可能是 shell 还在加载，尝试延迟一下再次触发路由事件? 
+        // 或者直接报错 UI
+        const shell = document.getElementById('panel-sops');
+        if (shell) shell.innerHTML = `<div class="p-10 text-red-500">❌ 错误: 内容容器加载超时，请刷新重试。</div>`;
+        return;
+    }
+
+    // 2. 卸载旧模块
     if (currentModule && currentModule.unmount) {
         try {
             currentModule.unmount();
@@ -51,9 +83,9 @@ async function loadSubModule(routeId) {
             console.warn(`[SOPs] 卸载模块时出错:`, unmountErr);
         }
     }
-    container.innerHTML = '<div class="p-10 text-center"><i class="fas fa-spinner fa-spin text-2xl text-blue-500"></i></div>';
 
-    // 2. 匹配路由
+    container.innerHTML = '<div class="p-10 text-center fade-in"><i class="fas fa-spinner fa-spin text-2xl text-blue-500"></i><p class="text-slate-400 text-xs mt-2">Loading module...</p></div>';
+
     const loader = MODULE_MAP[routeId];
     if (!loader) {
         container.innerHTML = `<div class="p-10 text-red-500">⚠️ 模块 [${routeId}] 尚未开发或未注册。</div>`;
@@ -67,34 +99,47 @@ async function loadSubModule(routeId) {
         // 4. 挂载新模块
         if (module.mount) {
             await module.mount(container);
-            currentModule = module; // 保存引用
+            currentModule = module;
         } else {
-            console.error(`模块 ${routeId} 缺少 export function mount()`);
             throw new Error(`模块接口不完整: 缺少 mount() 函数`);
         }
     } catch (err) {
-        console.error("加载子模块失败:", err);
+        console.error(`加载子模块失败 (重试 ${retryCount}):`, err);
 
-        // 🎯 P2: 错误边界 UI
+        // 自动重试机制 (Max 1次)
+        if (retryCount < 1) {
+            container.innerHTML = '<div class="p-10 text-center"><i class="fas fa-circle-notch fa-spin text-orange-500"></i><span class="ml-2 text-slate-500">连接超时，正在重试...</span></div>';
+            setTimeout(() => loadSubModule(routeId, retryCount + 1), 1000);
+            return;
+        }
+
+        // 错误边界 UI
         container.innerHTML = `
-            <div class="sops-error-boundary flex flex-col items-center justify-center p-12 text-center">
+            <div class="sops-error-boundary flex flex-col items-center justify-center p-12 text-center fade-in">
                 <div class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mb-4">
                     <i class="fas fa-exclamation-triangle text-2xl text-red-500"></i>
                 </div>
                 <h3 class="text-lg font-bold text-slate-800 mb-2">模块加载失败</h3>
-                <p class="text-sm text-slate-500 mb-4 max-w-md">${err.message || '未知错误'}</p>
+                <p class="text-sm text-slate-500 mb-4 max-w-md">${err.message || '网络连接不稳定或文件缺失'}</p>
                 <div class="flex gap-3">
-                    <button onclick="location.reload()" 
+                    <button onclick="window.location.reload()" 
                         class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors">
                         <i class="fas fa-redo mr-2"></i>刷新页面
                     </button>
-                    <button onclick="window.dispatchEvent(new CustomEvent('app:route-changed', { detail: { routeId: 'sops_overview' } }))" 
+                    <!-- 我们使用一个全局唯一的重试函数或者简单的 onclick -->
+                    <button id="btn-retry-${routeId}" 
                         class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
-                        返回总览
+                        再试一次
                     </button>
                 </div>
             </div>
         `;
+
+        // 绑定重试按钮 (因为 onclick 里的函数作用域问题，这里手动绑定更安全)
+        setTimeout(() => {
+            const retryBtn = document.getElementById(`btn-retry-${routeId}`);
+            if (retryBtn) retryBtn.onclick = () => loadSubModule(routeId, 0);
+        }, 0);
     }
 }
 
