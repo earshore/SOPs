@@ -1,4 +1,5 @@
 // 促销活动提报 SOP - 欧洲站
+import { loadTemplate } from "../../../../../common/utils/viewLoader.js";
 // Profit Calculator Logic
 
 function calculateProfit() {

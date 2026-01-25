@@ -439,23 +439,39 @@ window.amz_clearPromptInputs = function () {
 };
 
 // ================= Initialization =================
+// ================= Initialization =================
+let isEventsBound = false;
+
+function bindUIEvents() {
+  if (isEventsBound) return;
+  const panel = document.getElementById("panel-promptlab");
+  if (!panel) return;
+
+  panel.addEventListener("change", (e) => {
+    saveInputsToState();
+    if (e.target.id === "lab-char-limit") updateCharCount();
+    updateButtonState();
+  });
+
+  // Bind input listeners for Tier 1 & Tier 2
+  ["lab-keywords-tier1", "lab-keywords-tier2"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("input", updateButtonState);
+  });
+
+  // Bind output character count
+  const outEl = document.getElementById("final-prompt-output");
+  if (outEl) outEl.addEventListener("input", updateCharCount);
+
+  isEventsBound = true;
+  console.log("✅ PromptLab Events Bound Successfully");
+}
+
 export function initPromptlabModule() {
   console.log("🚀 Prompt Lab (Clean UX v5.0) Init...");
 
-  const panel = document.getElementById("panel-promptlab");
-  if (panel) {
-    panel.addEventListener("change", (e) => {
-      saveInputsToState();
-      if (e.target.id === "lab-char-limit") updateCharCount();
-      updateButtonState();
-      ["lab-keywords-tier1", "lab-keywords-tier2"].forEach((id) => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener("input", updateButtonState);
-      });
-    });
-    const outEl = document.getElementById("final-prompt-output");
-    if (outEl) outEl.addEventListener("input", updateCharCount);
-  }
+  // Remove immediate binding as DOM might not be ready
+  // We rely on route change to bind events
 
   // ✅ 修复 2：使用事件监听替代 Monkey Patch
   // 监听路由切换事件
@@ -463,10 +479,17 @@ export function initPromptlabModule() {
     const { routeId } = e.detail;
     if (routeId === "promptlab") {
       const myPanel = document.getElementById("panel-promptlab");
+
+      // Try to bind events now that we are active
+      bindUIEvents();
+
       if (myPanel) {
         myPanel.classList.add("fade-in");
         restoreInputsFromState(); // 恢复数据
         renderReportAnalysis();   // 渲染复选框 (包含下拉框生成)
+
+        // Ensure button state is correct after render
+        setTimeout(updateButtonState, 100);
       }
     }
   });
