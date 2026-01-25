@@ -1,6 +1,7 @@
 // src/modules/amz_hub/views/promotions/index.js
 // 欧洲站实战版 - 基于头部卖家真实经验
 import BaseModule from "../../../../common/BaseModule.js";
+import { loadTemplate } from "../../../../common/utils/viewLoader.js";
 
 // ==================== 1. 内容数据源 (欧洲站实战版) ====================
 const promoData = [
@@ -434,8 +435,7 @@ class PromotionsModule extends BaseModule {
     }
 
     async render() {
-        const response = await fetch('src/modules/amz_hub/views/promotions/template.html');
-        this.container.innerHTML = await response.text();
+        this.container.innerHTML = await loadTemplate('src/modules/amz_hub/views/promotions/template.html');
     }
 
     async init() {

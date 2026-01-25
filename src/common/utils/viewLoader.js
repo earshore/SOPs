@@ -128,3 +128,28 @@ export async function ensureViewLoaded(routeId) {
 export function registerView(viewConfig) {
     // 暂不处理动态注册，现有逻辑不需要
 }
+
+/**
+ * 通用：根据路径加载模版（解决子模块 fetch 404 问题）
+ * @param {string} path - 相对 src 的路径, e.g., 'src/modules/sops/views/growth/npi_tracker/template.html'
+ */
+export async function loadTemplate(path) {
+    try {
+        // 尝试标准化路径
+        if (!path.startsWith('/')) path = '/' + path;
+
+        const loader = htmlModules[path];
+        if (!loader) {
+            console.error(`[ViewLoader] Template not found in registry: ${path}`);
+            // Fallback: 尝试不带前导斜杠
+            const altPath = path.substring(1);
+            if (htmlModules[altPath]) return htmlModules[altPath]();
+
+            throw new Error(`Template path not found: ${path}`);
+        }
+        return await loader();
+    } catch (e) {
+        console.error(`[ViewLoader] Failed to load template [${path}]:`, e);
+        return `<div class="p-4 text-red-500">Error loading template: ${e.message}</div>`;
+    }
+}

@@ -1,5 +1,6 @@
 import BaseModule from "../../../../common/BaseModule.js";
 import { A10_CHART_DATA } from "../../constants/amz_hub_constants.js";
+import { loadTemplate } from "../../../../common/utils/viewLoader.js";
 
 class EcosystemModule extends BaseModule {
     constructor() {
@@ -8,8 +9,7 @@ class EcosystemModule extends BaseModule {
     }
 
     async render() {
-        const response = await fetch('src/modules/amz_hub/views/ecosystem/template.html');
-        this.container.innerHTML = await response.text();
+        this.container.innerHTML = await loadTemplate('src/modules/amz_hub/views/ecosystem/template.html');
     }
 
     async init() {

@@ -526,7 +526,21 @@ class AnalysisModule extends BaseModule {
 
     this.grid.batchUpdate();
     this.grid.removeAll();
-    widgets.forEach((w) => this.grid.addWidget(w));
+    widgets.forEach((w) => {
+      // [FIX] Manually create widget element to ensure content is treated as HTML
+      // GridStack 默认可能转义 content，或者版本差异导致的问题
+      // 我们改为让 addWidget 生成 widget，然后手动设置 innerHTML
+      const widgetConfig = {
+        x: w.x, y: w.y, w: w.w, h: w.h, id: w.id
+      };
+      const el = this.grid.addWidget(widgetConfig);
+
+      // Find the content container that GridStack created
+      const contentEl = el.querySelector('.grid-stack-item-content');
+      if (contentEl) {
+        contentEl.innerHTML = w.content; // Force innerHTML assignment
+      }
+    });
     this.grid.batchUpdate(false);
 
     this.grid.on("change", () => this.saveGridLayout(templateId));

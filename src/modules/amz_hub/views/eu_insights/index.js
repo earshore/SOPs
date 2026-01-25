@@ -1,5 +1,6 @@
 import BaseModule from "../../../../common/BaseModule.js";
 import { AMZ_COUNTRY_DATA } from "../../constants/amz_hub_constants.js";
+import { loadTemplate } from "../../../../common/utils/viewLoader.js";
 
 class EuInsightsModule extends BaseModule {
     constructor() {
@@ -8,8 +9,7 @@ class EuInsightsModule extends BaseModule {
     }
 
     async render() {
-        const response = await fetch('src/modules/amz_hub/views/eu_insights/template.html');
-        this.container.innerHTML = await response.text();
+        this.container.innerHTML = await loadTemplate('src/modules/amz_hub/views/eu_insights/template.html');
     }
 
     async init() {
@@ -82,12 +82,12 @@ class EuInsightsModule extends BaseModule {
                         pointBackgroundColor: 'rgb(99, 102, 241)',
                     }]
                 },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    scales: { 
-                        r: { suggestedMin: 0, suggestedMax: 100 } 
-                    } 
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: { suggestedMin: 0, suggestedMax: 100 }
+                    }
                 }
             });
         }

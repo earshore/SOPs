@@ -1,5 +1,6 @@
 import BaseModule from "../../../../common/BaseModule.js";
 import { SEO_RADAR_DATA } from "../../constants/amz_hub_constants.js";
+import { loadTemplate } from "../../../../common/utils/viewLoader.js";
 
 class SeoStrategyModule extends BaseModule {
     constructor() {
@@ -8,8 +9,7 @@ class SeoStrategyModule extends BaseModule {
     }
 
     async render() {
-        const response = await fetch('src/modules/amz_hub/views/seo_strategy/template.html');
-        this.container.innerHTML = await response.text();
+        this.container.innerHTML = await loadTemplate('src/modules/amz_hub/views/seo_strategy/template.html');
     }
 
     async init() {

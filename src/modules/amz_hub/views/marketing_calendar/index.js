@@ -6,6 +6,7 @@
 import BaseModule from "../../../../common/BaseModule.js";
 import { amzf_countries, amzf_months, amzf_events } from "../../constants/amz_hub_constants.js";
 import { StorageService, STORAGE_KEYS } from "../../../../services/storageService.js";
+import { loadTemplate } from "../../../../common/utils/viewLoader.js";
 
 const AMZF_HISTORY_KEY = 'amzf_search_history'; // 使用 StorageService 键
 const AMZF_MAX_HISTORY = 10; // 最大历史记录数
@@ -14,7 +15,7 @@ const AMZF_QUICK_TAGS = ['圣诞', 'Prime Day', '黑五', '复活节', '情人�
 class MarketingCalendarModule extends BaseModule {
     constructor() {
         super('amz_marketing_calendar');
-        
+
         // State Initialization
         this.state = {
             currentView: 'country',
@@ -23,13 +24,12 @@ class MarketingCalendarModule extends BaseModule {
             expandedSections: new Set(),
             searchHistory: []
         };
-        
+
         this.debounceTimer = null;
     }
 
     async render() {
-        const response = await fetch('src/modules/amz_hub/views/marketing_calendar/template.html');
-        this.container.innerHTML = await response.text();
+        this.container.innerHTML = await loadTemplate('src/modules/amz_hub/views/marketing_calendar/template.html');
     }
 
     async init() {
@@ -42,7 +42,7 @@ class MarketingCalendarModule extends BaseModule {
         this.renderStats();
         this.renderContent();
         this.bindSearchEvents();
-        
+
         console.log("✅ Marketing Calendar Loaded");
     }
 
@@ -53,7 +53,7 @@ class MarketingCalendarModule extends BaseModule {
     }
 
     // ==================== Global Proxies (Bridge for HTML onclicks) ====================
-    
+
     bindGlobalProxies() {
         // 使用箭头函数保持 this 指向实例
         window.amzf_selectCountry = (code) => this.selectCountry(code);
@@ -64,7 +64,7 @@ class MarketingCalendarModule extends BaseModule {
         window.amzf_deleteHistoryItem = (idx) => this.deleteHistoryItem(idx);
         window.amzf_clearAllHistory = () => this.clearAllHistory();
         // 暴露 scroll 用于内部生成的 HTML
-        window.amzf_scrollTo = (id) => { /* needed? */ }; 
+        window.amzf_scrollTo = (id) => { /* needed? */ };
     }
 
     unbindGlobalProxies() {
@@ -100,13 +100,13 @@ class MarketingCalendarModule extends BaseModule {
     addToHistory(term) {
         if (!term || term.trim().length < 2) return;
         const normalizedTerm = term.trim();
-        
+
         // 去重并添加到头部
         this.state.searchHistory = this.state.searchHistory.filter(
             item => item.toLowerCase() !== normalizedTerm.toLowerCase()
         );
         this.state.searchHistory.unshift(normalizedTerm);
-        
+
         if (this.state.searchHistory.length > AMZF_MAX_HISTORY) {
             this.state.searchHistory = this.state.searchHistory.slice(0, AMZF_MAX_HISTORY);
         }
@@ -152,7 +152,7 @@ class MarketingCalendarModule extends BaseModule {
 
     selectCountry(code) {
         this.state.selectedCountry = code;
-        
+
         // Update Tabs UI
         const tabs = this.container.querySelectorAll('.amzf_country_tab');
         tabs.forEach(tab => {
@@ -197,7 +197,7 @@ class MarketingCalendarModule extends BaseModule {
             input.focus();
         }
         if (clearBtn) clearBtn.classList.remove('amzf_visible');
-        
+
         this.state.searchTerm = '';
         this.renderStats();
         this.renderContent();
@@ -260,7 +260,7 @@ class MarketingCalendarModule extends BaseModule {
 
         // BaseModule.addEventListener handles cleanup automatically
         this.addEventListener(input, 'focus', () => this.showSearchHistory());
-        
+
         if (searchBox) {
             this.addEventListener(searchBox, 'click', () => input.focus());
         }
