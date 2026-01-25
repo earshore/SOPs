@@ -5,19 +5,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title> Amazing Amazon Architect </title>
-  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
-  <link href="https://cdn.jsdelivr.net/npm/gridstack@10.1.0/dist/gridstack.min.css" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/gridstack@10.1.0/dist/gridstack-all.js"></script>
-
-  <link rel="stylesheet" href="css/style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Local Assets Handling by Vite -->
+  <!-- CSS will be imported in main.js -->
 
   <link rel="icon" href="data:;base64,iVBORw0KGgo=">
-
 </head>
 
 <body class="bg-slate-50 h-screen flex flex-col overflow-hidden">
@@ -143,25 +135,9 @@
   <div id="toast-container" class="fixed bottom-6 right-6 z-[9999] space-y-3 pointer-events-none"></div>
   <div id="modal-container"></div>
 
-  <!-- 使用指南模态框容器 -->
+  <!-- User Guide Modal Container -->
   <div id="user-guide-container"></div>
 
-  <script>
-    // 动态加载使用指南模态框组件
-    fetch('src/components/modal/userGuideModal.html')
-      .then(response => response.text())
-      .then(html => {
-        document.getElementById('user-guide-container').innerHTML = html;
-        // 重新执行脚本
-        const scripts = document.getElementById('user-guide-container').querySelectorAll('script');
-        scripts.forEach(script => {
-          const newScript = document.createElement('script');
-          newScript.textContent = script.textContent;
-          document.body.appendChild(newScript);
-        });
-      })
-      .catch(err => console.warn('Failed to load user guide modal:', err));
-  </script>
 
   <script type="module" src="src/main.js"></script>
 

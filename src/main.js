@@ -4,11 +4,53 @@
 // 🎯 Phase 4: 使用 StorageService 统一数据访问
 // ================================================================
 
+// ✅ Dependency Bundling (Optimization)
+import { marked } from 'marked';
+import Chart from 'chart.js/auto';
+import 'gridstack/dist/gridstack.min.css';
+import { GridStack } from 'gridstack';
+import '@fortawesome/fontawesome-free/css/all.min.css';
+import '../css/style.css';
+
+// Expose to window for legacy compatibility
+window.marked = marked;
+window.Chart = Chart;
+window.GridStack = GridStack;
+
 // ✅ 导入视图加载器 (HTML 拆分重构的核心)
 import { initViews } from './common/utils/viewLoader.js';
 
 // ✅ 导入 StorageService
 import { StorageService, STORAGE_KEYS } from './services/storageService.js';
+
+// ✅ Import User Guide Modal (Vite Raw Import)
+import userGuideModalHtml from './components/modal/userGuideModal.html?raw';
+import promptModalHtml from './components/modal/promptModal.html?raw';
+
+// Inject Modals
+document.addEventListener('DOMContentLoaded', () => {
+  // User Guide Modal
+  const guideContainer = document.getElementById('user-guide-container');
+  if (guideContainer) {
+    guideContainer.innerHTML = userGuideModalHtml;
+    Array.from(guideContainer.querySelectorAll('script')).forEach(script => {
+      const newScript = document.createElement('script');
+      Array.from(script.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+      newScript.textContent = script.textContent;
+      document.body.appendChild(newScript);
+    });
+  }
+
+  // Register Prompt Modal Global Helper
+  window.renderPromptModal = () => {
+    if (!document.getElementById('prompt-modal')) {
+      const temp = document.createElement('div');
+      temp.innerHTML = promptModalHtml;
+      document.getElementById('modal-container').appendChild(temp.firstElementChild);
+    }
+  };
+});
+
 
 // ✅ P1: 导入动作注册中心
 import {

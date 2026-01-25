@@ -1,8 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* =========================================
    1. 全局基础与排版 (Global Reset)
    ========================================= */
 * {
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
   box-sizing: border-box;
 }
 
