@@ -5,12 +5,11 @@ import state from "../../../common/state.js";
 import { showToast, showProgress, getErrorSummary, sleep } from "../../../common/utils/ui.js";
 import { scrapeAsin } from "./scraperService.js";
 import { LANGUAGE_HEADERS, languageFlagMap, SITE_NAME_MAP } from "../../../common/constants/constants.js";
-import { renderDataPanel } from "../data_manage/dataDisplay.js";
-import { updateAsinSelectList } from "../analysis/analysisDisplay.js";
 import { HistoryService } from "../services/historyService.js";
 import { saveProxyConfig, renderProxyInputUI, closeSettings } from "../../../components/settings/systemSettings.js";
 import { StorageService, STORAGE_KEYS } from "../../../services/storageService.js";
 import { ErrorService } from "../../../services/errorService.js";
+import eventBus from "../../../common/EventBus.js";
 
 // ==========================================
 // Scraper Module Class
@@ -371,8 +370,8 @@ class ScraperModule extends BaseModule {
 
             const successCount = products.filter((p) => p.scrape_status === "success").length;
             if (successCount > 0) {
-                if (typeof renderDataPanel === "function") renderDataPanel();
-                if (typeof updateAsinSelectList === "function") updateAsinSelectList();
+                // [MODIFIED] Use Event Bus instead of direct coupling
+                eventBus.emit('SCRAPE_COMPLETE', state.scrapedData);
             }
             this.renderHistory();
 
@@ -570,8 +569,9 @@ class ScraperModule extends BaseModule {
             const noDataMsg = document.getElementById("no-data-msg");
 
             if (validCount > 0) {
-                if (typeof renderDataPanel === "function") renderDataPanel();
-                if (typeof updateAsinSelectList === "function") updateAsinSelectList();
+                // [MODIFIED] Decoupled via EventBus
+                eventBus.emit('SCRAPE_COMPLETE', state.scrapedData);
+
                 dataCards?.classList.remove("hidden");
                 noDataMsg?.classList.add("hidden");
             } else {

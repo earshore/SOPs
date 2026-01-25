@@ -12,6 +12,7 @@ import { StorageService, STORAGE_KEYS } from "../../../services/storageService.j
 import { ErrorService } from "../../../services/errorService.js";
 import { registerActionsWithLegacy } from "../../../common/utils/actionRegistry.js";
 import { renderWidgetCard, renderViewModeHTML, renderEditorForm } from "./analysisRenderer.js";
+import eventBus from "../../../common/EventBus.js"; // [NEW] Import EventBus
 
 class AnalysisModule extends BaseModule {
   constructor() {
@@ -31,6 +32,17 @@ class AnalysisModule extends BaseModule {
 
     // 1. UI Initialization
     this.setupUI();
+
+    // [NEW] Subscribe to Scraper Events
+    this.addDisposable(eventBus.on('SCRAPE_COMPLETE', () => {
+      console.log("AnalysisModule received SCRAPE_COMPLETE");
+      this.updateAsinSelectList();
+    }));
+
+    // [FIX] Initial Load for existing data
+    if (state.scrapedData) {
+      this.updateAsinSelectList();
+    }
 
     // 2. Bind Events
     const analyzeBtn = document.getElementById("analyze-btn");

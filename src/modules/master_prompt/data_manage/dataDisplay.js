@@ -8,6 +8,7 @@ import { updateAsinSelectList } from "../analysis/analysisDisplay.js";
 import { StorageService } from "../../../services/storageService.js";
 import { languageFlagMap } from "../../../common/constants/constants.js";
 import { registerActionsWithLegacy } from "../../../common/utils/actionRegistry.js";
+import eventBus from "../../../common/EventBus.js"; // [NEW] Import EventBus
 
 class DataModule extends BaseModule {
     constructor() {
@@ -22,6 +23,12 @@ class DataModule extends BaseModule {
     async init() {
         console.log("🚀 Data Module Initialized (BaseModule)");
         this.setupEventListeners();
+
+        // [NEW] Subscribe to Scraper Events
+        this.addDisposable(eventBus.on('SCRAPE_COMPLETE', (data) => {
+            console.log("DataModule received SCRAPE_COMPLETE");
+            this.renderDataPanel();
+        }));
 
         if (state.scrapedData) {
             this.renderDataPanel();

@@ -17,14 +17,32 @@ export default class BaseModule {
         this.container = container;
         this._isMounted = true;
         this._disposables = []; // 重置清理列表
-        
+
         console.log(`[BaseModule] Mounting ${this.moduleId}...`);
-        
+
         try {
             await this.render();
+            // Use runAsync to wrap init if needed, though init is usually safe to call directly if we want to catch top level here.
+            // But we want to encourage using runAsync for internal async ops.
             await this.init();
         } catch (error) {
             this.handleError(error);
+        }
+    }
+
+    /**
+     * 统一异步操作包装器，自动处理错误
+     * @param {Function} asyncFn - 异步函数
+     * @param {string} errorContext - 错误上下文描述
+     */
+    async runAsync(asyncFn, errorContext = 'Operation failed') {
+        try {
+            return await asyncFn();
+        } catch (error) {
+            console.error(`[${this.moduleId}] ${errorContext}:`, error);
+            // Optionally notify user via Toast or UI
+            // showToast(error.message, 'error'); // If we import showToast
+            this.handleError(error); // Or just use the module level error handler
         }
     }
 
@@ -38,7 +56,7 @@ export default class BaseModule {
     /**
      * 可选由子类实现：初始化逻辑 (绑定事件等)
      */
-    async init() {}
+    async init() { }
 
     /**
      * 核心：安全卸载
@@ -78,7 +96,7 @@ export default class BaseModule {
     /**
      * 可选由子类实现：自定义卸载逻辑
      */
-    onUnmount() {}
+    onUnmount() { }
 
     // ================= 工具方法 =================
 
