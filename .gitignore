@@ -68,3 +68,7 @@ Thumbs.db
 
 # Dist
 dist/
+
+# Docs
+docs/
+
