@@ -23,6 +23,9 @@ export default defineConfig({
             output: {
                 // 代码分割
                 manualChunks: {
+                    // 第三方库分离 (Cache Optimization)
+                    'vendor': ['marked', 'chart.js', 'gridstack'],
+
                     // 将服务层单独打包
                     'services': [
                         './src/services/storageService.js',
