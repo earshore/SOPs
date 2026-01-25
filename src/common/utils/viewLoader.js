@@ -8,80 +8,121 @@
  * priority: 'critical' = 串行加载（确保顺序）
  * priority: 'normal'   = 并行加载（提升速度）
  */
-const viewsConfig = [
-    // 🔒 关键模块 - 串行加载，确保 Shell 容器先就绪
-    { url: './src/modules/home/homeDisplay.html', target: 'main', priority: 'critical' },
-    { url: './src/modules/sops/sops.html', target: 'main', priority: 'critical' },
-    { url: './src/modules/amz_hub/amz_hub.html', target: 'main', priority: 'critical' },
+// src/common/utils/viewLoader.js
+// ================================================================
+// 🎯 P1 增强: 按需加载（Lazy Loading），大幅提升首屏速度
+// 🎯 P2 优化: 修复 308 跳转问题 (移除了 url 前面的 ./)
+// ================================================================
 
-    // 🔓 非关键模块 - 并行加载
-    { url: './src/modules/master_prompt/scraper/scraperPanel.html', target: 'main', priority: 'normal' },
-    { url: './src/modules/master_prompt/data_manage/dataDisplay.html', target: 'main', priority: 'normal' },
-    { url: './src/modules/master_prompt/analysis/analysisDisplay.html', target: 'main', priority: 'normal' },
-    { url: './src/modules/master_prompt/promptlab/promptlabDisplay.html', target: 'main', priority: 'normal' },
-    { url: './src/modules/keyword_tracker/trackerDisplay.html', target: 'main', priority: 'normal' },
+/**
+ * 视图配置注册表
+ * 
+ * 优化说明：
+ * 1. 移除了 './' 前缀以规避服务器可能的 308 跳转
+ * 2. 关键模块 (Critical) 会在 initViews() 时立即加载
+ * 3. 普通模块 (Lazy) 仅在 ensureViewLoaded() 被调用时加载
+ */
+const VIEW_REGISTRY = {
+    // === 核心视图 (Critical) ===
+    'home': { url: 'src/modules/home/homeDisplay.html', target: 'main', isLoaded: false },
+    'settings': { url: 'src/components/settings/systemSettings.html', target: '#modal-container', isLoaded: false },
+    'modals': { url: 'src/components/modal/sharedModals.html', target: '#modal-container', isLoaded: false },
 
-    // 全局弹窗组件 -> 插入到 modal-container
-    { url: './src/components/settings/systemSettings.html', target: '#modal-container', priority: 'normal' },
-    { url: './src/components/modal/sharedModals.html', target: '#modal-container', priority: 'normal' }
-];
+    // === 业务视图 (Lazy) ===
+    'sops': { url: 'src/modules/sops/sops.html', target: 'main', isLoaded: false },
+    'amz_hub': { url: 'src/modules/amz_hub/amz_hub.html', target: 'main', isLoaded: false },
+
+    // Master Prompt Views
+    'scraper': { url: 'src/modules/master_prompt/scraper/scraperPanel.html', target: 'main', isLoaded: false },
+    'data_manage': { url: 'src/modules/master_prompt/data_manage/dataDisplay.html', target: 'main', isLoaded: false },
+    'analysis': { url: 'src/modules/master_prompt/analysis/analysisDisplay.html', target: 'main', isLoaded: false },
+    'promptlab': { url: 'src/modules/master_prompt/promptlab/promptlabDisplay.html', target: 'main', isLoaded: false },
+
+    // Keyword Tracker
+    'tracker': { url: 'src/modules/keyword_tracker/trackerDisplay.html', target: 'main', isLoaded: false },
+};
 
 /**
  * 加载单个 HTML 模块
- * @param {string} url - HTML 文件路径
- * @param {string} targetSelector - 目标容器选择器
- * @returns {Promise<boolean>} 是否成功
  */
-async function loadHtml(url, targetSelector) {
+async function loadHtml(key) {
+    const config = VIEW_REGISTRY[key];
+    if (!config || config.isLoaded) return true;
+
     try {
-        const response = await fetch(url);
+        const response = await fetch(config.url);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
         const html = await response.text();
-        const container = document.querySelector(targetSelector);
+        const container = document.querySelector(config.target);
+
         if (container) {
             container.insertAdjacentHTML('beforeend', html);
+            config.isLoaded = true;
+            console.log(`✅ [ViewLoader] Loaded: ${key}`);
             return true;
         } else {
-            console.error(`[ViewLoader] 容器未找到: ${targetSelector}`);
+            console.error(`[ViewLoader] Target container not found: ${config.target}`);
             return false;
         }
     } catch (e) {
-        console.error(`[ViewLoader] 加载失败 [${url}]:`, e);
+        console.error(`[ViewLoader] Failed to load [${key}]:`, e);
         return false;
     }
 }
 
 /**
- * 核心导出函数：初始化所有视图
- * 采用分层加载策略：关键模块串行 -> 非关键模块并行
+ * 初始化核心视图
+ * 只加载 Home 和 全局模态框
  */
 export async function initViews() {
     const startTime = performance.now();
+    console.log("🚀 [ViewLoader] Initializing Critical Views...");
 
-    // 1. 分离关键和非关键模块
-    const critical = viewsConfig.filter(v => v.priority === 'critical');
-    const normal = viewsConfig.filter(v => v.priority !== 'critical');
-
-    // 2. 关键模块串行加载（确保 DOM 依赖顺序）
-    for (const view of critical) {
-        await loadHtml(view.url, view.target);
-    }
-    console.log(`✅ [ViewLoader] ${critical.length} 个关键模块已加载`);
-
-    // 3. 非关键模块并行加载（提升速度）
-    await Promise.all(normal.map(view => loadHtml(view.url, view.target)));
+    await Promise.all([
+        loadHtml('home'),
+        loadHtml('settings'),
+        loadHtml('modals')
+    ]);
 
     const elapsed = (performance.now() - startTime).toFixed(0);
-    console.log(`✅ [ViewLoader] 全部 ${viewsConfig.length} 个模块就绪 (${elapsed}ms)`);
+    console.log(`✅ [ViewLoader] Critical Views Ready (${elapsed}ms)`);
 }
 
 /**
- * 动态注册新视图（运行时扩展用）
- * @param {Object} viewConfig - { url, target, priority }
+ * 按需加载视图 (路由拦截器调用)
+ * @param {string} routeId - 路由ID，通常对应 registry 中的 key, 或者需要映射
+ */
+export async function ensureViewLoaded(routeId) {
+    // 简单的映射逻辑：路由ID通常包含模块名
+    // 例如 'sops_overview' -> 属于 'sops' 模块
+    // 'amz_eu_insights' -> 属于 'amz_hub' 模块
+
+    let moduleKey = null;
+
+    if (routeId.startsWith('sops')) moduleKey = 'sops';
+    else if (routeId.startsWith('amz')) moduleKey = 'amz_hub';
+
+    // Correct mapping for Master Prompt
+    else if (routeId === 'scraper') moduleKey = 'scraper';
+    else if (routeId === 'data') moduleKey = 'data_manage';
+    else if (routeId === 'analysis') moduleKey = 'analysis';
+    else if (routeId === 'promptlab') moduleKey = 'promptlab';
+
+    // Correct mapping for Keyword Tracker
+    else if (routeId.startsWith('kw_')) moduleKey = 'tracker';
+
+    if (moduleKey && VIEW_REGISTRY[moduleKey]) {
+        if (!VIEW_REGISTRY[moduleKey].isLoaded) {
+            console.log(`⏳ [ViewLoader] Lazy loading module: ${moduleKey} (Mapped from ${routeId})...`);
+            await loadHtml(moduleKey);
+        }
+    }
+}
+
+/**
+ * 动态注册新视图 (保留 API 兼容)
  */
 export function registerView(viewConfig) {
-    viewsConfig.push({
-        priority: 'normal',
-        ...viewConfig
-    });
+    // 暂不处理动态注册，现有逻辑不需要
 }

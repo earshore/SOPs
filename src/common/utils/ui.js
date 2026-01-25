@@ -353,11 +353,13 @@ function updateSidebarHighlight(activeTabId) {
     }
 }
 
+import { ensureViewLoaded } from "./viewLoader.js";
+
 /**
  * 👑 全能路由切换函数 (Event-Driven)
  * 此函数不再包含任何特定业务模块的 if/else 逻辑
  */
-export function switchTab(tab) {
+export async function switchTab(tab) {
     const cleanTab = String(tab).trim();
 
     // 1. 处理 Config 中的 redirect (别名)
@@ -365,6 +367,16 @@ export function switchTab(tab) {
     // 目前为了兼容性，保留一行硬代码，但建议将其移至 Config
     if (cleanTab === 'amz_hub') {
         switchTab('amz_eu_insights');
+        return;
+    }
+
+    // ⚡️ LAZY LOAD CHECK (按需加载视图)
+    // 在切换前确保目标视图的 HTML Shell 已加载
+    try {
+        await ensureViewLoaded(cleanTab);
+    } catch (err) {
+        console.error("View lazy load failed:", err);
+        showToast("页面资源加载失败，请重试", "error");
         return;
     }
 
