@@ -812,6 +812,8 @@ class AnalysisModule extends BaseModule {
 
   updateAsinSelectList() {
     const list = document.getElementById("asin-select-list");
+    if (!list) return;
+
     if (!state.scrapedData?.products?.length) {
       list.innerHTML = '<p class="text-sm text-slate-400 text-center py-4">暂无数据</p>';
       return;
