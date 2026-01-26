@@ -17,40 +17,18 @@ const MODULE_MAP = {
 let currentModule = null; // 保持对当前子模块的引用，以便卸载
 
 /**
- * 等待容器渲染 (解决 Race Condition)
- */
-function waitForContainer(id, timeout = 3000) {
-    return new Promise((resolve) => {
-        const el = document.getElementById(id);
-        if (el) return resolve(el);
-
-        const startTime = Date.now();
-        const timer = setInterval(() => {
-            const el = document.getElementById(id);
-            if (el) {
-                clearInterval(timer);
-                resolve(el);
-            }
-            if (Date.now() - startTime > timeout) {
-                clearInterval(timer);
-                resolve(null);
-            }
-        }, 50);
-    });
-}
-
-/**
  * 核心：加载子模块视图
- * 增强: 等待容器 + 错误重试 + 错误边界
+ * 增强: 错误边界 + 状态管理
  */
 async function loadSubModule(routeId, retryCount = 0) {
-    // 1. 等待 Shell 容器
-    const container = await waitForContainer('amz_hub_content_area');
+    // 1. 直接获取容器 (前提：ViewLoader 已保证 amz_hub.html 加载完毕)
+    const container = document.getElementById('amz_hub_content_area');
 
     if (!container) {
-        console.error(`[AmzHub] 容器 #amz_hub_content_area 未找到 (超时)`);
+        console.error(`[AmzHub] 致命错误: 容器 #amz_hub_content_area 未找到。ViewLoader 可能未正确加载父视图。`);
+        // 尝试在 Shell 中显示错误 (如果有)
         const shell = document.getElementById('panel-amz_hub');
-        if (shell) shell.innerHTML = `<div class="p-10 text-red-500">❌ 错误: 内容容器加载超时，请刷新重试。</div>`;
+        if (shell) shell.innerHTML = `<div class="p-10 text-red-500">❌ 系统错误: 视图容器丢失。请刷新页面。</div>`;
         return;
     }
 
@@ -62,6 +40,8 @@ async function loadSubModule(routeId, retryCount = 0) {
             console.warn(`[AmzHub] 卸载模块时出错:`, unmountErr);
         }
     }
+    
+    // 3. 设置加载状态
     container.innerHTML = '<div class="p-10 text-center fade-in"><i class="fas fa-spinner fa-spin text-2xl text-blue-500"></i><p class="text-slate-400 text-xs mt-2">Loading module...</p></div>';
 
     const loader = MODULE_MAP[routeId];
@@ -71,10 +51,11 @@ async function loadSubModule(routeId, retryCount = 0) {
     }
 
     try {
-        // 3. 动态导入模块 (Lazy Load)
+        // 4. 动态导入模块 (Lazy Load)
         const module = await loader();
 
-        // 4. 挂载新模块
+        // 5. 挂载新模块
+        // 传递容器引用，遵循 BaseModule 契约
         if (module.mount) {
             await module.mount(container);
             currentModule = module;
@@ -111,10 +92,13 @@ async function loadSubModule(routeId, retryCount = 0) {
                 </div>
             </div>
         `;
-
+        
+        // 绑定重试按钮 (使用 setTimeout 确保 DOM 已渲染)
         setTimeout(() => {
             const retryBtn = document.getElementById(`btn-retry-${routeId}`);
-            if (retryBtn) retryBtn.onclick = () => loadSubModule(routeId, 0);
+            if (retryBtn) {
+                retryBtn.onclick = () => loadSubModule(routeId, 0);
+            }
         }, 0);
     }
 }

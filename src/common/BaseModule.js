@@ -14,6 +14,11 @@ export default class BaseModule {
      * @param {HTMLElement} container 
      */
     async mount(container) {
+        // 安全检查：如果已经挂载，先执行卸载以防止状态泄漏
+        if (this._isMounted) {
+            this.unmount();
+        }
+
         this.container = container;
         this._isMounted = true;
         this._disposables = []; // 重置清理列表
@@ -79,18 +84,9 @@ export default class BaseModule {
         // 2. 调用子类特定的清理逻辑
         this.onUnmount();
 
-        // 3. 移除 DOM - ❌ 移除此逻辑
-        // AihangSOP 采用混合架构：部分模块(Master Prompt)依赖 ViewLoader 预加载的静态 HTML，
-        // 如果在此处清空，再次进入时 render() 不会重新加载 HTML，导致页面空白。
-        // 对于动态模块(AmzHub)，它们的 render() 方法会覆盖 innerHTML，所以也不需要在此处清空。
-        /*
-        if (this.container) {
-            this.container.innerHTML = '';
-        }
-        */
-
         this._isMounted = false;
-        this.container = null;
+        // 注意：不清除 container 引用，以便 handleError 可以重用容器
+        // this.container = null; 
     }
 
     /**
@@ -155,11 +151,30 @@ export default class BaseModule {
         console.error(`[${this.moduleId}] Error:`, error);
         if (this.container) {
             this.container.innerHTML = `
-                <div class="p-4 text-red-500 bg-red-50 rounded border border-red-200">
-                    <h3 class="font-bold">模块错误 (${this.moduleId})</h3>
-                    <p class="text-sm mt-1">${error.message}</p>
+                <div class="flex flex-col items-center justify-center p-12 text-center h-full fade-in">
+                    <div class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mb-4">
+                        <i class="fas fa-exclamation-triangle text-2xl text-red-500"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800 mb-2">模块加载失败 (${this.moduleId})</h3>
+                    <p class="text-sm text-slate-500 mb-6 max-w-md break-words">${error.message}</p>
+                    <button id="retry-btn-${this.moduleId}" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-redo mr-2"></i>重试
+                    </button>
                 </div>
             `;
+
+            // 绑定重试逻辑
+            const btn = this.container.querySelector(`#retry-btn-${this.moduleId}`);
+            if (btn) {
+                btn.onclick = () => {
+                    this.container.innerHTML = '<div class="p-10 text-center"><i class="fas fa-spinner fa-spin text-slate-400"></i></div>';
+                    // 重新挂载
+                    this.mount(this.container).catch(e => {
+                        console.error("Retry failed:", e);
+                        this.handleError(e); // 递归处理再次失败的情况
+                    });
+                };
+            }
         }
     }
 }

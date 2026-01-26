@@ -44,10 +44,16 @@ const VIEW_REGISTRY = {
 
 /**
  * 加载单个 HTML 模块
+ * @returns {Promise<HTMLElement|null>} 返回目标容器元素，失败返回 null
  */
 async function loadHtml(key) {
     const config = VIEW_REGISTRY[key];
-    if (!config || config.isLoaded) return true;
+    // 如果配置不存在或已加载，尝试直接返回容器
+    if (!config) return null;
+    
+    if (config.isLoaded) {
+        return document.querySelector(config.target);
+    }
 
     try {
         const path = config.path;
@@ -64,16 +70,16 @@ async function loadHtml(key) {
         if (container) {
             container.insertAdjacentHTML('beforeend', html);
             config.isLoaded = true;
-            console.log(`✅ [ViewLoader] Loaded: ${key}`);
+            console.log(`✅ [ViewLoader] Loaded & Mounted: ${key} -> ${config.target}`);
             // 触发可能的初始化事件 (如果模块依赖 DOM 存在)
-            return true;
+            return container;
         } else {
             console.error(`[ViewLoader] Target container not found: ${config.target}`);
-            return false;
+            return null;
         }
     } catch (e) {
         console.error(`[ViewLoader] Failed to load [${key}]:`, e);
-        return false;
+        return null;
     }
 }
 
