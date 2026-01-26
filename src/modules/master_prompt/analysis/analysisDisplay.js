@@ -36,11 +36,19 @@ class AnalysisModule extends BaseModule {
     // [NEW] Subscribe to Scraper Events
     this.addDisposable(eventBus.on('SCRAPE_COMPLETE', () => {
       console.log("AnalysisModule received SCRAPE_COMPLETE");
+      if (state.scrapedData && state.scrapedData.products) {
+        state.selectedAsins = state.scrapedData.products.map((p) => p.asin);
+      }
       this.updateAsinSelectList();
     }));
 
     // [FIX] Initial Load for existing data
     if (state.scrapedData) {
+      if (!state.selectedAsins || state.selectedAsins.length === 0) {
+        if (state.scrapedData.products) {
+          state.selectedAsins = state.scrapedData.products.map((p) => p.asin);
+        }
+      }
       this.updateAsinSelectList();
     }
 
@@ -141,7 +149,7 @@ class AnalysisModule extends BaseModule {
       (mod) => `
             <label class="module-item group relative flex items-start gap-2.5 p-2.5 rounded-xl border border-slate-100 hover:bg-blue-50/50 hover:border-blue-200 cursor-pointer transition-all bg-white" data-category="${mod.category}">
                 <div class="flex items-center pt-0.5">
-                    <input type="checkbox" name="analysis_module" value="${mod.id}" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" onchange="window.updatePromptPreview()">
+                    <input type="checkbox" name="analysis_module" value="${mod.id}" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" checked onchange="window.updatePromptPreview()">
                 </div>
                 <div class="text-sm leading-tight flex-1 min-w-0">
                     <div class="font-medium text-slate-700 group-hover:text-blue-700 truncate">${mod.label_cn}</div>
