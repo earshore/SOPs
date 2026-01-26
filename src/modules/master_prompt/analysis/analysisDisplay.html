@@ -31,13 +31,13 @@
                         class="flex items-center gap-3 bg-white/60 backdrop-blur-sm rounded-xl px-4 py-3 border border-slate-200/50">
                         <span
                             class="w-7 h-7 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">1</span>
-                        <span class="text-sm text-slate-600">选择 ASIN</span>
+                        <span class="text-sm text-slate-600">配置分析目标</span>
                     </div>
                     <div
                         class="flex items-center gap-3 bg-white/60 backdrop-blur-sm rounded-xl px-4 py-3 border border-slate-200/50">
                         <span
                             class="w-7 h-7 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center text-xs font-bold">2</span>
-                        <span class="text-sm text-slate-600">配置分析目标</span>
+                        <span class="text-sm text-slate-600">选择 ASIN</span>
                     </div>
                     <div
                         class="flex items-center gap-3 bg-white/60 backdrop-blur-sm rounded-xl px-4 py-3 border border-slate-200/50">
@@ -53,7 +53,30 @@
     <!-- 主配置区域 - 横向排列的配置卡片 -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
 
-        <!-- 左侧：ASIN 选择 + 数据来源 -->
+        <!-- 中间：分析目标选择 -->
+        <div class="lg:col-span-7">
+            <div class="glass-card rounded-2xl shadow-lg border border-slate-200 p-5 h-full">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-base font-semibold flex items-center gap-2 text-slate-800">
+                        <i class="fas fa-crosshairs text-purple-500"></i>
+                        分析目标
+                    </h3>
+                    <div class="text-xs space-x-2">
+                        <button onclick="window.toggleAllModules(true)"
+                            class="text-blue-600 hover:text-blue-700 font-medium px-2 py-1 rounded hover:bg-blue-50 transition-colors">全选</button>
+                        <span class="text-slate-300">|</span>
+                        <button onclick="window.toggleAllModules(false)"
+                            class="text-slate-400 hover:text-slate-600 px-2 py-1 rounded hover:bg-slate-50 transition-colors">清空</button>
+                    </div>
+                </div>
+
+                <div id="modules-container"
+                    class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[280px] overflow-y-auto pr-1 custom-scrollbar">
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧：ASIN 选择 + 数据来源 -->
         <div class="lg:col-span-5">
             <div class="glass-card rounded-2xl shadow-lg border border-slate-200 p-5 h-full">
                 <h3 class="text-base font-semibold mb-4 flex items-center gap-2 text-slate-800">
@@ -88,29 +111,6 @@
                     <i class="fas fa-brain"></i>
                     <span>开始分析</span>
                 </button>
-            </div>
-        </div>
-
-        <!-- 中间：分析目标选择 -->
-        <div class="lg:col-span-7">
-            <div class="glass-card rounded-2xl shadow-lg border border-slate-200 p-5 h-full">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-base font-semibold flex items-center gap-2 text-slate-800">
-                        <i class="fas fa-crosshairs text-purple-500"></i>
-                        分析目标
-                    </h3>
-                    <div class="text-xs space-x-2">
-                        <button onclick="window.toggleAllModules(true)"
-                            class="text-blue-600 hover:text-blue-700 font-medium px-2 py-1 rounded hover:bg-blue-50 transition-colors">全选</button>
-                        <span class="text-slate-300">|</span>
-                        <button onclick="window.toggleAllModules(false)"
-                            class="text-slate-400 hover:text-slate-600 px-2 py-1 rounded hover:bg-slate-50 transition-colors">清空</button>
-                    </div>
-                </div>
-
-                <div id="modules-container"
-                    class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[280px] overflow-y-auto pr-1 custom-scrollbar">
-                </div>
             </div>
         </div>
     </div>
