@@ -428,6 +428,12 @@ class AnalysisModule extends BaseModule {
                         <div class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 text-slate-600 rounded-lg border border-slate-200">
                             <i class="fas fa-file-contract"></i> ${report.meta?.templateUsed || "Analysis"}
                         </div>
+                        <div class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 text-slate-600 rounded-lg border border-slate-200">
+                            <i class="fas fa-earth"></i> ${report.meta?.targetMarket || ""}
+                        </div>
+                        <div class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 text-slate-600 rounded-lg border border-slate-200">
+                            <i class="fas fa-clock"></i> ${report.meta?.generatedAt || ""}
+                        </div>
                     </div>
                     
                     <div class="flex items-center gap-3">
