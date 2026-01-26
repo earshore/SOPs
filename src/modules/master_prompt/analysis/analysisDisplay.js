@@ -492,35 +492,48 @@ class AnalysisModule extends BaseModule {
     const select = document.getElementById("translation-model-select");
     if (!select) return;
 
-    // Use PROVIDERS from constants (imported at top)
-    const providers = window.PROVIDERS || {}; // Fallback or import
-    // Actually PROVIDERS is imported on line 4. 
-    // We need to flatten to a list of models.
-    // For simplicity, let's hardcode common translation models or fetch from config if available.
-    // Better: use the same logic as the original select.
-    // The original select was empty in HTML. 
-    // Let's iterate PROVIDERS to get models.
+    // 1. Get active provider
+    const activeProvider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
+
+    // 2. Get provider config
+    const providerConfig = activeProvider ? PROVIDERS[activeProvider] : null;
 
     let options = "";
-    // Define preferred translation models
-    const preferred = ["gpt-4o", "gpt-4o-mini", "claude-3-5-sonnet-20240620", "gemini-1.5-pro", "deepseek-chat"];
 
-    preferred.forEach(model => {
-      const isSelected = state.lastTranslationModel === model ? "selected" : "";
-      options += `<option value="${model}" ${isSelected}>${model}</option>`;
-    });
+    if (providerConfig && providerConfig.models && providerConfig.models.length > 0) {
+      // 3. Generate options from provider models
+      providerConfig.models.forEach(modelObj => {
+        const modelId = modelObj.id;
+        const isSelected = state.lastTranslationModel === modelId ? "selected" : "";
+        options += `<option value="${modelId}" ${isSelected}>${modelId}</option>`;
+      });
+    } else {
+      // Fallback if no provider or models found
+      options = `<option value="" disabled>No models found for ${activeProvider || 'current provider'}</option>`;
+    }
 
-    select.innerHTML = options || '<option value="gpt-4o-mini">gpt-4o-mini</option>';
+    select.innerHTML = options;
+
+    // Set initial value if state exists and is valid for current provider
+    if (state.lastTranslationModel) {
+      // Check if the last model is actually in the current list
+      const exists = Array.from(select.options).some(opt => opt.value === state.lastTranslationModel);
+      if (exists) {
+        select.value = state.lastTranslationModel;
+      } else if (select.options.length > 0 && !select.options[0].disabled) {
+        // Default to first if last used is invalid
+        select.value = select.options[0].value;
+        state.lastTranslationModel = select.value;
+      }
+    } else if (select.options.length > 0 && !select.options[0].disabled) {
+      // Default to first available
+      select.value = select.options[0].value;
+    }
 
     // Bind change event to store preference
     select.onchange = (e) => {
       state.lastTranslationModel = e.target.value;
     };
-
-    // Set initial value if state exists
-    if (state.lastTranslationModel) {
-      select.value = state.lastTranslationModel;
-    }
   }
 
 
