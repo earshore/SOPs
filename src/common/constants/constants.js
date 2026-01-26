@@ -15,18 +15,18 @@ export const USER_AGENTS = [
 export const getRandomUserAgent = () => USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
 
 export const PROVIDERS = {
-    serverless: {
+  serverless: {
     name: "OpenAI-cn",
     endpoint: "v1",
     models: [
-    { id: "gpt-5-mini-ca", context: 128000, features: ["vision", "function"] },
-    { id: "gpt-5-nano-ca", context: 128000, features: ["vision", "function"] },
-    { id: "gpt-4.1-mini-ca", context: 32768, features: ["function"] },
-    { id: "gpt-4.1-nano-ca", context: 32768, features: ["function"] },
-    { id: "gpt-4o-mini-ca", context: 32768, features: ["vision", "function"] },
-    { id: "gpt-3.5-turbo", context: 16385, features: ["function"] }
-  ]
-  ,
+      { id: "gpt-5-mini-ca", context: 128000, features: ["vision", "function"] },
+      { id: "gpt-5-nano-ca", context: 128000, features: ["vision", "function"] },
+      { id: "gpt-4.1-mini-ca", context: 32768, features: ["function"] },
+      { id: "gpt-4.1-nano-ca", context: 32768, features: ["function"] },
+      { id: "gpt-4o-mini-ca", context: 32768, features: ["vision", "function"] },
+      { id: "gpt-3.5-turbo", context: 16385, features: ["function"] }
+    ]
+    ,
   },
   openai: {
     name: "OpenAI",
@@ -48,7 +48,7 @@ export const PROVIDERS = {
       { id: "claude-3-haiku-20240307", context: 200000, features: ["vision"] },
     ],
   },
-  gemini: {
+  google: {
     name: "Google Gemini",
     endpoint: "https://generativelanguage.googleapis.com/v1beta",
     models: [
@@ -130,7 +130,7 @@ const SITE_CONFIGS = {
   BE: { flag: "🇧🇪", name_cn: "比利时", locale: "fr_BE", name: "Belgian", domain: "amazon.com.be", lang: "fr-BE,fr;q=0.9,en;q=0.1" },
   IE: { flag: "🇮🇪", name_cn: "爱尔兰", locale: "en_IE", name: "English (IE)", domain: "amazon.ie", lang: "en-IE,en;q=0.9" },
   UK: { flag: "🇬🇧", name_cn: "英国", locale: "en_GB", name: "English (UK)", domain: "amazon.co.uk", lang: "en-GB,en;q=0.9" },
-  
+
   // 北美
   US: { flag: "🇺🇸", name_cn: "美国", locale: "en_US", name: "English (US)", domain: "amazon.com", lang: "en-US,en;q=0.9" },
   CA: { flag: "🇨🇦", name_cn: "加拿大", locale: "en_CA", name: "English (CA)", domain: "amazon.ca", lang: "en-CA,en;q=0.9" },
@@ -153,7 +153,7 @@ export default SITE_CONFIGS;
 
 // 自动生成 LANGUAGE_HEADERS
 export const LANGUAGE_HEADERS = Object.entries(SITE_CONFIGS).reduce((acc, [key, config]) => {
-// 1. ✅ 必须先定义这个变量，下面才能引用它
+  // 1. ✅ 必须先定义这个变量，下面才能引用它
   const headerConfig = {
     ...BASE_HEADERS,
     "Accept-Language": config.lang,
@@ -180,7 +180,7 @@ export const LANGUAGE_HEADERS = Object.entries(SITE_CONFIGS).reduce((acc, [key, 
 // 自动生成 languageFlagMap (保持向后兼容)
 export const languageFlagMap = Object.entries(SITE_CONFIGS).reduce((acc, [key, config]) => {
   acc[key] = config.flag;
-  if(key === 'UK') acc['GB'] = config.flag;
+  if (key === 'UK') acc['GB'] = config.flag;
   return acc;
 }, {});
 
