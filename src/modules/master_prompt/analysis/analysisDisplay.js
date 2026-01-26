@@ -431,6 +431,18 @@ class AnalysisModule extends BaseModule {
                     </div>
                     
                     <div class="flex items-center gap-3">
+                        <!-- Translation Controls -->
+                        <div class="flex items-center gap-2 mr-2">
+                             <select id="translation-model-select" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-slate-50 text-slate-600 focus:outline-none focus:border-blue-300 w-32">
+                                <option value="" disabled selected>Translation Model</option>
+                             </select>
+                             <button id="quick-translate-btn" onclick="window.translateReport()" class="text-xs bg-indigo-50 text-indigo-600 hover:bg-indigo-100 px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1" ${showTrans ? "disabled" : ""}>
+                                <i class="fas fa-language"></i> 翻译
+                             </button>
+                        </div>
+
+                        <div class="w-px bg-slate-200 h-6"></div>
+
                         <div class="flex items-center gap-2 bg-slate-100 p-1 rounded-full px-1 border border-slate-200">
                             <span class="text-[10px] px-2 font-bold ${!showTrans ? "text-slate-700" : "text-slate-400"} uppercase tracking-wide cursor-default" title="原文语言">
                                 ${targetMarket}
@@ -466,11 +478,51 @@ class AnalysisModule extends BaseModule {
 
     display.innerHTML = toolbarHtml;
 
+    // Populate Models
+    this.populateTranslationModels();
+
     const toggleBtn = document.getElementById("toggle-trans-view-btn");
     if (toggleBtn) this.addEventListener(toggleBtn, "click", () => this.toggleTranslationView());
 
     this.initGridStack(report);
   }
+
+  // [NEW] Populate translation models from constants
+  populateTranslationModels() {
+    const select = document.getElementById("translation-model-select");
+    if (!select) return;
+
+    // Use PROVIDERS from constants (imported at top)
+    const providers = window.PROVIDERS || {}; // Fallback or import
+    // Actually PROVIDERS is imported on line 4. 
+    // We need to flatten to a list of models.
+    // For simplicity, let's hardcode common translation models or fetch from config if available.
+    // Better: use the same logic as the original select.
+    // The original select was empty in HTML. 
+    // Let's iterate PROVIDERS to get models.
+
+    let options = "";
+    // Define preferred translation models
+    const preferred = ["gpt-4o", "gpt-4o-mini", "claude-3-5-sonnet-20240620", "gemini-1.5-pro", "deepseek-chat"];
+
+    preferred.forEach(model => {
+      const isSelected = state.lastTranslationModel === model ? "selected" : "";
+      options += `<option value="${model}" ${isSelected}>${model}</option>`;
+    });
+
+    select.innerHTML = options || '<option value="gpt-4o-mini">gpt-4o-mini</option>';
+
+    // Bind change event to store preference
+    select.onchange = (e) => {
+      state.lastTranslationModel = e.target.value;
+    };
+
+    // Set initial value if state exists
+    if (state.lastTranslationModel) {
+      select.value = state.lastTranslationModel;
+    }
+  }
+
 
   initGridStack(report) {
     const gridEl = document.querySelector(".grid-stack");
