@@ -20,7 +20,7 @@
                     <div class="flex-1">
                         <h2 class="text-xl font-bold text-slate-800 mb-2">AI 智能分析</h2>
                         <p class="text-slate-500 text-sm leading-relaxed max-w-xl">
-                            选择要分析的 ASIN 和分析目标，AI 将自动提取 Listing 和 Reviews 中的关键洞察，生成结构化分析报告。
+                            选择要分析的目标和分析ASIN，AI 将自动提取 Title、Bullet Points 和 Reviews 中的关键洞察，生成结构化分析报告。
                         </p>
                     </div>
                 </div>
@@ -61,6 +61,11 @@
                         <i class="fas fa-crosshairs text-purple-500"></i>
                         分析目标
                     </h3>
+                    <div class="mb-4">
+                        <!-- <label
+                            class="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2 block">数据来源</label> -->
+                        <div class="flex gap-2" id="source-toggle-container"></div>
+                    </div>
                     <div class="text-xs space-x-2">
                         <button onclick="window.toggleAllModules(true)"
                             class="text-blue-600 hover:text-blue-700 font-medium px-2 py-1 rounded hover:bg-blue-50 transition-colors">全选</button>
@@ -85,10 +90,10 @@
                 </h3>
 
                 <!-- 数据来源切换 -->
-                <div class="mb-4">
+                <!-- <div class="mb-4">
                     <label class="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2 block">数据来源</label>
                     <div class="flex gap-2" id="source-toggle-container"></div>
-                </div>
+                </div> -->
 
                 <!-- ASIN 列表 -->
                 <div class="mb-4">
