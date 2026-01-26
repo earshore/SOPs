@@ -31,7 +31,7 @@
       </div>
 
       <nav class="flex items-center h-full">
-        <button onclick="switchTab('home')" id="nav-home"
+        <button data-action="switch-tab" data-tab="home" id="nav-home"
           class="nav-item px-6 h-full text-sm font-medium text-slate-600 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-600 transition-all">
           首页
         </button>
@@ -69,7 +69,7 @@
                     <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">快速访问</h3>
                     <ul class="space-y-3">
                       <li>
-                        <button onclick="openSettings()"
+                        <button data-action="openSettings"
                           class="flex items-center gap-3 text-slate-600 hover:text-blue-600 text-sm transition-colors w-full text-left">
                           <div
                             class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600">
@@ -79,7 +79,7 @@
                         </button>
                       </li>
                       <li>
-                        <button onclick="openUserGuide()"
+                        <button data-action="open-user-guide"
                           class="flex items-center gap-3 text-slate-600 hover:text-blue-600 text-sm transition-colors w-full text-left">
                           <div
                             class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600">
@@ -111,7 +111,7 @@
           <span class="status-dot status-pending pulse-dot"></span>
           <span class="text-slate-600 font-medium">未配置模型</span>
         </div>
-        <!-- <button onclick="openSettings()"
+        <!-- <button data-action="openSettings"
         class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 transition-colors text-slate-500 hover:text-slate-800">
         <i class="fas fa-cog"></i>
       </button> -->

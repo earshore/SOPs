@@ -8,7 +8,7 @@
                 <i class="fas fa-book text-blue-500"></i>
                 使用指南 - Amazing Amazon Architect
             </h2>
-            <button onclick="closeUserGuide()" class="text-slate-400 hover:text-slate-600 transition-colors">
+            <button data-action="close-user-guide" class="text-slate-400 hover:text-slate-600 transition-colors">
                 <i class="fas fa-times text-xl"></i>
             </button>
         </div>
@@ -30,27 +30,27 @@
             <div class="flex border-b border-slate-200 mb-6 overflow-x-auto" id="guide-tabs">
                 <button
                     class="guide-tab active px-4 py-2 text-sm font-medium text-blue-600 border-b-2 border-blue-500 whitespace-nowrap"
-                    data-tab="overview">
+                    data-action="switch-guide-tab" data-tab="overview">
                     <i class="fas fa-home mr-1.5"></i>平台概览
                 </button>
                 <button
                     class="guide-tab px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700 whitespace-nowrap"
-                    data-tab="sops">
+                    data-action="switch-guide-tab" data-tab="sops">
                     <i class="fas fa-clipboard-list mr-1.5"></i>SOPs流程中心
                 </button>
                 <button
                     class="guide-tab px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700 whitespace-nowrap"
-                    data-tab="master">
+                    data-action="switch-guide-tab" data-tab="master">
                     <i class="fas fa-cubes-stacked mr-1.5"></i>Master Prompt
                 </button>
                 <button
                     class="guide-tab px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700 whitespace-nowrap"
-                    data-tab="keyword">
+                    data-action="switch-guide-tab" data-tab="keyword">
                     <i class="fas fa-search mr-1.5"></i>Keyword Hunter
                 </button>
                 <button
                     class="guide-tab px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700 whitespace-nowrap"
-                    data-tab="hub">
+                    data-action="switch-guide-tab" data-tab="hub">
                     <i class="fas fa-book-open mr-1.5"></i>智库Hub
                 </button>
             </div>
@@ -357,37 +357,3 @@
         </div>
     </div>
 </div>
-
-<script>
-    function openUserGuide() {
-        document.getElementById('user-guide-modal').classList.remove('hidden');
-    }
-    function closeUserGuide() {
-        document.getElementById('user-guide-modal').classList.add('hidden');
-    }
-
-    // Close on backdrop click
-    document.getElementById('user-guide-modal')?.addEventListener('click', (e) => {
-        if (e.target.id === 'user-guide-modal') closeUserGuide();
-    });
-
-    // Tab switching logic
-    document.querySelectorAll('.guide-tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-            // Update tab styles
-            document.querySelectorAll('.guide-tab').forEach(t => {
-                t.classList.remove('active', 'text-blue-600', 'border-b-2', 'border-blue-500');
-                t.classList.add('text-slate-500');
-            });
-            tab.classList.add('active', 'text-blue-600', 'border-b-2', 'border-blue-500');
-            tab.classList.remove('text-slate-500');
-
-            // Show corresponding panel
-            const targetPanel = tab.dataset.tab;
-            document.querySelectorAll('.guide-panel').forEach(panel => {
-                panel.classList.add('hidden');
-            });
-            document.querySelector(`.guide-panel[data-panel="${targetPanel}"]`)?.classList.remove('hidden');
-        });
-    });
-</script>
