@@ -10,6 +10,7 @@ import { saveProxyConfig, renderProxyInputUI, closeSettings } from "../../../com
 import { StorageService, STORAGE_KEYS } from "../../../services/storageService.js";
 import { ErrorService } from "../../../services/errorService.js";
 import eventBus from "../../../common/EventBus.js";
+import { EVENTS } from "../../../common/constants/eventConstants.js";
 
 // ==========================================
 // Scraper Module Class
@@ -371,7 +372,7 @@ class ScraperModule extends BaseModule {
             const successCount = products.filter((p) => p.scrape_status === "success").length;
             if (successCount > 0) {
                 // [MODIFIED] Use Event Bus instead of direct coupling
-                eventBus.emit('SCRAPE_COMPLETE', state.scrapedData);
+                eventBus.emit(EVENTS.SCRAPE_COMPLETE, state.scrapedData);
             }
             this.renderHistory();
 
@@ -570,7 +571,7 @@ class ScraperModule extends BaseModule {
 
             if (validCount > 0) {
                 // [MODIFIED] Decoupled via EventBus
-                eventBus.emit('SCRAPE_COMPLETE', state.scrapedData);
+                eventBus.emit(EVENTS.SCRAPE_COMPLETE, state.scrapedData);
 
                 dataCards?.classList.remove("hidden");
                 noDataMsg?.classList.add("hidden");
