@@ -735,18 +735,28 @@ class AnalysisModule extends BaseModule {
       return;
     }
 
-    const btn = document.getElementById("translate-btn");
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-1"></i> 翻译中...';
+    const btn = document.getElementById("quick-translate-btn");
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-1"></i> 翻译中...';
+    }
 
     try {
       const site = state.scrapedData.metadata.marketplace;
       const language = LANGUAGE_HEADERS[site].name;
+
+      // Read model from the new select or state
+      const modelSelect = document.getElementById("translation-model-select");
+      const selectedModel = modelSelect ? modelSelect.value : state.lastTranslationModel;
+
+      // If no specific model selected, fall back to current provider config
+      const modelToUse = selectedModel || config.model;
+
       const llmConfig = {
         provider,
         endpoint: config.endpoint,
         apiKey: config.apiKey,
-        model: config.model,
+        model: modelToUse,
       };
 
       const result = await AnalysisService.translateReport(
@@ -765,7 +775,7 @@ class AnalysisModule extends BaseModule {
     } finally {
       if (btn) {
         btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-language mr-1"></i> 翻译报告';
+        btn.innerHTML = '<i class="fas fa-language mr-1"></i> 翻译';
       }
     }
   }
