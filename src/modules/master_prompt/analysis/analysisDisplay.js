@@ -436,7 +436,9 @@ class AnalysisModule extends BaseModule {
                              <select id="translation-model-select" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-slate-50 text-slate-600 focus:outline-none focus:border-blue-300 w-32">
                                 <option value="" disabled selected>Translation Model</option>
                              </select>
-                             <button id="quick-translate-btn" onclick="window.translateReport()" class="text-xs bg-indigo-50 text-indigo-600 hover:bg-indigo-100 px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1" ${showTrans ? "disabled" : ""}>
+                             <button id="quick-translate-btn" onclick="window.translateReport()" 
+                                     class="text-xs px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1 ${showTrans ? "bg-slate-100 text-slate-400 cursor-not-allowed opacity-60" : "bg-indigo-50 text-indigo-600 hover:bg-indigo-100 cursor-pointer"}" 
+                                     ${showTrans ? "disabled" : ""}>
                                 <i class="fas fa-language"></i> 翻译
                              </button>
                         </div>
