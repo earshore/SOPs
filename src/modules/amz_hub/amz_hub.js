@@ -1,7 +1,6 @@
 console.log("📚 AmzHub Core Module Loading...");
 
-// 导入公共 CSS (如果 ViewLoader 没处理的话，这里动态引入也可以，或者保持在 index.html 引入)
-// import './amz_style.css'; 
+import './amz_hub_style.css';
 
 // ================= 路由配置表 =================
 // 键名对应 menuConfig.js 里的 route id

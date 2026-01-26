@@ -1,6 +1,7 @@
 // src/modules/home/homeDisplay.js
 import BaseModule from "../../common/BaseModule.js";
 import { loadTemplate } from "../../common/utils/viewLoader.js";
+import './homeDisplay.css';
 
 class HomeModule extends BaseModule {
     constructor() {

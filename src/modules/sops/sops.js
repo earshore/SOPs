@@ -1,4 +1,5 @@
 console.log("📋 SOPs Core Module Loading...");
+import './sops_style.css';
 
 // ================= 路由配置表 =================
 // 键名对应 menuConfig.js 里的 route id
