@@ -86,7 +86,7 @@
                 <i class="fas fa-tasks text-indigo-500"></i>每日任务速览（点击直达）
             </h4>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
-                <button onclick="switchTab('sops_npi_tracker')"
+                <button data-action="switch-tab" data-tab="sops_npi_tracker"
                     class="p-3 bg-white rounded-lg border border-slate-200 hover:border-blue-400 hover:shadow-md transition-all text-left group">
                     <div class="flex items-center gap-2 mb-1">
                         <span class="text-lg">🔍</span>
@@ -94,7 +94,7 @@
                     </div>
                     <p class="text-slate-500">哪些SKU需要关注？</p>
                 </button>
-                <button onclick="switchTab('sops_ppc_advertising')"
+                <button data-action="switch-tab" data-tab="sops_ppc_advertising"
                     class="p-3 bg-white rounded-lg border border-slate-200 hover:border-blue-400 hover:shadow-md transition-all text-left group">
                     <div class="flex items-center gap-2 mb-1">
                         <span class="text-lg">📊</span>
@@ -102,7 +102,7 @@
                     </div>
                     <p class="text-slate-500">ACOS是否达标？</p>
                 </button>
-                <button onclick="switchTab('sops_email_templates')"
+                <button data-action="switch-tab" data-tab="sops_email_templates"
                     class="p-3 bg-white rounded-lg border border-slate-200 hover:border-blue-400 hover:shadow-md transition-all text-left group">
                     <div class="flex items-center gap-2 mb-1">
                         <span class="text-lg">📧</span>
@@ -110,7 +110,7 @@
                     </div>
                     <p class="text-slate-500">24h SLA内完成</p>
                 </button>
-                <button onclick="switchTab('sops_competitor_monitoring')"
+                <button data-action="switch-tab" data-tab="sops_competitor_monitoring"
                     class="p-3 bg-white rounded-lg border border-slate-200 hover:border-blue-400 hover:shadow-md transition-all text-left group">
                     <div class="flex items-center gap-2 mb-1">
                         <span class="text-lg">📈</span>
@@ -135,7 +135,7 @@
             </div>
             <div class="text-xs text-slate-400">
                 <i class="fas fa-shield-halved mr-1"></i>账号安全红线请查看：
-                <button onclick="switchTab('sops_account_security')"
+                <button data-action="switch-tab" data-tab="sops_account_security"
                     class="text-red-500 hover:underline">账号安全SOP</button>
             </div>
         </div>
@@ -154,7 +154,7 @@
         </div>
         <div class="sop-card-grid">
             <!-- 新品生命周期跟踪 (NPI Tracker) -->
-            <div class="sop-card border-l-4 border-l-emerald-400" onclick="switchTab('sops_npi_tracker')">
+            <div class="sop-card border-l-4 border-l-emerald-400" data-action="switch-tab" data-tab="sops_npi_tracker">
                 <div class="flex items-start justify-between mb-3">
                     <div class="sop-icon-container bg-emerald-50 text-emerald-600">
                         <i class="fas fa-seedling"></i>
@@ -171,7 +171,7 @@
             </div>
 
             <!-- Listing 极致优化 -->
-            <div class="sop-card border-l-4 border-l-emerald-400" onclick="switchTab('sops_listing_seo')">
+            <div class="sop-card border-l-4 border-l-emerald-400" data-action="switch-tab" data-tab="sops_listing_seo">
                 <div class="flex items-start justify-between mb-3">
                     <div class="sop-icon-container bg-emerald-50 text-emerald-600">
                         <i class="fas fa-magnifying-glass-chart"></i>
@@ -186,7 +186,7 @@
             </div>
 
             <!-- PPC 广告投放 -->
-            <div class="sop-card border-l-4 border-l-emerald-400" onclick="switchTab('sops_ppc_advertising')">
+            <div class="sop-card border-l-4 border-l-emerald-400" data-action="switch-tab" data-tab="sops_ppc_advertising">
                 <div class="flex items-start justify-between mb-3">
                     <div class="sop-icon-container bg-emerald-50 text-emerald-600">
                         <i class="fas fa-chart-line"></i>
@@ -203,7 +203,7 @@
 
 
             <!-- 促销活动提报 -->
-            <div class="sop-card border-l-4 border-l-emerald-400" onclick="switchTab('sops_promotion_submission')">
+            <div class="sop-card border-l-4 border-l-emerald-400" data-action="switch-tab" data-tab="sops_promotion_submission">
                 <div class="flex items-start justify-between mb-3">
                     <div class="sop-icon-container bg-emerald-50 text-emerald-600">
                         <i class="fas fa-tags"></i>
@@ -218,7 +218,7 @@
             </div>
 
             <!-- 竞品监控与分析 -->
-            <div class="sop-card border-l-4 border-l-emerald-400" onclick="switchTab('sops_competitor_monitoring')">
+            <div class="sop-card border-l-4 border-l-emerald-400" data-action="switch-tab" data-tab="sops_competitor_monitoring">
                 <div class="flex items-start justify-between mb-3">
                     <div class="sop-icon-container bg-emerald-50 text-emerald-600">
                         <i class="fas fa-binoculars"></i>
@@ -247,7 +247,7 @@
         </div>
         <div class="sop-card-grid">
             <!-- FBA发货标准操作 -->
-            <div class="sop-card border-l-4 border-l-amber-400" onclick="switchTab('sops_fba_shipping')">
+            <div class="sop-card border-l-4 border-l-amber-400" data-action="switch-tab" data-tab="sops_fba_shipping">
                 <div class="flex items-start justify-between mb-3">
                     <div class="sop-icon-container bg-amber-50 text-amber-600">
                         <i class="fas fa-truck-fast"></i>
@@ -262,7 +262,7 @@
             </div>
 
             <!-- 采购与质检 -->
-            <div class="sop-card border-l-4 border-l-amber-400" onclick="switchTab('sops_procurement_qc')">
+            <div class="sop-card border-l-4 border-l-amber-400" data-action="switch-tab" data-tab="sops_procurement_qc">
                 <div class="flex items-start justify-between mb-3">
                     <div class="sop-icon-container bg-amber-50 text-amber-600">
                         <i class="fas fa-clipboard-check"></i>
@@ -277,7 +277,7 @@
             </div>
 
             <!-- 库存预警与补货 -->
-            <div class="sop-card border-l-4 border-l-amber-400" onclick="switchTab('sops_inventory_replenishment')">
+            <div class="sop-card border-l-4 border-l-amber-400" data-action="switch-tab" data-tab="sops_inventory_replenishment">
                 <div class="flex items-start justify-between mb-3">
                     <div class="sop-icon-container bg-amber-50 text-amber-600">
                         <i class="fas fa-cubes"></i>
@@ -307,7 +307,7 @@
         </div>
         <div class="sop-card-grid">
             <!-- 账号登录与环境安全 -->
-            <div class="sop-card border-l-4 border-l-red-400" onclick="switchTab('sops_account_security')">
+            <div class="sop-card border-l-4 border-l-red-400" data-action="switch-tab" data-tab="sops_account_security">
                 <div class="flex items-start justify-between mb-3">
                     <div class="sop-icon-container bg-red-50 text-red-600">
                         <i class="fas fa-shield-halved"></i>
@@ -324,7 +324,7 @@
             </div>
 
             <!-- 后台权限管理 -->
-            <div class="sop-card border-l-4 border-l-red-400" onclick="switchTab('sops_permission_management')">
+            <div class="sop-card border-l-4 border-l-red-400" data-action="switch-tab" data-tab="sops_permission_management">
                 <div class="flex items-start justify-between mb-3">
                     <div class="sop-icon-container bg-red-50 text-red-600">
                         <i class="fas fa-user-lock"></i>
@@ -339,7 +339,7 @@
             </div>
 
             <!-- 品牌与侵权审核 -->
-            <div class="sop-card border-l-4 border-l-red-400" onclick="switchTab('sops_brand_infringement')">
+            <div class="sop-card border-l-4 border-l-red-400" data-action="switch-tab" data-tab="sops_brand_infringement">
                 <div class="flex items-start justify-between mb-3">
                     <div class="sop-icon-container bg-red-50 text-red-600">
                         <i class="fas fa-trademark"></i>
@@ -356,7 +356,7 @@
             </div>
 
             <!-- 绩效通知处理 -->
-            <div class="sop-card border-l-4 border-l-red-400" onclick="switchTab('sops_performance_notification')">
+            <div class="sop-card border-l-4 border-l-red-400" data-action="switch-tab" data-tab="sops_performance_notification">
                 <div class="flex items-start justify-between mb-3">
                     <div class="sop-icon-container bg-red-50 text-red-600">
                         <i class="fas fa-bell"></i>
@@ -370,7 +370,7 @@
                 </div>
             </div>
             <!-- 欧洲本土化高危词库 -->
-            <div class="sop-card border-l-4 border-l-red-400" onclick="switchTab('sops_restricted_words')">
+            <div class="sop-card border-l-4 border-l-red-400" data-action="switch-tab" data-tab="sops_restricted_words">
                 <div class="flex items-start justify-between mb-3">
                     <div class="sop-icon-container bg-red-50 text-red-600">
                         <i class="fas fa-book-dead"></i>
@@ -387,7 +387,7 @@
             </div>
 
             <!-- 产品Listing合规性 -->
-            <div class="sop-card border-l-4 border-l-red-400" onclick="switchTab('sops_product_compliance')">
+            <div class="sop-card border-l-4 border-l-red-400" data-action="switch-tab" data-tab="sops_product_compliance">
                 <div class="flex items-start justify-between mb-3">
                     <div class="sop-icon-container bg-red-50 text-red-600">
                         <i class="fas fa-file-shield"></i>
@@ -418,7 +418,7 @@
         </div>
         <div class="sop-card-grid">
             <!-- 邮件回复模板 -->
-            <div class="sop-card border-l-4 border-l-blue-400" onclick="switchTab('sops_email_templates')">
+            <div class="sop-card border-l-4 border-l-blue-400" data-action="switch-tab" data-tab="sops_email_templates">
                 <div class="flex items-start justify-between mb-3">
                     <div class="sop-icon-container bg-blue-50 text-blue-600">
                         <i class="fas fa-envelope-open-text"></i>
@@ -435,7 +435,7 @@
             </div>
 
             <!-- 差评处理与分析 -->
-            <div class="sop-card border-l-4 border-l-blue-400" onclick="switchTab('sops_negative_review')">
+            <div class="sop-card border-l-4 border-l-blue-400" data-action="switch-tab" data-tab="sops_negative_review">
                 <div class="flex items-start justify-between mb-3">
                     <div class="sop-icon-container bg-blue-50 text-blue-600">
                         <i class="fas fa-comment-dots"></i>
@@ -450,7 +450,7 @@
             </div>
 
             <!-- QA 问答维护 -->
-            <div class="sop-card border-l-4 border-l-blue-400" onclick="switchTab('sops_qa_maintenance')">
+            <div class="sop-card border-l-4 border-l-blue-400" data-action="switch-tab" data-tab="sops_qa_maintenance">
                 <div class="flex items-start justify-between mb-3">
                     <div class="sop-icon-container bg-blue-50 text-blue-600">
                         <i class="fas fa-comments"></i>
