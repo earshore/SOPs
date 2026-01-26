@@ -7,6 +7,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 build_log.txt
+build_log_2.txt
 
 # Dependency directories
 node_modules/
