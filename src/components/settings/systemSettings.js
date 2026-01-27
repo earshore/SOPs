@@ -15,7 +15,7 @@ import { ErrorService } from "../../services/errorService.js";
 
 const SettingsPanel = () => ({
     isOpen: false,
-    
+
     // LLM Config State
     llm: {
         provider: 'openai',
@@ -68,7 +68,7 @@ const SettingsPanel = () => ({
     init() {
         this.loadProxyConfig();
         this.loadProviderConfig(this.llm.provider); // Force load on init
-        
+
         // Watch for provider changes to load its config
         this.$watch('llm.provider', (val) => this.loadProviderConfig(val));
         // Watch for proxy type to restore cached key
@@ -92,7 +92,7 @@ const SettingsPanel = () => ({
     loadProviderConfig(provider) {
         if (!provider) return;
         const config = PROVIDERS[provider];
-        
+
         // Safety check: if provider key doesn't exist in constants
         if (!config) {
             console.warn(`Unknown provider: ${provider}, falling back to OpenAI`);
@@ -103,12 +103,12 @@ const SettingsPanel = () => ({
 
         this.llm.endpoint = savedConfig.endpoint || config.endpoint;
         this.llm.apiKey = savedConfig.apiKey || "";
-        
+
         // Models: Use saved or default
-        const rawModels = (savedConfig.models && savedConfig.models.length > 0) 
-            ? savedConfig.models 
+        const rawModels = (savedConfig.models && savedConfig.models.length > 0)
+            ? savedConfig.models
             : (config.models || []);
-            
+
         // Deduplicate models
         const seen = new Set();
         this.llm.models = rawModels.filter(m => {
@@ -117,13 +117,13 @@ const SettingsPanel = () => ({
             seen.add(id);
             return true;
         });
-            
+
         this.llm.model = savedConfig.model || "";
-        
+
         // Auto-select first model if none selected and models exist
         if (!this.llm.model && this.llm.models.length > 0) {
-             const first = this.llm.models[0];
-             this.llm.model = typeof first === 'string' ? first : first.id;
+            const first = this.llm.models[0];
+            this.llm.model = typeof first === 'string' ? first : first.id;
         }
     },
 
@@ -137,8 +137,8 @@ const SettingsPanel = () => ({
         try {
             let models = [];
             const provider = this.llm.provider;
-            
-            if (["openai", "deepseek", "moonshot", "qwen"].includes(provider)) {
+
+            if (["llmgateway", "openai", "deepseek", "moonshot", "qwen"].includes(provider)) {
                 models = await fetchModelsFromApi(provider, this.llm.endpoint, this.llm.apiKey);
             } else {
                 // Mock delay for static providers
@@ -156,7 +156,7 @@ const SettingsPanel = () => ({
                 seen.add(id);
                 return true;
             });
-            
+
             showToast(`成功同步 ${this.llm.models.length} 个模型`, "success");
         } catch (e) {
             ErrorService.handle(e, { action: 'fetchModels', module: 'settings' });
@@ -175,7 +175,7 @@ const SettingsPanel = () => ({
         try {
             showToast("正在发送测试请求...", "info");
             const messages = [{ role: "user", content: "Hello! Reply 'OK'." }];
-            
+
             const response = await callLLM(
                 messages,
                 this.llm.provider,
@@ -196,8 +196,8 @@ const SettingsPanel = () => ({
 
     saveProviderConfig() {
         if (!this.llm.apiKey && this.llm.provider !== 'custom') { // Custom might not need key? Usually does.
-             showToast("请填写 API Key", "warning");
-             return;
+            showToast("请填写 API Key", "warning");
+            return;
         }
 
         const newConfig = {
@@ -208,12 +208,12 @@ const SettingsPanel = () => ({
         };
 
         StorageService.setLLMConfig(this.llm.provider, newConfig);
-        
+
         // Update global status UI (if any outside this component)
         // Since we use Alpine, we might want a global store for status
         // For now, rely on StorageService events or manual update
-        updateModelStatus(); 
-        
+        updateModelStatus();
+
         showToast("LLM 配置已保存", "success");
         setTimeout(() => this.close(), 500);
     },
@@ -223,7 +223,7 @@ const SettingsPanel = () => ({
     loadProxyConfig() {
         const savedConfig = StorageService.get(STORAGE_KEYS.SCRAPER_PROXY_CONFIG, {});
         this.proxy.savedKeyMap = StorageService.get(STORAGE_KEYS.PROXY_KEY_MAP, {});
-        
+
         this.proxy.type = savedConfig.type || "allorigins";
         // If the saved active type matches current type, use its URL, otherwise fallback to cache
         if (savedConfig.type === this.proxy.type) {
@@ -277,41 +277,41 @@ export function openSettings() {
 
 export function closeSettings() {
     // Dispatch event to close via Alpine
-    window.dispatchEvent(new CustomEvent('close-settings')); 
+    window.dispatchEvent(new CustomEvent('close-settings'));
     // We need to add @close-settings.window="close()" to HTML
 }
 
 // These are no longer needed for direct calling, but kept if other modules import them
 // actually, other modules shouldn't import them anymore if we move to event bus.
 // For now, we only need openSettings export.
-export const initSettingsListeners = () => {}; // No-op, handled by Alpine
-export const saveProviderConfig = () => {}; 
-export const loadProviderConfig = () => {}; 
-export const fetchModels = () => {};
-export const toggleApiKeyVisibility = () => {};
-export const testConnection = () => {};
-export const saveProxyConfig = () => {};
-export const renderProxyInputUI = () => {};
+export const initSettingsListeners = () => { }; // No-op, handled by Alpine
+export const saveProviderConfig = () => { };
+export const loadProviderConfig = () => { };
+export const fetchModels = () => { };
+export const toggleApiKeyVisibility = () => { };
+export const testConnection = () => { };
+export const saveProxyConfig = () => { };
+export const renderProxyInputUI = () => { };
 
 // Keep this for main.js status update
 export function updateModelStatus() {
-  const provider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
-  const statusEl = document.getElementById("model-status");
-  if (!statusEl) return;
+    const provider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
+    const statusEl = document.getElementById("model-status");
+    if (!statusEl) return;
 
-  if (provider && PROVIDERS[provider]) {
-    const config = StorageService.getLLMConfig(provider) || {};
-    if (config.apiKey && config.model) {
-      statusEl.innerHTML = `
+    if (provider && PROVIDERS[provider]) {
+        const config = StorageService.getLLMConfig(provider) || {};
+        if (config.apiKey && config.model) {
+            statusEl.innerHTML = `
                 <span class="status-dot status-success"></span>
                 <span class="text-slate-600 text-xs font-medium flex items-center gap-1">
                     ${PROVIDERS[provider].name}: <span class="font-mono text-blue-600">${config.model}</span>
                 </span>
             `;
-      return;
+            return;
+        }
     }
-  }
-  statusEl.innerHTML = `
+    statusEl.innerHTML = `
         <span class="status-dot status-pending pulse-dot"></span>
         <span class="text-slate-500 text-xs italic">等待API配置...</span>
     `;
