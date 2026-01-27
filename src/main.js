@@ -60,6 +60,8 @@ import {
   initGlobalEventDelegation
 } from './common/utils/actionRegistry.js';
 
+import { loadPlugins } from './common/utils/pluginLoader.js';
+
 // ✅ P1: 导入事件调试工具
 import { initEventLogger } from './common/utils/eventLogger.js';
 
@@ -155,6 +157,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // ✅ P1: 初始化全局事件委托 (支持 data-action 模式)
     initGlobalEventDelegation();
+
+    // ⚡️ Load Plugins (Dynamic Registration)
+    loadPlugins();
 
     initHomeSplash();
 

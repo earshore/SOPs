@@ -2,6 +2,9 @@
 // CONFIGURATION CONSTANTS
 // ========================
 
+// App Version for cache invalidation
+export const APP_VERSION = '1.0.0';
+
 // 1. 增加随机 User-Agent 池 (反爬虫核心)
 export const USER_AGENTS = [
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",

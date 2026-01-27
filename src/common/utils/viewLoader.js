@@ -2,7 +2,79 @@
 // ================================================================
 // 🎯 P1 增强: 按需加载（Lazy Loading），大幅提升首屏速度
 // 🎯 P2 优化: 使用 Vite glob import 替代 fetch，解决生产环境 404 问题
+// 🎯 P3 优化: 本地持久化缓存 (LocalStorage Cache)
 // ================================================================
+
+import { APP_VERSION } from '../constants/constants.js';
+
+const CACHE_PREFIX = 'view_cache_';
+
+/**
+ * 获取带版本的缓存键
+ * @param {string} path 
+ */
+function getCacheKey(path) {
+    return `${CACHE_PREFIX}${APP_VERSION}_${path}`;
+}
+
+/**
+ * 检查缓存
+ * @param {string} path 
+ * @returns {string|null}
+ */
+function checkCache(path) {
+    try {
+        const key = getCacheKey(path);
+        const cached = localStorage.getItem(key);
+        if (cached) {
+            // console.log(`[ViewLoader] Cache Hit: ${path}`);
+            return cached;
+        }
+    } catch (e) {
+        console.warn('Cache read error:', e);
+    }
+    return null;
+}
+
+/**
+ * 设置缓存
+ * @param {string} path 
+ * @param {string} content 
+ */
+function setCache(path, content) {
+    try {
+        const key = getCacheKey(path);
+        localStorage.setItem(key, content);
+        
+        // 简单的清理逻辑：清理旧版本缓存
+        // 遍历 localStorage，删除以 CACHE_PREFIX 开头但不匹配当前版本的 key
+        // 仅在首次设置时偶尔执行，避免性能损耗？或者简单点，每次都检查太重了。
+        // 这里仅简单设置。清理逻辑可以放在应用启动时统一执行一次。
+    } catch (e) {
+        console.warn('Cache write error:', e);
+    }
+}
+
+/**
+ * 清理旧版本缓存 (Exported for main.js or init)
+ */
+export function clearOldCache() {
+    try {
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith(CACHE_PREFIX) && !key.includes(APP_VERSION)) {
+                keysToRemove.push(key);
+            }
+        }
+        keysToRemove.forEach(k => localStorage.removeItem(k));
+        if (keysToRemove.length > 0) {
+            console.log(`[ViewLoader] Cleared ${keysToRemove.length} old cache items.`);
+        }
+    } catch (e) {
+        console.warn('Cache clear error:', e);
+    }
+}
 
 /**
  * 使用 Vite 的 import.meta.glob 批量导入所有需要的 HTML 文件
@@ -90,14 +162,23 @@ async function loadHtml(key) {
 
     try {
         const path = config.path;
-        const loader = htmlModules[path];
+        
+        // 1. Check Cache
+        const cachedHtml = checkCache(path);
+        let html;
 
-        if (!loader) {
-            throw new Error(`Module path not found in glob registry: ${path}`);
+        if (cachedHtml) {
+            html = cachedHtml;
+        } else {
+            const loader = htmlModules[path];
+            if (!loader) {
+                throw new Error(`Module path not found in glob registry: ${path}`);
+            }
+            // 2. Load
+            html = await loader();
+            // 3. Set Cache
+            setCache(path, html);
         }
-
-        // 调用 loader 获取内容 (Vite 会处理懒加载)
-        const html = await loader();
 
         container.insertAdjacentHTML('beforeend', html);
         config.isLoaded = true;
@@ -115,6 +196,7 @@ async function loadHtml(key) {
  * 只加载 Home 和 全局模态框
  */
 export async function initViews() {
+    clearOldCache();
     const startTime = performance.now();
     console.log("🚀 [ViewLoader] Initializing Critical Views (Bundled)...");
 
@@ -171,16 +253,27 @@ export async function loadTemplate(path) {
         // 尝试标准化路径
         if (!path.startsWith('/')) path = '/' + path;
 
+        // 1. Check Cache
+        const cachedHtml = checkCache(path);
+        if (cachedHtml) return cachedHtml;
+
         const loader = htmlModules[path];
         if (!loader) {
             console.error(`[ViewLoader] Template not found in registry: ${path}`);
             // Fallback: 尝试不带前导斜杠
             const altPath = path.substring(1);
-            if (htmlModules[altPath]) return htmlModules[altPath]();
+            if (htmlModules[altPath]) {
+                const html = await htmlModules[altPath]();
+                setCache(path, html); // Cache for original path to avoid retry
+                return html;
+            }
 
             throw new Error(`Template path not found: ${path}`);
         }
-        return await loader();
+        
+        const html = await loader();
+        setCache(path, html);
+        return html;
     } catch (e) {
         console.error(`[ViewLoader] Failed to load template [${path}]:`, e);
         return `<div class="p-4 text-red-500">Error loading template: ${e.message}</div>`;

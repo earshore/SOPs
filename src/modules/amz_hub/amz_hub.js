@@ -14,6 +14,19 @@ const MODULE_MAP = {
     // 'amz_calendar':  () => import('./views/marketing_calendar/index.js'),
 };
 
+/**
+ * 注册子模块 (Plugin API)
+ * @param {string} routeId - 路由 ID
+ * @param {Function} loader - 动态导入函数
+ */
+export function registerHubModule(routeId, loader) {
+    if (MODULE_MAP[routeId]) {
+        console.warn(`[AmzHub] 覆盖已存在的子模块: ${routeId}`);
+    }
+    MODULE_MAP[routeId] = loader;
+    console.log(`[AmzHub] 注册子模块: ${routeId}`);
+}
+
 let currentModule = null; // 保持对当前子模块的引用，以便卸载
 
 /**

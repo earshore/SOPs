@@ -34,6 +34,19 @@ const MODULE_MAP = {
     'sops_qa_maintenance': () => import('./views/service/qa_maintenance/index.js'),
 };
 
+/**
+ * 注册子模块 (Plugin API)
+ * @param {string} routeId - 路由 ID
+ * @param {Function} loader - 动态导入函数
+ */
+export function registerSubModule(routeId, loader) {
+    if (MODULE_MAP[routeId]) {
+        console.warn(`[SOPs] 覆盖已存在的子模块: ${routeId}`);
+    }
+    MODULE_MAP[routeId] = loader;
+    console.log(`[SOPs] 注册子模块: ${routeId}`);
+}
+
 let currentModule = null; // 保持对当前子模块的引用，以便卸载
 
 /**
