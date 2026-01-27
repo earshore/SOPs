@@ -18,7 +18,7 @@ export const USER_AGENTS = [
 export const getRandomUserAgent = () => USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
 
 export const PROVIDERS = {
-  llmgatewat: {
+  llmgateway: {
     name: "LLM-Gateway",
     endpoint: "https://llm-gateway.hongecb.store/",
     models: [
