@@ -131,6 +131,22 @@ export const StorageService = {
     },
 
     /**
+     * 获取抓取历史
+     * @returns {Array}
+     */
+    getScrapeHistory() {
+        return this.get(STORAGE_KEYS.SCRAPE_HISTORY, []);
+    },
+
+    /**
+     * 保存抓取历史
+     * @param {Array} history
+     */
+    setScrapeHistory(history) {
+        this.set(STORAGE_KEYS.SCRAPE_HISTORY, history);
+    },
+
+    /**
      * 保存草稿
      * @param {string} module - 模块名
      * @param {*} data - 草稿数据
