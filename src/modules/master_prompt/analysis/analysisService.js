@@ -1,14 +1,16 @@
 // src/modules/master_prompt/analysis/analysisService.js
-// ================================================================
+// @ts-check
+// ================================================= ===============
 // 🎯 P2 重构: 添加完整的 JSDoc 类型注释
-// ================================================================
+// 🛡️ Phase 1: 增强鲁棒性 - 改进解析逻辑与类型检查
+// ================================================= ===============
 
 import { callLLM } from "../../../services/llmService.js";
 import { TRANSLATE_PROMPT_TEMPLATE } from "../../../common/constants/prompts.js";
 
-// ========================
+// ======================== 
 // 类型定义
-// ========================
+// ======================== 
 
 /**
  * 产品数据对象
@@ -30,9 +32,9 @@ import { TRANSLATE_PROMPT_TEMPLATE } from "../../../common/constants/prompts.js"
 /**
  * 数据维度选项
  * @typedef {Object} DataOptions
- * @property {boolean} [includeTitle=true] - 是否包含标题
- * @property {boolean} [includeBullets=true] - 是否包含五点描述
- * @property {boolean} [includeReviews=true] - 是否包含评论
+ * @property {boolean} [includeTitle] - 是否包含标题
+ * @property {boolean} [includeBullets] - 是否包含五点描述
+ * @property {boolean} [includeReviews] - 是否包含评论
  */
 
 /**
@@ -52,11 +54,44 @@ import { TRANSLATE_PROMPT_TEMPLATE } from "../../../common/constants/prompts.js"
  * @property {Object} [meta] - 元数据
  * @property {boolean} [parse_error] - 解析是否出错
  * @property {string} [raw_response] - 原始响应 (解析失败时)
+ * @property {string} [error_detail] - 错误详情
  */
 
-// ========================
+// ======================== 
+// 辅助函数
+// ======================== 
+
+/**
+ * 鲁棒的 JSON 提取器
+ * 处理 Markdown 代码块及杂余文本
+ * @param {string} text 
+ * @returns {any}
+ */
+function robustParseJSON(text) {
+  if (!text) return null;
+  
+  // 1. 尝试直接解析
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    // 2. 尝试提取 Markdown JSON 块: ```json ... ```
+    const mdMatch = text.match(/```json\s*([\s\S]*?)\s*```/);
+    if (mdMatch && mdMatch[1]) {
+      try { return JSON.parse(mdMatch[1]); } catch (e2) { /* ignore */ }
+    }
+
+    // 3. 尝试使用花括号匹配提取最外层的 {}
+    const braceMatch = text.match(/\{[\s\S]*\}/);
+    if (braceMatch) {
+      try { return JSON.parse(braceMatch[0]); } catch (e3) { /* ignore */ }
+    }
+  }
+  throw new Error("无法从响应中解析有效的 JSON 数据");
+}
+
+// ======================== 
 // 核心分析服务
-// ========================
+// ======================== 
 
 /**
  * 分析服务模块
@@ -72,14 +107,6 @@ export const AnalysisService = {
    * @param {LLMConfig} llmConfig - LLM 配置对象
    * @param {DataOptions} [dataOptions={}] - 数据维度选项
    * @returns {Promise<AnalysisReport>} 分析报告对象
-   *
-   * @example
-   * const report = await AnalysisService.generateReport(
-   *   [{ asin: 'B123', productTitle: 'Example Product' }],
-   *   ANALYSIS_PROMPT,
-   *   'English',
-   *   { provider: 'openai', endpoint: '...', apiKey: '...', model: 'gpt-4o' }
-   * );
    */
   async generateReport(
     products,
@@ -105,7 +132,7 @@ export const AnalysisService = {
         }
 
         if (includeBullets) {
-          const bullets =
+          const bullets = 
             p.feature_bullets && p.feature_bullets.length > 0
               ? p.feature_bullets.join("; ")
               : "N/A";
@@ -131,21 +158,26 @@ export const AnalysisService = {
       .replace("{{category}}", "General");
 
     // 3. 调用 LLM
+    // 增加超时到 120s，因为分析通常涉及大量上下文
     const response = await callLLM(
       [{ role: "user", content: finalPrompt }],
       llmConfig.provider,
       llmConfig.endpoint,
       llmConfig.apiKey,
-      llmConfig.model
+      llmConfig.model,
+      { jsonMode: false, timeout: 120000 }
     );
 
     // 4. 解析结果
     try {
-      const jsonMatch = response.match(/\{[\s\S]*\}/);
-      return JSON.parse(jsonMatch ? jsonMatch[0] : response);
+      return robustParseJSON(response);
     } catch (e) {
-      console.warn("JSON Parse Failed, returning raw response wrapper");
-      return { raw_response: response, parse_error: true };
+      console.warn("Analysis JSON Parse Failed:", e.message);
+      return { 
+        raw_response: response, 
+        parse_error: true, 
+        error_detail: e.message 
+      };
     }
   },
 
@@ -158,9 +190,9 @@ export const AnalysisService = {
    * @returns {Promise<AnalysisReport>} 翻译后的报告
    */
   async translateReport(report, language, llmConfig) {
-    // 深拷贝并移除 meta 字段
+    // 深拷贝并移除 meta 字段，减少 Token 消耗
     const toTranslate = JSON.parse(JSON.stringify(report));
-    delete toTranslate.meta;
+    if (toTranslate.meta) delete toTranslate.meta;
 
     const translatePrompt = TRANSLATE_PROMPT_TEMPLATE.replace(
       /{{language}}/g,
@@ -172,10 +204,19 @@ export const AnalysisService = {
       llmConfig.provider,
       llmConfig.endpoint,
       llmConfig.apiKey,
-      llmConfig.model
+      llmConfig.model,
+      { jsonMode: false, timeout: 60000 }
     );
 
-    const jsonMatch = response.match(/\{[\s\S]*\}/);
-    return JSON.parse(jsonMatch ? jsonMatch[0] : response);
+    try {
+      return robustParseJSON(response);
+    } catch (e) {
+      console.warn("Translation JSON Parse Failed:", e.message);
+      return { 
+        ...report, // 返回原报告，但标记错误
+        parse_error: true, 
+        raw_response: response 
+      };
+    }
   },
 };

@@ -11,7 +11,7 @@ import { getFieldTitle } from "../promptlab/promptlabDisplay.js";
 import { StorageService, STORAGE_KEYS } from "../../../services/storageService.js";
 import { ErrorService } from "../../../services/errorService.js";
 import { registerActionsWithLegacy } from "../../../common/utils/actionRegistry.js";
-import { renderWidgetCard, renderViewModeHTML, renderEditorForm } from "./analysisRenderer.js";
+import { renderWidgetCard, renderViewModeHTML, renderEditorForm, renderSkeleton } from "./analysisRenderer.js";
 import eventBus from "../../../common/EventBus.js"; // [NEW] Import EventBus
 import { EVENTS } from "../../../common/constants/eventConstants.js";
 import { loadGridStack } from "../../../common/utils/lazyLibs.js";
@@ -325,7 +325,24 @@ class AnalysisModule extends BaseModule {
     const btn = document.getElementById("analyze-btn");
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> 分析中...';
-    showProgress(true, 30);
+    
+    // 🛡️ [UX] 1. Render Skeleton State Immediately
+    const loadingReport = {};
+    const selectedCheckboxes = document.querySelectorAll('input[name="analysis_module"]:checked');
+    selectedCheckboxes.forEach((cb) => {
+        loadingReport[cb.value] = '__LOADING__';
+    });
+    
+    // Add meta placeholders to prevent UI errors
+    loadingReport.meta = {
+        targetMarket: "Analyze...",
+        generatedByModel: config.model,
+        generatedAt: "Pending...",
+        templateUsed: "Dynamic Analysis",
+    };
+    
+    state.analysisReport = loadingReport;
+    this.renderReport(); // Shows skeletons
 
     const selectedProducts = state.scrapedData.products.filter((p) => state.selectedAsins.includes(p.asin));
     const site = state.scrapedData.metadata.marketplace;
@@ -353,8 +370,6 @@ class AnalysisModule extends BaseModule {
         dataOptions
       );
 
-      showProgress(true, 80);
-
       report.meta = {
         targetMarket: language,
         analyzedASINs: state.selectedAsins,
@@ -374,14 +389,20 @@ class AnalysisModule extends BaseModule {
       state.isEditing = false;
 
       HistoryService.save(state.scrapedData, report);
-      renderHistory(); // Assuming renderHistory is imported
-      this.renderReport();
+      renderHistory(); 
+      this.renderReport(); // Re-render with real data
 
-      showProgress(false);
       showToast("分析完成", "success");
     } catch (e) {
       ErrorService.handle(e, { action: 'analyzeSelectedAsins', module: 'analysis' });
-      showProgress(false);
+      // On error, clear loading state
+      state.analysisReport = null; 
+      // Re-render empty state or error state if implemented
+      const display = document.getElementById("report-display");
+      if (display) display.classList.add("hidden");
+      const noReportMsg = document.getElementById("no-report-msg");
+      if (noReportMsg) noReportMsg.classList.remove("hidden");
+      
     } finally {
       btn.disabled = false;
       btn.innerHTML = '<i class="fas fa-brain mr-2"></i> 分析ASIN';
@@ -646,6 +667,12 @@ class AnalysisModule extends BaseModule {
     const origVal = report[key];
     const showTrans = state.showTranslation;
     const transVal = showTrans && transReport ? transReport[key] : undefined;
+    
+    // 🛡️ [UX] 2. Check for Loading State
+    if (origVal === '__LOADING__') {
+        // Return skeleton HTML immediately
+        return renderSkeleton();
+    }
 
     const displayVal = this.getDisplayValue(origVal, transVal);
 

@@ -155,6 +155,50 @@ function _renderObjectArray(val) {
 // 3. 编辑模式 (Editor Mode) HTML 生成
 // ==========================================
 
+// ==========================================
+// 4. 加载状态 (Loading State) HTML 生成
+// ==========================================
+
+/**
+ * 渲染骨架屏 (Skeleton Screen)
+ * @returns {string} 骨架屏 HTML
+ */
+export function renderSkeleton() {
+    return `
+        <div class="analysis-widget-card h-full p-5 bg-white">
+            <!-- Header Skeleton -->
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-8 h-8 rounded-xl bg-slate-100 skeleton"></div>
+                <div class="h-4 w-32 bg-slate-100 rounded skeleton"></div>
+            </div>
+            
+            <!-- Content Skeleton -->
+            <div class="space-y-4 animate-pulse">
+                <div class="h-2.5 bg-slate-100 rounded w-3/4 skeleton"></div>
+                <div class="h-2.5 bg-slate-100 rounded w-full skeleton"></div>
+                <div class="h-2.5 bg-slate-100 rounded w-5/6 skeleton"></div>
+                <div class="h-2.5 bg-slate-100 rounded w-2/3 skeleton"></div>
+            </div>
+
+            <!-- List Skeleton (simulating bullets) -->
+            <div class="mt-6 space-y-3">
+                <div class="flex gap-2">
+                    <div class="w-1.5 h-1.5 mt-1.5 rounded-full bg-slate-200"></div>
+                    <div class="h-2 bg-slate-100 rounded w-11/12 skeleton"></div>
+                </div>
+                <div class="flex gap-2">
+                    <div class="w-1.5 h-1.5 mt-1.5 rounded-full bg-slate-200"></div>
+                    <div class="h-2 bg-slate-100 rounded w-10/12 skeleton"></div>
+                </div>
+                <div class="flex gap-2">
+                    <div class="w-1.5 h-1.5 mt-1.5 rounded-full bg-slate-200"></div>
+                    <div class="h-2 bg-slate-100 rounded w-full skeleton"></div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
 export function renderEditorForm(key, data) {
     // 自动高度脚本
     const autoResizeJS = "this.style.height='auto';this.style.height=this.scrollHeight+'px'";

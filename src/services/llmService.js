@@ -1,7 +1,9 @@
 // src/services/llmService.js
+// @ts-check
 // ================================================================
 // 🎯 P2 重构: 添加完整的 JSDoc 类型注释
 // 🎯 Phase 5: 已集成 ErrorService
+// 🛡️ Phase 1.2: 增强鲁棒性 - 指数退避重试 (Exponential Backoff)
 // ================================================================
 
 import { ErrorService } from './errorService.js';
@@ -21,8 +23,10 @@ import { ErrorService } from './errorService.js';
  * LLM 调用配置选项
  * @typedef {Object} LLMOptions
  * @property {number} [temperature=0.3] - 温度参数 (0-2)，越低越确定性
- * @property {boolean} [jsonMode=true] - 是否强制 JSON 输出格式
+ * @property {boolean} [jsonMode=false] - 是否强制 JSON 输出格式 (默认为 false 以兼容更多模型)
  * @property {number} [timeout=90000] - 超时时间 (毫秒)
+ * @property {number} [retries=3] - 最大重试次数
+ * @property {number} [retryDelay=1000] - 初始重试延迟 (ms)
  */
 
 /**
@@ -43,11 +47,22 @@ import { ErrorService } from './errorService.js';
  */
 
 // ========================
+// 辅助函数
+// ========================
+
+/**
+ * 睡眠函数
+ * @param {number} ms 
+ * @returns {Promise<void>}
+ */
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+// ========================
 // 核心 API 函数
 // ========================
 
 /**
- * 通用大语言模型调用接口
+ * 通用大语言模型调用接口 (带自动重试)
  * 
  * @param {ChatMessage[]} messages - 聊天上下文消息数组
  * @param {string} provider - 厂商标识 (openai, anthropic, deepseek...)
@@ -64,7 +79,8 @@ import { ErrorService } from './errorService.js';
  *   'openai',
  *   'https://api.openai.com/v1',
  *   'sk-xxx',
- *   'gpt-4o-mini'
+ *   'gpt-4o-mini',
+ *   { retries: 2 }
  * );
  */
 export async function callLLM(
@@ -75,10 +91,13 @@ export async function callLLM(
   model,
   options = {}
 ) {
-  const { temperature = 0.3, jsonMode = true, timeout = 90000 } = options;
-
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeout);
+  const { 
+    temperature = 0.3, 
+    jsonMode = false, 
+    timeout = 90000,
+    retries = 2,
+    retryDelay = 1000
+  } = options;
 
   /** @type {Object} */
   const requestBody = {
@@ -89,42 +108,105 @@ export async function callLLM(
     ...(jsonMode && { response_format: { type: "json_object" } }),
   };
 
-  try {
-    const response = await fetch(`${endpoint}/chat/completions`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify(requestBody),
-      signal: controller.signal,
-    });
+  let lastError = null;
 
-    clearTimeout(timeoutId);
+  // 重试循环
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      let errorMsg = `服务器返回错误 ${response.status}`;
-      try {
-        const errorJson = JSON.parse(errorText);
-        if (errorJson.error && errorJson.error.message) {
-          errorMsg = errorJson.error.message;
-        }
-      } catch (e) {
-        // 解析失败，使用原始文本或状态码
+    try {
+      // 首次之后的重试需要等待
+      if (attempt > 0) {
+        // 指数退避: 1s, 2s, 4s... 加少量 jitter 防止惊群
+        const delay = retryDelay * Math.pow(2, attempt - 1) * (1 + Math.random() * 0.2);
+        console.log(`⏳ LLM 调用重试 [${attempt}/${retries}]，等待 ${Math.round(delay)}ms...`);
+        await sleep(delay);
       }
-      throw new Error(errorMsg);
-    }
 
-    const data = await response.json();
-    return data.choices[0].message.content;
-  } catch (e) {
-    clearTimeout(timeoutId);
-    if (e.name === "AbortError") {
-      throw new Error(`模型响应超时(${timeout / 1000}秒)，请检查网络或重试`);
+      const response = await fetch(`${endpoint}/chat/completions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify(requestBody),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      // 处理非 200 响应
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorMsg = `服务器返回错误 ${response.status}`;
+        let shouldRetry = false;
+
+        try {
+          const errorJson = JSON.parse(errorText);
+          if (errorJson.error && errorJson.error.message) {
+            errorMsg = errorJson.error.message;
+          }
+        } catch (e) {
+          // 解析失败，使用原始文本
+        }
+
+        // 决定是否重试
+        // 429: Too Many Requests (限流)
+        // 5xx: Server Errors (服务器崩溃/网关超时)
+        if (response.status === 429 || response.status >= 500) {
+          shouldRetry = true;
+        }
+
+        const error = new Error(errorMsg);
+        // @ts-ignore
+        error.status = response.status;
+        
+        if (shouldRetry && attempt < retries) {
+          lastError = error;
+          console.warn(`⚠️ LLM 调用失败 (${response.status})，准备重试:`, errorMsg);
+          continue; // 进入下一次循环
+        } else {
+          throw error; // 致命错误或重试耗尽，直接抛出
+        }
+      }
+
+      const data = await response.json();
+      
+      // 兼容性检查：某些非标准 API 可能返回结构不同
+      if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+        throw new Error(`API 返回格式异常: ${JSON.stringify(data).substring(0, 100)}...`);
+      }
+
+      return data.choices[0].message.content;
+
+    } catch (e) {
+      clearTimeout(timeoutId);
+      lastError = e;
+
+      // 如果是 AbortError (超时)，通常也可以重试
+      if (e.name === "AbortError") {
+        const timeoutMsg = `模型响应超时(${timeout / 1000}秒)`;
+        if (attempt < retries) {
+           console.warn(`⚠️ LLM ${timeoutMsg}，准备重试...`);
+           continue;
+        }
+        throw new Error(`${timeoutMsg}，请检查网络或增加超时时间`);
+      }
+
+      // 如果已经是 Error 对象且有 status (上面抛出的)，则保持
+      // 否则如果是网络错误 (fetch failed)，也值得重试
+      if (!e.status && attempt < retries) {
+          console.warn(`⚠️ 网络/未知错误，准备重试:`, e.message);
+          continue;
+      }
+
+      // 其他情况 (如 400 Bad Request) 直接抛出
+      throw e;
     }
-    throw e;
   }
+
+  throw lastError || new Error("LLM 调用失败 (未知原因)");
 }
 
 /**
@@ -141,9 +223,15 @@ export async function callLLM(
  */
 export async function fetchModelsFromApi(provider, endpoint, apiKey) {
   try {
+    // 设置 10秒 超时，避免获取列表卡死
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
     const res = await fetch(`${endpoint}/models`, {
       headers: { Authorization: `Bearer ${apiKey}` },
-    });
+      signal: controller.signal
+    }).finally(() => clearTimeout(timeoutId));
+
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
 
