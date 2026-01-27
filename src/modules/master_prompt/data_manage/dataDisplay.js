@@ -6,7 +6,7 @@ import { HistoryService } from "../services/historyService.js";
 import { renderHistory } from "../scraper/scraperPanel.js";
 import { updateAsinSelectList } from "../analysis/analysisDisplay.js";
 import { StorageService } from "../../../services/storageService.js";
-import { languageFlagMap, SITE_NAME_MAP } from "../../../common/constants/constants.js";
+import { languageFlagMap, SITE_NAME_MAP, SITE_DOMAIN_MAP } from "../../../common/constants/constants.js";
 import { registerActionsWithLegacy } from "../../../common/utils/actionRegistry.js";
 import eventBus from "../../../common/EventBus.js"; // [NEW] Import EventBus
 import { EVENTS } from "../../../common/constants/eventConstants.js";
@@ -116,15 +116,15 @@ class DataModule extends BaseModule {
             if (siteKey === 'UK') siteKey = 'GB';
             const flag = languageFlagMap[siteKey] || "🌐";
 
+            // const domain = SITE_DOMAIN_MAP[siteKey] || "";
+
             const statusConfig = {
                 success: { class: "bg-emerald-100 text-emerald-700 border-emerald-200", icon: "fa-check-circle", text: "成功" },
                 partial: { class: "bg-amber-100 text-amber-700 border-amber-200", icon: "fa-exclamation-circle", text: "部分" },
                 failed: { class: "bg-red-100 text-red-700 border-red-200", icon: "fa-times-circle", text: "失败" },
             };
             const status = statusConfig[p.scrape_status] || statusConfig.partial;
-
-            const name = SITE_NAME_MAP[siteKey] || "";
-
+            /* <span class="text-2xl w-10 h-10 bg-gradient-to-br from-black-500 to-white-600 rounded-xl flex items-center justify-center shadow-md">${flag}</span> */
             return `
                 <div id="card-${p.asin}" 
                      class="asin-card group relative p-5 border rounded-2xl transition-all cursor-pointer hover:shadow-md 
@@ -139,7 +139,8 @@ class DataModule extends BaseModule {
                     
                     <div class="flex items-center justify-between mb-3">
                         <div class="flex items-center gap-3">
-                            <span class="text-2xl w-10 h-10 bg-gradient-to-br from-black-500 to-white-600 rounded-xl flex items-center justify-center shadow-md">${flag}</span>
+                            <span class="flex items-center gap-1.5 px-2 py-1 bg-gradient-to-br from-black-500 to-white-600 rounded-xl flex items-center justify-center shadow-md"><i class="fa-brands fa-amazon text-yellow-500"></i>${SITE_DOMAIN_MAP[siteKey]}</span>
+                            
                             <div>
                                 <div class="flex items-center gap-2">
                                     <span class="font-mono text-base font-bold text-slate-800 tracking-tight">${p.asin}</span>
@@ -151,7 +152,8 @@ class DataModule extends BaseModule {
                         </div>
                         <div class="flex items-center gap-4">
                             <div class="flex items-center gap-3 text-xs font-medium text-slate-500">
-                                <span class="flex items-center gap-1.5 px-2 py-1 bg-white rounded-md border border-slate-100 shadow-sm"><i class="fa-solid fa-heading text-yellow-500"></i> </span>
+                                <span class="flex items-center gap-1.5 px-2 py-1 bg-white rounded-md border border-slate-100 shadow-sm">${flag}</span>
+                                <span class="flex items-center gap-1.5 px-2 py-1 bg-white rounded-md border border-slate-100 shadow-sm"><i class="fa-solid fa-heading"></i> </span>
                                 <span class="flex items-center gap-1.5 px-2 py-1 bg-white rounded-md border border-slate-100 shadow-sm"><i class="fas fa-list-ul text-blue-500"></i> ${p.feature_bullets.length}</span>
                                 <span class="flex items-center gap-1.5 px-2 py-1 bg-white rounded-md border border-slate-100 shadow-sm"><i class="fas fa-comments text-purple-500"></i> ${(p.customer_reviews || []).length}</span>
                             </div>
@@ -162,7 +164,7 @@ class DataModule extends BaseModule {
                     </div>
                     
                     <div class="mb-2">
-                        <h5 class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2"><i class="fa-solid fa-heading text-yellow-500"></i> 标题</h5>
+                        <h5 class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2"><i class="fa-solid fa-heading"></i> 标题</h5>
                         <h4 class="text-sm font-medium text-slate-700 leading-relaxed ${isExpanded ? "" : "line-clamp-1"}">
                             ${p.productTitle || "<span class='text-slate-400 italic'>(无标题)</span>"}
                         </h4>

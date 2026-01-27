@@ -178,7 +178,6 @@ export const languageFlagMap = Object.entries(SITE_CONFIGS).reduce((acc, [key, c
   return acc;
 }, {});
 
-// 🔥 新增：自动生成 SITE_NAME_MAP
 export const SITE_NAME_MAP = Object.entries(SITE_CONFIGS).reduce((acc, [key, config]) => {
   acc[key] = config.name_cn;
   // 特殊处理兼容：确保 GB 也能映射到英国 (因为 UK 和 GB 常混用)
@@ -186,6 +185,11 @@ export const SITE_NAME_MAP = Object.entries(SITE_CONFIGS).reduce((acc, [key, con
   return acc;
 }, {});
 
+// 🔥 新增：自动生成 SITE_DOMAIN_MAP
+export const SITE_DOMAIN_MAP = Object.entries(SITE_CONFIGS).reduce((acc, [key, config]) => {
+  acc[key] = config.domain;
+  return acc;
+}, {});
 
 export const PROXY_URLS = {
   allorigins: "https://api.allorigins.win/raw?url=",
