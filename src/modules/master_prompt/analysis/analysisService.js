@@ -5,6 +5,7 @@
 
 import { callLLM } from "../../../services/llmService.js";
 import { TRANSLATE_PROMPT_TEMPLATE } from "../../../common/constants/prompts.js";
+import { jsonrepair } from "jsonrepair"; // [NEW] Import jsonrepair
 
 // ========================
 // 类型定义
@@ -146,11 +147,17 @@ export const AnalysisService = {
 
     // 4. 解析结果
     try {
-      const jsonMatch = response.match(/\{[\s\S]*\}/);
-      return JSON.parse(jsonMatch ? jsonMatch[0] : response);
+      // [MODIFIED] Use jsonrepair for robust parsing
+      const repairedJson = jsonrepair(response);
+      return JSON.parse(repairedJson);
     } catch (e) {
-      console.warn("JSON Parse Failed, returning raw response wrapper");
-      return { raw_response: response, parse_error: true };
+      console.error("JSON Parse Error:", e);
+      // Fallback: Return raw response with error flag
+      return {
+        parse_error: true,
+        raw_response: response,
+        error_message: e.message
+      };
     }
   },
 

@@ -42,6 +42,7 @@ class AnalysisModule extends BaseModule {
         state.selectedAsins = state.scrapedData.products.map((p) => p.asin);
       }
       this.updateAsinSelectList();
+      this.saveDraft(); // [NEW] Auto-save when scraper updates ASINs
     }));
 
     // [FIX] Initial Load for existing data
@@ -80,10 +81,78 @@ class AnalysisModule extends BaseModule {
 
     // 4. Register Global Actions (Proxies)
     // this.registerGlobalActions(); // Moved to constructor
+
+    // [NEW] Restore Draft
+    this.restoreDraft();
+
+    // [NEW] Subscribe to state changes for auto-save
+    // Observe selectedAsins changes
+    // Since state.selectedAsins is proxied, we might need a way to listen.
+    // The current state.js implementation supports subscribers.
+    // However, BaseModule doesn't automatically subscribe.
+    // Let's manually hook into UI events for now as that's safer and covers all UI inputs.
+  }
+
+  // [NEW] Auto-Save Logic
+  saveDraft() {
+    // Debounce
+    if (this._saveTimer) clearTimeout(this._saveTimer);
+    this._saveTimer = setTimeout(() => {
+      const draft = {
+        selectedAsins: state.selectedAsins,
+        isListingSelected: /** @type {HTMLInputElement} */ (document.getElementById("opt-listing"))?.checked,
+        isReviewsSelected: /** @type {HTMLInputElement} */ (document.getElementById("opt-reviews"))?.checked,
+        selectedModules: Array.from(document.querySelectorAll('input[name="analysis_module"]:checked')).map(cb => cb.value),
+        timestamp: Date.now()
+      };
+      StorageService.setDraft('analysis', draft);
+      // console.log("Draft saved", draft);
+    }, 1000); // 1 second debounce
+  }
+
+  restoreDraft() {
+    const draft = StorageService.getDraft('analysis');
+    if (!draft) return;
+
+    // Check if draft is too old (e.g. > 24 hours)? Optional.
+
+    // Restore ASINs
+    if (draft.selectedAsins && Array.isArray(draft.selectedAsins)) {
+      state.selectedAsins = draft.selectedAsins;
+      this.updateAsinSelectList();
+    }
+
+    // Restore Toggles
+    if (typeof draft.isListingSelected === 'boolean') {
+      const el = /** @type {HTMLInputElement} */ (document.getElementById("opt-listing"));
+      if (el) { el.checked = draft.isListingSelected; }
+    }
+    if (typeof draft.isReviewsSelected === 'boolean') {
+      const el = /** @type {HTMLInputElement} */ (document.getElementById("opt-reviews"));
+      if (el) { el.checked = draft.isReviewsSelected; }
+    }
+    this.updateSourceVisuals();
+
+    // Restore Modules (deferred to after renderModuleSelector if needed, but it's called in init)
+    // We need to wait for renderModuleSelector to finish or call it again?
+    // init() calls setupUI() -> renderModuleSelector().
+    // restoreDraft is called after setupUI(), so elements should exist.
+
+    if (draft.selectedModules && Array.isArray(draft.selectedModules)) {
+      const inputs = document.querySelectorAll('input[name="analysis_module"]');
+      inputs.forEach(input => {
+        input.checked = draft.selectedModules.includes(input.value);
+      });
+    }
+
+    this.updateModuleListVisibility();
+    this.updatePromptPreview();
+    showToast("已恢复上次的分析配置", "info");
   }
 
   onUnmount() {
     console.log("💤 Analysis Module Unmounting...");
+    if (this._saveTimer) clearTimeout(this._saveTimer);
     if (this.grid) {
       this.grid.destroy(false); // false: do not remove DOM elements, just events
       this.grid = null;
@@ -111,20 +180,36 @@ class AnalysisModule extends BaseModule {
     const container = document.getElementById("source-toggle-container");
     if (!container) return;
 
+    // [MODIFIED] Added onchange handler to call saveDraft
     container.innerHTML = `
             <label id="lbl-opt-listing" class="flex-1 group relative flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border cursor-pointer transition-all select-none text-sm font-medium text-slate-500 border-slate-200 bg-white hover:border-blue-300">
-                <input type="checkbox" id="opt-listing" checked class="hidden peer" onchange="window.updateSourceVisuals()">
+                <input type="checkbox" id="opt-listing" checked class="hidden peer">
                 <i class="fas fa-file-alt text-xs opacity-70"></i>
                 <span>Listings</span>
             </label>
             
             <label id="lbl-opt-reviews" class="flex-1 group relative flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border cursor-pointer transition-all select-none text-sm font-medium text-slate-500 border-slate-200 bg-white hover:border-blue-300">
-                <input type="checkbox" id="opt-reviews" checked class="hidden peer" onchange="window.updateSourceVisuals()">
+                <input type="checkbox" id="opt-reviews" checked class="hidden peer">
                 <i class="fas fa-comments text-xs opacity-70"></i>
                 <span>Reviews</span>
             </label>
         `;
-    // Events are bound in init() or via global proxies for onchange="window.xxx"
+
+    // Bind events manually to support class method binding
+    const optListing = document.getElementById("opt-listing");
+    if (optListing) {
+      optListing.addEventListener('change', () => {
+        window.updateSourceVisuals(); // Keep existing global for now if needed, or inline logic
+        this.saveDraft(); // [NEW]
+      });
+    }
+    const optReviews = document.getElementById("opt-reviews");
+    if (optReviews) {
+      optReviews.addEventListener('change', () => {
+        window.updateSourceVisuals();
+        this.saveDraft(); // [NEW]
+      });
+    }
   }
 
   updateSourceVisuals() {
@@ -151,7 +236,7 @@ class AnalysisModule extends BaseModule {
       (mod) => `
             <label class="module-item group relative flex items-start gap-2.5 p-2.5 rounded-xl border border-slate-100 hover:bg-blue-50/50 hover:border-blue-200 cursor-pointer transition-all bg-white" data-category="${mod.category}">
                 <div class="flex items-center pt-0.5">
-                    <input type="checkbox" name="analysis_module" value="${mod.id}" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" checked onchange="window.updatePromptPreview()">
+                    <input type="checkbox" name="analysis_module" value="${mod.id}" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" checked>
                 </div>
                 <div class="text-sm leading-tight flex-1 min-w-0">
                     <div class="font-medium text-slate-700 group-hover:text-blue-700 truncate">${mod.label_cn}</div>
@@ -160,11 +245,20 @@ class AnalysisModule extends BaseModule {
             </label>
         `
     ).join("");
+
+    // [NEW] Bind change events for saving draft
+    const inputs = container.querySelectorAll('input[type="checkbox"]');
+    inputs.forEach(input => {
+      input.addEventListener('change', () => {
+        window.updatePromptPreview(); // Keep global call if needed
+        this.saveDraft();
+      });
+    });
   }
 
   updateModuleListVisibility() {
-    const showListing = document.getElementById("opt-listing").checked;
-    const showReviews = document.getElementById("opt-reviews").checked;
+    const showListing = /** @type {HTMLInputElement} */ (document.getElementById("opt-listing")).checked;
+    const showReviews = /** @type {HTMLInputElement} */ (document.getElementById("opt-reviews")).checked;
     const items = document.querySelectorAll(".module-item");
 
     items.forEach((item) => {
@@ -576,7 +670,7 @@ class AnalysisModule extends BaseModule {
 
   // [NEW] Populate translation models from constants
   populateTranslationModels() {
-    const select = document.getElementById("translation-model-select");
+    const select = /** @type {HTMLSelectElement} */ (document.getElementById("translation-model-select"));
     if (!select) return;
 
     // 1. Get active provider
@@ -619,7 +713,7 @@ class AnalysisModule extends BaseModule {
 
     // Bind change event to store preference
     select.onchange = (e) => {
-      state.lastTranslationModel = e.target.value;
+      state.lastTranslationModel = /** @type {HTMLSelectElement} */ (e.target).value;
     };
   }
 
