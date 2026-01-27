@@ -21,7 +21,7 @@ import { ErrorService } from './errorService.js';
  * LLM 调用配置选项
  * @typedef {Object} LLMOptions
  * @property {number} [temperature=0.3] - 温度参数 (0-2)，越低越确定性
- * @property {boolean} [jsonMode=false] - 是否强制 JSON 输出格式 (默认为 false 以兼容更多模型)
+ * @property {boolean} [jsonMode=true] - 是否强制 JSON 输出格式
  * @property {number} [timeout=90000] - 超时时间 (毫秒)
  */
 
@@ -75,7 +75,7 @@ export async function callLLM(
   model,
   options = {}
 ) {
-  const { temperature = 0.3, jsonMode = false, timeout = 90000 } = options;
+  const { temperature = 0.3, jsonMode = true, timeout = 90000 } = options;
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
