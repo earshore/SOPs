@@ -66,7 +66,6 @@ const SettingsPanel = () => ({
 
     // Lifecycle
     init() {
-        console.log("SettingsPanel Init. Provider:", this.llm.provider);
         this.loadProxyConfig();
         this.loadProviderConfig(this.llm.provider); // Force load on init
         
@@ -97,28 +96,32 @@ const SettingsPanel = () => ({
         // Safety check: if provider key doesn't exist in constants
         if (!config) {
             console.warn(`Unknown provider: ${provider}, falling back to OpenAI`);
-            // Optionally reset to valid one
-            // this.llm.provider = 'openai'; 
             return;
         }
 
         const savedConfig = StorageService.getLLMConfig(provider) || {};
-        console.log(`[Settings] Loading ${provider}`, { config, savedConfig });
 
         this.llm.endpoint = savedConfig.endpoint || config.endpoint;
         this.llm.apiKey = savedConfig.apiKey || "";
         
         // Models: Use saved or default
-        // [FIX] Ensure we have models array even if savedConfig.models is undefined
-        this.llm.models = (savedConfig.models && savedConfig.models.length > 0) 
+        const rawModels = (savedConfig.models && savedConfig.models.length > 0) 
             ? savedConfig.models 
             : (config.models || []);
+            
+        // Deduplicate models
+        const seen = new Set();
+        this.llm.models = rawModels.filter(m => {
+            const id = typeof m === 'string' ? m : m.id;
+            if (seen.has(id)) return false;
+            seen.add(id);
+            return true;
+        });
             
         this.llm.model = savedConfig.model || "";
         
         // Auto-select first model if none selected and models exist
         if (!this.llm.model && this.llm.models.length > 0) {
-             // Handle string vs object models
              const first = this.llm.models[0];
              this.llm.model = typeof first === 'string' ? first : first.id;
         }
@@ -145,12 +148,16 @@ const SettingsPanel = () => ({
 
             if (models.length === 0) throw new Error("未能获取到有效模型列表");
 
-            this.llm.models = models;
+            // Deduplicate models
+            const seen = new Set();
+            this.llm.models = models.filter(m => {
+                const id = typeof m === 'string' ? m : m.id;
+                if (seen.has(id)) return false;
+                seen.add(id);
+                return true;
+            });
             
-            // Save immediately? Or wait for explicit save? 
-            // Usually explicit save is better, but fetching implies updating local state.
-            // Let's just keep it in state, user must click Save.
-            showToast(`成功同步 ${models.length} 个模型`, "success");
+            showToast(`成功同步 ${this.llm.models.length} 个模型`, "success");
         } catch (e) {
             ErrorService.handle(e, { action: 'fetchModels', module: 'settings' });
         } finally {
