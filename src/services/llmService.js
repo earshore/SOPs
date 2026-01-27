@@ -113,14 +113,20 @@ export async function callLLM(
 
     if (!response.ok) {
       const errorText = await response.text();
-      let errorMsg = `服务器返回错误 ${response.status}`;
+      let errorMsg = `Server returned error ${response.status}`;
       try {
         const errorJson = JSON.parse(errorText);
         if (errorJson.error && errorJson.error.message) {
           errorMsg = errorJson.error.message;
         }
       } catch (e) {
-        // 解析失败，使用原始文本或状态码
+        // If parsing fails, append a snippet of the raw text for debugging
+        // especially if it looks like a stream but failed
+        if (errorText.length < 200) {
+          errorMsg += `: ${errorText}`;
+        } else {
+          errorMsg += `: ${errorText.substring(0, 200)}...`;
+        }
       }
       throw new Error(errorMsg);
     }
