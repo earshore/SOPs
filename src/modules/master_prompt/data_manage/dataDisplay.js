@@ -149,7 +149,7 @@ class DataModule extends BaseModule {
                         </div>
                         <div class="flex items-center gap-4">
                             <div class="flex items-center gap-3 text-xs font-medium text-slate-500">
-                                <span class="flex items-center gap-1.5 px-2 py-1 bg-white rounded-md border border-slate-100 shadow-sm"><i class="fa-brands fa-font-awesome text-yellow-500"></i> </span>
+                                <span class="flex items-center gap-1.5 px-2 py-1 bg-white rounded-md border border-slate-100 shadow-sm"><i class="fa-solid fa-heading text-yellow-500"></i> </span>
                                 <span class="flex items-center gap-1.5 px-2 py-1 bg-white rounded-md border border-slate-100 shadow-sm"><i class="fas fa-list-ul text-blue-500"></i> ${p.feature_bullets.length}</span>
                                 <span class="flex items-center gap-1.5 px-2 py-1 bg-white rounded-md border border-slate-100 shadow-sm"><i class="fas fa-comments text-purple-500"></i> ${(p.customer_reviews || []).length}</span>
                             </div>
@@ -160,7 +160,7 @@ class DataModule extends BaseModule {
                     </div>
                     
                     <div class="mb-2">
-                        <h5 class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2"><i class="fa-brands fa-font-awesome text-yellow-500"></i> 标题</h5>
+                        <h5 class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2"><i class="fa-solid fa-heading text-yellow-500"></i> 标题</h5>
                         <h4 class="text-sm font-medium text-slate-700 leading-relaxed ${isExpanded ? "" : "line-clamp-1"}">
                             ${p.productTitle || "<span class='text-slate-400 italic'>(无标题)</span>"}
                         </h4>
@@ -254,8 +254,8 @@ class DataModule extends BaseModule {
 
     async deleteProduct(asin) {
         const confirmed = await this.confirmWithModal(
-            "确定删除",
-            `ASIN: <span class="font-bold text-red-500">${asin}</span> 及其所有数据吗？`,
+            `确认要删除吗？`,
+            `永久删除 ASIN: <span class="font-bold text-red-500">${asin}</span> 所有数据！`,
             "ignore_del_prod_confirm"
         );
 
@@ -275,8 +275,8 @@ class DataModule extends BaseModule {
 
     async deleteReview(asin, index) {
         const confirmed = await this.confirmWithModal(
-            "确定要移除这条评论吗？",
-            '',
+            "确认要删除吗？",
+            '永久删除该Review！',
             "ignore_del_review_confirm"
         );
 

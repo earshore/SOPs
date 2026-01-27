@@ -184,6 +184,15 @@ export class AppModal extends HTMLElement {
                 .cursor-pointer { cursor: pointer; }
                 .bg-slate-50 { background-color: #f8fafc; }
                 .border-t { border-top-width: 1px; }
+
+                .gap-2 { gap: 0.5rem; }
+                .w-6 { width: 1.5rem; }
+                .h-6 { height: 1.5rem; }
+                .fill-current { fill: currentColor; }
+                .text-blue-600 { color: #2563eb; }
+                .flex-shrink-0 { flex-shrink: 0; }
+                .outline-none { outline: 2px solid transparent; outline-offset: 2px; }
+                .btn-close svg { border: none; }
             </style>
 
             <div class="modal-container hidden fixed inset-0 z-50 flex items-center justify-center">
@@ -191,23 +200,45 @@ export class AppModal extends HTMLElement {
                 <div class="modal-backdrop fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-all opacity-0"></div>
 
                 <!-- Panel -->
+                <!-- 这个外层 div 是模态框的容器 -->
                 <div class="modal-panel bg-white rounded-2xl shadow-2xl w-full overflow-hidden transform transition-all opacity-0 translate-y-4 scale-95 p-0 m-4 relative z-10 ${this._getSizeClass(size)}">
-                    
+
+                    <!-- Header: 标题栏，包含图标、文字和关闭按钮 -->
                     ${hideHeader ? '' : `
-                    <div class="modal-header px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-white">
-                        <h3 class="modal-title text-lg font-bold text-slate-800">${title}</h3>
-                        <button class="btn-close text-slate-400 hover:text-slate-600 transition-colors cursor-pointer border-none bg-transparent p-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    <div class="modal-header px-6 py-3 border-b border-slate-100 flex items-center justify-between bg-white">
+                        
+                        <!-- 标题区域：使用 flex items-center gap-2 使图标和文字对齐并有间距 -->
+                        <h3 class="modal-title text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <!-- 标题前的问号 SVG 图标：w-6 h-6 尺寸略大于文字，使用蓝色填充 -->
+                            <svg xmlns="http://www.w3.org" 
+                                viewBox="0 0 640 640" 
+                                class="w-6 h-6 fill-current text-blue-600 flex-shrink-0" 
+                                aria-hidden="true">
+                                <path d="M528 320C528 205.1 434.9 112 320 112C205.1 112 112 205.1 112 320C112 434.9 205.1 528 320 528C434.9 528 528 434.9 528 320zM64 320C64 178.6 178.6 64 320 64C461.4 64 576 178.6 576 320C576 461.4 461.4 576 320 576C178.6 576 64 461.4 64 320zM320 240C302.3 240 288 254.3 288 272C288 285.3 277.3 296 264 296C250.7 296 240 285.3 240 272C240 227.8 275.8 192 320 192C364.2 192 400 227.8 400 272C400 319.2 364 339.2 344 346.5L344 350.3C344 363.6 333.3 374.3 320 374.3C306.7 374.3 296 363.6 296 350.3L296 342.2C296 321.7 310.8 307 326.1 302C332.5 299.9 339.3 296.5 344.3 291.7C348.6 287.5 352 281.7 352 272.1C352 254.4 337.7 240.1 320 240.1zM288 432C288 414.3 302.3 400 320 400C337.7 400 352 414.3 352 432C352 449.7 337.7 464 320 464C302.3 464 288 449.7 288 432z""")/>>
                             </svg>
+                            <span>${title}</span>
+                        </h3>
+                        
+                        <!-- 关闭按钮：使用柔和的灰色图标，点击无默认边框 -->
+                        <button class="btn-close text-slate-400 hover:text-slate-600 transition-colors cursor-pointer border-none bg-transparent p-1 focus:outline-none">
+                        <svg xmlns="http://www.w3.org" 
+                            class="h-5 w-5 outline-none" 
+                            fill="none" 
+                            viewBox="0 0 24 24" 
+                            stroke="currentColor" 
+                            style="width: 20px; height: 20px; border: none;"> 
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
                         </button>
                     </div>
                     `}
 
-                    <div class="modal-body p-0">
+                    <!-- Body: 主体内容区域（这里使用了 slot 来插入外部内容） -->
+                    <div class="modal-body items-center p-0">
                         <slot name="body"></slot>
                     </div>
 
+                    <!-- Footer: 底部按钮区域（这里使用了 slot 来插入外部内容） -->
                     <div class="modal-footer">
                         <slot name="footer"></slot>
                     </div>

@@ -59,14 +59,18 @@
 </app-modal>
 
 <!--dataDisplay删除确认模态框-->
-<app-modal id="delete-confirm-modal" title="确认删除" size="sm">
-    <div slot="body" class="p-6 space-y-4">
-        <p id="del-modal-desc" class="text-sm text-slate-600 leading-relaxed">
+<app-modal id="delete-confirm-modal" title="确认要删除吗？" size="sm">
+    <!-- 1. 将 p-6 改为 p-4 (减小内边距)；将 space-y-4 改为 space-y-2 (减小元素间距) -->
+    <!-- 添加 flex flex-col justify-center 来实现垂直居中 -->
+    <!-- h-24 是示例高度（约 96px），你可以根据需要调整这个数值 -->
+    <div slot="body" class="p-6 h-18 items-center space-y-2">
+        <p id="del-modal-desc" class="text-sm text-slate-600 leading-relaxed text-center">
             确认要删除吗？
         </p>
 
-        <div class="flex items-center pt-2">
-            <label class="flex items-center gap-2 cursor-pointer group">
+        <!-- 2. 将 pt-2 移除或减小，让勾选框更贴合文字 -->
+        <div class="items-center">
+            <label class="items-center gap-2 cursor-pointer group">
                 <input type="checkbox" id="del-dont-ask"
                     class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 transition-colors">
                 <span class="text-xs text-slate-500 group-hover:text-slate-700 select-none">不再提醒</span>
@@ -74,13 +78,14 @@
         </div>
     </div>
 
-    <div slot="footer" class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+    <!-- 3. 将 py-4 改为 py-3 (减小页脚高度) -->
+    <div slot="footer" class="px-6 py-3 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
         <button id="btn-del-cancel"
             class="px-4 py-2 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-800 text-sm font-medium rounded-lg transition-colors shadow-sm">
             取消
         </button>
         <button id="btn-del-confirm"
-            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg shadow-md transition-all active:scale-95">
+            class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-lg shadow-md transition-all active:scale-95">
             确定
         </button>
     </div>
