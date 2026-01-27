@@ -27,7 +27,9 @@ export const PROVIDERS = {
       { id: "gpt-4.1-mini-ca", context: 32768, features: ["function"] },
       { id: "gpt-4.1-nano-ca", context: 32768, features: ["function"] },
       { id: "gpt-4o-mini-ca", context: 32768, features: ["vision", "function"] },
-      { id: "gpt-3.5-turbo", context: 16385, features: ["function"] }
+      { id: "gpt-3.5-turbo", context: 16385, features: ["function"] },
+      { id: "glm-4.7", context: 128000, features: [] },
+      { id: "hunyuan-lite", context: 32000, features: ["function"] },
     ],
   },
   openai: {
