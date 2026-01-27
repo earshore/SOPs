@@ -195,7 +195,7 @@ const SettingsPanel = () => ({
     },
 
     saveProviderConfig() {
-        if (!this.llm.apiKey && this.llm.provider !== 'custom') { // Custom might not need key? Usually does.
+        if (!this.llm.apiKey && this.llm.provider !== 'custom') {  // Custom might not need key? Usually does.
             showToast("请填写 API Key", "warning");
             return;
         }
