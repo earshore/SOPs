@@ -278,13 +278,15 @@ function updateSidebarHighlight(activeTabId) {
 /**
  * 👑 全能路由切换函数 (Event-Driven)
  * 此函数不再包含任何特定业务模块的 if/else 逻辑
+ * @param {string} tab - 目标路由ID
+ * @param {boolean} updateHistory - 是否更新浏览器 URL Hash (默认 true)
  */
-export async function switchTab(tab) {
+export async function switchTab(tab, updateHistory = true) {
     const cleanTab = String(tab).trim();
 
     // 1. 处理 Config 中的 redirect (别名)
     if (cleanTab === 'amz_hub') {
-        switchTab('amz_eu_insights');
+        switchTab('amz_eu_insights', updateHistory);
         return;
     }
 
@@ -329,6 +331,23 @@ export async function switchTab(tab) {
     updateHeaderNav(fullConfig);
     updateSidebarHighlight(cleanTab);
 
+    // 6. 🌐 URL Hash Sync (Router Layer)
+    if (updateHistory) {
+        const newHash = cleanTab === 'home' ? '' : `#${cleanTab}`;
+        // 只有当 Hash 确实改变时才 Push，避免冗余历史记录
+        if (window.location.hash !== newHash) {
+            // 使用 pushState 而不是直接赋值 location.hash，防止触发 hashchange 事件导致死循环
+            // 或者仅仅赋值 hash，但在 hashchange 监听器中做判断
+            // 这里使用 replaceState/pushState 更干净，不触发 hashchange (但在某些浏览器行为不一)
+            // 简单起见，我们直接修改 hash，但在 initRouter 里加锁
+            if (newHash === '') {
+                history.pushState(null, '', window.location.pathname + window.location.search);
+            } else {
+                history.pushState(null, '', newHash);
+            }
+        }
+    }
+
     // ============================================================
     // 🚀 核心解耦：分发事件 (Event Broadcasting)
     // 任何业务逻辑 (加载数据、内部Tab切换) 都必须监听此事件
@@ -344,6 +363,31 @@ export async function switchTab(tab) {
     window.dispatchEvent(event);
 
     console.log(`📡 路由切换事件已广播: ${cleanTab} (Module: ${targetModuleId})`);
+}
+
+/**
+ * 🚦 初始化路由系统
+ * 监听浏览器前进/后退，处理首屏 Deep Link
+ */
+export function initRouter() {
+    // 1. 监听 Hash 变化 (点击浏览器后退/前进按钮)
+    window.addEventListener('popstate', () => {
+        const hash = window.location.hash.slice(1); // 去掉 #
+        const target = hash || 'home';
+        
+        console.log(`[Router] Detected navigation to: ${target}`);
+        // 传入 updateHistory: false，因为 URL 已经变了，不需要再 Push
+        switchTab(target, false);
+    });
+
+    // 2. 处理页面首次加载的 Deep Link
+    const initialHash = window.location.hash.slice(1);
+    if (initialHash) {
+        console.log(`[Router] Booting with Deep Link: ${initialHash}`);
+        switchTab(initialHash, false);
+    } else {
+        switchTab('home', true);
+    }
 }
 
 // ========================

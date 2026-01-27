@@ -101,7 +101,7 @@ import {
   saveProxyConfig
 } from "./components/settings/systemSettings.js";
 
-import { switchTab, renderMegaMenu, showToast } from "../src/common/utils/ui.js";
+import { switchTab, renderMegaMenu, showToast, initRouter } from "../src/common/utils/ui.js";
 import { initHomeSplash } from "./modules/home/homeDisplay.js";
 import {
   initScraperListeners,
@@ -192,7 +192,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  switchTab('home');
+  // 4. 初始化路由 (替代手动 switchTab)
+  initRouter();
 
   console.log("✅ System: Ready");
 });
