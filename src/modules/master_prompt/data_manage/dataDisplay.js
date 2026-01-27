@@ -6,7 +6,7 @@ import { HistoryService } from "../services/historyService.js";
 import { renderHistory } from "../scraper/scraperPanel.js";
 import { updateAsinSelectList } from "../analysis/analysisDisplay.js";
 import { StorageService } from "../../../services/storageService.js";
-import { languageFlagMap } from "../../../common/constants/constants.js";
+import { languageFlagMap, SITE_NAME_MAP } from "../../../common/constants/constants.js";
 import { registerActionsWithLegacy } from "../../../common/utils/actionRegistry.js";
 import eventBus from "../../../common/EventBus.js"; // [NEW] Import EventBus
 import { EVENTS } from "../../../common/constants/eventConstants.js";
@@ -122,6 +122,8 @@ class DataModule extends BaseModule {
                 failed: { class: "bg-red-100 text-red-700 border-red-200", icon: "fa-times-circle", text: "失败" },
             };
             const status = statusConfig[p.scrape_status] || statusConfig.partial;
+
+            const name = SITE_NAME_MAP[siteKey] || "";
 
             return `
                 <div id="card-${p.asin}" 
@@ -519,7 +521,7 @@ class DataModule extends BaseModule {
                                 <label class="flex items-center p-3 border border-slate-200 rounded-xl cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all group">
                                     <input type="radio" name="site_choice" value="${site}" ${index === 0 ? 'checked' : ''} 
                                         class="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300">
-                                    <span class="ml-3 font-bold text-slate-700 group-hover:text-blue-700">${site}</span>
+                                    <span class="ml-3 font-bold text-slate-700 group-hover:text-blue-700"> ${SITE_NAME_MAP[site]} - ${site} </span>
                                     <span class="ml-auto text-xs text-slate-400 bg-white px-2 py-1 rounded border border-slate-100 shadow-sm">
                                         ${languageFlagMap[site === 'UK' ? 'GB' : site] || '🏳️'}
                                     </span>
