@@ -23,126 +23,128 @@ export const PROVIDERS = {
     endpoint: "https://llm-gateway.hongecb.store",
     models: [
       { id: "gpt-5-mini-ca", context: 128000, features: ["vision", "function"] },
-      { id: "gpt-5-nano-ca", context: 128000, features: ["vision", "function"] },
-      { id: "gpt-4.1-mini-ca", context: 32768, features: ["function"] },
-      { id: "gpt-4.1-nano-ca", context: 32768, features: ["function"] },
-      { id: "gpt-4o-mini-ca", context: 32768, features: ["vision", "function"] },
-      { id: "gpt-3.5-turbo", context: 16385, features: ["function"] },
+      // { id: "gpt-5-nano-ca", context: 128000, features: ["vision", "function"] },
+      // { id: "gpt-4.1-mini-ca", context: 32768, features: ["function"] },
+      // { id: "gpt-4.1-nano-ca", context: 32768, features: ["function"] },
+      // { id: "gpt-4o-mini-ca", context: 32768, features: ["vision", "function"] },
+      // { id: "gpt-3.5-turbo", context: 16385, features: ["function"] },
       { id: "glm-4.7", context: 128000, features: [] },
-      { id: "hunyuan-lite", context: 32000, features: ["function"] },
-    ],
-  },
-  openai: {
-    name: "OpenAI",
-    endpoint: "https://api.openai.com/v1",
-    models: [
-      { id: "gpt-5-mini", context: 128000, features: ["vision", "function"] },
-      { id: "gpt-4o", context: 128000, features: ["vision", "function"] },
-      { id: "gpt-4o-mini", context: 128000, features: ["vision", "function"] },
-      { id: "gpt-4-turbo", context: 128000, features: ["vision", "function"] },
-      { id: "gpt-3.5-turbo", context: 16385, features: ["function"] },
-    ],
-  },
-  anthropic: {
-    name: "Anthropic",
-    endpoint: "https://api.anthropic.com/v1",
-    models: [
-      { id: "claude-3-5-sonnet-20241022", context: 200000, features: ["vision"], },
-      { id: "claude-3-opus-20240229", context: 200000, features: ["vision"] },
-      { id: "claude-3-haiku-20240307", context: 200000, features: ["vision"] },
-    ],
-  },
-  google: {
-    name: "Google Gemini",
-    endpoint: "https://generativelanguage.googleapis.com/v1beta",
-    models: [
-      { id: "gemini-2.5-pro", context: 2000000, features: ["vision", "audio"] },
-      { id: "gemini-2.5-flash", context: 2000000, features: ["vision", "audio"], },
-      { id: "gemini-1.5-pro", context: 2000000, features: ["vision", "audio"] },
-      { id: "gemini-1.5-flash", context: 1000000, features: ["vision", "audio"], },
-      { id: "gemini-pro", context: 32000, features: [] },
-    ],
-  },
-  deepseek: {
-    name: "DeepSeek",
-    endpoint: "https://api.deepseek.com/v1",
-    models: [
-      { id: "deepseek-chat", context: 64000, features: ["function"] },
-      { id: "deepseek-coder", context: 64000, features: ["code"] },
-    ],
-  },
-  moonshot: {
-    name: "月之暗面 Moonshot",
-    endpoint: "https://api.moonshot.cn/v1",
-    models: [
-      { id: "moonshot-v1-128k", context: 128000, features: [] },
-      { id: "moonshot-v1-32k", context: 32000, features: [] },
-      { id: "moonshot-v1-8k", context: 8000, features: [] },
-    ],
-  },
-  zhipu: {
-    name: "智谱GLM",
-    endpoint: "https://open.bigmodel.cn/api/paas/v4",
-    models: [
-      { id: "glm-4.7", context: 128000, features: [] },
-      { id: "glm-4.6", context: 128000, features: ["function"] },
-      { id: "glm-4.5-air", context: 128000, features: ["function"] },
-      { id: "glm-4.5", context: 128000, features: ["vision", "function"] },
-    ],
-  },
-  qwen: {
-    name: "通义千问",
-    endpoint: "https://dashscope.aliyuncs.com/compatible-mode/v1",
-    models: [
-      { id: "qwen-max", context: 32000, features: ["function"] },
-      { id: "qwen-plus", context: 131072, features: ["function"] },
-      { id: "qwen-turbo", context: 131072, features: [] },
-    ],
-  },
-  hunyuan: {
-    name: "腾讯混元",
-    endpoint: "https://hunyuan.tencentcloudapi.com/v1",
-    models: [
       { id: "hunyuan-lite", context: 32000, features: ["function"] },
       { id: "hunyuan-turbos-latest", context: 131072, features: ["function"] },
-      { id: "hunyuan-vision", context: 131072, features: ["vision"] },
-    ],
-  },
-  ernie: {
-    name: "文心一言",
-    endpoint: "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop",
-    models: [
-      {},
-    ],
-  },
-  spark: {
-    name: "讯飞星火",
-    endpoint: "https://spark-api-open.xf-yun.com/v1",
-    models: [
-      {},
-    ],
-  },
-  siliconflow: {
-    name: "硅基流动 SiliconFlow",
-    endpoint: "https://api.siliconflow.cn/v1",
-    models: [
       { id: "deepseek-ai/DeepSeek-V3", context: 32000, features: ["function"] },
     ],
   },
-  openrouter: {
-    name: "OpenRouter",
-    endpoint: "https://openrouter.ai/api/v1",
-    models: [
-      { id: "qwen-max", context: 32000, features: ["function"] },
-      { id: "z-ai/glm-4.5-air:free", context: 128000, features: [] },
-      { id: "deepseek/deepseek-chat-v3.1:free", context: 64000, features: ["code"] },
-    ],
-  },
-  custom: {
-    name: "自定义",
-    endpoint: "",
-    models: [],
-  },
+  // openai: {
+  //   name: "OpenAI",
+  //   endpoint: "https://api.openai.com/v1",
+  //   models: [
+  //     { id: "gpt-5-mini", context: 128000, features: ["vision", "function"] },
+  //     { id: "gpt-4o", context: 128000, features: ["vision", "function"] },
+  //     { id: "gpt-4o-mini", context: 128000, features: ["vision", "function"] },
+  //     { id: "gpt-4-turbo", context: 128000, features: ["vision", "function"] },
+  //     { id: "gpt-3.5-turbo", context: 16385, features: ["function"] },
+  //   ],
+  // },
+  // anthropic: {
+  //   name: "Anthropic",
+  //   endpoint: "https://api.anthropic.com/v1",
+  //   models: [
+  //     { id: "claude-3-5-sonnet-20241022", context: 200000, features: ["vision"], },
+  //     { id: "claude-3-opus-20240229", context: 200000, features: ["vision"] },
+  //     { id: "claude-3-haiku-20240307", context: 200000, features: ["vision"] },
+  //   ],
+  // },
+  // google: {
+  //   name: "Google Gemini",
+  //   endpoint: "https://generativelanguage.googleapis.com/v1beta",
+  //   models: [
+  //     { id: "gemini-2.5-pro", context: 2000000, features: ["vision", "audio"] },
+  //     { id: "gemini-2.5-flash", context: 2000000, features: ["vision", "audio"], },
+  //     { id: "gemini-1.5-pro", context: 2000000, features: ["vision", "audio"] },
+  //     { id: "gemini-1.5-flash", context: 1000000, features: ["vision", "audio"], },
+  //     { id: "gemini-pro", context: 32000, features: [] },
+  //   ],
+  // },
+  // deepseek: {
+  //   name: "DeepSeek",
+  //   endpoint: "https://api.deepseek.com/v1",
+  //   models: [
+  //     { id: "deepseek-chat", context: 64000, features: ["function"] },
+  //     { id: "deepseek-coder", context: 64000, features: ["code"] },
+  //   ],
+  // },
+  // moonshot: {
+  //   name: "月之暗面 Moonshot",
+  //   endpoint: "https://api.moonshot.cn/v1",
+  //   models: [
+  //     { id: "moonshot-v1-128k", context: 128000, features: [] },
+  //     { id: "moonshot-v1-32k", context: 32000, features: [] },
+  //     { id: "moonshot-v1-8k", context: 8000, features: [] },
+  //   ],
+  // },
+  // zhipu: {
+  //   name: "智谱GLM",
+  //   endpoint: "https://open.bigmodel.cn/api/paas/v4",
+  //   models: [
+  //     { id: "glm-4.7", context: 128000, features: [] },
+  //     { id: "glm-4.6", context: 128000, features: ["function"] },
+  //     { id: "glm-4.5-air", context: 128000, features: ["function"] },
+  //     { id: "glm-4.5", context: 128000, features: ["vision", "function"] },
+  //   ],
+  // },
+  // qwen: {
+  //   name: "通义千问",
+  //   endpoint: "https://dashscope.aliyuncs.com/compatible-mode/v1",
+  //   models: [
+  //     { id: "qwen-max", context: 32000, features: ["function"] },
+  //     { id: "qwen-plus", context: 131072, features: ["function"] },
+  //     { id: "qwen-turbo", context: 131072, features: [] },
+  //   ],
+  // },
+  // hunyuan: {
+  //   name: "腾讯混元",
+  //   endpoint: "https://hunyuan.tencentcloudapi.com/v1",
+  //   models: [
+  //     { id: "hunyuan-lite", context: 32000, features: ["function"] },
+  //     { id: "hunyuan-turbos-latest", context: 131072, features: ["function"] },
+  //     { id: "hunyuan-vision", context: 131072, features: ["vision"] },
+  //   ],
+  // },
+  // ernie: {
+  //   name: "文心一言",
+  //   endpoint: "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop",
+  //   models: [
+  //     {},
+  //   ],
+  // },
+  // spark: {
+  //   name: "讯飞星火",
+  //   endpoint: "https://spark-api-open.xf-yun.com/v1",
+  //   models: [
+  //     {},
+  //   ],
+  // },
+  // siliconflow: {
+  //   name: "硅基流动 SiliconFlow",
+  //   endpoint: "https://api.siliconflow.cn/v1",
+  //   models: [
+  //     { id: "deepseek-ai/DeepSeek-V3", context: 32000, features: ["function"] },
+  //   ],
+  // },
+  // openrouter: {
+  //   name: "OpenRouter",
+  //   endpoint: "https://openrouter.ai/api/v1",
+  //   models: [
+  //     { id: "qwen-max", context: 32000, features: ["function"] },
+  //     { id: "z-ai/glm-4.5-air:free", context: 128000, features: [] },
+  //     { id: "deepseek/deepseek-chat-v3.1:free", context: 64000, features: ["code"] },
+  //   ],
+  // },
+  // custom: {
+  //   name: "自定义",
+  //   endpoint: "",
+  //   models: [],
+  // },
 };
 
 
