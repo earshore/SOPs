@@ -18,7 +18,7 @@ export const USER_AGENTS = [
 export const getRandomUserAgent = () => USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
 
 export const PROVIDERS = {
-  serverless: {
+  llmgateway: {
     name: "OpenAI-cn",
     endpoint: "https://llm-gateway.hongecb.store",
     models: [
