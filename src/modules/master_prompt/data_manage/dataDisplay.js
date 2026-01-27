@@ -300,13 +300,12 @@ class DataModule extends BaseModule {
             }
 
             const modal = document.getElementById('delete-confirm-modal');
-            const titleEl = document.getElementById('del-modal-title');
             const descEl = document.getElementById('del-modal-desc');
             const checkbox = document.getElementById('del-dont-ask');
             const confirmBtn = document.getElementById('btn-del-confirm');
             const cancelBtn = document.getElementById('btn-del-cancel');
 
-            titleEl.textContent = title;
+            modal.setAttribute('title', title);
             descEl.innerHTML = content;
             checkbox.checked = false;
 

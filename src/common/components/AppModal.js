@@ -158,7 +158,7 @@ export class AppModal extends HTMLElement {
                 .flex { display: flex; }
                 .items-center { align-items: center; }
                 .justify-center { justify-content: center; }
-                .bg-slate-900\/50 { background-color: rgb(15 23 42 / 0.5); }
+                .bg-slate-900\\/50 { background-color: rgb(15 23 42 / 0.5); }
                 .backdrop-blur-sm { backdrop-filter: blur(4px); }
                 .bg-white { background-color: white; }
                 .rounded-2xl { border-radius: 1rem; }
@@ -180,7 +180,7 @@ export class AppModal extends HTMLElement {
                 .font-bold { font-weight: 700; }
                 .text-slate-800 { color: #1e293b; }
                 .text-slate-400 { color: #94a3b8; }
-                .hover\:text-slate-600:hover { color: #475569; }
+                .hover\\:text-slate-600:hover { color: #475569; }
                 .cursor-pointer { cursor: pointer; }
                 .bg-slate-50 { background-color: #f8fafc; }
                 .border-t { border-top-width: 1px; }
