@@ -20,7 +20,7 @@ export const getRandomUserAgent = () => USER_AGENTS[Math.floor(Math.random() * U
 export const PROVIDERS = {
   serverless: {
     name: "OpenAI-cn",
-    endpoint: "v1",
+    endpoint: "https://llm-gateway.hongecb.store",
     models: [
       { id: "gpt-5-mini-ca", context: 128000, features: ["vision", "function"] },
       { id: "gpt-5-nano-ca", context: 128000, features: ["vision", "function"] },
