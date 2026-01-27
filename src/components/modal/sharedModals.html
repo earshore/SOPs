@@ -59,46 +59,29 @@
 </app-modal>
 
 <!--dataDisplay删除确认模态框-->
-<app-modal id="delete-confirm-modal" title="确认删除操作" size="sm">
-    <div slot="body">
-        <div class="p-6 md:p-8 text-center bg-white rounded-xl">
-            <div
-                class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-rose-50 ring-8 ring-rose-50/40 animate-pulse-slow">
-                <i class="fas fa-trash-alt text-2xl text-rose-500"></i>
-            </div>
+<app-modal id="delete-confirm-modal" title="确认删除" size="sm">
+    <div slot="body" class="p-6 space-y-4">
+        <p id="del-modal-desc" class="text-sm text-slate-600 leading-relaxed">
+            确认要删除吗？
+        </p>
 
-            <h3 class="mb-2 text-lg font-bold text-gray-900">
-                确定要删除吗？
-            </h3>
-            <p id="del-modal-desc" class="text-sm text-gray-500 leading-relaxed mb-8 max-w-[80%] mx-auto">
-                此操作将<span class="font-medium text-rose-500">永久删除</span>该数据且无法恢复。请谨慎操作。
-            </p>
-
-            <div class="mb-8 flex justify-center">
-                <label
-                    class="group flex cursor-pointer items-center gap-3 rounded-lg border border-transparent px-3 py-2 transition-all hover:bg-gray-50 active:scale-95">
-                    <div class="relative flex items-center">
-                        <input type="checkbox" id="del-dont-ask"
-                            class="peer h-4 w-4 cursor-pointer appearance-none rounded border border-gray-300 shadow-sm transition-all checked:border-rose-500 checked:bg-rose-500 hover:border-rose-400 focus:ring-2 focus:ring-rose-200">
-                        <i
-                            class="fas fa-check absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-white opacity-0 transition-opacity peer-checked:opacity-100"></i>
-                    </div>
-                    <span class="text-sm text-gray-500 transition-colors group-hover:text-gray-700 select-none">
-                        不再提醒我
-                    </span>
-                </label>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <button id="btn-del-cancel"
-                    class="w-full rounded-xl border border-gray-200 bg-white py-3 px-4 text-sm font-semibold text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:text-gray-900 hover:shadow active:scale-[0.98]">
-                    取消
-                </button>
-                <button id="btn-del-confirm"
-                    class="w-full rounded-xl bg-rose-600 py-3 px-4 text-sm font-semibold text-white shadow-lg shadow-rose-500/30 transition-all hover:bg-rose-700 hover:shadow-rose-500/40 hover:-translate-y-0.5 active:scale-[0.98] active:translate-y-0 flex items-center justify-center gap-2">
-                    <span>确认删除</span>
-                </button>
-            </div>
+        <div class="flex items-center pt-2">
+            <label class="flex items-center gap-2 cursor-pointer group">
+                <input type="checkbox" id="del-dont-ask"
+                    class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 transition-colors">
+                <span class="text-xs text-slate-500 group-hover:text-slate-700 select-none">不再提醒</span>
+            </label>
         </div>
+    </div>
+
+    <div slot="footer" class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+        <button id="btn-del-cancel"
+            class="px-4 py-2 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-800 text-sm font-medium rounded-lg transition-colors shadow-sm">
+            取消
+        </button>
+        <button id="btn-del-confirm"
+            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg shadow-md transition-all active:scale-95">
+            确定
+        </button>
     </div>
 </app-modal>

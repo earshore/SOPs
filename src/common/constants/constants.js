@@ -3,7 +3,7 @@
 // ========================
 
 // App Version for cache invalidation
-export const APP_VERSION = '1.0.0';
+export const APP_VERSION = '1.0.1';
 
 // 1. 增加随机 User-Agent 池 (反爬虫核心)
 export const USER_AGENTS = [
