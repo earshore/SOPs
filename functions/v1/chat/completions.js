@@ -66,11 +66,42 @@ export async function onRequest(context) {
     }
 
     // ============================================================
-    // 📡 转发请求模块
+    // 📡 转发请求模块 (带 KV 缓存)
     // ============================================================
 
     const requestBody = await context.request.json();
     const UPSTREAM_API_URL = context.env.LLM_API_BASE_URL || "https://api.openai.com/v1";
+    
+    // --- 1. 缓存键生成 ---
+    let cacheKey = null;
+    const kv = context.env.LLM_CACHE_KV; // 需在后台绑定 KV Namespace
+    
+    if (kv) {
+        try {
+            // 只缓存核心参数，忽略 temperature 等随机因子以提高命中率? 
+            // 不，为了严谨，缓存整个 body 比较安全。
+            const bodyStr = JSON.stringify(requestBody);
+            const msgBuffer = new TextEncoder().encode(bodyStr);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            cacheKey = `llm_req_${hashHex}`;
+            
+            // --- 2. 读缓存 ---
+            const cachedData = await kv.get(cacheKey);
+            if (cachedData) {
+                return new Response(cachedData, {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Access-Control-Allow-Origin": "*",
+                        "X-Cache-Status": "HIT"
+                    }
+                });
+            }
+        } catch (e) {
+            console.warn("Cache Read Error:", e);
+        }
+    }
 
     const response = await fetch(`${UPSTREAM_API_URL}/chat/completions`, {
       method: "POST",
@@ -84,11 +115,26 @@ export async function onRequest(context) {
 
     // 处理流式响应或普通响应
     const data = await response.json();
-    return new Response(JSON.stringify(data), {
+    const jsonStr = JSON.stringify(data);
+
+    // --- 3. 写缓存 (仅成功时) ---
+    if (response.ok && kv && cacheKey) {
+        try {
+            // 异步写入，不阻塞响应 (waitUntil)
+            context.waitUntil(
+                kv.put(cacheKey, jsonStr, { expirationTtl: 86400 * 2 }) // 缓存 48 小时
+            );
+        } catch (e) {
+            console.warn("Cache Write Error:", e);
+        }
+    }
+
+    return new Response(jsonStr, {
       status: response.status,
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
+        "X-Cache-Status": "MISS"
       },
     });
 
