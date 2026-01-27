@@ -316,27 +316,7 @@ class DataModule extends BaseModule {
                 modal.close();
                 confirmBtn.onclick = null;
                 cancelBtn.onclick = null;
-                if (closeIconBtn) closeIconBtn.onclick = null;
             };
-
-            let contentContainer = modal.querySelector('.bg-white') || modal.firstElementChild;
-            let closeIconBtn = contentContainer.querySelector('.js-modal-close-icon');
-
-            if (!closeIconBtn && contentContainer) {
-                closeIconBtn = document.createElement('button');
-                closeIconBtn.className = 'js-modal-close-icon absolute top-4 right-4 text-slate-300 hover:text-slate-500 transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-50 z-50';
-                closeIconBtn.innerHTML = '<i class="fas fa-times"></i>';
-                const style = window.getComputedStyle(contentContainer);
-                if (style.position === 'static') contentContainer.style.position = 'relative';
-                contentContainer.appendChild(closeIconBtn);
-            }
-
-            if (closeIconBtn) {
-                closeIconBtn.onclick = () => {
-                    cleanup();
-                    resolve(false);
-                }
-            }
 
             confirmBtn.onclick = () => {
                 if (storageKey && checkbox.checked) {
