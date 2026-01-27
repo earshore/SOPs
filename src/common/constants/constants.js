@@ -29,9 +29,6 @@ export const PROVIDERS = {
       // { id: "gpt-4o-mini-ca", context: 32768, features: ["vision", "function"] },
       // { id: "gpt-3.5-turbo", context: 16385, features: ["function"] },
       { id: "glm-4.7", context: 128000, features: [] },
-      { id: "hunyuan-lite", context: 32000, features: ["function"] },
-      { id: "hunyuan-turbos-latest", context: 131072, features: ["function"] },
-      { id: "deepseek-ai/DeepSeek-V3", context: 32000, features: ["function"] },
     ],
   },
   // openai: {
@@ -101,15 +98,15 @@ export const PROVIDERS = {
   //     { id: "qwen-turbo", context: 131072, features: [] },
   //   ],
   // },
-  // hunyuan: {
-  //   name: "腾讯混元",
-  //   endpoint: "https://hunyuan.tencentcloudapi.com/v1",
-  //   models: [
-  //     { id: "hunyuan-lite", context: 32000, features: ["function"] },
-  //     { id: "hunyuan-turbos-latest", context: 131072, features: ["function"] },
-  //     { id: "hunyuan-vision", context: 131072, features: ["vision"] },
-  //   ],
-  // },
+  hunyuan: {
+    name: "腾讯混元",
+    endpoint: "https://hunyuan.tencentcloudapi.com/v1",
+    models: [
+      { id: "hunyuan-lite", context: 32000, features: ["function"] },
+      { id: "hunyuan-turbos-latest", context: 131072, features: ["function"] },
+      { id: "hunyuan-vision", context: 131072, features: ["vision"] },
+    ],
+  },
   // ernie: {
   //   name: "文心一言",
   //   endpoint: "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop",
