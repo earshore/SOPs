@@ -18,12 +18,12 @@ export const USER_AGENTS = [
 export const getRandomUserAgent = () => USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
 
 export const PROVIDERS = {
-  serverless: {
-    name: "OpenAI-cn (Direct)",
-    endpoint: "https://api.chatanywhere.org/v1",
+  llmgatewat: {
+    name: "LLM-Gateway",
+    endpoint: "https://llm-gateway.hongecb.store/",
     models: [
-      { id: "gpt-3.5-turbo", context: 16385, features: ["function"] },
-      { id: "gpt-4o-mini", context: 128000, features: ["vision", "function"] },
+      { id: "gpt-5-mini", context: 16385, features: ["function"] },
+      { id: "glm-4.7", context: 128000, features: ["vision", "function"] },
     ],
   },
   openai: {
