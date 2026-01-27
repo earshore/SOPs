@@ -310,8 +310,8 @@ function renderAffectedSites(sites) {
   return html;
 }
 
-// 显示详情 (挂载到 window)
-window.showWordDetail = function (wordId) {
+// 显示详情
+function showWordDetail(wordId) {
   const word = RESTRICTED_WORDS_DATABASE.find(w => w.id === wordId);
   if (!word) return;
 
@@ -437,10 +437,10 @@ window.showWordDetail = function (wordId) {
   requestAnimationFrame(() => {
     modal.classList.add('show');
   });
-};
+}
 
 // 关闭详情
-window.closeWordDetail = function () {
+function closeWordDetail() {
   const modal = document.getElementById('rw-detail-modal');
   if (!modal) return;
 
@@ -448,28 +448,19 @@ window.closeWordDetail = function () {
   setTimeout(() => {
     modal.classList.add('hidden');
   }, 200); // 等待动画结束
-};
-
-// 工具函数：防抖
-function debounce(func, wait) {
-  let timeout;
-  return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-  };
 }
+
+// 暴露给 window 以兼容 onclick (Legacy)
+window.showWordDetail = showWordDetail;
+window.closeWordDetail = closeWordDetail;
 
 // ================================================================
 // 🎯 Phase 4: 集中注册所有动作到 ActionRegistry
 // ================================================================
 
 const restrictedWordsActions = {
-  showWordDetail: window.showWordDetail,
-  closeWordDetail: window.closeWordDetail,
+  showWordDetail: showWordDetail,
+  closeWordDetail: closeWordDetail,
 };
 
 registerActionsWithLegacy(restrictedWordsActions);

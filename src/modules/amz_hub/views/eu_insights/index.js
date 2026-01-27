@@ -1,6 +1,7 @@
 import BaseModule from "../../../../common/BaseModule.js";
 import { AMZ_COUNTRY_DATA } from "../../constants/amz_hub_constants.js";
 import { loadTemplate } from "../../../../common/utils/viewLoader.js";
+import { loadChartJs } from "../../../../common/utils/lazyLibs.js";
 
 class EuInsightsModule extends BaseModule {
     constructor() {
@@ -13,6 +14,7 @@ class EuInsightsModule extends BaseModule {
     }
 
     async init() {
+        await loadChartJs();
         const selector = document.getElementById('amz_countrySelector');
         if (selector) {
             // 使用 BaseModule 提供的 addEventListener，卸载时会自动清理

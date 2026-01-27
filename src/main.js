@@ -6,16 +6,11 @@
 
 // ✅ Dependency Bundling (Optimization)
 import { marked } from 'marked';
-import Chart from 'chart.js/auto';
-import 'gridstack/dist/gridstack.min.css';
-import { GridStack } from 'gridstack';
-// import '@fortawesome/fontawesome-free/css/all.min.css'; // Removed: Used CDN in index.html for performance
+// Chart.js and GridStack are now lazy loaded via src/common/utils/lazyLibs.js
 import '../css/style.css';
 
 // Expose to window for legacy compatibility
 window.marked = marked;
-window.Chart = Chart;
-window.GridStack = GridStack;
 
 // ✅ 导入视图加载器 (HTML 拆分重构的核心)
 import { initViews } from './common/utils/viewLoader.js';

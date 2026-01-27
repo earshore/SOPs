@@ -14,6 +14,7 @@ import { registerActionsWithLegacy } from "../../../common/utils/actionRegistry.
 import { renderWidgetCard, renderViewModeHTML, renderEditorForm } from "./analysisRenderer.js";
 import eventBus from "../../../common/EventBus.js"; // [NEW] Import EventBus
 import { EVENTS } from "../../../common/constants/eventConstants.js";
+import { loadGridStack } from "../../../common/utils/lazyLibs.js";
 
 class AnalysisModule extends BaseModule {
   constructor() {
@@ -554,9 +555,11 @@ class AnalysisModule extends BaseModule {
   }
 
 
-  initGridStack(report) {
+  async initGridStack(report) {
     const gridEl = document.querySelector(".grid-stack");
     if (!gridEl) return;
+
+    await loadGridStack();
 
     if (this.grid) this.grid.destroy(false);
 

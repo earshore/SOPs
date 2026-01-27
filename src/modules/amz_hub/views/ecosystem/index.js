@@ -1,6 +1,7 @@
 import BaseModule from "../../../../common/BaseModule.js";
 import { A10_CHART_DATA } from "../../constants/amz_hub_constants.js";
 import { loadTemplate } from "../../../../common/utils/viewLoader.js";
+import { loadChartJs } from "../../../../common/utils/lazyLibs.js";
 
 class EcosystemModule extends BaseModule {
     constructor() {
@@ -13,6 +14,7 @@ class EcosystemModule extends BaseModule {
     }
 
     async init() {
+        await loadChartJs();
         this.initChart();
     }
 
