@@ -15,6 +15,9 @@ window.marked = marked;
 // ✅ 导入视图加载器 (HTML 拆分重构的核心)
 import { initViews } from './common/utils/viewLoader.js';
 
+// ✅ 导入 Web Components
+import './common/components/AppModal.js';
+
 // ✅ 导入 StorageService
 import { StorageService, STORAGE_KEYS } from './services/storageService.js';
 
@@ -38,11 +41,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Register Prompt Modal Global Helper
   window.renderPromptModal = () => {
-    if (!document.getElementById('prompt-modal')) {
+    const modalId = 'prompt-modal';
+    if (!document.getElementById(modalId)) {
       const temp = document.createElement('div');
       temp.innerHTML = promptModalHtml;
       document.getElementById('modal-container').appendChild(temp.firstElementChild);
     }
+    // Use the component's open method
+    const modal = document.getElementById(modalId);
+    if (modal && modal.open) modal.open();
   };
 });
 

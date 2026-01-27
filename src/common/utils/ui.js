@@ -499,12 +499,12 @@ function clearSOPSearch() {
 // User Guide Actions
 function openUserGuide() {
     const modal = getEl('user-guide-modal');
-    if (modal) modal.classList.remove('hidden');
+    if (modal) modal.open();
 }
 
 function closeUserGuide() {
     const modal = getEl('user-guide-modal');
-    if (modal) modal.classList.add('hidden');
+    if (modal) modal.close();
 }
 
 function switchGuideTab({ tab }) {

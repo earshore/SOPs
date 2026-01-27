@@ -310,10 +310,10 @@ class DataModule extends BaseModule {
             descEl.innerHTML = content;
             checkbox.checked = false;
 
-            modal.classList.remove('hidden');
+            modal.open();
 
             const cleanup = () => {
-                modal.classList.add('hidden');
+                modal.close();
                 confirmBtn.onclick = null;
                 cancelBtn.onclick = null;
                 if (closeIconBtn) closeIconBtn.onclick = null;

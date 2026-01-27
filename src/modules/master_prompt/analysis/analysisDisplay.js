@@ -201,26 +201,13 @@ class AnalysisModule extends BaseModule {
       showToast("请至少选择一个分析模块", "warning");
       return;
     }
-    // Assuming renderPromptModal is global or available. If not, it needs to be imported or implemented.
-    // Based on original code, renderPromptModal wasn't imported, so it might be a missing function or handled elsewhere.
-    // For now, let's assume it's global or simply show the modal if it exists.
-    if (typeof window.renderPromptModal === 'function' && !document.getElementById("prompt-modal")) {
+    
+    if (typeof window.renderPromptModal === 'function') {
       window.renderPromptModal();
     }
 
     const textarea = document.getElementById("current-prompt-display");
     if (textarea) textarea.value = dynamicPrompt;
-
-    const modal = document.getElementById("prompt-modal");
-    const backdrop = document.getElementById("prompt-modal-backdrop");
-    const panel = document.getElementById("prompt-modal-panel");
-    if (!modal) return;
-    modal.classList.remove("hidden");
-    requestAnimationFrame(() => {
-      backdrop.classList.remove("opacity-0");
-      panel.classList.remove("opacity-0", "scale-95");
-      panel.classList.add("opacity-100", "scale-100");
-    });
   }
 
   // ================== Prompt Logic ==================
