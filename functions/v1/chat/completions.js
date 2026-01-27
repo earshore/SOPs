@@ -26,36 +26,44 @@ export async function onRequest(context) {
     // 去掉 "Bearer " 前缀，拿到纯密码
     const userProvidedPass = authHeader.replace("Bearer ", "").trim();
     
-    // 获取你在 Cloudflare 后台设置的正确密码
-    const correctPassword = context.env.AUTH_PASSWORD;
-
-    // 如果设置了密码，就强制检查
-    if (correctPassword && userProvidedPass !== correctPassword) {
-      return new Response(JSON.stringify({ 
-        error: { message: "⛔ 访问被拒绝：请输入正确的访问密码 (Access Password)" } 
-      }), {
-        status: 401, // Unauthorized
-        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
-      });
-    }
-
     // ============================================================
-    // 🚀 多 Key 负载均衡模块
+    // 🚀 多 Key 负载均衡模块 (与直连模式兼容)
     // ============================================================
     
     // 获取真实的 API Keys (逗号分隔)
     const envKeys = context.env.LLM_API_KEY || "";
     const keyList = envKeys.split(',').map(k => k.trim()).filter(k => k);
 
-    if (keyList.length === 0) {
-      return new Response(JSON.stringify({ error: { message: "Server: Configuration Error (No Real API Keys found)" } }), {
-        status: 500,
-        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
-      });
-    }
+    let REAL_API_KEY = "";
 
-    // 随机抽取一个真实 Key
-    const REAL_API_KEY = keyList[Math.floor(Math.random() * keyList.length)];
+    // 模式 A: 服务器托管 Key (需密码验证)
+    if (keyList.length > 0) {
+       // 验证密码
+       const correctPassword = context.env.AUTH_PASSWORD;
+       if (correctPassword && userProvidedPass !== correctPassword) {
+         return new Response(JSON.stringify({ 
+           error: { message: "⛔ 访问被拒绝：请输入正确的访问密码 (Access Password)" } 
+         }), {
+           status: 401,
+           headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+         });
+       }
+       // 随机抽取一个服务器 Key
+       REAL_API_KEY = keyList[Math.floor(Math.random() * keyList.length)];
+    } 
+    // 模式 B: 用户自带 Key (透传模式)
+    else {
+       if (!userProvidedPass) {
+         return new Response(JSON.stringify({ 
+           error: { message: "⛔ 未配置 API Key：请在设置中输入您的 OpenAI API Key，或联系管理员配置服务器 Key。" } 
+         }), {
+           status: 401,
+           headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+         });
+       }
+       // 使用用户提供的 Key
+       REAL_API_KEY = userProvidedPass;
+    }
 
     // ============================================================
     // 📡 转发请求模块
@@ -68,7 +76,7 @@ export async function onRequest(context) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        // 这里必须用 REAL_API_KEY，而不是用户传来的密码
+        // 使用最终确定的 Key
         "Authorization": `Bearer ${REAL_API_KEY}`, 
       },
       body: JSON.stringify(requestBody),
