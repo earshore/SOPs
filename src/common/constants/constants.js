@@ -19,7 +19,7 @@ export const getRandomUserAgent = () => USER_AGENTS[Math.floor(Math.random() * U
 
 export const PROVIDERS = {
   llmgateway: {
-    name: "OpenAI-cn",
+    name: "LLM-Gateway",
     endpoint: "https://llm-gateway.hongecb.store",
     models: [
       { id: "gpt-5-mini-ca", context: 128000, features: ["vision", "function"] },
