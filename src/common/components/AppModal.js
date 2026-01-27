@@ -138,8 +138,6 @@ export class AppModal extends HTMLElement {
         const hideHeader = this.hasAttribute('no-header');
 
         this.shadowRoot.innerHTML = `
-            <link rel="stylesheet" href="/src/css/style.css">
-            
             <style>
                 :host { display: block; z-index: 1000; position: relative; }
                 .hidden { display: none !important; }
