@@ -201,7 +201,7 @@ class AnalysisModule extends BaseModule {
       showToast("请至少选择一个分析模块", "warning");
       return;
     }
-    
+
     if (typeof window.renderPromptModal === 'function') {
       window.renderPromptModal();
     }
@@ -247,6 +247,82 @@ class AnalysisModule extends BaseModule {
         `;
 
     reportContent.insertBefore(previewDiv, reportContent.firstChild);
+  }
+
+  renderStreamingOverlay() {
+    const display = document.getElementById("report-display");
+    if (!display) return;
+
+    // Remove existing overlay if any
+    const existing = document.getElementById("streaming-overlay");
+    if (existing) existing.remove();
+
+    const overlay = document.createElement("div");
+    overlay.id = "streaming-overlay";
+    overlay.className = "fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/90 backdrop-blur-sm fade-in";
+    overlay.innerHTML = `
+      <div class="w-full max-w-4xl p-8 space-y-6">
+        <div class="flex items-center justify-center gap-3 text-blue-600 mb-4">
+          <i class="fas fa-brain fa-bounce text-2xl"></i>
+          <span class="text-xl font-medium tracking-tight">AI 深度思考中...</span>
+        </div>
+        
+        <div class="relative group">
+          <div class="absolute -inset-1 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-2xl blur opacity-50 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
+          <div class="relative bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden min-h-[400px] max-h-[60vh] flex flex-col">
+            <div class="flex items-center justify-between px-4 py-3 bg-slate-50 border-b border-slate-100">
+               <div class="flex items-center gap-2">
+                 <div class="flex gap-1.5">
+                   <div class="w-2.5 h-2.5 rounded-full bg-red-400"></div>
+                   <div class="w-2.5 h-2.5 rounded-full bg-amber-400"></div>
+                   <div class="w-2.5 h-2.5 rounded-full bg-green-400"></div>
+                 </div>
+                 <span class="ml-3 text-xs font-mono text-slate-400">stream_output.log</span>
+               </div>
+               <span id="stream-stats" class="text-xs font-mono text-blue-500 bg-blue-50 px-2 py-0.5 rounded">Connecting...</span>
+            </div>
+            <pre id="streaming-content" class="flex-1 p-6 font-mono text-sm text-slate-700 overflow-y-auto whitespace-pre-wrap custom-scrollbar leading-relaxed"></pre>
+          </div>
+        </div>
+
+        <div class="text-center">
+           <button class="px-4 py-2 text-sm text-slate-400 hover:text-slate-600 transition-colors" onclick="location.reload()">
+             <i class="fas fa-times-circle mr-1"></i> 取消生成
+           </button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+    this.streamContentEl = document.getElementById("streaming-content");
+    this.streamStatsEl = document.getElementById("stream-stats");
+    this.streamStartTime = Date.now();
+  }
+
+  updateStreamingOverlay(content) {
+    if (this.streamContentEl) {
+      this.streamContentEl.textContent = content;
+      // Auto scroll to bottom
+      this.streamContentEl.scrollTop = this.streamContentEl.scrollHeight;
+
+      // Update stats
+      if (this.streamStatsEl) {
+        const duration = ((Date.now() - this.streamStartTime) / 1000).toFixed(1);
+        const chars = content.length;
+        const speed = Math.round(chars / (duration || 0.1));
+        this.streamStatsEl.textContent = `${duration}s | ${chars} chars | ~${speed} chars/s`;
+      }
+    }
+  }
+
+  removeStreamingOverlay() {
+    const overlay = document.getElementById("streaming-overlay");
+    if (overlay) {
+      overlay.classList.add("fade-out"); // Ensure CSS has fade-out animation
+      setTimeout(() => overlay.remove(), 300);
+    }
+    this.streamContentEl = null;
+    this.streamStatsEl = null;
   }
 
   updatePromptPreview() {
@@ -324,8 +400,10 @@ class AnalysisModule extends BaseModule {
 
     const btn = document.getElementById("analyze-btn");
     btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> 分析中...';
-    showProgress(true, 30);
+
+    // [MODIFIED] No more global progress bar for the whole duration, use overlay
+    // showProgress(true, 30); 
+    this.renderStreamingOverlay();
 
     const selectedProducts = state.scrapedData.products.filter((p) => state.selectedAsins.includes(p.asin));
     const site = state.scrapedData.metadata.marketplace;
@@ -350,10 +428,11 @@ class AnalysisModule extends BaseModule {
         currentPrompt,
         language,
         llmConfig,
-        dataOptions
+        dataOptions,
+        (fullContent) => this.updateStreamingOverlay(fullContent) // [NEW] Callback
       );
 
-      showProgress(true, 80);
+      // showProgress(true, 80); // No need
 
       report.meta = {
         targetMarket: language,
@@ -375,13 +454,16 @@ class AnalysisModule extends BaseModule {
 
       HistoryService.save(state.scrapedData, report);
       renderHistory(); // Assuming renderHistory is imported
+
+      this.removeStreamingOverlay(); // [NEW] Remove overlay
       this.renderReport();
 
-      showProgress(false);
+      // showProgress(false); // No need
       showToast("分析完成", "success");
     } catch (e) {
+      this.removeStreamingOverlay(); // [NEW] Ensure removal on error
       ErrorService.handle(e, { action: 'analyzeSelectedAsins', module: 'analysis' });
-      showProgress(false);
+      // showProgress(false);
     } finally {
       btn.disabled = false;
       btn.innerHTML = '<i class="fas fa-brain mr-2"></i> 分析ASIN';

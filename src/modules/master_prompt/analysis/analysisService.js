@@ -86,7 +86,8 @@ export const AnalysisService = {
     promptTemplate,
     language,
     llmConfig,
-    dataOptions = {}
+    dataOptions = {},
+    onProgress = null
   ) {
     const {
       includeTitle = true,
@@ -136,7 +137,11 @@ export const AnalysisService = {
       llmConfig.provider,
       llmConfig.endpoint,
       llmConfig.apiKey,
-      llmConfig.model
+      llmConfig.model,
+      {
+        stream: !!onProgress,
+        onUpdate: onProgress
+      }
     );
 
     // 4. 解析结果
