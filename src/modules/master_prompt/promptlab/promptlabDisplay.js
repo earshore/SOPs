@@ -6,7 +6,6 @@ import SITE_CONFIGS from "../../../common/constants/constants.js";
 import { ANALYSIS_MODULES } from "../../../common/constants/prompts.js";
 import { showToast } from "../../../common/utils/ui.js";
 import { registerActionsWithLegacy } from "../../../common/utils/actionRegistry.js";
-import { StorageService } from "../../../services/storageService.js";
 
 class PromptlabModule extends BaseModule {
     constructor() {
@@ -22,15 +21,13 @@ class PromptlabModule extends BaseModule {
     async init() {
         console.log("🚀 Prompt Lab Module Initialized (BaseModule)");
         this.setupEventListeners();
-        this.restoreDraft(); // [NEW] Restore draft from storage
-        this.restoreInputsFromState(); // Render state to UI
+        this.restoreInputsFromState();
         this.renderReportAnalysis();
         this.updateButtonState();
     }
 
     onUnmount() {
         console.log("💤 Prompt Lab Module Unmounting...");
-        if (this._saveTimer) clearTimeout(this._saveTimer);
     }
 
     setupEventListeners() {
@@ -38,7 +35,6 @@ class PromptlabModule extends BaseModule {
 
         this.addEventListener(this.container, "change", (e) => {
             this.saveInputsToState();
-            this.saveDraft(); // [NEW] Trigger auto-save
             if (e.target.id === "lab-char-limit") this.updateCharCount();
             this.updateButtonState();
         });
@@ -46,43 +42,12 @@ class PromptlabModule extends BaseModule {
         // Bind input listeners for Tier 1 & Tier 2
         ["lab-keywords-tier1", "lab-keywords-tier2"].forEach((id) => {
             const el = document.getElementById(id);
-            if (el) this.addEventListener(el, "input", () => {
-                this.updateButtonState();
-                this.saveInputsToState(); // Ensure state is updated on input too for these text fields
-                this.saveDraft();
-            });
+            if (el) this.addEventListener(el, "input", () => this.updateButtonState());
         });
 
         // Bind output character count
         const outEl = document.getElementById("final-prompt-output");
         if (outEl) this.addEventListener(outEl, "input", () => this.updateCharCount());
-    }
-
-    // ================= Auto-Save / Drafts =================
-
-    saveDraft() {
-        if (this._saveTimer) clearTimeout(this._saveTimer);
-        this._saveTimer = setTimeout(() => {
-            // State is already updated by saveInputsToState()
-            const draft = {
-                ...state.promptlab.userProductProfile,
-                timestamp: Date.now()
-            };
-            StorageService.setDraft('promptlab', draft);
-            // console.log("PromptLab draft saved", draft);
-        }, 1000);
-    }
-
-    restoreDraft() {
-        const draft = StorageService.getDraft('promptlab');
-        if (draft) {
-            // Merge draft into state
-            state.promptlab.userProductProfile = {
-                ...state.promptlab.userProductProfile,
-                ...draft
-            };
-            showToast("已恢复上次的 Prompt 草稿", "info");
-        }
     }
 
     // ================= 辅助：生成语言选项 =================

@@ -27,7 +27,6 @@
  * @property {boolean} isEditing
  * @property {boolean} showTranslation
  * @property {any[]} editHistory
- * @property {string} lastTranslationModel
  */
 
 /**
@@ -121,7 +120,6 @@ const stateData = {
     isEditing: false,
     showTranslation: false,
     editHistory: [],
-    lastTranslationModel: null,
   },
 
   // ========================
@@ -305,8 +303,6 @@ function createNamespaceProxy(obj, nsName) {
  * - 支持旧代码直接访问: state.currentTab
  * - 支持新代码命名空间访问: state.ui.currentTab
  * - 🆕 自动触发订阅者通知
- * 
- * @type {AppStateData & UIState & ScraperState & AnalysisState & PromptlabState & KeywordTrackerState}
  */
 const state = new Proxy(stateData, {
   /**

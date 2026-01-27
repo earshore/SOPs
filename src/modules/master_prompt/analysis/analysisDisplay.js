@@ -42,7 +42,6 @@ class AnalysisModule extends BaseModule {
         state.selectedAsins = state.scrapedData.products.map((p) => p.asin);
       }
       this.updateAsinSelectList();
-      this.saveDraft(); // [NEW] Auto-save when scraper updates ASINs
     }));
 
     // [FIX] Initial Load for existing data
@@ -81,78 +80,10 @@ class AnalysisModule extends BaseModule {
 
     // 4. Register Global Actions (Proxies)
     // this.registerGlobalActions(); // Moved to constructor
-
-    // [NEW] Restore Draft
-    this.restoreDraft();
-
-    // [NEW] Subscribe to state changes for auto-save
-    // Observe selectedAsins changes
-    // Since state.selectedAsins is proxied, we might need a way to listen.
-    // The current state.js implementation supports subscribers.
-    // However, BaseModule doesn't automatically subscribe.
-    // Let's manually hook into UI events for now as that's safer and covers all UI inputs.
-  }
-
-  // [NEW] Auto-Save Logic
-  saveDraft() {
-    // Debounce
-    if (this._saveTimer) clearTimeout(this._saveTimer);
-    this._saveTimer = setTimeout(() => {
-      const draft = {
-        selectedAsins: state.selectedAsins,
-        isListingSelected: /** @type {HTMLInputElement} */ (document.getElementById("opt-listing"))?.checked,
-        isReviewsSelected: /** @type {HTMLInputElement} */ (document.getElementById("opt-reviews"))?.checked,
-        selectedModules: Array.from(document.querySelectorAll('input[name="analysis_module"]:checked')).map(cb => cb.value),
-        timestamp: Date.now()
-      };
-      StorageService.setDraft('analysis', draft);
-      // console.log("Draft saved", draft);
-    }, 1000); // 1 second debounce
-  }
-
-  restoreDraft() {
-    const draft = StorageService.getDraft('analysis');
-    if (!draft) return;
-
-    // Check if draft is too old (e.g. > 24 hours)? Optional.
-
-    // Restore ASINs
-    if (draft.selectedAsins && Array.isArray(draft.selectedAsins)) {
-      state.selectedAsins = draft.selectedAsins;
-      this.updateAsinSelectList();
-    }
-
-    // Restore Toggles
-    if (typeof draft.isListingSelected === 'boolean') {
-      const el = /** @type {HTMLInputElement} */ (document.getElementById("opt-listing"));
-      if (el) { el.checked = draft.isListingSelected; }
-    }
-    if (typeof draft.isReviewsSelected === 'boolean') {
-      const el = /** @type {HTMLInputElement} */ (document.getElementById("opt-reviews"));
-      if (el) { el.checked = draft.isReviewsSelected; }
-    }
-    this.updateSourceVisuals();
-
-    // Restore Modules (deferred to after renderModuleSelector if needed, but it's called in init)
-    // We need to wait for renderModuleSelector to finish or call it again?
-    // init() calls setupUI() -> renderModuleSelector().
-    // restoreDraft is called after setupUI(), so elements should exist.
-
-    if (draft.selectedModules && Array.isArray(draft.selectedModules)) {
-      const inputs = document.querySelectorAll('input[name="analysis_module"]');
-      inputs.forEach(input => {
-        input.checked = draft.selectedModules.includes(input.value);
-      });
-    }
-
-    this.updateModuleListVisibility();
-    this.updatePromptPreview();
-    showToast("已恢复上次的分析配置", "info");
   }
 
   onUnmount() {
     console.log("💤 Analysis Module Unmounting...");
-    if (this._saveTimer) clearTimeout(this._saveTimer);
     if (this.grid) {
       this.grid.destroy(false); // false: do not remove DOM elements, just events
       this.grid = null;
@@ -180,36 +111,20 @@ class AnalysisModule extends BaseModule {
     const container = document.getElementById("source-toggle-container");
     if (!container) return;
 
-    // [MODIFIED] Added onchange handler to call saveDraft
     container.innerHTML = `
             <label id="lbl-opt-listing" class="flex-1 group relative flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border cursor-pointer transition-all select-none text-sm font-medium text-slate-500 border-slate-200 bg-white hover:border-blue-300">
-                <input type="checkbox" id="opt-listing" checked class="hidden peer">
+                <input type="checkbox" id="opt-listing" checked class="hidden peer" onchange="window.updateSourceVisuals()">
                 <i class="fas fa-file-alt text-xs opacity-70"></i>
                 <span>Listings</span>
             </label>
             
             <label id="lbl-opt-reviews" class="flex-1 group relative flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border cursor-pointer transition-all select-none text-sm font-medium text-slate-500 border-slate-200 bg-white hover:border-blue-300">
-                <input type="checkbox" id="opt-reviews" checked class="hidden peer">
+                <input type="checkbox" id="opt-reviews" checked class="hidden peer" onchange="window.updateSourceVisuals()">
                 <i class="fas fa-comments text-xs opacity-70"></i>
                 <span>Reviews</span>
             </label>
         `;
-
-    // Bind events manually to support class method binding
-    const optListing = document.getElementById("opt-listing");
-    if (optListing) {
-      optListing.addEventListener('change', () => {
-        window.updateSourceVisuals(); // Keep existing global for now if needed, or inline logic
-        this.saveDraft(); // [NEW]
-      });
-    }
-    const optReviews = document.getElementById("opt-reviews");
-    if (optReviews) {
-      optReviews.addEventListener('change', () => {
-        window.updateSourceVisuals();
-        this.saveDraft(); // [NEW]
-      });
-    }
+    // Events are bound in init() or via global proxies for onchange="window.xxx"
   }
 
   updateSourceVisuals() {
@@ -236,7 +151,7 @@ class AnalysisModule extends BaseModule {
       (mod) => `
             <label class="module-item group relative flex items-start gap-2.5 p-2.5 rounded-xl border border-slate-100 hover:bg-blue-50/50 hover:border-blue-200 cursor-pointer transition-all bg-white" data-category="${mod.category}">
                 <div class="flex items-center pt-0.5">
-                    <input type="checkbox" name="analysis_module" value="${mod.id}" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" checked>
+                    <input type="checkbox" name="analysis_module" value="${mod.id}" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" checked onchange="window.updatePromptPreview()">
                 </div>
                 <div class="text-sm leading-tight flex-1 min-w-0">
                     <div class="font-medium text-slate-700 group-hover:text-blue-700 truncate">${mod.label_cn}</div>
@@ -245,20 +160,11 @@ class AnalysisModule extends BaseModule {
             </label>
         `
     ).join("");
-
-    // [NEW] Bind change events for saving draft
-    const inputs = container.querySelectorAll('input[type="checkbox"]');
-    inputs.forEach(input => {
-      input.addEventListener('change', () => {
-        window.updatePromptPreview(); // Keep global call if needed
-        this.saveDraft();
-      });
-    });
   }
 
   updateModuleListVisibility() {
-    const showListing = /** @type {HTMLInputElement} */ (document.getElementById("opt-listing")).checked;
-    const showReviews = /** @type {HTMLInputElement} */ (document.getElementById("opt-reviews")).checked;
+    const showListing = document.getElementById("opt-listing").checked;
+    const showReviews = document.getElementById("opt-reviews").checked;
     const items = document.querySelectorAll(".module-item");
 
     items.forEach((item) => {
@@ -343,82 +249,6 @@ class AnalysisModule extends BaseModule {
     reportContent.insertBefore(previewDiv, reportContent.firstChild);
   }
 
-  renderStreamingOverlay() {
-    const display = document.getElementById("report-display");
-    if (!display) return;
-
-    // Remove existing overlay if any
-    const existing = document.getElementById("streaming-overlay");
-    if (existing) existing.remove();
-
-    const overlay = document.createElement("div");
-    overlay.id = "streaming-overlay";
-    overlay.className = "fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/90 backdrop-blur-sm fade-in";
-    overlay.innerHTML = `
-      <div class="w-full max-w-4xl p-8 space-y-6">
-        <div class="flex items-center justify-center gap-3 text-blue-600 mb-4">
-          <i class="fas fa-brain fa-bounce text-2xl"></i>
-          <span class="text-xl font-medium tracking-tight">AI 深度思考中...</span>
-        </div>
-        
-        <div class="relative group">
-          <div class="absolute -inset-1 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-2xl blur opacity-50 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
-          <div class="relative bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden min-h-[400px] max-h-[60vh] flex flex-col">
-            <div class="flex items-center justify-between px-4 py-3 bg-slate-50 border-b border-slate-100">
-               <div class="flex items-center gap-2">
-                 <div class="flex gap-1.5">
-                   <div class="w-2.5 h-2.5 rounded-full bg-red-400"></div>
-                   <div class="w-2.5 h-2.5 rounded-full bg-amber-400"></div>
-                   <div class="w-2.5 h-2.5 rounded-full bg-green-400"></div>
-                 </div>
-                 <span class="ml-3 text-xs font-mono text-slate-400">stream_output.log</span>
-               </div>
-               <span id="stream-stats" class="text-xs font-mono text-blue-500 bg-blue-50 px-2 py-0.5 rounded">Connecting...</span>
-            </div>
-            <pre id="streaming-content" class="flex-1 p-6 font-mono text-sm text-slate-700 overflow-y-auto whitespace-pre-wrap custom-scrollbar leading-relaxed"></pre>
-          </div>
-        </div>
-
-        <div class="text-center">
-           <button class="px-4 py-2 text-sm text-slate-400 hover:text-slate-600 transition-colors" onclick="location.reload()">
-             <i class="fas fa-times-circle mr-1"></i> 取消生成
-           </button>
-        </div>
-      </div>
-    `;
-
-    document.body.appendChild(overlay);
-    this.streamContentEl = document.getElementById("streaming-content");
-    this.streamStatsEl = document.getElementById("stream-stats");
-    this.streamStartTime = Date.now();
-  }
-
-  updateStreamingOverlay(content) {
-    if (this.streamContentEl) {
-      this.streamContentEl.textContent = content;
-      // Auto scroll to bottom
-      this.streamContentEl.scrollTop = this.streamContentEl.scrollHeight;
-
-      // Update stats
-      if (this.streamStatsEl) {
-        const duration = ((Date.now() - this.streamStartTime) / 1000).toFixed(1);
-        const chars = content.length;
-        const speed = Math.round(chars / (duration || 0.1));
-        this.streamStatsEl.textContent = `${duration}s | ${chars} chars | ~${speed} chars/s`;
-      }
-    }
-  }
-
-  removeStreamingOverlay() {
-    const overlay = document.getElementById("streaming-overlay");
-    if (overlay) {
-      overlay.classList.add("fade-out"); // Ensure CSS has fade-out animation
-      setTimeout(() => overlay.remove(), 300);
-    }
-    this.streamContentEl = null;
-    this.streamStatsEl = null;
-  }
-
   updatePromptPreview() {
     const prompt = this.buildDynamicPrompt();
     const container = document.getElementById("prompt-preview-container");
@@ -494,10 +324,8 @@ class AnalysisModule extends BaseModule {
 
     const btn = document.getElementById("analyze-btn");
     btn.disabled = true;
-
-    // [MODIFIED] No more global progress bar for the whole duration, use overlay
-    // showProgress(true, 30); 
-    this.renderStreamingOverlay();
+    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> 分析中...';
+    showProgress(true, 30);
 
     const selectedProducts = state.scrapedData.products.filter((p) => state.selectedAsins.includes(p.asin));
     const site = state.scrapedData.metadata.marketplace;
@@ -522,11 +350,10 @@ class AnalysisModule extends BaseModule {
         currentPrompt,
         language,
         llmConfig,
-        dataOptions,
-        (fullContent) => this.updateStreamingOverlay(fullContent) // [NEW] Callback
+        dataOptions
       );
 
-      // showProgress(true, 80); // No need
+      showProgress(true, 80);
 
       report.meta = {
         targetMarket: language,
@@ -548,16 +375,13 @@ class AnalysisModule extends BaseModule {
 
       HistoryService.save(state.scrapedData, report);
       renderHistory(); // Assuming renderHistory is imported
-
-      this.removeStreamingOverlay(); // [NEW] Remove overlay
       this.renderReport();
 
-      // showProgress(false); // No need
+      showProgress(false);
       showToast("分析完成", "success");
     } catch (e) {
-      this.removeStreamingOverlay(); // [NEW] Ensure removal on error
       ErrorService.handle(e, { action: 'analyzeSelectedAsins', module: 'analysis' });
-      // showProgress(false);
+      showProgress(false);
     } finally {
       btn.disabled = false;
       btn.innerHTML = '<i class="fas fa-brain mr-2"></i> 分析ASIN';
@@ -670,7 +494,7 @@ class AnalysisModule extends BaseModule {
 
   // [NEW] Populate translation models from constants
   populateTranslationModels() {
-    const select = /** @type {HTMLSelectElement} */ (document.getElementById("translation-model-select"));
+    const select = document.getElementById("translation-model-select");
     if (!select) return;
 
     // 1. Get active provider
@@ -713,7 +537,7 @@ class AnalysisModule extends BaseModule {
 
     // Bind change event to store preference
     select.onchange = (e) => {
-      state.lastTranslationModel = /** @type {HTMLSelectElement} */ (e.target).value;
+      state.lastTranslationModel = e.target.value;
     };
   }
 

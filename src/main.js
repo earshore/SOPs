@@ -7,7 +7,7 @@
 // ✅ Dependency Bundling (Optimization)
 import { marked } from 'marked';
 // Chart.js and GridStack are now lazy loaded via src/common/utils/lazyLibs.js
-import './css/style.css';
+import '../css/style.css';
 
 // Expose to window for legacy compatibility
 window.marked = marked;

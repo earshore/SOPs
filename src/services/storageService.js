@@ -29,9 +29,6 @@ export const STORAGE_KEYS = {
 
     // === 搜索历史 ===
     AMZ_SEARCH_HISTORY: 'amzf_search_history',
-
-    // === 草稿箱 ===
-    DRAFT_PREFIX: 'draft_',
 };
 
 /**
@@ -39,48 +36,79 @@ export const STORAGE_KEYS = {
  */
 export const StorageService = {
     /**
-     * 获取数据
-     * @param {string} key
-     * @param {*} defaultValue
+     * 获取存储值
+     * @param {string} key - 存储键名
+     * @param {*} defaultValue - 默认值
+     * @returns {*} 解析后的值或默认值
      */
     get(key, defaultValue = null) {
         try {
-            const item = localStorage.getItem(key);
-            // Handle cases where item might be "undefined" string
-            if (item === "undefined") return defaultValue;
-            return item ? JSON.parse(item) : defaultValue;
+            const raw = localStorage.getItem(key);
+            if (raw === null) return defaultValue;
+            return JSON.parse(raw);
         } catch (e) {
-            console.warn(`[Storage] Error reading ${key}:`, e);
+            console.warn(`[StorageService] 解析失败: ${key}`, e);
             return defaultValue;
         }
     },
 
     /**
-     * 保存数据
-     * @param {string} key
-     * @param {*} value
+     * 设置存储值
+     * @param {string} key - 存储键名
+     * @param {*} value - 要存储的值
+     * @returns {boolean} 是否成功
      */
     set(key, value) {
         try {
             localStorage.setItem(key, JSON.stringify(value));
+            return true;
         } catch (e) {
-            console.error(`[Storage] Error saving ${key}:`, e);
+            console.error(`[StorageService] 存储失败: ${key}`, e);
+            // 可能是存储空间已满
+            if (e.name === 'QuotaExceededError') {
+                this._handleQuotaExceeded();
+            }
+            return false;
         }
     },
 
     /**
-     * 删除数据
-     * @param {string} key
+     * 删除存储值
+     * @param {string} key - 存储键名
      */
     remove(key) {
         localStorage.removeItem(key);
     },
 
     /**
-     * 清空所有数据
+     * 获取存储使用情况
+     * @returns {{used: number, total: number, percent: number}}
      */
-    clear() {
-        localStorage.clear();
+    getUsage() {
+        let used = 0;
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            used += (localStorage.getItem(key) || '').length * 2; // UTF-16 编码
+        }
+        const total = 5 * 1024 * 1024; // 5MB 限制
+        return {
+            used,
+            total,
+            percent: Math.round((used / total) * 100)
+        };
+    },
+
+    /**
+     * 处理存储空间超限
+     * @private
+     */
+    _handleQuotaExceeded() {
+        console.warn('[StorageService] 存储空间不足，尝试清理历史数据...');
+        // 清理采集历史中的旧数据
+        const history = this.get(STORAGE_KEYS.SCRAPE_HISTORY, []);
+        if (history.length > 10) {
+            this.set(STORAGE_KEYS.SCRAPE_HISTORY, history.slice(0, 10));
+        }
     },
 
     // ================================================================
@@ -89,49 +117,43 @@ export const StorageService = {
 
     /**
      * 获取 LLM 配置
-     * @param {string} provider 
+     * @param {string} [provider] - 厂商标识，不传则使用当前激活的
+     * @returns {Object|null}
      */
-    getLLMConfig(provider) {
-        return this.get(`${STORAGE_KEYS.LLM_CONFIG_PREFIX}${provider}`, {});
+    getLLMConfig(provider = null) {
+        const activeProvider = provider || this.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
+        if (!activeProvider) return null;
+        return this.get(`${STORAGE_KEYS.LLM_CONFIG_PREFIX}${activeProvider}`, {});
     },
 
     /**
      * 保存 LLM 配置
-     * @param {string} provider 
-     * @param {Object} config 
+     * @param {string} provider - 厂商标识
+     * @param {Object} config - 配置对象
      */
     setLLMConfig(provider, config) {
         this.set(`${STORAGE_KEYS.LLM_CONFIG_PREFIX}${provider}`, config);
+        this.set(STORAGE_KEYS.LLM_ACTIVE_PROVIDER, provider);
     },
 
     /**
-     * 获取代理配置 (Main.js 兼容)
+     * 获取代理配置
      * @returns {Object}
      */
     getProxyConfig() {
-        // 优先读取新版 Scraper Proxy Config，如果不存在读取旧版 Proxy Config
-        // 这里根据 main.js 的用法，似乎是指全局代理或 Scraper 代理
-        // Main.js 195行: StorageService.getProxyConfig() 用于 setting the global proxy input?
-        // Let's assume it matches STORAGE_KEYS.PROXY_CONFIG based on variable names usually.
-        // But systemSettings.js uses SCRAPER_PROXY_CONFIG for scraping.
-        // Let's look at main.js again. loading "proxy-select" value.
-        // In systemSettings.js loadProxyConfig uses SCRAPER_PROXY_CONFIG. 
-        // Main.js seems to be loading the generic proxy config (maybe for the browser/system?).
-        // For safety, I will map it to PROXY_CONFIG as per keys.
-        return this.get(STORAGE_KEYS.PROXY_CONFIG, {});
+        return this.get(STORAGE_KEYS.PROXY_CONFIG, { type: 'allorigins' });
     },
 
     /**
-     * 获取草稿
-     * @param {string} module - 模块名 (e.g. 'analysis', 'promptlab')
-     * @returns {*} 草稿数据
+     * 保存代理配置
+     * @param {Object} config
      */
-    getDraft(module) {
-        return this.get(`${STORAGE_KEYS.DRAFT_PREFIX}${module}`, null);
+    setProxyConfig(config) {
+        this.set(STORAGE_KEYS.PROXY_CONFIG, config);
     },
 
     /**
-     * 获取抓取历史
+     * 获取采集历史
      * @returns {Array}
      */
     getScrapeHistory() {
@@ -139,31 +161,15 @@ export const StorageService = {
     },
 
     /**
-     * 保存抓取历史
+     * 保存采集历史
      * @param {Array} history
      */
     setScrapeHistory(history) {
-        this.set(STORAGE_KEYS.SCRAPE_HISTORY, history);
+        // 限制最大条数
+        const maxItems = 50;
+        const trimmed = history.slice(0, maxItems);
+        this.set(STORAGE_KEYS.SCRAPE_HISTORY, trimmed);
     },
-
-    /**
-     * 保存草稿
-     * @param {string} module - 模块名
-     * @param {*} data - 草稿数据
-     */
-    setDraft(module, data) {
-        this.set(`${STORAGE_KEYS.DRAFT_PREFIX}${module}`, data);
-    },
-
-    /**
-     * 清除草稿
-     * @param {string} module - 模块名
-     */
-    removeDraft(module) {
-        this.remove(`${STORAGE_KEYS.DRAFT_PREFIX}${module}`);
-    },
-
-    // ... existing layout config methods ...
 
     /**
      * 获取布局配置

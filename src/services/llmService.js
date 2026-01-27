@@ -23,8 +23,6 @@ import { ErrorService } from './errorService.js';
  * @property {number} [temperature=0.3] - 温度参数 (0-2)，越低越确定性
  * @property {boolean} [jsonMode=true] - 是否强制 JSON 输出格式
  * @property {number} [timeout=90000] - 超时时间 (毫秒)
- * @property {boolean} [stream=false] - 是否开启流式传输
- * @property {function(string, string):void} [onUpdate] - 流式更新回调 (fullContent, delta) => void
  */
 
 /**
@@ -77,13 +75,7 @@ export async function callLLM(
   model,
   options = {}
 ) {
-  const {
-    temperature = 0.3,
-    jsonMode = true,
-    timeout = 90000,
-    stream = false,
-    onUpdate = null
-  } = options;
+  const { temperature = 0.3, jsonMode = true, timeout = 90000 } = options;
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
@@ -93,9 +85,8 @@ export async function callLLM(
     model: model,
     messages: messages,
     temperature: temperature,
-    stream: stream,
-    // 只有部分模型支持 response_format, 且流式模式下通常不需要或需特殊处理
-    ...(jsonMode && !stream && { response_format: { type: "json_object" } }),
+    // 只有部分模型支持 response_format
+    ...(jsonMode && { response_format: { type: "json_object" } }),
   };
 
   try {
@@ -113,58 +104,18 @@ export async function callLLM(
 
     if (!response.ok) {
       const errorText = await response.text();
-      let errorMsg = `Server returned error ${response.status}`;
+      let errorMsg = `服务器返回错误 ${response.status}`;
       try {
         const errorJson = JSON.parse(errorText);
         if (errorJson.error && errorJson.error.message) {
           errorMsg = errorJson.error.message;
         }
       } catch (e) {
-        // If parsing fails, append a snippet of the raw text for debugging
-        // especially if it looks like a stream but failed
-        if (errorText.length < 200) {
-          errorMsg += `: ${errorText}`;
-        } else {
-          errorMsg += `: ${errorText.substring(0, 200)}...`;
-        }
+        // 解析失败，使用原始文本或状态码
       }
       throw new Error(errorMsg);
     }
 
-    // ========== 流式处理逻辑 ==========
-    if (stream && response.body) {
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder("utf-8");
-      let fullContent = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split('\n');
-
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (!trimmed || trimmed === 'data: [DONE]') continue;
-          if (trimmed.startsWith('data: ')) {
-            try {
-              const data = JSON.parse(trimmed.slice(6));
-              const delta = data.choices?.[0]?.delta?.content || "";
-              if (delta) {
-                fullContent += delta;
-                if (onUpdate) onUpdate(fullContent, delta);
-              }
-            } catch (e) {
-              console.debug("SSE Parse Error (ignorable):", e);
-            }
-          }
-        }
-      }
-      return fullContent;
-    }
-
-    // ========== 普通处理逻辑 ==========
     const data = await response.json();
     return data.choices[0].message.content;
   } catch (e) {
