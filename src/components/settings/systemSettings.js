@@ -66,7 +66,10 @@ const SettingsPanel = () => ({
 
     // Lifecycle
     init() {
+        console.log("SettingsPanel Init. Provider:", this.llm.provider);
         this.loadProxyConfig();
+        this.loadProviderConfig(this.llm.provider); // Force load on init
+        
         // Watch for provider changes to load its config
         this.$watch('llm.provider', (val) => this.loadProviderConfig(val));
         // Watch for proxy type to restore cached key
@@ -100,16 +103,25 @@ const SettingsPanel = () => ({
         }
 
         const savedConfig = StorageService.getLLMConfig(provider) || {};
+        console.log(`[Settings] Loading ${provider}`, { config, savedConfig });
 
         this.llm.endpoint = savedConfig.endpoint || config.endpoint;
         this.llm.apiKey = savedConfig.apiKey || "";
         
         // Models: Use saved or default
+        // [FIX] Ensure we have models array even if savedConfig.models is undefined
         this.llm.models = (savedConfig.models && savedConfig.models.length > 0) 
             ? savedConfig.models 
-            : config.models;
+            : (config.models || []);
             
         this.llm.model = savedConfig.model || "";
+        
+        // Auto-select first model if none selected and models exist
+        if (!this.llm.model && this.llm.models.length > 0) {
+             // Handle string vs object models
+             const first = this.llm.models[0];
+             this.llm.model = typeof first === 'string' ? first : first.id;
+        }
     },
 
     async fetchModels() {
