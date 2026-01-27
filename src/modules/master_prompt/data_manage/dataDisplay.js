@@ -253,9 +253,10 @@ class DataModule extends BaseModule {
     }
 
     async deleteProduct(asin) {
+        // [MODIFIED] 使用更清晰的HTML结构
         const confirmed = await this.confirmWithModal(
-            `确认要删除吗？`,
-            `永久删除 ASIN: <span class="font-bold text-red-500">${asin}</span> 所有数据！`,
+            `删除产品`,
+            `确定删除 ASIN: <span class="font-bold text-red-600 bg-red-50 px-1 rounded">${asin}</span> 及其所有数据吗？<br/><span class="text-xs text-red-400 mt-1 block">此操作无法撤销。</span>`,
             "ignore_del_prod_confirm"
         );
 
@@ -274,9 +275,10 @@ class DataModule extends BaseModule {
     }
 
     async deleteReview(asin, index) {
+        // [MODIFIED] 微调提示文案
         const confirmed = await this.confirmWithModal(
-            "确认要删除吗？",
-            '永久删除该Review！',
+            "删除评论",
+            '确定删除这条Review吗？',
             "ignore_del_review_confirm"
         );
 
@@ -300,14 +302,20 @@ class DataModule extends BaseModule {
             }
 
             const modal = document.getElementById('delete-confirm-modal');
+
+            // [MODIFIED] 由于使用了 no-header 模式，我们需要手动设置 Body 内部的 Title 元素
+            const titleEl = document.getElementById('del-modal-title');
             const descEl = document.getElementById('del-modal-desc');
+
             const checkbox = document.getElementById('del-dont-ask');
             const confirmBtn = document.getElementById('btn-del-confirm');
             const cancelBtn = document.getElementById('btn-del-cancel');
 
-            modal.setAttribute('title', title);
-            descEl.innerHTML = content;
-            checkbox.checked = false;
+            // 设置标题和内容
+            if (titleEl) titleEl.textContent = title;
+            if (descEl) descEl.innerHTML = content;
+
+            if (checkbox) checkbox.checked = false;
 
             modal.open();
 
@@ -318,7 +326,7 @@ class DataModule extends BaseModule {
             };
 
             confirmBtn.onclick = () => {
-                if (storageKey && checkbox.checked) {
+                if (storageKey && checkbox && checkbox.checked) {
                     StorageService.set(storageKey, true);
                     showToast('已保存设置：以后不再提醒', 'info');
                 }
