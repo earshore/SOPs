@@ -90,6 +90,15 @@ const SettingsPanel = () => ({
     loadProviderConfig(provider) {
         if (!provider) return;
         const config = PROVIDERS[provider];
+        
+        // Safety check: if provider key doesn't exist in constants
+        if (!config) {
+            console.warn(`Unknown provider: ${provider}, falling back to OpenAI`);
+            // Optionally reset to valid one
+            // this.llm.provider = 'openai'; 
+            return;
+        }
+
         const savedConfig = StorageService.getLLMConfig(provider) || {};
 
         this.llm.endpoint = savedConfig.endpoint || config.endpoint;
