@@ -2,7 +2,8 @@
 import BaseModule from "../../../common/BaseModule.js";
 import { promptlabService } from "./promptlabService.js";
 import state from "../../../common/state.js";
-import { SITE_CONFIGS, ANALYSIS_MODULES } from "../../../common/constants/constants.js";
+import SITE_CONFIGS from "../../../common/constants/constants.js";
+import { ANALYSIS_MODULES } from "../../../common/constants/prompts.js";
 import { showToast } from "../../../common/utils/ui.js";
 import { registerActionsWithLegacy } from "../../../common/utils/actionRegistry.js";
 
@@ -448,12 +449,6 @@ class PromptlabModule extends BaseModule {
         }
     }
 
-    getFieldTitle(key) {
-        const module = ANALYSIS_MODULES.find((m) => m.id === key);
-        if (module) return module.label_cn;
-        return key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
-    }
-
     registerGlobalActions() {
         registerActionsWithLegacy({
             amz_generateMasterPrompt: () => this.generateMasterPrompt(),
@@ -470,6 +465,11 @@ class PromptlabModule extends BaseModule {
             amz_clearPromptInputs: () => this.clearPromptInputs(),
         });
     }
+    
+    // Helper to access the standalone function from within the class if needed
+    getFieldTitle(key) {
+        return getFieldTitle(key);
+    }
 }
 
 const instance = new PromptlabModule();
@@ -484,4 +484,10 @@ export function initPromptlabModule() {
             if (instance._isMounted) instance.unmount();
         }
     });
+}
+
+export function getFieldTitle(key) {
+    const module = ANALYSIS_MODULES.find((m) => m.id === key);
+    if (module) return module.label_cn;
+    return key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
 }

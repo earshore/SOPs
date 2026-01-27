@@ -579,3 +579,15 @@ function saveKeyToMap(type, key) {
   map[type] = key;
   StorageService.set(STORAGE_KEYS.PROXY_KEY_MAP, map);
 }
+
+function getProxyDisplayName(type) {
+  const names = {
+    scraperapi: "ScraperAPI (商业)",
+    zenrows: "ZenRows (商业)",
+    brightdata: "Bright Data",
+    custom_api: "自定义 API",
+    allorigins: "AllOrigins (免费)",
+    custom_proxy: "HTTP 代理",
+  };
+  return names[type] || "默认直连";
+}

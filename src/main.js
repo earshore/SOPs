@@ -76,7 +76,9 @@ window.addEventListener("error", (event) => {
     import('./services/errorService.js').then(({ ErrorService }) => {
       ErrorService.handle(event.error, { action: 'window.onerror', fatal: false });
     });
-  } catch (e) {}
+  } catch (e) {
+    // ignore dynamic import errors
+  }
 });
 
 // ✅ Promise 异常兜底 (增强版)

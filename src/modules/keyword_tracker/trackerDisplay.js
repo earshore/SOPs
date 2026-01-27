@@ -1,6 +1,6 @@
 // src/modules/keyword_tracker/trackerDisplay.js
 import BaseModule from "../../common/BaseModule.js";
-import { showToast } from "../../common/utils/ui.js";
+import { showToast, showProgress } from "../../common/utils/ui.js";
 import * as KeywordService from "./trackerService.js";
 import state from "../../common/state.js";
 import { ErrorService } from "../../services/errorService.js";

@@ -6,15 +6,17 @@ self.onmessage = function(e) {
     const { action, payload } = e.data;
 
     switch(action) {
-        case 'ANALYZE_KEYWORDS':
+        case 'ANALYZE_KEYWORDS': {
             const { text, keywords, options } = payload;
             const result = analyzeMatching(text, keywords, options);
             self.postMessage({ action: 'ANALYZE_KEYWORDS_RESULT', payload: result });
             break;
-        case 'CALCULATE_FREQUENCY':
+        }
+        case 'CALCULATE_FREQUENCY': {
             const freq = calculateFrequency(payload.text);
             self.postMessage({ action: 'CALCULATE_FREQUENCY_RESULT', payload: freq });
             break;
+        }
     }
 };
 
