@@ -98,16 +98,16 @@ export const PROVIDERS = {
   //     { id: "qwen-turbo", context: 131072, features: [] },
   //   ],
   // },
-  hunyuan: {
-    name: "腾讯混元",
-    endpoint: "https://hunyuan.tencentcloudapi.com/v1",
-    models: [
-      { id: "hunyuan-2.0-thinking-20251109", context: 32000, features: ["function"] },
-      { id: "hunyuan-2.0-instruct-20251111", context: 131072, features: ["function"] },
-      { id: "hunyuan-turbos-latest", context: 131072, features: ["vision"] },
-      { id: "hunyuan-vision", context: 131072, features: ["vision"] },
-    ],
-  },
+  // hunyuan: {
+  //   name: "腾讯混元",
+  //   endpoint: "https://hunyuan.tencentcloudapi.com/v1",
+  //   models: [
+  //     { id: "hunyuan-2.0-thinking-20251109", context: 32000, features: ["function"] },
+  //     { id: "hunyuan-2.0-instruct-20251111", context: 131072, features: ["function"] },
+  //     { id: "hunyuan-turbos-latest", context: 131072, features: ["vision"] },
+  //     { id: "hunyuan-vision", context: 131072, features: ["vision"] },
+  //   ],
+  // },
   // ernie: {
   //   name: "文心一言",
   //   endpoint: "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop",
