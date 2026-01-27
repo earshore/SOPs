@@ -18,7 +18,7 @@ const SettingsPanel = () => ({
 
     // LLM Config State
     llm: {
-        provider: 'openai',
+        provider: 'llmgateway',
         endpoint: '',
         apiKey: '',
         model: '',
