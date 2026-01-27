@@ -97,26 +97,26 @@ window.addEventListener("unhandledrejection", (event) => {
 
 // 1. 导入各模块的初始化函数和业务函数
 import {
-  initSettingsListeners,
+  initAlpineSettings, // [NEW] Alpine Init
   updateModelStatus,
-  loadProviderConfig,
   openSettings,
   closeSettings,
-  toggleApiKeyVisibility,
   saveProviderConfig,
-  renderProxyInputUI,
   fetchModels,
   testConnection,
   saveProxyConfig
 } from "./components/settings/systemSettings.js";
 
-import { switchTab, renderMegaMenu, showToast, initRouter } from "../src/common/utils/ui.js";
-import { initHomeSplash } from "./modules/home/homeDisplay.js";
 import {
+  initAlpineScraper, // [NEW] Alpine Init
   initScraperListeners,
   selectSite,
   renderHistory
 } from "./modules/master_prompt/scraper/scraperPanel.js";
+
+import { switchTab, renderMegaMenu, showToast, initRouter } from "../src/common/utils/ui.js";
+import { initHomeSplash } from "./modules/home/homeDisplay.js";
+
 import {
   renderDataPanel,
   triggerImport,
@@ -139,12 +139,21 @@ import { initKeywordTracker } from './modules/keyword_tracker/trackerDisplay.js'
 import './modules/amz_hub/amz_hub.js';
 import './modules/sops/sops.js';
 
+// ✅ Alpine.js
+import Alpine from 'alpinejs';
+window.Alpine = Alpine;
+
 // ========================
 // APP STARTUP (程序启动)
 // ========================
 
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("🚀 System: Application Booting...");
+
+  // 0. Initialize Alpine Components
+  initAlpineSettings();
+  initAlpineScraper();
+  Alpine.start();
 
   // ----------------------------------------------------
   // ✅ 核心改动点：必须等待 HTML 注入完成后，才能绑定事件
@@ -164,7 +173,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     initHomeSplash();
 
     // 1. 初始化各模块的事件监听器
-    initSettingsListeners();
+    // initSettingsListeners(); // [REMOVED] Handled by Alpine
     initScraperListeners();
     initAnalysisPanel();
     initPromptlabModule();
@@ -191,18 +200,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   updateModelStatus();
   renderHistory();
 
-  // 3. 恢复用户设置 (代理等) - 使用 StorageService
-  const savedProxy = StorageService.getProxyConfig();
-  if (savedProxy.type) {
-    const proxySelect = document.getElementById("proxy-select");
-    if (proxySelect) {
-      proxySelect.value = savedProxy.type;
-      if (savedProxy.type === "custom") {
-        document.getElementById("custom-proxy").classList.remove("hidden");
-        document.getElementById("custom-proxy").value = savedProxy.customUrl || "";
-      }
-    }
-  }
+  // 3. [REMOVED] Proxy setup is now handled by Alpine component init()
 
   // 4. 初始化路由 (替代手动 switchTab)
   initRouter();
