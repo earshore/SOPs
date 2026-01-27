@@ -61,24 +61,32 @@ import {
 // ✅ P1: 导入事件调试工具
 import { initEventLogger } from './common/utils/eventLogger.js';
 
-// ✅ 全局错误兜底 (放在最前面)
+// ✅ 全局错误兜底 (增强版)
 window.addEventListener("error", (event) => {
   console.error("Global Error:", event.error);
-  const msg = `系统错误: ${event.message || "未知错误"}`;
-  if (!window._lastError || Date.now() - window._lastError > 1000) {
-    window._lastError = Date.now();
-    if (window.showToast) window.showToast(msg, "error");
-  }
+  // 避免循环报错导致的 Toast 刷屏
+  if (window._errorThrottle && Date.now() - window._errorThrottle < 2000) return;
+  window._errorThrottle = Date.now();
+
+  const msg = `系统运行异常: ${event.message || "未知错误"}`;
+  if (window.showToast) window.showToast(msg, "error");
+  
+  // 记录到错误服务 (如果存在)
+  try {
+    import('./services/errorService.js').then(({ ErrorService }) => {
+      ErrorService.handle(event.error, { action: 'window.onerror', fatal: false });
+    });
+  } catch (e) {}
 });
 
-// ✅ Promise 异常兜底
+// ✅ Promise 异常兜底 (增强版)
 window.addEventListener("unhandledrejection", (event) => {
   console.error("Unhandled Rejection:", event.reason);
-  const msg = `异步操作失败: ${event.reason?.message || "未知原因"}`;
-  if (!window._lastError || Date.now() - window._lastError > 1000) {
-    window._lastError = Date.now();
-    if (window.showToast) window.showToast(msg, "error");
-  }
+  if (window._errorThrottle && Date.now() - window._errorThrottle < 2000) return;
+  window._errorThrottle = Date.now();
+
+  const msg = `异步操作异常: ${event.reason?.message || "网络请求或数据处理失败"}`;
+  if (window.showToast) window.showToast(msg, "error");
 });
 
 // 1. 导入各模块的初始化函数和业务函数

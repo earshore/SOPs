@@ -22,6 +22,14 @@ class KeywordTrackerModule extends BaseModule {
         };
         // Debounced function reference for cleanup
         this._debouncedInputHandler = null;
+        
+        // Initialize Worker
+        this.worker = null;
+        try {
+            this.worker = new Worker(new URL('../../workers/keywordMatcher.worker.js', import.meta.url), { type: 'module' });
+        } catch (e) {
+            console.warn('[KeywordTracker] Web Worker initialization failed, falling back to main thread.', e);
+        }
     }
 
     async render() {
@@ -324,7 +332,7 @@ class KeywordTrackerModule extends BaseModule {
         showToast("已去重");
     }
 
-    startAnalysis() {
+    async startAnalysis() {
         const kwText = document.getElementById('kt-keywords-input').value;
         const copyText = document.getElementById('kt-copy-input').value;
 
@@ -339,16 +347,49 @@ class KeywordTrackerModule extends BaseModule {
         state.keywordTracker.translationMode = false;
         state.keywordTracker.paragraphs = [];
 
-        const analysisResult = KeywordService.analyzeKeywordMatching(
-            state.keywordTracker.processedCopy, 
-            state.keywordTracker.keywords
-        );
-        state.keywordTracker.matchedKeywords = analysisResult.matched;
-        state.keywordTracker.unmatchedKeywords = analysisResult.unmatched;
+        showProgress(true, 50);
 
-        state.keywordTracker.wordFrequency = KeywordService.calculateWordFrequency(state.keywordTracker.processedCopy);
+        // Use Worker for analysis if available
+        if (this.worker) {
+            this.worker.onmessage = (e) => {
+                const { action, payload } = e.data;
+                if (action === 'ANALYZE_KEYWORDS_RESULT') {
+                    state.keywordTracker.matchedKeywords = payload.matched;
+                    state.keywordTracker.unmatchedKeywords = payload.unmatched;
+                    
+                    // Trigger second worker task
+                    this.worker.postMessage({ 
+                        action: 'CALCULATE_FREQUENCY', 
+                        payload: { text: state.keywordTracker.processedCopy } 
+                    });
+                } else if (action === 'CALCULATE_FREQUENCY_RESULT') {
+                    state.keywordTracker.wordFrequency = payload;
+                    this.finalizeAnalysis();
+                }
+            };
+
+            this.worker.postMessage({
+                action: 'ANALYZE_KEYWORDS',
+                payload: {
+                    text: state.keywordTracker.processedCopy,
+                    keywords: state.keywordTracker.keywords
+                }
+            });
+        } else {
+            // Fallback to main thread
+            const analysisResult = KeywordService.analyzeKeywordMatching(
+                state.keywordTracker.processedCopy, 
+                state.keywordTracker.keywords
+            );
+            state.keywordTracker.matchedKeywords = analysisResult.matched;
+            state.keywordTracker.unmatchedKeywords = analysisResult.unmatched;
+            state.keywordTracker.wordFrequency = KeywordService.calculateWordFrequency(state.keywordTracker.processedCopy);
+            this.finalizeAnalysis();
+        }
+    }
+
+    finalizeAnalysis() {
         state.keywordTracker.isWindowMinimized = false;
-        
         this.updateMinimizedBadge();
 
         const reportContainer = document.getElementById('kt-llm-analysis-result');
@@ -369,6 +410,7 @@ class KeywordTrackerModule extends BaseModule {
             this.showModule('process');
         }
 
+        showProgress(false);
         showToast("分析完成", "success");
     }
 

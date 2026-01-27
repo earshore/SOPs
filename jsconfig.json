@@ -1,17 +1,15 @@
 {
   "compilerOptions": {
+    "target": "ESNext",
     "module": "ESNext",
-    "target": "ES2022",
-    "checkJs": true,
-    "allowJs": true,
     "moduleResolution": "node",
-    "strict": false,
-    "lib": ["ESNext", "DOM", "DOM.Iterable"],
-    "baseUrl": "./",
+    "allowJs": true,
+    "checkJs": true,
+    "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
-    }
+    },
+    "lib": ["ESNext", "DOM", "DOM.Iterable"]
   },
-  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

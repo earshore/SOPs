@@ -3,14 +3,15 @@
  */
 class EventBus {
     constructor() {
+        /** @type {Object.<string, Function[]>} */
         this.events = {};
     }
 
     /**
      * Subscribe to an event
-     * @param {string} event 
-     * @param {Function} callback 
-     * @returns {Function} unsubscribe function
+     * @param {string} event - Event name
+     * @param {function(any): void} callback - Callback function
+     * @returns {function(): void} unsubscribe function
      */
     on(event, callback) {
         if (!this.events[event]) {
@@ -23,8 +24,8 @@ class EventBus {
 
     /**
      * Unsubscribe from an event
-     * @param {string} event 
-     * @param {Function} callback 
+     * @param {string} event - Event name
+     * @param {function(any): void} callback - Callback function
      */
     off(event, callback) {
         if (!this.events[event]) return;
@@ -33,8 +34,8 @@ class EventBus {
 
     /**
      * Emit an event
-     * @param {string} event 
-     * @param {any} data 
+     * @param {string} event - Event name
+     * @param {any} [data] - Data to pass to listeners
      */
     emit(event, data) {
         if (!this.events[event]) return;

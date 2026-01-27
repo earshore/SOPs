@@ -43,6 +43,33 @@ const VIEW_REGISTRY = {
 };
 
 /**
+ * 渲染错误占位视图
+ * @param {HTMLElement} container 
+ * @param {string} key 
+ * @param {Error} error 
+ */
+function renderErrorPlaceholder(container, key, error) {
+    const errorHtml = `
+        <div class="view-error-placeholder p-8 flex flex-col items-center justify-center text-center space-y-4 border-2 border-dashed border-red-200 rounded-xl bg-red-50/30 m-4">
+            <div class="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center">
+                <i class="fas fa-exclamation-triangle text-2xl"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-bold text-gray-800">视图加载失败: ${key}</h3>
+                <p class="text-sm text-gray-500 max-w-md mt-1">${error.message || '未知错误'}</p>
+            </div>
+            <button 
+                onclick="location.reload()" 
+                class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm font-medium shadow-sm"
+            >
+                <i class="fas fa-sync-alt mr-2"></i>刷新页面重试
+            </button>
+        </div>
+    `;
+    container.insertAdjacentHTML('beforeend', errorHtml);
+}
+
+/**
  * 加载单个 HTML 模块
  * @returns {Promise<HTMLElement|null>} 返回目标容器元素，失败返回 null
  */
@@ -55,6 +82,12 @@ async function loadHtml(key) {
         return document.querySelector(config.target);
     }
 
+    const container = document.querySelector(config.target);
+    if (!container) {
+        console.error(`[ViewLoader] Target container not found: ${config.target}`);
+        return null;
+    }
+
     try {
         const path = config.path;
         const loader = htmlModules[path];
@@ -65,20 +98,14 @@ async function loadHtml(key) {
 
         // 调用 loader 获取内容 (Vite 会处理懒加载)
         const html = await loader();
-        const container = document.querySelector(config.target);
 
-        if (container) {
-            container.insertAdjacentHTML('beforeend', html);
-            config.isLoaded = true;
-            console.log(`✅ [ViewLoader] Loaded & Mounted: ${key} -> ${config.target}`);
-            // 触发可能的初始化事件 (如果模块依赖 DOM 存在)
-            return container;
-        } else {
-            console.error(`[ViewLoader] Target container not found: ${config.target}`);
-            return null;
-        }
+        container.insertAdjacentHTML('beforeend', html);
+        config.isLoaded = true;
+        console.log(`✅ [ViewLoader] Loaded & Mounted: ${key} -> ${config.target}`);
+        return container;
     } catch (e) {
         console.error(`[ViewLoader] Failed to load [${key}]:`, e);
+        renderErrorPlaceholder(container, key, e);
         return null;
     }
 }

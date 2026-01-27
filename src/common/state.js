@@ -4,8 +4,90 @@
 // ================================================================
 
 /**
+ * @typedef {Object} UIState
+ * @property {string} currentTab
+ * @property {string} currentDataTab
+ * @property {string} currentReportTab
+ */
+
+/**
+ * @typedef {Object} ScraperState
+ * @property {boolean} isScraping
+ * @property {string} selectedSite
+ * @property {any} scrapedData
+ * @property {string|number|null} currentHistoryId
+ */
+
+/**
+ * @typedef {Object} AnalysisState
+ * @property {any} analysisReport
+ * @property {any} translatedReport
+ * @property {string[]} selectedAsins
+ * @property {string|null} expandedAsin
+ * @property {boolean} isEditing
+ * @property {boolean} showTranslation
+ * @property {any[]} editHistory
+ */
+
+/**
+ * @typedef {Object} UserProductProfile
+ * @property {string} targetMarket
+ * @property {string} keywordsTier1
+ * @property {string} keywordsTier2
+ * @property {string} audience
+ * @property {string} usps
+ * @property {string} specs
+ * @property {string} socialHook
+ * @property {string} negative
+ * @property {string} tone
+ * @property {string} customStrategy
+ * @property {boolean} useRufus
+ * @property {boolean} useEmoji
+ * @property {boolean} useCosmo
+ * @property {string[]} selectedReportSections
+ * @property {number} charLimit
+ */
+
+/**
+ * @typedef {Object} PromptlabState
+ * @property {UserProductProfile} userProductProfile
+ */
+
+/**
+ * @typedef {Object} KeywordTrackerSettings
+ * @property {boolean} matchPlural
+ * @property {boolean} matchStem
+ * @property {boolean} matchCase
+ * @property {boolean} matchPartial
+ */
+
+/**
+ * @typedef {Object} KeywordTrackerState
+ * @property {any[]} keywords
+ * @property {string} processedCopy
+ * @property {string} formattedCopy
+ * @property {any[]} matchedKeywords
+ * @property {any[]} unmatchedKeywords
+ * @property {any[]} wordFrequency
+ * @property {any[]} paragraphs
+ * @property {boolean} translationMode
+ * @property {Object.<string, any>} keywordLocationIndex
+ * @property {KeywordTrackerSettings} settings
+ * @property {boolean} isWindowMinimized
+ */
+
+/**
+ * @typedef {Object} AppStateData
+ * @property {UIState} ui
+ * @property {ScraperState} scraper
+ * @property {AnalysisState} analysis
+ * @property {PromptlabState} promptlab
+ * @property {KeywordTrackerState} keywordTracker
+ */
+
+/**
  * 采用命名空间隔离的全局状态对象
- * 通过 Proxy 代理实现完全向后兼容
+ * @type {AppStateData}
  */
 const stateData = {
   // ========================
@@ -138,15 +220,32 @@ export function subscribe(key, callback) {
 function notifySubscribers(key, newValue, oldValue) {
   if (newValue === oldValue) return; // 值未变化不通知
 
-  const subs = subscribers.get(key);
-  if (subs) {
-    subs.forEach(callback => {
+  // 1. 通知精确匹配的订阅者 (例如 "ui.currentTab")
+  const exactSubs = subscribers.get(key);
+  if (exactSubs) {
+    exactSubs.forEach(callback => {
       try {
         callback(newValue, oldValue);
       } catch (e) {
         console.error(`[State] 订阅回调执行出错 (key: ${key}):`, e);
       }
     });
+  }
+
+  // 2. 通知短键匹配的订阅者 (例如 "currentTab")
+  // 如果 key 是 "ui.currentTab"，也要通知订阅了 "currentTab" 的人
+  if (key.includes('.')) {
+    const shortKey = key.split('.').pop();
+    const shortSubs = subscribers.get(shortKey);
+    if (shortSubs) {
+      shortSubs.forEach(callback => {
+        try {
+          callback(newValue, oldValue);
+        } catch (e) {
+          console.error(`[State] 订阅回调执行出错 (key: ${shortKey}):`, e);
+        }
+      });
+    }
   }
 }
 
@@ -158,25 +257,41 @@ function notifySubscribers(key, newValue, oldValue) {
  * batchUpdate({ currentTab: 'home', isScraping: false });
  */
 export function batchUpdate(updates) {
-  const notifications = [];
-
   Object.entries(updates).forEach(([key, value]) => {
-    // 查找属性所在命名空间
-    for (const nsKey of Object.keys(stateData)) {
-      const ns = stateData[nsKey];
-      if (ns && typeof ns === 'object' && key in ns) {
-        const oldValue = ns[key];
-        ns[key] = value;
-        notifications.push({ key, newValue: value, oldValue });
-        break;
-      }
+    // 查找属性所在命名空间并更新 (会触发 proxy set)
+    state[key] = value;
+  });
+}
+
+/**
+ * 缓存已创建的命名空间 Proxy
+ */
+const proxyCache = new WeakMap();
+
+/**
+ * 为命名空间创建 Proxy
+ * @param {Object} obj - 命名空间对象
+ * @param {string} nsName - 命名空间名称
+ */
+function createNamespaceProxy(obj, nsName) {
+  if (proxyCache.has(obj)) return proxyCache.get(obj);
+
+  const proxy = new Proxy(obj, {
+    get(target, prop) {
+      if (typeof prop === "symbol") return target[prop];
+      return target[prop];
+    },
+    set(target, prop, value) {
+      const oldValue = target[prop];
+      target[prop] = value;
+      // 同时通知全路径和短路径
+      notifySubscribers(`${nsName}.${String(prop)}`, value, oldValue);
+      return true;
     }
   });
 
-  // 批量通知
-  notifications.forEach(({ key, newValue, oldValue }) => {
-    notifySubscribers(key, newValue, oldValue);
-  });
+  proxyCache.set(obj, proxy);
+  return proxy;
 }
 
 // ================================================================
@@ -192,7 +307,7 @@ export function batchUpdate(updates) {
 const state = new Proxy(stateData, {
   /**
    * GET 拦截器
-   * 1. 如果访问的是命名空间 (ui, scraper, ...) 则直接返回
+   * 1. 如果访问的是命名空间 (ui, scraper, ...) 则返回代理后的命名空间
    * 2. 否则遍历所有命名空间，查找属性（向后兼容）
    */
   get(target, prop) {
@@ -201,9 +316,9 @@ const state = new Proxy(stateData, {
       return target[prop];
     }
 
-    // 如果是命名空间键，直接返回命名空间对象
-    if (prop in target) {
-      return target[prop];
+    // 如果是命名空间键，返回代理后的命名空间对象
+    if (prop in target && typeof target[prop] === 'object' && target[prop] !== null) {
+      return createNamespaceProxy(target[prop], String(prop));
     }
 
     // 向后兼容：遍历所有命名空间查找属性
@@ -214,17 +329,17 @@ const state = new Proxy(stateData, {
       }
     }
 
-    return undefined;
+    return target[prop];
   },
 
   /**
    * SET 拦截器
-   * 1. 如果设置的是命名空间，直接赋值
+   * 1. 如果设置的是命名空间，直接赋值（并通知）
    * 2. 否则遍历所有命名空间，找到属性所在位置并设置（向后兼容）
    * 3. 🆕 自动通知订阅者
    */
   set(target, prop, value) {
-    // 如果是命名空间键，直接设置（通常不应该替换整个命名空间）
+    // 如果是命名空间键
     if (prop in target) {
       const oldValue = target[prop];
       target[prop] = value;
@@ -238,8 +353,8 @@ const state = new Proxy(stateData, {
       if (ns && typeof ns === "object" && prop in ns) {
         const oldValue = ns[prop];
         ns[prop] = value;
-        // 🔔 触发订阅者通知
-        notifySubscribers(String(prop), value, oldValue);
+        // 🔔 触发全路径和短路径订阅通知
+        notifySubscribers(`${nsKey}.${String(prop)}`, value, oldValue);
         return true;
       }
     }
