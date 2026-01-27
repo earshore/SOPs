@@ -102,9 +102,12 @@ import {
   openSettings,
   closeSettings,
   saveProviderConfig,
+  loadProviderConfig, // [RESTORED]
   fetchModels,
+  toggleApiKeyVisibility, // [RESTORED]
   testConnection,
-  saveProxyConfig
+  saveProxyConfig,
+  renderProxyInputUI // [RESTORED]
 } from "./components/settings/systemSettings.js";
 
 import {
