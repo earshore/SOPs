@@ -104,6 +104,7 @@ export const PROVIDERS = {
     models: [
       { id: "hunyuan-2.0-thinking-20251109", context: 32000, features: ["function"] },
       { id: "hunyuan-2.0-instruct-20251111", context: 131072, features: ["function"] },
+      { id: "hunyuan-turbos-latest", context: 131072, features: ["vision"] },
       { id: "hunyuan-vision", context: 131072, features: ["vision"] },
     ],
   },
