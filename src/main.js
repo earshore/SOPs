@@ -7,7 +7,7 @@
 // ✅ Dependency Bundling (Optimization)
 import { marked } from 'marked';
 // Chart.js and GridStack are now lazy loaded via src/common/utils/lazyLibs.js
-import '../css/style.css';
+import './css/style.css';
 
 // Expose to window for legacy compatibility
 window.marked = marked;
@@ -74,7 +74,7 @@ window.addEventListener("error", (event) => {
 
   const msg = `系统运行异常: ${event.message || "未知错误"}`;
   if (window.showToast) window.showToast(msg, "error");
-  
+
   // 记录到错误服务 (如果存在)
   try {
     import('./services/errorService.js').then(({ ErrorService }) => {

@@ -38,13 +38,88 @@ export const STORAGE_KEYS = {
  * 存储服务 - 统一的数据持久化接口
  */
 export const StorageService = {
-    // ... existing basic methods ...
+    /**
+     * 获取数据
+     * @param {string} key
+     * @param {*} defaultValue
+     */
+    get(key, defaultValue = null) {
+        try {
+            const item = localStorage.getItem(key);
+            // Handle cases where item might be "undefined" string
+            if (item === "undefined") return defaultValue;
+            return item ? JSON.parse(item) : defaultValue;
+        } catch (e) {
+            console.warn(`[Storage] Error reading ${key}:`, e);
+            return defaultValue;
+        }
+    },
+
+    /**
+     * 保存数据
+     * @param {string} key
+     * @param {*} value
+     */
+    set(key, value) {
+        try {
+            localStorage.setItem(key, JSON.stringify(value));
+        } catch (e) {
+            console.error(`[Storage] Error saving ${key}:`, e);
+        }
+    },
+
+    /**
+     * 删除数据
+     * @param {string} key
+     */
+    remove(key) {
+        localStorage.removeItem(key);
+    },
+
+    /**
+     * 清空所有数据
+     */
+    clear() {
+        localStorage.clear();
+    },
 
     // ================================================================
     // 🔧 业务快捷方法
     // ================================================================
 
-    // ... existing LLM and Proxy config methods ...
+    /**
+     * 获取 LLM 配置
+     * @param {string} provider 
+     */
+    getLLMConfig(provider) {
+        return this.get(`${STORAGE_KEYS.LLM_CONFIG_PREFIX}${provider}`, {});
+    },
+
+    /**
+     * 保存 LLM 配置
+     * @param {string} provider 
+     * @param {Object} config 
+     */
+    setLLMConfig(provider, config) {
+        this.set(`${STORAGE_KEYS.LLM_CONFIG_PREFIX}${provider}`, config);
+    },
+
+    /**
+     * 获取代理配置 (Main.js 兼容)
+     * @returns {Object}
+     */
+    getProxyConfig() {
+        // 优先读取新版 Scraper Proxy Config，如果不存在读取旧版 Proxy Config
+        // 这里根据 main.js 的用法，似乎是指全局代理或 Scraper 代理
+        // Main.js 195行: StorageService.getProxyConfig() 用于 setting the global proxy input?
+        // Let's assume it matches STORAGE_KEYS.PROXY_CONFIG based on variable names usually.
+        // But systemSettings.js uses SCRAPER_PROXY_CONFIG for scraping.
+        // Let's look at main.js again. loading "proxy-select" value.
+        // In systemSettings.js loadProxyConfig uses SCRAPER_PROXY_CONFIG. 
+        // Main.js seems to be loading the generic proxy config (maybe for the browser/system?).
+        // For safety, I will map it to PROXY_CONFIG as per keys.
+        return this.get(STORAGE_KEYS.PROXY_CONFIG, {});
+    },
 
     /**
      * 获取草稿
