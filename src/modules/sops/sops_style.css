@@ -2,15 +2,14 @@
    SOPs Module Styles
    ================================ */
 
-/* SOPs 全宽显示 - 覆盖模板中的 max-w 限制 */
-#sops_content_area .max-w-4xl,
-#sops_content_area .max-w-5xl,
-#sops_content_area .max-w-6xl {
-    max-width: 100% !important;
+/* SOP Overview Container - Centered Limit */
+.sop-overview-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1rem;
 }
 
 #sops_content_area>div {
-    max-width: 100%;
     width: 100%;
 }
 
