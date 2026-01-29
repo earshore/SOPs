@@ -5,8 +5,8 @@
 // 🛡️ Phase 1: 增强鲁棒性 - 改进解析逻辑与类型检查
 // ================================================= ===============
 
-import { callLLM } from "../../../services/llmService.js";
-import { TRANSLATE_PROMPT_TEMPLATE } from "../../../common/constants/prompts.js";
+import { callLLM } from "../../../../services/llmService.js";
+import { TRANSLATE_PROMPT_TEMPLATE } from "../../../../common/constants/prompts.js";
 
 // ======================== 
 // 类型定义
@@ -15,7 +15,7 @@ import { TRANSLATE_PROMPT_TEMPLATE } from "../../../common/constants/prompts.js"
 /**
  * 产品数据对象
  * @typedef {Object} ProductData
- * @property {string} asin - Amazon 标准识别号
+ * @property {string} asin - Amazon 标准识别码
  * @property {string} [productTitle] - 产品标题
  * @property {string[]} [feature_bullets] - 五点描述
  * @property {CustomerReview[]} [customer_reviews] - 客户评论
@@ -62,7 +62,7 @@ import { TRANSLATE_PROMPT_TEMPLATE } from "../../../common/constants/prompts.js"
 // ======================== 
 
 /**
- * 鲁棒的 JSON 提取器
+ * 鲁棒性 JSON 提取器
  * 处理 Markdown 代码块及杂余文本
  * @param {string} text 
  * @returns {any}
@@ -74,7 +74,7 @@ function robustParseJSON(text) {
   try {
     return JSON.parse(text);
   } catch (e) {
-    // 2. 尝试提取 Markdown JSON 块: ```json ... ```
+    // 2. 尝试提取 Markdown JSON 块 ```json ... ```
     const mdMatch = text.match(/```json\s*([\s\S]*?)\s*```/);
     if (mdMatch && mdMatch[1]) {
       try { return JSON.parse(mdMatch[1]); } catch (e2) { /* ignore */ }
@@ -158,7 +158,7 @@ export const AnalysisService = {
       .replace("{{category}}", "General");
 
     // 3. 调用 LLM
-    // 增加超时到 120s，因为分析通常涉及大量上下文
+    // 增加超时至 120s，因为分析通常涉及大量上下文
     const response = await callLLM(
       [{ role: "user", content: finalPrompt }],
       llmConfig.provider,

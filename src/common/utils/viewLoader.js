@@ -105,13 +105,13 @@ const VIEW_REGISTRY = {
     'amz_hub': { path: '/src/modules/amz_hub/amz_hub.html', target: 'main', isLoaded: false },
 
     // Master Prompt Views
-    'scraper': { path: '/src/modules/master_prompt/scraper/scraperPanel.html', target: 'main', isLoaded: false },
-    'data_manage': { path: '/src/modules/master_prompt/data_manage/dataDisplay.html', target: 'main', isLoaded: false },
-    'analysis': { path: '/src/modules/master_prompt/analysis/analysisDisplay.html', target: 'main', isLoaded: false },
-    'promptlab': { path: '/src/modules/master_prompt/promptlab/promptlabDisplay.html', target: 'main', isLoaded: false },
+    'scraper': { path: '/src/modules/app_center/master_prompt/scraper/scraperPanel.html', target: 'main', isLoaded: false },
+    'data_manage': { path: '/src/modules/app_center/master_prompt/data_manage/dataDisplay.html', target: 'main', isLoaded: false },
+    'analysis': { path: '/src/modules/app_center/master_prompt/analysis/analysisDisplay.html', target: 'main', isLoaded: false },
+    'promptlab': { path: '/src/modules/app_center/master_prompt/promptlab/promptlabDisplay.html', target: 'main', isLoaded: false },
 
     // Keyword Tracker
-    'tracker': { path: '/src/modules/keyword_tracker/trackerDisplay.html', target: 'main', isLoaded: false },
+    'tracker': { path: '/src/modules/app_center/keyword_tracker/trackerDisplay.html', target: 'main', isLoaded: false },
 };
 
 /**

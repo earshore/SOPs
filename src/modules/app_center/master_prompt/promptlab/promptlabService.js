@@ -256,3 +256,4 @@ For EACH module, provide:
 `.trim();
   },
 };
+

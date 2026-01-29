@@ -1,10 +1,10 @@
 // src/modules/master_prompt/analysis/analysisRenderer.js
-import { ANALYSIS_MODULES } from "../../../common/constants/prompts.js";
+import { ANALYSIS_MODULES } from "../../../../common/constants/prompts.js";
 import { getFieldTitle } from "../promptlab/promptlabDisplay.js";
 
-// ==========================================
+// ========================================== 
 // 1. Widget 卡片外壳渲染
-// ==========================================
+// ========================================== 
 
 /**
  * 渲染 Widget 卡片的外层容器 (Header + Content Wrapper)
@@ -65,9 +65,9 @@ export function renderWidgetCard(key, title, style, isTranslationMode, contentHT
         </div>`;
 }
 
-// ==========================================
+// ========================================== 
 // 2. 查看模式 (View Mode) HTML 生成
-// ==========================================
+// ========================================== 
 
 export function renderViewModeHTML(val, style = {}) {
     // 0. 空状态
@@ -151,13 +151,13 @@ function _renderObjectArray(val) {
     </div>`;
 }
 
-// ==========================================
+// ========================================== 
 // 3. 编辑模式 (Editor Mode) HTML 生成
-// ==========================================
+// ========================================== 
 
-// ==========================================
+// ========================================== 
 // 4. 加载状态 (Loading State) HTML 生成
-// ==========================================
+// ========================================== 
 
 /**
  * 渲染骨架屏 (Skeleton Screen)
@@ -219,7 +219,7 @@ export function renderEditorForm(key, data) {
     if (typeof data === "string") {
         return `<div class="py-1 group relative">
               <textarea id="input-${key}" 
-                class="${inputStyle} min-h-[80px]" 
+                class="${inputStyle} min-h-[80px]"
                 style="height: ${calcHeight(data)}"
                 oninput="${autoResizeJS}"
                 onfocus="pushEditSnapshot('${key}'); ${autoResizeJS}" 
@@ -282,7 +282,7 @@ export function renderEditorForm(key, data) {
                                     
                                     <div class="relative w-full">
                                         <textarea data-subkey="${subKey}" 
-                                                  class="${inputStyle} obj-input" 
+                                                  class="${inputStyle} obj-input"
                                                   rows="1" 
                                                   style="height: ${calcHeight(typeof obj[subKey] === "object" ? JSON.stringify(obj[subKey]) : obj[subKey])}"
                                                   oninput="${autoResizeJS}"
@@ -297,7 +297,7 @@ export function renderEditorForm(key, data) {
             </div>
             
             <button onclick="window.addObjItem('${key}')" class="${addBtnStyle}">
-                <i class="fas fa-plus"></i> <span>添加数据组</span>
+                <i class="fas fa-plus"></i> <span>添加数据</span>
             </button>
             <script id="tpl-${key}" type="application/json">${JSON.stringify(data[0] || {})}</script>
         `;

@@ -29,7 +29,8 @@ export function renderMegaMenu() {
     if (!container) return; // 防御性返回
 
     try {
-        const modules = Object.values(MENU_CONFIG.modules || {});
+        const modules = Object.values(MENU_CONFIG.modules || {})
+            .filter(mod => mod.contextId === 'apps');
 
         const html = modules.map(mod => {
             const targetRoute = getDefaultRouteForModule(mod.id);

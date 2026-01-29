@@ -1,20 +1,20 @@
 // src/modules/master_prompt/analysis/analysisDisplay.js
-import BaseModule from "../../../common/BaseModule.js";
-import state from "../../../common/state.js";
-import { PROVIDERS, LANGUAGE_HEADERS } from "../../../common/constants/constants.js";
-import { ANALYSIS_MODULES, DYNAMIC_MASTER_TEMPLATE } from "../../../common/constants/prompts.js";
-import { showToast, showProgress } from "../../../common/utils/ui.js";
+import BaseModule from "../../../../common/BaseModule.js";
+import state from "../../../../common/state.js";
+import { PROVIDERS, LANGUAGE_HEADERS } from "../../../../common/constants/constants.js";
+import { ANALYSIS_MODULES, DYNAMIC_MASTER_TEMPLATE } from "../../../../common/constants/prompts.js";
+import { showToast, showProgress } from "../../../../common/utils/ui.js";
 import { HistoryService } from "../services/historyService.js";
 import { renderHistory } from "../scraper/scraperPanel.js";
 import { AnalysisService } from "./analysisService.js";
 import { getFieldTitle } from "../promptlab/promptlabDisplay.js";
-import { StorageService, STORAGE_KEYS } from "../../../services/storageService.js";
-import { ErrorService } from "../../../services/errorService.js";
-import { registerActionsWithLegacy } from "../../../common/utils/actionRegistry.js";
+import { StorageService, STORAGE_KEYS } from "../../../../services/storageService.js";
+import { ErrorService } from "../../../../services/errorService.js";
+import { registerActionsWithLegacy } from "../../../../common/utils/actionRegistry.js";
 import { renderWidgetCard, renderViewModeHTML, renderEditorForm, renderSkeleton } from "./analysisRenderer.js";
-import eventBus from "../../../common/EventBus.js"; // [NEW] Import EventBus
-import { EVENTS } from "../../../common/constants/eventConstants.js";
-import { loadGridStack } from "../../../common/utils/lazyLibs.js";
+import eventBus from "../../../../common/EventBus.js"; // [NEW] Import EventBus
+import { EVENTS } from "../../../../common/constants/eventConstants.js";
+import { loadGridStack } from "../../../../common/utils/lazyLibs.js";
 
 class AnalysisModule extends BaseModule {
   constructor() {
@@ -325,22 +325,22 @@ class AnalysisModule extends BaseModule {
     const btn = document.getElementById("analyze-btn");
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> 分析中...';
-    
+
     // 🛡️ [UX] 1. Render Skeleton State Immediately
     const loadingReport = {};
     const selectedCheckboxes = document.querySelectorAll('input[name="analysis_module"]:checked');
     selectedCheckboxes.forEach((cb) => {
-        loadingReport[cb.value] = '__LOADING__';
+      loadingReport[cb.value] = '__LOADING__';
     });
-    
+
     // Add meta placeholders to prevent UI errors
     loadingReport.meta = {
-        targetMarket: "Analyze...",
-        generatedByModel: config.model,
-        generatedAt: "Pending...",
-        templateUsed: "Dynamic Analysis",
+      targetMarket: "Analyze...",
+      generatedByModel: config.model,
+      generatedAt: "Pending...",
+      templateUsed: "Dynamic Analysis",
     };
-    
+
     state.analysisReport = loadingReport;
     this.renderReport(); // Shows skeletons
 
@@ -389,20 +389,20 @@ class AnalysisModule extends BaseModule {
       state.isEditing = false;
 
       HistoryService.save(state.scrapedData, report);
-      renderHistory(); 
+      renderHistory();
       this.renderReport(); // Re-render with real data
 
       showToast("分析完成", "success");
     } catch (e) {
       ErrorService.handle(e, { action: 'analyzeSelectedAsins', module: 'analysis' });
       // On error, clear loading state
-      state.analysisReport = null; 
+      state.analysisReport = null;
       // Re-render empty state or error state if implemented
       const display = document.getElementById("report-display");
       if (display) display.classList.add("hidden");
       const noReportMsg = document.getElementById("no-report-msg");
       if (noReportMsg) noReportMsg.classList.remove("hidden");
-      
+
     } finally {
       btn.disabled = false;
       btn.innerHTML = '<i class="fas fa-brain mr-2"></i> 分析ASIN';
@@ -667,11 +667,11 @@ class AnalysisModule extends BaseModule {
     const origVal = report[key];
     const showTrans = state.showTranslation;
     const transVal = showTrans && transReport ? transReport[key] : undefined;
-    
+
     // 🛡️ [UX] 2. Check for Loading State
     if (origVal === '__LOADING__') {
-        // Return skeleton HTML immediately
-        return renderSkeleton();
+      // Return skeleton HTML immediately
+      return renderSkeleton();
     }
 
     const displayVal = this.getDisplayValue(origVal, transVal);

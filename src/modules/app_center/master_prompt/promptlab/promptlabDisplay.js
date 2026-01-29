@@ -1,11 +1,11 @@
 // src/modules/master_prompt/promptlab/promptlabDisplay.js
-import BaseModule from "../../../common/BaseModule.js";
+import BaseModule from "../../../../common/BaseModule.js";
 import { promptlabService } from "./promptlabService.js";
-import state from "../../../common/state.js";
-import SITE_CONFIGS from "../../../common/constants/constants.js";
-import { ANALYSIS_MODULES } from "../../../common/constants/prompts.js";
-import { showToast } from "../../../common/utils/ui.js";
-import { registerActionsWithLegacy } from "../../../common/utils/actionRegistry.js";
+import state from "../../../../common/state.js";
+import SITE_CONFIGS from "../../../../common/constants/constants.js";
+import { ANALYSIS_MODULES } from "../../../../common/constants/prompts.js";
+import { showToast } from "../../../../common/utils/ui.js";
+import { registerActionsWithLegacy } from "../../../../common/utils/actionRegistry.js";
 
 class PromptlabModule extends BaseModule {
     constructor() {
@@ -126,7 +126,7 @@ class PromptlabModule extends BaseModule {
 
     saveInputsToState() {
         const selectedSections = [];
-        document.querySelectorAll('input[name="report-section"]:checked').forEach((cb) => {
+        document.querySelectorAll('input[name="report-section":checked]').forEach((cb) => {
             selectedSections.push(cb.value);
         });
 
@@ -367,7 +367,7 @@ class PromptlabModule extends BaseModule {
         this.updateCharCount();
         outEl.classList.add("bg-green-50");
         this.setTimeout(() => outEl.classList.remove("bg-green-50"), 300);
-        showToast("Master Prompt 已生成!", "success");
+        showToast("Master Prompt 已生成", "success");
     }
 
     generateVisualPrompt() {
@@ -388,7 +388,7 @@ class PromptlabModule extends BaseModule {
         this.updateCharCount();
         outEl.classList.add("bg-pink-50");
         this.setTimeout(() => outEl.classList.remove("bg-pink-50"), 300);
-        showToast("视觉转化剧本已生成!", "success");
+        showToast("视觉转化剧本已生成", "success");
     }
 
     toggleConsoleMode(mode) {

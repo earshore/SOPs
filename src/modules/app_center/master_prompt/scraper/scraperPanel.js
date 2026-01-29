@@ -1,16 +1,16 @@
 // src/modules/master_prompt/scraper/scraperPanel.js
-// ================================================= ================
+// ================================================= ================ 
 // 🎯 Phase 3.2: Alpine.js Refactor - Scraper Panel
-// ================================================= ================
+// ================================================= ================ 
 
 import { scrapeAsin } from "./scraperService.js";
-import { LANGUAGE_HEADERS, languageFlagMap, SITE_NAME_MAP } from "../../../common/constants/constants.js";
+import { LANGUAGE_HEADERS, languageFlagMap, SITE_NAME_MAP } from "../../../../common/constants/constants.js";
 import { HistoryService } from "../services/historyService.js";
-import { StorageService, STORAGE_KEYS } from "../../../services/storageService.js";
-import { ErrorService } from "../../../services/errorService.js";
-import { showToast, sleep, getErrorSummary } from "../../../common/utils/ui.js";
-import eventBus from "../../../common/EventBus.js";
-import { EVENTS } from "../../../common/constants/eventConstants.js";
+import { StorageService, STORAGE_KEYS } from "../../../../services/storageService.js";
+import { ErrorService } from "../../../../services/errorService.js";
+import { showToast, sleep, getErrorSummary } from "../../../../common/utils/ui.js";
+import eventBus from "../../../../common/EventBus.js";
+import { EVENTS } from "../../../../common/constants/eventConstants.js";
 
 // ========================================== 
 // Alpine Component Logic
@@ -22,14 +22,14 @@ const ScraperPanel = () => ({
     selectedSite: 'DE',
     scrapeReviews: true,
     isScraping: false,
-    
+
     // UI State
     tasks: [], // { asin, status: 'pending'|'scraping'|'success'|'failed', message: '', richMsg: '' }
     history: [],
-    
+
     // Constants for View
     sites: ['DE', 'FR', 'IT', 'ES', 'NL', 'SE', 'PL', 'BE', 'IE', 'UK'],
-    
+
     // Computed
     get validAsins() {
         if (!this.inputAsins) return [];
@@ -63,7 +63,7 @@ const ScraperPanel = () => ({
     init() {
         console.log("🚀 Scraper Panel (Alpine) Initialized");
         this.loadHistory();
-        
+
         // Listen for external history updates (e.g. from Analysis module saving history)
         // We use a window event listener for simplicity or EventBus bridge
         window.addEventListener('history-updated', () => this.loadHistory());
@@ -85,7 +85,7 @@ const ScraperPanel = () => ({
 
     deleteHistoryItem(id) {
         if (!confirm("确定要删除这条历史记录吗？")) return;
-        
+
         const newHistory = this.history.filter(h => h.id !== id);
         StorageService.setScrapeHistory(newHistory);
         this.loadHistory();
@@ -103,31 +103,31 @@ const ScraperPanel = () => ({
         if (this.isScraping) {
             if (!confirm("任务进行中，确定覆盖？")) return;
         }
-        
+
         // Restore State
         this.inputAsins = Array.isArray(item.asins) ? item.asins.join('\n') : '';
         this.selectedSite = item.site;
-        
+
         // Restore Global State (for Analysis Module)
         // Ideally Analysis Module should listen to an event, but direct state manipulation is current pattern
         // We will emit an event instead of touching state directly if possible, but for compatibility:
-        import("../../../common/state.js").then(({ default: state }) => {
+        import("../../../../common/state.js").then(({ default: state }) => {
             state.currentHistoryId = item.id;
             state.scrapedData = item.data;
             state.analysisReport = item.report;
             state.translatedReport = null;
             state.selectedSite = item.site;
-            
+
             // Notify other modules
             eventBus.emit(EVENTS.SCRAPE_COMPLETE, item.data);
-            
+
             // If report exists, we might want to switch tab? 
             // For now, just load data. User can click Analysis tab.
             if (item.report) {
                 // Bridge to trigger render in Analysis (if it listens)
                 // AnalysisModule listens to 'app:route-changed' or checks state on render.
             }
-            
+
             showToast("历史快照已加载", "success");
         });
     },
@@ -136,10 +136,10 @@ const ScraperPanel = () => ({
 
     async startScrape() {
         if (!this.canStart) return;
-        
+
         this.isScraping = true;
         this.tasks = []; // Clear previous tasks
-        
+
         // Initialize Tasks UI
         this.validAsins.forEach(asin => {
             this.tasks.push({ asin, status: 'pending', message: '等待中...' });
@@ -153,9 +153,9 @@ const ScraperPanel = () => ({
             const promises = this.validAsins.map(async (asin, index) => {
                 // Update task to scraping
                 this.updateTask(asin, 'scraping', '正在采集...');
-                
+
                 // Stagger requests
-                if (index > 0) await sleep(index * 800); 
+                if (index > 0) await sleep(index * 800);
 
                 return scrapeAsin(asin, site, scrapeReviews, (a, status, msg) => {
                     this.updateTask(a, status, msg);
@@ -189,13 +189,13 @@ const ScraperPanel = () => ({
     handleScrapeComplete(products) {
         // Fallback for failed/empty
         if (!products || products.length === 0) {
-             products = this.validAsins.map(asin => ({
+            products = this.validAsins.map(asin => ({
                 asin, scrape_status: 'failed', error: 'Unknown Error'
-             }));
+            }));
         }
 
         const siteConfig = LANGUAGE_HEADERS[this.selectedSite] || {};
-        
+
         const scrapedData = {
             metadata: {
                 scrape_timestamp: new Date().toISOString(),
@@ -212,10 +212,10 @@ const ScraperPanel = () => ({
         this.loadHistory(); // Refresh list
 
         // Update Global State
-        import("../../../common/state.js").then(({ default: state }) => {
+        import("../../../../common/state.js").then(({ default: state }) => {
             state.scrapedData = scrapedData;
             state.analysisReport = null; // Reset analysis
-            
+
             const successCount = products.filter(p => p.scrape_status === 'success').length;
             if (successCount > 0) {
                 eventBus.emit(EVENTS.SCRAPE_COMPLETE, scrapedData);
@@ -234,7 +234,7 @@ const ScraperPanel = () => ({
         };
         return map[site] || '🏳️';
     },
-    
+
     getSiteName(site) {
         const map = {
             DE: '德国', FR: '法国', IT: '意大利', ES: '西班牙', NL: '荷兰',
@@ -273,4 +273,4 @@ export const initScraperListeners = () => {
     // No-op for listeners, handled by Alpine
 };
 
-export const selectSite = () => {}; // Handled by Alpine
+export const selectSite = () => { }; // Handled by Alpine

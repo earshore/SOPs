@@ -68,7 +68,7 @@ import { initEventLogger } from './common/utils/eventLogger.js';
 // ✅ 全局错误兜底 (增强版)
 window.addEventListener("error", (event) => {
   console.error("Global Error:", event.error);
-  // 避免循环报错导致的 Toast 刷屏
+  // 避免循环报错导致 Toast 刷屏
   if (window._errorThrottle && Date.now() - window._errorThrottle < 2000) return;
   window._errorThrottle = Date.now();
 
@@ -115,7 +115,7 @@ import {
   initScraperListeners,
   selectSite,
   renderHistory
-} from "./modules/master_prompt/scraper/scraperPanel.js";
+} from "./modules/app_center/master_prompt/scraper/scraperPanel.js";
 
 import { switchTab, renderMegaMenu, showToast, initRouter } from "../src/common/utils/ui.js";
 import { initHomeSplash } from "./modules/home/homeDisplay.js";
@@ -128,15 +128,15 @@ import {
   toggleCardExpand,
   deleteProduct,
   deleteReview
-} from "./modules/master_prompt/data_manage/dataDisplay.js";
+} from "./modules/app_center/master_prompt/data_manage/dataDisplay.js";
 import {
   initAnalysisPanel,
   updateAsinSelectList,
   analyzeSelectedAsins,
   renderReport
-} from "./modules/master_prompt/analysis/analysisDisplay.js";
-import { initPromptlabModule } from './modules/master_prompt/promptlab/promptlabDisplay.js';
-import { initKeywordTracker } from './modules/keyword_tracker/trackerDisplay.js';
+} from "./modules/app_center/master_prompt/analysis/analysisDisplay.js";
+import { initPromptlabModule } from './modules/app_center/master_prompt/promptlab/promptlabDisplay.js';
+import { initKeywordTracker } from './modules/app_center/keyword_tracker/trackerDisplay.js';
 
 // ✅ 自动注册事件监听器的模块 (事件驱动模式)
 import './modules/amz_hub/amz_hub.js';
@@ -159,7 +159,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   Alpine.start();
 
   // ----------------------------------------------------
-  // ✅ 核心改动点：必须等待 HTML 注入完成后，才能绑定事件
+  // 🔥 核心改动点：必须等待 HTML 注入完成后，才能绑定事件
   // ----------------------------------------------------
   try {
     await initViews();
@@ -240,4 +240,3 @@ registerActionsWithLegacy({
 });
 
 console.log("✅ [ActionRegistry] 全局动作已注册");
-

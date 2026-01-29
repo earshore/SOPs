@@ -9,9 +9,10 @@ export const MENU_CONFIG = {
     // 作用：决定 Header 哪个按钮高亮
     // ==========================================
     contexts: {
-        apps: { id: 'apps', label: '应用中心' }, // 对应 Header 的 "应用"
-        hub: { id: 'hub', label: '智库 Hub' }, // 对应 Header 的 "智库"
-        sys: { id: 'sys', label: '系统设置' }  // 预留拓展
+        sops: { id: 'sops', label: 'SOPs 流程中心' },
+        apps: { id: 'apps', label: '应用中心' },
+        hub: { id: 'hub', label: 'Amazon 智库' },
+        sys: { id: 'sys', label: '系统设置' }
     },
 
     // ==========================================
@@ -22,7 +23,7 @@ export const MENU_CONFIG = {
         // [应用 SOPs] 标准作业程序
         sops: {
             id: 'sops',
-            contextId: 'apps',
+            contextId: 'sops',
             title: 'SOPs 流程中心',
             version: 'v1.0',
             icon: 'fas fa-clipboard-list',

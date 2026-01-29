@@ -1,11 +1,11 @@
 // src/modules/keyword_tracker/trackerDisplay.js
-import BaseModule from "../../common/BaseModule.js";
-import { showToast, showProgress } from "../../common/utils/ui.js";
+import BaseModule from "../../../common/BaseModule.js";
+import { showToast, showProgress } from "../../../common/utils/ui.js";
 import * as KeywordService from "./trackerService.js";
-import state from "../../common/state.js";
-import { ErrorService } from "../../services/errorService.js";
+import state from "../../../common/state.js";
+import { ErrorService } from "../../../services/errorService.js";
 
-// 1. 定义路由映射表 (Route ID -> Internal Module Name)
+// 1. 定义路由映射�?(Route ID -> Internal Module Name)
 const ROUTE_MAP = {
     'kw_input': 'input',
     'kw_process': 'process',
@@ -22,11 +22,11 @@ class KeywordTrackerModule extends BaseModule {
         };
         // Debounced function reference for cleanup
         this._debouncedInputHandler = null;
-        
+
         // Initialize Worker
         this.worker = null;
         try {
-            this.worker = new Worker(new URL('../../workers/keywordMatcher.worker.js', import.meta.url), { type: 'module' });
+            this.worker = new Worker(new URL('../../../workers/keywordMatcher.worker.js', import.meta.url), { type: 'module' });
         } catch (e) {
             console.warn('[KeywordTracker] Web Worker initialization failed, falling back to main thread.', e);
         }
@@ -39,7 +39,7 @@ class KeywordTrackerModule extends BaseModule {
 
     async init() {
         console.log("🚀 Keyword Tracker Initialized (BaseModule)");
-        
+
         // 1. Setup UI Events
         this.setupEventListeners();
         this.setupFloatingWindow();
@@ -52,10 +52,10 @@ class KeywordTrackerModule extends BaseModule {
         if (state.keywordTracker.processedCopy) {
             this.renderCopyDisplay();
         }
-        
+
         // Initial check for internal tab
         // We don't force 'input' here because the router might have sent us to 'kw_analysis' directly
-        const currentRoute = state.ui.currentTab; 
+        const currentRoute = state.ui.currentTab;
         if (ROUTE_MAP[currentRoute]) {
             this.showModule(ROUTE_MAP[currentRoute]);
         } else {
@@ -121,12 +121,14 @@ class KeywordTrackerModule extends BaseModule {
                     if (counter) counter.textContent = text.length;
                 }
                 showToast("已粘贴");
-            } catch (e) { showToast("无法访问剪贴板", "error"); }
+            } catch (e) {
+                showToast("无法访问剪贴板", "error");
+            }
         });
 
         const checkTrans = document.getElementById('kt-show-translation');
         if (checkTrans) this.addEventListener(checkTrans, 'change', () => this.renderCopyDisplay());
-        
+
         // Listen for internal route changes (specific to this module)
         // Note: The global app:route-changed is handled by the initKeywordTracker wrapper to trigger mount/unmount
         // But once mounted, we might need to react to sub-tab switching if the module is already active.
@@ -356,11 +358,11 @@ class KeywordTrackerModule extends BaseModule {
                 if (action === 'ANALYZE_KEYWORDS_RESULT') {
                     state.keywordTracker.matchedKeywords = payload.matched;
                     state.keywordTracker.unmatchedKeywords = payload.unmatched;
-                    
+
                     // Trigger second worker task
-                    this.worker.postMessage({ 
-                        action: 'CALCULATE_FREQUENCY', 
-                        payload: { text: state.keywordTracker.processedCopy } 
+                    this.worker.postMessage({
+                        action: 'CALCULATE_FREQUENCY',
+                        payload: { text: state.keywordTracker.processedCopy }
                     });
                 } else if (action === 'CALCULATE_FREQUENCY_RESULT') {
                     state.keywordTracker.wordFrequency = payload;
@@ -378,7 +380,7 @@ class KeywordTrackerModule extends BaseModule {
         } else {
             // Fallback to main thread
             const analysisResult = KeywordService.analyzeKeywordMatching(
-                state.keywordTracker.processedCopy, 
+                state.keywordTracker.processedCopy,
                 state.keywordTracker.keywords
             );
             state.keywordTracker.matchedKeywords = analysisResult.matched;
@@ -640,11 +642,11 @@ class KeywordTrackerModule extends BaseModule {
 
         if (btn) {
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> 分析中...';
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> 分析�?..';
             btn.classList.add('opacity-75', 'cursor-wait');
         }
 
-        if (resultDiv) resultDiv.innerHTML = '<div class="text-center py-10"><i class="fas fa-circle-notch fa-spin text-purple-500 text-2xl"></i><p class="mt-2 text-slate-500">AI 正在深度分析您的 Listing (可能需要 20秒)...</p></div>';
+        if (resultDiv) resultDiv.innerHTML = '<div class="text-center py-10"><i class="fas fa-circle-notch fa-spin text-purple-500 text-2xl"></i><p class="mt-2 text-slate-500">AI 正在深度分析您的 Listing (可能需�?20�?...</p></div>';
 
         try {
             const response = await KeywordService.fetchListingAnalysis(
@@ -832,12 +834,12 @@ export function initKeywordTracker() {
     window.addEventListener('app:route-changed', (e) => {
         const { moduleId } = e.detail;
         const container = document.getElementById('panel-keyword_tracker');
-        
-        // 只要 moduleId 匹配，就挂载 (处理子路由变化)
+
+        // 只要 moduleId 匹配，就挂载 (处理子路由变�?
         if (moduleId === 'keyword_tracker') {
-             if (!instance._isMounted && container) instance.mount(container);
+            if (!instance._isMounted && container) instance.mount(container);
         } else {
-             if (instance._isMounted) instance.unmount();
+            if (instance._isMounted) instance.unmount();
         }
     });
 }

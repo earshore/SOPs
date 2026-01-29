@@ -1,15 +1,15 @@
 // src/modules/master_prompt/data_manage/dataDisplay.js
-import BaseModule from "../../../common/BaseModule.js";
-import state from "../../../common/state.js";
-import { getErrorSummary, showToast, switchTab } from "../../../common/utils/ui.js";
+import BaseModule from "../../../../common/BaseModule.js";
+import state from "../../../../common/state.js";
+import { getErrorSummary, showToast, switchTab } from "../../../../common/utils/ui.js";
 import { HistoryService } from "../services/historyService.js";
 import { renderHistory } from "../scraper/scraperPanel.js";
 import { updateAsinSelectList } from "../analysis/analysisDisplay.js";
-import { StorageService } from "../../../services/storageService.js";
-import { languageFlagMap, SITE_NAME_MAP, SITE_DOMAIN_MAP } from "../../../common/constants/constants.js";
-import { registerActionsWithLegacy } from "../../../common/utils/actionRegistry.js";
-import eventBus from "../../../common/EventBus.js"; // [NEW] Import EventBus
-import { EVENTS } from "../../../common/constants/eventConstants.js";
+import { StorageService } from "../../../../services/storageService.js";
+import { languageFlagMap, SITE_NAME_MAP, SITE_DOMAIN_MAP } from "../../../../common/constants/constants.js";
+import { registerActionsWithLegacy } from "../../../../common/utils/actionRegistry.js";
+import eventBus from "../../../../common/EventBus.js"; // [NEW] Import EventBus
+import { EVENTS } from "../../../../common/constants/eventConstants.js";
 
 class DataModule extends BaseModule {
     constructor() {
@@ -231,7 +231,7 @@ class DataModule extends BaseModule {
 
     renderStars(rating) {
         if (!rating) return "";
-        return `<div class="flex items-center gap-0.5 text-sm" title="${rating} 星">
+        return `<div class="flex items-center gap-0.5 text-sm" title="${rating} 分">
             ${[1, 2, 3, 4, 5].map((star) => {
             if (rating >= star) return '<i class="fas fa-star text-amber-400"></i>';
             if (rating >= star - 0.5) return '<i class="fas fa-star-half-alt text-amber-400"></i>';
@@ -260,7 +260,7 @@ class DataModule extends BaseModule {
         // [MODIFIED] 使用更清晰的HTML结构
         const confirmed = await this.confirmWithModal(
             `删除产品`,
-            `确定删除 ASIN: <span class="font-bold text-red-600 bg-red-50 px-1 rounded">${asin}</span> 及其所有数据吗？<br/><span class="text-xs text-red-400 mt-1 block">此操作无法撤销。</span>`,
+            `确定删除 ASIN: <span class="font-bold text-red-600 bg-red-50 px-1 rounded">${asin}</span> 及其所有数据吗？<br/><span class="text-xs text-red-400 mt-1 block">此操作无法撤销</span>`,
             "ignore_del_prod_confirm"
         );
 
@@ -514,7 +514,7 @@ class DataModule extends BaseModule {
                     
                     <div class="p-6">
                         <p class="text-slate-600 text-sm mb-4 font-medium">
-                            请选择一个 <span class="text-blue-600 font-bold">主站点</span>。
+                            请选择一个<span class="text-blue-600 font-bold">主站点</span>：
                             <br/><span class="text-xs text-slate-400 font-normal">我们将保留该站点的标题和描述，并自动合并其他站点的评论。</span>
                         </p>
                         
