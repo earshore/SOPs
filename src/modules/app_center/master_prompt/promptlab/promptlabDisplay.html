@@ -51,48 +51,49 @@
               <input type="text" id="lab-keywords-tier1" placeholder="humidifiers for bedroom, cool mist humidifier"
                 class="w-full text-sm border-slate-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 p-2 border" />
             </div>
+
             <div>
-              <label class="block text-xs font-medium text-slate-500 mb-1">目标受众 (Target Audience) - 有就填,报告含此字段</label>
+              <label class="block text-xs font-medium text-slate-700 mb-1">
+                <i class="fa-solid fa-ban"></i> 限制词 (Negative) - 有就填
+              </label>
+              <input type="text" id="negative-keywords" placeholder="例如: bestseller/cure"
+                class="w-full text-sm border-slate-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 p-2 border" />
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1">
+                <span class="text-red-500 mr-1">*</span>Tier 2 长尾词 (Bullets 2-5) - 必填
+              </label>
+              <textarea type="text" id="lab-keywords-tier2" rows="1"
+                placeholder="baby humidifier, easy to clean, quiet operation"
+                class="w-full text-sm border-slate-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 p-2 border"></textarea>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-500 mb-1">目标受众 (Target Audience) - 可补充，报告含此字段</label>
               <input type="text" id="lab-audience" placeholder="e.g. Busy moms, Tech enthusiasts"
                 class="w-full text-sm border-slate-300 rounded-lg focus:ring-indigo-500 p-2 border" />
             </div>
-          </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-500 mb-1">核心卖点 (USPs) - 可补充，报告已拆解竞品卖点</label>
+              <textarea id="lab-usps" rows="2" placeholder="- 专利静音技术 (<28dB)&#10;- 360度旋转喷嘴"
+                class="w-full text-sm border-slate-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 p-2 border"></textarea>
+            </div>
 
+            <div>
+              <label class="block text-xs font-medium text-slate-500 mb-1">详细参数 (Specs) - 可补充，报告无此字段</label>
+              <textarea id="lab-specs" rows="2" placeholder="材质: ABS + PP&#10;尺寸: 20x20x30cm"
+                class="w-full text-sm border-slate-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 p-2 border"></textarea>
+            </div>
+
+          </div>
           <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1">
-              <span class="text-red-500 mr-1">*</span>Tier 2 长尾词 (Bullets 2-5) - 必填
-            </label>
-            <textarea id="lab-keywords-tier2" rows="2" placeholder="baby humidifier, easy to clean, quiet operation"
-              class="w-full text-sm border-slate-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 p-2 border"></textarea>
-          </div>
-
-          <div>
-            <label class="block text-xs font-medium text-slate-500 mb-1">核心卖点 (USPs) - 每行一个 - 有就填，报告已拆解竞品卖点</label>
-            <textarea id="lab-usps" rows="3" placeholder="- 专利静音技术 (<28dB)&#10;- 360度旋转喷嘴"
-              class="w-full text-sm border-slate-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 p-2 border"></textarea>
-          </div>
-
-          <div>
-            <label class="block text-xs font-medium text-slate-500 mb-1">详细参数 (Specs) - 有就填，报告无此字段</label>
-            <textarea id="lab-specs" rows="3" placeholder="材质: ABS + PP&#10;尺寸: 20x20x30cm"
-              class="w-full text-sm border-slate-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 p-2 border"></textarea>
-          </div>
-
-          <div class="pt-2">
             <label class="block text-xs font-medium text-purple-600 mb-1">
-              <i class="fab fa-instagram mr-1"></i> 植入社媒“Hook”/节日词 (Social Hooks) - 有就填
+              <i class="fab fa-instagram mr-1"></i> 植入社媒“Hook”/节日词 (Social Hooks) - 可补充
             </label>
             <input type="text" id="lab-social-hook" placeholder="例如: 🔥限时半价 / 🎄圣诞特供 / #SummerVibes"
               class="w-full text-sm border-purple-200 rounded-lg focus:ring-purple-500 border p-2 bg-purple-50/20 text-purple-700" />
           </div>
 
-          <div class="pt-2">
-            <label class="block text-xs font-medium text-slate-500 mb-1">
-              <i class="fa-solid fa-ban"></i> 限制词 (Negative) - 有就填
-            </label>
-            <input type="text" id="negative-keywords" placeholder="例如: bestseller/cure"
-              class="w-full text-sm border-slate-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 p-2 border" />
-          </div>
         </div>
       </div>
 
