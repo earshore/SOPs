@@ -145,8 +145,8 @@ You must strictly follow this JSON structure. Do not output markdown code blocks
 * 翻译模板 (保留) 
 */
 export const TRANSLATE_PROMPT_TEMPLATE = ` 
-You are a professional translator and localization expert. 
-Translate the following JSON report from **{{language}}** to Simplified Chinese.
+You are a professional translator and localization expert in Europe. 
+Translate the following JSON report from mainly **{{language}}** to Simplified Chinese.
 
 ## Input
 - Report language: **{{language}}**
@@ -156,7 +156,7 @@ Translate the following JSON report from **{{language}}** to Simplified Chinese.
 1. **Recursively translate ALL string values** in the JSON, including nested objects and arrays.
 2. **Keep JSON Keys in English** (Do NOT translate keys like "feature_points", "strengths").
 3. **Preserve formatting**: If a value contains Markdown (like tables, lists), translate the content inside but keep the Markdown syntax structure.
-4. **Context**: This is an Amazon e-commerce analysis report. Use professional e-commerce terminology (e.g., "Listing" -> "Listing", "Bullet Points" -> "五点描述").
+4. **Context**: This is an Amazon e-commerce analysis report. Use professional Amazon e-commerce terminology (e.g., "Listing" -> "Listing", "Bullet Points" -> "五点描述").
 5. Output ONLY valid JSON.
 
 ## Output
@@ -230,7 +230,7 @@ Evaluate strictly based on the following criteria. **Do not give high scores eas
 1. **Validation:** If the input is NOT a valid Amazon listing (e.g. just random words, or too short), STOP and return a score of 0 with a warning.
 2. **Analysis:** Review the copy against the rubric.
 3. **Drafting:** Generate specific suggestions.
-4. **Final Output:** Generate the report in Simplified Chinese.
+4. **Final Output:** Generate the refined report in Simplified Chinese.
 
 # OUTPUT FORMAT (Simplified Chinese)
 Please output the result in the following structured format:
@@ -247,7 +247,7 @@ Please output the result in the following structured format:
 | SEO Coverage | /30 | ... |
 | **总分 (Total)** | **/100** | |
 
-## 2. 优化建议 (Optimization Suggestions)
+## 2. Top-3 优化建议 (Top-3 Optimization Suggestions)
 *   **针对性修改建议:** [Provide specific rewrite examples for the weakest sections]
 *   **未覆盖关键词策略:** [How to integrate the **Unmatched Keywords**]
 
