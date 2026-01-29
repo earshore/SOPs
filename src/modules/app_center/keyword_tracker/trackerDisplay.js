@@ -642,7 +642,7 @@ class KeywordTrackerModule extends BaseModule {
 
         if (btn) {
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> 分析�?..';
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> 分析中...';
             btn.classList.add('opacity-75', 'cursor-wait');
         }
 
@@ -835,7 +835,7 @@ export function initKeywordTracker() {
         const { moduleId } = e.detail;
         const container = document.getElementById('panel-keyword_tracker');
 
-        // 只要 moduleId 匹配，就挂载 (处理子路由变�?
+        // 只要 moduleId 匹配，就挂载 (处理子路由变化)
         if (moduleId === 'keyword_tracker') {
             if (!instance._isMounted && container) instance.mount(container);
         } else {
