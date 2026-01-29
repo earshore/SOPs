@@ -73,28 +73,36 @@ export const MENU_CONFIG = {
             label: '运营与推广体系',
             icon: 'fas fa-rocket',
             color: 'emerald',
-            order: 1
+            order: 1,
+            version: 'v2.0',
+            description: '从新品上架到爆款打造的全链路运营推广策略集合。'
         },
         backend: {
             id: 'backend',
             label: '供应链与物流体系',
             icon: 'fas fa-warehouse',
             color: 'amber',
-            order: 2
+            order: 2,
+            version: 'v1.5',
+            description: '构建高效供应链，优化库存周转与物流成本。'
         },
         safety: {
             id: 'safety',
             label: '账号安全与风控体系',
             icon: 'fas fa-shield-halved',
             color: 'red',
-            order: 3
+            order: 3,
+            version: 'v3.0',
+            description: '全方位账号健康监控与风险防御机制。'
         },
         service: {
             id: 'service',
             label: '客服与客户体验体系',
             icon: 'fas fa-headset',
             color: 'blue',
-            order: 4
+            order: 4,
+            version: 'v1.2',
+            description: '提升客户满意度，打造极致的品牌服务体验。'
         }
     },
 

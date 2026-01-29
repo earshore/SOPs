@@ -117,7 +117,7 @@ import {
   renderHistory
 } from "./modules/app_center/master_prompt/scraper/scraperPanel.js";
 
-import { switchTab, renderMegaMenu, showToast, initRouter } from "../src/common/utils/ui.js";
+import { switchTab, renderMegaMenu, renderSopsMegaMenu, showToast, initRouter } from "../src/common/utils/ui.js";
 import { initHomeSplash } from "./modules/home/homeDisplay.js";
 
 import {
@@ -184,6 +184,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // 2. 渲染顶部 Mega Menu
     renderMegaMenu();
+    renderSopsMegaMenu();
 
     // ================================================================
     // 🎯 P3: 广播应用初始化完成事件

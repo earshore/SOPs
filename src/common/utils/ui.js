@@ -66,6 +66,92 @@ export function renderMegaMenu() {
     }
 }
 
+
+/**
+ * 🎨 SOPs Mega Menu Renderer
+ * 渲染 SOP 顶部的核心模块菜单
+ */
+export function renderSopsMegaMenu() {
+    const container = getEl('sops-mega-menu-content');
+    if (!container) return;
+
+    try {
+        const overviewRoute = MENU_CONFIG.routes['sops_overview'];
+        const categories = Object.values(MENU_CONFIG.sopCategories || {}).sort((a, b) => a.order - b.order);
+
+        let html = '';
+
+        // Helper: Rich Card Generator (Matches renderMegaMenu style)
+        const createRichCard = (id, label, icon, color, version = 'v1.0', description = '', isOverview = false) => {
+            const colorMap = { emerald: 'emerald', amber: 'amber', red: 'red', blue: 'blue', indigo: 'indigo' };
+            const c = colorMap[color] || 'blue';
+
+            // Calculate target route
+            // Calculate target route
+            let target = id;
+            if (!isOverview) {
+                // Find first route for this category by looking at entries to get the key (id)
+                const entry = Object.entries(MENU_CONFIG.routes).find(([key, r]) => r.category === id);
+                if (entry) target = entry[0];
+            }
+
+            return `
+            <div data-action="switch-tab" data-tab="${target}" 
+                 class="cursor-pointer group/card p-4 rounded-xl bg-white border border-slate-100 hover:border-${c}-200 hover:bg-slate-50 hover:shadow-md hover:shadow-${c}-100/50 transition-all duration-200 flex flex-col gap-3 h-full">
+                
+                <div class="flex items-start justify-between">
+                    <div class="w-10 h-10 bg-${c}-50 text-${c}-600 rounded-lg flex items-center justify-center text-lg group-hover/card:scale-110 group-hover/card:bg-${c}-600 group-hover/card:text-white transition-all duration-300">
+                        <i class="${icon}"></i>
+                    </div>
+                    <span class="text-[10px] font-mono font-medium text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 group-hover/card:border-${c}-200 group-hover/card:text-${c}-500 transition-colors">
+                        ${version}
+                    </span>
+                </div>
+
+                <div class="flex-grow flex flex-col">
+                    <h4 class="text-sm font-bold text-slate-800 mb-1 group-hover/card:text-${c}-700 transition-colors flex items-center gap-2">
+                        ${label}
+                        <i class="fas fa-arrow-right opacity-0 -translate-x-2 text-xs text-${c}-500 group-hover/card:opacity-100 group-hover/card:translate-x-0 transition-all"></i>
+                    </h4>
+                    <p class="text-xs text-slate-500 leading-relaxed line-clamp-3">
+                        ${description || '暂无描述'}
+                    </p>
+                </div>
+            </div>`;
+        };
+
+        // 1. Overview Card
+        if (overviewRoute) {
+            html += createRichCard(
+                'sops_overview',
+                'SOP 总览',
+                overviewRoute.icon,
+                'blue',
+                'v1.0',
+                '掌控全局运营进度，查看所有待办事项与核心指标仪表盘。',
+                true
+            );
+        }
+
+        // 2. Category Cards
+        categories.forEach(cat => {
+            html += createRichCard(
+                cat.id,
+                cat.label,
+                cat.icon,
+                cat.color,
+                cat.version,
+                cat.description,
+                false
+            );
+        });
+
+        container.innerHTML = html;
+    } catch (e) {
+        console.error("❌ SOPs MegaMenu Render Error:", e);
+    }
+}
+
 // ========================
 // 2. DYNAMIC SIDEBAR (无状态与缓存优化)
 // ========================
@@ -84,7 +170,28 @@ function renderSidebar(moduleId) {
     }
 
     // 2. 缓存检查
-    if (currentSidebarModuleId === moduleId) {
+    // 2. 缓存检查 (增强版: 支持 SOPs 内部 Category 切换)
+    // 对于 SOPs，我们需要根据当前 Tab 的 Category 来区分 Sidebar 状态
+    // 生成一个 unique key
+    let sidebarKey = moduleId;
+
+    if (moduleId === 'sops') {
+        const currentTab = state.currentTab;
+
+        // Special Case: Hide sidebar on Overview page
+        if (currentTab === 'sops_overview') {
+            sidebar.classList.add("hidden", "-ml-64");
+            sidebar.innerHTML = '';
+            currentSidebarModuleId = null; // Force refresh when leaving overview
+            return;
+        }
+
+        const routeConfig = MENU_CONFIG.routes[currentTab];
+        const category = routeConfig?.category || 'overview';
+        sidebarKey = `sops:${category}`;
+    }
+
+    if (currentSidebarModuleId === sidebarKey) {
         sidebar.classList.remove("hidden", "-ml-64");
         return;
     }
@@ -108,89 +215,110 @@ function renderSidebar(moduleId) {
     }
 
     sidebar.classList.remove("hidden", "-ml-64");
-    currentSidebarModuleId = moduleId;
+    currentSidebarModuleId = sidebarKey;
 }
 
 // SOPs模块专用侧边栏渲染（带搜索和可折叠分组）
+// Sop 模块侧边栏渲染 (扁平化 - 基于当前 Category)
 function renderSopsSidebar(sidebar, moduleConfig, routes) {
-    const categories = MENU_CONFIG.sopCategories || {};
-    const sortedCategories = Object.values(categories).sort((a, b) => a.order - b.order);
+    const currentTab = state.currentTab;
+    const currentRouteConfig = MENU_CONFIG.routes[currentTab];
 
-    // 分离总览和分类路由
-    const overviewRoute = routes.find(r => r.id === 'sops_overview');
-    const categoryRoutes = routes.filter(r => r.id !== 'sops_overview' && r.category);
+    // 1. 确定当前上下文 (Category)
+    let activeCategory = 'overview';
+    if (currentRouteConfig && currentRouteConfig.category) {
+        activeCategory = currentRouteConfig.category;
+    }
 
-    // 按分类分组
-    const groupedRoutes = {};
-    categoryRoutes.forEach(route => {
-        if (!groupedRoutes[route.category]) {
-            groupedRoutes[route.category] = [];
+    // 2. 筛选要显示的路由
+    let displayRoutes = [];
+    let sidebarTitle = "SOP 总览";
+    let sidebarIcon = moduleConfig.icon;
+    let sidebarColor = "slate"; // Default text color class suffix
+
+    if (activeCategory === 'overview') {
+        // 在总览页面：显示"SOP 总览"自身，加上 4 个体系的快捷入口(作为 Navigation Items)
+        // 这样用户可以在侧边栏快速切换体系
+        displayRoutes = [
+            MENU_CONFIG.routes['sops_overview'], // Overview itself
+            // Add pseudo-routes for categories to act as navigation
+        ];
+        // 我们可以构造虚拟路由对象给 Sidebar 渲染
+        const categories = Object.values(MENU_CONFIG.sopCategories || {}).sort((a, b) => a.order - b.order);
+        categories.forEach(cat => {
+            // Find target
+            const first = Object.values(MENU_CONFIG.routes).find(r => r.category === cat.id);
+            if (first) {
+                displayRoutes.push({
+                    id: first.id, // Switching to this ID enters the category
+                    label: cat.label,
+                    icon: cat.icon,
+                    isCategoryLink: true // Marker for styling if needed
+                });
+            }
+        });
+
+    } else {
+        // 在具体体系页面：只显示该体系下的的所有 SOPs
+        displayRoutes = routes.filter(r => r.category === activeCategory);
+
+        // 更新标题
+        const catConfig = MENU_CONFIG.sopCategories[activeCategory];
+        if (catConfig) {
+            sidebarTitle = catConfig.label;
+            sidebarIcon = catConfig.icon;
+            sidebarColor = catConfig.color; // e.g. 'emerald'
         }
-        groupedRoutes[route.category].push(route);
-    });
+    }
+
+    // 3. 构建 HTML (扁平列表)
+    // 搜索框只在 Category 模式下显示？或者都显示？
+    // 用户说"使得操作逻辑跟应用中心一样"，应用中心通常没有搜索框，或者有。
+    // 之前的 SOP Sidebar 有搜索框。保留搜索框是一个好功能，不违反"类似应用中心"的请求。
+    // 但应用中心侧边栏就是简单的列表。
+    // 我们保留搜索框，但在 Sidebar Title 上做文章。
+
+    const titleColorClass = sidebarColor === 'slate' ? 'text-slate-400' : `text-${sidebarColor}-500`;
 
     const html = `
         <div class="flex flex-col h-full bg-white">
             <div class="p-4 pb-2">
-                <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-                    ${moduleConfig.title}
+                <h2 class="text-xs font-bold ${titleColorClass} uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <i class="${sidebarIcon}"></i>
+                    ${sidebarTitle}
                 </h2>
                 
-                <!-- 搜索框 -->
-                <div class="relative mb-3">
+                <!-- 搜索框 (全局搜索 SOP) -->
+                <div class="relative mb-3 group">
                     <input type="text" id="sop-search-input" 
-                        placeholder="搜索 SOP..." 
-                        class="w-full px-3 py-2 pl-9 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                        placeholder="搜索全站 SOP..." 
+                        class="w-full px-3 py-2 pl-9 text-xs border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                         oninput="window.searchSOPs(this.value)">
-                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm group-focus-within:text-blue-500 transition-colors"></i>
                     <button id="sop-search-clear" data-action="clear-sop-search" class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
                         <i class="fas fa-times text-xs"></i>
                     </button>
+                    
+                    <!-- 搜索结果下拉 (Absolute positioning to overlay sidebar content) -->
+                    <div id="sop-search-results" class="hidden absolute top-full left-0 w-full bg-white border border-slate-200 shadow-xl rounded-lg mt-1 max-h-60 overflow-y-auto z-50"></div>
                 </div>
                 
-                <!-- 搜索结果区域 (默认隐藏) -->
-                <div id="sop-search-results" class="hidden mb-3 max-h-48 overflow-y-auto"></div>
-                
-                <nav id="sop-nav-container" class="space-y-2">
-                    <!-- 总览按钮 -->
-                    ${overviewRoute ? `
-                    <button data-action="switch-tab" data-tab="${overviewRoute.id}" id="sidebar-btn-${overviewRoute.id}" 
-                        class="sidebar-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">
-                        <i class="${overviewRoute.icon} w-5 text-center"></i> 
-                        ${overviewRoute.label}
-                    </button>
-                    ` : ''}
-                    
-                    <!-- 分组菜单 -->
-                    ${sortedCategories.map(cat => {
-        const catRoutes = groupedRoutes[cat.id] || [];
-        if (catRoutes.length === 0) return '';
-
-        return `
-                        <div class="sop-group" data-category="${cat.id}">
-                            <button data-action="toggle-sop-group" data-category="${cat.id}" 
-                                class="sop-group-header w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-all duration-200">
-                                <span class="flex items-center gap-2">
-                                    <i class="${cat.icon} w-5 text-center text-${cat.color}-500"></i>
-                                    <span class="truncate">${cat.label}</span>
-                                </span>
-                                <i class="fas fa-chevron-down text-xs text-slate-400 transition-transform duration-200 group-toggle-icon"></i>
-                            </button>
-                            <div class="sop-group-items hidden pl-6 mt-1 space-y-0.5" id="sop-group-${cat.id}">
-                                ${catRoutes.map(route => `
-                                    <button data-action="switch-tab" data-tab="${route.id}" id="sidebar-btn-${route.id}" 
-                                        class="sidebar-btn w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">
-                                        <i class="${route.icon} w-4 text-center text-slate-400"></i> 
-                                        <span class="truncate">${route.label}</span>
-                                    </button>
-                                `).join('')}
-                            </div>
-                        </div>
-                        `;
-    }).join('')}
+                <nav id="sop-nav-container" class="space-y-1">
+                    ${displayRoutes.map(route => `
+                        <button data-action="switch-tab" data-tab="${route.id}" id="sidebar-btn-${route.id}" 
+                            class="sidebar-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">
+                            <i class="${route.icon} w-5 text-center ${route.isCategoryLink ? 'text-slate-400' : ''}"></i> 
+                            ${route.label}
+                        </button>
+                    `).join('')}
                 </nav>
             </div>  
+            
             <div class="mt-auto p-4 border-t border-slate-100 bg-slate-50/50">
+                 <!-- Back to Overview Link if we are deep in a category -->
+                 ${activeCategory !== 'overview' ? `
+
+                 ` : ''}
                  <div class="flex items-center gap-3 text-slate-400 text-xs">
                      <i class="${moduleConfig.icon}"></i>
                      <span>${moduleConfig.version}</span>
@@ -198,6 +326,9 @@ function renderSopsSidebar(sidebar, moduleConfig, routes) {
             </div>
         </div>
     `;
+    //      <button data-action="switch-tab" data-tab="sops_overview" class="w-full flex items-center gap-2 text-xs text-slate-400 hover:text-blue-600 mb-2 transition-colors">
+    //     <i class="fas fa-arrow-left"></i> 返回 SOP 总览
+    //  </button>
     sidebar.innerHTML = html;
 }
 
@@ -375,7 +506,7 @@ export function initRouter() {
     window.addEventListener('popstate', () => {
         const hash = window.location.hash.slice(1); // 去掉 #
         const target = hash || 'home';
-        
+
         console.log(`[Router] Detected navigation to: ${target}`);
         // 传入 updateHistory: false，因为 URL 已经变了，不需要再 Push
         switchTab(target, false);
@@ -510,12 +641,12 @@ function closeUserGuide() {
 
 function switchGuideTab({ tab }) {
     if (!tab) return;
-    
+
     // Update tab styles
     document.querySelectorAll('.guide-tab').forEach(t => {
         t.classList.remove('active', 'text-blue-600', 'border-b-2', 'border-blue-500');
         t.classList.add('text-slate-500');
-        
+
         // Match by data-tab attribute
         if (t.dataset.tab === tab) {
             t.classList.add('active', 'text-blue-600', 'border-b-2', 'border-blue-500');
@@ -615,6 +746,8 @@ registerActions({
 
 // 不再导出 window.switchTab 等，除非为了调试或其它模块遗留调用
 // 为了安全起见，暂时保留 switchTab 在 window 上，直到所有模板都清理完毕
-window.switchTab = switchTab; 
+window.switchTab = switchTab;
+window.switchTab = switchTab;
 window.renderMegaMenu = renderMegaMenu;
+window.renderSopsMegaMenu = renderSopsMegaMenu;
 window.showToast = showToast;
