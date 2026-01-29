@@ -110,7 +110,68 @@ export const MENU_CONFIG = {
             panelId: 'panel-sops'
         },
 
-        // === 第一模块：账号安全与风控体系 (The Safety Layer) ===
+        // === 第一模块：运营与推广体系 (The Growth Layer) ===
+        sops_npi_tracker: {
+            moduleId: 'sops',
+            label: '新品生命周期跟踪',
+            icon: 'fas fa-seedling',
+            panelId: 'panel-sops',
+            category: 'growth'
+        },
+        sops_listing_seo: {
+            moduleId: 'sops',
+            label: 'Listing 极致优化 (SEO)',
+            icon: 'fas fa-magnifying-glass-chart',
+            panelId: 'panel-sops',
+            category: 'growth'
+        },
+        sops_ppc_advertising: {
+            moduleId: 'sops',
+            label: 'PPC 广告投放与优化',
+            icon: 'fas fa-chart-line',
+            panelId: 'panel-sops',
+            category: 'growth'
+        },
+
+        sops_promotion_submission: {
+            moduleId: 'sops',
+            label: '促销活动提报',
+            icon: 'fas fa-tags',
+            panelId: 'panel-sops',
+            category: 'growth'
+        },
+        sops_competitor_monitoring: {
+            moduleId: 'sops',
+            label: '竞品监控与分析',
+            icon: 'fas fa-binoculars',
+            panelId: 'panel-sops',
+            category: 'growth'
+        },
+
+        // === 第二模块：供应链与物流体系 (The Backend Layer) ===
+        sops_fba_shipping: {
+            moduleId: 'sops',
+            label: 'FBA 发货标准操作',
+            icon: 'fas fa-truck-fast',
+            panelId: 'panel-sops',
+            category: 'backend'
+        },
+        sops_procurement_qc: {
+            moduleId: 'sops',
+            label: '采购与质检 (QC)',
+            icon: 'fas fa-clipboard-check',
+            panelId: 'panel-sops',
+            category: 'backend'
+        },
+        sops_inventory_replenishment: {
+            moduleId: 'sops',
+            label: '库存预警与补货',
+            icon: 'fas fa-cubes',
+            panelId: 'panel-sops',
+            category: 'backend'
+        },
+
+        // === 第三模块：账号安全与风控体系 (The Safety Layer) ===
         sops_account_security: {
             moduleId: 'sops',
             label: '账号登录与环境安全',
@@ -154,66 +215,6 @@ export const MENU_CONFIG = {
             category: 'safety'
         },
 
-        // === 第二模块：供应链与物流体系 (The Backend Layer) ===
-        sops_fba_shipping: {
-            moduleId: 'sops',
-            label: 'FBA 发货标准操作',
-            icon: 'fas fa-truck-fast',
-            panelId: 'panel-sops',
-            category: 'backend'
-        },
-        sops_procurement_qc: {
-            moduleId: 'sops',
-            label: '采购与质检 (QC)',
-            icon: 'fas fa-clipboard-check',
-            panelId: 'panel-sops',
-            category: 'backend'
-        },
-        sops_inventory_replenishment: {
-            moduleId: 'sops',
-            label: '库存预警与补货',
-            icon: 'fas fa-cubes',
-            panelId: 'panel-sops',
-            category: 'backend'
-        },
-
-        // === 第三模块：运营与推广体系 (The Growth Layer) ===
-        sops_npi_tracker: {
-            moduleId: 'sops',
-            label: '新品生命周期跟踪',
-            icon: 'fas fa-seedling',
-            panelId: 'panel-sops',
-            category: 'growth'
-        },
-        sops_listing_seo: {
-            moduleId: 'sops',
-            label: 'Listing 极致优化 (SEO)',
-            icon: 'fas fa-magnifying-glass-chart',
-            panelId: 'panel-sops',
-            category: 'growth'
-        },
-        sops_ppc_advertising: {
-            moduleId: 'sops',
-            label: 'PPC 广告投放与优化',
-            icon: 'fas fa-chart-line',
-            panelId: 'panel-sops',
-            category: 'growth'
-        },
-
-        sops_promotion_submission: {
-            moduleId: 'sops',
-            label: '促销活动提报',
-            icon: 'fas fa-tags',
-            panelId: 'panel-sops',
-            category: 'growth'
-        },
-        sops_competitor_monitoring: {
-            moduleId: 'sops',
-            label: '竞品监控与分析',
-            icon: 'fas fa-binoculars',
-            panelId: 'panel-sops',
-            category: 'growth'
-        },
 
         // === 第四模块：客服与客户体验体系 (The Service Layer) ===
         sops_email_templates: {
