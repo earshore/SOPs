@@ -139,7 +139,7 @@ class DataModule extends BaseModule {
                     
                     <div class="flex items-center justify-between mb-3">
                         <div class="flex items-center gap-3">
-                            <span class="flex items-center gap-1.5 px-2 py-1 bg-gradient-to-br from-black-500 to-white-600 rounded-xl flex items-center justify-center shadow-md"><i class="fa-brands fa-amazon text-yellow-500"></i>${SITE_DOMAIN_MAP[siteKey]}</span>
+                            <span class="flex items-center gap-1.5 px-2 py-1 bg-gradient-to-br from-black-500 to-white-600 rounded-xl flex items-center justify-center shadow-md">${flag}</span>
                             
                             <div>
                                 <div class="flex items-center gap-2">
@@ -152,7 +152,7 @@ class DataModule extends BaseModule {
                         </div>
                         <div class="flex items-center gap-4">
                             <div class="flex items-center gap-3 text-xs font-medium text-slate-500">
-                                <span class="flex items-center gap-1.5 px-2 py-1 bg-white rounded-md border border-slate-100 shadow-sm">${flag}</span>
+                                <span class="flex items-center gap-1.5 px-2 py-1 bg-white rounded-md border border-slate-100 shadow-sm"><i class="fa-brands fa-amazon text-yellow-500"></i>${SITE_DOMAIN_MAP[siteKey]}</span>
                                 <span class="flex items-center gap-1.5 px-2 py-1 bg-white rounded-md border border-slate-100 shadow-sm"><i class="fa-solid fa-heading"></i> </span>
                                 <span class="flex items-center gap-1.5 px-2 py-1 bg-white rounded-md border border-slate-100 shadow-sm"><i class="fas fa-list-ul text-blue-500"></i> ${p.feature_bullets.length}</span>
                                 <span class="flex items-center gap-1.5 px-2 py-1 bg-white rounded-md border border-slate-100 shadow-sm"><i class="fas fa-comments text-purple-500"></i> ${(p.customer_reviews || []).length}</span>
