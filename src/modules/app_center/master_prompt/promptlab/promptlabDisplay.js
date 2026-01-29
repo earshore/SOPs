@@ -126,7 +126,7 @@ class PromptlabModule extends BaseModule {
 
     saveInputsToState() {
         const selectedSections = [];
-        document.querySelectorAll('input[name="report-section":checked]').forEach((cb) => {
+        document.querySelectorAll('input[name="report-section"]:checked').forEach((cb) => {
             selectedSections.push(cb.value);
         });
 
