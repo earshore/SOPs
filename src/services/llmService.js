@@ -227,23 +227,106 @@ export async function fetchModelsFromApi(provider, endpoint, apiKey) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000);
 
+    console.log(`🔄 正在从 ${endpoint}/models 获取模型列表...`);
+    console.log(`📋 请求详情: Provider=${provider}, Endpoint=${endpoint}`);
+    
     const res = await fetch(`${endpoint}/models`, {
       headers: { Authorization: `Bearer ${apiKey}` },
       signal: controller.signal
     }).finally(() => clearTimeout(timeoutId));
 
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
+    console.log(`📡 API响应状态: ${res.status} ${res.statusText}`);
+    console.log(`📡 响应头:`, Object.fromEntries(res.headers.entries()));
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error(`❌ API返回错误: ${res.status}`, errorText);
+      throw new Error(`HTTP ${res.status}: ${errorText.substring(0, 200)}`);
+    }
+    
+    const rawText = await res.text();
+    console.log(`📦 API返回原始数据 (前500字符):`, rawText.substring(0, 500));
+    
+    let data;
+    try {
+      data = JSON.parse(rawText);
+      console.log(`📦 解析后的数据结构:`, JSON.stringify(data, null, 2).substring(0, 1000));
+    } catch (parseError) {
+      console.error(`❌ JSON解析失败:`, parseError);
+      throw new Error(`API返回的不是有效的JSON格式: ${rawText.substring(0, 100)}`);
+    }
 
     // 兼容不同厂商的数据结构 (OpenAI wrap in .data, some others might be array directly)
-    const list = Array.isArray(data) ? data : data.data || [];
+    let list = [];
+    
+    if (Array.isArray(data)) {
+      list = data;
+      console.log(`✅ 数据是数组格式，包含 ${list.length} 个元素`);
+    } else if (data.data && Array.isArray(data.data)) {
+      list = data.data;
+      console.log(`✅ 数据在 .data 字段中，包含 ${list.length} 个元素`);
+    } else if (data.models && Array.isArray(data.models)) {
+      list = data.models;
+      console.log(`✅ 数据在 .models 字段中，包含 ${list.length} 个元素`);
+    } else if (typeof data === 'object' && data !== null) {
+      console.warn(`⚠️ 未识别的数据结构，对象键:`, Object.keys(data));
+      // 尝试从对象中提取可能的模型列表
+      const possibleArrays = Object.entries(data)
+        .filter(([key, value]) => Array.isArray(value))
+        .map(([key, value]) => ({ key, value, length: value.length }));
+      
+      console.log(`🔍 找到的数组字段:`, possibleArrays.map(p => `${p.key}(${p.length})`));
+      
+      if (possibleArrays.length > 0) {
+        // 选择最长的数组，通常是模型列表
+        const longest = possibleArrays.reduce((a, b) => a.length > b.length ? a : b);
+        list = longest.value;
+        console.log(`✅ 使用字段 "${longest.key}"，包含 ${list.length} 个元素`);
+      }
+    }
 
-    return list
-      .map((m) => ({ id: m.id, context: 128000, features: [] }))
+    if (list.length === 0) {
+      console.warn(`⚠️ 模型列表为空，完整响应:`, JSON.stringify(data));
+      throw new Error('API返回的模型列表为空，请检查API配置是否正确');
+    }
+
+    console.log(`📋 原始列表前3个元素:`, list.slice(0, 3));
+
+    // 处理模型数据，兼容不同的字段名
+    const models = list
+      .map((m, index) => {
+        // 如果是字符串，直接使用
+        if (typeof m === 'string') {
+          return { id: m, context: 128000, features: [] };
+        }
+        
+        // 如果是对象，尝试提取ID
+        if (typeof m === 'object' && m !== null) {
+          const id = m.id || m.model || m.name;
+          if (!id) {
+            console.warn(`⚠️ 跳过无效模型 [${index}]:`, m);
+            return null;
+          }
+          return { id: String(id), context: 128000, features: [] };
+        }
+        
+        // 其他类型，尝试转换为字符串
+        console.warn(`⚠️ 未知模型类型 [${index}]:`, typeof m, m);
+        return null;
+      })
+      .filter(m => m !== null)
       .sort((a, b) => a.id.localeCompare(b.id));
+
+    console.log(`✅ 成功解析 ${models.length} 个模型`);
+    console.log(`📋 前5个模型:`, models.slice(0, 5).map(m => m.id));
+    
+    return models;
+    
   } catch (error) {
+    console.error(`❌ fetchModelsFromApi 失败:`, error);
+    console.error(`❌ 错误堆栈:`, error.stack);
     ErrorService.handle(error, { action: 'fetchModelsFromApi', module: 'llm', notify: false });
-    return []; // 失败返回空数组，不阻断流程
+    throw error; // 抛出错误而不是返回空数组，让调用方知道失败了
   }
 }
 

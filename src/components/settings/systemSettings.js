@@ -133,7 +133,19 @@ const SettingsPanel = () => ({
             return;
         }
 
+        if (!this.llm.endpoint) {
+            showToast("请先输入API端点地址", "warning");
+            return;
+        }
+
         this.llm.isFetching = true;
+        console.log(`\n${'='.repeat(60)}`);
+        console.log(`🚀 开始获取模型列表`);
+        console.log(`📋 Provider: ${this.llm.provider}`);
+        console.log(`📋 Endpoint: ${this.llm.endpoint}`);
+        console.log(`📋 API Key: ${this.llm.apiKey.substring(0, 10)}...`);
+        console.log(`${'='.repeat(60)}\n`);
+
         try {
             let models = [];
             const provider = this.llm.provider;
@@ -141,7 +153,7 @@ const SettingsPanel = () => ({
             if (["llmgateway", "openai", "deepseek", "moonshot", "qwen"].includes(provider)) {
                 console.log(`🔄 正在从 ${provider} 获取模型列表...`);
                 models = await fetchModelsFromApi(provider, this.llm.endpoint, this.llm.apiKey);
-                console.log(`📋 从API获取到 ${models.length} 个模型:`, models);
+                console.log(`📋 从API获取到 ${models.length} 个模型:`, models.slice(0, 5));
             } else {
                 // Mock delay for static providers
                 models = PROVIDERS[provider].models || [];
@@ -181,10 +193,33 @@ const SettingsPanel = () => ({
                 console.log(`🔄 自动选择第一个模型: ${this.llm.model}`);
             }
 
+            console.log(`\n${'='.repeat(60)}`);
+            console.log(`✅ 模型列表获取成功！共 ${this.llm.models.length} 个模型`);
+            console.log(`${'='.repeat(60)}\n`);
+
             showToast(`成功同步 ${this.llm.models.length} 个模型`, "success");
         } catch (e) {
+            console.error(`\n${'='.repeat(60)}`);
             console.error("❌ 获取模型列表失败:", e);
-            showToast(`获取模型失败: ${e.message}`, "error");
+            console.error("❌ 错误详情:", e.message);
+            console.error("❌ 错误堆栈:", e.stack);
+            console.error(`${'='.repeat(60)}\n`);
+            
+            // 提供更友好的错误提示
+            let errorMsg = e.message;
+            if (e.message.includes('HTTP 401') || e.message.includes('Unauthorized')) {
+                errorMsg = 'API Key 无效或已过期，请检查配置';
+            } else if (e.message.includes('HTTP 403') || e.message.includes('Forbidden')) {
+                errorMsg = 'API Key 没有访问权限，请检查配置';
+            } else if (e.message.includes('HTTP 404')) {
+                errorMsg = 'API端点地址不正确，请检查配置';
+            } else if (e.message.includes('Failed to fetch') || e.message.includes('NetworkError')) {
+                errorMsg = '网络连接失败，请检查网络或端点地址';
+            } else if (e.message.includes('timeout') || e.message.includes('AbortError')) {
+                errorMsg = '请求超时，请检查网络连接';
+            }
+            
+            showToast(`获取模型失败: ${errorMsg}`, "error");
             ErrorService.handle(e, { action: 'fetchModels', module: 'settings' });
         } finally {
             this.llm.isFetching = false;

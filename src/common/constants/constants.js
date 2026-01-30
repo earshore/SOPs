@@ -75,9 +75,9 @@ export const PROVIDERS = {
     name: "智谱GLM",
     endpoint: "https://open.bigmodel.cn/api/paas/v4",
     models: [
-      { id: "glm-4.5-air", context: 128000, features: ["function"] },
-      { id: "glm-4.5", context: 128000, features: ["vision", "function"] },
-      { id: "glm-4", context: 128000, features: ["function"] },
+      { id: "glm-4.7", context: 128000, features: ["function"] },
+      { id: "glm-4.6", context: 128000, features: ["vision", "function"] },
+      { id: "glm-4.5", context: 128000, features: ["function"] },
     ],
   },
   qwen: {
@@ -87,6 +87,30 @@ export const PROVIDERS = {
       { id: "qwen-max", context: 32000, features: ["function"] },
       { id: "qwen-plus", context: 131072, features: ["function"] },
       { id: "qwen-turbo", context: 131072, features: [] },
+    ],
+  },
+  hunyuan: {
+    name: "腾讯混元",
+    endpoint: "https://api.hunyuan.cloud.tencent.com/v1/",
+    models: [
+      { id: "hunyuan-lite", context: 32000, features: ["function"] },
+      { id: "hunyuan-turbos-latest", context: 131072, features: ["function"] },
+      { id: "hunyuan-vision", context: 131072, features: [] },
+    ],
+  },
+  nim: {
+    name: "英伟达Nvidia",
+    endpoint: "https://integrate.api.nvidia.com/v1/",
+    models: [
+      { id: "z-ai/glm4.7", context: 32000, features: ["function"] },
+      { id: "minimaxai/minimax-m2.1", context: 131072, features: ["function"] }
+    ],
+  },
+  siliconflow: {
+    name: "硅基流动",
+    endpoint: "https://api.siliconflow.cn/v1/",
+    models: [
+      { id: "deepseek-ai/DeepSeek-V3", context: 32000, features: ["function"] },
     ],
   },
   custom: {
