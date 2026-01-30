@@ -20,7 +20,7 @@ export const getRandomUserAgent = () => USER_AGENTS[Math.floor(Math.random() * U
 export const PROVIDERS = {
   llmgateway: {
     name: "LLM-Gateway",
-    endpoint: "https://llm-gateway.hongecb.store/",
+    endpoint: "https://llm-gateway.hongecb.store",
     models: [
       { id: "gpt-5-mini", context: 16385, features: ["function"] },
       { id: "glm-4.7", context: 128000, features: ["vision", "function"] },
@@ -49,9 +49,8 @@ export const PROVIDERS = {
     name: "Google Gemini",
     endpoint: "https://generativelanguage.googleapis.com/v1beta",
     models: [
-      { id: "gemini-1.5-pro", context: 2000000, features: ["vision", "audio"] },
-      { id: "gemini-1.5-flash", context: 1000000, features: ["vision", "audio"], },
-      { id: "gemini-pro", context: 32000, features: [] },
+      { id: "gemini-3-pro", context: 2000000, features: ["vision", "audio"] },
+      { id: "gemini-3-flash", context: 1000000, features: ["vision", "audio"] }
     ],
   },
   deepseek: {
@@ -91,7 +90,7 @@ export const PROVIDERS = {
   },
   hunyuan: {
     name: "腾讯混元",
-    endpoint: "https://api.hunyuan.cloud.tencent.com/v1/",
+    endpoint: "https://api.hunyuan.cloud.tencent.com/v1",
     models: [
       { id: "hunyuan-lite", context: 32000, features: ["function"] },
       { id: "hunyuan-turbos-latest", context: 131072, features: ["function"] },
@@ -100,7 +99,7 @@ export const PROVIDERS = {
   },
   nim: {
     name: "英伟达Nvidia",
-    endpoint: "https://integrate.api.nvidia.com/v1/",
+    endpoint: "https://integrate.api.nvidia.com/v1",
     models: [
       { id: "z-ai/glm4.7", context: 32000, features: ["function"] },
       { id: "minimaxai/minimax-m2.1", context: 131072, features: ["function"] }
@@ -108,7 +107,7 @@ export const PROVIDERS = {
   },
   siliconflow: {
     name: "硅基流动",
-    endpoint: "https://api.siliconflow.cn/v1/",
+    endpoint: "https://api.siliconflow.cn/v1",
     models: [
       { id: "deepseek-ai/DeepSeek-V3", context: 32000, features: ["function"] },
     ],
