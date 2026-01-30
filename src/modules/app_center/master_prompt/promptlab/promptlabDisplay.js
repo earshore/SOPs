@@ -453,7 +453,7 @@ class PromptlabModule extends BaseModule {
         registerActionsWithLegacy({
             amz_generateMasterPrompt: () => this.generateMasterPrompt(),
             amz_generateVisualPrompt: () => this.generateVisualPrompt(),
-            amz_toggleConsoleMode: (m) => this.toggleConsoleMode(m),
+            amz_toggleConsoleMode: (params) => this.toggleConsoleMode(params.param),
             amz_copyMasterPrompt: () => {
                 const copyText = document.getElementById("final-prompt-output");
                 if (copyText && copyText.value.length > 10) {

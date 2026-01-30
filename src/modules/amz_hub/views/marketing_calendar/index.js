@@ -7,6 +7,7 @@ import BaseModule from "../../../../common/BaseModule.js";
 import { amzf_countries, amzf_months, amzf_events } from "../../constants/amz_hub_constants.js";
 import { StorageService, STORAGE_KEYS } from "../../../../services/storageService.js";
 import { loadTemplate } from "../../../../common/utils/viewLoader.js";
+import { registerActionsWithLegacy } from "../../../../common/utils/actionRegistry.js";
 
 const AMZF_HISTORY_KEY = 'amzf_search_history'; // 使用 StorageService 键
 const AMZF_MAX_HISTORY = 10; // 最大历史记录数
@@ -55,16 +56,33 @@ class MarketingCalendarModule extends BaseModule {
     // ==================== Global Proxies (Bridge for HTML onclicks) ====================
 
     bindGlobalProxies() {
-        // 使用箭头函数保持 this 指向实例
-        window.amzf_selectCountry = (code) => this.selectCountry(code);
-        window.amzf_switchView = (view) => this.switchView(view);
-        window.amzf_clearSearch = () => this.clearSearch();
-        window.amzf_toggleSection = (id) => this.toggleSection(id);
-        window.amzf_selectHistoryItem = (term) => this.selectHistoryItem(term);
-        window.amzf_deleteHistoryItem = (idx) => this.deleteHistoryItem(idx);
-        window.amzf_clearAllHistory = () => this.clearAllHistory();
-        // 暴露 scroll 用于内部生成的 HTML
-        window.amzf_scrollTo = (id) => { /* needed? */ };
+        // Register actions with ActionRegistry (handles data-param correctly)
+        registerActionsWithLegacy({
+            amzf_selectCountry: (params) => {
+                // Handle both direct calls (legacy) and data-action calls
+                const code = typeof params === 'string' ? params : params.param;
+                this.selectCountry(code);
+            },
+            amzf_switchView: (params) => {
+                // Handle both direct calls (legacy) and data-action calls
+                const view = typeof params === 'string' ? params : params.param;
+                this.switchView(view);
+            },
+            amzf_clearSearch: () => this.clearSearch(),
+            amzf_toggleSection: (params) => {
+                const id = typeof params === 'string' ? params : params.param;
+                this.toggleSection(id);
+            },
+            amzf_selectHistoryItem: (params) => {
+                const term = typeof params === 'string' ? params : params.param;
+                this.selectHistoryItem(term);
+            },
+            amzf_deleteHistoryItem: (params) => {
+                const idx = typeof params === 'number' ? params : parseInt(params.param);
+                this.deleteHistoryItem(idx);
+            },
+            amzf_clearAllHistory: () => this.clearAllHistory(),
+        });
     }
 
     unbindGlobalProxies() {

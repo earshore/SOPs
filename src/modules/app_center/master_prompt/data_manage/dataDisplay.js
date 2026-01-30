@@ -615,7 +615,7 @@ class DataModule extends BaseModule {
             deleteReview: (asin, i) => this.deleteReview(asin, i),
             renderDataPanel: () => this.renderDataPanel(),
             deleteProduct: (asin) => this.deleteProduct(asin),
-            switchDataTab: (tab) => this.switchDataTab(tab),
+            switchDataTab: (params) => this.switchDataTab(params.param),
         });
     }
 }

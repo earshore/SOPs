@@ -220,7 +220,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 registerActionsWithLegacy({
   // === Navigation 导航 ===
-  switchTab,
+  switchTab: (params) => {
+    // Handle both direct calls (legacy) and data-action calls
+    const tab = typeof params === 'string' ? params : params.param;
+    const updateHistory = typeof params === 'object' && params.updateHistory !== undefined 
+      ? params.updateHistory 
+      : true;
+    return switchTab(tab, updateHistory);
+  },
   // switchDataTab, // Owned by DataModule
   renderMegaMenu,
 
