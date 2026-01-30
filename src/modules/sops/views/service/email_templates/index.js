@@ -47,13 +47,8 @@ function renderTemplateCards(container) {
         langs.forEach(lang => {
             const isHidden = lang !== currentLang ? 'hidden' : '';
             const templateContent = getTemplateHtml(category.id, lang);
-            langContents += `
-                <div class="lang-content lang-${lang} ${isHidden}">
-                    <div class="bg-slate-50 p-3 rounded text-xs font-mono leading-relaxed whitespace-pre-wrap template-text">
-                        ${templateContent}
-                    </div>
-                </div>
-            `;
+            langContents += `<div class="lang-content lang-${lang} ${isHidden}"><div class="bg-slate-50 p-3 rounded text-xs font-mono leading-relaxed whitespace-pre-wrap template-text">${templateContent}</div></div>`;
+
         });
 
         cardsHtml += `
