@@ -362,8 +362,10 @@ export function getRouteFullConfig(routeId) {
 // 🎯 P2 增强: 模块自注册机制
 // ================================================================
 
+import { validateRouteConfig, validateModuleConfig } from '../utils/typeGuards.js';
+
 /**
- * 动态注册路由
+ * 动态注册路由（带类型校验）
  * 允许模块在运行时注册自己的路由，无需修改此文件
  * 
  * @param {string} routeId - 路由 ID
@@ -380,14 +382,16 @@ export function getRouteFullConfig(routeId) {
  * });
  */
 export function registerRoute(routeId, config) {
-    if (MENU_CONFIG.routes[routeId]) {
-        console.warn(`[MenuConfig] 路由 "${routeId}" 已存在，跳过注册`);
+    // 运行时类型校验
+    try {
+        validateRouteConfig(config);
+    } catch (error) {
+        console.error(`[MenuConfig] 路由注册失败 "${routeId}":`, error.message);
         return false;
     }
 
-    // 校验必填字段
-    if (!config.moduleId || !config.label) {
-        console.error(`[MenuConfig] 路由注册失败: 缺少 moduleId 或 label`);
+    if (MENU_CONFIG.routes[routeId]) {
+        console.warn(`[MenuConfig] 路由 "${routeId}" 已存在，跳过注册`);
         return false;
     }
 
@@ -397,12 +401,23 @@ export function registerRoute(routeId, config) {
 }
 
 /**
- * 动态注册模块
+ * 动态注册模块（带类型校验）
  * @param {string} moduleId - 模块 ID
  * @param {Object} config - 模块配置
  * @returns {boolean} 是否注册成功
  */
 export function registerModule(moduleId, config) {
+    // 运行时类型校验
+    try {
+        validateModuleConfig({
+            id: moduleId,
+            ...config
+        });
+    } catch (error) {
+        console.error(`[MenuConfig] 模块注册失败 "${moduleId}":`, error.message);
+        return false;
+    }
+
     if (MENU_CONFIG.modules[moduleId]) {
         console.warn(`[MenuConfig] 模块 "${moduleId}" 已存在，跳过注册`);
         return false;

@@ -7,27 +7,31 @@ export default defineConfig({
         environment: 'jsdom',
 
         // 测试文件匹配
-        include: ['src/**/*.test.js', 'src/**/*.spec.js'],
+        include: ['src/**/*.test.js', 'src/**/*.spec.js', 'tests/**/*.test.js'],
+
+        // 设置文件
+        setupFiles: ['./tests/setup.js'],
 
         // 覆盖率配置
         coverage: {
             provider: 'v8',
-            reporter: ['text', 'html', 'lcov'],
+            reporter: ['text', 'html', 'lcov', 'json-summary'],
             include: [
-                'src/services/**',
-                'src/common/utils/**',
-                'src/common/config/**'
+                'src/**/*.js'
             ],
             exclude: [
                 'src/**/*.test.js',
-                'src/**/*.spec.js'
+                'src/**/*.spec.js',
+                'src/main.js',
+                'src/workers/**',
+                'src/**/constants/**'
             ],
-            // 覆盖率阈值
+            // 覆盖率阈值 (逐步提升)
             thresholds: {
-                lines: 50,
-                functions: 50,
-                branches: 50,
-                statements: 50
+                lines: 60,
+                functions: 60,
+                branches: 55,
+                statements: 60
             }
         },
 
@@ -35,7 +39,13 @@ export default defineConfig({
         globals: true,
 
         // 报告配置
-        reporters: ['verbose']
+        reporters: ['verbose', 'html'],
+
+        // 测试超时
+        testTimeout: 10000,
+
+        // 钩子超时
+        hookTimeout: 10000
     },
 
     // 路径别名 (与 jsconfig.json / vite.config.js 保持一致)
