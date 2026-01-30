@@ -484,7 +484,7 @@ function updateHeaderNav(fullConfig) {
     });
 
     // 更加智能的 Header 高亮匹配
-    let targetId = 'nav-home';
+    let targetId = null; // 默认不高亮任何导航项
     if (fullConfig && fullConfig.context) {
         // 尝试匹配 nav-{contextId}，例如 nav-apps, nav-hub, nav-more
         const contextBtn = getEl(`nav-${fullConfig.context.id}`);
@@ -495,10 +495,12 @@ function updateHeaderNav(fullConfig) {
         if (specificBtn) targetId = 'nav-amz_hub';
     }
 
-    const targetBtn = getEl(targetId);
-    if (targetBtn) {
-        targetBtn.classList.remove("text-slate-600", "border-transparent");
-        targetBtn.classList.add("text-blue-600", "border-blue-600");
+    if (targetId) {
+        const targetBtn = getEl(targetId);
+        if (targetBtn) {
+            targetBtn.classList.remove("text-slate-600", "border-transparent");
+            targetBtn.classList.add("text-blue-600", "border-blue-600");
+        }
     }
 }
 
