@@ -515,7 +515,7 @@ class DataModule extends BaseModule {
                     <div class="p-6">
                         <p class="text-slate-600 text-sm mb-4 font-medium">
                             请选择一个<span class="text-blue-600 font-bold">主站点</span>：
-                            <br/><span class="text-xs text-slate-400 font-normal">我们将保留主站点的标题和描述，并自动合并其他站点的评论。</span>
+                            <br/><span class="text-xs text-slate-400 font-normal">我们将保留主站点的标题、五点描述、Review，并自动合并其他站点的Review。</span>
                         </p>
                         
                         <div class="space-y-3 mb-6">
