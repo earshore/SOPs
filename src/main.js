@@ -117,7 +117,7 @@ import {
   renderHistory
 } from "./modules/app_center/master_prompt/scraper/scraperPanel.js";
 
-import { switchTab, renderMegaMenu, renderSopsMegaMenu, showToast, initRouter } from "../src/common/utils/ui.js";
+import { switchTab, renderMegaMenu, renderSopsMegaMenu, renderMoreMenu, showToast, initRouter } from "../src/common/utils/ui.js";
 import { initHomeSplash } from "./modules/home/homeDisplay.js";
 
 import {
@@ -141,6 +141,7 @@ import { initKeywordTracker } from './modules/app_center/keyword_tracker/tracker
 // ✅ 自动注册事件监听器的模块 (事件驱动模式)
 import './modules/amz_hub/amz_hub.js';
 import './modules/sops/sops.js';
+import './modules/more/more.js';
 
 // ✅ Alpine.js
 import Alpine from 'alpinejs';
@@ -185,6 +186,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // 2. 渲染顶部 Mega Menu
     renderMegaMenu();
     renderSopsMegaMenu();
+    renderMoreMenu();
 
     // ================================================================
     // 🎯 P3: 广播应用初始化完成事件

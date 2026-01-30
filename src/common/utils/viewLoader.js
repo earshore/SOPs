@@ -103,6 +103,7 @@ const VIEW_REGISTRY = {
     // === 业务视图 (Lazy) ===
     'sops': { path: '/src/modules/sops/sops.html', target: 'main', isLoaded: false },
     'amz_hub': { path: '/src/modules/amz_hub/amz_hub.html', target: 'main', isLoaded: false },
+    'more': { path: '/src/modules/more/more.html', target: 'main', isLoaded: false },
 
     // Master Prompt Views
     'scraper': { path: '/src/modules/app_center/master_prompt/scraper/scraperPanel.html', target: 'main', isLoaded: false },
@@ -219,6 +220,7 @@ export async function ensureViewLoaded(routeId) {
 
     if (routeId.startsWith('sops')) moduleKey = 'sops';
     else if (routeId.startsWith('amz')) moduleKey = 'amz_hub';
+    else if (routeId.startsWith('more')) moduleKey = 'more';
 
     // Correct mapping for Master Prompt
     else if (routeId === 'scraper') moduleKey = 'scraper';

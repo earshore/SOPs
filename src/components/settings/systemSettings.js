@@ -139,26 +139,52 @@ const SettingsPanel = () => ({
             const provider = this.llm.provider;
 
             if (["llmgateway", "openai", "deepseek", "moonshot", "qwen"].includes(provider)) {
+                console.log(`🔄 正在从 ${provider} 获取模型列表...`);
                 models = await fetchModelsFromApi(provider, this.llm.endpoint, this.llm.apiKey);
+                console.log(`📋 从API获取到 ${models.length} 个模型:`, models);
             } else {
                 // Mock delay for static providers
-                models = PROVIDERS[provider].models;
+                models = PROVIDERS[provider].models || [];
+                console.log(`📋 使用静态模型列表 (${provider}):`, models);
                 await new Promise(r => setTimeout(r, 600));
             }
 
-            if (models.length === 0) throw new Error("未能获取到有效模型列表");
+            if (models.length === 0) {
+                console.warn("⚠️ 模型列表为空，可能是API配置错误或网络问题");
+                throw new Error("未能获取到有效模型列表，请检查API配置和网络连接");
+            }
 
-            // Deduplicate models
+            // Deduplicate models - 改进去重逻辑
             const seen = new Set();
-            this.llm.models = models.filter(m => {
+            const uniqueModels = [];
+            
+            models.forEach(m => {
                 const id = typeof m === 'string' ? m : m.id;
-                if (seen.has(id)) return false;
-                seen.add(id);
-                return true;
+                if (id && !seen.has(id)) {
+                    seen.add(id);
+                    uniqueModels.push(m);
+                }
             });
+
+            this.llm.models = uniqueModels;
+            console.log(`✅ 去重后保留 ${this.llm.models.length} 个模型`);
+
+            // 如果当前选中的模型不在新列表中，自动选择第一个
+            const currentModelExists = this.llm.models.some(m => {
+                const id = typeof m === 'string' ? m : m.id;
+                return id === this.llm.model;
+            });
+
+            if (!currentModelExists && this.llm.models.length > 0) {
+                const firstModel = this.llm.models[0];
+                this.llm.model = typeof firstModel === 'string' ? firstModel : firstModel.id;
+                console.log(`🔄 自动选择第一个模型: ${this.llm.model}`);
+            }
 
             showToast(`成功同步 ${this.llm.models.length} 个模型`, "success");
         } catch (e) {
+            console.error("❌ 获取模型列表失败:", e);
+            showToast(`获取模型失败: ${e.message}`, "error");
             ErrorService.handle(e, { action: 'fetchModels', module: 'settings' });
         } finally {
             this.llm.isFetching = false;

@@ -66,6 +66,52 @@ export function renderMegaMenu() {
     }
 }
 
+/**
+ * 🎨 More Menu Renderer
+ * 渲染"更多"菜单的探索模块
+ */
+export function renderMoreMenu() {
+    const container = getEl('more-menu-content');
+    if (!container) return; // 防御性返回
+
+    try {
+        const modules = Object.values(MENU_CONFIG.modules || {})
+            .filter(mod => mod.contextId === 'more');
+
+        const html = modules.map(mod => {
+            const targetRoute = getDefaultRouteForModule(mod.id);
+            if (!targetRoute) return '';
+
+            return `
+            <div data-action="switch-tab" data-tab="${targetRoute}" 
+                 class="cursor-pointer group/card p-4 rounded-xl bg-white border border-slate-100 hover:border-green-200 hover:bg-slate-50 hover:shadow-md hover:shadow-green-100/50 transition-all duration-200 flex flex-col gap-3">
+                <div class="flex items-start justify-between">
+                    <div class="w-10 h-10 bg-green-50 text-green-600 rounded-lg flex items-center justify-center text-lg group-hover/card:scale-110 group-hover/card:bg-green-600 group-hover/card:text-white transition-all duration-300">
+                        <i class="${mod.icon || 'fas fa-compass'}"></i>
+                    </div>
+                    <span class="text-[10px] font-mono font-medium text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 group-hover/card:border-green-200 group-hover/card:text-green-500 transition-colors">
+                        ${mod.version || 'v1.0'}
+                    </span>
+                </div>
+                <div class="flex-grow">
+                    <h4 class="text-sm font-bold text-slate-800 mb-1 group-hover/card:text-green-700 transition-colors flex items-center gap-2">
+                        ${mod.title || 'Unknown Module'}
+                        <i class="fas fa-arrow-right opacity-0 -translate-x-2 text-xs text-green-500 group-hover/card:opacity-100 group-hover/card:translate-x-0 transition-all"></i>
+                    </h4>
+                    <p class="text-xs text-slate-500 leading-relaxed line-clamp-2">
+                        ${mod.description || '暂无描述'}
+                    </p>
+                </div>
+            </div>`;
+        }).join('');
+
+        container.innerHTML = html;
+    } catch (e) {
+        console.error("❌ MoreMenu 渲染失败:", e);
+        container.innerHTML = `<div class="p-4 text-red-500 text-xs">菜单加载失败</div>`;
+    }
+}
+
 
 /**
  * 🎨 SOPs Mega Menu Renderer
@@ -378,7 +424,7 @@ function updateHeaderNav(fullConfig) {
     // 更加智能的 Header 高亮匹配
     let targetId = 'nav-home';
     if (fullConfig && fullConfig.context) {
-        // 尝试匹配 nav-{contextId}，例如 nav-apps, nav-hub
+        // 尝试匹配 nav-{contextId}，例如 nav-apps, nav-hub, nav-more
         const contextBtn = getEl(`nav-${fullConfig.context.id}`);
         // 兼容旧的特例 (如果有)
         const specificBtn = fullConfig.context.id === 'hub' ? getEl('nav-amz_hub') : null;
@@ -750,4 +796,5 @@ window.switchTab = switchTab;
 window.switchTab = switchTab;
 window.renderMegaMenu = renderMegaMenu;
 window.renderSopsMegaMenu = renderSopsMegaMenu;
+window.renderMoreMenu = renderMoreMenu;
 window.showToast = showToast;

@@ -12,6 +12,7 @@ export const MENU_CONFIG = {
         sops: { id: 'sops', label: 'SOPs 流程中心' },
         apps: { id: 'apps', label: '应用中心' },
         hub: { id: 'hub', label: 'Amazon 智库' },
+        more: { id: 'more', label: '更多' },
         sys: { id: 'sys', label: '系统设置' }
     },
 
@@ -61,6 +62,16 @@ export const MENU_CONFIG = {
             icon: 'fas fa-book-open',
             // ✅ 新增描述字段
             description: '亚马逊市场洞察报告、SEO策略、A10 算法知识库、营销日历与旺季攻略。'
+        },
+
+        // [更多] More Section
+        more_explore: {
+            id: 'more_explore',
+            contextId: 'more',         // 归属于 "更多"
+            title: '探索',
+            version: 'v1.0',
+            icon: 'fas fa-compass',
+            description: '探索更多功能和工具，包括全局设置、使用指南等实用功能。'
         }
     },
 
@@ -329,6 +340,26 @@ export const MENU_CONFIG = {
             icon: 'fa-solid fa-gift',
             panelId: 'panel-amz_hub',
             isHub: true
+        },
+
+        // --- 属于 More 更多的页面 ---
+        more_settings: {
+            moduleId: 'more_explore',
+            label: '全局设置',
+            icon: 'fas fa-cog',
+            panelId: 'panel-settings'
+        },
+        more_guide: {
+            moduleId: 'more_explore',
+            label: '使用指南',
+            icon: 'fas fa-book',
+            panelId: 'panel-guide'
+        },
+        more_tips: {
+            moduleId: 'more_explore',
+            label: '提示',
+            icon: 'fas fa-lightbulb',
+            panelId: 'panel-tips'
         },
 
     }
