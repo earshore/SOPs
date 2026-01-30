@@ -646,7 +646,7 @@ class KeywordTrackerModule extends BaseModule {
             btn.classList.add('opacity-75', 'cursor-wait');
         }
 
-        if (resultDiv) resultDiv.innerHTML = '<div class="text-center py-10"><i class="fas fa-circle-notch fa-spin text-purple-500 text-2xl"></i><p class="mt-2 text-slate-500">AI 正在深度分析您的 Listing (可能需�?20�?...</p></div>';
+        if (resultDiv) resultDiv.innerHTML = '<div class="text-center py-10"><i class="fas fa-circle-notch fa-spin text-purple-500 text-2xl"></i><p class="mt-2 text-slate-500">AI 正在深度分析您的 Listing ...</p></div>';
 
         try {
             const response = await KeywordService.fetchListingAnalysis(
