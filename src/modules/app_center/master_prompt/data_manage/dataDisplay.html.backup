@@ -122,17 +122,17 @@
 
     <div class="glass-card rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
         <div class="border-b border-slate-200 bg-slate-50 px-6 py-3 flex items-center gap-4">
-            <button data-action="switchDataTab" data-param="preview" id="data-tab-preview"
+            <button onclick="switchDataTab('preview')" id="data-tab-preview"
                 class="data-tab px-4 py-2 text-sm font-medium text-blue-600 border-b-2 border-blue-600 flex items-center gap-2">
                 <i class="fas fa-table"></i> 数据预览
             </button>
-            <button data-action="switchDataTab" data-param="json" id="data-tab-json"
+            <button onclick="switchDataTab('json')" id="data-tab-json"
                 class="data-tab px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700 flex items-center gap-2">
                 <i class="fas fa-code"></i> JSON数据
             </button>
             <div class="flex-1"></div>
 
-            <button data-action="triggerImport"
+            <button onclick="triggerImport()"
                 class="px-3 py-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-400 hover:to-purple-500 text-white font-bold rounded-lg shadow-md transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2 group cursor-pointer">
                 <i class="fas fa-file-import"></i>
                 导入JSON

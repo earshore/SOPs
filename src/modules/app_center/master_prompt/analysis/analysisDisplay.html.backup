@@ -94,7 +94,7 @@
                 <div class="mb-4">
                     <div class="flex items-center justify-between mb-2">
                         <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">选择 ASIN</label>
-                        <button data-action="selectAllAsins"
+                        <button onclick="selectAllAsins()"
                             class="text-xs text-blue-600 hover:text-blue-700 font-medium px-2 py-0.5 rounded hover:bg-blue-50 transition-colors">
                             全选
                         </button>

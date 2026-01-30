@@ -4,7 +4,8 @@
  * 恢复.backup文件
  */
 
-import { glob } from 'glob';
+import pkg from 'glob';
+const { glob } = pkg;
 import fs from 'fs';
 
 console.log('🔙 开始回滚onclick迁移...\n');

@@ -179,12 +179,12 @@
               class="absolute top-1 left-1 w-[calc(50%-4px)] h-[calc(100%-8px)] bg-white shadow-sm rounded transition-all duration-300 ease-out z-0">
             </div>
 
-            <button data-action="amz_toggleConsoleMode" data-param="listing" id="btn-mode-listing"
+            <button onclick="amz_toggleConsoleMode('listing')" id="btn-mode-listing"
               class="relative z-10 px-3 py-1 text-[10px] font-bold rounded transition-colors duration-300 text-blue-600 uppercase tracking-wide cursor-pointer">
               Listing
             </button>
 
-            <button data-action="amz_toggleConsoleMode" data-param="visual" id="btn-mode-visual"
+            <button onclick="amz_toggleConsoleMode('visual')" id="btn-mode-visual"
               class="relative z-10 px-3 py-1 text-[10px] font-bold rounded transition-colors duration-300 text-slate-500 hover:text-pink-600 uppercase tracking-wide cursor-pointer">
               Visual
             </button>
@@ -208,18 +208,18 @@
                 </div>
 
                 <div class="space-y-3 pb-2">
-                  <button id="btn-generate-prompt" data-action="amz_generateMasterPrompt"
+                  <button id="btn-generate-prompt" onclick="amz_generateMasterPrompt()"
                     class="w-full py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-400 hover:to-purple-500 text-white font-bold rounded-lg shadow-md transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2 group cursor-pointer">
                     <i class="fas fa-microchip group-hover:animate-pulse"></i>
                     生成 Master Prompt
                   </button>
 
                   <div class="grid grid-cols-2 gap-2">
-                    <button data-action="amz_copyMasterPrompt"
+                    <button onclick="amz_copyMasterPrompt()"
                       class="py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-colors text-slate-300 hover:text-white cursor-pointer backdrop-blur-sm border border-white/5">
                       <i class="fas fa-copy mr-1"></i> 复制
                     </button>
-                    <button data-action="amz_clearPromptInputs"
+                    <button onclick="amz_clearPromptInputs()"
                       class="py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-colors text-slate-300 hover:text-white cursor-pointer backdrop-blur-sm border border-white/5">
                       <i class="fas fa-trash-alt mr-1"></i> 清空
                     </button>
@@ -243,18 +243,18 @@
                 </div>
 
                 <div class="space-y-3 pb-2">
-                  <button id="btn-generate-visual" data-action="amz_generateVisualPrompt"
+                  <button id="btn-generate-visual" onclick="amz_generateVisualPrompt()"
                     class="w-full py-3 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-bold rounded-lg shadow-lg shadow-pink-700/30 transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2 group cursor-pointer border border-pink-400/20">
                     <i class="fas fa-magic group-hover:spin-slow"></i>
                     生成视觉剧本 (A+/EBC)
                   </button>
 
                   <div class="grid grid-cols-2 gap-2">
-                    <button data-action="amz_copyMasterPrompt"
+                    <button onclick="amz_copyMasterPrompt()"
                       class="py-2 bg-pink-900/40 hover:bg-pink-800/60 rounded-lg text-sm transition-colors text-pink-100/80 hover:text-white cursor-pointer backdrop-blur-sm border border-pink-500/10">
                       <i class="fas fa-copy mr-1"></i> 复制
                     </button>
-                    <button data-action="amz_clearPromptInputs"
+                    <button onclick="amz_clearPromptInputs()"
                       class="py-2 bg-pink-900/40 hover:bg-pink-800/60 rounded-lg text-sm transition-colors text-pink-100/80 hover:text-white cursor-pointer backdrop-blur-sm border border-pink-500/10">
                       <i class="fas fa-eraser mr-1"></i> 清空
                     </button>

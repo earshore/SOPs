@@ -4,7 +4,8 @@
  * 扫描代码库中的全局变量使用和onclick调用
  */
 
-import { glob } from 'glob';
+import pkg from 'glob';
+const { glob } = pkg;
 import fs from 'fs';
 import path from 'path';
 

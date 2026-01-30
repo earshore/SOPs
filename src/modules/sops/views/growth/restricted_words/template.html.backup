@@ -240,7 +240,7 @@
 
             <!-- Footer -->
             <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end shrink-0 rounded-b-xl">
-                <button data-action="closeWordDetail"
+                <button onclick="closeWordDetail()"
                     class="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium shadow-sm">
                     关闭 (Esc)
                 </button>

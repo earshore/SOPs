@@ -1127,10 +1127,10 @@
     </header>
     <div class="amzf_controls">
         <div class="amzf_view_toggle">
-            <button class="amzf_view_btn amzf_active" id="amzf_btn_country" data-action="amzf_switchView" data-param="country">
+            <button class="amzf_view_btn amzf_active" id="amzf_btn_country" onclick="amzf_switchView('country')">
                 <i class="fas fa-globe"></i> 按国家/地区
             </button>
-            <button class="amzf_view_btn" id="amzf_btn_event" data-action="amzf_switchView" data-param="event">
+            <button class="amzf_view_btn" id="amzf_btn_event" onclick="amzf_switchView('event')">
                 <i class="fas fa-gifts"></i> 按活动
             </button>
         </div>

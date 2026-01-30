@@ -4,7 +4,8 @@
  * 将 onclick="xxx()" 转换为 data-action="xxx"
  */
 
-import { glob } from 'glob';
+import pkg from 'glob';
+const { glob } = pkg;
 import fs from 'fs';
 import path from 'path';
 
