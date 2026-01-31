@@ -8,18 +8,18 @@ const MODULE_MAP = {
     // 总览
     'amz_hub_overview': () => import('./views/overview/index.js'),
     
-    // Amazon知识早知道
-    'amz_eu_insights': () => import('./views/eu_insights/index.js'),
-    'amz_seo_strategy': () => import('./views/seo_strategy/index.js'),
-    'amz_ecosystem': () => import('./views/ecosystem/index.js'),
+    // Amazon知识早知道 (knowledge)
+    'amz_eu_insights': () => import('./views/knowledge/eu_insights/index.js'),
+    'amz_seo_strategy': () => import('./views/knowledge/seo_strategy/index.js'),
+    'amz_ecosystem': () => import('./views/knowledge/ecosystem/index.js'),
     
-    // 入门实操宝典
-    'amz_quality_listing': () => import('./views/quality_listing/index.js'),
-    'amz_marketing_calendar': () => import('./views/marketing_calendar/index.js'),
-    'amz_seasons_tools': () => import('./views/promotions/index.js'),
+    // 入门实操宝典 (practice)
+    'amz_quality_listing': () => import('./views/practice/quality_listing/index.js'),
+    'amz_marketing_calendar': () => import('./views/practice/marketing_calendar/index.js'),
+    'amz_seasons_tools': () => import('./views/practice/promotions/index.js'),
     
-    // 运营提升全攻略
-    'amz_conversion_optimization': () => import('./views/conversion_optimization/index.js'),
+    // 运营提升全攻略 (advanced)
+    'amz_conversion_optimization': () => import('./views/advanced/conversion_optimization/index.js'),
 };
 
 /**

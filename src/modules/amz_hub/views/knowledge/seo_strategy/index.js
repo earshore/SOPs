@@ -1,7 +1,7 @@
-import BaseModule from "../../../../common/BaseModule.js";
-import { SEO_RADAR_DATA } from "../../constants/amz_hub_constants.js";
-import { loadTemplate } from "../../../../common/utils/viewLoader.js";
-import { loadChartJs } from "../../../../common/utils/lazyLibs.js";
+import BaseModule from "../../../../../common/BaseModule.js";
+import { SEO_RADAR_DATA } from "../../../constants/amz_hub_constants.js";
+import { loadTemplate } from "../../../../../common/utils/viewLoader.js";
+import { loadChartJs } from "../../../../../common/utils/lazyLibs.js";
 
 class SeoStrategyModule extends BaseModule {
     constructor() {

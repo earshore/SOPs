@@ -396,7 +396,7 @@ export const MENU_CONFIG = {
         // === 运营提升全攻略 ===
         amz_conversion_optimization: {
             moduleId: 'amz_hub_core',
-            label: '链接转化率低自查优化的五大方面',
+            label: '链接转化率低自查优化',
             icon: 'fas fa-chart-line',
             panelId: 'panel-amz_hub',
             category: 'advanced'

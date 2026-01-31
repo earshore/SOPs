@@ -1,13 +1,13 @@
-// src/modules/amz_hub/views/marketing_calendar/index.js
+// src/modules/amz_hub/views/practice/marketing_calendar/index.js
 // ================================================================
 // 🎯 Phase 4: 已迁移使用 StorageService + BaseModule
 // ================================================================
 
-import BaseModule from "../../../../common/BaseModule.js";
-import { amzf_countries, amzf_months, amzf_events } from "../../constants/amz_hub_constants.js";
-import { StorageService, STORAGE_KEYS } from "../../../../services/storageService.js";
-import { loadTemplate } from "../../../../common/utils/viewLoader.js";
-import { registerActionsWithLegacy } from "../../../../common/utils/actionRegistry.js";
+import BaseModule from "../../../../../common/BaseModule.js";
+import { amzf_countries, amzf_months, amzf_events } from "../../../constants/amz_hub_constants.js";
+import { StorageService, STORAGE_KEYS } from "../../../../../services/storageService.js";
+import { loadTemplate } from "../../../../../common/utils/viewLoader.js";
+import { registerActionsWithLegacy } from "../../../../../common/utils/actionRegistry.js";
 
 const AMZF_HISTORY_KEY = 'amzf_search_history'; // 使用 StorageService 键
 const AMZF_MAX_HISTORY = 10; // 最大历史记录数
@@ -30,7 +30,7 @@ class MarketingCalendarModule extends BaseModule {
     }
 
     async render() {
-        this.container.innerHTML = await loadTemplate('src/modules/amz_hub/views/marketing_calendar/template.html');
+        this.container.innerHTML = await loadTemplate('src/modules/amz_hub/views/practice/marketing_calendar/template.html');
     }
 
     async init() {
