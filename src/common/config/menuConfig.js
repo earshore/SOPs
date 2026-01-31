@@ -118,6 +118,39 @@ export const MENU_CONFIG = {
     },
 
     // ==========================================
+    // Hub Categories (用于Amazon智库模块的侧边栏分组)
+    // ==========================================
+    hubCategories: {
+        knowledge: {
+            id: 'knowledge',
+            label: 'Amazon知识早知道',
+            icon: 'fas fa-lightbulb',
+            color: 'blue',
+            order: 1,
+            version: 'v1.0',
+            description: '深入了解Amazon市场洞察、SEO策略与A10算法核心知识。'
+        },
+        practice: {
+            id: 'practice',
+            label: '入门实操宝典',
+            icon: 'fas fa-hands',
+            color: 'emerald',
+            order: 2,
+            version: 'v1.0',
+            description: '从零开始的实战指南，掌握营销日历与促销工具使用技巧。'
+        },
+        advanced: {
+            id: 'advanced',
+            label: '运营提升全攻略',
+            icon: 'fas fa-chart-line',
+            color: 'purple',
+            order: 3,
+            version: 'v1.0',
+            description: '进阶运营策略，提升转化率与销售表现的系统方法论。'
+        }
+    },
+
+    // ==========================================
     // Tier 3: Routes (具体页面路由)
     // 作用：定义点击行为、图标、目标 Panel
     // ==========================================
@@ -306,40 +339,67 @@ export const MENU_CONFIG = {
 
         // --- 属于 Hub 智库的页面 ---
 
+        // 总览页面
+        amz_hub_overview: {
+            moduleId: 'amz_hub_core',
+            label: '智库总览',
+            icon: 'fas fa-th-large',
+            panelId: 'panel-amz_hub'
+        },
+
+        // === Amazon知识早知道 ===
         amz_eu_insights: {
             moduleId: 'amz_hub_core',
             label: '市场洞察',
             icon: 'fas fa-globe-europe',
             panelId: 'panel-amz_hub',
-            isHub: true
+            category: 'knowledge'
         },
         amz_seo_strategy: {
             moduleId: 'amz_hub_core',
             label: 'SEO 策略',
             icon: 'fas fa-magnifying-glass-chart',
             panelId: 'panel-amz_hub',
-            isHub: true
+            category: 'knowledge'
         },
         amz_ecosystem: {
             moduleId: 'amz_hub_core',
             label: 'A10 & COSMO',
             icon: 'fas fa-network-wired',
             panelId: 'panel-amz_hub',
-            isHub: true
+            category: 'knowledge'
         },
-        amz_marketing_calendar: {   //预留营销日历
+
+        // === 入门实操宝典 ===
+        amz_quality_listing: {
+            moduleId: 'amz_hub_core',
+            label: '教你打造优质Listing',
+            icon: 'fas fa-star',
+            panelId: 'panel-amz_hub',
+            category: 'practice'
+        },
+        amz_marketing_calendar: {
             moduleId: 'amz_hub_core',
             label: 'EU营销日历',
             icon: 'fas fa-calendar-alt',
             panelId: 'panel-amz_hub',
-            isHub: true
+            category: 'practice'
         },
         amz_seasons_tools: {
             moduleId: 'amz_hub_core',
             label: '销售活动/促销工具',
             icon: 'fa-solid fa-gift',
             panelId: 'panel-amz_hub',
-            isHub: true
+            category: 'practice'
+        },
+
+        // === 运营提升全攻略 ===
+        amz_conversion_optimization: {
+            moduleId: 'amz_hub_core',
+            label: '链接转化率低自查优化的五大方面',
+            icon: 'fas fa-chart-line',
+            panelId: 'panel-amz_hub',
+            category: 'advanced'
         },
 
         // --- 属于 More 更多的页面 ---

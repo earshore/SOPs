@@ -123,6 +123,130 @@ export function renderMoreMenu() {
  * 🎨 SOPs Mega Menu Renderer
  * 渲染 SOP 顶部的核心模块菜单
  */
+/**
+ * 渲染 Amazon智库 顶部的核心模块菜单
+ */
+export function renderHubMegaMenu() {
+    const container = getEl('hub-mega-menu-content');
+    if (!container) return;
+
+    try {
+        const overviewRoute = MENU_CONFIG.routes['amz_hub_overview'];
+        const categories = Object.values(MENU_CONFIG.hubCategories || {}).sort((a, b) => a.order - b.order);
+
+        let html = '';
+
+        // Helper: Rich Card Generator
+        const createRichCard = (id, label, icon, color, version = 'v1.0', description = '', isOverview = false) => {
+            let target = id;
+            if (!isOverview) {
+                const entry = Object.entries(MENU_CONFIG.routes).find(([key, r]) => r.category === id);
+                if (entry) target = entry[0];
+            }
+
+            const colorSchemes = {
+                blue: {
+                    border: 'border-blue-100 hover:border-blue-300',
+                    bg: 'hover:bg-blue-50/80',
+                    shadow: 'hover:shadow-lg hover:shadow-blue-200/40',
+                    iconBg: 'bg-blue-50 group-hover/card:bg-blue-500',
+                    iconText: 'text-blue-600 group-hover/card:text-white',
+                    iconScale: 'group-hover/card:scale-110',
+                    titleText: 'group-hover/card:text-blue-700',
+                    arrow: 'text-blue-500',
+                    versionBorder: 'group-hover/card:border-blue-300',
+                    versionText: 'group-hover/card:text-blue-600',
+                    glow: 'group-hover/card:ring-2 group-hover/card:ring-blue-200/50'
+                },
+                emerald: {
+                    border: 'border-emerald-100 hover:border-emerald-300',
+                    bg: 'hover:bg-emerald-50/80',
+                    shadow: 'hover:shadow-lg hover:shadow-emerald-200/40',
+                    iconBg: 'bg-emerald-50 group-hover/card:bg-emerald-500',
+                    iconText: 'text-emerald-600 group-hover/card:text-white',
+                    iconScale: 'group-hover/card:scale-110',
+                    titleText: 'group-hover/card:text-emerald-700',
+                    arrow: 'text-emerald-500',
+                    versionBorder: 'group-hover/card:border-emerald-300',
+                    versionText: 'group-hover/card:text-emerald-600',
+                    glow: 'group-hover/card:ring-2 group-hover/card:ring-emerald-200/50'
+                },
+                purple: {
+                    border: 'border-purple-100 hover:border-purple-300',
+                    bg: 'hover:bg-purple-50/80',
+                    shadow: 'hover:shadow-lg hover:shadow-purple-200/40',
+                    iconBg: 'bg-purple-50 group-hover/card:bg-purple-500',
+                    iconText: 'text-purple-600 group-hover/card:text-white',
+                    iconScale: 'group-hover/card:scale-110',
+                    titleText: 'group-hover/card:text-purple-700',
+                    arrow: 'text-purple-500',
+                    versionBorder: 'group-hover/card:border-purple-300',
+                    versionText: 'group-hover/card:text-purple-600',
+                    glow: 'group-hover/card:ring-2 group-hover/card:ring-purple-200/50'
+                }
+            };
+
+            const scheme = colorSchemes[color] || colorSchemes.blue;
+
+            return `
+            <div data-action="switch-tab" data-tab="${target}" 
+                 class="cursor-pointer group/card p-5 rounded-2xl bg-white border ${scheme.border} ${scheme.bg} ${scheme.shadow} ${scheme.glow} transition-all duration-300 ease-out flex flex-col gap-4 h-full transform hover:-translate-y-1">
+                
+                <div class="flex items-start justify-between">
+                    <div class="w-12 h-12 ${scheme.iconBg} ${scheme.iconText} rounded-xl flex items-center justify-center text-xl ${scheme.iconScale} transition-all duration-300 shadow-sm group-hover/card:shadow-md">
+                        <i class="${icon}"></i>
+                    </div>
+                    <span class="text-[10px] font-mono font-semibold text-slate-400 bg-slate-100 px-2 py-1 rounded-md border border-slate-200 ${scheme.versionBorder} ${scheme.versionText} transition-all duration-300">
+                        ${version}
+                    </span>
+                </div>
+
+                <div class="flex-grow flex flex-col">
+                    <h4 class="text-sm font-bold text-slate-800 mb-2 ${scheme.titleText} transition-colors duration-300 flex items-center gap-2">
+                        ${label}
+                        <i class="fas fa-arrow-right opacity-0 -translate-x-2 text-xs ${scheme.arrow} group-hover/card:opacity-100 group-hover/card:translate-x-0 transition-all duration-300"></i>
+                    </h4>
+                    <p class="text-xs text-slate-500 leading-relaxed line-clamp-3 group-hover/card:text-slate-600 transition-colors duration-300">
+                        ${description || '暂无描述'}
+                    </p>
+                </div>
+
+                <div class="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+            </div>`;
+        };
+
+        // 1. Overview Card
+        if (overviewRoute) {
+            html += createRichCard(
+                'amz_hub_overview',
+                '智库总览',
+                overviewRoute.icon,
+                'blue',
+                'v1.0',
+                '系统化的Amazon运营知识体系，从基础认知到进阶策略。',
+                true
+            );
+        }
+
+        // 2. Category Cards
+        categories.forEach(cat => {
+            html += createRichCard(
+                cat.id,
+                cat.label,
+                cat.icon,
+                cat.color,
+                cat.version,
+                cat.description,
+                false
+            );
+        });
+
+        container.innerHTML = html;
+    } catch (e) {
+        console.error("❌ Hub MegaMenu Render Error:", e);
+    }
+}
+
 export function renderSopsMegaMenu() {
     const container = getEl('sops-mega-menu-content');
     if (!container) return;
@@ -299,6 +423,23 @@ function renderSidebar(moduleId) {
         sidebarKey = `sops:${category}`;
     }
 
+    // 对于 Amazon智库，也需要根据当前 Tab 的 Category 来区分 Sidebar 状态
+    if (moduleId === 'amz_hub_core') {
+        const currentTab = state.currentTab;
+
+        // Special Case: Hide sidebar on Overview page
+        if (currentTab === 'amz_hub_overview') {
+            sidebar.classList.add("hidden", "-ml-64");
+            sidebar.innerHTML = '';
+            currentSidebarModuleId = null; // Force refresh when leaving overview
+            return;
+        }
+
+        const routeConfig = MENU_CONFIG.routes[currentTab];
+        const category = routeConfig?.category || 'overview';
+        sidebarKey = `amz_hub_core:${category}`;
+    }
+
     if (currentSidebarModuleId === sidebarKey) {
         sidebar.classList.remove("hidden", "-ml-64");
         return;
@@ -317,6 +458,9 @@ function renderSidebar(moduleId) {
     // 4. 特殊处理 SOPs 模块 - 使用分组显示
     if (moduleId === 'sops') {
         renderSopsSidebar(sidebar, moduleConfig, routes);
+    } else if (moduleId === 'amz_hub_core') {
+        // 特殊处理 Amazon智库 模块 - 使用分组显示
+        renderHubSidebar(sidebar, moduleConfig, routes);
     } else {
         // 普通模块使用平铺列表
         renderDefaultSidebar(sidebar, moduleConfig, routes);
@@ -440,6 +584,105 @@ function renderSopsSidebar(sidebar, moduleConfig, routes) {
     sidebar.innerHTML = html;
 }
 
+// Amazon智库模块专用侧边栏渲染（完全复刻SOPs风格）
+function renderHubSidebar(sidebar, moduleConfig, routes) {
+    const currentTab = state.currentTab;
+    const currentRouteConfig = MENU_CONFIG.routes[currentTab];
+
+    // 1. 确定当前上下文 (Category)
+    let activeCategory = 'overview';
+    if (currentRouteConfig && currentRouteConfig.category) {
+        activeCategory = currentRouteConfig.category;
+    }
+
+    // 2. 筛选要显示的路由
+    let displayRoutes = [];
+    let sidebarTitle = "智库总览";
+    let sidebarIcon = moduleConfig.icon;
+    let sidebarColor = "slate"; // Default text color class suffix
+
+    if (activeCategory === 'overview') {
+        // 在总览页面：显示"智库总览"自身，加上 3 个模块的快捷入口
+        displayRoutes = [
+            MENU_CONFIG.routes['amz_hub_overview'], // Overview itself
+        ];
+        // 构造虚拟路由对象给 Sidebar 渲染
+        const categories = Object.values(MENU_CONFIG.hubCategories || {}).sort((a, b) => a.order - b.order);
+        categories.forEach(cat => {
+            // Find target
+            const first = Object.values(MENU_CONFIG.routes).find(r => r.category === cat.id);
+            if (first) {
+                displayRoutes.push({
+                    id: first.id, // Switching to this ID enters the category
+                    label: cat.label,
+                    icon: cat.icon,
+                    isCategoryLink: true // Marker for styling if needed
+                });
+            }
+        });
+
+    } else {
+        // 在具体模块页面：只显示该模块下的所有内容
+        displayRoutes = routes.filter(r => r.category === activeCategory);
+
+        // 更新标题
+        const catConfig = MENU_CONFIG.hubCategories[activeCategory];
+        if (catConfig) {
+            sidebarTitle = catConfig.label;
+            sidebarIcon = catConfig.icon;
+            sidebarColor = catConfig.color; // e.g. 'blue', 'emerald', 'purple'
+        }
+    }
+
+    // 3. 构建 HTML (扁平列表 - 完全复刻SOPs风格)
+    const titleColorClass = sidebarColor === 'slate' ? 'text-slate-400' : `text-${sidebarColor}-500`;
+
+    const html = `
+        <div class="flex flex-col h-full bg-white">
+            <div class="p-4 pb-2">
+                <h2 class="text-xs font-bold ${titleColorClass} uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <i class="${sidebarIcon}"></i>
+                    ${sidebarTitle}
+                </h2>
+                
+                <!-- 搜索框 (全局搜索智库内容) -->
+                <div class="relative mb-3 group">
+                    <input type="text" id="hub-search-input" 
+                        placeholder="搜索智库内容..." 
+                        class="w-full px-3 py-2 pl-9 text-xs border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                        oninput="window.searchHub(this.value)">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm group-focus-within:text-blue-500 transition-colors"></i>
+                    <button id="hub-search-clear" data-action="clear-hub-search" class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                        <i class="fas fa-times text-xs"></i>
+                    </button>
+                    
+                    <!-- 搜索结果下拉 -->
+                    <div id="hub-search-results" class="hidden absolute top-full left-0 w-full bg-white border border-slate-200 shadow-xl rounded-lg mt-1 max-h-60 overflow-y-auto z-50"></div>
+                </div>
+                
+                <nav id="hub-nav-container" class="space-y-1">
+                    ${displayRoutes.map(route => `
+                        <button data-action="switch-tab" data-tab="${route.id}" id="sidebar-btn-${route.id}" 
+                            class="sidebar-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">
+                            <i class="${route.icon} w-5 text-center ${route.isCategoryLink ? 'text-slate-400' : ''}"></i> 
+                            ${route.label}
+                        </button>
+                    `).join('')}
+                </nav>
+            </div>  
+            
+            <div class="mt-auto p-4 border-t border-slate-100 bg-slate-50/50">
+                 <div class="flex items-center gap-3 text-slate-400 text-xs">
+                     <i class="${moduleConfig.icon}"></i>
+                     <span>${moduleConfig.version}</span>
+                 </div>
+            </div>
+        </div>
+    `;
+    
+    sidebar.innerHTML = html;
+}
+
 // 默认侧边栏渲染（平铺列表）
 function renderDefaultSidebar(sidebar, moduleConfig, routes) {
     try {
@@ -528,7 +771,7 @@ export async function switchTab(tab, updateHistory = true) {
 
     // 1. 处理 Config 中的 redirect (别名)
     if (cleanTab === 'amz_hub') {
-        switchTab('amz_eu_insights', updateHistory);
+        switchTab('amz_hub_overview', updateHistory);
         return;
     }
 
@@ -843,12 +1086,86 @@ window.searchSOPs = function (query) {
 // 方案：保留 window.clearSOPSearch 供 legacy click 或者是 search 里的 click 使用。
 window.clearSOPSearch = clearSOPSearch;
 
+/**
+ * Amazon智库搜索功能（复刻SOPs搜索）
+ */
+window.searchHub = function (query) {
+    const resultsContainer = getEl('hub-search-results');
+    const navContainer = getEl('hub-nav-container');
+    const clearBtn = getEl('hub-search-clear');
+
+    if (!query.trim()) {
+        resultsContainer.classList.add('hidden');
+        navContainer.classList.remove('hidden');
+        clearBtn.classList.add('hidden');
+        return;
+    }
+
+    clearBtn.classList.remove('hidden');
+    const lowerQuery = query.toLowerCase();
+
+    // 搜索所有智库路由
+    const allRoutes = Object.entries(MENU_CONFIG.routes)
+        .filter(([id, cfg]) => cfg.moduleId === 'amz_hub_core')
+        .map(([id, cfg]) => ({ id, ...cfg }));
+
+    const matches = allRoutes.filter(route => {
+        const label = (route.label || '').toLowerCase();
+        const category = (route.category || '').toLowerCase();
+
+        // 完全匹配
+        if (label === lowerQuery) return true;
+        // 模糊匹配
+        if (label.includes(lowerQuery)) return true;
+        // 首字母匹配
+        const initials = label.split(/[\s-]+/).map(w => w[0]).join('');
+        if (initials.includes(lowerQuery)) return true;
+        // 分类匹配
+        if (category.includes(lowerQuery)) return true;
+
+        return false;
+    });
+
+    if (matches.length === 0) {
+        resultsContainer.innerHTML = '<div class="text-xs text-slate-400 text-center py-2">未找到匹配的内容</div>';
+    } else {
+        resultsContainer.innerHTML = matches.map(route => `
+            <button data-action="switch-tab" data-tab="${route.id}" onclick="window.clearHubSearch()" 
+                class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all">
+                <i class="${route.icon} w-4 text-center"></i>
+                <span class="truncate">${route.label}</span>
+            </button>
+        `).join('');
+    }
+
+    resultsContainer.classList.remove('hidden');
+    navContainer.classList.add('hidden');
+};
+
+/**
+ * 清空智库搜索
+ */
+function clearHubSearch() {
+    const searchInput = getEl('hub-search-input');
+    const resultsContainer = getEl('hub-search-results');
+    const navContainer = getEl('hub-nav-container');
+    const clearBtn = getEl('hub-search-clear');
+
+    if (searchInput) searchInput.value = '';
+    if (resultsContainer) resultsContainer.classList.add('hidden');
+    if (navContainer) navContainer.classList.remove('hidden');
+    if (clearBtn) clearBtn.classList.add('hidden');
+}
+
+window.clearHubSearch = clearHubSearch;
+
 
 // 注册 UI 模块的动作
 registerActions({
     'switch-tab': (params) => switchTab(params.tab),
     'toggle-sop-group': (params) => toggleSOPGroup(params),
     'clear-sop-search': clearSOPSearch,
+    'clear-hub-search': clearHubSearch,
     'open-user-guide': openUserGuide,
     'close-user-guide': closeUserGuide,
     'switch-guide-tab': (params) => switchGuideTab(params),
@@ -860,5 +1177,6 @@ window.switchTab = switchTab;
 window.switchTab = switchTab;
 window.renderMegaMenu = renderMegaMenu;
 window.renderSopsMegaMenu = renderSopsMegaMenu;
+window.renderHubMegaMenu = renderHubMegaMenu;
 window.renderMoreMenu = renderMoreMenu;
 window.showToast = showToast;

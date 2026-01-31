@@ -5,13 +5,21 @@ import './amz_hub_style.css';
 // ================= 路由配置表 =================
 // 键名对应 menuConfig.js 里的 route id
 const MODULE_MAP = {
+    // 总览
+    'amz_hub_overview': () => import('./views/overview/index.js'),
+    
+    // Amazon知识早知道
     'amz_eu_insights': () => import('./views/eu_insights/index.js'),
     'amz_seo_strategy': () => import('./views/seo_strategy/index.js'),
     'amz_ecosystem': () => import('./views/ecosystem/index.js'),
+    
+    // 入门实操宝典
+    'amz_quality_listing': () => import('./views/quality_listing/index.js'),
     'amz_marketing_calendar': () => import('./views/marketing_calendar/index.js'),
     'amz_seasons_tools': () => import('./views/promotions/index.js'),
-    // ✨ 未来拓展只需加一行：
-    // 'amz_calendar':  () => import('./views/marketing_calendar/index.js'),
+    
+    // 运营提升全攻略
+    'amz_conversion_optimization': () => import('./views/conversion_optimization/index.js'),
 };
 
 /**
