@@ -10,7 +10,7 @@ class EcosystemModule extends BaseModule {
     }
 
     async render() {
-        this.container.innerHTML = await loadTemplate('src/modules/amz_hub/views/ecosystem/template.html');
+        this.container.innerHTML = await loadTemplate('src/modules/amz_hub/views/knowledge/ecosystem/template.html');
     }
 
     async init() {

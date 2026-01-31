@@ -10,7 +10,7 @@ class EuInsightsModule extends BaseModule {
     }
 
     async render() {
-        this.container.innerHTML = await loadTemplate('src/modules/amz_hub/views/eu_insights/template.html');
+        this.container.innerHTML = await loadTemplate('src/modules/amz_hub/views/knowledge/eu_insights/template.html');
     }
 
     async init() {

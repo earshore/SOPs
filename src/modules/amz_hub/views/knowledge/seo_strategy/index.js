@@ -10,7 +10,7 @@ class SeoStrategyModule extends BaseModule {
     }
 
     async render() {
-        this.container.innerHTML = await loadTemplate('src/modules/amz_hub/views/seo_strategy/template.html');
+        this.container.innerHTML = await loadTemplate('src/modules/amz_hub/views/knowledge/seo_strategy/template.html');
     }
 
     async init() {

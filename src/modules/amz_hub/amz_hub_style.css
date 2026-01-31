@@ -2,6 +2,17 @@
  * 关键词: 磨砂 (Glass), 流光 (Glow), Q弹 (Bouncy)
  */
 
+/* Hub Overview Container - Centered Limit */
+.hub-overview-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+#amz_hub_content_area>div {
+    width: 100%;
+}
+
 /* =========================================
    1. 灵动卡片 (Lively Cards)
    ========================================= */
