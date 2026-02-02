@@ -1,0 +1,79 @@
+/* ================================
+   More Module Styles
+   ================================ */
+
+/* More Overview Container - Centered Limit */
+.more-overview-container {
+    max-width: 1450px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* More Module Section - Same padding as overview */
+.more-module-section {
+    max-width: 1450px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* More Content Container - For sub-pages */
+.more-content-container {
+    max-width: 1450px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+#more_content_area>div {
+    max-width: 1450px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* Module highlight animation */
+.more-module-highlight {
+    animation: moreModuleHighlight 2s ease-out;
+}
+
+@keyframes moreModuleHighlight {
+    0% {
+        background-color: transparent;
+    }
+    10% {
+        background-color: rgba(34, 197, 94, 0.1); /* green-500 with opacity */
+    }
+    100% {
+        background-color: transparent;
+    }
+}
+
+/* Sidebar active state for category buttons */
+/* Green active state for explore category */
+.more-sidebar-active.group[data-category="explore"] {
+    background-color: rgb(240 253 244) !important; /* bg-green-50 */
+    border-color: rgb(187 247 208) !important; /* border-green-200 */
+    color: rgb(21 128 61) !important; /* text-green-700 */
+}
+
+.more-sidebar-active.group[data-category="explore"] i {
+    color: rgb(22 163 74) !important; /* text-green-600 */
+}
+
+.more-sidebar-active.group[data-category="explore"] .fa-chevron-right {
+    opacity: 0.5 !important;
+}
+
+/* Fade in animation */
+.fade-in {
+    animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

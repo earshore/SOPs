@@ -64,14 +64,14 @@ export const MENU_CONFIG = {
             description: '亚马逊市场洞察报告、SEO策略、A10 算法知识库、营销日历与旺季攻略。'
         },
 
-        // [更多] More Section
-        more_explore: {
-            id: 'more_explore',
-            contextId: 'more',         // 归属于 "更多"
-            title: '探索',
+        // [更多] More Core Module
+        more_core: {
+            id: 'more_core',
+            contextId: 'more',
+            title: '更多',
             version: 'v1.0',
             icon: 'fas fa-compass',
-            description: '探索更多功能和工具，包括全局设置、使用指南等实用功能。'
+            description: '探索更多实用功能和工具，提升工作效率。'
         }
     },
 
@@ -147,6 +147,21 @@ export const MENU_CONFIG = {
             order: 3,
             version: 'v1.0',
             description: '进阶运营策略，提升转化率与销售表现的系统方法论。'
+        }
+    },
+
+    // ==========================================
+    // More Categories (用于More模块的侧边栏分组)
+    // ==========================================
+    moreCategories: {
+        explore: {
+            id: 'explore',
+            label: '探索',
+            icon: 'fas fa-compass',
+            color: 'green',
+            order: 1,
+            version: 'v1.0',
+            description: '智能体、提示词、工作流等实用功能。'
         }
     },
 
@@ -402,31 +417,36 @@ export const MENU_CONFIG = {
             category: 'advanced'
         },
 
-        // --- 探索功能的子页面 ---
-        more_explore: {
-            moduleId: 'more_explore',
-            label: '探索',
-            icon: 'fas fa-compass',
+        // --- 属于 More 模块的页面 ---
+        more_overview: {
+            moduleId: 'more_core',
+            label: '更多总览',
+            icon: 'fas fa-th-large',
             panelId: 'panel-more'
         },
-        explore_agents: {
-            moduleId: 'more_explore',
+
+        // === 探索体系 (The Explore Layer) ===
+        more_agents: {
+            moduleId: 'more_core',
             label: '智能体',
             icon: 'fas fa-robot',
-            panelId: 'panel-more'
+            panelId: 'panel-more',
+            category: 'explore'
         },
-        explore_prompts: {
-            moduleId: 'more_explore',
+        more_prompts: {
+            moduleId: 'more_core',
             label: '提示词',
             icon: 'fas fa-message',
-            panelId: 'panel-more'
+            panelId: 'panel-more',
+            category: 'explore'
         },
-        explore_workflows: {
-            moduleId: 'more_explore',
+        more_workflows: {
+            moduleId: 'more_core',
             label: '工作流',
             icon: 'fas fa-diagram-project',
-            panelId: 'panel-more'
-        },
+            panelId: 'panel-more',
+            category: 'explore'
+        }
 
     }
 };

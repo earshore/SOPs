@@ -1,149 +1,153 @@
-// src/modules/more/more.js
-// More Module - 更多功能模块
+console.log("📋 More Core Module Loading...");
+import './more_style.css';
 
-console.log("🚀 More Module 开始加载...");
-
-// 存储默认的探索页面HTML
-let defaultExploreHTML = '';
-
-// 监听路由变化事件
-window.addEventListener('app:route-changed', (event) => {
-    const { routeId, moduleId } = event.detail;
+// ================= 路由配置表 =================
+const MODULE_MAP = {
+    // 总览
+    'more_overview': () => import('./views/overview/index.js'),
     
-    // 只处理属于 more 模块的路由
-    if (moduleId === 'more_explore') {
-        console.log(`📍 More Module: 处理路由 ${routeId}`);
-        handleMoreRoute(routeId);
-    }
-});
+    // 探索体系
+    'more_agents': () => import('./views/explore/agents/index.js'),
+    'more_prompts': () => import('./views/explore/prompts/index.js'),
+    'more_workflows': () => import('./views/explore/workflows/index.js'),
+};
 
 /**
- * 处理更多模块的路由切换
- * @param {string} routeId - 路由ID
+ * 注册子模块 (Plugin API)
  */
-function handleMoreRoute(routeId) {
-    const contentArea = document.getElementById('more_content_area');
-    if (!contentArea) return;
-
-    // 保存默认页面HTML（首次加载时）
-    if (!defaultExploreHTML && routeId !== 'explore_agents' && routeId !== 'explore_prompts' && routeId !== 'explore_workflows') {
-        defaultExploreHTML = contentArea.innerHTML;
+export function registerSubModule(routeId, loader) {
+    if (MODULE_MAP[routeId]) {
+        console.warn(`[More] 覆盖已存在的子模块: ${routeId}`);
     }
+    MODULE_MAP[routeId] = loader;
+    console.log(`[More] 注册子模块: ${routeId}`);
+}
 
-    switch (routeId) {
-        // 探索功能的子页面
-        case 'explore_agents':
-            loadExploreView('agents');
-            break;
-            
-        case 'explore_prompts':
-            loadExploreView('prompts');
-            break;
-            
-        case 'explore_workflows':
-            loadExploreView('workflows');
-            break;
-            
-        default:
-            console.log(`📍 More Module: 显示默认探索页面`);
-            // 恢复默认探索页面
-            if (defaultExploreHTML) {
-                contentArea.innerHTML = defaultExploreHTML;
-                // 重新绑定事件
-                bindCardEvents();
+let currentModule = null; // 保持对当前子模块的引用，以便卸载
+
+/**
+ * 等待容器渲染 (解决 Race Condition)
+ */
+function waitForContainer(id, timeout = 3000) {
+    return new Promise((resolve) => {
+        const el = document.getElementById(id);
+        if (el) return resolve(el);
+
+        const startTime = Date.now();
+        const timer = setInterval(() => {
+            const el = document.getElementById(id);
+            if (el) {
+                clearInterval(timer);
+                resolve(el);
             }
-            break;
-    }
-}
-
-/**
- * 加载探索功能的子页面
- * @param {string} viewName - 视图名称 (agents/prompts/workflows)
- */
-async function loadExploreView(viewName) {
-    const contentArea = document.getElementById('more_content_area');
-    if (!contentArea) return;
-
-    try {
-        // 动态加载HTML模板
-        const response = await fetch(`/src/modules/more/views/${viewName}/template.html`);
-        if (!response.ok) throw new Error(`加载 ${viewName} 模板失败`);
-        
-        const html = await response.text();
-        contentArea.innerHTML = html;
-        
-        // 动态加载并初始化JS模块
-        try {
-            const module = await import(`./views/${viewName}/index.js`);
-            if (module && module[`init${capitalize(viewName)}View`]) {
-                module[`init${capitalize(viewName)}View`]();
+            if (Date.now() - startTime > timeout) {
+                clearInterval(timer);
+                resolve(null);
             }
-        } catch (jsError) {
-            console.warn(`⚠️ ${viewName} JS模块加载失败，仅显示HTML:`, jsError);
-        }
-        
-        console.log(`✅ ${viewName} 视图加载完成`);
-    } catch (error) {
-        console.error(`❌ 加载 ${viewName} 视图失败:`, error);
-        contentArea.innerHTML = `
-            <div class="flex items-center justify-center h-full">
-                <div class="text-center">
-                    <i class="fas fa-exclamation-triangle text-4xl text-red-400 mb-4"></i>
-                    <p class="text-slate-600">加载页面失败，请稍后重试</p>
-                </div>
-            </div>
-        `;
-    }
-}
-
-/**
- * 首字母大写
- */
-function capitalize(str) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
-/**
- * 绑定卡片点击事件
- */
-function bindCardEvents() {
-    const morePanel = document.getElementById('panel-more');
-    if (!morePanel) return;
-
-    // 移除旧的监听器，使用事件委托
-    const cards = morePanel.querySelectorAll('[data-route]');
-    cards.forEach(card => {
-        card.addEventListener('click', handleCardClick);
+        }, 50);
     });
 }
 
 /**
- * 处理卡片点击
+ * 核心：加载子模块视图
  */
-function handleCardClick(e) {
-    const card = e.currentTarget;
-    const routeId = card.dataset.route;
-    
-    if (!routeId) return;
-    
-    console.log(`🔗 点击卡片，导航到: ${routeId}`);
-    
-    // 触发路由导航
-    if (window.switchTab) {
-        window.switchTab(routeId, true);
-    } else {
-        console.error('❌ switchTab 函数未找到');
+async function loadSubModule(routeId, retryCount = 0) {
+    // 1. 等待 Shell 容器 (最多 3 秒)
+    const container = await waitForContainer('more_content_area');
+
+    if (!container) {
+        console.error(`[More] 容器 #more_content_area 未找到 (超时)`);
+        const shell = document.getElementById('panel-more');
+        if (shell) shell.innerHTML = `<div class="p-10 text-red-500">❌ 错误: 内容容器加载超时，请刷新重试。</div>`;
+        return;
+    }
+
+    // 2. 卸载旧模块
+    if (currentModule && currentModule.unmount) {
+        try {
+            currentModule.unmount();
+        } catch (unmountErr) {
+            console.warn(`[More] 卸载模块时出错:`, unmountErr);
+        }
+    }
+
+    container.innerHTML = '<div class="p-10 text-center fade-in"><i class="fas fa-spinner fa-spin text-2xl text-green-500"></i><p class="text-slate-400 text-xs mt-2">Loading module...</p></div>';
+
+    const loader = MODULE_MAP[routeId];
+    if (!loader) {
+        container.innerHTML = `<div class="p-10 text-red-500">⚠️ 模块 [${routeId}] 尚未开发或未注册。</div>`;
+        return;
+    }
+
+    try {
+        // 3. 动态导入模块 (Lazy Load)
+        const module = await loader();
+
+        // 4. 挂载新模块
+        if (module.mount) {
+            await module.mount(container);
+            currentModule = module;
+        } else {
+            throw new Error(`模块接口不完整: 缺少 mount() 函数`);
+        }
+    } catch (err) {
+        console.error(`加载子模块失败 (重试 ${retryCount}):`, err);
+
+        // 自动重试机制 (Max 1次)
+        if (retryCount < 1) {
+            container.innerHTML = '<div class="p-10 text-center"><i class="fas fa-circle-notch fa-spin text-orange-500"></i><span class="ml-2 text-slate-500">连接超时，正在重试...</span></div>';
+            setTimeout(() => loadSubModule(routeId, retryCount + 1), 1000);
+            return;
+        }
+
+        // 错误边界 UI
+        container.innerHTML = `
+            <div class="more-error-boundary flex flex-col items-center justify-center p-12 text-center fade-in">
+                <div class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mb-4">
+                    <i class="fas fa-exclamation-triangle text-2xl text-red-500"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-800 mb-2">模块加载失败</h3>
+                <p class="text-sm text-slate-500 mb-4 max-w-md">${err.message || '网络连接不稳定或文件缺失'}</p>
+                <div class="flex gap-3">
+                    <button onclick="window.location.reload()" 
+                        class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-redo mr-2"></i>刷新页面
+                    </button>
+                    <button id="btn-retry-${routeId}" 
+                        class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors">
+                        再试一次
+                    </button>
+                </div>
+            </div>
+        `;
+
+        setTimeout(() => {
+            const retryBtn = document.getElementById(`btn-retry-${routeId}`);
+            if (retryBtn) retryBtn.onclick = () => loadSubModule(routeId, 0);
+        }, 0);
     }
 }
 
-// 初始化点击事件监听
-document.addEventListener('DOMContentLoaded', () => {
-    bindCardEvents();
-});
+// ================= 监听全局路由事件 =================
+window.addEventListener('app:route-changed', async (e) => {
+    const { routeId, config } = e.detail;
 
-// 如果DOM已经加载完成，立即绑定
-if (document.readyState !== 'loading') {
-    bindCardEvents();
-}
+    console.log(`📡 [More 调试] 收到路由: ${routeId}, 模块ID: ${config?.module?.id}`);
+
+    // 只要这个路由 ID 在我们的 MODULE_MAP 映射表里存在，我们就处理它
+    if (MODULE_MAP[routeId]) {
+        console.log(`✅ 匹配成功，准备加载子模块: ${routeId}`);
+
+        // 1. 确保 Shell 已经存在
+        const shell = document.getElementById('panel-more');
+        if (!shell) {
+            console.warn("⚠️ Shell 容器 #panel-more 未找到，请检查 more.html 是否已加载");
+            return;
+        }
+
+        // 2. 加载子视图
+        await loadSubModule(routeId);
+    }
+});
 
 console.log("✅ More Module 加载完成");

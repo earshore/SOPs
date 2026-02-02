@@ -75,41 +75,92 @@ export function renderMegaMenu() {
  */
 export function renderMoreMenu() {
     const container = getEl('more-menu-content');
-    if (!container) return; // 防御性返回
+    if (!container) return;
 
     try {
-        const modules = Object.values(MENU_CONFIG.modules || {})
-            .filter(mod => mod.contextId === 'more');
+        const overviewRoute = MENU_CONFIG.routes['more_overview'];
+        const categories = Object.values(MENU_CONFIG.moreCategories || {}).sort((a, b) => a.order - b.order);
 
-        const html = modules.map(mod => {
-            const targetRoute = getDefaultRouteForModule(mod.id);
-            if (!targetRoute) return '';
+        let html = '';
+
+        // Helper: Rich Card Generator
+        const createRichCard = (id, label, icon, color, version = 'v1.0', description = '', isOverview = false) => {
+            let target = id;
+            if (!isOverview) {
+                const entry = Object.entries(MENU_CONFIG.routes).find(([key, r]) => r.category === id);
+                if (entry) target = entry[0];
+            }
+
+            const colorSchemes = {
+                green: {
+                    border: 'border-green-100 hover:border-green-300',
+                    bg: 'hover:bg-green-50/80',
+                    shadow: 'hover:shadow-lg hover:shadow-green-200/40',
+                    iconBg: 'bg-green-50 group-hover/card:bg-green-500',
+                    iconText: 'text-green-600 group-hover/card:text-white',
+                    iconScale: 'group-hover/card:scale-110',
+                    titleText: 'group-hover/card:text-green-700',
+                    arrow: 'text-green-500',
+                    versionBorder: 'group-hover/card:border-green-300',
+                    versionText: 'group-hover/card:text-green-600',
+                    glow: 'group-hover/card:ring-2 group-hover/card:ring-green-200/50'
+                }
+            };
+
+            const scheme = colorSchemes[color] || colorSchemes.green;
 
             return `
-            <div data-action="switch-tab" data-tab="${targetRoute}" 
-                 class="cursor-pointer group/card p-5 rounded-2xl bg-white border border-green-100 hover:border-green-300 hover:bg-green-50/80 hover:shadow-lg hover:shadow-green-200/40 hover:ring-2 hover:ring-green-200/50 transition-all duration-300 ease-out flex flex-col gap-4 transform hover:-translate-y-1">
+            <div data-action="switch-tab" data-tab="${target}" 
+                 class="cursor-pointer group/card p-5 rounded-2xl bg-white border ${scheme.border} ${scheme.bg} ${scheme.shadow} ${scheme.glow} transition-all duration-300 ease-out flex flex-col gap-4 h-full transform hover:-translate-y-1">
+                
                 <div class="flex items-start justify-between">
-                    <div class="w-12 h-12 bg-green-50 text-green-600 rounded-xl flex items-center justify-center text-xl group-hover/card:scale-110 group-hover/card:bg-green-600 group-hover/card:text-white transition-all duration-300 shadow-sm group-hover/card:shadow-md">
-                        <i class="${mod.icon || 'fas fa-compass'}"></i>
+                    <div class="w-12 h-12 ${scheme.iconBg} ${scheme.iconText} rounded-xl flex items-center justify-center text-xl ${scheme.iconScale} transition-all duration-300 shadow-sm group-hover/card:shadow-md">
+                        <i class="${icon}"></i>
                     </div>
-                    <span class="text-[10px] font-mono font-semibold text-slate-400 bg-slate-100 px-2 py-1 rounded-md border border-slate-200 group-hover/card:border-green-300 group-hover/card:text-green-600 transition-all duration-300">
-                        ${mod.version || 'v1.0'}
+                    <span class="text-[10px] font-mono font-semibold text-slate-400 bg-slate-100 px-2 py-1 rounded-md border border-slate-200 ${scheme.versionBorder} ${scheme.versionText} transition-all duration-300">
+                        ${version}
                     </span>
                 </div>
-                <div class="flex-grow">
-                    <h4 class="text-sm font-bold text-slate-800 mb-2 group-hover/card:text-green-700 transition-colors duration-300 flex items-center gap-2">
-                        ${mod.title || 'Unknown Module'}
-                        <i class="fas fa-arrow-right opacity-0 -translate-x-2 text-xs text-green-500 group-hover/card:opacity-100 group-hover/card:translate-x-0 transition-all duration-300"></i>
+
+                <div class="flex-grow flex flex-col">
+                    <h4 class="text-sm font-bold text-slate-800 mb-2 ${scheme.titleText} transition-colors duration-300 flex items-center gap-2">
+                        ${label}
+                        <i class="fas fa-arrow-right opacity-0 -translate-x-2 text-xs ${scheme.arrow} group-hover/card:opacity-100 group-hover/card:translate-x-0 transition-all duration-300"></i>
                     </h4>
-                    <p class="text-xs text-slate-500 leading-relaxed line-clamp-2 group-hover/card:text-slate-600 transition-colors duration-300">
-                        ${mod.description || '暂无描述'}
+                    <p class="text-xs text-slate-500 leading-relaxed line-clamp-3 group-hover/card:text-slate-600 transition-colors duration-300">
+                        ${description || '暂无描述'}
                     </p>
                 </div>
-                
-                <!-- Subtle gradient overlay on hover -->
+
                 <div class="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
             </div>`;
-        }).join('');
+        };
+
+        // 1. Overview Card
+        if (overviewRoute) {
+            html += createRichCard(
+                'more_overview',
+                '更多总览',
+                overviewRoute.icon,
+                'green',
+                'v1.0',
+                '探索更多实用功能和工具，提升工作效率。',
+                true
+            );
+        }
+
+        // 2. Category Cards
+        categories.forEach(cat => {
+            html += createRichCard(
+                cat.id,
+                cat.label,
+                cat.icon,
+                cat.color,
+                cat.version,
+                cat.description,
+                false
+            );
+        });
 
         container.innerHTML = html;
     } catch (e) {
@@ -422,6 +473,14 @@ function renderSidebar(moduleId) {
         sidebarKey = `amz_hub_core:${category}`;
     }
 
+    // 对于 More 模块，也需要根据当前 Tab 的 Category 来区分 Sidebar 状态
+    if (moduleId === 'more_core') {
+        const currentTab = state.currentTab;
+        const routeConfig = MENU_CONFIG.routes[currentTab];
+        const category = routeConfig?.category || 'overview';
+        sidebarKey = `more_core:${category}`;
+    }
+
     if (currentSidebarModuleId === sidebarKey) {
         sidebar.classList.remove("hidden", "-ml-64");
         return;
@@ -443,6 +502,9 @@ function renderSidebar(moduleId) {
     } else if (moduleId === 'amz_hub_core') {
         // 特殊处理 Amazon智库 模块 - 使用分组显示
         renderHubSidebar(sidebar, moduleConfig, routes);
+    } else if (moduleId === 'more_core') {
+        // 特殊处理 More 模块 - 使用分组显示
+        renderMoreSidebar(sidebar, moduleConfig, routes);
     } else {
         // 普通模块使用平铺列表
         renderDefaultSidebar(sidebar, moduleConfig, routes);
@@ -799,6 +861,126 @@ function renderDefaultSidebar(sidebar, moduleConfig, routes) {
     } catch (e) {
         console.error(`❌ 侧边栏渲染错误:`, e);
     }
+}
+
+// More模块专用侧边栏渲染（完全复刻SOPs风格）
+function renderMoreSidebar(sidebar, moduleConfig, routes) {
+    const currentTab = state.currentTab;
+    const currentRouteConfig = MENU_CONFIG.routes[currentTab];
+
+    // 1. 确定当前上下文 (Category)
+    let activeCategory = 'overview';
+    if (currentRouteConfig && currentRouteConfig.category) {
+        activeCategory = currentRouteConfig.category;
+    }
+
+    // 2. 筛选要显示的路由
+    let displayRoutes = [];
+    let sidebarTitle = "更多总览";
+    let sidebarIcon = moduleConfig.icon;
+    let sidebarColor = "slate"; // Default text color class suffix
+
+    if (activeCategory === 'overview') {
+        // 在总览页面：显示一级菜单分类
+        sidebarTitle = "更多总览";
+        const categories = Object.values(MENU_CONFIG.moreCategories || {}).sort((a, b) => a.order - b.order);
+        categories.forEach(cat => {
+            // 找到该分类下的第一个路由作为入口
+            const firstRouteEntry = Object.entries(MENU_CONFIG.routes).find(([_, r]) => r.category === cat.id);
+            if (firstRouteEntry) {
+                const [routeId, routeConfig] = firstRouteEntry;
+                displayRoutes.push({
+                    id: routeId, // 使用路由 ID 作为 key
+                    label: cat.label,
+                    icon: cat.icon,
+                    color: cat.color, // 添加颜色信息
+                    categoryId: cat.id, // 添加分类 ID，用于滚动定位
+                    isCategoryLink: true
+                });
+            }
+        });
+    } else {
+        // 在具体体系页面：只显示该体系下的所有内容
+        displayRoutes = routes.filter(r => r.category === activeCategory);
+
+        // 更新标题
+        const catConfig = MENU_CONFIG.moreCategories[activeCategory];
+        if (catConfig) {
+            sidebarTitle = catConfig.label;
+            sidebarIcon = catConfig.icon;
+            sidebarColor = catConfig.color; // e.g. 'green'
+        }
+    }
+
+    // 3. 构建 HTML (扁平列表)
+    const titleColorClass = sidebarColor === 'slate' ? 'text-slate-400' : `text-${sidebarColor}-500`;
+
+    const html = `
+        <div class="flex flex-col h-full bg-white">
+            <div class="p-4 pb-2">
+                <h2 class="text-xs font-bold ${titleColorClass} uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <i class="${sidebarIcon}"></i>
+                    ${sidebarTitle}
+                </h2>
+                
+                <nav id="more-nav-container" class="space-y-2">
+                    ${displayRoutes.map(route => {
+                        const isCategory = route.isCategoryLink;
+                        
+                        if (isCategory) {
+                            // 一级菜单分类 - 点击滚动到对应模块
+                            const color = route.color || 'slate';
+                            const categoryId = route.categoryId || ''; // 分类 ID
+                            const colorSchemes = {
+                                green: {
+                                    hoverBg: 'hover:bg-green-50',
+                                    hoverBorder: 'hover:border-green-200',
+                                    text: 'text-slate-700',
+                                    hoverText: 'hover:text-green-700',
+                                    icon: 'text-slate-500',
+                                    hoverIcon: 'group-hover:text-green-600'
+                                }
+                            };
+                            const scheme = colorSchemes[color] || colorSchemes.green;
+                            
+                            return `
+                            <button data-action="scroll-to-more-module" data-category="${categoryId}" id="sidebar-btn-${route.id}" 
+                                class="group sidebar-btn w-full flex items-center gap-3 px-3 py-3 rounded-lg border border-transparent ${scheme.hoverBg} ${scheme.hoverBorder} ${scheme.text} ${scheme.hoverText} font-semibold text-sm transition-all duration-200 hover:shadow-md">
+                                <i class="${route.icon} w-5 text-center ${scheme.icon} ${scheme.hoverIcon} transition-colors"></i> 
+                                <span class="flex-1 text-left">${route.label}</span>
+                                <i class="fas fa-chevron-right text-xs opacity-0 group-hover:opacity-50 transition-opacity"></i>
+                            </button>
+                        `;
+                        } else {
+                            // 二级菜单项 - 简洁样式
+                            return `
+                            <button data-action="switch-tab" data-tab="${route.id}" id="sidebar-btn-${route.id}" 
+                                class="sidebar-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">
+                                <i class="${route.icon} w-5 text-center"></i> 
+                                ${route.label}
+                            </button>
+                        `;
+                        }
+                    }).join('')}
+                </nav>
+            </div>  
+            
+            <div class="mt-auto p-4 border-t border-slate-100 bg-slate-50/50">
+                 ${activeCategory !== 'overview' ? `
+                 <button data-action="switch-tab" data-tab="more_overview" class="w-full flex items-center gap-2 text-xs text-slate-500 hover:text-green-600 mb-3 transition-colors px-2 py-1.5 rounded hover:bg-white">
+                     <i class="fas fa-arrow-left"></i>
+                     <span>返回更多总览</span>
+                 </button>
+                 ` : ''}
+                 <div class="flex items-center gap-3 text-slate-400 text-xs">
+                     <i class="${moduleConfig.icon}"></i>
+                     <span>${moduleConfig.version}</span>
+                 </div>
+            </div>
+        </div>
+    `;
+    
+    sidebar.innerHTML = html;
 }
 
 // ========================
@@ -1171,6 +1353,60 @@ function updateHubSidebarActiveState(categoryId) {
         activeBtn.classList.add('hub-sidebar-active');
     }
 }
+
+/**
+ * 滚动到 More 模块区域
+ * @param {string} categoryId - 分类 ID (explore)
+ */
+function scrollToMoreModule(categoryId) {
+    if (!categoryId) {
+        console.warn('⚠️ scrollToMoreModule: categoryId 为空');
+        return;
+    }
+    
+    const moduleId = `more-module-${categoryId}`;
+    const moduleElement = document.getElementById(moduleId);
+    
+    if (moduleElement) {
+        // 使用平滑滚动
+        moduleElement.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start',
+            inline: 'nearest'
+        });
+        
+        // 添加高亮效果
+        moduleElement.classList.add('more-module-highlight');
+        setTimeout(() => {
+            moduleElement.classList.remove('more-module-highlight');
+        }, 2000);
+        
+        // 更新侧边栏按钮的选中状态
+        updateMoreSidebarActiveState(categoryId);
+        
+        console.log(`✅ 滚动到 More 模块: ${categoryId}`);
+    } else {
+        console.warn(`⚠️ 未找到模块元素: ${moduleId}`);
+    }
+}
+
+/**
+ * 更新 More 侧边栏按钮的选中状态
+ * @param {string} categoryId - 当前选中的分类 ID
+ */
+function updateMoreSidebarActiveState(categoryId) {
+    // 移除所有按钮的选中状态
+    document.querySelectorAll('[data-action="scroll-to-more-module"]').forEach(btn => {
+        btn.classList.remove('more-sidebar-active');
+    });
+    
+    // 添加当前按钮的选中状态
+    const activeBtn = document.querySelector(`[data-action="scroll-to-more-module"][data-category="${categoryId}"]`);
+    if (activeBtn) {
+        activeBtn.classList.add('more-sidebar-active');
+    }
+}
+
 // User Guide Actions
 function openUserGuide() {
     const modal = getEl('user-guide-modal');
@@ -1361,6 +1597,7 @@ registerActions({
     'switch-guide-tab': (params) => switchGuideTab(params),
     'scroll-to-sop-module': (params) => scrollToSOPModule(params.category),
     'scroll-to-hub-module': (params) => scrollToHubModule(params.category),
+    'scroll-to-more-module': (params) => scrollToMoreModule(params.category),
 });
 
 // 不再导出 window.switchTab 等，除非为了调试或其它模块遗留调用
