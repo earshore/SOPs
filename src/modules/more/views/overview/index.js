@@ -1,16 +1,16 @@
 // src/modules/more/views/overview/index.js
 // 更多总览页面
 
+import { loadTemplate } from "../../../../common/utils/viewLoader.js";
+
 console.log("🧭 更多总览页面加载...");
 
 export async function mount(container) {
     try {
         // 加载HTML模板
-        const response = await fetch('/src/modules/more/views/overview/template.html');
-        if (!response.ok) throw new Error('加载模板失败');
-        
-        const html = await response.text();
+        const html = await loadTemplate('src/modules/more/views/overview/template.html');
         container.innerHTML = html;
+        container.classList.add('fade-in');
         
         console.log("✅ 更多总览页面挂载完成");
     } catch (error) {
