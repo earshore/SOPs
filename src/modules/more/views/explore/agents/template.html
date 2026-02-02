@@ -1,23 +1,155 @@
 <!-- More - 智能体 Template -->
-<div class="more-content-container">
+<div class="more-content-container py-6">
     <!-- Header Section -->
-    <header class="text-center mb-8">
-        <h1 class="text-3xl font-extrabold text-slate-900 mb-2">
-            <i class="fas fa-robot text-green-500 mr-3"></i>智能体
-        </h1>
-        <p class="text-slate-600 max-w-3xl mx-auto">
-            探索和使用各种智能体，提升工作效率和自动化水平。
-        </p>
-    </header>
+    <div class="flex items-baseline justify-between mb-6">
+        <h2 class="text-2xl font-semibold text-slate-900">智能体</h2>
+        <div class="text-sm text-slate-500">2</div>
+    </div>
 
-    <!-- Content Section -->
-    <div class="bg-white rounded-2xl border border-slate-200 p-8 mb-8">
-        <div class="text-center py-12">
-            <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i class="fas fa-robot text-4xl text-green-600"></i>
+    <!-- Search Box -->
+    <div class="mb-8">
+        <div class="relative">
+            <input 
+                type="text" 
+                class="flex h-10 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 pl-10" 
+                placeholder="搜索智能体...">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.35-4.35"></path>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Agent Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Agent Card 1 -->
+        <div class="agent-card relative border border-slate-200 flex flex-col p-5 h-full bg-white rounded-lg hover:shadow-xl transition-shadow duration-300">
+            <!-- Hover Effect Container -->
+            <div class="agent-card-header p-0.5 bg-transparent aspect-square w-full mb-4">
+                <div class="group/card rounded-lg w-full h-full relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+                    <!-- Animated Background Effects -->
+                    <div class="pointer-events-none">
+                        <div class="absolute inset-0 rounded-lg opacity-0 group-hover/card:opacity-50 transition-opacity duration-500"></div>
+                        <div class="agent-card-gradient absolute inset-0 rounded-lg bg-gradient-to-r from-green-500 to-blue-600 opacity-0 group-hover/card:opacity-100 backdrop-blur-xl transition-opacity duration-500"></div>
+                        <div class="absolute inset-0 rounded-lg opacity-0 mix-blend-overlay group-hover/card:opacity-100 transition-opacity duration-500">
+                            <p class="agent-card-noise absolute inset-x-0 text-[8px] md:text-[10px] h-full break-words whitespace-pre-wrap text-white font-mono font-bold transition duration-500 overflow-hidden">LDbDDm7QAkayxCzZezT3fvxe74K4wFwg1W1a9GJBWdTlLPOfC7CC8S955n26M1wU1aIPJ78HqjLMIFms1nWulUt7Aovybe1K839cbgllhdJTplqnO1zmIzsBj7JzxVPKZajlPiblheXljA3NRT3TVbQTxAEI5HY1RL6h8J8nZsgZ3fMUhmU98CkkcSYSjbbhCRwFQWMM9I8j9IRDv3O22qDWB3BhlmPpvx8NLKeoOPP2LQpSis2QG6kXEy4558TwYQxhkb1pjZInj2LI1REOhTAGWjn24pUYSTTSRiEnTNdDklGNLFUjzeuXrW8hgVoMxY5MFP6zgwacePTauLViQFVe8U8lie6yW6m4lov4YB8nyMwtQtHnm8nGffl2NJRC5nIJorpyKKDBIyV2OcScEB9aYDLnMYQKkNSPzaOLWY4Q7JISnnNGjo2hZSYxGzBE0HOUlNnIH3mKowU8EcALQdLiu5OUE2jvyxKcUG2KwBzgIgr8fUF7KSlqYwrt9iD716iEhGAaFHqt6quUnYYmB8WQ8E9reNgf7wJa2npBWBjo64hHopTR22ljJDKp4NvhTLVb3uhajF9qnu5wAwKoooLOJlQFXa2aij8Lxj3pj3yI1amO7zJzU1L7Lz13PqdFvK7pdwwHnFsdot4Puqpgyauko2XBtGi1BZZ0P5ZRcH9ZhwdqmUG2PwOoYIAzQsTcnNlOZank2QSTcG5kmWSoKXcio6qgIHiw31wgwztzuDaRaLuOSefyaewRRbwriPMYGJzS48P1HOXJbHrhEXKwsmlYqS5zBbLGkdHGvS04fhSFmfW1feAZR5JZITKst0QvWEXyEf965ngeVoOw5joDMIifaL3FMx5hgB1Vzg6fTDsdMnFK48PmyfSW9Ia8kmUMHb9v72vYbxuMc1JApr3ktIleHmmHMsF7FKA13g4YHUbJh6AOjhhkz8FzSnKN3ZJ7Dhfo2Zl3YiVMWSxc9RmvfIyfw1rL2cONjGXBCDqeO1kdpEFwBSBxV66w2tRXKsadpkllQBQm77K6JJqlVnbNoSl5EmwznrbxQJdugypC5ag4qazIUANfj9F5mwsqiT7H5xgPqKpWEf47QkiNgSCzd5dGJzCZgbMRRtSTFrwJyuEpMffnjyvHV2w4mUdzqB3Jh9THdgKn9puaA1W5i5s8rd9fBkaP3w1597FIFmjb83RluxwzlAKvVLYIXnBTCj345JmKpOlPJg4cPQYLOeI0jmOZmmYfTLS7XFSzcUlKsaPZCnrAu9khXSbrTYXSFiY4JT5JE2fZoe1iQmY0MofwED1F4MtSY01h2xZG7F8Cc2f34dOO6I9qEnaFtzt1uIQvYENhDY8z6LdJeAmkeUGvXB8RYlwUrXvlTh3fxiFroJnqPL4ZPycGHJfkjd5IvbW65ZFkSkoRLFoprYD738nm1muNea2LmXILmHzy98EVN4qzO3A6uy3aAYX8o960X35HOctCbTEGnN9hjyPgf7yuPEG2FBO9</p>
+                        </div>
+                    </div>
+                    <!-- Agent Title -->
+                    <div class="relative z-10 flex items-center justify-center">
+                        <div class="absolute h-32 w-32 md:h-40 md:w-40 rounded-full bg-white/80 blur-lg"></div>
+                        <span class="text-slate-900 font-bold text-3xl md:text-4xl whitespace-nowrap z-10">Human 3.0</span>
+                    </div>
+                </div>
             </div>
-            <h3 class="text-xl font-bold text-slate-800 mb-2">智能体功能</h3>
-            <p class="text-slate-500 mb-6">该功能正在开发中，敬请期待...</p>
+
+            <!-- Designer Info -->
+            <div class="w-full flex items-center gap-3 mb-4">
+                <div class="inline-flex items-center justify-center overflow-hidden rounded-full bg-slate-100 border border-slate-200 h-9 w-9 flex-shrink-0">
+                    <i class="fas fa-user text-slate-600"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="text-sm font-medium text-slate-900 truncate">Dan Koe</div>
+                    <div class="text-xs text-slate-500">Designed by</div>
+                </div>
+                <a href="https://www.youtube.com/watch?v=SL5lwg1wYaE&t=329s" target="_blank" rel="noopener noreferrer" class="ml-auto inline-flex flex-shrink-0 text-slate-600 hover:text-red-600 transition-colors">
+                    <i class="fab fa-youtube text-2xl"></i>
+                </a>
+            </div>
+
+            <!-- Description -->
+            <h2 class="text-slate-900 text-sm font-medium leading-relaxed mb-4 line-clamp-4">
+                基于 Dan Koe 的 HUMAN 3.0 框架，这份AI 智能体提示词 将深度评估你在心智、身体、精神和职业四大领域的现状。它能精准识别你的'元类型'（Metatype），并提供一份直击痛点、拒绝平庸的行动蓝图，助你实现全方位的自我进化。
+            </h2>
+
+            <!-- Action Buttons -->
+            <div class="mt-auto pt-3 flex items-center gap-2">
+                <button class="text-sm border font-medium border-slate-300 rounded-full text-slate-700 px-4 py-1.5 hover:bg-slate-50 transition-colors">
+                    直接对话
+                </button>
+                <button class="text-sm border font-medium border-slate-300 rounded-full text-slate-700 px-4 py-1.5 hover:bg-slate-50 transition-colors">
+                    提示词
+                </button>
+            </div>
+
+            <!-- Corner Decorations -->
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="absolute h-6 w-6 -top-3 -left-3 text-slate-900">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"></path>
+            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="absolute h-6 w-6 -bottom-3 -left-3 text-slate-900">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"></path>
+            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="absolute h-6 w-6 -top-3 -right-3 text-slate-900">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"></path>
+            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="absolute h-6 w-6 -bottom-3 -right-3 text-slate-900">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"></path>
+            </svg>
+        </div>
+
+        <!-- Agent Card 2 -->
+        <div class="agent-card relative border border-slate-200 flex flex-col p-5 h-full bg-white rounded-lg hover:shadow-xl transition-shadow duration-300">
+            <!-- Hover Effect Container -->
+            <div class="agent-card-header p-0.5 bg-transparent aspect-square w-full mb-4">
+                <div class="group/card rounded-lg w-full h-full relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+                    <!-- Animated Background Effects -->
+                    <div class="pointer-events-none">
+                        <div class="absolute inset-0 rounded-lg opacity-0 group-hover/card:opacity-50 transition-opacity duration-500"></div>
+                        <div class="agent-card-gradient absolute inset-0 rounded-lg bg-gradient-to-r from-green-500 to-blue-600 opacity-0 group-hover/card:opacity-100 backdrop-blur-xl transition-opacity duration-500"></div>
+                        <div class="absolute inset-0 rounded-lg opacity-0 mix-blend-overlay group-hover/card:opacity-100 transition-opacity duration-500">
+                            <p class="agent-card-noise absolute inset-x-0 text-[8px] md:text-[10px] h-full break-words whitespace-pre-wrap text-white font-mono font-bold transition duration-500 overflow-hidden">tnHWe0goJaBIASVrLvu8Sx69UUhW6GOeRbziluvnjSoU8byZzKl1kKd4eeV29WluNvZ3afx42H043X3gfp3yG7hEDieOqhx0eqbuQfFPjvHmi9vJdBtmSnJ8lxUAxsPHOB9BvoM1MjfNYkvwB6l2DNqCgpAKEVrJG0yjobeko30BVK0wy7MzALuhqgFc4NOytgS7PRCRtJTH7CLJPTPjRwf3dxfp0X9Y7lgL1wD7kSdKlW2UIvuXHL0yrZeh5ai3ZpYfbwzxaV2Lxg0sECHOkfdyaDZ4lwnzniiQ4V6rHnxCyExWrY5LIKarZmfJ6JWrycF7kTaEj2px5Nk3o64IJ0pAv3v3tHM4ElCZzgnfgvioKZ5cvES0apyuH44SU748kZusNp1vof5utvFm96Em9XffDfwyLAXbxxbXDifSKxqn7fZIcbruLcFR5vSJXcUiEFXGxN0lE1B8BI8gHRA7qXrFvTqTlQkXX4c6aeMbx01i0EsAFdBK1551tUS7Bq0p4i1fGkTT1AdvHMUAlgeiL8tVdtT0xn2711jGTQWrVgOIVmoaOFXmO4BoW6eyUA0jOiyZ3ycO4vunR9ao8O7D9u6dbQ6eamyQ0zMo8774yn8tutcEkbfJXDAu4yyfHOSLsl4zlcQsmGvhlQYcdyN7EJ3OeRKxMzEvkdD1e27IVOaj6jEaCPTkchPIuA44KNwdrdURTqEfOwMr6L8pVtNzvkMqzcQ2TL3rBWe7zwfiMzgbU5hSPTk4kdBa9LTr32kPU3ziZgH9fB7o1ceKPOG6HR0Td2xWTBV1kwgFlr7a5BtY8VBQHAHRrgkJc3XskVCvOxtDQbh4X9sgOaXk5YoOlGulaQgTgdhfstnep8ELfYl2mRlbrIGG1lz3z679IcWE6NVtbevlOG6L0nccBpBIcqnwdLKjNSegRTReQQ9xOnKtVkpkXk6aMjrPOdJbCDCevyU4k2V6cdMjGS0rNWT8ZJFGmqy4sKxrY4Px52TWXC1Isvh2t40eCNp0V7ZyrRVfBRUEQ5YQViehdmrKaUxN34hRIbj7dNwJ3C8yliK6H8hDxQPlI67TPFaQAM23CUDg7WRyiGFLVPMQHbikKfg3GpuHgU1a5oO0Y5ScnsBogGKQyhVBLDvuInQVHuQ8tsRkbcFUqF2CMZdGGUViDo2S3yDjdzy2xlCI5i41W3osUvNLJ2bBtaQ3WjcNFVNkz1WddGg7qULMVihyZkrvjzayca9gLST9gE5sGEZmRsfs8tSV7WWuRzd0O4lSNTGpUbGgjg6wnHpiEIY8sao4c4MOpxcwe5ElMwfDEua0vQlI93dXUbkD7ctVgvDobbhwdQwy1RNfaeBJuikOvlcWKprupOWCTpEnaxQBafJNB69bmZbQbQafbuRVwoKquYOJ5USPIzJKeR4kufkekeUmv5k8l4wifVQNTsluqpdFj0FiNKX1qy6yXbNubkzNJ0LXTXRie8lVY70JpROaOLYoYnvVYA6CBSUD</p>
+                        </div>
+                    </div>
+                    <!-- Agent Title -->
+                    <div class="relative z-10 flex items-center justify-center">
+                        <div class="absolute h-32 w-32 md:h-40 md:w-40 rounded-full bg-white/80 blur-lg"></div>
+                        <span class="text-slate-900 font-bold text-3xl md:text-4xl whitespace-nowrap z-10">Lyra</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Designer Info -->
+            <div class="w-full flex items-center gap-3 mb-4">
+                <div class="inline-flex items-center justify-center overflow-hidden rounded-full bg-slate-100 border border-slate-200 h-9 w-9 flex-shrink-0">
+                    <i class="fas fa-user text-slate-600"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="text-sm font-medium text-slate-900 truncate">metapromptjc</div>
+                    <div class="text-xs text-slate-500">Designed by</div>
+                </div>
+                <a href="https://www.reddit.com/r/ChatGPT/comments/1lnfcnt/after_147_failed_chatgpt_prompts_i_had_a/" target="_blank" rel="noopener noreferrer" class="ml-auto inline-flex flex-shrink-0 text-slate-600 hover:text-orange-600 transition-colors">
+                    <i class="fab fa-reddit text-2xl"></i>
+                </a>
+            </div>
+
+            <!-- Description -->
+            <h2 class="text-slate-900 text-sm font-medium leading-relaxed mb-4 line-clamp-4">
+                经过 147 次失败的 ChatGPT 提示词尝试后，我终于找到了完美的解决方案。Lyra 是一个强大的 AI 智能体，能够理解复杂的上下文并提供精准的回答。它结合了自然语言处理和深度学习技术，为用户提供卓越的对话体验。
+            </h2>
+
+            <!-- Action Buttons -->
+            <div class="mt-auto pt-3 flex items-center gap-2">
+                <button class="text-sm border font-medium border-slate-300 rounded-full text-slate-700 px-4 py-1.5 hover:bg-slate-50 transition-colors">
+                    直接对话
+                </button>
+                <button class="text-sm border font-medium border-slate-300 rounded-full text-slate-700 px-4 py-1.5 hover:bg-slate-50 transition-colors">
+                    提示词
+                </button>
+            </div>
+
+            <!-- Corner Decorations -->
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="absolute h-6 w-6 -top-3 -left-3 text-slate-900">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"></path>
+            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="absolute h-6 w-6 -bottom-3 -left-3 text-slate-900">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"></path>
+            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="absolute h-6 w-6 -top-3 -right-3 text-slate-900">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"></path>
+            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="absolute h-6 w-6 -bottom-3 -right-3 text-slate-900">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"></path>
+            </svg>
         </div>
     </div>
 </div>

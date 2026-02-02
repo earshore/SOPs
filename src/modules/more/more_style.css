@@ -77,3 +77,79 @@
         transform: translateY(0);
     }
 }
+
+
+/* ================================
+   Agent Card Styles
+   ================================ */
+
+/* Agent Card Container */
+.agent-card {
+    transition: all 0.3s ease;
+}
+
+/* Agent Card Gradient Effect */
+.agent-card-gradient {
+    mask-image: radial-gradient(250px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), white, transparent);
+    -webkit-mask-image: radial-gradient(250px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), white, transparent);
+}
+
+/* Agent Card Noise Text */
+.agent-card-noise {
+    user-select: none;
+    pointer-events: none;
+}
+
+/* Line Clamp Utility */
+.line-clamp-4 {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Agent Card Hover Effect - Track Mouse Position */
+.agent-card:hover .agent-card-gradient {
+    animation: agentCardPulse 2s ease-in-out infinite;
+}
+
+@keyframes agentCardPulse {
+    0%, 100% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+/* Smooth transitions for all interactive elements */
+.agent-card button,
+.agent-card a {
+    transition: all 0.2s ease;
+}
+
+/* Enhanced hover states */
+.agent-card button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.agent-card a:hover {
+    transform: scale(1.1);
+}
+
+/* Corner decoration animations */
+.agent-card svg {
+    transition: all 0.3s ease;
+}
+
+.agent-card:hover svg {
+    transform: rotate(90deg);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .agent-card-noise {
+        font-size: 8px;
+    }
+}
