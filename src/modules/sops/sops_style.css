@@ -17,7 +17,9 @@
 }
 
 #sops_content_area>div {
-    width: 100%;
+    max-width: 1450px;
+    margin: 0 auto;
+    padding: 0 1rem;
 }
 
 /* SOP Card Grid */
