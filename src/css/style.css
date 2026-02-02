@@ -382,3 +382,12 @@
     background: white;
     border: 1px solid #e2e8f0;
 }
+
+/* =========================================
+   More Module Content Area
+   ========================================= */
+#more_content_area>div {
+    max-width: 1450px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
