@@ -1,76 +1,111 @@
-# Logs
-logs
-*.log
+# ==============================================================================
+# 1. Dependency & Build
+# ==============================================================================
+# Node
+node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-build_log.txt
-build_log_2.txt
+.npm/
 
-# Dependency directories
-node_modules/
-jspm_packages/
+# Build Output
+dist/
+build/
+out/
+.output/
 
-# TypeScript cache
+# Vitest HTML report / Vite preview output (可选：若 html/ 为构建产物则忽略)
+html/
+
+# Cache
+.cache/
+.parcel-cache/
+.eslintcache
 *.tsbuildinfo
 
-# Optional npm cache directory
-.npm
-
-# Optional eslint cache
-.eslintcache
-
-# Optional REPL history
-.node_repl_history
-
-# Output of 'npm pack'
-*.tgz
-
-# Yarn Integrity file
-.yarn-integrity
-
-# dotenv environment variables file
+# ==============================================================================
+# 2. Framework & Tooling
+# ==============================================================================
+# Vite / generic
+*.local
 .env
-.env.test
+.env.*
+!.env.example
+!.env.test.example
 
-# parcel-bundler cache (https://parceljs.org/)
-.cache
+# Testing / Coverage
+coverage/
+.nyc_output/
+reports/
+*.lcov
+test-*.html
+*.test.local.js
 
-# next.js build output
-.next
+# Documentation
+# docs/  <-- Keep docs tracked usually, unless generated
+jsdoc-debug.html
 
-# nuxt.js build output
-.nuxt
-
-# vuepress build output
-.vuepress/dist
-
-# Serverless directories
-.serverless/
-
-# FuseBox cache
-.fusebox/
-
-# DynamoDB Local files
-.dynamodb/
-
-# TernJS port file
-.tern-port
-
-# Stores VSCode versions used for testing VSCode extensions
-.vscode-test
-
-# Mac OS
+# ==============================================================================
+# 3. System & IDE
+# ==============================================================================
+# OS
 .DS_Store
-
-# Windows
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+Thumbs.db:encryptable
+Desktop.ini
 
-# Dist
-dist/
+# IDEs
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
 
-# Docs
-docs/
+# ==============================================================================
+# 4. Project Specific
+# ==============================================================================
+# Logs
+logs/
+*.log
+build_log*.txt
 
+# Temp / Backup
+.tmp/
+tmp/
+temp/
+*.tmp
+*.bak
+*.backup
+*.backup-*
+*backup-*
+
+# Archives
+*.zip
+*.tar
+*.gz
+*.rar
+*.7z
+
+# Agent / AI
+.agent/
+.kiro/
+.gemini/
+
+# Large files protection
+public/downloads/*.zip
+
+# Specific temporary files found
+test-new-llm-service.html
