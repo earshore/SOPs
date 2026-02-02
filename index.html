@@ -32,14 +32,21 @@
       <button data-action="switch-tab" data-tab="home" class="px-6 h-16 flex items-center gap-3 md:gap-4 group hover:bg-slate-50 transition-colors cursor-pointer">
         <div class="relative">
           <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-            class="lucide lucide-atom w-8 h-8 text-cyan-600 dark:text-cyan-400 animate-[spin_10s_linear_infinite]"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-atom w-8 h-8 animate-[spin_10s_linear_infinite]"
             aria-hidden="true">
-            <circle cx="12" cy="12" r="1"></circle>
-            <path
+            <defs>
+              <linearGradient id="gemini-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#4285F4;stop-opacity:1" />
+                <stop offset="50%" style="stop-color:#9B72F2;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#D96570;stop-opacity:1" />
+              </linearGradient>
+            </defs>
+            <circle cx="12" cy="12" r="1" stroke="url(#gemini-gradient)"></circle>
+            <path stroke="url(#gemini-gradient)"
               d="M20.2 20.2c2.04-2.03.02-7.36-4.5-11.9-4.54-4.52-9.87-6.54-11.9-4.5-2.04 2.03-.02 7.36 4.5 11.9 4.54 4.52 9.87 6.54 11.9 4.5Z">
             </path>
-            <path
+            <path stroke="url(#gemini-gradient)"
               d="M15.7 15.7c4.52-4.54 6.54-9.87 4.5-11.9-2.03-2.04-7.36-.02-11.9 4.5-4.52 4.54-6.54 9.87-4.5 11.9 2.03 2.04 7.36.02 11.9-4.5Z">
             </path>
           </svg>
@@ -106,7 +113,7 @@
                     <i class="fas fa-layer-group text-slate-400 text-xs"></i>
                     <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">核心应用模块</h3>
                   </div>
-                  <div id="mega-menu-content" class="grid grid-cols-3 gap-5">
+                  <div id="mega-menu-content" class="grid grid-cols-4 gap-5">
                     <div class="animate-pulse bg-slate-100 h-32 rounded-xl"></div>
                     <div class="animate-pulse bg-slate-100 h-32 rounded-xl"></div>
                     <div class="animate-pulse bg-slate-100 h-32 rounded-xl"></div>
