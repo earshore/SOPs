@@ -156,7 +156,7 @@ export const MENU_CONFIG = {
     moreCategories: {
         explore: {
             id: 'explore',
-            label: '探索',
+            label: '大模型探索',
             icon: 'fas fa-compass',
             color: 'green',
             order: 1,
