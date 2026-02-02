@@ -402,24 +402,30 @@ export const MENU_CONFIG = {
             category: 'advanced'
         },
 
-        // --- 属于 More 更多的页面 ---
-        more_settings: {
+        // --- 探索功能的子页面 ---
+        more_explore: {
             moduleId: 'more_explore',
-            label: '全局设置',
-            icon: 'fas fa-cog',
-            panelId: 'panel-settings'
+            label: '探索',
+            icon: 'fas fa-compass',
+            panelId: 'panel-more'
         },
-        more_guide: {
+        explore_agents: {
             moduleId: 'more_explore',
-            label: '使用指南',
-            icon: 'fas fa-book',
-            panelId: 'panel-guide'
+            label: '智能体',
+            icon: 'fas fa-robot',
+            panelId: 'panel-more'
         },
-        more_tips: {
+        explore_prompts: {
             moduleId: 'more_explore',
-            label: '提示',
-            icon: 'fas fa-lightbulb',
-            panelId: 'panel-tips'
+            label: '提示词',
+            icon: 'fas fa-message',
+            panelId: 'panel-more'
+        },
+        explore_workflows: {
+            moduleId: 'more_explore',
+            label: '工作流',
+            icon: 'fas fa-diagram-project',
+            panelId: 'panel-more'
         },
 
     }

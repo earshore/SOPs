@@ -409,15 +409,6 @@ function renderSidebar(moduleId) {
 
     if (moduleId === 'sops') {
         const currentTab = state.currentTab;
-
-        // Special Case: Hide sidebar on Overview page
-        if (currentTab === 'sops_overview') {
-            sidebar.classList.add("hidden", "-ml-64");
-            sidebar.innerHTML = '';
-            currentSidebarModuleId = null; // Force refresh when leaving overview
-            return;
-        }
-
         const routeConfig = MENU_CONFIG.routes[currentTab];
         const category = routeConfig?.category || 'overview';
         sidebarKey = `sops:${category}`;
@@ -426,15 +417,6 @@ function renderSidebar(moduleId) {
     // 对于 Amazon智库，也需要根据当前 Tab 的 Category 来区分 Sidebar 状态
     if (moduleId === 'amz_hub_core') {
         const currentTab = state.currentTab;
-
-        // Special Case: Hide sidebar on Overview page
-        if (currentTab === 'amz_hub_overview') {
-            sidebar.classList.add("hidden", "-ml-64");
-            sidebar.innerHTML = '';
-            currentSidebarModuleId = null; // Force refresh when leaving overview
-            return;
-        }
-
         const routeConfig = MENU_CONFIG.routes[currentTab];
         const category = routeConfig?.category || 'overview';
         sidebarKey = `amz_hub_core:${category}`;
@@ -489,27 +471,24 @@ function renderSopsSidebar(sidebar, moduleConfig, routes) {
     let sidebarColor = "slate"; // Default text color class suffix
 
     if (activeCategory === 'overview') {
-        // 在总览页面：显示"SOP 总览"自身，加上 4 个体系的快捷入口(作为 Navigation Items)
-        // 这样用户可以在侧边栏快速切换体系
-        displayRoutes = [
-            MENU_CONFIG.routes['sops_overview'], // Overview itself
-            // Add pseudo-routes for categories to act as navigation
-        ];
-        // 我们可以构造虚拟路由对象给 Sidebar 渲染
+        // 在总览页面：显示四个一级菜单分类
+        sidebarTitle = "SOP 总览";
         const categories = Object.values(MENU_CONFIG.sopCategories || {}).sort((a, b) => a.order - b.order);
         categories.forEach(cat => {
-            // Find target
-            const first = Object.values(MENU_CONFIG.routes).find(r => r.category === cat.id);
-            if (first) {
+            // 找到该分类下的第一个路由作为入口
+            const firstRouteEntry = Object.entries(MENU_CONFIG.routes).find(([_, r]) => r.category === cat.id);
+            if (firstRouteEntry) {
+                const [routeId, routeConfig] = firstRouteEntry;
                 displayRoutes.push({
-                    id: first.id, // Switching to this ID enters the category
+                    id: routeId, // 使用路由 ID 作为 key
                     label: cat.label,
                     icon: cat.icon,
-                    isCategoryLink: true // Marker for styling if needed
+                    color: cat.color, // 添加颜色信息
+                    categoryId: cat.id, // 添加分类 ID，用于滚动定位
+                    isCategoryLink: true
                 });
             }
         });
-
     } else {
         // 在具体体系页面：只显示该体系下的的所有 SOPs
         displayRoutes = routes.filter(r => r.category === activeCategory);
@@ -555,21 +534,78 @@ function renderSopsSidebar(sidebar, moduleConfig, routes) {
                     <div id="sop-search-results" class="hidden absolute top-full left-0 w-full bg-white border border-slate-200 shadow-xl rounded-lg mt-1 max-h-60 overflow-y-auto z-50"></div>
                 </div>
                 
-                <nav id="sop-nav-container" class="space-y-1">
-                    ${displayRoutes.map(route => `
-                        <button data-action="switch-tab" data-tab="${route.id}" id="sidebar-btn-${route.id}" 
-                            class="sidebar-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">
-                            <i class="${route.icon} w-5 text-center ${route.isCategoryLink ? 'text-slate-400' : ''}"></i> 
-                            ${route.label}
-                        </button>
-                    `).join('')}
+                <nav id="sop-nav-container" class="space-y-2">
+                    ${displayRoutes.map(route => {
+                        const isCategory = route.isCategoryLink;
+                        
+                        if (isCategory) {
+                            // 一级菜单分类 - 点击滚动到对应模块
+                            const color = route.color || 'slate';
+                            const categoryId = route.categoryId || ''; // 分类 ID
+                            const colorSchemes = {
+                                emerald: {
+                                    hoverBg: 'hover:bg-emerald-50',
+                                    hoverBorder: 'hover:border-emerald-200',
+                                    text: 'text-slate-700',
+                                    hoverText: 'hover:text-emerald-700',
+                                    icon: 'text-slate-500',
+                                    hoverIcon: 'group-hover:text-emerald-600'
+                                },
+                                amber: {
+                                    hoverBg: 'hover:bg-amber-50',
+                                    hoverBorder: 'hover:border-amber-200',
+                                    text: 'text-slate-700',
+                                    hoverText: 'hover:text-amber-700',
+                                    icon: 'text-slate-500',
+                                    hoverIcon: 'group-hover:text-amber-600'
+                                },
+                                red: {
+                                    hoverBg: 'hover:bg-red-50',
+                                    hoverBorder: 'hover:border-red-200',
+                                    text: 'text-slate-700',
+                                    hoverText: 'hover:text-red-700',
+                                    icon: 'text-slate-500',
+                                    hoverIcon: 'group-hover:text-red-600'
+                                },
+                                blue: {
+                                    hoverBg: 'hover:bg-blue-50',
+                                    hoverBorder: 'hover:border-blue-200',
+                                    text: 'text-slate-700',
+                                    hoverText: 'hover:text-blue-700',
+                                    icon: 'text-slate-500',
+                                    hoverIcon: 'group-hover:text-blue-600'
+                                }
+                            };
+                            const scheme = colorSchemes[color] || colorSchemes.blue;
+                            
+                            return `
+                            <button data-action="scroll-to-sop-module" data-category="${categoryId}" id="sidebar-btn-${route.id}" 
+                                class="group sidebar-btn w-full flex items-center gap-3 px-3 py-3 rounded-lg border border-transparent ${scheme.hoverBg} ${scheme.hoverBorder} ${scheme.text} ${scheme.hoverText} font-semibold text-sm transition-all duration-200 hover:shadow-md">
+                                <i class="${route.icon} w-5 text-center ${scheme.icon} ${scheme.hoverIcon} transition-colors"></i> 
+                                <span class="flex-1 text-left">${route.label}</span>
+                                <i class="fas fa-chevron-right text-xs opacity-0 group-hover:opacity-50 transition-opacity"></i>
+                            </button>
+                        `;
+                        } else {
+                            // 二级菜单项 - 简洁样式
+                            return `
+                            <button data-action="switch-tab" data-tab="${route.id}" id="sidebar-btn-${route.id}" 
+                                class="sidebar-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">
+                                <i class="${route.icon} w-5 text-center"></i> 
+                                ${route.label}
+                            </button>
+                        `;
+                        }
+                    }).join('')}
                 </nav>
             </div>  
             
             <div class="mt-auto p-4 border-t border-slate-100 bg-slate-50/50">
-                 <!-- Back to Overview Link if we are deep in a category -->
                  ${activeCategory !== 'overview' ? `
-
+                 <button data-action="switch-tab" data-tab="sops_overview" class="w-full flex items-center gap-2 text-xs text-slate-500 hover:text-blue-600 mb-3 transition-colors px-2 py-1.5 rounded hover:bg-white">
+                    <i class="fas fa-arrow-left"></i> 
+                    <span>返回 SOP 总览</span>
+                 </button>
                  ` : ''}
                  <div class="flex items-center gap-3 text-slate-400 text-xs">
                      <i class="${moduleConfig.icon}"></i>
@@ -578,9 +614,6 @@ function renderSopsSidebar(sidebar, moduleConfig, routes) {
             </div>
         </div>
     `;
-    //      <button data-action="switch-tab" data-tab="sops_overview" class="w-full flex items-center gap-2 text-xs text-slate-400 hover:text-blue-600 mb-2 transition-colors">
-    //     <i class="fas fa-arrow-left"></i> 返回 SOP 总览
-    //  </button>
     sidebar.innerHTML = html;
 }
 
@@ -602,27 +635,26 @@ function renderHubSidebar(sidebar, moduleConfig, routes) {
     let sidebarColor = "slate"; // Default text color class suffix
 
     if (activeCategory === 'overview') {
-        // 在总览页面：显示"智库总览"自身，加上 3 个模块的快捷入口
-        displayRoutes = [
-            MENU_CONFIG.routes['amz_hub_overview'], // Overview itself
-        ];
-        // 构造虚拟路由对象给 Sidebar 渲染
+        // 在总览页面：显示三个一级菜单分类
+        sidebarTitle = "智库总览";
         const categories = Object.values(MENU_CONFIG.hubCategories || {}).sort((a, b) => a.order - b.order);
         categories.forEach(cat => {
-            // Find target
-            const first = Object.values(MENU_CONFIG.routes).find(r => r.category === cat.id);
-            if (first) {
+            // 找到该分类下的第一个路由作为入口
+            const firstRouteEntry = Object.entries(MENU_CONFIG.routes).find(([_, r]) => r.category === cat.id);
+            if (firstRouteEntry) {
+                const [routeId, routeConfig] = firstRouteEntry;
                 displayRoutes.push({
-                    id: first.id, // Switching to this ID enters the category
+                    id: routeId, // 使用路由 ID 作为 key
                     label: cat.label,
                     icon: cat.icon,
-                    isCategoryLink: true // Marker for styling if needed
+                    color: cat.color, // 添加颜色信息
+                    categoryId: cat.id, // 添加分类 ID，用于滚动定位
+                    isCategoryLink: true
                 });
             }
         });
-
     } else {
-        // 在具体模块页面：只显示该模块下的所有内容
+        // 在具体体系页面：只显示该体系下的所有内容
         displayRoutes = routes.filter(r => r.category === activeCategory);
 
         // 更新标题
@@ -634,7 +666,7 @@ function renderHubSidebar(sidebar, moduleConfig, routes) {
         }
     }
 
-    // 3. 构建 HTML (扁平列表 - 完全复刻SOPs风格)
+    // 3. 构建 HTML (扁平列表)
     const titleColorClass = sidebarColor === 'slate' ? 'text-slate-400' : `text-${sidebarColor}-500`;
 
     const html = `
@@ -660,18 +692,71 @@ function renderHubSidebar(sidebar, moduleConfig, routes) {
                     <div id="hub-search-results" class="hidden absolute top-full left-0 w-full bg-white border border-slate-200 shadow-xl rounded-lg mt-1 max-h-60 overflow-y-auto z-50"></div>
                 </div>
                 
-                <nav id="hub-nav-container" class="space-y-1">
-                    ${displayRoutes.map(route => `
-                        <button data-action="switch-tab" data-tab="${route.id}" id="sidebar-btn-${route.id}" 
-                            class="sidebar-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">
-                            <i class="${route.icon} w-5 text-center ${route.isCategoryLink ? 'text-slate-400' : ''}"></i> 
-                            ${route.label}
-                        </button>
-                    `).join('')}
+                <nav id="hub-nav-container" class="space-y-2">
+                    ${displayRoutes.map(route => {
+                        const isCategory = route.isCategoryLink;
+                        
+                        if (isCategory) {
+                            // 一级菜单分类 - 点击滚动到对应模块
+                            const color = route.color || 'slate';
+                            const categoryId = route.categoryId || ''; // 分类 ID
+                            const colorSchemes = {
+                                blue: {
+                                    hoverBg: 'hover:bg-blue-50',
+                                    hoverBorder: 'hover:border-blue-200',
+                                    text: 'text-slate-700',
+                                    hoverText: 'hover:text-blue-700',
+                                    icon: 'text-slate-500',
+                                    hoverIcon: 'group-hover:text-blue-600'
+                                },
+                                emerald: {
+                                    hoverBg: 'hover:bg-emerald-50',
+                                    hoverBorder: 'hover:border-emerald-200',
+                                    text: 'text-slate-700',
+                                    hoverText: 'hover:text-emerald-700',
+                                    icon: 'text-slate-500',
+                                    hoverIcon: 'group-hover:text-emerald-600'
+                                },
+                                purple: {
+                                    hoverBg: 'hover:bg-purple-50',
+                                    hoverBorder: 'hover:border-purple-200',
+                                    text: 'text-slate-700',
+                                    hoverText: 'hover:text-purple-700',
+                                    icon: 'text-slate-500',
+                                    hoverIcon: 'group-hover:text-purple-600'
+                                }
+                            };
+                            const scheme = colorSchemes[color] || colorSchemes.blue;
+                            
+                            return `
+                            <button data-action="scroll-to-hub-module" data-category="${categoryId}" id="sidebar-btn-${route.id}" 
+                                class="group sidebar-btn w-full flex items-center gap-3 px-3 py-3 rounded-lg border border-transparent ${scheme.hoverBg} ${scheme.hoverBorder} ${scheme.text} ${scheme.hoverText} font-semibold text-sm transition-all duration-200 hover:shadow-md">
+                                <i class="${route.icon} w-5 text-center ${scheme.icon} ${scheme.hoverIcon} transition-colors"></i> 
+                                <span class="flex-1 text-left">${route.label}</span>
+                                <i class="fas fa-chevron-right text-xs opacity-0 group-hover:opacity-50 transition-opacity"></i>
+                            </button>
+                        `;
+                        } else {
+                            // 二级菜单项 - 简洁样式
+                            return `
+                            <button data-action="switch-tab" data-tab="${route.id}" id="sidebar-btn-${route.id}" 
+                                class="sidebar-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">
+                                <i class="${route.icon} w-5 text-center"></i> 
+                                ${route.label}
+                            </button>
+                        `;
+                        }
+                    }).join('')}
                 </nav>
             </div>  
             
             <div class="mt-auto p-4 border-t border-slate-100 bg-slate-50/50">
+                 ${activeCategory !== 'overview' ? `
+                 <button data-action="switch-tab" data-tab="amz_hub_overview" class="w-full flex items-center gap-2 text-xs text-slate-500 hover:text-blue-600 mb-3 transition-colors px-2 py-1.5 rounded hover:bg-white">
+                     <i class="fas fa-arrow-left"></i>
+                     <span>返回智库总览</span>
+                 </button>
+                 ` : ''}
                  <div class="flex items-center gap-3 text-slate-400 text-xs">
                      <i class="${moduleConfig.icon}"></i>
                      <span>${moduleConfig.version}</span>
@@ -981,6 +1066,111 @@ function clearSOPSearch() {
     clearBtn.classList.add('hidden');
 }
 
+/**
+ * 滚动到 SOP 模块区域
+ * @param {string} categoryId - 分类 ID (growth, backend, safety, service)
+ */
+function scrollToSOPModule(categoryId) {
+    if (!categoryId) {
+        console.warn('⚠️ scrollToSOPModule: categoryId 为空');
+        return;
+    }
+    
+    const moduleId = `sop-module-${categoryId}`;
+    const moduleElement = document.getElementById(moduleId);
+    
+    if (moduleElement) {
+        // 使用平滑滚动
+        moduleElement.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start',
+            inline: 'nearest'
+        });
+        
+        // 添加高亮效果
+        moduleElement.classList.add('sop-module-highlight');
+        setTimeout(() => {
+            moduleElement.classList.remove('sop-module-highlight');
+        }, 2000);
+        
+        // 更新侧边栏按钮的选中状态
+        updateSidebarActiveState(categoryId);
+        
+        console.log(`✅ 滚动到模块: ${categoryId}`);
+    } else {
+        console.warn(`⚠️ 未找到模块元素: ${moduleId}`);
+    }
+}
+
+/**
+ * 更新侧边栏按钮的选中状态
+ * @param {string} categoryId - 当前选中的分类 ID
+ */
+function updateSidebarActiveState(categoryId) {
+    // 移除所有按钮的选中状态
+    document.querySelectorAll('[data-action="scroll-to-sop-module"]').forEach(btn => {
+        btn.classList.remove('sop-sidebar-active');
+    });
+    
+    // 添加当前按钮的选中状态
+    const activeBtn = document.querySelector(`[data-action="scroll-to-sop-module"][data-category="${categoryId}"]`);
+    if (activeBtn) {
+        activeBtn.classList.add('sop-sidebar-active');
+    }
+}
+
+/**
+ * 滚动到智库模块区域
+ * @param {string} categoryId - 分类 ID (knowledge, practice, advanced)
+ */
+function scrollToHubModule(categoryId) {
+    if (!categoryId) {
+        console.warn('⚠️ scrollToHubModule: categoryId 为空');
+        return;
+    }
+    
+    const moduleId = `hub-module-${categoryId}`;
+    const moduleElement = document.getElementById(moduleId);
+    
+    if (moduleElement) {
+        // 使用平滑滚动
+        moduleElement.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start',
+            inline: 'nearest'
+        });
+        
+        // 添加高亮效果
+        moduleElement.classList.add('hub-module-highlight');
+        setTimeout(() => {
+            moduleElement.classList.remove('hub-module-highlight');
+        }, 2000);
+        
+        // 更新侧边栏按钮的选中状态
+        updateHubSidebarActiveState(categoryId);
+        
+        console.log(`✅ 滚动到智库模块: ${categoryId}`);
+    } else {
+        console.warn(`⚠️ 未找到模块元素: ${moduleId}`);
+    }
+}
+
+/**
+ * 更新智库侧边栏按钮的选中状态
+ * @param {string} categoryId - 当前选中的分类 ID
+ */
+function updateHubSidebarActiveState(categoryId) {
+    // 移除所有按钮的选中状态
+    document.querySelectorAll('[data-action="scroll-to-hub-module"]').forEach(btn => {
+        btn.classList.remove('hub-sidebar-active');
+    });
+    
+    // 添加当前按钮的选中状态
+    const activeBtn = document.querySelector(`[data-action="scroll-to-hub-module"][data-category="${categoryId}"]`);
+    if (activeBtn) {
+        activeBtn.classList.add('hub-sidebar-active');
+    }
+}
 // User Guide Actions
 function openUserGuide() {
     const modal = getEl('user-guide-modal');
@@ -1169,6 +1359,8 @@ registerActions({
     'open-user-guide': openUserGuide,
     'close-user-guide': closeUserGuide,
     'switch-guide-tab': (params) => switchGuideTab(params),
+    'scroll-to-sop-module': (params) => scrollToSOPModule(params.category),
+    'scroll-to-hub-module': (params) => scrollToHubModule(params.category),
 });
 
 // 不再导出 window.switchTab 等，除非为了调试或其它模块遗留调用

@@ -4,7 +4,14 @@
 
 /* SOP Overview Container - Centered Limit */
 .sop-overview-container {
-    max-width: 1400px;
+    max-width: 1450px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* SOP Module Section - Same padding as overview */
+.sop-module-section {
+    max-width: 1450px;
     margin: 0 auto;
     padding: 0 1rem;
 }
@@ -163,6 +170,86 @@
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/* Module highlight animation */
+.sop-module-highlight {
+    animation: sopModuleHighlight 2s ease-out;
+}
+
+@keyframes sopModuleHighlight {
+    0% {
+        background-color: transparent;
+    }
+    10% {
+        background-color: rgba(59, 130, 246, 0.1);
+    }
+    100% {
+        background-color: transparent;
+    }
+}
+
+/* Sidebar active state for category buttons */
+/* Active states are defined below for each color scheme */
+
+/* Emerald active state */
+.sop-sidebar-active.group[data-category="growth"] {
+    background-color: rgb(236 253 245) !important; /* bg-emerald-50 */
+    border-color: rgb(167 243 208) !important; /* border-emerald-200 */
+    color: rgb(4 120 87) !important; /* text-emerald-700 */
+}
+
+.sop-sidebar-active.group[data-category="growth"] i {
+    color: rgb(5 150 105) !important; /* text-emerald-600 */
+}
+
+.sop-sidebar-active.group[data-category="growth"] .fa-chevron-right {
+    opacity: 0.5 !important;
+}
+
+/* Amber active state */
+.sop-sidebar-active.group[data-category="backend"] {
+    background-color: rgb(255 251 235) !important; /* bg-amber-50 */
+    border-color: rgb(253 230 138) !important; /* border-amber-200 */
+    color: rgb(180 83 9) !important; /* text-amber-700 */
+}
+
+.sop-sidebar-active.group[data-category="backend"] i {
+    color: rgb(217 119 6) !important; /* text-amber-600 */
+}
+
+.sop-sidebar-active.group[data-category="backend"] .fa-chevron-right {
+    opacity: 0.5 !important;
+}
+
+/* Red active state */
+.sop-sidebar-active.group[data-category="safety"] {
+    background-color: rgb(254 242 242) !important; /* bg-red-50 */
+    border-color: rgb(254 202 202) !important; /* border-red-200 */
+    color: rgb(185 28 28) !important; /* text-red-700 */
+}
+
+.sop-sidebar-active.group[data-category="safety"] i {
+    color: rgb(220 38 38) !important; /* text-red-600 */
+}
+
+.sop-sidebar-active.group[data-category="safety"] .fa-chevron-right {
+    opacity: 0.5 !important;
+}
+
+/* Blue active state */
+.sop-sidebar-active.group[data-category="service"] {
+    background-color: rgb(239 246 255) !important; /* bg-blue-50 */
+    border-color: rgb(191 219 254) !important; /* border-blue-200 */
+    color: rgb(29 78 216) !important; /* text-blue-700 */
+}
+
+.sop-sidebar-active.group[data-category="service"] i {
+    color: rgb(37 99 235) !important; /* text-blue-600 */
+}
+
+.sop-sidebar-active.group[data-category="service"] .fa-chevron-right {
+    opacity: 0.5 !important;
 }
 
 /* Category Filter Tabs */

@@ -16,6 +16,34 @@ export function unmount() {
     console.log("❌ SOPs 总览模块已卸载");
 }
 
+/**
+ * 滚动到指定的模块区域
+ * @param {string} categoryId - 分类 ID (growth, backend, safety, service)
+ */
+export function scrollToModule(categoryId) {
+    const moduleId = `sop-module-${categoryId}`;
+    const moduleElement = document.getElementById(moduleId);
+    
+    if (moduleElement) {
+        // 使用平滑滚动
+        moduleElement.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start',
+            inline: 'nearest'
+        });
+        
+        // 添加高亮效果
+        moduleElement.classList.add('sop-module-highlight');
+        setTimeout(() => {
+            moduleElement.classList.remove('sop-module-highlight');
+        }, 2000);
+        
+        console.log(`✅ 滚动到模块: ${categoryId}`);
+    } else {
+        console.warn(`⚠️ 未找到模块: ${moduleId}`);
+    }
+}
+
 function initOverviewEvents(container) {
     // 分类筛选标签点击事件
     const categoryTabs = container.querySelectorAll('.sop-category-tab');
