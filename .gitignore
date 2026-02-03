@@ -42,10 +42,12 @@ reports/
 *.lcov
 test-*.html
 *.test.local.js
+test/
 
 # Documentation
 # docs/  <-- Keep docs tracked usually, unless generated
 jsdoc-debug.html
+docs/
 
 # ==============================================================================
 # 3. System & IDE
@@ -91,21 +93,15 @@ temp/
 *.backup
 *.backup-*
 *backup-*
-
-# Archives
-*.zip
-*.tar
-*.gz
-*.rar
-*.7z
+coverage/
 
 # Agent / AI
 .agent/
 .kiro/
 .gemini/
 
-# Large files protection
-public/downloads/*.zip
-
 # Specific temporary files found
 test-new-llm-service.html
+
+# Scripts
+/scripts
