@@ -42,11 +42,15 @@ reports/
 *.lcov
 test-*.html
 *.test.local.js
+# test/ - 保留测试脚本，不要忽略
+test/**/*.local.js
+test/**/temp-*.js
 test/
 
 # Documentation
-# docs/  <-- Keep docs tracked usually, unless generated
+# docs/ - 保留文档，不要忽略
 jsdoc-debug.html
+docs/**/*.draft.md
 docs/
 
 # ==============================================================================
@@ -93,7 +97,7 @@ temp/
 *.backup
 *.backup-*
 *backup-*
-coverage/
+**/*.html.backup
 
 # Agent / AI
 .agent/

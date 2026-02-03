@@ -13,7 +13,7 @@ import { ErrorService } from "../../../../services/errorService.js";
 import { registerActionsWithLegacy } from "../../../../common/utils/actionRegistry.js";
 import { renderWidgetCard, renderViewModeHTML, renderEditorForm, renderSkeleton } from "./analysisRenderer.js";
 import eventBus from "../../../../common/EventBus.js"; // [NEW] Import EventBus
-import { EVENTS } from "../../../../common/constants/eventConstants.js";
+import { MODULE_EVENTS } from "../../../../common/constants/eventConstants.js";
 import { loadGridStack } from "../../../../common/utils/lazyLibs.js";
 
 class AnalysisModule extends BaseModule {
@@ -36,8 +36,8 @@ class AnalysisModule extends BaseModule {
     this.setupUI();
 
     // [NEW] Subscribe to Scraper Events
-    this.addDisposable(eventBus.on(EVENTS.SCRAPE_COMPLETE, () => {
-      console.log("AnalysisModule received SCRAPE_COMPLETE");
+    this.addDisposable(eventBus.on(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, () => {
+      console.log("AnalysisModule received SCRAPE_SUCCESS");
       if (state.scrapedData && state.scrapedData.products) {
         state.selectedAsins = state.scrapedData.products.map((p) => p.asin);
       }

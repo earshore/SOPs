@@ -119,6 +119,8 @@ import {
 } from "./modules/app_center/master_prompt/scraper/scraperPanel.js";
 
 import { switchTab, renderMegaMenu, renderSopsMegaMenu, renderHubMegaMenu, renderMoreMenu, showToast, initRouter } from "../src/common/utils/ui.js";
+import { router, initRouterSystem } from './common/router/index.js';
+import { APP_EVENTS } from './common/constants/eventConstants.js';
 import { initHomeSplash } from "./modules/home/homeDisplay.js";
 
 import {
@@ -155,7 +157,14 @@ window.Alpine = Alpine;
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("🚀 System: Application Booting...");
 
-  // 0. Initialize Alpine Components
+  // 0. Initialize Router System (新路由系统)
+  initRouterSystem({
+    enableLogging: true,
+    enableScrollRestoration: true,
+    defaultTitle: 'Amazing Amazon Architect'
+  });
+
+  // 1. Initialize Alpine Components
   initAlpineSettings();
   initAlpineScraper();
   Alpine.start();
@@ -194,7 +203,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // 🎯 P3: 广播应用初始化完成事件
     // 所有模块可以监听此事件实现自注册初始化
     // ================================================================
-    window.dispatchEvent(new CustomEvent('app:initialized', {
+    window.dispatchEvent(new CustomEvent(APP_EVENTS.INITIALIZED, {
       detail: { timestamp: Date.now() }
     }));
 

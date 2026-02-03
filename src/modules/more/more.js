@@ -1,5 +1,6 @@
 console.log("📋 More Core Module Loading...");
 import './more_style.css';
+import { APP_EVENTS } from '../../common/constants/eventConstants.js';
 
 // ================= 路由配置表 =================
 const MODULE_MAP = {
@@ -129,7 +130,7 @@ async function loadSubModule(routeId, retryCount = 0) {
 }
 
 // ================= 监听全局路由事件 =================
-window.addEventListener('app:route-changed', async (e) => {
+window.addEventListener(APP_EVENTS.ROUTE_CHANGED, async (e) => {
     const { routeId, config } = e.detail;
 
     console.log(`📡 [More 调试] 收到路由: ${routeId}, 模块ID: ${config?.module?.id}`);

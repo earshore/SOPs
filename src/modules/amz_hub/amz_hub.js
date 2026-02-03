@@ -1,6 +1,7 @@
 console.log("📚 AmzHub Core Module Loading...");
 
 import './amz_hub_style.css';
+import { APP_EVENTS } from '../../common/constants/eventConstants.js';
 
 // ================= 路由配置表 =================
 // 键名对应 menuConfig.js 里的 route id
@@ -127,7 +128,7 @@ async function loadSubModule(routeId, retryCount = 0) {
 // ================= 监听全局路由事件 =================
 // src/modules/amz_hub/amz_hub.js 底部
 
-window.addEventListener('app:route-changed', async (e) => {
+window.addEventListener(APP_EVENTS.ROUTE_CHANGED, async (e) => {
     const { routeId, config } = e.detail;
 
     // 🔍 调试日志：看看究竟收到了什么

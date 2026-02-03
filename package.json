@@ -15,7 +15,9 @@
         "docs:watch": "nodemon --watch src --exec npm run docs",
         "audit:globals": "node scripts/audit-globals.js",
         "migrate:onclick": "node scripts/migrate-onclick.js",
-        "rollback:onclick": "node scripts/rollback-onclick.js"
+        "rollback:onclick": "node scripts/rollback-onclick.js",
+        "cleanup": "node scripts/cleanup-garbage-files.js",
+        "cleanup:dry-run": "node scripts/cleanup-garbage-files.js --dry-run"
     },
     "devDependencies": {
         "@vitest/coverage-v8": "^1.0.0",

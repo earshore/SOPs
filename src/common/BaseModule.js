@@ -7,6 +7,7 @@ export default class BaseModule {
         this._disposables = [];
         this._isMounted = false;
         this.container = null;
+        this._abortController = new AbortController();
     }
 
     /**
@@ -71,6 +72,9 @@ export default class BaseModule {
 
         console.log(`[BaseModule] Unmounting ${this.moduleId}...`);
 
+        // 0. 取消所有进行中的请求
+        this._abortController.abort();
+
         // 1. 执行注册的清理函数
         this._disposables.forEach(dispose => {
             try {
@@ -85,8 +89,9 @@ export default class BaseModule {
         this.onUnmount();
 
         this._isMounted = false;
-        // 注意：不清除 container 引用，以便 handleError 可以重用容器
-        // this.container = null; 
+        
+        // 3. 重置 AbortController 以便重新挂载
+        this._abortController = new AbortController();
     }
 
     /**
@@ -141,6 +146,27 @@ export default class BaseModule {
         if (typeof fn === 'function') {
             this._disposables.push(fn);
         }
+    }
+
+    /**
+     * 发起可取消的 fetch 请求
+     * @param {string} url - 请求URL
+     * @param {RequestInit} options - fetch 选项
+     * @returns {Promise<Response>}
+     */
+    async fetch(url, options = {}) {
+        return fetch(url, {
+            ...options,
+            signal: this._abortController.signal
+        });
+    }
+
+    /**
+     * 获取 AbortSignal (用于其他需要取消的操作)
+     * @returns {AbortSignal}
+     */
+    getAbortSignal() {
+        return this._abortController.signal;
     }
 
     /**

@@ -10,7 +10,7 @@ import { StorageService, STORAGE_KEYS } from "../../../../services/storageServic
 import { ErrorService } from "../../../../services/errorService.js";
 import { showToast, sleep, getErrorSummary } from "../../../../common/utils/ui.js";
 import eventBus from "../../../../common/EventBus.js";
-import { EVENTS } from "../../../../common/constants/eventConstants.js";
+import { MODULE_EVENTS } from "../../../../common/constants/eventConstants.js";
 
 // ========================================== 
 // Alpine Component Logic
@@ -119,7 +119,7 @@ const ScraperPanel = () => ({
             state.selectedSite = item.site;
 
             // Notify other modules
-            eventBus.emit(EVENTS.SCRAPE_COMPLETE, item.data);
+            eventBus.emit(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, item.data);
 
             // If report exists, we might want to switch tab? 
             // For now, just load data. User can click Analysis tab.
@@ -218,7 +218,7 @@ const ScraperPanel = () => ({
 
             const successCount = products.filter(p => p.scrape_status === 'success').length;
             if (successCount > 0) {
-                eventBus.emit(EVENTS.SCRAPE_COMPLETE, scrapedData);
+                eventBus.emit(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, scrapedData);
                 showToast(`采集完成: ${successCount} 成功`, "success");
             } else {
                 showToast("采集完成，但全部失败", "error");

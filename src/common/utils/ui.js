@@ -5,6 +5,7 @@ import { ERROR_MESSAGES } from "../constants/constants.js";
 import { MENU_CONFIG, getRoutesByModule, getRouteFullConfig } from "../config/menuConfig.js";
 import { registerActions } from "./actionRegistry.js";
 import { ensureViewLoaded } from "./viewLoader.js";
+import { APP_EVENTS, emitAppEvent } from "../constants/eventConstants.js";
 
 // ========================
 // 🛡️ HELPER: 健壮的 DOM 获取器
@@ -1104,15 +1105,11 @@ export async function switchTab(tab, updateHistory = true) {
     // 🚀 核心解耦：分发事件 (Event Broadcasting)
     // 任何业务逻辑 (加载数据、内部Tab切换) 都必须监听此事件
     // ============================================================
-    const event = new CustomEvent('app:route-changed', {
-        detail: {
-            routeId: cleanTab,
-            moduleId: targetModuleId,
-            config: fullConfig,
-            timestamp: Date.now()
-        }
+    emitAppEvent(APP_EVENTS.ROUTE_CHANGED, {
+        routeId: cleanTab,
+        moduleId: targetModuleId,
+        config: fullConfig
     });
-    window.dispatchEvent(event);
 
     console.log(`📡 路由切换事件已广播: ${cleanTab} (Module: ${targetModuleId})`);
 }

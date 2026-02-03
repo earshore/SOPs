@@ -9,7 +9,7 @@ import { StorageService } from "../../../../services/storageService.js";
 import { languageFlagMap, SITE_NAME_MAP, SITE_DOMAIN_MAP } from "../../../../common/constants/constants.js";
 import { registerActionsWithLegacy } from "../../../../common/utils/actionRegistry.js";
 import eventBus from "../../../../common/EventBus.js"; // [NEW] Import EventBus
-import { EVENTS } from "../../../../common/constants/eventConstants.js";
+import { MODULE_EVENTS } from "../../../../common/constants/eventConstants.js";
 
 class DataModule extends BaseModule {
     constructor() {
@@ -26,8 +26,8 @@ class DataModule extends BaseModule {
         this.setupEventListeners();
 
         // [NEW] Subscribe to Scraper Events
-        this.addDisposable(eventBus.on(EVENTS.SCRAPE_COMPLETE, (data) => {
-            console.log("DataModule received SCRAPE_COMPLETE");
+        this.addDisposable(eventBus.on(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, (data) => {
+            console.log("DataModule received SCRAPE_SUCCESS");
             this.renderDataPanel();
         }));
 
