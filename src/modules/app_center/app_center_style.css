@@ -415,6 +415,70 @@
     border-color: #3b82f6;
 }
 
+/* 关键词高亮样式 */
+.keyword-bold {
+    font-weight: 600;
+    color: #059669;
+    background: linear-gradient(120deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.08) 100%);
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.25rem;
+    transition: all 0.2s ease;
+}
+
+.highlightable {
+    cursor: pointer;
+    position: relative;
+}
+
+.highlightable:hover {
+    background: linear-gradient(120deg, rgba(16, 185, 129, 0.25) 0%, rgba(16, 185, 129, 0.15) 100%);
+    transform: scale(1.02);
+}
+
+/* 高亮定位焦点样式 */
+.highlight-focus {
+    background: linear-gradient(120deg, rgba(251, 191, 36, 0.4) 0%, rgba(251, 191, 36, 0.25) 100%) !important;
+    color: #92400e !important;
+    font-weight: 700 !important;
+    padding: 0.25rem 0.375rem !important;
+    border-radius: 0.375rem !important;
+    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.2), 0 4px 12px -2px rgba(251, 191, 36, 0.3) !important;
+    animation: highlightPulse 0.6s ease-out;
+    transform: scale(1.05) !important;
+    z-index: 10;
+    position: relative;
+}
+
+@keyframes highlightPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(251, 191, 36, 0.1);
+        transform: scale(1.08);
+    }
+    100% {
+        box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.2);
+        transform: scale(1.05);
+    }
+}
+
+/* 翻译模式段落样式 */
+.paragraph-original {
+    color: #334155;
+    margin-bottom: 0.5rem;
+}
+
+.sentence-translation {
+    color: #64748b;
+    font-size: 0.8125rem;
+    font-style: italic;
+    padding-left: 1rem;
+    border-left: 3px solid #e2e8f0;
+    margin-top: 0.5rem;
+}
+
 /* ==================== Master Prompt 特定样式 ==================== */
 
 /* Master Prompt 原始样式 - 完整保留 */
