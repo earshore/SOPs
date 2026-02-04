@@ -174,4 +174,26 @@ window.addEventListener(APP_EVENTS.ROUTE_CHANGED, async (e) => {
     }
 });
 
+// ================= 监听主模块卸载事件 =================
+// 当用户从应用中心切换到其他主模块时，清理当前子模块
+window.addEventListener(APP_EVENTS.MODULE_UNLOAD, (e) => {
+    const { panelId } = /** @type {CustomEvent} */(e).detail;
+    
+    // 只处理应用中心的卸载
+    if (panelId === 'panel-app_center') {
+        console.log('[AppCenter] 🔄 收到模块卸载请求，开始清理子模块');
+        
+        // 卸载当前激活的子模块
+        if (currentModule && currentModule.unmount) {
+            try {
+                currentModule.unmount();
+                currentModule = null;
+                console.log('[AppCenter] ✅ 子模块已卸载');
+            } catch (err) {
+                console.error('[AppCenter] ❌ 子模块卸载失败:', err);
+            }
+        }
+    }
+});
+
 console.log("✅ App Center Module 加载完成");

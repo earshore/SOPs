@@ -21,6 +21,7 @@ export const APP_EVENTS = {
     // 模块生命周期
     MODULE_MOUNTED: 'app:module-mounted',
     MODULE_UNMOUNTED: 'app:module-unmounted',
+    MODULE_UNLOAD: 'app:module-unload', // 主模块卸载请求（在切换前触发）
     MODULE_ERROR: 'app:module-error',
     
     // 状态变化

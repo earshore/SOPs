@@ -609,10 +609,12 @@ export async function mount(container) {
         // 2. 将浮动窗口移到 body 级别(避免被容器限制)
         const floatWin = document.getElementById('kt-keywords-floating');
         const minBtn = document.getElementById('kt-keywords-minimized');
-        if (floatWin && !floatWin.parentElement.matches('body')) {
+        
+        // 如果浮动窗口不在 body 中，则移动到 body
+        if (floatWin && floatWin.parentElement !== document.body) {
             document.body.appendChild(floatWin);
         }
-        if (minBtn && !minBtn.parentElement.matches('body')) {
+        if (minBtn && minBtn.parentElement !== document.body) {
             document.body.appendChild(minBtn);
         }
 
@@ -661,20 +663,14 @@ export function unmount() {
         // 1. 保存状态到 state
         saveProcessStateToState();
 
-        // 2. 隐藏并移除浮动窗口和最小化按钮(从 body 中移除)
+        // 2. 移除浮动窗口和最小化按钮（从 DOM 中完全移除）
         const floatWin = document.getElementById('kt-keywords-floating');
         const minBtn = document.getElementById('kt-keywords-minimized');
         if (floatWin) {
-            floatWin.classList.remove('show');
-            if (floatWin.parentElement === document.body) {
-                floatWin.remove();
-            }
+            floatWin.remove();
         }
         if (minBtn) {
-            minBtn.classList.remove('show');
-            if (minBtn.parentElement === document.body) {
-                minBtn.remove();
-            }
+            minBtn.remove();
         }
 
         // 3. 清理事件监听器和定时器

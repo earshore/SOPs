@@ -152,3 +152,22 @@ window.addEventListener(APP_EVENTS.ROUTE_CHANGED, async (e) => {
         await loadSubModule(routeId);
     }
 });
+
+// ================= 监听主模块卸载事件 =================
+window.addEventListener(APP_EVENTS.MODULE_UNLOAD, (e) => {
+    const { panelId } = e.detail;
+    
+    if (panelId === 'panel-amz_hub') {
+        console.log('[AmzHub] 🔄 收到模块卸载请求，开始清理子模块');
+        
+        if (currentModule && currentModule.unmount) {
+            try {
+                currentModule.unmount();
+                currentModule = null;
+                console.log('[AmzHub] ✅ 子模块已卸载');
+            } catch (err) {
+                console.error('[AmzHub] ❌ 子模块卸载失败:', err);
+            }
+        }
+    }
+});

@@ -1034,6 +1034,10 @@ function updateSidebarHighlight(activeTabId) {
  * @param {string} tab - 目标路由ID
  * @param {boolean} updateHistory - 是否更新浏览器 URL Hash (默认 true)
  */
+
+// 记录当前激活的主模块 Panel（用于检测模块切换）
+let currentActivePanel = null;
+
 export async function switchTab(tab, updateHistory = true) {
     const cleanTab = String(tab).trim();
 
@@ -1062,14 +1066,27 @@ export async function switchTab(tab, updateHistory = true) {
     renderSidebar(targetModuleId);
 
     // 4. 面板显隐 (View Layer)
-    // 先隐藏所有 .panel
-    document.querySelectorAll(".panel").forEach(p => p.classList.add("hidden"));
-
     // 确定目标 Panel ID
     let targetPanelId = 'panel-home';
     if (fullConfig && fullConfig.route.panelId) {
         targetPanelId = fullConfig.route.panelId;
     }
+
+    // ============================================================
+    // 🔥 核心增强：主模块生命周期管理
+    // 当切换到不同的主模块时，触发旧模块的卸载事件
+    // ============================================================
+    if (currentActivePanel && currentActivePanel !== targetPanelId) {
+        console.log(`[Router] 主模块切换: ${currentActivePanel} -> ${targetPanelId}`);
+        emitAppEvent(APP_EVENTS.MODULE_UNLOAD, { 
+            panelId: currentActivePanel,
+            nextPanelId: targetPanelId 
+        });
+    }
+    currentActivePanel = targetPanelId;
+
+    // 先隐藏所有 .panel
+    document.querySelectorAll(".panel").forEach(p => p.classList.add("hidden"));
 
     const targetPanel = getEl(targetPanelId);
     if (targetPanel) {
