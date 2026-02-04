@@ -1,14 +1,20 @@
-console.log("📋 Master Prompt Core Module Loading...");
-import './master_prompt_style.css';
-import { APP_EVENTS } from '../../../common/constants/eventConstants.js';
+console.log("🎯 App Center Core Module Loading...");
+import './app_center_style.css';
+import { APP_EVENTS } from '../../common/constants/eventConstants.js';
 
 // ================= 路由配置表 =================
 // 键名对应 menuConfig.js 里的 route id
 const MODULE_MAP = {
-    'scraper': () => import('./views/scraper/index.js'),
-    'data': () => import('./views/data/index.js'),
-    'analysis': () => import('./views/analysis/index.js'),
-    'promptlab': () => import('./views/promptlab/index.js'),
+    // Master Prompt 子模块
+    'scraper': () => import('./master_prompt/views/scraper/index.js'),
+    'data': () => import('./master_prompt/views/data/index.js'),
+    'analysis': () => import('./master_prompt/views/analysis/index.js'),
+    'promptlab': () => import('./master_prompt/views/promptlab/index.js'),
+
+    // Keyword Hunter 子模块
+    'kw_input': () => import('./keyword_hunter/views/input/index.js'),
+    'kw_process': () => import('./keyword_hunter/views/process/index.js'),
+    'kw_analysis': () => import('./keyword_hunter/views/analysis/index.js'),
 };
 
 /**
@@ -18,10 +24,10 @@ const MODULE_MAP = {
  */
 export function registerSubModule(routeId, loader) {
     if (MODULE_MAP[routeId]) {
-        console.warn(`[Master Prompt] 覆盖已存在的子模块: ${routeId}`);
+        console.warn(`[AppCenter] 覆盖已存在的子模块: ${routeId}`);
     }
     MODULE_MAP[routeId] = loader;
-    console.log(`[Master Prompt] 注册子模块: ${routeId}`);
+    console.log(`[AppCenter] 注册子模块: ${routeId}`);
 }
 
 let currentModule = null; // 保持对当前子模块的引用，以便卸载
@@ -59,15 +65,14 @@ function waitForContainer(id, timeout = 3000) {
  * @param {number} retryCount - 重试次数
  */
 async function loadSubModule(routeId, retryCount = 0) {
-    console.log(`[Master Prompt] 🔄 开始加载子模块: ${routeId}`);
+    console.log(`[AppCenter] 🔄 开始加载子模块: ${routeId}`);
 
     // 1. 等待 Shell 容器 (最多 3 秒)
-    const container = await waitForContainer('master_prompt_content_area');
+    const container = await waitForContainer('app_center_content_area');
 
     if (!container) {
-        console.error(`[Master Prompt] 容器 #master_prompt_content_area 未找到 (超时)`);
-        // 如果是第一次失败，可能是 shell 还在加载
-        const shell = document.getElementById('panel-master_prompt');
+        console.error(`[AppCenter] 容器 #app_center_content_area 未找到 (超时)`);
+        const shell = document.getElementById('panel-app_center');
         if (shell) {
             shell.innerHTML = `<div class="p-10 text-red-500">❌ 错误: 内容容器加载超时，请刷新重试。</div>`;
         }
@@ -77,10 +82,10 @@ async function loadSubModule(routeId, retryCount = 0) {
     // 2. 卸载旧模块
     if (currentModule && currentModule.unmount) {
         try {
-            console.log(`[Master Prompt] 🔄 卸载旧模块`);
+            console.log(`[AppCenter] 🔄 卸载旧模块`);
             currentModule.unmount();
         } catch (unmountErr) {
-            console.warn(`[Master Prompt] 卸载模块时出错:`, unmountErr);
+            console.warn(`[AppCenter] 卸载模块时出错:`, unmountErr);
         }
     }
 
@@ -95,20 +100,20 @@ async function loadSubModule(routeId, retryCount = 0) {
 
     try {
         // 4. 动态导入模块 (Lazy Load)
-        console.log(`[Master Prompt] 📦 动态导入模块: ${routeId}`);
+        console.log(`[AppCenter] 📦 动态导入模块: ${routeId}`);
         const module = await loader();
 
         // 5. 挂载新模块
         if (module.mount) {
-            console.log(`[Master Prompt] 🔧 挂载新模块: ${routeId}`);
+            console.log(`[AppCenter] 🔧 挂载新模块: ${routeId}`);
             await module.mount(container);
             currentModule = module;
-            console.log(`[Master Prompt] ✅ 子模块加载成功: ${routeId}`);
+            console.log(`[AppCenter] ✅ 子模块加载成功: ${routeId}`);
         } else {
             throw new Error(`模块接口不完整: 缺少 mount() 函数`);
         }
     } catch (err) {
-        console.error(`[Master Prompt] 加载子模块失败 (重试 ${retryCount}):`, err);
+        console.error(`[AppCenter] 加载子模块失败 (重试 ${retryCount}):`, err);
 
         // 自动重试机制 (Max 1次)
         if (retryCount < 1) {
@@ -119,7 +124,7 @@ async function loadSubModule(routeId, retryCount = 0) {
 
         // 错误边界 UI
         container.innerHTML = `
-            <div class="master-prompt-error-boundary flex flex-col items-center justify-center p-12 text-center fade-in">
+            <div class="app-center-error-boundary flex flex-col items-center justify-center p-12 text-center fade-in">
                 <div class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mb-4">
                     <i class="fas fa-exclamation-triangle text-2xl text-red-500"></i>
                 </div>
@@ -151,16 +156,16 @@ window.addEventListener(APP_EVENTS.ROUTE_CHANGED, async (e) => {
     const { routeId, config } = e.detail;
 
     // 🔍 调试日志：看看究竟收到了什么
-    console.log(`📡 [Master Prompt 调试] 收到路由: ${routeId}, 模块ID: ${config?.module?.id}`);
+    console.log(`📡 [AppCenter 调试] 收到路由: ${routeId}, 模块ID: ${config?.module?.id}`);
 
     // 只要这个路由 ID 在我们的 MODULE_MAP 映射表里存在，我们就处理它
     if (MODULE_MAP[routeId]) {
-        console.log(`✅ [Master Prompt] 匹配成功，准备加载子模块: ${routeId}`);
+        console.log(`✅ [AppCenter] 匹配成功，准备加载子模块: ${routeId}`);
 
         // 1. 确保 Shell 已经存在
-        const shell = document.getElementById('panel-master_prompt');
+        const shell = document.getElementById('panel-app_center');
         if (!shell) {
-            console.warn("⚠️ [Master Prompt] Shell 容器 #panel-master_prompt 未找到，请检查 master_prompt.html 是否已加载");
+            console.warn("⚠️ [AppCenter] Shell 容器 #panel-app_center 未找到，请检查 app_center.html 是否已加载");
             return;
         }
 
@@ -169,4 +174,4 @@ window.addEventListener(APP_EVENTS.ROUTE_CHANGED, async (e) => {
     }
 });
 
-console.log("✅ Master Prompt Module 加载完成");
+console.log("✅ App Center Module 加载完成");

@@ -1,364 +1,46 @@
-/* ================================
-   App Center Module Styles
-   ================================ */
+/**
+ * App Center 应用中心样式
+ * 统一的应用中心模块样式定义
+ */
 
-/* App Center Overview Container - Centered Limit */
-.app-center-overview-container {
-    max-width: 1450px;
-    margin: 0 auto;
-    padding: 0 1rem;
+/* ==================== 容器基础样式 ==================== */
+#panel-app_center {
+    /* 继承全局 panel 样式 */
 }
 
-/* App Center Module Section - Same padding as overview */
-.app-center-module-section {
-    max-width: 1450px;
-    margin: 0 auto;
-    padding: 0 1rem;
-}
-
-/* App Center Content Container - For sub-pages */
-.app-center-content-container {
-    max-width: 1450px;
-    margin: 0 auto;
-    padding: 0 1rem;
-}
-
-/* =========================================
-   GridStack 交互优化 (Analysis Panel)
-   ========================================= */
-.grid-stack-item-content {
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  will-change: transform, box-shadow;
-  transition: background-color 0.2s, box-shadow 0.2s;
-}
-
-.grid-stack-item .ui-resizable-handle { display: none !important; }
-
-.grid-stack-item.is-resizing-active .ui-resizable-handle {
-  display: block !important;
-  background: rgba(59, 130, 246, 0.1);
-  border-radius: 0 0 12px 0;
-  backdrop-filter: blur(2px);
-}
-
-.grid-stack-item.is-resizing-active .grid-stack-item-content {
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5), 
-              0 8px 20px -6px rgba(59, 130, 246, 0.2);
-  z-index: 50 !important;
-}
-
-.drag-handle { cursor: grab; }
-.drag-handle:active { cursor: grabbing; }
-
-/* GridStack Handle Specifics */
-.grid-stack-item.is-resizing .ui-resizable-se {
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    z-index: 100 !important;
-    width: 20px; height: 20px;
-    right: 4px !important; bottom: 4px !important;
-    background: white !important;
-    border-radius: 50%;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    border: 1px solid #e2e8f0;
-    cursor: nwse-resize;
-    transition: all 0.2s;
-}
-.grid-stack-item.is-resizing .ui-resizable-se:hover {
-    background: #eff6ff !important;
-    border-color: #3b82f6;
-    transform: scale(1.1);
-}
-.grid-stack-item.is-resizing .ui-resizable-se::after {
-    content: '';
-    width: 6px; height: 6px;
-    border-right: 2px solid #94a3b8;
-    border-bottom: 2px solid #94a3b8;
-    margin-bottom: 2px; margin-right: 2px;
-}
-.grid-stack-item.is-resizing .ui-resizable-se:hover::after {
-    border-color: #3b82f6;
-}
-
-/* =========================================
-   分析面板组件样式 (Analysis Widgets)
-   ========================================= */
-/* Widget Card */
-.analysis-widget-card {
-    background-color: white;
-    border-radius: 1rem;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(226, 232, 240, 0.8);
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
-    transition: all 0.3s;
+#app_center_content_area {
+    /* 内容区域样式 */
     position: relative;
-    box-sizing: border-box;
-}
-.analysis-widget-card:hover {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-/* 编辑模式高亮 */
-.widget-card-container.is-editing {
-    border-color: #3b82f6 !important;
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1) !important;
-    transform: translateY(-2px);
+/* ==================== 错误边界样式 ==================== */
+.app-center-error-boundary {
+    min-height: 400px;
 }
 
-/* Editor Input */
-.editor-input-modern {
-    width: 100%;
-    background-color: transparent;
-    color: #334155;
-    font-size: 13px;
-    line-height: 1.5rem;
-    padding: 0.25rem 0.5rem;
-    margin-left: -0.5rem;
-    border-radius: 0.25rem;
-    border: none;
-    outline: none;
-    resize: none;
-    overflow: hidden;
-    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    letter-spacing: 0.025em;
-    transition: background-color 0.15s;
-}
-.editor-input-modern::placeholder { color: rgba(203, 213, 225, 0.5); }
-.editor-input-modern:focus { background-color: rgba(239, 246, 255, 0.5); box-shadow: none; }
-
-/* Row Item */
-.editor-row-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.75rem;
-    position: relative;
-    padding: 0 0.5rem;
-    margin: 0 -0.5rem;
-    border-radius: 0.25rem;
-    transition: background-color 0.2s;
-}
-.editor-row-item:hover { background-color: rgba(248, 250, 252, 0.5); }
-
-/* 自定义面板内滚动条 */
-.custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background-color: transparent; border-radius: 10px; }
-.custom-scrollbar:hover::-webkit-scrollbar-thumb { background-color: #cbd5e1; }
-.custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: #94a3b8; }
-
-/* =========================================
-   浮窗与关键字交互 (Keyword Tracker)
-   ========================================= */
-.floating-window { 
-    position: fixed; 
-    z-index: 100; 
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3); 
-    transition: opacity 0.3s ease;
-}
-.floating-header { cursor: move; user-select: none; }
-
-.resize-handle { position: absolute; bottom: 0; right: 0; width: 20px; height: 20px; cursor: se-resize; }
-.resize-handle::after { content: ''; position: absolute; right: 3px; bottom: 3px; width: 10px; height: 10px; border-right: 2px solid #999; border-bottom: 2px solid #999; }
-
-/* 关键字高亮样式 */
-.keyword-bold { font-weight: 600; color: #1e40af; }
-.keyword-card { transition: all 0.2s ease; }
-.keyword-card:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-
-.highlight-focus { 
-    background: linear-gradient(120deg, #fbbf24 0%, #f59e0b 100%); 
-    padding: 2px 6px; 
-    border-radius: 4px; 
-    color: #000; 
-    font-weight: 700; 
-    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.4);
+.app-center-error-boundary .w-16 {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* 关键字输入框结构 */
-.keyword-input-wrapper { position: relative; }
-.keyword-input-highlight { 
-    position: absolute; top: 0; left: 0; right: 0; bottom: 0; 
-    pointer-events: none; overflow: hidden; padding: 16px; 
-    white-space: pre-wrap; word-wrap: break-word; 
-    font-size: 14px; line-height: 1.5; color: transparent; 
-    border: 1px solid transparent; border-radius: 12px; 
-}
-.keyword-input-highlight .duplicate { background: #fef3c7; border-bottom: 2px solid #f59e0b; color: transparent; }
-.keyword-input-textarea { background: transparent; position: relative; z-index: 1; }
-
-.context-preview { background: #f8fafc; border-left: 3px solid #3b82f6; padding: 12px 16px; margin-top: 8px; font-size: 13px; line-height: 1.8; }
-.auto-height-textarea { min-height: 200px; field-sizing: content; resize: vertical; }
-
-/* Stats badge in textarea */
-.textarea-wrapper { position: relative; }
-.textarea-stats { 
-    position: absolute; 
-    bottom: 8px; 
-    right: 8px; 
-    z-index: 10;
-    pointer-events: none;
+/* ==================== 加载动画优化 ==================== */
+#app_center_content_area .fade-in {
+    animation: fadeIn 0.3s ease-in;
 }
 
-/* Provider Badges */
-.provider-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 20px; font-size: 11px; font-weight: 500; }
-.active-provider-display { 
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%); 
-    color: white; padding: 8px 16px; border-radius: 12px; 
-    font-size: 13px; font-weight: 500; 
-    display: flex; align-items: center; gap: 8px; 
-}
-
-/* =========================================
-   沉浸式翻译样式 (Scraper Panel)
-   ========================================= */
-.listing-section { margin-bottom: 16px; }
-.listing-section-title { 
-    font-size: 12px; 
-    font-weight: 600; 
-    color: #6b7280; 
-    text-transform: uppercase; 
-    letter-spacing: 0.5px;
-    margin-bottom: 8px;
-    padding: 4px 8px;
-    background: #f3f4f6;
-    border-radius: 4px;
-    display: inline-block;
-}
-.listing-content { line-height: 1.8; }
-.sentence-block { margin-bottom: 4px; }
-.sentence-original { line-height: 1.8; }
-.sentence-translation { 
-    margin-top: 2px;
-    padding: 6px 12px; 
-    background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%); 
-    border-left: 3px solid #0ea5e9; 
-    border-radius: 0 8px 8px 0; 
-    color: #0369a1; 
-    font-size: 13px; 
-    line-height: 1.6;
-    transition: all 0.2s ease;
-}
-.sentence-translation.hidden { display: none; }
-
-/* =========================================
-   Markdown 内容排版 (Promptlab & Analysis)
-   ========================================= */
-.markdown-content h1 { font-size: 1.5rem; font-weight: 700; margin: 1rem 0 0.5rem; color: #1f2937; }
-.markdown-content h2 { font-size: 1.25rem; font-weight: 600; margin: 1rem 0 0.5rem; color: #374151; }
-.markdown-content h3 { font-size: 1.1rem; font-weight: 600; margin: 0.75rem 0 0.5rem; color: #4b5563; }
-.markdown-content p { margin: 0.5rem 0; line-height: 1.7; }
-.markdown-content ul, .markdown-content ol { margin: 0.5rem 0; padding-left: 1.5rem; }
-.markdown-content li { margin: 0.25rem 0; }
-.markdown-content strong { font-weight: 600; color: #7c3aed; }
-.markdown-content code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
-.markdown-content blockquote { border-left: 3px solid #8b5cf6; padding-left: 1rem; margin: 0.5rem 0; color: #6b7280; }
-.markdown-content hr { border: 0; border-top: 1px solid #e5e7eb; margin: 1rem 0; }
-.markdown-content a { color: #2563eb; text-decoration: underline; text-underline-offset: 3px; }
-.markdown-content pre { background: #0b1220; color: #e5e7eb; padding: 12px 14px; border-radius: 12px; overflow: auto; margin: 0.75rem 0; }
-.markdown-content pre code { background: transparent; padding: 0; color: inherit; }
-.markdown-content table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.9rem; }
-.markdown-content th, .markdown-content td { border: 1px solid #e5e7eb; padding: 8px 10px; text-align: left; }
-
-/* =========================================
-   骨架屏加载动画 (All Panels)
-   ========================================= */
-.skeleton {
-  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 37%, #f1f5f9 63%);
-  background-size: 400% 100%;
-  animation: skeleton-loading 1.4s ease infinite;
-}
-
-@keyframes skeleton-loading {
-  0% { background-position: 100% 50%; }
-  100% { background-position: 0 50%; }
-}
-
-.skeleton-text {
-  height: 0.75rem;
-  margin-bottom: 0.5rem;
-  border-radius: 0.25rem;
-}
-
-.skeleton-text:last-child {
-  width: 80%;
-}
-
-.skeleton-card {
-    padding: 1rem;
-    border-radius: 0.75rem;
-    background: white;
-    border: 1px solid #e2e8f0;
-}
-
-/* Glass Card Effect for Panels */
-.glass-card {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-}
-
-/* Site Selection Button Styles */
-.site-btn {
-    position: relative;
-    overflow: hidden;
-}
-
-.site-btn::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: rgba(59, 130, 246, 0.1);
-    transform: translate(-50%, -50%);
-    transition: width 0.3s ease, height 0.3s ease;
-}
-
-.site-btn:hover::before {
-    width: 100%;
-    height: 100%;
-}
-
-/* Keyword Tracker Styles */
-.tracker-display-container {
-    max-width: 1450px;
-    margin: 0 auto;
-    padding: 0 1rem;
-}
-
-.keyword-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    transition: all 0.2s ease;
-}
-
-.keyword-badge:hover {
-    transform: scale(1.05);
-}
-
-/* Responsive Adjustments */
-@media (max-width: 768px) {
-    .app-center-overview-container,
-    .app-center-module-section,
-    .app-center-content-container,
-    .tracker-display-container {
-        padding: 0 0.75rem;
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
     }
-    
-    .site-btn {
-        padding: 0.5rem;
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ==================== 响应式适配 ==================== */
+@media (max-width: 768px) {
+    #app_center_content_area {
+        padding: 1rem;
     }
 }

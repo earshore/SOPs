@@ -105,11 +105,8 @@ const VIEW_REGISTRY = {
     'amz_hub': { path: '/src/modules/amz_hub/amz_hub.html', target: 'main', isLoaded: false },
     'more': { path: '/src/modules/more/more.html', target: 'main', isLoaded: false },
 
-    // Master Prompt Shell HTML
-    'master_prompt': { path: '/src/modules/app_center/master_prompt/master_prompt.html', target: 'main', isLoaded: false },
-
-    // Keyword Hunter Shell HTML
-    'keyword_hunter': { path: '/src/modules/app_center/keyword_hunter/keyword_hunter.html', target: 'main', isLoaded: false },
+    // App Center 统一 Shell HTML
+    'app_center': { path: '/src/modules/app_center/app_center.html', target: 'main', isLoaded: false },
 };
 
 /**
@@ -219,13 +216,12 @@ export async function ensureViewLoaded(routeId) {
     else if (routeId.startsWith('amz')) moduleKey = 'amz_hub';
     else if (routeId.startsWith('more')) moduleKey = 'more';
 
-    // Master Prompt 路由映射到统一的 Shell HTML
-    else if (['scraper', 'data', 'analysis', 'promptlab'].includes(routeId)) {
-        moduleKey = 'master_prompt';
+    // App Center 路由映射到统一的 Shell HTML
+    // Master Prompt 路由: scraper, data, analysis, promptlab
+    // Keyword Hunter 路由: kw_input, kw_process, kw_analysis
+    else if (['scraper', 'data', 'analysis', 'promptlab'].includes(routeId) || routeId.startsWith('kw_')) {
+        moduleKey = 'app_center';
     }
-
-    // Keyword Hunter 路由映射到统一的 Shell HTML
-    else if (routeId.startsWith('kw_')) moduleKey = 'keyword_hunter';
 
     if (moduleKey && VIEW_REGISTRY[moduleKey]) {
         if (!VIEW_REGISTRY[moduleKey].isLoaded) {

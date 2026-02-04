@@ -124,8 +124,7 @@ import { initHomeSplash } from "./modules/home/homeDisplay.js";
 import './modules/amz_hub/amz_hub.js';
 import './modules/sops/sops.js';
 import './modules/more/more.js';
-import './modules/app_center/master_prompt/master_prompt.js';
-import './modules/app_center/keyword_hunter/keyword_hunter.js';
+import './modules/app_center/app_center.js';
 
 // ✅ Alpine.js
 import Alpine from 'alpinejs';
