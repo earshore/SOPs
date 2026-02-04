@@ -224,7 +224,8 @@ function renderCopyDisplay() {
     if (state.keywordTracker.processedCopy) {
         display.innerHTML = highlightText(state.keywordTracker.processedCopy);
     } else {
-        display.innerHTML = '<div class="text-center text-slate-400 py-20 italic">请先在"输入模块"点击"开始分析"</div>';
+        // 没有内容时清空,让 CSS placeholder 显示
+        display.innerHTML = '';
     }
 }
 
@@ -540,6 +541,22 @@ function manageFloatingWindowVisibility() {
 
     if (!floatWin || !minBtn) return;
 
+    // 确保状态初始化
+    if (state.keywordTracker.isWindowMinimized === undefined) {
+        state.keywordTracker.isWindowMinimized = false;
+    }
+
+    // 只有在有分析数据时才显示浮动窗口
+    const hasAnalysisData = state.keywordTracker.matchedKeywords && 
+                           state.keywordTracker.matchedKeywords.length > 0;
+
+    if (!hasAnalysisData) {
+        // 没有数据时隐藏浮动窗口和最小化按钮
+        floatWin.classList.remove('show');
+        minBtn.classList.remove('show');
+        return;
+    }
+
     // Process 模块显示浮动窗口
     if (state.keywordTracker.isWindowMinimized) {
         floatWin.classList.remove('show');
@@ -589,7 +606,17 @@ export async function mount(container) {
         const html = await loadTemplate('src/modules/app_center/keyword_hunter/views/process/template.html');
         container.innerHTML = html;
 
-        // 2. 注册全局操作（用于 HTML onclick 兼容）
+        // 2. 将浮动窗口移到 body 级别(避免被容器限制)
+        const floatWin = document.getElementById('kt-keywords-floating');
+        const minBtn = document.getElementById('kt-keywords-minimized');
+        if (floatWin && !floatWin.parentElement.matches('body')) {
+            document.body.appendChild(floatWin);
+        }
+        if (minBtn && !minBtn.parentElement.matches('body')) {
+            document.body.appendChild(minBtn);
+        }
+
+        // 3. 注册全局操作（用于 HTML onclick 兼容）
         registerActionsWithLegacy({
             kt_syncToInput: () => syncToInput(),
             kt_translateCopyImmersive: () => translateCopyImmersive(),
@@ -599,14 +626,23 @@ export async function mount(container) {
             kt_restoreKeywordsWindow: () => restoreKeywordsWindow(),
         });
 
-        // 3. 设置事件监听器
+        // 4. 设置事件监听器
         setupEventListeners(container);
 
-        // 4. 从 state 恢复状态
+        // 5. 从 state 恢复状态
         restoreProcessStateFromState();
 
-        // 5. 管理浮动窗口显示
-        manageFloatingWindowVisibility();
+        // 6. 管理浮动窗口显示 - 延迟执行确保 DOM 已渲染
+        setTimeout(() => {
+            manageFloatingWindowVisibility();
+            console.log('[Process] 浮动窗口状态:', {
+                hasMatchedKeywords: state.keywordTracker.matchedKeywords?.length > 0,
+                isMinimized: state.keywordTracker.isWindowMinimized,
+                floatWinExists: !!document.getElementById('kt-keywords-floating'),
+                minBtnExists: !!document.getElementById('kt-keywords-minimized'),
+                floatWinParent: document.getElementById('kt-keywords-floating')?.parentElement?.tagName
+            });
+        }, 100);
 
         console.log('[Process] ✅ 子模块挂载成功');
     } catch (error) {
@@ -625,11 +661,21 @@ export function unmount() {
         // 1. 保存状态到 state
         saveProcessStateToState();
 
-        // 2. 隐藏浮动窗口和最小化按钮
+        // 2. 隐藏并移除浮动窗口和最小化按钮(从 body 中移除)
         const floatWin = document.getElementById('kt-keywords-floating');
         const minBtn = document.getElementById('kt-keywords-minimized');
-        if (floatWin) floatWin.classList.remove('show');
-        if (minBtn) minBtn.classList.remove('show');
+        if (floatWin) {
+            floatWin.classList.remove('show');
+            if (floatWin.parentElement === document.body) {
+                floatWin.remove();
+            }
+        }
+        if (minBtn) {
+            minBtn.classList.remove('show');
+            if (minBtn.parentElement === document.body) {
+                minBtn.remove();
+            }
+        }
 
         // 3. 清理事件监听器和定时器
         cleanup();

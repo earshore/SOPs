@@ -100,10 +100,12 @@ class AnalysisModule extends BaseModule {
     const transToggle = document.getElementById("opt-listing");
     if (transToggle) {
       this.addEventListener(document.getElementById("opt-listing"), "change", () => {
+        this.updateSourceVisuals();
         this.updateModuleListVisibility();
         this.updatePromptPreview();
       });
       this.addEventListener(document.getElementById("opt-reviews"), "change", () => {
+        this.updateSourceVisuals();
         this.updateModuleListVisibility();
         this.updatePromptPreview();
       });
@@ -166,9 +168,9 @@ class AnalysisModule extends BaseModule {
       if (!input || !label) return;
 
       if (input.checked) {
-        label.className = `flex-1 group relative flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border cursor-pointer transition-all select-none text-sm font-regular bg-blue-50/50 border-blue-200 text-blue-700 shadow-sm`;
+        label.className = `flex-1 group relative flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border cursor-pointer transition-all select-none text-sm font-medium bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-300 text-blue-700 shadow-sm ring-1 ring-blue-200`;
       } else {
-        label.className = `flex-1 group relative flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border cursor-pointer transition-all select-none text-sm font-regular bg-slate-50 border-slate-200 text-slate-400 hover:bg-white hover:border-slate-300`;
+        label.className = `flex-1 group relative flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border cursor-pointer transition-all select-none text-sm font-medium bg-white border-slate-200 text-slate-400 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-600`;
       }
     };
     updateStyle("opt-listing", "lbl-opt-listing");
