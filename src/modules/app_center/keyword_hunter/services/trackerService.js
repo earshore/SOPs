@@ -1,11 +1,11 @@
-// src/modules/keyword_tracker/keywordtrackerService.js
+// src/modules/app_center/keyword_hunter/services/trackerService.js
 // ================================================================
 // 🎯 Phase 4: 已迁移使用 StorageService
 // ================================================================
 
-import { callLLM } from "../../../services/llmService.js";
-import { ANALYSIS_PROMPT_TEMPLATE, TRANSLATE_PROMPT_TEMPLATE2 } from "../../../common/constants/prompts.js";
-import { StorageService, STORAGE_KEYS } from "../../../services/storageService.js";
+import { callLLM } from "../../../../services/llmService.js";
+import { ANALYSIS_PROMPT_TEMPLATE, TRANSLATE_PROMPT_TEMPLATE2 } from "../../../../common/constants/prompts.js";
+import { StorageService, STORAGE_KEYS } from "../../../../services/storageService.js";
 
 // ==========================================
 // 1. 基础文本处理工具

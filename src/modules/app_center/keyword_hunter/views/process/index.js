@@ -11,7 +11,7 @@
 
 import { loadTemplate } from '../../../../../common/utils/viewLoader.js';
 import { showToast, showProgress } from '../../../../../common/utils/ui.js';
-import * as KeywordService from '../../../keyword_tracker/trackerService.js';
+import * as KeywordService from '../../services/trackerService.js';
 import state from '../../../../../common/state.js';
 import { ErrorService } from '../../../../../services/errorService.js';
 import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry.js';
