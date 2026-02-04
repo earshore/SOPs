@@ -22,7 +22,7 @@ window.state = state;
 import { initViews } from './common/utils/viewLoader.js';
 
 // ✅ 导入 Web Components
-import './common/components/AppModal.js';
+import './components/modal/AppModal.js';
 
 // ✅ 导入 StorageService
 import { StorageService, STORAGE_KEYS } from './services/storageService.js';
