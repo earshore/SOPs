@@ -16,7 +16,7 @@ import { ANALYSIS_MODULES, DYNAMIC_MASTER_TEMPLATE } from '../../../../../common
 import { showToast, showProgress } from '../../../../../common/utils/ui.js';
 import { HistoryService } from '../../services/historyService.js';
 import { renderHistory } from '../scraper/index.js';
-import { AnalysisService } from '../../analysis/analysisService.js';
+import { AnalysisService } from '../../services/analysisService.js';
 import { StorageService, STORAGE_KEYS } from '../../../../../services/storageService.js';
 import { ErrorService } from '../../../../../services/errorService.js';
 import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry.js';

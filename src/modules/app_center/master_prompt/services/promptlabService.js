@@ -1,4 +1,4 @@
-// src/services/promptlabService.js
+// src/modules/app_center/master_prompt/services/promptlabService.js
 
 /**
  * ------------------------------------------------------------------
@@ -256,4 +256,3 @@ For EACH module, provide:
 `.trim();
   },
 };
-

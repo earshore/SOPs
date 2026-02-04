@@ -11,7 +11,7 @@
 import { loadTemplate } from '../../../../../common/utils/viewLoader.js';
 import eventBus from '../../../../../common/EventBus.js';
 import state from '../../../../../common/state.js';
-import { scrapeAsin } from '../../scraper/scraperService.js';
+import { scrapeAsin } from '../../services/scraperService.js';
 import { LANGUAGE_HEADERS } from '../../../../../common/constants/constants.js';
 import { HistoryService } from '../../services/historyService.js';
 import { StorageService, STORAGE_KEYS } from '../../../../../services/storageService.js';

@@ -1,4 +1,4 @@
-// src/services/parserService.js
+// src/modules/app_center/master_prompt/services/parserService.js
 import {
   SELECTOR_MAP,
   VERIFIED_PURCHASE_PATTERNS,
@@ -186,4 +186,3 @@ export function parseReviews(html) {
 
   return reviews.slice(0, 20);
 }
-

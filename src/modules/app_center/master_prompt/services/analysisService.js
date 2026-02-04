@@ -1,4 +1,4 @@
-// src/modules/master_prompt/analysis/analysisService.js
+// src/modules/master_prompt/services/analysisService.js
 // @ts-check
 // ================================================= ===============
 // 🎯 P2 重构: 添加完整的 JSDoc 类型注释
