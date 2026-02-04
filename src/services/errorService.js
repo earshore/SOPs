@@ -115,14 +115,27 @@ export const ErrorService = {
             customMessage = null,
         } = context;
 
+        // 确保 error 是一个对象
+        if (!error) {
+            error = new Error('Unknown error occurred');
+        }
+
+        // 如果 error 不是 Error 实例,尝试转换
+        if (!(error instanceof Error)) {
+            const errorMsg = typeof error === 'string' ? error : JSON.stringify(error);
+            error = new Error(errorMsg);
+        }
+
         const errorType = this.classify(error);
         const userMessage = this.getUserMessage(error, customMessage);
 
-        // 1. 记录日志
+        // 1. 记录日志 - 使用更详细的格式
         console.error(`[${module}] ${action} failed:`, {
             type: errorType,
             message: error.message,
+            status: error.status,
             stack: error.stack,
+            raw: error
         });
 
         // 2. 用户通知

@@ -467,7 +467,23 @@ class AnalysisModule extends BaseModule {
 
       showToast("分析完成", "success");
     } catch (e) {
-      ErrorService.handle(e, { action: 'analyzeSelectedAsins', module: 'analysis' });
+      // 确保错误对象有 message 属性
+      const errorMessage = e?.message || e?.toString() || '未知错误';
+      const error = new Error(errorMessage);
+      
+      // 保留原始错误的 status 属性(如果有)
+      if (e?.status) {
+        error.status = e.status;
+      }
+      
+      console.error('[Analysis] analyzeSelectedAsins 错误详情:', {
+        message: errorMessage,
+        status: e?.status,
+        stack: e?.stack,
+        original: e
+      });
+      
+      ErrorService.handle(error, { action: 'analyzeSelectedAsins', module: 'analysis' });
       state.analysis.analysisReport = null;
       const display = document.getElementById("report-display");
       if (display) display.classList.add("hidden");
