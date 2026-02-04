@@ -1,36 +1,37 @@
-<div onclick="document.getElementById('amz_refining_container').classList.toggle('hidden'); document.getElementById('data-refine-chevron').classList.toggle('rotate-180')"
-    class="mb-6 cursor-pointer group">
-    <div
-        class="bg-gradient-to-br from-slate-50 via-orange-50/30 to-amber-50/30 rounded-2xl border border-slate-200/60 p-8 relative overflow-hidden hover:shadow-md transition-all duration-300">
-        <!-- 装饰元素 -->
+<div class="app-center-container">
+    <div onclick="document.getElementById('amz_refining_container').classList.toggle('hidden'); document.getElementById('data-refine-chevron').classList.toggle('rotate-180')"
+        class="mb-6 cursor-pointer group">
         <div
-            class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-orange-100/30 to-amber-100/40 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2">
-        </div>
-        <div
-            class="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-yellow-100/30 to-orange-100/30 rounded-full blur-2xl translate-y-1/3 -translate-x-1/3">
-        </div>
-
-        <div class="relative z-10 flex items-start justify-between">
-            <div class="flex items-start gap-6">
-                <div
-                    class="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center shadow-lg shadow-orange-500/20 flex-shrink-0">
-                    <i class="fas fa-compass text-2xl text-white"></i>
-                </div>
-                <div class="flex-1">
-                    <h2 class="text-xl font-bold text-slate-800 mb-2">Ai分析 & 数据结构化策略</h2>
-                    <p class="text-slate-500 text-sm leading-relaxed max-w-3xl">
-                        不要把所有信息都丢给 AI。垃圾进，垃圾出。你需要提取那些能喂饱 Project COSMO（知识图谱）和 Rufus（问答助手）的高价值信息。
-                    </p>
-                </div>
+            class="bg-gradient-to-br from-slate-50 via-orange-50/30 to-amber-50/30 rounded-2xl border border-slate-200/60 p-8 relative overflow-hidden hover:shadow-md transition-all duration-300">
+            <!-- 装饰元素 -->
+            <div
+                class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-orange-100/30 to-amber-100/40 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2">
+            </div>
+            <div
+                class="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-yellow-100/30 to-orange-100/30 rounded-full blur-2xl translate-y-1/3 -translate-x-1/3">
             </div>
 
-            <div class="flex-shrink-0 ml-4 pt-2">
-                <i id="data-refine-chevron"
-                    class="fas fa-chevron-down text-slate-400 transition-transform duration-300 group-hover:text-slate-600 text-lg"></i>
+            <div class="relative z-10 flex items-start justify-between">
+                <div class="flex items-start gap-6">
+                    <div
+                        class="app-center-icon-container bg-gradient-to-br from-orange-500 to-amber-600 shadow-lg shadow-orange-500/20">
+                        <i class="fas fa-database text-white"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h2 class="text-xl font-bold text-slate-800 mb-2">AI 分析 & 数据结构化策略</h2>
+                        <p class="text-slate-600 text-sm leading-relaxed max-w-3xl">
+                            不要把所有信息都丢给 AI。垃圾进，垃圾出。你需要提取那些能喂饱 Project COSMO（知识图谱）和 Rufus（问答助手）的高价值信息。
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex-shrink-0 ml-4 pt-2">
+                    <i id="data-refine-chevron"
+                        class="fas fa-chevron-down text-slate-400 transition-transform duration-300 group-hover:text-slate-600 text-lg"></i>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
 <div id="amz_refining_container"
     class="hidden border border-slate-200 bg-slate-50/50 p-5 rounded-xl mb-6 shadow-sm">
@@ -118,7 +119,7 @@
 
 <input type="file" id="import-file-input" accept=".json" multiple class="hidden" />
 
-<div class="glass-card rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
+<div class="app-center-card overflow-hidden">
     <div class="border-b border-slate-200 bg-slate-50 px-6 py-3 flex items-center gap-4">
         <button onclick="window.dataModule.switchDataTab('preview')" id="data-tab-preview"
             class="data-tab px-4 py-2 text-sm font-medium text-blue-600 border-b-2 border-blue-600 flex items-center gap-2">
