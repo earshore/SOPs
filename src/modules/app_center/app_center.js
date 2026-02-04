@@ -153,7 +153,7 @@ async function loadSubModule(routeId, retryCount = 0) {
 
 // ================= 监听全局路由事件 =================
 window.addEventListener(APP_EVENTS.ROUTE_CHANGED, async (e) => {
-    const { routeId, config } = e.detail;
+    const { routeId, config } = /** @type {CustomEvent} */(e).detail;
 
     // 🔍 调试日志：看看究竟收到了什么
     console.log(`📡 [AppCenter 调试] 收到路由: ${routeId}, 模块ID: ${config?.module?.id}`);

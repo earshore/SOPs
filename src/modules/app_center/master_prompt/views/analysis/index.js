@@ -637,9 +637,11 @@ class AnalysisModule extends BaseModule {
         float: false,
         disableOneColumnMode: false,
         staticGrid: false,
-        disableResize: true,
         handle: ".drag-handle",
-        resizable: { handles: "se" },
+        resizable: { 
+          handles: "se",
+          autoHide: false
+        },
       },
       gridEl
     );
@@ -669,6 +671,8 @@ class AnalysisModule extends BaseModule {
         y: savedNode ? savedNode.y : undefined,
         w: savedNode ? savedNode.w : defaultW,
         h: savedNode ? savedNode.h : autoH,
+        noMove: true,    // 默认不可移动
+        noResize: true,  // 默认不可调整
         content: this.renderWidgetContent(key, report, state.analysis.translatedReport),
       });
     });
@@ -677,7 +681,7 @@ class AnalysisModule extends BaseModule {
     this.grid.removeAll();
     widgets.forEach((w) => {
       const widgetConfig = {
-        x: w.x, y: w.y, w: w.w, h: w.h, id: w.id
+        x: w.x, y: w.y, w: w.w, h: w.h, id: w.id, noMove: w.noMove, noResize: w.noResize
       };
       const el = this.grid.addWidget(widgetConfig);
 
@@ -689,17 +693,41 @@ class AnalysisModule extends BaseModule {
     this.grid.batchUpdate(false);
 
     this.grid.on("change", () => this.saveGridLayout(templateId));
-    this.addEventListener(document, "mousedown", (e) => this.handleGlobalClickForResize(e));
+    this.addEventListener(document, "mousedown", (e) => this.handleGlobalClick(e));
   }
 
-  handleGlobalClickForResize(e) {
-    if (e.target.closest(".ui-resizable-handle") || e.target.closest(".btn-resize"))
+  handleGlobalClick(e) {
+    // 如果点击的是调整按钮、调整手柄或拖拽手柄,不处理
+    if (e.target.closest(".ui-resizable-handle") || 
+        e.target.closest(".btn-resize") ||
+        e.target.closest(".drag-handle") ||
+        e.target.closest("[data-action='toggleCardResize']")) {
       return;
+    }
+    
+    // 处理调整模式
     const resizingCard = document.querySelector(".grid-stack-item.is-resizing");
     if (resizingCard && !resizingCard.contains(e.target)) {
+      // 点击了卡片外部,退出调整模式
       const key = resizingCard.getAttribute("gs-id");
-      this.toggleCardResize(key, false);
+      if (key) {
+        this.toggleCardResize(key, false);
+      }
     }
+    
+    // 处理编辑模式
+    // 查找所有处于编辑模式的卡片
+    const editingCards = document.querySelectorAll('.widget-card-container .edit-controls:not(.hidden)');
+    editingCards.forEach(editControls => {
+      const card = editControls.closest('.widget-card-container');
+      if (card && !card.contains(e.target)) {
+        // 点击了卡片外部,自动保存并退出编辑
+        const cardId = card.id.replace('widget-card-', '');
+        if (cardId) {
+          this.saveLocalEdit(cardId);
+        }
+      }
+    });
   }
 
   saveGridLayout(templateId) {
@@ -898,13 +926,66 @@ class AnalysisModule extends BaseModule {
     const isResizing = forceState !== undefined ? forceState : !el.classList.contains("is-resizing");
 
     if (isResizing) {
+      // 先退出其他正在调整的卡片
+      const otherResizingCards = document.querySelectorAll('.grid-stack-item.is-resizing');
+      otherResizingCards.forEach(otherEl => {
+        const otherKey = otherEl.getAttribute('gs-id');
+        if (otherKey && otherKey !== key) {
+          this.toggleCardResize(otherKey, false);
+        }
+      });
+
+      // 进入调整模式
       el.classList.add("is-resizing");
-      card.style.resize = "both";
-      card.style.overflow = "auto";
+      el.classList.add('grid-stack-item-resizing');
+      
+      // 启用当前卡片的移动和调整
+      if (this.grid) {
+        // 更新当前节点的属性
+        this.grid.update(el, { noMove: false, noResize: false });
+        
+        // 确保其他卡片保持禁用
+        this.grid.engine.nodes.forEach(node => {
+          if (node.el !== el) {
+            this.grid.update(node.el, { noMove: true, noResize: true });
+          }
+        });
+      }
+      
+      // 视觉反馈
+      card.style.boxShadow = '0 0 0 2px #3b82f6';
+      
+      // 更新按钮状态
+      const resizeBtn = card.querySelector('.btn-resize');
+      if (resizeBtn) {
+        resizeBtn.innerHTML = '<i class="fas fa-check text-xs"></i>';
+        resizeBtn.classList.add('text-blue-600', 'bg-blue-50');
+        resizeBtn.title = '完成调整';
+      }
     } else {
+      // 退出调整模式
       el.classList.remove("is-resizing");
-      card.style.resize = "none";
-      card.style.overflow = "hidden";
+      el.classList.remove('grid-stack-item-resizing');
+      
+      // 禁用当前卡片的移动和调整
+      if (this.grid) {
+        this.grid.update(el, { noMove: true, noResize: true });
+      }
+      
+      // 移除视觉反馈
+      card.style.boxShadow = '';
+      
+      // 恢复按钮状态
+      const resizeBtn = card.querySelector('.btn-resize');
+      if (resizeBtn) {
+        resizeBtn.innerHTML = '<i class="fas fa-expand-alt text-xs"></i>';
+        resizeBtn.classList.remove('text-blue-600', 'bg-blue-50');
+        resizeBtn.title = '调整';
+      }
+      
+      // 保存布局
+      const templateId = state.analysis.analysisReport?.meta?.templateId || "default";
+      this.saveGridLayout(templateId);
     }
   }
 
@@ -928,6 +1009,252 @@ class AnalysisModule extends BaseModule {
     };
 
     registerActionsWithLegacy(actions);
+    
+    // 注册编辑相关的全局函数
+    window.startLocalEdit = (key) => this.startLocalEdit(key);
+    window.saveLocalEdit = (key) => this.saveLocalEdit(key);
+    window.undoLocalEdit = (key) => this.undoLocalEdit(key);
+    window.pushEditSnapshot = (key) => this.pushEditSnapshot(key);
+    window.deleteRowItem = (btn, key) => this.deleteRowItem(btn, key);
+    window.addListItem = (key) => this.addListItem(key);
+    window.addObjItem = (key) => this.addObjItem(key);
+  }
+
+  // ================== 编辑功能实现 ==================
+
+  startLocalEdit(key) {
+    // 先保存其他正在编辑的卡片
+    const editingCards = document.querySelectorAll('.widget-card-container .edit-controls:not(.hidden)');
+    editingCards.forEach(editControls => {
+      const card = editControls.closest('.widget-card-container');
+      if (card) {
+        const cardId = card.id.replace('widget-card-', '');
+        if (cardId && cardId !== key) {
+          this.saveLocalEdit(cardId);
+        }
+      }
+    });
+
+    const card = document.getElementById(`widget-card-${key}`);
+    if (!card) return;
+
+    const contentArea = document.getElementById(`widget-content-${key}`);
+    const viewControls = card.querySelector('.view-controls');
+    const editControls = card.querySelector('.edit-controls');
+
+    if (!contentArea || !viewControls || !editControls) return;
+
+    // 保存原始数据
+    const report = state.analysis.showTranslation && state.analysis.translatedReport 
+      ? state.analysis.translatedReport 
+      : state.analysis.analysisReport;
+    
+    if (!this.originalDataMap.has(key)) {
+      this.originalDataMap.set(key, JSON.parse(JSON.stringify(report[key])));
+    }
+
+    // 初始化编辑历史
+    if (!this.editHistoryMap.has(key)) {
+      this.editHistoryMap.set(key, []);
+    }
+
+    // 切换到编辑模式
+    viewControls.classList.add('hidden');
+    editControls.classList.remove('hidden');
+
+    // 渲染编辑表单
+    contentArea.innerHTML = renderEditorForm(key, report[key]);
+  }
+
+  saveLocalEdit(key) {
+    const card = document.getElementById(`widget-card-${key}`);
+    if (!card) return;
+
+    const contentArea = document.getElementById(`widget-content-${key}`);
+    const viewControls = card.querySelector('.view-controls');
+    const editControls = card.querySelector('.edit-controls');
+
+    // 收集编辑后的数据
+    const newData = this.collectEditedData(key);
+    
+    // 更新状态
+    const report = state.analysis.showTranslation && state.analysis.translatedReport 
+      ? state.analysis.translatedReport 
+      : state.analysis.analysisReport;
+    
+    report[key] = newData;
+
+    // 清除原始数据缓存
+    this.originalDataMap.delete(key);
+    this.editHistoryMap.delete(key);
+
+    // 切换回查看模式
+    editControls.classList.add('hidden');
+    viewControls.classList.remove('hidden');
+
+    // 重新渲染
+    const moduleConfig = ANALYSIS_MODULES.find((m) => m.id === key);
+    let style = { color: "slate", bg: "bg-slate-500", lightBg: "bg-slate-100", icon: "fa-info-circle" };
+    if (moduleConfig) {
+      if (moduleConfig.category === "listing")
+        style = { color: "blue", bg: "bg-blue-600", lightBg: "bg-blue-50", icon: "fa-file-alt" };
+      else if (moduleConfig.category === "reviews")
+        style = { color: "orange", bg: "bg-orange-500", lightBg: "bg-orange-50", icon: "fa-comments" };
+      else if (moduleConfig.category === "cross")
+        style = { color: "purple", bg: "bg-purple-600", lightBg: "bg-purple-50", icon: "fa-random" };
+    }
+
+    contentArea.innerHTML = renderViewModeHTML(newData, style);
+    showToast("保存成功", "success");
+  }
+
+  undoLocalEdit(key) {
+    const originalData = this.originalDataMap.get(key);
+    if (!originalData) return;
+
+    const report = state.analysis.showTranslation && state.analysis.translatedReport 
+      ? state.analysis.translatedReport 
+      : state.analysis.analysisReport;
+    
+    report[key] = JSON.parse(JSON.stringify(originalData));
+
+    // 清除缓存
+    this.originalDataMap.delete(key);
+    this.editHistoryMap.delete(key);
+
+    // 退出编辑模式
+    const card = document.getElementById(`widget-card-${key}`);
+    if (card) {
+      const viewControls = card.querySelector('.view-controls');
+      const editControls = card.querySelector('.edit-controls');
+      const contentArea = document.getElementById(`widget-content-${key}`);
+
+      editControls.classList.add('hidden');
+      viewControls.classList.remove('hidden');
+
+      const moduleConfig = ANALYSIS_MODULES.find((m) => m.id === key);
+      let style = { color: "slate", bg: "bg-slate-500", lightBg: "bg-slate-100", icon: "fa-info-circle" };
+      if (moduleConfig) {
+        if (moduleConfig.category === "listing")
+          style = { color: "blue", bg: "bg-blue-600", lightBg: "bg-blue-50", icon: "fa-file-alt" };
+        else if (moduleConfig.category === "reviews")
+          style = { color: "orange", bg: "bg-orange-500", lightBg: "bg-orange-50", icon: "fa-comments" };
+        else if (moduleConfig.category === "cross")
+          style = { color: "purple", bg: "bg-purple-600", lightBg: "bg-purple-50", icon: "fa-random" };
+      }
+
+      contentArea.innerHTML = renderViewModeHTML(originalData, style);
+    }
+
+    showToast("已撤销", "info");
+  }
+
+  pushEditSnapshot(key) {
+    // 用于撤销功能的快照保存
+    const history = this.editHistoryMap.get(key) || [];
+    const currentData = this.collectEditedData(key);
+    history.push(JSON.parse(JSON.stringify(currentData)));
+    this.editHistoryMap.set(key, history);
+  }
+
+  collectEditedData(key) {
+    const contentArea = document.getElementById(`widget-content-${key}`);
+    if (!contentArea) return null;
+
+    // 检查是否是简单文本编辑
+    const simpleInput = contentArea.querySelector(`#input-${key}`);
+    if (simpleInput) {
+      return simpleInput.value;
+    }
+
+    // 检查是否是列表编辑
+    const listContainer = contentArea.querySelector(`#list-container-${key}`);
+    if (listContainer) {
+      const items = [];
+      listContainer.querySelectorAll('.edit-row textarea').forEach(textarea => {
+        const val = textarea.value.trim();
+        if (val) items.push(val);
+      });
+      return items;
+    }
+
+    // 检查是否是对象数组编辑
+    const objContainer = contentArea.querySelector(`#obj-list-container-${key}`);
+    if (objContainer) {
+      const objects = [];
+      objContainer.querySelectorAll('.edit-row').forEach(row => {
+        const obj = {};
+        row.querySelectorAll('.obj-input').forEach(input => {
+          const subKey = input.dataset.subkey;
+          obj[subKey] = input.value;
+        });
+        objects.push(obj);
+      });
+      return objects;
+    }
+
+    return null;
+  }
+
+  deleteRowItem(btn, key) {
+    const row = btn.closest('.edit-row');
+    if (row) {
+      row.remove();
+    }
+  }
+
+  addListItem(key) {
+    const container = document.getElementById(`list-container-${key}`);
+    if (!container) return;
+
+    const newRow = document.createElement('div');
+    newRow.className = 'edit-row group flex items-start gap-2 relative';
+    newRow.innerHTML = `
+      <div class="pt-2.5 pl-1"> 
+        <div class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-blue-400 transition-colors"></div>
+      </div>
+      <div class="flex-1 relative">
+        <textarea class="editor-input-modern" rows="1" style="height: 28px" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onfocus="window.pushEditSnapshot('${key}'); this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+      </div>
+      <div class="pt-1">
+        <button onclick="window.deleteRowItem(this, '${key}')" class="w-6 h-6 flex items-center justify-center rounded-md text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer opacity-0 group-hover:opacity-100" title="删除此项">
+          <i class="fas fa-times text-xs"></i>
+        </button>
+      </div>
+    `;
+    container.appendChild(newRow);
+  }
+
+  addObjItem(key) {
+    const container = document.getElementById(`obj-list-container-${key}`);
+    const template = document.getElementById(`tpl-${key}`);
+    if (!container || !template) return;
+
+    const templateObj = JSON.parse(template.textContent);
+    const newRow = document.createElement('div');
+    newRow.className = 'edit-row group relative bg-white rounded-xl border border-slate-200 p-4 hover:border-slate-300 hover:shadow-sm transition-all';
+    
+    const fields = Object.keys(templateObj).map(subKey => `
+      <div class="grid grid-cols-1 sm:grid-cols-[110px_1fr] gap-2 sm:gap-4 items-start group/field">
+        <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider text-left sm:text-right select-none pt-2 cursor-default group-hover/field:text-blue-500 transition-colors">
+          ${getFieldTitle(subKey)}
+        </label>
+        <div class="relative w-full">
+          <textarea data-subkey="${subKey}" class="editor-input-modern obj-input" rows="1" style="height: 28px" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onfocus="window.pushEditSnapshot('${key}'); this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+        </div>
+      </div>
+    `).join('');
+
+    newRow.innerHTML = `
+      <button onclick="window.deleteRowItem(this, '${key}')" class="w-6 h-6 flex items-center justify-center rounded-md text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer opacity-0 group-hover:opacity-100 absolute top-3 right-3 bg-white shadow-sm border border-slate-200 z-10 hover:border-red-200" title="删除此项">
+        <i class="fas fa-trash-alt text-[10px]"></i>
+      </button>
+      <div class="grid gap-y-3 gap-x-4">
+        ${fields}
+      </div>
+    `;
+    
+    container.appendChild(newRow);
   }
 }
 

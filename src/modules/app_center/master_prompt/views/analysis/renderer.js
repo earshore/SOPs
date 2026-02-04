@@ -45,7 +45,7 @@ export function renderWidgetCard(key, title, style, isTranslationMode, contentHT
     return `
         <div id="widget-card-${key}" class="analysis-widget-card widget-card-container group/card">
             
-            <div class="flex-shrink-0 flex justify-between items-center px-5 pt-5 pb-2 bg-white select-none drag-handle cursor-move">
+            <div class="flex-shrink-0 flex justify-between items-center px-5 pt-5 pb-3 bg-white select-none drag-handle cursor-move border-b border-slate-100">
                 <h3 class="text-[15px] font-bold text-slate-800 flex items-center gap-2.5 pointer-events-none truncate mr-2">
                     <span class="w-8 h-8 rounded-xl ${style.lightBg} text-${style.color}-600 flex items-center justify-center text-xs flex-shrink-0 shadow-sm transition-transform group-hover/card:scale-105">
                         <i class="fas ${style.icon}"></i>
@@ -56,7 +56,7 @@ export function renderWidgetCard(key, title, style, isTranslationMode, contentHT
                 <div class="flex items-center gap-1 bg-white pl-2">
                     
                     <div class="view-controls flex items-center gap-1 opacity-0 group-hover/card:opacity-100 transition-all duration-200 translate-x-2 group-hover/card:translate-x-0">
-                        <button onclick="window.toggleCardResize('${key}', true)" class="btn-resize w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all" title="调整大小">
+                        <button data-action="toggleCardResize" data-key="${key}" class="btn-resize w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all" title="调整">
                             <i class="fas fa-expand-alt text-xs"></i>
                         </button>
                         
@@ -80,7 +80,7 @@ export function renderWidgetCard(key, title, style, isTranslationMode, contentHT
                 </div>
             </div>
             
-            <div id="widget-content-${key}" class="flex-1 px-5 pb-5 pt-2 overflow-y-auto custom-scrollbar relative leading-relaxed widget-content-area">
+            <div id="widget-content-${key}" class="flex-1 px-5 pb-5 pt-4 overflow-y-auto custom-scrollbar relative leading-relaxed widget-content-area">
                 ${contentHTML}
             </div>
         </div>`;
@@ -155,12 +155,12 @@ function _renderObjectArray(val) {
     return `
     <div class="flex flex-col gap-3">
         ${val.map((obj) => `
-            <div class="relative group/card bg-white rounded-xl border border-slate-100 p-3 hover:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] hover:border-slate-200 transition-all duration-300">
-                <div class="absolute left-0 top-3 bottom-3 w-0.5 bg-blue-500 rounded-r opacity-0 group-hover/card:opacity-100 transition-opacity"></div>
-                <div class="grid gap-y-2 gap-x-4">
+            <div class="relative group/card bg-white rounded-xl border border-slate-200 p-4 hover:shadow-md hover:border-slate-300 transition-all duration-300">
+                <div class="absolute left-0 top-4 bottom-4 w-1 bg-gradient-to-b from-blue-500 to-purple-500 rounded-r opacity-0 group-hover/card:opacity-100 transition-opacity"></div>
+                <div class="grid gap-y-3 gap-x-4">
                 ${Object.keys(obj).map((subKey) => `
-                    <div class="grid grid-cols-1 sm:grid-cols-[100px_1fr] gap-1 sm:gap-4 items-baseline">
-                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider text-left sm:text-right select-none pt-0.5">
+                    <div class="grid grid-cols-1 sm:grid-cols-[110px_1fr] gap-2 sm:gap-4 items-baseline">
+                        <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider text-left sm:text-right select-none pt-0.5">
                             ${getFieldTitle(subKey)}
                         </div>
                         <div class="text-[13px] text-slate-700 leading-6 font-medium break-words">
@@ -288,16 +288,16 @@ export function renderEditorForm(key, data) {
         return `
             <div id="obj-list-container-${key}" class="flex flex-col gap-3">
                 ${data.map((obj) => `
-                    <div class="edit-row group relative bg-slate-50/30 rounded-xl border border-slate-100 p-3 hover:border-blue-200/50 hover:bg-slate-50/80 transition-all">
+                    <div class="edit-row group relative bg-white rounded-xl border border-slate-200 p-4 hover:border-slate-300 hover:shadow-sm transition-all">
                         
-                        <button onclick="window.deleteRowItem(this, '${key}')" class="${deleteBtnStyle} absolute top-2 right-2 bg-white shadow-sm border border-slate-100 z-10">
+                        <button onclick="window.deleteRowItem(this, '${key}')" class="${deleteBtnStyle} absolute top-3 right-3 bg-white shadow-sm border border-slate-200 z-10 hover:border-red-200">
                             <i class="fas fa-trash-alt text-[10px]"></i>
                         </button>
 
-                        <div class="grid gap-y-2 gap-x-4">
+                        <div class="grid gap-y-3 gap-x-4">
                             ${Object.keys(obj).map((subKey) => `
-                                <div class="grid grid-cols-1 sm:grid-cols-[100px_1fr] gap-1 sm:gap-4 items-start group/field">
-                                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider text-left sm:text-right select-none pt-2 cursor-default group-hover/field:text-blue-400 transition-colors">
+                                <div class="grid grid-cols-1 sm:grid-cols-[110px_1fr] gap-2 sm:gap-4 items-start group/field">
+                                    <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider text-left sm:text-right select-none pt-2 cursor-default group-hover/field:text-blue-500 transition-colors">
                                       ${getFieldTitle(subKey)}
                                     </label>
                                     

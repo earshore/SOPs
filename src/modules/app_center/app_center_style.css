@@ -264,28 +264,67 @@
     z-index: 1000;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     display: none;
+    overflow: hidden;
 }
 
 .kt-floating-window.show {
-    display: block;
-}
-
-.kt-floating-content {
-    height: calc(100% - 52px);
     display: flex;
     flex-direction: column;
-    padding: 1rem;
-}
-
-.kt-keyword-list {
-    flex: 1;
-    min-height: 0;
 }
 
 .floating-header {
     cursor: move;
     user-select: none;
     border-radius: 1rem 1rem 0 0;
+    flex-shrink: 0;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.floating-header h3 {
+    margin: 0;
+    flex: 1;
+}
+
+.floating-header .flex {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.kt-floating-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    overflow: hidden;
+    min-height: 0;
+}
+
+/* 标签页按钮容器 */
+.kt-tab-buttons {
+    flex-shrink: 0;
+    margin-bottom: 0.75rem;
+}
+
+/* 关键词列表容器 - 统一滚动区域 */
+.kt-keyword-list-wrapper {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+.kt-keyword-list {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow-y: auto;
+    padding-right: 0.25rem;
 }
 
 /* Minimized Button - 参考 SOPs 按钮样式 */
@@ -301,6 +340,8 @@
     font-size: 0.875rem;
     font-weight: 500;
     transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
 }
 
 .kt-minimized-btn.show {
@@ -337,6 +378,128 @@
     #master_prompt_content_area {
         padding: 1rem;
     }
+}
+
+/* Analysis Widget Card 样式优化 */
+.analysis-widget-card {
+    background: white;
+    border-radius: 1rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.analysis-widget-card:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.1);
+}
+
+/* Widget Card Container */
+.widget-card-container {
+    height: 100%;
+    min-height: 200px;
+}
+
+/* Widget Content Area */
+.widget-content-area {
+    background: #fafafa;
+}
+
+/* 对象数组卡片内部边界优化 */
+.widget-content-area .group\/card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    transition: all 0.2s ease;
+}
+
+.widget-content-area .group\/card:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08);
+}
+
+/* 编辑模式卡片样式 */
+.edit-row {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    transition: all 0.2s ease;
+}
+
+.edit-row:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.06);
+}
+
+/* Glass Card 样式 */
+.glass-card {
+    background: white;
+    border-radius: 1rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08);
+}
+
+/* GridStack 调整模式样式 */
+.grid-stack-item-resizing {
+    z-index: 100 !important;
+}
+
+.grid-stack-item-resizing .widget-card-container {
+    box-shadow: 0 0 0 2px #3b82f6, 0 8px 24px -4px rgba(59, 130, 246, 0.3) !important;
+    transition: box-shadow 0.2s ease;
+}
+
+.grid-stack-item.is-resizing .drag-handle {
+    cursor: move !important;
+}
+
+/* 默认隐藏所有调整手柄 */
+.grid-stack-item .ui-resizable-handle {
+    display: none !important;
+}
+
+/* 只在调整模式下显示调整手柄 */
+.grid-stack-item.is-resizing .ui-resizable-handle {
+    display: block !important;
+}
+
+/* 禁用移动的卡片样式 */
+.grid-stack-item[gs-no-move="true"] .drag-handle {
+    cursor: default !important;
+}
+
+/* 输入框样式优化 */
+.editor-input-modern {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: #334155;
+    background: white;
+    transition: all 0.2s ease;
+    resize: none;
+    overflow: hidden;
+}
+
+.editor-input-modern:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    background: white;
+}
+
+.editor-input-modern:hover {
+    border-color: #cbd5e1;
 }
 
 /* ==================== 通用工具类 ==================== */

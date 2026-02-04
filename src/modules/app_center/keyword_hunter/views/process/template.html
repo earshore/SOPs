@@ -68,9 +68,8 @@
 </section>
 
 <!-- Floating Keywords Window -->
-<div id="kt-keywords-floating" class="kt-floating-window bg-white rounded-2xl shadow-2xl">
-    <div
-        class="floating-header bg-gradient-to-r from-blue-500 to-purple-500 text-white p-3 rounded-t-2xl flex items-center justify-between">
+<div id="kt-keywords-floating" class="kt-floating-window">
+    <div class="floating-header bg-gradient-to-r from-blue-500 to-purple-500 text-white">
         <h3 class="font-medium text-sm flex items-center gap-2">
             <i class="fas fa-list"></i> 关键词监控
         </h3>
@@ -81,8 +80,8 @@
         </div>
     </div>
 
-    <div class="kt-floating-content p-4">
-        <div class="flex items-center gap-2 mb-3">
+    <div class="kt-floating-content">
+        <div class="kt-tab-buttons flex items-center gap-2">
             <button onclick="window.kt_showKeywordTab('matched')" id="kt-kw-tab-matched"
                 class="flex-1 py-2 text-sm font-medium bg-green-100 text-green-700 rounded-lg smooth-transition hover:bg-green-200">
                 已匹配 (<span id="kt-tab-matched-count">0</span>)
@@ -92,8 +91,10 @@
                 未匹配 (<span id="kt-tab-unmatched-count">0</span>)
             </button>
         </div>
-        <div id="kt-matched-keywords" class="kt-keyword-list space-y-2 overflow-y-auto scrollbar-thin pr-1"></div>
-        <div id="kt-unmatched-keywords" class="kt-keyword-list space-y-2 overflow-y-auto scrollbar-thin hidden pr-1"></div>
+        <div class="kt-keyword-list-wrapper">
+            <div id="kt-matched-keywords" class="kt-keyword-list space-y-2 scrollbar-thin"></div>
+            <div id="kt-unmatched-keywords" class="kt-keyword-list space-y-2 scrollbar-thin hidden"></div>
+        </div>
     </div>
 </div>
 
