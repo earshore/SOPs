@@ -67,40 +67,38 @@
 </section>
 
 <!-- Floating Keywords Window -->
-<div id="kt-keywords-floating" class="floating-window bg-white rounded-2xl hidden"
-    style="width: 380px; height: 500px; bottom: 40px; left: 20px;">
+<div id="kt-keywords-floating" class="kt-floating-window bg-white rounded-2xl shadow-2xl">
     <div
         class="floating-header bg-gradient-to-r from-blue-500 to-purple-500 text-white p-3 rounded-t-2xl flex items-center justify-between">
         <h3 class="font-medium text-sm flex items-center gap-2">
             <i class="fas fa-list"></i> 关键词监控
         </h3>
         <div class="flex items-center gap-2">
-            <button onclick="window.kt_minimizeKeywordsWindow()" class="p-1 hover:bg-white/20 rounded" title="最小化">
+            <button onclick="window.kt_minimizeKeywordsWindow()" class="p-1 hover:bg-white/20 rounded transition-colors" title="最小化">
                 <i class="fas fa-minus"></i>
             </button>
         </div>
     </div>
 
-    <div class="p-4 h-full flex flex-col" style="height: calc(100% - 52px);">
-        <div class="flex items-center justify-between mb-3">
-            <div class="flex items-center gap-2"></div>
+    <div class="kt-floating-content p-4">
+        <div class="flex items-center gap-2 mb-3">
             <button onclick="window.kt_showKeywordTab('matched')" id="kt-kw-tab-matched"
-                class="flex-1 py-2 text-sm font-medium bg-green-100 text-green-700 rounded-lg smooth-transition">
+                class="flex-1 py-2 text-sm font-medium bg-green-100 text-green-700 rounded-lg smooth-transition hover:bg-green-200">
                 已匹配 (<span id="kt-tab-matched-count">0</span>)
             </button>
             <button onclick="window.kt_showKeywordTab('unmatched')" id="kt-kw-tab-unmatched"
-                class="flex-1 py-2 text-sm font-medium bg-red-100 text-red-600 rounded-lg smooth-transition">
+                class="flex-1 py-2 text-sm font-medium bg-red-100 text-red-600 rounded-lg smooth-transition hover:bg-red-200">
                 未匹配 (<span id="kt-tab-unmatched-count">0</span>)
             </button>
         </div>
-        <div id="kt-matched-keywords" class="flex-1 space-y-2 overflow-y-auto scrollbar-thin pr-1"></div>
-        <div id="kt-unmatched-keywords" class="flex-1 space-y-2 overflow-y-auto scrollbar-thin hidden pr-1"></div>
+        <div id="kt-matched-keywords" class="kt-keyword-list space-y-2 overflow-y-auto scrollbar-thin pr-1"></div>
+        <div id="kt-unmatched-keywords" class="kt-keyword-list space-y-2 overflow-y-auto scrollbar-thin hidden pr-1"></div>
     </div>
 </div>
 
 <!-- Minimized Keywords Button -->
 <button id="kt-keywords-minimized" onclick="window.kt_restoreKeywordsWindow()"
-    class="fixed bottom-4 right-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-3 rounded-full shadow-lg hidden z-50 flex items-center gap-2 hover:shadow-xl smooth-transition">
+    class="kt-minimized-btn fixed bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-3 rounded-full shadow-lg hidden hover:shadow-xl smooth-transition">
     <i class="fas fa-list"></i>
     <span class="text-sm font-medium">关键词</span>
     <span class="bg-red-500 text-white text-[10px] px-1.5 rounded-full" id="kt-minimized-badge">0</span>

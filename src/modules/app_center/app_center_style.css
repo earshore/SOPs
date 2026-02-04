@@ -1,20 +1,40 @@
 /**
  * App Center 应用中心样式
  * 统一的应用中心模块样式定义
+ * 整合了 Keyword Hunter 和 Master Prompt 的样式
  */
 
-/* ==================== 容器基础样式 ==================== */
-#panel-app_center {
-    /* 继承全局 panel 样式 */
+
+/* Hub Module Section - Same padding as overview */
+.app-center-module-section {
+    max-width: 1450px;
+    margin: 0 auto;
+    padding: 0 1rem;
 }
 
+/* ==================== 容器基础样式 ==================== */
 #app_center_content_area {
-    /* 内容区域样式 */
-    position: relative;
+    /* position: relative;
+    background: linear-gradient(to bottom, rgba(248, 250, 252, 0.5), rgba(241, 245, 249, 0.3)); */
+    max-width: 1450px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+#app_center_content_area>div {
+    max-width: 1450px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* ==================== 平滑滚动 ==================== */
+.scroll-smooth {
+    scroll-behavior: smooth;
 }
 
 /* ==================== 错误边界样式 ==================== */
-.app-center-error-boundary {
+.app-center-error-boundary,
+.error-boundary {
     min-height: 400px;
 }
 
@@ -22,8 +42,10 @@
     animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* ==================== 加载动画优化 ==================== */
-#app_center_content_area .fade-in {
+/* ==================== 动画定义 ==================== */
+
+/* 淡入动画 */
+.fade-in {
     animation: fadeIn 0.3s ease-in;
 }
 
@@ -38,9 +60,243 @@
     }
 }
 
+/* 旋转加载动画 */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.fa-spin {
+    animation: spin 1s linear infinite;
+}
+
+/* 脉冲动画 */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
 /* ==================== 响应式适配 ==================== */
 @media (max-width: 768px) {
     #app_center_content_area {
         padding: 1rem;
     }
+}
+
+/* ==================== Keyword Hunter 特定样式 ==================== */
+
+/* Keyword Hunter 原始样式 - 完整保留 */
+#keyword_hunter_content_area {
+    background: linear-gradient(to bottom, rgba(248, 250, 252, 0.5), rgba(241, 245, 249, 0.3));
+}
+
+/* Keyword Hunter 响应式调整 */
+@media (max-width: 768px) {
+    #keyword_hunter_content_area {
+        padding: 1rem;
+    }
+}
+
+/* 输入模块优化 - 固定高度布局 */
+.kt-input-grid {
+    height: calc(100vh - 380px);
+    min-height: 500px;
+    max-height: 700px;
+}
+
+.kt-input-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.kt-textarea-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.kt-textarea-container textarea {
+    flex: 1;
+    resize: none;
+    min-height: 100%;
+}
+
+/* Keyword Input 相关样式 */
+.keyword-input-wrapper {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.keyword-input-highlight {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    padding: 1rem;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    color: transparent;
+    z-index: 1;
+}
+
+.keyword-input-textarea {
+    position: relative;
+    z-index: 2;
+    background: transparent;
+    resize: none;
+    flex: 1;
+}
+
+/* Textarea 相关样式 */
+.textarea-wrapper {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.textarea-stats {
+    position: absolute;
+    bottom: 0.75rem;
+    right: 0.75rem;
+    z-index: 10;
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Floating Window 样式优化 */
+.kt-floating-window {
+    position: fixed;
+    width: 380px;
+    height: 500px;
+    bottom: 40px;
+    left: 20px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    z-index: 1000;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    display: none;
+}
+
+.kt-floating-window.show {
+    display: block;
+}
+
+.kt-floating-content {
+    height: calc(100% - 52px);
+    display: flex;
+    flex-direction: column;
+}
+
+.kt-keyword-list {
+    flex: 1;
+    min-height: 0;
+}
+
+.floating-header {
+    cursor: move;
+    user-select: none;
+}
+
+/* Minimized Button */
+.kt-minimized-btn {
+    bottom: 1rem;
+    right: 1rem;
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.kt-minimized-btn.show {
+    display: flex;
+}
+
+/* Copy Content 样式 */
+.copy-content {
+    line-height: 1.8;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.copy-content:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+/* ==================== Master Prompt 特定样式 ==================== */
+
+/* Master Prompt 原始样式 - 完整保留 */
+#master_prompt_content_area {
+    background: linear-gradient(to bottom, rgba(248, 250, 252, 0.5), rgba(241, 245, 249, 0.3));
+}
+
+/* Master Prompt 响应式调整 */
+@media (max-width: 768px) {
+    #master_prompt_content_area {
+        padding: 1rem;
+    }
+}
+
+/* ==================== 通用工具类 ==================== */
+
+/* 平滑过渡效果 */
+.smooth-transition {
+    transition: all 180ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Markdown 内容样式 */
+.markdown-content {
+    line-height: 1.7;
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3 {
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    font-weight: 600;
+}
+
+.markdown-content p {
+    margin-bottom: 1em;
+}
+
+.markdown-content ul,
+.markdown-content ol {
+    margin-left: 1.5em;
+    margin-bottom: 1em;
+}
+
+.markdown-content code {
+    background: rgba(0, 0, 0, 0.05);
+    padding: 0.2em 0.4em;
+    border-radius: 0.25rem;
+    font-size: 0.9em;
+}
+
+.markdown-content pre {
+    background: rgba(0, 0, 0, 0.05);
+    padding: 1em;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    margin-bottom: 1em;
+}
+
+.markdown-content pre code {
+    background: none;
+    padding: 0;
 }

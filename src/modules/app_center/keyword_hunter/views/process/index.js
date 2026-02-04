@@ -441,11 +441,11 @@ function minimizeKeywordsWindow() {
     if (floatWinEl) {
         floatWinEl.classList.add('opacity-0', 'scale-95');
         addTimeout(() => {
-            floatWinEl.classList.add('hidden');
+            floatWinEl.classList.remove('show');
             floatWinEl.classList.remove('opacity-0', 'scale-95');
 
             if (minBtn) {
-                minBtn.classList.remove('hidden');
+                minBtn.classList.add('show');
                 state.keywordTracker.isWindowMinimized = true;
             }
         }, 200);
@@ -459,9 +459,9 @@ function restoreKeywordsWindow() {
     const floatWinEl = document.getElementById('kt-keywords-floating');
     const minBtn = document.getElementById('kt-keywords-minimized');
 
-    if (minBtn) minBtn.classList.add('hidden');
+    if (minBtn) minBtn.classList.remove('show');
     if (floatWinEl) {
-        floatWinEl.classList.remove('hidden');
+        floatWinEl.classList.add('show');
         floatWinEl.classList.add('opacity-0', 'scale-95');
         requestAnimationFrame(() => {
             floatWinEl.classList.remove('opacity-0', 'scale-95');
@@ -542,11 +542,11 @@ function manageFloatingWindowVisibility() {
 
     // Process 模块显示浮动窗口
     if (state.keywordTracker.isWindowMinimized) {
-        floatWin.classList.add('hidden');
-        minBtn.classList.remove('hidden');
+        floatWin.classList.remove('show');
+        minBtn.classList.add('show');
     } else {
-        floatWin.classList.remove('hidden');
-        minBtn.classList.add('hidden');
+        floatWin.classList.add('show');
+        minBtn.classList.remove('show');
     }
 }
 
@@ -628,8 +628,8 @@ export function unmount() {
         // 2. 隐藏浮动窗口和最小化按钮
         const floatWin = document.getElementById('kt-keywords-floating');
         const minBtn = document.getElementById('kt-keywords-minimized');
-        if (floatWin) floatWin.classList.add('hidden');
-        if (minBtn) minBtn.classList.add('hidden');
+        if (floatWin) floatWin.classList.remove('show');
+        if (minBtn) minBtn.classList.remove('show');
 
         // 3. 清理事件监听器和定时器
         cleanup();
