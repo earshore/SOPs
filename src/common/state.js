@@ -16,6 +16,7 @@
  * @property {string} selectedSite
  * @property {any} scrapedData
  * @property {string|number|null} currentHistoryId
+ * @property {string} inputAsins
  */
 
 /**
@@ -107,6 +108,7 @@ const stateData = {
     selectedSite: "",
     scrapedData: null,
     currentHistoryId: null,
+    inputAsins: "", // 用户输入的 ASIN 列表
   },
 
   // ========================
@@ -123,7 +125,55 @@ const stateData = {
   },
 
   // ========================
-  // Promptlab 模块 (Prompt 工场)
+  // Master Prompt 模块 (统一命名空间)
+  // ========================
+  masterPrompt: {
+    // Scraper 子模块状态
+    scraper: {
+      isScraping: false,
+      selectedSite: "",
+      scrapedData: null,
+      currentHistoryId: null,
+      inputAsins: "",
+    },
+    // Data 子模块状态
+    data: {
+      currentTab: "preview",
+    },
+    // Analysis 子模块状态
+    analysis: {
+      analysisReport: null,
+      translatedReport: null,
+      selectedAsins: [],
+      expandedAsin: null,
+      isEditing: false,
+      showTranslation: false,
+      editHistory: [],
+    },
+    // Promptlab 子模块状态
+    promptlab: {
+      userProductProfile: {
+        targetMarket: "",
+        keywordsTier1: "",
+        keywordsTier2: "",
+        audience: "",
+        usps: "",
+        specs: "",
+        socialHook: "",
+        negative: "",
+        tone: "professional",
+        customStrategy: "",
+        useRufus: true,
+        useEmoji: true,
+        useCosmo: true,
+        selectedReportSections: [],
+        charLimit: 5000,
+      },
+    },
+  },
+
+  // ========================
+  // Promptlab 模块 (Prompt 工场) - 向后兼容
   // ========================
   promptlab: {
     userProductProfile: {

@@ -1,0 +1,53 @@
+/**
+ * Keyword Hunter 模块样式
+ */
+
+/* 淡入动画 */
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* 错误边界样式 */
+.error-boundary {
+    min-height: 400px;
+}
+
+/* 加载动画 */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.fa-spin {
+    animation: spin 1s linear infinite;
+}
+
+/* 内容区样式 */
+#keyword_hunter_content_area {
+    background: linear-gradient(to bottom, rgba(248, 250, 252, 0.5), rgba(241, 245, 249, 0.3));
+}
+
+/* 平滑滚动 */
+.scroll-smooth {
+    scroll-behavior: smooth;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    #keyword_hunter_content_area {
+        padding: 1rem;
+    }
+}

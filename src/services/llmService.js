@@ -4,9 +4,11 @@
 // 🎯 P2 重构: 添加完整的 JSDoc 类型注释
 // 🎯 Phase 5: 已集成 ErrorService
 // 🛡️ Phase 1.2: 增强鲁棒性 - 指数退避重试 (Exponential Backoff)
+// 🌐 Phase 1.3: 环境适配 - 开发/生产环境自动切换
 // ================================================================
 
 import { ErrorService } from './errorService.js';
+import { EnvConfig } from '../common/config/envConfig.js';
 
 // ========================
 // 类型定义
@@ -99,6 +101,13 @@ export async function callLLM(
     retryDelay = 1000
   } = options;
 
+  // 标准化 endpoint (开发/生产环境自动适配)
+  const normalizedEndpoint = EnvConfig.api.normalizeEndpoint(endpoint);
+  
+  if (EnvConfig.logging.verbose) {
+    console.log(`🌐 环境: ${EnvConfig.environment}, 原始 Endpoint: ${endpoint}, 标准化 Endpoint: ${normalizedEndpoint}`);
+  }
+
   /** @type {Object} */
   const requestBody = {
     model: model,
@@ -124,7 +133,7 @@ export async function callLLM(
         await sleep(delay);
       }
 
-      const response = await fetch(`${endpoint}/chat/completions`, {
+      const response = await fetch(`${normalizedEndpoint}/chat/completions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -223,14 +232,22 @@ export async function callLLM(
  */
 export async function fetchModelsFromApi(provider, endpoint, apiKey) {
   try {
+    // 标准化 endpoint (开发/生产环境自动适配)
+    const normalizedEndpoint = EnvConfig.api.normalizeEndpoint(endpoint);
+    
+    if (EnvConfig.logging.verbose) {
+      console.log(`🌐 环境: ${EnvConfig.environment}, 获取模型列表`);
+      console.log(`📋 原始 Endpoint: ${endpoint}, 标准化 Endpoint: ${normalizedEndpoint}`);
+    }
+    
     // 设置 10秒 超时，避免获取列表卡死
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-    console.log(`🔄 正在从 ${endpoint}/models 获取模型列表...`);
-    console.log(`📋 请求详情: Provider=${provider}, Endpoint=${endpoint}`);
+    console.log(`🔄 正在从 ${normalizedEndpoint}/models 获取模型列表...`);
+    console.log(`📋 请求详情: Provider=${provider}`);
     
-    const res = await fetch(`${endpoint}/models`, {
+    const res = await fetch(`${normalizedEndpoint}/models`, {
       headers: { Authorization: `Bearer ${apiKey}` },
       signal: controller.signal
     }).finally(() => clearTimeout(timeoutId));

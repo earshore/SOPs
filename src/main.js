@@ -14,6 +14,10 @@ import './modules/app_center/app_center_style.css';
 // Expose to window for legacy compatibility
 window.marked = marked;
 
+// ✅ 导入全局状态对象
+import state from './common/state.js';
+window.state = state;
+
 // ✅ 导入视图加载器 (HTML 拆分重构的核心)
 import { initViews } from './common/utils/viewLoader.js';
 
@@ -108,44 +112,20 @@ import {
   fetchModels,
   toggleApiKeyVisibility, // [RESTORED]
   testConnection,
-  saveProxyConfig,
-  renderProxyInputUI // [RESTORED]
+  saveProxyConfig
 } from "./components/settings/systemSettings.js";
 
-import {
-  initAlpineScraper, // [NEW] Alpine Init
-  initScraperListeners,
-  selectSite,
-  renderHistory
-} from "./modules/app_center/master_prompt/scraper/scraperPanel.js";
-
 import { switchTab, renderMegaMenu, renderSopsMegaMenu, renderHubMegaMenu, renderMoreMenu, showToast, initRouter } from "../src/common/utils/ui.js";
-import { router, initRouterSystem } from './common/router/index.js';
+import { initRouterSystem } from './common/router/index.js';
 import { APP_EVENTS } from './common/constants/eventConstants.js';
 import { initHomeSplash } from "./modules/home/homeDisplay.js";
-
-import {
-  renderDataPanel,
-  triggerImport,
-  switchDataTab,
-  handleImportFiles,
-  toggleCardExpand,
-  deleteProduct,
-  deleteReview
-} from "./modules/app_center/master_prompt/data_manage/dataDisplay.js";
-import {
-  initAnalysisPanel,
-  updateAsinSelectList,
-  analyzeSelectedAsins,
-  renderReport
-} from "./modules/app_center/master_prompt/analysis/analysisDisplay.js";
-import { initPromptlabModule } from './modules/app_center/master_prompt/promptlab/promptlabDisplay.js';
-import { initKeywordTracker } from './modules/app_center/keyword_tracker/trackerDisplay.js';
 
 // ✅ 自动注册事件监听器的模块 (事件驱动模式)
 import './modules/amz_hub/amz_hub.js';
 import './modules/sops/sops.js';
 import './modules/more/more.js';
+import './modules/app_center/master_prompt/master_prompt.js';
+import './modules/app_center/keyword_hunter/keyword_hunter.js';
 
 // ✅ Alpine.js
 import Alpine from 'alpinejs';
@@ -167,7 +147,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // 1. Initialize Alpine Components
   initAlpineSettings();
-  initAlpineScraper();
   Alpine.start();
 
   // ----------------------------------------------------
@@ -187,14 +166,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     initHomeSplash();
 
-    // 1. 初始化各模块的事件监听器
-    // initSettingsListeners(); // [REMOVED] Handled by Alpine
-    initScraperListeners();
-    initAnalysisPanel();
-    initPromptlabModule();
-    initKeywordTracker();
-
-    // 2. 渲染顶部 Mega Menu
+    // 1. 渲染顶部 Mega Menu
     renderMegaMenu();
     renderSopsMegaMenu();
     renderHubMegaMenu();
@@ -216,11 +188,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // 2. 初始化默认状态
   updateModelStatus();
-  renderHistory();
 
-  // 3. [REMOVED] Proxy setup is now handled by Alpine component init()
-
-  // 4. 初始化路由 (替代手动 switchTab)
+  // 3. 初始化路由 (替代手动 switchTab)
   initRouter();
 
   console.log("✅ System: Ready");

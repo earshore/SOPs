@@ -139,9 +139,31 @@ beforeEach(() => {
   // 重置 fetch mock
   global.fetch.mockReset();
   
-  // 重置 location
-  window.location.hash = '';
-  window.location.pathname = '/';
+  // 重置 location - 只在需要时定义
+  if (global.window && (!global.window.location || Object.getOwnPropertyDescriptor(global.window, 'location')?.configurable !== false)) {
+    try {
+      Object.defineProperty(global.window, 'location', {
+        writable: true,
+        configurable: true,
+        value: {
+          href: 'http://localhost/',
+          origin: 'http://localhost',
+          protocol: 'http:',
+          host: 'localhost',
+          hostname: 'localhost',
+          port: '',
+          pathname: '/',
+          search: '',
+          hash: '',
+          reload: vi.fn(),
+          replace: vi.fn(),
+          assign: vi.fn()
+        }
+      });
+    } catch (e) {
+      // location 已经被定义且不可配置，跳过
+    }
+  }
   
   // 清理 DOM
   document.body.innerHTML = '';

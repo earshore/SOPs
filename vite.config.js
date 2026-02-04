@@ -8,7 +8,28 @@ export default defineConfig({
     server: {
         port: 3000,
         open: true,
-        cors: true
+        cors: true,
+        // 代理配置 - 解决开发环境 CORS 问题
+        proxy: {
+            // 代理 /v1 路径到生产环境的 LLM Gateway
+            '/v1': {
+                target: 'https://llm-gateway.hongecb.store',
+                changeOrigin: true,
+                secure: true,
+                rewrite: (path) => path,
+                configure: (proxy, options) => {
+                    proxy.on('error', (err, req, res) => {
+                        console.log('proxy error', err);
+                    });
+                    proxy.on('proxyReq', (proxyReq, req, res) => {
+                        console.log('Sending Request to the Target:', req.method, req.url);
+                    });
+                    proxy.on('proxyRes', (proxyRes, req, res) => {
+                        console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
+                    });
+                }
+            }
+        }
     },
 
     // 构建配置

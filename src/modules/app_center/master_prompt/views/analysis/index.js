@@ -1,0 +1,984 @@
+/**
+ * Analysis 子模�?
+ * 负责 AI 分析功能
+ * 
+ * 架构说明�?
+ * - 继承 BaseModule 实现生命周期管理
+ * - 状态保存到 state.analysis 命名空间
+ * - 通过 EventBus 与其他模块通信
+ */
+
+import { loadTemplate } from '../../../../../common/utils/viewLoader.js';
+import BaseModule from '../../../../../common/BaseModule.js';
+import state from '../../../../../common/state.js';
+import { PROVIDERS, LANGUAGE_HEADERS } from '../../../../../common/constants/constants.js';
+import { ANALYSIS_MODULES, DYNAMIC_MASTER_TEMPLATE } from '../../../../../common/constants/prompts.js';
+import { showToast, showProgress } from '../../../../../common/utils/ui.js';
+import { HistoryService } from '../../services/historyService.js';
+import { renderHistory } from '../scraper/index.js';
+import { AnalysisService } from '../../analysis/analysisService.js';
+import { StorageService, STORAGE_KEYS } from '../../../../../services/storageService.js';
+import { ErrorService } from '../../../../../services/errorService.js';
+import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry.js';
+import { renderWidgetCard, renderViewModeHTML, renderEditorForm, renderSkeleton } from './renderer.js';
+import eventBus from '../../../../../common/EventBus.js';
+import { MODULE_EVENTS } from '../../../../../common/constants/eventConstants.js';
+import { loadGridStack } from '../../../../../common/utils/lazyLibs.js';
+
+// 辅助函数：获取字段标题
+function getFieldTitle(key) {
+  const titleMap = {
+    'target_market': '目标市场',
+    'keywords_tier1': '一级关键词',
+    'keywords_tier2': '二级关键词',
+    'product_category': '产品类别',
+    'product_features': '产品特点',
+    'product_benefits': '产品优势',
+    'target_audience': '目标受众',
+    'pain_points': '痛点',
+    'unique_selling_points': 'USP',
+    'competitive_advantages': '竞争优势',
+    'product_positioning': '产品定位',
+    'brand_tone': '品牌调性',
+    'emotional_triggers': '情感触发',
+    'call_to_action': '行动号召',
+    'seasonal_relevance': '季节相关性'
+  };
+  return titleMap[key] || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+}
+
+// ========================================== 
+// Analysis Module Class
+// ========================================== 
+
+class AnalysisModule extends BaseModule {
+  constructor(container) {
+    super('master_prompt_analysis');
+    this.container = container;
+    this.grid = null;
+    this.originalDataMap = new Map();
+    this.editHistoryMap = new Map();
+    this.registerGlobalActions();
+  }
+
+  async render() {
+    // render() 方法�?BaseModule 要求实现
+    // 但在这个模块中，HTML 已经�?mount() 函数中加�?
+  }
+
+  async init() {
+    console.log("🚀 Analysis Module Initialized (BaseModule)");
+
+    // 1. UI Initialization
+    this.setupUI();
+
+    // 订阅 Scraper 事件
+    this.addDisposable(eventBus.on(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, () => {
+      console.log("AnalysisModule received SCRAPE_SUCCESS");
+      if (state.scraper.scrapedData && state.scraper.scrapedData.products) {
+        state.analysis.selectedAsins = state.scraper.scrapedData.products.map((p) => p.asin);
+      }
+      this.updateAsinSelectList();
+    }));
+
+    // 初始加载现有数据
+    if (state.scraper.scrapedData) {
+      if (!state.analysis.selectedAsins || state.analysis.selectedAsins.length === 0) {
+        if (state.scraper.scrapedData.products) {
+          state.analysis.selectedAsins = state.scraper.scrapedData.products.map((p) => p.asin);
+        }
+      }
+      this.updateAsinSelectList();
+    }
+
+    // 2. 绑定事件
+    const analyzeBtn = document.getElementById("analyze-btn");
+    if (analyzeBtn) {
+      this.addEventListener(analyzeBtn, "click", () => this.analyzeSelectedAsins());
+    }
+
+    const transToggle = document.getElementById("opt-listing");
+    if (transToggle) {
+      this.addEventListener(document.getElementById("opt-listing"), "change", () => {
+        this.updateModuleListVisibility();
+        this.updatePromptPreview();
+      });
+      this.addEventListener(document.getElementById("opt-reviews"), "change", () => {
+        this.updateModuleListVisibility();
+        this.updatePromptPreview();
+      });
+    }
+
+    // 3. 恢复视图（如果报告存在）
+    if (state.analysis.analysisReport) {
+      this.renderReport();
+    }
+  }
+
+  onUnmount() {
+    console.log("💤 Analysis Module Unmounting...");
+    if (this.grid) {
+      this.grid.destroy(false);
+      this.grid = null;
+    }
+    // BaseModule 自动处理事件监听器清�?
+  }
+
+
+  // ================== UI Setup ==================
+
+  setupUI() {
+    this.renderModuleSelector();
+    this.renderPromptPreviewArea();
+  }
+
+  renderModuleSelector() {
+    this.renderSourceToggle();
+    this.renderModuleCheckboxes();
+    this.updateModuleListVisibility();
+    this.updateSourceVisuals();
+    this.setTimeout(() => this.updatePromptPreview(), 100);
+  }
+
+  renderSourceToggle() {
+    const container = document.getElementById("source-toggle-container");
+    if (!container) return;
+
+    container.innerHTML = `
+      <label id="lbl-opt-listing" class="flex-1 group relative flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border cursor-pointer transition-all select-none text-sm font-medium text-slate-500 border-slate-200 bg-white hover:border-blue-300">
+        <input type="checkbox" id="opt-listing" checked class="hidden peer">
+        <i class="fas fa-file-alt text-xs opacity-70"></i>
+        <span>Listings</span>
+      </label>
+      
+      <label id="lbl-opt-reviews" class="flex-1 group relative flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border cursor-pointer transition-all select-none text-sm font-medium text-slate-500 border-slate-200 bg-white hover:border-blue-300">
+        <input type="checkbox" id="opt-reviews" checked class="hidden peer">
+        <i class="fas fa-comments text-xs opacity-70"></i>
+        <span>Reviews</span>
+      </label>
+    `;
+  }
+
+  updateSourceVisuals() {
+    const updateStyle = (inputId, labelId) => {
+      const input = document.getElementById(inputId);
+      const label = document.getElementById(labelId);
+      if (!input || !label) return;
+
+      if (input.checked) {
+        label.className = `flex-1 group relative flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border cursor-pointer transition-all select-none text-sm font-regular bg-blue-50/50 border-blue-200 text-blue-700 shadow-sm`;
+      } else {
+        label.className = `flex-1 group relative flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border cursor-pointer transition-all select-none text-sm font-regular bg-slate-50 border-slate-200 text-slate-400 hover:bg-white hover:border-slate-300`;
+      }
+    };
+    updateStyle("opt-listing", "lbl-opt-listing");
+    updateStyle("opt-reviews", "lbl-opt-reviews");
+  }
+
+
+  renderModuleCheckboxes() {
+    const container = document.getElementById("modules-container");
+    if (!container) return;
+
+    container.innerHTML = ANALYSIS_MODULES.map(
+      (mod) => `
+        <label class="module-item group relative flex items-start gap-2.5 p-2.5 rounded-xl border border-slate-100 hover:bg-blue-50/50 hover:border-blue-200 cursor-pointer transition-all bg-white" data-category="${mod.category}">
+          <div class="flex items-center pt-0.5">
+            <input type="checkbox" name="analysis_module" value="${mod.id}" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" checked>
+          </div>
+          <div class="text-sm leading-tight flex-1 min-w-0">
+            <div class="font-medium text-slate-700 group-hover:text-blue-700 truncate">${mod.label_cn}</div>
+            <div class="text-slate-400 text-[11px] mt-0.5 group-hover:text-slate-500 line-clamp-2">${mod.desc_cn}</div>
+          </div>
+        </label>
+      `
+    ).join("");
+
+    // 绑定复选框 change 事件,实时更新 Prompt 预览
+    container.querySelectorAll('input[name="analysis_module"]').forEach(checkbox => {
+      this.addEventListener(checkbox, 'change', () => {
+        this.updatePromptPreview();
+      });
+    });
+  }
+
+  updateModuleListVisibility() {
+    const showListing = document.getElementById("opt-listing")?.checked;
+    const showReviews = document.getElementById("opt-reviews")?.checked;
+    const items = document.querySelectorAll(".module-item");
+
+    items.forEach((item) => {
+      const cat = item.dataset.category;
+      let visible = false;
+
+      if (cat === "listing" && showListing) visible = true;
+      if (cat === "reviews" && showReviews) visible = true;
+      if (cat === "cross" && showListing && showReviews) visible = true;
+
+      if (visible) {
+        item.classList.remove("hidden");
+      } else {
+        item.classList.add("hidden");
+        const checkbox = item.querySelector("input");
+        if (checkbox) checkbox.checked = false;
+      }
+    });
+  }
+
+  toggleAllModules(checked) {
+    const inputs = document.querySelectorAll('#modules-container input[type="checkbox"]');
+    inputs.forEach((input) => {
+      if (!input.closest(".module-item").classList.contains("hidden")) {
+        input.checked = checked;
+      }
+    });
+    this.updatePromptPreview();
+  }
+
+
+  updateAsinSelectList() {
+    const container = document.getElementById("asin-select-list");
+    if (!container) return;
+
+    if (!state.scraper.scrapedData || !state.scraper.scrapedData.products || state.scraper.scrapedData.products.length === 0) {
+      container.innerHTML = '<p class="text-sm text-slate-400 text-center py-6">暂无数据</p>';
+      return;
+    }
+
+    if (!state.analysis.selectedAsins) {
+      state.analysis.selectedAsins = [];
+    }
+
+    container.innerHTML = state.scraper.scrapedData.products.map((p) => {
+      const isSelected = state.analysis.selectedAsins.includes(p.asin);
+      return `
+        <label class="flex items-center gap-2 p-2 rounded-lg hover:bg-blue-50 cursor-pointer transition-colors group">
+          <input type="checkbox" value="${p.asin}" ${isSelected ? 'checked' : ''} 
+            class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 asin-checkbox">
+          <span class="text-sm font-mono font-medium text-slate-700 group-hover:text-blue-700">${p.asin}</span>
+        </label>
+      `;
+    }).join("");
+
+    // 绑定复选框事件
+    container.querySelectorAll('.asin-checkbox').forEach(checkbox => {
+      this.addEventListener(checkbox, 'change', (e) => {
+        const asin = e.target.value;
+        if (e.target.checked) {
+          if (!state.analysis.selectedAsins.includes(asin)) {
+            state.analysis.selectedAsins.push(asin);
+          }
+        } else {
+          state.analysis.selectedAsins = state.analysis.selectedAsins.filter(a => a !== asin);
+        }
+      });
+    });
+  }
+
+  selectAllAsins() {
+    if (!state.scraper.scrapedData || !state.scraper.scrapedData.products) return;
+    state.analysis.selectedAsins = state.scraper.scrapedData.products.map(p => p.asin);
+    this.updateAsinSelectList();
+  }
+
+  // ================== Prompt Logic ==================
+
+  renderPromptPreviewArea() {
+    const reportContent = document.getElementById("report-content");
+    if (!reportContent || document.getElementById("prompt-preview-container")) return;
+
+    const previewDiv = document.createElement("div");
+    previewDiv.id = "prompt-preview-container";
+    previewDiv.className = "mb-6 hidden fade-in";
+
+    previewDiv.innerHTML = `
+      <details class="group bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden open:ring-2 open:ring-blue-100 transition-all">
+        <summary class="flex items-center justify-between p-4 cursor-pointer bg-slate-50/50 hover:bg-slate-50 transition-colors list-none select-none">
+          <div class="flex items-center gap-2 text-sm font-semibold text-slate-700">
+            <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs">
+              <i class="fas fa-terminal"></i>
+            </span>
+            <span>Prompt 实时预览</span>
+            <span id="prompt-token-count" class="text-xs font-normal text-slate-400 font-mono ml-2"></span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-xs text-slate-400 group-open:hidden">点击展开查看策略</span>
+            <i class="fas fa-chevron-down text-slate-400 transition-transform group-open:rotate-180 text-xs"></i>
+          </div>
+        </summary>
+        <div class="border-t border-slate-100 bg-slate-900">
+          <div class="relative">
+            <pre id="live-prompt-code" class="p-4 text-xs font-mono text-green-400 overflow-x-auto whitespace-pre-wrap max-h-[300px] custom-scrollbar leading-relaxed"></pre>
+            <button data-action="copyPromptText" class="absolute top-2 right-2 text-slate-500 hover:text-white bg-slate-800/50 hover:bg-slate-700 p-1.5 rounded transition-colors" title="复制 Prompt">
+              <i class="fas fa-copy text-xs"></i>
+            </button>
+          </div>
+        </div>
+      </details>
+    `;
+
+    reportContent.insertBefore(previewDiv, reportContent.firstChild);
+  }
+
+
+  updatePromptPreview() {
+    const prompt = this.buildDynamicPrompt();
+    const container = document.getElementById("prompt-preview-container");
+    const codeBlock = document.getElementById("live-prompt-code");
+    const countLabel = document.getElementById("prompt-token-count");
+
+    if (!container || !codeBlock) return;
+
+    if (!prompt) {
+      container.classList.add("hidden");
+    } else {
+      container.classList.remove("hidden");
+      codeBlock.textContent = prompt;
+      const estTokens = Math.ceil(prompt.length / 4);
+      if (countLabel) countLabel.textContent = `~${estTokens} Tokens`;
+    }
+  }
+
+  copyPromptText() {
+    const text = document.getElementById("live-prompt-code")?.textContent;
+    if (text) {
+      navigator.clipboard.writeText(text);
+      showToast("Prompt 已复制", "success");
+    }
+  }
+
+  buildDynamicPrompt() {
+    const selectedCheckboxes = document.querySelectorAll('input[name="analysis_module"]:checked');
+    if (selectedCheckboxes.length === 0) return null;
+
+    const selectedModules = Array.from(selectedCheckboxes)
+      .map((cb) => ANALYSIS_MODULES.find((m) => m.id === cb.value))
+      .filter(Boolean);
+
+    const tasksStr = selectedModules
+      .map((m, index) => `${index + 1}. ${m.label_en}: ${m.extraction_instruction}`)
+      .join("\n");
+
+    const schemaParts = selectedModules
+      .map((m) => `  "${m.id}": ["..."]`)
+      .join(",\n");
+
+    return DYNAMIC_MASTER_TEMPLATE.replace("{{dynamic_tasks}}", tasksStr).replace("{{dynamic_schema}}", schemaParts);
+  }
+
+  // ================== Core Analysis Logic ==================
+
+  async analyzeSelectedAsins() {
+    if (!state.analysis.selectedAsins || state.analysis.selectedAsins.length === 0) {
+      showToast("请先选择要分析的 ASIN", "warning");
+      return;
+    }
+
+    const currentPrompt = this.buildDynamicPrompt();
+    if (!currentPrompt) {
+      showToast("请至少勾选一个分析目标", "warning");
+      return;
+    }
+
+    const isListingSelected = document.getElementById("opt-listing")?.checked;
+    const isReviewsSelected = document.getElementById("opt-reviews")?.checked;
+
+    const provider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
+    if (!provider) {
+      showToast("请先配置AI模型", "warning");
+      return;
+    }
+    const config = StorageService.getLLMConfig(provider) || {};
+    if (!config.apiKey) {
+      showToast("API Key 未配置", "warning");
+      return;
+    }
+
+    const btn = document.getElementById("analyze-btn");
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> 分析中..';
+
+    // 渲染骨架屏状�?
+    const loadingReport = {};
+    const selectedCheckboxes = document.querySelectorAll('input[name="analysis_module"]:checked');
+    selectedCheckboxes.forEach((cb) => {
+      loadingReport[cb.value] = '__LOADING__';
+    });
+
+    loadingReport.meta = {
+      targetMarket: "Analyze...",
+      generatedByModel: config.model,
+      generatedAt: "Pending...",
+      templateUsed: "Dynamic Analysis",
+    };
+
+    state.analysis.analysisReport = loadingReport;
+    this.renderReport();
+
+    const selectedProducts = state.scraper.scrapedData.products.filter((p) => state.analysis.selectedAsins.includes(p.asin));
+    const site = state.scraper.scrapedData.metadata.marketplace;
+    const language = LANGUAGE_HEADERS[site].name;
+
+    try {
+      const llmConfig = {
+        provider,
+        endpoint: config.endpoint,
+        apiKey: config.apiKey,
+        model: config.model,
+      };
+
+      const dataOptions = {
+        includeTitle: isListingSelected,
+        includeBullets: isListingSelected,
+        includeReviews: isReviewsSelected,
+      };
+
+      const report = await AnalysisService.generateReport(
+        selectedProducts,
+        currentPrompt,
+        language,
+        llmConfig,
+        dataOptions
+      );
+
+      report.meta = {
+        targetMarket: language,
+        analyzedASINs: state.analysis.selectedAsins,
+        generatedByModel: config.model,
+        generatedAt: new Date().toISOString(),
+        templateUsed: "Dynamic Analysis",
+        dataScope: [
+          isListingSelected ? "Listing" : "",
+          isReviewsSelected ? "Reviews" : "",
+        ].filter(Boolean),
+      };
+
+      state.analysis.analysisReport = report;
+      state.analysis.translatedReport = null;
+      state.analysis.showTranslation = false;
+      state.analysis.editHistory = [JSON.stringify(report)];
+      state.analysis.isEditing = false;
+
+      HistoryService.save(state.scraper.scrapedData, report);
+      renderHistory();
+      this.renderReport();
+
+      showToast("分析完成", "success");
+    } catch (e) {
+      ErrorService.handle(e, { action: 'analyzeSelectedAsins', module: 'analysis' });
+      state.analysis.analysisReport = null;
+      const display = document.getElementById("report-display");
+      if (display) display.classList.add("hidden");
+      const noReportMsg = document.getElementById("no-report-msg");
+      if (noReportMsg) noReportMsg.classList.remove("hidden");
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-brain mr-2"></i> 分析ASIN';
+    }
+  }
+
+
+  renderReport() {
+    const report = state.analysis.analysisReport;
+    if (!report) return;
+
+    if (!state.analysis.translatedReport) state.analysis.showTranslation = false;
+
+    const welcomeEl = document.getElementById("analysis-welcome");
+    if (welcomeEl) welcomeEl.classList.add("hidden");
+
+    document.getElementById("no-report-msg").classList.add("hidden");
+    const display = document.getElementById("report-display");
+    display.classList.remove("hidden");
+    const jsonDisplay = document.getElementById("report-json-display");
+    if (jsonDisplay && jsonDisplay.parentElement)
+      jsonDisplay.parentElement.classList.add("hidden");
+
+    if (report.parse_error) {
+      display.innerHTML = `<div class="p-6 bg-red-50 border border-red-200 rounded-xl text-red-700 font-mono text-sm whitespace-pre-wrap"><i class="fas fa-bug mr-2"></i> ⚠️ 解析错误，原始数据：\n${report.raw_response}</div>`;
+      return;
+    }
+
+    const showTrans = state.analysis.showTranslation && state.analysis.translatedReport;
+    const targetMarket = report.meta?.targetMarket || "Original";
+
+    const disabledClass = "opacity-40 cursor-not-allowed pointer-events-none grayscale";
+    const mdBtnClass = showTrans
+      ? disabledClass
+      : "text-slate-500 hover:text-blue-600 hover:bg-slate-50";
+
+    let toolbarHtml = `
+      <div class="space-y-4 font-sans text-slate-800 pb-8" id="report-container">
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-4 sticky top-0 z-30 backdrop-blur-md bg-white/95">
+          <div class="flex flex-wrap gap-3 text-xs font-medium text-slate-500">
+            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 text-slate-600 rounded-lg border border-slate-200">
+              <i class="fas fa-file-contract"></i> ${report.meta?.templateUsed || "Analysis"}
+            </div>
+            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 text-slate-600 rounded-lg border border-slate-200">
+              <i class="fas fa-earth"></i> ${report.meta?.targetMarket || ""}
+            </div>
+            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 text-slate-600 rounded-lg border border-slate-200">
+              <i class="fas fa-clock"></i> ${report.meta?.generatedAt || ""}
+            </div>
+          </div>
+          
+          <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 mr-2">
+              <select id="translation-model-select" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-slate-50 text-slate-600 focus:outline-none focus:border-blue-300 w-32">
+                <option value="" disabled selected>Translation Model</option>
+              </select>
+              <button id="quick-translate-btn" data-action="translateReport" 
+                class="text-xs px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1 ${showTrans ? "bg-slate-100 text-slate-400 cursor-not-allowed opacity-60" : "bg-indigo-50 text-indigo-600 hover:bg-indigo-100 cursor-pointer"}" 
+                ${showTrans ? "disabled" : ""}>
+                <i class="fas fa-language"></i> 翻译
+              </button>
+            </div>
+
+            <div class="w-px bg-slate-200 h-6"></div>
+
+            <div class="flex items-center gap-2 bg-slate-100 p-1 rounded-full px-1 border border-slate-200">
+              <span class="text-[10px] px-2 font-bold ${!showTrans ? "text-slate-700" : "text-slate-400"} uppercase tracking-wide cursor-default" title="原文语言">
+                ${targetMarket}
+              </span>
+              
+              <button id="toggle-trans-view-btn" 
+                class="relative inline-flex h-4 w-8 items-center rounded-full transition-colors duration-200 focus:outline-none ${showTrans ? "bg-blue-600" : "bg-slate-300"} ${!state.analysis.translatedReport ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}"
+                ${!state.analysis.translatedReport ? "disabled" : ""}>
+                <span class="inline-block h-3 w-3 transform rounded-full bg-white transition-transform duration-200 ${showTrans ? "translate-x-4" : "translate-x-1"} shadow-sm"></span>
+              </button>
+              
+              <span class="text-[10px] px-2 font-bold ${showTrans ? "text-blue-600" : "text-slate-400"} cursor-default">
+                CN
+              </span>
+            </div>
+
+            <div class="flex bg-white border border-slate-200 rounded-lg p-0.5 shadow-sm ml-2">
+              <button data-action="copyReportMarkdown" class="px-2 py-1 rounded transition-colors ${mdBtnClass}" title="${showTrans ? "翻译模式下禁用" : "复制 Markdown"}" ${showTrans ? "disabled" : ""}>
+                <i class="fab fa-markdown text-sm"></i>
+              </button>
+              
+              <div class="w-px bg-slate-100 my-1"></div>
+              
+              <button data-action="exportReport" class="px-2 py-1 text-slate-500 hover:text-blue-600 hover:bg-slate-50 rounded transition-colors" title="导出 JSON">
+                <i class="fas fa-download text-xs"></i>
+              </button>
+            </div>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="grid-stack"></div>
+      </div>`;
+
+    display.innerHTML = toolbarHtml;
+
+    this.populateTranslationModels();
+
+    const toggleBtn = document.getElementById("toggle-trans-view-btn");
+    if (toggleBtn) this.addEventListener(toggleBtn, "click", () => this.toggleTranslationView());
+
+    this.initGridStack(report);
+  }
+
+  populateTranslationModels() {
+    const select = document.getElementById("translation-model-select");
+    if (!select) return;
+
+    const activeProvider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
+    const providerConfig = activeProvider ? PROVIDERS[activeProvider] : null;
+
+    let options = "";
+
+    if (providerConfig && providerConfig.models && providerConfig.models.length > 0) {
+      providerConfig.models.forEach(modelObj => {
+        const modelId = modelObj.id;
+        const isSelected = state.analysis.lastTranslationModel === modelId ? "selected" : "";
+        options += `<option value="${modelId}" ${isSelected}>${modelId}</option>`;
+      });
+    } else {
+      options = `<option value="" disabled>No models found for ${activeProvider || 'current provider'}</option>`;
+    }
+
+    select.innerHTML = options;
+
+    if (state.analysis.lastTranslationModel) {
+      const exists = Array.from(select.options).some(opt => opt.value === state.analysis.lastTranslationModel);
+      if (exists) {
+        select.value = state.analysis.lastTranslationModel;
+      } else if (select.options.length > 0 && !select.options[0].disabled) {
+        select.value = select.options[0].value;
+        state.analysis.lastTranslationModel = select.value;
+      }
+    } else if (select.options.length > 0 && !select.options[0].disabled) {
+      select.value = select.options[0].value;
+    }
+
+    select.onchange = (e) => {
+      state.analysis.lastTranslationModel = e.target.value;
+    };
+  }
+
+
+  async initGridStack(report) {
+    const gridEl = document.querySelector(".grid-stack");
+    if (!gridEl) return;
+
+    await loadGridStack();
+
+    if (this.grid) this.grid.destroy(false);
+
+    this.grid = GridStack.init(
+      {
+        column: 12,
+        cellHeight: 60,
+        margin: 15,
+        animate: true,
+        float: false,
+        disableOneColumnMode: false,
+        staticGrid: false,
+        disableResize: true,
+        handle: ".drag-handle",
+        resizable: { handles: "se" },
+      },
+      gridEl
+    );
+
+    const templateId = report.meta?.templateId || "default";
+    const savedLayout = StorageService.getLayoutConfig(templateId);
+
+    const widgets = [];
+    const keys = Object.keys(report).filter((k) => k !== "meta");
+
+    keys.forEach((key) => {
+      let content = report[key];
+      if (state.analysis.showTranslation && state.analysis.translatedReport && state.analysis.translatedReport[key]) {
+        content = state.analysis.translatedReport[key];
+      }
+      const autoH = this.calculateWidgetHeight(content);
+
+      let defaultW = 4;
+      if (autoH > 6) defaultW = 6;
+      if (autoH > 10) defaultW = 12;
+
+      const savedNode = savedLayout.find((n) => n.id === key);
+
+      widgets.push({
+        id: key,
+        x: savedNode ? savedNode.x : undefined,
+        y: savedNode ? savedNode.y : undefined,
+        w: savedNode ? savedNode.w : defaultW,
+        h: savedNode ? savedNode.h : autoH,
+        content: this.renderWidgetContent(key, report, state.analysis.translatedReport),
+      });
+    });
+
+    this.grid.batchUpdate();
+    this.grid.removeAll();
+    widgets.forEach((w) => {
+      const widgetConfig = {
+        x: w.x, y: w.y, w: w.w, h: w.h, id: w.id
+      };
+      const el = this.grid.addWidget(widgetConfig);
+
+      const contentEl = el.querySelector('.grid-stack-item-content');
+      if (contentEl) {
+        contentEl.innerHTML = w.content;
+      }
+    });
+    this.grid.batchUpdate(false);
+
+    this.grid.on("change", () => this.saveGridLayout(templateId));
+    this.addEventListener(document, "mousedown", (e) => this.handleGlobalClickForResize(e));
+  }
+
+  handleGlobalClickForResize(e) {
+    if (e.target.closest(".ui-resizable-handle") || e.target.closest(".btn-resize"))
+      return;
+    const resizingCard = document.querySelector(".grid-stack-item.is-resizing");
+    if (resizingCard && !resizingCard.contains(e.target)) {
+      const key = resizingCard.getAttribute("gs-id");
+      this.toggleCardResize(key, false);
+    }
+  }
+
+  saveGridLayout(templateId) {
+    if (!this.grid) return;
+    const layout = this.grid.save(false);
+    const cleanLayout = layout.map((node) => ({
+      id: node.id,
+      x: node.x,
+      y: node.y,
+      w: node.w,
+      h: node.h,
+    }));
+    StorageService.setLayoutConfig(templateId, cleanLayout);
+  }
+
+  renderWidgetContent(key, report, transReport) {
+    const origVal = report[key];
+    const showTrans = state.analysis.showTranslation;
+    const transVal = showTrans && transReport ? transReport[key] : undefined;
+
+    if (origVal === '__LOADING__') {
+      return renderSkeleton();
+    }
+
+    const displayVal = this.getDisplayValue(origVal, transVal);
+
+    const moduleConfig = ANALYSIS_MODULES.find((m) => m.id === key);
+    const title = moduleConfig ? moduleConfig.label_cn : getFieldTitle(key);
+
+    let style = {
+      color: "slate",
+      bg: "bg-slate-500",
+      lightBg: "bg-slate-100",
+      icon: "fa-info-circle",
+    };
+
+    if (moduleConfig) {
+      if (moduleConfig.category === "listing")
+        style = { color: "blue", bg: "bg-blue-600", lightBg: "bg-blue-50", icon: "fa-file-alt" };
+      else if (moduleConfig.category === "reviews")
+        style = { color: "orange", bg: "bg-orange-500", lightBg: "bg-orange-50", icon: "fa-comments" };
+      else if (moduleConfig.category === "cross")
+        style = { color: "purple", bg: "bg-purple-600", lightBg: "bg-purple-50", icon: "fa-random" };
+    }
+
+    return renderWidgetCard(key, title, style, showTrans, renderViewModeHTML(displayVal, style));
+  }
+
+  calculateWidgetHeight(content) {
+    if (!content) return 4;
+    let textLength = 0;
+    let lineCount = 0;
+
+    if (typeof content === "string") {
+      textLength = content.length;
+      lineCount = content.split("\n").length;
+    } else if (Array.isArray(content)) {
+      const str = JSON.stringify(content);
+      textLength = str.length;
+      lineCount = Array.isArray(content) ? content.length * 1.5 : 5;
+    } else if (typeof content === "object") {
+      const str = JSON.stringify(content);
+      textLength = str.length;
+      lineCount = Object.keys(content).length * 2;
+    }
+
+    const heightByChar = Math.ceil(textLength / 150);
+    const heightByLine = Math.ceil(lineCount / 3);
+    let h = Math.max(3, heightByChar, heightByLine);
+    return Math.min(h + 2, 24);
+  }
+
+  getDisplayValue(orig, trans) {
+    return state.analysis.showTranslation && trans !== undefined && trans !== null ? trans : orig;
+  }
+
+  // ================== Actions / Methods ==================
+
+  toggleTranslationView() {
+    state.analysis.showTranslation = !state.analysis.showTranslation;
+    this.renderReport();
+  }
+
+  async translateReport() {
+    if (state.analysis.showTranslation && state.analysis.translatedReport) return;
+    if (!state.analysis.analysisReport) return;
+
+    const provider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
+    if (!provider) {
+      showToast("请先配置AI模型", "warning");
+      return;
+    }
+    const config = StorageService.getLLMConfig(provider) || {};
+    if (!config.apiKey) {
+      showToast("API Key 未配置", "warning");
+      return;
+    }
+
+    const select = document.getElementById("translation-model-select");
+    const selectedModel = select?.value || config.model;
+
+    const btn = document.getElementById("quick-translate-btn");
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-1"></i> 翻译中...';
+    }
+
+    try {
+      const llmConfig = {
+        provider,
+        endpoint: config.endpoint,
+        apiKey: config.apiKey,
+        model: selectedModel,
+      };
+
+      // 翻译目标语言默认为中文
+      const targetLanguage = "Chinese";
+
+      const translated = await AnalysisService.translateReport(
+        state.analysis.analysisReport,
+        targetLanguage,
+        llmConfig
+      );
+
+      state.analysis.translatedReport = translated;
+      state.analysis.showTranslation = true;
+      this.renderReport();
+      showToast("翻译完成", "success");
+    } catch (e) {
+      ErrorService.handle(e, { action: 'translateReport', module: 'analysis' });
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-language"></i> 翻译';
+      }
+    }
+  }
+
+  copyReportMarkdown() {
+    if (!state.analysis.analysisReport) {
+      showToast("暂无报告", "warning");
+      return;
+    }
+
+    let md = `# Analysis Report\n\n`;
+    md += this.generateDynamicMarkdown(state.analysis.analysisReport);
+    navigator.clipboard.writeText(md);
+    showToast("Markdown 已复制", "success");
+  }
+
+  generateDynamicMarkdown(data, depth = 1) {
+    if (!data) return "";
+    let md = "";
+
+    Object.keys(data).forEach((key) => {
+      if (key === "meta") return;
+      const val = data[key];
+      const heading = "#".repeat(Math.min(depth + 1, 6));
+      md += `${heading} ${key}\n\n`;
+
+      if (typeof val === "string") {
+        md += `${val}\n\n`;
+      } else if (Array.isArray(val)) {
+        val.forEach((item) => {
+          if (typeof item === "string") {
+            md += `- ${item}\n`;
+          } else {
+            md += `- ${JSON.stringify(item)}\n`;
+          }
+        });
+        md += "\n";
+      }
+    });
+
+    return md;
+  }
+
+  exportReport() {
+    if (!state.analysis.analysisReport) return;
+    const blob = new Blob([JSON.stringify(state.analysis.analysisReport, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `analysis-report-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  toggleCardResize(key, forceState) {
+    const el = document.querySelector(`.grid-stack-item[gs-id="${key}"]`);
+    const card = document.getElementById(`widget-card-${key}`);
+    if (!el || !card) return;
+
+    const isResizing = forceState !== undefined ? forceState : !el.classList.contains("is-resizing");
+
+    if (isResizing) {
+      el.classList.add("is-resizing");
+      card.style.resize = "both";
+      card.style.overflow = "auto";
+    } else {
+      el.classList.remove("is-resizing");
+      card.style.resize = "none";
+      card.style.overflow = "hidden";
+    }
+  }
+
+  // ================== Global Actions Registration ==================
+
+  registerGlobalActions() {
+    const actions = {
+      toggleAllModules: (params) => {
+        const checked = params.checked === 'true';
+        this.toggleAllModules(checked);
+      },
+      selectAllAsins: () => this.selectAllAsins(),
+      copyPromptText: () => this.copyPromptText(),
+      translateReport: () => this.translateReport(),
+      copyReportMarkdown: () => this.copyReportMarkdown(),
+      exportReport: () => this.exportReport(),
+      toggleCardResize: (params) => {
+        const key = params.key;
+        if (key) this.toggleCardResize(key, true);
+      },
+    };
+
+    registerActionsWithLegacy(actions);
+  }
+}
+
+// ========================================== 
+// Module Exports (统一架构接口)
+// ========================================== 
+
+let moduleInstance = null;
+
+/**
+ * 挂载子模�?
+ * @param {HTMLElement} container - 容器元素
+ */
+export async function mount(container) {
+  console.log('[Analysis] 🔧 开始挂载子模块');
+
+  try {
+    // 1. 加载模板
+    const html = await loadTemplate('src/modules/app_center/master_prompt/views/analysis/template.html');
+    container.innerHTML = html;
+
+    // 2. 创建模块实例
+    moduleInstance = new AnalysisModule(container);
+    
+    // 3. 初始化模块
+    await moduleInstance.render();
+    await moduleInstance.init();
+
+    console.log('[Analysis] ✅ 子模块挂载成功');
+  } catch (error) {
+    console.error('[Analysis] ❌ 子模块挂载失败', error);
+    throw error;
+  }
+}
+
+/**
+ * 卸载子模块
+ */
+export function unmount() {
+  console.log('[Analysis] 🔄 开始卸载子模块');
+
+  try {
+    if (moduleInstance) {
+      moduleInstance.onUnmount();
+      // BaseModule 的 unmount() 方法会自动处理清理
+      // 不需要手动调用 cleanup()
+      moduleInstance = null;
+    }
+
+    console.log('[Analysis] ✅ 子模块卸载成功');
+  } catch (error) {
+    console.error('[Analysis] ❌ 子模块卸载失败', error);
+  }
+}

@@ -46,6 +46,7 @@ test-*.html
 test/**/*.local.js
 test/**/temp-*.js
 test/
+tests/
 
 # Documentation
 # docs/ - 保留文档，不要忽略

@@ -1,4 +1,4 @@
-<div id="panel-analysis" class="panel hidden fade-in">
+<div id="panel-analysis" class="panel fade-in">
     <!-- 页面顶部欢迎区域 (无内容时显示) -->
     <div id="analysis-welcome" class="mb-6">
         <div
@@ -51,7 +51,6 @@
     </div>
 
     <!-- 主配置区域 - 横向排列的配置卡片 -->
-    <!-- 主配置区域 - 横向排列的配置卡片 -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
 
         <!-- 中间：分析目标选择 (Widened to 8) -->
@@ -68,10 +67,10 @@
                     </div>
 
                     <div class="text-xs space-x-2">
-                        <button onclick="window.toggleAllModules(true)"
+                        <button data-action="toggleAllModules" data-checked="true"
                             class="text-blue-600 hover:text-blue-700 font-medium px-2 py-1 rounded hover:bg-blue-50 transition-colors">全选</button>
                         <span class="text-slate-300">|</span>
-                        <button onclick="window.toggleAllModules(false)"
+                        <button data-action="toggleAllModules" data-checked="false"
                             class="text-slate-400 hover:text-slate-600 px-2 py-1 rounded hover:bg-slate-50 transition-colors">清空</button>
                     </div>
                 </div>

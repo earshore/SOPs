@@ -7,7 +7,7 @@ export default defineConfig({
         environment: 'jsdom',
 
         // 测试文件匹配
-        include: ['src/**/*.test.js', 'src/**/*.spec.js', 'tests/**/*.test.js'],
+        include: ['src/**/*.test.js', 'src/**/*.spec.js', 'tests/**/*.test.js', 'test/**/*.test.js'],
 
         // 设置文件
         setupFiles: ['./tests/setup.js'],

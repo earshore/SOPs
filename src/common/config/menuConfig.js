@@ -311,45 +311,45 @@ export const MENU_CONFIG = {
             moduleId: 'master_prompt', // 关键：绑定到模块 A
             label: '数据采集',
             icon: 'fas fa-spider',
-            panelId: 'panel-scraper'
+            panelId: 'panel-master_prompt'
         },
         data: {
             moduleId: 'master_prompt',
             label: '数据管理',
             icon: 'fas fa-database',
-            panelId: 'panel-data'
+            panelId: 'panel-master_prompt'
         },
         analysis: {
             moduleId: 'master_prompt',
             label: 'AI 分析',
             icon: 'fas fa-chart-pie',
-            panelId: 'panel-analysis'
+            panelId: 'panel-master_prompt'
         },
         promptlab: {
             moduleId: 'master_prompt',
             label: 'Prompt 生成',
             icon: 'fas fa-wand-magic-sparkles',
-            panelId: 'panel-promptlab'
+            panelId: 'panel-master_prompt'
         },
 
-        // --- 属于 Keyword Tracker 应用的页面 (拓展示例) ---
+        // --- 属于 Keyword Hunter 应用的页面 ---
         kw_input: {
             moduleId: 'keyword_tracker',
             label: '输入模块',
             icon: 'fas fa-keyboard',
-            panelId: 'panel-keyword_tracker'
+            panelId: 'panel-keyword_hunter'
         },
         kw_process: {
             moduleId: 'keyword_tracker',
             label: '处理模块',
             icon: 'fas fa-cogs',
-            panelId: 'panel-keyword_tracker'
+            panelId: 'panel-keyword_hunter'
         },
         kw_analysis: {
             moduleId: 'keyword_tracker',
             label: '分析统计',
             icon: 'fas fa-chart-pie',
-            panelId: 'panel-keyword_tracker'
+            panelId: 'panel-keyword_hunter'
         },
 
         // --- 属于 Hub 智库的页面 ---

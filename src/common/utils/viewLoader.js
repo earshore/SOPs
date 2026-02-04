@@ -105,14 +105,11 @@ const VIEW_REGISTRY = {
     'amz_hub': { path: '/src/modules/amz_hub/amz_hub.html', target: 'main', isLoaded: false },
     'more': { path: '/src/modules/more/more.html', target: 'main', isLoaded: false },
 
-    // Master Prompt Views
-    'scraper': { path: '/src/modules/app_center/master_prompt/scraper/scraperPanel.html', target: 'main', isLoaded: false },
-    'data_manage': { path: '/src/modules/app_center/master_prompt/data_manage/dataDisplay.html', target: 'main', isLoaded: false },
-    'analysis': { path: '/src/modules/app_center/master_prompt/analysis/analysisDisplay.html', target: 'main', isLoaded: false },
-    'promptlab': { path: '/src/modules/app_center/master_prompt/promptlab/promptlabDisplay.html', target: 'main', isLoaded: false },
+    // Master Prompt Shell HTML
+    'master_prompt': { path: '/src/modules/app_center/master_prompt/master_prompt.html', target: 'main', isLoaded: false },
 
-    // Keyword Tracker
-    'tracker': { path: '/src/modules/app_center/keyword_tracker/trackerDisplay.html', target: 'main', isLoaded: false },
+    // Keyword Hunter Shell HTML
+    'keyword_hunter': { path: '/src/modules/app_center/keyword_hunter/keyword_hunter.html', target: 'main', isLoaded: false },
 };
 
 /**
@@ -222,14 +219,13 @@ export async function ensureViewLoaded(routeId) {
     else if (routeId.startsWith('amz')) moduleKey = 'amz_hub';
     else if (routeId.startsWith('more')) moduleKey = 'more';
 
-    // Correct mapping for Master Prompt
-    else if (routeId === 'scraper') moduleKey = 'scraper';
-    else if (routeId === 'data') moduleKey = 'data_manage';
-    else if (routeId === 'analysis') moduleKey = 'analysis';
-    else if (routeId === 'promptlab') moduleKey = 'promptlab';
+    // Master Prompt 路由映射到统一的 Shell HTML
+    else if (['scraper', 'data', 'analysis', 'promptlab'].includes(routeId)) {
+        moduleKey = 'master_prompt';
+    }
 
-    // Correct mapping for Keyword Tracker
-    else if (routeId.startsWith('kw_')) moduleKey = 'tracker';
+    // Keyword Hunter 路由映射到统一的 Shell HTML
+    else if (routeId.startsWith('kw_')) moduleKey = 'keyword_hunter';
 
     if (moduleKey && VIEW_REGISTRY[moduleKey]) {
         if (!VIEW_REGISTRY[moduleKey].isLoaded) {

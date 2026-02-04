@@ -27,6 +27,9 @@ export const INITIAL_STATE = {
     },
     analysis: {
         selectedAsins: [],
+        analysisReport: null,
+        translatedReport: null,
+        showTranslation: false,
         reportData: null,
         isAnalyzing: false
     },
