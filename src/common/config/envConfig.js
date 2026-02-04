@@ -73,18 +73,25 @@ export const EnvConfig = {
      * @returns {string} 标准化后的 endpoint
      */
     normalizeEndpoint(endpoint) {
-      // 如果用户配置的是完整 URL,在开发环境下统一使用代理路径
+      // 开发环境: 统一使用代理路径
       if (EnvConfig.isDevelopment) {
         return this.llmBasePath;
       }
       
-      // 生产环境: 如果是完整 URL,保持不变;如果是相对路径,使用默认路径
+      // 生产环境: 
+      // 1. 如果用户配置了完整的 URL (http/https 开头),直接使用
+      // 2. 如果是相对路径或空,使用 Cloudflare Functions 代理
       if (endpoint && (endpoint.startsWith('http://') || endpoint.startsWith('https://'))) {
-        // 生产环境下,如果用户配置了完整 URL,需要转换为使用 Functions 代理
-        // 但为了兼容性,我们统一使用 /v1
-        return this.llmBasePath;
+        // 移除末尾的 /v1 (如果存在),避免重复
+        let normalizedUrl = endpoint.trim();
+        if (normalizedUrl.endsWith('/v1')) {
+          normalizedUrl = normalizedUrl.slice(0, -3);
+        }
+        // 保留用户配置的完整 URL,直接调用外部网关
+        return normalizedUrl;
       }
       
+      // 使用 Cloudflare Functions 代理
       return this.llmBasePath;
     }
   },
