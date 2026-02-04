@@ -6,7 +6,7 @@
 // ================================================= ===============
 
 import { callLLM } from "../../../../services/llmService.js";
-import { TRANSLATE_PROMPT_TEMPLATE } from "../../../../common/constants/prompts.js";
+import { TRANSLATE_PROMPT_TEMPLATE } from "../constants/prompts.js";
 
 // ======================== 
 // 类型定义

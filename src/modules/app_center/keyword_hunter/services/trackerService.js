@@ -4,7 +4,7 @@
 // ================================================================
 
 import { callLLM } from "../../../../services/llmService.js";
-import { ANALYSIS_PROMPT_TEMPLATE, TRANSLATE_PROMPT_TEMPLATE2 } from "../../../../common/constants/prompts.js";
+import { ANALYSIS_PROMPT_TEMPLATE, TRANSLATE_PROMPT_TEMPLATE as TRANSLATE_PROMPT_TEMPLATE2 } from "../constants/prompts.js";
 import { StorageService, STORAGE_KEYS } from "../../../../services/storageService.js";
 
 // ==========================================

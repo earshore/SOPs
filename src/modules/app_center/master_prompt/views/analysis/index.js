@@ -12,7 +12,7 @@ import { loadTemplate } from '../../../../../common/utils/viewLoader.js';
 import BaseModule from '../../../../../common/BaseModule.js';
 import state from '../../../../../common/state.js';
 import { PROVIDERS, LANGUAGE_HEADERS } from '../../../../../common/constants/constants.js';
-import { ANALYSIS_MODULES, DYNAMIC_MASTER_TEMPLATE } from '../../../../../common/constants/prompts.js';
+import { ANALYSIS_MODULES, DYNAMIC_MASTER_TEMPLATE } from '../../constants/prompts.js';
 import { showToast, showProgress } from '../../../../../common/utils/ui.js';
 import { HistoryService } from '../../services/historyService.js';
 import { renderHistory } from '../scraper/index.js';
