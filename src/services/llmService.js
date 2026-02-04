@@ -160,6 +160,15 @@ export async function callLLM(
           // 解析失败，使用原始文本
         }
 
+        // 特殊处理 401 错误,提供更友好的提示
+        if (response.status === 401) {
+          if (EnvConfig.isProduction) {
+            errorMsg = `⛔ 认证失败: ${errorMsg}\n\n可能的原因:\n1. 未配置访问密码 (如果服务器启用了密码保护)\n2. API Key 格式不正确\n3. API Key 已过期或无效\n\n请在设置中检查您的配置。`;
+          } else {
+            errorMsg = `⛔ API Key 认证失败: ${errorMsg}\n\n请检查您在设置中配置的 API Key 是否正确。`;
+          }
+        }
+
         // 决定是否重试
         // 429: Too Many Requests (限流)
         // 5xx: Server Errors (服务器崩溃/网关超时)
