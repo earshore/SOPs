@@ -116,7 +116,6 @@ import {
 } from "./components/settings/systemSettings.js";
 
 import { switchTab, renderMegaMenu, renderSopsMegaMenu, renderHubMegaMenu, renderMoreMenu, showToast, initRouter } from "../src/common/utils/ui.js";
-import { initRouterSystem } from './common/router/index.js';
 import { APP_EVENTS } from './common/constants/eventConstants.js';
 import { initHomeSplash } from "./modules/home/homeDisplay.js";
 
@@ -136,13 +135,6 @@ window.Alpine = Alpine;
 
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("🚀 System: Application Booting...");
-
-  // 0. Initialize Router System (新路由系统)
-  initRouterSystem({
-    enableLogging: true,
-    enableScrollRestoration: true,
-    defaultTitle: 'Amazing Amazon Architect'
-  });
 
   // 1. Initialize Alpine Components
   initAlpineSettings();

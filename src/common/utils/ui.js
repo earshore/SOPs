@@ -1600,7 +1600,6 @@ registerActions({
 // 不再导出 window.switchTab 等，除非为了调试或其它模块遗留调用
 // 为了安全起见，暂时保留 switchTab 在 window 上，直到所有模板都清理完毕
 window.switchTab = switchTab;
-window.switchTab = switchTab;
 window.renderMegaMenu = renderMegaMenu;
 window.renderSopsMegaMenu = renderSopsMegaMenu;
 window.renderHubMegaMenu = renderHubMegaMenu;

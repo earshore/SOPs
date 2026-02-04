@@ -45,14 +45,13 @@ test-*.html
 # test/ - 保留测试脚本，不要忽略
 test/**/*.local.js
 test/**/temp-*.js
-test/
-tests/
+
 
 # Documentation
 # docs/ - 保留文档，不要忽略
 jsdoc-debug.html
 docs/**/*.draft.md
-docs/
+
 
 # ==============================================================================
 # 3. System & IDE
@@ -107,6 +106,3 @@ temp/
 
 # Specific temporary files found
 test-new-llm-service.html
-
-# Scripts
-/scripts

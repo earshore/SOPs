@@ -10,14 +10,7 @@
         "test": "vitest",
         "test:ui": "vitest --ui",
         "test:coverage": "vitest run --coverage",
-        "lint": "eslint src",
-        "docs": "jsdoc -c jsdoc.json",
-        "docs:watch": "nodemon --watch src --exec npm run docs",
-        "audit:globals": "node scripts/audit-globals.js",
-        "migrate:onclick": "node scripts/migrate-onclick.js",
-        "rollback:onclick": "node scripts/rollback-onclick.js",
-        "cleanup": "node scripts/cleanup-garbage-files.js",
-        "cleanup:dry-run": "node scripts/cleanup-garbage-files.js --dry-run"
+        "lint": "eslint src"
     },
     "devDependencies": {
         "@vitest/coverage-v8": "^1.0.0",

@@ -4,8 +4,6 @@
 // 替代分散的 fetch 调用
 // ================================================================
 
-import { ErrorService, ERROR_TYPES } from './errorService.js';
-
 /**
  * HTTP 请求配置
  * @typedef {Object} HttpOptions
@@ -68,26 +66,26 @@ export const HttpService = {
         // 合并请求头
         const finalHeaders = { ...this.defaults.headers, ...headers };
 
-        // 设置超时
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-        // 构建请求配置
-        const fetchOptions = {
-            method,
-            headers: finalHeaders,
-            signal: controller.signal,
-        };
-
-        // 处理请求体
-        if (body) {
-            fetchOptions.body = typeof body === 'string' ? body : JSON.stringify(body);
-        }
-
         // 执行请求（带重试）
         let lastError = null;
         for (let attempt = 0; attempt <= retries; attempt++) {
             try {
+                // 每次尝试都创建独立的 AbortController 和 timeout，避免重试复用已 abort 的 signal
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+                // 构建请求配置
+                const fetchOptions = {
+                    method,
+                    headers: finalHeaders,
+                    signal: controller.signal,
+                };
+
+                // 处理请求体
+                if (body) {
+                    fetchOptions.body = typeof body === 'string' ? body : JSON.stringify(body);
+                }
+
                 const response = await fetch(url, fetchOptions);
                 clearTimeout(timeoutId);
 
@@ -104,7 +102,6 @@ export const HttpService = {
                 return await response.text();
 
             } catch (error) {
-                clearTimeout(timeoutId);
                 lastError = error;
 
                 // 如果是最后一次尝试，抛出错误
