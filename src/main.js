@@ -9,6 +9,7 @@ import { marked } from 'marked';
 // Chart.js and GridStack are now lazy loaded via src/common/utils/lazyLibs.js
 import './css/style.css';
 import './modules/more/more_style.css';
+import './modules/app_center/app_center_style.css';
 
 // Expose to window for legacy compatibility
 window.marked = marked;
