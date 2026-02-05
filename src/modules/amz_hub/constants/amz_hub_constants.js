@@ -156,10 +156,10 @@ export const amzf_events = [
         tags: ['面具', '服饰', '派对用品']
     },
     {
-        id: 6, name: '斋月开始', nameEn: 'Ramadan Start', emoji: '<i class="fas fa-moon" style="color: #673AB7;"></i>', date: '2月28日', month: 2,
+        id: 6, name: '斋月开始', nameEn: 'Ramadan Start', emoji: '<i class="fas fa-moon" style="color: #673AB7;"></i>', date: '2月18日', month: 2,
         countries: ['FR', 'DE', 'GB'], type: 'cultural',
         description: '斋戒月是精神反思和成长的时刻，人们会帮助有需要的人，并且与亲人共度时光。整个斋戒月期间，穆斯林会在白天封斋。',
-        strategy: '2025年斋月开始。针对穆斯林社区推广家居装饰（灯笼）、餐具、祈祷垫及开斋礼品。',
+        strategy: '2026年斋月从2月18日开始。针对穆斯林社区推广家居装饰(灯笼)、餐具、祈祷垫及开斋礼品。',
         tags: ['家居', '灯饰', '餐具']
     },
 
@@ -179,26 +179,26 @@ export const amzf_events = [
         tags: ['男士配饰', '电子产品', '工具']
     },
     {
-        id: 9, name: '开斋节', nameEn: 'Eid al-Fitr', emoji: '<i class="fas fa-mosque" style="color: #4CAF50;"></i>', date: '3月30-31日', month: 3,
+        id: 9, name: '开斋节', nameEn: 'Eid al-Fitr', emoji: '<i class="fas fa-mosque" style="color: #4CAF50;"></i>', date: '3月19日', month: 3,
         countries: ['FR', 'DE', 'GB'], type: 'cultural',
         description: '这是庆祝斋戒月结束的宗教节日。庆祝活动包括慈善捐赠、互赠礼物、与家人和朋友聚会以及享用节日大餐。',
-        strategy: '斋月结束的盛大庆祝。互赠礼物、糖果盒、新衣、家庭聚会用品需求大爆发。',
+        strategy: '2026年开斋节在3月19日。斋月结束的盛大庆祝,互赠礼物、糖果盒、新衣、家庭聚会用品需求大爆发。',
         tags: ['礼品', '糖果', '服饰']
     },
     {
-        id: 10, name: '母亲节(英国)', nameEn: "Mother’s Day UK", emoji: '<i class="fas fa-female" style="color: #F44336;"></i>', date: '3月30日', month: 3,
+        id: 10, name: '母亲节(英国)', nameEn: "Mother’s Day UK", emoji: '<i class="fas fa-female" style="color: #F44336;"></i>', date: '3月15日', month: 3,
         countries: ['GB'], type: 'holiday',
         description: '赞颂母亲、母爱、母系纽带以及母亲的社会影响力的节日。赠送礼物是常见的庆祝方式，顾客通常会提前几周挑选礼物。',
-        strategy: '2025年英国母亲节在3月底。礼品、园艺工具、定制相框、美容仪热销。',
+        strategy: '2026年英国母亲节(Mothering Sunday)在3月15日。礼品、园艺工具、定制相框、美容仪热销。',
         tags: ['礼品', '珠宝', '园艺', '美妆']
     },
 
     // ==================== April (四月) ====================
     {
-        id: 11, name: '复活节', nameEn: 'Easter', emoji: '<i class="fas fa-egg" style="color: #FFC107;"></i>', date: '4月20日', month: 4,
+        id: 11, name: '复活节', nameEn: 'Easter', emoji: '<i class="fas fa-egg" style="color: #FFC107;"></i>', date: '4月5日', month: 4,
         countries: ['DE', 'FR', 'IT', 'ES', 'NL', 'PL', 'GB', 'SE'], type: 'holiday',
         description: '人们通常会用五颜六色的复活节彩蛋、巧克力、糖果和礼物来庆祝复活节。',
-        strategy: '2025年复活节较晚。巧克力彩蛋、兔子装饰、园艺用品、春季轻薄服装热销。',
+        strategy: '2026年复活节在4月5日。巧克力彩蛋、兔子装饰、园艺用品、春季轻薄服装热销。',
         tags: ['巧克力', '装饰品', '园艺', '春装']
     },
     {
@@ -225,17 +225,17 @@ export const amzf_events = [
         tags: ['户外', '旅行', '野餐']
     },
     {
-        id: 15, name: '母亲节(西班牙)', nameEn: "Mother’s Day ES", emoji: '<i class="fas fa-heart" style="color: #E91E63;"></i>', date: '5月4日', month: 5,
+        id: 15, name: '母亲节(西班牙)', nameEn: "Mother’s Day ES", emoji: '<i class="fas fa-heart" style="color: #E91E63;"></i>', date: '5月3日', month: 5,
         countries: ['ES'], type: 'holiday',
         description: '赞颂母亲、母爱、母系纽带以及母亲的社会影响力的节日。赠送礼物是常见的庆祝方式。',
-        strategy: '西班牙母亲节(5月首个周日)。主推珠宝、香水、定制化礼品。',
+        strategy: '2026年西班牙母亲节在5月3日(5月首个周日)。主推珠宝、香水、定制化礼品。',
         tags: ['珠宝', '香水', '定制礼品']
     },
     {
-        id: 16, name: '母亲节(德/意/荷)', nameEn: "Mother’s Day DE/IT/NL", emoji: '<i class="fas fa-heart" style="color: #E91E63;"></i>', date: '5月11日', month: 5,
+        id: 16, name: '母亲节(德/意/荷)', nameEn: "Mother’s Day DE/IT/NL", emoji: '<i class="fas fa-heart" style="color: #E91E63;"></i>', date: '5月10日', month: 5,
         countries: ['DE', 'IT', 'NL'], type: 'holiday',
         description: '赞颂母亲、母爱、母系纽带以及母亲的社会影响力的节日。顾客通常会在活动开始前几周就开始为他们所爱的人挑选礼物。',
-        strategy: '主流欧洲国家母亲节。鲜花周边、家居装饰、小家电是热门选择。',
+        strategy: '2026年主流欧洲国家母亲节在5月10日(5月第二个周日)。鲜花周边、家居装饰、小家电是热门选择。',
         tags: ['家居', '美妆', '小家电']
     },
     {
@@ -246,10 +246,10 @@ export const amzf_events = [
         tags: ['高客单价', '电子', '家电']
     },
     {
-        id: 18, name: '母亲节(法/瑞)', nameEn: "Mother’s Day FR/SE", emoji: '<i class="fas fa-heart" style="color: #E91E63;"></i>', date: '5月25日', month: 5,
+        id: 18, name: '母亲节(法/瑞)', nameEn: "Mother’s Day FR/SE", emoji: '<i class="fas fa-heart" style="color: #E91E63;"></i>', date: '5月31日', month: 5,
         countries: ['FR', 'SE'], type: 'holiday',
         description: '赞颂母亲、母爱、母系纽带以及母亲的社会影响力的节日。赠送礼物是常见的庆祝方式。',
-        strategy: '法国和瑞典的母亲节较晚(5月最后周日)。需针对这两个国家单独延长母亲节广告投放。',
+        strategy: '2026年法国和瑞典的母亲节在5月31日(5月最后周日)。需针对这两个国家单独延长母亲节广告投放。',
         tags: ['珠宝', '鲜花', '美妆']
     },
     {
@@ -260,19 +260,19 @@ export const amzf_events = [
         tags: ['礼品', '鲜花', '珠宝']
     },
     {
-        id: 20, name: '父亲节(德国)', nameEn: "Father’s Day DE", emoji: '<i class="fas fa-beer" style="color: #FFC107;"></i>', date: '5月29日', month: 5,
+        id: 20, name: '父亲节(德国)', nameEn: "Father’s Day DE", emoji: '<i class="fas fa-beer" style="color: #FFC107;"></i>', date: '5月21日', month: 5,
         countries: ['DE'], type: 'holiday',
         description: '德国的父亲节（Vatertag）通常在耶稣升天节庆祝。按照传统，男士们会组织徒步旅行，并享用啤酒和美食。',
-        strategy: '耶稣升天节即德国父亲节。男士们拉着手推车徒步喝酒。啤酒周边、户外装备、烧烤架热销。',
+        strategy: '2026年耶稣升天节(德国父亲节)在5月21日。男士们拉着手推车徒步喝酒。啤酒周边、户外装备、烧烤架热销。',
         tags: ['啤酒用品', '户外', '男士礼品']
     },
 
     // ==================== June (六月) ====================
     {
-        id: 21, name: '父亲节(法/荷/英)', nameEn: "Father’s Day Global", emoji: '<i class="fas fa-beer" style="color: #FFC107;"></i>', date: '6月15日', month: 6,
+        id: 21, name: '父亲节(法/荷/英)', nameEn: "Father’s Day Global", emoji: '<i class="fas fa-beer" style="color: #FFC107;"></i>', date: '6月21日', month: 6,
         countries: ['FR', 'NL', 'GB'], type: 'holiday',
         description: '父亲节是赞颂父亲、父爱、父系纽带以及父亲的社会影响力的特殊节日。赠送礼物是常见的庆祝方式。',
-        strategy: '主流父亲节日期。电子产品、工具套装、运动手表、男士护理品热销。',
+        strategy: '2026年主流父亲节在6月21日(6月第三个周日)。电子产品、工具套装、运动手表、男士护理品热销。',
         tags: ['电子产品', '工具', '运动', '男士护理']
     },
     {
@@ -338,10 +338,10 @@ export const amzf_events = [
         tags: ['玩具', '游戏', '文具']
     },
     {
-        id: 30, name: '慕尼黑啤酒节', nameEn: 'Oktoberfest', emoji: '<i class="fas fa-beer" style="color: #FF9800;"></i>', date: '9月20日-10月5日', month: 9,
+        id: 30, name: '慕尼黑啤酒节', nameEn: 'Oktoberfest', emoji: '<i class="fas fa-beer" style="color: #FF9800;"></i>', date: '9月19日-10月4日', month: 9,
         countries: ['DE'], type: 'cultural',
         description: '在慕尼黑举行的一年一度的啤酒节，为期两周。数百万游客身着巴伐利亚传统服饰，享用啤酒和美食。',
-        strategy: '为期两周的啤酒狂欢。巴伐利亚传统服饰(Dirndl/Lederhosen)、啤酒杯、派对装饰全欧热销。',
+        strategy: '2026年第191届慕尼黑啤酒节从9月19日至10月4日。巴伐利亚传统服饰(Dirndl/Lederhosen)、啤酒杯、派对装饰全欧热销。',
         tags: ['传统服饰', '啤酒用品', '派对']
     },
 
@@ -370,10 +370,10 @@ export const amzf_events = [
         tags: ['蜡烛', '鲜花']
     },
     {
-        id: 34, name: '父亲节(瑞典)', nameEn: "Father’s Day SE", emoji: '<i class="fas fa-user-tie" style="color: #006AA7;"></i>', date: '11月9日', month: 11,
+        id: 34, name: '父亲节(瑞典)', nameEn: "Father’s Day SE", emoji: '<i class="fas fa-user-tie" style="color: #006AA7;"></i>', date: '11月8日', month: 11,
         countries: ['SE'], type: 'holiday',
         description: '父亲节是赞颂父亲、父爱、父系纽带以及父亲的社会影响力的特殊节日。赠送礼物是常见的庆祝方式。',
-        strategy: '北欧父亲节在冬季。保暖内衣、冬帽、室内娱乐设备、威士忌酒具是好选择。',
+        strategy: '2026年瑞典父亲节在11月8日(11月第二个周日)。北欧父亲节在冬季,保暖内衣、冬帽、室内娱乐设备、威士忌酒具是好选择。',
         tags: ['冬装', '男士礼品', '室内娱乐']
     },
     {
@@ -391,19 +391,19 @@ export const amzf_events = [
         tags: ['玩具', '礼品']
     },
     {
-        id: 37, name: '黑色星期五', nameEn: 'Black Friday', emoji: '<i class="fas fa-tag" style="color: #212121;"></i>', date: '11月28日', month: 11,
+        id: 37, name: '黑色星期五', nameEn: 'Black Friday', emoji: '<i class="fas fa-tag" style="color: #212121;"></i>', date: '11月27日', month: 11,
         countries: ['DE', 'FR', 'IT', 'ES', 'NL', 'PL', 'GB', 'SE'], type: 'shopping',
         description: '这场促销活动为期四天，通常发生在美国感恩节之后（一般是 11 月的第四个星期五）。它标志着圣诞购物季的开始。',
-        strategy: '全年最疯狂大促！电子、家电、时尚、家居全线爆发。务必保证库存充足。',
+        strategy: '2026年黑色星期五在11月27日。全年最疯狂大促!电子、家电、时尚、家居全线爆发。务必保证库存充足。',
         tags: ['全品类', '大促', '电子', '家居']
     },
 
     // ==================== December (十二月) ====================
     {
-        id: 38, name: '网络星期一', nameEn: 'Cyber Monday', emoji: '<i class="fas fa-laptop" style="color: #3F51B5;"></i>', date: '12月1日', month: 12,
+        id: 38, name: '网络星期一', nameEn: 'Cyber Monday', emoji: '<i class="fas fa-laptop" style="color: #3F51B5;"></i>', date: '11月30日', month: 12,
         countries: ['DE', 'FR', 'IT', 'ES', 'NL', 'PL', 'GB', 'SE'], type: 'shopping',
         description: '紧随黑色星期五之后的在线购物日，通常以电子产品和在线独家优惠为主。',
-        strategy: '黑五返场，侧重线上品类。电脑硬件、软件、游戏配件、智能家居转化率高。',
+        strategy: '2026年网络星期一在11月30日。黑五返场,侧重线上品类。电脑硬件、软件、游戏配件、智能家居转化率高。',
         tags: ['电子产品', '数码', '软件']
     },
     {
