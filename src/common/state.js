@@ -299,17 +299,105 @@ function notifySubscribers(key, newValue, oldValue) {
   }
 }
 
+// ================================================================
+// 🎯 P2 性能优化: 批量更新和防抖机制
+// ================================================================
+
+/**
+ * 批量更新队列
+ */
+let batchUpdateQueue = [];
+let batchUpdateTimer = null;
+let isBatching = false;
+
 /**
  * 批量更新状态 (减少多次订阅触发)
+ * 🎯 性能优化: 支持同步和异步批量更新
+ * 
  * @param {Object} updates - 要更新的键值对
+ * @param {Object} options - 配置选项
+ * @param {boolean} options.immediate - 是否立即执行 (默认false)
+ * @param {number} options.debounce - 防抖延迟 (毫秒，默认0)
  * 
  * @example
- * batchUpdate({ currentTab: 'home', isScraping: false });
+ * // 立即批量更新
+ * batchUpdate({ currentTab: 'home', isScraping: false }, { immediate: true });
+ * 
+ * // 防抖批量更新 (16ms后执行，适合高频更新)
+ * batchUpdate({ x: 100, y: 200 }, { debounce: 16 });
  */
-export function batchUpdate(updates) {
+export function batchUpdate(updates, options = {}) {
+  const { immediate = false, debounce = 0 } = options;
+
+  if (immediate) {
+    // 立即执行
+    executeBatchUpdate(updates);
+    return;
+  }
+
+  if (debounce > 0) {
+    // 防抖模式
+    batchUpdateQueue.push(updates);
+    
+    if (batchUpdateTimer) {
+      clearTimeout(batchUpdateTimer);
+    }
+    
+    batchUpdateTimer = setTimeout(() => {
+      const mergedUpdates = Object.assign({}, ...batchUpdateQueue);
+      executeBatchUpdate(mergedUpdates);
+      batchUpdateQueue = [];
+      batchUpdateTimer = null;
+    }, debounce);
+  } else {
+    // 微任务批量 (下一个事件循环)
+    batchUpdateQueue.push(updates);
+    
+    if (!isBatching) {
+      isBatching = true;
+      Promise.resolve().then(() => {
+        const mergedUpdates = Object.assign({}, ...batchUpdateQueue);
+        executeBatchUpdate(mergedUpdates);
+        batchUpdateQueue = [];
+        isBatching = false;
+      });
+    }
+  }
+}
+
+/**
+ * 执行批量更新
+ * @private
+ */
+function executeBatchUpdate(updates) {
+  // 🎯 性能优化: 暂停通知，批量更新后统一通知
+  const notifications = [];
+  
   Object.entries(updates).forEach(([key, value]) => {
-    // 查找属性所在命名空间并更新 (会触发 proxy set)
-    state[key] = value;
+    // 查找属性所在命名空间
+    let found = false;
+    
+    for (const nsKey of Object.keys(stateData)) {
+      const ns = stateData[nsKey];
+      if (ns && typeof ns === "object" && key in ns) {
+        const oldValue = ns[key];
+        ns[key] = value;
+        notifications.push({ key: `${nsKey}.${key}`, newValue: value, oldValue });
+        found = true;
+        break;
+      }
+    }
+    
+    if (!found && key in stateData) {
+      const oldValue = stateData[key];
+      stateData[key] = value;
+      notifications.push({ key, newValue: value, oldValue });
+    }
+  });
+  
+  // 统一通知订阅者
+  notifications.forEach(({ key, newValue, oldValue }) => {
+    notifySubscribers(key, newValue, oldValue);
   });
 }
 

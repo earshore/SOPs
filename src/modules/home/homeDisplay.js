@@ -15,6 +15,15 @@ class HomeModule extends BaseModule {
         this.width = 0;
         this.height = 0;
 
+        // 🎯 性能优化: 空间分区网格
+        this.grid = new Map();
+        this.gridSize = 100; // 网格大小
+
+        // 🎯 性能优化: 帧率控制
+        this.lastFrameTime = 0;
+        this.targetFPS = 60;
+        this.frameInterval = 1000 / this.targetFPS;
+
         // Animation Config
         this.CONFIG = {
             spacing: 50,       // 粒子间距
@@ -135,26 +144,76 @@ class HomeModule extends BaseModule {
 
     initParticles() {
         this.particles = [];
+        this.grid.clear();
+        
         for (let y = 0; y < this.height + this.CONFIG.spacing; y += this.CONFIG.spacing) {
             for (let x = 0; x < this.width + this.CONFIG.spacing; x += this.CONFIG.spacing) {
-                this.particles.push(new Particle(x, y, this.CONFIG));
+                const particle = new Particle(x, y, this.CONFIG);
+                this.particles.push(particle);
+                
+                // 🎯 性能优化: 将粒子加入空间网格
+                this.addToGrid(particle);
             }
         }
     }
 
-    animate() {
+    // 🎯 性能优化: 空间分区 - 添加粒子到网格
+    addToGrid(particle) {
+        const gridX = Math.floor(particle.x / this.gridSize);
+        const gridY = Math.floor(particle.y / this.gridSize);
+        const key = `${gridX},${gridY}`;
+        
+        if (!this.grid.has(key)) {
+            this.grid.set(key, []);
+        }
+        this.grid.get(key).push(particle);
+    }
+
+    // 🎯 性能优化: 获取粒子周围的网格单元
+    getNearbyParticles(particle) {
+        const gridX = Math.floor(particle.x / this.gridSize);
+        const gridY = Math.floor(particle.y / this.gridSize);
+        const nearby = [];
+        
+        // 检查周围9个网格
+        for (let dy = -1; dy <= 1; dy++) {
+            for (let dx = -1; dx <= 1; dx++) {
+                const key = `${gridX + dx},${gridY + dy}`;
+                if (this.grid.has(key)) {
+                    nearby.push(...this.grid.get(key));
+                }
+            }
+        }
+        
+        return nearby;
+    }
+
+    animate(currentTime = 0) {
         if (!this._isMounted) return; // BaseModule 提供的标志位
+
+        // 🎯 性能优化: 帧率控制，避免过度渲染
+        const elapsed = currentTime - this.lastFrameTime;
+        if (elapsed < this.frameInterval) {
+            this.animationFrameId = requestAnimationFrame((t) => this.animate(t));
+            return;
+        }
+        this.lastFrameTime = currentTime - (elapsed % this.frameInterval);
 
         this.ctx.clearRect(0, 0, this.width, this.height);
 
+        // 🎯 性能优化: 重建空间网格
+        this.grid.clear();
+        
+        // 更新粒子并重新加入网格
         this.particles.forEach(p => {
             p.update(this.mouse);
+            this.addToGrid(p);
             p.draw(this.ctx);
         });
 
         this.drawConnections();
 
-        this.animationFrameId = requestAnimationFrame(() => this.animate());
+        this.animationFrameId = requestAnimationFrame((t) => this.animate(t));
     }
 
     drawConnections() {
@@ -162,15 +221,31 @@ class HomeModule extends BaseModule {
         this.ctx.strokeStyle = "rgba(37, 99, 235, 0.15)";
         this.ctx.lineWidth = 0.5;
 
-        // 优化：只在鼠标附近检测连线
+        // 🎯 性能优化: 使用空间分区，避免 O(n²) 复杂度
+        const connectDistSq = Math.pow(this.CONFIG.spacing * 1.2, 2);
+        const mouseRadiusSq = Math.pow(this.CONFIG.mouseRadius + 50, 2);
+        const drawn = new Set(); // 避免重复绘制
+
         this.particles.forEach(p => {
-            const dToMouse = Math.hypot(p.x - this.mouse.x, p.y - this.mouse.y);
-            if (dToMouse < this.CONFIG.mouseRadius + 50) {
-                this.particles.forEach(p2 => {
-                    const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
-                    if (dist < this.CONFIG.spacing * 1.2 && dist > 0) {
+            const dToMouseSq = Math.pow(p.x - this.mouse.x, 2) + Math.pow(p.y - this.mouse.y, 2);
+            
+            // 只处理鼠标附近的粒子
+            if (dToMouseSq < mouseRadiusSq) {
+                // 🎯 只检查附近网格的粒子，而不是全部粒子
+                const nearby = this.getNearbyParticles(p);
+                
+                nearby.forEach(p2 => {
+                    if (p === p2) return;
+                    
+                    // 避免重复绘制 (A->B 和 B->A)
+                    const pairKey = p.id < p2.id ? `${p.id}-${p2.id}` : `${p2.id}-${p.id}`;
+                    if (drawn.has(pairKey)) return;
+                    
+                    const distSq = Math.pow(p.x - p2.x, 2) + Math.pow(p.y - p2.y, 2);
+                    if (distSq < connectDistSq) {
                         this.ctx.moveTo(p.x, p.y);
                         this.ctx.lineTo(p2.x, p2.y);
+                        drawn.add(pairKey);
                     }
                 });
             }
@@ -180,8 +255,11 @@ class HomeModule extends BaseModule {
 }
 
 // 辅助类：粒子 (从内部类提取出来，或者放在模块底部)
+let particleIdCounter = 0; // 全局计数器
+
 class Particle {
     constructor(x, y, config) {
+        this.id = particleIdCounter++; // 🎯 性能优化: 唯一ID用于去重
         this.ox = x;
         this.oy = y;
         this.x = x;

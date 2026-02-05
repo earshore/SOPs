@@ -2,6 +2,7 @@
 // ================================================================
 // 🎯 P1-5: 统一 HTTP 请求服务
 // 替代分散的 fetch 调用
+// 🔄 P1优化: 增强超时控制和并发管理
 // ================================================================
 
 /**
@@ -14,6 +15,7 @@
  * @property {number} [retries=0] - 重试次数
  * @property {number} [retryDelay=1000] - 重试间隔 (毫秒)
  * @property {boolean} [json=true] - 是否自动解析 JSON
+ * @property {AbortSignal} [signal] - 外部取消信号
  */
 
 /**
@@ -27,6 +29,36 @@ export class HttpError extends Error {
         this.response = response;
     }
 }
+
+/**
+ * 并发控制池
+ * 限制同时进行的请求数量
+ */
+class RequestPool {
+    constructor(maxConcurrent = 6) {
+        this.max = maxConcurrent;
+        this.running = 0;
+        this.queue = [];
+    }
+
+    async add(fn) {
+        if (this.running >= this.max) {
+            await new Promise(resolve => this.queue.push(resolve));
+        }
+        this.running++;
+        try {
+            return await fn();
+        } finally {
+            this.running--;
+            if (this.queue.length > 0) {
+                this.queue.shift()();
+            }
+        }
+    }
+}
+
+// 全局请求池
+const globalRequestPool = new RequestPool(6);
 
 /**
  * 统一 HTTP 请求服务
@@ -61,61 +93,79 @@ export const HttpService = {
             retries = this.defaults.retries,
             retryDelay = this.defaults.retryDelay,
             json = true,
+            signal = null,
+            usePool = false, // 🔄 P1优化: 是否使用并发控制
         } = options;
 
         // 合并请求头
         const finalHeaders = { ...this.defaults.headers, ...headers };
 
-        // 执行请求（带重试）
-        let lastError = null;
-        for (let attempt = 0; attempt <= retries; attempt++) {
-            try {
-                // 每次尝试都创建独立的 AbortController 和 timeout，避免重试复用已 abort 的 signal
+        // 执行请求的函数
+        const executeRequest = async () => {
+            let lastError = null;
+            
+            for (let attempt = 0; attempt <= retries; attempt++) {
+                // 创建独立的 AbortController
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-                // 构建请求配置
-                const fetchOptions = {
-                    method,
-                    headers: finalHeaders,
-                    signal: controller.signal,
-                };
-
-                // 处理请求体
-                if (body) {
-                    fetchOptions.body = typeof body === 'string' ? body : JSON.stringify(body);
+                
+                // 如果提供了外部signal,监听其abort事件
+                if (signal) {
+                    signal.addEventListener('abort', () => controller.abort(), { once: true });
                 }
 
-                const response = await fetch(url, fetchOptions);
-                clearTimeout(timeoutId);
+                try {
+                    // 构建请求配置
+                    const fetchOptions = {
+                        method,
+                        headers: finalHeaders,
+                        signal: controller.signal,
+                    };
 
-                // 检查响应状态
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new HttpError(response.status, errorText, response);
+                    // 处理请求体
+                    if (body) {
+                        fetchOptions.body = typeof body === 'string' ? body : JSON.stringify(body);
+                    }
+
+                    const response = await fetch(url, fetchOptions);
+                    clearTimeout(timeoutId);
+
+                    // 检查响应状态
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new HttpError(response.status, errorText, response);
+                    }
+
+                    // 解析响应
+                    if (json) {
+                        return await response.json();
+                    }
+                    return await response.text();
+
+                } catch (error) {
+                    clearTimeout(timeoutId);
+                    lastError = error;
+
+                    // 如果是最后一次尝试，抛出错误
+                    if (attempt === retries) {
+                        throw error;
+                    }
+
+                    // 等待后重试
+                    await this._delay(retryDelay * (attempt + 1));
+                    console.log(`[HttpService] Retry ${attempt + 1}/${retries}: ${url}`);
                 }
-
-                // 解析响应
-                if (json) {
-                    return await response.json();
-                }
-                return await response.text();
-
-            } catch (error) {
-                lastError = error;
-
-                // 如果是最后一次尝试，抛出错误
-                if (attempt === retries) {
-                    throw error;
-                }
-
-                // 等待后重试
-                await this._delay(retryDelay);
-                console.log(`[HttpService] Retry ${attempt + 1}/${retries}: ${url}`);
             }
-        }
 
-        throw lastError;
+            throw lastError;
+        };
+
+        // 🔄 P1优化: 使用并发控制池
+        if (usePool) {
+            return await globalRequestPool.add(executeRequest);
+        }
+        
+        return await executeRequest();
     },
 
     /**

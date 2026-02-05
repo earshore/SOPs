@@ -272,21 +272,28 @@ try {
 
 ---
 
-### 7. 优化状态树结构 ⏱️ 3天
+### 7. 优化状态树结构 ⏱️ 3天 ⚠️ 已降级为P2
 
-**问题**: 缺少命名空间隔离,大型应用可能冲突
+**状态**: 已回滚，降级为P2任务
 
-**任务清单**:
-- [ ] 引入模块命名空间
-- [ ] 迁移现有状态到新结构
-- [ ] 添加状态树可视化工具
+**原因**: 
+- 影响范围过大 (50+ 文件需要修改)
+- 上线在即，风险过高
+- 当前 Proxy 兼容层已足够稳定
 
-**参考代码**:
+**后续计划**:
+- 上线后作为 P2 任务重新评估
+- 考虑渐进式迁移策略
+- 优先保证系统稳定性
+
+**参考代码** (暂缓):
 ```javascript
-// Before:
+// 当前保持扁平结构:
 state.scraper.isScraping
+state.analysis.selectedAsins
+state.keywordTracker.keywords
 
-// After:
+// 未来可能的命名空间结构:
 state.modules.masterPrompt.scraper.isScraping
 state.modules.keywordHunter.keywords
 ```
@@ -374,17 +381,20 @@ const product = ProductSchema.safeParse(rawData); // 返回 { success, data, err
 - [ ] P0-1: 统一存储方式 (100%)
 - [ ] P0-3: 完善模块卸载 (50%)
 
-## Day 3
-- [ ] P0-3: 完善模块卸载 (100%)
-- [ ] P0-4: API密钥加密 (50%)
+## Day 3 ✅ 已完成
+- [x] P0-3: 完善模块卸载 (100%)
+- [x] P0-4: API密钥加密 (50%)
 
-## Day 4
-- [ ] P0-4: API密钥加密 (100%)
+## Day 4 ✅ 已完成
+- [x] P0-4: API密钥加密 (100%)
+- [x] P1-5: 统一 fetch 调用 (100%)
+- [x] P1-6: 统一错误处理 (100%)
+
+## Day 5 (当前)
+- [x] P1-7: 状态树优化 (已回滚，降级为P2)
+- [ ] P1-8: 添加 Zod 校验 (可选)
 - [ ] 集成测试
-
-## Day 5
 - [ ] 回归测试
-- [ ] 性能测试
 - [ ] 准备上线
 ```
 
