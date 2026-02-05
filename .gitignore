@@ -106,3 +106,6 @@ temp/
 
 # Specific temporary files found
 test-new-llm-service.html
+
+# ==============================================================================
+*.cjs
