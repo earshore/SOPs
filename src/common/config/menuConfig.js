@@ -570,6 +570,11 @@ export function getAllRouteIds() {
  * @returns {string|null} 视图路径
  */
 export function getViewPathByRoute(routeId) {
+    // 特殊路由：home 不在 routes 配置中
+    if (routeId === 'home') {
+        return '/src/modules/home/homeDisplay.html';
+    }
+
     const route = MENU_CONFIG.routes[routeId];
     if (!route) return null;
 

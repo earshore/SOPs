@@ -218,6 +218,19 @@ registerActionsWithLegacy({
   // === Utilities 工具函数 ===
   showToast,
 
+  // === Modal 模态框 ===
+  close: (params, event) => {
+    // 通用的 close 动作：查找最近的 app-modal 并关闭
+    const target = event?.target;
+    if (!target) return;
+    
+    // 向上查找最近的 app-modal 元素
+    const modal = target.closest('app-modal');
+    if (modal && typeof modal.close === 'function') {
+      modal.close();
+    }
+  },
+
   // === Settings 设置 ===
   openSettings,
   closeSettings,

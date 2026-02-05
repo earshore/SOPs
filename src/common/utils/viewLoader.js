@@ -217,7 +217,7 @@ export async function ensureViewLoaded(routeId) {
     const viewPath = getViewPathByRoute(routeId);
     
     if (!viewPath) {
-        console.warn(`[ViewLoader] 未找到路由 ${routeId} 的视图路径`);
+        // 不再警告，因为很多路由是子模块路由，不需要加载主视图
         return;
     }
 

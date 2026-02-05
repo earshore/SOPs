@@ -33,6 +33,29 @@ export function registerActions(actions) {
 }
 
 /**
+ * 注销单个动作
+ * @param {string} actionName - 动作名称
+ */
+export function unregisterAction(actionName) {
+    if (ActionRegistry[actionName]) {
+        delete ActionRegistry[actionName];
+        
+        // 同时从 window 对象移除
+        if (window[actionName]) {
+            delete window[actionName];
+        }
+    }
+}
+
+/**
+ * 批量注销动作
+ * @param {string[]} actionNames - 动作名称数组
+ */
+export function unregisterActions(actionNames) {
+    actionNames.forEach(name => unregisterAction(name));
+}
+
+/**
  * 执行动作
  * @param {string} actionName - 动作名称
  * @param {Object} params - 参数对象 (来自 data-* 属性)
@@ -148,13 +171,19 @@ export function registerActionWithLegacy(actionName, handler) {
 
 /**
  * 批量注册并挂载到 window (带弃用警告)
+ * @param {Object} actions - { actionName: handler } 映射对象
+ * @returns {string[]} 返回注册的动作名称数组（用于后续清理）
  */
 export function registerActionsWithLegacy(actions) {
+    const actionNames = Object.keys(actions);
+    
     Object.entries(actions).forEach(([name, handler]) => {
         registerActionWithLegacy(name, handler);
     });
 
-    console.log(`✅ [ActionRegistry] 已注册 ${Object.keys(actions).length} 个动作 (含向后兼容)`);
+    console.log(`✅ [ActionRegistry] 已注册 ${actionNames.length} 个动作 (含向后兼容)`);
+    
+    return actionNames;
 }
 
 /**

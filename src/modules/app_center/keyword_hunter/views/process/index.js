@@ -22,6 +22,7 @@ import { registerActionsWithLegacy } from '../../../../../common/utils/actionReg
 
 let eventListeners = []; // 用于清理事件监听器
 let timeouts = []; // 用于清理定时器
+let registeredActionNames = []; // 用于清理已注册的动作
 let floatWinState = {
     isDragging: false,
     offsetX: 0,
@@ -62,6 +63,15 @@ function cleanup() {
     // 清理定时器
     timeouts.forEach(id => clearTimeout(id));
     timeouts = [];
+
+    // 清理已注册的动作
+    if (registeredActionNames.length > 0) {
+        import('../../../../../common/utils/actionRegistry.js').then(({ unregisterActions }) => {
+            unregisterActions(registeredActionNames);
+            console.log(`[Process] 已清理 ${registeredActionNames.length} 个动作`);
+            registeredActionNames = [];
+        });
+    }
 
     // 重置浮动窗口状态
     floatWinState = {
@@ -619,7 +629,7 @@ export async function mount(container) {
         }
 
         // 3. 注册全局操作（用于 HTML onclick 兼容）
-        registerActionsWithLegacy({
+        registeredActionNames = registerActionsWithLegacy({
             kt_syncToInput: () => syncToInput(),
             kt_translateCopyImmersive: () => translateCopyImmersive(),
             kt_showKeywordTab: (type) => showKeywordTab(type),

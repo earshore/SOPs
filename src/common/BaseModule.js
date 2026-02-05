@@ -8,6 +8,7 @@ export default class BaseModule {
         this._isMounted = false;
         this.container = null;
         this._abortController = new AbortController();
+        this._registeredActions = []; // 存储已注册的动作名称
     }
 
     /**
@@ -85,12 +86,17 @@ export default class BaseModule {
         });
         this._disposables = [];
 
-        // 2. 调用子类特定的清理逻辑
+        // 2. 清理已注册的动作
+        if (this._registeredActions.length > 0) {
+            this._unregisterActions();
+        }
+
+        // 3. 调用子类特定的清理逻辑
         this.onUnmount();
 
         this._isMounted = false;
         
-        // 3. 重置 AbortController 以便重新挂载
+        // 4. 重置 AbortController 以便重新挂载
         this._abortController = new AbortController();
     }
 
@@ -145,6 +151,35 @@ export default class BaseModule {
     addDisposable(fn) {
         if (typeof fn === 'function') {
             this._disposables.push(fn);
+        }
+    }
+
+    /**
+     * 注册动作（自动在卸载时清理）
+     * @param {Object} actions - { actionName: handler } 映射对象
+     */
+    async registerActions(actions) {
+        // 动态导入 actionRegistry 避免循环依赖
+        const { registerActionsWithLegacy } = await import('./utils/actionRegistry.js');
+        const actionNames = registerActionsWithLegacy(actions);
+        this._registeredActions.push(...actionNames);
+    }
+
+    /**
+     * 清理已注册的动作（内部方法）
+     * @private
+     */
+    async _unregisterActions() {
+        if (this._registeredActions.length === 0) return;
+
+        try {
+            // 动态导入 actionRegistry 避免循环依赖
+            const { unregisterActions } = await import('./utils/actionRegistry.js');
+            unregisterActions(this._registeredActions);
+            console.log(`[BaseModule] 已清理 ${this._registeredActions.length} 个动作: ${this.moduleId}`);
+            this._registeredActions = [];
+        } catch (error) {
+            console.warn(`[BaseModule] 清理动作失败:`, error);
         }
     }
 
