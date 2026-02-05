@@ -40,8 +40,11 @@ export class SidebarRenderer {
      * @param {Array} routes - 路由列表
      */
     render(sidebar, moduleConfig, routes) {
+        // 🔥 关键修复：确保读取最新的currentTab状态
         const currentTab = state.currentTab;
         const currentRouteConfig = MENU_CONFIG.routes[currentTab];
+
+        console.log(`[SidebarRenderer] 渲染侧边栏 - 当前Tab: ${currentTab}`);
 
         // 确定当前上下文（Category）
         let activeCategory = 'overview';
@@ -71,8 +74,8 @@ export class SidebarRenderer {
             }
         }
 
-        // 构建 HTML
-        const html = this._buildHTML(sidebarTitle, sidebarIcon, sidebarColor, displayRoutes, activeCategory);
+        // 构建 HTML（传入currentTab以确保正确的高亮状态）
+        const html = this._buildHTML(sidebarTitle, sidebarIcon, sidebarColor, displayRoutes, activeCategory, currentTab);
         sidebar.innerHTML = html;
     }
 
@@ -105,7 +108,7 @@ export class SidebarRenderer {
      * 构建侧边栏 HTML
      * @private
      */
-    _buildHTML(title, icon, color, routes, activeCategory) {
+    _buildHTML(title, icon, color, routes, activeCategory, currentTab) {
         const titleColorClass = color === 'slate' ? 'text-slate-400' : `text-${color}-500`;
         
         return `
@@ -119,7 +122,7 @@ export class SidebarRenderer {
                     ${this.enableSearch ? this._buildSearchBox() : ''}
                     
                     <nav id="sidebar-nav-container" class="space-y-2">
-                        ${routes.map(route => this._buildRouteItem(route, activeCategory)).join('')}
+                        ${routes.map(route => this._buildRouteItem(route, activeCategory, currentTab)).join('')}
                     </nav>
                 </div>
             </div>
@@ -151,9 +154,10 @@ export class SidebarRenderer {
      * 构建路由项
      * @private
      */
-    _buildRouteItem(route, activeCategory) {
+    _buildRouteItem(route, activeCategory, currentTab) {
         const isCategory = route.isCategoryLink;
-        const isActive = state.currentTab === route.id;
+        // 🔥 关键修复：使用传入的currentTab参数而不是再次读取state
+        const isActive = currentTab === route.id;
         
         if (isCategory) {
             return this._buildCategoryItem(route);
@@ -171,8 +175,8 @@ export class SidebarRenderer {
         const scheme = COLOR_SCHEMES[color] || COLOR_SCHEMES.blue;
         
         return `
-            <button data-action="switch-tab" data-tab="${route.id}" 
-                class="w-full group flex items-center gap-3 px-3 py-2.5 rounded-lg border border-slate-200 ${scheme.hoverBg} ${scheme.hoverBorder} transition-all duration-200">
+            <button data-action="switch-tab" data-tab="${route.id}" id="sidebar-btn-${route.id}"
+                class="sidebar-btn w-full group flex items-center gap-3 px-3 py-2.5 rounded-lg border border-slate-200 ${scheme.hoverBg} ${scheme.hoverBorder} transition-all duration-200">
                 <div class="w-8 h-8 rounded-lg ${scheme.iconBg} flex items-center justify-center ${scheme.iconScale} transition-all duration-200">
                     <i class="${route.icon} text-sm ${scheme.icon} ${scheme.hoverIcon}"></i>
                 </div>
@@ -191,13 +195,14 @@ export class SidebarRenderer {
      * @private
      */
     _buildNormalItem(route, isActive) {
+        // 🔥 关键修复：添加sidebar-btn类以支持搜索等功能，并添加id以便定位
         const activeClasses = isActive 
             ? 'bg-blue-50 border-blue-200 text-blue-700' 
             : 'border-transparent hover:bg-slate-50';
         
         return `
-            <button data-action="switch-tab" data-tab="${route.id}" 
-                class="w-full flex items-center gap-3 px-3 py-2 rounded-lg border ${activeClasses} transition-all duration-200 group">
+            <button data-action="switch-tab" data-tab="${route.id}" id="sidebar-btn-${route.id}"
+                class="sidebar-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg border ${activeClasses} transition-all duration-200 group">
                 <i class="${route.icon} text-sm ${isActive ? 'text-blue-600' : 'text-slate-400 group-hover:text-slate-600'}"></i>
                 <span class="text-sm ${isActive ? 'font-medium' : 'text-slate-700 group-hover:text-slate-900'} transition-colors">
                     ${route.label}

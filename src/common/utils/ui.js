@@ -26,7 +26,7 @@ function getDefaultRouteForModule(moduleId) {
 }
 
 // ========================
-// 🎯 侧边栏渲染器实例（短期优化）
+// 🎯 侧边栏渲染器实例（统一管理）
 // ========================
 const sopsRenderer = createSidebarRenderer({
     moduleId: 'sops',
@@ -51,6 +51,33 @@ const moreRenderer = createSidebarRenderer({
     enableSearch: true,
     searchPlaceholder: '搜索功能...'
 });
+
+/**
+ * 🎯 侧边栏渲染器注册表
+ * 新增模块时，只需在此注册专用渲染器即可，无需修改核心逻辑
+ * 如果模块未注册，将自动使用默认渲染器
+ */
+const SIDEBAR_RENDERER_REGISTRY = {
+    'sops': sopsRenderer,
+    'amz_hub_core': hubRenderer,
+    'more_core': moreRenderer
+    // 🔥 新增模块示例：
+    // 'new_module': createSidebarRenderer({ ... })
+};
+
+/**
+ * 🎯 动态注册侧边栏渲染器
+ * 允许外部模块注册自己的专用渲染器
+ * @param {string} moduleId - 模块ID
+ * @param {SidebarRenderer} renderer - 渲染器实例
+ */
+export function registerSidebarRenderer(moduleId, renderer) {
+    if (SIDEBAR_RENDERER_REGISTRY[moduleId]) {
+        console.warn(`[UI] 覆盖已存在的侧边栏渲染器: ${moduleId}`);
+    }
+    SIDEBAR_RENDERER_REGISTRY[moduleId] = renderer;
+    console.log(`[UI] 注册侧边栏渲染器: ${moduleId}`);
+}
 
 // ========================
 // 1. MEGA MENU RENDERER (配置驱动)
@@ -467,9 +494,31 @@ export function renderSopsMegaMenu() {
 }
 
 // ========================
-// 2. DYNAMIC SIDEBAR (无状态与缓存优化)
+// 2. DYNAMIC SIDEBAR (统一架构 + 自动化缓存)
 // ========================
 let currentSidebarModuleId = null;
+
+/**
+ * 🎯 智能生成侧边栏缓存键
+ * 自动判断模块是否需要包含currentTab，无需硬编码模块列表
+ * @param {string} moduleId - 模块ID
+ * @returns {string} 缓存键
+ */
+function generateSidebarCacheKey(moduleId) {
+    const currentTab = state.currentTab;
+    const routes = getRoutesByModule(moduleId);
+    
+    // 🔥 智能判断：如果模块有多个路由（多页面模块），则缓存键包含currentTab
+    // 这样新增模块时无需修改此函数，自动兼容
+    if (routes.length > 1) {
+        const routeConfig = MENU_CONFIG.routes[currentTab];
+        const category = routeConfig?.category || 'overview';
+        return `${moduleId}:${category}:${currentTab}`;
+    }
+    
+    // 单页面模块只需要moduleId
+    return moduleId;
+}
 
 function renderSidebar(moduleId) {
     const sidebar = getEl("dynamic-sidebar");
@@ -483,15 +532,8 @@ function renderSidebar(moduleId) {
         return;
     }
 
-    // 2. 生成缓存键（支持 Category 切换）
-    let sidebarKey = moduleId;
-
-    if (moduleId === 'sops' || moduleId === 'amz_hub_core' || moduleId === 'more_core') {
-        const currentTab = state.currentTab;
-        const routeConfig = MENU_CONFIG.routes[currentTab];
-        const category = routeConfig?.category || 'overview';
-        sidebarKey = `${moduleId}:${category}`;
-    }
+    // 2. 🔥 统一架构：自动生成缓存键，无需硬编码模块列表
+    const sidebarKey = generateSidebarCacheKey(moduleId);
 
     // 3. 缓存检查
     if (currentSidebarModuleId === sidebarKey) {
@@ -509,19 +551,32 @@ function renderSidebar(moduleId) {
 
     const routes = getRoutesByModule(moduleId);
 
-    // 5. 🎯 使用统一渲染器（短期优化）
-    if (moduleId === 'sops') {
-        sopsRenderer.render(sidebar, moduleConfig, routes);
-    } else if (moduleId === 'amz_hub_core') {
-        hubRenderer.render(sidebar, moduleConfig, routes);
-    } else if (moduleId === 'more_core') {
-        moreRenderer.render(sidebar, moduleConfig, routes);
-    } else {
-        renderDefaultSidebar(sidebar, moduleConfig, routes);
-    }
+    // 5. 🎯 统一渲染：优先使用SidebarRenderer，自动降级到默认渲染
+    renderSidebarContent(sidebar, moduleId, moduleConfig, routes);
 
     sidebar.classList.remove("hidden", "-ml-64");
     currentSidebarModuleId = sidebarKey;
+}
+
+/**
+ * 🎯 统一侧边栏内容渲染
+ * 根据模块配置自动选择合适的渲染器
+ * @param {HTMLElement} sidebar - 侧边栏容器
+ * @param {string} moduleId - 模块ID
+ * @param {Object} moduleConfig - 模块配置
+ * @param {Array} routes - 路由列表
+ */
+function renderSidebarContent(sidebar, moduleId, moduleConfig, routes) {
+    // 🔥 统一架构：从注册表中查找专用渲染器
+    const renderer = SIDEBAR_RENDERER_REGISTRY[moduleId];
+    
+    if (renderer) {
+        // 使用专用渲染器（支持分类、搜索等高级功能）
+        renderer.render(sidebar, moduleConfig, routes);
+    } else {
+        // 使用默认渲染器（简单列表，自动处理高亮状态）
+        renderDefaultSidebar(sidebar, moduleConfig, routes);
+    }
 }
 
 // 🗑️ 旧的渲染函数已被 SidebarRenderer 替代，保留注释以便回滚
@@ -848,6 +903,9 @@ function renderHubSidebar(sidebar, moduleConfig, routes) {
 // 默认侧边栏渲染（平铺列表）
 function renderDefaultSidebar(sidebar, moduleConfig, routes) {
     try {
+        // 🔥 修复：读取当前激活的tab
+        const currentTab = state.currentTab;
+        
         const html = `
             <div class="flex flex-col h-full bg-white">
                 <div class="p-6 pb-2">
@@ -855,13 +913,21 @@ function renderDefaultSidebar(sidebar, moduleConfig, routes) {
                         ${moduleConfig.title}
                     </h2>
                     <nav class="space-y-1">
-                        ${routes.map(route => `
-                            <button data-action="switch-tab" data-tab="${route.id}" id="sidebar-btn-${route.id}" 
-                                class="sidebar-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">
-                                <i class="${route.icon} w-5 text-center"></i> 
-                                ${route.label}
-                            </button>
-                        `).join('')}
+                        ${routes.map(route => {
+                            // 🔥 修复：判断是否为当前激活的路由
+                            const isActive = currentTab === route.id;
+                            const activeClasses = isActive 
+                                ? 'bg-blue-50 text-blue-600 font-semibold' 
+                                : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900';
+                            
+                            return `
+                                <button data-action="switch-tab" data-tab="${route.id}" id="sidebar-btn-${route.id}" 
+                                    class="sidebar-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium ${activeClasses} transition-all duration-200">
+                                    <i class="${route.icon} w-5 text-center"></i> 
+                                    ${route.label}
+                                </button>
+                            `;
+                        }).join('')}
                     </nav>
                 </div>  
                 <div class="mt-auto p-6 border-t border-slate-100 bg-slate-50/50">
@@ -1071,11 +1137,12 @@ export async function switchTab(tab, updateHistory = true) {
         return;
     }
 
-    // 2. 更新全局状态
+    // 2. 🔥 关键修复：先更新全局状态，确保渲染时能读取到正确的currentTab
     state.currentTab = cleanTab;
     const fullConfig = getRouteFullConfig(cleanTab);
 
     // 3. 渲染侧边栏 (View Layer)
+    // 注意：renderSidebar内部会读取state.currentTab来判断高亮状态
     const targetModuleId = fullConfig ? fullConfig.module.id : null;
     renderSidebar(targetModuleId);
 
@@ -1113,7 +1180,8 @@ export async function switchTab(tab, updateHistory = true) {
 
     // 5. 更新导航高亮 (View Layer)
     updateHeaderNav(fullConfig);
-    updateSidebarHighlight(cleanTab);
+    // 🔥 修复：移除updateSidebarHighlight调用，因为SidebarRenderer已在渲染时处理高亮
+    // updateSidebarHighlight(cleanTab);
 
     // 6. 🌐 URL History Management (P0优化: 统一使用 History API)
     // 🔄 P0优化: 不再直接操作 location.hash,统一使用 pushState/replaceState
