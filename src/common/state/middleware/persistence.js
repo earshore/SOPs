@@ -2,7 +2,10 @@
 // ================================================================
 // 🎯 持久化中间件
 // 自动保存到 localStorage
+// 🔄 P0优化: 迁移到 StorageService 统一接口
 // ================================================================
+
+import { StorageService } from '../../../services/storageService.js';
 
 /**
  * 需要持久化的状态路径列表
@@ -26,7 +29,7 @@ export function persistenceMiddleware(action, next) {
   if (PERSIST_KEYS.includes(action.path)) {
     try {
       const key = `state_${action.path}`;
-      localStorage.setItem(key, JSON.stringify(action.value));
+      StorageService.set(key, action.value);
     } catch (e) {
       console.warn('[State] Persistence failed:', e);
     }
@@ -43,10 +46,9 @@ export function restorePersistedState(stateManager) {
   PERSIST_KEYS.forEach(path => {
     try {
       const key = `state_${path}`;
-      const value = localStorage.getItem(key);
+      const value = StorageService.get(key, null);
       if (value !== null) {
-        const parsed = JSON.parse(value);
-        stateManager.set(path, parsed, { source: 'persistence' });
+        stateManager.set(path, value, { source: 'persistence' });
         console.log(`✅ [State] Restored ${path} from localStorage`);
       }
     } catch (e) {

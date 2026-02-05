@@ -390,8 +390,10 @@ class AnalysisModule extends BaseModule {
       showToast("请先配置AI模型", "warning");
       return;
     }
-    const config = StorageService.getLLMConfig(provider) || {};
-    if (!config.apiKey) {
+    
+    // 🔐 P0优化: 使用安全存储读取配置
+    const config = await StorageService.getLLMConfigWithKey(provider);
+    if (!config || !config.apiKey) {
       showToast("API Key 未配置", "warning");
       return;
     }
@@ -838,8 +840,10 @@ class AnalysisModule extends BaseModule {
       showToast("请先配置AI模型", "warning");
       return;
     }
-    const config = StorageService.getLLMConfig(provider) || {};
-    if (!config.apiKey) {
+    
+    // 🔐 P0优化: 使用安全存储读取配置
+    const config = await StorageService.getLLMConfigWithKey(provider);
+    if (!config || !config.apiKey) {
       showToast("API Key 未配置", "warning");
       return;
     }

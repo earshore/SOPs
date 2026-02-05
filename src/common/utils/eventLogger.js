@@ -2,7 +2,10 @@
 // ================================================================
 // 🎯 P1 增强: 事件调试工具
 // 监控并记录所有 app:* 自定义事件，便于调试事件流
+// 🔄 P0优化: 迁移到 StorageService 统一接口
 // ================================================================
+
+import { StorageService } from '../../services/storageService.js';
 
 /**
  * 需要监控的事件列表
@@ -20,6 +23,7 @@ const TRACKED_EVENTS = [
  */
 const eventHistory = [];
 const MAX_HISTORY = 100;
+const DEBUG_EVENTS_KEY = 'debug_events';
 
 /**
  * 获取 localStorage 中的调试开关
@@ -27,7 +31,7 @@ const MAX_HISTORY = 100;
  */
 function isDebugEnabled() {
     try {
-        return localStorage.getItem('debug_events') === 'true';
+        return StorageService.get(DEBUG_EVENTS_KEY, 'false') === 'true';
     } catch {
         return false;
     }
@@ -53,7 +57,7 @@ function formatEventForLog(event) {
  */
 export function initEventLogger() {
     if (!isDebugEnabled()) {
-        console.log('💡 [EventLogger] 调试模式未开启。启用方式: localStorage.setItem("debug_events", "true")');
+        console.log('💡 [EventLogger] 调试模式未开启。启用方式: StorageService.set("debug_events", "true")');
         return;
     }
 
@@ -127,7 +131,7 @@ if (typeof window !== 'undefined') {
         getHistory: getEventHistory,
         clear: clearEventHistory,
         log: logCustomEvent,
-        enable: () => localStorage.setItem('debug_events', 'true'),
-        disable: () => localStorage.setItem('debug_events', 'false')
+        enable: () => StorageService.set(DEBUG_EVENTS_KEY, 'true'),
+        disable: () => StorageService.set(DEBUG_EVENTS_KEY, 'false')
     };
 }

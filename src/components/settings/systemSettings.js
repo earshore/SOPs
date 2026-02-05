@@ -89,7 +89,7 @@ const SettingsPanel = () => ({
 
     // --- LLM Logic ---
 
-    loadProviderConfig(provider) {
+    async loadProviderConfig(provider) {
         if (!provider) return;
         const config = PROVIDERS[provider];
 
@@ -102,7 +102,15 @@ const SettingsPanel = () => ({
         const savedConfig = StorageService.getLLMConfig(provider) || {};
 
         this.llm.endpoint = savedConfig.endpoint || config.endpoint;
-        this.llm.apiKey = savedConfig.apiKey || "";
+        
+        // 🔐 P0优化: 从安全存储读取API密钥
+        try {
+            this.llm.apiKey = await StorageService.getSecure(`llm_key_${provider}`, "");
+        } catch (error) {
+            console.warn('[Settings] Failed to load encrypted API key, using fallback:', error);
+            // 兼容旧数据: 如果加密读取失败,尝试读取明文(迁移期)
+            this.llm.apiKey = savedConfig.apiKey || "";
+        }
 
         // Models: Use saved or default
         const rawModels = (savedConfig.models && savedConfig.models.length > 0)
@@ -255,28 +263,36 @@ const SettingsPanel = () => ({
         }
     },
 
-    saveProviderConfig() {
+    async saveProviderConfig() {
         if (!this.llm.apiKey && this.llm.provider !== 'custom') {  // Custom might not need key? Usually does.
             showToast("请填写 API Key", "warning");
             return;
         }
 
-        const newConfig = {
-            endpoint: this.llm.endpoint,
-            apiKey: this.llm.apiKey,
-            model: this.llm.model,
-            models: this.llm.models
-        };
+        try {
+            // 🔐 P0优化: 使用安全存储保存API密钥
+            const newConfig = {
+                endpoint: this.llm.endpoint,
+                model: this.llm.model,
+                models: this.llm.models
+            };
+            
+            // API Key 单独加密存储
+            await StorageService.setSecure(`llm_key_${this.llm.provider}`, this.llm.apiKey);
+            
+            // 其他配置正常存储
+            StorageService.setLLMConfig(this.llm.provider, newConfig);
 
-        StorageService.setLLMConfig(this.llm.provider, newConfig);
+            // Update global status UI (if any outside this component)
+            // Since we use Alpine, we might want a global store for status
+            // For now, rely on StorageService events or manual update
+            updateModelStatus();
 
-        // Update global status UI (if any outside this component)
-        // Since we use Alpine, we might want a global store for status
-        // For now, rely on StorageService events or manual update
-        updateModelStatus();
-
-        showToast("LLM 配置已保存", "success");
-        setTimeout(() => this.close(), 500);
+            showToast("LLM 配置已保存 (API Key 已加密)", "success");
+            setTimeout(() => this.close(), 500);
+        } catch (error) {
+            ErrorService.handle(error, { action: 'saveProviderConfig', module: 'settings' });
+        }
     },
 
     // --- Proxy Logic ---
@@ -355,14 +371,15 @@ export const saveProxyConfig = () => { };
 export const renderProxyInputUI = () => { };
 
 // Keep this for main.js status update
-export function updateModelStatus() {
+export async function updateModelStatus() {
     const provider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
     const statusEl = document.getElementById("model-status");
     if (!statusEl) return;
 
     if (provider && PROVIDERS[provider]) {
-        const config = StorageService.getLLMConfig(provider) || {};
-        if (config.apiKey && config.model) {
+        // 🔐 P0优化: 使用安全存储读取配置
+        const config = await StorageService.getLLMConfigWithKey(provider);
+        if (config && config.apiKey && config.model) {
             statusEl.innerHTML = `
                 <span class="status-dot status-success"></span>
                 <span class="text-slate-600 text-xs font-medium flex items-center gap-1">

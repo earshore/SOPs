@@ -116,6 +116,28 @@ export const StorageService = {
     // ================================================================
 
     /**
+     * 获取 LLM 配置 (包含加密的API密钥)
+     * @param {string} [provider] - 厂商标识，不传则使用当前激活的
+     * @returns {Promise<Object|null>} 完整配置(包含解密后的apiKey)
+     */
+    async getLLMConfigWithKey(provider = null) {
+        const activeProvider = provider || this.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
+        if (!activeProvider) return null;
+        
+        const config = this.getLLMConfig(activeProvider);
+        if (!config) return null;
+        
+        // 🔐 从安全存储读取API密钥
+        try {
+            const apiKey = await this.getSecure(`llm_key_${activeProvider}`, '');
+            return { ...config, apiKey };
+        } catch (error) {
+            console.warn('[StorageService] Failed to decrypt API key:', error);
+            return { ...config, apiKey: '' };
+        }
+    },
+
+    /**
      * 获取 LLM 配置
      * @param {string} [provider] - 厂商标识，不传则使用当前激活的
      * @returns {Object|null}
@@ -123,7 +145,16 @@ export const StorageService = {
     getLLMConfig(provider = null) {
         const activeProvider = provider || this.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
         if (!activeProvider) return null;
-        return this.get(`${STORAGE_KEYS.LLM_CONFIG_PREFIX}${activeProvider}`, {});
+        
+        const config = this.get(`${STORAGE_KEYS.LLM_CONFIG_PREFIX}${activeProvider}`, {});
+        
+        // 🔐 P0优化: 不再返回apiKey,需要通过getSecure单独获取
+        // 移除可能存在的明文apiKey(迁移期兼容)
+        if (config.apiKey) {
+            delete config.apiKey;
+        }
+        
+        return config;
     },
 
     /**
@@ -187,6 +218,41 @@ export const StorageService = {
      */
     setLayoutConfig(templateId, layout) {
         this.set(`${STORAGE_KEYS.LAYOUT_CONFIG_PREFIX}${templateId}`, layout);
+    },
+    
+    // ================================================================
+    // 🔐 P0优化: 安全存储快捷方法
+    // ================================================================
+    
+    /**
+     * 安全存储敏感数据 (加密)
+     * @param {string} key - 存储键名
+     * @param {any} value - 要存储的值
+     * @returns {Promise<boolean>} 是否成功
+     */
+    async setSecure(key, value) {
+        // 动态导入 SecureStorage 避免循环依赖
+        const { SecureStorage } = await import('../common/utils/secureStorage.js');
+        return await SecureStorage.setSecure(key, value);
+    },
+    
+    /**
+     * 读取安全存储的数据 (解密)
+     * @param {string} key - 存储键名
+     * @param {any} defaultValue - 默认值
+     * @returns {Promise<any>} 解密后的值
+     */
+    async getSecure(key, defaultValue = null) {
+        const { SecureStorage } = await import('../common/utils/secureStorage.js');
+        return await SecureStorage.getSecure(key, defaultValue);
+    },
+    
+    /**
+     * 删除安全存储的数据
+     * @param {string} key - 存储键名
+     */
+    removeSecure(key) {
+        this.remove(`secure_${key}`);
     },
 };
 

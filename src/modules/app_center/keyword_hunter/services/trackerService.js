@@ -122,11 +122,12 @@ async function bridgeCallLLM(systemPrompt, userPrompt, options = {}) {
         throw new Error("请先在全局设置中选择 LLM 提供商");
     }
 
-    const config = StorageService.getLLMConfig(activeProvider) || {};
+    // 🔐 P0优化: 使用安全存储读取配置
+    const config = await StorageService.getLLMConfigWithKey(activeProvider);
 
 
     // 检查 Key
-    if (!config.apiKey) {
+    if (!config || !config.apiKey) {
         // 特殊处理：如果是 serverless 模式，允许前端 key 为空或随意值，但为了通过校验建议前端填个占位符
         // 这里抛出错误提示用户去设置里检查
         throw new Error("所选提供商未配置 API Key");

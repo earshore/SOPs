@@ -6,6 +6,7 @@
 // ================================================================
 
 import { APP_VERSION } from '../constants/constants.js';
+import { StorageService } from '../../services/storageService.js';
 
 const CACHE_PREFIX = 'view_cache_';
 
@@ -25,7 +26,7 @@ function getCacheKey(path) {
 function checkCache(path) {
     try {
         const key = getCacheKey(path);
-        const cached = localStorage.getItem(key);
+        const cached = StorageService.get(key, null);
         if (cached) {
             // console.log(`[ViewLoader] Cache Hit: ${path}`);
             return cached;
@@ -44,7 +45,7 @@ function checkCache(path) {
 function setCache(path, content) {
     try {
         const key = getCacheKey(path);
-        localStorage.setItem(key, content);
+        StorageService.set(key, content);
         
         // 简单的清理逻辑：清理旧版本缓存
         // 遍历 localStorage，删除以 CACHE_PREFIX 开头但不匹配当前版本的 key
@@ -61,13 +62,14 @@ function setCache(path, content) {
 export function clearOldCache() {
     try {
         const keysToRemove = [];
+        // 获取所有存储的键
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
             if (key && key.startsWith(CACHE_PREFIX) && !key.includes(APP_VERSION)) {
                 keysToRemove.push(key);
             }
         }
-        keysToRemove.forEach(k => localStorage.removeItem(k));
+        keysToRemove.forEach(k => StorageService.remove(k));
         if (keysToRemove.length > 0) {
             console.log(`[ViewLoader] Cleared ${keysToRemove.length} old cache items.`);
         }

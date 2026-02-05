@@ -1115,20 +1115,20 @@ export async function switchTab(tab, updateHistory = true) {
     updateHeaderNav(fullConfig);
     updateSidebarHighlight(cleanTab);
 
-    // 6. 🌐 URL Hash Sync (Router Layer)
+    // 6. 🌐 URL History Management (P0优化: 统一使用 History API)
+    // 🔄 P0优化: 不再直接操作 location.hash,统一使用 pushState/replaceState
     if (updateHistory) {
         const newHash = cleanTab === 'home' ? '' : `#${cleanTab}`;
-        // 只有当 Hash 确实改变时才 Push，避免冗余历史记录
-        if (window.location.hash !== newHash) {
-            // 使用 pushState 而不是直接赋值 location.hash，防止触发 hashchange 事件导致死循环
-            // 或者仅仅赋值 hash，但在 hashchange 监听器中做判断
-            // 这里使用 replaceState/pushState 更干净，不触发 hashchange (但在某些浏览器行为不一)
-            // 简单起见，我们直接修改 hash，但在 initRouter 里加锁
-            if (newHash === '') {
-                history.pushState(null, '', window.location.pathname + window.location.search);
-            } else {
-                history.pushState(null, '', newHash);
-            }
+        const currentHash = window.location.hash;
+        
+        // 只有当 Hash 确实改变时才更新历史
+        if (currentHash !== newHash) {
+            const newUrl = newHash === '' 
+                ? window.location.pathname + window.location.search
+                : newHash;
+            
+            // 使用 pushState 而不是直接修改 hash,避免触发 hashchange 事件
+            history.pushState({ routeId: cleanTab }, '', newUrl);
         }
     }
 
@@ -1148,23 +1148,30 @@ export async function switchTab(tab, updateHistory = true) {
 /**
  * 🚦 初始化路由系统
  * 监听浏览器前进/后退，处理首屏 Deep Link
+ * 🔄 P0优化: 移除hashchange监听,统一使用popstate
  */
 export function initRouter() {
-    // 1. 监听 Hash 变化 (点击浏览器后退/前进按钮)
-    window.addEventListener('popstate', () => {
+    // 1. 监听 popstate 事件 (浏览器前进/后退按钮)
+    // 🔄 P0优化: 只监听popstate,不再监听hashchange,避免重复触发
+    window.addEventListener('popstate', (event) => {
         const hash = window.location.hash.slice(1); // 去掉 #
         const target = hash || 'home';
 
-        console.log(`[Router] Detected navigation to: ${target}`);
+        console.log(`[Router] popstate detected, navigating to: ${target}`);
+        
+        // 从 state 中获取 routeId (如果有)
+        const routeId = event.state?.routeId || target;
+        
         // 传入 updateHistory: false，因为 URL 已经变了，不需要再 Push
-        switchTab(target, false);
+        switchTab(routeId, false);
     });
 
     // 2. 处理页面首次加载的 Deep Link
     const initialHash = window.location.hash.slice(1);
     if (initialHash) {
         console.log(`[Router] Booting with Deep Link: ${initialHash}`);
-        switchTab(initialHash, false);
+        // 首次加载时需要更新 history state
+        switchTab(initialHash, true);
     } else {
         switchTab('home', true);
     }
