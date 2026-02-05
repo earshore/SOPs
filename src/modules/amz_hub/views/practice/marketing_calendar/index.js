@@ -486,7 +486,12 @@ class MarketingCalendarModule extends BaseModule {
         events.forEach(event => {
             let groupKey = event.nameEn.replace(/ (UK|IT|ES|FR|PL|EU)$/i, '').trim();
             if (!eventGroups[groupKey]) {
-                eventGroups[groupKey] = { emoji: event.emoji, events: [] };
+                eventGroups[groupKey] = { 
+                    emoji: event.emoji, 
+                    events: [],
+                    name: event.name.replace(/\(.*?\)$/, '').trim(), // 提取中文名称（去除国家后缀）
+                    nameEn: groupKey
+                };
             }
             eventGroups[groupKey].events.push(event);
         });
@@ -499,13 +504,14 @@ class MarketingCalendarModule extends BaseModule {
             const safeKey = key.replace(/[^a-zA-Z0-9]/g, '_');
             const sectionId = `amzf_group_event_${safeKey}`;
             const isExpanded = isSearchActive || this.state.expandedSections.has(sectionId);
+            const displayName = `${group.name}(${group.nameEn})`;
 
             html += `
                 <div id="${sectionId}" class="amzf_event_comparison ${isExpanded ? 'amzf_expanded' : ''}" style="animation-delay: ${idx * 0.03}s">
                     <div class="amzf_comparison_header" onclick="amzf_toggleSection('${sectionId}')">
                         <div class="amzf_comparison_title">
                             <span>${group.emoji}</span>
-                            <span>${key}</span>
+                            <span>${displayName}</span>
                             <span class="amzf_month_badge">${new Set(group.events.flatMap(e => e.countries)).size} 个站点</span>
                         </div>
                         <div class="amzf_month_toggle"><i class="fas fa-chevron-down"></i></div>
