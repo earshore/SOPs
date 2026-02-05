@@ -245,6 +245,15 @@
   <!-- User Guide Modal Container -->
   <div id="user-guide-container"></div>
 
+  <!-- 🎯 短期优化：全局 Loading 元素 -->
+  <div id="global-loading" class="hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-[10000] items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 flex flex-col items-center gap-4 min-w-[280px]">
+      <div class="relative">
+        <div class="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+      </div>
+      <p data-loading-message class="text-sm text-slate-600 font-medium">加载中...</p>
+    </div>
+  </div>
 
   <script type="module" src="src/main.js"></script>
 

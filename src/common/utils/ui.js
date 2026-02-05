@@ -6,6 +6,9 @@ import { MENU_CONFIG, getRoutesByModule, getRouteFullConfig } from "../config/me
 import { registerActions } from "./actionRegistry.js";
 import { ensureViewLoaded } from "./viewLoader.js";
 import { APP_EVENTS, emitAppEvent } from "../constants/eventConstants.js";
+// 🎯 短期优化：新增导入
+import { createSidebarRenderer } from '../components/SidebarRenderer.js';
+import { COLOR_SCHEMES } from '../constants/colorSchemes.js';
 
 // ========================
 // 🛡️ HELPER: 健壮的 DOM 获取器
@@ -21,6 +24,33 @@ function getDefaultRouteForModule(moduleId) {
     const entry = allRoutes.find(([_, config]) => config.moduleId === moduleId);
     return entry ? entry[0] : null;
 }
+
+// ========================
+// 🎯 侧边栏渲染器实例（短期优化）
+// ========================
+const sopsRenderer = createSidebarRenderer({
+    moduleId: 'sops',
+    categories: MENU_CONFIG.sopCategories,
+    overviewRouteId: 'sops_overview',
+    enableSearch: true,
+    searchPlaceholder: '搜索全站 SOP...'
+});
+
+const hubRenderer = createSidebarRenderer({
+    moduleId: 'amz_hub_core',
+    categories: MENU_CONFIG.hubCategories,
+    overviewRouteId: 'amz_hub_overview',
+    enableSearch: true,
+    searchPlaceholder: '搜索智库内容...'
+});
+
+const moreRenderer = createSidebarRenderer({
+    moduleId: 'more_core',
+    categories: MENU_CONFIG.moreCategories,
+    overviewRouteId: 'more_overview',
+    enableSearch: true,
+    searchPlaceholder: '搜索功能...'
+});
 
 // ========================
 // 1. MEGA MENU RENDERER (配置驱动)
@@ -448,72 +478,56 @@ function renderSidebar(moduleId) {
     // 1. 隐藏逻辑
     if (!moduleId) {
         sidebar.classList.add("hidden", "-ml-64");
-        sidebar.innerHTML = ''; // 清空内容以防残留
+        sidebar.innerHTML = '';
         currentSidebarModuleId = null;
         return;
     }
 
-    // 2. 缓存检查
-    // 2. 缓存检查 (增强版: 支持 SOPs 内部 Category 切换)
-    // 对于 SOPs，我们需要根据当前 Tab 的 Category 来区分 Sidebar 状态
-    // 生成一个 unique key
+    // 2. 生成缓存键（支持 Category 切换）
     let sidebarKey = moduleId;
 
-    if (moduleId === 'sops') {
+    if (moduleId === 'sops' || moduleId === 'amz_hub_core' || moduleId === 'more_core') {
         const currentTab = state.currentTab;
         const routeConfig = MENU_CONFIG.routes[currentTab];
         const category = routeConfig?.category || 'overview';
-        sidebarKey = `sops:${category}`;
+        sidebarKey = `${moduleId}:${category}`;
     }
 
-    // 对于 Amazon智库，也需要根据当前 Tab 的 Category 来区分 Sidebar 状态
-    if (moduleId === 'amz_hub_core') {
-        const currentTab = state.currentTab;
-        const routeConfig = MENU_CONFIG.routes[currentTab];
-        const category = routeConfig?.category || 'overview';
-        sidebarKey = `amz_hub_core:${category}`;
-    }
-
-    // 对于 More 模块，也需要根据当前 Tab 的 Category 来区分 Sidebar 状态
-    if (moduleId === 'more_core') {
-        const currentTab = state.currentTab;
-        const routeConfig = MENU_CONFIG.routes[currentTab];
-        const category = routeConfig?.category || 'overview';
-        sidebarKey = `more_core:${category}`;
-    }
-
+    // 3. 缓存检查
     if (currentSidebarModuleId === sidebarKey) {
         sidebar.classList.remove("hidden", "-ml-64");
         return;
     }
 
-    // 3. 数据获取与防御
+    // 4. 数据获取与防御
     const moduleConfig = MENU_CONFIG.modules[moduleId];
     if (!moduleConfig) {
-        console.warn(`⚠️ 未找到 ID 为 [${moduleId}] 的模块配置，侧边栏将隐藏。`);
+        console.warn(`⚠️ 未找到模块配置: ${moduleId}`);
         sidebar.classList.add("hidden", "-ml-64");
         return;
     }
 
     const routes = getRoutesByModule(moduleId);
 
-    // 4. 特殊处理 SOPs 模块 - 使用分组显示
+    // 5. 🎯 使用统一渲染器（短期优化）
     if (moduleId === 'sops') {
-        renderSopsSidebar(sidebar, moduleConfig, routes);
+        sopsRenderer.render(sidebar, moduleConfig, routes);
     } else if (moduleId === 'amz_hub_core') {
-        // 特殊处理 Amazon智库 模块 - 使用分组显示
-        renderHubSidebar(sidebar, moduleConfig, routes);
+        hubRenderer.render(sidebar, moduleConfig, routes);
     } else if (moduleId === 'more_core') {
-        // 特殊处理 More 模块 - 使用分组显示
-        renderMoreSidebar(sidebar, moduleConfig, routes);
+        moreRenderer.render(sidebar, moduleConfig, routes);
     } else {
-        // 普通模块使用平铺列表
         renderDefaultSidebar(sidebar, moduleConfig, routes);
     }
 
     sidebar.classList.remove("hidden", "-ml-64");
     currentSidebarModuleId = sidebarKey;
 }
+
+// 🗑️ 旧的渲染函数已被 SidebarRenderer 替代，保留注释以便回滚
+// function renderSopsSidebar(sidebar, moduleConfig, routes) { ... }
+// function renderHubSidebar(sidebar, moduleConfig, routes) { ... }
+// function renderMoreSidebar(sidebar, moduleConfig, routes) { ... }
 
 // SOPs模块专用侧边栏渲染（带搜索和可折叠分组）
 // Sop 模块侧边栏渲染 (扁平化 - 基于当前 Category)

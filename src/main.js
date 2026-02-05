@@ -27,6 +27,9 @@ import './components/modal/AppModal.js';
 // ✅ 导入 StorageService
 import { StorageService, STORAGE_KEYS } from './services/storageService.js';
 
+// 🎯 短期优化：导入 LoadingManager
+import { loadingManager } from './common/utils/LoadingManager.js';
+
 // ✅ Import User Guide Modal (Vite Raw Import)
 import userGuideModalHtml from './components/modal/userGuideModal.html?raw';
 import promptModalHtml from './components/modal/promptModal.html?raw';
@@ -145,6 +148,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ----------------------------------------------------
   try {
     await initViews();
+
+    // 🎯 短期优化：初始化 LoadingManager
+    const globalLoading = document.getElementById('global-loading');
+    if (globalLoading) {
+      loadingManager.setGlobalLoadingElement(globalLoading);
+      console.log("✅ LoadingManager initialized");
+    }
 
     // ✅ P1: 初始化事件调试器 (需在广播事件前启用)
     initEventLogger();

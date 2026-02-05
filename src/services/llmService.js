@@ -29,6 +29,7 @@ import { EnvConfig } from '../common/config/envConfig.js';
  * @property {number} [timeout=90000] - 超时时间 (毫秒)
  * @property {number} [retries=3] - 最大重试次数
  * @property {number} [retryDelay=1000] - 初始重试延迟 (ms)
+ * @property {AbortSignal} [signal] - 🎯 短期优化：请求取消信号
  */
 
 /**
@@ -98,7 +99,8 @@ export async function callLLM(
     jsonMode = false, 
     timeout = 90000,
     retries = 2,
-    retryDelay = 1000
+    retryDelay = 1000,
+    signal // 🎯 短期优化：支持请求取消
   } = options;
 
   // 标准化 endpoint (开发/生产环境自动适配)
@@ -123,8 +125,14 @@ export async function callLLM(
 
   // 重试循环
   for (let attempt = 0; attempt <= retries; attempt++) {
+    // 🎯 短期优化：支持外部取消信号
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
+    
+    // 如果提供了外部 signal，监听其 abort 事件
+    if (signal) {
+      signal.addEventListener('abort', () => controller.abort(), { once: true });
+    }
 
     try {
       // 首次之后的重试需要等待
