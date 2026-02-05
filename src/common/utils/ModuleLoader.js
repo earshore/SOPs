@@ -37,9 +37,38 @@ export class ModuleLoader {
         this.loaderColor = config.loaderColor || 'blue';
         this.moduleName = config.moduleName || 'Module';
         this.currentModule = null;
+        
+        // 🎯 P1 优化：提取路由前缀用于快速过滤
+        this.routePrefixes = this._extractRoutePrefixes();
 
         // 自动监听路由变化
         this._initRouteListener();
+    }
+
+    /**
+     * 提取所有注册路由的前缀（用于快速过滤）
+     * @returns {Set<string>} 路由前缀集合
+     * @private
+     */
+    _extractRoutePrefixes() {
+        const prefixes = new Set();
+        Object.keys(this.moduleMap).forEach(routeId => {
+            // 提取前缀：例如 sops_overview -> sops, amz_hub_overview -> amz
+            const prefix = routeId.split('_')[0];
+            prefixes.add(prefix);
+        });
+        return prefixes;
+    }
+
+    /**
+     * 快速检查路由是否可能匹配（基于前缀）
+     * @param {string} routeId - 路由ID
+     * @returns {boolean}
+     * @private
+     */
+    _shouldHandleRoute(routeId) {
+        const prefix = routeId.split('_')[0];
+        return this.routePrefixes.has(prefix);
     }
 
     /**
@@ -211,6 +240,11 @@ export class ModuleLoader {
         window.addEventListener(APP_EVENTS.ROUTE_CHANGED, async (e) => {
             const { routeId, config } = e.detail;
 
+            // 🎯 P1 优化：快速前缀过滤，避免无效处理
+            if (!this._shouldHandleRoute(routeId)) {
+                return; // 前缀不匹配，直接跳过
+            }
+
             console.log(`📡 [${this.moduleName} 调试] 收到路由: ${routeId}, 模块ID: ${config?.module?.id}`);
 
             // 只处理在moduleMap中注册的路由
@@ -240,7 +274,7 @@ export class ModuleLoader {
             }
         });
 
-        console.log(`✅ [${this.moduleName}] 路由监听器已初始化`);
+        console.log(`✅ [${this.moduleName}] 路由监听器已初始化 (前缀: ${Array.from(this.routePrefixes).join(', ')})`);
     }
 
     /**

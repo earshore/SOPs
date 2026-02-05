@@ -11,11 +11,60 @@
 const ActionRegistry = {};
 
 /**
+ * 🎯 P1 优化：动作命名规范
+ * 推荐使用模块前缀避免命名冲突
+ * 例如：kt_xxx (keyword_tracker), mp_xxx (master_prompt)
+ */
+const NAMING_CONVENTIONS = {
+    // 全局动作（无前缀）
+    global: ['switchTab', 'showToast', 'openSettings', 'closeSettings', 'close', 'renderMegaMenu'],
+    // 模块前缀映射
+    prefixes: {
+        'kt_': 'keyword_tracker',
+        'mp_': 'master_prompt',
+        'sops_': 'sops_module',
+        'amz_': 'amz_hub',
+        'more_': 'more_module'
+    }
+};
+
+/**
+ * 验证动作命名是否符合规范
+ * @param {string} actionName - 动作名称
+ * @returns {boolean} 是否符合规范
+ * @private
+ */
+function _validateActionName(actionName) {
+    // 全局动作豁免
+    if (NAMING_CONVENTIONS.global.includes(actionName)) {
+        return true;
+    }
+    
+    // 检查是否有模块前缀
+    const hasPrefix = Object.keys(NAMING_CONVENTIONS.prefixes).some(prefix => 
+        actionName.startsWith(prefix)
+    );
+    
+    if (!hasPrefix && !actionName.startsWith('_')) {
+        console.warn(
+            `⚠️ [ActionRegistry] 动作 "${actionName}" 未使用模块前缀。\n` +
+            `   推荐格式: <prefix>_<action>，例如: kt_syncToInput\n` +
+            `   可用前缀: ${Object.keys(NAMING_CONVENTIONS.prefixes).join(', ')}`
+        );
+    }
+    
+    return true;
+}
+
+/**
  * 注册动作处理函数
  * @param {string} actionName - 动作名称 (对应 data-action 属性值)
  * @param {Function} handler - 处理函数
  */
 export function registerAction(actionName, handler) {
+    // 🎯 P1 优化：验证命名规范
+    _validateActionName(actionName);
+    
     if (ActionRegistry[actionName]) {
         console.warn(`[ActionRegistry] 动作 "${actionName}" 已存在，将被覆盖`);
     }

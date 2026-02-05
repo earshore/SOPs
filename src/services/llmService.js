@@ -106,11 +106,14 @@ export async function callLLM(
   // 标准化 endpoint (开发/生产环境自动适配)
   const normalizedEndpoint = EnvConfig.api.normalizeEndpoint(endpoint);
   
-  // 在生产环境也输出日志,方便调试
-  console.log(`🌐 [LLM] 环境: ${EnvConfig.environment}`);
-  console.log(`🌐 [LLM] 原始 Endpoint: ${endpoint}`);
-  console.log(`🌐 [LLM] 标准化 Endpoint: ${normalizedEndpoint}`);
-  console.log(`🌐 [LLM] 最终请求 URL: ${normalizedEndpoint}/chat/completions`);
+  // 只在首次调用或调试模式下输出配置信息
+  if (!callLLM._configLogged || EnvConfig.isDevelopment) {
+    console.log(`🌐 [LLM] 环境: ${EnvConfig.environment}`);
+    console.log(`🌐 [LLM] 原始 Endpoint: ${endpoint}`);
+    console.log(`🌐 [LLM] 标准化 Endpoint: ${normalizedEndpoint}`);
+    console.log(`🌐 [LLM] 最终请求 URL: ${normalizedEndpoint}/chat/completions`);
+    callLLM._configLogged = true;
+  }
 
   /** @type {Object} */
   const requestBody = {
@@ -254,11 +257,14 @@ export async function fetchModelsFromApi(provider, endpoint, apiKey) {
     // 标准化 endpoint (开发/生产环境自动适配)
     const normalizedEndpoint = EnvConfig.api.normalizeEndpoint(endpoint);
     
-    // 在生产环境也输出日志,方便调试
-    console.log(`🌐 [Models] 环境: ${EnvConfig.environment}`);
-    console.log(`🌐 [Models] 原始 Endpoint: ${endpoint}`);
-    console.log(`🌐 [Models] 标准化 Endpoint: ${normalizedEndpoint}`);
-    console.log(`🌐 [Models] 最终请求 URL: ${normalizedEndpoint}/models`);
+    // 只在首次调用或调试模式下输出配置信息
+    if (!fetchModelsFromApi._configLogged || EnvConfig.isDevelopment) {
+      console.log(`🌐 [Models] 环境: ${EnvConfig.environment}`);
+      console.log(`🌐 [Models] 原始 Endpoint: ${endpoint}`);
+      console.log(`🌐 [Models] 标准化 Endpoint: ${normalizedEndpoint}`);
+      console.log(`🌐 [Models] 最终请求 URL: ${normalizedEndpoint}/models`);
+      fetchModelsFromApi._configLogged = true;
+    }
     
     // 设置 10秒 超时，避免获取列表卡死
     const controller = new AbortController();
