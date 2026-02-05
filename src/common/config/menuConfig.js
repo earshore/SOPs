@@ -409,6 +409,13 @@ export const MENU_CONFIG = {
         },
 
         // === 运营提升全攻略 ===
+        amz_new_product_30days: {
+            moduleId: 'amz_hub_core',
+            label: '新品30天极速突围',
+            icon: 'fas fa-rocket',
+            panelId: 'panel-amz_hub',
+            category: 'advanced'
+        },
         amz_conversion_optimization: {
             moduleId: 'amz_hub_core',
             label: '链接转化率低自查优化',
