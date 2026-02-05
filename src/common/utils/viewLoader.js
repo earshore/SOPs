@@ -207,22 +207,21 @@ export async function initViews() {
 
 /**
  * 按需加载视图 (路由拦截器调用)
- * @param {string} routeId - 路由ID，通常对应 registry 中的 key, 或者需要映射
+ * @param {string} routeId - 路由ID
  */
 export async function ensureViewLoaded(routeId) {
-    let moduleKey = null;
-
-    if (routeId.startsWith('sops')) moduleKey = 'sops';
-    else if (routeId.startsWith('amz')) moduleKey = 'amz_hub';
-    else if (routeId.startsWith('more')) moduleKey = 'more';
-
-    // App Center 路由映射到统一的 Shell HTML
-    // Master Prompt 路由: scraper, data, analysis, promptlab
-    // Keyword Hunter 路由: kw_input, kw_process, kw_analysis
-    else if (['scraper', 'data', 'analysis', 'promptlab'].includes(routeId) || routeId.startsWith('kw_')) {
-        moduleKey = 'app_center';
+    // 动态导入menuConfig以获取视图路径
+    const { getViewPathByRoute } = await import('../config/menuConfig.js');
+    const viewPath = getViewPathByRoute(routeId);
+    
+    if (!viewPath) {
+        console.warn(`[ViewLoader] 未找到路由 ${routeId} 的视图路径`);
+        return;
     }
 
+    // 从路径中提取模块key
+    const moduleKey = viewPath.split('/').filter(Boolean)[2]; // 例如: sops, app_center, amz_hub, more
+    
     if (moduleKey && VIEW_REGISTRY[moduleKey]) {
         if (!VIEW_REGISTRY[moduleKey].isLoaded) {
             console.log(`⏳ [ViewLoader] Lazy loading module: ${moduleKey} (Mapped from ${routeId})...`);

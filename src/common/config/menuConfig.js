@@ -175,7 +175,8 @@ export const MENU_CONFIG = {
             moduleId: 'sops',
             label: 'SOP 总览',
             icon: 'fas fa-th-large',
-            panelId: 'panel-sops'
+            panelId: 'panel-sops',
+            viewPath: '/src/modules/sops/sops.html'  // 视图路径
         },
 
         // === 第一模块：运营与推广体系 (The Growth Layer) ===
@@ -561,4 +562,24 @@ export function registerModule(moduleId, config) {
  */
 export function getAllRouteIds() {
     return Object.keys(MENU_CONFIG.routes);
+}
+
+/**
+ * 根据路由ID获取视图路径
+ * @param {string} routeId - 路由ID
+ * @returns {string|null} 视图路径
+ */
+export function getViewPathByRoute(routeId) {
+    const route = MENU_CONFIG.routes[routeId];
+    if (!route) return null;
+
+    // 根据panelId映射到对应的视图路径
+    const viewPathMap = {
+        'panel-sops': '/src/modules/sops/sops.html',
+        'panel-app_center': '/src/modules/app_center/app_center.html',
+        'panel-amz_hub': '/src/modules/amz_hub/amz_hub.html',
+        'panel-more': '/src/modules/more/more.html'
+    };
+
+    return viewPathMap[route.panelId] || null;
 }
