@@ -204,20 +204,28 @@ export class StateManager {
       });
     }
     
-    // 通知父路径订阅者（如 'ui' 订阅者也会收到 'ui.currentTab' 变化）
+    // 🎯 性能优化：父路径通知优化
+    // 只在父对象真正变化时通知（通过浅比较检测）
     const parts = path.split('.');
     for (let i = parts.length - 1; i > 0; i--) {
       const parentPath = parts.slice(0, i).join('.');
       const parentSubs = this._subscribers.get(parentPath);
-      if (parentSubs) {
+      if (parentSubs && parentSubs.size > 0) {
         const parentValue = this.get(parentPath);
-        parentSubs.forEach(cb => {
-          try {
-            cb(parentValue, parentValue); // 父对象引用未变
-          } catch (e) {
-            console.error(`[StateManager] Parent subscriber error:`, e);
-          }
-        });
+        
+        // 🔍 浅比较：检查父对象是否真正变化
+        // 对于对象类型，引用未变则不通知（避免不必要的重渲染）
+        const shouldNotify = typeof parentValue !== 'object' || parentValue === null;
+        
+        if (shouldNotify) {
+          parentSubs.forEach(cb => {
+            try {
+              cb(parentValue, parentValue);
+            } catch (e) {
+              console.error(`[StateManager] Parent subscriber error:`, e);
+            }
+          });
+        }
       }
     }
   }

@@ -48,7 +48,11 @@ export const APP_EVENTS = {
     // 搜索相关
     SEARCH_START: 'app:search-start',
     SEARCH_COMPLETE: 'app:search-complete',
-    SEARCH_CLEAR: 'app:search-clear'
+    SEARCH_CLEAR: 'app:search-clear',
+    
+    // 加载状态相关
+    LOADING_START: 'app:loading-start',
+    LOADING_STOP: 'app:loading-stop'
 };
 
 /**

@@ -104,8 +104,5 @@ temp/
 .kiro/
 .gemini/
 
-# Specific temporary files found
+# Specific temporary files
 test-new-llm-service.html
-
-# ==============================================================================
-*.cjs
