@@ -9,6 +9,7 @@ export default class BaseModule {
         this.container = null;
         this._abortController = new AbortController();
         this._registeredActions = []; // 存储已注册的动作名称
+        this._unregisterActionsFn = null; // 存储 unregisterActions 函数引用
     }
 
     /**
@@ -86,9 +87,9 @@ export default class BaseModule {
         });
         this._disposables = [];
 
-        // 2. 清理已注册的动作
+        // 2. 同步清理已注册的动作（改为同步方式）
         if (this._registeredActions.length > 0) {
-            this._unregisterActions();
+            this._unregisterActionsSync();
         }
 
         // 3. 调用子类特定的清理逻辑
@@ -160,13 +161,40 @@ export default class BaseModule {
      */
     async registerActions(actions) {
         // 动态导入 actionRegistry 避免循环依赖
-        const { registerActionsWithLegacy } = await import('./utils/actionRegistry.js');
+        const { registerActionsWithLegacy, unregisterActions } = await import('./utils/actionRegistry.js');
         const actionNames = registerActionsWithLegacy(actions);
+        
+        // 保存动作名称
         this._registeredActions.push(...actionNames);
+        
+        // 保存 unregisterActions 函数引用，用于同步清理
+        if (!this._unregisterActionsFn) {
+            this._unregisterActionsFn = unregisterActions;
+        }
     }
 
     /**
-     * 清理已注册的动作（内部方法）
+     * 清理已注册的动作（同步版本）
+     * @private
+     */
+    _unregisterActionsSync() {
+        if (this._registeredActions.length === 0) return;
+
+        try {
+            // 使用保存的函数引用进行同步清理
+            if (this._unregisterActionsFn) {
+                this._unregisterActionsFn(this._registeredActions);
+                console.log(`[BaseModule] 已清理 ${this._registeredActions.length} 个动作: ${this.moduleId}`);
+            }
+            // 立即清空数组，防止重复清理
+            this._registeredActions = [];
+        } catch (error) {
+            console.warn(`[BaseModule] 清理动作失败:`, error);
+        }
+    }
+
+    /**
+     * 清理已注册的动作（异步版本，保留用于特殊场景）
      * @private
      */
     async _unregisterActions() {

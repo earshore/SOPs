@@ -28,7 +28,19 @@ const NAMING_CONVENTIONS = {
         // 全局 UI 交互
         'switch-tab', 'toggle-sop-group', 'clear-sop-search', 'clear-hub-search',
         'open-user-guide', 'close-user-guide', 'switch-guide-tab',
-        'scroll-to-sop-module', 'scroll-to-hub-module', 'scroll-to-more-module'
+        'scroll-to-sop-module', 'scroll-to-hub-module', 'scroll-to-more-module',
+        
+        // NPI Tracker 模块专用动作
+        'updateField', 'updateDeliveryFee', 'toggleDecision',
+        'openNextStepEditor', 'saveNextSteps', 'closeNextStepModal',
+        'exportToExcel', 'filterByStore', 'filterByStage',
+        
+        // Restricted Words 模块专用动作
+        'showWordDetail', 'closeWordDetail',
+        
+        // Analysis 模块专用动作
+        'toggleAllModules', 'selectAllAsins', 'copyPromptText',
+        'translateReport', 'copyReportMarkdown', 'exportReport', 'toggleCardResize'
     ],
     // 模块前缀映射
     prefixes: {

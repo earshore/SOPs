@@ -20,6 +20,7 @@ const MODULE_MAP = {
     'amz_seasons_tools': () => import('./views/practice/promotions/index.js'),
     
     // 运营提升全攻略 (advanced)
+    'amz_new_product_30days': () => import('./views/advanced/new_product_30days/index.js'),
     'amz_conversion_optimization': () => import('./views/advanced/conversion_optimization/index.js'),
 };
 

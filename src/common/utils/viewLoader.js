@@ -26,7 +26,7 @@ function getCacheKey(path) {
 function checkCache(path) {
     try {
         const key = getCacheKey(path);
-        const cached = StorageService.get(key, null);
+        const cached = StorageService.getRaw(key, null);
         if (cached) {
             // console.log(`[ViewLoader] Cache Hit: ${path}`);
             return cached;
@@ -45,7 +45,7 @@ function checkCache(path) {
 function setCache(path, content) {
     try {
         const key = getCacheKey(path);
-        StorageService.set(key, content);
+        StorageService.setRaw(key, content);
         
         // 简单的清理逻辑：清理旧版本缓存
         // 遍历 localStorage，删除以 CACHE_PREFIX 开头但不匹配当前版本的 key
@@ -65,13 +65,15 @@ export function clearOldCache() {
         // 获取所有存储的键
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
-            if (key && key.startsWith(CACHE_PREFIX) && !key.includes(APP_VERSION)) {
+            // 清除所有 view_cache_ 开头的缓存（包括当前版本）
+            // 这样可以强制重新生成使用 setRaw() 存储的新缓存
+            if (key && key.startsWith(CACHE_PREFIX)) {
                 keysToRemove.push(key);
             }
         }
         keysToRemove.forEach(k => StorageService.remove(k));
         if (keysToRemove.length > 0) {
-            console.log(`[ViewLoader] Cleared ${keysToRemove.length} old cache items.`);
+            console.log(`[ViewLoader] Cleared ${keysToRemove.length} view cache items.`);
         }
     } catch (e) {
         console.warn('Cache clear error:', e);

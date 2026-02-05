@@ -73,6 +73,42 @@ export const StorageService = {
     },
 
     /**
+     * 获取原始字符串（不进行 JSON 解析）
+     * @param {string} key - 存储键名
+     * @param {string} defaultValue - 默认值
+     * @returns {string|null} 原始字符串或默认值
+     */
+    getRaw(key, defaultValue = null) {
+        try {
+            const raw = localStorage.getItem(key);
+            return raw !== null ? raw : defaultValue;
+        } catch (e) {
+            console.warn(`[StorageService] 读取失败: ${key}`, e);
+            return defaultValue;
+        }
+    },
+
+    /**
+     * 设置原始字符串（不进行 JSON 序列化）
+     * @param {string} key - 存储键名
+     * @param {string} value - 要存储的字符串
+     * @returns {boolean} 是否成功
+     */
+    setRaw(key, value) {
+        try {
+            localStorage.setItem(key, value);
+            return true;
+        } catch (e) {
+            console.error(`[StorageService] 存储失败: ${key}`, e);
+            // 可能是存储空间已满
+            if (e.name === 'QuotaExceededError') {
+                this._handleQuotaExceeded();
+            }
+            return false;
+        }
+    },
+
+    /**
      * 删除存储值
      * @param {string} key - 存储键名
      */

@@ -21,6 +21,7 @@ import { registerActionsWithLegacy } from '../../../../../common/utils/actionReg
 let eventListeners = []; // 用于清理事件监听器
 let timeouts = []; // 用于清理定时器
 let debouncedInputHandler = null; // Debounced function reference
+let registeredActions = []; // 用于清理已注册的动作
 
 // ========================================== 
 // Helper Functions
@@ -59,6 +60,17 @@ function cleanup() {
 
     // 清理 debounced handler
     debouncedInputHandler = null;
+    
+    // 清理已注册的动作
+    if (registeredActions.length > 0) {
+        import('../../../../../common/utils/actionRegistry.js').then(({ unregisterActions }) => {
+            unregisterActions(registeredActions);
+            console.log(`[Input] 已清理 ${registeredActions.length} 个动作`);
+            registeredActions = [];
+        }).catch(err => {
+            console.warn('[Input] 清理动作失败:', err);
+        });
+    }
 }
 
 /**
@@ -371,13 +383,16 @@ export async function mount(container) {
         container.innerHTML = html;
 
         // 2. 注册全局操作（用于 HTML onclick 兼容）
-        registerActionsWithLegacy({
+        const actionNames = registerActionsWithLegacy({
             kt_cleanKeywords: () => cleanKeywordsUI(),
             kt_removeDuplicates: () => removeDuplicatesUI(),
             kt_pasteFromClipboard: () => pasteFromClipboard(),
             kt_clearCopyInput: () => clearCopyInput(),
             kt_startAnalysis: () => startAnalysis(),
         });
+        
+        // 保存已注册的动作名称，用于卸载时清理
+        registeredActions = actionNames;
 
         // 3. 设置事件监听器
         setupEventListeners(container);
