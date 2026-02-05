@@ -506,7 +506,7 @@ class MarketingCalendarModule extends BaseModule {
                         <div class="amzf_comparison_title">
                             <span>${group.emoji}</span>
                             <span>${key}</span>
-                            <span class="amzf_month_badge">${group.events.length} 个站点</span>
+                            <span class="amzf_month_badge">${new Set(group.events.flatMap(e => e.countries)).size} 个站点</span>
                         </div>
                         <div class="amzf_month_toggle"><i class="fas fa-chevron-down"></i></div>
                     </div>
