@@ -24,6 +24,7 @@ import { registerActionsWithLegacy } from '../../../../../common/utils/actionReg
 let currentConsoleMode = "listing";
 let eventListeners = []; // 用于清理事件监听器
 let timeouts = []; // 用于清理定时器
+let registeredActions = []; // 用于清理已注册的动作
 
 // ========================================== 
 // Helper Functions
@@ -59,6 +60,17 @@ function cleanup() {
     // 清理定时器
     timeouts.forEach(id => clearTimeout(id));
     timeouts = [];
+    
+    // 清理已注册的动作
+    if (registeredActions.length > 0) {
+        import('../../../../../common/utils/actionRegistry.js').then(({ unregisterActions }) => {
+            unregisterActions(registeredActions);
+            console.log(`[Promptlab] 已清理 ${registeredActions.length} 个动作`);
+            registeredActions = [];
+        }).catch(err => {
+            console.warn('[Promptlab] 清理动作失败:', err);
+        });
+    }
 }
 
 /**
@@ -572,13 +584,16 @@ export async function mount(container) {
         container.innerHTML = html;
 
         // 2. 注册全局操作
-        registerActionsWithLegacy({
+        const actionNames = registerActionsWithLegacy({
             amz_generateMasterPrompt: () => generateMasterPrompt(),
             amz_generateVisualPrompt: () => generateVisualPrompt(),
             amz_toggleConsoleMode: (params) => toggleConsoleMode(params.param),
             amz_copyMasterPrompt: () => copyMasterPrompt(),
             amz_clearPromptInputs: () => clearPromptInputs(),
         });
+        
+        // 保存已注册的动作名称，用于卸载时清理
+        registeredActions = actionNames;
 
         // 3. 设置事件监听器
         setupEventListeners(container);

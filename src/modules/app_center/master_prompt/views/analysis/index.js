@@ -1030,16 +1030,31 @@ class AnalysisModule extends BaseModule {
       },
     };
 
-    registerActionsWithLegacy(actions);
+    // 使用 BaseModule 的 registerActions 方法，自动在卸载时清理
+    this.registerActions(actions);
     
-    // 注册编辑相关的全局函数
-    window.startLocalEdit = (key) => this.startLocalEdit(key);
-    window.saveLocalEdit = (key) => this.saveLocalEdit(key);
-    window.undoLocalEdit = (key) => this.undoLocalEdit(key);
-    window.pushEditSnapshot = (key) => this.pushEditSnapshot(key);
-    window.deleteRowItem = (btn, key) => this.deleteRowItem(btn, key);
-    window.addListItem = (key) => this.addListItem(key);
-    window.addObjItem = (key) => this.addObjItem(key);
+    // 注册编辑相关的全局函数，并添加到清理列表
+    const globalFunctions = {
+      startLocalEdit: (key) => this.startLocalEdit(key),
+      saveLocalEdit: (key) => this.saveLocalEdit(key),
+      undoLocalEdit: (key) => this.undoLocalEdit(key),
+      pushEditSnapshot: (key) => this.pushEditSnapshot(key),
+      deleteRowItem: (btn, key) => this.deleteRowItem(btn, key),
+      addListItem: (key) => this.addListItem(key),
+      addObjItem: (key) => this.addObjItem(key),
+    };
+    
+    // 将全局函数挂载到 window，并注册清理函数
+    Object.entries(globalFunctions).forEach(([name, fn]) => {
+      window[name] = fn;
+    });
+    
+    // 添加清理函数，在卸载时移除全局函数
+    this.addDisposable(() => {
+      Object.keys(globalFunctions).forEach(name => {
+        delete window[name];
+      });
+    });
   }
 
   // ================== 编辑功能实现 ==================

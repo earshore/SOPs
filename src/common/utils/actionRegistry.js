@@ -16,14 +16,27 @@ const ActionRegistry = {};
  * 例如：kt_xxx (keyword_tracker), mp_xxx (master_prompt)
  */
 const NAMING_CONVENTIONS = {
-    // 全局动作（无前缀）
-    global: ['switchTab', 'showToast', 'openSettings', 'closeSettings', 'close', 'renderMegaMenu'],
+    // 全局动作（无前缀）- UI 核心功能和系统级操作
+    global: [
+        // 核心导航
+        'switchTab', 'renderMegaMenu',
+        // 通用 UI
+        'showToast', 'close',
+        // 设置相关
+        'openSettings', 'closeSettings', 'saveProviderConfig', 'loadProviderConfig', 
+        'fetchModels', 'toggleApiKeyVisibility', 'testConnection', 'saveProxyConfig',
+        // 全局 UI 交互
+        'switch-tab', 'toggle-sop-group', 'clear-sop-search', 'clear-hub-search',
+        'open-user-guide', 'close-user-guide', 'switch-guide-tab',
+        'scroll-to-sop-module', 'scroll-to-hub-module', 'scroll-to-more-module'
+    ],
     // 模块前缀映射
     prefixes: {
         'kt_': 'keyword_tracker',
         'mp_': 'master_prompt',
         'sops_': 'sops_module',
         'amz_': 'amz_hub',
+        'amzf_': 'amz_hub_features',
         'more_': 'more_module'
     }
 };
