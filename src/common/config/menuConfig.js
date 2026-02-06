@@ -282,6 +282,13 @@ export const MENU_CONFIG = {
             panelId: 'panel-sops',
             category: 'safety'
         },
+        sops_eu_gpsr_compliance: {
+            moduleId: 'sops',
+            label: '欧洲GPSR合规',
+            icon: 'fa-solid fa-shield-dog',
+            panelId: 'panel-sops',
+            category: 'safety'
+        },
 
 
         // === 第四模块：客服与客户体验体系 (The Service Layer) ===

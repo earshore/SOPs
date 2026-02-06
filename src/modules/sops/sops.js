@@ -27,6 +27,7 @@ const MODULE_MAP = {
     'sops_brand_infringement': () => import('./views/safety/brand_infringement/index.js'),
     'sops_performance_notification': () => import('./views/safety/performance_notification/index.js'),
     'sops_product_compliance': () => import('./views/safety/product_compliance/index.js'),
+    'sops_eu_gpsr_compliance': () => import('./views/safety/eu_gpsr_compliance/index.js'),
 
     // 第四模块：客服与客户体验体系 (The Service Layer)
     'sops_email_templates': () => import('./views/service/email_templates/index.js'),
