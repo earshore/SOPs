@@ -296,9 +296,42 @@ export class SidebarRenderer {
                 </div>
                 
                 <nav id="sidebar-nav-container" class="flex-1 overflow-y-auto px-4 space-y-2 scrollbar-thin">
+                    ${this._buildOverviewButton(currentTab)}
                     ${categoryTree.map(category => this._buildCategoryGroup(category, currentTab)).join('')}
                 </nav>
             </div>
+        `;
+    }
+
+    /**
+     * 构建总览按钮
+     * @private
+     * @param {string} currentTab - 当前激活的路由ID
+     * @returns {string} 总览按钮HTML
+     */
+    _buildOverviewButton(currentTab) {
+        const isActive = currentTab === this.overviewRouteId;
+        
+        const activeClasses = isActive 
+            ? 'bg-blue-50 text-blue-700' 
+            : 'hover:bg-slate-50 text-slate-700';
+        
+        const iconClasses = isActive
+            ? 'text-blue-600'
+            : 'text-slate-400 group-hover:text-slate-600';
+        
+        // 从 MENU_CONFIG 获取总览路由的标签
+        const overviewRoute = MENU_CONFIG.routes[this.overviewRouteId];
+        const overviewLabel = overviewRoute?.label || '总览';
+        
+        return `
+            <button data-action="switch-tab" data-tab="${this.overviewRouteId}" id="sidebar-btn-${this.overviewRouteId}"
+                class="sidebar-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg ${activeClasses} transition-all duration-200 group mb-2">
+                <i class="fas fa-th-large text-base ${iconClasses} transition-colors"></i>
+                <span class="text-sm ${isActive ? 'font-medium' : 'group-hover:text-slate-900'} transition-colors flex-1 text-left">
+                    ${overviewLabel}
+                </span>
+            </button>
         `;
     }
 
