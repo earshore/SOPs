@@ -31,6 +31,16 @@ export const MENU_CONFIG = {
             description: '集成所有亚马逊运营标准化流程指引，确保团队执行一致性。'
         },
 
+        // [应用中心] App Center 容器模块
+        app_center: {
+            id: 'app_center',
+            contextId: 'apps',
+            title: '应用中心',
+            version: 'v1.0',
+            icon: 'fas fa-cubes',
+            description: '集成多个专业工具的应用中心，提供数据采集、分析与优化功能。'
+        },
+
         // [应用 A] Master Prompt
         master_prompt: {
             id: 'master_prompt',
@@ -162,6 +172,21 @@ export const MENU_CONFIG = {
             order: 1,
             version: 'v1.0',
             description: '智能体、提示词、工作流等实用功能。'
+        }
+    },
+
+    // ==========================================
+    // App Center Categories (用于应用中心模块的侧边栏分组)
+    // ==========================================
+    appCategories: {
+        apps: {
+            id: 'apps',
+            label: '应用工具集',
+            icon: 'fas fa-cubes',
+            color: 'blue',
+            order: 1,
+            version: 'v1.0',
+            description: '集成数据采集、分析与关键词优化的专业工具套件。'
         }
     },
 
@@ -315,6 +340,15 @@ export const MENU_CONFIG = {
         },
 
         // --- 属于 Master Prompt 应用的页面 ---
+
+        // App Center 总览页面
+        app_center_overview: {
+            moduleId: 'app_center',
+            label: '应用总览',
+            icon: 'fas fa-th-large',
+            panelId: 'panel-app_center'
+        },
+
         scraper: {
             moduleId: 'master_prompt', // 关键：绑定到模块 A
             label: '数据采集',

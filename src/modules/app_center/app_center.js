@@ -5,6 +5,9 @@ import { createModuleLoader } from '../../common/utils/ModuleLoader.js';
 // ================= 路由配置表 =================
 // 键名对应 menuConfig.js 里的 route id
 const MODULE_MAP = {
+    // App Center Overview
+    'app_center_overview': () => import('./views/overview/index.js'),
+
     // Master Prompt 子模块
     'scraper': () => import('./master_prompt/views/scraper/index.js'),
     'data': () => import('./master_prompt/views/data/index.js'),
@@ -30,9 +33,29 @@ const moduleLoader = createModuleLoader({
  * 注册子模块 (Plugin API)
  * @param {string} routeId - 路由 ID
  * @param {Function} loader - 动态导入函数
+ * @returns {boolean} 是否注册成功
  */
 export function registerSubModule(routeId, loader) {
+    // 检查路由ID是否已存在
+    if (MODULE_MAP[routeId]) {
+        console.warn(`⚠️ 路由 "${routeId}" 已存在，跳过注册`);
+        return false;
+    }
+    
+    // 验证loader参数是否为函数类型
+    if (typeof loader !== 'function') {
+        console.error(`❌ 无效的loader函数:`, loader);
+        return false;
+    }
+    
+    // 注册到MODULE_MAP
+    MODULE_MAP[routeId] = loader;
+    
+    // 同时注册到moduleLoader
     moduleLoader.registerSubModule(routeId, loader);
+    
+    console.log(`✅ 动态注册子模块: ${routeId}`);
+    return true;
 }
 
 console.log("✅ App Center Module 加载完成");
