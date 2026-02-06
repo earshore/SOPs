@@ -809,67 +809,6 @@
     box-shadow: 0 0 0 2px #3b82f6;
 }
 
-/* ==================== Overview 页面样式 ==================== */
-
-/* Overview 容器 */
-.app-overview-container {
-    max-width: 1450px;
-    margin: 0 auto;
-    padding: 2rem 1rem;
-}
-
-/* Overview 模块区域 */
-.app-module-section {
-    background: white;
-    border-radius: 1rem;
-    padding: 1.5rem;
-    border: 1px solid #e2e8f0;
-    transition: all 0.3s ease;
-}
-
-/* Overview 卡片网格 */
-.app-card-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 1.5rem;
-}
-
-/* 模块高亮效果 */
-.app-module-highlight {
-    animation: moduleHighlight 2s ease-out;
-}
-
-@keyframes moduleHighlight {
-    0% {
-        background: rgba(59, 130, 246, 0.1);
-        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
-    }
-    50% {
-        background: rgba(59, 130, 246, 0.15);
-        box-shadow: 0 0 0 8px rgba(59, 130, 246, 0.1);
-    }
-    100% {
-        background: transparent;
-        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
-    }
-}
-
-/* Overview 响应式适配 */
-@media (max-width: 768px) {
-    .app-overview-container {
-        padding: 1rem 0.5rem;
-    }
-    
-    .app-card-grid {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-    }
-    
-    .app-module-section {
-        padding: 1rem;
-    }
-}
-
 /* ==================== 滚动条样式优化 ==================== */
 .scrollbar-thin::-webkit-scrollbar {
     width: 6px;

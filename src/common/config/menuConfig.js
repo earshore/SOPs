@@ -45,6 +45,7 @@ export const MENU_CONFIG = {
         master_prompt: {
             id: 'master_prompt',
             contextId: 'apps',         // 归属于 "应用"
+            parentModuleId: 'app_center', // 🔥 新增：标识父模块
             title: 'Master Prompt',    // 侧边栏大标题
             version: 'v2.1 Pro',       // 侧边栏底部版本
             icon: 'fas fa-cubes-stacked', // 侧边栏底部图标
@@ -56,6 +57,7 @@ export const MENU_CONFIG = {
         keyword_tracker: {
             id: 'keyword_tracker',
             contextId: 'apps',
+            parentModuleId: 'app_center', // 🔥 新增：标识父模块
             title: 'Keyword Hunter',
             version: 'v1.0 Pro',
             icon: 'fas fa-search',
@@ -177,16 +179,26 @@ export const MENU_CONFIG = {
 
     // ==========================================
     // App Center Categories (用于应用中心模块的侧边栏分组)
+    // 按应用分组，而非功能分类
     // ==========================================
     appCategories: {
-        apps: {
-            id: 'apps',
-            label: '应用工具集',
-            icon: 'fas fa-cubes',
+        master_prompt: {
+            id: 'master_prompt',
+            label: 'Master Prompt',
+            icon: 'fas fa-robot',
             color: 'blue',
             order: 1,
-            version: 'v1.0',
-            description: '集成数据采集、分析与关键词优化的专业工具套件。'
+            version: 'v2.1 Pro',
+            description: '集成数据采集、管理、AI分析与提示词工程的一站式解决方案。'
+        },
+        keyword_tracker: {
+            id: 'keyword_tracker',
+            label: 'Keyword Hunter',
+            icon: 'fas fa-search',
+            color: 'purple',
+            order: 2,
+            version: 'v1.0 Pro',
+            description: 'ASIN 关键词覆盖情况查询，手动补充与 SEO 合规性审查工具。'
         }
     },
 
@@ -195,6 +207,10 @@ export const MENU_CONFIG = {
     // 作用：定义点击行为、图标、目标 Panel
     // ==========================================
     routes: {
+        // ==========================================
+        // SOPs 流程中心路由
+        // ==========================================
+        
         // --- 属于 SOPs 应用的页面 ---
         sops_overview: {
             moduleId: 'sops',
@@ -339,8 +355,10 @@ export const MENU_CONFIG = {
             category: 'service'
         },
 
-        // --- 属于 Master Prompt 应用的页面 ---
-
+        // ==========================================
+        // App Center 应用中心路由
+        // ==========================================
+        
         // App Center 总览页面
         app_center_overview: {
             moduleId: 'app_center',
@@ -349,52 +367,62 @@ export const MENU_CONFIG = {
             panelId: 'panel-app_center'
         },
 
+        // --- Master Prompt 应用 ---
         scraper: {
-            moduleId: 'master_prompt', // 关键：绑定到模块 A
+            moduleId: 'master_prompt',
             label: '数据采集',
             icon: 'fas fa-spider',
-            panelId: 'panel-app_center'
+            panelId: 'panel-app_center',
+            category: 'master_prompt'
         },
         data: {
             moduleId: 'master_prompt',
             label: '数据管理',
             icon: 'fas fa-database',
-            panelId: 'panel-app_center'
+            panelId: 'panel-app_center',
+            category: 'master_prompt'
         },
         analysis: {
             moduleId: 'master_prompt',
             label: 'AI 分析',
             icon: 'fas fa-chart-pie',
-            panelId: 'panel-app_center'
+            panelId: 'panel-app_center',
+            category: 'master_prompt'
         },
         promptlab: {
             moduleId: 'master_prompt',
             label: 'Prompt 生成',
             icon: 'fas fa-wand-magic-sparkles',
-            panelId: 'panel-app_center'
+            panelId: 'panel-app_center',
+            category: 'master_prompt'
         },
 
-        // --- 属于 Keyword Hunter 应用的页面 ---
+        // --- Keyword Hunter 应用 ---
         kw_input: {
             moduleId: 'keyword_tracker',
             label: '输入模块',
             icon: 'fas fa-keyboard',
-            panelId: 'panel-app_center'
+            panelId: 'panel-app_center',
+            category: 'keyword_tracker'
         },
         kw_process: {
             moduleId: 'keyword_tracker',
             label: '处理模块',
             icon: 'fas fa-cogs',
-            panelId: 'panel-app_center'
+            panelId: 'panel-app_center',
+            category: 'keyword_tracker'
         },
         kw_analysis: {
             moduleId: 'keyword_tracker',
             label: '分析统计',
             icon: 'fas fa-chart-pie',
-            panelId: 'panel-app_center'
+            panelId: 'panel-app_center',
+            category: 'keyword_tracker'
         },
 
-        // --- 属于 Hub 智库的页面 ---
+        // ==========================================
+        // Amazon 智库路由
+        // ==========================================
 
         // 总览页面
         amz_hub_overview: {
@@ -466,6 +494,10 @@ export const MENU_CONFIG = {
             category: 'advanced'
         },
 
+        // ==========================================
+        // More 更多模块路由
+        // ==========================================
+        
         // --- 属于 More 模块的页面 ---
         more_overview: {
             moduleId: 'more_core',

@@ -34,81 +34,254 @@ export class SidebarRenderer {
     }
 
     /**
-     * 渲染侧边栏
+     * 渲染侧边栏 - 重构版
+     * 统一的侧边栏渲染逻辑：
+     * 1. 一次性加载所有分类和子路由
+     * 2. 根据当前路由自动展开对应分类
+     * 3. 高亮当前激活的路由
+     * 
      * @param {HTMLElement} sidebar - 侧边栏容器
      * @param {Object} moduleConfig - 模块配置
      * @param {Array} routes - 路由列表
      */
     render(sidebar, moduleConfig, routes) {
-        // 🔥 关键修复：确保读取最新的currentTab状态
         const currentTab = state.currentTab;
         const currentRouteConfig = MENU_CONFIG.routes[currentTab];
 
         console.log(`[SidebarRenderer] 渲染侧边栏 - 当前Tab: ${currentTab}`);
 
-        // 确定当前上下文（Category）
-        let activeCategory = 'overview';
+        // 确定当前激活的分类
+        let activeCategory = null;
         if (currentRouteConfig && currentRouteConfig.category) {
             activeCategory = currentRouteConfig.category;
         }
 
-        // 筛选要显示的路由
-        let displayRoutes = [];
-        let sidebarTitle = moduleConfig.title;
-        let sidebarIcon = moduleConfig.icon;
-        let sidebarColor = 'slate';
+        // 🎯 优化：如果侧边栏已经渲染，只更新状态，不重新渲染
+        const existingNav = sidebar.querySelector('#sidebar-nav-container');
+        const lastModuleId = sidebar.dataset.moduleId;
+        
+        if (existingNav && lastModuleId === this.moduleId) {
+            // 侧边栏已存在，只更新激活状态和展开状态
+            console.log(`[SidebarRenderer] 侧边栏已存在，仅更新状态`);
+            this._updateNavigationState(sidebar, currentTab, activeCategory);
+            return;
+        }
 
-        if (activeCategory === 'overview') {
-            // 总览页面：显示分类入口
-            displayRoutes = this._getCategoryRoutes();
-        } else {
-            // 具体分类页面：显示该分类下的所有路由
-            displayRoutes = routes.filter(r => r.category === activeCategory);
+        // 🎯 首次渲染：构建完整的侧边栏结构
+        console.log(`[SidebarRenderer] 首次渲染侧边栏 - 模块: ${this.moduleId}`);
+        
+        // 记录当前模块ID
+        sidebar.dataset.moduleId = this.moduleId;
+
+        // 构建完整的分类树结构
+        const categoryTree = this._buildCategoryTree(routes);
+
+        // 构建 HTML
+        const html = this._buildHTML(
+            moduleConfig.title,
+            moduleConfig.icon,
+            'slate',
+            categoryTree,
+            currentTab,
+            activeCategory
+        );
+        sidebar.innerHTML = html;
+        
+        // 初始化展开/收起事件
+        this._initCategoryToggle(sidebar);
+        
+        // 自动展开当前激活的分类
+        if (activeCategory) {
+            this._expandCategory(sidebar, activeCategory);
+        }
+    }
+
+    /**
+     * 构建分类树结构
+     * @private
+     * @param {Array} routes - 所有路由（可能不完整，仅用于参考）
+     * @returns {Array} 分类树
+     */
+    _buildCategoryTree(routes) {
+        const tree = [];
+        
+        // 按order排序分类
+        const sortedCategories = Object.values(this.categories).sort((a, b) => a.order - b.order);
+        
+        for (const category of sortedCategories) {
+            // 🔥 关键修复：直接从MENU_CONFIG获取该分类下的所有子路由
+            // 不依赖传入的routes参数，因为对于应用中心这种复合模块，
+            // 传入的routes可能不包含子应用的路由
+            const childRoutes = Object.entries(MENU_CONFIG.routes)
+                .filter(([_, r]) => r.category === category.id)
+                .map(([id, r]) => ({ id, ...r }));
             
-            // 更新标题
-            const catConfig = this.categories[activeCategory];
-            if (catConfig) {
-                sidebarTitle = catConfig.label;
-                sidebarIcon = catConfig.icon;
-                sidebarColor = catConfig.color;
+            if (childRoutes.length > 0) {
+                tree.push({
+                    ...category,
+                    children: childRoutes
+                });
+            }
+        }
+        
+        return tree;
+    }
+
+    /**
+     * 更新导航状态（不重新渲染DOM）
+     * @private
+     * @param {HTMLElement} sidebar - 侧边栏容器
+     * @param {string} currentTab - 当前激活的路由ID
+     * @param {string|null} activeCategory - 当前激活的分类ID
+     */
+    _updateNavigationState(sidebar, currentTab, activeCategory) {
+        // 1. 更新所有路由的激活状态
+        this._updateActiveState(sidebar, currentTab);
+        
+        // 2. 更新分类的展开状态
+        const lastActiveCategory = sidebar.dataset.activeCategory;
+        
+        if (activeCategory && activeCategory !== lastActiveCategory) {
+            // 🔥 优化：只展开新的分类，不收起之前的分类
+            // 这样用户可以同时查看多个分类的内容
+            this._expandCategory(sidebar, activeCategory);
+            
+            // 记录当前激活的分类
+            sidebar.dataset.activeCategory = activeCategory || '';
+        }
+    }
+
+    /**
+     * 更新激活状态（不重新渲染）
+     * @private
+     */
+    _updateActiveState(sidebar, currentTab) {
+        // 移除所有激活状态
+        const allBtns = sidebar.querySelectorAll('.sidebar-btn');
+        allBtns.forEach(btn => {
+            btn.classList.remove('bg-blue-50', 'text-blue-700');
+            btn.classList.add('hover:bg-slate-50', 'text-slate-700');
+            
+            // 更新图标颜色
+            const icon = btn.querySelector('i:first-child');
+            if (icon) {
+                icon.classList.remove('text-blue-600');
+                icon.classList.add('text-slate-400', 'group-hover:text-slate-600');
+            }
+            
+            // 更新文字样式
+            const span = btn.querySelector('span');
+            if (span) {
+                span.classList.remove('font-medium');
+                span.classList.add('group-hover:text-slate-900');
+            }
+        });
+
+        // 添加当前激活状态
+        const activeBtn = sidebar.querySelector(`#sidebar-btn-${currentTab}`);
+        if (activeBtn) {
+            activeBtn.classList.remove('hover:bg-slate-50', 'text-slate-700');
+            activeBtn.classList.add('bg-blue-50', 'text-blue-700');
+            
+            // 更新图标颜色
+            const icon = activeBtn.querySelector('i:first-child');
+            if (icon) {
+                icon.classList.remove('text-slate-400', 'group-hover:text-slate-600');
+                icon.classList.add('text-blue-600');
+            }
+            
+            // 更新文字样式
+            const span = activeBtn.querySelector('span');
+            if (span) {
+                span.classList.remove('group-hover:text-slate-900');
+                span.classList.add('font-medium');
             }
         }
 
-        // 构建 HTML（传入currentTab以确保正确的高亮状态）
-        const html = this._buildHTML(sidebarTitle, sidebarIcon, sidebarColor, displayRoutes, activeCategory, currentTab);
-        sidebar.innerHTML = html;
+        console.log(`[SidebarRenderer] 仅更新激活状态 - ${currentTab}`);
     }
 
     /**
-     * 获取分类路由列表
+     * 初始化分类展开/收起事件
      * @private
      */
-    _getCategoryRoutes() {
-        const categories = Object.values(this.categories).sort((a, b) => a.order - b.order);
-        return categories.map(cat => {
-            const firstRouteEntry = Object.entries(MENU_CONFIG.routes)
-                .find(([_, r]) => r.category === cat.id);
+    _initCategoryToggle(sidebar) {
+        const categoryBtns = sidebar.querySelectorAll('[data-action="toggle-category"]');
+        
+        categoryBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const categoryId = btn.dataset.category;
+                const group = sidebar.querySelector(`.sidebar-category-group[data-category="${categoryId}"]`);
+                const children = group?.querySelector('.sidebar-category-children');
+                const chevron = btn.querySelector('.category-chevron');
+                
+                if (children && chevron) {
+                    const isExpanded = !children.classList.contains('hidden');
+                    
+                    if (isExpanded) {
+                        // 收起
+                        children.classList.add('hidden');
+                        chevron.style.transform = 'rotate(0deg)';
+                    } else {
+                        // 展开
+                        children.classList.remove('hidden');
+                        chevron.style.transform = 'rotate(180deg)';
+                    }
+                }
+            });
+        });
+    }
+
+    /**
+     * 展开指定分类
+     * @private
+     */
+    _expandCategory(sidebar, categoryId) {
+        const group = sidebar.querySelector(`.sidebar-category-group[data-category="${categoryId}"]`);
+        if (group) {
+            const children = group.querySelector('.sidebar-category-children');
+            const chevron = group.querySelector('.category-chevron');
             
-            if (firstRouteEntry) {
-                const [routeId] = firstRouteEntry;
-                return {
-                    id: routeId,
-                    label: cat.label,
-                    icon: cat.icon,
-                    color: cat.color,
-                    categoryId: cat.id,
-                    isCategoryLink: true
-                };
+            if (children) {
+                children.classList.remove('hidden');
             }
-            return null;
-        }).filter(Boolean);
+            if (chevron) {
+                chevron.style.transform = 'rotate(180deg)';
+            }
+        }
     }
 
     /**
-     * 构建侧边栏 HTML
+     * 收起指定分类
      * @private
      */
-    _buildHTML(title, icon, color, routes, activeCategory, currentTab) {
+    _collapseCategory(sidebar, categoryId) {
+        const group = sidebar.querySelector(`.sidebar-category-group[data-category="${categoryId}"]`);
+        if (group) {
+            const children = group.querySelector('.sidebar-category-children');
+            const chevron = group.querySelector('.category-chevron');
+            
+            if (children) {
+                children.classList.add('hidden');
+            }
+            if (chevron) {
+                chevron.style.transform = 'rotate(0deg)';
+            }
+        }
+    }
+
+    /**
+     * 构建侧边栏 HTML - 重构版
+     * @private
+     * @param {string} title - 侧边栏标题
+     * @param {string} icon - 标题图标
+     * @param {string} color - 主题颜色
+     * @param {Array} categoryTree - 分类树结构
+     * @param {string} currentTab - 当前激活的路由ID
+     * @param {string|null} activeCategory - 当前激活的分类ID
+     */
+    _buildHTML(title, icon, color, categoryTree, currentTab, activeCategory) {
         const titleColorClass = color === 'slate' ? 'text-slate-400' : `text-${color}-500`;
         
         return `
@@ -120,12 +293,66 @@ export class SidebarRenderer {
                     </h2>
                     
                     ${this.enableSearch ? this._buildSearchBox() : ''}
-                    
-                    <nav id="sidebar-nav-container" class="space-y-2">
-                        ${routes.map(route => this._buildRouteItem(route, activeCategory, currentTab)).join('')}
-                    </nav>
+                </div>
+                
+                <nav id="sidebar-nav-container" class="flex-1 overflow-y-auto px-4 space-y-2 scrollbar-thin">
+                    ${categoryTree.map(category => this._buildCategoryGroup(category, currentTab)).join('')}
+                </nav>
+            </div>
+        `;
+    }
+
+    /**
+     * 构建分类组（包含分类按钮和子路由列表）
+     * @private
+     */
+    _buildCategoryGroup(category, currentTab) {
+        const color = category.color || 'slate';
+        const scheme = COLOR_SCHEMES[color] || COLOR_SCHEMES.blue;
+        
+        return `
+            <div class="sidebar-category-group" data-category="${category.id}">
+                <button data-action="toggle-category" data-category="${category.id}" id="sidebar-category-${category.id}"
+                    class="sidebar-category-btn w-full group flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-100 transition-all duration-200">
+                    <i class="${category.icon} text-base ${scheme.icon} ${scheme.hoverIcon} transition-colors"></i>
+                    <div class="flex-1 text-left">
+                        <div class="text-slate-700 group-hover:text-slate-900 text-sm font-medium transition-colors">
+                            ${category.label}
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-down text-xs text-slate-400 group-hover:text-slate-600 transition-all duration-200 category-chevron"></i>
+                </button>
+                
+                <div class="sidebar-category-children hidden pl-6 mt-1 space-y-1">
+                    ${category.children.map(route => this._buildChildRouteItem(route, currentTab)).join('')}
                 </div>
             </div>
+        `;
+    }
+
+    /**
+     * 构建子路由项
+     * @private
+     */
+    _buildChildRouteItem(route, currentTab) {
+        const isActive = currentTab === route.id;
+        
+        const activeClasses = isActive 
+            ? 'bg-blue-50 text-blue-700' 
+            : 'hover:bg-slate-50 text-slate-700';
+        
+        const iconClasses = isActive
+            ? 'text-blue-600'
+            : 'text-slate-400 group-hover:text-slate-600';
+        
+        return `
+            <button data-action="switch-tab" data-tab="${route.id}" id="sidebar-btn-${route.id}"
+                class="sidebar-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg ${activeClasses} transition-all duration-200 group">
+                <i class="${route.icon} text-sm ${iconClasses} transition-colors"></i>
+                <span class="text-sm ${isActive ? 'font-medium' : 'group-hover:text-slate-900'} transition-colors flex-1 text-left">
+                    ${route.label}
+                </span>
+            </button>
         `;
     }
 
@@ -147,67 +374,6 @@ export class SidebarRenderer {
                 
                 <div id="sidebar-search-results" class="hidden absolute top-full left-0 w-full bg-white border border-slate-200 shadow-xl rounded-lg mt-1 max-h-60 overflow-y-auto z-50"></div>
             </div>
-        `;
-    }
-
-    /**
-     * 构建路由项
-     * @private
-     */
-    _buildRouteItem(route, activeCategory, currentTab) {
-        const isCategory = route.isCategoryLink;
-        // 🔥 关键修复：使用传入的currentTab参数而不是再次读取state
-        const isActive = currentTab === route.id;
-        
-        if (isCategory) {
-            return this._buildCategoryItem(route);
-        } else {
-            return this._buildNormalItem(route, isActive);
-        }
-    }
-
-    /**
-     * 构建分类项
-     * @private
-     */
-    _buildCategoryItem(route) {
-        const color = route.color || 'slate';
-        const scheme = COLOR_SCHEMES[color] || COLOR_SCHEMES.blue;
-        
-        return `
-            <button data-action="switch-tab" data-tab="${route.id}" id="sidebar-btn-${route.id}"
-                class="sidebar-btn w-full group flex items-center gap-3 px-3 py-2.5 rounded-lg border border-slate-200 ${scheme.hoverBg} ${scheme.hoverBorder} transition-all duration-200">
-                <div class="w-8 h-8 rounded-lg ${scheme.iconBg} flex items-center justify-center ${scheme.iconScale} transition-all duration-200">
-                    <i class="${route.icon} text-sm ${scheme.icon} ${scheme.hoverIcon}"></i>
-                </div>
-                <div class="flex-1 text-left">
-                    <div class="${scheme.text} ${scheme.hoverText} text-sm font-medium transition-colors">
-                        ${route.label}
-                    </div>
-                </div>
-                <i class="fas fa-chevron-right text-xs text-slate-400 group-hover:text-slate-600 transition-colors"></i>
-            </button>
-        `;
-    }
-
-    /**
-     * 构建普通路由项
-     * @private
-     */
-    _buildNormalItem(route, isActive) {
-        // 🔥 关键修复：添加sidebar-btn类以支持搜索等功能，并添加id以便定位
-        const activeClasses = isActive 
-            ? 'bg-blue-50 border-blue-200 text-blue-700' 
-            : 'border-transparent hover:bg-slate-50';
-        
-        return `
-            <button data-action="switch-tab" data-tab="${route.id}" id="sidebar-btn-${route.id}"
-                class="sidebar-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg border ${activeClasses} transition-all duration-200 group">
-                <i class="${route.icon} text-sm ${isActive ? 'text-blue-600' : 'text-slate-400 group-hover:text-slate-600'}"></i>
-                <span class="text-sm ${isActive ? 'font-medium' : 'text-slate-700 group-hover:text-slate-900'} transition-colors">
-                    ${route.label}
-                </span>
-            </button>
         `;
     }
 }

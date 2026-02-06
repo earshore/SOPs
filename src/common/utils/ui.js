@@ -28,12 +28,22 @@ function getDefaultRouteForModule(moduleId) {
 // ========================
 // 🎯 侧边栏渲染器实例（统一管理）
 // ========================
+// 🎯 侧边栏渲染器实例（统一管理）
+// ========================
 const sopsRenderer = createSidebarRenderer({
     moduleId: 'sops',
     categories: MENU_CONFIG.sopCategories,
     overviewRouteId: 'sops_overview',
     enableSearch: true,
     searchPlaceholder: '搜索全站 SOP...'
+});
+
+const appCenterRenderer = createSidebarRenderer({
+    moduleId: 'app_center',
+    categories: MENU_CONFIG.appCategories,
+    overviewRouteId: 'app_center_overview',
+    enableSearch: true,
+    searchPlaceholder: '搜索应用...'
 });
 
 const hubRenderer = createSidebarRenderer({
@@ -59,6 +69,7 @@ const moreRenderer = createSidebarRenderer({
  */
 const SIDEBAR_RENDERER_REGISTRY = {
     'sops': sopsRenderer,
+    'app_center': appCenterRenderer,
     'amz_hub_core': hubRenderer,
     'more_core': moreRenderer
     // 🔥 新增模块示例：
@@ -532,29 +543,28 @@ function renderSidebar(moduleId) {
         return;
     }
 
-    // 2. 🔥 统一架构：自动生成缓存键，无需硬编码模块列表
-    const sidebarKey = generateSidebarCacheKey(moduleId);
-
-    // 3. 缓存检查
-    if (currentSidebarModuleId === sidebarKey) {
-        sidebar.classList.remove("hidden", "-ml-64");
-        return;
-    }
-
-    // 4. 数据获取与防御
+    // 🔥 新增：如果模块有父模块，使用父模块的侧边栏
     const moduleConfig = MENU_CONFIG.modules[moduleId];
-    if (!moduleConfig) {
-        console.warn(`⚠️ 未找到模块配置: ${moduleId}`);
+    const effectiveModuleId = moduleConfig?.parentModuleId || moduleId;
+
+    // 2. 数据获取与防御
+    const effectiveModuleConfig = MENU_CONFIG.modules[effectiveModuleId];
+    if (!effectiveModuleConfig) {
+        console.warn(`⚠️ 未找到模块配置: ${effectiveModuleId}`);
         sidebar.classList.add("hidden", "-ml-64");
         return;
     }
 
-    const routes = getRoutesByModule(moduleId);
+    const routes = getRoutesByModule(effectiveModuleId);
 
-    // 5. 🎯 统一渲染：优先使用SidebarRenderer，自动降级到默认渲染
-    renderSidebarContent(sidebar, moduleId, moduleConfig, routes);
+    // 3. 🎯 统一渲染：优先使用SidebarRenderer，自动降级到默认渲染
+    // 注意：不再使用缓存检查，让渲染器自己决定是否需要更新DOM
+    renderSidebarContent(sidebar, effectiveModuleId, effectiveModuleConfig, routes);
 
     sidebar.classList.remove("hidden", "-ml-64");
+    
+    // 4. 更新缓存键（用于其他逻辑判断）
+    const sidebarKey = generateSidebarCacheKey(effectiveModuleId);
     currentSidebarModuleId = sidebarKey;
 }
 
@@ -1687,6 +1697,96 @@ function clearHubSearch() {
 }
 
 window.clearHubSearch = clearHubSearch;
+
+/**
+ * 通用侧边栏搜索功能
+ * 用于 SidebarRenderer 生成的侧边栏
+ */
+window.searchSidebar = function (query) {
+    const resultsContainer = getEl('sidebar-search-results');
+    const navContainer = getEl('sidebar-nav-container');
+    const clearBtn = getEl('sidebar-search-clear');
+
+    if (!resultsContainer || !navContainer) {
+        console.warn('[searchSidebar] 未找到搜索容器');
+        return;
+    }
+
+    // 显示/隐藏清除按钮
+    if (clearBtn) {
+        clearBtn.classList.toggle('hidden', !query);
+    }
+
+    if (!query.trim()) {
+        resultsContainer.classList.add('hidden');
+        navContainer.classList.remove('hidden');
+        return;
+    }
+
+    // 从当前 tab 推断模块
+    const currentTab = state.currentTab;
+    const currentRoute = MENU_CONFIG.routes[currentTab];
+    if (!currentRoute) {
+        console.warn('[searchSidebar] 当前路由未找到');
+        return;
+    }
+
+    const currentModuleId = currentRoute.moduleId;
+    if (!currentModuleId) {
+        console.warn('[searchSidebar] 当前模块ID未找到');
+        return;
+    }
+
+    // 获取该模块的所有路由
+    const allRoutes = Object.entries(MENU_CONFIG.routes)
+        .filter(([_, config]) => config.moduleId === currentModuleId)
+        .map(([id, config]) => ({ id, ...config }));
+
+    // 搜索匹配
+    const lowerQuery = query.toLowerCase();
+    const matches = allRoutes.filter(route => 
+        route.label.toLowerCase().includes(lowerQuery)
+    );
+
+    // 显示结果
+    if (matches.length === 0) {
+        resultsContainer.innerHTML = `
+            <div class="p-3 text-xs text-slate-400 text-center">
+                <i class="fas fa-search mb-2"></i>
+                <p>未找到匹配项</p>
+            </div>
+        `;
+        resultsContainer.classList.remove('hidden');
+        navContainer.classList.add('hidden');
+    } else {
+        resultsContainer.innerHTML = matches.map(route => `
+            <button data-action="switch-tab" data-tab="${route.id}" onclick="window.clearSidebarSearch()" 
+                class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all">
+                <i class="${route.icon} w-4 text-center"></i>
+                <span class="flex-1 text-left">${route.label}</span>
+            </button>
+        `).join('');
+        resultsContainer.classList.remove('hidden');
+        navContainer.classList.add('hidden');
+    }
+};
+
+/**
+ * 清除侧边栏搜索
+ */
+function clearSidebarSearch() {
+    const searchInput = getEl('sidebar-search-input');
+    const resultsContainer = getEl('sidebar-search-results');
+    const navContainer = getEl('sidebar-nav-container');
+    const clearBtn = getEl('sidebar-search-clear');
+
+    if (searchInput) searchInput.value = '';
+    if (resultsContainer) resultsContainer.classList.add('hidden');
+    if (navContainer) navContainer.classList.remove('hidden');
+    if (clearBtn) clearBtn.classList.add('hidden');
+}
+
+window.clearSidebarSearch = clearSidebarSearch;
 
 
 // 注册 UI 模块的动作
