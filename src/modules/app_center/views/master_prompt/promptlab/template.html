@@ -214,17 +214,6 @@
                   <i class="fas fa-microchip group-hover:animate-pulse"></i>
                   生成 Master Prompt
                 </button>
-
-                <div class="grid grid-cols-2 gap-2">
-                  <button data-action="amz_copyMasterPrompt"
-                    class="py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-colors text-slate-300 hover:text-white cursor-pointer backdrop-blur-sm border border-white/5">
-                    <i class="fas fa-copy mr-1"></i> 复制
-                  </button>
-                  <button data-action="amz_clearPromptInputs"
-                    class="py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-colors text-slate-300 hover:text-white cursor-pointer backdrop-blur-sm border border-white/5">
-                    <i class="fas fa-trash-alt mr-1"></i> 清空
-                  </button>
-                </div>
               </div>
             </div>
           </div>
@@ -249,36 +238,36 @@
                   <i class="fas fa-magic group-hover:spin-slow"></i>
                   生成视觉剧本 (A+/EBC)
                 </button>
-
-                <div class="grid grid-cols-2 gap-2">
-                  <button data-action="amz_copyMasterPrompt"
-                    class="py-2 bg-pink-900/40 hover:bg-pink-800/60 rounded-lg text-sm transition-colors text-pink-100/80 hover:text-white cursor-pointer backdrop-blur-sm border border-pink-500/10">
-                    <i class="fas fa-copy mr-1"></i> 复制
-                  </button>
-                  <button data-action="amz_clearPromptInputs"
-                    class="py-2 bg-pink-900/40 hover:bg-pink-800/60 rounded-lg text-sm transition-colors text-pink-100/80 hover:text-white cursor-pointer backdrop-blur-sm border border-pink-500/10">
-                    <i class="fas fa-eraser mr-1"></i> 清空
-                  </button>
-                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="app-center-card flex flex-col h-[500px]">
-        <div class="p-3 border-b border-slate-100 bg-slate-50 rounded-t-xl flex justify-between items-center">
-          <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Output Preview</span>
-          <div class="flex items-center gap-1 text-xs">
-            <span id="prompt-word-count" class="text-slate-400">0 / 5000</span>
-            <span class="text-slate-300">| Limit:</span>
-            <input type="number" id="lab-char-limit" value="5000"
-              class="w-12 h-5 text-xs text-center border border-slate-200 rounded text-slate-500 p-0 focus:ring-0 focus:border-blue-400" />
+      <div class="app-center-card flex flex-col h-[500px] overflow-hidden !p-0">
+        <div class="px-4 py-2 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+          <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">Output Preview</span>
+          <div class="flex items-center gap-1">
+            <button data-action="amz_copyMasterPrompt" title="复制"
+              class="w-7 h-7 flex items-center justify-center rounded-md hover:bg-blue-100/80 text-slate-400 hover:text-blue-600 transition-all cursor-pointer">
+              <i class="fas fa-copy text-sm"></i>
+            </button>
+            <button data-action="amz_clearPromptInputs" title="清空"
+              class="w-7 h-7 flex items-center justify-center rounded-md hover:bg-red-100/80 text-slate-400 hover:text-red-600 transition-all cursor-pointer">
+              <i class="fas fa-trash-alt text-sm"></i>
+            </button>
+          </div>
+          <input type="number" id="lab-char-limit" value="5000" class="hidden" />
+        </div>
+        <div class="relative flex-1 bg-white">
+          <textarea id="final-prompt-output"
+            class="w-full h-full px-4 py-3 pb-8 text-xs font-mono text-slate-600 bg-transparent resize-none focus:outline-none border-0 transition-colors duration-500"
+            placeholder="// 1. 填写左侧信息&#10;// 2. 点击生成按钮&#10;// 3. 复制并发送给 Ai大模型" readonly></textarea>
+          <div class="absolute bottom-2 right-3 flex items-center gap-1.5 text-xs text-slate-400">
+            <span id="prompt-word-count" class="font-medium">0</span>
+            <span>chars</span>
           </div>
         </div>
-        <textarea id="final-prompt-output"
-          class="flex-1 w-full p-4 text-xs font-mono text-slate-600 bg-white resize-none focus:outline-none rounded-b-xl transition-colors duration-500"
-          placeholder="// 1. 填写左侧信息&#10;// 2. 点击生成按钮&#10;// 3. 复制并发送给 Ai大模型" readonly></textarea>
       </div>
     </div>
   </div>

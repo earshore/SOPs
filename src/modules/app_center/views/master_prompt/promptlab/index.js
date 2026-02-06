@@ -244,13 +244,13 @@ function updateCharCount() {
 
     const currentLen = outEl.value.length;
     const limit = parseInt(limitInput.value) || 5000;
-    countEl.innerText = `${currentLen} / ${limit} chars`;
+    countEl.innerText = `${currentLen}`;
 
     if (currentLen > limit) {
-        countEl.className = "text-xs font-bold text-red-600 animate-pulse";
+        countEl.className = "font-medium text-red-600 animate-pulse";
         outEl.classList.add("border-red-300", "focus:ring-red-500");
     } else {
-        countEl.className = "text-xs text-slate-400";
+        countEl.className = "font-medium text-slate-600";
         outEl.classList.remove("border-red-300", "focus:ring-red-500");
     }
 }
