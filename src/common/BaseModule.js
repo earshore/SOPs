@@ -157,53 +157,39 @@ export default class BaseModule {
 
     /**
      * 注册动作（自动在卸载时清理）
+     * 🔧 P0修复: 使用事件驱动解耦,避免循环依赖
      * @param {Object} actions - { actionName: handler } 映射对象
      */
-    async registerActions(actions) {
-        // 动态导入 actionRegistry 避免循环依赖
-        const { registerActionsWithLegacy, unregisterActions } = await import('./utils/actionRegistry.js');
-        const actionNames = registerActionsWithLegacy(actions);
+    registerActions(actions) {
+        // 🎯 使用事件总线发送注册请求,完全解耦
+        import('./EventBus.js').then(({ default: eventBus }) => {
+            eventBus.emit('registerActions', {
+                moduleId: this.moduleId,
+                actions
+            });
+        });
         
-        // 保存动作名称
-        this._registeredActions.push(...actionNames);
-        
-        // 保存 unregisterActions 函数引用，用于同步清理
-        if (!this._unregisterActionsFn) {
-            this._unregisterActionsFn = unregisterActions;
-        }
+        // 保存动作名称用于清理
+        this._registeredActions.push(...Object.keys(actions));
     }
 
     /**
      * 清理已注册的动作（同步版本）
+     * 🔧 P0修复: 使用事件驱动清理
      * @private
      */
     _unregisterActionsSync() {
         if (this._registeredActions.length === 0) return;
 
         try {
-            // 使用保存的函数引用进行同步清理
-            if (this._unregisterActionsFn) {
-                this._unregisterActionsFn(this._registeredActions);
-                console.log(`[BaseModule] 已清理 ${this._registeredActions.length} 个动作: ${this.moduleId}`);
-            }
-            // 立即清空数组，防止重复清理
-            this._registeredActions = [];
-        } catch (error) {
-            console.warn(`[BaseModule] 清理动作失败:`, error);
-        }
-    }
-
-    /**
-     * 清理已注册的动作（异步版本，保留用于特殊场景）
-     * @private
-     */
-    async _unregisterActions() {
-        if (this._registeredActions.length === 0) return;
-
-        try {
-            // 动态导入 actionRegistry 避免循环依赖
-            const { unregisterActions } = await import('./utils/actionRegistry.js');
-            unregisterActions(this._registeredActions);
+            // 🎯 使用事件总线发送清理请求
+            import('./EventBus.js').then(({ default: eventBus }) => {
+                eventBus.emit('unregisterActions', {
+                    moduleId: this.moduleId,
+                    actionNames: this._registeredActions
+                });
+            });
+            
             console.log(`[BaseModule] 已清理 ${this._registeredActions.length} 个动作: ${this.moduleId}`);
             this._registeredActions = [];
         } catch (error) {

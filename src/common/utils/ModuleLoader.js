@@ -198,9 +198,11 @@ export class ModuleLoader {
         }
 
         try {
-            // 5. 动态导入模块
+            // 5. 动态导入模块（集成性能监控）
             console.log(`[${this.moduleName}] 📦 动态导入模块: ${routeId}`);
-            const module = await loader();
+            
+            // 🎯 阶段1: 性能监控 - 测量模块加载时间
+            const module = await this._measureModuleLoad(routeId, loader);
 
             // 6. 挂载新模块
             if (module.mount) {
@@ -228,6 +230,25 @@ export class ModuleLoader {
 
             // 8. 渲染错误边界
             this._renderErrorBoundary(container, routeId, err);
+        }
+    }
+
+    /**
+     * 测量模块加载时间（集成性能监控）
+     * @param {string} routeId - 路由ID
+     * @param {Function} loader - 加载函数
+     * @returns {Promise<any>}
+     * @private
+     */
+    async _measureModuleLoad(routeId, loader) {
+        // 动态导入性能服务（避免循环依赖）
+        try {
+            const { performanceService } = await import('../../services/performanceService.js');
+            return await performanceService.measureModuleLoad(routeId, loader);
+        } catch (e) {
+            // 如果性能服务不可用，直接加载模块
+            console.debug(`[${this.moduleName}] 性能监控不可用，直接加载模块`);
+            return await loader();
         }
     }
 

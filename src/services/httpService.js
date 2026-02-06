@@ -95,6 +95,7 @@ export const HttpService = {
             json = true,
             signal = null,
             usePool = false, // 🔄 P1优化: 是否使用并发控制
+            measurePerformance = true, // 🎯 阶段1: 是否测量性能
         } = options;
 
         // 合并请求头
@@ -160,12 +161,49 @@ export const HttpService = {
             throw lastError;
         };
 
+        // 🎯 阶段1: 性能监控 - 测量API调用时间
+        if (measurePerformance) {
+            try {
+                const { performanceService } = await import('./performanceService.js');
+                const apiName = this._extractApiName(url);
+                
+                if (usePool) {
+                    return await performanceService.measureApiCall(apiName, () => 
+                        globalRequestPool.add(executeRequest)
+                    );
+                }
+                
+                return await performanceService.measureApiCall(apiName, executeRequest);
+            } catch (e) {
+                // 如果性能服务不可用，直接执行请求
+                console.debug('[HttpService] 性能监控不可用，直接执行请求');
+            }
+        }
+
         // 🔄 P1优化: 使用并发控制池
         if (usePool) {
             return await globalRequestPool.add(executeRequest);
         }
         
         return await executeRequest();
+    }
+
+    /**
+     * 从URL提取API名称（用于性能监控）
+     * @param {string} url - 请求URL
+     * @returns {string}
+     * @private
+     */
+    _extractApiName(url) {
+        try {
+            const urlObj = new URL(url);
+            const path = urlObj.pathname;
+            // 提取最后两段路径作为API名称
+            const segments = path.split('/').filter(s => s);
+            return segments.slice(-2).join('/') || 'unknown';
+        } catch (e) {
+            return 'unknown';
+        }
     },
 
     /**

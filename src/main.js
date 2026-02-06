@@ -30,6 +30,13 @@ import { StorageService, STORAGE_KEYS } from './services/storageService.js';
 // 🎯 短期优化：导入 LoadingManager
 import { loadingManager } from './common/utils/LoadingManager.js';
 
+// 🎯 阶段1: 导入性能监控服务
+import { performanceService } from './services/performanceService.js';
+
+// 🎯 阶段1: 导入日志和监控服务
+import { Logger } from './services/loggerService.js';
+import { monitoringService } from './services/monitoringService.js';
+
 // ✅ Import User Guide Modal (Vite Raw Import)
 import userGuideModalHtml from './components/modal/userGuideModal.html?raw';
 import promptModalHtml from './components/modal/promptModal.html?raw';
@@ -74,34 +81,50 @@ import { loadPlugins } from './common/utils/pluginLoader.js';
 // ✅ P1: 导入事件调试工具
 import { initEventLogger } from './common/utils/eventLogger.js';
 
-// ✅ 全局错误兜底 (增强版)
+// ✅ 全局错误兜底 (增强版 - 集成日志和监控)
 window.addEventListener("error", (event) => {
-  console.error("Global Error:", event.error);
   // 避免循环报错导致 Toast 刷屏
   if (window._errorThrottle && Date.now() - window._errorThrottle < 2000) return;
   window._errorThrottle = Date.now();
 
   const msg = `系统运行异常: ${event.message || "未知错误"}`;
+  
+  // 记录到日志服务
+  Logger.fatal('全局错误捕获', event.error, 'System');
+  
+  // 用户通知
   if (window.showToast) window.showToast(msg, "error");
 
-  // 记录到错误服务 (如果存在)
-  try {
-    import('./services/errorService.js').then(({ ErrorService }) => {
-      ErrorService.handle(event.error, { action: 'window.onerror', fatal: false });
+  // 记录到错误服务和监控服务
+  import('./services/errorService.js').then(({ ErrorService }) => {
+    ErrorService.handle(event.error, { 
+      module: 'System',
+      action: 'window.onerror', 
+      notify: false // 已经显示过toast
     });
-  } catch (e) {
-    // ignore dynamic import errors
-  }
+  }).catch(() => {});
 });
 
-// ✅ Promise 异常兜底 (增强版)
+// ✅ Promise 异常兜底 (增强版 - 集成日志和监控)
 window.addEventListener("unhandledrejection", (event) => {
-  console.error("Unhandled Rejection:", event.reason);
   if (window._errorThrottle && Date.now() - window._errorThrottle < 2000) return;
   window._errorThrottle = Date.now();
 
   const msg = `异步操作异常: ${event.reason?.message || "网络请求或数据处理失败"}`;
+  
+  // 记录到日志服务
+  Logger.error('未处理的Promise拒绝', event.reason, 'System');
+  
+  // 用户通知
   if (window.showToast) window.showToast(msg, "error");
+  
+  // 记录到监控服务
+  import('./services/monitoringService.js').then(({ monitoringService }) => {
+    monitoringService.captureException(event.reason, {
+      module: 'System',
+      tags: { type: 'unhandledrejection' }
+    });
+  }).catch(() => {});
 });
 
 // 1. 导入各模块的初始化函数和业务函数
@@ -138,6 +161,16 @@ window.Alpine = Alpine;
 
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("🚀 System: Application Booting...");
+
+  // 🎯 阶段1: 初始化日志服务
+  Logger.info('应用启动', { version: '1.0.0' }, 'System');
+
+  // 🎯 阶段1: 初始化监控服务（仅生产环境）
+  // 注意：需要配置Sentry DSN才能启用
+  // monitoringService.init({ dsn: 'YOUR_SENTRY_DSN' });
+
+  // 🎯 阶段1: 初始化性能监控
+  performanceService.init();
 
   // 1. Initialize Alpine Components
   initAlpineSettings();
@@ -240,6 +273,75 @@ registerActionsWithLegacy({
   toggleApiKeyVisibility,
   testConnection,
   saveProxyConfig,
+
+  // 🎯 阶段1: 性能监控
+  showPerformanceReport: async () => {
+    try {
+      const { performanceService } = await import('./services/performanceService.js');
+      const report = performanceService.getReport();
+      
+      console.log('📊 性能报告:', report);
+      console.table(report.summary);
+      
+      if (window.showToast) {
+        window.showToast('性能报告已输出到控制台 (F12)', 'info');
+      }
+      
+      return report;
+    } catch (e) {
+      console.error('获取性能报告失败:', e);
+    }
+  },
+
+  // 🎯 阶段1: 日志管理
+  showLogs: () => {
+    const logs = Logger.getLogs();
+    console.log('📋 所有日志:', logs);
+    console.table(logs.map(log => ({
+      时间: new Date(log.timestamp).toLocaleTimeString('zh-CN'),
+      级别: log.levelName,
+      模块: log.module,
+      消息: log.message,
+    })));
+    
+    if (window.showToast) {
+      window.showToast(`共 ${logs.length} 条日志，已输出到控制台`, 'info');
+    }
+    
+    return logs;
+  },
+
+  showErrors: () => {
+    const errors = Logger.getErrors();
+    console.log('❌ 错误日志:', errors);
+    console.table(errors.map(log => ({
+      时间: new Date(log.timestamp).toLocaleTimeString('zh-CN'),
+      级别: log.levelName,
+      模块: log.module,
+      消息: log.message,
+    })));
+    
+    if (window.showToast) {
+      window.showToast(`共 ${errors.length} 条错误，已输出到控制台`, errors.length > 0 ? 'warning' : 'info');
+    }
+    
+    return errors;
+  },
+
+  clearLogs: () => {
+    Logger.clear();
+    if (window.showToast) {
+      window.showToast('日志已清除', 'success');
+    }
+  },
+
+  downloadLogs: (params) => {
+    const format = params?.format || 'json';
+    Logger.download(format);
+    if (window.showToast) {
+      window.showToast(`日志已导出为 ${format.toUpperCase()} 格式`, 'success');
+    }
+  },
 
   // Scraper, Data, Analysis actions are now self-registered by their respective modules
 });

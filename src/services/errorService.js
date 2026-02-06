@@ -129,26 +129,66 @@ export const ErrorService = {
         const errorType = this.classify(error);
         const userMessage = this.getUserMessage(error, customMessage);
 
-        // 1. 记录日志 - 使用更详细的格式
-        console.error(`[${module}] ${action} failed:`, {
-            type: errorType,
-            message: error.message,
-            status: error.status,
-            stack: error.stack,
-            raw: error
-        });
+        // 1. 记录日志 - 使用Logger服务
+        this._logError(error, { module, action, errorType });
 
         // 2. 用户通知
         if (notify && typeof showToast === 'function') {
             showToast(userMessage, 'error');
         }
 
-        // 3. 预留：错误上报
-        // this._report(error, context);
+        // 3. 错误上报 - 发送到监控服务
+        this._reportError(error, { module, action, errorType });
 
         // 4. 是否重新抛出
         if (rethrow) {
             throw error;
+        }
+    },
+
+    /**
+     * 记录错误日志
+     * @param {Error} error - 错误对象
+     * @param {Object} context - 上下文
+     * @private
+     */
+    async _logError(error, context) {
+        try {
+            const { Logger } = await import('./loggerService.js');
+            Logger.error(
+                `${context.action} failed`,
+                error,
+                context.module
+            );
+        } catch (e) {
+            // 如果Logger服务不可用，回退到console
+            console.error(`[${context.module}] ${context.action} failed:`, {
+                type: context.errorType,
+                message: error.message,
+                stack: error.stack,
+            });
+        }
+    },
+
+    /**
+     * 上报错误到监控服务
+     * @param {Error} error - 错误对象
+     * @param {Object} context - 上下文
+     * @private
+     */
+    async _reportError(error, context) {
+        try {
+            const { monitoringService } = await import('./monitoringService.js');
+            monitoringService.captureException(error, {
+                module: context.module,
+                tags: {
+                    action: context.action,
+                    errorType: context.errorType,
+                },
+            });
+        } catch (e) {
+            // 监控服务不可用，静默失败
+            console.debug('[ErrorService] 监控服务不可用');
         }
     },
 

@@ -10,7 +10,11 @@
         "test": "vitest",
         "test:ui": "vitest --ui",
         "test:coverage": "vitest run --coverage",
-        "lint": "eslint src"
+        "lint": "eslint src",
+        "xss:scan": "node tools/xss-scanner.js",
+        "xss:fix": "node tools/xss-fixer.js --auto-fix",
+        "xss:fix:dry": "node tools/xss-fixer.js --dry-run",
+        "security:check": "npm run xss:scan"
     },
     "devDependencies": {
         "@vitest/coverage-v8": "^1.0.0",

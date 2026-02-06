@@ -28,6 +28,26 @@
                     <i class="fas fa-robot"></i> LLM 模型配置
                 </h3>
 
+                <!-- 🔒 P0修复: 生产环境安全警告 -->
+                <div x-show="isProduction && llm.endpoint && isDangerousEndpoint(llm.endpoint)" 
+                     x-transition
+                     class="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                    <div class="flex items-start gap-3">
+                        <i class="fas fa-exclamation-triangle text-amber-500 mt-0.5"></i>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-amber-800 text-sm mb-1">⚠️ 安全警告</h4>
+                            <p class="text-xs text-amber-700 leading-relaxed mb-2">
+                                为保护您的 API 密钥安全，生产环境已禁用直接调用外部 API。
+                            </p>
+                            <p class="text-xs text-amber-600">
+                                <strong>解决方案：</strong><br>
+                                • 使用内置代理服务器<br>
+                                • 或联系管理员配置企业网关
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="space-y-5">
                     <!-- Provider Select -->
                     <div>

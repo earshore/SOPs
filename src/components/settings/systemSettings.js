@@ -8,6 +8,7 @@ import { fetchModelsFromApi, callLLM } from "../../services/llmService.js";
 import { showToast } from "../../common/utils/ui.js";
 import { StorageService, STORAGE_KEYS } from "../../services/storageService.js";
 import { ErrorService } from "../../services/errorService.js";
+import { EnvConfig } from "../../common/config/envConfig.js"; // 🔒 P0修复: 导入环境配置
 
 // ==========================================
 // Alpine Component Logic
@@ -46,6 +47,23 @@ const SettingsPanel = () => ({
         const m = this.llm.models.find(x => (typeof x === 'string' ? x : x.id) === this.llm.model);
         if (!m || typeof m === 'string') return null;
         return m;
+    },
+
+    // 🔒 P0修复: 检查是否为生产环境
+    get isProduction() {
+        return EnvConfig.isProduction;
+    },
+
+    // 🔒 P0修复: 检查端点是否为危险的外部API
+    isDangerousEndpoint(endpoint) {
+        if (!endpoint) return false;
+        const dangerousEndpoints = [
+            'api.openai.com',
+            'api.anthropic.com',
+            'api.deepseek.com',
+            'generativelanguage.googleapis.com'
+        ];
+        return dangerousEndpoints.some(domain => endpoint.includes(domain));
     },
 
     get proxyNeedsInput() {

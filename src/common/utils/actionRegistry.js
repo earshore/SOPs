@@ -268,4 +268,24 @@ export function getLegacyCallStats() {
     return Array.from(warnedFunctions);
 }
 
+// ================================================================
+// 🔧 P0修复: 监听事件总线,实现解耦
+// ================================================================
+
+import eventBus from '../EventBus.js';
+
+// 监听注册事件
+eventBus.on('registerActions', ({ moduleId, actions }) => {
+    const actionNames = registerActionsWithLegacy(actions);
+    console.log(`[ActionRegistry] 已注册 ${actionNames.length} 个动作 (模块: ${moduleId})`);
+});
+
+// 监听清理事件
+eventBus.on('unregisterActions', ({ moduleId, actionNames }) => {
+    unregisterActions(actionNames);
+    console.log(`[ActionRegistry] 已清理 ${actionNames.length} 个动作 (模块: ${moduleId})`);
+});
+
+console.log('✅ [ActionRegistry] 事件监听器已初始化 (循环依赖已解决)');
+
 export default ActionRegistry;
