@@ -28,20 +28,106 @@
         white-space: nowrap;
         /* 核心：防止文字换行导致行高被撑开 */
     }
+
+    /* 阶段标签样式 */
+    .stage-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-weight: 700;
+        font-size: 11px;
+        white-space: nowrap;
+    }
+
+    .stage-test {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .stage-growth {
+        background: #d1fae5;
+        color: #047857;
+    }
+
+    .stage-stable {
+        background: #ede9fe;
+        color: #6d28d9;
+    }
+
+    .stage-clearance {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    /* SOP步骤编号圆圈 */
+    .step-circle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        font-weight: 700;
+        font-size: 13px;
+        flex-shrink: 0;
+    }
+
+    /* SOP时间轴连接线 */
+    .timeline-connector {
+        position: relative;
+    }
+
+    .timeline-connector::after {
+        content: '';
+        position: absolute;
+        left: 14px;
+        top: 36px;
+        bottom: -8px;
+        width: 2px;
+        background: #e2e8f0;
+    }
+
+    .timeline-connector:last-child::after {
+        display: none;
+    }
+
+    /* 预警闪烁动画 */
+    @keyframes pulse-warning {
+
+        0%,
+        100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.5;
+        }
+    }
+
+    .alert-pulse {
+        animation: pulse-warning 2s ease-in-out infinite;
+    }
+
+    /* 打印优化 */
+    @media print {
+        .no-print {
+            display: none !important;
+        }
+    }
 </style>
 
 <div class="npi-tracker-container">
     <!-- Header -->
     <div class="mb-6">
-        <div class="sop-detail-header bg-gradient-to-r from-emerald-50 to-green-50">
+        <div class="sop-detail-header bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border border-emerald-200 p-6">
             <div class="flex items-start gap-4">
-                <div class="sop-icon-container bg-emerald-100 text-emerald-600 w-16 h-16 text-2xl">
+                <div class="sop-icon-container bg-emerald-100 text-emerald-600 w-16 h-16 text-2xl rounded-xl flex items-center justify-center flex-shrink-0">
                     <i class="fas fa-seedling"></i>
                 </div>
                 <div class="flex-1">
                     <div class="flex items-center gap-3 mb-2">
                         <h1 class="text-2xl font-bold text-slate-900">新品生命周期跟踪 SOP</h1>
-                        <span class="sop-status-badge sop-status-active">已发布</span>
+                        <span class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold">已发布</span>
                     </div>
                     <p class="text-slate-600 mb-3">
                         Amazon NPI Tracker - 监控新品从"测款"到"稳定销售"全流程的SOP看板，强制执行上架合规检查，自动计算财务红线确保亏损预警。
@@ -52,6 +138,57 @@
                         <span><i class="fas fa-clock mr-1"></i>更新日期：2024-01</span>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 新增：SOP核心流程总览 ==================== -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-project-diagram text-indigo-500"></i>SOP 核心流程总览（实战版）
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-9 gap-0 items-start">
+            <!-- Step 1 -->
+            <div class="flex flex-col items-center text-center p-3">
+                <div class="step-circle bg-blue-100 text-blue-700 mb-2">1</div>
+                <span class="text-xs font-bold text-slate-700 mb-1">选品建档</span>
+                <span class="text-[10px] text-slate-500 leading-tight">录入SKU/ASIN<br>设定配送费基准</span>
+            </div>
+            <div class="hidden md:flex items-center justify-center text-slate-300 text-xl pt-4">
+                <i class="fas fa-chevron-right"></i>
+            </div>
+            <!-- Step 2 -->
+            <div class="flex flex-col items-center text-center p-3">
+                <div class="step-circle bg-purple-100 text-purple-700 mb-2">2</div>
+                <span class="text-xs font-bold text-slate-700 mb-1">合规检查</span>
+                <span class="text-[10px] text-slate-500 leading-tight">5项Checklist<br>全部✓方可推广</span>
+            </div>
+            <div class="hidden md:flex items-center justify-center text-slate-300 text-xl pt-4">
+                <i class="fas fa-chevron-right"></i>
+            </div>
+            <!-- Step 3 -->
+            <div class="flex flex-col items-center text-center p-3">
+                <div class="step-circle bg-emerald-100 text-emerald-700 mb-2">3</div>
+                <span class="text-xs font-bold text-slate-700 mb-1">定价计算</span>
+                <span class="text-[10px] text-slate-500 leading-tight">配送费→清仓线<br>→动销价→建议价</span>
+            </div>
+            <div class="hidden md:flex items-center justify-center text-slate-300 text-xl pt-4">
+                <i class="fas fa-chevron-right"></i>
+            </div>
+            <!-- Step 4 -->
+            <div class="flex flex-col items-center text-center p-3">
+                <div class="step-circle bg-amber-100 text-amber-700 mb-2">4</div>
+                <span class="text-xs font-bold text-slate-700 mb-1">推广执行</span>
+                <span class="text-[10px] text-slate-500 leading-tight">Vine+广告<br>阶段性推进</span>
+            </div>
+            <div class="hidden md:flex items-center justify-center text-slate-300 text-xl pt-4">
+                <i class="fas fa-chevron-right"></i>
+            </div>
+            <!-- Step 5 -->
+            <div class="flex flex-col items-center text-center p-3">
+                <div class="step-circle bg-red-100 text-red-700 mb-2">5</div>
+                <span class="text-xs font-bold text-slate-700 mb-1">数据复盘</span>
+                <span class="text-[10px] text-slate-500 leading-tight">每周看板复盘<br>保留/放弃决策</span>
             </div>
         </div>
     </div>
@@ -152,6 +289,468 @@
         </div>
     </div>
 
+    <!-- ==================== 新增：各阶段详细SOP操作手册 ==================== -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+        <h2 class="text-lg font-bold text-slate-800 mb-5 flex items-center gap-2">
+            <i class="fas fa-tasks text-emerald-500"></i>各阶段详细 SOP 操作手册
+        </h2>
+
+        <!-- 测款期 SOP -->
+        <div class="mb-6">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="stage-badge stage-test"><i class="fas fa-flask mr-1"></i>测款期 (Day 0-30)</span>
+                <span class="text-xs text-slate-500">目标：验证产品是否有市场 & 完成基础建设</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Day 0: 上架日 -->
+                <div class="border border-blue-200 rounded-lg p-4 bg-blue-50/30">
+                    <h4 class="font-bold text-blue-700 text-sm mb-3 flex items-center gap-2">
+                        <span class="step-circle bg-blue-100 text-blue-700 text-xs" style="width:22px;height:22px;">D0</span>
+                        上架日 Checklist
+                    </h4>
+                    <div class="space-y-2 text-xs text-slate-700">
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-check-square text-blue-500 mt-0.5 w-3.5"></i>
+                            <span>在本看板「基础档案」区录入 SKU/ASIN/店铺/站点/发货量</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-check-square text-blue-500 mt-0.5 w-3.5"></i>
+                            <span>填写配送费 → 系统自动计算清仓线/动销价/建议价</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-check-square text-blue-500 mt-0.5 w-3.5"></i>
+                            <span>完成5项合规Checklist（泛欧/Rufus/敏感词/图片QA/A+）</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-check-square text-blue-500 mt-0.5 w-3.5"></i>
+                            <span>定价 = 市场均价 × 0.9，设置Coupon 5%-10%（吸引首单）</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-check-square text-blue-500 mt-0.5 w-3.5"></i>
+                            <span>提交 Vine 申请（30个名额），备注提交日期</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-check-square text-blue-500 mt-0.5 w-3.5"></i>
+                            <span>开启自动广告（竞价建议价×0.8），预算€10-15/天</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Day 1-7 -->
+                <div class="border border-blue-200 rounded-lg p-4 bg-blue-50/30">
+                    <h4 class="font-bold text-blue-700 text-sm mb-3 flex items-center gap-2">
+                        <span class="step-circle bg-blue-100 text-blue-700 text-xs" style="width:22px;height:22px;">D7</span>
+                        第1周：数据收集期
+                    </h4>
+                    <div class="space-y-2 text-xs text-slate-700">
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-chart-bar text-blue-500 mt-0.5 w-3.5"></i>
+                            <span>每日检查：广告曝光是否>100/天 → 否则检查Listing是否被抑制</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-chart-bar text-blue-500 mt-0.5 w-3.5"></i>
+                            <span>确认ASIN是否已被亚马逊收录（搜索ASIN能找到自己）</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-chart-bar text-blue-500 mt-0.5 w-3.5"></i>
+                            <span>检查Buy Box归属（新品偶尔会丢Buy Box）</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-chart-bar text-blue-500 mt-0.5 w-3.5"></i>
+                            <span>记录本周流量/点击/订单基础数据到看板</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-chart-bar text-blue-500 mt-0.5 w-3.5"></i>
+                            <span>7天后下载Search Term报告 → 收集有效搜索词</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Day 8-14 -->
+                <div class="border border-blue-200 rounded-lg p-4 bg-blue-50/30">
+                    <h4 class="font-bold text-blue-700 text-sm mb-3 flex items-center gap-2">
+                        <span class="step-circle bg-blue-100 text-blue-700 text-xs" style="width:22px;height:22px;">D14</span>
+                        第2周：广告优化期
+                    </h4>
+                    <div class="space-y-2 text-xs text-slate-700">
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-bullseye text-blue-500 mt-0.5 w-3.5"></i>
+                            <span>从自动广告中提取出单词 → 开手动精准广告</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-bullseye text-blue-500 mt-0.5 w-3.5"></i>
+                            <span>否定无效关键词（高花费零转化的词，阈值：10次点击0单）</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-bullseye text-blue-500 mt-0.5 w-3.5"></i>
+                            <span>CTR&lt;0.3% → 主图有问题，安排换图测试</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-bullseye text-blue-500 mt-0.5 w-3.5"></i>
+                            <span>CTR正常但CVR&lt;8% → 检查价格/评论/五点是否有硬伤</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-bullseye text-blue-500 mt-0.5 w-3.5"></i>
+                            <span>Vine评价开始陆续到达 → 关注评分走势</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Day 15-30 -->
+                <div class="border border-blue-200 rounded-lg p-4 bg-blue-50/30">
+                    <h4 class="font-bold text-blue-700 text-sm mb-3 flex items-center gap-2">
+                        <span class="step-circle bg-blue-100 text-blue-700 text-xs" style="width:22px;height:22px;">D30</span>
+                        第3-4周：首次决策点
+                    </h4>
+                    <div class="space-y-2 text-xs text-slate-700">
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-gavel text-red-500 mt-0.5 w-3.5"></i>
+                            <span class="font-bold text-red-700">30天决策：此SKU是否进入成长期？</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-thumbs-up text-emerald-500 mt-0.5 w-3.5"></i>
+                            <span>✓ 进入成长期：日均≥1单 + CTR>0.5% + 评分≥4.0</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-thumbs-down text-red-500 mt-0.5 w-3.5"></i>
+                            <span>✗ 直接清仓：零单 或 评分&lt;3.5 或 ACOS>80%无改善空间</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-hourglass-half text-amber-500 mt-0.5 w-3.5"></i>
+                            <span>△ 延长观察：有零星出单但数据不够 → 再给15天，期间不加预算</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-pen text-blue-500 mt-0.5 w-3.5"></i>
+                            <span>在看板「决策」栏更新：保留/放弃 + Next Step</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 成长期 SOP -->
+        <div class="mb-6">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="stage-badge stage-growth"><i class="fas fa-chart-line mr-1"></i>成长期 (Day 30-90)</span>
+                <span class="text-xs text-slate-500">目标：积累评价 & 降低ACOS & 提升自然排名</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="border border-emerald-200 rounded-lg p-4 bg-emerald-50/30">
+                    <h4 class="font-bold text-emerald-700 text-sm mb-3"><i class="fas fa-ad mr-1"></i>广告策略</h4>
+                    <div class="space-y-2 text-xs text-slate-700">
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-caret-right text-emerald-500 mt-0.5"></i>
+                            <span>广告结构：自动(低竞价收词) + 手动精准(主推词) + 手动广泛(拓词)</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-caret-right text-emerald-500 mt-0.5"></i>
+                            <span>每周否定一次无效词，周期：每周一执行</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-caret-right text-emerald-500 mt-0.5"></i>
+                            <span>ACOS>50%的精准词 → 降竞价20% 或 暂停</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-caret-right text-emerald-500 mt-0.5"></i>
+                            <span>出单好的词 → 开商品投放(ASIN定位)对标竞品</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-caret-right text-emerald-500 mt-0.5"></i>
+                            <span>预算控制：日预算 = 日均销售额 × 目标ACOS</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border border-emerald-200 rounded-lg p-4 bg-emerald-50/30">
+                    <h4 class="font-bold text-emerald-700 text-sm mb-3"><i class="fas fa-star mr-1"></i>评价管理</h4>
+                    <div class="space-y-2 text-xs text-slate-700">
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-caret-right text-emerald-500 mt-0.5"></i>
+                            <span>Vine进度跟踪：目标30天内拿到15+评价</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-caret-right text-emerald-500 mt-0.5"></i>
+                            <span>差评出现 → 48小时内联系买家(Buyer-Seller Message)</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-caret-right text-emerald-500 mt-0.5"></i>
+                            <span>评分&lt;4.0 → 检查产品缺陷，考虑改包装/说明书后重新发货</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-caret-right text-emerald-500 mt-0.5"></i>
+                            <span>评分4.0-4.3 → 正常推进，加A+页面对比模块引导认知</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-caret-right text-emerald-500 mt-0.5"></i>
+                            <span>评分≥4.3 → 可以开始提价至建议价</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border border-emerald-200 rounded-lg p-4 bg-emerald-50/30">
+                    <h4 class="font-bold text-emerald-700 text-sm mb-3"><i class="fas fa-cogs mr-1"></i>Listing优化</h4>
+                    <div class="space-y-2 text-xs text-slate-700">
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-caret-right text-emerald-500 mt-0.5"></i>
+                            <span>根据出单词优化标题（前80字符包含核心转化词）</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-caret-right text-emerald-500 mt-0.5"></i>
+                            <span>根据差评优化五点（解决买家真实痛点）</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-caret-right text-emerald-500 mt-0.5"></i>
+                            <span>补充后台Search Term（从广告报告中提取长尾词）</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-caret-right text-emerald-500 mt-0.5"></i>
+                            <span>主图A/B Test（每2周测一次，至少跑7天数据）</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-caret-right text-emerald-500 mt-0.5"></i>
+                            <span>价格策略：Day30-60保持新品价，Day60+逐步提至建议价</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 成长期60天决策点 -->
+            <div class="mt-4 p-4 bg-amber-50 rounded-lg border border-amber-200">
+                <h4 class="font-bold text-amber-800 text-sm mb-2"><i class="fas fa-exclamation-triangle mr-1"></i>60天决策节点（成长期中期检查）</h4>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                    <div class="bg-white rounded p-3 border border-emerald-200">
+                        <span class="font-bold text-emerald-700">✓ 继续投入</span>
+                        <p class="text-slate-600 mt-1">ACOS&lt;40% + 自然单占比≥30% + 日均≥3单 → 加大广告预算，备货第二批</p>
+                    </div>
+                    <div class="bg-white rounded p-3 border border-amber-200">
+                        <span class="font-bold text-amber-700">△ 维持观察</span>
+                        <p class="text-slate-600 mt-1">ACOS 40-55% + 有自然单但不稳定 → 维持现状，不加预算，继续优化</p>
+                    </div>
+                    <div class="bg-white rounded p-3 border border-red-200">
+                        <span class="font-bold text-red-700">✗ 准备退出</span>
+                        <p class="text-slate-600 mt-1">ACOS>55% + 评分&lt;4.0 + 无自然单 → 降价至动销价，不再补货</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 稳定期 SOP -->
+        <div class="mb-6">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="stage-badge stage-stable"><i class="fas fa-crown mr-1"></i>稳定期 (Day 90+)</span>
+                <span class="text-xs text-slate-500">目标：最大化利润 & 降低广告依赖 & 补货节奏稳定</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="border border-purple-200 rounded-lg p-4 bg-purple-50/30">
+                    <h4 class="font-bold text-purple-700 text-sm mb-3"><i class="fas fa-euro-sign mr-1"></i>利润优化</h4>
+                    <div class="space-y-2 text-xs text-slate-700">
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-caret-right text-purple-500 mt-0.5"></i>
+                            <span>价格提至建议价或以上（评分≥4.3可溢价5-10%）</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-caret-right text-purple-500 mt-0.5"></i>
+                            <span>广告预算逐步下调：每周降10%，观察自然单是否稳定</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-caret-right text-purple-500 mt-0.5"></i>
+                            <span>只保留ACOS&lt;25%的精准词和品牌词广告</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-caret-right text-purple-500 mt-0.5"></i>
+                            <span>自然单占比目标：>50%（理想>70%）</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-caret-right text-purple-500 mt-0.5"></i>
+                            <span>Coupon/Deal策略：仅在大促期间使用（Prime Day/黑五）</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border border-purple-200 rounded-lg p-4 bg-purple-50/30">
+                    <h4 class="font-bold text-purple-700 text-sm mb-3"><i class="fas fa-boxes mr-1"></i>库存管理</h4>
+                    <div class="space-y-2 text-xs text-slate-700">
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-caret-right text-purple-500 mt-0.5"></i>
+                            <span>补货公式：(日均销量 × 补货周期天数) × 1.2安全系数</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-caret-right text-purple-500 mt-0.5"></i>
+                            <span>欧洲站补货周期预估：海运40天 + 上架7天 = 47天提前量</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-caret-right text-purple-500 mt-0.5"></i>
+                            <span>库存天数&lt;30天 → 立即触发补货流程</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-caret-right text-purple-500 mt-0.5"></i>
+                            <span>库存天数>90天 → 考虑降价促销或跨站点调拨</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-caret-right text-purple-500 mt-0.5"></i>
+                            <span>旺季前60天 → 按日均销量×2备货</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border border-purple-200 rounded-lg p-4 bg-purple-50/30">
+                    <h4 class="font-bold text-purple-700 text-sm mb-3"><i class="fas fa-shield-alt mr-1"></i>防御策略</h4>
+                    <div class="space-y-2 text-xs text-slate-700">
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-caret-right text-purple-500 mt-0.5"></i>
+                            <span>每周监控竞品价格变动（3个核心竞品）</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-caret-right text-purple-500 mt-0.5"></i>
+                            <span>排名下降>20位 → 检查是否被恶意跟卖/差评攻击</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-caret-right text-purple-500 mt-0.5"></i>
+                            <span>品牌注册+透明计划（Transparency）防跟卖</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-caret-right text-purple-500 mt-0.5"></i>
+                            <span>定期更新A+页面和副图（每季度刷新一次）</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-caret-right text-purple-500 mt-0.5"></i>
+                            <span>考虑变体扩展（颜色/尺寸）复用评价权重</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 清仓期 SOP -->
+        <div>
+            <div class="flex items-center gap-3 mb-4">
+                <span class="stage-badge stage-clearance"><i class="fas fa-fire mr-1"></i>清仓期</span>
+                <span class="text-xs text-slate-500">目标：最小化亏损 & 尽快回笼资金</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="border border-red-200 rounded-lg p-4 bg-red-50/30">
+                    <h4 class="font-bold text-red-700 text-sm mb-3"><i class="fas fa-exclamation-circle mr-1"></i>触发条件（满足任一即启动）</h4>
+                    <div class="space-y-2 text-xs text-slate-700">
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-times-circle text-red-500 mt-0.5 w-3.5"></i>
+                            <span>库存天数 > 90天，且降价后仍无明显改善</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-times-circle text-red-500 mt-0.5 w-3.5"></i>
+                            <span>评分 &lt; 3.5，差评问题无法通过改品解决</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-times-circle text-red-500 mt-0.5 w-3.5"></i>
+                            <span>ACOS持续>60%超过30天，且已完成所有优化手段</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-times-circle text-red-500 mt-0.5 w-3.5"></i>
+                            <span>品类竞争恶化，市场均价已低于自己的清仓红线</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-times-circle text-red-500 mt-0.5 w-3.5"></i>
+                            <span>长期仓储费即将产生（FBA库龄>270天）</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border border-red-200 rounded-lg p-4 bg-red-50/30">
+                    <h4 class="font-bold text-red-700 text-sm mb-3"><i class="fas fa-clipboard-list mr-1"></i>清仓执行步骤</h4>
+                    <div class="space-y-2 text-xs text-slate-700">
+                        <div class="flex items-start gap-2">
+                            <span class="font-bold text-red-600 w-4">①</span>
+                            <span>立即停止所有广告投放，节省广告费</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="font-bold text-red-600 w-4">②</span>
+                            <span>降价至动销价（清仓红线+€1），观察3天动销情况</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="font-bold text-red-600 w-4">③</span>
+                            <span>仍无动销 → 降至清仓红线，同时创建Outlet Deal</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="font-bold text-red-600 w-4">④</span>
+                            <span>评估是否创建移除订单（Removal Order）运回或销毁</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="font-bold text-red-600 w-4">⑤</span>
+                            <span>移除成本 vs 继续仓储成本对比，选择更低成本方案</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="font-bold text-red-600 w-4">⑥</span>
+                            <span>在看板标记「清仓完成」，归档至历史记录，记录亏损金额</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 新增：每周复盘SOP ==================== -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-calendar-check text-blue-500"></i>每周复盘 SOP（每周一上午执行，预计30分钟）
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="border border-slate-200 rounded-lg p-4">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="step-circle bg-blue-100 text-blue-700 text-xs" style="width:24px;height:24px;">1</span>
+                    <h4 class="font-bold text-slate-700 text-sm">更新看板数据</h4>
+                </div>
+                <div class="space-y-1.5 text-xs text-slate-600">
+                    <p>• 登录各店铺后台，更新库存天数</p>
+                    <p>• 更新流量/CTR/CVR/ACOS数据</p>
+                    <p>• 更新Vine评价进度</p>
+                    <p>• 检查评分变化（是否有新差评）</p>
+                    <p class="text-blue-600 font-bold">⏱ 预计10分钟</p>
+                </div>
+            </div>
+
+            <div class="border border-slate-200 rounded-lg p-4">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="step-circle bg-amber-100 text-amber-700 text-xs" style="width:24px;height:24px;">2</span>
+                    <h4 class="font-bold text-slate-700 text-sm">检查预警项</h4>
+                </div>
+                <div class="space-y-1.5 text-xs text-slate-600">
+                    <p>• 库存天数>60 → 标记预警</p>
+                    <p>• CTR<0.5% → 安排主图优化</p>
+                    <p>• 当前售价<清仓红线 → 财务预警</p>
+                    <p>• 评分<4.0 → 检查差评内容</p>
+                    <p class="text-blue-600 font-bold">⏱ 预计5分钟</p>
+                </div>
+            </div>
+
+            <div class="border border-slate-200 rounded-lg p-4">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="step-circle bg-emerald-100 text-emerald-700 text-xs" style="width:24px;height:24px;">3</span>
+                    <h4 class="font-bold text-slate-700 text-sm">执行广告优化</h4>
+                </div>
+                <div class="space-y-1.5 text-xs text-slate-600">
+                    <p>• 否定无效关键词（本周新增）</p>
+                    <p>• 提取出单新词加入手动广告</p>
+                    <p>• 调整竞价（出单词+10%，低效词-20%）</p>
+                    <p>• 检查预算是否够用（是否提前耗尽）</p>
+                    <p class="text-blue-600 font-bold">⏱ 预计10分钟</p>
+                </div>
+            </div>
+
+            <div class="border border-slate-200 rounded-lg p-4">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="step-circle bg-red-100 text-red-700 text-xs" style="width:24px;height:24px;">4</span>
+                    <h4 class="font-bold text-slate-700 text-sm">决策 & 记录</h4>
+                </div>
+                <div class="space-y-1.5 text-xs text-slate-600">
+                    <p>• 到达决策节点的SKU → 更新保留/放弃</p>
+                    <p>• 符合升阶条件的 → 更新生命周期阶段</p>
+                    <p>• 填写每个SKU的Next Step</p>
+                    <p>• 记录本周关键变化（备忘）</p>
+                    <p class="text-blue-600 font-bold">⏱ 预计5分钟</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Formula Reference -->
     <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 mb-6">
         <div class="flex items-start gap-3">
@@ -178,6 +777,45 @@
                         <span class="text-emerald-600 font-bold">建议售价</span>
                         <p class="font-mono text-xs mt-1">= 清仓红线 + €2</p>
                         <p class="text-[10px] text-slate-500">目标日常售价，利润合理</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 新增：欧洲站特别注意事项 ==================== -->
+    <div class="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-xl p-4 mb-6">
+        <div class="flex items-start gap-3">
+            <i class="fas fa-flag text-indigo-500 text-xl"></i>
+            <div class="flex-1">
+                <h3 class="font-bold text-slate-800 mb-3">欧洲站特别注意事项（踩坑总结）</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                    <div class="bg-white rounded-lg p-3 border border-indigo-200">
+                        <h4 class="font-bold text-indigo-700 mb-2"><i class="fas fa-file-invoice mr-1"></i>VAT & 合规</h4>
+                        <div class="space-y-1 text-slate-600">
+                            <p>• 泛欧计划(Pan-EU)：各国VAT号必须齐全，否则无法入仓</p>
+                            <p>• EPR注册：DE/FR站必须有包装法合规注册号</p>
+                            <p>• WEEE注册：电子产品必须，否则Listing会被下架</p>
+                            <p>• CE认证：大部分品类需要，确保合规文件上传</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg p-3 border border-indigo-200">
+                        <h4 class="font-bold text-indigo-700 mb-2"><i class="fas fa-globe-europe mr-1"></i>多站点策略</h4>
+                        <div class="space-y-1 text-slate-600">
+                            <p>• 首发站点选择：DE（最大）> FR > IT/ES > NL/SE/PL</p>
+                            <p>• 同一ASIN泛欧后 → 只用改翻译即可多站点销售</p>
+                            <p>• 小站点不单独开广告，靠泛欧自然流量测试</p>
+                            <p>• 翻译质量：用母语者校对，机翻直接影响CVR</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg p-3 border border-indigo-200">
+                        <h4 class="font-bold text-indigo-700 mb-2"><i class="fas fa-shipping-fast mr-1"></i>物流节奏</h4>
+                        <div class="space-y-1 text-slate-600">
+                            <p>• 海运到DE仓：35-45天（含清关）</p>
+                            <p>• 建议首批发货量：60-90天销量预估</p>
+                            <p>• Q4旺季备货：最迟8月底海运出发</p>
+                            <p>• 断货影响极大：排名恢复需2-3周</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -219,7 +857,7 @@
 
     <!-- Data Table -->
     <div class="bg-white rounded-xl border border-slate-200 overflow-hidden mb-6 shadow-sm">
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto custom-scrollbar">
             <table class="w-full text-left text-xs whitespace-nowrap">
                 <thead>
                     <tr class="bg-slate-50 border-b border-slate-200">
@@ -283,9 +921,10 @@
                     </tr>
                 </thead>
                 <tbody id="npi-table-body" class="divide-y divide-slate-100">
+                    <!-- Row 1: 新品-测款 -->
                     <tr class="hover:bg-blue-50/50 transition-colors group">
                         <td class="px-2 py-1 sticky left-0 bg-white group-hover:bg-blue-50 border-r border-slate-100">
-                            <span class="text-blue-600 font-bold text-xs">新品-测款</span>
+                            <span class="stage-badge stage-test">新品-测款</span>
                         </td>
 
                         <td class="px-2 py-1 font-mono text-slate-700">DE-WIDGET-001</td>
@@ -313,10 +952,10 @@
                         <td class="px-1 py-1 text-center"><input type="checkbox" checked
                                 class="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-offset-0 focus:ring-1">
                         </td>
-                        <td class="px-1 py-1 text-center font-bold text-amber-500 border-r border-slate-100">3/4</td>
+                        <td class="px-1 py-1 text-center font-bold text-amber-500 border-r border-slate-100">4/5</td>
 
                         <td class="px-1 py-1">
-                            <input type="text" value="4.5"
+                            <input type="text" value="4.50"
                                 class="w-full text-center bg-transparent border-none p-0 text-slate-700 font-mono text-xs focus:ring-1 focus:ring-blue-500 focus:bg-white rounded-sm">
                         </td>
                         <td class="px-1 py-1 text-center text-slate-400 font-mono text-[11px]">40.9%</td>
@@ -332,7 +971,7 @@
                             <input type="text" value="€11.00"
                                 class="w-full text-center bg-transparent border-none p-0 text-emerald-600 font-mono font-bold text-xs focus:ring-1 focus:ring-blue-500 focus:bg-white rounded-sm">
                         </td>
-                        <td class="px-2 py-1 text-center font-mono border-r border-slate-100">€12</td>
+                        <td class="px-2 py-1 text-center font-mono border-r border-slate-100">€12.00</td>
 
                         <td class="px-2 py-1 text-center font-mono">1,250</td>
                         <td class="px-2 py-1 text-center font-mono">0.68%</td>
@@ -342,17 +981,421 @@
 
                         <td class="px-2 py-1 text-center font-mono">15/30</td>
                         <td class="px-1 py-1 text-center">
-                            <button
-                                class="px-2 py-0.5 rounded border border-slate-200 bg-white text-xs hover:bg-slate-50">混合</button>
+                            <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-bold">混合</span>
                         </td>
-                        <td class="px-1 py-1 text-center">30/30</td>
+                        <td class="px-1 py-1 text-center"><span class="text-emerald-600 font-bold">✓</span></td>
                         <td class="px-1 py-1">
                             <button
-                                class="px-2 py-0.5 rounded border border-slate-200 bg-white text-xs hover:bg-slate-50">手册</button>
+                                class="px-2 py-0.5 rounded border border-slate-200 bg-white text-xs hover:bg-slate-50">开手动精准</button>
+                        </td>
+                    </tr>
+
+                    <!-- Row 2: 成长期 -->
+                    <tr class="hover:bg-emerald-50/50 transition-colors group">
+                        <td class="px-2 py-1 sticky left-0 bg-white group-hover:bg-emerald-50 border-r border-slate-100">
+                            <span class="stage-badge stage-growth">成长期</span>
+                        </td>
+
+                        <td class="px-2 py-1 font-mono text-slate-700">DE-LAMP-002</td>
+                        <td class="px-2 py-1 text-slate-600 truncate max-w-[100px]" title="LED护眼台灯">LED护眼台灯</td>
+                        <td class="px-2 py-1 text-slate-500">Altear</td>
+                        <td class="px-2 py-1 font-mono text-slate-400 text-[11px]">B0CXXXXXXX2</td>
+                        <td class="px-2 py-1 text-center"><span
+                                class="bg-gray-100 text-gray-600 px-1 rounded text-[10px]">DE</span></td>
+                        <td class="px-2 py-1 text-center font-mono">800</td>
+
+                        <td class="px-2 py-1 text-center font-mono border-r border-slate-100">32天</td>
+
+                        <td class="px-1 py-1 text-center"><input type="checkbox" checked
+                                class="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-offset-0 focus:ring-1">
+                        </td>
+                        <td class="px-1 py-1 text-center"><input type="checkbox" checked
+                                class="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-offset-0 focus:ring-1">
+                        </td>
+                        <td class="px-1 py-1 text-center"><input type="checkbox" checked
+                                class="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-offset-0 focus:ring-1">
+                        </td>
+                        <td class="px-1 py-1 text-center"><input type="checkbox" checked
+                                class="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-offset-0 focus:ring-1">
+                        </td>
+                        <td class="px-1 py-1 text-center"><input type="checkbox" checked
+                                class="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-offset-0 focus:ring-1">
+                        </td>
+                        <td class="px-1 py-1 text-center font-bold text-emerald-500 border-r border-slate-100">✓</td>
+
+                        <td class="px-1 py-1">
+                            <input type="text" value="5.80"
+                                class="w-full text-center bg-transparent border-none p-0 text-slate-700 font-mono text-xs focus:ring-1 focus:ring-blue-500 focus:bg-white rounded-sm">
+                        </td>
+                        <td class="px-1 py-1 text-center text-slate-400 font-mono text-[11px]">29.7%</td>
+                        <td class="px-1 py-1">
+                            <input type="text" value="€11.60"
+                                class="w-full text-center bg-transparent border-none p-0 text-red-600 font-mono font-bold text-xs focus:ring-1 focus:ring-blue-500 focus:bg-white rounded-sm">
+                        </td>
+                        <td class="px-1 py-1">
+                            <input type="text" value="€12.60"
+                                class="w-full text-center bg-transparent border-none p-0 text-amber-600 font-mono font-bold text-xs focus:ring-1 focus:ring-blue-500 focus:bg-white rounded-sm">
+                        </td>
+                        <td class="px-1 py-1">
+                            <input type="text" value="€13.60"
+                                class="w-full text-center bg-transparent border-none p-0 text-emerald-600 font-mono font-bold text-xs focus:ring-1 focus:ring-blue-500 focus:bg-white rounded-sm">
+                        </td>
+                        <td class="px-2 py-1 text-center font-mono border-r border-slate-100">€15.00</td>
+
+                        <td class="px-2 py-1 text-center font-mono">3,420</td>
+                        <td class="px-2 py-1 text-center font-mono">0.82%</td>
+                        <td class="px-2 py-1 text-center font-mono">15.3%</td>
+                        <td class="px-2 py-1 text-center font-mono font-bold text-emerald-600">28%</td>
+                        <td class="px-2 py-1 text-center font-mono border-r border-slate-100">52%</td>
+
+                        <td class="px-2 py-1 text-center font-mono">28/30</td>
+                        <td class="px-1 py-1 text-center">
+                            <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 text-[10px] font-bold">精准+商品</span>
+                        </td>
+                        <td class="px-1 py-1 text-center"><span class="text-emerald-600 font-bold">✓</span></td>
+                        <td class="px-1 py-1">
+                            <button
+                                class="px-2 py-0.5 rounded border border-slate-200 bg-white text-xs hover:bg-slate-50">提价至建议价</button>
+                        </td>
+                    </tr>
+
+                    <!-- Row 3: 稳定期 -->
+                    <tr class="hover:bg-purple-50/50 transition-colors group">
+                        <td class="px-2 py-1 sticky left-0 bg-white group-hover:bg-purple-50 border-r border-slate-100">
+                            <span class="stage-badge stage-stable">稳定期</span>
+                        </td>
+
+                        <td class="px-2 py-1 font-mono text-slate-700">FR-HOOK-003</td>
+                        <td class="px-2 py-1 text-slate-600 truncate max-w-[100px]" title="不锈钢挂钩套装">不锈钢挂钩套装</td>
+                        <td class="px-2 py-1 text-slate-500">Aiacbof</td>
+                        <td class="px-2 py-1 font-mono text-slate-400 text-[11px]">B0CXXXXXXX3</td>
+                        <td class="px-2 py-1 text-center"><span
+                                class="bg-blue-100 text-blue-600 px-1 rounded text-[10px]">FR</span></td>
+                        <td class="px-2 py-1 text-center font-mono">1,200</td>
+
+                        <td class="px-2 py-1 text-center font-mono border-r border-slate-100">28天</td>
+
+                        <td class="px-1 py-1 text-center"><input type="checkbox" checked
+                                class="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-offset-0 focus:ring-1">
+                        </td>
+                        <td class="px-1 py-1 text-center"><input type="checkbox" checked
+                                class="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-offset-0 focus:ring-1">
+                        </td>
+                        <td class="px-1 py-1 text-center"><input type="checkbox" checked
+                                class="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-offset-0 focus:ring-1">
+                        </td>
+                        <td class="px-1 py-1 text-center"><input type="checkbox" checked
+                                class="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-offset-0 focus:ring-1">
+                        </td>
+                        <td class="px-1 py-1 text-center"><input type="checkbox" checked
+                                class="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-offset-0 focus:ring-1">
+                        </td>
+                        <td class="px-1 py-1 text-center font-bold text-emerald-500 border-r border-slate-100">✓</td>
+
+                        <td class="px-1 py-1">
+                            <input type="text" value="3.20"
+                                class="w-full text-center bg-transparent border-none p-0 text-slate-700 font-mono text-xs focus:ring-1 focus:ring-blue-500 focus:bg-white rounded-sm">
+                        </td>
+                        <td class="px-1 py-1 text-center text-slate-400 font-mono text-[11px]">22.5%</td>
+                        <td class="px-1 py-1">
+                            <input type="text" value="€6.40"
+                                class="w-full text-center bg-transparent border-none p-0 text-red-600 font-mono font-bold text-xs focus:ring-1 focus:ring-blue-500 focus:bg-white rounded-sm">
+                        </td>
+                        <td class="px-1 py-1">
+                            <input type="text" value="€7.40"
+                                class="w-full text-center bg-transparent border-none p-0 text-amber-600 font-mono font-bold text-xs focus:ring-1 focus:ring-blue-500 focus:bg-white rounded-sm">
+                        </td>
+                        <td class="px-1 py-1">
+                            <input type="text" value="€8.40"
+                                class="w-full text-center bg-transparent border-none p-0 text-emerald-600 font-mono font-bold text-xs focus:ring-1 focus:ring-blue-500 focus:bg-white rounded-sm">
+                        </td>
+                        <td class="px-2 py-1 text-center font-mono border-r border-slate-100">€9.50</td>
+
+                        <td class="px-2 py-1 text-center font-mono">5,800</td>
+                        <td class="px-2 py-1 text-center font-mono">1.12%</td>
+                        <td class="px-2 py-1 text-center font-mono">18.7%</td>
+                        <td class="px-2 py-1 text-center font-mono font-bold text-emerald-600">18%</td>
+                        <td class="px-2 py-1 text-center font-mono text-emerald-600 font-bold border-r border-slate-100">72%</td>
+
+                        <td class="px-2 py-1 text-center font-mono text-slate-400">30/30</td>
+                        <td class="px-1 py-1 text-center">
+                            <span class="px-2 py-0.5 rounded bg-purple-100 text-purple-700 text-[10px] font-bold">品牌词</span>
+                        </td>
+                        <td class="px-1 py-1 text-center"><span class="text-emerald-600 font-bold">✓</span></td>
+                        <td class="px-1 py-1">
+                            <button
+                                class="px-2 py-0.5 rounded border border-slate-200 bg-white text-xs hover:bg-slate-50">降广告预算</button>
+                        </td>
+                    </tr>
+
+                    <!-- Row 4: 清仓期 -->
+                    <tr class="hover:bg-red-50/50 transition-colors group bg-red-50/20">
+                        <td class="px-2 py-1 sticky left-0 bg-red-50/20 group-hover:bg-red-50 border-r border-slate-100">
+                            <span class="stage-badge stage-clearance">清仓期</span>
+                        </td>
+
+                        <td class="px-2 py-1 font-mono text-slate-700">DE-MAT-004</td>
+                        <td class="px-2 py-1 text-slate-600 truncate max-w-[100px]" title="硅胶餐垫">硅胶餐垫</td>
+                        <td class="px-2 py-1 text-slate-500">Altear</td>
+                        <td class="px-2 py-1 font-mono text-slate-400 text-[11px]">B0CXXXXXXX4</td>
+                        <td class="px-2 py-1 text-center"><span
+                                class="bg-gray-100 text-gray-600 px-1 rounded text-[10px]">DE</span></td>
+                        <td class="px-2 py-1 text-center font-mono">300</td>
+
+                        <td class="px-2 py-1 text-center font-mono text-red-600 font-bold border-r border-slate-100 alert-pulse">92天</td>
+
+                        <td class="px-1 py-1 text-center"><input type="checkbox" checked
+                                class="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-offset-0 focus:ring-1">
+                        </td>
+                        <td class="px-1 py-1 text-center"><input type="checkbox" checked
+                                class="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-offset-0 focus:ring-1">
+                        </td>
+                        <td class="px-1 py-1 text-center"><input type="checkbox" checked
+                                class="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-offset-0 focus:ring-1">
+                        </td>
+                        <td class="px-1 py-1 text-center"><input type="checkbox" checked
+                                class="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-offset-0 focus:ring-1">
+                        </td>
+                        <td class="px-1 py-1 text-center"><input type="checkbox"
+                                class="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-offset-0 focus:ring-1">
+                        </td>
+                        <td class="px-1 py-1 text-center font-bold text-amber-500 border-r border-slate-100">4/5</td>
+
+                        <td class="px-1 py-1">
+                            <input type="text" value="3.80"
+                                class="w-full text-center bg-transparent border-none p-0 text-slate-700 font-mono text-xs focus:ring-1 focus:ring-blue-500 focus:bg-white rounded-sm">
+                        </td>
+                        <td class="px-1 py-1 text-center text-red-500 font-bold font-mono text-[11px]">48.7%</td>
+                        <td class="px-1 py-1">
+                            <input type="text" value="€7.60"
+                                class="w-full text-center bg-transparent border-none p-0 text-red-600 font-mono font-bold text-xs focus:ring-1 focus:ring-blue-500 focus:bg-white rounded-sm">
+                        </td>
+                        <td class="px-1 py-1">
+                            <input type="text" value="€8.60"
+                                class="w-full text-center bg-transparent border-none p-0 text-amber-600 font-mono font-bold text-xs focus:ring-1 focus:ring-blue-500 focus:bg-white rounded-sm">
+                        </td>
+                        <td class="px-1 py-1">
+                            <input type="text" value="€9.60"
+                                class="w-full text-center bg-transparent border-none p-0 text-emerald-600 font-mono font-bold text-xs focus:ring-1 focus:ring-blue-500 focus:bg-white rounded-sm">
+                        </td>
+                        <td class="px-2 py-1 text-center font-mono border-r border-slate-100">€10.50</td>
+
+                        <td class="px-2 py-1 text-center font-mono text-slate-400">320</td>
+                        <td class="px-2 py-1 text-center font-mono text-red-500">0.31%</td>
+                        <td class="px-2 py-1 text-center font-mono">6.2%</td>
+                        <td class="px-2 py-1 text-center font-mono font-bold text-red-600">72%</td>
+                        <td class="px-2 py-1 text-center font-mono text-red-500 border-r border-slate-100">12%</td>
+
+                        <td class="px-2 py-1 text-center font-mono text-slate-400">8/30</td>
+                        <td class="px-1 py-1 text-center">
+                            <span class="px-2 py-0.5 rounded bg-red-100 text-red-700 text-[10px] font-bold">已停</span>
+                        </td>
+                        <td class="px-1 py-1 text-center"><span class="text-red-600 font-bold">✗</span></td>
+                        <td class="px-1 py-1">
+                            <button
+                                class="px-2 py-0.5 rounded border border-red-200 bg-red-50 text-red-700 text-xs hover:bg-red-100">降至清仓线</button>
+                        </td>
+                    </tr>
+
+                    <!-- Row 5: 新品-测款 (另一个店铺) -->
+                    <tr class="hover:bg-blue-50/50 transition-colors group">
+                        <td class="px-2 py-1 sticky left-0 bg-white group-hover:bg-blue-50 border-r border-slate-100">
+                            <span class="stage-badge stage-test">新品-测款</span>
+                        </td>
+
+                        <td class="px-2 py-1 font-mono text-slate-700">ES-ORGAN-005</td>
+                        <td class="px-2 py-1 text-slate-600 truncate max-w-[100px]" title="桌面收纳架">桌面收纳架</td>
+                        <td class="px-2 py-1 text-slate-500">Aiacbof</td>
+                        <td class="px-2 py-1 font-mono text-slate-400 text-[11px]">B0CXXXXXXX5</td>
+                        <td class="px-2 py-1 text-center"><span
+                                class="bg-amber-100 text-amber-600 px-1 rounded text-[10px]">ES</span></td>
+                        <td class="px-2 py-1 text-center font-mono">400</td>
+
+                        <td class="px-2 py-1 text-center font-mono border-r border-slate-100">55天</td>
+
+                        <td class="px-1 py-1 text-center"><input type="checkbox" checked
+                                class="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-offset-0 focus:ring-1">
+                        </td>
+                        <td class="px-1 py-1 text-center"><input type="checkbox"
+                                class="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-offset-0 focus:ring-1">
+                        </td>
+                        <td class="px-1 py-1 text-center"><input type="checkbox" checked
+                                class="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-offset-0 focus:ring-1">
+                        </td>
+                        <td class="px-1 py-1 text-center"><input type="checkbox"
+                                class="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-offset-0 focus:ring-1">
+                        </td>
+                        <td class="px-1 py-1 text-center"><input type="checkbox"
+                                class="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-offset-0 focus:ring-1">
+                        </td>
+                        <td class="px-1 py-1 text-center font-bold text-red-500 border-r border-slate-100">2/5</td>
+
+                        <td class="px-1 py-1">
+                            <input type="text" value="4.10"
+                                class="w-full text-center bg-transparent border-none p-0 text-slate-700 font-mono text-xs focus:ring-1 focus:ring-blue-500 focus:bg-white rounded-sm">
+                        </td>
+                        <td class="px-1 py-1 text-center text-slate-400 font-mono text-[11px]">37.3%</td>
+                        <td class="px-1 py-1">
+                            <input type="text" value="€8.20"
+                                class="w-full text-center bg-transparent border-none p-0 text-red-600 font-mono font-bold text-xs focus:ring-1 focus:ring-blue-500 focus:bg-white rounded-sm">
+                        </td>
+                        <td class="px-1 py-1">
+                            <input type="text" value="€9.20"
+                                class="w-full text-center bg-transparent border-none p-0 text-amber-600 font-mono font-bold text-xs focus:ring-1 focus:ring-blue-500 focus:bg-white rounded-sm">
+                        </td>
+                        <td class="px-1 py-1">
+                            <input type="text" value="€10.20"
+                                class="w-full text-center bg-transparent border-none p-0 text-emerald-600 font-mono font-bold text-xs focus:ring-1 focus:ring-blue-500 focus:bg-white rounded-sm">
+                        </td>
+                        <td class="px-2 py-1 text-center font-mono border-r border-slate-100">€11.00</td>
+
+                        <td class="px-2 py-1 text-center font-mono">680</td>
+                        <td class="px-2 py-1 text-center font-mono text-red-500">0.42%</td>
+                        <td class="px-2 py-1 text-center font-mono">8.1%</td>
+                        <td class="px-2 py-1 text-center font-mono font-bold">48%</td>
+                        <td class="px-2 py-1 text-center font-mono border-r border-slate-100">22%</td>
+
+                        <td class="px-2 py-1 text-center font-mono">5/30</td>
+                        <td class="px-1 py-1 text-center">
+                            <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-bold">自动</span>
+                        </td>
+                        <td class="px-1 py-1 text-center"><span class="text-amber-500 font-bold">△</span></td>
+                        <td class="px-1 py-1">
+                            <button
+                                class="px-2 py-0.5 rounded border border-amber-200 bg-amber-50 text-amber-700 text-xs hover:bg-amber-100">补合规项</button>
                         </td>
                     </tr>
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    <!-- ==================== 新增：阶段升降级规则速查表 ==================== -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-exchange-alt text-indigo-500"></i>阶段升降级规则速查表
+        </h2>
+        <div class="overflow-x-auto custom-scrollbar">
+            <table class="w-full text-xs border-collapse">
+                <thead>
+                    <tr class="bg-slate-50">
+                        <th class="px-3 py-2 text-left border border-slate-200 font-bold text-slate-700">当前阶段</th>
+                        <th class="px-3 py-2 text-left border border-slate-200 font-bold text-emerald-700">升级条件 ↑</th>
+                        <th class="px-3 py-2 text-left border border-slate-200 font-bold text-red-700">降级/清仓条件 ↓</th>
+                        <th class="px-3 py-2 text-left border border-slate-200 font-bold text-blue-700">操作动作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="px-3 py-2 border border-slate-200"><span class="stage-badge stage-test">测款期</span></td>
+                        <td class="px-3 py-2 border border-slate-200 text-emerald-700">
+                            日均≥1单 + CTR>0.5% + 评分≥4.0<br>
+                            <span class="text-slate-500">→ 升级为「成长期」</span>
+                        </td>
+                        <td class="px-3 py-2 border border-slate-200 text-red-700">
+                            30天零单 或 评分&lt;3.5 或 ACOS>80%<br>
+                            <span class="text-slate-500">→ 直接进入「清仓期」</span>
+                        </td>
+                        <td class="px-3 py-2 border border-slate-200 text-blue-700">更新看板阶段标签 + 调整广告策略</td>
+                    </tr>
+                    <tr class="bg-slate-50/50">
+                        <td class="px-3 py-2 border border-slate-200"><span class="stage-badge stage-growth">成长期</span></td>
+                        <td class="px-3 py-2 border border-slate-200 text-emerald-700">
+                            自然单占比>50% + ACOS&lt;30% + 日均≥5单<br>
+                            <span class="text-slate-500">→ 升级为「稳定期」</span>
+                        </td>
+                        <td class="px-3 py-2 border border-slate-200 text-red-700">
+                            60天后ACOS>55% + 无自然单 + 评分&lt;4.0<br>
+                            <span class="text-slate-500">→ 降级为「清仓期」</span>
+                        </td>
+                        <td class="px-3 py-2 border border-slate-200 text-blue-700">升级→提价/减广告；降级→停广告/降价</td>
+                    </tr>
+                    <tr>
+                        <td class="px-3 py-2 border border-slate-200"><span class="stage-badge stage-stable">稳定期</span></td>
+                        <td class="px-3 py-2 border border-slate-200 text-emerald-700">
+                            保持现状，持续盈利<br>
+                            <span class="text-slate-500">→ 考虑变体扩展/多站点复制</span>
+                        </td>
+                        <td class="px-3 py-2 border border-slate-200 text-red-700">
+                            排名持续下降 + 库存积压>90天<br>
+                            <span class="text-slate-500">→ 降级为「清仓期」</span>
+                        </td>
+                        <td class="px-3 py-2 border border-slate-200 text-blue-700">降级→立即启动清仓SOP</td>
+                    </tr>
+                    <tr class="bg-slate-50/50">
+                        <td class="px-3 py-2 border border-slate-200"><span class="stage-badge stage-clearance">清仓期</span></td>
+                        <td class="px-3 py-2 border border-slate-200 text-slate-400">
+                            通常不升级<br>
+                            <span class="text-slate-500">（除非降价后意外爆单）</span>
+                        </td>
+                        <td class="px-3 py-2 border border-slate-200 text-red-700">
+                            库龄>270天 → 移除<br>
+                            <span class="text-slate-500">→ 归档关闭</span>
+                        </td>
+                        <td class="px-3 py-2 border border-slate-200 text-blue-700">执行清仓6步 → 归档 → 复盘记录</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ==================== 新增：广告阶段配置速查 ==================== -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-bullhorn text-amber-500"></i>广告阶段配置速查（欧洲站实战参数）
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="border border-blue-200 rounded-lg p-4 bg-blue-50/20">
+                <h4 class="font-bold text-blue-700 text-sm mb-3 flex items-center gap-1">
+                    <span class="stage-badge stage-test text-[10px]">测款期</span>广告
+                </h4>
+                <div class="space-y-2 text-xs text-slate-700">
+                    <div class="flex justify-between"><span>广告类型</span><span class="font-mono font-bold">自动广告</span></div>
+                    <div class="flex justify-between"><span>日预算</span><span class="font-mono font-bold">€10-15</span></div>
+                    <div class="flex justify-between"><span>竞价策略</span><span class="font-mono">建议价×0.8</span></div>
+                    <div class="flex justify-between"><span>ACOS容忍度</span><span class="font-mono text-amber-600">&lt;60%</span></div>
+                    <div class="flex justify-between"><span>目标</span><span class="font-bold text-blue-600">收集搜索词</span></div>
+                </div>
+            </div>
+
+            <div class="border border-emerald-200 rounded-lg p-4 bg-emerald-50/20">
+                <h4 class="font-bold text-emerald-700 text-sm mb-3 flex items-center gap-1">
+                    <span class="stage-badge stage-growth text-[10px]">成长期</span>广告
+                </h4>
+                <div class="space-y-2 text-xs text-slate-700">
+                    <div class="flex justify-between"><span>广告类型</span><span class="font-mono font-bold">自动+手动精准</span></div>
+                    <div class="flex justify-between"><span>日预算</span><span class="font-mono font-bold">€15-30</span></div>
+                    <div class="flex justify-between"><span>竞价策略</span><span class="font-mono">出单词+10%</span></div>
+                    <div class="flex justify-between"><span>ACOS容忍度</span><span class="font-mono text-amber-600">&lt;40%</span></div>
+                    <div class="flex justify-between"><span>目标</span><span class="font-bold text-emerald-600">推排名+出单</span></div>
+                </div>
+            </div>
+
+            <div class="border border-purple-200 rounded-lg p-4 bg-purple-50/20">
+                <h4 class="font-bold text-purple-700 text-sm mb-3 flex items-center gap-1">
+                    <span class="stage-badge stage-stable text-[10px]">稳定期</span>广告
+                </h4>
+                <div class="space-y-2 text-xs text-slate-700">
+                    <div class="flex justify-between"><span>广告类型</span><span class="font-mono font-bold">精准+品牌词</span></div>
+                    <div class="flex justify-between"><span>日预算</span><span class="font-mono font-bold">€5-15</span></div>
+                    <div class="flex justify-between"><span>竞价策略</span><span class="font-mono">逐步降低</span></div>
+                    <div class="flex justify-between"><span>ACOS容忍度</span><span class="font-mono text-emerald-600">&lt;25%</span></div>
+                    <div class="flex justify-between"><span>目标</span><span class="font-bold text-purple-600">防御+利润</span></div>
+                </div>
+            </div>
+
+            <div class="border border-red-200 rounded-lg p-4 bg-red-50/20">
+                <h4 class="font-bold text-red-700 text-sm mb-3 flex items-center gap-1">
+                    <span class="stage-badge stage-clearance text-[10px]">清仓期</span>广告
+                </h4>
+                <div class="space-y-2 text-xs text-slate-700">
+                    <div class="flex justify-between"><span>广告类型</span><span class="font-mono font-bold text-red-600">全部暂停</span></div>
+                    <div class="flex justify-between"><span>日预算</span><span class="font-mono font-bold">€0</span></div>
+                    <div class="flex justify-between"><span>竞价策略</span><span class="font-mono">—</span></div>
+                    <div class="flex justify-between"><span>ACOS容忍度</span><span class="font-mono">—</span></div>
+                    <div class="flex justify-between"><span>目标</span><span class="font-bold text-red-600">零广告费清库存</span></div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -372,6 +1415,14 @@
                 <span class="flex items-center gap-1"><span
                         class="inline-block w-3 h-3 bg-red-100 rounded border border-red-300"></span>清仓期</span>
             </div>
+            <div class="mt-3 pt-3 border-t border-slate-100">
+                <p class="text-xs text-slate-500 mb-1"><strong>决策栏图标：</strong></p>
+                <div class="flex items-center gap-4 text-xs">
+                    <span><span class="text-emerald-600 font-bold">✓</span> = 保留推进</span>
+                    <span><span class="text-amber-500 font-bold">△</span> = 观察中</span>
+                    <span><span class="text-red-600 font-bold">✗</span> = 放弃清仓</span>
+                </div>
+            </div>
         </div>
         <div class="bg-amber-50 rounded-xl border border-amber-200 p-4">
             <h3 class="font-bold text-amber-800 mb-2 flex items-center gap-2">
@@ -381,42 +1432,107 @@
                 <p><span class="text-red-600 font-bold">库存&gt;60天</span> = 滞销预警，考虑降价或清仓</p>
                 <p><span class="text-amber-600 font-bold">CTR&lt;0.5%</span> = 点击预警，需优化主图或标题</p>
                 <p><span class="text-red-600 font-bold">建议价&lt;清仓线</span> = 财务预警，当前定价已亏损</p>
+                <p><span class="text-red-600 font-bold">合规状态 &lt; 5/5</span> = 合规未完成，暂缓广告投放</p>
+                <p><span class="text-amber-600 font-bold">配送占比&gt;45%</span> = 配送费过高，检查包装尺寸是否可优化</p>
+                <p><span class="text-red-600 font-bold">ACOS&gt;60%持续2周</span> = 广告效率预警，需立即优化或暂停</p>
             </div>
         </div>
     </div>
 
-    <!-- Video Resource -->
-    <div class="bg-blue-50 rounded-xl border border-blue-200 p-4">
-        <div class="flex items-center gap-3">
-            <i class="fas fa-video text-blue-500 text-xl"></i>
-            <div>
-                <h3 class="font-bold text-slate-800">操作视频教程</h3>
-                <p class="text-sm text-slate-600">访问公司网盘(待完善)观看详细操作录屏：<a href="http://192.168.1.99"
-                        class="text-blue-600 underline">192.168.1.99</a>（仅限内网访问）→ 培训资料 → NPI新品跟踪专题</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Next Step Modal -->
-    <div id="next-step-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4">
-            <div class="flex items-center justify-between px-4 py-3 border-b">
-                <h3 class="font-bold text-slate-800">编辑 Next Step</h3>
-                <button data-action="closeNextStepModal" class="text-slate-400 hover:text-slate-600">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="p-4">
-                <div id="next-step-checkboxes" class="space-y-2">
-                    <!-- Dynamic checkboxes -->
+    <!-- ==================== 新增：常见问题FAQ ==================== -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-question-circle text-blue-500"></i>常见问题 FAQ（实操场景）
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-3">
+                <div class="p-3 bg-slate-50 rounded-lg">
+                    <h4 class="font-bold text-slate-700 text-sm mb-1">Q：新品上架多久没出单应该放弃？</h4>
+                    <p class="text-xs text-slate-600">A：<strong>30天是第一道红线</strong>。如果30天内曝光正常（>500/天）但零单，说明产品或价格有硬伤，建议直接清仓止损。如果曝光极低，先排查Listing是否有问题。</p>
+                </div>
+                <div class="p-3 bg-slate-50 rounded-lg">
+                    <h4 class="font-bold text-slate-700 text-sm mb-1">Q：Vine评价一直不来怎么办？</h4>
+                    <p class="text-xs text-slate-600">A：Vine评价通常7-21天开始到达。如果30天还没有，检查：①价格是否太低（Vine用户不感兴趣）②类目是否冷门 ③库存是否显示在售。无法解决就只能等自然评价。</p>
+                </div>
+                <div class="p-3 bg-slate-50 rounded-lg">
+                    <h4 class="font-bold text-slate-700 text-sm mb-1">Q：运营如何高效管理多个新品？</h4>
+                    <p class="text-xs text-slate-600">A：<strong>同时推广不超过5个新品</strong>。用本看板每周一复盘30分钟即可。严格执行阶段决策，不合格的果断清仓，不要拖。精力集中在有潜力的SKU上。</p>
                 </div>
             </div>
-            <div class="flex justify-end gap-2 px-4 py-3 border-t bg-slate-50">
-                <button data-action="closeNextStepModal"
-                    class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg">取消</button>
-                <button data-action="saveNextSteps"
-                    class="px-4 py-2 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-lg">保存</button>
+            <div class="space-y-3">
+                <div class="p-3 bg-slate-50 rounded-lg">
+                    <h4 class="font-bold text-slate-700 text-sm mb-1">Q：清仓时应该降到什么价格？</h4>
+                    <p class="text-xs text-slate-600">A：分两步：先降到<strong>动销价</strong>（清仓线+€1），观察3天。如果仍无动销，直接降到<strong>清仓红线</strong>。低于清仓线卖每一单都在亏钱，这时考虑移除订单(Removal Order)可能更划算。</p>
+                </div>
+                <div class="p-3 bg-slate-50 rounded-lg">
+                    <h4 class="font-bold text-slate-700 text-sm mb-1">Q：如何判断该不该开泛欧？</h4>
+                    <p class="text-xs text-slate-600">A：<strong>默认开</strong>。除非：①该品类在小站点有合规风险（如电子产品需额外认证）②产品只适合特定市场（如德语书籍）。泛欧能显著降低配送费，提高小站点曝光。</p>
+                </div>
+                <div class="p-3 bg-slate-50 rounded-lg">
+                    <h4 class="font-bold text-slate-700 text-sm mb-1">Q：自然单占比一直上不去怎么办？</h4>
+                    <p class="text-xs text-slate-600">A：自然单占比低说明<strong>自然排名不够</strong>。检查：①核心关键词是否在标题前80字符 ②是否有足够评价（20+）③是否有A+页面 ④后台Search Term是否填满。如果以上都做了，可能是品类太卷，考虑换长尾词方向。</p>
+                </div>
             </div>
+        </div>
+    </div>
+
+    <!-- ==================== 新增：历史归档与复盘模板 ==================== -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-archive text-slate-500"></i>SKU 复盘归档模板（每个清仓SKU必填）
+        </h2>
+        <div class="overflow-x-auto custom-scrollbar">
+            <table class="w-full text-xs border-collapse">
+                <thead>
+                    <tr class="bg-slate-100">
+                        <th class="px-3 py-2 text-left border border-slate-200 font-bold text-slate-700">复盘维度</th>
+                        <th class="px-3 py-2 text-left border border-slate-200 font-bold text-slate-700">记录内容</th>
+                        <th class="px-3 py-2 text-left border border-slate-200 font-bold text-slate-700">示例</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="px-3 py-2 border border-slate-200 font-bold text-slate-700">SKU & 时间线</td>
+                        <td class="px-3 py-2 border border-slate-200 text-slate-600">SKU编号 / 上架日期 / 清仓日期 / 总运营天数</td>
+                        <td class="px-3 py-2 border border-slate-200 text-slate-500 font-mono">DE-MAT-004 / 2024-01-15 / 2024-04-20 / 95天</td>
+                    </tr>
+                    <tr class="bg-slate-50/50">
+                        <td class="px-3 py-2 border border-slate-200 font-bold text-slate-700">财务总结</td>
+                        <td class="px-3 py-2 border border-slate-200 text-slate-600">总投入（货+头程+广告费）/ 总收入 / 净利润或亏损</td>
+                        <td class="px-3 py-2 border border-slate-200 text-red-600 font-mono">投入€1,850 / 收入€1,220 / 亏损€630</td>
+                    </tr>
+                    <tr>
+                        <td class="px-3 py-2 border border-slate-200 font-bold text-slate-700">失败原因</td>
+                        <td class="px-3 py-2 border border-slate-200 text-slate-600">核心失败原因（选品/定价/竞争/质量/运营）</td>
+                        <td class="px-3 py-2 border border-slate-200 text-slate-500">市场均价持续下降，配送费过高导致无利润空间</td>
+                    </tr>
+                    <tr class="bg-slate-50/50">
+                        <td class="px-3 py-2 border border-slate-200 font-bold text-slate-700">经验教训</td>
+                        <td class="px-3 py-2 border border-slate-200 text-slate-600">下次选品/运营中应避免的问题</td>
+                        <td class="px-3 py-2 border border-slate-200 
+text-slate-500">①包装尺寸优化不足 ②未提前测算配送费占比 ③低价品类需更严格控制成本</td>
+                    </tr>
+                    <tr>
+                        <td class="px-3 py-2 border border-slate-200 font-bold text-slate-700">数据留存</td>
+                        <td class="px-3 py-2 border border-slate-200 text-slate-600">关键数据截图（广告报告/流量/转化率）保存路径</td>
+                        <td class="px-3 py-2 border border-slate-200 text-slate-500 font-mono">/archive/2024Q1/DE-MAT-004/</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+            <p class="text-xs text-blue-700">
+                <i class="fas fa-lightbulb mr-1"></i><strong>复盘建议：</strong>
+                每个清仓SKU都应完成复盘归档。失败的经验比成功更有价值，避免重复踩坑。建议每季度回顾一次归档记录，总结选品规律。
+            </p>
+        </div>
+    </div>
+
+    <!-- Footer Actions -->
+    <div class="flex items-center justify-between pt-6 border-t border-slate-200">
+        <div class="text-xs text-slate-500">
+            <i class="fas fa-info-circle mr-1"></i>
+            本看板数据每日自动更新，建议每周一复盘30分钟
         </div>
     </div>
 </div>
