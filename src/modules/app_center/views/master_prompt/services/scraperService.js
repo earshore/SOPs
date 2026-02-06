@@ -3,11 +3,11 @@
 // 🎯 Phase 4: 已迁移使用 StorageService
 // ==========================================
 
-import { LANGUAGE_HEADERS, PROXY_URLS } from "../../../../common/constants/constants.js";
+import { LANGUAGE_HEADERS, PROXY_URLS } from "../../../../../common/constants/constants.js";
 import { parseProductPage, parseReviews } from "./parserService.js";
-import { sleep, getErrorSummary } from "../../../../common/utils/ui.js";
+import { sleep, getErrorSummary } from "../../../../../common/utils/ui.js";
 import { HistoryService } from "./historyService.js";
-import { StorageService, STORAGE_KEYS } from "../../../../services/storageService.js";
+import { StorageService, STORAGE_KEYS } from "../../../../../services/storageService.js";
 
 const CACHE_DURATION_MS = 24 * 60 * 60 * 1000;
 

@@ -12,6 +12,9 @@ export async function mount(container) {
         container.innerHTML = html;
         container.classList.add('fade-in');
         
+        // 初始化事件监听
+        initOverviewEvents(container);
+        
         console.log("✅ 更多总览页面挂载完成");
     } catch (error) {
         console.error("❌ 更多总览页面挂载失败:", error);
@@ -22,6 +25,52 @@ export async function mount(container) {
             </div>
         `;
     }
+}
+
+/**
+ * 初始化事件监听
+ */
+function initOverviewEvents(container) {
+    // 分类筛选按钮事件
+    const filterBtns = container.querySelectorAll('.category-filter-btn');
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // 移除所有按钮的 active 状态
+            filterBtns.forEach(b => {
+                b.classList.remove('active', 'bg-green-500', 'text-white');
+                b.classList.add('bg-white', 'text-slate-700', 'border-slate-300');
+            });
+            
+            // 添加当前按钮的 active 状态
+            btn.classList.add('active', 'bg-green-500', 'text-white');
+            btn.classList.remove('bg-white', 'text-slate-700', 'border-slate-300');
+            
+            // 执行筛选
+            const category = btn.dataset.category;
+            filterByCategory(container, category);
+        });
+    });
+}
+
+/**
+ * 按分类筛选
+ */
+function filterByCategory(container, category) {
+    const sections = container.querySelectorAll('section[data-category]');
+    
+    sections.forEach(section => {
+        if (category === 'all') {
+            section.style.display = '';
+            section.classList.add('fade-in');
+        } else {
+            if (section.dataset.category === category) {
+                section.style.display = '';
+                section.classList.add('fade-in');
+            } else {
+                section.style.display = 'none';
+            }
+        }
+    });
 }
 
 export function unmount() {

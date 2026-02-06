@@ -9,15 +9,15 @@ const MODULE_MAP = {
     'app_center_overview': () => import('./views/overview/index.js'),
 
     // Master Prompt 子模块
-    'scraper': () => import('./master_prompt/views/scraper/index.js'),
-    'data': () => import('./master_prompt/views/data/index.js'),
-    'analysis': () => import('./master_prompt/views/analysis/index.js'),
-    'promptlab': () => import('./master_prompt/views/promptlab/index.js'),
+    'scraper': () => import('./views/master_prompt/scraper/index.js'),
+    'data': () => import('./views/master_prompt/data/index.js'),
+    'analysis': () => import('./views/master_prompt/analysis/index.js'),
+    'promptlab': () => import('./views/master_prompt/promptlab/index.js'),
 
     // Keyword Hunter 子模块
-    'kw_input': () => import('./keyword_hunter/views/input/index.js'),
-    'kw_process': () => import('./keyword_hunter/views/process/index.js'),
-    'kw_analysis': () => import('./keyword_hunter/views/analysis/index.js'),
+    'kw_input': () => import('./views/keyword_hunter/input/index.js'),
+    'kw_process': () => import('./views/keyword_hunter/process/index.js'),
+    'kw_analysis': () => import('./views/keyword_hunter/analysis/index.js'),
 };
 
 // ================= 使用通用ModuleLoader =================

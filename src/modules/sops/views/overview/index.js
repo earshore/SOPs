@@ -45,6 +45,26 @@ export function scrollToModule(categoryId) {
 }
 
 function initOverviewEvents(container) {
+    // 分类筛选按钮事件
+    const filterBtns = container.querySelectorAll('.category-filter-btn');
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // 移除所有按钮的 active 状态
+            filterBtns.forEach(b => {
+                b.classList.remove('active', 'bg-blue-500', 'text-white');
+                b.classList.add('bg-white', 'text-slate-700', 'border-slate-300');
+            });
+            
+            // 添加当前按钮的 active 状态
+            btn.classList.add('active', 'bg-blue-500', 'text-white');
+            btn.classList.remove('bg-white', 'text-slate-700', 'border-slate-300');
+            
+            // 执行筛选
+            const category = btn.dataset.category;
+            filterByCategory(container, category);
+        });
+    });
+
     // 分类筛选标签点击事件
     const categoryTabs = container.querySelectorAll('.sop-category-tab');
     categoryTabs.forEach(tab => {
@@ -66,6 +86,24 @@ function initOverviewEvents(container) {
             searchSOPs(container, e.target.value);
         });
     }
+}
+
+function filterByCategory(container, category) {
+    const sections = container.querySelectorAll('section[data-category]');
+    
+    sections.forEach(section => {
+        if (category === 'all') {
+            section.style.display = '';
+            section.classList.add('fade-in');
+        } else {
+            if (section.dataset.category === category) {
+                section.style.display = '';
+                section.classList.add('fade-in');
+            } else {
+                section.style.display = 'none';
+            }
+        }
+    });
 }
 
 function filterSOPs(container, category) {

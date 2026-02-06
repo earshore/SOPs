@@ -11,9 +11,9 @@
 import { loadTemplate } from '../../../../../common/utils/viewLoader.js';
 import eventBus from '../../../../../common/EventBus.js';
 import state from '../../../../../common/state.js';
-import { scrapeAsin } from '../../services/scraperService.js';
+import { scrapeAsin } from '../services/scraperService.js';
 import { LANGUAGE_HEADERS } from '../../../../../common/constants/constants.js';
-import { HistoryService } from '../../services/historyService.js';
+import { HistoryService } from '../services/historyService.js';
 import { StorageService, STORAGE_KEYS } from '../../../../../services/storageService.js';
 import { ErrorService } from '../../../../../services/errorService.js';
 import { showToast, sleep } from '../../../../../common/utils/ui.js';
@@ -307,7 +307,7 @@ export async function mount(container) {
 
     try {
         // 1. 加载模板
-        const html = await loadTemplate('src/modules/app_center/master_prompt/views/scraper/template.html');
+        const html = await loadTemplate('src/modules/app_center/views/master_prompt/scraper/template.html');
         container.innerHTML = html;
 
         // 2. 初始化 Alpine.js 组件

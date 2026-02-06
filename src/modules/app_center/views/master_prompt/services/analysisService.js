@@ -5,7 +5,7 @@
 // 🛡️ Phase 1: 增强鲁棒性 - 改进解析逻辑与类型检查
 // ================================================= ===============
 
-import { callLLM } from "../../../../services/llmService.js";
+import { callLLM } from "../../../../../services/llmService.js";
 import { TRANSLATE_PROMPT_TEMPLATE } from "../constants/prompts.js";
 
 // ======================== 

@@ -3,7 +3,7 @@
 // 🎯 P1优化: Master Prompt 模块专属错误处理器
 // ================================================================
 
-import { ErrorService } from '../../../../services/errorService.js';
+import { ErrorService } from '../../../../../services/errorService.js';
 
 /**
  * Master Prompt 模块错误处理器

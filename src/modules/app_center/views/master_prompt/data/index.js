@@ -12,7 +12,7 @@ import { loadTemplate } from '../../../../../common/utils/viewLoader.js';
 import BaseModule from '../../../../../common/BaseModule.js';
 import state from '../../../../../common/state.js';
 import { getErrorSummary, showToast, switchTab } from '../../../../../common/utils/ui.js';
-import { HistoryService } from '../../services/historyService.js';
+import { HistoryService } from '../services/historyService.js';
 import { StorageService } from '../../../../../services/storageService.js';
 import { languageFlagMap, SITE_NAME_MAP, SITE_DOMAIN_MAP } from '../../../../../common/constants/constants.js';
 import eventBus from '../../../../../common/EventBus.js';
@@ -684,7 +684,7 @@ export async function mount(container) {
 
     try {
         // 1. 加载模板
-        const html = await loadTemplate('src/modules/app_center/master_prompt/views/data/template.html');
+        const html = await loadTemplate('src/modules/app_center/views/master_prompt/data/template.html');
         container.innerHTML = html;
 
         // 2. 创建模块实例

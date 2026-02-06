@@ -11,9 +11,9 @@
 import { loadTemplate } from '../../../../../common/utils/viewLoader.js';
 import eventBus from '../../../../../common/EventBus.js';
 import state from '../../../../../common/state.js';
-import { promptlabService } from '../../services/promptlabService.js';
+import { promptlabService } from '../services/promptlabService.js';
 import SITE_CONFIGS from '../../../../../common/constants/constants.js';
-import { ANALYSIS_MODULES } from '../../constants/prompts.js';
+import { ANALYSIS_MODULES } from '../constants/prompts.js';
 import { showToast } from '../../../../../common/utils/ui.js';
 import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry.js';
 
@@ -580,7 +580,7 @@ export async function mount(container) {
 
     try {
         // 1. 加载模板
-        const html = await loadTemplate('src/modules/app_center/master_prompt/views/promptlab/template.html');
+        const html = await loadTemplate('src/modules/app_center/views/master_prompt/promptlab/template.html');
         container.innerHTML = html;
 
         // 2. 注册全局操作

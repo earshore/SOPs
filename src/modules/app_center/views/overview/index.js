@@ -1,125 +1,98 @@
-// src/modules/app_center/views/overview/index.js
-// 应用中心总览页面
-
 import { loadTemplate } from "../../../../common/utils/viewLoader.js";
 
-console.log("🧭 应用中心总览页面加载...");
-
-/**
- * 挂载overview页面
- * @param {HTMLElement} container - 容器DOM元素
- * @returns {Promise<void>}
- */
+// App Center Overview - 总览页面
 export async function mount(container) {
-    // 验证容器元素
-    if (!container || !(container instanceof HTMLElement)) {
-        console.error("❌ 无效的容器元素:", container);
-        throw new Error("mount函数需要有效的HTMLElement作为参数");
-    }
+    const html = await loadTemplate('src/modules/app_center/views/overview/template.html');
+    container.innerHTML = html;
+    container.classList.add('fade-in');
 
-    try {
-        // 加载HTML模板
-        const html = await loadTemplate('src/modules/app_center/views/overview/template.html');
-        container.innerHTML = html;
-        container.classList.add('fade-in');
-        
-        // 初始化事件监听
-        initOverviewEvents(container);
-        
-        console.log("✅ App Center 总览模块已挂载");
-    } catch (error) {
-        console.error("❌ App Center 总览页面加载失败:", error);
-        container.innerHTML = `
-            <div class="p-10 text-center text-red-500">
-                <i class="fas fa-exclamation-triangle text-4xl mb-4"></i>
-                <p>页面加载失败，请刷新重试</p>
-            </div>
-        `;
-    }
+    // 初始化事件监听
+    initOverviewEvents(container);
+
+    console.log("✅ App Center 总览模块已挂载");
 }
 
-/**
- * 卸载overview页面
- * @returns {void}
- */
 export function unmount() {
-    console.log("🧹 App Center 总览模块已卸载");
+    console.log("❌ App Center 总览模块已卸载");
 }
 
-/**
- * 滚动到指定分类区域
- * @param {string} categoryId - 分类ID (如'apps')
- * @returns {void}
- */
-export function scrollToModule(categoryId) {
-    if (!categoryId) {
-        console.warn('⚠️ scrollToModule: categoryId为空');
-        return;
-    }
-    
-    const moduleId = `app-module-${categoryId}`;
-    const moduleElement = document.getElementById(moduleId);
-    
-    if (moduleElement) {
-        // 使用平滑滚动
-        moduleElement.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'start',
-            inline: 'nearest'
-        });
-        
-        // 添加高亮效果
-        moduleElement.classList.add('app-module-highlight');
-        setTimeout(() => {
-            moduleElement.classList.remove('app-module-highlight');
-        }, 2000);
-        
-        console.log(`✅ 滚动到模块: ${categoryId}`);
-    } else {
-        console.warn(`⚠️ 未找到模块元素: ${moduleId}`);
-    }
-}
-
-/**
- * 初始化overview页面事件监听
- * @param {HTMLElement} container - 容器元素
- */
 function initOverviewEvents(container) {
-    // 1. 子应用卡片点击事件
-    const appCards = container.querySelectorAll('[data-action="switch-tab"]');
-    
-    if (appCards.length === 0) {
-        console.warn('⚠️ 未找到任何可点击的应用卡片');
-    }
-    
-    appCards.forEach(card => {
-        try {
-            card.addEventListener('click', () => {
-                const targetTab = card.dataset.tab;
-                if (!targetTab) {
-                    console.error('❌ 卡片缺少data-tab属性:', card);
-                    return;
-                }
-                // 触发路由切换（由全局路由系统处理）
-                window.dispatchEvent(new CustomEvent('route-change', {
-                    detail: { routeId: targetTab }
-                }));
+    // 分类筛选按钮事件
+    const filterBtns = container.querySelectorAll('.category-filter-btn');
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // 移除所有按钮的 active 状态
+            filterBtns.forEach(b => {
+                b.classList.remove('active', 'bg-blue-500', 'text-white');
+                b.classList.add('bg-white', 'text-slate-700', 'border-slate-300');
             });
-        } catch (error) {
-            console.error('❌ 添加事件监听器失败:', error);
-        }
+            
+            // 添加当前按钮的 active 状态
+            btn.classList.add('active', 'bg-blue-500', 'text-white');
+            btn.classList.remove('bg-white', 'text-slate-700', 'border-slate-300');
+            
+            // 执行筛选
+            const category = btn.dataset.category;
+            filterByCategory(container, category);
+        });
     });
 
-    // 2. 快速入口按钮点击事件
+    // 快速链接按钮事件
     const quickLinks = container.querySelectorAll('[data-quick-link]');
     quickLinks.forEach(link => {
         link.addEventListener('click', () => {
-            const targetRoute = link.dataset.quickLink;
-            if (targetRoute) {
+            const targetTab = link.dataset.quickLink;
+            if (targetTab) {
                 window.dispatchEvent(new CustomEvent('route-change', {
-                    detail: { routeId: targetRoute }
+                    detail: { routeId: targetTab }
                 }));
             }
         });
     });
+
+    // 应用卡片点击事件
+    const appCards = container.querySelectorAll('[data-action="switch-tab"]');
+    appCards.forEach(card => {
+        card.addEventListener('click', () => {
+            const targetTab = card.dataset.tab;
+            if (targetTab) {
+                window.dispatchEvent(new CustomEvent('route-change', {
+                    detail: { routeId: targetTab }
+                }));
+            }
+        });
+    });
+}
+
+/**
+ * 按分类筛选应用卡片
+ */
+function filterByCategory(container, category) {
+    // 获取所有应用卡片（不是 section）
+    const cards = container.querySelectorAll('.app-center-card-grid > div[data-category]');
+    
+    cards.forEach(card => {
+        if (category === 'all') {
+            card.style.display = '';
+            card.classList.add('fade-in');
+        } else {
+            if (card.dataset.category === category) {
+                card.style.display = '';
+                card.classList.add('fade-in');
+            } else {
+                card.style.display = 'none';
+            }
+        }
+    });
+    
+    // 检查是否有可见的卡片，如果没有则隐藏整个 section
+    const section = container.querySelector('#app-module-apps');
+    if (section) {
+        const visibleCards = section.querySelectorAll('.app-center-card-grid > div[data-category]:not([style*="display: none"])');
+        if (visibleCards.length === 0 && category !== 'all') {
+            section.style.display = 'none';
+        } else {
+            section.style.display = '';
+        }
+    }
 }

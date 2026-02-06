@@ -10,7 +10,7 @@
 
 import { loadTemplate } from '../../../../../common/utils/viewLoader.js';
 import { showToast } from '../../../../../common/utils/ui.js';
-import * as KeywordService from '../../services/trackerService.js';
+import * as KeywordService from '../services/trackerService.js';
 import state from '../../../../../common/state.js';
 import { ErrorService } from '../../../../../services/errorService.js';
 import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry.js';
@@ -305,7 +305,7 @@ export async function mount(container) {
 
     try {
         // 1. 加载模板
-        const html = await loadTemplate('src/modules/app_center/keyword_hunter/views/analysis/template.html');
+        const html = await loadTemplate('src/modules/app_center/views/keyword_hunter/analysis/template.html');
         container.innerHTML = html;
 
         // 2. 注册全局操作（用于 HTML onclick 兼容）

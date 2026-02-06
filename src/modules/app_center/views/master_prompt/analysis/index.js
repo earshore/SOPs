@@ -12,11 +12,11 @@ import { loadTemplate } from '../../../../../common/utils/viewLoader.js';
 import BaseModule from '../../../../../common/BaseModule.js';
 import state from '../../../../../common/state.js';
 import { PROVIDERS, LANGUAGE_HEADERS } from '../../../../../common/constants/constants.js';
-import { ANALYSIS_MODULES, DYNAMIC_MASTER_TEMPLATE } from '../../constants/prompts.js';
+import { ANALYSIS_MODULES, DYNAMIC_MASTER_TEMPLATE } from '../constants/prompts.js';
 import { showToast, showProgress } from '../../../../../common/utils/ui.js';
-import { HistoryService } from '../../services/historyService.js';
+import { HistoryService } from '../services/historyService.js';
 import { renderHistory } from '../scraper/index.js';
-import { AnalysisService } from '../../services/analysisService.js';
+import { AnalysisService } from '../services/analysisService.js';
 import { StorageService, STORAGE_KEYS } from '../../../../../services/storageService.js';
 import { ErrorService } from '../../../../../services/errorService.js';
 import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry.js';
@@ -1310,7 +1310,7 @@ export async function mount(container) {
 
   try {
     // 1. 加载模板
-    const html = await loadTemplate('src/modules/app_center/master_prompt/views/analysis/template.html');
+    const html = await loadTemplate('src/modules/app_center/views/master_prompt/analysis/template.html');
     container.innerHTML = html;
 
     // 2. 创建模块实例
