@@ -25,6 +25,8 @@ let currentConsoleMode = "listing";
 let eventListeners = []; // 用于清理事件监听器
 let timeouts = []; // 用于清理定时器
 let registeredActions = []; // 用于清理已注册的动作
+let listingPromptCache = ""; // 缓存 Listing Prompt
+let visualPromptCache = ""; // 缓存 Visual Prompt
 
 // ========================================== 
 // Helper Functions
@@ -433,6 +435,7 @@ function generateMasterPrompt() {
     if (!outEl) return;
 
     const result = promptlabService.generateMasterPrompt(inputs, state.analysis.analysisReport);
+    listingPromptCache = result; // 缓存到模块状态
     outEl.value = result;
     updateCharCount();
     outEl.classList.add("bg-green-50");
@@ -457,6 +460,7 @@ function generateVisualPrompt() {
     if (!outEl) return;
 
     const result = promptlabService.generateVisualPrompt(inputs, state.analysis.analysisReport);
+    visualPromptCache = result; // 缓存到模块状态
     outEl.value = result;
     updateCharCount();
     outEl.classList.add("bg-pink-50");
@@ -476,6 +480,7 @@ function toggleConsoleMode(mode) {
     const btnListing = document.getElementById("btn-mode-listing");
     const btnVisual = document.getElementById("btn-mode-visual");
     const outputArea = document.getElementById("final-prompt-output");
+    const outputTitle = document.querySelector("#output-preview-title");
 
     if (!cardInner || !glider) return;
 
@@ -493,6 +498,11 @@ function toggleConsoleMode(mode) {
         if (outputArea) {
             outputArea.classList.add("bg-pink-50/30");
             outputArea.placeholder = "// 等待生成视觉转化剧本...";
+            // 切换到 Visual 模式时，显示缓存的 Visual Prompt
+            outputArea.value = visualPromptCache;
+        }
+        if (outputTitle) {
+            outputTitle.textContent = "Visual Prompt";
         }
     } else {
         cardInner.style.transform = "rotateY(0deg)";
@@ -508,8 +518,14 @@ function toggleConsoleMode(mode) {
         if (outputArea) {
             outputArea.classList.remove("bg-pink-50/30");
             outputArea.placeholder = "// 1. 填写左侧信息\n// 2. 点击生成按钮...";
+            // 切换到 Listing 模式时，显示缓存的 Listing Prompt
+            outputArea.value = listingPromptCache;
+        }
+        if (outputTitle) {
+            outputTitle.textContent = "Listing Prompt";
         }
     }
+    updateCharCount();
     updateButtonState();
 }
 
@@ -629,6 +645,8 @@ export function unmount() {
 
         // 3. 重置模块状态
         currentConsoleMode = "listing";
+        listingPromptCache = "";
+        visualPromptCache = "";
 
         console.log('[Promptlab] ✅ 子模块卸载成功');
     } catch (error) {

@@ -250,7 +250,7 @@ class DataModule extends BaseModule {
                             ` : '<p class="text-sm text-slate-400 italic pl-6">无评论数据</p>'} 
                         </div>
                         <div class="pt-3 flex justify-end">
-                            <a href="${p.url}" target="_blank" class="text-xs font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 rounded-lg transition-colors">
+                            <a href="https://${SITE_DOMAIN_MAP[siteKey]}/dp/${p.asin}" target="_blank" class="text-xs font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 rounded-lg transition-colors">
                                 <span>查看原始页面</span> <i class="fas fa-external-link-alt"></i>
                             </a>
                         </div>
