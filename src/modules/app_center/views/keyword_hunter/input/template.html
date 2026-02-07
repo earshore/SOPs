@@ -1,4 +1,5 @@
 <!-- Input Module Template -->
+
 <section id="kt-module-input" class="flex-1 overflow-y-auto pb-20">
     <div class="app-center-container">
         <!-- Input Module Welcome -->
@@ -29,13 +30,13 @@
                             class="flex items-center gap-3 bg-white/60 backdrop-blur-sm rounded-xl px-4 py-3 border border-slate-200/50">
                             <span
                                 class="w-7 h-7 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">1</span>
-                            <span class="text-sm text-slate-600">输入关键词</span>
+                            <span class="text-sm text-slate-600">输入关键词、目标Listing文案</span>
                         </div>
                         <div
                             class="flex items-center gap-3 bg-white/60 backdrop-blur-sm rounded-xl px-4 py-3 border border-slate-200/50">
                             <span
                                 class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">2</span>
-                            <span class="text-sm text-slate-600">一键去重</span>
+                            <span class="text-sm text-slate-600">清理格式</span>
                         </div>
                         <div
                             class="flex items-center gap-3 bg-white/60 backdrop-blur-sm rounded-xl px-4 py-3 border border-slate-200/50">
@@ -59,12 +60,10 @@
                     </svg>
                     关键词列表
                 </h2>
-                <div class="flex items-center gap-2">
-                    <button id="kt-btn-clean-kw"
-                        class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg text-sm font-medium smooth-transition">清理格式</button>
-                    <button id="kt-btn-dedup-kw"
-                        class="px-3 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-lg text-sm font-medium smooth-transition">一键去重</button>
-                </div>
+                <button id="kt-btn-clean-kw"
+                    class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg text-sm font-medium smooth-transition">
+                    <i class="fas fa-broom mr-1"></i> 清理格式
+                </button>
             </div>
             <div class="relative kt-textarea-container">
                 <div class="keyword-input-wrapper">
@@ -89,9 +88,13 @@
             <div class="lg:col-span-2 kt-input-card">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                    <i class="fas fa-file-alt text-green-500"></i> 目标文案
+                    <i class="fas fa-file-alt text-green-500"></i> 目标Listing文案
                 </h2>
                 <div class="flex items-center gap-2">
+                    <button id="kt-btn-clean-copy"
+                        class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg text-sm font-medium smooth-transition">
+                        <i class="fas fa-broom mr-1"></i> 清理格式
+                    </button>
                     <button id="kt-btn-paste"
                         class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg text-sm font-medium smooth-transition">
                         <i class="fas fa-paste mr-1"></i> 从剪贴板粘贴

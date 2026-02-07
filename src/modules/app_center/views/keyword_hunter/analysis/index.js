@@ -15,6 +15,8 @@ import state from '../../../../../common/state.js';
 import { ErrorService } from '../../../../../services/errorService.js';
 import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry.js';
 
+import '../keyword_hunter_style.css';
+
 // ========================================== 
 // Module State
 // ========================================== 
@@ -97,6 +99,7 @@ function restoreAnalysisStateFromState() {
     if (resultDiv && state.keywordTracker && state.keywordTracker.llmAnalysisResult) {
         // ✅ 安全: 静态HTML模板，无用户输入
         resultDiv.innerHTML = state.keywordTracker.llmAnalysisResult;
+        highlightScores(resultDiv); // ← 改动：恢复状态时也染色
     }
 
     // 渲染分析模块
@@ -139,14 +142,107 @@ function renderAnalysisModule() {
     const totalEl = document.getElementById('kt-stat-total');
     if (totalEl) totalEl.textContent = total;
 
-    // 渲染高频词云
+    // 渲染高频词云（带关键词命中标注）
     const freqList = document.getElementById('kt-word-frequency-list');
     if (freqList && state.keywordTracker.wordFrequency) {
-        freqList.innerHTML = state.keywordTracker.wordFrequency.map(([w, c]) => `
-            <span class="px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded-md">
-                ${escapeHtml(w)} <span class="text-slate-400">(${c})</span>
-            </span>
-        `).join('');
+        // 构建已匹配关键词的词根集合
+        const matchedKeywordRoots = new Set();
+        if (state.keywordTracker.matchedKeywords && state.keywordTracker.matchedKeywords.length > 0) {
+            state.keywordTracker.matchedKeywords.forEach(item => {
+                // matchedKeywords 可能是对象数组 {keyword: "xxx", count: n} 或字符串数组
+                const kw = typeof item === 'object' ? item.keyword : item;
+                if (kw) {
+                    // 将关键词拆分为单词，并转为小写
+                    // 支持欧洲全语种：\p{L} 匹配任何语言的字母，\p{M} 匹配变音符号
+                    const words = kw.toLowerCase().match(/[\p{L}\p{M}]+/gu) || [];
+                    words.forEach(w => {
+                        if (w.length > 2) { // 过滤掉过短的词
+                            matchedKeywordRoots.add(w);
+                        }
+                    });
+                }
+            });
+        }
+
+        // 构建未匹配关键词的词根集合（排除已在高频词中出现的）
+        const unmatchedKeywordRoots = new Set();
+        const highFreqWordsSet = new Set(state.keywordTracker.wordFrequency.map(([w]) => w.toLowerCase()));
+        
+        if (state.keywordTracker.unmatchedKeywords && state.keywordTracker.unmatchedKeywords.length > 0) {
+            state.keywordTracker.unmatchedKeywords.forEach(kw => {
+                if (kw) {
+                    // 将关键词拆分为单词，并转为小写
+                    // 支持欧洲全语种：\p{L} 匹配任何语言的字母，\p{M} 匹配变音符号
+                    const words = kw.toLowerCase().match(/[\p{L}\p{M}]+/gu) || [];
+                    words.forEach(w => {
+                        if (w.length > 2 && !highFreqWordsSet.has(w)) { // 只添加不在高频词中的词根
+                            unmatchedKeywordRoots.add(w);
+                        }
+                    });
+                }
+            });
+        }
+
+        console.log('[Analysis] 已匹配词根:', Array.from(matchedKeywordRoots));
+        console.log('[Analysis] 未匹配词根:', Array.from(unmatchedKeywordRoots));
+
+        // 渲染高频词云
+        let html = '<div class="flex flex-wrap gap-2">';
+        
+        state.keywordTracker.wordFrequency.forEach(([w, c]) => {
+            const isMatched = matchedKeywordRoots.has(w.toLowerCase());
+            if (isMatched) {
+                // 命中的词根 - 标绿
+                html += `
+                    <span class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-md flex items-center gap-1">
+                        <span class="font-bold">✓</span>
+                        ${escapeHtml(w)} <span class="opacity-60">(${c})</span>
+                    </span>
+                `;
+            } else {
+                // 其他高频词 - 保持灰色
+                html += `
+                    <span class="px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded-md">
+                        ${escapeHtml(w)} <span class="text-slate-400">(${c})</span>
+                    </span>
+                `;
+            }
+        });
+        
+        html += '</div>';
+
+        // 如果有未命中的词根，在下方单独展示
+        if (unmatchedKeywordRoots.size > 0) {
+            const unmatchedRootsArray = Array.from(unmatchedKeywordRoots).sort();
+            console.log('[Analysis] 准备渲染未匹配词根:', unmatchedRootsArray);
+            
+            html += `
+                <div class="mt-4 pt-4 border-t border-slate-200">
+                    <div class="text-xs text-slate-500 mb-2 font-medium flex items-center gap-2">
+                        <i class="fas fa-exclamation-triangle text-red-500"></i> 
+                        <span>未在文案中出现的关键词词根 (${unmatchedRootsArray.length})</span>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+            `;
+            
+            unmatchedRootsArray.forEach(root => {
+                html += `
+                    <span class="px-2 py-1 bg-red-100 text-red-700 text-xs rounded-md inline-flex items-center gap-1">
+                        <span class="font-bold">✗</span>
+                        <span>${escapeHtml(root)}</span>
+                    </span>
+                `;
+            });
+            
+            html += `
+                    </div>
+                </div>
+            `;
+        } else {
+            console.log('[Analysis] 没有未匹配词根需要显示');
+        }
+
+        freqList.innerHTML = html;
     }
 
     // 更新生成报告按钮状态
@@ -163,14 +259,12 @@ function updateAnalyzeButtonState() {
     if (btn) {
         if (hasContent) {
             btn.disabled = false;
-            // ✅ 安全: 静态HTML模板，无用户输入
-            btn.innerHTML = '<i class="fas fa-magic"></i> 生成报告';
-            btn.classList.remove('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
-            btn.classList.add('bg-purple-600', 'text-white', 'hover:bg-purple-700', 'shadow-sm');
+            btn.classList.remove('bg-gray-300', 'text-gray-500', 'cursor-not-allowed', 'opacity-50', 'grayscale');
+            btn.classList.add('bg-purple-600', 'text-white', 'hover:bg-purple-700', 'shadow-sm', 'cursor-pointer');
         } else {
             btn.disabled = true;
-            btn.classList.add('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
-            btn.classList.remove('bg-purple-600', 'text-white', 'hover:bg-purple-700', 'shadow-sm');
+            btn.classList.remove('bg-purple-600', 'text-white', 'hover:bg-purple-700', 'shadow-sm', 'cursor-pointer');
+            btn.classList.add('bg-gray-300', 'text-gray-500', 'cursor-not-allowed', 'opacity-50', 'grayscale');
         }
     }
 }
@@ -192,12 +286,11 @@ async function runLLMAnalysis() {
 
     const resultDiv = document.getElementById('kt-llm-analysis-result');
 
-    // 更新按钮状态
+    // 更新按钮状态 - 分析中（灰度冻结）
     if (btn) {
         btn.disabled = true;
-        // ✅ 安全: 静态HTML模板，无用户输入
-        btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> 分析中...';
-        btn.classList.add('opacity-75', 'cursor-wait');
+        btn.classList.remove('bg-purple-600', 'hover:bg-purple-700', 'cursor-pointer');
+        btn.classList.add('bg-gray-400', 'cursor-wait', 'opacity-75', 'grayscale');
     }
 
     // 显示加载状态
@@ -222,20 +315,18 @@ async function runLLMAnalysis() {
         // 渲染分析结果
         if (resultDiv) {
             if (window.marked) {
-                // ✅ 安全: 静态HTML模板，无用户输入
                 resultDiv.innerHTML = window.marked.parse(response);
+                highlightScores(resultDiv);
             } else {
                 resultDiv.textContent = response;
             }
         }
 
-        // 更新按钮状态为已完成
+        // 更新按钮状态为已完成（绿色）
         if (btn) {
             btn.disabled = true;
-            // ✅ 安全: 静态HTML模板，无用户输入
-            btn.innerHTML = '<i class="fas fa-check"></i> 报告已生成';
-            btn.classList.remove('from-blue-500', 'to-purple-600', 'text-white', 'hover:from-blue-400', 'hover:to-purple-500', 'opacity-75', 'cursor-wait');
-            btn.classList.add('text-gray-500', 'cursor-not-allowed');
+            btn.classList.remove('bg-gray-400', 'cursor-wait', 'opacity-75', 'grayscale');
+            btn.classList.add('bg-green-500', 'text-white', 'cursor-not-allowed');
         }
 
         // 保存状态
@@ -272,13 +363,11 @@ async function runLLMAnalysis() {
             `;
         }
 
-        // 恢复按钮状态
+        // 恢复按钮状态为可点击（紫色）
         if (btn) {
             btn.disabled = false;
-            // ✅ 安全: 静态HTML模板，无用户输入
-            btn.innerHTML = '<i class="fas fa-magic"></i> 重试生成';
-            btn.classList.remove('bg-gray-300', 'text-gray-500', 'cursor-not-allowed', 'opacity-75', 'cursor-wait');
-            btn.classList.add('bg-purple-600', 'text-white', 'hover:bg-purple-700');
+            btn.classList.remove('bg-gray-400', 'cursor-wait', 'opacity-75', 'grayscale', 'cursor-not-allowed');
+            btn.classList.add('bg-purple-600', 'text-white', 'hover:bg-purple-700', 'cursor-pointer');
         }
     }
 }
@@ -299,6 +388,126 @@ function setupEventListeners(container) {
         addEventListener(btnAnalyze, 'click', async () => await runLLMAnalysis());
     }
 }
+
+
+// ==========================================
+// Score Highlighting (Fixed)
+// ==========================================
+
+function highlightScores(container) {
+    if (!container) return;
+
+    const rows = container.querySelectorAll('tbody tr');
+    if (!rows.length) return;
+
+    rows.forEach((tr, index) => {
+        const tds = tr.querySelectorAll('td');
+        if (tds.length < 2) return;
+
+        const td1 = tds[0]; // 维度名
+        const td2 = tds[1]; // 分数
+        const text = td2.textContent.trim();
+        const isLastRow = index === rows.length - 1;
+
+        // 清除旧状态
+        tr.classList.remove('row-total', 'row-low', 'row-risk');
+
+        // ——— 总分行（最后一行） ———
+        if (isLastRow) {
+            tr.classList.add('row-total');
+            const totalMatch = text.match(/(\d+)\s*\/\s*(\d+)/);
+            if (totalMatch) {
+                const score = parseInt(totalMatch[1]);
+                td2.innerHTML = '<span class="score-badge score-badge-total">⭐ ' + score + '/' + totalMatch[2] + '</span>';
+            }
+            return;
+        }
+
+        // ——— 违规行 ———
+        if (text.includes('-10') || text.includes('🚨')) {
+            tr.classList.add('row-risk');
+            td2.innerHTML = '<span class="score-badge score-badge-risk">🚨 -10</span>';
+            return;
+        }
+
+        // ——— 通过行（违规检查通过） ———
+        if (text.includes('✅') || text.includes('+0') || text.includes('通过')) {
+            td2.innerHTML = '<span class="score-badge score-badge-pass">✅ 通过</span>';
+            return;
+        }
+
+        // ——— 数字分数行 ———
+        const match = text.match(/(\d+)\s*\/\s*(\d+)/);
+        if (!match) return;
+
+        const score = parseInt(match[1]);
+        const max = parseInt(match[2]);
+        if (max === 0) return;
+
+        const ratio = score / max;
+
+        let badgeClass, icon;
+        if (ratio >= 0.75) {
+            badgeClass = 'score-badge-high';
+            icon = '🟢';
+        } else if (ratio >= 0.5) {
+            badgeClass = 'score-badge-mid';
+            icon = '🟡';
+        } else {
+            badgeClass = 'score-badge-low';
+            icon = '🔴';
+            tr.classList.add('row-low');
+        }
+
+        td2.innerHTML = '<span class="score-badge ' + badgeClass + '">' + icon + ' ' + score + '/' + max + '</span>';
+    });
+
+    // ——— 总分标题处理 ———
+    const h2 = container.querySelector('h2');
+    if (!h2) return;
+
+    const h2Text = h2.textContent;
+    const totalMatch = h2Text.match(/(\d+)\s*\/\s*100/);
+    if (!totalMatch) return;
+
+    const total = parseInt(totalMatch[1]);
+    let gradientColors;
+
+    if (total >= 85) {
+        gradientColors = 'linear-gradient(135deg, #065f46, #059669, #34d399)';
+    } else if (total >= 75) {
+        gradientColors = 'linear-gradient(135deg, #1e1b4b, #4c1d95, #7c3aed)';
+    } else if (total >= 70) {
+        gradientColors = 'linear-gradient(135deg, #78350f, #d97706, #fbbf24)';
+    } else {
+        gradientColors = 'linear-gradient(135deg, #7f1d1d, #dc2626, #f87171)';
+    }
+
+    h2.style.background = gradientColors;
+    h2.style.color = '#ffffff';
+
+    // 移除旧进度条（防止重复追加）
+    const oldBar = h2.querySelector('.score-progress-bar');
+    if (oldBar) oldBar.remove();
+
+    // 注入进度条
+    const progressBar = document.createElement('div');
+    progressBar.className = 'score-progress-bar';
+    progressBar.style.cssText = 'margin-top:0.75rem;background:rgba(255,255,255,0.15);border-radius:1rem;height:6px;overflow:hidden;width:100%;';
+    
+    const progressFill = document.createElement('div');
+    progressFill.style.cssText = 'width:0%;height:100%;background:rgba(255,255,255,0.7);border-radius:1rem;transition:width 1s ease-out;';
+    progressBar.appendChild(progressFill);
+    h2.appendChild(progressBar);
+
+    // 延迟触发动画
+    requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+            progressFill.style.width = total + '%';
+        });
+    });
+}
+
 
 // ========================================== 
 // Module Exports (统一架构接口)

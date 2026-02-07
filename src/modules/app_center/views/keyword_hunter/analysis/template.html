@@ -1,4 +1,8 @@
 <!-- Analysis Module Template -->
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<!-- <script src="../keyword_hunter_style.css"></script>
+<link rel="stylesheet" href="../keyword_hunter_style.css"> -->
 <section class="flex-1 overflow-y-auto pb-20">
     <div class="app-center-container">
         <!-- Analysis Module Welcome -->
@@ -12,9 +16,9 @@
                             <i class="fas fa-chart-line text-white"></i>
                         </div>
                         <div class="flex-1">
-                            <h2 class="text-xl font-bold text-slate-800 mb-2">深度分析报告</h2>
+                            <h2 class="text-xl font-bold text-slate-800 mb-2">深度分析评审Listing文案</h2>
                             <p class="text-slate-600 text-sm leading-relaxed max-w-xl">
-                                基于大数据的多维分析,生成包含覆盖率、高频词和 AI 诊断的专业报告,助您通过数据驱动决策。
+                                基于大数据的多维分析,生成包含SEO覆盖率、高频词和 AI 评审的专业报告,助您通过数据驱动决策。
                             </p>
                         </div>
                     </div>
@@ -25,11 +29,11 @@
                         </div>
                         <div class="flex items-center gap-3 bg-white/60 backdrop-blur-sm rounded-xl px-4 py-3 border border-slate-200/50">
                             <span class="w-7 h-7 rounded-lg bg-pink-100 text-pink-600 flex items-center justify-center text-xs font-bold">2</span>
-                            <span class="text-sm text-slate-600">查看统计</span>
+                            <span class="text-sm text-slate-600">优化策略</span>
                         </div>
                         <div class="flex items-center gap-3 bg-white/60 backdrop-blur-sm rounded-xl px-4 py-3 border border-slate-200/50">
                             <span class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">3</span>
-                            <span class="text-sm text-slate-600">优化策略</span>
+                            <span class="text-sm text-slate-600">查看统计</span>
                         </div>
                     </div>
                 </div>
@@ -40,7 +44,7 @@
         <div class="app-center-card h-auto mb-6">
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-lg font-semibold text-slate-800 flex items-center gap-2">
-                <i class="fa-solid fa-user-doctor text-purple-500"></i> AI 深度诊断
+                <i class="fa-solid fa-user-doctor text-purple-500"></i> AI 评审
                 <span class="text-xs bg-purple-100 text-purple-600 px-2 py-1 rounded-full ml-2">仅供参考</span>
             </h2>
 
@@ -101,7 +105,7 @@
             <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
                 <i class="fas fa-cloud text-indigo-500"></i> 高频词云 (Top 50)
             </h3>
-            <div id="kt-word-frequency-list" class="flex flex-wrap gap-2 max-h-64 overflow-y-auto scrollbar-thin">
+            <div id="kt-word-frequency-list" class="max-h-96 overflow-y-auto scrollbar-thin">
                 <!-- 高频词将在这里动态渲染 -->
             </div>
             </div>
