@@ -92,12 +92,18 @@ function escapeHtml(text) {
 }
 
 /**
- * 属性转义
+ * 属性转义（完善版：覆盖所有 HTML 属性危险字符）
  */
 function escapeAttr(text) {
     if (!text) return '';
-    return text.replace(/'/g, "\\'").replace(/"/g, '\\"');
+    return text
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
 }
+
 
 /**
  * 正则表达式转义
@@ -383,6 +389,7 @@ function renderCopyDisplay() {
 
 /**
  * 高亮文本中的关键词
+ * 使用 \x01 作为内部分隔符，避免关键词含 | 时冲突
  */
 function highlightText(text) {
     if (!text) return '';
@@ -390,21 +397,68 @@ function highlightText(text) {
         return escapeHtml(text).replace(/\n/g, '<br>');
     }
 
-    const sortedKw = [...state.keywordTracker.matchedKeywords].sort((a, b) => b.keyword.length - a.keyword.length);
-    const pattern = sortedKw.map(item => escapeRegex(item.keyword)).join('|');
-    const regex = new RegExp(`(${pattern})`, 'gi');
-    const parts = text.split(regex);
+    const len = text.length;
+    const SEP = '\x01'; // 内部分隔符，不可能出现在用户输入中
 
-    const htmlParts = parts.map((part, index) => {
-        if (index % 2 === 1) {
-            const lowerKw = part.toLowerCase();
-            return `<span class="keyword-bold highlightable" data-kw="${escapeAttr(lowerKw)}">${escapeHtml(part)}</span>`;
+    // 为每个字符位置记录它属于哪些关键词
+    const charKeywords = new Array(len);
+    for (let i = 0; i < len; i++) {
+        charKeywords[i] = new Set();
+    }
+
+    // 对每个关键词，找出它在文本中的所有匹配位置
+    state.keywordTracker.matchedKeywords.forEach(item => {
+        const kw = item.keyword;
+        const kwLower = kw.toLowerCase();
+        const regex = new RegExp(escapeRegex(kw), 'gi');
+        let match;
+        while ((match = regex.exec(text)) !== null) {
+            const start = match.index;
+            const end = start + match[0].length;
+            for (let i = start; i < end; i++) {
+                charKeywords[i].add(kwLower);
+            }
+        }
+    });
+
+    // 将文本按照"关键词集合相同的连续字符"分段
+    const segments = [];
+    let segStart = 0;
+
+    for (let i = 1; i <= len; i++) {
+        if (i === len || !setsEqual(charKeywords[i], charKeywords[i - 1])) {
+            segments.push({
+                text: text.substring(segStart, i),
+                keywords: charKeywords[segStart]
+            });
+            segStart = i;
+        }
+    }
+
+    // 渲染各段
+    const htmlParts = segments.map(seg => {
+        if (seg.keywords.size === 0) {
+            return escapeHtml(seg.text);
         } else {
-            return escapeHtml(part);
+            // 用 \x01 连接所有关键词
+            const allKw = Array.from(seg.keywords).join(SEP);
+            return `<span class="keyword-bold highlightable" data-kw-all="${escapeAttr(allKw)}">${escapeHtml(seg.text)}</span>`;
         }
     });
 
     return htmlParts.join('').replace(/\n/g, '<br>');
+}
+
+
+/**
+ * 判断两个 Set 是否相等
+ */
+function setsEqual(a, b) {
+    if (a.size !== b.size) return false;
+    for (const item of a) {
+        if (!b.has(item)) return false;
+    }
+    return true;
 }
 
 /**
@@ -600,39 +654,66 @@ function locateKeywordInCopy(keyword) {
     const container = document.getElementById('kt-copy-display');
     if (!container) return;
     const targetKw = keyword.toLowerCase();
+    const SEP = '\x01';
 
-    let spans = Array.from(container.querySelectorAll(`.highlightable`)).filter(el =>
-        el.getAttribute('data-kw') === targetKw
-    );
-
-    if (spans.length === 0) {
-        spans = Array.from(container.querySelectorAll(`.highlightable`)).filter(el => {
-            const elKw = el.getAttribute('data-kw');
-            return elKw && elKw.includes(targetKw);
-        });
-    }
+    // 查找所有 data-kw-all 中包含目标关键词的 span
+    const allSpans = Array.from(container.querySelectorAll('.highlightable'));
+    const spans = allSpans.filter(el => {
+        const kwAll = el.getAttribute('data-kw-all');
+        if (!kwAll) return false;
+        const kwList = kwAll.split(SEP);
+        return kwList.includes(targetKw);
+    });
 
     if (spans.length === 0) {
         showToast(`未找到关键词: ${keyword}`, 'warning');
         return;
     }
 
+    // 将属于同一次匹配的连续 span 分组
+    // 只有 DOM 中直接相邻（nextSibling）才视为同一组
+    const groups = [];
+    let currentGroup = [spans[0]];
+
+    for (let i = 1; i < spans.length; i++) {
+        const prev = spans[i - 1];
+        const curr = spans[i];
+        // 修复：只用 nextSibling，不用 nextElementSibling
+        // nextElementSibling 会跳过文本节点导致误判
+        if (prev.nextSibling === curr) {
+            currentGroup.push(curr);
+        } else {
+            groups.push(currentGroup);
+            currentGroup = [curr];
+        }
+    }
+    groups.push(currentGroup);
+
+    // 管理循环定位索引
     if (!state.keywordTracker.keywordLocationIndex) {
         state.keywordTracker.keywordLocationIndex = {};
     }
     let idx = state.keywordTracker.keywordLocationIndex[targetKw] || 0;
-    if (idx >= spans.length) idx = 0;
+    if (idx >= groups.length) idx = 0;
 
-    container.querySelectorAll('.highlight-focus').forEach(el => el.classList.remove('highlight-focus'));
+    // 移除之前的聚焦高亮
+    container.querySelectorAll('.highlight-focus').forEach(el =>
+        el.classList.remove('highlight-focus')
+    );
 
-    const targetSpan = spans[idx];
-    targetSpan.classList.add('highlight-focus');
+    // 聚焦当前组的所有 span
+    const targetGroup = groups[idx];
+    targetGroup.forEach(span => {
+        span.classList.add('highlight-focus');
+    });
 
-    targetSpan.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // 滚动到第一个 span
+    targetGroup[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-    state.keywordTracker.keywordLocationIndex[targetKw] = (idx + 1) % spans.length;
+    // 更新索引
+    state.keywordTracker.keywordLocationIndex[targetKw] = (idx + 1) % groups.length;
 
-    showToast(`定位: ${keyword} (${idx + 1}/${spans.length})`);
+    showToast(`定位: ${keyword} (${idx + 1}/${groups.length})`);
 }
 
 /**
