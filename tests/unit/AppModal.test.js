@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { AppModal } from '@/common/components/AppModal.js';
+import { AppModal } from '@/components/modal/AppModal.js';
 
 describe('AppModal Component', () => {
   let modal;

@@ -32,7 +32,6 @@ import { loadingManager } from './common/utils/LoadingManager.js';
 
 // ✅ Import User Guide Modal (Vite Raw Import)
 import userGuideModalHtml from './components/modal/userGuideModal.html?raw';
-import promptModalHtml from './components/modal/promptModal.html?raw';
 
 // Inject Modals
 document.addEventListener('DOMContentLoaded', () => {
@@ -48,20 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
       document.body.appendChild(newScript);
     });
   }
-
-  // Register Prompt Modal Global Helper
-  window.renderPromptModal = () => {
-    const modalId = 'prompt-modal';
-    if (!document.getElementById(modalId)) {
-      const temp = document.createElement('div');
-      // ✅ 安全: 静态HTML模板，无用户输入
-      temp.innerHTML = promptModalHtml;
-      document.getElementById('modal-container').appendChild(temp.firstElementChild);
-    }
-    // Use the component's open method
-    const modal = document.getElementById(modalId);
-    if (modal && modal.open) modal.open();
-  };
 });
 
 
