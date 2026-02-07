@@ -156,6 +156,20 @@ const ScraperPanel = () => ({
         this.inputAsins = Array.isArray(item.asins) ? item.asins.join('\n') : '';
         this.selectedSite = item.site;
 
+        // 🔐 确保历史数据的 metadata 结构完整
+        if (item.data && !item.data.metadata) {
+            item.data.metadata = {
+                scrape_timestamp: item.timestamp || new Date().toISOString(),
+                marketplace: item.site || 'US',
+                domain: LANGUAGE_HEADERS[item.site]?.domain || 'amazon.com',
+                language: LANGUAGE_HEADERS[item.site]?.name || 'English (US)',
+                total_asins: item.asins?.length || 0,
+            };
+        } else if (item.data && item.data.metadata && !item.data.metadata.marketplace) {
+            // 如果 metadata 存在但缺少 marketplace 字段
+            item.data.metadata.marketplace = item.site || 'US';
+        }
+
         // 恢复全局状态
         state.scraper.currentHistoryId = item.id;
         state.scraper.scrapedData = item.data;

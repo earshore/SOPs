@@ -304,7 +304,11 @@ class DataModule extends BaseModule {
         if (!confirmed) return;
 
         state.scraper.scrapedData.products = state.scraper.scrapedData.products.filter(p => p.asin !== asin);
-        state.scraper.scrapedData.metadata.total_asins = state.scraper.scrapedData.products.length;
+        
+        // 🔐 防御性检查：确保 metadata 存在
+        if (state.scraper.scrapedData.metadata) {
+            state.scraper.scrapedData.metadata.total_asins = state.scraper.scrapedData.products.length;
+        }
 
         HistoryService.save(state.scraper.scrapedData, state.analysis.analysisReport);
 
@@ -435,7 +439,7 @@ class DataModule extends BaseModule {
             } else if (!hasExistingData && detectedSites.size === 1) {
                 targetMarketplace = [...detectedSites][0];
             } else if (hasExistingData) {
-                targetMarketplace = state.scraper.scrapedData.metadata.marketplace;
+                targetMarketplace = state.scraper.scrapedData.metadata?.marketplace;
             }
 
             const finalProducts = [];

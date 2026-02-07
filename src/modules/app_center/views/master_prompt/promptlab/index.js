@@ -18,6 +18,8 @@ import { ANALYSIS_MODULES } from '../constants/prompts.js';
 import { showToast } from '../../../../../common/utils/ui.js';
 import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry.js';
 
+import '../master_prompt_style.css';
+
 // ========================================== 
 // Module State
 // ========================================== 
@@ -297,39 +299,6 @@ function renderReportAnalysis() {
     statusDiv.innerHTML = '<i class="fas fa-check-circle"></i> 分析报告已就绪';
     checkboxMain.disabled = false;
     checkboxMain.checked = true;
-
-    // Batch Actions
-    const headerRow = checkboxMain.parentElement;
-    if (headerRow && !document.getElementById("lab-batch-actions")) {
-        headerRow.classList.add("flex", "items-center", "w-full");
-        const actionSpan = document.createElement("div");
-        actionSpan.id = "lab-batch-actions";
-        actionSpan.className = "ml-auto flex items-center gap-3 text-xs font-medium select-none";
-        // ✅ 安全: 静态HTML模板，无用户输入
-        actionSpan.innerHTML = `
-            <span id="btn-select-all" class="text-blue-600 cursor-pointer hover:text-blue-800 hover:underline">全选</span>
-            <span class="text-slate-300">|</span>
-            <span id="btn-clear-all" class="text-slate-500 cursor-pointer hover:text-slate-700 hover:underline">清空</span>
-        `;
-        headerRow.appendChild(actionSpan);
-
-        addTimeout(() => {
-            const selBtn = document.getElementById("btn-select-all");
-            if (selBtn) addEventListener(selBtn, 'click', (e) => {
-                e.preventDefault(); e.stopPropagation();
-                document.querySelectorAll('input[name="report-section"]').forEach((cb) => (cb.checked = true));
-                saveInputsToState();
-                showToast("已全选模块", "success");
-            });
-            const clrBtn = document.getElementById("btn-clear-all");
-            if (clrBtn) addEventListener(clrBtn, 'click', (e) => {
-                e.preventDefault(); e.stopPropagation();
-                document.querySelectorAll('input[name="report-section"]').forEach((cb) => (cb.checked = false));
-                saveInputsToState();
-                showToast("已清空选择", "success");
-            });
-        }, 0);
-    }
 
     // Auto-select language
     if (marketSelect && !state.masterPrompt.promptlab?.userProductProfile?.targetMarket) {
@@ -657,6 +626,28 @@ function clearPromptInputs() {
     }
 }
 
+/**
+ * 全选报告分析模块
+ */
+function selectAllReportSections() {
+    document.querySelectorAll('input[name="report-section"]').forEach((cb) => {
+        cb.checked = true;
+    });
+    saveInputsToState();
+    showToast("已全选模块", "success");
+}
+
+/**
+ * 清空报告分析模块选择
+ */
+function clearReportSections() {
+    document.querySelectorAll('input[name="report-section"]').forEach((cb) => {
+        cb.checked = false;
+    });
+    saveInputsToState();
+    showToast("已清空选择", "success");
+}
+
 // ========================================== 
 // Event Listeners Setup
 // ========================================== 
@@ -709,6 +700,8 @@ export async function mount(container) {
             amz_copyMasterPrompt: () => copyMasterPrompt(),
             amz_clearPromptInputs: () => clearPromptInputs(),
             amz_togglePromptZoom: () => togglePromptZoom(),
+            amz_selectAllReportSections: () => selectAllReportSections(),
+            amz_clearReportSections: () => clearReportSections(),
         });
         
         // 保存已注册的动作名称，用于卸载时清理

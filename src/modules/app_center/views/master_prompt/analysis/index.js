@@ -427,7 +427,16 @@ class AnalysisModule extends BaseModule {
     this.renderReport();
 
     const selectedProducts = state.scraper.scrapedData.products.filter((p) => state.analysis.selectedAsins.includes(p.asin));
-    const site = state.scraper.scrapedData.metadata.marketplace;
+    const site = state.scraper.scrapedData.metadata?.marketplace;
+    
+    // 🔐 防御性检查：确保站点配置存在
+    if (!site || !LANGUAGE_HEADERS[site]) {
+      showToast(`无效的站点配置: ${site || '未知'}`, "error");
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-brain mr-2"></i> 分析ASIN';
+      return;
+    }
+    
     const language = LANGUAGE_HEADERS[site].name;
 
     try {
