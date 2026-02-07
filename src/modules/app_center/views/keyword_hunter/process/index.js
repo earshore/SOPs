@@ -389,7 +389,6 @@ function renderCopyDisplay() {
 
 /**
  * 高亮文本中的关键词
- * 使用 \x01 作为内部分隔符，避免关键词含 | 时冲突
  */
 function highlightText(text) {
     if (!text) return '';
@@ -398,7 +397,7 @@ function highlightText(text) {
     }
 
     const len = text.length;
-    const SEP = '\x01'; // 内部分隔符，不可能出现在用户输入中
+    const SEP = '\x01';
 
     // 为每个字符位置记录它属于哪些关键词
     const charKeywords = new Array(len);
@@ -429,21 +428,36 @@ function highlightText(text) {
         if (i === len || !setsEqual(charKeywords[i], charKeywords[i - 1])) {
             segments.push({
                 text: text.substring(segStart, i),
-                keywords: charKeywords[segStart]
+                keywords: charKeywords[segStart],
+                isHighlight: charKeywords[segStart].size > 0
             });
             segStart = i;
         }
     }
 
-    // 渲染各段
-    const htmlParts = segments.map(seg => {
-        if (seg.keywords.size === 0) {
+    // 渲染各段，为连续高亮段标记位置
+    const htmlParts = segments.map((seg, idx) => {
+        if (!seg.isHighlight) {
             return escapeHtml(seg.text);
-        } else {
-            // 用 \x01 连接所有关键词
-            const allKw = Array.from(seg.keywords).join(SEP);
-            return `<span class="keyword-bold highlightable" data-kw-all="${escapeAttr(allKw)}">${escapeHtml(seg.text)}</span>`;
         }
+
+        const allKw = Array.from(seg.keywords).join(SEP);
+        const prevIsHighlight = idx > 0 && segments[idx - 1].isHighlight;
+        const nextIsHighlight = idx < segments.length - 1 && segments[idx + 1].isHighlight;
+
+        // 确定在连续高亮区域中的位置
+        let posClass = '';
+        if (!prevIsHighlight && !nextIsHighlight) {
+            posClass = 'kw-solo';      // 独立段
+        } else if (!prevIsHighlight && nextIsHighlight) {
+            posClass = 'kw-start';     // 起始段
+        } else if (prevIsHighlight && nextIsHighlight) {
+            posClass = 'kw-mid';       // 中间段
+        } else {
+            posClass = 'kw-end';       // 结束段
+        }
+
+        return `<span class="keyword-bold highlightable ${posClass}" data-kw-all="${escapeAttr(allKw)}">${escapeHtml(seg.text)}</span>`;
     });
 
     return htmlParts.join('').replace(/\n/g, '<br>');

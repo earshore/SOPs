@@ -315,3 +315,50 @@
         font-size: 0.8rem;
     }
 }
+
+
+/* ===== 关键词高亮基础样式 ===== */
+.keyword-bold {
+    font-weight: 600;
+    background-color: rgba(34, 197, 94, 0.15);
+    border-bottom: 2px solid rgba(34, 197, 94, 0.6);
+    padding: 1px 0;
+    /* 默认无圆角，由位置类控制 */
+    border-radius: 0;
+    /* 消除相邻 span 之间的间隙 */
+    margin: 0;
+    display: inline;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+}
+
+/* 独立段：四角都有圆角 */
+.keyword-bold.kw-solo {
+    border-radius: 3px;
+    padding: 1px 3px;
+}
+
+/* 起始段：左侧有圆角 */
+.keyword-bold.kw-start {
+    border-radius: 3px 0 0 3px;
+    padding: 1px 0 1px 3px;
+}
+
+/* 中间段：无圆角 */
+.keyword-bold.kw-mid {
+    border-radius: 0;
+    padding: 1px 0;
+}
+
+/* 结束段：右侧有圆角 */
+.keyword-bold.kw-end {
+    border-radius: 0 3px 3px 0;
+    padding: 0 3px 1px 0;
+}
+
+/* ===== 聚焦高亮（点击定位时） ===== */
+.keyword-bold.highlight-focus {
+    background-color: rgba(234, 179, 8, 0.35);
+    border-bottom-color: rgba(234, 179, 8, 0.8);
+    transition: background-color 0.3s ease;
+}
