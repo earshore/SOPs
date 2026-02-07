@@ -26,6 +26,8 @@ import eventBus from '../../../../../common/EventBus.js';
 import { MODULE_EVENTS } from '../../../../../common/constants/eventConstants.js';
 import { loadGridStack } from '../../../../../common/utils/lazyLibs.js';
 
+import '../master_prompt_style.css';
+
 // 辅助函数：获取字段标题
 function getFieldTitle(key) {
   const titleMap = {

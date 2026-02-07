@@ -14,6 +14,8 @@ import * as KeywordService from '../services/trackerService.js';
 import state from '../../../../../common/state.js';
 import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry.js';
 
+import '../keyword_hunter_style.css';
+
 // ========================================== 
 // Module State
 // ========================================== 

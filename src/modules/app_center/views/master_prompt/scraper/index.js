@@ -19,6 +19,8 @@ import { ErrorService } from '../../../../../services/errorService.js';
 import { showToast, sleep } from '../../../../../common/utils/ui.js';
 import { MODULE_EVENTS } from '../../../../../common/constants/eventConstants.js';
 
+import '../master_prompt_style.css';
+
 // ========================================== 
 // Alpine Component Logic
 // ========================================== 

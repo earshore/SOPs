@@ -18,6 +18,8 @@ import { languageFlagMap, SITE_NAME_MAP, SITE_DOMAIN_MAP } from '../../../../../
 import eventBus from '../../../../../common/EventBus.js';
 import { MODULE_EVENTS } from '../../../../../common/constants/eventConstants.js';
 
+import '../master_prompt_style.css';
+
 // ========================================== 
 // Data Module Class
 // ========================================== 

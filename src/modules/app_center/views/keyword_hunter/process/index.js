@@ -16,6 +16,8 @@ import state from '../../../../../common/state.js';
 import { ErrorService } from '../../../../../services/errorService.js';
 import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry.js';
 
+import '../keyword_hunter_style.css';
+
 // ========================================== 
 // Module State
 // ========================================== 

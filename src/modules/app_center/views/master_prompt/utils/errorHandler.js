@@ -4,6 +4,7 @@
 // ================================================================
 
 import { ErrorService } from '../../../../../services/errorService.js';
+import '../master_prompt_style.css';
 
 /**
  * Master Prompt 模块错误处理器
