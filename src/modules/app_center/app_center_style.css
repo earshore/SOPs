@@ -471,12 +471,16 @@
 }
 
 .sentence-translation {
-    color: #64748b;
+    color: #3b82f6;
     font-size: 0.8125rem;
-    font-style: italic;
-    padding-left: 1rem;
-    border-left: 3px solid #e2e8f0;
+    font-style: normal;
+    padding: 0.5rem 1rem;
     margin-top: 0.5rem;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border-left: 3px solid #3b82f6;
+    border-radius: 0 0.5rem 0.5rem 0;
+    line-height: 1.6;
+    box-shadow: 0 1px 3px rgba(59, 130, 246, 0.1);
 }
 
 /* ==================== Master Prompt 特定样式 ==================== */
@@ -828,4 +832,41 @@
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
+}
+
+/* ==================== 关键词监控 - 词根高亮样式 ==================== */
+.keyword-root-highlight {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%) !important;
+    border-left-color: #f59e0b !important;
+    border-left-width: 5px !important;
+    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.4), 0 8px 16px -4px rgba(245, 158, 11, 0.3) !important;
+    transform: scale(1.05) !important;
+    animation: keyword-root-pulse 0.8s ease-in-out !important;
+    position: relative;
+    z-index: 10;
+}
+
+.keyword-root-highlight .text-red-800 {
+    color: #92400e !important;
+    font-weight: 700 !important;
+}
+
+.keyword-root-highlight .fa-times-circle {
+    color: #f59e0b !important;
+    font-size: 1.1rem !important;
+}
+
+@keyframes keyword-root-pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(245, 158, 11, 0.3);
+        transform: scale(1.08);
+    }
+    100% {
+        box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.4);
+        transform: scale(1.05);
+    }
 }

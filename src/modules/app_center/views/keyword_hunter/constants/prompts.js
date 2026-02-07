@@ -97,7 +97,7 @@ Every sentence must carry information. No filler. No redundant explanations.
 
 ### 📊 评分
 
-| 维度 | 分 | 一句话 |
+| 维度 | 得分 | 评审结论 |
 |:--|:--|:--|
 | 🔍 SEO覆盖 | /35 | |
 | 🎯 COSMO意图 | /20 | |

@@ -20,7 +20,7 @@
                         <div class="flex-1">
                             <h2 class="text-xl font-bold text-slate-800 mb-2">SEO处理中心</h2>
                             <p class="text-slate-600 text-sm leading-relaxed">
-                                通过 自动化 的方式，对文案进行SEO覆盖情况标注，利用 AI 强大的理解能力，提供逐行翻译服务，方便用户审核、补充和优化，确保每一个词都精准有效。
+                                通过 自动化 的方式，对文案进行SEO覆盖标注、分析高频词云，快速定位，利用 AI 强大的理解能力，提供逐行翻译服务，方便用户审核、补充和优化，确保最大化SEO，提高语义丰富度。
                             </p>
                         </div>
                     </div>
@@ -62,6 +62,54 @@
                 contenteditable="true"
                 data-placeholder="请先在 输入模块 点击 开始分析!">
             </div>
+        </div>
+
+        <!-- Statistics + Word Frequency (从 Analysis 模块移动过来) -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start mt-6">
+            <!-- Word Frequency (左侧，占2/3，突出显示) -->
+            <div class="lg:col-span-2 app-center-card h-auto shadow-lg border-2 border-indigo-100">
+                <h3 class="text-xl font-bold text-gray-800 mb-5 flex items-center gap-3 pb-3 border-b border-slate-200">
+                    <i class="fas fa-cloud text-indigo-500 text-2xl"></i> 
+                    <span>高频词云 (Top 50)</span>
+                </h3>
+                <div id="kt-word-frequency-list" class="max-h-96 overflow-y-auto scrollbar-thin leading-relaxed">
+                    <!-- 高频词将在这里动态渲染 -->
+                </div>
+            </div>
+
+            <!-- Coverage Rate (右侧，占1/3，紧凑显示) -->
+            <div class="app-center-card h-auto">
+                <h2 class="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                    <i class="fas fa-chart-pie text-blue-500 text-base"></i> 关键词覆盖率
+                </h2>
+
+                <div class="mb-4">
+                    <div class="flex justify-between items-end mb-1.5">
+                        <span class="text-xs text-slate-500">Coverage</span>
+                        <span id="kt-coverage-rate" class="text-xl font-bold text-blue-600">0%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                        <div id="kt-coverage-bar"
+                            class="bg-gradient-to-r from-blue-500 to-purple-500 h-3 rounded-full smooth-transition"
+                            style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 gap-2.5">
+                    <div class="p-2.5 bg-green-50 rounded-lg border border-green-100 text-center">
+                        <div id="kt-stat-matched" class="text-xl font-bold text-green-600">0</div>
+                        <div class="text-[10px] text-green-800 mt-0.5">已匹配</div>
+                    </div>
+                    <div class="p-2.5 bg-red-50 rounded-lg border border-red-100 text-center">
+                        <div id="kt-stat-unmatched" class="text-xl font-bold text-red-600">0</div>
+                        <div class="text-[10px] text-red-800 mt-0.5">未匹配</div>
+                    </div>
+                    <div class="p-2.5 bg-slate-50 rounded-lg border border-slate-200 text-center">
+                        <div id="kt-stat-total" class="text-xl font-bold text-slate-600">0</div>
+                        <div class="text-[10px] text-slate-500 mt-0.5">总词数</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -81,19 +129,18 @@
     </div>
 
     <div class="kt-floating-content">
-        <div class="kt-tab-buttons flex items-center gap-2">
-            <button onclick="window.kt_showKeywordTab('matched')" id="kt-kw-tab-matched"
-                class="flex-1 py-2 text-sm font-medium bg-green-100 text-green-700 rounded-lg smooth-transition hover:bg-green-200">
-                已匹配 (<span id="kt-tab-matched-count">0</span>)
-            </button>
-            <button onclick="window.kt_showKeywordTab('unmatched')" id="kt-kw-tab-unmatched"
-                class="flex-1 py-2 text-sm font-medium bg-red-100 text-red-600 rounded-lg smooth-transition hover:bg-red-200">
-                未匹配 (<span id="kt-tab-unmatched-count">0</span>)
-            </button>
+        <div class="flex items-center justify-start gap-4 mb-3 pb-3 border-b border-slate-200">
+            <div class="flex items-center gap-1.5 text-xs">
+                <span class="w-3 h-3 bg-green-500 rounded-full"></span>
+                <span class="text-slate-600 font-medium">已匹配 (<span id="kt-tab-matched-count">0</span>)</span>
+            </div>
+            <div class="flex items-center gap-1.5 text-xs">
+                <span class="w-3 h-3 bg-red-500 rounded-full"></span>
+                <span class="text-slate-600 font-medium">未匹配 (<span id="kt-tab-unmatched-count">0</span>)</span>
+            </div>
         </div>
         <div class="kt-keyword-list-wrapper">
-            <div id="kt-matched-keywords" class="kt-keyword-list space-y-2 scrollbar-thin"></div>
-            <div id="kt-unmatched-keywords" class="kt-keyword-list space-y-2 scrollbar-thin hidden"></div>
+            <div id="kt-all-keywords" class="kt-keyword-list space-y-2 scrollbar-thin"></div>
         </div>
     </div>
 </div>

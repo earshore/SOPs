@@ -1,409 +1,317 @@
-/* ===== 基础排版 ===== */
+/* ===== 基础与排版 (Modern Reset) ===== */
 .markdown-content {
-    font-size: 0.875rem;
-    line-height: 1.7;
-    color: #334155;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 0.925rem; /* 稍微调大一点点正文 */
+    line-height: 1.75;
+    color: #334155; /* Slate-700: 更柔和的深灰 */
+    background-color: #fff;
+    max-width: 100%;
 }
 
 .markdown-content p {
-    margin: 0.3rem 0;
+    margin: 0.75rem 0;
 }
 
 .markdown-content hr {
     border: none;
     height: 1px;
-    background: linear-gradient(to right, transparent, #e2e8f0, transparent);
-    margin: 1.5rem 0;
+    background: #e2e8f0;
+    margin: 2rem 0;
 }
 
-/* ===== 总分标题 — 最大视觉锤 ===== */
+/* ===== 核心标题 (Hero Header) ===== */
 .markdown-content h2:first-of-type {
     font-size: 1.5rem;
-    font-weight: 800;
-    margin: 0 0 0.5rem 0;
-    padding: 1rem 1.25rem;
-    border-radius: 1rem;
-    border: none;
-    background: linear-gradient(135deg, #1e1b4b 0%, #4c1d95 50%, #7c3aed 100%);
+    font-weight: 700;
+    margin: 0 0 1.5rem 0;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    /* 更加现代、克制的深色渐变 */
+    background: linear-gradient(120deg, #1e293b 0%, #334155 100%);
     color: #ffffff;
-    letter-spacing: 0.03em;
-    box-shadow: 0 4px 20px rgba(124, 58, 237, 0.3);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     position: relative;
     overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.1);
 }
 
+/* 装饰性光晕，更微妙 */
 .markdown-content h2:first-of-type::after {
     content: '';
     position: absolute;
-    top: -50%;
-    right: -20%;
-    width: 200px;
-    height: 200px;
-    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    top: -50px;
+    right: -50px;
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
     border-radius: 50%;
+    pointer-events: none;
 }
 
-/* 其余 h2 */
+/* 次级标题 */
 .markdown-content h2:not(:first-of-type) {
-    font-size: 1.2rem;
+    font-size: 1.25rem;
     font-weight: 700;
-    margin: 1.25rem 0 0.4rem 0;
-    padding: 0.6rem 0;
-    border-bottom: 2px solid #e2e8f0;
-    color: #1e293b;
+    color: #0f172a;
+    margin: 2.5rem 0 1rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
 }
 
-/* ===== 小节标题 h3 — 带左色块 ===== */
+/* ===== 功能性小标题 (H3) ===== */
+/* 去除原本的色块背景，改为清爽的左侧标记风格 */
 .markdown-content h3 {
-    font-size: 1rem;
-    font-weight: 700;
+    font-size: 1.05rem;
+    font-weight: 600;
     color: #1e293b;
-    margin: 1.5rem 0 0.6rem 0;
-    padding: 0.5rem 0.75rem;
-    border-radius: 0.5rem;
-    position: relative;
+    margin: 1.5rem 0 0.75rem 0;
+    padding: 0 0 0 0.75rem;
+    border-left: 4px solid transparent; /* 预留边框位置 */
+    display: flex;
+    align-items: center;
+    background: none; /* 去除背景 */
 }
 
 /* 📊 评分 */
 .markdown-content h3:nth-of-type(1) {
-    background: linear-gradient(135deg, #eff6ff, #dbeafe);
-    border-left: 4px solid #3b82f6;
+    border-color: #3b82f6;
+    color: #1d4ed8;
 }
 
 /* 🚨 致命问题 */
 .markdown-content h3:nth-of-type(2) {
-    background: linear-gradient(135deg, #fef2f2, #fee2e2);
-    border-left: 4px solid #ef4444;
+    border-color: #ef4444;
+    color: #b91c1c;
 }
 
 /* 🔧 改写 */
 .markdown-content h3:nth-of-type(3) {
-    background: linear-gradient(135deg, #f0fdf4, #dcfce7);
-    border-left: 4px solid #22c55e;
+    border-color: #10b981;
+    color: #047857;
 }
 
-/* ===== 总评 blockquote — 第一个 ===== */
+/* ===== 引用块 (Blockquote) - 卡片化设计 ===== */
+.markdown-content blockquote {
+    background: #f8fafc; /* 极淡的灰背景 */
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #94a3b8; /* 默认灰色 */
+    border-radius: 0.5rem;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+    color: #475569;
+    font-style: normal;
+    font-size: 0.95rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* 总评 Blockquote */
 .markdown-content h2:first-of-type + hr + h3 + blockquote,
 .markdown-content blockquote:first-of-type {
-    border-left: 4px solid #a78bfa;
-    background: linear-gradient(135deg, #faf5ff, #f5f3ff);
-    padding: 0.75rem 1rem;
-    margin: 0.5rem 0 0.75rem 0;
-    border-radius: 0 0.75rem 0.75rem 0;
+    background: #f5f3ff; /* 淡紫背景 */
+    border-color: #ddd6fe;
+    border-left-color: #8b5cf6;
     color: #5b21b6;
-    font-weight: 600;
-    font-size: 0.95rem;
-    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.08);
 }
 
-/* ===== 致命问题 blockquote ===== */
+/* 致命问题 Blockquote */
 .markdown-content h3:nth-of-type(2) + blockquote {
-    border-left: 4px solid #ef4444;
-    background: linear-gradient(135deg, #fef2f2, #fff1f2);
+    background: #fff1f2; /* 淡红背景 */
+    border-color: #fecaca;
+    border-left-color: #ef4444;
     color: #991b1b;
-    padding: 0.75rem 1rem;
-    border-radius: 0 0.75rem 0.75rem 0;
-    font-weight: 600;
-    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.08);
-    animation: pulse-border 2s ease-in-out infinite;
+    animation: none; /* 去除晃眼的动画，保持稳重 */
 }
 
-@keyframes pulse-border {
-    0%, 100% { border-left-color: #ef4444; }
-    50% { border-left-color: #fca5a5; }
-}
-
-/* ===== 评分表格 ===== */
+/* ===== 表格 (Modern Data Grid) ===== */
 .markdown-content table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    margin: 0.75rem 0;
-    border-radius: 0.75rem;
-    overflow: hidden;
+    margin: 1.5rem 0;
     border: 1px solid #e2e8f0;
-    font-size: 0.85rem;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    font-size: 0.9rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
 }
 
 .markdown-content thead th {
-    background: #f8fafc;
-    text-align: left;
-    padding: 0.65rem 0.85rem;
-    font-weight: 700;
-    color: #475569;
-    border-bottom: 2px solid #e2e8f0;
-    font-size: 0.78rem;
+    background: #f1f5f9;
+    color: #64748b;
+    font-weight: 600;
     text-transform: uppercase;
+    font-size: 0.75rem;
     letter-spacing: 0.05em;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e2e8f0;
 }
 
 .markdown-content tbody td {
-    padding: 0.6rem 0.85rem;
+    padding: 0.75rem 1rem;
     border-bottom: 1px solid #f1f5f9;
-    color: #334155;
     vertical-align: middle;
 }
 
-/* 维度名称列 */
+.markdown-content tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* 维度名称 */
 .markdown-content tbody td:first-child {
     font-weight: 600;
-    color: #1e293b;
-    white-space: nowrap;
+    color: #334155;
 }
 
-/* 分数列 — 只管布局，颜色交给JS */
-.markdown-content tbody td:nth-child(2) {
-    text-align: center;
-    white-space: nowrap;
-    min-width: 5rem;
-}
-
-/* 诊断列 */
-.markdown-content tbody td:nth-child(3) {
-    font-size: 0.82rem;
-    color: #64748b;
-    line-height: 1.5;
-}
-
-/* 行hover — 不覆盖JS设置的背景 */
-.markdown-content tbody tr:not(.row-total):not(.row-risk):not(.row-low):hover td {
-    background: #f8fafc;
-}
-
-/* ===== JS 控制的行级样式 ===== */
-
-/* 总分行 */
+/* 总分行设计优化 - 像是一个Footer summary */
 .markdown-content tbody tr.row-total td {
-    background: linear-gradient(135deg, #1e1b4b, #4c1d95);
-    color: #ffffff;
-    font-weight: 800;
-    border-bottom: none;
-    font-size: 0.95rem;
+    background: #1e293b; /* 深色背景 */
+    color: #f8fafc;
+    font-weight: 600;
+    font-size: 1rem;
+    border-top: 2px solid #334155;
 }
 
-/* 低分行 */
-.markdown-content tbody tr.row-low td {
-    background: #fef2f2;
-}
-
-/* 违规行 */
+/* 风险行 */
 .markdown-content tbody tr.row-risk td {
-    background: linear-gradient(135deg, #fef2f2, #fff1f2);
+    background: #fff1f2;
 }
 
-/* ===== 分数徽章（JS注入的span） ===== */
+/* ===== 列表与 Diff 对比 (最大的视觉优化点) ===== */
+/* 原本是全色块，现在改为清爽的“白底+左色条” */
+.markdown-content ul, .markdown-content ol {
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem; /* 增加项之间的间距 */
+}
+
+.markdown-content li {
+    padding: 0.75rem 1rem;
+    border-radius: 0.375rem;
+    background: #ffffff;
+    border: 1px solid #f1f5f9; /* 极淡的边框 */
+    border-left-width: 4px; /* 左侧加粗 */
+    font-size: 0.9rem;
+    color: #475569;
+    transition: all 0.2s ease;
+}
+
+.markdown-content li:hover {
+    transform: translateX(2px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* 🔴 原文 (Original) - 红色系 */
+.markdown-content li:nth-child(3n+1) {
+    border-left-color: #ef4444;
+    background: linear-gradient(to right, #fef2f2, #ffffff 80%);
+}
+
+/* 🟢 改写 (Rewrite) - 绿色系 */
+.markdown-content li:nth-child(3n+2) {
+    border-left-color: #10b981;
+    background: linear-gradient(to right, #ecfdf5, #ffffff 80%);
+}
+
+/* 🔵 植入/说明 (Note) - 蓝色系 */
+.markdown-content li:nth-child(3n) {
+    border-left-color: #3b82f6;
+    background: linear-gradient(to right, #eff6ff, #ffffff 80%);
+    margin-bottom: 1rem; /* 每组之间增加额外的间距 */
+    color: #64748b;
+    font-size: 0.85rem;
+}
+
+/* ===== Code 片段 (Inline Highlighting) ===== */
+.markdown-content code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.85em;
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+}
+
+/* 原文中的删除线效果优化 */
+.markdown-content li:nth-child(3n+1) code {
+    background: rgba(239, 68, 68, 0.1);
+    color: #b91c1c;
+    text-decoration: line-through;
+    opacity: 0.8;
+}
+
+/* 改写中的高亮优化 */
+.markdown-content li:nth-child(3n+2) code {
+    background: rgba(16, 185, 129, 0.15);
+    color: #047857;
+    font-weight: 600;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+/* 普通 Code */
+.markdown-content p code, 
+.markdown-content blockquote code {
+    background: #f1f5f9;
+    color: #0f172a;
+    border: 1px solid #e2e8f0;
+}
+
+/* ===== 分数徽章 (Badges) ===== */
 .score-badge {
     display: inline-flex;
     align-items: center;
-    gap: 0.3rem;
-    padding: 0.2rem 0.65rem;
-    border-radius: 2rem;
-    font-weight: 800;
-    font-size: 0.85rem;
-    line-height: 1.4;
+    justify-content: center;
+    min-width: 2.5rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 9999px;
+    font-weight: 700;
+    font-size: 0.75rem;
 }
 
 .score-badge-high {
     background: #dcfce7;
-    color: #16a34a;
-    border: 1px solid #bbf7d0;
+    color: #15803d;
 }
 
 .score-badge-mid {
     background: #fef3c7;
-    color: #d97706;
-    border: 1px solid #fde68a;
+    color: #b45309;
 }
 
 .score-badge-low {
     background: #fee2e2;
-    color: #dc2626;
-    border: 1px solid #fecaca;
-    animation: badge-pulse 1.5s ease-in-out infinite;
+    color: #b91c1c;
 }
 
-.score-badge-pass {
-    background: #dcfce7;
-    color: #16a34a;
-    border: 1px solid #bbf7d0;
-}
-
-.score-badge-risk {
-    background: #fee2e2;
-    color: #dc2626;
-    border: 1px solid #fecaca;
-    animation: badge-pulse 1.5s ease-in-out infinite;
-}
-
-.score-badge-total {
-    background: rgba(255, 255, 255, 0.15);
-    color: #fbbf24;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    font-size: 1rem;
-    padding: 0.25rem 0.75rem;
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
-}
-
-@keyframes badge-pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
-}
-
-/* ===== 分数动态颜色 ===== */
-.score-high {
-    color: #16a34a !important;
-    background: #f0fdf4;
-    border-radius: 0.375rem;
-    padding: 0.15rem 0.5rem;
+/* ===== 胶囊标签 (Pills) ===== */
+/* 用于 "① 标题优化" 这种小标签 */
+.markdown-content h3:nth-of-type(3) ~ p > strong:first-child {
     display: inline-block;
-}
-
-.score-mid {
-    color: #d97706 !important;
-    background: #fffbeb;
-    border-radius: 0.375rem;
-    padding: 0.15rem 0.5rem;
-    display: inline-block;
-}
-
-.score-low {
-    color: #dc2626 !important;
-    background: #fef2f2;
-    border-radius: 0.375rem;
-    padding: 0.15rem 0.5rem;
-    display: inline-block;
-    animation: score-flash 1.5s ease-in-out infinite;
-}
-
-@keyframes score-flash {
-    0%, 100% { background: #fef2f2; }
-    50% { background: #fee2e2; }
-}
-
-/* ===== 加粗文字 ===== */
-.markdown-content strong {
-    color: #1e293b;
-    font-weight: 700;
-}
-
-/* ===== 改写编号 ①②③ — 胶囊徽章 ===== */
-.markdown-content h3:nth-of-type(3) ~ p > strong:first-child,
-.markdown-content p > strong:only-child {
-    display: inline-block;
-    background: linear-gradient(135deg, #7c3aed, #a855f7);
-    color: #ffffff;
-    padding: 0.2rem 0.75rem;
-    border-radius: 2rem;
-    font-size: 0.82rem;
-    font-weight: 700;
-    margin-bottom: 0.35rem;
-    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.2);
-    letter-spacing: 0.02em;
-}
-
-/* ===== 列表项 — 改写内容 ===== */
-.markdown-content ul, .markdown-content ol {
-    padding-left: 0;
-    margin: 0.4rem 0;
-    list-style: none;
-}
-
-.markdown-content li {
-    font-size: 0.85rem;
-    color: #475569;
-    margin-bottom: 0.35rem;
-    line-height: 1.6;
-    padding: 0.4rem 0.75rem;
-    border-radius: 0.5rem;
-    position: relative;
-    border-left: 3px solid transparent;
-}
-
-/* 原文行 — 红色标记 */
-.markdown-content li:nth-child(3n+1) {
-    background: #fef2f2;
-    border-left-color: #fca5a5;
-}
-
-/* 改写行 — 绿色标记 */
-.markdown-content li:nth-child(3n+2) {
-    background: #f0fdf4;
-    border-left-color: #86efac;
-}
-
-/* 植入位置行 — 蓝色标记 */
-.markdown-content li:nth-child(3n) {
-    background: #eff6ff;
-    border-left-color: #93c5fd;
-}
-
-/* ===== 行内 code — 关键片段标注 ===== */
-.markdown-content code {
-    padding: 0.15rem 0.45rem;
-    border-radius: 0.3rem;
+    background: #f3e8ff;
+    color: #7e22ce;
+    padding: 0.2rem 0.6rem;
+    border-radius: 0.25rem;
     font-size: 0.8rem;
     font-weight: 600;
+    margin-bottom: 0.25rem;
+    border: 1px solid #e9d5ff;
+    box-shadow: none; /* 去除阴影，扁平化 */
 }
 
-/* 原文行中的 code */
-.markdown-content li:nth-child(3n+1) code {
-    background: #fee2e2;
-    color: #dc2626;
-    border: 1px solid #fecaca;
-    text-decoration: line-through;
-    text-decoration-color: #f87171;
-    text-decoration-thickness: 1.5px;
-}
-
-/* 改写行中的 code */
-.markdown-content li:nth-child(3n+2) code {
-    background: #dcfce7;
-    color: #16a34a;
-    border: 1px solid #bbf7d0;
-}
-
-/* 植入行中的 code */
-.markdown-content li:nth-child(3n) code {
-    background: #dbeafe;
-    color: #2563eb;
-    border: 1px solid #bfdbfe;
-}
-
-/* 通用 code（不在列表中） */
-.markdown-content p code,
-.markdown-content blockquote code {
-    background: #fef3c7;
-    color: #92400e;
-    border: 1px solid #fde68a;
-}
-
-/* ===== 违规行 特殊高亮 ===== */
-.risk-flag td {
-    background: #fef2f2 !important;
-}
-
-.risk-flag td::before {
-    content: '⚠️ ';
-}
-
-/* ===== 响应式 ===== */
+/* ===== 响应式微调 ===== */
 @media (max-width: 640px) {
+    .markdown-content {
+        font-size: 0.875rem;
+    }
+    
     .markdown-content h2:first-of-type {
-        font-size: 1.2rem;
-        padding: 0.75rem 1rem;
+        padding: 1rem;
+        font-size: 1.25rem;
     }
-
-    .markdown-content table {
-        font-size: 0.78rem;
-    }
-
-    .markdown-content thead th,
-    .markdown-content tbody td {
-        padding: 0.4rem 0.5rem;
-    }
-
-    .markdown-content li {
-        padding: 0.3rem 0.5rem;
+    
+    .markdown-content td:nth-child(2) {
+        /* 在手机端隐藏详细诊断，只显示分数? 或者缩小 */
+        font-size: 0.8rem;
     }
 }
