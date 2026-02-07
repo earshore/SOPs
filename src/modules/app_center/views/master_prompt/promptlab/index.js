@@ -555,9 +555,10 @@ function togglePromptZoom() {
     const isZoomed = modal.style.display !== 'none' && modal.style.display !== '';
     
     if (isZoomed) {
-        // 关闭放大视图 - 将元素移回原位
+        // 关闭放大视图 - 缩小动画
         zoomContent.classList.remove('scale-100', 'opacity-100');
         zoomContent.classList.add('scale-95', 'opacity-0');
+        modal.style.opacity = '0';
         
         addTimeout(() => {
             const consoleCard = document.querySelector('.zoomed-console-card');
@@ -567,9 +568,7 @@ function togglePromptZoom() {
             if (consoleCard) {
                 const originalParent = document.querySelector('.lg\\:col-span-4 .sticky');
                 if (originalParent) {
-                    // 移除放大视图的类
                     consoleCard.classList.remove('zoomed-console-card');
-                    // 插入到第一个位置
                     originalParent.insertBefore(consoleCard, originalParent.firstChild);
                 }
             }
@@ -578,15 +577,14 @@ function togglePromptZoom() {
             if (outputCard) {
                 const originalParent = document.querySelector('.lg\\:col-span-4 .sticky');
                 if (originalParent) {
-                    // 移除放大视图的类
                     outputCard.classList.remove('zoomed-output-card');
-                    // 插入到最后
                     originalParent.appendChild(outputCard);
                 }
             }
             
             modal.style.display = 'none';
             modal.classList.remove('flex');
+            modal.style.opacity = '';
             document.body.style.overflow = '';
             
             // 恢复图标和提示
@@ -594,30 +592,34 @@ function togglePromptZoom() {
             zoomIcon.parentElement.title = '放大视图';
         }, 300);
     } else {
-        // 打开放大视图 - 移动原始元素
+        // 打开放大视图 - 放大动画
+        const consoleCardWrapper = document.querySelector('.lg\\:col-span-4 .sticky > div:first-child');
+        const outputCard = document.getElementById('prompt-output-card');
+        
+        if (!consoleCardWrapper || !outputCard) {
+            console.error('[Promptlab] 未找到卡片元素');
+            return;
+        }
+        
+        // 显示模态框
         modal.style.display = 'flex';
         modal.classList.add('flex');
+        modal.style.opacity = '0';
         document.body.style.overflow = 'hidden';
         
         // 清空容器
         zoomedContainer.innerHTML = '';
         
-        // 移动翻转卡片容器（包含切换按钮）
-        const consoleCardWrapper = document.querySelector('.lg\\:col-span-4 .sticky > div:first-child');
-        if (consoleCardWrapper) {
-            consoleCardWrapper.classList.add('zoomed-console-card');
-            zoomedContainer.appendChild(consoleCardWrapper);
-        }
-        
-        // 移动输出卡片
-        const outputCard = document.getElementById('prompt-output-card');
-        if (outputCard) {
-            outputCard.classList.add('zoomed-output-card');
-            zoomedContainer.appendChild(outputCard);
-        }
+        // 移动元素到模态框
+        consoleCardWrapper.classList.add('zoomed-console-card');
+        outputCard.classList.add('zoomed-output-card');
+        zoomedContainer.appendChild(consoleCardWrapper);
+        zoomedContainer.appendChild(outputCard);
         
         // 触发动画
         requestAnimationFrame(() => {
+            modal.style.transition = 'opacity 0.3s ease-in';
+            modal.style.opacity = '1';
             zoomContent.classList.remove('scale-95', 'opacity-0');
             zoomContent.classList.add('scale-100', 'opacity-100');
         });
