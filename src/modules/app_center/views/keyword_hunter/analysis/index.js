@@ -187,7 +187,7 @@ function renderAnalysisModule() {
         console.log('[Analysis] 未匹配词根:', Array.from(unmatchedKeywordRoots));
 
         // 渲染高频词云
-        let html = '<div class="flex flex-wrap gap-2">';
+        let html = '<div class="flex flex-wrap gap-3">';
         
         state.keywordTracker.wordFrequency.forEach(([w, c]) => {
             const isMatched = matchedKeywordRoots.has(w.toLowerCase());
