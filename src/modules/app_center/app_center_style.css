@@ -155,21 +155,17 @@
     }
 }
 
-/* 输入模块优化 - 固定高度布局 */
+/* 输入模块优化 - 自适应高度布局 */
 .kt-input-grid {
-    height: calc(100vh - 380px);
     min-height: 500px;
-    max-height: 700px;
 }
 
 .kt-input-card {
     display: flex;
     flex-direction: column;
-    height: 100%;
     background: white;
     border-radius: 1rem;
     border: 1px solid #e2e8f0;
-    padding: 1.5rem;
     transition: all 0.3s ease;
 }
 
@@ -179,34 +175,32 @@
 }
 
 .kt-textarea-container {
-    flex: 1;
     display: flex;
     flex-direction: column;
-    min-height: 0;
+    position: relative;
 }
 
 .kt-textarea-container textarea {
-    flex: 1;
-    resize: none;
-    min-height: 100%;
+    resize: vertical;
+    min-height: 400px;
+    max-height: 800px;
+    height: 400px;
     font-size: 0.875rem;
     line-height: 1.6;
     padding: 1rem;
-    border: 1px solid #e2e8f0;
+    border: none;
     border-radius: 0.75rem;
     transition: all 0.2s ease;
 }
 
 .kt-textarea-container textarea:focus {
     outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border: none;
 }
 
 /* Keyword Input 相关样式 */
 .keyword-input-wrapper {
     position: relative;
-    flex: 1;
     display: flex;
     flex-direction: column;
 }
@@ -229,14 +223,15 @@
     position: relative;
     z-index: 2;
     background: transparent;
-    resize: none;
-    flex: 1;
+    resize: vertical;
+    min-height: 400px;
+    max-height: 800px;
+    height: 400px;
 }
 
 /* Textarea 相关样式 */
 .textarea-wrapper {
     position: relative;
-    flex: 1;
     display: flex;
     flex-direction: column;
 }
