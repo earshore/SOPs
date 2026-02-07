@@ -12,6 +12,7 @@ import {
     renderNotRegistered,
     renderTimeout
 } from '../../components/ErrorBoundary.js';
+import { Logger } from '../../services/loggerService.js';
 
 /**
  * 模块加载器配置
@@ -248,7 +249,7 @@ export class ModuleLoader {
             return await performanceService.measureModuleLoad(routeId, loader);
         } catch (e) {
             // 如果性能服务不可用，直接加载模块
-            console.debug(`[${this.moduleName}] 性能监控不可用，直接加载模块`);
+            Logger.debug('性能监控不可用，直接加载模块', {}, this.moduleName);
             return await loader();
         }
     }

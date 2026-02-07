@@ -1,7 +1,7 @@
 # ==============================================================================
 # 1. Dependency & Build
 # ==============================================================================
-# Node
+# Node Dependencies
 node_modules/
 npm-debug.log*
 yarn-debug.log*
@@ -9,100 +9,181 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 .npm/
+.pnpm-store/
 
 # Build Output
 dist/
+dist-ssr/
 build/
 out/
 .output/
-
-# Vitest HTML report / Vite preview output (可选：若 html/ 为构建产物则忽略)
 html/
 
 # Cache
 .cache/
 .parcel-cache/
+.vite/
 .eslintcache
 *.tsbuildinfo
+.turbo/
 
 # ==============================================================================
-# 2. Framework & Tooling
+# 2. Environment & Configuration
 # ==============================================================================
-# Vite / generic
-*.local
+# Environment Variables (保留示例文件)
 .env
-.env.*
+.env.local
+.env.development
+.env.production
+.env.test
+.env.*.local
 !.env.example
 !.env.test.example
 
-# Testing / Coverage
+# ==============================================================================
+# 3. Testing & Coverage
+# ==============================================================================
 coverage/
 .nyc_output/
 reports/
 *.lcov
 test-*.html
 *.test.local.js
-# test/ - 保留测试脚本，不要忽略
-test/**/*.local.js
-test/**/temp-*.js
+tests/**/*.local.js
+tests/**/temp-*.js
+tests/**/.temp/
 
-
-# Documentation
-# docs/ - 保留文档，不要忽略
+# ==============================================================================
+# 4. Documentation
+# ==============================================================================
+# 保留文档目录，仅忽略草稿和临时文件
 jsdoc-debug.html
 docs/**/*.draft.md
+docs/**/.temp/
+docs/**/temp-*.md
 
 
 # ==============================================================================
-# 3. System & IDE
+# 5. System Files
 # ==============================================================================
-# OS
+# macOS
 .DS_Store
 .DS_Store?
 ._*
 .Spotlight-V100
 .Trashes
-ehthumbs.db
+.AppleDouble
+.LSOverride
+
+# Windows
 Thumbs.db
 Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
 Desktop.ini
+$RECYCLE.BIN/
+*.lnk
 
-# IDEs
-.idea/
+# Linux
+*~
+.directory
+.Trash-*
+
+# ==============================================================================
+# 6. IDE & Editors
+# ==============================================================================
+# VSCode
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+*.code-workspace
+
+# JetBrains IDEs
+.idea/
+*.iml
+*.iws
+*.ipr
+.idea_modules/
+
+# Vim
 *.swp
 *.swo
+*.swn
 *~
+
+# Sublime Text
 *.sublime-project
 *.sublime-workspace
 
+# Emacs
+*~
+\#*\#
+.\#*
+
 # ==============================================================================
-# 4. Project Specific
+# 7. Logs
 # ==============================================================================
-# Logs
 logs/
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 build_log*.txt
 
-# Temp / Backup
+# ==============================================================================
+# 8. Temporary & Backup Files
+# ==============================================================================
+# Temporary directories
 .tmp/
 tmp/
 temp/
+.temp/
+
+# Temporary files
 *.tmp
+*.temp
+*~
+
+# Backup files
 *.bak
 *.backup
 *.backup-*
 *backup-*
+**/*.backup
+**/*.bak
 **/*.html.backup
+tools/backups/
+**/backups/
 
-# Agent / AI
+# ==============================================================================
+# 9. AI & Development Tools
+# ==============================================================================
+# AI Assistants
 .agent/
 .kiro/
 .gemini/
+.cursor/
+.copilot/
 
-# Specific temporary files
+# Development artifacts
 test-new-llm-service.html
+*.local.html
+*.test.local.*
+
+# ==============================================================================
+# 10. Project Specific
+# ==============================================================================
+# Cloudflare Workers
+.wrangler/
+wrangler.toml.local
+
+# Functions build output
+functions/dist/
+
+# Public downloads (如果是用户上传的文件)
+# public/downloads/*
+# !public/downloads/.gitkeep

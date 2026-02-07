@@ -58,26 +58,65 @@ function setCache(path, content) {
 
 /**
  * 清理旧版本缓存 (Exported for main.js or init)
+ * 🔧 优化: 智能清理，只删除旧版本缓存，保留当前版本
  */
 export function clearOldCache() {
     try {
         const keysToRemove = [];
+        const currentVersionPrefix = `${CACHE_PREFIX}${APP_VERSION}_`;
+        
         // 获取所有存储的键
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
-            // 清除所有 view_cache_ 开头的缓存（包括当前版本）
-            // 这样可以强制重新生成使用 setRaw() 存储的新缓存
-            if (key && key.startsWith(CACHE_PREFIX)) {
+            
+            // 只清除旧版本的缓存，保留当前版本
+            if (key && key.startsWith(CACHE_PREFIX) && !key.startsWith(currentVersionPrefix)) {
                 keysToRemove.push(key);
             }
         }
+        
         keysToRemove.forEach(k => StorageService.remove(k));
+        
         if (keysToRemove.length > 0) {
-            console.log(`[ViewLoader] Cleared ${keysToRemove.length} view cache items.`);
+            console.log(`[ViewLoader] 清理了 ${keysToRemove.length} 个旧版本缓存项`);
         }
     } catch (e) {
-        console.warn('Cache clear error:', e);
+        console.warn('[ViewLoader] 缓存清理失败:', e);
     }
+}
+
+/**
+ * 获取缓存使用情况
+ * @returns {{count: number, size: number, items: Array}}
+ */
+export function getCacheStats() {
+    const stats = {
+        count: 0,
+        size: 0,
+        items: []
+    };
+    
+    try {
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith(CACHE_PREFIX)) {
+                const value = localStorage.getItem(key);
+                const itemSize = value ? value.length * 2 : 0; // UTF-16编码，每字符2字节
+                
+                stats.count++;
+                stats.size += itemSize;
+                stats.items.push({
+                    key,
+                    size: itemSize,
+                    sizeKB: (itemSize / 1024).toFixed(2)
+                });
+            }
+        }
+    } catch (e) {
+        console.warn('[ViewLoader] 获取缓存统计失败:', e);
+    }
+    
+    return stats;
 }
 
 /**

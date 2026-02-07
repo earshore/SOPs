@@ -1,43 +1,20 @@
 // src/common/config/envConfig.js
 // ================================================================
-// 🌐 环境配置管理
-// 自动检测开发/生产环境并提供相应配置
+// 🌐 环境配置管理 - 基于 Vite 环境变量
+// 支持 .env 文件配置，提供灵活的环境管理
 // ================================================================
 
 /**
- * 检测当前运行环境
- * @returns {'development' | 'production'}
- */
-export function getEnvironment() {
-  if (typeof window === 'undefined') {
-    return 'production';
-  }
-  
-  const hostname = window.location.hostname;
-  
-  // 开发环境特征
-  if (
-    hostname === 'localhost' ||
-    hostname === '127.0.0.1' ||
-    hostname.startsWith('192.168.') ||
-    hostname.startsWith('10.') ||
-    hostname.endsWith('.local')
-  ) {
-    return 'development';
-  }
-  
-  return 'production';
-}
-
-/**
  * 环境配置
+ * 基于 Vite 的 import.meta.env 读取配置
  */
 export const EnvConfig = {
   /**
    * 当前环境
+   * @returns {'development' | 'production' | 'test'}
    */
   get environment() {
-    return getEnvironment();
+    return import.meta.env.VITE_APP_ENV || import.meta.env.MODE || 'production';
   },
 
   /**
@@ -55,16 +32,29 @@ export const EnvConfig = {
   },
 
   /**
+   * 是否为测试环境
+   */
+  get isTest() {
+    return this.environment === 'test';
+  },
+
+  /**
    * API 配置
    */
   api: {
     /**
-     * 获取 LLM API 的基础路径
-     * 开发环境: /v1 (通过 Vite 代理)
-     * 生产环境: /v1 (通过 Cloudflare Functions)
+     * API 基础路径
      */
-    get llmBasePath() {
-      return '/v1';
+    get baseUrl() {
+      return import.meta.env.VITE_API_BASE_URL || '/v1';
+    },
+
+    /**
+     * API 超时时间（毫秒）
+     */
+    get timeout() {
+      const timeout = import.meta.env.VITE_API_TIMEOUT;
+      return timeout ? parseInt(timeout, 10) : 30000;
     },
 
     /**
@@ -75,7 +65,7 @@ export const EnvConfig = {
     normalizeEndpoint(endpoint) {
       // 开发环境: 统一使用代理路径
       if (EnvConfig.isDevelopment) {
-        return this.llmBasePath;
+        return this.baseUrl;
       }
       
       // 生产环境: 
@@ -87,12 +77,37 @@ export const EnvConfig = {
         if (normalizedUrl.endsWith('/v1')) {
           normalizedUrl = normalizedUrl.slice(0, -3);
         }
-        // 保留用户配置的完整 URL,直接调用外部网关
         return normalizedUrl;
       }
       
-      // 使用 Cloudflare Functions 代理
-      return this.llmBasePath;
+      // 使用配置的基础路径
+      return this.baseUrl;
+    }
+  },
+
+  /**
+   * 功能开关
+   */
+  features: {
+    /**
+     * 是否启用监控
+     */
+    get monitoring() {
+      return import.meta.env.VITE_ENABLE_MONITORING === 'true';
+    },
+
+    /**
+     * 是否启用调试模式
+     */
+    get debug() {
+      return import.meta.env.VITE_ENABLE_DEBUG === 'true';
+    },
+
+    /**
+     * 是否启用性能监控
+     */
+    get performance() {
+      return import.meta.env.VITE_ENABLE_PERFORMANCE === 'true';
     }
   },
 
@@ -101,11 +116,56 @@ export const EnvConfig = {
    */
   logging: {
     /**
+     * 日志级别
+     * @returns {'debug' | 'info' | 'warn' | 'error'}
+     */
+    get level() {
+      return import.meta.env.VITE_LOG_LEVEL || 'info';
+    },
+
+    /**
      * 是否启用详细日志
      */
     get verbose() {
-      return EnvConfig.isDevelopment;
+      return this.level === 'debug' || EnvConfig.features.debug;
     }
+  },
+
+  /**
+   * 监控服务配置
+   */
+  monitoring: {
+    /**
+     * Sentry DSN
+     */
+    get sentryDsn() {
+      return import.meta.env.VITE_SENTRY_DSN || null;
+    }
+  },
+
+  /**
+   * 获取所有环境变量（调试用）
+   * @returns {Object}
+   */
+  getAll() {
+    return {
+      environment: this.environment,
+      isDevelopment: this.isDevelopment,
+      isProduction: this.isProduction,
+      api: {
+        baseUrl: this.api.baseUrl,
+        timeout: this.api.timeout
+      },
+      features: {
+        monitoring: this.features.monitoring,
+        debug: this.features.debug,
+        performance: this.features.performance
+      },
+      logging: {
+        level: this.logging.level,
+        verbose: this.logging.verbose
+      }
+    };
   }
 };
 

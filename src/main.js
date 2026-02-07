@@ -24,25 +24,14 @@ import { initViews } from './common/utils/viewLoader.js';
 // ✅ 导入 Web Components
 import './components/modal/AppModal.js';
 
-// 🎯 P0修复: 导入依赖注入容器
-import { container } from './common/di/Container.js';
-
-// ✅ 导入 StorageService
-import { StorageService, STORAGE_KEYS } from './services/storageService.js';
+// 🎯 P0优化: 导入服务初始化管理器
+import { ServiceBootstrap } from './common/bootstrap/ServiceBootstrap.js';
 
 // 🎯 短期优化：导入 LoadingManager
 import { loadingManager } from './common/utils/LoadingManager.js';
 
-// 🎯 阶段1: 导入性能监控服务
-import { performanceService } from './services/performanceService.js';
-
-// 🎯 阶段1: 导入日志和监控服务
-import { Logger } from './services/loggerService.js';
-import { monitoringService } from './services/monitoringService.js';
-
 // ✅ Import User Guide Modal (Vite Raw Import)
 import userGuideModalHtml from './components/modal/userGuideModal.html?raw';
-import promptModalHtml from './components/modal/promptModal.html?raw';
 
 // Inject Modals
 document.addEventListener('DOMContentLoaded', () => {
@@ -58,20 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
       document.body.appendChild(newScript);
     });
   }
-
-  // Register Prompt Modal Global Helper
-  window.renderPromptModal = () => {
-    const modalId = 'prompt-modal';
-    if (!document.getElementById(modalId)) {
-      const temp = document.createElement('div');
-      // ✅ 安全: 静态HTML模板，无用户输入
-      temp.innerHTML = promptModalHtml;
-      document.getElementById('modal-container').appendChild(temp.firstElementChild);
-    }
-    // Use the component's open method
-    const modal = document.getElementById(modalId);
-    if (modal && modal.open) modal.open();
-  };
 });
 
 
@@ -167,86 +142,151 @@ window.Alpine = Alpine;
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("🚀 System: Application Booting...");
 
-  // 🎯 P0修复: 初始化依赖注入容器
-  console.log("🔧 [DI] 初始化依赖注入容器...");
-  
-  // 注册核心服务
-  const { default: actionRegistry } = await import('./common/utils/actionRegistry.js');
-  container.register('actionRegistry', () => actionRegistry);
-  
-  const { router } = await import('./common/router/Router.js');
-  container.register('router', () => router);
-  
-  const { stateManager } = await import('./common/state/StateManager.js');
-  container.register('stateManager', () => stateManager);
-  
-  console.log("✅ [DI] 核心服务已注册:", container.getRegisteredServices());
+  // ================================================================
+  // 🎯 P0优化: 使用服务初始化管理器
+  // ================================================================
+  const bootstrap = new ServiceBootstrap();
 
-  // 🎯 阶段1: 初始化日志服务
-  Logger.info('应用启动', { version: '1.0.0' }, 'System');
+  // 1. 基础服务（无依赖）
+  bootstrap.register('eventBus', async () => {
+    const { default: eventBus } = await import('./common/EventBus.js');
+    return eventBus;
+  });
 
-  // 🎯 阶段1: 初始化监控服务（仅生产环境）
-  // 注意：需要配置Sentry DSN才能启用
-  // monitoringService.init({ dsn: 'YOUR_SENTRY_DSN' });
+  bootstrap.register('container', async () => {
+    const { container } = await import('./common/di/Container.js');
+    return container;
+  }, { dependencies: ['eventBus'] });
 
-  // 🎯 阶段1: 初始化性能监控
-  performanceService.init();
+  // 2. 工具服务
+  bootstrap.register('actionRegistry', async () => {
+    const { default: actionRegistry } = await import('./common/utils/actionRegistry.js');
+    const { container } = await import('./common/di/Container.js');
+    container.register('actionRegistry', () => actionRegistry);
+    return actionRegistry;
+  }, { dependencies: ['container'] });
 
-  // 1. Initialize Alpine Components
-  initAlpineSettings();
-  Alpine.start();
+  bootstrap.register('stateManager', async () => {
+    const { stateManager } = await import('./common/state/StateManager.js');
+    const { container } = await import('./common/di/Container.js');
+    container.register('stateManager', () => stateManager);
+    return stateManager;
+  }, { dependencies: ['container'] });
 
-  // ----------------------------------------------------
-  // 🔥 核心改动点：必须等待 HTML 注入完成后，才能绑定事件
-  // ----------------------------------------------------
-  try {
-    await initViews();
+  // 3. 路由服务
+  bootstrap.register('router', async () => {
+    const { router } = await import('./common/router/Router.js');
+    const { container } = await import('./common/di/Container.js');
+    container.register('router', () => router);
+    return router;
+  }, { dependencies: ['container', 'stateManager'] });
 
-    // 🎯 短期优化：初始化 LoadingManager
+  // 4. 监控服务（可选）
+  bootstrap.register('performanceService', async () => {
+    const { performanceService } = await import('./services/performanceService.js');
+    performanceService.init();
+    return performanceService;
+  }, { 
+    optional: true,
+    fallback: () => {
+      console.log('[Bootstrap] 性能监控服务未启用');
+      return null;
+    }
+  });
+
+  bootstrap.register('logger', async () => {
+    const { Logger } = await import('./services/loggerService.js');
+    Logger.info('应用启动', { version: '1.0.0' }, 'System');
+    return Logger;
+  }, { optional: true });
+
+  // 5. UI 服务
+  bootstrap.register('loadingManager', async () => {
     const globalLoading = document.getElementById('global-loading');
     if (globalLoading) {
       loadingManager.setGlobalLoadingElement(globalLoading);
       console.log("✅ LoadingManager initialized");
     }
+    return loadingManager;
+  });
 
-    // ✅ P1: 初始化事件调试器 (需在广播事件前启用)
+  bootstrap.register('alpine', async () => {
+    initAlpineSettings();
+    Alpine.start();
+    return Alpine;
+  });
+
+  bootstrap.register('views', async () => {
+    await initViews();
+    return true;
+  }, { dependencies: ['router', 'stateManager', 'loadingManager'] });
+
+  // 6. 事件系统
+  bootstrap.register('eventLogger', async () => {
+    const { initEventLogger } = await import('./common/utils/eventLogger.js');
     initEventLogger();
+    return true;
+  }, { optional: true });
 
-    // ✅ P1: 初始化全局事件委托 (支持 data-action 模式)
+  bootstrap.register('eventDelegation', async () => {
+    const { initGlobalEventDelegation } = await import('./common/utils/actionRegistry.js');
     initGlobalEventDelegation();
+    return true;
+  }, { dependencies: ['actionRegistry'] });
 
-    // ⚡️ Load Plugins (Dynamic Registration)
+  // 7. 插件系统
+  bootstrap.register('plugins', async () => {
+    const { loadPlugins } = await import('./common/utils/pluginLoader.js');
     loadPlugins();
+    return true;
+  }, { optional: true });
 
+  // ================================================================
+  // 执行初始化
+  // ================================================================
+  try {
+    const result = await bootstrap.initialize();
+    
+    if (!result.success) {
+      console.error('❌ 部分服务初始化失败，应用可能无法正常工作');
+      if (window.showToast) {
+        showToast('应用初始化失败，请刷新页面重试', 'error');
+      }
+      return;
+    }
+
+    // ================================================================
+    // 初始化成功，继续启动流程
+    // ================================================================
+    
+    // 初始化首页
     initHomeSplash();
 
-    // 1. 渲染顶部 Mega Menu
+    // 渲染顶部 Mega Menu
     renderMegaMenu();
     renderSopsMegaMenu();
     renderHubMegaMenu();
     renderMoreMenu();
 
-    // ================================================================
-    // 🎯 P3: 广播应用初始化完成事件
-    // 所有模块可以监听此事件实现自注册初始化
-    // ================================================================
+    // 广播应用初始化完成事件
     window.dispatchEvent(new CustomEvent(APP_EVENTS.INITIALIZED, {
       detail: { timestamp: Date.now() }
     }));
 
-    console.log("✅ Views loaded successfully");
+    // 初始化默认状态
+    updateModelStatus();
+
+    // 初始化路由
+    initRouter();
+
+    console.log("✅ System: Ready");
+
   } catch (error) {
-    console.error("❌ Failed to load views:", error);
-    return;
+    console.error('❌ 应用启动失败:', error);
+    if (window.showToast) {
+      showToast('应用启动失败，请刷新页面重试', 'error');
+    }
   }
-
-  // 2. 初始化默认状态
-  updateModelStatus();
-
-  // 3. 初始化路由 (替代手动 switchTab)
-  initRouter();
-
-  console.log("✅ System: Ready");
 });
 
 // ================================================================
