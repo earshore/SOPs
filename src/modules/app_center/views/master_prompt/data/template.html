@@ -1,217 +1,238 @@
 <div class="app-center-container">
 
-    <!-- ========== Strategy Guide Banner (Collapsible) ========== -->
-    <div onclick="document.getElementById('amz_refining_container').classList.toggle('hidden'); document.getElementById('data-refine-chevron').classList.toggle('rotate-180')"
-        class="mb-6 cursor-pointer group">
-        <div class="relative rounded-2xl border border-slate-200/60 overflow-hidden bg-white hover:shadow-lg hover:shadow-orange-100/40 transition-all duration-300">
-            <!-- 背景装饰 -->
-            <div class="absolute inset-0 bg-gradient-to-br from-slate-50 via-orange-50/40 to-amber-50/30"></div>
-            <div class="absolute top-0 right-0 w-80 h-80 bg-gradient-to-br from-orange-100/30 to-amber-200/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
-            <div class="absolute bottom-0 left-0 w-56 h-56 bg-gradient-to-tr from-yellow-100/30 to-orange-100/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4"></div>
-            <div class="absolute inset-0 opacity-[0.02]" style="background-image: radial-gradient(circle, #f97316 1px, transparent 1px); background-size: 28px 28px;"></div>
+    <!-- ========== Strategy Guide Card (Unified Collapsible) ========== -->
+    <div class="mb-6 group/card">
+        <div class="relative rounded-2xl border border-slate-200/60 overflow-hidden bg-white transition-all duration-300"
+            id="strategy-card-wrapper"
+            :class="{ 'shadow-lg shadow-orange-100/40': true }">
 
-            <!-- 浮动粒子 -->
-            <div class="absolute top-6 right-20 w-2 h-2 rounded-full bg-orange-300/50 animate-pulse"></div>
-            <div class="absolute top-14 right-40 w-1.5 h-1.5 rounded-full bg-amber-300/40 animate-pulse" style="animation-delay: 0.6s;"></div>
-            <div class="absolute bottom-8 right-32 w-1 h-1 rounded-full bg-yellow-400/50 animate-pulse" style="animation-delay: 1.2s;"></div>
+            <!-- ===== Collapsed Header (Always Visible & Clickable) ===== -->
+            <div onclick="
+                const container = document.getElementById('amz_refining_container');
+                const chevron = document.getElementById('data-refine-chevron');
+                const divider = document.getElementById('strategy-divider');
+                const card = document.getElementById('strategy-card-wrapper');
+                container.classList.toggle('hidden');
+                chevron.classList.toggle('rotate-180');
+                divider.classList.toggle('hidden');
+                card.classList.toggle('hover:shadow-lg');
+                card.classList.toggle('hover:shadow-orange-100/40');
+            "
+                class="cursor-pointer group relative">
 
-            <div class="relative z-10 p-8 md:p-10">
-                <div class="flex items-start justify-between">
-                    <div class="flex items-start gap-5">
-                        <!-- Icon -->
-                        <div class="relative flex-shrink-0">
-                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center shadow-lg shadow-orange-500/25">
-                                <i class="fas fa-database text-[22px] text-white"></i>
-                            </div>
-                            <div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-400 border-2 border-white flex items-center justify-center">
-                                <i class="fas fa-lightbulb text-[8px] text-white"></i>
-                            </div>
-                        </div>
+                <!-- 背景装饰 -->
+                <div class="absolute inset-0 bg-gradient-to-br from-slate-50 via-orange-50/40 to-amber-50/30"></div>
+                <div class="absolute top-0 right-0 w-80 h-80 bg-gradient-to-br from-orange-100/30 to-amber-200/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+                <div class="absolute bottom-0 left-0 w-56 h-56 bg-gradient-to-tr from-yellow-100/30 to-orange-100/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4"></div>
+                <div class="absolute inset-0 opacity-[0.02]" style="background-image: radial-gradient(circle, #f97316 1px, transparent 1px); background-size: 28px 28px;"></div>
 
-                        <!-- Content -->
-                        <div class="flex-1">
-                            <div class="flex items-center gap-3 mb-2">
-                                <h2 class="text-xl font-bold text-slate-800 tracking-tight">AI 分析 & 数据结构化策略</h2>
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-sm">
-                                    <i class="fas fa-book-open mr-1 text-[8px]"></i>指南
-                                </span>
-                            </div>
-                            <p class="text-slate-500 text-sm leading-relaxed">
-                                不要把所有信息都丢给 AI。垃圾进，垃圾出。你需要提取那些能喂饱 Project COSMO（知识图谱）和 Rufus（问答助手）的高价值信息。
-                            </p>
-                            <!-- Quick Tags -->
-                            <div class="flex items-center gap-4 mt-4">
-                                <div class="flex items-center gap-1.5">
-                                    <div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
-                                    <span class="text-xs text-slate-400">高价值信号提取</span>
+                <!-- 浮动粒子 -->
+                <div class="absolute top-6 right-20 w-2 h-2 rounded-full bg-orange-300/50 animate-pulse"></div>
+                <div class="absolute top-14 right-40 w-1.5 h-1.5 rounded-full bg-amber-300/40 animate-pulse" style="animation-delay: 0.6s;"></div>
+                <div class="absolute bottom-8 right-32 w-1 h-1 rounded-full bg-yellow-400/50 animate-pulse" style="animation-delay: 1.2s;"></div>
+
+                <div class="relative z-10 p-8 md:p-10">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-start gap-5">
+                            <!-- Icon -->
+                            <div class="relative flex-shrink-0">
+                                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center shadow-lg shadow-orange-500/25">
+                                    <i class="fas fa-database text-[22px] text-white"></i>
                                 </div>
-                                <div class="flex items-center gap-1.5">
-                                    <div class="w-1.5 h-1.5 rounded-full bg-rose-400"></div>
-                                    <span class="text-xs text-slate-400">噪音过滤策略</span>
-                                </div>
-                                <div class="flex items-center gap-1.5">
-                                    <div class="w-1.5 h-1.5 rounded-full bg-violet-400"></div>
-                                    <span class="text-xs text-slate-400">语义优化</span>
+                                <div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-400 border-2 border-white flex items-center justify-center">
+                                    <i class="fas fa-lightbulb text-[8px] text-white"></i>
                                 </div>
                             </div>
-                        </div>
-                    </div>
 
-                    <!-- Chevron -->
-                    <div class="flex-shrink-0 ml-4 pt-1">
-                        <div class="w-9 h-9 rounded-xl bg-white/80 border border-slate-200/80 flex items-center justify-center group-hover:bg-slate-800 group-hover:border-slate-800 transition-all duration-200 shadow-sm">
-                            <i id="data-refine-chevron"
-                                class="fas fa-chevron-down text-slate-400 group-hover:text-white transition-all duration-300 text-sm"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ========== Strategy Detail Panel (Collapsible Content) ========== -->
-    <div id="amz_refining_container"
-        class="hidden mb-6">
-        <div class="rounded-2xl border border-slate-200/80 bg-gradient-to-b from-slate-50/80 to-white p-6 shadow-sm">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-
-                <!-- ✅ Must Extract Card -->
-                <div class="bg-white rounded-xl border-2 border-emerald-100 overflow-hidden hover:shadow-lg hover:shadow-emerald-50/50 transition-all duration-300 group">
-                    <!-- Card Header -->
-                    <div class="bg-gradient-to-r from-emerald-50 to-green-50/50 px-5 py-4 border-b border-emerald-100">
-                        <div class="flex items-center justify-between">
-                            <h4 class="font-bold text-emerald-800 text-sm flex items-center gap-2.5">
-                                <div class="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center">
-                                    <i class="fas fa-check text-emerald-600 text-xs"></i>
+                            <!-- Content -->
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <h2 class="text-xl font-bold text-slate-800 tracking-tight">AI 分析 & 数据结构化策略</h2>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-sm">
+                                        <i class="fas fa-book-open mr-1 text-[8px]"></i>指南
+                                    </span>
                                 </div>
-                                必须提取 (高价值信号)
-                            </h4>
-                            <span class="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">4 项</span>
-                        </div>
-                    </div>
-                    <!-- Card Body -->
-                    <div class="p-5 space-y-1">
-                        <!-- Item 1 -->
-                        <div class="flex items-start gap-3 p-3 rounded-xl hover:bg-emerald-50/50 transition-colors group/item">
-                            <div class="flex-shrink-0 mt-0.5">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-sm">
-                                    COSMO
-                                </span>
-                            </div>
-                            <div class="min-w-0">
-                                <h5 class="font-bold text-slate-700 text-xs mb-1">具体使用场景 (Context)</h5>
-                                <p class="text-[11px] text-slate-500 leading-relaxed">例如：Review中提到的 "<span class="text-emerald-600 font-medium">Taking it on a ski trip</span>" 而非单纯的 "Winter coat"。COSMO 依赖场景构建图谱。</p>
-                            </div>
-                        </div>
-
-                        <!-- Item 2 -->
-                        <div class="flex items-start gap-3 p-3 rounded-xl hover:bg-blue-50/50 transition-colors">
-                            <div class="flex-shrink-0 mt-0.5">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-sm">
-                                    Rufus
-                                </span>
-                            </div>
-                            <div class="min-w-0">
-                                <h5 class="font-bold text-slate-700 text-xs mb-1">具体痛点与解决方案 (QA Pairs)</h5>
-                                <p class="text-[11px] text-slate-500 leading-relaxed">提取负面 Review 中的具体失效点（如"<span class="text-blue-600 font-medium">拉链在零下度数卡住</span>"），转化为 Listing 中的 QA 或属性描述。</p>
-                            </div>
-                        </div>
-
-                        <!-- Item 3 -->
-                        <div class="flex items-start gap-3 p-3 rounded-xl hover:bg-violet-50/50 transition-colors">
-                            <div class="flex-shrink-0 mt-0.5">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-gradient-to-r from-violet-500 to-purple-500 text-white shadow-sm">
-                                    Intent
-                                </span>
-                            </div>
-                            <div class="min-w-0">
-                                <h5 class="font-bold text-slate-700 text-xs mb-1">情感形容词与原生表达</h5>
-                                <p class="text-[11px] text-slate-500 leading-relaxed">用户用来形容产品的非官方词汇（如 "<span class="text-violet-600 font-medium">Game changer for arthritis</span>"）。这是长尾流量的来源。</p>
-                            </div>
-                        </div>
-
-                        <!-- Item 4 -->
-                        <div class="flex items-start gap-3 p-3 rounded-xl hover:bg-orange-50/50 transition-colors">
-                            <div class="flex-shrink-0 mt-0.5">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-sm">
-                                    A10
-                                </span>
-                            </div>
-                            <div class="min-w-0">
-                                <h5 class="font-bold text-slate-700 text-xs mb-1">变体偏好分布</h5>
-                                <p class="text-[11px] text-slate-500 leading-relaxed">分析 Top 竞品哪个颜色/尺寸评论最多，直接决定备货，避免库存积压影响 IPI。</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ❌ Must Filter Card -->
-                <div class="bg-white rounded-xl border-2 border-rose-100 overflow-hidden hover:shadow-lg hover:shadow-rose-50/50 transition-all duration-300">
-                    <!-- Card Header -->
-                    <div class="bg-gradient-to-r from-rose-50 to-red-50/50 px-5 py-4 border-b border-rose-100">
-                        <div class="flex items-center justify-between">
-                            <h4 class="font-bold text-rose-800 text-sm flex items-center gap-2.5">
-                                <div class="w-7 h-7 rounded-lg bg-rose-100 flex items-center justify-center">
-                                    <i class="fas fa-times text-rose-500 text-xs"></i>
+                                <p class="text-slate-500 text-sm leading-relaxed">
+                                    不要把所有信息都丢给 AI。垃圾进，垃圾出。你需要提取那些能喂饱 Project COSMO（知识图谱）和 Rufus（问答助手）的高价值信息。
+                                </p>
+                                <!-- Quick Tags -->
+                                <div class="flex items-center gap-4 mt-4">
+                                    <div class="flex items-center gap-1.5">
+                                        <div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
+                                        <span class="text-xs text-slate-400">高价值信号提取</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <div class="w-1.5 h-1.5 rounded-full bg-rose-400"></div>
+                                        <span class="text-xs text-slate-400">噪音过滤策略</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <div class="w-1.5 h-1.5 rounded-full bg-violet-400"></div>
+                                        <span class="text-xs text-slate-400">语义优化</span>
+                                    </div>
                                 </div>
-                                必须过滤 (噪音)
-                            </h4>
-                            <span class="text-[10px] font-bold text-rose-500 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-100">3 项</span>
-                        </div>
-                    </div>
-                    <!-- Card Body -->
-                    <div class="p-5 space-y-1">
-                        <!-- Noise Item 1 -->
-                        <div class="p-3 rounded-xl hover:bg-rose-50/40 transition-colors group/noise">
-                            <div class="flex items-center gap-2 mb-1.5">
-                                <div class="w-5 h-5 rounded flex items-center justify-center bg-rose-100/80">
-                                    <i class="fas fa-ban text-[9px] text-rose-400"></i>
-                                </div>
-                                <h5 class="font-bold text-slate-600 text-xs line-through decoration-rose-300 decoration-2">通用的好评</h5>
                             </div>
-                            <p class="text-[11px] text-slate-500 leading-relaxed pl-7">
-                                "<span class="text-rose-400 italic">Great product</span>", "<span class="text-rose-400 italic">Fast shipping</span>", "<span class="text-rose-400 italic">Love it</span>". 这些对构建语义图谱毫无价值，会稀释 AI 的注意力。
-                            </p>
                         </div>
 
-                        <!-- Noise Item 2 -->
-                        <div class="p-3 rounded-xl hover:bg-rose-50/40 transition-colors">
-                            <div class="flex items-center gap-2 mb-1.5">
-                                <div class="w-5 h-5 rounded flex items-center justify-center bg-rose-100/80">
-                                    <i class="fas fa-ban text-[9px] text-rose-400"></i>
-                                </div>
-                                <h5 class="font-bold text-slate-600 text-xs line-through decoration-rose-300 decoration-2">物流与包装抱怨 (非FBM)</h5>
-                            </div>
-                            <p class="text-[11px] text-slate-500 leading-relaxed pl-7">
-                                除非你是自发货，否则 FBA 的物流问题不属于产品本身的属性缺陷，会误导 Rufus 对产品质量的判断。
-                            </p>
-                        </div>
-
-                        <!-- Noise Item 3 -->
-                        <div class="p-3 rounded-xl hover:bg-rose-50/40 transition-colors">
-                            <div class="flex items-center gap-2 mb-1.5">
-                                <div class="w-5 h-5 rounded flex items-center justify-center bg-rose-100/80">
-                                    <i class="fas fa-ban text-[9px] text-rose-400"></i>
-                                </div>
-                                <h5 class="font-bold text-slate-600 text-xs line-through decoration-rose-300 decoration-2">竞品特定的品牌词</h5>
-                            </div>
-                            <p class="text-[11px] text-slate-500 leading-relaxed pl-7">
-                                虽然可以做 PPC 竞品词，但在 Listing 埋词中应避免，以免造成侵权或相关性降低。
-                            </p>
-                        </div>
-
-                        <!-- Bottom Tip -->
-                        <div class="mt-3 mx-3 p-3 bg-amber-50/80 rounded-lg border border-amber-100">
-                            <div class="flex items-start gap-2">
-                                <i class="fas fa-exclamation-triangle text-amber-500 text-[11px] mt-0.5"></i>
-                                <p class="text-[10px] text-amber-700 leading-relaxed font-medium">过滤噪音数据可显著提升 AI 分析质量，建议在采集后先清洗再送入分析流程。</p>
+                        <!-- Chevron -->
+                        <div class="flex-shrink-0 ml-4 pt-1">
+                            <div class="w-9 h-9 rounded-xl bg-white/80 border border-slate-200/80 flex items-center justify-center group-hover:bg-slate-800 group-hover:border-slate-800 transition-all duration-200 shadow-sm">
+                                <i id="data-refine-chevron"
+                                    class="fas fa-chevron-down text-slate-400 group-hover:text-white transition-all duration-300 text-sm"></i>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div id="amz_prompt_box" class="hidden"></div>
+            <!-- ===== Divider between header and expanded content ===== -->
+            <div id="strategy-divider" class="hidden">
+                <div class="mx-6 md:mx-8 border-t border-orange-200/50"></div>
+            </div>
+
+            <!-- ===== Expanded Detail Content (Inside Same Card) ===== -->
+            <div id="amz_refining_container" class="hidden">
+                <div class="bg-gradient-to-b from-orange-50/20 via-slate-50/50 to-white px-6 md:px-8 pb-8 pt-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+                        <!-- ✅ Must Extract Card -->
+                        <div class="bg-white rounded-xl border-2 border-emerald-100 overflow-hidden hover:shadow-lg hover:shadow-emerald-50/50 transition-all duration-300 group">
+                            <!-- Card Header -->
+                            <div class="bg-gradient-to-r from-emerald-50 to-green-50/50 px-5 py-4 border-b border-emerald-100">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="font-bold text-emerald-800 text-sm flex items-center gap-2.5">
+                                        <div class="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center">
+                                            <i class="fas fa-check text-emerald-600 text-xs"></i>
+                                        </div>
+                                        必须提取 (高价值信号)
+                                    </h4>
+                                    <span class="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">4 项</span>
+                                </div>
+                            </div>
+                            <!-- Card Body -->
+                            <div class="p-5 space-y-1">
+                                <!-- Item 1 -->
+                                <div class="flex items-start gap-3 p-3 rounded-xl hover:bg-emerald-50/50 transition-colors group/item">
+                                    <div class="flex-shrink-0 mt-0.5">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-sm">
+                                            COSMO
+                                        </span>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <h5 class="font-bold text-slate-700 text-xs mb-1">具体使用场景 (Context)</h5>
+                                        <p class="text-[11px] text-slate-500 leading-relaxed">例如：Review中提到的 "<span class="text-emerald-600 font-medium">Taking it on a ski trip</span>" 而非单纯的 "Winter coat"。COSMO 依赖场景构建图谱。</p>
+                                    </div>
+                                </div>
+
+                                <!-- Item 2 -->
+                                <div class="flex items-start gap-3 p-3 rounded-xl hover:bg-blue-50/50 transition-colors">
+                                    <div class="flex-shrink-0 mt-0.5">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-sm">
+                                            Rufus
+                                        </span>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <h5 class="font-bold text-slate-700 text-xs mb-1">具体痛点与解决方案 (QA Pairs)</h5>
+                                        <p class="text-[11px] text-slate-500 leading-relaxed">提取负面 Review 中的具体失效点（如"<span class="text-blue-600 font-medium">拉链在零下度数卡住</span>"），转化为 Listing 中的 QA 或属性描述。</p>
+                                    </div>
+                                </div>
+
+                                <!-- Item 3 -->
+                                <div class="flex items-start gap-3 p-3 rounded-xl hover:bg-violet-50/50 transition-colors">
+                                    <div class="flex-shrink-0 mt-0.5">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-gradient-to-r from-violet-500 to-purple-500 text-white shadow-sm">
+                                            Intent
+                                        </span>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <h5 class="font-bold text-slate-700 text-xs mb-1">情感形容词与原生表达</h5>
+                                        <p class="text-[11px] text-slate-500 leading-relaxed">用户用来形容产品的非官方词汇（如 "<span class="text-violet-600 font-medium">Game changer for arthritis</span>"）。这是长尾流量的来源。</p>
+                                    </div>
+                                </div>
+
+                                <!-- Item 4 -->
+                                <div class="flex items-start gap-3 p-3 rounded-xl hover:bg-orange-50/50 transition-colors">
+                                    <div class="flex-shrink-0 mt-0.5">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-sm">
+                                            A10
+                                        </span>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <h5 class="font-bold text-slate-700 text-xs mb-1">变体偏好分布</h5>
+                                        <p class="text-[11px] text-slate-500 leading-relaxed">分析 Top 竞品哪个颜色/尺寸评论最多，直接决定备货，避免库存积压影响 IPI。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ❌ Must Filter Card -->
+                        <div class="bg-white rounded-xl border-2 border-rose-100 overflow-hidden hover:shadow-lg hover:shadow-rose-50/50 transition-all duration-300">
+                            <!-- Card Header -->
+                            <div class="bg-gradient-to-r from-rose-50 to-red-50/50 px-5 py-4 border-b border-rose-100">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="font-bold text-rose-800 text-sm flex items-center gap-2.5">
+                                        <div class="w-7 h-7 rounded-lg bg-rose-100 flex items-center justify-center">
+                                            <i class="fas fa-times text-rose-500 text-xs"></i>
+                                        </div>
+                                        必须过滤 (噪音)
+                                    </h4>
+                                    <span class="text-[10px] font-bold text-rose-500 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-100">3 项</span>
+                                </div>
+                            </div>
+                            <!-- Card Body -->
+                            <div class="p-5 space-y-1">
+                                <!-- Noise Item 1 -->
+                                <div class="p-3 rounded-xl hover:bg-rose-50/40 transition-colors group/noise">
+                                    <div class="flex items-center gap-2 mb-1.5">
+                                        <div class="w-5 h-5 rounded flex items-center justify-center bg-rose-100/80">
+                                            <i class="fas fa-ban text-[9px] text-rose-400"></i>
+                                        </div>
+                                        <h5 class="font-bold text-slate-600 text-xs line-through decoration-rose-300 decoration-2">通用的好评</h5>
+                                    </div>
+                                    <p class="text-[11px] text-slate-500 leading-relaxed pl-7">
+                                        "<span class="text-rose-400 italic">Great product</span>", "<span class="text-rose-400 italic">Fast shipping</span>", "<span class="text-rose-400 italic">Love it</span>". 这些对构建语义图谱毫无价值，会稀释 AI 的注意力。
+                                    </p>
+                                </div>
+
+                                <!-- Noise Item 2 -->
+                                <div class="p-3 rounded-xl hover:bg-rose-50/40 transition-colors">
+                                    <div class="flex items-center gap-2 mb-1.5">
+                                        <div class="w-5 h-5 rounded flex items-center justify-center bg-rose-100/80">
+                                            <i class="fas fa-ban text-[9px] text-rose-400"></i>
+                                        </div>
+                                        <h5 class="font-bold text-slate-600 text-xs line-through decoration-rose-300 decoration-2">物流与包装抱怨 (非FBM)</h5>
+                                    </div>
+                                    <p class="text-[11px] text-slate-500 leading-relaxed pl-7">
+                                        除非你是自发货，否则 FBA 的物流问题不属于产品本身的属性缺陷，会误导 Rufus 对产品质量的判断。
+                                    </p>
+                                </div>
+
+                                <!-- Noise Item 3 -->
+                                <div class="p-3 rounded-xl hover:bg-rose-50/40 transition-colors">
+                                    <div class="flex items-center gap-2 mb-1.5">
+                                        <div class="w-5 h-5 rounded flex items-center justify-center bg-rose-100/80">
+                                            <i class="fas fa-ban text-[9px] text-rose-400"></i>
+                                        </div>
+                                        <h5 class="font-bold text-slate-600 text-xs line-through decoration-rose-300 decoration-2">竞品特定的品牌词</h5>
+                                    </div>
+                                    <p class="text-[11px] text-slate-500 leading-relaxed pl-7">
+                                        虽然可以做 PPC 竞品词，但在 Listing 埋词中应避免，以免造成侵权或相关性降低。
+                                    </p>
+                                </div>
+
+                                <!-- Bottom Tip -->
+                                <div class="mt-3 mx-3 p-3 bg-amber-50/80 rounded-lg border border-amber-100">
+                                    <div class="flex items-start gap-2">
+                                        <i class="fas fa-exclamation-triangle text-amber-500 text-[11px] mt-0.5"></i>
+                                        <p class="text-[10px] text-amber-700 leading-relaxed font-medium">过滤噪音数据可显著提升 AI 分析质量，建议在采集后先清洗再送入分析流程。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="amz_prompt_box" class="hidden"></div>
+                </div>
+            </div>
         </div>
     </div>
 
