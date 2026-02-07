@@ -255,8 +255,8 @@
     position: fixed;
     width: 380px;
     height: 500px;
-    bottom: 40px;
-    left: 20px;
+    bottom: 80px;  /* 修改: 增加底部距离，避免遮挡toast通知 */
+    right: 20px;  /* 修改: 从左下角改为右下角，避免遮挡左侧边栏 */
     background: white;
     border-radius: 1rem;
     border: 1px solid #e2e8f0;

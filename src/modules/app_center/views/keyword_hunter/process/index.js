@@ -537,10 +537,11 @@ function setupFloatingWindow() {
         const screenWidth = window.innerWidth;
         const threshold = 100;
 
-        if (rect.left < threshold) {
-            el.style.left = '20px';
-        } else if (rect.right > screenWidth - threshold) {
+        // 修改: 优先吸附到右侧，避免遮挡左侧边栏
+        if (rect.right > screenWidth - threshold) {
             el.style.left = (screenWidth - rect.width - 20) + 'px';
+        } else if (rect.left < threshold) {
+            el.style.left = '20px';
         }
     });
 }
