@@ -244,10 +244,14 @@
         </div>
       </div>
 
-      <div class="app-center-card flex flex-col h-[500px] overflow-hidden !p-0">
+      <div class="app-center-card flex flex-col h-[500px] overflow-hidden !p-0" id="prompt-output-card">
         <div class="px-4 py-2 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
           <span id="output-preview-title" class="text-xs font-bold text-slate-600 uppercase tracking-wider">Listing Prompt</span>
           <div class="flex items-center gap-1">
+            <button data-action="amz_togglePromptZoom" title="放大视图"
+              class="w-7 h-7 flex items-center justify-center rounded-md hover:bg-indigo-100/80 text-slate-400 hover:text-indigo-600 transition-all cursor-pointer">
+              <i class="fas fa-expand text-sm" id="zoom-icon"></i>
+            </button>
             <button data-action="amz_copyMasterPrompt" title="复制"
               class="w-7 h-7 flex items-center justify-center rounded-md hover:bg-blue-100/80 text-slate-400 hover:text-blue-600 transition-all cursor-pointer">
               <i class="fas fa-copy text-sm"></i>
@@ -269,6 +273,16 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- 放大视图模态框 -->
+<div id="prompt-zoom-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] hidden items-center justify-center p-6" style="display: none;">
+  <div id="prompt-zoom-content" class="bg-white rounded-2xl shadow-2xl w-full max-w-7xl h-[90vh] flex flex-col transform scale-95 opacity-0 transition-all duration-300">
+    <!-- 放大后的内容容器 -->
+    <div id="zoomed-cards-container" class="flex-1 overflow-y-auto p-6 space-y-6">
+      <!-- 卡片将被动态移动到这里 -->
     </div>
   </div>
 </div>

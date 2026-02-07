@@ -542,6 +542,89 @@ function toggleConsoleMode(mode) {
 }
 
 /**
+ * 切换 Prompt 放大视图
+ */
+function togglePromptZoom() {
+    const modal = document.getElementById('prompt-zoom-modal');
+    const zoomContent = document.getElementById('prompt-zoom-content');
+    const zoomIcon = document.getElementById('zoom-icon');
+    const zoomedContainer = document.getElementById('zoomed-cards-container');
+    
+    if (!modal || !zoomContent || !zoomedContainer) return;
+    
+    const isZoomed = modal.style.display !== 'none' && modal.style.display !== '';
+    
+    if (isZoomed) {
+        // 恢复原状
+        zoomContent.classList.remove('scale-100', 'opacity-100');
+        zoomContent.classList.add('scale-95', 'opacity-0');
+        
+        addTimeout(() => {
+            // 将卡片移回原位
+            const consoleCard = document.querySelector('.zoomed-console-card');
+            const outputCard = document.querySelector('.zoomed-output-card');
+            
+            if (consoleCard) {
+                const originalParent = document.querySelector('.lg\\:col-span-4 .sticky');
+                if (originalParent) {
+                    // 插入到第一个位置
+                    originalParent.insertBefore(consoleCard, originalParent.firstChild);
+                    consoleCard.classList.remove('zoomed-console-card');
+                }
+            }
+            
+            if (outputCard) {
+                const originalParent = document.querySelector('.lg\\:col-span-4 .sticky');
+                if (originalParent) {
+                    // 插入到第二个位置
+                    originalParent.appendChild(outputCard);
+                    outputCard.classList.remove('zoomed-output-card');
+                }
+            }
+            
+            modal.style.display = 'none';
+            modal.classList.remove('flex');
+            document.body.style.overflow = '';
+            
+            // 恢复图标
+            zoomIcon.className = 'fas fa-expand text-sm';
+        }, 300);
+    } else {
+        // 放大视图
+        modal.style.display = 'flex';
+        modal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+        
+        // 清空容器
+        zoomedContainer.innerHTML = '';
+        
+        // 只移动右侧的两个卡片
+        // 1. 生成按钮卡片（翻转卡片容器）
+        const consoleCardWrapper = document.querySelector('.lg\\:col-span-4 .sticky > div:first-child');
+        if (consoleCardWrapper) {
+            consoleCardWrapper.classList.add('zoomed-console-card');
+            zoomedContainer.appendChild(consoleCardWrapper);
+        }
+        
+        // 2. Prompt输出卡片
+        const outputCard = document.getElementById('prompt-output-card');
+        if (outputCard) {
+            outputCard.classList.add('zoomed-output-card');
+            zoomedContainer.appendChild(outputCard);
+        }
+        
+        // 触发动画
+        requestAnimationFrame(() => {
+            zoomContent.classList.remove('scale-95', 'opacity-0');
+            zoomContent.classList.add('scale-100', 'opacity-100');
+        });
+        
+        // 更改图标
+        zoomIcon.className = 'fas fa-compress text-sm';
+    }
+}
+
+/**
  * 复制 Master Prompt
  */
 function copyMasterPrompt() {
@@ -619,6 +702,7 @@ export async function mount(container) {
             amz_toggleConsoleMode: (params) => toggleConsoleMode(params.param),
             amz_copyMasterPrompt: () => copyMasterPrompt(),
             amz_clearPromptInputs: () => clearPromptInputs(),
+            amz_togglePromptZoom: () => togglePromptZoom(),
         });
         
         // 保存已注册的动作名称，用于卸载时清理
@@ -626,6 +710,16 @@ export async function mount(container) {
 
         // 3. 设置事件监听器
         setupEventListeners(container);
+        
+        // 3.1 设置放大模态框点击背景关闭
+        const modal = document.getElementById('prompt-zoom-modal');
+        if (modal) {
+            addEventListener(modal, 'click', (e) => {
+                if (e.target === modal) {
+                    togglePromptZoom();
+                }
+            });
+        }
 
         // 4. 从 state 恢复状态
         restoreInputsFromState();
