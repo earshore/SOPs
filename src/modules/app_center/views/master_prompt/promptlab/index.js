@@ -8,6 +8,7 @@
  * - 使用 registerActionsWithLegacy 注册全局操作
  */
 
+import { escapeHtml } from '@/common/utils/security.js';
 import { loadTemplate } from '../../../../../common/utils/viewLoader.js';
 import eventBus from '../../../../../common/EventBus.js';
 import state from '../../../../../common/state.js';
@@ -164,6 +165,7 @@ function generateLanguageOptions() {
     const select = document.getElementById("lab-target-market");
     if (!select) return;
 
+    // ✅ 安全: 静态HTML模板，无用户输入
     select.innerHTML = '<option value="" disabled selected>选择目标站点/语言...</option>';
 
     Object.entries(SITE_CONFIGS).forEach(([code, config]) => {
@@ -201,6 +203,7 @@ function updateButtonState() {
             "hover:from-blue-400", "hover:to-purple-500", "text-white",
             "shadow-md", "transform", "hover:scale-[1.02]", "cursor-pointer"
         );
+        // ✅ 安全: 静态HTML模板，无用户输入
         btn.innerHTML = '<i class="fas fa-microchip"></i> 生成 Master Prompt';
     } else {
         btn.dataset.disabledState = "true";
@@ -212,12 +215,16 @@ function updateButtonState() {
         btn.classList.add("bg-slate-300", "text-slate-500", "cursor-not-allowed", "shadow-none");
 
         if (!hasReport) {
+            // ✅ 安全: 静态HTML模板，无用户输入
             btn.innerHTML = '<i class="fas fa-lock"></i> 请先生成 Ai 分析报告';
         } else if (!hasLanguage) {
+            // ✅ 安全: 静态HTML模板，无用户输入
             btn.innerHTML = '<i class="fas fa-globe"></i> 请选择目标站点/语言';
         } else if (!hasTier1) {
+            // ✅ 安全: 静态HTML模板，无用户输入
             btn.innerHTML = '<i class="fas fa-pen"></i> 请填写 Tier 1 核心词';
         } else if (!hasTier2) {
+            // ✅ 安全: 静态HTML模板，无用户输入
             btn.innerHTML = '<i class="fas fa-pen"></i> 请填写 Tier 2 长尾词';
         }
     }
@@ -274,9 +281,11 @@ function renderReportAnalysis() {
 
     if (!state.analysis.analysisReport) {
         statusDiv.className = "px-2 py-1 bg-slate-100 text-slate-500 rounded text-xs flex items-center gap-1";
+        // ✅ 安全: 静态HTML模板，无用户输入
         statusDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> 未检测到分析报告';
         checkboxMain.disabled = true;
         checkboxMain.checked = false;
+        // ✅ 安全: 静态HTML模板，无用户输入
         container.innerHTML = `<p class="text-xs text-slate-400 italic p-2">暂无可用数据...</p>`;
         container.className = "mt-3";
         updateButtonState();
@@ -284,6 +293,7 @@ function renderReportAnalysis() {
     }
 
     statusDiv.className = "px-2 py-1 bg-green-100 text-green-700 rounded text-xs flex items-center gap-1";
+    // ✅ 安全: 静态HTML模板，无用户输入
     statusDiv.innerHTML = '<i class="fas fa-check-circle"></i> 分析报告已就绪';
     checkboxMain.disabled = false;
     checkboxMain.checked = true;
@@ -295,6 +305,7 @@ function renderReportAnalysis() {
         const actionSpan = document.createElement("div");
         actionSpan.id = "lab-batch-actions";
         actionSpan.className = "ml-auto flex items-center gap-3 text-xs font-medium select-none";
+        // ✅ 安全: 静态HTML模板，无用户输入
         actionSpan.innerHTML = `
             <span id="btn-select-all" class="text-blue-600 cursor-pointer hover:text-blue-800 hover:underline">全选</span>
             <span class="text-slate-300">|</span>
@@ -340,6 +351,7 @@ function renderReportAnalysis() {
     const ignoreKeys = ["meta", "generatedByModel", "generatedAt", "templateUsed", "templateId", "raw_response"];
     const keys = Object.keys(state.analysis.analysisReport).filter((k) => !ignoreKeys.includes(k));
 
+    // ✅ 安全: 静态HTML模板，无用户输入
     container.innerHTML = "";
     container.className = "mt-3 grid grid-cols-1 lg:grid-cols-2 gap-3";
     const savedSelection = state.masterPrompt.promptlab?.userProductProfile?.selectedReportSections || [];
@@ -365,13 +377,13 @@ function renderReportAnalysis() {
         div.className = "relative flex items-start p-3 rounded-lg border border-slate-200 bg-white hover:border-blue-300 hover:shadow-sm transition-all";
         div.innerHTML = `
             <div class="flex h-5 items-center">
-                <input type="checkbox" name="report-section" value="${key}" id="sect-${key}" 
-                    class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" ${isChecked ? "checked" : ""}>
+                <input type="checkbox" name="report-section" value="${escapeHtml(key)}" id="sect-${escapeHtml(key)}" 
+                    class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" ${escapeHtml(isChecked ? "checked" : "")}>
             </div>
             <div class="ml-3 text-sm flex-1 min-w-0"> 
-                <label for="sect-${key}" class="cursor-pointer select-none w-full block">
-                    <span class="font-medium text-slate-700 block mb-0.5 leading-snug">${label}</span>
-                    <p class="text-xs text-slate-400 truncate font-normal" title="${previewText}">${previewText}</p>
+                <label for="sect-${escapeHtml(key)}" class="cursor-pointer select-none w-full block">
+                    <span class="font-medium text-slate-700 block mb-0.5 leading-snug">${escapeHtml(label)}</span>
+                    <p class="text-xs text-slate-400 truncate font-normal" title="${escapeHtml(previewText)}">${escapeHtml(previewText)}</p>
                 </label>
             </div>
         `;
@@ -597,6 +609,7 @@ export async function mount(container) {
     try {
         // 1. 加载模板
         const html = await loadTemplate('src/modules/app_center/views/master_prompt/promptlab/template.html');
+        // ✅ 安全: 静态HTML模板，无用户输入
         container.innerHTML = html;
 
         // 2. 注册全局操作

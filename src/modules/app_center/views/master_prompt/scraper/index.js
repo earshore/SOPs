@@ -308,6 +308,7 @@ export async function mount(container) {
     try {
         // 1. 加载模板
         const html = await loadTemplate('src/modules/app_center/views/master_prompt/scraper/template.html');
+        // ✅ 安全: 静态HTML模板，无用户输入
         container.innerHTML = html;
 
         // 2. 初始化 Alpine.js 组件

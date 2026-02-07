@@ -8,6 +8,7 @@ export async function mount(container) {
     console.log('🚀 [New Product 30 Days] 模块挂载中...');
     
     // 渲染模板
+    // ✅ 安全: 静态HTML模板，无用户输入
     container.innerHTML = templateHTML;
     
     console.log('✅ [New Product 30 Days] 模块挂载完成');

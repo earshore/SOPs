@@ -1,6 +1,6 @@
 # XSS风险扫描报告
 
-**扫描时间**: 2026/2/6 18:55:31  
+**扫描时间**: 2026/2/7 12:26:40  
 **扫描目录**: `src/`  
 **扫描文件数**: 56  
 **发现风险点**: 169
@@ -11,9 +11,9 @@
 
 | 风险等级 | 数量 | 占比 |
 |---------|------|------|
-| 🔴 严重 (CRITICAL) | 51 | 30.2% |
+| 🔴 严重 (CRITICAL) | 35 | 20.7% |
 | 🟠 高危 (HIGH) | 25 | 14.8% |
-| 🟡 中危 (MEDIUM) | 88 | 52.1% |
+| 🟡 中危 (MEDIUM) | 104 | 61.5% |
 | 🟢 低危 (LOW) | 5 | 3.0% |
 | ⚪ 信息 (INFO) | 0 | 0.0% |
 
@@ -22,10 +22,10 @@
 ## 🎯 修复优先级
 
 ### 立即修复 (P0)
-需要在发布前修复的严重和高危风险: **76** 处
+需要在发布前修复的严重和高危风险: **60** 处
 
 ### 计划修复 (P1)
-建议在下个版本修复的中危风险: **88** 处
+建议在下个版本修复的中危风险: **104** 处
 
 ### 可选修复 (P2)
 低风险和信息级别: **5** 处
@@ -36,9 +36,9 @@
 
 ### 1. `src\modules\app_center\views\master_prompt\analysis\index.js`
 
-**风险评分**: 156 | **风险数量**: 21 | 🔴 7 严重 | 🟠 8 高危
+**风险评分**: 141 | **风险数量**: 21 | 🔴 4 严重 | 🟠 8 高危
 
-#### 🔴 风险 #1 - 第 149 行
+#### 🔴 风险 #1 - 第 151 行
 
 **风险等级**: CRITICAL (10分)  
 **风险原因**: 包含用户输入相关变量, 使用模板字符串  
@@ -97,7 +97,7 @@ container.textContent = `
 
 ---
 
-#### 🔴 风险 #2 - 第 185 行
+#### 🔴 风险 #2 - 第 188 行
 
 **风险等级**: CRITICAL (10分)  
 **风险原因**: 包含用户输入相关变量, 使用模板字符串  
@@ -156,7 +156,7 @@ container.textContent = ANALYSIS_MODULES.map(
 
 ---
 
-#### 🔴 风险 #3 - 第 254 行
+#### 🔴 风险 #3 - 第 259 行
 
 **风险等级**: CRITICAL (10分)  
 **风险原因**: 包含用户输入相关变量, 使用模板字符串  
@@ -206,7 +206,7 @@ class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 asin-c
 
 ---
 
-#### 🔴 风险 #4 - 第 296 行
+#### 🔴 风险 #4 - 第 302 行
 
 **风险等级**: CRITICAL (10分)  
 **风险原因**: 包含用户输入相关变量, 使用模板字符串  
@@ -286,133 +286,7 @@ previewDiv.textContent = `
 
 ---
 
-#### 🔴 风险 #5 - 第 518 行
-
-**风险等级**: CRITICAL (10分)  
-**风险原因**: 包含用户输入相关变量, 使用模板字符串  
-**代码片段**:
-```javascript
-display.innerHTML = `<div class="p-6 bg-red-50 border border-red-200 rounded-xl text-red-700 font-mono text-sm whitespace-pre-wrap"><i class="fas fa-bug mr-2"></i> ⚠️ 解析错误，原始数据：\n${report.raw_response}</div>`;
-```
-
-**修复建议**: 🚨 立即修复: 使用 escapeHtml() 转义所有变量
-
-**修复示例**:
-```javascript
-// 原代码
-display.innerHTML = `<div class="p-6 bg-red-50 border border-red-200 rounded-xl text-red-700 font-mono text-sm whitespace-pre-wrap"><i class="fas fa-bug mr-2"></i> ⚠️ 解析错误，原始数据：\n${report.raw_response}</div>`;
-
-// 修复后
-import { escapeHtml } from '@/common/utils/security.js';
-display.innerHTML = `<div class="p-6 bg-red-50 border border-red-200 rounded-xl text-red-700 font-mono text-sm whitespace-pre-wrap"><i class="fas fa-bug mr-2"></i> ⚠️ 解析错误，原始数据：\n${report.raw_response}</div>`;
-```
-
----
-
-#### 🔴 风险 #6 - 第 1249 行
-
-**风险等级**: CRITICAL (10分)  
-**风险原因**: 包含用户输入相关变量, 使用模板字符串  
-**代码片段**:
-```javascript
-newRow.innerHTML = `
-<div class="pt-2.5 pl-1">
-<div class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-blue-400 transition-colors"></div>
-</div>
-<div class="flex-1 relative">
-<textarea class="editor-input-modern" rows="1" style="height: 28px" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onfocus="window.pushEditSnapshot('${key}'); this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
-</div>
-<div class="pt-1">
-<button onclick="window.deleteRowItem(this, '${key}')" class="w-6 h-6 flex items-center justify-center rounded-md text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer opacity-0 group-hover:opacity-100" title="删除此项">
-<i class="fas fa-times text-xs"></i>
-</button>
-</div>
-`;
-```
-
-**修复建议**: 🚨 立即修复: 使用 escapeHtml() 转义所有变量
-
-**修复示例**:
-```javascript
-// 原代码
-newRow.innerHTML = `
-<div class="pt-2.5 pl-1">
-<div class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-blue-400 transition-colors"></div>
-</div>
-<div class="flex-1 relative">
-<textarea class="editor-input-modern" rows="1" style="height: 28px" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onfocus="window.pushEditSnapshot('${key}'); this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
-</div>
-<div class="pt-1">
-<button onclick="window.deleteRowItem(this, '${key}')" class="w-6 h-6 flex items-center justify-center rounded-md text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer opacity-0 group-hover:opacity-100" title="删除此项">
-<i class="fas fa-times text-xs"></i>
-</button>
-</div>
-`;
-
-// 修复后
-import { setSafeHtml } from '@/common/utils/security.js';
-newRow.textContent = `
-<div class="pt-2.5 pl-1">
-<div class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-blue-400 transition-colors"></div>
-</div>
-<div class="flex-1 relative">
-<textarea class="editor-input-modern" rows="1" style="height: 28px" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onfocus="window.pushEditSnapshot('${key}'); this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
-</div>
-<div class="pt-1">
-<button onclick="window.deleteRowItem(this, '${key}')" class="w-6 h-6 flex items-center justify-center rounded-md text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer opacity-0 group-hover:opacity-100" title="删除此项">
-<i class="fas fa-times text-xs"></i>
-</button>
-</div>
-`;
-```
-
----
-
-#### 🔴 风险 #7 - 第 1285 行
-
-**风险等级**: CRITICAL (10分)  
-**风险原因**: 包含用户输入相关变量, 使用模板字符串  
-**代码片段**:
-```javascript
-newRow.innerHTML = `
-<button onclick="window.deleteRowItem(this, '${key}')" class="w-6 h-6 flex items-center justify-center rounded-md text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer opacity-0 group-hover:opacity-100 absolute top-3 right-3 bg-white shadow-sm border border-slate-200 z-10 hover:border-red-200" title="删除此项">
-<i class="fas fa-trash-alt text-[10px]"></i>
-</button>
-<div class="grid gap-y-3 gap-x-4">
-${fields}
-</div>
-`;
-```
-
-**修复建议**: 🚨 立即修复: 使用 escapeHtml() 转义所有变量
-
-**修复示例**:
-```javascript
-// 原代码
-newRow.innerHTML = `
-<button onclick="window.deleteRowItem(this, '${key}')" class="w-6 h-6 flex items-center justify-center rounded-md text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer opacity-0 group-hover:opacity-100 absolute top-3 right-3 bg-white shadow-sm border border-slate-200 z-10 hover:border-red-200" title="删除此项">
-<i class="fas fa-trash-alt text-[10px]"></i>
-</button>
-<div class="grid gap-y-3 gap-x-4">
-${fields}
-</div>
-`;
-
-// 修复后
-import { setSafeHtml } from '@/common/utils/security.js';
-newRow.textContent = `
-<button onclick="window.deleteRowItem(this, '${key}')" class="w-6 h-6 flex items-center justify-center rounded-md text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer opacity-0 group-hover:opacity-100 absolute top-3 right-3 bg-white shadow-sm border border-slate-200 z-10 hover:border-red-200" title="删除此项">
-<i class="fas fa-trash-alt text-[10px]"></i>
-</button>
-<div class="grid gap-y-3 gap-x-4">
-${fields}
-</div>
-`;
-```
-
----
-
-#### 🟠 风险 #8 - 第 246 行
+#### 🟠 风险 #5 - 第 250 行
 
 **风险等级**: HIGH (7分)  
 **风险原因**: 包含用户输入相关变量  
@@ -435,7 +309,7 @@ container.textContent = '<p class="text-sm text-slate-400 text-center py-6">暂�
 
 ---
 
-#### 🟠 风险 #9 - 第 496 行
+#### 🟠 风险 #6 - 第 504 行
 
 **风险等级**: HIGH (7分)  
 **风险原因**: 包含用户输入相关变量  
@@ -458,7 +332,7 @@ btn.textContent = '<i class="fas fa-brain mr-2"></i> 分析ASIN';
 
 ---
 
-#### 🟠 风险 #10 - 第 710 行
+#### 🟠 风险 #7 - 第 721 行
 
 **风险等级**: HIGH (7分)  
 **风险原因**: 包含用户输入相关变量  
@@ -481,7 +355,7 @@ contentEl.textContent = w.content;
 
 ---
 
-#### 🟠 风险 #11 - 第 983 行
+#### 🟠 风险 #8 - 第 997 行
 
 **风险等级**: HIGH (7分)  
 **风险原因**: 包含用户输入相关变量  
@@ -504,7 +378,7 @@ resizeBtn.textContent = '<i class="fas fa-check text-xs"></i>';
 
 ---
 
-#### 🟠 风险 #12 - 第 1003 行
+#### 🟠 风险 #9 - 第 1018 行
 
 **风险等级**: HIGH (7分)  
 **风险原因**: 包含用户输入相关变量  
@@ -527,7 +401,7 @@ resizeBtn.textContent = '<i class="fas fa-expand-alt text-xs"></i>';
 
 ---
 
-#### 🟠 风险 #13 - 第 1103 行
+#### 🟠 风险 #10 - 第 1119 行
 
 **风险等级**: HIGH (7分)  
 **风险原因**: 包含用户输入相关变量  
@@ -550,7 +424,7 @@ contentArea.textContent = renderEditorForm(key, report[key]);
 
 ---
 
-#### 🟠 风险 #14 - 第 1144 行
+#### 🟠 风险 #11 - 第 1161 行
 
 **风险等级**: HIGH (7分)  
 **风险原因**: 包含用户输入相关变量  
@@ -573,7 +447,7 @@ contentArea.textContent = renderViewModeHTML(newData, style);
 
 ---
 
-#### 🟠 风险 #15 - 第 1183 行
+#### 🟠 风险 #12 - 第 1201 行
 
 **风险等级**: HIGH (7分)  
 **风险原因**: 包含用户输入相关变量  
@@ -596,7 +470,7 @@ contentArea.textContent = renderViewModeHTML(originalData, style);
 
 ---
 
-#### 🟡 风险 #16 - 第 403 行
+#### 🟡 风险 #13 - 第 410 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -609,7 +483,20 @@ btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> 分析中..';
 
 ---
 
-#### 🟡 风险 #17 - 第 594 行
+#### 🟡 风险 #14 - 第 526 行
+
+**风险等级**: MEDIUM (5分)  
+**风险原因**: 包含用户输入相关变量, 已使用安全函数, 使用模板字符串  
+**代码片段**:
+```javascript
+display.innerHTML = `<div class="p-6 bg-red-50 border border-red-200 rounded-xl text-red-700 font-mono text-sm whitespace-pre-wrap"><i class="fas fa-bug mr-2"></i> ⚠️ 解析错误，原始数据：\n${escapeHtml(report.raw_response)}</div>`;
+```
+
+**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
+
+---
+
+#### 🟡 风险 #15 - 第 603 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -622,7 +509,7 @@ display.innerHTML = toolbarHtml;
 
 ---
 
-#### 🟡 风险 #18 - 第 623 行
+#### 🟡 风险 #16 - 第 633 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -635,7 +522,7 @@ select.innerHTML = options;
 
 ---
 
-#### 🟡 风险 #19 - 第 857 行
+#### 🟡 风险 #17 - 第 869 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -648,7 +535,7 @@ btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-1"></i> 翻译中...';
 
 ---
 
-#### 🟡 风险 #20 - 第 886 行
+#### 🟡 风险 #18 - 第 899 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -661,7 +548,52 @@ btn.innerHTML = '<i class="fas fa-language"></i> 翻译';
 
 ---
 
-#### 🟡 风险 #21 - 第 1314 行
+#### 🟡 风险 #19 - 第 1267 行
+
+**风险等级**: MEDIUM (5分)  
+**风险原因**: 包含用户输入相关变量, 已使用安全函数, 使用模板字符串  
+**代码片段**:
+```javascript
+newRow.innerHTML = `
+<div class="pt-2.5 pl-1">
+<div class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-blue-400 transition-colors"></div>
+</div>
+<div class="flex-1 relative">
+<textarea class="editor-input-modern" rows="1" style="height: 28px" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onfocus="window.pushEditSnapshot('${escapeHtml(key)}'); this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+</div>
+<div class="pt-1">
+<button onclick="window.deleteRowItem(this, '${escapeHtml(key)}')" class="w-6 h-6 flex items-center justify-center rounded-md text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer opacity-0 group-hover:opacity-100" title="删除此项">
+<i class="fas fa-times text-xs"></i>
+</button>
+</div>
+`;
+```
+
+**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
+
+---
+
+#### 🟡 风险 #20 - 第 1303 行
+
+**风险等级**: MEDIUM (5分)  
+**风险原因**: 包含用户输入相关变量, 已使用安全函数, 使用模板字符串  
+**代码片段**:
+```javascript
+newRow.innerHTML = `
+<button onclick="window.deleteRowItem(this, '${escapeHtml(key)}')" class="w-6 h-6 flex items-center justify-center rounded-md text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer opacity-0 group-hover:opacity-100 absolute top-3 right-3 bg-white shadow-sm border border-slate-200 z-10 hover:border-red-200" title="删除此项">
+<i class="fas fa-trash-alt text-[10px]"></i>
+</button>
+<div class="grid gap-y-3 gap-x-4">
+${escapeHtml(fields)}
+</div>
+`;
+```
+
+**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
+
+---
+
+#### 🟡 风险 #21 - 第 1333 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -676,32 +608,9 @@ container.innerHTML = html;
 
 ### 2. `src\common\utils\ui.js`
 
-**风险评分**: 129 | **风险数量**: 18 | 🔴 7 严重 | 🟠 2 高危
+**风险评分**: 124 | **风险数量**: 18 | 🔴 6 严重 | 🟠 2 高危
 
-#### 🔴 风险 #1 - 第 137 行
-
-**风险等级**: CRITICAL (10分)  
-**风险原因**: 包含用户输入相关变量, 使用模板字符串  
-**代码片段**:
-```javascript
-container.innerHTML = `<div class="p-4 text-red-500 text-xs">菜单加载失败</div>`;
-```
-
-**修复建议**: 🚨 立即修复: 使用 escapeHtml() 转义所有变量
-
-**修复示例**:
-```javascript
-// 原代码
-container.innerHTML = `<div class="p-4 text-red-500 text-xs">菜单加载失败</div>`;
-
-// 修复后
-import { setSafeHtml } from '@/common/utils/security.js';
-container.textContent = `<div class="p-4 text-red-500 text-xs">菜单加载失败</div>`;
-```
-
----
-
-#### 🔴 风险 #2 - 第 237 行
+#### 🔴 风险 #1 - 第 140 行
 
 **风险等级**: CRITICAL (10分)  
 **风险原因**: 包含用户输入相关变量, 使用模板字符串  
@@ -724,13 +633,13 @@ container.textContent = `<div class="p-4 text-red-500 text-xs">菜单加载失�
 
 ---
 
-#### 🔴 风险 #3 - 第 1286 行
+#### 🔴 风险 #2 - 第 242 行
 
 **风险等级**: CRITICAL (10分)  
 **风险原因**: 包含用户输入相关变量, 使用模板字符串  
 **代码片段**:
 ```javascript
-toast.innerHTML = `<i class="fas ${style.icon} text-lg"></i><span class="text-sm font-medium tracking-wide">${message}</span>`;
+container.innerHTML = `<div class="p-4 text-red-500 text-xs">菜单加载失败</div>`;
 ```
 
 **修复建议**: 🚨 立即修复: 使用 escapeHtml() 转义所有变量
@@ -738,16 +647,16 @@ toast.innerHTML = `<i class="fas ${style.icon} text-lg"></i><span class="text-sm
 **修复示例**:
 ```javascript
 // 原代码
-toast.innerHTML = `<i class="fas ${style.icon} text-lg"></i><span class="text-sm font-medium tracking-wide">${message}</span>`;
+container.innerHTML = `<div class="p-4 text-red-500 text-xs">菜单加载失败</div>`;
 
 // 修复后
-import { escapeHtml } from '@/common/utils/security.js';
-toast.innerHTML = `<i class="fas ${style.icon} text-lg"></i><span class="text-sm font-medium tracking-wide">${escapeHtml(message)}</span>`;
+import { setSafeHtml } from '@/common/utils/security.js';
+container.textContent = `<div class="p-4 text-red-500 text-xs">菜单加载失败</div>`;
 ```
 
 ---
 
-#### 🔴 风险 #4 - 第 1602 行
+#### 🔴 风险 #3 - 第 1615 行
 
 **风险等级**: CRITICAL (10分)  
 **风险原因**: 包含用户输入相关变量, 使用模板字符串  
@@ -788,7 +697,7 @@ class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-slate-60
 
 ---
 
-#### 🔴 风险 #5 - 第 1671 行
+#### 🔴 风险 #4 - 第 1685 行
 
 **风险等级**: CRITICAL (10分)  
 **风险原因**: 包含用户输入相关变量, 使用模板字符串  
@@ -829,7 +738,7 @@ class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-slate-60
 
 ---
 
-#### 🔴 风险 #6 - 第 1753 行
+#### 🔴 风险 #5 - 第 1768 行
 
 **风险等级**: CRITICAL (10分)  
 **风险原因**: 包含用户输入相关变量, 使用模板字符串  
@@ -867,7 +776,7 @@ resultsContainer.textContent = `
 
 ---
 
-#### 🔴 风险 #7 - 第 1762 行
+#### 🔴 风险 #6 - 第 1777 行
 
 **风险等级**: CRITICAL (10分)  
 **风险原因**: 包含用户输入相关变量, 使用模板字符串  
@@ -908,7 +817,7 @@ class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-slate-60
 
 ---
 
-#### 🟠 风险 #8 - 第 1599 行
+#### 🟠 风险 #7 - 第 1612 行
 
 **风险等级**: HIGH (7分)  
 **风险原因**: 包含用户输入相关变量  
@@ -931,7 +840,7 @@ resultsContainer.textContent = '<div class="text-xs text-slate-400 text-center p
 
 ---
 
-#### 🟠 风险 #9 - 第 1669 行
+#### 🟠 风险 #8 - 第 1683 行
 
 **风险等级**: HIGH (7分)  
 **风险原因**: 包含用户输入相关变量  
@@ -954,7 +863,7 @@ resultsContainer.textContent = '<div class="text-xs text-slate-400 text-center p
 
 ---
 
-#### 🟡 风险 #10 - 第 134 行
+#### 🟡 风险 #9 - 第 136 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -967,7 +876,7 @@ container.innerHTML = html;
 
 ---
 
-#### 🟡 风险 #11 - 第 234 行
+#### 🟡 风险 #10 - 第 238 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -980,7 +889,7 @@ container.innerHTML = html;
 
 ---
 
-#### 🟡 风险 #12 - 第 364 行
+#### 🟡 风险 #11 - 第 370 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -993,7 +902,7 @@ container.innerHTML = html;
 
 ---
 
-#### 🟡 风险 #13 - 第 501 行
+#### 🟡 风险 #12 - 第 508 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -1006,7 +915,7 @@ container.innerHTML = html;
 
 ---
 
-#### 🟡 风险 #14 - 第 541 行
+#### 🟡 风险 #13 - 第 549 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -1019,7 +928,7 @@ sidebar.innerHTML = '';
 
 ---
 
-#### 🟡 风险 #15 - 第 759 行
+#### 🟡 风险 #14 - 第 768 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -1032,7 +941,7 @@ sidebar.innerHTML = html;
 
 ---
 
-#### 🟡 风险 #16 - 第 910 行
+#### 🟡 风险 #15 - 第 920 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -1045,7 +954,7 @@ sidebar.innerHTML = html;
 
 ---
 
-#### 🟡 风险 #17 - 第 951 行
+#### 🟡 风险 #16 - 第 962 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -1058,13 +967,26 @@ sidebar.innerHTML = html;
 
 ---
 
-#### 🟡 风险 #18 - 第 1074 行
+#### 🟡 风险 #17 - 第 1086 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
 **代码片段**:
 ```javascript
 sidebar.innerHTML = html;
+```
+
+**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
+
+---
+
+#### 🟡 风险 #18 - 第 1298 行
+
+**风险等级**: MEDIUM (5分)  
+**风险原因**: 包含用户输入相关变量, 已使用安全函数, 使用模板字符串  
+**代码片段**:
+```javascript
+toast.innerHTML = `<i class="fas ${escapeHtml(style.icon)} text-lg"></i><span class="text-sm font-medium tracking-wide">${escapeHtml(message)}</span>`;
 ```
 
 **修复建议**: 📋 建议修复: 审查变量来源,必要时转义
@@ -1073,9 +995,9 @@ sidebar.innerHTML = html;
 
 ### 3. `src\modules\app_center\views\master_prompt\promptlab\index.js`
 
-**风险评分**: 84 | **风险数量**: 13 | 🔴 3 严重 | 🟠 2 高危
+**风险评分**: 79 | **风险数量**: 13 | 🔴 2 严重 | 🟠 2 高危
 
-#### 🔴 风险 #1 - 第 280 行
+#### 🔴 风险 #1 - 第 289 行
 
 **风险等级**: CRITICAL (10分)  
 **风险原因**: 包含用户输入相关变量, 使用模板字符串  
@@ -1098,7 +1020,7 @@ container.textContent = `<p class="text-xs text-slate-400 italic p-2">暂无可�
 
 ---
 
-#### 🔴 风险 #2 - 第 298 行
+#### 🔴 风险 #2 - 第 309 行
 
 **风险等级**: CRITICAL (10分)  
 **风险原因**: 包含用户输入相关变量, 使用模板字符串  
@@ -1133,63 +1055,7 @@ actionSpan.textContent = `
 
 ---
 
-#### 🔴 风险 #3 - 第 366 行
-
-**风险等级**: CRITICAL (10分)  
-**风险原因**: 包含用户输入相关变量, 使用模板字符串  
-**代码片段**:
-```javascript
-div.innerHTML = `
-<div class="flex h-5 items-center">
-<input type="checkbox" name="report-section" value="${key}" id="sect-${key}"
-class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" ${isChecked ? "checked" : ""}>
-</div>
-<div class="ml-3 text-sm flex-1 min-w-0">
-<label for="sect-${key}" class="cursor-pointer select-none w-full block">
-<span class="font-medium text-slate-700 block mb-0.5 leading-snug">${label}</span>
-<p class="text-xs text-slate-400 truncate font-normal" title="${previewText}">${previewText}</p>
-</label>
-</div>
-`;
-```
-
-**修复建议**: 🚨 立即修复: 使用 escapeHtml() 转义所有变量
-
-**修复示例**:
-```javascript
-// 原代码
-div.innerHTML = `
-<div class="flex h-5 items-center">
-<input type="checkbox" name="report-section" value="${key}" id="sect-${key}"
-class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" ${isChecked ? "checked" : ""}>
-</div>
-<div class="ml-3 text-sm flex-1 min-w-0">
-<label for="sect-${key}" class="cursor-pointer select-none w-full block">
-<span class="font-medium text-slate-700 block mb-0.5 leading-snug">${label}</span>
-<p class="text-xs text-slate-400 truncate font-normal" title="${previewText}">${previewText}</p>
-</label>
-</div>
-`;
-
-// 修复后
-import { setSafeHtml } from '@/common/utils/security.js';
-div.textContent = `
-<div class="flex h-5 items-center">
-<input type="checkbox" name="report-section" value="${key}" id="sect-${key}"
-class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" ${isChecked ? "checked" : ""}>
-</div>
-<div class="ml-3 text-sm flex-1 min-w-0">
-<label for="sect-${key}" class="cursor-pointer select-none w-full block">
-<span class="font-medium text-slate-700 block mb-0.5 leading-snug">${label}</span>
-<p class="text-xs text-slate-400 truncate font-normal" title="${previewText}">${previewText}</p>
-</label>
-</div>
-`;
-```
-
----
-
-#### 🟠 风险 #4 - 第 167 行
+#### 🟠 风险 #3 - 第 169 行
 
 **风险等级**: HIGH (7分)  
 **风险原因**: 包含用户输入相关变量  
@@ -1212,7 +1078,7 @@ select.textContent = '<option value="" disabled selected>选择目标站点/语�
 
 ---
 
-#### 🟠 风险 #5 - 第 204 行
+#### 🟠 风险 #4 - 第 207 行
 
 **风险等级**: HIGH (7分)  
 **风险原因**: 包含用户输入相关变量  
@@ -1235,7 +1101,7 @@ btn.textContent = '<i class="fas fa-microchip"></i> 生成 Master Prompt';
 
 ---
 
-#### 🟡 风险 #6 - 第 215 行
+#### 🟡 风险 #5 - 第 219 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -1248,7 +1114,7 @@ btn.innerHTML = '<i class="fas fa-lock"></i> 请先生成 Ai 分析报告';
 
 ---
 
-#### 🟡 风险 #7 - 第 217 行
+#### 🟡 风险 #6 - 第 222 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -1261,7 +1127,7 @@ btn.innerHTML = '<i class="fas fa-globe"></i> 请选择目标站点/语言';
 
 ---
 
-#### 🟡 风险 #8 - 第 219 行
+#### 🟡 风险 #7 - 第 225 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -1274,7 +1140,7 @@ btn.innerHTML = '<i class="fas fa-pen"></i> 请填写 Tier 1 核心词';
 
 ---
 
-#### 🟡 风险 #9 - 第 221 行
+#### 🟡 风险 #8 - 第 228 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -1287,7 +1153,7 @@ btn.innerHTML = '<i class="fas fa-pen"></i> 请填写 Tier 2 长尾词';
 
 ---
 
-#### 🟡 风险 #10 - 第 277 行
+#### 🟡 风险 #9 - 第 285 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -1300,7 +1166,7 @@ statusDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> 未检测到分
 
 ---
 
-#### 🟡 风险 #11 - 第 287 行
+#### 🟡 风险 #10 - 第 297 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -1313,7 +1179,7 @@ statusDiv.innerHTML = '<i class="fas fa-check-circle"></i> 分析报告已就绪
 
 ---
 
-#### 🟡 风险 #12 - 第 343 行
+#### 🟡 风险 #11 - 第 355 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -1326,7 +1192,31 @@ container.innerHTML = "";
 
 ---
 
-#### 🟡 风险 #13 - 第 600 行
+#### 🟡 风险 #12 - 第 378 行
+
+**风险等级**: MEDIUM (5分)  
+**风险原因**: 包含用户输入相关变量, 已使用安全函数, 使用模板字符串  
+**代码片段**:
+```javascript
+div.innerHTML = `
+<div class="flex h-5 items-center">
+<input type="checkbox" name="report-section" value="${escapeHtml(key)}" id="sect-${escapeHtml(key)}"
+class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" ${escapeHtml(isChecked ? "checked" : "")}>
+</div>
+<div class="ml-3 text-sm flex-1 min-w-0">
+<label for="sect-${escapeHtml(key)}" class="cursor-pointer select-none w-full block">
+<span class="font-medium text-slate-700 block mb-0.5 leading-snug">${escapeHtml(label)}</span>
+<p class="text-xs text-slate-400 truncate font-normal" title="${escapeHtml(previewText)}">${escapeHtml(previewText)}</p>
+</label>
+</div>
+`;
+```
+
+**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
+
+---
+
+#### 🟡 风险 #13 - 第 613 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -1339,11 +1229,202 @@ container.innerHTML = html;
 
 ---
 
-### 4. `src\modules\sops\views\growth\restricted_words\restrictedWordsHandler.js`
+### 4. `src\modules\app_center\views\keyword_hunter\analysis\index.js`
 
-**风险评分**: 60 | **风险数量**: 6 | 🔴 6 严重 
+**风险评分**: 59 | **风险数量**: 10 | 🔴 1 严重 | 🟠 2 高危
 
-#### 🔴 风险 #1 - 第 36 行
+#### 🔴 风险 #1 - 第 206 行
+
+**风险等级**: CRITICAL (10分)  
+**风险原因**: 包含用户输入相关变量, 使用模板字符串  
+**代码片段**:
+```javascript
+resultDiv.innerHTML = `
+<div class="text-center py-10">
+<i class="fas fa-circle-notch fa-spin text-purple-500 text-2xl"></i>
+<p class="mt-2 text-slate-500">AI 正在深度分析您的 Listing ...</p>
+</div>
+`;
+```
+
+**修复建议**: 🚨 立即修复: 使用 escapeHtml() 转义所有变量
+
+**修复示例**:
+```javascript
+// 原代码
+resultDiv.innerHTML = `
+<div class="text-center py-10">
+<i class="fas fa-circle-notch fa-spin text-purple-500 text-2xl"></i>
+<p class="mt-2 text-slate-500">AI 正在深度分析您的 Listing ...</p>
+</div>
+`;
+
+// 修复后
+import { setSafeHtml } from '@/common/utils/security.js';
+resultDiv.textContent = `
+<div class="text-center py-10">
+<i class="fas fa-circle-notch fa-spin text-purple-500 text-2xl"></i>
+<p class="mt-2 text-slate-500">AI 正在深度分析您的 Listing ...</p>
+</div>
+`;
+```
+
+---
+
+#### 🟠 风险 #2 - 第 99 行
+
+**风险等级**: HIGH (7分)  
+**风险原因**: 包含用户输入相关变量  
+**代码片段**:
+```javascript
+resultDiv.innerHTML = state.keywordTracker.llmAnalysisResult;
+```
+
+**修复建议**: ⚠️ 优先修复: 使用 setTemplate() 或 escapeHtml()
+
+**修复示例**:
+```javascript
+// 原代码
+resultDiv.innerHTML = state.keywordTracker.llmAnalysisResult;
+
+// 修复后
+import { setSafeHtml } from '@/common/utils/security.js';
+resultDiv.textContent = state.keywordTracker.llmAnalysisResult;
+```
+
+---
+
+#### 🟠 风险 #3 - 第 226 行
+
+**风险等级**: HIGH (7分)  
+**风险原因**: 包含用户输入相关变量  
+**代码片段**:
+```javascript
+resultDiv.innerHTML = window.marked.parse(response);
+```
+
+**修复建议**: ⚠️ 优先修复: 使用 setTemplate() 或 escapeHtml()
+
+**修复示例**:
+```javascript
+// 原代码
+resultDiv.innerHTML = window.marked.parse(response);
+
+// 修复后
+import { setSafeHtml } from '@/common/utils/security.js';
+resultDiv.textContent = window.marked.parse(response);
+```
+
+---
+
+#### 🟡 风险 #4 - 第 145 行
+
+**风险等级**: MEDIUM (5分)  
+**风险原因**: 包含用户输入相关变量, 已使用安全函数, 使用模板字符串  
+**代码片段**:
+```javascript
+freqList.innerHTML = state.keywordTracker.wordFrequency.map(([w, c]) => `
+<span class="px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded-md">
+${escapeHtml(w)} <span class="text-slate-400">(${c})</span>
+</span>
+`).join('');
+```
+
+**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
+
+---
+
+#### 🟡 风险 #5 - 第 167 行
+
+**风险等级**: MEDIUM (5分)  
+**风险原因**: 使用innerHTML  
+**代码片段**:
+```javascript
+btn.innerHTML = '<i class="fas fa-magic"></i> 生成报告';
+```
+
+**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
+
+---
+
+#### 🟡 风险 #6 - 第 199 行
+
+**风险等级**: MEDIUM (5分)  
+**风险原因**: 使用innerHTML  
+**代码片段**:
+```javascript
+btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> 分析中...';
+```
+
+**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
+
+---
+
+#### 🟡 风险 #7 - 第 236 行
+
+**风险等级**: MEDIUM (5分)  
+**风险原因**: 使用innerHTML  
+**代码片段**:
+```javascript
+btn.innerHTML = '<i class="fas fa-check"></i> 报告已生成';
+```
+
+**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
+
+---
+
+#### 🟡 风险 #8 - 第 264 行
+
+**风险等级**: MEDIUM (5分)  
+**风险原因**: 包含用户输入相关变量, 已使用安全函数, 使用模板字符串  
+**代码片段**:
+```javascript
+resultDiv.innerHTML = `
+<div class="p-4 bg-${colorClass}-50 border border-${colorClass}-200 rounded-lg">
+<div class="flex items-center gap-2 text-${colorClass}-700 font-bold mb-2">
+<i class="fas ${icon}"></i> ${title}
+</div>
+<p class="text-sm text-${colorClass}-800">${escapeHtml(errorMsg)}</p>
+<button onclick="window.kt_runLLMAnalysis()" class="mt-3 px-3 py-1 bg-white border border-${colorClass}-200 text-${colorClass}-700 text-xs rounded hover:bg-${colorClass}-50">重试</button>
+</div>
+`;
+```
+
+**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
+
+---
+
+#### 🟡 风险 #9 - 第 279 行
+
+**风险等级**: MEDIUM (5分)  
+**风险原因**: 使用innerHTML  
+**代码片段**:
+```javascript
+btn.innerHTML = '<i class="fas fa-magic"></i> 重试生成';
+```
+
+**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
+
+---
+
+#### 🟡 风险 #10 - 第 318 行
+
+**风险等级**: MEDIUM (5分)  
+**风险原因**: 使用innerHTML  
+**代码片段**:
+```javascript
+container.innerHTML = html;
+```
+
+**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
+
+---
+
+### 5. `src\modules\sops\views\growth\restricted_words\restrictedWordsHandler.js`
+
+**风险评分**: 55 | **风险数量**: 6 | 🔴 5 严重 
+
+#### 🔴 风险 #1 - 第 37 行
 
 **风险等级**: CRITICAL (10分)  
 **风险原因**: 包含用户输入相关变量, 使用模板字符串  
@@ -1366,7 +1447,7 @@ catSelect.textContent = `<option value="">全部分类</option>` + options;
 
 ---
 
-#### 🔴 风险 #2 - 第 46 行
+#### 🔴 风险 #2 - 第 48 行
 
 **风险等级**: CRITICAL (10分)  
 **风险原因**: 包含用户输入相关变量, 使用模板字符串  
@@ -1389,7 +1470,7 @@ riskSelect.textContent = `<option value="">全部</option>` + options;
 
 ---
 
-#### 🔴 风险 #3 - 第 219 行
+#### 🔴 风险 #3 - 第 222 行
 
 **风险等级**: CRITICAL (10分)  
 **风险原因**: 包含用户输入相关变量, 使用模板字符串  
@@ -1442,7 +1523,7 @@ tbody.textContent = `
 
 ---
 
-#### 🔴 风险 #4 - 第 233 行
+#### 🔴 风险 #4 - 第 237 行
 
 **风险等级**: CRITICAL (10分)  
 **风险原因**: 包含用户输入相关变量, 使用模板字符串  
@@ -1522,87 +1603,7 @@ return `
 
 ---
 
-#### 🔴 风险 #5 - 第 328 行
-
-**风险等级**: CRITICAL (10分)  
-**风险原因**: 包含用户输入相关变量, 使用模板字符串  
-**代码片段**:
-```javascript
-header.innerHTML = `
-<div class="flex items-center gap-4">
-<div class="w-12 h-12 rounded-lg bg-${risk.color}-100 flex items-center justify-center text-2xl">
-${risk.icon}
-</div>
-<div>
-<h3 class="text-xl font-bold text-slate-800 flex items-center gap-3">
-${word.keyword}
-<span class="text-xs font-normal text-slate-400 border border-slate-200 rounded px-1.5 py-0.5">ID: ${word.id}</span>
-</h3>
-<div class="flex items-center gap-2 mt-1">
-<span class="px-2 py-0.5 rounded text-xs font-medium bg-${category.color}-50 text-${category.color}-700 border border-${category.color}-100">
-${category.label}
-</span>
-<span class="px-2 py-0.5 rounded text-xs font-medium bg-${risk.color}-50 text-${risk.color}-700 border border-${risk.color}-100">
-风险等级 ${word.riskLevel}: ${risk.label}
-</span>
-</div>
-</div>
-</div>
-```
-
-**修复建议**: 🚨 立即修复: 使用 escapeHtml() 转义所有变量
-
-**修复示例**:
-```javascript
-// 原代码
-header.innerHTML = `
-<div class="flex items-center gap-4">
-<div class="w-12 h-12 rounded-lg bg-${risk.color}-100 flex items-center justify-center text-2xl">
-${risk.icon}
-</div>
-<div>
-<h3 class="text-xl font-bold text-slate-800 flex items-center gap-3">
-${word.keyword}
-<span class="text-xs font-normal text-slate-400 border border-slate-200 rounded px-1.5 py-0.5">ID: ${word.id}</span>
-</h3>
-<div class="flex items-center gap-2 mt-1">
-<span class="px-2 py-0.5 rounded text-xs font-medium bg-${category.color}-50 text-${category.color}-700 border border-${category.color}-100">
-${category.label}
-</span>
-<span class="px-2 py-0.5 rounded text-xs font-medium bg-${risk.color}-50 text-${risk.color}-700 border border-${risk.color}-100">
-风险等级 ${word.riskLevel}: ${risk.label}
-</span>
-</div>
-</div>
-</div>
-
-// 修复后
-import { setSafeHtml } from '@/common/utils/security.js';
-header.textContent = `
-<div class="flex items-center gap-4">
-<div class="w-12 h-12 rounded-lg bg-${risk.color}-100 flex items-center justify-center text-2xl">
-${risk.icon}
-</div>
-<div>
-<h3 class="text-xl font-bold text-slate-800 flex items-center gap-3">
-${word.keyword}
-<span class="text-xs font-normal text-slate-400 border border-slate-200 rounded px-1.5 py-0.5">ID: ${word.id}</span>
-</h3>
-<div class="flex items-center gap-2 mt-1">
-<span class="px-2 py-0.5 rounded text-xs font-medium bg-${category.color}-50 text-${category.color}-700 border border-${category.color}-100">
-${category.label}
-</span>
-<span class="px-2 py-0.5 rounded text-xs font-medium bg-${risk.color}-50 text-${risk.color}-700 border border-${risk.color}-100">
-风险等级 ${word.riskLevel}: ${risk.label}
-</span>
-</div>
-</div>
-</div>
-```
-
----
-
-#### 🔴 风险 #6 - 第 351 行
+#### 🔴 风险 #5 - 第 355 行
 
 **风险等级**: CRITICAL (10分)  
 **风险原因**: 包含用户输入相关变量, 使用模板字符串  
@@ -1682,191 +1683,32 @@ ${Object.entries(word.localizedKeywords || {}).map(([site, localKw]) => `
 
 ---
 
-### 5. `src\modules\app_center\views\keyword_hunter\analysis\index.js`
-
-**风险评分**: 59 | **风险数量**: 10 | 🔴 1 严重 | 🟠 2 高危
-
-#### 🔴 风险 #1 - 第 201 行
-
-**风险等级**: CRITICAL (10分)  
-**风险原因**: 包含用户输入相关变量, 使用模板字符串  
-**代码片段**:
-```javascript
-resultDiv.innerHTML = `
-<div class="text-center py-10">
-<i class="fas fa-circle-notch fa-spin text-purple-500 text-2xl"></i>
-<p class="mt-2 text-slate-500">AI 正在深度分析您的 Listing ...</p>
-</div>
-`;
-```
-
-**修复建议**: 🚨 立即修复: 使用 escapeHtml() 转义所有变量
-
-**修复示例**:
-```javascript
-// 原代码
-resultDiv.innerHTML = `
-<div class="text-center py-10">
-<i class="fas fa-circle-notch fa-spin text-purple-500 text-2xl"></i>
-<p class="mt-2 text-slate-500">AI 正在深度分析您的 Listing ...</p>
-</div>
-`;
-
-// 修复后
-import { setSafeHtml } from '@/common/utils/security.js';
-resultDiv.textContent = `
-<div class="text-center py-10">
-<i class="fas fa-circle-notch fa-spin text-purple-500 text-2xl"></i>
-<p class="mt-2 text-slate-500">AI 正在深度分析您的 Listing ...</p>
-</div>
-`;
-```
-
----
-
-#### 🟠 风险 #2 - 第 97 行
-
-**风险等级**: HIGH (7分)  
-**风险原因**: 包含用户输入相关变量  
-**代码片段**:
-```javascript
-resultDiv.innerHTML = state.keywordTracker.llmAnalysisResult;
-```
-
-**修复建议**: ⚠️ 优先修复: 使用 setTemplate() 或 escapeHtml()
-
-**修复示例**:
-```javascript
-// 原代码
-resultDiv.innerHTML = state.keywordTracker.llmAnalysisResult;
-
-// 修复后
-import { setSafeHtml } from '@/common/utils/security.js';
-resultDiv.textContent = state.keywordTracker.llmAnalysisResult;
-```
-
----
-
-#### 🟠 风险 #3 - 第 220 行
-
-**风险等级**: HIGH (7分)  
-**风险原因**: 包含用户输入相关变量  
-**代码片段**:
-```javascript
-resultDiv.innerHTML = window.marked.parse(response);
-```
-
-**修复建议**: ⚠️ 优先修复: 使用 setTemplate() 或 escapeHtml()
-
-**修复示例**:
-```javascript
-// 原代码
-resultDiv.innerHTML = window.marked.parse(response);
-
-// 修复后
-import { setSafeHtml } from '@/common/utils/security.js';
-resultDiv.textContent = window.marked.parse(response);
-```
-
----
-
-#### 🟡 风险 #4 - 第 143 行
+#### 🟡 风险 #6 - 第 332 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 包含用户输入相关变量, 已使用安全函数, 使用模板字符串  
 **代码片段**:
 ```javascript
-freqList.innerHTML = state.keywordTracker.wordFrequency.map(([w, c]) => `
-<span class="px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded-md">
-${escapeHtml(w)} <span class="text-slate-400">(${c})</span>
+header.innerHTML = `
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-lg bg-${escapeHtml(risk.color)}-100 flex items-center justify-center text-2xl">
+${escapeHtml(risk.icon)}
+</div>
+<div>
+<h3 class="text-xl font-bold text-slate-800 flex items-center gap-3">
+${escapeHtml(word.keyword)}
+<span class="text-xs font-normal text-slate-400 border border-slate-200 rounded px-1.5 py-0.5">ID: ${escapeHtml(word.id)}</span>
+</h3>
+<div class="flex items-center gap-2 mt-1">
+<span class="px-2 py-0.5 rounded text-xs font-medium bg-${escapeHtml(category.color)}-50 text-${escapeHtml(category.color)}-700 border border-${escapeHtml(category.color)}-100">
+${escapeHtml(category.label)}
 </span>
-`).join('');
-```
-
-**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
-
----
-
-#### 🟡 风险 #5 - 第 164 行
-
-**风险等级**: MEDIUM (5分)  
-**风险原因**: 使用innerHTML  
-**代码片段**:
-```javascript
-btn.innerHTML = '<i class="fas fa-magic"></i> 生成报告';
-```
-
-**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
-
----
-
-#### 🟡 风险 #6 - 第 195 行
-
-**风险等级**: MEDIUM (5分)  
-**风险原因**: 使用innerHTML  
-**代码片段**:
-```javascript
-btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> 分析中...';
-```
-
-**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
-
----
-
-#### 🟡 风险 #7 - 第 229 行
-
-**风险等级**: MEDIUM (5分)  
-**风险原因**: 使用innerHTML  
-**代码片段**:
-```javascript
-btn.innerHTML = '<i class="fas fa-check"></i> 报告已生成';
-```
-
-**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
-
----
-
-#### 🟡 风险 #8 - 第 257 行
-
-**风险等级**: MEDIUM (5分)  
-**风险原因**: 包含用户输入相关变量, 已使用安全函数, 使用模板字符串  
-**代码片段**:
-```javascript
-resultDiv.innerHTML = `
-<div class="p-4 bg-${colorClass}-50 border border-${colorClass}-200 rounded-lg">
-<div class="flex items-center gap-2 text-${colorClass}-700 font-bold mb-2">
-<i class="fas ${icon}"></i> ${title}
+<span class="px-2 py-0.5 rounded text-xs font-medium bg-${escapeHtml(risk.color)}-50 text-${escapeHtml(risk.color)}-700 border border-${escapeHtml(risk.color)}-100">
+风险等级 ${escapeHtml(word.riskLevel)}: ${escapeHtml(risk.label)}
+</span>
 </div>
-<p class="text-sm text-${colorClass}-800">${escapeHtml(errorMsg)}</p>
-<button onclick="window.kt_runLLMAnalysis()" class="mt-3 px-3 py-1 bg-white border border-${colorClass}-200 text-${colorClass}-700 text-xs rounded hover:bg-${colorClass}-50">重试</button>
 </div>
-`;
-```
-
-**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
-
----
-
-#### 🟡 风险 #9 - 第 271 行
-
-**风险等级**: MEDIUM (5分)  
-**风险原因**: 使用innerHTML  
-**代码片段**:
-```javascript
-btn.innerHTML = '<i class="fas fa-magic"></i> 重试生成';
-```
-
-**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
-
----
-
-#### 🟡 风险 #10 - 第 309 行
-
-**风险等级**: MEDIUM (5分)  
-**风险原因**: 使用innerHTML  
-**代码片段**:
-```javascript
-container.innerHTML = html;
+</div>
 ```
 
 **修复建议**: 📋 建议修复: 审查变量来源,必要时转义
@@ -1877,7 +1719,7 @@ container.innerHTML = html;
 
 **风险评分**: 54 | **风险数量**: 6 | 🔴 4 严重 | 🟠 2 高危
 
-#### 🔴 风险 #1 - 第 63 行
+#### 🔴 风险 #1 - 第 66 行
 
 **风险等级**: CRITICAL (10分)  
 **风险原因**: 包含用户输入相关变量, 使用模板字符串  
@@ -1957,7 +1799,7 @@ panel.textContent = `
 
 ---
 
-#### 🔴 风险 #2 - 第 112 行
+#### 🔴 风险 #2 - 第 115 行
 
 **风险等级**: CRITICAL (10分)  
 **风险原因**: 包含用户输入相关变量, 使用模板字符串  
@@ -1980,7 +1822,7 @@ content.innerHTML = `<pre style="margin: 0; white-space: pre-wrap; word-break: b
 
 ---
 
-#### 🔴 风险 #3 - 第 120 行
+#### 🔴 风险 #3 - 第 124 行
 
 **风险等级**: CRITICAL (10分)  
 **风险原因**: 包含用户输入相关变量, 使用模板字符串  
@@ -2021,7 +1863,7 @@ content.textContent = history.map((action, i) => `
 
 ---
 
-#### 🔴 风险 #4 - 第 135 行
+#### 🔴 风险 #4 - 第 140 行
 
 **风险等级**: CRITICAL (10分)  
 **风险原因**: 包含用户输入相关变量, 使用模板字符串  
@@ -2059,7 +1901,7 @@ content.textContent = subs.map(([path, callbacks]) => `
 
 ---
 
-#### 🟠 风险 #5 - 第 118 行
+#### 🟠 风险 #5 - 第 122 行
 
 **风险等级**: HIGH (7分)  
 **风险原因**: 包含用户输入相关变量  
@@ -2082,7 +1924,7 @@ content.textContent = '<div style="color: #6b7280; text-align: center; padding: 
 
 ---
 
-#### 🟠 风险 #6 - 第 133 行
+#### 🟠 风险 #6 - 第 138 行
 
 **风险等级**: HIGH (7分)  
 **风险原因**: 包含用户输入相关变量  
@@ -2105,481 +1947,11 @@ content.textContent = '<div style="color: #6b7280; text-align: center; padding: 
 
 ---
 
-### 7. `src\components\ErrorBoundary.js`
+### 7. `src\modules\amz_hub\views\practice\marketing_calendar\index.js`
 
-**风险评分**: 50 | **风险数量**: 5 | 🔴 5 严重 
+**风险评分**: 38 | **风险数量**: 7 | 🔴 1 严重 
 
-#### 🔴 风险 #1 - 第 48 行
-
-**风险等级**: CRITICAL (10分)  
-**风险原因**: 包含用户输入相关变量, 使用模板字符串  
-**代码片段**:
-```javascript
-container.innerHTML = `
-<div class="error-boundary flex flex-col items-center justify-center p-12 text-center fade-in">
-<div class="w-16 h-16 rounded-full bg-${color}-50 flex items-center justify-center mb-4">
-<i class="fas fa-exclamation-triangle text-2xl text-${color}-500"></i>
-</div>
-<h3 class="text-lg font-bold text-slate-800 mb-2">${title}</h3>
-<p class="text-sm text-slate-500 mb-4 max-w-md">${error.message || '网络连接不稳定或文件缺失'}</p>
-<div class="flex gap-3">
-${reloadButton}
-${retryButton}
-</div>
-</div>
-`;
-```
-
-**修复建议**: 🚨 立即修复: 使用 escapeHtml() 转义所有变量
-
-**修复示例**:
-```javascript
-// 原代码
-container.innerHTML = `
-<div class="error-boundary flex flex-col items-center justify-center p-12 text-center fade-in">
-<div class="w-16 h-16 rounded-full bg-${color}-50 flex items-center justify-center mb-4">
-<i class="fas fa-exclamation-triangle text-2xl text-${color}-500"></i>
-</div>
-<h3 class="text-lg font-bold text-slate-800 mb-2">${title}</h3>
-<p class="text-sm text-slate-500 mb-4 max-w-md">${error.message || '网络连接不稳定或文件缺失'}</p>
-<div class="flex gap-3">
-${reloadButton}
-${retryButton}
-</div>
-</div>
-`;
-
-// 修复后
-import { setSafeHtml } from '@/common/utils/security.js';
-container.textContent = `
-<div class="error-boundary flex flex-col items-center justify-center p-12 text-center fade-in">
-<div class="w-16 h-16 rounded-full bg-${color}-50 flex items-center justify-center mb-4">
-<i class="fas fa-exclamation-triangle text-2xl text-${color}-500"></i>
-</div>
-<h3 class="text-lg font-bold text-slate-800 mb-2">${title}</h3>
-<p class="text-sm text-slate-500 mb-4 max-w-md">${error.message || '网络连接不稳定或文件缺失'}</p>
-<div class="flex gap-3">
-${reloadButton}
-${retryButton}
-</div>
-</div>
-`;
-```
-
----
-
-#### 🔴 风险 #2 - 第 80 行
-
-**风险等级**: CRITICAL (10分)  
-**风险原因**: 包含用户输入相关变量, 使用模板字符串  
-**代码片段**:
-```javascript
-container.innerHTML = `
-<div class="p-10 text-center fade-in">
-<i class="fas fa-spinner fa-spin text-2xl text-${color}-500"></i>
-<p class="text-slate-400 text-xs mt-2">${message}</p>
-</div>
-`;
-```
-
-**修复建议**: 🚨 立即修复: 使用 escapeHtml() 转义所有变量
-
-**修复示例**:
-```javascript
-// 原代码
-container.innerHTML = `
-<div class="p-10 text-center fade-in">
-<i class="fas fa-spinner fa-spin text-2xl text-${color}-500"></i>
-<p class="text-slate-400 text-xs mt-2">${message}</p>
-</div>
-`;
-
-// 修复后
-import { setSafeHtml } from '@/common/utils/security.js';
-container.textContent = `
-<div class="p-10 text-center fade-in">
-<i class="fas fa-spinner fa-spin text-2xl text-${color}-500"></i>
-<p class="text-slate-400 text-xs mt-2">${message}</p>
-</div>
-`;
-```
-
----
-
-#### 🔴 风险 #3 - 第 95 行
-
-**风险等级**: CRITICAL (10分)  
-**风险原因**: 包含用户输入相关变量, 使用模板字符串  
-**代码片段**:
-```javascript
-container.innerHTML = `
-<div class="flex flex-col items-center justify-center p-12 text-center">
-<div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
-<i class="fas ${icon} text-2xl text-slate-400"></i>
-</div>
-<p class="text-sm text-slate-500">${message}</p>
-</div>
-`;
-```
-
-**修复建议**: 🚨 立即修复: 使用 escapeHtml() 转义所有变量
-
-**修复示例**:
-```javascript
-// 原代码
-container.innerHTML = `
-<div class="flex flex-col items-center justify-center p-12 text-center">
-<div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
-<i class="fas ${icon} text-2xl text-slate-400"></i>
-</div>
-<p class="text-sm text-slate-500">${message}</p>
-</div>
-`;
-
-// 修复后
-import { setSafeHtml } from '@/common/utils/security.js';
-container.textContent = `
-<div class="flex flex-col items-center justify-center p-12 text-center">
-<div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
-<i class="fas ${icon} text-2xl text-slate-400"></i>
-</div>
-<p class="text-sm text-slate-500">${message}</p>
-</div>
-`;
-```
-
----
-
-#### 🔴 风险 #4 - 第 111 行
-
-**风险等级**: CRITICAL (10分)  
-**风险原因**: 包含用户输入相关变量, 使用模板字符串  
-**代码片段**:
-```javascript
-container.innerHTML = `
-<div class="p-10 text-center">
-<div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-50 mb-4">
-<i class="fas fa-tools text-2xl text-amber-500"></i>
-</div>
-<h3 class="text-lg font-bold text-slate-800 mb-2">功能开发中</h3>
-<p class="text-sm text-slate-500">模块 [${routeId}] 尚未开发或未注册</p>
-</div>
-`;
-```
-
-**修复建议**: 🚨 立即修复: 使用 escapeHtml() 转义所有变量
-
-**修复示例**:
-```javascript
-// 原代码
-container.innerHTML = `
-<div class="p-10 text-center">
-<div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-50 mb-4">
-<i class="fas fa-tools text-2xl text-amber-500"></i>
-</div>
-<h3 class="text-lg font-bold text-slate-800 mb-2">功能开发中</h3>
-<p class="text-sm text-slate-500">模块 [${routeId}] 尚未开发或未注册</p>
-</div>
-`;
-
-// 修复后
-import { setSafeHtml } from '@/common/utils/security.js';
-container.textContent = `
-<div class="p-10 text-center">
-<div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-50 mb-4">
-<i class="fas fa-tools text-2xl text-amber-500"></i>
-</div>
-<h3 class="text-lg font-bold text-slate-800 mb-2">功能开发中</h3>
-<p class="text-sm text-slate-500">模块 [${routeId}] 尚未开发或未注册</p>
-</div>
-`;
-```
-
----
-
-#### 🔴 风险 #5 - 第 127 行
-
-**风险等级**: CRITICAL (10分)  
-**风险原因**: 包含用户输入相关变量, 使用模板字符串  
-**代码片段**:
-```javascript
-container.innerHTML = `
-<div class="p-10 text-center">
-<div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-orange-50 mb-4">
-<i class="fas fa-clock text-2xl text-orange-500"></i>
-</div>
-<h3 class="text-lg font-bold text-slate-800 mb-2">加载超时</h3>
-<p class="text-sm text-slate-500 mb-4">内容容器加载超时，请刷新重试</p>
-<button onclick="window.location.reload()"
-class="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-sm font-medium transition-colors">
-<i class="fas fa-redo mr-2"></i>刷新页面
-</button>
-</div>
-`;
-```
-
-**修复建议**: 🚨 立即修复: 使用 escapeHtml() 转义所有变量
-
-**修复示例**:
-```javascript
-// 原代码
-container.innerHTML = `
-<div class="p-10 text-center">
-<div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-orange-50 mb-4">
-<i class="fas fa-clock text-2xl text-orange-500"></i>
-</div>
-<h3 class="text-lg font-bold text-slate-800 mb-2">加载超时</h3>
-<p class="text-sm text-slate-500 mb-4">内容容器加载超时，请刷新重试</p>
-<button onclick="window.location.reload()"
-class="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-sm font-medium transition-colors">
-<i class="fas fa-redo mr-2"></i>刷新页面
-</button>
-</div>
-`;
-
-// 修复后
-import { setSafeHtml } from '@/common/utils/security.js';
-container.textContent = `
-<div class="p-10 text-center">
-<div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-orange-50 mb-4">
-<i class="fas fa-clock text-2xl text-orange-500"></i>
-</div>
-<h3 class="text-lg font-bold text-slate-800 mb-2">加载超时</h3>
-<p class="text-sm text-slate-500 mb-4">内容容器加载超时，请刷新重试</p>
-<button onclick="window.location.reload()"
-class="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-sm font-medium transition-colors">
-<i class="fas fa-redo mr-2"></i>刷新页面
-</button>
-</div>
-`;
-```
-
----
-
-### 8. `src\common\utils\xssFixer.js`
-
-**风险评分**: 45 | **风险数量**: 7 | 🔴 2 严重 
-
-#### 🔴 风险 #1 - 第 11 行
-
-**风险等级**: CRITICAL (10分)  
-**风险原因**: 包含用户输入相关变量, 使用模板字符串  
-**代码片段**:
-```javascript
-* 用于替换所有 element.innerHTML = xxx 的场景
-*
-* @param {HTMLElement} element - 目标元素
-* @param {string} html - HTML字符串
-* @param {boolean} [trusted=false] - 是否信任内容(静态模板可设为true)
-*
-* @example
-* // ❌ 危险
-* container.innerHTML = `<div>${userInput}</div>`;
-```
-
-**修复建议**: 🚨 立即修复: 使用 escapeHtml() 转义所有变量
-
-**修复示例**:
-```javascript
-// 原代码
-* 用于替换所有 element.innerHTML = xxx 的场景
-*
-* @param {HTMLElement} element - 目标元素
-* @param {string} html - HTML字符串
-* @param {boolean} [trusted=false] - 是否信任内容(静态模板可设为true)
-*
-* @example
-* // ❌ 危险
-* container.innerHTML = `<div>${userInput}</div>`;
-
-// 修复后
-import { setSafeHtml } from '@/common/utils/security.js';
-* 用于替换所有 element.textContent = xxx 的场景
-*
-* @param {HTMLElement} element - 目标元素
-* @param {string} html - HTML字符串
-* @param {boolean} [trusted=false] - 是否信任内容(静态模板可设为true)
-*
-* @example
-* // ❌ 危险
-* container.innerHTML = `<div>${userInput}</div>`;
-```
-
----
-
-#### 🔴 风险 #2 - 第 19 行
-
-**风险等级**: CRITICAL (10分)  
-**风险原因**: 包含用户输入相关变量, 使用模板字符串  
-**代码片段**:
-```javascript
-* container.innerHTML = `<div>${userInput}</div>`;
-```
-
-**修复建议**: 🚨 立即修复: 使用 escapeHtml() 转义所有变量
-
-**修复示例**:
-```javascript
-// 原代码
-* container.innerHTML = `<div>${userInput}</div>`;
-
-// 修复后
-import { escapeHtml } from '@/common/utils/security.js';
-* container.innerHTML = `<div>${escapeHtml(userInput)}</div>`;
-```
-
----
-
-#### 🟡 风险 #3 - 第 32 行
-
-**风险等级**: MEDIUM (5分)  
-**风险原因**: 使用innerHTML  
-**代码片段**:
-```javascript
-element.innerHTML = html;
-```
-
-**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
-
----
-
-#### 🟡 风险 #4 - 第 65 行
-
-**风险等级**: MEDIUM (5分)  
-**风险原因**: 使用innerHTML  
-**代码片段**:
-```javascript
-element.innerHTML = html;
-```
-
-**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
-
----
-
-#### 🟡 风险 #5 - 第 88 行
-
-**风险等级**: MEDIUM (5分)  
-**风险原因**: 使用innerHTML  
-**代码片段**:
-```javascript
-element.innerHTML = '';
-```
-
-**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
-
----
-
-#### 🟡 风险 #6 - 第 94 行
-
-**风险等级**: MEDIUM (5分)  
-**风险原因**: 使用innerHTML  
-**代码片段**:
-```javascript
-element.innerHTML = items.map((item, index) => renderItem(item, index)).join('');
-```
-
-**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
-
----
-
-#### 🟡 风险 #7 - 第 97 行
-
-**风险等级**: MEDIUM (5分)  
-**风险原因**: 使用innerHTML  
-**代码片段**:
-```javascript
-element.innerHTML = '';
-```
-
-**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
-
----
-
-### 9. `src\modules\amz_hub\views\practice\marketing_calendar\index.js`
-
-**风险评分**: 43 | **风险数量**: 7 | 🔴 2 严重 
-
-#### 🔴 风险 #1 - 第 396 行
-
-**风险等级**: CRITICAL (10分)  
-**风险原因**: 包含用户输入相关变量, 使用模板字符串  
-**代码片段**:
-```javascript
-container.innerHTML = `
-<div class="amzf_stat_item">
-<div class="amzf_stat_icon amzf_blue"><i class="fa-solid fa-timeline text-purple-500"></i></div>
-<div>
-<div class="amzf_stat_value">${filtered.length}</div>
-<div class="amzf_stat_label">营销节点</div>
-</div>
-</div>
-<div class="amzf_stat_item">
-<div class="amzf_stat_icon amzf_green"><i class="fas fa-gifts text-purple-500"></i></div>
-<div>
-<div class="amzf_stat_value">${holidays}</div>
-<div class="amzf_stat_label">重要节日</div>
-</div>
-</div>
-<div class="amzf_stat_item">
-<div class="amzf_stat_icon amzf_orange"><i class="fas fa-shopping-cart text-purple-500"></i></div>
-<div>
-<div class="amzf_stat_value">${shopping}</div>
-<div class="amzf_stat_label">电商大促</div>
-```
-
-**修复建议**: 🚨 立即修复: 使用 escapeHtml() 转义所有变量
-
-**修复示例**:
-```javascript
-// 原代码
-container.innerHTML = `
-<div class="amzf_stat_item">
-<div class="amzf_stat_icon amzf_blue"><i class="fa-solid fa-timeline text-purple-500"></i></div>
-<div>
-<div class="amzf_stat_value">${filtered.length}</div>
-<div class="amzf_stat_label">营销节点</div>
-</div>
-</div>
-<div class="amzf_stat_item">
-<div class="amzf_stat_icon amzf_green"><i class="fas fa-gifts text-purple-500"></i></div>
-<div>
-<div class="amzf_stat_value">${holidays}</div>
-<div class="amzf_stat_label">重要节日</div>
-</div>
-</div>
-<div class="amzf_stat_item">
-<div class="amzf_stat_icon amzf_orange"><i class="fas fa-shopping-cart text-purple-500"></i></div>
-<div>
-<div class="amzf_stat_value">${shopping}</div>
-<div class="amzf_stat_label">电商大促</div>
-
-// 修复后
-import { setSafeHtml } from '@/common/utils/security.js';
-container.textContent = `
-<div class="amzf_stat_item">
-<div class="amzf_stat_icon amzf_blue"><i class="fa-solid fa-timeline text-purple-500"></i></div>
-<div>
-<div class="amzf_stat_value">${filtered.length}</div>
-<div class="amzf_stat_label">营销节点</div>
-</div>
-</div>
-<div class="amzf_stat_item">
-<div class="amzf_stat_icon amzf_green"><i class="fas fa-gifts text-purple-500"></i></div>
-<div>
-<div class="amzf_stat_value">${holidays}</div>
-<div class="amzf_stat_label">重要节日</div>
-</div>
-</div>
-<div class="amzf_stat_item">
-<div class="amzf_stat_icon amzf_orange"><i class="fas fa-shopping-cart text-purple-500"></i></div>
-<div>
-<div class="amzf_stat_value">${shopping}</div>
-<div class="amzf_stat_label">电商大促</div>
-```
-
----
-
-#### 🔴 风险 #2 - 第 428 行
+#### 🔴 风险 #1 - 第 433 行
 
 **风险等级**: CRITICAL (10分)  
 **风险原因**: 包含用户输入相关变量, 使用模板字符串  
@@ -2617,7 +1989,7 @@ container.textContent = `
 
 ---
 
-#### 🟡 风险 #3 - 第 343 行
+#### 🟡 风险 #2 - 第 346 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -2630,7 +2002,7 @@ container.innerHTML = html;
 
 ---
 
-#### 🟡 风险 #4 - 第 385 行
+#### 🟡 风险 #3 - 第 389 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -2643,7 +2015,39 @@ container.innerHTML = html;
 
 ---
 
-#### 🟡 风险 #5 - 第 479 行
+#### 🟡 风险 #4 - 第 400 行
+
+**风险等级**: MEDIUM (5分)  
+**风险原因**: 包含用户输入相关变量, 已使用安全函数, 使用模板字符串  
+**代码片段**:
+```javascript
+container.innerHTML = `
+<div class="amzf_stat_item">
+<div class="amzf_stat_icon amzf_blue"><i class="fa-solid fa-timeline text-purple-500"></i></div>
+<div>
+<div class="amzf_stat_value">${escapeHtml(filtered.length)}</div>
+<div class="amzf_stat_label">营销节点</div>
+</div>
+</div>
+<div class="amzf_stat_item">
+<div class="amzf_stat_icon amzf_green"><i class="fas fa-gifts text-purple-500"></i></div>
+<div>
+<div class="amzf_stat_value">${escapeHtml(holidays)}</div>
+<div class="amzf_stat_label">重要节日</div>
+</div>
+</div>
+<div class="amzf_stat_item">
+<div class="amzf_stat_icon amzf_orange"><i class="fas fa-shopping-cart text-purple-500"></i></div>
+<div>
+<div class="amzf_stat_value">${escapeHtml(shopping)}</div>
+<div class="amzf_stat_label">电商大促</div>
+```
+
+**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
+
+---
+
+#### 🟡 风险 #5 - 第 485 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -2656,7 +2060,7 @@ container.innerHTML = html;
 
 ---
 
-#### 🟡 风险 #6 - 第 528 行
+#### 🟡 风险 #6 - 第 535 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -2669,7 +2073,7 @@ container.innerHTML = html;
 
 ---
 
-#### 🟢 风险 #7 - 第 33 行
+#### 🟢 风险 #7 - 第 35 行
 
 **风险等级**: LOW (3分)  
 **风险原因**: 静态模板加载  
@@ -2682,11 +2086,11 @@ this.container.innerHTML = await loadTemplate('src/modules/amz_hub/views/practic
 
 ---
 
-### 10. `src\modules\app_center\views\master_prompt\data\index.js`
+### 8. `src\modules\app_center\views\master_prompt\data\index.js`
 
 **风险评分**: 36 | **风险数量**: 5 | 🔴 1 严重 | 🟠 3 高危
 
-#### 🔴 风险 #1 - 第 152 行
+#### 🔴 风险 #1 - 第 153 行
 
 **风险等级**: CRITICAL (10分)  
 **风险原因**: 包含用户输入相关变量, 使用模板字符串  
@@ -2766,7 +2170,7 @@ onclick="window.dataModule.toggleCardExpand('${p.asin}')">
 
 ---
 
-#### 🟠 风险 #2 - 第 264 行
+#### 🟠 风险 #2 - 第 266 行
 
 **风险等级**: HIGH (7分)  
 **风险原因**: 包含用户输入相关变量  
@@ -2789,7 +2193,7 @@ jsonDisplay.textContent = this.syntaxHighlight(JSON.stringify(state.scraper.scra
 
 ---
 
-#### 🟠 风险 #3 - 第 355 行
+#### 🟠 风险 #3 - 第 358 行
 
 **风险等级**: HIGH (7分)  
 **风险原因**: 包含用户输入相关变量  
@@ -2812,7 +2216,7 @@ if (descEl) descEl.textContent = content;
 
 ---
 
-#### 🟠 风险 #4 - 第 587 行
+#### 🟠 风险 #4 - 第 591 行
 
 **风险等级**: HIGH (7分)  
 **风险原因**: 包含用户输入相关变量  
@@ -2835,7 +2239,7 @@ backdrop.textContent = content;
 
 ---
 
-#### 🟡 风险 #5 - 第 688 行
+#### 🟡 风险 #5 - 第 693 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -2848,11 +2252,114 @@ container.innerHTML = html;
 
 ---
 
-### 11. `src\modules\app_center\views\keyword_hunter\process\index.js`
+### 9. `src\common\utils\xssFixer.js`
+
+**风险评分**: 35 | **风险数量**: 7 
+
+#### 🟡 风险 #1 - 第 12 行
+
+**风险等级**: MEDIUM (5分)  
+**风险原因**: 包含用户输入相关变量, 已使用安全函数, 使用模板字符串  
+**代码片段**:
+```javascript
+* 用于替换所有 element.innerHTML = xxx 的场景
+*
+* @param {HTMLElement} element - 目标元素
+* @param {string} html - HTML字符串
+* @param {boolean} [trusted=false] - 是否信任内容(静态模板可设为true)
+*
+* @example
+* // ❌ 危险
+* container.innerHTML = `<div>${escapeHtml(userInput)}</div>`;
+```
+
+**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
+
+---
+
+#### 🟡 风险 #2 - 第 20 行
+
+**风险等级**: MEDIUM (5分)  
+**风险原因**: 包含用户输入相关变量, 已使用安全函数, 使用模板字符串  
+**代码片段**:
+```javascript
+* container.innerHTML = `<div>${escapeHtml(userInput)}</div>`;
+```
+
+**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
+
+---
+
+#### 🟡 风险 #3 - 第 34 行
+
+**风险等级**: MEDIUM (5分)  
+**风险原因**: 使用innerHTML  
+**代码片段**:
+```javascript
+element.innerHTML = html;
+```
+
+**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
+
+---
+
+#### 🟡 风险 #4 - 第 68 行
+
+**风险等级**: MEDIUM (5分)  
+**风险原因**: 使用innerHTML  
+**代码片段**:
+```javascript
+element.innerHTML = html;
+```
+
+**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
+
+---
+
+#### 🟡 风险 #5 - 第 92 行
+
+**风险等级**: MEDIUM (5分)  
+**风险原因**: 使用innerHTML  
+**代码片段**:
+```javascript
+element.innerHTML = '';
+```
+
+**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
+
+---
+
+#### 🟡 风险 #6 - 第 99 行
+
+**风险等级**: MEDIUM (5分)  
+**风险原因**: 使用innerHTML  
+**代码片段**:
+```javascript
+element.innerHTML = items.map((item, index) => renderItem(item, index)).join('');
+```
+
+**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
+
+---
+
+#### 🟡 风险 #7 - 第 103 行
+
+**风险等级**: MEDIUM (5分)  
+**风险原因**: 使用innerHTML  
+**代码片段**:
+```javascript
+element.innerHTML = '';
+```
+
+**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
+
+---
+
+### 10. `src\modules\app_center\views\keyword_hunter\process\index.js`
 
 **风险评分**: 32 | **风险数量**: 6 | 🟠 1 高危
 
-#### 🟠 风险 #1 - 第 235 行
+#### 🟠 风险 #1 - 第 237 行
 
 **风险等级**: HIGH (7分)  
 **风险原因**: 包含用户输入相关变量  
@@ -2875,7 +2382,7 @@ display.textContent = highlightText(state.keywordTracker.processedCopy);
 
 ---
 
-#### 🟡 风险 #2 - 第 229 行
+#### 🟡 风险 #2 - 第 230 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -2888,7 +2395,7 @@ display.innerHTML = html;
 
 ---
 
-#### 🟡 风险 #3 - 第 238 行
+#### 🟡 风险 #3 - 第 241 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -2901,7 +2408,7 @@ display.innerHTML = '';
 
 ---
 
-#### 🟡 风险 #4 - 第 276 行
+#### 🟡 风险 #4 - 第 279 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 包含用户输入相关变量, 已使用安全函数, 使用模板字符串  
@@ -2920,7 +2427,7 @@ onclick="window.kt_locateKeyword('${escapeAttr(item.keyword)}')">
 
 ---
 
-#### 🟡 风险 #5 - 第 286 行
+#### 🟡 风险 #5 - 第 289 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 包含用户输入相关变量, 已使用安全函数, 使用模板字符串  
@@ -2937,7 +2444,7 @@ ${escapeHtml(kw)}
 
 ---
 
-#### 🟡 风险 #6 - 第 617 行
+#### 🟡 风险 #6 - 第 621 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -2950,11 +2457,158 @@ container.innerHTML = html;
 
 ---
 
+### 11. `src\components\ErrorBoundary.js`
+
+**风险评分**: 30 | **风险数量**: 5 | 🔴 1 严重 
+
+#### 🔴 风险 #1 - 第 130 行
+
+**风险等级**: CRITICAL (10分)  
+**风险原因**: 包含用户输入相关变量, 使用模板字符串  
+**代码片段**:
+```javascript
+container.innerHTML = `
+<div class="p-10 text-center">
+<div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-orange-50 mb-4">
+<i class="fas fa-clock text-2xl text-orange-500"></i>
+</div>
+<h3 class="text-lg font-bold text-slate-800 mb-2">加载超时</h3>
+<p class="text-sm text-slate-500 mb-4">内容容器加载超时，请刷新重试</p>
+<button onclick="window.location.reload()"
+class="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-sm font-medium transition-colors">
+<i class="fas fa-redo mr-2"></i>刷新页面
+</button>
+</div>
+`;
+```
+
+**修复建议**: 🚨 立即修复: 使用 escapeHtml() 转义所有变量
+
+**修复示例**:
+```javascript
+// 原代码
+container.innerHTML = `
+<div class="p-10 text-center">
+<div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-orange-50 mb-4">
+<i class="fas fa-clock text-2xl text-orange-500"></i>
+</div>
+<h3 class="text-lg font-bold text-slate-800 mb-2">加载超时</h3>
+<p class="text-sm text-slate-500 mb-4">内容容器加载超时，请刷新重试</p>
+<button onclick="window.location.reload()"
+class="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-sm font-medium transition-colors">
+<i class="fas fa-redo mr-2"></i>刷新页面
+</button>
+</div>
+`;
+
+// 修复后
+import { setSafeHtml } from '@/common/utils/security.js';
+container.textContent = `
+<div class="p-10 text-center">
+<div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-orange-50 mb-4">
+<i class="fas fa-clock text-2xl text-orange-500"></i>
+</div>
+<h3 class="text-lg font-bold text-slate-800 mb-2">加载超时</h3>
+<p class="text-sm text-slate-500 mb-4">内容容器加载超时，请刷新重试</p>
+<button onclick="window.location.reload()"
+class="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-sm font-medium transition-colors">
+<i class="fas fa-redo mr-2"></i>刷新页面
+</button>
+</div>
+`;
+```
+
+---
+
+#### 🟡 风险 #2 - 第 50 行
+
+**风险等级**: MEDIUM (5分)  
+**风险原因**: 包含用户输入相关变量, 已使用安全函数, 使用模板字符串  
+**代码片段**:
+```javascript
+container.innerHTML = `
+<div class="error-boundary flex flex-col items-center justify-center p-12 text-center fade-in">
+<div class="w-16 h-16 rounded-full bg-${escapeHtml(color)}-50 flex items-center justify-center mb-4">
+<i class="fas fa-exclamation-triangle text-2xl text-${escapeHtml(color)}-500"></i>
+</div>
+<h3 class="text-lg font-bold text-slate-800 mb-2">${escapeHtml(title)}</h3>
+<p class="text-sm text-slate-500 mb-4 max-w-md">${escapeHtml(error.message || '网络连接不稳定或文件缺失')}</p>
+<div class="flex gap-3">
+${escapeHtml(reloadButton)}
+${escapeHtml(retryButton)}
+</div>
+</div>
+`;
+```
+
+**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
+
+---
+
+#### 🟡 风险 #3 - 第 82 行
+
+**风险等级**: MEDIUM (5分)  
+**风险原因**: 包含用户输入相关变量, 已使用安全函数, 使用模板字符串  
+**代码片段**:
+```javascript
+container.innerHTML = `
+<div class="p-10 text-center fade-in">
+<i class="fas fa-spinner fa-spin text-2xl text-${escapeHtml(color)}-500"></i>
+<p class="text-slate-400 text-xs mt-2">${escapeHtml(message)}</p>
+</div>
+`;
+```
+
+**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
+
+---
+
+#### 🟡 风险 #4 - 第 97 行
+
+**风险等级**: MEDIUM (5分)  
+**风险原因**: 包含用户输入相关变量, 已使用安全函数, 使用模板字符串  
+**代码片段**:
+```javascript
+container.innerHTML = `
+<div class="flex flex-col items-center justify-center p-12 text-center">
+<div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
+<i class="fas ${escapeHtml(icon)} text-2xl text-slate-400"></i>
+</div>
+<p class="text-sm text-slate-500">${escapeHtml(message)}</p>
+</div>
+`;
+```
+
+**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
+
+---
+
+#### 🟡 风险 #5 - 第 113 行
+
+**风险等级**: MEDIUM (5分)  
+**风险原因**: 包含用户输入相关变量, 已使用安全函数, 使用模板字符串  
+**代码片段**:
+```javascript
+container.innerHTML = `
+<div class="p-10 text-center">
+<div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-50 mb-4">
+<i class="fas fa-tools text-2xl text-amber-500"></i>
+</div>
+<h3 class="text-lg font-bold text-slate-800 mb-2">功能开发中</h3>
+<p class="text-sm text-slate-500">模块 [${escapeHtml(routeId)}] 尚未开发或未注册</p>
+</div>
+`;
+```
+
+**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
+
+---
+
 ### 12. `src\modules\more\views\explore\prompts\index.js`
 
 **风险评分**: 30 | **风险数量**: 4 | 🔴 2 严重 
 
-#### 🔴 风险 #1 - 第 105 行
+#### 🔴 风险 #1 - 第 109 行
 
 **风险等级**: CRITICAL (10分)  
 **风险原因**: 包含用户输入相关变量, 使用模板字符串  
@@ -2992,7 +2646,7 @@ container.textContent = `
 
 ---
 
-#### 🔴 风险 #2 - 第 114 行
+#### 🔴 风险 #2 - 第 119 行
 
 **风险等级**: CRITICAL (10分)  
 **风险原因**: 包含用户输入相关变量, 使用模板字符串  
@@ -3072,7 +2726,7 @@ ${model.badge}
 
 ---
 
-#### 🟡 风险 #3 - 第 20 行
+#### 🟡 风险 #3 - 第 22 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -3085,7 +2739,7 @@ container.innerHTML = html;
 
 ---
 
-#### 🟡 风险 #4 - 第 95 行
+#### 🟡 风险 #4 - 第 98 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -3102,7 +2756,7 @@ container.innerHTML = allBtn + categoryBtns;
 
 **风险评分**: 30 | **风险数量**: 6 
 
-#### 🟡 风险 #1 - 第 10 行
+#### 🟡 风险 #1 - 第 12 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -3115,7 +2769,7 @@ container.innerHTML = html;
 
 ---
 
-#### 🟡 风险 #2 - 第 74 行
+#### 🟡 风险 #2 - 第 78 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -3128,7 +2782,7 @@ cardsContainer.innerHTML = cardsHtml;
 
 ---
 
-#### 🟡 风险 #3 - 第 131 行
+#### 🟡 风险 #3 - 第 137 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -3141,7 +2795,7 @@ copyBtn.innerHTML = '<i class="fas fa-check"></i><span>已复制!</span>';
 
 ---
 
-#### 🟡 风险 #4 - 第 137 行
+#### 🟡 风险 #4 - 第 144 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -3154,7 +2808,7 @@ copyBtn.innerHTML = originalHtml;
 
 ---
 
-#### 🟡 风险 #5 - 第 146 行
+#### 🟡 风险 #5 - 第 155 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -3167,7 +2821,7 @@ copyBtn.innerHTML = '<i class="fas fa-times"></i><span>失败</span>';
 
 ---
 
-#### 🟡 风险 #6 - 第 151 行
+#### 🟡 风险 #6 - 第 161 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -3184,7 +2838,7 @@ copyBtn.innerHTML = originalHtml;
 
 **风险评分**: 25 | **风险数量**: 3 | 🔴 2 严重 
 
-#### 🔴 风险 #1 - 第 215 行
+#### 🔴 风险 #1 - 第 216 行
 
 **风险等级**: CRITICAL (10分)  
 **风险原因**: 包含用户输入相关变量, 使用模板字符串  
@@ -3264,7 +2918,7 @@ return `
 
 ---
 
-#### 🔴 风险 #2 - 第 342 行
+#### 🔴 风险 #2 - 第 343 行
 
 **风险等级**: CRITICAL (10分)  
 **风险原因**: 包含用户输入相关变量, 使用模板字符串  
@@ -3302,7 +2956,7 @@ checkboxes.textContent = NEXT_STEP_OPTIONS.map(option => `
 
 ---
 
-#### 🟡 风险 #3 - 第 470 行
+#### 🟡 风险 #3 - 第 472 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -3319,7 +2973,7 @@ container.innerHTML = html;
 
 **风险评分**: 20 | **风险数量**: 2 | 🔴 2 严重 
 
-#### 🔴 风险 #1 - 第 14 行
+#### 🔴 风险 #1 - 第 16 行
 
 **风险等级**: CRITICAL (10分)  
 **风险原因**: 包含用户输入相关变量, 使用模板字符串  
@@ -3399,7 +3053,7 @@ class="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-
 
 ---
 
-#### 🔴 风险 #2 - 第 52 行
+#### 🔴 风险 #2 - 第 54 行
 
 **风险等级**: CRITICAL (10分)  
 **风险原因**: 包含用户输入相关变量, 使用模板字符串  
@@ -3479,85 +3133,11 @@ ${errorStack ? `
 
 ---
 
-### 16. `src\components\settings\systemSettings.js`
-
-**风险评分**: 20 | **风险数量**: 2 | 🔴 2 严重 
-
-#### 🔴 风险 #1 - 第 401 行
-
-**风险等级**: CRITICAL (10分)  
-**风险原因**: 包含用户输入相关变量, 使用模板字符串  
-**代码片段**:
-```javascript
-statusEl.innerHTML = `
-<span class="status-dot status-success"></span>
-<span class="text-slate-600 text-xs font-medium flex items-center gap-1">
-${PROVIDERS[provider].name}: <span class="font-mono text-blue-600">${config.model}</span>
-</span>
-`;
-```
-
-**修复建议**: 🚨 立即修复: 使用 escapeHtml() 转义所有变量
-
-**修复示例**:
-```javascript
-// 原代码
-statusEl.innerHTML = `
-<span class="status-dot status-success"></span>
-<span class="text-slate-600 text-xs font-medium flex items-center gap-1">
-${PROVIDERS[provider].name}: <span class="font-mono text-blue-600">${config.model}</span>
-</span>
-`;
-
-// 修复后
-import { setSafeHtml } from '@/common/utils/security.js';
-statusEl.textContent = `
-<span class="status-dot status-success"></span>
-<span class="text-slate-600 text-xs font-medium flex items-center gap-1">
-${PROVIDERS[provider].name}: <span class="font-mono text-blue-600">${config.model}</span>
-</span>
-`;
-```
-
----
-
-#### 🔴 风险 #2 - 第 410 行
-
-**风险等级**: CRITICAL (10分)  
-**风险原因**: 包含用户输入相关变量, 使用模板字符串  
-**代码片段**:
-```javascript
-statusEl.innerHTML = `
-<span class="status-dot status-pending pulse-dot"></span>
-<span class="text-slate-500 text-xs italic">等待API配置...</span>
-`;
-```
-
-**修复建议**: 🚨 立即修复: 使用 escapeHtml() 转义所有变量
-
-**修复示例**:
-```javascript
-// 原代码
-statusEl.innerHTML = `
-<span class="status-dot status-pending pulse-dot"></span>
-<span class="text-slate-500 text-xs italic">等待API配置...</span>
-`;
-
-// 修复后
-import { setSafeHtml } from '@/common/utils/security.js';
-statusEl.textContent = `
-<span class="status-dot status-pending pulse-dot"></span>
-<span class="text-slate-500 text-xs italic">等待API配置...</span>
-`;
-```
-
----
-
-### 17. `src\modules\amz_hub\views\practice\promotions\index.js`
+### 16. `src\modules\amz_hub\views\practice\promotions\index.js`
 
 **风险评分**: 20 | **风险数量**: 3 | 🔴 1 严重 | 🟠 1 高危
 
-#### 🔴 风险 #1 - 第 514 行
+#### 🔴 风险 #1 - 第 516 行
 
 **风险等级**: CRITICAL (10分)  
 **风险原因**: 包含用户输入相关变量, 使用模板字符串  
@@ -3604,7 +3184,7 @@ ${this.renderSectionBody(section.content)}
 
 ---
 
-#### 🟠 风险 #2 - 第 471 行
+#### 🟠 风险 #2 - 第 473 行
 
 **风险等级**: HIGH (7分)  
 **风险原因**: 使用模板字符串  
@@ -3684,7 +3264,7 @@ ${child.label}
 
 ---
 
-#### 🟢 风险 #3 - 第 438 行
+#### 🟢 风险 #3 - 第 439 行
 
 **风险等级**: LOW (3分)  
 **风险原因**: 静态模板加载  
@@ -3697,27 +3277,19 @@ this.container.innerHTML = await loadTemplate('src/modules/amz_hub/views/practic
 
 ---
 
-### 18. `src\common\BaseModule.js`
+### 17. `src\components\settings\systemSettings.js`
 
-**风险评分**: 17 | **风险数量**: 2 | 🔴 1 严重 | 🟠 1 高危
+**风险评分**: 15 | **风险数量**: 2 | 🔴 1 严重 
 
-#### 🔴 风险 #1 - 第 228 行
+#### 🔴 风险 #1 - 第 412 行
 
 **风险等级**: CRITICAL (10分)  
 **风险原因**: 包含用户输入相关变量, 使用模板字符串  
 **代码片段**:
 ```javascript
-this.container.innerHTML = `
-<div class="flex flex-col items-center justify-center p-12 text-center h-full fade-in">
-<div class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mb-4">
-<i class="fas fa-exclamation-triangle text-2xl text-red-500"></i>
-</div>
-<h3 class="text-lg font-bold text-slate-800 mb-2">模块加载失败 (${this.moduleId})</h3>
-<p class="text-sm text-slate-500 mb-6 max-w-md break-words">${error.message}</p>
-<button id="retry-btn-${this.moduleId}" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors">
-<i class="fas fa-redo mr-2"></i>重试
-</button>
-</div>
+statusEl.innerHTML = `
+<span class="status-dot status-pending pulse-dot"></span>
+<span class="text-slate-500 text-xs italic">等待API配置...</span>
 `;
 ```
 
@@ -3726,65 +3298,44 @@ this.container.innerHTML = `
 **修复示例**:
 ```javascript
 // 原代码
-this.container.innerHTML = `
-<div class="flex flex-col items-center justify-center p-12 text-center h-full fade-in">
-<div class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mb-4">
-<i class="fas fa-exclamation-triangle text-2xl text-red-500"></i>
-</div>
-<h3 class="text-lg font-bold text-slate-800 mb-2">模块加载失败 (${this.moduleId})</h3>
-<p class="text-sm text-slate-500 mb-6 max-w-md break-words">${error.message}</p>
-<button id="retry-btn-${this.moduleId}" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors">
-<i class="fas fa-redo mr-2"></i>重试
-</button>
-</div>
+statusEl.innerHTML = `
+<span class="status-dot status-pending pulse-dot"></span>
+<span class="text-slate-500 text-xs italic">等待API配置...</span>
 `;
 
 // 修复后
 import { setSafeHtml } from '@/common/utils/security.js';
-this.container.textContent = `
-<div class="flex flex-col items-center justify-center p-12 text-center h-full fade-in">
-<div class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mb-4">
-<i class="fas fa-exclamation-triangle text-2xl text-red-500"></i>
-</div>
-<h3 class="text-lg font-bold text-slate-800 mb-2">模块加载失败 (${this.moduleId})</h3>
-<p class="text-sm text-slate-500 mb-6 max-w-md break-words">${error.message}</p>
-<button id="retry-btn-${this.moduleId}" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors">
-<i class="fas fa-redo mr-2"></i>重试
-</button>
-</div>
+statusEl.textContent = `
+<span class="status-dot status-pending pulse-dot"></span>
+<span class="text-slate-500 text-xs italic">等待API配置...</span>
 `;
 ```
 
 ---
 
-#### 🟠 风险 #2 - 第 245 行
+#### 🟡 风险 #2 - 第 402 行
 
-**风险等级**: HIGH (7分)  
-**风险原因**: 包含用户输入相关变量  
+**风险等级**: MEDIUM (5分)  
+**风险原因**: 包含用户输入相关变量, 已使用安全函数, 使用模板字符串  
 **代码片段**:
 ```javascript
-this.container.innerHTML = '<div class="p-10 text-center"><i class="fas fa-spinner fa-spin text-slate-400"></i></div>';
+statusEl.innerHTML = `
+<span class="status-dot status-success"></span>
+<span class="text-slate-600 text-xs font-medium flex items-center gap-1">
+${escapeHtml(PROVIDERS[provider].name)}: <span class="font-mono text-blue-600">${escapeHtml(config.model)}</span>
+</span>
+`;
 ```
 
-**修复建议**: ⚠️ 优先修复: 使用 setTemplate() 或 escapeHtml()
-
-**修复示例**:
-```javascript
-// 原代码
-this.container.innerHTML = '<div class="p-10 text-center"><i class="fas fa-spinner fa-spin text-slate-400"></i></div>';
-
-// 修复后
-import { setSafeHtml } from '@/common/utils/security.js';
-this.container.textContent = '<div class="p-10 text-center"><i class="fas fa-spinner fa-spin text-slate-400"></i></div>';
-```
+**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
 
 ---
 
-### 19. `src\modules\more\views\overview\index.js`
+### 18. `src\modules\more\views\overview\index.js`
 
 **风险评分**: 15 | **风险数量**: 2 | 🔴 1 严重 
 
-#### 🔴 风险 #1 - 第 21 行
+#### 🔴 风险 #1 - 第 23 行
 
 **风险等级**: CRITICAL (10分)  
 **风险原因**: 包含用户输入相关变量, 使用模板字符串  
@@ -3822,7 +3373,7 @@ container.textContent = `
 
 ---
 
-#### 🟡 风险 #2 - 第 12 行
+#### 🟡 风险 #2 - 第 13 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -3835,11 +3386,11 @@ container.innerHTML = html;
 
 ---
 
-### 20. `src\main.js`
+### 19. `src\main.js`
 
 **风险评分**: 14 | **风险数量**: 2 | 🟠 2 高危
 
-#### 🟠 风险 #1 - 第 42 行
+#### 🟠 风险 #1 - 第 53 行
 
 **风险等级**: HIGH (7分)  
 **风险原因**: 包含用户输入相关变量  
@@ -3862,7 +3413,7 @@ guideContainer.textContent = userGuideModalHtml;
 
 ---
 
-#### 🟠 风险 #2 - 第 56 行
+#### 🟠 风险 #2 - 第 68 行
 
 **风险等级**: HIGH (7分)  
 **风险原因**: 包含用户输入相关变量  
@@ -3885,108 +3436,62 @@ temp.textContent = promptModalHtml;
 
 ---
 
-### 21. `src\modules\amz_hub\views\knowledge\eu_insights\index.js`
+### 20. `src\common\BaseModule.js`
 
-**风险评分**: 13 | **风险数量**: 2 | 🔴 1 严重 
+**风险评分**: 12 | **风险数量**: 2 | 🟠 1 高危
 
-#### 🔴 风险 #1 - 第 40 行
+#### 🟠 风险 #1 - 第 287 行
 
-**风险等级**: CRITICAL (10分)  
-**风险原因**: 包含用户输入相关变量, 使用模板字符串  
+**风险等级**: HIGH (7分)  
+**风险原因**: 包含用户输入相关变量  
 **代码片段**:
 ```javascript
-details.innerHTML = `
-<div class="flex items-center justify-between mb-4">
-<h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
-<span class="text-3xl">${this.getFlagEmoji(code)}</span> ${data.name}
-</h2>
-<span class="px-3 py-1 bg-indigo-50 text-indigo-600 text-xs font-bold uppercase rounded-full">Mature Market</span>
-</div>
-<div class="space-y-4">
-<div>
-<h4 class="text-xs font-bold uppercase text-slate-400 mb-1">核心画像 (Persona)</h4>
-<p class="text-sm text-slate-700 leading-relaxed">${data.traits}</p>
-</div>
-<div>
-<h4 class="text-xs font-bold uppercase text-slate-400 mb-1">运营建议 (Strategy)</h4>
-<div class="text-sm text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-100">
-${data.tips}
-</div>
-</div>
-</div>
-`;
+this.container.innerHTML = '<div class="p-10 text-center"><i class="fas fa-spinner fa-spin text-slate-400"></i></div>';
 ```
 
-**修复建议**: 🚨 立即修复: 使用 escapeHtml() 转义所有变量
+**修复建议**: ⚠️ 优先修复: 使用 setTemplate() 或 escapeHtml()
 
 **修复示例**:
 ```javascript
 // 原代码
-details.innerHTML = `
-<div class="flex items-center justify-between mb-4">
-<h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
-<span class="text-3xl">${this.getFlagEmoji(code)}</span> ${data.name}
-</h2>
-<span class="px-3 py-1 bg-indigo-50 text-indigo-600 text-xs font-bold uppercase rounded-full">Mature Market</span>
-</div>
-<div class="space-y-4">
-<div>
-<h4 class="text-xs font-bold uppercase text-slate-400 mb-1">核心画像 (Persona)</h4>
-<p class="text-sm text-slate-700 leading-relaxed">${data.traits}</p>
-</div>
-<div>
-<h4 class="text-xs font-bold uppercase text-slate-400 mb-1">运营建议 (Strategy)</h4>
-<div class="text-sm text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-100">
-${data.tips}
-</div>
-</div>
-</div>
-`;
+this.container.innerHTML = '<div class="p-10 text-center"><i class="fas fa-spinner fa-spin text-slate-400"></i></div>';
 
 // 修复后
 import { setSafeHtml } from '@/common/utils/security.js';
-details.textContent = `
-<div class="flex items-center justify-between mb-4">
-<h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
-<span class="text-3xl">${this.getFlagEmoji(code)}</span> ${data.name}
-</h2>
-<span class="px-3 py-1 bg-indigo-50 text-indigo-600 text-xs font-bold uppercase rounded-full">Mature Market</span>
+this.container.textContent = '<div class="p-10 text-center"><i class="fas fa-spinner fa-spin text-slate-400"></i></div>';
+```
+
+---
+
+#### 🟡 风险 #2 - 第 269 行
+
+**风险等级**: MEDIUM (5分)  
+**风险原因**: 包含用户输入相关变量, 已使用安全函数, 使用模板字符串  
+**代码片段**:
+```javascript
+this.container.innerHTML = `
+<div class="flex flex-col items-center justify-center p-12 text-center h-full fade-in">
+<div class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mb-4">
+<i class="fas fa-exclamation-triangle text-2xl text-red-500"></i>
 </div>
-<div class="space-y-4">
-<div>
-<h4 class="text-xs font-bold uppercase text-slate-400 mb-1">核心画像 (Persona)</h4>
-<p class="text-sm text-slate-700 leading-relaxed">${data.traits}</p>
-</div>
-<div>
-<h4 class="text-xs font-bold uppercase text-slate-400 mb-1">运营建议 (Strategy)</h4>
-<div class="text-sm text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-100">
-${data.tips}
-</div>
-</div>
+<h3 class="text-lg font-bold text-slate-800 mb-2">模块加载失败 (${escapeHtml(this.moduleId)})</h3>
+<p class="text-sm text-slate-500 mb-6 max-w-md break-words">${escapeHtml(error.message)}</p>
+<button id="retry-btn-${escapeHtml(this.moduleId)}" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors">
+<i class="fas fa-redo mr-2"></i>重试
+</button>
 </div>
 `;
 ```
 
----
-
-#### 🟢 风险 #2 - 第 13 行
-
-**风险等级**: LOW (3分)  
-**风险原因**: 静态模板加载  
-**代码片段**:
-```javascript
-this.container.innerHTML = await loadTemplate('src/modules/amz_hub/views/knowledge/eu_insights/template.html');
-```
-
-**修复建议**: ✅ 低风险: 确认为静态内容或已安全处理
+**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
 
 ---
 
-### 22. `src\common\utils\ModuleLoader.js`
+### 21. `src\common\utils\ModuleLoader.js`
 
 **风险评分**: 10 | **风险数量**: 1 | 🔴 1 严重 
 
-#### 🔴 风险 #1 - 第 219 行
+#### 🔴 风险 #1 - 第 222 行
 
 **风险等级**: CRITICAL (10分)  
 **风险原因**: 包含用户输入相关变量, 使用模板字符串  
@@ -4024,7 +3529,7 @@ container.textContent = `
 
 ---
 
-### 23. `src\common\utils\viewLoader.js`
+### 22. `src\common\utils\viewLoader.js`
 
 **风险评分**: 10 | **风险数量**: 2 
 
@@ -4054,11 +3559,11 @@ container.insertAdjacentHTML('beforeend', html);
 
 ---
 
-### 24. `src\modules\app_center\views\keyword_hunter\input\index.js`
+### 23. `src\modules\app_center\views\keyword_hunter\input\index.js`
 
 **风险评分**: 10 | **风险数量**: 2 
 
-#### 🟡 风险 #1 - 第 193 行
+#### 🟡 风险 #1 - 第 194 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -4071,7 +3576,7 @@ layer.innerHTML = html;
 
 ---
 
-#### 🟡 风险 #2 - 第 383 行
+#### 🟡 风险 #2 - 第 385 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -4084,11 +3589,60 @@ container.innerHTML = html;
 
 ---
 
+### 24. `src\modules\amz_hub\views\knowledge\eu_insights\index.js`
+
+**风险评分**: 8 | **风险数量**: 2 
+
+#### 🟡 风险 #1 - 第 42 行
+
+**风险等级**: MEDIUM (5分)  
+**风险原因**: 包含用户输入相关变量, 已使用安全函数, 使用模板字符串  
+**代码片段**:
+```javascript
+details.innerHTML = `
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+<span class="text-3xl">${this.getFlagEmoji(code)}</span> ${escapeHtml(data.name)}
+</h2>
+<span class="px-3 py-1 bg-indigo-50 text-indigo-600 text-xs font-bold uppercase rounded-full">Mature Market</span>
+</div>
+<div class="space-y-4">
+<div>
+<h4 class="text-xs font-bold uppercase text-slate-400 mb-1">核心画像 (Persona)</h4>
+<p class="text-sm text-slate-700 leading-relaxed">${escapeHtml(data.traits)}</p>
+</div>
+<div>
+<h4 class="text-xs font-bold uppercase text-slate-400 mb-1">运营建议 (Strategy)</h4>
+<div class="text-sm text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-100">
+${escapeHtml(data.tips)}
+</div>
+</div>
+</div>
+`;
+```
+
+**修复建议**: 📋 建议修复: 审查变量来源,必要时转义
+
+---
+
+#### 🟢 风险 #2 - 第 15 行
+
+**风险等级**: LOW (3分)  
+**风险原因**: 静态模板加载  
+**代码片段**:
+```javascript
+this.container.innerHTML = await loadTemplate('src/modules/amz_hub/views/knowledge/eu_insights/template.html');
+```
+
+**修复建议**: ✅ 低风险: 确认为静态内容或已安全处理
+
+---
+
 ### 25. `src\components\modal\AppModal.js`
 
 **风险评分**: 7 | **风险数量**: 1 | 🟠 1 高危
 
-#### 🟠 风险 #1 - 第 140 行
+#### 🟠 风险 #1 - 第 143 行
 
 **风险等级**: HIGH (7分)  
 **风险原因**: 使用模板字符串  
@@ -4172,7 +3726,7 @@ this.shadowRoot.textContent = `
 
 **风险评分**: 5 | **风险数量**: 1 
 
-#### 🟡 风险 #1 - 第 68 行
+#### 🟡 风险 #1 - 第 69 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -4189,7 +3743,7 @@ this.container.innerHTML = html;
 
 **风险评分**: 5 | **风险数量**: 1 
 
-#### 🟡 风险 #1 - 第 88 行
+#### 🟡 风险 #1 - 第 89 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -4206,7 +3760,7 @@ sidebar.innerHTML = html;
 
 **风险评分**: 5 | **风险数量**: 1 
 
-#### 🟡 风险 #1 - 第 138 行
+#### 🟡 风险 #1 - 第 139 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -4223,7 +3777,7 @@ element.innerHTML = '';
 
 **风险评分**: 5 | **风险数量**: 1 
 
-#### 🟡 风险 #1 - 第 11 行
+#### 🟡 风险 #1 - 第 12 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -4240,7 +3794,7 @@ container.innerHTML = templateHTML;
 
 **风险评分**: 5 | **风险数量**: 1 
 
-#### 🟡 风险 #1 - 第 11 行
+#### 🟡 风险 #1 - 第 12 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -4257,7 +3811,7 @@ container.innerHTML = templateHTML;
 
 **风险评分**: 5 | **风险数量**: 1 
 
-#### 🟡 风险 #1 - 第 12 行
+#### 🟡 风险 #1 - 第 13 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -4274,7 +3828,7 @@ container.innerHTML = html;
 
 **风险评分**: 5 | **风险数量**: 1 
 
-#### 🟡 风险 #1 - 第 11 行
+#### 🟡 风险 #1 - 第 12 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -4291,7 +3845,7 @@ container.innerHTML = templateHTML;
 
 **风险评分**: 5 | **风险数量**: 1 
 
-#### 🟡 风险 #1 - 第 311 行
+#### 🟡 风险 #1 - 第 312 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -4308,7 +3862,7 @@ container.innerHTML = html;
 
 **风险评分**: 5 | **风险数量**: 1 
 
-#### 🟡 风险 #1 - 第 6 行
+#### 🟡 风险 #1 - 第 7 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -4325,7 +3879,7 @@ container.innerHTML = html;
 
 **风险评分**: 5 | **风险数量**: 1 
 
-#### 🟡 风险 #1 - 第 46 行
+#### 🟡 风险 #1 - 第 47 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -4342,7 +3896,7 @@ this.container.innerHTML = html;
 
 **风险评分**: 5 | **风险数量**: 1 
 
-#### 🟡 风险 #1 - 第 6 行
+#### 🟡 风险 #1 - 第 7 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -4359,7 +3913,7 @@ container.innerHTML = html;
 
 **风险评分**: 5 | **风险数量**: 1 
 
-#### 🟡 风险 #1 - 第 6 行
+#### 🟡 风险 #1 - 第 7 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -4376,7 +3930,7 @@ container.innerHTML = html;
 
 **风险评分**: 5 | **风险数量**: 1 
 
-#### 🟡 风险 #1 - 第 6 行
+#### 🟡 风险 #1 - 第 7 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -4393,7 +3947,7 @@ container.innerHTML = html;
 
 **风险评分**: 5 | **风险数量**: 1 
 
-#### 🟡 风险 #1 - 第 6 行
+#### 🟡 风险 #1 - 第 7 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -4410,7 +3964,7 @@ container.innerHTML = html;
 
 **风险评分**: 5 | **风险数量**: 1 
 
-#### 🟡 风险 #1 - 第 6 行
+#### 🟡 风险 #1 - 第 7 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -4427,7 +3981,7 @@ container.innerHTML = html;
 
 **风险评分**: 5 | **风险数量**: 1 
 
-#### 🟡 风险 #1 - 第 6 行
+#### 🟡 风险 #1 - 第 7 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -4444,7 +3998,7 @@ container.innerHTML = html;
 
 **风险评分**: 5 | **风险数量**: 1 
 
-#### 🟡 风险 #1 - 第 6 行
+#### 🟡 风险 #1 - 第 7 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -4461,7 +4015,7 @@ container.innerHTML = html;
 
 **风险评分**: 5 | **风险数量**: 1 
 
-#### 🟡 风险 #1 - 第 6 行
+#### 🟡 风险 #1 - 第 7 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -4478,7 +4032,7 @@ container.innerHTML = html;
 
 **风险评分**: 5 | **风险数量**: 1 
 
-#### 🟡 风险 #1 - 第 101 行
+#### 🟡 风险 #1 - 第 102 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -4495,7 +4049,7 @@ container.innerHTML = html;
 
 **风险评分**: 5 | **风险数量**: 1 
 
-#### 🟡 风险 #1 - 第 8 行
+#### 🟡 风险 #1 - 第 9 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -4512,7 +4066,7 @@ container.innerHTML = html;
 
 **风险评分**: 5 | **风险数量**: 1 
 
-#### 🟡 风险 #1 - 第 6 行
+#### 🟡 风险 #1 - 第 7 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -4529,7 +4083,7 @@ container.innerHTML = html;
 
 **风险评分**: 5 | **风险数量**: 1 
 
-#### 🟡 风险 #1 - 第 6 行
+#### 🟡 风险 #1 - 第 7 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -4546,7 +4100,7 @@ container.innerHTML = html;
 
 **风险评分**: 5 | **风险数量**: 1 
 
-#### 🟡 风险 #1 - 第 6 行
+#### 🟡 风险 #1 - 第 7 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -4563,7 +4117,7 @@ container.innerHTML = html;
 
 **风险评分**: 5 | **风险数量**: 1 
 
-#### 🟡 风险 #1 - 第 6 行
+#### 🟡 风险 #1 - 第 7 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -4580,7 +4134,7 @@ container.innerHTML = html;
 
 **风险评分**: 5 | **风险数量**: 1 
 
-#### 🟡 风险 #1 - 第 6 行
+#### 🟡 风险 #1 - 第 7 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -4597,7 +4151,7 @@ container.innerHTML = html;
 
 **风险评分**: 5 | **风险数量**: 1 
 
-#### 🟡 风险 #1 - 第 6 行
+#### 🟡 风险 #1 - 第 7 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -4614,7 +4168,7 @@ container.innerHTML = html;
 
 **风险评分**: 5 | **风险数量**: 1 
 
-#### 🟡 风险 #1 - 第 6 行
+#### 🟡 风险 #1 - 第 7 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -4631,7 +4185,7 @@ container.innerHTML = html;
 
 **风险评分**: 5 | **风险数量**: 1 
 
-#### 🟡 风险 #1 - 第 6 行
+#### 🟡 风险 #1 - 第 7 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -4648,7 +4202,7 @@ container.innerHTML = html;
 
 **风险评分**: 5 | **风险数量**: 1 
 
-#### 🟡 风险 #1 - 第 6 行
+#### 🟡 风险 #1 - 第 7 行
 
 **风险等级**: MEDIUM (5分)  
 **风险原因**: 使用innerHTML  
@@ -4665,7 +4219,7 @@ container.innerHTML = html;
 
 **风险评分**: 3 | **风险数量**: 1 
 
-#### 🟢 风险 #1 - 第 13 行
+#### 🟢 风险 #1 - 第 14 行
 
 **风险等级**: LOW (3分)  
 **风险原因**: 静态模板加载  
@@ -4682,7 +4236,7 @@ this.container.innerHTML = await loadTemplate('src/modules/amz_hub/views/knowled
 
 **风险评分**: 3 | **风险数量**: 1 
 
-#### 🟢 风险 #1 - 第 13 行
+#### 🟢 风险 #1 - 第 14 行
 
 **风险等级**: LOW (3分)  
 **风险原因**: 静态模板加载  

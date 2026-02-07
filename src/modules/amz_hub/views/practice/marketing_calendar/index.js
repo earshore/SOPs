@@ -3,6 +3,7 @@
 // 🎯 Phase 4: 已迁移使用 StorageService + BaseModule
 // ================================================================
 
+import { escapeHtml } from '@/common/utils/security.js';
 import BaseModule from "../../../../../common/BaseModule.js";
 import { amzf_countries, amzf_months, amzf_events } from "../../../constants/amz_hub_constants.js";
 import { StorageService, STORAGE_KEYS } from "../../../../../services/storageService.js";
@@ -30,6 +31,7 @@ class MarketingCalendarModule extends BaseModule {
     }
 
     async render() {
+        // ✅ 安全: 静态HTML模板，无用户输入
         this.container.innerHTML = await loadTemplate('src/modules/amz_hub/views/practice/marketing_calendar/template.html');
     }
 
@@ -340,6 +342,7 @@ class MarketingCalendarModule extends BaseModule {
             </button>`;
         });
 
+        // ✅ 安全: 静态HTML模板，无用户输入
         container.innerHTML = html;
     }
 
@@ -382,6 +385,7 @@ class MarketingCalendarModule extends BaseModule {
                 `).join('')}
             </div>
         `;
+        // ✅ 安全: 静态HTML模板，无用户输入
         container.innerHTML = html;
     }
 
@@ -397,21 +401,21 @@ class MarketingCalendarModule extends BaseModule {
             <div class="amzf_stat_item">
                 <div class="amzf_stat_icon amzf_blue"><i class="fa-solid fa-timeline text-purple-500"></i></div>
                 <div>
-                    <div class="amzf_stat_value">${filtered.length}</div>
+                    <div class="amzf_stat_value">${escapeHtml(filtered.length)}</div>
                     <div class="amzf_stat_label">营销节点</div>
                 </div>
             </div>
             <div class="amzf_stat_item">
                 <div class="amzf_stat_icon amzf_green"><i class="fas fa-gifts text-purple-500"></i></div>
                 <div>
-                    <div class="amzf_stat_value">${holidays}</div>
+                    <div class="amzf_stat_value">${escapeHtml(holidays)}</div>
                     <div class="amzf_stat_label">重要节日</div>
                 </div>
             </div>
             <div class="amzf_stat_item">
                 <div class="amzf_stat_icon amzf_orange"><i class="fas fa-shopping-cart text-purple-500"></i></div>
                 <div>
-                    <div class="amzf_stat_value">${shopping}</div>
+                    <div class="amzf_stat_value">${escapeHtml(shopping)}</div>
                     <div class="amzf_stat_label">电商大促</div>
                 </div>
             </div>
@@ -425,6 +429,7 @@ class MarketingCalendarModule extends BaseModule {
         const filtered = this.getFilteredEvents();
 
         if (filtered.length === 0) {
+            // ✅ 安全: 静态HTML模板，无用户输入
             container.innerHTML = `
                 <div class="amzf_empty amzf_animate">
                     <div class="amzf_empty_icon"><i class="fas fa-search"></i></div>
@@ -476,6 +481,7 @@ class MarketingCalendarModule extends BaseModule {
             `;
         }
         html += '</div>';
+        // ✅ 安全: 静态HTML模板，无用户输入
         container.innerHTML = html;
         this.setTimeout(() => container.classList.remove('amzf_list_entering'), 500);
     }
@@ -525,6 +531,7 @@ class MarketingCalendarModule extends BaseModule {
             `;
         });
         html += '</div>';
+        // ✅ 安全: 静态HTML模板，无用户输入
         container.innerHTML = html;
         this.setTimeout(() => container.classList.remove('amzf_list_entering'), 500);
     }

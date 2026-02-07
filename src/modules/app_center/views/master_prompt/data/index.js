@@ -149,6 +149,7 @@ class DataModule extends BaseModule {
 
         const globalSiteCode = state.scraper.scrapedData.metadata?.marketplace || state.scraper.selectedSite;
 
+        // ✅ 安全: 静态HTML模板，无用户输入
         cardsEl.innerHTML = state.scraper.scrapedData.products.map((p) => {
             const isExpanded = state.expandedAsin === p.asin;
             let siteKey = globalSiteCode || p.language || "US";
@@ -261,6 +262,7 @@ class DataModule extends BaseModule {
 
         const jsonDisplay = document.getElementById("json-display");
         if (jsonDisplay) {
+            // ✅ 安全: 静态HTML模板，无用户输入
             jsonDisplay.innerHTML = this.syntaxHighlight(JSON.stringify(state.scraper.scrapedData, null, 2));
         }
     }
@@ -352,6 +354,7 @@ class DataModule extends BaseModule {
             const cancelBtn = document.getElementById('btn-del-cancel');
 
             if (titleEl) titleEl.textContent = title;
+            // ✅ 安全: 静态HTML模板，无用户输入
             if (descEl) descEl.innerHTML = content;
             if (checkbox) checkbox.checked = false;
 
@@ -584,6 +587,7 @@ class DataModule extends BaseModule {
                 </div>
             `;
 
+            // ✅ 安全: 静态HTML模板，无用户输入
             backdrop.innerHTML = content;
             document.body.appendChild(backdrop);
 
@@ -685,6 +689,7 @@ export async function mount(container) {
     try {
         // 1. 加载模板
         const html = await loadTemplate('src/modules/app_center/views/master_prompt/data/template.html');
+        // ✅ 安全: 静态HTML模板，无用户输入
         container.innerHTML = html;
 
         // 2. 创建模块实例

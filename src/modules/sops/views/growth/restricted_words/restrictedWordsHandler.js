@@ -7,6 +7,7 @@ import {
   EU_SITES
 } from './constants/restrictedWordsConstants.js';
 import { registerActionsWithLegacy } from "../../../../../common/utils/actionRegistry.js";
+import { escapeHtml } from "../../../../../common/utils/security.js";
 
 let currentResults = [...RESTRICTED_WORDS_DATABASE];
 let currentSiteContext = 'ALL'; // 当前选中的站点上下文
@@ -43,6 +44,7 @@ function populateFilterDropdowns() {
     const options = [5, 4, 3, 2, 1].map(level =>
       `<option value="${level}">${RISK_LEVELS[level].icon} ${RISK_LEVELS[level].label}</option>`
     ).join('');
+    // ✅ 安全: 静态HTML模板，无用户输入
     riskSelect.innerHTML = `<option value="">全部</option>` + options;
   }
 }
@@ -216,6 +218,7 @@ function renderResults() {
   if (!tbody) return;
 
   if (currentResults.length === 0) {
+    // ✅ 安全: 静态HTML模板，无用户输入
     tbody.innerHTML = `
       <tr>
         <td colspan="6" class="text-center py-12 text-slate-400">
@@ -230,6 +233,7 @@ function renderResults() {
     return;
   }
 
+  // ✅ 安全: 静态HTML模板，无用户输入
   tbody.innerHTML = currentResults.map(word => {
     const risk = RISK_LEVELS[word.riskLevel];
     const category = WORD_CATEGORIES[word.category];
@@ -250,18 +254,18 @@ function renderResults() {
     return `
       <tr class="hover:bg-slate-50 border-b border-slate-100 transition-colors">
         <td class="px-4 py-3 align-top">
-          <div class="font-bold text-slate-800 text-base mb-0.5 break-all">${displayKeyword}</div>
-          <div class="text-xs text-slate-500 line-clamp-2">${subDisplay || '-'}</div>
+          <div class="font-bold text-slate-800 text-base mb-0.5 break-all">${escapeHtml(displayKeyword)}</div>
+          <div class="text-xs text-slate-500 line-clamp-2">${escapeHtml(subDisplay || '-')}</div>
         </td>
         <td class="px-4 py-3 align-top">
           <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium bg-${category.color}-50 text-${category.color}-700 border border-${category.color}-100">
-            <i class="fas ${category.icon}"></i> ${category.label}
+            <i class="fas ${category.icon}"></i> ${escapeHtml(category.label)}
           </span>
-          ${word.subCategory ? `<div class="text-[10px] text-slate-400 mt-1 pl-1">${word.subCategory}</div>` : ''}
+          ${word.subCategory ? `<div class="text-[10px] text-slate-400 mt-1 pl-1">${escapeHtml(word.subCategory)}</div>` : ''}
         </td>
         <td class="px-4 py-3 align-top text-center">
           <div class="flex flex-col items-center">
-            <span class="text-xl mb-0.5" title="${risk.label}">${risk.icon}</span>
+            <span class="text-xl mb-0.5" title="${escapeHtml(risk.label)}">${risk.icon}</span>
             <span class="px-1.5 text-[10px] font-bold rounded bg-${risk.color}-100 text-${risk.color}-700">
               ${word.riskLevel}级
             </span>
@@ -273,8 +277,8 @@ function renderResults() {
           </div>
         </td>
         <td class="px-4 py-3 align-top text-xs text-slate-600">
-          <div class="line-clamp-2" title="${word.commonProducts.join(', ')}">
-            ${word.commonProducts.join(', ')}
+          <div class="line-clamp-2" title="${escapeHtml(word.commonProducts.join(', '))}">
+            ${escapeHtml(word.commonProducts.join(', '))}
           </div>
         </td>
         <td class="px-4 py-3 align-top text-center">
@@ -327,20 +331,20 @@ function showWordDetail(wordId) {
   // 渲染 Header
   header.innerHTML = `
     <div class="flex items-center gap-4">
-      <div class="w-12 h-12 rounded-lg bg-${risk.color}-100 flex items-center justify-center text-2xl">
-        ${risk.icon}
+      <div class="w-12 h-12 rounded-lg bg-${escapeHtml(risk.color)}-100 flex items-center justify-center text-2xl">
+        ${escapeHtml(risk.icon)}
       </div>
       <div>
         <h3 class="text-xl font-bold text-slate-800 flex items-center gap-3">
-          ${word.keyword}
-          <span class="text-xs font-normal text-slate-400 border border-slate-200 rounded px-1.5 py-0.5">ID: ${word.id}</span>
+          ${escapeHtml(word.keyword)}
+          <span class="text-xs font-normal text-slate-400 border border-slate-200 rounded px-1.5 py-0.5">ID: ${escapeHtml(word.id)}</span>
         </h3>
         <div class="flex items-center gap-2 mt-1">
-          <span class="px-2 py-0.5 rounded text-xs font-medium bg-${category.color}-50 text-${category.color}-700 border border-${category.color}-100">
-            ${category.label}
+          <span class="px-2 py-0.5 rounded text-xs font-medium bg-${escapeHtml(category.color)}-50 text-${escapeHtml(category.color)}-700 border border-${escapeHtml(category.color)}-100">
+            ${escapeHtml(category.label)}
           </span>
-          <span class="px-2 py-0.5 rounded text-xs font-medium bg-${risk.color}-50 text-${risk.color}-700 border border-${risk.color}-100">
-            风险等级 ${word.riskLevel}: ${risk.label}
+          <span class="px-2 py-0.5 rounded text-xs font-medium bg-${escapeHtml(risk.color)}-50 text-${escapeHtml(risk.color)}-700 border border-${escapeHtml(risk.color)}-100">
+            风险等级 ${escapeHtml(word.riskLevel)}: ${escapeHtml(risk.label)}
           </span>
         </div>
       </div>

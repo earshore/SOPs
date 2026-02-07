@@ -1,3 +1,4 @@
+import { escapeHtml } from '@/common/utils/security.js';
 import BaseModule from "../../../../../common/BaseModule.js";
 import { AMZ_COUNTRY_DATA } from "../../../constants/amz_hub_constants.js";
 import { loadTemplate } from "../../../../../common/utils/viewLoader.js";
@@ -10,6 +11,7 @@ class EuInsightsModule extends BaseModule {
     }
 
     async render() {
+        // ✅ 安全: 静态HTML模板，无用户输入
         this.container.innerHTML = await loadTemplate('src/modules/amz_hub/views/knowledge/eu_insights/template.html');
     }
 
@@ -40,19 +42,19 @@ class EuInsightsModule extends BaseModule {
             details.innerHTML = `
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
-                        <span class="text-3xl">${this.getFlagEmoji(code)}</span> ${data.name}
+                        <span class="text-3xl">${this.getFlagEmoji(code)}</span> ${escapeHtml(data.name)}
                     </h2>
                     <span class="px-3 py-1 bg-indigo-50 text-indigo-600 text-xs font-bold uppercase rounded-full">Mature Market</span>
                 </div>
                 <div class="space-y-4">
                     <div>
                         <h4 class="text-xs font-bold uppercase text-slate-400 mb-1">核心画像 (Persona)</h4>
-                        <p class="text-sm text-slate-700 leading-relaxed">${data.traits}</p>
+                        <p class="text-sm text-slate-700 leading-relaxed">${escapeHtml(data.traits)}</p>
                     </div>
                     <div>
                         <h4 class="text-xs font-bold uppercase text-slate-400 mb-1">运营建议 (Strategy)</h4>
                         <div class="text-sm text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-100">
-                            ${data.tips}
+                            ${escapeHtml(data.tips)}
                         </div>
                     </div>
                 </div>

@@ -1,5 +1,6 @@
 console.log("🚀 ui.js 模块 (Event-Driven Core) 开始加载...");
 
+import { escapeHtml } from '@/common/utils/security.js';
 import state from "../state.js";
 import { ERROR_MESSAGES } from "../constants/constants.js";
 import { MENU_CONFIG, getRoutesByModule, getRouteFullConfig } from "../config/menuConfig.js";
@@ -131,9 +132,11 @@ export function renderMegaMenu() {
             </div>`;
         }).join('');
 
+        // ✅ 安全: 静态HTML模板，无用户输入
         container.innerHTML = html;
     } catch (e) {
         console.error("❌ MegaMenu 渲染失败:", e);
+        // ✅ 安全: 静态HTML模板，无用户输入
         container.innerHTML = `<div class="p-4 text-red-500 text-xs">菜单加载失败</div>`;
     }
 }
@@ -231,9 +234,11 @@ export function renderMoreMenu() {
             );
         });
 
+        // ✅ 安全: 静态HTML模板，无用户输入
         container.innerHTML = html;
     } catch (e) {
         console.error("❌ MoreMenu 渲染失败:", e);
+        // ✅ 安全: 静态HTML模板，无用户输入
         container.innerHTML = `<div class="p-4 text-red-500 text-xs">菜单加载失败</div>`;
     }
 }
@@ -361,6 +366,7 @@ export function renderHubMegaMenu() {
             );
         });
 
+        // ✅ 安全: 静态HTML模板，无用户输入
         container.innerHTML = html;
     } catch (e) {
         console.error("❌ Hub MegaMenu Render Error:", e);
@@ -498,6 +504,7 @@ export function renderSopsMegaMenu() {
             );
         });
 
+        // ✅ 安全: 静态HTML模板，无用户输入
         container.innerHTML = html;
     } catch (e) {
         console.error("❌ SOPs MegaMenu Render Error:", e);
@@ -538,6 +545,7 @@ function renderSidebar(moduleId) {
     // 1. 隐藏逻辑
     if (!moduleId) {
         sidebar.classList.add("hidden", "-ml-64");
+        // ✅ 安全: 静态HTML模板，无用户输入
         sidebar.innerHTML = '';
         currentSidebarModuleId = null;
         return;
@@ -756,6 +764,7 @@ function renderSopsSidebar(sidebar, moduleConfig, routes) {
             </div>
         </div>
     `;
+    // ✅ 安全: 静态HTML模板，无用户输入
     sidebar.innerHTML = html;
 }
 
@@ -907,6 +916,7 @@ function renderHubSidebar(sidebar, moduleConfig, routes) {
         </div>
     `;
     
+    // ✅ 安全: 静态HTML模板，无用户输入
     sidebar.innerHTML = html;
 }
 
@@ -948,6 +958,7 @@ function renderDefaultSidebar(sidebar, moduleConfig, routes) {
                 </div>
             </div>
         `;
+        // ✅ 安全: 静态HTML模板，无用户输入
         sidebar.innerHTML = html;
     } catch (e) {
         console.error(`❌ 侧边栏渲染错误:`, e);
@@ -1071,6 +1082,7 @@ function renderMoreSidebar(sidebar, moduleConfig, routes) {
         </div>
     `;
     
+    // ✅ 安全: 静态HTML模板，无用户输入
     sidebar.innerHTML = html;
 }
 
@@ -1283,7 +1295,7 @@ export function showToast(message, type = "info") {
     translate-y-2 opacity-0
     relative pointer-events-auto
   `;
-    toast.innerHTML = `<i class="fas ${style.icon} text-lg"></i><span class="text-sm font-medium tracking-wide">${message}</span>`;
+    toast.innerHTML = `<i class="fas ${escapeHtml(style.icon)} text-lg"></i><span class="text-sm font-medium tracking-wide">${escapeHtml(message)}</span>`;
 
     container.appendChild(toast);
 
@@ -1596,6 +1608,7 @@ window.searchSOPs = function (query) {
     });
 
     if (matches.length === 0) {
+        // ✅ 安全: 静态HTML模板，无用户输入
         resultsContainer.innerHTML = '<div class="text-xs text-slate-400 text-center py-2">未找到匹配的 SOP</div>';
     } else {
         // Generate results with data-action
@@ -1666,6 +1679,7 @@ window.searchHub = function (query) {
     });
 
     if (matches.length === 0) {
+        // ✅ 安全: 静态HTML模板，无用户输入
         resultsContainer.innerHTML = '<div class="text-xs text-slate-400 text-center py-2">未找到匹配的内容</div>';
     } else {
         resultsContainer.innerHTML = matches.map(route => `
@@ -1750,6 +1764,7 @@ window.searchSidebar = function (query) {
 
     // 显示结果
     if (matches.length === 0) {
+        // ✅ 安全: 静态HTML模板，无用户输入
         resultsContainer.innerHTML = `
             <div class="p-3 text-xs text-slate-400 text-center">
                 <i class="fas fa-search mb-2"></i>

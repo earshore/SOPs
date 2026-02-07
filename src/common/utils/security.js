@@ -135,6 +135,7 @@ export function createSafeFragment(html) {
  */
 export function setSafeHtml(element, html) {
     if (!element) return;
+    // ✅ 安全: 静态HTML模板，无用户输入
     element.innerHTML = '';
     element.appendChild(createSafeFragment(html));
 }

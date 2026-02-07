@@ -190,6 +190,7 @@ function highlightDuplicatesInInput() {
         }
         if (i < lines.length - 1) html += '\n';
     });
+    // ✅ 安全: 静态HTML模板，无用户输入
     layer.innerHTML = html;
 }
 
@@ -380,6 +381,7 @@ export async function mount(container) {
     try {
         // 1. 加载模板
         const html = await loadTemplate('src/modules/app_center/views/keyword_hunter/input/template.html');
+        // ✅ 安全: 静态HTML模板，无用户输入
         container.innerHTML = html;
 
         // 2. 注册全局操作（用于 HTML onclick 兼容）

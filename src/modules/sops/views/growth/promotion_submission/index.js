@@ -98,6 +98,7 @@ window.calculateProfit = calculateProfit;
 
 export async function mount(container) {
     const html = await loadTemplate('src/modules/sops/views/growth/promotion_submission/template.html');
+    // ✅ 安全: 静态HTML模板，无用户输入
     container.innerHTML = html;
     container.classList.add('fade-in');
 

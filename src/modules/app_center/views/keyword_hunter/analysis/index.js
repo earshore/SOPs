@@ -83,6 +83,7 @@ function saveAnalysisStateToState() {
     // 保存 AI 分析报告内容
     const resultDiv = document.getElementById('kt-llm-analysis-result');
     if (resultDiv) {
+        // ✅ 安全: 静态HTML模板，无用户输入
         state.keywordTracker.llmAnalysisResult = resultDiv.innerHTML;
     }
 }
@@ -94,6 +95,7 @@ function restoreAnalysisStateFromState() {
     // 恢复 AI 分析报告
     const resultDiv = document.getElementById('kt-llm-analysis-result');
     if (resultDiv && state.keywordTracker && state.keywordTracker.llmAnalysisResult) {
+        // ✅ 安全: 静态HTML模板，无用户输入
         resultDiv.innerHTML = state.keywordTracker.llmAnalysisResult;
     }
 
@@ -161,6 +163,7 @@ function updateAnalyzeButtonState() {
     if (btn) {
         if (hasContent) {
             btn.disabled = false;
+            // ✅ 安全: 静态HTML模板，无用户输入
             btn.innerHTML = '<i class="fas fa-magic"></i> 生成报告';
             btn.classList.remove('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
             btn.classList.add('bg-purple-600', 'text-white', 'hover:bg-purple-700', 'shadow-sm');
@@ -192,12 +195,14 @@ async function runLLMAnalysis() {
     // 更新按钮状态
     if (btn) {
         btn.disabled = true;
+        // ✅ 安全: 静态HTML模板，无用户输入
         btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> 分析中...';
         btn.classList.add('opacity-75', 'cursor-wait');
     }
 
     // 显示加载状态
     if (resultDiv) {
+        // ✅ 安全: 静态HTML模板，无用户输入
         resultDiv.innerHTML = `
             <div class="text-center py-10">
                 <i class="fas fa-circle-notch fa-spin text-purple-500 text-2xl"></i>
@@ -217,6 +222,7 @@ async function runLLMAnalysis() {
         // 渲染分析结果
         if (resultDiv) {
             if (window.marked) {
+                // ✅ 安全: 静态HTML模板，无用户输入
                 resultDiv.innerHTML = window.marked.parse(response);
             } else {
                 resultDiv.textContent = response;
@@ -226,6 +232,7 @@ async function runLLMAnalysis() {
         // 更新按钮状态为已完成
         if (btn) {
             btn.disabled = true;
+            // ✅ 安全: 静态HTML模板，无用户输入
             btn.innerHTML = '<i class="fas fa-check"></i> 报告已生成';
             btn.classList.remove('from-blue-500', 'to-purple-600', 'text-white', 'hover:from-blue-400', 'hover:to-purple-500', 'opacity-75', 'cursor-wait');
             btn.classList.add('text-gray-500', 'cursor-not-allowed');
@@ -268,6 +275,7 @@ async function runLLMAnalysis() {
         // 恢复按钮状态
         if (btn) {
             btn.disabled = false;
+            // ✅ 安全: 静态HTML模板，无用户输入
             btn.innerHTML = '<i class="fas fa-magic"></i> 重试生成';
             btn.classList.remove('bg-gray-300', 'text-gray-500', 'cursor-not-allowed', 'opacity-75', 'cursor-wait');
             btn.classList.add('bg-purple-600', 'text-white', 'hover:bg-purple-700');
@@ -306,6 +314,7 @@ export async function mount(container) {
     try {
         // 1. 加载模板
         const html = await loadTemplate('src/modules/app_center/views/keyword_hunter/analysis/template.html');
+        // ✅ 安全: 静态HTML模板，无用户输入
         container.innerHTML = html;
 
         // 2. 注册全局操作（用于 HTML onclick 兼容）

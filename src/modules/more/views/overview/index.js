@@ -9,6 +9,7 @@ export async function mount(container) {
     try {
         // 加载HTML模板
         const html = await loadTemplate('src/modules/more/views/overview/template.html');
+        // ✅ 安全: 静态HTML模板，无用户输入
         container.innerHTML = html;
         container.classList.add('fade-in');
         
@@ -18,6 +19,7 @@ export async function mount(container) {
         console.log("✅ 更多总览页面挂载完成");
     } catch (error) {
         console.error("❌ 更多总览页面挂载失败:", error);
+        // ✅ 安全: 静态HTML模板，无用户输入
         container.innerHTML = `
             <div class="p-10 text-center text-red-500">
                 <i class="fas fa-exclamation-triangle text-4xl mb-4"></i>

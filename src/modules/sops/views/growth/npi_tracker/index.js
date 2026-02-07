@@ -212,6 +212,7 @@ function renderTable() {
     const tbody = document.getElementById('npi-table-body');
     if (!tbody) return;
 
+    // ✅ 安全: 静态HTML模板，无用户输入
     tbody.innerHTML = tableData.map((row, index) => {
         const stageConfig = STAGE_CONFIG[row.stage] || STAGE_CONFIG['new-test'];
         const clearancePrice = calcClearancePrice(row.delivery_fee);
@@ -467,6 +468,7 @@ import { loadTemplate } from "../../../../../common/utils/viewLoader.js";
 // Module mount function
 export async function mount(container) {
     const html = await loadTemplate('src/modules/sops/views/growth/npi_tracker/template.html');
+    // ✅ 安全: 静态HTML模板，无用户输入
     container.innerHTML = html;
     container.classList.add('fade-in');
 

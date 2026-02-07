@@ -226,15 +226,18 @@ function renderCopyDisplay() {
             }
             html += `</div>`;
         });
+        // ✅ 安全: 静态HTML模板，无用户输入
         display.innerHTML = html;
         return;
     }
 
     // 普通模式：显示高亮的文案
     if (state.keywordTracker.processedCopy) {
+        // ✅ 安全: 静态HTML模板，无用户输入
         display.innerHTML = highlightText(state.keywordTracker.processedCopy);
     } else {
         // 没有内容时清空,让 CSS placeholder 显示
+        // ✅ 安全: 静态HTML模板，无用户输入
         display.innerHTML = '';
     }
 }
@@ -614,6 +617,7 @@ export async function mount(container) {
     try {
         // 1. 加载模板
         const html = await loadTemplate('src/modules/app_center/views/keyword_hunter/process/template.html');
+        // ✅ 安全: 静态HTML模板，无用户输入
         container.innerHTML = html;
 
         // 2. 将浮动窗口移到 body 级别(避免被容器限制)

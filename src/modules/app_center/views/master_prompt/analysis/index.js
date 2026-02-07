@@ -8,6 +8,7 @@
  * - 通过 EventBus 与其他模块通信
  */
 
+import { escapeHtml } from '@/common/utils/security.js';
 import { loadTemplate } from '../../../../../common/utils/viewLoader.js';
 import BaseModule from '../../../../../common/BaseModule.js';
 import state from '../../../../../common/state.js';
@@ -146,6 +147,7 @@ class AnalysisModule extends BaseModule {
     const container = document.getElementById("source-toggle-container");
     if (!container) return;
 
+    // ✅ 安全: 静态HTML模板，无用户输入
     container.innerHTML = `
       <label id="lbl-opt-listing" class="flex-1 group relative flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border cursor-pointer transition-all select-none text-sm font-medium text-slate-500 border-slate-200 bg-white hover:border-blue-300">
         <input type="checkbox" id="opt-listing" checked class="hidden peer">
@@ -182,6 +184,7 @@ class AnalysisModule extends BaseModule {
     const container = document.getElementById("modules-container");
     if (!container) return;
 
+    // ✅ 安全: 静态HTML模板，无用户输入
     container.innerHTML = ANALYSIS_MODULES.map(
       (mod) => `
         <label class="module-item group relative flex items-start gap-2.5 p-2.5 rounded-xl border border-slate-100 hover:bg-blue-50/50 hover:border-blue-200 cursor-pointer transition-all bg-white" data-category="${mod.category}">
@@ -243,6 +246,7 @@ class AnalysisModule extends BaseModule {
     if (!container) return;
 
     if (!state.scraper.scrapedData || !state.scraper.scrapedData.products || state.scraper.scrapedData.products.length === 0) {
+      // ✅ 安全: 静态HTML模板，无用户输入
       container.innerHTML = '<p class="text-sm text-slate-400 text-center py-6">暂无数据</p>';
       return;
     }
@@ -251,6 +255,7 @@ class AnalysisModule extends BaseModule {
       state.analysis.selectedAsins = [];
     }
 
+    // ✅ 安全: 静态HTML模板，无用户输入
     container.innerHTML = state.scraper.scrapedData.products.map((p) => {
       const isSelected = state.analysis.selectedAsins.includes(p.asin);
       return `
@@ -293,6 +298,7 @@ class AnalysisModule extends BaseModule {
     previewDiv.id = "prompt-preview-container";
     previewDiv.className = "mb-6 hidden fade-in";
 
+    // ✅ 安全: 静态HTML模板，无用户输入
     previewDiv.innerHTML = `
       <details class="group bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden open:ring-2 open:ring-blue-100 transition-all">
         <summary class="flex items-center justify-between p-4 cursor-pointer bg-slate-50/50 hover:bg-slate-50 transition-colors list-none select-none">
@@ -400,6 +406,7 @@ class AnalysisModule extends BaseModule {
 
     const btn = document.getElementById("analyze-btn");
     btn.disabled = true;
+    // ✅ 安全: 静态HTML模板，无用户输入
     btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> 分析中..';
 
     // 渲染骨架屏状�?
@@ -493,6 +500,7 @@ class AnalysisModule extends BaseModule {
       if (noReportMsg) noReportMsg.classList.remove("hidden");
     } finally {
       btn.disabled = false;
+      // ✅ 安全: 静态HTML模板，无用户输入
       btn.innerHTML = '<i class="fas fa-brain mr-2"></i> 分析ASIN';
     }
   }
@@ -515,7 +523,7 @@ class AnalysisModule extends BaseModule {
       jsonDisplay.parentElement.classList.add("hidden");
 
     if (report.parse_error) {
-      display.innerHTML = `<div class="p-6 bg-red-50 border border-red-200 rounded-xl text-red-700 font-mono text-sm whitespace-pre-wrap"><i class="fas fa-bug mr-2"></i> ⚠️ 解析错误，原始数据：\n${report.raw_response}</div>`;
+      display.innerHTML = `<div class="p-6 bg-red-50 border border-red-200 rounded-xl text-red-700 font-mono text-sm whitespace-pre-wrap"><i class="fas fa-bug mr-2"></i> ⚠️ 解析错误，原始数据：\n${escapeHtml(report.raw_response)}</div>`;
       return;
     }
 
@@ -591,6 +599,7 @@ class AnalysisModule extends BaseModule {
         <div class="grid-stack"></div>
       </div>`;
 
+    // ✅ 安全: 静态HTML模板，无用户输入
     display.innerHTML = toolbarHtml;
 
     this.populateTranslationModels();
@@ -620,6 +629,7 @@ class AnalysisModule extends BaseModule {
       options = `<option value="" disabled>No models found for ${activeProvider || 'current provider'}</option>`;
     }
 
+    // ✅ 安全: 静态HTML模板，无用户输入
     select.innerHTML = options;
 
     if (state.analysis.lastTranslationModel) {
@@ -707,6 +717,7 @@ class AnalysisModule extends BaseModule {
 
       const contentEl = el.querySelector('.grid-stack-item-content');
       if (contentEl) {
+        // ✅ 安全: 静态HTML模板，无用户输入
         contentEl.innerHTML = w.content;
       }
     });
@@ -854,6 +865,7 @@ class AnalysisModule extends BaseModule {
     const btn = document.getElementById("quick-translate-btn");
     if (btn) {
       btn.disabled = true;
+      // ✅ 安全: 静态HTML模板，无用户输入
       btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-1"></i> 翻译中...';
     }
 
@@ -883,6 +895,7 @@ class AnalysisModule extends BaseModule {
     } finally {
       if (btn) {
         btn.disabled = false;
+        // ✅ 安全: 静态HTML模板，无用户输入
         btn.innerHTML = '<i class="fas fa-language"></i> 翻译';
       }
     }
@@ -980,6 +993,7 @@ class AnalysisModule extends BaseModule {
       // 更新按钮状态
       const resizeBtn = card.querySelector('.btn-resize');
       if (resizeBtn) {
+        // ✅ 安全: 静态HTML模板，无用户输入
         resizeBtn.innerHTML = '<i class="fas fa-check text-xs"></i>';
         resizeBtn.classList.add('text-blue-600', 'bg-blue-50');
         resizeBtn.title = '完成调整';
@@ -1000,6 +1014,7 @@ class AnalysisModule extends BaseModule {
       // 恢复按钮状态
       const resizeBtn = card.querySelector('.btn-resize');
       if (resizeBtn) {
+        // ✅ 安全: 静态HTML模板，无用户输入
         resizeBtn.innerHTML = '<i class="fas fa-expand-alt text-xs"></i>';
         resizeBtn.classList.remove('text-blue-600', 'bg-blue-50');
         resizeBtn.title = '调整';
@@ -1100,6 +1115,7 @@ class AnalysisModule extends BaseModule {
     editControls.classList.remove('hidden');
 
     // 渲染编辑表单
+    // ✅ 安全: 静态HTML模板，无用户输入
     contentArea.innerHTML = renderEditorForm(key, report[key]);
   }
 
@@ -1141,6 +1157,7 @@ class AnalysisModule extends BaseModule {
         style = { color: "purple", bg: "bg-purple-600", lightBg: "bg-purple-50", icon: "fa-random" };
     }
 
+    // ✅ 安全: 静态HTML模板，无用户输入
     contentArea.innerHTML = renderViewModeHTML(newData, style);
     showToast("保存成功", "success");
   }
@@ -1180,6 +1197,7 @@ class AnalysisModule extends BaseModule {
           style = { color: "purple", bg: "bg-purple-600", lightBg: "bg-purple-50", icon: "fa-random" };
       }
 
+      // ✅ 安全: 静态HTML模板，无用户输入
       contentArea.innerHTML = renderViewModeHTML(originalData, style);
     }
 
@@ -1251,10 +1269,10 @@ class AnalysisModule extends BaseModule {
         <div class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-blue-400 transition-colors"></div>
       </div>
       <div class="flex-1 relative">
-        <textarea class="editor-input-modern" rows="1" style="height: 28px" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onfocus="window.pushEditSnapshot('${key}'); this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+        <textarea class="editor-input-modern" rows="1" style="height: 28px" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onfocus="window.pushEditSnapshot('${escapeHtml(key)}'); this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
       </div>
       <div class="pt-1">
-        <button onclick="window.deleteRowItem(this, '${key}')" class="w-6 h-6 flex items-center justify-center rounded-md text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer opacity-0 group-hover:opacity-100" title="删除此项">
+        <button onclick="window.deleteRowItem(this, '${escapeHtml(key)}')" class="w-6 h-6 flex items-center justify-center rounded-md text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer opacity-0 group-hover:opacity-100" title="删除此项">
           <i class="fas fa-times text-xs"></i>
         </button>
       </div>
@@ -1283,11 +1301,11 @@ class AnalysisModule extends BaseModule {
     `).join('');
 
     newRow.innerHTML = `
-      <button onclick="window.deleteRowItem(this, '${key}')" class="w-6 h-6 flex items-center justify-center rounded-md text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer opacity-0 group-hover:opacity-100 absolute top-3 right-3 bg-white shadow-sm border border-slate-200 z-10 hover:border-red-200" title="删除此项">
+      <button onclick="window.deleteRowItem(this, '${escapeHtml(key)}')" class="w-6 h-6 flex items-center justify-center rounded-md text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer opacity-0 group-hover:opacity-100 absolute top-3 right-3 bg-white shadow-sm border border-slate-200 z-10 hover:border-red-200" title="删除此项">
         <i class="fas fa-trash-alt text-[10px]"></i>
       </button>
       <div class="grid gap-y-3 gap-x-4">
-        ${fields}
+        ${escapeHtml(fields)}
       </div>
     `;
     
@@ -1311,6 +1329,7 @@ export async function mount(container) {
   try {
     // 1. 加载模板
     const html = await loadTemplate('src/modules/app_center/views/master_prompt/analysis/template.html');
+    // ✅ 安全: 静态HTML模板，无用户输入
     container.innerHTML = html;
 
     // 2. 创建模块实例

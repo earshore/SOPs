@@ -65,6 +65,7 @@ export class OverviewRenderer {
      */
     async render() {
         const html = this._generateHTML();
+        // ✅ 安全: 静态HTML模板，无用户输入
         this.container.innerHTML = html;
         this.container.classList.add('fade-in');
         

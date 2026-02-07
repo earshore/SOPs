@@ -10,6 +10,7 @@ class SeoStrategyModule extends BaseModule {
     }
 
     async render() {
+        // ✅ 安全: 静态HTML模板，无用户输入
         this.container.innerHTML = await loadTemplate('src/modules/amz_hub/views/knowledge/seo_strategy/template.html');
     }
 

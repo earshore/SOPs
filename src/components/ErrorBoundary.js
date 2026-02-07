@@ -1,3 +1,5 @@
+import { escapeHtml } from '@/common/utils/security.js';
+
 // src/components/ErrorBoundary.js
 // ================================================================
 // 🎯 统一错误边界组件
@@ -47,14 +49,14 @@ export function renderErrorBoundary(container, error, config = {}) {
 
     container.innerHTML = `
         <div class="error-boundary flex flex-col items-center justify-center p-12 text-center fade-in">
-            <div class="w-16 h-16 rounded-full bg-${color}-50 flex items-center justify-center mb-4">
-                <i class="fas fa-exclamation-triangle text-2xl text-${color}-500"></i>
+            <div class="w-16 h-16 rounded-full bg-${escapeHtml(color)}-50 flex items-center justify-center mb-4">
+                <i class="fas fa-exclamation-triangle text-2xl text-${escapeHtml(color)}-500"></i>
             </div>
-            <h3 class="text-lg font-bold text-slate-800 mb-2">${title}</h3>
-            <p class="text-sm text-slate-500 mb-4 max-w-md">${error.message || '网络连接不稳定或文件缺失'}</p>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">${escapeHtml(title)}</h3>
+            <p class="text-sm text-slate-500 mb-4 max-w-md">${escapeHtml(error.message || '网络连接不稳定或文件缺失')}</p>
             <div class="flex gap-3">
-                ${reloadButton}
-                ${retryButton}
+                ${escapeHtml(reloadButton)}
+                ${escapeHtml(retryButton)}
             </div>
         </div>
     `;
@@ -79,8 +81,8 @@ export function renderErrorBoundary(container, error, config = {}) {
 export function renderLoading(container, color = 'blue', message = 'Loading module...') {
     container.innerHTML = `
         <div class="p-10 text-center fade-in">
-            <i class="fas fa-spinner fa-spin text-2xl text-${color}-500"></i>
-            <p class="text-slate-400 text-xs mt-2">${message}</p>
+            <i class="fas fa-spinner fa-spin text-2xl text-${escapeHtml(color)}-500"></i>
+            <p class="text-slate-400 text-xs mt-2">${escapeHtml(message)}</p>
         </div>
     `;
 }
@@ -95,9 +97,9 @@ export function renderEmpty(container, message = '暂无内容', icon = 'fa-inbo
     container.innerHTML = `
         <div class="flex flex-col items-center justify-center p-12 text-center">
             <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
-                <i class="fas ${icon} text-2xl text-slate-400"></i>
+                <i class="fas ${escapeHtml(icon)} text-2xl text-slate-400"></i>
             </div>
-            <p class="text-sm text-slate-500">${message}</p>
+            <p class="text-sm text-slate-500">${escapeHtml(message)}</p>
         </div>
     `;
 }
@@ -114,7 +116,7 @@ export function renderNotRegistered(container, routeId) {
                 <i class="fas fa-tools text-2xl text-amber-500"></i>
             </div>
             <h3 class="text-lg font-bold text-slate-800 mb-2">功能开发中</h3>
-            <p class="text-sm text-slate-500">模块 [${routeId}] 尚未开发或未注册</p>
+            <p class="text-sm text-slate-500">模块 [${escapeHtml(routeId)}] 尚未开发或未注册</p>
         </div>
     `;
 }
@@ -124,6 +126,7 @@ export function renderNotRegistered(container, routeId) {
  * @param {HTMLElement} container - 容器元素
  */
 export function renderTimeout(container) {
+    // ✅ 安全: 静态HTML模板，无用户输入
     container.innerHTML = `
         <div class="p-10 text-center">
             <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-orange-50 mb-4">

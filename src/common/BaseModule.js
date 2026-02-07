@@ -1,3 +1,6 @@
+import { escapeHtml } from '@/common/utils/security.js';
+import { container } from './di/Container.js';
+
 export default class BaseModule {
     /**
      * @param {string} moduleId - 模块唯一ID
@@ -9,7 +12,30 @@ export default class BaseModule {
         this.container = null;
         this._abortController = new AbortController();
         this._registeredActions = []; // 存储已注册的动作名称
-        this._unregisterActionsFn = null; // 存储 unregisterActions 函数引用
+    }
+
+    /**
+     * 注册动作（自动在卸载时清理）
+     * 🔧 P0修复: 使用依赖注入容器,彻底解决循环依赖
+     * @param {Object} actions - { actionName: handler } 映射对象
+     */
+    registerActions(actions) {
+        try {
+            // 🎯 使用依赖注入容器获取actionRegistry
+            const actionRegistry = container.resolve('actionRegistry');
+            
+            // 注册每个动作
+            Object.entries(actions).forEach(([actionName, handler]) => {
+                actionRegistry.registerAction(actionName, handler);
+            });
+            
+            console.log(`[BaseModule] 已注册 ${Object.keys(actions).length} 个动作: ${this.moduleId}`);
+        } catch (error) {
+            console.error(`[BaseModule] 注册动作失败:`, error);
+        }
+        
+        // 保存动作名称用于清理
+        this._registeredActions.push(...Object.keys(actions));
     }
 
     /**
@@ -167,6 +193,9 @@ export default class BaseModule {
                 moduleId: this.moduleId,
                 actions
             });
+            console.log(`[BaseModule] 已发送注册请求: ${this.moduleId}, ${Object.keys(actions).length} 个动作`);
+        }).catch(error => {
+            console.error(`[BaseModule] 注册动作失败:`, error);
         });
         
         // 保存动作名称用于清理
@@ -175,19 +204,19 @@ export default class BaseModule {
 
     /**
      * 清理已注册的动作（同步版本）
-     * 🔧 P0修复: 使用事件驱动清理
+     * 🔧 P0修复: 使用依赖注入容器清理
      * @private
      */
     _unregisterActionsSync() {
         if (this._registeredActions.length === 0) return;
 
         try {
-            // 🎯 使用事件总线发送清理请求
-            import('./EventBus.js').then(({ default: eventBus }) => {
-                eventBus.emit('unregisterActions', {
-                    moduleId: this.moduleId,
-                    actionNames: this._registeredActions
-                });
+            // 🎯 使用依赖注入容器获取actionRegistry
+            const actionRegistry = container.resolve('actionRegistry');
+            
+            // 清理每个动作
+            this._registeredActions.forEach(actionName => {
+                actionRegistry.unregisterAction(actionName);
             });
             
             console.log(`[BaseModule] 已清理 ${this._registeredActions.length} 个动作: ${this.moduleId}`);
@@ -230,9 +259,9 @@ export default class BaseModule {
                     <div class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mb-4">
                         <i class="fas fa-exclamation-triangle text-2xl text-red-500"></i>
                     </div>
-                    <h3 class="text-lg font-bold text-slate-800 mb-2">模块加载失败 (${this.moduleId})</h3>
-                    <p class="text-sm text-slate-500 mb-6 max-w-md break-words">${error.message}</p>
-                    <button id="retry-btn-${this.moduleId}" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors">
+                    <h3 class="text-lg font-bold text-slate-800 mb-2">模块加载失败 (${escapeHtml(this.moduleId)})</h3>
+                    <p class="text-sm text-slate-500 mb-6 max-w-md break-words">${escapeHtml(error.message)}</p>
+                    <button id="retry-btn-${escapeHtml(this.moduleId)}" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors">
                         <i class="fas fa-redo mr-2"></i>重试
                     </button>
                 </div>
@@ -242,6 +271,7 @@ export default class BaseModule {
             const btn = this.container.querySelector(`#retry-btn-${this.moduleId}`);
             if (btn) {
                 btn.onclick = () => {
+                    // ✅ 安全: 静态HTML模板，无用户输入
                     this.container.innerHTML = '<div class="p-10 text-center"><i class="fas fa-spinner fa-spin text-slate-400"></i></div>';
                     // 重新挂载
                     this.mount(this.container).catch(e => {
