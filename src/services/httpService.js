@@ -5,6 +5,8 @@
 // 🔄 P1优化: 增强超时控制和并发管理
 // ================================================================
 
+import { Logger } from './loggerService.js';
+
 /**
  * HTTP 请求配置
  * @typedef {Object} HttpOptions
@@ -180,7 +182,7 @@ export const HttpService = {
                 return await performanceService.measureApiCall(apiName, executeRequest);
             } catch (e) {
                 // 如果性能服务不可用，直接执行请求
-                console.debug('[HttpService] 性能监控不可用，直接执行请求');
+                Logger.debug('性能监控不可用，直接执行请求', {}, 'HttpService');
             }
         }
 

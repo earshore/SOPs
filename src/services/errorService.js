@@ -188,7 +188,7 @@ export const ErrorService = {
             });
         } catch (e) {
             // 监控服务不可用，静默失败
-            console.debug('[ErrorService] 监控服务不可用');
+            Logger.debug('监控服务不可用', {}, 'ErrorService');
         }
     },
 
@@ -243,7 +243,7 @@ export const ErrorService = {
         try {
             return fn();
         } catch (e) {
-            console.debug('[ErrorService] Silent error:', e.message);
+            Logger.debug('Silent error', { message: e.message }, 'ErrorService');
             return defaultValue;
         }
     },

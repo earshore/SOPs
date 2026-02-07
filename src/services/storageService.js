@@ -36,6 +36,15 @@ export const STORAGE_KEYS = {
  */
 export const StorageService = {
     /**
+     * LRU缓存配置
+     */
+    _lruConfig: {
+        maxSize: 4 * 1024 * 1024, // 4MB 最大缓存大小
+        warningThreshold: 0.8, // 80% 警告阈值
+        cleanupRatio: 0.3, // 清理30%的旧数据
+    },
+
+    /**
      * 获取存储值
      * @param {string} key - 存储键名
      * @param {*} defaultValue - 默认值
@@ -45,6 +54,10 @@ export const StorageService = {
         try {
             const raw = localStorage.getItem(key);
             if (raw === null) return defaultValue;
+            
+            // 更新访问时间（用于LRU）
+            this._updateAccessTime(key);
+            
             return JSON.parse(raw);
         } catch (e) {
             console.warn(`[StorageService] 解析失败: ${key}`, e);
@@ -60,13 +73,31 @@ export const StorageService = {
      */
     set(key, value) {
         try {
-            localStorage.setItem(key, JSON.stringify(value));
+            const serialized = JSON.stringify(value);
+            
+            // 检查缓存大小
+            this._checkCacheSize(serialized.length * 2);
+            
+            localStorage.setItem(key, serialized);
+            
+            // 更新访问时间
+            this._updateAccessTime(key);
+            
             return true;
         } catch (e) {
             console.error(`[StorageService] 存储失败: ${key}`, e);
             // 可能是存储空间已满
             if (e.name === 'QuotaExceededError') {
                 this._handleQuotaExceeded();
+                // 重试一次
+                try {
+                    localStorage.setItem(key, JSON.stringify(value));
+                    this._updateAccessTime(key);
+                    return true;
+                } catch (retryError) {
+                    console.error(`[StorageService] 重试后仍然失败: ${key}`, retryError);
+                    return false;
+                }
             }
             return false;
         }
@@ -81,6 +112,12 @@ export const StorageService = {
     getRaw(key, defaultValue = null) {
         try {
             const raw = localStorage.getItem(key);
+            
+            if (raw !== null) {
+                // 更新访问时间
+                this._updateAccessTime(key);
+            }
+            
             return raw !== null ? raw : defaultValue;
         } catch (e) {
             console.warn(`[StorageService] 读取失败: ${key}`, e);
@@ -96,13 +133,29 @@ export const StorageService = {
      */
     setRaw(key, value) {
         try {
+            // 检查缓存大小
+            this._checkCacheSize(value.length * 2);
+            
             localStorage.setItem(key, value);
+            
+            // 更新访问时间
+            this._updateAccessTime(key);
+            
             return true;
         } catch (e) {
             console.error(`[StorageService] 存储失败: ${key}`, e);
             // 可能是存储空间已满
             if (e.name === 'QuotaExceededError') {
                 this._handleQuotaExceeded();
+                // 重试一次
+                try {
+                    localStorage.setItem(key, value);
+                    this._updateAccessTime(key);
+                    return true;
+                } catch (retryError) {
+                    console.error(`[StorageService] 重试后仍然失败: ${key}`, retryError);
+                    return false;
+                }
             }
             return false;
         }
@@ -114,6 +167,139 @@ export const StorageService = {
      */
     remove(key) {
         localStorage.removeItem(key);
+        this._removeAccessTime(key);
+    },
+
+    /**
+     * 更新访问时间（用于LRU）
+     * @param {string} key - 存储键名
+     * @private
+     */
+    _updateAccessTime(key) {
+        try {
+            const accessKey = `_lru_access_${key}`;
+            localStorage.setItem(accessKey, Date.now().toString());
+        } catch (e) {
+            // 静默失败，不影响主要功能
+        }
+    },
+
+    /**
+     * 移除访问时间记录
+     * @param {string} key - 存储键名
+     * @private
+     */
+    _removeAccessTime(key) {
+        try {
+            const accessKey = `_lru_access_${key}`;
+            localStorage.removeItem(accessKey);
+        } catch (e) {
+            // 静默失败
+        }
+    },
+
+    /**
+     * 获取所有键的访问时间
+     * @returns {Array<{key: string, accessTime: number, size: number}>}
+     * @private
+     */
+    _getAccessTimes() {
+        const items = [];
+        
+        try {
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                
+                // 跳过访问时间记录本身
+                if (key && key.startsWith('_lru_access_')) {
+                    continue;
+                }
+                
+                if (key) {
+                    const accessKey = `_lru_access_${key}`;
+                    const accessTime = parseInt(localStorage.getItem(accessKey) || '0', 10);
+                    const value = localStorage.getItem(key) || '';
+                    const size = value.length * 2; // UTF-16编码
+                    
+                    items.push({ key, accessTime, size });
+                }
+            }
+        } catch (e) {
+            console.warn('[StorageService] 获取访问时间失败:', e);
+        }
+        
+        // 按访问时间排序（最旧的在前）
+        return items.sort((a, b) => a.accessTime - b.accessTime);
+    },
+
+    /**
+     * 检查缓存大小
+     * @param {number} newItemSize - 新项目大小（字节）
+     * @private
+     */
+    _checkCacheSize(newItemSize) {
+        const usage = this.getUsage();
+        const projectedUsage = usage.used + newItemSize;
+        const threshold = this._lruConfig.maxSize * this._lruConfig.warningThreshold;
+        
+        // 如果预计使用量超过警告阈值，触发清理
+        if (projectedUsage > threshold) {
+            console.warn(`[StorageService] 缓存使用量接近上限 (${(projectedUsage / 1024 / 1024).toFixed(2)}MB / ${(this._lruConfig.maxSize / 1024 / 1024).toFixed(2)}MB)，开始清理...`);
+            this._cleanupLRU();
+        }
+    },
+
+    /**
+     * LRU清理策略
+     * @private
+     */
+    _cleanupLRU() {
+        try {
+            const items = this._getAccessTimes();
+            const usage = this.getUsage();
+            const targetSize = usage.used * (1 - this._lruConfig.cleanupRatio);
+            
+            let currentSize = usage.used;
+            let removedCount = 0;
+            
+            // 从最旧的开始删除，直到达到目标大小
+            for (const item of items) {
+                // 保护关键数据（不删除配置和安全数据）
+                if (this._isProtectedKey(item.key)) {
+                    continue;
+                }
+                
+                this.remove(item.key);
+                currentSize -= item.size;
+                removedCount++;
+                
+                if (currentSize <= targetSize) {
+                    break;
+                }
+            }
+            
+            console.log(`[StorageService] LRU清理完成，删除了 ${removedCount} 个项目，释放了 ${((usage.used - currentSize) / 1024).toFixed(2)}KB`);
+        } catch (e) {
+            console.error('[StorageService] LRU清理失败:', e);
+        }
+    },
+
+    /**
+     * 判断是否为受保护的键（不应被LRU清理）
+     * @param {string} key - 存储键名
+     * @returns {boolean}
+     * @private
+     */
+    _isProtectedKey(key) {
+        const protectedPrefixes = [
+            'llm_',           // LLM配置
+            'secure_',        // 安全存储
+            'proxy_',         // 代理配置
+            'feature_',       // 功能开关
+            'layout_config_', // 布局配置
+        ];
+        
+        return protectedPrefixes.some(prefix => key.startsWith(prefix));
     },
 
     /**
@@ -139,11 +325,16 @@ export const StorageService = {
      * @private
      */
     _handleQuotaExceeded() {
-        console.warn('[StorageService] 存储空间不足，尝试清理历史数据...');
-        // 清理采集历史中的旧数据
+        console.warn('[StorageService] 存储空间不足，尝试清理数据...');
+        
+        // 1. 先尝试LRU清理
+        this._cleanupLRU();
+        
+        // 2. 如果还不够，清理采集历史
         const history = this.get(STORAGE_KEYS.SCRAPE_HISTORY, []);
         if (history.length > 10) {
             this.set(STORAGE_KEYS.SCRAPE_HISTORY, history.slice(0, 10));
+            console.log('[StorageService] 清理了采集历史数据');
         }
     },
 

@@ -6,6 +6,7 @@
 
 import { StorageService } from './storageService.js';
 import { EnvConfig } from '../common/config/envConfig.js';
+import { Logger } from './loggerService.js';
 
 /**
  * 性能指标类型
@@ -252,7 +253,7 @@ export class PerformanceService {
             this.observers.push(observer);
         } catch (e) {
             // longtask 可能不被支持
-            console.debug('[Performance] Long task measurement not supported');
+            Logger.debug('Long task measurement not supported', {}, 'Performance');
         }
     }
 
@@ -456,12 +457,19 @@ export class PerformanceService {
     _sendMetrics(metrics) {
         // 仅在生产环境发送
         if (!EnvConfig.isProduction) {
-            console.debug('[Performance] 开发环境，跳过指标上报');
+            Logger.debug('开发环境，跳过指标上报', {}, 'Performance');
             return;
         }
 
-        // TODO: 集成实际的分析服务 (Google Analytics, Sentry, 自建服务等)
+        // 📊 性能指标上报
+        // 未来功能: 集成分析服务 (Google Analytics, Sentry, 自建服务等)
+        // 当前: 仅在开发环境输出到控制台
         console.log('[Performance] 指标上报:', metrics);
+        
+        // 预留接口: 可通过配置启用远程上报
+        // if (EnvConfig.monitoring.performanceEndpoint) {
+        //     await this._sendToRemote(metrics);
+        // }
     }
 
     /**
