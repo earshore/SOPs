@@ -555,30 +555,33 @@ function togglePromptZoom() {
     const isZoomed = modal.style.display !== 'none' && modal.style.display !== '';
     
     if (isZoomed) {
-        // 恢复原状
+        // 关闭放大视图 - 将元素移回原位
         zoomContent.classList.remove('scale-100', 'opacity-100');
         zoomContent.classList.add('scale-95', 'opacity-0');
         
         addTimeout(() => {
-            // 将卡片移回原位
             const consoleCard = document.querySelector('.zoomed-console-card');
             const outputCard = document.querySelector('.zoomed-output-card');
             
+            // 移回翻转卡片
             if (consoleCard) {
                 const originalParent = document.querySelector('.lg\\:col-span-4 .sticky');
                 if (originalParent) {
+                    // 移除放大视图的类
+                    consoleCard.classList.remove('zoomed-console-card');
                     // 插入到第一个位置
                     originalParent.insertBefore(consoleCard, originalParent.firstChild);
-                    consoleCard.classList.remove('zoomed-console-card');
                 }
             }
             
+            // 移回输出卡片
             if (outputCard) {
                 const originalParent = document.querySelector('.lg\\:col-span-4 .sticky');
                 if (originalParent) {
-                    // 插入到第二个位置
-                    originalParent.appendChild(outputCard);
+                    // 移除放大视图的类
                     outputCard.classList.remove('zoomed-output-card');
+                    // 插入到最后
+                    originalParent.appendChild(outputCard);
                 }
             }
             
@@ -586,11 +589,12 @@ function togglePromptZoom() {
             modal.classList.remove('flex');
             document.body.style.overflow = '';
             
-            // 恢复图标
+            // 恢复图标和提示
             zoomIcon.className = 'fas fa-expand text-sm';
+            zoomIcon.parentElement.title = '放大视图';
         }, 300);
     } else {
-        // 放大视图
+        // 打开放大视图 - 移动原始元素
         modal.style.display = 'flex';
         modal.classList.add('flex');
         document.body.style.overflow = 'hidden';
@@ -598,15 +602,14 @@ function togglePromptZoom() {
         // 清空容器
         zoomedContainer.innerHTML = '';
         
-        // 只移动右侧的两个卡片
-        // 1. 生成按钮卡片（翻转卡片容器）
+        // 移动翻转卡片容器（包含切换按钮）
         const consoleCardWrapper = document.querySelector('.lg\\:col-span-4 .sticky > div:first-child');
         if (consoleCardWrapper) {
             consoleCardWrapper.classList.add('zoomed-console-card');
             zoomedContainer.appendChild(consoleCardWrapper);
         }
         
-        // 2. Prompt输出卡片
+        // 移动输出卡片
         const outputCard = document.getElementById('prompt-output-card');
         if (outputCard) {
             outputCard.classList.add('zoomed-output-card');
@@ -619,8 +622,9 @@ function togglePromptZoom() {
             zoomContent.classList.add('scale-100', 'opacity-100');
         });
         
-        // 更改图标
+        // 更改图标和提示
         zoomIcon.className = 'fas fa-compress text-sm';
+        zoomIcon.parentElement.title = '恢复视图';
     }
 }
 

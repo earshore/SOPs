@@ -279,10 +279,83 @@
 
 <!-- 放大视图模态框 -->
 <div id="prompt-zoom-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] hidden items-center justify-center p-6" style="display: none;">
-  <div id="prompt-zoom-content" class="bg-white rounded-2xl shadow-2xl w-full max-w-7xl h-[90vh] flex flex-col transform scale-95 opacity-0 transition-all duration-300">
+  <div id="prompt-zoom-content" class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col transform scale-95 opacity-0 transition-all duration-300">
     <!-- 放大后的内容容器 -->
-    <div id="zoomed-cards-container" class="flex-1 overflow-y-auto p-6 space-y-6">
+    <div id="zoomed-cards-container" class="flex-1 overflow-y-auto p-6 space-y-4">
       <!-- 卡片将被动态移动到这里 -->
     </div>
   </div>
 </div>
+
+<!-- 放大视图的CSS样式 -->
+<style>
+/* 放大视图模态框样式 */
+#prompt-zoom-modal {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* 放大视图中的卡片容器 */
+#prompt-zoom-content {
+  transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+}
+
+/* 翻转卡片容器样式 - 保持原始尺寸 */
+.zoomed-console-card {
+  width: 100%;
+  max-width: 420px !important;
+  margin: 0 auto !important;
+  flex-shrink: 0;
+}
+
+/* 修复切换按钮定位 - 在放大视图中重新定位 */
+.zoomed-console-card #embed-toggle-container {
+  position: absolute !important;
+  top: 1rem !important;
+  right: 1rem !important;
+  left: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+}
+
+/* 输出卡片样式 - 占据剩余空间 */
+.zoomed-output-card {
+  max-width: 100%;
+  flex: 1;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* 输出卡片内的textarea占满容器 */
+.zoomed-output-card textarea {
+  flex: 1 !important;
+  min-height: 450px !important;
+}
+
+/* 放大视图容器的滚动条样式 */
+#zoomed-cards-container {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.3) transparent;
+}
+
+#zoomed-cards-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+#zoomed-cards-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#zoomed-cards-container::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.3);
+  border-radius: 3px;
+}
+
+#zoomed-cards-container::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(148, 163, 184, 0.5);
+}
+</style>
