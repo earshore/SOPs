@@ -57,7 +57,9 @@ class RequestPool {
     }
 }
 
-// 全局请求池
+import { priorityRequestPool, REQUEST_PRIORITY } from './PriorityRequestPool.js';
+
+// 全局请求池（向后兼容）
 const globalRequestPool = new RequestPool(6);
 
 /**
@@ -95,6 +97,7 @@ export const HttpService = {
             json = true,
             signal = null,
             usePool = false, // 🔄 P1优化: 是否使用并发控制
+            priority = REQUEST_PRIORITY.NORMAL, // 🎯 P1优化: 请求优先级
             measurePerformance = true, // 🎯 阶段1: 是否测量性能
         } = options;
 
@@ -168,8 +171,9 @@ export const HttpService = {
                 const apiName = this._extractApiName(url);
                 
                 if (usePool) {
+                    // 🎯 P1优化: 使用优先级请求池
                     return await performanceService.measureApiCall(apiName, () => 
-                        globalRequestPool.add(executeRequest)
+                        priorityRequestPool.add(executeRequest, priority, { url, method })
                     );
                 }
                 
@@ -180,13 +184,13 @@ export const HttpService = {
             }
         }
 
-        // 🔄 P1优化: 使用并发控制池
+        // 🔄 P1优化: 使用优先级请求池
         if (usePool) {
-            return await globalRequestPool.add(executeRequest);
+            return await priorityRequestPool.add(executeRequest, priority, { url, method });
         }
         
         return await executeRequest();
-    }
+    },
 
     /**
      * 从URL提取API名称（用于性能监控）
@@ -289,10 +293,14 @@ export const HttpService = {
 // 默认导出
 export default HttpService;
 
+// 导出优先级常量
+export { REQUEST_PRIORITY } from './PriorityRequestPool.js';
+
 // ================================================================
 // 🔄 向后兼容：暴露到 window
 // ================================================================
 if (typeof window !== 'undefined') {
     window.HttpService = HttpService;
     window.HttpError = HttpError;
+    window.REQUEST_PRIORITY = REQUEST_PRIORITY;
 }

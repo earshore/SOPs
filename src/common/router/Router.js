@@ -24,6 +24,33 @@ export class Router {
         
         // 初始化浏览器历史监听
         this._initHistoryListener();
+        
+        // 注册内置守卫（按优先级顺序）
+        this._registerBuiltinGuards();
+    }
+
+    /**
+     * 注册内置守卫
+     * @private
+     */
+    _registerBuiltinGuards() {
+        // 动态导入守卫，避免循环依赖
+        import('./RouteGuard.js').then(({ 
+            metaValidationGuard, 
+            dependencyGuard, 
+            authGuard, 
+            dataPreloadGuard 
+        }) => {
+            // 按优先级顺序注册
+            routeGuard.register('metaValidation', metaValidationGuard);
+            routeGuard.register('dependency', dependencyGuard);
+            routeGuard.register('auth', authGuard);
+            routeGuard.register('dataPreload', dataPreloadGuard);
+            
+            console.log('✅ [Router] 内置守卫已注册');
+        }).catch(error => {
+            console.error('[Router] 注册内置守卫失败:', error);
+        });
     }
 
     /**
