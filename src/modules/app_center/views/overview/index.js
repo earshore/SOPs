@@ -3,6 +3,7 @@ import { loadTemplate } from "../../../../common/utils/viewLoader.js";
 // App Center Overview - 总览页面
 export async function mount(container) {
     const html = await loadTemplate('src/modules/app_center/views/overview/template.html');
+    // ✅ 安全: 静态HTML模板，无用户输入
     container.innerHTML = html;
     container.classList.add('fade-in');
 

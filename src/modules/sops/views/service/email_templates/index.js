@@ -1,5 +1,6 @@
 import { loadTemplate } from "../../../../../common/utils/viewLoader.js";
 import { TEMPLATE_CATEGORIES, EMAIL_TEMPLATES, getTemplateHtml } from "./constant/email_templates.js";
+import { escapeHtml } from "../../../../../common/utils/security.js";
 
 // 当前选中的语言
 let currentLang = 'en';
@@ -7,6 +8,7 @@ let currentLang = 'en';
 // 邮件回复模板 SOP
 export async function mount(container) {
     const html = await loadTemplate('src/modules/sops/views/service/email_templates/template.html');
+    // ✅ 安全: 静态HTML模板，无用户输入
     container.innerHTML = html;
     container.classList.add('fade-in');
 
@@ -47,7 +49,8 @@ function renderTemplateCards(container) {
         langs.forEach(lang => {
             const isHidden = lang !== currentLang ? 'hidden' : '';
             const templateContent = getTemplateHtml(category.id, lang);
-            langContents += `<div class="lang-content lang-${lang} ${isHidden}"><div class="bg-slate-50 p-3 rounded text-xs font-mono leading-relaxed whitespace-pre-wrap template-text">${templateContent}</div></div>`;
+            // 🔒 P0修复: 转义模板内容防止XSS
+            langContents += `<div class="lang-content lang-${lang} ${isHidden}"><div class="bg-slate-50 p-3 rounded text-xs font-mono leading-relaxed whitespace-pre-wrap template-text">${escapeHtml(templateContent)}</div></div>`;
 
         });
 
@@ -71,6 +74,7 @@ function renderTemplateCards(container) {
         `;
     });
 
+    // ✅ 安全: 静态HTML模板，无用户输入
     cardsContainer.innerHTML = cardsHtml;
 }
 
@@ -127,13 +131,16 @@ function initCopyButtons(container) {
             await navigator.clipboard.writeText(textContent.trim());
 
             // 显示复制成功反馈
+            // ✅ 安全: 静态HTML模板，无用户输入
             const originalHtml = copyBtn.innerHTML;
+            // ✅ 安全: 静态HTML模板，无用户输入
             copyBtn.innerHTML = '<i class="fas fa-check"></i><span>已复制!</span>';
             copyBtn.classList.remove('bg-slate-100', 'text-slate-600');
             copyBtn.classList.add('bg-green-100', 'text-green-600');
 
             // 2秒后恢复原样
             setTimeout(() => {
+                // ✅ 安全: 静态HTML模板，无用户输入
                 copyBtn.innerHTML = originalHtml;
                 copyBtn.classList.remove('bg-green-100', 'text-green-600');
                 copyBtn.classList.add('bg-slate-100', 'text-slate-600');
@@ -142,12 +149,15 @@ function initCopyButtons(container) {
         } catch (err) {
             console.error('复制失败:', err);
             // 显示失败提示
+            // ✅ 安全: 静态HTML模板，无用户输入
             const originalHtml = copyBtn.innerHTML;
+            // ✅ 安全: 静态HTML模板，无用户输入
             copyBtn.innerHTML = '<i class="fas fa-times"></i><span>失败</span>';
             copyBtn.classList.remove('bg-slate-100', 'text-slate-600');
             copyBtn.classList.add('bg-red-100', 'text-red-600');
 
             setTimeout(() => {
+                // ✅ 安全: 静态HTML模板，无用户输入
                 copyBtn.innerHTML = originalHtml;
                 copyBtn.classList.remove('bg-red-100', 'text-red-600');
                 copyBtn.classList.add('bg-slate-100', 'text-slate-600');

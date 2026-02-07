@@ -24,6 +24,9 @@ import { initViews } from './common/utils/viewLoader.js';
 // ✅ 导入 Web Components
 import './components/modal/AppModal.js';
 
+// 🎯 P0修复: 导入依赖注入容器
+import { container } from './common/di/Container.js';
+
 // ✅ 导入 StorageService
 import { StorageService, STORAGE_KEYS } from './services/storageService.js';
 
@@ -46,6 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // User Guide Modal
   const guideContainer = document.getElementById('user-guide-container');
   if (guideContainer) {
+    // ✅ 安全: 静态HTML模板，无用户输入
     guideContainer.innerHTML = userGuideModalHtml;
     Array.from(guideContainer.querySelectorAll('script')).forEach(script => {
       const newScript = document.createElement('script');
@@ -60,6 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalId = 'prompt-modal';
     if (!document.getElementById(modalId)) {
       const temp = document.createElement('div');
+      // ✅ 安全: 静态HTML模板，无用户输入
       temp.innerHTML = promptModalHtml;
       document.getElementById('modal-container').appendChild(temp.firstElementChild);
     }
@@ -161,6 +166,21 @@ window.Alpine = Alpine;
 
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("🚀 System: Application Booting...");
+
+  // 🎯 P0修复: 初始化依赖注入容器
+  console.log("🔧 [DI] 初始化依赖注入容器...");
+  
+  // 注册核心服务
+  const { default: actionRegistry } = await import('./common/utils/actionRegistry.js');
+  container.register('actionRegistry', () => actionRegistry);
+  
+  const { router } = await import('./common/router/Router.js');
+  container.register('router', () => router);
+  
+  const { stateManager } = await import('./common/state/StateManager.js');
+  container.register('stateManager', () => stateManager);
+  
+  console.log("✅ [DI] 核心服务已注册:", container.getRegisteredServices());
 
   // 🎯 阶段1: 初始化日志服务
   Logger.info('应用启动', { version: '1.0.0' }, 'System');

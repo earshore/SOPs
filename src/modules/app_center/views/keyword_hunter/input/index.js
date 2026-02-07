@@ -14,6 +14,8 @@ import * as KeywordService from '../services/trackerService.js';
 import state from '../../../../../common/state.js';
 import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry.js';
 
+import '../keyword_hunter_style.css';
+
 // ========================================== 
 // Module State
 // ========================================== 
@@ -190,6 +192,7 @@ function highlightDuplicatesInInput() {
         }
         if (i < lines.length - 1) html += '\n';
     });
+    // ✅ 安全: 静态HTML模板，无用户输入
     layer.innerHTML = html;
 }
 
@@ -209,19 +212,39 @@ function updateCopyCharCount() {
 // ========================================== 
 
 /**
- * 清理关键词格式
+ * 清理关键词格式（包含去重）
  */
 function cleanKeywordsUI() {
     const inputEl = document.getElementById('kt-keywords-input');
-    if (!inputEl) return;
-    inputEl.value = KeywordService.cleanKeywordsText(inputEl.value);
+    if (!inputEl || !inputEl.value.trim()) {
+        showToast("关键词列表为空", "warning");
+        return;
+    }
+
+    const originalText = inputEl.value;
+    const originalKeywords = KeywordService.parseKeywords(originalText);
+    
+    // 先清理格式，再去重
+    let cleanedText = KeywordService.cleanKeywordsText(originalText);
+    cleanedText = KeywordService.deduplicateKeywordsText(cleanedText);
+    
+    inputEl.value = cleanedText;
     updateInputStats();
     highlightDuplicatesInInput();
     saveInputsToState();
+    
+    const finalKeywords = KeywordService.parseKeywords(cleanedText);
+    const removedCount = originalKeywords.length - finalKeywords.length;
+    
+    if (removedCount > 0) {
+        showToast(`已清理格式并去重，移除 ${removedCount} 个重复项`, "success");
+    } else {
+        showToast("已清理格式", "success");
+    }
 }
 
 /**
- * 去除重复关键词
+ * 去除重复关键词（已合并到 cleanKeywordsUI）
  */
 function removeDuplicatesUI() {
     const inputEl = document.getElementById('kt-keywords-input');
@@ -260,6 +283,59 @@ function clearCopyInput() {
         copyInput.value = '';
         updateCopyCharCount();
         saveInputsToState();
+    }
+}
+
+/**
+ * 清理文案格式
+ * 去除大模型生成的 Markdown 格式符号，如 *、`、** 等
+ */
+function cleanCopyFormat() {
+    const copyInput = document.getElementById('kt-copy-input');
+    if (!copyInput || !copyInput.value.trim()) {
+        showToast("文案为空，无需清理", "warning");
+        return;
+    }
+
+    let text = copyInput.value;
+    const originalLength = text.length;
+
+    // 去除 Markdown 格式符号
+    // 1. 去除粗体标记 **text** 或 __text__
+    text = text.replace(/\*\*(.+?)\*\*/g, '$1');
+    text = text.replace(/__(.+?)__/g, '$1');
+    
+    // 2. 去除斜体标记 *text* 或 _text_
+    text = text.replace(/\*(.+?)\*/g, '$1');
+    text = text.replace(/_(.+?)_/g, '$1');
+    
+    // 3. 去除代码标记 `text`
+    text = text.replace(/`(.+?)`/g, '$1');
+    
+    // 4. 去除删除线 ~~text~~
+    text = text.replace(/~~(.+?)~~/g, '$1');
+    
+    // 5. 去除多余的星号和反引号（未配对的）
+    text = text.replace(/[*`~_]+/g, '');
+    
+    // 6. 清理多余的空行（保留最多一个空行）
+    text = text.replace(/\n{3,}/g, '\n\n');
+    
+    // 7. 清理行首行尾的空格
+    text = text.split('\n').map(line => line.trim()).join('\n');
+    
+    // 8. 清理首尾空白
+    text = text.trim();
+
+    copyInput.value = text;
+    updateCopyCharCount();
+    saveInputsToState();
+
+    const cleanedCount = originalLength - text.length;
+    if (cleanedCount > 0) {
+        showToast(`已清理 ${cleanedCount} 个格式字符`, "success");
+    } else {
+        showToast("未发现需要清理的格式", "info");
     }
 }
 
@@ -353,8 +429,8 @@ function setupEventListeners(container) {
     const btnClean = document.getElementById('kt-btn-clean-kw');
     if (btnClean) addEventListener(btnClean, 'click', () => cleanKeywordsUI());
 
-    const btnDedup = document.getElementById('kt-btn-dedup-kw');
-    if (btnDedup) addEventListener(btnDedup, 'click', () => removeDuplicatesUI());
+    const btnCleanCopy = document.getElementById('kt-btn-clean-copy');
+    if (btnCleanCopy) addEventListener(btnCleanCopy, 'click', () => cleanCopyFormat());
 
     const btnClearCopy = document.getElementById('kt-btn-clear-copy');
     if (btnClearCopy) addEventListener(btnClearCopy, 'click', () => clearCopyInput());
@@ -380,12 +456,14 @@ export async function mount(container) {
     try {
         // 1. 加载模板
         const html = await loadTemplate('src/modules/app_center/views/keyword_hunter/input/template.html');
+        // ✅ 安全: 静态HTML模板，无用户输入
         container.innerHTML = html;
 
         // 2. 注册全局操作（用于 HTML onclick 兼容）
         const actionNames = registerActionsWithLegacy({
             kt_cleanKeywords: () => cleanKeywordsUI(),
             kt_removeDuplicates: () => removeDuplicatesUI(),
+            kt_cleanCopyFormat: () => cleanCopyFormat(),
             kt_pasteFromClipboard: () => pasteFromClipboard(),
             kt_clearCopyInput: () => clearCopyInput(),
             kt_startAnalysis: () => startAnalysis(),

@@ -102,7 +102,9 @@ export function analyzeKeywordMatching(copyText, keywordList) {
  * @returns {Array} [[word, count], ...]
  */
 export function calculateWordFrequency(text) {
-    const words = text.toLowerCase().match(/\b\w+\b/g) || [];
+    // 支持欧洲全语种：包括拉丁字母、扩展拉丁字符、变音符号等
+    // \p{L} 匹配任何语言的字母字符（需要 u 标志）
+    const words = text.toLowerCase().match(/[\p{L}\p{M}]+/gu) || [];
     const freq = {};
     words.forEach(w => {
         if (w.length > 2) freq[w] = (freq[w] || 0) + 1;

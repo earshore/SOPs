@@ -1,3 +1,4 @@
+import { escapeHtml } from '@/common/utils/security.js';
 import { loadTemplate } from "../../../../../common/utils/viewLoader.js";
 import { 
     PROMPT_LIBRARY, 
@@ -17,6 +18,7 @@ let currentLang = 'zh'; // 默认中文
 // More - 提示词页面
 export async function mount(container) {
     const html = await loadTemplate('src/modules/more/views/explore/prompts/template.html');
+    // ✅ 安全: 静态HTML模板，无用户输入
     container.innerHTML = html;
     container.classList.add('fade-in');
 
@@ -92,6 +94,7 @@ function renderCategories() {
         </button>
     `).join('');
 
+    // ✅ 安全: 静态HTML模板，无用户输入
     container.innerHTML = allBtn + categoryBtns;
 }
 
@@ -102,6 +105,7 @@ function renderPromptList(prompts = null) {
     const promptsToRender = prompts || getPromptsByCategory(currentCategory);
 
     if (promptsToRender.length === 0) {
+        // ✅ 安全: 静态HTML模板，无用户输入
         container.innerHTML = `
             <div class="col-span-full text-center py-12">
                 <i class="fas fa-search text-4xl text-slate-300 mb-4"></i>
@@ -111,6 +115,7 @@ function renderPromptList(prompts = null) {
         return;
     }
 
+    // ✅ 安全: 静态HTML模板，无用户输入
     container.innerHTML = promptsToRender.map(prompt => {
         // 通过 id 查找分类
         const category = Object.values(PROMPT_CATEGORIES).find(cat => cat.id === prompt.category);
@@ -167,7 +172,7 @@ window.viewPrompt = function(promptId) {
 
     document.getElementById('modal-prompt-title').textContent = prompt.title;
     document.getElementById('modal-prompt-category').innerHTML = `
-        <i class="fas ${category.icon}"></i> ${category.name}
+        <i class="fas ${escapeHtml(category.icon)}"></i> ${escapeHtml(category.name)}
     `;
     document.getElementById('modal-prompt-model').textContent = model.name;
     document.getElementById('modal-prompt-description').textContent = prompt.description;

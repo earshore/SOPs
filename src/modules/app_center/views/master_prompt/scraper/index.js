@@ -19,6 +19,8 @@ import { ErrorService } from '../../../../../services/errorService.js';
 import { showToast, sleep } from '../../../../../common/utils/ui.js';
 import { MODULE_EVENTS } from '../../../../../common/constants/eventConstants.js';
 
+import '../master_prompt_style.css';
+
 // ========================================== 
 // Alpine Component Logic
 // ========================================== 
@@ -155,6 +157,20 @@ const ScraperPanel = () => ({
         // 恢复本地状态
         this.inputAsins = Array.isArray(item.asins) ? item.asins.join('\n') : '';
         this.selectedSite = item.site;
+
+        // 🔐 确保历史数据的 metadata 结构完整
+        if (item.data && !item.data.metadata) {
+            item.data.metadata = {
+                scrape_timestamp: item.timestamp || new Date().toISOString(),
+                marketplace: item.site || 'US',
+                domain: LANGUAGE_HEADERS[item.site]?.domain || 'amazon.com',
+                language: LANGUAGE_HEADERS[item.site]?.name || 'English (US)',
+                total_asins: item.asins?.length || 0,
+            };
+        } else if (item.data && item.data.metadata && !item.data.metadata.marketplace) {
+            // 如果 metadata 存在但缺少 marketplace 字段
+            item.data.metadata.marketplace = item.site || 'US';
+        }
 
         // 恢复全局状态
         state.scraper.currentHistoryId = item.id;
@@ -308,6 +324,7 @@ export async function mount(container) {
     try {
         // 1. 加载模板
         const html = await loadTemplate('src/modules/app_center/views/master_prompt/scraper/template.html');
+        // ✅ 安全: 静态HTML模板，无用户输入
         container.innerHTML = html;
 
         // 2. 初始化 Alpine.js 组件

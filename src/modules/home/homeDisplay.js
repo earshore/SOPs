@@ -43,6 +43,7 @@ class HomeModule extends BaseModule {
         // 如果容器是空的，我们可以尝试加载（可选）
         if (!this.container.innerHTML.trim()) {
             const html = await loadTemplate('src/modules/home/homeDisplay.html');
+            // ✅ 安全: 静态HTML模板，无用户输入
             this.container.innerHTML = html;
         }
     }

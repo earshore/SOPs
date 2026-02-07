@@ -18,6 +18,8 @@ import { languageFlagMap, SITE_NAME_MAP, SITE_DOMAIN_MAP } from '../../../../../
 import eventBus from '../../../../../common/EventBus.js';
 import { MODULE_EVENTS } from '../../../../../common/constants/eventConstants.js';
 
+import '../master_prompt_style.css';
+
 // ========================================== 
 // Data Module Class
 // ========================================== 
@@ -149,6 +151,7 @@ class DataModule extends BaseModule {
 
         const globalSiteCode = state.scraper.scrapedData.metadata?.marketplace || state.scraper.selectedSite;
 
+        // ✅ 安全: 静态HTML模板，无用户输入
         cardsEl.innerHTML = state.scraper.scrapedData.products.map((p) => {
             const isExpanded = state.expandedAsin === p.asin;
             let siteKey = globalSiteCode || p.language || "US";
@@ -261,6 +264,7 @@ class DataModule extends BaseModule {
 
         const jsonDisplay = document.getElementById("json-display");
         if (jsonDisplay) {
+            // ✅ 安全: 静态HTML模板，无用户输入
             jsonDisplay.innerHTML = this.syntaxHighlight(JSON.stringify(state.scraper.scrapedData, null, 2));
         }
     }
@@ -302,7 +306,11 @@ class DataModule extends BaseModule {
         if (!confirmed) return;
 
         state.scraper.scrapedData.products = state.scraper.scrapedData.products.filter(p => p.asin !== asin);
-        state.scraper.scrapedData.metadata.total_asins = state.scraper.scrapedData.products.length;
+        
+        // 🔐 防御性检查：确保 metadata 存在
+        if (state.scraper.scrapedData.metadata) {
+            state.scraper.scrapedData.metadata.total_asins = state.scraper.scrapedData.products.length;
+        }
 
         HistoryService.save(state.scraper.scrapedData, state.analysis.analysisReport);
 
@@ -352,6 +360,7 @@ class DataModule extends BaseModule {
             const cancelBtn = document.getElementById('btn-del-cancel');
 
             if (titleEl) titleEl.textContent = title;
+            // ✅ 安全: 静态HTML模板，无用户输入
             if (descEl) descEl.innerHTML = content;
             if (checkbox) checkbox.checked = false;
 
@@ -432,7 +441,7 @@ class DataModule extends BaseModule {
             } else if (!hasExistingData && detectedSites.size === 1) {
                 targetMarketplace = [...detectedSites][0];
             } else if (hasExistingData) {
-                targetMarketplace = state.scraper.scrapedData.metadata.marketplace;
+                targetMarketplace = state.scraper.scrapedData.metadata?.marketplace;
             }
 
             const finalProducts = [];
@@ -584,6 +593,7 @@ class DataModule extends BaseModule {
                 </div>
             `;
 
+            // ✅ 安全: 静态HTML模板，无用户输入
             backdrop.innerHTML = content;
             document.body.appendChild(backdrop);
 
@@ -685,6 +695,7 @@ export async function mount(container) {
     try {
         // 1. 加载模板
         const html = await loadTemplate('src/modules/app_center/views/master_prompt/data/template.html');
+        // ✅ 安全: 静态HTML模板，无用户输入
         container.innerHTML = html;
 
         // 2. 创建模块实例

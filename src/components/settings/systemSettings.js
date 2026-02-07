@@ -3,6 +3,7 @@
 // 🎯 Phase 3: Alpine.js Refactor
 // ================================================================
 
+import { escapeHtml } from '@/common/utils/security.js';
 import { PROVIDERS } from "../../common/constants/constants.js";
 import { fetchModelsFromApi, callLLM } from "../../services/llmService.js";
 import { showToast } from "../../common/utils/ui.js";
@@ -401,12 +402,13 @@ export async function updateModelStatus() {
             statusEl.innerHTML = `
                 <span class="status-dot status-success"></span>
                 <span class="text-slate-600 text-xs font-medium flex items-center gap-1">
-                    ${PROVIDERS[provider].name}: <span class="font-mono text-blue-600">${config.model}</span>
+                    ${escapeHtml(PROVIDERS[provider].name)}: <span class="font-mono text-blue-600">${escapeHtml(config.model)}</span>
                 </span>
             `;
             return;
         }
     }
+    // ✅ 安全: 静态HTML模板，无用户输入
     statusEl.innerHTML = `
         <span class="status-dot status-pending pulse-dot"></span>
         <span class="text-slate-500 text-xs italic">等待API配置...</span>

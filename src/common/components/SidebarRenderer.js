@@ -85,6 +85,7 @@ export class SidebarRenderer {
             currentTab,
             activeCategory
         );
+        // ✅ 安全: 静态HTML模板，无用户输入
         sidebar.innerHTML = html;
         
         // 初始化展开/收起事件

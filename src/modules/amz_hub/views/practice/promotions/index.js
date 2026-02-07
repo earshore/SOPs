@@ -435,6 +435,7 @@ class PromotionsModule extends BaseModule {
     }
 
     async render() {
+        // ✅ 安全: 静态HTML模板，无用户输入
         this.container.innerHTML = await loadTemplate('src/modules/amz_hub/views/practice/promotions/template.html');
     }
 
@@ -468,6 +469,7 @@ class PromotionsModule extends BaseModule {
         const navContainer = document.getElementById('amzp_nav');
         if (!navContainer) return;
 
+        // ✅ 安全: 静态HTML模板，无用户输入
         navContainer.innerHTML = navStructure.map(node => {
             if (node.type === 'root') {
                 return `

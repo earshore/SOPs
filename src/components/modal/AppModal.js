@@ -1,3 +1,5 @@
+import { escapeHtml } from '@/common/utils/security.js';
+
 /**
  * @class AppModal
  * @extends HTMLElement
@@ -137,6 +139,7 @@ export class AppModal extends HTMLElement {
         const size = this.getAttribute('size') || 'md';
         const hideHeader = this.hasAttribute('no-header');
 
+        // ✅ 安全: 静态HTML模板，无用户输入
         this.shadowRoot.innerHTML = `
             <style>
                 :host { display: block; z-index: 1000; position: relative; }

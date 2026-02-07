@@ -1,3 +1,5 @@
+import { escapeHtml } from '@/common/utils/security.js';
+
 // src/common/router/NotFound.js
 // ================================================================
 // 🎯 404 和错误页面渲染

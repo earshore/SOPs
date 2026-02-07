@@ -8,6 +8,7 @@
  * - 使用 registerActionsWithLegacy 注册全局操作
  */
 
+import { escapeHtml } from '@/common/utils/security.js';
 import { loadTemplate } from '../../../../../common/utils/viewLoader.js';
 import eventBus from '../../../../../common/EventBus.js';
 import state from '../../../../../common/state.js';
@@ -16,6 +17,8 @@ import SITE_CONFIGS from '../../../../../common/constants/constants.js';
 import { ANALYSIS_MODULES } from '../constants/prompts.js';
 import { showToast } from '../../../../../common/utils/ui.js';
 import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry.js';
+
+import '../master_prompt_style.css';
 
 // ========================================== 
 // Module State
@@ -164,6 +167,7 @@ function generateLanguageOptions() {
     const select = document.getElementById("lab-target-market");
     if (!select) return;
 
+    // ✅ 安全: 静态HTML模板，无用户输入
     select.innerHTML = '<option value="" disabled selected>选择目标站点/语言...</option>';
 
     Object.entries(SITE_CONFIGS).forEach(([code, config]) => {
@@ -201,6 +205,7 @@ function updateButtonState() {
             "hover:from-blue-400", "hover:to-purple-500", "text-white",
             "shadow-md", "transform", "hover:scale-[1.02]", "cursor-pointer"
         );
+        // ✅ 安全: 静态HTML模板，无用户输入
         btn.innerHTML = '<i class="fas fa-microchip"></i> 生成 Master Prompt';
     } else {
         btn.dataset.disabledState = "true";
@@ -212,12 +217,16 @@ function updateButtonState() {
         btn.classList.add("bg-slate-300", "text-slate-500", "cursor-not-allowed", "shadow-none");
 
         if (!hasReport) {
+            // ✅ 安全: 静态HTML模板，无用户输入
             btn.innerHTML = '<i class="fas fa-lock"></i> 请先生成 Ai 分析报告';
         } else if (!hasLanguage) {
+            // ✅ 安全: 静态HTML模板，无用户输入
             btn.innerHTML = '<i class="fas fa-globe"></i> 请选择目标站点/语言';
         } else if (!hasTier1) {
+            // ✅ 安全: 静态HTML模板，无用户输入
             btn.innerHTML = '<i class="fas fa-pen"></i> 请填写 Tier 1 核心词';
         } else if (!hasTier2) {
+            // ✅ 安全: 静态HTML模板，无用户输入
             btn.innerHTML = '<i class="fas fa-pen"></i> 请填写 Tier 2 长尾词';
         }
     }
@@ -274,9 +283,11 @@ function renderReportAnalysis() {
 
     if (!state.analysis.analysisReport) {
         statusDiv.className = "px-2 py-1 bg-slate-100 text-slate-500 rounded text-xs flex items-center gap-1";
+        // ✅ 安全: 静态HTML模板，无用户输入
         statusDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> 未检测到分析报告';
         checkboxMain.disabled = true;
         checkboxMain.checked = false;
+        // ✅ 安全: 静态HTML模板，无用户输入
         container.innerHTML = `<p class="text-xs text-slate-400 italic p-2">暂无可用数据...</p>`;
         container.className = "mt-3";
         updateButtonState();
@@ -284,41 +295,10 @@ function renderReportAnalysis() {
     }
 
     statusDiv.className = "px-2 py-1 bg-green-100 text-green-700 rounded text-xs flex items-center gap-1";
+    // ✅ 安全: 静态HTML模板，无用户输入
     statusDiv.innerHTML = '<i class="fas fa-check-circle"></i> 分析报告已就绪';
     checkboxMain.disabled = false;
     checkboxMain.checked = true;
-
-    // Batch Actions
-    const headerRow = checkboxMain.parentElement;
-    if (headerRow && !document.getElementById("lab-batch-actions")) {
-        headerRow.classList.add("flex", "items-center", "w-full");
-        const actionSpan = document.createElement("div");
-        actionSpan.id = "lab-batch-actions";
-        actionSpan.className = "ml-auto flex items-center gap-3 text-xs font-medium select-none";
-        actionSpan.innerHTML = `
-            <span id="btn-select-all" class="text-blue-600 cursor-pointer hover:text-blue-800 hover:underline">全选</span>
-            <span class="text-slate-300">|</span>
-            <span id="btn-clear-all" class="text-slate-500 cursor-pointer hover:text-slate-700 hover:underline">清空</span>
-        `;
-        headerRow.appendChild(actionSpan);
-
-        addTimeout(() => {
-            const selBtn = document.getElementById("btn-select-all");
-            if (selBtn) addEventListener(selBtn, 'click', (e) => {
-                e.preventDefault(); e.stopPropagation();
-                document.querySelectorAll('input[name="report-section"]').forEach((cb) => (cb.checked = true));
-                saveInputsToState();
-                showToast("已全选模块", "success");
-            });
-            const clrBtn = document.getElementById("btn-clear-all");
-            if (clrBtn) addEventListener(clrBtn, 'click', (e) => {
-                e.preventDefault(); e.stopPropagation();
-                document.querySelectorAll('input[name="report-section"]').forEach((cb) => (cb.checked = false));
-                saveInputsToState();
-                showToast("已清空选择", "success");
-            });
-        }, 0);
-    }
 
     // Auto-select language
     if (marketSelect && !state.masterPrompt.promptlab?.userProductProfile?.targetMarket) {
@@ -340,6 +320,7 @@ function renderReportAnalysis() {
     const ignoreKeys = ["meta", "generatedByModel", "generatedAt", "templateUsed", "templateId", "raw_response"];
     const keys = Object.keys(state.analysis.analysisReport).filter((k) => !ignoreKeys.includes(k));
 
+    // ✅ 安全: 静态HTML模板，无用户输入
     container.innerHTML = "";
     container.className = "mt-3 grid grid-cols-1 lg:grid-cols-2 gap-3";
     const savedSelection = state.masterPrompt.promptlab?.userProductProfile?.selectedReportSections || [];
@@ -365,13 +346,13 @@ function renderReportAnalysis() {
         div.className = "relative flex items-start p-3 rounded-lg border border-slate-200 bg-white hover:border-blue-300 hover:shadow-sm transition-all";
         div.innerHTML = `
             <div class="flex h-5 items-center">
-                <input type="checkbox" name="report-section" value="${key}" id="sect-${key}" 
-                    class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" ${isChecked ? "checked" : ""}>
+                <input type="checkbox" name="report-section" value="${escapeHtml(key)}" id="sect-${escapeHtml(key)}" 
+                    class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" ${escapeHtml(isChecked ? "checked" : "")}>
             </div>
             <div class="ml-3 text-sm flex-1 min-w-0"> 
-                <label for="sect-${key}" class="cursor-pointer select-none w-full block">
-                    <span class="font-medium text-slate-700 block mb-0.5 leading-snug">${label}</span>
-                    <p class="text-xs text-slate-400 truncate font-normal" title="${previewText}">${previewText}</p>
+                <label for="sect-${escapeHtml(key)}" class="cursor-pointer select-none w-full block">
+                    <span class="font-medium text-slate-700 block mb-0.5 leading-snug">${escapeHtml(label)}</span>
+                    <p class="text-xs text-slate-400 truncate font-normal" title="${escapeHtml(previewText)}">${escapeHtml(previewText)}</p>
                 </label>
             </div>
         `;
@@ -530,6 +511,95 @@ function toggleConsoleMode(mode) {
 }
 
 /**
+ * 切换 Prompt 放大视图
+ */
+function togglePromptZoom() {
+    const modal = document.getElementById('prompt-zoom-modal');
+    const zoomContent = document.getElementById('prompt-zoom-content');
+    const zoomIcon = document.getElementById('zoom-icon');
+    const zoomedContainer = document.getElementById('zoomed-cards-container');
+    
+    if (!modal || !zoomContent || !zoomedContainer) return;
+    
+    const isZoomed = modal.style.display !== 'none' && modal.style.display !== '';
+    
+    if (isZoomed) {
+        // 关闭放大视图 - 缩小动画
+        zoomContent.classList.remove('scale-100', 'opacity-100');
+        zoomContent.classList.add('scale-95', 'opacity-0');
+        modal.style.opacity = '0';
+        
+        addTimeout(() => {
+            const consoleCard = document.querySelector('.zoomed-console-card');
+            const outputCard = document.querySelector('.zoomed-output-card');
+            
+            // 移回翻转卡片
+            if (consoleCard) {
+                const originalParent = document.querySelector('.lg\\:col-span-4 .sticky');
+                if (originalParent) {
+                    consoleCard.classList.remove('zoomed-console-card');
+                    originalParent.insertBefore(consoleCard, originalParent.firstChild);
+                }
+            }
+            
+            // 移回输出卡片
+            if (outputCard) {
+                const originalParent = document.querySelector('.lg\\:col-span-4 .sticky');
+                if (originalParent) {
+                    outputCard.classList.remove('zoomed-output-card');
+                    originalParent.appendChild(outputCard);
+                }
+            }
+            
+            modal.style.display = 'none';
+            modal.classList.remove('flex');
+            modal.style.opacity = '';
+            document.body.style.overflow = '';
+            
+            // 恢复图标和提示
+            zoomIcon.className = 'fas fa-expand text-sm';
+            zoomIcon.parentElement.title = '放大视图';
+        }, 300);
+    } else {
+        // 打开放大视图 - 放大动画
+        const consoleCardWrapper = document.querySelector('.lg\\:col-span-4 .sticky > div:first-child');
+        const outputCard = document.getElementById('prompt-output-card');
+        
+        if (!consoleCardWrapper || !outputCard) {
+            console.error('[Promptlab] 未找到卡片元素');
+            return;
+        }
+        
+        // 显示模态框
+        modal.style.display = 'flex';
+        modal.classList.add('flex');
+        modal.style.opacity = '0';
+        document.body.style.overflow = 'hidden';
+        
+        // 清空容器
+        zoomedContainer.innerHTML = '';
+        
+        // 移动元素到模态框
+        consoleCardWrapper.classList.add('zoomed-console-card');
+        outputCard.classList.add('zoomed-output-card');
+        zoomedContainer.appendChild(consoleCardWrapper);
+        zoomedContainer.appendChild(outputCard);
+        
+        // 触发动画
+        requestAnimationFrame(() => {
+            modal.style.transition = 'opacity 0.3s ease-in';
+            modal.style.opacity = '1';
+            zoomContent.classList.remove('scale-95', 'opacity-0');
+            zoomContent.classList.add('scale-100', 'opacity-100');
+        });
+        
+        // 更改图标和提示
+        zoomIcon.className = 'fas fa-compress text-sm';
+        zoomIcon.parentElement.title = '恢复视图';
+    }
+}
+
+/**
  * 复制 Master Prompt
  */
 function copyMasterPrompt() {
@@ -554,6 +624,28 @@ function clearPromptInputs() {
         updateButtonState();
         showToast("已清空", "success");
     }
+}
+
+/**
+ * 全选报告分析模块
+ */
+function selectAllReportSections() {
+    document.querySelectorAll('input[name="report-section"]').forEach((cb) => {
+        cb.checked = true;
+    });
+    saveInputsToState();
+    showToast("已全选模块", "success");
+}
+
+/**
+ * 清空报告分析模块选择
+ */
+function clearReportSections() {
+    document.querySelectorAll('input[name="report-section"]').forEach((cb) => {
+        cb.checked = false;
+    });
+    saveInputsToState();
+    showToast("已清空选择", "success");
 }
 
 // ========================================== 
@@ -597,6 +689,7 @@ export async function mount(container) {
     try {
         // 1. 加载模板
         const html = await loadTemplate('src/modules/app_center/views/master_prompt/promptlab/template.html');
+        // ✅ 安全: 静态HTML模板，无用户输入
         container.innerHTML = html;
 
         // 2. 注册全局操作
@@ -606,6 +699,9 @@ export async function mount(container) {
             amz_toggleConsoleMode: (params) => toggleConsoleMode(params.param),
             amz_copyMasterPrompt: () => copyMasterPrompt(),
             amz_clearPromptInputs: () => clearPromptInputs(),
+            amz_togglePromptZoom: () => togglePromptZoom(),
+            amz_selectAllReportSections: () => selectAllReportSections(),
+            amz_clearReportSections: () => clearReportSections(),
         });
         
         // 保存已注册的动作名称，用于卸载时清理
@@ -613,6 +709,16 @@ export async function mount(container) {
 
         // 3. 设置事件监听器
         setupEventListeners(container);
+        
+        // 3.1 设置放大模态框点击背景关闭
+        const modal = document.getElementById('prompt-zoom-modal');
+        if (modal) {
+            addEventListener(modal, 'click', (e) => {
+                if (e.target === modal) {
+                    togglePromptZoom();
+                }
+            });
+        }
 
         // 4. 从 state 恢复状态
         restoreInputsFromState();

@@ -1,3 +1,5 @@
+import { escapeHtml } from '@/common/utils/security.js';
+
 // src/common/state/devtools/StateDevTools.js
 // ================================================================
 // 🎯 状态调试工具
@@ -60,6 +62,7 @@ export class StateDevTools {
     panel.className = 'fixed bottom-0 right-0 w-96 h-96 bg-white border-2 border-blue-500 shadow-2xl z-[10000] hidden';
     panel.style.cssText = 'font-family: monospace; font-size: 12px;';
     
+    // ✅ 安全: 静态HTML模板，无用户输入
     panel.innerHTML = `
       <div style="display: flex; flex-direction: column; height: 100%;">
         <!-- Header -->
@@ -115,6 +118,7 @@ export class StateDevTools {
       case 'history':
         const history = this.stateManager.getHistory();
         if (history.length === 0) {
+          // ✅ 安全: 静态HTML模板，无用户输入
           content.innerHTML = '<div style="color: #6b7280; text-align: center; padding: 20px;">No history yet</div>';
         } else {
           content.innerHTML = history.map((action, i) => `
@@ -130,6 +134,7 @@ export class StateDevTools {
       case 'subscribers':
         const subs = Array.from(this.stateManager._subscribers.entries());
         if (subs.length === 0) {
+          // ✅ 安全: 静态HTML模板，无用户输入
           content.innerHTML = '<div style="color: #6b7280; text-align: center; padding: 20px;">No subscribers</div>';
         } else {
           content.innerHTML = subs.map(([path, callbacks]) => `

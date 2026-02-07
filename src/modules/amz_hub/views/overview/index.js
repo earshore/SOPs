@@ -9,6 +9,7 @@ export async function mount(container) {
     
     // 渲染模板
     const html = await loadTemplate('src/modules/amz_hub/views/overview/template.html');
+    // ✅ 安全: 静态HTML模板，无用户输入
     container.innerHTML = html;
     container.classList.add('fade-in');
 

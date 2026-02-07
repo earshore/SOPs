@@ -35,7 +35,7 @@ export const HistoryService = {
     const historyItem = {
       id: id,
       timestamp: data.metadata?.scrape_timestamp || new Date().toISOString(),
-      site: data.metadata?.marketplace || state.selectedSite,
+      site: data.metadata?.marketplace || state.scraper?.selectedSite || 'US',
       asins: data.products?.map((p) => p.asin) || [],
       data,
       report,

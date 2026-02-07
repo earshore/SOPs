@@ -218,6 +218,7 @@ export class ModuleLoader {
 
             // 7. 自动重试机制（最多1次）
             if (retryCount < 1) {
+                // ✅ 安全: 静态HTML模板，无用户输入
                 container.innerHTML = `
                     <div class="p-10 text-center">
                         <i class="fas fa-circle-notch fa-spin text-orange-500"></i>

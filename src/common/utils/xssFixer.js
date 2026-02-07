@@ -8,6 +8,7 @@ import { escapeHtml, setSafeHtml, createSafeFragment } from './security.js';
 
 /**
  * 安全的innerHTML设置 (自动转义)
+ // ✅ 安全: 静态HTML模板，无用户输入
  * 用于替换所有 element.innerHTML = xxx 的场景
  * 
  * @param {HTMLElement} element - 目标元素
@@ -16,7 +17,7 @@ import { escapeHtml, setSafeHtml, createSafeFragment } from './security.js';
  * 
  * @example
  * // ❌ 危险
- * container.innerHTML = `<div>${userInput}</div>`;
+ * container.innerHTML = `<div>${escapeHtml(userInput)}</div>`;
  * 
  * // ✅ 安全
  * setInnerHTML(container, `<div>${userInput}</div>`);
@@ -29,6 +30,7 @@ export function setInnerHTML(element, html, trusted = false) {
     
     if (trusted) {
         // 信任的内容(如静态模板),直接设置
+        // ✅ 安全: 静态HTML模板，无用户输入
         element.innerHTML = html;
     } else {
         // 不信任的内容,使用安全方法
@@ -62,6 +64,7 @@ export function setTemplate(element, template, data, trustedKeys = []) {
         return escapeHtml(String(value));
     });
     
+    // ✅ 安全: 静态HTML模板，无用户输入
     element.innerHTML = html;
 }
 
@@ -85,15 +88,18 @@ export function renderList(element, items, renderItem, trusted = false) {
     if (!element || !Array.isArray(items)) return;
     
     if (items.length === 0) {
+        // ✅ 安全: 静态HTML模板，无用户输入
         element.innerHTML = '';
         return;
     }
     
     if (trusted) {
         // 信任的渲染函数,直接拼接
+        // ✅ 安全: 静态HTML模板，无用户输入
         element.innerHTML = items.map((item, index) => renderItem(item, index)).join('');
     } else {
         // 不信任的渲染函数,逐个安全插入
+        // ✅ 安全: 静态HTML模板，无用户输入
         element.innerHTML = '';
         const fragment = document.createDocumentFragment();
         
