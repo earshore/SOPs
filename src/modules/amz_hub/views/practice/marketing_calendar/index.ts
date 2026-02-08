@@ -9,6 +9,7 @@ import { amzf_countries, amzf_months, amzf_events } from '../../../constants/amz
 import { StorageService } from '../../../../../services/storageService';
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry';
+import type { MarketingEvent, CountryInfo } from '@/types/modules-business';
 
 const AMZF_HISTORY_KEY = 'amzf_search_history'; // 使用 StorageService 键
 const AMZF_MAX_HISTORY = 10; // 最大历史记录数
@@ -71,27 +72,25 @@ class MarketingCalendarModule extends BaseModule {
     bindGlobalProxies(): void {
         // Register actions with ActionRegistry (handles data-param correctly)
         registerActionsWithLegacy({
-            amzf_selectCountry: (params: any) => {
-                // Handle both direct calls (legacy) and data-action calls
-                const code = typeof params === 'string' ? params : params.param;
+            amzf_selectCountry: (params: Record<string, unknown>) => {
+                const code = typeof params.param === 'string' ? params.param : String(params.param || 'ALL');
                 this.selectCountry(code);
             },
-            amzf_switchView: (params: any) => {
-                // Handle both direct calls (legacy) and data-action calls
-                const view = typeof params === 'string' ? params : params.param;
+            amzf_switchView: (params: Record<string, unknown>) => {
+                const view = typeof params.param === 'string' ? params.param : String(params.param || 'country');
                 this.switchView(view);
             },
             amzf_clearSearch: () => this.clearSearch(),
-            amzf_toggleSection: (params: any) => {
-                const id = typeof params === 'string' ? params : params.param;
+            amzf_toggleSection: (params: Record<string, unknown>) => {
+                const id = typeof params.param === 'string' ? params.param : String(params.param || '');
                 this.toggleSection(id);
             },
-            amzf_selectHistoryItem: (params: any) => {
-                const term = typeof params === 'string' ? params : params.param;
+            amzf_selectHistoryItem: (params: Record<string, unknown>) => {
+                const term = typeof params.param === 'string' ? params.param : String(params.param || '');
                 this.selectHistoryItem(term);
             },
-            amzf_deleteHistoryItem: (params: any) => {
-                const idx = typeof params === 'number' ? params : parseInt(params.param);
+            amzf_deleteHistoryItem: (params: Record<string, unknown>) => {
+                const idx = typeof params.param === 'number' ? params.param : parseInt(String(params.param || '0'));
                 this.deleteHistoryItem(idx);
             },
             amzf_clearAllHistory: () => this.clearAllHistory(),
@@ -99,13 +98,22 @@ class MarketingCalendarModule extends BaseModule {
     }
 
     unbindGlobalProxies(): void {
-        delete (window as any).amzf_selectCountry;
-        delete (window as any).amzf_switchView;
-        delete (window as any).amzf_clearSearch;
-        delete (window as any).amzf_toggleSection;
-        delete (window as any).amzf_selectHistoryItem;
-        delete (window as any).amzf_deleteHistoryItem;
-        delete (window as any).amzf_clearAllHistory;
+        const w = window as Window & {
+            amzf_selectCountry?: unknown;
+            amzf_switchView?: unknown;
+            amzf_clearSearch?: unknown;
+            amzf_toggleSection?: unknown;
+            amzf_selectHistoryItem?: unknown;
+            amzf_deleteHistoryItem?: unknown;
+            amzf_clearAllHistory?: unknown;
+        };
+        delete w.amzf_selectCountry;
+        delete w.amzf_switchView;
+        delete w.amzf_clearSearch;
+        delete w.amzf_toggleSection;
+        delete w.amzf_selectHistoryItem;
+        delete w.amzf_deleteHistoryItem;
+        delete w.amzf_clearAllHistory;
     }
 
     // ==================== Core Logic ====================
@@ -144,7 +152,7 @@ class MarketingCalendarModule extends BaseModule {
         this.saveSearchHistory();
     }
 
-    calculateScore(event: any, terms: string[]): number {
+    calculateScore(event: MarketingEvent, terms: string[]): number {
         let score = 0;
         const textFields = {
             title: (event.name + ' ' + event.nameEn).toLowerCase(),
@@ -171,8 +179,8 @@ class MarketingCalendarModule extends BaseModule {
         return score;
     }
 
-    getFilteredEvents(): any[] {
-        let candidates = (amzf_events as any[]).filter(
+    getFilteredEvents(): MarketingEvent[] {
+        let candidates = (amzf_events as unknown as MarketingEvent[]).filter(
             (event) =>
                 this.state.selectedCountry === 'ALL' ||
                 event.countries.includes(this.state.selectedCountry)
@@ -203,8 +211,8 @@ class MarketingCalendarModule extends BaseModule {
             const targetName =
                 code === 'ALL'
                     ? '全部'
-                    : (amzf_countries as any[]).find((c) => c.code === code)?.name;
-            if (tabText && tabText.includes(targetName)) {
+                    : (amzf_countries as CountryInfo[]).find((c) => c.code === code)?.name;
+            if (tabText && tabText.includes(targetName || '')) {
                 tab.classList.add('amzf_active');
             }
         });
@@ -364,7 +372,7 @@ class MarketingCalendarModule extends BaseModule {
             <span class="amzf_country_flag"><i class="fas fa-globe"></i></span> 全部
         </button>`;
 
-        (amzf_countries as any[]).forEach((c) => {
+        (amzf_countries as CountryInfo[]).forEach((c) => {
             html += `<button class="amzf_country_tab" onclick="amzf_selectCountry('${c.code}')">
                 <span class="amzf_country_flag">${c.flag}</span> ${c.name}
             </button>`;
@@ -476,9 +484,9 @@ class MarketingCalendarModule extends BaseModule {
         }
     }
 
-    renderCountryView(events: any[], container: HTMLElement): void {
+    renderCountryView(events: MarketingEvent[], container: HTMLElement): void {
         container.classList.add('amzf_list_entering');
-        const byMonth: Record<number, any[]> = {};
+        const byMonth: Record<number, MarketingEvent[]> = {};
         events.forEach((event) => {
             if (!byMonth[event.month]) byMonth[event.month] = [];
             byMonth[event.month]!.push(event);
@@ -516,9 +524,15 @@ class MarketingCalendarModule extends BaseModule {
         this.setTimeout(() => container.classList.remove('amzf_list_entering'), 500);
     }
 
-    renderEventView(events: any[], container: HTMLElement): void {
+    renderEventView(events: MarketingEvent[], container: HTMLElement): void {
         container.classList.add('amzf_list_entering');
-        const eventGroups: Record<string, any> = {};
+        interface EventGroup {
+            emoji: string;
+            events: MarketingEvent[];
+            name: string;
+            nameEn: string;
+        }
+        const eventGroups: Record<string, EventGroup> = {};
         events.forEach((event) => {
             let groupKey = event.nameEn.replace(/ (UK|IT|ES|FR|PL|EU)$/i, '').trim();
             if (!eventGroups[groupKey]) {
@@ -529,14 +543,14 @@ class MarketingCalendarModule extends BaseModule {
                     nameEn: groupKey,
                 };
             }
-            eventGroups[groupKey].events.push(event);
+            eventGroups[groupKey]!.events.push(event);
         });
 
         let html = '<div class="amzf_event_view">';
         const isSearchActive = this.state.searchTerm && this.state.searchTerm.length > 0;
 
         Object.keys(eventGroups).forEach((key, idx) => {
-            const group = eventGroups[key];
+            const group = eventGroups[key]!;
             const safeKey = key.replace(/[^a-zA-Z0-9]/g, '_');
             const sectionId = `amzf_group_event_${safeKey}`;
             const isExpanded = isSearchActive || this.state.expandedSections.has(sectionId);
@@ -548,13 +562,13 @@ class MarketingCalendarModule extends BaseModule {
                         <div class="amzf_comparison_title">
                             <span>${group.emoji}</span>
                             <span>${displayName}</span>
-                            <span class="amzf_month_badge">${new Set(group.events.flatMap((e: any) => e.countries)).size} 个站点</span>
+                            <span class="amzf_month_badge">${new Set(group.events.flatMap((e) => e.countries)).size} 个站点</span>
                         </div>
                         <div class="amzf_month_toggle"><i class="fas fa-chevron-down"></i></div>
                     </div>
                     <div class="amzf_comparison_content">
                         <div class="amzf_country_list">
-                            ${group.events.map((e: any) => this.renderCountryEvent(e)).join('')}
+                            ${group.events.map((e) => this.renderCountryEvent(e)).join('')}
                         </div>
                     </div>
                 </div>
@@ -566,11 +580,11 @@ class MarketingCalendarModule extends BaseModule {
         this.setTimeout(() => container.classList.remove('amzf_list_entering'), 500);
     }
 
-    renderEventCard(event: any): string {
+    renderEventCard(event: MarketingEvent): string {
         const typeClass = `amzf_type_${event.type}`;
         const countryBadges = event.countries
             .map((code: string) => {
-                const c = (amzf_countries as any[]).find((x) => x.code === code);
+                const c = (amzf_countries as CountryInfo[]).find((x) => x.code === code);
                 return `<span class="amzf_country_badge" title="${c?.name}">${c?.flag}</span>`;
             })
             .join('');
@@ -599,10 +613,10 @@ class MarketingCalendarModule extends BaseModule {
         `;
     }
 
-    renderCountryEvent(event: any): string {
+    renderCountryEvent(event: MarketingEvent): string {
         const flags = event.countries
             .map((code: string) => {
-                const c = (amzf_countries as any[]).find((x) => x.code === code);
+                const c = (amzf_countries as CountryInfo[]).find((x) => x.code === code);
                 return `<span title="${c?.name}">${c?.flag}</span>`;
             })
             .join(' ');

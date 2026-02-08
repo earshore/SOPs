@@ -394,6 +394,24 @@ export interface MarketingEvent {
   description: string;
   category: 'holiday' | 'promotion' | 'seasonal' | 'custom';
   markets?: string[];
+  // AMZ Hub specific fields
+  name: string;
+  nameEn: string;
+  emoji: string;
+  month: number;
+  type: 'holiday' | 'shopping';
+  countries: string[];
+  strategy: string;
+  tags?: string[];
+}
+
+/**
+ * 国家信息
+ */
+export interface CountryInfo {
+  code: string;
+  name: string;
+  flag: string;
 }
 
 /**

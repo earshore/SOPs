@@ -177,10 +177,14 @@ function renderTable(): void {
 }
 
 // Update field
-function updateField(index: number, field: keyof NPIProductRecord, value: any): void {
+function updateField(index: number, field: keyof NPIProductRecord, value: unknown): void {
     if (index >= 0 && index < tableData.length) {
-        (tableData[index] as any)[field] = value;
-        renderTable();
+        const row = tableData[index];
+        if (row) {
+            // 类型安全的字段更新
+            (row[field] as typeof value) = value as never;
+            renderTable();
+        }
     }
 }
 
@@ -399,16 +403,31 @@ function filterByStage(stage: string): void {
     renderTable();
 }
 
+// 扩展 Window 接口以支持全局函数
+declare global {
+    interface Window {
+        updateField?: (index: number, field: keyof NPIProductRecord, value: unknown) => void;
+        updateDeliveryFee?: (index: number, value: string) => void;
+        toggleDecision?: (index: number) => void;
+        openNextStepEditor?: (index: number) => void;
+        saveNextSteps?: () => void;
+        closeNextStepModal?: () => void;
+        exportToExcel?: () => void;
+        filterByStore?: (store: string) => void;
+        filterByStage?: (stage: string) => void;
+    }
+}
+
 // Expose to window for inline event handlers
-(window as any).updateField = updateField;
-(window as any).updateDeliveryFee = updateDeliveryFee;
-(window as any).toggleDecision = toggleDecision;
-(window as any).openNextStepEditor = openNextStepEditor;
-(window as any).saveNextSteps = saveNextSteps;
-(window as any).closeNextStepModal = closeNextStepModal;
-(window as any).exportToExcel = exportToExcel;
-(window as any).filterByStore = filterByStore;
-(window as any).filterByStage = filterByStage;
+window.updateField = updateField;
+window.updateDeliveryFee = updateDeliveryFee;
+window.toggleDecision = toggleDecision;
+window.openNextStepEditor = openNextStepEditor;
+window.saveNextSteps = saveNextSteps;
+window.closeNextStepModal = closeNextStepModal;
+window.exportToExcel = exportToExcel;
+window.filterByStore = filterByStore;
+window.filterByStage = filterByStage;
 
 // Module class
 class NPITrackerModule extends BaseModule {
@@ -434,31 +453,31 @@ class NPITrackerModule extends BaseModule {
      */
     unmount(): void {
         // Clean up global functions
-        delete (window as any).updateField;
-        delete (window as any).updateDeliveryFee;
-        delete (window as any).toggleDecision;
-        delete (window as any).openNextStepEditor;
-        delete (window as any).saveNextSteps;
-        delete (window as any).closeNextStepModal;
-        delete (window as any).exportToExcel;
-        delete (window as any).filterByStore;
-        delete (window as any).filterByStage;
+        delete window.updateField;
+        delete window.updateDeliveryFee;
+        delete window.toggleDecision;
+        delete window.openNextStepEditor;
+        delete window.saveNextSteps;
+        delete window.closeNextStepModal;
+        delete window.exportToExcel;
+        delete window.filterByStore;
+        delete window.filterByStage;
 
         console.log('❌ 新品生命周期跟踪 SOP 模块已卸载');
     }
 }
 
 // Phase 4: 集中注册所有动作到 ActionRegistry
-const npiTrackerActions: Record<string, (...args: any[]) => void> = {
-    updateField: updateField as any,
-    updateDeliveryFee: updateDeliveryFee as any,
-    toggleDecision: toggleDecision as any,
-    openNextStepEditor: openNextStepEditor as any,
-    saveNextSteps: saveNextSteps as any,
-    closeNextStepModal: closeNextStepModal as any,
-    exportToExcel: exportToExcel as any,
-    filterByStore: filterByStore as any,
-    filterByStage: filterByStage as any,
+const npiTrackerActions: Record<string, (...args: unknown[]) => void> = {
+    updateField: updateField as (...args: unknown[]) => void,
+    updateDeliveryFee: updateDeliveryFee as (...args: unknown[]) => void,
+    toggleDecision: toggleDecision as (...args: unknown[]) => void,
+    openNextStepEditor: openNextStepEditor as (...args: unknown[]) => void,
+    saveNextSteps: saveNextSteps as (...args: unknown[]) => void,
+    closeNextStepModal: closeNextStepModal as (...args: unknown[]) => void,
+    exportToExcel: exportToExcel as (...args: unknown[]) => void,
+    filterByStore: filterByStore as (...args: unknown[]) => void,
+    filterByStage: filterByStage as (...args: unknown[]) => void,
 };
 
 registerActionsWithLegacy(npiTrackerActions);
