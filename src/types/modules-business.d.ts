@@ -60,6 +60,13 @@ export interface ScrapedProduct {
   customer_reviews: CustomerReview[];
   scrape_status: ScraperStatus;
   error: string;
+  metadata?: {
+    marketplace?: string;
+    scrape_timestamp?: string;
+    [key: string]: unknown;
+  };
+  _source_site?: string;
+  _filename?: string;
 }
 
 /**

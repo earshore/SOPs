@@ -17,6 +17,7 @@ import { StorageService } from '../../../../../services/storageService';
 import { languageFlagMap, SITE_NAME_MAP, SITE_DOMAIN_MAP } from '../../../../../common/constants/constants';
 import eventBus from '../../../../../common/EventBus';
 import { APP_EVENTS, MODULE_EVENTS } from '../../../../../common/constants/eventConstants';
+import type { ScrapedProduct, CustomerReview, ScraperStatus } from '../../../../../types/modules-business';
 
 import '../master_prompt_style.css';
 
@@ -26,12 +27,13 @@ import '../master_prompt_style.css';
 
 interface Product {
     asin: string;
-    productTitle?: string;
+    url: string;
+    language: string;
+    productTitle: string;
     feature_bullets: string[];
-    customer_reviews?: Review[];
-    scrape_status: 'success' | 'partial' | 'failed';
-    language?: string;
-    error?: string;
+    customer_reviews: Review[];
+    scrape_status: ScraperStatus;
+    error: string;
     metadata?: Record<string, any>;
     _source_site?: string;
     _filename?: string;
@@ -50,7 +52,7 @@ interface Review {
 }
 
 interface FileData {
-    data: any;
+    data: ScrapedProduct | ScrapedProduct[] | { products: ScrapedProduct[] };
     filename: string;
 }
 
@@ -75,7 +77,7 @@ class DataModule extends BaseModule {
         this.setupEventListeners();
 
         // 订阅 Scraper 事件
-        this.addDisposable(eventBus.on(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, (_data: any) => {
+        this.addDisposable(eventBus.on(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, () => {
             console.log("DataModule received SCRAPE_SUCCESS");
             this.renderDataPanel();
         }));
@@ -186,7 +188,7 @@ class DataModule extends BaseModule {
         const globalSiteCode = state.scraper.scrapedData.metadata?.marketplace || state.scraper.selectedSite;
 
         // ✅ 安全: 静态HTML模板，无用户输入
-        cardsEl.innerHTML = state.scraper.scrapedData.products.map((p: any) => {
+        cardsEl.innerHTML = state.scraper.scrapedData.products.map((p: ScrapedProduct) => {
             const isExpanded = (state as any).expandedAsin === p.asin;
             let siteKey = globalSiteCode || p.language || "US";
             if (siteKey === 'UK') siteKey = 'GB';
@@ -253,7 +255,7 @@ class DataModule extends BaseModule {
                             <h5 class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2"><i class="fas fa-list-ul text-blue-500"></i> 五点描述</h5>
                             ${p.feature_bullets.length > 0 ? `
                                 <ul class="space-y-2">
-                                    ${p.feature_bullets.map((b: any, i: number) => `
+                                    ${p.feature_bullets.map((b: string, i: number) => `
                                         <li class="text-sm text-slate-600 bg-white p-3 rounded-lg border border-slate-100 shadow-sm flex gap-3 hover:border-blue-200 transition-colors">
                                             <span class="text-blue-500 font-bold font-mono text-xs mt-0.5 bg-blue-50 px-1.5 py-0.5 rounded h-fit">${i + 1}</span> 
                                             <span class="leading-relaxed">${b}</span>
@@ -269,7 +271,7 @@ class DataModule extends BaseModule {
                             </h5>
                             ${(p.customer_reviews || []).length > 0 ? `
                                 <div class="max-h-96 overflow-y-auto space-y-3 pr-1 custom-scrollbar">
-                                    ${(p.customer_reviews || []).map((review: any, i: number) => `
+                                    ${(p.customer_reviews || []).map((review: CustomerReview, i: number) => `
                                         <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm group/review relative hover:border-purple-200 hover:shadow-md transition-all">
                                             <button onclick="window.dataModule.deleteReview('${p.asin}', ${i})" 
                                                 class="absolute top-3 right-3 w-7 h-7 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover/review:opacity-100 z-10">
@@ -343,7 +345,7 @@ class DataModule extends BaseModule {
         if (!confirmed) return;
 
         if (state.scraper.scrapedData) {
-            state.scraper.scrapedData.products = state.scraper.scrapedData.products.filter((p: any) => p.asin !== asin);
+            state.scraper.scrapedData.products = state.scraper.scrapedData.products.filter((p: ScrapedProduct) => p.asin !== asin);
             
             // 🔐 防御性检查：确保 metadata 存在
             if (state.scraper.scrapedData.metadata) {
@@ -372,7 +374,7 @@ class DataModule extends BaseModule {
         if (!confirmed) return;
 
         if (state.scraper.scrapedData) {
-            const product = state.scraper.scrapedData.products.find((p: any) => p.asin === asin);
+            const product = state.scraper.scrapedData.products.find((p: ScrapedProduct) => p.asin === asin);
             if (product && product.customer_reviews) {
                 product.customer_reviews.splice(index, 1);
                 HistoryService.save(state.scraper.scrapedData, state.analysis.analysisReport);
@@ -444,28 +446,39 @@ class DataModule extends BaseModule {
 
             fileContents.forEach(({ data, filename }) => {
                 if (!data) return;
+                
                 let fileSite: string | null = null;
-                if (data.metadata?.marketplace) fileSite = data.metadata.marketplace;
-                else if (data.marketplace) fileSite = data.marketplace;
-                else if (Array.isArray(data) && data.length > 0 && data[0].metadata?.marketplace) {
-                    fileSite = data[0].metadata.marketplace;
+                
+                // 类型守卫: 检查是否是包含products的对象
+                if (!Array.isArray(data) && 'products' in data) {
+                    fileSite = (data as any).metadata?.marketplace || null;
+                } else if (!Array.isArray(data) && 'metadata' in data) {
+                    // 单个产品对象
+                    fileSite = (data as ScrapedProduct).metadata?.marketplace || null;
+                } else if (Array.isArray(data) && data.length > 0 && data[0]) {
+                    // 产品数组
+                    fileSite = data[0].metadata?.marketplace || null;
                 }
 
                 const site = fileSite || "Unknown";
                 if (fileSite) detectedSites.add(fileSite);
 
-                const list = Array.isArray(data) ? data : (data.products || (data.asin ? [data] : []));
+                // 标准化为数组
+                const list: ScrapedProduct[] = Array.isArray(data) 
+                    ? data 
+                    : ('products' in data ? data.products : [data as ScrapedProduct]);
 
-                list.forEach((p: any) => {
+                list.forEach((p: ScrapedProduct) => {
                     if (!p.asin) return;
                     if (!productPool.has(p.asin)) {
                         productPool.set(p.asin, []);
                     }
                     productPool.get(p.asin)!.push({
                         ...p,
+                        customer_reviews: p.customer_reviews as any as Review[],
                         _source_site: site,
                         _filename: filename
-                    });
+                    } as Product);
                 });
             });
 
@@ -488,29 +501,31 @@ class DataModule extends BaseModule {
             }
 
             const finalProducts: Product[] = [];
-            const currentProductsMap = new Map((state.scraper.scrapedData?.products || []).map((p: any) => [p.asin, p]));
+            const currentProductsMap = new Map((state.scraper.scrapedData?.products || []).map((p: ScrapedProduct) => [p.asin, p]));
 
             for (const [asin, versions] of productPool.entries()) {
                 const masterVersion = versions.find(v => v._source_site === targetMarketplace);
                 const existingVersion = currentProductsMap.get(asin);
                 const baseProduct = existingVersion || masterVersion || versions[0];
 
-                const mergedProduct: Product = JSON.parse(JSON.stringify(baseProduct));
+                if (!baseProduct) continue;
+
+                const mergedProduct: Product = JSON.parse(JSON.stringify(baseProduct)) as Product;
                 if (!mergedProduct.metadata) mergedProduct.metadata = {};
 
-                const allReviewSources: any[] = [];
-                if (existingVersion) allReviewSources.push(existingVersion);
+                const allReviewSources: Product[] = [];
+                if (existingVersion) allReviewSources.push(existingVersion as any as Product);
                 allReviewSources.push(...versions);
 
                 const uniqueReviewsMap = new Map<string, Review>();
 
                 allReviewSources.forEach(ver => {
                     if (Array.isArray(ver.customer_reviews)) {
-                        ver.customer_reviews.forEach((r: any) => {
+                        ver.customer_reviews.forEach((r: Review) => {
                             const sig = this.getReviewSignature(r);
                             if (!uniqueReviewsMap.has(sig)) {
                                 if (ver._source_site && ver._source_site !== "Unknown") {
-                                    r._origin_site = ver._source_site;
+                                    (r as any)._origin_site = ver._source_site;
                                 }
                                 uniqueReviewsMap.set(sig, r);
                             }
@@ -518,9 +533,9 @@ class DataModule extends BaseModule {
                     }
                 });
 
-                mergedProduct.customer_reviews = Array.from(uniqueReviewsMap.values());
-                delete mergedProduct._source_site;
-                delete mergedProduct._filename;
+                mergedProduct.customer_reviews = Array.from(uniqueReviewsMap.values()) as Review[];
+                delete (mergedProduct as any)._source_site;
+                delete (mergedProduct as any)._filename;
                 finalProducts.push(mergedProduct);
             }
 
@@ -540,7 +555,7 @@ class DataModule extends BaseModule {
                     total_asins: finalProducts.length,
                     last_action: "multi_site_import_merge"
                 },
-                products: finalProducts
+                products: finalProducts as any as ScrapedProduct[]
             };
 
             state.analysis.analysisReport = null;
@@ -560,9 +575,10 @@ class DataModule extends BaseModule {
 
             showToast(`✅ 成功导入并合并 ${finalProducts.length} 个ASIN (基准站点: ${targetMarketplace})`, "success");
 
-        } catch (error: any) {
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
             console.error(error);
-            showToast("❌ 导入出错: " + error.message, "error");
+            showToast("❌ 导入出错: " + errorMessage, "error");
         } finally {
             inputEl.value = '';
         }
