@@ -159,17 +159,17 @@ const SettingsPanel = (): SettingsPanelData => ({
 
     async loadProviderConfig(provider: string): Promise<void> {
         if (!provider) return;
-        const config = PROVIDERS[provider];
-
-        // Safety check: if provider key doesn't exist in constants
-        if (!config) {
+        
+        // 类型安全检查: 确保provider是有效的key
+        if (!(provider in PROVIDERS)) {
             console.warn(`Unknown provider: ${provider}, falling back to OpenAI`);
             return;
         }
-
+        
+        const config = PROVIDERS[provider as keyof typeof PROVIDERS];
         const savedConfig = StorageService.getLLMConfig(provider);
 
-        this.llm.endpoint = savedConfig?.endpoint || config.endpoint;
+        this.llm.endpoint = savedConfig?.endpoint || config?.endpoint || '';
         
         // 🔐 P0优化: 从安全存储读取API密钥
         try {
@@ -184,7 +184,7 @@ const SettingsPanel = (): SettingsPanelData => ({
         // Models: Use saved or default
         const rawModels: Array<string | { id: string }> = (savedConfig && 'models' in savedConfig && savedConfig.models && savedConfig.models.length > 0)
             ? savedConfig.models
-            : (config.models || []);
+            : (config?.models || []);
 
         // Deduplicate models
         const seen = new Set<string>();
@@ -444,18 +444,20 @@ export const renderProxyInputUI = (): void => { };
 
 // Keep this for main.js status update
 export async function updateModelStatus(): Promise<void> {
-    const provider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
+    const provider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER) as string | null;
     const statusEl = document.getElementById('model-status');
     if (!statusEl) return;
 
-    if (provider && PROVIDERS[provider]) {
+    if (provider && typeof provider === 'string' && provider in PROVIDERS) {
         // 🔐 P0优化: 使用安全存储读取配置
         const config = await StorageService.getLLMConfigWithKey(provider);
-        if (config && config.apiKey && config.model) {
+        const providerKey = provider as keyof typeof PROVIDERS;
+        const providerInfo = PROVIDERS[providerKey];
+        if (config && config.apiKey && config.model && providerInfo) {
             statusEl.innerHTML = `
                 <span class="status-dot status-success"></span>
                 <span class="text-slate-600 text-xs font-medium flex items-center gap-1">
-                    ${escapeHtml(PROVIDERS[provider].name)}: <span class="font-mono text-blue-600">${escapeHtml(config.model)}</span>
+                    ${escapeHtml(providerInfo.name)}: <span class="font-mono text-blue-600">${escapeHtml(config.model)}</span>
                 </span>
             `;
             return;

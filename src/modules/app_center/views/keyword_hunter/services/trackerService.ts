@@ -124,9 +124,9 @@ export function calculateWordFrequency(text: string): WordFrequency[] {
 
 async function bridgeCallLLM(systemPrompt: string, userPrompt: string, options: { temperature?: number; jsonMode?: boolean } = {}): Promise<string> {
     // 使用 StorageService 获取 LLM 配置
-    const activeProvider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
+    const activeProvider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER) as string | null;
 
-    if (!activeProvider) {
+    if (!activeProvider || typeof activeProvider !== 'string') {
         throw new Error("请先在全局设置中选择 LLM 提供商");
     }
 
@@ -141,7 +141,7 @@ async function bridgeCallLLM(systemPrompt: string, userPrompt: string, options: 
         throw new Error("所选提供商未配置 API Key");
     }
 
-    const targetModel = config.model || (config.models && config.models[0] ? config.models[0].id : undefined);
+    const targetModel = config.model || (config.models && config.models[0] ? (typeof config.models[0] === 'string' ? config.models[0] : config.models[0].id) : undefined);
     if (!targetModel) throw new Error("未选择模型，请在设置中同步或选择模型");
 
     const messages = [
@@ -157,7 +157,7 @@ async function bridgeCallLLM(systemPrompt: string, userPrompt: string, options: 
 
     return await callLLM(
         messages,
-        activeProvider,
+        activeProvider as string,
         config.endpoint,
         config.apiKey,
         targetModel,

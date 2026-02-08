@@ -431,8 +431,8 @@ class AnalysisModule extends BaseModule {
     const isListingSelected = (document.getElementById("opt-listing") as HTMLInputElement)?.checked;
     const isReviewsSelected = (document.getElementById("opt-reviews") as HTMLInputElement)?.checked;
 
-    const provider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
-    if (!provider) {
+    const provider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER) as string | null;
+    if (!provider || typeof provider !== 'string') {
       showToast("请先配置AI模型", "warning");
       return;
     }
@@ -482,7 +482,7 @@ class AnalysisModule extends BaseModule {
 
     try {
       const llmConfig = {
-        provider,
+        provider: provider as string,
         endpoint: config.endpoint,
         apiKey: config.apiKey,
         model: config.model,
@@ -677,8 +677,10 @@ class AnalysisModule extends BaseModule {
     const select = document.getElementById("translation-model-select") as HTMLSelectElement;
     if (!select) return;
 
-    const activeProvider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
-    const providerConfig = activeProvider ? PROVIDERS[activeProvider] : null;
+    const activeProvider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER) as string | null;
+    const providerConfig = (activeProvider && typeof activeProvider === 'string' && activeProvider in PROVIDERS) 
+      ? PROVIDERS[activeProvider as keyof typeof PROVIDERS] 
+      : null;
 
     let options = "";
 
@@ -929,8 +931,8 @@ class AnalysisModule extends BaseModule {
       return;
     }
 
-    const provider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
-    if (!provider) {
+    const provider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER) as string | null;
+    if (!provider || typeof provider !== 'string') {
       showToast("请先配置AI模型", "warning");
       return;
     }
@@ -954,7 +956,7 @@ class AnalysisModule extends BaseModule {
 
     try {
       const llmConfig = {
-        provider,
+        provider: provider as string,
         endpoint: config.endpoint,
         apiKey: config.apiKey,
         model: selectedModel,
