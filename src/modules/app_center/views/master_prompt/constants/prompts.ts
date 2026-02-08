@@ -1,8 +1,21 @@
-// src/modules/app_center/master_prompt/constants/prompts.js
+// src/modules/app_center/master_prompt/constants/prompts.ts
 // ================================================================
 // Master Prompt 模块 - 提示词常量
 // 包含 PromptLab 和 Analysis 功能的所有提示词模板
 // ================================================================
+
+/**
+ * 分析模块定义
+ */
+export interface AnalysisModule {
+    id: string;
+    category: 'listing' | 'reviews' | 'cross';
+    label_cn: string;
+    desc_cn: string;
+    label_en: string;
+    desc_en: string;
+    extraction_instruction: string;
+}
 
 /**
  * 核心 JSON 规则 (所有模板共用)
@@ -21,7 +34,7 @@ const CORE_JSON_RULES = `
  * label_en/extraction_instruction -> 传给 LLM (英文)
  * label_cn/desc_cn -> UI 展示 (中文)
  */
-export const ANALYSIS_MODULES = [
+export const ANALYSIS_MODULES: AnalysisModule[] = [
   // --- 1. Listing Base Analysis (文案基建) ---
   {
     id: "title_seo_roots",
