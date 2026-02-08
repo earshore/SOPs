@@ -377,13 +377,16 @@ function renderCopyDisplay(): void {
     if (state.keywordTracker.translationMode && state.keywordTracker.paragraphs && state.keywordTracker.paragraphs.length > 0) {
         let html = '';
         state.keywordTracker.paragraphs.forEach(p => {
-            const highlightedOriginal = highlightText(p.original);
-            html += `<div class="mb-4">`;
-            html += `<div class="paragraph-original leading-relaxed">${highlightedOriginal}</div>`;
-            if (showTrans && p.translation) {
-                html += `<div class="sentence-translation">${escapeHtml(p.translation)}</div>`;
+            // 类型守卫: 检查是否为ParagraphData对象
+            if (typeof p === 'object' && 'original' in p) {
+                const highlightedOriginal = highlightText(p.original);
+                html += `<div class="mb-4">`;
+                html += `<div class="paragraph-original leading-relaxed">${highlightedOriginal}</div>`;
+                if (showTrans && p.translation) {
+                    html += `<div class="sentence-translation">${escapeHtml(p.translation)}</div>`;
+                }
+                html += `</div>`;
             }
-            html += `</div>`;
         });
         // ✅ 安全: 静态HTML模板，无用户输入
         display.innerHTML = html;
@@ -606,7 +609,7 @@ function syncToInput(): void {
     if (state.keywordTracker.translationMode && state.keywordTracker.paragraphs && state.keywordTracker.paragraphs.length > 0) {
         // 从 paragraphs 中提取所有原文
         text = state.keywordTracker.paragraphs
-            .map(p => p.original)
+            .map(p => typeof p === 'object' && 'original' in p ? p.original : p)
             .filter(t => t && t.trim())
             .join('\n');
         
@@ -724,7 +727,7 @@ function locateKeywordInCopy(keyword: string): void {
     if (!state.keywordTracker.keywordLocationIndex) {
         state.keywordTracker.keywordLocationIndex = {};
     }
-    let idx = state.keywordTracker.keywordLocationIndex[targetKw] || 0;
+    let idx = state.keywordTracker.keywordLocationIndex[targetKw] as number || 0;
     if (idx >= groups.length) idx = 0;
 
     // 移除之前的聚焦高亮
@@ -734,12 +737,12 @@ function locateKeywordInCopy(keyword: string): void {
 
     // 聚焦当前组的所有 span
     const targetGroup = groups[idx]!;
-    targetGroup.forEach(span => {
-        span.classList.add('highlight-focus');
+    targetGroup.forEach((span: Element) => {
+        (span as HTMLElement).classList.add('highlight-focus');
     });
 
     // 滚动到第一个 span
-    targetGroup[0]!.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    (targetGroup[0] as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'center' });
 
     // 更新索引
     state.keywordTracker.keywordLocationIndex[targetKw] = (idx + 1) % groups.length;

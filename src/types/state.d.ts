@@ -4,6 +4,8 @@
 // 为应用状态提供完整的类型约束
 // ================================================================
 
+import type { AnalysisReport } from './modules-business';
+
 // ==================== UI状态 ====================
 
 /**
@@ -41,7 +43,7 @@ export interface ScrapedDataItem {
   reviews?: number;
   url?: string;
   image?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -71,8 +73,8 @@ export type ReportType = 'overview' | 'detailed' | 'comparison' | 'trend';
 export interface ReportData {
   type: ReportType;
   generatedAt: number;
-  data: any;
-  charts?: any[];
+  data: Record<string, unknown>;
+  charts?: Array<Record<string, unknown>>;
   summary?: string;
 }
 
@@ -82,12 +84,12 @@ export interface ReportData {
 export interface AnalysisState {
   selectedAsins: string[];
   reportData?: ReportData | null;
-  analysisReport?: any | null;
-  translatedReport?: any | null;
+  analysisReport?: AnalysisReport | string | null;
+  translatedReport?: AnalysisReport | null;
   expandedAsin?: string | null;
   isEditing?: boolean;
   showTranslation?: boolean;
-  editHistory?: any[];
+  editHistory?: Array<AnalysisReport | string>;
   lastTranslationModel?: string | null;
   isAnalyzing?: boolean;
   filters?: {
@@ -178,18 +180,26 @@ export interface KeywordTrackerSettings {
 }
 
 /**
+ * 段落数据
+ */
+export interface ParagraphData {
+  original: string;
+  translation?: string;
+}
+
+/**
  * KeywordTracker状态
  */
 export interface KeywordTrackerState {
-  keywords: any[];
+  keywords: string[];
   processedCopy: string;
   formattedCopy: string;
-  matchedKeywords: any[];
-  unmatchedKeywords: any[];
-  wordFrequency: any[];
-  paragraphs: any[];
+  matchedKeywords: Array<{ keyword: string; count: number }>;
+  unmatchedKeywords: string[];
+  wordFrequency: Array<[string, number]>;
+  paragraphs: Array<string | ParagraphData>;
   translationMode: boolean;
-  keywordLocationIndex: Record<string, any>;
+  keywordLocationIndex: Record<string, number | number[]>;
   settings: KeywordTrackerSettings;
   isWindowMinimized: boolean;
   trackingData?: TrackingData | null;
@@ -356,10 +366,10 @@ export interface BatchUpdateAction {
   type: 'BATCH_UPDATE';
   changes: Array<{
     path: StatePath;
-    value: any;
-    oldValue?: any;
+    value: unknown;
+    oldValue?: unknown;
   }>;
-  meta?: Record<string, any>;
+  meta?: Record<string, unknown>;
 }
 
 /**

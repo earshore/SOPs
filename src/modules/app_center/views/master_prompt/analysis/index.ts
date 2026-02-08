@@ -522,7 +522,7 @@ class AnalysisModule extends BaseModule {
       state.analysis.analysisReport = report;
       state.analysis.translatedReport = null;
       state.analysis.showTranslation = false;
-      state.analysis.editHistory = [JSON.stringify(report)];
+      state.analysis.editHistory = [JSON.stringify(report) as any];
       state.analysis.isEditing = false;
 
       HistoryService.save(state.scraper.scrapedData, report);
@@ -564,6 +564,12 @@ class AnalysisModule extends BaseModule {
   renderReport(): void {
     const report = state.analysis.analysisReport;
     if (!report) return;
+    
+    // 🔐 类型守卫: 确保 report 是对象类型
+    if (typeof report === 'string') {
+      console.warn('[Analysis] analysisReport 是字符串类型,跳过渲染');
+      return;
+    }
 
     if (!state.analysis.translatedReport) state.analysis.showTranslation = false;
 
@@ -582,7 +588,7 @@ class AnalysisModule extends BaseModule {
 
     if (report.parse_error) {
       if (display) {
-        display.innerHTML = `<div class="p-6 bg-red-50 border border-red-200 rounded-xl text-red-700 font-mono text-sm whitespace-pre-wrap"><i class="fas fa-bug mr-2"></i> ⚠️ 解析错误，原始数据：\n${escapeHtml(report.raw_response)}</div>`;
+        display.innerHTML = `<div class="p-6 bg-red-50 border border-red-200 rounded-xl text-red-700 font-mono text-sm whitespace-pre-wrap"><i class="fas fa-bug mr-2"></i> ⚠️ 解析错误，原始数据：\n${escapeHtml(report.raw_response || '')}</div>`;
       }
       return;
     }
@@ -908,6 +914,12 @@ class AnalysisModule extends BaseModule {
   async translateReport(): Promise<void> {
     if (state.analysis.showTranslation && state.analysis.translatedReport) return;
     if (!state.analysis.analysisReport) return;
+    
+    // 🔐 类型守卫: 确保 analysisReport 是对象类型
+    if (typeof state.analysis.analysisReport === 'string') {
+      showToast("报告格式错误", "error");
+      return;
+    }
 
     const provider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
     if (!provider) {
@@ -1086,8 +1098,8 @@ class AnalysisModule extends BaseModule {
       }
       
       // 保存布局
-      const templateId = state.analysis.analysisReport?.meta?.templateId || "default";
-      this.saveGridLayout(templateId);
+      const templateId = (state.analysis.analysisReport as any)?.templateId || (state.analysis.analysisReport as any)?.meta?.templateId || "default";
+      this.saveGridLayout(templateId as string);
     }
   }
 
@@ -1168,8 +1180,10 @@ class AnalysisModule extends BaseModule {
       ? state.analysis.translatedReport 
       : state.analysis.analysisReport;
     
+    if (!report) return;
+    
     if (!this.originalDataMap.has(key)) {
-      this.originalDataMap.set(key, JSON.parse(JSON.stringify(report[key])));
+      this.originalDataMap.set(key, JSON.parse(JSON.stringify((report as any)[key])));
     }
 
     // 初始化编辑历史
@@ -1183,7 +1197,7 @@ class AnalysisModule extends BaseModule {
 
     // 渲染编辑表单
     // ✅ 安全: 静态HTML模板，无用户输入
-    contentArea.innerHTML = renderEditorForm(key, report[key]);
+    contentArea.innerHTML = renderEditorForm(key, (report as any)[key]);
   }
 
   saveLocalEdit(key: string): void {
@@ -1201,6 +1215,9 @@ class AnalysisModule extends BaseModule {
     const report = state.analysis.showTranslation && state.analysis.translatedReport 
       ? state.analysis.translatedReport 
       : state.analysis.analysisReport;
+    
+    // 🔐 类型守卫: 确保 report 存在且是对象类型
+    if (!report || typeof report === 'string') return;
     
     report[key] = newData;
 
@@ -1237,6 +1254,9 @@ class AnalysisModule extends BaseModule {
     const report = state.analysis.showTranslation && state.analysis.translatedReport 
       ? state.analysis.translatedReport 
       : state.analysis.analysisReport;
+    
+    // 🔐 类型守卫: 确保 report 存在且是对象类型
+    if (!report || typeof report === 'string') return;
     
     report[key] = JSON.parse(JSON.stringify(originalData));
 

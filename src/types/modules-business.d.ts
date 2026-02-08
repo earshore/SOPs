@@ -122,11 +122,14 @@ export interface LLMConfig {
 export interface AnalysisReport {
   targetMarket?: string;
   language?: string;
-  meta?: any;
+  templateUsed?: string;
+  templateId?: string;
+  generatedAt?: number;
+  meta?: Record<string, unknown>;
   parse_error?: boolean;
   raw_response?: string;
   error_detail?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**

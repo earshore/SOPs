@@ -16,6 +16,7 @@ import SITE_CONFIGS from '../../../../../common/constants/constants';
 import { ANALYSIS_MODULES } from '../constants/prompts';
 import { showToast } from '../../../../../common/ui';
 import { registerActionsWithLegacy, unregisterActions } from '../../../../../common/utils/actionRegistry';
+import type { AnalysisReport } from '../../../../../types/modules-business';
 
 import '../master_prompt_style.css';
 
@@ -465,7 +466,11 @@ function generateMasterPrompt(): void {
     const outEl = document.getElementById("final-prompt-output") as HTMLTextAreaElement;
     if (!outEl) return;
 
-    const result = promptlabService.generateMasterPrompt(inputs as any, state.analysis.analysisReport);
+    // 🔐 类型守卫: 确保 analysisReport 是对象类型或 null
+    const analysisReport = state.analysis.analysisReport;
+    const reportToUse: AnalysisReport | null = (typeof analysisReport === 'string' || !analysisReport) ? null : analysisReport;
+    
+    const result = promptlabService.generateMasterPrompt(inputs as any, reportToUse);
     listingPromptCache = result; // 缓存到模块状态
     outEl.value = result;
     updateCharCount();
@@ -494,7 +499,11 @@ function generateVisualPrompt(): void {
     const outEl = document.getElementById("final-prompt-output") as HTMLTextAreaElement;
     if (!outEl) return;
 
-    const result = promptlabService.generateVisualPrompt(inputs as any, state.analysis.analysisReport);
+    // 🔐 类型守卫: 确保 analysisReport 是对象类型或 null
+    const analysisReport = state.analysis.analysisReport;
+    const reportToUse: AnalysisReport | null = (typeof analysisReport === 'string' || !analysisReport) ? null : analysisReport;
+    
+    const result = promptlabService.generateVisualPrompt(inputs as any, reportToUse);
     visualPromptCache = result; // 缓存到模块状态
     outEl.value = result;
     updateCharCount();

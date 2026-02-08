@@ -4,6 +4,8 @@
 // 集中管理所有应用级事件名称，避免硬编码字符串
 // ================================================================
 
+import type { RouteConfig, Route } from '@/types/config';
+
 /**
  * 应用级事件常量
  * 命名规范: APP_[模块]_[动作]
@@ -124,8 +126,8 @@ export type AppEventType = typeof APP_EVENTS[keyof typeof APP_EVENTS];
  */
 export interface RouteChangedEventDetail {
   routeId: string;
-  config: any;
-  from?: any;
+  config: RouteConfig;
+  from?: Route;
 }
 
 /**
@@ -143,7 +145,7 @@ export interface ModuleMountedEventDetail {
 export interface ErrorOccurredEventDetail {
   error: Error;
   source: string;
-  context?: any;
+  context?: Record<string, unknown>;
 }
 
 /**
@@ -151,8 +153,8 @@ export interface ErrorOccurredEventDetail {
  */
 export interface StateUpdatedEventDetail {
   path: string;
-  value: any;
-  oldValue?: any;
+  value: unknown;
+  oldValue?: unknown;
 }
 
 /**
@@ -160,7 +162,7 @@ export interface StateUpdatedEventDetail {
  */
 export interface DataLoadedEventDetail {
   dataType: string;
-  data: any;
+  data: unknown;
   source?: string;
 }
 
@@ -171,7 +173,7 @@ export interface LLMRequestEventDetail {
   requestId: string;
   model?: string;
   prompt?: string;
-  response?: any;
+  response?: string;
   error?: Error;
 }
 
@@ -180,7 +182,7 @@ export interface LLMRequestEventDetail {
  */
 export interface AppEventDetail {
   timestamp: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // ==================== 辅助函数 ====================
