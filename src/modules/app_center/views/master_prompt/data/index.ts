@@ -17,7 +17,7 @@ import { StorageService } from '../../../../../services/storageService';
 import { languageFlagMap, SITE_NAME_MAP, SITE_DOMAIN_MAP } from '../../../../../common/constants/constants';
 import eventBus from '../../../../../common/EventBus';
 import { APP_EVENTS, MODULE_EVENTS } from '../../../../../common/constants/eventConstants';
-import type { ScrapedProduct, CustomerReview, ScraperStatus } from '../../../../../types/modules-business';
+import type { ScrapedProduct, CustomerReview, ScraperStatus, ScraperSite } from '../../../../../types/modules-business';
 
 import '../master_prompt_style.css';
 
@@ -34,7 +34,11 @@ interface Product {
     customer_reviews: Review[];
     scrape_status: ScraperStatus;
     error: string;
-    metadata?: Record<string, any>;
+    metadata?: {
+        marketplace?: string;
+        scrape_timestamp?: string;
+        [key: string]: unknown;
+    };
     _source_site?: string;
     _filename?: string;
 }
@@ -52,8 +56,15 @@ interface Review {
 }
 
 interface FileData {
-    data: ScrapedProduct | ScrapedProduct[] | { products: ScrapedProduct[] };
+    data: ScrapedProduct | ScrapedProduct[] | { products: ScrapedProduct[]; metadata?: { marketplace?: string; [key: string]: unknown } };
     filename: string;
+}
+
+// 扩展 Window 接口以支持全局模块实例
+declare global {
+    interface Window {
+        dataModule?: DataModule;
+    }
 }
 
 // ========================================== 
@@ -106,16 +117,20 @@ class DataModule extends BaseModule {
         // 状态已经保存在 state.scraper.scrapedData 中
         // 保存 UI 状态
         if (state.masterPrompt) {
-            (state.masterPrompt as any).expandedAsin = (state as any).expandedAsin;
-            (state.masterPrompt as any).currentDataTab = (state as any).currentDataTab;
+            const masterPromptState = state.masterPrompt as { expandedAsin?: string | null; currentDataTab?: string };
+            const stateWithUI = state as { expandedAsin?: string | null; currentDataTab?: string };
+            masterPromptState.expandedAsin = stateWithUI.expandedAsin;
+            masterPromptState.currentDataTab = stateWithUI.currentDataTab;
         }
     }
 
     restoreState(): void {
         // 恢复 UI 状态
         if (state.masterPrompt) {
-            (state as any).expandedAsin = (state.masterPrompt as any).expandedAsin || null;
-            (state as any).currentDataTab = (state.masterPrompt as any).currentDataTab || 'preview';
+            const masterPromptState = state.masterPrompt as { expandedAsin?: string | null; currentDataTab?: string };
+            const stateWithUI = state as { expandedAsin?: string | null; currentDataTab?: string };
+            stateWithUI.expandedAsin = masterPromptState.expandedAsin || null;
+            stateWithUI.currentDataTab = masterPromptState.currentDataTab || 'preview';
         }
     }
 
@@ -129,12 +144,13 @@ class DataModule extends BaseModule {
         if (!cardBody) return;
 
         const isCurrentlyHidden = cardBody.classList.contains("hidden");
+        const stateWithUI = state as { expandedAsin?: string | null };
 
         if (isCurrentlyHidden) {
-            if ((state as any).expandedAsin && (state as any).expandedAsin !== asin) {
-                const prevBody = document.getElementById(`card-body-${(state as any).expandedAsin}`);
-                const prevIcon = document.getElementById(`card-icon-${(state as any).expandedAsin}`);
-                const prevContainer = document.getElementById(`card-${(state as any).expandedAsin}`);
+            if (stateWithUI.expandedAsin && stateWithUI.expandedAsin !== asin) {
+                const prevBody = document.getElementById(`card-body-${stateWithUI.expandedAsin}`);
+                const prevIcon = document.getElementById(`card-icon-${stateWithUI.expandedAsin}`);
+                const prevContainer = document.getElementById(`card-${stateWithUI.expandedAsin}`);
 
                 if (prevBody) prevBody.classList.add("hidden");
                 if (prevIcon) prevIcon.classList.remove("rotate-180");
@@ -146,13 +162,13 @@ class DataModule extends BaseModule {
             cardContainer?.classList.add("ring-1", "ring-blue-500", "bg-blue-50/30");
             if (cardIcon) cardIcon.classList.add("rotate-180");
 
-            (state as any).expandedAsin = asin;
+            stateWithUI.expandedAsin = asin;
         } else {
             cardBody.classList.add("hidden");
             cardContainer?.classList.remove("ring-1", "ring-blue-500", "bg-blue-50/30");
             if (cardIcon) cardIcon.classList.remove("rotate-180");
 
-            (state as any).expandedAsin = null;
+            stateWithUI.expandedAsin = null;
         }
     }
 
@@ -189,7 +205,8 @@ class DataModule extends BaseModule {
 
         // ✅ 安全: 静态HTML模板，无用户输入
         cardsEl.innerHTML = state.scraper.scrapedData.products.map((p: ScrapedProduct) => {
-            const isExpanded = (state as any).expandedAsin === p.asin;
+            const stateWithUI = state as { expandedAsin?: string | null };
+            const isExpanded = stateWithUI.expandedAsin === p.asin;
             let siteKey = globalSiteCode || p.language || "US";
             if (siteKey === 'UK') siteKey = 'GB';
             const flag = languageFlagMap[siteKey] || "🌐";
@@ -395,7 +412,7 @@ class DataModule extends BaseModule {
                 return;
             }
 
-            const modal = document.getElementById('delete-confirm-modal') as any;
+            const modal = document.getElementById('delete-confirm-modal') as HTMLElement & { open: () => void; close: () => void };
             const titleEl = document.getElementById('del-modal-title');
             const descEl = document.getElementById('del-modal-desc');
             const checkbox = document.getElementById('del-dont-ask') as HTMLInputElement;
@@ -451,7 +468,8 @@ class DataModule extends BaseModule {
                 
                 // 类型守卫: 检查是否是包含products的对象
                 if (!Array.isArray(data) && 'products' in data) {
-                    fileSite = (data as any).metadata?.marketplace || null;
+                    const dataWithMeta = data as { products: ScrapedProduct[]; metadata?: { marketplace?: string } };
+                    fileSite = dataWithMeta.metadata?.marketplace || null;
                 } else if (!Array.isArray(data) && 'metadata' in data) {
                     // 单个产品对象
                     fileSite = (data as ScrapedProduct).metadata?.marketplace || null;
@@ -466,7 +484,7 @@ class DataModule extends BaseModule {
                 // 标准化为数组
                 const list: ScrapedProduct[] = Array.isArray(data) 
                     ? data 
-                    : ('products' in data ? data.products : [data as ScrapedProduct]);
+                    : ('products' in data ? (data as { products: ScrapedProduct[] }).products : [data as ScrapedProduct]);
 
                 list.forEach((p: ScrapedProduct) => {
                     if (!p.asin) return;
@@ -475,7 +493,7 @@ class DataModule extends BaseModule {
                     }
                     productPool.get(p.asin)!.push({
                         ...p,
-                        customer_reviews: p.customer_reviews as any as Review[],
+                        customer_reviews: p.customer_reviews as unknown as Review[],
                         _source_site: site,
                         _filename: filename
                     } as Product);
@@ -514,7 +532,7 @@ class DataModule extends BaseModule {
                 if (!mergedProduct.metadata) mergedProduct.metadata = {};
 
                 const allReviewSources: Product[] = [];
-                if (existingVersion) allReviewSources.push(existingVersion as any as Product);
+                if (existingVersion) allReviewSources.push(existingVersion as unknown as Product);
                 allReviewSources.push(...versions);
 
                 const uniqueReviewsMap = new Map<string, Review>();
@@ -525,7 +543,8 @@ class DataModule extends BaseModule {
                             const sig = this.getReviewSignature(r);
                             if (!uniqueReviewsMap.has(sig)) {
                                 if (ver._source_site && ver._source_site !== "Unknown") {
-                                    (r as any)._origin_site = ver._source_site;
+                                    const reviewWithOrigin = r as Review & { _origin_site?: string };
+                                    reviewWithOrigin._origin_site = ver._source_site;
                                 }
                                 uniqueReviewsMap.set(sig, r);
                             }
@@ -534,13 +553,13 @@ class DataModule extends BaseModule {
                 });
 
                 mergedProduct.customer_reviews = Array.from(uniqueReviewsMap.values()) as Review[];
-                delete (mergedProduct as any)._source_site;
-                delete (mergedProduct as any)._filename;
+                delete mergedProduct._source_site;
+                delete mergedProduct._filename;
                 finalProducts.push(mergedProduct);
             }
 
             if (!hasExistingData) {
-                state.scraper.selectedSite = targetMarketplace as any;
+                state.scraper.selectedSite = targetMarketplace as ScraperSite | '';
                 const siteSelect = document.getElementById("site-select") as HTMLSelectElement;
                 if (siteSelect) {
                     siteSelect.value = targetMarketplace || '';
@@ -555,7 +574,7 @@ class DataModule extends BaseModule {
                     total_asins: finalProducts.length,
                     last_action: "multi_site_import_merge"
                 },
-                products: finalProducts as any as ScrapedProduct[]
+                products: finalProducts as unknown as ScrapedProduct[]
             };
 
             state.analysis.analysisReport = null;
@@ -722,7 +741,8 @@ class DataModule extends BaseModule {
     }
 
     switchDataTab(tab: string): void {
-        (state as any).currentDataTab = tab;
+        const stateWithUI = state as { currentDataTab?: string };
+        stateWithUI.currentDataTab = tab;
 
         const previewEl = document.getElementById("data-preview");
         const jsonEl = document.getElementById("data-json");
@@ -770,7 +790,7 @@ export async function mount(container: HTMLElement): Promise<void> {
         moduleInstance.restoreState();
         
         // 5. 暴露到全局（用于 onclick 事件）
-        (window as any).dataModule = moduleInstance;
+        window.dataModule = moduleInstance;
 
         console.log('[Data] ✅ 子模块挂载成功');
     } catch (error) {
@@ -792,8 +812,8 @@ export function unmount(): void {
         }
         
         // 清理全局引用
-        if ((window as any).dataModule) {
-            delete (window as any).dataModule;
+        if (window.dataModule) {
+            delete window.dataModule;
         }
 
         console.log('[Data] ✅ 子模块卸载成功');

@@ -25,7 +25,7 @@ export interface UIState {
 /**
  * 采集站点类型
  */
-export type ScraperSite = 'amazon' | 'ebay' | 'walmart' | 'custom';
+export type ScraperSite = 'amazon.com' | 'amazon.de' | 'amazon.co.uk' | 'amazon.fr' | 'amazon.it' | 'amazon.es' | 'amazon.ca' | 'amazon.co.jp';
 
 /**
  * 采集状态
