@@ -1,9 +1,8 @@
-// src/modules/master_prompt/services/analysisService.js
-// @ts-check
-// ================================================= ===============
-// 🎯 P2 重构: 添加完整的 JSDoc 类型注释
+// src/modules/master_prompt/services/analysisService.ts
+// ================================================================
+// 🎯 P2 重构: 添加完整的类型注释
 // 🛡️ Phase 1: 增强鲁棒性 - 改进解析逻辑与类型检查
-// ================================================= ===============
+// ================================================================
 
 import { callLLM } from "../../../../../services/llmService";
 import { TRANSLATE_PROMPT_TEMPLATE } from "../constants/prompts";
@@ -12,50 +11,41 @@ import { TRANSLATE_PROMPT_TEMPLATE } from "../constants/prompts";
 // 类型定义
 // ======================== 
 
-/**
- * 产品数据对象
- * @typedef {Object} ProductData
- * @property {string} asin - Amazon 标准识别码
- * @property {string} [productTitle] - 产品标题
- * @property {string[]} [feature_bullets] - 五点描述
- * @property {CustomerReview[]} [customer_reviews] - 客户评论
- */
+interface CustomerReview {
+  body: string;
+  rating?: number;
+  title?: string;
+}
 
-/**
- * 客户评论对象
- * @typedef {Object} CustomerReview
- * @property {string} body - 评论正文
- * @property {number} [rating] - 评分 (1-5)
- * @property {string} [title] - 评论标题
- */
+interface ProductData {
+  asin: string;
+  productTitle?: string;
+  feature_bullets?: string[];
+  customer_reviews?: CustomerReview[];
+}
 
-/**
- * 数据维度选项
- * @typedef {Object} DataOptions
- * @property {boolean} [includeTitle] - 是否包含标题
- * @property {boolean} [includeBullets] - 是否包含五点描述
- * @property {boolean} [includeReviews] - 是否包含评论
- */
+interface DataOptions {
+  includeTitle?: boolean;
+  includeBullets?: boolean;
+  includeReviews?: boolean;
+}
 
-/**
- * LLM 配置对象
- * @typedef {Object} LLMConfig
- * @property {string} provider - 厂商标识
- * @property {string} endpoint - API 端点
- * @property {string} apiKey - API 密钥
- * @property {string} model - 模型名称
- */
+interface LLMConfig {
+  provider: string;
+  endpoint: string;
+  apiKey: string;
+  model: string;
+}
 
-/**
- * 分析报告对象
- * @typedef {Object} AnalysisReport
- * @property {string} [targetMarket] - 目标市场
- * @property {string} [language] - 语言
- * @property {Object} [meta] - 元数据
- * @property {boolean} [parse_error] - 解析是否出错
- * @property {string} [raw_response] - 原始响应 (解析失败时)
- * @property {string} [error_detail] - 错误详情
- */
+interface AnalysisReport {
+  targetMarket?: string;
+  language?: string;
+  meta?: any;
+  parse_error?: boolean;
+  raw_response?: string;
+  error_detail?: string;
+  [key: string]: any;
+}
 
 // ======================== 
 // 辅助函数
@@ -64,10 +54,8 @@ import { TRANSLATE_PROMPT_TEMPLATE } from "../constants/prompts";
 /**
  * 鲁棒性 JSON 提取器
  * 处理 Markdown 代码块及杂余文本
- * @param {string} text 
- * @returns {any}
  */
-function robustParseJSON(text) {
+function robustParseJSON(text: string): any {
   if (!text) return null;
   
   // 1. 尝试直接解析
@@ -101,20 +89,20 @@ export const AnalysisService = {
   /**
    * 执行竞品分析，生成分析报告
    *
-   * @param {ProductData[]} products - 选中的产品数据数组
-   * @param {string} promptTemplate - Prompt 模版 (包含 {{language}}, {{rawdataStr}}, {{category}} 占位符)
-   * @param {string} language - 目标语言 (如 "English", "German")
-   * @param {LLMConfig} llmConfig - LLM 配置对象
-   * @param {DataOptions} [dataOptions={}] - 数据维度选项
-   * @returns {Promise<AnalysisReport>} 分析报告对象
+   * @param products - 选中的产品数据数组
+   * @param promptTemplate - Prompt 模版 (包含 {{language}}, {{rawdataStr}}, {{category}} 占位符)
+   * @param language - 目标语言 (如 "English", "German")
+   * @param llmConfig - LLM 配置对象
+   * @param dataOptions - 数据维度选项
+   * @returns 分析报告对象
    */
   async generateReport(
-    products,
-    promptTemplate,
-    language,
-    llmConfig,
-    dataOptions = {}
-  ) {
+    products: ProductData[],
+    promptTemplate: string,
+    language: string,
+    llmConfig: LLMConfig,
+    dataOptions: DataOptions = {}
+  ): Promise<AnalysisReport> {
     const {
       includeTitle = true,
       includeBullets = true,
@@ -124,8 +112,7 @@ export const AnalysisService = {
     // 1. 动态构建数据字符串
     const rawdataStr = products
       .map((p) => {
-        /** @type {string[]} */
-        let parts = [`ASIN: ${p.asin}`];
+        const parts: string[] = [`ASIN: ${p.asin}`];
 
         if (includeTitle) {
           parts.push(`Title: ${p.productTitle || "N/A"}`);
@@ -171,7 +158,7 @@ export const AnalysisService = {
     try {
       return robustParseJSON(response);
     } catch (e) {
-      const error = /** @type {Error} */ (e);
+      const error = e as Error;
       console.warn("Analysis JSON Parse Failed:", error.message);
       return { 
         raw_response: response, 
@@ -184,12 +171,16 @@ export const AnalysisService = {
   /**
    * 翻译分析报告
    *
-   * @param {AnalysisReport} report - 原始分析报告
-   * @param {string} language - 目标翻译语言
-   * @param {LLMConfig} llmConfig - LLM 配置对象
-   * @returns {Promise<AnalysisReport>} 翻译后的报告
+   * @param report - 原始分析报告
+   * @param language - 目标翻译语言
+   * @param llmConfig - LLM 配置对象
+   * @returns 翻译后的报告
    */
-  async translateReport(report, language, llmConfig) {
+  async translateReport(
+    report: AnalysisReport, 
+    language: string, 
+    llmConfig: LLMConfig
+  ): Promise<AnalysisReport> {
     // 深拷贝并移除 meta 字段，减少 Token 消耗
     const toTranslate = JSON.parse(JSON.stringify(report));
     if (toTranslate.meta) delete toTranslate.meta;
@@ -211,7 +202,7 @@ export const AnalysisService = {
     try {
       return robustParseJSON(response);
     } catch (e) {
-      const error = /** @type {Error} */ (e);
+      const error = e as Error;
       console.warn("Translation JSON Parse Failed:", error.message);
       return { 
         ...report, // 返回原报告，但标记错误

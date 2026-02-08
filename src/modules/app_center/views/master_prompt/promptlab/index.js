@@ -12,7 +12,7 @@ import { escapeHtml } from '@/common/utils/security';
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import eventBus from '../../../../../common/EventBus.ts';
 import state from "../../../../../common/state";
-import { promptlabService } from '../services/promptlabService.js';
+import { promptlabService } from '../services/promptlabService';
 import SITE_CONFIGS from '../../../../../common/constants/constants';
 import { ANALYSIS_MODULES } from '../constants/prompts';
 import { showToast } from '../../../../../common/utils/ui.js';

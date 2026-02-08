@@ -1,13 +1,39 @@
-// src/modules/app_center/master_prompt/services/promptlabService.js
+// src/modules/app_center/master_prompt/services/promptlabService.ts
+
+// ----------------------------------------
+// 类型定义
+// ----------------------------------------
+
+interface PromptInputs {
+  useAnalysisData?: boolean;
+  selectedReportSections?: string[];
+  audience?: string;
+  usps?: string;
+  specs?: string;
+  keywordsTier1?: string;
+  keywordsTier2?: string;
+  socialHook?: string;
+  negative?: string;
+  tone?: string;
+  targetMarket?: string;
+  useCosmo?: boolean;
+  useRufus?: boolean;
+  useEmoji?: boolean;
+  customStrategy?: string;
+}
+
+interface AnalysisReport {
+  [key: string]: any;
+}
+
+// ----------------------------------------
+// 内部 Helper 函数
+// ----------------------------------------
 
 /**
- * ------------------------------------------------------------------
- * 内部 Helper 函数 (用于复用逻辑，不暴露给外部)
- * ------------------------------------------------------------------
+ * 构建竞品/市场分析上下文 (Context Section)
  */
-
-// 1. 构建竞品/市场分析上下文 (Context Section)
-const buildContextSection = (inputs, analysisReport) => {
+const buildContextSection = (inputs: PromptInputs, analysisReport: AnalysisReport | null): string => {
   const { useAnalysisData, selectedReportSections } = inputs;
 
   if (
@@ -29,7 +55,7 @@ const buildContextSection = (inputs, analysisReport) => {
       "marketplace",
     ].forEach((k) => delete cleanReport[k]);
 
-    const finalContextObj = {};
+    const finalContextObj: Record<string, any> = {};
     selectedReportSections.forEach((key) => {
       if (cleanReport[key]) finalContextObj[key] = cleanReport[key];
     });
@@ -45,13 +71,13 @@ const buildContextSection = (inputs, analysisReport) => {
   return "";
 };
 
-// 2. 构建产品 DNA (Product DNA Section)
-const buildProductSection = (inputs) => {
-  // ❌ 移除 productName，现在 Tier 1 兼任此职
+/**
+ * 构建产品 DNA (Product DNA Section)
+ */
+const buildProductSection = (inputs: PromptInputs): string => {
   const { audience, usps, specs } = inputs;
-  const dnaParts = [];
+  const dnaParts: string[] = [];
 
-  // 这里的 product name 移除，由下方的 SEO Tier 1 覆盖
   if (audience) dnaParts.push(`- **Target Audience**: ${audience}`);
   if (usps) dnaParts.push(`- **Core USPs**: \n${usps}`);
   if (specs) dnaParts.push(`- **Technical Specs**: \n${specs}`);
@@ -59,15 +85,15 @@ const buildProductSection = (inputs) => {
   return dnaParts.length > 0 ? `\n[PRODUCT DNA]\n${dnaParts.join("\n")}\n` : "";
 };
 
-// 构建 SEO 部分 (SEO Section)
-const buildSeoSection = (inputs, mode = "master") => {
-  // ❌ 移除 keywordsBackend
+/**
+ * 构建 SEO 部分 (SEO Section)
+ */
+const buildSeoSection = (inputs: PromptInputs, mode: 'master' | 'visual' = "master"): string => {
   const { keywordsTier1, keywordsTier2, socialHook, negative } = inputs;
-  const seoParts = [];
+  const seoParts: string[] = [];
   const isVisual = mode === "visual";
 
   // Tier 1 文案差异处理
-  // 这里明确标注 Tier 1 既是 SEO 核心，也是产品定义的基石
   const t1Label = isVisual
     ? "Tier 1 (Main Keyword / Product Definition)"
     : "Tier 1 (Title / Bullet 1 / Product Name)";
@@ -78,8 +104,6 @@ const buildSeoSection = (inputs, mode = "master") => {
     ? "Tier 2 (Longtail Keyword)"
     : "Tier 2 (Bullet 2-5)";
   if (keywordsTier2) seoParts.push(`- **${t2Label}**: ${keywordsTier2}`);
-
-  // ❌ Backend 部分已彻底移除
 
   // Social Hook 逻辑
   if (socialHook) {
@@ -100,23 +124,24 @@ const buildSeoSection = (inputs, mode = "master") => {
     : "";
 };
 
-/**
- * ------------------------------------------------------------------
- * 主服务导出
- * ------------------------------------------------------------------
- */
+// ----------------------------------------
+// 主服务导出
+// ----------------------------------------
+
 export const promptlabService = {
-  generateMasterPrompt: (inputs, analysisReport) => {
-    const { tone, targetMarket, useCosmo, useRufus, useEmoji, customStrategy } =
-      inputs;
+  /**
+   * 生成 Master Prompt
+   */
+  generateMasterPrompt: (inputs: PromptInputs, analysisReport: AnalysisReport | null): string => {
+    const { tone, targetMarket, useCosmo, useRufus, useEmoji, customStrategy } = inputs;
 
     // 复用 Helper 函数生成基础模块
     const contextSection = buildContextSection(inputs, analysisReport);
     const productSection = buildProductSection(inputs);
-    const seoSection = buildSeoSection(inputs, "master"); // 使用 master 模式文案
+    const seoSection = buildSeoSection(inputs, "master");
 
     // 4. Instructions (Master Prompt 特有的指令逻辑)
-    const styleInstructions = [];
+    const styleInstructions: string[] = [];
 
     // 语言
     if (targetMarket) {
@@ -191,16 +216,18 @@ Generate the complete Amazon Listing following the structure below:
 `.trim();
   },
 
-  // 🔥🔥🔥 Visual Blueprint 生成逻辑 🔥🔥🔥
-  generateVisualPrompt: (inputs, analysisReport) => {
+  /**
+   * 生成 Visual Blueprint
+   */
+  generateVisualPrompt: (inputs: PromptInputs, analysisReport: AnalysisReport | null): string => {
     const { targetMarket } = inputs;
 
     // 复用 Helper 函数生成基础模块
     const contextSection = buildContextSection(inputs, analysisReport);
     const productSection = buildProductSection(inputs);
-    const seoSection = buildSeoSection(inputs, "visual"); // 使用 visual 模式文案
+    const seoSection = buildSeoSection(inputs, "visual");
 
-    // 2. 组装 Visual Prompt (指令部分与 Master 不同，保持原样)
+    // 2. 组装 Visual Prompt
     return `
 # ROLE
 Act as an expert **Amazon Visual Merchandiser & Art Director** with 10+ years of experience in High-Conversion A+ Content (EBC) and Brand Story design for the **${targetMarket}** market.
