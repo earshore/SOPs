@@ -7,6 +7,7 @@
 
 import { ErrorService } from './errorService';
 import { configCenter } from '../common/config/ConfigCenter';
+import { EnvConfig } from '../common/config/envConfig';
 
 // ========================
 // 类型定义
@@ -146,7 +147,7 @@ export async function callLLM(
   }
 
   // 标准化 endpoint (开发/生产环境自动适配)
-  const normalizedEndpoint = configCenter.get('api.baseUrl') || endpoint;
+  const normalizedEndpoint = EnvConfig.api.normalizeEndpoint(endpoint);
 
   // 🔍 调试：始终输出配置信息（用于诊断生产环境问题）
   if (!(callLLM as any)._configLogged) {
@@ -308,7 +309,7 @@ export async function fetchModelsFromApi(
     }
 
     // 标准化 endpoint (开发/生产环境自动适配)
-    const normalizedEndpoint = configCenter.get('api.baseUrl') || endpoint;
+    const normalizedEndpoint = EnvConfig.api.normalizeEndpoint(endpoint);
 
     // 🔍 调试：始终输出配置信息（用于诊断生产环境问题）
     if (!(fetchModelsFromApi as any)._configLogged) {
