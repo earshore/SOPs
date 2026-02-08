@@ -22,10 +22,10 @@ import '../keyword_hunter_style.css';
 // Module State
 // ========================================== 
 
-interface EventListener {
+interface EventListenerRecord {
     element: HTMLElement | Document;
     event: string;
-    handler: EventListener;
+    handler: EventListenerOrEventListenerObject;
 }
 
 interface FloatWinState {
@@ -34,7 +34,7 @@ interface FloatWinState {
     offsetY: number;
 }
 
-let eventListeners: EventListener[] = []; // 用于清理事件监听器
+let eventListeners: EventListenerRecord[] = []; // 用于清理事件监听器
 let timeouts: number[] = []; // 用于清理定时器
 let registeredActionNames: string[] = []; // 用于清理已注册的动作
 let floatWinState: FloatWinState = {
@@ -50,8 +50,8 @@ let floatWinState: FloatWinState = {
 /**
  * 添加事件监听器（带自动清理）
  */
-function addEventListener(element: HTMLElement | Document, event: string, handler: EventListener): void {
-    element.addEventListener(event, handler as any);
+function addEventListener(element: HTMLElement | Document, event: string, handler: EventListenerOrEventListenerObject): void {
+    element.addEventListener(event, handler);
     eventListeners.push({ element, event, handler });
 }
 
@@ -70,7 +70,7 @@ function addTimeout(callback: () => void, delay: number): number {
 function cleanup(): void {
     // 清理事件监听器
     eventListeners.forEach(({ element, event, handler }) => {
-        element.removeEventListener(event, handler as any);
+        element.removeEventListener(event, handler);
     });
     eventListeners = [];
 
@@ -135,7 +135,24 @@ function escapeRegex(string: string): string {
  */
 function saveProcessStateToState(): void {
     if (!state.keywordTracker) {
-        state.keywordTracker = {} as any;
+        state.keywordTracker = {
+            keywords: [],
+            processedCopy: '',
+            formattedCopy: '',
+            matchedKeywords: [],
+            unmatchedKeywords: [],
+            wordFrequency: [],
+            paragraphs: [],
+            translationMode: false,
+            keywordLocationIndex: {},
+            settings: {
+                matchPlural: false,
+                matchStem: false,
+                matchCase: false,
+                matchPartial: false
+            },
+            isWindowMinimized: false
+        };
     }
 
     // 保存文案显示内容
@@ -191,7 +208,24 @@ function renderProcessModule(): void {
  */
 function renderAnalysisStats(): void {
     if (!state.keywordTracker) {
-        state.keywordTracker = {} as any;
+        state.keywordTracker = {
+            keywords: [],
+            processedCopy: '',
+            formattedCopy: '',
+            matchedKeywords: [],
+            unmatchedKeywords: [],
+            wordFrequency: [],
+            paragraphs: [],
+            translationMode: false,
+            keywordLocationIndex: {},
+            settings: {
+                matchPlural: false,
+                matchStem: false,
+                matchCase: false,
+                matchPartial: false
+            },
+            isWindowMinimized: false
+        };
     }
 
     const total = state.keywordTracker.keywords ? state.keywordTracker.keywords.length : 0;
@@ -635,8 +669,8 @@ function syncToInput(): void {
     }
 
     // 切换到输入模块
-    if ((window as any).switchTab) {
-        (window as any).switchTab('kw_input');
+    if (window.switchTab) {
+        window.switchTab('kw_input');
     }
 
     showToast("已同步原文到输入模块");
@@ -897,21 +931,23 @@ function setupFloatingWindow(): void {
     const header = el.querySelector('.floating-header') as HTMLElement | null;
     if (!header) return;
 
-    addEventListener(header, 'mousedown', ((e: MouseEvent) => {
+    addEventListener(header, 'mousedown', (e: Event) => {
+        const mouseEvent = e as MouseEvent;
         floatWinState.isDragging = true;
-        floatWinState.offsetX = e.clientX - el.getBoundingClientRect().left;
-        floatWinState.offsetY = e.clientY - el.getBoundingClientRect().top;
+        floatWinState.offsetX = mouseEvent.clientX - el.getBoundingClientRect().left;
+        floatWinState.offsetY = mouseEvent.clientY - el.getBoundingClientRect().top;
 
         el.style.opacity = '0.9';
         el.style.transition = 'none';
-        e.preventDefault();
-    }) as any);
+        mouseEvent.preventDefault();
+    });
 
-    addEventListener(document, 'mousemove', ((e: MouseEvent) => {
+    addEventListener(document, 'mousemove', (e: Event) => {
+        const mouseEvent = e as MouseEvent;
         if (!floatWinState.isDragging) return;
 
-        let newX = e.clientX - floatWinState.offsetX;
-        let newY = e.clientY - floatWinState.offsetY;
+        let newX = mouseEvent.clientX - floatWinState.offsetX;
+        let newY = mouseEvent.clientY - floatWinState.offsetY;
 
         const maxX = window.innerWidth - el.offsetWidth;
         const maxY = window.innerHeight - el.offsetHeight;
@@ -922,9 +958,9 @@ function setupFloatingWindow(): void {
         el.style.left = newX + 'px';
         el.style.top = newY + 'px';
         el.style.right = 'auto';
-    }) as any);
+    });
 
-    addEventListener(document, 'mouseup', (() => {
+    addEventListener(document, 'mouseup', () => {
         if (!floatWinState.isDragging) return;
         floatWinState.isDragging = false;
 
@@ -941,7 +977,7 @@ function setupFloatingWindow(): void {
         } else if (rect.left < threshold) {
             el.style.left = '20px';
         }
-    }) as any);
+    });
 }
 
 /**
@@ -992,10 +1028,10 @@ function setupEventListeners(container: HTMLElement): void {
     // 翻译显示复选框
     const checkTrans = document.getElementById('kt-show-translation') as HTMLInputElement | null;
     if (checkTrans) {
-        addEventListener(checkTrans, 'change', (() => {
+        addEventListener(checkTrans, 'change', () => {
             saveProcessStateToState();
             renderCopyDisplay();
-        }) as any);
+        });
     }
 
     // 设置浮动窗口拖拽
@@ -1035,8 +1071,8 @@ export async function mount(container: HTMLElement): Promise<void> {
         registeredActionNames = registerActionsWithLegacy({
             kt_syncToInput: () => syncToInput(),
             kt_translateCopyImmersive: () => translateCopyImmersive(),
-            kt_locateKeyword: (params: Record<string, any>) => locateKeywordInCopy(params.keyword || params[0] || ''),
-            kt_locateUnmatchedRoot: (params: Record<string, any>) => locateUnmatchedRootInList(params.root || params[0] || ''),
+            kt_locateKeyword: (params: Record<string, unknown>) => locateKeywordInCopy(params.keyword as string || params[0] as string || ''),
+            kt_locateUnmatchedRoot: (params: Record<string, unknown>) => locateUnmatchedRootInList(params.root as string || params[0] as string || ''),
             kt_minimizeKeywordsWindow: () => minimizeKeywordsWindow(),
             kt_restoreKeywordsWindow: () => restoreKeywordsWindow(),
         });
