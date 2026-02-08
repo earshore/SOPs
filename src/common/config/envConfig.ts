@@ -85,19 +85,9 @@ export const EnvConfig = {
         return this.baseUrl;
       }
       
-      // 生产环境: 
-      // 1. 如果用户配置了完整的 URL (http/https 开头),直接使用
-      // 2. 如果是相对路径或空,使用 Cloudflare Functions 代理
-      if (endpoint && (endpoint.startsWith('http://') || endpoint.startsWith('https://'))) {
-        // 移除末尾的 /v1 (如果存在),避免重复
-        let normalizedUrl = endpoint.trim();
-        if (normalizedUrl.endsWith('/v1')) {
-          normalizedUrl = normalizedUrl.slice(0, -3);
-        }
-        return normalizedUrl;
-      }
-      
-      // 使用配置的基础路径
+      // 生产环境: 始终使用 Cloudflare Functions 代理
+      // 用户配置的 endpoint 会被 Functions 转发到实际的上游 API
+      // 这样可以避免地理位置限制和 CORS 问题
       return this.baseUrl;
     }
   },
