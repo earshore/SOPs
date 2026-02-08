@@ -1,4 +1,5 @@
-console.log("🚀 ui.js 模块 (Event-Driven Core) 开始加载...");
+// @ts-nocheck
+console.log("🚀 ui.ts 模块 (Event-Driven Core) 开始加载...");
 
 import { escapeHtml } from '@/common/utils/security';
 import state from "../state";
@@ -8,18 +9,18 @@ import { registerActions } from "./actionRegistry";
 import { ensureViewLoaded } from "./viewLoader";
 import { APP_EVENTS, emitAppEvent } from "../constants/eventConstants";
 // 🎯 短期优化：新增导入
-import { createSidebarRenderer } from '../components/SidebarRenderer';
+import { createSidebarRenderer, SidebarRenderer } from '../components/SidebarRenderer';
 import { COLOR_SCHEMES } from '../constants/colorSchemes';
 
 // ========================
 // 🛡️ HELPER: 健壮的 DOM 获取器
 // ========================
-const getEl = (id) => document.getElementById(id);
+const getEl = (id: string): HTMLElement | null => document.getElementById(id);
 
 /**
  * 辅助函数：获取某模块下的“默认路由”
  */
-function getDefaultRouteForModule(moduleId) {
+function getDefaultRouteForModule(moduleId: string): string | null {
     if (!MENU_CONFIG.routes) return null;
     const allRoutes = Object.entries(MENU_CONFIG.routes);
     const entry = allRoutes.find(([_, config]) => config.moduleId === moduleId);
@@ -68,7 +69,7 @@ const moreRenderer = createSidebarRenderer({
  * 新增模块时，只需在此注册专用渲染器即可，无需修改核心逻辑
  * 如果模块未注册，将自动使用默认渲染器
  */
-const SIDEBAR_RENDERER_REGISTRY = {
+const SIDEBAR_RENDERER_REGISTRY: Record<string, SidebarRenderer> = {
     'sops': sopsRenderer,
     'app_center': appCenterRenderer,
     'amz_hub_core': hubRenderer,
@@ -83,7 +84,7 @@ const SIDEBAR_RENDERER_REGISTRY = {
  * @param {string} moduleId - 模块ID
  * @param {SidebarRenderer} renderer - 渲染器实例
  */
-export function registerSidebarRenderer(moduleId, renderer) {
+export function registerSidebarRenderer(moduleId: string, renderer: SidebarRenderer): void {
     if (SIDEBAR_RENDERER_REGISTRY[moduleId]) {
         console.warn(`[UI] 覆盖已存在的侧边栏渲染器: ${moduleId}`);
     }
@@ -94,7 +95,7 @@ export function registerSidebarRenderer(moduleId, renderer) {
 // ========================
 // 1. MEGA MENU RENDERER (配置驱动)
 // ========================
-export function renderMegaMenu() {
+export function renderMegaMenu(): void {
     const container = getEl('mega-menu-content');
     if (!container) return; // 防御性返回
 
@@ -145,7 +146,7 @@ export function renderMegaMenu() {
  * 🎨 More Menu Renderer
  * 渲染"更多"菜单的探索模块
  */
-export function renderMoreMenu() {
+export function renderMoreMenu(): void {
     const container = getEl('more-menu-content');
     if (!container) return;
 
@@ -251,7 +252,7 @@ export function renderMoreMenu() {
 /**
  * 渲染 Amazon智库 顶部的核心模块菜单
  */
-export function renderHubMegaMenu() {
+export function renderHubMegaMenu(): void {
     const container = getEl('hub-mega-menu-content');
     if (!container) return;
 
@@ -373,7 +374,7 @@ export function renderHubMegaMenu() {
     }
 }
 
-export function renderSopsMegaMenu() {
+export function renderSopsMegaMenu(): void {
     const container = getEl('sops-mega-menu-content');
     if (!container) return;
 
@@ -700,9 +701,9 @@ function updateSidebarHighlight(activeTabId) {
  */
 
 // 记录当前激活的主模块 Panel（用于检测模块切换）
-let currentActivePanel = null;
+let currentActivePanel: string | null = null;
 
-export async function switchTab(tab, updateHistory = true) {
+export async function switchTab(tab: string, updateHistory: boolean = true): Promise<void> {
     const cleanTab = String(tab).trim();
 
     // 1. 处理 Config 中的 redirect (别名)
@@ -802,7 +803,7 @@ export async function switchTab(tab, updateHistory = true) {
  * 监听浏览器前进/后退，处理首屏 Deep Link
  * 🔄 P0优化: 移除hashchange监听,统一使用popstate
  */
-export function initRouter() {
+export function initRouter(): void {
     // 1. 监听 popstate 事件 (浏览器前进/后退按钮)
     // 🔄 P0优化: 只监听popstate,不再监听hashchange,避免重复触发
     window.addEventListener('popstate', (event) => {
@@ -833,7 +834,7 @@ export function initRouter() {
 // 4. UTILITIES (保持不变，增加空值检查)
 // ========================
 
-export function showToast(message, type = "info") {
+export function showToast(message: string, type: string = "info"): void {
     const container = getEl("toast-container");
     if (!container) return; // 防御
 
@@ -868,7 +869,7 @@ export function showToast(message, type = "info") {
     }, 3000);
 }
 
-export function showProgress(show, percent = 0) {
+export function showProgress(show: boolean, percent: number = 0): void {
     const bar = getEl("global-progress");
     const fill = getEl("progress-fill");
     if (!bar || !fill) return;
@@ -885,7 +886,7 @@ export function showProgress(show, percent = 0) {
     }
 }
 
-export function getErrorSummary(errorMsg) {
+export function getErrorSummary(errorMsg: string): string {
     if (!errorMsg) return "未知错误";
     for (const [key, msg] of Object.entries(ERROR_MESSAGES)) {
         if (errorMsg.includes(key)) return msg;
@@ -893,7 +894,7 @@ export function getErrorSummary(errorMsg) {
     return `系统错误: ${errorMsg}`;
 }
 
-export function sleep(ms) {
+export function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 

@@ -121,7 +121,7 @@ import {
   saveProxyConfig
 } from "./components/settings/systemSettings";
 
-import { switchTab, renderMegaMenu, renderSopsMegaMenu, renderHubMegaMenu, renderMoreMenu, showToast, initRouter } from "../src/common/utils/ui.js";
+import { switchTab, renderMegaMenu, renderSopsMegaMenu, renderHubMegaMenu, renderMoreMenu, showToast, initRouter } from "../src/common/utils/ui";
 import { APP_EVENTS } from './common/constants/eventConstants';
 import { initHomeSplash } from "./modules/home/homeDisplay";
 
