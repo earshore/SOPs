@@ -9,12 +9,12 @@
  */
 
 import { loadTemplate } from '../../../../../common/utils/viewLoader.js';
-import eventBus from '../../../../../common/EventBus.js';
+import eventBus from '../../../../../common/EventBus.ts';
 import state from '../../../../../common/state.js';
 import { scrapeAsin } from '../services/scraperService.js';
 import { LANGUAGE_HEADERS } from '../../../../../common/constants/constants.js';
 import { HistoryService } from '../services/historyService.js';
-import { StorageService, STORAGE_KEYS } from '../../../../../services/storageService.js';
+import { StorageService, STORAGE_KEYS } from '../../../../../services/storageService.ts';
 import { ErrorService } from '../../../../../services/errorService.js';
 import { showToast, sleep } from '../../../../../common/utils/ui.js';
 import { MODULE_EVENTS } from '../../../../../common/constants/eventConstants.js';

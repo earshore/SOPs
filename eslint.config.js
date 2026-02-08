@@ -1,9 +1,43 @@
 import js from "@eslint/js";
 import globals from "globals";
+import tseslint from "@typescript-eslint/eslint-plugin";
+import tsparser from "@typescript-eslint/parser";
 
 export default [
     js.configs.recommended,
     {
+        files: ["**/*.ts", "**/*.tsx"],
+        languageOptions: {
+            parser: tsparser,
+            parserOptions: {
+                ecmaVersion: 2022,
+                sourceType: "module",
+                project: "./tsconfig.json"
+            },
+            globals: {
+                ...globals.browser,
+                ...globals.node
+            }
+        },
+        plugins: {
+            "@typescript-eslint": tseslint
+        },
+        rules: {
+            ...tseslint.configs.recommended.rules,
+            "@typescript-eslint/no-explicit-any": "warn",
+            "@typescript-eslint/explicit-function-return-type": "off",
+            "@typescript-eslint/no-unused-vars": ["error", { 
+                argsIgnorePattern: "^_",
+                varsIgnorePattern: "^_"
+            }],
+            "@typescript-eslint/no-non-null-assertion": "warn",
+            "@typescript-eslint/ban-types": "warn",
+            // 禁用no-dupe-class-members，因为TypeScript支持方法重载
+            "no-dupe-class-members": "off"
+        }
+    },
+    {
+        files: ["**/*.js", "**/*.jsx"],
         languageOptions: {
             ecmaVersion: 2022,
             sourceType: "module",
@@ -21,6 +55,7 @@ export default [
             "no-unused-vars": "warn",
             "no-console": "off",
             "no-undef": "warn",
+            "no-case-declarations": "warn",
             
             // ================================================================
             // 🎯 防止全局变量污染
@@ -55,7 +90,9 @@ export default [
             
             // 推荐使用import/export而不是全局变量
             "no-implicit-globals": "error"
-        },
-        ignores: ["dist/", "node_modules/", "coverage/"]
+        }
+    },
+    {
+        ignores: ["dist/", "node_modules/", "coverage/", "html/"]
     }
 ];

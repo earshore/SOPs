@@ -4,7 +4,7 @@
 // 集中管理状态结构、持久化策略、中间件配置
 // ================================================================
 
-import { stateManager } from './StateManager.js';
+import { stateManager } from './StateManager.ts';
 import { persistenceMiddleware, restorePersistedState } from './middleware/persistence.js';
 import { loggerMiddleware } from './middleware/logger.js';
 import { validatorMiddleware } from './middleware/validator.js';

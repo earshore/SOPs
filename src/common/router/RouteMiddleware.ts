@@ -1,14 +1,19 @@
-// src/common/router/RouteMiddleware.js
+// src/common/router/RouteMiddleware.ts
 // ================================================================
-// 🎯 路由中间件管理器
+// 🎯 路由中间件管理器（TypeScript版本）
 // 提供路由切换前后的钩子函数
 // ================================================================
+
+import type { Route, RouteMiddlewareFunction } from '../../types/config.js';
 
 /**
  * 路由中间件管理器
  * 在路由切换前后执行自定义逻辑
  */
 export class RouteMiddlewareManager {
+  private beforeEach: RouteMiddlewareFunction[];
+  private afterEach: RouteMiddlewareFunction[];
+
   constructor() {
     this.beforeEach = [];
     this.afterEach = [];
@@ -16,36 +21,28 @@ export class RouteMiddlewareManager {
 
   /**
    * 添加前置中间件
-   * @param {Function} middleware - (to, from) => void | Promise<void>
-   * @example
-   * routeMiddleware.addBeforeEach((to, from) => {
-   *   console.log('导航前:', from.path, '->', to.path);
-   * });
+   * @param middleware - (to, from) => void | Promise<void>
    */
-  addBeforeEach(middleware) {
+  addBeforeEach(middleware: RouteMiddlewareFunction): void {
     this.beforeEach.push(middleware);
     console.log(`✅ [RouteMiddleware] 已添加前置中间件，当前共 ${this.beforeEach.length} 个`);
   }
 
   /**
    * 添加后置中间件
-   * @param {Function} middleware - (to, from) => void | Promise<void>
-   * @example
-   * routeMiddleware.addAfterEach((to, from) => {
-   *   console.log('导航后:', from.path, '->', to.path);
-   * });
+   * @param middleware - (to, from) => void | Promise<void>
    */
-  addAfterEach(middleware) {
+  addAfterEach(middleware: RouteMiddlewareFunction): void {
     this.afterEach.push(middleware);
     console.log(`✅ [RouteMiddleware] 已添加后置中间件，当前共 ${this.afterEach.length} 个`);
   }
 
   /**
    * 执行前置中间件
-   * @param {Object} to - 目标路由
-   * @param {Object} from - 来源路由
+   * @param to - 目标路由
+   * @param from - 来源路由
    */
-  async runBeforeEach(to, from) {
+  async runBeforeEach(to: Route, from: Route | null): Promise<void> {
     for (const middleware of this.beforeEach) {
       try {
         await middleware(to, from);
@@ -57,10 +54,10 @@ export class RouteMiddlewareManager {
 
   /**
    * 执行后置中间件
-   * @param {Object} to - 目标路由
-   * @param {Object} from - 来源路由
+   * @param to - 目标路由
+   * @param from - 来源路由
    */
-  async runAfterEach(to, from) {
+  async runAfterEach(to: Route, from: Route | null): Promise<void> {
     for (const middleware of this.afterEach) {
       try {
         await middleware(to, from);
@@ -73,7 +70,7 @@ export class RouteMiddlewareManager {
   /**
    * 清空所有中间件
    */
-  clearMiddleware() {
+  clearMiddleware(): void {
     this.beforeEach = [];
     this.afterEach = [];
     console.log('✅ [RouteMiddleware] 已清空所有中间件');
@@ -81,9 +78,9 @@ export class RouteMiddlewareManager {
 
   /**
    * 获取中间件数量
-   * @returns {Object} { beforeEach: number, afterEach: number }
+   * @returns { beforeEach: number, afterEach: number }
    */
-  getMiddlewareCount() {
+  getMiddlewareCount(): { beforeEach: number; afterEach: number } {
     return {
       beforeEach: this.beforeEach.length,
       afterEach: this.afterEach.length
@@ -100,27 +97,29 @@ export const routeMiddleware = new RouteMiddlewareManager();
 
 /**
  * 页面标题更新中间件
- * @param {string} defaultTitle - 默认标题
- * @returns {Function} 中间件函数
+ * @param defaultTitle - 默认标题
+ * @returns 中间件函数
  */
-export function createTitleMiddleware(defaultTitle = 'Amazing Amazon Architect') {
-  return (to, from) => {
-    document.title = to.meta?.title || defaultTitle;
+export function createTitleMiddleware(defaultTitle = 'Amazing Amazon Architect'): RouteMiddlewareFunction {
+  return (to: Route, _from: Route | null) => {
+    document.title = to.config?.meta?.title || defaultTitle;
   };
 }
 
 /**
  * 页面访问统计中间件
- * @param {Function} trackPageView - 统计函数
- * @returns {Function} 中间件函数
+ * @param trackPageView - 统计函数
+ * @returns 中间件函数
  */
-export function createAnalyticsMiddleware(trackPageView) {
-  return (to, from) => {
+export function createAnalyticsMiddleware(
+  trackPageView: (data: { path: string; title?: string; from?: string }) => void
+): RouteMiddlewareFunction {
+  return (to: Route, from: Route | null) => {
     if (typeof trackPageView === 'function') {
       trackPageView({
         path: to.path,
-        title: to.meta?.title,
-        from: from.path
+        title: to.config?.meta?.title,
+        from: from?.path
       });
     }
   };
@@ -128,19 +127,22 @@ export function createAnalyticsMiddleware(trackPageView) {
 
 /**
  * 滚动位置管理中间件
- * @returns {Object} { beforeEach, afterEach } 中间件对
+ * @returns { beforeEach, afterEach } 中间件对
  */
-export function createScrollMiddleware() {
-  const scrollPositions = new Map();
+export function createScrollMiddleware(): {
+  beforeEach: RouteMiddlewareFunction;
+  afterEach: RouteMiddlewareFunction;
+} {
+  const scrollPositions = new Map<string, number>();
   
   return {
-    beforeEach: (to, from) => {
+    beforeEach: (_to: Route, from: Route | null) => {
       // 保存当前滚动位置
-      if (from.path) {
+      if (from?.path) {
         scrollPositions.set(from.path, window.scrollY);
       }
     },
-    afterEach: (to, from) => {
+    afterEach: (to: Route, _from: Route | null) => {
       // 恢复滚动位置
       const savedPosition = scrollPositions.get(to.path);
       if (savedPosition !== undefined) {
@@ -154,38 +156,44 @@ export function createScrollMiddleware() {
 
 /**
  * 路由日志中间件
- * @param {boolean} verbose - 是否详细输出
- * @returns {Function} 中间件函数
+ * @param verbose - 是否详细输出
+ * @returns 中间件函数
  */
-export function createLoggerMiddleware(verbose = false) {
-  return (to, from) => {
+export function createLoggerMiddleware(verbose = false): RouteMiddlewareFunction {
+  return (to: Route, from: Route | null) => {
     const timestamp = new Date().toLocaleTimeString();
     if (verbose) {
       console.group(`🔀 [Router] ${timestamp}`);
-      console.log('From:', from.path);
+      console.log('From:', from?.path);
       console.log('To:', to.path);
       console.log('Config:', to.config);
       console.groupEnd();
     } else {
-      console.log(`🔀 [Router] ${from.path} -> ${to.path}`);
+      console.log(`🔀 [Router] ${from?.path} -> ${to.path}`);
     }
   };
 }
 
 /**
  * 加载状态中间件
- * @param {Function} showLoading - 显示加载的函数
- * @param {Function} hideLoading - 隐藏加载的函数
- * @returns {Object} { beforeEach, afterEach } 中间件对
+ * @param showLoading - 显示加载的函数
+ * @param hideLoading - 隐藏加载的函数
+ * @returns { beforeEach, afterEach } 中间件对
  */
-export function createLoadingMiddleware(showLoading, hideLoading) {
+export function createLoadingMiddleware(
+  showLoading: () => void,
+  hideLoading: () => void
+): {
+  beforeEach: RouteMiddlewareFunction;
+  afterEach: RouteMiddlewareFunction;
+} {
   return {
-    beforeEach: (to, from) => {
+    beforeEach: (_to: Route, _from: Route | null) => {
       if (typeof showLoading === 'function') {
         showLoading();
       }
     },
-    afterEach: (to, from) => {
+    afterEach: (_to: Route, _from: Route | null) => {
       if (typeof hideLoading === 'function') {
         // 延迟隐藏，确保页面已渲染
         setTimeout(hideLoading, 100);

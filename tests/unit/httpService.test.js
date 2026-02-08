@@ -4,7 +4,7 @@
 // ================================================================
 
 import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
-import { HttpService, HttpError } from '@/services/httpService.js';
+import { HttpService, HttpError } from '@/services/httpService.ts';
 
 describe('HttpService', () => {
     beforeEach(() => {

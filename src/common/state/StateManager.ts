@@ -1,15 +1,31 @@
-// src/common/state/StateManager.js
+// src/common/state/StateManager.ts
 // ================================================================
-// 🎯 增强的状态管理器
+// 🎯 增强的状态管理器（TypeScript版本）
 // 提供状态追踪、历史记录、中间件支持
 // ================================================================
+
+import type { 
+  StateSchema, 
+  StateAction, 
+  StateMiddleware, 
+  StateSubscriber,
+  StateHistory,
+  BatchUpdateAction
+} from '../../types/state.js';
 
 /**
  * 增强的状态管理器
  * 提供状态追踪、历史记录、中间件支持
  */
-export class StateManager {
-  constructor(initialState = {}) {
+export class StateManager<T extends StateSchema = StateSchema> {
+  private _state: T;
+  private _subscribers: Map<string, Set<StateSubscriber>>;
+  private _middleware: StateMiddleware[];
+  private _history: StateHistory[];
+  private _maxHistorySize: number;
+  private _isRecording: boolean;
+
+  constructor(initialState: T) {
     this._state = initialState;
     this._subscribers = new Map();
     this._middleware = [];
@@ -20,34 +36,50 @@ export class StateManager {
 
   /**
    * 获取状态（只读）
-   * @param {string} [path] - 状态路径，如 'ui.currentTab'
-   * @returns {any}
+   * @param path - 状态路径，如 'ui.currentTab'
+   * @returns 状态值
    */
-  get(path) {
+  get<K extends keyof T>(path?: K): T[K];
+  get(path?: string): any;
+  get(path?: string): any {
     if (!path) return this._state;
     
-    return path.split('.').reduce((obj, key) => obj?.[key], this._state);
+    return path.split('.').reduce((obj: any, key) => obj?.[key], this._state);
   }
 
   /**
    * 设置状态（触发订阅）
-   * @param {string} path - 状态路径
-   * @param {any} value - 新值
-   * @param {Object} [meta] - 元数据（用于调试）
+   * @param path - 状态路径
+   * @param value - 新值
+   * @param meta - 元数据（用于调试）
    */
-  set(path, value, meta = {}) {
+  set(path: string, value: any, meta: Record<string, any> = {}): void {
     const oldValue = this.get(path);
     
     // 执行中间件
-    const action = { type: 'SET', path, value, oldValue, meta };
+    const action: StateAction = { 
+      type: 'SET', 
+      path, 
+      value, 
+      oldValue, 
+      meta 
+    };
     const finalAction = this._runMiddleware(action);
     
     if (finalAction === null) {
       return; // 中间件拦截
     }
 
+    // 确保返回的是StateAction类型
+    if (finalAction.type !== 'SET') {
+      console.error('[StateManager] Middleware returned invalid action type');
+      return;
+    }
+
+    const setAction = finalAction as StateAction;
+
     // 更新状态
-    this._setByPath(path, finalAction.value);
+    this._setByPath(path, setAction.value);
     
     // 记录历史
     if (this._isRecording) {
@@ -55,18 +87,18 @@ export class StateManager {
     }
     
     // 通知订阅者
-    this._notify(path, finalAction.value, oldValue);
+    this._notify(path, setAction.value, oldValue);
   }
 
   /**
    * 批量更新（减少通知次数）
-   * @param {Object} updates - { path: value }
+   * @param updates - { path: value }
    */
-  batchUpdate(updates) {
+  batchUpdate(updates: Record<string, any>): void {
     const prevRecording = this._isRecording;
     this._isRecording = false;
     
-    const changes = [];
+    const changes: Array<{ path: string; value: any; oldValue: any }> = [];
     Object.entries(updates).forEach(([path, value]) => {
       const oldValue = this.get(path);
       this._setByPath(path, value);
@@ -77,7 +109,12 @@ export class StateManager {
     
     // 统一记录历史
     if (this._isRecording) {
-      this._recordHistory({ type: 'BATCH_UPDATE', changes });
+      const batchAction: BatchUpdateAction = { 
+        type: 'BATCH_UPDATE', 
+        changes,
+        meta: {}
+      };
+      this._recordHistory(batchAction);
     }
     
     // 批量通知
@@ -88,15 +125,15 @@ export class StateManager {
 
   /**
    * 订阅状态变化
-   * @param {string} path - 状态路径
-   * @param {Function} callback - 回调函数
-   * @returns {Function} 取消订阅函数
+   * @param path - 状态路径
+   * @param callback - 回调函数
+   * @returns 取消订阅函数
    */
-  subscribe(path, callback) {
+  subscribe(path: string, callback: StateSubscriber): () => void {
     if (!this._subscribers.has(path)) {
       this._subscribers.set(path, new Set());
     }
-    this._subscribers.get(path).add(callback);
+    this._subscribers.get(path)!.add(callback);
     
     return () => {
       const subs = this._subscribers.get(path);
@@ -111,25 +148,25 @@ export class StateManager {
 
   /**
    * 添加中间件
-   * @param {Function} middleware - (action, next) => action | null
+   * @param middleware - (action, next) => action | null
    */
-  use(middleware) {
+  use(middleware: StateMiddleware): void {
     this._middleware.push(middleware);
   }
 
   /**
    * 创建状态快照
-   * @returns {Object}
+   * @returns 状态快照
    */
-  snapshot() {
+  snapshot(): T {
     return JSON.parse(JSON.stringify(this._state));
   }
 
   /**
    * 恢复状态快照
-   * @param {Object} snapshot
+   * @param snapshot - 状态快照
    */
-  restore(snapshot) {
+  restore(snapshot: T): void {
     const oldState = this._state;
     this._state = snapshot;
     
@@ -139,21 +176,23 @@ export class StateManager {
 
   /**
    * 撤销上一次操作
-   * @returns {boolean} 是否成功撤销
+   * @returns 是否成功撤销
    */
-  undo() {
+  undo(): boolean {
     if (this._history.length === 0) return false;
     
-    const lastAction = this._history.pop();
+    const lastAction = this._history.pop()!;
     
     if (lastAction.type === 'SET') {
-      this._setByPath(lastAction.path, lastAction.oldValue);
-      this._notify(lastAction.path, lastAction.oldValue, lastAction.value);
+      const setAction = lastAction as StateAction;
+      this._setByPath(setAction.path, setAction.oldValue);
+      this._notify(setAction.path, setAction.oldValue, setAction.value);
     } else if (lastAction.type === 'BATCH_UPDATE') {
-      lastAction.changes.forEach(({ path, oldValue }) => {
+      const batchAction = lastAction as unknown as BatchUpdateAction;
+      batchAction.changes.forEach(({ path, oldValue }) => {
         this._setByPath(path, oldValue);
       });
-      lastAction.changes.forEach(({ path, oldValue, value }) => {
+      batchAction.changes.forEach(({ path, oldValue, value }) => {
         this._notify(path, oldValue, value);
       });
     }
@@ -163,33 +202,33 @@ export class StateManager {
 
   /**
    * 获取历史记录
-   * @returns {Array}
+   * @returns 历史记录数组
    */
-  getHistory() {
+  getHistory(): StateHistory[] {
     return [...this._history];
   }
 
   /**
    * 清空历史记录
    */
-  clearHistory() {
+  clearHistory(): void {
     this._history = [];
   }
 
   // ========== 私有方法 ==========
 
-  _setByPath(path, value) {
+  private _setByPath(path: string, value: any): void {
     const keys = path.split('.');
-    const lastKey = keys.pop();
-    const target = keys.reduce((obj, key) => {
+    const lastKey = keys.pop()!;
+    const _target = keys.reduce((obj: any, key) => {
       if (!obj[key]) obj[key] = {};
       return obj[key];
     }, this._state);
     
-    target[lastKey] = value;
+    _target[lastKey] = value;
   }
 
-  _notify(path, newValue, oldValue) {
+  private _notify(path: string, newValue: any, oldValue: any): void {
     if (newValue === oldValue) return;
     
     // 通知精确路径订阅者
@@ -230,10 +269,10 @@ export class StateManager {
     }
   }
 
-  _notifyAll(oldState) {
+  private _notifyAll(oldState: T): void {
     this._subscribers.forEach((subs, path) => {
       const newValue = this.get(path);
-      const oldValue = path.split('.').reduce((obj, key) => obj?.[key], oldState);
+      const oldValue = path.split('.').reduce((obj: any, key) => obj?.[key], oldState);
       subs.forEach(cb => {
         try {
           cb(newValue, oldValue);
@@ -244,22 +283,22 @@ export class StateManager {
     });
   }
 
-  _runMiddleware(action) {
-    let currentAction = action;
+  private _runMiddleware(action: StateAction | BatchUpdateAction): StateAction | BatchUpdateAction | null {
+    let currentAction: StateAction | BatchUpdateAction | null = action;
     
     for (const middleware of this._middleware) {
-      currentAction = middleware(currentAction, () => currentAction);
+      currentAction = middleware(currentAction as StateAction, () => currentAction as StateAction);
       if (currentAction === null) break;
     }
     
     return currentAction;
   }
 
-  _recordHistory(action) {
+  private _recordHistory(action: StateAction | BatchUpdateAction): void {
     this._history.push({
       ...action,
       timestamp: Date.now()
-    });
+    } as StateHistory);
     
     // 限制历史记录大小
     if (this._history.length > this._maxHistorySize) {
@@ -269,7 +308,7 @@ export class StateManager {
 }
 
 // 创建全局实例
-export const stateManager = new StateManager({
+export const stateManager = new StateManager<StateSchema>({
   ui: {
     currentTab: "scraper",
     currentDataTab: "preview",
@@ -277,6 +316,7 @@ export const stateManager = new StateManager({
   },
   scraper: {
     isScraping: false,
+    status: "idle",
     selectedSite: "",
     scrapedData: null,
     currentHistoryId: null,
@@ -296,11 +336,11 @@ export const stateManager = new StateManager({
 });
 
 // 向后兼容的 Proxy
-export default new Proxy(stateManager._state, {
-  get(target, prop) {
+export default new Proxy(stateManager['_state'], {
+  get(_target: StateSchema, prop: string | symbol) {
     return stateManager.get(String(prop));
   },
-  set(target, prop, value) {
+  set(_target: StateSchema, prop: string | symbol, value: any) {
     stateManager.set(String(prop), value);
     return true;
   }

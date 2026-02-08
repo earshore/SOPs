@@ -68,7 +68,7 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
  * 通用大语言模型调用接口 (带自动重试)
  * 
  * @param {ChatMessage[]} messages - 聊天上下文消息数组
- * @param {string} provider - 厂商标识 (openai, anthropic, deepseek...)
+ * @param {string} _provider - 厂商标识 (openai, anthropic, deepseek...) [未使用]
  * @param {string} endpoint - API 端点 URL (不含 /chat/completions)
  * @param {string} apiKey - API 密钥
  * @param {string} model - 模型名称
@@ -88,7 +88,7 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
  */
 export async function callLLM(
   messages,
-  provider,
+  _provider,
   endpoint,
   apiKey,
   model,
@@ -130,11 +130,13 @@ export async function callLLM(
   const normalizedEndpoint = EnvConfig.api.normalizeEndpoint(endpoint);
   
   // 只在首次调用或调试模式下输出配置信息
+  // @ts-ignore - 动态添加属性用于日志控制
   if (!callLLM._configLogged || EnvConfig.isDevelopment) {
     console.log(`🌐 [LLM] 环境: ${EnvConfig.environment}`);
     console.log(`🌐 [LLM] 原始 Endpoint: ${endpoint}`);
     console.log(`🌐 [LLM] 标准化 Endpoint: ${normalizedEndpoint}`);
     console.log(`🌐 [LLM] 最终请求 URL: ${normalizedEndpoint}/chat/completions`);
+    // @ts-ignore
     callLLM._configLogged = true;
   }
 
@@ -237,9 +239,10 @@ export async function callLLM(
     } catch (e) {
       clearTimeout(timeoutId);
       lastError = e;
+      const error = /** @type {Error & { name?: string; status?: number }} */ (e);
 
       // 如果是 AbortError (超时)，通常也可以重试
-      if (e.name === "AbortError") {
+      if (error.name === "AbortError") {
         const timeoutMsg = `模型响应超时(${timeout / 1000}秒)`;
         if (attempt < retries) {
            console.warn(`⚠️ LLM ${timeoutMsg}，准备重试...`);
@@ -250,8 +253,8 @@ export async function callLLM(
 
       // 如果已经是 Error 对象且有 status (上面抛出的)，则保持
       // 否则如果是网络错误 (fetch failed)，也值得重试
-      if (!e.status && attempt < retries) {
-          console.warn(`⚠️ 网络/未知错误，准备重试:`, e.message);
+      if (!error.status && attempt < retries) {
+          console.warn(`⚠️ 网络/未知错误，准备重试:`, error.message);
           continue;
       }
 
@@ -298,11 +301,13 @@ export async function fetchModelsFromApi(provider, endpoint, apiKey) {
     const normalizedEndpoint = EnvConfig.api.normalizeEndpoint(endpoint);
     
     // 只在首次调用或调试模式下输出配置信息
+    // @ts-ignore - 动态添加属性用于日志控制
     if (!fetchModelsFromApi._configLogged || EnvConfig.isDevelopment) {
       console.log(`🌐 [Models] 环境: ${EnvConfig.environment}`);
       console.log(`🌐 [Models] 原始 Endpoint: ${endpoint}`);
       console.log(`🌐 [Models] 标准化 Endpoint: ${normalizedEndpoint}`);
       console.log(`🌐 [Models] 最终请求 URL: ${normalizedEndpoint}/models`);
+      // @ts-ignore
       fetchModelsFromApi._configLogged = true;
     }
     
@@ -355,8 +360,8 @@ export async function fetchModelsFromApi(provider, endpoint, apiKey) {
       console.warn(`⚠️ 未识别的数据结构，对象键:`, Object.keys(data));
       // 尝试从对象中提取可能的模型列表
       const possibleArrays = Object.entries(data)
-        .filter(([key, value]) => Array.isArray(value))
-        .map(([key, value]) => ({ key, value, length: value.length }));
+        .filter(([_key, value]) => Array.isArray(value))
+        .map(([key, value]) => ({ key, value, length: /** @type {any[]} */ (value).length }));
       
       console.log(`🔍 找到的数组字段:`, possibleArrays.map(p => `${p.key}(${p.length})`));
       
@@ -377,7 +382,7 @@ export async function fetchModelsFromApi(provider, endpoint, apiKey) {
 
     // 处理模型数据，兼容不同的字段名
     const models = list
-      .map((m, index) => {
+      .map((/** @type {any} */ m, /** @type {number} */ _index) => {
         // 如果是字符串，直接使用
         if (typeof m === 'string') {
           return { id: m, context: 128000, features: [] };
@@ -387,28 +392,29 @@ export async function fetchModelsFromApi(provider, endpoint, apiKey) {
         if (typeof m === 'object' && m !== null) {
           const id = m.id || m.model || m.name;
           if (!id) {
-            console.warn(`⚠️ 跳过无效模型 [${index}]:`, m);
+            console.warn(`⚠️ 跳过无效模型 [${_index}]:`, m);
             return null;
           }
           return { id: String(id), context: 128000, features: [] };
         }
         
         // 其他类型，尝试转换为字符串
-        console.warn(`⚠️ 未知模型类型 [${index}]:`, typeof m, m);
+        console.warn(`⚠️ 未知模型类型 [${_index}]:`, typeof m, m);
         return null;
       })
-      .filter(m => m !== null)
-      .sort((a, b) => a.id.localeCompare(b.id));
+      .filter((/** @type {any} */ m) => m !== null)
+      .sort((/** @type {any} */ a, /** @type {any} */ b) => a.id.localeCompare(b.id));
 
     console.log(`✅ 成功解析 ${models.length} 个模型`);
-    console.log(`📋 前5个模型:`, models.slice(0, 5).map(m => m.id));
+    console.log(`📋 前5个模型:`, models.slice(0, 5).map((/** @type {any} */ m) => m.id));
     
     return models;
     
   } catch (error) {
+    const err = /** @type {Error & { stack?: string }} */ (error);
     console.error(`❌ fetchModelsFromApi 失败:`, error);
-    console.error(`❌ 错误堆栈:`, error.stack);
-    ErrorService.handle(error, { action: 'fetchModelsFromApi', module: 'llm', notify: false });
+    console.error(`❌ 错误堆栈:`, err.stack);
+    ErrorService.handle(/** @type {Error} */ (error), { action: 'fetchModelsFromApi', module: 'llm', notify: false });
     throw error; // 抛出错误而不是返回空数组，让调用方知道失败了
   }
 }

@@ -154,7 +154,7 @@ export const ErrorService = {
      */
     async _logError(error, context) {
         try {
-            const { Logger } = await import('./loggerService.js');
+            const { Logger } = await import('./loggerService.ts');
             Logger.error(
                 `${context.action} failed`,
                 error,

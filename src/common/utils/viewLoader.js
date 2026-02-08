@@ -6,7 +6,7 @@
 // ================================================================
 
 import { APP_VERSION } from '../constants/constants.js';
-import { StorageService } from '../../services/storageService.js';
+import { StorageService } from '../../services/storageService.ts';
 
 const CACHE_PREFIX = 'view_cache_';
 

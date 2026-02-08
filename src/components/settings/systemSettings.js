@@ -7,7 +7,7 @@ import { escapeHtml } from '@/common/utils/security.js';
 import { PROVIDERS } from "../../common/constants/constants.js";
 import { fetchModelsFromApi, callLLM } from "../../services/llmService.js";
 import { showToast } from "../../common/utils/ui.js";
-import { StorageService, STORAGE_KEYS } from "../../services/storageService.js";
+import { StorageService, STORAGE_KEYS } from "../../services/storageService.ts";
 import { ErrorService } from "../../services/errorService.js";
 import { EnvConfig } from "../../common/config/envConfig.js"; // 🔒 P0修复: 导入环境配置
 

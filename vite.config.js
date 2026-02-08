@@ -1,7 +1,17 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
+import checker from 'vite-plugin-checker';
 
 export default defineConfig({
+    plugins: [
+        checker({
+            typescript: true,
+            // 暂时禁用ESLint检查，避免配置冲突
+            // eslint: {
+            //     lintCommand: 'eslint "./src/**/*.{js,ts,jsx,tsx}"'
+            // }
+        })
+    ],
     root: './',
 
     // 开发服务器配置
@@ -52,14 +62,15 @@ export default defineConfig({
         }
     },
 
-    // 路径别名 (与 jsconfig.json 保持一致)
+    // 路径别名 (与 tsconfig.json 保持一致)
     resolve: {
         alias: {
             '@': resolve(__dirname, 'src'),
             '@common': resolve(__dirname, 'src/common'),
             '@services': resolve(__dirname, 'src/services'),
             '@modules': resolve(__dirname, 'src/modules'),
-            '@components': resolve(__dirname, 'src/components')
+            '@components': resolve(__dirname, 'src/components'),
+            '@types': resolve(__dirname, 'src/types')
         }
     },
 

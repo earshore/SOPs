@@ -4,13 +4,13 @@
 // ================================================================
 
 // 先导入需要的模块
-import { routeMiddleware, createTitleMiddleware, createScrollMiddleware, createLoggerMiddleware } from './RouteMiddleware.js';
+import { routeMiddleware, createTitleMiddleware, createScrollMiddleware, createLoggerMiddleware } from './RouteMiddleware.ts';
 
 // 然后导出所有模块
-export { Router, router } from './Router.js';
-export { RouteGuardManager, routeGuard, createAuthGuard, createPreloadGuard, createValidationGuard } from './RouteGuard.js';
-export { RouteMiddlewareManager, routeMiddleware, createTitleMiddleware, createAnalyticsMiddleware, createScrollMiddleware, createLoggerMiddleware, createLoadingMiddleware } from './RouteMiddleware.js';
-export { RouteErrorHandler, routeErrorHandler } from './ErrorHandler.js';
+export { Router, router } from './Router.ts';
+export { RouteGuardManager, routeGuard, createAuthGuard, createPreloadGuard, createValidationGuard } from './RouteGuard.ts';
+export { RouteMiddlewareManager, routeMiddleware, createTitleMiddleware, createAnalyticsMiddleware, createScrollMiddleware, createLoggerMiddleware, createLoadingMiddleware } from './RouteMiddleware.ts';
+export { RouteErrorHandlerManager as RouteErrorHandler, routeErrorHandler } from './ErrorHandler.ts';
 export { render404, renderError } from './NotFound.js';
 
 /**

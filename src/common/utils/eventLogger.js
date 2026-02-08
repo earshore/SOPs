@@ -5,7 +5,7 @@
 // 🔄 P0优化: 迁移到 StorageService 统一接口
 // ================================================================
 
-import { StorageService } from '../../services/storageService.js';
+import { StorageService } from '../../services/storageService.ts';
 
 /**
  * 需要监控的事件列表

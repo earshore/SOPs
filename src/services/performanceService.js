@@ -4,9 +4,9 @@
 // 监控页面加载、Core Web Vitals、用户交互性能
 // ================================================================
 
-import { StorageService } from './storageService.js';
+import { StorageService } from './storageService.ts';
 import { EnvConfig } from '../common/config/envConfig.js';
-import { Logger } from './loggerService.js';
+import { Logger } from './loggerService.ts';
 
 /**
  * 性能指标类型

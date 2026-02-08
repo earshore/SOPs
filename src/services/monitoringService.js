@@ -5,7 +5,7 @@
 // ================================================================
 
 import { EnvConfig } from '../common/config/envConfig.js';
-import { Logger } from './loggerService.js';
+import { Logger } from './loggerService.ts';
 
 /**
  * 错误监控配置

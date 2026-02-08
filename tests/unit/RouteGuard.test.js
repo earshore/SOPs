@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { RouteGuardManager, createAuthGuard, createPreloadGuard, createValidationGuard } from '@/common/router/RouteGuard.js';
+import { RouteGuardManager, createAuthGuard, createPreloadGuard, createValidationGuard } from '@/common/router/RouteGuard.ts';
 
 describe('RouteGuard', () => {
   let guardManager;

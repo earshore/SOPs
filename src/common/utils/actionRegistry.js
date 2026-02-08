@@ -187,7 +187,7 @@ export function initGlobalEventDelegation() {
 /** 记录已警告的函数名，避免重复警告 */
 const warnedFunctions = new Set();
 
-import { StorageService } from '../../services/storageService.js';
+import { StorageService } from '../../services/storageService.ts';
 
 const LEGACY_WARNINGS_KEY = 'enable_legacy_warnings';
 
@@ -272,7 +272,7 @@ export function getLegacyCallStats() {
 // 🔧 P0修复: 监听事件总线,实现解耦
 // ================================================================
 
-import eventBus from '../EventBus.js';
+import eventBus from '../EventBus.ts';
 
 // 监听注册事件
 eventBus.on('registerActions', ({ moduleId, actions }) => {

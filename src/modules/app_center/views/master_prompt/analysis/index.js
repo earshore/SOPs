@@ -18,11 +18,11 @@ import { showToast, showProgress } from '../../../../../common/utils/ui.js';
 import { HistoryService } from '../services/historyService.js';
 import { renderHistory } from '../scraper/index.js';
 import { AnalysisService } from '../services/analysisService.js';
-import { StorageService, STORAGE_KEYS } from '../../../../../services/storageService.js';
+import { StorageService, STORAGE_KEYS } from '../../../../../services/storageService.ts';
 import { ErrorService } from '../../../../../services/errorService.js';
 import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry.js';
 import { renderWidgetCard, renderViewModeHTML, renderEditorForm, renderSkeleton } from './renderer.js';
-import eventBus from '../../../../../common/EventBus.js';
+import eventBus from '../../../../../common/EventBus.ts';
 import { MODULE_EVENTS } from '../../../../../common/constants/eventConstants.js';
 import { loadGridStack } from '../../../../../common/utils/lazyLibs.js';
 

@@ -13,9 +13,9 @@ import BaseModule from '../../../../../common/BaseModule.js';
 import state from '../../../../../common/state.js';
 import { getErrorSummary, showToast, switchTab } from '../../../../../common/utils/ui.js';
 import { HistoryService } from '../services/historyService.js';
-import { StorageService } from '../../../../../services/storageService.js';
+import { StorageService } from '../../../../../services/storageService.ts';
 import { languageFlagMap, SITE_NAME_MAP, SITE_DOMAIN_MAP } from '../../../../../common/constants/constants.js';
-import eventBus from '../../../../../common/EventBus.js';
+import eventBus from '../../../../../common/EventBus.ts';
 import { MODULE_EVENTS } from '../../../../../common/constants/eventConstants.js';
 
 import '../master_prompt_style.css';

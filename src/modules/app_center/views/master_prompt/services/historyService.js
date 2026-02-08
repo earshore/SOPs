@@ -4,7 +4,7 @@
 // ================================================================
 
 import state from "../../../../../common/state.js";
-import { StorageService, STORAGE_KEYS } from "../../../../../services/storageService.js";
+import { StorageService, STORAGE_KEYS } from "../../../../../services/storageService.ts";
 
 const MAX_HISTORY_ITEMS = 20; // 限制只存最近20条
 

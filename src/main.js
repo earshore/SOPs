@@ -149,34 +149,34 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // 1. 基础服务（无依赖）
   bootstrap.register('eventBus', async () => {
-    const { default: eventBus } = await import('./common/EventBus.js');
+    const { default: eventBus } = await import('./common/EventBus.ts');
     return eventBus;
   });
 
   bootstrap.register('container', async () => {
-    const { container } = await import('./common/di/Container.js');
+    const { container } = await import('./common/di/Container.ts');
     return container;
   }, { dependencies: ['eventBus'] });
 
   // 2. 工具服务
   bootstrap.register('actionRegistry', async () => {
     const { default: actionRegistry } = await import('./common/utils/actionRegistry.js');
-    const { container } = await import('./common/di/Container.js');
+    const { container } = await import('./common/di/Container.ts');
     container.register('actionRegistry', () => actionRegistry);
     return actionRegistry;
   }, { dependencies: ['container'] });
 
   bootstrap.register('stateManager', async () => {
-    const { stateManager } = await import('./common/state/StateManager.js');
-    const { container } = await import('./common/di/Container.js');
+    const { stateManager } = await import('./common/state/StateManager.ts');
+    const { container } = await import('./common/di/Container.ts');
     container.register('stateManager', () => stateManager);
     return stateManager;
   }, { dependencies: ['container'] });
 
   // 3. 路由服务
   bootstrap.register('router', async () => {
-    const { router } = await import('./common/router/Router.js');
-    const { container } = await import('./common/di/Container.js');
+    const { router } = await import('./common/router/Router.ts');
+    const { container } = await import('./common/di/Container.ts');
     container.register('router', () => router);
     return router;
   }, { dependencies: ['container', 'stateManager'] });
@@ -195,7 +195,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   bootstrap.register('logger', async () => {
-    const { Logger } = await import('./services/loggerService.js');
+    const { Logger } = await import('./services/loggerService.ts');
     Logger.info('应用启动', { version: '1.0.0' }, 'System');
     return Logger;
   }, { optional: true });

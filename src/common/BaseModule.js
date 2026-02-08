@@ -1,5 +1,5 @@
 import { escapeHtml } from '@/common/utils/security.js';
-import { container } from './di/Container.js';
+import { container } from './di/Container.ts';
 
 export default class BaseModule {
     /**
@@ -12,30 +12,6 @@ export default class BaseModule {
         this.container = null;
         this._abortController = new AbortController();
         this._registeredActions = []; // 存储已注册的动作名称
-    }
-
-    /**
-     * 注册动作（自动在卸载时清理）
-     * 🔧 P0修复: 使用依赖注入容器,彻底解决循环依赖
-     * @param {Object} actions - { actionName: handler } 映射对象
-     */
-    registerActions(actions) {
-        try {
-            // 🎯 使用依赖注入容器获取actionRegistry
-            const actionRegistry = container.resolve('actionRegistry');
-            
-            // 注册每个动作
-            Object.entries(actions).forEach(([actionName, handler]) => {
-                actionRegistry.registerAction(actionName, handler);
-            });
-            
-            console.log(`[BaseModule] 已注册 ${Object.keys(actions).length} 个动作: ${this.moduleId}`);
-        } catch (error) {
-            console.error(`[BaseModule] 注册动作失败:`, error);
-        }
-        
-        // 保存动作名称用于清理
-        this._registeredActions.push(...Object.keys(actions));
     }
 
     /**
@@ -188,7 +164,7 @@ export default class BaseModule {
      */
     registerActions(actions) {
         // 🎯 使用事件总线发送注册请求,完全解耦
-        import('./EventBus.js').then(({ default: eventBus }) => {
+        import('./EventBus.ts').then(({ default: eventBus }) => {
             eventBus.emit('registerActions', {
                 moduleId: this.moduleId,
                 actions

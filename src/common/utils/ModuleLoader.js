@@ -12,7 +12,7 @@ import {
     renderNotRegistered,
     renderTimeout
 } from '../../components/ErrorBoundary.js';
-import { Logger } from '../../services/loggerService.js';
+import { Logger } from '../../services/loggerService.ts';
 
 /**
  * 模块加载器配置

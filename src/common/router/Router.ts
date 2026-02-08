@@ -1,6 +1,6 @@
-// src/common/router/Router.js
+// src/common/router/Router.ts
 // ================================================================
-// 🎯 完整的路由系统
+// 🎯 完整的路由系统（TypeScript版本）
 // 支持浏览器历史、路由守卫、中间件
 // ================================================================
 
@@ -10,11 +10,18 @@ import { routeMiddleware } from './RouteMiddleware.js';
 import { routeErrorHandler } from './ErrorHandler.js';
 import { MENU_CONFIG } from '../config/menuConfig.js';
 import { ensureViewLoaded } from '../utils/viewLoader.js';
+import type { Route, RouteConfig, NavigationOptions, RouteHistory } from '../../types/config.js';
 
 /**
  * 路由管理器
  */
 export class Router {
+    private routes: Map<string, RouteConfig>;
+    private currentRoute: Route | null;
+    private history: RouteHistory[];
+    private maxHistorySize: number;
+    private isNavigating: boolean;
+    
     constructor() {
         this.routes = new Map();
         this.currentRoute = null;
@@ -33,7 +40,7 @@ export class Router {
      * 注册内置守卫
      * @private
      */
-    _registerBuiltinGuards() {
+    private _registerBuiltinGuards(): void {
         // 动态导入守卫，避免循环依赖
         import('./RouteGuard.js').then(({ 
             metaValidationGuard, 
@@ -55,12 +62,11 @@ export class Router {
 
     /**
      * 注册路由
-     * @param {string} path - 路由路径
-     * @param {Object} config - 路由配置
+     * @param path - 路由路径
+     * @param config - 路由配置
      */
-    register(path, config) {
+    register(path: string, config: RouteConfig): void {
         this.routes.set(path, {
-            path,
             ...config,
             meta: config.meta || {}
         });
@@ -68,9 +74,9 @@ export class Router {
 
     /**
      * 批量注册路由
-     * @param {Object} routes - 路由配置对象
+     * @param routes - 路由配置对象
      */
-    registerRoutes(routes) {
+    registerRoutes(routes: Record<string, RouteConfig>): void {
         Object.entries(routes).forEach(([path, config]) => {
             this.register(path, config);
         });
@@ -78,11 +84,11 @@ export class Router {
 
     /**
      * 导航到指定路由
-     * @param {string} routeId - 路由ID
-     * @param {Object} options - 导航选项
-     * @returns {Promise<boolean>} 是否导航成功
+     * @param routeId - 路由ID
+     * @param options - 导航选项
+     * @returns 是否导航成功
      */
-    async navigate(routeId, options = {}) {
+    async navigate(routeId: string, options: NavigationOptions = {}): Promise<boolean> {
         const {
             updateHistory = true,
             replace = false,
@@ -96,7 +102,7 @@ export class Router {
         }
 
         // 检查路由是否存在
-        const routeConfig = MENU_CONFIG.routes[routeId];
+        const routeConfig = (MENU_CONFIG as any).routes[routeId];
         if (!routeConfig) {
             console.error(`[Router] Route not found: ${routeId}`);
             routeErrorHandler.handle(
@@ -110,7 +116,7 @@ export class Router {
 
         try {
             const from = this.currentRoute;
-            const to = {
+            const to: Route = {
                 path: routeId,
                 config: routeConfig,
                 state
@@ -161,7 +167,7 @@ export class Router {
 
         } catch (error) {
             console.error('[Router] Navigation error:', error);
-            routeErrorHandler.handle(error, {
+            routeErrorHandler.handle(error as Error, {
                 routeId,
                 from: this.currentRoute,
                 action: 'navigate'
@@ -175,45 +181,45 @@ export class Router {
     /**
      * 后退
      */
-    back() {
+    back(): void {
         window.history.back();
     }
 
     /**
      * 前进
      */
-    forward() {
+    forward(): void {
         window.history.forward();
     }
 
     /**
      * 跳转到历史记录中的特定位置
-     * @param {number} delta - 相对当前位置的偏移量
+     * @param delta - 相对当前位置的偏移量
      */
-    go(delta) {
+    go(delta: number): void {
         window.history.go(delta);
     }
 
     /**
      * 获取当前路由
-     * @returns {Object|null}
+     * @returns 当前路由对象
      */
-    getCurrentRoute() {
+    getCurrentRoute(): Route | null {
         return this.currentRoute;
     }
 
     /**
      * 获取历史记录
-     * @returns {Array}
+     * @returns 历史记录数组
      */
-    getHistory() {
+    getHistory(): RouteHistory[] {
         return [...this.history];
     }
 
     /**
      * 清空历史记录
      */
-    clearHistory() {
+    clearHistory(): void {
         this.history = [];
     }
 
@@ -221,7 +227,7 @@ export class Router {
      * 初始化浏览器历史监听
      * @private
      */
-    _initHistoryListener() {
+    private _initHistoryListener(): void {
         window.addEventListener('popstate', (event) => {
             const state = event.state;
             if (state && state.routeId) {
@@ -236,7 +242,7 @@ export class Router {
         // 监听 hash 变化（兼容旧代码）
         window.addEventListener('hashchange', () => {
             const hash = window.location.hash.slice(1);
-            if (hash && MENU_CONFIG.routes[hash]) {
+            if (hash && (MENU_CONFIG as any).routes[hash]) {
                 this.navigate(hash, { updateHistory: false });
             }
         });
@@ -246,7 +252,7 @@ export class Router {
      * 记录历史
      * @private
      */
-    _recordHistory(route) {
+    private _recordHistory(route: Route): void {
         this.history.push({
             ...route,
             timestamp: Date.now()
@@ -264,7 +270,7 @@ export const router = new Router();
 
 // 向后兼容：暴露到 window
 if (typeof window !== 'undefined') {
-    window.router = router;
+    (window as any).router = router;
 }
 
 export default router;

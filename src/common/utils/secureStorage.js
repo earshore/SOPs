@@ -4,7 +4,7 @@
 // 提供基于 Web Crypto API 的加密存储功能
 // ================================================================
 
-import { StorageService } from '../../services/storageService.js';
+import { StorageService } from '../../services/storageService.ts';
 
 /**
  * 获取设备指纹作为加密密钥
