@@ -59,7 +59,7 @@ export interface AppConfig {
 /**
  * 配置变更监听器
  */
-export type ConfigChangeListener = (key: string, newValue: any, oldValue: any) => void;
+export type ConfigChangeListener = (key: string, newValue: unknown, oldValue: unknown) => void;
 
 // ==================== 配置中心类 ====================
 
@@ -214,13 +214,13 @@ export class ConfigCenter {
   /**
    * 获取指定路径的配置值
    */
-  public get<T = any>(path: string): T | undefined {
+  public get<T = unknown>(path: string): T | undefined {
     const keys = path.split('.');
-    let value: any = this.config;
+    let value: unknown = this.config;
     
     for (const key of keys) {
       if (value && typeof value === 'object' && key in value) {
-        value = value[key];
+        value = (value as Record<string, unknown>)[key];
       } else {
         return undefined;
       }
@@ -232,17 +232,17 @@ export class ConfigCenter {
   /**
    * 设置配置值（支持热更新）
    */
-  public set(path: string, value: any): void {
+  public set(path: string, value: unknown): void {
     const keys = path.split('.');
     const lastKey = keys.pop()!;
-    let target: any = this.config;
+    let target: Record<string, unknown> = this.config as unknown as Record<string, unknown>;
     
     // 导航到目标对象
     for (const key of keys) {
       if (!(key in target)) {
         target[key] = {};
       }
-      target = target[key];
+      target = target[key] as Record<string, unknown>;
     }
     
     // 保存旧值
@@ -282,7 +282,7 @@ export class ConfigCenter {
   /**
    * 通知监听器
    */
-  private notifyListeners(path: string, newValue: any, oldValue: any): void {
+  private notifyListeners(path: string, newValue: unknown, oldValue: unknown): void {
     const listeners = this.listeners.get(path);
     if (listeners) {
       listeners.forEach(listener => {

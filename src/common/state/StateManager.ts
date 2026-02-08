@@ -104,7 +104,7 @@ export class StateManager<T extends StateSchema = StateSchema> {
     const prevRecording = this._isRecording;
     this._isRecording = false;
     
-    const changes: Array<{ path: string; value: any; oldValue: any }> = [];
+    const changes: Array<{ path: string; value: unknown; oldValue: unknown }> = [];
     Object.entries(updates).forEach(([path, value]) => {
       const oldValue = this.get(path);
       this._setByPath(path, value);
@@ -278,7 +278,11 @@ export class StateManager<T extends StateSchema = StateSchema> {
   private _notifyAll(oldState: T): void {
     this._subscribers.forEach((subs, path) => {
       const newValue = this.get(path);
-      const oldValue = path.split('.').reduce((obj: any, key) => obj?.[key], oldState);
+      const oldValue = path.split('.').reduce<unknown>((obj, key) => {
+        return (obj && typeof obj === 'object' && key in (obj as object)) 
+          ? (obj as Record<string, unknown>)[key] 
+          : undefined;
+      }, oldState);
       subs.forEach(cb => {
         try {
           cb(newValue, oldValue);
@@ -361,7 +365,7 @@ export default new Proxy(stateManager['_state'], {
   get(_target: StateSchema, prop: string | symbol) {
     return stateManager.get(String(prop));
   },
-  set(_target: StateSchema, prop: string | symbol, value: any) {
+  set(_target: StateSchema, prop: string | symbol, value: unknown) {
     stateManager.set(String(prop), value);
     return true;
   }
