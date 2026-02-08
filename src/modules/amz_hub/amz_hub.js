@@ -7,21 +7,21 @@ import { createModuleLoader } from '../../common/utils/ModuleLoader';
 // 键名对应 menuConfig.js 里的 route id
 const MODULE_MAP = {
     // 总览
-    'amz_hub_overview': () => import('./views/overview/index.js'),
+    'amz_hub_overview': () => import('./views/overview/index'),
     
     // Amazon知识早知道 (knowledge)
-    'amz_eu_insights': () => import('./views/knowledge/eu_insights/index.js'),
-    'amz_seo_strategy': () => import('./views/knowledge/seo_strategy/index.js'),
-    'amz_ecosystem': () => import('./views/knowledge/ecosystem/index.js'),
+    'amz_eu_insights': () => import('./views/knowledge/eu_insights/index'),
+    'amz_seo_strategy': () => import('./views/knowledge/seo_strategy/index'),
+    'amz_ecosystem': () => import('./views/knowledge/ecosystem/index'),
     
     // 入门实操宝典 (practice)
-    'amz_quality_listing': () => import('./views/practice/quality_listing/index.js'),
-    'amz_marketing_calendar': () => import('./views/practice/marketing_calendar/index.js'),
+    'amz_quality_listing': () => import('./views/practice/quality_listing/index'),
+    'amz_marketing_calendar': () => import('./views/practice/marketing_calendar/index'),
     'amz_seasons_tools': () => import('./views/practice/promotions/index.js'),
     
     // 运营提升全攻略 (advanced)
-    'amz_new_product_30days': () => import('./views/advanced/new_product_30days/index.js'),
-    'amz_conversion_optimization': () => import('./views/advanced/conversion_optimization/index.js'),
+    'amz_new_product_30days': () => import('./views/advanced/new_product_30days/index'),
+    'amz_conversion_optimization': () => import('./views/advanced/conversion_optimization/index'),
 };
 
 // ================= 使用通用ModuleLoader =================
