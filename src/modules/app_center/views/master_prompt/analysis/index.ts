@@ -24,6 +24,14 @@ import { renderWidgetCard, renderViewModeHTML, renderEditorForm, renderSkeleton 
 import eventBus from '../../../../../common/EventBus';
 import { MODULE_EVENTS } from '../../../../../common/constants/eventConstants';
 import { loadGridStack } from '../../../../../common/utils/lazyLibs';
+import type { 
+  AnalysisReport, 
+  AnalysisModuleConfig, 
+  GridStackInstance, 
+  GridStackNode,
+  GridStackWidget,
+  ScrapedProduct 
+} from '@/types/modules-business';
 
 import '../master_prompt_style.css';
 
@@ -38,18 +46,6 @@ interface StyleConfig {
   icon: string;
 }
 
-interface GridStackWidget {
-  id: string;
-  x?: number;
-  y?: number;
-  w: number;
-  h: number;
-  noMove: boolean;
-  noResize: boolean;
-  content: string;
-}
-
-
 // 扩展 Window 接口以支持全局函数
 declare global {
   interface Window {
@@ -60,7 +56,7 @@ declare global {
     deleteRowItem: (btn: HTMLElement, key: string) => void;
     addListItem: (key: string) => void;
     addObjItem: (key: string) => void;
-    GridStack: any;
+    GridStack: unknown;
   }
 }
 
@@ -91,9 +87,9 @@ function getFieldTitle(key: string): string {
 // ========================================== 
 
 class AnalysisModule extends BaseModule {
-  private grid: any = null;
-  private originalDataMap: Map<string, any> = new Map();
-  private editHistoryMap: Map<string, any[]> = new Map();
+  private grid: GridStackInstance | null = null;
+  private originalDataMap: Map<string, unknown> = new Map();
+  private editHistoryMap: Map<string, unknown[]> = new Map();
 
   constructor(container: HTMLElement) {
     super('master_prompt_analysis');
@@ -117,7 +113,7 @@ class AnalysisModule extends BaseModule {
     this.addDisposable(eventBus.on(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, () => {
       console.log("AnalysisModule received SCRAPE_SUCCESS");
       if (state.scraper.scrapedData && state.scraper.scrapedData.products) {
-        state.analysis.selectedAsins = state.scraper.scrapedData.products.map((p: any) => p.asin);
+        state.analysis.selectedAsins = state.scraper.scrapedData.products.map((p: ScrapedProduct) => p.asin);
       }
       this.updateAsinSelectList();
     }));
@@ -126,7 +122,7 @@ class AnalysisModule extends BaseModule {
     if (state.scraper.scrapedData) {
       if (!state.analysis.selectedAsins || state.analysis.selectedAsins.length === 0) {
         if (state.scraper.scrapedData.products) {
-          state.analysis.selectedAsins = state.scraper.scrapedData.products.map((p: any) => p.asin);
+          state.analysis.selectedAsins = state.scraper.scrapedData.products.map((p: ScrapedProduct) => p.asin);
         }
       }
       this.updateAsinSelectList();
@@ -226,7 +222,7 @@ class AnalysisModule extends BaseModule {
 
     // ✅ 安全: 静态HTML模板，无用户输入
     container.innerHTML = ANALYSIS_MODULES.map(
-      (mod: any) => `
+      (mod: AnalysisModuleConfig) => `
         <label class="module-item group relative flex items-start gap-2.5 p-2.5 rounded-xl border border-slate-100 hover:bg-blue-50/50 hover:border-blue-200 cursor-pointer transition-all bg-white" data-category="${mod.category}">
           <div class="flex items-center pt-0.5">
             <input type="checkbox" name="analysis_module" value="${mod.id}" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" checked>
@@ -298,7 +294,7 @@ class AnalysisModule extends BaseModule {
 
 
     // ✅ 安全: 静态HTML模板，无用户输入
-    container.innerHTML = state.scraper.scrapedData.products.map((p: any) => {
+    container.innerHTML = state.scraper.scrapedData.products.map((p: ScrapedProduct) => {
       const isSelected = state.analysis.selectedAsins.includes(p.asin);
       return `
         <label class="flex items-center gap-2 p-2 rounded-lg hover:bg-blue-50 cursor-pointer transition-colors group">
@@ -327,7 +323,7 @@ class AnalysisModule extends BaseModule {
 
   selectAllAsins(): void {
     if (!state.scraper.scrapedData || !state.scraper.scrapedData.products) return;
-    state.analysis.selectedAsins = state.scraper.scrapedData.products.map((p: any) => p.asin);
+    state.analysis.selectedAsins = state.scraper.scrapedData.products.map((p: ScrapedProduct) => p.asin);
     this.updateAsinSelectList();
   }
 
@@ -404,15 +400,15 @@ class AnalysisModule extends BaseModule {
     if (selectedCheckboxes.length === 0) return null;
 
     const selectedModules = Array.from(selectedCheckboxes)
-      .map((cb) => ANALYSIS_MODULES.find((m: any) => m.id === (cb as HTMLInputElement).value))
-      .filter(Boolean);
+      .map((cb) => ANALYSIS_MODULES.find((m: AnalysisModuleConfig) => m.id === (cb as HTMLInputElement).value))
+      .filter(Boolean) as AnalysisModuleConfig[];
 
     const tasksStr = selectedModules
-      .map((m: any, index: number) => `${index + 1}. ${m.label_en}: ${m.extraction_instruction}`)
+      .map((m: AnalysisModuleConfig, index: number) => `${index + 1}. ${m.label_en}: ${m.extraction_instruction}`)
       .join("\n");
 
     const schemaParts = selectedModules
-      .map((m: any) => `  "${m.id}": ["..."]`)
+      .map((m: AnalysisModuleConfig) => `  "${m.id}": ["..."]`)
       .join(",\n");
 
     return DYNAMIC_MASTER_TEMPLATE.replace("{{dynamic_tasks}}", tasksStr).replace("{{dynamic_schema}}", schemaParts);
@@ -455,7 +451,7 @@ class AnalysisModule extends BaseModule {
     btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> 分析中..';
 
     // 渲染骨架屏状态
-    const loadingReport: any = {};
+    const loadingReport: Partial<AnalysisReport> = {};
     const selectedCheckboxes = document.querySelectorAll('input[name="analysis_module"]:checked');
     selectedCheckboxes.forEach((cb) => {
       loadingReport[(cb as HTMLInputElement).value] = '__LOADING__';
@@ -471,7 +467,7 @@ class AnalysisModule extends BaseModule {
     state.analysis.analysisReport = loadingReport;
     this.renderReport();
 
-    const selectedProducts = state.scraper.scrapedData.products.filter((p: any) => state.analysis.selectedAsins.includes(p.asin));
+    const selectedProducts = state.scraper.scrapedData.products.filter((p: ScrapedProduct) => state.analysis.selectedAsins.includes(p.asin));
     const site = state.scraper.scrapedData.metadata?.marketplace;
     
     // 🔐 防御性检查：确保站点配置存在
@@ -522,7 +518,7 @@ class AnalysisModule extends BaseModule {
       state.analysis.analysisReport = report;
       state.analysis.translatedReport = null;
       state.analysis.showTranslation = false;
-      state.analysis.editHistory = [JSON.stringify(report) as any];
+      state.analysis.editHistory = [JSON.stringify(report)];
       state.analysis.isEditing = false;
 
       HistoryService.save(state.scraper.scrapedData, report);
@@ -530,24 +526,25 @@ class AnalysisModule extends BaseModule {
       this.renderReport();
 
       showToast("分析完成", "success");
-    } catch (e: any) {
+    } catch (e: unknown) {
       // 确保错误对象有 message 属性
-      const errorMessage = e?.message || e?.toString() || '未知错误';
-      const error: any = new Error(errorMessage);
+      const error = e instanceof Error ? e : new Error(String(e));
+      const errorMessage = error.message || '未知错误';
       
       // 保留原始错误的 status 属性(如果有)
-      if (e?.status) {
-        error.status = e.status;
+      const errorWithStatus = error as Error & { status?: number };
+      if (typeof e === 'object' && e !== null && 'status' in e) {
+        errorWithStatus.status = (e as { status: number }).status;
       }
       
       console.error('[Analysis] analyzeSelectedAsins 错误详情:', {
         message: errorMessage,
-        status: e?.status,
-        stack: e?.stack,
+        status: errorWithStatus.status,
+        stack: error.stack,
         original: e
       });
       
-      ErrorService.handle(error, { action: 'analyzeSelectedAsins', module: 'analysis' });
+      ErrorService.handle(errorWithStatus, { action: 'analyzeSelectedAsins', module: 'analysis' });
       state.analysis.analysisReport = null;
       const display = document.getElementById("report-display");
       if (display) display.classList.add("hidden");
@@ -686,8 +683,8 @@ class AnalysisModule extends BaseModule {
     let options = "";
 
     if (providerConfig && providerConfig.models && providerConfig.models.length > 0) {
-      providerConfig.models.forEach((modelObj: any) => {
-        const modelId = modelObj.id;
+      providerConfig.models.forEach((modelObj: string | { id: string; name?: string; context?: number }) => {
+        const modelId = typeof modelObj === 'string' ? modelObj : modelObj.id;
         const isSelected = state.analysis.lastTranslationModel === modelId ? "selected" : "";
         options += `<option value="${modelId}" ${isSelected}>${modelId}</option>`;
       });
@@ -715,7 +712,7 @@ class AnalysisModule extends BaseModule {
     };
   }
 
-  async initGridStack(report: any): Promise<void> {
+  async initGridStack(report: AnalysisReport): Promise<void> {
     const gridEl = document.querySelector(".grid-stack");
     if (!gridEl) return;
 
@@ -723,7 +720,7 @@ class AnalysisModule extends BaseModule {
 
     if (this.grid) this.grid.destroy(false);
 
-    this.grid = window.GridStack.init(
+    this.grid = (window.GridStack as any).init(
       {
         column: 12,
         cellHeight: 60,
@@ -759,7 +756,7 @@ class AnalysisModule extends BaseModule {
       if (autoH > 6) defaultW = 6;
       if (autoH > 10) defaultW = 12;
 
-      const savedNode = savedLayout.find((n: any) => n.id === key);
+      const savedNode = savedLayout.find((n: GridStackNode) => n.id === key);
 
       widgets.push({
         id: key,
@@ -773,11 +770,21 @@ class AnalysisModule extends BaseModule {
       });
     });
 
+    if (!this.grid) return;
+
     this.grid.batchUpdate();
     this.grid.removeAll();
     widgets.forEach((w) => {
-      const widgetConfig = {
-        x: w.x, y: w.y, w: w.w, h: w.h, id: w.id, noMove: w.noMove, noResize: w.noResize
+      if (!this.grid) return;
+      const widgetConfig: GridStackWidget = {
+        x: w.x, 
+        y: w.y, 
+        w: w.w, 
+        h: w.h, 
+        id: w.id, 
+        noMove: w.noMove, 
+        noResize: w.noResize,
+        content: w.content
       };
       const el = this.grid.addWidget(widgetConfig);
 
@@ -787,9 +794,10 @@ class AnalysisModule extends BaseModule {
         contentEl.innerHTML = w.content;
       }
     });
-    this.grid.batchUpdate(false);
+    this.grid.batchUpdate();
 
-    this.grid.on("change", () => this.saveGridLayout(templateId));
+    const templateId = report?.templateId || report?.meta?.templateId || "default";
+    this.grid.on("change", () => this.saveGridLayout(templateId as string));
     this.addEventListener(document, "mousedown", (e) => this.handleGlobalClick(e as MouseEvent));
   }
 
@@ -831,7 +839,7 @@ class AnalysisModule extends BaseModule {
   saveGridLayout(templateId: string): void {
     if (!this.grid) return;
     const layout = this.grid.save(false);
-    const cleanLayout = layout.map((node: any) => ({
+    const cleanLayout = layout.map((node: GridStackNode) => ({
       id: node.id,
       x: node.x,
       y: node.y,
@@ -841,7 +849,7 @@ class AnalysisModule extends BaseModule {
     StorageService.setLayoutConfig(templateId, cleanLayout);
   }
 
-  renderWidgetContent(key: string, report: any, transReport: any): string {
+  renderWidgetContent(key: string, report: AnalysisReport, transReport: AnalysisReport | null): string {
     const origVal = report[key];
     const showTrans = state.analysis.showTranslation;
     const transVal = showTrans && transReport ? transReport[key] : undefined;
@@ -852,7 +860,7 @@ class AnalysisModule extends BaseModule {
 
     const displayVal = this.getDisplayValue(origVal, transVal);
 
-    const moduleConfig = ANALYSIS_MODULES.find((m: any) => m.id === key);
+    const moduleConfig = ANALYSIS_MODULES.find((m: AnalysisModuleConfig) => m.id === key);
     const title = moduleConfig ? moduleConfig.label_cn : getFieldTitle(key);
 
 
@@ -875,7 +883,7 @@ class AnalysisModule extends BaseModule {
     return renderWidgetCard(key, title, style, showTrans || false, renderViewModeHTML(displayVal, style));
   }
 
-  calculateWidgetHeight(content: any): number {
+  calculateWidgetHeight(content: unknown): number {
     if (!content) return 4;
     let textLength = 0;
     let lineCount = 0;
@@ -899,7 +907,7 @@ class AnalysisModule extends BaseModule {
     return Math.min(h + 2, 24);
   }
 
-  getDisplayValue(orig: any, trans: any): any {
+  getDisplayValue(orig: unknown, trans: unknown): unknown {
     return state.analysis.showTranslation && trans !== undefined && trans !== null ? trans : orig;
   }
 
@@ -965,7 +973,7 @@ class AnalysisModule extends BaseModule {
       state.analysis.showTranslation = true;
       this.renderReport();
       showToast("翻译完成", "success");
-    } catch (e: any) {
+    } catch (e: unknown) {
       ErrorService.handle(e, { action: 'translateReport', module: 'analysis' });
     } finally {
       if (btn) {
@@ -989,7 +997,7 @@ class AnalysisModule extends BaseModule {
     showToast("Markdown 已复制", "success");
   }
 
-  generateDynamicMarkdown(data: any, depth: number = 1): string {
+  generateDynamicMarkdown(data: unknown, depth: number = 1): string {
     if (!data) return "";
     let md = "";
 
@@ -1057,7 +1065,7 @@ class AnalysisModule extends BaseModule {
         this.grid.update(el, { noMove: false, noResize: false });
         
         // 确保其他卡片保持禁用
-        this.grid.engine.nodes.forEach((node: any) => {
+        this.grid.engine.nodes.forEach((node: GridStackNode) => {
           if (node.el !== el) {
             this.grid.update(node.el, { noMove: true, noResize: true });
           }
@@ -1098,7 +1106,8 @@ class AnalysisModule extends BaseModule {
       }
       
       // 保存布局
-      const templateId = (state.analysis.analysisReport as any)?.templateId || (state.analysis.analysisReport as any)?.meta?.templateId || "default";
+      const report = state.analysis.analysisReport as AnalysisReport;
+      const templateId = report?.templateId || report?.meta?.templateId || "default";
       this.saveGridLayout(templateId as string);
     }
   }
@@ -1108,7 +1117,7 @@ class AnalysisModule extends BaseModule {
 
   registerGlobalActions(): void {
     const actions = {
-      toggleAllModules: (params: any) => {
+      toggleAllModules: (params: { checked: string }) => {
         const checked = params.checked === 'true';
         this.toggleAllModules(checked);
       },
@@ -1117,7 +1126,7 @@ class AnalysisModule extends BaseModule {
       translateReport: () => this.translateReport(),
       copyReportMarkdown: () => this.copyReportMarkdown(),
       exportReport: () => this.exportReport(),
-      toggleCardResize: (params: any) => {
+      toggleCardResize: (params: { key: string }) => {
         const key = params.key;
         if (key) this.toggleCardResize(key, true);
       },
@@ -1139,13 +1148,13 @@ class AnalysisModule extends BaseModule {
     
     // 将全局函数挂载到 window，并注册清理函数
     Object.entries(globalFunctions).forEach(([name, fn]) => {
-      (window as any)[name] = fn;
+      (window as Record<string, unknown>)[name] = fn;
     });
     
     // 添加清理函数，在卸载时移除全局函数
     this.addDisposable(() => {
       Object.keys(globalFunctions).forEach(name => {
-        delete (window as any)[name];
+        delete (window as Record<string, unknown>)[name];
       });
     });
   }
@@ -1183,7 +1192,7 @@ class AnalysisModule extends BaseModule {
     if (!report) return;
     
     if (!this.originalDataMap.has(key)) {
-      this.originalDataMap.set(key, JSON.parse(JSON.stringify((report as any)[key])));
+      this.originalDataMap.set(key, JSON.parse(JSON.stringify(report[key])));
     }
 
     // 初始化编辑历史
@@ -1197,7 +1206,7 @@ class AnalysisModule extends BaseModule {
 
     // 渲染编辑表单
     // ✅ 安全: 静态HTML模板，无用户输入
-    contentArea.innerHTML = renderEditorForm(key, (report as any)[key]);
+    contentArea.innerHTML = renderEditorForm(key, report[key]);
   }
 
   saveLocalEdit(key: string): void {
@@ -1230,7 +1239,7 @@ class AnalysisModule extends BaseModule {
     if (viewControls) viewControls.classList.remove('hidden');
 
     // 重新渲染
-    const moduleConfig = ANALYSIS_MODULES.find((m: any) => m.id === key);
+    const moduleConfig = ANALYSIS_MODULES.find((m: AnalysisModuleConfig) => m.id === key);
     let style: StyleConfig = { color: "slate", bg: "bg-slate-500", lightBg: "bg-slate-100", icon: "fa-info-circle" };
     if (moduleConfig) {
       if (moduleConfig.category === "listing")
@@ -1274,7 +1283,7 @@ class AnalysisModule extends BaseModule {
       if (editControls) editControls.classList.add('hidden');
       if (viewControls) viewControls.classList.remove('hidden');
 
-      const moduleConfig = ANALYSIS_MODULES.find((m: any) => m.id === key);
+      const moduleConfig = ANALYSIS_MODULES.find((m: AnalysisModuleConfig) => m.id === key);
       let style: StyleConfig = { color: "slate", bg: "bg-slate-500", lightBg: "bg-slate-100", icon: "fa-info-circle" };
       if (moduleConfig) {
         if (moduleConfig.category === "listing")
@@ -1301,7 +1310,7 @@ class AnalysisModule extends BaseModule {
   }
 
 
-  collectEditedData(key: string): any {
+  collectEditedData(key: string): unknown {
     const contentArea = document.getElementById(`widget-content-${key}`);
     if (!contentArea) return null;
 
@@ -1325,9 +1334,9 @@ class AnalysisModule extends BaseModule {
     // 检查是否是对象数组编辑
     const objContainer = contentArea.querySelector(`#obj-list-container-${key}`);
     if (objContainer) {
-      const objects: any[] = [];
+      const objects: Record<string, string>[] = [];
       objContainer.querySelectorAll('.edit-row').forEach(row => {
-        const obj: any = {};
+        const obj: Record<string, string> = {};
         row.querySelectorAll('.obj-input').forEach(input => {
           const subKey = (input as HTMLElement).dataset.subkey;
           if (subKey) {

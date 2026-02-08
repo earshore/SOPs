@@ -140,6 +140,66 @@ export interface AnalysisReport {
 }
 
 /**
+ * 分析模块配置
+ */
+export interface AnalysisModuleConfig {
+  id: string;
+  label_cn: string;
+  label_en: string;
+  desc_cn?: string;
+  category: string;
+  extraction_instruction: string;
+  icon?: string;
+  color?: string;
+}
+
+/**
+ * GridStack节点
+ */
+export interface GridStackNode {
+  id: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  el?: HTMLElement;
+  noMove?: boolean;
+  noResize?: boolean;
+}
+
+/**
+ * GridStack实例接口
+ */
+export interface GridStackInstance {
+  addWidget: (widget: GridStackWidget) => HTMLElement;
+  save: (saveContent?: boolean) => GridStackNode[];
+  destroy: (removeDOM?: boolean) => void;
+  update: (el: HTMLElement | null, opts: Partial<GridStackNode>) => void;
+  enable: () => void;
+  disable: () => void;
+  batchUpdate: () => void;
+  removeAll: (removeDOM?: boolean) => void;
+  on: (event: string, callback: (event: Event, el: HTMLElement) => void) => void;
+  engine: {
+    nodes: GridStackNode[];
+  };
+}
+
+/**
+ * GridStack组件
+ */
+export interface GridStackWidget {
+  id: string;
+  x?: number;
+  y?: number;
+  w: number;
+  h: number;
+  noMove?: boolean;
+  noResize?: boolean;
+  content: string;
+}
+
+/**
  * 历史记录项
  */
 export interface HistoryItem {
@@ -449,6 +509,10 @@ export type {
   DataOptions,
   LLMConfig,
   AnalysisReport,
+  AnalysisModuleConfig,
+  GridStackNode,
+  GridStackInstance,
+  GridStackWidget,
   HistoryItem,
   KeywordMatchResult,
   AnalysisResult,
