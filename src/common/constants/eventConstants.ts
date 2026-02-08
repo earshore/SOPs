@@ -66,7 +66,24 @@ export const APP_EVENTS = {
   HISTORY_UPDATED: 'history-updated',
   
   // 动作注册
-  REGISTER_ACTIONS: 'registerActions'
+  REGISTER_ACTIONS: 'registerActions',
+  UNREGISTER_ACTIONS: 'unregisterActions',
+  
+  // 配置相关
+  CONFIG_CHANGE: 'app:config-change',
+  CONFIG_CHANGED: 'app:config-changed',
+  CONFIG_RELOAD: 'app:config-reload',
+  CONFIG_VALIDATE: 'app:config-validate',
+  
+  // 服务相关
+  SERVICE_INIT: 'app:service-init',
+  SERVICE_READY: 'app:service-ready',
+  SERVICE_ERROR: 'app:service-error',
+  
+  // UI相关
+  UI_MODAL_OPEN: 'app:ui-modal-open',
+  UI_MODAL_CLOSE: 'app:ui-modal-close',
+  UI_TOAST_SHOW: 'app:ui-toast-show'
 } as const;
 
 /**
