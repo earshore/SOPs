@@ -76,18 +76,28 @@ export const EnvConfig = {
 
     /**
      * 标准化 API Endpoint
-     * @param _endpoint - 用户配置的 endpoint（未使用，保留参数以保持接口兼容性）
+     * @param endpoint - 用户配置的 endpoint
      * @returns 标准化后的 endpoint
      */
-    normalizeEndpoint(_endpoint: string): string {
+    normalizeEndpoint(endpoint: string): string {
       // 开发环境: 统一使用代理路径
       if (EnvConfig.isDevelopment) {
         return this.baseUrl;
       }
       
-      // 生产环境: 始终使用 Cloudflare Functions 代理
-      // 用户配置的 endpoint 会被 Functions 转发到实际的上游 API
-      // 这样可以避免地理位置限制和 CORS 问题
+      // 生产环境: 
+      // 1. 如果用户配置了完整的 URL (http/https 开头),直接使用
+      // 2. 如果是相对路径或空,使用 Cloudflare Functions 代理
+      if (endpoint && (endpoint.startsWith('http://') || endpoint.startsWith('https://'))) {
+        // 移除末尾的 /v1 (如果存在),避免重复
+        let normalizedUrl = endpoint.trim();
+        if (normalizedUrl.endsWith('/v1')) {
+          normalizedUrl = normalizedUrl.slice(0, -3);
+        }
+        return normalizedUrl;
+      }
+      
+      // 使用配置的基础路径
       return this.baseUrl;
     }
   },
