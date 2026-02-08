@@ -9,7 +9,7 @@ const MODULE_MAP = {
     'sops_overview': () => import('./views/overview/index'),
 
     // 第一模块：运营与推广体系 (The Growth Layer)
-    'sops_npi_tracker': () => import('./views/growth/npi_tracker/index.js'),
+    'sops_npi_tracker': () => import('./views/growth/npi_tracker/index'),
     'sops_listing_seo': () => import('./views/growth/listing_seo/index'),
     'sops_ppc_advertising': () => import('./views/growth/ppc_advertising/index'),
     'sops_restricted_words': () => import('./views/growth/restricted_words/index'),
