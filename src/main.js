@@ -19,7 +19,7 @@ import state from './common/state.js';
 window.state = state;
 
 // ✅ 导入视图加载器 (HTML 拆分重构的核心)
-import { initViews } from './common/utils/viewLoader.js';
+import { initViews } from './common/utils/viewLoader';
 
 // ✅ 导入 Web Components
 import './components/modal/AppModal.js';
@@ -54,12 +54,12 @@ document.addEventListener('DOMContentLoaded', () => {
 import {
   registerActionsWithLegacy,
   initGlobalEventDelegation
-} from './common/utils/actionRegistry.js';
+} from './common/utils/actionRegistry';
 
-import { loadPlugins } from './common/utils/pluginLoader.js';
+import { loadPlugins } from './common/utils/pluginLoader';
 
 // ✅ P1: 导入事件调试工具
-import { initEventLogger } from './common/utils/eventLogger.js';
+import { initEventLogger } from './common/utils/eventLogger';
 
 // ✅ 全局错误兜底 (增强版 - 集成日志和监控)
 window.addEventListener("error", (event) => {
@@ -76,7 +76,7 @@ window.addEventListener("error", (event) => {
   if (window.showToast) window.showToast(msg, "error");
 
   // 记录到错误服务和监控服务
-  import('./services/errorService.js').then(({ ErrorService }) => {
+  import('./services/errorService').then(({ ErrorService }) => {
     ErrorService.handle(event.error, { 
       module: 'System',
       action: 'window.onerror', 
@@ -99,7 +99,7 @@ window.addEventListener("unhandledrejection", (event) => {
   if (window.showToast) window.showToast(msg, "error");
   
   // 记录到监控服务
-  import('./services/monitoringService.js').then(({ monitoringService }) => {
+  import('./services/monitoringService').then(({ monitoringService }) => {
     monitoringService.captureException(event.reason, {
       module: 'System',
       tags: { type: 'unhandledrejection' }
@@ -160,7 +160,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // 2. 工具服务
   bootstrap.register('actionRegistry', async () => {
-    const { default: actionRegistry } = await import('./common/utils/actionRegistry.js');
+    const { default: actionRegistry } = await import('./common/utils/actionRegistry');
     const { container } = await import('./common/di/Container.ts');
     container.register('actionRegistry', () => actionRegistry);
     return actionRegistry;
@@ -183,7 +183,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // 4. 监控服务（可选）
   bootstrap.register('performanceService', async () => {
-    const { performanceService } = await import('./services/performanceService.js');
+    const { performanceService } = await import('./services/performanceService');
     performanceService.init();
     return performanceService;
   }, { 
@@ -223,20 +223,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // 6. 事件系统
   bootstrap.register('eventLogger', async () => {
-    const { initEventLogger } = await import('./common/utils/eventLogger.js');
+    const { initEventLogger } = await import('./common/utils/eventLogger');
     initEventLogger();
     return true;
   }, { optional: true });
 
   bootstrap.register('eventDelegation', async () => {
-    const { initGlobalEventDelegation } = await import('./common/utils/actionRegistry.js');
+    const { initGlobalEventDelegation } = await import('./common/utils/actionRegistry');
     initGlobalEventDelegation();
     return true;
   }, { dependencies: ['actionRegistry'] });
 
   // 7. 插件系统
   bootstrap.register('plugins', async () => {
-    const { loadPlugins } = await import('./common/utils/pluginLoader.js');
+    const { loadPlugins } = await import('./common/utils/pluginLoader');
     loadPlugins();
     return true;
   }, { optional: true });
@@ -337,7 +337,7 @@ registerActionsWithLegacy({
   // 🎯 阶段1: 性能监控
   showPerformanceReport: async () => {
     try {
-      const { performanceService } = await import('./services/performanceService.js');
+      const { performanceService } = await import('./services/performanceService');
       const report = performanceService.getReport();
       
       console.log('📊 性能报告:', report);

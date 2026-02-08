@@ -164,8 +164,11 @@ export default class BaseModule {
      */
     registerActions(actions) {
         // 🎯 使用事件总线发送注册请求,完全解耦
-        import('./EventBus.ts').then(({ default: eventBus }) => {
-            eventBus.emit('registerActions', {
+        Promise.all([
+            import('./EventBus.ts'),
+            import('./constants/eventConstants')
+        ]).then(([{ default: eventBus }, { APP_EVENTS }]) => {
+            eventBus.emit(APP_EVENTS.REGISTER_ACTIONS, {
                 moduleId: this.moduleId,
                 actions
             });

@@ -420,7 +420,7 @@ class StorageServiceClass {
    * 安全存储敏感数据
    */
   async setSecure(key: string, value: any): Promise<boolean> {
-    const { SecureStorage } = await import('../common/utils/secureStorage.js');
+    const { SecureStorage } = await import('../common/utils/secureStorage');
     return await SecureStorage.setSecure(key, value);
   }
 
@@ -428,7 +428,7 @@ class StorageServiceClass {
    * 读取安全存储的数据
    */
   async getSecure<T = any>(key: string, defaultValue: T | null = null): Promise<T | null> {
-    const { SecureStorage } = await import('../common/utils/secureStorage.js');
+    const { SecureStorage } = await import('../common/utils/secureStorage');
     return await SecureStorage.getSecure(key, defaultValue);
   }
 

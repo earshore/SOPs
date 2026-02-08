@@ -4,8 +4,8 @@
 // 替代分散的 fetch 调用
 // ================================================================
 
-import { Logger } from './loggerService.js';
-import { priorityRequestPool, REQUEST_PRIORITY } from './PriorityRequestPool.js';
+import { Logger } from './loggerService';
+import { priorityRequestPool, REQUEST_PRIORITY } from './PriorityRequestPool';
 
 /**
  * 请求优先级类型
@@ -195,7 +195,7 @@ class HttpServiceClass {
     // 性能监控
     if (measurePerformance) {
       try {
-        const { performanceService } = await import('./performanceService.js');
+        const { performanceService } = await import('./performanceService');
         const apiName = this._extractApiName(url);
         
         if (usePool) {
@@ -300,7 +300,7 @@ export const HttpService = new HttpServiceClass();
 export default HttpService;
 
 // 导出优先级常量
-export { REQUEST_PRIORITY } from './PriorityRequestPool.js';
+export { REQUEST_PRIORITY } from './PriorityRequestPool';
 
 // 向后兼容：暴露到 window
 if (typeof window !== 'undefined') {

@@ -3,7 +3,7 @@
 // 🎯 Phase 4: 已迁移使用 StorageService
 // ================================================================
 
-import { callLLM } from "../../../../../services/llmService.js";
+import { callLLM } from "../../../../../services/llmService";
 import { ANALYSIS_PROMPT_TEMPLATE, TRANSLATE_PROMPT_TEMPLATE as TRANSLATE_PROMPT_TEMPLATE2 } from "../constants/prompts.js";
 import { StorageService, STORAGE_KEYS } from "../../../../../services/storageService.ts";
 

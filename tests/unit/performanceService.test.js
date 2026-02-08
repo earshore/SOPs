@@ -4,7 +4,7 @@
 // ================================================================
 
 import { describe, test, expect, beforeEach, vi } from 'vitest';
-import { performanceService, METRIC_TYPES } from '@/services/performanceService.js';
+import { performanceService, METRIC_TYPES } from '@/services/performanceService';
 
 describe('PerformanceService', () => {
     beforeEach(() => {

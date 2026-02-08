@@ -1,7 +1,7 @@
 import BaseModule from "../../../../../common/BaseModule.js";
 import { A10_CHART_DATA } from "../../../constants/amz_hub_constants.js";
-import { loadTemplate } from "../../../../../common/utils/viewLoader.js";
-import { loadChartJs } from "../../../../../common/utils/lazyLibs.js";
+import { loadTemplate } from "../../../../../common/utils/viewLoader";
+import { loadChartJs } from "../../../../../common/utils/lazyLibs";
 
 class EcosystemModule extends BaseModule {
     constructor() {

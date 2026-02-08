@@ -4,7 +4,7 @@
 // 提供结构化日志记录，支持不同日志级别和上下文
 // ================================================================
 
-import { StorageService } from './storageService.js';
+import { StorageService } from './storageService';
 
 /**
  * 日志级别

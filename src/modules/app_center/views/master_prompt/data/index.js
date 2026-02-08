@@ -8,7 +8,7 @@
  * - 通过 EventBus 与其他模块通信
  */
 
-import { loadTemplate } from '../../../../../common/utils/viewLoader.js';
+import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import BaseModule from '../../../../../common/BaseModule.js';
 import state from '../../../../../common/state.js';
 import { getErrorSummary, showToast, switchTab } from '../../../../../common/utils/ui.js';
@@ -317,8 +317,8 @@ class DataModule extends BaseModule {
         this.renderDataPanel();
         
         // 触发事件通知其他模块更新
-        eventBus.emit('app:data-updated');
-        window.dispatchEvent(new CustomEvent('history-updated'));
+        eventBus.emit(APP_EVENTS.DATA_UPDATED);
+        window.dispatchEvent(new CustomEvent(APP_EVENTS.HISTORY_UPDATED));
 
         showToast(`ASIN ${asin} 已移除`, "info");
     }
@@ -339,7 +339,7 @@ class DataModule extends BaseModule {
             this.renderDataPanel();
             
             // 触发事件通知其他模块更新
-            window.dispatchEvent(new CustomEvent('history-updated'));
+            window.dispatchEvent(new CustomEvent(APP_EVENTS.HISTORY_UPDATED));
             
             showToast("评论已删除", "success");
         }
@@ -512,8 +512,8 @@ class DataModule extends BaseModule {
             }, 100);
             
             // 触发事件通知其他模块更新
-            eventBus.emit('app:data-updated');
-            window.dispatchEvent(new CustomEvent('history-updated'));
+            eventBus.emit(APP_EVENTS.DATA_UPDATED);
+            window.dispatchEvent(new CustomEvent(APP_EVENTS.HISTORY_UPDATED));
 
             showToast(`✅ 成功导入并合并 ${finalProducts.length} 个ASIN (基准站点: ${targetMarketplace})`, "success");
 

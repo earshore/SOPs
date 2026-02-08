@@ -11,6 +11,7 @@
 export const APP_EVENTS = {
   // 路由事件
   ROUTE_CHANGED: 'app:route-changed',
+  ROUTE_CHANGE: 'route-change', // Legacy: 用于向后兼容
   ROUTE_BEFORE_CHANGE: 'app:route-before-change',
   ROUTE_ERROR: 'app:route-error',
   
@@ -22,6 +23,7 @@ export const APP_EVENTS = {
   MODULE_MOUNTED: 'app:module-mounted',
   MODULE_UNMOUNTED: 'app:module-unmounted',
   MODULE_UNLOAD: 'app:module-unload', // 主模块卸载请求（在切换前触发）
+  MODULE_LOADED: 'app:module-loaded',
   MODULE_ERROR: 'app:module-error',
   
   // 状态变化
@@ -33,12 +35,14 @@ export const APP_EVENTS = {
   
   // 错误处理
   ERROR_OCCURRED: 'app:error-occurred',
+  ERROR: 'app:error',
   ERROR_RECOVERED: 'app:error-recovered',
   
   // 数据操作
   DATA_LOADED: 'app:data-loaded',
   DATA_SAVED: 'app:data-saved',
   DATA_DELETED: 'app:data-deleted',
+  DATA_UPDATED: 'app:data-updated',
   
   // LLM 相关
   LLM_REQUEST_START: 'app:llm-request-start',
@@ -52,7 +56,17 @@ export const APP_EVENTS = {
   
   // 加载状态相关
   LOADING_START: 'app:loading-start',
-  LOADING_STOP: 'app:loading-stop'
+  LOADING_STOP: 'app:loading-stop',
+  
+  // 设置相关
+  SETTINGS_OPEN: 'open-settings',
+  SETTINGS_CLOSE: 'close-settings',
+  
+  // 历史记录相关
+  HISTORY_UPDATED: 'history-updated',
+  
+  // 动作注册
+  REGISTER_ACTIONS: 'registerActions'
 } as const;
 
 /**

@@ -8,12 +8,13 @@
  * - 使用 registerActionsWithLegacy 注册全局操作
  */
 
-import { loadTemplate } from '../../../../../common/utils/viewLoader.js';
+import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import { showToast } from '../../../../../common/utils/ui.js';
 import * as KeywordService from '../services/trackerService.js';
 import state from '../../../../../common/state.js';
-import { ErrorService } from '../../../../../services/errorService.js';
-import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry.js';
+import { APP_EVENTS } from '../../../../../common/constants/eventConstants';
+import { ErrorService } from '../../../../../services/errorService';
+import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry';
 
 import '../keyword_hunter_style.css';
 

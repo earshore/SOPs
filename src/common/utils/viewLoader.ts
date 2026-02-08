@@ -1,4 +1,4 @@
-// src/common/utils/viewLoader.js
+// src/common/utils/viewLoader.ts
 // ================================================================
 // 🎯 P1 增强: 按需加载（Lazy Loading），大幅提升首屏速度
 // 🎯 P2 优化: 使用 Vite glob import 替代 fetch，解决生产环境 404 问题
@@ -6,24 +6,54 @@
 // ================================================================
 
 import { APP_VERSION } from '../constants/constants.js';
-import { StorageService } from '../../services/storageService.ts';
+import { StorageService } from '../../services/storageService';
 
 const CACHE_PREFIX = 'view_cache_';
 
 /**
- * 获取带版本的缓存键
- * @param {string} path 
+ * 视图配置接口
  */
-function getCacheKey(path) {
+interface ViewConfig {
+    path: string;
+    target: string;
+    isLoaded: boolean;
+}
+
+/**
+ * 视图注册表类型
+ */
+type ViewRegistry = Record<string, ViewConfig>;
+
+/**
+ * HTML模块加载器类型
+ */
+type HtmlModuleLoader = () => Promise<string>;
+type HtmlModules = Record<string, HtmlModuleLoader>;
+
+/**
+ * 缓存统计信息
+ */
+interface CacheStats {
+    count: number;
+    size: number;
+    items: Array<{
+        key: string;
+        size: number;
+        sizeKB: string;
+    }>;
+}
+
+/**
+ * 获取带版本的缓存键
+ */
+function getCacheKey(path: string): string {
     return `${CACHE_PREFIX}${APP_VERSION}_${path}`;
 }
 
 /**
  * 检查缓存
- * @param {string} path 
- * @returns {string|null}
  */
-function checkCache(path) {
+function checkCache(path: string): string | null {
     try {
         const key = getCacheKey(path);
         const cached = StorageService.getRaw(key, null);
@@ -39,10 +69,8 @@ function checkCache(path) {
 
 /**
  * 设置缓存
- * @param {string} path 
- * @param {string} content 
  */
-function setCache(path, content) {
+function setCache(path: string, content: string): void {
     try {
         const key = getCacheKey(path);
         StorageService.setRaw(key, content);
@@ -60,9 +88,9 @@ function setCache(path, content) {
  * 清理旧版本缓存 (Exported for main.js or init)
  * 🔧 优化: 智能清理，只删除旧版本缓存，保留当前版本
  */
-export function clearOldCache() {
+export function clearOldCache(): void {
     try {
-        const keysToRemove = [];
+        const keysToRemove: string[] = [];
         const currentVersionPrefix = `${CACHE_PREFIX}${APP_VERSION}_`;
         
         // 获取所有存储的键
@@ -87,10 +115,9 @@ export function clearOldCache() {
 
 /**
  * 获取缓存使用情况
- * @returns {{count: number, size: number, items: Array}}
  */
-export function getCacheStats() {
-    const stats = {
+export function getCacheStats(): CacheStats {
+    const stats: CacheStats = {
         count: 0,
         size: 0,
         items: []
@@ -131,13 +158,13 @@ const htmlModules = import.meta.glob([
 ], {
     query: '?raw',
     import: 'default'
-});
+}) as HtmlModules;
 
 /**
  * 视图配置注册表 - 仅保留目标容器映射
  * URL 现在是用来在 htmlModules 中查找的 key
  */
-const VIEW_REGISTRY = {
+const VIEW_REGISTRY: ViewRegistry = {
     // === 核心视图 (Critical) ===
     'home': { path: '/src/modules/home/homeDisplay.html', target: 'main', isLoaded: false },
     'settings': { path: '/src/components/settings/systemSettings.html', target: '#modal-container', isLoaded: false },
@@ -154,11 +181,8 @@ const VIEW_REGISTRY = {
 
 /**
  * 渲染错误占位视图
- * @param {HTMLElement} container 
- * @param {string} key 
- * @param {Error} error 
  */
-function renderErrorPlaceholder(container, key, error) {
+function renderErrorPlaceholder(container: HTMLElement, key: string, error: Error): void {
     const errorHtml = `
         <div class="view-error-placeholder p-8 flex flex-col items-center justify-center text-center space-y-4 border-2 border-dashed border-red-200 rounded-xl bg-red-50/30 m-4">
             <div class="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center">
@@ -181,18 +205,18 @@ function renderErrorPlaceholder(container, key, error) {
 
 /**
  * 加载单个 HTML 模块
- * @returns {Promise<HTMLElement|null>} 返回目标容器元素，失败返回 null
+ * @returns 返回目标容器元素，失败返回 null
  */
-async function loadHtml(key) {
+async function loadHtml(key: string): Promise<HTMLElement | null> {
     const config = VIEW_REGISTRY[key];
     // 如果配置不存在或已加载，尝试直接返回容器
     if (!config) return null;
     
     if (config.isLoaded) {
-        return document.querySelector(config.target);
+        return document.querySelector<HTMLElement>(config.target);
     }
 
-    const container = document.querySelector(config.target);
+    const container = document.querySelector<HTMLElement>(config.target);
     if (!container) {
         console.error(`[ViewLoader] Target container not found: ${config.target}`);
         return null;
@@ -203,7 +227,7 @@ async function loadHtml(key) {
         
         // 1. Check Cache
         const cachedHtml = checkCache(path);
-        let html;
+        let html: string;
 
         if (cachedHtml) {
             html = cachedHtml;
@@ -223,8 +247,9 @@ async function loadHtml(key) {
         console.log(`✅ [ViewLoader] Loaded & Mounted: ${key} -> ${config.target}`);
         return container;
     } catch (e) {
-        console.error(`[ViewLoader] Failed to load [${key}]:`, e);
-        renderErrorPlaceholder(container, key, e);
+        const error = e instanceof Error ? e : new Error(String(e));
+        console.error(`[ViewLoader] Failed to load [${key}]:`, error);
+        renderErrorPlaceholder(container, key, error);
         return null;
     }
 }
@@ -233,7 +258,7 @@ async function loadHtml(key) {
  * 初始化核心视图
  * 只加载 Home 和 全局模态框
  */
-export async function initViews() {
+export async function initViews(): Promise<void> {
     clearOldCache();
     const startTime = performance.now();
     console.log("🚀 [ViewLoader] Initializing Critical Views (Bundled)...");
@@ -250,9 +275,9 @@ export async function initViews() {
 
 /**
  * 按需加载视图 (路由拦截器调用)
- * @param {string} routeId - 路由ID
+ * @param routeId - 路由ID
  */
-export async function ensureViewLoaded(routeId) {
+export async function ensureViewLoaded(routeId: string): Promise<void> {
     // 动态导入menuConfig以获取视图路径
     const { getViewPathByRoute } = await import('../config/menuConfig');
     const viewPath = getViewPathByRoute(routeId);
@@ -276,15 +301,15 @@ export async function ensureViewLoaded(routeId) {
 /**
  * 动态注册新视图 (保留 API 兼容)
  */
-export function registerView(viewConfig) {
+export function registerView(_viewConfig: Partial<ViewConfig>): void {
     // 暂不处理动态注册，现有逻辑不需要
 }
 
 /**
  * 通用：根据路径加载模版（解决子模块 fetch 404 问题）
- * @param {string} path - 相对 src 的路径, e.g., 'src/modules/sops/views/growth/npi_tracker/template.html'
+ * @param path - 相对 src 的路径, e.g., 'src/modules/sops/views/growth/npi_tracker/template.html'
  */
-export async function loadTemplate(path) {
+export async function loadTemplate(path: string): Promise<string> {
     try {
         // 尝试标准化路径
         if (!path.startsWith('/')) path = '/' + path;
@@ -311,7 +336,8 @@ export async function loadTemplate(path) {
         setCache(path, html);
         return html;
     } catch (e) {
-        console.error(`[ViewLoader] Failed to load template [${path}]:`, e);
-        return `<div class="p-4 text-red-500">Error loading template: ${e.message}</div>`;
+        const error = e instanceof Error ? e : new Error(String(e));
+        console.error(`[ViewLoader] Failed to load template [${path}]:`, error);
+        return `<div class="p-4 text-red-500">Error loading template: ${error.message}</div>`;
     }
 }

@@ -2,7 +2,7 @@
  * Amazon智库总览 视图模块
  */
 
-import { loadTemplate } from "../../../../common/utils/viewLoader.js";
+import { loadTemplate } from "../../../../common/utils/viewLoader";
 
 export async function mount(container) {
     console.log('📚 [Hub Overview] 模块挂载中...');

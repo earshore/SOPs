@@ -1,6 +1,6 @@
 // tests/unit/lazyLibs.test.js
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { loadChartJs, loadGridStack } from '@/common/utils/lazyLibs.js';
+import { loadChartJs, loadGridStack } from '@/common/utils/lazyLibs';
 
 describe('LazyLibs', () => {
   beforeEach(() => {

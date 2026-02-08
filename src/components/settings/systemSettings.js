@@ -5,10 +5,10 @@
 
 import { escapeHtml } from '@/common/utils/security';
 import { PROVIDERS } from "../../common/constants/constants.js";
-import { fetchModelsFromApi, callLLM } from "../../services/llmService.js";
+import { fetchModelsFromApi, callLLM } from "../../services/llmService";
 import { showToast } from "../../common/utils/ui.js";
 import { StorageService, STORAGE_KEYS } from "../../services/storageService.ts";
-import { ErrorService } from "../../services/errorService.js";
+import { ErrorService } from "../../services/errorService";
 import { EnvConfig } from "../../common/config/envConfig.js"; // 🔒 P0修复: 导入环境配置
 
 // ==========================================
@@ -368,12 +368,12 @@ export function initAlpineSettings() {
 
 // Legacy Bridge for ActionRegistry
 export function openSettings() {
-    window.dispatchEvent(new CustomEvent('open-settings'));
+    window.dispatchEvent(new CustomEvent(APP_EVENTS.SETTINGS_OPEN));
 }
 
 export function closeSettings() {
     // Dispatch event to close via Alpine
-    window.dispatchEvent(new CustomEvent('close-settings'));
+    window.dispatchEvent(new CustomEvent(APP_EVENTS.SETTINGS_CLOSE));
     // We need to add @close-settings.window="close()" to HTML
 }
 

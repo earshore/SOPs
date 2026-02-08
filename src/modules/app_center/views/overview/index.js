@@ -1,4 +1,5 @@
-import { loadTemplate } from "../../../../common/utils/viewLoader.js";
+import { loadTemplate } from "../../../../common/utils/viewLoader";
+import { APP_EVENTS } from "../../../../common/constants/eventConstants";
 
 // App Center Overview - 总览页面
 export async function mount(container) {
@@ -44,7 +45,7 @@ function initOverviewEvents(container) {
         link.addEventListener('click', () => {
             const targetTab = link.dataset.quickLink;
             if (targetTab) {
-                window.dispatchEvent(new CustomEvent('route-change', {
+                window.dispatchEvent(new CustomEvent(APP_EVENTS.ROUTE_CHANGE, {
                     detail: { routeId: targetTab }
                 }));
             }
@@ -57,7 +58,7 @@ function initOverviewEvents(container) {
         card.addEventListener('click', () => {
             const targetTab = card.dataset.tab;
             if (targetTab) {
-                window.dispatchEvent(new CustomEvent('route-change', {
+                window.dispatchEvent(new CustomEvent(APP_EVENTS.ROUTE_CHANGE, {
                     detail: { routeId: targetTab }
                 }));
             }

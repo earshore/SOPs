@@ -1,4 +1,4 @@
-import { loadTemplate } from "../../../../../common/utils/viewLoader.js";
+import { loadTemplate } from "../../../../../common/utils/viewLoader";
 
 // 欧洲本土化高危词库 (Restricted Words) SOP
 import { initRestrictedWordsPanel } from './restrictedWordsHandler.js';

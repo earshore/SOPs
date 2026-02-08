@@ -8,11 +8,11 @@
  * - 使用 registerActionsWithLegacy 注册全局操作
  */
 
-import { loadTemplate } from '../../../../../common/utils/viewLoader.js';
+import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import { showToast, showProgress } from '../../../../../common/utils/ui.js';
 import * as KeywordService from '../services/trackerService.js';
 import state from '../../../../../common/state.js';
-import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry.js';
+import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry';
 
 import '../keyword_hunter_style.css';
 
@@ -65,7 +65,7 @@ function cleanup() {
     
     // 清理已注册的动作
     if (registeredActions.length > 0) {
-        import('../../../../../common/utils/actionRegistry.js').then(({ unregisterActions }) => {
+        import('../../../../../common/utils/actionRegistry').then(({ unregisterActions }) => {
             unregisterActions(registeredActions);
             console.log(`[Input] 已清理 ${registeredActions.length} 个动作`);
             registeredActions = [];

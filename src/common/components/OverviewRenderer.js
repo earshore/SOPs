@@ -446,7 +446,7 @@ export class OverviewRenderer {
             card.addEventListener('click', () => {
                 const targetTab = card.dataset.tab;
                 if (targetTab) {
-                    window.dispatchEvent(new CustomEvent('route-change', {
+                    window.dispatchEvent(new CustomEvent(APP_EVENTS.ROUTE_CHANGE, {
                         detail: { routeId: targetTab }
                     }));
                 }

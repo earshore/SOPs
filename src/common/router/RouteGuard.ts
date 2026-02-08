@@ -162,7 +162,7 @@ export const dependencyGuard: RouteGuard = {
     // 检查依赖是否存在
     for (const dep of dependencies) {
       try {
-        const { container } = await import('../di/Container.js');
+        const { container } = await import('../di/Container');
         if (!container.has(dep)) {
           missing.push(dep);
         }

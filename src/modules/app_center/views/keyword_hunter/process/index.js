@@ -9,12 +9,12 @@
  * - 管理浮动关键词窗口的显示和交互
  */
 
-import { loadTemplate } from '../../../../../common/utils/viewLoader.js';
+import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import { showToast, showProgress } from '../../../../../common/utils/ui.js';
 import * as KeywordService from '../services/trackerService.js';
 import state from '../../../../../common/state.js';
-import { ErrorService } from '../../../../../services/errorService.js';
-import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry.js';
+import { ErrorService } from '../../../../../services/errorService';
+import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry';
 
 import '../keyword_hunter_style.css';
 
@@ -68,7 +68,7 @@ function cleanup() {
 
     // 清理已注册的动作
     if (registeredActionNames.length > 0) {
-        import('../../../../../common/utils/actionRegistry.js').then(({ unregisterActions }) => {
+        import('../../../../../common/utils/actionRegistry').then(({ unregisterActions }) => {
             unregisterActions(registeredActionNames);
             console.log(`[Process] 已清理 ${registeredActionNames.length} 个动作`);
             registeredActionNames = [];

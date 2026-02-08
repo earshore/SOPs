@@ -1,7 +1,7 @@
 // src/modules/more/views/overview/index.js
 // 更多总览页面
 
-import { loadTemplate } from "../../../../common/utils/viewLoader.js";
+import { loadTemplate } from "../../../../common/utils/viewLoader";
 
 console.log("🧭 更多总览页面加载...");
 

@@ -232,7 +232,7 @@ if (typeof window !== 'undefined') {
   if (isDev) {
     // 延迟加载，等待 stateManager 初始化
     setTimeout(() => {
-      import('./StateManager.js').then(({ stateManager }) => {
+      import('./StateManager').then(({ stateManager }) => {
         const devtools = new StateDevTools(stateManager);
         devtools.init();
         window.__STATE_DEVTOOLS__ = devtools;

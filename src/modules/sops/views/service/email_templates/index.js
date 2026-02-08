@@ -1,4 +1,4 @@
-import { loadTemplate } from "../../../../../common/utils/viewLoader.js";
+import { loadTemplate } from "../../../../../common/utils/viewLoader";
 import { TEMPLATE_CATEGORIES, EMAIL_TEMPLATES, getTemplateHtml } from "./constant/email_templates.js";
 import { escapeHtml } from "../../../../../common/utils/security";
 

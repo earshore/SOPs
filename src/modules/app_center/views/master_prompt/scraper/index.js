@@ -8,14 +8,14 @@
  * - 通过 EventBus 与其他模块通信
  */
 
-import { loadTemplate } from '../../../../../common/utils/viewLoader.js';
+import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import eventBus from '../../../../../common/EventBus.ts';
 import state from '../../../../../common/state.js';
 import { scrapeAsin } from '../services/scraperService.js';
 import { LANGUAGE_HEADERS } from '../../../../../common/constants/constants.js';
 import { HistoryService } from '../services/historyService.js';
 import { StorageService, STORAGE_KEYS } from '../../../../../services/storageService.ts';
-import { ErrorService } from '../../../../../services/errorService.js';
+import { ErrorService } from '../../../../../services/errorService';
 import { showToast, sleep } from '../../../../../common/utils/ui.js';
 import { MODULE_EVENTS } from '../../../../../common/constants/eventConstants';
 
@@ -85,7 +85,7 @@ const ScraperPanel = () => ({
         this.loadHistory();
 
         // 监听外部历史更新事件
-        window.addEventListener('history-updated', () => this.loadHistory());
+        window.addEventListener(APP_EVENTS.HISTORY_UPDATED, () => this.loadHistory());
     },
 
     // ========== State Management ==========
@@ -356,7 +356,7 @@ export function unmount() {
         // 2. 清理事件监听器
         // Alpine 会自动清理其内部的事件监听器
         // 我们只需要清理手动添加的全局监听器
-        // 注意：window.addEventListener('history-updated') 在 Alpine init 中添加
+        // 注意：window.addEventListener(APP_EVENTS.HISTORY_UPDATED) 在 Alpine init 中添加
         // 由于 Alpine 组件会被销毁，这个监听器也会失效
 
         console.log('[Scraper] ✅ 子模块卸载成功');
@@ -382,7 +382,7 @@ export function initAlpineScraper() {
  * 渲染历史记录（向后兼容）
  */
 export const renderHistory = () => {
-    window.dispatchEvent(new CustomEvent('history-updated'));
+    window.dispatchEvent(new CustomEvent(APP_EVENTS.HISTORY_UPDATED));
 };
 
 /**

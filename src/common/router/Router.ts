@@ -5,11 +5,11 @@
 // ================================================================
 
 import { APP_EVENTS, emitAppEvent } from '../constants/eventConstants';
-import { routeGuard } from './RouteGuard.js';
-import { routeMiddleware } from './RouteMiddleware.js';
-import { routeErrorHandler } from './ErrorHandler.js';
+import { routeGuard } from './RouteGuard';
+import { routeMiddleware } from './RouteMiddleware';
+import { routeErrorHandler } from './ErrorHandler';
 import { MENU_CONFIG } from '../config/menuConfig';
-import { ensureViewLoaded } from '../utils/viewLoader.js';
+import { ensureViewLoaded } from '../utils/viewLoader';
 import type { Route, RouteConfig, NavigationOptions, RouteHistory } from '../../types/config.js';
 
 /**
@@ -42,7 +42,7 @@ export class Router {
      */
     private _registerBuiltinGuards(): void {
         // 动态导入守卫，避免循环依赖
-        import('./RouteGuard.js').then(({ 
+        import('./RouteGuard').then(({ 
             metaValidationGuard, 
             dependencyGuard, 
             authGuard, 

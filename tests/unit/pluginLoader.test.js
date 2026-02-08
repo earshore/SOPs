@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { loadPlugins } from '@/common/utils/pluginLoader.js';
+import { loadPlugins } from '@/common/utils/pluginLoader';
 
 describe('PluginLoader', () => {
   beforeEach(() => {
