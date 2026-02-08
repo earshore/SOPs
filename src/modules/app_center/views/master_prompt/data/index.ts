@@ -13,35 +13,69 @@ import BaseModule from "../../../../../common/BaseModule";
 import state from "../../../../../common/state";
 import { getErrorSummary, showToast, switchTab } from '../../../../../common/utils/ui.js';
 import { HistoryService } from '../services/historyService';
-import { StorageService } from '../../../../../services/storageService.ts';
+import { StorageService } from '../../../../../services/storageService';
 import { languageFlagMap, SITE_NAME_MAP, SITE_DOMAIN_MAP } from '../../../../../common/constants/constants';
-import eventBus from '../../../../../common/EventBus.ts';
+import eventBus from '../../../../../common/EventBus';
 import { APP_EVENTS, MODULE_EVENTS } from '../../../../../common/constants/eventConstants';
 
 import '../master_prompt_style.css';
+
+// ========================================== 
+// Types
+// ========================================== 
+
+interface Product {
+    asin: string;
+    productTitle?: string;
+    feature_bullets: string[];
+    customer_reviews?: Review[];
+    scrape_status: 'success' | 'partial' | 'failed';
+    language?: string;
+    error?: string;
+    metadata?: Record<string, any>;
+    _source_site?: string;
+    _filename?: string;
+}
+
+interface Review {
+    id?: string;
+    star_rating?: number;
+    headline?: string;
+    body: string;
+    date?: string;
+    author?: string;
+    is_verified?: boolean;
+    isVerified?: boolean;
+    _origin_site?: string;
+}
+
+interface FileData {
+    data: any;
+    filename: string;
+}
 
 // ========================================== 
 // Data Module Class
 // ========================================== 
 
 class DataModule extends BaseModule {
-    constructor(container) {
+    constructor(container: HTMLElement) {
         super('master_prompt_data');
         this.container = container;
     }
 
-    async render() {
+    async render(): Promise<void> {
         // render() 方法由 BaseModule 要求实现
         // 但在这个模块中，HTML 已经在 mount() 函数中加载
         // 所以这里不需要做任何事情
     }
 
-    async init() {
+    async init(): Promise<void> {
         console.log("🚀 Data Module Initialized");
         this.setupEventListeners();
 
         // 订阅 Scraper 事件
-        this.addDisposable(eventBus.on(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, (data) => {
+        this.addDisposable(eventBus.on(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, (_data: any) => {
             console.log("DataModule received SCRAPE_SUCCESS");
             this.renderDataPanel();
         }));
@@ -52,40 +86,40 @@ class DataModule extends BaseModule {
         }
     }
 
-    onUnmount() {
+    onUnmount(): void {
         console.log("💤 Data Module Unmounting...");
         // 保存状态
         this.saveState();
     }
 
-    setupEventListeners() {
+    setupEventListeners(): void {
         // Import input change
-        const importInput = document.getElementById("import-file-input");
+        const importInput = document.getElementById("import-file-input") as HTMLInputElement;
         if (importInput) {
-            this.addEventListener(importInput, "change", (e) => this.handleImportFiles(e));
+            this.addEventListener(importInput, "change", (e) => this.handleImportFiles(e as Event));
         }
     }
 
-    saveState() {
+    saveState(): void {
         // 状态已经保存在 state.scraper.scrapedData 中
         // 保存 UI 状态
         if (state.masterPrompt) {
-            state.masterPrompt.expandedAsin = state.expandedAsin;
-            state.masterPrompt.currentDataTab = state.currentDataTab;
+            (state.masterPrompt as any).expandedAsin = (state as any).expandedAsin;
+            (state.masterPrompt as any).currentDataTab = (state as any).currentDataTab;
         }
     }
 
-    restoreState() {
+    restoreState(): void {
         // 恢复 UI 状态
         if (state.masterPrompt) {
-            state.expandedAsin = state.masterPrompt.expandedAsin || null;
-            state.currentDataTab = state.masterPrompt.currentDataTab || 'preview';
+            (state as any).expandedAsin = (state.masterPrompt as any).expandedAsin || null;
+            (state as any).currentDataTab = (state.masterPrompt as any).currentDataTab || 'preview';
         }
     }
 
     // ================== Logic Methods ==================
 
-    toggleCardExpand(asin) {
+    toggleCardExpand(asin: string): void {
         const cardBody = document.getElementById(`card-body-${asin}`);
         const cardIcon = document.getElementById(`card-icon-${asin}`);
         const cardContainer = document.getElementById(`card-${asin}`);
@@ -95,10 +129,10 @@ class DataModule extends BaseModule {
         const isCurrentlyHidden = cardBody.classList.contains("hidden");
 
         if (isCurrentlyHidden) {
-            if (state.expandedAsin && state.expandedAsin !== asin) {
-                const prevBody = document.getElementById(`card-body-${state.expandedAsin}`);
-                const prevIcon = document.getElementById(`card-icon-${state.expandedAsin}`);
-                const prevContainer = document.getElementById(`card-${state.expandedAsin}`);
+            if ((state as any).expandedAsin && (state as any).expandedAsin !== asin) {
+                const prevBody = document.getElementById(`card-body-${(state as any).expandedAsin}`);
+                const prevIcon = document.getElementById(`card-icon-${(state as any).expandedAsin}`);
+                const prevContainer = document.getElementById(`card-${(state as any).expandedAsin}`);
 
                 if (prevBody) prevBody.classList.add("hidden");
                 if (prevIcon) prevIcon.classList.remove("rotate-180");
@@ -107,28 +141,28 @@ class DataModule extends BaseModule {
 
             cardBody.classList.remove("hidden");
             cardBody.classList.add("fade-in");
-            cardContainer.classList.add("ring-1", "ring-blue-500", "bg-blue-50/30");
+            cardContainer?.classList.add("ring-1", "ring-blue-500", "bg-blue-50/30");
             if (cardIcon) cardIcon.classList.add("rotate-180");
 
-            state.expandedAsin = asin;
+            (state as any).expandedAsin = asin;
         } else {
             cardBody.classList.add("hidden");
-            cardContainer.classList.remove("ring-1", "ring-blue-500", "bg-blue-50/30");
+            cardContainer?.classList.remove("ring-1", "ring-blue-500", "bg-blue-50/30");
             if (cardIcon) cardIcon.classList.remove("rotate-180");
 
-            state.expandedAsin = null;
+            (state as any).expandedAsin = null;
         }
     }
 
-    triggerImport() {
-        const input = document.getElementById("import-file-input");
+    triggerImport(): void {
+        const input = document.getElementById("import-file-input") as HTMLInputElement;
         if (input) {
             input.value = "";
             input.click();
         }
     }
 
-    renderDataPanel() {
+    renderDataPanel(): void {
         if (!state.scraper.scrapedData) return;
 
         const noDataMsg = document.getElementById("no-data-msg");
@@ -152,18 +186,21 @@ class DataModule extends BaseModule {
         const globalSiteCode = state.scraper.scrapedData.metadata?.marketplace || state.scraper.selectedSite;
 
         // ✅ 安全: 静态HTML模板，无用户输入
-        cardsEl.innerHTML = state.scraper.scrapedData.products.map((p) => {
-            const isExpanded = state.expandedAsin === p.asin;
+        cardsEl.innerHTML = state.scraper.scrapedData.products.map((p: any) => {
+            const isExpanded = (state as any).expandedAsin === p.asin;
             let siteKey = globalSiteCode || p.language || "US";
             if (siteKey === 'UK') siteKey = 'GB';
             const flag = languageFlagMap[siteKey] || "🌐";
 
-            const statusConfig = {
+            const statusConfig: Record<string, { class: string; icon: string; text: string }> = {
                 success: { class: "bg-emerald-100 text-emerald-700 border-emerald-200", icon: "fa-check-circle", text: "成功" },
                 partial: { class: "bg-amber-100 text-amber-700 border-amber-200", icon: "fa-exclamation-circle", text: "部分" },
                 failed: { class: "bg-red-100 text-red-700 border-red-200", icon: "fa-times-circle", text: "失败" },
             };
-            const status = statusConfig[p.scrape_status] || statusConfig.partial;
+            const status = statusConfig[p.scrape_status] || statusConfig['partial']!;
+            const statusClass = status.class;
+            const statusIcon = status.icon;
+            const statusText = status.text;
 
             return `
                 <div id="card-${p.asin}" 
@@ -183,8 +220,8 @@ class DataModule extends BaseModule {
                             <div>
                                 <div class="flex items-center gap-2">
                                     <span class="font-mono text-base font-bold text-slate-800 tracking-tight">${p.asin}</span>
-                                    <span class="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full border ${status.class}">
-                                        <i class="fas ${status.icon}"></i> ${status.text}
+                                    <span class="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full border ${statusClass}">
+                                        <i class="fas ${statusIcon}"></i> ${statusText}
                                     </span>
                                 </div>
                             </div>
@@ -216,7 +253,7 @@ class DataModule extends BaseModule {
                             <h5 class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2"><i class="fas fa-list-ul text-blue-500"></i> 五点描述</h5>
                             ${p.feature_bullets.length > 0 ? `
                                 <ul class="space-y-2">
-                                    ${p.feature_bullets.map((b, i) => `
+                                    ${p.feature_bullets.map((b: any, i: number) => `
                                         <li class="text-sm text-slate-600 bg-white p-3 rounded-lg border border-slate-100 shadow-sm flex gap-3 hover:border-blue-200 transition-colors">
                                             <span class="text-blue-500 font-bold font-mono text-xs mt-0.5 bg-blue-50 px-1.5 py-0.5 rounded h-fit">${i + 1}</span> 
                                             <span class="leading-relaxed">${b}</span>
@@ -232,7 +269,7 @@ class DataModule extends BaseModule {
                             </h5>
                             ${(p.customer_reviews || []).length > 0 ? `
                                 <div class="max-h-96 overflow-y-auto space-y-3 pr-1 custom-scrollbar">
-                                    ${(p.customer_reviews || []).map((review, i) => `
+                                    ${(p.customer_reviews || []).map((review: any, i: number) => `
                                         <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm group/review relative hover:border-purple-200 hover:shadow-md transition-all">
                                             <button onclick="window.dataModule.deleteReview('${p.asin}', ${i})" 
                                                 class="absolute top-3 right-3 w-7 h-7 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover/review:opacity-100 z-10">
@@ -269,7 +306,7 @@ class DataModule extends BaseModule {
         }
     }
 
-    renderStars(rating) {
+    renderStars(rating?: number): string {
         if (!rating) return "";
         return `<div class="flex items-center gap-0.5 text-sm" title="${rating} 分">
             ${[1, 2, 3, 4, 5].map((star) => {
@@ -281,9 +318,9 @@ class DataModule extends BaseModule {
         </div>`;
     }
 
-    syntaxHighlight(json) {
+    syntaxHighlight(json: string): string {
         return json.replace(
-            /("(\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)/g,
+            /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)/g,
             (match) => {
                 let cls = "json-number";
                 if (/^"/.test(match)) {
@@ -296,7 +333,7 @@ class DataModule extends BaseModule {
         );
     }
 
-    async deleteProduct(asin) {
+    async deleteProduct(asin: string): Promise<void> {
         const confirmed = await this.confirmWithModal(
             `删除产品`,
             `确定删除 ASIN: <span class="font-bold text-red-600 bg-red-50 px-1 rounded">${asin}</span> 及其所有数据吗？<br/><span class="text-xs text-red-400 mt-1 block">此操作无法撤销</span>`,
@@ -305,25 +342,27 @@ class DataModule extends BaseModule {
 
         if (!confirmed) return;
 
-        state.scraper.scrapedData.products = state.scraper.scrapedData.products.filter(p => p.asin !== asin);
-        
-        // 🔐 防御性检查：确保 metadata 存在
-        if (state.scraper.scrapedData.metadata) {
-            state.scraper.scrapedData.metadata.total_asins = state.scraper.scrapedData.products.length;
+        if (state.scraper.scrapedData) {
+            state.scraper.scrapedData.products = state.scraper.scrapedData.products.filter((p: any) => p.asin !== asin);
+            
+            // 🔐 防御性检查：确保 metadata 存在
+            if (state.scraper.scrapedData.metadata) {
+                state.scraper.scrapedData.metadata.total_asins = state.scraper.scrapedData.products.length;
+            }
+
+            HistoryService.save(state.scraper.scrapedData, state.analysis.analysisReport);
+
+            this.renderDataPanel();
+            
+            // 触发事件通知其他模块更新
+            eventBus.emit(APP_EVENTS.DATA_UPDATED);
+            window.dispatchEvent(new CustomEvent(APP_EVENTS.HISTORY_UPDATED));
+
+            showToast(`ASIN ${asin} 已移除`, "info");
         }
-
-        HistoryService.save(state.scraper.scrapedData, state.analysis.analysisReport);
-
-        this.renderDataPanel();
-        
-        // 触发事件通知其他模块更新
-        eventBus.emit(APP_EVENTS.DATA_UPDATED);
-        window.dispatchEvent(new CustomEvent(APP_EVENTS.HISTORY_UPDATED));
-
-        showToast(`ASIN ${asin} 已移除`, "info");
     }
 
-    async deleteReview(asin, index) {
+    async deleteReview(asin: string, index: number): Promise<void> {
         const confirmed = await this.confirmWithModal(
             "删除评论",
             '确定删除这条Review吗？',
@@ -332,32 +371,34 @@ class DataModule extends BaseModule {
 
         if (!confirmed) return;
 
-        const product = state.scraper.scrapedData.products.find((p) => p.asin === asin);
-        if (product && product.customer_reviews) {
-            product.customer_reviews.splice(index, 1);
-            HistoryService.save(state.scraper.scrapedData, state.analysis.analysisReport);
-            this.renderDataPanel();
-            
-            // 触发事件通知其他模块更新
-            window.dispatchEvent(new CustomEvent(APP_EVENTS.HISTORY_UPDATED));
-            
-            showToast("评论已删除", "success");
+        if (state.scraper.scrapedData) {
+            const product = state.scraper.scrapedData.products.find((p: any) => p.asin === asin);
+            if (product && product.customer_reviews) {
+                product.customer_reviews.splice(index, 1);
+                HistoryService.save(state.scraper.scrapedData, state.analysis.analysisReport);
+                this.renderDataPanel();
+                
+                // 触发事件通知其他模块更新
+                window.dispatchEvent(new CustomEvent(APP_EVENTS.HISTORY_UPDATED));
+                
+                showToast("评论已删除", "success");
+            }
         }
     }
 
-    confirmWithModal(title, content, storageKey) {
+    confirmWithModal(title: string, content: string, storageKey: string): Promise<boolean> {
         return new Promise((resolve) => {
             if (storageKey && StorageService.get(storageKey) === true) {
                 resolve(true);
                 return;
             }
 
-            const modal = document.getElementById('delete-confirm-modal');
+            const modal = document.getElementById('delete-confirm-modal') as any;
             const titleEl = document.getElementById('del-modal-title');
             const descEl = document.getElementById('del-modal-desc');
-            const checkbox = document.getElementById('del-dont-ask');
-            const confirmBtn = document.getElementById('btn-del-confirm');
-            const cancelBtn = document.getElementById('btn-del-cancel');
+            const checkbox = document.getElementById('del-dont-ask') as HTMLInputElement;
+            const confirmBtn = document.getElementById('btn-del-confirm') as HTMLButtonElement;
+            const cancelBtn = document.getElementById('btn-del-cancel') as HTMLButtonElement;
 
             if (titleEl) titleEl.textContent = title;
             // ✅ 安全: 静态HTML模板，无用户输入
@@ -388,21 +429,22 @@ class DataModule extends BaseModule {
         });
     }
 
-    async handleImportFiles(event) {
-        const files = Array.from(event.target.files);
+    async handleImportFiles(event: Event): Promise<void> {
+        const target = event.target as HTMLInputElement;
+        const files = Array.from(target.files || []);
         if (files.length === 0) return;
 
-        const inputEl = event.target;
+        const inputEl = target;
         showToast(`📂 正在解析 ${files.length} 个文件...`, "info");
 
         try {
             const fileContents = await Promise.all(files.map(f => this.readFileAsJSON(f)));
-            const productPool = new Map();
-            const detectedSites = new Set();
+            const productPool = new Map<string, Product[]>();
+            const detectedSites = new Set<string>();
 
             fileContents.forEach(({ data, filename }) => {
                 if (!data) return;
-                let fileSite = null;
+                let fileSite: string | null = null;
                 if (data.metadata?.marketplace) fileSite = data.metadata.marketplace;
                 else if (data.marketplace) fileSite = data.marketplace;
                 else if (Array.isArray(data) && data.length > 0 && data[0].metadata?.marketplace) {
@@ -414,12 +456,12 @@ class DataModule extends BaseModule {
 
                 const list = Array.isArray(data) ? data : (data.products || (data.asin ? [data] : []));
 
-                list.forEach(p => {
+                list.forEach((p: any) => {
                     if (!p.asin) return;
                     if (!productPool.has(p.asin)) {
                         productPool.set(p.asin, []);
                     }
-                    productPool.get(p.asin).push({
+                    productPool.get(p.asin)!.push({
                         ...p,
                         _source_site: site,
                         _filename: filename
@@ -429,41 +471,42 @@ class DataModule extends BaseModule {
 
             if (productPool.size === 0) throw new Error("未找到有效的产品数据");
 
-            let targetMarketplace = state.scraper.selectedSite;
+            let targetMarketplace: string = state.scraper.selectedSite || '';
             const hasExistingData = state.scraper.scrapedData && state.scraper.scrapedData.products && state.scraper.scrapedData.products.length > 0;
 
             if (!hasExistingData && detectedSites.size > 1) {
-                targetMarketplace = await this.showMarketplaceSelectionModal([...detectedSites]);
-                if (!targetMarketplace) {
+                const selected = await this.showMarketplaceSelectionModal([...detectedSites]);
+                if (!selected) {
                     showToast("用户取消导入", "info");
                     return;
                 }
+                targetMarketplace = selected;
             } else if (!hasExistingData && detectedSites.size === 1) {
-                targetMarketplace = [...detectedSites][0];
-            } else if (hasExistingData) {
-                targetMarketplace = state.scraper.scrapedData.metadata?.marketplace;
+                targetMarketplace = [...detectedSites][0] || '';
+            } else if (hasExistingData && state.scraper.scrapedData) {
+                targetMarketplace = state.scraper.scrapedData.metadata?.marketplace || '';
             }
 
-            const finalProducts = [];
-            const currentProductsMap = new Map((state.scraper.scrapedData?.products || []).map(p => [p.asin, p]));
+            const finalProducts: Product[] = [];
+            const currentProductsMap = new Map((state.scraper.scrapedData?.products || []).map((p: any) => [p.asin, p]));
 
             for (const [asin, versions] of productPool.entries()) {
-                let masterVersion = versions.find(v => v._source_site === targetMarketplace);
+                const masterVersion = versions.find(v => v._source_site === targetMarketplace);
                 const existingVersion = currentProductsMap.get(asin);
-                let baseProduct = existingVersion || masterVersion || versions[0];
+                const baseProduct = existingVersion || masterVersion || versions[0];
 
-                const mergedProduct = JSON.parse(JSON.stringify(baseProduct));
+                const mergedProduct: Product = JSON.parse(JSON.stringify(baseProduct));
                 if (!mergedProduct.metadata) mergedProduct.metadata = {};
 
-                const allReviewSources = [];
+                const allReviewSources: any[] = [];
                 if (existingVersion) allReviewSources.push(existingVersion);
                 allReviewSources.push(...versions);
 
-                const uniqueReviewsMap = new Map();
+                const uniqueReviewsMap = new Map<string, Review>();
 
                 allReviewSources.forEach(ver => {
                     if (Array.isArray(ver.customer_reviews)) {
-                        ver.customer_reviews.forEach(r => {
+                        ver.customer_reviews.forEach((r: any) => {
                             const sig = this.getReviewSignature(r);
                             if (!uniqueReviewsMap.has(sig)) {
                                 if (ver._source_site && ver._source_site !== "Unknown") {
@@ -482,10 +525,10 @@ class DataModule extends BaseModule {
             }
 
             if (!hasExistingData) {
-                state.scraper.selectedSite = targetMarketplace;
-                const siteSelect = document.getElementById("site-select");
+                state.scraper.selectedSite = targetMarketplace as any;
+                const siteSelect = document.getElementById("site-select") as HTMLSelectElement;
                 if (siteSelect) {
-                    siteSelect.value = targetMarketplace;
+                    siteSelect.value = targetMarketplace || '';
                     siteSelect.dispatchEvent(new Event('change'));
                 }
             }
@@ -517,7 +560,7 @@ class DataModule extends BaseModule {
 
             showToast(`✅ 成功导入并合并 ${finalProducts.length} 个ASIN (基准站点: ${targetMarketplace})`, "success");
 
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
             showToast("❌ 导入出错: " + error.message, "error");
         } finally {
@@ -525,12 +568,12 @@ class DataModule extends BaseModule {
         }
     }
 
-    readFileAsJSON(file) {
+    readFileAsJSON(file: File): Promise<FileData> {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = (e) => {
                 try {
-                    const json = JSON.parse(e.target.result);
+                    const json = JSON.parse(e.target?.result as string);
                     resolve({ data: json, filename: file.name });
                 } catch (err) {
                     reject(new Error(`文件 ${file.name} 格式错误`));
@@ -541,12 +584,12 @@ class DataModule extends BaseModule {
         });
     }
 
-    getReviewSignature(review) {
+    getReviewSignature(review: Review): string {
         if (review.id) return review.id;
         return `${review.date || ''}_${review.author || ''}_${(review.headline || '').substring(0, 20)}`.trim();
     }
 
-    showMarketplaceSelectionModal(sites) {
+    showMarketplaceSelectionModal(sites: string[]): Promise<string | null> {
         return new Promise((resolve) => {
             const modalId = 'site-select-modal-' + Date.now();
             const backdrop = document.createElement('div');
@@ -597,8 +640,8 @@ class DataModule extends BaseModule {
             backdrop.innerHTML = content;
             document.body.appendChild(backdrop);
 
-            const btnConfirm = document.getElementById(`btn-confirm-${modalId}`);
-            const btnCancel = document.getElementById(`btn-cancel-${modalId}`);
+            const btnConfirm = document.getElementById(`btn-confirm-${modalId}`) as HTMLButtonElement;
+            const btnCancel = document.getElementById(`btn-cancel-${modalId}`) as HTMLButtonElement;
 
             let resolved = false; // 防止重复 resolve
 
@@ -621,14 +664,14 @@ class DataModule extends BaseModule {
                 }
             };
 
-            const handleConfirm = (e) => {
+            const handleConfirm = (e: Event) => {
                 e.preventDefault();
                 e.stopPropagation();
                 
                 if (resolved) return; // 如果已经 resolved,直接返回
                 resolved = true;
                 
-                const selectedInput = backdrop.querySelector('input[name="site_choice"]:checked');
+                const selectedInput = backdrop.querySelector('input[name="site_choice"]:checked') as HTMLInputElement;
                 const selected = selectedInput ? selectedInput.value : null;
                 
                 // 立即清理 DOM
@@ -640,7 +683,7 @@ class DataModule extends BaseModule {
                 }, 0);
             };
 
-            const handleCancel = (e) => {
+            const handleCancel = (e: Event) => {
                 e.preventDefault();
                 e.stopPropagation();
                 
@@ -662,11 +705,14 @@ class DataModule extends BaseModule {
         });
     }
 
-    switchDataTab(tab) {
-        state.currentDataTab = tab;
+    switchDataTab(tab: string): void {
+        (state as any).currentDataTab = tab;
 
-        document.getElementById("data-preview").classList.toggle("hidden", tab !== "preview");
-        document.getElementById("data-json").classList.toggle("hidden", tab !== "json");
+        const previewEl = document.getElementById("data-preview");
+        const jsonEl = document.getElementById("data-json");
+        
+        if (previewEl) previewEl.classList.toggle("hidden", tab !== "preview");
+        if (jsonEl) jsonEl.classList.toggle("hidden", tab !== "json");
 
         document.querySelectorAll(".data-tab").forEach((t) => {
             const isActive = t.id === `data-tab-${tab}`;
@@ -683,13 +729,13 @@ class DataModule extends BaseModule {
 // Module Exports (统一架构接口)
 // ========================================== 
 
-let moduleInstance = null;
+let moduleInstance: DataModule | null = null;
 
 /**
  * 挂载子模块
  * @param {HTMLElement} container - 容器元素
  */
-export async function mount(container) {
+export async function mount(container: HTMLElement): Promise<void> {
     console.log('[Data] 🔧 开始挂载子模块');
 
     try {
@@ -708,7 +754,7 @@ export async function mount(container) {
         moduleInstance.restoreState();
         
         // 5. 暴露到全局（用于 onclick 事件）
-        window.dataModule = moduleInstance;
+        (window as any).dataModule = moduleInstance;
 
         console.log('[Data] ✅ 子模块挂载成功');
     } catch (error) {
@@ -720,7 +766,7 @@ export async function mount(container) {
 /**
  * 卸载子模块
  */
-export function unmount() {
+export function unmount(): void {
     console.log('[Data] 🔄 开始卸载子模块');
 
     try {
@@ -730,8 +776,8 @@ export function unmount() {
         }
         
         // 清理全局引用
-        if (window.dataModule) {
-            delete window.dataModule;
+        if ((window as any).dataModule) {
+            delete (window as any).dataModule;
         }
 
         console.log('[Data] ✅ 子模块卸载成功');
@@ -744,10 +790,10 @@ export function unmount() {
 // Legacy Bridges (向后兼容)
 // ========================================== 
 
-export const renderDataPanel = () => moduleInstance?.renderDataPanel();
-export const triggerImport = () => moduleInstance?.triggerImport();
-export const switchDataTab = (tab) => moduleInstance?.switchDataTab(tab);
-export const handleImportFiles = (e) => moduleInstance?.handleImportFiles(e);
-export const toggleCardExpand = (asin) => moduleInstance?.toggleCardExpand(asin);
-export const deleteProduct = (asin) => moduleInstance?.deleteProduct(asin);
-export const deleteReview = (asin, i) => moduleInstance?.deleteReview(asin, i);
+export const renderDataPanel = (): void => moduleInstance?.renderDataPanel();
+export const triggerImport = (): void => moduleInstance?.triggerImport();
+export const switchDataTab = (tab: string): void => moduleInstance?.switchDataTab(tab);
+export const handleImportFiles = (e: Event): void => { moduleInstance?.handleImportFiles(e); };
+export const toggleCardExpand = (asin: string): void => moduleInstance?.toggleCardExpand(asin);
+export const deleteProduct = (asin: string): void => { moduleInstance?.deleteProduct(asin); };
+export const deleteReview = (asin: string, i: number): void => { moduleInstance?.deleteReview(asin, i); };
