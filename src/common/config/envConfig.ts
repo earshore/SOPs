@@ -76,10 +76,10 @@ export const EnvConfig = {
 
     /**
      * 标准化 API Endpoint
-     * @param endpoint - 用户配置的 endpoint
+     * @param _endpoint - 用户配置的 endpoint（未使用，保留参数以保持接口兼容性）
      * @returns 标准化后的 endpoint
      */
-    normalizeEndpoint(endpoint: string): string {
+    normalizeEndpoint(_endpoint: string): string {
       // 开发环境: 统一使用代理路径
       if (EnvConfig.isDevelopment) {
         return this.baseUrl;
