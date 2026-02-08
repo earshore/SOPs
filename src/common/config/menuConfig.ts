@@ -35,7 +35,7 @@ export interface CategoryConfig {
   id: string;
   label: string;
   icon: string;
-  color: string;
+  color: string; // 颜色方案名称，如 'blue', 'emerald', 'amber' 等
   order: number;
   version: string;
   description: string;

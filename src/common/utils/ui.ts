@@ -1,4 +1,3 @@
-// @ts-nocheck
 console.log("🚀 ui.ts 模块 (Event-Driven Core) 开始加载...");
 
 import { escapeHtml } from '@/common/utils/security';
@@ -10,7 +9,6 @@ import { ensureViewLoaded } from "./viewLoader";
 import { APP_EVENTS, emitAppEvent } from "../constants/eventConstants";
 // 🎯 短期优化：新增导入
 import { createSidebarRenderer, SidebarRenderer } from '../components/SidebarRenderer';
-import { COLOR_SCHEMES } from '../constants/colorSchemes';
 
 // ========================
 // 🛡️ HELPER: 健壮的 DOM 获取器
@@ -515,16 +513,13 @@ export function renderSopsMegaMenu(): void {
 // ========================
 // 2. DYNAMIC SIDEBAR (统一架构 + 自动化缓存)
 // ========================
-let currentSidebarModuleId = null;
 
 /**
  * 🎯 智能生成侧边栏缓存键
  * 自动判断模块是否需要包含currentTab，无需硬编码模块列表
- * @param {string} moduleId - 模块ID
- * @returns {string} 缓存键
  */
-function generateSidebarCacheKey(moduleId) {
-    const currentTab = state.currentTab;
+function generateSidebarCacheKey(moduleId: string): string {
+    const currentTab = state.ui.currentTab;
     const routes = getRoutesByModule(moduleId);
     
     // 🔥 智能判断：如果模块有多个路由（多页面模块），则缓存键包含currentTab
@@ -539,7 +534,7 @@ function generateSidebarCacheKey(moduleId) {
     return moduleId;
 }
 
-function renderSidebar(moduleId) {
+function renderSidebar(moduleId: string | null): void {
     const sidebar = getEl("dynamic-sidebar");
     if (!sidebar) return;
 
@@ -548,7 +543,6 @@ function renderSidebar(moduleId) {
         sidebar.classList.add("hidden", "-ml-64");
         // ✅ 安全: 静态HTML模板，无用户输入
         sidebar.innerHTML = '';
-        currentSidebarModuleId = null;
         return;
     }
 
@@ -571,21 +565,13 @@ function renderSidebar(moduleId) {
     renderSidebarContent(sidebar, effectiveModuleId, effectiveModuleConfig, routes);
 
     sidebar.classList.remove("hidden", "-ml-64");
-    
-    // 4. 更新缓存键（用于其他逻辑判断）
-    const sidebarKey = generateSidebarCacheKey(effectiveModuleId);
-    currentSidebarModuleId = sidebarKey;
 }
 
 /**
  * 🎯 统一侧边栏内容渲染
  * 根据模块配置自动选择合适的渲染器
- * @param {HTMLElement} sidebar - 侧边栏容器
- * @param {string} moduleId - 模块ID
- * @param {Object} moduleConfig - 模块配置
- * @param {Array} routes - 路由列表
  */
-function renderSidebarContent(sidebar, moduleId, moduleConfig, routes) {
+function renderSidebarContent(sidebar: HTMLElement, moduleId: string, moduleConfig: any, routes: any[]): void {
     // 🔥 统一架构：从注册表中查找专用渲染器
     const renderer = SIDEBAR_RENDERER_REGISTRY[moduleId];
     
@@ -605,10 +591,10 @@ function renderSidebarContent(sidebar, moduleId, moduleConfig, routes) {
 
 // 默认侧边栏渲染（平铺列表）
 // 用于没有注册专用渲染器的模块
-function renderDefaultSidebar(sidebar, moduleConfig, routes) {
+function renderDefaultSidebar(sidebar: HTMLElement, moduleConfig: any, routes: any[]): void {
     try {
         // 🔥 修复：读取当前激活的tab
-        const currentTab = state.currentTab;
+        const currentTab = state.ui.currentTab;
         
         const html = `
             <div class="flex flex-col h-full bg-white">
@@ -653,7 +639,7 @@ function renderDefaultSidebar(sidebar, moduleConfig, routes) {
 // 3. ROUTER LOGIC (核心改动：通用化)
 // ========================
 
-function updateHeaderNav(fullConfig) {
+function updateHeaderNav(fullConfig: any): void {
     document.querySelectorAll(".nav-item").forEach((el) => {
         el.classList.remove("text-blue-600", "border-blue-600");
         el.classList.add("text-slate-600", "border-transparent");
@@ -680,24 +666,9 @@ function updateHeaderNav(fullConfig) {
     }
 }
 
-function updateSidebarHighlight(activeTabId) {
-    document.querySelectorAll(".sidebar-btn").forEach(btn => {
-        btn.classList.remove("bg-blue-50", "text-blue-600");
-        btn.classList.add("text-slate-600", "hover:bg-slate-50");
-    });
-
-    const activeBtn = getEl(`sidebar-btn-${activeTabId}`);
-    if (activeBtn) {
-        activeBtn.classList.remove("text-slate-600", "hover:bg-slate-50");
-        activeBtn.classList.add("bg-blue-50", "text-blue-600");
-    }
-}
-
 /**
  * 👑 全能路由切换函数 (Event-Driven)
  * 此函数不再包含任何特定业务模块的 if/else 逻辑
- * @param {string} tab - 目标路由ID
- * @param {boolean} updateHistory - 是否更新浏览器 URL Hash (默认 true)
  */
 
 // 记录当前激活的主模块 Panel（用于检测模块切换）
@@ -723,11 +694,11 @@ export async function switchTab(tab: string, updateHistory: boolean = true): Pro
     }
 
     // 2. 🔥 关键修复：先更新全局状态，确保渲染时能读取到正确的currentTab
-    state.currentTab = cleanTab;
+    state.ui.currentTab = cleanTab;
     const fullConfig = getRouteFullConfig(cleanTab);
 
     // 3. 渲染侧边栏 (View Layer)
-    // 注意：renderSidebar内部会读取state.currentTab来判断高亮状态
+    // 注意：renderSidebar内部会读取state.ui.currentTab来判断高亮状态
     const targetModuleId = fullConfig ? fullConfig.module.id : null;
     renderSidebar(targetModuleId);
 
@@ -765,8 +736,6 @@ export async function switchTab(tab: string, updateHistory: boolean = true): Pro
 
     // 5. 更新导航高亮 (View Layer)
     updateHeaderNav(fullConfig);
-    // 🔥 修复：移除updateSidebarHighlight调用，因为SidebarRenderer已在渲染时处理高亮
-    // updateSidebarHighlight(cleanTab);
 
     // 6. 🌐 URL History Management (P0优化: 统一使用 History API)
     // 🔄 P0优化: 不再直接操作 location.hash,统一使用 pushState/replaceState
@@ -1301,7 +1270,7 @@ window.searchSidebar = function (query) {
     }
 
     // 从当前 tab 推断模块
-    const currentTab = state.currentTab;
+    const currentTab = state.ui.currentTab;
     const currentRoute = MENU_CONFIG.routes[currentTab];
     if (!currentRoute) {
         console.warn('[searchSidebar] 当前路由未找到');

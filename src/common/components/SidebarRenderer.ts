@@ -10,7 +10,7 @@
  * - 微交互动效 (scale, translate, opacity)
  */
 
-import { MENU_CONFIG, type RouteConfig } from '../config/menuConfig';
+import { MENU_CONFIG, type RouteConfig, type CategoryConfig } from '../config/menuConfig';
 import state from '../state';
 import { COLOR_SCHEMES, type ColorSchemeName } from '../constants/colorSchemes';
 
@@ -18,14 +18,7 @@ import { COLOR_SCHEMES, type ColorSchemeName } from '../constants/colorSchemes';
 // Types & Interfaces
 // ═══════════════════════════════════════════════════════════
 
-export interface CategoryConfig {
-  id: string;
-  label: string;
-  icon: string;
-  color: ColorSchemeName;
-  description: string;
-  order: number;
-}
+// 使用 menuConfig 中的 CategoryConfig，不再重复定义
 
 interface CategoryTreeNode extends CategoryConfig {
   children: Array<RouteConfig & { id: string }>;
