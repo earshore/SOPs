@@ -135,9 +135,11 @@ const SettingsPanel = (): SettingsPanelData => ({
         this.loadProviderConfig(this.llm.provider);
 
         // Watch for provider changes to load its config
-        (this as any).$watch('llm.provider', (val: string) => this.loadProviderConfig(val));
+        // @ts-expect-error - Alpine.js $watch is injected at runtime
+        this.$watch('llm.provider', (val: string) => this.loadProviderConfig(val));
         // Watch for proxy type to restore cached key
-        (this as any).$watch('proxy.type', (val: string) => {
+        // @ts-expect-error - Alpine.js $watch is injected at runtime
+        this.$watch('proxy.type', (val: string) => {
             this.proxy.customUrl = this.proxy.savedKeyMap[val] || '';
         });
     },
@@ -410,8 +412,8 @@ const SettingsPanel = (): SettingsPanelData => ({
 // ==========================================
 
 export function initAlpineSettings(): void {
-    if ((window as any).Alpine) {
-        (window as any).Alpine.data('settingsPanel', SettingsPanel);
+    if (window.Alpine) {
+        window.Alpine.data('settingsPanel', SettingsPanel);
     } else {
         console.error('Alpine not found!');
     }

@@ -10,7 +10,7 @@
  * - 微交互动效 (scale, translate, opacity)
  */
 
-import { MENU_CONFIG, type RouteConfig, type CategoryConfig } from '../config/menuConfig';
+import { MENU_CONFIG, type RouteConfig, type CategoryConfig, type ModuleConfig } from '../config/menuConfig';
 import state from '../state';
 import { COLOR_SCHEMES } from '../constants/colorSchemes';
 
@@ -57,8 +57,8 @@ export class SidebarRenderer {
   // Public API
   // ═══════════════════════════════════════════════════════
 
-  render(sidebar: HTMLElement, moduleConfig: any, routes: RouteConfig[]): void {
-    const currentTab = (state as any).currentTab;
+  render(sidebar: HTMLElement, moduleConfig: ModuleConfig, routes: RouteConfig[]): void {
+    const currentTab = state.ui?.currentTab || '';
     const currentRouteConfig = MENU_CONFIG.routes[currentTab];
 
     let activeCategory: string | null = null;
@@ -81,7 +81,7 @@ export class SidebarRenderer {
     const html = this._buildHTML(
       moduleConfig.title,
       moduleConfig.icon,
-      moduleConfig.color || 'blue',
+      'blue', // 默认颜色
       categoryTree,
       currentTab,
       activeCategory
