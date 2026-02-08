@@ -8,18 +8,65 @@ import { configCenter } from '../common/config/ConfigCenter';
 import { Logger } from './loggerService';
 
 /**
+ * Sentry事件类型
+ */
+interface SentryEvent {
+  request?: {
+    cookies?: Record<string, string>;
+    headers?: Record<string, string>;
+  };
+  contexts?: {
+    state?: Record<string, any>;
+    app?: Record<string, any>;
+    [key: string]: any;
+  };
+  [key: string]: any;
+}
+
+/**
+ * Sentry捕获上下文
+ */
+interface SentryCaptureContext {
+  tags?: Record<string, string>;
+  extra?: Record<string, any>;
+  level?: string;
+}
+
+/**
+ * Sentry初始化配置
+ */
+interface SentryInitConfig {
+  dsn: string;
+  environment?: string;
+  release?: string;
+  tracesSampleRate?: number;
+  beforeSend?: (event: SentryEvent, hint: any) => SentryEvent | null;
+  integrations?: any[];
+  ignoreErrors?: string[];
+}
+
+/**
+ * Sentry事务类型
+ */
+interface SentryTransaction {
+  finish: () => void;
+  setStatus: (status: string) => void;
+  [key: string]: any;
+}
+
+/**
  * Sentry SDK类型定义
  */
 interface SentrySDK {
-  init: (config: any) => void;
-  captureException: (error: Error, context?: any) => void;
-  captureMessage: (message: string, context?: any) => void;
-  setUser: (user: any) => void;
+  init: (config: SentryInitConfig) => void;
+  captureException: (error: Error, context?: SentryCaptureContext) => void;
+  captureMessage: (message: string, context?: SentryCaptureContext) => void;
+  setUser: (user: Record<string, any>) => void;
   setTag: (key: string, value: string) => void;
-  setContext: (name: string, context: any) => void;
-  addBreadcrumb: (breadcrumb: any) => void;
-  startTransaction: (config: { name: string }) => any;
-  BrowserTracing: any;
+  setContext: (name: string, context: Record<string, any>) => void;
+  addBreadcrumb: (breadcrumb: Record<string, any>) => void;
+  startTransaction: (config: { name: string }) => SentryTransaction;
+  BrowserTracing: new (config?: any) => any;
 }
 
 /**
@@ -151,7 +198,7 @@ export class MonitoringService {
   /**
    * 默认的beforeSend处理函数
    */
-  private _defaultBeforeSend(event: any, _hint: any): any {
+  private _defaultBeforeSend(event: SentryEvent, _hint: any): SentryEvent | null {
     // 过滤敏感信息
     if (event.request) {
       // 移除Cookie
@@ -192,11 +239,13 @@ export class MonitoringService {
       return;
     }
 
-    this.Sentry.captureException(error, {
+    const captureContext: SentryCaptureContext = {
       tags: context.tags || {},
       extra: context.extra || {},
       level: context.level || 'error',
-    });
+    };
+
+    this.Sentry.captureException(error, captureContext);
 
     Logger.error('捕获异常', error, context.module || 'App');
   }
@@ -210,11 +259,13 @@ export class MonitoringService {
       return;
     }
 
-    this.Sentry.captureMessage(message, {
+    const captureContext: SentryCaptureContext = {
       level,
       tags: context.tags || {},
       extra: context.extra || {},
-    });
+    };
+
+    this.Sentry.captureMessage(message, captureContext);
 
     Logger.info(message, context, 'Monitoring');
   }
@@ -251,7 +302,7 @@ export class MonitoringService {
   /**
    * 设置上下文
    */
-  setContext(name: string, context: any): void {
+  setContext(name: string, context: Record<string, any>): void {
     if (!this.isInitialized || !this.Sentry) {
       return;
     }
@@ -262,7 +313,7 @@ export class MonitoringService {
   /**
    * 添加面包屑
    */
-  addBreadcrumb(breadcrumb: any): void {
+  addBreadcrumb(breadcrumb: Record<string, any>): void {
     if (!this.isInitialized || !this.Sentry) {
       return;
     }
@@ -273,7 +324,7 @@ export class MonitoringService {
   /**
    * 开始性能追踪
    */
-  startTransaction(name: string): any {
+  startTransaction(name: string): SentryTransaction | null {
     if (!this.isInitialized || !this.Sentry) {
       return null;
     }

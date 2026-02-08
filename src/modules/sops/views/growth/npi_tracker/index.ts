@@ -12,6 +12,9 @@ import { registerActionsWithLegacy } from '../../../../../common/utils/actionReg
 import type {
   NPIProductRecord,
   StageConfig,
+  StageConfigMap,
+  SiteFlagsMap,
+  SiteDomainsMap,
   ComplianceStatus
 } from '@/types/modules-business';
 import {
@@ -23,6 +26,11 @@ import {
 
 // 示例数据
 const SAMPLE_DATA = MOCK_PRODUCTS as NPIProductRecord[];
+
+// 类型断言常量
+const stageConfigMap = STAGE_CONFIG as StageConfigMap;
+const siteFlagsMap = SITE_FLAGS as SiteFlagsMap;
+const siteDomainsMap = SITE_DOMAINS as SiteDomainsMap;
 
 // Next step options
 const NEXT_STEP_OPTIONS: string[] = [
@@ -62,7 +70,7 @@ function renderTable(): void {
     // ✅ 安全: 静态HTML模板，无用户输入
     tbody.innerHTML = tableData
         .map((row: NPIProductRecord, index) => {
-            const stageConfig: StageConfig = (STAGE_CONFIG as any)[row.stage] || (STAGE_CONFIG as any)['new-test'];
+            const stageConfig: StageConfig = stageConfigMap[row.stage] || stageConfigMap['new-test'];
             const clearancePrice = calcClearancePrice(row.delivery_fee);
             const movingPrice = calcMovingPrice(row.delivery_fee);
             const suggestedPrice = calcCurrentPrice(row.delivery_fee);
@@ -71,8 +79,8 @@ function renderTable(): void {
             const isOverstock = row.inventory_days > 60;
             const isPriceBelowClearance = parseFloat(suggestedPrice) < parseFloat(clearancePrice);
 
-            const domain = (SITE_DOMAINS as any)[row.site] || 'amazon.de';
-            const flag = (SITE_FLAGS as any)[row.site] || row.site;
+            const domain = siteDomainsMap[row.site] || 'amazon.de';
+            const flag = siteFlagsMap[row.site] || row.site;
 
             return `
         <tr class="hover:bg-slate-50 border-b border-slate-100" data-index="${index}">
@@ -169,36 +177,45 @@ function renderTable(): void {
 }
 
 // Update field
-function updateField(index: number, field: string, value: any): void {
-    (tableData[index] as any)[field] = value;
-    renderTable();
+function updateField(index: number, field: keyof NPIProductRecord, value: any): void {
+    if (index >= 0 && index < tableData.length) {
+        (tableData[index] as any)[field] = value;
+        renderTable();
+    }
 }
 
 // Update delivery fee and recalculate prices
 function updateDeliveryFee(index: number, value: string): void {
-    (tableData[index] as any).delivery_fee = parseFloat(value) || 0;
-    renderTable();
+    const row = tableData[index];
+    if (row) {
+        row.delivery_fee = parseFloat(value) || 0;
+        renderTable();
+    }
 }
 
 // Toggle decision
 function toggleDecision(index: number): void {
-    const row = tableData[index] as any;
-    row.decision = row.decision === 'keep' ? 'kill' : 'keep';
-    renderTable();
+    const row = tableData[index];
+    if (row) {
+        row.decision = row.decision === 'keep' ? 'kill' : 'keep';
+        renderTable();
+    }
 }
 
 // Open Next Step Editor
 function openNextStepEditor(index: number): void {
-    const modal = document.getElementById('next-step-modal');
+    const modal = document.getElementById('next-step-modal') as HTMLElement & { dataset: { index: string } };
     const checkboxes = document.getElementById('next-step-checkboxes');
-    if (!modal || !checkboxes) return;
+    const row = tableData[index];
+    if (!modal || !checkboxes || !row) return;
 
-    (modal as any).dataset.index = index;
+    modal.dataset.index = index.toString();
 
+    const currentSteps = row.next_step;
     checkboxes.innerHTML = NEXT_STEP_OPTIONS.map(
         (option) => `
         <label class="flex items-center gap-2 p-2 hover:bg-slate-50 rounded cursor-pointer">
-            <input type="checkbox" value="${option}" ${(tableData[index] as any).next_step.includes(option) ? 'checked' : ''} class="w-4 h-4 rounded">
+            <input type="checkbox" value="${option}" ${currentSteps.includes(option) ? 'checked' : ''} class="w-4 h-4 rounded">
             <span class="text-sm">${option}</span>
         </label>
     `
@@ -209,13 +226,16 @@ function openNextStepEditor(index: number): void {
 
 // Save Next Steps
 function saveNextSteps(): void {
-    const modal = document.getElementById('next-step-modal');
+    const modal = document.getElementById('next-step-modal') as HTMLElement & { dataset: { index: string } };
     if (!modal) return;
 
-    const index = parseInt((modal as any).dataset.index);
+    const index = parseInt(modal.dataset.index);
+    const row = tableData[index];
+    if (isNaN(index) || !row) return;
+
     const checkboxes = document.querySelectorAll('#next-step-checkboxes input:checked');
 
-    (tableData[index] as any).next_step = Array.from(checkboxes).map((cb) => (cb as HTMLInputElement).value);
+    row.next_step = Array.from(checkboxes).map((cb) => (cb as HTMLInputElement).value);
     modal.classList.add('hidden');
     renderTable();
 }
@@ -238,11 +258,43 @@ function exportToExcel(): void {
         SUGGESTED: 'S', // Column S = 建议售价
     };
 
-    const exportData = tableData.map((row: any, idx) => {
+    interface ExportRow {
+        阶段: string;
+        SKU: string;
+        中文名: string;
+        店铺: string;
+        ASIN: string;
+        站点: string;
+        发货数量: number;
+        库存周转天数: number;
+        是否泛欧: string;
+        五点Rufus加标题: string;
+        敏感词规避: string;
+        图片加QA: string;
+        A加页面: string;
+        SOP合规状态: string;
+        DE配送费欧元: number;
+        配送占比百分号: string;
+        清仓红线欧元: string;
+        动销价格欧元: string;
+        建议售价欧元: string;
+        盈亏平衡点欧元: string;
+        流量: number;
+        七天CTR百分号: number;
+        七天CVR百分号: number;
+        ACOAS百分号: number;
+        自然单占比百分号: number;
+        Vine进度: string;
+        广告策略: string;
+        是否保留: string;
+        NextStep: string;
+    }
+
+    const exportData: ExportRow[] = tableData.map((row, idx) => {
         const excelRow = idx + 2; // Excel row number (1-indexed, row 1 is header)
 
         return {
-            阶段: ((STAGE_CONFIG as any)[row.stage]?.label || row.stage) as string,
+            阶段: stageConfigMap[row.stage]?.label || row.stage,
             SKU: row.sku,
             中文名: row.cn_name,
             店铺: row.store,
@@ -278,13 +330,24 @@ function exportToExcel(): void {
     });
 
     // Convert to CSV
-    const headers = Object.keys(exportData[0]!);
+    if (exportData.length === 0) {
+        alert('没有数据可导出');
+        return;
+    }
+
+    const firstRow = exportData[0];
+    if (!firstRow) {
+        alert('数据格式错误');
+        return;
+    }
+
+    const headers = Object.keys(firstRow);
     const csvContent = [
         headers.join(','),
         ...exportData.map((row) =>
             headers
                 .map((h) => {
-                    const val = (row as any)[h];
+                    const val = row[h as keyof ExportRow];
                     // Escape commas and quotes in values
                     if (
                         typeof val === 'string' &&

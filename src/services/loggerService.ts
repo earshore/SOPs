@@ -183,7 +183,15 @@ export class LoggerService {
         return;
       }
 
-      const storedLogs = StorageService.get<any[]>('error_logs', []) || [];
+      interface StoredLogEntry {
+        level: string;
+        message: string;
+        module: string;
+        timestamp: number;
+        url: string;
+      }
+
+      const storedLogs = StorageService.get<StoredLogEntry[]>('error_logs', []) || [];
       storedLogs.push({
         level: entry.levelName,
         message: entry.message,

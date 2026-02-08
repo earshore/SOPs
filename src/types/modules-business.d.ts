@@ -192,7 +192,12 @@ export interface KeywordTrackerSettings {
 /**
  * NPI 产品阶段
  */
-export type NPIStage = 'new-test' | 'growth' | 'mature' | 'decline';
+export type NPIStage = 'new-test' | 'growth' | 'stable' | 'clearance';
+
+/**
+ * 站点代码
+ */
+export type SiteCode = 'DE' | 'FR' | 'IT' | 'ES' | 'UK' | 'NL' | 'SE' | 'PL' | 'BE' | 'US' | 'JP';
 
 /**
  * 广告策略
@@ -213,7 +218,7 @@ export interface NPIProductRecord {
   cn_name: string;
   store: string;
   asin: string;
-  site: string;
+  site: SiteCode;
   qty_shipped: number;
   inventory_days: number;
   is_pan_eu: boolean;
@@ -241,6 +246,21 @@ export interface StageConfig {
   label: string;
   color: string;
 }
+
+/**
+ * 阶段配置映射
+ */
+export type StageConfigMap = Record<NPIStage, StageConfig>;
+
+/**
+ * 站点标志映射
+ */
+export type SiteFlagsMap = Record<SiteCode, string>;
+
+/**
+ * 站点域名映射
+ */
+export type SiteDomainsMap = Record<SiteCode, string>;
 
 /**
  * 合规状态
@@ -435,10 +455,14 @@ export type {
   WordFrequency,
   KeywordTrackerSettings,
   NPIStage,
+  SiteCode,
   AdsStrategy,
   ProductDecision,
   NPIProductRecord,
   StageConfig,
+  StageConfigMap,
+  SiteFlagsMap,
+  SiteDomainsMap,
   ComplianceStatus,
   EmailTemplateType,
   EmailTemplate,
