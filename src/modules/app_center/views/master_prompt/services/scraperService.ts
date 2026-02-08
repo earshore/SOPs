@@ -1,20 +1,58 @@
 // ==========================================
-// 🚀 优化版 scraperService.js
+// 🚀 优化版 scraperService.ts
 // 🎯 Phase 4: 已迁移使用 StorageService
 // ==========================================
 
 import { LANGUAGE_HEADERS, PROXY_URLS } from '../../../../../common/constants/constants';
-import { parseProductPage, parseReviews } from "./parserService.js";
+import { parseProductPage, parseReviews } from "./parserService";
 import { sleep, getErrorSummary } from "../../../../../common/utils/ui.js";
-import { HistoryService } from "./historyService.js";
-import { StorageService, STORAGE_KEYS } from "../../../../../services/storageService.ts";
+import { HistoryService } from "./historyService";
+import { StorageService } from "../../../../../services/storageService";
 
 const CACHE_DURATION_MS = 24 * 60 * 60 * 1000;
 
-// ✅ 优化1: 请求超时控制器
+// ----------------------------------------
+// 类型定义
+// ----------------------------------------
+
+interface ProxyConfig {
+  type?: string;
+  customUrl?: string;
+}
+
+interface FetchOptions {
+  retries?: number;
+  delay?: number;
+  proxyConfig?: ProxyConfig;
+  timeout?: number;
+}
+
+interface ScrapedProduct {
+  asin: string;
+  url: string;
+  language: string;
+  productTitle: string;
+  feature_bullets: string[];
+  customer_reviews: Array<{
+    headline: string;
+    body: string;
+    star_rating: number;
+    is_verified: boolean;
+    review_date: string;
+  }>;
+  scrape_status: 'pending' | 'scraping' | 'success' | 'failed';
+  error: string;
+}
+
+type StatusCallback = (asin: string, status: string, message: string) => void;
+
+// ----------------------------------------
+// 请求超时控制器
+// ----------------------------------------
+
 const REQUEST_TIMEOUT_MS = 15000; // 15秒超时，防止请求永久挂起
 
-function fetchWithTimeout(url, options = {}, timeout = REQUEST_TIMEOUT_MS) {
+function fetchWithTimeout(url: string, options: RequestInit = {}, timeout: number = REQUEST_TIMEOUT_MS): Promise<Response> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
 
@@ -22,17 +60,22 @@ function fetchWithTimeout(url, options = {}, timeout = REQUEST_TIMEOUT_MS) {
         .finally(() => clearTimeout(timeoutId));
 }
 
-// ✅ 优化2: 并发控制池 (限制同时请求数) // 限制同时最多2个请求，避免触发反爬
+// ----------------------------------------
+// 并发控制池
+// ----------------------------------------
+
 class RequestPool {
-    constructor(maxConcurrent = 2) {
+    private max: number;
+    private running: number = 0;
+    private queue: Array<() => void> = [];
+
+    constructor(maxConcurrent: number = 2) {
         this.max = maxConcurrent;
-        this.running = 0;
-        this.queue = [];
     }
 
-    async add(fn) {
+    async add<T>(fn: () => Promise<T>): Promise<T> {
         if (this.running >= this.max) {
-            await new Promise(resolve => this.queue.push(resolve));
+            await new Promise<void>(resolve => this.queue.push(resolve));
         }
         this.running++;
         try {
@@ -40,7 +83,8 @@ class RequestPool {
         } finally {
             this.running--;
             if (this.queue.length > 0) {
-                this.queue.shift()();
+                const resolve = this.queue.shift();
+                if (resolve) resolve();
             }
         }
     }
@@ -48,8 +92,11 @@ class RequestPool {
 
 const requestPool = new RequestPool(2); // 最多2个并发
 
-// URL策略保持不变...
-const URL_STRATEGIES = {
+// ----------------------------------------
+// URL 策略
+// ----------------------------------------
+
+const URL_STRATEGIES: Record<string, (targetUrl: string, key?: string) => string> = {
     scraperapi: (targetUrl, key) =>
         `http://api.scraperapi.com?api_key=${key}&url=${encodeURIComponent(targetUrl)}`,
     zenrows: (targetUrl, key) =>
@@ -57,8 +104,8 @@ const URL_STRATEGIES = {
     brightdata: (targetUrl, key) =>
         `https://api.brightdata.com/request?customer=${key}&url=${encodeURIComponent(targetUrl)}`,
     custom_api: (targetUrl, baseUrl) => {
-        const separator = baseUrl.includes("?") ? (baseUrl.endsWith("=") ? "" : "&url=") : "?url=";
-        const finalBase = (baseUrl.endsWith("url=") || baseUrl.endsWith("url")) ? baseUrl : `${baseUrl}${separator}`;
+        const separator = baseUrl!.includes("?") ? (baseUrl!.endsWith("=") ? "" : "&url=") : "?url=";
+        const finalBase = (baseUrl!.endsWith("url=") || baseUrl!.endsWith("url")) ? baseUrl : `${baseUrl}${separator}`;
         return `${finalBase}${encodeURIComponent(targetUrl)}`;
     },
     allorigins: (targetUrl) =>
@@ -71,7 +118,7 @@ const URL_STRATEGIES = {
     custom: (targetUrl, proxyUrl) => `${proxyUrl}${encodeURIComponent(targetUrl)}`
 };
 
-function constructFetchUrl(targetUrl, proxyConfig) {
+function constructFetchUrl(targetUrl: string, proxyConfig: ProxyConfig): string {
     const { type = "allorigins", customUrl } = proxyConfig;
     const strategy = URL_STRATEGIES[type];
 
@@ -85,36 +132,43 @@ function constructFetchUrl(targetUrl, proxyConfig) {
     return (PROXY_URLS.allorigins || "https://api.allorigins.win/get?url=") + encodeURIComponent(targetUrl);
 }
 
-// ✅ 优化3: 改进的 fetchWithProxy
-async function fetchWithProxy(url, site, options = {}) {
+// ----------------------------------------
+// 代理请求
+// ----------------------------------------
+
+async function fetchWithProxy(url: string, site: string, options: FetchOptions = {}): Promise<string> {
     const {
         retries = 3,
-        delay = 500,        // ✅ 降低基础延迟
+        delay = 500,
         proxyConfig = {},
         timeout = REQUEST_TIMEOUT_MS
     } = options;
 
     const headers = LANGUAGE_HEADERS[site];
+    if (!headers) {
+        throw new Error(`未找到站点 ${site} 的配置`);
+    }
+    
     const separator = url.includes("?") ? "&" : "?";
     const urlWithLang = `${url}${separator}language=${headers.locale}`;
 
     const isAllOriginsJson = proxyConfig.type === 'allorigins';
-    const isCommercial = ['scraperapi', 'zenrows', 'brightdata', 'custom_api'].includes(proxyConfig.type);
+    const isCommercial = ['scraperapi', 'zenrows', 'brightdata', 'custom_api'].includes(proxyConfig.type || '');
     const isFreeProxy = proxyConfig.type === 'allorigins';
 
-    let lastError;
+    let lastError: Error | undefined;
 
     for (let i = 0; i < retries; i++) {
         try {
-            // ✅ 优化: 使用 jitter 随机化延迟，避免被检测为机器人
+            // 使用 jitter 随机化延迟，避免被检测为机器人
             if (i > 0) {
                 const jitter = Math.random() * 300;
-                await sleep(delay * (i + 1) + jitter); // 线性而非指数
+                await sleep(delay * (i + 1) + jitter);
             }
 
             const fetchUrl = constructFetchUrl(urlWithLang, proxyConfig);
 
-            let reqOptions = {};
+            let reqOptions: RequestInit = {};
             if (!isCommercial && !isFreeProxy) {
                 reqOptions = {
                     headers: {
@@ -125,7 +179,7 @@ async function fetchWithProxy(url, site, options = {}) {
                 };
             }
 
-            // ✅ 使用带超时的 fetch + 并发池
+            // 使用带超时的 fetch + 并发池
             const res = await requestPool.add(() =>
                 fetchWithTimeout(fetchUrl, reqOptions, timeout)
             );
@@ -134,7 +188,7 @@ async function fetchWithProxy(url, site, options = {}) {
                 throw new Error("API Key 无效或访问被拒绝");
             }
             if (res.status === 429) {
-                // ✅ 新增: 处理限流，等待后重试
+                // 处理限流，等待后重试
                 await sleep(2000 + Math.random() * 1000);
                 throw new Error("请求过于频繁 (429)");
             }
@@ -156,27 +210,30 @@ async function fetchWithProxy(url, site, options = {}) {
             return text;
 
         } catch (e) {
-            lastError = e;
-            // ✅ 超时错误特殊处理
-            if (e.name === 'AbortError') {
+            lastError = e as Error;
+            // 超时错误特殊处理
+            if ((e as any).name === 'AbortError') {
                 console.warn(`请求超时 (attempt ${i + 1})`);
                 lastError = new Error(`请求超时 (${timeout}ms)`);
             } else {
-                console.warn(`Fetch attempt ${i + 1} failed:`, e.message);
+                console.warn(`Fetch attempt ${i + 1} failed:`, (e as Error).message);
             }
         }
     }
     throw lastError;
 }
 
-// ✅ 优化4: 并行评论抓取
-async function fetchReviewsParallel(asin, site, fetchOptions, lang) {
+// ----------------------------------------
+// 并行评论抓取
+// ----------------------------------------
+
+async function fetchReviewsParallel(asin: string, site: string, fetchOptions: FetchOptions, lang: any): Promise<any[]> {
     const reviewUrls = [
         `https://www.${lang.domain}/product-reviews/${asin}/ref=cm_cr_dp_d_show_all_btm?ie=UTF8&reviewerType=all_reviews&sortBy=recent`,
         `https://www.${lang.domain}/product-reviews/${asin}`
     ];
 
-    // ✅ 并行请求，取第一个成功的
+    // 并行请求，取第一个成功的
     const results = await Promise.allSettled(
         reviewUrls.map(url =>
             fetchWithProxy(url, site, { ...fetchOptions, retries: 2 })
@@ -192,16 +249,27 @@ async function fetchReviewsParallel(asin, site, fetchOptions, lang) {
     return [];
 }
 
-export async function scrapeAsin(asin, site, scrapeReviews, updateStatusCallback) {
+// ----------------------------------------
+// 主抓取函数
+// ----------------------------------------
+
+export async function scrapeAsin(
+    asin: string, 
+    site: string, 
+    scrapeReviews: boolean, 
+    updateStatusCallback: StatusCallback
+): Promise<ScrapedProduct> {
     // 使用 StorageService 获取代理配置
     const proxyConfig = StorageService.getProxyConfig();
-
 
     if (!site || !LANGUAGE_HEADERS[site]) {
         const errorMsg = `无效的站点参数: ${site || "为空"}`;
         updateStatusCallback(asin, "failed", errorMsg);
         return {
             asin,
+            url: '',
+            language: '',
+            productTitle: '',
             scrape_status: "failed",
             error: errorMsg,
             feature_bullets: [],
@@ -209,7 +277,7 @@ export async function scrapeAsin(asin, site, scrapeReviews, updateStatusCallback
         };
     }
 
-    // 缓存检查 (保持不变，但移除不必要的 sleep)
+    // 缓存检查
     try {
         const cachedItem = HistoryService.getByAsin(asin, site);
         if (cachedItem && cachedItem.product) {
@@ -219,18 +287,18 @@ export async function scrapeAsin(asin, site, scrapeReviews, updateStatusCallback
             if ((now - cachedTime) < CACHE_DURATION_MS) {
                 const age = ((now - cachedTime) / 3600000).toFixed(1);
                 updateStatusCallback(asin, "success", `⚡ 命中缓存 (${age}小时前)`);
-                return cachedItem.product;  // ✅ 移除了 sleep(300)
+                return cachedItem.product;
             }
         }
     } catch (err) {
         console.warn("缓存读取失败，转为网络请求");
     }
 
-    const fetchOptions = { retries: 3, delay: 500, proxyConfig };
+    const fetchOptions: FetchOptions = { retries: 3, delay: 500, proxyConfig };
     const lang = LANGUAGE_HEADERS[site];
     const baseUrl = `https://www.${lang.domain}/dp/${asin}`;
 
-    let result = {
+    let result: ScrapedProduct = {
         asin,
         url: `${baseUrl}?language=${lang.locale}`,
         language: lang.name,
@@ -257,7 +325,7 @@ export async function scrapeAsin(asin, site, scrapeReviews, updateStatusCallback
             result.productTitle = title;
             result.feature_bullets = bullets;
 
-            // ✅ 优化: 并行抓取评论
+            // 并行抓取评论
             if (scrapeReviews) {
                 updateStatusCallback(asin, "scraping", "正在分析评论...");
 
@@ -284,9 +352,8 @@ export async function scrapeAsin(asin, site, scrapeReviews, updateStatusCallback
             console.error(`Task Error ${asin}:`, e);
             if (attempt === MAX_TASK_RETRIES) {
                 result.scrape_status = "failed";
-                result.error = e.message;
+                result.error = (e as Error).message;
             } else {
-                // ✅ 优化: 降低重试等待时间
                 await sleep(1000 * attempt);
             }
         }
@@ -300,12 +367,20 @@ export async function scrapeAsin(asin, site, scrapeReviews, updateStatusCallback
     return result;
 }
 
-// ✅ 新增: 批量抓取优化 (可选导出)
-export async function scrapeMultipleAsins(asins, site, scrapeReviews, updateStatusCallback) {
+// ----------------------------------------
+// 批量抓取优化
+// ----------------------------------------
+
+export async function scrapeMultipleAsins(
+    asins: string[], 
+    site: string, 
+    scrapeReviews: boolean, 
+    updateStatusCallback: StatusCallback
+): Promise<ScrapedProduct[]> {
     const BATCH_SIZE = 3;  // 每批3个
     const BATCH_DELAY = 1500; // 批次间隔
 
-    const results = [];
+    const results: ScrapedProduct[] = [];
 
     for (let i = 0; i < asins.length; i += BATCH_SIZE) {
         const batch = asins.slice(i, i + BATCH_SIZE);

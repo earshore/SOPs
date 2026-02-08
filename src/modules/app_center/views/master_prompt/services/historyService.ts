@@ -1,19 +1,41 @@
-// src/modules/master_prompt/services/historyService.js
+// src/modules/master_prompt/services/historyService.ts
 // ================================================================
 // 🎯 Phase 4: 已迁移使用 StorageService
 // ================================================================
 
 import state from "../../../../../common/state";
-import { StorageService, STORAGE_KEYS } from "../../../../../services/storageService.ts";
+import { StorageService, STORAGE_KEYS } from "../../../../../services/storageService";
 
 const MAX_HISTORY_ITEMS = 20; // 限制只存最近20条
+
+// ----------------------------------------
+// 类型定义
+// ----------------------------------------
+
+interface HistoryItem {
+  id: number;
+  timestamp: string;
+  site: string;
+  asins: string[];
+  data: any;
+  report: any;
+}
+
+interface CachedProduct {
+  product: any;
+  timestamp: string;
+}
+
+// ----------------------------------------
+// History Service
+// ----------------------------------------
 
 export const HistoryService = {
   /**
    * 获取所有历史记录
-   * @returns {Array} 历史记录数组
+   * @returns 历史记录数组
    */
-  getAll() {
+  getAll(): HistoryItem[] {
     try {
       return StorageService.getScrapeHistory();
     } catch (e) {
@@ -24,19 +46,20 @@ export const HistoryService = {
 
   /**
    * 保存一次抓取记录
-   * @param {Object} data 抓取的数据
-   * @param {Object} report 分析报告(可选)
+   * @param data 抓取的数据
+   * @param report 分析报告(可选)
    */
-  save(data, report) {
+  save(data: any, report: any): HistoryItem[] {
     const history = this.getAll();
     // 使用当前 state 中的 ID，如果是新抓取则用时间戳生成新 ID
-    const id = state.currentHistoryId || Date.now();
+    const rawId = state.scraper.currentHistoryId || Date.now();
+    const id = typeof rawId === 'number' ? rawId : Number(rawId);
 
-    const historyItem = {
+    const historyItem: HistoryItem = {
       id: id,
       timestamp: data.metadata?.scrape_timestamp || new Date().toISOString(),
       site: data.metadata?.marketplace || state.scraper?.selectedSite || 'US',
-      asins: data.products?.map((p) => p.asin) || [],
+      asins: data.products?.map((p: any) => p.asin) || [],
       data,
       report,
     };
@@ -48,7 +71,7 @@ export const HistoryService = {
     } else {
       // 新记录插到最前面
       history.unshift(historyItem);
-      state.currentHistoryId = historyItem.id;
+      state.scraper.currentHistoryId = historyItem.id;
     }
 
     // 保持存储空间整洁，只留最新的
@@ -60,9 +83,9 @@ export const HistoryService = {
 
   /**
    * 根据ID获取单条记录
-   * @param {number} id
+   * @param id - 历史记录ID
    */
-  getById(id) {
+  getById(id: number): HistoryItem | undefined {
     const history = this.getAll();
     return history.find((h) => h.id === Number(id)); // 确保类型匹配
   },
@@ -70,7 +93,7 @@ export const HistoryService = {
   /**
    * 清空所有记录
    */
-  clear() {
+  clear(): void {
     StorageService.remove(STORAGE_KEYS.SCRAPE_HISTORY);
   },
 
@@ -78,7 +101,7 @@ export const HistoryService = {
    * ✅ 新增：根据 ASIN 和站点查找最近的有效缓存
    * 用于 scraperService 在抓取前进行查询
    */
-  getByAsin(asin, site) {
+  getByAsin(asin: string, site: string): CachedProduct | null {
     const history = this.getAll();
 
     // 遍历所有历史任务
@@ -89,7 +112,7 @@ export const HistoryService = {
       // 2. 检查该任务是否包含此 ASIN 且状态为 success
       if (record.data && record.data.products) {
         const product = record.data.products.find(
-          (p) => p.asin === asin && p.scrape_status === "success"
+          (p: any) => p.asin === asin && p.scrape_status === "success"
         );
 
         if (product) {

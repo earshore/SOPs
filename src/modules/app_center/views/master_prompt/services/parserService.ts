@@ -1,20 +1,36 @@
-// src/modules/app_center/master_prompt/services/parserService.js
+// src/modules/app_center/master_prompt/services/parserService.ts
 import {
   SELECTOR_MAP,
   VERIFIED_PURCHASE_PATTERNS,
 } from '../../../../../common/constants/constants';
 
 // ----------------------------------------
-// 1. 通用解析工具 (Utility Functions)
+// 1. 类型定义
+// ----------------------------------------
+
+interface ParsedProduct {
+  title: string;
+  bullets: string[];
+}
+
+interface ParsedReview {
+  title: string;
+  content: string;
+  rating: number;
+  isVerified: boolean;
+}
+
+// ----------------------------------------
+// 2. 通用解析工具 (Utility Functions)
 // ----------------------------------------
 
 /**
  * 安全提取元素文本
- * @param {Element|Document} root - 根元素
- * @param {string|Array} selector - 选择器或选择器数组
- * @returns {string} 提取到的文本，如果没找到则返回 ""
+ * @param root - 根元素
+ * @param selector - 选择器或选择器数组
+ * @returns 提取到的文本，如果没找到则返回 ""
  */
-function safeExtractText(root, selector) {
+function safeExtractText(root: Element | Document, selector: string | string[]): string {
   const selectors = Array.isArray(selector) ? selector : [selector];
   for (const sel of selectors) {
     const el = root.querySelector(sel);
@@ -26,10 +42,10 @@ function safeExtractText(root, selector) {
 
 /**
  * 解析星级评分
- * @param {Element} container
- * @param {Array} selectors
+ * @param container - 容器元素
+ * @param selectors - 选择器数组
  */
-function extractRating(container, selectors) {
+function extractRating(container: Element, selectors: string[]): number {
   for (const sel of selectors) {
     const el = container.querySelector(sel);
     if (!el) continue;
@@ -48,20 +64,23 @@ function extractRating(container, selectors) {
 }
 
 // ----------------------------------------
-// 2. 主解析逻辑 (Main Logic)
+// 3. 主解析逻辑 (Main Logic)
 // ----------------------------------------
 
-// 解析产品页面，提取标题和要点
-export function parseProductPage(html, asin, site) {
+/**
+ * 解析产品页面，提取标题和要点
+ */
+export function parseProductPage(html: string, _asin: string, _site: string): ParsedProduct {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, "text/html");
 
   // 1. 提取标题
-  const title = safeExtractText(doc, SELECTOR_MAP.productTitle);
+  const title = safeExtractText(doc, SELECTOR_MAP.productTitle || []);
 
   // 2. 提取五点描述 (Feature Bullets)
-  const bullets = [];
-  for (const sel of SELECTOR_MAP.bulletPoints) {
+  const bullets: string[] = [];
+  const bulletSelectors = SELECTOR_MAP.bulletPoints || [];
+  for (const sel of bulletSelectors) {
     const els = doc.querySelectorAll(sel);
     if (els.length > 0) {
       els.forEach((el) => {
@@ -81,16 +100,19 @@ export function parseProductPage(html, asin, site) {
   };
 }
 
-// 解析评论页面，提取评论列表
-export function parseReviews(html) {
+/**
+ * 解析评论页面，提取评论列表
+ */
+export function parseReviews(html: string): ParsedReview[] {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, "text/html");
-  const reviews = [];
-  const seenContents = new Set(); // 用于去重
+  const reviews: ParsedReview[] = [];
+  const seenContents = new Set<string>(); // 用于去重
 
   // 1. 定位评论容器
-  let reviewContainers = [];
-  for (const sel of SELECTOR_MAP.reviewContainers) {
+  let reviewContainers: Element[] = [];
+  const containerSelectors = SELECTOR_MAP.reviewContainers || [];
+  for (const sel of containerSelectors) {
     const containers = doc.querySelectorAll(sel);
     if (containers.length > 0) {
       reviewContainers = Array.from(containers); // 转为数组方便操作
@@ -104,7 +126,8 @@ export function parseReviews(html) {
       "Parser: No review containers found, fallback to direct body extraction."
     );
     // 这种情况下通常无法提取评分和标题，只能提取内容
-    for (const sel of SELECTOR_MAP.reviewBody) {
+    const bodySelectors = SELECTOR_MAP.reviewBody || [];
+    for (const sel of bodySelectors) {
       const els = doc.querySelectorAll(sel);
       if (els.length > 0) {
         els.forEach((el) => {
@@ -134,7 +157,8 @@ export function parseReviews(html) {
     // A. 提取内容
     let content = "";
     // 优先查找内部 span，因为有时外层包含多余空格
-    for (const sel of SELECTOR_MAP.reviewBody) {
+    const bodySelectors = SELECTOR_MAP.reviewBody || [];
+    for (const sel of bodySelectors) {
       const bodyEl = container.querySelector(sel);
       if (!bodyEl) continue;
 
@@ -157,7 +181,7 @@ export function parseReviews(html) {
     }
 
     // B. 提取标题
-    let title = safeExtractText(container, SELECTOR_MAP.reviewTitle);
+    let title = safeExtractText(container, SELECTOR_MAP.reviewTitle || []);
     // 清理标题中的杂质 (e.g. "5.0 out of 5 stars Great Product")
     title = title.replace(
       /^\d+([.,]\d)?\s*(von|out of|sur|su|de)\s*\d+\s*(Sternen?|stars?|étoiles?|stelle|estrellas)?\s*-?\s*/i,
@@ -165,7 +189,7 @@ export function parseReviews(html) {
     );
 
     // C. 提取评分
-    const rating = extractRating(container, SELECTOR_MAP.reviewRating);
+    const rating = extractRating(container, SELECTOR_MAP.reviewRating || []);
 
     // D. 校验是否 VP (Verified Purchase)
     const containerText = container.textContent || "";
