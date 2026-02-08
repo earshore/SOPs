@@ -1,10 +1,11 @@
 console.log("📋 SOPs Core Module Loading...");
 import './sops_style.css';
-import { createModuleLoader } from '../../common/utils/ModuleLoader';
+import { createModuleLoader, ModuleLoader } from '../../common/utils/ModuleLoader';
+import type { ModuleMap, ModuleLoaderFn } from '@/types/modules-business';
 
 // ================= 路由配置表 =================
 // 键名对应 menuConfig.js 里的 route id
-const MODULE_MAP: Record<string, () => Promise<any>> = {
+const MODULE_MAP: ModuleMap = {
     // 总览
     'sops_overview': () => import('./views/overview/index'),
 
@@ -36,7 +37,7 @@ const MODULE_MAP: Record<string, () => Promise<any>> = {
 };
 
 // ================= 使用通用ModuleLoader =================
-const moduleLoader = createModuleLoader({
+const moduleLoader: ModuleLoader = createModuleLoader({
     containerId: 'sops_content_area',
     shellId: 'panel-sops',
     moduleMap: MODULE_MAP,
@@ -46,9 +47,9 @@ const moduleLoader = createModuleLoader({
 
 /**
  * 注册子模块 (Plugin API)
- * @param {string} routeId - 路由 ID
- * @param {Function} loader - 动态导入函数
+ * @param routeId - 路由 ID
+ * @param loader - 动态导入函数
  */
-export function registerSubModule(routeId: string, loader: () => Promise<any>): void {
+export function registerSubModule(routeId: string, loader: ModuleLoaderFn): void {
     moduleLoader.registerSubModule(routeId, loader);
 }

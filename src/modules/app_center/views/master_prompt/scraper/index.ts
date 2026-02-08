@@ -225,7 +225,7 @@ const ScraperPanel = () => ({
                 // 错开请求时间
                 if (index > 0) await sleep(index * 800);
 
-                return scrapeAsin(asin, site, scrapeReviews, (a: string, status: string, msg: string) => {
+                return scrapeAsin(asin, site as any, scrapeReviews, (a: string, status: string, msg: string) => {
                     this.updateTask(a, status as any, msg);
                 });
             });

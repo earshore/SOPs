@@ -2,12 +2,18 @@
  * 亚马逊新品生命周期跟踪 SOP - NPI Tracker
  * Amazon New Product Introduction Tracker (EU Focus)
  * Phase 4: 迁移 window 全局函数到 ActionRegistry
+ * 🎯 P0优化: 使用统一类型定义
  * 优化: 示例数据已移至独立文件
  */
 
 import BaseModule from '../../../../../common/BaseModule';
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry';
+import type {
+  NPIProductRecord,
+  StageConfig,
+  ComplianceStatus
+} from '@/types/modules-business';
 import {
     MOCK_PRODUCTS,
     STAGE_CONFIG,
@@ -16,10 +22,10 @@ import {
 } from './data/mockData';
 
 // 示例数据
-const SAMPLE_DATA = MOCK_PRODUCTS;
+const SAMPLE_DATA = MOCK_PRODUCTS as NPIProductRecord[];
 
 // Next step options
-const NEXT_STEP_OPTIONS = [
+const NEXT_STEP_OPTIONS: string[] = [
     '加VINE (0评论)',
     '降价/Coupon (CVR低)',
     '否词/关广告 (ACOS高)',
@@ -34,7 +40,7 @@ const calcDeliveryPercent = (deliveryFee: number, currentPrice: number): string 
     ((deliveryFee / currentPrice) * 100).toFixed(1);
 
 // Check compliance score
-const getComplianceStatus = (record: any) => {
+const getComplianceStatus = (record: NPIProductRecord): ComplianceStatus => {
     const checks = [
         record.check_content,
         record.check_sensitive,
@@ -46,7 +52,7 @@ const getComplianceStatus = (record: any) => {
 };
 
 // Current data state
-let tableData = [...SAMPLE_DATA];
+let tableData: NPIProductRecord[] = [...SAMPLE_DATA];
 
 // Render the table
 function renderTable(): void {
@@ -55,8 +61,8 @@ function renderTable(): void {
 
     // ✅ 安全: 静态HTML模板，无用户输入
     tbody.innerHTML = tableData
-        .map((row: any, index) => {
-            const stageConfig = (STAGE_CONFIG as any)[row.stage] || (STAGE_CONFIG as any)['new-test'];
+        .map((row: NPIProductRecord, index) => {
+            const stageConfig: StageConfig = (STAGE_CONFIG as any)[row.stage] || (STAGE_CONFIG as any)['new-test'];
             const clearancePrice = calcClearancePrice(row.delivery_fee);
             const movingPrice = calcMovingPrice(row.delivery_fee);
             const suggestedPrice = calcCurrentPrice(row.delivery_fee);
@@ -315,7 +321,7 @@ function filterByStore(store: string): void {
     if (store === 'all') {
         tableData = [...SAMPLE_DATA];
     } else {
-        tableData = SAMPLE_DATA.filter((row: any) => row.store === store);
+        tableData = SAMPLE_DATA.filter((row: NPIProductRecord) => row.store === store);
     }
     renderTable();
 }
@@ -325,7 +331,7 @@ function filterByStage(stage: string): void {
     if (stage === 'all') {
         tableData = [...SAMPLE_DATA];
     } else {
-        tableData = SAMPLE_DATA.filter((row: any) => row.stage === stage);
+        tableData = SAMPLE_DATA.filter((row: NPIProductRecord) => row.stage === stage);
     }
     renderTable();
 }

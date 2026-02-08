@@ -1,6 +1,7 @@
 ﻿// ==========================================
 // 🚀 优化版 scraperService.ts
 // 🎯 Phase 4: 已迁移使用 StorageService
+// 🎯 P0优化: 完整类型定义
 // ==========================================
 
 import { LANGUAGE_HEADERS, PROXY_URLS } from '../../../../../common/constants/constants';
@@ -8,43 +9,15 @@ import { parseProductPage, parseReviews } from "./parserService";
 import { sleep, getErrorSummary } from '../../../../../common/ui';
 import { HistoryService } from "./historyService";
 import { StorageService } from "../../../../../services/storageService";
+import type {
+  ProxyConfig,
+  FetchOptions,
+  ScrapedProduct,
+  StatusCallback,
+  ScraperSite
+} from '@/types/modules-business';
 
 const CACHE_DURATION_MS = 24 * 60 * 60 * 1000;
-
-// ----------------------------------------
-// 类型定义
-// ----------------------------------------
-
-interface ProxyConfig {
-  type?: string;
-  customUrl?: string;
-}
-
-interface FetchOptions {
-  retries?: number;
-  delay?: number;
-  proxyConfig?: ProxyConfig;
-  timeout?: number;
-}
-
-interface ScrapedProduct {
-  asin: string;
-  url: string;
-  language: string;
-  productTitle: string;
-  feature_bullets: string[];
-  customer_reviews: Array<{
-    headline: string;
-    body: string;
-    star_rating: number;
-    is_verified: boolean;
-    review_date: string;
-  }>;
-  scrape_status: 'pending' | 'scraping' | 'success' | 'failed';
-  error: string;
-}
-
-type StatusCallback = (asin: string, status: string, message: string) => void;
 
 // ----------------------------------------
 // 请求超时控制器
@@ -60,10 +33,9 @@ function fetchWithTimeout(url: string, options: RequestInit = {}, timeout: numbe
         .finally(() => clearTimeout(timeoutId));
 }
 
-// ----------------------------------------
-// 并发控制池
-// ----------------------------------------
-
+/**
+ * 并发控制池
+ */
 class RequestPool {
     private max: number;
     private running: number = 0;
@@ -96,7 +68,9 @@ const requestPool = new RequestPool(2); // 最多2个并发
 // URL 策略
 // ----------------------------------------
 
-const URL_STRATEGIES: Record<string, (targetUrl: string, key?: string) => string> = {
+type URLStrategy = (targetUrl: string, key?: string) => string;
+
+const URL_STRATEGIES: Record<string, URLStrategy> = {
     scraperapi: (targetUrl, key) =>
         `http://api.scraperapi.com?api_key=${key}&url=${encodeURIComponent(targetUrl)}`,
     zenrows: (targetUrl, key) =>
@@ -223,11 +197,15 @@ async function fetchWithProxy(url: string, site: string, options: FetchOptions =
     throw lastError;
 }
 
-// ----------------------------------------
-// 并行评论抓取
-// ----------------------------------------
-
-async function fetchReviewsParallel(asin: string, site: string, fetchOptions: FetchOptions, lang: any): Promise<any[]> {
+/**
+ * 并行评论抓取
+ */
+async function fetchReviewsParallel(
+  asin: string, 
+  site: ScraperSite, 
+  fetchOptions: FetchOptions, 
+  lang: { domain: string; locale: string; name: string }
+): Promise<any[]> {
     const reviewUrls = [
         `https://www.${lang.domain}/product-reviews/${asin}/ref=cm_cr_dp_d_show_all_btm?ie=UTF8&reviewerType=all_reviews&sortBy=recent`,
         `https://www.${lang.domain}/product-reviews/${asin}`
@@ -249,13 +227,17 @@ async function fetchReviewsParallel(asin: string, site: string, fetchOptions: Fe
     return [];
 }
 
-// ----------------------------------------
-// 主抓取函数
-// ----------------------------------------
-
+/**
+ * 主抓取函数
+ * @param asin - 产品ASIN
+ * @param site - 站点标识
+ * @param scrapeReviews - 是否抓取评论
+ * @param updateStatusCallback - 状态更新回调
+ * @returns 抓取的产品数据
+ */
 export async function scrapeAsin(
     asin: string, 
-    site: string, 
+    site: ScraperSite, 
     scrapeReviews: boolean, 
     updateStatusCallback: StatusCallback
 ): Promise<ScrapedProduct> {
@@ -367,13 +349,17 @@ export async function scrapeAsin(
     return result;
 }
 
-// ----------------------------------------
-// 批量抓取优化
-// ----------------------------------------
-
+/**
+ * 批量抓取优化
+ * @param asins - ASIN列表
+ * @param site - 站点标识
+ * @param scrapeReviews - 是否抓取评论
+ * @param updateStatusCallback - 状态更新回调
+ * @returns 抓取的产品数据列表
+ */
 export async function scrapeMultipleAsins(
     asins: string[], 
-    site: string, 
+    site: ScraperSite, 
     scrapeReviews: boolean, 
     updateStatusCallback: StatusCallback
 ): Promise<ScrapedProduct[]> {

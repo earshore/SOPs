@@ -1,9 +1,10 @@
 console.log('📋 More Core Module Loading...');
 import './more_style.css';
-import { createModuleLoader } from '../../common/utils/ModuleLoader';
+import { createModuleLoader, ModuleLoader } from '../../common/utils/ModuleLoader';
+import type { ModuleMap, ModuleLoaderFn } from '@/types/modules-business';
 
 // ================= 路由配置表 =================
-const MODULE_MAP = {
+const MODULE_MAP: ModuleMap = {
     // 总览
     more_overview: () => import('./views/overview/index'),
 
@@ -14,7 +15,7 @@ const MODULE_MAP = {
 };
 
 // ================= 使用通用ModuleLoader =================
-const moduleLoader = createModuleLoader({
+const moduleLoader: ModuleLoader = createModuleLoader({
     containerId: 'more_content_area',
     shellId: 'panel-more',
     moduleMap: MODULE_MAP,
@@ -27,7 +28,7 @@ const moduleLoader = createModuleLoader({
  * @param routeId - 路由 ID
  * @param loader - 动态导入函数
  */
-export function registerSubModule(routeId: string, loader: () => Promise<any>): void {
+export function registerSubModule(routeId: string, loader: ModuleLoaderFn): void {
     moduleLoader.registerSubModule(routeId, loader);
 }
 

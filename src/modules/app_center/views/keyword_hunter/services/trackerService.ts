@@ -1,27 +1,17 @@
 // src/modules/app_center/keyword_hunter/services/trackerService.ts
 // ================================================================
 // 🎯 Phase 4: 已迁移使用 StorageService
+// 🎯 P0优化: 使用统一类型定义
 // ================================================================
 
 import { callLLM } from "../../../../../services/llmService";
 import { ANALYSIS_PROMPT_TEMPLATE, TRANSLATE_PROMPT_TEMPLATE as TRANSLATE_PROMPT_TEMPLATE2 } from "../constants/prompts";
 import { StorageService, STORAGE_KEYS } from "../../../../../services/storageService";
-
-// ==========================================
-// Types
-// ==========================================
-
-export interface KeywordMatchResult {
-    keyword: string;
-    count: number;
-}
-
-export interface AnalysisResult {
-    matched: KeywordMatchResult[];
-    unmatched: string[];
-}
-
-export type WordFrequency = [string, number];
+import type {
+  KeywordMatchResult,
+  AnalysisResult,
+  WordFrequency
+} from '@/types/modules-business';
 
 // ==========================================
 // 1. 基础文本处理工具
@@ -200,6 +190,11 @@ function isValidListing(text: string): boolean {
 
 /**
  * 执行 AI 深度诊断
+ * @param copyText - Listing文案
+ * @param _keywords - 关键词列表(未使用)
+ * @param matchedKeywords - 匹配的关键词
+ * @param unmatchedKeywords - 未匹配的关键词
+ * @returns AI分析结果
  */
 export async function fetchListingAnalysis(
     copyText: string, 
@@ -233,6 +228,8 @@ export async function fetchListingAnalysis(
 
 /**
  * 执行沉浸式翻译
+ * @param copyText - 待翻译的文案
+ * @returns 翻译结果
  */
 export async function fetchImmersionTranslation(copyText: string): Promise<string> {
     // 🔥🔥🔥 新增校验：检查文案是否为空 🔥🔥🔥

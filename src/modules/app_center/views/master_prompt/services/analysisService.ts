@@ -2,50 +2,17 @@
 // ================================================================
 // 🎯 P2 重构: 添加完整的类型注释
 // 🛡️ Phase 1: 增强鲁棒性 - 改进解析逻辑与类型检查
+// 🎯 P0优化: 使用统一类型定义
 // ================================================================
 
 import { callLLM } from "../../../../../services/llmService";
 import { TRANSLATE_PROMPT_TEMPLATE } from "../constants/prompts";
-
-// ======================== 
-// 类型定义
-// ======================== 
-
-interface CustomerReview {
-  body: string;
-  rating?: number;
-  title?: string;
-}
-
-interface ProductData {
-  asin: string;
-  productTitle?: string;
-  feature_bullets?: string[];
-  customer_reviews?: CustomerReview[];
-}
-
-interface DataOptions {
-  includeTitle?: boolean;
-  includeBullets?: boolean;
-  includeReviews?: boolean;
-}
-
-interface LLMConfig {
-  provider: string;
-  endpoint: string;
-  apiKey: string;
-  model: string;
-}
-
-interface AnalysisReport {
-  targetMarket?: string;
-  language?: string;
-  meta?: any;
-  parse_error?: boolean;
-  raw_response?: string;
-  error_detail?: string;
-  [key: string]: any;
-}
+import type {
+  ProductData,
+  DataOptions,
+  LLMConfig,
+  AnalysisReport
+} from '@/types/modules-business';
 
 // ======================== 
 // 辅助函数
