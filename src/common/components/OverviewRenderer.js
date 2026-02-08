@@ -14,6 +14,7 @@
  */
 
 import { MENU_CONFIG, getRoutesByModule } from '../config/menuConfig';
+import { APP_EVENTS } from '../constants/eventConstants';
 
 export class OverviewRenderer {
     /**

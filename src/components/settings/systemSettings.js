@@ -10,6 +10,7 @@ import { showToast } from "../../common/utils/ui.js";
 import { StorageService, STORAGE_KEYS } from "../../services/storageService.ts";
 import { ErrorService } from "../../services/errorService";
 import { EnvConfig } from "../../common/config/envConfig.js"; // 🔒 P0修复: 导入环境配置
+import { APP_EVENTS } from "../../common/constants/eventConstants";
 
 // ==========================================
 // Alpine Component Logic

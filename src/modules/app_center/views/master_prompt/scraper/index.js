@@ -17,7 +17,7 @@ import { HistoryService } from '../services/historyService.js';
 import { StorageService, STORAGE_KEYS } from '../../../../../services/storageService.ts';
 import { ErrorService } from '../../../../../services/errorService';
 import { showToast, sleep } from '../../../../../common/utils/ui.js';
-import { MODULE_EVENTS } from '../../../../../common/constants/eventConstants';
+import { APP_EVENTS, MODULE_EVENTS } from '../../../../../common/constants/eventConstants';
 
 import '../master_prompt_style.css';
 
