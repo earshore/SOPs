@@ -5,6 +5,7 @@
 // ================================================================
 
 import type { Route, RouteGuard, RouteGuardResult } from '../../types/config';
+import { APP_EVENTS } from '../constants/eventConstants';
 
 /**
  * 路由守卫管理器
@@ -90,7 +91,7 @@ export class RouteGuardManager {
         if (result && typeof result === 'object' && result.redirect) {
           console.log(`🔀 [RouteGuard] 守卫 "${name}" 请求重定向到: ${result.redirect}`);
           // 触发重定向（由 Router 处理）
-          window.dispatchEvent(new CustomEvent('route-redirect', {
+          window.dispatchEvent(new CustomEvent(APP_EVENTS.ROUTE_REDIRECT, {
             detail: { to: result.redirect, reason: result.reason }
           }));
           return false;

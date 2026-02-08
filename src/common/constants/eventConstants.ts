@@ -14,6 +14,7 @@ export const APP_EVENTS = {
   ROUTE_CHANGE: 'route-change', // Legacy: 用于向后兼容
   ROUTE_BEFORE_CHANGE: 'app:route-before-change',
   ROUTE_ERROR: 'app:route-error',
+  ROUTE_REDIRECT: 'route-redirect', // 路由重定向
   
   // 应用生命周期
   INITIALIZED: 'app:initialized',
