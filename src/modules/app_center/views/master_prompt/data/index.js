@@ -14,7 +14,7 @@ import state from "../../../../../common/state";
 import { getErrorSummary, showToast, switchTab } from '../../../../../common/utils/ui.js';
 import { HistoryService } from '../services/historyService.js';
 import { StorageService } from '../../../../../services/storageService.ts';
-import { languageFlagMap, SITE_NAME_MAP, SITE_DOMAIN_MAP } from '../../../../../common/constants/constants.js';
+import { languageFlagMap, SITE_NAME_MAP, SITE_DOMAIN_MAP } from '../../../../../common/constants/constants';
 import eventBus from '../../../../../common/EventBus.ts';
 import { APP_EVENTS, MODULE_EVENTS } from '../../../../../common/constants/eventConstants';
 

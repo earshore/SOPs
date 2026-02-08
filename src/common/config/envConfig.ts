@@ -1,42 +1,51 @@
-// src/common/config/envConfig.js
-// ================================================================
-// 🌐 环境配置管理 - 基于 ConfigCenter
-// 向后兼容的环境配置接口
-// ================================================================
+/**
+ * envConfig.ts - 环境配置管理
+ * 
+ * 基于 ConfigCenter 的向后兼容环境配置接口
+ */
 
 import { configCenter } from './ConfigCenter';
 
 /**
- * 环境配置
+ * 环境类型
+ */
+export type Environment = 'development' | 'production' | 'test';
+
+/**
+ * 日志级别
+ */
+export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+
+/**
+ * 环境配置接口
  * @deprecated 请使用 configCenter 替代
  */
 export const EnvConfig = {
   /**
    * 当前环境
-   * @returns {'development' | 'production' | 'test'}
    */
-  get environment() {
-    return configCenter.get('environment');
+  get environment(): Environment {
+    return configCenter.get('environment') as Environment;
   },
 
   /**
    * 是否为开发环境
    */
-  get isDevelopment() {
+  get isDevelopment(): boolean {
     return configCenter.isDevelopment();
   },
 
   /**
    * 是否为生产环境
    */
-  get isProduction() {
+  get isProduction(): boolean {
     return configCenter.isProduction();
   },
 
   /**
    * 是否为测试环境
    */
-  get isTest() {
+  get isTest(): boolean {
     return configCenter.isTest();
   },
 
@@ -47,30 +56,30 @@ export const EnvConfig = {
     /**
      * API 基础路径
      */
-    get baseUrl() {
-      return configCenter.get('api.baseUrl');
+    get baseUrl(): string {
+      return configCenter.get('api.baseUrl') as string;
     },
 
     /**
      * API 超时时间
      */
-    get timeout() {
-      return configCenter.get('api.timeout');
+    get timeout(): number {
+      return configCenter.get('api.timeout') as number;
     },
 
     /**
      * 重试次数
      */
-    get retryAttempts() {
-      return configCenter.get('api.retryAttempts');
+    get retryAttempts(): number {
+      return configCenter.get('api.retryAttempts') as number;
     },
 
     /**
      * 标准化 API Endpoint
-     * @param {string} endpoint - 用户配置的 endpoint
-     * @returns {string} 标准化后的 endpoint
+     * @param endpoint - 用户配置的 endpoint
+     * @returns 标准化后的 endpoint
      */
-    normalizeEndpoint(endpoint) {
+    normalizeEndpoint(endpoint: string): string {
       // 开发环境: 统一使用代理路径
       if (EnvConfig.isDevelopment) {
         return this.baseUrl;
@@ -100,22 +109,22 @@ export const EnvConfig = {
     /**
      * 是否启用性能监控
      */
-    get enableMonitoring() {
-      return configCenter.get('performance.enableMonitoring');
+    get enableMonitoring(): boolean {
+      return configCenter.get('performance.enableMonitoring') as boolean;
     },
 
     /**
      * 是否启用DevTools
      */
-    get enableDevTools() {
-      return configCenter.get('performance.enableDevTools');
+    get enableDevTools(): boolean {
+      return configCenter.get('performance.enableDevTools') as boolean;
     },
 
     /**
      * 日志级别
      */
-    get logLevel() {
-      return configCenter.get('performance.logLevel');
+    get logLevel(): LogLevel {
+      return configCenter.get('performance.logLevel') as LogLevel;
     }
   },
 
@@ -126,43 +135,29 @@ export const EnvConfig = {
     /**
      * 是否启用实验性功能
      */
-    get enableExperimentalFeatures() {
-      return configCenter.get('features.enableExperimentalFeatures');
+    get enableExperimentalFeatures(): boolean {
+      return configCenter.get('features.enableExperimentalFeatures') as boolean;
     },
 
     /**
      * 是否启用Beta功能
      */
-    get enableBetaFeatures() {
-      return configCenter.get('features.enableBetaFeatures');
+    get enableBetaFeatures(): boolean {
+      return configCenter.get('features.enableBetaFeatures') as boolean;
     },
 
     /**
      * 是否启用调试模式
      */
-    get enableDebugMode() {
-      return configCenter.get('features.enableDebugMode');
-    },
-
-    /**
-     * 是否启用监控（向后兼容）
-     */
-    get monitoring() {
-      return this.enableMonitoring;
-    },
-
-    /**
-     * 是否启用调试模式（向后兼容）
-     */
-    get debug() {
-      return this.enableDebugMode;
+    get enableDebugMode(): boolean {
+      return configCenter.get('features.enableDebugMode') as boolean;
     },
 
     /**
      * 是否启用性能监控（向后兼容）
      */
-    get performance() {
-      return configCenter.get('performance.enableMonitoring');
+    get performance(): boolean {
+      return configCenter.get('performance.enableMonitoring') as boolean;
     }
   },
 
@@ -172,16 +167,15 @@ export const EnvConfig = {
   logging: {
     /**
      * 日志级别
-     * @returns {'debug' | 'info' | 'warn' | 'error'}
      */
-    get level() {
-      return configCenter.get('performance.logLevel');
+    get level(): LogLevel {
+      return configCenter.get('performance.logLevel') as LogLevel;
     },
 
     /**
      * 是否启用详细日志
      */
-    get verbose() {
+    get verbose(): boolean {
       return this.level === 'debug' || EnvConfig.features.enableDebugMode;
     }
   },
@@ -193,14 +187,13 @@ export const EnvConfig = {
     /**
      * Sentry DSN
      */
-    get sentryDsn() {
+    get sentryDsn(): string | null {
       return import.meta.env.VITE_SENTRY_DSN || null;
     }
   },
 
   /**
    * 获取所有环境变量（调试用）
-   * @returns {Object}
    */
   getAll() {
     return {

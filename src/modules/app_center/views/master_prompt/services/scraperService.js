@@ -3,7 +3,7 @@
 // 🎯 Phase 4: 已迁移使用 StorageService
 // ==========================================
 
-import { LANGUAGE_HEADERS, PROXY_URLS } from "../../../../../common/constants/constants.js";
+import { LANGUAGE_HEADERS, PROXY_URLS } from '../../../../../common/constants/constants';
 import { parseProductPage, parseReviews } from "./parserService.js";
 import { sleep, getErrorSummary } from "../../../../../common/utils/ui.js";
 import { HistoryService } from "./historyService.js";

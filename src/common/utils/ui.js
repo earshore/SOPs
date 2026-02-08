@@ -2,14 +2,14 @@ console.log("🚀 ui.js 模块 (Event-Driven Core) 开始加载...");
 
 import { escapeHtml } from '@/common/utils/security';
 import state from "../state";
-import { ERROR_MESSAGES } from "../constants/constants.js";
+import { ERROR_MESSAGES } from '../constants/constants';
 import { MENU_CONFIG, getRoutesByModule, getRouteFullConfig } from "../config/menuConfig";
 import { registerActions } from "./actionRegistry";
 import { ensureViewLoaded } from "./viewLoader";
 import { APP_EVENTS, emitAppEvent } from "../constants/eventConstants";
 // 🎯 短期优化：新增导入
-import { createSidebarRenderer } from '../components/SidebarRenderer.js';
-import { COLOR_SCHEMES } from '../constants/colorSchemes.js';
+import { createSidebarRenderer } from '../components/SidebarRenderer';
+import { COLOR_SCHEMES } from '../constants/colorSchemes';
 
 // ========================
 // 🛡️ HELPER: 健壮的 DOM 获取器

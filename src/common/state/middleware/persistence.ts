@@ -1,28 +1,30 @@
-// src/common/state/middleware/persistence.js
-// ================================================================
-// 🎯 持久化中间件
-// 自动保存到 localStorage
-// 🔄 P0优化: 迁移到 StorageService 统一接口
-// ================================================================
+/**
+ * persistence.ts - 持久化中间件
+ * 
+ * 自动保存到 localStorage
+ * 使用 StorageService 统一接口
+ */
 
-import { StorageService } from '../../../services/storageService.ts';
+import { StorageService } from '../../../services/storageService';
+import type { StateAction, MiddlewareNext } from '../StateManager';
+import type { StateManager } from '../StateManager';
 
 /**
  * 需要持久化的状态路径列表
  */
-const PERSIST_KEYS = [
+const PERSIST_KEYS: readonly string[] = [
   'ui.currentTab',
   'scraper.selectedSite',
   'analysis.selectedAsins'
-];
+] as const;
 
 /**
  * 持久化中间件 - 自动保存到 localStorage
- * @param {Object} action - 状态变化动作
- * @param {Function} next - 下一个中间件
- * @returns {Object} 处理后的动作
+ * @param action - 状态变化动作
+ * @param next - 下一个中间件
+ * @returns 处理后的动作
  */
-export function persistenceMiddleware(action, next) {
+export function persistenceMiddleware(action: StateAction, next: MiddlewareNext): StateAction | null {
   const result = next();
   
   // 检查是否需要持久化
@@ -40,9 +42,9 @@ export function persistenceMiddleware(action, next) {
 
 /**
  * 从 localStorage 恢复持久化的状态
- * @param {StateManager} stateManager - 状态管理器实例
+ * @param stateManager - 状态管理器实例
  */
-export function restorePersistedState(stateManager) {
+export function restorePersistedState(stateManager: StateManager): void {
   PERSIST_KEYS.forEach(path => {
     try {
       const key = `state_${path}`;

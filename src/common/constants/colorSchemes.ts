@@ -1,14 +1,42 @@
-// src/common/constants/colorSchemes.js
-// ================================================================
-// 🎨 统一颜色方案配置
-// 消除各渲染函数中重复的颜色方案定义
-// ================================================================
+/**
+ * colorSchemes.ts - 统一颜色方案配置
+ * 
+ * 消除各渲染函数中重复的颜色方案定义
+ * 用于卡片、按钮、侧边栏等组件的统一样式
+ */
+
+/**
+ * 颜色方案接口
+ */
+export interface ColorScheme {
+  border: string;
+  bg: string;
+  shadow: string;
+  iconBg: string;
+  iconText: string;
+  iconScale: string;
+  titleText: string;
+  arrow: string;
+  versionBorder: string;
+  versionText: string;
+  glow: string;
+  hoverBg: string;
+  hoverBorder: string;
+  text: string;
+  hoverText: string;
+  icon: string;
+  hoverIcon: string;
+}
+
+/**
+ * 颜色方案类型
+ */
+export type ColorSchemeName = 'blue' | 'emerald' | 'amber' | 'red' | 'green' | 'purple' | 'slate';
 
 /**
  * 颜色方案配置
- * 用于卡片、按钮、侧边栏等组件的统一样式
  */
-export const COLOR_SCHEMES = {
+export const COLOR_SCHEMES: Record<ColorSchemeName, ColorScheme> = {
     blue: {
         border: 'border-blue-100 hover:border-blue-300',
         bg: 'hover:bg-blue-50/80',
@@ -21,7 +49,6 @@ export const COLOR_SCHEMES = {
         versionBorder: 'group-hover/card:border-blue-300',
         versionText: 'group-hover/card:text-blue-600',
         glow: 'group-hover/card:ring-2 group-hover/card:ring-blue-200/50',
-        // 侧边栏专用
         hoverBg: 'hover:bg-blue-50',
         hoverBorder: 'hover:border-blue-200',
         text: 'text-slate-700',
@@ -147,11 +174,11 @@ export const COLOR_SCHEMES = {
 
 /**
  * 获取颜色方案
- * @param {string} color - 颜色名称
- * @returns {Object} 颜色方案对象
+ * @param color - 颜色名称
+ * @returns 颜色方案对象
  */
-export function getColorScheme(color) {
-    return COLOR_SCHEMES[color] || COLOR_SCHEMES.blue;
+export function getColorScheme(color: string): ColorScheme {
+    return COLOR_SCHEMES[color as ColorSchemeName] || COLOR_SCHEMES.blue;
 }
 
 export default COLOR_SCHEMES;

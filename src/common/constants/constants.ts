@@ -1,23 +1,62 @@
+/**
+ * constants.ts - 全局常量配置
+ * 
+ * 包含应用版本、LLM提供商、站点配置、选择器映射等
+ */
+
 // ========================
 // CONFIGURATION CONSTANTS
 // ========================
 
-// App Version for cache invalidation
+/** 应用版本号（用于缓存失效） */
 export const APP_VERSION = '1.0.1';
 
-// 1. 增加随机 User-Agent 池 (反爬虫核心)
-export const USER_AGENTS = [
+// ========================
+// USER AGENT POOL
+// ========================
+
+/** User-Agent 池（反爬虫核心） */
+export const USER_AGENTS: readonly string[] = [
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0",
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15",
   "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
-];
+] as const;
 
-// 2. 辅助函数：随机获取 User-Agent
-export const getRandomUserAgent = () => USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+/** 随机获取 User-Agent */
+export const getRandomUserAgent = (): string => {
+  const index = Math.floor(Math.random() * USER_AGENTS.length);
+  const agent = USER_AGENTS[index];
+  if (!agent) {
+    throw new Error('USER_AGENTS array is empty');
+  }
+  return agent;
+};
 
-export const PROVIDERS = {
+// ========================
+// LLM PROVIDERS
+// ========================
+
+/** 模型特性 */
+export type ModelFeature = 'vision' | 'function' | 'audio' | 'code';
+
+/** 模型配置 */
+export interface ModelConfig {
+  id: string;
+  context: number;
+  features: ModelFeature[];
+}
+
+/** LLM提供商配置 */
+export interface ProviderConfig {
+  name: string;
+  endpoint: string;
+  models: ModelConfig[];
+}
+
+/** LLM提供商映射 */
+export const PROVIDERS: Record<string, ProviderConfig> = {
   llmgateway: {
     name: "LLM-Gateway",
     endpoint: "https://llm-gateway.hongecb.store",
@@ -40,7 +79,7 @@ export const PROVIDERS = {
     name: "Anthropic",
     endpoint: "https://api.anthropic.com/v1",
     models: [
-      { id: "claude-3-5-sonnet-20241022", context: 200000, features: ["vision"], },
+      { id: "claude-3-5-sonnet-20241022", context: 200000, features: ["vision"] },
       { id: "claude-3-opus-20240229", context: 200000, features: ["vision"] },
       { id: "claude-3-haiku-20240307", context: 200000, features: ["vision"] },
     ],
@@ -119,23 +158,22 @@ export const PROVIDERS = {
   },
 };
 
+// ========================
+// SITE CONFIGURATIONS
+// ========================
 
+/** 站点配置 */
+export interface SiteConfig {
+  flag: string;
+  name_cn: string;
+  locale: string;
+  name: string;
+  domain: string;
+  lang: string;
+}
 
-
-// 不同语言站点的请求头配置
-// ==========================================
-// 3. 优化：动态生成 Header 配置 (减少冗余代码)
-// ==========================================
-const BASE_HEADERS = {
-  "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-  "Accept-Encoding": "gzip, deflate, br",
-  "Connection": "keep-alive",
-  "Upgrade-Insecure-Requests": "1",
-};
-
-// 定义各站点基础信息 (包含 flag)
-// 🔥 修改：在配置中增加 name_cn 字段
-const SITE_CONFIGS = {
+/** 站点配置映射 */
+const SITE_CONFIGS: Record<string, SiteConfig> = {
   // 欧洲
   DE: { flag: "🇩🇪", name_cn: "德国", locale: "de_DE", name: "German", domain: "amazon.de", lang: "de-DE,de;q=0.9,en;q=0.1" },
   FR: { flag: "🇫🇷", name_cn: "法国", locale: "fr_FR", name: "French", domain: "amazon.fr", lang: "fr-FR,fr;q=0.9,en;q=0.1" },
@@ -168,61 +206,86 @@ const SITE_CONFIGS = {
 
 export default SITE_CONFIGS;
 
-// 自动生成 LANGUAGE_HEADERS
-export const LANGUAGE_HEADERS = Object.entries(SITE_CONFIGS).reduce((acc, [key, config]) => {
-  // 1. ✅ 必须先定义这个变量，下面才能引用它
-  const headerConfig = {
+// ========================
+// HTTP HEADERS
+// ========================
+
+/** 基础请求头 */
+const BASE_HEADERS: Record<string, string> = {
+  "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+  "Accept-Encoding": "gzip, deflate, br",
+  "Connection": "keep-alive",
+  "Upgrade-Insecure-Requests": "1",
+};
+
+/** 语言请求头配置 */
+export interface LanguageHeader extends Record<string, string> {
+  "Accept-Language": string;
+  "Content-Language": string;
+  locale: string;
+  name: string;
+  domain: string;
+}
+
+/** 自动生成语言请求头 */
+export const LANGUAGE_HEADERS: Record<string, LanguageHeader> = Object.entries(SITE_CONFIGS).reduce((acc, [key, config]) => {
+  const langParts = config.lang.split(',');
+  const headerConfig: LanguageHeader = {
     ...BASE_HEADERS,
     "Accept-Language": config.lang,
-    "Content-Language": config.lang.split(',')[0],
+    "Content-Language": langParts[0] || config.lang,
     locale: config.locale,
     name: config.name,
     domain: config.domain
   };
 
-  // 2. 赋值给当前国家代码 (例如 UK)
   acc[key] = headerConfig;
 
-  // 3. ✅ 兼容处理：如果是 UK，同时赋值给 GB
+  // 兼容处理：UK 同时映射到 GB
   if (key === 'UK') {
-    acc['GB'] = headerConfig; // 现在 headerConfig 已经定义了，不会报错了
+    acc['GB'] = headerConfig;
   }
   return acc;
-}, {});
+}, {} as Record<string, LanguageHeader>);
 
-
-// 语言国旗映射
-// 注意：Font Awesome 没有彩色国旗图标，所以在文本渲染时，Emoji 依然是最佳选择。
-// 如果需要在 UI 上使用 SVG 国旗，建议引入专门的 flag-icon-css 库。
-// 自动生成 languageFlagMap (保持向后兼容)
-export const languageFlagMap = Object.entries(SITE_CONFIGS).reduce((acc, [key, config]) => {
+/** 语言国旗映射 */
+export const languageFlagMap: Record<string, string> = Object.entries(SITE_CONFIGS).reduce((acc, [key, config]) => {
   acc[key] = config.flag;
   if (key === 'UK') acc['GB'] = config.flag;
   return acc;
-}, {});
+}, {} as Record<string, string>);
 
-export const SITE_NAME_MAP = Object.entries(SITE_CONFIGS).reduce((acc, [key, config]) => {
+/** 站点名称映射（中文） */
+export const SITE_NAME_MAP: Record<string, string> = Object.entries(SITE_CONFIGS).reduce((acc, [key, config]) => {
   acc[key] = config.name_cn;
-  // 特殊处理兼容：确保 GB 也能映射到英国 (因为 UK 和 GB 常混用)
   if (key === 'UK') acc['GB'] = config.name_cn;
   return acc;
-}, {});
+}, {} as Record<string, string>);
 
-// 🔥 新增：自动生成 SITE_DOMAIN_MAP
-export const SITE_DOMAIN_MAP = Object.entries(SITE_CONFIGS).reduce((acc, [key, config]) => {
+/** 站点域名映射 */
+export const SITE_DOMAIN_MAP: Record<string, string> = Object.entries(SITE_CONFIGS).reduce((acc, [key, config]) => {
   acc[key] = config.domain;
   return acc;
-}, {});
+}, {} as Record<string, string>);
 
-export const PROXY_URLS = {
+// ========================
+// PROXY URLS
+// ========================
+
+/** 代理服务URL */
+export const PROXY_URLS: Record<string, string> = {
   allorigins: "https://api.allorigins.win/raw?url=",
   corsproxy: "https://corsproxy.io/?",
   corsanywhere: "https://cors-anywhere.herokuapp.com/",
-  // 增加备用
   thingproxy: "https://thingproxy.freeboard.io/fetch/",
 };
 
-export const SELECTOR_MAP = {
+// ========================
+// SELECTOR MAP
+// ========================
+
+/** CSS选择器映射 */
+export const SELECTOR_MAP: Record<string, string[]> = {
   productTitle: [
     "#productTitle",
     "#title",
@@ -230,7 +293,6 @@ export const SELECTOR_MAP = {
     "span#productTitle",
     "#titleSection #title",
   ],
-  // 增加价格选择器
   price: [
     ".a-price .a-offscreen",
     "#priceblock_ourprice",
@@ -238,17 +300,10 @@ export const SELECTOR_MAP = {
     "#corePrice_feature_div .a-offscreen",
     "span.a-price span.a-offscreen"
   ],
-  // // 增加主图选择器
-  // mainImage: [
-  //   "#landingImage",
-  //   "#imgBlkFront",
-  //   "#main-image",
-  //   ".a-dynamic-image"
-  // ],
   bulletPoints: [
-    "#feature-bullets ul li .a-list-item", // 经典版最准
-    "#productFactsDesktop_feature_div ul li", // 现代版最准
-    ".a-unordered-list.a-vertical li", // 通用备选，不再直接指点到 span
+    "#feature-bullets ul li .a-list-item",
+    "#productFactsDesktop_feature_div ul li",
+    ".a-unordered-list.a-vertical li",
   ],
   reviewContainers: [
     '[data-hook="review"]',
@@ -288,10 +343,12 @@ export const SELECTOR_MAP = {
   ]
 };
 
-// ==========================================
-// 6. 核心修正：恢复数组导出，兼容 parserService.js
-// ==========================================
-export const VERIFIED_PURCHASE_PATTERNS = [
+// ========================
+// VERIFIED PURCHASE PATTERNS
+// ========================
+
+/** 已验证购买标识（多语言） */
+export const VERIFIED_PURCHASE_PATTERNS: readonly string[] = [
   "Verifizierter Kauf",
   "Achat vérifié",
   "Acquisto verificato",
@@ -301,12 +358,17 @@ export const VERIFIED_PURCHASE_PATTERNS = [
   "Zweryfikowany zakup",
   "Aankoop geverifieerd",
   "Verified Purchase"
-];
+] as const;
 
-// 同时也保留正则优化，供未来升级使用
+/** 已验证购买正则表达式 */
 export const VERIFIED_PURCHASE_REGEX = new RegExp(VERIFIED_PURCHASE_PATTERNS.join("|"), "i");
 
-export const ERROR_MESSAGES = {
+// ========================
+// ERROR MESSAGES
+// ========================
+
+/** 错误消息映射 */
+export const ERROR_MESSAGES: Record<string, string> = {
   "403": "🚫 访问拒绝 (403) - 请切换代理节点或稍后重试",
   "404": "❌ 页面未找到 (404) - 请检查 ASIN 是否正确",
   "429": "⏳ 请求过快 (429) - 触发限流，请暂停 5 秒",

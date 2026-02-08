@@ -18,7 +18,7 @@ import {
 import {
   RouteConfigSchema,
   LLMConfigSchema
-} from '@/common/validators/schemas.js';
+} from '@/common/validators/schemas';
 
 describe('TypeGuards', () => {
   describe('validateRouteConfig', () => {

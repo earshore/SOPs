@@ -12,7 +12,7 @@ import { escapeHtml } from '@/common/utils/security';
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import BaseModule from "../../../../../common/BaseModule";
 import state from "../../../../../common/state";
-import { PROVIDERS, LANGUAGE_HEADERS } from '../../../../../common/constants/constants.js';
+import { PROVIDERS, LANGUAGE_HEADERS } from '../../../../../common/constants/constants';
 import { ANALYSIS_MODULES, DYNAMIC_MASTER_TEMPLATE } from '../constants/prompts.js';
 import { showToast, showProgress } from '../../../../../common/utils/ui.js';
 import { HistoryService } from '../services/historyService.js';

@@ -5,7 +5,7 @@
 // 🎯 P3 优化: 本地持久化缓存 (LocalStorage Cache)
 // ================================================================
 
-import { APP_VERSION } from '../constants/constants.js';
+import { APP_VERSION } from '../constants/constants';
 import { StorageService } from '../../services/storageService';
 
 const CACHE_PREFIX = 'view_cache_';

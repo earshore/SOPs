@@ -12,7 +12,7 @@ import {
   ProxyConfigSchema,
   HTTPRequestOptionsSchema,
   LLMRequestOptionsSchema
-} from '../validators/schemas.js';
+} from '../validators/schemas';
 
 // ==================== 类型定义 ====================
 

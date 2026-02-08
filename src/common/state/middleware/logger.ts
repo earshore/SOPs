@@ -1,16 +1,18 @@
-// src/common/state/middleware/logger.js
-// ================================================================
-// 🎯 日志中间件
-// 记录所有状态变化（仅开发环境）
-// ================================================================
+/**
+ * logger.ts - 日志中间件
+ * 
+ * 记录所有状态变化（仅开发环境）
+ */
+
+import type { StateAction, MiddlewareNext } from '../StateManager';
 
 /**
  * 日志中间件 - 记录所有状态变化
- * @param {Object} action - 状态变化动作
- * @param {Function} next - 下一个中间件
- * @returns {Object} 处理后的动作
+ * @param action - 状态变化动作
+ * @param next - 下一个中间件
+ * @returns 处理后的动作
  */
-export function loggerMiddleware(action, next) {
+export function loggerMiddleware(action: StateAction, next: MiddlewareNext): StateAction | null {
   // 仅在开发环境启用
   const isDev = !import.meta.env || import.meta.env.DEV || import.meta.env.MODE === 'development';
   

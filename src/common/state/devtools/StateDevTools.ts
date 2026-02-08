@@ -1,27 +1,34 @@
-import { escapeHtml } from '@/common/utils/security';
+/**
+ * StateDevTools.ts - 状态调试工具
+ * 
+ * 提供可视化的状态管理调试面板
+ */
 
-// src/common/state/devtools/StateDevTools.js
-// ================================================================
-// 🎯 状态调试工具
-// 提供可视化的状态管理调试面板
-// ================================================================
+import type { StateManager } from '../StateManager';
+
+/**
+ * 标签页类型
+ */
+type DevToolsTab = 'state' | 'history' | 'subscribers';
 
 /**
  * 状态开发者工具
  * 提供状态查看、历史记录、订阅者管理等功能
  */
 export class StateDevTools {
-  constructor(stateManager) {
+  private stateManager: StateManager;
+  private isOpen: boolean = false;
+  private panel: HTMLElement | null = null;
+  private currentTab: DevToolsTab = 'state';
+
+  constructor(stateManager: StateManager) {
     this.stateManager = stateManager;
-    this.isOpen = false;
-    this.panel = null;
-    this.currentTab = 'state';
   }
 
   /**
    * 初始化开发者工具
    */
-  init() {
+  init(): void {
     // 创建开发者工具面板
     this.panel = this._createPanel();
     document.body.appendChild(this.panel);
@@ -43,9 +50,9 @@ export class StateDevTools {
   /**
    * 切换面板显示/隐藏
    */
-  toggle() {
+  toggle(): void {
     this.isOpen = !this.isOpen;
-    this.panel.classList.toggle('hidden', !this.isOpen);
+    this.panel?.classList.toggle('hidden', !this.isOpen);
     
     if (this.isOpen) {
       this._render();
@@ -56,7 +63,7 @@ export class StateDevTools {
    * 创建面板 DOM
    * @private
    */
-  _createPanel() {
+  private _createPanel(): HTMLElement {
     const panel = document.createElement('div');
     panel.id = 'state-devtools';
     panel.className = 'fixed bottom-0 right-0 w-96 h-96 bg-white border-2 border-blue-500 shadow-2xl z-[10000] hidden';
@@ -91,13 +98,16 @@ export class StateDevTools {
     `;
     
     // 绑定事件
-    panel.querySelector('#devtools-close').onclick = () => this.toggle();
-    panel.querySelector('#devtools-snapshot').onclick = () => this._downloadSnapshot();
-    panel.querySelector('#devtools-undo').onclick = () => this._undo();
-    panel.querySelector('#devtools-clear').onclick = () => this._clearHistory();
+    panel.querySelector('#devtools-close')!.addEventListener('click', () => this.toggle());
+    panel.querySelector('#devtools-snapshot')!.addEventListener('click', () => this._downloadSnapshot());
+    panel.querySelector('#devtools-undo')!.addEventListener('click', () => this._undo());
+    panel.querySelector('#devtools-clear')!.addEventListener('click', () => this._clearHistory());
     
     panel.querySelectorAll('.devtools-tab').forEach(tab => {
-      tab.onclick = () => this._switchTab(tab.dataset.tab);
+      (tab as HTMLElement).addEventListener('click', () => {
+        const tabName = (tab as HTMLElement).dataset.tab as DevToolsTab;
+        this._switchTab(tabName);
+      });
     });
     
     return panel;
@@ -107,12 +117,15 @@ export class StateDevTools {
    * 渲染内容
    * @private
    */
-  _render() {
-    const content = this.panel.querySelector('#devtools-content');
+  private _render(): void {
+    if (!this.panel) return;
+    
+    const content = this.panel.querySelector('#devtools-content') as HTMLElement;
+    if (!content) return;
     
     switch (this.currentTab) {
       case 'state':
-        content.innerHTML = `<pre style="margin: 0; white-space: pre-wrap; word-break: break-all;">${JSON.stringify(this.stateManager._state, null, 2)}</pre>`;
+        content.innerHTML = `<pre style="margin: 0; white-space: pre-wrap; word-break: break-all;">${JSON.stringify((this.stateManager as any)._state, null, 2)}</pre>`;
         break;
         
       case 'history':
@@ -132,12 +145,12 @@ export class StateDevTools {
         break;
         
       case 'subscribers':
-        const subs = Array.from(this.stateManager._subscribers.entries());
+        const subs = Array.from((this.stateManager as any)._subscribers.entries()) as Array<[string, Set<Function>]>;
         if (subs.length === 0) {
           // ✅ 安全: 静态HTML模板，无用户输入
           content.innerHTML = '<div style="color: #6b7280; text-align: center; padding: 20px;">No subscribers</div>';
         } else {
-          content.innerHTML = subs.map(([path, callbacks]) => `
+          content.innerHTML = subs.map(([path, callbacks]: [string, Set<Function>]) => `
             <div style="margin-bottom: 8px; padding: 8px; border: 1px solid #e5e7eb; border-radius: 4px; background: white;">
               <div style="font-weight: bold; color: #1f2937;">${path}</div>
               <div style="color: #6b7280; margin-top: 4px;">${callbacks.size} subscriber(s)</div>
@@ -152,13 +165,16 @@ export class StateDevTools {
    * 切换标签页
    * @private
    */
-  _switchTab(tab) {
+  private _switchTab(tab: DevToolsTab): void {
     this.currentTab = tab;
     
+    if (!this.panel) return;
+    
     this.panel.querySelectorAll('.devtools-tab').forEach(t => {
-      const isActive = t.dataset.tab === tab;
-      t.style.background = isActive ? '#f3f4f6' : 'white';
-      t.style.fontWeight = isActive ? 'bold' : 'normal';
+      const element = t as HTMLElement;
+      const isActive = element.dataset.tab === tab;
+      element.style.background = isActive ? '#f3f4f6' : 'white';
+      element.style.fontWeight = isActive ? 'bold' : 'normal';
     });
     
     this._render();
@@ -168,7 +184,7 @@ export class StateDevTools {
    * 订阅状态变化
    * @private
    */
-  _subscribeToChanges() {
+  private _subscribeToChanges(): void {
     // 监听所有状态变化并自动刷新
     const refresh = () => {
       if (this.isOpen) {
@@ -186,7 +202,7 @@ export class StateDevTools {
    * 下载状态快照
    * @private
    */
-  _downloadSnapshot() {
+  private _downloadSnapshot(): void {
     const snapshot = this.stateManager.snapshot();
     const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -203,7 +219,7 @@ export class StateDevTools {
    * 撤销操作
    * @private
    */
-  _undo() {
+  private _undo(): void {
     if (this.stateManager.undo()) {
       this._render();
       console.log('✅ [StateDevTools] Undo successful');
@@ -216,7 +232,7 @@ export class StateDevTools {
    * 清空历史
    * @private
    */
-  _clearHistory() {
+  private _clearHistory(): void {
     if (confirm('Clear all history?')) {
       this.stateManager.clearHistory();
       this._render();
@@ -232,10 +248,10 @@ if (typeof window !== 'undefined') {
   if (isDev) {
     // 延迟加载，等待 stateManager 初始化
     setTimeout(() => {
-      import('./StateManager').then(({ stateManager }) => {
+      import('../StateManager').then(({ stateManager }) => {
         const devtools = new StateDevTools(stateManager);
         devtools.init();
-        window.__STATE_DEVTOOLS__ = devtools;
+        (window as any).__STATE_DEVTOOLS__ = devtools;
       }).catch(err => {
         console.warn('[StateDevTools] Failed to initialize:', err);
       });

@@ -1,16 +1,18 @@
-// src/common/state/middleware/validator.js
-// ================================================================
-// 🎯 校验中间件
-// 防止非法状态更新
-// ================================================================
+/**
+ * validator.ts - 校验中间件
+ * 
+ * 防止非法状态更新
+ */
+
+import type { StateAction, MiddlewareNext } from '../StateManager';
 
 /**
  * 校验中间件 - 防止非法状态更新
- * @param {Object} action - 状态变化动作
- * @param {Function} next - 下一个中间件
- * @returns {Object|null} 处理后的动作，null表示拦截
+ * @param action - 状态变化动作
+ * @param next - 下一个中间件
+ * @returns 处理后的动作，null表示拦截
  */
-export function validatorMiddleware(action, next) {
+export function validatorMiddleware(action: StateAction, next: MiddlewareNext): StateAction | null {
   // 防止将 currentTab 设置为空字符串
   if (action.path === 'ui.currentTab' && !action.value) {
     console.error('[State] Invalid currentTab value:', action.value);

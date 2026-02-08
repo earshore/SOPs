@@ -25,7 +25,7 @@ import { initViews } from './common/utils/viewLoader';
 import './components/modal/AppModal.js';
 
 // 🎯 P0优化: 导入服务初始化管理器
-import { ServiceBootstrap } from './common/bootstrap/ServiceBootstrap.js';
+import { ServiceBootstrap } from './common/bootstrap/ServiceBootstrap';
 
 // 🎯 短期优化：导入 LoadingManager
 import { loadingManager } from './common/utils/LoadingManager';

@@ -4,12 +4,12 @@
 // ================================================================
 
 import { escapeHtml } from '@/common/utils/security';
-import { PROVIDERS } from "../../common/constants/constants.js";
+import { PROVIDERS } from '../../common/constants/constants';
 import { fetchModelsFromApi, callLLM } from "../../services/llmService";
 import { showToast } from "../../common/utils/ui.js";
 import { StorageService, STORAGE_KEYS } from "../../services/storageService.ts";
 import { ErrorService } from "../../services/errorService";
-import { EnvConfig } from "../../common/config/envConfig.js"; // 🔒 P0修复: 导入环境配置
+import { EnvConfig } from "../../common/config/envConfig"; // 🔒 P0修复: 导入环境配置
 import { APP_EVENTS } from "../../common/constants/eventConstants";
 
 // ==========================================

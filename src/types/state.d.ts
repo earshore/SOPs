@@ -88,6 +88,7 @@ export interface AnalysisState {
   isEditing?: boolean;
   showTranslation?: boolean;
   editHistory?: any[];
+  lastTranslationModel?: string | null;
   isAnalyzing?: boolean;
   filters?: {
     dateRange?: [number, number];

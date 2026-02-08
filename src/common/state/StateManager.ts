@@ -13,6 +13,12 @@ import type {
   BatchUpdateAction
 } from '../../types/state.js';
 
+// 导出类型供其他模块使用
+export type { StateAction, StateMiddleware, StateSubscriber, StateHistory, BatchUpdateAction };
+
+// 中间件next函数类型
+export type MiddlewareNext = () => StateAction | null;
+
 /**
  * 增强的状态管理器
  * 提供状态追踪、历史记录、中间件支持
