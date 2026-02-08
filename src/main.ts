@@ -148,11 +148,18 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
   // 1. 基础服务（无依赖）
   bootstrap.register('eventBus', async () => {
     const { default: eventBus } = await import('./common/EventBus');
+    const { container } = await import('./common/di/Container');
+    // 注册到DI容器，声明无依赖
+    container.register('eventBus', () => eventBus, { 
+      dependencies: [],
+      lifetime: 'singleton'
+    });
     return eventBus;
   });
 
   bootstrap.register('container', async () => {
     const { container } = await import('./common/di/Container');
+    // Container自身不需要注册到自己
     return container;
   }, { dependencies: ['eventBus'] });
 
@@ -160,14 +167,22 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
   bootstrap.register('actionRegistry', async () => {
     const { default: actionRegistry } = await import('./common/utils/actionRegistry');
     const { container } = await import('./common/di/Container');
-    container.register('actionRegistry', () => actionRegistry);
+    // 注册到DI容器，声明依赖EventBus
+    container.register('actionRegistry', () => actionRegistry, {
+      dependencies: ['eventBus'],
+      lifetime: 'singleton'
+    });
     return actionRegistry;
   }, { dependencies: ['container'] });
 
   bootstrap.register('stateManager', async () => {
     const { stateManager } = await import('./common/state/StateManager');
     const { container } = await import('./common/di/Container');
-    container.register('stateManager', () => stateManager);
+    // 注册到DI容器，声明依赖EventBus
+    container.register('stateManager', () => stateManager, {
+      dependencies: ['eventBus'],
+      lifetime: 'singleton'
+    });
     return stateManager;
   }, { dependencies: ['container'] });
 
@@ -175,14 +190,24 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
   bootstrap.register('router', async () => {
     const { router } = await import('./common/router/Router');
     const { container } = await import('./common/di/Container');
-    container.register('router', () => router);
+    // 注册到DI容器，声明依赖StateManager和EventBus
+    container.register('router', () => router, {
+      dependencies: ['stateManager', 'eventBus'],
+      lifetime: 'singleton'
+    });
     return router;
   }, { dependencies: ['container', 'stateManager'] });
 
   // 4. 监控服务（可选）
   bootstrap.register('performanceService', async () => {
     const { performanceService } = await import('./services/performanceService');
+    const { container } = await import('./common/di/Container');
     performanceService.init();
+    // 注册到DI容器
+    container.register('performanceService', () => performanceService, {
+      dependencies: [],
+      lifetime: 'singleton'
+    });
     return performanceService;
   }, { 
     optional: true,
@@ -194,17 +219,29 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
 
   bootstrap.register('logger', async () => {
     const { Logger } = await import('./services/loggerService');
+    const { container } = await import('./common/di/Container');
     Logger.info('应用启动', { version: '1.0.0' }, 'System');
+    // 注册到DI容器
+    container.register('logger', () => Logger, {
+      dependencies: [],
+      lifetime: 'singleton'
+    });
     return Logger;
   }, { optional: true });
 
   // 5. UI 服务
   bootstrap.register('loadingManager', async () => {
+    const { container } = await import('./common/di/Container');
     const globalLoading = document.getElementById('global-loading');
     if (globalLoading) {
       loadingManager.setGlobalLoadingElement(globalLoading);
       console.log("✅ LoadingManager initialized");
     }
+    // 注册到DI容器
+    container.register('loadingManager', () => loadingManager, {
+      dependencies: [],
+      lifetime: 'singleton'
+    });
     return loadingManager;
   });
 

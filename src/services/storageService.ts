@@ -4,6 +4,8 @@
 // 替代分散的 localStorage 直接调用
 // ================================================================
 
+import type { IStorageService } from '../types/services';
+
 /**
  * 存储键名常量
  */
@@ -33,7 +35,7 @@ export const STORAGE_KEYS = {
 /**
  * LRU缓存配置
  */
-interface LRUConfig {
+export interface LRUConfig {
   maxSize: number;
   warningThreshold: number;
   cleanupRatio: number;
@@ -42,7 +44,7 @@ interface LRUConfig {
 /**
  * 存储使用情况
  */
-interface StorageUsage {
+export interface StorageUsage {
   used: number;
   total: number;
   percent: number;
@@ -51,7 +53,7 @@ interface StorageUsage {
 /**
  * 访问时间记录
  */
-interface AccessTimeRecord {
+export interface AccessTimeRecord {
   key: string;
   accessTime: number;
   size: number;
@@ -60,7 +62,7 @@ interface AccessTimeRecord {
 /**
  * 存储服务类
  */
-class StorageServiceClass {
+class StorageServiceClass implements IStorageService {
   private _lruConfig: LRUConfig;
 
   constructor() {
@@ -172,6 +174,34 @@ class StorageServiceClass {
   remove(key: string): void {
     localStorage.removeItem(key);
     this._removeAccessTime(key);
+  }
+
+  /**
+   * 清空所有存储
+   */
+  clear(): void {
+    localStorage.clear();
+  }
+
+  /**
+   * 检查键是否存在
+   */
+  has(key: string): boolean {
+    return localStorage.getItem(key) !== null;
+  }
+
+  /**
+   * 获取所有键
+   */
+  keys(): string[] {
+    const keys: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && !key.startsWith('_lru_access_')) {
+        keys.push(key);
+      }
+    }
+    return keys;
   }
 
   /**

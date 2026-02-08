@@ -22,6 +22,21 @@ export interface RegisterOptions {
    * 服务生命周期（默认singleton）
    */
   lifetime?: ServiceLifetime;
+  /**
+   * 服务依赖列表
+   */
+  dependencies?: string[];
+}
+
+/**
+ * 服务元信息
+ */
+export interface ServiceMetadata {
+  name: string;
+  lifetime: ServiceLifetime;
+  dependencies: string[];
+  registered: number;
+  resolved: number;
 }
 
 /**
@@ -37,11 +52,19 @@ export class DIContainer {
   
   /** 服务生命周期 */
   private lifetimes: Map<string, ServiceLifetime>;
+  
+  /** 服务依赖关系 */
+  private dependencies: Map<string, string[]>;
+  
+  /** 服务元信息 */
+  private metadata: Map<string, ServiceMetadata>;
 
   constructor() {
     this.factories = new Map();
     this.singletons = new Map();
     this.lifetimes = new Map();
+    this.dependencies = new Map();
+    this.metadata = new Map();
   }
 
   /**
@@ -60,9 +83,18 @@ export class DIContainer {
     }
 
     const lifetime = options.lifetime || 'singleton';
+    const deps = options.dependencies || [];
     
     this.factories.set(name, factory);
     this.lifetimes.set(name, lifetime);
+    this.dependencies.set(name, deps);
+    this.metadata.set(name, {
+      name,
+      lifetime,
+      dependencies: deps,
+      registered: Date.now(),
+      resolved: 0
+    });
     
     console.log(`[DIContainer] 已注册服务: ${name} (${lifetime})`);
   }
@@ -91,6 +123,12 @@ export class DIContainer {
       const factory = this.factories.get(name)!;
       const instance = factory(this);
       this.singletons.set(name, instance);
+      
+      // 更新元信息
+      const meta = this.metadata.get(name);
+      if (meta) {
+        meta.resolved = Date.now();
+      }
       
       console.log(`[DIContainer] 创建单例: ${name}`);
       return instance as T;
@@ -129,6 +167,67 @@ export class DIContainer {
   getRegisteredServices(): string[] {
     return Array.from(this.factories.keys());
   }
+  
+  /**
+   * 获取服务元信息
+   * @param name - 服务名称
+   */
+  getMetadata(name: string): ServiceMetadata | undefined {
+    return this.metadata.get(name);
+  }
+  
+  /**
+   * 获取所有服务元信息
+   */
+  getAllMetadata(): ServiceMetadata[] {
+    return Array.from(this.metadata.values());
+  }
+  
+  /**
+   * 检查循环依赖
+   * @param name - 服务名称
+   * @param visited - 已访问的服务
+   */
+  private checkCircularDependency(name: string, visited: Set<string> = new Set()): void {
+    if (visited.has(name)) {
+      throw new Error(`[DIContainer] 检测到循环依赖: ${Array.from(visited).join(' -> ')} -> ${name}`);
+    }
+    
+    visited.add(name);
+    const deps = this.dependencies.get(name) || [];
+    
+    for (const dep of deps) {
+      this.checkCircularDependency(dep, new Set(visited));
+    }
+  }
+  
+  /**
+   * 验证所有依赖
+   */
+  validateDependencies(): { valid: boolean; errors: string[] } {
+    const errors: string[] = [];
+    
+    for (const [name, deps] of this.dependencies.entries()) {
+      // 检查循环依赖
+      try {
+        this.checkCircularDependency(name);
+      } catch (error) {
+        errors.push((error as Error).message);
+      }
+      
+      // 检查依赖是否已注册
+      for (const dep of deps) {
+        if (!this.has(dep)) {
+          errors.push(`[DIContainer] 服务 "${name}" 依赖的服务 "${dep}" 未注册`);
+        }
+      }
+    }
+    
+    return {
+      valid: errors.length === 0,
+      errors
+    };
+  }
 
   /**
    * 重置容器（用于测试）
@@ -137,6 +236,8 @@ export class DIContainer {
     this.factories.clear();
     this.singletons.clear();
     this.lifetimes.clear();
+    this.dependencies.clear();
+    this.metadata.clear();
     console.log(`[DIContainer] 容器已重置`);
   }
 }

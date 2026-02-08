@@ -13,7 +13,7 @@ const CACHE_PREFIX = 'view_cache_';
 /**
  * 视图配置接口
  */
-interface ViewConfig {
+export interface ViewConfig {
     path: string;
     target: string;
     isLoaded: boolean;
@@ -22,18 +22,18 @@ interface ViewConfig {
 /**
  * 视图注册表类型
  */
-type ViewRegistry = Record<string, ViewConfig>;
+export type ViewRegistry = Record<string, ViewConfig>;
 
 /**
  * HTML模块加载器类型
  */
-type HtmlModuleLoader = () => Promise<string>;
-type HtmlModules = Record<string, HtmlModuleLoader>;
+export type HtmlModuleLoader = () => Promise<string>;
+export type HtmlModules = Record<string, HtmlModuleLoader>;
 
 /**
  * 缓存统计信息
  */
-interface CacheStats {
+export interface CacheStats {
     count: number;
     size: number;
     items: Array<{
@@ -41,6 +41,14 @@ interface CacheStats {
         size: number;
         sizeKB: string;
     }>;
+}
+
+/**
+ * 视图加载选项
+ */
+export interface ViewLoadOptions {
+    useCache?: boolean;
+    forceReload?: boolean;
 }
 
 /**

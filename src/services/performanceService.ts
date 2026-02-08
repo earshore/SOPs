@@ -7,6 +7,7 @@
 import { StorageService } from './storageService';
 import { configCenter } from '../common/config/ConfigCenter';
 import { Logger } from './loggerService';
+import type { PerformanceMetric as IPerformanceMetric, PerformanceReport as IPerformanceReport } from '../types/services';
 
 /**
  * 性能指标类型
@@ -35,15 +36,9 @@ export const METRIC_TYPES = {
 export type MetricType = typeof METRIC_TYPES[keyof typeof METRIC_TYPES];
 
 /**
- * 性能指标
+ * 性能指标（使用接口类型）
  */
-export interface PerformanceMetric {
-  type: MetricType | string;
-  value: number;
-  context: Record<string, any>;
-  timestamp: number;
-  url: string;
-}
+export type PerformanceMetric = IPerformanceMetric;
 
 /**
  * 性能摘要统计
@@ -59,13 +54,9 @@ export interface MetricSummary {
 }
 
 /**
- * 性能报告
+ * 性能报告（使用接口类型）
  */
-export interface PerformanceReport {
-  summary: Record<string, MetricSummary>;
-  metrics: PerformanceMetric[];
-  timestamp: number;
-}
+export type PerformanceReport = IPerformanceReport;
 
 /**
  * 性能监控服务类
@@ -384,13 +375,15 @@ export class PerformanceService {
   /**
    * 记录性能指标
    */
-  recordMetric(type: string, value: number, context: Record<string, any> = {}): void {
+  recordMetric(name: string, duration: number, metadata: Record<string, any> = {}): void {
     const metric: PerformanceMetric = {
-      type,
-      value,
-      context,
+      name,
+      duration,
       timestamp: Date.now(),
-      url: window.location.pathname,
+      metadata: {
+        ...metadata,
+        url: window.location.pathname,
+      },
     };
 
     this.metrics.push(metric);
@@ -408,53 +401,29 @@ export class PerformanceService {
    * 获取性能报告
    */
   getReport(): PerformanceReport {
+    const durations = this.metrics.map(m => m.duration);
+    const byCategory: Record<string, PerformanceMetric[]> = {};
+    
+    // 按名称分组
+    this.metrics.forEach(metric => {
+      if (!byCategory[metric.name]) {
+        byCategory[metric.name] = [];
+      }
+      byCategory[metric.name]!.push(metric);
+    });
+
     const report: PerformanceReport = {
-      summary: this._calculateSummary(),
+      summary: {
+        totalMetrics: this.metrics.length,
+        avgDuration: durations.length > 0 ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length) : 0,
+        maxDuration: durations.length > 0 ? Math.max(...durations) : 0,
+        minDuration: durations.length > 0 ? Math.min(...durations) : 0,
+      },
       metrics: this.metrics,
-      timestamp: Date.now(),
+      byCategory,
     };
 
     return report;
-  }
-
-  /**
-   * 计算性能摘要
-   */
-  private _calculateSummary(): Record<string, MetricSummary> {
-    const summary: Record<string, MetricSummary> = {};
-
-    // 按类型分组
-    const grouped: Record<string, number[]> = {};
-    this.metrics.forEach((metric) => {
-      if (!grouped[metric.type]) {
-        grouped[metric.type] = [];
-      }
-      grouped[metric.type]!.push(metric.value);
-    });
-
-    // 计算统计值
-    Object.entries(grouped).forEach(([type, values]) => {
-      summary[type] = {
-        count: values.length,
-        avg: Math.round(values.reduce((a, b) => a + b, 0) / values.length),
-        min: Math.min(...values),
-        max: Math.max(...values),
-        p50: this._percentile(values, 50),
-        p95: this._percentile(values, 95),
-        p99: this._percentile(values, 99),
-      };
-    });
-
-    return summary;
-  }
-
-  /**
-   * 计算百分位数
-   */
-  private _percentile(values: number[], p: number): number {
-    const sorted = [...values].sort((a, b) => a - b);
-    const index = Math.ceil((p / 100) * sorted.length) - 1;
-    return sorted[index] || 0;
   }
 
   /**
