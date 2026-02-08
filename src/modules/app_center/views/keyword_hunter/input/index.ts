@@ -20,15 +20,15 @@ import '../keyword_hunter_style.css';
 // Module State
 // ========================================== 
 
-interface EventListener {
+interface EventListenerRecord {
     element: HTMLElement | Document;
     event: string;
-    handler: EventListener;
+    handler: EventListenerOrEventListenerObject;
 }
 
-let eventListeners: EventListener[] = []; // 用于清理事件监听器
+let eventListeners: EventListenerRecord[] = []; // 用于清理事件监听器
 let timeouts: number[] = []; // 用于清理定时器
-let debouncedInputHandler: ((...args: any[]) => void) | null = null; // Debounced function reference
+let debouncedInputHandler: ((...args: unknown[]) => void) | null = null; // Debounced function reference
 let registeredActions: string[] = []; // 用于清理已注册的动作
 
 // ========================================== 
@@ -38,8 +38,8 @@ let registeredActions: string[] = []; // 用于清理已注册的动作
 /**
  * 添加事件监听器（带自动清理）
  */
-function addEventListener(element: HTMLElement | Document, event: string, handler: EventListener): void {
-    element.addEventListener(event, handler as any);
+function addEventListener(element: HTMLElement | Document, event: string, handler: EventListenerOrEventListenerObject): void {
+    element.addEventListener(event, handler);
     eventListeners.push({ element, event, handler });
 }
 
@@ -58,7 +58,7 @@ function addTimeout(callback: () => void, delay: number): number {
 function cleanup(): void {
     // 清理事件监听器
     eventListeners.forEach(({ element, event, handler }) => {
-        element.removeEventListener(event, handler as any);
+        element.removeEventListener(event, handler);
     });
     eventListeners = [];
 
@@ -84,7 +84,7 @@ function cleanup(): void {
 /**
  * Debounce 函数
  */
-function debounce<T extends (...args: any[]) => void>(func: T, wait: number): (...args: Parameters<T>) => void {
+function debounce<T extends (...args: unknown[]) => void>(func: T, wait: number): (...args: Parameters<T>) => void {
     let timeout: number;
     return (...args: Parameters<T>) => {
         clearTimeout(timeout);
@@ -114,7 +114,24 @@ function saveInputsToState(): void {
     const copyInput = document.getElementById('kt-copy-input') as HTMLTextAreaElement | null;
 
     if (!state.keywordTracker) {
-        state.keywordTracker = {} as any;
+        state.keywordTracker = {
+            keywords: [],
+            processedCopy: '',
+            formattedCopy: '',
+            matchedKeywords: [],
+            unmatchedKeywords: [],
+            wordFrequency: [],
+            paragraphs: [],
+            translationMode: false,
+            keywordLocationIndex: {},
+            settings: {
+                matchPlural: false,
+                matchStem: false,
+                matchCase: false,
+                matchPartial: false
+            },
+            isWindowMinimized: false
+        };
     }
 
     if (kwInput) {
@@ -386,8 +403,8 @@ async function startAnalysis(): Promise<void> {
         showToast("分析完成", "success");
 
         // 切换到 process 模块
-        if ((window as any).switchTab) {
-            (window as any).switchTab('kw_process');
+        if (window.switchTab) {
+            window.switchTab('kw_process');
         }
     } catch (error) {
         showProgress(false);
@@ -417,35 +434,35 @@ function setupEventListeners(container: HTMLElement): void {
     }, 300);
 
     if (kwInput) {
-        addEventListener(kwInput, 'input', debouncedInputHandler as any);
-        addEventListener(kwInput, 'scroll', (() => {
+        addEventListener(kwInput, 'input', debouncedInputHandler);
+        addEventListener(kwInput, 'scroll', () => {
             const highlight = document.getElementById('kt-keyword-highlight-layer');
             if (highlight) highlight.scrollTop = kwInput.scrollTop;
-        }) as any);
+        });
     }
 
     if (copyInput) {
-        addEventListener(copyInput, 'input', (() => {
+        addEventListener(copyInput, 'input', () => {
             updateCopyCharCount();
             saveInputsToState();
-        }) as any);
+        });
     }
 
     // Button event listeners
     const btnClean = document.getElementById('kt-btn-clean-kw');
-    if (btnClean) addEventListener(btnClean, 'click', (() => cleanKeywordsUI()) as any);
+    if (btnClean) addEventListener(btnClean, 'click', () => cleanKeywordsUI());
 
     const btnCleanCopy = document.getElementById('kt-btn-clean-copy');
-    if (btnCleanCopy) addEventListener(btnCleanCopy, 'click', (() => cleanCopyFormat()) as any);
+    if (btnCleanCopy) addEventListener(btnCleanCopy, 'click', () => cleanCopyFormat());
 
     const btnClearCopy = document.getElementById('kt-btn-clear-copy');
-    if (btnClearCopy) addEventListener(btnClearCopy, 'click', (() => clearCopyInput()) as any);
+    if (btnClearCopy) addEventListener(btnClearCopy, 'click', () => clearCopyInput());
 
     const btnPaste = document.getElementById('kt-btn-paste');
-    if (btnPaste) addEventListener(btnPaste, 'click', (async () => await pasteFromClipboard()) as any);
+    if (btnPaste) addEventListener(btnPaste, 'click', async () => await pasteFromClipboard());
 
     const btnStartAnalysis = document.getElementById('kt-btn-start-analysis');
-    if (btnStartAnalysis) addEventListener(btnStartAnalysis, 'click', (async () => await startAnalysis()) as any);
+    if (btnStartAnalysis) addEventListener(btnStartAnalysis, 'click', async () => await startAnalysis());
 }
 
 // ========================================== 
