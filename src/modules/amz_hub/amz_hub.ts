@@ -5,7 +5,7 @@ import { createModuleLoader } from '../../common/utils/ModuleLoader';
 
 // ================= 路由配置表 =================
 // 键名对应 menuConfig.js 里的 route id
-const MODULE_MAP = {
+const MODULE_MAP: Record<string, () => Promise<any>> = {
     // 总览
     'amz_hub_overview': () => import('./views/overview/index'),
     
@@ -17,7 +17,7 @@ const MODULE_MAP = {
     // 入门实操宝典 (practice)
     'amz_quality_listing': () => import('./views/practice/quality_listing/index'),
     'amz_marketing_calendar': () => import('./views/practice/marketing_calendar/index'),
-    'amz_seasons_tools': () => import('./views/practice/promotions/index.js'),
+    'amz_seasons_tools': () => import('./views/practice/promotions/index'),
     
     // 运营提升全攻略 (advanced)
     'amz_new_product_30days': () => import('./views/advanced/new_product_30days/index'),
@@ -38,7 +38,7 @@ const moduleLoader = createModuleLoader({
  * @param {string} routeId - 路由 ID
  * @param {Function} loader - 动态导入函数
  */
-export function registerHubModule(routeId, loader) {
+export function registerHubModule(routeId: string, loader: () => Promise<any>): void {
     moduleLoader.registerSubModule(routeId, loader);
 }
 

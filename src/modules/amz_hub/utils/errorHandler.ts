@@ -1,4 +1,4 @@
-// src/modules/amz_hub/utils/errorHandler.js
+// src/modules/amz_hub/utils/errorHandler.ts
 // ================================================================
 // 🎯 P1优化: Amazon Hub 模块专属错误处理器
 // ================================================================

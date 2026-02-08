@@ -1,16 +1,23 @@
 /**
- * SidebarRenderer.ts - 统一侧边栏渲染器
+ * SidebarRenderer.ts - 统一侧边栏渲染器 v2.0
  * 
- * 消除 renderSopsSidebar/renderHubSidebar/renderMoreSidebar 的重复代码
+ * 视觉升级要点:
+ * - 渐变图标容器 + 带色阴影 (与设置面板/指南统一)
+ * - 左侧激活色条指示器
+ * - 分类头渐变背景 + 展开/收起动画
+ * - 搜索框前缀图标容器 + focus 联动
+ * - 统一圆角体系 (rounded-xl / rounded-2xl)
+ * - 微交互动效 (scale, translate, opacity)
  */
 
 import { MENU_CONFIG, type RouteConfig } from '../config/menuConfig';
 import state from '../state';
 import { COLOR_SCHEMES, type ColorSchemeName } from '../constants/colorSchemes';
 
-/**
- * 分类配置接口
- */
+// ═══════════════════════════════════════════════════════════
+// Types & Interfaces
+// ═══════════════════════════════════════════════════════════
+
 export interface CategoryConfig {
   id: string;
   label: string;
@@ -20,33 +27,22 @@ export interface CategoryConfig {
   order: number;
 }
 
-/**
- * 分类树节点
- */
 interface CategoryTreeNode extends CategoryConfig {
   children: Array<RouteConfig & { id: string }>;
 }
 
-/**
- * 侧边栏渲染器配置
- */
 export interface SidebarConfig {
-  /** 模块ID */
   moduleId: string;
-  /** 分类配置对象 */
   categories: Record<string, CategoryConfig>;
-  /** 总览路由ID */
   overviewRouteId: string;
-  /** 是否启用搜索 */
   enableSearch?: boolean;
-  /** 搜索框占位符 */
   searchPlaceholder?: string;
 }
 
-/**
- * 统一侧边栏渲染器
- * 负责渲染模块的侧边栏导航
- */
+// ═══════════════════════════════════════════════════════════
+// Sidebar Renderer
+// ═══════════════════════════════════════════════════════════
+
 export class SidebarRenderer {
   private moduleId: string;
   private categories: Record<string, CategoryConfig>;
@@ -54,9 +50,6 @@ export class SidebarRenderer {
   private enableSearch: boolean;
   private searchPlaceholder: string;
 
-  /**
-   * @param config - 渲染器配置
-   */
   constructor(config: SidebarConfig) {
     this.moduleId = config.moduleId;
     this.categories = config.categories;
@@ -65,241 +58,246 @@ export class SidebarRenderer {
     this.searchPlaceholder = config.searchPlaceholder || '搜索...';
   }
 
-  /**
-   * 渲染侧边栏 - 重构版
-   * 统一的侧边栏渲染逻辑：
-   * 1. 一次性加载所有分类和子路由
-   * 2. 根据当前路由自动展开对应分类
-   * 3. 高亮当前激活的路由
-   * 
-   * @param sidebar - 侧边栏容器
-   * @param moduleConfig - 模块配置
-   * @param routes - 路由列表
-   */
+  // ═══════════════════════════════════════════════════════
+  // Public API
+  // ═══════════════════════════════════════════════════════
+
   render(sidebar: HTMLElement, moduleConfig: any, routes: RouteConfig[]): void {
     const currentTab = (state as any).currentTab;
     const currentRouteConfig = MENU_CONFIG.routes[currentTab];
 
-    console.log(`[SidebarRenderer] 渲染侧边栏 - 当前Tab: ${currentTab}`);
-
-    // 确定当前激活的分类
     let activeCategory: string | null = null;
-    if (currentRouteConfig && currentRouteConfig.category) {
+    if (currentRouteConfig?.category) {
       activeCategory = currentRouteConfig.category;
     }
 
-    // 🎯 优化：如果侧边栏已经渲染，只更新状态，不重新渲染
+    // 增量更新：已渲染时仅更新状态
     const existingNav = sidebar.querySelector('#sidebar-nav-container');
     const lastModuleId = sidebar.dataset.moduleId;
-    
+
     if (existingNav && lastModuleId === this.moduleId) {
-      // 侧边栏已存在，只更新激活状态和展开状态
-      console.log(`[SidebarRenderer] 侧边栏已存在，仅更新状态`);
       this._updateNavigationState(sidebar, currentTab, activeCategory);
       return;
     }
 
-    // 🎯 首次渲染：构建完整的侧边栏结构
-    console.log(`[SidebarRenderer] 首次渲染侧边栏 - 模块: ${this.moduleId}`);
-    
-    // 记录当前模块ID
+    // 首次渲染
     sidebar.dataset.moduleId = this.moduleId;
-
-    // 构建完整的分类树结构
     const categoryTree = this._buildCategoryTree(routes);
-
-    // 构建 HTML
     const html = this._buildHTML(
       moduleConfig.title,
       moduleConfig.icon,
-      'slate',
+      moduleConfig.color || 'blue',
       categoryTree,
       currentTab,
       activeCategory
     );
-    // ✅ 安全: 静态HTML模板，无用户输入
     sidebar.innerHTML = html;
-    
-    // 初始化展开/收起事件
     this._initCategoryToggle(sidebar);
-    
-    // 自动展开当前激活的分类
+
     if (activeCategory) {
       this._expandCategory(sidebar, activeCategory);
     }
   }
 
-  /**
-   * 构建分类树结构
-   * @private
-   * @param routes - 所有路由（可能不完整，仅用于参考）
-   * @returns 分类树
-   */
+  // ═══════════════════════════════════════════════════════
+  // Tree Building
+  // ═══════════════════════════════════════════════════════
+
   private _buildCategoryTree(_routes: RouteConfig[]): CategoryTreeNode[] {
     const tree: CategoryTreeNode[] = [];
-    
-    // 按order排序分类
-    const sortedCategories = Object.values(this.categories).sort((a, b) => a.order - b.order);
-    
-    for (const category of sortedCategories) {
-      // 🔥 关键修复：直接从MENU_CONFIG获取该分类下的所有子路由
-      // 不依赖传入的routes参数，因为对于应用中心这种复合模块，
-      // 传入的routes可能不包含子应用的路由
+    const sorted = Object.values(this.categories).sort((a, b) => a.order - b.order);
+
+    for (const category of sorted) {
       const childRoutes = Object.entries(MENU_CONFIG.routes)
         .filter(([_, r]) => r.category === category.id)
         .map(([id, r]) => ({ id, ...r }));
-      
+
       if (childRoutes.length > 0) {
-        tree.push({
-          ...category,
-          children: childRoutes
-        });
+        tree.push({ ...category, children: childRoutes });
       }
     }
-    
+
     return tree;
   }
 
-  /**
-   * 更新导航状态（不重新渲染DOM）
-   * @private
-   * @param sidebar - 侧边栏容器
-   * @param currentTab - 当前激活的路由ID
-   * @param activeCategory - 当前激活的分类ID
-   */
+  // ═══════════════════════════════════════════════════════
+  // State Management (no re-render)
+  // ═══════════════════════════════════════════════════════
+
   private _updateNavigationState(
-    sidebar: HTMLElement, 
-    currentTab: string, 
+    sidebar: HTMLElement,
+    currentTab: string,
     activeCategory: string | null
   ): void {
-    // 1. 更新所有路由的激活状态
     this._updateActiveState(sidebar, currentTab);
-    
-    // 2. 更新分类的展开状态
+
     const lastActiveCategory = sidebar.dataset.activeCategory;
-    
     if (activeCategory && activeCategory !== lastActiveCategory) {
-      // 🔥 优化：只展开新的分类，不收起之前的分类
-      // 这样用户可以同时查看多个分类的内容
       this._expandCategory(sidebar, activeCategory);
-      
-      // 记录当前激活的分类
       sidebar.dataset.activeCategory = activeCategory || '';
     }
   }
 
-  /**
-   * 更新激活状态（不重新渲染）
-   * @private
-   */
   private _updateActiveState(sidebar: HTMLElement, currentTab: string): void {
-    // 移除所有激活状态
+    // ── Reset all buttons ──
     const allBtns = sidebar.querySelectorAll('.sidebar-btn');
     allBtns.forEach(btn => {
-      btn.classList.remove('bg-blue-50', 'text-blue-700');
-      btn.classList.add('hover:bg-slate-50', 'text-slate-700');
-      
-      // 更新图标颜色
-      const icon = btn.querySelector('i:first-child');
-      if (icon) {
-        icon.classList.remove('text-blue-600');
-        icon.classList.add('text-slate-400', 'group-hover:text-slate-600');
+      const el = btn as HTMLElement;
+      // Remove active classes
+      el.classList.remove(
+        'bg-blue-50/80', 'text-blue-700',
+        'border-l-2', 'border-blue-500',
+        'shadow-sm'
+      );
+      // Add default classes
+      el.classList.add('text-slate-600', 'border-l-2', 'border-transparent');
+
+      // Reset icon
+      const iconContainer = el.querySelector('.sidebar-icon-container') as HTMLElement;
+      if (iconContainer) {
+        iconContainer.classList.remove('bg-blue-100', 'scale-105');
+        iconContainer.classList.add('bg-slate-100');
       }
-      
-      // 更新文字样式
-      const span = btn.querySelector('span');
+      const icon = el.querySelector('.sidebar-icon') as HTMLElement;
+      if (icon) {
+        icon.classList.remove('text-blue-500');
+        icon.classList.add('text-slate-400');
+      }
+
+      // Reset text
+      const span = el.querySelector('.sidebar-label');
       if (span) {
-        span.classList.remove('font-medium');
-        span.classList.add('group-hover:text-slate-900');
+        span.classList.remove('font-semibold', 'text-blue-700');
+        span.classList.add('font-medium', 'text-slate-600');
+      }
+
+      // Hide active dot
+      const dot = el.querySelector('.sidebar-active-dot');
+      if (dot) {
+        (dot as HTMLElement).classList.add('opacity-0', 'scale-0');
+        (dot as HTMLElement).classList.remove('opacity-100', 'scale-100');
       }
     });
 
-    // 添加当前激活状态
-    const activeBtn = sidebar.querySelector(`#sidebar-btn-${currentTab}`);
+    // ── Set active button ──
+    const activeBtn = sidebar.querySelector(`#sidebar-btn-${currentTab}`) as HTMLElement;
     if (activeBtn) {
-      activeBtn.classList.remove('hover:bg-slate-50', 'text-slate-700');
-      activeBtn.classList.add('bg-blue-50', 'text-blue-700');
-      
-      // 更新图标颜色
-      const icon = activeBtn.querySelector('i:first-child');
-      if (icon) {
-        icon.classList.remove('text-slate-400', 'group-hover:text-slate-600');
-        icon.classList.add('text-blue-600');
+      activeBtn.classList.remove('text-slate-600', 'border-transparent');
+      activeBtn.classList.add(
+        'bg-blue-50/80', 'text-blue-700',
+        'border-l-2', 'border-blue-500',
+        'shadow-sm'
+      );
+
+      const iconContainer = activeBtn.querySelector('.sidebar-icon-container');
+      if (iconContainer) {
+        iconContainer.classList.remove('bg-slate-100');
+        iconContainer.classList.add('bg-blue-100', 'scale-105');
       }
-      
-      // 更新文字样式
-      const span = activeBtn.querySelector('span');
+      const icon = activeBtn.querySelector('.sidebar-icon');
+      if (icon) {
+        icon.classList.remove('text-slate-400');
+        icon.classList.add('text-blue-500');
+      }
+
+      const span = activeBtn.querySelector('.sidebar-label');
       if (span) {
-        span.classList.remove('group-hover:text-slate-900');
-        span.classList.add('font-medium');
+        span.classList.remove('font-medium', 'text-slate-600');
+        span.classList.add('font-semibold', 'text-blue-700');
+      }
+
+      const dot = activeBtn.querySelector('.sidebar-active-dot');
+      if (dot) {
+        (dot as HTMLElement).classList.remove('opacity-0', 'scale-0');
+        (dot as HTMLElement).classList.add('opacity-100', 'scale-100');
       }
     }
-
-    console.log(`[SidebarRenderer] 仅更新激活状态 - ${currentTab}`);
   }
 
-  /**
-   * 初始化分类展开/收起事件
-   * @private
-   */
+  // ═══════════════════════════════════════════════════════
+  // Toggle & Expand
+  // ═══════════════════════════════════════════════════════
+
   private _initCategoryToggle(sidebar: HTMLElement): void {
     const categoryBtns = sidebar.querySelectorAll('[data-action="toggle-category"]');
-    
+
     categoryBtns.forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         const categoryId = (btn as HTMLElement).dataset.category;
         if (!categoryId) return;
 
-        const group = sidebar.querySelector(`.sidebar-category-group[data-category="${categoryId}"]`);
-        const children = group?.querySelector('.sidebar-category-children');
+        const group = sidebar.querySelector(
+          `.sidebar-category-group[data-category="${categoryId}"]`
+        );
+        const children = group?.querySelector('.sidebar-category-children') as HTMLElement;
         const chevron = btn.querySelector('.category-chevron') as HTMLElement;
-        
+        const countBadge = btn.querySelector('.category-count') as HTMLElement;
+
         if (children && chevron) {
           const isExpanded = !children.classList.contains('hidden');
-          
+
           if (isExpanded) {
-            // 收起
-            children.classList.add('hidden');
+            // Collapse with animation
+            children.style.maxHeight = children.scrollHeight + 'px';
+            children.offsetHeight; // force reflow
+            children.style.maxHeight = '0px';
+            children.style.opacity = '0';
+            setTimeout(() => {
+              children.classList.add('hidden');
+              children.style.maxHeight = '';
+              children.style.opacity = '';
+            }, 200);
             chevron.style.transform = 'rotate(0deg)';
+            if (countBadge) countBadge.classList.remove('opacity-0');
           } else {
-            // 展开
+            // Expand with animation
             children.classList.remove('hidden');
+            const fullHeight = children.scrollHeight;
+            children.style.maxHeight = '0px';
+            children.style.opacity = '0';
+            children.offsetHeight; // force reflow
+            children.style.maxHeight = fullHeight + 'px';
+            children.style.opacity = '1';
+            setTimeout(() => {
+              children.style.maxHeight = '';
+              children.style.opacity = '';
+            }, 200);
             chevron.style.transform = 'rotate(180deg)';
+            if (countBadge) countBadge.classList.add('opacity-0');
           }
         }
       });
     });
   }
 
-  /**
-   * 展开指定分类
-   * @private
-   */
   private _expandCategory(sidebar: HTMLElement, categoryId: string): void {
-    const group = sidebar.querySelector(`.sidebar-category-group[data-category="${categoryId}"]`);
-    if (group) {
-      const children = group.querySelector('.sidebar-category-children');
-      const chevron = group.querySelector('.category-chevron') as HTMLElement;
-      
-      if (children) {
-        children.classList.remove('hidden');
-      }
-      if (chevron) {
-        chevron.style.transform = 'rotate(180deg)';
-      }
+    const group = sidebar.querySelector(
+      `.sidebar-category-group[data-category="${categoryId}"]`
+    );
+    if (!group) return;
+
+    const children = group.querySelector('.sidebar-category-children') as HTMLElement;
+    const chevron = group.querySelector('.category-chevron') as HTMLElement;
+    const countBadge = group.querySelector('.category-count') as HTMLElement;
+
+    if (children) {
+      children.classList.remove('hidden');
+      children.style.maxHeight = '';
+      children.style.opacity = '';
+    }
+    if (chevron) {
+      chevron.style.transform = 'rotate(180deg)';
+    }
+    if (countBadge) {
+      countBadge.classList.add('opacity-0');
     }
   }
 
-  /**
-   * 构建侧边栏 HTML - 重构版
-   * @private
-   * @param title - 侧边栏标题
-   * @param icon - 标题图标
-   * @param color - 主题颜色
-   * @param categoryTree - 分类树结构
-   * @param currentTab - 当前激活的路由ID
-   */
+  // ═══════════════════════════════════════════════════════
+  // HTML Building
+  // ═══════════════════════════════════════════════════════
+
   private _buildHTML(
     title: string,
     icon: string,
@@ -308,140 +306,250 @@ export class SidebarRenderer {
     currentTab: string,
     _activeCategory: string | null
   ): string {
-    const titleColorClass = color === 'slate' ? 'text-slate-400' : `text-${color}-500`;
-    
     return `
-      <div class="flex flex-col h-full bg-white">
-        <div class="p-4 pb-2">
-          <h2 class="text-xs font-bold ${titleColorClass} uppercase tracking-wider mb-3 flex items-center gap-2">
-            <i class="${icon}"></i>
-            ${title}
-          </h2>
-          
+      <div class="flex flex-col h-full bg-gradient-to-b from-white to-slate-50/50">
+
+        <!-- ═══ Header ═══ -->
+        <div class="p-4 pb-3">
+          <div class="flex items-center gap-2.5 mb-4">
+            <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-${color}-500 to-${color}-600 flex items-center justify-center shadow-md shadow-${color}-500/20">
+              <i class="${icon} text-white text-[10px]"></i>
+            </div>
+            <h2 class="text-xs font-bold text-slate-500 uppercase tracking-widest">${title}</h2>
+          </div>
+
           ${this.enableSearch ? this._buildSearchBox() : ''}
         </div>
-        
-        <nav id="sidebar-nav-container" class="flex-1 overflow-y-auto px-4 space-y-2 scrollbar-thin">
+
+        <!-- ═══ Subtle Separator ═══ -->
+        <div class="mx-4 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
+
+        <!-- ═══ Navigation ═══ -->
+        <nav id="sidebar-nav-container" class="flex-1 overflow-y-auto px-3 py-3 space-y-1"
+          style="scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent;">
+
           ${this._buildOverviewButton(currentTab)}
-          ${categoryTree.map(category => this._buildCategoryGroup(category, currentTab)).join('')}
+
+          <!-- Category Divider -->
+          <div class="flex items-center gap-2 px-2 pt-3 pb-1">
+            <span class="text-[10px] font-semibold text-slate-300 uppercase tracking-widest">分类导航</span>
+            <div class="flex-1 h-px bg-slate-100"></div>
+          </div>
+
+          ${categoryTree.map(cat => this._buildCategoryGroup(cat, currentTab)).join('')}
         </nav>
+
+        <!-- ═══ Footer ═══ -->
+        <div class="px-4 py-3 border-t border-slate-100/80">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-1.5">
+              <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
+              <span class="text-[10px] text-slate-300 font-medium">已就绪</span>
+            </div>
+            <span class="text-[10px] text-slate-300 font-mono">${categoryTree.reduce((s, c) => s + c.children.length, 0)} 项</span>
+          </div>
+        </div>
       </div>
     `;
   }
 
-  /**
-   * 构建总览按钮
-   * @private
-   * @param currentTab - 当前激活的路由ID
-   * @returns 总览按钮HTML
-   */
+  // ── Overview Button ──
+
   private _buildOverviewButton(currentTab: string): string {
     const isActive = currentTab === this.overviewRouteId;
-    
-    const activeClasses = isActive 
-      ? 'bg-blue-50 text-blue-700' 
-      : 'hover:bg-slate-50 text-slate-700';
-    
-    const iconClasses = isActive
-      ? 'text-blue-600'
-      : 'text-slate-400 group-hover:text-slate-600';
-    
-    // 从 MENU_CONFIG 获取总览路由的标签
     const overviewRoute = MENU_CONFIG.routes[this.overviewRouteId];
-    const overviewLabel = overviewRoute?.label || '总览';
-    
+    const label = overviewRoute?.label || '总览';
+
+    const containerCls = isActive
+      ? 'bg-blue-50/80 border-l-2 border-blue-500 shadow-sm'
+      : 'border-l-2 border-transparent hover:bg-slate-50/80 hover:border-slate-200';
+
+    const iconContainerCls = isActive
+      ? 'bg-blue-100 scale-105'
+      : 'bg-slate-100 group-hover:bg-slate-200';
+
+    const iconCls = isActive
+      ? 'text-blue-500'
+      : 'text-slate-400 group-hover:text-slate-600';
+
+    const labelCls = isActive
+      ? 'font-semibold text-blue-700'
+      : 'font-medium text-slate-600 group-hover:text-slate-800';
+
+    const dotCls = isActive
+      ? 'opacity-100 scale-100'
+      : 'opacity-0 scale-0';
+
     return `
-      <button data-action="switch-tab" data-tab="${this.overviewRouteId}" id="sidebar-btn-${this.overviewRouteId}"
-        class="sidebar-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg ${activeClasses} transition-all duration-200 group mb-2">
-        <i class="fas fa-th-large text-base ${iconClasses} transition-colors"></i>
-        <span class="text-sm ${isActive ? 'font-medium' : 'group-hover:text-slate-900'} transition-colors flex-1 text-left">
-          ${overviewLabel}
+      <button data-action="switch-tab" data-tab="${this.overviewRouteId}"
+        id="sidebar-btn-${this.overviewRouteId}"
+        class="sidebar-btn group w-full flex items-center gap-3 px-3 py-2.5 rounded-xl ${containerCls} transition-all duration-200 mb-1">
+        <div class="sidebar-icon-container w-7 h-7 rounded-lg ${iconContainerCls} flex items-center justify-center transition-all duration-200">
+          <i class="sidebar-icon fas fa-th-large text-[11px] ${iconCls} transition-colors duration-200"></i>
+        </div>
+        <span class="sidebar-label text-[13px] ${labelCls} transition-colors duration-200 flex-1 text-left">
+          ${label}
         </span>
+        <div class="sidebar-active-dot w-1.5 h-1.5 rounded-full bg-blue-500 ${dotCls} transition-all duration-300"></div>
       </button>
     `;
   }
 
-  /**
-   * 构建分类组（包含分类按钮和子路由列表）
-   * @private
-   */
+  // ── Category Group ──
+
   private _buildCategoryGroup(category: CategoryTreeNode, currentTab: string): string {
     const color = category.color || 'slate';
     const scheme = COLOR_SCHEMES[color] || COLOR_SCHEMES.blue;
-    
+    const childCount = category.children.length;
+
     return `
       <div class="sidebar-category-group" data-category="${category.id}">
-        <button data-action="toggle-category" data-category="${category.id}" id="sidebar-category-${category.id}"
-          class="sidebar-category-btn w-full group flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-100 transition-all duration-200">
-          <i class="${category.icon} text-base ${scheme.icon} ${scheme.hoverIcon} transition-colors"></i>
-          <div class="flex-1 text-left">
-            <div class="text-slate-700 group-hover:text-slate-900 text-sm font-medium transition-colors">
+
+        <!-- Category Header -->
+        <button data-action="toggle-category" data-category="${category.id}"
+          id="sidebar-category-${category.id}"
+          class="sidebar-category-btn group w-full flex items-center gap-3 px-3 py-2.5 rounded-xl
+            hover:bg-${color}-50/40 transition-all duration-200 mt-0.5">
+
+          <!-- Category Icon -->
+          <div class="w-6 h-6 rounded-md ${scheme.badgeBg} flex items-center justify-center
+            group-hover:scale-110 transition-transform duration-200">
+            <i class="${category.icon} text-[10px] ${scheme.badgeText}"></i>
+          </div>
+
+          <!-- Category Label -->
+          <div class="flex-1 text-left min-w-0">
+            <div class="text-[13px] font-medium text-slate-700 group-hover:text-slate-900
+              transition-colors duration-200 truncate">
               ${category.label}
             </div>
           </div>
-          <i class="fas fa-chevron-down text-xs text-slate-400 group-hover:text-slate-600 transition-all duration-200 category-chevron"></i>
+
+          <!-- Count Badge -->
+          <span class="category-count text-[10px] font-medium text-slate-300 bg-slate-100 px-1.5 py-0.5 rounded-md
+            transition-opacity duration-200">
+            ${childCount}
+          </span>
+
+          <!-- Chevron -->
+          <i class="fas fa-chevron-down text-[9px] text-slate-300 group-hover:text-slate-500
+            transition-all duration-300 category-chevron" style="transform: rotate(0deg)"></i>
         </button>
-        
-        <div class="sidebar-category-children hidden pl-6 mt-1 space-y-1">
-          ${category.children.map(route => this._buildChildRouteItem(route, currentTab)).join('')}
+
+        <!-- Children Container -->
+        <div class="sidebar-category-children hidden overflow-hidden transition-all duration-200"
+          style="will-change: max-height, opacity;">
+
+          <!-- Left accent line container -->
+          <div class="relative ml-[18px] pl-4 mt-1 space-y-0.5">
+
+            <!-- Vertical accent line -->
+            <div class="absolute left-0 top-1 bottom-1 w-[2px] rounded-full ${scheme.accentBar} opacity-30"></div>
+
+            ${category.children.map(route =>
+              this._buildChildRouteItem(route, currentTab, color)
+            ).join('')}
+          </div>
         </div>
       </div>
     `;
   }
 
-  /**
-   * 构建子路由项
-   * @private
-   */
-  private _buildChildRouteItem(route: RouteConfig & { id: string }, currentTab: string): string {
+  // ── Child Route Item ──
+
+  private _buildChildRouteItem(
+    route: RouteConfig & { id: string },
+    currentTab: string,
+    parentColor: string
+  ): string {
     const isActive = currentTab === route.id;
-    
-    const activeClasses = isActive 
-      ? 'bg-blue-50 text-blue-700' 
-      : 'hover:bg-slate-50 text-slate-700';
-    
-    const iconClasses = isActive
-      ? 'text-blue-600'
-      : 'text-slate-400 group-hover:text-slate-600';
-    
+
+    const containerCls = isActive
+      ? `bg-blue-50/80 border-l-2 border-blue-500 shadow-sm`
+      : 'border-l-2 border-transparent hover:bg-slate-50/80 hover:border-slate-200';
+
+    const iconContainerCls = isActive
+      ? 'bg-blue-100 scale-105'
+      : `bg-slate-100 group-hover:bg-${parentColor}-50`;
+
+    const iconCls = isActive
+      ? 'text-blue-500'
+      : 'text-slate-400 group-hover:text-slate-500';
+
+    const labelCls = isActive
+      ? 'font-semibold text-blue-700'
+      : 'font-medium text-slate-600 group-hover:text-slate-800';
+
+    const dotCls = isActive
+      ? 'opacity-100 scale-100'
+      : 'opacity-0 scale-0';
+
     return `
-      <button data-action="switch-tab" data-tab="${route.id}" id="sidebar-btn-${route.id}"
-        class="sidebar-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg ${activeClasses} transition-all duration-200 group">
-        <i class="${route.icon} text-sm ${iconClasses} transition-colors"></i>
-        <span class="text-sm ${isActive ? 'font-medium' : 'group-hover:text-slate-900'} transition-colors flex-1 text-left">
+      <button data-action="switch-tab" data-tab="${route.id}"
+        id="sidebar-btn-${route.id}"
+        class="sidebar-btn group w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg
+          ${containerCls} transition-all duration-200">
+        <div class="sidebar-icon-container w-5.5 h-5.5 rounded-md ${iconContainerCls}
+          flex items-center justify-center transition-all duration-200"
+          style="width: 22px; height: 22px;">
+          <i class="sidebar-icon ${route.icon} text-[9px] ${iconCls} transition-colors duration-200"></i>
+        </div>
+        <span class="sidebar-label text-[12px] ${labelCls} transition-colors duration-200 flex-1 text-left truncate">
           ${route.label}
         </span>
+        <div class="sidebar-active-dot w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0
+          ${dotCls} transition-all duration-300"></div>
       </button>
     `;
   }
 
-  /**
-   * 构建搜索框
-   * @private
-   */
+  // ── Search Box ──
+
   private _buildSearchBox(): string {
     return `
-      <div class="relative mb-3 group">
-        <input type="text" id="sidebar-search-input" 
-          placeholder="${this.searchPlaceholder}" 
-          class="w-full px-3 py-2 pl-9 text-xs border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+      <div class="relative group mb-1">
+        <!-- Search Icon Container -->
+        <div class="absolute left-2.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-md bg-slate-100
+          group-focus-within:bg-blue-100 flex items-center justify-center transition-colors duration-200 pointer-events-none z-10">
+          <i class="fas fa-search text-[9px] text-slate-400 group-focus-within:text-blue-500 transition-colors duration-200"></i>
+        </div>
+
+        <!-- Input -->
+        <input type="text" id="sidebar-search-input"
+          placeholder="${this.searchPlaceholder}"
+          class="w-full pl-10 pr-8 py-2 text-[12px] border border-slate-200 rounded-xl
+            bg-white/80 backdrop-blur-sm
+            focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400
+            hover:border-slate-300
+            placeholder:text-slate-300
+            outline-none transition-all duration-200 shadow-sm"
           oninput="window.searchSidebar(this.value)">
-        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm group-focus-within:text-blue-500 transition-colors"></i>
-        <button id="sidebar-search-clear" data-action="clear-sidebar-search" class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-          <i class="fas fa-times text-xs"></i>
+
+        <!-- Clear Button -->
+        <button id="sidebar-search-clear" data-action="clear-sidebar-search"
+          class="hidden absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 rounded-md
+            bg-slate-100 hover:bg-slate-200
+            flex items-center justify-center
+            text-slate-400 hover:text-slate-600 transition-all duration-200">
+          <i class="fas fa-times text-[8px]"></i>
         </button>
-        
-        <div id="sidebar-search-results" class="hidden absolute top-full left-0 w-full bg-white border border-slate-200 shadow-xl rounded-lg mt-1 max-h-60 overflow-y-auto z-50"></div>
+
+        <!-- Search Results Dropdown -->
+        <div id="sidebar-search-results"
+          class="hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-sm
+            border border-slate-200 shadow-xl shadow-slate-200/50
+            rounded-xl mt-1.5 max-h-60 overflow-y-auto z-50 p-1"
+          style="scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent;">
+        </div>
       </div>
     `;
   }
 }
 
-/**
- * 创建侧边栏渲染器的工厂函数
- * @param config - 配置对象
- * @returns SidebarRenderer实例
- */
+// ═══════════════════════════════════════════════════════════
+// Factory
+// ═══════════════════════════════════════════════════════════
+
 export function createSidebarRenderer(config: SidebarConfig): SidebarRenderer {
   return new SidebarRenderer(config);
 }

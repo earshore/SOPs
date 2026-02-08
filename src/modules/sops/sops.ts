@@ -4,7 +4,7 @@ import { createModuleLoader } from '../../common/utils/ModuleLoader';
 
 // ================= 路由配置表 =================
 // 键名对应 menuConfig.js 里的 route id
-const MODULE_MAP = {
+const MODULE_MAP: Record<string, () => Promise<any>> = {
     // 总览
     'sops_overview': () => import('./views/overview/index'),
 
@@ -49,6 +49,6 @@ const moduleLoader = createModuleLoader({
  * @param {string} routeId - 路由 ID
  * @param {Function} loader - 动态导入函数
  */
-export function registerSubModule(routeId, loader) {
+export function registerSubModule(routeId: string, loader: () => Promise<any>): void {
     moduleLoader.registerSubModule(routeId, loader);
 }

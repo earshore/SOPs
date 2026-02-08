@@ -1,10 +1,36 @@
-// src/modules/amz_hub/views/practice/promotions/index.js
+// src/modules/amz_hub/views/practice/promotions/index.ts
 // 欧洲站实战版 - 基于头部卖家真实经验
 import BaseModule from "../../../../../common/BaseModule";
 import { loadTemplate } from "../../../../../common/utils/viewLoader";
 
+// ==================== 类型定义 ====================
+interface ContentBlock {
+    type: string;
+    text?: string;
+    title?: string;
+    style?: string;
+    headers?: string[];
+    rows?: string[][];
+    items?: any[];
+}
+
+interface PromoSection {
+    id: string;
+    title: string;
+    icon: string;
+    content: ContentBlock[];
+}
+
+interface NavNode {
+    id: string;
+    label: string;
+    type: 'root' | 'group';
+    targetId?: string;
+    children?: { id: string; label: string }[];
+}
+
 // ==================== 1. 内容数据源 (欧洲站实战版) ====================
-const promoData = [
+const promoData: PromoSection[] = [
     {
         id: 'overview',
         title: '欧洲站促销实战概览',
@@ -398,7 +424,7 @@ const promoData = [
 ];
 
 // ==================== 2. 导航结构 (树状，用于渲染侧边栏) ====================
-const navStructure = [
+const navStructure: NavNode[] = [
     {
         id: 'overview',
         label: '实战概览',
@@ -429,21 +455,22 @@ const navStructure = [
 ];
 
 class PromotionsModule extends BaseModule {
+    private observer: IntersectionObserver | null = null;
+
     constructor() {
         super('amz_promotions');
-        this.observer = null;
     }
 
-    async render() {
+    async render(): Promise<void> {
         // ✅ 安全: 静态HTML模板，无用户输入
-        this.container.innerHTML = await loadTemplate('src/modules/amz_hub/views/practice/promotions/template.html');
+        this.container!.innerHTML = await loadTemplate('src/modules/amz_hub/views/practice/promotions/template.html');
     }
 
-    async init() {
+    async init(): Promise<void> {
         // 挂载全局方法供 HTML 调用 (需要注意 this 的绑定)
         // 使用箭头函数包装以保持上下文，或者直接绑定
-        window.amzp_scrollTo = (id) => this.scrollToSection(id);
-        window.amzp_scrollTo_Name = (name) => this.scrollToSectionByName(name);
+        (window as any).amzp_scrollTo = (id: string) => this.scrollToSection(id);
+        (window as any).amzp_scrollTo_Name = (name: string) => this.scrollToSectionByName(name);
 
         this.renderNav();
         this.renderContent();
@@ -452,20 +479,20 @@ class PromotionsModule extends BaseModule {
         console.log("✅ Promotions Module Loaded (实战版)");
     }
 
-    onUnmount() {
+    protected onUnmount(): void {
         if (this.observer) {
             this.observer.disconnect();
             this.observer = null;
         }
-        delete window.amzp_scrollTo;
-        delete window.amzp_scrollTo_Name;
+        delete (window as any).amzp_scrollTo;
+        delete (window as any).amzp_scrollTo_Name;
         console.log("❌ Promotions Module Unmounted");
     }
 
     // ==================== Logic ====================
 
     // 1. 渲染侧边栏 (递归渲染树状结构)
-    renderNav() {
+    private renderNav(): void {
         const navContainer = document.getElementById('amzp_nav');
         if (!navContainer) return;
 
@@ -482,7 +509,7 @@ class PromotionsModule extends BaseModule {
                     </div>
                 `;
             } else if (node.type === 'group') {
-                const childrenHtml = node.children.map(child => `
+                const childrenHtml = (node.children || []).map(child => `
                     <a href="javascript:void(0)" class="amzp_sub_link" 
                        id="nav_link_${child.id}"
                        onclick="window.amzp_scrollTo('${child.id}')">
@@ -505,11 +532,12 @@ class PromotionsModule extends BaseModule {
                     </div>
                 `;
             }
+            return '';
         }).join('');
     }
 
     // 2. 渲染内容区 (扁平渲染)
-    renderContent() {
+    private renderContent(): void {
         const contentContainer = document.getElementById('amzp_main');
         if (!contentContainer) return;
 
@@ -524,7 +552,7 @@ class PromotionsModule extends BaseModule {
         `).join('');
     }
 
-    renderSectionBody(contentArray) {
+    private renderSectionBody(contentArray: ContentBlock[]): string {
         if (!contentArray) return '';
 
         return contentArray.map(block => {
@@ -545,7 +573,7 @@ class PromotionsModule extends BaseModule {
 
             // 4. 多彩呼出框 (新增)
             if (block.type === 'callout') {
-                const styleMap = {
+                const styleMap: Record<string, { bg: string; color: string; border: string }> = {
                     'insight': { bg: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: '#fff', border: 'none' },
                     'core': { bg: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)', color: '#fff', border: 'none' },
                     'warning': { bg: '#fff3cd', color: '#856404', border: '1px solid #ffc107' },
@@ -553,7 +581,8 @@ class PromotionsModule extends BaseModule {
                     'tip': { bg: '#e7f3ff', color: '#0066cc', border: '1px solid #b3d7ff' },
                     'formula': { bg: 'linear-gradient(135deg, #434343 0%, #000000 100%)', color: '#fff', border: 'none' }
                 };
-                const style = styleMap[block.style] || styleMap['insight'];
+                const styleKey = block.style || 'insight';
+                const style = styleMap[styleKey]!;
                 return `
                     <div class="amzp_callout" style="background: ${style.bg}; color: ${style.color}; border: ${style.border}; border-radius: 12px; padding: 20px 24px; margin-bottom: 24px;">
                         <div style="font-weight: 700; font-size: 1.1rem; margin-bottom: 8px;">${block.title}</div>
@@ -566,7 +595,7 @@ class PromotionsModule extends BaseModule {
             if (block.type === 'grid_links') {
                 return `
                     <div class="amzp_grid" style="margin-top: 10px;">
-                        ${block.items.map(item => `
+                        ${(block.items || []).map(item => `
                             <div class="amzp_sub_item" style="cursor: pointer; padding: 20px;" onclick="window.amzp_scrollTo_Name('${item.title}')">
                                 <div class="amzp_sub_header" style="margin-bottom: 8px;">
                                     <div class="amzp_sub_icon"><i class="fas ${item.icon}"></i></div>
@@ -583,7 +612,7 @@ class PromotionsModule extends BaseModule {
             if (block.type === 'sub_items') {
                 return `
                     <div class="amzp_grid">
-                        ${block.items.map(item => `
+                        ${(block.items || []).map(item => `
                             <div class="amzp_sub_item">
                                 <div class="amzp_sub_header">
                                     <div class="amzp_sub_icon"><i class="fas ${item.icon}"></i></div>
@@ -592,7 +621,7 @@ class PromotionsModule extends BaseModule {
                                 <div class="amzp_sub_desc">${item.desc}</div>
                                 ${item.tags ? `
                                     <div style="margin-top:auto">
-                                        ${item.tags.map(t => `<span class="amzp_tag">${t}</span>`).join('')}
+                                        ${item.tags.map((t: string) => `<span class="amzp_tag">${t}</span>`).join('')}
                                     </div>
                                 ` : ''}
                             </div>
@@ -605,7 +634,7 @@ class PromotionsModule extends BaseModule {
             if (block.type === 'stats') {
                 return `
                     <div class="amzp_grid">
-                        ${block.items.map(item => `
+                        ${(block.items || []).map(item => `
                             <div class="amzp_stats_box">
                                 <i class="fas ${item.icon}" style="font-size:1.8rem; color: #566ce8;"></i>
                                 <div class="amzp_stats_text">${item.text}</div>
@@ -622,11 +651,11 @@ class PromotionsModule extends BaseModule {
                         <table class="amzp_table" style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
                             <thead>
                                 <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff;">
-                                    ${block.headers.map(h => `<th style="padding: 12px 15px; text-align: left; font-weight: 600;">${h}</th>`).join('')}
+                                    ${(block.headers || []).map(h => `<th style="padding: 12px 15px; text-align: left; font-weight: 600;">${h}</th>`).join('')}
                                 </tr>
                             </thead>
                             <tbody>
-                                ${block.rows.map((row, i) => `
+                                ${(block.rows || []).map((row, i) => `
                                     <tr style="background: ${i % 2 === 0 ? '#f8f9fa' : '#fff'}; border-bottom: 1px solid #eee;">
                                         ${row.map((cell, j) => `<td style="padding: 12px 15px; ${j === 0 ? 'font-weight: 600; color: #333;' : ''}">${cell}</td>`).join('')}
                                     </tr>
@@ -641,7 +670,7 @@ class PromotionsModule extends BaseModule {
             if (block.type === 'tip_list') {
                 return `
                     <div class="amzp_tip_list" style="margin: 15px 0;">
-                        ${block.items.map(item => {
+                        ${(block.items || []).map(item => {
                     const color = item.style === 'success' ? '#28a745' : (item.style === 'danger' ? '#dc3545' : '#666');
                     const bg = item.style === 'success' ? '#d4edda' : (item.style === 'danger' ? '#f8d7da' : '#f8f9fa');
                     return `
@@ -659,7 +688,7 @@ class PromotionsModule extends BaseModule {
             if (block.type === 'key_value_list') {
                 return `
                     <div class="amzp_kv_list" style="margin: 15px 0; background: #f8f9fa; border-radius: 10px; padding: 5px 0;">
-                        ${block.items.map(item => `
+                        ${(block.items || []).map(item => `
                             <div style="display: flex; padding: 12px 20px; border-bottom: 1px solid #eee;">
                                 <span style="font-weight: 600; color: #566ce8; min-width: 120px;">${item.key}</span>
                                 <span style="color: #333;">${item.value}</span>
@@ -674,14 +703,14 @@ class PromotionsModule extends BaseModule {
                 return `
                     <div class="amzp_timeline" style="margin: 20px 0; position: relative; padding-left: 30px;">
                         <div style="position: absolute; left: 8px; top: 0; bottom: 0; width: 3px; background: linear-gradient(to bottom, #667eea, #764ba2); border-radius: 2px;"></div>
-                        ${block.items.map(item => {
-                    const levelColors = {
+                        ${(block.items || []).map(item => {
+                    const levelColors: Record<string, string> = {
                         'peak': '#dc3545',
                         'high': '#fd7e14',
                         'medium': '#28a745',
                         'warning': '#ffc107'
                     };
-                    const color = levelColors[item.level] || '#666';
+                    const color = levelColors[item.level as string] || '#666';
                     return `
                                 <div style="position: relative; margin-bottom: 20px; padding-left: 20px;">
                                     <div style="position: absolute; left: -22px; top: 5px; width: 14px; height: 14px; background: ${color}; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.15);"></div>
@@ -699,7 +728,7 @@ class PromotionsModule extends BaseModule {
             if (block.type === 'checklist') {
                 return `
                     <div class="amzp_checklist" style="margin: 15px 0;">
-                        ${block.items.map(item => `
+                        ${(block.items || []).map(item => `
                             <div style="display: flex; align-items: flex-start; gap: 12px; padding: 10px 15px; margin-bottom: 6px; background: ${item.done ? '#d4edda' : '#fff'}; border: 1px solid ${item.done ? '#28a745' : '#ddd'}; border-radius: 8px;">
                                 <i class="fas ${item.done ? 'fa-check-square' : 'fa-square'}" style="color: ${item.done ? '#28a745' : '#ccc'}; font-size: 1.1rem; margin-top: 1px;"></i>
                                 <span style="color: ${item.done ? '#155724' : '#333'}; font-size: 0.95rem; ${item.done ? '' : ''}">${item.text}</span>
@@ -714,7 +743,7 @@ class PromotionsModule extends BaseModule {
     }
 
     // 3. 滚动与高亮逻辑
-    scrollToSection(id) {
+    private scrollToSection(id: string): void {
         const el = document.getElementById(id);
         if (el) {
             const container = document.querySelector('.amzp_container');
@@ -726,13 +755,16 @@ class PromotionsModule extends BaseModule {
         }
     }
 
-    scrollToSectionByName(name) {
-        const target = promoData.find(p => name.includes(p.title.split(' ')[0]) || p.title.includes(name));
+    private scrollToSectionByName(name: string): void {
+        const target = promoData.find(p => {
+            const firstWord = p.title.split(' ')[0];
+            return (firstWord && name.includes(firstWord)) || p.title.includes(name);
+        });
         if (target) this.scrollToSection(target.id);
     }
 
     // 核心：更新导航状态
-    updateNavState(activeId) {
+    private updateNavState(activeId: string): void {
         if (!activeId) return;
 
         document.querySelectorAll('.amzp_nav_header').forEach(el => el.classList.remove('active'));
@@ -763,7 +795,7 @@ class PromotionsModule extends BaseModule {
         }
     }
 
-    setupIntersectionObserver() {
+    private setupIntersectionObserver(): void {
         const container = document.querySelector('.amzp_container');
         if (!container) return;
 
@@ -781,11 +813,11 @@ class PromotionsModule extends BaseModule {
 
         promoData.forEach(section => {
             const el = document.getElementById(section.id);
-            if (el) this.observer.observe(el);
+            if (el) this.observer!.observe(el);
         });
     }
 }
 
 const instance = new PromotionsModule();
-export const mount = (c) => instance.mount(c);
+export const mount = (c: HTMLElement) => instance.mount(c);
 export const unmount = () => instance.unmount();
