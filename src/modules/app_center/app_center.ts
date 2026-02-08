@@ -21,18 +21,18 @@ type ModuleMap = Record<string, ModuleLoaderFn>;
 // 键名对应 menuConfig.ts 里的 route id
 const MODULE_MAP: ModuleMap = {
   // App Center Overview
-  app_center_overview: () => import('./views/overview/index.js'),
+  app_center_overview: () => import('./views/overview/index'),
 
   // Master Prompt 子模块
-  scraper: () => import('./views/master_prompt/scraper/index.js'),
-  data: () => import('./views/master_prompt/data/index.js'),
-  analysis: () => import('./views/master_prompt/analysis/index.js'),
-  promptlab: () => import('./views/master_prompt/promptlab/index.js'),
+  scraper: () => import('./views/master_prompt/scraper/index'),
+  data: () => import('./views/master_prompt/data/index'),
+  analysis: () => import('./views/master_prompt/analysis/index'),
+  promptlab: () => import('./views/master_prompt/promptlab/index'),
 
   // Keyword Hunter 子模块
-  kw_input: () => import('./views/keyword_hunter/input/index.js'),
-  kw_process: () => import('./views/keyword_hunter/process/index.js'),
-  kw_analysis: () => import('./views/keyword_hunter/analysis/index.js'),
+  kw_input: () => import('./views/keyword_hunter/input/index'),
+  kw_process: () => import('./views/keyword_hunter/process/index'),
+  kw_analysis: () => import('./views/keyword_hunter/analysis/index'),
 };
 
 // ================= 使用通用ModuleLoader =================

@@ -5,7 +5,7 @@
 
 import BaseModule from '../../../../../common/BaseModule';
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
-import { TEMPLATE_CATEGORIES, getTemplateHtml } from './constant/email_templates.js';
+import { TEMPLATE_CATEGORIES, getTemplateHtml } from './constant/email_templates';
 import { escapeHtml } from '../../../../../common/utils/security';
 
 type Language = 'en' | 'de' | 'fr' | 'it' | 'es' | 'nl' | 'se' | 'pl' | 'be' | 'ie';

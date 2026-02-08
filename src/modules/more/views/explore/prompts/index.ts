@@ -12,7 +12,7 @@ import {
     getPromptById,
     searchPrompts,
     getModelInfo,
-} from './constants/promptLibrary.js';
+} from './constants/promptLibrary';
 import { showToast } from '../../../../../common/ui';
 import './prompts_style.css';
 

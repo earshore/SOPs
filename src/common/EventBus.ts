@@ -9,7 +9,7 @@ import type {
   TypedEventHandler, 
   GenericEventHandler,
   EventUnsubscribe 
-} from '../types/events.js';
+} from '../types/events';
 
 /**
  * EventBus配置选项

@@ -4,8 +4,8 @@
 // 统一处理路由相关的错误
 // ================================================================
 
-import type { RouteErrorContext, RouteErrorHandler } from '../../types/config.js';
-import { render404, renderError } from './NotFound.js';
+import type { RouteErrorContext, RouteErrorHandler } from '../../types/config';
+import { render404, renderError } from './NotFound';
 
 type ErrorType = 'NOT_FOUND' | 'PERMISSION_DENIED' | 'LOAD_FAILED' | 'TIMEOUT' | 'NETWORK_ERROR' | 'UNKNOWN';
 

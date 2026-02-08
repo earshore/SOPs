@@ -4,7 +4,7 @@
 // 提供路由级别的权限控制和预加载
 // ================================================================
 
-import type { Route, RouteGuard, RouteGuardResult } from '../../types/config.js';
+import type { Route, RouteGuard, RouteGuardResult } from '../../types/config';
 
 /**
  * 路由守卫管理器

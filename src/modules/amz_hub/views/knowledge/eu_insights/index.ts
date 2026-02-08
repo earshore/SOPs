@@ -4,7 +4,7 @@
 
 import { escapeHtml } from '@/common/utils/security';
 import BaseModule from '../../../../../common/BaseModule';
-import { AMZ_COUNTRY_DATA } from '../../../constants/amz_hub_constants.js';
+import { AMZ_COUNTRY_DATA } from '../../../constants/amz_hub_constants';
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import { loadChartJs } from '../../../../../common/utils/lazyLibs';
 

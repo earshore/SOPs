@@ -10,7 +10,7 @@ import { routeMiddleware } from './RouteMiddleware';
 import { routeErrorHandler } from './ErrorHandler';
 import { MENU_CONFIG } from '../config/menuConfig';
 import { ensureViewLoaded } from '../utils/viewLoader';
-import type { Route, RouteConfig, NavigationOptions, RouteHistory } from '../../types/config.js';
+import type { Route, RouteConfig, NavigationOptions, RouteHistory } from '../../types/config';
 
 /**
  * 路由管理器

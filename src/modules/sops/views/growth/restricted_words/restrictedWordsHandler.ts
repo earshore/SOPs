@@ -8,7 +8,7 @@ import {
     RESTRICTED_WORDS_DATABASE,
     RISK_LEVELS,
     WORD_CATEGORIES,
-} from './constants/restrictedWordsConstants.js';
+} from './constants/restrictedWordsConstants';
 import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry';
 import { escapeHtml } from '../../../../../common/utils/security';
 

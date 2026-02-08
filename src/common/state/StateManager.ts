@@ -11,7 +11,7 @@ import type {
   StateSubscriber,
   StateHistory,
   BatchUpdateAction
-} from '../../types/state.js';
+} from '../../types/state';
 
 // 导出类型供其他模块使用
 export type { StateAction, StateMiddleware, StateSubscriber, StateHistory, BatchUpdateAction };

@@ -13,7 +13,7 @@ import {
     STAGE_CONFIG,
     SITE_FLAGS,
     SITE_DOMAINS,
-} from './data/mockData.js';
+} from './data/mockData';
 
 // 示例数据
 const SAMPLE_DATA = MOCK_PRODUCTS;

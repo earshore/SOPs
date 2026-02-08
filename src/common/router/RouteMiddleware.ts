@@ -4,7 +4,7 @@
 // 提供路由切换前后的钩子函数
 // ================================================================
 
-import type { Route, RouteMiddlewareFunction } from '../../types/config.js';
+import type { Route, RouteMiddlewareFunction } from '../../types/config';
 
 /**
  * 路由中间件管理器
