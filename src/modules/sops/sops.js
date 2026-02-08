@@ -13,7 +13,7 @@ const MODULE_MAP = {
     'sops_listing_seo': () => import('./views/growth/listing_seo/index'),
     'sops_ppc_advertising': () => import('./views/growth/ppc_advertising/index'),
     'sops_restricted_words': () => import('./views/growth/restricted_words/index.js'),
-    'sops_promotion_submission': () => import('./views/growth/promotion_submission/index.js'),
+    'sops_promotion_submission': () => import('./views/growth/promotion_submission/index'),
     'sops_competitor_monitoring': () => import('./views/growth/competitor_monitoring/index'),
 
     // 第二模块：供应链与物流体系 (The Backend Layer)
