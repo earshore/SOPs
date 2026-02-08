@@ -9,17 +9,37 @@
  */
 
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
-import eventBus from '../../../../../common/EventBus.ts';
+import eventBus from '../../../../../common/EventBus';
 import state from "../../../../../common/state";
 import { scrapeAsin } from '../services/scraperService';
 import { LANGUAGE_HEADERS } from '../../../../../common/constants/constants';
 import { HistoryService } from '../services/historyService';
-import { StorageService, STORAGE_KEYS } from '../../../../../services/storageService.ts';
+import { StorageService, STORAGE_KEYS } from '../../../../../services/storageService';
 import { ErrorService } from '../../../../../services/errorService';
 import { showToast, sleep } from '../../../../../common/utils/ui.js';
 import { APP_EVENTS, MODULE_EVENTS } from '../../../../../common/constants/eventConstants';
 
 import '../master_prompt_style.css';
+
+// 类型定义
+interface Task {
+    asin: string;
+    status: 'pending' | 'scraping' | 'success' | 'failed';
+    message: string;
+    richMsg?: string;
+}
+
+interface ProxyConfig {
+    type: string;
+    customUrl?: string;
+}
+
+// 扩展 Window 接口以支持 Alpine
+declare global {
+    interface Window {
+        Alpine?: any;
+    }
+}
 
 // ========================================== 
 // Alpine Component Logic
@@ -37,15 +57,15 @@ const ScraperPanel = () => ({
     isScraping: false,
 
     // UI State
-    tasks: [], // { asin, status: 'pending'|'scraping'|'success'|'failed', message: '', richMsg: '' }
-    history: [],
+    tasks: [] as Task[],
+    history: [] as any[],
 
     // Constants for View
     sites: ['DE', 'FR', 'IT', 'ES', 'NL', 'SE', 'PL', 'BE', 'IE', 'UK'],
 
     // ========== Computed Properties ==========
     
-    get validAsins() {
+    get validAsins(): string[] {
         if (!this.inputAsins) return [];
         return this.inputAsins
             .split(/[,,\n\s]+/)
@@ -53,18 +73,18 @@ const ScraperPanel = () => ({
             .filter(a => /^B0[A-Z0-9]{8}$/.test(a));
     },
 
-    get invalidCount() {
+    get invalidCount(): number {
         const raw = this.inputAsins.split(/[,,\n\s]+/).filter(a => a.trim());
         return raw.length - this.validAsins.length;
     },
 
-    get canStart() {
+    get canStart(): boolean {
         return this.validAsins.length > 0 && !this.isScraping;
     },
 
-    get proxyConfigStatus() {
-        const config = StorageService.get(STORAGE_KEYS.PROXY_CONFIG) || { type: 'allorigins' };
-        const map = {
+    get proxyConfigStatus(): { name: string; ready: boolean; type: string } {
+        const config = StorageService.get(STORAGE_KEYS.PROXY_CONFIG) as ProxyConfig || { type: 'allorigins' };
+        const map: Record<string, string> = {
             scraperapi: 'ScraperAPI', zenrows: 'ZenRows', brightdata: 'Bright Data',
             custom_api: 'Custom API', allorigins: '自动托管', custom_proxy: 'HTTP 代理'
         };
@@ -110,7 +130,7 @@ const ScraperPanel = () => ({
      * 保存状态到 state
      */
     saveState() {
-        state.scraper.selectedSite = this.selectedSite;
+        state.scraper.selectedSite = this.selectedSite as any;
         state.scraper.inputAsins = this.inputAsins;
         state.scraper.isScraping = this.isScraping;
         
@@ -119,8 +139,8 @@ const ScraperPanel = () => ({
 
     // ========== Actions ==========
 
-    selectSite(site) {
-        this.selectedSite = site;
+    selectSite(site: string) {
+        this.selectedSite = site as any;
         this.saveState();
     },
 
@@ -133,7 +153,7 @@ const ScraperPanel = () => ({
         this.history = HistoryService.getAll();
     },
 
-    deleteHistoryItem(id) {
+    deleteHistoryItem(id: string) {
         if (!confirm("确定要删除这条历史记录吗？")) return;
 
         const newHistory = this.history.filter(h => h.id !== id);
@@ -149,7 +169,7 @@ const ScraperPanel = () => ({
         showToast("历史已清空", "success");
     },
 
-    loadHistoryItem(item) {
+    loadHistoryItem(item: any) {
         if (this.isScraping) {
             if (!confirm("任务进行中，确定覆盖？")) return;
         }
@@ -177,7 +197,7 @@ const ScraperPanel = () => ({
         state.scraper.scrapedData = item.data;
         state.analysis.analysisReport = item.report;
         state.analysis.translatedReport = null;
-        state.scraper.selectedSite = item.site;
+        state.scraper.selectedSite = item.site as any;
 
         // 通知其他模块
         eventBus.emit(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, item.data);
@@ -202,7 +222,7 @@ const ScraperPanel = () => ({
 
         const site = this.selectedSite;
         const scrapeReviews = this.scrapeReviews;
-        let products = [];
+        let products: any[] = [];
 
         try {
             const promises = this.validAsins.map(async (asin, index) => {
@@ -212,15 +232,15 @@ const ScraperPanel = () => ({
                 // 错开请求时间
                 if (index > 0) await sleep(index * 800);
 
-                return scrapeAsin(asin, site, scrapeReviews, (a, status, msg) => {
-                    this.updateTask(a, status, msg);
+                return scrapeAsin(asin, site, scrapeReviews, (a: string, status: string, msg: string) => {
+                    this.updateTask(a, status as any, msg);
                 });
             });
 
             products = await Promise.all(promises);
 
         } catch (e) {
-            ErrorService.handle(e, { action: 'startScrape', module: 'scraper' });
+            ErrorService.handle(e as Error, { action: 'startScrape', module: 'scraper' });
             showToast("采集任务异常中断", "error");
         } finally {
             // 完成采集
@@ -230,7 +250,7 @@ const ScraperPanel = () => ({
         }
     },
 
-    updateTask(asin, status, message) {
+    updateTask(asin: string, status: Task['status'], message: string) {
         const task = this.tasks.find(t => t.asin === asin);
         if (task) {
             task.status = status;
@@ -242,7 +262,7 @@ const ScraperPanel = () => ({
         }
     },
 
-    handleScrapeComplete(products) {
+    handleScrapeComplete(products: any[]) {
         // 处理失败或空结果
         if (!products || products.length === 0) {
             products = this.validAsins.map(asin => ({
@@ -250,7 +270,7 @@ const ScraperPanel = () => ({
             }));
         }
 
-        const siteConfig = LANGUAGE_HEADERS[this.selectedSite] || {};
+        const siteConfig = (LANGUAGE_HEADERS as any)[this.selectedSite] || {};
 
         const scrapedData = {
             metadata: {
@@ -284,23 +304,23 @@ const ScraperPanel = () => ({
 
     // ========== Helpers ==========
     
-    getFlag(site) {
-        const map = {
+    getFlag(site: string): string {
+        const map: Record<string, string> = {
             DE: '🇩🇪', FR: '🇫🇷', IT: '🇮🇹', ES: '🇪🇸', NL: '🇳🇱',
             SE: '🇸🇪', PL: '🇵🇱', BE: '🇧🇪', IE: '🇮🇪', UK: '🇬🇧', GB: '🇬🇧'
         };
         return map[site] || '🏳️';
     },
 
-    getSiteName(site) {
-        const map = {
+    getSiteName(site: string): string {
+        const map: Record<string, string> = {
             DE: '德国', FR: '法国', IT: '意大利', ES: '西班牙', NL: '荷兰',
             SE: '瑞典', PL: '波兰', BE: '比利时', IE: '爱尔兰', UK: '英国'
         };
         return map[site] || site;
     },
 
-    formatDate(ts) {
+    formatDate(ts: string): string {
         const date = new Date(ts);
         const now = new Date();
         if (date.toDateString() === now.toDateString()) {
@@ -316,9 +336,9 @@ const ScraperPanel = () => ({
 
 /**
  * 挂载子模块
- * @param {HTMLElement} container - 容器元素
+ * @param container - 容器元素
  */
-export async function mount(container) {
+export async function mount(container: HTMLElement): Promise<void> {
     console.log('[Scraper] 🔧 开始挂载子模块');
 
     try {
@@ -345,7 +365,7 @@ export async function mount(container) {
 /**
  * 卸载子模块
  */
-export function unmount() {
+export function unmount(): void {
     console.log('[Scraper] 🔄 开始卸载子模块');
 
     try {
@@ -372,7 +392,7 @@ export function unmount() {
 /**
  * 初始化 Alpine Scraper 组件（向后兼容）
  */
-export function initAlpineScraper() {
+export function initAlpineScraper(): void {
     if (window.Alpine) {
         window.Alpine.data('scraperPanel', ScraperPanel);
     }
@@ -381,20 +401,20 @@ export function initAlpineScraper() {
 /**
  * 渲染历史记录（向后兼容）
  */
-export const renderHistory = () => {
+export const renderHistory = (): void => {
     window.dispatchEvent(new CustomEvent(APP_EVENTS.HISTORY_UPDATED));
 };
 
 /**
  * 初始化 Scraper 监听器（向后兼容）
  */
-export const initScraperListeners = () => {
+export const initScraperListeners = (): void => {
     // No-op，由 Alpine 处理
 };
 
 /**
  * 选择站点（向后兼容）
  */
-export const selectSite = () => {
+export const selectSite = (): void => {
     // No-op，由 Alpine 处理
 };

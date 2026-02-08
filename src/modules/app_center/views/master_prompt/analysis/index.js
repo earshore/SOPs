@@ -16,7 +16,7 @@ import { PROVIDERS, LANGUAGE_HEADERS } from '../../../../../common/constants/con
 import { ANALYSIS_MODULES, DYNAMIC_MASTER_TEMPLATE } from '../constants/prompts';
 import { showToast, showProgress } from '../../../../../common/utils/ui.js';
 import { HistoryService } from '../services/historyService';
-import { renderHistory } from '../scraper/index.js';
+import { renderHistory } from '../scraper/index';
 import { AnalysisService } from '../services/analysisService';
 import { StorageService, STORAGE_KEYS } from '../../../../../services/storageService.ts';
 import { ErrorService } from '../../../../../services/errorService';
