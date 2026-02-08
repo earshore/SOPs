@@ -1,4 +1,4 @@
-import BaseModule from "../../../../../common/BaseModule.js";
+import BaseModule from "../../../../../common/BaseModule";
 import { SEO_RADAR_DATA } from "../../../constants/amz_hub_constants.js";
 import { loadTemplate } from "../../../../../common/utils/viewLoader";
 import { loadChartJs } from "../../../../../common/utils/lazyLibs";

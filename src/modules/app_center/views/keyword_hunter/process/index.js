@@ -12,7 +12,7 @@
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import { showToast, showProgress } from '../../../../../common/utils/ui.js';
 import * as KeywordService from '../services/trackerService.js';
-import state from '../../../../../common/state.js';
+import state from "../../../../../common/state";
 import { ErrorService } from '../../../../../services/errorService';
 import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry';
 

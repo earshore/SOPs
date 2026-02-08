@@ -3,7 +3,7 @@
 // 🎯 Phase 4: 已迁移使用 StorageService
 // ================================================================
 
-import state from "../../../../../common/state.js";
+import state from "../../../../../common/state";
 import { StorageService, STORAGE_KEYS } from "../../../../../services/storageService.ts";
 
 const MAX_HISTORY_ITEMS = 20; // 限制只存最近20条

@@ -1,96 +1,19 @@
-// src/common/state.js
-// ================================================================
-// 🎯 P0 重构: 状态命名空间隔离 + Proxy 向后兼容
-// ================================================================
-
 /**
- * @typedef {Object} UIState
- * @property {string} currentTab
- * @property {string} currentDataTab
- * @property {string} currentReportTab
+ * state.ts - 全局状态管理
+ * 
+ * 功能特性:
+ * - 命名空间隔离
+ * - 响应式订阅系统
+ * - 批量更新和防抖机制
+ * - Proxy 代理实现向后兼容
  */
 
-/**
- * @typedef {Object} ScraperState
- * @property {boolean} isScraping
- * @property {string} selectedSite
- * @property {any} scrapedData
- * @property {string|number|null} currentHistoryId
- * @property {string} inputAsins
- */
-
-/**
- * @typedef {Object} AnalysisState
- * @property {any} analysisReport
- * @property {any} translatedReport
- * @property {string[]} selectedAsins
- * @property {string|null} expandedAsin
- * @property {boolean} isEditing
- * @property {boolean} showTranslation
- * @property {any[]} editHistory
- */
-
-/**
- * @typedef {Object} UserProductProfile
- * @property {string} targetMarket
- * @property {string} keywordsTier1
- * @property {string} keywordsTier2
- * @property {string} audience
- * @property {string} usps
- * @property {string} specs
- * @property {string} socialHook
- * @property {string} negative
- * @property {string} tone
- * @property {string} customStrategy
- * @property {boolean} useRufus
- * @property {boolean} useEmoji
- * @property {boolean} useCosmo
- * @property {string[]} selectedReportSections
- * @property {number} charLimit
- */
-
-/**
- * @typedef {Object} PromptlabState
- * @property {UserProductProfile} userProductProfile
- */
-
-/**
- * @typedef {Object} KeywordTrackerSettings
- * @property {boolean} matchPlural
- * @property {boolean} matchStem
- * @property {boolean} matchCase
- * @property {boolean} matchPartial
- */
-
-/**
- * @typedef {Object} KeywordTrackerState
- * @property {any[]} keywords
- * @property {string} processedCopy
- * @property {string} formattedCopy
- * @property {any[]} matchedKeywords
- * @property {any[]} unmatchedKeywords
- * @property {any[]} wordFrequency
- * @property {any[]} paragraphs
- * @property {boolean} translationMode
- * @property {Object.<string, any>} keywordLocationIndex
- * @property {KeywordTrackerSettings} settings
- * @property {boolean} isWindowMinimized
- */
-
-/**
- * @typedef {Object} AppStateData
- * @property {UIState} ui
- * @property {ScraperState} scraper
- * @property {AnalysisState} analysis
- * @property {PromptlabState} promptlab
- * @property {KeywordTrackerState} keywordTracker
- */
+import type { AppState, StateSubscriber, BatchUpdateOptions } from '../types/state';
 
 /**
  * 采用命名空间隔离的全局状态对象
- * @type {AppStateData}
  */
-const stateData = {
+const stateData: AppState = {
   // ========================
   // UI 全局状态
   // ========================
@@ -108,7 +31,7 @@ const stateData = {
     selectedSite: "",
     scrapedData: null,
     currentHistoryId: null,
-    inputAsins: "", // 用户输入的 ASIN 列表
+    inputAsins: "",
   },
 
   // ========================
@@ -185,13 +108,11 @@ const stateData = {
       specs: "",
       socialHook: "",
       negative: "",
-
       tone: "professional",
       customStrategy: "",
       useRufus: true,
       useEmoji: true,
-      useCosmo: true, // ✅ 构建场景化 (COSMO) 默认开启
-
+      useCosmo: true,
       selectedReportSections: [],
       charLimit: 5000,
     },
@@ -221,7 +142,7 @@ const stateData = {
 };
 
 // ================================================================
-// 🎯 P0 增强: 响应式订阅系统
+// 响应式订阅系统
 // ================================================================
 
 /**
@@ -229,13 +150,13 @@ const stateData = {
  * 键: 属性路径 (如 "currentTab" 或 "ui.currentTab")
  * 值: Set<callback>
  */
-const subscribers = new Map();
+const subscribers = new Map<string, Set<StateSubscriber>>();
 
 /**
  * 订阅状态变化
- * @param {string} key - 要订阅的属性键名
- * @param {Function} callback - 变化时的回调函数 (newValue, oldValue) => void
- * @returns {Function} 取消订阅的函数
+ * @param key - 要订阅的属性键名
+ * @param callback - 变化时的回调函数
+ * @returns 取消订阅的函数
  * 
  * @example
  * const unsubscribe = subscribe('currentTab', (newVal, oldVal) => {
@@ -244,11 +165,11 @@ const subscribers = new Map();
  * // 取消订阅
  * unsubscribe();
  */
-export function subscribe(key, callback) {
+export function subscribe(key: string, callback: StateSubscriber): () => void {
   if (!subscribers.has(key)) {
     subscribers.set(key, new Set());
   }
-  subscribers.get(key).add(callback);
+  subscribers.get(key)!.add(callback);
 
   // 返回取消订阅函数
   return () => {
@@ -262,12 +183,12 @@ export function subscribe(key, callback) {
 
 /**
  * 通知订阅者
- * @param {string} key - 变化的属性键名
- * @param {*} newValue - 新值
- * @param {*} oldValue - 旧值
+ * @param key - 变化的属性键名
+ * @param newValue - 新值
+ * @param oldValue - 旧值
  * @private
  */
-function notifySubscribers(key, newValue, oldValue) {
+function notifySubscribers(key: string, newValue: any, oldValue: any): void {
   if (newValue === oldValue) return; // 值未变化不通知
 
   // 1. 通知精确匹配的订阅者 (例如 "ui.currentTab")
@@ -286,38 +207,37 @@ function notifySubscribers(key, newValue, oldValue) {
   // 如果 key 是 "ui.currentTab"，也要通知订阅了 "currentTab" 的人
   if (key.includes('.')) {
     const shortKey = key.split('.').pop();
-    const shortSubs = subscribers.get(shortKey);
-    if (shortSubs) {
-      shortSubs.forEach(callback => {
-        try {
-          callback(newValue, oldValue);
-        } catch (e) {
-          console.error(`[State] 订阅回调执行出错 (key: ${shortKey}):`, e);
-        }
-      });
+    if (shortKey) {
+      const shortSubs = subscribers.get(shortKey);
+      if (shortSubs) {
+        shortSubs.forEach(callback => {
+          try {
+            callback(newValue, oldValue);
+          } catch (e) {
+            console.error(`[State] 订阅回调执行出错 (key: ${shortKey}):`, e);
+          }
+        });
+      }
     }
   }
 }
 
 // ================================================================
-// 🎯 P2 性能优化: 批量更新和防抖机制
+// 批量更新和防抖机制
 // ================================================================
 
 /**
  * 批量更新队列
  */
-let batchUpdateQueue = [];
-let batchUpdateTimer = null;
+let batchUpdateQueue: Record<string, any>[] = [];
+let batchUpdateTimer: number | null = null;
 let isBatching = false;
 
 /**
  * 批量更新状态 (减少多次订阅触发)
- * 🎯 性能优化: 支持同步和异步批量更新
  * 
- * @param {Object} updates - 要更新的键值对
- * @param {Object} options - 配置选项
- * @param {boolean} options.immediate - 是否立即执行 (默认false)
- * @param {number} options.debounce - 防抖延迟 (毫秒，默认0)
+ * @param updates - 要更新的键值对
+ * @param options - 配置选项
  * 
  * @example
  * // 立即批量更新
@@ -326,7 +246,7 @@ let isBatching = false;
  * // 防抖批量更新 (16ms后执行，适合高频更新)
  * batchUpdate({ x: 100, y: 200 }, { debounce: 16 });
  */
-export function batchUpdate(updates, options = {}) {
+export function batchUpdate(updates: Record<string, any>, options: BatchUpdateOptions = {}): void {
   const { immediate = false, debounce = 0 } = options;
 
   if (immediate) {
@@ -339,11 +259,11 @@ export function batchUpdate(updates, options = {}) {
     // 防抖模式
     batchUpdateQueue.push(updates);
     
-    if (batchUpdateTimer) {
+    if (batchUpdateTimer !== null) {
       clearTimeout(batchUpdateTimer);
     }
     
-    batchUpdateTimer = setTimeout(() => {
+    batchUpdateTimer = window.setTimeout(() => {
       const mergedUpdates = Object.assign({}, ...batchUpdateQueue);
       executeBatchUpdate(mergedUpdates);
       batchUpdateQueue = [];
@@ -369,16 +289,16 @@ export function batchUpdate(updates, options = {}) {
  * 执行批量更新
  * @private
  */
-function executeBatchUpdate(updates) {
-  // 🎯 性能优化: 暂停通知，批量更新后统一通知
-  const notifications = [];
+function executeBatchUpdate(updates: Record<string, any>): void {
+  // 暂停通知，批量更新后统一通知
+  const notifications: Array<{ key: string; newValue: any; oldValue: any }> = [];
   
   Object.entries(updates).forEach(([key, value]) => {
     // 查找属性所在命名空间
     let found = false;
     
     for (const nsKey of Object.keys(stateData)) {
-      const ns = stateData[nsKey];
+      const ns = (stateData as any)[nsKey];
       if (ns && typeof ns === "object" && key in ns) {
         const oldValue = ns[key];
         ns[key] = value;
@@ -389,8 +309,8 @@ function executeBatchUpdate(updates) {
     }
     
     if (!found && key in stateData) {
-      const oldValue = stateData[key];
-      stateData[key] = value;
+      const oldValue = (stateData as any)[key];
+      (stateData as any)[key] = value;
       notifications.push({ key, newValue: value, oldValue });
     }
   });
@@ -404,24 +324,24 @@ function executeBatchUpdate(updates) {
 /**
  * 缓存已创建的命名空间 Proxy
  */
-const proxyCache = new WeakMap();
+const proxyCache = new WeakMap<object, any>();
 
 /**
  * 为命名空间创建 Proxy
- * @param {Object} obj - 命名空间对象
- * @param {string} nsName - 命名空间名称
+ * @param obj - 命名空间对象
+ * @param nsName - 命名空间名称
  */
-function createNamespaceProxy(obj, nsName) {
+function createNamespaceProxy<T extends object>(obj: T, nsName: string): T {
   if (proxyCache.has(obj)) return proxyCache.get(obj);
 
   const proxy = new Proxy(obj, {
     get(target, prop) {
-      if (typeof prop === "symbol") return target[prop];
-      return target[prop];
+      if (typeof prop === "symbol") return (target as any)[prop];
+      return (target as any)[prop];
     },
     set(target, prop, value) {
-      const oldValue = target[prop];
-      target[prop] = value;
+      const oldValue = (target as any)[prop];
+      (target as any)[prop] = value;
       // 同时通知全路径和短路径
       notifySubscribers(`${nsName}.${String(prop)}`, value, oldValue);
       return true;
@@ -433,14 +353,14 @@ function createNamespaceProxy(obj, nsName) {
 }
 
 // ================================================================
-// 🛡️ Proxy 代理：实现向后兼容 + 响应式通知
+// Proxy 代理：实现向后兼容 + 响应式通知
 // ================================================================
 
 /**
  * 创建向后兼容的 Proxy 代理
  * - 支持旧代码直接访问: state.currentTab
  * - 支持新代码命名空间访问: state.ui.currentTab
- * - 🆕 自动触发订阅者通知
+ * - 自动触发订阅者通知
  */
 const state = new Proxy(stateData, {
   /**
@@ -451,47 +371,47 @@ const state = new Proxy(stateData, {
   get(target, prop) {
     // 特殊处理：Symbol.toStringTag 等内置属性
     if (typeof prop === "symbol") {
-      return target[prop];
+      return (target as any)[prop];
     }
 
     // 如果是命名空间键，返回代理后的命名空间对象
-    if (prop in target && typeof target[prop] === 'object' && target[prop] !== null) {
-      return createNamespaceProxy(target[prop], String(prop));
+    if (prop in target && typeof (target as any)[prop] === 'object' && (target as any)[prop] !== null) {
+      return createNamespaceProxy((target as any)[prop], String(prop));
     }
 
     // 向后兼容：遍历所有命名空间查找属性
     for (const nsKey of Object.keys(target)) {
-      const ns = target[nsKey];
+      const ns = (target as any)[nsKey];
       if (ns && typeof ns === "object" && prop in ns) {
         return ns[prop];
       }
     }
 
-    return target[prop];
+    return (target as any)[prop];
   },
 
   /**
    * SET 拦截器
    * 1. 如果设置的是命名空间，直接赋值（并通知）
    * 2. 否则遍历所有命名空间，找到属性所在位置并设置（向后兼容）
-   * 3. 🆕 自动通知订阅者
+   * 3. 自动通知订阅者
    */
   set(target, prop, value) {
     // 如果是命名空间键
     if (prop in target) {
-      const oldValue = target[prop];
-      target[prop] = value;
+      const oldValue = (target as any)[prop];
+      (target as any)[prop] = value;
       notifySubscribers(String(prop), value, oldValue);
       return true;
     }
 
     // 向后兼容：遍历所有命名空间查找并设置属性
     for (const nsKey of Object.keys(target)) {
-      const ns = target[nsKey];
+      const ns = (target as any)[nsKey];
       if (ns && typeof ns === "object" && prop in ns) {
         const oldValue = ns[prop];
         ns[prop] = value;
-        // 🔔 触发全路径和短路径订阅通知
+        // 触发全路径和短路径订阅通知
         notifySubscribers(`${nsKey}.${String(prop)}`, value, oldValue);
         return true;
       }
@@ -502,7 +422,7 @@ const state = new Proxy(stateData, {
       `[State] 属性 "${String(prop)}" 不属于任何命名空间，将创建于顶层。` +
       `建议添加到对应命名空间中。`
     );
-    target[prop] = value;
+    (target as any)[prop] = value;
     notifySubscribers(String(prop), value, undefined);
     return true;
   },
@@ -513,19 +433,19 @@ const state = new Proxy(stateData, {
   has(target, prop) {
     if (prop in target) return true;
     for (const nsKey of Object.keys(target)) {
-      const ns = target[nsKey];
+      const ns = (target as any)[nsKey];
       if (ns && typeof ns === "object" && prop in ns) {
         return true;
       }
     }
     return false;
   },
-});
+}) as AppState;
 
 export default state;
 
 // ================================================================
-// 🔧 命名空间快捷访问器 (可选导出，方便新代码使用)
+// 命名空间快捷访问器 (可选导出，方便新代码使用)
 // ================================================================
 export const uiState = stateData.ui;
 export const scraperState = stateData.scraper;

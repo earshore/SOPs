@@ -10,7 +10,7 @@
 
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import eventBus from '../../../../../common/EventBus.ts';
-import state from '../../../../../common/state.js';
+import state from "../../../../../common/state";
 import { scrapeAsin } from '../services/scraperService.js';
 import { LANGUAGE_HEADERS } from '../../../../../common/constants/constants.js';
 import { HistoryService } from '../services/historyService.js';

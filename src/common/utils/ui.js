@@ -1,7 +1,7 @@
 console.log("🚀 ui.js 模块 (Event-Driven Core) 开始加载...");
 
 import { escapeHtml } from '@/common/utils/security';
-import state from "../state.js";
+import state from "../state";
 import { ERROR_MESSAGES } from "../constants/constants.js";
 import { MENU_CONFIG, getRoutesByModule, getRouteFullConfig } from "../config/menuConfig";
 import { registerActions } from "./actionRegistry";

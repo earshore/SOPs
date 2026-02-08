@@ -1,5 +1,5 @@
 // src/modules/home/homeDisplay.js
-import BaseModule from "../../common/BaseModule.js";
+import BaseModule from "../../common/BaseModule";
 import { loadTemplate } from "../../common/utils/viewLoader";
 import './homeDisplay.css';
 

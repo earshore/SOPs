@@ -15,7 +15,7 @@ import './modules/app_center/app_center_style.css';
 window.marked = marked;
 
 // ✅ 导入全局状态对象
-import state from './common/state.js';
+import state from './common/state';
 window.state = state;
 
 // ✅ 导入视图加载器 (HTML 拆分重构的核心)

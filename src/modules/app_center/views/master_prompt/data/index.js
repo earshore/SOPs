@@ -9,8 +9,8 @@
  */
 
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
-import BaseModule from '../../../../../common/BaseModule.js';
-import state from '../../../../../common/state.js';
+import BaseModule from "../../../../../common/BaseModule";
+import state from "../../../../../common/state";
 import { getErrorSummary, showToast, switchTab } from '../../../../../common/utils/ui.js';
 import { HistoryService } from '../services/historyService.js';
 import { StorageService } from '../../../../../services/storageService.ts';

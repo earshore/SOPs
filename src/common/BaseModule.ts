@@ -1,24 +1,69 @@
-import { escapeHtml } from '@/common/utils/security';
-import { container } from './di/Container.ts';
+/**
+ * BaseModule.ts - 模块基类
+ * 
+ * 提供统一的生命周期管理、资源清理和错误处理
+ * 所有业务模块都应继承此类
+ */
 
+import { escapeHtml } from '@/common/utils/security';
+import { container } from './di/Container';
+
+/**
+ * 动作处理器类型
+ */
+export type ActionHandler = (...args: any[]) => void | Promise<void>;
+
+/**
+ * 动作映射类型
+ */
+export type ActionMap = Record<string, ActionHandler>;
+
+/**
+ * 清理函数类型
+ */
+export type DisposeFn = () => void;
+
+/**
+ * 模块基类
+ * 
+ * 功能特性:
+ * - 统一的生命周期管理 (mount/unmount)
+ * - 自动资源清理 (事件监听器、定时器、请求)
+ * - 错误处理和重试机制
+ * - 动作注册和清理
+ */
 export default class BaseModule {
+    /** 模块唯一标识符 */
+    protected readonly moduleId: string;
+    
+    /** 容器元素 */
+    protected container: HTMLElement | null = null;
+    
+    /** 清理函数列表 */
+    private _disposables: DisposeFn[] = [];
+    
+    /** 挂载状态 */
+    private _isMounted: boolean = false;
+    
+    /** 请求取消控制器 */
+    private _abortController: AbortController = new AbortController();
+    
+    /** 已注册的动作名称列表 */
+    private _registeredActions: string[] = [];
+
     /**
-     * @param {string} moduleId - 模块唯一ID
+     * 构造函数
+     * @param moduleId - 模块唯一ID
      */
-    constructor(moduleId) {
+    constructor(moduleId: string) {
         this.moduleId = moduleId;
-        this._disposables = [];
-        this._isMounted = false;
-        this.container = null;
-        this._abortController = new AbortController();
-        this._registeredActions = []; // 存储已注册的动作名称
     }
 
     /**
-     * 必须由子类实现
-     * @param {HTMLElement} container 
+     * 挂载模块
+     * @param container - 容器元素
      */
-    async mount(container) {
+    async mount(container: HTMLElement): Promise<void> {
         // 安全检查：如果已经挂载，先执行卸载以防止状态泄漏
         if (this._isMounted) {
             this.unmount();
@@ -32,46 +77,48 @@ export default class BaseModule {
 
         try {
             await this.render();
-            // Use runAsync to wrap init if needed, though init is usually safe to call directly if we want to catch top level here.
-            // But we want to encourage using runAsync for internal async ops.
             await this.init();
         } catch (error) {
-            this.handleError(error);
+            this.handleError(error as Error);
         }
     }
 
     /**
      * 统一异步操作包装器，自动处理错误
-     * @param {Function} asyncFn - 异步函数
-     * @param {string} errorContext - 错误上下文描述
+     * @param asyncFn - 异步函数
+     * @param errorContext - 错误上下文描述
      */
-    async runAsync(asyncFn, errorContext = 'Operation failed') {
+    protected async runAsync<T>(
+        asyncFn: () => Promise<T>,
+        errorContext: string = 'Operation failed'
+    ): Promise<T | undefined> {
         try {
             return await asyncFn();
         } catch (error) {
             console.error(`[${this.moduleId}] ${errorContext}:`, error);
-            // Optionally notify user via Toast or UI
-            // showToast(error.message, 'error'); // If we import showToast
-            this.handleError(error); // Or just use the module level error handler
+            this.handleError(error as Error);
+            return undefined;
         }
     }
 
     /**
-     * 必须由子类实现：渲染 HTML
+     * 渲染 HTML（必须由子类实现）
      */
-    async render() {
+    protected async render(): Promise<void> {
         throw new Error('BaseModule.render() must be implemented');
     }
 
     /**
-     * 可选由子类实现：初始化逻辑 (绑定事件等)
+     * 初始化逻辑（可选由子类实现）
      */
-    async init() { }
+    protected async init(): Promise<void> {
+        // 子类可以覆盖此方法
+    }
 
     /**
-     * 核心：安全卸载
+     * 卸载模块
      */
-    unmount() {
+    unmount(): void {
         if (!this._isMounted) return;
 
         console.log(`[BaseModule] Unmounting ${this.moduleId}...`);
@@ -89,7 +136,7 @@ export default class BaseModule {
         });
         this._disposables = [];
 
-        // 2. 同步清理已注册的动作（改为同步方式）
+        // 2. 同步清理已注册的动作
         if (this._registeredActions.length > 0) {
             this._unregisterActionsSync();
         }
@@ -104,20 +151,33 @@ export default class BaseModule {
     }
 
     /**
-     * 可选由子类实现：自定义卸载逻辑
+     * 自定义卸载逻辑（可选由子类实现）
      */
-    onUnmount() { }
+    protected onUnmount(): void {
+        // 子类可以覆盖此方法
+    }
 
     // ================= 工具方法 =================
 
     /**
      * 添加自动清理的事件监听器
-     * @param {EventTarget} target 
-     * @param {string} type 
-     * @param {EventListenerOrEventListenerObject} listener 
-     * @param {boolean|AddEventListenerOptions} [options] 
+     * @param target - 事件目标
+     * @param type - 事件类型
+     * @param listener - 事件监听器
+     * @param options - 监听器选项
      */
-    addEventListener(target, type, listener, options) {
+    protected addEventListener<K extends keyof HTMLElementEventMap>(
+        target: HTMLElement | Window | Document | null,
+        type: K,
+        listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any,
+        options?: boolean | AddEventListenerOptions
+    ): void;
+    protected addEventListener(
+        target: EventTarget | null,
+        type: string,
+        listener: EventListenerOrEventListenerObject,
+        options?: boolean | AddEventListenerOptions
+    ): void {
         if (!target) return;
         target.addEventListener(type, listener, options);
         this._disposables.push(() => {
@@ -127,31 +187,33 @@ export default class BaseModule {
 
     /**
      * 添加自动清理的定时器
-     * @param {Function} callback 
-     * @param {number} delay 
+     * @param callback - 回调函数
+     * @param delay - 延迟时间（毫秒）
+     * @returns 定时器ID
      */
-    setTimeout(callback, delay) {
-        const id = setTimeout(callback, delay);
+    protected setTimeout(callback: () => void, delay: number): number {
+        const id = window.setTimeout(callback, delay);
         this._disposables.push(() => clearTimeout(id));
         return id;
     }
 
     /**
      * 添加自动清理的循环定时器
-     * @param {Function} callback 
-     * @param {number} delay 
+     * @param callback - 回调函数
+     * @param delay - 间隔时间（毫秒）
+     * @returns 定时器ID
      */
-    setInterval(callback, delay) {
-        const id = setInterval(callback, delay);
+    protected setInterval(callback: () => void, delay: number): number {
+        const id = window.setInterval(callback, delay);
         this._disposables.push(() => clearInterval(id));
         return id;
     }
 
     /**
      * 注册任意清理函数
-     * @param {Function} fn 
+     * @param fn - 清理函数
      */
-    addDisposable(fn) {
+    protected addDisposable(fn: DisposeFn): void {
         if (typeof fn === 'function') {
             this._disposables.push(fn);
         }
@@ -159,13 +221,13 @@ export default class BaseModule {
 
     /**
      * 注册动作（自动在卸载时清理）
-     * 🔧 P0修复: 使用事件驱动解耦,避免循环依赖
-     * @param {Object} actions - { actionName: handler } 映射对象
+     * 使用事件驱动解耦，避免循环依赖
+     * @param actions - 动作映射对象
      */
-    registerActions(actions) {
-        // 🎯 使用事件总线发送注册请求,完全解耦
+    protected registerActions(actions: ActionMap): void {
+        // 使用事件总线发送注册请求，完全解耦
         Promise.all([
-            import('./EventBus.ts'),
+            import('./EventBus'),
             import('./constants/eventConstants')
         ]).then(([{ default: eventBus }, { APP_EVENTS }]) => {
             eventBus.emit(APP_EVENTS.REGISTER_ACTIONS, {
@@ -183,14 +245,14 @@ export default class BaseModule {
 
     /**
      * 清理已注册的动作（同步版本）
-     * 🔧 P0修复: 使用依赖注入容器清理
+     * 使用依赖注入容器清理
      * @private
      */
-    _unregisterActionsSync() {
+    private _unregisterActionsSync(): void {
         if (this._registeredActions.length === 0) return;
 
         try {
-            // 🎯 使用依赖注入容器获取actionRegistry
+            // 使用依赖注入容器获取actionRegistry
             const actionRegistry = container.resolve('actionRegistry');
             
             // 清理每个动作
@@ -207,11 +269,11 @@ export default class BaseModule {
 
     /**
      * 发起可取消的 fetch 请求
-     * @param {string} url - 请求URL
-     * @param {RequestInit} options - fetch 选项
-     * @returns {Promise<Response>}
+     * @param url - 请求URL
+     * @param options - fetch 选项
+     * @returns Response Promise
      */
-    async fetch(url, options = {}) {
+    protected async fetch(url: string, options: RequestInit = {}): Promise<Response> {
         return fetch(url, {
             ...options,
             signal: this._abortController.signal
@@ -219,18 +281,18 @@ export default class BaseModule {
     }
 
     /**
-     * 获取 AbortSignal (用于其他需要取消的操作)
-     * @returns {AbortSignal}
+     * 获取 AbortSignal（用于其他需要取消的操作）
+     * @returns AbortSignal
      */
-    getAbortSignal() {
+    protected getAbortSignal(): AbortSignal {
         return this._abortController.signal;
     }
 
     /**
      * 统一错误处理
-     * @param {Error} error 
+     * @param error - 错误对象
      */
-    handleError(error) {
+    protected handleError(error: Error): void {
         console.error(`[${this.moduleId}] Error:`, error);
         if (this.container) {
             this.container.innerHTML = `
@@ -247,18 +309,25 @@ export default class BaseModule {
             `;
 
             // 绑定重试逻辑
-            const btn = this.container.querySelector(`#retry-btn-${this.moduleId}`);
+            const btn = this.container.querySelector(`#retry-btn-${this.moduleId}`) as HTMLButtonElement;
             if (btn) {
                 btn.onclick = () => {
                     // ✅ 安全: 静态HTML模板，无用户输入
-                    this.container.innerHTML = '<div class="p-10 text-center"><i class="fas fa-spinner fa-spin text-slate-400"></i></div>';
+                    this.container!.innerHTML = '<div class="p-10 text-center"><i class="fas fa-spinner fa-spin text-slate-400"></i></div>';
                     // 重新挂载
-                    this.mount(this.container).catch(e => {
+                    this.mount(this.container!).catch(e => {
                         console.error("Retry failed:", e);
-                        this.handleError(e); // 递归处理再次失败的情况
+                        this.handleError(e as Error); // 递归处理再次失败的情况
                     });
                 };
             }
         }
+    }
+
+    /**
+     * 获取挂载状态
+     */
+    get isMounted(): boolean {
+        return this._isMounted;
     }
 }

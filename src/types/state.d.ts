@@ -49,10 +49,11 @@ export interface ScrapedDataItem {
  */
 export interface ScraperState {
   isScraping: boolean;
-  status: ScraperStatus;
+  status?: ScraperStatus;
   selectedSite: ScraperSite | '';
-  scrapedData: ScrapedDataItem[] | null;
-  currentHistoryId: string | null;
+  scrapedData: ScrapedDataItem[] | any | null;
+  currentHistoryId: string | number | null;
+  inputAsins?: string;
   progress?: number;
   error?: string;
 }
@@ -80,7 +81,13 @@ export interface ReportData {
  */
 export interface AnalysisState {
   selectedAsins: string[];
-  reportData: ReportData | null;
+  reportData?: ReportData | null;
+  analysisReport?: any | null;
+  translatedReport?: any | null;
+  expandedAsin?: string | null;
+  isEditing?: boolean;
+  showTranslation?: boolean;
+  editHistory?: any[];
   isAnalyzing?: boolean;
   filters?: {
     dateRange?: [number, number];
@@ -104,11 +111,33 @@ export interface PromptHistoryItem {
 }
 
 /**
+ * 用户产品配置
+ */
+export interface UserProductProfile {
+  targetMarket: string;
+  keywordsTier1: string;
+  keywordsTier2: string;
+  audience: string;
+  usps: string;
+  specs: string;
+  socialHook: string;
+  negative: string;
+  tone: string;
+  customStrategy: string;
+  useRufus: boolean;
+  useEmoji: boolean;
+  useCosmo: boolean;
+  selectedReportSections: string[];
+  charLimit: number;
+}
+
+/**
  * PromptLab状态
  */
 export interface PromptLabState {
-  currentPrompt: string;
-  history: PromptHistoryItem[];
+  currentPrompt?: string;
+  history?: PromptHistoryItem[];
+  userProductProfile?: UserProductProfile;
   selectedModel?: string;
   temperature?: number;
   maxTokens?: number;
@@ -138,11 +167,31 @@ export interface TrackingData {
 }
 
 /**
+ * 关键词追踪设置
+ */
+export interface KeywordTrackerSettings {
+  matchPlural: boolean;
+  matchStem: boolean;
+  matchCase: boolean;
+  matchPartial: boolean;
+}
+
+/**
  * KeywordTracker状态
  */
 export interface KeywordTrackerState {
-  keywords: string[];
-  trackingData: TrackingData | null;
+  keywords: any[];
+  processedCopy: string;
+  formattedCopy: string;
+  matchedKeywords: any[];
+  unmatchedKeywords: any[];
+  wordFrequency: any[];
+  paragraphs: any[];
+  translationMode: boolean;
+  keywordLocationIndex: Record<string, any>;
+  settings: KeywordTrackerSettings;
+  isWindowMinimized: boolean;
+  trackingData?: TrackingData | null;
   isTracking?: boolean;
   filters?: {
     minVolume?: number;
@@ -224,6 +273,18 @@ export interface SettingsState {
 // ==================== 完整应用状态 ====================
 
 /**
+ * Master Prompt 模块状态
+ */
+export interface MasterPromptState {
+  scraper: ScraperState;
+  data: {
+    currentTab: string;
+  };
+  analysis: AnalysisState;
+  promptlab: PromptLabState;
+}
+
+/**
  * 应用状态树
  */
 export interface AppState {
@@ -232,6 +293,7 @@ export interface AppState {
   analysis: AnalysisState;
   promptlab: PromptLabState;
   keywordTracker: KeywordTrackerState;
+  masterPrompt?: MasterPromptState;
   user?: UserState;
   settings?: SettingsState;
 }
@@ -290,6 +352,14 @@ export interface BatchUpdateAction {
     oldValue?: any;
   }>;
   meta?: Record<string, any>;
+}
+
+/**
+ * 批量更新选项
+ */
+export interface BatchUpdateOptions {
+  immediate?: boolean;
+  debounce?: number;
 }
 
 // ==================== 状态订阅类型 ====================

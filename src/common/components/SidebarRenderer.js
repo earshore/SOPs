@@ -5,7 +5,7 @@
 // ================================================================
 
 import { MENU_CONFIG } from '../config/menuConfig';
-import state from '../state.js';
+import state from '../state';
 import { COLOR_SCHEMES } from '../constants/colorSchemes.js';
 
 /**

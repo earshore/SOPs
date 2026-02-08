@@ -11,7 +11,7 @@
 import { escapeHtml } from '@/common/utils/security';
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import eventBus from '../../../../../common/EventBus.ts';
-import state from '../../../../../common/state.js';
+import state from "../../../../../common/state";
 import { promptlabService } from '../services/promptlabService.js';
 import SITE_CONFIGS from '../../../../../common/constants/constants.js';
 import { ANALYSIS_MODULES } from '../constants/prompts.js';
