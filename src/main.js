@@ -128,7 +128,7 @@ import { initHomeSplash } from "./modules/home/homeDisplay";
 // ✅ 自动注册事件监听器的模块 (事件驱动模式)
 import './modules/amz_hub/amz_hub.js';
 import './modules/sops/sops.js';
-import './modules/more/more.js';
+import './modules/more/more';
 import './modules/app_center/app_center';
 
 // ✅ Alpine.js
