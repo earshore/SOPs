@@ -1,4 +1,8 @@
 // @ts-nocheck
+// TODO: 移除 @ts-nocheck 并修复所有类型错误（约61个）
+// 主要错误类型：隐式 any 参数、DOM 元素类型、null 检查
+// 预计工作量：2-3小时
+// 优先级：P2（功能正常，但需要类型安全）
 console.log("🚀 ui.ts 模块 (Event-Driven Core) 开始加载...");
 
 import { escapeHtml } from '@/common/utils/security';
@@ -384,7 +388,15 @@ export function renderSopsMegaMenu(): void {
         let html = '';
 
         // Helper: Rich Card Generator with Enhanced Visual Effects
-        const createRichCard = (id, label, icon, color, version = 'v1.0', description = '', isOverview = false) => {
+        const createRichCard = (
+            id: string, 
+            label: string, 
+            icon: string, 
+            color: string, 
+            version: string = 'v1.0', 
+            description: string = '', 
+            isOverview: boolean = false
+        ): string => {
             // Calculate target route
             let target = id;
             if (!isOverview) {
