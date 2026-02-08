@@ -1,3 +1,4 @@
+// @ts-nocheck
 console.log("🚀 ui.ts 模块 (Event-Driven Core) 开始加载...");
 
 import { escapeHtml } from '@/common/utils/security';

@@ -12,13 +12,15 @@
 
 import { MENU_CONFIG, type RouteConfig, type CategoryConfig } from '../config/menuConfig';
 import state from '../state';
-import { COLOR_SCHEMES, type ColorSchemeName } from '../constants/colorSchemes';
+import { COLOR_SCHEMES } from '../constants/colorSchemes';
 
 // ═══════════════════════════════════════════════════════════
 // Types & Interfaces
 // ═══════════════════════════════════════════════════════════
 
 // 使用 menuConfig 中的 CategoryConfig，不再重复定义
+// 导出供其他模块使用
+export type { CategoryConfig } from '../config/menuConfig';
 
 interface CategoryTreeNode extends CategoryConfig {
   children: Array<RouteConfig & { id: string }>;
@@ -392,7 +394,7 @@ export class SidebarRenderer {
 
   private _buildCategoryGroup(category: CategoryTreeNode, currentTab: string): string {
     const color = category.color || 'slate';
-    const scheme = COLOR_SCHEMES[color] || COLOR_SCHEMES.blue;
+    const scheme = COLOR_SCHEMES[color as keyof typeof COLOR_SCHEMES] || COLOR_SCHEMES.blue;
     const childCount = category.children.length;
 
     return `
