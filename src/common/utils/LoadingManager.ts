@@ -4,7 +4,7 @@
 // 解决多个模块同时显示 loading、状态不一致的问题
 // ================================================================
 
-import { APP_EVENTS, emitAppEvent } from '../constants/eventConstants.js';
+import { APP_EVENTS, emitAppEvent } from '../constants/eventConstants';
 
 // ==================== 类型定义 ====================
 

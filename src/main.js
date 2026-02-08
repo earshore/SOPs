@@ -122,7 +122,7 @@ import {
 } from "./components/settings/systemSettings.js";
 
 import { switchTab, renderMegaMenu, renderSopsMegaMenu, renderHubMegaMenu, renderMoreMenu, showToast, initRouter } from "../src/common/utils/ui.js";
-import { APP_EVENTS } from './common/constants/eventConstants.js';
+import { APP_EVENTS } from './common/constants/eventConstants';
 import { initHomeSplash } from "./modules/home/homeDisplay.js";
 
 // ✅ 自动注册事件监听器的模块 (事件驱动模式)

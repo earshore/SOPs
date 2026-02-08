@@ -4,7 +4,7 @@
 // 支持浏览器历史、路由守卫、中间件
 // ================================================================
 
-import { APP_EVENTS, emitAppEvent } from '../constants/eventConstants.js';
+import { APP_EVENTS, emitAppEvent } from '../constants/eventConstants';
 import { routeGuard } from './RouteGuard.js';
 import { routeMiddleware } from './RouteMiddleware.js';
 import { routeErrorHandler } from './ErrorHandler.js';

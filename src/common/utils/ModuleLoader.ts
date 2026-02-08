@@ -5,7 +5,7 @@
 // 消除各业务模块中的重复代码
 // ================================================================
 
-import { APP_EVENTS } from '../constants/eventConstants.js';
+import { APP_EVENTS } from '../constants/eventConstants';
 import {
   renderErrorBoundary,
   renderLoading,

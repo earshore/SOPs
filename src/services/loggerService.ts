@@ -4,7 +4,6 @@
 // 提供结构化日志记录，支持不同日志级别和上下文
 // ================================================================
 
-import { EnvConfig } from '../common/config/envConfig.js';
 import { StorageService } from './storageService.js';
 
 /**
@@ -83,7 +82,9 @@ export class LoggerService {
   constructor() {
     this.logs = [];
     this.maxLogs = 100;
-    this.minLevel = EnvConfig.isDevelopment ? LOG_LEVELS.DEBUG : LOG_LEVELS.INFO;
+    // 直接使用环境变量，避免循环依赖
+    const isDevelopment = import.meta.env.MODE === 'development';
+    this.minLevel = isDevelopment ? LOG_LEVELS.DEBUG : LOG_LEVELS.INFO;
     this.remoteEndpoint = null;
     this.batchSize = 10;
     this.batchTimeout = 5000;

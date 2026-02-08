@@ -6,7 +6,7 @@ import { ERROR_MESSAGES } from "../constants/constants.js";
 import { MENU_CONFIG, getRoutesByModule, getRouteFullConfig } from "../config/menuConfig";
 import { registerActions } from "./actionRegistry.js";
 import { ensureViewLoaded } from "./viewLoader.js";
-import { APP_EVENTS, emitAppEvent } from "../constants/eventConstants.js";
+import { APP_EVENTS, emitAppEvent } from "../constants/eventConstants";
 // 🎯 短期优化：新增导入
 import { createSidebarRenderer } from '../components/SidebarRenderer.js';
 import { COLOR_SCHEMES } from '../constants/colorSchemes.js';

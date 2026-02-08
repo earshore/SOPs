@@ -23,7 +23,7 @@ import { ErrorService } from '../../../../../services/errorService.js';
 import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry.js';
 import { renderWidgetCard, renderViewModeHTML, renderEditorForm, renderSkeleton } from './renderer.js';
 import eventBus from '../../../../../common/EventBus.ts';
-import { MODULE_EVENTS } from '../../../../../common/constants/eventConstants.js';
+import { MODULE_EVENTS } from '../../../../../common/constants/eventConstants';
 import { loadGridStack } from '../../../../../common/utils/lazyLibs.js';
 
 import '../master_prompt_style.css';

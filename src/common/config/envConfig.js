@@ -1,12 +1,14 @@
 // src/common/config/envConfig.js
 // ================================================================
-// 🌐 环境配置管理 - 基于 Vite 环境变量
-// 支持 .env 文件配置，提供灵活的环境管理
+// 🌐 环境配置管理 - 基于 ConfigCenter
+// 向后兼容的环境配置接口
 // ================================================================
+
+import { configCenter } from './ConfigCenter';
 
 /**
  * 环境配置
- * 基于 Vite 的 import.meta.env 读取配置
+ * @deprecated 请使用 configCenter 替代
  */
 export const EnvConfig = {
   /**
@@ -14,28 +16,28 @@ export const EnvConfig = {
    * @returns {'development' | 'production' | 'test'}
    */
   get environment() {
-    return import.meta.env.VITE_APP_ENV || import.meta.env.MODE || 'production';
+    return configCenter.get('environment');
   },
 
   /**
    * 是否为开发环境
    */
   get isDevelopment() {
-    return this.environment === 'development';
+    return configCenter.isDevelopment();
   },
 
   /**
    * 是否为生产环境
    */
   get isProduction() {
-    return this.environment === 'production';
+    return configCenter.isProduction();
   },
 
   /**
    * 是否为测试环境
    */
   get isTest() {
-    return this.environment === 'test';
+    return configCenter.isTest();
   },
 
   /**
@@ -46,15 +48,21 @@ export const EnvConfig = {
      * API 基础路径
      */
     get baseUrl() {
-      return import.meta.env.VITE_API_BASE_URL || '/v1';
+      return configCenter.get('api.baseUrl');
     },
 
     /**
-     * API 超时时间（毫秒）
+     * API 超时时间
      */
     get timeout() {
-      const timeout = import.meta.env.VITE_API_TIMEOUT;
-      return timeout ? parseInt(timeout, 10) : 30000;
+      return configCenter.get('api.timeout');
+    },
+
+    /**
+     * 重试次数
+     */
+    get retryAttempts() {
+      return configCenter.get('api.retryAttempts');
     },
 
     /**
@@ -86,28 +94,75 @@ export const EnvConfig = {
   },
 
   /**
+   * 性能配置
+   */
+  performance: {
+    /**
+     * 是否启用性能监控
+     */
+    get enableMonitoring() {
+      return configCenter.get('performance.enableMonitoring');
+    },
+
+    /**
+     * 是否启用DevTools
+     */
+    get enableDevTools() {
+      return configCenter.get('performance.enableDevTools');
+    },
+
+    /**
+     * 日志级别
+     */
+    get logLevel() {
+      return configCenter.get('performance.logLevel');
+    }
+  },
+
+  /**
    * 功能开关
    */
   features: {
     /**
-     * 是否启用监控
+     * 是否启用实验性功能
      */
-    get monitoring() {
-      return import.meta.env.VITE_ENABLE_MONITORING === 'true';
+    get enableExperimentalFeatures() {
+      return configCenter.get('features.enableExperimentalFeatures');
+    },
+
+    /**
+     * 是否启用Beta功能
+     */
+    get enableBetaFeatures() {
+      return configCenter.get('features.enableBetaFeatures');
     },
 
     /**
      * 是否启用调试模式
      */
-    get debug() {
-      return import.meta.env.VITE_ENABLE_DEBUG === 'true';
+    get enableDebugMode() {
+      return configCenter.get('features.enableDebugMode');
     },
 
     /**
-     * 是否启用性能监控
+     * 是否启用监控（向后兼容）
+     */
+    get monitoring() {
+      return this.enableMonitoring;
+    },
+
+    /**
+     * 是否启用调试模式（向后兼容）
+     */
+    get debug() {
+      return this.enableDebugMode;
+    },
+
+    /**
+     * 是否启用性能监控（向后兼容）
      */
     get performance() {
-      return import.meta.env.VITE_ENABLE_PERFORMANCE === 'true';
+      return configCenter.get('performance.enableMonitoring');
     }
   },
 
@@ -120,14 +175,14 @@ export const EnvConfig = {
      * @returns {'debug' | 'info' | 'warn' | 'error'}
      */
     get level() {
-      return import.meta.env.VITE_LOG_LEVEL || 'info';
+      return configCenter.get('performance.logLevel');
     },
 
     /**
      * 是否启用详细日志
      */
     get verbose() {
-      return this.level === 'debug' || EnvConfig.features.debug;
+      return this.level === 'debug' || EnvConfig.features.enableDebugMode;
     }
   },
 
@@ -154,12 +209,18 @@ export const EnvConfig = {
       isProduction: this.isProduction,
       api: {
         baseUrl: this.api.baseUrl,
-        timeout: this.api.timeout
+        timeout: this.api.timeout,
+        retryAttempts: this.api.retryAttempts
       },
       features: {
-        monitoring: this.features.monitoring,
-        debug: this.features.debug,
-        performance: this.features.performance
+        enableExperimentalFeatures: this.features.enableExperimentalFeatures,
+        enableBetaFeatures: this.features.enableBetaFeatures,
+        enableDebugMode: this.features.enableDebugMode
+      },
+      performance: {
+        enableMonitoring: this.performance.enableMonitoring,
+        enableDevTools: this.performance.enableDevTools,
+        logLevel: this.performance.logLevel
       },
       logging: {
         level: this.logging.level,
