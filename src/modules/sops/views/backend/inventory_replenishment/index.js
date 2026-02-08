@@ -1,4 +1,4 @@
-import { loadTemplate } from "../../../../../common/utils/viewLoader.js";
+import { loadTemplate } from "../../../../../common/utils/viewLoader";
 
 // 库存预警与补货 SOP
 export async function mount(container) {

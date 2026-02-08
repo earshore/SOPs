@@ -1,4 +1,4 @@
-import { loadTemplate } from "../../../../../common/utils/viewLoader.js";
+import { loadTemplate } from "../../../../../common/utils/viewLoader";
 
 // QA 问答维护 SOP
 export async function mount(container) {

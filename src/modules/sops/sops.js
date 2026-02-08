@@ -1,6 +1,6 @@
 console.log("📋 SOPs Core Module Loading...");
 import './sops_style.css';
-import { createModuleLoader } from '../../common/utils/ModuleLoader.js';
+import { createModuleLoader } from '../../common/utils/ModuleLoader';
 
 // ================= 路由配置表 =================
 // 键名对应 menuConfig.js 里的 route id

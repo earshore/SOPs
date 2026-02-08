@@ -8,15 +8,15 @@
  * - 通过 EventBus 与其他模块通信
  */
 
-import { loadTemplate } from '../../../../../common/utils/viewLoader.js';
-import BaseModule from '../../../../../common/BaseModule.js';
-import state from '../../../../../common/state.js';
+import { loadTemplate } from '../../../../../common/utils/viewLoader';
+import BaseModule from "../../../../../common/BaseModule";
+import state from "../../../../../common/state";
 import { getErrorSummary, showToast, switchTab } from '../../../../../common/utils/ui.js';
 import { HistoryService } from '../services/historyService.js';
-import { StorageService } from '../../../../../services/storageService.js';
-import { languageFlagMap, SITE_NAME_MAP, SITE_DOMAIN_MAP } from '../../../../../common/constants/constants.js';
-import eventBus from '../../../../../common/EventBus.js';
-import { MODULE_EVENTS } from '../../../../../common/constants/eventConstants.js';
+import { StorageService } from '../../../../../services/storageService.ts';
+import { languageFlagMap, SITE_NAME_MAP, SITE_DOMAIN_MAP } from '../../../../../common/constants/constants';
+import eventBus from '../../../../../common/EventBus.ts';
+import { APP_EVENTS, MODULE_EVENTS } from '../../../../../common/constants/eventConstants';
 
 import '../master_prompt_style.css';
 
@@ -317,8 +317,8 @@ class DataModule extends BaseModule {
         this.renderDataPanel();
         
         // 触发事件通知其他模块更新
-        eventBus.emit('app:data-updated');
-        window.dispatchEvent(new CustomEvent('history-updated'));
+        eventBus.emit(APP_EVENTS.DATA_UPDATED);
+        window.dispatchEvent(new CustomEvent(APP_EVENTS.HISTORY_UPDATED));
 
         showToast(`ASIN ${asin} 已移除`, "info");
     }
@@ -339,7 +339,7 @@ class DataModule extends BaseModule {
             this.renderDataPanel();
             
             // 触发事件通知其他模块更新
-            window.dispatchEvent(new CustomEvent('history-updated'));
+            window.dispatchEvent(new CustomEvent(APP_EVENTS.HISTORY_UPDATED));
             
             showToast("评论已删除", "success");
         }
@@ -512,8 +512,8 @@ class DataModule extends BaseModule {
             }, 100);
             
             // 触发事件通知其他模块更新
-            eventBus.emit('app:data-updated');
-            window.dispatchEvent(new CustomEvent('history-updated'));
+            eventBus.emit(APP_EVENTS.DATA_UPDATED);
+            window.dispatchEvent(new CustomEvent(APP_EVENTS.HISTORY_UPDATED));
 
             showToast(`✅ 成功导入并合并 ${finalProducts.length} 个ASIN (基准站点: ${targetMarketplace})`, "success");
 

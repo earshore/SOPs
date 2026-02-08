@@ -5,7 +5,7 @@
  * 🔧 优化: 示例数据已移至独立文件
  */
 
-import { registerActionsWithLegacy } from "../../../../../common/utils/actionRegistry.js";
+import { registerActionsWithLegacy } from "../../../../../common/utils/actionRegistry";
 import { 
     MOCK_PRODUCTS, 
     STAGE_CONFIG, 
@@ -301,7 +301,7 @@ window.filterByStage = function (stage) {
     renderTable();
 };
 
-import { loadTemplate } from "../../../../../common/utils/viewLoader.js";
+import { loadTemplate } from "../../../../../common/utils/viewLoader";
 
 // Module mount function
 export async function mount(container) {

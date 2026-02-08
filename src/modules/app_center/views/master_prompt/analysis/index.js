@@ -8,23 +8,23 @@
  * - 通过 EventBus 与其他模块通信
  */
 
-import { escapeHtml } from '@/common/utils/security.js';
-import { loadTemplate } from '../../../../../common/utils/viewLoader.js';
-import BaseModule from '../../../../../common/BaseModule.js';
-import state from '../../../../../common/state.js';
-import { PROVIDERS, LANGUAGE_HEADERS } from '../../../../../common/constants/constants.js';
+import { escapeHtml } from '@/common/utils/security';
+import { loadTemplate } from '../../../../../common/utils/viewLoader';
+import BaseModule from "../../../../../common/BaseModule";
+import state from "../../../../../common/state";
+import { PROVIDERS, LANGUAGE_HEADERS } from '../../../../../common/constants/constants';
 import { ANALYSIS_MODULES, DYNAMIC_MASTER_TEMPLATE } from '../constants/prompts.js';
 import { showToast, showProgress } from '../../../../../common/utils/ui.js';
 import { HistoryService } from '../services/historyService.js';
 import { renderHistory } from '../scraper/index.js';
 import { AnalysisService } from '../services/analysisService.js';
-import { StorageService, STORAGE_KEYS } from '../../../../../services/storageService.js';
-import { ErrorService } from '../../../../../services/errorService.js';
-import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry.js';
+import { StorageService, STORAGE_KEYS } from '../../../../../services/storageService.ts';
+import { ErrorService } from '../../../../../services/errorService';
+import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry';
 import { renderWidgetCard, renderViewModeHTML, renderEditorForm, renderSkeleton } from './renderer.js';
-import eventBus from '../../../../../common/EventBus.js';
-import { MODULE_EVENTS } from '../../../../../common/constants/eventConstants.js';
-import { loadGridStack } from '../../../../../common/utils/lazyLibs.js';
+import eventBus from '../../../../../common/EventBus.ts';
+import { MODULE_EVENTS } from '../../../../../common/constants/eventConstants';
+import { loadGridStack } from '../../../../../common/utils/lazyLibs';
 
 import '../master_prompt_style.css';
 

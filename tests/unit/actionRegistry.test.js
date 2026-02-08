@@ -13,7 +13,7 @@ import {
   registerActionsWithLegacy,
   getLegacyCallStats,
   initGlobalEventDelegation
-} from '@/common/utils/actionRegistry.js';
+} from '@/common/utils/actionRegistry';
 
 describe('ActionRegistry', () => {
   beforeEach(() => {

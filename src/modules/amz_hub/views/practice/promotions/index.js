@@ -1,7 +1,7 @@
 // src/modules/amz_hub/views/practice/promotions/index.js
 // 欧洲站实战版 - 基于头部卖家真实经验
-import BaseModule from "../../../../../common/BaseModule.js";
-import { loadTemplate } from "../../../../../common/utils/viewLoader.js";
+import BaseModule from "../../../../../common/BaseModule";
+import { loadTemplate } from "../../../../../common/utils/viewLoader";
 
 // ==================== 1. 内容数据源 (欧洲站实战版) ====================
 const promoData = [

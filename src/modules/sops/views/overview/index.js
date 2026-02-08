@@ -1,4 +1,4 @@
-import { loadTemplate } from "../../../../common/utils/viewLoader.js";
+import { loadTemplate } from "../../../../common/utils/viewLoader";
 
 // SOPs Overview - 总览页面
 export async function mount(container) {

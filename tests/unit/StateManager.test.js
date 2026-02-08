@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { StateManager } from '@/common/state/StateManager.js';
+import { StateManager } from '@/common/state/StateManager.ts';
 
 describe('StateManager', () => {
   let stateManager;

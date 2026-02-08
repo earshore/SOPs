@@ -2,7 +2,7 @@
 import {
   SELECTOR_MAP,
   VERIFIED_PURCHASE_PATTERNS,
-} from "../../../../../common/constants/constants.js";
+} from '../../../../../common/constants/constants';
 
 // ----------------------------------------
 // 1. 通用解析工具 (Utility Functions)

@@ -4,9 +4,9 @@ import {
   openSettings,
   closeSettings,
   updateModelStatus
-} from '@/components/settings/systemSettings.js';
-import { StorageService, STORAGE_KEYS } from '@/services/storageService.js';
-import { PROVIDERS } from '@/common/constants/constants.js';
+} from '@/components/settings/systemSettings';
+import { StorageService, STORAGE_KEYS } from '@/services/storageService.ts';
+import { PROVIDERS } from '@/common/constants/constants';
 
 describe('SystemSettings', () => {
   beforeEach(() => {

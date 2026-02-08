@@ -3,12 +3,12 @@
 // 🎯 Phase 4: 已迁移使用 StorageService + BaseModule
 // ================================================================
 
-import { escapeHtml } from '@/common/utils/security.js';
-import BaseModule from "../../../../../common/BaseModule.js";
+import { escapeHtml } from '@/common/utils/security';
+import BaseModule from "../../../../../common/BaseModule";
 import { amzf_countries, amzf_months, amzf_events } from "../../../constants/amz_hub_constants.js";
-import { StorageService, STORAGE_KEYS } from "../../../../../services/storageService.js";
-import { loadTemplate } from "../../../../../common/utils/viewLoader.js";
-import { registerActionsWithLegacy } from "../../../../../common/utils/actionRegistry.js";
+import { StorageService, STORAGE_KEYS } from "../../../../../services/storageService.ts";
+import { loadTemplate } from "../../../../../common/utils/viewLoader";
+import { registerActionsWithLegacy } from "../../../../../common/utils/actionRegistry";
 
 const AMZF_HISTORY_KEY = 'amzf_search_history'; // 使用 StorageService 键
 const AMZF_MAX_HISTORY = 10; // 最大历史记录数

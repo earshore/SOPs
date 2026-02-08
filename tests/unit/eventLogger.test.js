@@ -5,7 +5,7 @@ import {
   getEventHistory,
   clearEventHistory,
   logCustomEvent
-} from '@/common/utils/eventLogger.js';
+} from '@/common/utils/eventLogger';
 
 describe('EventLogger', () => {
   let originalLocalStorage;

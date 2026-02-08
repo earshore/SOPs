@@ -1,4 +1,4 @@
-import { loadTemplate } from "../../../../../common/utils/viewLoader.js";
+import { loadTemplate } from "../../../../../common/utils/viewLoader";
 
 // FBA 发货标准操作 SOP
 export async function mount(container) {

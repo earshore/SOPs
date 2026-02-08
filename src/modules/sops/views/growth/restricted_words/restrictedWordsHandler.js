@@ -6,8 +6,8 @@ import {
   WORD_CATEGORIES,
   EU_SITES
 } from './constants/restrictedWordsConstants.js';
-import { registerActionsWithLegacy } from "../../../../../common/utils/actionRegistry.js";
-import { escapeHtml } from "../../../../../common/utils/security.js";
+import { registerActionsWithLegacy } from "../../../../../common/utils/actionRegistry";
+import { escapeHtml } from "../../../../../common/utils/security";
 
 let currentResults = [...RESTRICTED_WORDS_DATABASE];
 let currentSiteContext = 'ALL'; // 当前选中的站点上下文

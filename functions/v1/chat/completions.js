@@ -70,7 +70,13 @@ export async function onRequest(context) {
     // ============================================================
 
     const requestBody = await context.request.json();
+    
+    // 🌍 多端点支持 (优先使用不受地理限制的端点)
+    // 1. 优先使用环境变量配置的端点
+    // 2. 如果未配置，使用 OpenAI 官方端点 (可能受地理限制)
     const UPSTREAM_API_URL = context.env.LLM_API_BASE_URL || "https://api.openai.com/v1";
+    
+    console.log(`🌐 [Functions] 使用上游端点: ${UPSTREAM_API_URL}`);
     
     // --- 1. 缓存键生成 ---
     let cacheKey = null;
@@ -112,6 +118,39 @@ export async function onRequest(context) {
       },
       body: JSON.stringify(requestBody),
     });
+
+    // 🔍 详细的错误处理
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`❌ [Functions] 上游 API 错误 ${response.status}:`, errorText);
+      
+      // 特殊处理 403 地理限制错误
+      if (response.status === 403 && errorText.includes('Country, region, or territory not supported')) {
+        return new Response(JSON.stringify({ 
+          error: { 
+            message: "⛔ 地理位置限制：当前服务器所在地区无法访问上游 API。\n\n解决方案：\n1. 在 Cloudflare Pages 环境变量中配置 LLM_API_BASE_URL 为不受限制的端点\n2. 使用 Cloudflare AI Gateway\n3. 使用第三方代理服务（如 OpenRouter）\n\n请联系管理员配置。",
+            status: 403,
+            upstream_error: errorText
+          } 
+        }), {
+          status: 403,
+          headers: { 
+            "Content-Type": "application/json", 
+            "Access-Control-Allow-Origin": "*",
+            "X-Error-Type": "GEO_RESTRICTION"
+          }
+        });
+      }
+      
+      // 其他错误直接返回
+      return new Response(errorText, {
+        status: response.status,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+      });
+    }
 
     // 处理流式响应或普通响应
     const data = await response.json();

@@ -4,7 +4,7 @@
 // ================================================================
 
 import { describe, test, expect, beforeEach, vi } from 'vitest';
-import { Logger, LOG_LEVELS } from '@/services/loggerService.js';
+import { Logger, LOG_LEVELS } from '@/services/loggerService.ts';
 
 describe('LoggerService', () => {
     beforeEach(() => {

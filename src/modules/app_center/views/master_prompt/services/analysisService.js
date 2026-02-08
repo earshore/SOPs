@@ -5,7 +5,7 @@
 // 🛡️ Phase 1: 增强鲁棒性 - 改进解析逻辑与类型检查
 // ================================================= ===============
 
-import { callLLM } from "../../../../../services/llmService.js";
+import { callLLM } from "../../../../../services/llmService";
 import { TRANSLATE_PROMPT_TEMPLATE } from "../constants/prompts.js";
 
 // ======================== 
@@ -168,15 +168,15 @@ export const AnalysisService = {
       { jsonMode: false, timeout: 120000 }
     );
 
-    // 4. 解析结果
     try {
       return robustParseJSON(response);
     } catch (e) {
-      console.warn("Analysis JSON Parse Failed:", e.message);
+      const error = /** @type {Error} */ (e);
+      console.warn("Analysis JSON Parse Failed:", error.message);
       return { 
         raw_response: response, 
         parse_error: true, 
-        error_detail: e.message 
+        error_detail: error.message 
       };
     }
   },
@@ -211,7 +211,8 @@ export const AnalysisService = {
     try {
       return robustParseJSON(response);
     } catch (e) {
-      console.warn("Translation JSON Parse Failed:", e.message);
+      const error = /** @type {Error} */ (e);
+      console.warn("Translation JSON Parse Failed:", error.message);
       return { 
         ...report, // 返回原报告，但标记错误
         parse_error: true, 
