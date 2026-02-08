@@ -739,8 +739,8 @@ class AnalysisModule extends BaseModule {
     );
 
 
-    const templateId = report.meta?.templateId || "default";
-    const savedLayout = StorageService.getLayoutConfig(templateId);
+    const savedTemplateId = (report.meta?.templateId as string | undefined) || "default";
+    const savedLayout = StorageService.getLayoutConfig(savedTemplateId);
 
     const widgets: GridStackWidget[] = [];
     const keys = Object.keys(report).filter((k) => k !== "meta");
@@ -840,7 +840,7 @@ class AnalysisModule extends BaseModule {
     if (!this.grid) return;
     const layout = this.grid.save(false);
     const cleanLayout = layout.map((node: GridStackNode) => ({
-      id: node.id,
+      id: node.id || '',
       x: node.x,
       y: node.y,
       w: node.w,
@@ -849,7 +849,7 @@ class AnalysisModule extends BaseModule {
     StorageService.setLayoutConfig(templateId, cleanLayout);
   }
 
-  renderWidgetContent(key: string, report: AnalysisReport, transReport: AnalysisReport | null): string {
+  renderWidgetContent(key: string, report: AnalysisReport, transReport: AnalysisReport | null | undefined): string {
     const origVal = report[key];
     const showTrans = state.analysis.showTranslation;
     const transVal = showTrans && transReport ? transReport[key] : undefined;
@@ -998,12 +998,13 @@ class AnalysisModule extends BaseModule {
   }
 
   generateDynamicMarkdown(data: unknown, depth: number = 1): string {
-    if (!data) return "";
+    if (!data || typeof data !== 'object') return "";
     let md = "";
 
-    Object.keys(data).forEach((key) => {
+    const dataObj = data as Record<string, unknown>;
+    Object.keys(dataObj).forEach((key) => {
       if (key === "meta") return;
-      const val = data[key];
+      const val = dataObj[key];
       const heading = "#".repeat(Math.min(depth + 1, 6));
       md += `${heading} ${key}\n\n`;
 
@@ -1039,7 +1040,7 @@ class AnalysisModule extends BaseModule {
 
 
   toggleCardResize(key: string, forceState?: boolean): void {
-    const el = document.querySelector(`.grid-stack-item[gs-id="${key}"]`);
+    const el = document.querySelector(`.grid-stack-item[gs-id="${key}"]`) as HTMLElement | null;
     const card = document.getElementById(`widget-card-${key}`);
     if (!el || !card) return;
 
@@ -1066,8 +1067,8 @@ class AnalysisModule extends BaseModule {
         
         // 确保其他卡片保持禁用
         this.grid.engine.nodes.forEach((node: GridStackNode) => {
-          if (node.el !== el) {
-            this.grid.update(node.el, { noMove: true, noResize: true });
+          if (node.el && node.el !== el) {
+            this.grid!.update(node.el, { noMove: true, noResize: true });
           }
         });
       }
@@ -1089,7 +1090,7 @@ class AnalysisModule extends BaseModule {
       el.classList.remove('grid-stack-item-resizing');
       
       // 禁用当前卡片的移动和调整
-      if (this.grid) {
+      if (this.grid && el) {
         this.grid.update(el, { noMove: true, noResize: true });
       }
       
@@ -1117,8 +1118,9 @@ class AnalysisModule extends BaseModule {
 
   registerGlobalActions(): void {
     const actions = {
-      toggleAllModules: (params: { checked: string }) => {
-        const checked = params.checked === 'true';
+      toggleAllModules: (params: unknown) => {
+        const typedParams = params as { checked: string };
+        const checked = typedParams.checked === 'true';
         this.toggleAllModules(checked);
       },
       selectAllAsins: () => this.selectAllAsins(),
@@ -1126,8 +1128,9 @@ class AnalysisModule extends BaseModule {
       translateReport: () => this.translateReport(),
       copyReportMarkdown: () => this.copyReportMarkdown(),
       exportReport: () => this.exportReport(),
-      toggleCardResize: (params: { key: string }) => {
-        const key = params.key;
+      toggleCardResize: (params: unknown) => {
+        const typedParams = params as { key: string };
+        const key = typedParams.key;
         if (key) this.toggleCardResize(key, true);
       },
     };
@@ -1148,13 +1151,13 @@ class AnalysisModule extends BaseModule {
     
     // 将全局函数挂载到 window，并注册清理函数
     Object.entries(globalFunctions).forEach(([name, fn]) => {
-      (window as Record<string, unknown>)[name] = fn;
+      (window as unknown as Record<string, unknown>)[name] = fn;
     });
     
     // 添加清理函数，在卸载时移除全局函数
     this.addDisposable(() => {
       Object.keys(globalFunctions).forEach(name => {
-        delete (window as Record<string, unknown>)[name];
+        delete (window as unknown as Record<string, unknown>)[name];
       });
     });
   }
@@ -1189,10 +1192,11 @@ class AnalysisModule extends BaseModule {
       ? state.analysis.translatedReport 
       : state.analysis.analysisReport;
     
-    if (!report) return;
+    if (!report || typeof report === 'string') return;
     
     if (!this.originalDataMap.has(key)) {
-      this.originalDataMap.set(key, JSON.parse(JSON.stringify(report[key])));
+      const value = (report as Record<string, unknown>)[key];
+      this.originalDataMap.set(key, JSON.parse(JSON.stringify(value)));
     }
 
     // 初始化编辑历史
@@ -1206,7 +1210,8 @@ class AnalysisModule extends BaseModule {
 
     // 渲染编辑表单
     // ✅ 安全: 静态HTML模板，无用户输入
-    contentArea.innerHTML = renderEditorForm(key, report[key]);
+    const value = (report as Record<string, unknown>)[key];
+    contentArea.innerHTML = renderEditorForm(key, value);
   }
 
   saveLocalEdit(key: string): void {
