@@ -1,4 +1,4 @@
-// src/main.js
+// src/main.ts
 // ================================================================
 // 🎯 P1 重构: 使用 ActionRegistry 替代散落的 window.xxx 赋值
 // 🎯 Phase 4: 使用 StorageService 统一数据访问
@@ -34,15 +34,15 @@ import { loadingManager } from './common/utils/LoadingManager';
 import userGuideModalHtml from './components/modal/userGuideModal.html?raw';
 
 // Inject Modals
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', (): void => {
   // User Guide Modal
   const guideContainer = document.getElementById('user-guide-container');
   if (guideContainer) {
     // ✅ 安全: 静态HTML模板，无用户输入
     guideContainer.innerHTML = userGuideModalHtml;
-    Array.from(guideContainer.querySelectorAll('script')).forEach(script => {
+    Array.from(guideContainer.querySelectorAll('script')).forEach((script: HTMLScriptElement) => {
       const newScript = document.createElement('script');
-      Array.from(script.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+      Array.from(script.attributes).forEach((attr: Attr) => newScript.setAttribute(attr.name, attr.value));
       newScript.textContent = script.textContent;
       document.body.appendChild(newScript);
     });
@@ -52,17 +52,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ✅ P1: 导入动作注册中心
 import {
-  registerActionsWithLegacy,
-  initGlobalEventDelegation
+  registerActionsWithLegacy
 } from './common/utils/actionRegistry';
 
-import { loadPlugins } from './common/utils/pluginLoader';
-
-// ✅ P1: 导入事件调试工具
-import { initEventLogger } from './common/utils/eventLogger';
-
 // ✅ 全局错误兜底 (增强版 - 集成日志和监控)
-window.addEventListener("error", (event) => {
+window.addEventListener("error", (event: ErrorEvent): void => {
   // 避免循环报错导致 Toast 刷屏
   if (window._errorThrottle && Date.now() - window._errorThrottle < 2000) return;
   window._errorThrottle = Date.now();
@@ -70,7 +64,9 @@ window.addEventListener("error", (event) => {
   const msg = `系统运行异常: ${event.message || "未知错误"}`;
   
   // 记录到日志服务
-  Logger.fatal('全局错误捕获', event.error, 'System');
+  import('./services/loggerService').then(({ Logger }) => {
+    Logger.fatal('全局错误捕获', event.error, 'System');
+  }).catch(() => {});
   
   // 用户通知
   if (window.showToast) window.showToast(msg, "error");
@@ -86,14 +82,16 @@ window.addEventListener("error", (event) => {
 });
 
 // ✅ Promise 异常兜底 (增强版 - 集成日志和监控)
-window.addEventListener("unhandledrejection", (event) => {
+window.addEventListener("unhandledrejection", (event: PromiseRejectionEvent): void => {
   if (window._errorThrottle && Date.now() - window._errorThrottle < 2000) return;
   window._errorThrottle = Date.now();
 
   const msg = `异步操作异常: ${event.reason?.message || "网络请求或数据处理失败"}`;
   
   // 记录到日志服务
-  Logger.error('未处理的Promise拒绝', event.reason, 'System');
+  import('./services/loggerService').then(({ Logger }) => {
+    Logger.error('未处理的Promise拒绝', event.reason, 'System');
+  }).catch(() => {});
   
   // 用户通知
   if (window.showToast) window.showToast(msg, "error");
@@ -121,7 +119,7 @@ import {
   saveProxyConfig
 } from "./components/settings/systemSettings";
 
-import { switchTab, renderMegaMenu, renderSopsMegaMenu, renderHubMegaMenu, renderMoreMenu, showToast, initRouter } from "../src/common/utils/ui";
+import { switchTab, renderMegaMenu, renderSopsMegaMenu, renderHubMegaMenu, renderMoreMenu, showToast, initRouter } from "./common/utils/ui";
 import { APP_EVENTS } from './common/constants/eventConstants';
 import { initHomeSplash } from "./modules/home/homeDisplay";
 
@@ -139,7 +137,7 @@ window.Alpine = Alpine;
 // APP STARTUP (程序启动)
 // ========================
 
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
   console.log("🚀 System: Application Booting...");
 
   // ================================================================
@@ -149,34 +147,34 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // 1. 基础服务（无依赖）
   bootstrap.register('eventBus', async () => {
-    const { default: eventBus } = await import('./common/EventBus.ts');
+    const { default: eventBus } = await import('./common/EventBus');
     return eventBus;
   });
 
   bootstrap.register('container', async () => {
-    const { container } = await import('./common/di/Container.ts');
+    const { container } = await import('./common/di/Container');
     return container;
   }, { dependencies: ['eventBus'] });
 
   // 2. 工具服务
   bootstrap.register('actionRegistry', async () => {
     const { default: actionRegistry } = await import('./common/utils/actionRegistry');
-    const { container } = await import('./common/di/Container.ts');
+    const { container } = await import('./common/di/Container');
     container.register('actionRegistry', () => actionRegistry);
     return actionRegistry;
   }, { dependencies: ['container'] });
 
   bootstrap.register('stateManager', async () => {
-    const { stateManager } = await import('./common/state/StateManager.ts');
-    const { container } = await import('./common/di/Container.ts');
+    const { stateManager } = await import('./common/state/StateManager');
+    const { container } = await import('./common/di/Container');
     container.register('stateManager', () => stateManager);
     return stateManager;
   }, { dependencies: ['container'] });
 
   // 3. 路由服务
   bootstrap.register('router', async () => {
-    const { router } = await import('./common/router/Router.ts');
-    const { container } = await import('./common/di/Container.ts');
+    const { router } = await import('./common/router/Router');
+    const { container } = await import('./common/di/Container');
     container.register('router', () => router);
     return router;
   }, { dependencies: ['container', 'stateManager'] });
@@ -195,7 +193,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   bootstrap.register('logger', async () => {
-    const { Logger } = await import('./services/loggerService.ts');
+    const { Logger } = await import('./services/loggerService');
     Logger.info('应用启动', { version: '1.0.0' }, 'System');
     return Logger;
   }, { optional: true });
@@ -249,9 +247,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     
     if (!result.success) {
       console.error('❌ 部分服务初始化失败，应用可能无法正常工作');
-      if (window.showToast) {
-        showToast('应用初始化失败，请刷新页面重试', 'error');
-      }
+      showToast('应用初始化失败，请刷新页面重试', 'error');
       return;
     }
 
@@ -283,9 +279,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   } catch (error) {
     console.error('❌ 应用启动失败:', error);
-    if (window.showToast) {
-      showToast('应用启动失败，请刷新页面重试', 'error');
-    }
+    showToast('应用启动失败，请刷新页面重试', 'error');
   }
 });
 
@@ -295,11 +289,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 // 使用 registerActionsWithLegacy 在注册到 ActionRegistry 的同时
 // 也挂载到 window，保持向后兼容现有 onclick="xxx()" 调用
 
+interface ActionParams {
+  param?: string;
+  updateHistory?: boolean;
+  format?: 'json' | 'csv';
+}
+
+type ToastType = 'success' | 'error' | 'warning' | 'info';
+
 registerActionsWithLegacy({
   // === Navigation 导航 ===
-  switchTab: (params) => {
+  switchTab: (params: string | ActionParams) => {
     // Handle both direct calls (legacy) and data-action calls
-    const tab = typeof params === 'string' ? params : params.param;
+    const tab = typeof params === 'string' ? params : params.param || '';
     const updateHistory = typeof params === 'object' && params.updateHistory !== undefined 
       ? params.updateHistory 
       : true;
@@ -309,16 +311,22 @@ registerActionsWithLegacy({
   renderMegaMenu,
 
   // === Utilities 工具函数 ===
-  showToast,
+  showToast: (params: Record<string, any>) => {
+    if (typeof params === 'string') {
+      showToast(params as string);
+    } else if (params.message) {
+      showToast(params.message as string, params.type as ToastType | undefined);
+    }
+  },
 
   // === Modal 模态框 ===
-  close: (params, event) => {
+  close: (_params: unknown, event?: Event) => {
     // 通用的 close 动作：查找最近的 app-modal 并关闭
-    const target = event?.target;
+    const target = event?.target as HTMLElement | null;
     if (!target) return;
     
     // 向上查找最近的 app-modal 元素
-    const modal = target.closest('app-modal');
+    const modal = target.closest('app-modal') as any;
     if (modal && typeof modal.close === 'function') {
       modal.close();
     }
@@ -350,11 +358,13 @@ registerActionsWithLegacy({
       return report;
     } catch (e) {
       console.error('获取性能报告失败:', e);
+      return undefined;
     }
   },
 
   // 🎯 阶段1: 日志管理
-  showLogs: () => {
+  showLogs: async () => {
+    const { Logger } = await import('./services/loggerService');
     const logs = Logger.getLogs();
     console.log('📋 所有日志:', logs);
     console.table(logs.map(log => ({
@@ -371,7 +381,8 @@ registerActionsWithLegacy({
     return logs;
   },
 
-  showErrors: () => {
+  showErrors: async () => {
+    const { Logger } = await import('./services/loggerService');
     const errors = Logger.getErrors();
     console.log('❌ 错误日志:', errors);
     console.table(errors.map(log => ({
@@ -388,15 +399,17 @@ registerActionsWithLegacy({
     return errors;
   },
 
-  clearLogs: () => {
+  clearLogs: async () => {
+    const { Logger } = await import('./services/loggerService');
     Logger.clear();
     if (window.showToast) {
       window.showToast('日志已清除', 'success');
     }
   },
 
-  downloadLogs: (params) => {
-    const format = params?.format || 'json';
+  downloadLogs: async (params?: ActionParams) => {
+    const { Logger } = await import('./services/loggerService');
+    const format = (params?.format || 'json') as 'json' | 'csv';
     Logger.download(format);
     if (window.showToast) {
       window.showToast(`日志已导出为 ${format.toUpperCase()} 格式`, 'success');

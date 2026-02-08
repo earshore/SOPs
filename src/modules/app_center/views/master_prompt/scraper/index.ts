@@ -34,13 +34,6 @@ interface ProxyConfig {
     customUrl?: string;
 }
 
-// 扩展 Window 接口以支持 Alpine
-declare global {
-    interface Window {
-        Alpine?: any;
-    }
-}
-
 // ========================================== 
 // Alpine Component Logic
 // ========================================== 

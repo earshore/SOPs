@@ -17,28 +17,54 @@ interface ImportMeta {
 }
 
 // ==================== Window全局对象扩展 ====================
-interface Window {
-  // Alpine.js
-  Alpine: any;
-  
-  // Marked
-  marked: any;
-  
-  // 全局状态
-  state: any;
-  
-  // 路由
-  router: import('../common/router/Router').Router;
-  
-  // 工具函数
-  showToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
-  switchTab: (tab: string, updateHistory?: boolean) => void;
-  
-  // 调试工具
-  __DIContainer?: import('../common/di/Container').DIContainer;
-  
-  // 错误节流
-  _errorThrottle?: number;
+declare global {
+  interface Window {
+    // Alpine.js
+    Alpine: any;
+    
+    // Marked
+    marked: any;
+    
+    // 全局状态
+    state: any;
+    
+    // 路由
+    router: import('../common/router/Router').Router;
+    
+    // 工具函数
+    showToast: (message: string, type?: 'success' | 'error' | 'warning' | 'info') => void;
+    switchTab: (tab: string, updateHistory?: boolean) => Promise<void>;
+    renderMegaMenu: () => void;
+    renderSopsMegaMenu: () => void;
+    renderHubMegaMenu: () => void;
+    renderMoreMenu: () => void;
+    initRouter: () => void;
+    
+    // 搜索函数
+    searchSOPs?: (query: string) => void;
+    clearSOPSearch?: () => void;
+    searchHub?: (query: string) => void;
+    clearHubSearch?: () => void;
+    searchSidebar?: (query: string) => void;
+    clearSidebarSearch?: () => void;
+    
+    // 设置相关
+    openSettings?: () => void;
+    closeSettings?: () => void;
+    saveProviderConfig?: () => void;
+    loadProviderConfig?: () => void;
+    fetchModels?: () => void;
+    toggleApiKeyVisibility?: () => void;
+    testConnection?: () => void;
+    saveProxyConfig?: () => void;
+    updateModelStatus?: () => void;
+    
+    // 调试工具
+    __DIContainer?: import('../common/di/Container').DIContainer;
+    
+    // 错误节流
+    _errorThrottle?: number;
+  }
 }
 
 // ==================== 模块声明 ====================

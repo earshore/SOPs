@@ -57,7 +57,10 @@
     "checkJs": false,
     
     // 类型定义
-    "types": ["vite/client", "node"]
+    "types": ["vite/client", "node"],
+    
+    // 类型根目录
+    "typeRoots": ["./node_modules/@types", "./src/types"]
   },
   
   "include": [
