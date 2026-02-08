@@ -78,7 +78,7 @@ class StorageServiceClass implements IStorageService {
   /**
    * 获取存储值
    */
-  get<T = any>(key: string, defaultValue: T | null = null): T | null {
+  get<T = unknown>(key: string, defaultValue: T | null = null): T | null {
     try {
       const raw = localStorage.getItem(key);
       if (raw === null) return defaultValue;
@@ -95,7 +95,7 @@ class StorageServiceClass implements IStorageService {
   /**
    * 设置存储值
    */
-  set(key: string, value: any): boolean {
+  set(key: string, value: unknown): boolean {
     try {
       const serialized = JSON.stringify(value);
       
@@ -108,7 +108,7 @@ class StorageServiceClass implements IStorageService {
     } catch (e) {
       console.error(`[StorageService] 存储失败: ${key}`, e);
       
-      if ((e as any).name === 'QuotaExceededError') {
+      if ((e as Error & { name: string }).name === 'QuotaExceededError') {
         this._handleQuotaExceeded();
         try {
           localStorage.setItem(key, JSON.stringify(value));
@@ -155,7 +155,7 @@ class StorageServiceClass implements IStorageService {
     } catch (e) {
       console.error(`[StorageService] 存储失败: ${key}`, e);
       
-      if ((e as any).name === 'QuotaExceededError') {
+      if ((e as Error & { name: string }).name === 'QuotaExceededError') {
         this._handleQuotaExceeded();
         try {
           localStorage.setItem(key, value);
@@ -346,7 +346,7 @@ class StorageServiceClass implements IStorageService {
     
     this._cleanupLRU();
     
-    const history = this.get<any[]>(STORAGE_KEYS.SCRAPE_HISTORY, []);
+    const history = this.get<unknown[]>(STORAGE_KEYS.SCRAPE_HISTORY, []);
     if (history && history.length > 10) {
       this.set(STORAGE_KEYS.SCRAPE_HISTORY, history.slice(0, 10));
       console.log('[StorageService] 清理了采集历史数据');
@@ -360,7 +360,7 @@ class StorageServiceClass implements IStorageService {
   /**
    * 获取 LLM 配置（包含加密的API密钥）
    */
-  async getLLMConfigWithKey(provider: string | null = null): Promise<any | null> {
+  async getLLMConfigWithKey(provider: string | null = null): Promise<LLMProviderConfig | null> {
     const activeProvider = provider || this.get<string>(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
     if (!activeProvider) return null;
     
@@ -369,10 +369,10 @@ class StorageServiceClass implements IStorageService {
     
     try {
       const apiKey = await this.getSecure(`llm_key_${activeProvider}`, '');
-      return { ...config, apiKey };
+      return { ...config, apiKey: apiKey || '' } as LLMProviderConfig;
     } catch (error) {
       console.warn('[StorageService] Failed to decrypt API key:', error);
-      return { ...config, apiKey: '' };
+      return { ...config, apiKey: '' } as LLMProviderConfig;
     }
   }
 
@@ -457,7 +457,7 @@ class StorageServiceClass implements IStorageService {
   /**
    * 安全存储敏感数据
    */
-  async setSecure(key: string, value: any): Promise<boolean> {
+  async setSecure(key: string, value: unknown): Promise<boolean> {
     const { SecureStorage } = await import('../common/utils/secureStorage');
     return await SecureStorage.setSecure(key, value);
   }
@@ -465,7 +465,7 @@ class StorageServiceClass implements IStorageService {
   /**
    * 读取安全存储的数据
    */
-  async getSecure<T = any>(key: string, defaultValue: T | null = null): Promise<T | null> {
+  async getSecure<T = unknown>(key: string, defaultValue: T | null = null): Promise<T | null> {
     const { SecureStorage } = await import('../common/utils/secureStorage');
     return await SecureStorage.getSecure(key, defaultValue);
   }
@@ -486,6 +486,6 @@ export default StorageService;
 
 // 向后兼容：暴露到 window
 if (typeof window !== 'undefined') {
-  (window as any).StorageService = StorageService;
-  (window as any).STORAGE_KEYS = STORAGE_KEYS;
+  (window as Window & { StorageService?: StorageServiceClass; STORAGE_KEYS?: typeof STORAGE_KEYS }).StorageService = StorageService;
+  (window as Window & { StorageService?: StorageServiceClass; STORAGE_KEYS?: typeof STORAGE_KEYS }).STORAGE_KEYS = STORAGE_KEYS;
 }
