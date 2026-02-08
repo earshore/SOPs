@@ -16,11 +16,11 @@ interface SentryEvent {
     headers?: Record<string, string>;
   };
   contexts?: {
-    state?: Record<string, any>;
-    app?: Record<string, any>;
-    [key: string]: any;
+    state?: Record<string, unknown>;
+    app?: Record<string, unknown>;
+    [key: string]: unknown;
   };
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -28,8 +28,17 @@ interface SentryEvent {
  */
 interface SentryCaptureContext {
   tags?: Record<string, string>;
-  extra?: Record<string, any>;
+  extra?: Record<string, unknown>;
   level?: string;
+}
+
+/**
+ * Sentry事件提示
+ */
+interface SentryEventHint {
+  originalException?: Error | string;
+  syntheticException?: Error;
+  [key: string]: unknown;
 }
 
 /**
@@ -40,9 +49,25 @@ interface SentryInitConfig {
   environment?: string;
   release?: string;
   tracesSampleRate?: number;
-  beforeSend?: (event: SentryEvent, hint: any) => SentryEvent | null;
-  integrations?: any[];
+  beforeSend?: (event: SentryEvent, hint: SentryEventHint) => SentryEvent | null;
+  integrations?: SentryIntegration[];
   ignoreErrors?: string[];
+}
+
+/**
+ * Sentry集成接口
+ */
+interface SentryIntegration {
+  name: string;
+  [key: string]: unknown;
+}
+
+/**
+ * Sentry浏览器追踪配置
+ */
+interface BrowserTracingConfig {
+  tracingOrigins?: (string | RegExp)[];
+  [key: string]: unknown;
 }
 
 /**
@@ -51,7 +76,7 @@ interface SentryInitConfig {
 interface SentryTransaction {
   finish: () => void;
   setStatus: (status: string) => void;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -61,12 +86,12 @@ interface SentrySDK {
   init: (config: SentryInitConfig) => void;
   captureException: (error: Error, context?: SentryCaptureContext) => void;
   captureMessage: (message: string, context?: SentryCaptureContext) => void;
-  setUser: (user: Record<string, any>) => void;
+  setUser: (user: Record<string, unknown>) => void;
   setTag: (key: string, value: string) => void;
-  setContext: (name: string, context: Record<string, any>) => void;
-  addBreadcrumb: (breadcrumb: Record<string, any>) => void;
+  setContext: (name: string, context: Record<string, unknown>) => void;
+  addBreadcrumb: (breadcrumb: Record<string, unknown>) => void;
   startTransaction: (config: { name: string }) => SentryTransaction;
-  BrowserTracing: new (config?: any) => any;
+  BrowserTracing: new (config?: BrowserTracingConfig) => SentryIntegration;
 }
 
 /**
@@ -82,7 +107,7 @@ export interface MonitoringConfig {
   /** 性能追踪采样率 */
   tracesSampleRate?: number;
   /** 发送前处理函数 */
-  beforeSend?: (event: any, hint: any) => any;
+  beforeSend?: (event: SentryEvent, hint: SentryEventHint) => SentryEvent | null;
   /** 强制启用（即使在开发环境） */
   forceEnable?: boolean;
 }
@@ -93,7 +118,7 @@ export interface MonitoringConfig {
 export interface ErrorContext {
   module?: string;
   tags?: Record<string, string>;
-  extra?: Record<string, any>;
+  extra?: Record<string, unknown>;
   level?: 'error' | 'warning' | 'info' | 'debug';
 }
 
@@ -184,8 +209,9 @@ export class MonitoringService {
       script.src = 'https://browser.sentry-cdn.com/7.x/bundle.min.js';
       script.crossOrigin = 'anonymous';
       script.onload = () => {
-        if ((window as any).Sentry) {
-          resolve((window as any).Sentry);
+        const w = window as Window & { Sentry?: SentrySDK };
+        if (w.Sentry) {
+          resolve(w.Sentry);
         } else {
           reject(new Error('Sentry SDK加载失败'));
         }
@@ -198,7 +224,7 @@ export class MonitoringService {
   /**
    * 默认的beforeSend处理函数
    */
-  private _defaultBeforeSend(event: SentryEvent, _hint: any): SentryEvent | null {
+  private _defaultBeforeSend(event: SentryEvent, _hint: SentryEventHint): SentryEvent | null {
     // 过滤敏感信息
     if (event.request) {
       // 移除Cookie
@@ -213,9 +239,10 @@ export class MonitoringService {
 
     // 过滤localStorage中的敏感数据
     if (event.contexts && event.contexts.state) {
-      const state = event.contexts.state;
-      if (state.llm) {
-        delete state.llm.apiKey;
+      const state = event.contexts.state as Record<string, unknown>;
+      if (state.llm && typeof state.llm === 'object') {
+        const llm = state.llm as Record<string, unknown>;
+        delete llm.apiKey;
       }
     }
 
@@ -273,13 +300,13 @@ export class MonitoringService {
   /**
    * 设置用户信息
    */
-  setUser(user: { id?: string; username?: string; [key: string]: any }): void {
+  setUser(user: { id?: string; username?: string; [key: string]: unknown }): void {
     if (!this.isInitialized || !this.Sentry) {
       return;
     }
 
     // 过滤敏感信息
-    const safeUser = {
+    const safeUser: Record<string, unknown> = {
       id: user.id,
       username: user.username,
     };
@@ -302,7 +329,7 @@ export class MonitoringService {
   /**
    * 设置上下文
    */
-  setContext(name: string, context: Record<string, any>): void {
+  setContext(name: string, context: Record<string, unknown>): void {
     if (!this.isInitialized || !this.Sentry) {
       return;
     }
@@ -313,7 +340,7 @@ export class MonitoringService {
   /**
    * 添加面包屑
    */
-  addBreadcrumb(breadcrumb: Record<string, any>): void {
+  addBreadcrumb(breadcrumb: Record<string, unknown>): void {
     if (!this.isInitialized || !this.Sentry) {
       return;
     }
@@ -345,5 +372,5 @@ export default monitoringService;
 // 🔄 向后兼容：暴露到 window
 // ================================================================
 if (typeof window !== 'undefined') {
-  (window as any).MonitoringService = monitoringService;
+  (window as Window & { MonitoringService?: MonitoringService }).MonitoringService = monitoringService;
 }
