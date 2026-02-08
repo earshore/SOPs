@@ -46,11 +46,15 @@ export class StateManager<T extends StateSchema = StateSchema> {
    * @returns 状态值
    */
   get<K extends keyof T>(path?: K): T[K];
-  get(path?: string): any;
-  get(path?: string): any {
+  get(path?: string): unknown;
+  get(path?: string): unknown {
     if (!path) return this._state;
     
-    return path.split('.').reduce((obj: any, key) => obj?.[key], this._state);
+    return path.split('.').reduce((obj: unknown, key) => {
+      return (obj && typeof obj === 'object' && key in (obj as object)) 
+        ? (obj as Record<string, unknown>)[key] 
+        : undefined;
+    }, this._state as unknown);
   }
 
   /**
@@ -59,7 +63,7 @@ export class StateManager<T extends StateSchema = StateSchema> {
    * @param value - 新值
    * @param meta - 元数据（用于调试）
    */
-  set(path: string, value: any, meta: Record<string, any> = {}): void {
+  set(path: string, value: unknown, meta: Record<string, unknown> = {}): void {
     const oldValue = this.get(path);
     
     // 执行中间件
@@ -100,7 +104,7 @@ export class StateManager<T extends StateSchema = StateSchema> {
    * 批量更新（减少通知次数）
    * @param updates - { path: value }
    */
-  batchUpdate(updates: Record<string, any>): void {
+  batchUpdate(updates: Record<string, unknown>): void {
     const prevRecording = this._isRecording;
     this._isRecording = false;
     
@@ -223,18 +227,18 @@ export class StateManager<T extends StateSchema = StateSchema> {
 
   // ========== 私有方法 ==========
 
-  private _setByPath(path: string, value: any): void {
+  private _setByPath(path: string, value: unknown): void {
     const keys = path.split('.');
     const lastKey = keys.pop()!;
-    const _target = keys.reduce((obj: any, key) => {
+    const _target = keys.reduce((obj: Record<string, unknown>, key) => {
       if (!obj[key]) obj[key] = {};
-      return obj[key];
-    }, this._state);
+      return obj[key] as Record<string, unknown>;
+    }, this._state as unknown as Record<string, unknown>);
     
     _target[lastKey] = value;
   }
 
-  private _notify(path: string, newValue: any, oldValue: any): void {
+  private _notify(path: string, newValue: unknown, oldValue: unknown): void {
     if (newValue === oldValue) return;
     
     // 通知精确路径订阅者
