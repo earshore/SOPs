@@ -4,7 +4,7 @@
 // 提供安全的DOM操作包装函数
 // ================================================================
 
-import { escapeHtml, setSafeHtml, createSafeFragment } from './security.js';
+import { escapeHtml, setSafeHtml, createSafeFragment } from './security';
 
 /**
  * 安全的innerHTML设置 (自动转义)

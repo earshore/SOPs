@@ -3,7 +3,7 @@
 // 🎯 Phase 3: Alpine.js Refactor
 // ================================================================
 
-import { escapeHtml } from '@/common/utils/security.js';
+import { escapeHtml } from '@/common/utils/security';
 import { PROVIDERS } from "../../common/constants/constants.js";
 import { fetchModelsFromApi, callLLM } from "../../services/llmService.js";
 import { showToast } from "../../common/utils/ui.js";

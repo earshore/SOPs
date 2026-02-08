@@ -1,9 +1,9 @@
 console.log("🚀 ui.js 模块 (Event-Driven Core) 开始加载...");
 
-import { escapeHtml } from '@/common/utils/security.js';
+import { escapeHtml } from '@/common/utils/security';
 import state from "../state.js";
 import { ERROR_MESSAGES } from "../constants/constants.js";
-import { MENU_CONFIG, getRoutesByModule, getRouteFullConfig } from "../config/menuConfig.js";
+import { MENU_CONFIG, getRoutesByModule, getRouteFullConfig } from "../config/menuConfig";
 import { registerActions } from "./actionRegistry.js";
 import { ensureViewLoaded } from "./viewLoader.js";
 import { APP_EVENTS, emitAppEvent } from "../constants/eventConstants.js";

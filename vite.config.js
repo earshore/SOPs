@@ -71,7 +71,9 @@ export default defineConfig({
             '@modules': resolve(__dirname, 'src/modules'),
             '@components': resolve(__dirname, 'src/components'),
             '@types': resolve(__dirname, 'src/types')
-        }
+        },
+        // 支持 .ts 和 .js 文件扩展名解析
+        extensions: ['.ts', '.js', '.json']
     },
 
     // CSS 处理

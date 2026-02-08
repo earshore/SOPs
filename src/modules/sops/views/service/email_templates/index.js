@@ -1,6 +1,6 @@
 import { loadTemplate } from "../../../../../common/utils/viewLoader.js";
 import { TEMPLATE_CATEGORIES, EMAIL_TEMPLATES, getTemplateHtml } from "./constant/email_templates.js";
-import { escapeHtml } from "../../../../../common/utils/security.js";
+import { escapeHtml } from "../../../../../common/utils/security";
 
 // 当前选中的语言
 let currentLang = 'en';

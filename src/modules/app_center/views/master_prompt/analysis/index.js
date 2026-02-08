@@ -8,7 +8,7 @@
  * - 通过 EventBus 与其他模块通信
  */
 
-import { escapeHtml } from '@/common/utils/security.js';
+import { escapeHtml } from '@/common/utils/security';
 import { loadTemplate } from '../../../../../common/utils/viewLoader.js';
 import BaseModule from '../../../../../common/BaseModule.js';
 import state from '../../../../../common/state.js';

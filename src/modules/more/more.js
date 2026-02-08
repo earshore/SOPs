@@ -1,6 +1,6 @@
 console.log("📋 More Core Module Loading...");
 import './more_style.css';
-import { createModuleLoader } from '../../common/utils/ModuleLoader.js';
+import { createModuleLoader } from '../../common/utils/ModuleLoader';
 
 // ================= 路由配置表 =================
 const MODULE_MAP = {

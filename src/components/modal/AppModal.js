@@ -1,4 +1,4 @@
-import { escapeHtml } from '@/common/utils/security.js';
+import { escapeHtml } from '@/common/utils/security';
 
 /**
  * @class AppModal

@@ -254,7 +254,7 @@ export async function initViews() {
  */
 export async function ensureViewLoaded(routeId) {
     // 动态导入menuConfig以获取视图路径
-    const { getViewPathByRoute } = await import('../config/menuConfig.js');
+    const { getViewPathByRoute } = await import('../config/menuConfig');
     const viewPath = getViewPathByRoute(routeId);
     
     if (!viewPath) {

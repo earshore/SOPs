@@ -8,7 +8,7 @@ import { APP_EVENTS, emitAppEvent } from '../constants/eventConstants.js';
 import { routeGuard } from './RouteGuard.js';
 import { routeMiddleware } from './RouteMiddleware.js';
 import { routeErrorHandler } from './ErrorHandler.js';
-import { MENU_CONFIG } from '../config/menuConfig.js';
+import { MENU_CONFIG } from '../config/menuConfig';
 import { ensureViewLoaded } from '../utils/viewLoader.js';
 import type { Route, RouteConfig, NavigationOptions, RouteHistory } from '../../types/config.js';
 

@@ -3,7 +3,7 @@
 // 🎯 Phase 4: 已迁移使用 StorageService + BaseModule
 // ================================================================
 
-import { escapeHtml } from '@/common/utils/security.js';
+import { escapeHtml } from '@/common/utils/security';
 import BaseModule from "../../../../../common/BaseModule.js";
 import { amzf_countries, amzf_months, amzf_events } from "../../../constants/amz_hub_constants.js";
 import { StorageService, STORAGE_KEYS } from "../../../../../services/storageService.ts";

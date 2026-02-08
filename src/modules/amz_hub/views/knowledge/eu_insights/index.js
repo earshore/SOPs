@@ -1,4 +1,4 @@
-import { escapeHtml } from '@/common/utils/security.js';
+import { escapeHtml } from '@/common/utils/security';
 import BaseModule from "../../../../../common/BaseModule.js";
 import { AMZ_COUNTRY_DATA } from "../../../constants/amz_hub_constants.js";
 import { loadTemplate } from "../../../../../common/utils/viewLoader.js";

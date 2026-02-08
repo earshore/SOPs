@@ -1,4 +1,4 @@
-import { escapeHtml } from '@/common/utils/security.js';
+import { escapeHtml } from '@/common/utils/security';
 
 // src/components/ErrorBoundary.js
 // ================================================================

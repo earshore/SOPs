@@ -28,7 +28,7 @@ import './components/modal/AppModal.js';
 import { ServiceBootstrap } from './common/bootstrap/ServiceBootstrap.js';
 
 // 🎯 短期优化：导入 LoadingManager
-import { loadingManager } from './common/utils/LoadingManager.js';
+import { loadingManager } from './common/utils/LoadingManager';
 
 // ✅ Import User Guide Modal (Vite Raw Import)
 import userGuideModalHtml from './components/modal/userGuideModal.html?raw';

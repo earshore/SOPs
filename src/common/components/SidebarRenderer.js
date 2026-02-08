@@ -4,7 +4,7 @@
 // 消除 renderSopsSidebar/renderHubSidebar/renderMoreSidebar 的重复代码
 // ================================================================
 
-import { MENU_CONFIG } from '../config/menuConfig.js';
+import { MENU_CONFIG } from '../config/menuConfig';
 import state from '../state.js';
 import { COLOR_SCHEMES } from '../constants/colorSchemes.js';
 

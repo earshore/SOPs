@@ -8,7 +8,7 @@
  * - 使用 registerActionsWithLegacy 注册全局操作
  */
 
-import { escapeHtml } from '@/common/utils/security.js';
+import { escapeHtml } from '@/common/utils/security';
 import { loadTemplate } from '../../../../../common/utils/viewLoader.js';
 import eventBus from '../../../../../common/EventBus.ts';
 import state from '../../../../../common/state.js';

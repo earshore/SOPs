@@ -1,4 +1,4 @@
-import { escapeHtml } from '@/common/utils/security.js';
+import { escapeHtml } from '@/common/utils/security';
 import { loadTemplate } from "../../../../../common/utils/viewLoader.js";
 import { 
     PROMPT_LIBRARY, 

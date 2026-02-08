@@ -1,0 +1,235 @@
+// src/common/utils/LoadingManager.ts
+// ================================================================
+// 🎯 统一加载状态管理器 (TypeScript版本)
+// 解决多个模块同时显示 loading、状态不一致的问题
+// ================================================================
+
+import { APP_EVENTS, emitAppEvent } from '../constants/eventConstants.js';
+
+// ==================== 类型定义 ====================
+
+/**
+ * 加载任务配置
+ */
+export interface LoadingTask {
+  /** 任务唯一标识 */
+  id: string;
+  /** 加载提示信息 */
+  message: string;
+  /** 优先级（数字越大优先级越高） */
+  priority: number;
+  /** 开始时间戳 */
+  startTime: number;
+}
+
+/**
+ * 加载任务选项
+ */
+export interface LoadingTaskOptions {
+  /** 加载提示信息 */
+  message?: string;
+  /** 优先级 */
+  priority?: number;
+}
+
+/**
+ * 作用域加载管理器
+ */
+export interface ScopedLoadingManager {
+  start: (taskId: string, options?: LoadingTaskOptions) => void;
+  stop: (taskId: string) => void;
+  wrap: <T>(taskId: string, asyncFn: () => Promise<T>, options?: LoadingTaskOptions) => Promise<T>;
+}
+
+// ==================== 加载管理器类 ====================
+
+/**
+ * 统一加载状态管理器
+ * 管理全局加载状态，避免多个 loading 同时显示
+ */
+export class LoadingManager {
+  private tasks: Map<string, LoadingTask>;
+  private globalLoadingElement: HTMLElement | null;
+  private defaultMessage: string;
+
+  constructor() {
+    this.tasks = new Map();
+    this.globalLoadingElement = null;
+    this.defaultMessage = '加载中...';
+  }
+
+  /**
+   * 开始一个加载任务
+   * @param taskId - 任务ID
+   * @param options - 配置选项
+   */
+  start(taskId: string, options: LoadingTaskOptions = {}): void {
+    const task: LoadingTask = {
+      id: taskId,
+      message: options.message || this.defaultMessage,
+      priority: options.priority || 0,
+      startTime: Date.now()
+    };
+
+    this.tasks.set(taskId, task);
+    this._updateUI();
+
+    // 触发事件
+    emitAppEvent(APP_EVENTS.LOADING_START, { taskId, task });
+
+    console.log(`⏳ [LoadingManager] 开始任务: ${taskId} (${task.message})`);
+  }
+
+  /**
+   * 结束一个加载任务
+   * @param taskId - 任务ID
+   */
+  stop(taskId: string): void {
+    const task = this.tasks.get(taskId);
+    if (!task) {
+      console.warn(`⚠️ [LoadingManager] 任务不存在: ${taskId}`);
+      return;
+    }
+
+    const duration = Date.now() - task.startTime;
+    this.tasks.delete(taskId);
+    this._updateUI();
+
+    // 触发事件
+    emitAppEvent(APP_EVENTS.LOADING_STOP, { taskId, duration });
+
+    console.log(`✅ [LoadingManager] 完成任务: ${taskId} (耗时 ${duration}ms)`);
+  }
+
+  /**
+   * 检查是否有加载任务
+   */
+  get isLoading(): boolean {
+    return this.tasks.size > 0;
+  }
+
+  /**
+   * 获取当前加载任务数量
+   */
+  get taskCount(): number {
+    return this.tasks.size;
+  }
+
+  /**
+   * 获取当前显示的加载信息
+   */
+  get currentMessage(): string {
+    if (this.tasks.size === 0) return '';
+
+    // 返回优先级最高的任务消息
+    const tasks = Array.from(this.tasks.values());
+    tasks.sort((a, b) => b.priority - a.priority);
+    return tasks[0]!.message;
+  }
+
+  /**
+   * 获取所有任务列表
+   */
+  getAllTasks(): LoadingTask[] {
+    return Array.from(this.tasks.values());
+  }
+
+  /**
+   * 清空所有任务
+   */
+  clearAll(): void {
+    const taskIds = Array.from(this.tasks.keys());
+    this.tasks.clear();
+    this._updateUI();
+
+    console.log(`🧹 [LoadingManager] 清空所有任务 (${taskIds.length} 个)`);
+  }
+
+  /**
+   * 设置全局 Loading 元素
+   * @param element - Loading 元素
+   */
+  setGlobalLoadingElement(element: HTMLElement): void {
+    this.globalLoadingElement = element;
+  }
+
+  /**
+   * 更新 UI 显示
+   * @private
+   */
+  private _updateUI(): void {
+    if (!this.globalLoadingElement) return;
+
+    if (this.isLoading) {
+      this.globalLoadingElement.classList.remove('hidden');
+      this.globalLoadingElement.classList.add('flex');
+      
+      // 更新消息
+      const messageEl = this.globalLoadingElement.querySelector('[data-loading-message]');
+      if (messageEl) {
+        messageEl.textContent = this.currentMessage;
+      }
+    } else {
+      this.globalLoadingElement.classList.add('hidden');
+      this.globalLoadingElement.classList.remove('flex');
+    }
+  }
+
+  /**
+   * 包装异步函数，自动管理加载状态
+   * @param taskId - 任务ID
+   * @param asyncFn - 异步函数
+   * @param options - 配置选项
+   * @returns 异步函数的返回值
+   * 
+   * @example
+   * const result = await loadingManager.wrap('fetch-data', async () => {
+   *   return await fetchData();
+   * }, { message: '正在获取数据...' });
+   */
+  async wrap<T>(taskId: string, asyncFn: () => Promise<T>, options: LoadingTaskOptions = {}): Promise<T> {
+    this.start(taskId, options);
+    try {
+      const result = await asyncFn();
+      return result;
+    } finally {
+      this.stop(taskId);
+    }
+  }
+
+  /**
+   * 创建带作用域的加载管理器
+   * @param scope - 作用域名称
+   * @returns 作用域加载管理器
+   * 
+   * @example
+   * const scraperLoading = loadingManager.createScope('scraper');
+   * scraperLoading.start('fetch'); // 实际任务ID: scraper:fetch
+   * scraperLoading.stop('fetch');
+   */
+  createScope(scope: string): ScopedLoadingManager {
+    return {
+      start: (taskId: string, options?: LoadingTaskOptions) => 
+        this.start(`${scope}:${taskId}`, options),
+      stop: (taskId: string) => 
+        this.stop(`${scope}:${taskId}`),
+      wrap: <T>(taskId: string, asyncFn: () => Promise<T>, options?: LoadingTaskOptions) => 
+        this.wrap(`${scope}:${taskId}`, asyncFn, options)
+    };
+  }
+}
+
+// ==================== 全局实例 ====================
+
+/**
+ * 全局加载管理器实例
+ */
+export const loadingManager = new LoadingManager();
+
+// 向后兼容：暴露到 window
+if (typeof window !== 'undefined') {
+  (window as any).loadingManager = loadingManager;
+}
+
+// 默认导出
+export default loadingManager;

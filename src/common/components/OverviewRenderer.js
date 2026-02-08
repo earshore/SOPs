@@ -13,7 +13,7 @@
  * await renderer.render();
  */
 
-import { MENU_CONFIG, getRoutesByModule } from '../config/menuConfig.js';
+import { MENU_CONFIG, getRoutesByModule } from '../config/menuConfig';
 
 export class OverviewRenderer {
     /**
