@@ -9,9 +9,9 @@ import { getEl } from './utils';
  * 打开用户指南
  */
 export function openUserGuide(): void {
-  const modal = getEl('user-guide-modal');
-  if (modal && typeof (modal as any).open === 'function') {
-    (modal as any).open();
+  const modal = getEl('user-guide-modal') as HTMLElement & { open?: () => void };
+  if (modal && typeof modal.open === 'function') {
+    modal.open();
   }
 }
 
@@ -19,9 +19,9 @@ export function openUserGuide(): void {
  * 关闭用户指南
  */
 export function closeUserGuide(): void {
-  const modal = getEl('user-guide-modal');
-  if (modal && typeof (modal as any).close === 'function') {
-    (modal as any).close();
+  const modal = getEl('user-guide-modal') as HTMLElement & { close?: () => void };
+  if (modal && typeof modal.close === 'function') {
+    modal.close();
   }
 }
 

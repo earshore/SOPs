@@ -4,7 +4,7 @@
  */
 
 import state from '../state';
-import { MENU_CONFIG, getRoutesByModule, getRouteFullConfig, type RouteWithId } from '../config/menuConfig';
+import { MENU_CONFIG, getRoutesByModule, getRouteFullConfig, type RouteWithId, type ModuleConfig, type RouteFullConfig } from '../config/menuConfig';
 import { createSidebarRenderer, type SidebarRenderer } from '../components/SidebarRenderer';
 import { ensureViewLoaded } from '../utils/viewLoader';
 import { APP_EVENTS, emitAppEvent } from '../constants/eventConstants';
@@ -109,7 +109,7 @@ function renderSidebar(moduleId: string | null): void {
 function renderSidebarContent(
   sidebar: HTMLElement,
   moduleId: string,
-  moduleConfig: any,
+  moduleConfig: ModuleConfig,
   routes: RouteWithId[]
 ): void {
   const renderer = SIDEBAR_RENDERER_REGISTRY[moduleId];
@@ -126,9 +126,9 @@ function renderSidebarContent(
 /**
  * 默认侧边栏渲染（平铺列表）
  */
-function renderDefaultSidebar(sidebar: HTMLElement, moduleConfig: any, routes: RouteWithId[]): void {
+function renderDefaultSidebar(sidebar: HTMLElement, moduleConfig: ModuleConfig, routes: RouteWithId[]): void {
   try {
-    const currentTab = (state as any).ui.currentTab;
+    const currentTab = state.ui?.currentTab || '';
 
     const html = `
       <div class="flex flex-col h-full bg-white">
@@ -174,7 +174,7 @@ function renderDefaultSidebar(sidebar: HTMLElement, moduleConfig: any, routes: R
 /**
  * 更新头部导航高亮
  */
-function updateHeaderNav(fullConfig: any): void {
+function updateHeaderNav(fullConfig: RouteFullConfig): void {
   document.querySelectorAll(".nav-item").forEach((el) => {
     el.classList.remove("text-blue-600", "border-blue-600");
     el.classList.add("text-slate-600", "border-transparent");
@@ -227,7 +227,9 @@ export async function switchTab(tab: string, updateHistory: boolean = true): Pro
   }
 
   // 更新全局状态
-  (state as any).ui.currentTab = cleanTab;
+  if (state.ui) {
+    state.ui.currentTab = cleanTab;
+  }
   const fullConfig = getRouteFullConfig(cleanTab);
 
   // 渲染侧边栏
@@ -263,7 +265,9 @@ export async function switchTab(tab: string, updateHistory: boolean = true): Pro
   }
 
   // 更新导航高亮
-  updateHeaderNav(fullConfig);
+  if (fullConfig) {
+    updateHeaderNav(fullConfig);
+  }
 
   // URL History Management
   if (updateHistory) {

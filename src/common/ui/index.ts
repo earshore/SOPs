@@ -97,17 +97,17 @@ import { toggleSOPGroup, scrollToSOPModule, scrollToHubModule, scrollToMoreModul
 import { openUserGuide, closeUserGuide, switchGuideTab } from './userGuide';
 
 registerActions({
-  'switch-tab': (params: any) => switchTab(params.tab),
-  'toggle-sop-group': (params: any) => toggleSOPGroup(params),
+  'switch-tab': (params: Record<string, unknown>) => switchTab((params.tab as string) || ''),
+  'toggle-sop-group': (params: Record<string, unknown>) => toggleSOPGroup({ category: params.group as string || params.category as string }),
   'clear-sop-search': clearSOPSearch,
   'clear-hub-search': clearHubSearch,
   'clear-sidebar-search': clearSidebarSearch,
   'open-user-guide': openUserGuide,
   'close-user-guide': closeUserGuide,
-  'switch-guide-tab': (params: any) => switchGuideTab(params),
-  'scroll-to-sop-module': (params: any) => scrollToSOPModule(params.category),
-  'scroll-to-hub-module': (params: any) => scrollToHubModule(params.category),
-  'scroll-to-more-module': (params: any) => scrollToMoreModule(params.category),
+  'switch-guide-tab': (params: Record<string, unknown>) => switchGuideTab({ tab: params.tab as string }),
+  'scroll-to-sop-module': (params: Record<string, unknown>) => scrollToSOPModule(params.category as string),
+  'scroll-to-hub-module': (params: Record<string, unknown>) => scrollToHubModule(params.category as string),
+  'scroll-to-more-module': (params: Record<string, unknown>) => scrollToMoreModule(params.category as string),
 });
 
 console.log("✅ [UI] 模块已加载并注册到 ActionRegistry");

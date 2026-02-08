@@ -174,7 +174,7 @@ export function searchSidebar(query: string): void {
   }
 
   // 从当前 tab 推断模块
-  const currentTab = (state as any).ui.currentTab;
+  const currentTab = state.ui?.currentTab || '';
   const currentRoute = MENU_CONFIG.routes[currentTab];
   if (!currentRoute) {
     console.warn('[searchSidebar] 当前路由未找到');
