@@ -137,10 +137,14 @@ export interface AnalysisReport {
  */
 export interface HistoryItem {
   id: string | number;
-  asin: string;
+  timestamp: string;
   site: string;
-  timestamp: string | number;
-  product: ScrapedProduct;
+  asins: string[];
+  data: any;
+  report: any;
+  // 向后兼容旧格式
+  asin?: string;
+  product?: ScrapedProduct;
 }
 
 // ==================== Keyword Hunter 模块类型 ====================

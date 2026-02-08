@@ -5,21 +5,13 @@
 
 import state from "../../../../../common/state";
 import { StorageService, STORAGE_KEYS } from "../../../../../services/storageService";
+import type { HistoryItem } from "../../../../../types/modules-business";
 
 const MAX_HISTORY_ITEMS = 20; // 限制只存最近20条
 
 // ----------------------------------------
 // 类型定义
 // ----------------------------------------
-
-interface HistoryItem {
-  id: number;
-  timestamp: string;
-  site: string;
-  asins: string[];
-  data: any;
-  report: any;
-}
 
 interface CachedProduct {
   product: any;

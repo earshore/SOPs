@@ -5,6 +5,8 @@
 // ================================================================
 
 import type { IStorageService } from '../types/services';
+import type { LLMProviderConfig } from '../types/state';
+import type { HistoryItem, ProxyConfig } from '../types/modules-business';
 
 /**
  * 存储键名常量
@@ -377,14 +379,16 @@ class StorageServiceClass implements IStorageService {
   /**
    * 获取 LLM 配置
    */
-  getLLMConfig(provider: string | null = null): any | null {
+  getLLMConfig(provider: string | null = null): Partial<LLMProviderConfig> | null {
     const activeProvider = provider || this.get<string>(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
     if (!activeProvider) return null;
     
-    const config = this.get<any>(`${STORAGE_KEYS.LLM_CONFIG_PREFIX}${activeProvider}`, {});
+    const config = this.get<LLMProviderConfig>(`${STORAGE_KEYS.LLM_CONFIG_PREFIX}${activeProvider}`, {} as LLMProviderConfig);
     
-    if (config && config.apiKey) {
-      delete config.apiKey;
+    // 🔐 安全: 移除敏感的 apiKey,返回部分配置
+    if (config && 'apiKey' in config) {
+      const { apiKey, ...safeConfig } = config;
+      return safeConfig;
     }
     
     return config;
@@ -393,7 +397,7 @@ class StorageServiceClass implements IStorageService {
   /**
    * 保存 LLM 配置
    */
-  setLLMConfig(provider: string, config: any): void {
+  setLLMConfig(provider: string, config: LLMProviderConfig): void {
     this.set(`${STORAGE_KEYS.LLM_CONFIG_PREFIX}${provider}`, config);
     this.set(STORAGE_KEYS.LLM_ACTIVE_PROVIDER, provider);
   }
@@ -401,28 +405,29 @@ class StorageServiceClass implements IStorageService {
   /**
    * 获取代理配置
    */
-  getProxyConfig(): any {
-    return this.get(STORAGE_KEYS.PROXY_CONFIG, { type: 'allorigins' });
+  getProxyConfig(): ProxyConfig {
+    const config = this.get<ProxyConfig>(STORAGE_KEYS.PROXY_CONFIG, null);
+    return config || { type: 'allorigins', enabled: true };
   }
 
   /**
    * 保存代理配置
    */
-  setProxyConfig(config: any): void {
+  setProxyConfig(config: ProxyConfig): void {
     this.set(STORAGE_KEYS.PROXY_CONFIG, config);
   }
 
   /**
    * 获取采集历史
    */
-  getScrapeHistory(): any[] {
-    return this.get<any[]>(STORAGE_KEYS.SCRAPE_HISTORY, []) || [];
+  getScrapeHistory(): HistoryItem[] {
+    return this.get<HistoryItem[]>(STORAGE_KEYS.SCRAPE_HISTORY, []) || [];
   }
 
   /**
    * 保存采集历史
    */
-  setScrapeHistory(history: any[]): void {
+  setScrapeHistory(history: HistoryItem[]): void {
     const maxItems = 50;
     const trimmed = history.slice(0, maxItems);
     this.set(STORAGE_KEYS.SCRAPE_HISTORY, trimmed);
@@ -431,14 +436,17 @@ class StorageServiceClass implements IStorageService {
   /**
    * 获取布局配置
    */
-  getLayoutConfig(templateId: string): any[] {
-    return this.get<any[]>(`${STORAGE_KEYS.LAYOUT_CONFIG_PREFIX}${templateId}`, []) || [];
+  getLayoutConfig(templateId: string): Array<{ id: string; x: number; y: number; w: number; h: number }> {
+    return this.get<Array<{ id: string; x: number; y: number; w: number; h: number }>>(
+      `${STORAGE_KEYS.LAYOUT_CONFIG_PREFIX}${templateId}`, 
+      []
+    ) || [];
   }
 
   /**
    * 保存布局配置
    */
-  setLayoutConfig(templateId: string, layout: any[]): void {
+  setLayoutConfig(templateId: string, layout: Array<{ id: string; x: number; y: number; w: number; h: number }>): void {
     this.set(`${STORAGE_KEYS.LAYOUT_CONFIG_PREFIX}${templateId}`, layout);
   }
 

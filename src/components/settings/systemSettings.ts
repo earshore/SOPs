@@ -11,6 +11,7 @@ import { StorageService, STORAGE_KEYS } from '../../services/storageService';
 import { ErrorService } from '../../services/errorService';
 import { EnvConfig } from '../../common/config/envConfig';
 import { APP_EVENTS } from '../../common/constants/eventConstants';
+import type { LLMProviderConfig } from '../../types/state';
 
 // ==========================================
 // 类型定义
@@ -166,9 +167,9 @@ const SettingsPanel = (): SettingsPanelData => ({
             return;
         }
 
-        const savedConfig = StorageService.getLLMConfig(provider) || {};
+        const savedConfig = StorageService.getLLMConfig(provider);
 
-        this.llm.endpoint = savedConfig.endpoint || config.endpoint;
+        this.llm.endpoint = savedConfig?.endpoint || config.endpoint;
         
         // 🔐 P0优化: 从安全存储读取API密钥
         try {
@@ -177,11 +178,11 @@ const SettingsPanel = (): SettingsPanelData => ({
         } catch (error) {
             console.warn('[Settings] Failed to load encrypted API key, using fallback:', error);
             // 兼容旧数据: 如果加密读取失败,尝试读取明文(迁移期)
-            this.llm.apiKey = savedConfig.apiKey || '';
+            this.llm.apiKey = (savedConfig && 'apiKey' in savedConfig) ? (savedConfig.apiKey || '') : '';
         }
 
         // Models: Use saved or default
-        const rawModels = (savedConfig.models && savedConfig.models.length > 0)
+        const rawModels: Array<string | { id: string }> = (savedConfig && 'models' in savedConfig && savedConfig.models && savedConfig.models.length > 0)
             ? savedConfig.models
             : (config.models || []);
 
@@ -194,7 +195,7 @@ const SettingsPanel = (): SettingsPanelData => ({
             return true;
         });
 
-        this.llm.model = savedConfig.model || '';
+        this.llm.model = savedConfig?.model || '';
 
         // Auto-select first model if none selected and models exist
         if (!this.llm.model && this.llm.models.length > 0) {
@@ -345,10 +346,13 @@ const SettingsPanel = (): SettingsPanelData => ({
 
         try {
             // 🔐 P0优化: 使用安全存储保存API密钥
-            const newConfig = {
+            const newConfig: LLMProviderConfig = {
+                provider: this.llm.provider,
                 endpoint: this.llm.endpoint,
                 model: this.llm.model,
-                models: this.llm.models
+                models: this.llm.models,
+                enabled: true,
+                apiKey: '' // 占位符,实际存储在安全存储中
             };
             
             // API Key 单独加密存储
