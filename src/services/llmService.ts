@@ -148,12 +148,14 @@ export async function callLLM(
   // 标准化 endpoint (开发/生产环境自动适配)
   const normalizedEndpoint = configCenter.get('api.baseUrl') || endpoint;
 
-  // 只在首次调用或调试模式下输出配置信息
-  if (!(callLLM as any)._configLogged || !configCenter.isProduction()) {
+  // 🔍 调试：始终输出配置信息（用于诊断生产环境问题）
+  if (!(callLLM as any)._configLogged) {
     console.log(`🌐 [LLM] 环境: ${configCenter.get('environment')}`);
     console.log(`🌐 [LLM] 原始 Endpoint: ${endpoint}`);
+    console.log(`🌐 [LLM] api.baseUrl: ${configCenter.get('api.baseUrl')}`);
     console.log(`🌐 [LLM] 标准化 Endpoint: ${normalizedEndpoint}`);
     console.log(`🌐 [LLM] 最终请求 URL: ${normalizedEndpoint}/chat/completions`);
+    console.log(`🌐 [LLM] API Key (前10字符): ${apiKey.substring(0, 10)}...`);
     (callLLM as any)._configLogged = true;
   }
 
@@ -308,10 +310,11 @@ export async function fetchModelsFromApi(
     // 标准化 endpoint (开发/生产环境自动适配)
     const normalizedEndpoint = configCenter.get('api.baseUrl') || endpoint;
 
-    // 只在首次调用或调试模式下输出配置信息
-    if (!(fetchModelsFromApi as any)._configLogged || !configCenter.isProduction()) {
+    // 🔍 调试：始终输出配置信息（用于诊断生产环境问题）
+    if (!(fetchModelsFromApi as any)._configLogged) {
       console.log(`🌐 [Models] 环境: ${configCenter.get('environment')}`);
       console.log(`🌐 [Models] 原始 Endpoint: ${endpoint}`);
+      console.log(`🌐 [Models] api.baseUrl: ${configCenter.get('api.baseUrl')}`);
       console.log(`🌐 [Models] 标准化 Endpoint: ${normalizedEndpoint}`);
       console.log(`🌐 [Models] 最终请求 URL: ${normalizedEndpoint}/models`);
       (fetchModelsFromApi as any)._configLogged = true;
