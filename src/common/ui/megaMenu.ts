@@ -1,24 +1,429 @@
 ﻿/**
- * megaMenu.ts - Mega Menu 渲染器
- * 负责渲染顶部下拉菜单的卡片式布局
+ * megaMenu.ts - Mega Menu 渲染器 v3.1
+ * 
+ * v3.1 变更: hover 时显示契合配色的细边框
+ * - 默认: border-white/60 (几乎不可见的玻璃边)
+ * - hover: border-{color}-300/50 (柔和的配色边框浮现)
  */
 
 import { MENU_CONFIG } from '../config/menuConfig';
 import { getEl } from './utils';
+import type { ColorSchemeName } from '../constants/colorSchemes';
 
-/**
- * 获取某模块下的"默认路由"
- */
+// ═══════════════════════════════════════════════════════════
+// Utilities
+// ═══════════════════════════════════════════════════════════
+
 function getDefaultRouteForModule(moduleId: string): string | null {
   if (!MENU_CONFIG.routes) return null;
-  const allRoutes = Object.entries(MENU_CONFIG.routes);
-  const entry = allRoutes.find(([_, config]) => config.moduleId === moduleId);
+  const entry = Object.entries(MENU_CONFIG.routes)
+    .find(([_, config]) => config.moduleId === moduleId);
   return entry ? entry[0] : null;
 }
 
+function getFirstRouteForCategory(categoryId: string): string | null {
+  const entry = Object.entries(MENU_CONFIG.routes)
+    .find(([_, r]) => r.category === categoryId);
+  return entry ? entry[0] : null;
+}
+
+function countCategoryRoutes(categoryId: string): number {
+  return Object.values(MENU_CONFIG.routes)
+    .filter(r => r.category === categoryId).length;
+}
+
+// ═══════════════════════════════════════════════════════════
+// Frosted Glass Color System
+// ═══════════════════════════════════════════════════════════
+
+interface GlassColorScheme {
+  glow: string;
+  iconBg: string;
+  iconShadow: string;
+  versionBg: string;
+  versionText: string;
+  tagBg: string;
+  tagText: string;
+  /** hover 时浮现的配色边框 */
+  hoverBorder: string;
+}
+
+const GLASS_COLORS: Record<string, GlassColorScheme> = {
+  blue: {
+    glow: 'from-blue-200/40 via-indigo-100/20 to-transparent',
+    iconBg: 'bg-gradient-to-br from-blue-500 to-indigo-600',
+    iconShadow: 'shadow-blue-500/30',
+    versionBg: 'bg-blue-500/10',
+    versionText: 'text-blue-600',
+    tagBg: 'bg-blue-500/8',
+    tagText: 'text-blue-600/80',
+    hoverBorder: 'group-hover/card:border-blue-300/50',
+  },
+  indigo: {
+    glow: 'from-indigo-200/40 via-violet-100/20 to-transparent',
+    iconBg: 'bg-gradient-to-br from-indigo-500 to-violet-600',
+    iconShadow: 'shadow-indigo-500/30',
+    versionBg: 'bg-indigo-500/10',
+    versionText: 'text-indigo-600',
+    tagBg: 'bg-indigo-500/8',
+    tagText: 'text-indigo-600/80',
+    hoverBorder: 'group-hover/card:border-indigo-300/50',
+  },
+  violet: {
+    glow: 'from-violet-200/40 via-purple-100/20 to-transparent',
+    iconBg: 'bg-gradient-to-br from-violet-500 to-purple-600',
+    iconShadow: 'shadow-violet-500/30',
+    versionBg: 'bg-violet-500/10',
+    versionText: 'text-violet-600',
+    tagBg: 'bg-violet-500/8',
+    tagText: 'text-violet-600/80',
+    hoverBorder: 'group-hover/card:border-violet-300/50',
+  },
+  purple: {
+    glow: 'from-purple-200/40 via-pink-100/20 to-transparent',
+    iconBg: 'bg-gradient-to-br from-purple-500 to-pink-600',
+    iconShadow: 'shadow-purple-500/30',
+    versionBg: 'bg-purple-500/10',
+    versionText: 'text-purple-600',
+    tagBg: 'bg-purple-500/8',
+    tagText: 'text-purple-600/80',
+    hoverBorder: 'group-hover/card:border-purple-300/50',
+  },
+  emerald: {
+    glow: 'from-emerald-200/40 via-teal-100/20 to-transparent',
+    iconBg: 'bg-gradient-to-br from-emerald-500 to-teal-600',
+    iconShadow: 'shadow-emerald-500/30',
+    versionBg: 'bg-emerald-500/10',
+    versionText: 'text-emerald-600',
+    tagBg: 'bg-emerald-500/8',
+    tagText: 'text-emerald-600/80',
+    hoverBorder: 'group-hover/card:border-emerald-300/50',
+  },
+  teal: {
+    glow: 'from-teal-200/40 via-cyan-100/20 to-transparent',
+    iconBg: 'bg-gradient-to-br from-teal-500 to-cyan-600',
+    iconShadow: 'shadow-teal-500/30',
+    versionBg: 'bg-teal-500/10',
+    versionText: 'text-teal-600',
+    tagBg: 'bg-teal-500/8',
+    tagText: 'text-teal-600/80',
+    hoverBorder: 'group-hover/card:border-teal-300/50',
+  },
+  green: {
+    glow: 'from-green-200/40 via-emerald-100/20 to-transparent',
+    iconBg: 'bg-gradient-to-br from-green-500 to-emerald-600',
+    iconShadow: 'shadow-green-500/30',
+    versionBg: 'bg-green-500/10',
+    versionText: 'text-green-600',
+    tagBg: 'bg-green-500/8',
+    tagText: 'text-green-600/80',
+    hoverBorder: 'group-hover/card:border-green-300/50',
+  },
+  amber: {
+    glow: 'from-amber-200/40 via-orange-100/20 to-transparent',
+    iconBg: 'bg-gradient-to-br from-amber-500 to-orange-600',
+    iconShadow: 'shadow-amber-500/30',
+    versionBg: 'bg-amber-500/10',
+    versionText: 'text-amber-600',
+    tagBg: 'bg-amber-500/8',
+    tagText: 'text-amber-600/80',
+    hoverBorder: 'group-hover/card:border-amber-300/50',
+  },
+  orange: {
+    glow: 'from-orange-200/40 via-amber-100/20 to-transparent',
+    iconBg: 'bg-gradient-to-br from-orange-500 to-red-600',
+    iconShadow: 'shadow-orange-500/30',
+    versionBg: 'bg-orange-500/10',
+    versionText: 'text-orange-600',
+    tagBg: 'bg-orange-500/8',
+    tagText: 'text-orange-600/80',
+    hoverBorder: 'group-hover/card:border-orange-300/50',
+  },
+  red: {
+    glow: 'from-red-200/40 via-rose-100/20 to-transparent',
+    iconBg: 'bg-gradient-to-br from-red-500 to-rose-600',
+    iconShadow: 'shadow-red-500/30',
+    versionBg: 'bg-red-500/10',
+    versionText: 'text-red-600',
+    tagBg: 'bg-red-500/8',
+    tagText: 'text-red-600/80',
+    hoverBorder: 'group-hover/card:border-red-300/50',
+  },
+  rose: {
+    glow: 'from-rose-200/40 via-pink-100/20 to-transparent',
+    iconBg: 'bg-gradient-to-br from-rose-500 to-pink-600',
+    iconShadow: 'shadow-rose-500/30',
+    versionBg: 'bg-rose-500/10',
+    versionText: 'text-rose-600',
+    tagBg: 'bg-rose-500/8',
+    tagText: 'text-rose-600/80',
+    hoverBorder: 'group-hover/card:border-rose-300/50',
+  },
+  pink: {
+    glow: 'from-pink-200/40 via-rose-100/20 to-transparent',
+    iconBg: 'bg-gradient-to-br from-pink-500 to-rose-600',
+    iconShadow: 'shadow-pink-500/30',
+    versionBg: 'bg-pink-500/10',
+    versionText: 'text-pink-600',
+    tagBg: 'bg-pink-500/8',
+    tagText: 'text-pink-600/80',
+    hoverBorder: 'group-hover/card:border-pink-300/50',
+  },
+  cyan: {
+    glow: 'from-cyan-200/40 via-blue-100/20 to-transparent',
+    iconBg: 'bg-gradient-to-br from-cyan-500 to-blue-600',
+    iconShadow: 'shadow-cyan-500/30',
+    versionBg: 'bg-cyan-500/10',
+    versionText: 'text-cyan-600',
+    tagBg: 'bg-cyan-500/8',
+    tagText: 'text-cyan-600/80',
+    hoverBorder: 'group-hover/card:border-cyan-300/50',
+  },
+  slate: {
+    glow: 'from-slate-200/30 via-gray-100/15 to-transparent',
+    iconBg: 'bg-gradient-to-br from-slate-500 to-gray-600',
+    iconShadow: 'shadow-slate-500/25',
+    versionBg: 'bg-slate-500/10',
+    versionText: 'text-slate-600',
+    tagBg: 'bg-slate-500/8',
+    tagText: 'text-slate-600/80',
+    hoverBorder: 'group-hover/card:border-slate-300/50',
+  },
+};
+
+function getGlassColor(color: string): GlassColorScheme {
+  return (GLASS_COLORS[color] || GLASS_COLORS.blue) as GlassColorScheme;
+}
+
+// ═══════════════════════════════════════════════════════════
+// Card Renderer
+// ═══════════════════════════════════════════════════════════
+
+interface CardOptions {
+  target: string;
+  label: string;
+  icon: string;
+  color: ColorSchemeName;
+  version?: string;
+  description?: string;
+  childCount?: number;
+  isOverview?: boolean;
+}
+
 /**
- * 渲染应用中心 Mega Menu
+ * 毛玻璃卡片
+ *
+ * hover 变化 (4 个):
+ * 1. translate-y  -2px
+ * 2. bg-white/60 → bg-white/80 (玻璃变清晰)
+ * 3. border-white/60 → border-{color}-300/50 (配色边框浮现)
+ * 4. arrow opacity 0 → 1
  */
+function renderCard(opts: CardOptions): string {
+  const {
+    target,
+    label,
+    icon,
+    color,
+    version = 'v1.0',
+    description = '暂无描述',
+    childCount,
+    isOverview = false,
+  } = opts;
+
+  const g = getGlassColor(color);
+  const footer = buildFooterTags(childCount, isOverview, g);
+
+  return `
+    <div data-action="switch-tab" data-tab="${target}"
+      class="cursor-pointer group/card relative rounded-2xl overflow-hidden
+        h-full flex flex-col
+        transition-all duration-300 ease-out
+        hover:-translate-y-0.5
+        active:translate-y-0">
+
+      <!-- Layer 1: Frosted glass + color-tinted hover border -->
+      <div class="absolute inset-0
+        bg-white/60 backdrop-blur-xl
+        border border-white/60
+        ${g.hoverBorder}
+        rounded-2xl
+        shadow-sm shadow-slate-200/50
+        group-hover/card:bg-white/80
+        group-hover/card:shadow-md group-hover/card:shadow-slate-200/60
+        transition-all duration-300"></div>
+
+      <!-- Layer 2: Top color glow -->
+      <div class="absolute -top-6 -left-6 w-32 h-20
+        bg-gradient-to-br ${g.glow}
+        rounded-full blur-2xl
+        opacity-80 group-hover/card:opacity-100
+        transition-opacity duration-500
+        pointer-events-none"></div>
+
+      <!-- Layer 3: Content -->
+      <div class="relative z-10 p-5 flex flex-col gap-3 flex-1">
+
+        <!-- Header -->
+        <div class="flex items-start justify-between">
+          <div class="w-10 h-10 ${g.iconBg} rounded-xl
+            flex items-center justify-center
+            shadow-lg ${g.iconShadow}
+            ring-1 ring-white/50">
+            <i class="${icon} text-white text-sm"></i>
+          </div>
+          <span class="text-[10px] font-mono font-semibold
+            ${g.versionText} ${g.versionBg}
+            px-2 py-0.5 rounded-md
+            backdrop-blur-sm border border-white/40">
+            ${version}
+          </span>
+        </div>
+
+        <!-- Body -->
+        <div class="flex-1 min-h-0">
+          <h4 class="text-[13px] font-bold text-slate-800 mb-1
+            flex items-center gap-1.5 leading-tight">
+            <span>${label}</span>
+            <i class="fas fa-arrow-right text-[9px] text-slate-300
+              opacity-0 -translate-x-1.5
+              group-hover/card:opacity-100 group-hover/card:translate-x-0
+              transition-all duration-300 ease-out"></i>
+          </h4>
+          <p class="text-[11px] text-slate-400 leading-relaxed line-clamp-2">
+            ${description}
+          </p>
+        </div>
+
+        ${footer}
+      </div>
+    </div>
+  `;
+}
+
+function buildFooterTags(
+  childCount: number | undefined,
+  isOverview: boolean,
+  g: GlassColorScheme
+): string {
+  if (childCount === undefined || childCount <= 0) return '';
+
+  const countTag = `
+    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md
+      ${g.tagBg} backdrop-blur-sm
+      text-[10px] font-medium ${g.tagText}">
+      <i class="fas fa-layer-group text-[8px]"></i>
+      ${childCount} 项
+    </span>
+  `;
+
+  const overviewTag = isOverview ? `
+    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md
+      bg-slate-500/6 backdrop-blur-sm
+      text-[10px] font-medium text-slate-500/80">
+      <i class="fas fa-compass text-[8px]"></i>
+      总览
+    </span>
+  ` : '';
+
+  return `
+    <div class="flex items-center gap-1.5 pt-2 mt-auto
+      border-t border-slate-200/30">
+      ${countTag}${overviewTag}
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════════════════════
+// Error State
+// ═══════════════════════════════════════════════════════════
+
+function renderErrorCard(message: string = '菜单加载失败'): string {
+  return `
+    <div class="col-span-full relative rounded-2xl overflow-hidden">
+      <div class="absolute inset-0 bg-red-50/60 backdrop-blur-xl
+        border border-red-200/40 rounded-2xl"></div>
+      <div class="relative z-10 p-5 flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-red-500 to-rose-600
+          flex items-center justify-center shadow-lg shadow-red-500/30
+          ring-1 ring-white/50">
+          <i class="fas fa-exclamation-triangle text-white text-xs"></i>
+        </div>
+        <div>
+          <p class="text-sm font-semibold text-red-800">${message}</p>
+          <p class="text-[11px] text-red-500/70 mt-0.5">请检查配置或刷新页面重试</p>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════════════════════
+// Generic Category Menu
+// ═══════════════════════════════════════════════════════════
+
+interface MenuRendererConfig {
+  containerId: string;
+  overviewRouteId: string;
+  overviewLabel: string;
+  overviewDescription: string;
+  overviewColor: ColorSchemeName;
+  categories: Record<string, any>;
+  logLabel: string;
+}
+
+function renderCategoryMenu(config: MenuRendererConfig): void {
+  const container = getEl(config.containerId);
+  if (!container) return;
+
+  try {
+    const overviewRoute = MENU_CONFIG.routes[config.overviewRouteId];
+    const categories = Object.values(config.categories || {})
+      .sort((a: any, b: any) => a.order - b.order);
+
+    let html = '';
+
+    if (overviewRoute) {
+      const totalRoutes = categories.reduce(
+        (sum: number, cat: any) => sum + countCategoryRoutes(cat.id), 0
+      );
+      html += renderCard({
+        target: config.overviewRouteId,
+        label: config.overviewLabel,
+        icon: overviewRoute.icon,
+        color: config.overviewColor,
+        version: 'v1.0',
+        description: config.overviewDescription,
+        childCount: totalRoutes,
+        isOverview: true,
+      });
+    }
+
+    categories.forEach((cat: any) => {
+      const target = getFirstRouteForCategory(cat.id);
+      if (!target) return;
+      html += renderCard({
+        target,
+        label: cat.label,
+        icon: cat.icon,
+        color: cat.color || 'blue',
+        version: cat.version || 'v1.0',
+        description: cat.description || '',
+        childCount: countCategoryRoutes(cat.id),
+      });
+    });
+
+    container.innerHTML = html;
+  } catch (e) {
+    console.error(`❌ ${config.logLabel} 渲染失败:`, e);
+    container.innerHTML = renderErrorCard();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// Public API
+// ═══════════════════════════════════════════════════════════
+
 export function renderMegaMenu(): void {
   const container = getEl('mega-menu-content');
   if (!container) return;
@@ -30,419 +435,55 @@ export function renderMegaMenu(): void {
     const html = modules.map(mod => {
       const targetRoute = getDefaultRouteForModule(mod.id);
       if (!targetRoute) return '';
-
-      return `
-        <div data-action="switch-tab" data-tab="${targetRoute}" 
-             class="cursor-pointer group/card p-5 rounded-2xl bg-white border border-blue-100 hover:border-blue-300 hover:bg-blue-50/80 hover:shadow-lg hover:shadow-blue-200/40 hover:ring-2 hover:ring-blue-200/50 transition-all duration-300 ease-out flex flex-col gap-4 transform hover:-translate-y-1">
-          <div class="flex items-start justify-between">
-            <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl group-hover/card:scale-110 group-hover/card:bg-blue-600 group-hover/card:text-white transition-all duration-300 shadow-sm group-hover/card:shadow-md">
-              <i class="${mod.icon || 'fas fa-cube'}"></i>
-            </div>
-            <span class="text-[10px] font-mono font-semibold text-slate-400 bg-slate-100 px-2 py-1 rounded-md border border-slate-200 group-hover/card:border-blue-300 group-hover/card:text-blue-600 transition-all duration-300">
-              ${mod.version || 'v1.0'}
-            </span>
-          </div>
-          <div class="flex-grow">
-            <h4 class="text-sm font-bold text-slate-800 mb-2 group-hover/card:text-blue-700 transition-colors duration-300 flex items-center gap-2">
-              ${mod.title || 'Unknown Module'}
-              <i class="fas fa-arrow-right opacity-0 -translate-x-2 text-xs text-blue-500 group-hover/card:opacity-100 group-hover/card:translate-x-0 transition-all duration-300"></i>
-            </h4>
-            <p class="text-xs text-slate-500 leading-relaxed line-clamp-2 group-hover/card:text-slate-600 transition-colors duration-300">
-              ${mod.description || '暂无描述'}
-            </p>
-          </div>
-          
-          <div class="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-        </div>`;
+      return renderCard({
+        target: targetRoute,
+        label: mod.title || 'Unknown Module',
+        icon: mod.icon || 'fas fa-cube',
+        color: (mod as any).color || 'blue',
+        version: mod.version || 'v1.0',
+        description: mod.description || '暂无描述',
+      });
     }).join('');
 
     container.innerHTML = html;
   } catch (e) {
-    console.error("❌ MegaMenu 渲染失败:", e);
-    container.innerHTML = `<div class="p-4 text-red-500 text-xs">菜单加载失败</div>`;
+    console.error('❌ MegaMenu 渲染失败:', e);
+    container.innerHTML = renderErrorCard();
   }
 }
 
-/**
- * 渲染 More 菜单
- */
-export function renderMoreMenu(): void {
-  const container = getEl('more-menu-content');
-  if (!container) return;
-
-  try {
-    const overviewRoute = MENU_CONFIG.routes['more_overview'];
-    const categories = Object.values(MENU_CONFIG.moreCategories || {}).sort((a, b) => a.order - b.order);
-
-    let html = '';
-
-    // Helper: Rich Card Generator
-    const createRichCard = (
-      id: string,
-      label: string,
-      icon: string,
-      color: string,
-      version: string = 'v1.0',
-      description: string = '',
-      isOverview: boolean = false
-    ): string => {
-      let target = id;
-      if (!isOverview) {
-        const entry = Object.entries(MENU_CONFIG.routes).find(([_, r]) => r.category === id);
-        if (entry) target = entry[0];
-      }
-
-      const colorSchemes: Record<string, Record<string, string>> = {
-        green: {
-          border: 'border-green-100 hover:border-green-300',
-          bg: 'hover:bg-green-50/80',
-          shadow: 'hover:shadow-lg hover:shadow-green-200/40',
-          iconBg: 'bg-green-50 group-hover/card:bg-green-500',
-          iconText: 'text-green-600 group-hover/card:text-white',
-          iconScale: 'group-hover/card:scale-110',
-          titleText: 'group-hover/card:text-green-700',
-          arrow: 'text-green-500',
-          versionBorder: 'group-hover/card:border-green-300',
-          versionText: 'group-hover/card:text-green-600',
-          glow: 'group-hover/card:ring-2 group-hover/card:ring-green-200/50'
-        }
-      };
-
-      const scheme = (colorSchemes[color] ?? colorSchemes.green)!;
-
-      return `
-        <div data-action="switch-tab" data-tab="${target}" 
-             class="cursor-pointer group/card p-5 rounded-2xl bg-white border ${scheme.border} ${scheme.bg} ${scheme.shadow} ${scheme.glow} transition-all duration-300 ease-out flex flex-col gap-4 h-full transform hover:-translate-y-1">
-          
-          <div class="flex items-start justify-between">
-            <div class="w-12 h-12 ${scheme.iconBg} ${scheme.iconText} rounded-xl flex items-center justify-center text-xl ${scheme.iconScale} transition-all duration-300 shadow-sm group-hover/card:shadow-md">
-              <i class="${icon}"></i>
-            </div>
-            <span class="text-[10px] font-mono font-semibold text-slate-400 bg-slate-100 px-2 py-1 rounded-md border border-slate-200 ${scheme.versionBorder} ${scheme.versionText} transition-all duration-300">
-              ${version}
-            </span>
-          </div>
-
-          <div class="flex-grow flex flex-col">
-            <h4 class="text-sm font-bold text-slate-800 mb-2 ${scheme.titleText} transition-colors duration-300 flex items-center gap-2">
-              ${label}
-              <i class="fas fa-arrow-right opacity-0 -translate-x-2 text-xs ${scheme.arrow} group-hover/card:opacity-100 group-hover/card:translate-x-0 transition-all duration-300"></i>
-            </h4>
-            <p class="text-xs text-slate-500 leading-relaxed line-clamp-3 group-hover/card:text-slate-600 transition-colors duration-300">
-              ${description || '暂无描述'}
-            </p>
-          </div>
-
-          <div class="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-        </div>`;
-    };
-
-    // 1. Overview Card
-    if (overviewRoute) {
-      html += createRichCard(
-        'more_overview',
-        '更多总览',
-        overviewRoute.icon,
-        'green',
-        'v1.0',
-        '探索更多实用功能和工具，提升工作效率。',
-        true
-      );
-    }
-
-    // 2. Category Cards
-    categories.forEach(cat => {
-      html += createRichCard(
-        cat.id,
-        cat.label,
-        cat.icon,
-        cat.color,
-        cat.version,
-        cat.description,
-        false
-      );
-    });
-
-    container.innerHTML = html;
-  } catch (e) {
-    console.error("❌ MoreMenu 渲染失败:", e);
-    container.innerHTML = `<div class="p-4 text-red-500 text-xs">菜单加载失败</div>`;
-  }
-}
-
-/**
- * 渲染 Amazon 智库 Mega Menu
- */
-export function renderHubMegaMenu(): void {
-  const container = getEl('hub-mega-menu-content');
-  if (!container) return;
-
-  try {
-    const overviewRoute = MENU_CONFIG.routes['amz_hub_overview'];
-    const categories = Object.values(MENU_CONFIG.hubCategories || {}).sort((a, b) => a.order - b.order);
-
-    let html = '';
-
-    // Helper: Rich Card Generator
-    const createRichCard = (
-      id: string,
-      label: string,
-      icon: string,
-      color: string,
-      version: string = 'v1.0',
-      description: string = '',
-      isOverview: boolean = false
-    ): string => {
-      let target = id;
-      if (!isOverview) {
-        const entry = Object.entries(MENU_CONFIG.routes).find(([_, r]) => r.category === id);
-        if (entry) target = entry[0];
-      }
-
-      const colorSchemes: Record<string, Record<string, string>> = {
-        blue: {
-          border: 'border-blue-100 hover:border-blue-300',
-          bg: 'hover:bg-blue-50/80',
-          shadow: 'hover:shadow-lg hover:shadow-blue-200/40',
-          iconBg: 'bg-blue-50 group-hover/card:bg-blue-500',
-          iconText: 'text-blue-600 group-hover/card:text-white',
-          iconScale: 'group-hover/card:scale-110',
-          titleText: 'group-hover/card:text-blue-700',
-          arrow: 'text-blue-500',
-          versionBorder: 'group-hover/card:border-blue-300',
-          versionText: 'group-hover/card:text-blue-600',
-          glow: 'group-hover/card:ring-2 group-hover/card:ring-blue-200/50'
-        },
-        emerald: {
-          border: 'border-emerald-100 hover:border-emerald-300',
-          bg: 'hover:bg-emerald-50/80',
-          shadow: 'hover:shadow-lg hover:shadow-emerald-200/40',
-          iconBg: 'bg-emerald-50 group-hover/card:bg-emerald-500',
-          iconText: 'text-emerald-600 group-hover/card:text-white',
-          iconScale: 'group-hover/card:scale-110',
-          titleText: 'group-hover/card:text-emerald-700',
-          arrow: 'text-emerald-500',
-          versionBorder: 'group-hover/card:border-emerald-300',
-          versionText: 'group-hover/card:text-emerald-600',
-          glow: 'group-hover/card:ring-2 group-hover/card:ring-emerald-200/50'
-        },
-        purple: {
-          border: 'border-purple-100 hover:border-purple-300',
-          bg: 'hover:bg-purple-50/80',
-          shadow: 'hover:shadow-lg hover:shadow-purple-200/40',
-          iconBg: 'bg-purple-50 group-hover/card:bg-purple-500',
-          iconText: 'text-purple-600 group-hover/card:text-white',
-          iconScale: 'group-hover/card:scale-110',
-          titleText: 'group-hover/card:text-purple-700',
-          arrow: 'text-purple-500',
-          versionBorder: 'group-hover/card:border-purple-300',
-          versionText: 'group-hover/card:text-purple-600',
-          glow: 'group-hover/card:ring-2 group-hover/card:ring-purple-200/50'
-        }
-      };
-
-      const scheme = (colorSchemes[color] ?? colorSchemes.blue)!;
-
-      return `
-        <div data-action="switch-tab" data-tab="${target}" 
-             class="cursor-pointer group/card p-5 rounded-2xl bg-white border ${scheme.border} ${scheme.bg} ${scheme.shadow} ${scheme.glow} transition-all duration-300 ease-out flex flex-col gap-4 h-full transform hover:-translate-y-1">
-          
-          <div class="flex items-start justify-between">
-            <div class="w-12 h-12 ${scheme.iconBg} ${scheme.iconText} rounded-xl flex items-center justify-center text-xl ${scheme.iconScale} transition-all duration-300 shadow-sm group-hover/card:shadow-md">
-              <i class="${icon}"></i>
-            </div>
-            <span class="text-[10px] font-mono font-semibold text-slate-400 bg-slate-100 px-2 py-1 rounded-md border border-slate-200 ${scheme.versionBorder} ${scheme.versionText} transition-all duration-300">
-              ${version}
-            </span>
-          </div>
-
-          <div class="flex-grow flex flex-col">
-            <h4 class="text-sm font-bold text-slate-800 mb-2 ${scheme.titleText} transition-colors duration-300 flex items-center gap-2">
-              ${label}
-              <i class="fas fa-arrow-right opacity-0 -translate-x-2 text-xs ${scheme.arrow} group-hover/card:opacity-100 group-hover/card:translate-x-0 transition-all duration-300"></i>
-            </h4>
-            <p class="text-xs text-slate-500 leading-relaxed line-clamp-3 group-hover/card:text-slate-600 transition-colors duration-300">
-              ${description || '暂无描述'}
-            </p>
-          </div>
-
-          <div class="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-        </div>`;
-    };
-
-    // 1. Overview Card
-    if (overviewRoute) {
-      html += createRichCard(
-        'amz_hub_overview',
-        '智库总览',
-        overviewRoute.icon,
-        'blue',
-        'v1.0',
-        '系统化的Amazon运营知识体系，从基础认知到进阶策略。',
-        true
-      );
-    }
-
-    // 2. Category Cards
-    categories.forEach(cat => {
-      html += createRichCard(
-        cat.id,
-        cat.label,
-        cat.icon,
-        cat.color,
-        cat.version,
-        cat.description,
-        false
-      );
-    });
-
-    container.innerHTML = html;
-  } catch (e) {
-    console.error("❌ Hub MegaMenu Render Error:", e);
-  }
-}
-
-/**
- * 渲染 SOPs Mega Menu
- */
 export function renderSopsMegaMenu(): void {
-  const container = getEl('sops-mega-menu-content');
-  if (!container) return;
+  renderCategoryMenu({
+    containerId: 'sops-mega-menu-content',
+    overviewRouteId: 'sops_overview',
+    overviewLabel: 'SOP 总览',
+    overviewDescription: '掌控全局运营进度，查看所有待办事项与核心指标仪表盘。',
+    overviewColor: 'blue',
+    categories: MENU_CONFIG.sopCategories || {},
+    logLabel: 'SOPs MegaMenu',
+  });
+}
 
-  try {
-    const overviewRoute = MENU_CONFIG.routes['sops_overview'];
-    const categories = Object.values(MENU_CONFIG.sopCategories || {}).sort((a, b) => a.order - b.order);
+export function renderHubMegaMenu(): void {
+  renderCategoryMenu({
+    containerId: 'hub-mega-menu-content',
+    overviewRouteId: 'amz_hub_overview',
+    overviewLabel: '智库总览',
+    overviewDescription: '系统化的Amazon运营知识体系，从基础认知到进阶策略。',
+    overviewColor: 'blue',
+    categories: MENU_CONFIG.hubCategories || {},
+    logLabel: 'Hub MegaMenu',
+  });
+}
 
-    let html = '';
-
-    // Helper: Rich Card Generator
-    const createRichCard = (
-      id: string,
-      label: string,
-      icon: string,
-      color: string,
-      version: string = 'v1.0',
-      description: string = '',
-      isOverview: boolean = false
-    ): string => {
-      let target = id;
-      if (!isOverview) {
-        const entry = Object.entries(MENU_CONFIG.routes).find(([_, r]) => r.category === id);
-        if (entry) target = entry[0];
-      }
-
-      const colorSchemes: Record<string, Record<string, string>> = {
-        emerald: {
-          border: 'border-emerald-100 hover:border-emerald-300',
-          bg: 'hover:bg-emerald-50/80',
-          shadow: 'hover:shadow-lg hover:shadow-emerald-200/40',
-          iconBg: 'bg-emerald-50 group-hover/card:bg-emerald-500',
-          iconText: 'text-emerald-600 group-hover/card:text-white',
-          iconScale: 'group-hover/card:scale-110',
-          titleText: 'group-hover/card:text-emerald-700',
-          arrow: 'text-emerald-500',
-          versionBorder: 'group-hover/card:border-emerald-300',
-          versionText: 'group-hover/card:text-emerald-600',
-          glow: 'group-hover/card:ring-2 group-hover/card:ring-emerald-200/50'
-        },
-        amber: {
-          border: 'border-amber-100 hover:border-amber-300',
-          bg: 'hover:bg-amber-50/80',
-          shadow: 'hover:shadow-lg hover:shadow-amber-200/40',
-          iconBg: 'bg-amber-50 group-hover/card:bg-amber-500',
-          iconText: 'text-amber-600 group-hover/card:text-white',
-          iconScale: 'group-hover/card:scale-110',
-          titleText: 'group-hover/card:text-amber-700',
-          arrow: 'text-amber-500',
-          versionBorder: 'group-hover/card:border-amber-300',
-          versionText: 'group-hover/card:text-amber-600',
-          glow: 'group-hover/card:ring-2 group-hover/card:ring-amber-200/50'
-        },
-        red: {
-          border: 'border-red-100 hover:border-red-300',
-          bg: 'hover:bg-red-50/80',
-          shadow: 'hover:shadow-lg hover:shadow-red-200/40',
-          iconBg: 'bg-red-50 group-hover/card:bg-red-500',
-          iconText: 'text-red-600 group-hover/card:text-white',
-          iconScale: 'group-hover/card:scale-110',
-          titleText: 'group-hover/card:text-red-700',
-          arrow: 'text-red-500',
-          versionBorder: 'group-hover/card:border-red-300',
-          versionText: 'group-hover/card:text-red-600',
-          glow: 'group-hover/card:ring-2 group-hover/card:ring-red-200/50'
-        },
-        blue: {
-          border: 'border-blue-100 hover:border-blue-300',
-          bg: 'hover:bg-blue-50/80',
-          shadow: 'hover:shadow-lg hover:shadow-blue-200/40',
-          iconBg: 'bg-blue-50 group-hover/card:bg-blue-500',
-          iconText: 'text-blue-600 group-hover/card:text-white',
-          iconScale: 'group-hover/card:scale-110',
-          titleText: 'group-hover/card:text-blue-700',
-          arrow: 'text-blue-500',
-          versionBorder: 'group-hover/card:border-blue-300',
-          versionText: 'group-hover/card:text-blue-600',
-          glow: 'group-hover/card:ring-2 group-hover/card:ring-blue-200/50'
-        }
-      };
-
-      const scheme = (colorSchemes[color] ?? colorSchemes.blue)!;
-
-      return `
-        <div data-action="switch-tab" data-tab="${target}" 
-             class="cursor-pointer group/card p-5 rounded-2xl bg-white border ${scheme.border} ${scheme.bg} ${scheme.shadow} ${scheme.glow} transition-all duration-300 ease-out flex flex-col gap-4 h-full transform hover:-translate-y-1">
-          
-          <div class="flex items-start justify-between">
-            <div class="w-12 h-12 ${scheme.iconBg} ${scheme.iconText} rounded-xl flex items-center justify-center text-xl ${scheme.iconScale} transition-all duration-300 shadow-sm group-hover/card:shadow-md">
-              <i class="${icon}"></i>
-            </div>
-            <span class="text-[10px] font-mono font-semibold text-slate-400 bg-slate-100 px-2 py-1 rounded-md border border-slate-200 ${scheme.versionBorder} ${scheme.versionText} transition-all duration-300">
-              ${version}
-            </span>
-          </div>
-
-          <div class="flex-grow flex flex-col">
-            <h4 class="text-sm font-bold text-slate-800 mb-2 ${scheme.titleText} transition-colors duration-300 flex items-center gap-2">
-              ${label}
-              <i class="fas fa-arrow-right opacity-0 -translate-x-2 text-xs ${scheme.arrow} group-hover/card:opacity-100 group-hover/card:translate-x-0 transition-all duration-300"></i>
-            </h4>
-            <p class="text-xs text-slate-500 leading-relaxed line-clamp-3 group-hover/card:text-slate-600 transition-colors duration-300">
-              ${description || '暂无描述'}
-            </p>
-          </div>
-
-          <div class="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-        </div>`;
-    };
-
-    // 1. Overview Card
-    if (overviewRoute) {
-      html += createRichCard(
-        'sops_overview',
-        'SOP 总览',
-        overviewRoute.icon,
-        'blue',
-        'v1.0',
-        '掌控全局运营进度，查看所有待办事项与核心指标仪表盘。',
-        true
-      );
-    }
-
-    // 2. Category Cards
-    categories.forEach(cat => {
-      html += createRichCard(
-        cat.id,
-        cat.label,
-        cat.icon,
-        cat.color,
-        cat.version,
-        cat.description,
-        false
-      );
-    });
-
-    container.innerHTML = html;
-  } catch (e) {
-    console.error("❌ SOPs MegaMenu Render Error:", e);
-  }
+export function renderMoreMenu(): void {
+  renderCategoryMenu({
+    containerId: 'more-menu-content',
+    overviewRouteId: 'more_overview',
+    overviewLabel: '更多总览',
+    overviewDescription: '探索更多实用功能和工具，提升工作效率。',
+    overviewColor: 'green',
+    categories: MENU_CONFIG.moreCategories || {},
+    logLabel: 'More Menu',
+  });
 }
