@@ -1,5 +1,5 @@
 // src/modules/app_center/views/master_prompt/analysis/renderer.js
-import { ANALYSIS_MODULES } from "../constants/prompts.js";
+import { ANALYSIS_MODULES } from "../constants/prompts";
 
 // 辅助函数：获取字段标题
 function getFieldTitle(key) {

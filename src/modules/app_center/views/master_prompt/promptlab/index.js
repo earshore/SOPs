@@ -14,7 +14,7 @@ import eventBus from '../../../../../common/EventBus.ts';
 import state from "../../../../../common/state";
 import { promptlabService } from '../services/promptlabService.js';
 import SITE_CONFIGS from '../../../../../common/constants/constants';
-import { ANALYSIS_MODULES } from '../constants/prompts.js';
+import { ANALYSIS_MODULES } from '../constants/prompts';
 import { showToast } from '../../../../../common/utils/ui.js';
 import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry';
 
