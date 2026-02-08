@@ -160,8 +160,9 @@ export function unregisterAction(actionName: string): void {
     delete ActionRegistry[actionName];
 
     // 同时从 window 对象移除
-    if ((window as any)[actionName]) {
-      delete (window as any)[actionName];
+    const windowWithAction = window as unknown as Record<string, unknown>;
+    if (windowWithAction[actionName]) {
+      delete windowWithAction[actionName];
     }
   }
 }

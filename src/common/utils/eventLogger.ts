@@ -139,7 +139,16 @@ export function logCustomEvent(eventName: string, detail: any = {}): void {
 // 🔄 向后兼容：暴露到 window (调试用)
 // ================================================================
 if (typeof window !== 'undefined') {
-  (window as any).EventLogger = {
+  type EventLoggerWindow = Window & {
+    EventLogger?: {
+      getHistory: typeof getEventHistory;
+      clear: typeof clearEventHistory;
+      log: typeof logCustomEvent;
+      enable: () => void;
+      disable: () => void;
+    };
+  };
+  (window as EventLoggerWindow).EventLogger = {
     getHistory: getEventHistory,
     clear: clearEventHistory,
     log: logCustomEvent,

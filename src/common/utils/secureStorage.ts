@@ -151,7 +151,7 @@ export const SecureStorage = {
  * 向后兼容: 暴露到 window
  */
 if (typeof window !== 'undefined') {
-  (window as any).SecureStorage = SecureStorage;
+  (window as Window & { SecureStorage?: typeof SecureStorage }).SecureStorage = SecureStorage;
 }
 
 export default SecureStorage;

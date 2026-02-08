@@ -49,9 +49,10 @@ export function validateRouteConfig(config: unknown): boolean {
   try {
     RouteConfigSchema.parse(config);
     return true;
-  } catch (error: any) {
-    console.error('[TypeGuard] Invalid route config:', error.errors);
-    throw new Error(`Route config validation failed: ${error.message}`);
+  } catch (error: unknown) {
+    const zodError = error as { errors?: unknown[]; message?: string };
+    console.error('[TypeGuard] Invalid route config:', zodError.errors);
+    throw new Error(`Route config validation failed: ${zodError.message || 'Unknown error'}`);
   }
 }
 
@@ -65,9 +66,10 @@ export function validateModuleConfig(config: unknown): boolean {
   try {
     ModuleConfigSchema.parse(config);
     return true;
-  } catch (error: any) {
-    console.error('[TypeGuard] Invalid module config:', error.errors);
-    throw new Error(`Module config validation failed: ${error.message}`);
+  } catch (error: unknown) {
+    const zodError = error as { errors?: unknown[]; message?: string };
+    console.error('[TypeGuard] Invalid module config:', zodError.errors);
+    throw new Error(`Module config validation failed: ${zodError.message || 'Unknown error'}`);
   }
 }
 
@@ -81,9 +83,10 @@ export function validateLLMConfig(config: unknown): boolean {
   try {
     LLMConfigSchema.parse(config);
     return true;
-  } catch (error: any) {
-    console.error('[TypeGuard] Invalid LLM config:', error.errors);
-    throw new Error(`LLM config validation failed: ${error.message}`);
+  } catch (error: unknown) {
+    const zodError = error as { errors?: unknown[]; message?: string };
+    console.error('[TypeGuard] Invalid LLM config:', zodError.errors);
+    throw new Error(`LLM config validation failed: ${zodError.message || 'Unknown error'}`);
   }
 }
 
@@ -97,9 +100,10 @@ export function validateProxyConfig(config: unknown): boolean {
   try {
     ProxyConfigSchema.parse(config);
     return true;
-  } catch (error: any) {
-    console.error('[TypeGuard] Invalid proxy config:', error.errors);
-    throw new Error(`Proxy config validation failed: ${error.message}`);
+  } catch (error: unknown) {
+    const zodError = error as { errors?: unknown[]; message?: string };
+    console.error('[TypeGuard] Invalid proxy config:', zodError.errors);
+    throw new Error(`Proxy config validation failed: ${zodError.message || 'Unknown error'}`);
   }
 }
 
@@ -206,8 +210,8 @@ export function isFunction(value: unknown): value is Function {
  * @param value - 待检查的值
  * @returns 类型守卫结果
  */
-export function isPromise(value: unknown): value is Promise<any> {
-  return value instanceof Promise || (isObject(value) && isFunction((value as any).then));
+export function isPromise(value: unknown): value is Promise<unknown> {
+  return value instanceof Promise || (isObject(value) && isFunction((value as Record<string, unknown>).then));
 }
 
 /**
@@ -243,7 +247,7 @@ export const TypeGuards = {
 
 // 暴露到 window（浏览器环境）
 if (typeof window !== 'undefined') {
-  (window as any).TypeGuards = TypeGuards;
+  (window as Window & { TypeGuards?: typeof TypeGuards }).TypeGuards = TypeGuards;
 }
 
 // 默认导出
