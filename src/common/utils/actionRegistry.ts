@@ -11,7 +11,12 @@ import { APP_EVENTS } from '../constants/eventConstants';
 /**
  * 动作处理函数类型
  */
-export type ActionHandler = (params: Record<string, any>, event: Event) => any;
+export type ActionHandler = (params: Record<string, unknown>, event: Event) => unknown;
+
+/**
+ * 动作映射类型
+ */
+export type ActionMap = Record<string, ActionHandler>;
 
 /**
  * 动作注册表类型
@@ -171,7 +176,7 @@ export function unregisterActions(actionNames: string[]): void {
 /**
  * 执行动作
  */
-export function executeAction(actionName: string, params: Record<string, any>, event: Event): any {
+export function executeAction(actionName: string, params: Record<string, unknown>, event: Event): unknown {
   const handler = ActionRegistry[actionName];
   if (!handler) {
     console.warn(`[ActionRegistry] 未注册的动作: "${actionName}"`);
@@ -294,13 +299,13 @@ export function getLegacyCallStats(): string[] {
 // ================================================================
 
 // 监听注册事件
-eventBus.on(APP_EVENTS.REGISTER_ACTIONS, ({ moduleId, actions }: any) => {
+eventBus.on(APP_EVENTS.REGISTER_ACTIONS, ({ moduleId, actions }: { moduleId: string; actions: ActionMap }) => {
   const actionNames = registerActionsWithLegacy(actions);
   console.log(`[ActionRegistry] 已注册 ${actionNames.length} 个动作 (模块: ${moduleId})`);
 });
 
 // 监听清理事件
-eventBus.on('unregisterActions', ({ moduleId, actionNames }: any) => {
+eventBus.on('unregisterActions', ({ moduleId, actionNames }: { moduleId: string; actionNames: string[] }) => {
   unregisterActions(actionNames);
   console.log(`[ActionRegistry] 已清理 ${actionNames.length} 个动作 (模块: ${moduleId})`);
 });
