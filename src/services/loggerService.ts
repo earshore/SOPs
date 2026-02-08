@@ -48,7 +48,7 @@ export interface LogEntry {
   level: LogLevel;
   levelName: string;
   message: string;
-  data: Record<string, any>;
+  data: Record<string, unknown>;
   module: string;
   timestamp: number;
   url: string;
@@ -59,11 +59,11 @@ export interface LogEntry {
  * 模块日志记录器
  */
 export interface ModuleLogger {
-  debug: (message: string, data?: Record<string, any>) => void;
-  info: (message: string, data?: Record<string, any>) => void;
-  warn: (message: string, data?: Record<string, any>) => void;
-  error: (message: string, error?: Error | Record<string, any>) => void;
-  fatal: (message: string, error?: Error | Record<string, any>) => void;
+  debug: (message: string, data?: Record<string, unknown>) => void;
+  info: (message: string, data?: Record<string, unknown>) => void;
+  warn: (message: string, data?: Record<string, unknown>) => void;
+  error: (message: string, error?: Error | Record<string, unknown>) => void;
+  fatal: (message: string, error?: Error | Record<string, unknown>) => void;
 }
 
 /**
@@ -111,7 +111,7 @@ export class LoggerService {
   /**
    * 记录日志
    */
-  private _log(level: LogLevel, message: string, data: Record<string, any> = {}, module = 'App'): void {
+  private _log(level: LogLevel, message: string, data: Record<string, unknown> = {}, module = 'App'): void {
     // 过滤低于最小级别的日志
     if (level < this.minLevel) {
       return;
@@ -265,28 +265,28 @@ export class LoggerService {
   /**
    * DEBUG 级别日志
    */
-  debug(message: string, data: Record<string, any> = {}, module = 'App'): void {
+  debug(message: string, data: Record<string, unknown> = {}, module = 'App'): void {
     this._log(LOG_LEVELS.DEBUG, message, data, module);
   }
 
   /**
    * INFO 级别日志
    */
-  info(message: string, data: Record<string, any> = {}, module = 'App'): void {
+  info(message: string, data: Record<string, unknown> = {}, module = 'App'): void {
     this._log(LOG_LEVELS.INFO, message, data, module);
   }
 
   /**
    * WARN 级别日志
    */
-  warn(message: string, data: Record<string, any> = {}, module = 'App'): void {
+  warn(message: string, data: Record<string, unknown> = {}, module = 'App'): void {
     this._log(LOG_LEVELS.WARN, message, data, module);
   }
 
   /**
    * ERROR 级别日志
    */
-  error(message: string, error: Error | Record<string, any> = {}, module = 'App'): void {
+  error(message: string, error: Error | Record<string, unknown> = {}, module = 'App'): void {
     const data = error instanceof Error ? {
       name: error.name,
       message: error.message,
@@ -299,7 +299,7 @@ export class LoggerService {
   /**
    * FATAL 级别日志
    */
-  fatal(message: string, error: Error | Record<string, any> = {}, module = 'App'): void {
+  fatal(message: string, error: Error | Record<string, unknown> = {}, module = 'App'): void {
     const data = error instanceof Error ? {
       name: error.name,
       message: error.message,
@@ -314,11 +314,11 @@ export class LoggerService {
    */
   createModuleLogger(moduleName: string): ModuleLogger {
     return {
-      debug: (message: string, data?: Record<string, any>) => this.debug(message, data, moduleName),
-      info: (message: string, data?: Record<string, any>) => this.info(message, data, moduleName),
-      warn: (message: string, data?: Record<string, any>) => this.warn(message, data, moduleName),
-      error: (message: string, error?: Error | Record<string, any>) => this.error(message, error, moduleName),
-      fatal: (message: string, error?: Error | Record<string, any>) => this.fatal(message, error, moduleName),
+      debug: (message: string, data?: Record<string, unknown>) => this.debug(message, data, moduleName),
+      info: (message: string, data?: Record<string, unknown>) => this.info(message, data, moduleName),
+      warn: (message: string, data?: Record<string, unknown>) => this.warn(message, data, moduleName),
+      error: (message: string, error?: Error | Record<string, unknown>) => this.error(message, error, moduleName),
+      fatal: (message: string, error?: Error | Record<string, unknown>) => this.fatal(message, error, moduleName),
     };
   }
 
@@ -399,6 +399,6 @@ export default Logger;
 
 // 向后兼容：暴露到 window
 if (typeof window !== 'undefined') {
-  (window as any).Logger = Logger;
-  (window as any).LOG_LEVELS = LOG_LEVELS;
+  (window as Window & { Logger?: LoggerService; LOG_LEVELS?: typeof LOG_LEVELS }).Logger = Logger;
+  (window as Window & { Logger?: LoggerService; LOG_LEVELS?: typeof LOG_LEVELS }).LOG_LEVELS = LOG_LEVELS;
 }
