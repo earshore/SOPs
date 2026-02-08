@@ -1,22 +1,67 @@
-// src/components/settings/systemSettings.js
+// src/components/settings/systemSettings.ts
 // ================================================================
-// 🎯 Phase 3: Alpine.js Refactor
+// 🎯 Phase 3: Alpine.js Refactor (TypeScript版本)
 // ================================================================
 
-import { escapeHtml } from '@/common/utils/security';
-import { PROVIDERS } from '../../common/constants/constants';
-import { fetchModelsFromApi, callLLM } from "../../services/llmService";
-import { showToast } from "../../common/utils/ui.js";
-import { StorageService, STORAGE_KEYS } from "../../services/storageService.ts";
-import { ErrorService } from "../../services/errorService";
-import { EnvConfig } from "../../common/config/envConfig"; // 🔒 P0修复: 导入环境配置
-import { APP_EVENTS } from "../../common/constants/eventConstants";
+import { escapeHtml } from '../../common/utils/security';
+import { PROVIDERS, type ProviderConfig } from '../../common/constants/constants';
+import { fetchModelsFromApi, callLLM } from '../../services/llmService';
+import { showToast } from '../../common/utils/ui.js';
+import { StorageService, STORAGE_KEYS } from '../../services/storageService';
+import { ErrorService } from '../../services/errorService';
+import { EnvConfig } from '../../common/config/envConfig';
+import { APP_EVENTS } from '../../common/constants/eventConstants';
+
+// ==========================================
+// 类型定义
+// ==========================================
+
+interface LLMState {
+    provider: string;
+    endpoint: string;
+    apiKey: string;
+    model: string;
+    models: Array<string | { id: string; name?: string }>;
+    showKey: boolean;
+    isFetching: boolean;
+    isTesting: boolean;
+}
+
+interface ProxyState {
+    type: string;
+    customUrl: string;
+    showKey: boolean;
+    savedKeyMap: Record<string, string>;
+}
+
+interface SettingsPanelData {
+    isOpen: boolean;
+    llm: LLMState;
+    proxy: ProxyState;
+    currentProviderConfig: ProviderConfig | Record<string, never>;
+    activeModelInfo: { id: string; name?: string } | null;
+    isProduction: boolean;
+    proxyNeedsInput: boolean;
+    proxyInputLabel: string;
+    proxyInputPlaceholder: string;
+    init(): void;
+    open(): void;
+    close(): void;
+    loadProviderConfig(provider: string): Promise<void>;
+    fetchModels(): Promise<void>;
+    testConnection(): Promise<void>;
+    saveProviderConfig(): Promise<void>;
+    loadProxyConfig(): void;
+    saveProxyConfig(): void;
+    getProxyDisplayName(type: string): string;
+    isDangerousEndpoint(endpoint: string): boolean;
+}
 
 // ==========================================
 // Alpine Component Logic
 // ==========================================
 
-const SettingsPanel = () => ({
+const SettingsPanel = (): SettingsPanelData => ({
     isOpen: false,
 
     // LLM Config State
@@ -36,15 +81,15 @@ const SettingsPanel = () => ({
         type: 'allorigins',
         customUrl: '',
         showKey: false,
-        savedKeyMap: {} // Cache for keys of different providers
+        savedKeyMap: {}
     },
 
     // Computed / Helpers
-    get currentProviderConfig() {
+    get currentProviderConfig(): ProviderConfig | Record<string, never> {
         return PROVIDERS[this.llm.provider] || {};
     },
 
-    get activeModelInfo() {
+    get activeModelInfo(): { id: string; name?: string } | null {
         if (!this.llm.model) return null;
         const m = this.llm.models.find(x => (typeof x === 'string' ? x : x.id) === this.llm.model);
         if (!m || typeof m === 'string') return null;
@@ -52,12 +97,12 @@ const SettingsPanel = () => ({
     },
 
     // 🔒 P0修复: 检查是否为生产环境
-    get isProduction() {
+    get isProduction(): boolean {
         return EnvConfig.isProduction;
     },
 
     // 🔒 P0修复: 检查端点是否为危险的外部API
-    isDangerousEndpoint(endpoint) {
+    isDangerousEndpoint(endpoint: string): boolean {
         if (!endpoint) return false;
         const dangerousEndpoints = [
             'api.openai.com',
@@ -68,17 +113,17 @@ const SettingsPanel = () => ({
         return dangerousEndpoints.some(domain => endpoint.includes(domain));
     },
 
-    get proxyNeedsInput() {
+    get proxyNeedsInput(): boolean {
         return ['scraperapi', 'zenrows', 'brightdata', 'custom_api', 'custom_proxy'].includes(this.proxy.type);
     },
 
-    get proxyInputLabel() {
+    get proxyInputLabel(): string {
         if (this.proxy.type === 'custom_proxy') return 'HTTP 代理地址';
         if (this.proxy.type === 'custom_api') return '完整端点 (URL)';
         return 'API Key (密钥)';
     },
 
-    get proxyInputPlaceholder() {
+    get proxyInputPlaceholder(): string {
         if (this.proxy.type === 'custom_proxy') return 'http://user:pass@ip:port';
         if (this.proxy.type === 'custom_api') return 'https://api.example.com/?url=';
         return `粘贴 ${this.getProxyDisplayName(this.proxy.type)} Key`;
@@ -87,12 +132,12 @@ const SettingsPanel = () => ({
     // Lifecycle
     init() {
         this.loadProxyConfig();
-        this.loadProviderConfig(this.llm.provider); // Force load on init
+        this.loadProviderConfig(this.llm.provider);
 
         // Watch for provider changes to load its config
-        this.$watch('llm.provider', (val) => this.loadProviderConfig(val));
+        (this as any).$watch('llm.provider', (val: string) => this.loadProviderConfig(val));
         // Watch for proxy type to restore cached key
-        this.$watch('proxy.type', (val) => {
+        (this as any).$watch('proxy.type', (val: string) => {
             this.proxy.customUrl = this.proxy.savedKeyMap[val] || '';
         });
     },
@@ -109,7 +154,7 @@ const SettingsPanel = () => ({
 
     // --- LLM Logic ---
 
-    async loadProviderConfig(provider) {
+    async loadProviderConfig(provider: string): Promise<void> {
         if (!provider) return;
         const config = PROVIDERS[provider];
 
@@ -125,11 +170,12 @@ const SettingsPanel = () => ({
         
         // 🔐 P0优化: 从安全存储读取API密钥
         try {
-            this.llm.apiKey = await StorageService.getSecure(`llm_key_${provider}`, "");
+            const key = await StorageService.getSecure(`llm_key_${provider}`, '');
+            this.llm.apiKey = key || '';
         } catch (error) {
             console.warn('[Settings] Failed to load encrypted API key, using fallback:', error);
             // 兼容旧数据: 如果加密读取失败,尝试读取明文(迁移期)
-            this.llm.apiKey = savedConfig.apiKey || "";
+            this.llm.apiKey = savedConfig.apiKey || '';
         }
 
         // Models: Use saved or default
@@ -138,31 +184,33 @@ const SettingsPanel = () => ({
             : (config.models || []);
 
         // Deduplicate models
-        const seen = new Set();
-        this.llm.models = rawModels.filter(m => {
+        const seen = new Set<string>();
+        this.llm.models = rawModels.filter((m: string | { id: string }) => {
             const id = typeof m === 'string' ? m : m.id;
             if (seen.has(id)) return false;
             seen.add(id);
             return true;
         });
 
-        this.llm.model = savedConfig.model || "";
+        this.llm.model = savedConfig.model || '';
 
         // Auto-select first model if none selected and models exist
         if (!this.llm.model && this.llm.models.length > 0) {
             const first = this.llm.models[0];
-            this.llm.model = typeof first === 'string' ? first : first.id;
+            if (first) {
+                this.llm.model = typeof first === 'string' ? first : first.id;
+            }
         }
     },
 
-    async fetchModels() {
+    async fetchModels(): Promise<void> {
         if (!this.llm.apiKey) {
-            showToast("请先输入API Key", "warning");
+            showToast('请先输入API Key', 'warning');
             return;
         }
 
         if (!this.llm.endpoint) {
-            showToast("请先输入API端点地址", "warning");
+            showToast('请先输入API端点地址', 'warning');
             return;
         }
 
@@ -175,28 +223,29 @@ const SettingsPanel = () => ({
         console.log(`${'='.repeat(60)}\n`);
 
         try {
-            let models = [];
+            let models: Array<string | { id: string; name?: string }> = [];
             const provider = this.llm.provider;
 
-            if (["llmgateway", "openai", "deepseek", "moonshot", "qwen"].includes(provider)) {
+            if (['llmgateway', 'openai', 'deepseek', 'moonshot', 'qwen'].includes(provider)) {
                 console.log(`🔄 正在从 ${provider} 获取模型列表...`);
                 models = await fetchModelsFromApi(provider, this.llm.endpoint, this.llm.apiKey);
                 console.log(`📋 从API获取到 ${models.length} 个模型:`, models.slice(0, 5));
             } else {
                 // Mock delay for static providers
-                models = PROVIDERS[provider].models || [];
+                const providerConfig = PROVIDERS[provider];
+                models = providerConfig?.models || [];
                 console.log(`📋 使用静态模型列表 (${provider}):`, models);
                 await new Promise(r => setTimeout(r, 600));
             }
 
             if (models.length === 0) {
-                console.warn("⚠️ 模型列表为空，可能是API配置错误或网络问题");
-                throw new Error("未能获取到有效模型列表，请检查API配置和网络连接");
+                console.warn('⚠️ 模型列表为空，可能是API配置错误或网络问题');
+                throw new Error('未能获取到有效模型列表，请检查API配置和网络连接');
             }
 
-            // Deduplicate models - 改进去重逻辑
-            const seen = new Set();
-            const uniqueModels = [];
+            // Deduplicate models
+            const seen = new Set<string>();
+            const uniqueModels: Array<string | { id: string; name?: string }> = [];
             
             models.forEach(m => {
                 const id = typeof m === 'string' ? m : m.id;
@@ -217,53 +266,56 @@ const SettingsPanel = () => ({
 
             if (!currentModelExists && this.llm.models.length > 0) {
                 const firstModel = this.llm.models[0];
-                this.llm.model = typeof firstModel === 'string' ? firstModel : firstModel.id;
-                console.log(`🔄 自动选择第一个模型: ${this.llm.model}`);
+                if (firstModel) {
+                    this.llm.model = typeof firstModel === 'string' ? firstModel : firstModel.id;
+                    console.log(`🔄 自动选择第一个模型: ${this.llm.model}`);
+                }
             }
 
             console.log(`\n${'='.repeat(60)}`);
             console.log(`✅ 模型列表获取成功！共 ${this.llm.models.length} 个模型`);
             console.log(`${'='.repeat(60)}\n`);
 
-            showToast(`成功同步 ${this.llm.models.length} 个模型`, "success");
+            showToast(`成功同步 ${this.llm.models.length} 个模型`, 'success');
         } catch (e) {
+            const error = e as Error;
             console.error(`\n${'='.repeat(60)}`);
-            console.error("❌ 获取模型列表失败:", e);
-            console.error("❌ 错误详情:", e.message);
-            console.error("❌ 错误堆栈:", e.stack);
+            console.error('❌ 获取模型列表失败:', error);
+            console.error('❌ 错误详情:', error.message);
+            console.error('❌ 错误堆栈:', error.stack);
             console.error(`${'='.repeat(60)}\n`);
             
             // 提供更友好的错误提示
-            let errorMsg = e.message;
-            if (e.message.includes('HTTP 401') || e.message.includes('Unauthorized')) {
+            let errorMsg = error.message;
+            if (error.message.includes('HTTP 401') || error.message.includes('Unauthorized')) {
                 errorMsg = 'API Key 无效或已过期，请检查配置';
-            } else if (e.message.includes('HTTP 403') || e.message.includes('Forbidden')) {
+            } else if (error.message.includes('HTTP 403') || error.message.includes('Forbidden')) {
                 errorMsg = 'API Key 没有访问权限，请检查配置';
-            } else if (e.message.includes('HTTP 404')) {
+            } else if (error.message.includes('HTTP 404')) {
                 errorMsg = 'API端点地址不正确，请检查配置';
-            } else if (e.message.includes('Failed to fetch') || e.message.includes('NetworkError')) {
+            } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
                 errorMsg = '网络连接失败，请检查网络或端点地址';
-            } else if (e.message.includes('timeout') || e.message.includes('AbortError')) {
+            } else if (error.message.includes('timeout') || error.message.includes('AbortError')) {
                 errorMsg = '请求超时，请检查网络连接';
             }
             
-            showToast(`获取模型失败: ${errorMsg}`, "error");
-            ErrorService.handle(e, { action: 'fetchModels', module: 'settings' });
+            showToast(`获取模型失败: ${errorMsg}`, 'error');
+            ErrorService.handle(error, { action: 'fetchModels', module: 'settings' });
         } finally {
             this.llm.isFetching = false;
         }
     },
 
-    async testConnection() {
+    async testConnection(): Promise<void> {
         if (!this.llm.apiKey || !this.llm.model) {
-            showToast("请先完善配置 (Key + 模型)", "warning");
+            showToast('请先完善配置 (Key + 模型)', 'warning');
             return;
         }
 
         this.llm.isTesting = true;
         try {
-            showToast("正在发送测试请求...", "info");
-            const messages = [{ role: "user", content: "Hello! Reply 'OK'." }];
+            showToast('正在发送测试请求...', 'info');
+            const messages = [{ role: 'user' as const, content: "Hello! Reply 'OK'." }];
 
             const response = await callLLM(
                 messages,
@@ -274,18 +326,18 @@ const SettingsPanel = () => ({
                 { temperature: 0.1, jsonMode: false, timeout: 15000 }
             );
 
-            console.log("Test Response:", response);
-            showToast("连接成功！", "success");
+            console.log('Test Response:', response);
+            showToast('连接成功！', 'success');
         } catch (error) {
-            ErrorService.handle(error, { action: 'testConnection', module: 'settings' });
+            ErrorService.handle(error as Error, { action: 'testConnection', module: 'settings' });
         } finally {
             this.llm.isTesting = false;
         }
     },
 
-    async saveProviderConfig() {
-        if (!this.llm.apiKey && this.llm.provider !== 'custom') {  // Custom might not need key? Usually does.
-            showToast("请填写 API Key", "warning");
+    async saveProviderConfig(): Promise<void> {
+        if (!this.llm.apiKey && this.llm.provider !== 'custom') {
+            showToast('请填写 API Key', 'warning');
             return;
         }
 
@@ -303,34 +355,32 @@ const SettingsPanel = () => ({
             // 其他配置正常存储
             StorageService.setLLMConfig(this.llm.provider, newConfig);
 
-            // Update global status UI (if any outside this component)
-            // Since we use Alpine, we might want a global store for status
-            // For now, rely on StorageService events or manual update
+            // Update global status UI
             updateModelStatus();
 
-            showToast("LLM 配置已保存 (API Key 已加密)", "success");
+            showToast('LLM 配置已保存 (API Key 已加密)', 'success');
             setTimeout(() => this.close(), 500);
         } catch (error) {
-            ErrorService.handle(error, { action: 'saveProviderConfig', module: 'settings' });
+            ErrorService.handle(error as Error, { action: 'saveProviderConfig', module: 'settings' });
         }
     },
 
     // --- Proxy Logic ---
 
-    loadProxyConfig() {
-        const savedConfig = StorageService.get(STORAGE_KEYS.SCRAPER_PROXY_CONFIG, {});
-        this.proxy.savedKeyMap = StorageService.get(STORAGE_KEYS.PROXY_KEY_MAP, {});
+    loadProxyConfig(): void {
+        const savedConfig = StorageService.get(STORAGE_KEYS.SCRAPER_PROXY_CONFIG, {}) as { type?: string; customUrl?: string } | null;
+        this.proxy.savedKeyMap = (StorageService.get(STORAGE_KEYS.PROXY_KEY_MAP, {}) as Record<string, string>) || {};
 
-        this.proxy.type = savedConfig.type || "allorigins";
+        this.proxy.type = savedConfig?.type || 'allorigins';
         // If the saved active type matches current type, use its URL, otherwise fallback to cache
-        if (savedConfig.type === this.proxy.type) {
-            this.proxy.customUrl = savedConfig.customUrl || "";
+        if (savedConfig?.type === this.proxy.type) {
+            this.proxy.customUrl = savedConfig?.customUrl || '';
         } else {
-            this.proxy.customUrl = this.proxy.savedKeyMap[this.proxy.type] || "";
+            this.proxy.customUrl = this.proxy.savedKeyMap[this.proxy.type] || '';
         }
     },
 
-    saveProxyConfig() {
+    saveProxyConfig(): void {
         // Update cache map
         this.proxy.savedKeyMap[this.proxy.type] = this.proxy.customUrl;
         StorageService.set(STORAGE_KEYS.PROXY_KEY_MAP, this.proxy.savedKeyMap);
@@ -339,19 +389,19 @@ const SettingsPanel = () => ({
         const config = { type: this.proxy.type, customUrl: this.proxy.customUrl };
         StorageService.set(STORAGE_KEYS.SCRAPER_PROXY_CONFIG, config);
 
-        showToast("网络配置已更新", "success");
+        showToast('网络配置已更新', 'success');
     },
 
-    getProxyDisplayName(type) {
-        const names = {
-            scraperapi: "ScraperAPI",
-            zenrows: "ZenRows",
-            brightdata: "Bright Data",
-            custom_api: "自定义 API",
-            allorigins: "AllOrigins",
-            custom_proxy: "HTTP 代理",
+    getProxyDisplayName(type: string): string {
+        const names: Record<string, string> = {
+            scraperapi: 'ScraperAPI',
+            zenrows: 'ZenRows',
+            brightdata: 'Bright Data',
+            custom_api: '自定义 API',
+            allorigins: 'AllOrigins',
+            custom_proxy: 'HTTP 代理',
         };
-        return names[type] || "默认";
+        return names[type] || '默认';
     }
 });
 
@@ -359,41 +409,37 @@ const SettingsPanel = () => ({
 // Initialization & Exports
 // ==========================================
 
-export function initAlpineSettings() {
-    if (window.Alpine) {
-        window.Alpine.data('settingsPanel', SettingsPanel);
+export function initAlpineSettings(): void {
+    if ((window as any).Alpine) {
+        (window as any).Alpine.data('settingsPanel', SettingsPanel);
     } else {
-        console.error("Alpine not found!");
+        console.error('Alpine not found!');
     }
 }
 
 // Legacy Bridge for ActionRegistry
-export function openSettings() {
+export function openSettings(): void {
     window.dispatchEvent(new CustomEvent(APP_EVENTS.SETTINGS_OPEN));
 }
 
-export function closeSettings() {
-    // Dispatch event to close via Alpine
+export function closeSettings(): void {
     window.dispatchEvent(new CustomEvent(APP_EVENTS.SETTINGS_CLOSE));
-    // We need to add @close-settings.window="close()" to HTML
 }
 
-// These are no longer needed for direct calling, but kept if other modules import them
-// actually, other modules shouldn't import them anymore if we move to event bus.
-// For now, we only need openSettings export.
-export const initSettingsListeners = () => { }; // No-op, handled by Alpine
-export const saveProviderConfig = () => { };
-export const loadProviderConfig = () => { };
-export const fetchModels = () => { };
-export const toggleApiKeyVisibility = () => { };
-export const testConnection = () => { };
-export const saveProxyConfig = () => { };
-export const renderProxyInputUI = () => { };
+// These are no longer needed for direct calling, but kept for compatibility
+export const initSettingsListeners = (): void => { };
+export const saveProviderConfig = (): void => { };
+export const loadProviderConfig = (): void => { };
+export const fetchModels = (): void => { };
+export const toggleApiKeyVisibility = (): void => { };
+export const testConnection = (): void => { };
+export const saveProxyConfig = (): void => { };
+export const renderProxyInputUI = (): void => { };
 
 // Keep this for main.js status update
-export async function updateModelStatus() {
+export async function updateModelStatus(): Promise<void> {
     const provider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
-    const statusEl = document.getElementById("model-status");
+    const statusEl = document.getElementById('model-status');
     if (!statusEl) return;
 
     if (provider && PROVIDERS[provider]) {

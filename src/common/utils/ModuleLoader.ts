@@ -11,7 +11,7 @@ import {
   renderLoading,
   renderNotRegistered,
   renderTimeout
-} from '../../components/ErrorBoundary.js';
+} from '../../components/ErrorBoundary';
 import { Logger } from '../../services/loggerService';
 
 // ==================== 类型定义 ====================

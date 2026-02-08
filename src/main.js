@@ -22,7 +22,7 @@ window.state = state;
 import { initViews } from './common/utils/viewLoader';
 
 // ✅ 导入 Web Components
-import './components/modal/AppModal.js';
+import './components/modal/AppModal';
 
 // 🎯 P0优化: 导入服务初始化管理器
 import { ServiceBootstrap } from './common/bootstrap/ServiceBootstrap';
@@ -119,7 +119,7 @@ import {
   toggleApiKeyVisibility, // [RESTORED]
   testConnection,
   saveProxyConfig
-} from "./components/settings/systemSettings.js";
+} from "./components/settings/systemSettings";
 
 import { switchTab, renderMegaMenu, renderSopsMegaMenu, renderHubMegaMenu, renderMoreMenu, showToast, initRouter } from "../src/common/utils/ui.js";
 import { APP_EVENTS } from './common/constants/eventConstants';

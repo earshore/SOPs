@@ -4,7 +4,7 @@ import {
   openSettings,
   closeSettings,
   updateModelStatus
-} from '@/components/settings/systemSettings.js';
+} from '@/components/settings/systemSettings';
 import { StorageService, STORAGE_KEYS } from '@/services/storageService.ts';
 import { PROVIDERS } from '@/common/constants/constants';
 

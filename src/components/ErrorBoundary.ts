@@ -1,28 +1,38 @@
-import { escapeHtml } from '@/common/utils/security';
-
-// src/components/ErrorBoundary.js
+// src/components/ErrorBoundary.ts
 // ================================================================
-// 🎯 统一错误边界组件
+// 🎯 统一错误边界组件 (TypeScript版本)
 // 提供一致的错误UI和重试机制
 // ================================================================
 
+import { escapeHtml } from '../common/utils/security';
+
 /**
  * 错误边界配置
- * @typedef {Object} ErrorBoundaryConfig
- * @property {string} [title='模块加载失败'] - 错误标题
- * @property {string} [color='red'] - 主题颜色
- * @property {boolean} [showReload=true] - 是否显示刷新按钮
- * @property {boolean} [showRetry=true] - 是否显示重试按钮
- * @property {Function} [onRetry] - 重试回调函数
  */
+export interface ErrorBoundaryConfig {
+    /** 错误标题 */
+    title?: string;
+    /** 主题颜色 */
+    color?: string;
+    /** 是否显示刷新按钮 */
+    showReload?: boolean;
+    /** 是否显示重试按钮 */
+    showRetry?: boolean;
+    /** 重试回调函数 */
+    onRetry?: () => void;
+}
 
 /**
  * 渲染错误边界UI
- * @param {HTMLElement} container - 容器元素
- * @param {Error} error - 错误对象
- * @param {ErrorBoundaryConfig} config - 配置对象
+ * @param container - 容器元素
+ * @param error - 错误对象
+ * @param config - 配置对象
  */
-export function renderErrorBoundary(container, error, config = {}) {
+export function renderErrorBoundary(
+    container: HTMLElement,
+    error: Error,
+    config: ErrorBoundaryConfig = {}
+): void {
     const {
         title = '模块加载失败',
         color = 'red',
@@ -55,8 +65,8 @@ export function renderErrorBoundary(container, error, config = {}) {
             <h3 class="text-lg font-bold text-slate-800 mb-2">${escapeHtml(title)}</h3>
             <p class="text-sm text-slate-500 mb-4 max-w-md">${escapeHtml(error.message || '网络连接不稳定或文件缺失')}</p>
             <div class="flex gap-3">
-                ${escapeHtml(reloadButton)}
-                ${escapeHtml(retryButton)}
+                ${reloadButton}
+                ${retryButton}
             </div>
         </div>
     `;
@@ -74,11 +84,15 @@ export function renderErrorBoundary(container, error, config = {}) {
 
 /**
  * 渲染加载中状态
- * @param {HTMLElement} container - 容器元素
- * @param {string} color - 主题颜色
- * @param {string} message - 加载提示文本
+ * @param container - 容器元素
+ * @param color - 主题颜色
+ * @param message - 加载提示文本
  */
-export function renderLoading(container, color = 'blue', message = 'Loading module...') {
+export function renderLoading(
+    container: HTMLElement,
+    color: string = 'blue',
+    message: string = 'Loading module...'
+): void {
     container.innerHTML = `
         <div class="p-10 text-center fade-in">
             <i class="fas fa-spinner fa-spin text-2xl text-${escapeHtml(color)}-500"></i>
@@ -89,11 +103,15 @@ export function renderLoading(container, color = 'blue', message = 'Loading modu
 
 /**
  * 渲染空状态
- * @param {HTMLElement} container - 容器元素
- * @param {string} message - 提示信息
- * @param {string} icon - 图标类名
+ * @param container - 容器元素
+ * @param message - 提示信息
+ * @param icon - 图标类名
  */
-export function renderEmpty(container, message = '暂无内容', icon = 'fa-inbox') {
+export function renderEmpty(
+    container: HTMLElement,
+    message: string = '暂无内容',
+    icon: string = 'fa-inbox'
+): void {
     container.innerHTML = `
         <div class="flex flex-col items-center justify-center p-12 text-center">
             <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
@@ -106,10 +124,10 @@ export function renderEmpty(container, message = '暂无内容', icon = 'fa-inbo
 
 /**
  * 渲染未注册模块提示
- * @param {HTMLElement} container - 容器元素
- * @param {string} routeId - 路由ID
+ * @param container - 容器元素
+ * @param routeId - 路由ID
  */
-export function renderNotRegistered(container, routeId) {
+export function renderNotRegistered(container: HTMLElement, routeId: string): void {
     container.innerHTML = `
         <div class="p-10 text-center">
             <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-50 mb-4">
@@ -123,9 +141,9 @@ export function renderNotRegistered(container, routeId) {
 
 /**
  * 渲染超时提示
- * @param {HTMLElement} container - 容器元素
+ * @param container - 容器元素
  */
-export function renderTimeout(container) {
+export function renderTimeout(container: HTMLElement): void {
     // ✅ 安全: 静态HTML模板，无用户输入
     container.innerHTML = `
         <div class="p-10 text-center">
