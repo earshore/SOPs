@@ -27,6 +27,13 @@ interface Prompt {
     recommendedModel: string;
 }
 
+interface PromptCategory {
+    id: string;
+    name: string;
+    icon: string;
+    color: string;
+}
+
 let currentCategory = 'all';
 let currentPrompt: Prompt | null = null;
 let currentLang: 'zh' | 'en' = 'zh'; // 默认中文
@@ -100,9 +107,9 @@ function renderCategories(): void {
         </button>
     `;
 
-    const categoryBtns = Object.values(PROMPT_CATEGORIES as any)
+    const categoryBtns = Object.values(PROMPT_CATEGORIES as Record<string, PromptCategory>)
         .map(
-            (cat: any) => `
+            (cat) => `
         <button class="category-btn" data-category="${cat.id}">
             <i class="fas ${cat.icon}"></i>
             <span>${cat.name}</span>
@@ -137,12 +144,14 @@ function renderPromptList(prompts: Prompt[] | null = null): void {
 
     // ✅ 安全: 静态HTML模板，无用户输入
     container.innerHTML = promptsToRender
-        .map((prompt: any) => {
+        .map((prompt) => {
             // 通过 id 查找分类
-            const category = Object.values(PROMPT_CATEGORIES as any).find(
-                (cat: any) => cat.id === prompt.category
-            ) as any;
+            const category = Object.values(PROMPT_CATEGORIES as Record<string, PromptCategory>).find(
+                (cat) => cat.id === prompt.category
+            );
             const model = getModelInfo(prompt.recommendedModel);
+
+            if (!category) return '';
 
             return `
             <div class="prompt-card group" data-prompt-id="${prompt.id}">
@@ -221,8 +230,19 @@ function updateLangButtons(): void {
     });
 }
 
+// 扩展Window接口
+declare global {
+    interface Window {
+        viewPrompt?: (promptId: string) => void;
+        switchPromptLang?: (lang: 'zh' | 'en') => void;
+        closePromptModal?: () => void;
+        copyPrompt?: (promptId: string) => void;
+        copyModalPrompt?: () => void;
+    }
+}
+
 // 全局函数 - 查看提示词详情
-(window as any).viewPrompt = function (promptId: string): void {
+window.viewPrompt = function (promptId: string): void {
     const prompt = getPromptById(promptId);
     if (!prompt) return;
 
@@ -231,10 +251,12 @@ function updateLangButtons(): void {
     if (!modal) return;
 
     // 通过 id 查找分类
-    const category = Object.values(PROMPT_CATEGORIES as any).find(
-        (cat: any) => cat.id === prompt.category
-    ) as any;
+    const category = Object.values(PROMPT_CATEGORIES as Record<string, PromptCategory>).find(
+        (cat) => cat.id === prompt.category
+    );
     const model = getModelInfo(prompt.recommendedModel);
+
+    if (!category) return;
 
     const titleEl = document.getElementById('modal-prompt-title');
     const categoryEl = document.getElementById('modal-prompt-category');
@@ -261,14 +283,14 @@ function updateLangButtons(): void {
 };
 
 // 全局函数 - 切换语言
-(window as any).switchPromptLang = function (lang: 'zh' | 'en'): void {
+window.switchPromptLang = function (lang: 'zh' | 'en'): void {
     currentLang = lang;
     updatePromptContent();
     updateLangButtons();
 };
 
 // 全局函数 - 关闭模态框
-(window as any).closePromptModal = function (): void {
+window.closePromptModal = function (): void {
     const modal = document.getElementById('prompt-detail-modal');
     if (modal) {
         modal.classList.add('hidden');
@@ -277,7 +299,7 @@ function updateLangButtons(): void {
 };
 
 // 全局函数 - 复制提示词
-(window as any).copyPrompt = function (promptId: string): void {
+window.copyPrompt = function (promptId: string): void {
     const prompt = getPromptById(promptId);
     if (!prompt) return;
 
@@ -292,7 +314,7 @@ function updateLangButtons(): void {
 };
 
 // 全局函数 - 复制模态框中的提示词
-(window as any).copyModalPrompt = function (): void {
+window.copyModalPrompt = function (): void {
     if (!currentPrompt) return;
 
     // 复制当前显示语言的提示词
@@ -336,11 +358,11 @@ class PromptsModule extends BaseModule {
         currentPrompt = null;
 
         // 清理全局函数
-        delete (window as any).viewPrompt;
-        delete (window as any).switchPromptLang;
-        delete (window as any).closePromptModal;
-        delete (window as any).copyPrompt;
-        delete (window as any).copyModalPrompt;
+        delete window.viewPrompt;
+        delete window.switchPromptLang;
+        delete window.closePromptModal;
+        delete window.copyPrompt;
+        delete window.copyModalPrompt;
 
         console.log('❌ 提示词模块已卸载');
     }
