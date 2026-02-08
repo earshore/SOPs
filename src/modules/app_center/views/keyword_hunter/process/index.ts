@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Process 子模块
  * 负责文案处理、翻译和关键词匹配显示功能
  * 
@@ -10,7 +10,7 @@
  */
 
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
-import { showToast } from '../../../../../common/utils/ui.js';
+import { showToast } from '../../../../../common/ui';
 import * as KeywordService from '../services/trackerService';
 import state from "../../../../../common/state";
 import { ErrorService } from '../../../../../services/errorService';

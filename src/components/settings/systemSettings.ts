@@ -1,4 +1,4 @@
-// src/components/settings/systemSettings.ts
+﻿// src/components/settings/systemSettings.ts
 // ================================================================
 // 🎯 Phase 3: Alpine.js Refactor (TypeScript版本)
 // ================================================================
@@ -6,7 +6,7 @@
 import { escapeHtml } from '../../common/utils/security';
 import { PROVIDERS, type ProviderConfig } from '../../common/constants/constants';
 import { fetchModelsFromApi, callLLM } from '../../services/llmService';
-import { showToast } from '../../common/utils/ui.js';
+import { showToast } from '../../common/ui';
 import { StorageService, STORAGE_KEYS } from '../../services/storageService';
 import { ErrorService } from '../../services/errorService';
 import { EnvConfig } from '../../common/config/envConfig';

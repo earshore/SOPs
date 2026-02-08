@@ -1,10 +1,10 @@
-// src/services/errorService.ts
+﻿// src/services/errorService.ts
 // ================================================================
 // 🎯 统一错误处理服务 (TypeScript版本)
 // 替代分散的 catch 块处理逻辑
 // ================================================================
 
-import { showToast } from '../common/utils/ui.js';
+import { showToast } from '../common/ui';
 import { Logger } from './loggerService';
 
 /**

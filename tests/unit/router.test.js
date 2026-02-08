@@ -4,7 +4,7 @@
 // ================================================================
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { switchTab, initRouter } from '@/common/utils/ui.js';
+import { switchTab, initRouter } from '@/common/ui';
 import state from '@/common/state.js';
 import { MENU_CONFIG } from '@/common/config/menuConfig.js';
 

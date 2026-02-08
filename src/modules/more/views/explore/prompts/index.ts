@@ -1,4 +1,4 @@
-/**
+﻿/**
  * More 模块 - 提示词页面
  * 提示词库浏览、搜索和复制功能
  */
@@ -13,7 +13,7 @@ import {
     searchPrompts,
     getModelInfo,
 } from './constants/promptLibrary.js';
-import { showToast } from '../../../../../common/utils/ui.js';
+import { showToast } from '../../../../../common/ui';
 import './prompts_style.css';
 
 // 类型定义

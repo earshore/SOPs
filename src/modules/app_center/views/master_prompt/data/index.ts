@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Data 子模块
  * 负责数据管理和展示功能
  * 
@@ -11,7 +11,7 @@
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import BaseModule from "../../../../../common/BaseModule";
 import state from "../../../../../common/state";
-import { getErrorSummary, showToast, switchTab } from '../../../../../common/utils/ui.js';
+import { getErrorSummary, showToast, switchTab } from '../../../../../common/ui';
 import { HistoryService } from '../services/historyService';
 import { StorageService } from '../../../../../services/storageService';
 import { languageFlagMap, SITE_NAME_MAP, SITE_DOMAIN_MAP } from '../../../../../common/constants/constants';

@@ -1,11 +1,11 @@
-// ==========================================
+﻿// ==========================================
 // 🚀 优化版 scraperService.ts
 // 🎯 Phase 4: 已迁移使用 StorageService
 // ==========================================
 
 import { LANGUAGE_HEADERS, PROXY_URLS } from '../../../../../common/constants/constants';
 import { parseProductPage, parseReviews } from "./parserService";
-import { sleep, getErrorSummary } from "../../../../../common/utils/ui.js";
+import { sleep, getErrorSummary } from '../../../../../common/ui';
 import { HistoryService } from "./historyService";
 import { StorageService } from "../../../../../services/storageService";
 

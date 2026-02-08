@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Promptlab 子模块
  * 负责 Prompt 生成功能
  * 
@@ -14,7 +14,7 @@ import state from "../../../../../common/state";
 import { promptlabService } from '../services/promptlabService';
 import SITE_CONFIGS from '../../../../../common/constants/constants';
 import { ANALYSIS_MODULES } from '../constants/prompts';
-import { showToast } from '../../../../../common/utils/ui.js';
+import { showToast } from '../../../../../common/ui';
 import { registerActionsWithLegacy, unregisterActions } from '../../../../../common/utils/actionRegistry';
 
 import '../master_prompt_style.css';

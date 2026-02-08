@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Scraper 子模块
  * 负责亚马逊数据采集功能
  * 
@@ -16,7 +16,7 @@ import { LANGUAGE_HEADERS } from '../../../../../common/constants/constants';
 import { HistoryService } from '../services/historyService';
 import { StorageService, STORAGE_KEYS } from '../../../../../services/storageService';
 import { ErrorService } from '../../../../../services/errorService';
-import { showToast, sleep } from '../../../../../common/utils/ui.js';
+import { showToast, sleep } from '../../../../../common/ui';
 import { APP_EVENTS, MODULE_EVENTS } from '../../../../../common/constants/eventConstants';
 
 import '../master_prompt_style.css';

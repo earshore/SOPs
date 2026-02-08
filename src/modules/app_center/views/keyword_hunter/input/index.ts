@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Input 子模块
  * 负责关键词和文案的输入功能
  * 
@@ -9,7 +9,7 @@
  */
 
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
-import { showToast, showProgress } from '../../../../../common/utils/ui.js';
+import { showToast, showProgress } from '../../../../../common/ui';
 import * as KeywordService from '../services/trackerService';
 import state from "../../../../../common/state";
 import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry';

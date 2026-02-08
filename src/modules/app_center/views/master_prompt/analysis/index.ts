@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Analysis 子模块
  * 负责 AI 分析功能
  * 
@@ -14,7 +14,7 @@ import BaseModule from "../../../../../common/BaseModule";
 import state from "../../../../../common/state";
 import { PROVIDERS, LANGUAGE_HEADERS } from '../../../../../common/constants/constants';
 import { ANALYSIS_MODULES, DYNAMIC_MASTER_TEMPLATE } from '../constants/prompts';
-import { showToast } from '../../../../../common/utils/ui.js';
+import { showToast } from '../../../../../common/ui';
 import { HistoryService } from '../services/historyService';
 import { renderHistory } from '../scraper/index';
 import { AnalysisService } from '../services/analysisService';

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Analysis 子模块
  * 负责关键词分析、统计和 AI 诊断报告功能
  * 
@@ -9,7 +9,7 @@
  */
 
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
-import { showToast } from '../../../../../common/utils/ui.js';
+import { showToast } from '../../../../../common/ui';
 import * as KeywordService from '../services/trackerService';
 import state from "../../../../../common/state";
 import { ErrorService } from '../../../../../services/errorService';
