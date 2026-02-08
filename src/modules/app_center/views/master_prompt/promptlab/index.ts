@@ -10,24 +10,55 @@
 
 import { escapeHtml } from '@/common/utils/security';
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
-import eventBus from '../../../../../common/EventBus.ts';
 import state from "../../../../../common/state";
 import { promptlabService } from '../services/promptlabService';
 import SITE_CONFIGS from '../../../../../common/constants/constants';
 import { ANALYSIS_MODULES } from '../constants/prompts';
 import { showToast } from '../../../../../common/utils/ui.js';
-import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry';
+import { registerActionsWithLegacy, unregisterActions } from '../../../../../common/utils/actionRegistry';
 
 import '../master_prompt_style.css';
+
+// ========================================== 
+// Types
+// ========================================== 
+
+interface EventListenerRecord {
+    element: HTMLElement | Document;
+    event: string;
+    handler: EventListenerOrEventListenerObject;
+}
+
+interface UserProductProfile {
+    targetMarket: string;
+    keywordsTier1: string;
+    keywordsTier2: string;
+    audience: string;
+    usps: string;
+    specs: string;
+    socialHook: string;
+    negative: string;
+    tone: string;
+    customStrategy: string;
+    useCosmo: boolean;
+    useRufus: boolean;
+    useEmoji: boolean;
+    selectedReportSections: string[];
+    charLimit: number;
+}
+
+interface PromptInputs extends UserProductProfile {
+    useAnalysisData: boolean;
+}
 
 // ========================================== 
 // Module State
 // ========================================== 
 
-let currentConsoleMode = "listing";
-let eventListeners = []; // 用于清理事件监听器
-let timeouts = []; // 用于清理定时器
-let registeredActions = []; // 用于清理已注册的动作
+let currentConsoleMode: "listing" | "visual" = "listing";
+let eventListeners: EventListenerRecord[] = []; // 用于清理事件监听器
+let timeouts: number[] = []; // 用于清理定时器
+let registeredActions: string[] = []; // 用于清理已注册的动作
 let listingPromptCache = ""; // 缓存 Listing Prompt
 let visualPromptCache = ""; // 缓存 Visual Prompt
 
@@ -38,7 +69,7 @@ let visualPromptCache = ""; // 缓存 Visual Prompt
 /**
  * 添加事件监听器（带自动清理）
  */
-function addEventListener(element, event, handler) {
+function addEventListener(element: HTMLElement | Document, event: string, handler: EventListenerOrEventListenerObject): void {
     element.addEventListener(event, handler);
     eventListeners.push({ element, event, handler });
 }
@@ -46,8 +77,8 @@ function addEventListener(element, event, handler) {
 /**
  * 添加定时器（带自动清理）
  */
-function addTimeout(callback, delay) {
-    const id = setTimeout(callback, delay);
+function addTimeout(callback: () => void, delay: number): number {
+    const id = window.setTimeout(callback, delay);
     timeouts.push(id);
     return id;
 }
@@ -55,7 +86,7 @@ function addTimeout(callback, delay) {
 /**
  * 清理所有事件监听器和定时器
  */
-function cleanup() {
+function cleanup(): void {
     // 清理事件监听器
     eventListeners.forEach(({ element, event, handler }) => {
         element.removeEventListener(event, handler);
@@ -68,20 +99,16 @@ function cleanup() {
     
     // 清理已注册的动作
     if (registeredActions.length > 0) {
-        import('../../../../../common/utils/actionRegistry').then(({ unregisterActions }) => {
-            unregisterActions(registeredActions);
-            console.log(`[Promptlab] 已清理 ${registeredActions.length} 个动作`);
-            registeredActions = [];
-        }).catch(err => {
-            console.warn('[Promptlab] 清理动作失败:', err);
-        });
+        unregisterActions(registeredActions);
+        console.log(`[Promptlab] 已清理 ${registeredActions.length} 个动作`);
+        registeredActions = [];
     }
 }
 
 /**
  * 获取字段标题
  */
-function getFieldTitle(key) {
+function getFieldTitle(key: string): string {
     const module = ANALYSIS_MODULES.find((m) => m.id === key);
     if (module) return module.label_cn;
     return key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
@@ -94,29 +121,35 @@ function getFieldTitle(key) {
 /**
  * 保存输入到 state
  */
-function saveInputsToState() {
-    const selectedSections = [];
-    document.querySelectorAll('input[name="report-section"]:checked').forEach((cb) => {
+function saveInputsToState(): void {
+    const selectedSections: string[] = [];
+    document.querySelectorAll<HTMLInputElement>('input[name="report-section"]:checked').forEach((cb) => {
         selectedSections.push(cb.value);
     });
 
+    if (!state.masterPrompt) {
+        state.masterPrompt = {} as any;
+    }
+    
+    if (!state.masterPrompt) return; // Type guard
+
     state.masterPrompt.promptlab = {
         userProductProfile: {
-            targetMarket: document.getElementById("lab-target-market")?.value || "",
-            keywordsTier1: document.getElementById("lab-keywords-tier1")?.value || "",
-            keywordsTier2: document.getElementById("lab-keywords-tier2")?.value || "",
-            audience: document.getElementById("lab-audience")?.value || "",
-            usps: document.getElementById("lab-usps")?.value || "",
-            specs: document.getElementById("lab-specs")?.value || "",
-            socialHook: document.getElementById("lab-social-hook")?.value || "",
-            negative: document.getElementById("negative-keywords")?.value || "",
-            tone: document.getElementById("lab-tone")?.value || "professional",
-            customStrategy: document.getElementById("lab-custom-strategy")?.value || "",
-            useCosmo: document.getElementById("opt-cosmo")?.checked || false,
-            useRufus: document.getElementById("opt-rufus")?.checked || false,
-            useEmoji: document.getElementById("opt-emoji")?.checked || false,
+            targetMarket: (document.getElementById("lab-target-market") as HTMLSelectElement)?.value || "",
+            keywordsTier1: (document.getElementById("lab-keywords-tier1") as HTMLInputElement)?.value || "",
+            keywordsTier2: (document.getElementById("lab-keywords-tier2") as HTMLTextAreaElement)?.value || "",
+            audience: (document.getElementById("lab-audience") as HTMLInputElement)?.value || "",
+            usps: (document.getElementById("lab-usps") as HTMLTextAreaElement)?.value || "",
+            specs: (document.getElementById("lab-specs") as HTMLTextAreaElement)?.value || "",
+            socialHook: (document.getElementById("lab-social-hook") as HTMLInputElement)?.value || "",
+            negative: (document.getElementById("negative-keywords") as HTMLInputElement)?.value || "",
+            tone: (document.getElementById("lab-tone") as HTMLSelectElement)?.value || "professional",
+            customStrategy: (document.getElementById("lab-custom-strategy") as HTMLTextAreaElement)?.value || "",
+            useCosmo: (document.getElementById("opt-cosmo") as HTMLInputElement)?.checked || false,
+            useRufus: (document.getElementById("opt-rufus") as HTMLInputElement)?.checked || false,
+            useEmoji: (document.getElementById("opt-emoji") as HTMLInputElement)?.checked || false,
             selectedReportSections: selectedSections,
-            charLimit: document.getElementById("lab-char-limit")?.value || 5000,
+            charLimit: parseInt((document.getElementById("lab-char-limit") as HTMLInputElement)?.value) || 5000,
         }
     };
 }
@@ -124,17 +157,18 @@ function saveInputsToState() {
 /**
  * 从 state 恢复输入
  */
-function restoreInputsFromState() {
+function restoreInputsFromState(): void {
+    if (!state.masterPrompt) return;
     const p = state.masterPrompt.promptlab?.userProductProfile;
     if (!p) return;
 
-    const setVal = (id, val) => {
-        const el = document.getElementById(id);
-        if (el && val !== undefined) el.value = val;
+    const setVal = (id: string, val: string | number | undefined): void => {
+        const el = document.getElementById(id) as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+        if (el && val !== undefined) el.value = String(val);
     };
-    const setCheck = (id, val) => {
-        const el = document.getElementById(id);
-        if (el) el.checked = val;
+    const setCheck = (id: string, val: boolean | undefined): void => {
+        const el = document.getElementById(id) as HTMLInputElement;
+        if (el && val !== undefined) el.checked = val;
     };
 
     setVal("lab-usps", p.usps);
@@ -163,14 +197,14 @@ function restoreInputsFromState() {
 /**
  * 生成语言选项
  */
-function generateLanguageOptions() {
-    const select = document.getElementById("lab-target-market");
+function generateLanguageOptions(): void {
+    const select = document.getElementById("lab-target-market") as HTMLSelectElement;
     if (!select) return;
 
     // ✅ 安全: 静态HTML模板，无用户输入
     select.innerHTML = '<option value="" disabled selected>选择目标站点/语言...</option>';
 
-    Object.entries(SITE_CONFIGS).forEach(([code, config]) => {
+    Object.entries(SITE_CONFIGS).forEach(([_code, config]) => {
         const option = document.createElement("option");
         option.value = config.name;
         option.textContent = `${config.name} (${config.domain})`;
@@ -182,12 +216,12 @@ function generateLanguageOptions() {
 /**
  * 更新按钮状态
  */
-function updateButtonState() {
-    const btn = document.getElementById("btn-generate-prompt");
-    const btnVisual = document.getElementById("btn-generate-visual");
-    const select = document.getElementById("lab-target-market");
-    const tier1Input = document.getElementById("lab-keywords-tier1");
-    const tier2Input = document.getElementById("lab-keywords-tier2");
+function updateButtonState(): void {
+    const btn = document.getElementById("btn-generate-prompt") as HTMLButtonElement;
+    const btnVisual = document.getElementById("btn-generate-visual") as HTMLButtonElement;
+    const select = document.getElementById("lab-target-market") as HTMLSelectElement;
+    const tier1Input = document.getElementById("lab-keywords-tier1") as HTMLInputElement;
+    const tier2Input = document.getElementById("lab-keywords-tier2") as HTMLTextAreaElement;
 
     if (!btn) return;
 
@@ -247,10 +281,10 @@ function updateButtonState() {
 /**
  * 更新字符计数
  */
-function updateCharCount() {
-    const outEl = document.getElementById("final-prompt-output");
+function updateCharCount(): void {
+    const outEl = document.getElementById("final-prompt-output") as HTMLTextAreaElement;
     const countEl = document.getElementById("prompt-word-count");
-    const limitInput = document.getElementById("lab-char-limit");
+    const limitInput = document.getElementById("lab-char-limit") as HTMLInputElement;
     if (!outEl || !countEl || !limitInput) return;
 
     const currentLen = outEl.value.length;
@@ -269,11 +303,11 @@ function updateCharCount() {
 /**
  * 渲染报告分析
  */
-function renderReportAnalysis() {
+function renderReportAnalysis(): void {
     const container = document.getElementById("report-sections-container");
-    const checkboxMain = document.getElementById("use-analysis-data");
+    const checkboxMain = document.getElementById("use-analysis-data") as HTMLInputElement;
     const statusDiv = document.getElementById("lab-analysis-status");
-    const marketSelect = document.getElementById("lab-target-market");
+    const marketSelect = document.getElementById("lab-target-market") as HTMLSelectElement;
 
     if (marketSelect && marketSelect.options.length <= 1) {
         generateLanguageOptions();
@@ -282,9 +316,11 @@ function renderReportAnalysis() {
     if (!container || !checkboxMain) return;
 
     if (!state.analysis.analysisReport) {
-        statusDiv.className = "px-2 py-1 bg-slate-100 text-slate-500 rounded text-xs flex items-center gap-1";
-        // ✅ 安全: 静态HTML模板，无用户输入
-        statusDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> 未检测到分析报告';
+        if (statusDiv) {
+            statusDiv.className = "px-2 py-1 bg-slate-100 text-slate-500 rounded text-xs flex items-center gap-1";
+            // ✅ 安全: 静态HTML模板，无用户输入
+            statusDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> 未检测到分析报告';
+        }
         checkboxMain.disabled = true;
         checkboxMain.checked = false;
         // ✅ 安全: 静态HTML模板，无用户输入
@@ -294,15 +330,17 @@ function renderReportAnalysis() {
         return;
     }
 
-    statusDiv.className = "px-2 py-1 bg-green-100 text-green-700 rounded text-xs flex items-center gap-1";
-    // ✅ 安全: 静态HTML模板，无用户输入
-    statusDiv.innerHTML = '<i class="fas fa-check-circle"></i> 分析报告已就绪';
+    if (statusDiv) {
+        statusDiv.className = "px-2 py-1 bg-green-100 text-green-700 rounded text-xs flex items-center gap-1";
+        // ✅ 安全: 静态HTML模板，无用户输入
+        statusDiv.innerHTML = '<i class="fas fa-check-circle"></i> 分析报告已就绪';
+    }
     checkboxMain.disabled = false;
     checkboxMain.checked = true;
 
     // Auto-select language
-    if (marketSelect && !state.masterPrompt.promptlab?.userProductProfile?.targetMarket) {
-        const reportMarket = state.analysis.analysisReport.targetMarket || state.analysis.analysisReport.language || "";
+    if (marketSelect && state.masterPrompt && !state.masterPrompt.promptlab?.userProductProfile?.targetMarket) {
+        const reportMarket = (state.analysis.analysisReport as any).targetMarket || (state.analysis.analysisReport as any).language || "";
         if (reportMarket) {
             const options = Array.from(marketSelect.options);
             const match = options.find((opt) =>
@@ -311,8 +349,12 @@ function renderReportAnalysis() {
             );
             if (match) {
                 marketSelect.value = match.value;
-                if (!state.masterPrompt.promptlab) state.masterPrompt.promptlab = { userProductProfile: {} };
-                state.masterPrompt.promptlab.userProductProfile.targetMarket = match.value;
+                if (!state.masterPrompt) state.masterPrompt = {} as any;
+                if (!state.masterPrompt) return; // Type guard
+                if (!state.masterPrompt.promptlab) state.masterPrompt.promptlab = { userProductProfile: {} as UserProductProfile };
+                if (state.masterPrompt && state.masterPrompt.promptlab?.userProductProfile) {
+                    state.masterPrompt.promptlab.userProductProfile.targetMarket = match.value;
+                }
             }
         }
     }
@@ -323,23 +365,27 @@ function renderReportAnalysis() {
     // ✅ 安全: 静态HTML模板，无用户输入
     container.innerHTML = "";
     container.className = "mt-3 grid grid-cols-1 lg:grid-cols-2 gap-3";
-    const savedSelection = state.masterPrompt.promptlab?.userProductProfile?.selectedReportSections || [];
+    const savedSelection = state.masterPrompt?.promptlab?.userProductProfile?.selectedReportSections || [];
     const isFirstLoad = savedSelection.length === 0;
 
     keys.forEach((key) => {
         if (key === "target_audience") {
-            const audienceInput = document.getElementById("lab-audience");
+            const audienceInput = document.getElementById("lab-audience") as HTMLInputElement;
             if (audienceInput && !audienceInput.value) {
-                let val = state.analysis.analysisReport[key];
+                let val = (state.analysis.analysisReport as any)[key];
                 if (Array.isArray(val)) val = val.join(", ");
                 audienceInput.value = val;
-                if (!state.masterPrompt.promptlab) state.masterPrompt.promptlab = { userProductProfile: {} };
-                state.masterPrompt.promptlab.userProductProfile.audience = val;
+                if (!state.masterPrompt) state.masterPrompt = {} as any;
+                if (!state.masterPrompt) return; // Type guard
+                if (!state.masterPrompt.promptlab) state.masterPrompt.promptlab = { userProductProfile: {} as UserProductProfile };
+                if (state.masterPrompt && state.masterPrompt.promptlab?.userProductProfile) {
+                    state.masterPrompt.promptlab.userProductProfile.audience = val;
+                }
             }
         }
 
         const label = getFieldTitle(key);
-        const previewText = getPreviewText(state.analysis.analysisReport[key]);
+        const previewText = getPreviewText((state.analysis.analysisReport as any)[key]);
         const isChecked = isFirstLoad ? true : savedSelection.includes(key);
 
         const div = document.createElement("div");
@@ -347,7 +393,7 @@ function renderReportAnalysis() {
         div.innerHTML = `
             <div class="flex h-5 items-center">
                 <input type="checkbox" name="report-section" value="${escapeHtml(key)}" id="sect-${escapeHtml(key)}" 
-                    class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" ${escapeHtml(isChecked ? "checked" : "")}>
+                    class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" ${isChecked ? "checked" : ""}>
             </div>
             <div class="ml-3 text-sm flex-1 min-w-0"> 
                 <label for="sect-${escapeHtml(key)}" class="cursor-pointer select-none w-full block">
@@ -364,7 +410,7 @@ function renderReportAnalysis() {
 /**
  * 获取预览文本
  */
-function getPreviewText(val) {
+function getPreviewText(val: any): string {
     if (!val) return "";
     if (typeof val === "string") return val.length > 50 ? val.substring(0, 50) + "..." : val;
     try {
@@ -391,11 +437,11 @@ function getPreviewText(val) {
 /**
  * 生成 Master Prompt
  */
-function generateMasterPrompt() {
-    const btn = document.getElementById("btn-generate-prompt");
-    const select = document.getElementById("lab-target-market");
-    const t1 = document.getElementById("lab-keywords-tier1")?.value.trim();
-    const t2 = document.getElementById("lab-keywords-tier2")?.value.trim();
+function generateMasterPrompt(): void {
+    const btn = document.getElementById("btn-generate-prompt") as HTMLButtonElement;
+    const select = document.getElementById("lab-target-market") as HTMLSelectElement;
+    const t1 = (document.getElementById("lab-keywords-tier1") as HTMLInputElement)?.value.trim();
+    const t2 = (document.getElementById("lab-keywords-tier2") as HTMLTextAreaElement)?.value.trim();
 
     if (btn && btn.dataset.disabledState === "true") {
         let msg = "未就绪";
@@ -408,14 +454,18 @@ function generateMasterPrompt() {
     }
 
     saveInputsToState();
-    const inputs = {
+    if (!state.masterPrompt?.promptlab?.userProductProfile) {
+        showToast("配置信息不完整", "warning");
+        return;
+    }
+    const inputs: Partial<PromptInputs> = {
         ...state.masterPrompt.promptlab.userProductProfile,
-        useAnalysisData: document.getElementById("use-analysis-data")?.checked || false,
+        useAnalysisData: (document.getElementById("use-analysis-data") as HTMLInputElement)?.checked || false,
     };
-    const outEl = document.getElementById("final-prompt-output");
+    const outEl = document.getElementById("final-prompt-output") as HTMLTextAreaElement;
     if (!outEl) return;
 
-    const result = promptlabService.generateMasterPrompt(inputs, state.analysis.analysisReport);
+    const result = promptlabService.generateMasterPrompt(inputs as any, state.analysis.analysisReport);
     listingPromptCache = result; // 缓存到模块状态
     outEl.value = result;
     updateCharCount();
@@ -427,20 +477,24 @@ function generateMasterPrompt() {
 /**
  * 生成视觉 Prompt
  */
-function generateVisualPrompt() {
+function generateVisualPrompt(): void {
     if (!state.analysis.analysisReport) {
         showToast("请先生成 Ai 分析报告以获取视觉灵感", "warning");
         return;
     }
     saveInputsToState();
-    const inputs = {
+    if (!state.masterPrompt?.promptlab?.userProductProfile) {
+        showToast("配置信息不完整", "warning");
+        return;
+    }
+    const inputs: Partial<PromptInputs> = {
         ...state.masterPrompt.promptlab.userProductProfile,
-        useAnalysisData: document.getElementById("use-analysis-data")?.checked || false,
+        useAnalysisData: (document.getElementById("use-analysis-data") as HTMLInputElement)?.checked || false,
     };
-    const outEl = document.getElementById("final-prompt-output");
+    const outEl = document.getElementById("final-prompt-output") as HTMLTextAreaElement;
     if (!outEl) return;
 
-    const result = promptlabService.generateVisualPrompt(inputs, state.analysis.analysisReport);
+    const result = promptlabService.generateVisualPrompt(inputs as any, state.analysis.analysisReport);
     visualPromptCache = result; // 缓存到模块状态
     outEl.value = result;
     updateCharCount();
@@ -452,7 +506,7 @@ function generateVisualPrompt() {
 /**
  * 切换控制台模式
  */
-function toggleConsoleMode(mode) {
+function toggleConsoleMode(mode: "listing" | "visual"): void {
     if (currentConsoleMode === mode) return;
     currentConsoleMode = mode;
     const cardInner = document.getElementById("console-card-inner");
@@ -460,7 +514,7 @@ function toggleConsoleMode(mode) {
     const glider = document.getElementById("mode-toggle-glider");
     const btnListing = document.getElementById("btn-mode-listing");
     const btnVisual = document.getElementById("btn-mode-visual");
-    const outputArea = document.getElementById("final-prompt-output");
+    const outputArea = document.getElementById("final-prompt-output") as HTMLTextAreaElement;
     const outputTitle = document.querySelector("#output-preview-title");
 
     if (!cardInner || !glider) return;
@@ -470,12 +524,12 @@ function toggleConsoleMode(mode) {
         glider.style.transform = "translateX(100%)";
         glider.classList.add("bg-pink-500", "text-white");
         glider.classList.remove("bg-white");
-        toggleContainer.classList.add("bg-pink-900/30", "border-pink-500/30");
-        toggleContainer.classList.remove("bg-white/20", "border-white/10");
-        btnListing.classList.replace("text-blue-600", "text-pink-200");
-        btnListing.classList.add("opacity-60");
-        btnVisual.classList.replace("text-slate-500", "text-white");
-        btnVisual.classList.remove("hover:text-pink-600");
+        toggleContainer?.classList.add("bg-pink-900/30", "border-pink-500/30");
+        toggleContainer?.classList.remove("bg-white/20", "border-white/10");
+        btnListing?.classList.replace("text-blue-600", "text-pink-200");
+        btnListing?.classList.add("opacity-60");
+        btnVisual?.classList.replace("text-slate-500", "text-white");
+        btnVisual?.classList.remove("hover:text-pink-600");
         if (outputArea) {
             outputArea.classList.add("bg-pink-50/30");
             outputArea.placeholder = "// 等待生成视觉转化剧本...";
@@ -490,12 +544,12 @@ function toggleConsoleMode(mode) {
         glider.style.transform = "translateX(0)";
         glider.classList.remove("bg-pink-500", "text-white");
         glider.classList.add("bg-white");
-        toggleContainer.classList.remove("bg-pink-900/30", "border-pink-500/30");
-        toggleContainer.classList.add("bg-white/20", "border-white/10");
-        btnVisual.classList.replace("text-white", "text-slate-500");
-        btnVisual.classList.add("hover:text-pink-600");
-        btnListing.classList.replace("text-pink-200", "text-blue-600");
-        btnListing.classList.remove("opacity-60");
+        toggleContainer?.classList.remove("bg-pink-900/30", "border-pink-500/30");
+        toggleContainer?.classList.add("bg-white/20", "border-white/10");
+        btnVisual?.classList.replace("text-white", "text-slate-500");
+        btnVisual?.classList.add("hover:text-pink-600");
+        btnListing?.classList.replace("text-pink-200", "text-blue-600");
+        btnListing?.classList.remove("opacity-60");
         if (outputArea) {
             outputArea.classList.remove("bg-pink-50/30");
             outputArea.placeholder = "// 1. 填写左侧信息\n// 2. 点击生成按钮...";
@@ -513,7 +567,7 @@ function toggleConsoleMode(mode) {
 /**
  * 切换 Prompt 放大视图
  */
-function togglePromptZoom() {
+function togglePromptZoom(): void {
     const modal = document.getElementById('prompt-zoom-modal');
     const zoomContent = document.getElementById('prompt-zoom-content');
     const zoomIcon = document.getElementById('zoom-icon');
@@ -557,8 +611,11 @@ function togglePromptZoom() {
             document.body.style.overflow = '';
             
             // 恢复图标和提示
-            zoomIcon.className = 'fas fa-expand text-sm';
-            zoomIcon.parentElement.title = '放大视图';
+            if (zoomIcon) {
+                zoomIcon.className = 'fas fa-expand text-sm';
+                const parent = zoomIcon.parentElement;
+                if (parent) parent.title = '放大视图';
+            }
         }, 300);
     } else {
         // 打开放大视图 - 放大动画
@@ -580,8 +637,8 @@ function togglePromptZoom() {
         zoomedContainer.innerHTML = '';
         
         // 移动元素到模态框
-        consoleCardWrapper.classList.add('zoomed-console-card');
-        outputCard.classList.add('zoomed-output-card');
+        (consoleCardWrapper as HTMLElement).classList.add('zoomed-console-card');
+        (outputCard as HTMLElement).classList.add('zoomed-output-card');
         zoomedContainer.appendChild(consoleCardWrapper);
         zoomedContainer.appendChild(outputCard);
         
@@ -594,16 +651,19 @@ function togglePromptZoom() {
         });
         
         // 更改图标和提示
-        zoomIcon.className = 'fas fa-compress text-sm';
-        zoomIcon.parentElement.title = '恢复视图';
+        if (zoomIcon) {
+            zoomIcon.className = 'fas fa-compress text-sm';
+            const parent = zoomIcon.parentElement;
+            if (parent) parent.title = '恢复视图';
+        }
     }
 }
 
 /**
  * 复制 Master Prompt
  */
-function copyMasterPrompt() {
-    const copyText = document.getElementById("final-prompt-output");
+function copyMasterPrompt(): void {
+    const copyText = document.getElementById("final-prompt-output") as HTMLTextAreaElement;
     if (copyText && copyText.value.length > 10) {
         copyText.select();
         document.execCommand("copy");
@@ -614,11 +674,11 @@ function copyMasterPrompt() {
 /**
  * 清空 Prompt 输入
  */
-function clearPromptInputs() {
+function clearPromptInputs(): void {
     if (confirm("确定要清空所有输入框吗？")) {
-        document.querySelectorAll('input[type="text"], textarea')
+        document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input[type="text"], textarea')
             .forEach((el) => (el.value = ""));
-        const select = document.getElementById("lab-target-market");
+        const select = document.getElementById("lab-target-market") as HTMLSelectElement;
         if (select) select.value = "";
         saveInputsToState();
         updateButtonState();
@@ -629,8 +689,8 @@ function clearPromptInputs() {
 /**
  * 全选报告分析模块
  */
-function selectAllReportSections() {
-    document.querySelectorAll('input[name="report-section"]').forEach((cb) => {
+function selectAllReportSections(): void {
+    document.querySelectorAll<HTMLInputElement>('input[name="report-section"]').forEach((cb) => {
         cb.checked = true;
     });
     saveInputsToState();
@@ -640,8 +700,8 @@ function selectAllReportSections() {
 /**
  * 清空报告分析模块选择
  */
-function clearReportSections() {
-    document.querySelectorAll('input[name="report-section"]').forEach((cb) => {
+function clearReportSections(): void {
+    document.querySelectorAll<HTMLInputElement>('input[name="report-section"]').forEach((cb) => {
         cb.checked = false;
     });
     saveInputsToState();
@@ -655,24 +715,24 @@ function clearReportSections() {
 /**
  * 设置事件监听器
  */
-function setupEventListeners(container) {
+function setupEventListeners(container: HTMLElement): void {
     if (!container) return;
 
-    addEventListener(container, "change", (e) => {
+    addEventListener(container, "change", ((e: Event) => {
         saveInputsToState();
-        if (e.target.id === "lab-char-limit") updateCharCount();
+        if ((e.target as HTMLElement).id === "lab-char-limit") updateCharCount();
         updateButtonState();
-    });
+    }) as EventListenerOrEventListenerObject);
 
     // Bind input listeners for Tier 1 & Tier 2
     ["lab-keywords-tier1", "lab-keywords-tier2"].forEach((id) => {
         const el = document.getElementById(id);
-        if (el) addEventListener(el, "input", () => updateButtonState());
+        if (el) addEventListener(el as HTMLElement, "input", (() => updateButtonState()) as EventListenerOrEventListenerObject);
     });
 
     // Bind output character count
     const outEl = document.getElementById("final-prompt-output");
-    if (outEl) addEventListener(outEl, "input", () => updateCharCount());
+    if (outEl) addEventListener(outEl as HTMLElement, "input", (() => updateCharCount()) as EventListenerOrEventListenerObject);
 }
 
 // ========================================== 
@@ -683,7 +743,7 @@ function setupEventListeners(container) {
  * 挂载子模块
  * @param {HTMLElement} container - 容器元素
  */
-export async function mount(container) {
+export async function mount(container: HTMLElement): Promise<void> {
     console.log('[Promptlab] 🔧 开始挂载子模块');
 
     try {
@@ -696,7 +756,7 @@ export async function mount(container) {
         const actionNames = registerActionsWithLegacy({
             amz_generateMasterPrompt: () => generateMasterPrompt(),
             amz_generateVisualPrompt: () => generateVisualPrompt(),
-            amz_toggleConsoleMode: (params) => toggleConsoleMode(params.param),
+            amz_toggleConsoleMode: (params: Record<string, any>) => toggleConsoleMode(params.param as "listing" | "visual"),
             amz_copyMasterPrompt: () => copyMasterPrompt(),
             amz_clearPromptInputs: () => clearPromptInputs(),
             amz_togglePromptZoom: () => togglePromptZoom(),
@@ -713,11 +773,11 @@ export async function mount(container) {
         // 3.1 设置放大模态框点击背景关闭
         const modal = document.getElementById('prompt-zoom-modal');
         if (modal) {
-            addEventListener(modal, 'click', (e) => {
+            addEventListener(modal as HTMLElement, 'click', ((e: Event) => {
                 if (e.target === modal) {
                     togglePromptZoom();
                 }
-            });
+            }) as EventListenerOrEventListenerObject);
         }
 
         // 4. 从 state 恢复状态
@@ -739,7 +799,7 @@ export async function mount(container) {
 /**
  * 卸载子模块
  */
-export function unmount() {
+export function unmount(): void {
     console.log('[Promptlab] 🔄 开始卸载子模块');
 
     try {
