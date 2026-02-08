@@ -282,7 +282,7 @@ export class MonitoringService {
    */
   captureMessage(message: string, level: string = 'info', context: ErrorContext = {}): void {
     if (!this.isInitialized || !this.Sentry) {
-      Logger.info(`捕获消息（监控服务未启用）: ${message}`, context, 'Monitoring');
+      Logger.info(`捕获消息（监控服务未启用）: ${message}`, {}, 'Monitoring');
       return;
     }
 
@@ -294,7 +294,7 @@ export class MonitoringService {
 
     this.Sentry.captureMessage(message, captureContext);
 
-    Logger.info(message, context, 'Monitoring');
+    Logger.info(message, context.extra || {}, 'Monitoring');
   }
 
   /**
