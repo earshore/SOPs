@@ -1,191 +1,114 @@
 # TypeScript 完整迁移计划
 
 > 创建时间：2026-02-08  
-> 当前状态：Phase 1&2 已完成，Phase 3 规划中
+> 最后更新：2026-02-08  
+> 当前状态：Phase 1&2 已完成，Phase 3.5 规划中
 
 ---
 
-## 📊 迁移现状总览
+## 📊 迁移现状总览（更新）
 
-### 已完成迁移 (31个文件)
+### 最新统计
+- **总文件数**：119个
+- **已迁移**：54个 (45.4%)
+- **未迁移**：65个 (54.6%)
+- **核心代码完成率**：96.9% ✅
 
-**核心基础设施** ✅
-- Container.ts - 依赖注入容器
-- EventBus.ts - 事件总线
-- StateManager.ts - 状态管理器
-- Router.ts, RouteGuard.ts, RouteMiddleware.ts, ErrorHandler.ts - 路由系统
-- menuConfig.ts - 菜单配置
-- ConfigCenter.ts - 配置中心
-- eventConstants.ts - 事件常量
+### 已完成迁移 (54个文件)
 
-**服务层** ✅ (8个)
-- httpService.ts
-- storageService.ts
-- loggerService.ts
-- errorService.ts
-- monitoringService.ts
-- performanceService.ts
+**核心基础设施** ✅ (40个文件)
+- 依赖注入与事件：Container.ts, EventBus.ts
+- 状态管理：StateManager.ts, StateDevTools.ts, state.ts + 3个中间件
+- 路由系统：Router.ts, RouteGuard.ts, RouteMiddleware.ts, ErrorHandler.ts, NotFound.ts
+- 配置系统：ConfigCenter.ts, menuConfig.ts, envConfig.ts + 5个配置文件
+- 基础类：BaseModule.ts, ServiceBootstrap.ts
+- 渲染器：OverviewRenderer.ts, SidebarRenderer.ts
+- 常量：eventConstants.ts, colorSchemes.ts, constants.ts
+- 验证器：schemas.ts
+- 类型：types/index.ts
+
+**服务层** ✅ (8个文件)
+- httpService.ts, llmService.ts, storageService.ts, loggerService.ts
+- errorService.ts, monitoringService.ts, performanceService.ts
 - PriorityRequestPool.ts
-- llmService.ts
 
-**工具函数** ✅ (11个)
-- typeGuards.ts
-- LoadingManager.ts
-- security.ts
-- ModuleLoader.ts
-- actionRegistry.ts
-- eventLogger.ts
-- lazyLibs.ts
-- pluginLoader.ts
-- secureStorage.ts
-- xssFixer.ts
-- viewLoader.ts
+**工具函数** ✅ (11个文件)
+- actionRegistry.ts, eventLogger.ts, lazyLibs.ts, LoadingManager.ts
+- ModuleLoader.ts, pluginLoader.ts, secureStorage.ts, security.ts
+- typeGuards.ts, viewLoader.ts, xssFixer.ts
+
+**组件层** ✅ (3个文件)
+- ErrorBoundary.ts, AppModal.ts, systemSettings.ts
+
+**类型定义** ✅ (4个文件)
+- config.d.ts, events.d.ts, global.d.ts, state.d.ts
 
 ---
 
-## 🎯 待迁移模块分析
+## 🎯 待迁移模块分析（更新）
 
-### 总计：85个JS文件
-- **核心基础设施**：18个文件（src/common）
-- **组件层**：3个文件（src/components）
-- **业务模块**：63个文件（src/modules）
-- **入口文件**：1个文件（src/main.js）
+### 总计：65个JS文件
+- **核心基础设施**：1个文件（ui.js - 建议重构而非迁移）
+- **入口文件**：1个文件（main.js - 优先迁移）
+- **业务模块**：63个文件（按需迁移）
 
 ---
 
-## Phase 3: 核心基础设施完善 (优先级：P0)
+## Phase 3.5: 完成核心迁移 (优先级：P0) 🚀
 
-**目标**：完成所有核心基础设施的TypeScript迁移  
-**预计工时**：2-3周
+**目标**：实现核心代码100% TypeScript化  
+**预计工时**：1周
 
-### 3.1 Common层剩余模块 (18个文件)
+### 3.5.1 入口文件迁移 (立即执行)
 
-#### 高优先级 (P0 - 立即迁移)
-
-**3.1.1 核心基础类**
-- [ ] `src/common/BaseModule.js` (重要基类，被所有业务模块继承)
+- [ ] **`src/main.js` → `main.ts`** (应用主入口)
   - 复杂度：中等
-  - 影响范围：所有业务模块
-  - 预计工时：4小时
-  - 依赖：无
+  - 影响范围：整个应用启动流程
+  - 预计工时：1天
+  - 依赖：所有核心模块（已完成）
+  - 策略：ui.js通过@ts-ignore暂时跳过
+  - 验收标准：
+    - [ ] TypeScript编译成功
+    - [ ] 应用正常启动
+    - [ ] 所有模块加载正常
+    - [ ] 无功能回归
 
-- [ ] `src/common/state.js` (全局状态对象)
-  - 复杂度：低
-  - 影响范围：全局
-  - 预计工时：2小时
-  - 依赖：StateManager.ts
+### 3.5.2 UI工具库处理策略
 
-**3.1.2 Bootstrap层**
-- [ ] `src/common/bootstrap/ServiceBootstrap.js` (服务启动管理)
-  - 复杂度：中等
-  - 影响范围：应用启动流程
-  - 预计工时：3小时
-  - 依赖：无
+- [ ] **`src/common/utils/ui.js`** (1178行大型工具库)
+  - **决策**：不直接迁移，标记为"待重构"
+  - **原因**：
+    1. 代码量巨大（1178行）
+    2. 职责混杂（DOM操作、动画、工具函数）
+    3. 缺乏模块化设计
+    4. 包含大量jQuery风格的代码
+  - **短期方案**：
+    - 在main.ts中通过 `// @ts-ignore` 导入
+    - 创建类型声明文件 `ui.d.ts`
+    - 保持功能正常运行
+  - **长期方案**（Phase 5执行）：
+    - 拆分为独立的工具模块
+    - 使用现代化的组件设计
+    - 完全TypeScript化
 
-**3.1.3 组件渲染器**
-- [ ] `src/common/components/OverviewRenderer.js` (总览页渲染器)
-  - 复杂度：中等
-  - 影响范围：所有总览页面
-  - 预计工时：4小时
-  - 依赖：无
+---
 
-- [ ] `src/common/components/SidebarRenderer.js` (侧边栏渲染器)
-  - 复杂度：中等
-  - 影响范围：所有侧边栏
-  - 预计工时：4小时
-  - 依赖：无
+## Phase 3: 核心基础设施完善 (优先级：P0) ✅ 已完成
 
-**3.1.4 配置层**
-- [ ] `src/common/config/envConfig.js` (环境配置 - 已部分重构)
-  - 复杂度：低
-  - 影响范围：配置系统
-  - 预计工时：2小时
-  - 依赖：ConfigCenter.ts
-  - 注：已使用ConfigCenter，可能只需类型定义
+**状态**：已完成  
+**完成时间**：2026-02-08
 
-**3.1.5 常量定义**
-- [ ] `src/common/constants/colorSchemes.js` (颜色方案)
-  - 复杂度：低
-  - 影响范围：UI主题
-  - 预计工时：1小时
-  - 依赖：无
-
-- [ ] `src/common/constants/constants.js` (全局常量)
-  - 复杂度：低
-  - 影响范围：全局
-  - 预计工时：2小时
-  - 依赖：无
-
-**3.1.6 路由层**
-- [ ] `src/common/router/index.js` (路由导出)
-  - 复杂度：低
-  - 影响范围：路由系统
-  - 预计工时：1小时
-  - 依赖：Router.ts
-
-- [ ] `src/common/router/NotFound.js` (404页面)
-  - 复杂度：低
-  - 影响范围：路由错误处理
-  - 预计工时：1小时
-  - 依赖：无
-
-**3.1.7 状态管理中间件**
-- [ ] `src/common/state/stateConfig.js` (状态配置)
-  - 复杂度：低
-  - 影响范围：状态管理
-  - 预计工时：2小时
-  - 依赖：StateManager.ts
-
-- [ ] `src/common/state/devtools/StateDevTools.js` (状态调试工具)
-  - 复杂度：中等
-  - 影响范围：开发调试
-  - 预计工时：3小时
-  - 依赖：StateManager.ts
-
-- [ ] `src/common/state/middleware/logger.js` (日志中间件)
-  - 复杂度：低
-  - 影响范围：状态日志
-  - 预计工时：2小时
-  - 依赖：StateManager.ts
-
-- [ ] `src/common/state/middleware/persistence.js` (持久化中间件)
-  - 复杂度：中等
-  - 影响范围：状态持久化
-  - 预计工时：3小时
-  - 依赖：StateManager.ts, storageService.ts
-
-- [ ] `src/common/state/middleware/validator.js` (验证中间件)
-  - 复杂度：中等
-  - 影响范围：状态验证
-  - 预计工时：3小时
-  - 依赖：StateManager.ts
-
-**3.1.8 类型定义**
-- [ ] `src/common/types/index.js` (类型导出)
-  - 复杂度：低
-  - 影响范围：类型系统
-  - 预计工时：1小时
-  - 依赖：无
-
-**3.1.9 验证器**
-- [ ] `src/common/validators/schemas.js` (验证Schema)
-  - 复杂度：中等
-  - 影响范围：数据验证
-  - 预计工时：3小时
-  - 依赖：无
-
-#### 中优先级 (P1 - Phase 4迁移)
-
-**3.1.10 UI工具库**
-- [ ] `src/common/utils/ui.js` (1178行 - 大型UI工具库)
-  - 复杂度：高
-  - 影响范围：全局UI
-  - 预计工时：2-3天
-  - 策略：**不直接迁移，在Phase 4组件化改造时重构**
-  - 原因：
-    1. 代码量大，包含大量DOM操作
-    2. 职责混杂，需要拆分
-    3. 适合在组件化时重新设计
+### 已完成的模块
+- ✅ BaseModule.ts
+- ✅ ServiceBootstrap.ts
+- ✅ OverviewRenderer.ts, SidebarRenderer.ts
+- ✅ envConfig.ts
+- ✅ colorSchemes.ts, constants.ts
+- ✅ NotFound.ts
+- ✅ stateConfig.ts, StateDevTools.ts
+- ✅ 所有状态中间件
+- ✅ types/index.ts
+- ✅ validators/schemas.ts
 
 ---
 
