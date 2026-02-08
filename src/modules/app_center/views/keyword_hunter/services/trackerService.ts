@@ -1,11 +1,27 @@
-// src/modules/app_center/keyword_hunter/services/trackerService.js
+// src/modules/app_center/keyword_hunter/services/trackerService.ts
 // ================================================================
 // 🎯 Phase 4: 已迁移使用 StorageService
 // ================================================================
 
 import { callLLM } from "../../../../../services/llmService";
-import { ANALYSIS_PROMPT_TEMPLATE, TRANSLATE_PROMPT_TEMPLATE as TRANSLATE_PROMPT_TEMPLATE2 } from "../constants/prompts.js";
-import { StorageService, STORAGE_KEYS } from "../../../../../services/storageService.ts";
+import { ANALYSIS_PROMPT_TEMPLATE, TRANSLATE_PROMPT_TEMPLATE as TRANSLATE_PROMPT_TEMPLATE2 } from "../constants/prompts";
+import { StorageService, STORAGE_KEYS } from "../../../../../services/storageService";
+
+// ==========================================
+// Types
+// ==========================================
+
+export interface KeywordMatchResult {
+    keyword: string;
+    count: number;
+}
+
+export interface AnalysisResult {
+    matched: KeywordMatchResult[];
+    unmatched: string[];
+}
+
+export type WordFrequency = [string, number];
 
 // ==========================================
 // 1. 基础文本处理工具
@@ -14,7 +30,7 @@ import { StorageService, STORAGE_KEYS } from "../../../../../services/storageSer
 /**
  * 将文本解析为关键词数组
  */
-export function parseKeywords(text) {
+export function parseKeywords(text: string): string[] {
     if (!text) return [];
     return text.split(/[\n,;]/).map(k => k.trim()).filter(k => k.length > 0);
 }
@@ -22,7 +38,7 @@ export function parseKeywords(text) {
 /**
  * 清洗关键词文本（去除特殊字符，标准化格式）
  */
-export function cleanKeywordsText(text) {
+export function cleanKeywordsText(text: string): string {
     if (!text) return '';
     return text.replace(/[^\w\s\-\u00C0-\u024F\u1E00-\u1EFF]/g, ' ') // 允许欧洲字符
         .split('\n')
@@ -34,7 +50,7 @@ export function cleanKeywordsText(text) {
 /**
  * 去重关键词
  */
-export function deduplicateKeywordsText(text) {
+export function deduplicateKeywordsText(text: string): string {
     const keywords = parseKeywords(text);
     const unique = [...new Set(keywords.map(k => k.toLowerCase()))]; // 简单去重（统一小写）
     // 注意：这里返回的是去重后的字符串，丢失了原始的大小写，这是为了标准化的权衡
@@ -44,10 +60,10 @@ export function deduplicateKeywordsText(text) {
 /**
  * 检查输入中的重复项（返回 Set 供 UI 高亮使用）
  */
-export function findDuplicateKeywords(text) {
+export function findDuplicateKeywords(text: string): Set<string> {
     const keywords = parseKeywords(text);
-    const seen = new Set();
-    const dups = new Set();
+    const seen = new Set<string>();
+    const dups = new Set<string>();
 
     keywords.forEach(k => {
         const lower = k.toLowerCase();
@@ -68,10 +84,10 @@ export function findDuplicateKeywords(text) {
  * @param {Array} keywordList - 关键词数组
  * @returns {Object} { matched: [], unmatched: [] }
  */
-export function analyzeKeywordMatching(copyText, keywordList) {
+export function analyzeKeywordMatching(copyText: string, keywordList: string[]): AnalysisResult {
     const textLower = copyText.toLowerCase();
-    const matched = [];
-    const unmatched = [];
+    const matched: KeywordMatchResult[] = [];
+    const unmatched: string[] = [];
 
     keywordList.forEach(kw => {
         const kwLower = kw.toLowerCase();
@@ -101,11 +117,11 @@ export function analyzeKeywordMatching(copyText, keywordList) {
  * @param {string} text 
  * @returns {Array} [[word, count], ...]
  */
-export function calculateWordFrequency(text) {
+export function calculateWordFrequency(text: string): WordFrequency[] {
     // 支持欧洲全语种：包括拉丁字母、扩展拉丁字符、变音符号等
     // \p{L} 匹配任何语言的字母字符（需要 u 标志）
     const words = text.toLowerCase().match(/[\p{L}\p{M}]+/gu) || [];
-    const freq = {};
+    const freq: Record<string, number> = {};
     words.forEach(w => {
         if (w.length > 2) freq[w] = (freq[w] || 0) + 1;
     });
@@ -116,7 +132,7 @@ export function calculateWordFrequency(text) {
 // 3. LLM 服务封装
 // ==========================================
 
-async function bridgeCallLLM(systemPrompt, userPrompt, options = {}) {
+async function bridgeCallLLM(systemPrompt: string, userPrompt: string, options: { temperature?: number; jsonMode?: boolean } = {}): Promise<string> {
     // 使用 StorageService 获取 LLM 配置
     const activeProvider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
 
@@ -139,8 +155,8 @@ async function bridgeCallLLM(systemPrompt, userPrompt, options = {}) {
     if (!targetModel) throw new Error("未选择模型，请在设置中同步或选择模型");
 
     const messages = [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt }
+        { role: 'system' as const, content: systemPrompt },
+        { role: 'user' as const, content: userPrompt }
     ];
 
     const finalOptions = {
@@ -173,7 +189,7 @@ async function bridgeCallLLM(systemPrompt, userPrompt, options = {}) {
  * 1. 长度 > 50 字符
  * 2. 包含空格（说明有分词，不是乱码长串）
  */
-function isValidListing(text) {
+function isValidListing(text: string): boolean {
     if (!text) return false;
     const cleanText = text.trim();
     if (cleanText.length < 50) return false;
@@ -185,7 +201,12 @@ function isValidListing(text) {
 /**
  * 执行 AI 深度诊断
  */
-export async function fetchListingAnalysis(copyText, keywords, matchedKeywords, unmatchedKeywords) {
+export async function fetchListingAnalysis(
+    copyText: string, 
+    _keywords: string[], 
+    matchedKeywords: KeywordMatchResult[], 
+    unmatchedKeywords: string[]
+): Promise<string> {
     // 🔥🔥🔥 新增校验：检查文案是否为空 🔥🔥🔥
     if (!copyText || !copyText.trim()) {
         throw new Error("文案内容为空，无法进行AI分析。请先在左侧输入框填入Listing文案。");
@@ -213,7 +234,7 @@ export async function fetchListingAnalysis(copyText, keywords, matchedKeywords, 
 /**
  * 执行沉浸式翻译
  */
-export async function fetchImmersionTranslation(copyText) {
+export async function fetchImmersionTranslation(copyText: string): Promise<string> {
     // 🔥🔥🔥 新增校验：检查文案是否为空 🔥🔥🔥
     if (!copyText || !copyText.trim()) {
         throw new Error("文案内容为空，无法进行翻译。请先在左侧输入框填入Listing文案。");

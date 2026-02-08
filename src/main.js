@@ -123,13 +123,13 @@ import {
 
 import { switchTab, renderMegaMenu, renderSopsMegaMenu, renderHubMegaMenu, renderMoreMenu, showToast, initRouter } from "../src/common/utils/ui.js";
 import { APP_EVENTS } from './common/constants/eventConstants';
-import { initHomeSplash } from "./modules/home/homeDisplay.js";
+import { initHomeSplash } from "./modules/home/homeDisplay";
 
 // ✅ 自动注册事件监听器的模块 (事件驱动模式)
 import './modules/amz_hub/amz_hub.js';
 import './modules/sops/sops.js';
 import './modules/more/more.js';
-import './modules/app_center/app_center.js';
+import './modules/app_center/app_center';
 
 // ✅ Alpine.js
 import Alpine from 'alpinejs';

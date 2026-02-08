@@ -10,8 +10,8 @@
  */
 
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
-import { showToast, showProgress } from '../../../../../common/utils/ui.js';
-import * as KeywordService from '../services/trackerService.js';
+import { showToast } from '../../../../../common/utils/ui.js';
+import * as KeywordService from '../services/trackerService';
 import state from "../../../../../common/state";
 import { ErrorService } from '../../../../../services/errorService';
 import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry';
@@ -22,10 +22,22 @@ import '../keyword_hunter_style.css';
 // Module State
 // ========================================== 
 
-let eventListeners = []; // 用于清理事件监听器
-let timeouts = []; // 用于清理定时器
-let registeredActionNames = []; // 用于清理已注册的动作
-let floatWinState = {
+interface EventListener {
+    element: HTMLElement | Document;
+    event: string;
+    handler: EventListener;
+}
+
+interface FloatWinState {
+    isDragging: boolean;
+    offsetX: number;
+    offsetY: number;
+}
+
+let eventListeners: EventListener[] = []; // 用于清理事件监听器
+let timeouts: number[] = []; // 用于清理定时器
+let registeredActionNames: string[] = []; // 用于清理已注册的动作
+let floatWinState: FloatWinState = {
     isDragging: false,
     offsetX: 0,
     offsetY: 0
@@ -38,16 +50,16 @@ let floatWinState = {
 /**
  * 添加事件监听器（带自动清理）
  */
-function addEventListener(element, event, handler) {
-    element.addEventListener(event, handler);
+function addEventListener(element: HTMLElement | Document, event: string, handler: EventListener): void {
+    element.addEventListener(event, handler as any);
     eventListeners.push({ element, event, handler });
 }
 
 /**
  * 添加定时器（带自动清理）
  */
-function addTimeout(callback, delay) {
-    const id = setTimeout(callback, delay);
+function addTimeout(callback: () => void, delay: number): number {
+    const id = window.setTimeout(callback, delay);
     timeouts.push(id);
     return id;
 }
@@ -55,10 +67,10 @@ function addTimeout(callback, delay) {
 /**
  * 清理所有事件监听器和定时器
  */
-function cleanup() {
+function cleanup(): void {
     // 清理事件监听器
     eventListeners.forEach(({ element, event, handler }) => {
-        element.removeEventListener(event, handler);
+        element.removeEventListener(event, handler as any);
     });
     eventListeners = [];
 
@@ -86,7 +98,7 @@ function cleanup() {
 /**
  * HTML 转义
  */
-function escapeHtml(text) {
+function escapeHtml(text: string): string {
     if (!text) return '';
     const div = document.createElement('div');
     div.textContent = text;
@@ -96,7 +108,7 @@ function escapeHtml(text) {
 /**
  * 属性转义（完善版：覆盖所有 HTML 属性危险字符）
  */
-function escapeAttr(text) {
+function escapeAttr(text: string): string {
     if (!text) return '';
     return text
         .replace(/&/g, '&amp;')
@@ -110,7 +122,7 @@ function escapeAttr(text) {
 /**
  * 正则表达式转义
  */
-function escapeRegex(string) {
+function escapeRegex(string: string): string {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
@@ -121,9 +133,9 @@ function escapeRegex(string) {
 /**
  * 保存处理状态到 state
  */
-function saveProcessStateToState() {
+function saveProcessStateToState(): void {
     if (!state.keywordTracker) {
-        state.keywordTracker = {};
+        state.keywordTracker = {} as any;
     }
 
     // 保存文案显示内容
@@ -133,7 +145,7 @@ function saveProcessStateToState() {
     }
 
     // 保存翻译显示状态
-    const showTransCheckbox = document.getElementById('kt-show-translation');
+    const showTransCheckbox = document.getElementById('kt-show-translation') as HTMLInputElement | null;
     if (showTransCheckbox) {
         state.keywordTracker.showTranslation = showTransCheckbox.checked;
     }
@@ -142,9 +154,9 @@ function saveProcessStateToState() {
 /**
  * 从 state 恢复处理状态
  */
-function restoreProcessStateFromState() {
+function restoreProcessStateFromState(): void {
     // 恢复翻译显示状态
-    const showTransCheckbox = document.getElementById('kt-show-translation');
+    const showTransCheckbox = document.getElementById('kt-show-translation') as HTMLInputElement | null;
     if (showTransCheckbox && state.keywordTracker) {
         if (state.keywordTracker.showTranslation !== undefined) {
             showTransCheckbox.checked = state.keywordTracker.showTranslation;
@@ -166,7 +178,7 @@ function restoreProcessStateFromState() {
 /**
  * 渲染处理模块
  */
-function renderProcessModule() {
+function renderProcessModule(): void {
     updateTranslateButton();
     renderCopyDisplay();
     renderFloatingKeywords();
@@ -177,9 +189,9 @@ function renderProcessModule() {
 /**
  * 渲染分析统计数据（从 analysis 模块移动过来）
  */
-function renderAnalysisStats() {
+function renderAnalysisStats(): void {
     if (!state.keywordTracker) {
-        state.keywordTracker = {};
+        state.keywordTracker = {} as any;
     }
 
     const total = state.keywordTracker.keywords ? state.keywordTracker.keywords.length : 0;
@@ -190,27 +202,27 @@ function renderAnalysisStats() {
     const rateEl = document.getElementById('kt-coverage-rate');
     if (rateEl) rateEl.textContent = rate + '%';
 
-    const barEl = document.getElementById('kt-coverage-bar');
+    const barEl = document.getElementById('kt-coverage-bar') as HTMLElement | null;
     if (barEl) barEl.style.width = rate + '%';
 
     // 更新统计数据
     const matchedEl = document.getElementById('kt-stat-matched');
-    if (matchedEl) matchedEl.textContent = matched;
+    if (matchedEl) matchedEl.textContent = matched.toString();
 
     const unmatchedEl = document.getElementById('kt-stat-unmatched');
     if (unmatchedEl) {
         const unmatchedCount = state.keywordTracker.unmatchedKeywords ? state.keywordTracker.unmatchedKeywords.length : 0;
-        unmatchedEl.textContent = unmatchedCount;
+        unmatchedEl.textContent = unmatchedCount.toString();
     }
 
     const totalEl = document.getElementById('kt-stat-total');
-    if (totalEl) totalEl.textContent = total;
+    if (totalEl) totalEl.textContent = total.toString();
 
     // 渲染高频词云（带关键词命中标注）
     const freqList = document.getElementById('kt-word-frequency-list');
     if (freqList && state.keywordTracker.wordFrequency) {
         // 构建已匹配关键词的词根集合
-        const matchedKeywordRoots = new Set();
+        const matchedKeywordRoots = new Set<string>();
         if (state.keywordTracker.matchedKeywords && state.keywordTracker.matchedKeywords.length > 0) {
             state.keywordTracker.matchedKeywords.forEach(item => {
                 // matchedKeywords 可能是对象数组 {keyword: "xxx", count: n} 或字符串数组
@@ -219,7 +231,7 @@ function renderAnalysisStats() {
                     // 将关键词拆分为单词，并转为小写
                     // 支持欧洲全语种：\p{L} 匹配任何语言的字母，\p{M} 匹配变音符号
                     const words = kw.toLowerCase().match(/[\p{L}\p{M}]+/gu) || [];
-                    words.forEach(w => {
+                    words.forEach((w: string) => {
                         if (w.length > 2) { // 过滤掉过短的词
                             matchedKeywordRoots.add(w);
                         }
@@ -229,7 +241,7 @@ function renderAnalysisStats() {
         }
 
         // 构建未匹配关键词的词根集合（排除已在高频词中出现的）
-        const unmatchedKeywordRoots = new Set();
+        const unmatchedKeywordRoots = new Set<string>();
         const highFreqWordsSet = new Set(state.keywordTracker.wordFrequency.map(([w]) => w.toLowerCase()));
         
         if (state.keywordTracker.unmatchedKeywords && state.keywordTracker.unmatchedKeywords.length > 0) {
@@ -238,7 +250,7 @@ function renderAnalysisStats() {
                     // 将关键词拆分为单词，并转为小写
                     // 支持欧洲全语种：\p{L} 匹配任何语言的字母，\p{M} 匹配变音符号
                     const words = kw.toLowerCase().match(/[\p{L}\p{M}]+/gu) || [];
-                    words.forEach(w => {
+                    words.forEach((w: string) => {
                         if (w.length > 2 && !highFreqWordsSet.has(w)) { // 只添加不在高频词中的词根
                             unmatchedKeywordRoots.add(w);
                         }
@@ -315,10 +327,10 @@ function renderAnalysisStats() {
 /**
  * 更新翻译按钮状态
  */
-function updateTranslateButton() {
-    const transBtn = document.getElementById('kt-translate-btn');
+function updateTranslateButton(): void {
+    const transBtn = document.getElementById('kt-translate-btn') as HTMLButtonElement | null;
     const transBtnText = document.getElementById('kt-translate-btn-text');
-    const transCheckbox = document.getElementById('kt-show-translation');
+    const transCheckbox = document.getElementById('kt-show-translation') as HTMLInputElement | null;
 
     const hasContent = state.keywordTracker.processedCopy && state.keywordTracker.processedCopy.trim().length > 0;
     const hasTranslationData = state.keywordTracker.paragraphs && state.keywordTracker.paragraphs.length > 0;
@@ -355,11 +367,11 @@ function updateTranslateButton() {
 /**
  * 渲染文案显示区域
  */
-function renderCopyDisplay() {
+function renderCopyDisplay(): void {
     const display = document.getElementById('kt-copy-display');
     if (!display) return;
 
-    const showTrans = document.getElementById('kt-show-translation')?.checked;
+    const showTrans = (document.getElementById('kt-show-translation') as HTMLInputElement | null)?.checked;
 
     // 如果是翻译模式且有翻译数据
     if (state.keywordTracker.translationMode && state.keywordTracker.paragraphs && state.keywordTracker.paragraphs.length > 0) {
@@ -392,7 +404,7 @@ function renderCopyDisplay() {
 /**
  * 高亮文本中的关键词
  */
-function highlightText(text) {
+function highlightText(text: string): string {
     if (!text) return '';
     if (!state.keywordTracker.matchedKeywords || state.keywordTracker.matchedKeywords.length === 0) {
         return escapeHtml(text).replace(/\n/g, '<br>');
@@ -402,7 +414,7 @@ function highlightText(text) {
     const SEP = '\x01';
 
     // 为每个字符位置记录它属于哪些关键词
-    const charKeywords = new Array(len);
+    const charKeywords: Set<string>[] = [];
     for (let i = 0; i < len; i++) {
         charKeywords[i] = new Set();
     }
@@ -417,21 +429,27 @@ function highlightText(text) {
             const start = match.index;
             const end = start + match[0].length;
             for (let i = start; i < end; i++) {
-                charKeywords[i].add(kwLower);
+                charKeywords[i]!.add(kwLower);
             }
         }
     });
 
     // 将文本按照"关键词集合相同的连续字符"分段
-    const segments = [];
+    interface Segment {
+        text: string;
+        keywords: Set<string>;
+        isHighlight: boolean;
+    }
+    
+    const segments: Segment[] = [];
     let segStart = 0;
 
     for (let i = 1; i <= len; i++) {
-        if (i === len || !setsEqual(charKeywords[i], charKeywords[i - 1])) {
+        if (i === len || !setsEqual(charKeywords[i]!, charKeywords[i - 1]!)) {
             segments.push({
                 text: text.substring(segStart, i),
-                keywords: charKeywords[segStart],
-                isHighlight: charKeywords[segStart].size > 0
+                keywords: charKeywords[segStart]!,
+                isHighlight: charKeywords[segStart]!.size > 0
             });
             segStart = i;
         }
@@ -444,8 +462,8 @@ function highlightText(text) {
         }
 
         const allKw = Array.from(seg.keywords).join(SEP);
-        const prevIsHighlight = idx > 0 && segments[idx - 1].isHighlight;
-        const nextIsHighlight = idx < segments.length - 1 && segments[idx + 1].isHighlight;
+        const prevIsHighlight = idx > 0 && segments[idx - 1]!.isHighlight;
+        const nextIsHighlight = idx < segments.length - 1 && segments[idx + 1]!.isHighlight;
 
         // 确定在连续高亮区域中的位置
         let posClass = '';
@@ -469,7 +487,7 @@ function highlightText(text) {
 /**
  * 判断两个 Set 是否相等
  */
-function setsEqual(a, b) {
+function setsEqual(a: Set<string>, b: Set<string>): boolean {
     if (a.size !== b.size) return false;
     for (const item of a) {
         if (!b.has(item)) return false;
@@ -480,13 +498,19 @@ function setsEqual(a, b) {
 /**
  * 渲染浮动关键词窗口（统一展示已匹配和未匹配）
  */
-function renderFloatingKeywords() {
+function renderFloatingKeywords(): void {
     const allContainer = document.getElementById('kt-all-keywords');
     
     if (!allContainer) return;
 
     // 合并已匹配和未匹配的关键词
-    const allKeywords = [];
+    interface KeywordItem {
+        keyword: string;
+        count: number;
+        matched: boolean;
+    }
+    
+    const allKeywords: KeywordItem[] = [];
     
     // 添加已匹配的关键词
     if (state.keywordTracker.matchedKeywords && state.keywordTracker.matchedKeywords.length > 0) {
@@ -549,22 +573,22 @@ function renderFloatingKeywords() {
     // 更新计数显示
     const matchedCount = document.getElementById('kt-tab-matched-count');
     if (matchedCount && state.keywordTracker.matchedKeywords) {
-        matchedCount.textContent = state.keywordTracker.matchedKeywords.length;
+        matchedCount.textContent = state.keywordTracker.matchedKeywords.length.toString();
     }
 
     const unmatchedCount = document.getElementById('kt-tab-unmatched-count');
     if (unmatchedCount && state.keywordTracker.unmatchedKeywords) {
-        unmatchedCount.textContent = state.keywordTracker.unmatchedKeywords.length;
+        unmatchedCount.textContent = state.keywordTracker.unmatchedKeywords.length.toString();
     }
 }
 
 /**
  * 更新最小化徽章
  */
-function updateMinimizedBadge() {
+function updateMinimizedBadge(): void {
     const badge = document.getElementById('kt-minimized-badge');
     if (badge && state.keywordTracker.matchedKeywords) {
-        badge.textContent = state.keywordTracker.matchedKeywords.length;
+        badge.textContent = state.keywordTracker.matchedKeywords.length.toString();
     }
 }
 
@@ -575,7 +599,7 @@ function updateMinimizedBadge() {
 /**
  * 同步到输入模块
  */
-function syncToInput() {
+function syncToInput(): void {
     let text = '';
 
     // 如果是翻译模式，只提取原文
@@ -608,8 +632,8 @@ function syncToInput() {
     }
 
     // 切换到输入模块
-    if (window.switchTab) {
-        window.switchTab('kw_input');
+    if ((window as any).switchTab) {
+        (window as any).switchTab('kw_input');
     }
 
     showToast("已同步原文到输入模块");
@@ -618,9 +642,9 @@ function syncToInput() {
 /**
  * AI 沉浸式翻译
  */
-async function translateCopyImmersive() {
-    const btn = document.getElementById('kt-translate-btn');
-    const progress = document.getElementById('kt-translate-progress');
+async function translateCopyImmersive(): Promise<void> {
+    const btn = document.getElementById('kt-translate-btn') as HTMLButtonElement | null;
+    const progress = document.getElementById('kt-translate-progress') as HTMLElement | null;
     const btnText = document.getElementById('kt-translate-btn-text');
 
     if (btn) btn.disabled = true;
@@ -647,7 +671,7 @@ async function translateCopyImmersive() {
         addTimeout(() => progress?.classList.add('hidden'), 500);
 
     } catch (e) {
-        ErrorService.handle(e, { action: 'translateCopyImmersive', module: 'keywordTracker' });
+        ErrorService.handle(e as Error, { action: 'translateCopyImmersive', module: 'keywordTracker' });
         if (progress) progress.classList.add('hidden');
         if (btnText) btnText.textContent = "AI 沉浸式翻译";
         if (btn) btn.disabled = false;
@@ -655,18 +679,9 @@ async function translateCopyImmersive() {
 }
 
 /**
- * 切换关键词标签（已废弃 - 现在统一展示）
- * 保留此函数以防止旧代码引用报错
- */
-function showKeywordTab(type) {
-    // 功能已移除，现在统一展示所有关键词
-    console.log('[Process] showKeywordTab 已废弃，现在统一展示所有关键词');
-}
-
-/**
  * 定位关键词在文案中的位置
  */
-function locateKeywordInCopy(keyword) {
+function locateKeywordInCopy(keyword: string): void {
     const container = document.getElementById('kt-copy-display');
     if (!container) return;
     const targetKw = keyword.toLowerCase();
@@ -688,12 +703,12 @@ function locateKeywordInCopy(keyword) {
 
     // 将属于同一次匹配的连续 span 分组
     // 只有 DOM 中直接相邻（nextSibling）才视为同一组
-    const groups = [];
-    let currentGroup = [spans[0]];
+    const groups: Element[][] = [];
+    let currentGroup = [spans[0]!];
 
     for (let i = 1; i < spans.length; i++) {
-        const prev = spans[i - 1];
-        const curr = spans[i];
+        const prev = spans[i - 1]!;
+        const curr = spans[i]!;
         // 修复：只用 nextSibling，不用 nextElementSibling
         // nextElementSibling 会跳过文本节点导致误判
         if (prev.nextSibling === curr) {
@@ -718,13 +733,13 @@ function locateKeywordInCopy(keyword) {
     );
 
     // 聚焦当前组的所有 span
-    const targetGroup = groups[idx];
+    const targetGroup = groups[idx]!;
     targetGroup.forEach(span => {
         span.classList.add('highlight-focus');
     });
 
     // 滚动到第一个 span
-    targetGroup[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+    targetGroup[0]!.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
     // 更新索引
     state.keywordTracker.keywordLocationIndex[targetKw] = (idx + 1) % groups.length;
@@ -736,7 +751,7 @@ function locateKeywordInCopy(keyword) {
  * 定位未匹配词根在关键词监控列表中的位置
  * 点击词根后，在浮动窗口中高亮显示所有包含该词根的未匹配关键词
  */
-function locateUnmatchedRootInList(root) {
+function locateUnmatchedRootInList(root: string): void {
     const floatWin = document.getElementById('kt-keywords-floating');
     const allKeywordsContainer = document.getElementById('kt-all-keywords');
     
@@ -758,7 +773,7 @@ function locateUnmatchedRootInList(root) {
 /**
  * 高亮包含指定词根的关键词
  */
-function highlightRootKeywords(root, container) {
+function highlightRootKeywords(root: string, container: HTMLElement): void {
     // 移除之前的高亮
     const previousHighlights = container.querySelectorAll('.keyword-root-highlight');
     console.log('[Process] 移除之前的高亮数量:', previousHighlights.length);
@@ -771,7 +786,7 @@ function highlightRootKeywords(root, container) {
     const unmatchedKeywordDivs = container.querySelectorAll('.keyword-unmatched');
     console.log('[Process] 找到未匹配关键词元素数量:', unmatchedKeywordDivs.length);
     
-    const matchedDivs = [];
+    const matchedDivs: Element[] = [];
 
     unmatchedKeywordDivs.forEach((div, index) => {
         const keyword = div.getAttribute('data-keyword');
@@ -813,7 +828,7 @@ function highlightRootKeywords(root, container) {
 
     // 滚动到第一个匹配的关键词
     console.log('[Process] 滚动到第一个匹配的关键词');
-    matchedDivs[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+    matchedDivs[0]!.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
     // 显示提示
     showToast(`找到 ${matchedDivs.length} 个包含 "${root}" 的关键词`);
@@ -828,7 +843,7 @@ function highlightRootKeywords(root, container) {
 /**
  * 最小化关键词窗口
  */
-function minimizeKeywordsWindow() {
+function minimizeKeywordsWindow(): void {
     const floatWinEl = document.getElementById('kt-keywords-floating');
     const minBtn = document.getElementById('kt-keywords-minimized');
 
@@ -849,7 +864,7 @@ function minimizeKeywordsWindow() {
 /**
  * 恢复关键词窗口
  */
-function restoreKeywordsWindow() {
+function restoreKeywordsWindow(): void {
     const floatWinEl = document.getElementById('kt-keywords-floating');
     const minBtn = document.getElementById('kt-keywords-minimized');
 
@@ -873,13 +888,13 @@ function restoreKeywordsWindow() {
 /**
  * 设置浮动窗口拖拽功能
  */
-function setupFloatingWindow() {
-    const el = document.getElementById('kt-keywords-floating');
+function setupFloatingWindow(): void {
+    const el = document.getElementById('kt-keywords-floating') as HTMLElement | null;
     if (!el) return;
-    const header = el.querySelector('.floating-header');
+    const header = el.querySelector('.floating-header') as HTMLElement | null;
     if (!header) return;
 
-    addEventListener(header, 'mousedown', (e) => {
+    addEventListener(header, 'mousedown', ((e: MouseEvent) => {
         floatWinState.isDragging = true;
         floatWinState.offsetX = e.clientX - el.getBoundingClientRect().left;
         floatWinState.offsetY = e.clientY - el.getBoundingClientRect().top;
@@ -887,9 +902,9 @@ function setupFloatingWindow() {
         el.style.opacity = '0.9';
         el.style.transition = 'none';
         e.preventDefault();
-    });
+    }) as any);
 
-    addEventListener(document, 'mousemove', (e) => {
+    addEventListener(document, 'mousemove', ((e: MouseEvent) => {
         if (!floatWinState.isDragging) return;
 
         let newX = e.clientX - floatWinState.offsetX;
@@ -904,9 +919,9 @@ function setupFloatingWindow() {
         el.style.left = newX + 'px';
         el.style.top = newY + 'px';
         el.style.right = 'auto';
-    });
+    }) as any);
 
-    addEventListener(document, 'mouseup', () => {
+    addEventListener(document, 'mouseup', (() => {
         if (!floatWinState.isDragging) return;
         floatWinState.isDragging = false;
 
@@ -923,13 +938,13 @@ function setupFloatingWindow() {
         } else if (rect.left < threshold) {
             el.style.left = '20px';
         }
-    });
+    }) as any);
 }
 
 /**
  * 管理浮动窗口的显示/隐藏
  */
-function manageFloatingWindowVisibility() {
+function manageFloatingWindowVisibility(): void {
     const floatWin = document.getElementById('kt-keywords-floating');
     const minBtn = document.getElementById('kt-keywords-minimized');
 
@@ -968,16 +983,16 @@ function manageFloatingWindowVisibility() {
 /**
  * 设置事件监听器
  */
-function setupEventListeners(container) {
+function setupEventListeners(container: HTMLElement): void {
     if (!container) return;
 
     // 翻译显示复选框
-    const checkTrans = document.getElementById('kt-show-translation');
+    const checkTrans = document.getElementById('kt-show-translation') as HTMLInputElement | null;
     if (checkTrans) {
-        addEventListener(checkTrans, 'change', () => {
+        addEventListener(checkTrans, 'change', (() => {
             saveProcessStateToState();
             renderCopyDisplay();
-        });
+        }) as any);
     }
 
     // 设置浮动窗口拖拽
@@ -992,7 +1007,7 @@ function setupEventListeners(container) {
  * 挂载子模块
  * @param {HTMLElement} container - 容器元素
  */
-export async function mount(container) {
+export async function mount(container: HTMLElement): Promise<void> {
     console.log('[Process] 🔧 开始挂载子模块');
 
     try {
@@ -1017,8 +1032,8 @@ export async function mount(container) {
         registeredActionNames = registerActionsWithLegacy({
             kt_syncToInput: () => syncToInput(),
             kt_translateCopyImmersive: () => translateCopyImmersive(),
-            kt_locateKeyword: (keyword) => locateKeywordInCopy(keyword),
-            kt_locateUnmatchedRoot: (root) => locateUnmatchedRootInList(root),
+            kt_locateKeyword: (params: Record<string, any>) => locateKeywordInCopy(params.keyword || params[0] || ''),
+            kt_locateUnmatchedRoot: (params: Record<string, any>) => locateUnmatchedRootInList(params.root || params[0] || ''),
             kt_minimizeKeywordsWindow: () => minimizeKeywordsWindow(),
             kt_restoreKeywordsWindow: () => restoreKeywordsWindow(),
         });
@@ -1051,7 +1066,7 @@ export async function mount(container) {
 /**
  * 卸载子模块
  */
-export function unmount() {
+export function unmount(): void {
     console.log('[Process] 🔄 开始卸载子模块');
 
     try {

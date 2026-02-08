@@ -2,261 +2,312 @@
 <html lang="zh-CN">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title> Amazing Amazon Architect </title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Amazing Amazon Architect</title>
 
-  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 
-  <!-- Optimization: Preconnect to CDN -->
-  <link rel="preconnect" href="https://cdn.bootcdn.net">
+    <!-- Optimization: Preconnect to CDN -->
+    <link rel="preconnect" href="https://cdn.bootcdn.net">
 
-  <!-- Optimization: Use BootCDN for FontAwesome (Much faster in China) -->
-  <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <!-- Optimization: Use BootCDN for FontAwesome -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+
+    <style>
+
+    </style>
 </head>
 
-<body class="bg-slate-50 h-screen flex flex-col overflow-hidden">
+<body class="bg-slate-50 h-screen flex flex-col overflow-hidden antialiased">
 
-  <header class="bg-white border-b border-slate-200 z-[100] relative">
-    <div class="px-6 h-16 flex items-center justify-between">
-      <button data-action="switch-tab" data-tab="home" class="px-6 h-16 flex items-center gap-3 md:gap-4 group hover:bg-slate-50 transition-colors cursor-pointer">
-        <div class="relative">
-          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-            class="lucide lucide-atom w-8 h-8 animate-[spin_10s_linear_infinite]"
-            aria-hidden="true">
-            <defs>
-              <linearGradient id="gemini-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style="stop-color:#4285F4;stop-opacity:1" />
-                <stop offset="50%" style="stop-color:#9B72F2;stop-opacity:1" />
-                <stop offset="100%" style="stop-color:#D96570;stop-opacity:1" />
-              </linearGradient>
-            </defs>
-            <circle cx="12" cy="12" r="1" stroke="url(#gemini-gradient)"></circle>
-            <path stroke="url(#gemini-gradient)"
-              d="M20.2 20.2c2.04-2.03.02-7.36-4.5-11.9-4.54-4.52-9.87-6.54-11.9-4.5-2.04 2.03-.02 7.36 4.5 11.9 4.54 4.52 9.87 6.54 11.9 4.5Z">
-            </path>
-            <path stroke="url(#gemini-gradient)"
-              d="M15.7 15.7c4.52-4.54 6.54-9.87 4.5-11.9-2.03-2.04-7.36-.02-11.9 4.5-4.52 4.54-6.54 9.87-4.5 11.9 2.03 2.04 7.36.02 11.9-4.5Z">
-            </path>
-          </svg>
-        </div>
-        <div class="flex flex-col"><span
-            class="text-base font-display font-bold tracking-tight text-slate-900 dark:text-white leading-none">Amazing
-            Amazon
-            <span
-              class="text-base font-display font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-indigo-600 dark:from-cyan-400 dark:to-amber-400">Architect</span></span><span
-            class="text-[8px] md:text-[10px] uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400 font-medium">Prompt
-            by Prompt</span>
-        </div>
-      </button>
+    <!-- ========== Header ========== -->
+    <header class="bg-white border-b border-slate-200/80 z-[100] relative">
+        <!-- 顶部彩虹渐变线 -->
+        <div class="absolute top-0 left-0 right-0 h-[2px] header-gradient-line opacity-60"></div>
 
-      <nav class="flex items-center h-full">
-        <div class="group h-full static">
-          <button id="nav-sops"
-            class="nav-item px-6 h-full text-sm font-medium text-slate-600 group-hover:text-blue-600 border-b-2 border-transparent group-hover:border-blue-600 transition-all flex items-center gap-2">
-            SOPs 流程中心 <i
-              class="fas fa-chevron-down text-xs opacity-50 group-hover:rotate-180 transition-transform duration-300"></i>
-          </button>
+        <div class="px-6 h-16 flex items-center justify-between">
 
-          <div class="absolute top-16 left-0 w-full bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xl shadow-slate-200/50 
-                    transform origin-top scale-y-95 opacity-0 invisible translate-y-2
-                    group-hover:scale-y-100 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0
-                    transition-all duration-200 ease-out z-50">
-
-            <div class="max-w-screen-xl mx-auto px-8 py-8">
-              <div class="flex items-center gap-2 mb-4">
-                <i class="fas fa-layer-group text-slate-400 text-xs"></i>
-                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">核心SOP体系</h3>
-              </div>
-              <!-- SOPs Mega Menu Content (No Quick Access side panel) -->
-              <div id="sops-mega-menu-content" class="grid grid-cols-5 gap-5">
-                <!-- Content rendered by renderSopsMegaMenu() in ui.js -->
-                <div class="animate-pulse bg-slate-100 h-24 rounded-xl"></div>
-                <div class="animate-pulse bg-slate-100 h-24 rounded-xl"></div>
-                <div class="animate-pulse bg-slate-100 h-24 rounded-xl"></div>
-                <div class="animate-pulse bg-slate-100 h-24 rounded-xl"></div>
-                <div class="animate-pulse bg-slate-100 h-24 rounded-xl"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="group h-full static">
-
-          <button id="nav-apps"
-            class="nav-item px-6 h-full text-sm font-medium text-slate-600 group-hover:text-blue-600 border-b-2 border-transparent group-hover:border-blue-600 transition-all flex items-center gap-2">
-            应用中心 <i
-              class="fas fa-chevron-down text-xs opacity-50 group-hover:rotate-180 transition-transform duration-300"></i>
-          </button>
-
-          <div class="absolute top-16 left-0 w-full bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xl shadow-slate-200/50 
-                    transform origin-top scale-y-95 opacity-0 invisible translate-y-2
-                    group-hover:scale-y-100 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0
-                    transition-all duration-200 ease-out z-50">
-
-            <div class="max-w-screen-xl mx-auto px-8 py-8">
-              <div class="grid grid-cols-12 gap-8">
-
-                <div class="col-span-12">
-                  <div class="flex items-center gap-2 mb-4">
-                    <i class="fas fa-layer-group text-slate-400 text-xs"></i>
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">核心应用模块</h3>
-                  </div>
-                  <div id="mega-menu-content" class="grid grid-cols-4 gap-5">
-                    <div class="animate-pulse bg-slate-100 h-32 rounded-xl"></div>
-                    <div class="animate-pulse bg-slate-100 h-32 rounded-xl"></div>
-                    <div class="animate-pulse bg-slate-100 h-32 rounded-xl"></div>
-                  </div>
+            <!-- ===== Logo ===== -->
+            <button data-action="switch-tab" data-tab="home"
+                class="px-4 h-16 flex items-center gap-3.5 group hover:bg-slate-50/80 transition-all duration-200 cursor-pointer rounded-b-lg -ml-2">
+                <!-- Logo Icon -->
+                <div class="relative logo-glow">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-atom w-8 h-8 animate-[spin_12s_linear_infinite] group-hover:animate-[spin_3s_linear_infinite] transition-all"
+                        aria-hidden="true">
+                        <defs>
+                            <linearGradient id="gemini-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#4285F4;stop-opacity:1" />
+                                <stop offset="50%" style="stop-color:#9B72F2;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#D96570;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <circle cx="12" cy="12" r="1" stroke="url(#gemini-gradient)"></circle>
+                        <path stroke="url(#gemini-gradient)"
+                            d="M20.2 20.2c2.04-2.03.02-7.36-4.5-11.9-4.54-4.52-9.87-6.54-11.9-4.5-2.04 2.03-.02 7.36 4.5 11.9 4.54 4.52 9.87 6.54 11.9 4.5Z">
+                        </path>
+                        <path stroke="url(#gemini-gradient)"
+                            d="M15.7 15.7c4.52-4.54 6.54-9.87 4.5-11.9-2.03-2.04-7.36-.02-11.9 4.5-4.52 4.54-6.54 9.87-4.5 11.9 2.03 2.04 7.36.02 11.9-4.5Z">
+                        </path>
+                    </svg>
                 </div>
 
-              </div>
-            </div>
-          </div>
-        </div>
+                <!-- Logo Text -->
+                <div class="flex flex-col">
+                    <span class="text-base font-display font-bold tracking-tight text-slate-900 leading-none">
+                        Amazing Amazon
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600">
+                            Architect
+                        </span>
+                    </span>
+                    <span class="text-[9px] uppercase tracking-[0.2em] text-slate-400 font-semibold mt-0.5">
+                        Prompt by Prompt
+                    </span>
+                </div>
+            </button>
 
-        <div class="group h-full static">
-          <button id="nav-hub"
-            class="nav-item px-6 h-full text-sm font-medium text-slate-600 group-hover:text-blue-600 border-b-2 border-transparent group-hover:border-blue-600 transition-all flex items-center gap-2">
-            Amazon 智库 <i
-              class="fas fa-chevron-down text-xs opacity-50 group-hover:rotate-180 transition-transform duration-300"></i>
-          </button>
+            <!-- ===== Navigation ===== -->
+            <nav class="flex items-center h-full">
 
-          <div class="absolute top-16 left-0 w-full bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xl shadow-slate-200/50 
-                    transform origin-top scale-y-95 opacity-0 invisible translate-y-2
-                    group-hover:scale-y-100 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0
-                    transition-all duration-200 ease-out z-50">
+                <!-- SOPs 流程中心 -->
+                <div class="group h-full static">
+                    <button id="nav-sops"
+                        class="nav-item px-5 h-full text-sm font-semibold text-slate-500 group-hover:text-blue-600 border-b-2 border-transparent group-hover:border-blue-600 transition-all duration-200 flex items-center gap-2">
+                        <i class="fas fa-project-diagram text-xs opacity-60 group-hover:opacity-100 transition-opacity"></i>
+                        SOPs 流程中心
+                        <i class="fas fa-chevron-down text-[10px] opacity-40 group-hover:opacity-70 group-hover:rotate-180 transition-all duration-300"></i>
+                    </button>
 
-            <div class="max-w-screen-xl mx-auto px-8 py-8">
-              <div class="flex items-center gap-2 mb-4">
-                <i class="fas fa-layer-group text-slate-400 text-xs"></i>
-                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Amazon 智库体系</h3>
-              </div>
-              <div id="hub-mega-menu-content" class="grid grid-cols-4 gap-5">
-                <div class="animate-pulse bg-slate-100 h-24 rounded-xl"></div>
-                <div class="animate-pulse bg-slate-100 h-24 rounded-xl"></div>
-                <div class="animate-pulse bg-slate-100 h-24 rounded-xl"></div>
-                <div class="animate-pulse bg-slate-100 h-24 rounded-xl"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="group h-full static">
-
-          <button id="nav-more"
-            class="nav-item px-6 h-full text-sm font-medium text-slate-600 group-hover:text-blue-600 border-b-2 border-transparent group-hover:border-blue-600 transition-all flex items-center gap-2">
-            更多 <i
-              class="fas fa-chevron-down text-xs opacity-50 group-hover:rotate-180 transition-transform duration-300"></i>
-          </button>
-
-          <div class="absolute top-16 left-0 w-full bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xl shadow-slate-200/50 
-                    transform origin-top scale-y-95 opacity-0 invisible translate-y-2
-                    group-hover:scale-y-100 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0
-                    transition-all duration-200 ease-out z-50">
-
-            <div class="max-w-screen-xl mx-auto px-8 py-8">
-              <div class="grid grid-cols-12 gap-8">
-
-                <div class="col-span-9">
-                  <div class="flex items-center gap-2 mb-4">
-                    <i class="fas fa-layer-group text-slate-400 text-xs"></i>
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">探索模块</h3>
-                  </div>
-                  <div id="more-menu-content" class="grid grid-cols-3 gap-5">
-                    <div class="animate-pulse bg-slate-100 h-32 rounded-xl"></div>
-                  </div>
+                    <div class="mega-menu-panel absolute top-16 left-0 w-full bg-white/98 backdrop-blur-xl border-b border-slate-200/80 shadow-xl shadow-slate-900/[0.06]
+                                scale-y-[0.97] opacity-0 invisible translate-y-1
+                                group-hover:scale-y-100 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0
+                                z-50">
+                        <div class="max-w-screen-xl mx-auto px-8 py-8">
+                            <div class="flex items-center gap-2.5 mb-5">
+                                <div class="w-6 h-6 rounded-md bg-blue-50 flex items-center justify-center">
+                                    <i class="fas fa-layer-group text-blue-400 text-[10px]"></i>
+                                </div>
+                                <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">核心 SOP 体系</h3>
+                            </div>
+                            <div id="sops-mega-menu-content" class="grid grid-cols-5 gap-4">
+                                <div class="animate-pulse bg-slate-100/80 h-24 rounded-xl"></div>
+                                <div class="animate-pulse bg-slate-100/80 h-24 rounded-xl" style="animation-delay: 0.1s;"></div>
+                                <div class="animate-pulse bg-slate-100/80 h-24 rounded-xl" style="animation-delay: 0.2s;"></div>
+                                <div class="animate-pulse bg-slate-100/80 h-24 rounded-xl" style="animation-delay: 0.3s;"></div>
+                                <div class="animate-pulse bg-slate-100/80 h-24 rounded-xl" style="animation-delay: 0.4s;"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="col-span-3 border-l border-slate-100 pl-8 flex flex-col justify-between">
-                  <div>
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">快速访问</h3>
-                    <ul class="space-y-3">
-                      <li>
-                        <button data-action="openSettings"
-                          class="flex items-center gap-3 text-slate-600 hover:text-blue-600 text-sm transition-colors w-full text-left">
-                          <div
-                            class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600">
-                            <i class="fas fa-cog"></i>
-                          </div>
-                          <span>全局设置</span>
-                        </button>
-                      </li>
-                      <li>
-                        <button data-action="open-user-guide"
-                          class="flex items-center gap-3 text-slate-600 hover:text-blue-600 text-sm transition-colors w-full text-left">
-                          <div
-                            class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600">
-                            <i class="fas fa-book"></i>
-                          </div>
-                          <span>使用指南</span>
-                        </button>
-                      </li>
-                    </ul>
-                  </div>
+                <!-- 应用中心 -->
+                <div class="group h-full static">
+                    <button id="nav-apps"
+                        class="nav-item px-5 h-full text-sm font-semibold text-slate-500 group-hover:text-blue-600 border-b-2 border-transparent group-hover:border-blue-600 transition-all duration-200 flex items-center gap-2">
+                        <i class="fas fa-th-large text-xs opacity-60 group-hover:opacity-100 transition-opacity"></i>
+                        应用中心
+                        <i class="fas fa-chevron-down text-[10px] opacity-40 group-hover:opacity-70 group-hover:rotate-180 transition-all duration-300"></i>
+                    </button>
 
-                  <div class="mt-4 p-3 bg-blue-50/50 rounded-lg border border-blue-100">
-                    <p class="text-[10px] text-blue-600 leading-tight">
-                      <i class="fas fa-lightbulb mr-1"></i>
-                      提示: 这里包含系统设置和帮助文档等实用功能。
-                    </p>
-                  </div>
+                    <div class="mega-menu-panel absolute top-16 left-0 w-full bg-white/98 backdrop-blur-xl border-b border-slate-200/80 shadow-xl shadow-slate-900/[0.06]
+                                scale-y-[0.97] opacity-0 invisible translate-y-1
+                                group-hover:scale-y-100 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0
+                                z-50">
+                        <div class="max-w-screen-xl mx-auto px-8 py-8">
+                            <div class="grid grid-cols-12 gap-8">
+                                <div class="col-span-12">
+                                    <div class="flex items-center gap-2.5 mb-5">
+                                        <div class="w-6 h-6 rounded-md bg-indigo-50 flex items-center justify-center">
+                                            <i class="fas fa-rocket text-indigo-400 text-[10px]"></i>
+                                        </div>
+                                        <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">核心应用模块</h3>
+                                    </div>
+                                    <div id="mega-menu-content" class="grid grid-cols-4 gap-4">
+                                        <div class="animate-pulse bg-slate-100/80 h-32 rounded-xl"></div>
+                                        <div class="animate-pulse bg-slate-100/80 h-32 rounded-xl" style="animation-delay: 0.1s;"></div>
+                                        <div class="animate-pulse bg-slate-100/80 h-32 rounded-xl" style="animation-delay: 0.2s;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-              </div>
+                <!-- Amazon 智库 -->
+                <div class="group h-full static">
+                    <button id="nav-hub"
+                        class="nav-item px-5 h-full text-sm font-semibold text-slate-500 group-hover:text-blue-600 border-b-2 border-transparent group-hover:border-blue-600 transition-all duration-200 flex items-center gap-2">
+                        <i class="fas fa-book-open text-xs opacity-60 group-hover:opacity-100 transition-opacity"></i>
+                        Amazon 智库
+                        <i class="fas fa-chevron-down text-[10px] opacity-40 group-hover:opacity-70 group-hover:rotate-180 transition-all duration-300"></i>
+                    </button>
+
+                    <div class="mega-menu-panel absolute top-16 left-0 w-full bg-white/98 backdrop-blur-xl border-b border-slate-200/80 shadow-xl shadow-slate-900/[0.06]
+                                scale-y-[0.97] opacity-0 invisible translate-y-1
+                                group-hover:scale-y-100 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0
+                                z-50">
+                        <div class="max-w-screen-xl mx-auto px-8 py-8">
+                            <div class="flex items-center gap-2.5 mb-5">
+                                <div class="w-6 h-6 rounded-md bg-amber-50 flex items-center justify-center">
+                                    <i class="fas fa-lightbulb text-amber-400 text-[10px]"></i>
+                                </div>
+                                <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Amazon 智库体系</h3>
+                            </div>
+                            <div id="hub-mega-menu-content" class="grid grid-cols-4 gap-4">
+                                <div class="animate-pulse bg-slate-100/80 h-24 rounded-xl"></div>
+                                <div class="animate-pulse bg-slate-100/80 h-24 rounded-xl" style="animation-delay: 0.1s;"></div>
+                                <div class="animate-pulse bg-slate-100/80 h-24 rounded-xl" style="animation-delay: 0.2s;"></div>
+                                <div class="animate-pulse bg-slate-100/80 h-24 rounded-xl" style="animation-delay: 0.3s;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 更多 -->
+                <div class="group h-full static">
+                    <button id="nav-more"
+                        class="nav-item px-5 h-full text-sm font-semibold text-slate-500 group-hover:text-blue-600 border-b-2 border-transparent group-hover:border-blue-600 transition-all duration-200 flex items-center gap-2">
+                        <i class="fas fa-ellipsis-h text-xs opacity-60 group-hover:opacity-100 transition-opacity"></i>
+                        更多
+                        <i class="fas fa-chevron-down text-[10px] opacity-40 group-hover:opacity-70 group-hover:rotate-180 transition-all duration-300"></i>
+                    </button>
+
+                    <div class="mega-menu-panel absolute top-16 left-0 w-full bg-white/98 backdrop-blur-xl border-b border-slate-200/80 shadow-xl shadow-slate-900/[0.06]
+                                scale-y-[0.97] opacity-0 invisible translate-y-1
+                                group-hover:scale-y-100 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0
+                                z-50">
+                        <div class="max-w-screen-xl mx-auto px-8 py-8">
+                            <div class="grid grid-cols-12 gap-8">
+                                <!-- Main Content -->
+                                <div class="col-span-9">
+                                    <div class="flex items-center gap-2.5 mb-5">
+                                        <div class="w-6 h-6 rounded-md bg-emerald-50 flex items-center justify-center">
+                                            <i class="fas fa-compass text-emerald-400 text-[10px]"></i>
+                                        </div>
+                                        <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">探索模块</h3>
+                                    </div>
+                                    <div id="more-menu-content" class="grid grid-cols-3 gap-4">
+                                        <div class="animate-pulse bg-slate-100/80 h-32 rounded-xl"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Quick Access Sidebar -->
+                                <div class="col-span-3 border-l border-slate-100 pl-8 flex flex-col justify-between">
+                                    <div>
+                                        <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                            <i class="fas fa-bolt text-amber-400 text-[9px]"></i>
+                                            快速访问
+                                        </h3>
+                                        <ul class="space-y-2">
+                                            <li>
+                                                <button data-action="openSettings"
+                                                    class="flex items-center gap-3 text-slate-500 hover:text-blue-600 text-sm transition-all w-full text-left group/item px-2 py-2 rounded-lg hover:bg-blue-50/50">
+                                                    <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 group-hover/item:bg-blue-100 group-hover/item:text-blue-600 transition-all">
+                                                        <i class="fas fa-cog text-xs"></i>
+                                                    </div>
+                                                    <span class="font-medium">全局设置</span>
+                                                </button>
+                                            </li>
+                                            <li>
+                                                <button data-action="open-user-guide"
+                                                    class="flex items-center gap-3 text-slate-500 hover:text-blue-600 text-sm transition-all w-full text-left group/item px-2 py-2 rounded-lg hover:bg-blue-50/50">
+                                                    <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 group-hover/item:bg-blue-100 group-hover/item:text-blue-600 transition-all">
+                                                        <i class="fas fa-book text-xs"></i>
+                                                    </div>
+                                                    <span class="font-medium">使用指南</span>
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                    <!-- Tip Card -->
+                                    <div class="mt-6 p-3.5 bg-gradient-to-br from-blue-50 to-indigo-50/50 rounded-xl border border-blue-100/60">
+                                        <div class="flex items-start gap-2">
+                                            <div class="w-5 h-5 rounded-md bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                                <i class="fas fa-lightbulb text-blue-500 text-[9px]"></i>
+                                            </div>
+                                            <p class="text-[11px] text-blue-600/80 leading-relaxed font-medium">
+                                                这里包含系统设置和帮助文档等实用功能。
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- ===== Right Actions ===== -->
+            <div class="flex items-center gap-3 w-64 justify-end">
+                <!-- Model Status -->
+                <div id="model-status"
+                    class="flex items-center gap-2.5 px-3.5 py-2 bg-slate-50 rounded-xl text-xs border border-slate-200/80 hover:bg-slate-100 transition-colors cursor-default">
+                    <span class="status-dot status-pending pulse-dot"></span>
+                    <span class="text-slate-500 font-semibold">未配置模型</span>
+                </div>
             </div>
-          </div>
         </div>
-      </nav>
 
-      <div class="flex items-center gap-3 w-64 justify-end">
-        <div id="model-status"
-          class="flex items-center gap-2 px-3 py-1.5 bg-slate-100 rounded-full text-xs border border-slate-200">
-          <span class="status-dot status-pending pulse-dot"></span>
-          <span class="text-slate-600 font-medium">未配置模型</span>
+        <!-- Global Progress Bar -->
+        <div id="global-progress" class="absolute bottom-0 left-0 w-full h-[2px] bg-slate-100 hidden">
+            <div id="progress-fill"
+                class="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500 transition-all duration-300 relative"
+                style="width: 0%">
+                <!-- Shimmer on progress -->
+                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse"></div>
+            </div>
         </div>
-        <!-- <button data-action="openSettings"
-        class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 transition-colors text-slate-500 hover:text-slate-800">
-        <i class="fas fa-cog"></i>
-      </button> -->
-      </div>
+    </header>
+
+    <!-- ========== Main Layout ========== -->
+    <div class="flex flex-1 overflow-hidden relative">
+        <!-- Dynamic Sidebar -->
+        <aside id="dynamic-sidebar"
+            class="w-64 bg-white border-r border-slate-200/80 flex flex-col transition-all duration-300 -ml-64 hidden">
+        </aside>
+
+        <!-- Main Content -->
+        <main id="main-content"
+            class="flex-1 overflow-y-auto overflow-x-hidden bg-gradient-to-b from-slate-50/80 to-slate-100/30 p-8 relative scroll-smooth">
+            <!-- main content -->
+        </main>
     </div>
 
-    <div id="global-progress" class="absolute bottom-0 left-0 w-full h-0.5 bg-slate-100 hidden">
-      <div id="progress-fill" class="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300"
-        style="width: 0%"></div>
+    <!-- ========== Toast Container ========== -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[9999] space-y-3 pointer-events-none"></div>
+
+    <!-- ========== Modal Container ========== -->
+    <div id="modal-container"></div>
+
+    <!-- ========== User Guide Container ========== -->
+    <div id="user-guide-container"></div>
+
+    <!-- ========== Global Loading Overlay ========== -->
+    <div id="global-loading"
+        class="hidden fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-[10000] items-center justify-center">
+        <div class="bg-white rounded-2xl shadow-2xl shadow-slate-900/10 p-8 flex flex-col items-center gap-5 min-w-[280px] border border-slate-100">
+            <!-- Spinner -->
+            <div class="relative">
+                <div class="w-14 h-14 rounded-full border-[3px] border-slate-100"></div>
+                <div class="w-14 h-14 rounded-full border-[3px] border-transparent border-t-blue-500 border-r-indigo-500 loading-ring absolute inset-0"></div>
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 opacity-20 animate-ping"></div>
+                </div>
+            </div>
+            <div class="flex flex-col items-center gap-1">
+                <p data-loading-message class="text-sm text-slate-700 font-semibold">加载中</p>
+                <div class="flex items-center gap-0.5 text-xs text-slate-400">
+                    <span>请稍候</span>
+                    <span class="loading-dots"></span>
+                </div>
+            </div>
+        </div>
     </div>
-  </header>
-  <div class="flex flex-1 overflow-hidden relative">
-    <aside id="dynamic-sidebar"
-      class="w-64 bg-white border-r border-slate-200 flex flex-col transition-all duration-300 -ml-64 hidden">
-    </aside>
 
-    <main id="main-content" class="flex-1 overflow-y-auto overflow-x-hidden bg-slate-50/50 p-8 relative scroll-smooth">
-
-      <!--main content-->
-
-    </main>
-  </div>
-
-  <div id="toast-container" class="fixed bottom-6 right-6 z-[9999] space-y-3 pointer-events-none"></div>
-  <div id="modal-container"></div>
-
-  <!-- User Guide Modal Container -->
-  <div id="user-guide-container"></div>
-
-  <!-- 🎯 短期优化：全局 Loading 元素 -->
-  <div id="global-loading" class="hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-[10000] items-center justify-center">
-    <div class="bg-white rounded-2xl shadow-2xl p-8 flex flex-col items-center gap-4 min-w-[280px]">
-      <div class="relative">
-        <div class="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-      </div>
-      <p data-loading-message class="text-sm text-slate-600 font-medium">加载中...</p>
-    </div>
-  </div>
-
-  <script type="module" src="src/main.js"></script>
-
+    <script type="module" src="src/main.js"></script>
 
 </body>
 

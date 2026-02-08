@@ -10,9 +10,8 @@
 
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import { showToast } from '../../../../../common/utils/ui.js';
-import * as KeywordService from '../services/trackerService.js';
+import * as KeywordService from '../services/trackerService';
 import state from "../../../../../common/state";
-import { APP_EVENTS } from '../../../../../common/constants/eventConstants';
 import { ErrorService } from '../../../../../services/errorService';
 import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry';
 
@@ -22,8 +21,14 @@ import '../keyword_hunter_style.css';
 // Module State
 // ========================================== 
 
-let eventListeners = []; // 用于清理事件监听器
-let timeouts = []; // 用于清理定时器
+interface EventListener {
+    element: HTMLElement | Document;
+    event: string;
+    handler: EventListener;
+}
+
+let eventListeners: EventListener[] = []; // 用于清理事件监听器
+let timeouts: number[] = []; // 用于清理定时器
 
 // ========================================== 
 // Helper Functions
@@ -32,27 +37,18 @@ let timeouts = []; // 用于清理定时器
 /**
  * 添加事件监听器（带自动清理）
  */
-function addEventListener(element, event, handler) {
-    element.addEventListener(event, handler);
+function addEventListener(element: HTMLElement | Document, event: string, handler: EventListener): void {
+    element.addEventListener(event, handler as any);
     eventListeners.push({ element, event, handler });
-}
-
-/**
- * 添加定时器（带自动清理）
- */
-function addTimeout(callback, delay) {
-    const id = setTimeout(callback, delay);
-    timeouts.push(id);
-    return id;
 }
 
 /**
  * 清理所有事件监听器和定时器
  */
-function cleanup() {
+function cleanup(): void {
     // 清理事件监听器
     eventListeners.forEach(({ element, event, handler }) => {
-        element.removeEventListener(event, handler);
+        element.removeEventListener(event, handler as any);
     });
     eventListeners = [];
 
@@ -64,7 +60,7 @@ function cleanup() {
 /**
  * HTML 转义
  */
-function escapeHtml(text) {
+function escapeHtml(text: string): string {
     if (!text) return '';
     const div = document.createElement('div');
     div.textContent = text;
@@ -78,9 +74,9 @@ function escapeHtml(text) {
 /**
  * 保存分析状态到 state
  */
-function saveAnalysisStateToState() {
+function saveAnalysisStateToState(): void {
     if (!state.keywordTracker) {
-        state.keywordTracker = {};
+        state.keywordTracker = {} as any;
     }
 
     // 保存 AI 分析报告内容
@@ -94,7 +90,7 @@ function saveAnalysisStateToState() {
 /**
  * 从 state 恢复分析状态
  */
-function restoreAnalysisStateFromState() {
+function restoreAnalysisStateFromState(): void {
     // 恢复 AI 分析报告
     const resultDiv = document.getElementById('kt-llm-analysis-result');
     if (resultDiv && state.keywordTracker && state.keywordTracker.llmAnalysisResult) {
@@ -114,7 +110,7 @@ function restoreAnalysisStateFromState() {
 /**
  * 渲染分析模块
  */
-function renderAnalysisModule() {
+function renderAnalysisModule(): void {
     // 更新生成报告按钮状态
     updateAnalyzeButtonState();
 }
@@ -122,8 +118,8 @@ function renderAnalysisModule() {
 /**
  * 更新生成报告按钮状态
  */
-function updateAnalyzeButtonState() {
-    const btn = document.getElementById('kt-analyze-btn');
+function updateAnalyzeButtonState(): void {
+    const btn = document.getElementById('kt-analyze-btn') as HTMLButtonElement | null;
     const hasContent = state.keywordTracker.processedCopy && state.keywordTracker.processedCopy.trim().length > 0;
 
     if (btn) {
@@ -146,8 +142,8 @@ function updateAnalyzeButtonState() {
 /**
  * 运行 LLM 分析
  */
-async function runLLMAnalysis() {
-    const btn = document.getElementById('kt-analyze-btn');
+async function runLLMAnalysis(): Promise<void> {
+    const btn = document.getElementById('kt-analyze-btn') as HTMLButtonElement | null;
 
     if (!state.keywordTracker.processedCopy || !state.keywordTracker.processedCopy.trim()) {
         showToast("文案内容为空，无法进行AI分析", "warning");
@@ -184,8 +180,8 @@ async function runLLMAnalysis() {
 
         // 渲染分析结果
         if (resultDiv) {
-            if (window.marked) {
-                resultDiv.innerHTML = window.marked.parse(response);
+            if ((window as any).marked) {
+                resultDiv.innerHTML = (window as any).marked.parse(response);
                 highlightScores(resultDiv);
             } else {
                 resultDiv.textContent = response;
@@ -205,13 +201,14 @@ async function runLLMAnalysis() {
         showToast("报告生成成功", "success");
 
     } catch (e) {
-        const isValidationError = e.message.includes("输入内容过短") || e.message.includes("文案内容为空");
+        const error = e as Error;
+        const isValidationError = error.message.includes("输入内容过短") || error.message.includes("文案内容为空");
 
         if (!isValidationError) {
-            ErrorService.handle(e, { action: 'runLLMAnalysis', module: 'keywordTracker', notify: false });
+            ErrorService.handle(error, { action: 'runLLMAnalysis', module: 'keywordTracker', notify: false });
         }
 
-        let errorMsg = e.message;
+        let errorMsg = error.message;
         if (errorMsg.includes('503')) {
             errorMsg = "服务暂时不可用 (503)。可能是模型过载，请稍后重试。";
         }
@@ -249,13 +246,13 @@ async function runLLMAnalysis() {
 /**
  * 设置事件监听器
  */
-function setupEventListeners(container) {
+function setupEventListeners(container: HTMLElement): void {
     if (!container) return;
 
     // 生成报告按钮
     const btnAnalyze = document.getElementById('kt-analyze-btn');
     if (btnAnalyze) {
-        addEventListener(btnAnalyze, 'click', async () => await runLLMAnalysis());
+        addEventListener(btnAnalyze, 'click', (async () => await runLLMAnalysis()) as any);
     }
 }
 
@@ -264,7 +261,7 @@ function setupEventListeners(container) {
 // Score Highlighting (Fixed)
 // ==========================================
 
-function highlightScores(container) {
+function highlightScores(container: HTMLElement): void {
     if (!container) return;
 
     const rows = container.querySelectorAll('tbody tr');
@@ -274,9 +271,8 @@ function highlightScores(container) {
         const tds = tr.querySelectorAll('td');
         if (tds.length < 2) return;
 
-        const td1 = tds[0]; // 维度名
-        const td2 = tds[1]; // 分数
-        const text = td2.textContent.trim();
+        const td2 = tds[1] as HTMLElement; // 分数
+        const text = td2.textContent?.trim() || '';
         const isLastRow = index === rows.length - 1;
 
         // 清除旧状态
@@ -287,7 +283,7 @@ function highlightScores(container) {
             tr.classList.add('row-total');
             const totalMatch = text.match(/(\d+)\s*\/\s*(\d+)/);
             if (totalMatch) {
-                const score = parseInt(totalMatch[1]);
+                const score = parseInt(totalMatch[1]!, 10);
                 td2.innerHTML = '<span class="score-badge score-badge-total">⭐ ' + score + '/' + totalMatch[2] + '</span>';
             }
             return;
@@ -310,13 +306,13 @@ function highlightScores(container) {
         const match = text.match(/(\d+)\s*\/\s*(\d+)/);
         if (!match) return;
 
-        const score = parseInt(match[1]);
-        const max = parseInt(match[2]);
+        const score = parseInt(match[1]!, 10);
+        const max = parseInt(match[2]!, 10);
         if (max === 0) return;
 
         const ratio = score / max;
 
-        let badgeClass, icon;
+        let badgeClass: string, icon: string;
         if (ratio >= 0.75) {
             badgeClass = 'score-badge-high';
             icon = '🟢';
@@ -336,12 +332,12 @@ function highlightScores(container) {
     const h2 = container.querySelector('h2');
     if (!h2) return;
 
-    const h2Text = h2.textContent;
+    const h2Text = h2.textContent || '';
     const totalMatch = h2Text.match(/(\d+)\s*\/\s*100/);
     if (!totalMatch) return;
 
-    const total = parseInt(totalMatch[1]);
-    let gradientColors;
+    const total = parseInt(totalMatch[1]!, 10);
+    let gradientColors: string;
 
     if (total >= 85) {
         gradientColors = 'linear-gradient(135deg, #065f46, #059669, #34d399)';
@@ -387,7 +383,7 @@ function highlightScores(container) {
  * 挂载子模块
  * @param {HTMLElement} container - 容器元素
  */
-export async function mount(container) {
+export async function mount(container: HTMLElement): Promise<void> {
     console.log('[Analysis] 🔧 开始挂载子模块');
 
     try {
@@ -417,7 +413,7 @@ export async function mount(container) {
 /**
  * 卸载子模块
  */
-export function unmount() {
+export function unmount(): void {
     console.log('[Analysis] 🔄 开始卸载子模块');
 
     try {

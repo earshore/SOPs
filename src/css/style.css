@@ -2,6 +2,60 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Header 底部渐变线 */
+.header-gradient-line {
+    background: linear-gradient(90deg,
+            transparent 0%,
+            #3b82f6 15%,
+            #8b5cf6 35%,
+            #ec4899 55%,
+            #f59e0b 75%,
+            #10b981 90%,
+            transparent 100%);
+}
+
+/* Logo 呼吸光效 */
+@keyframes logoPulse {
+    0%, 100% {
+        filter: drop-shadow(0 0 6px rgba(99, 102, 241, 0.15));
+    }
+    50% {
+        filter: drop-shadow(0 0 12px rgba(99, 102, 241, 0.3));
+    }
+}
+
+.logo-glow {
+    animation: logoPulse 4s ease-in-out infinite;
+}
+
+/* Mega Menu 卡片动画 */
+.mega-menu-panel {
+    transform-origin: top;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 全局 Loading 动画增强 */
+.loading-ring {
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-dots::after {
+    content: '';
+    animation: dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes dots {
+    0% { content: ''; }
+    25% { content: '.'; }
+    50% { content: '..'; }
+    75% { content: '...'; }
+}
+
+
 /* =========================================
    1. 全局基础与排版 (Global Reset)
    ========================================= */

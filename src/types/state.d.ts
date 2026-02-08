@@ -199,6 +199,13 @@ export interface KeywordTrackerState {
     maxCpc?: number;
     competition?: string[];
   };
+  // Input 模块状态
+  keywordsInputText?: string;
+  copyInputText?: string;
+  // Analysis 模块状态
+  llmAnalysisResult?: string;
+  // Process 模块状态
+  showTranslation?: boolean;
 }
 
 // ==================== User状态 ====================

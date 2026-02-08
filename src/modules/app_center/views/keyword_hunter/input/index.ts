@@ -10,7 +10,7 @@
 
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import { showToast, showProgress } from '../../../../../common/utils/ui.js';
-import * as KeywordService from '../services/trackerService.js';
+import * as KeywordService from '../services/trackerService';
 import state from "../../../../../common/state";
 import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry';
 
@@ -20,10 +20,16 @@ import '../keyword_hunter_style.css';
 // Module State
 // ========================================== 
 
-let eventListeners = []; // 用于清理事件监听器
-let timeouts = []; // 用于清理定时器
-let debouncedInputHandler = null; // Debounced function reference
-let registeredActions = []; // 用于清理已注册的动作
+interface EventListener {
+    element: HTMLElement | Document;
+    event: string;
+    handler: EventListener;
+}
+
+let eventListeners: EventListener[] = []; // 用于清理事件监听器
+let timeouts: number[] = []; // 用于清理定时器
+let debouncedInputHandler: ((...args: any[]) => void) | null = null; // Debounced function reference
+let registeredActions: string[] = []; // 用于清理已注册的动作
 
 // ========================================== 
 // Helper Functions
@@ -32,16 +38,16 @@ let registeredActions = []; // 用于清理已注册的动作
 /**
  * 添加事件监听器（带自动清理）
  */
-function addEventListener(element, event, handler) {
-    element.addEventListener(event, handler);
+function addEventListener(element: HTMLElement | Document, event: string, handler: EventListener): void {
+    element.addEventListener(event, handler as any);
     eventListeners.push({ element, event, handler });
 }
 
 /**
  * 添加定时器（带自动清理）
  */
-function addTimeout(callback, delay) {
-    const id = setTimeout(callback, delay);
+function addTimeout(callback: () => void, delay: number): number {
+    const id = window.setTimeout(callback, delay);
     timeouts.push(id);
     return id;
 }
@@ -49,10 +55,10 @@ function addTimeout(callback, delay) {
 /**
  * 清理所有事件监听器和定时器
  */
-function cleanup() {
+function cleanup(): void {
     // 清理事件监听器
     eventListeners.forEach(({ element, event, handler }) => {
-        element.removeEventListener(event, handler);
+        element.removeEventListener(event, handler as any);
     });
     eventListeners = [];
 
@@ -78,9 +84,9 @@ function cleanup() {
 /**
  * Debounce 函数
  */
-function debounce(func, wait) {
-    let timeout;
-    return (...args) => {
+function debounce<T extends (...args: any[]) => void>(func: T, wait: number): (...args: Parameters<T>) => void {
+    let timeout: number;
+    return (...args: Parameters<T>) => {
         clearTimeout(timeout);
         timeout = addTimeout(() => func.apply(null, args), wait);
     };
@@ -89,7 +95,7 @@ function debounce(func, wait) {
 /**
  * HTML 转义
  */
-function escapeHtml(text) {
+function escapeHtml(text: string): string {
     if (!text) return '';
     const div = document.createElement('div');
     div.textContent = text;
@@ -103,12 +109,12 @@ function escapeHtml(text) {
 /**
  * 保存输入到 state
  */
-function saveInputsToState() {
-    const kwInput = document.getElementById('kt-keywords-input');
-    const copyInput = document.getElementById('kt-copy-input');
+function saveInputsToState(): void {
+    const kwInput = document.getElementById('kt-keywords-input') as HTMLTextAreaElement | null;
+    const copyInput = document.getElementById('kt-copy-input') as HTMLTextAreaElement | null;
 
     if (!state.keywordTracker) {
-        state.keywordTracker = {};
+        state.keywordTracker = {} as any;
     }
 
     if (kwInput) {
@@ -122,9 +128,9 @@ function saveInputsToState() {
 /**
  * 从 state 恢复输入
  */
-function restoreInputsFromState() {
-    const kwInput = document.getElementById('kt-keywords-input');
-    const copyInput = document.getElementById('kt-copy-input');
+function restoreInputsFromState(): void {
+    const kwInput = document.getElementById('kt-keywords-input') as HTMLTextAreaElement | null;
+    const copyInput = document.getElementById('kt-copy-input') as HTMLTextAreaElement | null;
 
     if (state.keywordTracker) {
         if (kwInput && state.keywordTracker.keywordsInputText !== undefined) {
@@ -148,14 +154,14 @@ function restoreInputsFromState() {
 /**
  * 更新关键词输入统计
  */
-function updateInputStats() {
-    const inputEl = document.getElementById('kt-keywords-input');
+function updateInputStats(): void {
+    const inputEl = document.getElementById('kt-keywords-input') as HTMLTextAreaElement | null;
     if (!inputEl) return;
 
     const text = inputEl.value;
     const keywords = KeywordService.parseKeywords(text);
     const countEl = document.getElementById('kt-keyword-count');
-    if (countEl) countEl.textContent = keywords.length;
+    if (countEl) countEl.textContent = keywords.length.toString();
 
     const dups = KeywordService.findDuplicateKeywords(text);
     const badge = document.getElementById('kt-duplicate-badge');
@@ -164,7 +170,7 @@ function updateInputStats() {
     if (badge && dupCountEl) {
         if (dups.size > 0) {
             badge.classList.remove('hidden');
-            dupCountEl.textContent = dups.size;
+            dupCountEl.textContent = dups.size.toString();
         } else {
             badge.classList.add('hidden');
         }
@@ -174,8 +180,8 @@ function updateInputStats() {
 /**
  * 高亮显示重复关键词
  */
-function highlightDuplicatesInInput() {
-    const input = document.getElementById('kt-keywords-input');
+function highlightDuplicatesInInput(): void {
+    const input = document.getElementById('kt-keywords-input') as HTMLTextAreaElement | null;
     const layer = document.getElementById('kt-keyword-highlight-layer');
     if (!input || !layer) return;
 
@@ -199,11 +205,11 @@ function highlightDuplicatesInInput() {
 /**
  * 更新文案字符计数
  */
-function updateCopyCharCount() {
-    const copyInput = document.getElementById('kt-copy-input');
+function updateCopyCharCount(): void {
+    const copyInput = document.getElementById('kt-copy-input') as HTMLTextAreaElement | null;
     const counter = document.getElementById('copy-char-count');
     if (copyInput && counter) {
-        counter.textContent = copyInput.value.length;
+        counter.textContent = copyInput.value.length.toString();
     }
 }
 
@@ -214,8 +220,8 @@ function updateCopyCharCount() {
 /**
  * 清理关键词格式（包含去重）
  */
-function cleanKeywordsUI() {
-    const inputEl = document.getElementById('kt-keywords-input');
+function cleanKeywordsUI(): void {
+    const inputEl = document.getElementById('kt-keywords-input') as HTMLTextAreaElement | null;
     if (!inputEl || !inputEl.value.trim()) {
         showToast("关键词列表为空", "warning");
         return;
@@ -246,8 +252,8 @@ function cleanKeywordsUI() {
 /**
  * 去除重复关键词（已合并到 cleanKeywordsUI）
  */
-function removeDuplicatesUI() {
-    const inputEl = document.getElementById('kt-keywords-input');
+function removeDuplicatesUI(): void {
+    const inputEl = document.getElementById('kt-keywords-input') as HTMLTextAreaElement | null;
     if (!inputEl) return;
     inputEl.value = KeywordService.deduplicateKeywordsText(inputEl.value);
     updateInputStats();
@@ -259,10 +265,10 @@ function removeDuplicatesUI() {
 /**
  * 从剪贴板粘贴
  */
-async function pasteFromClipboard() {
+async function pasteFromClipboard(): Promise<void> {
     try {
         const text = await navigator.clipboard.readText();
-        const copyInput = document.getElementById('kt-copy-input');
+        const copyInput = document.getElementById('kt-copy-input') as HTMLTextAreaElement | null;
         if (copyInput) {
             copyInput.value = text;
             updateCopyCharCount();
@@ -277,8 +283,8 @@ async function pasteFromClipboard() {
 /**
  * 清空文案输入
  */
-function clearCopyInput() {
-    const copyInput = document.getElementById('kt-copy-input');
+function clearCopyInput(): void {
+    const copyInput = document.getElementById('kt-copy-input') as HTMLTextAreaElement | null;
     if (copyInput) {
         copyInput.value = '';
         updateCopyCharCount();
@@ -290,8 +296,8 @@ function clearCopyInput() {
  * 清理文案格式
  * 去除大模型生成的 Markdown 格式符号，如 *、`、** 等
  */
-function cleanCopyFormat() {
-    const copyInput = document.getElementById('kt-copy-input');
+function cleanCopyFormat(): void {
+    const copyInput = document.getElementById('kt-copy-input') as HTMLTextAreaElement | null;
     if (!copyInput || !copyInput.value.trim()) {
         showToast("文案为空，无需清理", "warning");
         return;
@@ -342,9 +348,9 @@ function cleanCopyFormat() {
 /**
  * 开始分析
  */
-async function startAnalysis() {
-    const kwText = document.getElementById('kt-keywords-input')?.value;
-    const copyText = document.getElementById('kt-copy-input')?.value;
+async function startAnalysis(): Promise<void> {
+    const kwText = (document.getElementById('kt-keywords-input') as HTMLTextAreaElement | null)?.value;
+    const copyText = (document.getElementById('kt-copy-input') as HTMLTextAreaElement | null)?.value;
 
     if (!kwText || !kwText.trim() || !copyText || !copyText.trim()) {
         showToast(`请先输入关键词和文案`, "warning");
@@ -380,12 +386,12 @@ async function startAnalysis() {
         showToast("分析完成", "success");
 
         // 切换到 process 模块
-        if (window.switchTab) {
-            window.switchTab('kw_process');
+        if ((window as any).switchTab) {
+            (window as any).switchTab('kw_process');
         }
     } catch (error) {
         showProgress(false);
-        showToast("分析失败: " + error.message, "error");
+        showToast("分析失败: " + (error as Error).message, "error");
         console.error('[Input] 分析失败:', error);
     }
 }
@@ -397,11 +403,11 @@ async function startAnalysis() {
 /**
  * 设置事件监听器
  */
-function setupEventListeners(container) {
+function setupEventListeners(container: HTMLElement): void {
     if (!container) return;
 
-    const kwInput = document.getElementById('kt-keywords-input');
-    const copyInput = document.getElementById('kt-copy-input');
+    const kwInput = document.getElementById('kt-keywords-input') as HTMLTextAreaElement | null;
+    const copyInput = document.getElementById('kt-copy-input') as HTMLTextAreaElement | null;
 
     // Debounce Logic for keyword input
     debouncedInputHandler = debounce(() => {
@@ -411,35 +417,35 @@ function setupEventListeners(container) {
     }, 300);
 
     if (kwInput) {
-        addEventListener(kwInput, 'input', debouncedInputHandler);
-        addEventListener(kwInput, 'scroll', () => {
+        addEventListener(kwInput, 'input', debouncedInputHandler as any);
+        addEventListener(kwInput, 'scroll', (() => {
             const highlight = document.getElementById('kt-keyword-highlight-layer');
             if (highlight) highlight.scrollTop = kwInput.scrollTop;
-        });
+        }) as any);
     }
 
     if (copyInput) {
-        addEventListener(copyInput, 'input', () => {
+        addEventListener(copyInput, 'input', (() => {
             updateCopyCharCount();
             saveInputsToState();
-        });
+        }) as any);
     }
 
     // Button event listeners
     const btnClean = document.getElementById('kt-btn-clean-kw');
-    if (btnClean) addEventListener(btnClean, 'click', () => cleanKeywordsUI());
+    if (btnClean) addEventListener(btnClean, 'click', (() => cleanKeywordsUI()) as any);
 
     const btnCleanCopy = document.getElementById('kt-btn-clean-copy');
-    if (btnCleanCopy) addEventListener(btnCleanCopy, 'click', () => cleanCopyFormat());
+    if (btnCleanCopy) addEventListener(btnCleanCopy, 'click', (() => cleanCopyFormat()) as any);
 
     const btnClearCopy = document.getElementById('kt-btn-clear-copy');
-    if (btnClearCopy) addEventListener(btnClearCopy, 'click', () => clearCopyInput());
+    if (btnClearCopy) addEventListener(btnClearCopy, 'click', (() => clearCopyInput()) as any);
 
     const btnPaste = document.getElementById('kt-btn-paste');
-    if (btnPaste) addEventListener(btnPaste, 'click', async () => await pasteFromClipboard());
+    if (btnPaste) addEventListener(btnPaste, 'click', (async () => await pasteFromClipboard()) as any);
 
     const btnStartAnalysis = document.getElementById('kt-btn-start-analysis');
-    if (btnStartAnalysis) addEventListener(btnStartAnalysis, 'click', async () => await startAnalysis());
+    if (btnStartAnalysis) addEventListener(btnStartAnalysis, 'click', (async () => await startAnalysis()) as any);
 }
 
 // ========================================== 
@@ -450,7 +456,7 @@ function setupEventListeners(container) {
  * 挂载子模块
  * @param {HTMLElement} container - 容器元素
  */
-export async function mount(container) {
+export async function mount(container: HTMLElement): Promise<void> {
     console.log('[Input] 🔧 开始挂载子模块');
 
     try {
@@ -488,7 +494,7 @@ export async function mount(container) {
 /**
  * 卸载子模块
  */
-export function unmount() {
+export function unmount(): void {
     console.log('[Input] 🔄 开始卸载子模块');
 
     try {

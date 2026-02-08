@@ -1,4 +1,4 @@
-// src/modules/app_center/keyword_hunter/constants/prompts.js
+// src/modules/app_center/keyword_hunter/constants/prompts.ts
 // ================================================================
 // Keyword Hunter 模块 - 提示词常量
 // 包含翻译和分析功能的所有提示词模板
@@ -143,4 +143,3 @@ Every sentence must carry information. No filler. No redundant explanations.
 
 Begin audit now.
 `;
-
