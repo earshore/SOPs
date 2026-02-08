@@ -1,7 +1,7 @@
 import { loadTemplate } from "../../../../common/utils/viewLoader";
 
 // SOPs Overview - 总览页面
-export async function mount(container) {
+export async function mount(container: HTMLElement): Promise<void> {
     const html = await loadTemplate('src/modules/sops/views/overview/template.html');
     // ✅ 安全: 静态HTML模板，无用户输入
     container.innerHTML = html;
@@ -13,15 +13,15 @@ export async function mount(container) {
     console.log("✅ SOPs 总览模块已挂载");
 }
 
-export function unmount() {
+export function unmount(): void {
     console.log("❌ SOPs 总览模块已卸载");
 }
 
 /**
  * 滚动到指定的模块区域
- * @param {string} categoryId - 分类 ID (growth, backend, safety, service)
+ * @param categoryId - 分类 ID (growth, backend, safety, service)
  */
-export function scrollToModule(categoryId) {
+export function scrollToModule(categoryId: string): void {
     const moduleId = `sop-module-${categoryId}`;
     const moduleElement = document.getElementById(moduleId);
     
@@ -45,7 +45,7 @@ export function scrollToModule(categoryId) {
     }
 }
 
-function initOverviewEvents(container) {
+function initOverviewEvents(container: HTMLElement): void {
     // 分类筛选按钮事件
     const filterBtns = container.querySelectorAll('.category-filter-btn');
     filterBtns.forEach(btn => {
@@ -61,8 +61,10 @@ function initOverviewEvents(container) {
             btn.classList.remove('bg-white', 'text-slate-700', 'border-slate-300');
             
             // 执行筛选
-            const category = btn.dataset.category;
-            filterByCategory(container, category);
+            const category = (btn as HTMLElement).dataset.category;
+            if (category) {
+                filterByCategory(container, category);
+            }
         });
     });
 
@@ -75,60 +77,65 @@ function initOverviewEvents(container) {
             // 添加当前active状态
             tab.classList.add('active');
             // 这里可以添加筛选逻辑
-            const category = tab.dataset.category;
-            filterSOPs(container, category);
+            const category = (tab as HTMLElement).dataset.category;
+            if (category) {
+                filterSOPs(container, category);
+            }
         });
     });
 
     // 搜索框事件
-    const searchInput = container.querySelector('#sop-search-input');
+    const searchInput = container.querySelector('#sop-search-input') as HTMLInputElement;
     if (searchInput) {
         searchInput.addEventListener('input', (e) => {
-            searchSOPs(container, e.target.value);
+            searchSOPs(container, (e.target as HTMLInputElement).value);
         });
     }
 }
 
-function filterByCategory(container, category) {
+function filterByCategory(container: HTMLElement, category: string): void {
     const sections = container.querySelectorAll('section[data-category]');
     
     sections.forEach(section => {
+        const sectionElement = section as HTMLElement;
         if (category === 'all') {
-            section.style.display = '';
-            section.classList.add('fade-in');
+            sectionElement.style.display = '';
+            sectionElement.classList.add('fade-in');
         } else {
-            if (section.dataset.category === category) {
-                section.style.display = '';
-                section.classList.add('fade-in');
+            if (sectionElement.dataset.category === category) {
+                sectionElement.style.display = '';
+                sectionElement.classList.add('fade-in');
             } else {
-                section.style.display = 'none';
+                sectionElement.style.display = 'none';
             }
         }
     });
 }
 
-function filterSOPs(container, category) {
+function filterSOPs(container: HTMLElement, category: string): void {
     const cards = container.querySelectorAll('.sop-card');
     cards.forEach(card => {
-        if (category === 'all' || card.dataset.category === category) {
-            card.style.display = 'block';
-            card.classList.add('sop-fade-in');
+        const cardElement = card as HTMLElement;
+        if (category === 'all' || cardElement.dataset.category === category) {
+            cardElement.style.display = 'block';
+            cardElement.classList.add('sop-fade-in');
         } else {
-            card.style.display = 'none';
+            cardElement.style.display = 'none';
         }
     });
 }
 
-function searchSOPs(container, keyword) {
+function searchSOPs(container: HTMLElement, keyword: string): void {
     const cards = container.querySelectorAll('.sop-card');
     const lowerKeyword = keyword.toLowerCase();
     cards.forEach(card => {
-        const title = card.querySelector('h3')?.textContent.toLowerCase() || '';
-        const desc = card.querySelector('p')?.textContent.toLowerCase() || '';
+        const cardElement = card as HTMLElement;
+        const title = cardElement.querySelector('h3')?.textContent?.toLowerCase() || '';
+        const desc = cardElement.querySelector('p')?.textContent?.toLowerCase() || '';
         if (title.includes(lowerKeyword) || desc.includes(lowerKeyword)) {
-            card.style.display = 'block';
+            cardElement.style.display = 'block';
         } else {
-            card.style.display = 'none';
+            cardElement.style.display = 'none';
         }
     });
 }

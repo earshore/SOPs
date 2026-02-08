@@ -6,7 +6,7 @@ import { createModuleLoader } from '../../common/utils/ModuleLoader';
 // 键名对应 menuConfig.js 里的 route id
 const MODULE_MAP = {
     // 总览
-    'sops_overview': () => import('./views/overview/index.js'),
+    'sops_overview': () => import('./views/overview/index'),
 
     // 第一模块：运营与推广体系 (The Growth Layer)
     'sops_npi_tracker': () => import('./views/growth/npi_tracker/index.js'),
