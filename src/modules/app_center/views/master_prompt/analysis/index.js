@@ -21,7 +21,7 @@ import { AnalysisService } from '../services/analysisService';
 import { StorageService, STORAGE_KEYS } from '../../../../../services/storageService.ts';
 import { ErrorService } from '../../../../../services/errorService';
 import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry';
-import { renderWidgetCard, renderViewModeHTML, renderEditorForm, renderSkeleton } from './renderer.js';
+import { renderWidgetCard, renderViewModeHTML, renderEditorForm, renderSkeleton } from './renderer';
 import eventBus from '../../../../../common/EventBus.ts';
 import { MODULE_EVENTS } from '../../../../../common/constants/eventConstants';
 import { loadGridStack } from '../../../../../common/utils/lazyLibs';
