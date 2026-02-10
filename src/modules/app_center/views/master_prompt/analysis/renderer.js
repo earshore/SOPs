@@ -1,19 +1,9 @@
-// src/modules/app_center/views/master_prompt/analysis/renderer.ts
-
-// 类型定义
-interface StyleConfig {
-  color: string;
-  lightBg: string;
-  icon: string;
-}
-
-interface FieldTitleMap {
-  [key: string]: string;
-}
+// src/modules/app_center/views/master_prompt/analysis/renderer.js
+import { ANALYSIS_MODULES } from "../constants/prompts.ts";
 
 // 辅助函数：获取字段标题
-function getFieldTitle(key: string): string {
-  const titleMap: FieldTitleMap = {
+export function getFieldTitle(key) {
+  const titleMap = {
     'target_market': '目标市场',
     'keywords_tier1': '一级关键词',
     'keywords_tier2': '二级关键词',
@@ -39,19 +29,13 @@ function getFieldTitle(key: string): string {
 
 /**
  * 渲染 Widget 卡片的外层容器 (Header + Content Wrapper)
- * @param key - 模块 Key
- * @param title - 模块标题
- * @param style - 样式配置对象 {color, lightBg, icon, ...}
- * @param isTranslationMode - 是否处于翻译模式
- * @param contentHTML - 内部内容的 HTML 字符串
+ * @param {string} key - 模块 Key
+ * @param {string} title - 模块标题
+ * @param {Object} style - 样式配置对象 {color, lightBg, icon, ...}
+ * @param {boolean} isTranslationMode - 是否处于翻译模式
+ * @param {string} contentHTML - 内部内容的 HTML 字符串
  */
-export function renderWidgetCard(
-  key: string, 
-  title: string, 
-  style: StyleConfig, 
-  isTranslationMode: boolean, 
-  contentHTML: string
-): string {
+export function renderWidgetCard(key, title, style, isTranslationMode, contentHTML) {
     const editBtnState = isTranslationMode ? "disabled" : "";
     const editBtnClass = isTranslationMode
         ? "text-slate-300 cursor-not-allowed opacity-50"
@@ -106,7 +90,7 @@ export function renderWidgetCard(
 // 2. 查看模式 (View Mode) HTML 生成
 // ========================================== 
 
-export function renderViewModeHTML(val: any, _style: StyleConfig = {} as StyleConfig): string {
+export function renderViewModeHTML(val, style = {}) {
     // 0. 空状态
     if (val === null || val === undefined || val === "" || (Array.isArray(val) && val.length === 0)) {
         return _renderEmptyState();
@@ -128,7 +112,7 @@ export function renderViewModeHTML(val: any, _style: StyleConfig = {} as StyleCo
 }
 
 // 🏠 私有辅助：空状态
-function _renderEmptyState(): string {
+function _renderEmptyState() {
     return `
       <div class="h-24 flex flex-col items-center justify-center text-slate-300/60 select-none">
         <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center mb-2">
@@ -139,7 +123,7 @@ function _renderEmptyState(): string {
 }
 
 // 🏷️ 私有辅助：字符串数组
-function _renderStringArray(val: string[]): string {
+function _renderStringArray(val) {
     const isPath = val.some((s) => s.includes(" + "));
 
     if (isPath) {
@@ -167,7 +151,7 @@ function _renderStringArray(val: string[]): string {
 }
 
 // 📋 私有辅助：对象数组
-function _renderObjectArray(val: any[]): string {
+function _renderObjectArray(val) {
     return `
     <div class="flex flex-col gap-3">
         ${val.map((obj) => `
@@ -198,9 +182,9 @@ function _renderObjectArray(val: any[]): string {
 
 /**
  * 渲染骨架屏 (Skeleton Screen)
- * @returns 骨架屏 HTML
+ * @returns {string} 骨架屏 HTML
  */
-export function renderSkeleton(): string {
+export function renderSkeleton() {
     return `
         <div class="analysis-widget-card h-full p-5 bg-white">
             <!-- Header Skeleton -->
@@ -236,12 +220,12 @@ export function renderSkeleton(): string {
     `;
 }
 
-export function renderEditorForm(key: string, data: any): string {
+export function renderEditorForm(key, data) {
     // 自动高度脚本
     const autoResizeJS = "this.style.height='auto';this.style.height=this.scrollHeight+'px'";
     
     // 初始高度计算
-    const calcHeight = (val: any): string => {
+    const calcHeight = (val) => {
         if (!val) return "28px";
         const lines = val.toString().split("\n").length;
         return Math.max(lines, 1) * 24 + 4 + "px";
