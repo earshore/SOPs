@@ -85,20 +85,6 @@ class AnalysisModule extends BaseModule {
       this.addEventListener(analyzeBtn, "click", () => this.analyzeSelectedAsins());
     }
 
-    const transToggle = document.getElementById("opt-listing");
-    if (transToggle) {
-      this.addEventListener(document.getElementById("opt-listing"), "change", () => {
-        this.updateSourceVisuals();
-        this.updateModuleListVisibility();
-        this.promptBuilder.updatePromptPreview();
-      });
-      this.addEventListener(document.getElementById("opt-reviews"), "change", () => {
-        this.updateSourceVisuals();
-        this.updateModuleListVisibility();
-        this.promptBuilder.updatePromptPreview();
-      });
-    }
-
     // 3. 恢复视图（如果报告存在）
     if (state.analysis.analysisReport) {
       this.renderReport();
@@ -125,107 +111,186 @@ class AnalysisModule extends BaseModule {
   }
 
   renderModuleSelector() {
-    this.renderSourceToggle();
-    this.renderModuleCheckboxes();
-    this.updateModuleListVisibility();
-    this.updateSourceVisuals();
+    this.renderModuleCards();
+    this.updateSelectionSummary();
     this.setTimeout(() => this.promptBuilder.updatePromptPreview(), 100);
   }
 
-  renderSourceToggle() {
-    const container = document.getElementById("source-toggle-container");
-    if (!container) return;
+  renderModuleCards() {
+    const listingsContainer = document.getElementById("listings-container");
+    const reviewsContainer = document.getElementById("reviews-container");
+    
+    if (!listingsContainer || !reviewsContainer) return;
 
-    // ✅ 安全: 静态HTML模板，无用户输入
-    container.innerHTML = `
-      <label id="lbl-opt-listing" class="flex-1 group relative flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border cursor-pointer transition-all select-none text-sm font-medium text-slate-500 border-slate-200 bg-white hover:border-blue-300">
-        <input type="checkbox" id="opt-listing" checked class="hidden peer">
-        <i class="fas fa-file-alt text-xs opacity-70"></i>
-        <span>Listings</span>
-      </label>
-      
-      <label id="lbl-opt-reviews" class="flex-1 group relative flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border cursor-pointer transition-all select-none text-sm font-medium text-slate-500 border-slate-200 bg-white hover:border-blue-300">
-        <input type="checkbox" id="opt-reviews" checked class="hidden peer">
-        <i class="fas fa-comments text-xs opacity-70"></i>
-        <span>Reviews</span>
-      </label>
-    `;
-  }
+    // 初始化选中状态
+    if (!state.analysis.selectedModules) {
+      state.analysis.selectedModules = ANALYSIS_MODULES.map(m => m.id);
+    }
 
-  updateSourceVisuals() {
-    const updateStyle = (inputId, labelId) => {
-      const input = document.getElementById(inputId);
-      const label = document.getElementById(labelId);
-      if (!input || !label) return;
+    // 渲染 Listings 模块
+    const listingsModules = ANALYSIS_MODULES.filter(m => m.category === 'listing');
+    listingsContainer.innerHTML = listingsModules.map(mod => {
+      const isSelected = state.analysis.selectedModules.includes(mod.id);
+      return this.renderModuleCard(mod, isSelected);
+    }).join('');
 
-      if (input.checked) {
-        label.className = `flex-1 group relative flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border cursor-pointer transition-all select-none text-sm font-medium bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-300 text-blue-700 shadow-sm ring-1 ring-blue-200`;
-      } else {
-        label.className = `flex-1 group relative flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border cursor-pointer transition-all select-none text-sm font-medium bg-white border-slate-200 text-slate-400 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-600`;
-      }
-    };
-    updateStyle("opt-listing", "lbl-opt-listing");
-    updateStyle("opt-reviews", "lbl-opt-reviews");
-  }
+    // 渲染 Reviews 模块
+    const reviewsModules = ANALYSIS_MODULES.filter(m => m.category === 'reviews');
+    reviewsContainer.innerHTML = reviewsModules.map(mod => {
+      const isSelected = state.analysis.selectedModules.includes(mod.id);
+      return this.renderModuleCard(mod, isSelected);
+    }).join('');
 
-
-  renderModuleCheckboxes() {
-    const container = document.getElementById("modules-container");
-    if (!container) return;
-
-    // ✅ 安全: 静态HTML模板，无用户输入
-    container.innerHTML = ANALYSIS_MODULES.map(
-      (mod) => `
-        <label class="module-item group relative flex items-start gap-2.5 p-2.5 rounded-xl border border-slate-100 hover:bg-blue-50/50 hover:border-blue-200 cursor-pointer transition-all bg-white" data-category="${mod.category}">
-          <div class="flex items-center pt-0.5">
-            <input type="checkbox" name="analysis_module" value="${mod.id}" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" checked>
-          </div>
-          <div class="text-sm leading-tight flex-1 min-w-0">
-            <div class="font-medium text-slate-700 group-hover:text-blue-700 truncate">${mod.label_cn}</div>
-            <div class="text-slate-400 text-[11px] mt-0.5 group-hover:text-slate-500 line-clamp-2">${mod.desc_cn}</div>
-          </div>
-        </label>
-      `
-    ).join("");
-
-    // 绑定复选框 change 事件,实时更新 Prompt 预览
-    container.querySelectorAll('input[name="analysis_module"]').forEach(checkbox => {
-      this.addEventListener(checkbox, 'change', () => {
-        this.promptBuilder.updatePromptPreview();
+    // 绑定点击事件
+    document.querySelectorAll('.module-card').forEach(card => {
+      this.addEventListener(card, 'click', (e) => {
+        const moduleId = card.dataset.moduleId;
+        this.toggleModule(moduleId);
       });
     });
   }
 
-  updateModuleListVisibility() {
-    const showListing = document.getElementById("opt-listing")?.checked;
-    const showReviews = document.getElementById("opt-reviews")?.checked;
-    const items = document.querySelectorAll(".module-item");
+  renderModuleCard(module, isSelected) {
+    const colorMap = {
+      'blue': { bg: 'bg-blue-50', icon: 'text-blue-600', selectedBg: 'bg-blue-50', border: 'border-blue-300' },
+      'cyan': { bg: 'bg-cyan-50', icon: 'text-cyan-600', selectedBg: 'bg-cyan-50', border: 'border-cyan-300' },
+      'red': { bg: 'bg-red-50', icon: 'text-red-600', selectedBg: 'bg-red-50', border: 'border-red-300' },
+      'amber': { bg: 'bg-amber-50', icon: 'text-amber-600', selectedBg: 'bg-amber-50', border: 'border-amber-300' },
+      'orange': { bg: 'bg-orange-50', icon: 'text-orange-600', selectedBg: 'bg-orange-50', border: 'border-orange-300' },
+      'purple': { bg: 'bg-purple-50', icon: 'text-purple-600', selectedBg: 'bg-purple-50', border: 'border-purple-300' },
+      'teal': { bg: 'bg-teal-50', icon: 'text-teal-600', selectedBg: 'bg-teal-50', border: 'border-teal-300' },
+      'rose': { bg: 'bg-rose-50', icon: 'text-rose-600', selectedBg: 'bg-rose-50', border: 'border-rose-300' }
+    };
 
-    items.forEach((item) => {
-      const cat = item.dataset.category;
-      let visible = false;
+    const iconMap = {
+      'title_seo_roots': 'fa-font',
+      'selling_proposition_deconstruction': 'fa-layer-group',
+      'neg_deal_breakers': 'fa-triangle-exclamation',
+      'pos_aha_moments': 'fa-star',
+      'buying_hesitations': 'fa-circle-question',
+      'user_avatar_context': 'fa-user-group',
+      'vocabulary_gap': 'fa-comments',
+      'promise_reality_check': 'fa-scale-unbalanced'
+    };
 
-      if (cat === "listing" && showListing) visible = true;
-      if (cat === "reviews" && showReviews) visible = true;
-      if (cat === "cross" && showListing && showReviews) visible = true;
+    const colors = colorMap[module.color] || colorMap.blue;
+    const icon = iconMap[module.id] || 'fa-info-circle';
 
-      if (visible) {
-        item.classList.remove("hidden");
+    return `
+      <button
+        data-module-id="${module.id}"
+        data-category="${module.category}"
+        class="module-card relative p-4 rounded-xl border-2 text-left transition-all duration-200 group hover:shadow-md ${
+          isSelected
+            ? `${colors.border} ${colors.selectedBg} shadow-sm`
+            : 'border-slate-100 bg-slate-50/50 hover:border-slate-200 hover:bg-white'
+        }"
+      >
+        <div class="flex items-start gap-3">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 transition-all ${
+            isSelected ? colors.bg : 'bg-slate-100 group-hover:bg-slate-200'
+          }">
+            <i class="fas ${icon} w-4 h-4 transition-colors ${
+              isSelected ? colors.icon : 'text-slate-500'
+            }"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h3 class="font-semibold text-sm ${
+              isSelected ? 'text-slate-800' : 'text-slate-700'
+            }">
+              ${module.label_cn}
+            </h3>
+            <p class="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
+              ${module.desc_cn}
+            </p>
+          </div>
+          <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all mt-0.5 ${
+            isSelected
+              ? 'border-indigo-500 bg-indigo-500'
+              : 'border-slate-300 group-hover:border-slate-400'
+          }">
+            ${isSelected ? '<i class="fas fa-check w-2.5 h-2.5 text-white text-[10px]"></i>' : ''}
+          </div>
+        </div>
+      </button>
+    `;
+  }
+
+  toggleModule(moduleId) {
+    if (!state.analysis.selectedModules) {
+      state.analysis.selectedModules = [];
+    }
+
+    const index = state.analysis.selectedModules.indexOf(moduleId);
+    if (index > -1) {
+      state.analysis.selectedModules.splice(index, 1);
+    } else {
+      state.analysis.selectedModules.push(moduleId);
+    }
+
+    this.renderModuleCards();
+    this.updateSelectionSummary();
+    this.promptBuilder.updatePromptPreview();
+  }
+
+  updateSelectionSummary() {
+    const selectedCount = state.analysis.selectedModules?.length || 0;
+    const totalCount = ANALYSIS_MODULES.length;
+
+    const countEl = document.getElementById('selected-count');
+    const totalEl = document.getElementById('total-count');
+    const iconsContainer = document.getElementById('selected-icons-container');
+
+    if (countEl) countEl.textContent = selectedCount;
+    if (totalEl) totalEl.textContent = totalCount;
+
+    if (iconsContainer) {
+      if (selectedCount > 0) {
+        const iconMap = {
+          'title_seo_roots': 'fa-font',
+          'selling_proposition_deconstruction': 'fa-layer-group',
+          'neg_deal_breakers': 'fa-triangle-exclamation',
+          'pos_aha_moments': 'fa-star',
+          'buying_hesitations': 'fa-circle-question',
+          'user_avatar_context': 'fa-user-group',
+          'vocabulary_gap': 'fa-comments',
+          'promise_reality_check': 'fa-scale-unbalanced'
+        };
+
+        iconsContainer.innerHTML = `
+          <span class="text-xs text-slate-400">已选：</span>
+          <div class="flex -space-x-2">
+            ${state.analysis.selectedModules.slice(0, 5).map(id => {
+              const module = ANALYSIS_MODULES.find(m => m.id === id);
+              if (!module) return '';
+              const icon = iconMap[id] || 'fa-info-circle';
+              return `
+                <div class="w-8 h-8 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
+                  <i class="fas ${icon} w-3 h-3 text-indigo-600"></i>
+                </div>
+              `;
+            }).join('')}
+            ${selectedCount > 5 ? `
+              <div class="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center border-2 border-white text-xs font-medium text-slate-600">
+                +${selectedCount - 5}
+              </div>
+            ` : ''}
+          </div>
+        `;
       } else {
-        item.classList.add("hidden");
-        const checkbox = item.querySelector("input");
-        if (checkbox) checkbox.checked = false;
+        iconsContainer.innerHTML = '';
       }
-    });
+    }
   }
 
   toggleAllModules(checked) {
-    const inputs = document.querySelectorAll('#modules-container input[type="checkbox"]');
-    inputs.forEach((input) => {
-      if (!input.closest(".module-item").classList.contains("hidden")) {
-        input.checked = checked;
-      }
-    });
+    if (checked) {
+      state.analysis.selectedModules = ANALYSIS_MODULES.map(m => m.id);
+    } else {
+      state.analysis.selectedModules = [];
+    }
+    this.renderModuleCards();
+    this.updateSelectionSummary();
     this.promptBuilder.updatePromptPreview();
   }
 
@@ -291,8 +356,8 @@ class AnalysisModule extends BaseModule {
       return;
     }
 
-    const isListingSelected = document.getElementById("opt-listing")?.checked;
-    const isReviewsSelected = document.getElementById("opt-reviews")?.checked;
+    const isListingSelected = true;
+    const isReviewsSelected = true;
 
     const provider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
     if (!provider) {
@@ -312,11 +377,10 @@ class AnalysisModule extends BaseModule {
     // ✅ 安全: 静态HTML模板，无用户输入
     btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> 分析中..';
 
-    // 渲染骨架屏状�?
+    // 渲染骨架屏状态
     const loadingReport = {};
-    const selectedCheckboxes = document.querySelectorAll('input[name="analysis_module"]:checked');
-    selectedCheckboxes.forEach((cb) => {
-      loadingReport[cb.value] = '__LOADING__';
+    state.analysis.selectedModules.forEach((moduleId) => {
+      loadingReport[moduleId] = '__LOADING__';
     });
 
     loadingReport.meta = {
@@ -435,9 +499,6 @@ class AnalysisModule extends BaseModule {
     document.getElementById("no-report-msg").classList.add("hidden");
     const display = document.getElementById("report-display");
     display.classList.remove("hidden");
-    const jsonDisplay = document.getElementById("report-json-display");
-    if (jsonDisplay && jsonDisplay.parentElement)
-      jsonDisplay.parentElement.classList.add("hidden");
 
     if (report.parse_error) {
       display.innerHTML = `<div class="p-6 bg-red-50 border border-red-200 rounded-xl text-red-700 font-mono text-sm whitespace-pre-wrap"><i class="fas fa-bug mr-2"></i> ⚠️ 解析错误，原始数据：\n${escapeHtml(report.raw_response)}</div>`;
@@ -445,86 +506,309 @@ class AnalysisModule extends BaseModule {
     }
 
     const showTrans = state.analysis.showTranslation && state.analysis.translatedReport;
-    const targetMarket = report.meta?.targetMarket || "Original";
+    
+    // 渲染报告头部
+    const reportHeaderHtml = this.renderReportHeader(report, showTrans);
+    
+    // 渲染报告内容区域
+    const reportContentHtml = this.renderReportContent(report, showTrans);
+    
+    display.innerHTML = reportHeaderHtml + reportContentHtml;
 
-    const disabledClass = "opacity-40 cursor-not-allowed pointer-events-none grayscale";
-    const mdBtnClass = showTrans
-      ? disabledClass
-      : "text-slate-500 hover:text-blue-600 hover:bg-slate-50";
+    this.populateTranslationModels();
+    
+    const toggleBtn = document.getElementById("toggle-trans-view-btn");
+    if (toggleBtn) this.addEventListener(toggleBtn, "click", () => this.toggleTranslationView());
+  }
 
-    let toolbarHtml = `
-      <div class="space-y-4 font-sans text-slate-800 pb-8" id="report-container">
-        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-4 sticky top-0 z-30 backdrop-blur-md bg-white/95">
-          <div class="flex flex-wrap gap-3 text-xs font-medium text-slate-500">
-            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 text-slate-600 rounded-lg border border-slate-200">
-              <i class="fas fa-file-contract"></i> ${report.meta?.templateUsed || "Analysis"}
+  renderReportHeader(report, showTrans) {
+    const resultCount = Object.keys(report).filter(k => k !== 'meta').length;
+    
+    return `
+      <div class="relative overflow-hidden rounded-2xl mb-8">
+        <div class="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900"></div>
+        <div class="absolute inset-0 opacity-20">
+          <div class="absolute top-0 right-1/4 w-64 h-64 bg-emerald-400 rounded-full filter blur-[100px]"></div>
+          <div class="absolute bottom-0 left-1/4 w-64 h-64 bg-blue-400 rounded-full filter blur-[100px]"></div>
+        </div>
+        
+        <div class="relative p-6">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <div class="w-14 h-14 bg-emerald-500/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-emerald-500/30">
+                <i class="fas fa-circle-check text-emerald-400 text-2xl"></i>
+              </div>
+              <div>
+                <h2 class="text-2xl font-bold text-white">分析报告</h2>
+                <p class="text-slate-400 text-sm mt-0.5">
+                  ASIN: <span class="font-mono text-slate-300">${report.meta?.analyzedASINs?.[0] || 'N/A'}</span>
+                </p>
+              </div>
             </div>
-            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 text-slate-600 rounded-lg border border-slate-200">
-              <i class="fas fa-earth"></i> ${report.meta?.targetMarket || ""}
-            </div>
-            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 text-slate-600 rounded-lg border border-slate-200">
-              <i class="fas fa-clock"></i> ${report.meta?.generatedAt || ""}
-            </div>
-          </div>
-          
-          <div class="flex items-center gap-3">
-            <div class="flex items-center gap-2 mr-2">
-              <select id="translation-model-select" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-slate-50 text-slate-600 focus:outline-none focus:border-blue-300 w-32">
-                <option value="" disabled selected>Translation Model</option>
-              </select>
-              <button id="quick-translate-btn" data-action="translateReport" 
-                class="text-xs px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1 ${showTrans ? "bg-slate-100 text-slate-400 cursor-not-allowed opacity-60" : "bg-indigo-50 text-indigo-600 hover:bg-indigo-100 cursor-pointer"}" 
-                ${showTrans ? "disabled" : ""}>
-                <i class="fas fa-language"></i> 翻译
-              </button>
-            </div>
-
-            <div class="w-px bg-slate-200 h-6"></div>
-
-            <div class="flex items-center gap-2 bg-slate-100 p-1 rounded-full px-1 border border-slate-200">
-              <span class="text-[10px] px-2 font-bold ${!showTrans ? "text-slate-700" : "text-slate-400"} uppercase tracking-wide cursor-default" title="原文语言">
-                ${targetMarket}
-              </span>
+            <div class="flex items-center gap-6">
+              <div class="text-right">
+                <div class="text-3xl font-bold text-white">${resultCount}</div>
+                <div class="text-slate-400 text-xs uppercase tracking-wider">分析维度</div>
+              </div>
+              <div class="w-px h-12 bg-slate-700"></div>
+              <div class="text-right">
+                <div class="text-3xl font-bold text-emerald-400">100%</div>
+                <div class="text-slate-400 text-xs uppercase tracking-wider">完成度</div>
+              </div>
               
-              <button id="toggle-trans-view-btn" 
-                class="relative inline-flex h-4 w-8 items-center rounded-full transition-colors duration-200 focus:outline-none ${showTrans ? "bg-blue-600" : "bg-slate-300"} ${!state.analysis.translatedReport ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}"
-                ${!state.analysis.translatedReport ? "disabled" : ""}>
-                <span class="inline-block h-3 w-3 transform rounded-full bg-white transition-transform duration-200 ${showTrans ? "translate-x-4" : "translate-x-1"} shadow-sm"></span>
-              </button>
+              <div class="flex items-center gap-2 ml-4">
+                <select id="translation-model-select" class="text-xs border border-white/10 rounded-lg px-2 py-1.5 bg-white/10 text-white focus:outline-none focus:border-white/30 w-32 backdrop-blur-sm">
+                  <option value="" disabled selected>Translation Model</option>
+                </select>
+                <button id="quick-translate-btn" data-action="translateReport" 
+                  class="text-xs px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1 ${showTrans ? "bg-white/10 text-slate-400 cursor-not-allowed opacity-60" : "bg-white/10 text-white hover:bg-white/20 cursor-pointer border border-white/10"}" 
+                  ${showTrans ? "disabled" : ""}>
+                  <i class="fas fa-language"></i> 翻译
+                </button>
+              </div>
               
-              <span class="text-[10px] px-2 font-bold ${showTrans ? "text-blue-600" : "text-slate-400"} cursor-default">
-                CN
-              </span>
-            </div>
-
-            <div class="flex bg-white border border-slate-200 rounded-lg p-0.5 shadow-sm ml-2">
-              <button data-action="copyReportMarkdown" class="px-2 py-1 rounded transition-colors ${mdBtnClass}" title="${showTrans ? "翻译模式下禁用" : "复制 Markdown"}" ${showTrans ? "disabled" : ""}>
-                <i class="fab fa-markdown text-sm"></i>
-              </button>
-              
-              <div class="w-px bg-slate-100 my-1"></div>
-              
-              <button data-action="exportReport" class="px-2 py-1 text-slate-500 hover:text-blue-600 hover:bg-slate-50 rounded transition-colors" title="导出 JSON">
-                <i class="fas fa-download text-xs"></i>
-              </button>
-            </div>
+              <button data-action="exportReport" class="flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors border border-white/10">
+                <i class="fas fa-download w-4 h-4"></i>
+                导出报告
               </button>
             </div>
           </div>
         </div>
+      </div>
+    `;
+  }
+
+  renderReportContent(report, showTrans) {
+    const keys = Object.keys(report).filter(k => k !== 'meta');
+    
+    // 分类结果
+    const listingsResults = [];
+    const reviewsResults = [];
+    
+    keys.forEach(key => {
+      const module = ANALYSIS_MODULES.find(m => m.id === key);
+      if (module) {
+        if (module.category === 'listing') {
+          listingsResults.push({ key, module });
+        } else if (module.category === 'reviews') {
+          reviewsResults.push({ key, module });
+        }
+      }
+    });
+
+    let html = '<div class="space-y-8">';
+    
+    // Listings 结果
+    if (listingsResults.length > 0) {
+      html += `
+        <div>
+          <div class="flex items-center gap-3 mb-5">
+            <div class="flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold border border-blue-200">
+              <i class="fas fa-box-open w-4 h-4"></i>
+              Listings 分析结果
+            </div>
+            <div class="flex-1 h-px bg-gradient-to-r from-blue-200 to-transparent"></div>
+            <span class="text-sm text-slate-500 font-medium">${listingsResults.length} 项</span>
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            ${listingsResults.map((item, index) => this.renderResultWidget(item.key, item.module, report, showTrans, index)).join('')}
+          </div>
+        </div>
+      `;
+    }
+    
+    // Reviews 结果
+    if (reviewsResults.length > 0) {
+      html += `
+        <div>
+          <div class="flex items-center gap-3 mb-5">
+            <div class="flex items-center gap-2 bg-amber-100 text-amber-700 px-4 py-2 rounded-full text-sm font-semibold border border-amber-200">
+              <i class="fas fa-star w-4 h-4"></i>
+              Reviews 分析结果
+            </div>
+            <div class="flex-1 h-px bg-gradient-to-r from-amber-200 to-transparent"></div>
+            <span class="text-sm text-slate-500 font-medium">${reviewsResults.length} 项</span>
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            ${reviewsResults.map((item, index) => this.renderResultWidget(item.key, item.module, report, showTrans, index + listingsResults.length)).join('')}
+          </div>
+        </div>
+      `;
+    }
+    
+    html += '</div>';
+    
+    return html;
+  }
+
+  renderResultWidget(key, module, report, showTrans, index) {
+    const value = showTrans && state.analysis.translatedReport 
+      ? state.analysis.translatedReport[key] 
+      : report[key];
+    
+    if (value === '__LOADING__') {
+      return this.renderLoadingSkeleton(module, index);
+    }
+
+    const colorSchemes = {
+      'blue': { gradient: 'from-blue-500 to-blue-600', light: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-100' },
+      'cyan': { gradient: 'from-cyan-500 to-cyan-600', light: 'bg-cyan-50', text: 'text-cyan-700', border: 'border-cyan-100' },
+      'red': { gradient: 'from-red-500 to-red-600', light: 'bg-red-50', text: 'text-red-700', border: 'border-red-100' },
+      'amber': { gradient: 'from-amber-500 to-amber-600', light: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-100' },
+      'orange': { gradient: 'from-orange-500 to-orange-600', light: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-100' },
+      'purple': { gradient: 'from-purple-500 to-purple-600', light: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-100' },
+      'teal': { gradient: 'from-teal-500 to-teal-600', light: 'bg-teal-50', text: 'text-teal-700', border: 'border-teal-100' },
+      'rose': { gradient: 'from-rose-500 to-rose-600', light: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-100' }
+    };
+
+    const iconMap = {
+      'title_seo_roots': 'fa-font',
+      'selling_proposition_deconstruction': 'fa-layer-group',
+      'neg_deal_breakers': 'fa-triangle-exclamation',
+      'pos_aha_moments': 'fa-star',
+      'buying_hesitations': 'fa-circle-question',
+      'user_avatar_context': 'fa-user-group',
+      'vocabulary_gap': 'fa-comments',
+      'promise_reality_check': 'fa-scale-unbalanced'
+    };
+
+    const colors = colorSchemes[module.color] || colorSchemes.blue;
+    const icon = iconMap[key] || 'fa-info-circle';
+
+    return `
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden hover:shadow-xl transition-all duration-300 animate-fade-in-up" style="animation-delay: ${index * 80}ms">
+        <!-- Header -->
+        <div class="bg-gradient-to-r ${colors.gradient} p-5 text-white">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/30">
+              <i class="fas ${icon} w-5 h-5"></i>
+            </div>
+            <div class="flex-1">
+              <h3 class="font-bold text-lg">${module.label_cn}</h3>
+              <span class="text-xs px-2 py-0.5 rounded-full bg-white/20 border border-white/30">
+                ${module.category === 'listing' ? 'Listings' : 'Reviews'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Content -->
+        <div class="p-4">
+          ${this.renderWidgetContent(value, colors)}
+        </div>
+      </div>
+    `;
+  }
+
+  renderWidgetContent(value, colors) {
+    if (!value || value === '' || (Array.isArray(value) && value.length === 0)) {
+      return `
+        <div class="h-24 flex flex-col items-center justify-center text-slate-300/60 select-none">
+          <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center mb-2">
+            <i class="fas fa-minus text-xs"></i>
+          </div>
+          <span class="text-[11px] font-medium tracking-wide">暂无数据</span>
+        </div>
+      `;
+    }
+
+    if (typeof value === 'string') {
+      return `<div class="text-[13px] leading-relaxed text-slate-700 font-sans tracking-wide whitespace-pre-wrap">${value}</div>`;
+    }
+
+    if (Array.isArray(value)) {
+      if (typeof value[0] === 'string') {
+        return `
+          <div class="flex flex-wrap gap-2 pt-1">
+            ${value.map(item => `
+              <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[12px] font-medium bg-slate-50 text-slate-700 border border-slate-200/60 hover:bg-white hover:shadow-sm hover:text-blue-600 hover:border-blue-200 transition-all cursor-default">
+                ${item}
+              </span>
+            `).join('')}
+          </div>
+        `;
+      }
+      
+      if (typeof value[0] === 'object') {
+        return `
+          <div class="flex flex-col gap-3">
+            ${value.map(obj => `
+              <div class="relative group/card bg-white rounded-xl border border-slate-200 p-4 hover:shadow-md hover:border-slate-300 transition-all duration-300">
+                <div class="absolute left-0 top-4 bottom-4 w-1 bg-gradient-to-b ${colors.gradient} rounded-r opacity-0 group-hover/card:opacity-100 transition-opacity"></div>
+                <div class="grid gap-y-3 gap-x-4">
+                  ${Object.keys(obj).map(subKey => `
+                    <div class="grid grid-cols-1 sm:grid-cols-[110px_1fr] gap-2 sm:gap-4 items-baseline">
+                      <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider text-left sm:text-right select-none pt-0.5">
+                        ${getFieldTitle(subKey)}
+                      </div>
+                      <div class="text-[13px] text-slate-700 leading-6 font-medium break-words">
+                        ${typeof obj[subKey] === 'object' ? JSON.stringify(obj[subKey]) : obj[subKey] || '<span class="text-slate-300">-</span>'}
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+    }
+
+    return `<div class="text-xs text-slate-400 font-mono">${JSON.stringify(value)}</div>`;
+  }
+
+  renderLoadingSkeleton(module, index) {
+    const colorSchemes = {
+      'blue': { gradient: 'from-blue-500 to-blue-600' },
+      'cyan': { gradient: 'from-cyan-500 to-cyan-600' },
+      'red': { gradient: 'from-red-500 to-red-600' },
+      'amber': { gradient: 'from-amber-500 to-amber-600' },
+      'orange': { gradient: 'from-orange-500 to-orange-600' },
+      'purple': { gradient: 'from-purple-500 to-purple-600' },
+      'teal': { gradient: 'from-teal-500 to-teal-600' },
+      'rose': { gradient: 'from-rose-500 to-rose-600' }
+    };
+
+    const iconMap = {
+      'title_seo_roots': 'fa-font',
+      'selling_proposition_deconstruction': 'fa-layer-group',
+      'neg_deal_breakers': 'fa-triangle-exclamation',
+      'pos_aha_moments': 'fa-star',
+      'buying_hesitations': 'fa-circle-question',
+      'user_avatar_context': 'fa-user-group',
+      'vocabulary_gap': 'fa-comments',
+      'promise_reality_check': 'fa-scale-unbalanced'
+    };
+
+    const colors = colorSchemes[module.color] || colorSchemes.blue;
+    const icon = iconMap[module.id] || 'fa-info-circle';
+
+    return `
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden" style="animation-delay: ${index * 80}ms">
+        <div class="bg-gradient-to-r ${colors.gradient} p-5 text-white">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/30">
+              <i class="fas ${icon} w-5 h-5"></i>
+            </div>
+            <div class="flex-1">
+              <h3 class="font-bold text-lg">${module.label_cn}</h3>
+              <span class="text-xs px-2 py-0.5 rounded-full bg-white/20 border border-white/30">
+                ${module.category === 'listing' ? 'Listings' : 'Reviews'}
+              </span>
+            </div>
+          </div>
+        </div>
         
-        <div class="grid-stack"></div>
-      </div>`;
-
-    // ✅ 安全: 静态HTML模板，无用户输入
-    display.innerHTML = toolbarHtml;
-
-    this.populateTranslationModels();
-
-    const toggleBtn = document.getElementById("toggle-trans-view-btn");
-    if (toggleBtn) this.addEventListener(toggleBtn, "click", () => this.toggleTranslationView());
-
-    this.gridManager.initGridStack(report);
+        <div class="p-5">
+          <div class="space-y-4 animate-pulse">
+            <div class="h-2.5 bg-slate-100 rounded w-3/4"></div>
+            <div class="h-2.5 bg-slate-100 rounded w-full"></div>
+            <div class="h-2.5 bg-slate-100 rounded w-5/6"></div>
+            <div class="h-2.5 bg-slate-100 rounded w-2/3"></div>
+          </div>
+        </div>
+      </div>
+    `;
   }
 
   populateTranslationModels() {

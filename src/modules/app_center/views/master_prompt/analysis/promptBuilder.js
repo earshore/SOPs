@@ -9,6 +9,7 @@
 
 import { ANALYSIS_MODULES, DYNAMIC_MASTER_TEMPLATE } from '../constants/prompts.ts';
 import { showToast } from '../../../../../common/ui';
+import state from '../../../../../common/state';
 
 export class PromptBuilder {
   constructor(moduleInstance) {
@@ -20,11 +21,12 @@ export class PromptBuilder {
    * @returns {string|null} 生成的 Prompt 文本，如果没有选中模块则返回 null
    */
   buildDynamicPrompt() {
-    const selectedCheckboxes = document.querySelectorAll('input[name="analysis_module"]:checked');
-    if (selectedCheckboxes.length === 0) return null;
+    if (!state.analysis.selectedModules || state.analysis.selectedModules.length === 0) {
+      return null;
+    }
 
-    const selectedModules = Array.from(selectedCheckboxes)
-      .map((cb) => ANALYSIS_MODULES.find((m) => m.id === cb.value))
+    const selectedModules = state.analysis.selectedModules
+      .map((id) => ANALYSIS_MODULES.find((m) => m.id === id))
       .filter(Boolean);
 
     const tasksStr = selectedModules

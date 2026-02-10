@@ -23,6 +23,111 @@ export function getFieldTitle(key) {
   return titleMap[key] || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 }
 
+// 辅助函数：获取模块图标
+export function getModuleIcon(moduleId) {
+  const iconMap = {
+    'title-keywords': 'fa-font',
+    'selling-points': 'fa-layer-group',
+    'fatal-flaws': 'fa-triangle-exclamation',
+    'wow-moments': 'fa-star',
+    'hesitation-points': 'fa-circle-question',
+    'buyer-profile': 'fa-user-group',
+    'vocab-gap': 'fa-comments',
+    'promise-reality': 'fa-scale-unbalanced'
+  };
+  return iconMap[moduleId] || 'fa-info-circle';
+}
+
+// 辅助函数：获取模块颜色方案
+export function getModuleColorScheme(category) {
+  const colorSchemes = {
+    'listing': {
+      color: 'blue',
+      bg: 'bg-blue-600',
+      lightBg: 'bg-blue-50',
+      icon: 'fa-file-alt',
+      iconColor: 'text-blue-600',
+      selectedBg: 'bg-blue-50',
+      border: 'border-blue-300'
+    },
+    'reviews': {
+      color: 'orange',
+      bg: 'bg-orange-500',
+      lightBg: 'bg-orange-50',
+      icon: 'fa-comments',
+      iconColor: 'text-orange-600',
+      selectedBg: 'bg-orange-50',
+      border: 'border-orange-300'
+    },
+    'cross': {
+      color: 'purple',
+      bg: 'bg-purple-600',
+      lightBg: 'bg-purple-50',
+      icon: 'fa-random',
+      iconColor: 'text-purple-600',
+      selectedBg: 'bg-purple-50',
+      border: 'border-purple-300'
+    }
+  };
+  return colorSchemes[category] || colorSchemes.listing;
+}
+
+// 渲染模块选择卡片（新版视觉设计）
+export function renderModuleCard(module, isSelected) {
+  const colorMap = {
+    'blue': { bg: 'bg-blue-50', icon: 'text-blue-600', selectedBg: 'bg-blue-50', border: 'border-blue-300' },
+    'cyan': { bg: 'bg-cyan-50', icon: 'text-cyan-600', selectedBg: 'bg-cyan-50', border: 'border-cyan-300' },
+    'red': { bg: 'bg-red-50', icon: 'text-red-600', selectedBg: 'bg-red-50', border: 'border-red-300' },
+    'amber': { bg: 'bg-amber-50', icon: 'text-amber-600', selectedBg: 'bg-amber-50', border: 'border-amber-300' },
+    'orange': { bg: 'bg-orange-50', icon: 'text-orange-600', selectedBg: 'bg-orange-50', border: 'border-orange-300' },
+    'purple': { bg: 'bg-purple-50', icon: 'text-purple-600', selectedBg: 'bg-purple-50', border: 'border-purple-300' },
+    'teal': { bg: 'bg-teal-50', icon: 'text-teal-600', selectedBg: 'bg-teal-50', border: 'border-teal-300' },
+    'rose': { bg: 'bg-rose-50', icon: 'text-rose-600', selectedBg: 'bg-rose-50', border: 'border-rose-300' }
+  };
+
+  const colors = colorMap[module.color] || colorMap.blue;
+  const icon = getModuleIcon(module.id);
+
+  return `
+    <button
+      data-module-id="${module.id}"
+      data-category="${module.category}"
+      class="module-card relative p-4 rounded-xl border-2 text-left transition-all duration-200 group hover:shadow-md ${
+        isSelected
+          ? `${colors.border} ${colors.selectedBg} shadow-sm`
+          : 'border-slate-100 bg-slate-50/50 hover:border-slate-200 hover:bg-white'
+      }"
+    >
+      <div class="flex items-start gap-3">
+        <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 transition-all ${
+          isSelected ? colors.bg : 'bg-slate-100 group-hover:bg-slate-200'
+        }">
+          <i class="fas ${icon} w-4 h-4 transition-colors ${
+            isSelected ? colors.icon : 'text-slate-500'
+          }"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h3 class="font-semibold text-sm ${
+            isSelected ? 'text-slate-800' : 'text-slate-700'
+          }">
+            ${module.label_cn}
+          </h3>
+          <p class="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
+            ${module.desc_cn}
+          </p>
+        </div>
+        <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all mt-0.5 ${
+          isSelected
+            ? 'border-indigo-500 bg-indigo-500'
+            : 'border-slate-300 group-hover:border-slate-400'
+        }">
+          ${isSelected ? '<i class="fas fa-check w-2.5 h-2.5 text-white text-[10px]"></i>' : ''}
+        </div>
+      </div>
+    </button>
+  `;
+}
+
 // ========================================== 
 // 1. Widget 卡片外壳渲染
 // ========================================== 

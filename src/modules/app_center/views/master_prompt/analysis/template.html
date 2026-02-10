@@ -113,34 +113,71 @@
                 <div class="px-6 pt-5 pb-4 border-b border-slate-100">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-4">
-                            <h3 class="text-base font-bold text-slate-800 flex items-center gap-2.5">
-                                <div class="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center">
-                                    <i class="fas fa-crosshairs text-violet-500 text-sm"></i>
-                                </div>
-                                分析目标
-                            </h3>
-                            <!-- Source Toggles -->
-                            <div class="flex gap-2" id="source-toggle-container"></div>
+                            <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-200">
+                                <i class="fas fa-check-double text-white text-base"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-lg font-semibold text-slate-800">选择分析目标</h2>
+                                <p class="text-sm text-slate-500">选择需要执行的 AI 分析维度</p>
+                            </div>
                         </div>
 
-                        <div class="flex items-center gap-1">
+                        <div class="flex items-center gap-3">
                             <button data-action="toggleAllModules" data-checked="true"
-                                class="text-xs text-blue-600 hover:text-blue-700 font-semibold px-2.5 py-1.5 rounded-lg hover:bg-blue-50 transition-all border border-transparent hover:border-blue-100">
+                                class="flex items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-700 font-medium transition-colors">
+                                <i class="fas fa-check-double text-xs"></i>
                                 全选
                             </button>
-                            <span class="text-slate-200">|</span>
+                            <span class="text-slate-300">|</span>
                             <button data-action="toggleAllModules" data-checked="false"
-                                class="text-xs text-slate-400 hover:text-slate-600 font-medium px-2.5 py-1.5 rounded-lg hover:bg-slate-50 transition-all border border-transparent hover:border-slate-200">
+                                class="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 font-medium transition-colors">
+                                <i class="fas fa-times text-xs"></i>
                                 清空
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Modules Grid -->
-                <div class="p-5">
-                    <div id="modules-container"
-                        class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[280px] overflow-y-auto pr-1 custom-scrollbar">
+                <!-- Modules Content -->
+                <div class="p-6">
+                    <!-- Listings Section -->
+                    <div class="mb-6" id="listings-section">
+                        <div class="flex items-center gap-2 mb-4">
+                            <div class="flex items-center gap-2 bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1.5 rounded-full border border-blue-100">
+                                <i class="fas fa-box-open text-xs"></i>
+                                Listings 分析
+                            </div>
+                            <span class="text-xs text-slate-400">基于标题与五点描述</span>
+                        </div>
+                        <div id="listings-container" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <!-- Listings modules will be rendered here -->
+                        </div>
+                    </div>
+
+                    <!-- Reviews Section -->
+                    <div id="reviews-section">
+                        <div class="flex items-center gap-2 mb-4">
+                            <div class="flex items-center gap-2 bg-amber-50 text-amber-700 text-xs font-semibold px-3 py-1.5 rounded-full border border-amber-100">
+                                <i class="fas fa-star text-xs"></i>
+                                Reviews 分析
+                            </div>
+                            <span class="text-xs text-slate-400">基于用户评论数据</span>
+                        </div>
+                        <div id="reviews-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            <!-- Reviews modules will be rendered here -->
+                        </div>
+                    </div>
+
+                    <!-- Selection Summary -->
+                    <div class="mt-6 pt-5 border-t border-slate-100 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="text-sm text-slate-500">
+                                已选择 <span id="selected-count" class="font-bold text-indigo-600 text-base">0</span> / <span id="total-count">8</span> 个分析目标
+                            </span>
+                        </div>
+                        <div id="selected-icons-container" class="flex items-center gap-2">
+                            <!-- Selected icons will be rendered here -->
+                        </div>
                     </div>
                 </div>
             </div>
