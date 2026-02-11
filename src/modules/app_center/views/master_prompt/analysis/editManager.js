@@ -200,6 +200,27 @@ export class EditManager {
       return items;
     }
 
+    // 检查是否是 category-items 结构编辑
+    const categoryContainer = contentArea.querySelector(`#category-items-container-${key}`);
+    if (categoryContainer) {
+      const categories = [];
+      categoryContainer.querySelectorAll('.edit-section').forEach(section => {
+        const categoryInput = section.querySelector('textarea[data-field="category"]');
+        const category = categoryInput ? categoryInput.value.trim() : '';
+        
+        const items = [];
+        section.querySelectorAll('.item-input').forEach(input => {
+          const val = input.value.trim();
+          if (val) items.push(val);
+        });
+        
+        if (category || items.length > 0) {
+          categories.push({ category, items });
+        }
+      });
+      return categories;
+    }
+
     // 检查是否是对象数组编辑
     const objContainer = contentArea.querySelector(`#obj-list-container-${key}`);
     if (objContainer) {
@@ -290,6 +311,136 @@ export class EditManager {
     `;
     
     container.appendChild(newRow);
+  }
+
+  /**
+   * 添加分类区块 (category-items 结构)
+   * @param {string} key - 卡片 Key
+   */
+  addCategorySection(key) {
+    const container = document.getElementById(`category-items-container-${key}`);
+    const template = document.getElementById(`tpl-${key}`);
+    if (!container || !template) return;
+
+    const newSection = document.createElement('div');
+    newSection.className = 'edit-section group/section relative bg-gradient-to-br from-slate-50 to-white rounded-xl border border-slate-200 p-4 hover:border-slate-300 hover:shadow-sm transition-all';
+    
+    newSection.innerHTML = `
+      <button onclick="window.deleteCategorySection(this, '${escapeHtml(key)}')" 
+              class="w-6 h-6 flex items-center justify-center rounded-md text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer opacity-0 group-hover:opacity-100 absolute top-3 right-3 bg-white shadow-sm border border-slate-200 z-10 hover:border-red-200" 
+              title="删除此分类">
+        <i class="fas fa-trash-alt text-[10px]"></i>
+      </button>
+
+      <div class="mb-3">
+        <div class="flex items-center gap-2 mb-2">
+          <div class="w-1 h-4 bg-gradient-to-b from-blue-500 to-indigo-500 rounded-full"></div>
+          <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">分类名称</label>
+        </div>
+        <textarea data-field="category" 
+                  class="editor-input-modern font-semibold"
+                  rows="1" 
+                  style="height: 28px"
+                  oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"
+                  onfocus="window.pushEditSnapshot('${escapeHtml(key)}'); this.style.height='auto';this.style.height=this.scrollHeight+'px'"
+                  placeholder="输入分类名称..."></textarea>
+      </div>
+
+      <div class="pl-4">
+        <div class="flex items-center gap-2 mb-2">
+          <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">条目列表</label>
+        </div>
+        <div class="items-list flex flex-col gap-2">
+          <div class="item-row group/item flex items-start gap-2">
+            <div class="pt-2.5 pl-1">
+              <div class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover/item:bg-blue-400 transition-colors"></div>
+            </div>
+            <div class="flex-1">
+              <textarea class="editor-input-modern item-input"
+                        rows="1" 
+                        style="height: 28px"
+                        oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"
+                        onfocus="window.pushEditSnapshot('${escapeHtml(key)}'); this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+            </div>
+            <div class="pt-1">
+              <button onclick="window.deleteCategoryItem(this, '${escapeHtml(key)}')" 
+                      class="w-5 h-5 flex items-center justify-center rounded text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer" 
+                      title="删除此条目">
+                <i class="fas fa-times text-xs"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <button onclick="window.addCategoryItem(this, '${escapeHtml(key)}')" 
+                class="inline-flex items-center gap-1 px-2 py-1 text-[11px] font-medium text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all mt-2 cursor-pointer">
+          <i class="fas fa-plus text-[9px]"></i> <span>添加条目</span>
+        </button>
+      </div>
+    `;
+    
+    container.appendChild(newSection);
+  }
+
+  /**
+   * 删除分类区块
+   * @param {HTMLElement} btn - 删除按钮元素
+   * @param {string} key - 卡片 Key
+   */
+  deleteCategorySection(btn, key) {
+    const section = btn.closest('.edit-section');
+    if (section) {
+      section.remove();
+    }
+  }
+
+  /**
+   * 添加分类条目
+   * @param {HTMLElement} btn - 添加按钮元素
+   * @param {string} key - 卡片 Key
+   */
+  addCategoryItem(btn, key) {
+    const section = btn.closest('.edit-section');
+    if (!section) return;
+
+    const itemsList = section.querySelector('.items-list');
+    if (!itemsList) return;
+
+    const newItem = document.createElement('div');
+    newItem.className = 'item-row group/item flex items-start gap-2';
+    newItem.innerHTML = `
+      <div class="pt-2.5 pl-1">
+        <div class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover/item:bg-blue-400 transition-colors"></div>
+      </div>
+      <div class="flex-1">
+        <textarea class="editor-input-modern item-input"
+                  rows="1" 
+                  style="height: 28px"
+                  oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"
+                  onfocus="window.pushEditSnapshot('${escapeHtml(key)}'); this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+      </div>
+      <div class="pt-1">
+        <button onclick="window.deleteCategoryItem(this, '${escapeHtml(key)}')" 
+                class="w-5 h-5 flex items-center justify-center rounded text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer" 
+                title="删除此条目">
+          <i class="fas fa-times text-xs"></i>
+        </button>
+      </div>
+    `;
+    
+    itemsList.appendChild(newItem);
+  }
+
+  /**
+   * 删除分类条目
+   * @param {HTMLElement} btn - 删除按钮元素
+   * @param {string} key - 卡片 Key
+   */
+  deleteCategoryItem(btn, key) {
+    const item = btn.closest('.item-row');
+    if (item) {
+      item.remove();
+    }
   }
 
   /**

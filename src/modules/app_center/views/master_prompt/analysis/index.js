@@ -752,7 +752,7 @@ class AnalysisModule extends BaseModule {
 
         <!-- Content -->
         <div id="widget-content-${key}" class="p-5 widget-content-area">
-          ${this.renderSimpleWidgetContent(value, colors)}
+          ${renderViewModeHTML(value, colors)}
         </div>
       </div>
     `;
@@ -1213,6 +1213,11 @@ class AnalysisModule extends BaseModule {
       deleteRowItem: (btn, key) => this.deleteRowItem(btn, key),
       addListItem: (key) => this.addListItem(key),
       addObjItem: (key) => this.addObjItem(key),
+      // category-items 结构相关函数
+      addCategorySection: (key) => this.addCategorySection(key),
+      deleteCategorySection: (btn, key) => this.deleteCategorySection(btn, key),
+      addCategoryItem: (btn, key) => this.addCategoryItem(btn, key),
+      deleteCategoryItem: (btn, key) => this.deleteCategoryItem(btn, key),
     };
     
     // 将全局函数挂载到 window，并注册清理函数
@@ -1257,6 +1262,23 @@ class AnalysisModule extends BaseModule {
 
   addObjItem(key) {
     this.editManager.addObjItem(key);
+  }
+
+  // category-items 结构相关方法
+  addCategorySection(key) {
+    this.editManager.addCategorySection(key);
+  }
+
+  deleteCategorySection(btn, key) {
+    this.editManager.deleteCategorySection(btn, key);
+  }
+
+  addCategoryItem(btn, key) {
+    this.editManager.addCategoryItem(btn, key);
+  }
+
+  deleteCategoryItem(btn, key) {
+    this.editManager.deleteCategoryItem(btn, key);
   }
 }
 
