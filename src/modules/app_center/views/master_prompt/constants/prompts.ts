@@ -14,7 +14,7 @@ export interface AnalysisModule {
     desc_cn: string;
     label_en: string;
     desc_en: string;
-    extraction_instruction: string;
+    taskPrompt: string;
     color?: string; // 视觉设计颜色
 }
 
@@ -35,7 +35,7 @@ const CORE_JSON_RULES = `
 
 /**
  * 动态分析模块定义库
- * label_en/extraction_instruction -> 传给 LLM (英文)
+ * label_en/taskPrompt -> 传给 LLM (英文)
  * label_cn/desc_cn -> UI 展示 (中文)
  */
 export const ANALYSIS_MODULES: AnalysisModule[] = [
@@ -47,7 +47,7 @@ export const ANALYSIS_MODULES: AnalysisModule[] = [
     desc_cn: "分析竞品标题，剔除品牌与修饰词，提取决定流量属性的绝对核心词根。",
     label_en: "Title Core Root",
     desc_en: "Analyze titles to isolate absolute core keyword roots that determine traffic relevance, stripping brands/modifiers.",
-    extraction_instruction: "Strip brand names/measurements. Identify top 3 'Root Nouns' defining the product. Calculate frequency.",
+    taskPrompt: "Strip brand names/measurements. Identify top 3 'Root Nouns' defining the product. Calculate frequency.",
     color: "blue"
   },
   {
@@ -57,7 +57,7 @@ export const ANALYSIS_MODULES: AnalysisModule[] = [
     desc_cn: "将五点描述解构为'功能-场景-痛点'矩阵，识别竞品主打的差异化策略。",
     label_en: "USP",
     desc_en: "Deconstruct bullet points into a 'Feature-Scenario-Pain' matrix to identify competitor differentiation strategies.",
-    extraction_instruction: "Identify top 3 common Selling Propositions across ASINs. Map the 'Feature' to the 'Pain Point' it solves.",
+    taskPrompt: "Identify top 3 common Selling Propositions across ASINs. Map the 'Feature' to the 'Pain Point' it solves.",
     color: "cyan"
   },
 
@@ -69,7 +69,7 @@ export const ANALYSIS_MODULES: AnalysisModule[] = [
     desc_cn: "从1-3星评论中提炼导致退货的根本原因（非物流），用于规避产品缺陷。",
     label_en: "Deal Breakers",
     desc_en: "Extract root causes for returns/dissatisfaction from 1-3 star reviews (ignoring shipping) to identify fatal flaws.",
-    extraction_instruction: "Focus on Product Performance/Design Flaws (Ignore 'shipping' or 'arrived broken'). Top 5 reasons for regret.",
+    taskPrompt: "Focus on Product Performance/Design Flaws (Ignore 'shipping' or 'arrived broken'). Top 5 reasons for regret.",
     color: "red"
   },
   {
@@ -79,7 +79,7 @@ export const ANALYSIS_MODULES: AnalysisModule[] = [
     desc_cn: "提取5星评论中用户表示'超出预期'的具体瞬间，这是高转化率文案的核心素材。",
     label_en: "Aha Moments",
     desc_en: "Extract specific moments from 5-star reviews where value exceeded expectations. These are gold for conversion copy.",
-    extraction_instruction: "Extract specific scenarios from 5-star reviews (phrases like 'surprised', 'finally'). Keep verbatim.",
+    taskPrompt: "Extract specific scenarios from 5-star reviews (phrases like 'surprised', 'finally'). Keep verbatim.",
     color: "amber"
   },
   {
@@ -89,7 +89,7 @@ export const ANALYSIS_MODULES: AnalysisModule[] = [
     desc_cn: "挖掘'购买前曾担心，但收到后放心了'的评论，用于替代Q&A填补信息盲区。",
     label_en: "Hesitations",
     desc_en: "Identify 'I was worried about X, but...' comments to substitute missing Q&A data and address objections.",
-    extraction_instruction: "Extract specific pre-purchase concerns (phrases like 'skeptical', 'hesitated').",
+    taskPrompt: "Extract specific pre-purchase concerns (phrases like 'skeptical', 'hesitated').",
     color: "orange"
   },
   {
@@ -99,7 +99,7 @@ export const ANALYSIS_MODULES: AnalysisModule[] = [
     desc_cn: "基于评论用语推断买家身份（谁在买）和具体使用场景（在哪里用）。",
     label_en: "User Context",
     desc_en: "Infer the buyer's identity (Who) and specific usage environment (Where) based on review vocabulary.",
-    extraction_instruction: "Infer 'Who' (Persona) and 'Where' (Use Case) from narratives.",
+    taskPrompt: "Infer 'Who' (Persona) and 'Where' (Use Case) from narratives.",
     color: "purple"
   },
   {
@@ -109,7 +109,7 @@ export const ANALYSIS_MODULES: AnalysisModule[] = [
     desc_cn: "对比'商家用词'与'买家黑话'，找出Listing未覆盖但买家高频使用的词汇。",
     label_en: "Vocabulary Gap",
     desc_en: "Contrast 'Seller Jargon' vs 'Buyer Slang'. Identify high-frequency buyer terms missing from the listing.",
-    extraction_instruction: "Words frequent in Reviews (top 20%) but rare in Listing (<1%).",
+    taskPrompt: "Words frequent in Reviews (top 20%) but rare in Listing (<1%).",
     color: "teal"
   },
   {
@@ -119,7 +119,7 @@ export const ANALYSIS_MODULES: AnalysisModule[] = [
     desc_cn: "识别Listing过度承诺但Review频繁打脸的功能点，防止虚假宣传。",
     label_en: "Promise-Reality Gap",
     desc_en: "Identify features heavily promoted in listings that are frequently cited as failures in reviews.",
-    extraction_instruction: "Listing claims that correlate with negative sentiment.",
+    taskPrompt: "Listing claims that correlate with negative sentiment.",
     color: "rose"
   }
 ];

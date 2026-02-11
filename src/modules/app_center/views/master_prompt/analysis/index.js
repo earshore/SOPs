@@ -545,60 +545,68 @@ class AnalysisModule extends BaseModule {
           <div class="absolute bottom-0 left-1/4 w-64 h-64 bg-blue-400 rounded-full filter blur-[100px]"></div>
         </div>
         
-        <div class="relative p-6">
+        <div class="relative p-8">
           <div class="flex items-center justify-between">
-            <div class="flex items-center gap-4">
-              <div class="w-14 h-14 bg-emerald-500/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-emerald-500/30">
+            <div class="flex items-center gap-5">
+              <div class="w-16 h-16 bg-emerald-500/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-emerald-500/30">
                 <i class="fas fa-circle-check text-emerald-400 text-2xl"></i>
               </div>
               <div>
-                <h2 class="text-2xl font-bold text-white">分析报告</h2>
-                <p class="text-slate-400 text-sm mt-0.5 flex items-center gap-2">
+                <div class="flex items-center gap-3 mb-2">
+                  <h2 class="text-2xl font-bold text-white">分析报告</h2>
+                  <div class="flex items-center bg-slate-100/10 backdrop-blur-sm rounded-xl overflow-hidden">
+                    <button data-action="copyReportMarkdown" class="flex items-center gap-2 hover:bg-white/10 text-white px-3 py-1.5 text-xs font-medium transition-all">
+                      <i class="fas fa-copy text-sm"></i>
+                    </button>
+                    <div class="w-px h-4 bg-white/10"></div>
+                    <button data-action="exportReport" class="flex items-center justify-center hover:bg-white/10 text-white px-3 py-1.5 text-xs font-medium transition-all">
+                      <i class="fas fa-download text-sm"></i>
+                    </button>
+                  </div>
+                </div>
+                <p class="text-slate-400 text-sm flex items-center gap-2">
                   <span class="font-mono bg-slate-700/50 px-2 py-0.5 rounded text-slate-300">${asinDisplay}</span>
                   <span class="w-1 h-1 bg-slate-600 rounded-full"></span>
                   <span>分析完成于 ${analysisTime}</span>
                 </p>
               </div>
             </div>
-            <div class="flex items-center gap-6">
+            <div class="flex items-center gap-8">
               <div class="text-right">
                 <div class="text-3xl font-bold text-white">${resultCount}</div>
-                <div class="text-slate-400 text-xs uppercase tracking-wider">分析维度</div>
+                <div class="text-slate-400 text-xs uppercase tracking-wider mt-1">分析维度</div>
               </div>
-              <div class="w-px h-12 bg-slate-700"></div>
+              <div class="w-px h-14 bg-slate-700"></div>
               <div class="text-right">
                 <div class="text-3xl font-bold text-emerald-400">100%</div>
-                <div class="text-slate-400 text-xs uppercase tracking-wider">完成度</div>
+                <div class="text-slate-400 text-xs uppercase tracking-wider mt-1">完成度</div>
               </div>
               
-              <div class="flex items-center gap-2 ml-4">
+              <div class="flex items-center gap-3 ml-4">
                 ${state.analysis.translatedReport ? `
-                  <button id="toggle-trans-view-btn" data-action="toggleTranslationView"
-                    class="text-xs px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1.5 ${showTrans ? "bg-blue-500 text-white" : "bg-white/10 text-white hover:bg-white/20"} border border-white/10">
-                    <i class="fas fa-language text-xs"></i>
-                    <span>${showTrans ? '译文' : '原文'}</span>
-                  </button>
+                  <div class="flex items-center gap-2.5 bg-slate-100/10 backdrop-blur-sm px-4 py-2.5 rounded-xl">
+                    <span class="text-xs font-medium ${showTrans ? 'text-white/40' : 'text-white'} transition-colors">原文</span>
+                    <button id="toggle-trans-view-btn" data-action="toggleTranslationView"
+                      class="relative inline-flex h-6 w-11 items-center rounded-full transition-all ${showTrans ? 'bg-indigo-500' : 'bg-white/20'}">
+                      <span class="inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${showTrans ? 'translate-x-5' : 'translate-x-0.5'}"></span>
+                    </button>
+                    <span class="text-xs font-medium ${showTrans ? 'text-white' : 'text-white/40'} transition-colors">译文</span>
+                  </div>
                 ` : ''}
                 
-                <select id="translation-model-select" class="text-xs border border-white/10 rounded-lg px-2 py-1.5 bg-white/10 text-white focus:outline-none focus:border-white/30 w-32 backdrop-blur-sm">
-                  <option value="" disabled selected>Translation Model</option>
-                </select>
-                <button id="quick-translate-btn" data-action="translateReport" 
-                  class="text-xs px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1 ${showTrans ? "bg-white/10 text-slate-400 cursor-not-allowed opacity-60" : "bg-white/10 text-white hover:bg-white/20 cursor-pointer border border-white/10"}" 
-                  ${showTrans ? "disabled" : ""}>
-                  <i class="fas fa-language"></i> 翻译
-                </button>
+                <div class="flex items-center gap-2 bg-slate-100/10 backdrop-blur-sm px-3 py-2.5 rounded-xl">
+                  <select id="translation-model-select" class="text-xs bg-transparent text-white focus:outline-none w-28 font-medium cursor-pointer">
+                    <option value="" disabled selected>选择模型</option>
+                  </select>
+                  <button id="quick-translate-btn" data-action="translateReport" 
+                    class="text-xs px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1.5 ${showTrans ? "text-white/30 cursor-not-allowed" : "text-white hover:bg-white/10"}" 
+                    ${showTrans ? "disabled" : ""}>
+                    <i class="fas fa-language text-sm"></i>
+                    <span>翻译</span>
+                  </button>
+                </div>
               </div>
-              
-              <button data-action="copyReportMarkdown" class="flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors border border-white/10">
-                <i class="fas fa-copy w-4 h-4"></i>
-                复制 Markdown
-              </button>
-              
-              <button data-action="exportReport" class="flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors border border-white/10">
-                <i class="fas fa-download w-4 h-4"></i>
-                导出报告
-              </button>
+
             </div>
           </div>
         </div>

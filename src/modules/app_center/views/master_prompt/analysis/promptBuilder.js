@@ -30,7 +30,7 @@ export class PromptBuilder {
       .filter(Boolean);
 
     const tasksStr = selectedModules
-      .map((m, index) => `${index + 1}. ${m.label_en}: ${m.extraction_instruction}`)
+      .map((m, index) => `${index + 1}. ${m.label_en}: ${m.taskPrompt}`)
       .join("\n");
 
     const schemaParts = selectedModules
