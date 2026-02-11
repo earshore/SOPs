@@ -693,8 +693,8 @@ class AnalysisModule extends BaseModule {
         </div>
 
         <!-- Content -->
-        <div class="p-4">
-          ${this.renderWidgetContent(value, colors)}
+        <div class="p-5">
+          ${this.renderSimpleWidgetContent(value, colors)}
         </div>
       </div>
     `;
@@ -755,6 +755,84 @@ class AnalysisModule extends BaseModule {
     }
 
     return `<div class="text-xs text-slate-400 font-mono">${JSON.stringify(value)}</div>`;
+  }
+
+  renderSimpleWidgetContent(value, colors) {
+    if (!value || value === '' || (Array.isArray(value) && value.length === 0)) {
+      return `
+        <div class="h-24 flex flex-col items-center justify-center text-slate-300/60 select-none">
+          <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center mb-2">
+            <i class="fas fa-minus text-xs"></i>
+          </div>
+          <span class="text-[11px] font-medium tracking-wide">暂无数据</span>
+        </div>
+      `;
+    }
+
+    if (typeof value === 'string') {
+      return `<div class="text-[13px] leading-relaxed text-slate-700 font-sans tracking-wide whitespace-pre-wrap">${value}</div>`;
+    }
+
+    if (Array.isArray(value)) {
+      if (typeof value[0] === 'string') {
+        return `
+          <div class="flex flex-wrap gap-2 pt-1">
+            ${value.map(item => `
+              <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[12px] font-medium bg-slate-50 text-slate-700 border border-slate-200/60 hover:bg-white hover:shadow-sm hover:text-blue-600 hover:border-blue-200 transition-all cursor-default">
+                ${item}
+              </span>
+            `).join('')}
+          </div>
+        `;
+      }
+      
+      if (typeof value[0] === 'object') {
+        return `
+          <div class="flex flex-col gap-3">
+            ${value.map(obj => `
+              <div class="relative group/card bg-white rounded-xl border border-slate-200 p-4 hover:shadow-md hover:border-slate-300 transition-all duration-300">
+                <div class="absolute left-0 top-4 bottom-4 w-1 bg-gradient-to-b ${colors.gradient} rounded-r opacity-0 group-hover/card:opacity-100 transition-opacity"></div>
+                <div class="grid gap-y-3 gap-x-4">
+                  ${Object.keys(obj).map(subKey => `
+                    <div class="grid grid-cols-1 sm:grid-cols-[110px_1fr] gap-2 sm:gap-4 items-baseline">
+                      <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider text-left sm:text-right select-none pt-0.5">
+                        ${this.getFieldTitle(subKey)}
+                      </div>
+                      <div class="text-[13px] text-slate-700 leading-6 font-medium break-words">
+                        ${typeof obj[subKey] === 'object' ? JSON.stringify(obj[subKey]) : obj[subKey] || '<span class="text-slate-300">-</span>'}
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+    }
+
+    return `<div class="text-xs text-slate-400 font-mono">${JSON.stringify(value)}</div>`;
+  }
+
+  getFieldTitle(key) {
+    const titleMap = {
+      'target_market': '目标市场',
+      'keywords_tier1': '一级关键词',
+      'keywords_tier2': '二级关键词',
+      'product_category': '产品类别',
+      'product_features': '产品特点',
+      'product_benefits': '产品优势',
+      'target_audience': '目标受众',
+      'pain_points': '痛点',
+      'unique_selling_points': 'USP',
+      'competitive_advantages': '竞争优势',
+      'product_positioning': '产品定位',
+      'brand_tone': '品牌调性',
+      'emotional_triggers': '情感触发',
+      'call_to_action': '行动号召',
+      'seasonal_relevance': '季节相关性'
+    };
+    return titleMap[key] || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   }
 
   renderLoadingSkeleton(module, index) {

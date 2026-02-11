@@ -158,7 +158,7 @@ export function renderWidgetCard(key, title, style, isTranslationMode, contentHT
                     <span class="truncate tracking-tight" title="${title}">${title}</span>
                 </h3>
                 
-                <div class="flex items-center gap-1 bg-white pl-2">
+                <div class="flex items-center gap-1 bg-white pl-2" style="display: none;">
                     
                     <div class="view-controls flex items-center gap-1 opacity-0 group-hover/card:opacity-100 transition-all duration-200 translate-x-2 group-hover/card:translate-x-0">
                         <button data-action="toggleCardResize" data-key="${key}" class="btn-resize w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all" title="调整">
