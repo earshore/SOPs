@@ -1,7 +1,7 @@
 // src/modules/app_center/master_prompt/constants/prompts.ts
 // ================================================================
-// Master Prompt 模块 - 提示词常量
-// 包含 PromptLab 和 Analysis 功能的所有提示词模板
+// Prompt 模块 - 提示词常量
+// 包含 Master Prompt下所有提示词模板，含组合拼接prompt
 // ================================================================
 
 /**
@@ -22,12 +22,15 @@ export interface AnalysisModule {
  * 核心 JSON 规则 (所有模板共用)
  */
 const CORE_JSON_RULES = `
-## Core Rules
+## Critical JSON Rules
 1. **Analyze** ONLY the **Raw Data** based on the specific **Analysis Tasks & Logic**, never make up fake things.
-2. **Extract** high-density, specific information. Do not summarize; extract facts.
-3. **Format** the output into strictly VALID JSON.
+2. **Extract** high-density, specific information. Do not summarize, extract facts.
+3. **Format** Output ONLY valid JSON - no markdown code blocks, no explanations.
 4. **Language Rule**: JSON Keys must be in **English**(matches the schema). JSON Values must be in **{{language}}**.
-5. If a value is unknown, use null or "N/A".
+5. All string values must be properly escaped.
+6. Arrays cannot have trailing commas.
+7. Use null for missing/unknown values, never undefined.
+8. Ensure all brackets and braces are properly closed.
 `;
 
 /**
@@ -122,7 +125,7 @@ export const ANALYSIS_MODULES: AnalysisModule[] = [
 ];
 
 /**
- * 动态主模板 (PromptLab)
+ * 动态主模板 (Master Prompt - AI分析)
  */
 export const DYNAMIC_MASTER_TEMPLATE = `
 You are a Data Extraction Engine specialized in E-commerce Analysis.
@@ -147,7 +150,7 @@ You must strictly follow this JSON structure. Do not output markdown code blocks
 `;
 
 /**
- * 翻译模板 (Analysis)
+ * 翻译模板 (master_prompt - analysis)
  */
 export const TRANSLATE_PROMPT_TEMPLATE = ` 
 You are a professional translator and localization expert in Europe. 

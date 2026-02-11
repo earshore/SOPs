@@ -1,6 +1,6 @@
 ﻿/**
  * Promptlab 子模块
- * 负责 Prompt 生成功能
+ * 负责 Prompt 拼接生成功能
  * 
  * 架构说明：
  * - 状态保存到 state.masterPrompt.promptlab 命名空间

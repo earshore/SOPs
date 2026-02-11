@@ -197,10 +197,10 @@ class AnalysisModule extends BaseModule {
           <div class="flex-1 min-w-0">
             <h3 class="font-semibold text-sm ${
               isSelected ? 'text-slate-800' : 'text-slate-700'
-            }">
+            }" title="${module.label_cn}">
               ${module.label_cn}
             </h3>
-            <p class="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
+            <p class="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed" title="${module.desc_cn}">
               ${module.desc_cn}
             </p>
           </div>
@@ -524,6 +524,19 @@ class AnalysisModule extends BaseModule {
   renderReportHeader(report, showTrans) {
     const resultCount = Object.keys(report).filter(k => k !== 'meta').length;
     
+    // 处理多个ASIN的显示
+    const asins = report.meta?.analyzedASINs || [];
+    const asinDisplay = asins.length > 0 
+      ? asins.length > 1 
+        ? `${asins.slice(0, 2).join(', ')}${asins.length > 2 ? ` +${asins.length - 2}` : ''}`
+        : asins[0]
+      : 'N/A';
+    
+    // 格式化分析时间
+    const analysisTime = report.meta?.generatedAt 
+      ? new Date(report.meta.generatedAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+      : new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    
     return `
       <div class="relative overflow-hidden rounded-2xl mb-8">
         <div class="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900"></div>
@@ -540,8 +553,10 @@ class AnalysisModule extends BaseModule {
               </div>
               <div>
                 <h2 class="text-2xl font-bold text-white">分析报告</h2>
-                <p class="text-slate-400 text-sm mt-0.5">
-                  ASIN: <span class="font-mono text-slate-300">${report.meta?.analyzedASINs?.[0] || 'N/A'}</span>
+                <p class="text-slate-400 text-sm mt-0.5 flex items-center gap-2">
+                  <span class="font-mono bg-slate-700/50 px-2 py-0.5 rounded text-slate-300">${asinDisplay}</span>
+                  <span class="w-1 h-1 bg-slate-600 rounded-full"></span>
+                  <span>分析完成于 ${analysisTime}</span>
                 </p>
               </div>
             </div>
@@ -557,6 +572,14 @@ class AnalysisModule extends BaseModule {
               </div>
               
               <div class="flex items-center gap-2 ml-4">
+                ${state.analysis.translatedReport ? `
+                  <button id="toggle-trans-view-btn" data-action="toggleTranslationView"
+                    class="text-xs px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1.5 ${showTrans ? "bg-blue-500 text-white" : "bg-white/10 text-white hover:bg-white/20"} border border-white/10">
+                    <i class="fas fa-language text-xs"></i>
+                    <span>${showTrans ? '译文' : '原文'}</span>
+                  </button>
+                ` : ''}
+                
                 <select id="translation-model-select" class="text-xs border border-white/10 rounded-lg px-2 py-1.5 bg-white/10 text-white focus:outline-none focus:border-white/30 w-32 backdrop-blur-sm">
                   <option value="" disabled selected>Translation Model</option>
                 </select>
@@ -566,6 +589,11 @@ class AnalysisModule extends BaseModule {
                   <i class="fas fa-language"></i> 翻译
                 </button>
               </div>
+              
+              <button data-action="copyReportMarkdown" class="flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors border border-white/10">
+                <i class="fas fa-copy w-4 h-4"></i>
+                复制 Markdown
+              </button>
               
               <button data-action="exportReport" class="flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors border border-white/10">
                 <i class="fas fa-download w-4 h-4"></i>
@@ -602,13 +630,13 @@ class AnalysisModule extends BaseModule {
     if (listingsResults.length > 0) {
       html += `
         <div>
-          <div class="flex items-center gap-3 mb-5">
-            <div class="flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold border border-blue-200">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="flex items-center gap-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-lg shadow-blue-500/20">
               <i class="fas fa-box-open w-4 h-4"></i>
               Listings 分析结果
             </div>
-            <div class="flex-1 h-px bg-gradient-to-r from-blue-200 to-transparent"></div>
-            <span class="text-sm text-slate-500 font-medium">${listingsResults.length} 项</span>
+            <div class="flex-1 h-px bg-gradient-to-r from-blue-300 via-blue-200 to-transparent"></div>
+            <span class="text-sm text-slate-500 font-semibold bg-slate-100 px-3 py-1 rounded-full">${listingsResults.length} 项</span>
           </div>
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             ${listingsResults.map((item, index) => this.renderResultWidget(item.key, item.module, report, showTrans, index)).join('')}
@@ -621,13 +649,13 @@ class AnalysisModule extends BaseModule {
     if (reviewsResults.length > 0) {
       html += `
         <div>
-          <div class="flex items-center gap-3 mb-5">
-            <div class="flex items-center gap-2 bg-amber-100 text-amber-700 px-4 py-2 rounded-full text-sm font-semibold border border-amber-200">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="flex items-center gap-2.5 bg-gradient-to-r from-amber-500 to-orange-600 text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-lg shadow-amber-500/20">
               <i class="fas fa-star w-4 h-4"></i>
               Reviews 分析结果
             </div>
-            <div class="flex-1 h-px bg-gradient-to-r from-amber-200 to-transparent"></div>
-            <span class="text-sm text-slate-500 font-medium">${reviewsResults.length} 项</span>
+            <div class="flex-1 h-px bg-gradient-to-r from-amber-300 via-amber-200 to-transparent"></div>
+            <span class="text-sm text-slate-500 font-semibold bg-slate-100 px-3 py-1 rounded-full">${reviewsResults.length} 项</span>
           </div>
           <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             ${reviewsResults.map((item, index) => this.renderResultWidget(item.key, item.module, report, showTrans, index + listingsResults.length)).join('')}
@@ -674,9 +702,10 @@ class AnalysisModule extends BaseModule {
 
     const colors = colorSchemes[module.color] || colorSchemes.blue;
     const icon = iconMap[key] || 'fa-info-circle';
+    const isTranslationMode = showTrans;
 
     return `
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden hover:shadow-xl transition-all duration-300 animate-fade-in-up" style="animation-delay: ${index * 80}ms">
+      <div id="widget-card-${key}" class="bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden hover:shadow-xl transition-all duration-300 animate-fade-in-up group/card" style="animation-delay: ${index * 80}ms">
         <!-- Header -->
         <div class="bg-gradient-to-r ${colors.gradient} p-5 text-white">
           <div class="flex items-center gap-4">
@@ -689,11 +718,32 @@ class AnalysisModule extends BaseModule {
                 ${module.category === 'listing' ? 'Listings' : 'Reviews'}
               </span>
             </div>
+            
+            <!-- Edit Controls -->
+            <div class="flex items-center gap-2">
+              <div class="view-controls flex items-center gap-1 opacity-0 group-hover/card:opacity-100 transition-all duration-200">
+                <button onclick="${isTranslationMode ? "" : `window.startLocalEdit('${key}')`}" 
+                        ${isTranslationMode ? "disabled" : ""}
+                        class="btn-edit w-8 h-8 flex items-center justify-center rounded-lg transition-all ${isTranslationMode ? "text-white/30 cursor-not-allowed" : "text-white/70 hover:text-white hover:bg-white/20 cursor-pointer"}" 
+                        title="${isTranslationMode ? "翻译模式不可编辑" : "编辑内容"}">
+                  <i class="fas fa-pen text-xs"></i>
+                </button>
+              </div>
+
+              <div class="edit-controls hidden flex items-center gap-2">
+                <button onclick="window.undoLocalEdit('${key}')" class="btn-undo w-8 h-8 flex items-center justify-center rounded-lg text-white/70 hover:text-white hover:bg-white/20 transition-all" title="撤销">
+                  <i class="fas fa-undo text-xs"></i>
+                </button>
+                <button onclick="window.saveLocalEdit('${key}')" class="btn-save px-3 h-8 flex items-center justify-center gap-1.5 rounded-lg bg-white/20 hover:bg-white/30 text-white shadow-sm transition-all text-xs font-medium" title="完成">
+                  <i class="fas fa-check"></i> <span>完成</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
         <!-- Content -->
-        <div class="p-5">
+        <div id="widget-content-${key}" class="p-5 widget-content-area">
           ${this.renderSimpleWidgetContent(value, colors)}
         </div>
       </div>
