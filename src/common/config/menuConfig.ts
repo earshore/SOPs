@@ -466,6 +466,13 @@ export const MENU_CONFIG: MenuConfig = {
       panelId: 'panel-app_center',
       category: 'master_prompt'
     },
+    ai_analysis: {
+      moduleId: 'master_prompt',
+      label: 'AI智能分析',
+      icon: 'fas fa-brain',
+      panelId: 'panel-app_center',
+      category: 'master_prompt'
+    },
     promptlab: {
       moduleId: 'master_prompt',
       label: 'Prompt 生成',

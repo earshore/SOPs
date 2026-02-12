@@ -1,0 +1,872 @@
+<!-- AI智能分析模块 - 完整还原版本 -->
+<div x-data="aiAnalysisPanel" class="ai-analysis-wrapper">
+  
+  <!-- Header 区域 -->
+  <header class="ai-header">
+    <div class="ai-header-bg"></div>
+    <div class="ai-header-glow-1"></div>
+    <div class="ai-header-glow-2"></div>
+    <div class="ai-header-grid"></div>
+    
+    <div class="ai-header-content">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-6">
+          <!-- Logo -->
+          <div class="relative group">
+            <div class="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl blur-xl opacity-60"></div>
+            <div class="relative bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-5 rounded-2xl shadow-2xl border border-white/10">
+              <i class="fa-solid fa-brain text-white text-3xl"></i>
+            </div>
+          </div>
+          <!-- 标题 -->
+          <div>
+            <h1 class="text-4xl font-extrabold text-white tracking-tight flex items-center gap-3">
+              Insight<span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">AI</span>
+              <span class="text-xs bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-2 py-1 rounded-full font-semibold tracking-wider">PRO</span>
+            </h1>
+            <p class="text-slate-400 text-sm mt-2 flex items-center gap-3">
+              <span class="flex items-center gap-1.5">
+                <i class="fa-solid fa-rocket text-indigo-400"></i>
+                亚马逊产品智能分析平台
+              </span>
+              <span class="w-1 h-1 bg-slate-600 rounded-full"></span>
+              <span class="flex items-center gap-1.5">
+                <i class="fa-solid fa-chart-line text-purple-400"></i>
+                Listings & Reviews 深度洞察
+              </span>
+            </p>
+          </div>
+        </div>
+        <!-- 状态指示器 -->
+        <div class="flex items-center gap-6">
+          <div class="hidden lg:flex items-center gap-6 text-sm">
+            <div class="flex items-center gap-2 text-slate-400 bg-slate-800/50 px-4 py-2 rounded-full border border-slate-700/50">
+              <i class="fa-solid fa-microchip text-cyan-400"></i>
+              <span>GPT-4 Turbo</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-2.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-5 py-2.5 rounded-full text-sm font-semibold backdrop-blur-sm">
+            <span class="relative flex h-2.5 w-2.5">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400"></span>
+            </span>
+            AI 引擎就绪
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="ai-main-content">
+
+    <!-- 数据源横幅 -->
+    <div class="mb-6 flex items-center gap-4 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl border border-indigo-100">
+      <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+        <i class="fa-solid fa-database text-indigo-600"></i>
+      </div>
+      <div class="flex-1">
+        <p class="text-sm text-slate-700">
+          <span class="font-semibold">数据源已加载：</span>
+          <span x-show="hasData">包含产品数据和评论</span>
+          <span x-show="!hasData">使用示例数据</span>
+        </p>
+        <p class="text-xs text-slate-500 mt-0.5">
+          <i class="fa-solid fa-globe"></i>
+          可从"数据采集"模块获取真实产品数据
+        </p>
+      </div>
+    </div>
+
+    <!-- ASIN 选择和分析目标 -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+      
+      <!-- ASIN 输入区 -->
+      <div class="lg:col-span-4">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 p-6 h-full">
+          <div class="flex items-center gap-4 mb-5">
+            <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200">
+              <i class="fa-solid fa-barcode text-white"></i>
+            </div>
+            <div>
+              <h2 class="text-lg font-semibold text-slate-800">产品 ASIN</h2>
+              <p class="text-sm text-slate-500">选择或输入产品标识符</p>
+            </div>
+          </div>
+
+          <!-- ASIN 输入框 -->
+          <div class="relative">
+            <input
+              type="text"
+              x-model="asin"
+              placeholder="例如：B0DNMZ2MLG"
+              :disabled="isAnalyzing"
+              class="w-full px-5 py-4 bg-slate-50 border-2 rounded-xl text-slate-800 placeholder-slate-400 font-mono text-lg tracking-widest transition-all duration-200 focus:outline-none focus:bg-white"
+              :class="hasData ? 'border-emerald-300 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-50' : 'border-slate-200 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-50'"
+              maxlength="10"
+            />
+            <div x-show="hasData" class="absolute right-4 top-1/2 -translate-y-1/2">
+              <span class="flex items-center gap-1.5 bg-emerald-50 text-emerald-600 text-xs px-3 py-1.5 rounded-full font-medium border border-emerald-100">
+                <i class="fa-solid fa-circle-check"></i>
+                数据已加载
+              </span>
+            </div>
+          </div>
+
+          <!-- 产品信息 -->
+          <template x-if="currentProduct">
+            <div class="mt-4 p-4 bg-gradient-to-r from-slate-50 to-indigo-50/50 rounded-xl border border-slate-100">
+              <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <i class="fa-solid fa-box-open"></i>
+                产品信息
+              </h4>
+              <p class="text-sm text-slate-700 font-medium line-clamp-2 leading-relaxed" x-text="currentProduct.productTitle"></p>
+              <div class="flex items-center gap-4 mt-3 text-xs text-slate-500">
+                <span class="flex items-center gap-1">
+                  <i class="fa-solid fa-comments text-amber-500"></i>
+                  <span x-text="currentProduct.customer_reviews.length"></span> 条评论
+                </span>
+              </div>
+            </div>
+          </template>
+
+          <!-- 可用 ASIN 列表 -->
+          <template x-if="availableAsins.length > 0">
+            <div class="mt-4 pt-4 border-t border-slate-100">
+              <p class="text-xs text-slate-500 mb-2 font-medium">已加载的产品：</p>
+              <div class="flex flex-wrap gap-2">
+                <template x-for="asinItem in availableAsins" :key="asinItem">
+                  <button
+                    @click="selectAsin(asinItem)"
+                    :disabled="isAnalyzing"
+                    class="px-3 py-2 text-xs font-mono rounded-lg transition-all"
+                    :class="asinItem === asin ? 'bg-indigo-100 text-indigo-700 border-2 border-indigo-300 shadow-sm' : 'bg-slate-100 hover:bg-indigo-50 text-slate-600 hover:text-indigo-700 border-2 border-transparent'"
+                    x-text="asinItem"
+                  ></button>
+                </template>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- 分析目标选择区 -->
+      <div class="lg:col-span-8">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 p-6 h-full">
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-200">
+                <i class="fa-solid fa-check-double text-white"></i>
+              </div>
+              <div>
+                <h2 class="text-lg font-semibold text-slate-800">选择分析目标</h2>
+                <p class="text-sm text-slate-500">选择需要执行的 AI 分析维度</p>
+              </div>
+            </div>
+            <div class="flex gap-3">
+              <button @click="selectAllTargets()" :disabled="isAnalyzing" class="flex items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-700 font-medium transition-colors">
+                <i class="fa-solid fa-check-double"></i>
+                全选
+              </button>
+              <span class="text-slate-300">|</span>
+              <button @click="clearAllTargets()" :disabled="isAnalyzing" class="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 font-medium transition-colors">
+                <i class="fa-solid fa-xmark"></i>
+                清空
+              </button>
+            </div>
+          </div>
+
+          <!-- Listings 分析 -->
+          <div class="mb-6">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="flex items-center gap-2 bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1.5 rounded-full border border-blue-100">
+                <i class="fa-solid fa-box-open"></i>
+                Listings 分析
+              </div>
+              <span class="text-xs text-slate-400">基于标题与五点描述</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <template x-for="target in analysisTargets.filter(t => t.source === 'Listings')" :key="target.id">
+                <button
+                  @click="toggleTarget(target.id)"
+                  :disabled="isAnalyzing"
+                  class="relative p-4 rounded-xl border-2 text-left transition-all duration-200 group hover:shadow-md"
+                  :class="selectedTargets.includes(target.id) ? 'border-blue-300 bg-blue-50 shadow-sm' : 'border-slate-100 bg-slate-50/50 hover:border-slate-200 hover:bg-white'"
+                >
+                  <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 transition-all"
+                         :class="selectedTargets.includes(target.id) ? 'bg-blue-50' : 'bg-slate-100 group-hover:bg-slate-200'">
+                      <i :class="target.icon + ' text-blue-600'"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <h4 class="font-semibold text-sm text-slate-800" x-text="target.name"></h4>
+                      <p class="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed" x-text="target.description"></p>
+                    </div>
+                    <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all mt-0.5"
+                         :class="selectedTargets.includes(target.id) ? 'border-indigo-500 bg-indigo-500' : 'border-slate-300 group-hover:border-slate-400'">
+                      <i x-show="selectedTargets.includes(target.id)" class="fa-solid fa-check text-white text-[10px]"></i>
+                    </div>
+                  </div>
+                </button>
+              </template>
+            </div>
+          </div>
+
+          <!-- Reviews 分析 -->
+          <div>
+            <div class="flex items-center gap-2 mb-4">
+              <div class="flex items-center gap-2 bg-amber-50 text-amber-700 text-xs font-semibold px-3 py-1.5 rounded-full border border-amber-100">
+                <i class="fa-solid fa-star"></i>
+                Reviews 分析
+              </div>
+              <span class="text-xs text-slate-400">基于用户评论数据</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              <template x-for="target in analysisTargets.filter(t => t.source === 'Reviews')" :key="target.id">
+                <button
+                  @click="toggleTarget(target.id)"
+                  :disabled="isAnalyzing"
+                  class="relative p-4 rounded-xl border-2 text-left transition-all duration-200 group hover:shadow-md"
+                  :class="selectedTargets.includes(target.id) ? 'border-amber-300 bg-amber-50 shadow-sm' : 'border-slate-100 bg-slate-50/50 hover:border-slate-200 hover:bg-white'"
+                >
+                  <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 transition-all"
+                         :class="selectedTargets.includes(target.id) ? 'bg-amber-50' : 'bg-slate-100 group-hover:bg-slate-200'">
+                      <i :class="target.icon + ' text-amber-600'"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <h4 class="font-semibold text-sm text-slate-800" x-text="target.name"></h4>
+                      <p class="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed" x-text="target.description"></p>
+                    </div>
+                    <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all mt-0.5"
+                         :class="selectedTargets.includes(target.id) ? 'border-indigo-500 bg-indigo-500' : 'border-slate-300 group-hover:border-slate-400'">
+                      <i x-show="selectedTargets.includes(target.id)" class="fa-solid fa-check text-white text-[10px]"></i>
+                    </div>
+                  </div>
+                </button>
+              </template>
+            </div>
+          </div>
+
+          <!-- 选择摘要 -->
+          <div class="mt-6 pt-5 border-t border-slate-100 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="text-sm text-slate-500">
+                已选择 <span class="font-bold text-indigo-600 text-base" x-text="selectedTargets.length"></span> / <span x-text="analysisTargets.length"></span> 个分析目标
+              </span>
+            </div>
+            <template x-if="selectedTargets.length > 0">
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-slate-400">已选：</span>
+                <div class="flex -space-x-2">
+                  <template x-for="(targetId, index) in selectedTargets.slice(0, 5)" :key="targetId">
+                    <div class="w-8 h-8 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
+                      <i :class="analysisTargets.find(t => t.id === targetId).icon + ' text-indigo-600 text-xs'"></i>
+                    </div>
+                  </template>
+                  <template x-if="selectedTargets.length > 5">
+                    <div class="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center border-2 border-white text-xs font-medium text-slate-600">
+                      +<span x-text="selectedTargets.length - 5"></span>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 提示词预览面板 -->
+    <template x-if="selectedTargets.length > 0 && currentProduct">
+      <div class="mb-8">
+        <button @click="togglePromptPanel()" class="flex items-center gap-2 text-sm text-slate-600 hover:text-indigo-600 transition-colors mb-4">
+          <i class="fa-solid fa-code"></i>
+          <span class="font-medium" x-text="(showPromptPanel ? '隐藏' : '查看') + ' AI 提示词模板'"></span>
+          <span class="text-xs bg-slate-100 px-2 py-0.5 rounded-full text-slate-500" x-text="selectedTargets.length + ' 个任务'"></span>
+          <i :class="'fa-solid fa-chevron-' + (showPromptPanel ? 'up' : 'down')"></i>
+        </button>
+        
+        <template x-if="showPromptPanel">
+          <div class="space-y-3 animate-fade-in-up">
+            <template x-for="(targetId, index) in selectedTargets" :key="targetId">
+              <div class="bg-slate-900 rounded-xl overflow-hidden border border-slate-700">
+                <button @click="togglePromptItem(index)" class="w-full flex items-center justify-between p-4 hover:bg-slate-800/50 transition-colors">
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center">
+                      <i class="fa-solid fa-terminal text-emerald-400"></i>
+                    </div>
+                    <div class="text-left">
+                      <h4 class="text-sm font-semibold text-white">AI 分析提示词</h4>
+                      <p class="text-xs text-slate-400" x-text="analysisTargets.find(t => t.id === targetId).name"></p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <i :class="'fa-solid fa-chevron-' + (expandedPromptIndex === index ? 'up' : 'down') + ' text-slate-400'"></i>
+                  </div>
+                </button>
+                <template x-if="expandedPromptIndex === index">
+                  <div class="border-t border-slate-700">
+                    <div class="flex items-center justify-between px-4 py-2 bg-slate-800/50">
+                      <div class="flex items-center gap-2 text-xs text-slate-400">
+                        <i class="fa-solid fa-file-code"></i>
+                        <span>Prompt Template</span>
+                      </div>
+                      <button @click.stop="copyPrompt(index)" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-700 text-slate-300 hover:bg-slate-600 transition-all">
+                        <i class="fa-solid fa-copy"></i>
+                        复制
+                      </button>
+                    </div>
+                    <div class="p-4 max-h-96 overflow-auto">
+                      <pre class="text-xs text-slate-300 font-mono whitespace-pre-wrap leading-relaxed" x-text="getPromptText(targetId)"></pre>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </template>
+          </div>
+        </template>
+      </div>
+    </template>
+
+    <!-- 分析按钮 -->
+    <div class="mb-10">
+      <div class="relative overflow-hidden rounded-2xl shadow-xl">
+        <div class="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600"></div>
+        <div class="absolute inset-0 overflow-hidden">
+          <div class="absolute top-0 left-1/4 w-80 h-80 bg-white/20 rounded-full filter blur-[80px] animate-pulse"></div>
+          <div class="absolute bottom-0 right-1/4 w-64 h-64 bg-pink-300/20 rounded-full filter blur-[60px]"></div>
+        </div>
+        <div class="absolute inset-0 opacity-5" style="background-image: linear-gradient(rgba(255,255,255,.2) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.2) 1px, transparent 1px); background-size: 30px 30px;"></div>
+        
+        <div class="relative p-8">
+          <div class="flex items-center justify-between gap-8">
+            <div class="flex items-center gap-5 text-white">
+              <div class="relative">
+                <template x-if="isAnalyzing">
+                  <div class="absolute inset-0 bg-white/20 rounded-2xl animate-ping" style="animation-duration: 1.5s;"></div>
+                </template>
+                <div class="w-16 h-16 rounded-2xl flex items-center justify-center border border-white/20 backdrop-blur-sm shadow-lg transition-all"
+                     :class="isAnalyzing ? 'bg-white/20' : 'bg-white/10'">
+                  <i class="text-2xl" :class="progress >= 100 ? 'fa-solid fa-circle-check' : isAnalyzing ? 'fa-solid fa-robot animate-pulse' : 'fa-solid fa-bolt'"></i>
+                </div>
+              </div>
+              <div>
+                <h3 class="font-extrabold text-2xl flex items-center gap-3 tracking-tight">
+                  <span x-show="progress >= 100">分析完成</span>
+                  <span x-show="isAnalyzing && progress < 100">AI 正在分析中</span>
+                  <span x-show="!isAnalyzing && progress < 100">执行 AI 分析</span>
+                  <template x-if="isAnalyzing && progress < 100">
+                    <i class="fa-solid fa-cog animate-spin opacity-60"></i>
+                  </template>
+                </h3>
+                <p class="text-white/70 text-sm mt-1.5 flex items-center gap-2">
+                  <template x-if="isAnalyzing">
+                    <span class="flex items-center gap-2">
+                      <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                      </span>
+                      <span x-text="currentStep"></span>
+                    </span>
+                  </template>
+                  <template x-if="!isAnalyzing && selectedTargets.length > 0">
+                    <span>
+                      <span class="bg-white/20 px-2 py-0.5 rounded-full text-xs font-semibold" x-text="selectedTargets.length"></span>
+                      个维度将生成结构化洞察报告
+                    </span>
+                  </template>
+                  <template x-if="!isAnalyzing && selectedTargets.length === 0">
+                    <span>请先选择分析目标</span>
+                  </template>
+                </p>
+              </div>
+            </div>
+            
+            <button
+              @click="runAnalysis()"
+              :disabled="!canAnalyze"
+              class="relative px-10 py-5 rounded-xl font-bold text-lg transition-all duration-300 flex items-center gap-3 min-w-[200px] justify-center shadow-2xl"
+              :class="isAnalyzing ? 'bg-white/20 text-white cursor-wait backdrop-blur-sm border border-white/30' : !canAnalyze ? 'bg-white/10 text-white/40 cursor-not-allowed border border-white/10' : 'bg-white text-indigo-600 hover:bg-indigo-50 hover:scale-105 border border-white/50'"
+            >
+              <template x-if="isAnalyzing">
+                <span class="flex items-center gap-3">
+                  <i class="fa-solid fa-spinner animate-spin"></i>
+                  分析中...
+                </span>
+              </template>
+              <template x-if="!isAnalyzing">
+                <span class="flex items-center gap-3">
+                  <i class="fa-solid fa-play"></i>
+                  开始分析
+                </span>
+              </template>
+            </button>
+          </div>
+          
+          <!-- 进度条 -->
+          <template x-if="isAnalyzing">
+            <div class="mt-8">
+              <div class="flex items-center justify-between text-white/80 text-sm mb-3">
+                <span class="flex items-center gap-2 font-medium">
+                  <i class="fa-solid fa-spinner animate-spin"></i>
+                  分析进度
+                </span>
+                <span class="font-mono font-bold text-lg" x-text="Math.round(progress) + '%'"></span>
+              </div>
+              <div class="h-3 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm shadow-inner">
+                <div class="h-full bg-gradient-to-r from-white via-indigo-200 to-white rounded-full transition-all duration-500 ease-out relative"
+                     :style="'width: ' + progress + '%'">
+                  <div class="absolute inset-0 shimmer"></div>
+                  <div class="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg shadow-white/50"></div>
+                </div>
+              </div>
+              <div class="flex justify-between mt-3 text-xs text-white/50">
+                <span :class="progress >= 0 ? 'text-white/80' : ''">数据加载</span>
+                <span :class="progress >= 33 ? 'text-white/80' : ''">NLP 处理</span>
+                <span :class="progress >= 66 ? 'text-white/80' : ''">洞察生成</span>
+                <span :class="progress >= 100 ? 'text-white/80' : ''">完成</span>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+
+    <!-- JSON 查看器 -->
+    <template x-if="analysisReport && results.length > 0">
+      <div class="mb-8 bg-slate-900 rounded-2xl overflow-hidden border border-slate-700/50 shadow-xl transition-all duration-300">
+        <div class="flex items-center justify-between p-4 bg-gradient-to-r from-slate-800 to-slate-900 border-b border-slate-700/50">
+          <button @click="toggleJsonViewer()" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+            <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg">
+              <i class="fa-solid fa-database text-white"></i>
+            </div>
+            <div class="text-left">
+              <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                AI 分析报告 JSON
+                <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full">RAW DATA</span>
+              </h4>
+              <p class="text-xs text-slate-400">
+                <span x-text="selectedTargets.length"></span> 个分析维度 · 
+                <span x-text="(JSON.stringify(analysisReport).length / 1024).toFixed(1)"></span> KB
+              </p>
+            </div>
+          </button>
+          <div class="flex items-center gap-2">
+            <button @click="copyJson()" class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 border border-slate-600/50 transition-all">
+              <i class="fa-solid fa-copy"></i>
+              复制 JSON
+            </button>
+            <button @click="toggleJsonViewer()" class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 border border-slate-600/50 transition-all">
+              <i :class="'fa-solid fa-chevron-' + (showJsonViewer ? 'up' : 'down')"></i>
+            </button>
+          </div>
+        </div>
+        
+        <template x-if="showJsonViewer">
+          <div class="animate-fade-in">
+            <div class="flex items-center justify-between px-4 py-2 bg-slate-800/50 border-b border-slate-700/30">
+              <div class="flex items-center gap-2 text-xs text-slate-400">
+                <i class="fa-solid fa-file-code"></i>
+                <span>analysis_report.json</span>
+              </div>
+              <div class="flex items-center gap-4 text-xs text-slate-500">
+                <span>行数: <span x-text="JSON.stringify(analysisReport, null, 2).split('\\n').length"></span></span>
+                <span>字符: <span x-text="JSON.stringify(analysisReport).length.toLocaleString()"></span></span>
+              </div>
+            </div>
+            <div class="overflow-auto p-4 max-h-96">
+              <pre class="text-xs font-mono leading-relaxed"><code class="text-slate-300" x-html="highlightJson(JSON.stringify(analysisReport, null, 2))"></code></pre>
+            </div>
+          </div>
+        </template>
+        
+        <template x-if="!showJsonViewer">
+          <div class="px-4 py-3 bg-slate-800/30 border-t border-slate-700/30">
+            <div class="flex items-center gap-2 text-xs text-slate-500">
+              <i class="fa-solid fa-code"></i>
+              <span class="font-mono truncate">{ "asin": "<span x-text="analysisReport.asin"></span>", "analysis_timestamp": "<span x-text="analysisReport.analysis_timestamp"></span>", ... }</span>
+            </div>
+          </div>
+        </template>
+      </div>
+    </template>
+
+    <!-- 分析结果展示 -->
+    <template x-if="results.length > 0">
+      <div class="space-y-10">
+        <!-- 结果 Header -->
+        <div class="relative overflow-hidden rounded-2xl">
+          <div class="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900"></div>
+          <div class="absolute inset-0 overflow-hidden">
+            <div class="absolute top-0 right-1/4 w-80 h-80 bg-emerald-500/20 rounded-full filter blur-[100px] animate-pulse"></div>
+            <div class="absolute bottom-0 left-1/4 w-64 h-64 bg-blue-500/20 rounded-full filter blur-[80px]"></div>
+          </div>
+          <div class="relative p-8">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-5">
+                <div class="relative">
+                  <div class="absolute inset-0 bg-emerald-400 rounded-2xl blur-lg opacity-40"></div>
+                  <div class="relative w-16 h-16 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center border border-emerald-300/30 shadow-xl">
+                    <i class="fa-solid fa-circle-check text-white text-2xl"></i>
+                  </div>
+                </div>
+                <div>
+                  <h2 class="text-3xl font-extrabold text-white tracking-tight">分析报告</h2>
+                  <p class="text-slate-400 text-sm mt-1 flex items-center gap-2">
+                    <span class="font-mono bg-slate-700/50 px-2 py-0.5 rounded text-slate-300" x-text="asin"></span>
+                    <span class="w-1 h-1 bg-slate-600 rounded-full"></span>
+                    <span>分析完成于 <span x-text="new Date().toLocaleTimeString('zh-CN')"></span></span>
+                  </p>
+                </div>
+              </div>
+              <div class="flex items-center gap-8">
+                <div class="flex items-center gap-6">
+                  <div class="text-center">
+                    <div class="text-4xl font-extrabold text-white" x-text="results.length"></div>
+                    <div class="text-slate-400 text-xs uppercase tracking-wider mt-1">分析维度</div>
+                  </div>
+                  <div class="w-px h-14 bg-slate-700"></div>
+                  <div class="text-center">
+                    <div class="text-4xl font-extrabold text-emerald-400">100%</div>
+                    <div class="text-slate-400 text-xs uppercase tracking-wider mt-1">完成度</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 统计概览栏 -->
+            <div class="mt-6 pt-6 border-t border-slate-700/50 grid grid-cols-4 gap-4">
+              <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                    <i class="fa-solid fa-box-open text-blue-400"></i>
+                  </div>
+                  <div>
+                    <div class="text-xl font-bold text-white" x-text="listingsResults.length"></div>
+                    <div class="text-xs text-slate-400">Listings 分析</div>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 bg-amber-500/20 rounded-lg flex items-center justify-center">
+                    <i class="fa-solid fa-star text-amber-400"></i>
+                  </div>
+                  <div>
+                    <div class="text-xl font-bold text-white" x-text="reviewsResults.length"></div>
+                    <div class="text-xs text-slate-400">Reviews 分析</div>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                    <i class="fa-solid fa-chart-pie text-purple-400"></i>
+                  </div>
+                  <div>
+                    <div class="text-xl font-bold text-white" x-text="totalHighlights"></div>
+                    <div class="text-xs text-slate-400">核心发现</div>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center">
+                    <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                  </div>
+                  <div>
+                    <div class="text-xl font-bold text-white" x-text="totalDetails"></div>
+                    <div class="text-xs text-slate-400">分析维度</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Listings 结果 -->
+        <template x-if="listingsResults.length > 0">
+          <div>
+            <div class="flex items-center gap-4 mb-6">
+              <div class="flex items-center gap-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-lg shadow-blue-500/20">
+                <i class="fa-solid fa-box-open"></i>
+                Listings 分析结果
+              </div>
+              <div class="flex-1 h-px bg-gradient-to-r from-blue-300 via-blue-200 to-transparent"></div>
+              <span class="text-sm text-slate-500 font-semibold bg-slate-100 px-3 py-1 rounded-full" x-text="listingsResults.length + ' 项'"></span>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <template x-for="(result, index) in listingsResults" :key="result.targetId">
+                <div class="group bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden hover:shadow-2xl hover:border-slate-300/60 transition-all duration-500 animate-fade-in-up" :style="'animation-delay: ' + (index * 100) + 'ms'">
+                  <!-- Header -->
+                  <div class="relative overflow-hidden p-6 text-white"
+                       :class="'bg-gradient-to-r from-' + result.color + '-500 via-' + result.color + '-600 to-indigo-600'">
+                    <div class="absolute inset-0 opacity-10">
+                      <div class="absolute top-0 right-0 w-40 h-40 bg-white rounded-full filter blur-3xl translate-x-1/2 -translate-y-1/2"></div>
+                      <div class="absolute bottom-0 left-0 w-32 h-32 bg-white rounded-full filter blur-2xl -translate-x-1/2 translate-y-1/2"></div>
+                    </div>
+                    <div class="relative flex items-center gap-4">
+                      <div class="w-14 h-14 rounded-2xl flex items-center justify-center border border-white/20 backdrop-blur-sm shadow-lg"
+                           :class="'bg-' + result.color + '-500/20'">
+                        <i :class="result.icon + ' text-xl'"></i>
+                      </div>
+                      <div class="flex-1">
+                        <h3 class="font-bold text-xl tracking-tight" x-text="result.title"></h3>
+                        <div class="flex items-center gap-2 mt-1">
+                          <span class="text-xs px-2.5 py-1 rounded-full bg-white/20 border border-white/20 font-medium backdrop-blur-sm" x-text="result.source"></span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- 统计数据 -->
+                  <div class="p-5 bg-gradient-to-b from-slate-50/80 to-white border-b border-slate-100">
+                    <div class="flex items-center gap-2 mb-4">
+                      <div class="w-6 h-6 bg-indigo-100 rounded-lg flex items-center justify-center">
+                        <i class="fa-solid fa-chart-bar text-indigo-600"></i>
+                      </div>
+                      <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">数据概览</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3">
+                      <template x-for="stat in result.stats" :key="stat.label">
+                        <div class="relative bg-white rounded-xl p-4 text-center border border-slate-100 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all">
+                          <div class="text-2xl font-extrabold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent" x-text="stat.value"></div>
+                          <div class="text-xs text-slate-500 mt-1 font-medium" x-text="stat.label"></div>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+                  
+                  <!-- 核心发现 -->
+                  <div class="p-5 border-b border-slate-100">
+                    <div class="flex items-center gap-2 mb-4">
+                      <div class="w-6 h-6 bg-amber-100 rounded-lg flex items-center justify-center">
+                        <i class="fa-solid fa-lightbulb text-amber-600"></i>
+                      </div>
+                      <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">核心发现</span>
+                    </div>
+                    <div class="space-y-2.5">
+                      <template x-for="highlight in result.highlights" :key="highlight.text">
+                        <div class="relative flex items-start gap-3 px-4 py-3 rounded-xl text-sm font-medium border transition-all hover:shadow-md"
+                             :class="{
+                               'bg-gradient-to-r from-red-50 to-rose-50 text-red-700 border-red-200': highlight.type === 'danger',
+                               'bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 border-emerald-200': highlight.type === 'success',
+                               'bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 border-amber-200': highlight.type === 'warning',
+                               'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border-blue-200': highlight.type === 'info'
+                             }">
+                          <i class="fa-solid mt-0.5 flex-shrink-0"
+                             :class="{
+                               'fa-circle-exclamation text-red-500': highlight.type === 'danger',
+                               'fa-circle-check text-emerald-500': highlight.type === 'success',
+                               'fa-triangle-exclamation text-amber-500': highlight.type === 'warning',
+                               'fa-circle-info text-blue-500': highlight.type === 'info'
+                             }"></i>
+                          <span class="leading-relaxed" x-text="highlight.text"></span>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+                  
+                  <!-- 详细分析 -->
+                  <div class="p-5">
+                    <div class="flex items-center gap-2 mb-4">
+                      <div class="w-6 h-6 bg-slate-100 rounded-lg flex items-center justify-center">
+                        <i class="fa-solid fa-list text-slate-600"></i>
+                      </div>
+                      <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">详细分析</span>
+                    </div>
+                    <div class="space-y-5">
+                      <template x-for="detail in result.details" :key="detail.category">
+                        <div>
+                          <span class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full mb-3"
+                                :class="'bg-' + result.color + '-50 text-' + result.color + '-700'">
+                            <i class="fa-solid fa-quote-left opacity-60"></i>
+                            <span x-text="detail.category"></span>
+                          </span>
+                          <div class="flex flex-wrap gap-2">
+                            <template x-for="item in detail.items" :key="item">
+                              <span class="inline-block px-3 py-2 bg-slate-50 text-slate-700 text-xs rounded-lg hover:bg-indigo-50 hover:text-indigo-700 transition-colors cursor-default border border-slate-100 hover:border-indigo-200 font-medium"
+                                    x-text="item"></span>
+                            </template>
+                          </div>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+        </template>
+
+        <!-- Reviews 结果 -->
+        <template x-if="reviewsResults.length > 0">
+          <div>
+            <div class="flex items-center gap-4 mb-6">
+              <div class="flex items-center gap-2.5 bg-gradient-to-r from-amber-500 to-orange-600 text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-lg shadow-amber-500/20">
+                <i class="fa-solid fa-star"></i>
+                Reviews 分析结果
+              </div>
+              <div class="flex-1 h-px bg-gradient-to-r from-amber-300 via-amber-200 to-transparent"></div>
+              <span class="text-sm text-slate-500 font-semibold bg-slate-100 px-3 py-1 rounded-full" x-text="reviewsResults.length + ' 项'"></span>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+              <template x-for="(result, index) in reviewsResults" :key="result.targetId">
+                <div class="group bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden hover:shadow-2xl hover:border-slate-300/60 transition-all duration-500 animate-fade-in-up" :style="'animation-delay: ' + (index * 100) + 'ms'">
+                  <!-- Header -->
+                  <div class="relative overflow-hidden p-6 text-white"
+                       :class="'bg-gradient-to-r from-' + result.color + '-500 via-' + result.color + '-600 to-' + (result.color === 'amber' ? 'orange' : result.color === 'orange' ? 'red' : result.color === 'purple' ? 'indigo' : result.color === 'teal' ? 'cyan' : result.color === 'rose' ? 'pink' : 'indigo') + '-600'">
+                    <div class="absolute inset-0 opacity-10">
+                      <div class="absolute top-0 right-0 w-40 h-40 bg-white rounded-full filter blur-3xl translate-x-1/2 -translate-y-1/2"></div>
+                      <div class="absolute bottom-0 left-0 w-32 h-32 bg-white rounded-full filter blur-2xl -translate-x-1/2 translate-y-1/2"></div>
+                    </div>
+                    <div class="relative flex items-center gap-4">
+                      <div class="w-14 h-14 rounded-2xl flex items-center justify-center border border-white/20 backdrop-blur-sm shadow-lg"
+                           :class="'bg-' + result.color + '-500/20'">
+                        <i :class="result.icon + ' text-xl'"></i>
+                      </div>
+                      <div class="flex-1">
+                        <h3 class="font-bold text-xl tracking-tight" x-text="result.title"></h3>
+                        <div class="flex items-center gap-2 mt-1">
+                          <span class="text-xs px-2.5 py-1 rounded-full bg-white/20 border border-white/20 font-medium backdrop-blur-sm" x-text="result.source"></span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- 统计数据 -->
+                  <div class="p-5 bg-gradient-to-b from-slate-50/80 to-white border-b border-slate-100">
+                    <div class="flex items-center gap-2 mb-4">
+                      <div class="w-6 h-6 bg-indigo-100 rounded-lg flex items-center justify-center">
+                        <i class="fa-solid fa-chart-bar text-indigo-600"></i>
+                      </div>
+                      <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">数据概览</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3">
+                      <template x-for="stat in result.stats" :key="stat.label">
+                        <div class="relative bg-white rounded-xl p-4 text-center border border-slate-100 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all">
+                          <div class="text-2xl font-extrabold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent" x-text="stat.value"></div>
+                          <div class="text-xs text-slate-500 mt-1 font-medium" x-text="stat.label"></div>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+                  
+                  <!-- 核心发现 -->
+                  <div class="p-5 border-b border-slate-100">
+                    <div class="flex items-center gap-2 mb-4">
+                      <div class="w-6 h-6 bg-amber-100 rounded-lg flex items-center justify-center">
+                        <i class="fa-solid fa-lightbulb text-amber-600"></i>
+                      </div>
+                      <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">核心发现</span>
+                    </div>
+                    <div class="space-y-2.5">
+                      <template x-for="highlight in result.highlights" :key="highlight.text">
+                        <div class="relative flex items-start gap-3 px-4 py-3 rounded-xl text-sm font-medium border transition-all hover:shadow-md"
+                             :class="{
+                               'bg-gradient-to-r from-red-50 to-rose-50 text-red-700 border-red-200': highlight.type === 'danger',
+                               'bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 border-emerald-200': highlight.type === 'success',
+                               'bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 border-amber-200': highlight.type === 'warning',
+                               'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border-blue-200': highlight.type === 'info'
+                             }">
+                          <i class="fa-solid mt-0.5 flex-shrink-0"
+                             :class="{
+                               'fa-circle-exclamation text-red-500': highlight.type === 'danger',
+                               'fa-circle-check text-emerald-500': highlight.type === 'success',
+                               'fa-triangle-exclamation text-amber-500': highlight.type === 'warning',
+                               'fa-circle-info text-blue-500': highlight.type === 'info'
+                             }"></i>
+                          <span class="leading-relaxed" x-text="highlight.text"></span>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+                  
+                  <!-- 详细分析 -->
+                  <div class="p-5">
+                    <div class="flex items-center gap-2 mb-4">
+                      <div class="w-6 h-6 bg-slate-100 rounded-lg flex items-center justify-center">
+                        <i class="fa-solid fa-list text-slate-600"></i>
+                      </div>
+                      <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">详细分析</span>
+                    </div>
+                    <div class="space-y-5">
+                      <template x-for="detail in result.details" :key="detail.category">
+                        <div>
+                          <span class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full mb-3"
+                                :class="'bg-' + result.color + '-50 text-' + result.color + '-700'">
+                            <i class="fa-solid fa-quote-left opacity-60"></i>
+                            <span x-text="detail.category"></span>
+                          </span>
+                          <div class="flex flex-wrap gap-2">
+                            <template x-for="item in detail.items" :key="item">
+                              <span class="inline-block px-3 py-2 bg-slate-50 text-slate-700 text-xs rounded-lg hover:bg-indigo-50 hover:text-indigo-700 transition-colors cursor-default border border-slate-100 hover:border-indigo-200 font-medium"
+                                    x-text="item"></span>
+                            </template>
+                          </div>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+        </template>
+      </div>
+    </template>
+
+    <!-- 空状态 -->
+    <template x-if="results.length === 0 && !isAnalyzing">
+      <div class="text-center py-20">
+        <div class="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl mb-8 shadow-inner">
+          <i class="fa-solid fa-lightbulb text-slate-400 text-4xl"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-slate-700 mb-3">准备开始智能分析</h3>
+        <p class="text-slate-500 max-w-lg mx-auto leading-relaxed">
+          选择分析目标并确认 ASIN，点击"开始分析"按钮，<br />
+          AI 将自动提取 Listings 和 Reviews 中的关键洞察
+        </p>
+        <div class="mt-10 flex items-center justify-center gap-8">
+          <div class="flex items-center gap-3 text-slate-500">
+            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center border border-blue-200">
+              <i class="fa-solid fa-box-open text-blue-600"></i>
+            </div>
+            <div class="text-left">
+              <div class="font-semibold text-slate-700">Listings 分析</div>
+              <div class="text-xs text-slate-400">标题与卖点洞察</div>
+            </div>
+          </div>
+          <div class="w-px h-10 bg-slate-200"></div>
+          <div class="flex items-center gap-3 text-slate-500">
+            <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center border border-amber-200">
+              <i class="fa-solid fa-star text-amber-600"></i>
+            </div>
+            <div class="text-left">
+              <div class="font-semibold text-slate-700">Reviews 分析</div>
+              <div class="text-xs text-slate-400">用户评论深度挖掘</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="ai-footer">
+    <div class="ai-footer-content">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
+            <span class="text-white font-bold text-xs">AI</span>
+          </div>
+          <span class="text-sm text-slate-600 font-medium">InsightAI 智能分析平台</span>
+        </div>
+        <p class="text-sm text-slate-400">基于大语言模型的电商产品洞察工具 · 让数据驱动决策</p>
+      </div>
+    </div>
+  </footer>
+
+</div>

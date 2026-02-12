@@ -27,6 +27,7 @@ const MODULE_MAP: ModuleMap = {
   scraper: () => import('./views/master_prompt/scraper/index'),
   rawdata: () => import('./views/master_prompt/rawdata/index'),
   analysis: () => import('./views/master_prompt/analysis/index'),
+  ai_analysis: () => import('./views/master_prompt/ai_analysis/index'),
   promptlab: () => import('./views/master_prompt/promptlab/index'),
 
   // Keyword Hunter 子模块
