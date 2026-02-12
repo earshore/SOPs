@@ -7,10 +7,11 @@ import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import state from '../../../../../common/state';
 import { analysisTargets } from './analysisTargets';
 import { runAnalysis, getSampleReport } from './analysisService';
+import { runAIAnalysis } from './aiAnalysisService';
 import { generateAnalysisPrompt } from './analysisPrompts';
 import { getProductByAsin, getAvailableAsins, Product } from './sampleData';
 import { AnalysisResult } from './types';
-import { FullAnalysisReport } from './analysisReportData';
+import type { FullAnalysisReport } from './analysisReportData';
 import { showToast } from '../../../../../common/ui';
 
 import '../master_prompt_style.css';
@@ -28,6 +29,8 @@ interface ModuleState {
   expandedPromptIndex: number | null;
   showPromptPanel: boolean;
   showJsonViewer: boolean;
+  useRealData: boolean; // 是否使用真实数据
+  dataSource: 'sample' | 'scraper' | 'rawdata'; // 数据来源
 }
 
 let moduleState: ModuleState = {
@@ -40,7 +43,9 @@ let moduleState: ModuleState = {
   analysisReport: null,
   expandedPromptIndex: null,
   showPromptPanel: false,
-  showJsonViewer: false
+  showJsonViewer: false,
+  useRealData: false,
+  dataSource: 'sample'
 };
 
 /**
@@ -85,7 +90,9 @@ export function unmount(): void {
     analysisReport: null,
     expandedPromptIndex: null,
     showPromptPanel: false,
-    showJsonViewer: false
+    showJsonViewer: false,
+    useRealData: false,
+    dataSource: 'sample'
   };
   console.log('[AI智能分析] ✅ 模块卸载成功');
 }
@@ -101,12 +108,54 @@ function initializeFromScraperData(): void {
     // 使用第一个产品的 ASIN
     const firstProduct = scrapedData.products[0];
     moduleState.asin = firstProduct.asin || '';
+    moduleState.dataSource = 'scraper';
     console.log('[AI智能分析] 📦 已从 Scraper 加载数据:', moduleState.asin);
   } else {
     // 使用示例数据
     const availableAsins = getAvailableAsins();
     moduleState.asin = availableAsins[0] || 'B0DNMZ2MLG';
+    moduleState.dataSource = 'sample';
     console.log('[AI智能分析] 📦 使用示例数据:', moduleState.asin);
+  }
+}
+
+/**
+ * 从 Scraper 数据转换为 Product 格式
+ */
+function convertScraperDataToProduct(scrapedData: unknown): Product | null {
+  try {
+    if (!scrapedData || typeof scrapedData !== 'object') {
+      return null;
+    }
+
+    const data = scrapedData as { products?: unknown[] };
+    if (!data.products || data.products.length === 0) {
+      return null;
+    }
+
+    const product = data.products[0] as Record<string, unknown>;
+    
+    return {
+      asin: (product.asin as string) || '',
+      productTitle: (product.productTitle as string) || (product.title as string) || '',
+      feature_bullets: (product.feature_bullets as string[]) || (product.bulletPoints as string[]) || (product.bullet_points as string[]) || [],
+      customer_reviews: ((product.customer_reviews as unknown[]) || (product.reviews as unknown[]) || []).map((r: unknown) => {
+        const review = r as Record<string, unknown>;
+        return {
+          star_rating: (review.star_rating as number) || (review.rating as number) || 5,
+          headline: (review.headline as string) || (review.review_title as string) || (review.title as string) || '',
+          body: (review.body as string) || (review.review_text as string) || (review.text as string) || (review.content as string) || '',
+          origin_country: (review.origin_country as string) || '',
+          review_date: (review.review_date as string) || '',
+          _origin_site: (review._origin_site as string) || ''
+        };
+      }),
+      scrape_status: 'success',
+      metadata: {}
+    };
+  } catch (error) {
+    console.error('[AI智能分析] 转换 Scraper 数据失败:', error);
+    return null;
   }
 }
 
@@ -126,6 +175,8 @@ function createAiAnalysisPanel() {
     expandedPromptIndex: moduleState.expandedPromptIndex,
     showPromptPanel: moduleState.showPromptPanel,
     showJsonViewer: moduleState.showJsonViewer,
+    useRealData: moduleState.useRealData,
+    dataSource: moduleState.dataSource,
 
     // ========== Computed ==========
     get currentProduct(): Product | undefined {
@@ -162,6 +213,20 @@ function createAiAnalysisPanel() {
 
     get totalDetails() {
       return this.results.reduce((acc, r) => acc + r.details.length, 0);
+    },
+
+    get hasScraperData(): boolean {
+      const scrapedData = state.scraper?.scrapedData;
+      return !!(scrapedData && scrapedData.products && scrapedData.products.length > 0);
+    },
+
+    get dataSourceLabel(): string {
+      switch (this.dataSource) {
+        case 'scraper': return '数据采集';
+        case 'rawdata': return '数据管理';
+        case 'sample': return '示例数据';
+        default: return '未知';
+      }
     },
 
     // ========== Lifecycle ==========
@@ -232,6 +297,22 @@ function createAiAnalysisPanel() {
       moduleState.showJsonViewer = this.showJsonViewer;
     },
 
+    toggleDataSource() {
+      this.useRealData = !this.useRealData;
+      moduleState.useRealData = this.useRealData;
+      
+      // 清空之前的结果
+      this.results = [];
+      this.analysisReport = null;
+      moduleState.results = [];
+      moduleState.analysisReport = null;
+      
+      showToast(
+        this.useRealData ? '已切换到真实数据分析模式' : '已切换到示例数据模式',
+        'info'
+      );
+    },
+
     copyPrompt(index: number) {
       const product = this.currentProduct;
       if (!product) return;
@@ -268,28 +349,75 @@ function createAiAnalysisPanel() {
       this.syncToModuleState();
 
       try {
-        const results = await runAnalysis(
-          this.selectedTargets,
-          this.asin,
-          (progress: number, step: string) => {
-            this.progress = progress;
-            this.currentStep = step;
-            this.syncToModuleState();
+        let results: AnalysisResult[];
+
+        if (this.useRealData) {
+          // 使用真实数据进行 AI 分析
+          const product = this.getRealProduct();
+          
+          if (!product) {
+            throw new Error('无法获取产品数据,请确保已从数据采集或数据管理导入数据');
           }
-        );
+
+          showToast('正在调用 AI 进行分析...', 'info');
+
+          results = await runAIAnalysis(
+            this.selectedTargets,
+            product,
+            (progress: number, step: string) => {
+              this.progress = progress;
+              this.currentStep = step;
+              this.syncToModuleState();
+            }
+          );
+
+          // AI 分析不返回完整报告,只返回结果
+          this.analysisReport = null;
+        } else {
+          // 使用示例数据进行模拟分析
+          results = await runAnalysis(
+            this.selectedTargets,
+            this.asin,
+            (progress: number, step: string) => {
+              this.progress = progress;
+              this.currentStep = step;
+              this.syncToModuleState();
+            }
+          );
+
+          this.analysisReport = getSampleReport();
+        }
 
         this.results = results;
-        this.analysisReport = getSampleReport();
         this.syncToModuleState();
 
         showToast(`分析完成！生成了 ${results.length} 个洞察报告`, 'success');
       } catch (error) {
         console.error('[AI智能分析] 分析失败:', error);
-        showToast('分析失败，请重试', 'error');
+        showToast(`分析失败: ${(error as Error).message}`, 'error');
       } finally {
         this.isAnalyzing = false;
         this.syncToModuleState();
       }
+    },
+
+    getRealProduct(): Product | null {
+      // 优先从 Scraper 获取数据
+      const scrapedData = state.scraper?.scrapedData;
+      if (scrapedData) {
+        const product = convertScraperDataToProduct(scrapedData);
+        if (product) {
+          return product;
+        }
+      }
+
+      // TODO: 从 RawData 获取数据
+      // const rawData = state.rawdata?.data;
+      // if (rawData) {
+      //   return convertRawDataToProduct(rawData);
+      // }
+
+      return null;
     },
 
     // ========== Helpers ==========
