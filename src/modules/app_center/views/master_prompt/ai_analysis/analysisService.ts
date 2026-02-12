@@ -21,10 +21,29 @@ import {
 const getTarget = (id: string) => analysisTargets.find(t => t.id === id);
 
 /**
+ * 安全获取数组，如果不存在则返回空数组
+ */
+const safeArray = <T>(arr: T[] | undefined | null): T[] => arr || [];
+
+/**
+ * 安全获取对象，如果不存在则返回空对象
+ */
+const safeObject = <T extends object>(obj: T | undefined | null): T => obj || ({} as T);
+
+/**
  * 将标题关键词报告转换为展示格式
  */
 function parseTitleKeywords(report: TitleKeywordsReport): AnalysisResult {
   const target = getTarget('title-keywords')!;
+  
+  // 防御性检查：确保所有必需字段存在
+  const primaryKeywords = report.primary_keywords || [];
+  const secondaryKeywords = report.secondary_keywords || [];
+  const sceneKeywords = report.scene_keywords || [];
+  const audienceKeywords = report.audience_keywords || [];
+  const removedBrandTerms = report.removed_brand_terms || [];
+  const removedModifiers = report.removed_modifiers || [];
+  const optimizationSuggestions = report.optimization_suggestions || [];
   
   return {
     targetId: 'title-keywords',
@@ -33,16 +52,16 @@ function parseTitleKeywords(report: TitleKeywordsReport): AnalysisResult {
     icon: target.icon,
     color: target.color,
     stats: [
-      { label: '核心词根', value: `${report.primary_keywords.length}个` },
-      { label: '场景词', value: `${report.scene_keywords.length}个` },
-      { label: '已剔除', value: `${report.removed_brand_terms.length + report.removed_modifiers.length}个` }
+      { label: '核心词根', value: `${primaryKeywords.length}个` },
+      { label: '场景词', value: `${sceneKeywords.length}个` },
+      { label: '已剔除', value: `${removedBrandTerms.length + removedModifiers.length}个` }
     ],
     highlights: [
-      ...report.primary_keywords.slice(0, 2).map(k => ({
+      ...primaryKeywords.slice(0, 2).map(k => ({
         text: `${k.keyword} - ${k.search_volume_estimate}`,
         type: 'info' as const
       })),
-      ...report.secondary_keywords.slice(0, 2).map(k => ({
+      ...secondaryKeywords.slice(0, 2).map(k => ({
         text: `${k.keyword} - ${k.importance}`,
         type: 'success' as const
       }))
@@ -50,23 +69,23 @@ function parseTitleKeywords(report: TitleKeywordsReport): AnalysisResult {
     details: [
       { 
         category: '一级核心词（高权重）', 
-        items: report.primary_keywords.map(k => `${k.keyword} [${k.weight}]`)
+        items: primaryKeywords.map(k => `${k.keyword} [${k.weight}]`)
       },
       { 
         category: '二级功能词', 
-        items: report.secondary_keywords.map(k => k.keyword)
+        items: secondaryKeywords.map(k => k.keyword)
       },
       { 
         category: '场景/人群词', 
-        items: [...report.scene_keywords.map(k => k.keyword), ...report.audience_keywords.map(k => k.keyword)]
+        items: [...sceneKeywords.map(k => k.keyword), ...audienceKeywords.map(k => k.keyword)]
       },
       { 
         category: '已剔除的修饰词和品牌词', 
-        items: [...report.removed_brand_terms, ...report.removed_modifiers]
+        items: [...removedBrandTerms, ...removedModifiers]
       },
       { 
         category: '优化建议', 
-        items: report.optimization_suggestions
+        items: optimizationSuggestions
       }
     ]
   };
@@ -78,9 +97,13 @@ function parseTitleKeywords(report: TitleKeywordsReport): AnalysisResult {
 function parseSellingPoints(report: SellingPointsReport): AnalysisResult {
   const target = getTarget('selling-points')!;
   
-  const funcCount = report.function_scene_matrix.functions.length;
-  const sceneCount = report.function_scene_matrix.scenes.length;
-  const painCount = report.function_scene_matrix.pain_points.length;
+  // 防御性检查
+  const overallStrategy = safeObject(report.overall_strategy);
+  const functionSceneMatrix = safeObject(report.function_scene_matrix);
+  
+  const funcCount = safeArray(functionSceneMatrix.functions).length;
+  const sceneCount = safeArray(functionSceneMatrix.scenes).length;
+  const painCount = safeArray(functionSceneMatrix.pain_points).length;
   
   return {
     targetId: 'selling-points',
@@ -95,14 +118,14 @@ function parseSellingPoints(report: SellingPointsReport): AnalysisResult {
     ],
     highlights: [
       { 
-        text: `核心差异化：${report.overall_strategy.primary_differentiation}`, 
+        text: `核心差异化：${overallStrategy.primary_differentiation || '未知'}`, 
         type: 'success' 
       },
       { 
-        text: `目标人群：${report.overall_strategy.target_positioning}`, 
+        text: `目标人群：${overallStrategy.target_positioning || '未知'}`, 
         type: 'info' 
       },
-      ...report.overall_strategy.missing_elements.slice(0, 2).map(m => ({
+      ...safeArray(overallStrategy.missing_elements).slice(0, 2).map(m => ({
         text: `缺失：${m}`,
         type: 'warning' as const
       }))
@@ -110,23 +133,23 @@ function parseSellingPoints(report: SellingPointsReport): AnalysisResult {
     details: [
       { 
         category: '功能维度', 
-        items: report.function_scene_matrix.functions
+        items: safeArray(functionSceneMatrix.functions)
       },
       { 
         category: '场景维度', 
-        items: report.function_scene_matrix.scenes
+        items: safeArray(functionSceneMatrix.scenes)
       },
       { 
         category: '痛点解决', 
-        items: report.function_scene_matrix.pain_points
+        items: safeArray(functionSceneMatrix.pain_points)
       },
       { 
         category: '情感钩子', 
-        items: report.overall_strategy.emotional_hooks
+        items: safeArray(overallStrategy.emotional_hooks)
       },
       { 
         category: '待改进项', 
-        items: report.overall_strategy.missing_elements
+        items: safeArray(overallStrategy.missing_elements)
       }
     ]
   };
@@ -138,8 +161,15 @@ function parseSellingPoints(report: SellingPointsReport): AnalysisResult {
 function parseFatalFlaws(report: FatalFlawsReport): AnalysisResult {
   const target = getTarget('fatal-flaws')!;
   
-  const criticalCount = report.critical_issues.filter(i => i.severity === 'critical').length;
-  const majorCount = report.critical_issues.filter(i => i.severity === 'major').length;
+  // 防御性检查
+  const criticalIssues = safeArray(report.critical_issues);
+  const returnTriggers = safeArray(report.return_triggers);
+  const expectationGaps = safeArray(report.expectation_gaps);
+  const actionableFixes = safeArray(report.actionable_fixes);
+  const riskAssessment = safeObject(report.risk_assessment);
+  
+  const criticalCount = criticalIssues.filter(i => i.severity === 'critical').length;
+  const majorCount = criticalIssues.filter(i => i.severity === 'major').length;
   
   return {
     targetId: 'fatal-flaws',
@@ -150,28 +180,28 @@ function parseFatalFlaws(report: FatalFlawsReport): AnalysisResult {
     stats: [
       { label: '严重问题', value: `${criticalCount}个` },
       { label: '一般问题', value: `${majorCount}个` },
-      { label: '风险等级', value: report.risk_assessment.overall_risk_level.toUpperCase() }
+      { label: '风险等级', value: (riskAssessment.overall_risk_level || 'unknown').toUpperCase() }
     ],
-    highlights: report.critical_issues.map(issue => ({
-      text: `${issue.issue} - ${issue.user_quotes[0] || ''}`,
+    highlights: criticalIssues.map(issue => ({
+      text: `${issue.issue} - ${safeArray(issue.user_quotes)[0] || ''}`,
       type: issue.severity === 'critical' ? 'danger' as const : 'warning' as const
     })),
     details: [
       { 
         category: '退货触发原因', 
-        items: report.return_triggers
+        items: returnTriggers
       },
       { 
         category: '期望落差', 
-        items: report.expectation_gaps.map(g => `期望: ${g.expected} → 现实: ${g.reality}`)
+        items: expectationGaps.map(g => `期望: ${g.expected} → 现实: ${g.reality}`)
       },
       { 
         category: '用户原话', 
-        items: report.critical_issues.flatMap(i => i.user_quotes)
+        items: criticalIssues.flatMap(i => safeArray(i.user_quotes))
       },
       { 
         category: '改进建议', 
-        items: report.actionable_fixes
+        items: actionableFixes
       }
     ]
   };
@@ -183,6 +213,13 @@ function parseFatalFlaws(report: FatalFlawsReport): AnalysisResult {
 function parseWowMoments(report: WowMomentsReport): AnalysisResult {
   const target = getTarget('wow-moments')!;
   
+  // 防御性检查
+  const moments = safeArray(report.moments);
+  const emotionalTriggers = safeArray(report.emotional_triggers);
+  const highConversionPhrases = safeArray(report.high_conversion_phrases);
+  const unexpectedBenefits = safeArray(report.unexpected_benefits);
+  const copywritingAngles = safeArray(report.copywriting_angles);
+  
   return {
     targetId: 'wow-moments',
     title: '惊喜顿悟时刻',
@@ -190,30 +227,30 @@ function parseWowMoments(report: WowMomentsReport): AnalysisResult {
     icon: target.icon,
     color: target.color,
     stats: [
-      { label: '惊喜时刻', value: `${report.moments.length}个` },
-      { label: '情感触发词', value: `${report.emotional_triggers.length}个` },
-      { label: '高转化素材', value: `${report.high_conversion_phrases.length}条` }
+      { label: '惊喜时刻', value: `${moments.length}个` },
+      { label: '情感触发词', value: `${emotionalTriggers.length}个` },
+      { label: '高转化素材', value: `${highConversionPhrases.length}条` }
     ],
-    highlights: report.moments.map(m => ({
+    highlights: moments.map(m => ({
       text: `"${m.user_quote}" - ${m.moment_description}`,
       type: 'success' as const
     })),
     details: [
       { 
         category: '情感触发词', 
-        items: report.emotional_triggers
+        items: emotionalTriggers
       },
       { 
         category: '高转化文案素材', 
-        items: report.high_conversion_phrases
+        items: highConversionPhrases
       },
       { 
         category: '超预期亮点', 
-        items: report.unexpected_benefits
+        items: unexpectedBenefits
       },
       { 
         category: '文案创意角度', 
-        items: report.copywriting_angles
+        items: copywritingAngles
       }
     ]
   };
@@ -225,6 +262,12 @@ function parseWowMoments(report: WowMomentsReport): AnalysisResult {
 function parseHesitationPoints(report: HesitationPointsReport): AnalysisResult {
   const target = getTarget('hesitation-points')!;
   
+  // 防御性检查
+  const hesitations = safeArray(report.hesitations);
+  const commonDoubts = safeArray(report.common_doubts);
+  const trustBuilders = safeArray(report.trust_builders);
+  const qaOptimizationItems = safeArray(report.qa_optimization_items);
+  
   return {
     targetId: 'hesitation-points',
     title: '购买前犹豫点',
@@ -232,30 +275,30 @@ function parseHesitationPoints(report: HesitationPointsReport): AnalysisResult {
     icon: target.icon,
     color: target.color,
     stats: [
-      { label: '识别犹豫点', value: `${report.hesitations.length}个` },
-      { label: '常见疑虑', value: `${report.common_doubts.length}个` },
-      { label: 'Q&A优化项', value: `${report.qa_optimization_items.length}条` }
+      { label: '识别犹豫点', value: `${hesitations.length}个` },
+      { label: '常见疑虑', value: `${commonDoubts.length}个` },
+      { label: 'Q&A优化项', value: `${qaOptimizationItems.length}条` }
     ],
-    highlights: report.hesitations.slice(0, 4).map(h => ({
-      text: `${h.pre_purchase_worry} → ${h.post_purchase_resolution.substring(0, 50)}...`,
+    highlights: hesitations.slice(0, 4).map(h => ({
+      text: `${h.pre_purchase_worry || '未知'} → ${(h.post_purchase_resolution || '').substring(0, 50)}...`,
       type: 'warning' as const
     })),
     details: [
       { 
         category: '购前常见疑虑', 
-        items: report.common_doubts
+        items: commonDoubts
       },
       { 
         category: '信任建立要素', 
-        items: report.trust_builders
+        items: trustBuilders
       },
       { 
         category: 'Q&A优化建议', 
-        items: report.qa_optimization_items.map(q => `Q: ${q.question}`)
+        items: qaOptimizationItems.map(q => `Q: ${q.question || '未知'}`)
       },
       { 
         category: '建议回答要点', 
-        items: report.qa_optimization_items.map(q => q.suggested_answer.substring(0, 60) + '...')
+        items: qaOptimizationItems.map(q => (q.suggested_answer || '').substring(0, 60) + '...')
       }
     ]
   };
@@ -267,6 +310,16 @@ function parseHesitationPoints(report: HesitationPointsReport): AnalysisResult {
 function parseBuyerProfile(report: BuyerProfileReport): AnalysisResult {
   const target = getTarget('buyer-profile')!;
   
+  // 防御性检查
+  const demographics = safeObject(report.demographics);
+  const buyerTypes = safeArray(report.buyer_types);
+  const usageScenes = safeArray(report.usage_scenes);
+  const purchaseMotivations = safeArray(report.purchase_motivations);
+  const geographicInsights = safeObject(report.geographic_insights);
+  const primaryMarkets = safeArray(geographicInsights.primary_markets);
+  const culturalConsiderations = safeArray(geographicInsights.cultural_considerations);
+  const lifestyleIndicators = safeArray(demographics.lifestyle_indicators);
+  
   return {
     targetId: 'buyer-profile',
     title: '画像与场景侧写',
@@ -274,44 +327,44 @@ function parseBuyerProfile(report: BuyerProfileReport): AnalysisResult {
     icon: target.icon,
     color: target.color,
     stats: [
-      { label: '买家类型', value: `${report.buyer_types.length}类` },
-      { label: '使用场景', value: `${report.usage_scenes.length}个` },
-      { label: '覆盖市场', value: `${report.geographic_insights.primary_markets.length}个` }
+      { label: '买家类型', value: `${buyerTypes.length}类` },
+      { label: '使用场景', value: `${usageScenes.length}个` },
+      { label: '覆盖市场', value: `${primaryMarkets.length}个` }
     ],
     highlights: [
       { 
-        text: `核心用户：${report.demographics.age_range_estimate}${report.demographics.likely_gender === 'male' ? '男性' : '女性'}`, 
+        text: `核心用户：${demographics.age_range_estimate || '未知'}${demographics.likely_gender === 'male' ? '男性' : demographics.likely_gender === 'female' ? '女性' : ''}`, 
         type: 'info' 
       },
-      ...report.buyer_types.slice(0, 2).map(t => ({
-        text: `${t.type} (${t.percentage_estimate}) - ${t.evidence.substring(0, 40)}...`,
+      ...buyerTypes.slice(0, 2).map(t => ({
+        text: `${t.type || '未知'} (${t.percentage_estimate || '未知'}) - ${(t.evidence || '').substring(0, 40)}...`,
         type: 'info' as const
       })),
       { 
-        text: `主要市场：${report.geographic_insights.primary_markets.join('、')}`, 
+        text: `主要市场：${primaryMarkets.join('、') || '未知'}`, 
         type: 'success' 
       }
     ],
     details: [
       { 
         category: '生活方式特征', 
-        items: report.demographics.lifestyle_indicators
+        items: lifestyleIndicators
       },
       { 
         category: '买家类型分布', 
-        items: report.buyer_types.map(t => `${t.type} (${t.percentage_estimate})`)
+        items: buyerTypes.map(t => `${t.type || '未知'} (${t.percentage_estimate || '未知'})`)
       },
       { 
         category: '使用场景', 
-        items: report.usage_scenes.map(s => `${s.scene} [${s.frequency}]`)
+        items: usageScenes.map(s => `${s.scene || '未知'} [${s.frequency || '未知'}]`)
       },
       { 
         category: '购买动机', 
-        items: report.purchase_motivations
+        items: purchaseMotivations
       },
       { 
         category: '市场文化洞察', 
-        items: report.geographic_insights.cultural_considerations
+        items: culturalConsiderations
       }
     ]
   };
@@ -323,6 +376,15 @@ function parseBuyerProfile(report: BuyerProfileReport): AnalysisResult {
 function parseVocabGap(report: VocabGapReport): AnalysisResult {
   const target = getTarget('vocab-gap')!;
   
+  // 防御性检查
+  const sellerTerms = safeArray(report.seller_terms);
+  const buyerTerms = safeArray(report.buyer_terms);
+  const termTranslations = safeArray(report.term_translations);
+  const uncoveredBuyerTerms = safeArray(report.uncovered_buyer_terms);
+  const listingOptimization = safeObject(report.listing_optimization);
+  const titleAdditions = safeArray(listingOptimization.title_additions);
+  const keywordOpportunities = safeArray(listingOptimization.keyword_opportunities);
+  
   return {
     targetId: 'vocab-gap',
     title: '词汇鸿沟分析',
@@ -330,34 +392,34 @@ function parseVocabGap(report: VocabGapReport): AnalysisResult {
     icon: target.icon,
     color: target.color,
     stats: [
-      { label: '商家词汇', value: `${report.seller_terms.length}个` },
-      { label: '买家词汇', value: `${report.buyer_terms.length}个` },
-      { label: '待覆盖词', value: `${report.uncovered_buyer_terms.length}个` }
+      { label: '商家词汇', value: `${sellerTerms.length}个` },
+      { label: '买家词汇', value: `${buyerTerms.length}个` },
+      { label: '待覆盖词', value: `${uncoveredBuyerTerms.length}个` }
     ],
-    highlights: report.term_translations.slice(0, 4).map(t => ({
-      text: `商家说 "${t.seller_says}" → 买家说 "${t.buyer_says}"`,
-      type: t.buyer_says.includes('scam') || t.buyer_says.includes('doesn\'t') ? 'danger' as const : 'warning' as const
+    highlights: termTranslations.slice(0, 4).map(t => ({
+      text: `商家说 "${t.seller_says || '未知'}" → 买家说 "${t.buyer_says || '未知'}"`,
+      type: (t.buyer_says || '').includes('scam') || (t.buyer_says || '').includes('doesn\'t') ? 'danger' as const : 'warning' as const
     })),
     details: [
       { 
         category: '商家高频词（Listing）', 
-        items: report.seller_terms
+        items: sellerTerms
       },
       { 
         category: '买家高频词（Reviews）', 
-        items: report.buyer_terms
+        items: buyerTerms
       },
       { 
         category: '未覆盖的买家词（需关注）', 
-        items: report.uncovered_buyer_terms.map(t => `${t.term} - ${t.recommendation}`)
+        items: uncoveredBuyerTerms.map(t => `${t.term || '未知'} - ${t.recommendation || '未知'}`)
       },
       { 
         category: '标题优化建议', 
-        items: report.listing_optimization.title_additions
+        items: titleAdditions
       },
       { 
         category: '关键词机会', 
-        items: report.listing_optimization.keyword_opportunities
+        items: keywordOpportunities
       }
     ]
   };
@@ -369,7 +431,14 @@ function parseVocabGap(report: VocabGapReport): AnalysisResult {
 function parsePromiseReality(report: PromiseRealityReport): AnalysisResult {
   const target = getTarget('promise-reality')!;
   
-  const severeCount = report.gaps.filter(g => g.contradiction_severity === 'severe').length;
+  // 防御性检查
+  const gaps = safeArray(report.gaps);
+  const verifiedClaims = safeArray(report.verified_claims);
+  const unverifiedClaims = safeArray(report.unverified_claims);
+  const listingRevisionSuggestions = safeArray(report.listing_revision_suggestions);
+  const overallCredibility = safeObject(report.overall_credibility);
+  
+  const severeCount = gaps.filter(g => g.contradiction_severity === 'severe').length;
   
   return {
     targetId: 'promise-reality',
@@ -379,30 +448,30 @@ function parsePromiseReality(report: PromiseRealityReport): AnalysisResult {
     color: target.color,
     stats: [
       { label: '严重断层', value: `${severeCount}处` },
-      { label: '可信度评分', value: report.overall_credibility.score },
-      { label: '待验证承诺', value: `${report.unverified_claims.length}个` }
+      { label: '可信度评分', value: overallCredibility.score || '未知' },
+      { label: '待验证承诺', value: `${unverifiedClaims.length}个` }
     ],
-    highlights: report.gaps.map(gap => ({
-      text: `宣称 "${gap.listing_claim.substring(0, 25)}..." → 现实 "${gap.review_reality.substring(0, 30)}..."`,
+    highlights: gaps.map(gap => ({
+      text: `宣称 "${(gap.listing_claim || '').substring(0, 25)}..." → 现实 "${(gap.review_reality || '').substring(0, 30)}..."`,
       type: gap.contradiction_severity === 'severe' ? 'danger' as const : 
             gap.contradiction_severity === 'moderate' ? 'warning' as const : 'info' as const
     })),
     details: [
       { 
         category: '严重断层点', 
-        items: report.gaps.filter(g => g.contradiction_severity === 'severe').map(g => g.listing_claim)
+        items: gaps.filter(g => g.contradiction_severity === 'severe').map(g => g.listing_claim || '未知')
       },
       { 
         category: '已验证的真实承诺', 
-        items: report.verified_claims
+        items: verifiedClaims
       },
       { 
         category: '待验证的承诺', 
-        items: report.unverified_claims
+        items: unverifiedClaims
       },
       { 
         category: 'Listing修订建议', 
-        items: report.listing_revision_suggestions
+        items: listingRevisionSuggestions
       }
     ]
   };
@@ -417,51 +486,77 @@ export function parseAnalysisReport(
 ): AnalysisResult[] {
   const results: AnalysisResult[] = [];
   
+  console.log('[AI分析] 开始解析分析报告，目标数量:', targetIds.length);
+  console.log('[AI分析] 报告对象键:', Object.keys(report));
+  
   for (const targetId of targetIds) {
-    switch (targetId) {
-      case 'title-keywords':
-        if (report.title_keywords) {
-          results.push(parseTitleKeywords(report.title_keywords));
-        }
-        break;
-      case 'selling-points':
-        if (report.selling_points) {
-          results.push(parseSellingPoints(report.selling_points));
-        }
-        break;
-      case 'fatal-flaws':
-        if (report.fatal_flaws) {
-          results.push(parseFatalFlaws(report.fatal_flaws));
-        }
-        break;
-      case 'wow-moments':
-        if (report.wow_moments) {
-          results.push(parseWowMoments(report.wow_moments));
-        }
-        break;
-      case 'hesitation-points':
-        if (report.hesitation_points) {
-          results.push(parseHesitationPoints(report.hesitation_points));
-        }
-        break;
-      case 'buyer-profile':
-        if (report.buyer_profile) {
-          results.push(parseBuyerProfile(report.buyer_profile));
-        }
-        break;
-      case 'vocab-gap':
-        if (report.vocab_gap) {
-          results.push(parseVocabGap(report.vocab_gap));
-        }
-        break;
-      case 'promise-reality':
-        if (report.promise_reality) {
-          results.push(parsePromiseReality(report.promise_reality));
-        }
-        break;
+    try {
+      switch (targetId) {
+        case 'title-keywords':
+          if (report.title_keywords) {
+            console.log('[AI分析] 解析 title-keywords，数据:', report.title_keywords);
+            results.push(parseTitleKeywords(report.title_keywords));
+          } else {
+            console.warn('[AI分析] title-keywords 数据不存在');
+          }
+          break;
+        case 'selling-points':
+          if (report.selling_points) {
+            results.push(parseSellingPoints(report.selling_points));
+          } else {
+            console.warn('[AI分析] selling-points 数据不存在');
+          }
+          break;
+        case 'fatal-flaws':
+          if (report.fatal_flaws) {
+            results.push(parseFatalFlaws(report.fatal_flaws));
+          } else {
+            console.warn('[AI分析] fatal-flaws 数据不存在');
+          }
+          break;
+        case 'wow-moments':
+          if (report.wow_moments) {
+            results.push(parseWowMoments(report.wow_moments));
+          } else {
+            console.warn('[AI分析] wow-moments 数据不存在');
+          }
+          break;
+        case 'hesitation-points':
+          if (report.hesitation_points) {
+            results.push(parseHesitationPoints(report.hesitation_points));
+          } else {
+            console.warn('[AI分析] hesitation-points 数据不存在');
+          }
+          break;
+        case 'buyer-profile':
+          if (report.buyer_profile) {
+            results.push(parseBuyerProfile(report.buyer_profile));
+          } else {
+            console.warn('[AI分析] buyer-profile 数据不存在');
+          }
+          break;
+        case 'vocab-gap':
+          if (report.vocab_gap) {
+            results.push(parseVocabGap(report.vocab_gap));
+          } else {
+            console.warn('[AI分析] vocab-gap 数据不存在');
+          }
+          break;
+        case 'promise-reality':
+          if (report.promise_reality) {
+            results.push(parsePromiseReality(report.promise_reality));
+          } else {
+            console.warn('[AI分析] promise-reality 数据不存在');
+          }
+          break;
+      }
+    } catch (error) {
+      console.error(`[AI分析] 解析 ${targetId} 时出错:`, error);
+      // 继续处理其他目标
     }
   }
   
+  console.log('[AI分析] 解析完成，成功解析:', results.length, '个目标');
   return results;
 }
 

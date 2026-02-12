@@ -19,7 +19,7 @@ import './ai_analysis_style.css';
 
 // 模块状态
 interface ModuleState {
-  asin: string;
+  selectedAsins: string[]; // 改为数组，支持多选
   selectedTargets: string[];
   isAnalyzing: boolean;
   progress: number;
@@ -34,7 +34,7 @@ interface ModuleState {
 }
 
 let moduleState: ModuleState = {
-  asin: '',
+  selectedAsins: [],
   selectedTargets: [],
   isAnalyzing: false,
   progress: 0,
@@ -81,7 +81,7 @@ export function unmount(): void {
   console.log('[AI智能分析] 🔄 开始卸载模块');
   // 清理状态
   moduleState = {
-    asin: '',
+    selectedAsins: [],
     selectedTargets: [],
     isAnalyzing: false,
     progress: 0,
@@ -105,17 +105,18 @@ function initializeFromScraperData(): void {
   const scrapedData = state.scraper?.scrapedData;
   
   if (scrapedData && scrapedData.products && scrapedData.products.length > 0) {
-    // 使用第一个产品的 ASIN
-    const firstProduct = scrapedData.products[0];
-    moduleState.asin = firstProduct.asin || '';
+    // 自动选中所有产品的 ASIN
+    moduleState.selectedAsins = scrapedData.products
+      .map((p: any) => p.asin)
+      .filter((asin: string) => asin);
     moduleState.dataSource = 'scraper';
-    console.log('[AI智能分析] 📦 已从 Scraper 加载数据:', moduleState.asin);
+    console.log('[AI智能分析] 📦 已从 Scraper 加载数据:', moduleState.selectedAsins);
   } else {
     // 使用示例数据
     const availableAsins = getAvailableAsins();
-    moduleState.asin = availableAsins[0] || 'B0DNMZ2MLG';
+    moduleState.selectedAsins = availableAsins.length > 0 ? [availableAsins[0]!] : ['B0DNMZ2MLG'];
     moduleState.dataSource = 'sample';
-    console.log('[AI智能分析] 📦 使用示例数据:', moduleState.asin);
+    console.log('[AI智能分析] 📦 使用示例数据:', moduleState.selectedAsins);
   }
 }
 
@@ -160,7 +161,7 @@ function convertScraperDataToProduct(productData: unknown): Product | null {
 function createAiAnalysisPanel() {
   return {
     // ========== State ==========
-    asin: moduleState.asin,
+    selectedAsins: moduleState.selectedAsins,
     selectedTargets: moduleState.selectedTargets,
     isAnalyzing: moduleState.isAnalyzing,
     progress: moduleState.progress,
@@ -174,21 +175,34 @@ function createAiAnalysisPanel() {
     dataSource: moduleState.dataSource,
 
     // ========== Computed ==========
-    get currentProduct(): Product | undefined {
+    get currentProducts(): Product[] {
+      const products: Product[] = [];
+      
       // 优先从 Scraper 数据获取
       const scrapedData = state.scraper?.scrapedData;
       if (scrapedData && scrapedData.products && scrapedData.products.length > 0) {
-        const matchedProduct = scrapedData.products.find((p: any) => p.asin === this.asin);
-        if (matchedProduct) {
-          const product = convertScraperDataToProduct(matchedProduct);
-          if (product) {
-            return product;
+        for (const asin of this.selectedAsins) {
+          const matchedProduct = scrapedData.products.find((p: any) => p.asin === asin);
+          if (matchedProduct) {
+            const product = convertScraperDataToProduct(matchedProduct);
+            if (product) {
+              products.push(product);
+            }
           }
         }
       }
       
-      // 否则从示例数据获取
-      return getProductByAsin(this.asin);
+      // 如果没有从 Scraper 获取到，从示例数据获取
+      if (products.length === 0) {
+        for (const asin of this.selectedAsins) {
+          const product = getProductByAsin(asin);
+          if (product) {
+            products.push(product);
+          }
+        }
+      }
+      
+      return products;
     },
 
     get availableAsins(): string[] {
@@ -202,7 +216,7 @@ function createAiAnalysisPanel() {
     },
 
     get hasData(): boolean {
-      return !!this.currentProduct;
+      return this.currentProducts.length > 0;
     },
 
     get canAnalyze(): boolean {
@@ -254,7 +268,7 @@ function createAiAnalysisPanel() {
 
     // ========== State Sync ==========
     syncFromModuleState() {
-      this.asin = moduleState.asin;
+      this.selectedAsins = moduleState.selectedAsins;
       this.selectedTargets = moduleState.selectedTargets;
       this.isAnalyzing = moduleState.isAnalyzing;
       this.progress = moduleState.progress;
@@ -264,7 +278,7 @@ function createAiAnalysisPanel() {
     },
 
     syncToModuleState() {
-      moduleState.asin = this.asin;
+      moduleState.selectedAsins = this.selectedAsins;
       moduleState.selectedTargets = this.selectedTargets;
       moduleState.isAnalyzing = this.isAnalyzing;
       moduleState.progress = this.progress;
@@ -278,15 +292,18 @@ function createAiAnalysisPanel() {
       const scrapedData = state.scraper?.scrapedData;
       
       if (scrapedData && scrapedData.products && scrapedData.products.length > 0) {
-        // 如果有 Scraper 数据，自动加载第一个产品的 ASIN
-        const firstProduct = scrapedData.products[0];
-        if (firstProduct.asin && firstProduct.asin !== this.asin) {
-          this.asin = firstProduct.asin;
+        // 如果有 Scraper 数据，自动选中所有产品的 ASIN
+        const asins = scrapedData.products
+          .map((p: any) => p.asin)
+          .filter((asin: string) => asin);
+        
+        if (asins.length > 0 && JSON.stringify(asins) !== JSON.stringify(this.selectedAsins)) {
+          this.selectedAsins = asins;
           this.dataSource = 'scraper';
-          moduleState.asin = this.asin;
+          moduleState.selectedAsins = this.selectedAsins;
           moduleState.dataSource = 'scraper';
-          console.log('[AI智能分析] 📦 自动加载 Scraper 数据:', this.asin);
-          showToast(`已自动加载产品 ASIN: ${this.asin}`, 'success');
+          console.log('[AI智能分析] 📦 自动加载 Scraper 数据:', this.selectedAsins);
+          showToast(`已自动加载 ${asins.length} 个产品 ASIN`, 'success');
         }
         
         // 自动启用真实数据分析模式
@@ -299,8 +316,23 @@ function createAiAnalysisPanel() {
     },
 
     // ========== Actions ==========
-    selectAsin(asin: string) {
-      this.asin = asin;
+    toggleAsin(asin: string) {
+      const index = this.selectedAsins.indexOf(asin);
+      if (index > -1) {
+        this.selectedAsins.splice(index, 1);
+      } else {
+        this.selectedAsins.push(asin);
+      }
+      this.syncToModuleState();
+    },
+
+    selectAllAsins() {
+      this.selectedAsins = [...this.availableAsins];
+      this.syncToModuleState();
+    },
+
+    clearAllAsins() {
+      this.selectedAsins = [];
       this.syncToModuleState();
     },
 
@@ -356,13 +388,17 @@ function createAiAnalysisPanel() {
     },
 
     copyPrompt(index: number) {
-      const product = this.currentProduct;
-      if (!product) return;
+      const products = this.currentProducts;
+      if (products.length === 0) return;
 
       const targetId = this.selectedTargets[index];
       if (!targetId) return;
       
-      const prompt = generateAnalysisPrompt(targetId, product, 'en');
+      // 如果有多个产品，合并后生成提示词
+      const mergedProduct = products.length > 1 ? this.mergeProducts(products) : products[0];
+      if (!mergedProduct) return;
+      
+      const prompt = generateAnalysisPrompt(targetId, mergedProduct, 'en');
       
       navigator.clipboard.writeText(prompt).then(() => {
         showToast('提示词已复制', 'success');
@@ -395,17 +431,20 @@ function createAiAnalysisPanel() {
 
         if (this.useRealData) {
           // 使用真实数据进行 AI 分析
-          const product = this.getRealProduct();
+          const products = this.getRealProducts();
           
-          if (!product) {
+          if (products.length === 0) {
             throw new Error('无法获取产品数据,请确保已从数据采集或数据管理导入数据');
           }
 
-          showToast('正在调用 AI 进行分析...', 'info');
+          showToast(`正在调用 AI 分析 ${products.length} 个产品...`, 'info');
+
+          // 合并多个产品的数据
+          const mergedProduct = this.mergeProducts(products);
 
           results = await runAIAnalysis(
             this.selectedTargets,
-            product,
+            mergedProduct,
             (progress: number, step: string) => {
               this.progress = progress;
               this.currentStep = step;
@@ -419,7 +458,7 @@ function createAiAnalysisPanel() {
           // 使用示例数据进行模拟分析
           results = await runAnalysis(
             this.selectedTargets,
-            this.asin,
+            this.selectedAsins[0] || 'B0DNMZ2MLG',
             (progress: number, step: string) => {
               this.progress = progress;
               this.currentStep = step;
@@ -443,16 +482,19 @@ function createAiAnalysisPanel() {
       }
     },
 
-    getRealProduct(): Product | null {
-      // 根据当前选中的 ASIN 从 Scraper 获取对应的产品数据
+    getRealProducts(): Product[] {
+      const products: Product[] = [];
+      
+      // 根据选中的 ASIN 从 Scraper 获取对应的产品数据
       const scrapedData = state.scraper?.scrapedData;
       if (scrapedData && scrapedData.products && scrapedData.products.length > 0) {
-        // 查找匹配当前 ASIN 的产品
-        const matchedProduct = scrapedData.products.find((p: any) => p.asin === this.asin);
-        if (matchedProduct) {
-          const product = convertScraperDataToProduct(matchedProduct);
-          if (product) {
-            return product;
+        for (const asin of this.selectedAsins) {
+          const matchedProduct = scrapedData.products.find((p: any) => p.asin === asin);
+          if (matchedProduct) {
+            const product = convertScraperDataToProduct(matchedProduct);
+            if (product) {
+              products.push(product);
+            }
           }
         }
       }
@@ -463,7 +505,32 @@ function createAiAnalysisPanel() {
       //   return convertRawDataToProduct(rawData);
       // }
 
-      return null;
+      return products;
+    },
+
+    mergeProducts(products: Product[]): Product {
+      if (products.length === 0) {
+        throw new Error('没有可合并的产品数据');
+      }
+
+      // 合并多个产品的数据
+      const mergedProduct: Product = {
+        asin: products.map(p => p.asin).join(', '),
+        productTitle: products.map(p => p.productTitle).join(' | '),
+        feature_bullets: products.flatMap(p => p.feature_bullets),
+        customer_reviews: products.flatMap(p => p.customer_reviews),
+        scrape_status: 'success',
+        metadata: {
+          merged: true,
+          product_count: products.length,
+          asins: products.map(p => p.asin)
+        }
+      };
+
+      console.log('[AI智能分析] 📊 已合并 ' + products.length + ' 个产品的数据');
+      console.log('[AI智能分析] 📊 合并后数据: ' + mergedProduct.feature_bullets.length + ' 个卖点, ' + mergedProduct.customer_reviews.length + ' 条评论');
+
+      return mergedProduct;
     },
 
     // ========== Helpers ==========
@@ -476,11 +543,19 @@ function createAiAnalysisPanel() {
     },
 
     getPromptText(targetId: string): string {
-      const product = this.currentProduct;
-      if (!product) return '无产品数据';
+      const products = this.currentProducts;
+      if (products.length === 0) return '无产品数据';
       
       try {
-        return generateAnalysisPrompt(targetId, product, 'en');
+        // 如果有多个产品，合并后生成提示词
+        const mergedProduct = products.length > 1 ? this.mergeProducts(products) : products[0];
+        
+        // 确保 mergedProduct 存在
+        if (!mergedProduct) {
+          return '无产品数据';
+        }
+        
+        return generateAnalysisPrompt(targetId, mergedProduct, 'en');
       } catch (error) {
         console.error('[AI智能分析] 生成提示词失败:', error);
         return '提示词生成失败';

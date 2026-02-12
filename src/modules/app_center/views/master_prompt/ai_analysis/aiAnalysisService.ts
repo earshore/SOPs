@@ -8,16 +8,7 @@ import type { FullAnalysisReport } from './analysisReportData';
 import { parseAnalysisReport } from './analysisService';
 import type { Product } from './sampleData';
 import type { AnalysisResult } from './types';
-import { 
-  TITLE_KEYWORDS_PROMPT,
-  SELLING_POINTS_PROMPT,
-  FATAL_FLAWS_PROMPT,
-  WOW_MOMENTS_PROMPT,
-  HESITATION_POINTS_PROMPT,
-  BUYER_PROFILE_PROMPT,
-  VOCAB_GAP_PROMPT,
-  PROMISE_REALITY_PROMPT
-} from './aiPrompts';
+import { generateAnalysisPrompt } from './analysisPrompts';
 
 /**
  * LLM 配置接口
@@ -59,40 +50,8 @@ async function getLLMConfig(): Promise<LLMConfig> {
   };
 }
 
-/**
- * 准备产品数据为 JSON 字符串
- */
-function prepareProductData(product: Product): string {
-  return JSON.stringify({
-    asin: product.asin,
-    title: product.productTitle,
-    bullet_points: product.feature_bullets,
-    reviews: product.customer_reviews.map(r => ({
-      rating: r.star_rating,
-      title: r.headline,
-      text: r.body,
-      verified: true
-    }))
-  }, null, 2);
-}
-
-/**
- * 获取分析目标的 Prompt 模板
- */
-function getPromptTemplate(targetId: string): string {
-  const prompts: Record<string, string> = {
-    'title-keywords': TITLE_KEYWORDS_PROMPT,
-    'selling-points': SELLING_POINTS_PROMPT,
-    'fatal-flaws': FATAL_FLAWS_PROMPT,
-    'wow-moments': WOW_MOMENTS_PROMPT,
-    'hesitation-points': HESITATION_POINTS_PROMPT,
-    'buyer-profile': BUYER_PROFILE_PROMPT,
-    'vocab-gap': VOCAB_GAP_PROMPT,
-    'promise-reality': PROMISE_REALITY_PROMPT
-  };
-
-  return prompts[targetId] || '';
-}
+// 已移除 prepareProductData 和 getPromptTemplate 函数
+// 现在直接使用 analysisPrompts.ts 中的 generateAnalysisPrompt
 
 /**
  * 调用 AI 分析单个目标
@@ -103,13 +62,8 @@ async function analyzeTarget(
   config: LLMConfig,
   onProgress?: (step: string) => void
 ): Promise<unknown> {
-  const promptTemplate = getPromptTemplate(targetId);
-  if (!promptTemplate) {
-    throw new Error(`未找到分析目标 ${targetId} 的 Prompt 模板`);
-  }
-
-  const productData = prepareProductData(product);
-  const prompt = promptTemplate.replace('{{PRODUCT_DATA}}', productData);
+  // 使用 analysisPrompts.ts 中的 generateAnalysisPrompt 生成提示词
+  const prompt = generateAnalysisPrompt(targetId, product, 'en');
 
   onProgress?.(`正在分析: ${targetId}...`);
 
@@ -139,8 +93,13 @@ async function analyzeTarget(
       }
     );
 
+    console.log(`[AI分析] ${targetId} 原始响应长度:`, response.length);
+    console.log(`[AI分析] ${targetId} 原始响应前500字符:`, response.substring(0, 500));
+
     // 解析 JSON 响应
     const result = JSON.parse(response);
+    console.log(`[AI分析] ${targetId} 解析后的结果键:`, Object.keys(result));
+    
     return result;
   } catch (error) {
     console.error(`[AI分析] ${targetId} 分析失败:`, error);
@@ -189,10 +148,25 @@ export async function runAIAnalysis(
         onProgress(progress, step);
       });
 
-      // 将结果添加到报告中
+      // 验证并添加结果到报告中
       const fieldName = targetToField[targetId];
-      if (fieldName) {
-        (report as any)[fieldName] = result;
+      if (fieldName && result) {
+        // 确保结果是有效的对象
+        if (typeof result === 'object' && result !== null) {
+          // 检查是否有嵌套的字段名（AI 可能返回 {title_keywords: {...}} 而不是直接的 {...}）
+          let actualResult = result;
+          const resultObj = result as Record<string, unknown>;
+          if (resultObj[fieldName]) {
+            // 如果存在嵌套，提取内层数据
+            actualResult = resultObj[fieldName];
+            console.log(`[AI分析] ${targetId} 检测到嵌套结构，已提取内层数据`);
+          }
+          
+          (report as any)[fieldName] = actualResult;
+          console.log(`[AI分析] ${targetId} 分析成功，数据已添加到报告`);
+        } else {
+          console.warn(`[AI分析] ${targetId} 返回的数据格式无效:`, result);
+        }
       }
 
       completedTargets++;
