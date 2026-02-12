@@ -288,6 +288,13 @@ function createAiAnalysisPanel() {
           console.log('[AI智能分析] 📦 自动加载 Scraper 数据:', this.asin);
           showToast(`已自动加载产品 ASIN: ${this.asin}`, 'success');
         }
+        
+        // 自动启用真实数据分析模式
+        if (!this.useRealData) {
+          this.useRealData = true;
+          moduleState.useRealData = true;
+          console.log('[AI智能分析] 🤖 已自动启用真实数据分析模式');
+        }
       }
     },
 
