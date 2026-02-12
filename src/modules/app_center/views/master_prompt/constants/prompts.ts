@@ -81,10 +81,32 @@ Input Title: {{productTitle}}
 `,
     schemaTemplate: `
   "title_seo_roots": {
-    "primary_keywords": [{"keyword": "string", "weight": "high|medium|low", "search_volume_estimate": "string"}],
-    "secondary_keywords": [{"keyword": "string", "type": "feature|material|size", "importance": "string"}],
-    "scene_keywords": [{"keyword": "string", "usage_context": "string"}],
-    "audience_keywords": [{"keyword": "string", "target_group": "string"}],
+    "primary_keywords": [
+      {
+        "keyword": "string",
+        "weight": "high|medium|low",
+        "search_volume_estimate": "string"
+      }
+    ],
+    "secondary_keywords": [
+      {
+        "keyword": "string",
+        "type": "feature|material|size|scent",
+        "importance": "string"
+      }
+    ],
+    "scene_keywords": [
+      {
+        "keyword": "string",
+        "usage_context": "string"
+      }
+    ],
+    "audience_keywords": [
+      {
+        "keyword": "string",
+        "target_group": "string"
+      }
+    ],
     "removed_modifiers": ["string"],
     "removed_brand_terms": ["string"],
     "optimization_suggestions": ["string"]
@@ -192,7 +214,7 @@ Input Reviews (filtered 1-3 stars): {{lowStarReviews}}
     "critical_issues": [
       {
         "issue": "string",
-        "frequency": "number of mentions",
+        "frequency": "string (number of mentions)",
         "user_quotes": ["exact quotes"],
         "severity": "critical|major|minor",
         "category": "quality|performance|value|authenticity|other"
@@ -254,8 +276,8 @@ Input Reviews (5 stars only): {{highStarReviews}}
       {
         "moment_description": "string",
         "user_quote": "exact quote",
-        "emotion_type": "surprise|delight|relief|amazement",
-        "aspect": "quality|smell|packaging|value|performance",
+        "emotion_type": "surprise|delight|relief|amazement|satisfaction",
+        "aspect": "quality|smell|packaging|value|performance|overall",
         "marketing_potential": "high|medium|low"
       }
     ],
@@ -497,10 +519,10 @@ Customer Reviews:
         "recommended_action": "string"
       }
     ],
-    "verified_claims": ["claims that reviews support"],
-    "unverified_claims": ["claims with no review evidence"],
+    "verified_claims": ["string (claims that reviews support)"],
+    "unverified_claims": ["string (claims with no review evidence)"],
     "overall_credibility": {
-      "score": "1-10",
+      "score": "string (e.g., '5/10' or '1-10')",
       "assessment": "string"
     },
     "listing_revision_suggestions": ["string"]

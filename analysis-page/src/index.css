@@ -122,11 +122,13 @@
 .glass-morphism {
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .glass-dark {
   background: rgba(15, 23, 42, 0.8);
   backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 /* Shimmer effect */
@@ -139,8 +141,9 @@
 /* Gradient text */
 .gradient-text {
   background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   background-clip: text;
-  color: transparent;
 }
 
 /* Card hover effects */
@@ -156,6 +159,24 @@
 /* Button press effect */
 .btn-press:active {
   transform: scale(0.98);
+}
+
+/* Gradient borders */
+.gradient-border {
+  position: relative;
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }
 
 /* Code block styling */

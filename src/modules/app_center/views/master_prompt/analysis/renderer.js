@@ -21,8 +21,8 @@ export function getFieldTitle(key) {
     'call_to_action': '行动号召',
     'seasonal_relevance': '季节相关性',
     
-    // 标题核心词根相关
-    'primary_keywords': '一级核心词',
+    // 标题核心词根相关 (title-keywords)
+    'primary_keywords': '一级核心词（类目）',
     'secondary_keywords': '二级功能词',
     'scene_keywords': '场景/人群词',
     'audience_keywords': '目标受众词',
@@ -36,8 +36,9 @@ export function getFieldTitle(key) {
     'importance': '重要性',
     'usage_context': '使用场景',
     'target_group': '目标群体',
+    'fragrance_notes': '香调词',
     
-    // 卖点结构拆解相关
+    // 卖点结构拆解相关 (selling-points)
     'bullet_analysis': '要点分析',
     'bullet_index': '要点序号',
     'original_text_summary': '原文摘要',
@@ -52,6 +53,101 @@ export function getFieldTitle(key) {
     'emotional_hooks': '情感钩子',
     'missing_elements': '缺失要素',
     'function_scene_matrix': '功能场景矩阵',
+    'trust_endorsement': '信任背书',
+    
+    // 致命劝退点相关 (fatal-flaws)
+    'critical_issues': '核心退货原因',
+    'issue': '问题',
+    'frequency': '频次',
+    'user_quotes': '用户原话',
+    'severity': '严重程度',
+    'category': '类别',
+    'return_triggers': '退货触发因素',
+    'expectation_gaps': '期望落差',
+    'expected': '期望',
+    'reality': '现实',
+    'disappointment_level': '失望程度',
+    'actionable_fixes': '改进建议',
+    'risk_assessment': '风险评估',
+    'overall_risk_level': '整体风险等级',
+    'primary_concern': '主要关注点',
+    
+    // 惊喜顿悟时刻相关 (wow-moments)
+    'moments': '超预期瞬间',
+    'moment_description': '时刻描述',
+    'user_quote': '用户评价',
+    'emotion_type': '情感类型',
+    'aspect': '方面',
+    'marketing_potential': '营销潜力',
+    'emotional_trigger_words': '情感触发词',
+    'high_conversion_phrases': '高转化文案素材',
+    'unexpected_benefits': '意外收获',
+    'copywriting_angles': '文案角度',
+    'reusable_reviews': '可复用评价',
+    
+    // 购买前犹豫点相关 (hesitation-points)
+    'hesitations': '购前疑虑',
+    'pre_purchase_worry': '购前担忧',
+    'post_purchase_resolution': '购后释然',
+    'user_evidence': '用户证据',
+    'qa_recommendation': 'Q&A建议',
+    'common_doubts': '常见疑虑',
+    'trust_builders': '需要强化的信任点',
+    'qa_optimization_items': 'Q&A优化建议',
+    'question': '问题',
+    'suggested_answer': '建议答案',
+    'review_answers': '评论中的答案',
+    
+    // 画像与场景侧写相关 (buyer-profile)
+    'demographics': '人口统计',
+    'likely_gender': '性别倾向',
+    'age_range_estimate': '年龄范围',
+    'lifestyle_indicators': '生活方式指标',
+    'buyer_types': '买家身份',
+    'percentage_estimate': '占比估算',
+    'evidence': '证据',
+    'usage_scenes': '使用场景',
+    'scene': '场景',
+    'context': '上下文',
+    'purchase_motivations': '购买动机',
+    'geographic_insights': '地理分布',
+    'primary_markets': '主要市场',
+    'cultural_considerations': '文化考量',
+    'language_preferences': '语言偏好',
+    
+    // 词汇鸿沟分析相关 (vocab-gap)
+    'seller_terms': '商家高频词（Listing）',
+    'buyer_terms': '买家高频词（Reviews）',
+    'uncovered_buyer_terms': '未覆盖买家用词',
+    'term': '术语',
+    'recommendation': '建议',
+    'term_translations': '术语对照',
+    'seller_says': '商家说法',
+    'buyer_says': '买家说法',
+    'gap_vocabulary': '鸿沟词汇（需关注）',
+    'listing_optimization': 'Listing优化建议',
+    'title_additions': '标题补充',
+    'bullet_additions': '要点补充',
+    'keyword_opportunities': '关键词机会',
+    
+    // 承诺/现实断层相关 (promise-reality)
+    'gaps': '断层',
+    'severe_gaps': '严重断层',
+    'minor_gaps': '轻微偏差',
+    'aligned_claims': '符合预期',
+    'listing_claim': 'Listing承诺',
+    'review_reality': '评论现实',
+    'contradiction_severity': '矛盾严重度',
+    'evidence_quotes': '证据引用',
+    'false_advertising_risk': '虚假宣传风险',
+    'recommended_action': '建议措施',
+    'verified_claims': '已验证承诺',
+    'unverified_claims': '未验证承诺',
+    'overall_credibility': '整体可信度',
+    'score': '评分',
+    'assessment': '评估',
+    'revision_suggestions': '修正建议',
+    'listing_revision_suggestions': 'Listing修订建议',
   };
   
   return titleMap[key] || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());

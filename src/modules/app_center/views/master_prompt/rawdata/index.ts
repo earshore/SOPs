@@ -1,5 +1,5 @@
 ﻿/**
- * Data 子模块
+ * RawData 子模块
  * 负责数据管理和展示功能
  * 
  * 架构说明：
@@ -11,7 +11,7 @@
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import BaseModule from "../../../../../common/BaseModule";
 import state from "../../../../../common/state";
-import { getErrorSummary, showToast, switchTab } from '../../../../../common/ui';
+import { getErrorSummary, showToast } from '../../../../../common/ui';
 import { HistoryService } from '../services/historyService';
 import { StorageService } from '../../../../../services/storageService';
 import { languageFlagMap, SITE_NAME_MAP, SITE_DOMAIN_MAP } from '../../../../../common/constants/constants';
@@ -84,7 +84,7 @@ class DataModule extends BaseModule {
     }
 
     async init(): Promise<void> {
-        console.log("🚀 Data Module Initialized");
+        console.log("🚀 RawData Module Initialized");
         this.setupEventListeners();
 
         // 订阅 Scraper 事件
@@ -100,7 +100,7 @@ class DataModule extends BaseModule {
     }
 
     onUnmount(): void {
-        console.log("💤 Data Module Unmounting...");
+        console.log("💤 RawData Module Unmounting...");
         // 保存状态
         this.saveState();
     }
@@ -580,9 +580,7 @@ class DataModule extends BaseModule {
             state.analysis.analysisReport = null;
             HistoryService.save(state.scraper.scrapedData, null);
 
-            // 先切换到 data 标签页,确保 DOM 已加载
-            switchTab("data");
-            
+            // 不需要切换标签页，直接渲染数据面板
             // 使用 setTimeout 确保 DOM 完全渲染后再更新内容
             setTimeout(() => {
                 this.renderDataPanel();
@@ -695,7 +693,7 @@ class DataModule extends BaseModule {
                         document.body.removeChild(backdrop);
                     }
                 } catch (error) {
-                    console.error('[Data] 清理弹窗失败:', error);
+                    console.error('[RawData] 清理弹窗失败:', error);
                 }
             };
 
@@ -772,11 +770,11 @@ let moduleInstance: DataModule | null = null;
  * @param {HTMLElement} container - 容器元素
  */
 export async function mount(container: HTMLElement): Promise<void> {
-    console.log('[Data] 🔧 开始挂载子模块');
+    console.log('[RawData] 🔧 开始挂载子模块');
 
     try {
         // 1. 加载模板
-        const html = await loadTemplate('src/modules/app_center/views/master_prompt/data/template.html');
+        const html = await loadTemplate('src/modules/app_center/views/master_prompt/rawdata/template.html');
         // ✅ 安全: 静态HTML模板，无用户输入
         container.innerHTML = html;
 
@@ -792,9 +790,9 @@ export async function mount(container: HTMLElement): Promise<void> {
         // 5. 暴露到全局（用于 onclick 事件）
         window.dataModule = moduleInstance;
 
-        console.log('[Data] ✅ 子模块挂载成功');
+        console.log('[RawData] ✅ 子模块挂载成功');
     } catch (error) {
-        console.error('[Data] ❌ 子模块挂载失败:', error);
+        console.error('[RawData] ❌ 子模块挂载失败:', error);
         throw error;
     }
 }
@@ -803,7 +801,7 @@ export async function mount(container: HTMLElement): Promise<void> {
  * 卸载子模块
  */
 export function unmount(): void {
-    console.log('[Data] 🔄 开始卸载子模块');
+    console.log('[RawData] 🔄 开始卸载子模块');
 
     try {
         if (moduleInstance) {
@@ -816,9 +814,9 @@ export function unmount(): void {
             delete window.dataModule;
         }
 
-        console.log('[Data] ✅ 子模块卸载成功');
+        console.log('[RawData] ✅ 子模块卸载成功');
     } catch (error) {
-        console.error('[Data] ❌ 子模块卸载失败:', error);
+        console.error('[RawData] ❌ 子模块卸载失败:', error);
     }
 }
 

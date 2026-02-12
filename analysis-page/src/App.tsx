@@ -7,11 +7,13 @@ import { TargetSelector } from './components/TargetSelector';
 import { AnalysisButton } from './components/AnalysisButton';
 import { ResultsGrid } from './components/ResultsGrid';
 import { PromptPreviewPanel } from './components/PromptPreview';
+import { ReportJsonViewer } from './components/ReportJsonViewer';
 import { analysisTargets } from './data/analysisTargets';
-import { generateRealDataResults } from './data/mockAnalysisResults';
 import { sampleProductData, getProductByAsin, getAvailableAsins } from './data/sampleData';
 import { generateAnalysisPrompt, getTaskDefinition } from './prompts/analysisPrompts';
+import { getSampleReport, runAnalysis } from './services/analysisService';
 import { AnalysisResult } from './types/analysis';
+import { FullAnalysisReport } from './data/analysisReportData';
 
 export function App() {
   const availableAsins = getAvailableAsins();
@@ -21,6 +23,7 @@ export function App() {
   const [progress, setProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState('');
   const [results, setResults] = useState<AnalysisResult[]>([]);
+  const [analysisReport, setAnalysisReport] = useState<FullAnalysisReport | null>(null);
 
   // 获取当前产品数据
   const currentProduct = useMemo(() => getProductByAsin(asin), [asin]);
@@ -62,32 +65,35 @@ export function App() {
     setSelectedTargets([]);
   }, []);
 
-  const runAnalysis = useCallback(async () => {
+  const handleRunAnalysis = useCallback(async () => {
     if (selectedTargets.length === 0 || !currentProduct) return;
 
     setIsAnalyzing(true);
     setProgress(0);
     setResults([]);
+    setAnalysisReport(null);
 
-    const steps = [
-      '正在连接 AI 分析引擎...',
-      `正在加载产品数据 (ASIN: ${asin})...`,
-      `正在解析 ${currentProduct.feature_bullets.length} 条 Bullet Points...`,
-      `正在分析 ${currentProduct.customer_reviews.length} 条用户评论...`,
-      '正在执行自然语言处理...',
-      '正在生成结构化洞察...',
-      '分析完成！'
-    ];
+    try {
+      // 运行分析
+      const analysisResults = await runAnalysis(
+        selectedTargets,
+        asin,
+        (prog, step) => {
+          setProgress(prog);
+          setCurrentStep(step);
+        }
+      );
 
-    for (let i = 0; i < steps.length; i++) {
-      setCurrentStep(steps[i]);
-      setProgress((i / (steps.length - 1)) * 100);
-      await new Promise(resolve => setTimeout(resolve, 400 + Math.random() * 400));
+      // 获取完整报告 JSON
+      const report = getSampleReport();
+      
+      setResults(analysisResults);
+      setAnalysisReport(report);
+    } catch (error) {
+      console.error('Analysis failed:', error);
+    } finally {
+      setIsAnalyzing(false);
     }
-
-    const analysisResults = generateRealDataResults(selectedTargets, currentProduct);
-    setResults(analysisResults);
-    setIsAnalyzing(false);
   }, [selectedTargets, asin, currentProduct]);
 
   const isButtonDisabled = selectedTargets.length === 0 || !currentProduct || isAnalyzing;
@@ -149,7 +155,7 @@ export function App() {
         {/* Analysis Button */}
         <div className="mb-10">
           <AnalysisButton
-            onClick={runAnalysis}
+            onClick={handleRunAnalysis}
             disabled={isButtonDisabled}
             isAnalyzing={isAnalyzing}
             progress={progress}
@@ -157,6 +163,16 @@ export function App() {
             selectedCount={selectedTargets.length}
           />
         </div>
+
+        {/* JSON Report Viewer */}
+        {analysisReport && results.length > 0 && (
+          <div className="mb-8">
+            <ReportJsonViewer 
+              report={analysisReport} 
+              selectedTargets={selectedTargets}
+            />
+          </div>
+        )}
 
         {/* Results */}
         <ResultsGrid results={results} asin={asin} />

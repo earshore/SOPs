@@ -452,7 +452,7 @@ export const MENU_CONFIG: MenuConfig = {
       panelId: 'panel-app_center',
       category: 'master_prompt'
     },
-    data: {
+    rawdata: {
       moduleId: 'master_prompt',
       label: '数据管理',
       icon: 'fas fa-database',
