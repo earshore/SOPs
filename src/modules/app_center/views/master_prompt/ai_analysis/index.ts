@@ -120,20 +120,15 @@ function initializeFromScraperData(): void {
 }
 
 /**
- * 从 Scraper 数据转换为 Product 格式
+ * 从 Scraper 单个产品数据转换为 Product 格式
  */
-function convertScraperDataToProduct(scrapedData: unknown): Product | null {
+function convertScraperDataToProduct(productData: unknown): Product | null {
   try {
-    if (!scrapedData || typeof scrapedData !== 'object') {
+    if (!productData || typeof productData !== 'object') {
       return null;
     }
 
-    const data = scrapedData as { products?: unknown[] };
-    if (!data.products || data.products.length === 0) {
-      return null;
-    }
-
-    const product = data.products[0] as Record<string, unknown>;
+    const product = productData as Record<string, unknown>;
     
     return {
       asin: (product.asin as string) || '',
@@ -154,7 +149,7 @@ function convertScraperDataToProduct(scrapedData: unknown): Product | null {
       metadata: {}
     };
   } catch (error) {
-    console.error('[AI智能分析] 转换 Scraper 数据失败:', error);
+    console.error('[AI智能分析] 转换产品数据失败:', error);
     return null;
   }
 }
@@ -180,10 +175,29 @@ function createAiAnalysisPanel() {
 
     // ========== Computed ==========
     get currentProduct(): Product | undefined {
+      // 优先从 Scraper 数据获取
+      const scrapedData = state.scraper?.scrapedData;
+      if (scrapedData && scrapedData.products && scrapedData.products.length > 0) {
+        const matchedProduct = scrapedData.products.find((p: any) => p.asin === this.asin);
+        if (matchedProduct) {
+          const product = convertScraperDataToProduct(matchedProduct);
+          if (product) {
+            return product;
+          }
+        }
+      }
+      
+      // 否则从示例数据获取
       return getProductByAsin(this.asin);
     },
 
     get availableAsins(): string[] {
+      // 优先从 Scraper 获取 ASIN 列表
+      const scrapedData = state.scraper?.scrapedData;
+      if (scrapedData && scrapedData.products && scrapedData.products.length > 0) {
+        return scrapedData.products.map((p: any) => p.asin).filter((asin: string) => asin);
+      }
+      // 否则返回示例数据的 ASIN
       return getAvailableAsins();
     },
 
@@ -233,6 +247,9 @@ function createAiAnalysisPanel() {
     init() {
       console.log('[AI智能分析] 🚀 Alpine 组件初始化');
       this.syncFromModuleState();
+      
+      // 检查是否有新的 Scraper 数据
+      this.checkAndLoadScraperData();
     },
 
     // ========== State Sync ==========
@@ -254,6 +271,24 @@ function createAiAnalysisPanel() {
       moduleState.currentStep = this.currentStep;
       moduleState.results = this.results;
       moduleState.analysisReport = this.analysisReport;
+    },
+
+    // ========== Data Loading ==========
+    checkAndLoadScraperData() {
+      const scrapedData = state.scraper?.scrapedData;
+      
+      if (scrapedData && scrapedData.products && scrapedData.products.length > 0) {
+        // 如果有 Scraper 数据，自动加载第一个产品的 ASIN
+        const firstProduct = scrapedData.products[0];
+        if (firstProduct.asin && firstProduct.asin !== this.asin) {
+          this.asin = firstProduct.asin;
+          this.dataSource = 'scraper';
+          moduleState.asin = this.asin;
+          moduleState.dataSource = 'scraper';
+          console.log('[AI智能分析] 📦 自动加载 Scraper 数据:', this.asin);
+          showToast(`已自动加载产品 ASIN: ${this.asin}`, 'success');
+        }
+      }
     },
 
     // ========== Actions ==========
@@ -402,12 +437,16 @@ function createAiAnalysisPanel() {
     },
 
     getRealProduct(): Product | null {
-      // 优先从 Scraper 获取数据
+      // 根据当前选中的 ASIN 从 Scraper 获取对应的产品数据
       const scrapedData = state.scraper?.scrapedData;
-      if (scrapedData) {
-        const product = convertScraperDataToProduct(scrapedData);
-        if (product) {
-          return product;
+      if (scrapedData && scrapedData.products && scrapedData.products.length > 0) {
+        // 查找匹配当前 ASIN 的产品
+        const matchedProduct = scrapedData.products.find((p: any) => p.asin === this.asin);
+        if (matchedProduct) {
+          const product = convertScraperDataToProduct(matchedProduct);
+          if (product) {
+            return product;
+          }
         }
       }
 
