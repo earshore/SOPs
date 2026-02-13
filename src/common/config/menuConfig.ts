@@ -459,13 +459,6 @@ export const MENU_CONFIG: MenuConfig = {
       panelId: 'panel-app_center',
       category: 'master_prompt'
     },
-    analysis: {
-      moduleId: 'master_prompt',
-      label: 'AI 分析',
-      icon: 'fas fa-chart-pie',
-      panelId: 'panel-app_center',
-      category: 'master_prompt'
-    },
     ai_analysis: {
       moduleId: 'master_prompt',
       label: 'AI智能分析',
