@@ -66,15 +66,30 @@
         <i class="fa-solid fa-database text-indigo-600"></i>
       </div>
       <div class="flex-1">
-        <p class="text-sm text-slate-700">
-          <span class="font-semibold">数据源已加载：</span>
-          <span x-show="hasData">包含产品数据和评论</span>
-          <span x-show="!hasData">使用示例数据</span>
-        </p>
-        <p class="text-xs text-slate-500 mt-0.5">
-          <i class="fa-solid fa-globe"></i>
-          可从"数据采集"模块获取真实产品数据
-        </p>
+        <template x-if="hasScraperData">
+          <div>
+            <p class="text-sm text-slate-700">
+              <span class="font-semibold">数据源已加载：</span>
+              <span x-text="'包含 ' + currentProducts.length + ' 个产品，共 ' + currentProducts.reduce((sum, p) => sum + p.customer_reviews.length, 0) + ' 条评论'"></span>
+            </p>
+            <p class="text-xs text-slate-500 mt-0.5">
+              <i class="fa-solid fa-globe"></i>
+              <span x-text="'市场: ' + dataSourceMarketplace + ' · 抓取时间: ' + dataSourceTimestamp"></span>
+            </p>
+          </div>
+        </template>
+        <template x-if="!hasScraperData">
+          <div>
+            <p class="text-sm text-slate-700">
+              <span class="font-semibold">数据源已加载：</span>
+              <span>包含产品数据和评论</span>
+            </p>
+            <p class="text-xs text-slate-500 mt-0.5">
+              <i class="fa-solid fa-globe"></i>
+              可从"数据采集"模块获取真实产品数据
+            </p>
+          </div>
+        </template>
       </div>
     </div>
 
@@ -581,7 +596,7 @@
                 <div>
                   <h2 class="text-3xl font-extrabold text-white tracking-tight">分析报告</h2>
                   <p class="text-slate-400 text-sm mt-1 flex items-center gap-2">
-                    <span class="font-mono bg-slate-700/50 px-2 py-0.5 rounded text-slate-300" x-text="asin"></span>
+                    <span class="font-mono bg-slate-700/50 px-2 py-0.5 rounded text-slate-300" x-text="selectedAsins.join(', ')"></span>
                     <span class="w-1 h-1 bg-slate-600 rounded-full"></span>
                     <span>分析完成于 <span x-text="new Date().toLocaleTimeString('zh-CN')"></span></span>
                   </p>

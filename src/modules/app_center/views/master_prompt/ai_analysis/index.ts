@@ -257,6 +257,22 @@ function createAiAnalysisPanel() {
       }
     },
 
+    get dataSourceMarketplace(): string {
+      const scrapedData = state.scraper?.scrapedData;
+      if (scrapedData && scrapedData.metadata) {
+        return scrapedData.metadata.marketplace || '未知';
+      }
+      return '未知';
+    },
+
+    get dataSourceTimestamp(): string {
+      const scrapedData = state.scraper?.scrapedData;
+      if (scrapedData && scrapedData.metadata && scrapedData.metadata.scrape_timestamp) {
+        return this.formatHistoryDate(scrapedData.metadata.scrape_timestamp);
+      }
+      return '未知';
+    },
+
     // ========== Lifecycle ==========
     init() {
       console.log('[AI智能分析] 🚀 Alpine 组件初始化');
