@@ -282,8 +282,8 @@ function createAiAnalysisPanel() {
       // 检查是否有新的 Scraper 数据
       this.checkAndLoadScraperData();
 
-      // ✅ 检查是否有待加载的历史报告
-      this.checkPendingReport();
+      // ✅ 检查是否有已加载的历史报告（从全局状态）
+      this.checkLoadedReport();
     },
 
     // ========== State Sync ==========
@@ -336,19 +336,31 @@ function createAiAnalysisPanel() {
     },
 
     /**
-     * ✅ 检查是否有待加载的历史报告
+     * ✅ 检查是否有已加载的历史报告（从全局状态）
      */
-    checkPendingReport() {
-      if (state.analysis?.pendingReport) {
-        const { report, timestamp } = state.analysis.pendingReport;
+    checkLoadedReport() {
+      const report = state.analysis?.analysisReport;
+      
+      // 类型守卫：确保 report 是对象类型
+      if (!report || typeof report === 'string') {
+        return;
+      }
+      
+      // 检测报告格式：AI智能分析的新格式
+      const reportObj = report as any;
+      if (reportObj.results && Array.isArray(reportObj.results)) {
+        console.log('[AI智能分析] 📊 检测到已加载的"AI智能分析"报告');
         
-        console.log('[AI智能分析] 📊 检测到待加载的历史报告:', timestamp);
+        // 加载报告数据到当前组件
+        this.results = reportObj.results || [];
+        this.selectedTargets = reportObj.targets || [];
+        this.analysisReport = reportObj;
         
-        // 加载报告
-        this.loadHistoricalReport({ report, timestamp });
+        // 同步到模块状态
+        this.syncToModuleState();
         
-        // 清除待加载标记
-        delete state.analysis.pendingReport;
+        console.log('[AI智能分析] 📊 已显示历史分析报告');
+        showToast('已加载历史分析报告', 'success');
       }
     },
 
@@ -718,17 +730,26 @@ function createAiAnalysisPanel() {
         this.results = results;
         this.syncToModuleState();
 
-        // ✅ 新增：分析成功后自动更新历史快照的分析状态
+        // ✅ 将分析报告加载到全局状态，供 Prompt 生成等页面使用
+        const scrapedData = state.scraper?.scrapedData;
+        const marketplace = scrapedData?.metadata?.marketplace || 'US';
+        
+        const reportData = {
+          results: results,
+          targets: this.selectedTargets,
+          timestamp: new Date().toISOString(),
+          dataSource: this.dataSource,
+          marketplace: marketplace
+        };
+        state.analysis.analysisReport = reportData;
+        console.log('[AI智能分析] 📊 已将分析报告加载到全局状态，marketplace:', marketplace);
+
+        // ✅ 分析成功后自动更新历史快照的分析状态
         if (results.length > 0 && state.scraper?.currentHistoryId) {
           const { HistoryService } = await import('../services/historyService');
           const success = HistoryService.updateAnalysisStatus(
             state.scraper.currentHistoryId,
-            {
-              results: results,
-              targets: this.selectedTargets,
-              timestamp: new Date().toISOString(),
-              dataSource: this.dataSource
-            }
+            reportData
           );
           
           if (success) {

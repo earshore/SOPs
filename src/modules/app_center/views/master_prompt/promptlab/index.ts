@@ -16,7 +16,9 @@ import SITE_CONFIGS from '../../../../../common/constants/constants';
 import { ANALYSIS_MODULES } from '../constants/prompts';
 import { showToast } from '../../../../../common/ui';
 import { registerActionsWithLegacy, unregisterActions } from '../../../../../common/utils/actionRegistry';
+import { APP_EVENTS, MODULE_EVENTS } from '../../../../../common/constants/eventConstants';
 import type { AnalysisReport } from '../../../../../types/modules-business';
+import eventBus from '../../../../../common/EventBus';
 
 import '../master_prompt_style.css';
 
@@ -62,6 +64,8 @@ let timeouts: number[] = []; // 用于清理定时器
 let registeredActions: string[] = []; // 用于清理已注册的动作
 let listingPromptCache = ""; // 缓存 Listing Prompt
 let visualPromptCache = ""; // 缓存 Visual Prompt
+let dataUpdateHandler: (() => void) | null = null; // 用于清理 EventBus 监听器
+let lastMarketplace = ""; // 跟踪上次的 marketplace，用于检测数据源变化
 
 // ========================================== 
 // Helper Functions
@@ -339,72 +343,164 @@ function renderReportAnalysis(): void {
     checkboxMain.disabled = false;
     checkboxMain.checked = true;
 
-    // Auto-select language
-    if (marketSelect && state.masterPrompt && !state.masterPrompt.promptlab?.userProductProfile?.targetMarket) {
-        const reportMarket = (state.analysis.analysisReport as any).targetMarket || (state.analysis.analysisReport as any).language || "";
-        if (reportMarket) {
-            const options = Array.from(marketSelect.options);
-            const match = options.find((opt) =>
-                opt.value.toLowerCase().includes(reportMarket.toLowerCase()) ||
-                reportMarket.toLowerCase().includes(opt.value.toLowerCase())
-            );
-            if (match) {
-                marketSelect.value = match.value;
-                if (!state.masterPrompt) state.masterPrompt = {} as any;
-                if (!state.masterPrompt) return; // Type guard
-                if (!state.masterPrompt.promptlab) state.masterPrompt.promptlab = { userProductProfile: {} as UserProductProfile };
-                if (state.masterPrompt && state.masterPrompt.promptlab?.userProductProfile) {
-                    state.masterPrompt.promptlab.userProductProfile.targetMarket = match.value;
-                }
+    // ✅ 智能自动选择语言：检测数据源变化
+    if (marketSelect && state.masterPrompt) {
+        // 1. 获取当前数据源的 marketplace
+        let currentMarketplace = '';
+        
+        // 优先从分析报告的 marketplace 字段获取
+        const analysisReport = state.analysis.analysisReport as any;
+        if (analysisReport && analysisReport.marketplace) {
+            currentMarketplace = analysisReport.marketplace;
+        }
+        
+        // 如果没有，尝试从 scraper 数据获取 marketplace
+        if (!currentMarketplace) {
+            const scrapedData = state.scraper?.scrapedData;
+            if (scrapedData && scrapedData.metadata && scrapedData.metadata.marketplace) {
+                currentMarketplace = scrapedData.metadata.marketplace;
             }
+        }
+        
+        // 如果还没有，尝试从旧版报告格式获取（向后兼容）
+        if (!currentMarketplace && analysisReport) {
+            currentMarketplace = analysisReport.targetMarket || analysisReport.language || "";
+        }
+        
+        // 2. 检测是否需要自动更新
+        const isFirstLoad = !state.masterPrompt.promptlab?.userProductProfile?.targetMarket;
+        const isMarketplaceChanged = currentMarketplace && currentMarketplace !== lastMarketplace;
+        
+        // 3. 只在首次加载或数据源变化时自动更新
+        if (currentMarketplace && (isFirstLoad || isMarketplaceChanged)) {
+            console.log('[Promptlab] 检测到市场变化:', lastMarketplace, '→', currentMarketplace);
+            
+            // 通过站点代码（如 "FR"）查找对应的站点名称（如 "French"）
+            const siteConfig = SITE_CONFIGS[currentMarketplace];
+            if (siteConfig) {
+                const targetName = siteConfig.name; // 例如："French"
+                
+                // 在下拉框中查找匹配的选项
+                const options = Array.from(marketSelect.options);
+                const match = options.find((opt) => opt.value === targetName);
+                
+                if (match) {
+                    marketSelect.value = match.value;
+                    if (!state.masterPrompt.promptlab) state.masterPrompt.promptlab = { userProductProfile: {} as UserProductProfile };
+                    if (state.masterPrompt.promptlab?.userProductProfile) {
+                        state.masterPrompt.promptlab.userProductProfile.targetMarket = match.value;
+                    }
+                    
+                    // 更新跟踪的 marketplace
+                    lastMarketplace = currentMarketplace;
+                    console.log('[Promptlab] 已自动选择市场:', match.value, `(${currentMarketplace})`);
+                } else {
+                    console.warn('[Promptlab] 未找到匹配的下拉框选项:', targetName);
+                }
+            } else {
+                console.warn('[Promptlab] 未找到站点配置:', currentMarketplace);
+            }
+        } else if (currentMarketplace) {
+            // 数据源未变化，但需要更新跟踪值（防止首次加载后的误判）
+            lastMarketplace = currentMarketplace;
         }
     }
 
-    const ignoreKeys = ["meta", "generatedByModel", "generatedAt", "templateUsed", "templateId", "raw_response"];
-    const keys = Object.keys(state.analysis.analysisReport).filter((k) => !ignoreKeys.includes(k));
-
+    // ✅ 检测报告格式：AI智能分析 vs 旧版AI分析
+    const report = state.analysis.analysisReport as any;
+    const isNewFormat = report.results && Array.isArray(report.results);
+    
     // ✅ 安全: 静态HTML模板，无用户输入
     container.innerHTML = "";
     container.className = "mt-3 grid grid-cols-1 lg:grid-cols-2 gap-3";
     const savedSelection = state.masterPrompt?.promptlab?.userProductProfile?.selectedReportSections || [];
     const isFirstLoad = savedSelection.length === 0;
 
-    keys.forEach((key) => {
-        if (key === "target_audience") {
-            const audienceInput = document.getElementById("lab-audience") as HTMLInputElement;
-            if (audienceInput && !audienceInput.value) {
-                let val = (state.analysis.analysisReport as any)[key];
-                if (Array.isArray(val)) val = val.join(", ");
-                audienceInput.value = val;
-                if (!state.masterPrompt) state.masterPrompt = {} as any;
-                if (!state.masterPrompt) return; // Type guard
-                if (!state.masterPrompt.promptlab) state.masterPrompt.promptlab = { userProductProfile: {} as UserProductProfile };
-                if (state.masterPrompt && state.masterPrompt.promptlab?.userProductProfile) {
-                    state.masterPrompt.promptlab.userProductProfile.audience = val;
+    if (isNewFormat) {
+        // 处理"AI智能分析"的新格式报告
+        const results = report.results as Array<{
+            targetId: string;
+            title: string;
+            source: string;
+            highlights: Array<{ text: string }>;
+            details: Array<{ category: string; items: string[] }>;
+        }>;
+
+        results.forEach((result) => {
+            const key = result.targetId;
+            const label = result.title;
+            
+            // 生成预览文本：从 highlights 和 details 提取
+            let previewParts: string[] = [];
+            if (result.highlights && result.highlights.length > 0 && result.highlights[0]) {
+                previewParts.push(result.highlights[0].text);
+            }
+            if (result.details && result.details.length > 0 && result.details[0] && result.details[0].items.length > 0 && result.details[0].items[0]) {
+                previewParts.push(result.details[0].items[0]);
+            }
+            const previewText = previewParts.join(' | ').substring(0, 80) + (previewParts.join(' | ').length > 80 ? '...' : '');
+            
+            const isChecked = isFirstLoad ? true : savedSelection.includes(key);
+
+            const div = document.createElement("div");
+            div.className = "relative flex items-start p-3 rounded-lg border border-slate-200 bg-white hover:border-blue-300 hover:shadow-sm transition-all";
+            div.innerHTML = `
+                <div class="flex h-5 items-center">
+                    <input type="checkbox" name="report-section" value="${escapeHtml(key)}" id="sect-${escapeHtml(key)}" 
+                        class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" ${isChecked ? "checked" : ""}>
+                </div>
+                <div class="ml-3 text-sm flex-1 min-w-0"> 
+                    <label for="sect-${escapeHtml(key)}" class="cursor-pointer select-none w-full block">
+                        <span class="font-medium text-slate-700 block mb-0.5 leading-snug">${escapeHtml(label)}</span>
+                        <p class="text-xs text-slate-400 truncate font-normal" title="${escapeHtml(previewText)}">${escapeHtml(previewText)}</p>
+                    </label>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    } else {
+        // 处理旧版"AI分析"的报告格式（向后兼容）
+        const ignoreKeys = ["meta", "generatedByModel", "generatedAt", "templateUsed", "templateId", "raw_response"];
+        const keys = Object.keys(report).filter((k) => !ignoreKeys.includes(k));
+
+        keys.forEach((key) => {
+            if (key === "target_audience") {
+                const audienceInput = document.getElementById("lab-audience") as HTMLInputElement;
+                if (audienceInput && !audienceInput.value) {
+                    let val = report[key];
+                    if (Array.isArray(val)) val = val.join(", ");
+                    audienceInput.value = val;
+                    if (!state.masterPrompt) state.masterPrompt = {} as any;
+                    if (!state.masterPrompt) return; // Type guard
+                    if (!state.masterPrompt.promptlab) state.masterPrompt.promptlab = { userProductProfile: {} as UserProductProfile };
+                    if (state.masterPrompt && state.masterPrompt.promptlab?.userProductProfile) {
+                        state.masterPrompt.promptlab.userProductProfile.audience = val;
+                    }
                 }
             }
-        }
 
-        const label = getFieldTitle(key);
-        const previewText = getPreviewText((state.analysis.analysisReport as any)[key]);
-        const isChecked = isFirstLoad ? true : savedSelection.includes(key);
+            const label = getFieldTitle(key);
+            const previewText = getPreviewText(report[key]);
+            const isChecked = isFirstLoad ? true : savedSelection.includes(key);
 
-        const div = document.createElement("div");
-        div.className = "relative flex items-start p-3 rounded-lg border border-slate-200 bg-white hover:border-blue-300 hover:shadow-sm transition-all";
-        div.innerHTML = `
-            <div class="flex h-5 items-center">
-                <input type="checkbox" name="report-section" value="${escapeHtml(key)}" id="sect-${escapeHtml(key)}" 
-                    class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" ${isChecked ? "checked" : ""}>
-            </div>
-            <div class="ml-3 text-sm flex-1 min-w-0"> 
-                <label for="sect-${escapeHtml(key)}" class="cursor-pointer select-none w-full block">
-                    <span class="font-medium text-slate-700 block mb-0.5 leading-snug">${escapeHtml(label)}</span>
-                    <p class="text-xs text-slate-400 truncate font-normal" title="${escapeHtml(previewText)}">${escapeHtml(previewText)}</p>
-                </label>
-            </div>
-        `;
-        container.appendChild(div);
-    });
+            const div = document.createElement("div");
+            div.className = "relative flex items-start p-3 rounded-lg border border-slate-200 bg-white hover:border-blue-300 hover:shadow-sm transition-all";
+            div.innerHTML = `
+                <div class="flex h-5 items-center">
+                    <input type="checkbox" name="report-section" value="${escapeHtml(key)}" id="sect-${escapeHtml(key)}" 
+                        class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" ${isChecked ? "checked" : ""}>
+                </div>
+                <div class="ml-3 text-sm flex-1 min-w-0"> 
+                    <label for="sect-${escapeHtml(key)}" class="cursor-pointer select-none w-full block">
+                        <span class="font-medium text-slate-700 block mb-0.5 leading-snug">${escapeHtml(label)}</span>
+                        <p class="text-xs text-slate-400 truncate font-normal" title="${escapeHtml(previewText)}">${escapeHtml(previewText)}</p>
+                    </label>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    }
+    
     updateButtonState();
 }
 
@@ -795,7 +891,20 @@ export async function mount(container: HTMLElement): Promise<void> {
         // 5. 渲染报告分析
         renderReportAnalysis();
 
-        // 6. 更新按钮状态
+        // 6. 监听数据更新事件，自动重新渲染
+        dataUpdateHandler = () => {
+            console.log('[Promptlab] 检测到数据更新，重新渲染报告分析');
+            renderReportAnalysis();
+        };
+        
+        // 使用 EventBus 监听 Scraper 数据更新事件
+        eventBus.on(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, dataUpdateHandler);
+        
+        // 使用 window 监听历史记录更新事件（因为这个事件是通过 window.dispatchEvent 触发的）
+        window.addEventListener(APP_EVENTS.HISTORY_UPDATED, dataUpdateHandler);
+        eventListeners.push({ element: window as any, event: APP_EVENTS.HISTORY_UPDATED, handler: dataUpdateHandler });
+
+        // 7. 更新按钮状态
         updateButtonState();
 
         console.log('[Promptlab] ✅ 子模块挂载成功');
@@ -815,13 +924,20 @@ export function unmount(): void {
         // 1. 保存状态到 state
         saveInputsToState();
 
-        // 2. 清理事件监听器和定时器
+        // 2. 清理 EventBus 监听器
+        if (dataUpdateHandler) {
+            eventBus.off(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, dataUpdateHandler);
+            dataUpdateHandler = null;
+        }
+
+        // 3. 清理事件监听器和定时器
         cleanup();
 
-        // 3. 重置模块状态
+        // 4. 重置模块状态
         currentConsoleMode = "listing";
         listingPromptCache = "";
         visualPromptCache = "";
+        lastMarketplace = "";
 
         console.log('[Promptlab] ✅ 子模块卸载成功');
     } catch (error) {

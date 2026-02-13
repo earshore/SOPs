@@ -43,29 +43,69 @@ const buildContextSection = (inputs: PromptInputs, analysisReport: AnalysisRepor
     selectedReportSections.length > 0
   ) {
     const cleanReport = JSON.parse(JSON.stringify(analysisReport));
-    // 删除不必要的元数据
-    [
-      "meta",
-      "GeneratedByModel",
-      "GeneratedAt",
-      "templateUsed",
-      "raw_response",
-      "language",
-      "targetMarket",
-      "marketplace",
-    ].forEach((k) => delete cleanReport[k]);
+    
+    // ✅ 检测报告格式：AI智能分析 vs 旧版AI分析
+    const isNewFormat = cleanReport.results && Array.isArray(cleanReport.results);
+    
+    if (isNewFormat) {
+      // 处理"AI智能分析"的新格式报告
+      const results = cleanReport.results as Array<{
+        targetId: string;
+        title: string;
+        highlights: Array<{ text: string }>;
+        details: Array<{ category: string; items: string[] }>;
+      }>;
+      
+      const finalContextObj: Record<string, any> = {};
+      
+      // 根据 selectedReportSections 筛选对应的分析结果
+      selectedReportSections.forEach((targetId) => {
+        const result = results.find(r => r.targetId === targetId);
+        if (result) {
+          // 将分析结果转换为易读的格式
+          finalContextObj[result.title] = {
+            highlights: result.highlights.map(h => h.text),
+            details: result.details.reduce((acc, detail) => {
+              acc[detail.category] = detail.items;
+              return acc;
+            }, {} as Record<string, string[]>)
+          };
+        }
+      });
+      
+      if (Object.keys(finalContextObj).length > 0) {
+        return `\n[MARKET CONTEXT]\n**Competitor Insights (JSON):**\n${JSON.stringify(
+          finalContextObj,
+          null,
+          2
+        )}\n`;
+      }
+    } else {
+      // 处理旧版"AI分析"的报告格式（向后兼容）
+      // 删除不必要的元数据
+      [
+        "meta",
+        "GeneratedByModel",
+        "GeneratedAt",
+        "templateUsed",
+        "raw_response",
+        "language",
+        "targetMarket",
+        "marketplace",
+      ].forEach((k) => delete cleanReport[k]);
 
-    const finalContextObj: Record<string, any> = {};
-    selectedReportSections.forEach((key) => {
-      if (cleanReport[key]) finalContextObj[key] = cleanReport[key];
-    });
+      const finalContextObj: Record<string, any> = {};
+      selectedReportSections.forEach((key) => {
+        if (cleanReport[key]) finalContextObj[key] = cleanReport[key];
+      });
 
-    if (Object.keys(finalContextObj).length > 0) {
-      return `\n[MARKET CONTEXT]\n**Competitor Insights (JSON):**\n${JSON.stringify(
-        finalContextObj,
-        null,
-        2
-      )}\n`;
+      if (Object.keys(finalContextObj).length > 0) {
+        return `\n[MARKET CONTEXT]\n**Competitor Insights (JSON):**\n${JSON.stringify(
+          finalContextObj,
+          null,
+          2
+        )}\n`;
+      }
     }
   }
   return "";

@@ -191,23 +191,40 @@ const ScraperPanel = () => ({
             item.data.metadata.marketplace = item.site || 'US';
         }
 
-        // 恢复全局状态
+        // 恢复全局状态（供所有页面使用）
         state.scraper.currentHistoryId = item.id;
         state.scraper.scrapedData = item.data;
-        state.analysis.analysisReport = item.report;
+        
+        // ✅ 优先加载"AI智能分析"的报告，如果不存在则回退到旧的"AI分析"报告
+        if (item.analysisStatus?.isAnalyzed && item.analysisStatus?.analysisReport) {
+            state.analysis.analysisReport = item.analysisStatus.analysisReport;
+            console.log('[Scraper] 已加载"AI智能分析"报告到全局状态');
+        } else if (item.report) {
+            state.analysis.analysisReport = item.report;
+            console.log('[Scraper] 已加载旧版"AI分析"报告到全局状态');
+        } else {
+            state.analysis.analysisReport = null;
+            console.log('[Scraper] 该快照无分析报告');
+        }
+        
         state.analysis.translatedReport = null;
         state.scraper.selectedSite = item.site as any;
 
-        // 通知其他模块
+        // 通知其他模块数据已更新
         eventBus.emit(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, item.data);
 
-        showToast("历史快照已加载", "success");
+        // 显示加载成功提示
+        const hasReport = item.analysisStatus?.isAnalyzed || item.report;
+        const message = hasReport 
+            ? `历史快照已加载（包含分析报告）` 
+            : `历史快照已加载`;
+        showToast(message, "success");
         
         this.saveState();
     },
 
     /**
-     * ✅ 新增：从历史快照载入分析报告
+     * 从历史快照载入分析报告（跳转到AI智能分析页面查看）
      */
     async loadAnalysisReport(item: any) {
         if (!item.analysisStatus || !item.analysisStatus.isAnalyzed) {
@@ -216,29 +233,25 @@ const ScraperPanel = () => ({
         }
 
         try {
-            // 1. 先加载历史快照数据
+            // 1. 先加载历史快照数据到全局状态
             this.loadHistoryItem(item);
 
-            // 2. 将报告数据存储到全局状态中
-            if (!state.analysis) {
-                state.analysis = { selectedAsins: [] };
+            // 2. 确保报告数据已正确加载到全局状态
+            if (!state.analysis.analysisReport) {
+                throw new Error('报告数据加载失败');
             }
-            state.analysis.pendingReport = {
-                report: item.analysisStatus.analysisReport,
-                timestamp: item.analysisStatus.analyzedAt
-            };
 
-            console.log('[Scraper] 📊 已将报告数据存入全局状态:', state.analysis.pendingReport);
+            console.log('[Scraper] 📊 已将"AI智能分析"报告加载到全局状态');
 
             // 3. 等待状态更新
             await new Promise(resolve => setTimeout(resolve, 100));
 
-            // 4. 切换到 AI 分析页面
+            // 4. 跳转到 AI智能分析页面查看报告
             if (window.switchTab) {
                 await window.switchTab('ai_analysis', true);
             }
 
-            showToast("分析报告已加载", "success");
+            showToast("已跳转到 AI智能分析查看报告", "success");
         } catch (error) {
             console.error('[Scraper] 载入分析报告失败:', error);
             showToast("载入分析报告失败", "error");
