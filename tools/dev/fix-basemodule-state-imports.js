@@ -16,7 +16,6 @@ const filesToFix = [
   // BaseModule.js 引用
   'src/modules/home/homeDisplay.js',
   'src/modules/app_center/views/master_prompt/data/index.js',
-  'src/modules/app_center/views/master_prompt/analysis/index.js',
   'src/modules/amz_hub/views/practice/promotions/index.js',
   'src/modules/amz_hub/views/practice/marketing_calendar/index.js',
   'src/modules/amz_hub/views/knowledge/seo_strategy/index.js',
