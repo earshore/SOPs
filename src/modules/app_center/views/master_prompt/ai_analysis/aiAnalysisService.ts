@@ -60,10 +60,11 @@ async function analyzeTarget(
   targetId: string,
   product: Product,
   config: LLMConfig,
+  language: string = 'en',
   onProgress?: (step: string) => void
 ): Promise<unknown> {
   // 使用 analysisPrompts.ts 中的 generateAnalysisPrompt 生成提示词
-  const prompt = generateAnalysisPrompt(targetId, product, 'en');
+  const prompt = generateAnalysisPrompt(targetId, product, language);
 
   onProgress?.(`正在分析: ${targetId}...`);
 
@@ -113,7 +114,8 @@ async function analyzeTarget(
 export async function runAIAnalysis(
   targetIds: string[],
   product: Product,
-  onProgress: (progress: number, step: string) => void
+  onProgress: (progress: number, step: string) => void,
+  language: string = 'en'
 ): Promise<AnalysisResult[]> {
   const config = await getLLMConfig();
   const report: Partial<FullAnalysisReport> = {
@@ -144,7 +146,7 @@ export async function runAIAnalysis(
       const progress = Math.round((completedTargets / totalTargets) * 100);
       onProgress(progress, `正在分析: ${targetId}...`);
 
-      const result = await analyzeTarget(targetId, product, config, (step) => {
+      const result = await analyzeTarget(targetId, product, config, language, (step) => {
         onProgress(progress, step);
       });
 

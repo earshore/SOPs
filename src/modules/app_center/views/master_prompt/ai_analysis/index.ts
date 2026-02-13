@@ -9,6 +9,7 @@ import { analysisTargets } from './analysisTargets';
 import { runAnalysis, getSampleReport } from './analysisService';
 import { runAIAnalysis } from './aiAnalysisService';
 import { generateAnalysisPrompt } from './analysisPrompts';
+import { LANGUAGE_HEADERS } from '../../../../../common/constants/constants';
 import { getProductByAsin, getAvailableAsins, Product } from './sampleData';
 import { AnalysisResult } from './types';
 import type { FullAnalysisReport } from './analysisReportData';
@@ -487,7 +488,9 @@ function createAiAnalysisPanel() {
       const mergedProduct = products.length > 1 ? this.mergeProducts(products) : products[0];
       if (!mergedProduct) return;
       
-      const prompt = generateAnalysisPrompt(targetId, mergedProduct, 'en');
+      // 获取正确的语言代码
+      const language = this.getMarketLanguage();
+      const prompt = generateAnalysisPrompt(targetId, mergedProduct, language);
       
       navigator.clipboard.writeText(prompt).then(() => {
         showToast('提示词已复制', 'success');
@@ -531,6 +534,9 @@ function createAiAnalysisPanel() {
           // 合并多个产品的数据
           const mergedProduct = this.mergeProducts(products);
 
+          // 获取正确的语言代码
+          const language = this.getMarketLanguage();
+
           results = await runAIAnalysis(
             this.selectedTargets,
             mergedProduct,
@@ -538,7 +544,8 @@ function createAiAnalysisPanel() {
               this.progress = progress;
               this.currentStep = step;
               this.syncToModuleState();
-            }
+            },
+            language
           );
 
           // AI 分析不返回完整报告,只返回结果
@@ -651,6 +658,29 @@ function createAiAnalysisPanel() {
       return colorMap[color] || 'blue';
     },
 
+    /**
+     * 获取市场对应的语言代码
+     */
+    getMarketLanguage(): string {
+      const scrapedData = state.scraper?.scrapedData;
+      if (scrapedData && scrapedData.metadata && scrapedData.metadata.marketplace) {
+        const marketplace = scrapedData.metadata.marketplace;
+        
+        // 从 LANGUAGE_HEADERS 获取语言配置
+        const langConfig = LANGUAGE_HEADERS[marketplace];
+        
+        if (langConfig && langConfig.locale) {
+          // 从 locale (如 "de_DE") 提取语言代码 (如 "de")
+          const language = langConfig.locale.split('_')[0];
+          console.log(`[AI智能分析] 市场 ${marketplace} 对应语言: ${language}`);
+          return language || 'en';
+        }
+      }
+      
+      // 默认返回英语
+      return 'en';
+    },
+
     getPromptText(targetId: string): string {
       const products = this.currentProducts;
       if (products.length === 0) return '无产品数据';
@@ -664,7 +694,9 @@ function createAiAnalysisPanel() {
           return '无产品数据';
         }
         
-        return generateAnalysisPrompt(targetId, mergedProduct, 'en');
+        // 获取正确的语言代码
+        const language = this.getMarketLanguage();
+        return generateAnalysisPrompt(targetId, mergedProduct, language);
       } catch (error) {
         console.error('[AI智能分析] 生成提示词失败:', error);
         return '提示词生成失败';
