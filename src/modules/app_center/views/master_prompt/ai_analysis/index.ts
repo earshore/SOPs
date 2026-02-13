@@ -699,7 +699,7 @@ function createAiAnalysisPanel() {
           // 获取正确的语言代码
           const language = this.getMarketLanguage();
 
-          results = await runAIAnalysis(
+          const analysisResult = await runAIAnalysis(
             this.selectedTargets,
             mergedProduct,
             (progress: number, step: string) => {
@@ -710,8 +710,9 @@ function createAiAnalysisPanel() {
             language
           );
 
-          // AI 分析不返回完整报告,只返回结果
-          this.analysisReport = null;
+          // 保存完整的分析报告和结果
+          results = analysisResult.results;
+          this.analysisReport = analysisResult.report;
         } else {
           // 使用示例数据进行模拟分析
           results = await runAnalysis(

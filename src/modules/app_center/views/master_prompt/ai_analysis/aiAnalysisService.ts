@@ -110,13 +110,14 @@ async function analyzeTarget(
 
 /**
  * 执行完整的 AI 分析
+ * @returns 返回包含结果数组和完整报告的对象
  */
 export async function runAIAnalysis(
   targetIds: string[],
   product: Product,
   onProgress: (progress: number, step: string) => void,
   language: string = 'en'
-): Promise<AnalysisResult[]> {
+): Promise<{ results: AnalysisResult[]; report: FullAnalysisReport }> {
   const config = await getLLMConfig();
   const report: Partial<FullAnalysisReport> = {
     asin: product.asin,
@@ -182,7 +183,13 @@ export async function runAIAnalysis(
   onProgress(100, '分析完成!');
 
   // 解析报告为展示格式
-  return parseAnalysisReport(report as FullAnalysisReport, targetIds);
+  const results = parseAnalysisReport(report as FullAnalysisReport, targetIds);
+  
+  // 返回结果数组和完整报告
+  return {
+    results,
+    report: report as FullAnalysisReport
+  };
 }
 
 /**
