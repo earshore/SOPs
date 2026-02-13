@@ -117,5 +117,45 @@ export const HistoryService = {
       }
     }
     return null;
+  },
+
+  /**
+   * ✅ 新增：更新历史记录的分析状态
+   * @param id - 历史记录ID
+   * @param analysisReport - 分析报告数据
+   */
+  updateAnalysisStatus(id: number | string, analysisReport: any): boolean {
+    try {
+      const history = this.getAll();
+      const targetIndex = history.findIndex((h) => h.id === Number(id));
+
+      if (targetIndex === -1) {
+        console.warn(`[HistoryService] 未找到ID为 ${id} 的历史记录`);
+        return false;
+      }
+
+      // 获取目标历史记录
+      const targetItem = history[targetIndex];
+      if (!targetItem) {
+        console.warn(`[HistoryService] 历史记录项为空`);
+        return false;
+      }
+
+      // 更新分析状态
+      targetItem.analysisStatus = {
+        isAnalyzed: true,
+        analyzedAt: new Date().toISOString(),
+        analysisReport: analysisReport
+      };
+
+      // 保存更新后的历史记录
+      StorageService.setScrapeHistory(history);
+      
+      console.log(`[HistoryService] 已更新历史记录 ${id} 的分析状态`);
+      return true;
+    } catch (error) {
+      console.error(`[HistoryService] 更新分析状态失败:`, error);
+      return false;
+    }
   }
 };

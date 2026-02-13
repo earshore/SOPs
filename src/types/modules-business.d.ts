@@ -212,6 +212,12 @@ export interface HistoryItem {
   // 向后兼容旧格式
   asin?: string;
   product?: ScrapedProduct;
+  // AI分析状态
+  analysisStatus?: {
+    isAnalyzed: boolean;           // 是否已分析
+    analyzedAt?: string;            // 分析时间戳
+    analysisReport?: any;           // 分析报告数据
+  };
 }
 
 // ==================== Keyword Hunter 模块类型 ====================

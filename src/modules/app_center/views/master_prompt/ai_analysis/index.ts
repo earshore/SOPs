@@ -264,6 +264,9 @@ function createAiAnalysisPanel() {
       
       // 检查是否有新的 Scraper 数据
       this.checkAndLoadScraperData();
+
+      // ✅ 检查是否有待加载的历史报告
+      this.checkPendingReport();
     },
 
     // ========== State Sync ==========
@@ -312,6 +315,76 @@ function createAiAnalysisPanel() {
           moduleState.useRealData = true;
           console.log('[AI智能分析] 🤖 已自动启用真实数据分析模式');
         }
+      }
+    },
+
+    /**
+     * ✅ 检查是否有待加载的历史报告
+     */
+    checkPendingReport() {
+      if (state.analysis?.pendingReport) {
+        const { report, timestamp } = state.analysis.pendingReport;
+        
+        console.log('[AI智能分析] 📊 检测到待加载的历史报告:', timestamp);
+        
+        // 加载报告
+        this.loadHistoricalReport({ report, timestamp });
+        
+        // 清除待加载标记
+        delete state.analysis.pendingReport;
+      }
+    },
+
+    /**
+     * ✅ 新增：加载历史分析报告
+     */
+    loadHistoricalReport(detail: { report: any; timestamp: string }) {
+      try {
+        if (!detail || !detail.report) {
+          showToast('历史报告数据无效', 'error');
+          return;
+        }
+
+        // 加载历史报告数据
+        this.results = detail.report.results || [];
+        this.selectedTargets = detail.report.targets || [];
+        this.analysisReport = detail.report;
+        
+        // 同步到模块状态
+        this.syncToModuleState();
+
+        console.log('[AI智能分析] 📊 已加载历史分析报告:', detail.timestamp);
+        showToast(`已加载历史分析报告 (${this.formatHistoryDate(detail.timestamp)})`, 'success');
+      } catch (error) {
+        console.error('[AI智能分析] 加载历史报告失败:', error);
+        showToast('加载历史报告失败', 'error');
+      }
+    },
+
+    /**
+     * ✅ 新增：格式化历史日期
+     */
+    formatHistoryDate(timestamp: string): string {
+      try {
+        const date = new Date(timestamp);
+        const now = new Date();
+        
+        // 如果是今天
+        if (date.toDateString() === now.toDateString()) {
+          return `今天 ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+        }
+        
+        // 如果是昨天
+        const yesterday = new Date(now);
+        yesterday.setDate(yesterday.getDate() - 1);
+        if (date.toDateString() === yesterday.toDateString()) {
+          return `昨天 ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+        }
+        
+        // 其他日期
+        return `${date.getMonth() + 1}月${date.getDate()}日 ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+      } catch (error) {
+        return timestamp;
       }
     },
 
@@ -471,6 +544,26 @@ function createAiAnalysisPanel() {
 
         this.results = results;
         this.syncToModuleState();
+
+        // ✅ 新增：分析成功后自动更新历史快照的分析状态
+        if (results.length > 0 && state.scraper?.currentHistoryId) {
+          const { HistoryService } = await import('../services/historyService');
+          const success = HistoryService.updateAnalysisStatus(
+            state.scraper.currentHistoryId,
+            {
+              results: results,
+              targets: this.selectedTargets,
+              timestamp: new Date().toISOString(),
+              dataSource: this.dataSource
+            }
+          );
+          
+          if (success) {
+            console.log('[AI智能分析] ✅ 已自动标记历史快照为"已分析"');
+            // 触发历史记录更新事件，通知 Scraper 页面刷新
+            window.dispatchEvent(new CustomEvent('history-updated'));
+          }
+        }
 
         showToast(`分析完成！生成了 ${results.length} 个洞察报告`, 'success');
       } catch (error) {

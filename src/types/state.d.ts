@@ -97,6 +97,10 @@ export interface AnalysisState {
     categories?: string[];
     priceRange?: [number, number];
   };
+  pendingReport?: {
+    report: AnalysisReport | string;
+    timestamp: string;
+  };
 }
 
 // ==================== PromptLab状态 ====================

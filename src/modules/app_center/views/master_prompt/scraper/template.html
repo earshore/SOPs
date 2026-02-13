@@ -340,23 +340,28 @@
 
                 <div class="p-5 space-y-2.5 max-h-[480px] overflow-y-auto custom-scrollbar">
                     <template x-for="item in history" :key="item.id">
-                        <div class="relative p-4 rounded-xl border-2 bg-white group transition-all duration-200 hover:border-indigo-200 hover:shadow-md hover:shadow-indigo-50/50 border-slate-150 cursor-pointer"
-                            @click="loadHistoryItem(item)">
+                        <div class="relative p-4 rounded-xl border-2 bg-white group transition-all duration-200 hover:border-indigo-200 hover:shadow-md hover:shadow-indigo-50/50 border-slate-150"
+                            :class="item.analysisStatus?.isAnalyzed ? 'border-emerald-100 bg-gradient-to-br from-emerald-50/30 to-white' : ''">
+
+                            <!-- ✅ 新增：已分析标签徽章 -->
+                            <template x-if="item.analysisStatus?.isAnalyzed">
+                                <div class="absolute -top-2 -right-2 z-10">
+                                    <div class="flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-bold bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-lg shadow-emerald-200">
+                                        <i class="fas fa-check-circle text-[8px]"></i>
+                                        <span>已分析</span>
+                                    </div>
+                                </div>
+                            </template>
 
                             <!-- Header -->
                             <div class="flex items-start justify-between mb-3">
-                                <div class="flex items-center gap-2.5">
+                                <div class="flex items-center gap-2.5 cursor-pointer" @click="loadHistoryItem(item)">
                                     <span class="text-xl flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-150 shrink-0 shadow-sm"
                                         x-text="getFlag(item.site)"></span>
                                     <div class="flex flex-col">
                                         <div class="flex items-center gap-1.5">
                                             <span class="text-sm font-bold text-slate-800 tracking-tight"
                                                 x-text="getSiteName(item.site) + '站'"></span>
-                                            <template x-if="item.report">
-                                                <span class="inline-flex items-center px-1.5 py-[2px] rounded-md text-[9px] font-bold bg-gradient-to-r from-indigo-500 to-violet-500 text-white shadow-sm">
-                                                    <i class="fas fa-magic mr-0.5 text-[7px]"></i>已分析
-                                                </span>
-                                            </template>
                                         </div>
                                         <span class="text-[10px] text-slate-400 font-mono mt-0.5" x-text="formatDate(item.timestamp)"></span>
                                     </div>
@@ -380,6 +385,16 @@
                                 </template>
                             </div>
 
+                            <!-- ✅ 新增：分析时间显示 -->
+                            <template x-if="item.analysisStatus?.isAnalyzed && item.analysisStatus?.analyzedAt">
+                                <div class="flex items-center gap-1.5 mb-3 pl-0.5">
+                                    <i class="fas fa-clock text-[9px] text-emerald-500"></i>
+                                    <span class="text-[10px] text-emerald-600 font-medium">
+                                        分析于 <span x-text="formatDate(item.analysisStatus.analyzedAt)"></span>
+                                    </span>
+                                </div>
+                            </template>
+
                             <!-- Footer -->
                             <div class="flex items-center justify-between pt-2.5 border-t border-slate-100">
                                 <div class="flex items-center gap-1.5">
@@ -388,8 +403,22 @@
                                         <span class="font-bold text-slate-700" x-text="item.asins.length"></span> 件商品
                                     </span>
                                 </div>
-                                <div class="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-50 text-slate-300 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-200 border border-slate-100 group-hover:border-indigo-600 group-hover:shadow-md group-hover:shadow-indigo-200">
-                                    <i class="fas fa-arrow-right text-[10px]"></i>
+                                
+                                <!-- ✅ 新增：查看报告按钮（仅已分析的快照显示） -->
+                                <div class="flex items-center gap-2">
+                                    <template x-if="item.analysisStatus?.isAnalyzed">
+                                        <button @click.stop="loadAnalysisReport(item)"
+                                            class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-emerald-500 to-green-500 text-white text-[10px] font-bold hover:from-emerald-600 hover:to-green-600 transition-all duration-200 shadow-sm hover:shadow-md hover:shadow-emerald-200 active:scale-95"
+                                            title="查看分析报告">
+                                            <i class="fas fa-chart-line text-[9px]"></i>
+                                            <span>查看报告</span>
+                                        </button>
+                                    </template>
+                                    <button @click="loadHistoryItem(item)"
+                                        class="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-50 text-slate-300 hover:bg-indigo-600 hover:text-white transition-all duration-200 border border-slate-100 hover:border-indigo-600 hover:shadow-md hover:shadow-indigo-200"
+                                        title="加载快照">
+                                        <i class="fas fa-arrow-right text-[10px]"></i>
+                                    </button>
                                 </div>
                             </div>
                         </div>

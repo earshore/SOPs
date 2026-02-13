@@ -99,6 +99,12 @@ const ScraperPanel = () => ({
 
         // 监听外部历史更新事件
         window.addEventListener(APP_EVENTS.HISTORY_UPDATED, () => this.loadHistory());
+        
+        // ✅ 新增：监听自定义历史更新事件（来自 AI 分析模块）
+        window.addEventListener('history-updated', () => {
+            console.log('[Scraper] 收到历史更新事件，重新加载历史记录');
+            this.loadHistory();
+        });
     },
 
     // ========== State Management ==========
@@ -198,6 +204,45 @@ const ScraperPanel = () => ({
         showToast("历史快照已加载", "success");
         
         this.saveState();
+    },
+
+    /**
+     * ✅ 新增：从历史快照载入分析报告
+     */
+    async loadAnalysisReport(item: any) {
+        if (!item.analysisStatus || !item.analysisStatus.isAnalyzed) {
+            showToast("该快照没有分析报告", "warning");
+            return;
+        }
+
+        try {
+            // 1. 先加载历史快照数据
+            this.loadHistoryItem(item);
+
+            // 2. 将报告数据存储到全局状态中
+            if (!state.analysis) {
+                state.analysis = { selectedAsins: [] };
+            }
+            state.analysis.pendingReport = {
+                report: item.analysisStatus.analysisReport,
+                timestamp: item.analysisStatus.analyzedAt
+            };
+
+            console.log('[Scraper] 📊 已将报告数据存入全局状态:', state.analysis.pendingReport);
+
+            // 3. 等待状态更新
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            // 4. 切换到 AI 分析页面
+            if (window.switchTab) {
+                await window.switchTab('ai_analysis', true);
+            }
+
+            showToast("分析报告已加载", "success");
+        } catch (error) {
+            console.error('[Scraper] 载入分析报告失败:', error);
+            showToast("载入分析报告失败", "error");
+        }
     },
 
     // ========== Scraping Logic ==========
