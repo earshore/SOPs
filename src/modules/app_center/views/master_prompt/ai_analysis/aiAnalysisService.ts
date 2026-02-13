@@ -130,14 +130,14 @@ export async function runAIAnalysis(
 
   // 目标ID到报告字段的映射
   const targetToField: Record<string, keyof FullAnalysisReport> = {
-    'title-keywords': 'title_keywords',
-    'selling-points': 'selling_points',
-    'fatal-flaws': 'fatal_flaws',
-    'wow-moments': 'wow_moments',
-    'hesitation-points': 'hesitation_points',
-    'buyer-profile': 'buyer_profile',
-    'vocab-gap': 'vocab_gap',
-    'promise-reality': 'promise_reality'
+    'title-keywords': 'title-keywords',
+    'selling-points': 'selling-points',
+    'fatal-flaws': 'fatal-flaws',
+    'wow-moments': 'wow-moments',
+    'hesitation-points': 'hesitation-points',
+    'buyer-profile': 'buyer-profile',
+    'vocab-gap': 'vocab-gap',
+    'promise-reality': 'promise-reality'
   };
 
   // 逐个分析目标
@@ -155,7 +155,7 @@ export async function runAIAnalysis(
       if (fieldName && result) {
         // 确保结果是有效的对象
         if (typeof result === 'object' && result !== null) {
-          // 检查是否有嵌套的字段名（AI 可能返回 {title_keywords: {...}} 而不是直接的 {...}）
+          // 检查是否有嵌套的字段名（AI 可能返回 {"title-keywords": {...}} 而不是直接的 {...}）
           let actualResult = result;
           const resultObj = result as Record<string, unknown>;
           if (resultObj[fieldName]) {

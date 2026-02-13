@@ -152,14 +152,14 @@ export interface FullAnalysisReport {
   product_title: string;
   analysis_timestamp: string;
   market: string;
-  title_keywords?: TitleKeywordsReport;
-  selling_points?: SellingPointsReport;
-  fatal_flaws?: FatalFlawsReport;
-  wow_moments?: WowMomentsReport;
-  hesitation_points?: HesitationPointsReport;
-  buyer_profile?: BuyerProfileReport;
-  vocab_gap?: VocabGapReport;
-  promise_reality?: PromiseRealityReport;
+  'title-keywords'?: TitleKeywordsReport;
+  'selling-points'?: SellingPointsReport;
+  'fatal-flaws'?: FatalFlawsReport;
+  'wow-moments'?: WowMomentsReport;
+  'hesitation-points'?: HesitationPointsReport;
+  'buyer-profile'?: BuyerProfileReport;
+  'vocab-gap'?: VocabGapReport;
+  'promise-reality'?: PromiseRealityReport;
 }
 
 /**
@@ -172,7 +172,7 @@ export const SAMPLE_ANALYSIS_REPORT: FullAnalysisReport = {
   analysis_timestamp: "2026-02-10T19:30:00.000Z",
   market: "DE",
   
-  title_keywords: {
+  'title-keywords': {
     primary_keywords: [
       { keyword: "Perfume Men", weight: "high", search_volume_estimate: "极高 - 核心类目词" },
       { keyword: "Cologne for Men", weight: "high", search_volume_estimate: "极高 - 美式叫法" },
@@ -204,7 +204,7 @@ export const SAMPLE_ANALYSIS_REPORT: FullAnalysisReport = {
     ]
   },
 
-  selling_points: {
+  'selling-points': {
     bullet_analysis: [
       {
         bullet_index: 1,
@@ -270,7 +270,7 @@ export const SAMPLE_ANALYSIS_REPORT: FullAnalysisReport = {
     }
   },
 
-  fatal_flaws: {
+  'fatal-flaws': {
     critical_issues: [
       {
         issue: "产品真实性遭严重质疑",
@@ -329,7 +329,7 @@ export const SAMPLE_ANALYSIS_REPORT: FullAnalysisReport = {
     }
   },
 
-  wow_moments: {
+  'wow-moments': {
     moments: [
       {
         moment_description: "开瓶闻香的第一印象",
@@ -378,7 +378,7 @@ export const SAMPLE_ANALYSIS_REPORT: FullAnalysisReport = {
     ]
   },
 
-  hesitation_points: {
+  'hesitation-points': {
     hesitations: [
       {
         pre_purchase_worry: "香味是否真的好闻？",
@@ -437,7 +437,7 @@ export const SAMPLE_ANALYSIS_REPORT: FullAnalysisReport = {
     ]
   },
 
-  buyer_profile: {
+  'buyer-profile': {
     demographics: {
       likely_gender: "male",
       age_range_estimate: "25-40岁",
@@ -503,7 +503,7 @@ export const SAMPLE_ANALYSIS_REPORT: FullAnalysisReport = {
     }
   },
 
-  vocab_gap: {
+  'vocab-gap': {
     seller_terms: [
       "Long Lasting", "Aromatic Woody", "Nightclub Essential", "Daily Elegance",
       "Premium", "Elegant", "6+ hours", "Gentle formula", "Brand Reputation"
@@ -569,7 +569,7 @@ export const SAMPLE_ANALYSIS_REPORT: FullAnalysisReport = {
     }
   },
 
-  promise_reality: {
+  'promise-reality': {
     gaps: [
       {
         listing_claim: "持久留香超过6小时 (mehr als 6 Stunden)",

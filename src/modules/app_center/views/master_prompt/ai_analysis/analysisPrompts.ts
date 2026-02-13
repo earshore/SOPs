@@ -44,7 +44,7 @@ Instructions:
 Input Title: {{productTitle}}
 `,
     schemaTemplate: `
-"title_keywords": {
+"title-keywords": {
   "primary_keywords": [{"keyword": "string", "weight": "high|medium|low", "search_volume_estimate": "string"}],
   "secondary_keywords": [{"keyword": "string", "type": "feature|material|size", "importance": "string"}],
   "scene_keywords": [{"keyword": "string", "usage_context": "string"}],
@@ -75,7 +75,7 @@ Input Bullet Points:
 {{featureBullets}}
 `,
     schemaTemplate: `
-"selling_points": {
+"selling-points": {
   "bullet_analysis": [
     {
       "bullet_index": 1,
@@ -122,7 +122,7 @@ Input Reviews (filtered 1-3 stars):
 {{lowStarReviews}}
 `,
     schemaTemplate: `
-"fatal_flaws": {
+"fatal-flaws": {
   "critical_issues": [
     {
       "issue": "string",
@@ -168,7 +168,7 @@ Input Reviews (5 stars only):
 {{highStarReviews}}
 `,
     schemaTemplate: `
-"wow_moments": {
+"wow-moments": {
   "moments": [
     {
       "moment_description": "string",
@@ -204,7 +204,7 @@ Input Reviews:
 {{allReviews}}
 `,
     schemaTemplate: `
-"hesitation_points": {
+"hesitation-points": {
   "hesitations": [
     {
       "pre_purchase_worry": "string",
@@ -246,7 +246,7 @@ Input Reviews:
 Reviewer Countries: {{reviewerCountries}}
 `,
     schemaTemplate: `
-"buyer_profile": {
+"buyer-profile": {
   "demographics": {
     "likely_gender": "male|female|mixed",
     "age_range_estimate": "string",
@@ -297,7 +297,7 @@ Buyer Reviews:
 {{allReviews}}
 `,
     schemaTemplate: `
-"vocab_gap": {
+"vocab-gap": {
   "seller_terms": ["string"],
   "buyer_terms": ["string"],
   "uncovered_buyer_terms": [
@@ -344,7 +344,7 @@ Customer Reviews:
 {{allReviews}}
 `,
     schemaTemplate: `
-"promise_reality": {
+"promise-reality": {
   "gaps": [
     {
       "listing_claim": "string",

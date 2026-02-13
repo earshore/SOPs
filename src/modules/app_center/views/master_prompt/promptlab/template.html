@@ -186,35 +186,43 @@
                             AI 分析报告
                             <span class="text-[10px] text-slate-400 font-normal ml-1">Insights Injection</span>
                         </h3>
-                        <div id="lab-analysis-status"
-                            class="px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 font-semibold bg-slate-100 text-slate-500 border border-slate-200">
-                            <i class="fas fa-circle-notch fa-spin text-[10px]"></i> 检测中...
+                        <div class="flex items-center gap-3">
+                            <!-- 启用竞品分析数据注入开关 -->
+                            <label class="flex items-center gap-2.5 cursor-pointer group">
+                                <span class="text-sm font-semibold text-slate-700 group-hover:text-blue-600 transition-colors">启用竞品分析数据注入</span>
+                                <div class="relative">
+                                    <input type="checkbox" id="use-analysis-data" class="sr-only peer" />
+                                    <div class="w-10 h-5.5 bg-slate-200 rounded-full peer peer-checked:bg-blue-500 transition-colors duration-200 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-[18px] after:w-[18px] after:transition-all after:duration-200 after:shadow-sm peer-checked:after:translate-x-[18px]" style="height: 22px;"></div>
+                                </div>
+                            </label>
+                            <!-- 分析报告状态 -->
+                            <div id="lab-analysis-status"
+                                class="px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 font-semibold bg-slate-100 text-slate-500 border border-slate-200">
+                                <i class="fas fa-circle-notch fa-spin text-[10px]"></i> 检测中...
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Card Body -->
                 <div class="p-6">
-                    <div class="rounded-xl border-2 border-slate-150 overflow-hidden bg-slate-50/50">
+                    <div class="rounded-xl overflow-hidden bg-slate-50/50">
                         <!-- Toggle Header -->
-                        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200 bg-white">
-                            <label class="flex items-center gap-3 cursor-pointer group">
-                                <div class="relative">
-                                    <input type="checkbox" id="use-analysis-data" class="sr-only peer" />
-                                    <div class="w-10 h-5.5 bg-slate-200 rounded-full peer peer-checked:bg-blue-500 transition-colors duration-200 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-[18px] after:w-[18px] after:transition-all after:duration-200 after:shadow-sm peer-checked:after:translate-x-[18px]" style="height: 22px;"></div>
-                                </div>
-                                <span class="text-sm font-semibold text-slate-700 group-hover:text-blue-600 transition-colors">启用竞品分析数据注入</span>
-                            </label>
+                        <div class="flex items-center justify-between px-4 py-3 bg-white">
+                            <div class="text-sm font-semibold text-slate-600">
+                                <i class="fas fa-list-check text-blue-500 mr-1.5"></i>
+                                选择注入的分析维度
+                            </div>
                             
                             <!-- 全选/清空按钮组 -->
                             <div class="flex items-center gap-2">
                                 <button data-action="amz_selectAllReportSections" title="全选"
-                                    class="px-2.5 py-1.5 flex items-center gap-1.5 rounded-lg hover:bg-blue-50 text-slate-500 hover:text-blue-600 transition-all cursor-pointer text-xs font-medium border border-transparent hover:border-blue-200">
+                                    class="px-2.5 py-1.5 flex items-center gap-1.5 rounded-lg hover:bg-blue-50 text-slate-500 hover:text-blue-600 transition-all cursor-pointer text-xs font-medium">
                                     <i class="fas fa-check-double text-[10px]"></i>
                                     <span>全选</span>
                                 </button>
                                 <button data-action="amz_clearReportSections" title="清空"
-                                    class="px-2.5 py-1.5 flex items-center gap-1.5 rounded-lg hover:bg-slate-50 text-slate-400 hover:text-slate-600 transition-all cursor-pointer text-xs font-medium border border-transparent hover:border-slate-200">
+                                    class="px-2.5 py-1.5 flex items-center gap-1.5 rounded-lg hover:bg-slate-50 text-slate-400 hover:text-slate-600 transition-all cursor-pointer text-xs font-medium">
                                     <i class="fas fa-times text-[10px]"></i>
                                     <span>清空</span>
                                 </button>
@@ -225,7 +233,7 @@
                             class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto custom-scrollbar p-4">
                             <!-- Empty State -->
                             <div class="col-span-2 flex flex-col items-center justify-center py-8">
-                                <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center mb-3 border border-slate-150">
+                                <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center mb-3">
                                     <i class="fas fa-file-circle-xmark text-slate-300 text-sm"></i>
                                 </div>
                                 <p class="text-xs text-slate-400 font-medium">暂无报告数据</p>

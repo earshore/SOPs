@@ -420,43 +420,43 @@ export function parseAnalysisReport(
   for (const targetId of targetIds) {
     switch (targetId) {
       case 'title-keywords':
-        if (report.title_keywords) {
-          results.push(parseTitleKeywords(report.title_keywords));
+        if (report['title-keywords']) {
+          results.push(parseTitleKeywords(report['title-keywords']));
         }
         break;
       case 'selling-points':
-        if (report.selling_points) {
-          results.push(parseSellingPoints(report.selling_points));
+        if (report['selling-points']) {
+          results.push(parseSellingPoints(report['selling-points']));
         }
         break;
       case 'fatal-flaws':
-        if (report.fatal_flaws) {
-          results.push(parseFatalFlaws(report.fatal_flaws));
+        if (report['fatal-flaws']) {
+          results.push(parseFatalFlaws(report['fatal-flaws']));
         }
         break;
       case 'wow-moments':
-        if (report.wow_moments) {
-          results.push(parseWowMoments(report.wow_moments));
+        if (report['wow-moments']) {
+          results.push(parseWowMoments(report['wow-moments']));
         }
         break;
       case 'hesitation-points':
-        if (report.hesitation_points) {
-          results.push(parseHesitationPoints(report.hesitation_points));
+        if (report['hesitation-points']) {
+          results.push(parseHesitationPoints(report['hesitation-points']));
         }
         break;
       case 'buyer-profile':
-        if (report.buyer_profile) {
-          results.push(parseBuyerProfile(report.buyer_profile));
+        if (report['buyer-profile']) {
+          results.push(parseBuyerProfile(report['buyer-profile']));
         }
         break;
       case 'vocab-gap':
-        if (report.vocab_gap) {
-          results.push(parseVocabGap(report.vocab_gap));
+        if (report['vocab-gap']) {
+          results.push(parseVocabGap(report['vocab-gap']));
         }
         break;
       case 'promise-reality':
-        if (report.promise_reality) {
-          results.push(parsePromiseReality(report.promise_reality));
+        if (report['promise-reality']) {
+          results.push(parsePromiseReality(report['promise-reality']));
         }
         break;
     }
