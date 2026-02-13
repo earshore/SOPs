@@ -1,61 +1,68 @@
-<!-- AI智能分析模块 - 完整还原版本 -->
+<!-- AI智能分析模块 -->
 <div x-data="aiAnalysisPanel" class="ai-analysis-wrapper">
   
-  <!-- Header 区域 -->
-  <header class="ai-header">
-    <div class="ai-header-bg"></div>
-    <div class="ai-header-glow-1"></div>
-    <div class="ai-header-glow-2"></div>
-    <div class="ai-header-grid"></div>
-    
-    <div class="ai-header-content">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-6">
-          <!-- Logo -->
-          <div class="relative group">
-            <div class="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl blur-xl opacity-60"></div>
-            <div class="relative bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-5 rounded-2xl shadow-2xl border border-white/10">
-              <i class="fa-solid fa-brain text-white text-3xl"></i>
+  <!-- Welcome Banner -->
+  <div class="mb-8">
+    <div class="relative rounded-2xl border border-slate-200/60 overflow-hidden bg-white">
+      <!-- 背景装饰 -->
+      <div class="absolute inset-0 bg-gradient-to-br from-indigo-50/80 via-white to-purple-50/60"></div>
+      <div class="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-indigo-100/40 to-purple-200/30 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+      <div class="absolute bottom-0 left-0 w-72 h-72 bg-gradient-to-tr from-purple-100/40 to-indigo-100/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4"></div>
+      
+      <!-- 动态网格装饰 -->
+      <div class="absolute inset-0 opacity-[0.03]" style="background-image: radial-gradient(circle, #6366f1 1px, transparent 1px); background-size: 24px 24px;"></div>
+      
+      <!-- 浮动粒子装饰 -->
+      <div class="absolute top-8 right-24 w-2 h-2 rounded-full bg-indigo-300/60 animate-pulse"></div>
+      <div class="absolute top-16 right-48 w-1.5 h-1.5 rounded-full bg-purple-300/50 animate-pulse" style="animation-delay: 0.5s;"></div>
+      <div class="absolute bottom-12 right-36 w-1 h-1 rounded-full bg-pink-300/60 animate-pulse" style="animation-delay: 1s;"></div>
+
+      <div class="relative z-10 p-8 md:p-10">
+        <div class="flex items-start gap-5">
+          <!-- Icon -->
+          <div class="relative flex-shrink-0">
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/25">
+              <i class="fa-solid fa-brain text-[22px] text-white"></i>
+            </div>
+            <div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-400 border-2 border-white flex items-center justify-center">
+              <i class="fa-solid fa-microchip text-[8px] text-white"></i>
             </div>
           </div>
-          <!-- 标题 -->
-          <div>
-            <h1 class="text-4xl font-extrabold text-white tracking-tight flex items-center gap-3">
-              Insight<span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">AI</span>
-              <span class="text-xs bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-2 py-1 rounded-full font-semibold tracking-wider">PRO</span>
-            </h1>
-            <p class="text-slate-400 text-sm mt-2 flex items-center gap-3">
-              <span class="flex items-center gap-1.5">
-                <i class="fa-solid fa-rocket text-indigo-400"></i>
-                亚马逊产品智能分析平台
+          <!-- <i class="fa-solid fa-microchip w-4 h-4 text-cyan-400"></i> -->
+          <!-- Content -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-3 mb-2">
+              <h2 class="text-xl font-bold text-slate-800 tracking-tight">
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">AI</span> 
+                智能分析</h2>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-sm">
+                <i class="fa-solid fa-sparkles mr-1 text-[8px]"></i>PRO
               </span>
-              <span class="w-1 h-1 bg-slate-600 rounded-full"></span>
-              <span class="flex items-center gap-1.5">
-                <i class="fa-solid fa-chart-line text-purple-400"></i>
-                Listings & Reviews 深度洞察
-              </span>
+            </div>
+            <p class="text-slate-500 text-sm leading-relaxed max-w-2xl">
+              基于大语言模型的 Listings & Reviews 深度洞察，从标题关键词到用户评论，全方位解构产品竞争力。
             </p>
-          </div>
-        </div>
-        <!-- 状态指示器 -->
-        <div class="flex items-center gap-6">
-          <div class="hidden lg:flex items-center gap-6 text-sm">
-            <div class="flex items-center gap-2 text-slate-400 bg-slate-800/50 px-4 py-2 rounded-full border border-slate-700/50">
-              <i class="fa-solid fa-microchip text-cyan-400"></i>
-              <span>GPT-4 Turbo</span>
+            
+            <!-- Quick Stats -->
+            <div class="flex items-center gap-5 mt-4">
+              <div class="flex items-center gap-1.5">
+                <div class="w-1.5 h-1.5 rounded-full bg-indigo-400"></div>
+                <span class="text-xs text-slate-400">支持 <span class="font-semibold text-slate-600">Listings & Reviews</span> 分析维度</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <div class="w-1.5 h-1.5 rounded-full bg-purple-400"></div>
+                <span class="text-xs text-slate-400">AI 大模型驱动</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
+                <span class="text-xs text-slate-400">一键导出报告</span>
+              </div>
             </div>
-          </div>
-          <div class="flex items-center gap-2.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-5 py-2.5 rounded-full text-sm font-semibold backdrop-blur-sm">
-            <span class="relative flex h-2.5 w-2.5">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400"></span>
-            </span>
-            AI 引擎就绪
           </div>
         </div>
       </div>
     </div>
-  </header>
+  </div>
 
   <!-- Main Content -->
   <main class="ai-main-content">
@@ -594,7 +601,20 @@
                   </div>
                 </div>
                 <div>
-                  <h2 class="text-3xl font-extrabold text-white tracking-tight">分析报告</h2>
+                  <div class="flex items-center gap-3">
+                    <h2 class="text-3xl font-extrabold text-white tracking-tight">分析报告</h2>
+                    <!-- 导出按钮组 -->
+                    <div class="inline-flex rounded-lg border border-slate-600/50 overflow-hidden bg-slate-800/50">
+                      <button @click="copyMarkdown()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs text-slate-300 hover:text-white hover:bg-slate-700/50 transition-colors border-r border-slate-600/50">
+                        <i class="fa-solid fa-copy"></i>
+                        <span>Markdown</span>
+                      </button>
+                      <button @click="downloadJson()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs text-slate-300 hover:text-white hover:bg-slate-700/50 transition-colors">
+                        <i class="fa-solid fa-download"></i>
+                        <span>JSON</span>
+                      </button>
+                    </div>
+                  </div>
                   <p class="text-slate-400 text-sm mt-1 flex items-center gap-2">
                     <span class="font-mono bg-slate-700/50 px-2 py-0.5 rounded text-slate-300" x-text="selectedAsins.join(', ')"></span>
                     <span class="w-1 h-1 bg-slate-600 rounded-full"></span>
@@ -610,8 +630,10 @@
                   </div>
                   <div class="w-px h-14 bg-slate-700"></div>
                   <div class="text-center">
-                    <div class="text-4xl font-extrabold text-emerald-400">100%</div>
-                    <div class="text-slate-400 text-xs uppercase tracking-wider mt-1">完成度</div>
+                    <div class="inline-flex items-center gap-2 bg-emerald-500/20 text-emerald-400 px-4 py-2 rounded-full border border-emerald-500/30">
+                      <i class="fa-solid fa-circle-check"></i>
+                      <span class="text-sm font-bold">已完成</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -626,7 +648,7 @@
                   </div>
                   <div>
                     <div class="text-xl font-bold text-white" x-text="listingsResults.length"></div>
-                    <div class="text-xs text-slate-400">Listings 分析</div>
+                    <div class="text-xs text-slate-400">Listings 维度</div>
                   </div>
                 </div>
               </div>
@@ -637,7 +659,7 @@
                   </div>
                   <div>
                     <div class="text-xl font-bold text-white" x-text="reviewsResults.length"></div>
-                    <div class="text-xs text-slate-400">Reviews 分析</div>
+                    <div class="text-xs text-slate-400">Reviews 维度</div>
                   </div>
                 </div>
               </div>
@@ -935,20 +957,5 @@
     </template>
 
   </main>
-
-  <!-- Footer -->
-  <footer class="ai-footer">
-    <div class="ai-footer-content">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
-            <span class="text-white font-bold text-xs">AI</span>
-          </div>
-          <span class="text-sm text-slate-600 font-medium">InsightAI 智能分析平台</span>
-        </div>
-        <p class="text-sm text-slate-400">基于大语言模型的电商产品洞察工具 · 让数据驱动决策</p>
-      </div>
-    </div>
-  </footer>
 
 </div>

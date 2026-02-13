@@ -510,6 +510,156 @@ function createAiAnalysisPanel() {
       });
     },
 
+    /**
+     * 复制 Markdown 格式报告
+     */
+    copyMarkdown() {
+      if (this.results.length === 0) {
+        showToast('没有可复制的报告', 'warning');
+        return;
+      }
+
+      const markdown = this.generateMarkdownReport();
+      navigator.clipboard.writeText(markdown).then(() => {
+        showToast('Markdown 报告已复制', 'success');
+      }).catch(() => {
+        showToast('复制失败', 'error');
+      });
+    },
+
+    /**
+     * 下载 JSON 格式报告
+     */
+    downloadJson() {
+      if (this.results.length === 0) {
+        showToast('没有可下载的报告', 'warning');
+        return;
+      }
+
+      const reportData = {
+        metadata: {
+          asins: this.selectedAsins,
+          targets: this.selectedTargets,
+          timestamp: new Date().toISOString(),
+          dataSource: this.dataSource,
+          marketplace: this.dataSourceMarketplace
+        },
+        results: this.results,
+        analysisReport: this.analysisReport
+      };
+
+      const json = JSON.stringify(reportData, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `analysis-report-${this.selectedAsins.join('-')}-${Date.now()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      showToast('JSON 报告已下载', 'success');
+    },
+
+    /**
+     * 生成 Markdown 格式报告
+     */
+    generateMarkdownReport(): string {
+      const lines: string[] = [];
+      
+      // 标题
+      lines.push('# AI 智能分析报告\n');
+      lines.push(`**产品 ASIN**: ${this.selectedAsins.join(', ')}\n`);
+      lines.push(`**分析时间**: ${new Date().toLocaleString('zh-CN')}\n`);
+      lines.push(`**市场**: ${this.dataSourceMarketplace}\n`);
+      lines.push(`**数据源**: ${this.dataSourceLabel}\n`);
+      lines.push('\n---\n');
+      
+      // Listings 分析结果
+      const listingsResults = this.listingsResults;
+      if (listingsResults.length > 0) {
+        lines.push('\n## 📦 Listings 分析\n');
+        for (const result of listingsResults) {
+          lines.push(`\n### ${result.title}\n`);
+          
+          // 统计数据
+          if (result.stats && result.stats.length > 0) {
+            lines.push('\n**统计数据**:\n');
+            for (const stat of result.stats) {
+              lines.push(`- ${stat.label}: ${stat.value}`);
+            }
+            lines.push('');
+          }
+          
+          // 核心发现
+          if (result.highlights && result.highlights.length > 0) {
+            lines.push('\n**核心发现**:\n');
+            for (const highlight of result.highlights) {
+              lines.push(`- ${highlight.text}`);
+            }
+            lines.push('');
+          }
+          
+          // 详细分析
+          if (result.details && result.details.length > 0) {
+            lines.push('\n**详细分析**:\n');
+            for (const detail of result.details) {
+              lines.push(`\n#### ${detail.category}\n`);
+              for (const item of detail.items) {
+                lines.push(`- ${item}`);
+              }
+            }
+            lines.push('');
+          }
+        }
+      }
+      
+      // Reviews 分析结果
+      const reviewsResults = this.reviewsResults;
+      if (reviewsResults.length > 0) {
+        lines.push('\n## ⭐ Reviews 分析\n');
+        for (const result of reviewsResults) {
+          lines.push(`\n### ${result.title}\n`);
+          
+          // 统计数据
+          if (result.stats && result.stats.length > 0) {
+            lines.push('\n**统计数据**:\n');
+            for (const stat of result.stats) {
+              lines.push(`- ${stat.label}: ${stat.value}`);
+            }
+            lines.push('');
+          }
+          
+          // 核心发现
+          if (result.highlights && result.highlights.length > 0) {
+            lines.push('\n**核心发现**:\n');
+            for (const highlight of result.highlights) {
+              lines.push(`- ${highlight.text}`);
+            }
+            lines.push('');
+          }
+          
+          // 详细分析
+          if (result.details && result.details.length > 0) {
+            lines.push('\n**详细分析**:\n');
+            for (const detail of result.details) {
+              lines.push(`\n#### ${detail.category}\n`);
+              for (const item of detail.items) {
+                lines.push(`- ${item}`);
+              }
+            }
+            lines.push('');
+          }
+        }
+      }
+      
+      lines.push('\n---\n');
+      lines.push(`\n*报告生成于 ${new Date().toLocaleString('zh-CN')}*\n`);
+      
+      return lines.join('\n');
+    },
+
     async runAnalysis() {
       if (!this.canAnalyze) return;
 

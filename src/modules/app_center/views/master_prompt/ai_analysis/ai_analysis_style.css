@@ -1,5 +1,5 @@
 /**
- * AI智能分析模块专属样式 - 完整还原版本
+ * AI智能分析模块专属样式
  */
 
 /* ========== 容器样式 ========== */
@@ -10,76 +10,9 @@
 }
 
 .ai-main-content {
-  max-width: 1280px;
+  max-width: 1450px;
   margin: 0 auto;
-  padding: 2rem 1.5rem;
-}
-
-/* ========== Header 样式 ========== */
-.ai-header {
-  position: relative;
-  overflow: hidden;
-  margin-bottom: 2rem;
-}
-
-.ai-header-bg {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to right, #0f172a, #312e81, #0f172a);
-}
-
-.ai-header-glow-1 {
-  position: absolute;
-  top: 0;
-  left: 25%;
-  width: 500px;
-  height: 500px;
-  background: rgba(99, 102, 241, 0.3);
-  border-radius: 50%;
-  filter: blur(120px);
-  animation: pulse 3s ease-in-out infinite;
-}
-
-.ai-header-glow-2 {
-  position: absolute;
-  bottom: 0;
-  right: 25%;
-  width: 400px;
-  height: 400px;
-  background: rgba(168, 85, 247, 0.2);
-  border-radius: 50%;
-  filter: blur(100px);
-}
-
-.ai-header-grid {
-  position: absolute;
-  inset: 0;
-  opacity: 0.05;
-  background-image: 
-    linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px);
-  background-size: 50px 50px;
-}
-
-.ai-header-content {
-  position: relative;
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2.5rem 1.5rem;
-}
-
-/* ========== Footer 样式 ========== */
-.ai-footer {
-  border-top: 1px solid rgba(226, 232, 240, 0.6);
-  margin-top: 4rem;
-  background: rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(12px);
-}
-
-.ai-footer-content {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem 1.5rem;
+  padding: 0 1rem;
 }
 
 /* ========== 动画效果 ========== */
