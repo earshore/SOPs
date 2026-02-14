@@ -322,7 +322,10 @@ async function checkAuthentication(): Promise<boolean> {
  */
 export function createAuthGuard(isAuthenticated: () => boolean) {
   return (to: Route, _from: Route | null, next: (allowed: boolean) => void) => {
-    if (to.config?.meta?.requiresAuth && !isAuthenticated()) {
+    // 兼容测试中的简化路由对象
+    const requiresAuth = to.config?.meta?.requiresAuth || (to as any).meta?.requiresAuth;
+    
+    if (requiresAuth && !isAuthenticated()) {
       console.warn('[RouteGuard] 需要认证，导航被拦截');
       next(false);
       return;
@@ -337,7 +340,8 @@ export function createAuthGuard(isAuthenticated: () => boolean) {
  */
 export function createPreloadGuard() {
   return async (to: Route, _from: Route | null, next: (allowed: boolean) => void) => {
-    const preloadFn = to.config?.meta?.preload;
+    // 兼容测试中的简化路由对象
+    const preloadFn = to.config?.meta?.preload || (to as any).meta?.preload;
     
     if (preloadFn && typeof preloadFn === 'function') {
       try {

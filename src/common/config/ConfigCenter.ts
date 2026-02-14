@@ -27,6 +27,39 @@ export interface ApiConfig {
 }
 
 /**
+ * 爬虫服务配置
+ */
+export interface ScraperConfig {
+  requestTimeout: number;
+  maxConcurrent: number;
+  maxRetries: number;
+  retryDelay: number;
+  batchSize: number;
+  batchDelay: number;
+  cacheDuration: number;
+}
+
+/**
+ * LLM服务配置
+ */
+export interface LLMConfig {
+  defaultTimeout: number;
+  analysisTimeout: number;
+  testConnectionTimeout: number;
+  maxRetries: number;
+  retryDelay: number;
+}
+
+/**
+ * 历史记录配置
+ */
+export interface HistoryConfig {
+  maxItems: number;
+  maxEventHistory: number;
+  maxSearchHistory: number;
+}
+
+/**
  * 性能配置
  */
 export interface PerformanceConfig {
@@ -54,6 +87,9 @@ export interface AppConfig {
   performance: PerformanceConfig;
   features: FeatureFlags;
   routes: MenuConfig;
+  scraper: ScraperConfig;
+  llm: LLMConfig;
+  history: HistoryConfig;
 }
 
 /**
@@ -138,7 +174,28 @@ export class ConfigCenter {
         enableBetaFeatures: env === 'development',
         enableDebugMode: env === 'development'
       },
-      routes: {} as MenuConfig // 将在后续加载
+      routes: {} as MenuConfig, // 将在后续加载
+      scraper: {
+        requestTimeout: 15000,
+        maxConcurrent: 2,
+        maxRetries: 3,
+        retryDelay: 500,
+        batchSize: 3,
+        batchDelay: 1500,
+        cacheDuration: 24 * 60 * 60 * 1000 // 24小时
+      },
+      llm: {
+        defaultTimeout: 30000,
+        analysisTimeout: 120000,
+        testConnectionTimeout: 15000,
+        maxRetries: 2,
+        retryDelay: 1000
+      },
+      history: {
+        maxItems: 20,
+        maxEventHistory: 100,
+        maxSearchHistory: 10
+      }
     };
   }
 
@@ -157,6 +214,14 @@ export class ConfigCenter {
             enableMonitoring: true,
             enableDevTools: true,
             logLevel: 'debug'
+          },
+          scraper: {
+            requestTimeout: 30000,
+            maxRetries: 1
+          },
+          llm: {
+            defaultTimeout: 60000,
+            analysisTimeout: 180000
           }
         } as Partial<AppConfig>;
         
@@ -170,6 +235,14 @@ export class ConfigCenter {
             enableMonitoring: true,
             enableDevTools: false,
             logLevel: 'error'
+          },
+          scraper: {
+            requestTimeout: 15000,
+            maxRetries: 3
+          },
+          llm: {
+            defaultTimeout: 30000,
+            analysisTimeout: 120000
           }
         } as Partial<AppConfig>;
         
@@ -183,6 +256,14 @@ export class ConfigCenter {
             enableMonitoring: false,
             enableDevTools: false,
             logLevel: 'warn'
+          },
+          scraper: {
+            requestTimeout: 5000,
+            maxRetries: 0
+          },
+          llm: {
+            defaultTimeout: 5000,
+            analysisTimeout: 10000
           }
         } as Partial<AppConfig>;
         
@@ -200,7 +281,10 @@ export class ConfigCenter {
       api: { ...base.api, ...override.api },
       performance: { ...base.performance, ...override.performance },
       features: { ...base.features, ...override.features },
-      routes: override.routes || base.routes
+      routes: override.routes || base.routes,
+      scraper: { ...base.scraper, ...override.scraper },
+      llm: { ...base.llm, ...override.llm },
+      history: { ...base.history, ...override.history }
     };
   }
 

@@ -5,16 +5,17 @@
 
 import state from "../../../../../common/state";
 import { StorageService, STORAGE_KEYS } from "../../../../../services/storageService";
-import type { HistoryItem } from "../../../../../types/modules-business";
+import { configCenter } from '../../../../../common/config/ConfigCenter';
+import type { HistoryItem, ScrapedProduct, ScrapedData, AnalysisReport } from "../../../../../types/modules-business";
 
-const MAX_HISTORY_ITEMS = 20; // 限制只存最近20条
+const MAX_HISTORY_ITEMS = configCenter.get<number>('history.maxItems') || 20;
 
 // ----------------------------------------
 // 类型定义
 // ----------------------------------------
 
 interface CachedProduct {
-  product: any;
+  product: ScrapedProduct;
   timestamp: string;
 }
 
@@ -41,7 +42,7 @@ export const HistoryService = {
    * @param data 抓取的数据
    * @param report 分析报告(可选)
    */
-  save(data: any, report: any): HistoryItem[] {
+  save(data: ScrapedData, report?: AnalysisReport): HistoryItem[] {
     const history = this.getAll();
     // 使用当前 state 中的 ID，如果是新抓取则用时间戳生成新 ID
     const rawId = state.scraper.currentHistoryId || Date.now();
@@ -51,7 +52,7 @@ export const HistoryService = {
       id: id,
       timestamp: data.metadata?.scrape_timestamp || new Date().toISOString(),
       site: data.metadata?.marketplace || state.scraper?.selectedSite || 'US',
-      asins: data.products?.map((p: any) => p.asin) || [],
+      asins: data.products?.map(p => p.asin) || [],
       data,
       report,
     };
@@ -104,7 +105,7 @@ export const HistoryService = {
       // 2. 检查该任务是否包含此 ASIN 且状态为 success
       if (record.data && record.data.products) {
         const product = record.data.products.find(
-          (p: any) => p.asin === asin && p.scrape_status === "success"
+          p => p.asin === asin && p.scrape_status === "success"
         );
 
         if (product) {
@@ -124,7 +125,7 @@ export const HistoryService = {
    * @param id - 历史记录ID
    * @param analysisReport - 分析报告数据
    */
-  updateAnalysisStatus(id: number | string, analysisReport: any): boolean {
+  updateAnalysisStatus(id: number | string, analysisReport: AnalysisReport): boolean {
     try {
       const history = this.getAll();
       const targetIndex = history.findIndex((h) => h.id === Number(id));

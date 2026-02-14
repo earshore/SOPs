@@ -15,7 +15,7 @@ describe('App Center Overview - Property Tests', () => {
         
         it('应该导出mount、unmount和scrollToModule三个函数', async () => {
             // 动态导入overview模块
-            const overviewModule = await import('@/modules/app_center/views/overview/index.js');
+            const overviewModule = await import('@/modules/app_center/views/overview/index');
             
             // 验证三个必需函数存在
             expect(overviewModule).toHaveProperty('mount');
@@ -29,7 +29,7 @@ describe('App Center Overview - Property Tests', () => {
         });
         
         it('mount函数应该是异步函数或返回Promise', async () => {
-            const overviewModule = await import('@/modules/app_center/views/overview/index.js');
+            const overviewModule = await import('@/modules/app_center/views/overview/index');
             
             // 创建一个测试容器
             const testContainer = document.createElement('div');
@@ -43,14 +43,14 @@ describe('App Center Overview - Property Tests', () => {
         });
         
         it('unmount函数应该可以被调用而不抛出错误', async () => {
-            const overviewModule = await import('@/modules/app_center/views/overview/index.js');
+            const overviewModule = await import('@/modules/app_center/views/overview/index');
             
             // unmount应该可以安全调用
             expect(() => overviewModule.unmount()).not.toThrow();
         });
         
         it('scrollToModule函数应该接受字符串参数', async () => {
-            const overviewModule = await import('@/modules/app_center/views/overview/index.js');
+            const overviewModule = await import('@/modules/app_center/views/overview/index');
             
             // 使用fast-check生成随机字符串进行测试（最少100次迭代）
             await fc.assert(
@@ -72,8 +72,8 @@ describe('App Center Overview - Property Tests', () => {
                     fc.constant(null),
                     async () => {
                         // 每次都重新导入模块
-                        const module1 = await import('@/modules/app_center/views/overview/index.js');
-                        const module2 = await import('@/modules/app_center/views/overview/index.js');
+                        const module1 = await import('@/modules/app_center/views/overview/index');
+                        const module2 = await import('@/modules/app_center/views/overview/index');
                         
                         // 验证两次导入的接口一致
                         expect(typeof module1.mount).toBe(typeof module2.mount);
@@ -91,7 +91,7 @@ describe('App Center Overview - Property Tests', () => {
         });
         
         it('mount函数应该接受HTMLElement类型的容器参数', async () => {
-            const overviewModule = await import('@/modules/app_center/views/overview/index.js');
+            const overviewModule = await import('@/modules/app_center/views/overview/index');
             
             // 使用fast-check生成不同类型的DOM元素（最少100次迭代）
             await fc.assert(
@@ -113,7 +113,7 @@ describe('App Center Overview - Property Tests', () => {
         });
         
         it('mount函数应该拒绝无效的容器参数', async () => {
-            const overviewModule = await import('@/modules/app_center/views/overview/index.js');
+            const overviewModule = await import('@/modules/app_center/views/overview/index');
             
             // 使用fast-check生成各种无效输入（最少100次迭代）
             await fc.assert(
@@ -136,7 +136,7 @@ describe('App Center Overview - Property Tests', () => {
         });
         
         it('scrollToModule函数应该处理空字符串和null值', async () => {
-            const overviewModule = await import('@/modules/app_center/views/overview/index.js');
+            const overviewModule = await import('@/modules/app_center/views/overview/index');
             
             // 使用fast-check测试边界情况（最少100次迭代）
             await fc.assert(
@@ -156,7 +156,7 @@ describe('App Center Overview - Property Tests', () => {
         });
         
         it('所有导出的函数都应该有明确的参数签名', async () => {
-            const overviewModule = await import('@/modules/app_center/views/overview/index.js');
+            const overviewModule = await import('@/modules/app_center/views/overview/index');
             
             // 验证函数参数数量
             expect(overviewModule.mount.length).toBe(1); // mount(container)
@@ -165,7 +165,7 @@ describe('App Center Overview - Property Tests', () => {
         });
         
         it('模块应该只导出必需的三个函数，不暴露内部实现', async () => {
-            const overviewModule = await import('@/modules/app_center/views/overview/index.js');
+            const overviewModule = await import('@/modules/app_center/views/overview/index');
             
             // 获取所有导出的成员
             const exports = Object.keys(overviewModule);
@@ -191,7 +191,7 @@ describe('App Center Overview - Property Tests', () => {
         
         beforeEach(async () => {
             // 在每个测试前导入模块
-            overviewModule = await import('@/modules/app_center/views/overview/index.js');
+            overviewModule = await import('@/modules/app_center/views/overview/index');
         });
         
         afterEach(() => {
@@ -474,7 +474,7 @@ describe('App Center Overview - Property Tests', () => {
         
         beforeEach(async () => {
             // 在每个测试前导入模块
-            overviewModule = await import('@/modules/app_center/views/overview/index.js');
+            overviewModule = await import('@/modules/app_center/views/overview/index');
         });
         
         afterEach(() => {
@@ -914,7 +914,7 @@ describe('App Center Overview - Property Tests', () => {
         
         beforeEach(async () => {
             // 在每个测试前导入模块
-            overviewModule = await import('@/modules/app_center/views/overview/index.js');
+            overviewModule = await import('@/modules/app_center/views/overview/index');
         });
         
         afterEach(() => {

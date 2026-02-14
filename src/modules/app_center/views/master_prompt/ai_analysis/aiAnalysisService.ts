@@ -4,6 +4,7 @@
 
 import { callLLM, type ChatMessage } from '../../../../../services/llmService';
 import { StorageService, STORAGE_KEYS } from '../../../../../services/storageService';
+import { configCenter } from '../../../../../common/config/ConfigCenter';
 import type { FullAnalysisReport } from './analysisReportData';
 import { parseAnalysisReport } from './analysisService';
 import type { Product } from './sampleData';
@@ -89,8 +90,8 @@ async function analyzeTarget(
       {
         temperature: 0.3,
         jsonMode: true,
-        timeout: 120000, // 2分钟超时
-        retries: 2
+        timeout: configCenter.get<number>('llm.analysisTimeout') || 120000,
+        retries: configCenter.get<number>('llm.maxRetries') || 2
       }
     );
 

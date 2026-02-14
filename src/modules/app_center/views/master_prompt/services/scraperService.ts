@@ -9,6 +9,7 @@ import { parseProductPage, parseReviews } from "./parserService";
 import { sleep, getErrorSummary } from '../../../../../common/ui';
 import { HistoryService } from "./historyService";
 import { StorageService } from "../../../../../services/storageService";
+import { configCenter } from '../../../../../common/config/ConfigCenter';
 import type {
   ProxyConfig,
   FetchOptions,
@@ -17,13 +18,13 @@ import type {
   ScraperSite
 } from '@/types/modules-business';
 
-const CACHE_DURATION_MS = 24 * 60 * 60 * 1000;
+const CACHE_DURATION_MS = configCenter.get<number>('scraper.cacheDuration') || 24 * 60 * 60 * 1000;
 
 // ----------------------------------------
 // 请求超时控制器
 // ----------------------------------------
 
-const REQUEST_TIMEOUT_MS = 15000; // 15秒超时，防止请求永久挂起
+const REQUEST_TIMEOUT_MS = configCenter.get<number>('scraper.requestTimeout') || 15000;
 
 function fetchWithTimeout(url: string, options: RequestInit = {}, timeout: number = REQUEST_TIMEOUT_MS): Promise<Response> {
     const controller = new AbortController();
@@ -62,7 +63,7 @@ class RequestPool {
     }
 }
 
-const requestPool = new RequestPool(2); // 最多2个并发
+const requestPool = new RequestPool(configCenter.get<number>('scraper.maxConcurrent') || 2);
 
 // ----------------------------------------
 // URL 策略
@@ -111,11 +112,17 @@ function constructFetchUrl(targetUrl: string, proxyConfig: ProxyConfig): string 
 // ----------------------------------------
 
 async function fetchWithProxy(url: string, site: string, options: FetchOptions = {}): Promise<string> {
+    const scraperConfig = {
+        retries: configCenter.get<number>('scraper.maxRetries') || 3,
+        delay: configCenter.get<number>('scraper.retryDelay') || 500,
+        timeout: configCenter.get<number>('scraper.requestTimeout') || REQUEST_TIMEOUT_MS
+    };
+
     const {
-        retries = 3,
-        delay = 500,
+        retries = scraperConfig.retries,
+        delay = scraperConfig.delay,
         proxyConfig = {},
-        timeout = REQUEST_TIMEOUT_MS
+        timeout = scraperConfig.timeout
     } = options;
 
     const headers = LANGUAGE_HEADERS[site];
@@ -276,7 +283,11 @@ export async function scrapeAsin(
         console.warn("缓存读取失败，转为网络请求");
     }
 
-    const fetchOptions: FetchOptions = { retries: 3, delay: 500, proxyConfig };
+    const fetchOptions: FetchOptions = { 
+        retries: configCenter.get<number>('scraper.maxRetries') || 3, 
+        delay: configCenter.get<number>('scraper.retryDelay') || 500, 
+        proxyConfig 
+    };
     const lang = LANGUAGE_HEADERS[site];
     const baseUrl = `https://www.${lang.domain}/dp/${asin}`;
 
@@ -291,7 +302,7 @@ export async function scrapeAsin(
         error: "",
     };
 
-    const MAX_TASK_RETRIES = 3;
+    const MAX_TASK_RETRIES = configCenter.get<number>('scraper.maxRetries') || 3;
 
     for (let attempt = 1; attempt <= MAX_TASK_RETRIES; attempt++) {
         try {
@@ -363,8 +374,8 @@ export async function scrapeMultipleAsins(
     scrapeReviews: boolean, 
     updateStatusCallback: StatusCallback
 ): Promise<ScrapedProduct[]> {
-    const BATCH_SIZE = 3;  // 每批3个
-    const BATCH_DELAY = 1500; // 批次间隔
+    const BATCH_SIZE = configCenter.get<number>('scraper.batchSize') || 3;
+    const BATCH_DELAY = configCenter.get<number>('scraper.batchDelay') || 1500;
 
     const results: ScrapedProduct[] = [];
 

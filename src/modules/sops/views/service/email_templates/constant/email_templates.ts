@@ -3,8 +3,38 @@
  * 覆盖欧洲10国站点的多语言客服邮件模板
  */
 
+// 类型定义
+export type LanguageCode = 'en' | 'de' | 'fr' | 'it' | 'es' | 'nl' | 'se' | 'pl' | 'be' | 'ie';
+
+export type TemplateId = 
+    | 'delivery_delay'
+    | 'damaged_product'
+    | 'refund_request'
+    | 'invoice_request'
+    | 'partial_refund'
+    | 'usage_help';
+
+export interface Site {
+    code: LanguageCode;
+    name: string;
+    flag: string;
+    active: boolean;
+}
+
+export interface TemplateCategory {
+    id: TemplateId;
+    name: string;
+    icon: string;
+    color: string;
+    badge: string;
+}
+
+export type MultiLanguageTemplate = Record<LanguageCode, string>;
+
+export type EmailTemplates = Record<TemplateId, MultiLanguageTemplate>;
+
 // 站点配置 - 10个欧洲站点
-export const SITES = [
+export const SITES: readonly Site[] = [
     { code: 'en', name: 'UK (English)', flag: '🇬🇧', active: true },
     { code: 'de', name: 'DE (Deutsch)', flag: '🇩🇪', active: false },
     { code: 'fr', name: 'FR (Français)', flag: '🇫🇷', active: false },
@@ -15,20 +45,20 @@ export const SITES = [
     { code: 'pl', name: 'PL (Polski)', flag: '🇵🇱', active: false },
     { code: 'be', name: 'BE (NL/FR)', flag: '🇧🇪', active: false },
     { code: 'ie', name: 'IE (English)', flag: '🇮🇪', active: false }
-];
+] as const;
 
 // 模板场景配置
-export const TEMPLATE_CATEGORIES = [
+export const TEMPLATE_CATEGORIES: readonly TemplateCategory[] = [
     { id: 'delivery_delay', name: '物流延误 / Delivery Delay', icon: 'fa-truck', color: 'amber', badge: '高频' },
     { id: 'damaged_product', name: '产品破损 / Damaged Product', icon: 'fa-box-open', color: 'red', badge: '关键' },
     { id: 'refund_request', name: '退款请求 / Refund Request', icon: 'fa-hand-holding-dollar', color: 'purple', badge: '' },
     { id: 'invoice_request', name: '发票索取 / Invoice Request', icon: 'fa-file-invoice', color: 'emerald', badge: '欧洲高频' },
     { id: 'partial_refund', name: '部分退款 / Partial Refund', icon: 'fa-coins', color: 'blue', badge: '挽留神器' },
     { id: 'usage_help', name: '使用咨询 / Usage Help', icon: 'fa-question-circle', color: 'indigo', badge: '' }
-];
+] as const;
 
 // 多语言模板内容
-export const EMAIL_TEMPLATES = {
+export const EMAIL_TEMPLATES: EmailTemplates = {
     // 物流延误模板
     delivery_delay: {
         en: `Dear Customer,
@@ -740,11 +770,8 @@ Kind regards,
 
 /**
  * 获取指定场景和语言的模板内容
- * @param {string} templateId - 模板场景ID
- * @param {string} langCode - 语言代码
- * @returns {string} 模板内容
  */
-export function getTemplate(templateId, langCode) {
+export function getTemplate(templateId: TemplateId, langCode: LanguageCode): string {
     const template = EMAIL_TEMPLATES[templateId];
     if (!template) return '';
     return template[langCode] || template['en'] || '';
@@ -752,11 +779,8 @@ export function getTemplate(templateId, langCode) {
 
 /**
  * 获取模板用于HTML显示（换行转<br>）
- * @param {string} templateId - 模板场景ID
- * @param {string} langCode - 语言代码
- * @returns {string} HTML格式的模板内容
  */
-export function getTemplateHtml(templateId, langCode) {
+export function getTemplateHtml(templateId: TemplateId, langCode: LanguageCode): string {
     const content = getTemplate(templateId, langCode);
     return content.replace(/\n/g, '<br />');
 }

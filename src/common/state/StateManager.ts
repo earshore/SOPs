@@ -253,8 +253,8 @@ export class StateManager<T extends StateSchema = StateSchema> {
       });
     }
     
-    // 🎯 性能优化：父路径通知优化
-    // 只在父对象真正变化时通知（通过浅比较检测）
+    // 通知父路径订阅者
+    // 当子路径变化时,父路径订阅者也应该被通知
     const parts = path.split('.');
     for (let i = parts.length - 1; i > 0; i--) {
       const parentPath = parts.slice(0, i).join('.');
@@ -262,19 +262,14 @@ export class StateManager<T extends StateSchema = StateSchema> {
       if (parentSubs && parentSubs.size > 0) {
         const parentValue = this.get(parentPath);
         
-        // 🔍 浅比较：检查父对象是否真正变化
-        // 对于对象类型，引用未变则不通知（避免不必要的重渲染）
-        const shouldNotify = typeof parentValue !== 'object' || parentValue === null;
-        
-        if (shouldNotify) {
-          parentSubs.forEach(cb => {
-            try {
-              cb(parentValue, parentValue);
-            } catch (e) {
-              console.error(`[StateManager] Parent subscriber error:`, e);
-            }
-          });
-        }
+        // 通知父路径订阅者（传递父对象的当前值）
+        parentSubs.forEach(cb => {
+          try {
+            cb(parentValue, parentValue);
+          } catch (e) {
+            console.error(`[StateManager] Parent subscriber error:`, e);
+          }
+        });
       }
     }
   }

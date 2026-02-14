@@ -5,6 +5,7 @@
 // ================================================================
 
 import { Logger } from './loggerService';
+import { configCenter } from '../common/config/ConfigCenter';
 import { priorityRequestPool, REQUEST_PRIORITY } from './PriorityRequestPool';
 
 /**
@@ -102,9 +103,9 @@ class HttpServiceClass {
 
   constructor() {
     this.defaults = {
-      timeout: 30000,
-      retries: 0,
-      retryDelay: 1000,
+      timeout: configCenter.get<number>('api.timeout') || 30000,
+      retries: configCenter.get<number>('api.retryAttempts') || 0,
+      retryDelay: configCenter.get<number>('api.retryDelay') || 1000,
       headers: {
         'Content-Type': 'application/json',
       },

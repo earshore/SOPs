@@ -369,7 +369,12 @@ class DataModule extends BaseModule {
                 state.scraper.scrapedData.metadata.total_asins = state.scraper.scrapedData.products.length;
             }
 
-            HistoryService.save(state.scraper.scrapedData, state.analysis.analysisReport);
+            HistoryService.save(
+                state.scraper.scrapedData, 
+                (state.analysis.analysisReport && typeof state.analysis.analysisReport === 'object') 
+                    ? state.analysis.analysisReport 
+                    : undefined
+            );
 
             this.renderDataPanel();
             
@@ -394,7 +399,12 @@ class DataModule extends BaseModule {
             const product = state.scraper.scrapedData.products.find((p: ScrapedProduct) => p.asin === asin);
             if (product && product.customer_reviews) {
                 product.customer_reviews.splice(index, 1);
-                HistoryService.save(state.scraper.scrapedData, state.analysis.analysisReport);
+                HistoryService.save(
+                    state.scraper.scrapedData, 
+                    (state.analysis.analysisReport && typeof state.analysis.analysisReport === 'object') 
+                        ? state.analysis.analysisReport 
+                        : undefined
+                );
                 this.renderDataPanel();
                 
                 // 触发事件通知其他模块更新
@@ -578,7 +588,7 @@ class DataModule extends BaseModule {
             };
 
             state.analysis.analysisReport = null;
-            HistoryService.save(state.scraper.scrapedData, null);
+            HistoryService.save(state.scraper.scrapedData);
 
             // 不需要切换标签页，直接渲染数据面板
             // 使用 setTimeout 确保 DOM 完全渲染后再更新内容

@@ -335,7 +335,7 @@ const ScraperPanel = () => ({
         };
 
         // 保存历史记录
-        HistoryService.save(scrapedData, null);
+        HistoryService.save(scrapedData);
         this.loadHistory();
 
         // 更新全局状态

@@ -22,9 +22,12 @@ describe('HttpService', () => {
             global.fetch.mockResolvedValueOnce({
                 ok: true,
                 json: async () => mockResponse,
+                headers: new Headers(),
             });
 
-            const result = await HttpService.get('https://api.test.com/data');
+            const result = await HttpService.get('https://api.test.com/data', {
+                measurePerformance: false,
+            });
 
             expect(global.fetch).toHaveBeenCalledWith(
                 'https://api.test.com/data',
@@ -42,9 +45,12 @@ describe('HttpService', () => {
             global.fetch.mockResolvedValueOnce({
                 ok: true,
                 json: async () => mockResponse,
+                headers: new Headers(),
             });
 
-            const result = await HttpService.post('https://api.test.com/data', postData);
+            const result = await HttpService.post('https://api.test.com/data', postData, {
+                measurePerformance: false,
+            });
 
             expect(global.fetch).toHaveBeenCalledWith(
                 'https://api.test.com/data',
@@ -60,10 +66,12 @@ describe('HttpService', () => {
             global.fetch.mockResolvedValueOnce({
                 ok: true,
                 text: async () => '<html>test</html>',
+                headers: new Headers(),
             });
 
             const result = await HttpService.request('https://api.test.com/page', {
                 json: false,
+                measurePerformance: false,
             });
 
             expect(result).toBe('<html>test</html>');
@@ -76,6 +84,8 @@ describe('HttpService', () => {
                 ok: false,
                 status: 404,
                 text: async () => 'Not Found',
+                headers: new Headers(),
+                statusText: 'Not Found',
             });
 
             await expect(
@@ -92,17 +102,18 @@ describe('HttpService', () => {
         });
 
         test('应该处理超时', async () => {
+            // Mock一个永不resolve的Promise来模拟超时
             global.fetch.mockImplementationOnce(() => 
-                new Promise((resolve) => {
-                    setTimeout(() => resolve({
-                        ok: true,
-                        json: async () => ({ data: 'test' }),
-                    }), 100);
+                new Promise(() => {
+                    // 永不resolve,让AbortController超时触发
                 })
             );
 
             await expect(
-                HttpService.get('https://api.test.com/data', { timeout: 50 })
+                HttpService.get('https://api.test.com/data', { 
+                    timeout: 50,
+                    measurePerformance: false // 禁用性能监控避免干扰
+                })
             ).rejects.toThrow();
         });
     });
@@ -118,12 +129,14 @@ describe('HttpService', () => {
                 return Promise.resolve({
                     ok: true,
                     json: async () => ({ data: 'success' }),
+                    headers: new Headers(),
                 });
             });
 
             const result = await HttpService.get('https://api.test.com/data', {
                 retries: 2,
                 retryDelay: 10,
+                measurePerformance: false,
             });
 
             expect(attempts).toBe(3);
@@ -137,10 +150,12 @@ describe('HttpService', () => {
                 HttpService.get('https://api.test.com/data', {
                     retries: 2,
                     retryDelay: 10,
+                    measurePerformance: false,
                 })
             ).rejects.toThrow('Network error');
 
-            expect(global.fetch).toHaveBeenCalledTimes(3); // 1次初始 + 2次重试
+            // 1次初始尝试 + 2次重试 = 3次
+            expect(global.fetch).toHaveBeenCalledTimes(3);
         });
     });
 

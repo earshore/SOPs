@@ -207,8 +207,8 @@ export interface HistoryItem {
   timestamp: string;
   site: string;
   asins: string[];
-  data: any;
-  report: any;
+  data: ScrapedData;
+  report?: AnalysisReport;
   // 向后兼容旧格式
   asin?: string;
   product?: ScrapedProduct;
@@ -216,8 +216,22 @@ export interface HistoryItem {
   analysisStatus?: {
     isAnalyzed: boolean;           // 是否已分析
     analyzedAt?: string;            // 分析时间戳
-    analysisReport?: any;           // 分析报告数据
+    analysisReport?: AnalysisReport;  // 分析报告数据
   };
+}
+
+/**
+ * 抓取数据结构
+ */
+export interface ScrapedData {
+  products: ScrapedProduct[];
+  metadata?: {
+    scrape_timestamp?: string;
+    marketplace?: string;
+    total_count?: number;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
 }
 
 // ==================== Keyword Hunter 模块类型 ====================

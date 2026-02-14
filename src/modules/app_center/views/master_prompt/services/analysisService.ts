@@ -6,6 +6,7 @@
 // ================================================================
 
 import { callLLM } from "../../../../../services/llmService";
+import { configCenter } from '../../../../../common/config/ConfigCenter';
 import { TRANSLATE_PROMPT_TEMPLATE } from "../constants/prompts";
 import type {
   ProductData,
@@ -119,7 +120,7 @@ export const AnalysisService = {
       llmConfig.endpoint,
       llmConfig.apiKey,
       llmConfig.model,
-      { jsonMode: false, timeout: 120000 }
+      { jsonMode: false, timeout: configCenter.get<number>('llm.analysisTimeout') || 120000 }
     );
 
     try {
@@ -163,7 +164,7 @@ export const AnalysisService = {
       llmConfig.endpoint,
       llmConfig.apiKey,
       llmConfig.model,
-      { jsonMode: false, timeout: 60000 }
+      { jsonMode: false, timeout: configCenter.get<number>('llm.defaultTimeout') || 60000 }
     );
 
     try {

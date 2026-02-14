@@ -7,12 +7,13 @@ import { escapeHtml } from '@/common/utils/security';
 import BaseModule from '../../../../../common/BaseModule';
 import { amzf_countries, amzf_months, amzf_events } from '../../../constants/amz_hub_constants';
 import { StorageService } from '../../../../../services/storageService';
+import { configCenter } from '../../../../../common/config/ConfigCenter';
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry';
 import type { MarketingEvent, CountryInfo } from '@/types/modules-business';
 
-const AMZF_HISTORY_KEY = 'amzf_search_history'; // 使用 StorageService 键
-const AMZF_MAX_HISTORY = 10; // 最大历史记录数
+const AMZF_HISTORY_KEY = 'amzf_search_history';
+const AMZF_MAX_HISTORY = configCenter.get<number>('history.maxSearchHistory') || 10;
 const AMZF_QUICK_TAGS = ['圣诞', 'Prime Day', '黑五', '复活节', '情人节', '母亲节']; // 快捷搜索标签
 
 interface MarketingCalendarState {

@@ -4,7 +4,7 @@
 // ================================================================
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { ensureViewLoaded, loadTemplate, clearOldCache } from '@/common/utils/viewLoader.js';
+import { ensureViewLoaded, loadTemplate, clearOldCache } from '@/common/utils/viewLoader';
 
 describe('ViewLoader', () => {
   beforeEach(() => {

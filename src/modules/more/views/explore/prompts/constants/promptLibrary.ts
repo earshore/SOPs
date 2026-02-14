@@ -4,9 +4,40 @@
 // ================================================================
 
 /**
+ * 类型定义
+ */
+export type PromptCategoryId = 'listing' | 'review' | 'customer' | 'marketing' | 'competitor' | 'compliance';
+
+export type RecommendedModelKey = 'GPT4' | 'GPT4_TURBO' | 'CLAUDE_OPUS' | 'CLAUDE_SONNET' | 'GEMINI_PRO';
+
+export interface PromptCategory {
+    id: PromptCategoryId;
+    name: string;
+    icon: string;
+    color: string;
+}
+
+export interface RecommendedModel {
+    id: string;
+    name: string;
+    provider: string;
+    badge: string;
+}
+
+export interface PromptItem {
+    id: string;
+    category: PromptCategoryId;
+    title: string;
+    description: string;
+    recommendedModel: RecommendedModelKey;
+    prompt: string;
+    promptEn: string;
+}
+
+/**
  * 提示词分类
  */
-export const PROMPT_CATEGORIES = {
+export const PROMPT_CATEGORIES: Record<string, PromptCategory> = {
     LISTING: { id: 'listing', name: 'Listing优化', icon: 'fa-file-alt', color: 'blue' },
     REVIEW: { id: 'review', name: '评论分析', icon: 'fa-comments', color: 'purple' },
     CUSTOMER: { id: 'customer', name: '客户服务', icon: 'fa-headset', color: 'green' },
@@ -18,7 +49,7 @@ export const PROMPT_CATEGORIES = {
 /**
  * 推荐模型配置
  */
-export const RECOMMENDED_MODELS = {
+export const RECOMMENDED_MODELS: Record<RecommendedModelKey, RecommendedModel> = {
     GPT4: { id: 'gpt-4', name: 'GPT-4', provider: 'OpenAI', badge: '最佳' },
     GPT4_TURBO: { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', provider: 'OpenAI', badge: '推荐' },
     CLAUDE_OPUS: { id: 'claude-3-opus', name: 'Claude 3 Opus', provider: 'Anthropic', badge: '推荐' },
@@ -29,7 +60,7 @@ export const RECOMMENDED_MODELS = {
 /**
  * 专业提示词库
  */
-export const PROMPT_LIBRARY = [
+export const PROMPT_LIBRARY: readonly PromptItem[] = [
     // ============================================================
     // Listing 优化类
     // ============================================================
@@ -1883,7 +1914,7 @@ Product Category: {{category}}
 /**
  * 根据分类获取提示词
  */
-export function getPromptsByCategory(categoryId) {
+export function getPromptsByCategory(categoryId?: PromptCategoryId | 'all'): readonly PromptItem[] {
     if (!categoryId || categoryId === 'all') {
         return PROMPT_LIBRARY;
     }
@@ -1893,14 +1924,14 @@ export function getPromptsByCategory(categoryId) {
 /**
  * 根据ID获取提示词
  */
-export function getPromptById(promptId) {
+export function getPromptById(promptId: string): PromptItem | undefined {
     return PROMPT_LIBRARY.find(p => p.id === promptId);
 }
 
 /**
  * 搜索提示词
  */
-export function searchPrompts(keyword) {
+export function searchPrompts(keyword: string): PromptItem[] {
     const lowerKeyword = keyword.toLowerCase();
     return PROMPT_LIBRARY.filter(p => 
         p.title.toLowerCase().includes(lowerKeyword) ||
@@ -1912,6 +1943,6 @@ export function searchPrompts(keyword) {
 /**
  * 获取推荐模型信息
  */
-export function getModelInfo(modelKey) {
+export function getModelInfo(modelKey: RecommendedModelKey): RecommendedModel {
     return RECOMMENDED_MODELS[modelKey] || RECOMMENDED_MODELS.GPT4_TURBO;
 }

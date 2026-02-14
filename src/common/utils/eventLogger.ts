@@ -5,6 +5,7 @@
 // ================================================================
 
 import { StorageService } from '../../services/storageService';
+import { configCenter } from '../config/ConfigCenter';
 
 /**
  * 事件日志条目
@@ -31,7 +32,7 @@ const TRACKED_EVENTS = [
  * 事件历史记录 (最多保留 100 条)
  */
 const eventHistory: EventLogEntry[] = [];
-const MAX_HISTORY = 100;
+const MAX_HISTORY = configCenter.get<number>('history.maxEventHistory') || 100;
 const DEBUG_EVENTS_KEY = 'debug_events';
 
 /**

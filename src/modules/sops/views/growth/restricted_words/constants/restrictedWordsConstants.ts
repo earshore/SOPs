@@ -849,16 +849,16 @@ export const RESTRICTED_WORDS_DATABASE = [
 ];
 
 // 辅助函数：按分类获取词条
-export function getWordsByCategory(categoryCode) {
+export function getWordsByCategory(categoryCode: string) {
   return RESTRICTED_WORDS_DATABASE.filter(w => w.category === categoryCode);
 }
 
 // 辅助函数：按风险等级获取词条
-export function getWordsByRiskLevel(level) {
+export function getWordsByRiskLevel(level: number) {
   return RESTRICTED_WORDS_DATABASE.filter(w => w.riskLevel === level);
 }
 
 // 辅助函数：按站点获取词条
-export function getWordsBySite(siteCode) {
+export function getWordsBySite(siteCode: string) {
   return RESTRICTED_WORDS_DATABASE.filter(w => w.affectedSites.includes(siteCode));
 }

@@ -10,6 +10,7 @@ import { showToast } from '../../common/ui';
 import { StorageService, STORAGE_KEYS } from '../../services/storageService';
 import { ErrorService } from '../../services/errorService';
 import { EnvConfig } from '../../common/config/envConfig';
+import { configCenter } from '../../common/config/ConfigCenter';
 import { APP_EVENTS } from '../../common/constants/eventConstants';
 import type { LLMProviderConfig } from '../../types/state';
 
@@ -326,7 +327,7 @@ const SettingsPanel = (): SettingsPanelData => ({
                 this.llm.endpoint,
                 this.llm.apiKey,
                 this.llm.model,
-                { temperature: 0.1, jsonMode: false, timeout: 15000 }
+                { temperature: 0.1, jsonMode: false, timeout: configCenter.get<number>('llm.testConnectionTimeout') || 15000 }
             );
 
             console.log('Test Response:', response);

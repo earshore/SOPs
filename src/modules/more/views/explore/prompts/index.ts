@@ -12,29 +12,17 @@ import {
     getPromptById,
     searchPrompts,
     getModelInfo,
+    type PromptItem,
+    type PromptCategory,
+    type PromptCategoryId,
 } from './constants/promptLibrary';
 import { showToast } from '../../../../../common/ui';
 import './prompts_style.css';
 
-// 类型定义
-interface Prompt {
-    id: string;
-    title: string;
-    description: string;
-    category: string;
-    prompt: string;
-    promptEn?: string;
-    recommendedModel: string;
-}
+// 使用导入的类型别名
+type Prompt = PromptItem;
 
-interface PromptCategory {
-    id: string;
-    name: string;
-    icon: string;
-    color: string;
-}
-
-let currentCategory = 'all';
+let currentCategory: PromptCategoryId | 'all' = 'all';
 let currentPrompt: Prompt | null = null;
 let currentLang: 'zh' | 'en' = 'zh'; // 默认中文
 
@@ -79,7 +67,7 @@ function handleSearch(e: Event): void {
  * 处理分类切换
  */
 function handleCategoryChange(category: string): void {
-    currentCategory = category;
+    currentCategory = category as PromptCategoryId | 'all';
 
     // 更新按钮状态
     document.querySelectorAll('.category-btn').forEach((btn) => {
