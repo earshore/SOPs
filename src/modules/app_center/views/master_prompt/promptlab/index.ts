@@ -207,7 +207,7 @@ function generateLanguageOptions(): void {
     if (!select) return;
 
     // ✅ 安全: 静态HTML模板，无用户输入
-    select.innerHTML = '<option value="" disabled selected>选择目标站点/语言...</option>';
+    select.innerHTML = '<option value="" selected></option>';
 
     Object.entries(SITE_CONFIGS).forEach(([_code, config]) => {
         const option = document.createElement("option");
@@ -260,7 +260,7 @@ function updateButtonState(): void {
             btn.innerHTML = '<i class="fas fa-lock"></i> 请先生成 Ai 分析报告';
         } else if (!hasLanguage) {
             // ✅ 安全: 静态HTML模板，无用户输入
-            btn.innerHTML = '<i class="fas fa-globe"></i> 请选择目标站点/语言';
+            btn.innerHTML = '<i class="fas fa-globe"></i> 请选择目标语言/站点';
         } else if (!hasTier1) {
             // ✅ 安全: 静态HTML模板，无用户输入
             btn.innerHTML = '<i class="fas fa-pen"></i> 请填写 Tier 1 核心词';
@@ -543,7 +543,7 @@ function generateMasterPrompt(): void {
     if (btn && btn.dataset.disabledState === "true") {
         let msg = "未就绪";
         if (!state.analysis.analysisReport) msg = "请先前往 [AI 分析] 模块生成竞品报告";
-        else if (!select || select.value === "") msg = "请先选择目标站点/语言 (Card 1)";
+        else if (!select || select.value === "") msg = "请先选择目标语言/站点 (Card 1)";
         else if (!t1) msg = "Tier 1 核心大词不能为空";
         else if (!t2) msg = "Tier 2 长尾词不能为空";
         showToast(msg, "warning");

@@ -83,10 +83,16 @@
                             产品 DNA 定义
                             <span class="text-[10px] text-slate-400 font-normal ml-1">Product DNA</span>
                         </h3>
-                        <select id="lab-target-market"
-                            class="text-xs border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 p-2 w-48 bg-slate-50 text-slate-700 font-semibold transition-all hover:border-slate-300 cursor-pointer appearance-none">
-                            <option value="" disabled selected>选择目标站点/语言...</option>
-                        </select>
+                        <div class="flex items-center gap-2">
+                            <label for="lab-target-market" class="flex items-center text-xs font-bold text-slate-700 gap-1.5">
+                                <span class="w-1 h-3.5 bg-indigo-400 rounded-full"></span>
+                                目标语言/站点
+                            </label>
+                            <select id="lab-target-market"
+                                class="text-xs border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 p-2 w-48 bg-slate-50 text-slate-700 font-semibold transition-all hover:border-slate-300 cursor-pointer appearance-none">
+                                <option value="" selected></option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
@@ -109,7 +115,7 @@
                                 <label class="flex items-center text-xs font-bold text-slate-700 mb-2 gap-1.5">
                                     <span class="w-1 h-3.5 bg-slate-300 rounded-full"></span>
                                     <i class="fa-solid fa-ban text-slate-400 text-[10px]"></i>
-                                    限制词 <span class="text-slate-400 font-normal">- 不希望出现</span>
+                                    限制词 <span class="text-slate-400 font-normal">- 不允许出现</span>
                                 </label>
                                 <input type="text" id="negative-keywords" placeholder="例如: bestseller / cure"
                                     class="w-full text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 p-3 bg-slate-50/50 focus:bg-white transition-all placeholder:text-slate-300" />
