@@ -1000,4 +1000,390 @@ async function startAnalysis() {
     }
     document.getElementById(steps[i]).classList.add('active');
     document.getElementById(steps[i]).querySelector('i').className = 'fa-solid fa-circle-notch fa-spin';
-    bar.style.width = ((i+
+    bar.style.width = ((i+1)/steps.length*100)+'%';
+  }
+
+  await delay(600);
+  document.getElementById(steps[steps.length-1]).classList.remove('active');
+  document.getElementById(steps[steps.length-1]).classList.add('done');
+  document.getElementById(steps[steps.length-1]).querySelector('i').className = 'fa-solid fa-circle-check';
+
+  // Generate QAs
+  generatedQAs = generateMultiLangQAs(reportData);
+
+  // Hide progress, show results
+  document.getElementById('progressSection').classList.remove('active');
+  document.getElementById('inputSection').style.opacity = '1';
+  renderResults();
+  document.getElementById('resultsSection').classList.add('active');
+  showToast('success', '分析完成!', `已生成 ${generatedQAs.length} 个 Q&A`);
+}
+
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// ==================== RENDER FUNCTIONS ====================
+function renderResults() {
+  renderProductBar();
+  renderStats();
+  renderInsights();
+  renderLangSelector();
+  renderCategoryTabs();
+  renderQAGrid();
+}
+
+function renderProductBar() {
+  const ar = reportData.analysisReport || reportData;
+  const title = ar.product_title || '产品分析';
+  const asins = reportData.metadata?.asins || [];
+  
+  const html = `
+    <div class="product-bar-label">分析产品</div>
+    <div class="product-bar-title">${title.substring(0, 150)}${title.length > 150 ? '...' : ''}</div>
+    <div class="product-asins">
+      ${asins.map(asin => `<div class="asin-chip">${asin}</div>`).join('')}
+    </div>
+  `;
+  document.getElementById('productBar').innerHTML = html;
+}
+
+function renderStats() {
+  const totalQAs = generatedQAs.length;
+  const categories = [...new Set(generatedQAs.map(qa => qa.category))];
+  const avgConfidence = (generatedQAs.reduce((sum, qa) => sum + qa.confidence, 0) / totalQAs).toFixed(1);
+  const languages = LANGUAGES.length;
+  
+  const ar = reportData.analysisReport || reportData;
+  const criticalIssues = ar['fatal-flaws']?.critical_issues?.length || 0;
+  
+  const html = `
+    <div class="stat-card purple animate-fade-up" style="animation-delay:0s">
+      <div class="stat-icon"><i class="fa-solid fa-comments"></i></div>
+      <div class="stat-value">${totalQAs}</div>
+      <div class="stat-label">Top Q&A</div>
+    </div>
+    <div class="stat-card green animate-fade-up" style="animation-delay:0.1s">
+      <div class="stat-icon"><i class="fa-solid fa-language"></i></div>
+      <div class="stat-value">${languages}</div>
+      <div class="stat-label">语言版本</div>
+    </div>
+    <div class="stat-card orange animate-fade-up" style="animation-delay:0.2s">
+      <div class="stat-icon"><i class="fa-solid fa-star"></i></div>
+      <div class="stat-value">${avgConfidence}</div>
+      <div class="stat-label">平均置信度</div>
+    </div>
+    <div class="stat-card blue animate-fade-up" style="animation-delay:0.3s">
+      <div class="stat-icon"><i class="fa-solid fa-layer-group"></i></div>
+      <div class="stat-value">${categories.length}</div>
+      <div class="stat-label">问题分类</div>
+    </div>
+    <div class="stat-card red animate-fade-up" style="animation-delay:0.4s">
+      <div class="stat-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+      <div class="stat-value">${criticalIssues}</div>
+      <div class="stat-label">关键问题</div>
+    </div>
+  `;
+  document.getElementById('dashboardStats').innerHTML = html;
+}
+
+function renderInsights() {
+  const ar = reportData.analysisReport || reportData;
+  const ff = ar['fatal-flaws'] || {};
+  const wm = ar['wow-moments'] || {};
+  
+  const insights = [];
+  
+  if (ff.critical_issues && ff.critical_issues.length > 0) {
+    const topIssue = ff.critical_issues[0];
+    insights.push({
+      icon: 'hot',
+      iconClass: 'fa-solid fa-fire',
+      title: '高频致命缺陷',
+      desc: topIssue.issue.substring(0, 80) + (topIssue.issue.length > 80 ? '...' : '')
+    });
+  }
+  
+  if (wm.moments && wm.moments.length > 0) {
+    insights.push({
+      icon: 'good',
+      iconClass: 'fa-solid fa-sparkles',
+      title: '惊喜时刻',
+      desc: wm.moments[0].moment_description.substring(0, 80)
+    });
+  }
+  
+  if (ff.overall_risk_level) {
+    insights.push({
+      icon: 'warn',
+      iconClass: 'fa-solid fa-shield-halved',
+      title: '风险评估',
+      desc: `整体风险等级: ${ff.overall_risk_level.toUpperCase()}`
+    });
+  }
+  
+  const html = insights.map((ins, i) => `
+    <div class="insight-card animate-fade-up" style="animation-delay:${i*0.1}s">
+      <div class="insight-icon ${ins.icon}"><i class="${ins.iconClass}"></i></div>
+      <div>
+        <div class="insight-title">${ins.title}</div>
+        <div class="insight-desc">${ins.desc}</div>
+      </div>
+    </div>
+  `).join('');
+  
+  document.getElementById('insightsStrip').innerHTML = html;
+}
+
+function renderLangSelector() {
+  const html = LANGUAGES.map(lang => `
+    <button class="lang-btn ${lang.code === currentLang ? 'active' : ''}" 
+            onclick="switchLang('${lang.code}')">
+      <span class="lang-flag">${lang.flag}</span>
+      <span>${lang.label}</span>
+    </button>
+  `).join('');
+  document.getElementById('langSelector').innerHTML = html;
+}
+
+function renderCategoryTabs() {
+  const counts = {};
+  CATEGORIES.forEach(cat => {
+    counts[cat.id] = cat.id === 'all' 
+      ? generatedQAs.length 
+      : generatedQAs.filter(qa => qa.category === cat.id).length;
+  });
+  
+  const html = CATEGORIES.map(cat => `
+    <button class="cat-tab ${cat.id === currentCategory ? 'active' : ''}" 
+            onclick="switchCategory('${cat.id}')">
+      <i class="${cat.icon}"></i>
+      <span>${cat.label}</span>
+      <span class="count">${counts[cat.id]}</span>
+    </button>
+  `).join('');
+  document.getElementById('categoryTabs').innerHTML = html;
+}
+
+function renderQAGrid() {
+  const filtered = currentCategory === 'all' 
+    ? generatedQAs 
+    : generatedQAs.filter(qa => qa.category === currentCategory);
+  
+  const html = filtered.map((qa, index) => {
+    const trans = qa.translations[currentLang];
+    if (!trans) return '';
+    
+    const confDots = Array(5).fill(0).map((_, i) => 
+      `<div class="conf-dot ${i < qa.confidence ? 'filled' : ''}"></div>`
+    ).join('');
+    
+    return `
+      <div class="qa-card" style="animation-delay:${index*0.05}s">
+        <div class="qa-header" onclick="toggleQA(${qa.id})">
+          <div class="qa-number">${qa.id}</div>
+          <div class="qa-question-wrap">
+            <div class="qa-meta">
+              <div class="qa-tag ${qa.category}">${CATEGORIES.find(c=>c.id===qa.category)?.label || qa.category}</div>
+              <div class="qa-confidence">
+                <span>置信度</span>
+                <div class="conf-dots">${confDots}</div>
+              </div>
+            </div>
+            <div class="qa-question">${trans.q}</div>
+          </div>
+          <div class="qa-toggle"><i class="fa-solid fa-chevron-down"></i></div>
+        </div>
+        <div class="qa-body">
+          <div class="qa-answer-wrap">
+            <div class="qa-answer-inner">
+              <div class="qa-answer-label">
+                <i class="fa-solid fa-robot"></i> Rufus AI 答复
+              </div>
+              <div class="qa-answer">${trans.a}</div>
+              <div class="qa-sources">
+                ${qa.sources.map(src => `<div class="qa-source"><i class="fa-solid fa-database"></i>${src}</div>`).join('')}
+              </div>
+              <div class="qa-actions">
+                <button class="qa-action-btn" onclick="copyQA(${qa.id}, event)">
+                  <i class="fa-solid fa-copy"></i> 复制
+                </button>
+                <button class="qa-action-btn" onclick="editQA(${qa.id})">
+                  <i class="fa-solid fa-pen"></i> 编辑
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  document.getElementById('qaGrid').innerHTML = html;
+  
+  // Trigger animation
+  setTimeout(() => {
+    document.querySelectorAll('.qa-card').forEach(card => card.classList.add('visible'));
+  }, 50);
+}
+
+// ==================== INTERACTION FUNCTIONS ====================
+function switchLang(lang) {
+  currentLang = lang;
+  renderLangSelector();
+  renderQAGrid();
+  showToast('success', '语言已切换', `当前: ${LANGUAGES.find(l=>l.code===lang).name}`);
+}
+
+function switchCategory(cat) {
+  currentCategory = cat;
+  renderCategoryTabs();
+  renderQAGrid();
+}
+
+function toggleQA(id) {
+  const cards = document.querySelectorAll('.qa-card');
+  const card = cards[id - 1];
+  if (card) {
+    card.classList.toggle('open');
+  }
+}
+
+function toggleExpandAll() {
+  allExpanded = !allExpanded;
+  const cards = document.querySelectorAll('.qa-card');
+  const btn = document.getElementById('expandAllBtn');
+  
+  cards.forEach(card => {
+    if (allExpanded) {
+      card.classList.add('open');
+    } else {
+      card.classList.remove('open');
+    }
+  });
+  
+  btn.innerHTML = allExpanded 
+    ? '<i class="fa-solid fa-compress"></i> 全部折叠'
+    : '<i class="fa-solid fa-expand"></i> 全部展开';
+}
+
+function copyQA(id, event) {
+  event.stopPropagation();
+  const qa = generatedQAs.find(q => q.id === id);
+  if (!qa) return;
+  
+  const trans = qa.translations[currentLang];
+  const text = `Q: ${trans.q}\n\nA: ${trans.a}`;
+  
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = event.currentTarget;
+    btn.classList.add('copied');
+    btn.innerHTML = '<i class="fa-solid fa-check"></i> 已复制';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = '<i class="fa-solid fa-copy"></i> 复制';
+    }, 2000);
+    showToast('success', '已复制到剪贴板', '');
+  });
+}
+
+function editQA(id) {
+  showToast('info', '编辑功能', '此功能将在后续版本中提供');
+}
+
+// ==================== EXPORT FUNCTIONS ====================
+function exportJSON() {
+  const filtered = currentCategory === 'all' 
+    ? generatedQAs 
+    : generatedQAs.filter(qa => qa.category === currentCategory);
+  
+  const exportData = {
+    metadata: {
+      language: currentLang,
+      category: currentCategory,
+      exportDate: new Date().toISOString(),
+      totalQAs: filtered.length
+    },
+    qas: filtered.map(qa => ({
+      id: qa.id,
+      category: qa.category,
+      confidence: qa.confidence,
+      question: qa.translations[currentLang].q,
+      answer: qa.translations[currentLang].a,
+      sources: qa.sources
+    }))
+  };
+  
+  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+  downloadFile(blob, `rufus-qa-${currentLang}-${currentCategory}-${Date.now()}.json`);
+  showToast('success', '导出成功', 'JSON 文件已下载');
+}
+
+function exportCSV() {
+  const filtered = currentCategory === 'all' 
+    ? generatedQAs 
+    : generatedQAs.filter(qa => qa.category === currentCategory);
+  
+  let csv = 'ID,分类,置信度,问题,答复,数据源\n';
+  filtered.forEach(qa => {
+    const trans = qa.translations[currentLang];
+    const row = [
+      qa.id,
+      qa.category,
+      qa.confidence,
+      `"${trans.q.replace(/"/g, '""')}"`,
+      `"${trans.a.replace(/"/g, '""')}"`,
+      `"${qa.sources.join(', ')}"`
+    ].join(',');
+    csv += row + '\n';
+  });
+  
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  downloadFile(blob, `rufus-qa-${currentLang}-${currentCategory}-${Date.now()}.csv`);
+  showToast('success', '导出成功', 'CSV 文件已下载');
+}
+
+function exportText() {
+  const filtered = currentCategory === 'all' 
+    ? generatedQAs 
+    : generatedQAs.filter(qa => qa.category === currentCategory);
+  
+  let text = `Rufus Q&A 预研结果\n`;
+  text += `语言: ${LANGUAGES.find(l=>l.code===currentLang).name}\n`;
+  text += `分类: ${CATEGORIES.find(c=>c.id===currentCategory).label}\n`;
+  text += `导出时间: ${new Date().toLocaleString('zh-CN')}\n`;
+  text += `总计: ${filtered.length} 个 Q&A\n`;
+  text += `${'='.repeat(80)}\n\n`;
+  
+  filtered.forEach((qa, index) => {
+    const trans = qa.translations[currentLang];
+    text += `${index + 1}. [${CATEGORIES.find(c=>c.id===qa.category).label}] 置信度: ${qa.confidence}/5\n\n`;
+    text += `Q: ${trans.q}\n\n`;
+    text += `A: ${trans.a}\n\n`;
+    text += `数据源: ${qa.sources.join(', ')}\n`;
+    text += `${'-'.repeat(80)}\n\n`;
+  });
+  
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8;' });
+  downloadFile(blob, `rufus-qa-${currentLang}-${currentCategory}-${Date.now()}.txt`);
+  showToast('success', '导出成功', '文本文件已下载');
+}
+
+function downloadFile(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ==================== INIT ====================
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('Rufus Q&A 智能预研系统已就绪');
+});
+</script>
+</body>
+</html>
