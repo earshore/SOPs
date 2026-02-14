@@ -28,6 +28,7 @@ const MODULE_MAP: ModuleMap = {
   rawdata: () => import('./views/master_prompt/rawdata/index'),
   ai_analysis: () => import('./views/master_prompt/ai_analysis/index'),
   promptlab: () => import('./views/master_prompt/promptlab/index'),
+  qalab: () => import('./views/master_prompt/qalab/index'),
 
   // Keyword Hunter 子模块
   kw_input: () => import('./views/keyword_hunter/input/index'),

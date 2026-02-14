@@ -473,6 +473,13 @@ export const MENU_CONFIG: MenuConfig = {
       panelId: 'panel-app_center',
       category: 'master_prompt'
     },
+    qalab: {
+      moduleId: 'master_prompt',
+      label: 'Q&A 预研',
+      icon: 'fas fa-comments',
+      panelId: 'panel-app_center',
+      category: 'master_prompt'
+    },
 
     // --- Keyword Hunter 应用 ---
     kw_input: {

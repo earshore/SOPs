@@ -1,0 +1,105 @@
+<!-- QA Lab Template -->
+<div class="app-container">
+  <!-- Header -->
+  <header class="app-header">
+    <div class="logo-section">
+      <div class="logo-icon"><i class="fa-solid fa-robot"></i></div>
+      <div class="logo-text">
+        <h1>Rufus Q&A 智能预研系统</h1>
+        <p>Amazon EU · 竞品驱动 · AI Q&A 生成</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="rufus-badge"><i class="fa-solid fa-bolt"></i> Rufus AI 逻辑</div>
+      <div class="header-badge"><span class="dot"></span> 系统就绪</div>
+    </div>
+  </header>
+
+  <!-- Input Section -->
+  <section class="input-section" id="inputSection">
+    <div class="section-title"><i class="fa-solid fa-file-import"></i> 导入竞品分析报告</div>
+    <div class="input-card">
+      <textarea class="input-area" id="jsonInput" placeholder="在此粘贴竞品多维分析报告 JSON 数据...&#10;&#10;系统将自动解析报告内容，智能生成符合 Amazon Rufus AI 逻辑的 Top Q&A。&#10;&#10;支持的报告维度：标题关键词、卖点分析、致命缺陷、惊喜时刻、犹豫点、买家画像等。"></textarea>
+      <div class="input-actions">
+        <button class="btn btn-primary" id="btnAnalyze" data-action="amz_qalab_startAnalysis">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> 智能分析并生成 Q&A
+        </button>
+        <button class="btn btn-secondary" data-action="amz_qalab_loadSample">
+          <i class="fa-solid fa-flask"></i> 加载示例数据
+        </button>
+        <button class="btn btn-secondary" data-action="amz_qalab_clearInput">
+          <i class="fa-solid fa-eraser"></i> 清空
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Analysis Progress -->
+  <section class="analysis-progress" id="progressSection">
+    <div class="progress-card">
+      <div class="progress-spinner"></div>
+      <div class="progress-title">正在智能分析报告</div>
+      <div class="progress-desc">AI 引擎正在解析竞品数据，预判用户问题...</div>
+      <div class="progress-steps">
+        <div class="progress-step" id="step1"><i class="fa-solid fa-circle-notch fa-spin"></i> 解析报告 JSON 结构...</div>
+        <div class="progress-step" id="step2"><i class="fa-regular fa-circle"></i> 提取产品多维特征...</div>
+        <div class="progress-step" id="step3"><i class="fa-regular fa-circle"></i> 分析用户痛点与犹豫点...</div>
+        <div class="progress-step" id="step4"><i class="fa-regular fa-circle"></i> 预判 Rufus 高频问题...</div>
+        <div class="progress-step" id="step5"><i class="fa-regular fa-circle"></i> 生成多语言 Q&A 答复...</div>
+        <div class="progress-step" id="step6"><i class="fa-regular fa-circle"></i> 优化排序与置信度评分...</div>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar"></div></div>
+    </div>
+  </section>
+
+  <!-- Results Section -->
+  <section class="results-section" id="resultsSection">
+    <!-- Product Info -->
+    <div class="product-bar" id="productBar"></div>
+
+    <!-- Stats Dashboard -->
+    <div class="dashboard-stats" id="dashboardStats"></div>
+
+    <!-- Key Insights -->
+    <div class="insights-strip" id="insightsStrip"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div>
+        <div class="section-title" style="margin-bottom:10px"><i class="fa-solid fa-comments"></i> Top Q&A 预研结果</div>
+        <div class="category-tabs" id="categoryTabs"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+        <div class="lang-selector" id="langSelector"></div>
+        <div class="toolbar-right">
+          <button class="expand-all-btn" id="expandAllBtn" data-action="amz_qalab_toggleExpandAll">
+            <i class="fa-solid fa-expand"></i> 全部展开
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- QA Grid -->
+    <div class="qa-grid" id="qaGrid"></div>
+
+    <!-- Export -->
+    <div class="export-panel">
+      <div class="export-info">
+        <i class="fa-solid fa-file-export"></i>
+        <span>导出当前语言版本的 Q&A 结果，可直接用于 Listing 优化和 Rufus 预判准备</span>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-secondary btn-sm" data-action="amz_qalab_exportJSON"><i class="fa-solid fa-code"></i> 导出 JSON</button>
+        <button class="btn btn-secondary btn-sm" data-action="amz_qalab_exportCSV"><i class="fa-solid fa-table"></i> 导出 CSV</button>
+        <button class="btn btn-accent btn-sm" data-action="amz_qalab_exportText"><i class="fa-solid fa-file-lines"></i> 导出文本</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Rufus Q&A 智能预研系统 · 基于竞品多维分析驱动 · 适用于 Amazon EU 全站点 · Built with <i class="fa-solid fa-heart" style="color:var(--danger);margin:0 2px"></i></p>
+  </footer>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
