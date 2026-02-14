@@ -80,7 +80,8 @@ describe('HttpService', () => {
 
     describe('错误处理', () => {
         test('应该处理HTTP错误', async () => {
-            global.fetch.mockResolvedValueOnce({
+            // 使用mockResolvedValue而不是mockResolvedValueOnce,支持重试
+            global.fetch.mockResolvedValue({
                 ok: false,
                 status: 404,
                 text: async () => 'Not Found',
@@ -89,30 +90,52 @@ describe('HttpService', () => {
             });
 
             await expect(
-                HttpService.get('https://api.test.com/notfound')
+                HttpService.get('https://api.test.com/notfound', {
+                    measurePerformance: false,
+                    retries: 1, // 明确设置重试次数
+                })
             ).rejects.toThrow(HttpError);
         });
 
         test('应该处理网络错误', async () => {
-            global.fetch.mockRejectedValueOnce(new Error('Network error'));
+            // 使用mockRejectedValue而不是mockRejectedValueOnce,支持重试
+            global.fetch.mockRejectedValue(new Error('Network error'));
 
             await expect(
-                HttpService.get('https://api.test.com/data')
+                HttpService.get('https://api.test.com/data', {
+                    measurePerformance: false,
+                    retries: 1, // 明确设置重试次数
+                })
             ).rejects.toThrow('Network error');
         });
 
         test('应该处理超时', async () => {
-            // Mock一个永不resolve的Promise来模拟超时
-            global.fetch.mockImplementationOnce(() => 
-                new Promise(() => {
-                    // 永不resolve,让AbortController超时触发
-                })
-            );
+            // Mock一个会检查abort信号的请求
+            global.fetch.mockImplementationOnce((url, options) => {
+                return new Promise((resolve, reject) => {
+                    // 监听abort信号
+                    if (options.signal) {
+                        options.signal.addEventListener('abort', () => {
+                            reject(new Error('The operation was aborted'));
+                        });
+                    }
+                    
+                    // 模拟一个长时间运行的请求
+                    setTimeout(() => {
+                        resolve({
+                            ok: true,
+                            json: async () => ({ data: 'test' }),
+                            headers: new Headers(),
+                        });
+                    }, 500);
+                });
+            });
 
             await expect(
                 HttpService.get('https://api.test.com/data', { 
-                    timeout: 50,
-                    measurePerformance: false // 禁用性能监控避免干扰
+                    timeout: 100,
+                    retries: 0,
+                    measurePerformance: false
                 })
             ).rejects.toThrow();
         });
