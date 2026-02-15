@@ -521,64 +521,7 @@
       </div>
     </div>
 
-    <!-- JSON 查看器 -->
-    <template x-if="analysisReport && results.length > 0">
-      <div class="mb-8 bg-slate-900 rounded-2xl overflow-hidden border border-slate-700/50 shadow-xl transition-all duration-300">
-        <div class="flex items-center justify-between p-4 bg-gradient-to-r from-slate-800 to-slate-900 border-b border-slate-700/50">
-          <button @click="toggleJsonViewer()" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg">
-              <i class="fa-solid fa-database text-white"></i>
-            </div>
-            <div class="text-left">
-              <h4 class="text-sm font-bold text-white flex items-center gap-2">
-                AI 分析报告 JSON
-                <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full">RAW DATA</span>
-              </h4>
-              <p class="text-xs text-slate-400">
-                <span x-text="selectedTargets.length"></span> 个分析维度 · 
-                <span x-text="(JSON.stringify(analysisReport).length / 1024).toFixed(1)"></span> KB
-              </p>
-            </div>
-          </button>
-          <div class="flex items-center gap-2">
-            <button @click="copyJson()" class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 border border-slate-600/50 transition-all">
-              <i class="fa-solid fa-copy"></i>
-              复制 JSON
-            </button>
-            <button @click="toggleJsonViewer()" class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 border border-slate-600/50 transition-all">
-              <i :class="'fa-solid fa-chevron-' + (showJsonViewer ? 'up' : 'down')"></i>
-            </button>
-          </div>
-        </div>
-        
-        <template x-if="showJsonViewer">
-          <div class="animate-fade-in">
-            <div class="flex items-center justify-between px-4 py-2 bg-slate-800/50 border-b border-slate-700/30">
-              <div class="flex items-center gap-2 text-xs text-slate-400">
-                <i class="fa-solid fa-file-code"></i>
-                <span>analysis_report.json</span>
-              </div>
-              <div class="flex items-center gap-4 text-xs text-slate-500">
-                <span>行数: <span x-text="JSON.stringify(analysisReport, null, 2).split('\\n').length"></span></span>
-                <span>字符: <span x-text="JSON.stringify(analysisReport).length.toLocaleString()"></span></span>
-              </div>
-            </div>
-            <div class="overflow-auto p-4 max-h-96">
-              <pre class="text-xs font-mono leading-relaxed"><code class="text-slate-300" x-html="highlightJson(JSON.stringify(analysisReport, null, 2))"></code></pre>
-            </div>
-          </div>
-        </template>
-        
-        <template x-if="!showJsonViewer">
-          <div class="px-4 py-3 bg-slate-800/30 border-t border-slate-700/30">
-            <div class="flex items-center gap-2 text-xs text-slate-500">
-              <i class="fa-solid fa-code"></i>
-              <span class="font-mono truncate">{ "asin": "<span x-text="analysisReport.asin"></span>", "analysis_timestamp": "<span x-text="analysisReport.analysis_timestamp"></span>", ... }</span>
-            </div>
-          </div>
-        </template>
-      </div>
-    </template>
+    <!-- JSON 查看器 - 已移动到分析报告卡片内 -->
 
     <!-- 分析结果展示 -->
     <template x-if="results.length > 0">
@@ -685,6 +628,67 @@
                 </div>
               </div>
             </div>
+
+            <!-- AI 分析报告 JSON - 集成到分析报告卡片内 -->
+            <template x-if="analysisReport">
+              <div class="mt-6 pt-6 border-t border-slate-700/50">
+                <div class="bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700/50">
+                  <div class="flex items-center justify-between p-4 bg-slate-800/70">
+                    <button @click="toggleJsonViewer()" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                      <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fa-solid fa-database text-white"></i>
+                      </div>
+                      <div class="text-left">
+                        <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                          AI 分析报告 JSON
+                          <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full">RAW DATA</span>
+                        </h4>
+                        <p class="text-xs text-slate-400">
+                          <span x-text="selectedTargets.length"></span> 个分析维度 · 
+                          <span x-text="(JSON.stringify(analysisReport).length / 1024).toFixed(1)"></span> KB
+                        </p>
+                      </div>
+                    </button>
+                    <div class="flex items-center gap-2">
+                      <button @click="copyJson()" class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 border border-slate-600/50 transition-all">
+                        <i class="fa-solid fa-copy"></i>
+                        复制 JSON
+                      </button>
+                      <button @click="toggleJsonViewer()" class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 border border-slate-600/50 transition-all">
+                        <i :class="'fa-solid fa-chevron-' + (showJsonViewer ? 'up' : 'down')"></i>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <template x-if="showJsonViewer">
+                    <div class="animate-fade-in">
+                      <div class="flex items-center justify-between px-4 py-2 bg-slate-800/50 border-t border-slate-700/30">
+                        <div class="flex items-center gap-2 text-xs text-slate-400">
+                          <i class="fa-solid fa-file-code"></i>
+                          <span>analysis_report.json</span>
+                        </div>
+                        <div class="flex items-center gap-4 text-xs text-slate-500">
+                          <span>行数: <span x-text="JSON.stringify(analysisReport, null, 2).split('\\n').length"></span></span>
+                          <span>字符: <span x-text="JSON.stringify(analysisReport).length.toLocaleString()"></span></span>
+                        </div>
+                      </div>
+                      <div class="overflow-auto p-4 max-h-96">
+                        <pre class="text-xs font-mono leading-relaxed"><code class="text-slate-300" x-html="highlightJson(JSON.stringify(analysisReport, null, 2))"></code></pre>
+                      </div>
+                    </div>
+                  </template>
+                  
+                  <template x-if="!showJsonViewer">
+                    <div class="px-4 py-3 bg-slate-800/30 border-t border-slate-700/30">
+                      <div class="flex items-center gap-2 text-xs text-slate-500">
+                        <i class="fa-solid fa-code"></i>
+                        <span class="font-mono truncate">{ "asin": "<span x-text="analysisReport.asin"></span>", "analysis_timestamp": "<span x-text="analysisReport.analysis_timestamp"></span>", ... }</span>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </template>
           </div>
         </div>
 
