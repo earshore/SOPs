@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rufus Q&A 智能预研系统</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- Ambient Background Effects -->
+<div class="ambient-bg">
+  <div class="ambient-orb"></div>
+  <div class="ambient-orb"></div>
+  <div class="ambient-orb"></div>
+</div>
+<div class="grid-pattern"></div>
+
+<!-- QA Lab Template -->
+<div class="app-container">
+  <!-- Header -->
+  <header class="app-header">
+    <div class="logo-section">
+      <div class="logo-icon" id="logoIcon"><i class="fa-solid fa-robot"></i></div>
+      <div class="logo-text">
+        <h1>Rufus Q&A 智能预研系统</h1>
+        <p>Amazon EU · 竞品驱动 · AI Q&A 生成</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="rufus-badge"><i class="fa-solid fa-bolt"></i> Rufus AI 逻辑</div>
+      <div class="header-badge"><span class="dot"></span> 系统就绪</div>
+    </div>
+  </header>
+
+  <!-- Input Section -->
+  <section class="input-section" id="inputSection">
+    <div class="section-title"><i class="fa-solid fa-file-import"></i> 导入竞品分析报告</div>
+    <div class="input-card">
+      <textarea class="input-area" id="jsonInput" placeholder="在此粘贴竞品多维分析报告 JSON 数据...&#10;&#10;系统将自动解析报告内容，智能生成符合 Amazon Rufus AI 逻辑的 Top Q&A。&#10;&#10;支持的报告维度：标题关键词、卖点分析、致命缺陷、惊喜时刻、犹豫点、买家画像等。" spellcheck="false"></textarea>
+      <div class="input-actions">
+        <button class="btn btn-primary" id="btnAnalyze" data-action="amz_qalab_startAnalysis">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> 智能分析并生成 Q&A
+        </button>
+        <button class="btn btn-secondary" id="btnSample" data-action="amz_qalab_loadSample">
+          <i class="fa-solid fa-flask"></i> 加载示例数据
+        </button>
+        <button class="btn btn-secondary" id="btnClear" data-action="amz_qalab_clearInput">
+          <i class="fa-solid fa-eraser"></i> 清空
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Analysis Progress -->
+  <section class="analysis-progress" id="progressSection">
+    <div class="progress-card">
+      <div class="progress-spinner"></div>
+      <div class="progress-title">🤖 AI 智能分析中</div>
+      <div class="progress-desc">模拟大模型深度理解报告，智能生成 Q&A...</div>
+      <div class="progress-steps">
+        <div class="progress-step active" id="step1"><i class="fa-solid fa-circle-notch fa-spin"></i> 解析报告 JSON 结构...</div>
+        <div class="progress-step" id="step2"><i class="fa-regular fa-circle"></i> AI 理解产品全貌与市场定位...</div>
+        <div class="progress-step" id="step3"><i class="fa-regular fa-circle"></i> AI 识别致命缺陷与用户痛点...</div>
+        <div class="progress-step" id="step4"><i class="fa-regular fa-circle"></i> AI 提取惊喜亮点与购买疑虑...</div>
+        <div class="progress-step" id="step5"><i class="fa-regular fa-circle"></i> AI 生成自然语言 Q&A 答复...</div>
+        <div class="progress-step" id="step6"><i class="fa-regular fa-circle"></i> AI 优先级排序与质量评分...</div>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar"></div></div>
+    </div>
+  </section>
+
+  <!-- Results Section -->
+  <section class="results-section" id="resultsSection">
+    <!-- Product Info -->
+    <div class="product-bar" id="productBar">
+      <div class="product-icon"><i class="fa-solid fa-spray-can"></i></div>
+      <div class="product-info">
+        <h3>50ml Parfum Homme - Pheromone Cologne</h3>
+        <p>品类: 香水/个护 · 竞品ASIN: 3个 · 分析维度: 6</p>
+      </div>
+      <div class="product-meta">
+        <span class="meta-chip highlight"><i class="fa-solid fa-comments" style="margin-right:4px;font-size:10px"></i> 156 评论</span>
+        <span class="meta-chip">FR / DE / ES / IT / UK / CA / BE</span>
+      </div>
+    </div>
+
+    <!-- Stats Dashboard -->
+    <div class="dashboard-stats" id="dashboardStats">
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <div class="stat-value count-up" data-target="0">0</div>
+        <div class="stat-label">致命问题</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fa-solid fa-star"></i></div>
+        <div class="stat-value count-up" data-target="0">0</div>
+        <div class="stat-label">惊喜时刻</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fa-solid fa-circle-question"></i></div>
+        <div class="stat-value count-up" data-target="0">0</div>
+        <div class="stat-label">犹豫点</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fa-solid fa-language"></i></div>
+        <div class="stat-value count-up" data-target="0">0</div>
+        <div class="stat-label">覆盖市场</div>
+      </div>
+    </div>
+
+    <!-- Key Insights -->
+    <div class="insights-strip" id="insightsStrip">
+      <div class="insight-tag orange"><i class="fa-solid fa-triangle-exclamation"></i> 留香时间极短(5分钟内消失)</div>
+      <div class="insight-tag green"><i class="fa-solid fa-check-double"></i> 香调层次丰富(柑橘→木质)</div>
+      <div class="insight-tag blue"><i class="fa-solid fa-euro-sign"></i> 性价比超预期</div>
+      <div class="insight-tag purple"><i class="fa-solid fa-suitcase"></i> 便携设计受好评</div>
+      <div class="insight-tag pink"><i class="fa-solid fa-gift"></i> 适合作为礼物</div>
+      <div class="insight-tag cyan"><i class="fa-solid fa-flask"></i> 香味过于淡或无味</div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div>
+        <div class="section-title" style="margin-bottom:10px"><i class="fa-solid fa-comments"></i> 竞品分析结果</div>
+        <div class="category-tabs" id="categoryTabs">
+          <div class="cat-tab active" data-category="all"><span>全部<span class="tab-count">5</span></span></div>
+          <div class="cat-tab" data-category="cat-performance"><span>致命缺陷<span class="tab-count">4</span></span></div>
+          <div class="cat-tab" data-category="cat-features"><span>惊喜时刻<span class="tab-count">7</span></span></div>
+          <div class="cat-tab" data-category="cat-concerns"><span>犹豫点<span class="tab-count">5</span></span></div>
+          <div class="cat-tab" data-category="cat-usage"><span>买家画像<span class="tab-count">5</span></span></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+        <div class="lang-selector" id="langSelector">
+          <button class="lang-btn active">EN</button>
+          <button class="lang-btn">DE</button>
+          <button class="lang-btn">FR</button>
+          <button class="lang-btn">IT</button>
+          <button class="lang-btn">ES</button>
+        </div>
+        <div class="toolbar-right">
+          <button class="expand-all-btn" id="expandAllBtn" data-action="amz_qalab_toggleExpandAll">
+            <i class="fa-solid fa-expand"></i> 全部展开
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- QA Grid -->
+    <div class="qa-grid" id="qaGrid">
+      <!-- QA Card 1 - 致命缺陷 -->
+      <div class="qa-card cat-performance expanded fade-in-up stagger-1">
+        <div class="qa-header">
+          <div class="qa-rank top-3">1</div>
+          <div class="qa-question-wrap">
+            <div class="qa-question">Wie lange hält der Duft wirklich? (香味能持续多久?)</div>
+            <div class="qa-meta">
+              <span class="qa-tag category">致命缺陷</span>
+              <span class="qa-tag confidence-high">严重问题</span>
+            </div>
+          </div>
+          <div class="qa-toggle"><i class="fa-solid fa-chevron-down"></i></div>
+        </div>
+        <div class="qa-body">
+          <div class="qa-answer-content">
+            <div class="qa-answer-text">
+              <p><strong>问题:</strong> 多位用户反馈香味持续时间极短,有的不到5分钟就消失。<br><br><strong>用户原话:</strong> "Der Geruch haltet keine 5 Minuten" / "je ne comprends pas les avis positifs, la tenue il s'évapore presque aussitôt"<br><br><strong>改进建议:</strong> 重新配方以提高留香时间和香精浓度,达到香水应有的性能标准。</p>
+            </div>
+            <div class="qa-answer-actions">
+              <button class="qa-action-btn" data-copy><i class="fa-regular fa-copy"></i> 复制</button>
+              <button class="qa-action-btn"><i class="fa-solid fa-pen"></i> 编辑</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- QA Card 2 - 致命缺陷 -->
+      <div class="qa-card cat-features fade-in-up stagger-2">
+        <div class="qa-header">
+          <div class="qa-rank top-3">2</div>
+          <div class="qa-question-wrap">
+            <div class="qa-question">Ist der Duft überhaupt wahrnehmbar? (香味能闻到吗?)</div>
+            <div class="qa-meta">
+              <span class="qa-tag category">致命缺陷</span>
+              <span class="qa-tag confidence-high">严重问题</span>
+            </div>
+          </div>
+          <div class="qa-toggle"><i class="fa-solid fa-chevron-down"></i></div>
+        </div>
+        <div class="qa-body">
+          <div class="qa-answer-content">
+            <div class="qa-answer-text">
+              <p><strong>问题:</strong> 部分用户反馈几乎闻不到香味或香味极其微弱。<br><br><strong>用户原话:</strong> "Juste nul, on ne sent presque rien" / "It's not perfume: Do not get this product. It's a scam."<br><br><strong>改进建议:</strong> 提高质量控制,确保不同批次之间的香味强度一致性。</p>
+            </div>
+            <div class="qa-answer-actions">
+              <button class="qa-action-btn" data-copy><i class="fa-regular fa-copy"></i> 复制</button>
+              <button class="qa-action-btn"><i class="fa-solid fa-pen"></i> 编辑</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- QA Card 3 - 惊喜时刻 -->
+      <div class="qa-card cat-concerns fade-in-up stagger-3">
+        <div class="qa-header">
+          <div class="qa-rank top-3">3</div>
+          <div class="qa-question-wrap">
+            <div class="qa-question">Wie ist das Preis-Leistungs-Verhältnis? (性价比如何?)</div>
+            <div class="qa-meta">
+              <span class="qa-tag category">惊喜时刻</span>
+              <span class="qa-tag confidence-high">超预期</span>
+            </div>
+          </div>
+          <div class="qa-toggle"><i class="fa-solid fa-chevron-down"></i></div>
+        </div>
+        <div class="qa-body">
+          <div class="qa-answer-content">
+            <div class="qa-answer-text">
+              <p><strong>亮点:</strong> 多位用户对性价比表示惊喜,认为这个价格能买到如此品质的香水超出预期。<br><br><strong>用户原话:</strong> "C'est un très bon investissement rapport qualité prix" / "Sa tenue est excellente tout au fil de la journée"<br><br><strong>营销角度:</strong> 强调"奢华体验,平民价格"的定位。</p>
+            </div>
+            <div class="qa-answer-actions">
+              <button class="qa-action-btn" data-copy><i class="fa-regular fa-copy"></i> 复制</button>
+              <button class="qa-action-btn"><i class="fa-solid fa-pen"></i> 编辑</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- QA Card 4 - 惊喜时刻 -->
+      <div class="qa-card cat-comparison fade-in-up stagger-4">
+        <div class="qa-header">
+          <div class="qa-rank">4</div>
+          <div class="qa-question-wrap">
+            <div class="qa-question">Wie entwickelt sich der Duft im Laufe der Zeit? (香调如何演变?)</div>
+            <div class="qa-meta">
+              <span class="qa-tag category">惊喜时刻</span>
+              <span class="qa-tag confidence-high">超预期</span>
+            </div>
+          </div>
+          <div class="qa-toggle"><i class="fa-solid fa-chevron-down"></i></div>
+        </div>
+        <div class="qa-body">
+          <div class="qa-answer-content">
+            <div class="qa-answer-text">
+              <p><strong>亮点:</strong> 用户惊喜于香调的层次变化——从清新柑橘开场,逐渐演变为温暖木质调,类似高端香水的复杂性。<br><br><strong>用户原话:</strong> "L'ouverture est vive et fraîche avec les agrumes, mais il évolue rapidement vers des notes plus chaudes, boisées et légèrement minérales"<br><br><strong>营销角度:</strong> 突出"意外的复杂度"和"高端香水般的层次感"。</p>
+            </div>
+            <div class="qa-answer-actions">
+              <button class="qa-action-btn" data-copy><i class="fa-regular fa-copy"></i> 复制</button>
+              <button class="qa-action-btn"><i class="fa-solid fa-pen"></i> 编辑</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- QA Card 5 - 犹豫点 -->
+      <div class="qa-card cat-usage fade-in-up stagger-5">
+        <div class="qa-header">
+          <div class="qa-rank">5</div>
+          <div class="qa-question-wrap">
+            <div class="qa-question">Kann das Parfum beim Versand auslaufen? (运输会漏液吗?)</div>
+            <div class="qa-meta">
+              <span class="qa-tag category">犹豫点</span>
+              <span class="qa-tag confidence-medium">常见疑虑</span>
+            </div>
+          </div>
+          <div class="qa-toggle"><i class="fa-solid fa-chevron-down"></i></div>
+        </div>
+        <div class="qa-body">
+          <div class="qa-answer-content">
+            <div class="qa-answer-text">
+              <p><strong>疑虑:</strong> 购买前担心小瓶装在运输过程中可能漏液或损坏。<br><br><strong>解答:</strong> 大多数买家报告收到的产品完好无损,没有漏液问题。如遇到损坏,请联系客服更换。<br><br><strong>用户证据:</strong> "both time I ordered this product there was absolutely no issue with the delivery or the parfume leaking."</p>
+            </div>
+            <div class="qa-answer-actions">
+              <button class="qa-action-btn" data-copy><i class="fa-regular fa-copy"></i> 复制</button>
+              <button class="qa-action-btn"><i class="fa-solid fa-pen"></i> 编辑</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Export -->
+    <div class="export-panel">
+      <div class="export-info">
+        <i class="fa-solid fa-file-export"></i>
+        <span>导出当前语言版本的 Q&A 结果，可直接用于 Listing 优化和 Rufus 预判准备</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-shrink:0">
+        <button class="btn btn-secondary btn-sm" data-action="amz_qalab_exportJSON"><i class="fa-solid fa-code"></i> 导出 JSON</button>
+        <button class="btn btn-secondary btn-sm" data-action="amz_qalab_exportCSV"><i class="fa-solid fa-table"></i> 导出 CSV</button>
+        <button class="btn btn-accent btn-sm" data-action="amz_qalab_exportText"><i class="fa-solid fa-file-lines"></i> 导出文本</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Rufus Q&A 智能预研系统 · 基于竞品多维分析驱动 · 适用于 Amazon EU 全站点 · Built with <i class="fa-solid fa-heart" style="color:var(--accent-red);margin:0 2px"></i></p>
+  </footer>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script type="module" src="dist/app.js"></script>
+</body>
+</html>
