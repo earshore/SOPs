@@ -45,8 +45,8 @@ let moduleState: ModuleState = {
   expandedPromptIndex: null,
   showPromptPanel: false,
   showJsonViewer: false,
-  useRealData: false,
-  dataSource: 'sample'
+  useRealData: true, // 强制使用真实数据
+  dataSource: 'scraper' // 默认数据源为scraper
 };
 
 /**
@@ -92,8 +92,8 @@ export function unmount(): void {
     expandedPromptIndex: null,
     showPromptPanel: false,
     showJsonViewer: false,
-    useRealData: false,
-    dataSource: 'sample'
+    useRealData: true, // 强制使用真实数据
+    dataSource: 'scraper'
   };
   console.log('[AI智能分析] ✅ 模块卸载成功');
 }
@@ -278,6 +278,13 @@ function createAiAnalysisPanel() {
     init() {
       console.log('[AI智能分析] 🚀 Alpine 组件初始化');
       this.syncFromModuleState();
+      
+      // ✅ 默认全选所有分析目标（如果当前没有选中任何目标）
+      if (this.selectedTargets.length === 0) {
+        this.selectedTargets = analysisTargets.map(t => t.id);
+        this.syncToModuleState();
+        console.log('[AI智能分析] ✅ 已默认全选所有分析目标');
+      }
       
       // 检查是否有新的 Scraper 数据
       this.checkAndLoadScraperData();
