@@ -4,7 +4,6 @@
 // 集中管理所有应用配置，支持环境差异化、验证和热更新
 // ================================================================
 
-import { Logger } from '../../services/loggerService';
 import type { MenuConfig } from '../../types/config';
 import { validateConfig } from './schemas/configSchema';
 import { loadRouteConfig } from './loaders/routeConfigLoader';
@@ -60,6 +59,27 @@ export interface HistoryConfig {
 }
 
 /**
+ * 日志配置
+ */
+export interface LoggerConfig {
+  maxLogs: number;
+  minLevel: 'debug' | 'info' | 'warn' | 'error' | 'fatal';
+  batchSize: number;
+  batchTimeout: number;
+}
+
+/**
+ * 存储配置
+ */
+export interface StorageConfig {
+  lruMaxSize: number; // bytes
+  lruWarningThreshold: number; // 0-1
+  lruCleanupRatio: number; // 0-1
+  localStorageTotalSize: number; // bytes
+  historyMaxItems: number;
+}
+
+/**
  * 性能配置
  */
 export interface PerformanceConfig {
@@ -90,6 +110,8 @@ export interface AppConfig {
   scraper: ScraperConfig;
   llm: LLMConfig;
   history: HistoryConfig;
+  logger: LoggerConfig;
+  storage: StorageConfig;
 }
 
 /**
@@ -106,12 +128,12 @@ export class ConfigCenter {
   private static instance: ConfigCenter;
   private config: AppConfig;
   private listeners: Map<string, Set<ConfigChangeListener>>;
-  private readonly logger = Logger;
 
   private constructor() {
     this.listeners = new Map();
     this.config = this.loadConfig();
-    this.logger.info('配置中心已初始化', { environment: this.config.environment });
+    // 延迟日志记录，避免循环依赖
+    console.log(`[ConfigCenter] 配置中心已初始化, 环境: ${this.config.environment}`);
   }
 
   /**
@@ -195,6 +217,19 @@ export class ConfigCenter {
         maxItems: 20,
         maxEventHistory: 100,
         maxSearchHistory: 10
+      },
+      logger: {
+        maxLogs: 100,
+        minLevel: env === 'development' ? 'debug' : 'info',
+        batchSize: 10,
+        batchTimeout: 5000
+      },
+      storage: {
+        lruMaxSize: 4 * 1024 * 1024, // 4MB
+        lruWarningThreshold: 0.8,
+        lruCleanupRatio: 0.3,
+        localStorageTotalSize: 5 * 1024 * 1024, // 5MB
+        historyMaxItems: 50
       }
     };
   }
@@ -284,7 +319,9 @@ export class ConfigCenter {
       routes: override.routes || base.routes,
       scraper: { ...base.scraper, ...override.scraper },
       llm: { ...base.llm, ...override.llm },
-      history: { ...base.history, ...override.history }
+      history: { ...base.history, ...override.history },
+      logger: { ...base.logger, ...override.logger },
+      storage: { ...base.storage, ...override.storage }
     };
   }
 
@@ -337,8 +374,8 @@ export class ConfigCenter {
     
     // 触发监听器
     this.notifyListeners(path, value, oldValue);
-    
-    this.logger.debug('配置已更新', { path, oldValue, newValue: value });
+
+    console.log(`[ConfigCenter] 配置已更新: ${path}`);
   }
 
   /**
@@ -373,7 +410,7 @@ export class ConfigCenter {
         try {
           listener(path, newValue, oldValue);
         } catch (error) {
-          this.logger.error('配置监听器执行失败', { path, error });
+          console.error('[ConfigCenter] 配置监听器执行失败', { path, error });
         }
       });
     }
@@ -385,9 +422,9 @@ export class ConfigCenter {
   public validate(): boolean {
     const isValid = validateConfig(this.config);
     if (isValid) {
-      this.logger.info('配置验证通过');
+      console.log('[ConfigCenter] 配置验证通过');
     } else {
-      this.logger.error('配置验证失败');
+      console.error('[ConfigCenter] 配置验证失败');
     }
     return isValid;
   }
@@ -398,9 +435,9 @@ export class ConfigCenter {
   public reload(): void {
     const oldConfig = this.config;
     this.config = this.loadConfig();
-    this.logger.info('配置已重新加载', { 
-      oldEnv: oldConfig.environment, 
-      newEnv: this.config.environment 
+    console.log('[ConfigCenter] 配置已重新加载', {
+      oldEnv: oldConfig.environment,
+      newEnv: this.config.environment
     });
   }
 

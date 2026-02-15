@@ -5,6 +5,7 @@
 // ================================================================
 
 import { StorageService } from './storageService';
+import { configCenter, type LoggerConfig } from '../common/config/ConfigCenter';
 
 /**
  * 日志级别
@@ -71,32 +72,69 @@ export interface ModuleLogger {
  */
 export class LoggerService {
   private logs: LogEntry[];
-  private maxLogs: number;
-  private minLevel: LogLevel;
+  private _config: LoggerConfig | null;
   private remoteEndpoint: string | null;
-  private batchSize: number;
-  private batchTimeout: number;
   private pendingLogs: LogEntry[];
   private batchTimer: ReturnType<typeof setTimeout> | null;
 
   constructor() {
     this.logs = [];
-    this.maxLogs = 100;
-    // 直接使用环境变量，避免循环依赖
-    const isDevelopment = import.meta.env.MODE === 'development';
-    this.minLevel = isDevelopment ? LOG_LEVELS.DEBUG : LOG_LEVELS.INFO;
+    this._config = null; // 延迟加载配置
     this.remoteEndpoint = null;
-    this.batchSize = 10;
-    this.batchTimeout = 5000;
     this.pendingLogs = [];
     this.batchTimer = null;
+  }
+
+  /**
+   * 获取配置（懒加载）
+   */
+  private get config(): LoggerConfig {
+    if (!this._config) {
+      try {
+        this._config = configCenter.get<LoggerConfig>('logger') || {
+          maxLogs: 100,
+          minLevel: 'info',
+          batchSize: 10,
+          batchTimeout: 5000
+        };
+      } catch {
+        // 如果 configCenter 未初始化，使用默认配置
+        this._config = {
+          maxLogs: 100,
+          minLevel: 'info',
+          batchSize: 10,
+          batchTimeout: 5000
+        };
+      }
+    }
+    return this._config;
+  }
+
+  /**
+   * 获取最小日志级别 (从枚举值)
+   */
+  private getMinLogLevel(): LogLevel {
+    switch (this.config.minLevel) {
+      case 'debug': return LOG_LEVELS.DEBUG;
+      case 'info': return LOG_LEVELS.INFO;
+      case 'warn': return LOG_LEVELS.WARN;
+      case 'error': return LOG_LEVELS.ERROR;
+      case 'fatal': return LOG_LEVELS.FATAL;
+      default: return LOG_LEVELS.INFO;
+    }
   }
 
   /**
    * 设置最小日志级别
    */
   setMinLevel(level: LogLevel): void {
-    this.minLevel = level;
+    const newLevel = LEVEL_NAMES[level] as LoggerConfig['minLevel'];
+    this.config.minLevel = newLevel;
+    try {
+      configCenter.set('logger.minLevel', newLevel);
+    } catch {
+      // ConfigCenter 未初始化，跳过
+    }
     console.log(`[Logger] 最小日志级别设置为: ${LEVEL_NAMES[level]}`);
   }
 
@@ -113,7 +151,7 @@ export class LoggerService {
    */
   private _log(level: LogLevel, message: string, data: Record<string, unknown> = {}, module = 'App'): void {
     // 过滤低于最小级别的日志
-    if (level < this.minLevel) {
+    if (level < this.getMinLogLevel()) {
       return;
     }
 
@@ -130,8 +168,8 @@ export class LoggerService {
 
     // 添加到内存日志
     this.logs.push(entry);
-    if (this.logs.length > this.maxLogs) {
-      this.logs = this.logs.slice(-this.maxLogs);
+    if (this.logs.length > this.config.maxLogs) {
+      this.logs = this.logs.slice(-this.config.maxLogs);
     }
 
     // 输出到控制台
@@ -217,13 +255,13 @@ export class LoggerService {
 
     this.pendingLogs.push(entry);
 
-    if (this.pendingLogs.length >= this.batchSize) {
+    if (this.pendingLogs.length >= this.config.batchSize) {
       this._flushLogs();
     } else {
       if (!this.batchTimer) {
         this.batchTimer = setTimeout(() => {
           this._flushLogs();
-        }, this.batchTimeout);
+        }, this.config.batchTimeout);
       }
     }
   }

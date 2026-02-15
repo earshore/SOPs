@@ -1,27 +1,22 @@
 {
   "compilerOptions": {
-    // 基础选项
+    // 继承主配置
     "target": "ES2020",
     "module": "ESNext",
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "moduleResolution": "bundler",
 
-    // 严格模式
+    // 严格模式（测试环境可以稍微宽松）
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "strictBindCallApply": true,
-    "strictPropertyInitialization": true,
     "noImplicitThis": true,
-    "alwaysStrict": true,
 
-    // 额外检查
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    // 额外检查（测试环境不检查未使用变量）
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": true,
 
     // 模块解析
     "resolveJsonModule": true,
@@ -30,15 +25,14 @@
     "forceConsistentCasingInFileNames": true,
 
     // 输出
-    "declaration": true,
-    "declarationMap": true,
+    "composite": false,
+    "declaration": false,
     "sourceMap": true,
-    "outDir": "./dist",
 
-    // 跳过库检查（提升编译速度）
+    // 跳过库检查
     "skipLibCheck": true,
 
-    // JSX支持（如果未来需要）
+    // JSX支持
     "jsx": "preserve",
 
     // 路径映射
@@ -52,27 +46,27 @@
       "@types/*": ["src/types/*"]
     },
 
-    // 允许JS文件（渐进式迁移）
+    // 允许JS文件
     "allowJs": true,
     "checkJs": false,
 
-    // 类型定义
-    "types": ["vite/client", "node"],
+    // 类型定义（vitest类型）
+    "types": ["vitest/globals", "vite/client", "node"],
 
     // 类型根目录
     "typeRoots": ["./node_modules/@types", "./src/types"]
   },
 
   "include": [
-    "src/**/*",
-    "vite.config.ts"
+    "tests/**/*",
+    "src/**/*.test.ts",
+    "src/**/*.spec.ts",
+    "vitest.config.js"
   ],
 
   "exclude": [
     "node_modules",
     "dist",
-    "build",
-    "html",
-    "tests"
+    "build"
   ]
 }

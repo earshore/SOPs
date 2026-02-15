@@ -192,12 +192,15 @@ describe('路由导航集成测试', () => {
       const middleware = vi.fn(async () => {
         throw new Error('Middleware error');
       });
-      
+
       routeMiddleware.addBeforeEach(middleware);
-      
+
       const result = await router.navigate('sops_overview');
-      
+
       expect(result).toBe(false);
+
+      // 清理：移除测试中间件
+      routeMiddleware.removeBeforeEach(middleware);
     });
   });
 

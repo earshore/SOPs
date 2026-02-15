@@ -123,7 +123,11 @@ export class Router {
             };
 
             // 1. 执行前置中间件
-            await routeMiddleware.runBeforeEach(to, from);
+            const middlewarePassed = await routeMiddleware.runBeforeEach(to, from);
+            if (!middlewarePassed) {
+                this.isNavigating = false;
+                return false;
+            }
 
             // 2. 执行路由守卫
             const allowed = await routeGuard.runGuards(to, from);
