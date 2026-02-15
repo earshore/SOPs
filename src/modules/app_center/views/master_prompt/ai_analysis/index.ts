@@ -274,6 +274,22 @@ function createAiAnalysisPanel() {
       return '未知';
     },
 
+    get fullReportData() {
+      if (!this.analysisReport) return null;
+      
+      return {
+        metadata: {
+          asins: this.selectedAsins,
+          targets: this.selectedTargets,
+          timestamp: new Date().toISOString(),
+          dataSource: this.dataSource,
+          marketplace: this.dataSourceMarketplace
+        },
+        results: this.results,
+        analysisReport: this.analysisReport
+      };
+    },
+
     // ========== Lifecycle ==========
     init() {
       console.log('[AI智能分析] 🚀 Alpine 组件初始化');
@@ -521,9 +537,22 @@ function createAiAnalysisPanel() {
     copyJson() {
       if (!this.analysisReport) return;
 
-      const json = JSON.stringify(this.analysisReport, null, 2);
+      // 构建完整的报告数据（包含metadata）
+      const reportData = {
+        metadata: {
+          asins: this.selectedAsins,
+          targets: this.selectedTargets,
+          timestamp: new Date().toISOString(),
+          dataSource: this.dataSource,
+          marketplace: this.dataSourceMarketplace
+        },
+        results: this.results,
+        analysisReport: this.analysisReport
+      };
+
+      const json = JSON.stringify(reportData, null, 2);
       navigator.clipboard.writeText(json).then(() => {
-        showToast('JSON 已复制', 'success');
+        showToast('完整 JSON 报告已复制', 'success');
       }).catch(() => {
         showToast('复制失败', 'error');
       });

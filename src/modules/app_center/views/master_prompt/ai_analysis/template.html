@@ -543,20 +543,7 @@
                   </div>
                 </div>
                 <div>
-                  <div class="flex items-center gap-3">
-                    <h2 class="text-3xl font-extrabold text-white tracking-tight">分析报告</h2>
-                    <!-- 导出按钮组 -->
-                    <div class="inline-flex rounded-lg border border-slate-600/50 overflow-hidden bg-slate-800/50">
-                      <button @click="copyMarkdown()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs text-slate-300 hover:text-white hover:bg-slate-700/50 transition-colors border-r border-slate-600/50">
-                        <i class="fa-solid fa-copy"></i>
-                        <span>Markdown</span>
-                      </button>
-                      <button @click="downloadJson()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs text-slate-300 hover:text-white hover:bg-slate-700/50 transition-colors">
-                        <i class="fa-solid fa-download"></i>
-                        <span>JSON</span>
-                      </button>
-                    </div>
-                  </div>
+                  <h2 class="text-3xl font-extrabold text-white tracking-tight">分析报告</h2>
                   <p class="text-slate-400 text-sm mt-1 flex items-center gap-2">
                     <span class="font-mono bg-slate-700/50 px-2 py-0.5 rounded text-slate-300" x-text="selectedAsins.join(', ')"></span>
                     <span class="w-1 h-1 bg-slate-600 rounded-full"></span>
@@ -630,7 +617,7 @@
             </div>
 
             <!-- AI 分析报告 JSON - 集成到分析报告卡片内 -->
-            <template x-if="analysisReport">
+            <template x-if="fullReportData">
               <div class="mt-6 pt-6 border-t border-slate-700/50">
                 <div class="bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700/50">
                   <div class="flex items-center justify-between p-4 bg-slate-800/70">
@@ -641,19 +628,37 @@
                       <div class="text-left">
                         <h4 class="text-sm font-bold text-white flex items-center gap-2">
                           AI 分析报告 JSON
-                          <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full">RAW DATA</span>
+                          <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full">ANALYSIS REPORT</span>
                         </h4>
                         <p class="text-xs text-slate-400">
                           <span x-text="selectedTargets.length"></span> 个分析维度 · 
-                          <span x-text="(JSON.stringify(analysisReport).length / 1024).toFixed(1)"></span> KB
+                          <span x-text="(JSON.stringify(fullReportData).length / 1024).toFixed(1)"></span> KB
                         </p>
                       </div>
                     </button>
                     <div class="flex items-center gap-2">
-                      <button @click="copyJson()" class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 border border-slate-600/50 transition-all">
-                        <i class="fa-solid fa-copy"></i>
-                        复制 JSON
-                      </button>
+                      <!-- 导出按钮组 - 极简三段式设计 -->
+                      <div class="inline-flex rounded-lg overflow-hidden border border-slate-600/50 bg-slate-800/50">
+                        <button @click="copyMarkdown()" 
+                                class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700/50 transition-all border-r border-slate-600/50"
+                                title="复制 Markdown 格式报告">
+                          <i class="fa-brands fa-markdown text-base"></i>
+                          <span>MD</span>
+                        </button>
+                        <button @click="copyJson()" 
+                                class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700/50 transition-all border-r border-slate-600/50"
+                                title="复制 JSON 格式报告">
+                          <i class="fa-solid fa-copy text-base"></i>
+                          <span>JSON</span>
+                        </button>
+                        <button @click="downloadJson()" 
+                                class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700/50 transition-all"
+                                title="下载 JSON 格式报告">
+                          <i class="fa-solid fa-download text-base"></i>
+                          <span>下载</span>
+                        </button>
+                      </div>
+                      <div class="w-px h-6 bg-slate-600/50"></div>
                       <button @click="toggleJsonViewer()" class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 border border-slate-600/50 transition-all">
                         <i :class="'fa-solid fa-chevron-' + (showJsonViewer ? 'up' : 'down')"></i>
                       </button>
@@ -668,12 +673,12 @@
                           <span>analysis_report.json</span>
                         </div>
                         <div class="flex items-center gap-4 text-xs text-slate-500">
-                          <span>行数: <span x-text="JSON.stringify(analysisReport, null, 2).split('\\n').length"></span></span>
-                          <span>字符: <span x-text="JSON.stringify(analysisReport).length.toLocaleString()"></span></span>
+                          <span>行数: <span x-text="JSON.stringify(fullReportData, null, 2).split('\\n').length"></span></span>
+                          <span>字符: <span x-text="JSON.stringify(fullReportData).length.toLocaleString()"></span></span>
                         </div>
                       </div>
                       <div class="overflow-auto p-4 max-h-96">
-                        <pre class="text-xs font-mono leading-relaxed"><code class="text-slate-300" x-html="highlightJson(JSON.stringify(analysisReport, null, 2))"></code></pre>
+                        <pre class="text-xs font-mono leading-relaxed"><code class="text-slate-300" x-html="highlightJson(JSON.stringify(fullReportData, null, 2))"></code></pre>
                       </div>
                     </div>
                   </template>
@@ -682,7 +687,7 @@
                     <div class="px-4 py-3 bg-slate-800/30 border-t border-slate-700/30">
                       <div class="flex items-center gap-2 text-xs text-slate-500">
                         <i class="fa-solid fa-code"></i>
-                        <span class="font-mono truncate">{ "asin": "<span x-text="analysisReport.asin"></span>", "analysis_timestamp": "<span x-text="analysisReport.analysis_timestamp"></span>", ... }</span>
+                        <span class="font-mono truncate">{ "metadata": { "asins": [<span x-text="'\"' + selectedAsins.join('\", \"') + '\"'"></span>], ... }, "results": [...], "analysisReport": {...} }</span>
                       </div>
                     </div>
                   </template>
