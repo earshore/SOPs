@@ -2,10 +2,11 @@
 // ================================================================
 // 🎯 P1-8: 状态管理适配器
 // 提供StateManager和Zustand之间的双向同步
+// 使用Zustand Vanilla API
 // ================================================================
 
 import { stateManager } from '../common/state/StateManager';
-import { useUIStore } from './useAppStore';
+import { uiStore } from './useAppStore';
 
 /**
  * 状态适配器
@@ -33,7 +34,7 @@ export class StateAdapter {
     const unsubCurrentTab = stateManager.subscribe('ui.currentTab', (newValue) => {
       if (this.syncing) return;
       this.syncing = true;
-      useUIStore.getState().setCurrentTab(newValue as string);
+      uiStore.getState().setCurrentTab(newValue as string);
       this.syncing = false;
     });
 
@@ -41,7 +42,7 @@ export class StateAdapter {
     const unsubDataTab = stateManager.subscribe('ui.currentDataTab', (newValue) => {
       if (this.syncing) return;
       this.syncing = true;
-      useUIStore.getState().setCurrentDataTab(newValue as string);
+      uiStore.getState().setCurrentDataTab(newValue as string);
       this.syncing = false;
     });
 
@@ -49,7 +50,7 @@ export class StateAdapter {
     const unsubReportTab = stateManager.subscribe('ui.currentReportTab', (newValue) => {
       if (this.syncing) return;
       this.syncing = true;
-      useUIStore.getState().setCurrentReportTab(newValue as string);
+      uiStore.getState().setCurrentReportTab(newValue as string);
       this.syncing = false;
     });
 
@@ -62,7 +63,7 @@ export class StateAdapter {
    */
   private syncZustandToStateManager(): void {
     // 订阅Zustand store变化
-    const unsubZustand = useUIStore.subscribe((state, prevState) => {
+    const unsubZustand = uiStore.subscribe((state, prevState) => {
       if (this.syncing) return;
       this.syncing = true;
 

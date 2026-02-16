@@ -2,9 +2,10 @@
 // ================================================================
 // 🎯 P1-8: Zustand状态管理 - 渐进式迁移
 // 第一阶段: UI状态迁移
+// 使用Zustand Vanilla (非React版本)
 // ================================================================
 
-import { create } from 'zustand';
+import { createStore } from 'zustand/vanilla';
 import { devtools, persist } from 'zustand/middleware';
 import type { UIState } from '../types/state';
 
@@ -29,9 +30,9 @@ interface UIStore {
 }
 
 /**
- * 创建UI Store
+ * 创建UI Store (Vanilla版本)
  */
-export const useUIStore = create<UIStore>()(
+export const uiStore = createStore<UIStore>()(
   devtools(
     persist(
       (set) => ({
