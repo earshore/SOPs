@@ -2,11 +2,13 @@
 // ================================================================
 // 🎯 统一 HTTP 请求服务（TypeScript版本）
 // 替代分散的 fetch 调用
+// 🎯 P1-9: 集成请求去重和取消管理
 // ================================================================
 
 import { Logger } from './loggerService';
 import { configCenter } from '../common/config/ConfigCenter';
 import { priorityRequestPool, REQUEST_PRIORITY } from './PriorityRequestPool';
+import { requestManager } from './RequestManager';
 
 /**
  * 请求优先级类型
@@ -28,6 +30,10 @@ export interface HttpOptions {
   usePool?: boolean;
   priority?: RequestPriority;
   measurePerformance?: boolean;
+  // 🎯 P1-9: 新增请求管理选项
+  deduplicate?: boolean; // 是否去重
+  deduplicateKey?: string; // 自定义去重key
+  cancelPrevious?: boolean; // 是否取消之前的同类请求
 }
 
 /**
@@ -128,13 +134,20 @@ class HttpServiceClass {
       usePool = false,
       priority = REQUEST_PRIORITY.NORMAL,
       measurePerformance = true,
+      // 🎯 P1-9: 请求管理选项
+      deduplicate = false,
+      deduplicateKey = null,
+      cancelPrevious = false,
     } = options;
+
+    // 生成请求key(用于去重和取消)
+    const requestKey = deduplicateKey || `${method}:${url}`;
 
     // 合并请求头
     const finalHeaders = { ...this.defaults.headers, ...headers };
 
     // 执行请求的函数
-    const executeRequest = async (): Promise<T> => {
+    const executeRequest = async (abortSignal?: AbortSignal): Promise<T> => {
       let lastError: Error | null = null;
       
       for (let attempt = 0; attempt <= retries; attempt++) {
@@ -145,6 +158,11 @@ class HttpServiceClass {
         // 如果提供了外部signal,监听其abort事件
         if (signal) {
           signal.addEventListener('abort', () => controller.abort(), { once: true });
+        }
+        
+        // 🎯 P1-9: 如果提供了RequestManager的signal,也监听它
+        if (abortSignal) {
+          abortSignal.addEventListener('abort', () => controller.abort(), { once: true });
         }
 
         try {
@@ -193,22 +211,30 @@ class HttpServiceClass {
       throw lastError;
     };
 
+    // 🎯 P1-9: 如果启用去重或取消管理,使用RequestManager
+    if (deduplicate || cancelPrevious) {
+      return await requestManager.execute(
+        requestKey,
+        (signal) => {
+          // 性能监控
+          if (measurePerformance) {
+            return this._executeWithPerformance(url, method, usePool, priority, () => executeRequest(signal));
+          }
+          
+          // 使用优先级请求池
+          if (usePool) {
+            return priorityRequestPool.add(() => executeRequest(signal), priority, { url, method });
+          }
+          
+          return executeRequest(signal);
+        },
+        { deduplicate, cancelPrevious }
+      );
+    }
+
     // 性能监控
     if (measurePerformance) {
-      try {
-        const { performanceService } = await import('./performanceService');
-        const apiName = this._extractApiName(url);
-        
-        if (usePool) {
-          return await performanceService.measureApiCall(apiName, () => 
-            priorityRequestPool.add(executeRequest, priority, { url, method })
-          );
-        }
-        
-        return await performanceService.measureApiCall(apiName, executeRequest);
-      } catch (e) {
-        Logger.debug('性能监控不可用，直接执行请求', {}, 'HttpService');
-      }
+      return await this._executeWithPerformance(url, method, usePool, priority, executeRequest);
     }
 
     // 使用优先级请求池
@@ -217,6 +243,33 @@ class HttpServiceClass {
     }
     
     return await executeRequest();
+  }
+
+  /**
+   * 执行请求并进行性能监控
+   */
+  private async _executeWithPerformance<T>(
+    url: string,
+    method: string,
+    usePool: boolean,
+    priority: RequestPriority,
+    fn: () => Promise<T>
+  ): Promise<T> {
+    try {
+      const { performanceService } = await import('./performanceService');
+      const apiName = this._extractApiName(url);
+      
+      if (usePool) {
+        return await performanceService.measureApiCall(apiName, () => 
+          priorityRequestPool.add(fn, priority, { url, method })
+        );
+      }
+      
+      return await performanceService.measureApiCall(apiName, fn);
+    } catch (e) {
+      Logger.debug('性能监控不可用，直接执行请求', {}, 'HttpService');
+      return await fn();
+    }
   }
 
   /**

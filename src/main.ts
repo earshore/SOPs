@@ -294,6 +294,10 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     // 初始化成功，继续启动流程
     // ================================================================
     
+    // 🎯 P1-8: 初始化状态适配器(Zustand与StateManager双向同步)
+    const { stateAdapter } = await import('./stores/stateAdapter');
+    stateAdapter.initialize();
+    
     // 初始化首页
     initHomeSplash();
 
