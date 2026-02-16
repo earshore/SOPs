@@ -245,7 +245,7 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
   bootstrap.register('views', async () => {
     await initViews();
     return true;
-  }, { dependencies: ['router', 'stateManager', 'loadingManager'] });
+  }, { dependencies: ['router', 'loadingManager'] });
 
   // 6. 事件系统
   bootstrap.register('eventLogger', async () => {
