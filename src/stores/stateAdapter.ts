@@ -18,11 +18,21 @@ import { appStore } from './useAppStore';
 export class StateAdapter {
   private unsubscribers: Array<() => void> = [];
   private syncing = false;
+  private enabled = true; // 可以通过配置禁用
 
   /**
    * 初始化双向同步
    */
-  initialize(): void {
+  initialize(options?: { enabled?: boolean }): void {
+    if (options?.enabled !== undefined) {
+      this.enabled = options.enabled;
+    }
+
+    if (!this.enabled) {
+      console.log('⚠️ [StateAdapter] 双向同步已禁用,使用纯Zustand模式');
+      return;
+    }
+
     this.syncStateManagerToZustand();
     this.syncZustandToStateManager();
     console.log('✅ [StateAdapter] 双向同步已启动 (UI + Scraper + Analysis + PromptLab + KeywordTracker)');
@@ -33,6 +43,7 @@ export class StateAdapter {
    * 监听StateManager的状态变化,同步到Zustand
    */
   private syncStateManagerToZustand(): void {
+    if (!this.enabled) return;
     // UI状态同步
     const unsubCurrentTab = stateManager.subscribe('ui.currentTab', (newValue) => {
       if (this.syncing) return;
@@ -239,6 +250,7 @@ export class StateAdapter {
    * 监听Zustand的状态变化,同步到StateManager
    */
   private syncZustandToStateManager(): void {
+    if (!this.enabled) return;
     const unsubZustand = appStore.subscribe((state, prevState) => {
       if (this.syncing) return;
       this.syncing = true;
