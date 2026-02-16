@@ -128,28 +128,17 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     return actionRegistry;
   }, { dependencies: ['container'] });
 
-  bootstrap.register('stateManager', async () => {
-    const { stateManager } = await import('./common/state/StateManager');
-    const { container } = await import('./common/di/Container');
-    // 注册到DI容器，声明依赖EventBus
-    container.register('stateManager', () => stateManager, {
-      dependencies: ['eventBus'],
-      lifetime: 'singleton'
-    });
-    return stateManager;
-  }, { dependencies: ['container'] });
-
   // 3. 路由服务
   bootstrap.register('router', async () => {
     const { router } = await import('./common/router/Router');
     const { container } = await import('./common/di/Container');
-    // 注册到DI容器，声明依赖StateManager和EventBus
+    // 注册到DI容器
     container.register('router', () => router, {
-      dependencies: ['stateManager', 'eventBus'],
+      dependencies: ['eventBus'],
       lifetime: 'singleton'
     });
     return router;
-  }, { dependencies: ['container', 'stateManager'] });
+  }, { dependencies: ['container'] });
 
   // 4. 监控服务（可选）
   bootstrap.register('performanceService', async () => {
@@ -294,10 +283,8 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     // 初始化成功，继续启动流程
     // ================================================================
     
-    // 🎯 P1-8: 状态管理 - 已完全切换到Zustand
-    // stateAdapter双向同步已禁用,系统使用纯Zustand模式
-    const { stateAdapter } = await import('./stores/stateAdapter');
-    stateAdapter.initialize({ enabled: false });
+    // 🎯 P1-8: 状态管理已完全切换到Zustand
+    // StateManager和stateAdapter已移除
     
     // 初始化首页
     initHomeSplash();
