@@ -1,13 +1,12 @@
 // src/stores/useAppStore.ts
 // ================================================================
-// 🎯 P1-8: Zustand状态管理 - 渐进式迁移
-// 第一阶段: UI状态迁移 ✅
-// 第二阶段: Scraper状态迁移 ✅
-// 第三阶段: Analysis、PromptLab、KeywordTracker状态迁移
-// 使用Zustand Vanilla (非React版本)
+// 🎯 P1-8: Zustand状态管理 - 完整版
+// 包含持久化和DevTools支持
 // ================================================================
 
 import { createStore } from 'zustand/vanilla';
+import { persist } from './middleware/persist';
+import { devtools } from './middleware/devtools';
 import type { 
   UIState, 
   ScraperState, 
@@ -149,11 +148,13 @@ const initialKeywordTrackerState: KeywordTrackerState = {
 };
 
 /**
- * 创建应用Store (Vanilla版本)
- * 注意: 暂时移除devtools和persist middleware以避免React依赖
- * 后续可以使用vanilla版本的middleware或自定义实现
+ * 创建应用Store
+ * 使用持久化和DevTools中间件
  */
-export const appStore = createStore<AppStore>()((set) => ({
+export const appStore = createStore<AppStore>()(
+  devtools(
+    persist(
+      (set) => ({
         // 初始UI状态
         ui: {
           currentTab: 'home',
@@ -368,7 +369,34 @@ export const appStore = createStore<AppStore>()((set) => ({
         
         resetKeywordTracker: () =>
           set({ keywordTracker: initialKeywordTrackerState })
-      }));
+      }),
+      {
+        name: 'app-storage',
+        partialize: (state) => ({
+          ui: {
+            currentTab: state.ui.currentTab,
+            currentDataTab: state.ui.currentDataTab,
+            currentReportTab: state.ui.currentReportTab,
+            theme: state.ui.theme,
+            sidebarCollapsed: state.ui.sidebarCollapsed,
+            loading: state.ui.loading
+          },
+          scraper: {
+            isScraping: state.scraper.isScraping,
+            status: state.scraper.status,
+            selectedSite: state.scraper.selectedSite,
+            scrapedData: state.scraper.scrapedData,
+            currentHistoryId: state.scraper.currentHistoryId
+          }
+        })
+      }
+    ),
+    {
+      name: 'AppStore',
+      enabled: process.env.NODE_ENV === 'development'
+    }
+  )
+);
 
 /**
  * 状态选择器(优化性能)
