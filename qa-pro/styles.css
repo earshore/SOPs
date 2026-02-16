@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+SC:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+/* 🚀 P1-7: 移除Google Fonts,使用系统字体栈 */
 
 :root {
   --bg-primary: #f8f9fc;
