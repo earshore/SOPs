@@ -54,17 +54,104 @@ export default defineConfig({
             },
             output: {
                 // 手动分包策略
-                manualChunks: {
-                    // 核心框架
-                    'vendor-core': ['alpinejs'],
-                    // 图表库
-                    'vendor-charts': ['chart.js'],
-                    // 网格布局
-                    'vendor-grid': ['gridstack'],
-                    // Markdown渲染
-                    'vendor-markdown': ['marked'],
-                    // 工具库
-                    'vendor-utils': ['clsx', 'tailwind-merge', 'jsonrepair', 'zod']
+                manualChunks(id) {
+                    // 第三方依赖
+                    if (id.includes('node_modules')) {
+                        // Alpine.js核心
+                        if (id.includes('alpinejs')) {
+                            return 'vendor-alpine';
+                        }
+                        // 图表库
+                        if (id.includes('chart.js')) {
+                            return 'vendor-charts';
+                        }
+                        // 网格布局
+                        if (id.includes('gridstack')) {
+                            return 'vendor-grid';
+                        }
+                        // Markdown渲染
+                        if (id.includes('marked')) {
+                            return 'vendor-markdown';
+                        }
+                        // Zustand状态管理
+                        if (id.includes('zustand')) {
+                            return 'vendor-zustand';
+                        }
+                        // 其他工具库
+                        if (id.includes('clsx') || id.includes('tailwind-merge') || 
+                            id.includes('jsonrepair') || id.includes('zod')) {
+                            return 'vendor-utils';
+                        }
+                        // 其他第三方库统一打包
+                        return 'vendor-other';
+                    }
+                    
+                    // 核心基础设施(合并到一个chunk避免循环依赖)
+                    if (id.includes('/src/common/EventBus.ts') ||
+                        id.includes('/src/common/constants/') ||
+                        id.includes('/src/services/loggerService.ts') ||
+                        id.includes('/src/common/di/Container.ts') ||
+                        id.includes('/src/common/errors/') ||
+                        id.includes('/src/common/config/') ||
+                        id.includes('/src/common/utils/') ||
+                        id.includes('/src/services/')) {
+                        return 'core';
+                    }
+                    
+                    // 路由系统
+                    if (id.includes('/src/common/router/')) {
+                        return 'router';
+                    }
+                    
+                    // UI组件
+                    if (id.includes('/src/common/ui/') || 
+                        id.includes('/src/common/components/')) {
+                        return 'ui';
+                    }
+                    
+                    // 状态管理
+                    if (id.includes('/src/stores/')) {
+                        return 'stores';
+                    }
+                    
+                    // 业务模块按模块分包,并进一步细分
+                    if (id.includes('/src/modules/app_center/')) {
+                        // Master Prompt子模块
+                        if (id.includes('/views/master_prompt/')) {
+                            return 'module-master-prompt';
+                        }
+                        // Keyword Hunter子模块
+                        if (id.includes('/views/keyword_hunter/')) {
+                            return 'module-keyword-hunter';
+                        }
+                        // App Center主模块
+                        return 'module-app-center';
+                    }
+                    if (id.includes('/src/modules/amz_hub/')) {
+                        return 'module-amz-hub';
+                    }
+                    if (id.includes('/src/modules/sops/')) {
+                        // SOPs模块较大,按分类细分
+                        if (id.includes('/views/growth/')) {
+                            return 'module-sops-growth';
+                        }
+                        if (id.includes('/views/backend/')) {
+                            return 'module-sops-backend';
+                        }
+                        if (id.includes('/views/safety/')) {
+                            return 'module-sops-safety';
+                        }
+                        if (id.includes('/views/service/')) {
+                            return 'module-sops-service';
+                        }
+                        return 'module-sops';
+                    }
+                    if (id.includes('/src/modules/more/')) {
+                        return 'module-more';
+                    }
+                    if (id.includes('/src/modules/home/')) {
+                        return 'module-home';
+                    }
                 },
                 // 优化chunk命名
                 chunkFileNames: 'assets/js/[name]-[hash].js',
@@ -89,7 +176,14 @@ export default defineConfig({
             compress: {
                 drop_console: true, // 生产环境移除console
                 drop_debugger: true,
-                pure_funcs: ['console.log', 'console.info', 'console.debug'] // 移除特定console方法
+                pure_funcs: ['console.log', 'console.info', 'console.debug'], // 移除特定console方法
+                passes: 2 // 多次压缩以获得更好效果
+            },
+            mangle: {
+                safari10: true // 兼容Safari 10
+            },
+            format: {
+                comments: false // 移除注释
             }
         },
         // Chunk大小警告阈值
@@ -101,7 +195,13 @@ export default defineConfig({
         // 资源内联阈值(小于4KB的资源内联为base64)
         assetsInlineLimit: 4096,
         // 启用gzip压缩提示
-        reportCompressedSize: true
+        reportCompressedSize: true,
+        // 目标浏览器
+        target: 'es2015',
+        // 启用模块预加载
+        modulePreload: {
+            polyfill: true
+        }
     },
 
     // 路径别名 (与 tsconfig.json 保持一致)
