@@ -294,11 +294,10 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     // 初始化成功，继续启动流程
     // ================================================================
     
-    // 🎯 P1-8: 初始化状态适配器(Zustand与StateManager双向同步)
-    // 配置选项: enabled - 是否启用双向同步(默认true,用于渐进式迁移)
-    // 未来可以设置为false,完全切换到Zustand
+    // 🎯 P1-8: 状态管理 - 已完全切换到Zustand
+    // stateAdapter双向同步已禁用,系统使用纯Zustand模式
     const { stateAdapter } = await import('./stores/stateAdapter');
-    stateAdapter.initialize({ enabled: true });
+    stateAdapter.initialize({ enabled: false });
     
     // 初始化首页
     initHomeSplash();
