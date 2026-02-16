@@ -1,14 +1,18 @@
 ﻿// src/services/errorService.ts
 // ================================================================
 // 🎯 统一错误处理服务 (TypeScript版本)
-// 替代分散的 catch 块处理逻辑
+// 🎯 P0-4: 重构为GlobalErrorHandler的包装器,保持向后兼容
 // ================================================================
 
-import { showToast } from '../common/ui';
 import { Logger } from './loggerService';
+import {
+  globalErrorHandler,
+  toAppError,
+  type ErrorHandlerOptions
+} from '../common/errors';
 
 /**
- * 错误类型枚举
+ * 错误类型枚举 (向后兼容)
  */
 export const ERROR_TYPES = {
   NETWORK: 'NETWORK',
@@ -23,7 +27,7 @@ export const ERROR_TYPES = {
 export type ErrorType = typeof ERROR_TYPES[keyof typeof ERROR_TYPES];
 
 /**
- * 用户友好的错误消息映射
+ * 用户友好的错误消息映射 (向后兼容)
  */
 const USER_MESSAGES: Record<ErrorType, string> = {
   [ERROR_TYPES.NETWORK]: '网络连接失败，请检查网络后重试',
@@ -36,7 +40,7 @@ const USER_MESSAGES: Record<ErrorType, string> = {
 };
 
 /**
- * 错误处理上下文
+ * 错误处理上下文 (向后兼容)
  */
 export interface ErrorContext {
   /** 模块名称 (用于日志) */
@@ -52,20 +56,12 @@ export interface ErrorContext {
 }
 
 /**
- * 错误日志上下文
- */
-interface ErrorLogContext {
-  module: string;
-  action: string;
-  errorType: ErrorType;
-}
-
-/**
  * 统一错误处理服务类
+ * 现在作为GlobalErrorHandler的包装器,保持向后兼容
  */
 class ErrorServiceClass {
   /**
-   * 分析错误类型
+   * 分析错误类型 (向后兼容)
    */
   classify(error: Error | unknown): ErrorType {
     if (!error) return ERROR_TYPES.UNKNOWN;
@@ -111,7 +107,7 @@ class ErrorServiceClass {
   }
 
   /**
-   * 获取用户友好消息
+   * 获取用户友好消息 (向后兼容)
    */
   getUserMessage(error: Error | unknown, customMessage: string | null = null): string {
     if (customMessage) return customMessage;
@@ -121,7 +117,7 @@ class ErrorServiceClass {
   }
 
   /**
-   * 处理错误
+   * 处理错误 (向后兼容,现在委托给GlobalErrorHandler)
    */
   handle(error: Error | unknown, context: ErrorContext = {}): void {
     const {
@@ -132,75 +128,28 @@ class ErrorServiceClass {
       customMessage = null,
     } = context;
 
-    // 确保 error 是一个 Error 对象
-    let err: Error;
-    if (!error) {
-      err = new Error('Unknown error occurred');
-    } else if (!(error instanceof Error)) {
-      const errorMsg = typeof error === 'string' ? error : JSON.stringify(error);
-      err = new Error(errorMsg);
-    } else {
-      err = error;
-    }
+    // 转换为AppError
+    const appError = toAppError(error, { module, action });
 
-    const errorType = this.classify(err);
-    const userMessage = this.getUserMessage(err, customMessage);
+    // 使用GlobalErrorHandler处理
+    const options: ErrorHandlerOptions = {
+      notify,
+      log: true,
+      report: true,
+      userMessage: customMessage || undefined,
+      context: { module, action }
+    };
 
-    // 1. 记录日志
-    this._logError(err, { module, action, errorType });
+    globalErrorHandler.handle(appError, options);
 
-    // 2. 用户通知
-    if (notify && typeof showToast === 'function') {
-      showToast(userMessage, 'error');
-    }
-
-    // 3. 错误上报
-    this._reportError(err, { module, action, errorType });
-
-    // 4. 是否重新抛出
+    // 是否重新抛出
     if (rethrow) {
-      throw err;
+      throw appError;
     }
   }
 
   /**
-   * 记录错误日志
-   */
-  private _logError(error: Error, context: ErrorLogContext): void {
-    try {
-      Logger.error(`${context.action} failed`, error, context.module);
-    } catch (e) {
-      // 如果Logger服务不可用，回退到console
-      console.error(`[${context.module}] ${context.action} failed:`, {
-        type: context.errorType,
-        message: error.message,
-        stack: error.stack,
-      });
-    }
-  }
-
-  /**
-   * 上报错误到监控服务
-   */
-  private async _reportError(error: Error, context: ErrorLogContext): Promise<void> {
-    try {
-      const { monitoringService } = await import('./monitoringService');
-      monitoringService.captureException(error, {
-        module: context.module,
-        tags: {
-          action: context.action,
-          errorType: context.errorType,
-        },
-      });
-    } catch (e) {
-      // 监控服务不可用，静默失败
-      Logger.debug('监控服务不可用', {}, 'ErrorService');
-    }
-  }
-
-  /**
-   * 创建带上下文的错误处理器
-   * 用于简化模块内的错误处理
+   * 创建带上下文的错误处理器 (向后兼容)
    */
   createHandler(module: string): (error: Error | unknown, context?: ErrorContext) => void {
     return (error: Error | unknown, context: ErrorContext = {}) => {
@@ -209,7 +158,7 @@ class ErrorServiceClass {
   }
 
   /**
-   * 包装异步函数，自动处理错误
+   * 包装异步函数，自动处理错误 (向后兼容)
    */
   wrap<T extends (...args: any[]) => Promise<any>>(
     fn: T,
@@ -226,8 +175,7 @@ class ErrorServiceClass {
   }
 
   /**
-   * 安静地执行函数，忽略错误
-   * 用于非关键操作
+   * 安静地执行函数，忽略错误 (向后兼容)
    */
   silent<T>(fn: () => T, defaultValue: T | null = null): T | null {
     try {

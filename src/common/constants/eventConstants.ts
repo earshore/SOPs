@@ -86,7 +86,18 @@ export const APP_EVENTS = {
   // UI相关
   UI_MODAL_OPEN: 'app:ui-modal-open',
   UI_MODAL_CLOSE: 'app:ui-modal-close',
-  UI_TOAST_SHOW: 'app:ui-toast-show'
+  UI_TOAST_SHOW: 'app:ui-toast-show',
+  
+  // 工作状态相关 (P0优化)
+  WORKING_STATE_START: 'app:working-state-start',
+  WORKING_STATE_SUCCESS: 'app:working-state-success',
+  WORKING_STATE_FAILURE: 'app:working-state-failure',
+  WORKING_STATE_TIMEOUT: 'app:working-state-timeout',
+  WORKING_STATE_RETRY: 'app:working-state-retry',
+  
+  // 网络状态相关 (P0优化)
+  NETWORK_ONLINE: 'app:network-online',
+  NETWORK_OFFLINE: 'app:network-offline'
 } as const;
 
 /**

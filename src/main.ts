@@ -55,55 +55,8 @@ import {
   registerActionsWithLegacy
 } from './common/utils/actionRegistry';
 
-// ✅ 全局错误兜底 (增强版 - 集成日志和监控)
-window.addEventListener("error", (event: ErrorEvent): void => {
-  // 避免循环报错导致 Toast 刷屏
-  if (window._errorThrottle && Date.now() - window._errorThrottle < 2000) return;
-  window._errorThrottle = Date.now();
-
-  const msg = `系统运行异常: ${event.message || "未知错误"}`;
-  
-  // 记录到日志服务
-  import('./services/loggerService').then(({ Logger }) => {
-    Logger.fatal('全局错误捕获', event.error, 'System');
-  }).catch(() => {});
-  
-  // 用户通知
-  if (window.showToast) window.showToast(msg, "error");
-
-  // 记录到错误服务和监控服务
-  import('./services/errorService').then(({ ErrorService }) => {
-    ErrorService.handle(event.error, { 
-      module: 'System',
-      action: 'window.onerror', 
-      notify: false // 已经显示过toast
-    });
-  }).catch(() => {});
-});
-
-// ✅ Promise 异常兜底 (增强版 - 集成日志和监控)
-window.addEventListener("unhandledrejection", (event: PromiseRejectionEvent): void => {
-  if (window._errorThrottle && Date.now() - window._errorThrottle < 2000) return;
-  window._errorThrottle = Date.now();
-
-  const msg = `异步操作异常: ${event.reason?.message || "网络请求或数据处理失败"}`;
-  
-  // 记录到日志服务
-  import('./services/loggerService').then(({ Logger }) => {
-    Logger.error('未处理的Promise拒绝', event.reason, 'System');
-  }).catch(() => {});
-  
-  // 用户通知
-  if (window.showToast) window.showToast(msg, "error");
-  
-  // 记录到监控服务
-  import('./services/monitoringService').then(({ monitoringService }) => {
-    monitoringService.captureException(event.reason, {
-      module: 'System',
-      tags: { type: 'unhandledrejection' }
-    });
-  }).catch(() => {});
-});
+// ✅ 全局错误兜底已由GlobalErrorHandler统一处理
+// 见 src/common/errors/GlobalErrorHandler.ts
 
 // 1. 导入各模块的初始化函数和业务函数
 import {
@@ -228,6 +181,55 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     });
     return Logger;
   }, { optional: true });
+
+  // 🎯 P0优化: 内存泄漏检测器
+  bootstrap.register('memoryLeakDetector', async () => {
+    const { memoryLeakDetector } = await import('./common/utils/MemoryLeakDetector');
+    const { container } = await import('./common/di/Container');
+    
+    // 只在开发环境启用
+    if ((import.meta as any).env?.DEV) {
+      memoryLeakDetector.start();
+      console.log('✅ [P0] 内存泄漏检测器已启动');
+    }
+    
+    // 注册到DI容器
+    container.register('memoryLeakDetector', () => memoryLeakDetector, {
+      dependencies: [],
+      lifetime: 'singleton'
+    });
+    return memoryLeakDetector;
+  }, { optional: true });
+
+  // 🎯 P0优化: 工作状态管理器
+  bootstrap.register('workingStateManager', async () => {
+    const { workingStateManager } = await import('./common/utils/WorkingStateManager');
+    const { container } = await import('./common/di/Container');
+    
+    console.log('✅ [P0] 工作状态管理器已初始化');
+    
+    // 注册到DI容器
+    container.register('workingStateManager', () => workingStateManager, {
+      dependencies: [],
+      lifetime: 'singleton'
+    });
+    return workingStateManager;
+  });
+
+  // 🎯 P0优化: 全局错误处理器
+  bootstrap.register('globalErrorHandler', async () => {
+    const { globalErrorHandler } = await import('./common/errors/GlobalErrorHandler');
+    const { container } = await import('./common/di/Container');
+    
+    console.log('✅ [P0] 全局错误处理器已初始化');
+    
+    // 注册到DI容器
+    container.register('globalErrorHandler', () => globalErrorHandler, {
+      dependencies: [],
+      lifetime: 'singleton'
+    });
+    return globalErrorHandler;
+  });
 
   // 5. UI 服务
   bootstrap.register('loadingManager', async () => {

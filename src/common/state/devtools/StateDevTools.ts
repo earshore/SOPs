@@ -20,6 +20,8 @@ export class StateDevTools {
   private isOpen: boolean = false;
   private panel: HTMLElement | null = null;
   private currentTab: DevToolsTab = 'state';
+  private unsubscribers: Array<() => void> = [];
+  private keydownHandler: ((e: KeyboardEvent) => void) | null = null;
 
   constructor(stateManager: StateManager) {
     this.stateManager = stateManager;
@@ -34,12 +36,13 @@ export class StateDevTools {
     document.body.appendChild(this.panel);
     
     // 监听快捷键 (Ctrl+Shift+D)
-    document.addEventListener('keydown', (e) => {
+    this.keydownHandler = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.shiftKey && e.key === 'D') {
         e.preventDefault();
         this.toggle();
       }
-    });
+    };
+    document.addEventListener('keydown', this.keydownHandler);
     
     // 订阅所有状态变化
     this._subscribeToChanges();
@@ -192,10 +195,34 @@ export class StateDevTools {
       }
     };
     
-    // 订阅顶层命名空间
+    // 订阅顶层命名空间,并保存取消订阅函数
     ['ui', 'scraper', 'analysis', 'promptlab', 'keywordTracker'].forEach(ns => {
-      this.stateManager.subscribe(ns, refresh);
+      const unsubscribe = this.stateManager.subscribe(ns, refresh);
+      this.unsubscribers.push(unsubscribe);
     });
+  }
+
+  /**
+   * 销毁开发者工具,清理所有订阅和事件监听器
+   */
+  destroy(): void {
+    // 取消所有状态订阅
+    this.unsubscribers.forEach(unsubscribe => unsubscribe());
+    this.unsubscribers = [];
+    
+    // 移除键盘事件监听器
+    if (this.keydownHandler) {
+      document.removeEventListener('keydown', this.keydownHandler);
+      this.keydownHandler = null;
+    }
+    
+    // 移除面板DOM
+    if (this.panel && this.panel.parentNode) {
+      this.panel.parentNode.removeChild(this.panel);
+      this.panel = null;
+    }
+    
+    console.log('✅ [StateDevTools] Destroyed and cleaned up');
   }
 
   /**

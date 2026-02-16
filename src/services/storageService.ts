@@ -2,11 +2,13 @@
 // ================================================================
 // 🎯 统一数据持久化服务（TypeScript版本）
 // 替代分散的 localStorage 直接调用
+// 🎯 P0-4: 已迁移到统一错误处理
 // ================================================================
 
 import type { IStorageService } from '../types/services';
 import type { LLMProviderConfig } from '../types/state';
 import type { HistoryItem, ProxyConfig } from '../types/modules-business';
+import { handleSystemError } from '../common/errors';
 
 /**
  * 存储键名常量
@@ -87,7 +89,14 @@ class StorageServiceClass implements IStorageService {
       
       return JSON.parse(raw) as T;
     } catch (e) {
-      console.warn(`[StorageService] 解析失败: ${key}`, e);
+      handleSystemError('SYS_PARSE_ERROR', {
+        module: 'StorageService',
+        action: 'get',
+        key
+      }, e as Error, {
+        log: true,
+        notify: false // 静默失败,返回默认值
+      });
       return defaultValue;
     }
   }
@@ -106,19 +115,47 @@ class StorageServiceClass implements IStorageService {
       
       return true;
     } catch (e) {
-      console.error(`[StorageService] 存储失败: ${key}`, e);
+      const error = e as Error & { name: string };
       
-      if ((e as Error & { name: string }).name === 'QuotaExceededError') {
+      if (error.name === 'QuotaExceededError') {
+        handleSystemError('SYS_STORAGE_FULL', {
+          module: 'StorageService',
+          action: 'set',
+          key,
+          valueSize: JSON.stringify(value).length
+        }, error, {
+          log: true,
+          notify: true
+        });
+        
+        // 尝试清理后重试
         this._handleQuotaExceeded();
         try {
           localStorage.setItem(key, JSON.stringify(value));
           this._updateAccessTime(key);
           return true;
         } catch (retryError) {
-          console.error(`[StorageService] 重试后仍然失败: ${key}`, retryError);
+          handleSystemError('SYS_STORAGE_ERROR', {
+            module: 'StorageService',
+            action: 'set',
+            key,
+            retry: true
+          }, retryError as Error, {
+            log: true,
+            notify: true
+          });
           return false;
         }
       }
+      
+      handleSystemError('SYS_STORAGE_ERROR', {
+        module: 'StorageService',
+        action: 'set',
+        key
+      }, error, {
+        log: true,
+        notify: false
+      });
       return false;
     }
   }
@@ -136,7 +173,14 @@ class StorageServiceClass implements IStorageService {
       
       return raw !== null ? raw : defaultValue;
     } catch (e) {
-      console.warn(`[StorageService] 读取失败: ${key}`, e);
+      handleSystemError('SYS_STORAGE_ERROR', {
+        module: 'StorageService',
+        action: 'getRaw',
+        key
+      }, e as Error, {
+        log: true,
+        notify: false
+      });
       return defaultValue;
     }
   }
@@ -153,19 +197,46 @@ class StorageServiceClass implements IStorageService {
       
       return true;
     } catch (e) {
-      console.error(`[StorageService] 存储失败: ${key}`, e);
+      const error = e as Error & { name: string };
       
-      if ((e as Error & { name: string }).name === 'QuotaExceededError') {
+      if (error.name === 'QuotaExceededError') {
+        handleSystemError('SYS_STORAGE_FULL', {
+          module: 'StorageService',
+          action: 'setRaw',
+          key,
+          valueSize: value.length
+        }, error, {
+          log: true,
+          notify: true
+        });
+        
         this._handleQuotaExceeded();
         try {
           localStorage.setItem(key, value);
           this._updateAccessTime(key);
           return true;
         } catch (retryError) {
-          console.error(`[StorageService] 重试后仍然失败: ${key}`, retryError);
+          handleSystemError('SYS_STORAGE_ERROR', {
+            module: 'StorageService',
+            action: 'setRaw',
+            key,
+            retry: true
+          }, retryError as Error, {
+            log: true,
+            notify: true
+          });
           return false;
         }
       }
+      
+      handleSystemError('SYS_STORAGE_ERROR', {
+        module: 'StorageService',
+        action: 'setRaw',
+        key
+      }, error, {
+        log: true,
+        notify: false
+      });
       return false;
     }
   }

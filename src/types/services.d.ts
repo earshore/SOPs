@@ -197,7 +197,7 @@ export interface IErrorService {
 export interface MonitoringEvent {
   type: 'error' | 'performance' | 'user-action' | 'api-call';
   timestamp: number;
-  data: any;
+  data: Record<string, unknown>;
   tags?: Record<string, string>;
 }
 
