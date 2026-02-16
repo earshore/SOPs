@@ -159,6 +159,41 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     }
   });
 
+  // 🎯 P2-11: Web Vitals性能监控
+  bootstrap.register('webVitalsService', async () => {
+    const { webVitalsService } = await import('./services/webVitalsService');
+    const { container } = await import('./common/di/Container');
+    
+    await webVitalsService.initialize();
+    console.log('✅ [P2-11] Web Vitals监控已启动');
+    
+    // 注册到DI容器
+    container.register('webVitalsService', () => webVitalsService, {
+      dependencies: [],
+      lifetime: 'singleton'
+    });
+    return webVitalsService;
+  }, { optional: true });
+
+  // 🎯 P2-11: 性能监控面板
+  bootstrap.register('performanceMonitor', async () => {
+    const { performanceMonitor } = await import('./common/devtools/PerformanceMonitor');
+    const { container } = await import('./common/di/Container');
+    
+    performanceMonitor.initialize();
+    console.log('✅ [P2-11] 性能监控面板已初始化');
+    
+    // 注册到DI容器
+    container.register('performanceMonitor', () => performanceMonitor, {
+      dependencies: [],
+      lifetime: 'singleton'
+    });
+    return performanceMonitor;
+  }, { 
+    optional: true,
+    dependencies: ['webVitalsService']
+  });
+
   bootstrap.register('logger', async () => {
     const { Logger } = await import('./services/loggerService');
     const { container } = await import('./common/di/Container');
