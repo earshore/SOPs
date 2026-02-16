@@ -325,11 +325,12 @@ export interface AppState {
 
 /**
  * 状态路径（点分隔）
+ * @deprecated 使用 TypedStatePath 获得类型安全
  */
 export type StatePath = string;
 
 /**
- * 嵌套键路径
+ * 嵌套键路径工具类型
  */
 export type NestedKeyOf<T> = T extends object
   ? {
@@ -343,8 +344,111 @@ export type NestedKeyOf<T> = T extends object
 
 /**
  * 类型安全的状态路径
+ * 支持点分隔的嵌套路径,如 'ui.currentTab' | 'scraper.selectedSite'
  */
 export type TypedStatePath = NestedKeyOf<AppState>;
+
+/**
+ * 根据路径获取值类型
+ */
+export type PathValue<T, P extends string> = 
+  P extends `${infer K}.${infer Rest}`
+    ? K extends keyof T
+      ? PathValue<T[K], Rest>
+      : never
+    : P extends keyof T
+      ? T[P]
+      : never;
+
+/**
+ * UI模块路径
+ */
+export type UIPath = 
+  | 'ui'
+  | 'ui.currentTab'
+  | 'ui.currentDataTab'
+  | 'ui.currentReportTab'
+  | 'ui.sidebarCollapsed'
+  | 'ui.theme'
+  | 'ui.loading';
+
+/**
+ * Scraper模块路径
+ */
+export type ScraperPath = 
+  | 'scraper'
+  | 'scraper.isScraping'
+  | 'scraper.status'
+  | 'scraper.selectedSite'
+  | 'scraper.scrapedData'
+  | 'scraper.currentHistoryId'
+  | 'scraper.inputAsins'
+  | 'scraper.progress'
+  | 'scraper.error';
+
+/**
+ * Analysis模块路径
+ */
+export type AnalysisPath = 
+  | 'analysis'
+  | 'analysis.selectedAsins'
+  | 'analysis.reportData'
+  | 'analysis.analysisReport'
+  | 'analysis.translatedReport'
+  | 'analysis.expandedAsin'
+  | 'analysis.isEditing'
+  | 'analysis.showTranslation'
+  | 'analysis.editHistory'
+  | 'analysis.lastTranslationModel'
+  | 'analysis.isAnalyzing'
+  | 'analysis.filters'
+  | 'analysis.pendingReport';
+
+/**
+ * PromptLab模块路径
+ */
+export type PromptLabPath = 
+  | 'promptlab'
+  | 'promptlab.currentPrompt'
+  | 'promptlab.history'
+  | 'promptlab.userProductProfile'
+  | 'promptlab.selectedModel'
+  | 'promptlab.temperature'
+  | 'promptlab.maxTokens';
+
+/**
+ * KeywordTracker模块路径
+ */
+export type KeywordTrackerPath = 
+  | 'keywordTracker'
+  | 'keywordTracker.keywords'
+  | 'keywordTracker.processedCopy'
+  | 'keywordTracker.formattedCopy'
+  | 'keywordTracker.matchedKeywords'
+  | 'keywordTracker.unmatchedKeywords'
+  | 'keywordTracker.wordFrequency'
+  | 'keywordTracker.paragraphs'
+  | 'keywordTracker.translationMode'
+  | 'keywordTracker.keywordLocationIndex'
+  | 'keywordTracker.settings'
+  | 'keywordTracker.isWindowMinimized'
+  | 'keywordTracker.trackingData'
+  | 'keywordTracker.isTracking'
+  | 'keywordTracker.filters'
+  | 'keywordTracker.keywordsInputText'
+  | 'keywordTracker.copyInputText'
+  | 'keywordTracker.llmAnalysisResult'
+  | 'keywordTracker.showTranslation';
+
+/**
+ * 所有可用的状态路径(类型安全)
+ */
+export type ValidStatePath = 
+  | UIPath 
+  | ScraperPath 
+  | AnalysisPath 
+  | PromptLabPath 
+  | KeywordTrackerPath;
 
 // ==================== 状态操作类型 ====================
 
