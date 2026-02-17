@@ -140,23 +140,27 @@ const SettingsPanel = (): SettingsPanelData => ({
             console.error('[Settings] 加载proxy配置失败:', err);
         }
         
-        // 异步加载provider配置,不阻塞init
-        const loadPromise = this.loadProviderConfig(this.llm.provider);
-        if (loadPromise && typeof loadPromise.catch === 'function') {
-            loadPromise.catch(err => {
-                console.error('[Settings] 加载provider配置失败:', err);
-            });
-        }
+        // 延迟加载provider配置,避免阻塞init
+        setTimeout(() => {
+            const loadPromise = this.loadProviderConfig(this.llm.provider);
+            if (loadPromise && typeof loadPromise.catch === 'function') {
+                loadPromise.catch(err => {
+                    console.error('[Settings] 加载provider配置失败:', err);
+                });
+            }
+        }, 0);
 
         // Watch for provider changes to load its config
         // @ts-expect-error - Alpine.js $watch is injected at runtime
         this.$watch('llm.provider', (val: string) => {
-            const watchPromise = this.loadProviderConfig(val);
-            if (watchPromise && typeof watchPromise.catch === 'function') {
-                watchPromise.catch(err => {
-                    console.error('[Settings] 加载provider配置失败:', err);
-                });
-            }
+            setTimeout(() => {
+                const watchPromise = this.loadProviderConfig(val);
+                if (watchPromise && typeof watchPromise.catch === 'function') {
+                    watchPromise.catch(err => {
+                        console.error('[Settings] 加载provider配置失败:', err);
+                    });
+                }
+            }, 0);
         });
         // Watch for proxy type to restore cached key
         // @ts-expect-error - Alpine.js $watch is injected at runtime
@@ -167,12 +171,14 @@ const SettingsPanel = (): SettingsPanelData => ({
 
     open() {
         this.isOpen = true;
-        const loadPromise = this.loadProviderConfig(this.llm.provider);
-        if (loadPromise && typeof loadPromise.catch === 'function') {
-            loadPromise.catch(err => {
-                console.error('[Settings] 加载provider配置失败:', err);
-            });
-        }
+        setTimeout(() => {
+            const loadPromise = this.loadProviderConfig(this.llm.provider);
+            if (loadPromise && typeof loadPromise.catch === 'function') {
+                loadPromise.catch(err => {
+                    console.error('[Settings] 加载provider配置失败:', err);
+                });
+            }
+        }, 0);
         try {
             this.loadProxyConfig();
         } catch (err) {
