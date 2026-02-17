@@ -24,7 +24,6 @@ export function toggleAsin(context: any, moduleState: any, asin: string): void {
   } else {
     context.selectedAsins.push(asin);
   }
-  console.log('[toggleAsin] 当前选中的 ASINs:', context.selectedAsins);
   syncToModuleState(context, moduleState);
 }
 
@@ -54,7 +53,6 @@ export function toggleTarget(context: any, moduleState: any, targetId: string): 
   } else {
     context.selectedTargets.push(targetId);
   }
-  console.log('[toggleTarget] 当前选中的分析目标:', context.selectedTargets);
   syncToModuleState(context, moduleState);
 }
 
@@ -235,6 +233,12 @@ export async function runAnalysisAction(context: any, moduleState: any, currentP
   context.progress = 0;
   context.results = [];
   syncToModuleState(context, moduleState);
+  
+  console.log('[用户动作] 开始分析:', {
+    selectedTargets: context.selectedTargets.length,
+    selectedAsins: context.selectedAsins.length,
+    currentProducts: currentProducts.length
+  });
 
   try {
     let results: any[];
@@ -284,8 +288,15 @@ export async function runAnalysisAction(context: any, moduleState: any, currentP
       context.analysisReport = getSampleReport();
     }
 
+    // 直接赋值，让 Alpine.js 追踪新数组
     context.results = results;
+    // analysisReport 已在上面的 if/else 中设置
     syncToModuleState(context, moduleState);
+    
+    console.log('[用户动作] 分析结果已设置:', {
+      resultsLength: context.results.length,
+      results: context.results
+    });
 
     // 将分析报告加载到全局状态
     const scrapedData = state.scraper?.scrapedData;

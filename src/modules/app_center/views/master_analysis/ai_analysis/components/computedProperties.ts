@@ -43,27 +43,43 @@ export function createComputedProperties(context: any) {
       // 优先从 Scraper 数据获取
       const scrapedData = state.scraper?.scrapedData;
       if (scrapedData && scrapedData.products && scrapedData.products.length > 0) {
+        console.log('[计算属性] 开始从 Scraper 数据获取产品, selectedAsins:', context.selectedAsins);
         for (const asin of context.selectedAsins) {
           const matchedProduct = scrapedData.products.find((p: any) => p.asin === asin);
           if (matchedProduct) {
+            console.log('[计算属性] 找到匹配产品:', asin, matchedProduct);
             const product = convertScraperDataToProduct(matchedProduct);
             if (product) {
+              console.log('[计算属性] 产品转换成功:', asin);
               products.push(product);
+            } else {
+              console.warn('[计算属性] 产品转换失败:', asin, matchedProduct);
             }
+          } else {
+            console.warn('[计算属性] 未找到匹配产品:', asin);
           }
         }
+      } else {
+        console.warn('[计算属性] Scraper 数据不可用:', {
+          hasScrapedData: !!scrapedData,
+          hasProducts: !!(scrapedData && scrapedData.products),
+          productsLength: scrapedData?.products?.length
+        });
       }
       
       // 如果没有从 Scraper 获取到，从示例数据获取
       if (products.length === 0) {
+        console.log('[计算属性] 尝试从示例数据获取产品');
         for (const asin of context.selectedAsins) {
           const product = getProductByAsin(asin);
           if (product) {
+            console.log('[计算属性] 从示例数据获取到产品:', asin);
             products.push(product);
           }
         }
       }
       
+      console.log('[计算属性] currentProducts 最终结果:', products.length, '个产品');
       return products;
     },
 
@@ -73,52 +89,37 @@ export function createComputedProperties(context: any) {
     get availableAsins(): string[] {
       // 优先从 Scraper 获取 ASIN 列表
       const scrapedData = state.scraper?.scrapedData;
-      console.log('[availableAsins] state.scraper:', state.scraper);
-      console.log('[availableAsins] scrapedData:', scrapedData);
-      
       if (scrapedData && scrapedData.products && scrapedData.products.length > 0) {
-        const asins = scrapedData.products.map((p: any) => p.asin).filter((asin: string) => asin);
-        console.log('[availableAsins] 从 Scraper 获取:', asins);
-        return asins;
+        return scrapedData.products.map((p: any) => p.asin).filter((asin: string) => asin);
       }
-      // 没有真实数据时，从示例数据获取
-      const { getAvailableAsins } = require('../config/sampleData');
-      const sampleAsins = getAvailableAsins();
-      console.log('[availableAsins] 从示例数据获取:', sampleAsins);
-      return sampleAsins;
+      // 没有真实数据时返回空数组
+      return [];
     },
 
     /**
      * 是否有数据
      */
     get hasData(): boolean {
-      const result = this.availableAsins.length > 0;
-      console.log('[hasData] availableAsins.length:', this.availableAsins.length, 'result:', result);
-      return result;
+      return this.currentProducts.length > 0;
     },
 
     /**
      * 是否可以开始分析
+     * 注意：这里必须检查 context.selectedTargets，因为它是响应式的
+     * 但由于 Alpine.js 的初始化顺序问题，我们需要确保至少有一个目标被选中
      */
     get canAnalyze(): boolean {
-      const selectedAsinsCount = context.selectedAsins.length;
-      const selectedTargetsCount = context.selectedTargets.length;
-      const availableAsinsCount = this.availableAsins.length;
-      const isAnalyzing = context.isAnalyzing;
-      
-      const result = selectedAsinsCount > 0 && 
-                     selectedTargetsCount > 0 && 
-                     availableAsinsCount > 0 && 
-                     !isAnalyzing;
-      
-      console.log('[canAnalyze] 检查条件:', {
-        selectedAsins: selectedAsinsCount,
-        selectedTargets: selectedTargetsCount,
-        availableAsins: availableAsinsCount,
-        isAnalyzing: isAnalyzing,
-        result: result
+      // 如果 selectedTargets 为空但 analysisTargets 有值，说明还没初始化完成
+      // 这种情况下暂时返回 false，等待 init() 完成后会重新计算
+      const hasTargets = context.selectedTargets && context.selectedTargets.length > 0;
+      const result = hasTargets && this.hasData && !context.isAnalyzing;
+      console.log('[计算属性] canAnalyze 检查:', {
+        selectedTargets: context.selectedTargets?.length || 0,
+        hasData: this.hasData,
+        currentProducts: this.currentProducts.length,
+        isAnalyzing: context.isAnalyzing,
+        canAnalyze: result
       });
-      
       return result;
     },
 
@@ -133,14 +134,25 @@ export function createComputedProperties(context: any) {
      * Listings 分析结果
      */
     get listingsResults(): AnalysisResult[] {
-      return context.results.filter((r: AnalysisResult) => r.source === 'Listings');
+      const filtered = context.results.filter((r: AnalysisResult) => r.source === 'Listings');
+      console.log('[计算属性] listingsResults:', {
+        totalResults: context.results.length,
+        listingsCount: filtered.length,
+        results: context.results
+      });
+      return filtered;
     },
 
     /**
      * Reviews 分析结果
      */
     get reviewsResults(): AnalysisResult[] {
-      return context.results.filter((r: AnalysisResult) => r.source === 'Reviews');
+      const filtered = context.results.filter((r: AnalysisResult) => r.source === 'Reviews');
+      console.log('[计算属性] reviewsResults:', {
+        totalResults: context.results.length,
+        reviewsCount: filtered.length
+      });
+      return filtered;
     },
 
     /**

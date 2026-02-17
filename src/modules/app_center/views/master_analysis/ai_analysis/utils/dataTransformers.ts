@@ -11,12 +11,21 @@ import { Product } from '../config/sampleData';
 export function convertScraperDataToProduct(productData: unknown): Product | null {
   try {
     if (!productData || typeof productData !== 'object') {
+      console.error('[数据转换] 产品数据无效:', productData);
       return null;
     }
 
     const product = productData as Record<string, unknown>;
     
-    return {
+    console.log('[数据转换] 开始转换产品数据:', {
+      asin: product.asin,
+      hasTitle: !!(product.productTitle || product.title),
+      hasBullets: !!(product.feature_bullets || product.bulletPoints || product.bullet_points),
+      hasReviews: !!(product.customer_reviews || product.reviews),
+      rawData: product
+    });
+    
+    const converted = {
       asin: (product.asin as string) || '',
       productTitle: (product.productTitle as string) || (product.title as string) || '',
       feature_bullets: (product.feature_bullets as string[]) || (product.bulletPoints as string[]) || (product.bullet_points as string[]) || [],
@@ -34,8 +43,17 @@ export function convertScraperDataToProduct(productData: unknown): Product | nul
       scrape_status: 'success',
       metadata: {}
     };
+    
+    console.log('[数据转换] 转换结果:', {
+      asin: converted.asin,
+      title: converted.productTitle,
+      bulletsCount: converted.feature_bullets.length,
+      reviewsCount: converted.customer_reviews.length
+    });
+    
+    return converted;
   } catch (error) {
-    console.error('[数据转换] 转换产品数据失败:', error);
+    console.error('[数据转换] 转换产品数据失败:', error, productData);
     return null;
   }
 }
