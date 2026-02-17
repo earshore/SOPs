@@ -49,6 +49,7 @@ interface SettingsPanelData {
     init(): void;
     open(): void;
     close(): void;
+    openPerformanceMonitor(): Promise<void>;
     loadProviderConfig(provider: string): Promise<void>;
     fetchModels(): Promise<void>;
     testConnection(): Promise<void>;
@@ -154,6 +155,18 @@ const SettingsPanel = (): SettingsPanelData => ({
 
     close() {
         this.isOpen = false;
+    },
+
+    // 打开性能监控面板
+    async openPerformanceMonitor(): Promise<void> {
+        try {
+            const { performanceMonitor } = await import('../../common/devtools/PerformanceMonitor');
+            performanceMonitor.show();
+            showToast('监控面板已打开', 'success');
+        } catch (error) {
+            console.error('Failed to open performance monitor:', error);
+            showToast('打开监控面板失败', 'error');
+        }
     },
 
     // --- LLM Logic ---
@@ -431,6 +444,20 @@ export function openSettings(): void {
 
 export function closeSettings(): void {
     window.dispatchEvent(new CustomEvent(APP_EVENTS.SETTINGS_CLOSE));
+}
+
+/**
+ * 打开性能监控面板
+ */
+export async function openPerformanceMonitor(): Promise<void> {
+    try {
+        const { performanceMonitor } = await import('../../common/devtools/PerformanceMonitor');
+        performanceMonitor.show();
+        showToast('监控面板已打开', 'success');
+    } catch (error) {
+        console.error('Failed to open performance monitor:', error);
+        showToast('打开监控面板失败', 'error');
+    }
 }
 
 // These are no longer needed for direct calling, but kept for compatibility

@@ -34,7 +34,18 @@ jobs:
         run: npm run lint
       
       - name: 运行测试
-        run: npm run test:coverage
+        id: test
+        run: |
+          echo "开始运行测试套件..."
+          START_TIME=$(date +%s)
+          npm run test:coverage
+          END_TIME=$(date +%s)
+          DURATION=$((END_TIME - START_TIME))
+          echo "测试完成,耗时: ${DURATION}秒"
+          echo "duration=${DURATION}" >> $GITHUB_OUTPUT
+          if [ $DURATION -gt 120 ]; then
+            echo "⚠️ 警告: 测试运行时间超过2分钟"
+          fi
       
       - name: 上传覆盖率报告
         uses: codecov/codecov-action@v4
@@ -58,4 +69,67 @@ jobs:
       - name: 检查覆盖率阈值
         run: |
           echo "检查测试覆盖率是否达标..."
-          npm run test:coverage
+          node -e "const fs = require('fs'); const coverage = JSON.parse(fs.readFileSync('./coverage/coverage-summary.json', 'utf8')); const total = coverage.total; const threshold = 60; const lines = total.lines.pct; const statements = total.statements.pct; const functions = total.functions.pct; const branches = total.branches.pct; console.log('覆盖率统计:'); console.log('  行覆盖率:', lines + '%'); console.log('  语句覆盖率:', statements + '%'); console.log('  函数覆盖率:', functions + '%'); console.log('  分支覆盖率:', branches + '%'); if (lines < threshold || statements < threshold) { console.error('错误: 覆盖率低于阈值 ' + threshold + '%'); process.exit(1); } console.log('✅ 覆盖率检查通过');"
+      
+      - name: 评论PR覆盖率报告
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request' && matrix.node-version == '20.x'
+        with:
+          script: |
+            const fs = require('fs');
+            const coverage = JSON.parse(fs.readFileSync('./coverage/coverage-summary.json', 'utf8'));
+            const total = coverage.total;
+            
+            const comment = `## 📊 测试覆盖率报告
+            
+            | 指标 | 覆盖率 | 状态 |
+            |------|--------|------|
+            | 行覆盖率 | ${total.lines.pct}% | ${total.lines.pct >= 60 ? '✅' : '❌'} |
+            | 语句覆盖率 | ${total.statements.pct}% | ${total.statements.pct >= 60 ? '✅' : '❌'} |
+            | 函数覆盖率 | ${total.functions.pct}% | ${total.functions.pct >= 60 ? '✅' : '❌'} |
+            | 分支覆盖率 | ${total.branches.pct}% | ${total.branches.pct >= 60 ? '✅' : '❌'} |
+            
+            **阈值要求**: 60%
+            
+            ${total.lines.pct >= 60 && total.statements.pct >= 60 ? '✅ 覆盖率检查通过' : '❌ 覆盖率低于阈值'}
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+      
+      - name: 测试失败通知
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comment = `## ❌ 测试失败
+            
+            测试套件执行失败,请检查以下内容:
+            
+            1. 查看测试日志了解失败原因
+            2. 确保所有测试用例通过
+            3. 检查代码覆盖率是否达标
+            4. 修复问题后重新提交
+            
+            **工作流运行**: [查看详情](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+      
+      - name: 测试性能报告
+        if: always() && matrix.node-version == '20.x'
+        run: |
+          echo "## 测试性能统计" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- 测试运行时间: ${{ steps.test.outputs.duration }}秒" >> $GITHUB_STEP_SUMMARY
+          echo "- Node版本: ${{ matrix.node-version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- 运行器: windows-latest" >> $GITHUB_STEP_SUMMARY

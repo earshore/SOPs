@@ -69,7 +69,8 @@ import {
   fetchModels,
   toggleApiKeyVisibility, // [RESTORED]
   testConnection,
-  saveProxyConfig
+  saveProxyConfig,
+  openPerformanceMonitor // [NEW] 性能监控面板
 } from "./components/settings/systemSettings";
 
 import { switchTab, renderMegaMenu, renderSopsMegaMenu, renderHubMegaMenu, renderMoreMenu, showToast, initRouter } from "./common/ui";
@@ -407,6 +408,7 @@ registerActionsWithLegacy({
   toggleApiKeyVisibility,
   testConnection,
   saveProxyConfig,
+  openPerformanceMonitor,
 
   // 🎯 阶段1: 性能监控
   showPerformanceReport: async () => {

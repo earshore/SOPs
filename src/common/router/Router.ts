@@ -10,6 +10,7 @@ import { routeMiddleware } from './RouteMiddleware';
 import { routeErrorHandler } from './ErrorHandler';
 import { MENU_CONFIG } from '../config/menuConfig';
 import { ensureViewLoaded } from '../utils/viewLoader';
+import { analyticsService } from '@/services/analyticsService';
 import type { Route, RouteConfig, NavigationOptions, RouteHistory } from '../../types/config';
 
 /**
@@ -155,7 +156,10 @@ export class Router {
             // 6. 记录历史
             this._recordHistory(to);
 
-            // 7. 触发路由变化事件
+            // 7. 追踪页面浏览
+            analyticsService.trackPageView(routeId, routeConfig.title || routeId);
+
+            // 8. 触发路由变化事件
             emitAppEvent(APP_EVENTS.ROUTE_CHANGED, {
                 routeId,
                 config: routeConfig,
@@ -163,7 +167,7 @@ export class Router {
                 to
             });
 
-            // 8. 执行后置中间件
+            // 9. 执行后置中间件
             await routeMiddleware.runAfterEach(to, from);
 
             console.log(`[Router] Navigated: ${from?.path || 'null'} -> ${routeId}`);

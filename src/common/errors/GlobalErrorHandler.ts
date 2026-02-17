@@ -14,6 +14,7 @@ import {
   isAppError,
   toAppError
 } from './AppError';
+import { errorTracker } from '@/services/errorTracker';
 
 /**
  * 错误处理选项
@@ -107,6 +108,9 @@ export class GlobalErrorHandler {
 
     // 更新错误计数
     this.errorCount++;
+
+    // 捕获到错误追踪器
+    errorTracker.captureAppError(appError);
 
     // 记录日志
     if (options.log !== false) {

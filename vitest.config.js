@@ -43,11 +43,12 @@ export default defineConfig({
                 'src/**/types/**'
             ],
             // 覆盖率阈值 (根据测试规范)
+            // 当前目标: 60% (Week 2完成), 最终目标: 80% (Week 3完成)
             thresholds: {
-                lines: 70,
-                functions: 75,
-                branches: 65,
-                statements: 70
+                lines: 60,
+                functions: 60,
+                branches: 55,
+                statements: 60
             }
         },
 

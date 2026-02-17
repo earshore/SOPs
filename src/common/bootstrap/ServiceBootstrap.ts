@@ -4,6 +4,12 @@
  * 按依赖顺序初始化所有核心服务，确保启动流程可控
  */
 
+import { errorTracker } from '@/services/errorTracker';
+import { analyticsService } from '@/services/analyticsService';
+import { performanceStorage } from '@/services/performanceStorage';
+import { alertService } from '@/services/alertService';
+import { performanceMonitor } from '../devtools/PerformanceMonitor';
+
 /**
  * 服务配置选项
  */
@@ -93,6 +99,11 @@ export class ServiceBootstrap {
     console.log('\n🚀 [Bootstrap] 开始初始化服务...\n');
     
     try {
+      // 0. 初始化监控服务(优先)
+      if (process.env.NODE_ENV === 'development') {
+        await this._initMonitoringServices();
+      }
+
       // 1. 拓扑排序，确定初始化顺序
       this.initOrder = this._topologicalSort();
       console.log(`📋 [Bootstrap] 初始化顺序:`, this.initOrder.join(' → '));
@@ -113,6 +124,50 @@ export class ServiceBootstrap {
     } catch (error) {
       console.error('❌ [Bootstrap] 初始化流程失败:', error);
       throw error;
+    }
+  }
+
+  /**
+   * 初始化监控服务
+   * @private
+   */
+  private async _initMonitoringServices(): Promise<void> {
+    console.log('📊 [Bootstrap] 初始化监控服务...');
+
+    try {
+      // 1. 错误追踪
+      errorTracker.init({
+        enabled: true,
+        sampleRate: 1.0
+      });
+
+      // 2. 用户行为分析
+      analyticsService.init({
+        enabled: true,
+        trackPageViews: true,
+        trackUserActions: true
+      });
+
+      // 3. 性能数据存储
+      await performanceStorage.init({
+        retentionDays: 7,
+        maxRecords: 10000
+      });
+
+      // 4. 告警服务
+      alertService.init({
+        enabled: true,
+        showToast: true,
+        showBrowserNotification: false
+      });
+
+      // 5. 性能监控面板
+      performanceMonitor.initialize();
+
+      console.log('✅ [Bootstrap] 监控服务初始化完成');
+    } catch (error) {
+      console.warn('⚠️ [Bootstrap] 监控服务初始化失败:', error);
+      // 监控服务失败不影响主流程
     }
   }
 

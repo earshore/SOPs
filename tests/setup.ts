@@ -13,30 +13,45 @@ vi.setConfig({ testTimeout: 10000 });
 
 // ==================== 浏览器环境 Mock ====================
 
-// Mock localStorage
-const localStorageMock = {
-  getItem: (_key: string) => null,
-  setItem: (_key: string, _value: string) => {},
-  removeItem: (_key: string) => {},
-  clear: () => {},
-  length: 0,
-  key: (_index: number) => null,
-};
+// Mock localStorage - 使用真实的Map实现
+class LocalStorageMock implements Storage {
+  private store: Map<string, string> = new Map();
+
+  get length(): number {
+    return this.store.size;
+  }
+
+  getItem(key: string): string | null {
+    return this.store.get(key) ?? null;
+  }
+
+  setItem(key: string, value: string): void {
+    this.store.set(key, value);
+  }
+
+  removeItem(key: string): void {
+    this.store.delete(key);
+  }
+
+  clear(): void {
+    this.store.clear();
+  }
+
+  key(index: number): string | null {
+    const keys = Array.from(this.store.keys());
+    return keys[index] ?? null;
+  }
+}
+
+const localStorageMock = new LocalStorageMock();
 
 Object.defineProperty(window, 'localStorage', {
   value: localStorageMock,
   writable: true,
 });
 
-// Mock sessionStorage
-const sessionStorageMock = {
-  getItem: (_key: string) => null,
-  setItem: (_key: string, _value: string) => {},
-  removeItem: (_key: string) => {},
-  clear: () => {},
-  length: 0,
-  key: (_index: number) => null,
-};
+// Mock sessionStorage - 使用真实的Map实现
+const sessionStorageMock = new LocalStorageMock();
 
 Object.defineProperty(window, 'sessionStorage', {
   value: sessionStorageMock,
