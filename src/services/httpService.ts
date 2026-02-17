@@ -9,6 +9,7 @@ import { Logger } from './loggerService';
 import { configCenter } from '../common/config/ConfigCenter';
 import { priorityRequestPool, REQUEST_PRIORITY } from './PriorityRequestPool';
 import { requestManager } from './RequestManager';
+import { httpCacheService, type CacheStrategy } from './HttpCacheService';
 
 /**
  * 请求优先级类型
@@ -34,6 +35,11 @@ export interface HttpOptions {
   deduplicate?: boolean; // 是否去重
   deduplicateKey?: string; // 自定义去重key
   cancelPrevious?: boolean; // 是否取消之前的同类请求
+  // 🎯 优化C: HTTP缓存选项
+  cache?: CacheStrategy; // 缓存策略
+  cacheTTL?: number; // 缓存时长(毫秒)
+  cacheKey?: string; // 自定义缓存key
+  forceRefresh?: boolean; // 强制刷新(跳过缓存)
 }
 
 /**
@@ -138,10 +144,31 @@ class HttpServiceClass {
       deduplicate = false,
       deduplicateKey = null,
       cancelPrevious = false,
+      // 🎯 优化C: 缓存选项
+      cache = undefined,
+      cacheTTL = 5 * 60 * 1000, // 默认5分钟
+      cacheKey = null,
+      forceRefresh = false,
     } = options;
 
     // 生成请求key(用于去重和取消)
     const requestKey = deduplicateKey || `${method}:${url}`;
+    
+    // 生成缓存key
+    const finalCacheKey = cacheKey || requestKey;
+
+    // 🎯 优化C: 尝试从缓存获取(仅GET请求且未强制刷新)
+    if (method === 'GET' && cache && !forceRefresh) {
+      const cached = await httpCacheService.get(finalCacheKey, {
+        strategy: cache,
+        ttl: cacheTTL
+      });
+      
+      if (cached !== null) {
+        Logger.debug('使用缓存响应', { url, cacheKey: finalCacheKey }, 'HttpService');
+        return cached as T;
+      }
+    }
 
     // 合并请求头
     const finalHeaders = { ...this.defaults.headers, ...headers };
@@ -213,7 +240,7 @@ class HttpServiceClass {
 
     // 🎯 P1-9: 如果启用去重或取消管理,使用RequestManager
     if (deduplicate || cancelPrevious) {
-      return await requestManager.execute(
+      const result = await requestManager.execute(
         requestKey,
         (signal) => {
           // 性能监控
@@ -230,19 +257,40 @@ class HttpServiceClass {
         },
         { deduplicate, cancelPrevious }
       );
+      
+      // 🎯 优化C: 缓存响应(仅GET请求)
+      if (method === 'GET' && cache) {
+        await httpCacheService.set(finalCacheKey, result, {
+          strategy: cache,
+          ttl: cacheTTL
+        });
+      }
+      
+      return result;
     }
 
+    // 执行请求
+    let result: T;
+    
     // 性能监控
     if (measurePerformance) {
-      return await this._executeWithPerformance(url, method, usePool, priority, executeRequest);
-    }
-
-    // 使用优先级请求池
-    if (usePool) {
-      return await priorityRequestPool.add(executeRequest, priority, { url, method });
+      result = await this._executeWithPerformance(url, method, usePool, priority, executeRequest);
+    } else if (usePool) {
+      // 使用优先级请求池
+      result = await priorityRequestPool.add(executeRequest, priority, { url, method });
+    } else {
+      result = await executeRequest();
     }
     
-    return await executeRequest();
+    // 🎯 优化C: 缓存响应(仅GET请求)
+    if (method === 'GET' && cache) {
+      await httpCacheService.set(finalCacheKey, result, {
+        strategy: cache,
+        ttl: cacheTTL
+      });
+    }
+    
+    return result;
   }
 
   /**
