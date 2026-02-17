@@ -135,11 +135,18 @@ const SettingsPanel = (): SettingsPanelData => ({
     // Lifecycle
     init() {
         this.loadProxyConfig();
-        this.loadProviderConfig(this.llm.provider);
+        // 异步加载provider配置,不阻塞init
+        this.loadProviderConfig(this.llm.provider).catch(err => {
+            console.error('[Settings] 加载provider配置失败:', err);
+        });
 
         // Watch for provider changes to load its config
         // @ts-expect-error - Alpine.js $watch is injected at runtime
-        this.$watch('llm.provider', (val: string) => this.loadProviderConfig(val));
+        this.$watch('llm.provider', (val: string) => {
+            this.loadProviderConfig(val).catch(err => {
+                console.error('[Settings] 加载provider配置失败:', err);
+            });
+        });
         // Watch for proxy type to restore cached key
         // @ts-expect-error - Alpine.js $watch is injected at runtime
         this.$watch('proxy.type', (val: string) => {
@@ -149,7 +156,9 @@ const SettingsPanel = (): SettingsPanelData => ({
 
     open() {
         this.isOpen = true;
-        this.loadProviderConfig(this.llm.provider);
+        this.loadProviderConfig(this.llm.provider).catch(err => {
+            console.error('[Settings] 加载provider配置失败:', err);
+        });
         this.loadProxyConfig();
     },
 
