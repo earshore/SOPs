@@ -40,12 +40,12 @@ interface SettingsPanelData {
     isOpen: boolean;
     llm: LLMState;
     proxy: ProxyState;
-    currentProviderConfig: ProviderConfig | Record<string, never>;
-    activeModelInfo: { id: string; name?: string } | null;
-    isProduction: boolean;
-    proxyNeedsInput: boolean;
-    proxyInputLabel: string;
-    proxyInputPlaceholder: string;
+    currentProviderConfig(): ProviderConfig | Record<string, never>;
+    activeModelInfo(): { id: string; name?: string } | null;
+    isProduction(): boolean;
+    proxyNeedsInput(): boolean;
+    proxyInputLabel(): string;
+    proxyInputPlaceholder(): string;
     init(): void;
     open(): void;
     close(): void;
