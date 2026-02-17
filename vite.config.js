@@ -181,57 +181,57 @@ export default defineConfig({
                 }
             }
         },
-        // 生产环境压缩
-        minify: 'terser',
-        terserOptions: {
-            compress: {
-                drop_console: true, // 生产环境移除console
-                drop_debugger: true,
-                pure_funcs: ['console.log', 'console.info', 'console.debug'], // 移除特定console方法
-                passes: 2, // 多次压缩以获得更好效果
-                // 🔧 紧急修复: 禁用可能破坏 Alpine.js 组件的压缩选项
-                arrows: false, // 不转换箭头函数
-                booleans: false, // 不优化布尔值
-                collapse_vars: false, // 不折叠变量
-                comparisons: false, // 不优化比较表达式
-                computed_props: false, // 不优化计算属性
-                hoist_funs: false, // 不提升函数声明
-                hoist_props: false, // 不提升属性
-                hoist_vars: false, // 不提升变量
-                if_return: false, // 不优化if-return
-                inline: false, // 不内联函数
-                join_vars: false, // 不合并变量声明
-                keep_fargs: true, // 保留未使用的函数参数
-                keep_fnames: true, // 保留函数名
-                loops: false, // 不优化循环
-                negate_iife: false, // 不否定立即执行函数
-                properties: false, // 不优化属性访问
-                reduce_funcs: false, // 不优化函数
-                reduce_vars: false, // 不优化变量
-                sequences: false, // 不使用逗号序列
-                side_effects: false, // 不移除无副作用的语句
-                switches: false, // 不优化switch
-                top_retain: null, // 不移除顶层未使用的函数
-                typeofs: false, // 不优化typeof
-                unsafe: false, // 不使用不安全的优化
-                unsafe_arrows: false, // 不使用不安全的箭头函数优化
-                unsafe_comps: false, // 不使用不安全的比较优化
-                unsafe_Function: false, // 不使用不安全的Function优化
-                unsafe_math: false, // 不使用不安全的数学优化
-                unsafe_methods: false, // 不使用不安全的方法优化
-                unsafe_proto: false, // 不使用不安全的原型优化
-                unsafe_regexp: false, // 不使用不安全的正则优化
-                unsafe_undefined: false, // 不使用不安全的undefined优化
-                unused: false // 不移除未使用的变量和函数
-            },
-            mangle: {
-                safari10: true, // 兼容Safari 10
-                keep_fnames: true // 保留函数名，避免 Alpine 组件注册失败
-            },
-            format: {
-                comments: false // 移除注释
-            }
-        },
+        // 🚨 紧急修复: 暂时禁用压缩以确保 Alpine 组件正常工作
+        minify: false,
+        // minify: 'terser',
+        // terserOptions: {
+        //     compress: {
+        //         drop_console: true,
+        //         drop_debugger: true,
+        //         pure_funcs: ['console.log', 'console.info', 'console.debug'],
+        //         passes: 2,
+        //         arrows: false,
+        //         booleans: false,
+        //         collapse_vars: false,
+        //         comparisons: false,
+        //         computed_props: false,
+        //         hoist_funs: false,
+        //         hoist_props: false,
+        //         hoist_vars: false,
+        //         if_return: false,
+        //         inline: false,
+        //         join_vars: false,
+        //         keep_fargs: true,
+        //         keep_fnames: true,
+        //         loops: false,
+        //         negate_iife: false,
+        //         properties: false,
+        //         reduce_funcs: false,
+        //         reduce_vars: false,
+        //         sequences: false,
+        //         side_effects: false,
+        //         switches: false,
+        //         top_retain: null,
+        //         typeofs: false,
+        //         unsafe: false,
+        //         unsafe_arrows: false,
+        //         unsafe_comps: false,
+        //         unsafe_Function: false,
+        //         unsafe_math: false,
+        //         unsafe_methods: false,
+        //         unsafe_proto: false,
+        //         unsafe_regexp: false,
+        //         unsafe_undefined: false,
+        //         unused: false
+        //     },
+        //     mangle: {
+        //         safari10: true,
+        //         keep_fnames: true
+        //     },
+        //     format: {
+        //         comments: false
+        //     }
+        // },
         // Chunk大小警告阈值
         chunkSizeWarningLimit: 500,
         // CSS代码分割
