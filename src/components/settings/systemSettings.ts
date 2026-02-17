@@ -1,4 +1,4 @@
-﻿// src/components/settings/systemSettings.ts
+// src/components/settings/systemSettings.ts
 // ================================================================
 // 🎯 Phase 3: Alpine.js Refactor (TypeScript版本)
 // ================================================================
