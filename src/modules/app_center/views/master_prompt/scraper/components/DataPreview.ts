@@ -151,22 +151,23 @@ export class DataPreview {
         if (!this.scrapedData) return;
 
         const noDataMsg = document.getElementById("no-data-msg");
+        const cardsWrapper = document.getElementById("data-cards-wrapper");
         const cardsEl = document.getElementById("data-cards");
 
         // 如果 DOM 元素还不存在,延迟渲染
-        if (!cardsEl) {
+        if (!cardsEl || !cardsWrapper) {
             console.warn('[Scraper] DOM 元素尚未就绪,延迟渲染');
             return;
         }
 
         if (!this.scrapedData.products || this.scrapedData.products.length === 0) {
             if (noDataMsg) noDataMsg.classList.remove("hidden");
-            if (cardsEl) cardsEl.classList.add("hidden");
+            if (cardsWrapper) cardsWrapper.classList.add("hidden");
             return;
         }
 
         if (noDataMsg) noDataMsg.classList.add("hidden");
-        if (cardsEl) cardsEl.classList.remove("hidden");
+        if (cardsWrapper) cardsWrapper.classList.remove("hidden");
 
         // 使用分页数据而不是全部数据
         const productsToRender = this.shouldUsePagination ? this.paginatedProducts : this.scrapedData.products;
