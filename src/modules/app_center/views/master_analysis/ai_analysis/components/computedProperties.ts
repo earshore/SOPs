@@ -84,14 +84,17 @@ export function createComputedProperties(context: any) {
      * 是否有数据
      */
     get hasData(): boolean {
-      return this.currentProducts.length > 0;
+      return this.availableAsins.length > 0;
     },
 
     /**
      * 是否可以开始分析
      */
     get canAnalyze(): boolean {
-      return context.selectedTargets.length > 0 && this.hasData && !context.isAnalyzing;
+      return context.selectedAsins.length > 0 && 
+             context.selectedTargets.length > 0 && 
+             this.availableAsins.length > 0 && 
+             !context.isAnalyzing;
     },
 
     /**
