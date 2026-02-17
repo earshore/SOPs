@@ -326,7 +326,7 @@
 .site-btn {
   transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 .site-btn::after {
   content: '';
@@ -336,6 +336,7 @@
   opacity: 0;
   transition: opacity 0.3s;
   background: radial-gradient(circle at center, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
+  z-index: 1;
 }
 .site-btn:hover::after {
   opacity: 1;
@@ -345,6 +346,8 @@
 }
 .site-btn .site-flag {
   transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+  z-index: 2;
 }
 .site-btn:hover .site-flag {
   transform: scale(1.15) translateY(-1px);
@@ -657,29 +660,32 @@
 .textarea-wrapper {
   position: relative;
 }
-.textarea-wrapper::after {
+.textarea-wrapper::before {
   content: '';
   position: absolute;
-  bottom: 0;
-  left: 50%;
-  width: 0;
-  height: 2px;
-  background: linear-gradient(90deg, #3b82f6, #6366f1);
-  border-radius: 2px;
-  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-  transform: translateX(-50%);
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 0;
+  border-radius: 0 4px 4px 0;
+  background: linear-gradient(180deg, #8b5cf6, #a78bfa);
+  transition: height 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 10;
 }
-.textarea-wrapper:focus-within::after {
-  width: calc(100% - 16px);
+.textarea-wrapper:focus-within::before {
+  height: 60%;
 }
 .textarea-wrapper textarea {
   transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .textarea-wrapper textarea:focus {
   background: #ffffff;
-  border-color: #e2e8f0;
+  border-color: rgba(139, 92, 246, 0.25);
   outline: none;
-  box-shadow: none;
+  box-shadow: 
+    0 8px 24px -8px rgba(139, 92, 246, 0.12),
+    0 4px 8px -4px rgba(139, 92, 246, 0.06);
 }
 
 /* ---- Chevron Animation ---- */
