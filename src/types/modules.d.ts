@@ -4,11 +4,48 @@
 // ================================================================
 
 /**
- * 模块接口
+ * 模块生命周期钩子
  */
-export interface IModule {
+export interface ModuleLifecycle {
+  /** 模块初始化(在mount之前调用) */
+  onInit?(): Promise<void> | void;
+  /** 模块挂载完成 */
+  onMounted?(): Promise<void> | void;
+  /** 模块激活(从其他模块切换回来) */
+  onActivated?(): Promise<void> | void;
+  /** 模块失活(切换到其他模块) */
+  onDeactivated?(): Promise<void> | void;
+  /** 模块卸载前 */
+  onBeforeUnmount?(): Promise<void> | void;
+  /** 模块卸载完成 */
+  onUnmounted?(): Promise<void> | void;
+  /** 模块错误处理 */
+  onError?(error: Error): void;
+}
+
+/**
+ * 模块接口(增强版)
+ */
+export interface IModule extends ModuleLifecycle {
+  /** 模块唯一标识 */
+  readonly id: string;
+  /** 模块名称 */
+  readonly name: string;
+  /** 模块版本 */
+  readonly version: string;
+  /** 模块元信息 */
+  readonly metadata?: ModuleMetadata;
+  
+  /** 挂载模块到容器 */
   mount(container: HTMLElement): Promise<void> | void;
-  unmount?(): void;
+  /** 卸载模块 */
+  unmount(): Promise<void> | void;
+  /** 获取模块状态 */
+  getState(): ModuleState;
+  /** 模块是否已挂载 */
+  isMounted(): boolean;
+  
+  /** 向后兼容 */
   onUnmount?(): void;
 }
 
