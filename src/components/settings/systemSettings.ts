@@ -142,31 +142,48 @@ const SettingsPanel = (): SettingsPanelData => ({
         
         // 延迟加载provider配置,避免阻塞init
         setTimeout(() => {
-            const loadPromise = this.loadProviderConfig(this.llm.provider);
-            if (loadPromise && typeof loadPromise.catch === 'function') {
-                loadPromise.catch(err => {
-                    console.error('[Settings] 加载provider配置失败:', err);
-                });
+            try {
+                const loadPromise = this.loadProviderConfig(this.llm.provider);
+                if (loadPromise && typeof loadPromise.catch === 'function') {
+                    loadPromise.catch(err => {
+                        console.error('[Settings] 加载provider配置失败:', err);
+                    });
+                }
+            } catch (err) {
+                console.error('[Settings] 延迟加载配置失败:', err);
             }
         }, 0);
 
         // Watch for provider changes to load its config
-        // @ts-expect-error - Alpine.js $watch is injected at runtime
-        this.$watch('llm.provider', (val: string) => {
-            setTimeout(() => {
-                const watchPromise = this.loadProviderConfig(val);
-                if (watchPromise && typeof watchPromise.catch === 'function') {
-                    watchPromise.catch(err => {
-                        console.error('[Settings] 加载provider配置失败:', err);
-                    });
-                }
-            }, 0);
-        });
+        try {
+            // @ts-expect-error - Alpine.js $watch is injected at runtime
+            this.$watch('llm.provider', (val: string) => {
+                setTimeout(() => {
+                    try {
+                        const watchPromise = this.loadProviderConfig(val);
+                        if (watchPromise && typeof watchPromise.catch === 'function') {
+                            watchPromise.catch(err => {
+                                console.error('[Settings] 加载provider配置失败:', err);
+                            });
+                        }
+                    } catch (err) {
+                        console.error('[Settings] watch加载配置失败:', err);
+                    }
+                }, 0);
+            });
+        } catch (err) {
+            console.error('[Settings] 设置watch失败:', err);
+        }
+        
         // Watch for proxy type to restore cached key
-        // @ts-expect-error - Alpine.js $watch is injected at runtime
-        this.$watch('proxy.type', (val: string) => {
-            this.proxy.customUrl = this.proxy.savedKeyMap[val] || '';
-        });
+        try {
+            // @ts-expect-error - Alpine.js $watch is injected at runtime
+            this.$watch('proxy.type', (val: string) => {
+                this.proxy.customUrl = this.proxy.savedKeyMap[val] || '';
+            });
+        } catch (err) {
+            console.error('[Settings] 设置proxy watch失败:', err);
+        }
     },
 
     open() {
