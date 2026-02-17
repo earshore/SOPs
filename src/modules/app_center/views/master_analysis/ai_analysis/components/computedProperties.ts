@@ -76,8 +76,9 @@ export function createComputedProperties(context: any) {
       if (scrapedData && scrapedData.products && scrapedData.products.length > 0) {
         return scrapedData.products.map((p: any) => p.asin).filter((asin: string) => asin);
       }
-      // 没有真实数据时返回空数组
-      return [];
+      // 没有真实数据时，从示例数据获取
+      const { getAvailableAsins } = require('../config/sampleData');
+      return getAvailableAsins();
     },
 
     /**
