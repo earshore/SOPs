@@ -107,7 +107,7 @@
     </div>
 
     <!-- ASIN 选择和分析目标 -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8 animate-fade-in-up delay-100">
       
       <!-- ASIN 输入区 -->
       <div class="lg:col-span-4">
@@ -329,7 +329,7 @@
 
     <!-- 提示词预览面板 -->
     <template x-if="selectedTargets.length > 0 && currentProducts.length > 0">
-      <div class="mb-8">
+      <div class="mb-8 animate-fade-in-up delay-200">
         <button @click="togglePromptPanel()" class="flex items-center gap-2 text-sm text-slate-600 hover:text-indigo-600 transition-colors mb-4">
           <i class="fa-solid fa-code"></i>
           <span class="font-medium" x-text="(showPromptPanel ? '隐藏' : '查看') + ' AI 提示词模板'"></span>
@@ -423,7 +423,7 @@
     </div>
 
     <!-- 分析按钮 -->
-    <div class="mb-10">
+    <div class="mb-10 animate-fade-in-up delay-300">
       <div class="relative overflow-hidden rounded-2xl shadow-xl">
         <div class="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600"></div>
         <div class="absolute inset-0 overflow-hidden">
@@ -532,7 +532,7 @@
 
     <!-- 分析结果展示 -->
     <template x-if="results.length > 0">
-      <div class="space-y-10">
+      <div class="space-y-10 animate-fade-in-up delay-400">
         <!-- 结果 Header -->
         <div class="relative overflow-hidden rounded-2xl">
           <div class="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900"></div>
