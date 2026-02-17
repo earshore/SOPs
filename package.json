@@ -15,7 +15,9 @@
         "xss:scan": "node tools/xss-scanner.js",
         "xss:fix": "node tools/xss-fixer.js --auto-fix",
         "xss:fix:dry": "node tools/xss-fixer.js --dry-run",
-        "security:check": "npm run xss:scan"
+        "security:check": "npm run xss:scan",
+        "lighthouse": "lhci autorun",
+        "lighthouse:local": "lhci autorun --config=lighthouserc.js"
     },
     "devDependencies": {
         "@types/marked": "^5.0.2",
