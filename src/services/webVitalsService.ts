@@ -72,26 +72,10 @@ class WebVitalsService {
       return;
     }
 
-    try {
-      // 动态导入web-vitals(如果可用)
-      // 注意: 需要先安装 npm install web-vitals
-      const { onCLS, onFID, onLCP, onFCP, onTTFB, onINP } = await import('web-vitals');
-
-      // 监听各项指标
-      onCLS(this.handleMetric.bind(this));
-      onFID(this.handleMetric.bind(this));
-      onLCP(this.handleMetric.bind(this));
-      onFCP(this.handleMetric.bind(this));
-      onTTFB(this.handleMetric.bind(this));
-      onINP(this.handleMetric.bind(this));
-
-      this.isInitialized = true;
-      console.log('[WebVitals] ✅ 性能监控已启动');
-    } catch (error) {
-      // web-vitals未安装,使用降级方案
-      console.warn('[WebVitals] web-vitals库未安装,使用降级方案');
-      this.initializeFallback();
-    }
+    // 直接使用降级方案(Performance API)
+    // web-vitals库为可选依赖,如需使用请安装: npm install web-vitals
+    console.log('[WebVitals] 使用Performance API监控方案');
+    this.initializeFallback();
   }
 
   /**
