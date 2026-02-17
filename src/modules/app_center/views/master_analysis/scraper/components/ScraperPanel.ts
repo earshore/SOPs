@@ -2,7 +2,7 @@
  * Scraper Panel Alpine.js 组件核心逻辑
  */
 
-import type { Task, ProxyConfig } from '../types';
+import type { Task, ProxyConfig, DataTab } from '../types';
 import state from '../../../../../../common/state';
 import { StorageService, STORAGE_KEYS } from '../../../../../../services/storageService';
 import { ErrorService } from '../../../../../../services/errorService';
@@ -26,6 +26,7 @@ export function createScraperPanel() {
         selectedSite: 'DE',
         scrapeReviews: true,
         isScraping: false,
+        currentDataTab: 'preview' as DataTab, // 添加直接的状态属性
 
         // UI State
         tasks: [] as Task[],
@@ -94,10 +95,6 @@ export function createScraperPanel() {
             return this.dataPreview?.getState().expandedAsin || null;
         },
 
-        get currentDataTab(): string {
-            return this.dataPreview?.getState().currentDataTab || 'preview';
-        },
-
         // 历史记录相关计算属性
         get history(): any[] {
             return this.historyPanel?.getHistory() || [];
@@ -108,10 +105,13 @@ export function createScraperPanel() {
         init() {
             console.log("[Scraper] 🚀 Alpine 组件初始化");
 
+            // 从 state 初始化 currentDataTab
+            this.currentDataTab = state.scraper.currentDataTab || 'preview';
+
             // 初始化数据预览组件
             const previewState: DataPreviewState = {
                 expandedAsin: state.scraper.expandedAsin || null,
-                currentDataTab: state.scraper.currentDataTab || 'preview',
+                currentDataTab: this.currentDataTab,
                 currentPage: 1,
                 itemsPerPage: 50
             };
@@ -360,8 +360,10 @@ export function createScraperPanel() {
         },
 
         switchDataTab(tab: 'preview' | 'json'): void {
-            if (!this.dataPreview) return;
-            this.dataPreview.switchDataTab(tab);
+            this.currentDataTab = tab;
+            if (this.dataPreview) {
+                this.dataPreview.switchDataTab(tab);
+            }
             this.saveState();
         },
 
