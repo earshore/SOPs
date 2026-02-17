@@ -184,6 +184,8 @@ wrangler.toml.local
 # Functions build output
 functions/dist/
 
+
+qa-pro/
 # Public downloads (如果是用户上传的文件)
 # public/downloads/*
 # !public/downloads/.gitkeep

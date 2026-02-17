@@ -134,18 +134,29 @@ const SettingsPanel = (): SettingsPanelData => ({
 
     // Lifecycle
     init() {
-        this.loadProxyConfig();
+        try {
+            this.loadProxyConfig();
+        } catch (err) {
+            console.error('[Settings] 加载proxy配置失败:', err);
+        }
+        
         // 异步加载provider配置,不阻塞init
-        this.loadProviderConfig(this.llm.provider).catch(err => {
-            console.error('[Settings] 加载provider配置失败:', err);
-        });
+        const loadPromise = this.loadProviderConfig(this.llm.provider);
+        if (loadPromise && typeof loadPromise.catch === 'function') {
+            loadPromise.catch(err => {
+                console.error('[Settings] 加载provider配置失败:', err);
+            });
+        }
 
         // Watch for provider changes to load its config
         // @ts-expect-error - Alpine.js $watch is injected at runtime
         this.$watch('llm.provider', (val: string) => {
-            this.loadProviderConfig(val).catch(err => {
-                console.error('[Settings] 加载provider配置失败:', err);
-            });
+            const watchPromise = this.loadProviderConfig(val);
+            if (watchPromise && typeof watchPromise.catch === 'function') {
+                watchPromise.catch(err => {
+                    console.error('[Settings] 加载provider配置失败:', err);
+                });
+            }
         });
         // Watch for proxy type to restore cached key
         // @ts-expect-error - Alpine.js $watch is injected at runtime
@@ -156,10 +167,17 @@ const SettingsPanel = (): SettingsPanelData => ({
 
     open() {
         this.isOpen = true;
-        this.loadProviderConfig(this.llm.provider).catch(err => {
-            console.error('[Settings] 加载provider配置失败:', err);
-        });
-        this.loadProxyConfig();
+        const loadPromise = this.loadProviderConfig(this.llm.provider);
+        if (loadPromise && typeof loadPromise.catch === 'function') {
+            loadPromise.catch(err => {
+                console.error('[Settings] 加载provider配置失败:', err);
+            });
+        }
+        try {
+            this.loadProxyConfig();
+        } catch (err) {
+            console.error('[Settings] 加载proxy配置失败:', err);
+        }
     },
 
     close() {
