@@ -32,6 +32,7 @@ interface ModuleState {
   showJsonViewer: boolean;
   useRealData: boolean; // 是否使用真实数据
   dataSource: 'sample' | 'scraper'; // 数据来源
+  showDataSourceBanner: boolean; // 是否显示数据源横幅
 }
 
 let moduleState: ModuleState = {
@@ -46,7 +47,8 @@ let moduleState: ModuleState = {
   showPromptPanel: false,
   showJsonViewer: false,
   useRealData: true, // 强制使用真实数据
-  dataSource: 'scraper' // 默认数据源为scraper
+  dataSource: 'scraper', // 默认数据源为scraper
+  showDataSourceBanner: true // 默认显示数据源横幅
 };
 
 /**
@@ -93,7 +95,8 @@ export function unmount(): void {
     showPromptPanel: false,
     showJsonViewer: false,
     useRealData: true, // 强制使用真实数据
-    dataSource: 'scraper'
+    dataSource: 'scraper',
+    showDataSourceBanner: true
   };
   console.log('[AI智能分析] ✅ 模块卸载成功');
 }
@@ -174,6 +177,7 @@ function createAiAnalysisPanel() {
     showJsonViewer: moduleState.showJsonViewer,
     useRealData: moduleState.useRealData,
     dataSource: moduleState.dataSource,
+    showDataSourceBanner: moduleState.showDataSourceBanner,
 
     // ========== Computed ==========
     get currentProducts(): Product[] {
@@ -306,6 +310,13 @@ function createAiAnalysisPanel() {
 
       // ✅ 检查是否有已加载的历史报告（从全局状态）
       this.checkLoadedReport();
+
+      // ✅ 3秒后自动隐藏数据源横幅
+      setTimeout(() => {
+        this.showDataSourceBanner = false;
+        moduleState.showDataSourceBanner = false;
+        console.log('[AI智能分析] 🎯 数据源横幅已自动隐藏');
+      }, 3000);
     },
 
     // ========== State Sync ==========

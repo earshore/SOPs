@@ -176,6 +176,8 @@ class WebVitalsService {
   private collectCLS(): void {
     let clsValue = 0;
     let clsEntries: PerformanceEntry[] = [];
+    let lastLoggedValue = 0;
+    const LOG_THRESHOLD = 0.05; // 只在 CLS 变化超过 0.05 时才输出日志
 
     const observer = new PerformanceObserver((list) => {
       for (const entry of list.getEntries()) {
@@ -185,14 +187,18 @@ class WebVitalsService {
         }
       }
 
-      this.handleMetric({
-        name: 'CLS',
-        value: clsValue,
-        rating: getRating('CLS', clsValue),
-        delta: clsValue,
-        id: `v1-${Date.now()}-${Math.random()}`,
-        navigationType: 'navigate'
-      });
+      // 只在 CLS 值变化显著时才触发回调和日志
+      if (Math.abs(clsValue - lastLoggedValue) >= LOG_THRESHOLD) {
+        this.handleMetric({
+          name: 'CLS',
+          value: clsValue,
+          rating: getRating('CLS', clsValue),
+          delta: clsValue,
+          id: `v1-${Date.now()}-${Math.random()}`,
+          navigationType: 'navigate'
+        });
+        lastLoggedValue = clsValue;
+      }
     });
 
     try {

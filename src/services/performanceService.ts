@@ -201,6 +201,8 @@ export class PerformanceService {
 
     let clsValue = 0;
     let clsEntries: any[] = [];
+    let lastLoggedValue = 0;
+    const LOG_THRESHOLD = 0.05; // 只在 CLS 变化超过 0.05 时才输出日志
 
     try {
       const observer = new PerformanceObserver((list) => {
@@ -214,7 +216,12 @@ export class PerformanceService {
           }
         });
 
-        console.log('[Performance] CLS:', clsValue.toFixed(3));
+        // 只在 CLS 值变化显著时才输出日志,避免刷屏
+        if (Math.abs(clsValue - lastLoggedValue) >= LOG_THRESHOLD) {
+          console.log('[Performance] CLS:', clsValue.toFixed(3));
+          lastLoggedValue = clsValue;
+        }
+
         this.recordMetric(METRIC_TYPES.CLS, parseFloat(clsValue.toFixed(3)), {
           entries: clsEntries.length,
         });

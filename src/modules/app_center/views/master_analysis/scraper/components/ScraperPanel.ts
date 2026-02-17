@@ -227,6 +227,12 @@ export function createScraperPanel() {
         async startScrape() {
             if (!this.canStart) return;
 
+            console.log('[Scraper] 开始采集流程', {
+                asins: this.validAsins,
+                site: this.selectedSite,
+                scrapeReviews: this.scrapeReviews
+            });
+
             this.isScraping = true;
             this.tasks = []; // 清空之前的任务
 
@@ -240,6 +246,7 @@ export function createScraperPanel() {
             let products: any[] = [];
 
             try {
+                console.log('[Scraper] 调用 startScrape 函数');
                 products = await startScrape(
                     this.validAsins,
                     site,
@@ -247,12 +254,16 @@ export function createScraperPanel() {
                     this.tasks,
                     (asin, status, msg) => updateTask(this.tasks, asin, status, msg)
                 );
+                console.log('[Scraper] startScrape 完成', { productsCount: products.length, products });
             } catch (e) {
+                console.error('[Scraper] startScrape 异常:', e);
                 ErrorService.handle(e as Error, { action: 'startScrape', module: 'scraper' });
                 showToast("采集任务异常中断", "error");
             } finally {
+                console.log('[Scraper] 进入 finally 块', { productsCount: products.length });
                 // 完成采集
                 const scrapedData = handleScrapeComplete(products, this.validAsins, this.selectedSite);
+                console.log('[Scraper] handleScrapeComplete 完成', scrapedData);
 
                 // 更新全局状态
                 state.scraper.scrapedData = scrapedData;
