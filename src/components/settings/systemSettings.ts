@@ -181,12 +181,14 @@ const SettingsPanel = (): SettingsPanelData => ({
     // --- LLM Logic ---
 
     async loadProviderConfig(provider: string): Promise<void> {
-        if (!provider) return;
+        if (!provider) {
+            return Promise.resolve();
+        }
         
         // 类型安全检查: 确保provider是有效的key
         if (!(provider in PROVIDERS)) {
             console.warn(`Unknown provider: ${provider}, falling back to OpenAI`);
-            return;
+            return Promise.resolve();
         }
         
         const config = PROVIDERS[provider as keyof typeof PROVIDERS];
@@ -232,12 +234,12 @@ const SettingsPanel = (): SettingsPanelData => ({
     async fetchModels(): Promise<void> {
         if (!this.llm.apiKey) {
             showToast('请先输入API Key', 'warning');
-            return;
+            return Promise.resolve();
         }
 
         if (!this.llm.endpoint) {
             showToast('请先输入API端点地址', 'warning');
-            return;
+            return Promise.resolve();
         }
 
         this.llm.isFetching = true;
@@ -335,7 +337,7 @@ const SettingsPanel = (): SettingsPanelData => ({
     async testConnection(): Promise<void> {
         if (!this.llm.apiKey || !this.llm.model) {
             showToast('请先完善配置 (Key + 模型)', 'warning');
-            return;
+            return Promise.resolve();
         }
 
         this.llm.isTesting = true;
@@ -364,7 +366,7 @@ const SettingsPanel = (): SettingsPanelData => ({
     async saveProviderConfig(): Promise<void> {
         if (!this.llm.apiKey && this.llm.provider !== 'custom') {
             showToast('请填写 API Key', 'warning');
-            return;
+            return Promise.resolve();
         }
 
         try {
