@@ -133,7 +133,18 @@ export default defineConfig({
                     if (id.includes('/src/modules/sops/')) {
                         // SOPs模块较大,按分类细分
                         if (id.includes('/views/growth/')) {
-                            return 'module-sops-growth';
+                            // Growth模块进一步细分(457KB → 按子模块拆分)
+                            if (id.includes('/npi_tracker/')) {
+                                return 'module-sops-growth-npi';
+                            }
+                            if (id.includes('/restricted_words/')) {
+                                return 'module-sops-growth-restricted';
+                            }
+                            if (id.includes('/ppc_advertising/')) {
+                                return 'module-sops-growth-ppc';
+                            }
+                            // 其他growth子模块合并
+                            return 'module-sops-growth-other';
                         }
                         if (id.includes('/views/backend/')) {
                             return 'module-sops-backend';
