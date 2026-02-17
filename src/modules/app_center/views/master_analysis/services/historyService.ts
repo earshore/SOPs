@@ -1,4 +1,4 @@
-// src/modules/master_prompt/services/historyService.ts
+// src/modules/app_center/views/master_analysis/services/historyService.ts
 // ================================================================
 // 🎯 Phase 4: 已迁移使用 StorageService
 // ================================================================

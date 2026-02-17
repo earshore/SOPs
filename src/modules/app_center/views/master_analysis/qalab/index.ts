@@ -26,7 +26,7 @@ import {
 } from './actions';
 
 import './qalab.css';
-import '../master_prompt_style.css';
+import '../master_analysis_style.css';
 
 /**
  * 挂载子模块
@@ -36,7 +36,7 @@ export async function mount(container: HTMLElement): Promise<void> {
 
     try {
         // 1. 加载模板
-        const html = await loadTemplate('src/modules/app_center/views/master_prompt/qalab/template.html');
+        const html = await loadTemplate('src/modules/app_center/views/master_analysis/qalab/template.html');
         container.innerHTML = html;
 
         // 2. 注册全局操作

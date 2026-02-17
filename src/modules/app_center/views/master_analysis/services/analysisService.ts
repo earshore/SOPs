@@ -1,4 +1,4 @@
-// src/modules/master_prompt/services/analysisService.ts
+// src/modules/app_center/views/master_analysis/services/analysisService.ts
 // ================================================================
 // 🎯 P2 重构: 添加完整的类型注释
 // 🛡️ Phase 1: 增强鲁棒性 - 改进解析逻辑与类型检查

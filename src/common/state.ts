@@ -50,7 +50,7 @@ const stateData: AppState = {
   },
 
   // ========================
-  // Master Prompt 模块 (统一命名空间)
+  // Master Analysis 模块 (统一命名空间)
   // ========================
   masterPrompt: {
     // Scraper 子模块状态

@@ -23,7 +23,7 @@ vi.mock('@/common/EventBus', () => ({
   }
 }));
 
-vi.mock('@/modules/app_center/views/master_prompt/services/historyService', () => ({
+vi.mock('@/modules/app_center/views/master_analysis/services/historyService', () => ({
   HistoryService: {
     save: vi.fn(),
     getAll: vi.fn(() => []),

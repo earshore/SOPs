@@ -1,4 +1,4 @@
-// src/modules/app_center/master_prompt/services/promptlabService.ts
+// src/modules/app_center/views/master_analysis/services/promptlabService.ts
 
 // ----------------------------------------
 // 类型定义
@@ -170,7 +170,7 @@ const buildSeoSection = (inputs: PromptInputs, mode: 'master' | 'visual' = "mast
 
 export const promptlabService = {
   /**
-   * 生成 Master Prompt
+   * 生成 Listing Prompt
    */
   generateMasterPrompt: (inputs: PromptInputs, analysisReport: AnalysisReport | null): string => {
     const { tone, targetMarket, useCosmo, useRufus, useEmoji, customStrategy } = inputs;
@@ -180,7 +180,7 @@ export const promptlabService = {
     const productSection = buildProductSection(inputs);
     const seoSection = buildSeoSection(inputs, "master");
 
-    // 4. Instructions (Master Prompt 特有的指令逻辑)
+    // 4. Instructions (Listing Prompt 特有的指令逻辑)
     const styleInstructions: string[] = [];
 
     // 语言
@@ -221,7 +221,7 @@ export const promptlabService = {
       styleInstructions.push(`**USER RULES:** ${customStrategy}`);
     }
 
-    // 5. 组装 Master Prompt
+    // 5. 组装 Listing Prompt
     return `
 # ROLE
 Act as a Senior **${targetMarket}** Listing Copywriter and E-commerce SEO Specialist with 10+ years of experience in the DACH market.

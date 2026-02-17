@@ -78,16 +78,16 @@
     background-color: rgba(148, 163, 184, 0.5);
 }
 
-/* ==================== Master Prompt 特定样式 ==================== */
+/* ==================== Master Analysis 特定样式 ==================== */
 
-/* Master Prompt 原始样式 - 完整保留 */
-#master_prompt_content_area {
+/* Master Analysis 原始样式 - 完整保留 */
+#master_analysis_content_area {
     background: linear-gradient(to bottom, rgba(248, 250, 252, 0.5), rgba(241, 245, 249, 0.3));
 }
 
-/* Master Prompt 响应式调整 */
+/* Master Analysis 响应式调整 */
 @media (max-width: 768px) {
-    #master_prompt_content_area {
+    #master_analysis_content_area {
         padding: 1rem;
     }
 }

@@ -33,7 +33,7 @@ const mockHistoryService = {
   delete: vi.fn()
 };
 
-vi.mock('@/modules/app_center/views/master_prompt/services/historyService', () => ({
+vi.mock('@/modules/app_center/views/master_analysis/services/historyService', () => ({
   HistoryService: mockHistoryService
 }));
 

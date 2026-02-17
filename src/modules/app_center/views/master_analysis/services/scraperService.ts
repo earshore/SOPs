@@ -1,5 +1,5 @@
 ﻿// ==========================================
-// 🚀 优化版 scraperService.ts
+// 🚀 src/modules/app_center/views/master_analysis/services/scraperService.ts
 // 🎯 Phase 4: 已迁移使用 StorageService
 // 🎯 P0优化: 完整类型定义
 // ==========================================

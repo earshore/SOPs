@@ -23,12 +23,12 @@ const MODULE_MAP: ModuleMap = {
   // App Center Overview
   app_center_overview: () => import('./views/overview/index'),
 
-  // Master Prompt 子模块
-  scraper: () => import('./views/master_prompt/scraper/index'),
-  // rawdata: () => import('./views/master_prompt/rawdata/index'), // ⚠️ DEPRECATED v2.0.0 - 功能已迁移到 scraper 模块
-  ai_analysis: () => import('./views/master_prompt/ai_analysis/index'),
-  promptlab: () => import('./views/master_prompt/promptlab/index'),
-  qalab: () => import('./views/master_prompt/qalab/index'),
+  // Master Analysis 子模块
+  scraper: () => import('./views/master_analysis/scraper/index'),
+  // rawdata: () => import('./views/master_analysis/rawdata/index'), // ⚠️ DEPRECATED v2.0.0 - 功能已迁移到 scraper 模块
+  ai_analysis: () => import('./views/master_analysis/ai_analysis/index'),
+  promptlab: () => import('./views/master_analysis/promptlab/index'),
+  qalab: () => import('./views/master_analysis/qalab/index'),
 
   // Keyword Hunter 子模块
   kw_input: () => import('./views/keyword_hunter/input/index'),

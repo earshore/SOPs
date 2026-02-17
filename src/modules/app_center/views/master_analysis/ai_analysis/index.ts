@@ -1,6 +1,6 @@
 /**
  * AI智能分析模块
- * 集成到 Master Prompt 的子页面
+ * 集成到 Master Analysis 的子页面
  */
 
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
@@ -15,7 +15,7 @@ import { AnalysisResult } from './types';
 import type { FullAnalysisReport } from './analysisReportData';
 import { showToast } from '../../../../../common/ui';
 
-import '../master_prompt_style.css';
+import '../master_analysis_style.css';
 import './ai_analysis_style.css';
 
 // 模块状态
@@ -60,7 +60,7 @@ export async function mount(container: HTMLElement): Promise<void> {
     initializeFromScraperData();
 
     // 2. 加载模板
-    const html = await loadTemplate('src/modules/app_center/views/master_prompt/ai_analysis/template.html');
+    const html = await loadTemplate('src/modules/app_center/views/master_analysis/ai_analysis/template.html');
     container.innerHTML = html;
 
     // 3. 初始化 Alpine.js 组件

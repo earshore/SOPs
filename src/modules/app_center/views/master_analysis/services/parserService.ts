@@ -1,4 +1,4 @@
-// src/modules/app_center/master_prompt/services/parserService.ts
+// src/modules/app_center/views/master_analysis/services/parserService.ts
 import {
   SELECTOR_MAP,
   VERIFIED_PURCHASE_PATTERNS,

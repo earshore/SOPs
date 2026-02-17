@@ -98,7 +98,7 @@ const NAMING_CONVENTIONS: NamingConventions = {
   // 模块前缀映射
   prefixes: {
     kt_: 'keyword_tracker',
-    mp_: 'master_prompt',
+    mp_: 'master_analysis',
     sops_: 'sops_module',
     amz_: 'amz_hub',
     amzf_: 'amz_hub_features',

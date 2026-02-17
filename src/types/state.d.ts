@@ -298,7 +298,7 @@ export interface SettingsState {
 // ==================== 完整应用状态 ====================
 
 /**
- * Master Prompt 模块状态
+ * Master Analysis 模块状态
  */
 export interface MasterPromptState {
   scraper: ScraperState;

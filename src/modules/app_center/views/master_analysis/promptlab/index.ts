@@ -20,7 +20,7 @@ import { APP_EVENTS, MODULE_EVENTS } from '../../../../../common/constants/event
 import type { AnalysisReport } from '../../../../../types/modules-business';
 import eventBus from '../../../../../common/EventBus';
 
-import '../master_prompt_style.css';
+import '../master_analysis_style.css';
 
 // ========================================== 
 // Types
@@ -245,7 +245,7 @@ function updateButtonState(): void {
             "shadow-md", "transform", "hover:scale-[1.02]", "cursor-pointer"
         );
         // ✅ 安全: 静态HTML模板，无用户输入
-        btn.innerHTML = '<i class="fas fa-microchip"></i> 生成 Master Prompt';
+        btn.innerHTML = '<i class="fas fa-microchip"></i> 生成 Listing Prompt';
     } else {
         btn.dataset.disabledState = "true";
         btn.classList.remove(
@@ -532,7 +532,7 @@ function getPreviewText(val: any): string {
 // ========================================== 
 
 /**
- * 生成 Master Prompt
+ * 生成 Listing Prompt
  */
 function generateMasterPrompt(): void {
     const btn = document.getElementById("btn-generate-prompt") as HTMLButtonElement;
@@ -572,7 +572,7 @@ function generateMasterPrompt(): void {
     updateCharCount();
     outEl.classList.add("bg-green-50");
     addTimeout(() => outEl.classList.remove("bg-green-50"), 300);
-    showToast("Master Prompt 已生成", "success");
+    showToast("Listing Prompt 已生成", "success");
 }
 
 /**
@@ -765,7 +765,7 @@ function togglePromptZoom(): void {
 }
 
 /**
- * 复制 Master Prompt
+ * 复制 Listing Prompt
  */
 function copyMasterPrompt(): void {
     const copyText = document.getElementById("final-prompt-output") as HTMLTextAreaElement;
@@ -853,7 +853,7 @@ export async function mount(container: HTMLElement): Promise<void> {
 
     try {
         // 1. 加载模板
-        const html = await loadTemplate('src/modules/app_center/views/master_prompt/promptlab/template.html');
+        const html = await loadTemplate('src/modules/app_center/views/master_analysis/promptlab/template.html');
         // ✅ 安全: 静态HTML模板，无用户输入
         container.innerHTML = html;
 

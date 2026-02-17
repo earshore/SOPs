@@ -687,7 +687,7 @@
                     <div class="px-4 py-3 bg-slate-800/30 border-t border-slate-700/30">
                       <div class="flex items-center gap-2 text-xs text-slate-500">
                         <i class="fa-solid fa-code"></i>
-                        <span class="font-mono truncate">{ "metadata": { "asins": [<span x-text="'\"' + selectedAsins.join('\", \"') + '\"'"></span>], ... }, "results": [...], "analysisReport": {...} }</span>
+                        <span class="font-mono truncate">{ "metadata": { "asins": [<span x-text="`&quot;${selectedAsins.join('&quot;, &quot;')}&quot;`"></span>], ... }, "results": [...], "analysisReport": {...} }</span>
                       </div>
                     </div>
                   </template>
@@ -797,7 +797,7 @@
                             <span x-text="detail.category"></span>
                           </span>
                           <div class="flex flex-wrap gap-2">
-                            <template x-for="item in detail.items" :key="item">
+                            <template x-for="(item, index) in (detail.items || [])" :key="index">
                               <span class="inline-block px-3 py-2 bg-slate-50 text-slate-700 text-xs rounded-lg hover:bg-indigo-50 hover:text-indigo-700 transition-colors cursor-default border border-slate-100 hover:border-indigo-200 font-medium"
                                     x-text="item"></span>
                             </template>
@@ -912,7 +912,7 @@
                             <span x-text="detail.category"></span>
                           </span>
                           <div class="flex flex-wrap gap-2">
-                            <template x-for="item in detail.items" :key="item">
+                            <template x-for="(item, index) in (detail.items || [])" :key="index">
                               <span class="inline-block px-3 py-2 bg-slate-50 text-slate-700 text-xs rounded-lg hover:bg-indigo-50 hover:text-indigo-700 transition-colors cursor-default border border-slate-100 hover:border-indigo-200 font-medium"
                                     x-text="item"></span>
                             </template>

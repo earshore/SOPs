@@ -10,7 +10,7 @@
 
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import { createScraperPanel } from './components/ScraperPanel';
-import '../master_prompt_style.css';
+import '../master_analysis_style.css';
 
 // ========================================== 
 // Module Exports (统一架构接口)
@@ -25,7 +25,7 @@ export async function mount(container: HTMLElement): Promise<void> {
 
     try {
         // 1. 加载模板
-        const html = await loadTemplate('src/modules/app_center/views/master_prompt/scraper/template.html');
+        const html = await loadTemplate('src/modules/app_center/views/master_analysis/scraper/template.html');
         container.innerHTML = html;
 
         // 2. 初始化 Alpine.js 组件

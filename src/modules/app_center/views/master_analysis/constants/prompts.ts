@@ -1,7 +1,7 @@
-// src/modules/app_center/master_prompt/constants/prompts.ts
+// src/modules/app_center/views/master_analysis/constants/prompts.ts
 // ================================================================
 // Prompt 模块 - 提示词常量
-// 包含 Master Prompt下所有提示词模板，含组合拼接prompt
+// 包含 Master Analysis下所有提示词模板，含组合拼接prompt
 // ================================================================
 
 /**
@@ -533,7 +533,7 @@ Customer Reviews:
 ];
 
 /**
- * 动态主模板 (Master Prompt - AI分析)
+ * 动态主模板 (Listing Prompt - AI分析)
  */
 export const DYNAMIC_MASTER_TEMPLATE = `
 You are a Data Extraction Engine specialized in E-commerce Analysis.
@@ -580,7 +580,7 @@ You must strictly follow this JSON structure. Do not output markdown code blocks
 `;
 
 /**
- * 翻译模板 (master_prompt - analysis)
+ * 翻译模板 (master_analysis - analysis)
  */
 export const TRANSLATE_PROMPT_TEMPLATE = ` 
 You are a professional translator and localization expert in Europe. 

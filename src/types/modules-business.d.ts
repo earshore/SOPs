@@ -21,7 +21,7 @@ export type ModuleMap = Record<string, ModuleLoaderFn>;
  */
 export type ModuleRegisterFn = (routeId: string, loader: ModuleLoaderFn) => void | boolean;
 
-// ==================== Master Prompt 模块类型 ====================
+// ==================== Master Analysis 模块类型 ====================
 
 /**
  * 采集站点类型

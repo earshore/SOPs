@@ -116,9 +116,9 @@ export default defineConfig({
                     
                     // 业务模块按模块分包,并进一步细分
                     if (id.includes('/src/modules/app_center/')) {
-                        // Master Prompt子模块
-                        if (id.includes('/views/master_prompt/')) {
-                            return 'module-master-prompt';
+                        // Master Analysis子模块
+                        if (id.includes('/views/master_analysis/')) {
+                            return 'module-master-analysis';
                         }
                         // Keyword Hunter子模块
                         if (id.includes('/views/keyword_hunter/')) {
