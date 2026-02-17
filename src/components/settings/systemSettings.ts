@@ -87,12 +87,12 @@ const SettingsPanel = (): SettingsPanelData => ({
         savedKeyMap: {}
     },
 
-    // Computed / Helpers
-    get currentProviderConfig(): ProviderConfig | Record<string, never> {
+    // Computed / Helpers (改为普通方法以避免Terser压缩问题)
+    currentProviderConfig(): ProviderConfig | Record<string, never> {
         return PROVIDERS[this.llm.provider] || {};
     },
 
-    get activeModelInfo(): { id: string; name?: string } | null {
+    activeModelInfo(): { id: string; name?: string } | null {
         if (!this.llm.model) return null;
         const m = this.llm.models.find(x => (typeof x === 'string' ? x : x.id) === this.llm.model);
         if (!m || typeof m === 'string') return null;
@@ -100,7 +100,7 @@ const SettingsPanel = (): SettingsPanelData => ({
     },
 
     // 🔒 P0修复: 检查是否为生产环境
-    get isProduction(): boolean {
+    isProduction(): boolean {
         return EnvConfig.isProduction;
     },
 
@@ -116,17 +116,17 @@ const SettingsPanel = (): SettingsPanelData => ({
         return dangerousEndpoints.some(domain => endpoint.includes(domain));
     },
 
-    get proxyNeedsInput(): boolean {
+    proxyNeedsInput(): boolean {
         return ['scraperapi', 'zenrows', 'brightdata', 'custom_api', 'custom_proxy'].includes(this.proxy.type);
     },
 
-    get proxyInputLabel(): string {
+    proxyInputLabel(): string {
         if (this.proxy.type === 'custom_proxy') return 'HTTP 代理地址';
         if (this.proxy.type === 'custom_api') return '完整端点 (URL)';
         return 'API Key (密钥)';
     },
 
-    get proxyInputPlaceholder(): string {
+    proxyInputPlaceholder(): string {
         if (this.proxy.type === 'custom_proxy') return 'http://user:pass@ip:port';
         if (this.proxy.type === 'custom_api') return 'https://api.example.com/?url=';
         return `粘贴 ${this.getProxyDisplayName(this.proxy.type)} Key`;
