@@ -3,7 +3,7 @@
  * 处理所有用户交互操作
  */
 
-import { showToast } from '../../../../../common/ui';
+import { showToast } from '@common/ui/index';
 import { analysisTargets } from '../config/analysisTargets';
 import { generateAnalysisPrompt } from '../prompts/analysisPrompts';
 import { runAnalysis, getSampleReport } from '../services/analysisService';
@@ -12,7 +12,7 @@ import { generateMarkdownReport, generateJsonReportData } from '../services/repo
 import { mergeProducts, getProductsByAsins } from '../utils/dataTransformers';
 import { getMarketLanguage } from './helpers';
 import { Product } from '../config/sampleData';
-import state from '../../../../../common/state';
+import state from '@common/state';
 
 /**
  * 切换 ASIN 选择
@@ -301,7 +301,7 @@ export async function runAnalysisAction(context: any, moduleState: any, currentP
 
     // 分析成功后自动更新历史快照的分析状态
     if (results.length > 0 && state.scraper?.currentHistoryId) {
-      const { HistoryService } = await import('../services/historyService');
+      const { HistoryService } = await import('../../services/historyService');
       const success = HistoryService.updateAnalysisStatus(
         state.scraper.currentHistoryId,
         reportData

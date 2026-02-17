@@ -3,8 +3,8 @@
  * 负责从各种数据源加载和检查数据
  */
 
-import state from '../../../../../common/state';
-import { showToast } from '../../../../../common/ui';
+import state from '@common/state';
+import { showToast } from '@common/ui/index';
 import { formatHistoryDate } from '../services/reportGenerator';
 
 /**

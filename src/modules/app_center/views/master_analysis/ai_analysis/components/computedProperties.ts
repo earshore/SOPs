@@ -3,12 +3,11 @@
  * 定义所有 computed 属性的 getter 方法
  */
 
-import state from '../../../../../common/state';
+import state from '@common/state';
 import { analysisTargets } from '../config/analysisTargets';
 import { getProductByAsin, Product } from '../config/sampleData';
 import { convertScraperDataToProduct } from '../utils/dataTransformers';
 import { AnalysisResult } from '../types';
-import type { FullAnalysisReport } from '../config/analysisReportData';
 
 /**
  * 计算属性接口

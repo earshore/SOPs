@@ -15,7 +15,7 @@ import * as actions from './actions';
  * 创建 Alpine 面板组件
  */
 export function createAiAnalysisPanel(moduleState: any) {
-  return {
+  const panel: any = {
     // ========== State ==========
     selectedAsins: moduleState.selectedAsins,
     selectedTargets: moduleState.selectedTargets,
@@ -31,11 +31,8 @@ export function createAiAnalysisPanel(moduleState: any) {
     dataSource: moduleState.dataSource,
     showDataSourceBanner: moduleState.showDataSourceBanner,
 
-    // ========== Computed Properties ==========
-    ...createComputedProperties(this as any),
-
     // ========== Lifecycle ==========
-    init() {
+    init(this: any) {
       console.log('[Alpine 组件] 🚀 组件初始化');
       this.syncFromModuleState();
       
@@ -164,4 +161,9 @@ export function createAiAnalysisPanel(moduleState: any) {
       return highlightJson(json);
     }
   };
+  
+  // 添加 computed properties
+  Object.assign(panel, createComputedProperties(panel));
+  
+  return panel;
 }

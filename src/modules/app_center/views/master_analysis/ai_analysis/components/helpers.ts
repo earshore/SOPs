@@ -3,11 +3,11 @@
  * 提供各种工具函数和辅助方法
  */
 
-import { LANGUAGE_HEADERS } from '../../../../../common/constants/constants';
+import { LANGUAGE_HEADERS } from '@common/constants/constants';
 import { generateAnalysisPrompt } from '../prompts/analysisPrompts';
 import { Product } from '../config/sampleData';
 import { mergeProducts } from '../utils/dataTransformers';
-import state from '../../../../../common/state';
+import state from '@common/state';
 
 /**
  * 获取目标颜色映射
