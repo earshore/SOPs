@@ -452,13 +452,6 @@ export const MENU_CONFIG: MenuConfig = {
       panelId: 'panel-app_center',
       category: 'master_prompt'
     },
-    rawdata: {
-      moduleId: 'master_prompt',
-      label: '数据管理',
-      icon: 'fas fa-database',
-      panelId: 'panel-app_center',
-      category: 'master_prompt'
-    },
     ai_analysis: {
       moduleId: 'master_prompt',
       label: 'AI智能分析',

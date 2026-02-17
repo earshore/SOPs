@@ -85,6 +85,24 @@
 .scrollbar-thin::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
 .scrollbar-thin::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 3px; }
 
+/* 自定义滚动条样式 - 用于数据预览区域 */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(241, 245, 249, 0.5);
+    border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.4);
+    border-radius: 4px;
+    transition: background 0.3s;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 116, 139, 0.6);
+}
+
 /* 隐藏滚动条但保留功能 */
 .no-scrollbar::-webkit-scrollbar {
     display: none;

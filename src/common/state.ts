@@ -32,6 +32,8 @@ const stateData: AppState = {
     scrapedData: null,
     currentHistoryId: null,
     inputAsins: "",
+    expandedAsin: null,
+    currentDataTab: "preview",
   },
 
   // ========================

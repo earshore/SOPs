@@ -58,6 +58,8 @@ export interface ScraperState {
   inputAsins?: string;
   progress?: number;
   error?: string;
+  expandedAsin?: string | null;
+  currentDataTab?: 'preview' | 'json';
 }
 
 // ==================== Analysis状态 ====================

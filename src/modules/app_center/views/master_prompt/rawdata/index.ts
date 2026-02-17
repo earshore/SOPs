@@ -1,4 +1,21 @@
 ﻿/**
+ * ⚠️ DEPRECATED - 此模块已弃用
+ * 
+ * 此模块的功能已迁移到 scraper 模块中。
+ * 请使用 src/modules/app_center/views/master_prompt/scraper 代替。
+ * 
+ * 迁移说明：
+ * - 所有数据管理功能现已集成到数据采集页面
+ * - 导入、预览、编辑功能均可在 scraper 模块中使用
+ * - 所有导出的函数在 scraper 模块中都有对应的向后兼容版本
+ * 
+ * 此模块保留仅用于归档目的，将在未来版本中移除。
+ * 
+ * @deprecated 自 v2.0.0 起弃用，请使用 scraper 模块
+ * @see src/modules/app_center/views/master_prompt/scraper/index.ts
+ */
+
+/**
  * RawData 子模块
  * 负责数据管理和展示功能
  * 
