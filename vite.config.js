@@ -181,8 +181,8 @@ export default defineConfig({
                 }
             }
         },
-        // 🚨 紧急修复: 暂时禁用压缩以确保 Alpine 组件正常工作
-        minify: false,
+        // 🚨 紧急修复: 使用 esbuild 代替 terser 避免 Alpine 组件问题
+        minify: 'esbuild',
         // minify: 'terser',
         // terserOptions: {
         //     compress: {
