@@ -541,7 +541,7 @@ Your sole purpose is to convert unstructured text into a strict JSON object base
 
 ## Inputs
 - Market language: **{{language}}**
-- Raw data: {{rawdataStr}}
+- Products data: {{productsData}}
 
 ## Analysis Tasks & Logic
 {{dynamic_tasks}}

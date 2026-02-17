@@ -25,7 +25,7 @@ const MODULE_MAP: ModuleMap = {
 
   // Master Prompt 子模块
   scraper: () => import('./views/master_prompt/scraper/index'),
-  rawdata: () => import('./views/master_prompt/rawdata/index'),
+  // rawdata: () => import('./views/master_prompt/rawdata/index'), // ⚠️ DEPRECATED v2.0.0 - 功能已迁移到 scraper 模块
   ai_analysis: () => import('./views/master_prompt/ai_analysis/index'),
   promptlab: () => import('./views/master_prompt/promptlab/index'),
   qalab: () => import('./views/master_prompt/qalab/index'),

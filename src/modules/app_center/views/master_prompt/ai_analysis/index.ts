@@ -31,7 +31,7 @@ interface ModuleState {
   showPromptPanel: boolean;
   showJsonViewer: boolean;
   useRealData: boolean; // 是否使用真实数据
-  dataSource: 'sample' | 'scraper' | 'rawdata'; // 数据来源
+  dataSource: 'sample' | 'scraper'; // 数据来源
 }
 
 let moduleState: ModuleState = {
@@ -252,7 +252,6 @@ function createAiAnalysisPanel() {
     get dataSourceLabel(): string {
       switch (this.dataSource) {
         case 'scraper': return '数据采集';
-        case 'rawdata': return '数据管理';
         case 'sample': return '示例数据';
         default: return '未知';
       }
@@ -822,12 +821,6 @@ function createAiAnalysisPanel() {
           }
         }
       }
-
-      // TODO: 从 RawData 获取数据
-      // const rawData = state.rawdata?.data;
-      // if (rawData) {
-      //   return convertRawDataToProduct(rawData);
-      // }
 
       return products;
     },

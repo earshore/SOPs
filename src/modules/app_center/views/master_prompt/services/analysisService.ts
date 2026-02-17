@@ -58,7 +58,7 @@ export const AnalysisService = {
    * 执行竞品分析，生成分析报告
    *
    * @param products - 选中的产品数据数组
-   * @param promptTemplate - Prompt 模版 (包含 {{language}}, {{rawdataStr}}, {{category}} 占位符)
+   * @param promptTemplate - Prompt 模版 (包含 {{language}}, {{productsData}}, {{category}} 占位符)
    * @param language - 目标语言 (如 "English", "German")
    * @param llmConfig - LLM 配置对象
    * @param dataOptions - 数据维度选项
@@ -78,7 +78,7 @@ export const AnalysisService = {
     } = dataOptions;
 
     // 1. 动态构建数据字符串
-    const rawdataStr = products
+    const productsData = products
       .map((p) => {
         const parts: string[] = [`ASIN: ${p.asin}`];
 
@@ -109,7 +109,7 @@ export const AnalysisService = {
     // 2. 替换模板变量
     const finalPrompt = promptTemplate
       .replace(/{{language}}/g, language)
-      .replace("{{rawdataStr}}", rawdataStr)
+      .replace("{{productsData}}", productsData)
       .replace("{{category}}", "General");
 
     // 3. 调用 LLM
