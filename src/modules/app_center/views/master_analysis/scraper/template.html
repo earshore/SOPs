@@ -1,32 +1,31 @@
 <!-- Scraper 子模块模板 (Alpine.js) - Enhanced UI -->
 <div x-data="scraperPanel">
 
-    <!-- ========== Unified Welcome Banner ========== -->
-    <div class="mb-8 animate-fade-in-up">
-        <div class="relative rounded-2xl border border-slate-200/60 overflow-hidden bg-white card-elevated">
+    <!-- ========== Welcome Banner ========== -->
+    <div class="mb-8">
+        <div class="relative rounded-2xl border border-slate-200/60 overflow-hidden bg-white">
+            <!-- 背景装饰 -->
+            <div class="absolute inset-0 bg-gradient-to-br from-cyan-50/80 via-white to-blue-50/60"></div>
+            <div class="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-cyan-100/40 to-blue-200/30 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+            <div class="absolute bottom-0 left-0 w-72 h-72 bg-gradient-to-tr from-sky-100/40 to-cyan-100/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4"></div>
+            
+            <!-- 动态网格装饰 -->
+            <div class="absolute inset-0 opacity-[0.02]" style="background-image: radial-gradient(circle, #06b6d4 1px, transparent 1px); background-size: 24px 24px;"></div>
+            
+            <!-- 浮动粒子装饰 -->
+            <div class="absolute top-7 right-20 w-2 h-2 rounded-full bg-cyan-300/50 animate-pulse"></div>
+            <div class="absolute top-16 right-44 w-1.5 h-1.5 rounded-full bg-blue-300/40 animate-pulse" style="animation-delay: 0.6s;"></div>
+            <div class="absolute bottom-10 right-32 w-1 h-1 rounded-full bg-sky-400/50 animate-pulse" style="animation-delay: 1.2s;"></div>
+            <div class="absolute top-20 left-1/4 w-1.5 h-1.5 rounded-full bg-teal-300/30 animate-pulse" style="animation-delay: 0.9s;"></div>
 
-            <!-- 背景装饰 (Animated Gradient) -->
-            <div class="absolute inset-0 banner-gradient"></div>
-            <div class="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-cyan-100/40 to-blue-200/30 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 animate-float"></div>
-            <div class="absolute bottom-0 left-0 w-72 h-72 bg-gradient-to-tr from-sky-100/40 to-cyan-100/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4 animate-float" style="animation-delay: 2s;"></div>
-            <div class="absolute inset-0 dot-grid-bg"></div>
-
-            <!-- 浮动粒子 (Enhanced) -->
-            <div class="particle particle--1 top-8 right-24 w-2 h-2 bg-cyan-300/60"></div>
-            <div class="particle particle--2 top-16 right-48 w-1.5 h-1.5 bg-blue-300/50" style="animation-delay: 0.5s;"></div>
-            <div class="particle particle--3 bottom-12 right-36 w-1 h-1 bg-indigo-300/60" style="animation-delay: 1s;"></div>
-            <div class="particle particle--1 top-20 left-32 w-1.5 h-1.5 bg-sky-300/40" style="animation-delay: 1.5s;"></div>
-            <div class="particle particle--2 bottom-8 right-20 w-1 h-1 bg-violet-300/50" style="animation-delay: 2s;"></div>
-
-            <!-- ===== 主 Banner 区域 ===== -->
             <div class="relative z-10 p-8 md:p-10">
                 <div class="flex items-start gap-5">
                     <!-- Icon -->
                     <div class="relative flex-shrink-0">
-                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/25 animate-pulse-glow">
+                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/25">
                             <i class="fas fa-globe-americas text-[22px] text-white"></i>
                         </div>
-                        <div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-400 border-2 border-white flex items-center justify-center status-dot-live">
+                        <div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-400 border-2 border-white flex items-center justify-center">
                             <i class="fas fa-bolt text-[8px] text-white"></i>
                         </div>
                     </div>
@@ -35,31 +34,31 @@
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-3 mb-2">
                             <h2 class="text-xl font-bold text-slate-800 tracking-tight">产品数据采集与管理</h2>
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-sm analyzed-badge">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-sm">
                                 <i class="fa-solid fa-arrows-to-dot mr-1 text-[8px]"></i>LIVE
                             </span>
                         </div>
                         <p class="text-slate-500 text-sm leading-relaxed">
-                            连接亚马逊全球 10+ 站点，深度抓取 ASIN 标题、Listing 详情与 Review；支持 JSON 批量导入产品数据，合并Reviews，保留主站点Listings,统一管理。
+                            连接亚马逊全球 10+ 站点，深度抓取 ASIN 标题、Listing 详情与 Review；支持 JSON 批量导入产品数据，合并Reviews，保留主站点Listings，统一管理。
                         </p>
 
-                        <!-- Quick Stats -->
-                        <div class="flex flex-wrap items-center gap-x-5 gap-y-2 mt-4">
-                            <div class="flex items-center gap-1.5 group cursor-default">
-                                <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 stat-dot"></div>
-                                <span class="text-xs text-slate-400 group-hover:text-slate-600 transition-colors">支持 <span class="font-semibold text-slate-600">10+</span> 站点</span>
+                        <!-- Quick Tags -->
+                        <div class="flex items-center gap-5 mt-4">
+                            <div class="flex items-center gap-1.5">
+                                <div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
+                                <span class="text-xs text-slate-400">支持 10+ 站点</span>
                             </div>
-                            <div class="flex items-center gap-1.5 group cursor-default">
-                                <div class="w-1.5 h-1.5 rounded-full bg-blue-400 stat-dot"></div>
-                                <span class="text-xs text-slate-400 group-hover:text-slate-600 transition-colors">批量采集 & 导入</span>
+                            <div class="flex items-center gap-1.5">
+                                <div class="w-1.5 h-1.5 rounded-full bg-cyan-400"></div>
+                                <span class="text-xs text-slate-400">批量采集 & 导入</span>
                             </div>
-                            <div class="flex items-center gap-1.5 group cursor-default">
-                                <div class="w-1.5 h-1.5 rounded-full bg-amber-400 stat-dot"></div>
-                                <span class="text-xs text-slate-400 group-hover:text-slate-600 transition-colors">产品数据管理</span>
+                            <div class="flex items-center gap-1.5">
+                                <div class="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+                                <span class="text-xs text-slate-400">产品数据管理</span>
                             </div>
-                            <div class="flex items-center gap-1.5 group cursor-default">
-                                <div class="w-1.5 h-1.5 rounded-full bg-violet-400 stat-dot"></div>
-                                <span class="text-xs text-slate-400 group-hover:text-slate-600 transition-colors">历史快照</span>
+                            <div class="flex items-center gap-1.5">
+                                <div class="w-1.5 h-1.5 rounded-full bg-violet-400"></div>
+                                <span class="text-xs text-slate-400">历史快照</span>
                             </div>
                         </div>
                     </div>
@@ -67,23 +66,21 @@
             </div>
 
             <!-- ===== 分割线 ===== -->
-            <div class="relative z-10 mx-6 md:mx-8 border-t border-slate-200/50"></div>
+            <div class="relative z-10 mx-8 md:mx-10 border-t border-slate-200/50"></div>
 
             <!-- ===== 可点击的策略指南头部 ===== -->
             <div onclick="
                 const container = document.getElementById('amz_refining_container');
                 const chevron = document.getElementById('data-refine-chevron');
-                const divider = document.getElementById('strategy-divider');
                 container.classList.toggle('hidden');
                 chevron.classList.toggle('rotate-180');
-                divider.classList.toggle('hidden');
-            " class="cursor-pointer guide-toggle relative z-10">
+            " class="cursor-pointer relative z-10 hover:bg-slate-50/50 transition-colors">
 
-                <div class="relative px-8 md:px-10 py-5">
+                <div class="px-8 md:px-10 py-5">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center shadow-md shadow-orange-500/20 section-header">
-                                <i class="fas fa-lightbulb text-[13px] text-white header-icon"></i>
+                            <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center shadow-md shadow-orange-500/20">
+                                <i class="fas fa-lightbulb text-[13px] text-white"></i>
                             </div>
                             <h3 class="text-sm font-bold text-slate-700">数据结构化提取策略</h3>
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-sm">
@@ -93,9 +90,9 @@
 
                         <!-- Chevron -->
                         <div class="flex-shrink-0 ml-4">
-                            <div class="toggle-chevron-wrap w-8 h-8 rounded-lg bg-white/80 border border-slate-200/80 flex items-center justify-center transition-all duration-200 shadow-sm">
+                            <div class="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center transition-all duration-200 hover:bg-slate-200">
                                 <i id="data-refine-chevron"
-                                   class="fas fa-chevron-down text-slate-400 chevron-animated text-xs"></i>
+                                   class="fas fa-chevron-down text-slate-400 text-xs transition-transform duration-300"></i>
                             </div>
                         </div>
                     </div>
@@ -563,7 +560,7 @@
                                 <i class="fas fa-file-import text-slate-400 group-hover:text-blue-500 transition-colors duration-300"></i>
                             </div>
                             <div class="flex flex-col">
-                                <span class="text-sm font-semibold text-slate-700 group-hover:text-blue-600 transition-colors duration-300">导入更多数据</span>
+                                <span class="text-sm font-semibold text-slate-700 group-hover:text-blue-600 transition-colors duration-300">重新导入数据</span>
                                 <span class="text-xs text-slate-400 group-hover:text-blue-500 transition-colors duration-300">点击选择 JSON 文件</span>
                             </div>
                         </div>

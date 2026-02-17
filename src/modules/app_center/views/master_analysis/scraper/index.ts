@@ -11,6 +11,7 @@
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import { createScraperPanel } from './components/ScraperPanel';
 import '../master_analysis_style.css';
+import './scraper_style.css';
 
 // ========================================== 
 // Module Exports (统一架构接口)
