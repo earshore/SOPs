@@ -64,28 +64,32 @@ interface SettingsPanelData {
 // Alpine Component Logic
 // ==========================================
 
-const SettingsPanel = (): SettingsPanelData => ({
-    isOpen: false,
+/**
+ * 创建 Settings Panel Alpine 组件
+ */
+function createSettingsPanel(): SettingsPanelData {
+    return {
+        isOpen: false,
 
-    // LLM Config State
-    llm: {
-        provider: 'llmgateway',
-        endpoint: '',
-        apiKey: '',
-        model: '',
-        models: [],
-        showKey: false,
-        isFetching: false,
-        isTesting: false
-    },
+        // LLM Config State
+        llm: {
+            provider: 'llmgateway',
+            endpoint: '',
+            apiKey: '',
+            model: '',
+            models: [],
+            showKey: false,
+            isFetching: false,
+            isTesting: false
+        },
 
-    // Proxy Config State
-    proxy: {
-        type: 'allorigins',
-        customUrl: '',
-        showKey: false,
-        savedKeyMap: {}
-    },
+        // Proxy Config State
+        proxy: {
+            type: 'allorigins',
+            customUrl: '',
+            showKey: false,
+            savedKeyMap: {}
+        },
 
     // Computed / Helpers (改为普通方法以避免Terser压缩问题)
     currentProviderConfig(): ProviderConfig | Record<string, never> {
@@ -189,11 +193,15 @@ const SettingsPanel = (): SettingsPanelData => ({
     open() {
         this.isOpen = true;
         setTimeout(() => {
-            const loadPromise = this.loadProviderConfig(this.llm.provider);
-            if (loadPromise && typeof loadPromise.catch === 'function') {
-                loadPromise.catch(err => {
-                    console.error('[Settings] 加载provider配置失败:', err);
-                });
+            try {
+                const loadPromise = this.loadProviderConfig(this.llm.provider);
+                if (loadPromise && typeof loadPromise.catch === 'function') {
+                    loadPromise.catch(err => {
+                        console.error('[Settings] 加载provider配置失败:', err);
+                    });
+                }
+            } catch (err) {
+                console.error('[Settings] open加载配置失败:', err);
             }
         }, 0);
         try {
@@ -475,7 +483,8 @@ const SettingsPanel = (): SettingsPanelData => ({
         };
         return names[type] || '默认';
     }
-});
+    };
+}
 
 // ==========================================
 // Initialization & Exports
@@ -483,7 +492,7 @@ const SettingsPanel = (): SettingsPanelData => ({
 
 export function initAlpineSettings(): void {
     if (window.Alpine) {
-        window.Alpine.data('settingsPanel', SettingsPanel);
+        window.Alpine.data('settingsPanel', createSettingsPanel);
     } else {
         console.error('Alpine not found!');
     }
