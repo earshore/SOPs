@@ -24,6 +24,7 @@ export function toggleAsin(context: any, moduleState: any, asin: string): void {
   } else {
     context.selectedAsins.push(asin);
   }
+  console.log('[toggleAsin] 当前选中的 ASINs:', context.selectedAsins);
   syncToModuleState(context, moduleState);
 }
 
@@ -53,6 +54,7 @@ export function toggleTarget(context: any, moduleState: any, targetId: string): 
   } else {
     context.selectedTargets.push(targetId);
   }
+  console.log('[toggleTarget] 当前选中的分析目标:', context.selectedTargets);
   syncToModuleState(context, moduleState);
 }
 

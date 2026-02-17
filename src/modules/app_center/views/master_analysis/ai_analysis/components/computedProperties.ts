@@ -73,29 +73,53 @@ export function createComputedProperties(context: any) {
     get availableAsins(): string[] {
       // 优先从 Scraper 获取 ASIN 列表
       const scrapedData = state.scraper?.scrapedData;
+      console.log('[availableAsins] state.scraper:', state.scraper);
+      console.log('[availableAsins] scrapedData:', scrapedData);
+      
       if (scrapedData && scrapedData.products && scrapedData.products.length > 0) {
-        return scrapedData.products.map((p: any) => p.asin).filter((asin: string) => asin);
+        const asins = scrapedData.products.map((p: any) => p.asin).filter((asin: string) => asin);
+        console.log('[availableAsins] 从 Scraper 获取:', asins);
+        return asins;
       }
       // 没有真实数据时，从示例数据获取
       const { getAvailableAsins } = require('../config/sampleData');
-      return getAvailableAsins();
+      const sampleAsins = getAvailableAsins();
+      console.log('[availableAsins] 从示例数据获取:', sampleAsins);
+      return sampleAsins;
     },
 
     /**
      * 是否有数据
      */
     get hasData(): boolean {
-      return this.availableAsins.length > 0;
+      const result = this.availableAsins.length > 0;
+      console.log('[hasData] availableAsins.length:', this.availableAsins.length, 'result:', result);
+      return result;
     },
 
     /**
      * 是否可以开始分析
      */
     get canAnalyze(): boolean {
-      return context.selectedAsins.length > 0 && 
-             context.selectedTargets.length > 0 && 
-             this.availableAsins.length > 0 && 
-             !context.isAnalyzing;
+      const selectedAsinsCount = context.selectedAsins.length;
+      const selectedTargetsCount = context.selectedTargets.length;
+      const availableAsinsCount = this.availableAsins.length;
+      const isAnalyzing = context.isAnalyzing;
+      
+      const result = selectedAsinsCount > 0 && 
+                     selectedTargetsCount > 0 && 
+                     availableAsinsCount > 0 && 
+                     !isAnalyzing;
+      
+      console.log('[canAnalyze] 检查条件:', {
+        selectedAsins: selectedAsinsCount,
+        selectedTargets: selectedTargetsCount,
+        availableAsins: availableAsinsCount,
+        isAnalyzing: isAnalyzing,
+        result: result
+      });
+      
+      return result;
     },
 
     /**
