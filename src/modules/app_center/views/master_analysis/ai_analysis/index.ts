@@ -5,14 +5,14 @@
 
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import state from '../../../../../common/state';
-import { analysisTargets } from './analysisTargets';
-import { runAnalysis, getSampleReport } from './analysisService';
-import { runAIAnalysis } from './aiAnalysisService';
-import { generateAnalysisPrompt } from './analysisPrompts';
+import { analysisTargets } from './config/analysisTargets';
+import { runAnalysis, getSampleReport } from './services/analysisService';
+import { runAIAnalysis } from './services/aiAnalysisService';
+import { generateAnalysisPrompt } from './prompts/analysisPrompts';
 import { LANGUAGE_HEADERS } from '../../../../../common/constants/constants';
-import { getProductByAsin, getAvailableAsins, Product } from './sampleData';
+import { getProductByAsin, Product } from './config/sampleData';
 import { AnalysisResult } from './types';
-import type { FullAnalysisReport } from './analysisReportData';
+import type { FullAnalysisReport } from './config/analysisReportData';
 import { showToast } from '../../../../../common/ui';
 
 import '../master_analysis_style.css';
@@ -116,11 +116,10 @@ function initializeFromScraperData(): void {
     moduleState.dataSource = 'scraper';
     console.log('[AI智能分析] 📦 已从 Scraper 加载数据:', moduleState.selectedAsins);
   } else {
-    // 使用示例数据
-    const availableAsins = getAvailableAsins();
-    moduleState.selectedAsins = availableAsins.length > 0 ? [availableAsins[0]!] : ['B0DNMZ2MLG'];
-    moduleState.dataSource = 'sample';
-    console.log('[AI智能分析] 📦 使用示例数据:', moduleState.selectedAsins);
+    // 没有真实数据时保持空状态,不显示示例数据
+    moduleState.selectedAsins = [];
+    moduleState.dataSource = 'scraper';
+    console.log('[AI智能分析] 📦 无数据,等待用户从数据采集页面导入');
   }
 }
 
@@ -216,8 +215,8 @@ function createAiAnalysisPanel() {
       if (scrapedData && scrapedData.products && scrapedData.products.length > 0) {
         return scrapedData.products.map((p: any) => p.asin).filter((asin: string) => asin);
       }
-      // 否则返回示例数据的 ASIN
-      return getAvailableAsins();
+      // 没有真实数据时返回空数组,不显示示例数据
+      return [];
     },
 
     get hasData(): boolean {

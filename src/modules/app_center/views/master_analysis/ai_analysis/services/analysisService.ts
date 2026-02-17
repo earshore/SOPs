@@ -2,8 +2,8 @@
  * 分析服务 - 处理数据解析和报告生成
  */
 
-import { AnalysisResult } from './types';
-import { analysisTargets } from './analysisTargets';
+import { AnalysisResult } from '../types';
+import { analysisTargets } from '../config/analysisTargets';
 import { 
   FullAnalysisReport, 
   SAMPLE_ANALYSIS_REPORT,
@@ -15,7 +15,7 @@ import {
   BuyerProfileReport,
   VocabGapReport,
   PromiseRealityReport
-} from './analysisReportData';
+} from '../config/analysisReportData';
 
 // 获取目标配置
 const getTarget = (id: string) => analysisTargets.find(t => t.id === id);

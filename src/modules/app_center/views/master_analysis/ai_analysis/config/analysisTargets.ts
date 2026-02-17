@@ -2,7 +2,7 @@
  * AI智能分析 - 分析目标配置
  */
 
-import { AnalysisTarget } from './types';
+import { AnalysisTarget } from '../types';
 
 export const analysisTargets: AnalysisTarget[] = [
   {

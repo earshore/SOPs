@@ -2,14 +2,14 @@
  * AI 分析服务 - 调用大模型进行真实数据分析
  */
 
-import { callLLM, type ChatMessage } from '../../../../../services/llmService';
-import { StorageService, STORAGE_KEYS } from '../../../../../services/storageService';
-import { configCenter } from '../../../../../common/config/ConfigCenter';
-import type { FullAnalysisReport } from './analysisReportData';
+import { callLLM, type ChatMessage } from '../../../../../../services/llmService';
+import { StorageService, STORAGE_KEYS } from '../../../../../../services/storageService';
+import { configCenter } from '../../../../../../common/config/ConfigCenter';
+import type { FullAnalysisReport } from '../config/analysisReportData';
 import { parseAnalysisReport } from './analysisService';
-import type { Product } from './sampleData';
-import type { AnalysisResult } from './types';
-import { generateAnalysisPrompt } from './analysisPrompts';
+import type { Product } from '../config/sampleData';
+import type { AnalysisResult } from '../types';
+import { generateAnalysisPrompt } from '../prompts/analysisPrompts';
 
 /**
  * LLM 配置接口

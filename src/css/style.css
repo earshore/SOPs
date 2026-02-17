@@ -140,6 +140,75 @@
   50% { opacity: 0.6; transform: scale(0.95); }
 }
 
+/* =========================================
+   系统级页面加载淡入动画 (Universal Page Fade-in)
+   ========================================= */
+/* 通用页面淡入动画 - 所有页面加载时自动应用 */
+@keyframes pageViewFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Welcome Banner 快速淡入动画 */
+@keyframes welcomeBannerFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 主内容区延迟淡入动画 */
+@keyframes mainContentFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 系统级视图容器动画类 */
+.view-fade-in {
+  animation: pageViewFadeIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* 为了避免闪烁，初始状态设置为透明 */
+.view-fade-in-initial {
+  opacity: 0;
+}
+
+/* ===== 分层动画：Welcome Banner 优先淡入 ===== */
+/* 自动识别 Welcome Banner 区域并应用快速动画 */
+.view-fade-in > *:first-child:has(.rounded-2xl) {
+  opacity: 0;
+  animation: welcomeBannerFadeIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* 主内容区域延迟淡入，营造层次感 */
+.view-fade-in > *:not(:first-child),
+.view-fade-in > *:first-child:not(:has(.rounded-2xl)) {
+  opacity: 0;
+  animation: mainContentFadeIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.15s forwards;
+}
+
+/* 特殊处理：如果第一个子元素不是 Welcome Banner，则所有内容统一延迟淡入 */
+.view-fade-in:not(:has(> *:first-child .rounded-2xl)) > * {
+  opacity: 0;
+  animation: mainContentFadeIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
+}
+
 /* Mega Menu 过渡 */
 .mega-menu-enter {
     opacity: 0;

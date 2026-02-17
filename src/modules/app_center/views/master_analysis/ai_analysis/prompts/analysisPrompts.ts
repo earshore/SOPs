@@ -3,7 +3,7 @@
  * 基于 PromptLab 动态模板架构
  */
 
-import { Product } from './sampleData';
+import { Product } from '../config/sampleData';
 
 // 核心 JSON 规则
 export const CORE_JSON_RULES = `
