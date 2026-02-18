@@ -1,7 +1,9 @@
+import { loadTemplate } from "../../../../../common/utils/viewLoader";
+
 // Listing 极致优化 (SEO) SOP
 export async function mount(container) {
-    const response = await fetch('src/modules/sops/views/growth/listing_seo/template.html');
-    const html = await response.text();
+    const html = await loadTemplate('src/modules/sops/views/growth/listing_seo/template.html');
+    // ✅ 安全: 静态HTML模板，无用户输入
     container.innerHTML = html;
     container.classList.add('fade-in');
     console.log("✅ Listing SEO SOP 模块已挂载");

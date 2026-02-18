@@ -1,0 +1,473 @@
+<!-- Promptlab 子模块模板 -->
+<div class="app-center-container">
+
+    <!-- ========== Welcome Banner ========== -->
+    <div class="mb-8">
+        <div class="relative rounded-2xl border border-slate-200/60 overflow-hidden bg-white">
+            <!-- 背景装饰 -->
+            <div class="absolute inset-0 bg-gradient-to-br from-slate-50 via-purple-50/40 to-pink-50/40"></div>
+            <div class="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-purple-100/30 to-pink-200/25 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+            <div class="absolute bottom-0 left-0 w-72 h-72 bg-gradient-to-tr from-indigo-100/30 to-purple-100/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4"></div>
+            <div class="absolute inset-0 opacity-[0.02]" style="background-image: radial-gradient(circle, #9333ea 1px, transparent 1px); background-size: 26px 26px;"></div>
+
+            <!-- 浮动粒子 -->
+            <div class="absolute top-7 right-20 w-2 h-2 rounded-full bg-purple-300/50 animate-pulse"></div>
+            <div class="absolute top-16 right-44 w-1.5 h-1.5 rounded-full bg-pink-300/40 animate-pulse" style="animation-delay: 0.6s;"></div>
+            <div class="absolute bottom-10 right-32 w-1 h-1 rounded-full bg-indigo-400/50 animate-pulse" style="animation-delay: 1.2s;"></div>
+            <div class="absolute top-20 left-1/4 w-1.5 h-1.5 rounded-full bg-violet-300/30 animate-pulse" style="animation-delay: 0.9s;"></div>
+
+            <div class="relative z-10 p-8 md:p-10">
+                <div class="flex items-start gap-5">
+                    <!-- Icon -->
+                    <div class="relative flex-shrink-0">
+                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-500/25">
+                            <i class="fas fa-wand-magic-sparkles text-[22px] text-white"></i>
+                        </div>
+                        <div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-amber-400 border-2 border-white flex items-center justify-center">
+                            <i class="fas fa-fire text-[8px] text-white"></i>
+                        </div>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-3 mb-2">
+                            <h2 class="text-xl font-bold text-slate-800 tracking-tight">Listing 炼金术工场</h2>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-sm">
+                                <i class="fas fa-flask mr-1 text-[8px]"></i>Master Prompt
+                            </span>
+                        </div>
+                        <p class="text-slate-500 text-sm leading-relaxed">
+                            融合竞品洞察、产品 DNA 与 SEO 关键词，以及 A10、COSMO 与 Rufus AI 逻辑，打造高转化率的 Master Prompt。
+                        </p>
+
+                        <!-- Quick Tags -->
+                        <div class="flex items-center gap-5 mt-4">
+                            <div class="flex items-center gap-1.5">
+                                <div class="w-1.5 h-1.5 rounded-full bg-indigo-400"></div>
+                                <span class="text-xs text-slate-400">产品 DNA</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <div class="w-1.5 h-1.5 rounded-full bg-purple-400"></div>
+                                <span class="text-xs text-slate-400">竞品洞察注入</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <div class="w-1.5 h-1.5 rounded-full bg-pink-400"></div>
+                                <span class="text-xs text-slate-400">Master Prompt / 视觉剧本</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <div class="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
+                                <span class="text-xs text-slate-400">SEO 优化</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== Main Layout ========== -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 relative pb-10">
+
+        <!-- ===== Left Column: Config Cards ===== -->
+        <div class="lg:col-span-8 space-y-6">
+
+            <!-- Card 1: Product DNA -->
+            <div id="card-product-dna" class="rounded-2xl shadow-sm shadow-slate-200/50 border border-slate-200/80 bg-white overflow-hidden">
+                <!-- Card Header -->
+                <div class="px-6 pt-5 pb-4 border-b border-slate-100">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-base font-bold text-slate-800 flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-sm shadow-indigo-500/20">
+                                <span class="text-xs font-bold text-white">1</span>
+                            </div>
+                            产品 DNA 定义
+                            <span class="text-[10px] text-slate-400 font-normal ml-1">Product DNA</span>
+                        </h3>
+                        <select id="lab-target-market"
+                            class="text-xs border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 p-2 w-48 bg-slate-50 text-slate-700 font-semibold transition-all hover:border-slate-300 cursor-pointer appearance-none">
+                            <option value="" disabled selected>选择目标站点/语言...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Card Body -->
+                <div class="p-6">
+                    <div class="space-y-5">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Tier 1 Keywords -->
+                            <div class="group">
+                                <label class="flex items-center text-xs font-bold text-slate-700 mb-2 gap-1.5">
+                                    <span class="w-1 h-3.5 bg-red-400 rounded-full"></span>
+                                    Tier 1 核心大词 <span class="text-slate-400 font-normal">- 1-2个</span>
+                                </label>
+                                <input type="text" id="lab-keywords-tier1" placeholder="humidifiers for bedroom, cool mist humidifier"
+                                    class="w-full text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 p-3 bg-slate-50/50 focus:bg-white transition-all placeholder:text-slate-300 font-mono" />
+                            </div>
+
+                            <!-- Negative Keywords -->
+                            <div class="group">
+                                <label class="flex items-center text-xs font-bold text-slate-700 mb-2 gap-1.5">
+                                    <span class="w-1 h-3.5 bg-slate-300 rounded-full"></span>
+                                    <i class="fa-solid fa-ban text-slate-400 text-[10px]"></i>
+                                    限制词 <span class="text-slate-400 font-normal">- 不希望出现</span>
+                                </label>
+                                <input type="text" id="negative-keywords" placeholder="例如: bestseller / cure"
+                                    class="w-full text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 p-3 bg-slate-50/50 focus:bg-white transition-all placeholder:text-slate-300" />
+                            </div>
+
+                            <!-- Tier 2 Keywords -->
+                            <div class="group">
+                                <label class="flex items-center text-xs font-bold text-slate-700 mb-2 gap-1.5">
+                                    <span class="w-1 h-3.5 bg-red-400 rounded-full"></span>
+                                    Tier 2 长尾词 <span class="text-slate-400 font-normal">- 2-5个</span>
+                                </label>
+                                <textarea id="lab-keywords-tier2" rows="1"
+                                    placeholder="baby humidifier, easy to clean, quiet operation"
+                                    class="w-full text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 p-3 bg-slate-50/50 focus:bg-white transition-all resize-none placeholder:text-slate-300 font-mono"></textarea>
+                            </div>
+
+                            <!-- Target Audience -->
+                            <div class="group">
+                                <label class="flex items-center text-xs font-bold text-slate-600 mb-2 gap-1.5">
+                                    <span class="w-1 h-3.5 bg-slate-300 rounded-full"></span>
+                                    <i class="fa-solid fa-users text-slate-400 text-[10px]"></i>
+                                    目标受众 <span class="text-slate-400 font-normal">- 客户特征</span>
+                                </label>
+                                <input type="text" id="lab-audience" placeholder="e.g. Busy moms, Tech enthusiasts"
+                                    class="w-full text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 p-3 bg-slate-50/50 focus:bg-white transition-all placeholder:text-slate-300" />
+                            </div>
+
+                            <!-- USPs -->
+                            <div class="group">
+                                <label class="flex items-center text-xs font-bold text-slate-600 mb-2 gap-1.5">
+                                    <span class="w-1 h-3.5 bg-slate-300 rounded-full"></span>
+                                    <i class="fa-solid fa-list-check text-slate-400 text-[10px]"></i>
+                                    核心卖点 (USPs) <span class="text-slate-400 font-normal">- 可补充</span>
+                                </label>
+                                <textarea id="lab-usps" rows="2" placeholder="- 专利静音技术 (<28dB)&#10;- 360度旋转喷嘴"
+                                    class="w-full text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 p-3 bg-slate-50/50 focus:bg-white transition-all resize-none placeholder:text-slate-300"></textarea>
+                            </div>
+
+                            <!-- Specs -->
+                            <div class="group">
+                                <label class="flex items-center text-xs font-bold text-slate-600 mb-2 gap-1.5">
+                                    <span class="w-1 h-3.5 bg-slate-300 rounded-full"></span>
+                                    <i class="fa-solid fa-circle-info text-slate-400 text-[10px]"></i>
+                                    详细参数 (Specs) <span class="text-slate-400 font-normal">- 产品特征</span>
+                                </label>
+                                <textarea id="lab-specs" rows="2" placeholder="材质: ABS + PP&#10;尺寸: 20x20x30cm"
+                                    class="w-full text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 p-3 bg-slate-50/50 focus:bg-white transition-all resize-none placeholder:text-slate-300 font-mono"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Social Hooks -->
+                        <div class="group">
+                            <label class="flex items-center text-xs font-bold text-purple-600 mb-2 gap-1.5">
+                                <span class="w-1 h-3.5 bg-purple-400 rounded-full"></span>
+                                <i class="fab fa-instagram text-purple-400 text-[10px]"></i>
+                                植入社媒 Hook / 节日词 <span class="text-purple-400 font-normal">- 可补充</span>
+                            </label>
+                            <input type="text" id="lab-social-hook" placeholder="例如: 🔥限时半价 / 🎄圣诞特供 / #SummerVibes"
+                                class="w-full text-sm border-2 border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 p-3 bg-purple-50/30 focus:bg-purple-50/50 text-purple-700 transition-all placeholder:text-purple-300" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2: Analysis Report -->
+            <div id="card-analysis" class="rounded-2xl shadow-sm shadow-slate-200/50 border border-slate-200/80 bg-white overflow-hidden">
+                <!-- Card Header -->
+                <div class="px-6 pt-5 pb-4 border-b border-slate-100">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-base font-bold text-slate-800 flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-sm shadow-blue-500/20">
+                                <span class="text-xs font-bold text-white">2</span>
+                            </div>
+                            AI 分析报告
+                            <span class="text-[10px] text-slate-400 font-normal ml-1">Insights Injection</span>
+                        </h3>
+                        <div id="lab-analysis-status"
+                            class="px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 font-semibold bg-slate-100 text-slate-500 border border-slate-200">
+                            <i class="fas fa-circle-notch fa-spin text-[10px]"></i> 检测中...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card Body -->
+                <div class="p-6">
+                    <div class="rounded-xl border-2 border-slate-150 overflow-hidden bg-slate-50/50">
+                        <!-- Toggle Header -->
+                        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200 bg-white">
+                            <label class="flex items-center gap-3 cursor-pointer group">
+                                <div class="relative">
+                                    <input type="checkbox" id="use-analysis-data" class="sr-only peer" />
+                                    <div class="w-10 h-5.5 bg-slate-200 rounded-full peer peer-checked:bg-blue-500 transition-colors duration-200 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-[18px] after:w-[18px] after:transition-all after:duration-200 after:shadow-sm peer-checked:after:translate-x-[18px]" style="height: 22px;"></div>
+                                </div>
+                                <span class="text-sm font-semibold text-slate-700 group-hover:text-blue-600 transition-colors">启用竞品分析数据注入</span>
+                            </label>
+                            
+                            <!-- 全选/清空按钮组 -->
+                            <div class="flex items-center gap-2">
+                                <button data-action="amz_selectAllReportSections" title="全选"
+                                    class="px-2.5 py-1.5 flex items-center gap-1.5 rounded-lg hover:bg-blue-50 text-slate-500 hover:text-blue-600 transition-all cursor-pointer text-xs font-medium border border-transparent hover:border-blue-200">
+                                    <i class="fas fa-check-double text-[10px]"></i>
+                                    <span>全选</span>
+                                </button>
+                                <button data-action="amz_clearReportSections" title="清空"
+                                    class="px-2.5 py-1.5 flex items-center gap-1.5 rounded-lg hover:bg-slate-50 text-slate-400 hover:text-slate-600 transition-all cursor-pointer text-xs font-medium border border-transparent hover:border-slate-200">
+                                    <i class="fas fa-times text-[10px]"></i>
+                                    <span>清空</span>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Report Sections -->
+                        <div id="report-sections-container"
+                            class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto custom-scrollbar p-4">
+                            <!-- Empty State -->
+                            <div class="col-span-2 flex flex-col items-center justify-center py-8">
+                                <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center mb-3 border border-slate-150">
+                                    <i class="fas fa-file-circle-xmark text-slate-300 text-sm"></i>
+                                </div>
+                                <p class="text-xs text-slate-400 font-medium">暂无报告数据</p>
+                                <p class="text-[10px] text-slate-300 mt-1">请先在 AI 分析页面生成报告</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3: Strategy Config -->
+            <div id="card-strategy" class="rounded-2xl shadow-sm shadow-slate-200/50 border border-slate-200/80 bg-white overflow-hidden mb-10">
+                <!-- Card Header -->
+                <div class="px-6 pt-5 pb-4 border-b border-slate-100">
+                    <h3 class="text-base font-bold text-slate-800 flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shadow-sm shadow-orange-500/20">
+                            <span class="text-xs font-bold text-white">3</span>
+                        </div>
+                        生成策略配置
+                        <span class="text-[10px] text-slate-400 font-normal ml-1">Strategy</span>
+                    </h3>
+                </div>
+
+                <!-- Card Body -->
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+                        <!-- Tone -->
+                        <div>
+                            <label class="flex items-center text-xs font-bold text-slate-600 mb-2 gap-1.5">
+                                <span class="w-1 h-3.5 bg-orange-400 rounded-full"></span>
+                                文案语气 Tone
+                            </label>
+                            <select id="lab-tone"
+                                class="w-full text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 p-3 bg-slate-50/50 transition-all hover:border-slate-300 cursor-pointer font-medium text-slate-700">
+                                <option value="professional">Professional (专业)</option>
+                                <option value="exciting">Exciting (激动人心)</option>
+                                <option value="emotional">Emotional (情感共鸣)</option>
+                                <option value="minimalist">Minimalist (极简)</option>
+                            </select>
+                        </div>
+                        <!-- Custom Rules -->
+                        <div>
+                            <label class="flex items-center text-xs font-bold text-slate-600 mb-2 gap-1.5">
+                                <span class="w-1 h-3.5 bg-slate-300 rounded-full"></span>
+                                自定义规则 <span class="text-slate-400 font-normal">- 有就填</span>
+                            </label>
+                            <textarea id="lab-custom-strategy" rows="1" placeholder="例如: 禁止使用'Best Seller'词汇..."
+                                class="w-full text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 p-3 bg-slate-50/50 focus:bg-white transition-all resize-none placeholder:text-slate-300"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- AI Optimization Toggles -->
+                    <div class="pt-5 border-t border-slate-100">
+                        <label class="flex items-center text-xs font-bold text-slate-600 mb-3 gap-1.5">
+                            <span class="w-1 h-3.5 bg-orange-400 rounded-full"></span>
+                            AI 优化策略
+                        </label>
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <!-- COSMO -->
+                            <label class="flex items-center gap-2.5 text-sm cursor-pointer group px-4 py-2.5 rounded-xl border-2 transition-all duration-200 has-[:checked]:bg-orange-50 has-[:checked]:border-orange-200 has-[:checked]:shadow-sm border-slate-150 hover:border-orange-200 bg-white">
+                                <input type="checkbox" id="opt-cosmo" class="rounded text-orange-500 focus:ring-orange-500 w-4 h-4" checked />
+                                <div class="flex flex-col">
+                                    <span class="text-xs font-semibold text-slate-700 group-hover:text-orange-600 transition-colors">COSMO 意图匹配</span>
+                                    <span class="text-[10px] text-slate-400">构建场景化语义</span>
+                                </div>
+                            </label>
+
+                            <!-- Rufus -->
+                            <label class="flex items-center gap-2.5 text-sm cursor-pointer group px-4 py-2.5 rounded-xl border-2 transition-all duration-200 has-[:checked]:bg-orange-50 has-[:checked]:border-orange-200 has-[:checked]:shadow-sm border-slate-150 hover:border-orange-200 bg-white">
+                                <input type="checkbox" id="opt-rufus" class="rounded text-orange-500 focus:ring-orange-500 w-4 h-4" checked />
+                                <div class="flex flex-col">
+                                    <span class="text-xs font-semibold text-slate-700 group-hover:text-orange-600 transition-colors">Rufus 优化</span>
+                                    <span class="text-[10px] text-slate-400">问答预判策略</span>
+                                </div>
+                            </label>
+
+                            <!-- Emoji -->
+                            <label class="flex items-center gap-2.5 text-sm cursor-pointer group px-4 py-2.5 rounded-xl border-2 transition-all duration-200 has-[:checked]:bg-orange-50 has-[:checked]:border-orange-200 has-[:checked]:shadow-sm border-slate-150 hover:border-orange-200 bg-white">
+                                <input type="checkbox" id="opt-emoji" class="rounded text-orange-500 focus:ring-orange-500 w-4 h-4" checked />
+                                <div class="flex flex-col">
+                                    <span class="text-xs font-semibold text-slate-700 group-hover:text-orange-600 transition-colors">Emoji 点缀</span>
+                                    <span class="text-[10px] text-slate-400">增强视觉吸引</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== Right Column: Console & Output ===== -->
+        <div class="lg:col-span-4">
+            <div class="sticky top-6 space-y-5">
+
+                <!-- Flip Console Card -->
+                <div class="relative w-full group [perspective:1000px]">
+                    <!-- Mode Toggle -->
+                    <div id="embed-toggle-container"
+                        class="absolute top-4 right-4 z-[60] bg-white/15 backdrop-blur-xl p-1 rounded-xl flex items-center shadow-lg border border-white/10 transition-all duration-500">
+                        <div id="mode-toggle-glider"
+                            class="absolute top-1 left-1 w-[calc(50%-4px)] h-[calc(100%-8px)] bg-white shadow-md rounded-lg transition-all duration-300 ease-out z-0">
+                        </div>
+                        <button data-action="amz_toggleConsoleMode" data-param="listing" id="btn-mode-listing"
+                            class="relative z-10 px-3.5 py-1.5 text-[10px] font-bold rounded-lg transition-colors duration-300 text-blue-600 uppercase tracking-wider cursor-pointer">
+                            Listing
+                        </button>
+                        <button data-action="amz_toggleConsoleMode" data-param="visual" id="btn-mode-visual"
+                            class="relative z-10 px-3.5 py-1.5 text-[10px] font-bold rounded-lg transition-colors duration-300 text-slate-400 hover:text-pink-500 uppercase tracking-wider cursor-pointer">
+                            Visual
+                        </button>
+                    </div>
+
+                    <div id="console-card-inner"
+                        class="relative transition-all duration-700 [transform-style:preserve-3d] grid grid-cols-1 grid-rows-1">
+
+                        <!-- Front: Listing Mode -->
+                        <div class="col-start-1 row-start-1 w-full [backface-visibility:hidden]">
+                            <div class="relative bg-gradient-to-br from-slate-900 via-slate-800 to-blue-900 rounded-2xl shadow-xl shadow-blue-900/30 p-6 text-white h-full flex flex-col gap-5 border border-blue-500/20 overflow-hidden">
+                                <!-- 背景光效 -->
+                                <div class="absolute top-0 right-0 w-48 h-48 bg-blue-500/5 rounded-full blur-3xl"></div>
+                                <div class="absolute bottom-0 left-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-2xl"></div>
+                                <div class="absolute inset-0 opacity-[0.03]" style="background-image: radial-gradient(circle, #3b82f6 1px, transparent 1px); background-size: 20px 20px;"></div>
+
+                                <div class="pr-28 relative z-10">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <div class="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                                            <i class="fas fa-pen-nib text-blue-400 text-sm"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-bold text-base leading-none">Listing</h3>
+                                            <span class="text-blue-300/50 font-normal text-[10px]">Text Generation</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-slate-300/60 text-xs mt-1 leading-relaxed">
+                                        基于 A10 算法逻辑生成高转化 Listing 文本
+                                    </p>
+                                </div>
+
+                                <div class="relative z-10">
+                                    <button id="btn-generate-prompt" data-action="amz_generateMasterPrompt"
+                                        class="relative w-full py-3.5 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-0.5 flex items-center justify-center gap-2.5 group cursor-pointer overflow-hidden">
+                                        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                                        <i class="fas fa-microchip relative z-10 group-hover:animate-pulse"></i>
+                                        <span class="relative z-10">生成 Master Prompt</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Back: Visual Mode -->
+                        <div class="col-start-1 row-start-1 w-full [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                            <div class="relative bg-gradient-to-br from-slate-900 via-slate-800 to-pink-900 rounded-2xl shadow-xl shadow-pink-900/30 p-6 text-white h-full flex flex-col gap-5 border border-pink-500/20 overflow-hidden">
+                                <!-- 背景光效 -->
+                                <div class="absolute top-0 right-0 w-48 h-48 bg-pink-500/5 rounded-full blur-3xl"></div>
+                                <div class="absolute bottom-0 left-0 w-32 h-32 bg-rose-500/5 rounded-full blur-2xl"></div>
+                                <div class="absolute inset-0 opacity-[0.03]" style="background-image: radial-gradient(circle, #ec4899 1px, transparent 1px); background-size: 20px 20px;"></div>
+
+                                <div class="pr-28 relative z-10">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <div class="w-8 h-8 rounded-lg bg-pink-500/20 flex items-center justify-center">
+                                            <i class="fas fa-palette text-pink-400 text-sm"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-bold text-base leading-none text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-rose-300">Visual</h3>
+                                            <span class="text-pink-300/50 font-normal text-[10px]">Art Director</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-pink-200/60 text-xs mt-1 leading-relaxed">
+                                        将痛点转化为视觉防御策略
+                                    </p>
+                                </div>
+
+                                <div class="relative z-10">
+                                    <button id="btn-generate-visual" data-action="amz_generateVisualPrompt"
+                                        class="relative w-full py-3.5 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-bold rounded-xl shadow-lg shadow-pink-700/40 hover:shadow-xl hover:shadow-pink-600/50 transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-0.5 flex items-center justify-center gap-2.5 group cursor-pointer border border-pink-400/20 overflow-hidden">
+                                        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                                        <i class="fas fa-magic relative z-10"></i>
+                                        <span class="relative z-10">生成视觉剧本 (A+/EBC)</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Output Card -->
+                <div class="rounded-2xl shadow-sm shadow-slate-200/50 border border-slate-200/80 bg-white flex flex-col h-[500px] overflow-hidden" id="prompt-output-card">
+                    <!-- Output Header -->
+                    <div class="px-5 py-3 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 rounded-md bg-indigo-50 flex items-center justify-center">
+                                <i class="fas fa-terminal text-indigo-400 text-[10px]"></i>
+                            </div>
+                            <span id="output-preview-title" class="text-xs font-bold text-slate-600 uppercase tracking-wider">Listing Prompt</span>
+                        </div>
+                        <div class="flex items-center gap-0.5">
+                            <button data-action="amz_togglePromptZoom" title="放大视图"
+                                class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-indigo-50 text-slate-400 hover:text-indigo-600 transition-all cursor-pointer border border-transparent hover:border-indigo-100">
+                                <i class="fas fa-expand text-xs" id="zoom-icon"></i>
+                            </button>
+                            <button data-action="amz_copyMasterPrompt" title="复制"
+                                class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-blue-50 text-slate-400 hover:text-blue-600 transition-all cursor-pointer border border-transparent hover:border-blue-100">
+                                <i class="fas fa-copy text-xs"></i>
+                            </button>
+                            <button data-action="amz_clearPromptInputs" title="清空"
+                                class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-500 transition-all cursor-pointer border border-transparent hover:border-rose-100">
+                                <i class="fas fa-trash-alt text-xs"></i>
+                            </button>
+                        </div>
+                        <input type="number" id="lab-char-limit" value="5000" class="hidden" />
+                    </div>
+
+                    <!-- Output Body -->
+                    <div class="relative flex-1 bg-white">
+                        <textarea id="final-prompt-output"
+                            class="w-full h-full px-5 py-4 pb-10 text-xs font-mono text-slate-600 bg-transparent resize-none focus:outline-none border-0 transition-colors duration-500 leading-relaxed"
+                            placeholder="// 1. 填写左侧产品 DNA 信息&#10;// 2. 点击上方生成按钮&#10;// 3. 复制 Prompt 并发送给 AI 大模型&#10;&#10;// 💡 Tip: 填写越详细，生成效果越好" readonly></textarea>
+
+                        <!-- Footer Status Bar -->
+                        <div class="absolute bottom-0 left-0 right-0 px-5 py-2 bg-gradient-to-t from-white via-white to-transparent flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-1.5 h-1.5 rounded-full bg-slate-300"></div>
+                                <span class="text-[10px] text-slate-400 font-medium">Ready</span>
+                            </div>
+                            <div class="flex items-center gap-1.5 text-xs text-slate-400 bg-slate-50 px-2.5 py-1 rounded-full border border-slate-100">
+                                <span id="prompt-word-count" class="font-bold text-slate-600">0</span>
+                                <span class="text-[10px]">chars</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========== Zoom Modal ========== -->
+<div id="prompt-zoom-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] hidden items-center justify-center p-6" style="display: none;">
+    <div id="prompt-zoom-content" class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col transform scale-95 opacity-0 transition-all duration-300 border border-slate-200">
+        <div id="zoomed-cards-container" class="flex-1 overflow-y-auto p-6 space-y-4">
+        </div>
+    </div>
+</div>
+
+<!-- Zoom Modal Styles -->

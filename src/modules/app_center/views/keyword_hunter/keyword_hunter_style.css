@@ -1,0 +1,1610 @@
+/* ==================== Keyword Hunter 特定样式 ==================== */
+
+/* === 全局基础 === */
+#keyword_hunter_content_area {
+    background: linear-gradient(180deg, rgba(248, 250, 252, 0.5) 0%, rgba(241, 245, 249, 0.3) 100%);
+}
+
+@media (max-width: 768px) {
+    #keyword_hunter_content_area {
+        padding: 1rem;
+    }
+}
+
+/* ==================== 输入模块 ==================== */
+
+.kt-input-grid {
+    min-height: 500px;
+}
+
+.kt-input-card {
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border-radius: 1rem;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
+}
+
+.kt-input-card:hover {
+    border-color: #93c5fd;
+    box-shadow: 0 10px 40px -10px rgba(59, 130, 246, 0.15), 0 4px 12px -4px rgba(59, 130, 246, 0.08);
+}
+
+/* --- Textarea 容器 --- */
+.kt-textarea-container {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.kt-textarea-container textarea {
+    resize: vertical;
+    min-height: 400px;
+    max-height: 800px;
+    height: 400px;
+    font-size: 0.875rem;
+    line-height: 1.75;
+    padding: 1.25rem;
+    border: none;
+    border-radius: 0.75rem;
+    transition: all 0.2s ease;
+    background: transparent;
+}
+
+.kt-textarea-container textarea:focus {
+    outline: none;
+    border: none;
+}
+
+/* --- Keyword Input 高亮层 --- */
+.keyword-input-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.keyword-input-highlight {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    padding: 1.25rem;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    color: transparent;
+    z-index: 1;
+    line-height: 1.75;
+    font-size: 0.875rem;
+}
+
+.keyword-input-textarea {
+    position: relative;
+    z-index: 2;
+    background: transparent;
+    resize: vertical;
+    min-height: 400px;
+    max-height: 800px;
+    height: 400px;
+}
+
+/* --- Textarea Stats --- */
+.textarea-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.textarea-stats {
+    position: absolute;
+    bottom: 0.75rem;
+    right: 0.75rem;
+    z-index: 10;
+    display: flex;
+    gap: 0.5rem;
+}
+
+
+/* ==================== 浮动关键词窗口 ==================== */
+
+.kt-floating-window {
+    position: fixed;
+    width: 380px;
+    height: 500px;
+    bottom: 80px;
+    right: 20px;
+    background: white;
+    border-radius: 1rem;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow:
+        0 25px 50px -12px rgba(0, 0, 0, 0.12),
+        0 12px 24px -8px rgba(0, 0, 0, 0.06),
+        0 0 0 1px rgba(0, 0, 0, 0.03);
+    z-index: 9999;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    display: none;
+    overflow: hidden;
+    pointer-events: auto;
+}
+
+.kt-floating-window.show {
+    display: flex;
+    flex-direction: column;
+    animation: slideInUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(24px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.floating-header {
+    cursor: move;
+    user-select: none;
+    border-radius: 1rem 1rem 0 0;
+    flex-shrink: 0;
+    padding: 0.875rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.floating-header h3 {
+    margin: 0;
+    flex: 1;
+}
+
+.kt-floating-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem 1.25rem;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.kt-tab-buttons {
+    flex-shrink: 0;
+    margin-bottom: 0.75rem;
+}
+
+.kt-keyword-list-wrapper {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+.kt-keyword-list {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow-y: auto;
+    padding-right: 0.375rem;
+}
+
+/* --- Minimized Button --- */
+.kt-minimized-btn {
+    position: fixed;
+    bottom: 1.25rem;
+    right: 1.25rem;
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.875rem 1.25rem;
+    border-radius: 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: none;
+    cursor: pointer;
+    box-shadow:
+        0 10px 25px -5px rgba(59, 130, 246, 0.25),
+        0 8px 10px -6px rgba(59, 130, 246, 0.1);
+}
+
+.kt-minimized-btn.show {
+    display: flex;
+    animation: bounceIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3) translateY(10px);
+    }
+    60% {
+        opacity: 1;
+        transform: scale(1.05) translateY(-2px);
+    }
+    100% {
+        transform: scale(1) translateY(0);
+    }
+}
+
+.kt-minimized-btn:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow:
+        0 15px 35px -5px rgba(59, 130, 246, 0.3),
+        0 10px 15px -6px rgba(59, 130, 246, 0.15);
+}
+
+
+/* ==================== Copy Content (Listing 编辑器) ==================== */
+
+.copy-content {
+    line-height: 1.85;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 0.875rem;
+    position: relative;
+    color: #334155;
+}
+
+.copy-content:empty:before {
+    content: attr(data-placeholder);
+    color: #cbd5e1;
+    font-style: italic;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    text-align: center;
+    width: 100%;
+    font-size: 0.9rem;
+}
+
+.copy-content:focus {
+    outline: none;
+}
+
+
+/* ==================== 关键词高亮系统 ==================== */
+
+/* --- 基础高亮 --- */
+.keyword-bold {
+    font-weight: 600;
+    color: #047857;
+    background: linear-gradient(120deg, rgba(16, 185, 129, 0.18) 0%, rgba(16, 185, 129, 0.08) 100%);
+    border-bottom: 2px solid rgba(16, 185, 129, 0.5);
+    padding: 1px 0;
+    border-radius: 0;
+    margin: 0;
+    display: inline;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+    transition: all 0.2s ease;
+}
+
+.keyword-bold.kw-solo {
+    border-radius: 3px;
+    padding: 1px 4px;
+}
+
+.keyword-bold.kw-start {
+    border-radius: 3px 0 0 3px;
+    padding: 1px 0 1px 4px;
+}
+
+.keyword-bold.kw-mid {
+    border-radius: 0;
+    padding: 1px 0;
+}
+
+.keyword-bold.kw-end {
+    border-radius: 0 3px 3px 0;
+    padding: 0 4px 1px 0;
+}
+
+.highlightable {
+    cursor: pointer;
+    position: relative;
+}
+
+.highlightable:hover {
+    background: linear-gradient(120deg, rgba(16, 185, 129, 0.28) 0%, rgba(16, 185, 129, 0.15) 100%);
+    border-bottom-color: rgba(16, 185, 129, 0.7);
+}
+
+/* --- 聚焦高亮（点击定位） --- */
+.keyword-bold.highlight-focus,
+.highlight-focus {
+    background: linear-gradient(120deg, rgba(251, 191, 36, 0.35) 0%, rgba(251, 191, 36, 0.2) 100%) !important;
+    border-bottom-color: rgba(234, 179, 8, 0.8) !important;
+    color: #92400e !important;
+    font-weight: 700 !important;
+    padding: 2px 5px !important;
+    border-radius: 4px !important;
+    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.15), 0 2px 8px -2px rgba(251, 191, 36, 0.25) !important;
+    animation: highlightPulse 0.5s ease-out;
+    transform: scale(1.03) !important;
+    z-index: 10;
+    position: relative;
+}
+
+@keyframes highlightPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 0 6px rgba(251, 191, 36, 0.08);
+        transform: scale(1.05);
+    }
+    100% {
+        box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.15);
+        transform: scale(1.03);
+    }
+}
+
+
+/* ==================== 翻译模式 ==================== */
+
+.paragraph-original {
+    color: #334155;
+    margin-bottom: 0.375rem;
+}
+
+.sentence-translation {
+    color: #4f46e5;
+    font-size: 0.8125rem;
+    font-style: normal;
+    padding: 0.625rem 1rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.25rem;
+    background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+    border-left: 3px solid #6366f1;
+    border-radius: 0 0.5rem 0.5rem 0;
+    line-height: 1.65;
+    box-shadow: 0 1px 3px rgba(99, 102, 241, 0.08);
+    transition: all 0.2s ease;
+}
+
+.sentence-translation:hover {
+    background: linear-gradient(135deg, #e8ecff 0%, #dbe0fe 100%);
+    box-shadow: 0 2px 6px rgba(99, 102, 241, 0.12);
+}
+
+
+/* ==================== 关键词监控 - 词根高亮 ==================== */
+
+.keyword-root-highlight {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%) !important;
+    border-left-color: #f59e0b !important;
+    border-left-width: 5px !important;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.3), 0 6px 12px -4px rgba(245, 158, 11, 0.2) !important;
+    transform: scale(1.03) !important;
+    animation: keyword-root-pulse 0.7s ease-in-out !important;
+    position: relative;
+    z-index: 10;
+}
+
+.keyword-root-highlight .text-red-800 {
+    color: #92400e !important;
+    font-weight: 700 !important;
+}
+
+.keyword-root-highlight .fa-times-circle {
+    color: #f59e0b !important;
+    font-size: 1.05rem !important;
+}
+
+@keyframes keyword-root-pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.6);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.15);
+        transform: scale(1.05);
+    }
+    100% {
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.3);
+        transform: scale(1.03);
+    }
+}
+
+
+/* ==================================================================
+   Markdown Content - AI 报告渲染样式 (核心优化)
+   ================================================================== */
+
+/* === 基础排版 === */
+.markdown-content {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 0.925rem;
+    line-height: 1.8;
+    color: #334155;
+    background-color: transparent;
+    max-width: 100%;
+    padding: 0.5rem 0;
+}
+
+.markdown-content p {
+    margin: 0.625rem 0;
+    color: #475569;
+}
+
+.markdown-content hr {
+    border: none;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #e2e8f0, transparent);
+    margin: 2rem 0;
+}
+
+.markdown-content > *:first-child {
+    margin-top: 0;
+}
+
+/* === 核心标题 H2 (Hero Header) === */
+.markdown-content h2:first-of-type {
+    font-size: 1.375rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin: 0 0 1.75rem 0;
+    padding: 1.5rem 1.75rem;
+    border-radius: 1rem;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+    color: #ffffff;
+    box-shadow:
+        0 10px 25px -5px rgba(15, 23, 42, 0.2),
+        0 4px 10px -3px rgba(15, 23, 42, 0.1);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* 装饰光晕 */
+.markdown-content h2:first-of-type::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+        radial-gradient(ellipse at 90% 10%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 10% 90%, rgba(168, 85, 247, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.markdown-content h2:first-of-type::after {
+    content: '';
+    position: absolute;
+    top: -30%;
+    right: -10%;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.06) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+/* 次级 H2 */
+.markdown-content h2:not(:first-of-type) {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 2.5rem 0 1rem 0;
+    padding-bottom: 0.625rem;
+    border-bottom: 2px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    letter-spacing: -0.01em;
+}
+
+/* === H3 功能性小标题 === */
+.markdown-content h3 {
+    font-size: 1.025rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 1.75rem 0 0.875rem 0;
+    padding: 0.625rem 0.875rem;
+    border-left: 4px solid transparent;
+    border-radius: 0 0.5rem 0.5rem 0;
+    display: flex;
+    align-items: center;
+    background: none;
+    transition: all 0.2s ease;
+}
+
+/* H3 类型着色 */
+.markdown-content h3:nth-of-type(1) {
+    border-color: #6366f1;
+    color: #4338ca;
+    background: linear-gradient(to right, rgba(99, 102, 241, 0.06), transparent 60%);
+}
+
+.markdown-content h3:nth-of-type(2) {
+    border-color: #ef4444;
+    color: #dc2626;
+    background: linear-gradient(to right, rgba(239, 68, 68, 0.05), transparent 60%);
+}
+
+.markdown-content h3:nth-of-type(3) {
+    border-color: #10b981;
+    color: #059669;
+    background: linear-gradient(to right, rgba(16, 185, 129, 0.06), transparent 60%);
+}
+
+/* H3 hover 效果 */
+.markdown-content h3:hover {
+    padding-left: 1rem;
+}
+
+/* === 引用块 (Blockquote) === */
+.markdown-content blockquote {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #94a3b8;
+    border-radius: 0.625rem;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+    color: #475569;
+    font-style: normal;
+    font-size: 0.925rem;
+    line-height: 1.75;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.markdown-content blockquote:hover {
+    box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.08);
+}
+
+/* 总评引用块 */
+.markdown-content h2:first-of-type + hr + h3 + blockquote,
+.markdown-content blockquote:first-of-type {
+    background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+    border-color: #ddd6fe;
+    border-left-color: #8b5cf6;
+    color: #5b21b6;
+}
+
+/* 致命问题引用块 */
+.markdown-content h3:nth-of-type(2) + blockquote {
+    background: linear-gradient(135deg, #fff5f5 0%, #fef2f2 100%);
+    border-color: #fecaca;
+    border-left-color: #ef4444;
+    color: #991b1b;
+}
+
+/* 引用块内段落 */
+.markdown-content blockquote p {
+    margin: 0.375rem 0;
+    color: inherit;
+}
+
+.markdown-content blockquote p:first-child {
+    margin-top: 0;
+}
+
+.markdown-content blockquote p:last-child {
+    margin-bottom: 0;
+}
+
+/* === 表格 (Modern Data Grid) === */
+.markdown-content table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 1.5rem 0;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    font-size: 0.875rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
+}
+
+.markdown-content thead th {
+    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    color: #475569;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    padding: 0.875rem 1rem;
+    border-bottom: 2px solid #e2e8f0;
+    text-align: left;
+}
+
+.markdown-content tbody td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+    transition: background-color 0.15s ease;
+}
+
+.markdown-content tbody tr:hover td {
+    background-color: rgba(248, 250, 252, 0.8);
+}
+
+.markdown-content tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.markdown-content tbody td:first-child {
+    font-weight: 600;
+    color: #334155;
+}
+
+/* 总分行 */
+.markdown-content tbody tr.row-total td {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    color: #f8fafc;
+    font-weight: 700;
+    font-size: 1rem;
+    border-top: 2px solid #334155;
+}
+
+/* 风险行 */
+.markdown-content tbody tr.row-risk td {
+    background: linear-gradient(to right, #fff5f5, #ffffff);
+}
+
+/* === 列表 (Diff 对比优化) === */
+.markdown-content ul,
+.markdown-content ol {
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+.markdown-content li {
+    padding: 0.75rem 1rem 0.75rem 1.125rem;
+    border-radius: 0.5rem;
+    background: #ffffff;
+    border: 1px solid #f1f5f9;
+    border-left-width: 4px;
+    font-size: 0.9rem;
+    color: #475569;
+    line-height: 1.7;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.markdown-content li:hover {
+    transform: translateX(3px);
+    box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.06);
+}
+
+/* 原文 (红色系) */
+.markdown-content li:nth-child(3n+1) {
+    border-left-color: #f87171;
+    background: linear-gradient(100deg, #fef2f2 0%, #ffffff 40%);
+}
+
+/* 改写 (绿色系) */
+.markdown-content li:nth-child(3n+2) {
+    border-left-color: #34d399;
+    background: linear-gradient(100deg, #ecfdf5 0%, #ffffff 40%);
+}
+
+/* 说明 (蓝色系) */
+.markdown-content li:nth-child(3n) {
+    border-left-color: #60a5fa;
+    background: linear-gradient(100deg, #eff6ff 0%, #ffffff 40%);
+    margin-bottom: 0.75rem;
+    color: #64748b;
+    font-size: 0.85rem;
+    padding-top: 0.625rem;
+    padding-bottom: 0.625rem;
+}
+
+/* 嵌套列表 */
+.markdown-content li ul,
+.markdown-content li ol {
+    margin-top: 0.5rem;
+    gap: 0.25rem;
+}
+
+.markdown-content li li {
+    border-left-width: 3px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+}
+
+/* === Code 内联高亮 === */
+.markdown-content code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.84em;
+    padding: 0.15rem 0.4rem;
+    border-radius: 0.3rem;
+    word-break: break-word;
+}
+
+/* 原文中的 code - 删除线 */
+.markdown-content li:nth-child(3n+1) code {
+    background: rgba(239, 68, 68, 0.1);
+    color: #be123c;
+    text-decoration: line-through;
+    text-decoration-color: rgba(239, 68, 68, 0.4);
+    opacity: 0.85;
+    border: 1px solid rgba(239, 68, 68, 0.1);
+}
+
+/* 改写中的 code - 高亮强调 */
+.markdown-content li:nth-child(3n+2) code {
+    background: rgba(16, 185, 129, 0.12);
+    color: #047857;
+    font-weight: 600;
+    border: 1px solid rgba(16, 185, 129, 0.18);
+}
+
+/* 普通 code */
+.markdown-content p code,
+.markdown-content blockquote code {
+    background: #f1f5f9;
+    color: #0f172a;
+    border: 1px solid #e2e8f0;
+    font-weight: 500;
+}
+
+/* Code Block (pre > code) */
+.markdown-content pre {
+    margin: 1rem 0;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    border: 1px solid rgba(51, 65, 85, 0.15);
+    box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.1);
+}
+
+.markdown-content pre code {
+    display: block;
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+    color: #e2e8f0;
+    font-size: 0.8rem;
+    line-height: 1.75;
+    overflow-x: auto;
+    border: none;
+    border-radius: 0;
+}
+
+/* === 分数徽章 === */
+.score-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.75rem;
+    padding: 0.2rem 0.625rem;
+    border-radius: 9999px;
+    font-weight: 800;
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.score-badge-high {
+    background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+    color: #15803d;
+    border-color: rgba(34, 197, 94, 0.2);
+}
+
+.score-badge-mid {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    color: #b45309;
+    border-color: rgba(245, 158, 11, 0.2);
+}
+
+.score-badge-low {
+    background: linear-gradient(135deg, #fee2e2, #fecaca);
+    color: #b91c1c;
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
+.score-badge:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* === 胶囊标签 (H3 后的改写建议) === */
+.markdown-content h3:nth-of-type(3) ~ p > strong:first-child {
+    display: inline-block;
+    background: linear-gradient(135deg, #f3e8ff, #ede9fe);
+    color: #7c3aed;
+    padding: 0.2rem 0.7rem;
+    border-radius: 0.375rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    border: 1px solid #ddd6fe;
+}
+
+/* === Strong & Em 优化 === */
+.markdown-content strong {
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.markdown-content em {
+    font-style: italic;
+    color: #64748b;
+}
+
+.markdown-content strong em,
+.markdown-content em strong {
+    color: #7c3aed;
+    font-weight: 700;
+}
+
+
+/* === 响应式 === */
+@media (max-width: 640px) {
+    .markdown-content {
+        font-size: 0.875rem;
+        line-height: 1.7;
+    }
+
+    .markdown-content h2:first-of-type {
+        padding: 1.125rem 1.25rem;
+        font-size: 1.2rem;
+        border-radius: 0.75rem;
+    }
+
+    .markdown-content h3 {
+        font-size: 0.95rem;
+        padding: 0.5rem 0.75rem;
+    }
+
+    .markdown-content li {
+        padding: 0.625rem 0.75rem 0.625rem 0.875rem;
+        font-size: 0.85rem;
+    }
+
+    .markdown-content table {
+        font-size: 0.8rem;
+    }
+
+    .markdown-content thead th {
+        padding: 0.625rem 0.75rem;
+        font-size: 0.65rem;
+    }
+
+    .markdown-content tbody td {
+        padding: 0.625rem 0.75rem;
+    }
+
+    .markdown-content blockquote {
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+    }
+
+    .markdown-content pre code {
+        font-size: 0.75rem;
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .markdown-content h2:first-of-type {
+        padding: 1rem;
+        font-size: 1.1rem;
+    }
+
+    .markdown-content li {
+        padding: 0.5rem 0.625rem 0.5rem 0.75rem;
+    }
+}
+
+
+/* ==================================================================
+   AI 评审报告 - Keyword Hunter 专属渲染样式
+   容器: #kt-llm-analysis-result.markdown-content
+   ================================================================== */
+
+/* === 报告容器基础 === */
+#kt-llm-analysis-result.markdown-content {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 0.9rem;
+    line-height: 1.8;
+    color: #334155;
+    background: transparent;
+    max-width: 100%;
+    padding: 0;
+}
+
+#kt-llm-analysis-result.markdown-content > *:first-child {
+    margin-top: 0;
+}
+
+#kt-llm-analysis-result.markdown-content p {
+    margin: 0.5rem 0;
+    color: #475569;
+    line-height: 1.8;
+}
+
+/* === 分割线 === */
+#kt-llm-analysis-result.markdown-content hr {
+    border: none;
+    height: 1px;
+    background: linear-gradient(to right, transparent 5%, #e2e8f0 30%, #e2e8f0 70%, transparent 95%);
+    margin: 2rem 0;
+}
+
+/* ==================================================================
+   H2 - 报告大标题系统
+   ================================================================== */
+
+/* --- 首个 H2: 报告封面标题 --- */
+#kt-llm-analysis-result.markdown-content h2:first-of-type {
+    font-size: 1.3rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0 0 1.75rem 0;
+    padding: 1.5rem 1.75rem 1.5rem 1.75rem;
+    border-radius: 1rem;
+    /* Keyword Hunter 紫粉主题渐变 */
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4c1d95 100%);
+    color: #ffffff;
+    box-shadow:
+        0 12px 28px -8px rgba(76, 29, 149, 0.25),
+        0 4px 10px -4px rgba(30, 27, 75, 0.15);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* 多层装饰光晕 */
+#kt-llm-analysis-result.markdown-content h2:first-of-type::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse at 85% 20%, rgba(168, 85, 247, 0.2) 0%, transparent 50%),
+        radial-gradient(ellipse at 15% 80%, rgba(236, 72, 153, 0.12) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(255, 255, 255, 0.03) 0%, transparent 80%);
+    pointer-events: none;
+}
+
+#kt-llm-analysis-result.markdown-content h2:first-of-type::after {
+    content: '';
+    position: absolute;
+    top: -40%;
+    right: -8%;
+    width: 180px;
+    height: 180px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.06) 0%, transparent 65%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+/* --- 后续 H2: 大章节标题 --- */
+#kt-llm-analysis-result.markdown-content h2:not(:first-of-type) {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 2.5rem 0 1rem 0;
+    padding: 0 0 0.625rem 0;
+    border-bottom: 2px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    letter-spacing: -0.01em;
+    position: relative;
+}
+
+/* 底线渐变装饰 */
+#kt-llm-analysis-result.markdown-content h2:not(:first-of-type)::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 3rem;
+    height: 2px;
+    background: linear-gradient(to right, #7c3aed, #ec4899);
+    border-radius: 1px;
+}
+
+/* ==================================================================
+   H3 - 功能性章节标题（评分 / 致命问题 / 改写建议 etc.）
+   ================================================================== */
+
+#kt-llm-analysis-result.markdown-content h3 {
+    font-size: 0.975rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 1.75rem 0 0.875rem 0;
+    padding: 0.75rem 1rem;
+    border-left: 4px solid #cbd5e1;
+    border-radius: 0 0.5rem 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(to right, rgba(241, 245, 249, 0.8), transparent 70%);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+#kt-llm-analysis-result.markdown-content h3:hover {
+    padding-left: 1.125rem;
+    background: linear-gradient(to right, rgba(241, 245, 249, 1), transparent 70%);
+}
+
+/* 📊 评分类 H3 - 靛蓝 */
+#kt-llm-analysis-result.markdown-content h3:nth-of-type(1) {
+    border-left-color: #6366f1;
+    background: linear-gradient(to right, rgba(238, 242, 255, 0.9), transparent 60%);
+    color: #4338ca;
+}
+
+/* 🚨 致命问题 H3 - 红色 */
+#kt-llm-analysis-result.markdown-content h3:nth-of-type(2) {
+    border-left-color: #ef4444;
+    background: linear-gradient(to right, rgba(254, 242, 242, 0.9), transparent 60%);
+    color: #dc2626;
+}
+
+/* 🔧 改写建议 H3 - 紫色 */
+#kt-llm-analysis-result.markdown-content h3:nth-of-type(3) {
+    border-left-color: #8b5cf6;
+    background: linear-gradient(to right, rgba(245, 243, 255, 0.9), transparent 60%);
+    color: #7c3aed;
+}
+
+/* 后续 H3 - 交替色系 */
+#kt-llm-analysis-result.markdown-content h3:nth-of-type(4) {
+    border-left-color: #f59e0b;
+    background: linear-gradient(to right, rgba(255, 251, 235, 0.9), transparent 60%);
+    color: #d97706;
+}
+
+#kt-llm-analysis-result.markdown-content h3:nth-of-type(5) {
+    border-left-color: #06b6d4;
+    background: linear-gradient(to right, rgba(236, 254, 255, 0.9), transparent 60%);
+    color: #0891b2;
+}
+
+#kt-llm-analysis-result.markdown-content h3:nth-of-type(n+6) {
+    border-left-color: #64748b;
+    background: linear-gradient(to right, rgba(248, 250, 252, 0.9), transparent 60%);
+    color: #475569;
+}
+
+/* ==================================================================
+   H4 - 子章节
+   ================================================================== */
+
+#kt-llm-analysis-result.markdown-content h4 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #334155;
+    margin: 1.25rem 0 0.5rem 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+/* ==================================================================
+   引用块 (Blockquote) - 信息卡片化
+   ================================================================== */
+
+#kt-llm-analysis-result.markdown-content blockquote {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #94a3b8;
+    border-radius: 0.625rem;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+    color: #475569;
+    font-style: normal;
+    font-size: 0.9rem;
+    line-height: 1.75;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03);
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+#kt-llm-analysis-result.markdown-content blockquote:hover {
+    box-shadow: 0 3px 10px -3px rgba(0, 0, 0, 0.07);
+    transform: translateY(-1px);
+}
+
+/* 总评 Blockquote - 紫色系 */
+#kt-llm-analysis-result.markdown-content blockquote:first-of-type,
+#kt-llm-analysis-result.markdown-content h3:nth-of-type(1) + blockquote {
+    background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+    border-color: #e9d5ff;
+    border-left-color: #8b5cf6;
+    color: #6b21a8;
+}
+
+#kt-llm-analysis-result.markdown-content blockquote:first-of-type::before,
+#kt-llm-analysis-result.markdown-content h3:nth-of-type(1) + blockquote::before {
+    content: '💡';
+    position: absolute;
+    top: -0.625rem;
+    left: 1rem;
+    font-size: 1.1rem;
+    background: white;
+    padding: 0 0.25rem;
+    border-radius: 0.25rem;
+    line-height: 1;
+}
+
+/* 致命问题 Blockquote - 红色系 */
+#kt-llm-analysis-result.markdown-content h3:nth-of-type(2) + blockquote {
+    background: linear-gradient(135deg, #fff5f5 0%, #fef2f2 100%);
+    border-color: #fecdd3;
+    border-left-color: #ef4444;
+    color: #991b1b;
+}
+
+#kt-llm-analysis-result.markdown-content h3:nth-of-type(2) + blockquote::before {
+    content: '⚠️';
+    position: absolute;
+    top: -0.625rem;
+    left: 1rem;
+    font-size: 1.1rem;
+    background: white;
+    padding: 0 0.25rem;
+    border-radius: 0.25rem;
+    line-height: 1;
+}
+
+/* 改写建议 Blockquote - 紫色系 */
+#kt-llm-analysis-result.markdown-content h3:nth-of-type(3) + blockquote {
+    background: linear-gradient(135deg, #faf5ff 0%, #f5f3ff 100%);
+    border-color: #ddd6fe;
+    border-left-color: #8b5cf6;
+    color: #5b21b6;
+}
+
+/* Blockquote 内部段落 */
+#kt-llm-analysis-result.markdown-content blockquote p {
+    margin: 0.375rem 0;
+    color: inherit;
+}
+
+#kt-llm-analysis-result.markdown-content blockquote p:first-child {
+    margin-top: 0;
+}
+
+#kt-llm-analysis-result.markdown-content blockquote p:last-child {
+    margin-bottom: 0;
+}
+
+/* ==================================================================
+   表格 - 评分矩阵
+   ================================================================== */
+
+#kt-llm-analysis-result.markdown-content table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 1.5rem 0;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    font-size: 0.85rem;
+    box-shadow:
+        0 1px 3px 0 rgba(0, 0, 0, 0.05),
+        0 1px 2px -1px rgba(0, 0, 0, 0.05);
+}
+
+#kt-llm-analysis-result.markdown-content thead th {
+    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    color: #475569;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.675rem;
+    letter-spacing: 0.1em;
+    padding: 0.75rem 1rem;
+    border-bottom: 2px solid #e2e8f0;
+    text-align: left;
+    white-space: nowrap;
+}
+
+/* 第一列表头 - 维度 */
+#kt-llm-analysis-result.markdown-content thead th:first-child {
+    border-radius: 0.75rem 0 0 0;
+}
+
+#kt-llm-analysis-result.markdown-content thead th:last-child {
+    border-radius: 0 0.75rem 0 0;
+}
+
+#kt-llm-analysis-result.markdown-content tbody td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+    transition: background-color 0.15s ease;
+}
+
+#kt-llm-analysis-result.markdown-content tbody tr:hover td {
+    background-color: rgba(248, 250, 252, 0.9);
+}
+
+#kt-llm-analysis-result.markdown-content tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* 维度名称列 */
+#kt-llm-analysis-result.markdown-content tbody td:first-child {
+    font-weight: 600;
+    color: #334155;
+    white-space: nowrap;
+}
+
+/* 分数列 - 如果是第二列 */
+#kt-llm-analysis-result.markdown-content tbody td:nth-child(2) {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+/* 总分行 */
+#kt-llm-analysis-result.markdown-content tbody tr:last-child td {
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+    color: #f8fafc;
+    font-weight: 700;
+    font-size: 0.925rem;
+    border-top: 2px solid #4338ca;
+}
+
+#kt-llm-analysis-result.markdown-content tbody tr:last-child td:first-child {
+    border-radius: 0 0 0 0.75rem;
+}
+
+#kt-llm-analysis-result.markdown-content tbody tr:last-child td:last-child {
+    border-radius: 0 0 0.75rem 0;
+}
+
+/* ==================================================================
+   列表 - Diff 对比 / 改写建议
+   ================================================================== */
+
+#kt-llm-analysis-result.markdown-content ul,
+#kt-llm-analysis-result.markdown-content ol {
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    margin: 0.75rem 0;
+}
+
+#kt-llm-analysis-result.markdown-content li {
+    padding: 0.75rem 1rem 0.75rem 1.125rem;
+    border-radius: 0.5rem;
+    background: #ffffff;
+    border: 1px solid #f1f5f9;
+    border-left-width: 4px;
+    font-size: 0.875rem;
+    color: #475569;
+    line-height: 1.75;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+#kt-llm-analysis-result.markdown-content li:hover {
+    transform: translateX(3px);
+    box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.06);
+}
+
+/* 🔴 原文 / 问题 (红色系) - 每组第1条 */
+#kt-llm-analysis-result.markdown-content li:nth-child(3n+1) {
+    border-left-color: #f87171;
+    background: linear-gradient(105deg, #fef2f2 0%, #ffffff 35%);
+}
+
+#kt-llm-analysis-result.markdown-content li:nth-child(3n+1)::before {
+    content: '✕';
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: #fca5a5;
+    width: 1.25rem;
+    height: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(254, 226, 226, 0.6);
+}
+
+/* 🟢 改写 / 建议 (绿色系) - 每组第2条 */
+#kt-llm-analysis-result.markdown-content li:nth-child(3n+2) {
+    border-left-color: #34d399;
+    background: linear-gradient(105deg, #ecfdf5 0%, #ffffff 35%);
+}
+
+#kt-llm-analysis-result.markdown-content li:nth-child(3n+2)::before {
+    content: '✓';
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: #6ee7b7;
+    width: 1.25rem;
+    height: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(209, 250, 229, 0.6);
+}
+
+/* 🔵 说明 / 注释 (蓝紫色系) - 每组第3条 */
+#kt-llm-analysis-result.markdown-content li:nth-child(3n) {
+    border-left-color: #818cf8;
+    background: linear-gradient(105deg, #eef2ff 0%, #ffffff 35%);
+    margin-bottom: 0.875rem;
+    color: #64748b;
+    font-size: 0.825rem;
+    padding-top: 0.625rem;
+    padding-bottom: 0.625rem;
+}
+
+#kt-llm-analysis-result.markdown-content li:nth-child(3n)::before {
+    content: 'ℹ';
+    position: absolute;
+    top: 0.625rem;
+    right: 0.75rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #a5b4fc;
+    width: 1.25rem;
+    height: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(224, 231, 255, 0.6);
+}
+
+/* 嵌套列表 */
+#kt-llm-analysis-result.markdown-content li ul,
+#kt-llm-analysis-result.markdown-content li ol {
+    margin-top: 0.5rem;
+    margin-bottom: 0.25rem;
+    gap: 0.25rem;
+}
+
+#kt-llm-analysis-result.markdown-content li li {
+    border-left-width: 3px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.825rem;
+}
+
+#kt-llm-analysis-result.markdown-content li li::before {
+    display: none;
+}
+
+/* ==================================================================
+   内联代码 (Code)
+   ================================================================== */
+
+#kt-llm-analysis-result.markdown-content code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.82em;
+    padding: 0.15rem 0.4rem;
+    border-radius: 0.3rem;
+    word-break: break-word;
+}
+
+/* 原文中的 code - 删除线 */
+#kt-llm-analysis-result.markdown-content li:nth-child(3n+1) code {
+    background: rgba(239, 68, 68, 0.08);
+    color: #be123c;
+    text-decoration: line-through;
+    text-decoration-color: rgba(239, 68, 68, 0.35);
+    text-decoration-thickness: 1.5px;
+    opacity: 0.85;
+    border: 1px solid rgba(239, 68, 68, 0.08);
+}
+
+/* 改写中的 code - 高亮强调 */
+#kt-llm-analysis-result.markdown-content li:nth-child(3n+2) code {
+    background: rgba(16, 185, 129, 0.1);
+    color: #047857;
+    font-weight: 600;
+    border: 1px solid rgba(16, 185, 129, 0.15);
+}
+
+/* 说明中的 code */
+#kt-llm-analysis-result.markdown-content li:nth-child(3n) code {
+    background: rgba(99, 102, 241, 0.08);
+    color: #4338ca;
+    border: 1px solid rgba(99, 102, 241, 0.1);
+}
+
+/* 普通段落/引用块中的 code */
+#kt-llm-analysis-result.markdown-content p code,
+#kt-llm-analysis-result.markdown-content blockquote code {
+    background: #f1f5f9;
+    color: #0f172a;
+    border: 1px solid #e2e8f0;
+    font-weight: 500;
+}
+
+/* 代码块 */
+#kt-llm-analysis-result.markdown-content pre {
+    margin: 1.25rem 0;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    border: 1px solid rgba(51, 65, 85, 0.12);
+    box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.08);
+}
+
+#kt-llm-analysis-result.markdown-content pre code {
+    display: block;
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+    color: #e2e8f0;
+    font-size: 0.8rem;
+    line-height: 1.75;
+    overflow-x: auto;
+    border: none;
+    border-radius: 0;
+    text-decoration: none;
+    opacity: 1;
+}
+
+/* ==================================================================
+   分数徽章系统
+   ================================================================== */
+
+#kt-llm-analysis-result .score-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.75rem;
+    padding: 0.2rem 0.625rem;
+    border-radius: 9999px;
+    font-weight: 800;
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+}
+
+#kt-llm-analysis-result .score-badge:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+#kt-llm-analysis-result .score-badge-high {
+    background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+    color: #15803d;
+    border-color: rgba(34, 197, 94, 0.2);
+}
+
+#kt-llm-analysis-result .score-badge-mid {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    color: #b45309;
+    border-color: rgba(245, 158, 11, 0.2);
+}
+
+#kt-llm-analysis-result .score-badge-low {
+    background: linear-gradient(135deg, #fee2e2, #fecaca);
+    color: #b91c1c;
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
+/* ==================================================================
+   胶囊标签 (改写建议编号)
+   ================================================================== */
+
+#kt-llm-analysis-result.markdown-content h3:nth-of-type(3) ~ p > strong:first-child {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: linear-gradient(135deg, #f3e8ff, #ede9fe);
+    color: #7c3aed;
+    padding: 0.2rem 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    border: 1px solid #ddd6fe;
+}
+
+/* ==================================================================
+   Strong & Em 语义强调
+   ================================================================== */
+
+#kt-llm-analysis-result.markdown-content strong {
+    font-weight: 700;
+    color: #1e293b;
+}
+
+#kt-llm-analysis-result.markdown-content em {
+    font-style: italic;
+    color: #64748b;
+}
+
+#kt-llm-analysis-result.markdown-content strong em,
+#kt-llm-analysis-result.markdown-content em strong {
+    color: #7c3aed;
+    font-weight: 700;
+    font-style: normal;
+}
+
+/* ==================================================================
+   响应式适配
+   ================================================================== */
+
+@media (max-width: 640px) {
+    #kt-llm-analysis-result.markdown-content {
+        font-size: 0.85rem;
+        line-height: 1.7;
+    }
+
+    #kt-llm-analysis-result.markdown-content h2:first-of-type {
+        padding: 1.125rem 1.25rem;
+        font-size: 1.15rem;
+        border-radius: 0.75rem;
+    }
+
+    #kt-llm-analysis-result.markdown-content h3 {
+        font-size: 0.9rem;
+        padding: 0.625rem 0.75rem;
+    }
+
+    #kt-llm-analysis-result.markdown-content li {
+        padding: 0.625rem 0.75rem 0.625rem 0.875rem;
+        font-size: 0.825rem;
+    }
+
+    #kt-llm-analysis-result.markdown-content li::before {
+        display: none;
+    }
+
+    #kt-llm-analysis-result.markdown-content table {
+        font-size: 0.775rem;
+    }
+
+    #kt-llm-analysis-result.markdown-content thead th {
+        padding: 0.625rem 0.75rem;
+        font-size: 0.625rem;
+    }
+
+    #kt-llm-analysis-result.markdown-content tbody td {
+        padding: 0.625rem 0.75rem;
+    }
+
+    #kt-llm-analysis-result.markdown-content blockquote {
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+    }
+
+    #kt-llm-analysis-result.markdown-content blockquote::before {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    #kt-llm-analysis-result.markdown-content h2:first-of-type {
+        padding: 1rem;
+        font-size: 1.05rem;
+    }
+
+    #kt-llm-analysis-result.markdown-content li {
+        padding: 0.5rem 0.625rem 0.5rem 0.75rem;
+        border-left-width: 3px;
+    }
+}

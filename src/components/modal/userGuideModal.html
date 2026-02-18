@@ -1,89 +1,420 @@
 <!-- 使用指南模态框组件 -->
-<div id="user-guide-modal" class="fixed inset-0 bg-black/50 z-[9998] hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+<app-modal id="user-guide-modal" size="2xl" no-header>
+    <div slot="body">
+        <!-- Custom Header -->
         <div class="flex items-center justify-between px-6 py-4 border-b bg-gradient-to-r from-blue-50 to-indigo-50">
             <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
                 <i class="fas fa-book text-blue-500"></i>
-                使用指南 - AI驱动的高效工作流程
+                使用指南 - Amazing Amazon Architect
             </h2>
-            <button onclick="closeUserGuide()" class="text-slate-400 hover:text-slate-600 transition-colors">
+            <button data-action="close" class="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
                 <i class="fas fa-times text-xl"></i>
             </button>
         </div>
-        <div class="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
-            <header class="text-center mb-8">
-                <h1 class="text-2xl font-extrabold text-slate-900 mb-2">标准化作业程序 (SOP)</h1>
-                <p class="text-slate-600">集成 AI大模型 辅助的高效工作流程，旨在引导标准化作业和最大化单人产出效率。</p>
+
+        <!-- Content -->
+        <div class="p-6 overflow-y-auto max-h-[80vh]">
+
+            <!-- Welcome Section -->
+            <header class="text-center mb-8 pb-6 border-b border-slate-100">
+                <h1 class="text-2xl font-extrabold text-slate-900 mb-2">🚀 欢迎使用 AihangSOP</h1>
+                <p class="text-slate-600 max-w-2xl mx-auto">
+                    专为亚马逊欧洲站卖家打造的一站式辅助运营平台，集成 AI 辅助分析、SOP 流程标准化、智库知识库，
+                    助您实现 <span class="font-bold text-blue-600">简单</span>且<span class="font-bold text-blue-600">高效</span>
+                    的运营。
+                </p>
             </header>
-            <div class="relative border-l-2 border-blue-200 ml-4 space-y-8">
-                <div class="relative pl-8">
-                    <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-blue-500 border-2 border-white">
+
+            <!-- Navigation Tabs -->
+            <div class="flex border-b border-slate-200 mb-6 overflow-x-auto" id="guide-tabs">
+                <button
+                    class="guide-tab active px-4 py-2 text-sm font-medium text-blue-600 border-b-2 border-blue-500 whitespace-nowrap"
+                    data-action="switch-guide-tab" data-tab="overview">
+                    <i class="fas fa-home mr-1.5"></i>平台概览
+                </button>
+                <button
+                    class="guide-tab px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700 whitespace-nowrap"
+                    data-action="switch-guide-tab" data-tab="sops">
+                    <i class="fas fa-clipboard-list mr-1.5"></i>SOPs流程中心
+                </button>
+                <button
+                    class="guide-tab px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700 whitespace-nowrap"
+                    data-action="switch-guide-tab" data-tab="apps">
+                    <i class="fas fa-cubes mr-1.5"></i>应用中心
+                </button>
+                <button
+                    class="guide-tab px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700 whitespace-nowrap"
+                    data-action="switch-guide-tab" data-tab="hub">
+                    <i class="fas fa-book-open mr-1.5"></i>Amazon智库
+                </button>
+                <button
+                    class="guide-tab px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700 whitespace-nowrap"
+                    data-action="switch-guide-tab" data-tab="more">
+                    <i class="fas fa-compass mr-1.5"></i>更多
+                </button>
+            </div>
+
+            <!-- Tab Contents -->
+            <div id="guide-content">
+
+                <!-- 平台概览 Tab -->
+                <div class="guide-panel" data-panel="overview">
+                    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-5 rounded-xl border border-blue-200">
+                            <div class="w-10 h-10 bg-blue-500 text-white rounded-lg flex items-center justify-center mb-3">
+                                <i class="fas fa-clipboard-list"></i>
+                            </div>
+                            <h3 class="font-bold text-slate-800 mb-1">SOPs 流程中心</h3>
+                            <p class="text-xs text-slate-600">集成所有亚马逊运营标准化流程指引，确保团队执行一致性。</p>
+                        </div>
+                        <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-5 rounded-xl border border-purple-200">
+                            <div class="w-10 h-10 bg-purple-500 text-white rounded-lg flex items-center justify-center mb-3">
+                                <i class="fas fa-cubes"></i>
+                            </div>
+                            <h3 class="font-bold text-slate-800 mb-1">应用中心</h3>
+                            <p class="text-xs text-slate-600">集成多个专业工具的应用中心，提供数据采集、分析与优化功能。</p>
+                        </div>
+                        <div class="bg-gradient-to-br from-amber-50 to-amber-100 p-5 rounded-xl border border-amber-200">
+                            <div class="w-10 h-10 bg-amber-500 text-white rounded-lg flex items-center justify-center mb-3">
+                                <i class="fas fa-book-open"></i>
+                            </div>
+                            <h3 class="font-bold text-slate-800 mb-1">Amazon 智库</h3>
+                            <p class="text-xs text-slate-600">亚马逊市场洞察报告、SEO策略、A10 算法知识库、营销日历与旺季攻略。</p>
+                        </div>
+                        <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 p-5 rounded-xl border border-emerald-200">
+                            <div class="w-10 h-10 bg-emerald-500 text-white rounded-lg flex items-center justify-center mb-3">
+                                <i class="fas fa-compass"></i>
+                            </div>
+                            <h3 class="font-bold text-slate-800 mb-1">更多</h3>
+                            <p class="text-xs text-slate-600">探索更多实用功能和工具，提升工作效率。</p>
+                        </div>
                     </div>
-                    <h3 class="font-bold text-lg text-gray-900">Step 1: 原始数据获取 (Day 1)</h3>
-                    <p class="text-sm text-gray-500 mb-2">工具：前台插件 / 数据采集 / 卖家精灵 (JSON/CSV)</p>
-                    <div class="bg-slate-50 p-4 rounded-lg border border-slate-100 text-sm">
-                        收集 Top 20-50 的竞品 Listing 内容和最近 3 个月的 Review。不要贪多，要精。
-                        <br><span class="text-blue-600 font-semibold">目标：</span> 获取竞品Listing和Review。
+
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <h4 class="font-bold text-slate-800 mb-2 flex items-center gap-2">
+                            <i class="fas fa-flag text-blue-500"></i> 关注市场 (欧洲站)
+                        </h4>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-2 py-1 bg-white border border-slate-200 rounded text-sm font-medium">🇩🇪 德国</span>
+                            <span class="px-2 py-1 bg-white border border-slate-200 rounded text-sm font-medium">🇫🇷 法国</span>
+                            <span class="px-2 py-1 bg-white border border-slate-200 rounded text-sm font-medium">🇮🇹 意大利</span>
+                            <span class="px-2 py-1 bg-white border border-slate-200 rounded text-sm font-medium">🇪🇸 西班牙</span>
+                            <span class="px-2 py-1 bg-white border border-slate-200 rounded text-sm font-medium">🇬🇧 英国</span>
+                            <span class="px-2 py-1 bg-slate-100 text-slate-500 rounded text-sm">+ 荷兰/瑞典/波兰/比利时/爱尔兰</span>
+                        </div>
                     </div>
                 </div>
-                <div class="relative pl-8">
-                    <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-blue-400 border-2 border-white">
-                    </div>
-                    <h3 class="font-bold text-lg text-gray-900">Step 2: LLM 结构化清洗提取 (Day 1)</h3>
-                    <p class="text-sm text-gray-500 mb-2">工具：Gemini 1.5 Pro / GPT-4</p>
-                    <div class="bg-slate-50 p-4 rounded-lg border border-slate-100 text-sm">
-                        上传 JSON/CSV，选择合适的分析模板策略，生成 JSON 格式的使用场景、负面痛点、积极用户原话。
-                        <br><span class="text-blue-600 font-semibold">目标：</span> 将非结构化文本转化为 COSMO 可理解的"意图节点"。
+
+                <!-- SOPs流程中心 Tab -->
+                <div class="guide-panel hidden" data-panel="sops">
+                    <p class="text-sm text-slate-600 mb-4">集成所有亚马逊运营标准化流程指引，确保团队执行一致性。分为四大体系：</p>
+                    <div class="space-y-4">
+                        <!-- 1. 运营与推广体系 (order: 1) -->
+                        <div class="border border-slate-200 rounded-xl overflow-hidden">
+                            <div class="bg-emerald-50 px-4 py-3 border-b border-emerald-100">
+                                <h4 class="font-bold text-emerald-800 flex items-center gap-2">
+                                    <i class="fas fa-rocket"></i> 运营与推广体系 <span class="text-xs font-normal text-emerald-600 ml-2">v2.0</span>
+                                </h4>
+                                <p class="text-xs text-emerald-700 mt-1">从新品上架到爆款打造的全链路运营推广策略集合。</p>
+                            </div>
+                            <div class="p-4 grid md:grid-cols-2 lg:grid-cols-3 gap-2 text-sm">
+                                <span class="flex items-center gap-2 text-slate-700"><i class="fas fa-seedling text-emerald-500 w-4"></i>新品生命周期跟踪</span>
+                                <span class="flex items-center gap-2 text-slate-700"><i class="fas fa-magnifying-glass-chart text-emerald-500 w-4"></i>Listing 极致优化 (SEO)</span>
+                                <span class="flex items-center gap-2 text-slate-700"><i class="fas fa-chart-line text-emerald-500 w-4"></i>PPC 广告投放与优化</span>
+                                <span class="flex items-center gap-2 text-slate-700"><i class="fas fa-book-dead text-emerald-500 w-4"></i>欧洲本土化高危词库</span>
+                                <span class="flex items-center gap-2 text-slate-700"><i class="fas fa-tags text-emerald-500 w-4"></i>促销活动提报</span>
+                                <span class="flex items-center gap-2 text-slate-700"><i class="fas fa-binoculars text-emerald-500 w-4"></i>竞品监控与分析</span>
+                            </div>
+                        </div>
+
+                        <!-- 2. 供应链与物流体系 (order: 2) -->
+                        <div class="border border-slate-200 rounded-xl overflow-hidden">
+                            <div class="bg-amber-50 px-4 py-3 border-b border-amber-100">
+                                <h4 class="font-bold text-amber-800 flex items-center gap-2">
+                                    <i class="fas fa-warehouse"></i> 供应链与物流体系 <span class="text-xs font-normal text-amber-600 ml-2">v1.5</span>
+                                </h4>
+                                <p class="text-xs text-amber-700 mt-1">构建高效供应链，优化库存周转与物流成本。</p>
+                            </div>
+                            <div class="p-4 grid md:grid-cols-2 lg:grid-cols-3 gap-2 text-sm">
+                                <span class="flex items-center gap-2 text-slate-700"><i class="fas fa-truck-fast text-amber-500 w-4"></i>FBA 发货标准操作</span>
+                                <span class="flex items-center gap-2 text-slate-700"><i class="fas fa-clipboard-check text-amber-500 w-4"></i>采购与质检 (QC)</span>
+                                <span class="flex items-center gap-2 text-slate-700"><i class="fas fa-cubes text-amber-500 w-4"></i>库存预警与补货</span>
+                            </div>
+                        </div>
+
+                        <!-- 3. 账号安全与风控体系 (order: 3) -->
+                        <div class="border border-slate-200 rounded-xl overflow-hidden">
+                            <div class="bg-red-50 px-4 py-3 border-b border-red-100">
+                                <h4 class="font-bold text-red-800 flex items-center gap-2">
+                                    <i class="fas fa-shield-halved"></i> 账号安全与风控体系 <span class="text-xs font-normal text-red-600 ml-2">v3.0</span>
+                                </h4>
+                                <p class="text-xs text-red-700 mt-1">全方位账号健康监控与风险防御机制。</p>
+                            </div>
+                            <div class="p-4 grid md:grid-cols-2 lg:grid-cols-3 gap-2 text-sm">
+                                <span class="flex items-center gap-2 text-slate-700"><i class="fas fa-shield-halved text-red-400 w-4"></i>账号登录与环境安全</span>
+                                <span class="flex items-center gap-2 text-slate-700"><i class="fas fa-user-lock text-red-400 w-4"></i>后台权限管理</span>
+                                <span class="flex items-center gap-2 text-slate-700"><i class="fas fa-trademark text-red-400 w-4"></i>品牌与侵权审核</span>
+                                <span class="flex items-center gap-2 text-slate-700"><i class="fas fa-bell text-red-400 w-4"></i>绩效通知处理</span>
+                                <span class="flex items-center gap-2 text-slate-700"><i class="fas fa-file-shield text-red-400 w-4"></i>敏感产品合规销售</span>
+                                <span class="flex items-center gap-2 text-slate-700"><i class="fa-solid fa-shield-dog text-red-400 w-4"></i>欧洲GPSR合规</span>
+                            </div>
+                        </div>
+
+                        <!-- 4. 客服与客户体验体系 (order: 4) -->
+                        <div class="border border-slate-200 rounded-xl overflow-hidden">
+                            <div class="bg-blue-50 px-4 py-3 border-b border-blue-100">
+                                <h4 class="font-bold text-blue-800 flex items-center gap-2">
+                                    <i class="fas fa-headset"></i> 客服与客户体验体系 <span class="text-xs font-normal text-blue-600 ml-2">v1.2</span>
+                                </h4>
+                                <p class="text-xs text-blue-700 mt-1">提升客户满意度，打造极致的品牌服务体验。</p>
+                            </div>
+                            <div class="p-4 grid md:grid-cols-2 lg:grid-cols-3 gap-2 text-sm">
+                                <span class="flex items-center gap-2 text-slate-700"><i class="fas fa-envelope-open-text text-blue-500 w-4"></i>邮件回复模板</span>
+                                <span class="flex items-center gap-2 text-slate-700"><i class="fas fa-comment-dots text-blue-500 w-4"></i>差评处理与分析</span>
+                                <span class="flex items-center gap-2 text-slate-700"><i class="fas fa-comments text-blue-500 w-4"></i>QA 问答维护</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="relative pl-8">
-                    <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-blue-300 border-2 border-white">
+
+                <!-- 应用中心 Tab -->
+                <div class="guide-panel hidden" data-panel="apps">
+                    <p class="text-sm text-slate-600 mb-4">集成多个专业工具的应用中心，提供数据采集、分析与优化功能。</p>
+                    
+                    <!-- Master Prompt 应用 -->
+                    <div class="mb-6 border border-slate-200 rounded-xl overflow-hidden">
+                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 border-b border-blue-100">
+                            <h4 class="font-bold text-blue-800 flex items-center gap-2">
+                                <i class="fas fa-robot"></i> Master Prompt <span class="text-xs font-normal text-blue-600 ml-2">v2.1 Pro</span>
+                            </h4>
+                            <p class="text-xs text-blue-700 mt-1">集成数据采集、管理、AI分析与提示词工程的一站式解决方案。</p>
+                        </div>
+                        <div class="p-4">
+                            <div class="relative border-l-2 border-purple-200 ml-2 space-y-4">
+                                <div class="relative pl-6">
+                                    <div class="absolute -left-[7px] top-1 w-3 h-3 rounded-full bg-purple-500 border-2 border-white"></div>
+                                    <div class="flex items-start gap-2">
+                                        <i class="fas fa-spider text-purple-500 mt-0.5"></i>
+                                        <div>
+                                            <h5 class="font-semibold text-sm text-slate-800">数据采集</h5>
+                                            <p class="text-xs text-slate-600">输入竞品 ASIN，自动抓取 Listing 和 Review 数据</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="relative pl-6">
+                                    <div class="absolute -left-[7px] top-1 w-3 h-3 rounded-full bg-purple-400 border-2 border-white"></div>
+                                    <div class="flex items-start gap-2">
+                                        <i class="fas fa-database text-purple-400 mt-0.5"></i>
+                                        <div>
+                                            <h5 class="font-semibold text-sm text-slate-800">数据管理</h5>
+                                            <p class="text-xs text-slate-600">管理已采集数据，支持查看、筛选和删除</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="relative pl-6">
+                                    <div class="absolute -left-[7px] top-1 w-3 h-3 rounded-full bg-purple-300 border-2 border-white"></div>
+                                    <div class="flex items-start gap-2">
+                                        <i class="fas fa-chart-pie text-purple-300 mt-0.5"></i>
+                                        <div>
+                                            <h5 class="font-semibold text-sm text-slate-800">AI 分析</h5>
+                                            <p class="text-xs text-slate-600">AI 自动提取使用场景、痛点、卖点等结构化洞察</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="relative pl-6">
+                                    <div class="absolute -left-[7px] top-1 w-3 h-3 rounded-full bg-emerald-400 border-2 border-white"></div>
+                                    <div class="flex items-start gap-2">
+                                        <i class="fas fa-wand-magic-sparkles text-emerald-500 mt-0.5"></i>
+                                        <div>
+                                            <h5 class="font-semibold text-sm text-slate-800">Prompt 生成</h5>
+                                            <p class="text-xs text-slate-600">生成优化的 Master Prompt，用于撰写 Listing 内容</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <h3 class="font-bold text-lg text-gray-900">Step 3: 交叉验证与策略制定 (Day 2)</h3>
-                    <p class="text-sm text-gray-500 mb-2">工具：ABA (Amazon Brand Analytics) + Excel</p>
-                    <div class="bg-slate-50 p-4 rounded-lg border border-slate-100 text-sm">
-                        拿着 LLM 提取的"原生词"去 ABA 验证流量。确定主推词（高流量+高相关）和长尾词（高转化+特定场景）。
-                        <br><span class="text-blue-600 font-semibold">目标：</span> 确认哪些"意图"是有市场需求的。
+
+                    <!-- Keyword Hunter 应用 -->
+                    <div class="border border-slate-200 rounded-xl overflow-hidden">
+                        <div class="bg-gradient-to-r from-purple-50 to-pink-50 px-4 py-3 border-b border-purple-100">
+                            <h4 class="font-bold text-purple-800 flex items-center gap-2">
+                                <i class="fas fa-search"></i> Keyword Hunter <span class="text-xs font-normal text-purple-600 ml-2">v1.0 Pro</span>
+                            </h4>
+                            <p class="text-xs text-purple-700 mt-1">ASIN 关键词覆盖情况查询，手动补充与 SEO 合规性审查工具。</p>
+                        </div>
+                        <div class="p-4 grid md:grid-cols-3 gap-3">
+                            <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 p-4 rounded-lg border border-emerald-200">
+                                <div class="w-8 h-8 bg-emerald-500 text-white rounded-lg flex items-center justify-center mb-2">
+                                    <i class="fas fa-keyboard text-sm"></i>
+                                </div>
+                                <h5 class="font-bold text-emerald-800 mb-1 text-sm">输入模块</h5>
+                                <p class="text-xs text-emerald-700">输入 ASIN 或关键词列表，设置查询参数</p>
+                            </div>
+                            <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
+                                <div class="w-8 h-8 bg-blue-500 text-white rounded-lg flex items-center justify-center mb-2">
+                                    <i class="fas fa-cogs text-sm"></i>
+                                </div>
+                                <h5 class="font-bold text-blue-800 mb-1 text-sm">处理模块</h5>
+                                <p class="text-xs text-blue-700">批量查询关键词覆盖，手动补充缺失词</p>
+                            </div>
+                            <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
+                                <div class="w-8 h-8 bg-purple-500 text-white rounded-lg flex items-center justify-center mb-2">
+                                    <i class="fas fa-chart-pie text-sm"></i>
+                                </div>
+                                <h5 class="font-bold text-purple-800 mb-1 text-sm">分析统计</h5>
+                                <p class="text-xs text-purple-700">可视化覆盖率，SEO 健康度评分</p>
+                            </div>
+                        </div>
+                        <div class="px-4 pb-4">
+                            <div class="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                                <p class="text-xs text-amber-700">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    <strong>提示：</strong>此模块正在开发中，部分功能即将上线。
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="relative pl-8">
-                    <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-blue-200 border-2 border-white">
-                    </div>
-                    <h3 class="font-bold text-lg text-gray-900">Step 4: 智能生成 Listing (Day 2)</h3>
-                    <p class="text-sm text-gray-500 mb-2">核心动作：融合 Prompting</p>
-                    <div class="bg-slate-50 p-4 rounded-lg border border-slate-100 text-sm">
-                        基于 A10/COSMO/Rufus 的逻辑，让 LLM 撰写 Listing。
-                        <ul class="list-disc pl-4 mt-2 text-gray-500 text-xs">
-                            <li>Title: 包含 ABA 核心词 + 核心场景</li>
-                            <li>Bullets: 前 3 点针对 COSMO 场景化，后 2 点针对 Rufus 解决痛点/参数</li>
-                            <li>Description/A+: 讲述品牌故事，增加停留时间（A10 因素）</li>
-                        </ul>
+
+                <!-- 智库Hub Tab -->
+                <div class="guide-panel hidden" data-panel="hub">
+                    <p class="text-sm text-slate-600 mb-4">亚马逊运营知识库，聚合市场洞察与算法策略。分为三大板块：</p>
+                    <div class="space-y-4">
+                        <!-- Amazon知识早知道 -->
+                        <div class="border border-slate-200 rounded-xl overflow-hidden">
+                            <div class="bg-blue-50 px-4 py-3 border-b border-blue-100">
+                                <h4 class="font-bold text-blue-800 flex items-center gap-2">
+                                    <i class="fas fa-lightbulb"></i> Amazon知识早知道
+                                </h4>
+                            </div>
+                            <div class="p-4 grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                <div class="bg-gradient-to-br from-indigo-50 to-indigo-100 p-4 rounded-lg border border-indigo-200">
+                                    <h5 class="font-bold text-indigo-800 mb-1 flex items-center gap-2 text-sm">
+                                        <i class="fas fa-globe-europe text-indigo-500"></i> 市场洞察
+                                    </h5>
+                                    <p class="text-xs text-indigo-700">欧洲五国消费者画像、市场趋势、本地化策略。</p>
+                                </div>
+                                <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 p-4 rounded-lg border border-emerald-200">
+                                    <h5 class="font-bold text-emerald-800 mb-1 flex items-center gap-2 text-sm">
+                                        <i class="fas fa-magnifying-glass-chart text-emerald-500"></i> SEO 策略
+                                    </h5>
+                                    <p class="text-xs text-emerald-700">Listing 优化技巧、关键词布局、排名因子分析。</p>
+                                </div>
+                                <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
+                                    <h5 class="font-bold text-blue-800 mb-1 flex items-center gap-2 text-sm">
+                                        <i class="fas fa-network-wired text-blue-500"></i> A10 & COSMO
+                                    </h5>
+                                    <p class="text-xs text-blue-700">亚马逊搜索算法解析、COSMO 语义理解、Rufus AI 适配。</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 入门实操宝典 -->
+                        <div class="border border-slate-200 rounded-xl overflow-hidden">
+                            <div class="bg-emerald-50 px-4 py-3 border-b border-emerald-100">
+                                <h4 class="font-bold text-emerald-800 flex items-center gap-2">
+                                    <i class="fas fa-hands"></i> 入门实操宝典
+                                </h4>
+                            </div>
+                            <div class="p-4 grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                <div class="bg-gradient-to-br from-amber-50 to-amber-100 p-4 rounded-lg border border-amber-200">
+                                    <h5 class="font-bold text-amber-800 mb-1 flex items-center gap-2 text-sm">
+                                        <i class="fas fa-star text-amber-500"></i> 教你打造优质Listing
+                                    </h5>
+                                    <p class="text-xs text-amber-700">从零开始的Listing创建指南，掌握标题、五点、A+页面优化技巧。</p>
+                                </div>
+                                <div class="bg-gradient-to-br from-pink-50 to-pink-100 p-4 rounded-lg border border-pink-200">
+                                    <h5 class="font-bold text-pink-800 mb-1 flex items-center gap-2 text-sm">
+                                        <i class="fas fa-calendar-alt text-pink-500"></i> EU营销日历
+                                    </h5>
+                                    <p class="text-xs text-pink-700">Prime Day、Black Friday、欧洲本地节日营销时间表。</p>
+                                </div>
+                                <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
+                                    <h5 class="font-bold text-purple-800 mb-1 flex items-center gap-2 text-sm">
+                                        <i class="fa-solid fa-gift text-purple-500"></i> 销售活动/促销工具
+                                    </h5>
+                                    <p class="text-xs text-purple-700">LD/BD/Coupon 利润计算、活动提报技巧。</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 运营提升全攻略 -->
+                        <div class="border border-slate-200 rounded-xl overflow-hidden">
+                            <div class="bg-purple-50 px-4 py-3 border-b border-purple-100">
+                                <h4 class="font-bold text-purple-800 flex items-center gap-2">
+                                    <i class="fas fa-chart-line"></i> 运营提升全攻略
+                                </h4>
+                            </div>
+                            <div class="p-4 grid md:grid-cols-2 gap-3">
+                                <div class="bg-gradient-to-br from-rose-50 to-rose-100 p-4 rounded-lg border border-rose-200">
+                                    <h5 class="font-bold text-rose-800 mb-1 flex items-center gap-2 text-sm">
+                                        <i class="fas fa-rocket text-rose-500"></i> 新品30天极速突围
+                                    </h5>
+                                    <p class="text-xs text-rose-700">新品上架后30天的关键运营策略，快速提升排名与销量。</p>
+                                </div>
+                                <div class="bg-gradient-to-br from-cyan-50 to-cyan-100 p-4 rounded-lg border border-cyan-200">
+                                    <h5 class="font-bold text-cyan-800 mb-1 flex items-center gap-2 text-sm">
+                                        <i class="fas fa-chart-line text-cyan-500"></i> 链接转化率低自查优化
+                                    </h5>
+                                    <p class="text-xs text-cyan-700">系统化诊断转化率问题，提供针对性优化方案。</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="relative pl-8">
-                    <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-emerald-400 border-2 border-white">
+
+                <!-- 更多 Tab -->
+                <div class="guide-panel hidden" data-panel="more">
+                    <p class="text-sm text-slate-600 mb-4">探索更多实用功能和工具，提升工作效率。</p>
+                    
+                    <!-- 大模型探索 -->
+                    <div class="border border-slate-200 rounded-xl overflow-hidden">
+                        <div class="bg-gradient-to-r from-green-50 to-emerald-50 px-4 py-3 border-b border-green-100">
+                            <h4 class="font-bold text-green-800 flex items-center gap-2">
+                                <i class="fas fa-compass"></i> 大模型探索 <span class="text-xs font-normal text-green-600 ml-2">v1.0</span>
+                            </h4>
+                            <p class="text-xs text-green-700 mt-1">智能体、提示词、工作流等实用功能。</p>
+                        </div>
+                        <div class="p-4 grid md:grid-cols-3 gap-4">
+                            <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-5 rounded-xl border border-blue-200">
+                                <div class="w-10 h-10 bg-blue-500 text-white rounded-lg flex items-center justify-center mb-3">
+                                    <i class="fas fa-robot"></i>
+                                </div>
+                                <h5 class="font-bold text-blue-800 mb-2">智能体</h5>
+                                <p class="text-sm text-blue-700">探索和使用各种 AI 智能体，自动化复杂任务。</p>
+                            </div>
+                            <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-5 rounded-xl border border-purple-200">
+                                <div class="w-10 h-10 bg-purple-500 text-white rounded-lg flex items-center justify-center mb-3">
+                                    <i class="fas fa-message"></i>
+                                </div>
+                                <h5 class="font-bold text-purple-800 mb-2">提示词</h5>
+                                <p class="text-sm text-purple-700">精选提示词库，快速生成高质量内容。</p>
+                            </div>
+                            <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 p-5 rounded-xl border border-emerald-200">
+                                <div class="w-10 h-10 bg-emerald-500 text-white rounded-lg flex items-center justify-center mb-3">
+                                    <i class="fas fa-diagram-project"></i>
+                                </div>
+                                <h5 class="font-bold text-emerald-800 mb-2">工作流</h5>
+                                <p class="text-sm text-emerald-700">构建自动化工作流，提升运营效率。</p>
+                            </div>
+                        </div>
                     </div>
-                    <h3 class="font-bold text-lg text-gray-900">Step 5: 站外内容分发 (Ongoing)</h3>
-                    <p class="text-sm text-gray-500 mb-2">目标：A10 权重激活</p>
-                    <div class="bg-slate-50 p-4 rounded-lg border border-slate-100 text-sm">
-                        利用 AI 根据 Listing 内容生成 Blog Post, Social Media Captions。发布到相关垂直论坛或社媒，带上归因链接。
-                        <br><span class="text-emerald-600 font-semibold">关键：</span> 站外流量引入能极大提升 Listing 的自然排名权重。
-                    </div>
+                </div>
+
+            </div>
+
+            <!-- Footer -->
+            <div class="mt-8 pt-6 border-t border-slate-100 flex items-center justify-between">
+                <p class="text-xs text-slate-400">
+                    版本 1.0 · 持续更新中
+                </p>
+                <div class="flex items-center gap-3 text-xs">
+                    <span class="text-slate-400">快捷键：</span>
+                    <span class="px-2 py-0.5 bg-slate-100 rounded text-slate-600 font-mono">ESC</span>
+                    <span class="text-slate-400">关闭弹窗</span>
                 </div>
             </div>
         </div>
     </div>
-</div>
-
-<script>
-    function openUserGuide() {
-        document.getElementById('user-guide-modal').classList.remove('hidden');
-    }
-    function closeUserGuide() {
-        document.getElementById('user-guide-modal').classList.add('hidden');
-    }
-    // Close on backdrop click
-    document.getElementById('user-guide-modal')?.addEventListener('click', (e) => {
-        if (e.target.id === 'user-guide-modal') closeUserGuide();
-    });
-</script>
+</app-modal>

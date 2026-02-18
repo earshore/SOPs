@@ -1,0 +1,121 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =========================================
+   1. 全局基础与排版 (Global Reset)
+   ========================================= */
+* {
+  box-sizing: border-box;
+}
+
+/* 极简滚动条 - 鼠标悬停时才加深颜色 (全局默认) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent; 
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(203, 213, 225, 0.4); /* 默认半透明 */
+  border-radius: 3px;
+  transition: background 0.3s;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.8);
+}
+
+/* 特定细滚动条样式 (来自新 Style) */
+.scrollbar-thin::-webkit-scrollbar { width: 6px; }
+.scrollbar-thin::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 3px; }
+
+/* 隐藏滚动条但保留功能 */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* =========================================
+   2. 核心动效物理 (Animation Physics)
+   ========================================= */
+:root {
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Q弹效果 */
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1); /* 丝滑过渡 */
+}
+
+.fade-in { animation: fadeIn 0.4s var(--ease-smooth) forwards; }
+.slide-in { animation: slideIn 0.4s var(--ease-spring) forwards; }
+.pulse-dot { animation: pulse 3s infinite ease-in-out; }
+.smooth-transition { transition: all 180ms cubic-bezier(0.4, 0, 0.2, 1); } /* 新增平滑过渡 */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.95); }
+}
+
+/* Mega Menu 过渡 */
+.mega-menu-enter {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+}
+.group:hover .mega-menu-enter {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* =========================================
+   4. 通用数据展示与工具 (Utilities)
+   ========================================= */
+/* 状态圆点 */
+.status-dot {
+  width: 8px; height: 8px; 
+  border-radius: 50%;
+  display: inline-block;
+  position: relative;
+}
+.status-success { background: #22c55e; box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2); }
+.status-error   { background: #ef4444; box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2); }
+.status-pending { background: #f59e0b; box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2); }
+
+/* JSON 代码着色 */
+.json-key     { color: #059669; font-weight: 500; }
+.json-string  { color: #3b82f6; }
+.json-number  { color: #f59e0b; }
+.json-boolean { color: #8b5cf6; }
+
+/* 文本与交互工具类 */
+.copy-content { white-space: pre-wrap; line-height: 2; }
+.copy-frozen { pointer-events: none; user-select: none; opacity: 0.86; filter: grayscale(0.05); }
+.tab-active { border-bottom: 3px solid #3b82f6; color: #3b82f6; }
+
+/* 打印优化 */
+@media print {
+  .no-print { display: none !important; }
+  .grid-stack-item-content { box-shadow: none !important; border: 1px solid #ddd; }
+}
+
+/* =========================================
+   More Module Content Area
+   ========================================= */
+#more_content_area>div {
+    max-width: 1450px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
