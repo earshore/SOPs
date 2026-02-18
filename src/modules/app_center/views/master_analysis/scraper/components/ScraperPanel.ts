@@ -37,6 +37,9 @@ export function createScraperPanel() {
         // 历史记录组件
         historyPanel: null as HistoryPanel | null,
 
+        // 渲染防抖标志
+        _isRendering: false,
+
         // Constants for View
         sites: ['DE', 'FR', 'IT', 'ES', 'NL', 'SE', 'PL', 'BE', 'IE', 'UK'],
 
@@ -134,11 +137,32 @@ export function createScraperPanel() {
 
             // 如果有数据则渲染预览
             if (this.hasData && this.dataPreview) {
+                console.log('[Scraper] 📦 检测到数据，准备初始化渲染');
+                // 延迟渲染，确保 DOM 已经准备好
                 setTimeout(() => {
-                    this.dataPreview!.checkLargeDataset();
-                    this.renderDataPanel();
-                    this.dataPreview!.setupEventDelegation((asin) => this.toggleCardExpand(asin));
-                }, 100);
+                    console.log('[Scraper] ⏰ 延迟渲染开始');
+                    if (this.dataPreview) {
+                        console.log('[Scraper] 📊 检查大数据集');
+                        this.dataPreview.checkLargeDataset();
+                        
+                        console.log('[Scraper] 🎯 设置事件委托');
+                        this.dataPreview.setupEventDelegation((asin) => {
+                            console.log('[Scraper] 🖱️ 事件委托触发，ASIN:', asin);
+                            this.toggleCardExpand(asin);
+                        });
+                        
+                        console.log('[Scraper] 🎨 执行初始渲染');
+                        this.renderDataPanel();
+                        console.log('[Scraper] ✅ 初始化渲染完成');
+                    } else {
+                        console.warn('[Scraper] ⚠️ dataPreview 在延迟后不存在');
+                    }
+                }, 0);
+            } else {
+                console.log('[Scraper] ℹ️ 无数据或 dataPreview 不存在，跳过初始渲染', {
+                    hasData: this.hasData,
+                    hasDataPreview: !!this.dataPreview
+                });
             }
         },
 
@@ -163,17 +187,41 @@ export function createScraperPanel() {
          * 保存状态到 state
          */
         saveState() {
-            state.scraper.selectedSite = this.selectedSite as any;
-            state.scraper.inputAsins = this.inputAsins;
-            state.scraper.isScraping = this.isScraping;
+            // 只在状态真正改变时才保存，避免触发不必要的响应式更新
+            let hasChanges = false;
+            
+            if (state.scraper.selectedSite !== this.selectedSite) {
+                state.scraper.selectedSite = this.selectedSite as any;
+                hasChanges = true;
+            }
+            
+            if (state.scraper.inputAsins !== this.inputAsins) {
+                state.scraper.inputAsins = this.inputAsins;
+                hasChanges = true;
+            }
+            
+            if (state.scraper.isScraping !== this.isScraping) {
+                state.scraper.isScraping = this.isScraping;
+                hasChanges = true;
+            }
 
             if (this.dataPreview) {
                 const previewState = this.dataPreview.getState();
-                state.scraper.expandedAsin = previewState.expandedAsin;
-                state.scraper.currentDataTab = previewState.currentDataTab;
+                
+                if (state.scraper.expandedAsin !== previewState.expandedAsin) {
+                    state.scraper.expandedAsin = previewState.expandedAsin;
+                    hasChanges = true;
+                }
+                
+                if (state.scraper.currentDataTab !== previewState.currentDataTab) {
+                    state.scraper.currentDataTab = previewState.currentDataTab;
+                    hasChanges = true;
+                }
             }
 
-            console.log("[Scraper] 💾 状态已保存");
+            if (hasChanges) {
+                console.log("[Scraper] 💾 状态已保存");
+            }
         },
 
         // ========== Actions ==========
@@ -209,9 +257,7 @@ export function createScraperPanel() {
 
                 // 更新数据预览
                 if (this.dataPreview) {
-                    this.dataPreview.updateData(state.scraper.scrapedData);
-                    this.dataPreview.checkLargeDataset();
-                    this.renderDataPanel();
+                    this.updateDataPreview(state.scraper.scrapedData);
                 }
 
                 this.saveState();
@@ -278,9 +324,7 @@ export function createScraperPanel() {
 
                 // 更新数据预览
                 if (this.dataPreview) {
-                    this.dataPreview.updateData(scrapedData);
-                    this.dataPreview.checkLargeDataset();
-                    this.renderDataPanel();
+                    this.updateDataPreview(scrapedData);
                 }
 
                 // 重新加载历史记录
@@ -327,9 +371,7 @@ export function createScraperPanel() {
 
                     // 更新数据预览
                     if (this.dataPreview) {
-                        this.dataPreview.updateData(result.data);
-                        this.dataPreview.checkLargeDataset();
-                        this.renderDataPanel();
+                        this.updateDataPreview(result.data);
                     }
 
                     // 重新加载历史记录
@@ -342,21 +384,80 @@ export function createScraperPanel() {
 
         // ========== 数据预览功能 ==========
 
-        renderDataPanel(): void {
+        /**
+         * 更新数据并重新设置事件委托
+         */
+        updateDataPreview(data: any): void {
             if (!this.dataPreview) return;
+            
+            console.log('[Scraper] 🔄 更新数据预览');
+            this.dataPreview.updateData(data);
+            this.dataPreview.checkLargeDataset();
+            
+            // 重新设置事件委托
+            console.log('[Scraper] 🎯 重新设置事件委托');
+            this.dataPreview.setupEventDelegation((asin) => {
+                console.log('[Scraper] 🖱️ 事件委托触发，ASIN:', asin);
+                this.toggleCardExpand(asin);
+            });
+            
+            this.renderDataPanel();
+        },
 
-            this.dataPreview.renderDataPanel(
-                (asin) => this.toggleCardExpand(asin),
-                (asin) => this.deleteProduct(asin),
-                (asin, index) => this.deleteReview(asin, index)
-            );
+        renderDataPanel(): void {
+            console.log('[Scraper] 🎨 renderDataPanel 被调用');
+            
+            if (!this.dataPreview) {
+                console.warn('[Scraper] ⚠️ dataPreview 不存在，无法渲染');
+                return;
+            }
+            
+            // 防止重复渲染
+            if (this._isRendering) {
+                console.warn('[Scraper] ⚠️ 渲染已在进行中，跳过本次调用');
+                return;
+            }
+            
+            this._isRendering = true;
+            console.log('[Scraper] 🔒 设置渲染锁');
+            
+            try {
+                console.log('[Scraper] 📝 开始渲染数据面板');
+                this.dataPreview.renderDataPanel(
+                    (asin) => this.toggleCardExpand(asin),
+                    (asin) => this.deleteProduct(asin),
+                    (asin, index) => this.deleteReview(asin, index)
+                );
+                console.log('[Scraper] ✅ 数据面板渲染完成');
+            } catch (error) {
+                console.error('[Scraper] ❌ 渲染失败:', error);
+            } finally {
+                this._isRendering = false;
+                console.log('[Scraper] 🔓 释放渲染锁');
+            }
         },
 
         toggleCardExpand(asin: string): void {
-            if (!this.dataPreview) return;
+            console.log('[Scraper] 🔄 toggleCardExpand 被调用:', asin);
+            
+            if (!this.dataPreview) {
+                console.warn('[Scraper] ⚠️ dataPreview 不存在');
+                return;
+            }
+            
+            const oldExpandedAsin = this.dataPreview.getState().expandedAsin;
+            console.log('[Scraper] 📊 当前展开的 ASIN:', oldExpandedAsin);
+            
+            // 切换展开状态
             this.dataPreview.toggleCardExpand(asin);
-            this.saveState();
+            
+            const newExpandedAsin = this.dataPreview.getState().expandedAsin;
+            console.log('[Scraper] 📊 新的展开 ASIN:', newExpandedAsin);
+            
+            // 重新渲染以更新UI
+            console.log('[Scraper] 🎨 重新渲染数据面板');
             this.renderDataPanel();
+            this.saveState();
         },
 
         switchDataTab(tab: 'preview' | 'json'): void {
@@ -395,16 +496,14 @@ export function createScraperPanel() {
             if (result.success && result.data) {
                 state.scraper.scrapedData = result.data;
                 if (this.dataPreview) {
-                    this.dataPreview.updateData(result.data);
-                    this.renderDataPanel();
+                    this.updateDataPreview(result.data);
                 }
                 this.loadHistory();
             } else if (result.data) {
                 // 回滚
                 state.scraper.scrapedData = result.data;
                 if (this.dataPreview) {
-                    this.dataPreview.updateData(result.data);
-                    this.renderDataPanel();
+                    this.updateDataPreview(result.data);
                 }
             }
         },
@@ -420,16 +519,14 @@ export function createScraperPanel() {
             if (result.success && result.data) {
                 state.scraper.scrapedData = result.data;
                 if (this.dataPreview) {
-                    this.dataPreview.updateData(result.data);
-                    this.renderDataPanel();
+                    this.updateDataPreview(result.data);
                 }
                 this.loadHistory();
             } else if (result.data) {
                 // 回滚
                 state.scraper.scrapedData = result.data;
                 if (this.dataPreview) {
-                    this.dataPreview.updateData(result.data);
-                    this.renderDataPanel();
+                    this.updateDataPreview(result.data);
                 }
             }
         },

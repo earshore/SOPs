@@ -360,6 +360,13 @@
           <i class="fa-solid fa-code"></i>
           <span class="font-medium" x-text="(showPromptPanel ? '隐藏' : '查看') + ' AI 提示词模板'"></span>
           <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-semibold" x-text="selectedTargets.length + ' 个任务'"></span>
+          <template x-if="totalTokenCount > 0">
+            <span class="flex items-center gap-1.5 text-xs bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full font-semibold border border-emerald-200">
+              <i class="fa-solid fa-calculator"></i>
+              <span x-text="formattedTotalTokenCount"></span>
+              <span class="text-emerald-600">tokens</span>
+            </span>
+          </template>
           <i :class="'fa-solid fa-chevron-' + (showPromptPanel ? 'up' : 'down')"></i>
         </button>
         
@@ -378,6 +385,11 @@
                     </div>
                   </div>
                   <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-2 px-3 py-1.5 bg-slate-800 rounded-lg border border-slate-600">
+                      <i class="fa-solid fa-calculator text-emerald-400 text-xs"></i>
+                      <span class="text-xs font-mono font-semibold text-emerald-400" x-text="getFormattedTokenCount(targetId)"></span>
+                      <span class="text-xs text-slate-500">tokens</span>
+                    </div>
                     <i :class="'fa-solid fa-chevron-' + (expandedPromptIndex === index ? 'up' : 'down') + ' text-slate-400'"></i>
                   </div>
                 </button>
@@ -395,6 +407,27 @@
                     </div>
                     <div class="p-4 max-h-96 overflow-auto">
                       <pre class="text-xs text-slate-300 font-mono whitespace-pre-wrap leading-relaxed" x-text="getPromptText(targetId)"></pre>
+                    </div>
+                    <div class="border-t border-slate-700 px-4 py-3 bg-slate-800/30">
+                      <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                          <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-calculator text-emerald-400 text-xs"></i>
+                            <span class="text-xs text-slate-400">Token 统计:</span>
+                            <span class="text-sm font-mono font-bold text-emerald-400" x-text="getPromptTokenCount(targetId).toLocaleString()"></span>
+                            <span class="text-xs text-slate-500">tokens</span>
+                          </div>
+                          <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-align-left text-blue-400 text-xs"></i>
+                            <span class="text-xs text-slate-400">字符数:</span>
+                            <span class="text-sm font-mono font-semibold text-blue-400" x-text="getPromptText(targetId).length.toLocaleString()"></span>
+                          </div>
+                        </div>
+                        <div class="text-xs text-slate-500">
+                          <i class="fa-solid fa-info-circle"></i>
+                          <span>基于 GPT-4 token 估算</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </template>
