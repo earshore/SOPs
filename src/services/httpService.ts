@@ -2,10 +2,14 @@
 // ================================================================
 // 🎯 统一 HTTP 请求服务（TypeScript版本）
 // 替代分散的 fetch 调用
+// 🎯 P1-9: 集成请求去重和取消管理
 // ================================================================
 
 import { Logger } from './loggerService';
+import { configCenter } from '../common/config/ConfigCenter';
 import { priorityRequestPool, REQUEST_PRIORITY } from './PriorityRequestPool';
+import { requestManager } from './RequestManager';
+import { httpCacheService, type CacheStrategy } from './HttpCacheService';
 
 /**
  * 请求优先级类型
@@ -27,6 +31,15 @@ export interface HttpOptions {
   usePool?: boolean;
   priority?: RequestPriority;
   measurePerformance?: boolean;
+  // 🎯 P1-9: 新增请求管理选项
+  deduplicate?: boolean; // 是否去重
+  deduplicateKey?: string; // 自定义去重key
+  cancelPrevious?: boolean; // 是否取消之前的同类请求
+  // 🎯 优化C: HTTP缓存选项
+  cache?: CacheStrategy; // 缓存策略
+  cacheTTL?: number; // 缓存时长(毫秒)
+  cacheKey?: string; // 自定义缓存key
+  forceRefresh?: boolean; // 强制刷新(跳过缓存)
 }
 
 /**
@@ -102,9 +115,9 @@ class HttpServiceClass {
 
   constructor() {
     this.defaults = {
-      timeout: 30000,
-      retries: 0,
-      retryDelay: 1000,
+      timeout: configCenter.get<number>('api.timeout') || 30000,
+      retries: configCenter.get<number>('api.retryAttempts') || 0,
+      retryDelay: configCenter.get<number>('api.retryDelay') || 1000,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -127,13 +140,41 @@ class HttpServiceClass {
       usePool = false,
       priority = REQUEST_PRIORITY.NORMAL,
       measurePerformance = true,
+      // 🎯 P1-9: 请求管理选项
+      deduplicate = false,
+      deduplicateKey = null,
+      cancelPrevious = false,
+      // 🎯 优化C: 缓存选项
+      cache = undefined,
+      cacheTTL = 5 * 60 * 1000, // 默认5分钟
+      cacheKey = null,
+      forceRefresh = false,
     } = options;
+
+    // 生成请求key(用于去重和取消)
+    const requestKey = deduplicateKey || `${method}:${url}`;
+    
+    // 生成缓存key
+    const finalCacheKey = cacheKey || requestKey;
+
+    // 🎯 优化C: 尝试从缓存获取(仅GET请求且未强制刷新)
+    if (method === 'GET' && cache && !forceRefresh) {
+      const cached = await httpCacheService.get(finalCacheKey, {
+        strategy: cache,
+        ttl: cacheTTL
+      });
+      
+      if (cached !== null) {
+        Logger.debug('使用缓存响应', { url, cacheKey: finalCacheKey }, 'HttpService');
+        return cached as T;
+      }
+    }
 
     // 合并请求头
     const finalHeaders = { ...this.defaults.headers, ...headers };
 
     // 执行请求的函数
-    const executeRequest = async (): Promise<T> => {
+    const executeRequest = async (abortSignal?: AbortSignal): Promise<T> => {
       let lastError: Error | null = null;
       
       for (let attempt = 0; attempt <= retries; attempt++) {
@@ -144,6 +185,11 @@ class HttpServiceClass {
         // 如果提供了外部signal,监听其abort事件
         if (signal) {
           signal.addEventListener('abort', () => controller.abort(), { once: true });
+        }
+        
+        // 🎯 P1-9: 如果提供了RequestManager的signal,也监听它
+        if (abortSignal) {
+          abortSignal.addEventListener('abort', () => controller.abort(), { once: true });
         }
 
         try {
@@ -192,30 +238,86 @@ class HttpServiceClass {
       throw lastError;
     };
 
-    // 性能监控
-    if (measurePerformance) {
-      try {
-        const { performanceService } = await import('./performanceService');
-        const apiName = this._extractApiName(url);
-        
-        if (usePool) {
-          return await performanceService.measureApiCall(apiName, () => 
-            priorityRequestPool.add(executeRequest, priority, { url, method })
-          );
-        }
-        
-        return await performanceService.measureApiCall(apiName, executeRequest);
-      } catch (e) {
-        Logger.debug('性能监控不可用，直接执行请求', {}, 'HttpService');
+    // 🎯 P1-9: 如果启用去重或取消管理,使用RequestManager
+    if (deduplicate || cancelPrevious) {
+      const result = await requestManager.execute(
+        requestKey,
+        (signal) => {
+          // 性能监控
+          if (measurePerformance) {
+            return this._executeWithPerformance(url, method, usePool, priority, () => executeRequest(signal));
+          }
+          
+          // 使用优先级请求池
+          if (usePool) {
+            return priorityRequestPool.add(() => executeRequest(signal), priority, { url, method });
+          }
+          
+          return executeRequest(signal);
+        },
+        { deduplicate, cancelPrevious }
+      );
+      
+      // 🎯 优化C: 缓存响应(仅GET请求)
+      if (method === 'GET' && cache) {
+        await httpCacheService.set(finalCacheKey, result, {
+          strategy: cache,
+          ttl: cacheTTL
+        });
       }
+      
+      return result;
     }
 
-    // 使用优先级请求池
-    if (usePool) {
-      return await priorityRequestPool.add(executeRequest, priority, { url, method });
+    // 执行请求
+    let result: T;
+    
+    // 性能监控
+    if (measurePerformance) {
+      result = await this._executeWithPerformance(url, method, usePool, priority, executeRequest);
+    } else if (usePool) {
+      // 使用优先级请求池
+      result = await priorityRequestPool.add(executeRequest, priority, { url, method });
+    } else {
+      result = await executeRequest();
     }
     
-    return await executeRequest();
+    // 🎯 优化C: 缓存响应(仅GET请求)
+    if (method === 'GET' && cache) {
+      await httpCacheService.set(finalCacheKey, result, {
+        strategy: cache,
+        ttl: cacheTTL
+      });
+    }
+    
+    return result;
+  }
+
+  /**
+   * 执行请求并进行性能监控
+   */
+  private async _executeWithPerformance<T>(
+    url: string,
+    method: string,
+    usePool: boolean,
+    priority: RequestPriority,
+    fn: () => Promise<T>
+  ): Promise<T> {
+    try {
+      const { performanceService } = await import('./performanceService');
+      const apiName = this._extractApiName(url);
+      
+      if (usePool) {
+        return await performanceService.measureApiCall(apiName, () => 
+          priorityRequestPool.add(fn, priority, { url, method })
+        );
+      }
+      
+      return await performanceService.measureApiCall(apiName, fn);
+    } catch (e) {
+      Logger.debug('性能监控不可用，直接执行请求', {}, 'HttpService');
+      return await fn();
+    }
   }
 
   /**

@@ -4,7 +4,6 @@
 // 集中管理所有应用配置，支持环境差异化、验证和热更新
 // ================================================================
 
-import { Logger } from '../../services/loggerService';
 import type { MenuConfig } from '../../types/config';
 import { validateConfig } from './schemas/configSchema';
 import { loadRouteConfig } from './loaders/routeConfigLoader';
@@ -24,6 +23,60 @@ export interface ApiConfig {
   timeout: number;
   retryAttempts: number;
   retryDelay: number;
+}
+
+/**
+ * 爬虫服务配置
+ */
+export interface ScraperConfig {
+  requestTimeout: number;
+  maxConcurrent: number;
+  maxRetries: number;
+  retryDelay: number;
+  batchSize: number;
+  batchDelay: number;
+  cacheDuration: number;
+}
+
+/**
+ * LLM服务配置
+ */
+export interface LLMConfig {
+  defaultTimeout: number;
+  analysisTimeout: number;
+  testConnectionTimeout: number;
+  maxRetries: number;
+  retryDelay: number;
+}
+
+/**
+ * 历史记录配置
+ */
+export interface HistoryConfig {
+  maxItems: number;
+  maxEventHistory: number;
+  maxSearchHistory: number;
+}
+
+/**
+ * 日志配置
+ */
+export interface LoggerConfig {
+  maxLogs: number;
+  minLevel: 'debug' | 'info' | 'warn' | 'error' | 'fatal';
+  batchSize: number;
+  batchTimeout: number;
+}
+
+/**
+ * 存储配置
+ */
+export interface StorageConfig {
+  lruMaxSize: number; // bytes
+  lruWarningThreshold: number; // 0-1
+  lruCleanupRatio: number; // 0-1
+  localStorageTotalSize: number; // bytes
+  historyMaxItems: number;
 }
 
 /**
@@ -54,12 +107,17 @@ export interface AppConfig {
   performance: PerformanceConfig;
   features: FeatureFlags;
   routes: MenuConfig;
+  scraper: ScraperConfig;
+  llm: LLMConfig;
+  history: HistoryConfig;
+  logger: LoggerConfig;
+  storage: StorageConfig;
 }
 
 /**
  * 配置变更监听器
  */
-export type ConfigChangeListener = (key: string, newValue: any, oldValue: any) => void;
+export type ConfigChangeListener = (key: string, newValue: unknown, oldValue: unknown) => void;
 
 // ==================== 配置中心类 ====================
 
@@ -70,12 +128,12 @@ export class ConfigCenter {
   private static instance: ConfigCenter;
   private config: AppConfig;
   private listeners: Map<string, Set<ConfigChangeListener>>;
-  private readonly logger = Logger;
 
   private constructor() {
     this.listeners = new Map();
     this.config = this.loadConfig();
-    this.logger.info('配置中心已初始化', { environment: this.config.environment });
+    // 延迟日志记录，避免循环依赖
+    console.log(`[ConfigCenter] 配置中心已初始化, 环境: ${this.config.environment}`);
   }
 
   /**
@@ -138,7 +196,41 @@ export class ConfigCenter {
         enableBetaFeatures: env === 'development',
         enableDebugMode: env === 'development'
       },
-      routes: {} as MenuConfig // 将在后续加载
+      routes: {} as MenuConfig, // 将在后续加载
+      scraper: {
+        requestTimeout: 15000,
+        maxConcurrent: 2,
+        maxRetries: 3,
+        retryDelay: 500,
+        batchSize: 3,
+        batchDelay: 1500,
+        cacheDuration: 24 * 60 * 60 * 1000 // 24小时
+      },
+      llm: {
+        defaultTimeout: 30000,
+        analysisTimeout: 120000,
+        testConnectionTimeout: 15000,
+        maxRetries: 2,
+        retryDelay: 1000
+      },
+      history: {
+        maxItems: 20,
+        maxEventHistory: 100,
+        maxSearchHistory: 10
+      },
+      logger: {
+        maxLogs: 100,
+        minLevel: env === 'development' ? 'debug' : 'info',
+        batchSize: 10,
+        batchTimeout: 5000
+      },
+      storage: {
+        lruMaxSize: 4 * 1024 * 1024, // 4MB
+        lruWarningThreshold: 0.8,
+        lruCleanupRatio: 0.3,
+        localStorageTotalSize: 5 * 1024 * 1024, // 5MB
+        historyMaxItems: 50
+      }
     };
   }
 
@@ -157,6 +249,14 @@ export class ConfigCenter {
             enableMonitoring: true,
             enableDevTools: true,
             logLevel: 'debug'
+          },
+          scraper: {
+            requestTimeout: 30000,
+            maxRetries: 1
+          },
+          llm: {
+            defaultTimeout: 60000,
+            analysisTimeout: 180000
           }
         } as Partial<AppConfig>;
         
@@ -170,6 +270,14 @@ export class ConfigCenter {
             enableMonitoring: true,
             enableDevTools: false,
             logLevel: 'error'
+          },
+          scraper: {
+            requestTimeout: 15000,
+            maxRetries: 3
+          },
+          llm: {
+            defaultTimeout: 30000,
+            analysisTimeout: 120000
           }
         } as Partial<AppConfig>;
         
@@ -183,6 +291,14 @@ export class ConfigCenter {
             enableMonitoring: false,
             enableDevTools: false,
             logLevel: 'warn'
+          },
+          scraper: {
+            requestTimeout: 5000,
+            maxRetries: 0
+          },
+          llm: {
+            defaultTimeout: 5000,
+            analysisTimeout: 10000
           }
         } as Partial<AppConfig>;
         
@@ -200,7 +316,12 @@ export class ConfigCenter {
       api: { ...base.api, ...override.api },
       performance: { ...base.performance, ...override.performance },
       features: { ...base.features, ...override.features },
-      routes: override.routes || base.routes
+      routes: override.routes || base.routes,
+      scraper: { ...base.scraper, ...override.scraper },
+      llm: { ...base.llm, ...override.llm },
+      history: { ...base.history, ...override.history },
+      logger: { ...base.logger, ...override.logger },
+      storage: { ...base.storage, ...override.storage }
     };
   }
 
@@ -214,13 +335,13 @@ export class ConfigCenter {
   /**
    * 获取指定路径的配置值
    */
-  public get<T = any>(path: string): T | undefined {
+  public get<T = unknown>(path: string): T | undefined {
     const keys = path.split('.');
-    let value: any = this.config;
+    let value: unknown = this.config;
     
     for (const key of keys) {
       if (value && typeof value === 'object' && key in value) {
-        value = value[key];
+        value = (value as Record<string, unknown>)[key];
       } else {
         return undefined;
       }
@@ -232,17 +353,17 @@ export class ConfigCenter {
   /**
    * 设置配置值（支持热更新）
    */
-  public set(path: string, value: any): void {
+  public set(path: string, value: unknown): void {
     const keys = path.split('.');
     const lastKey = keys.pop()!;
-    let target: any = this.config;
+    let target: Record<string, unknown> = this.config as unknown as Record<string, unknown>;
     
     // 导航到目标对象
     for (const key of keys) {
       if (!(key in target)) {
         target[key] = {};
       }
-      target = target[key];
+      target = target[key] as Record<string, unknown>;
     }
     
     // 保存旧值
@@ -253,8 +374,8 @@ export class ConfigCenter {
     
     // 触发监听器
     this.notifyListeners(path, value, oldValue);
-    
-    this.logger.debug('配置已更新', { path, oldValue, newValue: value });
+
+    console.log(`[ConfigCenter] 配置已更新: ${path}`);
   }
 
   /**
@@ -282,14 +403,14 @@ export class ConfigCenter {
   /**
    * 通知监听器
    */
-  private notifyListeners(path: string, newValue: any, oldValue: any): void {
+  private notifyListeners(path: string, newValue: unknown, oldValue: unknown): void {
     const listeners = this.listeners.get(path);
     if (listeners) {
       listeners.forEach(listener => {
         try {
           listener(path, newValue, oldValue);
         } catch (error) {
-          this.logger.error('配置监听器执行失败', { path, error });
+          console.error('[ConfigCenter] 配置监听器执行失败', { path, error });
         }
       });
     }
@@ -301,9 +422,9 @@ export class ConfigCenter {
   public validate(): boolean {
     const isValid = validateConfig(this.config);
     if (isValid) {
-      this.logger.info('配置验证通过');
+      console.log('[ConfigCenter] 配置验证通过');
     } else {
-      this.logger.error('配置验证失败');
+      console.error('[ConfigCenter] 配置验证失败');
     }
     return isValid;
   }
@@ -314,9 +435,9 @@ export class ConfigCenter {
   public reload(): void {
     const oldConfig = this.config;
     this.config = this.loadConfig();
-    this.logger.info('配置已重新加载', { 
-      oldEnv: oldConfig.environment, 
-      newEnv: this.config.environment 
+    console.log('[ConfigCenter] 配置已重新加载', {
+      oldEnv: oldConfig.environment,
+      newEnv: this.config.environment
     });
   }
 

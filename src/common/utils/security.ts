@@ -55,7 +55,7 @@ export function escapeHtml(str: string): string {
 export function escapeObject<T>(obj: T): T {
   if (typeof obj !== 'object' || obj === null) return obj;
 
-  const result: any = Array.isArray(obj) ? [] : {};
+  const result = (Array.isArray(obj) ? [] : {}) as Record<string, unknown>;
 
   for (const key in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, key)) {
@@ -234,7 +234,7 @@ export const SecurityUtils = {
 
 // 向后兼容：暴露到 window
 if (typeof window !== 'undefined') {
-  (window as any).SecurityUtils = SecurityUtils;
+  (window as Window & { SecurityUtils?: typeof SecurityUtils }).SecurityUtils = SecurityUtils;
 }
 
 // 默认导出

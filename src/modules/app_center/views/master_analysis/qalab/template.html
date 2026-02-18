@@ -1,0 +1,157 @@
+<!-- QA Lab Template -->
+<div class="app-container">
+  
+  <!-- ========== Welcome Banner ========== -->
+  <div class="mb-8">
+    <div class="relative rounded-2xl border border-slate-200/60 overflow-hidden bg-white">
+      <!-- 背景装饰 -->
+      <div class="absolute inset-0 bg-gradient-to-br from-emerald-50/80 via-white to-teal-50/60"></div>
+      <div class="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-emerald-100/40 to-teal-200/30 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+      <div class="absolute bottom-0 left-0 w-72 h-72 bg-gradient-to-tr from-teal-100/40 to-emerald-100/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4"></div>
+      
+      <!-- 动态网格装饰 -->
+      <div class="absolute inset-0 opacity-[0.02]" style="background-image: radial-gradient(circle, #10b981 1px, transparent 1px); background-size: 24px 24px;"></div>
+      
+      <!-- 浮动粒子装饰 -->
+      <div class="absolute top-7 right-20 w-2 h-2 rounded-full bg-emerald-300/50 animate-pulse"></div>
+      <div class="absolute top-16 right-44 w-1.5 h-1.5 rounded-full bg-teal-300/40 animate-pulse" style="animation-delay: 0.6s;"></div>
+      <div class="absolute bottom-10 right-32 w-1 h-1 rounded-full bg-green-400/50 animate-pulse" style="animation-delay: 1.2s;"></div>
+      <div class="absolute top-20 left-1/4 w-1.5 h-1.5 rounded-full bg-cyan-300/30 animate-pulse" style="animation-delay: 0.9s;"></div>
+
+      <div class="relative z-10 p-8 md:p-10">
+        <div class="flex items-start gap-5">
+          <!-- Icon -->
+          <div class="relative flex-shrink-0">
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/25">
+              <i class="fa-solid fa-robot text-[22px] text-white"></i>
+            </div>
+            <div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-amber-400 border-2 border-white flex items-center justify-center">
+              <i class="fa-solid fa-bolt text-[8px] text-white"></i>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-3 mb-2">
+              <h2 class="text-xl font-bold text-slate-800 tracking-tight">Rufus Q&A 智能预研系统</h2>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-sm">
+                <i class="fa-solid fa-sparkles mr-1 text-[8px]"></i>AI
+              </span>
+            </div>
+            <p class="text-slate-500 text-sm leading-relaxed">
+              基于竞品多维分析报告，智能预判 Amazon Rufus AI 高频问题，自动生成多语言 Q&A 答复，助力 Listing 优化与转化提升。
+            </p>
+
+            <!-- Quick Tags -->
+            <div class="flex items-center gap-5 mt-4">
+              <div class="flex items-center gap-1.5">
+                <div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
+                <span class="text-xs text-slate-400">Rufus AI 逻辑</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <div class="w-1.5 h-1.5 rounded-full bg-teal-400"></div>
+                <span class="text-xs text-slate-400">竞品驱动分析</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <div class="w-1.5 h-1.5 rounded-full bg-cyan-400"></div>
+                <span class="text-xs text-slate-400">多语言生成</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <div class="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
+                <span class="text-xs text-slate-400">Amazon EU 全站点</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input Section -->
+  <section class="input-section animate-fade-in-up delay-100" id="inputSection">
+    <div class="section-title"><i class="fa-solid fa-file-import"></i> 导入竞品分析报告</div>
+    <div class="input-card">
+      <textarea class="input-area" id="jsonInput" placeholder="在此粘贴竞品多维分析报告 JSON 数据...&#10;&#10;系统将自动解析报告内容，智能生成符合 Amazon Rufus AI 逻辑的 Top Q&A。&#10;&#10;支持的报告维度：标题关键词、卖点分析、致命缺陷、惊喜时刻、犹豫点、买家画像等。"></textarea>
+      <div class="input-actions">
+        <button class="btn btn-primary" id="btnAnalyze" data-action="amz_qalab_startAnalysis">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> 智能分析并生成 Q&A
+        </button>
+        <button class="btn btn-secondary" data-action="amz_qalab_loadSample">
+          <i class="fa-solid fa-flask"></i> 加载示例数据
+        </button>
+        <button class="btn btn-secondary" data-action="amz_qalab_clearInput">
+          <i class="fa-solid fa-eraser"></i> 清空
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Analysis Progress -->
+  <section class="analysis-progress animate-fade-in-up delay-200" id="progressSection">
+    <div class="progress-card">
+      <div class="progress-spinner"></div>
+      <div class="progress-title">正在智能分析报告</div>
+      <div class="progress-desc">AI 引擎正在解析竞品数据，预判用户问题...</div>
+      <div class="progress-steps">
+        <div class="progress-step" id="step1"><i class="fa-solid fa-circle-notch fa-spin"></i> 解析报告 JSON 结构...</div>
+        <div class="progress-step" id="step2"><i class="fa-regular fa-circle"></i> 提取产品多维特征...</div>
+        <div class="progress-step" id="step3"><i class="fa-regular fa-circle"></i> 分析用户痛点与犹豫点...</div>
+        <div class="progress-step" id="step4"><i class="fa-regular fa-circle"></i> 预判 Rufus 高频问题...</div>
+        <div class="progress-step" id="step5"><i class="fa-regular fa-circle"></i> 生成多语言 Q&A 答复...</div>
+        <div class="progress-step" id="step6"><i class="fa-regular fa-circle"></i> 优化排序与置信度评分...</div>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar"></div></div>
+    </div>
+  </section>
+
+  <!-- Results Section -->
+  <section class="results-section animate-fade-in-up delay-300" id="resultsSection">
+    <!-- Product Info -->
+    <div class="product-bar" id="productBar"></div>
+
+    <!-- Stats Dashboard -->
+    <div class="dashboard-stats" id="dashboardStats"></div>
+
+    <!-- Key Insights -->
+    <div class="insights-strip" id="insightsStrip"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div>
+        <div class="section-title" style="margin-bottom:10px"><i class="fa-solid fa-comments"></i> Top Q&A 预研结果</div>
+        <div class="category-tabs" id="categoryTabs"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+        <div class="lang-selector" id="langSelector"></div>
+        <div class="toolbar-right">
+          <button class="expand-all-btn" id="expandAllBtn" data-action="amz_qalab_toggleExpandAll">
+            <i class="fa-solid fa-expand"></i> 全部展开
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- QA Grid -->
+    <div class="qa-grid" id="qaGrid"></div>
+
+    <!-- Export -->
+    <div class="export-panel">
+      <div class="export-info">
+        <i class="fa-solid fa-file-export"></i>
+        <span>导出当前语言版本的 Q&A 结果，可直接用于 Listing 优化和 Rufus 预判准备</span>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-secondary btn-sm" data-action="amz_qalab_exportJSON"><i class="fa-solid fa-code"></i> 导出 JSON</button>
+        <button class="btn btn-secondary btn-sm" data-action="amz_qalab_exportCSV"><i class="fa-solid fa-table"></i> 导出 CSV</button>
+        <button class="btn btn-accent btn-sm" data-action="amz_qalab_exportText"><i class="fa-solid fa-file-lines"></i> 导出文本</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Rufus Q&A 智能预研系统 · 基于竞品多维分析驱动 · 适用于 Amazon EU 全站点 · Built with <i class="fa-solid fa-heart" style="color:var(--danger);margin:0 2px"></i></p>
+  </footer>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>

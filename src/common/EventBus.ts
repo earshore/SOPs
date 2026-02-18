@@ -9,7 +9,7 @@ import type {
   TypedEventHandler, 
   GenericEventHandler,
   EventUnsubscribe 
-} from '../types/events.js';
+} from '../types/events';
 
 /**
  * EventBus配置选项
@@ -184,12 +184,12 @@ class EventBus {
    * @param event - 事件名称
    * @param data - 事件数据
    */
-  emit(event: string, data?: any): void;
+  emit(event: string, data?: unknown): void;
   
   /**
    * 发布事件实现
    */
-  emit(event: string, data?: any): void {
+  emit(event: string, data?: unknown): void {
     if (!this.events[event]) return;
     
     this.events[event].forEach(callback => {

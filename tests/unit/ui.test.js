@@ -11,7 +11,7 @@ import {
   sleep,
   renderMegaMenu,
   renderSopsMegaMenu
-} from '@/common/utils/ui.js';
+} from '@/common/ui';
 
 describe('UI Utilities', () => {
   beforeEach(() => {

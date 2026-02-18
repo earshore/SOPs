@@ -4,7 +4,8 @@
 // 提供路由级别的权限控制和预加载
 // ================================================================
 
-import type { Route, RouteGuard, RouteGuardResult } from '../../types/config.js';
+import type { Route, RouteGuard, RouteGuardResult } from '../../types/config';
+import { APP_EVENTS } from '../constants/eventConstants';
 
 /**
  * 路由守卫管理器
@@ -90,7 +91,7 @@ export class RouteGuardManager {
         if (result && typeof result === 'object' && result.redirect) {
           console.log(`🔀 [RouteGuard] 守卫 "${name}" 请求重定向到: ${result.redirect}`);
           // 触发重定向（由 Router 处理）
-          window.dispatchEvent(new CustomEvent('route-redirect', {
+          window.dispatchEvent(new CustomEvent(APP_EVENTS.ROUTE_REDIRECT, {
             detail: { to: result.redirect, reason: result.reason }
           }));
           return false;
@@ -321,7 +322,10 @@ async function checkAuthentication(): Promise<boolean> {
  */
 export function createAuthGuard(isAuthenticated: () => boolean) {
   return (to: Route, _from: Route | null, next: (allowed: boolean) => void) => {
-    if (to.config?.meta?.requiresAuth && !isAuthenticated()) {
+    // 兼容测试中的简化路由对象
+    const requiresAuth = to.config?.meta?.requiresAuth || (to as any).meta?.requiresAuth;
+    
+    if (requiresAuth && !isAuthenticated()) {
       console.warn('[RouteGuard] 需要认证，导航被拦截');
       next(false);
       return;
@@ -336,7 +340,8 @@ export function createAuthGuard(isAuthenticated: () => boolean) {
  */
 export function createPreloadGuard() {
   return async (to: Route, _from: Route | null, next: (allowed: boolean) => void) => {
-    const preloadFn = to.config?.meta?.preload;
+    // 兼容测试中的简化路由对象
+    const preloadFn = to.config?.meta?.preload || (to as any).meta?.preload;
     
     if (preloadFn && typeof preloadFn === 'function') {
       try {

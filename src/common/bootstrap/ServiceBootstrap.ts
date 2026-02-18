@@ -4,6 +4,12 @@
  * 按依赖顺序初始化所有核心服务，确保启动流程可控
  */
 
+import { errorTracker } from '@/services/errorTracker';
+import { analyticsService } from '@/services/analyticsService';
+import { performanceStorage } from '@/services/performanceStorage';
+import { alertService } from '@/services/alertService';
+import { performanceMonitor } from '../devtools/PerformanceMonitor';
+
 /**
  * 服务配置选项
  */
@@ -93,6 +99,9 @@ export class ServiceBootstrap {
     console.log('\n🚀 [Bootstrap] 开始初始化服务...\n');
     
     try {
+      // 0. 初始化监控服务(优先,所有环境)
+      await this._initMonitoringServices();
+
       // 1. 拓扑排序，确定初始化顺序
       this.initOrder = this._topologicalSort();
       console.log(`📋 [Bootstrap] 初始化顺序:`, this.initOrder.join(' → '));
@@ -114,6 +123,128 @@ export class ServiceBootstrap {
       console.error('❌ [Bootstrap] 初始化流程失败:', error);
       throw error;
     }
+  }
+
+  /**
+   * 初始化监控服务
+   * @private
+   */
+  private async _initMonitoringServices(): Promise<void> {
+    console.log('📊 [Bootstrap] 初始化监控服务...');
+
+    try {
+      // 1. 错误追踪
+      errorTracker.init({
+        enabled: true,
+        sampleRate: 1.0
+      });
+
+      // 2. 用户行为分析
+      analyticsService.init({
+        enabled: true,
+        trackPageViews: true,
+        trackUserActions: true
+      });
+
+      // 3. 性能数据存储
+      await performanceStorage.init({
+        retentionDays: 7,
+        maxRecords: 10000
+      });
+
+      // 4. 告警服务
+      alertService.init({
+        enabled: true,
+        showToast: true,
+        showBrowserNotification: false
+      });
+
+      // 5. 性能监控面板
+      performanceMonitor.initialize();
+
+      // 6. 连接数据流: webVitals -> storage
+      this._connectMonitoringDataFlow();
+
+      console.log('✅ [Bootstrap] 监控服务初始化完成');
+    } catch (error) {
+      console.warn('⚠️ [Bootstrap] 监控服务初始化失败:', error);
+      // 监控服务失败不影响主流程
+    }
+  }
+
+  /**
+   * 连接监控数据流
+   * @private
+   */
+  private async _connectMonitoringDataFlow(): Promise<void> {
+    // 动态导入webVitalsService
+    const { webVitalsService } = await import('@/services/webVitalsService');
+    const { AlertType } = await import('@/services/alertService');
+
+    // Web Vitals指标自动保存到存储
+    webVitalsService.onMetric(async (metric) => {
+      try {
+        await performanceStorage.save({
+          timestamp: Date.now(),
+          type: 'webvitals',
+          data: {
+            name: metric.name,
+            value: metric.value,
+            rating: metric.rating,
+            delta: metric.delta,
+            id: metric.id
+          }
+        });
+
+        // 触发告警检查
+        if (metric.name === 'LCP') {
+          alertService.check(AlertType.PERFORMANCE, { lcp: metric.value });
+        } else if (metric.name === 'FID') {
+          alertService.check(AlertType.PERFORMANCE, { fid: metric.value });
+        } else if (metric.name === 'CLS') {
+          alertService.check(AlertType.PERFORMANCE, { cls: metric.value });
+        }
+      } catch (error) {
+        console.warn('[Bootstrap] 保存性能指标失败:', error);
+      }
+    });
+
+    // 定期检查错误率(每分钟)
+    setInterval(() => {
+      const stats = errorTracker.getStats();
+      const total = stats.total;
+      
+      if (total > 0) {
+        // 计算错误率(假设每分钟100次操作)
+        const errorRate = total / 100;
+        alertService.check(AlertType.ERROR_RATE, { errorRate });
+      }
+    }, 60000);
+
+    // 定期检查内存泄漏(每5分钟) - 使用类型断言
+    const perfWithMemory = performance as Performance & {
+      memory?: {
+        usedJSHeapSize: number;
+        totalJSHeapSize: number;
+        jsHeapSizeLimit: number;
+      };
+    };
+
+    if (perfWithMemory.memory) {
+      let lastMemory = perfWithMemory.memory.usedJSHeapSize;
+      
+      setInterval(() => {
+        if (perfWithMemory.memory) {
+          const currentMemory = perfWithMemory.memory.usedJSHeapSize;
+          const memoryGrowth = currentMemory - lastMemory;
+          
+          alertService.check(AlertType.MEMORY_LEAK, { memoryGrowth });
+          lastMemory = currentMemory;
+        }
+      }, 300000);
+    }
+
+    console.log('✅ [Bootstrap] 监控数据流已连接');
   }
 
   /**

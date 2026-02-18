@@ -13,7 +13,7 @@ import {
   setSafeHtml,
   isSafeUrl,
   safeLink
-} from '@/common/utils/security.js';
+} from '@/common/utils/security';
 
 describe('Security Utils', () => {
   describe('escapeHtml', () => {

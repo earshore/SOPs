@@ -22,9 +22,12 @@ describe('HttpService', () => {
             global.fetch.mockResolvedValueOnce({
                 ok: true,
                 json: async () => mockResponse,
+                headers: new Headers(),
             });
 
-            const result = await HttpService.get('https://api.test.com/data');
+            const result = await HttpService.get('https://api.test.com/data', {
+                measurePerformance: false,
+            });
 
             expect(global.fetch).toHaveBeenCalledWith(
                 'https://api.test.com/data',
@@ -42,9 +45,12 @@ describe('HttpService', () => {
             global.fetch.mockResolvedValueOnce({
                 ok: true,
                 json: async () => mockResponse,
+                headers: new Headers(),
             });
 
-            const result = await HttpService.post('https://api.test.com/data', postData);
+            const result = await HttpService.post('https://api.test.com/data', postData, {
+                measurePerformance: false,
+            });
 
             expect(global.fetch).toHaveBeenCalledWith(
                 'https://api.test.com/data',
@@ -60,10 +66,12 @@ describe('HttpService', () => {
             global.fetch.mockResolvedValueOnce({
                 ok: true,
                 text: async () => '<html>test</html>',
+                headers: new Headers(),
             });
 
             const result = await HttpService.request('https://api.test.com/page', {
                 json: false,
+                measurePerformance: false,
             });
 
             expect(result).toBe('<html>test</html>');
@@ -72,37 +80,63 @@ describe('HttpService', () => {
 
     describe('错误处理', () => {
         test('应该处理HTTP错误', async () => {
-            global.fetch.mockResolvedValueOnce({
+            // 使用mockResolvedValue而不是mockResolvedValueOnce,支持重试
+            global.fetch.mockResolvedValue({
                 ok: false,
                 status: 404,
                 text: async () => 'Not Found',
+                headers: new Headers(),
+                statusText: 'Not Found',
             });
 
             await expect(
-                HttpService.get('https://api.test.com/notfound')
+                HttpService.get('https://api.test.com/notfound', {
+                    measurePerformance: false,
+                    retries: 1, // 明确设置重试次数
+                })
             ).rejects.toThrow(HttpError);
         });
 
         test('应该处理网络错误', async () => {
-            global.fetch.mockRejectedValueOnce(new Error('Network error'));
+            // 使用mockRejectedValue而不是mockRejectedValueOnce,支持重试
+            global.fetch.mockRejectedValue(new Error('Network error'));
 
             await expect(
-                HttpService.get('https://api.test.com/data')
+                HttpService.get('https://api.test.com/data', {
+                    measurePerformance: false,
+                    retries: 1, // 明确设置重试次数
+                })
             ).rejects.toThrow('Network error');
         });
 
         test('应该处理超时', async () => {
-            global.fetch.mockImplementationOnce(() => 
-                new Promise((resolve) => {
-                    setTimeout(() => resolve({
-                        ok: true,
-                        json: async () => ({ data: 'test' }),
-                    }), 100);
-                })
-            );
+            // Mock一个会检查abort信号的请求
+            global.fetch.mockImplementationOnce((url, options) => {
+                return new Promise((resolve, reject) => {
+                    // 监听abort信号
+                    if (options.signal) {
+                        options.signal.addEventListener('abort', () => {
+                            reject(new Error('The operation was aborted'));
+                        });
+                    }
+                    
+                    // 模拟一个长时间运行的请求
+                    setTimeout(() => {
+                        resolve({
+                            ok: true,
+                            json: async () => ({ data: 'test' }),
+                            headers: new Headers(),
+                        });
+                    }, 500);
+                });
+            });
 
             await expect(
-                HttpService.get('https://api.test.com/data', { timeout: 50 })
+                HttpService.get('https://api.test.com/data', { 
+                    timeout: 100,
+                    retries: 0,
+                    measurePerformance: false
+                })
             ).rejects.toThrow();
         });
     });
@@ -118,12 +152,14 @@ describe('HttpService', () => {
                 return Promise.resolve({
                     ok: true,
                     json: async () => ({ data: 'success' }),
+                    headers: new Headers(),
                 });
             });
 
             const result = await HttpService.get('https://api.test.com/data', {
                 retries: 2,
                 retryDelay: 10,
+                measurePerformance: false,
             });
 
             expect(attempts).toBe(3);
@@ -137,10 +173,12 @@ describe('HttpService', () => {
                 HttpService.get('https://api.test.com/data', {
                     retries: 2,
                     retryDelay: 10,
+                    measurePerformance: false,
                 })
             ).rejects.toThrow('Network error');
 
-            expect(global.fetch).toHaveBeenCalledTimes(3); // 1次初始 + 2次重试
+            // 1次初始尝试 + 2次重试 = 3次
+            expect(global.fetch).toHaveBeenCalledTimes(3);
         });
     });
 

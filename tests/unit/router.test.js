@@ -4,9 +4,9 @@
 // ================================================================
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { switchTab, initRouter } from '@/common/utils/ui.js';
-import state from '@/common/state.js';
-import { MENU_CONFIG } from '@/common/config/menuConfig.js';
+import { switchTab, initRouter } from '@/common/ui';
+import state from '@/common/state';
+import { MENU_CONFIG } from '@/common/config/menuConfig';
 
 describe('Router System', () => {
   beforeEach(() => {
@@ -15,7 +15,7 @@ describe('Router System', () => {
       <div id="main-content">
         <div id="panel-home" class="panel"></div>
         <div id="panel-sops" class="panel hidden"></div>
-        <div id="panel-scraper" class="panel hidden"></div>
+        <div id="panel-app_center" class="panel hidden"></div>
       </div>
       <div id="dynamic-sidebar" class="hidden -ml-64"></div>
       <div id="toast-container"></div>
@@ -36,7 +36,7 @@ describe('Router System', () => {
       await switchTab('scraper', false);
       
       expect(state.currentTab).toBe('scraper');
-      expect(document.getElementById('panel-scraper').classList.contains('hidden')).toBe(false);
+      expect(document.getElementById('panel-app_center').classList.contains('hidden')).toBe(false);
       expect(document.getElementById('panel-home').classList.contains('hidden')).toBe(true);
     });
 

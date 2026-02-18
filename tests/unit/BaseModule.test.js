@@ -4,7 +4,7 @@
 // ================================================================
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import BaseModule from '@/common/BaseModule.js';
+import BaseModule from '@/common/BaseModule.ts';
 
 // 创建测试用的子类
 class TestModule extends BaseModule {

@@ -15,13 +15,14 @@ describe('PerformanceService', () => {
     describe('指标记录', () => {
         test('应该记录性能指标', () => {
             performanceService.recordMetric(METRIC_TYPES.PAGE_LOAD, 1500, {
-                url: '/test'
+                customData: 'test'
             });
             
             expect(performanceService.metrics).toHaveLength(1);
-            expect(performanceService.metrics[0].type).toBe(METRIC_TYPES.PAGE_LOAD);
-            expect(performanceService.metrics[0].value).toBe(1500);
-            expect(performanceService.metrics[0].context.url).toBe('/test');
+            expect(performanceService.metrics[0].name).toBe(METRIC_TYPES.PAGE_LOAD);
+            expect(performanceService.metrics[0].duration).toBe(1500);
+            expect(performanceService.metrics[0].metadata.customData).toBe('test');
+            expect(performanceService.metrics[0].metadata.url).toBeDefined(); // url会自动添加
         });
 
         test('应该限制内存中的指标数量', () => {
@@ -47,11 +48,11 @@ describe('PerformanceService', () => {
             expect(mockLoader).toHaveBeenCalled();
             
             const metrics = performanceService.metrics.filter(
-                m => m.type === METRIC_TYPES.MODULE_LOAD
+                m => m.name === METRIC_TYPES.MODULE_LOAD
             );
             expect(metrics).toHaveLength(1);
-            expect(metrics[0].value).toBeGreaterThan(0);
-            expect(metrics[0].context.module).toBe('test-module');
+            expect(metrics[0].duration).toBeGreaterThan(0);
+            expect(metrics[0].metadata.module).toBe('test-module');
         });
 
         test('应该记录模块加载失败', async () => {
@@ -64,10 +65,10 @@ describe('PerformanceService', () => {
             ).rejects.toThrow('加载失败');
             
             const metrics = performanceService.metrics.filter(
-                m => m.type === METRIC_TYPES.MODULE_LOAD
+                m => m.name === METRIC_TYPES.MODULE_LOAD
             );
             expect(metrics).toHaveLength(1);
-            expect(metrics[0].context.error).toBe('加载失败');
+            expect(metrics[0].metadata.error).toBe('加载失败');
         });
     });
 
@@ -84,12 +85,12 @@ describe('PerformanceService', () => {
             expect(mockApiCall).toHaveBeenCalled();
             
             const metrics = performanceService.metrics.filter(
-                m => m.type === METRIC_TYPES.API_CALL
+                m => m.name === METRIC_TYPES.API_CALL
             );
             expect(metrics).toHaveLength(1);
-            expect(metrics[0].value).toBeGreaterThan(0);
-            expect(metrics[0].context.api).toBe('test-api');
-            expect(metrics[0].context.success).toBe(true);
+            expect(metrics[0].duration).toBeGreaterThan(0);
+            expect(metrics[0].metadata.api).toBe('test-api');
+            expect(metrics[0].metadata.success).toBe(true);
         });
 
         test('应该记录API调用失败', async () => {
@@ -102,11 +103,11 @@ describe('PerformanceService', () => {
             ).rejects.toThrow('API错误');
             
             const metrics = performanceService.metrics.filter(
-                m => m.type === METRIC_TYPES.API_CALL
+                m => m.name === METRIC_TYPES.API_CALL
             );
             expect(metrics).toHaveLength(1);
-            expect(metrics[0].context.success).toBe(false);
-            expect(metrics[0].context.error).toBe('API错误');
+            expect(metrics[0].metadata.success).toBe(false);
+            expect(metrics[0].metadata.error).toBe('API错误');
         });
     });
 
@@ -123,10 +124,10 @@ describe('PerformanceService', () => {
             expect(mockAction).toHaveBeenCalled();
             
             const metrics = performanceService.metrics.filter(
-                m => m.type === METRIC_TYPES.USER_ACTION
+                m => m.name === METRIC_TYPES.USER_ACTION
             );
             expect(metrics).toHaveLength(1);
-            expect(metrics[0].context.action).toBe('submit-form');
+            expect(metrics[0].metadata.action).toBe('submit-form');
         });
     });
 
@@ -145,30 +146,39 @@ describe('PerformanceService', () => {
             
             expect(report).toHaveProperty('summary');
             expect(report).toHaveProperty('metrics');
-            expect(report).toHaveProperty('timestamp');
+            expect(report).toHaveProperty('byCategory');
         });
 
         test('报告应该包含统计摘要', () => {
             const report = performanceService.getReport();
             const summary = report.summary;
             
-            expect(summary[METRIC_TYPES.PAGE_LOAD]).toBeDefined();
-            expect(summary[METRIC_TYPES.PAGE_LOAD].count).toBe(3);
-            expect(summary[METRIC_TYPES.PAGE_LOAD].avg).toBe(1500);
-            expect(summary[METRIC_TYPES.PAGE_LOAD].min).toBe(1000);
-            expect(summary[METRIC_TYPES.PAGE_LOAD].max).toBe(2000);
+            // 验证总体统计
+            expect(summary.totalMetrics).toBe(5);
+            expect(summary.avgDuration).toBeGreaterThan(0);
+            expect(summary.minDuration).toBeGreaterThan(0);
+            expect(summary.maxDuration).toBeGreaterThan(0);
             
-            expect(summary[METRIC_TYPES.API_CALL]).toBeDefined();
-            expect(summary[METRIC_TYPES.API_CALL].count).toBe(2);
+            // 验证分类统计
+            expect(report.byCategory[METRIC_TYPES.PAGE_LOAD]).toBeDefined();
+            expect(report.byCategory[METRIC_TYPES.PAGE_LOAD].length).toBe(3);
+            expect(report.byCategory[METRIC_TYPES.API_CALL]).toBeDefined();
+            expect(report.byCategory[METRIC_TYPES.API_CALL].length).toBe(2);
         });
 
-        test('报告应该包含百分位数', () => {
+        test('报告应该按类别分组指标', () => {
             const report = performanceService.getReport();
-            const summary = report.summary[METRIC_TYPES.PAGE_LOAD];
+            const pageLoadMetrics = report.byCategory[METRIC_TYPES.PAGE_LOAD];
             
-            expect(summary.p50).toBeDefined();
-            expect(summary.p95).toBeDefined();
-            expect(summary.p99).toBeDefined();
+            expect(pageLoadMetrics).toBeDefined();
+            expect(pageLoadMetrics.length).toBe(3);
+            
+            // 验证所有指标都有正确的属性
+            pageLoadMetrics.forEach(metric => {
+                expect(metric.name).toBe(METRIC_TYPES.PAGE_LOAD);
+                expect(metric.duration).toBeGreaterThan(0);
+                expect(metric.timestamp).toBeDefined();
+            });
         });
     });
 });

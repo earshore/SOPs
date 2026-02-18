@@ -17,7 +17,6 @@ const filesToFix = [
   'src/modules/app_center/views/master_prompt/scraper/index.js',
   'src/modules/app_center/views/master_prompt/services/scraperService.js',
   'src/modules/app_center/views/master_prompt/services/parserService.js',
-  'src/modules/app_center/views/master_prompt/analysis/index.js',
   'src/modules/app_center/views/master_prompt/promptlab/index.js',
   'src/modules/app_center/views/master_prompt/data/index.js',
   'src/common/utils/ui.js',

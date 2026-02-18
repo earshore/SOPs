@@ -10,7 +10,8 @@ import { routeMiddleware } from './RouteMiddleware';
 import { routeErrorHandler } from './ErrorHandler';
 import { MENU_CONFIG } from '../config/menuConfig';
 import { ensureViewLoaded } from '../utils/viewLoader';
-import type { Route, RouteConfig, NavigationOptions, RouteHistory } from '../../types/config.js';
+import { analyticsService } from '@/services/analyticsService';
+import type { Route, RouteConfig, NavigationOptions, RouteHistory } from '../../types/config';
 
 /**
  * 路由管理器
@@ -123,7 +124,11 @@ export class Router {
             };
 
             // 1. 执行前置中间件
-            await routeMiddleware.runBeforeEach(to, from);
+            const middlewarePassed = await routeMiddleware.runBeforeEach(to, from);
+            if (!middlewarePassed) {
+                this.isNavigating = false;
+                return false;
+            }
 
             // 2. 执行路由守卫
             const allowed = await routeGuard.runGuards(to, from);
@@ -151,7 +156,10 @@ export class Router {
             // 6. 记录历史
             this._recordHistory(to);
 
-            // 7. 触发路由变化事件
+            // 7. 追踪页面浏览
+            analyticsService.trackPageView(routeId, routeConfig.title || routeId);
+
+            // 8. 触发路由变化事件
             emitAppEvent(APP_EVENTS.ROUTE_CHANGED, {
                 routeId,
                 config: routeConfig,
@@ -159,7 +167,7 @@ export class Router {
                 to
             });
 
-            // 8. 执行后置中间件
+            // 9. 执行后置中间件
             await routeMiddleware.runAfterEach(to, from);
 
             console.log(`[Router] Navigated: ${from?.path || 'null'} -> ${routeId}`);

@@ -4,6 +4,8 @@
 // 为应用状态提供完整的类型约束
 // ================================================================
 
+import type { AnalysisReport } from './modules-business';
+
 // ==================== UI状态 ====================
 
 /**
@@ -23,7 +25,7 @@ export interface UIState {
 /**
  * 采集站点类型
  */
-export type ScraperSite = 'amazon' | 'ebay' | 'walmart' | 'custom';
+export type ScraperSite = 'amazon.com' | 'amazon.de' | 'amazon.co.uk' | 'amazon.fr' | 'amazon.it' | 'amazon.es' | 'amazon.ca' | 'amazon.co.jp';
 
 /**
  * 采集状态
@@ -41,7 +43,7 @@ export interface ScrapedDataItem {
   reviews?: number;
   url?: string;
   image?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -56,6 +58,8 @@ export interface ScraperState {
   inputAsins?: string;
   progress?: number;
   error?: string;
+  expandedAsin?: string | null;
+  currentDataTab?: 'preview' | 'json';
 }
 
 // ==================== Analysis状态 ====================
@@ -71,8 +75,8 @@ export type ReportType = 'overview' | 'detailed' | 'comparison' | 'trend';
 export interface ReportData {
   type: ReportType;
   generatedAt: number;
-  data: any;
-  charts?: any[];
+  data: Record<string, unknown>;
+  charts?: Array<Record<string, unknown>>;
   summary?: string;
 }
 
@@ -82,18 +86,22 @@ export interface ReportData {
 export interface AnalysisState {
   selectedAsins: string[];
   reportData?: ReportData | null;
-  analysisReport?: any | null;
-  translatedReport?: any | null;
+  analysisReport?: AnalysisReport | string | null;
+  translatedReport?: AnalysisReport | null;
   expandedAsin?: string | null;
   isEditing?: boolean;
   showTranslation?: boolean;
-  editHistory?: any[];
+  editHistory?: Array<AnalysisReport | string>;
   lastTranslationModel?: string | null;
   isAnalyzing?: boolean;
   filters?: {
     dateRange?: [number, number];
     categories?: string[];
     priceRange?: [number, number];
+  };
+  pendingReport?: {
+    report: AnalysisReport | string;
+    timestamp: string;
   };
 }
 
@@ -178,18 +186,26 @@ export interface KeywordTrackerSettings {
 }
 
 /**
+ * 段落数据
+ */
+export interface ParagraphData {
+  original: string;
+  translation?: string;
+}
+
+/**
  * KeywordTracker状态
  */
 export interface KeywordTrackerState {
-  keywords: any[];
+  keywords: string[];
   processedCopy: string;
   formattedCopy: string;
-  matchedKeywords: any[];
-  unmatchedKeywords: any[];
-  wordFrequency: any[];
-  paragraphs: any[];
+  matchedKeywords: Array<{ keyword: string; count: number }>;
+  unmatchedKeywords: string[];
+  wordFrequency: Array<[string, number]>;
+  paragraphs: Array<string | ParagraphData>;
   translationMode: boolean;
-  keywordLocationIndex: Record<string, any>;
+  keywordLocationIndex: Record<string, number | number[]>;
   settings: KeywordTrackerSettings;
   isWindowMinimized: boolean;
   trackingData?: TrackingData | null;
@@ -199,6 +215,13 @@ export interface KeywordTrackerState {
     maxCpc?: number;
     competition?: string[];
   };
+  // Input 模块状态
+  keywordsInputText?: string;
+  copyInputText?: string;
+  // Analysis 模块状态
+  llmAnalysisResult?: string;
+  // Process 模块状态
+  showTranslation?: boolean;
 }
 
 // ==================== User状态 ====================
@@ -245,6 +268,7 @@ export interface LLMProviderConfig {
   endpoint: string;
   apiKey: string;
   model: string;
+  models?: Array<string | { id: string; name?: string; context?: number }>;
   enabled: boolean;
 }
 
@@ -274,7 +298,7 @@ export interface SettingsState {
 // ==================== 完整应用状态 ====================
 
 /**
- * Master Prompt 模块状态
+ * Master Analysis 模块状态
  */
 export interface MasterPromptState {
   scraper: ScraperState;
@@ -303,11 +327,12 @@ export interface AppState {
 
 /**
  * 状态路径（点分隔）
+ * @deprecated 使用 TypedStatePath 获得类型安全
  */
 export type StatePath = string;
 
 /**
- * 嵌套键路径
+ * 嵌套键路径工具类型
  */
 export type NestedKeyOf<T> = T extends object
   ? {
@@ -321,8 +346,111 @@ export type NestedKeyOf<T> = T extends object
 
 /**
  * 类型安全的状态路径
+ * 支持点分隔的嵌套路径,如 'ui.currentTab' | 'scraper.selectedSite'
  */
 export type TypedStatePath = NestedKeyOf<AppState>;
+
+/**
+ * 根据路径获取值类型
+ */
+export type PathValue<T, P extends string> = 
+  P extends `${infer K}.${infer Rest}`
+    ? K extends keyof T
+      ? PathValue<T[K], Rest>
+      : never
+    : P extends keyof T
+      ? T[P]
+      : never;
+
+/**
+ * UI模块路径
+ */
+export type UIPath = 
+  | 'ui'
+  | 'ui.currentTab'
+  | 'ui.currentDataTab'
+  | 'ui.currentReportTab'
+  | 'ui.sidebarCollapsed'
+  | 'ui.theme'
+  | 'ui.loading';
+
+/**
+ * Scraper模块路径
+ */
+export type ScraperPath = 
+  | 'scraper'
+  | 'scraper.isScraping'
+  | 'scraper.status'
+  | 'scraper.selectedSite'
+  | 'scraper.scrapedData'
+  | 'scraper.currentHistoryId'
+  | 'scraper.inputAsins'
+  | 'scraper.progress'
+  | 'scraper.error';
+
+/**
+ * Analysis模块路径
+ */
+export type AnalysisPath = 
+  | 'analysis'
+  | 'analysis.selectedAsins'
+  | 'analysis.reportData'
+  | 'analysis.analysisReport'
+  | 'analysis.translatedReport'
+  | 'analysis.expandedAsin'
+  | 'analysis.isEditing'
+  | 'analysis.showTranslation'
+  | 'analysis.editHistory'
+  | 'analysis.lastTranslationModel'
+  | 'analysis.isAnalyzing'
+  | 'analysis.filters'
+  | 'analysis.pendingReport';
+
+/**
+ * PromptLab模块路径
+ */
+export type PromptLabPath = 
+  | 'promptlab'
+  | 'promptlab.currentPrompt'
+  | 'promptlab.history'
+  | 'promptlab.userProductProfile'
+  | 'promptlab.selectedModel'
+  | 'promptlab.temperature'
+  | 'promptlab.maxTokens';
+
+/**
+ * KeywordTracker模块路径
+ */
+export type KeywordTrackerPath = 
+  | 'keywordTracker'
+  | 'keywordTracker.keywords'
+  | 'keywordTracker.processedCopy'
+  | 'keywordTracker.formattedCopy'
+  | 'keywordTracker.matchedKeywords'
+  | 'keywordTracker.unmatchedKeywords'
+  | 'keywordTracker.wordFrequency'
+  | 'keywordTracker.paragraphs'
+  | 'keywordTracker.translationMode'
+  | 'keywordTracker.keywordLocationIndex'
+  | 'keywordTracker.settings'
+  | 'keywordTracker.isWindowMinimized'
+  | 'keywordTracker.trackingData'
+  | 'keywordTracker.isTracking'
+  | 'keywordTracker.filters'
+  | 'keywordTracker.keywordsInputText'
+  | 'keywordTracker.copyInputText'
+  | 'keywordTracker.llmAnalysisResult'
+  | 'keywordTracker.showTranslation';
+
+/**
+ * 所有可用的状态路径(类型安全)
+ */
+export type ValidStatePath = 
+  | UIPath 
+  | ScraperPath 
+  | AnalysisPath 
+  | PromptLabPath 
+  | KeywordTrackerPath;
 
 // ==================== 状态操作类型 ====================
 
@@ -349,10 +477,10 @@ export interface BatchUpdateAction {
   type: 'BATCH_UPDATE';
   changes: Array<{
     path: StatePath;
-    value: any;
-    oldValue?: any;
+    value: unknown;
+    oldValue?: unknown;
   }>;
-  meta?: Record<string, any>;
+  meta?: Record<string, unknown>;
 }
 
 /**

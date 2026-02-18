@@ -13,7 +13,7 @@ const CACHE_PREFIX = 'view_cache_';
 /**
  * 视图配置接口
  */
-interface ViewConfig {
+export interface ViewConfig {
     path: string;
     target: string;
     isLoaded: boolean;
@@ -22,18 +22,18 @@ interface ViewConfig {
 /**
  * 视图注册表类型
  */
-type ViewRegistry = Record<string, ViewConfig>;
+export type ViewRegistry = Record<string, ViewConfig>;
 
 /**
  * HTML模块加载器类型
  */
-type HtmlModuleLoader = () => Promise<string>;
-type HtmlModules = Record<string, HtmlModuleLoader>;
+export type HtmlModuleLoader = () => Promise<string>;
+export type HtmlModules = Record<string, HtmlModuleLoader>;
 
 /**
  * 缓存统计信息
  */
-interface CacheStats {
+export interface CacheStats {
     count: number;
     size: number;
     items: Array<{
@@ -41,6 +41,14 @@ interface CacheStats {
         size: number;
         sizeKB: string;
     }>;
+}
+
+/**
+ * 视图加载选项
+ */
+export interface ViewLoadOptions {
+    useCache?: boolean;
+    forceReload?: boolean;
 }
 
 /**
@@ -308,32 +316,44 @@ export function registerView(_viewConfig: Partial<ViewConfig>): void {
 /**
  * 通用：根据路径加载模版（解决子模块 fetch 404 问题）
  * @param path - 相对 src 的路径, e.g., 'src/modules/sops/views/growth/npi_tracker/template.html'
+ * @param options - 加载选项
+ * @param options.disableFadeIn - 是否禁用淡入动画（默认false，即启用动画）
  */
-export async function loadTemplate(path: string): Promise<string> {
+export async function loadTemplate(path: string, options?: { disableFadeIn?: boolean }): Promise<string> {
     try {
         // 尝试标准化路径
         if (!path.startsWith('/')) path = '/' + path;
 
         // 1. Check Cache
         const cachedHtml = checkCache(path);
-        if (cachedHtml) return cachedHtml;
-
-        const loader = htmlModules[path];
-        if (!loader) {
-            console.error(`[ViewLoader] Template not found in registry: ${path}`);
-            // Fallback: 尝试不带前导斜杠
-            const altPath = path.substring(1);
-            if (htmlModules[altPath]) {
-                const html = await htmlModules[altPath]();
-                setCache(path, html); // Cache for original path to avoid retry
-                return html;
+        let html: string;
+        
+        if (cachedHtml) {
+            html = cachedHtml;
+        } else {
+            const loader = htmlModules[path];
+            if (!loader) {
+                console.error(`[ViewLoader] Template not found in registry: ${path}`);
+                // Fallback: 尝试不带前导斜杠
+                const altPath = path.substring(1);
+                if (htmlModules[altPath]) {
+                    html = await htmlModules[altPath]();
+                    setCache(path, html); // Cache for original path to avoid retry
+                } else {
+                    throw new Error(`Template path not found: ${path}`);
+                }
+            } else {
+                html = await loader();
+                setCache(path, html);
             }
-
-            throw new Error(`Template path not found: ${path}`);
         }
         
-        const html = await loader();
-        setCache(path, html);
+        // 2. 自动包裹淡入动画容器（系统级通用功能）
+        // 除非明确禁用，否则所有页面都应用淡入动画
+        if (!options?.disableFadeIn) {
+            html = `<div class="view-fade-in-initial view-fade-in">${html}</div>`;
+        }
+        
         return html;
     } catch (e) {
         const error = e instanceof Error ? e : new Error(String(e));

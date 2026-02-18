@@ -35,7 +35,7 @@ export interface CategoryConfig {
   id: string;
   label: string;
   icon: string;
-  color: string;
+  color: string; // 颜色方案名称，如 'blue', 'emerald', 'amber' 等
   order: number;
   version: string;
   description: string;
@@ -122,12 +122,12 @@ export const MENU_CONFIG: MenuConfig = {
       description: '集成多个专业工具的应用中心，提供数据采集、分析与优化功能。'
     },
 
-    // [应用 A] Master Prompt
-    master_prompt: {
-      id: 'master_prompt',
+    // [应用 A] Master Analysis
+    master_analysis: {
+      id: 'master_analysis',
       contextId: 'apps',
       parentModuleId: 'app_center',
-      title: 'Master Prompt',
+      title: 'Master Analysis',
       version: 'v2.1 Pro',
       icon: 'fas fa-cubes-stacked',
       description: '集成数据采集、管理、AI分析与提示词工程的一站式解决方案。'
@@ -260,9 +260,9 @@ export const MENU_CONFIG: MenuConfig = {
   // 按应用分组，而非功能分类
   // ==========================================
   appCategories: {
-    master_prompt: {
-      id: 'master_prompt',
-      label: 'Master Prompt',
+    master_analysis: {
+      id: 'master_analysis',
+      label: 'Master Analysis',
       icon: 'fas fa-robot',
       color: 'blue',
       order: 1,
@@ -444,34 +444,34 @@ export const MENU_CONFIG: MenuConfig = {
       panelId: 'panel-app_center'
     },
 
-    // --- Master Prompt 应用 ---
+    // --- Master Analysis 应用 ---
     scraper: {
-      moduleId: 'master_prompt',
+      moduleId: 'master_analysis',
       label: '数据采集',
       icon: 'fas fa-spider',
       panelId: 'panel-app_center',
-      category: 'master_prompt'
+      category: 'master_analysis'
     },
-    data: {
-      moduleId: 'master_prompt',
-      label: '数据管理',
-      icon: 'fas fa-database',
+    ai_analysis: {
+      moduleId: 'master_analysis',
+      label: 'AI智能分析',
+      icon: 'fas fa-brain',
       panelId: 'panel-app_center',
-      category: 'master_prompt'
-    },
-    analysis: {
-      moduleId: 'master_prompt',
-      label: 'AI 分析',
-      icon: 'fas fa-chart-pie',
-      panelId: 'panel-app_center',
-      category: 'master_prompt'
+      category: 'master_analysis'
     },
     promptlab: {
-      moduleId: 'master_prompt',
+      moduleId: 'master_analysis',
       label: 'Prompt 生成',
       icon: 'fas fa-wand-magic-sparkles',
       panelId: 'panel-app_center',
-      category: 'master_prompt'
+      category: 'master_analysis'
+    },
+    qalab: {
+      moduleId: 'master_analysis',
+      label: 'Q&A 预研',
+      icon: 'fas fa-comments',
+      panelId: 'panel-app_center',
+      category: 'master_analysis'
     },
 
     // --- Keyword Hunter 应用 ---

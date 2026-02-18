@@ -2,7 +2,13 @@
 // ================================================================
 // 🎯 统一数据持久化服务（TypeScript版本）
 // 替代分散的 localStorage 直接调用
+// 🎯 P0-4: 已迁移到统一错误处理
 // ================================================================
+
+import type { IStorageService } from '../types/services';
+import type { LLMProviderConfig } from '../types/state';
+import type { HistoryItem, ProxyConfig } from '../types/modules-business';
+import { handleSystemError } from '../common/errors';
 
 /**
  * 存储键名常量
@@ -33,7 +39,7 @@ export const STORAGE_KEYS = {
 /**
  * LRU缓存配置
  */
-interface LRUConfig {
+export interface LRUConfig {
   maxSize: number;
   warningThreshold: number;
   cleanupRatio: number;
@@ -42,7 +48,7 @@ interface LRUConfig {
 /**
  * 存储使用情况
  */
-interface StorageUsage {
+export interface StorageUsage {
   used: number;
   total: number;
   percent: number;
@@ -51,7 +57,7 @@ interface StorageUsage {
 /**
  * 访问时间记录
  */
-interface AccessTimeRecord {
+export interface AccessTimeRecord {
   key: string;
   accessTime: number;
   size: number;
@@ -60,7 +66,7 @@ interface AccessTimeRecord {
 /**
  * 存储服务类
  */
-class StorageServiceClass {
+class StorageServiceClass implements IStorageService {
   private _lruConfig: LRUConfig;
 
   constructor() {
@@ -74,7 +80,7 @@ class StorageServiceClass {
   /**
    * 获取存储值
    */
-  get<T = any>(key: string, defaultValue: T | null = null): T | null {
+  get<T = unknown>(key: string, defaultValue: T | null = null): T | null {
     try {
       const raw = localStorage.getItem(key);
       if (raw === null) return defaultValue;
@@ -83,7 +89,14 @@ class StorageServiceClass {
       
       return JSON.parse(raw) as T;
     } catch (e) {
-      console.warn(`[StorageService] 解析失败: ${key}`, e);
+      handleSystemError('SYS_PARSE_ERROR', {
+        module: 'StorageService',
+        action: 'get',
+        key
+      }, e as Error, {
+        log: true,
+        notify: false // 静默失败,返回默认值
+      });
       return defaultValue;
     }
   }
@@ -91,7 +104,7 @@ class StorageServiceClass {
   /**
    * 设置存储值
    */
-  set(key: string, value: any): boolean {
+  set(key: string, value: unknown): boolean {
     try {
       const serialized = JSON.stringify(value);
       
@@ -102,19 +115,47 @@ class StorageServiceClass {
       
       return true;
     } catch (e) {
-      console.error(`[StorageService] 存储失败: ${key}`, e);
+      const error = e as Error & { name: string };
       
-      if ((e as any).name === 'QuotaExceededError') {
+      if (error.name === 'QuotaExceededError') {
+        handleSystemError('SYS_STORAGE_FULL', {
+          module: 'StorageService',
+          action: 'set',
+          key,
+          valueSize: JSON.stringify(value).length
+        }, error, {
+          log: true,
+          notify: true
+        });
+        
+        // 尝试清理后重试
         this._handleQuotaExceeded();
         try {
           localStorage.setItem(key, JSON.stringify(value));
           this._updateAccessTime(key);
           return true;
         } catch (retryError) {
-          console.error(`[StorageService] 重试后仍然失败: ${key}`, retryError);
+          handleSystemError('SYS_STORAGE_ERROR', {
+            module: 'StorageService',
+            action: 'set',
+            key,
+            retry: true
+          }, retryError as Error, {
+            log: true,
+            notify: true
+          });
           return false;
         }
       }
+      
+      handleSystemError('SYS_STORAGE_ERROR', {
+        module: 'StorageService',
+        action: 'set',
+        key
+      }, error, {
+        log: true,
+        notify: false
+      });
       return false;
     }
   }
@@ -132,7 +173,14 @@ class StorageServiceClass {
       
       return raw !== null ? raw : defaultValue;
     } catch (e) {
-      console.warn(`[StorageService] 读取失败: ${key}`, e);
+      handleSystemError('SYS_STORAGE_ERROR', {
+        module: 'StorageService',
+        action: 'getRaw',
+        key
+      }, e as Error, {
+        log: true,
+        notify: false
+      });
       return defaultValue;
     }
   }
@@ -149,19 +197,46 @@ class StorageServiceClass {
       
       return true;
     } catch (e) {
-      console.error(`[StorageService] 存储失败: ${key}`, e);
+      const error = e as Error & { name: string };
       
-      if ((e as any).name === 'QuotaExceededError') {
+      if (error.name === 'QuotaExceededError') {
+        handleSystemError('SYS_STORAGE_FULL', {
+          module: 'StorageService',
+          action: 'setRaw',
+          key,
+          valueSize: value.length
+        }, error, {
+          log: true,
+          notify: true
+        });
+        
         this._handleQuotaExceeded();
         try {
           localStorage.setItem(key, value);
           this._updateAccessTime(key);
           return true;
         } catch (retryError) {
-          console.error(`[StorageService] 重试后仍然失败: ${key}`, retryError);
+          handleSystemError('SYS_STORAGE_ERROR', {
+            module: 'StorageService',
+            action: 'setRaw',
+            key,
+            retry: true
+          }, retryError as Error, {
+            log: true,
+            notify: true
+          });
           return false;
         }
       }
+      
+      handleSystemError('SYS_STORAGE_ERROR', {
+        module: 'StorageService',
+        action: 'setRaw',
+        key
+      }, error, {
+        log: true,
+        notify: false
+      });
       return false;
     }
   }
@@ -172,6 +247,34 @@ class StorageServiceClass {
   remove(key: string): void {
     localStorage.removeItem(key);
     this._removeAccessTime(key);
+  }
+
+  /**
+   * 清空所有存储
+   */
+  clear(): void {
+    localStorage.clear();
+  }
+
+  /**
+   * 检查键是否存在
+   */
+  has(key: string): boolean {
+    return localStorage.getItem(key) !== null;
+  }
+
+  /**
+   * 获取所有键
+   */
+  keys(): string[] {
+    const keys: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && !key.startsWith('_lru_access_')) {
+        keys.push(key);
+      }
+    }
+    return keys;
   }
 
   /**
@@ -314,7 +417,7 @@ class StorageServiceClass {
     
     this._cleanupLRU();
     
-    const history = this.get<any[]>(STORAGE_KEYS.SCRAPE_HISTORY, []);
+    const history = this.get<unknown[]>(STORAGE_KEYS.SCRAPE_HISTORY, []);
     if (history && history.length > 10) {
       this.set(STORAGE_KEYS.SCRAPE_HISTORY, history.slice(0, 10));
       console.log('[StorageService] 清理了采集历史数据');
@@ -328,7 +431,7 @@ class StorageServiceClass {
   /**
    * 获取 LLM 配置（包含加密的API密钥）
    */
-  async getLLMConfigWithKey(provider: string | null = null): Promise<any | null> {
+  async getLLMConfigWithKey(provider: string | null = null): Promise<LLMProviderConfig | null> {
     const activeProvider = provider || this.get<string>(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
     if (!activeProvider) return null;
     
@@ -337,24 +440,26 @@ class StorageServiceClass {
     
     try {
       const apiKey = await this.getSecure(`llm_key_${activeProvider}`, '');
-      return { ...config, apiKey };
+      return { ...config, apiKey: apiKey || '' } as LLMProviderConfig;
     } catch (error) {
       console.warn('[StorageService] Failed to decrypt API key:', error);
-      return { ...config, apiKey: '' };
+      return { ...config, apiKey: '' } as LLMProviderConfig;
     }
   }
 
   /**
    * 获取 LLM 配置
    */
-  getLLMConfig(provider: string | null = null): any | null {
+  getLLMConfig(provider: string | null = null): Partial<LLMProviderConfig> | null {
     const activeProvider = provider || this.get<string>(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
     if (!activeProvider) return null;
     
-    const config = this.get<any>(`${STORAGE_KEYS.LLM_CONFIG_PREFIX}${activeProvider}`, {});
+    const config = this.get<LLMProviderConfig>(`${STORAGE_KEYS.LLM_CONFIG_PREFIX}${activeProvider}`, {} as LLMProviderConfig);
     
-    if (config && config.apiKey) {
-      delete config.apiKey;
+    // 🔐 安全: 移除敏感的 apiKey,返回部分配置
+    if (config && 'apiKey' in config) {
+      const { apiKey, ...safeConfig } = config;
+      return safeConfig;
     }
     
     return config;
@@ -363,7 +468,7 @@ class StorageServiceClass {
   /**
    * 保存 LLM 配置
    */
-  setLLMConfig(provider: string, config: any): void {
+  setLLMConfig(provider: string, config: LLMProviderConfig): void {
     this.set(`${STORAGE_KEYS.LLM_CONFIG_PREFIX}${provider}`, config);
     this.set(STORAGE_KEYS.LLM_ACTIVE_PROVIDER, provider);
   }
@@ -371,28 +476,29 @@ class StorageServiceClass {
   /**
    * 获取代理配置
    */
-  getProxyConfig(): any {
-    return this.get(STORAGE_KEYS.PROXY_CONFIG, { type: 'allorigins' });
+  getProxyConfig(): ProxyConfig {
+    const config = this.get<ProxyConfig>(STORAGE_KEYS.PROXY_CONFIG, null);
+    return config || { type: 'allorigins', enabled: true };
   }
 
   /**
    * 保存代理配置
    */
-  setProxyConfig(config: any): void {
+  setProxyConfig(config: ProxyConfig): void {
     this.set(STORAGE_KEYS.PROXY_CONFIG, config);
   }
 
   /**
    * 获取采集历史
    */
-  getScrapeHistory(): any[] {
-    return this.get<any[]>(STORAGE_KEYS.SCRAPE_HISTORY, []) || [];
+  getScrapeHistory(): HistoryItem[] {
+    return this.get<HistoryItem[]>(STORAGE_KEYS.SCRAPE_HISTORY, []) || [];
   }
 
   /**
    * 保存采集历史
    */
-  setScrapeHistory(history: any[]): void {
+  setScrapeHistory(history: HistoryItem[]): void {
     const maxItems = 50;
     const trimmed = history.slice(0, maxItems);
     this.set(STORAGE_KEYS.SCRAPE_HISTORY, trimmed);
@@ -401,14 +507,17 @@ class StorageServiceClass {
   /**
    * 获取布局配置
    */
-  getLayoutConfig(templateId: string): any[] {
-    return this.get<any[]>(`${STORAGE_KEYS.LAYOUT_CONFIG_PREFIX}${templateId}`, []) || [];
+  getLayoutConfig(templateId: string): Array<{ id: string; x: number; y: number; w: number; h: number }> {
+    return this.get<Array<{ id: string; x: number; y: number; w: number; h: number }>>(
+      `${STORAGE_KEYS.LAYOUT_CONFIG_PREFIX}${templateId}`, 
+      []
+    ) || [];
   }
 
   /**
    * 保存布局配置
    */
-  setLayoutConfig(templateId: string, layout: any[]): void {
+  setLayoutConfig(templateId: string, layout: Array<{ id: string; x: number; y: number; w: number; h: number }>): void {
     this.set(`${STORAGE_KEYS.LAYOUT_CONFIG_PREFIX}${templateId}`, layout);
   }
 
@@ -419,7 +528,7 @@ class StorageServiceClass {
   /**
    * 安全存储敏感数据
    */
-  async setSecure(key: string, value: any): Promise<boolean> {
+  async setSecure(key: string, value: unknown): Promise<boolean> {
     const { SecureStorage } = await import('../common/utils/secureStorage');
     return await SecureStorage.setSecure(key, value);
   }
@@ -427,7 +536,7 @@ class StorageServiceClass {
   /**
    * 读取安全存储的数据
    */
-  async getSecure<T = any>(key: string, defaultValue: T | null = null): Promise<T | null> {
+  async getSecure<T = unknown>(key: string, defaultValue: T | null = null): Promise<T | null> {
     const { SecureStorage } = await import('../common/utils/secureStorage');
     return await SecureStorage.getSecure(key, defaultValue);
   }
@@ -448,6 +557,6 @@ export default StorageService;
 
 // 向后兼容：暴露到 window
 if (typeof window !== 'undefined') {
-  (window as any).StorageService = StorageService;
-  (window as any).STORAGE_KEYS = STORAGE_KEYS;
+  (window as Window & { StorageService?: StorageServiceClass; STORAGE_KEYS?: typeof STORAGE_KEYS }).StorageService = StorageService;
+  (window as Window & { StorageService?: StorageServiceClass; STORAGE_KEYS?: typeof STORAGE_KEYS }).STORAGE_KEYS = STORAGE_KEYS;
 }

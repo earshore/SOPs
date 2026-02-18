@@ -14,7 +14,7 @@ import {
   isFunction,
   isPromise,
   isHTMLElement
-} from '@/common/utils/typeGuards.js';
+} from '@/common/utils/typeGuards';
 import {
   RouteConfigSchema,
   LLMConfigSchema

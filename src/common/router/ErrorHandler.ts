@@ -4,8 +4,8 @@
 // 统一处理路由相关的错误
 // ================================================================
 
-import type { RouteErrorContext, RouteErrorHandler } from '../../types/config.js';
-import { render404, renderError } from './NotFound.js';
+import type { RouteErrorContext, RouteErrorHandler } from '../../types/config';
+import { render404, renderError } from './NotFound';
 
 type ErrorType = 'NOT_FOUND' | 'PERMISSION_DENIED' | 'LOAD_FAILED' | 'TIMEOUT' | 'NETWORK_ERROR' | 'UNKNOWN';
 
@@ -64,8 +64,9 @@ export class RouteErrorHandlerManager {
     console.error('[RouteErrorHandler] 默认处理器:', error, context);
     
     // 尝试显示错误提示
-    if (typeof window !== 'undefined' && (window as any).showToast) {
-      (window as any).showToast('页面加载失败，请重试', 'error');
+    const w = window as Window & { showToast?: (message: string, type: string) => void };
+    if (typeof window !== 'undefined' && w.showToast) {
+      w.showToast('页面加载失败，请重试', 'error');
     }
   }
 
@@ -106,12 +107,16 @@ export class RouteErrorHandlerManager {
 
     // 权限错误处理器
     this.register('PERMISSION_DENIED', (_error: Error, _context: RouteErrorContext) => {
-      if (typeof window !== 'undefined' && (window as any).showToast) {
-        (window as any).showToast('您没有权限访问此页面', 'warning');
+      const w = window as Window & { 
+        showToast?: (message: string, type: string) => void;
+        switchTab?: (tab: string, updateHistory: boolean) => void;
+      };
+      if (typeof window !== 'undefined' && w.showToast) {
+        w.showToast('您没有权限访问此页面', 'warning');
       }
       // 重定向到首页
-      if (typeof window !== 'undefined' && (window as any).switchTab) {
-        setTimeout(() => (window as any).switchTab('home', false), 1000);
+      if (typeof window !== 'undefined' && w.switchTab) {
+        setTimeout(() => w.switchTab!('home', false), 1000);
       }
     });
 
@@ -125,8 +130,9 @@ export class RouteErrorHandlerManager {
       if (retryCount < 2) {
         console.log(`🔄 [RouteErrorHandler] 将在2秒后重试...`);
         setTimeout(() => {
-          if (typeof window !== 'undefined' && (window as any).switchTab) {
-            (window as any).switchTab(context.routeId, false);
+          const w = window as Window & { switchTab?: (tab: string, updateHistory: boolean) => void };
+          if (typeof window !== 'undefined' && w.switchTab) {
+            w.switchTab(context.routeId || '', false);
           }
         }, 2000);
       }
@@ -134,15 +140,17 @@ export class RouteErrorHandlerManager {
 
     // 超时处理器
     this.register('TIMEOUT', (_error: Error, _context: RouteErrorContext) => {
-      if (typeof window !== 'undefined' && (window as any).showToast) {
-        (window as any).showToast('页面加载超时，请检查网络连接', 'error');
+      const w = window as Window & { showToast?: (message: string, type: string) => void };
+      if (typeof window !== 'undefined' && w.showToast) {
+        w.showToast('页面加载超时，请检查网络连接', 'error');
       }
     });
 
     // 网络错误处理器
     this.register('NETWORK_ERROR', (_error: Error, _context: RouteErrorContext) => {
-      if (typeof window !== 'undefined' && (window as any).showToast) {
-        (window as any).showToast('网络连接失败，请检查网络设置', 'error');
+      const w = window as Window & { showToast?: (message: string, type: string) => void };
+      if (typeof window !== 'undefined' && w.showToast) {
+        w.showToast('网络连接失败，请检查网络设置', 'error');
       }
     });
   }

@@ -3,11 +3,13 @@
 // 🎯 大语言模型服务 (TypeScript版本)
 // 🛡️ 增强鲁棒性 - 指数退避重试 (Exponential Backoff)
 // 🌐 环境适配 - 开发/生产环境自动切换
+// 🎯 P0-4: 已迁移到统一错误处理
 // ================================================================
 
 import { ErrorService } from './errorService';
 import { configCenter } from '../common/config/ConfigCenter';
 import { EnvConfig } from '../common/config/envConfig';
+import { ApiError, NetworkError } from '../common/errors';
 
 // ========================
 // 类型定义
@@ -206,6 +208,7 @@ export async function callLLM(
       if (!response.ok) {
         const errorText = await response.text();
         let errorMsg = `服务器返回错误 ${response.status}`;
+        let errorCode = 'API_SERVER_ERROR';
         let shouldRetry = false;
 
         try {
@@ -217,31 +220,45 @@ export async function callLLM(
           // 解析失败，使用原始文本
         }
 
-        // 特殊处理 401 错误,提供更友好的提示
+        // 根据状态码确定错误类型和是否重试
         if (response.status === 401) {
-          if (configCenter.isProduction()) {
-            errorMsg = `⛔ 认证失败: ${errorMsg}\n\n可能的原因:\n1. 未配置访问密码 (如果服务器启用了密码保护)\n2. API Key 格式不正确\n3. API Key 已过期或无效\n\n请在设置中检查您的配置。`;
-          } else {
-            errorMsg = `⛔ API Key 认证失败: ${errorMsg}\n\n请检查您在设置中配置的 API Key 是否正确。`;
-          }
-        }
-
-        // 决定是否重试
-        // 429: Too Many Requests (限流)
-        // 5xx: Server Errors (服务器崩溃/网关超时)
-        if (response.status === 429 || response.status >= 500) {
+          errorCode = 'API_INVALID_KEY';
+          errorMsg = configCenter.isProduction()
+            ? `认证失败: ${errorMsg}\n\n可能的原因:\n1. 未配置访问密码\n2. API Key 格式不正确\n3. API Key 已过期或无效`
+            : `API Key 认证失败: ${errorMsg}`;
+        } else if (response.status === 429) {
+          errorCode = 'API_RATE_LIMIT';
           shouldRetry = true;
+        } else if (response.status === 404) {
+          errorCode = 'API_NOT_FOUND';
+        } else if (response.status >= 500) {
+          errorCode = 'API_SERVER_ERROR';
+          shouldRetry = true;
+        } else if (response.status === 400) {
+          errorCode = 'API_INVALID_REQUEST';
         }
 
-        const error: Error & { status?: number } = new Error(errorMsg);
-        error.status = response.status;
+        // 创建统一的API错误
+        const error = new ApiError(
+          errorMsg,
+          errorCode,
+          response.status,
+          errorText,
+          {
+            module: 'LLMService',
+            action: 'callLLM',
+            model,
+            endpoint: normalizedEndpoint,
+            attempt: attempt + 1
+          }
+        );
 
         if (shouldRetry && attempt < retries) {
           lastError = error;
           console.warn(`⚠️ LLM 调用失败 (${response.status})，准备重试:`, errorMsg);
-          continue; // 进入下一次循环
+          continue;
         } else {
-          throw error; // 致命错误或重试耗尽，直接抛出
+          throw error;
         }
       }
 
@@ -258,25 +275,56 @@ export async function callLLM(
       lastError = e as Error;
       const error = e as Error & { name?: string; status?: number };
 
-      // 如果是 AbortError (超时)，通常也可以重试
-      if (error.name === 'AbortError') {
-        const timeoutMsg = `模型响应超时(${timeout / 1000}秒)`;
-        if (attempt < retries) {
-          console.warn(`⚠️ LLM ${timeoutMsg}，准备重试...`);
+      // 如果已经是ApiError,直接处理
+      if (error instanceof ApiError) {
+        if (attempt < retries && (error.statusCode === 429 || (error.statusCode && error.statusCode >= 500))) {
+          console.warn(`⚠️ LLM 调用失败，准备重试...`);
           continue;
         }
-        throw new Error(`${timeoutMsg}，请检查网络或增加超时时间`);
+        throw error;
       }
 
-      // 如果已经是 Error 对象且有 status (上面抛出的)，则保持
-      // 否则如果是网络错误 (fetch failed)，也值得重试
+      // 超时错误
+      if (error.name === 'AbortError') {
+        const timeoutError = new NetworkError(
+          `模型响应超时(${timeout / 1000}秒)`,
+          'LLM_TIMEOUT',
+          {
+            module: 'LLMService',
+            action: 'callLLM',
+            model,
+            timeout,
+            attempt: attempt + 1
+          },
+          error
+        );
+
+        if (attempt < retries) {
+          lastError = timeoutError;
+          console.warn(`⚠️ LLM 超时，准备重试...`);
+          continue;
+        }
+        throw timeoutError;
+      }
+
+      // 网络错误
       if (!error.status && attempt < retries) {
-        console.warn(`⚠️ 网络/未知错误，准备重试:`, error.message);
+        lastError = new NetworkError(
+          error.message || '网络请求失败',
+          'NET_REQUEST_FAILED',
+          {
+            module: 'LLMService',
+            action: 'callLLM',
+            model,
+            attempt: attempt + 1
+          },
+          error
+        );
+        console.warn(`⚠️ 网络错误，准备重试:`, error.message);
         continue;
       }
 
-      // 其他情况 (如 400 Bad Request) 直接抛出
-      throw e;
+      throw error;
     }
   }
 

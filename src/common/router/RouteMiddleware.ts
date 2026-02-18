@@ -4,7 +4,7 @@
 // 提供路由切换前后的钩子函数
 // ================================================================
 
-import type { Route, RouteMiddlewareFunction } from '../../types/config.js';
+import type { Route, RouteMiddlewareFunction } from '../../types/config';
 
 /**
  * 路由中间件管理器
@@ -22,10 +22,32 @@ export class RouteMiddlewareManager {
   /**
    * 添加前置中间件
    * @param middleware - (to, from) => void | Promise<void>
+   * @returns 取消添加的函数
    */
-  addBeforeEach(middleware: RouteMiddlewareFunction): void {
+  addBeforeEach(middleware: RouteMiddlewareFunction): () => void {
     this.beforeEach.push(middleware);
     console.log(`✅ [RouteMiddleware] 已添加前置中间件，当前共 ${this.beforeEach.length} 个`);
+
+    // 返回取消函数
+    return () => {
+      const index = this.beforeEach.indexOf(middleware);
+      if (index > -1) {
+        this.beforeEach.splice(index, 1);
+        console.log(`✅ [RouteMiddleware] 已移除前置中间件，剩余 ${this.beforeEach.length} 个`);
+      }
+    };
+  }
+
+  /**
+   * 移除指定的前置中间件
+   * @param middleware - 要移除的中间件
+   */
+  removeBeforeEach(middleware: RouteMiddlewareFunction): void {
+    const index = this.beforeEach.indexOf(middleware);
+    if (index > -1) {
+      this.beforeEach.splice(index, 1);
+      console.log(`✅ [RouteMiddleware] 已移除前置中间件，剩余 ${this.beforeEach.length} 个`);
+    }
   }
 
   /**
@@ -41,15 +63,19 @@ export class RouteMiddlewareManager {
    * 执行前置中间件
    * @param to - 目标路由
    * @param from - 来源路由
+   * @returns 是否允许继续导航
    */
-  async runBeforeEach(to: Route, from: Route | null): Promise<void> {
+  async runBeforeEach(to: Route, from: Route | null): Promise<boolean> {
     for (const middleware of this.beforeEach) {
       try {
         await middleware(to, from);
       } catch (error) {
         console.error(`❌ [RouteMiddleware] 前置中间件执行错误:`, error);
+        // 中间件错误阻止导航
+        return false;
       }
     }
+    return true;
   }
 
   /**

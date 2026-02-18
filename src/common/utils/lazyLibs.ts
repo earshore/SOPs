@@ -7,12 +7,20 @@
 /**
  * Chart.js 类型 (简化版)
  */
-type ChartJS = any;
+type ChartJS = unknown;
 
 /**
  * GridStack 类型 (简化版)
  */
-type GridStack = any;
+type GridStack = unknown;
+
+/**
+ * Window扩展类型
+ */
+type WindowWithLibs = Window & {
+  Chart?: ChartJS;
+  GridStack?: GridStack;
+};
 
 let chartJsPromise: Promise<ChartJS> | null = null;
 let gridStackPromise: Promise<GridStack> | null = null;
@@ -21,15 +29,16 @@ let gridStackPromise: Promise<GridStack> | null = null;
  * 懒加载 Chart.js
  */
 export function loadChartJs(): Promise<ChartJS> {
-  if ((window as any).Chart) return Promise.resolve((window as any).Chart);
+  const win = window as WindowWithLibs;
+  if (win.Chart) return Promise.resolve(win.Chart);
 
   if (!chartJsPromise) {
     console.log('⏳ Loading Chart.js...');
     chartJsPromise = import('chart.js/auto')
       .then((module) => {
-        (window as any).Chart = module.default;
+        win.Chart = module.default;
         console.log('✅ Chart.js Loaded');
-        return (window as any).Chart;
+        return win.Chart as ChartJS;
       })
       .catch((err) => {
         console.error('Failed to load Chart.js', err);
@@ -44,7 +53,8 @@ export function loadChartJs(): Promise<ChartJS> {
  * 懒加载 GridStack
  */
 export function loadGridStack(): Promise<GridStack> {
-  if ((window as any).GridStack) return Promise.resolve((window as any).GridStack);
+  const win = window as WindowWithLibs;
+  if (win.GridStack) return Promise.resolve(win.GridStack);
 
   if (!gridStackPromise) {
     console.log('⏳ Loading GridStack...');
@@ -53,9 +63,9 @@ export function loadGridStack(): Promise<GridStack> {
 
     gridStackPromise = import('gridstack')
       .then((module) => {
-        (window as any).GridStack = module.GridStack;
+        win.GridStack = module.GridStack;
         console.log('✅ GridStack Loaded');
-        return (window as any).GridStack;
+        return win.GridStack as GridStack;
       })
       .catch((err) => {
         console.error('Failed to load GridStack', err);

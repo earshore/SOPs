@@ -1,418 +1,722 @@
-<!-- 使用指南模态框组件 -->
+<!-- 使用指南模态框组件 (Visual Enhanced - Style Unified) -->
 <app-modal id="user-guide-modal" size="2xl" no-header>
     <div slot="body">
+
+        <!-- Decorative top accent line -->
+        <div class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500 z-10 rounded-t-2xl"></div>
+
         <!-- Custom Header -->
-        <div class="flex items-center justify-between px-6 py-4 border-b bg-gradient-to-r from-blue-50 to-indigo-50">
-            <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                <i class="fas fa-book text-blue-500"></i>
-                使用指南 - Amazing Amazon Architect
-            </h2>
-            <button data-action="close" class="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
-                <i class="fas fa-times text-xl"></i>
+        <div class="relative flex items-center justify-between px-6 py-5 border-b border-slate-100">
+            <div class="flex items-center gap-3.5">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
+                    <i class="fas fa-book text-white text-sm"></i>
+                </div>
+                <div>
+                    <h2 class="text-[15px] font-bold text-slate-800 tracking-tight">使用指南</h2>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Amazing Amazon Architect · 快速上手</p>
+                </div>
+            </div>
+            <button data-action="close"
+                class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all duration-200 hover:rotate-90 cursor-pointer">
+                <i class="fas fa-times text-sm"></i>
             </button>
         </div>
 
         <!-- Content -->
-        <div class="p-6 overflow-y-auto max-h-[80vh]">
+        <div class="overflow-y-auto max-h-[80vh]" style="scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent;">
 
             <!-- Welcome Section -->
-            <header class="text-center mb-8 pb-6 border-b border-slate-100">
-                <h1 class="text-2xl font-extrabold text-slate-900 mb-2">🚀 欢迎使用 AihangSOP</h1>
-                <p class="text-slate-600 max-w-2xl mx-auto">
+            <header class="relative text-center px-6 pt-8 pb-8 bg-gradient-to-b from-slate-50/80 to-white">
+                <!-- Subtle decorative dots -->
+                <div class="absolute top-4 left-6 flex gap-1.5 opacity-30">
+                    <div class="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+                    <div class="w-1.5 h-1.5 rounded-full bg-indigo-400"></div>
+                    <div class="w-1.5 h-1.5 rounded-full bg-violet-400"></div>
+                </div>
+                <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-500 to-violet-500 shadow-xl shadow-indigo-500/20 mb-4">
+                    <span class="text-2xl">🚀</span>
+                </div>
+                <h1 class="text-2xl font-extrabold text-slate-900 mb-3 tracking-tight">欢迎使用 AihangSOP</h1>
+                <p class="text-sm text-slate-500 max-w-xl mx-auto leading-relaxed">
                     专为亚马逊欧洲站卖家打造的一站式辅助运营平台，集成 AI 辅助分析、SOP 流程标准化、智库知识库，
-                    助您实现 <span class="font-bold text-blue-600">简单</span>且<span class="font-bold text-blue-600">高效</span>
-                    的运营。
+                    助您实现 <span class="font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">简单</span> 且
+                    <span class="font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">高效</span> 的运营。
                 </p>
+                <!-- Subtle separator -->
+                <div class="mt-8 mx-auto w-48 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
             </header>
 
-            <!-- Navigation Tabs -->
-            <div class="flex border-b border-slate-200 mb-6 overflow-x-auto" id="guide-tabs">
-                <button
-                    class="guide-tab active px-4 py-2 text-sm font-medium text-blue-600 border-b-2 border-blue-500 whitespace-nowrap"
-                    data-action="switch-guide-tab" data-tab="overview">
-                    <i class="fas fa-home mr-1.5"></i>平台概览
-                </button>
-                <button
-                    class="guide-tab px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700 whitespace-nowrap"
-                    data-action="switch-guide-tab" data-tab="sops">
-                    <i class="fas fa-clipboard-list mr-1.5"></i>SOPs流程中心
-                </button>
-                <button
-                    class="guide-tab px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700 whitespace-nowrap"
-                    data-action="switch-guide-tab" data-tab="apps">
-                    <i class="fas fa-cubes mr-1.5"></i>应用中心
-                </button>
-                <button
-                    class="guide-tab px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700 whitespace-nowrap"
-                    data-action="switch-guide-tab" data-tab="hub">
-                    <i class="fas fa-book-open mr-1.5"></i>Amazon智库
-                </button>
-                <button
-                    class="guide-tab px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700 whitespace-nowrap"
-                    data-action="switch-guide-tab" data-tab="more">
-                    <i class="fas fa-compass mr-1.5"></i>更多
-                </button>
-            </div>
+            <div class="px-6 pb-6">
 
-            <!-- Tab Contents -->
-            <div id="guide-content">
-
-                <!-- 平台概览 Tab -->
-                <div class="guide-panel" data-panel="overview">
-                    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                        <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-5 rounded-xl border border-blue-200">
-                            <div class="w-10 h-10 bg-blue-500 text-white rounded-lg flex items-center justify-center mb-3">
-                                <i class="fas fa-clipboard-list"></i>
+                <!-- Navigation Tabs -->
+                <div class="flex border-b border-slate-200 mb-6 overflow-x-auto gap-1" id="guide-tabs"
+                    style="scrollbar-width: none;">
+                    <button
+                        class="guide-tab active group relative px-4 py-2.5 text-sm font-semibold text-blue-600 whitespace-nowrap transition-all duration-200"
+                        data-action="switch-guide-tab" data-tab="overview">
+                        <span class="flex items-center gap-2">
+                            <div class="w-5 h-5 rounded-md bg-blue-100 group-[.active]:bg-blue-500 flex items-center justify-center transition-colors duration-200">
+                                <i class="fas fa-home text-[9px] text-blue-500 group-[.active]:text-white transition-colors duration-200"></i>
                             </div>
-                            <h3 class="font-bold text-slate-800 mb-1">SOPs 流程中心</h3>
-                            <p class="text-xs text-slate-600">集成所有亚马逊运营标准化流程指引，确保团队执行一致性。</p>
-                        </div>
-                        <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-5 rounded-xl border border-purple-200">
-                            <div class="w-10 h-10 bg-purple-500 text-white rounded-lg flex items-center justify-center mb-3">
-                                <i class="fas fa-cubes"></i>
+                            平台概览
+                        </span>
+                        <div class="absolute bottom-0 left-2 right-2 h-[2px] bg-blue-500 rounded-full transition-opacity duration-200"></div>
+                    </button>
+                    <button
+                        class="guide-tab group relative px-4 py-2.5 text-sm font-medium text-slate-400 hover:text-slate-600 whitespace-nowrap transition-all duration-200"
+                        data-action="switch-guide-tab" data-tab="sops">
+                        <span class="flex items-center gap-2">
+                            <div class="w-5 h-5 rounded-md bg-slate-100 group-hover:bg-slate-200 group-[.active]:bg-emerald-500 flex items-center justify-center transition-colors duration-200">
+                                <i class="fas fa-clipboard-list text-[9px] text-slate-400 group-[.active]:text-white transition-colors duration-200"></i>
                             </div>
-                            <h3 class="font-bold text-slate-800 mb-1">应用中心</h3>
-                            <p class="text-xs text-slate-600">集成多个专业工具的应用中心，提供数据采集、分析与优化功能。</p>
-                        </div>
-                        <div class="bg-gradient-to-br from-amber-50 to-amber-100 p-5 rounded-xl border border-amber-200">
-                            <div class="w-10 h-10 bg-amber-500 text-white rounded-lg flex items-center justify-center mb-3">
-                                <i class="fas fa-book-open"></i>
+                            SOPs流程中心
+                        </span>
+                        <div class="absolute bottom-0 left-2 right-2 h-[2px] bg-blue-500 rounded-full opacity-0 group-[.active]:opacity-100 transition-opacity duration-200"></div>
+                    </button>
+                    <button
+                        class="guide-tab group relative px-4 py-2.5 text-sm font-medium text-slate-400 hover:text-slate-600 whitespace-nowrap transition-all duration-200"
+                        data-action="switch-guide-tab" data-tab="apps">
+                        <span class="flex items-center gap-2">
+                            <div class="w-5 h-5 rounded-md bg-slate-100 group-hover:bg-slate-200 group-[.active]:bg-purple-500 flex items-center justify-center transition-colors duration-200">
+                                <i class="fas fa-cubes text-[9px] text-slate-400 group-[.active]:text-white transition-colors duration-200"></i>
                             </div>
-                            <h3 class="font-bold text-slate-800 mb-1">Amazon 智库</h3>
-                            <p class="text-xs text-slate-600">亚马逊市场洞察报告、SEO策略、A10 算法知识库、营销日历与旺季攻略。</p>
-                        </div>
-                        <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 p-5 rounded-xl border border-emerald-200">
-                            <div class="w-10 h-10 bg-emerald-500 text-white rounded-lg flex items-center justify-center mb-3">
-                                <i class="fas fa-compass"></i>
+                            应用中心
+                        </span>
+                        <div class="absolute bottom-0 left-2 right-2 h-[2px] bg-blue-500 rounded-full opacity-0 group-[.active]:opacity-100 transition-opacity duration-200"></div>
+                    </button>
+                    <button
+                        class="guide-tab group relative px-4 py-2.5 text-sm font-medium text-slate-400 hover:text-slate-600 whitespace-nowrap transition-all duration-200"
+                        data-action="switch-guide-tab" data-tab="hub">
+                        <span class="flex items-center gap-2">
+                            <div class="w-5 h-5 rounded-md bg-slate-100 group-hover:bg-slate-200 group-[.active]:bg-amber-500 flex items-center justify-center transition-colors duration-200">
+                                <i class="fas fa-book-open text-[9px] text-slate-400 group-[.active]:text-white transition-colors duration-200"></i>
                             </div>
-                            <h3 class="font-bold text-slate-800 mb-1">更多</h3>
-                            <p class="text-xs text-slate-600">探索更多实用功能和工具，提升工作效率。</p>
-                        </div>
-                    </div>
-
-                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                        <h4 class="font-bold text-slate-800 mb-2 flex items-center gap-2">
-                            <i class="fas fa-flag text-blue-500"></i> 关注市场 (欧洲站)
-                        </h4>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="px-2 py-1 bg-white border border-slate-200 rounded text-sm font-medium">🇩🇪 德国</span>
-                            <span class="px-2 py-1 bg-white border border-slate-200 rounded text-sm font-medium">🇫🇷 法国</span>
-                            <span class="px-2 py-1 bg-white border border-slate-200 rounded text-sm font-medium">🇮🇹 意大利</span>
-                            <span class="px-2 py-1 bg-white border border-slate-200 rounded text-sm font-medium">🇪🇸 西班牙</span>
-                            <span class="px-2 py-1 bg-white border border-slate-200 rounded text-sm font-medium">🇬🇧 英国</span>
-                            <span class="px-2 py-1 bg-slate-100 text-slate-500 rounded text-sm">+ 荷兰/瑞典/波兰/比利时/爱尔兰</span>
-                        </div>
-                    </div>
+                            Amazon智库
+                        </span>
+                        <div class="absolute bottom-0 left-2 right-2 h-[2px] bg-blue-500 rounded-full opacity-0 group-[.active]:opacity-100 transition-opacity duration-200"></div>
+                    </button>
+                    <button
+                        class="guide-tab group relative px-4 py-2.5 text-sm font-medium text-slate-400 hover:text-slate-600 whitespace-nowrap transition-all duration-200"
+                        data-action="switch-guide-tab" data-tab="more">
+                        <span class="flex items-center gap-2">
+                            <div class="w-5 h-5 rounded-md bg-slate-100 group-hover:bg-slate-200 group-[.active]:bg-cyan-500 flex items-center justify-center transition-colors duration-200">
+                                <i class="fas fa-compass text-[9px] text-slate-400 group-[.active]:text-white transition-colors duration-200"></i>
+                            </div>
+                            更多
+                        </span>
+                        <div class="absolute bottom-0 left-2 right-2 h-[2px] bg-blue-500 rounded-full opacity-0 group-[.active]:opacity-100 transition-opacity duration-200"></div>
+                    </button>
                 </div>
 
-                <!-- SOPs流程中心 Tab -->
-                <div class="guide-panel hidden" data-panel="sops">
-                    <p class="text-sm text-slate-600 mb-4">集成所有亚马逊运营标准化流程指引，确保团队执行一致性。分为四大体系：</p>
-                    <div class="space-y-4">
-                        <!-- 1. 运营与推广体系 (order: 1) -->
-                        <div class="border border-slate-200 rounded-xl overflow-hidden">
-                            <div class="bg-emerald-50 px-4 py-3 border-b border-emerald-100">
-                                <h4 class="font-bold text-emerald-800 flex items-center gap-2">
-                                    <i class="fas fa-rocket"></i> 运营与推广体系 <span class="text-xs font-normal text-emerald-600 ml-2">v2.0</span>
-                                </h4>
-                                <p class="text-xs text-emerald-700 mt-1">从新品上架到爆款打造的全链路运营推广策略集合。</p>
+                <!-- Tab Contents -->
+                <div id="guide-content">
+
+                    <!-- ═══════════════════ 平台概览 Tab ═══════════════════ -->
+                    <div class="guide-panel" data-panel="overview">
+                        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                            <!-- SOPs Card -->
+                            <div class="group relative bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300 hover:-translate-y-0.5">
+                                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-400 to-blue-500 rounded-t-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl flex items-center justify-center mb-3.5 shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform duration-300">
+                                    <i class="fas fa-clipboard-list text-sm"></i>
+                                </div>
+                                <h3 class="font-bold text-slate-800 mb-1.5 text-sm">SOPs 流程中心</h3>
+                                <p class="text-[11px] text-slate-500 leading-relaxed">集成所有亚马逊运营标准化流程指引，确保团队执行一致性。</p>
                             </div>
-                            <div class="p-4 grid md:grid-cols-2 lg:grid-cols-3 gap-2 text-sm">
-                                <span class="flex items-center gap-2 text-slate-700"><i class="fas fa-seedling text-emerald-500 w-4"></i>新品生命周期跟踪</span>
-                                <span class="flex items-center gap-2 text-slate-700"><i class="fas fa-magnifying-glass-chart text-emerald-500 w-4"></i>Listing 极致优化 (SEO)</span>
-                                <span class="flex items-center gap-2 text-slate-700"><i class="fas fa-chart-line text-emerald-500 w-4"></i>PPC 广告投放与优化</span>
-                                <span class="flex items-center gap-2 text-slate-700"><i class="fas fa-book-dead text-emerald-500 w-4"></i>欧洲本土化高危词库</span>
-                                <span class="flex items-center gap-2 text-slate-700"><i class="fas fa-tags text-emerald-500 w-4"></i>促销活动提报</span>
-                                <span class="flex items-center gap-2 text-slate-700"><i class="fas fa-binoculars text-emerald-500 w-4"></i>竞品监控与分析</span>
+                            <!-- Apps Card -->
+                            <div class="group relative bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md hover:border-purple-200 transition-all duration-300 hover:-translate-y-0.5">
+                                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-400 to-purple-500 rounded-t-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl flex items-center justify-center mb-3.5 shadow-lg shadow-purple-500/20 group-hover:scale-110 transition-transform duration-300">
+                                    <i class="fas fa-cubes text-sm"></i>
+                                </div>
+                                <h3 class="font-bold text-slate-800 mb-1.5 text-sm">应用中心</h3>
+                                <p class="text-[11px] text-slate-500 leading-relaxed">集成多个专业工具的应用中心，提供数据采集、分析与优化功能。</p>
+                            </div>
+                            <!-- Hub Card -->
+                            <div class="group relative bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md hover:border-amber-200 transition-all duration-300 hover:-translate-y-0.5">
+                                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 to-amber-500 rounded-t-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                <div class="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-600 text-white rounded-xl flex items-center justify-center mb-3.5 shadow-lg shadow-amber-500/20 group-hover:scale-110 transition-transform duration-300">
+                                    <i class="fas fa-book-open text-sm"></i>
+                                </div>
+                                <h3 class="font-bold text-slate-800 mb-1.5 text-sm">Amazon 智库</h3>
+                                <p class="text-[11px] text-slate-500 leading-relaxed">亚马逊市场洞察报告、SEO策略、A10 算法知识库、营销日历。</p>
+                            </div>
+                            <!-- More Card -->
+                            <div class="group relative bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all duration-300 hover:-translate-y-0.5">
+                                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-t-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-xl flex items-center justify-center mb-3.5 shadow-lg shadow-emerald-500/20 group-hover:scale-110 transition-transform duration-300">
+                                    <i class="fas fa-compass text-sm"></i>
+                                </div>
+                                <h3 class="font-bold text-slate-800 mb-1.5 text-sm">更多</h3>
+                                <p class="text-[11px] text-slate-500 leading-relaxed">探索更多实用功能和工具，提升工作效率。</p>
                             </div>
                         </div>
 
-                        <!-- 2. 供应链与物流体系 (order: 2) -->
-                        <div class="border border-slate-200 rounded-xl overflow-hidden">
-                            <div class="bg-amber-50 px-4 py-3 border-b border-amber-100">
-                                <h4 class="font-bold text-amber-800 flex items-center gap-2">
-                                    <i class="fas fa-warehouse"></i> 供应链与物流体系 <span class="text-xs font-normal text-amber-600 ml-2">v1.5</span>
-                                </h4>
-                                <p class="text-xs text-amber-700 mt-1">构建高效供应链，优化库存周转与物流成本。</p>
-                            </div>
-                            <div class="p-4 grid md:grid-cols-2 lg:grid-cols-3 gap-2 text-sm">
-                                <span class="flex items-center gap-2 text-slate-700"><i class="fas fa-truck-fast text-amber-500 w-4"></i>FBA 发货标准操作</span>
-                                <span class="flex items-center gap-2 text-slate-700"><i class="fas fa-clipboard-check text-amber-500 w-4"></i>采购与质检 (QC)</span>
-                                <span class="flex items-center gap-2 text-slate-700"><i class="fas fa-cubes text-amber-500 w-4"></i>库存预警与补货</span>
-                            </div>
-                        </div>
-
-                        <!-- 3. 账号安全与风控体系 (order: 3) -->
-                        <div class="border border-slate-200 rounded-xl overflow-hidden">
-                            <div class="bg-red-50 px-4 py-3 border-b border-red-100">
-                                <h4 class="font-bold text-red-800 flex items-center gap-2">
-                                    <i class="fas fa-shield-halved"></i> 账号安全与风控体系 <span class="text-xs font-normal text-red-600 ml-2">v3.0</span>
-                                </h4>
-                                <p class="text-xs text-red-700 mt-1">全方位账号健康监控与风险防御机制。</p>
-                            </div>
-                            <div class="p-4 grid md:grid-cols-2 lg:grid-cols-3 gap-2 text-sm">
-                                <span class="flex items-center gap-2 text-slate-700"><i class="fas fa-shield-halved text-red-400 w-4"></i>账号登录与环境安全</span>
-                                <span class="flex items-center gap-2 text-slate-700"><i class="fas fa-user-lock text-red-400 w-4"></i>后台权限管理</span>
-                                <span class="flex items-center gap-2 text-slate-700"><i class="fas fa-trademark text-red-400 w-4"></i>品牌与侵权审核</span>
-                                <span class="flex items-center gap-2 text-slate-700"><i class="fas fa-bell text-red-400 w-4"></i>绩效通知处理</span>
-                                <span class="flex items-center gap-2 text-slate-700"><i class="fas fa-file-shield text-red-400 w-4"></i>敏感产品合规销售</span>
-                                <span class="flex items-center gap-2 text-slate-700"><i class="fa-solid fa-shield-dog text-red-400 w-4"></i>欧洲GPSR合规</span>
-                            </div>
-                        </div>
-
-                        <!-- 4. 客服与客户体验体系 (order: 4) -->
-                        <div class="border border-slate-200 rounded-xl overflow-hidden">
-                            <div class="bg-blue-50 px-4 py-3 border-b border-blue-100">
-                                <h4 class="font-bold text-blue-800 flex items-center gap-2">
-                                    <i class="fas fa-headset"></i> 客服与客户体验体系 <span class="text-xs font-normal text-blue-600 ml-2">v1.2</span>
-                                </h4>
-                                <p class="text-xs text-blue-700 mt-1">提升客户满意度，打造极致的品牌服务体验。</p>
-                            </div>
-                            <div class="p-4 grid md:grid-cols-2 lg:grid-cols-3 gap-2 text-sm">
-                                <span class="flex items-center gap-2 text-slate-700"><i class="fas fa-envelope-open-text text-blue-500 w-4"></i>邮件回复模板</span>
-                                <span class="flex items-center gap-2 text-slate-700"><i class="fas fa-comment-dots text-blue-500 w-4"></i>差评处理与分析</span>
-                                <span class="flex items-center gap-2 text-slate-700"><i class="fas fa-comments text-blue-500 w-4"></i>QA 问答维护</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 应用中心 Tab -->
-                <div class="guide-panel hidden" data-panel="apps">
-                    <p class="text-sm text-slate-600 mb-4">集成多个专业工具的应用中心，提供数据采集、分析与优化功能。</p>
-                    
-                    <!-- Master Prompt 应用 -->
-                    <div class="mb-6 border border-slate-200 rounded-xl overflow-hidden">
-                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 border-b border-blue-100">
-                            <h4 class="font-bold text-blue-800 flex items-center gap-2">
-                                <i class="fas fa-robot"></i> Master Prompt <span class="text-xs font-normal text-blue-600 ml-2">v2.1 Pro</span>
+                        <!-- Market Focus -->
+                        <div class="bg-gradient-to-br from-slate-50 to-blue-50/30 p-5 rounded-2xl border border-slate-100/80 shadow-sm">
+                            <h4 class="font-bold text-slate-800 mb-3 flex items-center gap-2.5 text-sm">
+                                <div class="w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center">
+                                    <i class="fas fa-flag text-blue-500 text-[10px]"></i>
+                                </div>
+                                关注市场 (欧洲站)
                             </h4>
-                            <p class="text-xs text-blue-700 mt-1">集成数据采集、管理、AI分析与提示词工程的一站式解决方案。</p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="px-3 py-1.5 bg-white border border-slate-200/80 rounded-lg text-sm font-medium shadow-sm hover:shadow transition-shadow duration-200 cursor-default">🇩🇪 德国</span>
+                                <span class="px-3 py-1.5 bg-white border border-slate-200/80 rounded-lg text-sm font-medium shadow-sm hover:shadow transition-shadow duration-200 cursor-default">🇫🇷 法国</span>
+                                <span class="px-3 py-1.5 bg-white border border-slate-200/80 rounded-lg text-sm font-medium shadow-sm hover:shadow transition-shadow duration-200 cursor-default">🇮🇹 意大利</span>
+                                <span class="px-3 py-1.5 bg-white border border-slate-200/80 rounded-lg text-sm font-medium shadow-sm hover:shadow transition-shadow duration-200 cursor-default">🇪🇸 西班牙</span>
+                                <span class="px-3 py-1.5 bg-white border border-slate-200/80 rounded-lg text-sm font-medium shadow-sm hover:shadow transition-shadow duration-200 cursor-default">🇬🇧 英国</span>
+                                <span class="px-3 py-1.5 bg-slate-100/80 text-slate-400 rounded-lg text-xs font-medium flex items-center gap-1">
+                                    <i class="fas fa-plus text-[8px]"></i> 荷兰 / 瑞典 / 波兰 / 比利时 / 爱尔兰
+                                </span>
+                            </div>
                         </div>
-                        <div class="p-4">
-                            <div class="relative border-l-2 border-purple-200 ml-2 space-y-4">
-                                <div class="relative pl-6">
-                                    <div class="absolute -left-[7px] top-1 w-3 h-3 rounded-full bg-purple-500 border-2 border-white"></div>
-                                    <div class="flex items-start gap-2">
-                                        <i class="fas fa-spider text-purple-500 mt-0.5"></i>
+                    </div>
+
+                    <!-- ═══════════════════ SOPs流程中心 Tab ═══════════════════ -->
+                    <div class="guide-panel hidden" data-panel="sops">
+                        <div class="flex items-center gap-2.5 mb-5">
+                            <div class="w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center">
+                                <i class="fas fa-clipboard-list text-emerald-500 text-[10px]"></i>
+                            </div>
+                            <p class="text-sm text-slate-500">集成所有亚马逊运营标准化流程指引，确保团队执行一致性。</p>
+                        </div>
+
+                        <div class="space-y-4">
+                            <!-- 1. 运营与推广体系 -->
+                            <div class="group rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+                                <div class="relative px-5 py-4 border-b border-emerald-100/80 bg-gradient-to-r from-emerald-50/80 to-teal-50/50">
+                                    <div class="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-emerald-400 to-teal-500 rounded-l"></div>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                                            <i class="fas fa-rocket text-white text-xs"></i>
+                                        </div>
                                         <div>
-                                            <h5 class="font-semibold text-sm text-slate-800">数据采集</h5>
-                                            <p class="text-xs text-slate-600">输入竞品 ASIN，自动抓取 Listing 和 Review 数据</p>
+                                            <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                                                运营与推广体系
+                                                <span class="px-2 py-0.5 bg-emerald-100 text-emerald-600 rounded-full text-[10px] font-semibold">v2.0</span>
+                                            </h4>
+                                            <p class="text-[11px] text-slate-400 mt-0.5">从新品上架到爆款打造的全链路运营推广策略集合</p>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="relative pl-6">
-                                    <div class="absolute -left-[7px] top-1 w-3 h-3 rounded-full bg-purple-400 border-2 border-white"></div>
-                                    <div class="flex items-start gap-2">
-                                        <i class="fas fa-database text-purple-400 mt-0.5"></i>
+                                <div class="p-4 grid md:grid-cols-2 lg:grid-cols-3 gap-2">
+                                    <span class="flex items-center gap-2.5 text-sm text-slate-600 px-3 py-2 rounded-xl hover:bg-emerald-50/50 transition-colors duration-200">
+                                        <div class="w-5 h-5 rounded-md bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-seedling text-emerald-500 text-[9px]"></i>
+                                        </div>
+                                        新品生命周期跟踪
+                                    </span>
+                                    <span class="flex items-center gap-2.5 text-sm text-slate-600 px-3 py-2 rounded-xl hover:bg-emerald-50/50 transition-colors duration-200">
+                                        <div class="w-5 h-5 rounded-md bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-magnifying-glass-chart text-emerald-500 text-[9px]"></i>
+                                        </div>
+                                        Listing 极致优化 (SEO)
+                                    </span>
+                                    <span class="flex items-center gap-2.5 text-sm text-slate-600 px-3 py-2 rounded-xl hover:bg-emerald-50/50 transition-colors duration-200">
+                                        <div class="w-5 h-5 rounded-md bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-chart-line text-emerald-500 text-[9px]"></i>
+                                        </div>
+                                        PPC 广告投放与优化
+                                    </span>
+                                    <span class="flex items-center gap-2.5 text-sm text-slate-600 px-3 py-2 rounded-xl hover:bg-emerald-50/50 transition-colors duration-200">
+                                        <div class="w-5 h-5 rounded-md bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-book-dead text-emerald-500 text-[9px]"></i>
+                                        </div>
+                                        欧洲本土化高危词库
+                                    </span>
+                                    <span class="flex items-center gap-2.5 text-sm text-slate-600 px-3 py-2 rounded-xl hover:bg-emerald-50/50 transition-colors duration-200">
+                                        <div class="w-5 h-5 rounded-md bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-tags text-emerald-500 text-[9px]"></i>
+                                        </div>
+                                        促销活动提报
+                                    </span>
+                                    <span class="flex items-center gap-2.5 text-sm text-slate-600 px-3 py-2 rounded-xl hover:bg-emerald-50/50 transition-colors duration-200">
+                                        <div class="w-5 h-5 rounded-md bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-binoculars text-emerald-500 text-[9px]"></i>
+                                        </div>
+                                        竞品监控与分析
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- 2. 供应链与物流体系 -->
+                            <div class="group rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+                                <div class="relative px-5 py-4 border-b border-amber-100/80 bg-gradient-to-r from-amber-50/80 to-orange-50/50">
+                                    <div class="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-amber-400 to-orange-500 rounded-l"></div>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/20">
+                                            <i class="fas fa-warehouse text-white text-xs"></i>
+                                        </div>
                                         <div>
-                                            <h5 class="font-semibold text-sm text-slate-800">数据管理</h5>
-                                            <p class="text-xs text-slate-600">管理已采集数据，支持查看、筛选和删除</p>
+                                            <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                                                供应链与物流体系
+                                                <span class="px-2 py-0.5 bg-amber-100 text-amber-600 rounded-full text-[10px] font-semibold">v1.5</span>
+                                            </h4>
+                                            <p class="text-[11px] text-slate-400 mt-0.5">构建高效供应链，优化库存周转与物流成本</p>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="relative pl-6">
-                                    <div class="absolute -left-[7px] top-1 w-3 h-3 rounded-full bg-purple-300 border-2 border-white"></div>
-                                    <div class="flex items-start gap-2">
-                                        <i class="fas fa-chart-pie text-purple-300 mt-0.5"></i>
+                                <div class="p-4 grid md:grid-cols-2 lg:grid-cols-3 gap-2">
+                                    <span class="flex items-center gap-2.5 text-sm text-slate-600 px-3 py-2 rounded-xl hover:bg-amber-50/50 transition-colors duration-200">
+                                        <div class="w-5 h-5 rounded-md bg-amber-100 flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-truck-fast text-amber-500 text-[9px]"></i>
+                                        </div>
+                                        FBA 发货标准操作
+                                    </span>
+                                    <span class="flex items-center gap-2.5 text-sm text-slate-600 px-3 py-2 rounded-xl hover:bg-amber-50/50 transition-colors duration-200">
+                                        <div class="w-5 h-5 rounded-md bg-amber-100 flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-clipboard-check text-amber-500 text-[9px]"></i>
+                                        </div>
+                                        采购与质检 (QC)
+                                    </span>
+                                    <span class="flex items-center gap-2.5 text-sm text-slate-600 px-3 py-2 rounded-xl hover:bg-amber-50/50 transition-colors duration-200">
+                                        <div class="w-5 h-5 rounded-md bg-amber-100 flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-cubes text-amber-500 text-[9px]"></i>
+                                        </div>
+                                        库存预警与补货
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- 3. 账号安全与风控体系 -->
+                            <div class="group rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+                                <div class="relative px-5 py-4 border-b border-red-100/80 bg-gradient-to-r from-red-50/80 to-rose-50/50">
+                                    <div class="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-red-400 to-rose-500 rounded-l"></div>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center shadow-lg shadow-red-500/20">
+                                            <i class="fas fa-shield-halved text-white text-xs"></i>
+                                        </div>
                                         <div>
-                                            <h5 class="font-semibold text-sm text-slate-800">AI 分析</h5>
-                                            <p class="text-xs text-slate-600">AI 自动提取使用场景、痛点、卖点等结构化洞察</p>
+                                            <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                                                账号安全与风控体系
+                                                <span class="px-2 py-0.5 bg-red-100 text-red-600 rounded-full text-[10px] font-semibold">v3.0</span>
+                                            </h4>
+                                            <p class="text-[11px] text-slate-400 mt-0.5">全方位账号健康监控与风险防御机制</p>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="relative pl-6">
-                                    <div class="absolute -left-[7px] top-1 w-3 h-3 rounded-full bg-emerald-400 border-2 border-white"></div>
-                                    <div class="flex items-start gap-2">
-                                        <i class="fas fa-wand-magic-sparkles text-emerald-500 mt-0.5"></i>
-                                        <div>
-                                            <h5 class="font-semibold text-sm text-slate-800">Prompt 生成</h5>
-                                            <p class="text-xs text-slate-600">生成优化的 Master Prompt，用于撰写 Listing 内容</p>
+                                <div class="p-4 grid md:grid-cols-2 lg:grid-cols-3 gap-2">
+                                    <span class="flex items-center gap-2.5 text-sm text-slate-600 px-3 py-2 rounded-xl hover:bg-red-50/50 transition-colors duration-200">
+                                        <div class="w-5 h-5 rounded-md bg-red-100 flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-shield-halved text-red-400 text-[9px]"></i>
                                         </div>
+                                        账号登录与环境安全
+                                    </span>
+                                    <span class="flex items-center gap-2.5 text-sm text-slate-600 px-3 py-2 rounded-xl hover:bg-red-50/50 transition-colors duration-200">
+                                        <div class="w-5 h-5 rounded-md bg-red-100 flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-user-lock text-red-400 text-[9px]"></i>
+                                        </div>
+                                        后台权限管理
+                                    </span>
+                                    <span class="flex items-center gap-2.5 text-sm text-slate-600 px-3 py-2 rounded-xl hover:bg-red-50/50 transition-colors duration-200">
+                                        <div class="w-5 h-5 rounded-md bg-red-100 flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-trademark text-red-400 text-[9px]"></i>
+                                        </div>
+                                        品牌与侵权审核
+                                    </span>
+                                    <span class="flex items-center gap-2.5 text-sm text-slate-600 px-3 py-2 rounded-xl hover:bg-red-50/50 transition-colors duration-200">
+                                        <div class="w-5 h-5 rounded-md bg-red-100 flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-bell text-red-400 text-[9px]"></i>
+                                        </div>
+                                        绩效通知处理
+                                    </span>
+                                    <span class="flex items-center gap-2.5 text-sm text-slate-600 px-3 py-2 rounded-xl hover:bg-red-50/50 transition-colors duration-200">
+                                        <div class="w-5 h-5 rounded-md bg-red-100 flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-file-shield text-red-400 text-[9px]"></i>
+                                        </div>
+                                        敏感产品合规销售
+                                    </span>
+                                    <span class="flex items-center gap-2.5 text-sm text-slate-600 px-3 py-2 rounded-xl hover:bg-red-50/50 transition-colors duration-200">
+                                        <div class="w-5 h-5 rounded-md bg-red-100 flex items-center justify-center flex-shrink-0">
+                                            <i class="fa-solid fa-shield-dog text-red-400 text-[9px]"></i>
+                                        </div>
+                                        欧洲GPSR合规
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- 4. 客服与客户体验体系 -->
+                            <div class="group rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+                                <div class="relative px-5 py-4 border-b border-blue-100/80 bg-gradient-to-r from-blue-50/80 to-indigo-50/50">
+                                    <div class="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-400 to-indigo-500 rounded-l"></div>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                                            <i class="fas fa-headset text-white text-xs"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                                                客服与客户体验体系
+                                                <span class="px-2 py-0.5 bg-blue-100 text-blue-600 rounded-full text-[10px] font-semibold">v1.2</span>
+                                            </h4>
+                                            <p class="text-[11px] text-slate-400 mt-0.5">提升客户满意度，打造极致的品牌服务体验</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="p-4 grid md:grid-cols-2 lg:grid-cols-3 gap-2">
+                                    <span class="flex items-center gap-2.5 text-sm text-slate-600 px-3 py-2 rounded-xl hover:bg-blue-50/50 transition-colors duration-200">
+                                        <div class="w-5 h-5 rounded-md bg-blue-100 flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-envelope-open-text text-blue-500 text-[9px]"></i>
+                                        </div>
+                                        邮件回复模板
+                                    </span>
+                                    <span class="flex items-center gap-2.5 text-sm text-slate-600 px-3 py-2 rounded-xl hover:bg-blue-50/50 transition-colors duration-200">
+                                        <div class="w-5 h-5 rounded-md bg-blue-100 flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-comment-dots text-blue-500 text-[9px]"></i>
+                                        </div>
+                                        差评处理与分析
+                                    </span>
+                                    <span class="flex items-center gap-2.5 text-sm text-slate-600 px-3 py-2 rounded-xl hover:bg-blue-50/50 transition-colors duration-200">
+                                        <div class="w-5 h-5 rounded-md bg-blue-100 flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-comments text-blue-500 text-[9px]"></i>
+                                        </div>
+                                        QA 问答维护
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ═══════════════════ 应用中心 Tab ═══════════════════ -->
+                    <div class="guide-panel hidden" data-panel="apps">
+                        <div class="flex items-center gap-2.5 mb-5">
+                            <div class="w-6 h-6 rounded-lg bg-purple-100 flex items-center justify-center">
+                                <i class="fas fa-cubes text-purple-500 text-[10px]"></i>
+                            </div>
+                            <p class="text-sm text-slate-500">集成多个专业工具的应用中心，提供数据采集、分析与优化功能。</p>
+                        </div>
+
+                        <!-- Master Analysis 应用 -->
+                        <div class="mb-5 rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm">
+                            <div class="relative px-5 py-4 border-b border-blue-100/80 bg-gradient-to-r from-blue-50/80 to-indigo-50/50">
+                                <div class="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-400 to-indigo-500 rounded-l"></div>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                                        <i class="fas fa-robot text-white text-xs"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                                            Master Analysis
+                                            <span class="px-2 py-0.5 bg-gradient-to-r from-blue-100 to-indigo-100 text-indigo-600 rounded-full text-[10px] font-semibold">v2.1 Pro</span>
+                                        </h4>
+                                        <p class="text-[11px] text-slate-400 mt-0.5">集成数据采集、管理、AI分析与提示词工程的一站式解决方案</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-5">
+                                <div class="relative ml-3 space-y-1">
+                                    <!-- Vertical line -->
+                                    <div class="absolute left-[7px] top-3 bottom-3 w-[2px] bg-gradient-to-b from-violet-300 via-purple-300 to-emerald-300 rounded-full"></div>
+
+                                    <!-- Step 1 -->
+                                    <div class="relative pl-8 py-3 group">
+                                        <div class="absolute left-0 top-3.5 w-4 h-4 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 border-[3px] border-white shadow-md shadow-violet-500/30 group-hover:scale-125 transition-transform duration-200"></div>
+                                        <div class="flex items-start gap-3 bg-white rounded-xl p-3 border border-slate-100 shadow-sm group-hover:shadow-md group-hover:border-violet-200 transition-all duration-200">
+                                            <div class="w-8 h-8 rounded-lg bg-violet-100 flex items-center justify-center flex-shrink-0">
+                                                <i class="fas fa-spider text-violet-500 text-xs"></i>
+                                            </div>
+                                            <div>
+                                                <h5 class="font-semibold text-sm text-slate-800">数据采集</h5>
+                                                <p class="text-[11px] text-slate-400 mt-0.5">输入竞品 ASIN，自动抓取 Listing 和 Review 数据</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Step 2 -->
+                                    <div class="relative pl-8 py-3 group">
+                                        <div class="absolute left-0 top-3.5 w-4 h-4 rounded-full bg-gradient-to-br from-purple-400 to-purple-500 border-[3px] border-white shadow-md shadow-purple-500/30 group-hover:scale-125 transition-transform duration-200"></div>
+                                        <div class="flex items-start gap-3 bg-white rounded-xl p-3 border border-slate-100 shadow-sm group-hover:shadow-md group-hover:border-purple-200 transition-all duration-200">
+                                            <div class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink-0">
+                                                <i class="fas fa-database text-purple-400 text-xs"></i>
+                                            </div>
+                                            <div>
+                                                <h5 class="font-semibold text-sm text-slate-800">数据管理</h5>
+                                                <p class="text-[11px] text-slate-400 mt-0.5">管理已采集数据，支持查看、筛选和删除</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Step 3 -->
+                                    <div class="relative pl-8 py-3 group">
+                                        <div class="absolute left-0 top-3.5 w-4 h-4 rounded-full bg-gradient-to-br from-purple-300 to-indigo-400 border-[3px] border-white shadow-md shadow-purple-500/30 group-hover:scale-125 transition-transform duration-200"></div>
+                                        <div class="flex items-start gap-3 bg-white rounded-xl p-3 border border-slate-100 shadow-sm group-hover:shadow-md group-hover:border-indigo-200 transition-all duration-200">
+                                            <div class="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                                                <i class="fas fa-chart-pie text-indigo-400 text-xs"></i>
+                                            </div>
+                                            <div>
+                                                <h5 class="font-semibold text-sm text-slate-800">AI 分析</h5>
+                                                <p class="text-[11px] text-slate-400 mt-0.5">AI 自动提取使用场景、痛点、卖点等结构化洞察</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Step 4 -->
+                                    <div class="relative pl-8 py-3 group">
+                                        <div class="absolute left-0 top-3.5 w-4 h-4 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-500 border-[3px] border-white shadow-md shadow-emerald-500/30 group-hover:scale-125 transition-transform duration-200"></div>
+                                        <div class="flex items-start gap-3 bg-white rounded-xl p-3 border border-slate-100 shadow-sm group-hover:shadow-md group-hover:border-emerald-200 transition-all duration-200">
+                                            <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                                                <i class="fas fa-wand-magic-sparkles text-emerald-500 text-xs"></i>
+                                            </div>
+                                            <div>
+                                                <h5 class="font-semibold text-sm text-slate-800">Prompt 生成</h5>
+                                                <p class="text-[11px] text-slate-400 mt-0.5">生成优化的 AI 提示词，用于撰写 Listing 内容</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Keyword Hunter 应用 -->
+                        <div class="rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm">
+                            <div class="relative px-5 py-4 border-b border-purple-100/80 bg-gradient-to-r from-purple-50/80 to-pink-50/50">
+                                <div class="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-purple-400 to-pink-500 rounded-l"></div>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
+                                        <i class="fas fa-search text-white text-xs"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                                            Keyword Hunter
+                                            <span class="px-2 py-0.5 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-600 rounded-full text-[10px] font-semibold">v1.0 Pro</span>
+                                        </h4>
+                                        <p class="text-[11px] text-slate-400 mt-0.5">ASIN 关键词覆盖情况查询，手动补充与 SEO 合规性审查工具</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-4 grid md:grid-cols-3 gap-3">
+                                <div class="group bg-white p-4 rounded-xl border border-slate-100 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all duration-300">
+                                    <div class="w-9 h-9 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-xl flex items-center justify-center mb-3 shadow-lg shadow-emerald-500/20 group-hover:scale-110 transition-transform duration-300">
+                                        <i class="fas fa-keyboard text-xs"></i>
+                                    </div>
+                                    <h5 class="font-bold text-slate-800 mb-1 text-sm">输入模块</h5>
+                                    <p class="text-[11px] text-slate-400 leading-relaxed">输入 ASIN 或关键词列表，设置查询参数</p>
+                                </div>
+                                <div class="group bg-white p-4 rounded-xl border border-slate-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300">
+                                    <div class="w-9 h-9 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl flex items-center justify-center mb-3 shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform duration-300">
+                                        <i class="fas fa-cogs text-xs"></i>
+                                    </div>
+                                    <h5 class="font-bold text-slate-800 mb-1 text-sm">处理模块</h5>
+                                    <p class="text-[11px] text-slate-400 leading-relaxed">批量查询关键词覆盖，手动补充缺失词</p>
+                                </div>
+                                <div class="group bg-white p-4 rounded-xl border border-slate-100 shadow-sm hover:shadow-md hover:border-purple-200 transition-all duration-300">
+                                    <div class="w-9 h-9 bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl flex items-center justify-center mb-3 shadow-lg shadow-purple-500/20 group-hover:scale-110 transition-transform duration-300">
+                                        <i class="fas fa-chart-pie text-xs"></i>
+                                    </div>
+                                    <h5 class="font-bold text-slate-800 mb-1 text-sm">分析统计</h5>
+                                    <p class="text-[11px] text-slate-400 leading-relaxed">可视化覆盖率，SEO 健康度评分</p>
+                                </div>
+                            </div>
+                            <div class="px-4 pb-4">
+                                <div class="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/60 rounded-xl p-3.5 flex items-center gap-3">
+                                    <div class="w-7 h-7 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-info-circle text-amber-500 text-[10px]"></i>
+                                    </div>
+                                    <p class="text-[11px] text-amber-700/80 leading-relaxed">
+                                        <strong class="text-amber-800">提示：</strong>此模块正在开发中，部分功能即将上线。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ═══════════════════ 智库Hub Tab ═══════════════════ -->
+                    <div class="guide-panel hidden" data-panel="hub">
+                        <div class="flex items-center gap-2.5 mb-5">
+                            <div class="w-6 h-6 rounded-lg bg-amber-100 flex items-center justify-center">
+                                <i class="fas fa-book-open text-amber-500 text-[10px]"></i>
+                            </div>
+                            <p class="text-sm text-slate-500">亚马逊运营知识库，聚合市场洞察与算法策略。分为三大板块。</p>
+                        </div>
+
+                        <div class="space-y-4">
+                            <!-- Amazon知识早知道 -->
+                            <div class="rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+                                <div class="relative px-5 py-4 border-b border-blue-100/80 bg-gradient-to-r from-blue-50/80 to-indigo-50/50">
+                                    <div class="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-400 to-indigo-500 rounded-l"></div>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                                            <i class="fas fa-lightbulb text-white text-xs"></i>
+                                        </div>
+                                        <h4 class="font-bold text-slate-800 text-sm">Amazon知识早知道</h4>
+                                    </div>
+                                </div>
+                                <div class="p-4 grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                    <div class="group bg-white p-4 rounded-xl border border-slate-100 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-300">
+                                        <div class="flex items-center gap-2.5 mb-2">
+                                            <div class="w-7 h-7 rounded-lg bg-indigo-100 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                                <i class="fas fa-globe-europe text-indigo-500 text-[10px]"></i>
+                                            </div>
+                                            <h5 class="font-bold text-slate-800 text-sm">市场洞察</h5>
+                                        </div>
+                                        <p class="text-[11px] text-slate-400 leading-relaxed">欧洲五国消费者画像、市场趋势、本地化策略。</p>
+                                    </div>
+                                    <div class="group bg-white p-4 rounded-xl border border-slate-100 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all duration-300">
+                                        <div class="flex items-center gap-2.5 mb-2">
+                                            <div class="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                                <i class="fas fa-magnifying-glass-chart text-emerald-500 text-[10px]"></i>
+                                            </div>
+                                            <h5 class="font-bold text-slate-800 text-sm">SEO 策略</h5>
+                                        </div>
+                                        <p class="text-[11px] text-slate-400 leading-relaxed">Listing 优化技巧、关键词布局、排名因子分析。</p>
+                                    </div>
+                                    <div class="group bg-white p-4 rounded-xl border border-slate-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300">
+                                        <div class="flex items-center gap-2.5 mb-2">
+                                            <div class="w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                                <i class="fas fa-network-wired text-blue-500 text-[10px]"></i>
+                                            </div>
+                                            <h5 class="font-bold text-slate-800 text-sm">A10 & COSMO</h5>
+                                        </div>
+                                        <p class="text-[11px] text-slate-400 leading-relaxed">亚马逊搜索算法解析、COSMO 语义理解、Rufus AI 适配。</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 入门实操宝典 -->
+                            <div class="rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+                                <div class="relative px-5 py-4 border-b border-emerald-100/80 bg-gradient-to-r from-emerald-50/80 to-teal-50/50">
+                                    <div class="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-emerald-400 to-teal-500 rounded-l"></div>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                                            <i class="fas fa-hands text-white text-xs"></i>
+                                        </div>
+                                        <h4 class="font-bold text-slate-800 text-sm">入门实操宝典</h4>
+                                    </div>
+                                </div>
+                                <div class="p-4 grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                    <div class="group bg-white p-4 rounded-xl border border-slate-100 shadow-sm hover:shadow-md hover:border-amber-200 transition-all duration-300">
+                                        <div class="flex items-center gap-2.5 mb-2">
+                                            <div class="w-7 h-7 rounded-lg bg-amber-100 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                                <i class="fas fa-star text-amber-500 text-[10px]"></i>
+                                            </div>
+                                            <h5 class="font-bold text-slate-800 text-sm">教你打造优质Listing</h5>
+                                        </div>
+                                        <p class="text-[11px] text-slate-400 leading-relaxed">从零开始的Listing创建指南，掌握标题、五点、A+页面优化技巧。</p>
+                                    </div>
+                                    <div class="group bg-white p-4 rounded-xl border border-slate-100 shadow-sm hover:shadow-md hover:border-pink-200 transition-all duration-300">
+                                        <div class="flex items-center gap-2.5 mb-2">
+                                            <div class="w-7 h-7 rounded-lg bg-pink-100 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                                <i class="fas fa-calendar-alt text-pink-500 text-[10px]"></i>
+                                            </div>
+                                            <h5 class="font-bold text-slate-800 text-sm">EU营销日历</h5>
+                                        </div>
+                                        <p class="text-[11px] text-slate-400 leading-relaxed">Prime Day、Black Friday、欧洲本地节日营销时间表。</p>
+                                    </div>
+                                    <div class="group bg-white p-4 rounded-xl border border-slate-100 shadow-sm hover:shadow-md hover:border-purple-200 transition-all duration-300">
+                                        <div class="flex items-center gap-2.5 mb-2">
+                                            <div class="w-7 h-7 rounded-lg bg-purple-100 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                                <i class="fa-solid fa-gift text-purple-500 text-[10px]"></i>
+                                            </div>
+                                            <h5 class="font-bold text-slate-800 text-sm">销售活动/促销工具</h5>
+                                        </div>
+                                        <p class="text-[11px] text-slate-400 leading-relaxed">LD/BD/Coupon 利润计算、活动提报技巧。</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 运营提升全攻略 -->
+                            <div class="rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+                                <div class="relative px-5 py-4 border-b border-purple-100/80 bg-gradient-to-r from-purple-50/80 to-violet-50/50">
+                                    <div class="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-purple-400 to-violet-500 rounded-l"></div>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
+                                            <i class="fas fa-chart-line text-white text-xs"></i>
+                                        </div>
+                                        <h4 class="font-bold text-slate-800 text-sm">运营提升全攻略</h4>
+                                    </div>
+                                </div>
+                                <div class="p-4 grid md:grid-cols-2 gap-3">
+                                    <div class="group bg-white p-4 rounded-xl border border-slate-100 shadow-sm hover:shadow-md hover:border-rose-200 transition-all duration-300">
+                                        <div class="flex items-center gap-2.5 mb-2">
+                                            <div class="w-7 h-7 rounded-lg bg-rose-100 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                                <i class="fas fa-rocket text-rose-500 text-[10px]"></i>
+                                            </div>
+                                            <h5 class="font-bold text-slate-800 text-sm">新品30天极速突围</h5>
+                                        </div>
+                                        <p class="text-[11px] text-slate-400 leading-relaxed">新品上架后30天的关键运营策略，快速提升排名与销量。</p>
+                                    </div>
+                                    <div class="group bg-white p-4 rounded-xl border border-slate-100 shadow-sm hover:shadow-md hover:border-cyan-200 transition-all duration-300">
+                                        <div class="flex items-center gap-2.5 mb-2">
+                                            <div class="w-7 h-7 rounded-lg bg-cyan-100 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                                <i class="fas fa-chart-line text-cyan-500 text-[10px]"></i>
+                                            </div>
+                                            <h5 class="font-bold text-slate-800 text-sm">链接转化率低自查优化</h5>
+                                        </div>
+                                        <p class="text-[11px] text-slate-400 leading-relaxed">系统化诊断转化率问题，提供针对性优化方案。</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Keyword Hunter 应用 -->
-                    <div class="border border-slate-200 rounded-xl overflow-hidden">
-                        <div class="bg-gradient-to-r from-purple-50 to-pink-50 px-4 py-3 border-b border-purple-100">
-                            <h4 class="font-bold text-purple-800 flex items-center gap-2">
-                                <i class="fas fa-search"></i> Keyword Hunter <span class="text-xs font-normal text-purple-600 ml-2">v1.0 Pro</span>
-                            </h4>
-                            <p class="text-xs text-purple-700 mt-1">ASIN 关键词覆盖情况查询，手动补充与 SEO 合规性审查工具。</p>
+                    <!-- ═══════════════════ 更多 Tab ═══════════════════ -->
+                    <div class="guide-panel hidden" data-panel="more">
+                        <div class="flex items-center gap-2.5 mb-5">
+                            <div class="w-6 h-6 rounded-lg bg-cyan-100 flex items-center justify-center">
+                                <i class="fas fa-compass text-cyan-500 text-[10px]"></i>
+                            </div>
+                            <p class="text-sm text-slate-500">探索更多实用功能和工具，提升工作效率。</p>
                         </div>
-                        <div class="p-4 grid md:grid-cols-3 gap-3">
-                            <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 p-4 rounded-lg border border-emerald-200">
-                                <div class="w-8 h-8 bg-emerald-500 text-white rounded-lg flex items-center justify-center mb-2">
-                                    <i class="fas fa-keyboard text-sm"></i>
+
+                        <!-- 大模型探索 -->
+                        <div class="rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm">
+                            <div class="relative px-5 py-4 border-b border-green-100/80 bg-gradient-to-r from-green-50/80 to-emerald-50/50">
+                                <div class="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-green-400 to-emerald-500 rounded-l"></div>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-500/20">
+                                        <i class="fas fa-compass text-white text-xs"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                                            大模型探索
+                                            <span class="px-2 py-0.5 bg-green-100 text-green-600 rounded-full text-[10px] font-semibold">v1.0</span>
+                                        </h4>
+                                        <p class="text-[11px] text-slate-400 mt-0.5">智能体、提示词、工作流等实用功能</p>
+                                    </div>
                                 </div>
-                                <h5 class="font-bold text-emerald-800 mb-1 text-sm">输入模块</h5>
-                                <p class="text-xs text-emerald-700">输入 ASIN 或关键词列表，设置查询参数</p>
                             </div>
-                            <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
-                                <div class="w-8 h-8 bg-blue-500 text-white rounded-lg flex items-center justify-center mb-2">
-                                    <i class="fas fa-cogs text-sm"></i>
+                            <div class="p-4 grid md:grid-cols-3 gap-3">
+                                <div class="group bg-white p-5 rounded-xl border border-slate-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300 hover:-translate-y-0.5">
+                                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl flex items-center justify-center mb-3.5 shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform duration-300">
+                                        <i class="fas fa-robot text-sm"></i>
+                                    </div>
+                                    <h5 class="font-bold text-slate-800 mb-1.5 text-sm">智能体</h5>
+                                    <p class="text-[11px] text-slate-400 leading-relaxed">探索和使用各种 AI 智能体，自动化复杂任务。</p>
                                 </div>
-                                <h5 class="font-bold text-blue-800 mb-1 text-sm">处理模块</h5>
-                                <p class="text-xs text-blue-700">批量查询关键词覆盖，手动补充缺失词</p>
-                            </div>
-                            <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
-                                <div class="w-8 h-8 bg-purple-500 text-white rounded-lg flex items-center justify-center mb-2">
-                                    <i class="fas fa-chart-pie text-sm"></i>
+                                <div class="group bg-white p-5 rounded-xl border border-slate-100 shadow-sm hover:shadow-md hover:border-purple-200 transition-all duration-300 hover:-translate-y-0.5">
+                                    <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl flex items-center justify-center mb-3.5 shadow-lg shadow-purple-500/20 group-hover:scale-110 transition-transform duration-300">
+                                        <i class="fas fa-message text-sm"></i>
+                                    </div>
+                                    <h5 class="font-bold text-slate-800 mb-1.5 text-sm">提示词</h5>
+                                    <p class="text-[11px] text-slate-400 leading-relaxed">精选提示词库，快速生成高质量内容。</p>
                                 </div>
-                                <h5 class="font-bold text-purple-800 mb-1 text-sm">分析统计</h5>
-                                <p class="text-xs text-purple-700">可视化覆盖率，SEO 健康度评分</p>
-                            </div>
-                        </div>
-                        <div class="px-4 pb-4">
-                            <div class="bg-amber-50 border border-amber-200 rounded-lg p-3">
-                                <p class="text-xs text-amber-700">
-                                    <i class="fas fa-info-circle mr-1"></i>
-                                    <strong>提示：</strong>此模块正在开发中，部分功能即将上线。
-                                </p>
+                                <div class="group bg-white p-5 rounded-xl border border-slate-100 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all duration-300 hover:-translate-y-0.5">
+                                    <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-xl flex items-center justify-center mb-3.5 shadow-lg shadow-emerald-500/20 group-hover:scale-110 transition-transform duration-300">
+                                        <i class="fas fa-diagram-project text-sm"></i>
+                                    </div>
+                                    <h5 class="font-bold text-slate-800 mb-1.5 text-sm">工作流</h5>
+                                    <p class="text-[11px] text-slate-400 leading-relaxed">构建自动化工作流，提升运营效率。</p>
+                                </div>
                             </div>
                         </div>
                     </div>
+
                 </div>
 
-                <!-- 智库Hub Tab -->
-                <div class="guide-panel hidden" data-panel="hub">
-                    <p class="text-sm text-slate-600 mb-4">亚马逊运营知识库，聚合市场洞察与算法策略。分为三大板块：</p>
-                    <div class="space-y-4">
-                        <!-- Amazon知识早知道 -->
-                        <div class="border border-slate-200 rounded-xl overflow-hidden">
-                            <div class="bg-blue-50 px-4 py-3 border-b border-blue-100">
-                                <h4 class="font-bold text-blue-800 flex items-center gap-2">
-                                    <i class="fas fa-lightbulb"></i> Amazon知识早知道
-                                </h4>
-                            </div>
-                            <div class="p-4 grid md:grid-cols-2 lg:grid-cols-3 gap-3">
-                                <div class="bg-gradient-to-br from-indigo-50 to-indigo-100 p-4 rounded-lg border border-indigo-200">
-                                    <h5 class="font-bold text-indigo-800 mb-1 flex items-center gap-2 text-sm">
-                                        <i class="fas fa-globe-europe text-indigo-500"></i> 市场洞察
-                                    </h5>
-                                    <p class="text-xs text-indigo-700">欧洲五国消费者画像、市场趋势、本地化策略。</p>
-                                </div>
-                                <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 p-4 rounded-lg border border-emerald-200">
-                                    <h5 class="font-bold text-emerald-800 mb-1 flex items-center gap-2 text-sm">
-                                        <i class="fas fa-magnifying-glass-chart text-emerald-500"></i> SEO 策略
-                                    </h5>
-                                    <p class="text-xs text-emerald-700">Listing 优化技巧、关键词布局、排名因子分析。</p>
-                                </div>
-                                <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
-                                    <h5 class="font-bold text-blue-800 mb-1 flex items-center gap-2 text-sm">
-                                        <i class="fas fa-network-wired text-blue-500"></i> A10 & COSMO
-                                    </h5>
-                                    <p class="text-xs text-blue-700">亚马逊搜索算法解析、COSMO 语义理解、Rufus AI 适配。</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 入门实操宝典 -->
-                        <div class="border border-slate-200 rounded-xl overflow-hidden">
-                            <div class="bg-emerald-50 px-4 py-3 border-b border-emerald-100">
-                                <h4 class="font-bold text-emerald-800 flex items-center gap-2">
-                                    <i class="fas fa-hands"></i> 入门实操宝典
-                                </h4>
-                            </div>
-                            <div class="p-4 grid md:grid-cols-2 lg:grid-cols-3 gap-3">
-                                <div class="bg-gradient-to-br from-amber-50 to-amber-100 p-4 rounded-lg border border-amber-200">
-                                    <h5 class="font-bold text-amber-800 mb-1 flex items-center gap-2 text-sm">
-                                        <i class="fas fa-star text-amber-500"></i> 教你打造优质Listing
-                                    </h5>
-                                    <p class="text-xs text-amber-700">从零开始的Listing创建指南，掌握标题、五点、A+页面优化技巧。</p>
-                                </div>
-                                <div class="bg-gradient-to-br from-pink-50 to-pink-100 p-4 rounded-lg border border-pink-200">
-                                    <h5 class="font-bold text-pink-800 mb-1 flex items-center gap-2 text-sm">
-                                        <i class="fas fa-calendar-alt text-pink-500"></i> EU营销日历
-                                    </h5>
-                                    <p class="text-xs text-pink-700">Prime Day、Black Friday、欧洲本地节日营销时间表。</p>
-                                </div>
-                                <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
-                                    <h5 class="font-bold text-purple-800 mb-1 flex items-center gap-2 text-sm">
-                                        <i class="fa-solid fa-gift text-purple-500"></i> 销售活动/促销工具
-                                    </h5>
-                                    <p class="text-xs text-purple-700">LD/BD/Coupon 利润计算、活动提报技巧。</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 运营提升全攻略 -->
-                        <div class="border border-slate-200 rounded-xl overflow-hidden">
-                            <div class="bg-purple-50 px-4 py-3 border-b border-purple-100">
-                                <h4 class="font-bold text-purple-800 flex items-center gap-2">
-                                    <i class="fas fa-chart-line"></i> 运营提升全攻略
-                                </h4>
-                            </div>
-                            <div class="p-4 grid md:grid-cols-2 gap-3">
-                                <div class="bg-gradient-to-br from-rose-50 to-rose-100 p-4 rounded-lg border border-rose-200">
-                                    <h5 class="font-bold text-rose-800 mb-1 flex items-center gap-2 text-sm">
-                                        <i class="fas fa-rocket text-rose-500"></i> 新品30天极速突围
-                                    </h5>
-                                    <p class="text-xs text-rose-700">新品上架后30天的关键运营策略，快速提升排名与销量。</p>
-                                </div>
-                                <div class="bg-gradient-to-br from-cyan-50 to-cyan-100 p-4 rounded-lg border border-cyan-200">
-                                    <h5 class="font-bold text-cyan-800 mb-1 flex items-center gap-2 text-sm">
-                                        <i class="fas fa-chart-line text-cyan-500"></i> 链接转化率低自查优化
-                                    </h5>
-                                    <p class="text-xs text-cyan-700">系统化诊断转化率问题，提供针对性优化方案。</p>
-                                </div>
-                            </div>
+                <!-- Footer -->
+                <div class="mt-8 pt-5 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <!-- Decorative separator above footer -->
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+                            <span class="text-[11px] text-slate-400 font-medium">版本 1.0 · 持续更新中</span>
                         </div>
                     </div>
-                </div>
-
-                <!-- 更多 Tab -->
-                <div class="guide-panel hidden" data-panel="more">
-                    <p class="text-sm text-slate-600 mb-4">探索更多实用功能和工具，提升工作效率。</p>
-                    
-                    <!-- 大模型探索 -->
-                    <div class="border border-slate-200 rounded-xl overflow-hidden">
-                        <div class="bg-gradient-to-r from-green-50 to-emerald-50 px-4 py-3 border-b border-green-100">
-                            <h4 class="font-bold text-green-800 flex items-center gap-2">
-                                <i class="fas fa-compass"></i> 大模型探索 <span class="text-xs font-normal text-green-600 ml-2">v1.0</span>
-                            </h4>
-                            <p class="text-xs text-green-700 mt-1">智能体、提示词、工作流等实用功能。</p>
-                        </div>
-                        <div class="p-4 grid md:grid-cols-3 gap-4">
-                            <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-5 rounded-xl border border-blue-200">
-                                <div class="w-10 h-10 bg-blue-500 text-white rounded-lg flex items-center justify-center mb-3">
-                                    <i class="fas fa-robot"></i>
-                                </div>
-                                <h5 class="font-bold text-blue-800 mb-2">智能体</h5>
-                                <p class="text-sm text-blue-700">探索和使用各种 AI 智能体，自动化复杂任务。</p>
-                            </div>
-                            <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-5 rounded-xl border border-purple-200">
-                                <div class="w-10 h-10 bg-purple-500 text-white rounded-lg flex items-center justify-center mb-3">
-                                    <i class="fas fa-message"></i>
-                                </div>
-                                <h5 class="font-bold text-purple-800 mb-2">提示词</h5>
-                                <p class="text-sm text-purple-700">精选提示词库，快速生成高质量内容。</p>
-                            </div>
-                            <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 p-5 rounded-xl border border-emerald-200">
-                                <div class="w-10 h-10 bg-emerald-500 text-white rounded-lg flex items-center justify-center mb-3">
-                                    <i class="fas fa-diagram-project"></i>
-                                </div>
-                                <h5 class="font-bold text-emerald-800 mb-2">工作流</h5>
-                                <p class="text-sm text-emerald-700">构建自动化工作流，提升运营效率。</p>
-                            </div>
-                        </div>
+                    <div class="flex items-center gap-2 text-[11px]">
+                        <span class="text-slate-400">快捷键</span>
+                        <span class="px-2 py-0.5 bg-slate-100 rounded-md text-slate-500 font-mono border border-slate-200/80 shadow-sm text-[10px]">ESC</span>
+                        <span class="text-slate-400">关闭</span>
                     </div>
-                </div>
-
-            </div>
-
-            <!-- Footer -->
-            <div class="mt-8 pt-6 border-t border-slate-100 flex items-center justify-between">
-                <p class="text-xs text-slate-400">
-                    版本 1.0 · 持续更新中
-                </p>
-                <div class="flex items-center gap-3 text-xs">
-                    <span class="text-slate-400">快捷键：</span>
-                    <span class="px-2 py-0.5 bg-slate-100 rounded text-slate-600 font-mono">ESC</span>
-                    <span class="text-slate-400">关闭弹窗</span>
                 </div>
             </div>
         </div>

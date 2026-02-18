@@ -11,7 +11,7 @@ import { container } from './di/Container';
 /**
  * 动作处理器类型
  */
-export type ActionHandler = (...args: any[]) => void | Promise<void>;
+export type ActionHandler = (...args: unknown[]) => void | Promise<void>;
 
 /**
  * 动作映射类型
@@ -169,7 +169,7 @@ export default class BaseModule {
     protected addEventListener<K extends keyof HTMLElementEventMap>(
         target: HTMLElement | Window | Document | null,
         type: K,
-        listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any,
+        listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => unknown,
         options?: boolean | AddEventListenerOptions
     ): void;
     protected addEventListener(

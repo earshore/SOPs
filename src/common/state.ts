@@ -32,6 +32,8 @@ const stateData: AppState = {
     scrapedData: null,
     currentHistoryId: null,
     inputAsins: "",
+    expandedAsin: null,
+    currentDataTab: "preview",
   },
 
   // ========================
@@ -48,7 +50,7 @@ const stateData: AppState = {
   },
 
   // ========================
-  // Master Prompt 模块 (统一命名空间)
+  // Master Analysis 模块 (统一命名空间)
   // ========================
   masterPrompt: {
     // Scraper 子模块状态
@@ -188,7 +190,7 @@ export function subscribe(key: string, callback: StateSubscriber): () => void {
  * @param oldValue - 旧值
  * @private
  */
-function notifySubscribers(key: string, newValue: any, oldValue: any): void {
+function notifySubscribers(key: string, newValue: unknown, oldValue: unknown): void {
   if (newValue === oldValue) return; // 值未变化不通知
 
   // 1. 通知精确匹配的订阅者 (例如 "ui.currentTab")
@@ -229,7 +231,7 @@ function notifySubscribers(key: string, newValue: any, oldValue: any): void {
 /**
  * 批量更新队列
  */
-let batchUpdateQueue: Record<string, any>[] = [];
+let batchUpdateQueue: Record<string, unknown>[] = [];
 let batchUpdateTimer: number | null = null;
 let isBatching = false;
 
@@ -246,7 +248,7 @@ let isBatching = false;
  * // 防抖批量更新 (16ms后执行，适合高频更新)
  * batchUpdate({ x: 100, y: 200 }, { debounce: 16 });
  */
-export function batchUpdate(updates: Record<string, any>, options: BatchUpdateOptions = {}): void {
+export function batchUpdate(updates: Record<string, unknown>, options: BatchUpdateOptions = {}): void {
   const { immediate = false, debounce = 0 } = options;
 
   if (immediate) {
@@ -289,19 +291,19 @@ export function batchUpdate(updates: Record<string, any>, options: BatchUpdateOp
  * 执行批量更新
  * @private
  */
-function executeBatchUpdate(updates: Record<string, any>): void {
+function executeBatchUpdate(updates: Record<string, unknown>): void {
   // 暂停通知，批量更新后统一通知
-  const notifications: Array<{ key: string; newValue: any; oldValue: any }> = [];
+  const notifications: Array<{ key: string; newValue: unknown; oldValue: unknown }> = [];
   
   Object.entries(updates).forEach(([key, value]) => {
     // 查找属性所在命名空间
     let found = false;
     
     for (const nsKey of Object.keys(stateData)) {
-      const ns = (stateData as any)[nsKey];
-      if (ns && typeof ns === "object" && key in ns) {
-        const oldValue = ns[key];
-        ns[key] = value;
+      const ns = (stateData as unknown as Record<string, unknown>)[nsKey];
+      if (ns && typeof ns === "object" && ns !== null && key in ns) {
+        const oldValue = (ns as Record<string, unknown>)[key];
+        (ns as Record<string, unknown>)[key] = value;
         notifications.push({ key: `${nsKey}.${key}`, newValue: value, oldValue });
         found = true;
         break;
@@ -309,8 +311,8 @@ function executeBatchUpdate(updates: Record<string, any>): void {
     }
     
     if (!found && key in stateData) {
-      const oldValue = (stateData as any)[key];
-      (stateData as any)[key] = value;
+      const oldValue = (stateData as unknown as Record<string, unknown>)[key];
+      (stateData as unknown as Record<string, unknown>)[key] = value;
       notifications.push({ key, newValue: value, oldValue });
     }
   });
@@ -324,7 +326,7 @@ function executeBatchUpdate(updates: Record<string, any>): void {
 /**
  * 缓存已创建的命名空间 Proxy
  */
-const proxyCache = new WeakMap<object, any>();
+const proxyCache = new WeakMap<object, unknown>();
 
 /**
  * 为命名空间创建 Proxy
@@ -332,16 +334,16 @@ const proxyCache = new WeakMap<object, any>();
  * @param nsName - 命名空间名称
  */
 function createNamespaceProxy<T extends object>(obj: T, nsName: string): T {
-  if (proxyCache.has(obj)) return proxyCache.get(obj);
+  if (proxyCache.has(obj)) return proxyCache.get(obj) as T;
 
   const proxy = new Proxy(obj, {
     get(target, prop) {
-      if (typeof prop === "symbol") return (target as any)[prop];
-      return (target as any)[prop];
+      if (typeof prop === "symbol") return (target as Record<string | symbol, unknown>)[prop];
+      return (target as Record<string, unknown>)[prop];
     },
     set(target, prop, value) {
-      const oldValue = (target as any)[prop];
-      (target as any)[prop] = value;
+      const oldValue = (target as Record<string, unknown>)[prop as string];
+      (target as Record<string, unknown>)[prop as string] = value;
       // 同时通知全路径和短路径
       notifySubscribers(`${nsName}.${String(prop)}`, value, oldValue);
       return true;
@@ -371,23 +373,24 @@ const state = new Proxy(stateData, {
   get(target, prop) {
     // 特殊处理：Symbol.toStringTag 等内置属性
     if (typeof prop === "symbol") {
-      return (target as any)[prop];
+      return (target as unknown as Record<string | symbol, unknown>)[prop];
     }
 
     // 如果是命名空间键，返回代理后的命名空间对象
-    if (prop in target && typeof (target as any)[prop] === 'object' && (target as any)[prop] !== null) {
-      return createNamespaceProxy((target as any)[prop], String(prop));
+    const targetValue = (target as unknown as Record<string, unknown>)[prop];
+    if (prop in target && typeof targetValue === 'object' && targetValue !== null) {
+      return createNamespaceProxy(targetValue as object, String(prop));
     }
 
     // 向后兼容：遍历所有命名空间查找属性
     for (const nsKey of Object.keys(target)) {
-      const ns = (target as any)[nsKey];
-      if (ns && typeof ns === "object" && prop in ns) {
-        return ns[prop];
+      const ns = (target as unknown as Record<string, unknown>)[nsKey];
+      if (ns && typeof ns === "object" && ns !== null && prop in ns) {
+        return (ns as Record<string, unknown>)[prop];
       }
     }
 
-    return (target as any)[prop];
+    return targetValue;
   },
 
   /**
@@ -399,18 +402,18 @@ const state = new Proxy(stateData, {
   set(target, prop, value) {
     // 如果是命名空间键
     if (prop in target) {
-      const oldValue = (target as any)[prop];
-      (target as any)[prop] = value;
+      const oldValue = (target as unknown as Record<string, unknown>)[prop as string];
+      (target as unknown as Record<string, unknown>)[prop as string] = value;
       notifySubscribers(String(prop), value, oldValue);
       return true;
     }
 
     // 向后兼容：遍历所有命名空间查找并设置属性
     for (const nsKey of Object.keys(target)) {
-      const ns = (target as any)[nsKey];
-      if (ns && typeof ns === "object" && prop in ns) {
-        const oldValue = ns[prop];
-        ns[prop] = value;
+      const ns = (target as unknown as Record<string, unknown>)[nsKey];
+      if (ns && typeof ns === "object" && ns !== null && prop in ns) {
+        const oldValue = (ns as Record<string, unknown>)[prop as string];
+        (ns as Record<string, unknown>)[prop as string] = value;
         // 触发全路径和短路径订阅通知
         notifySubscribers(`${nsKey}.${String(prop)}`, value, oldValue);
         return true;
@@ -422,7 +425,7 @@ const state = new Proxy(stateData, {
       `[State] 属性 "${String(prop)}" 不属于任何命名空间，将创建于顶层。` +
       `建议添加到对应命名空间中。`
     );
-    (target as any)[prop] = value;
+    (target as unknown as Record<string, unknown>)[prop as string] = value;
     notifySubscribers(String(prop), value, undefined);
     return true;
   },
@@ -433,8 +436,8 @@ const state = new Proxy(stateData, {
   has(target, prop) {
     if (prop in target) return true;
     for (const nsKey of Object.keys(target)) {
-      const ns = (target as any)[nsKey];
-      if (ns && typeof ns === "object" && prop in ns) {
+      const ns = (target as unknown as Record<string, unknown>)[nsKey];
+      if (ns && typeof ns === "object" && ns !== null && prop in ns) {
         return true;
       }
     }

@@ -4,6 +4,8 @@
 // 集中管理所有应用级事件名称，避免硬编码字符串
 // ================================================================
 
+import type { RouteConfig, Route } from '@/types/config';
+
 /**
  * 应用级事件常量
  * 命名规范: APP_[模块]_[动作]
@@ -14,6 +16,7 @@ export const APP_EVENTS = {
   ROUTE_CHANGE: 'route-change', // Legacy: 用于向后兼容
   ROUTE_BEFORE_CHANGE: 'app:route-before-change',
   ROUTE_ERROR: 'app:route-error',
+  ROUTE_REDIRECT: 'route-redirect', // 路由重定向
   
   // 应用生命周期
   INITIALIZED: 'app:initialized',
@@ -66,7 +69,35 @@ export const APP_EVENTS = {
   HISTORY_UPDATED: 'history-updated',
   
   // 动作注册
-  REGISTER_ACTIONS: 'registerActions'
+  REGISTER_ACTIONS: 'registerActions',
+  UNREGISTER_ACTIONS: 'unregisterActions',
+  
+  // 配置相关
+  CONFIG_CHANGE: 'app:config-change',
+  CONFIG_CHANGED: 'app:config-changed',
+  CONFIG_RELOAD: 'app:config-reload',
+  CONFIG_VALIDATE: 'app:config-validate',
+  
+  // 服务相关
+  SERVICE_INIT: 'app:service-init',
+  SERVICE_READY: 'app:service-ready',
+  SERVICE_ERROR: 'app:service-error',
+  
+  // UI相关
+  UI_MODAL_OPEN: 'app:ui-modal-open',
+  UI_MODAL_CLOSE: 'app:ui-modal-close',
+  UI_TOAST_SHOW: 'app:ui-toast-show',
+  
+  // 工作状态相关 (P0优化)
+  WORKING_STATE_START: 'app:working-state-start',
+  WORKING_STATE_SUCCESS: 'app:working-state-success',
+  WORKING_STATE_FAILURE: 'app:working-state-failure',
+  WORKING_STATE_TIMEOUT: 'app:working-state-timeout',
+  WORKING_STATE_RETRY: 'app:working-state-retry',
+  
+  // 网络状态相关 (P0优化)
+  NETWORK_ONLINE: 'app:network-online',
+  NETWORK_OFFLINE: 'app:network-offline'
 } as const;
 
 /**
@@ -106,8 +137,8 @@ export type AppEventType = typeof APP_EVENTS[keyof typeof APP_EVENTS];
  */
 export interface RouteChangedEventDetail {
   routeId: string;
-  config: any;
-  from?: any;
+  config: RouteConfig;
+  from?: Route;
 }
 
 /**
@@ -125,7 +156,7 @@ export interface ModuleMountedEventDetail {
 export interface ErrorOccurredEventDetail {
   error: Error;
   source: string;
-  context?: any;
+  context?: Record<string, unknown>;
 }
 
 /**
@@ -133,8 +164,8 @@ export interface ErrorOccurredEventDetail {
  */
 export interface StateUpdatedEventDetail {
   path: string;
-  value: any;
-  oldValue?: any;
+  value: unknown;
+  oldValue?: unknown;
 }
 
 /**
@@ -142,7 +173,7 @@ export interface StateUpdatedEventDetail {
  */
 export interface DataLoadedEventDetail {
   dataType: string;
-  data: any;
+  data: unknown;
   source?: string;
 }
 
@@ -153,7 +184,7 @@ export interface LLMRequestEventDetail {
   requestId: string;
   model?: string;
   prompt?: string;
-  response?: any;
+  response?: string;
   error?: Error;
 }
 
@@ -162,7 +193,7 @@ export interface LLMRequestEventDetail {
  */
 export interface AppEventDetail {
   timestamp: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // ==================== 辅助函数 ====================
