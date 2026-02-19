@@ -1,0 +1,250 @@
+/**
+ * 表单组件
+ * 统一的输入框、文本域等表单元素样式
+ */
+
+/* ========================================
+   现代输入框
+   ======================================== */
+.form-input,
+.editor-input-modern {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-slate-200);
+  border-radius: var(--radius-lg);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--color-slate-700);
+  background: white;
+  transition: all var(--duration-normal) var(--ease-smooth);
+  resize: none;
+  overflow: hidden;
+}
+
+.form-input:focus,
+.editor-input-modern:focus {
+  outline: none;
+  border-color: var(--color-blue-500);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  background: white;
+}
+
+.form-input:hover,
+.editor-input-modern:hover {
+  border-color: var(--color-slate-300);
+}
+
+.form-input:disabled,
+.editor-input-modern:disabled {
+  background: var(--color-slate-50);
+  color: var(--color-slate-400);
+  cursor: not-allowed;
+}
+
+/* ========================================
+   文本域 (Textarea)
+   ======================================== */
+.form-textarea {
+  resize: vertical;
+  min-height: 120px;
+  max-height: 600px;
+  font-size: 0.875rem;
+  line-height: 1.75;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-slate-200);
+  border-radius: var(--radius-lg);
+  transition: all var(--duration-normal) var(--ease-smooth);
+  background: white;
+  color: var(--color-slate-700);
+}
+
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--color-blue-500);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-textarea:hover {
+  border-color: var(--color-slate-300);
+}
+
+/* ========================================
+   Textarea 容器（带统计信息）
+   ======================================== */
+.textarea-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.textarea-stats {
+  position: absolute;
+  bottom: 0.75rem;
+  right: 0.75rem;
+  z-index: 10;
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* ========================================
+   表单标签
+   ======================================== */
+.form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-slate-700);
+  margin-bottom: 0.5rem;
+}
+
+.form-label-required::after {
+  content: '*';
+  color: var(--color-red-500);
+  margin-left: 0.25rem;
+}
+
+/* ========================================
+   表单帮助文本
+   ======================================== */
+.form-help {
+  font-size: 0.8125rem;
+  color: var(--color-slate-500);
+  margin-top: 0.375rem;
+}
+
+/* ========================================
+   表单错误状态
+   ======================================== */
+.form-input.error,
+.form-textarea.error {
+  border-color: var(--color-red-500);
+}
+
+.form-input.error:focus,
+.form-textarea.error:focus {
+  border-color: var(--color-red-500);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.form-error {
+  font-size: 0.8125rem;
+  color: var(--color-red-600);
+  margin-top: 0.375rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* ========================================
+   表单成功状态
+   ======================================== */
+.form-input.success,
+.form-textarea.success {
+  border-color: var(--color-green-500);
+}
+
+.form-input.success:focus,
+.form-textarea.success:focus {
+  border-color: var(--color-green-500);
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+}
+
+/* ========================================
+   表单组
+   ======================================== */
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-group:last-child {
+  margin-bottom: 0;
+}
+
+/* ========================================
+   内联表单
+   ======================================== */
+.form-inline {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-end;
+}
+
+.form-inline .form-group {
+  margin-bottom: 0;
+  flex: 1;
+}
+
+/* ========================================
+   Select 下拉框
+   ======================================== */
+.form-select {
+  width: 100%;
+  padding: 0.5rem 2rem 0.5rem 0.75rem;
+  border: 1px solid var(--color-slate-200);
+  border-radius: var(--radius-lg);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--color-slate-700);
+  background: white url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e") no-repeat right 0.5rem center/1.25rem 1.25rem;
+  appearance: none;
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-smooth);
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: var(--color-blue-500);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-select:hover {
+  border-color: var(--color-slate-300);
+}
+
+/* ========================================
+   Checkbox & Radio
+   ======================================== */
+.form-checkbox,
+.form-radio {
+  width: 1rem;
+  height: 1rem;
+  border: 1px solid var(--color-slate-300);
+  background: white;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-smooth);
+}
+
+.form-checkbox {
+  border-radius: 0.25rem;
+}
+
+.form-radio {
+  border-radius: 50%;
+}
+
+.form-checkbox:checked,
+.form-radio:checked {
+  background-color: var(--color-blue-500);
+  border-color: var(--color-blue-500);
+}
+
+.form-checkbox:focus,
+.form-radio:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* ========================================
+   表单尺寸变体
+   ======================================== */
+.form-input-sm,
+.form-textarea-sm {
+  padding: 0.375rem 0.625rem;
+  font-size: 0.8125rem;
+}
+
+.form-input-lg,
+.form-textarea-lg {
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+}

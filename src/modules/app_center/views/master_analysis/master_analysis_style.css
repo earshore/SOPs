@@ -1,5 +1,6 @@
-/*  Zoom Modal Styles */
+/* ==================== Master Analysis 特定样式 ==================== */
 
+/* === Zoom Modal 动画 === */
 #prompt-zoom-modal {
     animation: fadeIn 0.3s ease-out;
 }
@@ -28,6 +29,7 @@
     transition: transform 0.3s ease-out, opacity 0.3s ease-out;
 }
 
+/* === Zoom Modal 卡片布局 === */
 .zoomed-console-card {
     width: 100%;
     max-width: 420px !important;
@@ -56,6 +58,7 @@
     min-height: 450px !important;
 }
 
+/* === Zoom Modal 滚动条 === */
 #zoomed-cards-container {
     scrollbar-width: thin;
     scrollbar-color: rgba(148, 163, 184, 0.3) transparent;
@@ -78,21 +81,18 @@
     background-color: rgba(148, 163, 184, 0.5);
 }
 
-/* ==================== Master Analysis 特定样式 ==================== */
-
-/* Master Analysis 原始样式 - 完整保留 */
+/* === 内容区域背景 === */
 #master_analysis_content_area {
     background: linear-gradient(to bottom, rgba(248, 250, 252, 0.5), rgba(241, 245, 249, 0.3));
 }
 
-/* Master Analysis 响应式调整 */
 @media (max-width: 768px) {
     #master_analysis_content_area {
         padding: 1rem;
     }
 }
 
-/* Analysis Widget Card 样式优化 */
+/* === Analysis Widget Card === */
 .analysis-widget-card {
     background: white;
     border-radius: 1rem;
@@ -109,18 +109,17 @@
     box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.1);
 }
 
-/* Widget Card Container */
+/* === Widget 容器 === */
 .widget-card-container {
     height: 100%;
     min-height: 200px;
 }
 
-/* Widget Content Area */
 .widget-content-area {
     background: #fafafa;
 }
 
-/* 对象数组卡片内部边界优化 */
+/* === 对象数组卡片 === */
 .widget-content-area .group\/card {
     background: white;
     border: 1px solid #e2e8f0;
@@ -133,7 +132,7 @@
     box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08);
 }
 
-/* 编辑模式卡片样式 */
+/* === 编辑模式卡片 === */
 .edit-row {
     background: white;
     border: 1px solid #e2e8f0;
@@ -146,7 +145,7 @@
     box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.06);
 }
 
-/* Glass Card 样式 */
+/* === Glass Card === */
 .glass-card {
     background: white;
     border-radius: 1rem;
@@ -159,7 +158,7 @@
     box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08);
 }
 
-/* GridStack 调整模式样式 */
+/* === GridStack 调整模式 === */
 .grid-stack-item-resizing {
     z-index: 100 !important;
 }
@@ -186,30 +185,4 @@
 /* 禁用移动的卡片样式 */
 .grid-stack-item[gs-no-move="true"] .drag-handle {
     cursor: default !important;
-}
-
-/* 输入框样式优化 */
-.editor-input-modern {
-    width: 100%;
-    padding: 0.5rem 0.75rem;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.5rem;
-    font-size: 0.875rem;
-    line-height: 1.5;
-    color: #334155;
-    background: white;
-    transition: all 0.2s ease;
-    resize: none;
-    overflow: hidden;
-}
-
-.editor-input-modern:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    background: white;
-}
-
-.editor-input-modern:hover {
-    border-color: #cbd5e1;
 }

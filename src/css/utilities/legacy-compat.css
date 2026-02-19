@@ -1,0 +1,90 @@
+/**
+ * 向后兼容层
+ * 为旧的类名提供映射，避免破坏现有功能
+ */
+
+/* ==================== 卡片兼容 ==================== */
+.app-center-card {
+  @apply card;
+}
+
+.sop-card {
+  /* 保持原有样式，因为有特殊的 ::before 装饰 */
+}
+
+/* ==================== 按钮兼容 ==================== */
+.app-center-btn {
+  @apply btn;
+}
+
+.app-center-btn-primary {
+  @apply btn-primary;
+}
+
+.app-center-btn-secondary {
+  @apply btn-secondary;
+}
+
+/* ==================== 徽章兼容 ==================== */
+.app-center-badge {
+  @apply badge;
+}
+
+.app-center-badge-success {
+  @apply badge-success;
+}
+
+.app-center-badge-warning {
+  @apply badge-warning;
+}
+
+.app-center-badge-info {
+  @apply badge-info;
+}
+
+.app-center-badge-error {
+  @apply badge-error;
+}
+
+/* ==================== 网格兼容 ==================== */
+.app-center-card-grid {
+  @apply card-grid;
+}
+
+.sop-card-grid {
+  @apply card-grid;
+}
+
+/* ==================== 图标容器兼容 ==================== */
+.app-center-icon-container {
+  @apply card-icon;
+}
+
+.sop-icon-container {
+  @apply card-icon;
+}
+
+/* ==================== 搜索框兼容 ==================== */
+.app-center-search-box,
+.sop-search-box {
+  background: white;
+  border: 1px solid var(--color-slate-200);
+  border-radius: var(--radius-lg);
+  padding: 0.75rem 1rem;
+  transition: all var(--duration-normal) var(--ease-smooth);
+}
+
+.app-center-search-box:focus-within,
+.sop-search-box:focus-within {
+  border-color: var(--color-blue-500);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.app-center-search-box input,
+.sop-search-box input {
+  border: none;
+  outline: none;
+  width: 100%;
+  background: transparent;
+  font-size: 0.875rem;
+}

@@ -1,0 +1,153 @@
+/**
+ * 卡片组件样式
+ * 统一的卡片样式系统，适用于所有模块
+ */
+
+/* ========================================
+   基础卡片
+   ======================================== */
+.card {
+  background: white;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-slate-200);
+  padding: var(--spacing-lg);
+  transition: all var(--duration-slow) var(--ease-smooth);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.card:hover {
+  border-color: var(--color-blue-300);
+  box-shadow: 0 10px 40px -10px rgba(59, 130, 246, 0.2);
+  transform: translateY(-2px);
+}
+
+/* ========================================
+   卡片变体
+   ======================================== */
+
+/* 带左侧装饰条的卡片 */
+.card-accent {
+  overflow: hidden;
+}
+
+.card-accent::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--color-blue-500), var(--color-purple-600));
+  opacity: 0;
+  transition: opacity var(--duration-slow) var(--ease-smooth);
+}
+
+.card-accent:hover::before {
+  opacity: 1;
+}
+
+/* 玻璃卡片效果 */
+.card-glass {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* 紧凑卡片 */
+.card-compact {
+  padding: var(--spacing-md);
+}
+
+/* 宽松卡片 */
+.card-spacious {
+  padding: var(--spacing-xl);
+}
+
+/* ========================================
+   卡片网格布局
+   ======================================== */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.card-grid-compact {
+  gap: var(--spacing-md);
+}
+
+.card-grid-spacious {
+  gap: var(--spacing-xl);
+}
+
+/* ========================================
+   卡片图标容器
+   ======================================== */
+.card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  transition: transform var(--duration-slow) var(--ease-smooth);
+  flex-shrink: 0;
+}
+
+.card:hover .card-icon {
+  transform: scale(1.1);
+}
+
+/* ========================================
+   卡片内容区域
+   ======================================== */
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-md);
+}
+
+.card-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-slate-900);
+  margin: 0;
+}
+
+.card-subtitle {
+  font-size: 0.875rem;
+  color: var(--color-slate-500);
+  margin-top: var(--spacing-xs);
+}
+
+.card-body {
+  color: var(--color-slate-600);
+  line-height: 1.6;
+}
+
+.card-footer {
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--color-slate-100);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ========================================
+   响应式适配
+   ======================================== */
+@media (max-width: 768px) {
+  .card {
+    padding: var(--spacing-md);
+  }
+  
+  .card-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+}

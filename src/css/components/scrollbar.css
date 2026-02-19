@@ -1,0 +1,84 @@
+/**
+ * 滚动条样式
+ * 统一的滚动条外观
+ */
+
+/* ========================================
+   全局默认滚动条
+   ======================================== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(203, 213, 225, 0.4);
+  border-radius: 3px;
+  transition: background var(--duration-slow);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.8);
+}
+
+/* ========================================
+   细滚动条变体
+   ======================================== */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: var(--color-slate-100);
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--color-slate-300);
+  border-radius: 3px;
+  transition: background var(--duration-normal);
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: var(--color-slate-400);
+}
+
+/* ========================================
+   自定义滚动条 - 用于数据预览区域
+   ======================================== */
+.scrollbar-custom::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-track {
+  background: rgba(241, 245, 249, 0.5);
+  border-radius: 4px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 4px;
+  transition: background var(--duration-slow);
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.6);
+}
+
+/* ========================================
+   隐藏滚动条但保留功能
+   ======================================== */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

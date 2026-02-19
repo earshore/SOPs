@@ -1,0 +1,148 @@
+/**
+ * 关键帧动画定义
+ * 统一的动画效果库
+ */
+
+/* ========================================
+   淡入动画
+   ======================================== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.4s var(--ease-smooth) forwards;
+}
+
+/* ========================================
+   滑入动画
+   ======================================== */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.slide-in {
+  animation: slideIn 0.4s var(--ease-spring) forwards;
+}
+
+/* ========================================
+   脉冲动画
+   ======================================== */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(0.95);
+  }
+}
+
+.pulse-dot {
+  animation: pulse 3s infinite ease-in-out;
+}
+
+/* ========================================
+   旋转动画
+   ======================================== */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spin {
+  animation: spin 0.8s linear infinite;
+}
+
+/* ========================================
+   页面视图淡入动画
+   ======================================== */
+@keyframes pageViewFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes welcomeBannerFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes mainContentFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.view-fade-in {
+  animation: pageViewFadeIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.view-fade-in-initial {
+  opacity: 0;
+}
+
+/* Welcome Banner 优先淡入 */
+.view-fade-in > *:first-child:has(.rounded-2xl) {
+  opacity: 0;
+  animation: welcomeBannerFadeIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* 主内容区域延迟淡入 */
+.view-fade-in > *:not(:first-child),
+.view-fade-in > *:first-child:not(:has(.rounded-2xl)) {
+  opacity: 0;
+  animation: mainContentFadeIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.15s forwards;
+}
+
+.view-fade-in:not(:has(> *:first-child .rounded-2xl)) > * {
+  opacity: 0;
+  animation: mainContentFadeIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
+}
+
+/* ========================================
+   加载点动画
+   ======================================== */
+@keyframes dots {
+  0% { content: ''; }
+  25% { content: '.'; }
+  50% { content: '..'; }
+  75% { content: '...'; }
+}
+
+.loading-dots::after {
+  content: '';
+  animation: dots 1.5s steps(4, end) infinite;
+}

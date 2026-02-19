@@ -1,0 +1,91 @@
+/**
+ * Toast 通知组件样式
+ * 统一的通知提示样式
+ */
+
+/* ========================================
+   基础 Toast
+   ======================================== */
+.toast {
+  backdrop-filter: blur(8px);
+  transition: all var(--duration-slow) var(--ease-smooth);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md) var(--spacing-lg);
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 500;
+  box-shadow: var(--shadow-lg);
+}
+
+/* ========================================
+   Toast 变体 - Success
+   ======================================== */
+.toast-success {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25), 
+              0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+}
+
+/* ========================================
+   Toast 变体 - Error
+   ======================================== */
+.toast-error {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25), 
+              0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+}
+
+/* ========================================
+   Toast 变体 - Warning
+   ======================================== */
+.toast-warning {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25), 
+              0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+}
+
+/* ========================================
+   Toast 变体 - Info
+   ======================================== */
+.toast-info {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25), 
+              0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+}
+
+/* ========================================
+   Toast 动画
+   ======================================== */
+.toast-slide-in {
+  animation: toastSlideIn var(--duration-slow) var(--ease-spring) forwards;
+}
+
+.toast-slide-out {
+  animation: toastSlideOut var(--duration-slow) var(--ease-in) forwards;
+}
+
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes toastSlideOut {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%) scale(0.9);
+  }
+}

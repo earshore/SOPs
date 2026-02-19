@@ -1,0 +1,320 @@
+/**
+ * 模态框组件
+ * 统一的对话框、弹窗样式
+ */
+
+/* ========================================
+   模态框遮罩层
+   ======================================== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: var(--z-modal-backdrop);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: all var(--duration-slow) var(--ease-smooth);
+}
+
+.modal-backdrop.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ========================================
+   模态框容器
+   ======================================== */
+.modal {
+  position: relative;
+  background: white;
+  border-radius: var(--radius-2xl);
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(0, 0, 0, 0.05);
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  transform: scale(0.95) translateY(20px);
+  opacity: 0;
+  transition: all var(--duration-slow) var(--ease-spring);
+  z-index: var(--z-modal);
+}
+
+.modal-backdrop.show .modal {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+
+/* ========================================
+   模态框尺寸
+   ======================================== */
+.modal-sm {
+  width: 100%;
+  max-width: 400px;
+}
+
+.modal-md {
+  width: 100%;
+  max-width: 600px;
+}
+
+.modal-lg {
+  width: 100%;
+  max-width: 800px;
+}
+
+.modal-xl {
+  width: 100%;
+  max-width: 1200px;
+}
+
+.modal-full {
+  width: calc(100% - 2rem);
+  max-width: none;
+  height: calc(100vh - 2rem);
+  max-height: none;
+}
+
+/* ========================================
+   模态框头部
+   ======================================== */
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--color-slate-200);
+  flex-shrink: 0;
+}
+
+.modal-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-slate-900);
+  margin: 0;
+}
+
+.modal-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-md);
+  color: var(--color-slate-400);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-smooth);
+}
+
+.modal-close:hover {
+  background: var(--color-slate-100);
+  color: var(--color-slate-600);
+}
+
+/* ========================================
+   模态框主体
+   ======================================== */
+.modal-body {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+/* 自定义滚动条 */
+.modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background: var(--color-slate-300);
+  border-radius: 3px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: var(--color-slate-400);
+}
+
+/* ========================================
+   模态框底部
+   ======================================== */
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid var(--color-slate-200);
+  background: var(--color-slate-50);
+  border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
+  flex-shrink: 0;
+}
+
+/* ========================================
+   模态框变体 - 无头部
+   ======================================== */
+.modal-no-header .modal-body {
+  border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+}
+
+/* ========================================
+   模态框变体 - 无底部
+   ======================================== */
+.modal-no-footer .modal-body {
+  border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
+}
+
+/* ========================================
+   模态框变体 - 居中内容
+   ======================================== */
+.modal-centered .modal-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* ========================================
+   模态框变体 - 危险操作
+   ======================================== */
+.modal-danger .modal-header {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border-bottom-color: #fecaca;
+}
+
+.modal-danger .modal-title {
+  color: var(--color-red-700);
+}
+
+/* ========================================
+   模态框变体 - 成功提示
+   ======================================== */
+.modal-success .modal-header {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-bottom-color: #bbf7d0;
+}
+
+.modal-success .modal-title {
+  color: var(--color-green-700);
+}
+
+/* ========================================
+   模态框变体 - 信息提示
+   ======================================== */
+.modal-info .modal-header {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border-bottom-color: #bfdbfe;
+}
+
+.modal-info .modal-title {
+  color: var(--color-blue-700);
+}
+
+/* ========================================
+   模态框变体 - 警告提示
+   ======================================== */
+.modal-warning .modal-header {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border-bottom-color: #fde68a;
+}
+
+.modal-warning .modal-title {
+  color: var(--color-amber-700);
+}
+
+/* ========================================
+   Zoom Modal (全屏模态框)
+   ======================================== */
+.modal-zoom {
+  width: calc(100% - 3rem);
+  height: calc(100vh - 3rem);
+  max-width: none;
+  max-height: none;
+}
+
+.modal-zoom .modal-body {
+  padding: 1.5rem;
+}
+
+/* ========================================
+   响应式
+   ======================================== */
+@media (max-width: 640px) {
+  .modal-backdrop {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .modal {
+    border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+    max-height: 95vh;
+  }
+
+  .modal-sm,
+  .modal-md,
+  .modal-lg,
+  .modal-xl {
+    width: 100%;
+    max-width: none;
+  }
+
+  .modal-header {
+    padding: 1.25rem;
+  }
+
+  .modal-body {
+    padding: 1.25rem;
+  }
+
+  .modal-footer {
+    padding: 1rem 1.25rem;
+  }
+
+  .modal-zoom {
+    width: 100%;
+    height: 100vh;
+    border-radius: 0;
+  }
+}
+
+/* ========================================
+   动画关键帧
+   ======================================== */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalSlideUp {
+  from {
+    transform: scale(0.95) translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ========================================
+   辅助类 - 禁止背景滚动
+   ======================================== */
+body.modal-open {
+  overflow: hidden;
+}

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Debug - 卡片样式测试</title>
+    <link rel="stylesheet" href="../src/css/main.css">
+    <link rel="stylesheet" href="../src/modules/sops/sops_style.css">
+    <style>
+        body {
+            padding: 2rem;
+            background: #f8fafc;
+        }
+        .debug-info {
+            background: white;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            border-radius: 0.5rem;
+            border: 2px solid #3b82f6;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-info">
+        <h2>CSS变量测试</h2>
+        <div style="background: var(--color-blue-500); color: white; padding: 1rem;">
+            如果这个区域是蓝色背景，说明CSS变量正常加载
+        </div>
+        <div style="border-radius: var(--radius-xl); background: #e2e8f0; padding: 1rem; margin-top: 1rem;">
+            如果这个区域有圆角，说明--radius-xl变量正常
+        </div>
+    </div>
+
+    <div class="debug-info">
+        <h2>SOP卡片样式测试</h2>
+        <div class="sop-card-grid">
+            <div class="sop-card border-l-4 border-l-emerald-400">
+                <div class="flex items-start justify-between mb-3">
+                    <div class="sop-icon-container bg-emerald-50 text-emerald-600">
+                        <i class="fas fa-seedling"></i>
+                    </div>
+                    <span class="sop-status-badge sop-status-active">已发布</span>
+                </div>
+                <h3 class="font-bold text-lg text-slate-800 mb-2">测试卡片标题</h3>
+                <p class="text-sm text-slate-500 mb-3">这是卡片描述文本，用于测试内容是否被截断。如果你能看到这段完整的文字，说明卡片高度正常。</p>
+                <div class="text-xs text-slate-400">
+                    底部信息区域
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="debug-info">
+        <h2>计算样式检查</h2>
+        <p>打开浏览器开发者工具，检查.sop-card元素的计算样式：</p>
+        <ul>
+            <li>display: 应该是 flex</li>
+            <li>flex-direction: 应该是 column</li>
+            <li>min-height: 应该是 180px</li>
+            <li>overflow: 应该是 visible（不是hidden）</li>
+        </ul>
+    </div>
+</body>
+</html>

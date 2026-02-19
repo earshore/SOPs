@@ -7,7 +7,10 @@
 // ✅ Dependency Bundling (Optimization)
 import { marked } from 'marked';
 // Chart.js and GridStack are now lazy loaded via src/common/utils/lazyLibs.js
-import './css/style.css';
+
+// 🎯 CSS架构重构: 使用新的分层CSS系统
+import './css/main.css';
+// 模块特定样式保持按需加载
 import './modules/more/more_style.css';
 import './modules/app_center/app_center_style.css';
 

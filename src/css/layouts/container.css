@@ -1,0 +1,37 @@
+/**
+ * 容器布局样式
+ * 统一的内容区域宽度限制
+ */
+
+/* ========================================
+   标准容器 - 1450px 最大宽度
+   ======================================== */
+.container-standard {
+  max-width: 1450px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+}
+
+/* ========================================
+   响应式适配
+   ======================================== */
+@media (max-width: 768px) {
+  .container-standard {
+    padding: 0 var(--spacing-sm);
+  }
+}
+
+/* ========================================
+   内容区域容器 - 用于模块主内容
+   ======================================== */
+.content-area > div {
+  max-width: 1450px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+}
+
+@media (max-width: 768px) {
+  .content-area > div {
+    padding: 0 var(--spacing-sm);
+  }
+}
