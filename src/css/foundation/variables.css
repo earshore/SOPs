@@ -1,141 +1,146 @@
 /**
- * CSS 变量系统 - 设计令牌
- * 统一管理颜色、间距、动画等设计变量
+ * 设计令牌 — 全局 CSS 变量
+ * (在原有基础上补充缺失变量)
  */
 
 :root {
-  /* ========================================
-     颜色系统 - 基于 Tailwind 色板
-     ======================================== */
-  
-  /* 中性色 */
-  --color-slate-50: #f8fafc;
-  --color-slate-100: #f1f5f9;
-  --color-slate-200: #e2e8f0;
-  --color-slate-300: #cbd5e1;
-  --color-slate-400: #94a3b8;
-  --color-slate-500: #64748b;
-  --color-slate-600: #475569;
-  --color-slate-700: #334155;
-  --color-slate-800: #1e293b;
-  --color-slate-900: #0f172a;
+  /* ---- 字体 ---- */
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace;
 
-  /* 主题色 - Blue */
-  --color-blue-50: #eff6ff;
-  --color-blue-100: #dbeafe;
-  --color-blue-200: #bfdbfe;
-  --color-blue-300: #93c5fd;
-  --color-blue-400: #60a5fa;
-  --color-blue-500: #3b82f6;
-  --color-blue-600: #2563eb;
-  --color-blue-700: #1d4ed8;
+  /* ---- 间距系统 ---- */
+  --spacing-xs:  0.5rem;   /* 8px */
+  --spacing-sm:  0.75rem;  /* 12px */
+  --spacing-md:  1rem;     /* 16px */
+  --spacing-lg:  1.5rem;   /* 24px */
+  --spacing-xl:  2rem;     /* 32px */
+  --spacing-2xl: 3rem;     /* 48px */
 
-  /* 功能色 - Success */
-  --color-green-50: #f0fdf4;
-  --color-green-500: #22c55e;
-  --color-green-600: #16a34a;
-  --color-green-700: #15803d;
+  /* ---- 颜色（语义化） ---- */
+  --color-primary:         #3b82f6;
+  --color-primary-light:   rgba(59, 130, 246, 0.1);
+  --color-primary-dark:    #2563eb;
 
-  /* 功能色 - Error */
-  --color-red-50: #fef2f2;
-  --color-red-500: #ef4444;
-  --color-red-600: #dc2626;
-  --color-red-700: #b91c1c;
+  --color-text-primary:    #1a1a2e;
+  --color-text-secondary:  #6b7280;
+  --color-text-tertiary:   #9ca3af;
 
-  /* 功能色 - Warning */
-  --color-amber-50: #fffbeb;
-  --color-amber-500: #f59e0b;
-  --color-amber-600: #d97706;
+  --color-bg-primary:      #ffffff;
+  --color-bg-secondary:    #fafafa;
+  --color-bg-tertiary:     #f3f4f6;
+  --color-bg-elevated:     #ffffff;
+  --color-bg-hover:        rgba(0, 0, 0, 0.04);
 
-  /* 功能色 - Info */
-  --color-indigo-50: #eef2ff;
-  --color-indigo-500: #6366f1;
-  --color-indigo-600: #4f46e5;
+  --color-border-light:    rgba(0, 0, 0, 0.06);
+  --color-border-default:  rgba(0, 0, 0, 0.1);
 
-  /* 模块主题色 */
-  --color-purple-50: #faf5ff;
-  --color-purple-500: #a855f7;
-  --color-purple-600: #9333ea;
-  
-  --color-sky-50: #f0f9ff;
-  --color-sky-500: #0ea5e9;
-  --color-sky-600: #0284c7;
+  --color-focus-ring:      #3b82f6;
 
-  --color-emerald-50: #ecfdf5;
-  --color-emerald-500: #10b981;
-  --color-emerald-600: #059669;
+  --color-success:         #22c55e;
+  --color-error:           #ef4444;
+  --color-warning:         #f59e0b;
+  --color-info:            #3b82f6;
 
-  --color-fuchsia-50: #fdf4ff;
-  --color-fuchsia-500: #d946ef;
-  --color-fuchsia-600: #c026d3;
+  /* ---- Slate 色系（灰度） ---- */
+  --color-slate-50:        #f8fafc;
+  --color-slate-100:       #f1f5f9;
+  --color-slate-200:       #e2e8f0;
+  --color-slate-300:       #cbd5e1;
+  --color-slate-400:       #94a3b8;
+  --color-slate-500:       #64748b;
+  --color-slate-600:       #475569;
+  --color-slate-700:       #334155;
+  --color-slate-800:       #1e293b;
+  --color-slate-900:       #0f172a;
 
-  --color-orange-50: #fff7ed;
-  --color-orange-500: #f97316;
-  --color-orange-600: #ea580c;
+  /* ---- Blue 色系 ---- */
+  --color-blue-500:        #3b82f6;
+  --color-blue-600:        #2563eb;
+  --color-blue-700:        #1d4ed8;
 
-  --color-lime-50: #f7fee7;
-  --color-lime-500: #84cc16;
-  --color-lime-600: #65a30d;
+  /* ---- Red 色系 ---- */
+  --color-red-700:         #b91c1c;
 
-  /* ========================================
-     间距系统
-     ======================================== */
-  --spacing-xs: 0.25rem;    /* 4px */
-  --spacing-sm: 0.5rem;     /* 8px */
-  --spacing-md: 1rem;       /* 16px */
-  --spacing-lg: 1.5rem;     /* 24px */
-  --spacing-xl: 2rem;       /* 32px */
-  --spacing-2xl: 3rem;      /* 48px */
+  /* ---- Green 色系 ---- */
+  --color-green-700:       #15803d;
 
-  /* ========================================
-     圆角系统
-     ======================================== */
-  --radius-sm: 0.375rem;    /* 6px */
-  --radius-md: 0.5rem;      /* 8px */
-  --radius-lg: 0.75rem;     /* 12px */
-  --radius-xl: 1rem;        /* 16px */
-  --radius-2xl: 1.5rem;     /* 24px */
+  /* ---- Amber 色系 ---- */
+  --color-amber-700:       #b45309;
+
+  /* ---- Purple 色系 ---- */
+  --color-purple-600:      #9333ea;
+
+  /* ---- Z-index 层级 ---- */
+  --z-base:            1;
+  --z-dropdown:        30;
+  --z-sticky:          35;
+  --z-header:          40;
+  --z-overlay:         50;
+  --z-modal-backdrop:  55;
+  --z-modal:           60;
+  --z-popover:         70;
+  --z-toast:           80;
+  --z-tooltip:         90;
+  --z-max:             9999;
+
+  /* ---- 缓动函数（同步 keyframes.css） ---- */
+  --ease-smooth:   cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring:   cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-bounce:   cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --ease-elastic:  cubic-bezier(0.68, -0.6, 0.32, 1.6);
+  --ease-in:       cubic-bezier(0.4, 0, 1, 1);
+  --ease-out:      cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out:   cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ---- 时长 ---- */
+  --duration-fastest: 100ms;
+  --duration-fast:    200ms;
+  --duration-normal:  300ms;
+  --duration-slow:    400ms;
+  --duration-slower:  500ms;
+  --duration-slowest: 700ms;
+
+  /* ---- 圆角 ---- */
+  --radius-sm:  4px;
+  --radius-md:  8px;
+  --radius-lg:  12px;
+  --radius-xl:  16px;
+  --radius-2xl: 24px;
   --radius-full: 9999px;
 
-  /* ========================================
-     阴影系统
-     ======================================== */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  /* ---- 阴影 ---- */
+  --shadow-xs:  0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm:  0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md:  0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --shadow-lg:  0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 4px 10px -5px rgba(0, 0, 0, 0.03);
+  --shadow-xl:  0 20px 40px -10px rgba(0, 0, 0, 0.1);
+}
 
-  /* ========================================
-     动画曲线
-     ======================================== */
-  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  --ease-in: cubic-bezier(0.4, 0, 1, 1);
-  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+/* ---- 暗色模式覆盖 ---- */
+.dark,
+[data-theme="dark"] {
+  --color-primary:         #818cf8;
+  --color-primary-light:   rgba(129, 140, 248, 0.12);
+  --color-primary-dark:    #6366f1;
 
-  /* ========================================
-     动画时长
-     ======================================== */
-  --duration-fast: 150ms;
-  --duration-normal: 200ms;
-  --duration-slow: 300ms;
-  --duration-slower: 500ms;
+  --color-text-primary:    #f9fafb;
+  --color-text-secondary:  #d1d5db;
+  --color-text-tertiary:   #9ca3af;
 
-  /* ========================================
-     字体系统
-     ======================================== */
-  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --color-bg-primary:      #0f172a;
+  --color-bg-secondary:    #1e293b;
+  --color-bg-tertiary:     rgba(255, 255, 255, 0.06);
+  --color-bg-elevated:     #1e293b;
+  --color-bg-hover:        rgba(255, 255, 255, 0.06);
 
-  /* ========================================
-     Z-index 层级
-     ======================================== */
-  --z-dropdown: 50;
-  --z-sticky: 60;
-  --z-fixed: 70;
-  --z-modal-backdrop: 80;
-  --z-modal: 90;
-  --z-popover: 100;
-  --z-tooltip: 110;
-  --z-toast: 9999;
+  --color-border-light:    rgba(255, 255, 255, 0.06);
+  --color-border-default:  rgba(255, 255, 255, 0.1);
+
+  --color-focus-ring:      #818cf8;
+
+  --shadow-xs:  0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-sm:  0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md:  0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  --shadow-lg:  0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 4px 10px -5px rgba(0, 0, 0, 0.2);
+  --shadow-xl:  0 20px 40px -10px rgba(0, 0, 0, 0.5);
 }

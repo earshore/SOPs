@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toast Debug - 背景色测试</title>
+    <link rel="stylesheet" href="../src/css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            padding: 2rem;
+            background: #1e293b;
+            color: white;
+        }
+        .debug-section {
+            background: #334155;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-radius: 0.5rem;
+        }
+        .test-toast {
+            margin-bottom: 1rem;
+            max-width: 400px;
+        }
+        .control-panel {
+            background: #475569;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 2rem;
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            border: none;
+            cursor: pointer;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+    </style>
+</head>
+<body>
+    <h1>Toast 背景色调试</h1>
+    
+    <div class="control-panel">
+        <h2>动态测试</h2>
+        <button onclick="testToast('success')">Success Toast</button>
+        <button onclick="testToast('error')">Error Toast</button>
+        <button onclick="testToast('warning')">Warning Toast</button>
+        <button onclick="testToast('info')">Info Toast</button>
+    </div>
+
+    <div class="debug-section">
+        <h2>静态Toast样式测试</h2>
+        <p>这些是直接使用CSS类的静态Toast，用于验证CSS是否正确加载：</p>
+        
+        <div class="test-toast toast toast-success flex items-center gap-2">
+            <i class="fas fa-check-circle"></i>
+            <span>Success - 应该是绿色渐变</span>
+        </div>
+
+        <div class="test-toast toast toast-error flex items-center gap-2">
+            <i class="fas fa-exclamation-circle"></i>
+            <span>Error - 应该是红色渐变</span>
+        </div>
+
+        <div class="test-toast toast toast-warning flex items-center gap-2">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>Warning - 应该是橙色渐变</span>
+        </div>
+
+        <div class="test-toast toast toast-info flex items-center gap-2">
+            <i class="fas fa-info-circle"></i>
+            <span>Info - 应该是蓝色渐变</span>
+        </div>
+    </div>
+
+    <div class="debug-section">
+        <h2>CSS变量检查</h2>
+        <div style="background: var(--color-green-500); padding: 1rem; margin-bottom: 0.5rem;">
+            CSS变量测试 - 应该是绿色
+        </div>
+        <div style="border-radius: var(--radius-lg); background: #64748b; padding: 1rem;">
+            圆角测试 - 应该有圆角
+        </div>
+    </div>
+
+    <div class="debug-section">
+        <h2>计算样式检查指南</h2>
+        <ol>
+            <li>打开浏览器开发者工具（F12）</li>
+            <li>选择上面的任意一个Toast元素</li>
+            <li>查看"计算样式"或"Computed"标签</li>
+            <li>检查 <code>background</code> 或 <code>background-image</code> 属性</li>
+            <li>应该看到 <code>linear-gradient(...)</code></li>
+            <li>如果看到的是纯色或白色，说明样式被覆盖了</li>
+        </ol>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[9999] space-y-3 pointer-events-none"></div>
+
+    <script type="module">
+        // 简化的showToast函数用于测试
+        window.testToast = function(type) {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type} flex items-center gap-2 toast-slide-in`;
+
+            const icons = {
+                success: 'fas fa-check-circle',
+                error: 'fas fa-exclamation-circle',
+                warning: 'fas fa-exclamation-triangle',
+                info: 'fas fa-info-circle'
+            };
+
+            toast.innerHTML = `
+                <i class="${icons[type]}"></i>
+                <span>这是一个 ${type} 类型的Toast通知</span>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('toast-slide-in');
+                toast.classList.add('toast-slide-out');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        };
+    </script>
+</body>
+</html>

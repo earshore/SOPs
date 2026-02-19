@@ -110,8 +110,8 @@ export const MENU_CONFIG: MenuConfig = {
       title: 'SOPs 流程中心',
       version: 'v1.0',
       icon: 'fas fa-clipboard-list',
-      description: '集成所有亚马逊运营标准化流程指引，确保团队执行一致性。',
-      themeColor: 'sky' // ✅ 天空蓝 - 清新明亮的流程管理主题
+      description: '集成所有亚马逊运营标准化流程指引,确保团队执行一致性。',
+      themeColor: 'blue' // ✅ 蓝色 - 清新明亮的流程管理主题
     },
 
     // [应用中心] App Center 容器模块

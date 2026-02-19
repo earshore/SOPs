@@ -1,0 +1,102 @@
+/**
+ * 代码着色 & JSON 高亮
+ */
+
+/* ========================================
+   JSON Key-Value 着色
+   ======================================== */
+.json-key {
+  color: #059669;
+  font-weight: 500;
+}
+
+.json-string {
+  color: #3b82f6;
+}
+
+.json-number {
+  color: #f59e0b;
+}
+
+.json-boolean {
+  color: #8b5cf6;
+}
+
+.json-null {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.json-bracket {
+  color: #6b7280;
+}
+
+/* ========================================
+   暗色模式着色
+   ======================================== */
+.dark .json-key,
+[data-theme="dark"] .json-key {
+  color: #34d399;
+}
+
+.dark .json-string,
+[data-theme="dark"] .json-string {
+  color: #60a5fa;
+}
+
+.dark .json-number,
+[data-theme="dark"] .json-number {
+  color: #fbbf24;
+}
+
+.dark .json-boolean,
+[data-theme="dark"] .json-boolean {
+  color: #a78bfa;
+}
+
+.dark .json-null,
+[data-theme="dark"] .json-null {
+  color: #6b7280;
+}
+
+/* ========================================
+   代码块容器
+   ======================================== */
+.code-block {
+  position: relative;
+  font-family: var(--font-mono, 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace);
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  tab-size: 2;
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+/* ========================================
+   行号
+   ======================================== */
+.code-line-number {
+  display: inline-block;
+  width: 2.5em;
+  text-align: right;
+  padding-right: 1em;
+  color: #9ca3af;
+  user-select: none;
+  opacity: 0.5;
+}
+
+/* ========================================
+   代码高亮行
+   ======================================== */
+.code-line-highlight {
+  display: block;
+  margin: 0 -1rem;
+  padding: 0 1rem;
+  background: rgba(59, 130, 246, 0.08);
+  border-left: 3px solid #3b82f6;
+}
+
+.dark .code-line-highlight,
+[data-theme="dark"] .code-line-highlight {
+  background: rgba(59, 130, 246, 0.12);
+}

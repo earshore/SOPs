@@ -40,21 +40,6 @@
   }
 }
 
-/* ==================== 侧边栏激活状态 ==================== */
-.more-sidebar-active.group[data-category="explore"] {
-  background-color: rgb(240 253 244) !important;
-  border-color: rgb(187 247 208) !important;
-  color: rgb(21 128 61) !important;
-}
-
-.more-sidebar-active.group[data-category="explore"] i {
-  color: rgb(22 163 74) !important;
-}
-
-.more-sidebar-active.group[data-category="explore"] .fa-chevron-right {
-  opacity: 0.5 !important;
-}
-
 /* ==================== Agent Card 特有样式 ==================== */
 .agent-card {
   transition: all var(--duration-slow) var(--ease-smooth);

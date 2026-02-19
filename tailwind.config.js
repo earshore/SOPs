@@ -14,9 +14,9 @@ export default {
         // 使用正则模式减少重复配置
         // ═══════════════════════════════════════════════════════════
         
-        // 活跃模块颜色方案（移除已弃用的blue和cyan）
+        // 活跃模块颜色方案（包含所有有效颜色）
         {
-            pattern: /(bg|text|border|from|to|ring|shadow)-(sky|emerald|indigo|purple|fuchsia|orange|lime|amber|red|teal|green|violet|rose|pink|slate)-(50|100|200|300|400|500|600|700)/,
+            pattern: /(bg|text|border|from|to|ring|shadow)-(blue|sky|emerald|indigo|purple|fuchsia|orange|lime|amber|red|teal|green|violet|rose|pink|slate|cyan)-(50|100|200|300|400|500|600|700)(\/\d+)?/,
             variants: ['hover', 'focus', 'group-hover', 'group-focus-within'],
         },
         

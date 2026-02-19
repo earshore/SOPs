@@ -1,0 +1,70 @@
+/**
+ * 过渡 & 通用 Transition 工具类
+ */
+
+/* ========================================
+   平滑过渡
+   ======================================== */
+.smooth-transition {
+  transition: all 180ms var(--ease-smooth);
+}
+
+.smooth-transition-slow {
+  transition: all 300ms var(--ease-smooth);
+}
+
+/* ========================================
+   属性级精确过渡
+   ======================================== */
+.transition-colors {
+  transition-property: color, background-color, border-color, fill, stroke;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--ease-smooth);
+}
+
+.transition-opacity {
+  transition-property: opacity;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--ease-smooth);
+}
+
+.transition-shadow {
+  transition-property: box-shadow;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--ease-smooth);
+}
+
+.transition-transform {
+  transition-property: transform;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--ease-smooth);
+}
+
+.transition-all {
+  transition-property: all;
+  transition-duration: var(--duration-normal);
+  transition-timing-function: var(--ease-smooth);
+}
+
+/* ========================================
+   过渡时长覆盖
+   ======================================== */
+.transition-fast    { transition-duration: var(--duration-fast) !important; }
+.transition-normal  { transition-duration: var(--duration-normal) !important; }
+.transition-slow    { transition-duration: var(--duration-slow) !important; }
+
+/* ========================================
+   GPU 加速
+   ======================================== */
+.gpu-accelerated {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.will-change-opacity {
+  will-change: opacity;
+}
+
+.will-change-transform {
+  will-change: transform;
+}

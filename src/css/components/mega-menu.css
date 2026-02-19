@@ -1,0 +1,108 @@
+/**
+ * Mega Menu 超级下拉菜单
+ */
+
+/* ========================================
+   面板容器
+   ======================================== */
+.mega-menu-panel {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  transform-origin: top center;
+  z-index: var(--z-dropdown, 30);
+  min-width: 560px;
+  padding-top: 8px; /* 鼠标桥接区域 */
+}
+
+/* ========================================
+   面板内容
+   ======================================== */
+.mega-menu-content {
+  background: var(--color-bg-elevated, #ffffff);
+  border: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.06));
+  border-radius: 12px;
+  box-shadow:
+    0 10px 40px -10px rgba(0, 0, 0, 0.12),
+    0 4px 12px -2px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.dark .mega-menu-content,
+[data-theme="dark"] .mega-menu-content {
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 10px 40px -10px rgba(0, 0, 0, 0.5),
+    0 4px 12px -2px rgba(0, 0, 0, 0.3);
+}
+
+/* ========================================
+   进入 / 退出动画
+   ======================================== */
+.mega-menu-enter {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-50%) translateY(10px);
+  pointer-events: none;
+  transition:
+    opacity 0.25s var(--ease-smooth),
+    transform 0.25s var(--ease-smooth),
+    visibility 0s linear 0.25s;
+}
+
+/* hover 触发 */
+.group:hover > .mega-menu-enter,
+.mega-menu-enter[data-open="true"] {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+  transition:
+    opacity 0.25s var(--ease-smooth),
+    transform 0.25s var(--ease-smooth),
+    visibility 0s linear 0s;
+}
+
+/* ========================================
+   菜单项
+   ======================================== */
+.mega-menu-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  transition:
+    background-color 0.15s var(--ease-smooth),
+    transform 0.15s var(--ease-smooth);
+}
+
+.mega-menu-item:hover {
+  background: var(--color-bg-hover, rgba(0, 0, 0, 0.04));
+  transform: translateX(2px);
+}
+
+.dark .mega-menu-item:hover,
+[data-theme="dark"] .mega-menu-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* ========================================
+   菜单项 Icon
+   ======================================== */
+.mega-menu-icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--color-bg-tertiary, #f3f4f6);
+  transition: background-color 0.15s var(--ease-smooth);
+}
+
+.mega-menu-item:hover .mega-menu-icon {
+  background: var(--color-primary-light, rgba(59, 130, 246, 0.1));
+}

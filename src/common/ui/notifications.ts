@@ -18,7 +18,8 @@ export function showToast(message: string, type: ToastType = "info"): void {
   if (!container) return;
 
   const toast = document.createElement("div");
-  toast.className = `toast toast-${type} px-4 py-3 rounded-lg shadow-lg text-sm font-medium text-white flex items-center gap-2 animate-slide-in`;
+  // 移除可能冲突的Tailwind类，只保留必要的布局类
+  toast.className = `toast toast-${type} flex items-center gap-2 toast-slide-in`;
 
   const icons: Record<ToastType, string> = {
     success: "fas fa-check-circle",
@@ -35,7 +36,8 @@ export function showToast(message: string, type: ToastType = "info"): void {
   container.appendChild(toast);
 
   setTimeout(() => {
-    toast.classList.add("animate-slide-out");
+    toast.classList.remove("toast-slide-in");
+    toast.classList.add("toast-slide-out");
     setTimeout(() => toast.remove(), 300);
   }, 3000);
 }
