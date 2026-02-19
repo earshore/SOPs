@@ -31,7 +31,7 @@ export function showToast(type: 'success' | 'error' | 'info' | 'warning', title:
     if (!container) return;
 
     const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
+    toast.className = `qalab-toast ${type}`;
     
     const iconMap = {
         success: 'fa-circle-check',
