@@ -26,6 +26,7 @@ export interface ModuleConfig {
   icon: string;
   description: string;
   parentModuleId?: string;
+  themeColor?: string; // 模块主题色，如 'blue', 'emerald', 'purple' 等
 }
 
 /**
@@ -109,7 +110,8 @@ export const MENU_CONFIG: MenuConfig = {
       title: 'SOPs 流程中心',
       version: 'v1.0',
       icon: 'fas fa-clipboard-list',
-      description: '集成所有亚马逊运营标准化流程指引，确保团队执行一致性。'
+      description: '集成所有亚马逊运营标准化流程指引，确保团队执行一致性。',
+      themeColor: 'emerald' // ✅ 新增：模块主题色
     },
 
     // [应用中心] App Center 容器模块
@@ -119,7 +121,8 @@ export const MENU_CONFIG: MenuConfig = {
       title: '应用中心',
       version: 'v1.0',
       icon: 'fas fa-cubes',
-      description: '集成多个专业工具的应用中心，提供数据采集、分析与优化功能。'
+      description: '集成多个专业工具的应用中心，提供数据采集、分析与优化功能。',
+      themeColor: 'blue' // ✅ 新增：模块主题色
     },
 
     // [应用 A] Master Analysis
@@ -130,7 +133,8 @@ export const MENU_CONFIG: MenuConfig = {
       title: 'Master Analysis',
       version: 'v2.1 Pro',
       icon: 'fas fa-cubes-stacked',
-      description: '集成数据采集、管理、AI分析与提示词工程的一站式解决方案。'
+      description: '集成数据采集、管理、AI分析与提示词工程的一站式解决方案。',
+      themeColor: 'blue' // ✅ 新增：继承父模块颜色
     },
 
     // Keyword Tracker 模块配置
@@ -141,7 +145,8 @@ export const MENU_CONFIG: MenuConfig = {
       title: 'Keyword Hunter',
       version: 'v1.0 Pro',
       icon: 'fas fa-search',
-      description: 'ASIN 关键词覆盖情况查询，手动补充与 SEO 合规性审查工具。'
+      description: 'ASIN 关键词覆盖情况查询，手动补充与 SEO 合规性审查工具。',
+      themeColor: 'purple' // ✅ 新增：模块主题色
     },
 
     // [智库] Knowledge Base
@@ -151,7 +156,8 @@ export const MENU_CONFIG: MenuConfig = {
       title: 'Amazon 智库',
       version: 'KB v1.0',
       icon: 'fas fa-book-open',
-      description: '亚马逊市场洞察报告、SEO策略、A10 算法知识库、营销日历与旺季攻略。'
+      description: '亚马逊市场洞察报告、SEO策略、A10 算法知识库、营销日历与旺季攻略。',
+      themeColor: 'amber' // ✅ 新增：模块主题色
     },
 
     // [更多] More Core Module
@@ -161,7 +167,8 @@ export const MENU_CONFIG: MenuConfig = {
       title: '更多',
       version: 'v1.0',
       icon: 'fas fa-compass',
-      description: '探索更多实用功能和工具，提升工作效率。'
+      description: '探索更多实用功能和工具，提升工作效率。',
+      themeColor: 'cyan' // ✅ 新增：模块主题色
     }
   },
 

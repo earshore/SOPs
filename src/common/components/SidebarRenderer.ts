@@ -12,7 +12,8 @@
 
 import { MENU_CONFIG, type RouteConfig, type CategoryConfig, type ModuleConfig } from '../config/menuConfig';
 import state from '../state';
-import { COLOR_SCHEMES } from '../constants/colorSchemes';
+import { COLOR_SCHEMES, type ColorSchemeName } from '../constants/colorSchemes';
+import ColorContext from '../utils/ColorContext';
 
 // ═══════════════════════════════════════════════════════════
 // Types & Interfaces
@@ -44,6 +45,7 @@ export class SidebarRenderer {
   private overviewRouteId: string;
   private enableSearch: boolean;
   private searchPlaceholder: string;
+  private moduleColor: ColorSchemeName; // ✅ 新增：模块主题色
 
   constructor(config: SidebarConfig) {
     this.moduleId = config.moduleId;
@@ -51,6 +53,9 @@ export class SidebarRenderer {
     this.overviewRouteId = config.overviewRouteId;
     this.enableSearch = config.enableSearch !== false;
     this.searchPlaceholder = config.searchPlaceholder || '搜索...';
+    
+    // ✅ 自动推断模块颜色
+    this.moduleColor = ColorContext.inferColorFromModule(this.moduleId);
   }
 
   // ═══════════════════════════════════════════════════════
@@ -81,7 +86,6 @@ export class SidebarRenderer {
     const html = this._buildHTML(
       moduleConfig.title,
       moduleConfig.icon,
-      'blue', // 默认颜色
       categoryTree,
       currentTab,
       activeCategory
@@ -134,14 +138,16 @@ export class SidebarRenderer {
   }
 
   private _updateActiveState(sidebar: HTMLElement, currentTab: string): void {
+    const color = this.moduleColor; // ✅ 使用模块颜色
+    
     // ── Reset all buttons ──
     const allBtns = sidebar.querySelectorAll('.sidebar-btn');
     allBtns.forEach(btn => {
       const el = btn as HTMLElement;
       // Remove active classes
       el.classList.remove(
-        'bg-blue-50/80', 'text-blue-700',
-        'border-l-2', 'border-blue-500',
+        `bg-${color}-50/80`, `text-${color}-700`,
+        'border-l-2', `border-${color}-500`,
         'shadow-sm'
       );
       // Add default classes
@@ -150,19 +156,19 @@ export class SidebarRenderer {
       // Reset icon
       const iconContainer = el.querySelector('.sidebar-icon-container') as HTMLElement;
       if (iconContainer) {
-        iconContainer.classList.remove('bg-blue-100', 'scale-105');
+        iconContainer.classList.remove(`bg-${color}-100`, 'scale-105');
         iconContainer.classList.add('bg-slate-100');
       }
       const icon = el.querySelector('.sidebar-icon') as HTMLElement;
       if (icon) {
-        icon.classList.remove('text-blue-500');
+        icon.classList.remove(`text-${color}-500`);
         icon.classList.add('text-slate-400');
       }
 
       // Reset text
       const span = el.querySelector('.sidebar-label');
       if (span) {
-        span.classList.remove('font-semibold', 'text-blue-700');
+        span.classList.remove('font-semibold', `text-${color}-700`);
         span.classList.add('font-medium', 'text-slate-600');
       }
 
@@ -179,26 +185,26 @@ export class SidebarRenderer {
     if (activeBtn) {
       activeBtn.classList.remove('text-slate-600', 'border-transparent');
       activeBtn.classList.add(
-        'bg-blue-50/80', 'text-blue-700',
-        'border-l-2', 'border-blue-500',
+        `bg-${color}-50/80`, `text-${color}-700`,
+        'border-l-2', `border-${color}-500`,
         'shadow-sm'
       );
 
       const iconContainer = activeBtn.querySelector('.sidebar-icon-container');
       if (iconContainer) {
         iconContainer.classList.remove('bg-slate-100');
-        iconContainer.classList.add('bg-blue-100', 'scale-105');
+        iconContainer.classList.add(`bg-${color}-100`, 'scale-105');
       }
       const icon = activeBtn.querySelector('.sidebar-icon');
       if (icon) {
         icon.classList.remove('text-slate-400');
-        icon.classList.add('text-blue-500');
+        icon.classList.add(`text-${color}-500`);
       }
 
       const span = activeBtn.querySelector('.sidebar-label');
       if (span) {
         span.classList.remove('font-medium', 'text-slate-600');
-        span.classList.add('font-semibold', 'text-blue-700');
+        span.classList.add('font-semibold', `text-${color}-700`);
       }
 
       const dot = activeBtn.querySelector('.sidebar-active-dot');
@@ -296,11 +302,12 @@ export class SidebarRenderer {
   private _buildHTML(
     title: string,
     icon: string,
-    color: string,
     categoryTree: CategoryTreeNode[],
     currentTab: string,
     _activeCategory: string | null
   ): string {
+    const color = this.moduleColor; // ✅ 使用模块颜色
+    
     return `
       <div class="flex flex-col h-full bg-gradient-to-b from-white to-slate-50/50">
 
@@ -354,21 +361,22 @@ export class SidebarRenderer {
     const isActive = currentTab === this.overviewRouteId;
     const overviewRoute = MENU_CONFIG.routes[this.overviewRouteId];
     const label = overviewRoute?.label || '总览';
+    const color = this.moduleColor; // ✅ 使用模块颜色
 
     const containerCls = isActive
-      ? 'bg-blue-50/80 border-l-2 border-blue-500 shadow-sm'
+      ? `bg-${color}-50/80 border-l-2 border-${color}-500 shadow-sm`
       : 'border-l-2 border-transparent hover:bg-slate-50/80 hover:border-slate-200';
 
     const iconContainerCls = isActive
-      ? 'bg-blue-100 scale-105'
+      ? `bg-${color}-100 scale-105`
       : 'bg-slate-100 group-hover:bg-slate-200';
 
     const iconCls = isActive
-      ? 'text-blue-500'
+      ? `text-${color}-500`
       : 'text-slate-400 group-hover:text-slate-600';
 
     const labelCls = isActive
-      ? 'font-semibold text-blue-700'
+      ? `font-semibold text-${color}-700`
       : 'font-medium text-slate-600 group-hover:text-slate-800';
 
     const dotCls = isActive
@@ -385,7 +393,7 @@ export class SidebarRenderer {
         <span class="sidebar-label text-[13px] ${labelCls} transition-colors duration-200 flex-1 text-left">
           ${label}
         </span>
-        <div class="sidebar-active-dot w-1.5 h-1.5 rounded-full bg-blue-500 ${dotCls} transition-all duration-300"></div>
+        <div class="sidebar-active-dot w-1.5 h-1.5 rounded-full bg-${color}-500 ${dotCls} transition-all duration-300"></div>
       </button>
     `;
   }
@@ -458,21 +466,22 @@ export class SidebarRenderer {
     parentColor: string
   ): string {
     const isActive = currentTab === route.id;
+    const color = this.moduleColor; // ✅ 使用模块颜色
 
     const containerCls = isActive
-      ? `bg-blue-50/80 border-l-2 border-blue-500 shadow-sm`
+      ? `bg-${color}-50/80 border-l-2 border-${color}-500 shadow-sm`
       : 'border-l-2 border-transparent hover:bg-slate-50/80 hover:border-slate-200';
 
     const iconContainerCls = isActive
-      ? 'bg-blue-100 scale-105'
+      ? `bg-${color}-100 scale-105`
       : `bg-slate-100 group-hover:bg-${parentColor}-50`;
 
     const iconCls = isActive
-      ? 'text-blue-500'
+      ? `text-${color}-500`
       : 'text-slate-400 group-hover:text-slate-500';
 
     const labelCls = isActive
-      ? 'font-semibold text-blue-700'
+      ? `font-semibold text-${color}-700`
       : 'font-medium text-slate-600 group-hover:text-slate-800';
 
     const dotCls = isActive
@@ -492,7 +501,7 @@ export class SidebarRenderer {
         <span class="sidebar-label text-[12px] ${labelCls} transition-colors duration-200 flex-1 text-left truncate">
           ${route.label}
         </span>
-        <div class="sidebar-active-dot w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0
+        <div class="sidebar-active-dot w-1.5 h-1.5 rounded-full bg-${color}-500 flex-shrink-0
           ${dotCls} transition-all duration-300"></div>
       </button>
     `;
@@ -501,12 +510,14 @@ export class SidebarRenderer {
   // ── Search Box ──
 
   private _buildSearchBox(): string {
+    const color = this.moduleColor; // ✅ 使用模块颜色
+    
     return `
       <div class="relative group mb-1">
         <!-- Search Icon Container -->
         <div class="absolute left-2.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-md bg-slate-100
-          group-focus-within:bg-blue-100 flex items-center justify-center transition-colors duration-200 pointer-events-none z-10">
-          <i class="fas fa-search text-[9px] text-slate-400 group-focus-within:text-blue-500 transition-colors duration-200"></i>
+          group-focus-within:bg-${color}-100 flex items-center justify-center transition-colors duration-200 pointer-events-none z-10">
+          <i class="fas fa-search text-[9px] text-slate-400 group-focus-within:text-${color}-500 transition-colors duration-200"></i>
         </div>
 
         <!-- Input -->
@@ -514,7 +525,7 @@ export class SidebarRenderer {
           placeholder="${this.searchPlaceholder}"
           class="w-full pl-10 pr-8 py-2 text-[12px] border border-slate-200 rounded-xl
             bg-white/80 backdrop-blur-sm
-            focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400
+            focus:ring-2 focus:ring-${color}-500/20 focus:border-${color}-400
             hover:border-slate-300
             placeholder:text-slate-300
             outline-none transition-all duration-200 shadow-sm"
