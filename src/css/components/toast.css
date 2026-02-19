@@ -8,6 +8,7 @@
    ======================================== */
 .toast {
   backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   transition: all var(--duration-slow) var(--ease-smooth);
   border-radius: var(--radius-lg);
   padding: var(--spacing-md) var(--spacing-lg);
@@ -15,6 +16,8 @@
   font-size: 0.875rem;
   font-weight: 500;
   box-shadow: var(--shadow-lg);
+  /* 确保有背景色，即使变体类未应用 */
+  background: rgba(51, 65, 85, 0.95);
 }
 
 /* ========================================
