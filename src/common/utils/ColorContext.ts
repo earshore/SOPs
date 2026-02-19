@@ -139,7 +139,7 @@ export class ColorContext {
       'emerald', 'teal', 'green',
       'amber', 'orange',
       'red', 'rose', 'pink',
-      'cyan', 'slate'
+      'cyan', 'slate', 'lime'
     ];
 
     if (validColors.includes(color as ColorSchemeName)) {

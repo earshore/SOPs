@@ -59,6 +59,16 @@ const GLASS_COLORS: Record<string, GlassColorScheme> = {
     tagText: 'text-blue-600/80',
     hoverBorder: 'group-hover/card:border-blue-300/50',
   },
+  sky: {
+    glow: 'from-sky-200/40 via-blue-100/20 to-transparent',
+    iconBg: 'bg-gradient-to-br from-sky-500 to-blue-600',
+    iconShadow: 'shadow-sky-500/30',
+    versionBg: 'bg-sky-500/10',
+    versionText: 'text-sky-600',
+    tagBg: 'bg-sky-500/8',
+    tagText: 'text-sky-600/80',
+    hoverBorder: 'group-hover/card:border-sky-300/50',
+  },
   indigo: {
     glow: 'from-indigo-200/40 via-violet-100/20 to-transparent',
     iconBg: 'bg-gradient-to-br from-indigo-500 to-violet-600',
@@ -89,6 +99,16 @@ const GLASS_COLORS: Record<string, GlassColorScheme> = {
     tagText: 'text-purple-600/80',
     hoverBorder: 'group-hover/card:border-purple-300/50',
   },
+  fuchsia: {
+    glow: 'from-fuchsia-200/40 via-pink-100/20 to-transparent',
+    iconBg: 'bg-gradient-to-br from-fuchsia-500 to-pink-600',
+    iconShadow: 'shadow-fuchsia-500/30',
+    versionBg: 'bg-fuchsia-500/10',
+    versionText: 'text-fuchsia-600',
+    tagBg: 'bg-fuchsia-500/8',
+    tagText: 'text-fuchsia-600/80',
+    hoverBorder: 'group-hover/card:border-fuchsia-300/50',
+  },
   emerald: {
     glow: 'from-emerald-200/40 via-teal-100/20 to-transparent',
     iconBg: 'bg-gradient-to-br from-emerald-500 to-teal-600',
@@ -118,6 +138,16 @@ const GLASS_COLORS: Record<string, GlassColorScheme> = {
     tagBg: 'bg-green-500/8',
     tagText: 'text-green-600/80',
     hoverBorder: 'group-hover/card:border-green-300/50',
+  },
+  lime: {
+    glow: 'from-lime-200/40 via-green-100/20 to-transparent',
+    iconBg: 'bg-gradient-to-br from-lime-500 to-green-600',
+    iconShadow: 'shadow-lime-500/30',
+    versionBg: 'bg-lime-500/10',
+    versionText: 'text-lime-600',
+    tagBg: 'bg-lime-500/8',
+    tagText: 'text-lime-600/80',
+    hoverBorder: 'group-hover/card:border-lime-300/50',
   },
   amber: {
     glow: 'from-amber-200/40 via-orange-100/20 to-transparent',
@@ -439,7 +469,7 @@ export function renderMegaMenu(): void {
         target: targetRoute,
         label: mod.title || 'Unknown Module',
         icon: mod.icon || 'fas fa-cube',
-        color: (mod as any).color || 'blue',
+        color: (mod as any).themeColor || 'blue', // ✅ 修复：使用 themeColor 字段
         version: mod.version || 'v1.0',
         description: mod.description || '暂无描述',
       });
@@ -453,36 +483,39 @@ export function renderMegaMenu(): void {
 }
 
 export function renderSopsMegaMenu(): void {
+  const sopsModule = MENU_CONFIG.modules['sops'];
   renderCategoryMenu({
     containerId: 'sops-mega-menu-content',
     overviewRouteId: 'sops_overview',
     overviewLabel: 'SOP 总览',
     overviewDescription: '掌控全局运营进度，查看所有待办事项与核心指标仪表盘。',
-    overviewColor: 'blue',
+    overviewColor: (sopsModule?.themeColor as ColorSchemeName) || 'emerald',
     categories: MENU_CONFIG.sopCategories || {},
     logLabel: 'SOPs MegaMenu',
   });
 }
 
 export function renderHubMegaMenu(): void {
+  const hubModule = MENU_CONFIG.modules['amz_hub_core'];
   renderCategoryMenu({
     containerId: 'hub-mega-menu-content',
     overviewRouteId: 'amz_hub_overview',
     overviewLabel: '智库总览',
     overviewDescription: '系统化的Amazon运营知识体系，从基础认知到进阶策略。',
-    overviewColor: 'blue',
+    overviewColor: (hubModule?.themeColor as ColorSchemeName) || 'orange',
     categories: MENU_CONFIG.hubCategories || {},
     logLabel: 'Hub MegaMenu',
   });
 }
 
 export function renderMoreMenu(): void {
+  const moreModule = MENU_CONFIG.modules['more_core'];
   renderCategoryMenu({
     containerId: 'more-menu-content',
     overviewRouteId: 'more_overview',
     overviewLabel: '更多总览',
     overviewDescription: '探索更多实用功能和工具，提升工作效率。',
-    overviewColor: 'green',
+    overviewColor: (moreModule?.themeColor as ColorSchemeName) || 'green',
     categories: MENU_CONFIG.moreCategories || {},
     logLabel: 'More Menu',
   });

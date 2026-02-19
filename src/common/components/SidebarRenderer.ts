@@ -401,8 +401,9 @@ export class SidebarRenderer {
   // ── Category Group ──
 
   private _buildCategoryGroup(category: CategoryTreeNode, currentTab: string): string {
-    const color = category.color || 'slate';
-    const scheme = COLOR_SCHEMES[color as keyof typeof COLOR_SCHEMES] || COLOR_SCHEMES.blue;
+    const color = this.moduleColor; // ✅ 使用模块主色调
+    const categoryColor = category.color || 'slate'; // 分类装饰色
+    const scheme = COLOR_SCHEMES[categoryColor as keyof typeof COLOR_SCHEMES] || COLOR_SCHEMES.blue;
     const childCount = category.children.length;
 
     return `
@@ -446,11 +447,11 @@ export class SidebarRenderer {
           <!-- Left accent line container -->
           <div class="relative ml-[18px] pl-4 mt-1 space-y-0.5">
 
-            <!-- Vertical accent line -->
-            <div class="absolute left-0 top-1 bottom-1 w-[2px] rounded-full ${scheme.accentBar} opacity-30"></div>
+            <!-- Vertical accent line - 使用分类自己的颜色 -->
+            <div class="absolute left-0 top-1 bottom-1 w-[2px] rounded-full bg-${categoryColor}-200 opacity-30"></div>
 
             ${category.children.map(route =>
-              this._buildChildRouteItem(route, currentTab, color)
+              this._buildChildRouteItem(route, currentTab)
             ).join('')}
           </div>
         </div>
@@ -462,11 +463,10 @@ export class SidebarRenderer {
 
   private _buildChildRouteItem(
     route: RouteConfig & { id: string },
-    currentTab: string,
-    parentColor: string
+    currentTab: string
   ): string {
     const isActive = currentTab === route.id;
-    const color = this.moduleColor; // ✅ 使用模块颜色
+    const color = this.moduleColor; // ✅ 使用模块主色调
 
     const containerCls = isActive
       ? `bg-${color}-50/80 border-l-2 border-${color}-500 shadow-sm`
@@ -474,7 +474,7 @@ export class SidebarRenderer {
 
     const iconContainerCls = isActive
       ? `bg-${color}-100 scale-105`
-      : `bg-slate-100 group-hover:bg-${parentColor}-50`;
+      : `bg-slate-100 group-hover:bg-${color}-50`;
 
     const iconCls = isActive
       ? `text-${color}-500`

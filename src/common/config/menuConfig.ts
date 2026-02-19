@@ -111,7 +111,7 @@ export const MENU_CONFIG: MenuConfig = {
       version: 'v1.0',
       icon: 'fas fa-clipboard-list',
       description: '集成所有亚马逊运营标准化流程指引，确保团队执行一致性。',
-      themeColor: 'emerald' // ✅ 新增：模块主题色
+      themeColor: 'sky' // ✅ 天空蓝 - 清新明亮的流程管理主题
     },
 
     // [应用中心] App Center 容器模块
@@ -122,7 +122,7 @@ export const MENU_CONFIG: MenuConfig = {
       version: 'v1.0',
       icon: 'fas fa-cubes',
       description: '集成多个专业工具的应用中心，提供数据采集、分析与优化功能。',
-      themeColor: 'blue' // ✅ 新增：模块主题色
+      themeColor: 'purple' // ✅ 紫色 - 应用中心主题
     },
 
     // [应用 A] Master Analysis
@@ -134,7 +134,7 @@ export const MENU_CONFIG: MenuConfig = {
       version: 'v2.1 Pro',
       icon: 'fas fa-cubes-stacked',
       description: '集成数据采集、管理、AI分析与提示词工程的一站式解决方案。',
-      themeColor: 'blue' // ✅ 新增：继承父模块颜色
+      themeColor: 'indigo' // ✅ 靛蓝色 - 保持不变，与紫色相近
     },
 
     // Keyword Tracker 模块配置
@@ -146,7 +146,7 @@ export const MENU_CONFIG: MenuConfig = {
       version: 'v1.0 Pro',
       icon: 'fas fa-search',
       description: 'ASIN 关键词覆盖情况查询，手动补充与 SEO 合规性审查工具。',
-      themeColor: 'purple' // ✅ 新增：模块主题色
+      themeColor: 'fuchsia' // ✅ 紫红色 - 鲜艳醒目的搜索主题
     },
 
     // [智库] Knowledge Base
@@ -157,7 +157,7 @@ export const MENU_CONFIG: MenuConfig = {
       version: 'KB v1.0',
       icon: 'fas fa-book-open',
       description: '亚马逊市场洞察报告、SEO策略、A10 算法知识库、营销日历与旺季攻略。',
-      themeColor: 'amber' // ✅ 新增：模块主题色
+      themeColor: 'orange' // ✅ 调整为 orange，避免与分类冲突
     },
 
     // [更多] More Core Module
@@ -168,7 +168,7 @@ export const MENU_CONFIG: MenuConfig = {
       version: 'v1.0',
       icon: 'fas fa-compass',
       description: '探索更多实用功能和工具，提升工作效率。',
-      themeColor: 'cyan' // ✅ 新增：模块主题色
+      themeColor: 'green' // ✅ 绿色 - 清新自然的探索主题
     }
   },
 
@@ -207,7 +207,7 @@ export const MENU_CONFIG: MenuConfig = {
       id: 'service',
       label: '客服与客户体验体系',
       icon: 'fas fa-headset',
-      color: 'blue',
+      color: 'teal', // ✅ 调整为 teal，避免占用蓝色
       order: 4,
       version: 'v1.2',
       description: '提升客户满意度，打造极致的品牌服务体验。'
@@ -222,7 +222,7 @@ export const MENU_CONFIG: MenuConfig = {
       id: 'knowledge',
       label: 'Amazon知识早知道',
       icon: 'fas fa-lightbulb',
-      color: 'blue',
+      color: 'indigo', // ✅ 调整为 indigo，避免占用蓝色
       order: 1,
       version: 'v1.0',
       description: '深入了解Amazon市场洞察、SEO策略与A10算法核心知识。'
@@ -231,7 +231,7 @@ export const MENU_CONFIG: MenuConfig = {
       id: 'practice',
       label: '入门实操宝典',
       icon: 'fas fa-hands',
-      color: 'emerald',
+      color: 'green', // ✅ 调整为 green，避免与 SOPs 冲突
       order: 2,
       version: 'v1.0',
       description: '从零开始的实战指南，掌握营销日历与促销工具使用技巧。'
@@ -240,7 +240,7 @@ export const MENU_CONFIG: MenuConfig = {
       id: 'advanced',
       label: '运营提升全攻略',
       icon: 'fas fa-chart-line',
-      color: 'purple',
+      color: 'violet', // ✅ 调整为 violet，避免与 keyword_tracker 冲突
       order: 3,
       version: 'v1.0',
       description: '进阶运营策略，提升转化率与销售表现的系统方法论。'
@@ -255,7 +255,7 @@ export const MENU_CONFIG: MenuConfig = {
       id: 'explore',
       label: '大模型探索',
       icon: 'fas fa-compass',
-      color: 'green',
+      color: 'lime',
       order: 1,
       version: 'v1.0',
       description: '智能体、提示词、工作流等实用功能。'
@@ -271,7 +271,7 @@ export const MENU_CONFIG: MenuConfig = {
       id: 'master_analysis',
       label: 'Master Analysis',
       icon: 'fas fa-robot',
-      color: 'blue',
+      color: 'indigo', // ✅ 靛蓝色，与模块主题色一致
       order: 1,
       version: 'v2.1 Pro',
       description: '集成数据采集、管理、AI分析与提示词工程的一站式解决方案。'
@@ -280,7 +280,7 @@ export const MENU_CONFIG: MenuConfig = {
       id: 'keyword_tracker',
       label: 'Keyword Hunter',
       icon: 'fas fa-search',
-      color: 'purple',
+      color: 'fuchsia', // ✅ 紫红色，与模块主题色一致
       order: 2,
       version: 'v1.0 Pro',
       description: 'ASIN 关键词覆盖情况查询，手动补充与 SEO 合规性审查工具。'
