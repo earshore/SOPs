@@ -20,9 +20,10 @@ export default {
             variants: ['hover', 'focus', 'group-hover', 'group-focus-within'],
         },
         
-        // 卡片交互效果
+        // 卡片交互效果 - 修复正则表达式
         {
-            pattern: /group-hover\/card:(bg|text|border|ring|shadow|scale|opacity|translate)-(.*)/,
+            pattern: /(bg|text|border|ring|shadow|scale|opacity|translate)-(.*)/,
+            variants: ['group-hover/card'],
         },
         
         // 通用交互效果

@@ -4,6 +4,9 @@ import { createModuleLoader, ModuleLoader } from '../../common/utils/ModuleLoade
 import type { ModuleMap, ModuleLoaderFn } from '@/types/modules-business';
 
 // ================= 路由配置表 =================
+// ✅ 模块特定样式 - 懒加载
+import '../more_style.css';
+
 const MODULE_MAP: ModuleMap = {
     // 总览
     more_overview: () => import('./views/overview/index'),

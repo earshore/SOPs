@@ -5,14 +5,30 @@ import checker from 'vite-plugin-checker';
 export default defineConfig({
     plugins: [
         checker({
-            typescript: true,
-            // 暂时禁用ESLint检查，避免配置冲突
-            // eslint: {
-            //     lintCommand: 'eslint "./src/**/*.{js,ts,jsx,tsx}"'
-            // }
+            typescript: {
+                tsconfigPath: 'tsconfig.json',
+                buildMode: false // 只在构建时检查,开发时跳过
+            }
         })
     ],
     root: './',
+
+    // 依赖优化配置
+    optimizeDeps: {
+        include: [
+            'alpinejs',
+            'marked',
+            'zod',
+            'zustand',
+            'clsx',
+            'tailwind-merge',
+            'jsonrepair'
+        ],
+        exclude: [
+            'chart.js', // 懒加载
+            'gridstack'  // 懒加载
+        ]
+    },
 
     // 开发服务器配置
     server: {
@@ -26,18 +42,7 @@ export default defineConfig({
                 target: 'https://llm-gateway.hongecb.store',
                 changeOrigin: true,
                 secure: true,
-                rewrite: (path) => path,
-                configure: (proxy, options) => {
-                    proxy.on('error', (err, req, res) => {
-                        console.log('proxy error', err);
-                    });
-                    proxy.on('proxyReq', (proxyReq, req, res) => {
-                        console.log('Sending Request to the Target:', req.method, req.url);
-                    });
-                    proxy.on('proxyRes', (proxyRes, req, res) => {
-                        console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
-                    });
-                }
+                rewrite: (path) => path
             }
         }
     },

@@ -10,9 +10,9 @@ import { marked } from 'marked';
 
 // 🎯 CSS架构重构: 使用新的分层CSS系统
 import './css/main.css';
-// 模块特定样式保持按需加载
-import './modules/more/more_style.css';
-import './modules/app_center/app_center_style.css';
+// 模块特定样式改为按需懒加载,不在启动时导入
+// import './modules/more/more_style.css';
+// import './modules/app_center/app_center_style.css';
 
 // Expose to window for legacy compatibility
 window.marked = marked;
@@ -144,64 +144,20 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     return router;
   }, { dependencies: ['container'] });
 
-  // 4. 监控服务（可选）
-  bootstrap.register('performanceService', async () => {
-    const { performanceService } = await import('./services/performanceService');
-    const { container } = await import('./common/di/Container');
-    performanceService.init();
-    // 注册到DI容器
-    container.register('performanceService', () => performanceService, {
-      dependencies: [],
-      lifetime: 'singleton'
-    });
-    return performanceService;
-  }, { 
-    optional: true,
-    fallback: () => {
-      console.log('[Bootstrap] 性能监控服务未启用');
-      return null;
-    }
-  });
+  // 4. 监控服务（可选,懒加载）
+  // 性能监控服务不在启动时加载,按需使用
+  // bootstrap.register('performanceService', ...)
 
-  // 🎯 P2-11: Web Vitals性能监控
-  bootstrap.register('webVitalsService', async () => {
-    const { webVitalsService } = await import('./services/webVitalsService');
-    const { container } = await import('./common/di/Container');
-    
-    await webVitalsService.initialize();
-    console.log('✅ [P2-11] Web Vitals监控已启动');
-    
-    // 注册到DI容器
-    container.register('webVitalsService', () => webVitalsService, {
-      dependencies: [],
-      lifetime: 'singleton'
-    });
-    return webVitalsService;
-  }, { optional: true });
+  // 🎯 P2-11: Web Vitals性能监控 (懒加载,按需启用)
+  // 在开发环境可通过 window.enableWebVitals() 手动启用
+  // bootstrap.register('webVitalsService', ...)
 
-  // 🎯 P2-11: 性能监控面板
-  bootstrap.register('performanceMonitor', async () => {
-    const { performanceMonitor } = await import('./common/devtools/PerformanceMonitor');
-    const { container } = await import('./common/di/Container');
-    
-    performanceMonitor.initialize();
-    console.log('✅ [P2-11] 性能监控面板已初始化');
-    
-    // 注册到DI容器
-    container.register('performanceMonitor', () => performanceMonitor, {
-      dependencies: [],
-      lifetime: 'singleton'
-    });
-    return performanceMonitor;
-  }, { 
-    optional: true,
-    dependencies: ['webVitalsService']
-  });
+  // 🎯 P2-11: 性能监控面板 (懒加载,按需启用)
+  // bootstrap.register('performanceMonitor', ...)
 
   bootstrap.register('logger', async () => {
     const { Logger } = await import('./services/loggerService');
     const { container } = await import('./common/di/Container');
-    Logger.info('应用启动', { version: '1.0.0' }, 'System');
     // 注册到DI容器
     container.register('logger', () => Logger, {
       dependencies: [],
@@ -210,24 +166,9 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     return Logger;
   }, { optional: true });
 
-  // 🎯 P0优化: 内存泄漏检测器
-  bootstrap.register('memoryLeakDetector', async () => {
-    const { memoryLeakDetector } = await import('./common/utils/MemoryLeakDetector');
-    const { container } = await import('./common/di/Container');
-    
-    // 只在开发环境启用
-    if ((import.meta as any).env?.DEV) {
-      memoryLeakDetector.start();
-      console.log('✅ [P0] 内存泄漏检测器已启动');
-    }
-    
-    // 注册到DI容器
-    container.register('memoryLeakDetector', () => memoryLeakDetector, {
-      dependencies: [],
-      lifetime: 'singleton'
-    });
-    return memoryLeakDetector;
-  }, { optional: true });
+  // 🎯 P0优化: 内存泄漏检测器 (仅开发环境,懒加载)
+  // 可通过 window.enableMemoryDetector() 手动启用
+  // bootstrap.register('memoryLeakDetector', ...)
 
   // 🎯 P0优化: 工作状态管理器
   bootstrap.register('workingStateManager', async () => {
