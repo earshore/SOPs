@@ -5,6 +5,7 @@
 // 🎯 P0-4: 已迁移到统一错误处理
 // ================================================================
 
+import { Logger } from './loggerService';
 import type { IStorageService } from '../types/services';
 import type { LLMProviderConfig } from '../types/state';
 import type { HistoryItem, ProxyConfig } from '../types/modules-business';
@@ -325,7 +326,7 @@ class StorageServiceClass implements IStorageService {
         }
       }
     } catch (e) {
-      console.warn('[StorageService] 获取访问时间失败:', e);
+      Logger.warn('[StorageService] 获取访问时间失败', { error: e });
     }
     
     return items.sort((a, b) => a.accessTime - b.accessTime);
@@ -340,7 +341,10 @@ class StorageServiceClass implements IStorageService {
     const threshold = this._lruConfig.maxSize * this._lruConfig.warningThreshold;
     
     if (projectedUsage > threshold) {
-      console.warn(`[StorageService] 缓存使用量接近上限 (${(projectedUsage / 1024 / 1024).toFixed(2)}MB / ${(this._lruConfig.maxSize / 1024 / 1024).toFixed(2)}MB)，开始清理...`);
+      Logger.warn('[StorageService] 缓存使用量接近上限，开始清理', {
+        current: `${(projectedUsage / 1024 / 1024).toFixed(2)}MB`,
+        max: `${(this._lruConfig.maxSize / 1024 / 1024).toFixed(2)}MB`
+      });
       this._cleanupLRU();
     }
   }
@@ -371,9 +375,12 @@ class StorageServiceClass implements IStorageService {
         }
       }
       
-      console.log(`[StorageService] LRU清理完成，删除了 ${removedCount} 个项目，释放了 ${((usage.used - currentSize) / 1024).toFixed(2)}KB`);
+      Logger.info('[StorageService] LRU清理完成', {
+        removedCount,
+        freedSpace: `${((usage.used - currentSize) / 1024).toFixed(2)}KB`
+      });
     } catch (e) {
-      console.error('[StorageService] LRU清理失败:', e);
+      Logger.error('[StorageService] LRU清理失败', { error: e });
     }
   }
 
@@ -413,14 +420,14 @@ class StorageServiceClass implements IStorageService {
    * 处理存储空间超限
    */
   private _handleQuotaExceeded(): void {
-    console.warn('[StorageService] 存储空间不足，尝试清理数据...');
+    Logger.warn('[StorageService] 存储空间不足，尝试清理数据');
     
     this._cleanupLRU();
     
     const history = this.get<unknown[]>(STORAGE_KEYS.SCRAPE_HISTORY, []);
     if (history && history.length > 10) {
       this.set(STORAGE_KEYS.SCRAPE_HISTORY, history.slice(0, 10));
-      console.log('[StorageService] 清理了采集历史数据');
+      Logger.info('[StorageService] 清理了采集历史数据');
     }
   }
 
@@ -442,7 +449,7 @@ class StorageServiceClass implements IStorageService {
       const apiKey = await this.getSecure(`llm_key_${activeProvider}`, '');
       return { ...config, apiKey: apiKey || '' } as LLMProviderConfig;
     } catch (error) {
-      console.warn('[StorageService] Failed to decrypt API key:', error);
+      Logger.warn('[StorageService] Failed to decrypt API key', { error });
       return { ...config, apiKey: '' } as LLMProviderConfig;
     }
   }
