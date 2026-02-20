@@ -35,15 +35,16 @@ import { debugInterface } from './common/devtools/DebugInterface';
 import { ThemeManager } from './common/config/themeConfig';
 
 import { Logger } from './services/loggerService';
-import eventBus from './common/EventBus';
 import { container } from './common/di/Container';
 import { initViews } from './common/utils/viewLoader';
 
 // ✅ 导入 Web Components
 import './components/modal/AppModal';
 
-// 🎯 P0优化: 导入服务初始化管理器
+// 🎯 P0优化: 导入服务初始化管理器和注册表
 import { ServiceBootstrap } from './common/bootstrap/ServiceBootstrap';
+import { serviceRegistry } from './common/di/ServiceRegistry';
+import { registerAllServices } from './common/di/services';
 
 // 🎯 短期优化：导入 LoadingManager
 import { loadingManager } from './common/utils/LoadingManager';
@@ -116,115 +117,17 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
   console.log("🚀 System: Application Booting...");
 
   // ================================================================
-  // 🎯 P0优化: 使用服务初始化管理器（支持并行初始化）
+  // 🎯 DI容器整合: 使用ServiceRegistry统一管理服务
   // ================================================================
-  const bootstrap = new ServiceBootstrap();
-
-  // 1. 基础服务（无依赖）- 并行初始化
-  bootstrap.register('eventBus', async () => {
-    container.register('eventBus', () => eventBus, { 
-      dependencies: [],
-      lifetime: 'singleton'
-    });
-    return eventBus;
-  });
-
-  bootstrap.register('workingStateManager', async () => {
-    const { workingStateManager } = await import('./common/utils/WorkingStateManager');
-    console.log('✅ [P0] 工作状态管理器已初始化');
-    container.register('workingStateManager', () => workingStateManager, {
-      dependencies: [],
-      lifetime: 'singleton'
-    });
-    return workingStateManager;
-  });
-
-  bootstrap.register('globalErrorHandler', async () => {
-    const { globalErrorHandler } = await import('./common/errors/GlobalErrorHandler');
-    console.log('✅ [P0] 全局错误处理器已初始化');
-    container.register('globalErrorHandler', () => globalErrorHandler, {
-      dependencies: [],
-      lifetime: 'singleton'
-    });
-    return globalErrorHandler;
-  });
-
-  // 2. 依赖基础服务的核心服务
-  bootstrap.register('container', async () => {
-    return container;
-  }, { dependencies: ['eventBus'] });
-
-  bootstrap.register('actionRegistry', async () => {
-    const { default: actionRegistry } = await import('./common/utils/actionRegistry');
-    container.register('actionRegistry', () => actionRegistry, {
-      dependencies: ['eventBus'],
-      lifetime: 'singleton'
-    });
-    return actionRegistry;
-  }, { dependencies: ['eventBus'] });
-
-  bootstrap.register('router', async () => {
-    const { router } = await import('./common/router/Router');
-    container.register('router', () => router, {
-      dependencies: ['eventBus'],
-      lifetime: 'singleton'
-    });
-    return router;
-  }, { dependencies: ['eventBus'] });
-
-  // 3. UI服务（并行初始化）
-  bootstrap.register('loadingManager', async () => {
-    const globalLoading = document.getElementById('global-loading');
-    if (globalLoading) {
-      loadingManager.setGlobalLoadingElement(globalLoading);
-      console.log("✅ LoadingManager initialized");
-    }
-    container.register('loadingManager', () => loadingManager, {
-      dependencies: [],
-      lifetime: 'singleton'
-    });
-    return loadingManager;
-  });
-
-  bootstrap.register('alpine', async () => {
-    initAlpineSettings();
-    Alpine.start();
-    return Alpine;
-  });
-
-  // 4. 视图加载（依赖router和loadingManager）
-  bootstrap.register('views', async () => {
-    await initViews();
-    return true;
-  }, { dependencies: ['router', 'loadingManager'] });
-
-  // 5. 事件系统（依赖actionRegistry）
-  bootstrap.register('eventDelegation', async () => {
-    const { initGlobalEventDelegation } = await import('./common/utils/actionRegistry');
-    initGlobalEventDelegation();
-    return true;
-  }, { dependencies: ['actionRegistry'] });
-
-  // 6. 可选服务（延迟初始化，不阻塞启动）
-  bootstrap.register('logger', async () => {
-    container.register('logger', () => Logger, {
-      dependencies: [],
-      lifetime: 'singleton'
-    });
-    return Logger;
-  }, { optional: true });
-
-  bootstrap.register('eventLogger', async () => {
-    const { initEventLogger } = await import('./common/utils/eventLogger');
-    initEventLogger();
-    return true;
-  }, { optional: true });
-
-  bootstrap.register('plugins', async () => {
-    const { loadPlugins } = await import('./common/utils/pluginLoader');
-    loadPlugins();
-    return true;
-  }, { optional: true });
+  
+  // 1. 注册所有服务配置到注册表
+  registerAllServices(serviceRegistry);
+  
+  // 2. 将所有服务注册到DI容器
+  serviceRegistry.registerAll(container);
+  
+  // 3. 创建ServiceBootstrap实例（使用容器和注册表）
+  const bootstrap = new ServiceBootstrap(container, serviceRegistry);
 
   // ================================================================
   // 执行初始化
@@ -241,6 +144,40 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     // ================================================================
     // 初始化成功，继续启动流程
     // ================================================================
+    
+    // 初始化Alpine.js
+    initAlpineSettings();
+    Alpine.start();
+    
+    // 初始化视图
+    await initViews();
+    
+    // 初始化全局事件委托
+    const { initGlobalEventDelegation } = await import('./common/utils/actionRegistry');
+    initGlobalEventDelegation();
+    
+    // 初始化LoadingManager
+    const globalLoading = document.getElementById('global-loading');
+    if (globalLoading) {
+      loadingManager.setGlobalLoadingElement(globalLoading);
+      console.log("✅ LoadingManager initialized");
+    }
+    
+    // 可选：初始化事件日志
+    try {
+      const { initEventLogger } = await import('./common/utils/eventLogger');
+      initEventLogger();
+    } catch (e) {
+      console.warn('事件日志初始化失败:', e);
+    }
+    
+    // 可选：加载插件
+    try {
+      const { loadPlugins } = await import('./common/utils/pluginLoader');
+      loadPlugins();
+    } catch (e) {
+      console.warn('插件加载失败:', e);
+    }
     
     // 🎯 P1-8: 状态管理已完全切换到Zustand
     // StateManager和stateAdapter已移除

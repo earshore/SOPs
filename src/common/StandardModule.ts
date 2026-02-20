@@ -2,9 +2,15 @@
 // ================================================================
 // 🎯 标准化模块基类
 // 提供统一的模块接口和生命周期管理
+// 🎯 增强: 支持DI容器注入和服务获取
 // ================================================================
 
 import type { IModule, ModuleState, ModuleMetadata } from '../types/modules';
+import { container as globalContainer } from './di/Container';
+import type { DIContainer } from './di/Container';
+import type { ServiceName } from './di/ServiceRegistry';
+import { SERVICE_NAMES } from './di/ServiceRegistry';
+import type { ILoggerService, IStorageService, IHttpService } from '@/types/services';
 
 /**
  * 标准化模块配置
@@ -18,6 +24,8 @@ export interface StandardModuleConfig {
   version: string;
   /** 模块元信息 */
   metadata?: ModuleMetadata;
+  /** DI容器实例（可选，默认使用全局容器） */
+  container?: DIContainer;
 }
 
 /**
@@ -71,6 +79,9 @@ export abstract class StandardModule implements IModule {
   /** 模块元信息 */
   public readonly metadata?: ModuleMetadata;
   
+  /** DI容器实例 */
+  protected readonly diContainer: DIContainer;
+  
   /** 模块状态 */
   protected state: ModuleState;
   
@@ -85,6 +96,7 @@ export abstract class StandardModule implements IModule {
     this.name = config.name;
     this.version = config.version;
     this.metadata = config.metadata;
+    this.diContainer = config.container || globalContainer;
     
     this.state = {
       mounted: false,
@@ -204,6 +216,58 @@ export abstract class StandardModule implements IModule {
   isMounted(): boolean {
     return this.state.mounted;
   }
+
+  // ================================================================
+  // DI容器服务获取方法
+  // ================================================================
+
+  /**
+   * 获取服务实例（类型安全）
+   * @param name - 服务名称
+   * @returns 服务实例
+   */
+  protected getService<T = any>(name: ServiceName): T {
+    try {
+      return this.diContainer.resolve<T>(name);
+    } catch (error) {
+      console.error(`[${this.id}] 获取服务失败: ${name}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * 检查服务是否存在
+   * @param name - 服务名称
+   * @returns 是否存在
+   */
+  protected hasService(name: ServiceName): boolean {
+    return this.diContainer.has(name);
+  }
+
+  /**
+   * 获取Logger服务（便捷属性）
+   */
+  protected get logger(): ILoggerService {
+    return this.getService<ILoggerService>(SERVICE_NAMES.LOGGER);
+  }
+
+  /**
+   * 获取Storage服务（便捷属性）
+   */
+  protected get storage(): IStorageService {
+    return this.getService<IStorageService>(SERVICE_NAMES.STORAGE);
+  }
+
+  /**
+   * 获取Http服务（便捷属性）
+   */
+  protected get http(): IHttpService {
+    return this.getService<IHttpService>(SERVICE_NAMES.HTTP);
+  }
+
+  // ================================================================
+  // 资源管理方法
+  // ================================================================
 
   /**
    * 注册清理函数

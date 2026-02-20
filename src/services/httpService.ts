@@ -3,13 +3,14 @@
 // 🎯 统一 HTTP 请求服务（TypeScript版本）
 // 替代分散的 fetch 调用
 // 🎯 P1-9: 集成请求去重和取消管理
+// 🎯 DI改造：支持依赖注入Logger和Config
 // ================================================================
 
-import { Logger } from './loggerService';
 import { configCenter } from '../common/config/ConfigCenter';
 import { priorityRequestPool, REQUEST_PRIORITY } from './PriorityRequestPool';
 import { requestManager } from './RequestManager';
 import { httpCacheService, type CacheStrategy } from './HttpCacheService';
+import type { ILoggerService, IConfigService, IHttpService } from '../types/services';
 
 /**
  * 请求优先级类型
@@ -101,8 +102,9 @@ export interface HttpClient {
 
 /**
  * 统一 HTTP 请求服务
+ * 🎯 DI改造：支持依赖注入Logger和Config
  */
-class HttpServiceClass {
+class HttpServiceClass implements IHttpService {
   /**
    * 默认配置
    */
@@ -113,15 +115,62 @@ class HttpServiceClass {
     headers: Record<string, string>;
   };
 
-  constructor() {
+  private logger: ILoggerService | null;
+  private configService: IConfigService | null;
+
+  /**
+   * 构造函数
+   * @param logger - LoggerService实例（可选）
+   * @param config - ConfigService实例（可选）
+   */
+  constructor(logger?: ILoggerService, config?: IConfigService) {
+    this.logger = logger || null;
+    this.configService = config || null;
+    
+    // 尝试从config服务或configCenter获取配置
+    const getConfig = <T>(key: string, defaultValue: T): T => {
+      if (this.configService) {
+        try {
+          return this.configService.get<T>(key, defaultValue);
+        } catch {
+          return defaultValue;
+        }
+      }
+      try {
+        return configCenter.get<T>(key, defaultValue);
+      } catch {
+        return defaultValue;
+      }
+    };
+
     this.defaults = {
-      timeout: configCenter.get<number>('api.timeout') || 30000,
-      retries: configCenter.get<number>('api.retryAttempts') || 0,
-      retryDelay: configCenter.get<number>('api.retryDelay') || 1000,
+      timeout: getConfig<number>('api.timeout', 30000),
+      retries: getConfig<number>('api.retryAttempts', 0),
+      retryDelay: getConfig<number>('api.retryDelay', 1000),
       headers: {
         'Content-Type': 'application/json',
       },
     };
+  }
+
+  /**
+   * 设置LoggerService（延迟注入）
+   * @param logger - LoggerService实例
+   */
+  setLoggerService(logger: ILoggerService): void {
+    this.logger = logger;
+    console.log('[HttpService] LoggerService已注入');
+  }
+
+  /**
+   * 记录日志（使用注入的Logger或console）
+   */
+  private _log(level: 'debug' | 'info' | 'warn' | 'error', message: string, data: Record<string, unknown> = {}): void {
+    if (this.logger) {
+      this.logger[level](message, data, 'HttpService');
+    } else {
+      console[level](`[HttpService] ${message}`, data);
+    }
   }
 
   /**
@@ -165,7 +214,7 @@ class HttpServiceClass {
       });
       
       if (cached !== null) {
-        Logger.debug('使用缓存响应', { url, cacheKey: finalCacheKey }, 'HttpService');
+        this._log('debug', '使用缓存响应', { url, cacheKey: finalCacheKey });
         return cached as T;
       }
     }
@@ -295,6 +344,7 @@ class HttpServiceClass {
 
   /**
    * 执行请求并进行性能监控
+   * 🎯 DI改造：移除Logger依赖
    */
   private async _executeWithPerformance<T>(
     url: string,
@@ -315,7 +365,7 @@ class HttpServiceClass {
       
       return await performanceService.measureApiCall(apiName, fn);
     } catch (e) {
-      Logger.debug('性能监控不可用，直接执行请求', {}, 'HttpService');
+      this._log('debug', '性能监控不可用，直接执行请求', {});
       return await fn();
     }
   }
@@ -395,7 +445,8 @@ class HttpServiceClass {
   }
 }
 
-// 创建单例
+// 创建单例（向后兼容）
+/** @deprecated 请使用 container.resolve('http') 获取HttpService实例 */
 export const HttpService = new HttpServiceClass();
 
 // 默认导出
@@ -403,3 +454,25 @@ export default HttpService;
 
 // 导出优先级常量
 export { REQUEST_PRIORITY } from './PriorityRequestPool';
+
+// ================================================================
+// 🎯 DI容器工厂函数
+// ================================================================
+
+/**
+ * 创建HttpService实例的工厂函数
+ * @param logger - LoggerService实例（可选）
+ * @param config - ConfigService实例（可选）
+ * @returns HttpService实例
+ */
+export function createHttpService(
+  logger?: ILoggerService,
+  config?: IConfigService
+): HttpServiceClass {
+  return new HttpServiceClass(logger, config);
+}
+
+// ================================================================
+// 向后兼容：保留旧的单例导出
+// @deprecated 请使用DI容器获取服务实例
+// ================================================================

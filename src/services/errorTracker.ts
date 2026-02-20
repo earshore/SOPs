@@ -4,8 +4,8 @@
 // 捕获、记录和分析应用错误
 // ================================================================
 
-import { Logger } from './loggerService';
 import type { AppError } from '@/common/errors/AppError';
+import type { ILoggerService } from '../types/services';
 
 /**
  * 错误类型
@@ -70,6 +70,7 @@ export interface ErrorTrackerConfig {
 
 /**
  * 错误追踪服务
+ * 🎯 DI改造：支持依赖注入Logger
  */
 export class ErrorTracker {
   private static instance: ErrorTracker;
@@ -77,8 +78,9 @@ export class ErrorTracker {
   private errors: Map<string, ErrorRecord>;
   private errorQueue: ErrorRecord[];
   private isInitialized: boolean = false;
+  private logger: ILoggerService | null = null;
 
-  private constructor() {
+  private constructor(logger?: ILoggerService) {
     this.config = {
       enabled: true,
       maxErrors: 100,
@@ -90,6 +92,7 @@ export class ErrorTracker {
     };
     this.errors = new Map();
     this.errorQueue = [];
+    this.logger = logger || null;
   }
 
   /**
@@ -103,11 +106,22 @@ export class ErrorTracker {
   }
 
   /**
+   * 记录日志（使用注入的Logger或console）
+   */
+  private _log(level: 'debug' | 'info' | 'warn' | 'error', message: string, data: Record<string, unknown> = {}): void {
+    if (this.logger) {
+      this.logger[level](message, data, 'ErrorTracker');
+    } else {
+      console[level](`[ErrorTracker] ${message}`, data);
+    }
+  }
+
+  /**
    * 初始化错误追踪
    */
   init(config?: Partial<ErrorTrackerConfig>): void {
     if (this.isInitialized) {
-      Logger.warn('ErrorTracker already initialized', {}, 'ErrorTracker');
+      this._log('warn', 'ErrorTracker already initialized', {});
       return;
     }
 
@@ -115,7 +129,7 @@ export class ErrorTracker {
     this.config = { ...this.config, ...config };
 
     if (!this.config.enabled) {
-      Logger.info('ErrorTracker is disabled', {}, 'ErrorTracker');
+      this._log('info', 'ErrorTracker is disabled', {});
       return;
     }
 
@@ -123,7 +137,7 @@ export class ErrorTracker {
     this.setupGlobalErrorHandlers();
 
     this.isInitialized = true;
-    Logger.info('✅ ErrorTracker initialized', this.config as unknown as Record<string, unknown>, 'ErrorTracker');
+    this._log('info', '✅ ErrorTracker initialized', this.config as unknown as Record<string, unknown>);
   }
 
   /**
@@ -319,7 +333,8 @@ export class ErrorTracker {
       ? 'error'
       : 'warn';
 
-    Logger[logLevel](
+    this._log(
+      logLevel,
       `[${error.type}] ${error.message}`,
       {
         id: error.id,
@@ -327,8 +342,7 @@ export class ErrorTracker {
         count: error.count,
         stack: error.stack,
         context: error.context
-      },
-      'ErrorTracker'
+      } as Record<string, unknown>
     );
   }
 
@@ -417,7 +431,7 @@ export class ErrorTracker {
   clear(): void {
     this.errors.clear();
     this.errorQueue = [];
-    Logger.info('Error records cleared', {}, 'ErrorTracker');
+    this._log('info', 'Error records cleared', {});
   }
 
   /**
@@ -425,7 +439,7 @@ export class ErrorTracker {
    */
   updateConfig(config: Partial<ErrorTrackerConfig>): void {
     this.config = { ...this.config, ...config };
-    Logger.info('ErrorTracker config updated', this.config as unknown as Record<string, unknown>, 'ErrorTracker');
+    this._log('info', 'ErrorTracker config updated', this.config as unknown as Record<string, unknown>);
   }
 
   /**
@@ -434,12 +448,26 @@ export class ErrorTracker {
   destroy(): void {
     this.clear();
     this.isInitialized = false;
-    Logger.info('ErrorTracker destroyed', {}, 'ErrorTracker');
+    this._log('info', 'ErrorTracker destroyed', {});
   }
 }
 
-// 创建全局实例
+// 创建全局实例（向后兼容）
+/** @deprecated 请使用 container.resolve('errorTracker') 获取ErrorTracker实例 */
 export const errorTracker = ErrorTracker.getInstance();
 
 // 默认导出
 export default errorTracker;
+
+// ================================================================
+// 🎯 DI容器工厂函数
+// ================================================================
+
+/**
+ * 创建ErrorTracker实例的工厂函数
+ * @param logger - LoggerService实例（可选）
+ * @returns ErrorTracker实例
+ */
+export function createErrorTracker(logger?: ILoggerService): ErrorTracker {
+  return new (ErrorTracker as any)(logger);
+}

@@ -4,10 +4,8 @@
 // 监控页面加载、Core Web Vitals、用户交互性能
 // ================================================================
 
-import { StorageService } from './storageService';
 import { configCenter } from '../common/config/ConfigCenter';
-import { Logger } from './loggerService';
-import type { PerformanceMetric as IPerformanceMetric, PerformanceReport as IPerformanceReport } from '../types/services';
+import type { ILoggerService, PerformanceMetric as IPerformanceMetric, PerformanceReport as IPerformanceReport } from '../types/services';
 
 /**
  * 性能指标类型
@@ -60,11 +58,39 @@ export type PerformanceReport = IPerformanceReport;
 
 /**
  * 性能监控服务类
+ * 🎯 DI改造：支持依赖注入Logger
  */
 export class PerformanceService {
   private metrics: PerformanceMetric[] = [];
   private observers: PerformanceObserver[] = [];
   private isInitialized: boolean = false;
+  private logger: ILoggerService | null = null;
+
+  /**
+   * 构造函数
+   * @param logger - LoggerService实例（可选）
+   */
+  constructor(logger?: ILoggerService) {
+    this.logger = logger || null;
+  }
+
+  /**
+   * 设置LoggerService（延迟注入）
+   */
+  setLogger(logger: ILoggerService): void {
+    this.logger = logger;
+  }
+
+  /**
+   * 记录日志（使用注入的Logger或console）
+   */
+  private _log(level: 'debug' | 'info' | 'warn' | 'error', message: string, data: Record<string, unknown> = {}): void {
+    if (this.logger) {
+      this.logger[level](message, data, 'Performance');
+    } else {
+      console[level](`[Performance] ${message}`, data);
+    }
+  }
 
   /**
    * 初始化性能监控
@@ -287,7 +313,7 @@ export class PerformanceService {
       this.observers.push(observer);
     } catch (e) {
       // longtask 可能不被支持
-      Logger.debug('Long task measurement not supported', {}, 'Performance');
+      this._log('debug', 'Long task measurement not supported', {});
     }
   }
 
@@ -440,7 +466,10 @@ export class PerformanceService {
     try {
       // 只保存最近的指标
       const recentMetrics = this.metrics.slice(-50);
-      StorageService.set('performance_metrics', recentMetrics);
+      // 使用动态导入避免循环依赖
+      import('./storageService').then(({ StorageService }) => {
+        StorageService.set('performance_metrics', recentMetrics);
+      });
     } catch (e) {
       console.warn('[Performance] 保存指标失败:', e);
     }
@@ -452,7 +481,7 @@ export class PerformanceService {
   private _sendMetrics(metrics: Record<string, number>): void {
     // 仅在生产环境发送
     if (!configCenter.isProduction()) {
-      Logger.debug('开发环境，跳过指标上报', {}, 'Performance');
+      this._log('debug', '开发环境，跳过指标上报', {});
       return;
     }
 
@@ -479,12 +508,26 @@ export class PerformanceService {
 }
 
 /**
- * 性能监控服务单例
+ * 性能监控服务单例（向后兼容）
+ * @deprecated 请使用 container.resolve('performance') 获取PerformanceService实例
  */
 export const performanceService = new PerformanceService();
 
 // 默认导出
 export default performanceService;
+
+// ================================================================
+// 🎯 DI容器工厂函数
+// ================================================================
+
+/**
+ * 创建PerformanceService实例的工厂函数
+ * @param logger - LoggerService实例（可选）
+ * @returns PerformanceService实例
+ */
+export function createPerformanceService(logger?: ILoggerService): PerformanceService {
+  return new PerformanceService(logger);
+}
 
 // ================================================================
 // 🔄 向后兼容：暴露到 window

@@ -4,7 +4,7 @@
 // 使用IndexedDB存储性能数据
 // ================================================================
 
-import { Logger } from './loggerService';
+import type { ILoggerService } from '../types/services';
 
 /**
  * 性能数据记录
@@ -29,14 +29,16 @@ export interface StorageConfig {
 
 /**
  * 性能数据存储服务
+ * 🎯 DI改造：支持依赖注入Logger
  */
 export class PerformanceStorage {
   private static instance: PerformanceStorage;
   private config: StorageConfig;
   private db: IDBDatabase | null = null;
   private isInitialized: boolean = false;
+  private logger: ILoggerService | null = null;
 
-  private constructor() {
+  private constructor(logger?: ILoggerService) {
     this.config = {
       dbName: 'PerformanceDB',
       storeName: 'performance_records',
@@ -44,6 +46,7 @@ export class PerformanceStorage {
       retentionDays: 7,
       maxRecords: 10000
     };
+    this.logger = logger || null;
   }
 
   /**
@@ -57,11 +60,22 @@ export class PerformanceStorage {
   }
 
   /**
+   * 记录日志（使用注入的Logger或console）
+   */
+  private _log(level: 'debug' | 'info' | 'warn' | 'error', message: string, data: Record<string, unknown> = {}): void {
+    if (this.logger) {
+      this.logger[level](message, data, 'PerformanceStorage');
+    } else {
+      console[level](`[PerformanceStorage] ${message}`, data);
+    }
+  }
+
+  /**
    * 初始化数据库
    */
   async init(config?: Partial<StorageConfig>): Promise<void> {
     if (this.isInitialized) {
-      Logger.warn('PerformanceStorage already initialized', {}, 'PerformanceStorage');
+      this._log('warn', 'PerformanceStorage already initialized', {});
       return;
     }
 
@@ -70,19 +84,19 @@ export class PerformanceStorage {
 
     // 检查IndexedDB支持
     if (!window.indexedDB) {
-      Logger.error('IndexedDB not supported', {}, 'PerformanceStorage');
+      this._log('error', 'IndexedDB not supported', {});
       return;
     }
 
     try {
       this.db = await this.openDatabase();
       this.isInitialized = true;
-      Logger.info('✅ PerformanceStorage initialized', this.config as unknown as Record<string, unknown>, 'PerformanceStorage');
+      this._log('info', '✅ PerformanceStorage initialized', this.config as unknown as Record<string, unknown>);
 
       // 清理过期数据
       await this.cleanupOldRecords();
     } catch (error) {
-      Logger.error('Failed to initialize PerformanceStorage', { error }, 'PerformanceStorage');
+      this._log('error', 'Failed to initialize PerformanceStorage', { error: (error as Error).message });
       throw error;
     }
   }
@@ -302,7 +316,7 @@ export class PerformanceStorage {
       const request = objectStore.clear();
 
       request.onsuccess = () => {
-        Logger.info('All performance records cleared', {}, 'PerformanceStorage');
+        this._log('info', 'All performance records cleared', {});
         resolve();
       };
 
@@ -341,7 +355,7 @@ export class PerformanceStorage {
 
       transaction.oncomplete = () => {
         if (deletedCount > 0) {
-          Logger.info(`Cleaned up ${deletedCount} old records`, {}, 'PerformanceStorage');
+          this._log('info', `Cleaned up ${deletedCount} old records`, {});
         }
         resolve(deletedCount);
       };
@@ -402,7 +416,7 @@ export class PerformanceStorage {
       await this.saveBatch(records.map(({ id, ...rest }) => rest));
       return records.length;
     } catch (error) {
-      Logger.error('Failed to import data', { error }, 'PerformanceStorage');
+      this._log('error', 'Failed to import data', { error: (error as Error).message });
       throw error;
     }
   }
@@ -419,7 +433,7 @@ export class PerformanceStorage {
    */
   updateConfig(config: Partial<StorageConfig>): void {
     this.config = { ...this.config, ...config };
-    Logger.info('PerformanceStorage config updated', this.config as unknown as Record<string, unknown>, 'PerformanceStorage');
+    this._log('info', 'PerformanceStorage config updated', this.config as unknown as Record<string, unknown>);
   }
 
   /**
@@ -431,12 +445,26 @@ export class PerformanceStorage {
       this.db = null;
     }
     this.isInitialized = false;
-    Logger.info('PerformanceStorage destroyed', {}, 'PerformanceStorage');
+    this._log('info', 'PerformanceStorage destroyed', {});
   }
 }
 
-// 创建全局实例
+// 创建全局实例（向后兼容）
+/** @deprecated 请使用 container.resolve('performanceStorage') 获取PerformanceStorage实例 */
 export const performanceStorage = PerformanceStorage.getInstance();
 
 // 默认导出
 export default performanceStorage;
+
+// ================================================================
+// 🎯 DI容器工厂函数
+// ================================================================
+
+/**
+ * 创建PerformanceStorage实例的工厂函数
+ * @param logger - LoggerService实例（可选）
+ * @returns PerformanceStorage实例
+ */
+export function createPerformanceStorage(logger?: ILoggerService): PerformanceStorage {
+  return new (PerformanceStorage as any)(logger);
+}

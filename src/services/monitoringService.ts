@@ -5,7 +5,7 @@
 // ================================================================
 
 import { configCenter } from '../common/config/ConfigCenter';
-import { Logger } from './loggerService';
+import type { ILoggerService } from '../types/services';
 
 /**
  * Sentry事件类型
@@ -124,24 +124,45 @@ export interface ErrorContext {
 
 /**
  * 错误监控服务类
+ * 🎯 DI改造：支持依赖注入Logger
  */
 export class MonitoringService {
   private isInitialized: boolean = false;
   private Sentry: SentrySDK | null = null;
   private config: MonitoringConfig | null = null;
+  private logger: ILoggerService | null = null;
+
+  /**
+   * 构造函数
+   * @param logger - LoggerService实例（可选）
+   */
+  constructor(logger?: ILoggerService) {
+    this.logger = logger || null;
+  }
+
+  /**
+   * 记录日志（使用注入的Logger或console）
+   */
+  private _log(level: 'debug' | 'info' | 'warn' | 'error', message: string, data: Record<string, unknown> = {}): void {
+    if (this.logger) {
+      this.logger[level](message, data, 'Monitoring');
+    } else {
+      console[level](`[Monitoring] ${message}`, data);
+    }
+  }
 
   /**
    * 初始化监控服务
    */
   async init(config: MonitoringConfig = {}): Promise<void> {
     if (this.isInitialized) {
-      Logger.warn('监控服务已初始化', {}, 'Monitoring');
+      this._log('warn', '监控服务已初始化', {});
       return;
     }
 
     // 仅在生产环境启用
     if (!configCenter.isProduction() && !config.forceEnable) {
-      Logger.info('开发环境，跳过监控服务初始化', {}, 'Monitoring');
+      this._log('info', '开发环境，跳过监控服务初始化', {});
       return;
     }
 
@@ -155,7 +176,7 @@ export class MonitoringService {
 
     // 检查DSN
     if (!this.config.dsn) {
-      Logger.warn('未配置Sentry DSN，监控服务未启用', {}, 'Monitoring');
+      this._log('warn', '未配置Sentry DSN，监控服务未启用', {});
       return;
     }
 
@@ -194,9 +215,9 @@ export class MonitoringService {
       });
 
       this.isInitialized = true;
-      Logger.info('监控服务初始化成功', { dsn: this.config.dsn }, 'Monitoring');
+      this._log('info', '监控服务初始化成功', { dsn: this.config.dsn });
     } catch (error) {
-      Logger.error('监控服务初始化失败', error as Error, 'Monitoring');
+      this._log('error', '监控服务初始化失败', { error: (error as Error).message });
     }
   }
 
@@ -262,7 +283,10 @@ export class MonitoringService {
    */
   captureException(error: Error, context: ErrorContext = {}): void {
     if (!this.isInitialized || !this.Sentry) {
-      Logger.error('捕获异常（监控服务未启用）', error, context.module || 'App');
+      this._log('error', '捕获异常（监控服务未启用）', { 
+        error: error.message,
+        module: context.module || 'App'
+      });
       return;
     }
 
@@ -274,7 +298,10 @@ export class MonitoringService {
 
     this.Sentry.captureException(error, captureContext);
 
-    Logger.error('捕获异常', error, context.module || 'App');
+    this._log('error', '捕获异常', { 
+      error: error.message,
+      module: context.module || 'App'
+    });
   }
 
   /**
@@ -282,7 +309,7 @@ export class MonitoringService {
    */
   captureMessage(message: string, level: string = 'info', context: ErrorContext = {}): void {
     if (!this.isInitialized || !this.Sentry) {
-      Logger.info(`捕获消息（监控服务未启用）: ${message}`, {}, 'Monitoring');
+      this._log('info', `捕获消息（监控服务未启用）: ${message}`, {});
       return;
     }
 
@@ -294,7 +321,7 @@ export class MonitoringService {
 
     this.Sentry.captureMessage(message, captureContext);
 
-    Logger.info(message, context.extra || {}, 'Monitoring');
+    this._log('info', message, context.extra || {});
   }
 
   /**
@@ -312,7 +339,7 @@ export class MonitoringService {
     };
 
     this.Sentry.setUser(safeUser);
-    Logger.info('设置用户信息', safeUser, 'Monitoring');
+    this._log('info', '设置用户信息', safeUser);
   }
 
   /**
@@ -361,12 +388,26 @@ export class MonitoringService {
 }
 
 /**
- * 监控服务单例
+ * 监控服务单例（向后兼容）
+ * @deprecated 请使用 container.resolve('monitoring') 获取MonitoringService实例
  */
 export const monitoringService = new MonitoringService();
 
 // 默认导出
 export default monitoringService;
+
+// ================================================================
+// 🎯 DI容器工厂函数
+// ================================================================
+
+/**
+ * 创建MonitoringService实例的工厂函数
+ * @param logger - LoggerService实例（可选）
+ * @returns MonitoringService实例
+ */
+export function createMonitoringService(logger?: ILoggerService): MonitoringService {
+  return new MonitoringService(logger);
+}
 
 // ================================================================
 // 🔄 向后兼容：暴露到 window

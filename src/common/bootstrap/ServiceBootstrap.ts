@@ -2,39 +2,16 @@
  * ServiceBootstrap.ts - 服务初始化管理器
  * 
  * 按依赖顺序初始化所有核心服务，确保启动流程可控
+ * 🎯 重构: 使用DI容器作为底层依赖管理
  */
 
+import type { DIContainer } from '../di/Container';
+import type { ServiceRegistry, ServiceName } from '../di/ServiceRegistry';
 import { errorTracker } from '@/services/errorTracker';
 import { analyticsService } from '@/services/analyticsService';
 import { performanceStorage } from '@/services/performanceStorage';
 import { alertService, AlertType } from '@/services/alertService';
 import { performanceMonitor } from '../devtools/PerformanceMonitor';
-
-/**
- * 服务配置选项
- */
-export interface ServiceOptions {
-  /** 依赖的服务名称列表 */
-  dependencies?: string[];
-  /** 是否为可选服务 */
-  optional?: boolean;
-  /** 超时时间（毫秒） */
-  timeout?: number;
-  /** 失败时的降级函数 */
-  fallback?: () => Promise<any> | any;
-}
-
-/**
- * 服务定义
- */
-interface ServiceDefinition {
-  name: string;
-  initializer: () => Promise<any>;
-  dependencies: string[];
-  optional: boolean;
-  timeout: number;
-  fallback: (() => Promise<any> | any) | null;
-}
 
 /**
  * 失败的服务信息
@@ -59,36 +36,19 @@ export interface InitializeResult {
  * 负责按依赖关系顺序初始化所有核心服务
  */
 export class ServiceBootstrap {
-  private services: Map<string, ServiceDefinition> = new Map();
-  private initOrder: string[] = [];
   private failedServices: FailedService[] = [];
   private initializedServices: Set<string> = new Set();
 
   /**
-   * 注册服务
-   * @param name - 服务名称
-   * @param initializer - 初始化函数
-   * @param options - 配置选项
+   * 构造函数
+   * @param container - DI容器实例
+   * @param registry - 服务注册表实例
    */
-  register(
-    name: string,
-    initializer: () => Promise<any>,
-    options: ServiceOptions = {}
-  ): void {
-    if (this.services.has(name)) {
-      console.warn(`[Bootstrap] 服务 "${name}" 已注册，将被覆盖`);
-    }
-
-    this.services.set(name, {
-      name,
-      initializer,
-      dependencies: options.dependencies || [],
-      optional: options.optional || false,
-      timeout: options.timeout || 5000,
-      fallback: options.fallback || null
-    });
-
-    console.log(`✅ [Bootstrap] 已注册服务: ${name}`);
+  constructor(
+    private container: DIContainer,
+    private registry: ServiceRegistry
+  ) {
+    console.log('[Bootstrap] 服务初始化管理器已创建');
   }
 
   /**
@@ -104,11 +64,16 @@ export class ServiceBootstrap {
         console.warn('⚠️ [Bootstrap] 监控服务初始化失败:', err);
       });
 
-      // 1. 拓扑排序，确定初始化顺序
-      this.initOrder = this._topologicalSort();
-      console.log(`📋 [Bootstrap] 初始化顺序:`, this.initOrder.join(' → '));
-      
-      // 2. 并行初始化（按层级分组）
+      // 1. 验证依赖关系
+      const validation = this.container.validateDependencies();
+      if (!validation.valid) {
+        console.error('❌ [Bootstrap] 依赖验证失败:');
+        validation.errors.forEach(err => console.error(`  - ${err}`));
+        throw new Error(`依赖验证失败:\n${validation.errors.join('\n')}`);
+      }
+      console.log('✅ [Bootstrap] 依赖验证通过');
+
+      // 2. 按依赖层级分组并初始化
       await this._initServicesInParallel();
       
       // 3. 报告初始化结果
@@ -164,15 +129,15 @@ export class ServiceBootstrap {
         return levelMap.get(name)!;
       }
       
-      const service = this.services.get(name);
-      if (!service || service.dependencies.length === 0) {
+      const config = this.registry.getConfig(name as ServiceName);
+      if (!config || config.dependencies.length === 0) {
         levelMap.set(name, 0);
         return 0;
       }
       
       // 层级 = max(依赖层级) + 1
       const maxDepLevel = Math.max(
-        ...service.dependencies.map(dep => calculateLevel(dep))
+        ...config.dependencies.map(dep => calculateLevel(dep))
       );
       const level = maxDepLevel + 1;
       levelMap.set(name, level);
@@ -180,8 +145,9 @@ export class ServiceBootstrap {
     };
     
     // 计算所有服务的层级
-    for (const name of this.services.keys()) {
-      calculateLevel(name);
+    const allConfigs = this.registry.getAllConfigs();
+    for (const config of allConfigs) {
+      calculateLevel(config.name);
     }
     
     // 按层级分组
@@ -195,6 +161,100 @@ export class ServiceBootstrap {
     }
     
     return levels;
+  }
+
+
+  /**
+   * 初始化单个服务
+   * @param name - 服务名称
+   * @returns 服务实例
+   * @private
+   */
+  private async _initService(name: string): Promise<any> {
+    const config = this.registry.getConfig(name as ServiceName);
+    if (!config) {
+      throw new Error(`服务 "${name}" 未在注册表中找到`);
+    }
+
+    // 跳过已初始化的服务
+    if (this.initializedServices.has(name)) {
+      return;
+    }
+
+    console.log(`⏳ [Bootstrap] 初始化服务: ${name}`);
+    const startTime = performance.now();
+
+    try {
+      // 设置超时
+      const timeout = config.timeout || 5000;
+      const result = await Promise.race([
+        this.container.resolve(name),
+        this._timeout(timeout, name)
+      ]);
+
+      const duration = Math.round(performance.now() - startTime);
+      console.log(`✅ [Bootstrap] ${name} 初始化成功 (${duration}ms)`);
+      
+      this.initializedServices.add(name);
+      return result;
+
+    } catch (error) {
+      const duration = Math.round(performance.now() - startTime);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error(`❌ [Bootstrap] ${name} 初始化失败 (${duration}ms):`, errorMessage);
+
+      // 如果是可选服务，记录但不抛出错误
+      if (config.optional) {
+        console.warn(`[Bootstrap] ${name} 是可选服务，跳过`);
+        return null;
+      }
+
+      // 如果是必需服务，记录失败
+      this.failedServices.push({ 
+        name, 
+        error: errorMessage,
+        duration 
+      });
+      
+      throw error;
+    }
+  }
+
+  /**
+   * 超时处理
+   * @param ms - 超时时间
+   * @param serviceName - 服务名称
+   * @returns Promise that rejects on timeout
+   * @private
+   */
+  private _timeout(ms: number, serviceName: string): Promise<never> {
+    return new Promise((_, reject) => {
+      setTimeout(() => {
+        reject(new Error(`服务 ${serviceName} 初始化超时 (${ms}ms)`));
+      }, ms);
+    });
+  }
+
+  /**
+   * 报告初始化状态
+   * @private
+   */
+  private _reportStatus(): void {
+    const total = this.registry.size;
+    const failed = this.failedServices.length;
+    const success = total - failed;
+
+    console.log(`\n📊 [Bootstrap] 初始化完成:`);
+    console.log(`   ✅ 成功: ${success}/${total}`);
+    
+    if (failed > 0) {
+      console.log(`   ❌ 失败: ${failed}/${total}`);
+      this.failedServices.forEach(({ name, error, duration }) => {
+        console.log(`      - ${name}: ${error} (${duration}ms)`);
+      });
+    }
+    
+    console.log('');
   }
 
   /**
@@ -319,152 +379,6 @@ export class ServiceBootstrap {
   }
 
   /**
-   * 初始化单个服务
-   * @param name - 服务名称
-   * @returns 服务实例
-   * @private
-   */
-  private async _initService(name: string): Promise<any> {
-    const service = this.services.get(name);
-    if (!service) {
-      throw new Error(`服务 "${name}" 未注册`);
-    }
-
-    // 跳过已初始化的服务
-    if (this.initializedServices.has(name)) {
-      return;
-    }
-
-    console.log(`⏳ [Bootstrap] 初始化服务: ${name}`);
-    const startTime = performance.now();
-
-    try {
-      // 设置超时
-      const result = await Promise.race([
-        service.initializer(),
-        this._timeout(service.timeout, name)
-      ]);
-
-      const duration = Math.round(performance.now() - startTime);
-      console.log(`✅ [Bootstrap] ${name} 初始化成功 (${duration}ms)`);
-      
-      this.initializedServices.add(name);
-      return result;
-
-    } catch (error) {
-      const duration = Math.round(performance.now() - startTime);
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error(`❌ [Bootstrap] ${name} 初始化失败 (${duration}ms):`, errorMessage);
-
-      // 如果是可选服务，使用降级方案
-      if (service.optional) {
-        if (service.fallback) {
-          console.warn(`[Bootstrap] 使用 ${name} 的降级方案`);
-          try {
-            const fallbackResult = await service.fallback();
-            this.initializedServices.add(name);
-            return fallbackResult;
-          } catch (fallbackError) {
-            console.error(`[Bootstrap] ${name} 降级方案也失败:`, fallbackError);
-          }
-        } else {
-          console.warn(`[Bootstrap] ${name} 是可选服务，跳过`);
-        }
-        return null;
-      }
-
-      // 如果是必需服务，记录失败
-      this.failedServices.push({ 
-        name, 
-        error: errorMessage,
-        duration 
-      });
-      
-      throw error;
-    }
-  }
-
-  /**
-   * 拓扑排序（确定初始化顺序）
-   * @returns 排序后的服务名称列表
-   * @private
-   */
-  private _topologicalSort(): string[] {
-    const sorted: string[] = [];
-    const visited = new Set<string>();
-    const visiting = new Set<string>();
-
-    const visit = (name: string): void => {
-      if (visited.has(name)) return;
-      
-      if (visiting.has(name)) {
-        throw new Error(`检测到循环依赖: ${name}`);
-      }
-
-      visiting.add(name);
-
-      const service = this.services.get(name);
-      if (service) {
-        // 先访问依赖
-        service.dependencies.forEach(dep => {
-          if (!this.services.has(dep)) {
-            throw new Error(`服务 "${name}" 依赖的 "${dep}" 未注册`);
-          }
-          visit(dep);
-        });
-      }
-
-      visiting.delete(name);
-      visited.add(name);
-      sorted.push(name);
-    };
-
-    // 访问所有服务
-    for (const name of this.services.keys()) {
-      visit(name);
-    }
-
-    return sorted;
-  }
-
-  /**
-   * 超时处理
-   * @param ms - 超时时间
-   * @param serviceName - 服务名称
-   * @returns Promise that rejects on timeout
-   * @private
-   */
-  private _timeout(ms: number, serviceName: string): Promise<never> {
-    return new Promise((_, reject) => {
-      setTimeout(() => {
-        reject(new Error(`服务 ${serviceName} 初始化超时 (${ms}ms)`));
-      }, ms);
-    });
-  }
-
-  /**
-   * 报告初始化状态
-   * @private
-   */
-  private _reportStatus(): void {
-    const total = this.services.size;
-    const failed = this.failedServices.length;
-    const success = total - failed;
-
-    console.log(`\n📊 [Bootstrap] 初始化完成:`);
-    console.log(`   ✅ 成功: ${success}/${total}`);
-    
-    if (failed > 0) {
-      console.log(`   ❌ 失败: ${failed}/${total}`);
-      this.failedServices.forEach(({ name, error, duration }) => {
-        console.log(`      - ${name}: ${error} (${duration}ms)`);
-      });
-    }
-    
-    console.log('');
-  }
-
-  /**
    * 获取已初始化的服务列表
    * @returns 服务名称列表
    */
@@ -485,16 +399,11 @@ export class ServiceBootstrap {
    * 重置初始化状态（用于测试）
    */
   reset(): void {
-    this.services.clear();
-    this.initOrder = [];
     this.failedServices = [];
     this.initializedServices.clear();
     console.log('✅ [Bootstrap] 已重置');
   }
 }
 
-// 创建全局实例
-export const serviceBootstrap = new ServiceBootstrap();
-
 // 默认导出
-export default serviceBootstrap;
+export default ServiceBootstrap;

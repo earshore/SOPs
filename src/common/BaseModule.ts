@@ -3,12 +3,17 @@
  * 
  * 提供统一的生命周期管理、资源清理和错误处理
  * 所有业务模块都应继承此类
+ * 🎯 增强: 支持DI容器注入和服务获取
  */
 
 import { escapeHtml } from '@/common/utils/security';
-import { container } from './di/Container';
+import { container as globalContainer } from './di/Container';
+import type { DIContainer } from './di/Container';
+import type { ServiceName } from './di/ServiceRegistry';
+import { SERVICE_NAMES } from './di/ServiceRegistry';
 import eventBus from './EventBus';
 import { APP_EVENTS } from './constants/eventConstants';
+import type { ILoggerService, IStorageService, IHttpService } from '@/types/services';
 
 /**
  * 动作处理器类型
@@ -33,10 +38,14 @@ export type DisposeFn = () => void;
  * - 自动资源清理 (事件监听器、定时器、请求)
  * - 错误处理和重试机制
  * - 动作注册和清理
+ * - DI容器集成和服务获取
  */
 export default class BaseModule {
     /** 模块唯一标识符 */
     protected readonly moduleId: string;
+    
+    /** DI容器实例 */
+    protected readonly diContainer: DIContainer;
     
     /** 容器元素 */
     protected container: HTMLElement | null = null;
@@ -56,10 +65,60 @@ export default class BaseModule {
     /**
      * 构造函数
      * @param moduleId - 模块唯一ID
+     * @param container - DI容器实例（可选，默认使用全局容器）
      */
-    constructor(moduleId: string) {
+    constructor(moduleId: string, container?: DIContainer) {
         this.moduleId = moduleId;
+        this.diContainer = container || globalContainer;
     }
+
+    // ================= DI容器服务获取方法 =================
+
+    /**
+     * 获取服务实例（类型安全）
+     * @param name - 服务名称
+     * @returns 服务实例
+     */
+    protected getService<T = any>(name: ServiceName): T {
+        try {
+            return this.diContainer.resolve<T>(name);
+        } catch (error) {
+            console.error(`[${this.moduleId}] 获取服务失败: ${name}`, error);
+            throw error;
+        }
+    }
+
+    /**
+     * 检查服务是否存在
+     * @param name - 服务名称
+     * @returns 是否存在
+     */
+    protected hasService(name: ServiceName): boolean {
+        return this.diContainer.has(name);
+    }
+
+    /**
+     * 获取Logger服务（便捷属性）
+     */
+    protected get logger(): ILoggerService {
+        return this.getService<ILoggerService>(SERVICE_NAMES.LOGGER);
+    }
+
+    /**
+     * 获取Storage服务（便捷属性）
+     */
+    protected get storage(): IStorageService {
+        return this.getService<IStorageService>(SERVICE_NAMES.STORAGE);
+    }
+
+    /**
+     * 获取Http服务（便捷属性）
+     */
+    protected get http(): IHttpService {
+        return this.getService<IHttpService>(SERVICE_NAMES.HTTP);
+    }
+
+    // ================= 生命周期方法 =================
 
     /**
      * 挂载模块
@@ -248,7 +307,7 @@ export default class BaseModule {
 
         try {
             // 使用依赖注入容器获取actionRegistry
-            const actionRegistry = container.resolve('actionRegistry');
+            const actionRegistry = this.diContainer.resolve('actionRegistry');
             
             // 清理每个动作
             this._registeredActions.forEach(actionName => {
