@@ -2,14 +2,16 @@
  * 模块CSS注册表
  * 定义每个模块需要加载的CSS文件
  * 支持按需懒加载和预加载策略
+ * 
+ * 注意：生产环境中CSS通过import动态导入，路径由Vite处理
  */
 
 export interface ModuleCssConfig {
   moduleId: string;
-  cssFiles: string[];
+  cssImporter: () => Promise<any>; // 动态import函数
   priority: 'critical' | 'high' | 'normal' | 'low';
   preload?: boolean;
-  dependencies?: string[]; // 依赖的其他CSS文件
+  dependencies?: (() => Promise<any>)[]; // 依赖的CSS导入函数
 }
 
 /**
@@ -19,9 +21,7 @@ export const MODULE_CSS_REGISTRY: Record<string, ModuleCssConfig> = {
   // 首页模块
   home: {
     moduleId: 'home',
-    cssFiles: [
-      '/src/modules/home/homeDisplay.css'
-    ],
+    cssImporter: () => import('../../modules/home/homeDisplay.css'),
     priority: 'high',
     preload: true
   },
@@ -29,9 +29,7 @@ export const MODULE_CSS_REGISTRY: Record<string, ModuleCssConfig> = {
   // 应用中心
   app_center: {
     moduleId: 'app_center',
-    cssFiles: [
-      '/src/modules/app_center/app_center_style.css'
-    ],
+    cssImporter: () => import('../../modules/app_center/app_center_style.css'),
     priority: 'high',
     preload: true
   },
@@ -39,23 +37,19 @@ export const MODULE_CSS_REGISTRY: Record<string, ModuleCssConfig> = {
   // 关键词猎手
   keyword_hunter: {
     moduleId: 'keyword_hunter',
-    cssFiles: [
-      '/src/modules/app_center/views/keyword_hunter/keyword_hunter_style.css'
-    ],
+    cssImporter: () => import('../../modules/app_center/views/keyword_hunter/keyword_hunter_style.css'),
     priority: 'normal',
     preload: false,
     dependencies: [
-      '/src/css/components/code-highlight.css',
-      '/src/css/components/markdown.css'
+      () => import('../../css/components/code-highlight.css'),
+      () => import('../../css/components/markdown.css')
     ]
   },
   
   // Master Analysis
   master_analysis: {
     moduleId: 'master_analysis',
-    cssFiles: [
-      '/src/modules/app_center/views/master_analysis/master_analysis_style.css'
-    ],
+    cssImporter: () => import('../../modules/app_center/views/master_analysis/master_analysis_style.css'),
     priority: 'normal',
     preload: false
   },
@@ -63,9 +57,7 @@ export const MODULE_CSS_REGISTRY: Record<string, ModuleCssConfig> = {
   // Scraper
   scraper: {
     moduleId: 'scraper',
-    cssFiles: [
-      '/src/modules/app_center/views/master_analysis/scraper/scraper_style.css'
-    ],
+    cssImporter: () => import('../../modules/app_center/views/master_analysis/scraper/scraper_style.css'),
     priority: 'normal',
     preload: false
   },
@@ -73,22 +65,18 @@ export const MODULE_CSS_REGISTRY: Record<string, ModuleCssConfig> = {
   // AI Analysis
   ai_analysis: {
     moduleId: 'ai_analysis',
-    cssFiles: [
-      '/src/modules/app_center/views/master_analysis/ai_analysis/ai_analysis_style.css'
-    ],
+    cssImporter: () => import('../../modules/app_center/views/master_analysis/ai_analysis/ai_analysis_style.css'),
     priority: 'normal',
     preload: false,
     dependencies: [
-      '/src/css/components/markdown.css'
+      () => import('../../css/components/markdown.css')
     ]
   },
   
   // SOPs模块
   sops: {
     moduleId: 'sops',
-    cssFiles: [
-      '/src/modules/sops/sops_style.css'
-    ],
+    cssImporter: () => import('../../modules/sops/sops_style.css'),
     priority: 'high',
     preload: true
   },
@@ -96,9 +84,7 @@ export const MODULE_CSS_REGISTRY: Record<string, ModuleCssConfig> = {
   // Amazon Hub
   amz_hub: {
     moduleId: 'amz_hub',
-    cssFiles: [
-      '/src/modules/amz_hub/amz_hub_style.css'
-    ],
+    cssImporter: () => import('../../modules/amz_hub/amz_hub_style.css'),
     priority: 'normal',
     preload: false
   },
@@ -106,9 +92,7 @@ export const MODULE_CSS_REGISTRY: Record<string, ModuleCssConfig> = {
   // More模块
   more: {
     moduleId: 'more',
-    cssFiles: [
-      '/src/modules/more/more_style.css'
-    ],
+    cssImporter: () => import('../../modules/more/more_style.css'),
     priority: 'normal',
     preload: false
   },
@@ -116,9 +100,7 @@ export const MODULE_CSS_REGISTRY: Record<string, ModuleCssConfig> = {
   // Prompts探索
   prompts: {
     moduleId: 'prompts',
-    cssFiles: [
-      '/src/modules/more/views/explore/prompts/prompts_style.css'
-    ],
+    cssImporter: () => import('../../modules/more/views/explore/prompts/prompts_style.css'),
     priority: 'low',
     preload: false
   }
@@ -146,18 +128,18 @@ export function getModulesByPriority(priority: ModuleCssConfig['priority']): Mod
 }
 
 /**
- * 获取模块的所有CSS文件（包括依赖）
+ * 获取模块的所有CSS导入函数（包括依赖）
  */
-export function getModuleAllCssFiles(moduleId: string): string[] {
+export function getModuleAllCssImporters(moduleId: string): (() => Promise<any>)[] {
   const config = MODULE_CSS_REGISTRY[moduleId];
   if (!config) return [];
   
-  const allFiles = [...config.cssFiles];
+  const allImporters = [config.cssImporter];
   
-  // 添加依赖文件
+  // 添加依赖导入函数
   if (config.dependencies) {
-    allFiles.push(...config.dependencies);
+    allImporters.push(...config.dependencies);
   }
   
-  return allFiles;
+  return allImporters;
 }

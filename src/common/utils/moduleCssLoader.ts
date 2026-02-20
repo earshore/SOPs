@@ -1,10 +1,10 @@
 /**
  * 模块CSS懒加载器
  * 根据路由自动加载模块所需的CSS文件
+ * 使用动态import确保生产环境路径正确
  */
 
-import { cssLoader } from './cssLoader';
-import { MODULE_CSS_REGISTRY, getModuleAllCssFiles, type ModuleCssConfig } from '../config/moduleCssRegistry';
+import { MODULE_CSS_REGISTRY, getModuleAllCssImporters, type ModuleCssConfig } from '../config/moduleCssRegistry';
 
 class ModuleCssLoader {
   private loadedModules = new Set<string>();
@@ -47,22 +47,17 @@ class ModuleCssLoader {
    * 实际加载实现
    */
   private async loadModuleCSSImpl(config: ModuleCssConfig): Promise<void> {
-    const allFiles = getModuleAllCssFiles(config.moduleId);
+    const allImporters = getModuleAllCssImporters(config.moduleId);
     
-    if (allFiles.length === 0) {
+    if (allImporters.length === 0) {
       return;
     }
     
-    console.log(`[ModuleCssLoader] 加载模块CSS: ${config.moduleId}`, allFiles);
+    console.log(`[ModuleCssLoader] 加载模块CSS: ${config.moduleId}`);
     
     try {
-      const results = await cssLoader.loadCSSBatch(allFiles);
-      
-      // 检查是否有加载失败
-      const failed = results.filter(r => !r.success);
-      if (failed.length > 0) {
-        console.warn(`[ModuleCssLoader] 部分CSS加载失败:`, failed);
-      }
+      // 并行加载所有CSS
+      await Promise.all(allImporters.map(importer => importer()));
     } catch (error) {
       console.error(`[ModuleCssLoader] 模块CSS加载失败: ${config.moduleId}`, error);
       throw error;
@@ -72,23 +67,25 @@ class ModuleCssLoader {
   /**
    * 预加载模块CSS
    */
-  preloadModuleCSS(moduleId: string): void {
+  async preloadModuleCSS(moduleId: string): Promise<void> {
     const config = MODULE_CSS_REGISTRY[moduleId];
     if (!config || !config.preload) {
       return;
     }
     
-    const allFiles = getModuleAllCssFiles(moduleId);
-    allFiles.forEach(file => cssLoader.preloadCSS(file));
+    await this.loadModuleCSS(moduleId);
   }
   
   /**
    * 批量预加载高优先级模块
    */
-  preloadHighPriorityModules(): void {
-    Object.values(MODULE_CSS_REGISTRY)
-      .filter(config => config.preload && config.priority === 'high')
-      .forEach(config => this.preloadModuleCSS(config.moduleId));
+  async preloadHighPriorityModules(): Promise<void> {
+    const highPriorityModules = Object.values(MODULE_CSS_REGISTRY)
+      .filter(config => config.preload && config.priority === 'high');
+    
+    await Promise.all(
+      highPriorityModules.map(config => this.preloadModuleCSS(config.moduleId))
+    );
   }
   
   /**
