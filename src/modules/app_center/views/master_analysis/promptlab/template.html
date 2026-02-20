@@ -356,7 +356,7 @@
                         class="relative transition-all duration-700 [transform-style:preserve-3d] grid grid-cols-1 grid-rows-1">
 
                         <!-- Front: Listing Mode -->
-                        <div class="col-start-1 row-start-1 w-full [backface-visibility:hidden]">
+                        <div class="col-start-1 row-start-1 w-full [backface-visibility:hidden] [pointer-events:auto]">
                             <div class="relative bg-gradient-to-br from-slate-900 via-slate-800 to-blue-900 rounded-2xl shadow-xl shadow-blue-900/30 p-6 text-white h-full flex flex-col gap-5 border border-blue-500/20 overflow-hidden">
                                 <!-- 背景光效 -->
                                 <div class="absolute top-0 right-0 w-48 h-48 bg-blue-500/5 rounded-full blur-3xl"></div>
@@ -390,7 +390,7 @@
                         </div>
 
                         <!-- Back: Visual Mode -->
-                        <div class="col-start-1 row-start-1 w-full [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                        <div class="col-start-1 row-start-1 w-full [backface-visibility:hidden] [transform:rotateY(180deg)] [pointer-events:auto]">
                             <div class="relative bg-gradient-to-br from-slate-900 via-slate-800 to-pink-900 rounded-2xl shadow-xl shadow-pink-900/30 p-6 text-white h-full flex flex-col gap-5 border border-pink-500/20 overflow-hidden">
                                 <!-- 背景光效 -->
                                 <div class="absolute top-0 right-0 w-48 h-48 bg-pink-500/5 rounded-full blur-3xl"></div>
@@ -449,9 +449,10 @@
                     </div>
 
                     <!-- Output Body -->
-                    <div class="relative flex-1 bg-white">
+                    <div class="relative flex-1 bg-white overflow-hidden">
                         <textarea id="final-prompt-output"
                             class="w-full h-full px-5 py-4 pb-10 text-xs font-mono text-slate-600 bg-transparent resize-none focus:outline-none border-0 transition-colors duration-500 leading-relaxed"
+                            style="pointer-events: auto !important; overflow-y: auto !important;"
                             placeholder="// 1. 填写左侧产品 DNA 信息&#10;// 2. 点击上方生成按钮&#10;// 3. 复制 Prompt 并发送给 AI 大模型&#10;&#10;// 💡 Tip: 填写越详细，生成效果越好" readonly></textarea>
 
                         <!-- Footer Status Bar -->

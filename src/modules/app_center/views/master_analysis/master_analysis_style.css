@@ -105,3 +105,23 @@
 .grid-stack-item[gs-no-move="true"] .drag-handle {
     cursor: default !important;
 }
+
+/* === Promptlab 3D 翻转卡片修复 === */
+#console-card-inner > div {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+/* 确保背面元素不响应点击 */
+#console-card-inner > div:last-child {
+    pointer-events: none;
+}
+
+/* 翻转后，背面变成正面，恢复点击 */
+#console-card-inner[style*="rotateY(180deg)"] > div:last-child {
+    pointer-events: auto;
+}
+
+#console-card-inner[style*="rotateY(180deg)"] > div:first-child {
+    pointer-events: none;
+}
