@@ -7,7 +7,7 @@
 import { errorTracker } from '@/services/errorTracker';
 import { analyticsService } from '@/services/analyticsService';
 import { performanceStorage } from '@/services/performanceStorage';
-import { alertService } from '@/services/alertService';
+import { alertService, AlertType } from '@/services/alertService';
 import { performanceMonitor } from '../devtools/PerformanceMonitor';
 
 /**
@@ -92,24 +92,24 @@ export class ServiceBootstrap {
   }
 
   /**
-   * 按依赖顺序初始化所有服务
+   * 按依赖顺序初始化所有服务（支持并行初始化）
    * @returns 初始化结果
    */
   async initialize(): Promise<InitializeResult> {
     console.log('\n🚀 [Bootstrap] 开始初始化服务...\n');
     
     try {
-      // 0. 初始化监控服务(优先,所有环境)
-      await this._initMonitoringServices();
+      // 0. 初始化监控服务(优先,所有环境) - 异步不阻塞
+      this._initMonitoringServices().catch(err => {
+        console.warn('⚠️ [Bootstrap] 监控服务初始化失败:', err);
+      });
 
       // 1. 拓扑排序，确定初始化顺序
       this.initOrder = this._topologicalSort();
       console.log(`📋 [Bootstrap] 初始化顺序:`, this.initOrder.join(' → '));
       
-      // 2. 按顺序初始化
-      for (const serviceName of this.initOrder) {
-        await this._initService(serviceName);
-      }
+      // 2. 并行初始化（按层级分组）
+      await this._initServicesInParallel();
       
       // 3. 报告初始化结果
       this._reportStatus();
@@ -123,6 +123,78 @@ export class ServiceBootstrap {
       console.error('❌ [Bootstrap] 初始化流程失败:', error);
       throw error;
     }
+  }
+
+  /**
+   * 并行初始化服务（按依赖层级分组）
+   * @private
+   */
+  private async _initServicesInParallel(): Promise<void> {
+    // 按依赖层级分组
+    const levels = this._groupByDependencyLevel();
+    
+    console.log(`📊 [Bootstrap] 共 ${levels.length} 个并行层级`);
+    
+    // 逐层初始化，同层服务并行
+    for (let i = 0; i < levels.length; i++) {
+      const level = levels[i];
+      if (!level || level.length === 0) continue;
+      
+      console.log(`⚡ [Bootstrap] 并行初始化第 ${i + 1} 层 (${level.length} 个服务)`);
+      
+      // 同层服务并行初始化
+      await Promise.all(
+        level.map(serviceName => this._initService(serviceName))
+      );
+    }
+  }
+
+  /**
+   * 按依赖层级分组服务
+   * @returns 分层的服务名称数组
+   * @private
+   */
+  private _groupByDependencyLevel(): string[][] {
+    const levels: string[][] = [];
+    const levelMap = new Map<string, number>();
+    
+    // 计算每个服务的依赖层级
+    const calculateLevel = (name: string): number => {
+      if (levelMap.has(name)) {
+        return levelMap.get(name)!;
+      }
+      
+      const service = this.services.get(name);
+      if (!service || service.dependencies.length === 0) {
+        levelMap.set(name, 0);
+        return 0;
+      }
+      
+      // 层级 = max(依赖层级) + 1
+      const maxDepLevel = Math.max(
+        ...service.dependencies.map(dep => calculateLevel(dep))
+      );
+      const level = maxDepLevel + 1;
+      levelMap.set(name, level);
+      return level;
+    };
+    
+    // 计算所有服务的层级
+    for (const name of this.services.keys()) {
+      calculateLevel(name);
+    }
+    
+    // 按层级分组
+    for (const [name, level] of levelMap.entries()) {
+      if (level !== undefined) {
+        if (!levels[level]) {
+          levels[level] = [];
+        }
+        levels[level].push(name);
+      }
+    }
+    
+    return levels;
   }
 
   /**
@@ -179,7 +251,6 @@ export class ServiceBootstrap {
   private async _connectMonitoringDataFlow(): Promise<void> {
     // 动态导入webVitalsService
     const { webVitalsService } = await import('@/services/webVitalsService');
-    const { AlertType } = await import('@/services/alertService');
 
     // Web Vitals指标自动保存到存储
     webVitalsService.onMetric(async (metric) => {

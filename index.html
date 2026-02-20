@@ -53,13 +53,96 @@
     <link rel="preconnect" href="https://generativelanguage.googleapis.com" crossorigin>
     <link rel="dns-prefetch" href="https://generativelanguage.googleapis.com">
 
-    <!-- Preload critical CSS -->
-    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet" media="print" onload="this.media='all'">
+    <!-- 🚀 性能优化: 字体预加载和异步加载FontAwesome -->
+    <link rel="preload" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.2/webfonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.2/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet"></noscript>
+    
+    <!-- 字体显示优化 -->
+    <style>
+        @font-face {
+            font-family: 'Font Awesome 6 Free';
+            font-display: swap; /* 关键优化：避免字体阻塞渲染 */
+        }
+    </style>
 
     <style>
-
+        /* 🎯 Critical Inline CSS - 避免FOUC */
+        /* 最小化CSS变量集 - 仅首屏必需 */
+        :root {
+            /* 字体 */
+            --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            --text-base: 0.875rem;
+            --font-medium: 500;
+            --font-semibold: 600;
+            --font-bold: 700;
+            
+            /* 核心颜色 */
+            --color-slate-50: #f8fafc;
+            --color-slate-100: #f1f5f9;
+            --color-slate-200: #e2e8f0;
+            --color-slate-400: #94a3b8;
+            --color-slate-500: #64748b;
+            --color-slate-900: #0f172a;
+            --color-blue-500: #3b82f6;
+            --color-blue-600: #2563eb;
+            
+            /* 间距 */
+            --spacing-xs: 0.5rem;
+            --spacing-sm: 0.75rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            
+            /* 圆角 */
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+            
+            /* 动画 */
+            --duration-fast: 200ms;
+            --duration-normal: 300ms;
+            --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+            
+            /* Z-index */
+            --z-header: 40;
+            --z-modal: 60;
+            --z-toast: 80;
+        }
+        
+        /* 最小Reset - 避免布局偏移 */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+        body { font-family: var(--font-sans); font-size: var(--text-base); line-height: 1.5; }
+        
+        /* Loading动画 - 首屏可见 */
+        .loading-ring { animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-dots::after { content: '...'; animation: dots 1.5s steps(4, end) infinite; }
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+        .pulse-dot { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* 🎯 阶段4: 主题切换过渡动画 */
+        :root {
+            --theme-transition-duration: 0ms;
+        }
+        * {
+            transition: 
+                background-color var(--theme-transition-duration) var(--ease-smooth),
+                border-color var(--theme-transition-duration) var(--ease-smooth),
+                color var(--theme-transition-duration) var(--ease-smooth);
+        }
     </style>
+    
+    <!-- 🎯 预加载完整CSS变量和Reset -->
+    <link rel="preload" href="/src/css/foundation/variables.css" as="style">
+    <link rel="preload" href="/src/css/foundation/reset.css" as="style">
 </head>
 
 <body class="bg-slate-50 h-screen flex flex-col overflow-hidden antialiased">

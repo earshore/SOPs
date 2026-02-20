@@ -8,11 +8,17 @@
 import { marked } from 'marked';
 // Chart.js and GridStack are now lazy loaded via src/common/utils/lazyLibs.js
 
-// 🎯 CSS架构重构: 使用新的分层CSS系统
+// 🎯 性能优化: 只加载首屏关键CSS，其他CSS延迟加载
+import './css/critical.css';
+// 🎯 阶段3优化: 导入主CSS文件(包含所有组件)
 import './css/main.css';
+// 非关键CSS将在DOMContentLoaded后异步加载
 // 模块特定样式改为按需懒加载,不在启动时导入
-// import './modules/more/more_style.css';
-// import './modules/app_center/app_center_style.css';
+
+// 🎯 CSS性能监控（仅开发环境）
+if (import.meta.env.DEV) {
+  import('./common/devtools/CSSPerformanceMonitor');
+}
 
 // Expose to window for legacy compatibility
 window.marked = marked;
@@ -21,7 +27,12 @@ window.marked = marked;
 import state from './common/state';
 window.state = state;
 
-// ✅ 导入视图加载器 (HTML 拆分重构的核心)
+// 🎯 阶段4: 导入主题管理器
+import { ThemeManager } from './common/config/themeConfig';
+
+import { Logger } from './services/loggerService';
+import eventBus from './common/EventBus';
+import { container } from './common/di/Container';
 import { initViews } from './common/utils/viewLoader';
 
 // ✅ 导入 Web Components
@@ -98,15 +109,12 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
   console.log("🚀 System: Application Booting...");
 
   // ================================================================
-  // 🎯 P0优化: 使用服务初始化管理器
+  // 🎯 P0优化: 使用服务初始化管理器（支持并行初始化）
   // ================================================================
   const bootstrap = new ServiceBootstrap();
 
-  // 1. 基础服务（无依赖）
+  // 1. 基础服务（无依赖）- 并行初始化
   bootstrap.register('eventBus', async () => {
-    const { default: eventBus } = await import('./common/EventBus');
-    const { container } = await import('./common/di/Container');
-    // 注册到DI容器，声明无依赖
     container.register('eventBus', () => eventBus, { 
       dependencies: [],
       lifetime: 'singleton'
@@ -114,70 +122,9 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     return eventBus;
   });
 
-  bootstrap.register('container', async () => {
-    const { container } = await import('./common/di/Container');
-    // Container自身不需要注册到自己
-    return container;
-  }, { dependencies: ['eventBus'] });
-
-  // 2. 工具服务
-  bootstrap.register('actionRegistry', async () => {
-    const { default: actionRegistry } = await import('./common/utils/actionRegistry');
-    const { container } = await import('./common/di/Container');
-    // 注册到DI容器，声明依赖EventBus
-    container.register('actionRegistry', () => actionRegistry, {
-      dependencies: ['eventBus'],
-      lifetime: 'singleton'
-    });
-    return actionRegistry;
-  }, { dependencies: ['container'] });
-
-  // 3. 路由服务
-  bootstrap.register('router', async () => {
-    const { router } = await import('./common/router/Router');
-    const { container } = await import('./common/di/Container');
-    // 注册到DI容器
-    container.register('router', () => router, {
-      dependencies: ['eventBus'],
-      lifetime: 'singleton'
-    });
-    return router;
-  }, { dependencies: ['container'] });
-
-  // 4. 监控服务（可选,懒加载）
-  // 性能监控服务不在启动时加载,按需使用
-  // bootstrap.register('performanceService', ...)
-
-  // 🎯 P2-11: Web Vitals性能监控 (懒加载,按需启用)
-  // 在开发环境可通过 window.enableWebVitals() 手动启用
-  // bootstrap.register('webVitalsService', ...)
-
-  // 🎯 P2-11: 性能监控面板 (懒加载,按需启用)
-  // bootstrap.register('performanceMonitor', ...)
-
-  bootstrap.register('logger', async () => {
-    const { Logger } = await import('./services/loggerService');
-    const { container } = await import('./common/di/Container');
-    // 注册到DI容器
-    container.register('logger', () => Logger, {
-      dependencies: [],
-      lifetime: 'singleton'
-    });
-    return Logger;
-  }, { optional: true });
-
-  // 🎯 P0优化: 内存泄漏检测器 (仅开发环境,懒加载)
-  // 可通过 window.enableMemoryDetector() 手动启用
-  // bootstrap.register('memoryLeakDetector', ...)
-
-  // 🎯 P0优化: 工作状态管理器
   bootstrap.register('workingStateManager', async () => {
     const { workingStateManager } = await import('./common/utils/WorkingStateManager');
-    const { container } = await import('./common/di/Container');
-    
     console.log('✅ [P0] 工作状态管理器已初始化');
-    
-    // 注册到DI容器
     container.register('workingStateManager', () => workingStateManager, {
       dependencies: [],
       lifetime: 'singleton'
@@ -185,14 +132,9 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     return workingStateManager;
   });
 
-  // 🎯 P0优化: 全局错误处理器
   bootstrap.register('globalErrorHandler', async () => {
     const { globalErrorHandler } = await import('./common/errors/GlobalErrorHandler');
-    const { container } = await import('./common/di/Container');
-    
     console.log('✅ [P0] 全局错误处理器已初始化');
-    
-    // 注册到DI容器
     container.register('globalErrorHandler', () => globalErrorHandler, {
       dependencies: [],
       lifetime: 'singleton'
@@ -200,15 +142,36 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     return globalErrorHandler;
   });
 
-  // 5. UI 服务
+  // 2. 依赖基础服务的核心服务
+  bootstrap.register('container', async () => {
+    return container;
+  }, { dependencies: ['eventBus'] });
+
+  bootstrap.register('actionRegistry', async () => {
+    const { default: actionRegistry } = await import('./common/utils/actionRegistry');
+    container.register('actionRegistry', () => actionRegistry, {
+      dependencies: ['eventBus'],
+      lifetime: 'singleton'
+    });
+    return actionRegistry;
+  }, { dependencies: ['eventBus'] });
+
+  bootstrap.register('router', async () => {
+    const { router } = await import('./common/router/Router');
+    container.register('router', () => router, {
+      dependencies: ['eventBus'],
+      lifetime: 'singleton'
+    });
+    return router;
+  }, { dependencies: ['eventBus'] });
+
+  // 3. UI服务（并行初始化）
   bootstrap.register('loadingManager', async () => {
-    const { container } = await import('./common/di/Container');
     const globalLoading = document.getElementById('global-loading');
     if (globalLoading) {
       loadingManager.setGlobalLoadingElement(globalLoading);
       console.log("✅ LoadingManager initialized");
     }
-    // 注册到DI容器
     container.register('loadingManager', () => loadingManager, {
       dependencies: [],
       lifetime: 'singleton'
@@ -222,25 +185,34 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     return Alpine;
   });
 
+  // 4. 视图加载（依赖router和loadingManager）
   bootstrap.register('views', async () => {
     await initViews();
     return true;
   }, { dependencies: ['router', 'loadingManager'] });
 
-  // 6. 事件系统
-  bootstrap.register('eventLogger', async () => {
-    const { initEventLogger } = await import('./common/utils/eventLogger');
-    initEventLogger();
-    return true;
-  }, { optional: true });
-
+  // 5. 事件系统（依赖actionRegistry）
   bootstrap.register('eventDelegation', async () => {
     const { initGlobalEventDelegation } = await import('./common/utils/actionRegistry');
     initGlobalEventDelegation();
     return true;
   }, { dependencies: ['actionRegistry'] });
 
-  // 7. 插件系统
+  // 6. 可选服务（延迟初始化，不阻塞启动）
+  bootstrap.register('logger', async () => {
+    container.register('logger', () => Logger, {
+      dependencies: [],
+      lifetime: 'singleton'
+    });
+    return Logger;
+  }, { optional: true });
+
+  bootstrap.register('eventLogger', async () => {
+    const { initEventLogger } = await import('./common/utils/eventLogger');
+    initEventLogger();
+    return true;
+  }, { optional: true });
+
   bootstrap.register('plugins', async () => {
     const { loadPlugins } = await import('./common/utils/pluginLoader');
     loadPlugins();
@@ -268,6 +240,14 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     
     // 初始化首页
     initHomeSplash();
+
+    // 🎯 阶段4: 恢复用户主题设置
+    ThemeManager.restoreTheme();
+
+    // 🎯 阶段5: 预加载高优先级模块CSS
+    import('./common/utils/moduleCssLoader').then(({ moduleCssLoader }) => {
+      moduleCssLoader.preloadHighPriorityModules();
+    });
 
     // 渲染顶部 Mega Menu
     renderMegaMenu();
@@ -374,9 +354,26 @@ registerActionsWithLegacy({
     }
   },
 
+  // 🎯 阶段4: 主题切换
+  switchTheme: async (params: { themeId?: string } = {}) => {
+    const { themeId = 'default' } = params;
+    ThemeManager.applyTheme(themeId);
+    if (window.showToast) {
+      const theme = ThemeManager.getTheme(themeId);
+      window.showToast(`已切换到${theme?.name || themeId}`, 'success');
+    }
+  },
+
+  getAllThemes: async () => {
+    return ThemeManager.getAllThemes();
+  },
+
+  getCurrentTheme: async () => {
+    return ThemeManager.getCurrentTheme();
+  },
+
   // 🎯 阶段1: 日志管理
   showLogs: async () => {
-    const { Logger } = await import('./services/loggerService');
     const logs = Logger.getLogs();
     console.log('📋 所有日志:', logs);
     console.table(logs.map(log => ({
@@ -394,7 +391,6 @@ registerActionsWithLegacy({
   },
 
   showErrors: async () => {
-    const { Logger } = await import('./services/loggerService');
     const errors = Logger.getErrors();
     console.log('❌ 错误日志:', errors);
     console.table(errors.map(log => ({
@@ -412,7 +408,6 @@ registerActionsWithLegacy({
   },
 
   clearLogs: async () => {
-    const { Logger } = await import('./services/loggerService');
     Logger.clear();
     if (window.showToast) {
       window.showToast('日志已清除', 'success');
@@ -420,7 +415,6 @@ registerActionsWithLegacy({
   },
 
   downloadLogs: async (params?: ActionParams) => {
-    const { Logger } = await import('./services/loggerService');
     const format = (params?.format || 'json') as 'json' | 'csv';
     Logger.download(format);
     if (window.showToast) {

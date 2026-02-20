@@ -7,6 +7,8 @@
 
 import { escapeHtml } from '@/common/utils/security';
 import { container } from './di/Container';
+import eventBus from './EventBus';
+import { APP_EVENTS } from './constants/eventConstants';
 
 /**
  * 动作处理器类型
@@ -226,18 +228,11 @@ export default class BaseModule {
      */
     protected registerActions(actions: ActionMap): void {
         // 使用事件总线发送注册请求，完全解耦
-        Promise.all([
-            import('./EventBus'),
-            import('./constants/eventConstants')
-        ]).then(([{ default: eventBus }, { APP_EVENTS }]) => {
-            eventBus.emit(APP_EVENTS.REGISTER_ACTIONS, {
-                moduleId: this.moduleId,
-                actions
-            });
-            console.log(`[BaseModule] 已发送注册请求: ${this.moduleId}, ${Object.keys(actions).length} 个动作`);
-        }).catch(error => {
-            console.error(`[BaseModule] 注册动作失败:`, error);
+        eventBus.emit(APP_EVENTS.REGISTER_ACTIONS, {
+            moduleId: this.moduleId,
+            actions
         });
+        console.log(`[BaseModule] 已发送注册请求: ${this.moduleId}, ${Object.keys(actions).length} 个动作`);
         
         // 保存动作名称用于清理
         this._registeredActions.push(...Object.keys(actions));

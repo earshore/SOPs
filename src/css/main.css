@@ -67,8 +67,7 @@
 
 
 /* ========================================
-   6. Tailwind 基础层 (最后加载)
+   6. Tailwind 组件和工具类 (最后加载)
    ======================================== */
-@tailwind base;
 @tailwind components;
 @tailwind utilities;

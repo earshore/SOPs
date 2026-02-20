@@ -5,6 +5,7 @@
  * - 管理当前模块的主题配色
  * - 提供配色推断逻辑（模块 → 分类 → 默认）
  * - 确保通用组件能够自适应上下文配色
+ * - 支持运行时主题切换（阶段4新增）
  */
 
 import { MENU_CONFIG, getRoutesByModule, type ModuleConfig, type MenuConfig } from '../config/menuConfig';
@@ -18,6 +19,7 @@ import type { CategoryConfig } from '../components/SidebarRenderer';
 export class ColorContext {
   private static currentModuleColor: ColorSchemeName = 'blue';
   private static colorCache: Map<string, ColorSchemeName> = new Map();
+  private static themeChangeListeners: Array<(color: ColorSchemeName) => void> = [];
 
   /**
    * 设置当前模块颜色
@@ -25,6 +27,7 @@ export class ColorContext {
    */
   static setModuleColor(color: ColorSchemeName): void {
     this.currentModuleColor = color;
+    this.notifyThemeChange(color);
   }
 
   /**
@@ -192,6 +195,37 @@ export class ColorContext {
       module: module || null,
       source
     };
+  }
+
+  /**
+   * 注册主题变化监听器（阶段4新增）
+   * @param listener - 监听器函数
+   */
+  static onThemeChange(listener: (color: ColorSchemeName) => void): () => void {
+    this.themeChangeListeners.push(listener);
+    
+    // 返回取消订阅函数
+    return () => {
+      const index = this.themeChangeListeners.indexOf(listener);
+      if (index > -1) {
+        this.themeChangeListeners.splice(index, 1);
+      }
+    };
+  }
+
+  /**
+   * 通知主题变化（阶段4新增）
+   * @param color - 新的颜色方案
+   * @private
+   */
+  private static notifyThemeChange(color: ColorSchemeName): void {
+    this.themeChangeListeners.forEach(listener => {
+      try {
+        listener(color);
+      } catch (error) {
+        console.error('[ColorContext] 主题变化监听器执行失败:', error);
+      }
+    });
   }
 }
 

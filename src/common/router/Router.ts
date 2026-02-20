@@ -140,6 +140,17 @@ export class Router {
             // 3. 确保视图已加载
             await ensureViewLoaded(routeId);
 
+            // 🎯 阶段5: 加载模块CSS
+            const moduleId = routeConfig.moduleId || routeId.split('_')[0];
+            if (moduleId) {
+                try {
+                    const { moduleCssLoader } = await import('../utils/moduleCssLoader');
+                    await moduleCssLoader.loadModuleCSS(moduleId);
+                } catch (error) {
+                    console.warn('[Router] 模块CSS加载失败，继续导航', error);
+                }
+            }
+
             // 4. 更新浏览器历史
             if (updateHistory) {
                 const url = `#${routeId}`;

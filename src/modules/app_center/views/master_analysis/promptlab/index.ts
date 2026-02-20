@@ -670,101 +670,6 @@ function toggleConsoleMode(mode: "listing" | "visual"): void {
 }
 
 /**
- * 切换 Prompt 放大视图
- */
-function togglePromptZoom(): void {
-    const modal = document.getElementById('prompt-zoom-modal');
-    const zoomContent = document.getElementById('prompt-zoom-content');
-    const zoomIcon = document.getElementById('zoom-icon');
-    const zoomedContainer = document.getElementById('zoomed-cards-container');
-    
-    if (!modal || !zoomContent || !zoomedContainer) return;
-    
-    const isZoomed = modal.style.display !== 'none' && modal.style.display !== '';
-    
-    if (isZoomed) {
-        // 关闭放大视图 - 缩小动画
-        zoomContent.classList.remove('scale-100', 'opacity-100');
-        zoomContent.classList.add('scale-95', 'opacity-0');
-        modal.style.opacity = '0';
-        
-        addTimeout(() => {
-            const consoleCard = document.querySelector('.zoomed-console-card');
-            const outputCard = document.querySelector('.zoomed-output-card');
-            
-            // 移回翻转卡片
-            if (consoleCard) {
-                const originalParent = document.querySelector('.lg\\:col-span-4 .sticky');
-                if (originalParent) {
-                    consoleCard.classList.remove('zoomed-console-card');
-                    originalParent.insertBefore(consoleCard, originalParent.firstChild);
-                }
-            }
-            
-            // 移回输出卡片
-            if (outputCard) {
-                const originalParent = document.querySelector('.lg\\:col-span-4 .sticky');
-                if (originalParent) {
-                    outputCard.classList.remove('zoomed-output-card');
-                    originalParent.appendChild(outputCard);
-                }
-            }
-            
-            modal.style.display = 'none';
-            modal.classList.remove('flex');
-            modal.style.opacity = '';
-            document.body.style.overflow = '';
-            
-            // 恢复图标和提示
-            if (zoomIcon) {
-                zoomIcon.className = 'fas fa-expand text-sm';
-                const parent = zoomIcon.parentElement;
-                if (parent) parent.title = '放大视图';
-            }
-        }, 300);
-    } else {
-        // 打开放大视图 - 放大动画
-        const consoleCardWrapper = document.querySelector('.lg\\:col-span-4 .sticky > div:first-child');
-        const outputCard = document.getElementById('prompt-output-card');
-        
-        if (!consoleCardWrapper || !outputCard) {
-            console.error('[Promptlab] 未找到卡片元素');
-            return;
-        }
-        
-        // 显示模态框
-        modal.style.display = 'flex';
-        modal.classList.add('flex');
-        modal.style.opacity = '0';
-        document.body.style.overflow = 'hidden';
-        
-        // 清空容器
-        zoomedContainer.innerHTML = '';
-        
-        // 移动元素到模态框
-        (consoleCardWrapper as HTMLElement).classList.add('zoomed-console-card');
-        (outputCard as HTMLElement).classList.add('zoomed-output-card');
-        zoomedContainer.appendChild(consoleCardWrapper);
-        zoomedContainer.appendChild(outputCard);
-        
-        // 触发动画
-        requestAnimationFrame(() => {
-            modal.style.transition = 'opacity 0.3s ease-in';
-            modal.style.opacity = '1';
-            zoomContent.classList.remove('scale-95', 'opacity-0');
-            zoomContent.classList.add('scale-100', 'opacity-100');
-        });
-        
-        // 更改图标和提示
-        if (zoomIcon) {
-            zoomIcon.className = 'fas fa-compress text-sm';
-            const parent = zoomIcon.parentElement;
-            if (parent) parent.title = '恢复视图';
-        }
-    }
-}
-
-/**
  * 复制 Listing Prompt
  */
 function copyMasterPrompt(): void {
@@ -864,7 +769,6 @@ export async function mount(container: HTMLElement): Promise<void> {
             amz_toggleConsoleMode: (params: Record<string, any>) => toggleConsoleMode(params.param as "listing" | "visual"),
             amz_copyMasterPrompt: () => copyMasterPrompt(),
             amz_clearPromptInputs: () => clearPromptInputs(),
-            amz_togglePromptZoom: () => togglePromptZoom(),
             amz_selectAllReportSections: () => selectAllReportSections(),
             amz_clearReportSections: () => clearReportSections(),
         });
@@ -875,16 +779,6 @@ export async function mount(container: HTMLElement): Promise<void> {
         // 3. 设置事件监听器
         setupEventListeners(container);
         
-        // 3.1 设置放大模态框点击背景关闭
-        const modal = document.getElementById('prompt-zoom-modal');
-        if (modal) {
-            addEventListener(modal as HTMLElement, 'click', ((e: Event) => {
-                if (e.target === modal) {
-                    togglePromptZoom();
-                }
-            }) as EventListenerOrEventListenerObject);
-        }
-
         // 4. 从 state 恢复状态
         restoreInputsFromState();
 

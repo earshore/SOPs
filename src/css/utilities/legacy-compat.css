@@ -1,11 +1,22 @@
 /**
  * 向后兼容层
  * 为旧的类名提供映射，避免破坏现有功能
+ * 注意: 已移除@apply指令，使用标准CSS
  */
 
 /* ==================== 卡片兼容 ==================== */
 .app-center-card {
-  @apply card;
+  /* 映射到 .card 样式 */
+  background: white;
+  border-radius: var(--radius-xl, 16px);
+  padding: var(--spacing-lg, 1.5rem);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.app-center-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
 }
 
 .sop-card {
@@ -14,54 +25,91 @@
 
 /* ==================== 按钮兼容 ==================== */
 .app-center-btn {
-  @apply btn;
+  /* 映射到 .btn 样式 */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-lg, 12px);
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all var(--duration-fast, 200ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+  cursor: pointer;
+  border: none;
 }
 
 .app-center-btn-primary {
-  @apply btn-primary;
+  /* 映射到 .btn-primary 样式 */
+  background: var(--color-blue-600, #2563eb);
+  color: white;
+}
+
+.app-center-btn-primary:hover {
+  background: var(--color-blue-700, #1d4ed8);
 }
 
 .app-center-btn-secondary {
-  @apply btn-secondary;
+  /* 映射到 .btn-secondary 样式 */
+  background: var(--color-slate-100, #f1f5f9);
+  color: var(--color-slate-700, #334155);
+}
+
+.app-center-btn-secondary:hover {
+  background: var(--color-slate-200, #e2e8f0);
 }
 
 /* ==================== 徽章兼容 ==================== */
 .app-center-badge {
-  @apply badge;
+  /* 映射到 .badge 样式 */
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 .app-center-badge-success {
-  @apply badge-success;
+  background: var(--color-green-100, #dcfce7);
+  color: var(--color-green-700, #15803d);
 }
 
 .app-center-badge-warning {
-  @apply badge-warning;
+  background: var(--color-yellow-100, #fef3c7);
+  color: var(--color-yellow-700, #a16207);
 }
 
 .app-center-badge-info {
-  @apply badge-info;
+  background: var(--color-blue-100, #dbeafe);
+  color: var(--color-blue-700, #1d4ed8);
 }
 
 .app-center-badge-error {
-  @apply badge-error;
+  background: var(--color-red-100, #fee2e2);
+  color: var(--color-red-700, #b91c1c);
 }
 
 /* ==================== 网格兼容 ==================== */
-.app-center-card-grid {
-  @apply card-grid;
-}
-
+.app-center-card-grid,
 .sop-card-grid {
-  @apply card-grid;
+  /* 映射到 .card-grid 样式 */
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--spacing-lg, 1.5rem);
 }
 
 /* ==================== 图标容器兼容 ==================== */
-.app-center-icon-container {
-  @apply card-icon;
-}
-
+.app-center-icon-container,
 .sop-icon-container {
-  @apply card-icon;
+  /* 映射到 .card-icon 样式 */
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--radius-lg, 12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  flex-shrink: 0;
 }
 
 /* ==================== 搜索框兼容 ==================== */

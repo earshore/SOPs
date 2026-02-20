@@ -1,10 +1,44 @@
 /**
  * 全局 Reset & 基础规范
  * 在 Tailwind base 之前建立基础约束
+ *
+ * 设计原则:
+ * - 消除浏览器默认样式差异
+ * - 建立合理的排版基础
+ * - 提供无障碍默认行为
+ * - 不强制布局 —— 仅做 "归零"
+ *
+ * 目录:
+ * 1.  盒模型统一
+ * 2.  根元素 (html)
+ * 3.  Body 基础
+ * 4.  排版重置 (Heading / Paragraph / List)
+ * 5.  链接
+ * 6.  媒体元素 (img / video / svg / canvas)
+ * 7.  表单元素
+ * 8.  按钮重置
+ * 9.  表格重置
+ * 10. 对话框 & Details
+ * 11. 水平线
+ * 12. 引用 & 代码
+ * 13. 文本选中样式
+ * 14. 占位符样式
+ * 15. 自动填充 (Autofill)
+ * 16. 滚动条基础
+ * 17. 无障碍 — 焦点可见性
+ * 18. 无障碍 — 跳过导航
+ * 19. 无障碍 — 屏幕阅读器专用
+ * 20. 触摸优化
+ * 21. 暗色模式基础
+ * 22. 减少动画偏好
+ * 23. 高对比度模式
+ * 24. 打印基础
  */
 
+
 /* ========================================
-   盒模型统一
+   1. 盒模型统一
+   所有元素使用 border-box，padding/border 包含在 width 内
    ======================================== */
 *,
 *::before,
@@ -12,56 +46,236 @@
   box-sizing: border-box;
 }
 
-/* ========================================
-   消除默认 margin
-   ======================================== */
-body,
-h1, h2, h3, h4, h5, h6,
-p, figure, blockquote,
-dl, dd, ol, ul {
+/* 防止 margin 折叠导致的意外间距 */
+* {
   margin: 0;
-}
-
-/* ========================================
-   列表语义化：仅在有 role="list" 时保留标记
-   ======================================== */
-ul[role='list'],
-ol[role='list'] {
-  list-style: none;
   padding: 0;
 }
 
+
 /* ========================================
-   文档根元素
+   2. 根元素 (html)
    ======================================== */
 html {
+  /* 文字大小防止 iOS 横屏放大 */
   -webkit-text-size-adjust: 100%;
   -moz-text-size-adjust: 100%;
   text-size-adjust: 100%;
-  scroll-behavior: smooth;
+
+  /* 字体渲染优化 */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+
+  /* 平滑滚动 */
+  scroll-behavior: smooth;
+
+  /* Tab 尺寸 */
+  tab-size: 4;
+  -moz-tab-size: 4;
+
+  /* 基础字号 (1rem = 16px) */
+  font-size: 16px;
+
+  /* 防止移动端横屏时字号跳变 */
+  font-size-adjust: none;
+
+  /* 连字处理 */
+  font-variant-ligatures: common-ligatures;
+
+  /* 行内内容基线对齐 */
+  line-sizing: normal;
+
+  /* 溢出换行行为 */
+  overflow-wrap: break-word;
+
+  /* 滚动行为 (滚动链) */
+  overscroll-behavior: none;
+
+  /* 色彩方案声明，允许浏览器适配滚动条等 UI */
+  color-scheme: light dark;
+
+  /* 触摸高亮禁用 (全局) */
+  -webkit-tap-highlight-color: transparent;
+
+  /* 确保 100% 高度 */
+  height: 100%;
 }
 
 html:focus-within {
   scroll-behavior: smooth;
 }
 
-/* ========================================
-   Body 基础
-   ======================================== */
-body {
-  min-height: 100vh;
-  min-height: 100dvh;
-  text-rendering: optimizeSpeed;
-  line-height: 1.6;
-  font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
-  color: var(--color-text-primary, #1a1a2e);
-  background-color: var(--color-bg-primary, #ffffff);
-}
 
 /* ========================================
-   媒体元素
+   3. Body 基础
+   ======================================== */
+body {
+  /* 最小高度：视口高度 (兼容移动端地址栏) */
+  min-height: 100vh;
+  min-height: 100dvh;
+
+  /* 字体 */
+  font-family: var(--font-sans, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif);
+  font-size: var(--text-base, 0.875rem);
+  font-weight: var(--font-regular, 400);
+  line-height: var(--leading-normal, 1.6);
+
+  /* 颜色 */
+  color: var(--color-text-primary, #1a1a2e);
+  background-color: var(--color-bg-primary, #ffffff);
+
+  /* 渲染 */
+  text-rendering: optimizeSpeed;
+
+  /* 禁止 iOS 上的触摸 callout */
+  -webkit-touch-callout: default;
+
+  /* 防止内容溢出 body */
+  overflow-x: hidden;
+
+  /* 文字方向 */
+  direction: ltr;
+  unicode-bidi: normal;
+}
+
+/* 内容为空时 Body 不撑高 */
+body:empty {
+  min-height: 0;
+}
+
+
+/* ========================================
+   4. 排版重置
+   ======================================== */
+
+/* --- 标题 --- */
+h1, h2, h3, h4, h5, h6 {
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: var(--leading-tight, 1.25);
+  overflow-wrap: break-word;
+  /* 防止标题中出现孤字 */
+  text-wrap: balance;
+}
+
+/* --- 段落 --- */
+p {
+  overflow-wrap: break-word;
+  /* 优化段落末尾的孤行 */
+  text-wrap: pretty;
+}
+
+/* --- 列表 --- */
+ul, ol {
+  list-style: none;
+  padding: 0;
+}
+
+/* 恢复有 role="list" 的列表标记 (VoiceOver 兼容) */
+ul[role='list'],
+ol[role='list'] {
+  list-style: none;
+  padding: 0;
+}
+
+dl {
+  margin: 0;
+}
+
+dt {
+  font-weight: var(--font-semibold, 600);
+}
+
+dd {
+  margin-left: 0;
+}
+
+/* --- 文本级语义 --- */
+strong, b {
+  font-weight: var(--font-bold, 700);
+}
+
+em, i {
+  font-style: italic;
+}
+
+small {
+  font-size: 0.875em;
+}
+
+/* 上下标不影响行高 */
+sub, sup {
+  font-size: 0.75em;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
+sup {
+  top: -0.5em;
+}
+
+/* --- 缩写 --- */
+abbr[title] {
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+  cursor: help;
+  border-bottom: none;  /* 移除旧浏览器的边框 */
+}
+
+/* --- 标记 (高亮) --- */
+mark {
+  background: rgba(250, 204, 21, 0.3);
+  color: inherit;
+  padding: 0.1em 0.2em;
+  border-radius: 2px;
+}
+
+/* --- 地址 --- */
+address {
+  font-style: normal;
+}
+
+/* --- 引用 --- */
+blockquote,
+figure {
+  margin: 0;
+}
+
+figcaption {
+  font-size: 0.875em;
+  color: var(--color-text-secondary, #6b7280);
+  margin-top: 0.5em;
+}
+
+
+/* ========================================
+   5. 链接
+   ======================================== */
+a {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* 链接内图片去边框 (旧浏览器) */
+a > img {
+  border: none;
+}
+
+/* 确保链接上的触摸目标足够大 */
+a:not([class]) {
+  text-decoration-skip-ink: auto;
+}
+
+
+/* ========================================
+   6. 媒体元素
    ======================================== */
 img,
 picture,
@@ -73,52 +287,759 @@ svg {
   height: auto;
 }
 
+/* 防止图片拉伸 */
+img {
+  border-style: none; /* IE 兼容 */
+  vertical-align: middle;
+  font-style: italic; /* alt 文字用斜体区分 */
+  background-repeat: no-repeat;
+  background-size: cover;
+  shape-margin: 1rem;
+}
+
+/* 加载中的图片占位 (避免布局偏移) */
+img:not([src]):not([srcset]) {
+  visibility: hidden;
+}
+
+/* 懒加载图片淡入 */
+img[loading="lazy"] {
+  opacity: 1;
+}
+
+/* SVG 颜色继承 */
+svg {
+  fill: currentColor;
+}
+
+/* 可点击的 SVG 保留 pointer */
+svg[role="img"] {
+  pointer-events: none;
+}
+
+/* 响应式 iframe / embed */
+iframe,
+embed,
+object {
+  display: block;
+  max-width: 100%;
+  border: 0;
+}
+
+/* 响应式音频 */
+audio {
+  display: inline-block;
+  max-width: 100%;
+}
+
+/* 视频/图片宽高比提示 (防止 CLS) */
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* 有显式宽高的媒体保持比例 */
+img[width],
+img[height],
+video[width],
+video[height] {
+  max-width: 100%;
+  height: auto;
+}
+
+
 /* ========================================
-   表单元素字体继承
+   7. 表单元素
    ======================================== */
+
+/* 字体继承 */
 input,
 button,
 textarea,
-select {
+select,
+optgroup {
   font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  word-spacing: inherit;
+}
+
+/* 移除默认外观 */
+input,
+textarea,
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* 输入框 */
+input {
+  border-radius: 0; /* iOS 移除默认圆角 */
+}
+
+/* 搜索框取消按钮 */
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+/* 数字输入框取消增减按钮 */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* 文件输入框 */
+input[type="file"] {
+  cursor: pointer;
+}
+
+/* 颜色选择器 */
+input[type="color"] {
+  cursor: pointer;
+  border: none;
+  padding: 0;
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+input[type="color"]::-webkit-color-swatch {
+  border: none;
+  border-radius: var(--radius-sm, 4px);
+}
+
+/* 范围滑块 */
+input[type="range"] {
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+}
+
+/* 日期选择器 */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+input[type="month"],
+input[type="week"] {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* 文本域 */
+textarea {
+  resize: vertical;    /* 仅允许纵向拉伸 */
+  overflow: auto;      /* 移除 IE 默认滚动条 */
+  border-radius: 0;
+}
+
+/* 下拉框 */
+select {
+  cursor: pointer;
+  background-image: none; /* 移除默认箭头 */
+}
+
+/* 多选 */
+select[multiple] {
+  overflow: auto;
+}
+
+/* Label */
+label {
+  cursor: pointer;
+  display: inline-block;
+}
+
+/* Fieldset & Legend */
+fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+  min-width: 0; /* 修复 fieldset 在 flexbox 中的溢出 */
+}
+
+legend {
+  padding: 0;
+  display: table; /* 修复 IE 换行问题 */
+  max-width: 100%;
+  white-space: normal;
   color: inherit;
 }
 
+/* 进度条 */
+progress {
+  vertical-align: baseline;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* 仪表盘 */
+meter {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* 输出 */
+output {
+  display: inline-block;
+}
+
+/* 禁用状态 */
+:disabled,
+[disabled],
+[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
+/* 只读状态 */
+[readonly] {
+  cursor: default;
+}
+
+
 /* ========================================
-   按钮基础 Reset
+   8. 按钮重置
    ======================================== */
 button {
   cursor: pointer;
   border: none;
   background: none;
   padding: 0;
-}
-
-/* ========================================
-   链接
-   ======================================== */
-a {
   color: inherit;
-  text-decoration: none;
+  font: inherit;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  text-align: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
 }
+
+/* 移除 Firefox 内部边框/内边距 */
+button::-moz-focus-inner,
+[type="button"]::-moz-focus-inner,
+[type="reset"]::-moz-focus-inner,
+[type="submit"]::-moz-focus-inner {
+  border-style: none;
+  padding: 0;
+}
+
+/* 恢复 Firefox focus 样式 */
+button:-moz-focusring,
+[type="button"]:-moz-focusring,
+[type="reset"]:-moz-focusring,
+[type="submit"]:-moz-focusring {
+  outline: 1px dotted ButtonText;
+}
+
+/* 可交互按钮使用 pointer */
+[role="button"] {
+  cursor: pointer;
+}
+
 
 /* ========================================
-   无障碍：焦点可见性
+   9. 表格重置
    ======================================== */
-:focus-visible {
-  outline: 2px solid var(--color-focus-ring, #3b82f6);
-  outline-offset: 2px;
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  width: 100%;
+  text-indent: 0;   /* Chrome 修复 */
+  border-color: inherit; /* Firefox 修复 */
+  caption-side: top;
 }
 
+caption {
+  text-align: left;
+  font-weight: var(--font-semibold, 600);
+  padding-bottom: 0.5em;
+}
+
+th {
+  text-align: left;
+  font-weight: var(--font-semibold, 600);
+  vertical-align: bottom;
+}
+
+td {
+  vertical-align: top;
+}
+
+thead,
+tbody,
+tfoot,
+tr,
+th,
+td {
+  border: 0;
+  padding: 0;
+}
+
+
+/* ========================================
+   10. 对话框 & Details
+   ======================================== */
+
+/* Dialog */
+dialog {
+  padding: 0;
+  border: none;
+  background: var(--color-bg-elevated, #ffffff);
+  color: inherit;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* Dialog 遮罩 */
+dialog::backdrop {
+  background: var(--color-bg-backdrop, rgba(0, 0, 0, 0.4));
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+/* Details / Summary */
+details {
+  display: block;
+}
+
+summary {
+  display: list-item;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* 移除 Safari 默认三角样式 */
+summary::-webkit-details-marker {
+  display: none;
+}
+
+/* 移除 Firefox 默认三角 */
+summary::marker {
+  content: '';
+}
+
+/* Popover API */
+[popover] {
+  border: none;
+  padding: 0;
+  background: var(--color-bg-elevated, #ffffff);
+  color: inherit;
+}
+
+
+/* ========================================
+   11. 水平线
+   ======================================== */
+hr {
+  border: none;
+  height: 1px;
+  background: var(--color-border-light, rgba(0, 0, 0, 0.06));
+  margin: 0;
+  overflow: visible; /* Firefox 显示修复 */
+  box-sizing: content-box; /* Firefox 修复 */
+}
+
+
+/* ========================================
+   12. 引用 & 代码
+   ======================================== */
+
+/* 行内代码 */
+code,
+kbd,
+samp {
+  font-family: var(--font-mono, 'Fira Code', 'Cascadia Code', 'JetBrains Mono', 'SF Mono', Consolas, monospace);
+  font-size: 0.875em;
+}
+
+/* 预格式化文本 */
+pre {
+  font-family: var(--font-mono, 'Fira Code', Consolas, monospace);
+  font-size: 0.875em;
+  overflow-x: auto;
+  white-space: pre;
+  margin: 0;
+  tab-size: 2;
+  -moz-tab-size: 2;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 键盘按键 */
+kbd {
+  font-size: 0.8125em;
+}
+
+/* 引用 */
+blockquote {
+  quotes: none;
+}
+
+blockquote::before,
+blockquote::after {
+  content: '';
+  content: none;
+}
+
+/* 行内引用 */
+q {
+  quotes: '"' '"' "'" "'";
+}
+
+
+/* ========================================
+   13. 文本选中样式
+   ======================================== */
+::selection {
+  background: var(--color-primary, #3b82f6);
+  color: var(--color-primary-contrast, #ffffff);
+  text-shadow: none;
+}
+
+::-moz-selection {
+  background: var(--color-primary, #3b82f6);
+  color: var(--color-primary-contrast, #ffffff);
+  text-shadow: none;
+}
+
+
+/* ========================================
+   14. 占位符样式
+   ======================================== */
+::placeholder {
+  color: var(--color-text-placeholder, #9ca3af);
+  opacity: 1;  /* Firefox 默认 opacity < 1 */
+  font-weight: var(--font-regular, 400);
+}
+
+::-webkit-input-placeholder {
+  color: var(--color-text-placeholder, #9ca3af);
+}
+
+::-moz-placeholder {
+  color: var(--color-text-placeholder, #9ca3af);
+  opacity: 1;
+}
+
+:-ms-input-placeholder {
+  color: var(--color-text-placeholder, #9ca3af);
+}
+
+
+/* ========================================
+   15. 自动填充 (Autofill)
+   防止浏览器自动填充改变背景色
+   ======================================== */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--color-text-primary, #1a1a2e);
+  -webkit-box-shadow: 0 0 0 1000px var(--color-bg-primary, #ffffff) inset;
+  transition: background-color 600000s 0s, color 600000s 0s;
+  caret-color: var(--color-text-primary, #1a1a2e);
+}
+
+
+/* ========================================
+   16. 滚动条基础
+   ======================================== */
+
+/* 全局滚动条宽度 */
+:root {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb, rgba(0, 0, 0, 0.15))
+                   var(--scrollbar-track, transparent);
+}
+
+/* Webkit 滚动条 */
+::-webkit-scrollbar {
+  width: var(--scrollbar-width-thin, 6px);
+  height: var(--scrollbar-width-thin, 6px);
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track, transparent);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb, rgba(0, 0, 0, 0.15));
+  border-radius: var(--scrollbar-thumb-radius, 3px);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover, rgba(0, 0, 0, 0.25));
+}
+
+/* 滚动条角落 */
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* 横向滚动条仅在悬停时出现 */
+::-webkit-scrollbar:horizontal {
+  height: 4px;
+}
+
+
+/* ========================================
+   17. 无障碍 — 焦点可见性
+   ======================================== */
+
+/* 键盘焦点 */
+:focus-visible {
+  outline: var(--focus-ring-width, 2px) solid var(--color-focus-ring, #3b82f6);
+  outline-offset: var(--focus-ring-offset, 2px);
+}
+
+/* 鼠标点击不显示焦点环 */
 :focus:not(:focus-visible) {
   outline: none;
 }
 
+/* 确保焦点环在深色背景上可见 */
+:focus-visible {
+  box-shadow: none; /* 防止与焦点环冲突 */
+}
+
+
 /* ========================================
-   减少动画偏好
+   18. 无障碍 — 跳过导航
+   ======================================== */
+.skip-to-content {
+  position: absolute;
+  top: -100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 16px;
+  background: var(--color-primary, #3b82f6);
+  color: var(--color-primary-contrast, #ffffff);
+  font-weight: var(--font-semibold, 600);
+  font-size: var(--text-base, 0.875rem);
+  border-radius: 0 0 var(--radius-md, 8px) var(--radius-md, 8px);
+  z-index: var(--z-max, 9999);
+  transition: top var(--duration-fast, 200ms) var(--ease-smooth);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.skip-to-content:focus {
+  top: 0;
+  outline: none;
+}
+
+
+/* ========================================
+   19. 无障碍 — 屏幕阅读器专用
+   ======================================== */
+
+/* 视觉隐藏但屏幕阅读器可读 */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* 聚焦时恢复可见 */
+.sr-only-focusable:focus,
+.sr-only-focusable:focus-visible {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  padding: inherit !important;
+  margin: inherit !important;
+  overflow: visible !important;
+  clip: auto !important;
+  clip-path: none !important;
+  white-space: normal !important;
+}
+
+/* ARIA Live 区域 */
+[aria-live="polite"],
+[aria-live="assertive"] {
+  /* 不做视觉样式，仅确保存在于 DOM */
+}
+
+/* ARIA 隐藏 */
+[aria-hidden="true"] {
+  /* 视觉可见但屏幕阅读器忽略 */
+  pointer-events: none;
+  user-select: none;
+}
+
+
+/* ========================================
+   20. 触摸优化
+   ======================================== */
+
+/* 可交互元素默认 manipulation (禁止双击缩放) */
+a,
+button,
+input,
+select,
+textarea,
+[role="button"],
+[role="tab"],
+[role="link"],
+[tabindex]:not([tabindex="-1"]) {
+  touch-action: manipulation;
+}
+
+/* iOS 上防止长按弹出菜单 (可选) */
+img,
+a {
+  -webkit-touch-callout: default;
+}
+
+/* 可交互元素最小触摸区域提示 */
+@media (pointer: coarse) {
+  /* 粗指针设备 (触摸屏) 上增大最小尺寸 */
+  a,
+  button,
+  input:not([type="hidden"]),
+  select,
+  textarea,
+  [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* 表单输入行高增大 */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="number"],
+  textarea,
+  select {
+    font-size: 16px; /* 防止 iOS 自动缩放 */
+  }
+
+  /* 复选框/单选框增大 - 仅在移动端 */
+  input[type="checkbox"]:not(.w-4):not(.h-4),
+  input[type="radio"]:not(.w-4):not(.h-4) {
+    min-height: 20px;
+    min-width: 20px;
+  }
+}
+
+
+/* ========================================
+   21. 暗色模式基础
+   ======================================== */
+.dark,
+[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+/* 暗色模式下的选中色 */
+.dark ::selection,
+[data-theme="dark"] ::selection {
+  background: var(--color-primary, #818cf8);
+  color: var(--color-primary-contrast, #ffffff);
+}
+
+/* 暗色模式下的占位符 */
+.dark ::placeholder,
+[data-theme="dark"] ::placeholder {
+  color: var(--color-text-placeholder, #6b7280);
+}
+
+/* 暗色模式下的自动填充 */
+.dark input:-webkit-autofill,
+.dark textarea:-webkit-autofill,
+.dark select:-webkit-autofill,
+[data-theme="dark"] input:-webkit-autofill,
+[data-theme="dark"] textarea:-webkit-autofill,
+[data-theme="dark"] select:-webkit-autofill {
+  -webkit-text-fill-color: var(--color-text-primary, #f9fafb);
+  -webkit-box-shadow: 0 0 0 1000px var(--color-bg-primary, #0f172a) inset;
+  caret-color: var(--color-text-primary, #f9fafb);
+}
+
+/* 暗色模式下的滚动条 */
+.dark,
+[data-theme="dark"] {
+  scrollbar-color: var(--scrollbar-thumb, rgba(255, 255, 255, 0.15))
+                   var(--scrollbar-track, transparent);
+}
+
+.dark ::-webkit-scrollbar-thumb,
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover,
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* 暗色模式下的水平线 */
+.dark hr,
+[data-theme="dark"] hr {
+  background: var(--color-border-light, rgba(255, 255, 255, 0.06));
+}
+
+/* 暗色模式下的 mark */
+.dark mark,
+[data-theme="dark"] mark {
+  background: rgba(250, 204, 21, 0.2);
+  color: inherit;
+}
+
+/* 暗色模式下的 dialog */
+.dark dialog,
+[data-theme="dark"] dialog {
+  background: var(--color-bg-elevated, #1e293b);
+}
+
+.dark dialog::backdrop,
+[data-theme="dark"] dialog::backdrop {
+  background: var(--color-bg-backdrop, rgba(0, 0, 0, 0.6));
+}
+
+/* 暗色模式下的 figcaption */
+.dark figcaption,
+[data-theme="dark"] figcaption {
+  color: var(--color-text-secondary, #d1d5db);
+}
+
+
+/* ========================================
+   22. 减少动画偏好
    ======================================== */
 @media (prefers-reduced-motion: reduce) {
   html:focus-within {
+    scroll-behavior: auto;
+  }
+
+  html {
     scroll-behavior: auto;
   }
 
@@ -130,4 +1051,180 @@ a {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+
+  /* 保留必要的淡入 (仅降低为即时切换) */
+  .fade-in,
+  .fade-out,
+  .view-fade-in,
+  .view-fade-in > * {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+}
+
+
+/* ========================================
+   23. 高对比度模式
+   ======================================== */
+@media (forced-colors: active) {
+  /* 确保焦点环可见 */
+  :focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+
+  /* 分隔线可见 */
+  hr {
+    border-top: 1px solid CanvasText;
+    background: none;
+  }
+
+  /* 占位符可见 */
+  ::placeholder {
+    color: GrayText;
+  }
+
+  /* 禁用状态可识别 */
+  :disabled {
+    color: GrayText;
+  }
+
+  /* 选中色 */
+  ::selection {
+    background: Highlight;
+    color: HighlightText;
+  }
+
+  /* 对话框遮罩 */
+  dialog::backdrop {
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: none;
+  }
+
+  /* mark 标记 */
+  mark {
+    background: Highlight;
+    color: HighlightText;
+  }
+
+  /* 强制颜色下的 SVG */
+  svg {
+    fill: CanvasText;
+  }
+}
+
+
+/* ========================================
+   24. 打印基础
+   ======================================== */
+@media print {
+  /* 基础打印优化 */
+  *,
+  *::before,
+  *::after {
+    background: transparent !important;
+    color: #000 !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+  }
+
+  /* 保留必要背景 */
+  .print-keep-bg {
+    background: inherit !important;
+    color: inherit !important;
+  }
+
+  /* body */
+  body {
+    font-size: 12pt;
+    line-height: 1.5;
+    overflow: visible;
+  }
+
+  /* 链接显示 URL */
+  a[href]::after {
+    content: ' (' attr(href) ')';
+    font-size: 0.8em;
+    font-weight: var(--font-regular, 400);
+    color: #666 !important;
+  }
+
+  /* 内部链接不显示 URL */
+  a[href^="#"]::after,
+  a[href^="javascript"]::after,
+  a[href^="mailto"]::after,
+  a[href^="tel"]::after {
+    content: '';
+  }
+
+  /* 禁止分页断裂 */
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  p, li, blockquote, pre, table, figure {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* 标题后避免分页 */
+  h1, h2, h3 {
+    orphans: 3;
+    widows: 3;
+  }
+
+  /* 隐藏非打印元素 */
+  .no-print,
+  nav,
+  aside,
+  .sidebar,
+  .header-gradient-line {
+    display: none !important;
+  }
+
+  /* 强制显示打印专用 */
+  .print-only {
+    display: block !important;
+  }
+
+  /* 图片打印优化 */
+  img {
+    max-width: 100% !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* 表格打印 */
+  thead {
+    display: table-header-group;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* 预格式化文本 */
+  pre {
+    white-space: pre-wrap !important;
+    word-break: break-all !important;
+    border: 1px solid #ccc;
+    padding: 0.5em;
+  }
+
+  /* 页面边距 */
+  @page {
+    margin: 2cm;
+  }
+
+  @page :first {
+    margin-top: 3cm;
+  }
+}
+
+/* 默认隐藏打印专用元素 */
+.print-only {
+  display: none;
 }

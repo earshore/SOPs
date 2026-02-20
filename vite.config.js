@@ -27,7 +27,11 @@ export default defineConfig({
         exclude: [
             'chart.js', // 懒加载
             'gridstack'  // 懒加载
-        ]
+        ],
+        // 强制预构建，避免首次加载慢
+        force: false,
+        // 禁用依赖发现，加快启动
+        entries: ['index.html']
     },
 
     // 开发服务器配置
@@ -62,10 +66,8 @@ export default defineConfig({
                 manualChunks: {
                     // 核心框架
                     'vendor-core': ['alpinejs'],
-                    // 图表库
+                    // 图表库（懒加载，但构建时仍需分包）
                     'vendor-charts': ['chart.js'],
-                    // 网格布局
-                    'vendor-grid': ['gridstack'],
                     // Markdown渲染
                     'vendor-markdown': ['marked'],
                     // 工具库
@@ -143,8 +145,8 @@ export default defineConfig({
         chunkSizeWarningLimit: 500,
         // CSS代码分割
         cssCodeSplit: true,
-        // 启用CSS压缩
-        cssMinify: true,
+        // 启用CSS压缩 - 使用lightningcss获得更好的性能
+        cssMinify: 'lightningcss',
         // 资源内联阈值(小于4KB的资源内联为base64)
         assetsInlineLimit: 4096,
         // 启用gzip压缩提示
@@ -167,6 +169,11 @@ export default defineConfig({
 
     // CSS 处理
     css: {
-        devSourcemap: true
+        devSourcemap: true,
+        preprocessorOptions: {
+            css: {
+                charset: false // 减少体积，移除@charset声明
+            }
+        }
     }
 });
