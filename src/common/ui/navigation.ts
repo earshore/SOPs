@@ -76,8 +76,8 @@ function renderSidebar(moduleId: string | null): void {
   const sidebar = getEl("dynamic-sidebar");
   if (!sidebar) return;
 
-  // 隐藏逻辑
-  if (!moduleId) {
+  // 隐藏逻辑：无模块ID或home模块不显示侧边栏
+  if (!moduleId || moduleId === 'home') {
     sidebar.classList.add("hidden", "-ml-64");
     sidebar.innerHTML = '';
     return;

@@ -104,6 +104,17 @@ export const MENU_CONFIG: MenuConfig = {
   // 作用：决定侧边栏 (Sidebar) 显示什么标题和哪些菜单
   // ==========================================
   modules: {
+    // [系统] 首页模块
+    home: {
+      id: 'home',
+      contextId: 'sys',
+      title: '首页',
+      version: 'v1.0',
+      icon: 'fas fa-home',
+      description: '系统首页，快速访问常用功能。',
+      themeColor: 'slate'
+    },
+
     // [应用 SOPs] 标准作业程序
     sops: {
       id: 'sops',
@@ -293,6 +304,17 @@ export const MENU_CONFIG: MenuConfig = {
   // 作用：定义点击行为、图标、目标 Panel
   // ==========================================
   routes: {
+    // ==========================================
+    // 系统路由
+    // ==========================================
+    [SYSTEM_ROUTES.HOME]: {
+      moduleId: 'home',
+      label: '首页',
+      icon: 'fas fa-home',
+      panelId: 'panel-home',
+      viewPath: '/src/modules/home/homeDisplay.html'
+    },
+
     // ==========================================
     // SOPs 流程中心路由
     // ==========================================
@@ -731,11 +753,6 @@ export function getAllRouteIds(): string[] {
  * @returns 视图路径
  */
 export function getViewPathByRoute(routeId: string): string | null {
-  // 特殊路由：home 不在 routes 配置中
-  if (routeId === SYSTEM_ROUTES.HOME) {
-    return '/src/modules/home/homeDisplay.html';
-  }
-
   const route = MENU_CONFIG.routes[routeId];
   if (!route) return null;
 

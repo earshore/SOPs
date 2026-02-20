@@ -199,7 +199,7 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
         enableHoverPreload: true,
         enableIdlePreload: true,
         hoverDelay: 100,
-        highFrequencyRoutes: ['home', 'app_center', 'sops']
+        highFrequencyRoutes: ['home', 'app_center_overview', 'sops_overview']
       });
     });
 
