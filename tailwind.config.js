@@ -10,8 +10,8 @@ export default {
     plugins: [],
     safelist: [
         // ═══════════════════════════════════════════════════════════
-        // 动态颜色方案 Safelist - 优化版
-        // 使用正则模式减少重复配置
+        // 动态颜色方案 Safelist
+        // 只保留实际使用的动态类
         // ═══════════════════════════════════════════════════════════
         
         // 活跃模块颜色方案（包含所有有效颜色）
@@ -20,20 +20,18 @@ export default {
             variants: ['hover', 'focus', 'group-hover', 'group-focus-within'],
         },
         
-        // 卡片交互效果 - 修复正则表达式
-        {
-            pattern: /(bg|text|border|ring|shadow|scale|opacity|translate)-(.*)/,
-            variants: ['group-hover/card'],
-        },
-        
-        // 通用交互效果
+        // 通用交互效果 - 明确列出
         'hover:-translate-y-1',
+        'hover:-translate-y-0.5',
         'hover:shadow-lg',
+        'hover:shadow-md',
         'group-hover/card:text-white',
+        'group-hover/card:bg-white/80',
         'group-hover/card:scale-110',
         'group-hover/card:opacity-100',
         'group-hover/card:translate-x-0',
         'group-hover/card:shadow-md',
         'group-hover/card:ring-2',
+        'group-hover/card:-translate-y-0.5',
     ]
 }
