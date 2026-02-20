@@ -1061,6 +1061,12 @@ a {
     transform: none !important;
     animation: none !important;
   }
+  
+  /* 保留Logo旋转动画 (品牌标识) */
+  .logo-icon-wrapper svg {
+    animation-duration: 12s !important;
+    animation-iteration-count: infinite !important;
+  }
 }
 
 

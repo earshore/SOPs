@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 
 <head>
@@ -789,6 +789,12 @@
                 border-color var(--theme-transition-duration) var(--ease-smooth),
                 color var(--theme-transition-duration) var(--ease-smooth);
         }
+        
+        /* 排除动画元素，避免transition干扰animation */
+        .logo-icon-wrapper svg,
+        [style*="animation"] {
+            transition: none !important;
+        }
 
         /* ===== 装饰性背景 Blobs ===== */
         .bg-blob {
@@ -844,7 +850,7 @@
                 <div class="logo-icon-wrapper">
                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        style="animation: spin 12s linear infinite;"
+                        style="animation: spin 12s linear infinite; will-change: transform; fill: none !important;"
                         aria-hidden="true">
                         <defs>
                             <linearGradient id="gemini-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
