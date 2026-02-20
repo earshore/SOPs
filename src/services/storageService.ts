@@ -554,9 +554,3 @@ export const StorageService = new StorageServiceClass();
 
 // 默认导出
 export default StorageService;
-
-// 向后兼容：暴露到 window
-if (typeof window !== 'undefined') {
-  (window as Window & { StorageService?: StorageServiceClass; STORAGE_KEYS?: typeof STORAGE_KEYS }).StorageService = StorageService;
-  (window as Window & { StorageService?: StorageServiceClass; STORAGE_KEYS?: typeof STORAGE_KEYS }).STORAGE_KEYS = STORAGE_KEYS;
-}

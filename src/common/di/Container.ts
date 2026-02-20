@@ -247,11 +247,3 @@ export const container = new DIContainer();
 
 // 默认导出
 export default container;
-
-// ================================================================
-// 🔄 向后兼容：暴露到 window (开发调试用)
-// ================================================================
-if (typeof window !== 'undefined' && (import.meta as any).env?.DEV) {
-  (window as any).__DIContainer = container;
-  console.log('✅ [DIContainer] 开发模式：容器已暴露到 window.__DIContainer');
-}

@@ -10,8 +10,8 @@
  * 预期体积: ~4KB (从 56KB 减少 93%)
  */
 
-/* Tailwind基础层 - 必须在最前面 */
-@tailwind base;
-
 /* 首屏必需组件 - 仅 Loading */
 @import './components/loading.css';
+
+/* Tailwind基础层 */
+@tailwind base;

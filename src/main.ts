@@ -20,12 +20,16 @@ if (import.meta.env.DEV) {
   import('./common/devtools/CSSPerformanceMonitor');
 }
 
-// Expose to window for legacy compatibility
-window.marked = marked;
+// Expose to window for legacy compatibility (仅开发环境)
+if (import.meta.env.DEV) {
+  window.marked = marked;
+}
 
 // ✅ 导入全局状态对象
 import state from './common/state';
-window.state = state;
+
+// 🎯 开发环境调试接口
+import { debugInterface } from './common/devtools/DebugInterface';
 
 // 🎯 阶段4: 导入主题管理器
 import { ThemeManager } from './common/config/themeConfig';
@@ -99,7 +103,10 @@ import './modules/app_center/app_center';
 
 // ✅ Alpine.js
 import Alpine from 'alpinejs';
-window.Alpine = Alpine;
+// 仅开发环境暴露到window
+if (import.meta.env.DEV) {
+  window.Alpine = Alpine;
+}
 
 // ========================
 // APP STARTUP (程序启动)
@@ -249,6 +256,26 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
       moduleCssLoader.preloadHighPriorityModules();
     });
 
+    // 🎯 性能优化: 初始化路由预加载器
+    import('./common/router/RoutePreloader').then(({ routePreloader }) => {
+      routePreloader.initialize({
+        enableHoverPreload: true,
+        enableIdlePreload: true,
+        hoverDelay: 100,
+        highFrequencyRoutes: ['home', 'app_center', 'sops']
+      });
+    });
+
+    // 🎯 性能优化: 初始化图片懒加载
+    import('./common/utils/ImageLazyLoader').then(({ imageLazyLoader }) => {
+      imageLazyLoader.initialize({
+        rootMargin: '50px',
+        threshold: 0.01,
+        fadeIn: true,
+        fadeInDuration: 300
+      });
+    });
+
     // 渲染顶部 Mega Menu
     renderMegaMenu();
     renderSopsMegaMenu();
@@ -265,6 +292,14 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
 
     // 初始化路由
     initRouter();
+
+    // 🎯 开发环境：初始化调试接口
+    if (import.meta.env.DEV) {
+      debugInterface.initialize();
+      debugInterface.registerContainer(container);
+      debugInterface.registerState(state);
+      debugInterface.registerRouter(await import('./common/router/Router').then(m => m.router));
+    }
 
     console.log("✅ System: Ready");
 

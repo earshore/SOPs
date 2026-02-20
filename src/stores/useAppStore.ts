@@ -92,7 +92,12 @@ const initialScraperState: ScraperState = {
   status: 'idle',
   selectedSite: '',
   scrapedData: null,
-  currentHistoryId: null
+  currentHistoryId: null,
+  inputAsins: '',
+  progress: 0,
+  error: undefined,
+  expandedAsin: null,
+  currentDataTab: 'preview'
 };
 
 /**
@@ -144,7 +149,11 @@ const initialKeywordTrackerState: KeywordTrackerState = {
   },
   isWindowMinimized: false,
   trackingData: null,
-  isTracking: false
+  isTracking: false,
+  keywordsInputText: '',
+  copyInputText: '',
+  llmAnalysisResult: '',
+  showTranslation: false
 };
 
 /**

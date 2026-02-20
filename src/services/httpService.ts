@@ -403,10 +403,3 @@ export default HttpService;
 
 // 导出优先级常量
 export { REQUEST_PRIORITY } from './PriorityRequestPool';
-
-// 向后兼容：暴露到 window
-if (typeof window !== 'undefined') {
-  (window as any).HttpService = HttpService;
-  (window as any).HttpError = HttpError;
-  (window as any).REQUEST_PRIORITY = REQUEST_PRIORITY;
-}
