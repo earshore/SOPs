@@ -369,19 +369,31 @@
             transition: all var(--duration-normal) var(--ease-smooth);
         }
 
-        .nav-group:hover .nav-trigger {
+        .nav-group:hover .nav-trigger,
+        .nav-trigger:hover {
             color: var(--color-primary);
         }
-        .nav-group:hover .nav-trigger::after {
+        .nav-group:hover .nav-trigger::after,
+        .nav-trigger:hover::after {
             width: calc(100% - 32px);
         }
-        .nav-group:hover .nav-trigger .nav-icon {
+        .nav-group:hover .nav-trigger .nav-icon,
+        .nav-trigger:hover .nav-icon {
             opacity: 1;
             transform: scale(1.1);
         }
-        .nav-group:hover .nav-trigger .nav-chevron {
+        .nav-group:hover .nav-trigger .nav-chevron,
+        .nav-trigger:hover .nav-chevron {
             opacity: 0.7;
             transform: rotate(180deg);
+        }
+        
+        /* 确保非 hover 状态下样式被清除 */
+        .nav-trigger:not(:hover) {
+            color: var(--color-slate-500);
+        }
+        .nav-group:not(:hover) .nav-trigger {
+            color: var(--color-slate-500);
         }
 
         /* ===== Mega Menu ===== */
