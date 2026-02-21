@@ -118,10 +118,14 @@ window.Alpine = Alpine;
 (window as any)['useAppStore'] = appStore;
 (window as any)['appStore'] = appStore;
 
+// 🔧 暴露 state 对象到 window (用于向后兼容和测试)
+(window as any)['state'] = state;
+
 // 开发环境额外日志
 if (import.meta.env.DEV) {
   console.log('[Alpine] ✅ Alpine.js loaded and exposed to window');
   console.log('[Store] ✅ Zustand store exposed to window');
+  console.log('[State] ✅ Compat state exposed to window');
 }
 
 // ========================
@@ -160,6 +164,45 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     // 初始化成功，继续启动流程
     // ================================================================
     
+    // 🔧 暴露核心服务到 window (用于测试和调试)
+    try {
+      // 服务已经在 bootstrap.initialize() 中初始化并缓存
+      // 🔧 修复: resolve返回Promise时需要await获取实际实例
+      const eventBusResult = container.resolve('eventBus');
+      const actionRegistryResult = container.resolve('actionRegistry');
+      const routerResult = container.resolve('router');
+      
+      // await所有可能的Promise
+      const eventBus = eventBusResult instanceof Promise ? await eventBusResult : eventBusResult;
+      const actionRegistry = actionRegistryResult instanceof Promise ? await actionRegistryResult : actionRegistryResult;
+      const router = routerResult instanceof Promise ? await routerResult : routerResult;
+      
+      (window as any)['eventBus'] = eventBus;
+      (window as any)['EventBus'] = eventBus;
+      (window as any)['actionRegistry'] = actionRegistry;
+      (window as any)['ActionRegistry'] = actionRegistry;
+      (window as any)['router'] = router;
+      (window as any)['Router'] = router;
+      (window as any)['loadingManager'] = loadingManager;
+      (window as any)['LoadingManager'] = loadingManager;
+      
+      if (import.meta.env.DEV) {
+        console.log('[Services] ✅ Core services exposed to window');
+        console.log('[Services] EventBus:', typeof eventBus);
+        console.log('[Services] ActionRegistry:', typeof actionRegistry);
+        console.log('[Services] Router:', typeof router);
+        console.log('[Services] Router methods:', {
+          navigate: typeof router?.navigate,
+          back: typeof router?.back,
+          forward: typeof router?.forward,
+          getCurrentRoute: typeof router?.getCurrentRoute
+        });
+      }
+    } catch (e) {
+      console.error('[Services] ❌ Failed to expose some services to window:', e);
+      // 即使暴露失败,也继续启动流程
+    }
+    
     // ✅ 关键修复: 确保 Alpine 组件注册和启动的正确顺序
     console.log("🎨 Initializing Alpine.js...");
     
@@ -170,6 +213,16 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     // 2. 启动 Alpine.js (此时组件已注册,可以处理任何 HTML)
     Alpine.start();
     console.log("✅ Alpine.js started");
+    
+    // 🔧 修复: 初始化 AlpineRegistry (处理动态注册的组件)
+    try {
+      const { AlpineRegistry } = await import('./common/infrastructure/AlpineRegistry');
+      const registry = AlpineRegistry.getInstance();
+      registry.init();
+      console.log("✅ AlpineRegistry initialized");
+    } catch (e) {
+      console.error('❌ AlpineRegistry initialization failed:', e);
+    }
     
     // 3. 现在可以安全地加载包含 Alpine 组件的视图
     console.log("📦 Loading critical views...");
@@ -277,6 +330,7 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
 // 也挂载到 window，保持向后兼容现有 onclick="xxx()" 调用
 
 interface ActionParams {
+  tab?: string;
   param?: string;
   updateHistory?: boolean;
   format?: 'json' | 'csv';
@@ -288,7 +342,7 @@ registerActionsWithLegacy({
   // === Navigation 导航 ===
   switchTab: (params: string | ActionParams) => {
     // Handle both direct calls (legacy) and data-action calls
-    const tab = typeof params === 'string' ? params : params.param || '';
+    const tab = typeof params === 'string' ? params : (params.tab || params.param || '');
     const updateHistory = typeof params === 'object' && params.updateHistory !== undefined 
       ? params.updateHistory 
       : true;

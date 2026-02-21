@@ -1622,7 +1622,6 @@ test.describe('应用启动测试', () => {
 
     console.log('\n✅ 控制台错误输出测试通过');
   });
-});
 
   test('1.5.6 测试 Zustand store 初始化', async ({ page }) => {
     // 设置控制台错误监听器

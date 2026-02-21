@@ -1,0 +1,32 @@
+uid=1_0 RootWebArea "Amazing Amazon Architect" url="http://localhost:4174/#promptlab"
+  uid=1_1 banner
+    uid=1_2 button "Amazing Amazon Architect PROMPT BY PROMPT"
+    uid=1_3 navigation
+      uid=1_4 button " SOPs 流程中心 "
+      uid=1_5 button " 应用中心 "
+      uid=1_6 button " Amazon 智库 "
+      uid=1_7 button " 更多 "
+    uid=1_8 StaticText "等待API配置..."
+  uid=3_0 complementary
+    uid=2_0 StaticText ""
+    uid=3_1 heading "应用中心" level="2"
+    uid=2_0 StaticText ""
+    uid=3_2 textbox "搜索应用..."
+    uid=3_3 navigation
+      uid=3_4 button " 应用总览"
+      uid=3_5 StaticText "分类导航"
+      uid=3_6 button " Master Analysis 4 "
+      uid=3_7 button " 数据采集"
+      uid=3_8 button " AI智能分析"
+      uid=3_9 button " Prompt 生成" focusable focused
+      uid=3_10 button " Q&A 预研"
+      uid=3_11 button " Keyword Hunter 3 "
+    uid=3_12 StaticText "已就绪"
+    uid=3_13 StaticText "7 项"
+  uid=1_9 main
+    uid=2_0 StaticText ""
+    uid=5_0 heading "404" level="1"
+    uid=5_1 heading "页面未找到" level="2"
+    uid=5_2 StaticText "路由 "app_center_promptlab" 不存在或尚未开发。"
+    uid=5_3 button " 返回首页"
+    uid=5_4 button " 返回上一页"

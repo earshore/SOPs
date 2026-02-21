@@ -1,30 +1,7 @@
 // src/modules/app_center/views/master_analysis/services/promptlabService.ts
 
-// ----------------------------------------
-// 类型定义
-// ----------------------------------------
-
-interface PromptInputs {
-  useAnalysisData?: boolean;
-  selectedReportSections?: string[];
-  audience?: string;
-  usps?: string;
-  specs?: string;
-  keywordsTier1?: string;
-  keywordsTier2?: string;
-  socialHook?: string;
-  negative?: string;
-  tone?: string;
-  targetMarket?: string;
-  useCosmo?: boolean;
-  useRufus?: boolean;
-  useEmoji?: boolean;
-  customStrategy?: string;
-}
-
-interface AnalysisReport {
-  [key: string]: any;
-}
+import type { PromptInputs } from '../../../../../types/state';
+import type { AnalysisReport } from '../../../../../types/modules-business';
 
 // ----------------------------------------
 // 内部 Helper 函数
