@@ -141,6 +141,13 @@ export interface UserProductProfile {
 }
 
 /**
+ * Prompt 输入接口（扩展 UserProductProfile）
+ */
+export interface PromptInputs extends UserProductProfile {
+  useAnalysisData: boolean;
+}
+
+/**
  * PromptLab状态
  */
 export interface PromptLabState {
@@ -619,6 +626,8 @@ export type {
   ReportData,
   AnalysisState,
   PromptHistoryItem,
+  UserProductProfile,
+  PromptInputs,
   PromptLabState,
   KeywordData,
   TrackingData,
