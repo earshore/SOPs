@@ -36,7 +36,7 @@ export default defineConfig({
 
     // 开发服务器配置
     server: {
-        port: 3000,
+        port: 5173,
         open: true,
         cors: true,
         // 代理配置 - 解决开发环境 CORS 问题
@@ -94,51 +94,43 @@ export default defineConfig({
         minify: 'terser',
         terserOptions: {
             compress: {
-                drop_console: true, // 生产环境移除console
+                drop_console: true,
                 drop_debugger: true,
-                pure_funcs: ['console.log', 'console.info', 'console.debug'], // 移除特定console方法
-                passes: 2, // 多次压缩以获得更好效果
-                // 🔧 紧急修复: 禁用可能破坏 Alpine.js 组件的压缩选项
-                arrows: false, // 不转换箭头函数
-                booleans: false, // 不优化布尔值
-                collapse_vars: false, // 不折叠变量
-                comparisons: false, // 不优化比较表达式
-                computed_props: false, // 不优化计算属性
-                hoist_funs: false, // 不提升函数声明
-                hoist_props: false, // 不提升属性
-                hoist_vars: false, // 不提升变量
-                if_return: false, // 不优化if-return
-                inline: false, // 不内联函数
-                join_vars: false, // 不合并变量声明
-                keep_fargs: true, // 保留未使用的函数参数
-                keep_fnames: true, // 保留函数名
-                loops: false, // 不优化循环
-                negate_iife: false, // 不否定立即执行函数
-                properties: false, // 不优化属性访问
-                reduce_funcs: false, // 不优化函数
-                reduce_vars: false, // 不优化变量
-                sequences: false, // 不使用逗号序列
-                side_effects: false, // 不移除无副作用的语句
-                switches: false, // 不优化switch
-                top_retain: null, // 不移除顶层未使用的函数
-                typeofs: false, // 不优化typeof
-                unsafe: false, // 不使用不安全的优化
-                unsafe_arrows: false, // 不使用不安全的箭头函数优化
-                unsafe_comps: false, // 不使用不安全的比较优化
-                unsafe_Function: false, // 不使用不安全的Function优化
-                unsafe_math: false, // 不使用不安全的数学优化
-                unsafe_methods: false, // 不使用不安全的方法优化
-                unsafe_proto: false, // 不使用不安全的原型优化
-                unsafe_regexp: false, // 不使用不安全的正则优化
-                unsafe_undefined: false, // 不使用不安全的undefined优化
-                unused: false // 不移除未使用的变量和函数
+                pure_funcs: ['console.log', 'console.info', 'console.debug'],
+                passes: 2,
+                arrows: true,
+                booleans: true,
+                collapse_vars: true,
+                comparisons: true,
+                computed_props: true,
+                hoist_funs: true,
+                hoist_props: true,
+                if_return: true,
+                join_vars: true,
+                keep_fargs: false,
+                keep_fnames: false,
+                loops: true,
+                negate_iife: true,
+                properties: true,
+                reduce_funcs: true,
+                reduce_vars: true,
+                sequences: true,
+                side_effects: true,
+                switches: true,
+                typeofs: true,
+                unused: true,
+                conditionals: true,
+                dead_code: true,
+                evaluate: true,
+                inline: 2
             },
             mangle: {
-                safari10: true, // 兼容Safari 10
-                keep_fnames: true // 保留函数名，避免 Alpine 组件注册失败
+                safari10: true,
+                keep_fnames: false
             },
             format: {
-                comments: false // 移除注释
+                comments: false,
+                ascii_only: true
             }
         },
         // Chunk大小警告阈值

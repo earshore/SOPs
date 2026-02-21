@@ -24,9 +24,9 @@ export type ModuleRegisterFn = (routeId: string, loader: ModuleLoaderFn) => void
 // ==================== Master Analysis 模块类型 ====================
 
 /**
- * 采集站点类型
+ * 采集站点类型（简短代码）
  */
-export type ScraperSite = 'amazon.com' | 'amazon.de' | 'amazon.co.uk' | 'amazon.fr' | 'amazon.it' | 'amazon.es' | 'amazon.ca' | 'amazon.co.jp';
+export type ScraperSite = 'US' | 'DE' | 'FR' | 'IT' | 'ES' | 'NL' | 'SE' | 'PL' | 'BE' | 'IE' | 'UK' | 'CA' | 'JP';
 
 /**
  * 采集状态
@@ -37,6 +37,8 @@ export type ScraperStatus = 'pending' | 'scraping' | 'success' | 'failed';
  * 客户评论
  */
 export interface CustomerReview {
+  id?: string;
+  author?: string;
   headline: string;
   body: string;
   star_rating: number;

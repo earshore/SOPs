@@ -2,12 +2,13 @@
  * 数据操作处理器 - 删除产品/评论
  */
 
-import type { ScrapedData } from '../types';
+import type { ScrapedData, DeleteResult, ConfirmModalCallback } from '../types';
 import { HistoryService } from '../../services/historyService';
 import { StorageService } from '../../../../../../services/storageService';
 import { showToast } from '../../../../../../common/ui';
 import eventBus from '../../../../../../common/EventBus';
 import { APP_EVENTS } from '../../../../../../common/constants/eventConstants';
+import { SafeRenderer } from '../../../../../../common/infrastructure/SafeRenderer';
 
 /**
  * 删除产品
@@ -15,8 +16,8 @@ import { APP_EVENTS } from '../../../../../../common/constants/eventConstants';
 export async function deleteProduct(
     asin: string,
     scrapedData: ScrapedData | null,
-    confirmModal: (title: string, content: string, storageKey: string) => Promise<boolean>
-): Promise<{ success: boolean; data?: ScrapedData; error?: string }> {
+    confirmModal: ConfirmModalCallback
+): Promise<DeleteResult> {
     // 保存原始数据用于回滚
     const originalData = scrapedData ? JSON.parse(JSON.stringify(scrapedData)) : null;
     
@@ -116,8 +117,8 @@ export async function deleteReview(
     asin: string,
     index: number,
     scrapedData: ScrapedData | null,
-    confirmModal: (title: string, content: string, storageKey: string) => Promise<boolean>
-): Promise<{ success: boolean; data?: ScrapedData; error?: string }> {
+    confirmModal: ConfirmModalCallback
+): Promise<DeleteResult> {
     // 保存原始数据用于回滚
     const originalData = scrapedData ? JSON.parse(JSON.stringify(scrapedData)) : null;
     
@@ -266,7 +267,8 @@ export function confirmWithModal(title: string, content: string, storageKey: str
             </div>
         `;
 
-        backdrop.innerHTML = modalContent;
+        const renderer = SafeRenderer.getInstance();
+        renderer.renderTemplate(backdrop, modalContent);
         document.body.appendChild(backdrop);
 
         const btnConfirm = document.getElementById(`btn-confirm-${modalId}`) as HTMLButtonElement;
@@ -301,7 +303,7 @@ export function confirmWithModal(title: string, content: string, storageKey: str
             }
             
             cleanup();
-            setTimeout(() => resolve(true), 0);
+            resolve(true);
         };
 
         const handleCancel = (e: Event) => {
@@ -312,7 +314,7 @@ export function confirmWithModal(title: string, content: string, storageKey: str
             resolved = true;
             
             cleanup();
-            setTimeout(() => resolve(false), 0);
+            resolve(false);
         };
 
         btnConfirm.addEventListener('click', handleConfirm, { once: true });

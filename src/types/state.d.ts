@@ -23,9 +23,9 @@ export interface UIState {
 // ==================== Scraper状态 ====================
 
 /**
- * 采集站点类型
+ * 采集站点类型（简短代码）
  */
-export type ScraperSite = 'amazon.com' | 'amazon.de' | 'amazon.co.uk' | 'amazon.fr' | 'amazon.it' | 'amazon.es' | 'amazon.ca' | 'amazon.co.jp';
+export type ScraperSite = 'US' | 'DE' | 'FR' | 'IT' | 'ES' | 'NL' | 'SE' | 'PL' | 'BE' | 'IE' | 'UK' | 'CA' | 'JP';
 
 /**
  * 采集状态

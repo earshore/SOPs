@@ -6,9 +6,12 @@
  * - 使用 Alpine.js 进行响应式 UI 管理
  * - 状态保存到 state.scraper 命名空间
  * - 通过 EventBus 与其他模块通信
+ * - 使用 AlpineRegistry 统一管理组件注册
  */
 
-import { loadTemplate } from '../../../../../common/utils/viewLoader';
+import { SafeModuleLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
+import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
+import { AlpineRegistry } from '../../../../../common/infrastructure/AlpineRegistry';
 import { createScraperPanel } from './components/ScraperPanel';
 import '../master_analysis_style.css';
 import './scraper_style.css';
@@ -25,28 +28,27 @@ export async function mount(container: HTMLElement): Promise<void> {
     console.log('[Scraper] 🔧 开始挂载子模块');
 
     try {
-        // 1. 加载模板
-        const html = await loadTemplate('src/modules/app_center/views/master_analysis/scraper/template.html');
-        container.innerHTML = html;
-
-        // 2. 初始化 Alpine.js 组件 (带防御性检查)
-        if (typeof window.Alpine === 'undefined') {
-            console.warn('[Scraper] ⚠️ Alpine.js 未加载，延迟注册组件');
-            // 延迟注册,等待 Alpine 加载
-            setTimeout(() => {
-                if (window.Alpine && typeof window.Alpine.data === 'function') {
-                    window.Alpine.data('scraperPanel', createScraperPanel);
-                    console.log('[Scraper] ✅ Alpine 组件延迟注册成功');
+        // 1. 使用 SafeModuleLoader 加载模板
+        const loader = SafeModuleLoader.getInstance();
+        const renderer = SafeRenderer.getInstance();
+        
+        const html = await loader.loadTemplate(
+            'src/modules/app_center/views/master_analysis/scraper/template.html',
+            {
+                onError: (error) => {
+                    console.error('[Scraper] 模板加载失败:', error);
                 }
-            }, 100);
-        } else if (typeof window.Alpine.data === 'function') {
-            // 立即注册
-            window.Alpine.data('scraperPanel', createScraperPanel);
-            console.log('[Scraper] ✅ Alpine 组件注册成功');
-        } else {
-            console.error('[Scraper] ❌ Alpine.data 方法不可用');
-        }
+            }
+        );
+        
+        // 2. 使用 SafeRenderer 渲染模板（静态模板，已审计）
+        renderer.renderTemplate(container, html);
 
+        // 3. 使用 AlpineRegistry 注册组件
+        const registry = AlpineRegistry.getInstance();
+        registry.register('scraperPanel', createScraperPanel);
+        
+        console.log('[Scraper] ✅ Alpine 组件已通过 AlpineRegistry 注册');
         console.log('[Scraper] ✅ 子模块挂载成功');
     } catch (error) {
         console.error('[Scraper] ❌ 子模块挂载失败:', error);
@@ -71,6 +73,10 @@ export function unmount(): void {
             }
         }
 
+        // 使用 AlpineRegistry 卸载组件
+        const registry = AlpineRegistry.getInstance();
+        registry.unregister('scraperPanel');
+
         console.log('[Scraper] ✅ 子模块卸载成功');
     } catch (error) {
         console.error('[Scraper] ❌ 子模块卸载失败:', error);
@@ -94,32 +100,6 @@ function getScraperPanelInstance(): any {
 }
 
 /**
- * 初始化 Alpine Scraper 组件（向后兼容）
- * 包含防御性检查和重试机制
- */
-export function initAlpineScraper(): void {
-    if (typeof window.Alpine === 'undefined') {
-        console.warn('[Scraper] Alpine.js not loaded yet, retrying...');
-        const retryCount = (window as any).__alpineScraperRetryCount || 0;
-        if (retryCount < 10) {
-            (window as any).__alpineScraperRetryCount = retryCount + 1;
-            setTimeout(initAlpineScraper, 100);
-        } else {
-            console.error('[Scraper] Alpine.js failed to load after 10 retries');
-        }
-        return;
-    }
-    
-    if (typeof window.Alpine.data === 'function') {
-        window.Alpine.data('scraperPanel', createScraperPanel);
-        console.log('[Scraper] ✅ Alpine component registered');
-        delete (window as any).__alpineScraperRetryCount;
-    } else {
-        console.error('[Scraper] Alpine.data is not a function');
-    }
-}
-
-/**
  * 渲染历史记录（向后兼容）
  */
 export const renderHistory = (): void => {
@@ -127,20 +107,6 @@ export const renderHistory = (): void => {
     if (panel && typeof panel.loadHistory === 'function') {
         panel.loadHistory();
     }
-};
-
-/**
- * 初始化 Scraper 监听器（向后兼容）
- */
-export const initScraperListeners = (): void => {
-    // No-op，由 Alpine 处理
-};
-
-/**
- * 选择站点（向后兼容）
- */
-export const selectSite = (): void => {
-    // No-op，由 Alpine 处理
 };
 
 /**

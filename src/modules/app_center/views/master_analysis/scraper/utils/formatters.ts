@@ -40,10 +40,11 @@ export function formatDate(ts: string): string {
  * 获取错误摘要
  */
 export function getErrorSummary(error: string): string {
-    if (error.includes('timeout')) return '请求超时';
+    const lowerError = error.toLowerCase();
+    if (lowerError.includes('timeout')) return '请求超时';
     if (error.includes('404')) return '页面不存在';
     if (error.includes('403')) return '访问被拒绝';
-    if (error.includes('network')) return '网络错误';
+    if (lowerError.includes('network')) return '网络错误';
     return error;
 }
 

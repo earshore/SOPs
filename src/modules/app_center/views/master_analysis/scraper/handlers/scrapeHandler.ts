@@ -2,7 +2,8 @@
  * 采集流程处理器
  */
 
-import type { Task, ScrapedData } from '../types';
+import type { Task, ScrapedData, TaskStatusCallback } from '../types';
+import type { ScrapedProduct, ScraperSite } from '@/types/modules-business';
 import { scrapeAsin } from '../../services/scraperService';
 import { HistoryService } from '../../services/historyService';
 import { LANGUAGE_HEADERS } from '../../../../../../common/constants/constants';
@@ -33,11 +34,11 @@ export function updateTask(
  */
 export async function startScrape(
     validAsins: string[],
-    site: string,
+    site: ScraperSite,
     scrapeReviews: boolean,
     _tasks: Task[],
-    onTaskUpdate: (asin: string, status: Task['status'], message: string) => void
-): Promise<any[]> {
+    onTaskUpdate: TaskStatusCallback
+): Promise<ScrapedProduct[]> {
     const promises = validAsins.map(async (asin, index) => {
         // 更新任务状态为采集中
         onTaskUpdate(asin, 'scraping', '正在采集...');
@@ -45,8 +46,8 @@ export async function startScrape(
         // 错开请求时间
         if (index > 0) await sleep(index * 800);
 
-        return scrapeAsin(asin, site as any, scrapeReviews, (a: string, status: string, msg: string) => {
-            onTaskUpdate(a, status as any, msg);
+        return scrapeAsin(asin, site, scrapeReviews, (a: string, status: string, msg: string) => {
+            onTaskUpdate(a, status as Task['status'], msg);
         });
     });
 
@@ -57,18 +58,26 @@ export async function startScrape(
  * 处理采集完成
  */
 export function handleScrapeComplete(
-    products: any[],
+    products: ScrapedProduct[],
     validAsins: string[],
-    selectedSite: string
+    selectedSite: ScraperSite
 ): ScrapedData {
     // 处理失败或空结果
+    let finalProducts = products;
     if (!products || products.length === 0) {
-        products = validAsins.map(asin => ({
-            asin, scrape_status: 'failed', error: 'Unknown Error'
+        finalProducts = validAsins.map(asin => ({
+            asin, 
+            url: '',
+            language: '',
+            productTitle: '',
+            feature_bullets: [],
+            customer_reviews: [],
+            scrape_status: 'failed' as const, 
+            error: 'Unknown Error'
         }));
     }
 
-    const siteConfig = (LANGUAGE_HEADERS as any)[selectedSite] || {};
+    const siteConfig = (LANGUAGE_HEADERS as Record<string, { domain: string; name: string }>)[selectedSite] || { domain: 'unknown', name: 'unknown' };
 
     const scrapedData: ScrapedData = {
         metadata: {
@@ -78,7 +87,7 @@ export function handleScrapeComplete(
             language: siteConfig.name || "unknown",
             total_asins: validAsins.length,
         },
-        products,
+        products: finalProducts,
     };
 
     // 保存历史记录

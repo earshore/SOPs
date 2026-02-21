@@ -3,8 +3,10 @@
  */
 
 import type { ScrapedData, DataTab } from '../types';
+import type { ScrapedProduct } from '@/types/modules-business';
 import { renderProductCard, syntaxHighlight } from '../utils/renderers';
 import { showToast } from '../../../../../../common/ui';
+import { SafeRenderer } from '../../../../../../common/infrastructure/SafeRenderer';
 
 export interface DataPreviewState {
     expandedAsin: string | null;
@@ -36,7 +38,7 @@ export class DataPreview {
         return Math.ceil(this.totalProducts / this.state.itemsPerPage);
     }
 
-    get paginatedProducts(): any[] {
+    get paginatedProducts(): ScrapedProduct[] {
         if (!this.scrapedData?.products) return [];
         const start = (this.state.currentPage - 1) * this.state.itemsPerPage;
         const end = start + this.state.itemsPerPage;
@@ -153,8 +155,9 @@ export class DataPreview {
             });
         });
 
-        // 清空容器内容
-        container.innerHTML = '';
+        // 使用 SafeRenderer 清空容器
+        const renderer = SafeRenderer.getInstance();
+        renderer.renderTemplate(container, '');
     }
 
     /**
@@ -211,7 +214,7 @@ export class DataPreview {
         const globalSiteCode = this.scrapedData.metadata?.marketplace || '';
 
         // 渲染产品卡片
-        cardsEl.innerHTML = productsToRender.map((rawProduct: any) => {
+        const cardsHtml = productsToRender.map((rawProduct: any) => {
             const isExpanded = this.state.expandedAsin === rawProduct.asin;
             return renderProductCard(
                 rawProduct,
@@ -223,10 +226,14 @@ export class DataPreview {
             );
         }).join("");
 
+        const renderer = SafeRenderer.getInstance();
+        renderer.renderTemplate(cardsEl, cardsHtml);
+
         // 渲染JSON视图
         const jsonDisplay = document.getElementById("json-display");
         if (jsonDisplay) {
-            jsonDisplay.innerHTML = syntaxHighlight(JSON.stringify(this.scrapedData, null, 2));
+            const jsonHtml = syntaxHighlight(JSON.stringify(this.scrapedData, null, 2));
+            renderer.renderTemplate(jsonDisplay, jsonHtml);
         }
     }
 
