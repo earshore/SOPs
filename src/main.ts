@@ -330,6 +330,7 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
 // 也挂载到 window，保持向后兼容现有 onclick="xxx()" 调用
 
 interface ActionParams {
+  tab?: string;
   param?: string;
   updateHistory?: boolean;
   format?: 'json' | 'csv';
@@ -341,7 +342,7 @@ registerActionsWithLegacy({
   // === Navigation 导航 ===
   switchTab: (params: string | ActionParams) => {
     // Handle both direct calls (legacy) and data-action calls
-    const tab = typeof params === 'string' ? params : params.param || '';
+    const tab = typeof params === 'string' ? params : (params.tab || params.param || '');
     const updateHistory = typeof params === 'object' && params.updateHistory !== undefined 
       ? params.updateHistory 
       : true;
