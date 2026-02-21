@@ -45,7 +45,7 @@ export default [
             }],
             
             // 🎯 禁止使用console
-            "no-console": ["error", { allow: [] }]
+            "no-console": "error"
         }
     },
     {

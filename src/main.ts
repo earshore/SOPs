@@ -28,6 +28,9 @@ if (import.meta.env.DEV) {
 // ✅ 导入全局状态对象
 import state from './common/state';
 
+// 🎯 导入 Zustand Store
+import { appStore } from './stores/useAppStore';
+
 // 🎯 开发环境调试接口
 import { debugInterface } from './common/devtools/DebugInterface';
 
@@ -111,9 +114,14 @@ import Alpine from 'alpinejs';
 (window as any)['Alpine'] = Alpine;
 window.Alpine = Alpine;
 
+// 🔧 暴露 Zustand Store 到 window (用于调试和测试)
+(window as any)['useAppStore'] = appStore;
+(window as any)['appStore'] = appStore;
+
 // 开发环境额外日志
 if (import.meta.env.DEV) {
   console.log('[Alpine] ✅ Alpine.js loaded and exposed to window');
+  console.log('[Store] ✅ Zustand store exposed to window');
 }
 
 // ========================

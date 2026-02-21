@@ -1,0 +1,810 @@
+﻿
+> aihang-sop@1.0.0 test:coverage
+> vitest run --coverage tests/unit/SafeModuleLoader.test.ts
+
+
+[7m[1m[36m RUN [39m[22m[27m [36mv1.6.1[39m [90mD:/Users/Administrator/Documents/GitHub/AihangSOP[39m
+[2m      Coverage enabled with [22m[33mv8[39m
+
+[90mstdout[2m | new ConfigCenter (D:\Users\Administrator\Documents\GitHub\AihangSOP\src\common\config\ConfigCenter.ts:138:13)[22m[39m
+[ConfigCenter] 閰嶇疆涓績宸插垵濮嬪寲, 鐜: test
+
+[90mstdout[2m | LoggerService._consoleLog (D:\Users\Administrator\Documents\GitHub\AihangSOP\src\services\loggerService.ts:232:17)[22m[39m
+[17:58:50] [INFO] [SafeModuleLoader] SafeModuleLoader 宸插垵濮嬪寲 {}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m鍗曚緥妯″紡[2m > [22m[2m搴旇杩斿洖鍚屼竴涓疄渚?[22m[39m
+[17:58:50] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+[17:58:50] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒澶勭悊[2m > [22m[2m搴旇澶勭悊妯″潡鍔犺浇澶辫触[22m[39m
+[17:58:50] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒澶勭悊[2m > [22m[2m搴旇澶勭悊妯″潡鍔犺浇澶辫触[22m[39m
+[17:58:50] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒澶勭悊[2m > [22m[2m搴旇鏄剧ず闄嶇骇 UI[22m[39m
+[17:58:50] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒澶勭悊[2m > [22m[2m搴旇鏄剧ず闄嶇骇 UI[22m[39m
+[17:58:50] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒澶勭悊[2m > [22m[2m搴旇璋冪敤閿欒鍥炶皟[22m[39m
+[17:58:50] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒澶勭悊[2m > [22m[2m搴旇璋冪敤閿欒鍥炶皟[22m[39m
+[17:58:50] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒澶勭悊[2m > [22m[2m搴旇浣跨敤鑷畾涔夐檷绾?UI[22m[39m
+[17:58:50] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒澶勭悊[2m > [22m[2m搴旇浣跨敤鑷畾涔夐檷绾?UI[22m[39m
+[17:58:50] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒澶勭悊[2m > [22m[2m搴旇澶勭悊瓒呮椂閿欒[22m[39m
+[17:58:50] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒澶勭悊[2m > [22m[2m搴旇澶勭悊瓒呮椂閿欒[22m[39m
+[17:58:50] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閲嶈瘯鏈哄埗[2m > [22m[2m搴旇鍦ㄨ揪鍒版渶澶ч噸璇曟鏁板悗澶辫触[22m[39m
+[17:58:50] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m鍗曚緥妯″紡[2m > [22m搴旇杩斿洖鍚屼竴涓疄渚? [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閿欒澶勭悊[2m > [22m搴旇澶勭悊妯″潡鍔犺浇澶辫触
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閿欒澶勭悊[2m > [22m搴旇鏄剧ず闄嶇骇 UI
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閿欒澶勭悊[2m > [22m搴旇璋冪敤閿欒鍥炶皟
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閿欒澶勭悊[2m > [22m搴旇浣跨敤鑷畾涔夐檷绾?UI
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閿欒澶勭悊[2m > [22m搴旇澶勭悊瓒呮椂閿欒
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閲嶈瘯鏈哄埗[2m > [22m[2m搴旇鍦ㄨ揪鍒版渶澶ч噸璇曟鏁板悗澶辫触[22m[39m
+[17:58:50] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閲嶈瘯鏈哄埗[2m > [22m[2m搴旇璁板綍閲嶈瘯娆℃暟[22m[39m
+[17:58:50] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閲嶈瘯鏈哄埗[2m > [22m搴旇鍦ㄨ揪鍒版渶澶ч噸璇曟鏁板悗澶辫触
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閲嶈瘯鏈哄埗[2m > [22m[2m搴旇璁板綍閲嶈瘯娆℃暟[22m[39m
+[17:58:51] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2mloadTemplate[2m > [22m[2m搴旇鎴愬姛鍔犺浇妯℃澘[22m[39m
+[17:58:51] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+[17:58:51] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2mloadTemplate[2m > [22m[2m搴旇缂撳瓨妯℃澘[22m[39m
+[17:58:51] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+[17:58:51] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2mloadTemplate[2m > [22m[2m搴旇澶勭悊 HTTP 閿欒[22m[39m
+[17:58:51] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閲嶈瘯鏈哄埗[2m > [22m搴旇璁板綍閲嶈瘯娆℃暟[33m 806[2mms[22m[39m
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22mloadTemplate[2m > [22m搴旇鎴愬姛鍔犺浇妯℃澘
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22mloadTemplate[2m > [22m搴旇缂撳瓨妯℃澘
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2mloadTemplate[2m > [22m[2m搴旇澶勭悊 HTTP 閿欒[22m[39m
+[17:58:52] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2mloadTemplate[2m > [22m[2m搴旇澶勭悊缃戠粶閿欒[22m[39m
+[17:58:52] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22mloadTemplate[2m > [22m搴旇澶勭悊 HTTP 閿欒[33m 723[2mms[22m[39m
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2mloadTemplate[2m > [22m[2m搴旇澶勭悊缃戠粶閿欒[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2mloadTemplate[2m > [22m[2m搴旇鏀寔閲嶈瘯[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22mloadTemplate[2m > [22m搴旇澶勭悊缃戠粶閿欒[33m 740[2mms[22m[39m
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2mloadTemplate[2m > [22m[2m搴旇鏀寔閲嶈瘯[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m缂撳瓨绠＄悊[2m > [22m[2m搴旇娓呴櫎鎵€鏈夌紦瀛?[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m缂撳瓨绠＄悊[2m > [22m[2m搴旇杩斿洖缂撳瓨缁熻[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m缂撳瓨绠＄悊[2m > [22m[2m搴旇娓呴櫎鎸囧畾缂撳瓨[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m闄嶇骇 UI[2m > [22m[2m搴旇鏄剧ず閿欒 UI[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m闄嶇骇 UI[2m > [22m[2m搴旇鏄剧ず閿欒 UI[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m闄嶇骇 UI[2m > [22m[2m搴旇鍖呭惈鎿嶄綔鎸夐挳[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m闄嶇骇 UI[2m > [22m[2m搴旇鍖呭惈鎿嶄綔鎸夐挳[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m闄嶇骇 UI[2m > [22m[2m搴旇鏄剧ず閿欒鐮?[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m闄嶇骇 UI[2m > [22m[2m搴旇鏄剧ず閿欒鐮?[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m闄嶇骇 UI[2m > [22m[2m寮€鍙戞ā寮忓簲鏄剧ず鎶€鏈鎯?[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m闄嶇骇 UI[2m > [22m[2m寮€鍙戞ā寮忓簲鏄剧ず鎶€鏈鎯?[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m鎬ц兘[2m > [22m[2m搴旇璁板綍鍔犺浇鏃堕棿[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m鎬ц兘[2m > [22m[2m搴旇璁板綍鍔犺浇鏃堕棿[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m鎬ц兘[2m > [22m[2m搴旇璁板綍鎬ц兘鎸囨爣[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2mpreloadModules[2m > [22m[2m搴旇涓嶆姏鍑洪敊璇?[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2mpreloadModules[2m > [22m[2m搴旇涓嶆姏鍑洪敊璇?[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2mpreloadModules[2m > [22m[2m搴旇澶勭悊绌烘暟缁?[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒鍒嗙被[2m > [22m[2m搴旇璇嗗埆缃戠粶閿欒[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒鍒嗙被[2m > [22m[2m搴旇璇嗗埆缃戠粶閿欒[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒鍒嗙被[2m > [22m[2m搴旇璇嗗埆瓒呮椂閿欒[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒鍒嗙被[2m > [22m[2m搴旇璇嗗埆瓒呮椂閿欒[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒鍒嗙被[2m > [22m[2m搴旇璇嗗埆HTTP閿欒[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒UI娓叉煋[2m > [22m[2m搴旇娓叉煋缃戠粶閿欒UI[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒UI娓叉煋[2m > [22m[2m搴旇娓叉煋缃戠粶閿欒UI[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒UI娓叉煋[2m > [22m[2m搴旇娓叉煋瓒呮椂閿欒UI[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒UI娓叉煋[2m > [22m[2m搴旇鍖呭惈閿欒璇︽儏锛堝紑鍙戞ā寮忥級[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒UI娓叉煋[2m > [22m[2m搴旇鍖呭惈閿欒璇︽儏锛堝紑鍙戞ā寮忥級[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒UI娓叉煋[2m > [22m[2m搴旇鏀寔鑷畾涔夐檷绾фā鏉挎彃鍊?[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒UI浜や簰[2m > [22m[2m搴旇澶勭悊閲嶈瘯鎸夐挳鐐瑰嚮[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒UI浜や簰[2m > [22m[2m搴旇澶勭悊閲嶈瘯鎸夐挳鐐瑰嚮[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒UI浜や簰[2m > [22m[2m搴旇澶勭悊杩斿洖棣栭〉鎸夐挳[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒UI浜や簰[2m > [22m[2m搴旇澶勭悊杩斿洖棣栭〉鎸夐挳[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m妯″潡娓叉煋[2m > [22m[2m搴旇璋冪敤妯″潡鐨剅ender鏂规硶[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m妯″潡娓叉煋[2m > [22m[2m搴旇璋冪敤妯″潡鐨剅ender鏂规硶[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m妯″潡娓叉煋[2m > [22m[2m搴旇璋冪敤妯″潡鐨刴ount鏂规硶[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m妯″潡娓叉煋[2m > [22m[2m搴旇璋冪敤妯″潡鐨刴ount鏂规硶[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m鍔犺浇鎸囩ず鍣?[2m > [22m[2m搴旇鏄剧ず鍔犺浇鎸囩ず鍣?[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m鍔犺浇鎸囩ず鍣?[2m > [22m[2m搴旇鏄剧ず鍔犺浇鎸囩ず鍣?[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m鍔犺浇鎸囩ず鍣?[2m > [22m[2m搴旇鍦ㄥ姞杞藉畬鎴愬悗绉婚櫎鍔犺浇鎸囩ず鍣?[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m骞跺彂鍔犺浇[2m > [22m[2m搴旇澶勭悊鍚屼竴妯″潡鐨勫苟鍙戝姞杞借姹?[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2mHTML杞箟[2m > [22m[2m搴旇杞箟鐗规畩瀛楃[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2mHTML杞箟[2m > [22m[2m搴旇杞箟鐗规畩瀛楃[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閲嶈瘯绛栫暐[2m > [22m[2m搴旇浣跨敤鎸囨暟閫€閬跨瓥鐣?[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22mloadTemplate[2m > [22m搴旇鏀寔閲嶈瘯
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m缂撳瓨绠＄悊[2m > [22m搴旇娓呴櫎鎵€鏈夌紦瀛? [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m缂撳瓨绠＄悊[2m > [22m搴旇杩斿洖缂撳瓨缁熻
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m缂撳瓨绠＄悊[2m > [22m搴旇娓呴櫎鎸囧畾缂撳瓨
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m闄嶇骇 UI[2m > [22m搴旇鏄剧ず閿欒 UI
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m闄嶇骇 UI[2m > [22m搴旇鍖呭惈鎿嶄綔鎸夐挳
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m闄嶇骇 UI[2m > [22m搴旇鏄剧ず閿欒鐮? [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m闄嶇骇 UI[2m > [22m寮€鍙戞ā寮忓簲鏄剧ず鎶€鏈鎯? [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m鎬ц兘[2m > [22m搴旇璁板綍鍔犺浇鏃堕棿
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m鎬ц兘[2m > [22m搴旇璁板綍鎬ц兘鎸囨爣
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22mpreloadModules[2m > [22m搴旇涓嶆姏鍑洪敊璇? [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22mpreloadModules[2m > [22m搴旇澶勭悊绌烘暟缁? [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閿欒鍒嗙被[2m > [22m搴旇璇嗗埆缃戠粶閿欒
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閿欒鍒嗙被[2m > [22m搴旇璇嗗埆瓒呮椂閿欒
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閿欒鍒嗙被[2m > [22m搴旇璇嗗埆HTTP閿欒
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閿欒UI娓叉煋[2m > [22m搴旇娓叉煋缃戠粶閿欒UI
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閿欒UI娓叉煋[2m > [22m搴旇娓叉煋瓒呮椂閿欒UI
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閿欒UI娓叉煋[2m > [22m搴旇鍖呭惈閿欒璇︽儏锛堝紑鍙戞ā寮忥級
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閿欒UI娓叉煋[2m > [22m搴旇鏀寔鑷畾涔夐檷绾фā鏉挎彃鍊? [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閿欒UI浜や簰[2m > [22m搴旇澶勭悊閲嶈瘯鎸夐挳鐐瑰嚮
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閿欒UI浜や簰[2m > [22m搴旇澶勭悊杩斿洖棣栭〉鎸夐挳
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m妯″潡娓叉煋[2m > [22m搴旇璋冪敤妯″潡鐨剅ender鏂规硶
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m妯″潡娓叉煋[2m > [22m搴旇璋冪敤妯″潡鐨刴ount鏂规硶
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m鍔犺浇鎸囩ず鍣?[2m > [22m搴旇鏄剧ず鍔犺浇鎸囩ず鍣? [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m鍔犺浇鎸囩ず鍣?[2m > [22m搴旇鍦ㄥ姞杞藉畬鎴愬悗绉婚櫎鍔犺浇鎸囩ず鍣? [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m骞跺彂鍔犺浇[2m > [22m搴旇澶勭悊鍚屼竴妯″潡鐨勫苟鍙戝姞杞借姹? [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22mHTML杞箟[2m > [22m搴旇杞箟鐗规畩瀛楃
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閲嶈瘯绛栫暐[2m > [22m[2m搴旇浣跨敤鎸囨暟閫€閬跨瓥鐣?[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閲嶈瘯绛栫暐[2m > [22m[2m搴旇鍦ㄤ笉鍙噸璇曠殑閿欒鏃剁珛鍗冲け璐?[22m[39m
+[17:58:53] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閲嶈瘯绛栫暐[2m > [22m搴旇浣跨敤鎸囨暟閫€閬跨瓥鐣?[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閲嶈瘯绛栫暐[2m > [22m[2m搴旇鍦ㄤ笉鍙噸璇曠殑閿欒鏃剁珛鍗冲け璐?[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m缂撳瓨绠＄悊澧炲己[2m > [22m[2m搴旇姝ｇ‘鎶ュ憡缂撳瓨缁熻[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m缂撳瓨绠＄悊澧炲己[2m > [22m[2m搴旇娓呴櫎鎸囧畾妯″潡鐨勭紦瀛?[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒鍥炬爣[2m > [22m[2m搴旇涓轰笉鍚岄敊璇被鍨嬫樉绀轰笉鍚屽浘鏍?[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒鍥炬爣[2m > [22m[2m搴旇涓轰笉鍚岄敊璇被鍨嬫樉绀轰笉鍚屽浘鏍?[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒鍒嗙被璇︾粏娴嬭瘯[2m > [22m[2m搴旇璇嗗埆DNS閿欒[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒鍒嗙被璇︾粏娴嬭瘯[2m > [22m[2m搴旇璇嗗埆DNS閿欒[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒鍒嗙被璇︾粏娴嬭瘯[2m > [22m[2m搴旇璇嗗埆CORS閿欒[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒鍒嗙被璇︾粏娴嬭瘯[2m > [22m[2m搴旇璇嗗埆CORS閿欒[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒鍒嗙被璇︾粏娴嬭瘯[2m > [22m[2m搴旇璇嗗埆妯″潡瑙ｆ瀽閿欒[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒鍒嗙被璇︾粏娴嬭瘯[2m > [22m[2m搴旇璇嗗埆妯″潡瑙ｆ瀽閿欒[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒鍒嗙被璇︾粏娴嬭瘯[2m > [22m[2m搴旇璇嗗埆JSON瑙ｆ瀽閿欒[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒鍒嗙被璇︾粏娴嬭瘯[2m > [22m[2m搴旇璇嗗埆JSON瑙ｆ瀽閿欒[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒鍒嗙被璇︾粏娴嬭瘯[2m > [22m[2m搴旇璇嗗埆DOM寮傚父[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒UI鍙樹綋[2m > [22m[2m搴旇鏄剧ず瑙ｆ瀽閿欒UI[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒UI鍙樹綋[2m > [22m[2m搴旇鏄剧ず瑙ｆ瀽閿欒UI[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒UI鍙樹綋[2m > [22m[2m搴旇鏄剧ず娓叉煋閿欒UI[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒UI鍙樹綋[2m > [22m[2m搴旇鏄剧ず娓叉煋閿欒UI[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m妯℃澘鎻掑€?[2m > [22m[2m搴旇姝ｇ‘鎻掑€奸敊璇ā鏉?[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m妯℃澘鎻掑€?[2m > [22m[2m搴旇姝ｇ‘鎻掑€奸敊璇ā鏉?[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m缂撳瓨琛屼负[2m > [22m[2m搴旇鍦ㄥ姞杞藉け璐ユ椂涓嶇紦瀛?[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒UI鎿嶄綔澶勭悊[2m > [22m[2m搴旇澶勭悊reload鎿嶄綔[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒UI鎿嶄綔澶勭悊[2m > [22m[2m搴旇澶勭悊reload鎿嶄綔[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒UI鎿嶄綔澶勭悊[2m > [22m[2m搴旇澶勭悊鏈煡鎿嶄綔[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒UI鎿嶄綔澶勭悊[2m > [22m[2m搴旇澶勭悊鏈煡鎿嶄綔[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2mpreloadModules澧炲己娴嬭瘯[2m > [22m[2m搴旇鎴愬姛棰勫姞杞藉涓ā鍧?[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2mpreloadModules澧炲己娴嬭瘯[2m > [22m[2m搴旇鎴愬姛棰勫姞杞藉涓ā鍧?[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2mpreloadModules澧炲己娴嬭瘯[2m > [22m[2m搴旇澶勭悊棰勫姞杞藉け璐ョ殑妯″潡[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2mpreloadModules澧炲己娴嬭瘯[2m > [22m[2m搴旇澶勭悊棰勫姞杞藉け璐ョ殑妯″潡[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2mpreloadModules澧炲己娴嬭瘯[2m > [22m[2m搴旇璁板綍棰勫姞杞芥棩蹇?[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2mpreloadModules澧炲己娴嬭瘯[2m > [22m[2m搴旇璁板綍棰勫姞杞芥棩蹇?[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m妯″潡瀛楃涓叉覆鏌?[2m > [22m[2m搴旇娓叉煋瀛楃涓茬被鍨嬬殑妯″潡[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒鍒嗙被杈圭晫鎯呭喌[2m > [22m[2m搴旇澶勭悊鍖呭惈澶氫釜鍏抽敭璇嶇殑閿欒[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒鍒嗙被杈圭晫鎯呭喌[2m > [22m[2m搴旇澶勭悊鍖呭惈澶氫釜鍏抽敭璇嶇殑閿欒[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒鍒嗙被杈圭晫鎯呭喌[2m > [22m[2m搴旇澶勭悊绌洪敊璇秷鎭?[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒鍒嗙被杈圭晫鎯呭喌[2m > [22m[2m搴旇澶勭悊TypeError with null reference[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒鍒嗙被杈圭晫鎯呭喌[2m > [22m[2m搴旇澶勭悊TypeError with null reference[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m缂撳瓨骞跺彂鍦烘櫙[2m > [22m[2m搴旇姝ｇ‘澶勭悊姝ｅ湪鍔犺浇鐨勬ā鍧?[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閲嶈瘯绛栫暐[2m > [22m搴旇鍦ㄤ笉鍙噸璇曠殑閿欒鏃剁珛鍗冲け璐?[33m 756[2mms[22m[39m
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m缂撳瓨绠＄悊澧炲己[2m > [22m搴旇姝ｇ‘鎶ュ憡缂撳瓨缁熻
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m缂撳瓨绠＄悊澧炲己[2m > [22m搴旇娓呴櫎鎸囧畾妯″潡鐨勭紦瀛? [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閿欒鍥炬爣[2m > [22m搴旇涓轰笉鍚岄敊璇被鍨嬫樉绀轰笉鍚屽浘鏍? [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閿欒鍒嗙被璇︾粏娴嬭瘯[2m > [22m搴旇璇嗗埆DNS閿欒
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閿欒鍒嗙被璇︾粏娴嬭瘯[2m > [22m搴旇璇嗗埆CORS閿欒
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閿欒鍒嗙被璇︾粏娴嬭瘯[2m > [22m搴旇璇嗗埆妯″潡瑙ｆ瀽閿欒
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閿欒鍒嗙被璇︾粏娴嬭瘯[2m > [22m搴旇璇嗗埆JSON瑙ｆ瀽閿欒
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閿欒鍒嗙被璇︾粏娴嬭瘯[2m > [22m搴旇璇嗗埆DOM寮傚父
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閿欒UI鍙樹綋[2m > [22m搴旇鏄剧ず瑙ｆ瀽閿欒UI
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閿欒UI鍙樹綋[2m > [22m搴旇鏄剧ず娓叉煋閿欒UI
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m妯℃澘鎻掑€?[2m > [22m搴旇姝ｇ‘鎻掑€奸敊璇ā鏉? [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m缂撳瓨琛屼负[2m > [22m搴旇鍦ㄥ姞杞藉け璐ユ椂涓嶇紦瀛? [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閿欒UI鎿嶄綔澶勭悊[2m > [22m搴旇澶勭悊reload鎿嶄綔
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閿欒UI鎿嶄綔澶勭悊[2m > [22m搴旇澶勭悊鏈煡鎿嶄綔
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22mpreloadModules澧炲己娴嬭瘯[2m > [22m搴旇鎴愬姛棰勫姞杞藉涓ā鍧? [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22mpreloadModules澧炲己娴嬭瘯[2m > [22m搴旇澶勭悊棰勫姞杞藉け璐ョ殑妯″潡
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22mpreloadModules澧炲己娴嬭瘯[2m > [22m搴旇璁板綍棰勫姞杞芥棩蹇? [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m妯″潡瀛楃涓叉覆鏌?[2m > [22m搴旇娓叉煋瀛楃涓茬被鍨嬬殑妯″潡
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閿欒鍒嗙被杈圭晫鎯呭喌[2m > [22m搴旇澶勭悊鍖呭惈澶氫釜鍏抽敭璇嶇殑閿欒
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閿欒鍒嗙被杈圭晫鎯呭喌[2m > [22m搴旇澶勭悊绌洪敊璇秷鎭? [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閿欒鍒嗙被杈圭晫鎯呭喌[2m > [22m搴旇澶勭悊TypeError with null reference
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m缂撳瓨骞跺彂鍦烘櫙[2m > [22m[2m搴旇姝ｇ‘澶勭悊姝ｅ湪鍔犺浇鐨勬ā鍧?[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒UI妯℃澘鍙樹綋[2m > [22m[2m搴旇涓篐TTP 500閿欒鏄剧ず姝ｇ‘鐨刄I[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒UI妯℃澘鍙樹綋[2m > [22m[2m搴旇涓篐TTP 500閿欒鏄剧ず姝ｇ‘鐨刄I[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒UI妯℃澘鍙樹綋[2m > [22m[2m搴旇涓篐TTP 502閿欒鏄剧ず姝ｇ‘鐨刄I[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m鍔犺浇鏃堕棿璁板綍[2m > [22m[2m搴旇璁板綍鎴愬姛鍔犺浇鐨勬椂闂?[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2mHTML杞箟瀹屾暣娴嬭瘯[2m > [22m[2m搴旇杞箟鎵€鏈夌壒娈婂瓧绗﹀寘鎷枩鏉?[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2mHTML杞箟瀹屾暣娴嬭瘯[2m > [22m[2m搴旇杞箟鎵€鏈夌壒娈婂瓧绗﹀寘鎷枩鏉?[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2mHTML杞箟瀹屾暣娴嬭瘯[2m > [22m[2m搴旇杞箟鍗曞紩鍙?[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2mHTML杞箟瀹屾暣娴嬭瘯[2m > [22m[2m搴旇杞箟鍗曞紩鍙?[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2mHTML杞箟瀹屾暣娴嬭瘯[2m > [22m[2m搴旇杞箟鎵€鏈塇TML瀹炰綋[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2mHTML杞箟瀹屾暣娴嬭瘯[2m > [22m[2m搴旇杞箟鎵€鏈塇TML瀹炰綋[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2mpreloadModules鏃ュ織娴嬭瘯[2m > [22m[2m搴旇璁板綍棰勫姞杞芥垚鍔熺殑debug鏃ュ織[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2mpreloadModules鏃ュ織娴嬭瘯[2m > [22m[2m搴旇璁板綍棰勫姞杞芥垚鍔熺殑debug鏃ュ織[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2mpreloadModules鏃ュ織娴嬭瘯[2m > [22m[2m搴旇澶勭悊绌鸿矾寰勬暟缁勫厓绱?[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2mpreloadModules鏃ュ織娴嬭瘯[2m > [22m[2m搴旇澶勭悊绌鸿矾寰勬暟缁勫厓绱?[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒UI榛樿鍥炬爣[2m > [22m[2m搴旇鏄剧ず榛樿閿欒鍥炬爣[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒UI榛樿鍥炬爣[2m > [22m[2m搴旇鏄剧ず榛樿閿欒鍥炬爣[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m妯″潡鍔犺浇缂撳瓨鍛戒腑[2m > [22m[2m搴旇浠庣紦瀛樺姞杞藉凡瀛樺湪鐨勬ā鍧?[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒鍒嗙被瀹屾暣瑕嗙洊[2m > [22m[2m搴旇璇嗗埆鍖呭惈offline鍏抽敭璇嶇殑閿欒[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒鍒嗙被瀹屾暣瑕嗙洊[2m > [22m[2m搴旇璇嗗埆鍖呭惈offline鍏抽敭璇嶇殑閿欒[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒鍒嗙被瀹屾暣瑕嗙洊[2m > [22m[2m搴旇璇嗗埆鍖呭惈unreachable鍏抽敭璇嶇殑閿欒[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒鍒嗙被瀹屾暣瑕嗙洊[2m > [22m[2m搴旇璇嗗埆鍖呭惈unreachable鍏抽敭璇嶇殑閿欒[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒鍒嗙被瀹屾暣瑕嗙洊[2m > [22m[2m搴旇璇嗗埆鍖呭惈socket鍏抽敭璇嶇殑閿欒[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒鍒嗙被瀹屾暣瑕嗙洊[2m > [22m[2m搴旇璇嗗埆鍖呭惈socket鍏抽敭璇嶇殑閿欒[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒鍒嗙被瀹屾暣瑕嗙洊[2m > [22m[2m搴旇璇嗗埆鍖呭惈ajax鍏抽敭璇嶇殑閿欒[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒鍒嗙被瀹屾暣瑕嗙洊[2m > [22m[2m搴旇璇嗗埆鍖呭惈ajax鍏抽敭璇嶇殑閿欒[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒鍒嗙被瀹屾暣瑕嗙洊[2m > [22m[2m搴旇璇嗗埆鍖呭惈xhr鍏抽敭璇嶇殑閿欒[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2m閿欒鍒嗙被瀹屾暣瑕嗙洊[2m > [22m[2m搴旇璇嗗埆鍖呭惈xhr鍏抽敭璇嶇殑閿欒[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2mselectFallbackUI鍒嗘敮瑕嗙洊[2m > [22m[2m搴旇涓哄寘鍚玴arse鍏抽敭璇嶇殑閿欒閫夋嫨瑙ｆ瀽閿欒UI[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2mselectFallbackUI鍒嗘敮瑕嗙洊[2m > [22m[2m搴旇涓哄寘鍚玴arse鍏抽敭璇嶇殑閿欒閫夋嫨瑙ｆ瀽閿欒UI[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+[90mstdout[2m | tests/unit/SafeModuleLoader.test.ts[2m > [22m[2mSafeModuleLoader[2m > [22m[2mselectFallbackUI鍒嗘敮瑕嗙洊[2m > [22m[2m搴旇涓哄寘鍚玶ender鍏抽敭璇嶇殑閿欒閫夋嫨娓叉煋閿欒UI[22m[39m
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+[17:58:54] [INFO] [SafeModuleLoader] 宸叉竻闄ゆ墍鏈夋ā鍧楃紦瀛?{}
+
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m缂撳瓨骞跺彂鍦烘櫙[2m > [22m搴旇姝ｇ‘澶勭悊姝ｅ湪鍔犺浇鐨勬ā鍧? [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閿欒UI妯℃澘鍙樹綋[2m > [22m搴旇涓篐TTP 500閿欒鏄剧ず姝ｇ‘鐨刄I
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閿欒UI妯℃澘鍙樹綋[2m > [22m搴旇涓篐TTP 502閿欒鏄剧ず姝ｇ‘鐨刄I
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m鍔犺浇鏃堕棿璁板綍[2m > [22m搴旇璁板綍鎴愬姛鍔犺浇鐨勬椂闂? [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22mHTML杞箟瀹屾暣娴嬭瘯[2m > [22m搴旇杞箟鎵€鏈夌壒娈婂瓧绗﹀寘鎷枩鏉? [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22mHTML杞箟瀹屾暣娴嬭瘯[2m > [22m搴旇杞箟鍗曞紩鍙? [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22mHTML杞箟瀹屾暣娴嬭瘯[2m > [22m搴旇杞箟鎵€鏈塇TML瀹炰綋
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22mpreloadModules鏃ュ織娴嬭瘯[2m > [22m搴旇璁板綍棰勫姞杞芥垚鍔熺殑debug鏃ュ織
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22mpreloadModules鏃ュ織娴嬭瘯[2m > [22m搴旇澶勭悊绌鸿矾寰勬暟缁勫厓绱? [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閿欒UI榛樿鍥炬爣[2m > [22m搴旇鏄剧ず榛樿閿欒鍥炬爣
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m妯″潡鍔犺浇缂撳瓨鍛戒腑[2m > [22m搴旇浠庣紦瀛樺姞杞藉凡瀛樺湪鐨勬ā鍧? [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閿欒鍒嗙被瀹屾暣瑕嗙洊[2m > [22m搴旇璇嗗埆鍖呭惈offline鍏抽敭璇嶇殑閿欒
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閿欒鍒嗙被瀹屾暣瑕嗙洊[2m > [22m搴旇璇嗗埆鍖呭惈unreachable鍏抽敭璇嶇殑閿欒
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閿欒鍒嗙被瀹屾暣瑕嗙洊[2m > [22m搴旇璇嗗埆鍖呭惈socket鍏抽敭璇嶇殑閿欒
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閿欒鍒嗙被瀹屾暣瑕嗙洊[2m > [22m搴旇璇嗗埆鍖呭惈ajax鍏抽敭璇嶇殑閿欒
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22m閿欒鍒嗙被瀹屾暣瑕嗙洊[2m > [22m搴旇璇嗗埆鍖呭惈xhr鍏抽敭璇嶇殑閿欒
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22mselectFallbackUI鍒嗘敮瑕嗙洊[2m > [22m搴旇涓哄寘鍚玴arse鍏抽敭璇嶇殑閿欒閫夋嫨瑙ｆ瀽閿欒UI
+ [32m鉁?[39m tests/unit/SafeModuleLoader.test.ts[2m > [22mSafeModuleLoader[2m > [22mselectFallbackUI鍒嗘敮瑕嗙洊[2m > [22m搴旇涓哄寘鍚玶ender鍏抽敭璇嶇殑閿欒閫夋嫨娓叉煋閿欒UI
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m80 passed[39m[22m[90m (80)[39m
+[2m   Start at [22m 17:58:49
+[2m   Duration [22m 5.27s[2m (transform 166ms, setup 27ms, collect 233ms, tests 4.12s, environment 504ms, prepare 108ms)[22m
+
+[1m[7m[35m HTML [39m[27m[22m [35mReport is generated[39m
+[2m       You can run [22m[1mnpx vite preview --outDir html[22m[2m to see the test results.[22m
+[34m % [39m[2mCoverage report from [22m[33mv8[39m
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |    6.89 |    34.11 |   21.49 |    6.89 |                   
+ common            |       0 |        0 |       0 |       0 |                   
+  BaseModule.ts    |       0 |        0 |       0 |       0 | 1-387             
+  EventBus.ts      |       0 |        0 |       0 |       0 | 1-326             
+  ...dardModule.ts |       0 |        0 |       0 |       0 | 1-377             
+  state.ts         |       0 |        0 |       0 |       0 | 1-53              
+ common/bootstrap  |       0 |        0 |       0 |       0 |                   
+  ...eBootstrap.ts |       0 |        0 |       0 |       0 | 1-409             
+ common/components |       0 |        0 |       0 |       0 |                   
+  ...ewRenderer.ts |       0 |        0 |       0 |       0 | 1-599             
+  ...arRenderer.ts |       0 |        0 |       0 |       0 | 1-563             
+  ...etonLoader.ts |       0 |        0 |       0 |       0 | 1-347             
+ common/config     |   46.87 |    36.36 |      25 |   46.87 |                   
+  ConfigCenter.ts  |   74.13 |    47.05 |   38.09 |   74.13 | ...99-500,507-509 
+  apiEndpoints.ts  |       0 |        0 |       0 |       0 | 1-146             
+  envConfig.ts     |       0 |        0 |       0 |       0 | 1-226             
+  menuConfig.ts    |   90.36 |      100 |       0 |   90.36 | ...47-748,756-768 
+  ...ssRegistry.ts |       0 |        0 |       0 |       0 | 1-145             
+  themeConfig.ts   |       0 |        0 |       0 |       0 | 1-231             
+  themes.ts        |       0 |        0 |       0 |       0 | 1-268             
+ ...onfig/defaults |       0 |        0 |       0 |       0 |                   
+  routes.config.ts |       0 |        0 |       0 |       0 | 1-72              
+ common/config/env |       0 |        0 |       0 |       0 |                   
+  development.ts   |       0 |        0 |       0 |       0 | 1-32              
+  production.ts    |       0 |        0 |       0 |       0 | 1-32              
+ ...config/loaders |   36.36 |      100 |   33.33 |   36.36 |                   
+  ...nfigLoader.ts |   36.36 |      100 |   33.33 |   36.36 | 23-61,68-77       
+ ...config/schemas |   74.73 |      100 |       0 |   74.73 |                   
+  configSchema.ts  |   74.73 |      100 |       0 |   74.73 | 60-72,80-90       
+ common/constants  |    10.5 |        0 |       0 |    10.5 |                   
+  colorSchemes.ts  |       0 |        0 |       0 |       0 | 1-472             
+  constants.ts     |       0 |        0 |       0 |       0 | 1-380             
+  ...tConstants.ts |       0 |        0 |       0 |       0 | 1-245             
+  routes.ts        |   92.85 |      100 |       0 |   92.85 | 124-125,131-138   
+ common/devtools   |       0 |        0 |       0 |       0 |                   
+  ...nceMonitor.ts |       0 |        0 |       0 |       0 | 1-264             
+  ...gInterface.ts |       0 |        0 |       0 |       0 | 1-214             
+  ...ryDevTools.ts |       0 |        0 |       0 |       0 | 1-317             
+  ...nceMonitor.ts |       0 |        0 |       0 |       0 | 1-482             
+ common/di         |       0 |        0 |       0 |       0 |                   
+  Container.ts     |       0 |        0 |       0 |       0 | 1-249             
+  ...ceRegistry.ts |       0 |        0 |       0 |       0 | 1-144             
+ ...on/di/services |       0 |        0 |       0 |       0 |                   
+  ...ssServices.ts |       0 |        0 |       0 |       0 | 1-111             
+  coreServices.ts  |       0 |        0 |       0 |       0 | 1-144             
+  index.ts         |       0 |        0 |       0 |       0 | 1-27              
+ common/errors     |   21.29 |    66.66 |   30.76 |   21.29 |                   
+  AppError.ts      |   67.34 |      100 |      40 |   67.34 | ...65-266,272-294 
+  ...rorHandler.ts |       0 |        0 |       0 |       0 | 1-243             
+  errorCodes.ts    |       0 |        0 |       0 |       0 | 1-195             
+  index.ts         |       0 |        0 |       0 |       0 | 1-198             
+ ...infrastructure |   73.45 |    59.09 |   91.89 |   73.45 |                   
+  ...duleLoader.ts |   73.45 |    59.09 |   91.89 |   73.45 | ...1175,1225-1230 
+ common/router     |       0 |        0 |       0 |       0 |                   
+  ErrorHandler.ts  |       0 |        0 |       0 |       0 | 1-179             
+  NotFound.ts      |       0 |        0 |       0 |       0 | 1-91              
+  RouteGuard.ts    |       0 |        0 |       0 |       0 | 1-378             
+  ...Middleware.ts |       0 |        0 |       0 |       0 | 1-231             
+  ...ePreloader.ts |       0 |        0 |       0 |       0 | 1-269             
+  Router.ts        |       0 |        0 |       0 |       0 | 1-295             
+  index.ts         |       0 |        0 |       0 |       0 | 1-74              
+ common/state      |       0 |        0 |       0 |       0 |                   
+  ...eMigration.ts |       0 |        0 |       0 |       0 | 1-276             
+ common/ui         |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-113             
+  megaMenu.ts      |       0 |        0 |       0 |       0 | 1-544             
+  navigation.ts    |       0 |        0 |       0 |       0 | 1-429             
+  notifications.ts |       0 |        0 |       0 |       0 | 1-61              
+  search.ts        |       0 |        0 |       0 |       0 | 1-237             
+  userGuide.ts     |       0 |        0 |       0 |       0 | 1-57              
+  utils.ts         |       0 |        0 |       0 |       0 | 1-29              
+ common/utils      |     4.2 |        0 |       0 |     4.2 |                   
+  ColorContext.ts  |       0 |        0 |       0 |       0 | 1-236             
+  ...LazyLoader.ts |       0 |        0 |       0 |       0 | 1-300             
+  ...ingManager.ts |       0 |        0 |       0 |       0 | 1-233             
+  ...akDetector.ts |       0 |        0 |       0 |       0 | 1-298             
+  ModuleLoader.ts  |       0 |        0 |       0 |       0 | 1-387             
+  ...ateManager.ts |       0 |        0 |       0 |       0 | 1-429             
+  ...onRegistry.ts |       0 |        0 |       0 |       0 | 1-316             
+  cssLoader.ts     |       0 |        0 |       0 |       0 | 1-276             
+  eventLogger.ts   |       0 |        0 |       0 |       0 | 1-159             
+  lazyLibs.ts      |       0 |        0 |       0 |       0 | 1-77              
+  ...eCssLoader.ts |       0 |        0 |       0 |       0 | 1-110             
+  pluginLoader.ts  |       0 |        0 |       0 |       0 | 1-25              
+  secureStorage.ts |       0 |        0 |       0 |       0 | 1-157             
+  security.ts      |       0 |        0 |       0 |       0 | 1-241             
+  typeGuards.ts    |   71.65 |      100 |       0 |   71.65 | ...14-215,223-224 
+  validation.ts    |       0 |        0 |       0 |       0 | 1-270             
+  viewLoader.ts    |       0 |        0 |       0 |       0 | 1-363             
+  xssFixer.ts      |       0 |        0 |       0 |       0 | 1-195             
+ common/validators |     100 |      100 |     100 |     100 |                   
+  schemas.ts       |     100 |      100 |     100 |     100 |                   
+ components        |       0 |        0 |       0 |       0 |                   
+  ErrorBoundary.ts |       0 |        0 |       0 |       0 | 1-169             
+ components/modal  |       0 |        0 |       0 |       0 |                   
+  AppModal.ts      |       0 |        0 |       0 |       0 | 1-457             
+ ...nents/settings |       0 |        0 |       0 |       0 |                   
+  ...emSettings.ts |       0 |        0 |       0 |       0 | 1-528             
+ modules/amz_hub   |       0 |        0 |       0 |       0 |                   
+  amz_hub.ts       |       0 |        0 |       0 |       0 | 1-47              
+ ..._hub/constants |       0 |        0 |       0 |       0 |                   
+  ..._constants.ts |       0 |        0 |       0 |       0 | 1-254             
+ .../amz_hub/utils |       0 |        0 |       0 |       0 |                   
+  errorHandler.ts  |       0 |        0 |       0 |       0 | 1-13              
+ ...n_optimization |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-35              
+ ...product_30days |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-35              
+ ...edge/ecosystem |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-60              
+ ...ge/eu_insights |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-125             
+ ...e/seo_strategy |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-70              
+ ...views/overview |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-122             
+ ...eting_calendar |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-650             
+ ...ice/promotions |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-823             
+ ...uality_listing |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-35              
+ ...les/app_center |       0 |        0 |       0 |       0 |                   
+  app_center.ts    |       0 |        0 |       0 |       0 | 1-77              
+ ...unter/analysis |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-430             
+ ...nter/constants |       0 |        0 |       0 |       0 |                   
+  prompts.ts       |       0 |        0 |       0 |       0 | 1-145             
+ ...d_hunter/input |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-528             
+ ...hunter/process |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-1138            
+ ...unter/services |       0 |        0 |       0 |       0 |                   
+  ...kerService.ts |       0 |        0 |       0 |       0 | 1-244             
+ ...is/ai_analysis |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-65              
+  types.ts         |       0 |        0 |       0 |       0 | 1-23              
+ ...sis/components |       0 |        0 |       0 |       0 |                   
+  AlpinePanel.ts   |       0 |        0 |       0 |       0 | 1-413             
+  actions.ts       |       0 |        0 |       0 |       0 | 1-359             
+  ...Properties.ts |       0 |        0 |       0 |       0 | 1-233             
+  dataLoaders.ts   |       0 |        0 |       0 |       0 | 1-110             
+  helpers.ts       |       0 |        0 |       0 |       0 | 1-102             
+ ...nalysis/config |       0 |        0 |       0 |       0 |                   
+  ...ReportData.ts |       0 |        0 |       0 |       0 | 1-620             
+  ...sisTargets.ts |       0 |        0 |       0 |       0 | 1-72              
+  sampleData.ts    |       0 |        0 |       0 |       0 | 1-112             
+ ...alysis/prompts |       0 |        0 |       0 |       0 |                   
+  ...sisPrompts.ts |       0 |        0 |       0 |       0 | 1-526             
+ ...lysis/services |       0 |        0 |       0 |       0 |                   
+  ...sisService.ts |       0 |        0 |       0 |       0 | 1-248             
+  ...sisService.ts |       0 |        0 |       0 |       0 | 1-597             
+  ...tGenerator.ts |       0 |        0 |       0 |       0 | 1-175             
+ ...analysis/state |       0 |        0 |       0 |       0 |                   
+  moduleState.ts   |       0 |        0 |       0 |       0 | 1-74              
+ ...analysis/utils |       0 |        0 |       0 |       0 |                   
+  ...ansformers.ts |       0 |        0 |       0 |       0 | 1-123             
+  tokenCounter.ts  |       0 |        0 |       0 |       0 | 1-65              
+ ...ysis/constants |       0 |        0 |       0 |       0 |                   
+  prompts.ts       |       0 |        0 |       0 |       0 | 1-602             
+ ...ysis/promptlab |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-874             
+ ...analysis/qalab |       0 |        0 |       0 |       0 |                   
+  actions.ts       |       0 |        0 |       0 |       0 | 1-295             
+  constants.ts     |       0 |        0 |       0 |       0 | 1-54              
+  index.ts         |       0 |        0 |       0 |       0 | 1-114             
+  qaData.ts        |       0 |        0 |       0 |       0 | 1-405             
+  render.ts        |       0 |        0 |       0 |       0 | 1-301             
+  sampleData.ts    |       0 |        0 |       0 |       0 | 1-70              
+  state.ts         |       0 |        0 |       0 |       0 | 1-33              
+  types.ts         |       0 |        0 |       0 |       0 | 1-21              
+  utils.ts         |       0 |        0 |       0 |       0 | 1-105             
+ ...alysis/scraper |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-228             
+  types.ts         |       0 |        0 |       0 |       0 | 1-31              
+ ...per/components |       0 |        0 |       0 |       0 |                   
+  DataPreview.ts   |       0 |        0 |       0 |       0 | 1-303             
+  HistoryPanel.ts  |       0 |        0 |       0 |       0 | 1-147             
+  ScraperPanel.ts  |       0 |        0 |       0 |       0 | 1-540             
+ ...raper/handlers |       0 |        0 |       0 |       0 |                   
+  ...Operations.ts |       0 |        0 |       0 |       0 | 1-321             
+  importHandler.ts |       0 |        0 |       0 |       0 | 1-387             
+  scrapeHandler.ts |       0 |        0 |       0 |       0 | 1-88              
+ .../scraper/utils |       0 |        0 |       0 |       0 |                   
+  formatters.ts    |       0 |        0 |       0 |       0 | 1-60              
+  renderers.ts     |       0 |        0 |       0 |       0 | 1-167             
+  sanitizers.ts    |       0 |        0 |       0 |       0 | 1-101             
+  validators.ts    |       0 |        0 |       0 |       0 | 1-121             
+ ...lysis/services |       0 |        0 |       0 |       0 |                   
+  ...sisService.ts |       0 |        0 |       0 |       0 | 1-182             
+  ...oryService.ts |       0 |        0 |       0 |       0 | 1-162             
+  parserService.ts |       0 |        0 |       0 |       0 | 1-212             
+  ...labService.ts |       0 |        0 |       0 |       0 | 1-325             
+  ...perService.ts |       0 |        0 |       0 |       0 | 1-398             
+ ...analysis/utils |       0 |        0 |       0 |       0 |                   
+  errorHandler.ts  |       0 |        0 |       0 |       0 | 1-48              
+ ...views/overview |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-121             
+ modules/home      |       0 |        0 |       0 |       0 |                   
+  homeDisplay.ts   |       0 |        0 |       0 |       0 | 1-429             
+ modules/more      |       0 |        0 |       0 |       0 |                   
+  more.ts          |       0 |        0 |       0 |       0 | 1-35              
+ ...explore/agents |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-106             
+ ...xplore/prompts |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-363             
+ ...mpts/constants |       0 |        0 |       0 |       0 |                   
+  promptLibrary.ts |       0 |        0 |       0 |       0 | 1-1948            
+ ...lore/workflows |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-35              
+ ...views/overview |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-129             
+ modules/sops      |       0 |        0 |       0 |       0 |                   
+  sops.ts          |       0 |        0 |       0 |       0 | 1-56              
+ ...les/sops/utils |       0 |        0 |       0 |       0 |                   
+  errorHandler.ts  |       0 |        0 |       0 |       0 | 1-13              
+ ...d/fba_shipping |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-14              
+ ..._replenishment |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-14              
+ ...procurement_qc |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-14              
+ ...tor_monitoring |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-14              
+ ...th/listing_seo |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-14              
+ ...th/npi_tracker |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-491             
+ ...i_tracker/data |       0 |        0 |       0 |       0 |                   
+  mockData.ts      |       0 |        0 |       0 |       0 | 1-294             
+ ...pc_advertising |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-14              
+ ...ion_submission |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-210             
+ ...stricted_words |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-38              
+  ...rdsHandler.ts |       0 |        0 |       0 |       0 | 1-543             
+ ...ords/constants |       0 |        0 |       0 |       0 |                   
+  ...sConstants.ts |       0 |        0 |       0 |       0 | 1-2164            
+ ...views/overview |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-141             
+ ...count_security |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-14              
+ ...d_infringement |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-14              
+ ...psr_compliance |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-14              
+ ...e_notification |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-14              
+ ...ion_management |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-14              
+ ...uct_compliance |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-14              
+ ...mail_templates |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-32              
+ ...egative_review |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-14              
+ ...qa_maintenance |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-14              
+ services          |   10.18 |    48.14 |   36.66 |   10.18 |                   
+  ...cheService.ts |       0 |        0 |       0 |       0 | 1-329             
+  ...equestPool.ts |       0 |        0 |       0 |       0 | 1-300             
+  ...estManager.ts |       0 |        0 |       0 |       0 | 1-201             
+  alertService.ts  |       0 |        0 |       0 |       0 | 1-486             
+  ...icsService.ts |       0 |        0 |       0 |       0 | 1-601             
+  errorService.ts  |       0 |        0 |       0 |       0 | 1-204             
+  errorTracker.ts  |   67.65 |    51.72 |   47.61 |   67.65 | ...41-443,449-452 
+  httpService.ts   |       0 |        0 |       0 |       0 | 1-478             
+  llmService.ts    |       0 |        0 |       0 |       0 | 1-486             
+  ...ithTimeout.ts |       0 |        0 |       0 |       0 | 1-181             
+  loggerService.ts |   69.29 |    63.15 |      48 |   69.29 | ...36-456,462-472 
+  ...ingService.ts |       0 |        0 |       0 |       0 | 1-417             
+  ...nceService.ts |       0 |        0 |       0 |       0 | 1-537             
+  ...nceStorage.ts |       0 |        0 |       0 |       0 | 1-470             
+  ...ageService.ts |       0 |        0 |       0 |       0 | 1-586             
+  ...alsService.ts |       0 |        0 |       0 |       0 | 1-338             
+ stores            |       0 |        0 |       0 |       0 |                   
+  storeCompat.ts   |       0 |        0 |       0 |       0 | 1-375             
+  useAppStore.ts   |       0 |        0 |       0 |       0 | 1-456             
+ stores/middleware |       0 |        0 |       0 |       0 |                   
+  devtools.ts      |       0 |        0 |       0 |       0 | 1-129             
+  persist.ts       |       0 |        0 |       0 |       0 | 1-111             
+-------------------|---------|----------|---------|---------|-------------------
+node.exe : ERROR: Coverage for lines (6.89%) does not meet global threshold (60%)
+所在位置 行:1 字符: 1
++ & "D:\Program Files\nodejs/node.exe" "C:\Users\Administrator\AppData\ ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR: Coverage...threshold (60%):String) [], Re 
+   moteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+ERROR: Coverage for functions (21.49%) does not meet global threshold (60%)
+ERROR: Coverage for statements (6.89%) does not meet global threshold (60%)
+ERROR: Coverage for branches (34.11%) does not meet global threshold (55%)

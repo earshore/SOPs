@@ -53,6 +53,13 @@ tests/**/*.local.js
 tests/**/temp-*.js
 tests/**/.temp/
 
+# Playwright
+tests/playwright-report/
+tests/test-results/
+playwright-report/
+test-results/
+playwright/.cache/
+
 # ==============================================================================
 # 4. Documentation
 # ==============================================================================

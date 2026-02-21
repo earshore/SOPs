@@ -315,7 +315,6 @@ function updateCharCount(): void {
  */
 function renderReportAnalysis(): void {
     const container = document.getElementById("report-sections-container");
-    const checkboxMain = document.getElementById("use-analysis-data") as HTMLInputElement;
     const statusDiv = document.getElementById("lab-analysis-status");
     const marketSelect = document.getElementById("lab-target-market") as HTMLSelectElement;
 
@@ -323,7 +322,7 @@ function renderReportAnalysis(): void {
         generateLanguageOptions();
     }
 
-    if (!container || !checkboxMain) return;
+    if (!container) return;
 
     if (!state.analysis.analysisReport) {
         if (statusDiv) {
@@ -331,8 +330,6 @@ function renderReportAnalysis(): void {
             // ✅ 安全: 静态HTML模板，无用户输入
             statusDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> 未检测到分析报告';
         }
-        checkboxMain.disabled = true;
-        checkboxMain.checked = false;
         // ✅ 安全: 静态HTML模板，无用户输入
         container.innerHTML = `<p class="text-xs text-slate-400 italic p-2">暂无可用数据...</p>`;
         container.className = "mt-3";
@@ -345,8 +342,6 @@ function renderReportAnalysis(): void {
         // ✅ 安全: 静态HTML模板，无用户输入
         statusDiv.innerHTML = '<i class="fas fa-check-circle"></i> 分析报告已就绪';
     }
-    checkboxMain.disabled = false;
-    checkboxMain.checked = true;
 
     // ✅ 智能自动选择语言：检测数据源变化
     if (marketSelect && state.masterPrompt) {
@@ -581,7 +576,7 @@ function generateMasterPrompt(): void {
     }
     const inputs: Partial<PromptInputs> = {
         ...profile,
-        useAnalysisData: (document.getElementById("use-analysis-data") as HTMLInputElement)?.checked || false,
+        useAnalysisData: true,
     };
     const outEl = document.getElementById("final-prompt-output") as HTMLTextAreaElement;
     if (!outEl) return;
@@ -629,7 +624,7 @@ function generateVisualPrompt(): void {
     }
     const inputs: Partial<PromptInputs> = {
         ...profile,
-        useAnalysisData: (document.getElementById("use-analysis-data") as HTMLInputElement)?.checked || false,
+        useAnalysisData: true,
     };
     const outEl = document.getElementById("final-prompt-output") as HTMLTextAreaElement;
     if (!outEl) return;

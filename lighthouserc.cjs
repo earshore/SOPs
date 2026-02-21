@@ -9,14 +9,14 @@ module.exports = {
     collect: {
       // 要测试的URL
       url: [
-        'http://localhost:3000/',
-        'http://localhost:3000/#/sops',
-        'http://localhost:3000/#/app-center'
+        'http://localhost:4173/',
+        'http://localhost:4173/#/sops',
+        'http://localhost:4173/#/app-center'
       ],
-      // 启动服务器命令
-      startServerCommand: 'npm run preview',
+      // 不自动启动服务器（手动启动）
+      // startServerCommand: 'npm run preview',
       // 启动超时
-      startServerReadyTimeout: 30000,
+      // startServerReadyTimeout: 30000,
       // 每个URL运行次数
       numberOfRuns: 3,
       // 设置

@@ -51,7 +51,7 @@
     "checkJs": false,
 
     // 类型定义（vitest类型）
-    "types": ["vitest/globals", "vite/client", "node"],
+    "types": ["vitest/globals", "vite/client", "node", "@playwright/test"],
 
     // 类型根目录
     "typeRoots": ["./node_modules/@types", "./src/types"]
@@ -61,7 +61,8 @@
     "tests/**/*",
     "src/**/*.test.ts",
     "src/**/*.spec.ts",
-    "vitest.config.js"
+    "vitest.config.js",
+    "playwright.config.ts"
   ],
 
   "exclude": [
