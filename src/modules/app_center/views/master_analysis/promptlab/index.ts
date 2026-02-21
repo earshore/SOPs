@@ -26,6 +26,15 @@ import '../master_analysis_style.css';
 export async function mount(container: HTMLElement): Promise<void> {
     console.log('[Promptlab] 🔧 开始挂载子模块');
 
+    // 运行时检查: 确保没有 CSP meta 标签
+    const cspMeta = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
+    if (cspMeta) {
+        console.error('[Promptlab] ❌ 检测到 CSP meta 标签,这不应该存在!', cspMeta);
+        console.error('[Promptlab] meta 标签位置:', cspMeta.parentElement?.tagName);
+    } else {
+        console.log('[Promptlab] ✅ 未检测到 CSP meta 标签');
+    }
+
     try {
         // 1. 使用 SafeModuleLoader 加载模板
         const loader = SafeModuleLoader.getInstance();
