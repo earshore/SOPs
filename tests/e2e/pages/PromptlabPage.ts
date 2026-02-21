@@ -1,397 +1,601 @@
 // tests/e2e/pages/PromptlabPage.ts
 // ================================================================
-// 📄 Promptlab Page Object
-// 封装 Promptlab 模块的页面操作
+// 📄 Promptlab 页面对象
+// 提供 Promptlab 模块的页面操作方法
 // ================================================================
 
 import { Page } from '@playwright/test';
-import { BasePage } from '../../helpers/BasePage';
+import { BasePage } from './BasePage';
+
+/**
+ * 产品 DNA 数据接口
+ */
+export interface ProductDNA {
+  targetMarket?: string;
+  keywordsTier1?: string;
+  keywordsTier2?: string;
+  negative?: string;
+  audience?: string;
+  usps?: string;
+  specs?: string;
+  socialHook?: string;
+}
+
+/**
+ * 策略配置接口
+ */
+export interface StrategyConfig {
+  tone?: 'professional' | 'exciting' | 'emotional' | 'minimalist';
+  customStrategy?: string;
+  useCosmo?: boolean;
+  useRufus?: boolean;
+  useEmoji?: boolean;
+}
+
+/**
+ * 控制台模式类型
+ */
+export type ConsoleMode = 'listing' | 'visual';
 
 /**
  * Promptlab 页面对象
+ * 
+ * 提供 Promptlab 模块的所有交互方法，包括：
+ * - 产品 DNA 填写
+ * - 分析报告选择
+ * - 策略配置
+ * - Prompt 生成和复制
+ * 
+ * @example
+ * ```typescript
+ * const promptlab = new PromptlabPage(page);
+ * await promptlab.navigate();
+ * await promptlab.fillProductDNA({
+ *   targetMarket: 'English',
+ *   keywordsTier1: 'wireless earbuds',
+ *   keywordsTier2: 'bluetooth 5.0, noise cancelling'
+ * });
+ * await promptlab.generateListingPrompt();
+ * const prompt = await promptlab.getGeneratedPrompt();
+ * ```
  */
 export class PromptlabPage extends BasePage {
-  // ========== Selectors ==========
+  // ========== 选择器定义 ==========
   
-  // 导航
-  private readonly promptlabLink = '#nav-promptlab, a[href*="promptlab"]';
-  
-  // Card 1: Product DNA
-  private readonly targetMarketSelect = '#lab-target-market';
-  private readonly tier1KeywordsInput = '#lab-keywords-tier1';
-  private readonly tier2KeywordsInput = '#lab-keywords-tier2';
-  private readonly audienceInput = '#lab-audience';
-  private readonly uspsTextarea = '#lab-usps';
-  private readonly specsTextarea = '#lab-specs';
-  private readonly socialHookInput = '#lab-social-hook';
-  private readonly negativeKeywordsInput = '#negative-keywords';
-  
-  // Card 2: Analysis Report
-  private readonly analysisStatusDiv = '#lab-analysis-status';
-  private readonly reportSectionsContainer = '#report-sections-container';
-  private readonly reportSectionCheckbox = 'input[name="report-section"]';
-  private readonly selectAllButton = 'button:has-text("全选")';
-  private readonly clearSelectionsButton = 'button:has-text("清空")';
-  
-  // Card 3: Strategy Config
-  private readonly toneSelect = '#lab-tone';
-  private readonly customStrategyTextarea = '#lab-custom-strategy';
-  private readonly cosmoCheckbox = '#opt-cosmo';
-  private readonly rufusCheckbox = '#opt-rufus';
-  private readonly emojiCheckbox = '#opt-emoji';
-  
-  // Console & Output
-  private readonly listingModeButton = '#btn-mode-listing';
-  private readonly visualModeButton = '#btn-mode-visual';
-  private readonly generateListingButton = '#btn-generate-prompt';
-  private readonly generateVisualButton = '#btn-generate-visual';
-  private readonly promptOutput = '#final-prompt-output';
-  private readonly copyPromptButton = 'button:has-text("复制")';
-  private readonly clearInputsButton = 'button:has-text("清空输入")';
-  
-  constructor(page: Page, baseUrl?: string) {
-    super(page, baseUrl);
+  // 产品 DNA 输入框
+  private readonly selectors = {
+    // 目标市场
+    targetMarket: '#lab-target-market',
+    
+    // 关键词
+    keywordsTier1: '#lab-keywords-tier1',
+    keywordsTier2: '#lab-keywords-tier2',
+    negativeKeywords: '#negative-keywords',
+    
+    // 产品信息
+    audience: '#lab-audience',
+    usps: '#lab-usps',
+    specs: '#lab-specs',
+    socialHook: '#lab-social-hook',
+    
+    // 分析报告
+    analysisStatus: '#lab-analysis-status',
+    reportSectionsContainer: '#report-sections-container',
+    selectAllButton: 'button:has-text("全选")',
+    clearAllButton: 'button:has-text("清空")',
+    
+    // 策略配置
+    tone: '#lab-tone',
+    customStrategy: '#lab-custom-strategy',
+    cosmoCheckbox: '#opt-cosmo',
+    rufusCheckbox: '#opt-rufus',
+    emojiCheckbox: '#opt-emoji',
+    
+    // 控制台
+    listingModeButton: '#btn-mode-listing',
+    visualModeButton: '#btn-mode-visual',
+    generatePromptButton: '#btn-generate-prompt',
+    generateVisualButton: '#btn-generate-visual',
+    
+    // 输出
+    promptOutput: '#final-prompt-output',
+    copyButton: 'button[title="复制"]',
+    clearButton: 'button[title="清空"]',
+    charCount: '#prompt-word-count',
+    
+    // 卡片
+    productDnaCard: '#card-product-dna',
+    analysisCard: '#card-analysis',
+    strategyCard: '#card-strategy',
+    outputCard: '#prompt-output-card'
+  };
+
+  constructor(page: Page) {
+    super(page, { baseUrl: 'http://localhost:5173' });
   }
 
-  // ========== Navigation ==========
-  
+  // ========== 导航方法 ==========
+
   /**
    * 导航到 Promptlab 页面
    */
   async navigate(): Promise<void> {
     await super.navigate('/app_center/promptlab');
-    await this.waitForPageLoad();
-    await this.waitForPromptlabReady();
-  }
-  
-  /**
-   * 通过导航链接进入 Promptlab
-   */
-  async navigateViaLink(): Promise<void> {
-    await this.click(this.promptlabLink);
-    await this.waitForPageLoad();
-    await this.waitForPromptlabReady();
-  }
-  
-  /**
-   * 等待 Promptlab 模块就绪
-   */
-  async waitForPromptlabReady(): Promise<void> {
-    // 等待主要元素加载
-    await this.waitForElement(this.targetMarketSelect);
-    await this.waitForElement(this.tier1KeywordsInput);
-    await this.waitForElement(this.generateListingButton);
-    
-    // 等待 Alpine 组件初始化
-    await this.page.waitForFunction(() => {
-      const element = document.querySelector('[x-data="promptlabPanel"]');
-      return element && (element as any).__x;
-    }, { timeout: 5000 });
+    await this.waitForPageReady();
   }
 
-  // ========== Product DNA (Card 1) ==========
-  
+  /**
+   * 等待页面就绪
+   */
+  async waitForPageReady(): Promise<void> {
+    await this.waitForElement(this.selectors.productDnaCard);
+    await this.waitForElement(this.selectors.generatePromptButton);
+    await this.waitForLoadingToFinish();
+  }
+
+  // ========== 产品 DNA 填写方法 ==========
+
+  /**
+   * 填写产品 DNA 信息
+   * 
+   * @param data - 产品 DNA 数据
+   */
+  async fillProductDNA(data: ProductDNA): Promise<void> {
+    if (data.targetMarket) {
+      await this.select(this.selectors.targetMarket, data.targetMarket);
+    }
+
+    if (data.keywordsTier1) {
+      await this.fill(this.selectors.keywordsTier1, data.keywordsTier1);
+    }
+
+    if (data.keywordsTier2) {
+      await this.fill(this.selectors.keywordsTier2, data.keywordsTier2);
+    }
+
+    if (data.negative) {
+      await this.fill(this.selectors.negativeKeywords, data.negative);
+    }
+
+    if (data.audience) {
+      await this.fill(this.selectors.audience, data.audience);
+    }
+
+    if (data.usps) {
+      await this.fill(this.selectors.usps, data.usps);
+    }
+
+    if (data.specs) {
+      await this.fill(this.selectors.specs, data.specs);
+    }
+
+    if (data.socialHook) {
+      await this.fill(this.selectors.socialHook, data.socialHook);
+    }
+  }
+
   /**
    * 选择目标市场
+   * 
+   * @param market - 市场名称
    */
   async selectTargetMarket(market: string): Promise<void> {
-    await this.select(this.targetMarketSelect, market);
-    await this.wait(300); // 等待状态更新
-  }
-  
-  /**
-   * 填写 Tier 1 关键词
-   */
-  async fillTier1Keywords(keywords: string): Promise<void> {
-    await this.fill(this.tier1KeywordsInput, keywords);
-  }
-  
-  /**
-   * 填写 Tier 2 关键词
-   */
-  async fillTier2Keywords(keywords: string): Promise<void> {
-    await this.fill(this.tier2KeywordsInput, keywords);
-  }
-  
-  /**
-   * 填写目标受众
-   */
-  async fillAudience(audience: string): Promise<void> {
-    await this.fill(this.audienceInput, audience);
-  }
-  
-  /**
-   * 填写核心卖点
-   */
-  async fillUSPs(usps: string): Promise<void> {
-    await this.fill(this.uspsTextarea, usps);
-  }
-  
-  /**
-   * 填写详细参数
-   */
-  async fillSpecs(specs: string): Promise<void> {
-    await this.fill(this.specsTextarea, specs);
-  }
-  
-  /**
-   * 填写社媒 Hook
-   */
-  async fillSocialHook(hook: string): Promise<void> {
-    await this.fill(this.socialHookInput, hook);
-  }
-  
-  /**
-   * 填写限制词
-   */
-  async fillNegativeKeywords(keywords: string): Promise<void> {
-    await this.fill(this.negativeKeywordsInput, keywords);
-  }
-  
-  /**
-   * 填写完整的产品 DNA
-   */
-  async fillProductDNA(data: {
-    targetMarket: string;
-    tier1Keywords: string;
-    tier2Keywords: string;
-    audience?: string;
-    usps?: string;
-    specs?: string;
-    socialHook?: string;
-    negativeKeywords?: string;
-  }): Promise<void> {
-    await this.selectTargetMarket(data.targetMarket);
-    await this.fillTier1Keywords(data.tier1Keywords);
-    await this.fillTier2Keywords(data.tier2Keywords);
-    
-    if (data.audience) await this.fillAudience(data.audience);
-    if (data.usps) await this.fillUSPs(data.usps);
-    if (data.specs) await this.fillSpecs(data.specs);
-    if (data.socialHook) await this.fillSocialHook(data.socialHook);
-    if (data.negativeKeywords) await this.fillNegativeKeywords(data.negativeKeywords);
+    await this.select(this.selectors.targetMarket, market);
   }
 
-  // ========== Analysis Report (Card 2) ==========
-  
   /**
-   * 检查分析报告状态
+   * 填写 Tier 1 关键词
+   * 
+   * @param keywords - 关键词
+   */
+  async fillTier1Keywords(keywords: string): Promise<void> {
+    await this.fill(this.selectors.keywordsTier1, keywords);
+  }
+
+  /**
+   * 填写 Tier 2 关键词
+   * 
+   * @param keywords - 关键词
+   */
+  async fillTier2Keywords(keywords: string): Promise<void> {
+    await this.fill(this.selectors.keywordsTier2, keywords);
+  }
+
+  /**
+   * 填写限制词
+   * 
+   * @param keywords - 限制词
+   */
+  async fillNegativeKeywords(keywords: string): Promise<void> {
+    await this.fill(this.selectors.negativeKeywords, keywords);
+  }
+
+  /**
+   * 填写目标受众
+   * 
+   * @param audience - 受众描述
+   */
+  async fillAudience(audience: string): Promise<void> {
+    await this.fill(this.selectors.audience, audience);
+  }
+
+  /**
+   * 填写核心卖点
+   * 
+   * @param usps - 卖点描述
+   */
+  async fillUSPs(usps: string): Promise<void> {
+    await this.fill(this.selectors.usps, usps);
+  }
+
+  /**
+   * 填写产品参数
+   * 
+   * @param specs - 参数描述
+   */
+  async fillSpecs(specs: string): Promise<void> {
+    await this.fill(this.selectors.specs, specs);
+  }
+
+  /**
+   * 填写社媒 Hook
+   * 
+   * @param hook - Hook 内容
+   */
+  async fillSocialHook(hook: string): Promise<void> {
+    await this.fill(this.selectors.socialHook, hook);
+  }
+
+  /**
+   * 获取产品 DNA 数据
+   */
+  async getProductDNA(): Promise<ProductDNA> {
+    return {
+      targetMarket: await this.getValue(this.selectors.targetMarket),
+      keywordsTier1: await this.getValue(this.selectors.keywordsTier1),
+      keywordsTier2: await this.getValue(this.selectors.keywordsTier2),
+      negative: await this.getValue(this.selectors.negativeKeywords),
+      audience: await this.getValue(this.selectors.audience),
+      usps: await this.getValue(this.selectors.usps),
+      specs: await this.getValue(this.selectors.specs),
+      socialHook: await this.getValue(this.selectors.socialHook)
+    };
+  }
+
+  // ========== 分析报告方法 ==========
+
+  /**
+   * 获取分析报告状态
    */
   async getAnalysisStatus(): Promise<string> {
-    return await this.getText(this.analysisStatusDiv);
+    return await this.getText(this.selectors.analysisStatus);
   }
-  
+
   /**
    * 检查是否有分析报告
    */
   async hasAnalysisReport(): Promise<boolean> {
-    const status = await this.getAnalysisStatus();
-    return status.includes('已就绪') || status.includes('就绪');
+    const text = await this.getText(this.selectors.reportSectionsContainer);
+    return !text.includes('暂无报告数据');
   }
-  
+
   /**
-   * 获取报告模块数量
-   */
-  async getReportSectionsCount(): Promise<number> {
-    return await this.count(this.reportSectionCheckbox);
-  }
-  
-  /**
-   * 选择报告模块
-   */
-  async selectReportSection(value: string): Promise<void> {
-    await this.page.check(`${this.reportSectionCheckbox}[value="${value}"]`);
-  }
-  
-  /**
-   * 取消选择报告模块
-   */
-  async unselectReportSection(value: string): Promise<void> {
-    await this.page.uncheck(`${this.reportSectionCheckbox}[value="${value}"]`);
-  }
-  
-  /**
-   * 全选报告模块
+   * 全选分析报告维度
    */
   async selectAllReportSections(): Promise<void> {
-    await this.click(this.selectAllButton);
-    await this.wait(300);
+    await this.click(this.selectors.selectAllButton);
   }
-  
+
   /**
-   * 清空报告模块选择
+   * 清空分析报告选择
    */
-  async clearReportSelections(): Promise<void> {
-    await this.click(this.clearSelectionsButton);
-    await this.wait(300);
+  async clearReportSections(): Promise<void> {
+    await this.click(this.selectors.clearAllButton);
   }
-  
+
   /**
-   * 获取已选择的报告模块数量
+   * 选择特定的报告维度
+   * 
+   * @param sectionName - 维度名称
+   */
+  async selectReportSection(sectionName: string): Promise<void> {
+    const checkbox = this.page.locator(`input[type="checkbox"][value="${sectionName}"]`);
+    await checkbox.check();
+  }
+
+  /**
+   * 取消选择特定的报告维度
+   * 
+   * @param sectionName - 维度名称
+   */
+  async unselectReportSection(sectionName: string): Promise<void> {
+    const checkbox = this.page.locator(`input[type="checkbox"][value="${sectionName}"]`);
+    await checkbox.uncheck();
+  }
+
+  /**
+   * 获取已选择的报告维度数量
    */
   async getSelectedReportSectionsCount(): Promise<number> {
-    return await this.page.locator(`${this.reportSectionCheckbox}:checked`).count();
+    const checkboxes = this.page.locator(`${this.selectors.reportSectionsContainer} input[type="checkbox"]:checked`);
+    return await checkboxes.count();
   }
 
-  // ========== Strategy Config (Card 3) ==========
-  
+  // ========== 策略配置方法 ==========
+
+  /**
+   * 配置生成策略
+   * 
+   * @param config - 策略配置
+   */
+  async configureStrategy(config: StrategyConfig): Promise<void> {
+    if (config.tone) {
+      await this.select(this.selectors.tone, config.tone);
+    }
+
+    if (config.customStrategy !== undefined) {
+      await this.fill(this.selectors.customStrategy, config.customStrategy);
+    }
+
+    if (config.useCosmo !== undefined) {
+      await this.setChecked(this.selectors.cosmoCheckbox, config.useCosmo);
+    }
+
+    if (config.useRufus !== undefined) {
+      await this.setChecked(this.selectors.rufusCheckbox, config.useRufus);
+    }
+
+    if (config.useEmoji !== undefined) {
+      await this.setChecked(this.selectors.emojiCheckbox, config.useEmoji);
+    }
+  }
+
   /**
    * 选择文案语气
+   * 
+   * @param tone - 语气类型
    */
-  async selectTone(tone: string): Promise<void> {
-    await this.select(this.toneSelect, tone);
-  }
-  
-  /**
-   * 填写自定义规则
-   */
-  async fillCustomStrategy(strategy: string): Promise<void> {
-    await this.fill(this.customStrategyTextarea, strategy);
-  }
-  
-  /**
-   * 切换 COSMO 优化
-   */
-  async toggleCosmo(enabled: boolean): Promise<void> {
-    const isChecked = await this.page.isChecked(this.cosmoCheckbox);
-    if (isChecked !== enabled) {
-      await this.click(this.cosmoCheckbox);
-    }
-  }
-  
-  /**
-   * 切换 Rufus 优化
-   */
-  async toggleRufus(enabled: boolean): Promise<void> {
-    const isChecked = await this.page.isChecked(this.rufusCheckbox);
-    if (isChecked !== enabled) {
-      await this.click(this.rufusCheckbox);
-    }
-  }
-  
-  /**
-   * 切换 Emoji 点缀
-   */
-  async toggleEmoji(enabled: boolean): Promise<void> {
-    const isChecked = await this.page.isChecked(this.emojiCheckbox);
-    if (isChecked !== enabled) {
-      await this.click(this.emojiCheckbox);
-    }
+  async selectTone(tone: 'professional' | 'exciting' | 'emotional' | 'minimalist'): Promise<void> {
+    await this.select(this.selectors.tone, tone);
   }
 
-  // ========== Console & Output ==========
-  
   /**
-   * 切换到 Listing 模式
+   * 填写自定义策略
+   * 
+   * @param strategy - 策略内容
    */
-  async switchToListingMode(): Promise<void> {
-    await this.click(this.listingModeButton);
-    await this.wait(500); // 等待动画完成
+  async fillCustomStrategy(strategy: string): Promise<void> {
+    await this.fill(this.selectors.customStrategy, strategy);
   }
-  
+
   /**
-   * 切换到 Visual 模式
+   * 切换 COSMO 优化
+   * 
+   * @param enabled - 是否启用
    */
-  async switchToVisualMode(): Promise<void> {
-    await this.click(this.visualModeButton);
-    await this.wait(500); // 等待动画完成
+  async toggleCosmo(enabled: boolean): Promise<void> {
+    await this.setChecked(this.selectors.cosmoCheckbox, enabled);
   }
-  
+
+  /**
+   * 切换 Rufus 优化
+   * 
+   * @param enabled - 是否启用
+   */
+  async toggleRufus(enabled: boolean): Promise<void> {
+    await this.setChecked(this.selectors.rufusCheckbox, enabled);
+  }
+
+  /**
+   * 切换 Emoji 点缀
+   * 
+   * @param enabled - 是否启用
+   */
+  async toggleEmoji(enabled: boolean): Promise<void> {
+    await this.setChecked(this.selectors.emojiCheckbox, enabled);
+  }
+
+  /**
+   * 获取策略配置
+   */
+  async getStrategyConfig(): Promise<StrategyConfig> {
+    return {
+      tone: await this.getValue(this.selectors.tone) as any,
+      customStrategy: await this.getValue(this.selectors.customStrategy),
+      useCosmo: await this.isChecked(this.selectors.cosmoCheckbox),
+      useRufus: await this.isChecked(this.selectors.rufusCheckbox),
+      useEmoji: await this.isChecked(this.selectors.emojiCheckbox)
+    };
+  }
+
+  // ========== 控制台操作方法 ==========
+
+  /**
+   * 切换控制台模式
+   * 
+   * @param mode - 模式类型（listing 或 visual）
+   */
+  async switchConsoleMode(mode: ConsoleMode): Promise<void> {
+    const button = mode === 'listing' 
+      ? this.selectors.listingModeButton 
+      : this.selectors.visualModeButton;
+    
+    await this.click(button);
+    await this.wait(500); // 等待翻转动画
+  }
+
   /**
    * 生成 Listing Prompt
    */
   async generateListingPrompt(): Promise<void> {
-    await this.click(this.generateListingButton);
-    await this.wait(1000); // 等待生成完成
+    await this.switchConsoleMode('listing');
+    await this.click(this.selectors.generatePromptButton);
+    await this.waitForPromptGeneration();
   }
-  
+
   /**
    * 生成 Visual Prompt
    */
   async generateVisualPrompt(): Promise<void> {
-    await this.click(this.generateVisualButton);
-    await this.wait(1000); // 等待生成完成
+    await this.switchConsoleMode('visual');
+    await this.click(this.selectors.generateVisualButton);
+    await this.waitForPromptGeneration();
   }
-  
+
   /**
-   * 获取生成的 Prompt
+   * 等待 Prompt 生成完成
    */
-  async getGeneratedPrompt(): Promise<string> {
-    return await this.getValue(this.promptOutput);
+  async waitForPromptGeneration(): Promise<void> {
+    // 等待输出框有内容
+    await this.page.waitForFunction(
+      (selector) => {
+        const textarea = document.querySelector(selector) as HTMLTextAreaElement;
+        return textarea && textarea.value.length > 0;
+      },
+      this.selectors.promptOutput,
+      { timeout: 30000 }
+    );
   }
-  
-  /**
-   * 检查 Prompt 是否已生成
-   */
-  async hasGeneratedPrompt(): Promise<boolean> {
-    const prompt = await this.getGeneratedPrompt();
-    return prompt.length > 10;
-  }
-  
-  /**
-   * 复制 Prompt
-   */
-  async copyPrompt(): Promise<void> {
-    await this.click(this.copyPromptButton);
-    await this.wait(300);
-  }
-  
-  /**
-   * 清空所有输入
-   */
-  async clearAllInputs(): Promise<void> {
-    // 需要确认对话框
-    this.page.once('dialog', dialog => dialog.accept());
-    await this.click(this.clearInputsButton);
-    await this.wait(500);
-  }
-  
+
   /**
    * 检查生成按钮是否可用
    */
   async isGenerateButtonEnabled(): Promise<boolean> {
-    return await this.page.isEnabled(this.generateListingButton);
-  }
-  
-  /**
-   * 获取字符计数
-   */
-  async getCharCount(): Promise<number> {
-    const prompt = await this.getGeneratedPrompt();
-    return prompt.length;
+    return await this.isEnabled(this.selectors.generatePromptButton);
   }
 
-  // ========== Validation ==========
-  
+  // ========== 输出操作方法 ==========
+
   /**
-   * 验证必填字段是否已填写
+   * 获取生成的 Prompt
    */
-  async validateRequiredFields(): Promise<{
-    targetMarket: boolean;
-    tier1Keywords: boolean;
-    tier2Keywords: boolean;
-  }> {
-    const targetMarket = await this.getValue(this.targetMarketSelect);
-    const tier1 = await this.getValue(this.tier1KeywordsInput);
-    const tier2 = await this.getValue(this.tier2KeywordsInput);
-    
-    return {
-      targetMarket: targetMarket.length > 0,
-      tier1Keywords: tier1.trim().length > 0,
-      tier2Keywords: tier2.trim().length > 0
-    };
+  async getGeneratedPrompt(): Promise<string> {
+    return await this.getValue(this.selectors.promptOutput);
   }
-  
+
   /**
-   * 检查是否准备就绪（可以生成 Prompt）
+   * 复制 Prompt 到剪贴板
    */
-  async isReady(): Promise<boolean> {
-    const hasReport = await this.hasAnalysisReport();
-    const fields = await this.validateRequiredFields();
+  async copyPrompt(): Promise<void> {
+    await this.click(this.selectors.copyButton);
+    await this.wait(500); // 等待复制完成
+  }
+
+  /**
+   * 清空所有输入
+   */
+  async clearAllInputs(): Promise<void> {
+    await this.click(this.selectors.clearButton);
+  }
+
+  /**
+   * 获取字符数
+   */
+  async getCharCount(): Promise<number> {
+    const text = await this.getText(this.selectors.charCount);
+    return parseInt(text, 10);
+  }
+
+  /**
+   * 检查是否超出字符限制
+   */
+  async isOverCharLimit(): Promise<boolean> {
+    const charCountElement = this.page.locator(this.selectors.charCount);
+    const classes = await charCountElement.getAttribute('class');
+    return classes?.includes('text-red-600') || false;
+  }
+
+  // ========== 验证方法 ==========
+
+  /**
+   * 验证产品 DNA 卡片是否可见
+   */
+  async isProductDnaCardVisible(): Promise<boolean> {
+    return await this.isVisible(this.selectors.productDnaCard);
+  }
+
+  /**
+   * 验证分析报告卡片是否可见
+   */
+  async isAnalysisCardVisible(): Promise<boolean> {
+    return await this.isVisible(this.selectors.analysisCard);
+  }
+
+  /**
+   * 验证策略配置卡片是否可见
+   */
+  async isStrategyCardVisible(): Promise<boolean> {
+    return await this.isVisible(this.selectors.strategyCard);
+  }
+
+  /**
+   * 验证输出卡片是否可见
+   */
+  async isOutputCardVisible(): Promise<boolean> {
+    return await this.isVisible(this.selectors.outputCard);
+  }
+
+  /**
+   * 验证所有必需字段是否已填写
+   */
+  async areRequiredFieldsFilled(): Promise<boolean> {
+    const tier1 = await this.getValue(this.selectors.keywordsTier1);
+    const tier2 = await this.getValue(this.selectors.keywordsTier2);
     
-    return hasReport && 
-           fields.targetMarket && 
-           fields.tier1Keywords && 
-           fields.tier2Keywords;
+    return tier1.length > 0 && tier2.length > 0;
+  }
+
+  // ========== 完整流程方法 ==========
+
+  /**
+   * 完整的 Listing Prompt 生成流程
+   * 
+   * @param dna - 产品 DNA 数据
+   * @param strategy - 策略配置（可选）
+   * @returns 生成的 Prompt
+   */
+  async completeListingFlow(
+    dna: ProductDNA,
+    strategy?: StrategyConfig
+  ): Promise<string> {
+    // 1. 填写产品 DNA
+    await this.fillProductDNA(dna);
+
+    // 2. 配置策略（如果提供）
+    if (strategy) {
+      await this.configureStrategy(strategy);
+    }
+
+    // 3. 生成 Prompt
+    await this.generateListingPrompt();
+
+    // 4. 返回生成的 Prompt
+    return await this.getGeneratedPrompt();
+  }
+
+  /**
+   * 完整的 Visual Prompt 生成流程
+   * 
+   * @param dna - 产品 DNA 数据
+   * @param strategy - 策略配置（可选）
+   * @returns 生成的 Prompt
+   */
+  async completeVisualFlow(
+    dna: ProductDNA,
+    strategy?: StrategyConfig
+  ): Promise<string> {
+    // 1. 填写产品 DNA
+    await this.fillProductDNA(dna);
+
+    // 2. 配置策略（如果提供）
+    if (strategy) {
+      await this.configureStrategy(strategy);
+    }
+
+    // 3. 生成 Visual Prompt
+    await this.generateVisualPrompt();
+
+    // 4. 返回生成的 Prompt
+    return await this.getGeneratedPrompt();
   }
 }

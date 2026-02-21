@@ -5,6 +5,7 @@
 // ================================================================
 
 import { FullConfig } from '@playwright/test';
+import { ScreenshotManager } from './helpers/screenshot-manager';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -15,16 +16,29 @@ import * as path from 'path';
 async function globalTeardown(config: FullConfig) {
   console.log('🧹 Playwright 全局清理开始...');
 
+  // 获取截图管理器实例
+  const screenshotManager = ScreenshotManager.getInstance();
+
+  // 生成 HTML 索引页面
+  console.log('📄 生成截图索引页面...');
+  screenshotManager.generateHtmlIndex();
+
+  // 打印统计信息
+  screenshotManager.printStats();
+
   // 清理临时文件
   const tempDirs = [
-    'tests/playwright-report',
     'tests/screenshots/temp'
   ];
 
   for (const dir of tempDirs) {
     if (fs.existsSync(dir)) {
-      console.log(`🗑️  清理目录: ${dir}`);
-      // 注意：不删除报告目录，只清理临时文件
+      console.log(`🗑️  清理临时目录: ${dir}`);
+      try {
+        fs.rmSync(dir, { recursive: true, force: true });
+      } catch (error) {
+        console.warn(`⚠️  清理目录失败: ${dir}`, error);
+      }
     }
   }
 

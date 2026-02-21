@@ -1,454 +1,645 @@
 // tests/e2e/pages/ScraperPage.ts
 // ================================================================
-// 📄 Scraper 页面 Page Object
-// 封装 Scraper 页面的所有交互操作
+// 📄 Scraper 页面对象
+// 提供数据采集模块的页面操作方法
 // ================================================================
 
-import { Page, expect } from '@playwright/test';
+import { Page } from '@playwright/test';
+import { BasePage } from './BasePage';
 
-export class ScraperPage {
-  constructor(public readonly page: Page) {}
+/**
+ * 站点类型
+ */
+export type AmazonSite = 'US' | 'UK' | 'DE' | 'FR' | 'IT' | 'ES' | 'CA' | 'JP' | 'AU' | 'MX';
 
-  // ========== 导航 ==========
+/**
+ * 任务状态类型
+ */
+export type TaskStatus = 'pending' | 'scraping' | 'success' | 'failed';
+
+/**
+ * 采集配置接口
+ */
+export interface ScrapeConfig {
+  site?: AmazonSite;
+  asins: string[];
+  scrapeReviews?: boolean;
+}
+
+/**
+ * 任务信息接口
+ */
+export interface TaskInfo {
+  asin: string;
+  status: TaskStatus;
+  message: string;
+}
+
+/**
+ * 数据标签页类型
+ */
+export type DataTab = 'preview' | 'json';
+
+/**
+ * Scraper 页面对象
+ * 
+ * 提供数据采集模块的所有交互方法，包括：
+ * - 站点选择
+ * - ASIN 输入和验证
+ * - 采集配置
+ * - 任务状态监控
+ * - 数据预览和导入
+ * 
+ * @example
+ * ```typescript
+ * const scraper = new ScraperPage(page);
+ * await scraper.navigate();
+ * await scraper.selectSite('US');
+ * await scraper.fillAsins(['B08N5WRWNW', 'B09XBHXKKL']);
+ * await scraper.toggleReviews(true);
+ * await scraper.startScrape();
+ * await scraper.waitForScrapeComplete();
+ * const data = await scraper.getScrapedData();
+ * ```
+ */
+export class ScraperPage extends BasePage {
+  // ========== 选择器定义 ==========
+  
+  private readonly selectors = {
+    // 主容器
+    mainContainer: '[x-data="scraperPanel"]',
+    welcomeBanner: '.mb-8 > div:first-child',
+    
+    // 策略指南
+    strategyGuideToggle: '#amz_refining_container',
+    strategyChevron: '#data-refine-chevron',
+    
+    // 配置卡片
+    configCard: '[x-data*="configExpanded"]',
+    configHeader: '.config-header',
+    configChevron: '.chevron-animated',
+    
+    // 站点选择
+    siteButton: (site: string) => `button.site-btn:has(span:text("${site}"))`,
+    selectedSiteIndicator: '.site-check-badge',
+    
+    // ASIN 输入
+    asinTextarea: 'textarea[x-model="inputAsins"]',
+    validAsinCount: '.text-emerald-600 span[x-text="validAsins.length"]',
+    invalidCount: '.text-amber-600 span[x-text="invalidCount"]',
+    clearAsinsButton: 'button:has-text("清空")',
+    
+    // 采集选项
+    reviewsToggle: '.toggle-track',
+    reviewsCheckbox: 'input[type="checkbox"]',
+    
+    // 开始按钮
+    startButton: 'button.btn-start',
+    startButtonIcon: 'button.btn-start i',
+    startButtonText: 'button.btn-start span',
+    
+    // 任务状态面板
+    taskStatusPanel: '.rounded-2xl:has(h3:text("采集状态"))',
+    taskProgressBar: '.progress-bar-fill',
+    taskCard: '.task-card',
+    taskIcon: '.task-icon',
+    
+    // 数据管理
+    dataManagementPanel: '.rounded-2xl:has(h2:text("数据管理"))',
+    previewTab: 'button:has-text("数据预览")',
+    jsonTab: 'button:has-text("JSON数据")',
+    
+    // 数据预览
+    emptyState: '#no-data-msg',
+    dataCardsWrapper: '#data-cards-wrapper',
+    dataCards: '#data-cards',
+    importTrigger: '.import-trigger',
+    
+    // JSON 显示
+    jsonDisplay: '#json-display',
+    jsonContainer: '.json-container'
+  };
+
+  constructor(page: Page) {
+    super(page, { baseUrl: 'http://localhost:5173' });
+  }
+
+  // ========== 导航方法 ==========
 
   /**
    * 导航到 Scraper 页面
    */
   async navigate(): Promise<void> {
-    await this.page.goto('/app_center/master_analysis/scraper');
-    await this.page.waitForLoadState('networkidle');
-    
-    // 等待 Alpine 组件初始化
-    await this.page.waitForSelector('[x-data="scraperPanel"]', { timeout: 10000 });
+    await super.navigate('/app_center/master_analysis/scraper');
+    await this.waitForPageReady();
   }
 
-  // ========== 站点选择 ==========
+  /**
+   * 等待页面就绪
+   */
+  async waitForPageReady(): Promise<void> {
+    await this.waitForElement(this.selectors.mainContainer);
+    await this.waitForElement(this.selectors.configCard);
+    await this.waitForElement(this.selectors.dataManagementPanel);
+    await this.waitForLoadingToFinish();
+  }
+
+  // ========== 策略指南方法 ==========
 
   /**
-   * 选择目标站点
+   * 切换策略指南显示
    */
-  async selectSite(site: string): Promise<void> {
-    await this.page.click(`button:has-text("${site}")`);
-    await this.wait(300);
+  async toggleStrategyGuide(): Promise<void> {
+    const container = await this.page.$('#amz_refining_container');
+    if (container) {
+      await this.page.evaluate(() => {
+        const element = document.getElementById('amz_refining_container');
+        const chevron = document.getElementById('data-refine-chevron');
+        element?.classList.toggle('hidden');
+        chevron?.classList.toggle('rotate-180');
+      });
+      await this.wait(300); // 等待动画
+    }
+  }
+
+  /**
+   * 显示策略指南
+   */
+  async showStrategyGuide(): Promise<void> {
+    const isHidden = await this.page.evaluate(() => {
+      const element = document.getElementById('amz_refining_container');
+      return element?.classList.contains('hidden');
+    });
+    
+    if (isHidden) {
+      await this.toggleStrategyGuide();
+    }
+  }
+
+  /**
+   * 隐藏策略指南
+   */
+  async hideStrategyGuide(): Promise<void> {
+    const isHidden = await this.page.evaluate(() => {
+      const element = document.getElementById('amz_refining_container');
+      return element?.classList.contains('hidden');
+    });
+    
+    if (!isHidden) {
+      await this.toggleStrategyGuide();
+    }
+  }
+
+  // ========== 配置卡片方法 ==========
+
+  /**
+   * 展开配置卡片
+   */
+  async expandConfig(): Promise<void> {
+    const isExpanded = await this.page.evaluate(() => {
+      const element = document.querySelector('[x-data*="configExpanded"]') as any;
+      return element?.__x?.$data?.configExpanded || false;
+    });
+    
+    if (!isExpanded) {
+      await this.click(this.selectors.configHeader);
+      await this.wait(400); // 等待展开动画
+    }
+  }
+
+  /**
+   * 收起配置卡片
+   */
+  async collapseConfig(): Promise<void> {
+    const isExpanded = await this.page.evaluate(() => {
+      const element = document.querySelector('[x-data*="configExpanded"]') as any;
+      return element?.__x?.$data?.configExpanded || false;
+    });
+    
+    if (isExpanded) {
+      await this.click(this.selectors.configHeader);
+      await this.wait(300); // 等待收起动画
+    }
+  }
+
+  // ========== 站点选择方法 ==========
+
+  /**
+   * 选择亚马逊站点
+   * 
+   * @param site - 站点代码
+   */
+  async selectSite(site: AmazonSite): Promise<void> {
+    await this.expandConfig();
+    
+    // 通过 Alpine.js 数据查找并点击站点按钮
+    await this.page.evaluate((siteCode) => {
+      const buttons = document.querySelectorAll('button.site-btn');
+      for (const button of buttons) {
+        const element = button as any;
+        if (element.__x) {
+          const siteData = element.__x.$data?.site;
+          if (siteData === siteCode) {
+            button.dispatchEvent(new Event('click', { bubbles: true }));
+            return;
+          }
+        }
+      }
+    }, site);
+    
+    await this.wait(200); // 等待选择生效
   }
 
   /**
    * 获取当前选中的站点
    */
   async getSelectedSite(): Promise<string> {
-    const selectedButton = await this.page.locator('button.site-btn.selected').first();
-    return await selectedButton.textContent() || '';
+    return await this.page.evaluate(() => {
+      const element = document.querySelector('[x-data="scraperPanel"]') as any;
+      return element?.__x?.$data?.selectedSite || '';
+    });
   }
 
   /**
-   * 获取可用站点数量
+   * 检查站点是否被选中
+   * 
+   * @param site - 站点代码
    */
-  async getAvailableSitesCount(): Promise<number> {
-    return await this.page.locator('button.site-btn').count();
+  async isSiteSelected(site: AmazonSite): Promise<boolean> {
+    const selectedSite = await this.getSelectedSite();
+    return selectedSite === site;
   }
 
-  // ========== ASIN 输入 ==========
+  // ========== ASIN 输入方法 ==========
 
   /**
-   * 输入 ASIN 列表
+   * 填写 ASIN 列表
+   * 
+   * @param asins - ASIN 数组
    */
-  async fillAsins(asins: string | string[]): Promise<void> {
-    const asinText = Array.isArray(asins) ? asins.join('\n') : asins;
-    await this.page.fill('textarea[x-model="inputAsins"]', asinText);
-    await this.wait(500); // 等待验证
+  async fillAsins(asins: string[]): Promise<void> {
+    await this.expandConfig();
+    const asinText = asins.join('\n');
+    await this.fill(this.selectors.asinTextarea, asinText);
+    await this.wait(300); // 等待验证完成
+  }
+
+  /**
+   * 添加单个 ASIN
+   * 
+   * @param asin - ASIN 标识符
+   */
+  async addAsin(asin: string): Promise<void> {
+    await this.expandConfig();
+    const currentValue = await this.getValue(this.selectors.asinTextarea);
+    const newValue = currentValue ? `${currentValue}\n${asin}` : asin;
+    await this.fill(this.selectors.asinTextarea, newValue);
+    await this.wait(300);
   }
 
   /**
    * 清空 ASIN 输入
    */
   async clearAsins(): Promise<void> {
-    const clearButton = this.page.locator('button:has-text("清空")');
-    if (await clearButton.isVisible()) {
+    await this.expandConfig();
+    const clearButton = await this.page.$(this.selectors.clearAsinsButton);
+    if (clearButton) {
       await clearButton.click();
     }
   }
 
   /**
-   * 获取已识别的 ASIN 数量
+   * 获取已识别的有效 ASIN 数量
    */
-  async getValidAsinsCount(): Promise<number> {
-    const countText = await this.page.locator('text=/已识别.*个 ASIN/').textContent();
-    if (!countText) return 0;
-    
-    const match = countText.match(/已识别\s*(\d+)\s*个/);
-    return match ? parseInt(match[1]) : 0;
+  async getValidAsinCount(): Promise<number> {
+    return await this.page.evaluate(() => {
+      const element = document.querySelector('[x-data="scraperPanel"]') as any;
+      return element?.__x?.$data?.validAsins?.length || 0;
+    });
   }
 
   /**
    * 获取无效项数量
    */
   async getInvalidCount(): Promise<number> {
-    const invalidBadge = this.page.locator('text=/过滤.*个无效项/');
-    if (!await invalidBadge.isVisible()) return 0;
-    
-    const countText = await invalidBadge.textContent();
-    const match = countText?.match(/过滤\s*(\d+)\s*个/);
-    return match ? parseInt(match[1]) : 0;
+    return await this.page.evaluate(() => {
+      const element = document.querySelector('[x-data="scraperPanel"]') as any;
+      return element?.__x?.$data?.invalidCount || 0;
+    });
   }
 
-  // ========== 采集选项 ==========
+  /**
+   * 获取有效的 ASIN 列表
+   */
+  async getValidAsins(): Promise<string[]> {
+    return await this.page.evaluate(() => {
+      const element = document.querySelector('[x-data="scraperPanel"]') as any;
+      return element?.__x?.$data?.validAsins || [];
+    });
+  }
+
+  // ========== 采集选项方法 ==========
 
   /**
    * 切换评论采集选项
+   * 
+   * @param enabled - 是否启用
    */
-  async toggleReviewScraping(enabled: boolean): Promise<void> {
-    const toggle = this.page.locator('label:has-text("采集评论")');
-    const isEnabled = await this.isReviewScrapingEnabled();
+  async toggleReviews(enabled: boolean): Promise<void> {
+    await this.expandConfig();
     
-    if (isEnabled !== enabled) {
-      await toggle.click();
-      await this.wait(300);
+    const currentState = await this.page.evaluate(() => {
+      const element = document.querySelector('[x-data="scraperPanel"]') as any;
+      return element?.__x?.$data?.scrapeReviews || false;
+    });
+    
+    if (currentState !== enabled) {
+      await this.click(this.selectors.reviewsToggle);
+      await this.wait(200);
     }
   }
 
   /**
-   * 检查评论采集是否启用
+   * 检查是否启用评论采集
    */
-  async isReviewScrapingEnabled(): Promise<boolean> {
-    const track = this.page.locator('.toggle-track.active').first();
-    return await track.isVisible();
+  async isReviewsEnabled(): Promise<boolean> {
+    return await this.page.evaluate(() => {
+      const element = document.querySelector('[x-data="scraperPanel"]') as any;
+      return element?.__x?.$data?.scrapeReviews || false;
+    });
   }
 
-  // ========== 采集操作 ==========
+  // ========== 采集执行方法 ==========
 
   /**
    * 开始采集
    */
   async startScrape(): Promise<void> {
-    await this.page.click('button:has-text("开始采集")');
-    await this.wait(500);
+    await this.expandConfig();
+    await this.click(this.selectors.startButton);
   }
 
   /**
-   * 检查是否可以开始采集
+   * 等待采集完成
+   * 
+   * @param timeout - 超时时间（毫秒），默认 5 分钟
    */
-  async canStartScrape(): Promise<boolean> {
-    const button = this.page.locator('button:has-text("开始采集")');
-    return !(await button.isDisabled());
+  async waitForScrapeComplete(timeout: number = 300000): Promise<void> {
+    await this.page.waitForFunction(
+      () => {
+        const element = document.querySelector('[x-data="scraperPanel"]') as any;
+        if (!element?.__x?.$data) return false;
+        
+        const tasks = element.__x.$data.tasks || [];
+        if (tasks.length === 0) return false;
+        
+        return tasks.every((task: any) => 
+          task.status === 'success' || task.status === 'failed'
+        );
+      },
+      { timeout }
+    );
+    
+    // 等待 UI 更新
+    await this.wait(1000);
   }
 
   /**
    * 检查是否正在采集
    */
   async isScraping(): Promise<boolean> {
-    const spinner = this.page.locator('button:has-text("正在采集中")');
-    return await spinner.isVisible();
-  }
-
-  /**
-   * 等待采集完成
-   */
-  async waitForScrapeComplete(timeout: number = 30000): Promise<void> {
-    await this.page.waitForSelector('button:has-text("正在采集中")', { 
-      state: 'hidden', 
-      timeout 
+    return await this.page.evaluate(() => {
+      const element = document.querySelector('[x-data="scraperPanel"]') as any;
+      return element?.__x?.$data?.isScraping || false;
     });
   }
 
-  // ========== 任务状态 ==========
+  /**
+   * 检查是否可以开始采集
+   */
+  async canStartScrape(): Promise<boolean> {
+    return await this.page.evaluate(() => {
+      const element = document.querySelector('[x-data="scraperPanel"]') as any;
+      return element?.__x?.$data?.canStart || false;
+    });
+  }
+
+  /**
+   * 检查开始按钮是否可用
+   */
+  async isStartButtonEnabled(): Promise<boolean> {
+    return await this.isEnabled(this.selectors.startButton);
+  }
+
+  // ========== 任务状态方法 ==========
+
+  /**
+   * 检查是否显示任务状态面板
+   */
+  async hasTaskStatusPanel(): Promise<boolean> {
+    return await this.isVisible(this.selectors.taskStatusPanel);
+  }
+
+  /**
+   * 获取任务列表
+   */
+  async getTasks(): Promise<TaskInfo[]> {
+    return await this.page.evaluate(() => {
+      const element = document.querySelector('[x-data="scraperPanel"]') as any;
+      return element?.__x?.$data?.tasks || [];
+    });
+  }
 
   /**
    * 获取任务数量
    */
-  async getTasksCount(): Promise<number> {
-    return await this.page.locator('.task-item').count();
+  async getTaskCount(): Promise<number> {
+    const tasks = await this.getTasks();
+    return tasks.length;
   }
 
   /**
-   * 获取完成的任务数量
+   * 获取成功的任务数量
    */
-  async getCompletedTasksCount(): Promise<number> {
-    return await this.page.locator('.task-item:has(.fa-check-circle)').count();
+  async getSuccessTaskCount(): Promise<number> {
+    const tasks = await this.getTasks();
+    return tasks.filter(t => t.status === 'success').length;
   }
 
   /**
    * 获取失败的任务数量
    */
-  async getFailedTasksCount(): Promise<number> {
-    return await this.page.locator('.task-item:has(.fa-times-circle)').count();
+  async getFailedTaskCount(): Promise<number> {
+    const tasks = await this.getTasks();
+    return tasks.filter(t => t.status === 'failed').length;
   }
 
   /**
-   * 获取采集进度百分比
+   * 获取特定 ASIN 的任务状态
+   * 
+   * @param asin - ASIN 标识符
    */
-  async getScrapeProgress(): Promise<number> {
-    const progressText = await this.page.locator('text=/\\d+%/').first().textContent();
-    if (!progressText) return 0;
+  async getTaskStatus(asin: string): Promise<TaskStatus | null> {
+    const tasks = await this.getTasks();
+    const task = tasks.find(t => t.asin === asin);
+    return task ? task.status : null;
+  }
+
+  /**
+   * 获取任务进度百分比
+   */
+  async getTaskProgress(): Promise<number> {
+    const tasks = await this.getTasks();
+    if (tasks.length === 0) return 0;
     
-    const match = progressText.match(/(\d+)%/);
-    return match ? parseInt(match[1]) : 0;
+    const completedTasks = tasks.filter(t => 
+      t.status === 'success' || t.status === 'failed'
+    ).length;
+    
+    return (completedTasks / tasks.length) * 100;
   }
 
-  // ========== 数据导入 ==========
+  // ========== 数据管理方法 ==========
 
   /**
-   * 触发文件导入
+   * 切换数据标签页
+   * 
+   * @param tab - 标签页类型
    */
-  async triggerImport(): Promise<void> {
-    await this.page.click('button:has-text("导入数据")');
-    await this.wait(300);
-  }
-
-  /**
-   * 上传 JSON 文件
-   */
-  async uploadJsonFile(filePath: string): Promise<void> {
-    const fileInput = this.page.locator('input[type="file"]');
-    await fileInput.setInputFiles(filePath);
-    await this.wait(1000); // 等待文件处理
-  }
-
-  // ========== 历史记录 ==========
-
-  /**
-   * 获取历史记录数量
-   */
-  async getHistoryCount(): Promise<number> {
-    return await this.page.locator('.history-item').count();
+  async switchDataTab(tab: DataTab): Promise<void> {
+    const button = tab === 'preview' ? this.selectors.previewTab : this.selectors.jsonTab;
+    await this.click(button);
+    await this.wait(300); // 等待切换动画
   }
 
   /**
-   * 加载历史记录
+   * 获取当前数据标签页
    */
-  async loadHistory(index: number = 0): Promise<void> {
-    const historyItems = this.page.locator('.history-item');
-    const item = historyItems.nth(index);
-    await item.click();
-    await this.wait(500);
+  async getCurrentDataTab(): Promise<DataTab> {
+    return await this.page.evaluate(() => {
+      const element = document.querySelector('[x-data="scraperPanel"]') as any;
+      return element?.__x?.$data?.currentDataTab || 'preview';
+    });
   }
-
-  /**
-   * 删除历史记录
-   */
-  async deleteHistory(index: number): Promise<void> {
-    const deleteButton = this.page.locator('.history-item').nth(index).locator('button:has(.fa-trash)');
-    await deleteButton.click();
-    await this.wait(300);
-  }
-
-  // ========== 数据预览 ==========
 
   /**
    * 检查是否有数据
    */
   async hasData(): Promise<boolean> {
-    const dataCards = this.page.locator('.product-card');
-    return await dataCards.count() > 0;
+    await this.switchDataTab('preview');
+    return await this.isHidden(this.selectors.emptyState);
   }
 
   /**
-   * 获取产品卡片数量
+   * 触发数据导入
    */
-  async getProductCardsCount(): Promise<number> {
-    return await this.page.locator('.product-card').count();
-  }
-
-  /**
-   * 切换数据标签页
-   */
-  async switchDataTab(tab: 'preview' | 'json'): Promise<void> {
-    await this.page.click(`button:has-text("${tab === 'preview' ? '数据预览' : 'JSON'}")`);
-    await this.wait(300);
-  }
-
-  /**
-   * 展开/收起产品卡片
-   */
-  async toggleProductCard(index: number): Promise<void> {
-    const card = this.page.locator('.product-card').nth(index);
-    const expandButton = card.locator('button:has(.fa-chevron)');
-    await expandButton.click();
-    await this.wait(300);
-  }
-
-  /**
-   * 检查产品卡片是否展开
-   */
-  async isProductCardExpanded(index: number): Promise<boolean> {
-    const card = this.page.locator('.product-card').nth(index);
-    const chevron = card.locator('.fa-chevron-up');
-    return await chevron.isVisible();
-  }
-
-  /**
-   * 获取产品标题
-   */
-  async getProductTitle(index: number): Promise<string> {
-    const card = this.page.locator('.product-card').nth(index);
-    const title = card.locator('.product-title');
-    return await title.textContent() || '';
-  }
-
-  /**
-   * 获取产品 ASIN
-   */
-  async getProductAsin(index: number): Promise<string> {
-    const card = this.page.locator('.product-card').nth(index);
-    const asin = card.locator('text=/ASIN:/');
-    const text = await asin.textContent() || '';
-    return text.replace('ASIN:', '').trim();
-  }
-
-  /**
-   * 获取评论数量
-   */
-  async getReviewsCount(index: number): Promise<number> {
-    const card = this.page.locator('.product-card').nth(index);
-    const reviewsText = await card.locator('text=/\\d+ 条评论/').textContent();
-    if (!reviewsText) return 0;
+  async triggerImport(): Promise<void> {
+    await this.switchDataTab('preview');
     
-    const match = reviewsText.match(/(\d+)\s*条/);
-    return match ? parseInt(match[1]) : 0;
-  }
-
-  // ========== 数据操作 ==========
-
-  /**
-   * 删除产品
-   */
-  async deleteProduct(index: number): Promise<void> {
-    const card = this.page.locator('.product-card').nth(index);
-    const deleteButton = card.locator('button:has(.fa-trash)');
-    await deleteButton.click();
-    
-    // 确认删除
-    await this.page.click('button:has-text("确认")');
-    await this.wait(300);
-  }
-
-  /**
-   * 导出数据
-   */
-  async exportData(): Promise<void> {
-    await this.page.click('button:has-text("导出")');
-    await this.wait(500);
-  }
-
-  /**
-   * 清空所有数据
-   */
-  async clearAllData(): Promise<void> {
-    await this.page.click('button:has-text("清空")');
-    
-    // 确认清空
-    await this.page.click('button:has-text("确认")');
-    await this.wait(300);
-  }
-
-  // ========== JSON 查看器 ==========
-
-  /**
-   * 获取 JSON 内容
-   */
-  async getJsonContent(): Promise<string> {
-    await this.switchDataTab('json');
-    const jsonViewer = this.page.locator('pre, code, .json-viewer');
-    return await jsonViewer.textContent() || '';
-  }
-
-  /**
-   * 复制 JSON
-   */
-  async copyJson(): Promise<void> {
-    await this.switchDataTab('json');
-    await this.page.click('button:has-text("复制")');
-    await this.wait(300);
-  }
-
-  // ========== 配置面板 ==========
-
-  /**
-   * 展开/收起配置面板
-   */
-  async toggleConfigPanel(): Promise<void> {
-    await this.page.click('.config-header');
-    await this.wait(300);
-  }
-
-  /**
-   * 检查配置面板是否展开
-   */
-  async isConfigPanelExpanded(): Promise<boolean> {
-    const chevron = this.page.locator('.config-chevron-wrap .fa-chevron-down.rotate-180');
-    return await chevron.isVisible();
-  }
-
-  // ========== 策略指南 ==========
-
-  /**
-   * 展开/收起策略指南
-   */
-  async toggleStrategyGuide(): Promise<void> {
-    const guideHeader = this.page.locator('div:has-text("数据结构化提取策略")').first();
-    await guideHeader.click();
-    await this.wait(300);
-  }
-
-  /**
-   * 检查策略指南是否展开
-   */
-  async isStrategyGuideExpanded(): Promise<boolean> {
-    const container = this.page.locator('#amz_refining_container');
-    return !(await container.evaluate(el => el.classList.contains('hidden')));
-  }
-
-  // ========== 工具方法 ==========
-
-  /**
-   * 等待指定时间
-   */
-  async wait(ms: number): Promise<void> {
-    await this.page.waitForTimeout(ms);
-  }
-
-  /**
-   * 获取输入框的值
-   */
-  async getValue(selector: string): Promise<string> {
-    return await this.page.inputValue(selector);
-  }
-
-  /**
-   * 悬停在元素上
-   */
-  async hover(selector: string): Promise<void> {
-    await this.page.hover(selector);
-  }
-
-  /**
-   * 期望显示 Toast 提示
-   */
-  async expectToast(text: string): Promise<void> {
-    await expect(this.page.locator(`.toast:has-text("${text}")`)).toBeVisible({ timeout: 5000 });
-  }
-
-  /**
-   * 获取数据源信息
-   */
-  async getDataSourceInfo(): Promise<{
-    hasData: boolean;
-    productCount: number;
-    reviewCount: number;
-  }> {
     const hasData = await this.hasData();
+    if (hasData) {
+      await this.click(this.selectors.importTrigger);
+    } else {
+      await this.click(this.selectors.emptyState);
+    }
+  }
+
+  /**
+   * 获取 JSON 数据
+   */
+  async getJsonData(): Promise<string> {
+    await this.switchDataTab('json');
+    return await this.getText(this.selectors.jsonDisplay);
+  }
+
+  /**
+   * 获取采集的数据对象
+   */
+  async getScrapedData(): Promise<any> {
+    const jsonText = await this.getJsonData();
+    try {
+      return JSON.parse(jsonText);
+    } catch {
+      return null;
+    }
+  }
+
+  // ========== 验证方法 ==========
+
+  /**
+   * 验证欢迎横幅是否可见
+   */
+  async isWelcomeBannerVisible(): Promise<boolean> {
+    return await this.isVisible(this.selectors.welcomeBanner);
+  }
+
+  /**
+   * 验证配置卡片是否可见
+   */
+  async isConfigCardVisible(): Promise<boolean> {
+    return await this.isVisible(this.selectors.configCard);
+  }
+
+  /**
+   * 验证数据管理面板是否可见
+   */
+  async isDataManagementPanelVisible(): Promise<boolean> {
+    return await this.isVisible(this.selectors.dataManagementPanel);
+  }
+
+  /**
+   * 验证所有必需字段是否已填写
+   */
+  async areRequiredFieldsFilled(): Promise<boolean> {
+    const validCount = await this.getValidAsinCount();
+    const siteSelected = await this.getSelectedSite();
     
-    if (!hasData) {
-      return { hasData: false, productCount: 0, reviewCount: 0 };
+    return validCount > 0 && siteSelected.length > 0;
+  }
+
+  // ========== 完整流程方法 ==========
+
+  /**
+   * 完整的采集流程
+   * 
+   * @param config - 采集配置
+   * @returns 任务结果摘要
+   */
+  async completeScrapeFlow(config: ScrapeConfig): Promise<TaskInfo[]> {
+    // 1. 选择站点
+    if (config.site) {
+      await this.selectSite(config.site);
     }
 
-    const productCount = await this.getProductCardsCount();
-    
-    // 计算总评论数
-    let reviewCount = 0;
-    for (let i = 0; i < productCount; i++) {
-      reviewCount += await this.getReviewsCount(i);
+    // 2. 填写 ASIN
+    await this.fillAsins(config.asins);
+
+    // 3. 配置评论采集
+    if (config.scrapeReviews !== undefined) {
+      await this.toggleReviews(config.scrapeReviews);
     }
 
-    return { hasData: true, productCount, reviewCount };
+    // 4. 开始采集
+    await this.startScrape();
+
+    // 5. 等待完成
+    await this.waitForScrapeComplete();
+
+    // 6. 返回任务结果
+    return await this.getTasks();
+  }
+
+  /**
+   * 快速采集（使用默认配置）
+   * 
+   * @param asins - ASIN 列表
+   * @returns 任务结果摘要
+   */
+  async quickScrape(asins: string[]): Promise<TaskInfo[]> {
+    return await this.completeScrapeFlow({
+      site: 'US',
+      asins,
+      scrapeReviews: false
+    });
   }
 }

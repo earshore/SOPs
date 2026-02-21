@@ -60,6 +60,13 @@ playwright-report/
 test-results/
 playwright/.cache/
 
+# Screenshots (保留目录结构，忽略截图文件)
+tests/screenshots/failures/*.png
+tests/screenshots/temp/
+tests/screenshots/index.json
+!tests/screenshots/.gitkeep
+!tests/screenshots/failures/.gitkeep
+
 # ==============================================================================
 # 4. Documentation
 # ==============================================================================

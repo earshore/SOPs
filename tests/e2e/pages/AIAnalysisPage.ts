@@ -1,438 +1,644 @@
 // tests/e2e/pages/AIAnalysisPage.ts
 // ================================================================
-// 📄 AI Analysis Page Object
-// 封装 AI 智能分析模块的页面操作
+// 📄 AI 分析页面对象
+// 提供 AI 智能分析模块的页面操作方法
 // ================================================================
 
 import { Page } from '@playwright/test';
-import { BasePage } from '../../helpers/BasePage';
+import { BasePage } from './BasePage';
 
 /**
- * AI 智能分析页面对象
+ * 分析目标类型
+ */
+export type AnalysisSource = 'Listings' | 'Reviews';
+
+/**
+ * 分析配置接口
+ */
+export interface AnalysisConfig {
+  asins?: string[];
+  targets?: string[];
+  useRealData?: boolean;
+}
+
+/**
+ * 分析结果统计接口
+ */
+export interface AnalysisStats {
+  targetId: string;
+  title: string;
+  source: AnalysisSource;
+  stats: Array<{ label: string; value: string }>;
+  highlights: Array<{ text: string; type: string }>;
+}
+
+/**
+ * AI 分析页面对象
+ * 
+ * 提供 AI 智能分析模块的所有交互方法，包括：
+ * - ASIN 选择和管理
+ * - 分析目标选择
+ * - 分析执行和进度监控
+ * - 结果查看和导出
+ * 
+ * @example
+ * ```typescript
+ * const aiAnalysis = new AIAnalysisPage(page);
+ * await aiAnalysis.navigate();
+ * await aiAnalysis.selectAsins(['B08N5WRWNW']);
+ * await aiAnalysis.selectTargets(['keyword_analysis', 'sentiment_analysis']);
+ * await aiAnalysis.startAnalysis();
+ * await aiAnalysis.waitForAnalysisComplete();
+ * const results = await aiAnalysis.getAnalysisResults();
+ * ```
  */
 export class AIAnalysisPage extends BasePage {
-  // ========== Selectors ==========
+  // ========== 选择器定义 ==========
   
-  // 导航
-  private readonly aiAnalysisLink = '#nav-ai-analysis, a[href*="ai_analysis"]';
-  
-  // ASIN 选择区域
-  private readonly asinCheckbox = 'input[type="checkbox"]';
-  private readonly selectAllAsinsButton = 'button:has-text("全选")';
-  private readonly clearAllAsinsButton = 'button:has-text("清空")';
-  private readonly selectedAsinsCount = 'span:has-text("已选择")';
-  
-  // 分析目标选择区域
-  private readonly targetCheckbox = 'button[class*="border-2"]';
-  private readonly selectAllTargetsButton = 'button:has-text("全选")';
-  private readonly clearAllTargetsButton = 'button:has-text("清空")';
-  private readonly selectedTargetsCount = 'span:has-text("已选择")';
-  
-  // 分析按钮
-  private readonly startAnalysisButton = 'button:has-text("开始分析")';
-  private readonly progressBar = '.h-3.bg-white\\/20';
-  private readonly progressText = 'span[x-text*="progress"]';
-  private readonly currentStepText = 'span[x-text="currentStep"]';
-  
-  // 结果展示
-  private readonly resultsContainer = '.space-y-10';
-  private readonly listingsResults = 'div:has-text("Listings 分析结果")';
-  private readonly reviewsResults = 'div:has-text("Reviews 分析结果")';
-  private readonly resultCard = '.bg-white.rounded-2xl.shadow-sm';
-  
-  // JSON 查看器
-  private readonly jsonViewerToggle = 'button:has-text("AI 分析报告 JSON")';
-  private readonly jsonViewerContent = 'pre code';
-  private readonly copyJsonButton = 'button:has-text("JSON")';
-  private readonly copyMarkdownButton = 'button:has-text("MD")';
-  private readonly downloadJsonButton = 'button:has-text("下载")';
-  
-  // 提示词预览
-  private readonly promptPanelToggle = 'button:has-text("AI 提示词模板")';
-  private readonly promptPanel = '.space-y-3';
-  private readonly copyPromptButton = 'button:has-text("复制")';
-  
-  constructor(page: Page, baseUrl?: string) {
-    super(page, baseUrl);
+  private readonly selectors = {
+    // 主容器
+    mainContainer: '.ai-analysis-wrapper',
+    welcomeBanner: '.ai-analysis-wrapper > div:first-child',
+    
+    // 数据源横幅
+    dataSourceBanner: '[x-show="showDataSourceBanner"]',
+    dataSourceInfo: '.from-indigo-50',
+    
+    // ASIN 选择区域
+    asinCard: '.lg\\:col-span-4 .bg-white',
+    asinSelectAll: 'button:has-text("全选")',
+    asinClearAll: 'button:has-text("清空")',
+    asinCheckbox: (asin: string) => `input[type="checkbox"][value="${asin}"]`,
+    asinLabel: (asin: string) => `label:has(input[value="${asin}"])`,
+    selectedAsinCount: '.bg-emerald-50.text-emerald-600',
+    availableAsinsList: '.space-y-2.max-h-48',
+    noDataWarning: '.bg-amber-50.border-amber-200',
+    navigateToScraperButton: 'a:has-text("前往数据采集")',
+    
+    // 分析目标选择区域
+    targetCard: '.lg\\:col-span-8 .bg-white',
+    targetSelectAll: 'button:has-text("全选")',
+    targetClearAll: 'button:has-text("清空")',
+    listingsSection: '.grid.grid-cols-1.md\\:grid-cols-2',
+    reviewsSection: '.grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-3',
+    targetButton: (targetId: string) => `button[data-target-id="${targetId}"]`,
+    selectedTargetCount: '.font-bold.text-indigo-600',
+    targetSummary: '.flex.-space-x-2',
+    
+    // 提示词预览面板
+    promptPanelToggle: 'button:has-text("AI 提示词模板")',
+    promptPanel: '.space-y-3.animate-fade-in-up',
+    promptItem: (index: number) => `.space-y-3 > div:nth-child(${index + 1})`,
+    promptCopyButton: 'button:has-text("复制")',
+    totalTokenCount: '.text-emerald-700:has-text("tokens")',
+    
+    // 分析按钮和进度
+    analysisSection: '.mb-10.animate-fade-in-up',
+    startAnalysisButton: 'button:has-text("执行 AI 分析")',
+    analysisProgress: '.relative.w-full.h-3',
+    progressBar: '.absolute.inset-0.bg-white\\/30',
+    progressText: '.text-white\\/70',
+    currentStep: '[x-text="currentStep"]',
+    
+    // 结果区域
+    resultsContainer: '#analysis-results-container',
+    resultCard: '.analysis-result-card',
+    resultTitle: '.result-title',
+    resultStats: '.result-stats',
+    resultHighlights: '.result-highlights',
+    resultDetails: '.result-details',
+    
+    // 导出和操作
+    exportButton: 'button:has-text("导出报告")',
+    exportJsonButton: 'button:has-text("导出 JSON")',
+    exportMarkdownButton: 'button:has-text("导出 Markdown")',
+    clearResultsButton: 'button:has-text("清空结果")',
+    
+    // Toast 和通知
+    toast: '.toast',
+    errorMessage: '.text-red-600',
+    successMessage: '.text-emerald-600'
+  };
+
+  constructor(page: Page) {
+    super(page, { baseUrl: 'http://localhost:5173' });
   }
 
-  // ========== Navigation ==========
-  
+  // ========== 导航方法 ==========
+
   /**
    * 导航到 AI 分析页面
    */
   async navigate(): Promise<void> {
-    await super.navigate('/app_center/ai_analysis');
-    await this.waitForPageLoad();
-    await this.waitForAIAnalysisReady();
-  }
-  
-  /**
-   * 通过导航链接进入 AI 分析
-   */
-  async navigateViaLink(): Promise<void> {
-    await this.click(this.aiAnalysisLink);
-    await this.waitForPageLoad();
-    await this.waitForAIAnalysisReady();
-  }
-  
-  /**
-   * 等待 AI 分析模块就绪
-   */
-  async waitForAIAnalysisReady(): Promise<void> {
-    // 等待主要元素加载
-    await this.waitForElement(this.startAnalysisButton, 10000);
-    
-    // 等待 Alpine 组件初始化
-    await this.page.waitForFunction(() => {
-      const element = document.querySelector('[x-data="aiAnalysisPanel"]');
-      return element && (element as any).__x;
-    }, { timeout: 5000 });
+    await super.navigate('/app_center/master_analysis');
+    await this.waitForPageReady();
   }
 
-  // ========== ASIN 选择 ==========
-  
   /**
-   * 获取可用的 ASIN 数量
+   * 等待页面就绪
    */
-  async getAvailableAsinsCount(): Promise<number> {
-    return await this.count(this.asinCheckbox);
+  async waitForPageReady(): Promise<void> {
+    await this.waitForElement(this.selectors.mainContainer);
+    await this.waitForElement(this.selectors.asinCard);
+    await this.waitForElement(this.selectors.targetCard);
+    await this.waitForLoadingToFinish();
   }
-  
+
+  // ========== ASIN 选择方法 ==========
+
   /**
-   * 选择指定的 ASIN
+   * 获取可用的 ASIN 列表
+   */
+  async getAvailableAsins(): Promise<string[]> {
+    const checkboxes = this.page.locator(`${this.selectors.availableAsinsList} input[type="checkbox"]`);
+    const count = await checkboxes.count();
+    
+    const asins: string[] = [];
+    for (let i = 0; i < count; i++) {
+      const value = await checkboxes.nth(i).getAttribute('value');
+      if (value) {
+        asins.push(value);
+      }
+    }
+    
+    return asins;
+  }
+
+  /**
+   * 选择单个 ASIN
+   * 
+   * @param asin - ASIN 标识符
    */
   async selectAsin(asin: string): Promise<void> {
-    const checkbox = this.page.locator(`input[type="checkbox"]`).filter({ hasText: asin });
+    const checkbox = this.page.locator(`input[type="checkbox"][value="${asin}"]`);
     await checkbox.check();
-    await this.wait(300);
   }
-  
+
   /**
-   * 取消选择指定的 ASIN
+   * 取消选择单个 ASIN
+   * 
+   * @param asin - ASIN 标识符
    */
   async unselectAsin(asin: string): Promise<void> {
-    const checkbox = this.page.locator(`input[type="checkbox"]`).filter({ hasText: asin });
+    const checkbox = this.page.locator(`input[type="checkbox"][value="${asin}"]`);
     await checkbox.uncheck();
-    await this.wait(300);
   }
-  
+
   /**
-   * 全选所有 ASIN
+   * 选择多个 ASIN
+   * 
+   * @param asins - ASIN 列表
+   */
+  async selectAsins(asins: string[]): Promise<void> {
+    for (const asin of asins) {
+      await this.selectAsin(asin);
+    }
+  }
+
+  /**
+   * 全选 ASIN
    */
   async selectAllAsins(): Promise<void> {
-    const buttons = this.page.locator(this.selectAllAsinsButton);
-    await buttons.first().click();
-    await this.wait(300);
+    await this.click(this.selectors.asinSelectAll);
   }
-  
+
   /**
-   * 清空所有 ASIN 选择
+   * 清空 ASIN 选择
    */
   async clearAllAsins(): Promise<void> {
-    const buttons = this.page.locator(this.clearAllAsinsButton);
-    await buttons.first().click();
-    await this.wait(300);
+    await this.click(this.selectors.asinClearAll);
   }
-  
+
   /**
    * 获取已选择的 ASIN 数量
    */
-  async getSelectedAsinsCount(): Promise<number> {
-    const text = await this.page.locator(this.selectedAsinsCount).first().textContent();
-    const match = text?.match(/\d+/);
-    return match ? parseInt(match[0]) : 0;
+  async getSelectedAsinCount(): Promise<number> {
+    const text = await this.getText(this.selectors.selectedAsinCount);
+    const match = text.match(/已选择\s+(\d+)\s+个产品/);
+    return match ? parseInt(match[1], 10) : 0;
   }
-  
+
+  /**
+   * 获取已选择的 ASIN 列表
+   */
+  async getSelectedAsins(): Promise<string[]> {
+    const checkboxes = this.page.locator(`${this.selectors.availableAsinsList} input[type="checkbox"]:checked`);
+    const count = await checkboxes.count();
+    
+    const asins: string[] = [];
+    for (let i = 0; i < count; i++) {
+      const value = await checkboxes.nth(i).getAttribute('value');
+      if (value) {
+        asins.push(value);
+      }
+    }
+    
+    return asins;
+  }
+
   /**
    * 检查是否有可用数据
    */
   async hasAvailableData(): Promise<boolean> {
-    const count = await this.getAvailableAsinsCount();
-    return count > 0;
+    return !(await this.isVisible(this.selectors.noDataWarning));
   }
 
-  // ========== 分析目标选择 ==========
-  
   /**
-   * 获取可用的分析目标数量
+   * 检查 ASIN 是否被选中
+   * 
+   * @param asin - ASIN 标识符
    */
-  async getAvailableTargetsCount(): Promise<number> {
-    // 计算所有分析目标按钮
-    return await this.page.locator('button[class*="border-2"][class*="rounded-xl"]').count();
+  async isAsinSelected(asin: string): Promise<boolean> {
+    const checkbox = this.page.locator(`input[type="checkbox"][value="${asin}"]`);
+    return await checkbox.isChecked();
   }
-  
+
+  // ========== 分析目标选择方法 ==========
+
   /**
-   * 选择指定的分析目标
+   * 选择分析目标
+   * 
+   * @param targetId - 目标 ID
    */
-  async selectTarget(targetName: string): Promise<void> {
-    const button = this.page.locator(`button:has-text("${targetName}")`).first();
-    await button.click();
-    await this.wait(300);
+  async selectTarget(targetId: string): Promise<void> {
+    // 通过文本内容查找按钮（因为模板中没有 data-target-id 属性）
+    const buttons = this.page.locator(`${this.selectors.targetCard} button`);
+    const count = await buttons.count();
+    
+    for (let i = 0; i < count; i++) {
+      const button = buttons.nth(i);
+      const text = await button.textContent();
+      if (text?.includes(targetId)) {
+        await button.click();
+        return;
+      }
+    }
+    
+    throw new Error(`Target ${targetId} not found`);
   }
-  
+
   /**
-   * 全选所有分析目标
+   * 选择多个分析目标
+   * 
+   * @param targetIds - 目标 ID 列表
+   */
+  async selectTargets(targetIds: string[]): Promise<void> {
+    for (const targetId of targetIds) {
+      await this.selectTarget(targetId);
+    }
+  }
+
+  /**
+   * 全选分析目标
    */
   async selectAllTargets(): Promise<void> {
-    const buttons = this.page.locator(this.selectAllTargetsButton);
-    // 找到分析目标区域的全选按钮（第二个）
-    await buttons.nth(1).click();
-    await this.wait(300);
-  }
-  
-  /**
-   * 清空所有分析目标选择
-   */
-  async clearAllTargets(): Promise<void> {
-    const buttons = this.page.locator(this.clearAllTargetsButton);
-    // 找到分析目标区域的清空按钮（第二个）
-    await buttons.nth(1).click();
-    await this.wait(300);
-  }
-  
-  /**
-   * 获取已选择的分析目标数量
-   */
-  async getSelectedTargetsCount(): Promise<number> {
-    const text = await this.page.locator('span:has-text("已选择")').nth(1).textContent();
-    const match = text?.match(/\d+/);
-    return match ? parseInt(match[0]) : 0;
+    const button = this.page.locator(this.selectors.targetCard).locator('button:has-text("全选")');
+    await button.click();
   }
 
-  // ========== 分析执行 ==========
-  
   /**
-   * 检查开始分析按钮是否可用
+   * 清空分析目标选择
    */
-  async isStartAnalysisButtonEnabled(): Promise<boolean> {
-    return await this.page.isEnabled(this.startAnalysisButton);
+  async clearAllTargets(): Promise<void> {
+    const button = this.page.locator(this.selectors.targetCard).locator('button:has-text("清空")');
+    await button.click();
   }
-  
+
+  /**
+   * 获取已选择的目标数量
+   */
+  async getSelectedTargetCount(): Promise<number> {
+    const text = await this.getText(this.selectors.selectedTargetCount);
+    return parseInt(text, 10);
+  }
+
+  /**
+   * 选择所有 Listings 分析目标
+   */
+  async selectAllListingsTargets(): Promise<void> {
+    const buttons = this.page.locator(this.selectors.listingsSection).locator('button');
+    const count = await buttons.count();
+    
+    for (let i = 0; i < count; i++) {
+      await buttons.nth(i).click();
+    }
+  }
+
+  /**
+   * 选择所有 Reviews 分析目标
+   */
+  async selectAllReviewsTargets(): Promise<void> {
+    const buttons = this.page.locator(this.selectors.reviewsSection).locator('button');
+    const count = await buttons.count();
+    
+    for (let i = 0; i < count; i++) {
+      await buttons.nth(i).click();
+    }
+  }
+
+  // ========== 提示词预览方法 ==========
+
+  /**
+   * 切换提示词面板显示
+   */
+  async togglePromptPanel(): Promise<void> {
+    await this.click(this.selectors.promptPanelToggle);
+    await this.wait(300); // 等待动画
+  }
+
+  /**
+   * 显示提示词面板
+   */
+  async showPromptPanel(): Promise<void> {
+    const isVisible = await this.isVisible(this.selectors.promptPanel);
+    if (!isVisible) {
+      await this.togglePromptPanel();
+    }
+  }
+
+  /**
+   * 隐藏提示词面板
+   */
+  async hidePromptPanel(): Promise<void> {
+    const isVisible = await this.isVisible(this.selectors.promptPanel);
+    if (isVisible) {
+      await this.togglePromptPanel();
+    }
+  }
+
+  /**
+   * 展开特定的提示词项
+   * 
+   * @param index - 提示词项索引
+   */
+  async expandPromptItem(index: number): Promise<void> {
+    const item = this.page.locator(this.selectors.promptItem(index));
+    const button = item.locator('button').first();
+    await button.click();
+    await this.wait(300); // 等待展开动画
+  }
+
+  /**
+   * 复制提示词
+   * 
+   * @param index - 提示词项索引
+   */
+  async copyPrompt(index: number): Promise<void> {
+    await this.expandPromptItem(index);
+    const item = this.page.locator(this.selectors.promptItem(index));
+    const copyButton = item.locator(this.selectors.promptCopyButton);
+    await copyButton.click();
+    await this.wait(500); // 等待复制完成
+  }
+
+  /**
+   * 获取总 Token 数量
+   */
+  async getTotalTokenCount(): Promise<number> {
+    const text = await this.getText(this.selectors.totalTokenCount);
+    const match = text.match(/[\d,]+/);
+    return match ? parseInt(match[0].replace(/,/g, ''), 10) : 0;
+  }
+
+  // ========== 分析执行方法 ==========
+
   /**
    * 开始分析
    */
   async startAnalysis(): Promise<void> {
-    await this.click(this.startAnalysisButton);
-    await this.wait(500);
+    await this.click(this.selectors.startAnalysisButton);
   }
-  
-  /**
-   * 检查是否正在分析
-   */
-  async isAnalyzing(): Promise<boolean> {
-    const button = this.page.locator(this.startAnalysisButton);
-    const text = await button.textContent();
-    return text?.includes('分析中') || false;
-  }
-  
+
   /**
    * 等待分析完成
+   * 
+   * @param timeout - 超时时间（毫秒），默认 5 分钟
    */
-  async waitForAnalysisComplete(timeout: number = 30000): Promise<void> {
-    // 等待进度达到 100%
-    await this.page.waitForFunction(() => {
-      const element = document.querySelector('[x-data="aiAnalysisPanel"]') as any;
-      if (!element || !element.__x) return false;
-      return element.__x.$data.progress >= 100;
-    }, { timeout });
+  async waitForAnalysisComplete(timeout: number = 300000): Promise<void> {
+    await this.page.waitForFunction(
+      () => {
+        const progressElement = document.querySelector('[x-text="progress"]');
+        if (!progressElement) return false;
+        const progress = parseInt(progressElement.textContent || '0', 10);
+        return progress >= 100;
+      },
+      { timeout }
+    );
     
-    await this.wait(1000); // 等待结果渲染
+    // 等待结果渲染
+    await this.wait(1000);
   }
-  
+
   /**
    * 获取当前分析进度
    */
   async getAnalysisProgress(): Promise<number> {
-    const progressText = await this.page.locator('span[class*="font-mono"][x-text*="progress"]').textContent();
-    const match = progressText?.match(/(\d+)%/);
-    return match ? parseInt(match[1]) : 0;
+    return await this.page.evaluate(() => {
+      const progressElement = document.querySelector('[x-text="progress"]');
+      return progressElement ? parseInt(progressElement.textContent || '0', 10) : 0;
+    });
   }
-  
+
   /**
    * 获取当前分析步骤
    */
   async getCurrentStep(): Promise<string> {
-    return await this.page.locator('span[x-text="currentStep"]').textContent() || '';
+    return await this.getText(this.selectors.currentStep);
   }
 
-  // ========== 结果查看 ==========
-  
+  /**
+   * 检查是否正在分析
+   */
+  async isAnalyzing(): Promise<boolean> {
+    return await this.page.evaluate(() => {
+      const element = document.querySelector('[x-data="aiAnalysisPanel"]') as any;
+      return element?.__x?.$data?.isAnalyzing || false;
+    });
+  }
+
+  /**
+   * 检查分析按钮是否可用
+   */
+  async isAnalysisButtonEnabled(): Promise<boolean> {
+    return await this.isEnabled(this.selectors.startAnalysisButton);
+  }
+
+  // ========== 结果查看方法 ==========
+
   /**
    * 检查是否有分析结果
    */
-  async hasResults(): Promise<boolean> {
-    return await this.isVisible(this.resultsContainer);
+  async hasAnalysisResults(): Promise<boolean> {
+    return await this.isVisible(this.selectors.resultsContainer);
   }
-  
+
   /**
    * 获取结果卡片数量
    */
-  async getResultCardsCount(): Promise<number> {
-    return await this.count(this.resultCard);
-  }
-  
-  /**
-   * 检查是否有 Listings 结果
-   */
-  async hasListingsResults(): Promise<boolean> {
-    return await this.isVisible(this.listingsResults);
-  }
-  
-  /**
-   * 检查是否有 Reviews 结果
-   */
-  async hasReviewsResults(): Promise<boolean> {
-    return await this.isVisible(this.reviewsResults);
-  }
-  
-  /**
-   * 获取 Listings 结果数量
-   */
-  async getListingsResultsCount(): Promise<number> {
-    if (!await this.hasListingsResults()) return 0;
-    
-    const container = this.page.locator('div:has-text("Listings 分析结果")').first();
-    return await container.locator(this.resultCard).count();
-  }
-  
-  /**
-   * 获取 Reviews 结果数量
-   */
-  async getReviewsResultsCount(): Promise<number> {
-    if (!await this.hasReviewsResults()) return 0;
-    
-    const container = this.page.locator('div:has-text("Reviews 分析结果")').first();
-    return await container.locator(this.resultCard).count();
-  }
-  
-  /**
-   * 获取指定结果卡片的标题
-   */
-  async getResultCardTitle(index: number): Promise<string> {
-    const card = this.page.locator(this.resultCard).nth(index);
-    return await card.locator('h3').textContent() || '';
+  async getResultCardCount(): Promise<number> {
+    return await this.count(this.selectors.resultCard);
   }
 
-  // ========== JSON 查看器 ==========
-  
   /**
-   * 切换 JSON 查看器
+   * 获取特定结果卡片的标题
+   * 
+   * @param index - 卡片索引
    */
-  async toggleJsonViewer(): Promise<void> {
-    await this.click(this.jsonViewerToggle);
-    await this.wait(500);
+  async getResultTitle(index: number): Promise<string> {
+    const card = this.page.locator(this.selectors.resultCard).nth(index);
+    return await card.locator(this.selectors.resultTitle).textContent() || '';
   }
-  
+
   /**
-   * 检查 JSON 查看器是否展开
+   * 获取分析结果摘要
    */
-  async isJsonViewerExpanded(): Promise<boolean> {
-    return await this.isVisible(this.jsonViewerContent);
-  }
-  
-  /**
-   * 获取 JSON 内容
-   */
-  async getJsonContent(): Promise<string> {
-    if (!await this.isJsonViewerExpanded()) {
-      await this.toggleJsonViewer();
+  async getAnalysisResultsSummary(): Promise<string[]> {
+    const cards = this.page.locator(this.selectors.resultCard);
+    const count = await cards.count();
+    
+    const summaries: string[] = [];
+    for (let i = 0; i < count; i++) {
+      const title = await this.getResultTitle(i);
+      summaries.push(title);
     }
-    return await this.getText(this.jsonViewerContent);
-  }
-  
-  /**
-   * 复制 JSON
-   */
-  async copyJson(): Promise<void> {
-    await this.click(this.copyJsonButton);
-    await this.wait(300);
-  }
-  
-  /**
-   * 复制 Markdown
-   */
-  async copyMarkdown(): Promise<void> {
-    await this.click(this.copyMarkdownButton);
-    await this.wait(300);
-  }
-  
-  /**
-   * 下载 JSON
-   */
-  async downloadJson(): Promise<void> {
-    const [download] = await Promise.all([
-      this.page.waitForEvent('download'),
-      this.click(this.downloadJsonButton)
-    ]);
-    return download;
-  }
-
-  // ========== 提示词预览 ==========
-  
-  /**
-   * 切换提示词预览面板
-   */
-  async togglePromptPanel(): Promise<void> {
-    await this.click(this.promptPanelToggle);
-    await this.wait(500);
-  }
-  
-  /**
-   * 检查提示词面板是否展开
-   */
-  async isPromptPanelExpanded(): Promise<boolean> {
-    return await this.isVisible(this.promptPanel);
-  }
-  
-  /**
-   * 获取提示词数量
-   */
-  async getPromptCount(): Promise<number> {
-    if (!await this.isPromptPanelExpanded()) {
-      await this.togglePromptPanel();
-    }
-    return await this.page.locator('.bg-slate-900.rounded-xl').count();
-  }
-
-  // ========== 验证方法 ==========
-  
-  /**
-   * 检查是否准备就绪（可以开始分析）
-   */
-  async isReady(): Promise<boolean> {
-    const hasData = await this.hasAvailableData();
-    const selectedAsins = await this.getSelectedAsinsCount();
-    const selectedTargets = await this.getSelectedTargetsCount();
     
-    return hasData && selectedAsins > 0 && selectedTargets > 0;
+    return summaries;
   }
-  
+
+  /**
+   * 展开结果详情
+   * 
+   * @param index - 结果卡片索引
+   */
+  async expandResultDetails(index: number): Promise<void> {
+    const card = this.page.locator(this.selectors.resultCard).nth(index);
+    const expandButton = card.locator('button').first();
+    await expandButton.click();
+    await this.wait(300); // 等待展开动画
+  }
+
+  // ========== 导出方法 ==========
+
+  /**
+   * 导出报告
+   */
+  async exportReport(): Promise<void> {
+    await this.click(this.selectors.exportButton);
+  }
+
+  /**
+   * 导出 JSON 格式报告
+   */
+  async exportJson(): Promise<void> {
+    await this.click(this.selectors.exportJsonButton);
+  }
+
+  /**
+   * 导出 Markdown 格式报告
+   */
+  async exportMarkdown(): Promise<void> {
+    await this.click(this.selectors.exportMarkdownButton);
+  }
+
+  /**
+   * 清空分析结果
+   */
+  async clearResults(): Promise<void> {
+    await this.click(this.selectors.clearResultsButton);
+  }
+
+  // ========== 数据源方法 ==========
+
+  /**
+   * 检查是否显示数据源横幅
+   */
+  async hasDataSourceBanner(): Promise<boolean> {
+    return await this.isVisible(this.selectors.dataSourceBanner);
+  }
+
   /**
    * 获取数据源信息
    */
-  async getDataSourceInfo(): Promise<{
-    hasData: boolean;
-    productCount: number;
-    reviewCount: number;
-  }> {
-    const hasData = await this.hasAvailableData();
-    
-    if (!hasData) {
-      return { hasData: false, productCount: 0, reviewCount: 0 };
+  async getDataSourceInfo(): Promise<string> {
+    if (await this.hasDataSourceBanner()) {
+      return await this.getText(this.selectors.dataSourceInfo);
     }
+    return '';
+  }
+
+  // ========== 验证方法 ==========
+
+  /**
+   * 验证欢迎横幅是否可见
+   */
+  async isWelcomeBannerVisible(): Promise<boolean> {
+    return await this.isVisible(this.selectors.welcomeBanner);
+  }
+
+  /**
+   * 验证 ASIN 卡片是否可见
+   */
+  async isAsinCardVisible(): Promise<boolean> {
+    return await this.isVisible(this.selectors.asinCard);
+  }
+
+  /**
+   * 验证目标卡片是否可见
+   */
+  async isTargetCardVisible(): Promise<boolean> {
+    return await this.isVisible(this.selectors.targetCard);
+  }
+
+  /**
+   * 验证是否可以开始分析
+   */
+  async canStartAnalysis(): Promise<boolean> {
+    const hasAsins = (await this.getSelectedAsinCount()) > 0;
+    const hasTargets = (await this.getSelectedTargetCount()) > 0;
+    const isEnabled = await this.isAnalysisButtonEnabled();
     
-    // 从数据源横幅获取信息
-    const banner = this.page.locator('div[class*="bg-gradient-to-r from-indigo-50"]').first();
-    const text = await banner.textContent() || '';
-    
-    const productMatch = text.match(/(\d+)\s*个产品/);
-    const reviewMatch = text.match(/(\d+)\s*条评论/);
-    
-    return {
-      hasData: true,
-      productCount: productMatch ? parseInt(productMatch[1]) : 0,
-      reviewCount: reviewMatch ? parseInt(reviewMatch[1]) : 0
-    };
+    return hasAsins && hasTargets && isEnabled;
+  }
+
+  // ========== 完整流程方法 ==========
+
+  /**
+   * 完整的分析流程
+   * 
+   * @param config - 分析配置
+   * @returns 分析结果摘要
+   */
+  async completeAnalysisFlow(config: AnalysisConfig): Promise<string[]> {
+    // 1. 选择 ASIN
+    if (config.asins && config.asins.length > 0) {
+      await this.selectAsins(config.asins);
+    } else {
+      await this.selectAllAsins();
+    }
+
+    // 2. 选择分析目标
+    if (config.targets && config.targets.length > 0) {
+      await this.selectTargets(config.targets);
+    } else {
+      await this.selectAllTargets();
+    }
+
+    // 3. 开始分析
+    await this.startAnalysis();
+
+    // 4. 等待完成
+    await this.waitForAnalysisComplete();
+
+    // 5. 返回结果摘要
+    return await this.getAnalysisResultsSummary();
+  }
+
+  /**
+   * 快速分析（使用默认配置）
+   * 
+   * @returns 分析结果摘要
+   */
+  async quickAnalysis(): Promise<string[]> {
+    return await this.completeAnalysisFlow({});
   }
 }
