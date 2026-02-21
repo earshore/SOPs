@@ -29,12 +29,22 @@ export async function mount(container: HTMLElement): Promise<void> {
         const html = await loadTemplate('src/modules/app_center/views/master_analysis/scraper/template.html');
         container.innerHTML = html;
 
-        // 2. 初始化 Alpine.js 组件
-        if (window.Alpine) {
-            // 注册 Alpine 组件
+        // 2. 初始化 Alpine.js 组件 (带防御性检查)
+        if (typeof window.Alpine === 'undefined') {
+            console.warn('[Scraper] ⚠️ Alpine.js 未加载，延迟注册组件');
+            // 延迟注册,等待 Alpine 加载
+            setTimeout(() => {
+                if (window.Alpine && typeof window.Alpine.data === 'function') {
+                    window.Alpine.data('scraperPanel', createScraperPanel);
+                    console.log('[Scraper] ✅ Alpine 组件延迟注册成功');
+                }
+            }, 100);
+        } else if (typeof window.Alpine.data === 'function') {
+            // 立即注册
             window.Alpine.data('scraperPanel', createScraperPanel);
+            console.log('[Scraper] ✅ Alpine 组件注册成功');
         } else {
-            console.warn('[Scraper] ⚠️ Alpine.js 未加载');
+            console.error('[Scraper] ❌ Alpine.data 方法不可用');
         }
 
         console.log('[Scraper] ✅ 子模块挂载成功');
@@ -85,10 +95,27 @@ function getScraperPanelInstance(): any {
 
 /**
  * 初始化 Alpine Scraper 组件（向后兼容）
+ * 包含防御性检查和重试机制
  */
 export function initAlpineScraper(): void {
-    if (window.Alpine) {
+    if (typeof window.Alpine === 'undefined') {
+        console.warn('[Scraper] Alpine.js not loaded yet, retrying...');
+        const retryCount = (window as any).__alpineScraperRetryCount || 0;
+        if (retryCount < 10) {
+            (window as any).__alpineScraperRetryCount = retryCount + 1;
+            setTimeout(initAlpineScraper, 100);
+        } else {
+            console.error('[Scraper] Alpine.js failed to load after 10 retries');
+        }
+        return;
+    }
+    
+    if (typeof window.Alpine.data === 'function') {
         window.Alpine.data('scraperPanel', createScraperPanel);
+        console.log('[Scraper] ✅ Alpine component registered');
+        delete (window as any).__alpineScraperRetryCount;
+    } else {
+        console.error('[Scraper] Alpine.data is not a function');
     }
 }
 

@@ -429,11 +429,40 @@ const SettingsPanel = (): SettingsPanelData => ({
 // Initialization & Exports
 // ==========================================
 
+/**
+ * 初始化 Alpine.js 设置组件
+ * 包含防御性检查和重试机制,确保在生产环境中正确注册
+ */
 export function initAlpineSettings(): void {
-    if (window.Alpine) {
+    // 防御性检查: 确保 Alpine.js 已加载
+    if (typeof window.Alpine === 'undefined') {
+        console.warn('[Settings] Alpine.js not loaded yet, retrying in 100ms...');
+        // 延迟重试,最多重试 10 次
+        const retryCount = (window as any).__alpineRetryCount || 0;
+        if (retryCount < 10) {
+            (window as any).__alpineRetryCount = retryCount + 1;
+            setTimeout(initAlpineSettings, 100);
+        } else {
+            console.error('[Settings] Alpine.js failed to load after 10 retries');
+        }
+        return;
+    }
+    
+    // 确保 Alpine.data 方法可用
+    if (typeof window.Alpine.data !== 'function') {
+        console.error('[Settings] Alpine.data is not a function');
+        return;
+    }
+    
+    try {
+        // 注册 settingsPanel 组件
         window.Alpine.data('settingsPanel', SettingsPanel);
-    } else {
-        console.error('Alpine not found!');
+        console.log('[Settings] ✅ Alpine component "settingsPanel" registered successfully');
+        
+        // 清理重试计数器
+        delete (window as any).__alpineRetryCount;
+    } catch (error) {
+        console.error('[Settings] Failed to register Alpine component:', error);
     }
 }
 

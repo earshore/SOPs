@@ -104,9 +104,14 @@ import './modules/app_center/app_center';
 
 // ✅ Alpine.js
 import Alpine from 'alpinejs';
-// 仅开发环境暴露到window
+
+// 🔧 关键修复: 确保 Alpine 在所有环境下都可通过 window.Alpine 访问
+// 这对于动态注册组件至关重要
+window.Alpine = Alpine;
+
+// 开发环境额外日志
 if (import.meta.env.DEV) {
-  window.Alpine = Alpine;
+  console.log('[Alpine] ✅ Alpine.js loaded and exposed to window');
 }
 
 // ========================
@@ -145,9 +150,17 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     // 初始化成功，继续启动流程
     // ================================================================
     
-    // 初始化Alpine.js
+    // ✅ 关键修复: 在所有异步操作之前初始化 Alpine.js
+    // 确保 Alpine 组件在 DOM 操作之前就已经注册
+    console.log("🎨 Initializing Alpine.js...");
+    
+    // 1. 注册所有 Alpine 组件 (必须在 Alpine.start() 之前)
     initAlpineSettings();
+    console.log("✅ Alpine components registered");
+    
+    // 2. 启动 Alpine.js
     Alpine.start();
+    console.log("✅ Alpine.js started");
     
     // 初始化视图
     await initViews();

@@ -29,9 +29,22 @@ export async function mount(container: HTMLElement): Promise<void> {
     const html = await loadTemplate('src/modules/app_center/views/master_analysis/ai_analysis/template.html');
     container.innerHTML = html;
 
-    // 3. 初始化 Alpine.js 组件
-    if (window.Alpine) {
+    // 3. 初始化 Alpine.js 组件 (带防御性检查)
+    if (typeof window.Alpine === 'undefined') {
+      console.warn('[AI智能分析] ⚠️ Alpine.js 未加载，延迟注册组件');
+      // 延迟注册,等待 Alpine 加载
+      setTimeout(() => {
+        if (window.Alpine && typeof window.Alpine.data === 'function') {
+          window.Alpine.data('aiAnalysisPanel', () => createAiAnalysisPanel(moduleState));
+          console.log('[AI智能分析] ✅ Alpine 组件延迟注册成功');
+        }
+      }, 100);
+    } else if (typeof window.Alpine.data === 'function') {
+      // 立即注册
       window.Alpine.data('aiAnalysisPanel', () => createAiAnalysisPanel(moduleState));
+      console.log('[AI智能分析] ✅ Alpine 组件注册成功');
+    } else {
+      console.error('[AI智能分析] ❌ Alpine.data 方法不可用');
     }
 
     console.log('[AI智能分析] ✅ 模块挂载成功');
