@@ -44,8 +44,10 @@ interface GlassColorScheme {
   versionText: string;
   tagBg: string;
   tagText: string;
-  /** hover 时浮现的配色边框 */
-  hoverBorder: string;
+  /** 默认细线边框 */
+  defaultBorder: string;
+  /** hover 时的高亮背景 */
+  hoverBg: string;
 }
 
 const GLASS_COLORS: Record<string, GlassColorScheme> = {
@@ -57,7 +59,19 @@ const GLASS_COLORS: Record<string, GlassColorScheme> = {
     versionText: 'text-blue-600',
     tagBg: 'bg-blue-500/8',
     tagText: 'text-blue-600/80',
-    hoverBorder: 'group-hover/card:border-blue-300/50',
+    defaultBorder: 'border-blue-200/40',
+    hoverBg: 'group-hover/card:bg-blue-50/60',
+  },
+  sky: {
+    glow: 'from-sky-200/40 via-blue-100/20 to-transparent',
+    iconBg: 'bg-gradient-to-br from-sky-500 to-blue-600',
+    iconShadow: 'shadow-sky-500/30',
+    versionBg: 'bg-sky-500/10',
+    versionText: 'text-sky-600',
+    tagBg: 'bg-sky-500/8',
+    tagText: 'text-sky-600/80',
+    defaultBorder: 'border-sky-200/40',
+    hoverBg: 'group-hover/card:bg-sky-50/60',
   },
   indigo: {
     glow: 'from-indigo-200/40 via-violet-100/20 to-transparent',
@@ -67,7 +81,8 @@ const GLASS_COLORS: Record<string, GlassColorScheme> = {
     versionText: 'text-indigo-600',
     tagBg: 'bg-indigo-500/8',
     tagText: 'text-indigo-600/80',
-    hoverBorder: 'group-hover/card:border-indigo-300/50',
+    defaultBorder: 'border-indigo-200/40',
+    hoverBg: 'group-hover/card:bg-indigo-50/60',
   },
   violet: {
     glow: 'from-violet-200/40 via-purple-100/20 to-transparent',
@@ -77,7 +92,8 @@ const GLASS_COLORS: Record<string, GlassColorScheme> = {
     versionText: 'text-violet-600',
     tagBg: 'bg-violet-500/8',
     tagText: 'text-violet-600/80',
-    hoverBorder: 'group-hover/card:border-violet-300/50',
+    defaultBorder: 'border-violet-200/40',
+    hoverBg: 'group-hover/card:bg-violet-50/60',
   },
   purple: {
     glow: 'from-purple-200/40 via-pink-100/20 to-transparent',
@@ -87,7 +103,19 @@ const GLASS_COLORS: Record<string, GlassColorScheme> = {
     versionText: 'text-purple-600',
     tagBg: 'bg-purple-500/8',
     tagText: 'text-purple-600/80',
-    hoverBorder: 'group-hover/card:border-purple-300/50',
+    defaultBorder: 'border-purple-200/40',
+    hoverBg: 'group-hover/card:bg-purple-50/60',
+  },
+  fuchsia: {
+    glow: 'from-fuchsia-200/40 via-pink-100/20 to-transparent',
+    iconBg: 'bg-gradient-to-br from-fuchsia-500 to-pink-600',
+    iconShadow: 'shadow-fuchsia-500/30',
+    versionBg: 'bg-fuchsia-500/10',
+    versionText: 'text-fuchsia-600',
+    tagBg: 'bg-fuchsia-500/8',
+    tagText: 'text-fuchsia-600/80',
+    defaultBorder: 'border-fuchsia-200/40',
+    hoverBg: 'group-hover/card:bg-fuchsia-50/60',
   },
   emerald: {
     glow: 'from-emerald-200/40 via-teal-100/20 to-transparent',
@@ -97,7 +125,8 @@ const GLASS_COLORS: Record<string, GlassColorScheme> = {
     versionText: 'text-emerald-600',
     tagBg: 'bg-emerald-500/8',
     tagText: 'text-emerald-600/80',
-    hoverBorder: 'group-hover/card:border-emerald-300/50',
+    defaultBorder: 'border-emerald-200/40',
+    hoverBg: 'group-hover/card:bg-emerald-50/60',
   },
   teal: {
     glow: 'from-teal-200/40 via-cyan-100/20 to-transparent',
@@ -107,7 +136,8 @@ const GLASS_COLORS: Record<string, GlassColorScheme> = {
     versionText: 'text-teal-600',
     tagBg: 'bg-teal-500/8',
     tagText: 'text-teal-600/80',
-    hoverBorder: 'group-hover/card:border-teal-300/50',
+    defaultBorder: 'border-teal-200/40',
+    hoverBg: 'group-hover/card:bg-teal-50/60',
   },
   green: {
     glow: 'from-green-200/40 via-emerald-100/20 to-transparent',
@@ -117,7 +147,19 @@ const GLASS_COLORS: Record<string, GlassColorScheme> = {
     versionText: 'text-green-600',
     tagBg: 'bg-green-500/8',
     tagText: 'text-green-600/80',
-    hoverBorder: 'group-hover/card:border-green-300/50',
+    defaultBorder: 'border-green-200/40',
+    hoverBg: 'group-hover/card:bg-green-50/60',
+  },
+  lime: {
+    glow: 'from-lime-200/40 via-green-100/20 to-transparent',
+    iconBg: 'bg-gradient-to-br from-lime-500 to-green-600',
+    iconShadow: 'shadow-lime-500/30',
+    versionBg: 'bg-lime-500/10',
+    versionText: 'text-lime-600',
+    tagBg: 'bg-lime-500/8',
+    tagText: 'text-lime-600/80',
+    defaultBorder: 'border-lime-200/40',
+    hoverBg: 'group-hover/card:bg-lime-50/60',
   },
   amber: {
     glow: 'from-amber-200/40 via-orange-100/20 to-transparent',
@@ -127,7 +169,8 @@ const GLASS_COLORS: Record<string, GlassColorScheme> = {
     versionText: 'text-amber-600',
     tagBg: 'bg-amber-500/8',
     tagText: 'text-amber-600/80',
-    hoverBorder: 'group-hover/card:border-amber-300/50',
+    defaultBorder: 'border-amber-200/40',
+    hoverBg: 'group-hover/card:bg-amber-50/60',
   },
   orange: {
     glow: 'from-orange-200/40 via-amber-100/20 to-transparent',
@@ -137,7 +180,8 @@ const GLASS_COLORS: Record<string, GlassColorScheme> = {
     versionText: 'text-orange-600',
     tagBg: 'bg-orange-500/8',
     tagText: 'text-orange-600/80',
-    hoverBorder: 'group-hover/card:border-orange-300/50',
+    defaultBorder: 'border-orange-200/40',
+    hoverBg: 'group-hover/card:bg-orange-50/60',
   },
   red: {
     glow: 'from-red-200/40 via-rose-100/20 to-transparent',
@@ -147,7 +191,8 @@ const GLASS_COLORS: Record<string, GlassColorScheme> = {
     versionText: 'text-red-600',
     tagBg: 'bg-red-500/8',
     tagText: 'text-red-600/80',
-    hoverBorder: 'group-hover/card:border-red-300/50',
+    defaultBorder: 'border-red-200/40',
+    hoverBg: 'group-hover/card:bg-red-50/60',
   },
   rose: {
     glow: 'from-rose-200/40 via-pink-100/20 to-transparent',
@@ -157,7 +202,8 @@ const GLASS_COLORS: Record<string, GlassColorScheme> = {
     versionText: 'text-rose-600',
     tagBg: 'bg-rose-500/8',
     tagText: 'text-rose-600/80',
-    hoverBorder: 'group-hover/card:border-rose-300/50',
+    defaultBorder: 'border-rose-200/40',
+    hoverBg: 'group-hover/card:bg-rose-50/60',
   },
   pink: {
     glow: 'from-pink-200/40 via-rose-100/20 to-transparent',
@@ -167,7 +213,8 @@ const GLASS_COLORS: Record<string, GlassColorScheme> = {
     versionText: 'text-pink-600',
     tagBg: 'bg-pink-500/8',
     tagText: 'text-pink-600/80',
-    hoverBorder: 'group-hover/card:border-pink-300/50',
+    defaultBorder: 'border-pink-200/40',
+    hoverBg: 'group-hover/card:bg-pink-50/60',
   },
   cyan: {
     glow: 'from-cyan-200/40 via-blue-100/20 to-transparent',
@@ -177,7 +224,8 @@ const GLASS_COLORS: Record<string, GlassColorScheme> = {
     versionText: 'text-cyan-600',
     tagBg: 'bg-cyan-500/8',
     tagText: 'text-cyan-600/80',
-    hoverBorder: 'group-hover/card:border-cyan-300/50',
+    defaultBorder: 'border-cyan-200/40',
+    hoverBg: 'group-hover/card:bg-cyan-50/60',
   },
   slate: {
     glow: 'from-slate-200/30 via-gray-100/15 to-transparent',
@@ -187,7 +235,8 @@ const GLASS_COLORS: Record<string, GlassColorScheme> = {
     versionText: 'text-slate-600',
     tagBg: 'bg-slate-500/8',
     tagText: 'text-slate-600/80',
-    hoverBorder: 'group-hover/card:border-slate-300/50',
+    defaultBorder: 'border-slate-200/40',
+    hoverBg: 'group-hover/card:bg-slate-50/60',
   },
 };
 
@@ -211,12 +260,16 @@ interface CardOptions {
 }
 
 /**
- * 毛玻璃卡片
+ * 毛玻璃卡片 v3.2
+ *
+ * 默认状态:
+ * - 细线边框 (对应颜色的淡色边框)
+ * - 白色半透明背景
  *
  * hover 变化 (4 个):
  * 1. translate-y  -2px
- * 2. bg-white/60 → bg-white/80 (玻璃变清晰)
- * 3. border-white/60 → border-{color}-300/50 (配色边框浮现)
+ * 2. bg-white/60 → bg-{color}-50/60 (对应颜色的高亮背景)
+ * 3. border 保持细线边框
  * 4. arrow opacity 0 → 1
  */
 function renderCard(opts: CardOptions): string {
@@ -242,14 +295,13 @@ function renderCard(opts: CardOptions): string {
         hover:-translate-y-0.5
         active:translate-y-0">
 
-      <!-- Layer 1: Frosted glass + color-tinted hover border -->
+      <!-- Layer 1: Frosted glass + default border + hover bg -->
       <div class="absolute inset-0
         bg-white/60 backdrop-blur-xl
-        border border-white/60
-        ${g.hoverBorder}
+        ${g.hoverBg}
+        border ${g.defaultBorder}
         rounded-2xl
         shadow-sm shadow-slate-200/50
-        group-hover/card:bg-white/80
         group-hover/card:shadow-md group-hover/card:shadow-slate-200/60
         transition-all duration-300"></div>
 
@@ -439,7 +491,7 @@ export function renderMegaMenu(): void {
         target: targetRoute,
         label: mod.title || 'Unknown Module',
         icon: mod.icon || 'fas fa-cube',
-        color: (mod as any).color || 'blue',
+        color: (mod as any).themeColor || 'blue', // ✅ 修复：使用 themeColor 字段
         version: mod.version || 'v1.0',
         description: mod.description || '暂无描述',
       });
@@ -453,36 +505,39 @@ export function renderMegaMenu(): void {
 }
 
 export function renderSopsMegaMenu(): void {
+  const sopsModule = MENU_CONFIG.modules['sops'];
   renderCategoryMenu({
     containerId: 'sops-mega-menu-content',
     overviewRouteId: 'sops_overview',
     overviewLabel: 'SOP 总览',
     overviewDescription: '掌控全局运营进度，查看所有待办事项与核心指标仪表盘。',
-    overviewColor: 'blue',
+    overviewColor: (sopsModule?.themeColor as ColorSchemeName) || 'emerald',
     categories: MENU_CONFIG.sopCategories || {},
     logLabel: 'SOPs MegaMenu',
   });
 }
 
 export function renderHubMegaMenu(): void {
+  const hubModule = MENU_CONFIG.modules['amz_hub_core'];
   renderCategoryMenu({
     containerId: 'hub-mega-menu-content',
     overviewRouteId: 'amz_hub_overview',
     overviewLabel: '智库总览',
     overviewDescription: '系统化的Amazon运营知识体系，从基础认知到进阶策略。',
-    overviewColor: 'blue',
+    overviewColor: (hubModule?.themeColor as ColorSchemeName) || 'orange',
     categories: MENU_CONFIG.hubCategories || {},
     logLabel: 'Hub MegaMenu',
   });
 }
 
 export function renderMoreMenu(): void {
+  const moreModule = MENU_CONFIG.modules['more_core'];
   renderCategoryMenu({
     containerId: 'more-menu-content',
     overviewRouteId: 'more_overview',
     overviewLabel: '更多总览',
     overviewDescription: '探索更多实用功能和工具，提升工作效率。',
-    overviewColor: 'green',
+    overviewColor: (moreModule?.themeColor as ColorSchemeName) || 'green',
     categories: MENU_CONFIG.moreCategories || {},
     logLabel: 'More Menu',
   });

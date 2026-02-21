@@ -8,6 +8,8 @@ import { analysisTargets } from '../config/analysisTargets';
 import { checkAndLoadScraperData, checkLoadedReport, loadHistoricalReport } from './dataLoaders';
 import { formatHistoryDate } from '../services/reportGenerator';
 import { getTargetColor, getPromptText } from './helpers';
+import { getPromptTokenCount, getFormattedTokenCount } from './helpers';
+import { formatTokenCount } from '../utils/tokenCounter';
 import { highlightJson } from '../services/reportGenerator';
 import { convertScraperDataToProduct } from '../utils/dataTransformers';
 import { getProductByAsin, Product } from '../config/sampleData';
@@ -181,6 +183,14 @@ export function createAiAnalysisPanel(moduleState: any) {
 
     getPromptText(targetId: string): string {
       return getPromptText(targetId, this.currentProducts);
+    },
+
+    getPromptTokenCount(targetId: string): number {
+      return getPromptTokenCount(targetId, this.currentProducts);
+    },
+
+    getFormattedTokenCount(targetId: string): string {
+      return getFormattedTokenCount(targetId, this.currentProducts);
     },
 
     highlightJson(json: string): string {
@@ -377,6 +387,25 @@ export function createAiAnalysisPanel(moduleState: any) {
         results: this.results,
         analysisReport: this.analysisReport
       };
+    },
+
+    /**
+     * 所有选中任务的总 token 数
+     */
+    get totalTokenCount(): number {
+      if (this.selectedTargets.length === 0 || this.currentProducts.length === 0) {
+        return 0;
+      }
+      return this.selectedTargets.reduce((total: number, targetId: string) => {
+        return total + getPromptTokenCount(targetId, this.currentProducts);
+      }, 0);
+    },
+
+    /**
+     * 格式化的总 token 数
+     */
+    get formattedTotalTokenCount(): string {
+      return formatTokenCount(this.totalTokenCount);
     }
   };
   

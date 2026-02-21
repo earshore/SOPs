@@ -3,6 +3,7 @@
 // 🎯 统一数据持久化服务（TypeScript版本）
 // 替代分散的 localStorage 直接调用
 // 🎯 P0-4: 已迁移到统一错误处理
+// 🎯 DI改造：移除Logger依赖，使用console直接输出
 // ================================================================
 
 import type { IStorageService } from '../types/services';
@@ -65,6 +66,7 @@ export interface AccessTimeRecord {
 
 /**
  * 存储服务类
+ * 🎯 DI改造：无依赖，保持原样
  */
 class StorageServiceClass implements IStorageService {
   private _lruConfig: LRUConfig;
@@ -303,6 +305,7 @@ class StorageServiceClass implements IStorageService {
 
   /**
    * 获取所有键的访问时间
+   * 🎯 DI改造：移除Logger依赖
    */
   private _getAccessTimes(): AccessTimeRecord[] {
     const items: AccessTimeRecord[] = [];
@@ -325,7 +328,7 @@ class StorageServiceClass implements IStorageService {
         }
       }
     } catch (e) {
-      console.warn('[StorageService] 获取访问时间失败:', e);
+      console.warn('[StorageService] 获取访问时间失败', e);
     }
     
     return items.sort((a, b) => a.accessTime - b.accessTime);
@@ -333,6 +336,7 @@ class StorageServiceClass implements IStorageService {
 
   /**
    * 检查缓存大小
+   * 🎯 DI改造：移除Logger依赖
    */
   private _checkCacheSize(newItemSize: number): void {
     const usage = this.getUsage();
@@ -340,13 +344,17 @@ class StorageServiceClass implements IStorageService {
     const threshold = this._lruConfig.maxSize * this._lruConfig.warningThreshold;
     
     if (projectedUsage > threshold) {
-      console.warn(`[StorageService] 缓存使用量接近上限 (${(projectedUsage / 1024 / 1024).toFixed(2)}MB / ${(this._lruConfig.maxSize / 1024 / 1024).toFixed(2)}MB)，开始清理...`);
+      console.warn('[StorageService] 缓存使用量接近上限，开始清理', {
+        current: `${(projectedUsage / 1024 / 1024).toFixed(2)}MB`,
+        max: `${(this._lruConfig.maxSize / 1024 / 1024).toFixed(2)}MB`
+      });
       this._cleanupLRU();
     }
   }
 
   /**
    * LRU清理策略
+   * 🎯 DI改造：移除Logger依赖，直接使用console
    */
   private _cleanupLRU(): void {
     try {
@@ -371,9 +379,12 @@ class StorageServiceClass implements IStorageService {
         }
       }
       
-      console.log(`[StorageService] LRU清理完成，删除了 ${removedCount} 个项目，释放了 ${((usage.used - currentSize) / 1024).toFixed(2)}KB`);
+      console.info('[StorageService] LRU清理完成', {
+        removedCount,
+        freedSpace: `${((usage.used - currentSize) / 1024).toFixed(2)}KB`
+      });
     } catch (e) {
-      console.error('[StorageService] LRU清理失败:', e);
+      console.error('[StorageService] LRU清理失败', e);
     }
   }
 
@@ -411,16 +422,17 @@ class StorageServiceClass implements IStorageService {
 
   /**
    * 处理存储空间超限
+   * 🎯 DI改造：移除Logger依赖
    */
   private _handleQuotaExceeded(): void {
-    console.warn('[StorageService] 存储空间不足，尝试清理数据...');
+    console.warn('[StorageService] 存储空间不足，尝试清理数据');
     
     this._cleanupLRU();
     
     const history = this.get<unknown[]>(STORAGE_KEYS.SCRAPE_HISTORY, []);
     if (history && history.length > 10) {
       this.set(STORAGE_KEYS.SCRAPE_HISTORY, history.slice(0, 10));
-      console.log('[StorageService] 清理了采集历史数据');
+      console.info('[StorageService] 清理了采集历史数据');
     }
   }
 
@@ -430,6 +442,7 @@ class StorageServiceClass implements IStorageService {
 
   /**
    * 获取 LLM 配置（包含加密的API密钥）
+   * 🎯 DI改造：移除Logger依赖
    */
   async getLLMConfigWithKey(provider: string | null = null): Promise<LLMProviderConfig | null> {
     const activeProvider = provider || this.get<string>(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
@@ -442,7 +455,7 @@ class StorageServiceClass implements IStorageService {
       const apiKey = await this.getSecure(`llm_key_${activeProvider}`, '');
       return { ...config, apiKey: apiKey || '' } as LLMProviderConfig;
     } catch (error) {
-      console.warn('[StorageService] Failed to decrypt API key:', error);
+      console.warn('[StorageService] Failed to decrypt API key', error);
       return { ...config, apiKey: '' } as LLMProviderConfig;
     }
   }
@@ -555,8 +568,19 @@ export const StorageService = new StorageServiceClass();
 // 默认导出
 export default StorageService;
 
-// 向后兼容：暴露到 window
-if (typeof window !== 'undefined') {
-  (window as Window & { StorageService?: StorageServiceClass; STORAGE_KEYS?: typeof STORAGE_KEYS }).StorageService = StorageService;
-  (window as Window & { StorageService?: StorageServiceClass; STORAGE_KEYS?: typeof STORAGE_KEYS }).STORAGE_KEYS = STORAGE_KEYS;
+// ================================================================
+// 🎯 DI容器工厂函数
+// ================================================================
+
+/**
+ * 创建StorageService实例的工厂函数
+ * @returns StorageService实例
+ */
+export function createStorageService(): IStorageService {
+  return new StorageServiceClass();
 }
+
+// ================================================================
+// 向后兼容：保留旧的单例导出
+// @deprecated 请使用DI容器获取服务实例
+// ================================================================

@@ -1,0 +1,2052 @@
+/**
+ * Mega Menu 超级下拉菜单
+ * 支持多列、分组、特色区域、嵌套等丰富布局
+ *
+ * 目录:
+ * 1.  CSS 变量
+ * 2.  面板容器 & 定位变体
+ * 3.  鼠标桥接区域
+ * 4.  面板内容
+ * 5.  进入 / 退出动画
+ * 6.  面板 Header
+ * 7.  面板 Body & 列布局
+ * 8.  分组 (Section / Group)
+ * 9.  菜单项
+ * 10. 菜单项 Icon
+ * 11. 菜单项文字 (Title / Description)
+ * 12. 菜单项徽章 & 标签
+ * 13. 菜单项变体（Featured / Highlighted / Disabled）
+ * 14. 分隔线
+ * 15. 面板 Footer
+ * 16. 特色区域 (Promo / CTA)
+ * 17. 标签页导航 (Tab-based)
+ * 18. 全宽 Mega Menu
+ * 19. 简单下拉变体 (Dropdown)
+ * 20. 嵌套子菜单 (Flyout)
+ * 21. 暗色模式
+ * 22. 响应式 (移动端抽屉转换)
+ * 23. 无障碍 & 减少动画
+ */
+
+
+/* ========================================
+   1. CSS 变量
+   ======================================== */
+:root {
+  /* 面板 */
+  --mega-menu-min-width:     560px;
+  --mega-menu-max-width:     900px;
+  --mega-menu-radius:        var(--radius-xl, 16px);
+  --mega-menu-padding:       var(--spacing-md, 16px);
+  --mega-menu-bg:            var(--color-bg-elevated, #ffffff);
+  --mega-menu-border:        var(--color-border-light, rgba(0, 0, 0, 0.06));
+  --mega-menu-shadow:        0 10px 40px -10px rgba(0, 0, 0, 0.12),
+                             0 4px 12px -2px rgba(0, 0, 0, 0.05);
+
+  /* 桥接区域 */
+  --mega-menu-bridge:        12px;
+
+  /* 菜单项 */
+  --mega-menu-item-radius:   var(--radius-md, 8px);
+  --mega-menu-item-padding:  10px 12px;
+  --mega-menu-item-gap:      12px;
+
+  /* Icon */
+  --mega-menu-icon-size:     36px;
+  --mega-menu-icon-radius:   var(--radius-md, 8px);
+  --mega-menu-icon-bg:       var(--color-bg-tertiary, #f3f4f6);
+
+  /* 动画 */
+  --mega-menu-duration:      0.25s;
+  --mega-menu-ease:          var(--ease-smooth);
+  --mega-menu-offset-y:      10px;
+
+  /* 列 */
+  --mega-menu-column-gap:    var(--spacing-xs, 8px);
+  --mega-menu-section-gap:   var(--spacing-md, 16px);
+}
+
+
+/* ========================================
+   2. 面板容器 & 定位变体
+   ======================================== */
+.mega-menu-panel {
+  position: absolute;
+  top: 100%;
+  z-index: var(--z-dropdown, 30);
+  min-width: var(--mega-menu-min-width);
+  max-width: var(--mega-menu-max-width);
+  padding-top: var(--mega-menu-bridge);
+}
+
+/* --- 居中 (默认) --- */
+.mega-menu-panel {
+  left: 50%;
+  transform: translateX(-50%);
+  transform-origin: top center;
+}
+
+/* --- 左对齐 --- */
+.mega-menu-panel--left {
+  left: 0;
+  transform: none;
+  transform-origin: top left;
+}
+
+/* --- 右对齐 --- */
+.mega-menu-panel--right {
+  left: auto;
+  right: 0;
+  transform: none;
+  transform-origin: top right;
+}
+
+/* --- 全宽 (稍后第18节详细定义) --- */
+.mega-menu-panel--full {
+  left: 0;
+  right: 0;
+  transform: none;
+  transform-origin: top center;
+  max-width: none;
+  min-width: auto;
+}
+
+
+/* ========================================
+   3. 鼠标桥接区域
+   防止鼠标从触发元素到面板之间丢失 hover
+   ======================================== */
+.mega-menu-panel::before {
+  content: '';
+  position: absolute;
+  top: calc(var(--mega-menu-bridge) * -0.5);
+  left: 0;
+  right: 0;
+  height: calc(var(--mega-menu-bridge) + 4px);
+  background: transparent;
+  /* 视觉调试: background: rgba(255, 0, 0, 0.05); */
+}
+
+
+/* ========================================
+   4. 面板内容
+   ======================================== */
+.mega-menu-content {
+  background: var(--mega-menu-bg);
+  border: 1px solid var(--mega-menu-border);
+  border-radius: var(--mega-menu-radius);
+  box-shadow: var(--mega-menu-shadow);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 带侧栏的内容 (左侧导航 + 右侧面板) */
+.mega-menu-content--with-sidebar {
+  flex-direction: row;
+}
+
+
+/* ========================================
+   5. 进入 / 退出动画
+   ======================================== */
+
+/* --- 默认居中定位的动画 --- */
+.mega-menu-enter {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(var(--mega-menu-offset-y));
+  transition:
+    opacity var(--mega-menu-duration) var(--mega-menu-ease),
+    transform var(--mega-menu-duration) var(--mega-menu-ease),
+    visibility 0s linear var(--mega-menu-duration);
+}
+
+/* hover 触发 */
+.group:hover > .mega-menu-enter,
+.mega-menu-enter[data-open="true"],
+.mega-menu-enter.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+  transition:
+    opacity var(--mega-menu-duration) var(--mega-menu-ease),
+    transform var(--mega-menu-duration) var(--mega-menu-ease),
+    visibility 0s linear 0s;
+}
+
+/* --- 左对齐的动画 --- */
+.mega-menu-panel--left .mega-menu-enter,
+.mega-menu-panel--left.mega-menu-enter {
+  transform: translateY(var(--mega-menu-offset-y));
+}
+
+.group:hover > .mega-menu-panel--left .mega-menu-enter,
+.group:hover > .mega-menu-panel--left.mega-menu-enter,
+.mega-menu-panel--left .mega-menu-enter[data-open="true"],
+.mega-menu-panel--left .mega-menu-enter.is-open,
+.mega-menu-panel--left.mega-menu-enter[data-open="true"],
+.mega-menu-panel--left.mega-menu-enter.is-open {
+  transform: translateY(0);
+}
+
+/* --- 右对齐的动画 --- */
+.mega-menu-panel--right .mega-menu-enter,
+.mega-menu-panel--right.mega-menu-enter {
+  transform: translateY(var(--mega-menu-offset-y));
+}
+
+.group:hover > .mega-menu-panel--right .mega-menu-enter,
+.group:hover > .mega-menu-panel--right.mega-menu-enter,
+.mega-menu-panel--right .mega-menu-enter[data-open="true"],
+.mega-menu-panel--right .mega-menu-enter.is-open,
+.mega-menu-panel--right.mega-menu-enter[data-open="true"],
+.mega-menu-panel--right.mega-menu-enter.is-open {
+  transform: translateY(0);
+}
+
+/* --- 缩放入场 (高级动画) --- */
+.mega-menu-enter--scale {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(6px) scale(0.96);
+  transition:
+    opacity var(--mega-menu-duration) var(--mega-menu-ease),
+    transform var(--mega-menu-duration) var(--ease-spring),
+    visibility 0s linear var(--mega-menu-duration);
+}
+
+.group:hover > .mega-menu-enter--scale,
+.mega-menu-enter--scale[data-open="true"],
+.mega-menu-enter--scale.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0) scale(1);
+  transition:
+    opacity var(--mega-menu-duration) var(--mega-menu-ease),
+    transform var(--mega-menu-duration) var(--ease-spring),
+    visibility 0s linear 0s;
+}
+
+
+/* ========================================
+   6. 面板 Header
+   ======================================== */
+.mega-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md, 16px);
+  padding: var(--mega-menu-padding);
+  padding-bottom: var(--spacing-sm, 12px);
+  border-bottom: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.06));
+}
+
+.mega-menu-header-title {
+  font-size: var(--text-sm, 0.8125rem);
+  font-weight: var(--font-semibold, 600);
+  color: var(--color-text-primary, #1a1a2e);
+  margin: 0;
+}
+
+.mega-menu-header-subtitle {
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--color-text-tertiary, #9ca3af);
+  margin-top: 2px;
+}
+
+/* Header 带搜索框 */
+.mega-menu-search {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs, 8px);
+  padding: 6px 10px;
+  border-radius: var(--radius-md, 8px);
+  border: 1px solid var(--color-border-default, rgba(0, 0, 0, 0.1));
+  background: var(--color-bg-primary, #ffffff);
+  font-size: var(--text-sm, 0.8125rem);
+  color: var(--color-text-primary, #1a1a2e);
+  flex: 1;
+  max-width: 240px;
+}
+
+.mega-menu-search input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: inherit;
+  color: inherit;
+  width: 100%;
+}
+
+.mega-menu-search input::placeholder {
+  color: var(--color-text-placeholder, #9ca3af);
+}
+
+.mega-menu-search-icon {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  color: var(--color-text-tertiary, #9ca3af);
+}
+
+/* Header 关闭按钮 (移动端使用) */
+.mega-menu-close {
+  display: none;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md, 8px);
+  background: transparent;
+  color: var(--color-text-tertiary, #9ca3af);
+  cursor: pointer;
+  border: none;
+  transition: background-color var(--duration-fast, 200ms) var(--ease-smooth);
+}
+
+.mega-menu-close:hover {
+  background: var(--color-bg-hover, rgba(0, 0, 0, 0.04));
+  color: var(--color-text-primary, #1a1a2e);
+}
+
+
+/* ========================================
+   7. 面板 Body & 列布局
+   ======================================== */
+.mega-menu-body {
+  padding: var(--mega-menu-padding);
+}
+
+/* --- 自动列布局 --- */
+.mega-menu-columns {
+  display: grid;
+  gap: var(--mega-menu-column-gap);
+  padding: var(--mega-menu-padding);
+}
+
+.mega-menu-columns--2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.mega-menu-columns--3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.mega-menu-columns--4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* 列宽不等 (如 2:1) */
+.mega-menu-columns--2-1 {
+  grid-template-columns: 2fr 1fr;
+}
+
+.mega-menu-columns--1-2 {
+  grid-template-columns: 1fr 2fr;
+}
+
+/* 列宽不等 (如 3:1) */
+.mega-menu-columns--3-1 {
+  grid-template-columns: 3fr 1fr;
+}
+
+/* 分隔列之间的线 */
+.mega-menu-columns--divided > * {
+  padding-right: var(--mega-menu-column-gap);
+}
+
+.mega-menu-columns--divided > *:not(:last-child) {
+  border-right: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.06));
+}
+
+.mega-menu-columns--divided > *:last-child {
+  padding-right: 0;
+}
+
+/* 跨列 */
+.mega-menu-col-span-2 {
+  grid-column: span 2;
+}
+
+.mega-menu-col-span-full {
+  grid-column: 1 / -1;
+}
+
+/* --- 侧栏布局 (左侧导航 + 右侧内容) --- */
+.mega-menu-sidebar {
+  width: 200px;
+  flex-shrink: 0;
+  padding: var(--mega-menu-padding);
+  border-right: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.06));
+  background: var(--color-bg-secondary, #fafafa);
+  border-radius: var(--mega-menu-radius) 0 0 var(--mega-menu-radius);
+}
+
+.mega-menu-sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs, 8px);
+  padding: 8px 10px;
+  border-radius: var(--radius-md, 8px);
+  font-size: var(--text-sm, 0.8125rem);
+  font-weight: var(--font-medium, 500);
+  color: var(--color-text-secondary, #6b7280);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast, 200ms) var(--ease-smooth),
+    color var(--duration-fast, 200ms) var(--ease-smooth);
+}
+
+.mega-menu-sidebar-item:hover {
+  background: var(--color-bg-hover, rgba(0, 0, 0, 0.04));
+  color: var(--color-text-primary, #1a1a2e);
+}
+
+.mega-menu-sidebar-item--active,
+.mega-menu-sidebar-item[aria-selected="true"] {
+  background: var(--color-primary-light, rgba(59, 130, 246, 0.08));
+  color: var(--color-primary, #3b82f6);
+  font-weight: var(--font-semibold, 600);
+}
+
+.mega-menu-sidebar-item__icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+}
+
+/* 侧栏配套的主内容区 */
+.mega-menu-main {
+  flex: 1;
+  padding: var(--mega-menu-padding);
+  min-width: 0;
+}
+
+
+/* ========================================
+   8. 分组 (Section / Group)
+   ======================================== */
+.mega-menu-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mega-menu-section + .mega-menu-section {
+  margin-top: var(--mega-menu-section-gap);
+}
+
+/* 分组标题 */
+.mega-menu-section-title {
+  font-size: var(--text-xs, 0.75rem);
+  font-weight: var(--font-semibold, 600);
+  color: var(--color-text-tertiary, #9ca3af);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider, 0.05em);
+  padding: 4px 12px 8px;
+  margin: 0;
+  user-select: none;
+}
+
+/* 分组标题 — 带底线 */
+.mega-menu-section-title--underline {
+  padding-bottom: 8px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.06));
+}
+
+/* 可折叠分组 */
+.mega-menu-section--collapsible .mega-menu-section-title {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mega-menu-section--collapsible .mega-menu-section-title::after {
+  content: '';
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid currentColor;
+  transition: transform var(--duration-fast, 200ms) var(--ease-smooth);
+}
+
+.mega-menu-section--collapsible[data-collapsed="true"] .mega-menu-section-title::after {
+  transform: rotate(-90deg);
+}
+
+.mega-menu-section--collapsible[data-collapsed="true"] .mega-menu-section-body {
+  display: none;
+}
+
+
+/* ========================================
+   9. 菜单项
+   ======================================== */
+.mega-menu-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--mega-menu-item-gap);
+  padding: var(--mega-menu-item-padding);
+  border-radius: var(--mega-menu-item-radius);
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  position: relative;
+  transition:
+    background-color 0.15s var(--ease-smooth),
+    transform 0.15s var(--ease-smooth);
+}
+
+.mega-menu-item:hover {
+  background: var(--color-bg-hover, rgba(0, 0, 0, 0.04));
+  transform: translateX(2px);
+}
+
+.mega-menu-item:active {
+  background: var(--color-bg-active, rgba(0, 0, 0, 0.06));
+  transform: translateX(2px) scale(0.99);
+}
+
+/* --- 紧凑菜单项 (无描述，仅标题) --- */
+.mega-menu-item--compact {
+  padding: 8px 12px;
+  align-items: center;
+  gap: var(--spacing-xs, 8px);
+}
+
+.mega-menu-item--compact .mega-menu-icon {
+  --mega-menu-icon-size: 28px;
+  font-size: var(--text-sm, 0.8125rem);
+}
+
+/* --- 居中对齐项 (适用于图标 + 标题无描述) --- */
+.mega-menu-item--center {
+  align-items: center;
+}
+
+/* --- 仅文字项 (无图标) --- */
+.mega-menu-item--text-only {
+  gap: 0;
+}
+
+/* --- 链接全覆盖 (a 标签) --- */
+.mega-menu-item > a {
+  position: static;
+  color: inherit;
+  text-decoration: none;
+}
+
+.mega-menu-item > a::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+/* --- 箭头指示器 (有子菜单) --- */
+.mega-menu-item--has-children::after {
+  content: '›';
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2em;
+  color: var(--color-text-tertiary, #9ca3af);
+  line-height: 1;
+  transition:
+    transform 0.15s var(--ease-smooth),
+    color 0.15s var(--ease-smooth);
+}
+
+.mega-menu-item--has-children:hover::after {
+  transform: translateY(-50%) translateX(2px);
+  color: var(--color-text-secondary, #6b7280);
+}
+
+/* --- 外部链接箭头 --- */
+.mega-menu-item--external .mega-menu-item-title::after {
+  content: ' ↗';
+  font-size: 0.75em;
+  vertical-align: super;
+  opacity: 0.4;
+  margin-left: 2px;
+}
+
+
+/* ========================================
+   10. 菜单项 Icon
+   ======================================== */
+.mega-menu-icon {
+  flex-shrink: 0;
+  width: var(--mega-menu-icon-size);
+  height: var(--mega-menu-icon-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--mega-menu-icon-radius);
+  background: var(--mega-menu-icon-bg);
+  font-size: 1rem;
+  transition:
+    background-color 0.15s var(--ease-smooth),
+    color 0.15s var(--ease-smooth),
+    transform 0.15s var(--ease-smooth);
+}
+
+.mega-menu-item:hover .mega-menu-icon {
+  background: var(--color-primary-light, rgba(59, 130, 246, 0.1));
+  color: var(--color-primary, #3b82f6);
+  transform: scale(1.05);
+}
+
+/* --- Icon 颜色变体 --- */
+.mega-menu-icon--blue {
+  background: rgba(59, 130, 246, 0.08);
+  color: var(--color-blue-500, #3b82f6);
+}
+
+.mega-menu-item:hover .mega-menu-icon--blue {
+  background: rgba(59, 130, 246, 0.15);
+}
+
+.mega-menu-icon--green {
+  background: rgba(34, 197, 94, 0.08);
+  color: var(--color-green-500, #22c55e);
+}
+
+.mega-menu-item:hover .mega-menu-icon--green {
+  background: rgba(34, 197, 94, 0.15);
+}
+
+.mega-menu-icon--purple {
+  background: rgba(139, 92, 246, 0.08);
+  color: var(--color-purple-500, #a855f7);
+}
+
+.mega-menu-item:hover .mega-menu-icon--purple {
+  background: rgba(139, 92, 246, 0.15);
+}
+
+.mega-menu-icon--amber {
+  background: rgba(245, 158, 11, 0.08);
+  color: var(--color-amber-500, #f59e0b);
+}
+
+.mega-menu-item:hover .mega-menu-icon--amber {
+  background: rgba(245, 158, 11, 0.15);
+}
+
+.mega-menu-icon--rose {
+  background: rgba(244, 63, 94, 0.08);
+  color: var(--color-rose-500, #f43f5e);
+}
+
+.mega-menu-item:hover .mega-menu-icon--rose {
+  background: rgba(244, 63, 94, 0.15);
+}
+
+.mega-menu-icon--cyan {
+  background: rgba(6, 182, 212, 0.08);
+  color: var(--color-cyan-500, #06b6d4);
+}
+
+.mega-menu-item:hover .mega-menu-icon--cyan {
+  background: rgba(6, 182, 212, 0.15);
+}
+
+.mega-menu-icon--teal {
+  background: rgba(20, 184, 166, 0.08);
+  color: var(--color-teal-500, #14b8a6);
+}
+
+.mega-menu-item:hover .mega-menu-icon--teal {
+  background: rgba(20, 184, 166, 0.15);
+}
+
+.mega-menu-icon--orange {
+  background: rgba(249, 115, 22, 0.08);
+  color: var(--color-orange-500, #f97316);
+}
+
+.mega-menu-item:hover .mega-menu-icon--orange {
+  background: rgba(249, 115, 22, 0.15);
+}
+
+/* --- 圆形 Icon --- */
+.mega-menu-icon--circle {
+  border-radius: var(--radius-full, 9999px);
+}
+
+/* --- 大号 Icon --- */
+.mega-menu-icon--lg {
+  --mega-menu-icon-size: 44px;
+  --mega-menu-icon-radius: var(--radius-lg, 12px);
+  font-size: 1.25rem;
+}
+
+/* --- 小号 Icon --- */
+.mega-menu-icon--sm {
+  --mega-menu-icon-size: 28px;
+  --mega-menu-icon-radius: var(--radius-sm, 4px);
+  font-size: 0.8125rem;
+}
+
+/* --- Emoji / 文字 Icon --- */
+.mega-menu-icon--emoji {
+  background: transparent;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.mega-menu-item:hover .mega-menu-icon--emoji {
+  background: transparent;
+  transform: scale(1.15);
+}
+
+/* --- 图片 Icon --- */
+.mega-menu-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+
+/* ========================================
+   11. 菜单项文字 (Title / Description)
+   ======================================== */
+.mega-menu-item-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mega-menu-item-title {
+  font-size: var(--text-sm, 0.8125rem);
+  font-weight: var(--font-semibold, 600);
+  color: var(--color-text-primary, #1a1a2e);
+  line-height: 1.3;
+  margin: 0;
+  transition: color 0.15s var(--ease-smooth);
+}
+
+/* 标题单行截断 */
+.mega-menu-item-title--ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mega-menu-item:hover .mega-menu-item-title {
+  color: var(--color-primary, #3b82f6);
+}
+
+.mega-menu-item-description {
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--color-text-tertiary, #9ca3af);
+  line-height: 1.4;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 紧凑项标题文字调整 */
+.mega-menu-item--compact .mega-menu-item-title {
+  font-size: var(--text-sm, 0.8125rem);
+  font-weight: var(--font-medium, 500);
+}
+
+/* --- 右侧附加信息 (快捷键 / 计数) --- */
+.mega-menu-item-meta {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--color-text-tertiary, #9ca3af);
+}
+
+/* 快捷键 */
+.mega-menu-item-shortcut {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: var(--text-2xs, 0.625rem);
+  color: var(--color-text-tertiary, #9ca3af);
+  font-family: var(--font-mono);
+}
+
+.mega-menu-item-shortcut kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border: 1px solid var(--color-border-default, rgba(0, 0, 0, 0.1));
+  border-radius: var(--radius-xs, 2px);
+  background: var(--color-bg-primary, #ffffff);
+  font-size: var(--text-2xs, 0.625rem);
+  font-family: var(--font-mono);
+  line-height: 1;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
+}
+
+
+/* ========================================
+   12. 菜单项徽章 & 标签
+   ======================================== */
+.mega-menu-item-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  border-radius: var(--radius-full, 9999px);
+  font-size: var(--text-2xs, 0.625rem);
+  font-weight: var(--font-bold, 700);
+  line-height: 1.4;
+  white-space: nowrap;
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
+}
+
+/* 新功能 */
+.mega-menu-item-badge--new {
+  background: var(--color-primary-light, rgba(59, 130, 246, 0.1));
+  color: var(--color-primary, #3b82f6);
+}
+
+/* Beta */
+.mega-menu-item-badge--beta {
+  background: var(--color-warning-light, rgba(245, 158, 11, 0.1));
+  color: var(--color-warning-dark, #d97706);
+}
+
+/* 热门 */
+.mega-menu-item-badge--hot {
+  background: var(--color-error-light, rgba(239, 68, 68, 0.1));
+  color: var(--color-error, #ef4444);
+}
+
+/* 即将推出 */
+.mega-menu-item-badge--soon {
+  background: rgba(139, 92, 246, 0.1);
+  color: var(--color-purple-600, #9333ea);
+}
+
+/* 免费 */
+.mega-menu-item-badge--free {
+  background: var(--color-success-light, rgba(34, 197, 94, 0.1));
+  color: var(--color-success-dark, #16a34a);
+}
+
+/* 付费 / Pro */
+.mega-menu-item-badge--pro {
+  background: linear-gradient(135deg, #f59e0b, #f97316);
+  color: #ffffff;
+}
+
+/* --- 小红点 (无文字) --- */
+.mega-menu-item-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-primary, #3b82f6);
+  flex-shrink: 0;
+  margin-left: 4px;
+}
+
+.mega-menu-item-dot--error {
+  background: var(--color-error, #ef4444);
+}
+
+.mega-menu-item-dot--animated {
+  animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+
+/* ========================================
+   13. 菜单项变体
+   ======================================== */
+
+/* --- 特色 / 推荐项 --- */
+.mega-menu-item--featured {
+  background: var(--color-primary-lighter, rgba(59, 130, 246, 0.04));
+  border: 1px solid var(--color-primary-light, rgba(59, 130, 246, 0.1));
+}
+
+.mega-menu-item--featured:hover {
+  background: var(--color-primary-light, rgba(59, 130, 246, 0.08));
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+/* --- 高亮项 (当前页面) --- */
+.mega-menu-item--active,
+.mega-menu-item[aria-current="page"] {
+  background: var(--color-primary-light, rgba(59, 130, 246, 0.08));
+}
+
+.mega-menu-item--active .mega-menu-item-title,
+.mega-menu-item[aria-current="page"] .mega-menu-item-title {
+  color: var(--color-primary, #3b82f6);
+  font-weight: var(--font-bold, 700);
+}
+
+.mega-menu-item--active .mega-menu-icon,
+.mega-menu-item[aria-current="page"] .mega-menu-icon {
+  background: var(--color-primary-light, rgba(59, 130, 246, 0.12));
+  color: var(--color-primary, #3b82f6);
+}
+
+/* --- 禁用项 --- */
+.mega-menu-item--disabled,
+.mega-menu-item[aria-disabled="true"] {
+  opacity: var(--opacity-disabled, 0.5);
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.mega-menu-item--disabled:hover,
+.mega-menu-item[aria-disabled="true"]:hover {
+  background: transparent;
+  transform: none;
+}
+
+/* --- 危险 / 删除项 --- */
+.mega-menu-item--danger .mega-menu-item-title {
+  color: var(--color-error, #ef4444);
+}
+
+.mega-menu-item--danger:hover {
+  background: var(--color-error-light, rgba(239, 68, 68, 0.06));
+}
+
+.mega-menu-item--danger:hover .mega-menu-item-title {
+  color: var(--color-error-dark, #dc2626);
+}
+
+.mega-menu-item--danger:hover .mega-menu-icon {
+  background: var(--color-error-light, rgba(239, 68, 68, 0.1));
+  color: var(--color-error, #ef4444);
+}
+
+
+/* ========================================
+   14. 分隔线
+   ======================================== */
+.mega-menu-divider {
+  height: 1px;
+  background: var(--color-border-light, rgba(0, 0, 0, 0.06));
+  margin: var(--spacing-xs, 8px) 0;
+  border: none;
+}
+
+/* 带标签的分隔线 */
+.mega-menu-divider--labeled {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm, 12px);
+  margin: var(--spacing-sm, 12px) 0;
+  height: auto;
+  background: none;
+}
+
+.mega-menu-divider--labeled::before,
+.mega-menu-divider--labeled::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border-light, rgba(0, 0, 0, 0.06));
+}
+
+.mega-menu-divider-label {
+  font-size: var(--text-2xs, 0.625rem);
+  color: var(--color-text-tertiary, #9ca3af);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider, 0.05em);
+  font-weight: var(--font-medium, 500);
+  white-space: nowrap;
+}
+
+
+/* ========================================
+   15. 面板 Footer
+   ======================================== */
+.mega-menu-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md, 16px);
+  padding: var(--spacing-sm, 12px) var(--mega-menu-padding);
+  border-top: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.06));
+  background: var(--color-bg-secondary, #fafafa);
+  border-radius: 0 0 var(--mega-menu-radius) var(--mega-menu-radius);
+}
+
+/* Footer 链接 */
+.mega-menu-footer-link {
+  font-size: var(--text-xs, 0.75rem);
+  font-weight: var(--font-medium, 500);
+  color: var(--color-primary, #3b82f6);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.15s var(--ease-smooth);
+}
+
+.mega-menu-footer-link:hover {
+  color: var(--color-primary-dark, #2563eb);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Footer 箭头图标 */
+.mega-menu-footer-link-arrow {
+  font-size: 1.1em;
+  transition: transform 0.15s var(--ease-smooth);
+}
+
+.mega-menu-footer-link:hover .mega-menu-footer-link-arrow {
+  transform: translateX(2px);
+}
+
+/* Footer 帮助文本 */
+.mega-menu-footer-text {
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--color-text-tertiary, #9ca3af);
+}
+
+
+/* ========================================
+   16. 特色区域 (Promo / CTA / Banner)
+   ======================================== */
+
+/* --- 推广卡片 --- */
+.mega-menu-promo {
+  padding: var(--spacing-md, 16px);
+  border-radius: var(--radius-lg, 12px);
+  background: var(--gradient-primary, linear-gradient(135deg, #3b82f6, #6366f1));
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm, 12px);
+}
+
+.mega-menu-promo-title {
+  font-size: var(--text-sm, 0.8125rem);
+  font-weight: var(--font-bold, 700);
+  line-height: 1.3;
+  margin: 0;
+}
+
+.mega-menu-promo-description {
+  font-size: var(--text-xs, 0.75rem);
+  opacity: 0.85;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.mega-menu-promo-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  border-radius: var(--radius-md, 8px);
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-size: var(--text-xs, 0.75rem);
+  font-weight: var(--font-semibold, 600);
+  cursor: pointer;
+  border: none;
+  transition:
+    background-color 0.15s var(--ease-smooth);
+  align-self: flex-start;
+  text-decoration: none;
+}
+
+.mega-menu-promo-action:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* --- CTA 横幅 --- */
+.mega-menu-cta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md, 16px);
+  padding: var(--spacing-md, 16px);
+  border-radius: var(--radius-lg, 12px);
+  background: var(--color-bg-tertiary, #f3f4f6);
+  cursor: pointer;
+  transition:
+    background-color 0.15s var(--ease-smooth),
+    transform 0.15s var(--ease-smooth);
+}
+
+.mega-menu-cta:hover {
+  background: var(--color-bg-hover, rgba(0, 0, 0, 0.06));
+  transform: translateX(2px);
+}
+
+.mega-menu-cta-icon {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-lg, 12px);
+  font-size: 1.5rem;
+}
+
+.mega-menu-cta-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.mega-menu-cta-title {
+  font-size: var(--text-sm, 0.8125rem);
+  font-weight: var(--font-semibold, 600);
+  color: var(--color-text-primary, #1a1a2e);
+  margin: 0;
+}
+
+.mega-menu-cta-description {
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--color-text-tertiary, #9ca3af);
+  margin: 2px 0 0;
+}
+
+/* --- 图片推广区 --- */
+.mega-menu-promo-image {
+  border-radius: var(--radius-lg, 12px);
+  overflow: hidden;
+  position: relative;
+  aspect-ratio: 16 / 9;
+}
+
+.mega-menu-promo-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s var(--ease-smooth);
+}
+
+.mega-menu-promo-image:hover img {
+  transform: scale(1.05);
+}
+
+.mega-menu-promo-image-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: var(--spacing-sm, 12px);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
+  color: #ffffff;
+}
+
+
+/* ========================================
+   17. 标签页导航 (Tab-based Mega Menu)
+   ======================================== */
+.mega-menu-tabs {
+  display: flex;
+  flex-direction: column;
+}
+
+.mega-menu-tab-list {
+  display: flex;
+  border-bottom: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.06));
+  padding: 0 var(--mega-menu-padding);
+  gap: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.mega-menu-tab-list::-webkit-scrollbar {
+  display: none;
+}
+
+.mega-menu-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  font-size: var(--text-sm, 0.8125rem);
+  font-weight: var(--font-medium, 500);
+  color: var(--color-text-secondary, #6b7280);
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition:
+    color 0.15s var(--ease-smooth),
+    border-color 0.15s var(--ease-smooth);
+}
+
+.mega-menu-tab:hover {
+  color: var(--color-text-primary, #1a1a2e);
+}
+
+.mega-menu-tab--active,
+.mega-menu-tab[aria-selected="true"] {
+  color: var(--color-primary, #3b82f6);
+  border-bottom-color: var(--color-primary, #3b82f6);
+  font-weight: var(--font-semibold, 600);
+}
+
+.mega-menu-tab-panel {
+  padding: var(--mega-menu-padding);
+}
+
+.mega-menu-tab-panel[hidden] {
+  display: none;
+}
+
+
+/* ========================================
+   18. 全宽 Mega Menu
+   ======================================== */
+.mega-menu-panel--full {
+  left: 0;
+  right: 0;
+  max-width: none;
+  min-width: auto;
+}
+
+/* 内容限制最大宽度并居中 */
+.mega-menu-panel--full .mega-menu-content {
+  max-width: var(--container-2xl, 1450px);
+  margin: 0 auto;
+  border-radius: 0 0 var(--mega-menu-radius) var(--mega-menu-radius);
+  border-top: none;
+}
+
+/* 全宽面板的动画 (无水平偏移) */
+.mega-menu-panel--full .mega-menu-enter,
+.mega-menu-panel--full.mega-menu-enter {
+  transform: translateY(var(--mega-menu-offset-y));
+}
+
+.group:hover > .mega-menu-panel--full .mega-menu-enter,
+.group:hover > .mega-menu-panel--full.mega-menu-enter,
+.mega-menu-panel--full .mega-menu-enter[data-open="true"],
+.mega-menu-panel--full .mega-menu-enter.is-open,
+.mega-menu-panel--full.mega-menu-enter[data-open="true"],
+.mega-menu-panel--full.mega-menu-enter.is-open {
+  transform: translateY(0);
+}
+
+/* 全宽背景遮罩 */
+.mega-menu-panel--full .mega-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  top: var(--header-height, 64px);
+  background: rgba(0, 0, 0, 0.2);
+  z-index: -1;
+  opacity: 0;
+  transition: opacity var(--mega-menu-duration) var(--ease-smooth);
+}
+
+.group:hover > .mega-menu-panel--full .mega-menu-backdrop,
+.mega-menu-panel--full .mega-menu-backdrop[data-open="true"] {
+  opacity: 1;
+}
+
+
+/* ========================================
+   19. 简单下拉变体 (Dropdown)
+   ======================================== */
+.mega-menu-dropdown {
+  min-width: 200px;
+  max-width: 280px;
+}
+
+.mega-menu-dropdown .mega-menu-content {
+  padding: var(--spacing-xs, 8px);
+}
+
+.mega-menu-dropdown .mega-menu-item {
+  padding: 8px 10px;
+  gap: var(--spacing-xs, 8px);
+  align-items: center;
+}
+
+.mega-menu-dropdown .mega-menu-item-title {
+  font-weight: var(--font-medium, 500);
+}
+
+.mega-menu-dropdown .mega-menu-icon {
+  --mega-menu-icon-size: 24px;
+  --mega-menu-icon-radius: var(--radius-sm, 4px);
+  background: transparent;
+  font-size: var(--text-sm, 0.8125rem);
+}
+
+.mega-menu-dropdown .mega-menu-item:hover .mega-menu-icon {
+  background: transparent;
+  color: var(--color-primary, #3b82f6);
+}
+
+.mega-menu-dropdown .mega-menu-divider {
+  margin: var(--spacing-2xs, 4px) 0;
+}
+
+
+/* ========================================
+   20. 嵌套子菜单 (Flyout)
+   ======================================== */
+.mega-menu-flyout {
+  position: relative;
+}
+
+.mega-menu-flyout-panel {
+  position: absolute;
+  top: -8px;
+  left: 100%;
+  min-width: 200px;
+  padding-left: 4px; /* 桥接间距 */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(6px);
+  pointer-events: none;
+  z-index: 1;
+  transition:
+    opacity 0.2s var(--ease-smooth),
+    transform 0.2s var(--ease-smooth),
+    visibility 0s linear 0.2s;
+}
+
+.mega-menu-flyout:hover > .mega-menu-flyout-panel,
+.mega-menu-flyout-panel[data-open="true"] {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+  pointer-events: auto;
+  transition:
+    opacity 0.2s var(--ease-smooth),
+    transform 0.2s var(--ease-smooth),
+    visibility 0s linear 0s;
+}
+
+.mega-menu-flyout-panel .mega-menu-content {
+  border-radius: var(--radius-lg, 12px);
+  padding: var(--spacing-xs, 8px);
+}
+
+/* 左侧弹出 (空间不足时) */
+.mega-menu-flyout-panel--left {
+  left: auto;
+  right: 100%;
+  padding-left: 0;
+  padding-right: 4px;
+  transform: translateX(-6px);
+}
+
+.mega-menu-flyout:hover > .mega-menu-flyout-panel--left,
+.mega-menu-flyout-panel--left[data-open="true"] {
+  transform: translateX(0);
+}
+
+
+/* ========================================
+   21. 暗色模式
+   ======================================== */
+.dark .mega-menu-content,
+[data-theme="dark"] .mega-menu-content {
+  --mega-menu-bg: var(--color-bg-elevated, #1e293b);
+  --mega-menu-border: rgba(255, 255, 255, 0.08);
+  --mega-menu-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5),
+                      0 4px 12px -2px rgba(0, 0, 0, 0.3);
+
+  background: var(--mega-menu-bg);
+  border-color: var(--mega-menu-border);
+  box-shadow: var(--mega-menu-shadow);
+}
+
+/* 菜单项 */
+.dark .mega-menu-item:hover,
+[data-theme="dark"] .mega-menu-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.dark .mega-menu-item:active,
+[data-theme="dark"] .mega-menu-item:active {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* 标题 */
+.dark .mega-menu-item-title,
+[data-theme="dark"] .mega-menu-item-title {
+  color: var(--color-text-primary, #f9fafb);
+}
+
+.dark .mega-menu-item:hover .mega-menu-item-title,
+[data-theme="dark"] .mega-menu-item:hover .mega-menu-item-title {
+  color: var(--color-primary, #818cf8);
+}
+
+.dark .mega-menu-item-description,
+[data-theme="dark"] .mega-menu-item-description {
+  color: var(--color-text-tertiary, #9ca3af);
+}
+
+/* Icon */
+.dark .mega-menu-icon,
+[data-theme="dark"] .mega-menu-icon {
+  --mega-menu-icon-bg: rgba(255, 255, 255, 0.06);
+}
+
+.dark .mega-menu-item:hover .mega-menu-icon,
+[data-theme="dark"] .mega-menu-item:hover .mega-menu-icon {
+  background: rgba(129, 140, 248, 0.12);
+  color: var(--color-primary, #818cf8);
+}
+
+/* Icon 颜色变体 — 暗色 */
+.dark .mega-menu-icon--blue,
+[data-theme="dark"] .mega-menu-icon--blue {
+  background: rgba(96, 165, 250, 0.1);
+  color: var(--color-blue-400, #60a5fa);
+}
+
+.dark .mega-menu-icon--green,
+[data-theme="dark"] .mega-menu-icon--green {
+  background: rgba(74, 222, 128, 0.1);
+  color: var(--color-green-400, #4ade80);
+}
+
+.dark .mega-menu-icon--purple,
+[data-theme="dark"] .mega-menu-icon--purple {
+  background: rgba(192, 132, 252, 0.1);
+  color: var(--color-purple-400, #c084fc);
+}
+
+.dark .mega-menu-icon--amber,
+[data-theme="dark"] .mega-menu-icon--amber {
+  background: rgba(251, 191, 36, 0.1);
+  color: var(--color-amber-400, #fbbf24);
+}
+
+.dark .mega-menu-icon--rose,
+[data-theme="dark"] .mega-menu-icon--rose {
+  background: rgba(251, 113, 133, 0.1);
+  color: var(--color-rose-400, #fb7185);
+}
+
+.dark .mega-menu-icon--cyan,
+[data-theme="dark"] .mega-menu-icon--cyan {
+  background: rgba(34, 211, 238, 0.1);
+  color: var(--color-cyan-400, #22d3ee);
+}
+
+.dark .mega-menu-icon--teal,
+[data-theme="dark"] .mega-menu-icon--teal {
+  background: rgba(45, 212, 191, 0.1);
+  color: var(--color-teal-400, #2dd4bf);
+}
+
+.dark .mega-menu-icon--orange,
+[data-theme="dark"] .mega-menu-icon--orange {
+  background: rgba(251, 146, 60, 0.1);
+  color: var(--color-orange-400, #fb923c);
+}
+
+/* Section 标题 */
+.dark .mega-menu-section-title,
+[data-theme="dark"] .mega-menu-section-title {
+  color: var(--color-text-tertiary, #9ca3af);
+}
+
+.dark .mega-menu-section-title--underline,
+[data-theme="dark"] .mega-menu-section-title--underline {
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Header */
+.dark .mega-menu-header,
+[data-theme="dark"] .mega-menu-header {
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+.dark .mega-menu-header-title,
+[data-theme="dark"] .mega-menu-header-title {
+  color: var(--color-text-primary, #f9fafb);
+}
+
+.dark .mega-menu-search,
+[data-theme="dark"] .mega-menu-search {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.dark .mega-menu-close:hover,
+[data-theme="dark"] .mega-menu-close:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-text-primary, #f9fafb);
+}
+
+/* Footer */
+.dark .mega-menu-footer,
+[data-theme="dark"] .mega-menu-footer {
+  border-top-color: rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.dark .mega-menu-footer-link,
+[data-theme="dark"] .mega-menu-footer-link {
+  color: var(--color-primary, #818cf8);
+}
+
+.dark .mega-menu-footer-link:hover,
+[data-theme="dark"] .mega-menu-footer-link:hover {
+  color: var(--color-indigo-300, #a5b4fc);
+}
+
+/* 分隔线 */
+.dark .mega-menu-divider,
+[data-theme="dark"] .mega-menu-divider {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.dark .mega-menu-divider--labeled::before,
+.dark .mega-menu-divider--labeled::after,
+[data-theme="dark"] .mega-menu-divider--labeled::before,
+[data-theme="dark"] .mega-menu-divider--labeled::after {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* 列分隔线 */
+.dark .mega-menu-columns--divided > *:not(:last-child),
+[data-theme="dark"] .mega-menu-columns--divided > *:not(:last-child) {
+  border-right-color: rgba(255, 255, 255, 0.06);
+}
+
+/* 侧栏 */
+.dark .mega-menu-sidebar,
+[data-theme="dark"] .mega-menu-sidebar {
+  background: rgba(0, 0, 0, 0.15);
+  border-right-color: rgba(255, 255, 255, 0.06);
+}
+
+.dark .mega-menu-sidebar-item,
+[data-theme="dark"] .mega-menu-sidebar-item {
+  color: var(--color-text-secondary, #d1d5db);
+}
+
+.dark .mega-menu-sidebar-item:hover,
+[data-theme="dark"] .mega-menu-sidebar-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-text-primary, #f9fafb);
+}
+
+.dark .mega-menu-sidebar-item--active,
+.dark .mega-menu-sidebar-item[aria-selected="true"],
+[data-theme="dark"] .mega-menu-sidebar-item--active,
+[data-theme="dark"] .mega-menu-sidebar-item[aria-selected="true"] {
+  background: rgba(129, 140, 248, 0.1);
+  color: var(--color-primary, #818cf8);
+}
+
+/* Tab 导航 */
+.dark .mega-menu-tab-list,
+[data-theme="dark"] .mega-menu-tab-list {
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+.dark .mega-menu-tab,
+[data-theme="dark"] .mega-menu-tab {
+  color: var(--color-text-secondary, #d1d5db);
+}
+
+.dark .mega-menu-tab:hover,
+[data-theme="dark"] .mega-menu-tab:hover {
+  color: var(--color-text-primary, #f9fafb);
+}
+
+.dark .mega-menu-tab--active,
+.dark .mega-menu-tab[aria-selected="true"],
+[data-theme="dark"] .mega-menu-tab--active,
+[data-theme="dark"] .mega-menu-tab[aria-selected="true"] {
+  color: var(--color-primary, #818cf8);
+  border-bottom-color: var(--color-primary, #818cf8);
+}
+
+/* Featured 项 */
+.dark .mega-menu-item--featured,
+[data-theme="dark"] .mega-menu-item--featured {
+  background: rgba(129, 140, 248, 0.06);
+  border-color: rgba(129, 140, 248, 0.1);
+}
+
+.dark .mega-menu-item--featured:hover,
+[data-theme="dark"] .mega-menu-item--featured:hover {
+  background: rgba(129, 140, 248, 0.1);
+}
+
+/* Active 项 */
+.dark .mega-menu-item--active,
+.dark .mega-menu-item[aria-current="page"],
+[data-theme="dark"] .mega-menu-item--active,
+[data-theme="dark"] .mega-menu-item[aria-current="page"] {
+  background: rgba(129, 140, 248, 0.1);
+}
+
+.dark .mega-menu-item--active .mega-menu-item-title,
+.dark .mega-menu-item[aria-current="page"] .mega-menu-item-title,
+[data-theme="dark"] .mega-menu-item--active .mega-menu-item-title,
+[data-theme="dark"] .mega-menu-item[aria-current="page"] .mega-menu-item-title {
+  color: var(--color-primary, #818cf8);
+}
+
+/* CTA 区域 */
+.dark .mega-menu-cta,
+[data-theme="dark"] .mega-menu-cta {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.dark .mega-menu-cta:hover,
+[data-theme="dark"] .mega-menu-cta:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.dark .mega-menu-cta-title,
+[data-theme="dark"] .mega-menu-cta-title {
+  color: var(--color-text-primary, #f9fafb);
+}
+
+/* 快捷键 */
+.dark .mega-menu-item-shortcut kbd,
+[data-theme="dark"] .mega-menu-item-shortcut kbd {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* 全宽遮罩 */
+.dark .mega-menu-panel--full .mega-menu-backdrop,
+[data-theme="dark"] .mega-menu-panel--full .mega-menu-backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* Dropdown 简单下拉 */
+.dark .mega-menu-dropdown .mega-menu-icon,
+[data-theme="dark"] .mega-menu-dropdown .mega-menu-icon {
+  background: transparent;
+}
+
+.dark .mega-menu-dropdown .mega-menu-item:hover .mega-menu-icon,
+[data-theme="dark"] .mega-menu-dropdown .mega-menu-item:hover .mega-menu-icon {
+  color: var(--color-primary, #818cf8);
+}
+
+/* Flyout 嵌套 */
+.dark .mega-menu-flyout-panel .mega-menu-content,
+[data-theme="dark"] .mega-menu-flyout-panel .mega-menu-content {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* 徽章 — 暗色 */
+.dark .mega-menu-item-badge--new,
+[data-theme="dark"] .mega-menu-item-badge--new {
+  background: rgba(129, 140, 248, 0.15);
+  color: var(--color-indigo-400, #818cf8);
+}
+
+.dark .mega-menu-item-badge--beta,
+[data-theme="dark"] .mega-menu-item-badge--beta {
+  background: rgba(251, 191, 36, 0.15);
+  color: var(--color-amber-400, #fbbf24);
+}
+
+.dark .mega-menu-item-badge--hot,
+[data-theme="dark"] .mega-menu-item-badge--hot {
+  background: rgba(248, 113, 113, 0.15);
+  color: var(--color-red-400, #f87171);
+}
+
+
+/* ========================================
+   22. 响应式 (移动端抽屉转换)
+   ======================================== */
+
+/* --- 手机 (< 768px) --- */
+@media (max-width: 767px) {
+  /* 面板转为全屏抽屉 */
+  .mega-menu-panel {
+    position: fixed;
+    inset: 0;
+    top: var(--header-height, 64px);
+    left: auto;
+    right: 0;
+    transform: translateX(100%);
+    z-index: var(--z-overlay, 50);
+    min-width: auto;
+    max-width: none;
+    width: 100%;
+    max-width: 400px;
+    padding-top: 0;
+    background: var(--mega-menu-bg);
+    transition: transform var(--duration-normal, 300ms) var(--ease-smooth);
+  }
+
+  /* 居中定位的覆盖 */
+  .mega-menu-panel {
+    left: auto;
+  }
+
+  /* 打开状态 */
+  .mega-menu-panel[data-open="true"],
+  .mega-menu-panel.is-open {
+    transform: translateX(0);
+  }
+
+  /* 桥接区域移除 */
+  .mega-menu-panel::before {
+    display: none;
+  }
+
+  /* hover 不触发 (由 JS 控制) */
+  .group:hover > .mega-menu-enter,
+  .group:hover > .mega-menu-panel--left .mega-menu-enter,
+  .group:hover > .mega-menu-panel--right .mega-menu-enter {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateX(100%);
+  }
+
+  /* 显式打开状态覆盖 */
+  .mega-menu-enter[data-open="true"],
+  .mega-menu-enter.is-open {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateX(0) !important;
+  }
+
+  /* 面板内容充满 */
+  .mega-menu-content {
+    border-radius: 0;
+    border: none;
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.1);
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* 列布局转为单列 */
+  .mega-menu-columns,
+  .mega-menu-columns--2,
+  .mega-menu-columns--3,
+  .mega-menu-columns--4,
+  .mega-menu-columns--2-1,
+  .mega-menu-columns--1-2,
+  .mega-menu-columns--3-1 {
+    grid-template-columns: 1fr;
+  }
+
+  .mega-menu-columns--divided > *:not(:last-child) {
+    border-right: none;
+    padding-right: 0;
+    border-bottom: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.06));
+    padding-bottom: var(--mega-menu-section-gap);
+  }
+
+  /* 跨列失效 */
+  .mega-menu-col-span-2,
+  .mega-menu-col-span-full {
+    grid-column: auto;
+  }
+
+  /* 侧栏转为顶部标签 */
+  .mega-menu-content--with-sidebar {
+    flex-direction: column;
+  }
+
+  .mega-menu-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.06));
+    border-radius: 0;
+    display: flex;
+    gap: 4px;
+    padding: var(--spacing-xs, 8px);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .mega-menu-sidebar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mega-menu-sidebar-item {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* 关闭按钮显示 */
+  .mega-menu-close {
+    display: flex;
+  }
+
+  /* Header 强制显示 */
+  .mega-menu-header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--mega-menu-bg);
+  }
+
+  /* 全宽面板也转为抽屉 */
+  .mega-menu-panel--full {
+    max-width: 400px;
+    left: auto;
+    right: 0;
+  }
+
+  .mega-menu-panel--full .mega-menu-content {
+    max-width: none;
+  }
+
+  /* 遮罩层 */
+  .mega-menu-mobile-overlay {
+    position: fixed;
+    inset: 0;
+    top: var(--header-height, 64px);
+    background: rgba(0, 0, 0, 0.4);
+    z-index: calc(var(--z-overlay, 50) - 1);
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity var(--duration-normal, 300ms) var(--ease-smooth),
+      visibility 0s linear var(--duration-normal, 300ms);
+  }
+
+  .mega-menu-mobile-overlay[data-open="true"],
+  .mega-menu-mobile-overlay.is-open {
+    opacity: 1;
+    visibility: visible;
+    transition:
+      opacity var(--duration-normal, 300ms) var(--ease-smooth),
+      visibility 0s linear 0s;
+  }
+
+  /* 移动端菜单项增大触摸目标 */
+  .mega-menu-item {
+    min-height: 44px;
+    padding: 12px 14px;
+  }
+
+  /* Flyout 转为内联展开 */
+  .mega-menu-flyout-panel {
+    position: static;
+    padding-left: var(--spacing-lg, 24px);
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    pointer-events: auto;
+    min-width: auto;
+  }
+
+  .mega-menu-flyout-panel .mega-menu-content {
+    box-shadow: none;
+    border: none;
+    padding: 0;
+  }
+
+  /* 快捷键移动端隐藏 */
+  .mega-menu-item-shortcut {
+    display: none;
+  }
+}
+
+/* --- 平板 (768px - 1024px) --- */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .mega-menu-panel {
+    --mega-menu-min-width: 480px;
+    --mega-menu-max-width: 720px;
+  }
+
+  .mega-menu-columns--4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .mega-menu-columns--3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .mega-menu-sidebar {
+    width: 170px;
+  }
+}
+
+
+/* ========================================
+   23. 无障碍 & 减少动画
+   ======================================== */
+
+/* --- 焦点可见性 --- */
+.mega-menu-item:focus-visible {
+  outline: 2px solid var(--color-focus-ring, #3b82f6);
+  outline-offset: -2px;
+  border-radius: var(--mega-menu-item-radius);
+  z-index: 1;
+}
+
+.mega-menu-item:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.mega-menu-sidebar-item:focus-visible {
+  outline: 2px solid var(--color-focus-ring, #3b82f6);
+  outline-offset: -2px;
+}
+
+.mega-menu-tab:focus-visible {
+  outline: 2px solid var(--color-focus-ring, #3b82f6);
+  outline-offset: -2px;
+}
+
+.mega-menu-footer-link:focus-visible {
+  outline: 2px solid var(--color-focus-ring, #3b82f6);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm, 4px);
+}
+
+/* --- 键盘导航高亮 --- */
+.mega-menu-item[data-focused="true"],
+.mega-menu-item.is-focused {
+  background: var(--color-bg-hover, rgba(0, 0, 0, 0.04));
+  outline: 2px solid var(--color-primary-light, rgba(59, 130, 246, 0.3));
+  outline-offset: -2px;
+}
+
+.dark .mega-menu-item[data-focused="true"],
+.dark .mega-menu-item.is-focused,
+[data-theme="dark"] .mega-menu-item[data-focused="true"],
+[data-theme="dark"] .mega-menu-item.is-focused {
+  background: rgba(255, 255, 255, 0.06);
+  outline-color: rgba(129, 140, 248, 0.3);
+}
+
+/* --- ARIA Live Region (屏幕阅读器提示) --- */
+.mega-menu-live-region {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --- 减少动画 --- */
+@media (prefers-reduced-motion: reduce) {
+  .mega-menu-enter,
+  .mega-menu-enter--scale,
+  .mega-menu-panel--left .mega-menu-enter,
+  .mega-menu-panel--right .mega-menu-enter,
+  .mega-menu-panel--full .mega-menu-enter,
+  .mega-menu-flyout-panel {
+    transition: none !important;
+  }
+
+  .group:hover > .mega-menu-enter,
+  .mega-menu-enter[data-open="true"],
+  .mega-menu-enter.is-open,
+  .group:hover > .mega-menu-enter--scale,
+  .mega-menu-enter--scale[data-open="true"],
+  .mega-menu-enter--scale.is-open {
+    transition: none !important;
+  }
+
+  .mega-menu-item {
+    transition: none !important;
+  }
+
+  .mega-menu-item:hover {
+    transform: none !important;
+  }
+
+  .mega-menu-icon {
+    transition: none !important;
+  }
+
+  .mega-menu-item:hover .mega-menu-icon {
+    transform: none !important;
+  }
+
+  .mega-menu-promo-image:hover img {
+    transform: none !important;
+  }
+
+  .mega-menu-item-dot--animated {
+    animation: none !important;
+  }
+
+  .mega-menu-panel--full .mega-menu-backdrop {
+    transition: none !important;
+  }
+
+  .mega-menu-mobile-overlay {
+    transition: none !important;
+  }
+
+  /* 移动端抽屉直接切换 */
+  @media (max-width: 767px) {
+    .mega-menu-panel {
+      transition: none !important;
+    }
+  }
+}
+
+/* --- 高对比度模式 --- */
+@media (forced-colors: active) {
+  .mega-menu-content {
+    border: 2px solid CanvasText;
+  }
+
+  .mega-menu-item:hover,
+  .mega-menu-item--active {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+
+  .mega-menu-item--disabled {
+    color: GrayText;
+  }
+
+  .mega-menu-divider {
+    background: CanvasText;
+  }
+
+  .mega-menu-icon {
+    border: 1px solid CanvasText;
+  }
+
+  .mega-menu-item-badge {
+    border: 1px solid CanvasText;
+  }
+
+  .mega-menu-footer {
+    border-top: 2px solid CanvasText;
+  }
+
+  .mega-menu-header {
+    border-bottom: 2px solid CanvasText;
+  }
+}

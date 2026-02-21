@@ -1,12 +1,14 @@
 // src/modules/amz_hub/views/practice/marketing_calendar/index.ts
 // ================================================================
-// 🎯 Phase 4: 已迁移使用 StorageService + BaseModule
+// 🎯 Phase 4: 已迁移使用 DI容器 + BaseModule
+// 示例：使用 getService() 替代直接导入服务
 // ================================================================
 
 import { escapeHtml } from '@/common/utils/security';
 import BaseModule from '../../../../../common/BaseModule';
+import { SERVICE_NAMES } from '../../../../../common/di/ServiceRegistry';
+import type { IStorageService } from '@/types/services';
 import { amzf_countries, amzf_months, amzf_events } from '../../../constants/amz_hub_constants';
-import { StorageService } from '../../../../../services/storageService';
 import { configCenter } from '../../../../../common/config/ConfigCenter';
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry';
@@ -121,7 +123,9 @@ class MarketingCalendarModule extends BaseModule {
 
     loadSearchHistory(): void {
         try {
-            const saved = StorageService.get(AMZF_HISTORY_KEY, []) as string[];
+            // 🎯 使用 DI 容器获取 Storage 服务
+            const storageService = this.getService<IStorageService>(SERVICE_NAMES.STORAGE);
+            const saved = storageService.get(AMZF_HISTORY_KEY, []) as string[];
             this.state.searchHistory = saved || [];
         } catch (e) {
             console.warn('Failed to load search history:', e);
@@ -131,7 +135,9 @@ class MarketingCalendarModule extends BaseModule {
 
     saveSearchHistory(): void {
         try {
-            StorageService.set(AMZF_HISTORY_KEY, this.state.searchHistory);
+            // 🎯 使用 DI 容器获取 Storage 服务
+            const storageService = this.getService<IStorageService>(SERVICE_NAMES.STORAGE);
+            storageService.set(AMZF_HISTORY_KEY, this.state.searchHistory);
         } catch (e) {
             console.warn('Failed to save search history:', e);
         }

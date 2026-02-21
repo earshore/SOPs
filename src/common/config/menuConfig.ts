@@ -4,6 +4,7 @@
  */
 
 import { validateRouteConfig, validateModuleConfig } from '../utils/typeGuards';
+import { SOPS_ROUTES, APP_CENTER_ROUTES, AMZ_HUB_ROUTES, MORE_ROUTES, SYSTEM_ROUTES } from '../constants/routes';
 
 // ==================== 类型定义 ====================
 
@@ -26,6 +27,7 @@ export interface ModuleConfig {
   icon: string;
   description: string;
   parentModuleId?: string;
+  themeColor?: string; // 模块主题色，如 'blue', 'emerald', 'purple' 等
 }
 
 /**
@@ -102,6 +104,17 @@ export const MENU_CONFIG: MenuConfig = {
   // 作用：决定侧边栏 (Sidebar) 显示什么标题和哪些菜单
   // ==========================================
   modules: {
+    // [系统] 首页模块
+    home: {
+      id: 'home',
+      contextId: 'sys',
+      title: '首页',
+      version: 'v1.0',
+      icon: 'fas fa-home',
+      description: '系统首页，快速访问常用功能。',
+      themeColor: 'slate'
+    },
+
     // [应用 SOPs] 标准作业程序
     sops: {
       id: 'sops',
@@ -109,7 +122,8 @@ export const MENU_CONFIG: MenuConfig = {
       title: 'SOPs 流程中心',
       version: 'v1.0',
       icon: 'fas fa-clipboard-list',
-      description: '集成所有亚马逊运营标准化流程指引，确保团队执行一致性。'
+      description: '集成所有亚马逊运营标准化流程指引,确保团队执行一致性。',
+      themeColor: 'blue' // ✅ 蓝色 - 清新明亮的流程管理主题
     },
 
     // [应用中心] App Center 容器模块
@@ -119,7 +133,8 @@ export const MENU_CONFIG: MenuConfig = {
       title: '应用中心',
       version: 'v1.0',
       icon: 'fas fa-cubes',
-      description: '集成多个专业工具的应用中心，提供数据采集、分析与优化功能。'
+      description: '集成多个专业工具的应用中心，提供数据采集、分析与优化功能。',
+      themeColor: 'purple' // ✅ 紫色 - 应用中心主题
     },
 
     // [应用 A] Master Analysis
@@ -130,7 +145,8 @@ export const MENU_CONFIG: MenuConfig = {
       title: 'Master Analysis',
       version: 'v2.1 Pro',
       icon: 'fas fa-cubes-stacked',
-      description: '集成数据采集、管理、AI分析与提示词工程的一站式解决方案。'
+      description: '集成数据采集、管理、AI分析与提示词工程的一站式解决方案。',
+      themeColor: 'indigo' // ✅ 靛蓝色 - 保持不变，与紫色相近
     },
 
     // Keyword Tracker 模块配置
@@ -141,7 +157,8 @@ export const MENU_CONFIG: MenuConfig = {
       title: 'Keyword Hunter',
       version: 'v1.0 Pro',
       icon: 'fas fa-search',
-      description: 'ASIN 关键词覆盖情况查询，手动补充与 SEO 合规性审查工具。'
+      description: 'ASIN 关键词覆盖情况查询，手动补充与 SEO 合规性审查工具。',
+      themeColor: 'fuchsia' // ✅ 紫红色 - 鲜艳醒目的搜索主题
     },
 
     // [智库] Knowledge Base
@@ -151,7 +168,8 @@ export const MENU_CONFIG: MenuConfig = {
       title: 'Amazon 智库',
       version: 'KB v1.0',
       icon: 'fas fa-book-open',
-      description: '亚马逊市场洞察报告、SEO策略、A10 算法知识库、营销日历与旺季攻略。'
+      description: '亚马逊市场洞察报告、SEO策略、A10 算法知识库、营销日历与旺季攻略。',
+      themeColor: 'orange' // ✅ 调整为 orange，避免与分类冲突
     },
 
     // [更多] More Core Module
@@ -161,7 +179,8 @@ export const MENU_CONFIG: MenuConfig = {
       title: '更多',
       version: 'v1.0',
       icon: 'fas fa-compass',
-      description: '探索更多实用功能和工具，提升工作效率。'
+      description: '探索更多实用功能和工具，提升工作效率。',
+      themeColor: 'green' // ✅ 绿色 - 清新自然的探索主题
     }
   },
 
@@ -200,7 +219,7 @@ export const MENU_CONFIG: MenuConfig = {
       id: 'service',
       label: '客服与客户体验体系',
       icon: 'fas fa-headset',
-      color: 'blue',
+      color: 'teal', // ✅ 调整为 teal，避免占用蓝色
       order: 4,
       version: 'v1.2',
       description: '提升客户满意度，打造极致的品牌服务体验。'
@@ -215,7 +234,7 @@ export const MENU_CONFIG: MenuConfig = {
       id: 'knowledge',
       label: 'Amazon知识早知道',
       icon: 'fas fa-lightbulb',
-      color: 'blue',
+      color: 'indigo', // ✅ 调整为 indigo，避免占用蓝色
       order: 1,
       version: 'v1.0',
       description: '深入了解Amazon市场洞察、SEO策略与A10算法核心知识。'
@@ -224,7 +243,7 @@ export const MENU_CONFIG: MenuConfig = {
       id: 'practice',
       label: '入门实操宝典',
       icon: 'fas fa-hands',
-      color: 'emerald',
+      color: 'green', // ✅ 调整为 green，避免与 SOPs 冲突
       order: 2,
       version: 'v1.0',
       description: '从零开始的实战指南，掌握营销日历与促销工具使用技巧。'
@@ -233,7 +252,7 @@ export const MENU_CONFIG: MenuConfig = {
       id: 'advanced',
       label: '运营提升全攻略',
       icon: 'fas fa-chart-line',
-      color: 'purple',
+      color: 'violet', // ✅ 调整为 violet，避免与 keyword_tracker 冲突
       order: 3,
       version: 'v1.0',
       description: '进阶运营策略，提升转化率与销售表现的系统方法论。'
@@ -248,7 +267,7 @@ export const MENU_CONFIG: MenuConfig = {
       id: 'explore',
       label: '大模型探索',
       icon: 'fas fa-compass',
-      color: 'green',
+      color: 'lime',
       order: 1,
       version: 'v1.0',
       description: '智能体、提示词、工作流等实用功能。'
@@ -264,7 +283,7 @@ export const MENU_CONFIG: MenuConfig = {
       id: 'master_analysis',
       label: 'Master Analysis',
       icon: 'fas fa-robot',
-      color: 'blue',
+      color: 'indigo', // ✅ 靛蓝色，与模块主题色一致
       order: 1,
       version: 'v2.1 Pro',
       description: '集成数据采集、管理、AI分析与提示词工程的一站式解决方案。'
@@ -273,7 +292,7 @@ export const MENU_CONFIG: MenuConfig = {
       id: 'keyword_tracker',
       label: 'Keyword Hunter',
       icon: 'fas fa-search',
-      color: 'purple',
+      color: 'fuchsia', // ✅ 紫红色，与模块主题色一致
       order: 2,
       version: 'v1.0 Pro',
       description: 'ASIN 关键词覆盖情况查询，手动补充与 SEO 合规性审查工具。'
@@ -286,11 +305,22 @@ export const MENU_CONFIG: MenuConfig = {
   // ==========================================
   routes: {
     // ==========================================
+    // 系统路由
+    // ==========================================
+    [SYSTEM_ROUTES.HOME]: {
+      moduleId: 'home',
+      label: '首页',
+      icon: 'fas fa-home',
+      panelId: 'panel-home',
+      viewPath: '/src/modules/home/homeDisplay.html'
+    },
+
+    // ==========================================
     // SOPs 流程中心路由
     // ==========================================
     
     // --- 属于 SOPs 应用的页面 ---
-    sops_overview: {
+    [SOPS_ROUTES.OVERVIEW]: {
       moduleId: 'sops',
       label: 'SOP 总览',
       icon: 'fas fa-th-large',
@@ -299,42 +329,42 @@ export const MENU_CONFIG: MenuConfig = {
     },
 
     // === 第一模块：运营与推广体系 (The Growth Layer) ===
-    sops_npi_tracker: {
+    [SOPS_ROUTES.NPI_TRACKER]: {
       moduleId: 'sops',
       label: '新品生命周期跟踪',
       icon: 'fas fa-seedling',
       panelId: 'panel-sops',
       category: 'growth'
     },
-    sops_listing_seo: {
+    [SOPS_ROUTES.LISTING_SEO]: {
       moduleId: 'sops',
       label: 'Listing 极致优化 (SEO)',
       icon: 'fas fa-magnifying-glass-chart',
       panelId: 'panel-sops',
       category: 'growth'
     },
-    sops_ppc_advertising: {
+    [SOPS_ROUTES.PPC_ADVERTISING]: {
       moduleId: 'sops',
       label: 'PPC 广告投放与优化',
       icon: 'fas fa-chart-line',
       panelId: 'panel-sops',
       category: 'growth'
     },
-    sops_restricted_words: {
+    [SOPS_ROUTES.RESTRICTED_WORDS]: {
       moduleId: 'sops',
       label: '欧洲本土化高危词库',
       icon: 'fas fa-book-dead',
       panelId: 'panel-sops',
       category: 'growth'
     },
-    sops_promotion_submission: {
+    [SOPS_ROUTES.PROMOTION_SUBMISSION]: {
       moduleId: 'sops',
       label: '促销活动提报',
       icon: 'fas fa-tags',
       panelId: 'panel-sops',
       category: 'growth'
     },
-    sops_competitor_monitoring: {
+    [SOPS_ROUTES.COMPETITOR_MONITORING]: {
       moduleId: 'sops',
       label: '竞品监控与分析',
       icon: 'fas fa-binoculars',
@@ -343,21 +373,21 @@ export const MENU_CONFIG: MenuConfig = {
     },
 
     // === 第二模块：供应链与物流体系 (The Backend Layer) ===
-    sops_fba_shipping: {
+    [SOPS_ROUTES.FBA_SHIPPING]: {
       moduleId: 'sops',
       label: 'FBA 发货标准操作',
       icon: 'fas fa-truck-fast',
       panelId: 'panel-sops',
       category: 'backend'
     },
-    sops_procurement_qc: {
+    [SOPS_ROUTES.PROCUREMENT_QC]: {
       moduleId: 'sops',
       label: '采购与质检 (QC)',
       icon: 'fas fa-clipboard-check',
       panelId: 'panel-sops',
       category: 'backend'
     },
-    sops_inventory_replenishment: {
+    [SOPS_ROUTES.INVENTORY_REPLENISHMENT]: {
       moduleId: 'sops',
       label: '库存预警与补货',
       icon: 'fas fa-cubes',
@@ -366,42 +396,42 @@ export const MENU_CONFIG: MenuConfig = {
     },
 
     // === 第三模块：账号安全与风控体系 (The Safety Layer) ===
-    sops_account_security: {
+    [SOPS_ROUTES.ACCOUNT_SECURITY]: {
       moduleId: 'sops',
       label: '账号登录与环境安全',
       icon: 'fas fa-shield-halved',
       panelId: 'panel-sops',
       category: 'safety'
     },
-    sops_permission_management: {
+    [SOPS_ROUTES.PERMISSION_MANAGEMENT]: {
       moduleId: 'sops',
       label: '后台权限管理',
       icon: 'fas fa-user-lock',
       panelId: 'panel-sops',
       category: 'safety'
     },
-    sops_brand_infringement: {
+    [SOPS_ROUTES.BRAND_INFRINGEMENT]: {
       moduleId: 'sops',
       label: '品牌与侵权审核',
       icon: 'fas fa-trademark',
       panelId: 'panel-sops',
       category: 'safety'
     },
-    sops_performance_notification: {
+    [SOPS_ROUTES.PERFORMANCE_NOTIFICATION]: {
       moduleId: 'sops',
       label: '绩效通知处理',
       icon: 'fas fa-bell',
       panelId: 'panel-sops',
       category: 'safety'
     },
-    sops_product_compliance: {
+    [SOPS_ROUTES.PRODUCT_COMPLIANCE]: {
       moduleId: 'sops',
       label: '敏感产品合规销售',
       icon: 'fas fa-file-shield',
       panelId: 'panel-sops',
       category: 'safety'
     },
-    sops_eu_gpsr_compliance: {
+    [SOPS_ROUTES.EU_GPSR_COMPLIANCE]: {
       moduleId: 'sops',
       label: '欧洲GPSR合规',
       icon: 'fa-solid fa-shield-dog',
@@ -410,21 +440,21 @@ export const MENU_CONFIG: MenuConfig = {
     },
 
     // === 第四模块：客服与客户体验体系 (The Service Layer) ===
-    sops_email_templates: {
+    [SOPS_ROUTES.EMAIL_TEMPLATES]: {
       moduleId: 'sops',
       label: '邮件回复模板',
       icon: 'fas fa-envelope-open-text',
       panelId: 'panel-sops',
       category: 'service'
     },
-    sops_negative_review: {
+    [SOPS_ROUTES.NEGATIVE_REVIEW]: {
       moduleId: 'sops',
       label: '差评处理与分析',
       icon: 'fas fa-comment-dots',
       panelId: 'panel-sops',
       category: 'service'
     },
-    sops_qa_maintenance: {
+    [SOPS_ROUTES.QA_MAINTENANCE]: {
       moduleId: 'sops',
       label: 'QA 问答维护',
       icon: 'fas fa-comments',
@@ -437,7 +467,7 @@ export const MENU_CONFIG: MenuConfig = {
     // ==========================================
     
     // App Center 总览页面
-    app_center_overview: {
+    [APP_CENTER_ROUTES.OVERVIEW]: {
       moduleId: 'app_center',
       label: '应用总览',
       icon: 'fas fa-th-large',
@@ -445,28 +475,28 @@ export const MENU_CONFIG: MenuConfig = {
     },
 
     // --- Master Analysis 应用 ---
-    scraper: {
+    [APP_CENTER_ROUTES.SCRAPER]: {
       moduleId: 'master_analysis',
       label: '数据采集',
       icon: 'fas fa-spider',
       panelId: 'panel-app_center',
       category: 'master_analysis'
     },
-    ai_analysis: {
+    [APP_CENTER_ROUTES.AI_ANALYSIS]: {
       moduleId: 'master_analysis',
       label: 'AI智能分析',
       icon: 'fas fa-brain',
       panelId: 'panel-app_center',
       category: 'master_analysis'
     },
-    promptlab: {
+    [APP_CENTER_ROUTES.PROMPTLAB]: {
       moduleId: 'master_analysis',
       label: 'Prompt 生成',
       icon: 'fas fa-wand-magic-sparkles',
       panelId: 'panel-app_center',
       category: 'master_analysis'
     },
-    qalab: {
+    [APP_CENTER_ROUTES.QALAB]: {
       moduleId: 'master_analysis',
       label: 'Q&A 预研',
       icon: 'fas fa-comments',
@@ -475,21 +505,21 @@ export const MENU_CONFIG: MenuConfig = {
     },
 
     // --- Keyword Hunter 应用 ---
-    kw_input: {
+    [APP_CENTER_ROUTES.KW_INPUT]: {
       moduleId: 'keyword_tracker',
       label: '输入模块',
       icon: 'fas fa-keyboard',
       panelId: 'panel-app_center',
       category: 'keyword_tracker'
     },
-    kw_process: {
+    [APP_CENTER_ROUTES.KW_PROCESS]: {
       moduleId: 'keyword_tracker',
       label: '处理模块',
       icon: 'fas fa-cogs',
       panelId: 'panel-app_center',
       category: 'keyword_tracker'
     },
-    kw_analysis: {
+    [APP_CENTER_ROUTES.KW_ANALYSIS]: {
       moduleId: 'keyword_tracker',
       label: '分析统计',
       icon: 'fas fa-chart-pie',
@@ -502,7 +532,7 @@ export const MENU_CONFIG: MenuConfig = {
     // ==========================================
 
     // 总览页面
-    amz_hub_overview: {
+    [AMZ_HUB_ROUTES.OVERVIEW]: {
       moduleId: 'amz_hub_core',
       label: '智库总览',
       icon: 'fas fa-th-large',
@@ -510,21 +540,21 @@ export const MENU_CONFIG: MenuConfig = {
     },
 
     // === Amazon知识早知道 ===
-    amz_eu_insights: {
+    [AMZ_HUB_ROUTES.EU_INSIGHTS]: {
       moduleId: 'amz_hub_core',
       label: '市场洞察',
       icon: 'fas fa-globe-europe',
       panelId: 'panel-amz_hub',
       category: 'knowledge'
     },
-    amz_seo_strategy: {
+    [AMZ_HUB_ROUTES.SEO_STRATEGY]: {
       moduleId: 'amz_hub_core',
       label: 'SEO 策略',
       icon: 'fas fa-magnifying-glass-chart',
       panelId: 'panel-amz_hub',
       category: 'knowledge'
     },
-    amz_ecosystem: {
+    [AMZ_HUB_ROUTES.ECOSYSTEM]: {
       moduleId: 'amz_hub_core',
       label: 'A10 & COSMO',
       icon: 'fas fa-network-wired',
@@ -533,21 +563,21 @@ export const MENU_CONFIG: MenuConfig = {
     },
 
     // === 入门实操宝典 ===
-    amz_quality_listing: {
+    [AMZ_HUB_ROUTES.QUALITY_LISTING]: {
       moduleId: 'amz_hub_core',
       label: '教你打造优质Listing',
       icon: 'fas fa-star',
       panelId: 'panel-amz_hub',
       category: 'practice'
     },
-    amz_marketing_calendar: {
+    [AMZ_HUB_ROUTES.MARKETING_CALENDAR]: {
       moduleId: 'amz_hub_core',
       label: 'EU营销日历',
       icon: 'fas fa-calendar-alt',
       panelId: 'panel-amz_hub',
       category: 'practice'
     },
-    amz_seasons_tools: {
+    [AMZ_HUB_ROUTES.SEASONS_TOOLS]: {
       moduleId: 'amz_hub_core',
       label: '销售活动/促销工具',
       icon: 'fa-solid fa-gift',
@@ -556,14 +586,14 @@ export const MENU_CONFIG: MenuConfig = {
     },
 
     // === 运营提升全攻略 ===
-    amz_new_product_30days: {
+    [AMZ_HUB_ROUTES.NEW_PRODUCT_30DAYS]: {
       moduleId: 'amz_hub_core',
       label: '新品30天极速突围',
       icon: 'fas fa-rocket',
       panelId: 'panel-amz_hub',
       category: 'advanced'
     },
-    amz_conversion_optimization: {
+    [AMZ_HUB_ROUTES.CONVERSION_OPTIMIZATION]: {
       moduleId: 'amz_hub_core',
       label: '链接转化率低自查优化',
       icon: 'fas fa-chart-line',
@@ -576,7 +606,7 @@ export const MENU_CONFIG: MenuConfig = {
     // ==========================================
     
     // --- 属于 More 模块的页面 ---
-    more_overview: {
+    [MORE_ROUTES.OVERVIEW]: {
       moduleId: 'more_core',
       label: '更多总览',
       icon: 'fas fa-th-large',
@@ -584,21 +614,21 @@ export const MENU_CONFIG: MenuConfig = {
     },
 
     // === 探索体系 (The Explore Layer) ===
-    more_agents: {
+    [MORE_ROUTES.AGENTS]: {
       moduleId: 'more_core',
       label: '智能体',
       icon: 'fas fa-robot',
       panelId: 'panel-more',
       category: 'explore'
     },
-    more_prompts: {
+    [MORE_ROUTES.PROMPTS]: {
       moduleId: 'more_core',
       label: '提示词',
       icon: 'fas fa-message',
       panelId: 'panel-more',
       category: 'explore'
     },
-    more_workflows: {
+    [MORE_ROUTES.WORKFLOWS]: {
       moduleId: 'more_core',
       label: '工作流',
       icon: 'fas fa-diagram-project',
@@ -723,11 +753,6 @@ export function getAllRouteIds(): string[] {
  * @returns 视图路径
  */
 export function getViewPathByRoute(routeId: string): string | null {
-  // 特殊路由：home 不在 routes 配置中
-  if (routeId === 'home') {
-    return '/src/modules/home/homeDisplay.html';
-  }
-
   const route = MENU_CONFIG.routes[routeId];
   if (!route) return null;
 

@@ -1,0 +1,1874 @@
+/**
+ * 代码着色 & 语法高亮
+ * 统一的代码展示样式系统
+ *
+ * 目录:
+ * 1.  CSS 变量
+ * 2.  代码块容器
+ * 3.  代码块 Header（文件名 / 语言标签）
+ * 4.  代码块 Body
+ * 5.  行号
+ * 6.  代码高亮行
+ * 7.  代码行 Diff 标记（新增 / 删除）
+ * 8.  代码行悬停
+ * 9.  代码折叠
+ * 10. 代码块工具栏（复制 / 换行 / 全屏）
+ * 11. 内联代码
+ * 12. JSON Key-Value 着色
+ * 13. 通用语法着色令牌
+ * 14. SQL 着色补充
+ * 15. 终端 / Shell 样式
+ * 16. 代码对比 (Side-by-side Diff)
+ * 17. 代码组 (Tab 切换)
+ * 18. 代码块变体（尺寸 / 无边框）
+ * 19. 暗色模式
+ * 20. 响应式适配
+ * 21. 打印适配
+ * 22. 无障碍 & 减少动画
+ */
+
+
+/* ========================================
+   1. CSS 变量
+   ======================================== */
+:root {
+  /* ---- 代码块容器 ---- */
+  --code-font:          var(--font-mono, 'Fira Code', 'Cascadia Code', 'JetBrains Mono', 'SF Mono', Consolas, monospace);
+  --code-font-size:     0.8125rem;      /* 13px */
+  --code-line-height:   1.7;
+  --code-tab-size:      2;
+  --code-radius:        var(--radius-lg, 12px);
+  --code-padding-x:     var(--spacing-md, 16px);
+  --code-padding-y:     var(--spacing-md, 16px);
+
+  /* ---- 代码块颜色 ---- */
+  --code-bg:            #1e1e2e;         /* Catppuccin-inspired dark bg */
+  --code-bg-header:     #181825;
+  --code-text:          #cdd6f4;
+  --code-border:        rgba(255, 255, 255, 0.06);
+  --code-selection:     rgba(137, 180, 250, 0.2);
+  --code-gutter:        #6c7086;         /* 行号色 */
+  --code-gutter-active: #a6adc8;
+
+  /* ---- 内联代码颜色 ---- */
+  --code-inline-bg:     rgba(0, 0, 0, 0.06);
+  --code-inline-text:   var(--color-rose-600, #e11d48);
+  --code-inline-border: rgba(0, 0, 0, 0.06);
+  --code-inline-radius: var(--radius-sm, 4px);
+
+  /* ---- 高亮行 ---- */
+  --code-highlight-bg:         rgba(137, 180, 250, 0.08);
+  --code-highlight-border:     #89b4fa;
+
+  /* ---- Diff ---- */
+  --code-diff-add-bg:          rgba(166, 227, 161, 0.1);
+  --code-diff-add-border:      #a6e3a1;
+  --code-diff-add-text:        #a6e3a1;
+  --code-diff-delete-bg:       rgba(243, 139, 168, 0.1);
+  --code-diff-delete-border:   #f38ba8;
+  --code-diff-delete-text:     #f38ba8;
+
+  /* ---- 语法令牌颜色 (Catppuccin Mocha 风格) ---- */
+  --syntax-keyword:     #cba6f7;   /* 紫 — if / return / const */
+  --syntax-string:      #a6e3a1;   /* 绿 — "hello" */
+  --syntax-number:      #fab387;   /* 橙 — 42 / 3.14 */
+  --syntax-boolean:     #fab387;   /* 橙 — true / false */
+  --syntax-null:        #6c7086;   /* 灰 — null / undefined */
+  --syntax-comment:     #6c7086;   /* 灰 — // comment */
+  --syntax-function:    #89b4fa;   /* 蓝 — functionName */
+  --syntax-class:       #f9e2af;   /* 黄 — ClassName */
+  --syntax-variable:    #cdd6f4;   /* 白 — variableName */
+  --syntax-property:    #89dceb;   /* 青 — .property */
+  --syntax-operator:    #89dceb;   /* 青 — = + - */
+  --syntax-punctuation: #bac2de;   /* 浅灰 — { } ( ) */
+  --syntax-tag:         #f38ba8;   /* 粉 — <div> */
+  --syntax-attr-name:   #89b4fa;   /* 蓝 — class= */
+  --syntax-attr-value:  #a6e3a1;   /* 绿 — "value" */
+  --syntax-regex:       #f5c2e7;   /* 浅粉 — /regex/ */
+  --syntax-decorator:   #f9e2af;   /* 黄 — @decorator */
+  --syntax-type:        #f9e2af;   /* 黄 — Type */
+  --syntax-builtin:     #f38ba8;   /* 粉 — console / Math */
+  --syntax-param:       #eba0ac;   /* 浅粉 — (param) */
+  --syntax-selector:    #cba6f7;   /* 紫 — CSS .class */
+  --syntax-important:   #f38ba8;   /* 粉 — !important */
+  --syntax-deleted:     #f38ba8;   /* 粉 — diff - */
+  --syntax-inserted:    #a6e3a1;   /* 绿 — diff + */
+
+  /* ---- JSON 专用 (亮色模式，嵌入正文) ---- */
+  --json-key:           #059669;
+  --json-string:        #3b82f6;
+  --json-number:        #f59e0b;
+  --json-boolean:       #8b5cf6;
+  --json-null:          #9ca3af;
+  --json-bracket:       #6b7280;
+
+  /* ---- 工具栏 ---- */
+  --code-toolbar-bg:    rgba(255, 255, 255, 0.06);
+  --code-toolbar-text:  #a6adc8;
+  --code-toolbar-hover: rgba(255, 255, 255, 0.1);
+
+  /* ---- 终端 ---- */
+  --terminal-bg:        #11111b;
+  --terminal-text:      #cdd6f4;
+  --terminal-prompt:    #a6e3a1;
+  --terminal-command:   #cdd6f4;
+  --terminal-output:    #a6adc8;
+  --terminal-error:     #f38ba8;
+  --terminal-path:      #89b4fa;
+  --terminal-cursor:    #f5e0dc;
+}
+
+
+/* ========================================
+   2. 代码块容器
+   ======================================== */
+.code-block {
+  position: relative;
+  font-family: var(--code-font);
+  font-size: var(--code-font-size);
+  line-height: var(--code-line-height);
+  tab-size: var(--code-tab-size);
+  -moz-tab-size: var(--code-tab-size);
+  border-radius: var(--code-radius);
+  background: var(--code-bg);
+  color: var(--code-text);
+  border: 1px solid var(--code-border);
+  overflow: hidden;
+  direction: ltr;
+  text-align: left;
+  hyphens: none;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
+}
+
+/* 代码文本选中色 */
+.code-block ::selection {
+  background: var(--code-selection);
+}
+
+.code-block ::-moz-selection {
+  background: var(--code-selection);
+}
+
+/* 连字支持 */
+.code-block--ligatures {
+  font-variant-ligatures: contextual;
+  font-feature-settings: 'calt' 1, 'liga' 1;
+}
+
+/* 禁用连字 */
+.code-block--no-ligatures {
+  font-variant-ligatures: none;
+  font-feature-settings: 'calt' 0, 'liga' 0;
+}
+
+
+/* ========================================
+   3. 代码块 Header
+   ======================================== */
+.code-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm, 12px);
+  padding: var(--spacing-xs, 8px) var(--code-padding-x);
+  background: var(--code-bg-header);
+  border-bottom: 1px solid var(--code-border);
+  min-height: 36px;
+  flex-shrink: 0;
+}
+
+.code-block-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs, 8px);
+  min-width: 0;
+  flex: 1;
+}
+
+.code-block-header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2xs, 6px);
+  flex-shrink: 0;
+}
+
+/* --- macOS 风格窗口按钮 --- */
+.code-block-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.code-block-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.code-block-dot--red    { background: #ff5f57; }
+.code-block-dot--yellow { background: #febc2e; }
+.code-block-dot--green  { background: #28c840; }
+
+/* 暗色按钮 (非活跃) */
+.code-block-dots--dim .code-block-dot {
+  opacity: 0.4;
+}
+
+.code-block:hover .code-block-dots--dim .code-block-dot {
+  opacity: 1;
+  transition: opacity 0.2s var(--ease-smooth);
+}
+
+/* --- 文件名 --- */
+.code-block-filename {
+  font-size: var(--text-xs, 0.75rem);
+  font-weight: var(--font-medium, 500);
+  color: var(--code-gutter-active);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--code-font);
+}
+
+/* 文件图标 */
+.code-block-file-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+/* --- 语言标签 --- */
+.code-block-lang {
+  font-size: var(--text-2xs, 0.625rem);
+  font-weight: var(--font-medium, 500);
+  color: var(--code-toolbar-text);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider, 0.05em);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm, 4px);
+  background: var(--code-toolbar-bg);
+  line-height: 1.4;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+/* 语言标签颜色编码 */
+.code-block-lang--js,
+.code-block-lang--javascript  { color: #f9e2af; }
+.code-block-lang--ts,
+.code-block-lang--typescript  { color: #89b4fa; }
+.code-block-lang--py,
+.code-block-lang--python      { color: #89b4fa; }
+.code-block-lang--html        { color: #f38ba8; }
+.code-block-lang--css         { color: #89b4fa; }
+.code-block-lang--scss,
+.code-block-lang--sass        { color: #f38ba8; }
+.code-block-lang--json        { color: #a6e3a1; }
+.code-block-lang--yaml,
+.code-block-lang--yml         { color: #f38ba8; }
+.code-block-lang--md,
+.code-block-lang--markdown    { color: #cdd6f4; }
+.code-block-lang--sh,
+.code-block-lang--bash,
+.code-block-lang--shell,
+.code-block-lang--zsh         { color: #a6e3a1; }
+.code-block-lang--sql         { color: #f9e2af; }
+.code-block-lang--rust,
+.code-block-lang--rs          { color: #fab387; }
+.code-block-lang--go          { color: #89dceb; }
+.code-block-lang--java        { color: #fab387; }
+.code-block-lang--rb,
+.code-block-lang--ruby        { color: #f38ba8; }
+.code-block-lang--php         { color: #cba6f7; }
+.code-block-lang--c,
+.code-block-lang--cpp         { color: #89b4fa; }
+.code-block-lang--swift       { color: #fab387; }
+.code-block-lang--kt,
+.code-block-lang--kotlin      { color: #cba6f7; }
+.code-block-lang--vue         { color: #a6e3a1; }
+.code-block-lang--jsx,
+.code-block-lang--tsx         { color: #89b4fa; }
+.code-block-lang--graphql,
+.code-block-lang--gql         { color: #f5c2e7; }
+.code-block-lang--docker,
+.code-block-lang--dockerfile  { color: #89b4fa; }
+.code-block-lang--xml         { color: #fab387; }
+.code-block-lang--toml        { color: #f9e2af; }
+.code-block-lang--env         { color: #f9e2af; }
+
+
+/* ========================================
+   4. 代码块 Body
+   ======================================== */
+.code-block-body {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: var(--code-padding-y) 0;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+.code-block-body::-webkit-scrollbar {
+  height: 6px;
+}
+
+.code-block-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.code-block-body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.code-block-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* 代码内容 */
+.code-block-body pre {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.code-block-body code {
+  display: block;
+  padding: 0 var(--code-padding-x);
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  background: transparent;
+  color: inherit;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+}
+
+/* 自动换行模式 */
+.code-block--wrap .code-block-body code {
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* 最大高度限制 (可滚动) */
+.code-block--max-height .code-block-body {
+  max-height: var(--code-max-height, 400px);
+  overflow-y: auto;
+}
+
+.code-block--max-height .code-block-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+
+/* ========================================
+   5. 行号
+   ======================================== */
+.code-block-table {
+  display: table;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.code-line {
+  display: table-row;
+  line-height: var(--code-line-height);
+}
+
+/* 行号列 */
+.code-line-number {
+  display: table-cell;
+  width: 3em;
+  min-width: 3em;
+  padding-right: var(--spacing-sm, 12px);
+  padding-left: var(--code-padding-x);
+  text-align: right;
+  color: var(--code-gutter);
+  user-select: none;
+  vertical-align: top;
+  white-space: nowrap;
+  opacity: 0.6;
+  font-size: 0.75em;
+  transition: color 0.1s var(--ease-smooth);
+}
+
+/* 当前行行号高亮 */
+.code-line:hover .code-line-number {
+  color: var(--code-gutter-active);
+  opacity: 1;
+}
+
+/* 代码内容列 */
+.code-line-content {
+  display: table-cell;
+  padding-right: var(--code-padding-x);
+  vertical-align: top;
+}
+
+/* 紧凑行号 (窄宽度) */
+.code-block--compact-gutter .code-line-number {
+  width: 2em;
+  min-width: 2em;
+  padding-right: var(--spacing-xs, 8px);
+}
+
+/* 隐藏行号 */
+.code-block--no-line-numbers .code-line-number {
+  display: none;
+}
+
+.code-block--no-line-numbers .code-line-content {
+  padding-left: var(--code-padding-x);
+}
+
+/* 可点击行号 (用于锚链接) */
+.code-line-number--clickable {
+  cursor: pointer;
+}
+
+.code-line-number--clickable:hover {
+  color: var(--syntax-keyword, #cba6f7);
+  opacity: 1;
+}
+
+
+/* ========================================
+   6. 代码高亮行
+   ======================================== */
+.code-line--highlighted {
+  background: var(--code-highlight-bg);
+}
+
+.code-line--highlighted .code-line-number {
+  color: var(--code-highlight-border);
+  opacity: 1;
+  border-left: 3px solid var(--code-highlight-border);
+  padding-left: calc(var(--code-padding-x) - 3px);
+}
+
+/* 错误行 */
+.code-line--error {
+  background: var(--code-diff-delete-bg);
+}
+
+.code-line--error .code-line-number {
+  color: var(--code-diff-delete-border);
+  opacity: 1;
+  border-left: 3px solid var(--code-diff-delete-border);
+  padding-left: calc(var(--code-padding-x) - 3px);
+}
+
+/* 警告行 */
+.code-line--warning {
+  background: rgba(249, 226, 175, 0.08);
+}
+
+.code-line--warning .code-line-number {
+  color: #f9e2af;
+  opacity: 1;
+  border-left: 3px solid #f9e2af;
+  padding-left: calc(var(--code-padding-x) - 3px);
+}
+
+/* 聚焦行 (其他行模糊) */
+.code-block--focus-lines .code-line:not(.code-line--highlighted) {
+  opacity: 0.35;
+  filter: blur(0.4px);
+  transition: opacity 0.3s var(--ease-smooth), filter 0.3s var(--ease-smooth);
+}
+
+.code-block--focus-lines:hover .code-line:not(.code-line--highlighted) {
+  opacity: 1;
+  filter: none;
+}
+
+/* 行号范围选中 */
+.code-line--range-selected {
+  background: rgba(137, 180, 250, 0.06);
+}
+
+
+/* ========================================
+   7. 代码行 Diff 标记
+   ======================================== */
+
+/* 新增行 */
+.code-line--added {
+  background: var(--code-diff-add-bg);
+}
+
+.code-line--added .code-line-number {
+  color: var(--code-diff-add-border);
+  opacity: 0.8;
+}
+
+.code-line--added .code-line-number::before {
+  content: '+';
+  position: absolute;
+  left: 4px;
+  color: var(--code-diff-add-text);
+  font-weight: var(--font-bold, 700);
+}
+
+.code-line--added .code-line-content {
+  color: var(--code-diff-add-text);
+}
+
+/* 删除行 */
+.code-line--deleted {
+  background: var(--code-diff-delete-bg);
+}
+
+.code-line--deleted .code-line-number {
+  color: var(--code-diff-delete-border);
+  opacity: 0.8;
+}
+
+.code-line--deleted .code-line-number::before {
+  content: '−';
+  position: absolute;
+  left: 4px;
+  color: var(--code-diff-delete-text);
+  font-weight: var(--font-bold, 700);
+}
+
+.code-line--deleted .code-line-content {
+  color: var(--code-diff-delete-text);
+  text-decoration: line-through;
+  text-decoration-color: rgba(243, 139, 168, 0.4);
+}
+
+/* 行号需要 relative 定位配合 ::before */
+.code-line--added .code-line-number,
+.code-line--deleted .code-line-number {
+  position: relative;
+  padding-left: calc(var(--code-padding-x) + 12px);
+}
+
+/* 修改行 (左侧黄色标记) */
+.code-line--modified {
+  background: rgba(249, 226, 175, 0.06);
+}
+
+.code-line--modified .code-line-number {
+  border-left: 3px solid #f9e2af;
+  padding-left: calc(var(--code-padding-x) - 3px);
+}
+
+/* 内联 Diff 文字高亮 */
+.code-diff-word-add {
+  background: rgba(166, 227, 161, 0.2);
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+.code-diff-word-delete {
+  background: rgba(243, 139, 168, 0.2);
+  border-radius: 2px;
+  padding: 0 2px;
+  text-decoration: line-through;
+  text-decoration-color: rgba(243, 139, 168, 0.5);
+}
+
+
+/* ========================================
+   8. 代码行悬停
+   ======================================== */
+.code-block--hover-lines .code-line:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* 不覆盖高亮行 / Diff 行 */
+.code-block--hover-lines .code-line--highlighted:hover,
+.code-block--hover-lines .code-line--added:hover,
+.code-block--hover-lines .code-line--deleted:hover,
+.code-block--hover-lines .code-line--error:hover {
+  /* 使用原有背景，仅略微加深 */
+  filter: brightness(1.05);
+}
+
+
+/* ========================================
+   9. 代码折叠
+   ======================================== */
+.code-fold-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-right: 4px;
+  cursor: pointer;
+  color: var(--code-gutter);
+  opacity: 0;
+  transition: opacity 0.15s var(--ease-smooth);
+  vertical-align: middle;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--code-font);
+  font-size: 0.8em;
+  border-radius: 2px;
+}
+
+.code-line:hover .code-fold-trigger {
+  opacity: 0.6;
+}
+
+.code-fold-trigger:hover {
+  opacity: 1 !important;
+  color: var(--code-gutter-active);
+  background: var(--code-toolbar-bg);
+}
+
+/* 折叠指示器 */
+.code-fold-trigger::before {
+  content: '▾';
+  transition: transform 0.15s var(--ease-smooth);
+}
+
+.code-fold-trigger[aria-expanded="false"]::before {
+  transform: rotate(-90deg);
+}
+
+/* 折叠区域 */
+.code-fold-region[hidden] {
+  display: none;
+}
+
+/* 折叠占位符 */
+.code-fold-placeholder {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 6px;
+  margin: 0 4px;
+  background: var(--code-toolbar-bg);
+  color: var(--code-gutter-active);
+  border-radius: var(--radius-sm, 4px);
+  font-size: 0.75em;
+  cursor: pointer;
+  border: 1px solid var(--code-border);
+  transition:
+    background-color 0.15s var(--ease-smooth),
+    border-color 0.15s var(--ease-smooth);
+}
+
+.code-fold-placeholder:hover {
+  background: var(--code-toolbar-hover);
+  border-color: var(--code-gutter-active);
+}
+
+/* 折叠行数提示 */
+.code-fold-count {
+  font-weight: var(--font-medium, 500);
+  opacity: 0.7;
+}
+
+
+/* ========================================
+   10. 代码块工具栏
+   ======================================== */
+.code-block-toolbar {
+  position: absolute;
+  top: var(--spacing-xs, 8px);
+  right: var(--spacing-xs, 8px);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s var(--ease-smooth);
+  z-index: 2;
+}
+
+.code-block:hover .code-block-toolbar {
+  opacity: 1;
+}
+
+/* 带 Header 时工具栏放在 Header 内 */
+.code-block-header .code-block-toolbar {
+  position: static;
+  opacity: 1;
+}
+
+/* 工具栏按钮 */
+.code-block-toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm, 4px);
+  background: var(--code-toolbar-bg);
+  color: var(--code-toolbar-text);
+  cursor: pointer;
+  font-size: var(--text-xs, 0.75rem);
+  transition:
+    background-color 0.15s var(--ease-smooth),
+    color 0.15s var(--ease-smooth);
+}
+
+.code-block-toolbar-btn:hover {
+  background: var(--code-toolbar-hover);
+  color: #ffffff;
+}
+
+.code-block-toolbar-btn:active {
+  transform: scale(0.92);
+}
+
+/* 带文字的工具栏按钮 */
+.code-block-toolbar-btn--text {
+  width: auto;
+  padding: 0 8px;
+  gap: 4px;
+  font-size: var(--text-2xs, 0.625rem);
+  font-weight: var(--font-medium, 500);
+}
+
+/* 复制成功状态 */
+.code-block-toolbar-btn--copied {
+  color: var(--syntax-inserted, #a6e3a1) !important;
+}
+
+/* 复制按钮过渡 */
+.code-block-copy-icon,
+.code-block-check-icon {
+  transition:
+    opacity 0.2s var(--ease-smooth),
+    transform 0.2s var(--ease-smooth);
+}
+
+.code-block-toolbar-btn--copied .code-block-copy-icon {
+  opacity: 0;
+  transform: scale(0.5);
+  position: absolute;
+}
+
+.code-block-toolbar-btn:not(.code-block-toolbar-btn--copied) .code-block-check-icon {
+  opacity: 0;
+  transform: scale(0.5);
+  position: absolute;
+}
+
+
+/* ========================================
+   11. 内联代码
+   ======================================== */
+.code-inline,
+:not(pre) > code {
+  font-family: var(--code-font);
+  font-size: 0.875em;
+  font-weight: var(--font-medium, 500);
+  color: var(--code-inline-text);
+  background: var(--code-inline-bg);
+  border: 1px solid var(--code-inline-border);
+  border-radius: var(--code-inline-radius);
+  padding: 0.15em 0.4em;
+  white-space: nowrap;
+  word-break: break-word;
+  line-height: 1.6;
+  vertical-align: baseline;
+}
+
+/* 内联代码可换行 */
+.code-inline--wrap {
+  white-space: normal;
+}
+
+/* 内联代码变体 */
+.code-inline--blue {
+  --code-inline-text: var(--color-blue-600, #2563eb);
+  --code-inline-bg: rgba(59, 130, 246, 0.08);
+  --code-inline-border: rgba(59, 130, 246, 0.12);
+}
+
+.code-inline--green {
+  --code-inline-text: var(--color-green-600, #16a34a);
+  --code-inline-bg: rgba(34, 197, 94, 0.08);
+  --code-inline-border: rgba(34, 197, 94, 0.12);
+}
+
+.code-inline--purple {
+  --code-inline-text: var(--color-purple-600, #9333ea);
+  --code-inline-bg: rgba(139, 92, 246, 0.08);
+  --code-inline-border: rgba(139, 92, 246, 0.12);
+}
+
+.code-inline--amber {
+  --code-inline-text: var(--color-amber-700, #b45309);
+  --code-inline-bg: rgba(245, 158, 11, 0.08);
+  --code-inline-border: rgba(245, 158, 11, 0.12);
+}
+
+.code-inline--neutral {
+  --code-inline-text: var(--color-text-primary, #1a1a2e);
+  --code-inline-bg: var(--color-bg-tertiary, #f3f4f6);
+  --code-inline-border: transparent;
+}
+
+
+/* ========================================
+   12. JSON Key-Value 着色 (亮色正文内嵌)
+   ======================================== */
+.json-key {
+  color: var(--json-key);
+  font-weight: var(--font-medium, 500);
+}
+
+.json-string {
+  color: var(--json-string);
+}
+
+.json-number {
+  color: var(--json-number);
+}
+
+.json-boolean {
+  color: var(--json-boolean);
+}
+
+.json-null {
+  color: var(--json-null);
+  font-style: italic;
+}
+
+.json-bracket {
+  color: var(--json-bracket);
+}
+
+/* 可折叠的 JSON 节点 */
+.json-node {
+  position: relative;
+  padding-left: 16px;
+}
+
+.json-node-toggle {
+  position: absolute;
+  left: 0;
+  top: 0;
+  cursor: pointer;
+  user-select: none;
+  width: 14px;
+  height: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6em;
+  color: var(--json-bracket);
+  border-radius: 2px;
+}
+
+.json-node-toggle:hover {
+  background: var(--color-bg-hover, rgba(0, 0, 0, 0.04));
+}
+
+.json-node-toggle::before {
+  content: '▾';
+  transition: transform 0.15s var(--ease-smooth);
+}
+
+.json-node--collapsed .json-node-toggle::before {
+  transform: rotate(-90deg);
+}
+
+.json-node--collapsed .json-node-children {
+  display: none;
+}
+
+.json-node-ellipsis {
+  color: var(--json-bracket);
+  font-style: italic;
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+/* 可复制的 JSON 值 */
+.json-value-copyable {
+  cursor: pointer;
+  border-radius: 2px;
+  padding: 0 2px;
+  margin: 0 -2px;
+  transition: background-color 0.15s var(--ease-smooth);
+}
+
+.json-value-copyable:hover {
+  background: var(--color-bg-hover, rgba(0, 0, 0, 0.06));
+}
+
+/* JSON 路径面包屑 */
+.json-path {
+  font-family: var(--code-font);
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--color-text-tertiary, #9ca3af);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-bottom: var(--spacing-xs, 8px);
+}
+
+.json-path-segment {
+  color: var(--json-key);
+}
+
+.json-path-separator {
+  color: var(--json-bracket);
+  opacity: 0.5;
+}
+
+
+/* ========================================
+   13. 通用语法着色令牌
+   ======================================== */
+
+/* --- 关键词 --- */
+.token.keyword,
+.token.control,
+.token.directive { color: var(--syntax-keyword); }
+
+/* --- 字符串 --- */
+.token.string,
+.token.char,
+.token.template-string { color: var(--syntax-string); }
+
+/* --- 数字 --- */
+.token.number,
+.token.integer,
+.token.float,
+.token.hex,
+.token.oct { color: var(--syntax-number); }
+
+/* --- 布尔 --- */
+.token.boolean { color: var(--syntax-boolean); }
+
+/* --- Null / Undefined --- */
+.token.null,
+.token.nil,
+.token.undefined { color: var(--syntax-null); font-style: italic; }
+
+/* --- 注释 --- */
+.token.comment,
+.token.block-comment,
+.token.line-comment,
+.token.prolog,
+.token.doctype,
+.token.cdata { color: var(--syntax-comment); font-style: italic; }
+
+/* --- 函数 --- */
+.token.function,
+.token.method { color: var(--syntax-function); }
+
+/* --- 类名 / 类型 --- */
+.token.class-name,
+.token.type-name,
+.token.maybe-class-name { color: var(--syntax-class); }
+
+/* --- 变量 --- */
+.token.variable { color: var(--syntax-variable); }
+
+/* --- 属性 (对象) --- */
+.token.property,
+.token.constant { color: var(--syntax-property); }
+
+/* --- 运算符 --- */
+.token.operator,
+.token.arrow { color: var(--syntax-operator); }
+
+/* --- 标点 --- */
+.token.punctuation,
+.token.brace,
+.token.bracket,
+.token.paren { color: var(--syntax-punctuation); }
+
+/* --- HTML/XML 标签 --- */
+.token.tag { color: var(--syntax-tag); }
+
+/* --- 属性名 (HTML) --- */
+.token.attr-name { color: var(--syntax-attr-name); }
+
+/* --- 属性值 (HTML) --- */
+.token.attr-value { color: var(--syntax-attr-value); }
+
+/* --- 正则表达式 --- */
+.token.regex { color: var(--syntax-regex); }
+
+/* --- 装饰器 --- */
+.token.decorator,
+.token.annotation { color: var(--syntax-decorator); }
+
+/* --- 类型注解 --- */
+.token.type { color: var(--syntax-type); }
+
+/* --- 内建对象 --- */
+.token.builtin { color: var(--syntax-builtin); }
+
+/* --- 参数 --- */
+.token.parameter { color: var(--syntax-param); }
+
+/* --- CSS 选择器 --- */
+.token.selector { color: var(--syntax-selector); }
+
+/* --- !important --- */
+.token.important { color: var(--syntax-important); font-weight: var(--font-bold, 700); }
+
+/* --- Diff --- */
+.token.deleted { color: var(--syntax-deleted); }
+.token.inserted { color: var(--syntax-inserted); }
+
+/* --- 命名空间 --- */
+.token.namespace { opacity: 0.7; }
+
+/* --- URL / 链接 --- */
+.token.url {
+  color: var(--syntax-string);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* --- 实体 --- */
+.token.entity { color: var(--syntax-operator); cursor: help; }
+
+/* --- 粗体 / 斜体 --- */
+.token.bold { font-weight: var(--font-bold, 700); }
+.token.italic { font-style: italic; }
+
+/* --- Shell 特殊 --- */
+.token.shebang { color: var(--syntax-comment); }
+.token.environment { color: var(--syntax-property); }
+
+
+/* ========================================
+   14. SQL 着色补充
+   ======================================== */
+.token.sql-keyword,
+.sql-keyword {
+  color: var(--syntax-keyword);
+  text-transform: uppercase;
+}
+
+.token.sql-function,
+.sql-function {
+  color: var(--syntax-function);
+}
+
+.token.sql-table,
+.sql-table {
+  color: var(--syntax-class);
+}
+
+.token.sql-column,
+.sql-column {
+  color: var(--syntax-property);
+}
+
+.token.sql-alias,
+.sql-alias {
+  color: var(--syntax-variable);
+  font-style: italic;
+}
+
+.token.sql-operator,
+.sql-operator {
+  color: var(--syntax-operator);
+}
+
+
+/* ========================================
+   15. 终端 / Shell 样式
+   ======================================== */
+.code-terminal {
+  --code-bg: var(--terminal-bg);
+  --code-text: var(--terminal-text);
+
+  font-family: var(--code-font);
+  font-size: var(--code-font-size);
+  line-height: var(--code-line-height);
+  background: var(--terminal-bg);
+  color: var(--terminal-text);
+  border-radius: var(--code-radius);
+  border: 1px solid var(--code-border);
+  overflow: hidden;
+}
+
+/* 终端 Header */
+.code-terminal-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs, 8px);
+  padding: var(--spacing-xs, 8px) var(--code-padding-x);
+  background: var(--code-bg-header);
+  border-bottom: 1px solid var(--code-border);
+}
+
+.code-terminal-title {
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--code-gutter);
+  font-family: var(--font-sans);
+  font-weight: var(--font-medium, 500);
+}
+
+/* 终端 Body */
+.code-terminal-body {
+  padding: var(--code-padding-y) var(--code-padding-x);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 命令行 */
+.terminal-line {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-xs, 8px);
+  line-height: var(--code-line-height);
+}
+
+.terminal-line + .terminal-line {
+  margin-top: 2px;
+}
+
+/* 提示符 */
+.terminal-prompt {
+  color: var(--terminal-prompt);
+  font-weight: var(--font-medium, 500);
+  user-select: none;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* 带路径的提示符 */
+.terminal-prompt-path {
+  color: var(--terminal-path);
+}
+
+.terminal-prompt-symbol {
+  color: var(--terminal-prompt);
+}
+
+/* 命令 */
+.terminal-command {
+  color: var(--terminal-command);
+}
+
+/* 输出 */
+.terminal-output {
+  color: var(--terminal-output);
+  white-space: pre-wrap;
+}
+
+/* 错误输出 */
+.terminal-error {
+  color: var(--terminal-error);
+}
+
+/* 成功输出 */
+.terminal-success {
+  color: var(--terminal-prompt);
+}
+
+/* 警告输出 */
+.terminal-warning {
+  color: #f9e2af;
+}
+
+/* 闪烁光标 */
+@keyframes terminalBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.terminal-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 1.2em;
+  background: var(--terminal-cursor);
+  animation: terminalBlink 1s step-end infinite;
+  vertical-align: text-bottom;
+  margin-left: 1px;
+}
+
+/* 注释行 */
+.terminal-comment {
+  color: var(--syntax-comment);
+  font-style: italic;
+}
+
+/* 空行 */
+.terminal-blank {
+  height: calc(var(--code-font-size) * var(--code-line-height));
+}
+
+
+/* ========================================
+   16. 代码对比 (Side-by-side Diff)
+   ======================================== */
+.code-diff {
+  display: flex;
+  border: 1px solid var(--code-border);
+  border-radius: var(--code-radius);
+  overflow: hidden;
+  background: var(--code-bg);
+}
+
+.code-diff-pane {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.code-diff-pane + .code-diff-pane {
+  border-left: 1px solid var(--code-border);
+}
+
+/* Pane Header */
+.code-diff-pane-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-xs, 8px) var(--code-padding-x);
+  background: var(--code-bg-header);
+  border-bottom: 1px solid var(--code-border);
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--code-gutter-active);
+  font-family: var(--code-font);
+}
+
+.code-diff-pane-label {
+  font-weight: var(--font-semibold, 600);
+}
+
+.code-diff-pane-label--old {
+  color: var(--code-diff-delete-text);
+}
+
+.code-diff-pane-label--new {
+  color: var(--code-diff-add-text);
+}
+
+/* 统一 Diff (单栏模式) */
+.code-diff--unified {
+  flex-direction: column;
+}
+
+.code-diff--unified .code-diff-pane + .code-diff-pane {
+  border-left: none;
+  border-top: 1px solid var(--code-border);
+}
+
+/* Diff 统计 */
+.code-diff-stats {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm, 12px);
+  padding: var(--spacing-xs, 8px) var(--code-padding-x);
+  background: var(--code-bg-header);
+  border-bottom: 1px solid var(--code-border);
+  font-size: var(--text-xs, 0.75rem);
+  font-family: var(--code-font);
+}
+
+.code-diff-stats-add {
+  color: var(--code-diff-add-text);
+  font-weight: var(--font-semibold, 600);
+}
+
+.code-diff-stats-delete {
+  color: var(--code-diff-delete-text);
+  font-weight: var(--font-semibold, 600);
+}
+
+/* Diff 块分隔 */
+.code-diff-separator {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs, 8px);
+  padding: 4px var(--code-padding-x);
+  background: rgba(137, 180, 250, 0.06);
+  color: var(--code-gutter);
+  font-size: 0.7em;
+  user-select: none;
+}
+
+
+/* ========================================
+   17. 代码组 (Tab 切换多代码块)
+   ======================================== */
+.code-group {
+  border: 1px solid var(--code-border);
+  border-radius: var(--code-radius);
+  overflow: hidden;
+  background: var(--code-bg);
+}
+
+.code-group-tabs {
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
+  background: var(--code-bg-header);
+  border-bottom: 1px solid var(--code-border);
+}
+
+.code-group-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.code-group-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-family: var(--code-font);
+  font-size: var(--text-xs, 0.75rem);
+  font-weight: var(--font-medium, 500);
+  color: var(--code-gutter);
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition:
+    color 0.15s var(--ease-smooth),
+    border-color 0.15s var(--ease-smooth),
+    background-color 0.15s var(--ease-smooth);
+}
+
+.code-group-tab:hover {
+  color: var(--code-gutter-active);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.code-group-tab--active,
+.code-group-tab[aria-selected="true"] {
+  color: var(--code-text);
+  border-bottom-color: var(--syntax-keyword, #cba6f7);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.code-group-panel {
+  position: relative;
+}
+
+.code-group-panel[hidden] {
+  display: none;
+}
+
+/* 代码组内的代码块去掉自身容器样式 */
+.code-group .code-block {
+  border: none;
+  border-radius: 0;
+}
+
+
+/* ========================================
+   18. 代码块变体
+   ======================================== */
+
+/* --- 小号 --- */
+.code-block--sm {
+  --code-font-size: 0.75rem;
+  --code-padding-x: var(--spacing-sm, 12px);
+  --code-padding-y: var(--spacing-sm, 12px);
+}
+
+/* --- 大号 --- */
+.code-block--lg {
+  --code-font-size: 0.9375rem;
+  --code-padding-x: var(--spacing-lg, 24px);
+  --code-padding-y: var(--spacing-lg, 24px);
+  --code-line-height: 1.8;
+}
+
+/* --- 无边框 --- */
+.code-block--borderless {
+  border: none;
+  border-radius: 0;
+}
+
+/* --- 无背景 (透明) --- */
+.code-block--transparent {
+  background: transparent;
+  border: none;
+  --code-bg: transparent;
+}
+
+/* --- 亮色背景代码块 (嵌入正文) --- */
+.code-block--light {
+  --code-bg: var(--color-bg-tertiary, #f8f9fa);
+  --code-bg-header: var(--color-bg-secondary, #f1f5f9);
+  --code-text: var(--color-text-primary, #1a1a2e);
+  --code-border: var(--color-border-default, rgba(0, 0, 0, 0.1));
+  --code-gutter: var(--color-text-tertiary, #9ca3af);
+  --code-gutter-active: var(--color-text-secondary, #6b7280);
+  --code-selection: rgba(59, 130, 246, 0.15);
+  --code-toolbar-bg: rgba(0, 0, 0, 0.04);
+  --code-toolbar-text: var(--color-text-tertiary, #9ca3af);
+  --code-toolbar-hover: rgba(0, 0, 0, 0.08);
+  --code-highlight-bg: rgba(59, 130, 246, 0.06);
+  --code-highlight-border: #3b82f6;
+}
+
+/* 亮色代码块的语法颜色需要调整 */
+.code-block--light .token.keyword { color: #7c3aed; }
+.code-block--light .token.string { color: #059669; }
+.code-block--light .token.number { color: #d97706; }
+.code-block--light .token.boolean { color: #d97706; }
+.code-block--light .token.comment { color: #9ca3af; }
+.code-block--light .token.function { color: #2563eb; }
+.code-block--light .token.class-name { color: #b45309; }
+.code-block--light .token.property { color: #0891b2; }
+.code-block--light .token.operator { color: #0891b2; }
+.code-block--light .token.punctuation { color: #6b7280; }
+.code-block--light .token.tag { color: #dc2626; }
+.code-block--light .token.attr-name { color: #2563eb; }
+.code-block--light .token.attr-value { color: #059669; }
+.code-block--light .token.regex { color: #db2777; }
+
+
+/* ========================================
+   19. 暗色模式
+   (代码块默认已是暗色，此处处理亮色变体 & JSON & 内联代码)
+   ======================================== */
+
+/* --- JSON (正文内嵌) --- */
+.dark .json-key,
+[data-theme="dark"] .json-key {
+  --json-key: #34d399;
+  color: var(--json-key);
+}
+
+.dark .json-string,
+[data-theme="dark"] .json-string {
+  --json-string: #60a5fa;
+  color: var(--json-string);
+}
+
+.dark .json-number,
+[data-theme="dark"] .json-number {
+  --json-number: #fbbf24;
+  color: var(--json-number);
+}
+
+.dark .json-boolean,
+[data-theme="dark"] .json-boolean {
+  --json-boolean: #a78bfa;
+  color: var(--json-boolean);
+}
+
+.dark .json-null,
+[data-theme="dark"] .json-null {
+  --json-null: #6b7280;
+  color: var(--json-null);
+}
+
+.dark .json-bracket,
+[data-theme="dark"] .json-bracket {
+  color: #6b7280;
+}
+
+.dark .json-node-toggle:hover,
+[data-theme="dark"] .json-node-toggle:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.dark .json-value-copyable:hover,
+[data-theme="dark"] .json-value-copyable:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* --- 内联代码 --- */
+.dark .code-inline,
+.dark :not(pre) > code,
+[data-theme="dark"] .code-inline,
+[data-theme="dark"] :not(pre) > code {
+  --code-inline-bg: rgba(255, 255, 255, 0.08);
+  --code-inline-text: var(--color-rose-400, #fb7185);
+  --code-inline-border: rgba(255, 255, 255, 0.06);
+}
+
+.dark .code-inline--blue,
+[data-theme="dark"] .code-inline--blue {
+  --code-inline-text: var(--color-blue-400, #60a5fa);
+  --code-inline-bg: rgba(96, 165, 250, 0.1);
+  --code-inline-border: rgba(96, 165, 250, 0.12);
+}
+
+.dark .code-inline--green,
+[data-theme="dark"] .code-inline--green {
+  --code-inline-text: var(--color-green-400, #4ade80);
+  --code-inline-bg: rgba(74, 222, 128, 0.1);
+  --code-inline-border: rgba(74, 222, 128, 0.12);
+}
+
+.dark .code-inline--purple,
+[data-theme="dark"] .code-inline--purple {
+  --code-inline-text: var(--color-purple-400, #c084fc);
+  --code-inline-bg: rgba(192, 132, 252, 0.1);
+  --code-inline-border: rgba(192, 132, 252, 0.12);
+}
+
+.dark .code-inline--amber,
+[data-theme="dark"] .code-inline--amber {
+  --code-inline-text: var(--color-amber-400, #fbbf24);
+  --code-inline-bg: rgba(251, 191, 36, 0.1);
+  --code-inline-border: rgba(251, 191, 36, 0.12);
+}
+
+.dark .code-inline--neutral,
+[data-theme="dark"] .code-inline--neutral {
+  --code-inline-text: var(--color-text-primary, #f9fafb);
+  --code-inline-bg: rgba(255, 255, 255, 0.06);
+  --code-inline-border: transparent;
+}
+
+/* --- 亮色代码块在暗色模式下恢复暗色主题 --- */
+.dark .code-block--light,
+[data-theme="dark"] .code-block--light {
+  --code-bg: #1e1e2e;
+  --code-bg-header: #181825;
+  --code-text: #cdd6f4;
+  --code-border: rgba(255, 255, 255, 0.06);
+  --code-gutter: #6c7086;
+  --code-gutter-active: #a6adc8;
+  --code-toolbar-bg: rgba(255, 255, 255, 0.06);
+  --code-toolbar-text: #a6adc8;
+  --code-toolbar-hover: rgba(255, 255, 255, 0.1);
+}
+
+.dark .code-block--light .token.keyword,
+[data-theme="dark"] .code-block--light .token.keyword { color: var(--syntax-keyword); }
+
+.dark .code-block--light .token.string,
+[data-theme="dark"] .code-block--light .token.string { color: var(--syntax-string); }
+
+.dark .code-block--light .token.number,
+[data-theme="dark"] .code-block--light .token.number { color: var(--syntax-number); }
+
+.dark .code-block--light .token.comment,
+[data-theme="dark"] .code-block--light .token.comment { color: var(--syntax-comment); }
+
+.dark .code-block--light .token.function,
+[data-theme="dark"] .code-block--light .token.function { color: var(--syntax-function); }
+
+.dark .code-block--light .token.class-name,
+[data-theme="dark"] .code-block--light .token.class-name { color: var(--syntax-class); }
+
+.dark .code-block--light .token.property,
+[data-theme="dark"] .code-block--light .token.property { color: var(--syntax-property); }
+
+.dark .code-block--light .token.tag,
+[data-theme="dark"] .code-block--light .token.tag { color: var(--syntax-tag); }
+
+.dark .code-block--light .token.attr-name,
+[data-theme="dark"] .code-block--light .token.attr-name { color: var(--syntax-attr-name); }
+
+.dark .code-block--light .token.attr-value,
+[data-theme="dark"] .code-block--light .token.attr-value { color: var(--syntax-attr-value); }
+
+/* --- 代码块滚动条暗色 (已是暗色，此处确认一致性) --- */
+.dark .code-block-body::-webkit-scrollbar-thumb,
+[data-theme="dark"] .code-block-body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* --- 快捷键暗色 --- */
+.dark .mega-menu-item-shortcut kbd,
+[data-theme="dark"] .mega-menu-item-shortcut kbd {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+
+/* ========================================
+   20. 响应式适配
+   ======================================== */
+@media (max-width: 639px) {
+  :root {
+    --code-font-size: 0.75rem;
+    --code-padding-x: var(--spacing-sm, 12px);
+    --code-padding-y: var(--spacing-sm, 12px);
+  }
+
+  /* 行号移动端缩窄 */
+  .code-line-number {
+    width: 2.5em;
+    min-width: 2.5em;
+    padding-right: var(--spacing-xs, 8px);
+    font-size: 0.7em;
+  }
+
+  /* Header 紧凑 */
+  .code-block-header {
+    padding: 6px var(--spacing-sm, 12px);
+  }
+
+  .code-block-dots {
+    display: none;
+  }
+
+  /* 工具栏始终可见 */
+  .code-block-toolbar {
+    opacity: 1;
+  }
+
+  /* Diff 对比改为上下排列 */
+  .code-diff {
+    flex-direction: column;
+  }
+
+  .code-diff-pane + .code-diff-pane {
+    border-left: none;
+    border-top: 1px solid var(--code-border);
+  }
+
+  /* 代码组 Tab 紧凑 */
+  .code-group-tab {
+    padding: 6px 10px;
+    font-size: var(--text-2xs, 0.625rem);
+  }
+
+  /* 折叠按钮始终可见 */
+  .code-fold-trigger {
+    opacity: 0.5;
+  }
+
+  /* 终端行间距 */
+  .terminal-line {
+    gap: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* 极小屏幕隐藏行号 */
+  .code-block--auto-hide-gutter .code-line-number {
+    display: none;
+  }
+
+  .code-block--auto-hide-gutter .code-line-content {
+    padding-left: var(--code-padding-x);
+  }
+}
+
+
+/* ========================================
+   21. 打印适配
+   ======================================== */
+@media print {
+  .code-block,
+  .code-terminal,
+  .code-diff,
+  .code-group {
+    border: 1px solid #ccc !important;
+    border-radius: 4px !important;
+    background: #f8f8f8 !important;
+    color: #333 !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+  }
+
+  .code-block-header {
+    background: #eee !important;
+    border-bottom-color: #ccc !important;
+  }
+
+  .code-block-dots {
+    display: none !important;
+  }
+
+  .code-block-toolbar {
+    display: none !important;
+  }
+
+  .code-line-number {
+    color: #999 !important;
+  }
+
+  .code-block-body code {
+    white-space: pre-wrap !important;
+    word-break: break-all !important;
+  }
+
+  /* 打印时使用亮色语法颜色 */
+  .token.keyword     { color: #7c3aed !important; }
+  .token.string      { color: #059669 !important; }
+  .token.number      { color: #d97706 !important; }
+  .token.comment     { color: #9ca3af !important; }
+  .token.function    { color: #2563eb !important; }
+  .token.class-name  { color: #b45309 !important; }
+  .token.property    { color: #0891b2 !important; }
+  .token.tag         { color: #dc2626 !important; }
+  .token.attr-name   { color: #2563eb !important; }
+  .token.attr-value  { color: #059669 !important; }
+
+  /* 高亮行 */
+  .code-line--highlighted {
+    background: rgba(59, 130, 246, 0.1) !important;
+  }
+
+  .code-line--highlighted .code-line-number {
+    border-left-color: #3b82f6 !important;
+    color: #3b82f6 !important;
+  }
+
+  /* Diff */
+  .code-line--added {
+    background: rgba(34, 197, 94, 0.1) !important;
+  }
+
+  .code-line--deleted {
+    background: rgba(239, 68, 68, 0.1) !important;
+  }
+
+  /* 内联代码 */
+  .code-inline,
+  :not(pre) > code {
+    background: #f3f4f6 !important;
+    border-color: #e5e7eb !important;
+    color: #1a1a2e !important;
+  }
+}
+
+
+/* ========================================
+   22. 无障碍 & 减少动画
+   ======================================== */
+
+/* --- 焦点可见性 --- */
+.code-block:focus-visible {
+  outline: 2px solid var(--color-focus-ring, #3b82f6);
+  outline-offset: 2px;
+}
+
+.code-block-toolbar-btn:focus-visible {
+  outline: 2px solid var(--color-focus-ring, #3b82f6);
+  outline-offset: 1px;
+}
+
+.code-group-tab:focus-visible {
+  outline: 2px solid var(--color-focus-ring, #3b82f6);
+  outline-offset: -2px;
+}
+
+.code-fold-trigger:focus-visible {
+  outline: 2px solid var(--color-focus-ring, #3b82f6);
+  outline-offset: 1px;
+}
+
+.code-line-number--clickable:focus-visible {
+  outline: 2px solid var(--color-focus-ring, #3b82f6);
+  outline-offset: -2px;
+  border-radius: 2px;
+}
+
+/* --- 减少动画 --- */
+@media (prefers-reduced-motion: reduce) {
+  .code-block-toolbar {
+    opacity: 1 !important;
+    transition: none !important;
+  }
+
+  .code-fold-trigger {
+    opacity: 0.6 !important;
+    transition: none !important;
+  }
+
+  .code-fold-trigger::before {
+    transition: none !important;
+  }
+
+  .code-block-dots--dim .code-block-dot {
+    opacity: 1 !important;
+    transition: none !important;
+  }
+
+  .code-block--focus-lines .code-line:not(.code-line--highlighted) {
+    transition: none !important;
+  }
+
+  .terminal-cursor {
+    animation: none !important;
+    opacity: 1;
+  }
+
+  .code-block-toolbar-btn:active {
+    transform: none !important;
+  }
+
+  .code-block-copy-icon,
+  .code-block-check-icon {
+    transition: none !important;
+  }
+
+  .mega-menu-promo-image:hover img {
+    transform: none !important;
+  }
+}
+
+/* --- 高对比度 --- */
+@media (forced-colors: active) {
+  .code-block,
+  .code-terminal,
+  .code-diff,
+  .code-group {
+    border: 2px solid CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+
+  .code-block-header,
+  .code-terminal-header {
+    background: Canvas;
+    border-bottom: 2px solid CanvasText;
+  }
+
+  .code-line--highlighted {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+    background: transparent;
+  }
+
+  .code-line--added {
+    outline: 1px solid LinkText;
+    outline-offset: -1px;
+  }
+
+  .code-line--deleted {
+    outline: 1px solid LinkText;
+    outline-offset: -1px;
+    text-decoration: line-through;
+  }
+
+  .code-inline,
+  :not(pre) > code {
+    border: 1px solid CanvasText;
+    background: Canvas;
+  }
+
+  .code-block-toolbar-btn {
+    border: 1px solid CanvasText;
+  }
+
+  /* 重置所有语法颜色为系统颜色 */
+  .token.keyword,
+  .token.tag,
+  .token.important { color: Highlight; }
+
+  .token.string,
+  .token.attr-value { color: LinkText; }
+
+  .token.comment { color: GrayText; }
+
+  .token.function,
+  .token.class-name { color: CanvasText; font-weight: bold; }
+}

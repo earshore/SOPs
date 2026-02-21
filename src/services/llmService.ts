@@ -10,6 +10,7 @@ import { ErrorService } from './errorService';
 import { configCenter } from '../common/config/ConfigCenter';
 import { EnvConfig } from '../common/config/envConfig';
 import { ApiError, NetworkError } from '../common/errors';
+import { isDangerousEndpoint, getDangerousEndpoints } from '../common/config/apiEndpoints';
 
 // ========================
 // 类型定义
@@ -126,26 +127,19 @@ export async function callLLM(
   } = options;
 
   // 🔒 P0修复: 生产环境安全检查
-  if (configCenter.isProduction()) {
-    const dangerousEndpoints = [
-      'api.openai.com',
-      'api.anthropic.com',
-      'api.deepseek.com',
-      'generativelanguage.googleapis.com',
-    ];
-
-    if (dangerousEndpoints.some((domain) => endpoint.includes(domain))) {
-      throw new Error(
-        '⛔ 安全限制: 生产环境禁止直接调用外部API\n\n' +
-          '可能的原因:\n' +
-          '1. 未配置代理服务器\n' +
-          '2. API端点配置错误\n\n' +
-          '解决方案:\n' +
-          '- 请在设置中配置企业代理\n' +
-          '- 或联系管理员配置 Cloudflare Workers 代理\n\n' +
-          '这是为了保护您的API密钥安全。'
-      );
-    }
+  if (configCenter.isProduction() && isDangerousEndpoint(endpoint)) {
+    const dangerousEndpoints = getDangerousEndpoints();
+    throw new Error(
+      '⛔ 安全限制: 生产环境禁止直接调用外部API\n\n' +
+        '可能的原因:\n' +
+        '1. 未配置代理服务器\n' +
+        '2. API端点配置错误\n\n' +
+        '解决方案:\n' +
+        '- 请在设置中配置企业代理\n' +
+        '- 或联系管理员配置 Cloudflare Workers 代理\n\n' +
+        `检测到的危险端点: ${dangerousEndpoints.join(', ')}\n` +
+        '这是为了保护您的API密钥安全。'
+    );
   }
 
   // 标准化 endpoint (开发/生产环境自动适配)
@@ -341,19 +335,10 @@ export async function fetchModelsFromApi(
 ): Promise<ModelInfo[]> {
   try {
     // 🔒 P0修复: 生产环境安全检查
-    if (configCenter.isProduction()) {
-      const dangerousEndpoints = [
-        'api.openai.com',
-        'api.anthropic.com',
-        'api.deepseek.com',
-        'generativelanguage.googleapis.com',
-      ];
-
-      if (dangerousEndpoints.some((domain) => endpoint.includes(domain))) {
-        throw new Error(
-          '⛔ 安全限制: 生产环境禁止直接调用外部API\n' + '请配置企业代理或联系管理员'
-        );
-      }
+    if (configCenter.isProduction() && isDangerousEndpoint(endpoint)) {
+      throw new Error(
+        '⛔ 安全限制: 生产环境禁止直接调用外部API\n' + '请配置企业代理或联系管理员'
+      );
     }
 
     // 标准化 endpoint (开发/生产环境自动适配)

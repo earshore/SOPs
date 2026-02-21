@@ -5,14 +5,34 @@ import checker from 'vite-plugin-checker';
 export default defineConfig({
     plugins: [
         checker({
-            typescript: true,
-            // 暂时禁用ESLint检查，避免配置冲突
-            // eslint: {
-            //     lintCommand: 'eslint "./src/**/*.{js,ts,jsx,tsx}"'
-            // }
+            typescript: {
+                tsconfigPath: 'tsconfig.json',
+                buildMode: false // 只在构建时检查,开发时跳过
+            }
         })
     ],
     root: './',
+
+    // 依赖优化配置
+    optimizeDeps: {
+        include: [
+            'alpinejs',
+            'marked',
+            'zod',
+            'zustand',
+            'clsx',
+            'tailwind-merge',
+            'jsonrepair'
+        ],
+        exclude: [
+            'chart.js', // 懒加载
+            'gridstack'  // 懒加载
+        ],
+        // 强制预构建，避免首次加载慢
+        force: false,
+        // 禁用依赖发现，加快启动
+        entries: ['index.html']
+    },
 
     // 开发服务器配置
     server: {
@@ -26,18 +46,7 @@ export default defineConfig({
                 target: 'https://llm-gateway.hongecb.store',
                 changeOrigin: true,
                 secure: true,
-                rewrite: (path) => path,
-                configure: (proxy, options) => {
-                    proxy.on('error', (err, req, res) => {
-                        console.log('proxy error', err);
-                    });
-                    proxy.on('proxyReq', (proxyReq, req, res) => {
-                        console.log('Sending Request to the Target:', req.method, req.url);
-                    });
-                    proxy.on('proxyRes', (proxyRes, req, res) => {
-                        console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
-                    });
-                }
+                rewrite: (path) => path
             }
         }
     },
@@ -57,10 +66,8 @@ export default defineConfig({
                 manualChunks: {
                     // 核心框架
                     'vendor-core': ['alpinejs'],
-                    // 图表库
+                    // 图表库（懒加载，但构建时仍需分包）
                     'vendor-charts': ['chart.js'],
-                    // 网格布局
-                    'vendor-grid': ['gridstack'],
                     // Markdown渲染
                     'vendor-markdown': ['marked'],
                     // 工具库
@@ -138,8 +145,8 @@ export default defineConfig({
         chunkSizeWarningLimit: 500,
         // CSS代码分割
         cssCodeSplit: true,
-        // 启用CSS压缩
-        cssMinify: true,
+        // 启用CSS压缩 - 使用lightningcss获得更好的性能
+        cssMinify: 'lightningcss',
         // 资源内联阈值(小于4KB的资源内联为base64)
         assetsInlineLimit: 4096,
         // 启用gzip压缩提示
@@ -162,6 +169,11 @@ export default defineConfig({
 
     // CSS 处理
     css: {
-        devSourcemap: true
+        devSourcemap: true,
+        preprocessorOptions: {
+            css: {
+                charset: false // 减少体积，移除@charset声明
+            }
+        }
     }
 });

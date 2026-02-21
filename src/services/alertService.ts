@@ -4,7 +4,7 @@
 // 监控性能指标并触发告警
 // ================================================================
 
-import { Logger } from './loggerService';
+import type { ILoggerService } from '../types/services';
 import eventBus from '@/common/EventBus';
 
 /**
@@ -70,6 +70,7 @@ export interface AlertConfig {
 
 /**
  * 告警服务
+ * 🎯 DI改造：支持依赖注入Logger
  */
 export class AlertService {
   private static instance: AlertService;
@@ -77,8 +78,9 @@ export class AlertService {
   private rules: Map<string, AlertRule>;
   private alerts: Map<string, Alert>;
   private isInitialized: boolean = false;
+  private logger: ILoggerService | null = null;
 
-  private constructor() {
+  private constructor(logger?: ILoggerService) {
     this.config = {
       enabled: true,
       showToast: true,
@@ -88,6 +90,7 @@ export class AlertService {
     };
     this.rules = new Map();
     this.alerts = new Map();
+    this.logger = logger || null;
   }
 
   /**
@@ -101,11 +104,22 @@ export class AlertService {
   }
 
   /**
+   * 记录日志（使用注入的Logger或console）
+   */
+  private _log(level: 'debug' | 'info' | 'warn' | 'error', message: string, data: Record<string, unknown> = {}): void {
+    if (this.logger) {
+      this.logger[level](message, data, 'AlertService');
+    } else {
+      console[level](`[AlertService] ${message}`, data);
+    }
+  }
+
+  /**
    * 初始化告警服务
    */
   init(config?: Partial<AlertConfig>): void {
     if (this.isInitialized) {
-      Logger.warn('AlertService already initialized', {}, 'AlertService');
+      this._log('warn', 'AlertService already initialized', {});
       return;
     }
 
@@ -113,7 +127,7 @@ export class AlertService {
     this.config = { ...this.config, ...config };
 
     if (!this.config.enabled) {
-      Logger.info('AlertService is disabled', {}, 'AlertService');
+      this._log('info', 'AlertService is disabled', {});
       return;
     }
 
@@ -126,7 +140,7 @@ export class AlertService {
     }
 
     this.isInitialized = true;
-    Logger.info('✅ AlertService initialized', this.config as unknown as Record<string, unknown>, 'AlertService');
+    this._log('info', '✅ AlertService initialized', this.config as unknown as Record<string, unknown>);
   }
 
   /**
@@ -204,7 +218,7 @@ export class AlertService {
    */
   registerRule(rule: AlertRule): void {
     this.rules.set(rule.id, rule);
-    Logger.debug('Alert rule registered', { ruleId: rule.id }, 'AlertService');
+    this._log('debug', 'Alert rule registered', { ruleId: rule.id });
   }
 
   /**
@@ -317,14 +331,14 @@ export class AlertService {
       ? 'error'
       : 'warn';
 
-    Logger[logLevel](
+    this._log(
+      logLevel,
       `[${alert.type}] ${alert.message}`,
       {
         id: alert.id,
         level: alert.level,
         data: alert.data
-      },
-      'AlertService'
+      } as Record<string, unknown>
     );
   }
 
@@ -335,7 +349,7 @@ export class AlertService {
     const alert = this.alerts.get(alertId);
     if (alert) {
       alert.acknowledged = true;
-      Logger.debug('Alert acknowledged', { alertId }, 'AlertService');
+      this._log('debug', 'Alert acknowledged', { alertId });
     }
   }
 
@@ -346,7 +360,7 @@ export class AlertService {
     this.alerts.forEach(alert => {
       alert.acknowledged = true;
     });
-    Logger.info('All alerts acknowledged', {}, 'AlertService');
+    this._log('info', 'All alerts acknowledged', {});
   }
 
   /**
@@ -418,7 +432,7 @@ export class AlertService {
    */
   clear(): void {
     this.alerts.clear();
-    Logger.info('All alerts cleared', {}, 'AlertService');
+    this._log('info', 'All alerts cleared', {});
   }
 
   /**
@@ -428,7 +442,7 @@ export class AlertService {
     const rule = this.rules.get(ruleId);
     if (rule) {
       rule.enabled = enabled;
-      Logger.info(`Alert rule ${enabled ? 'enabled' : 'disabled'}`, { ruleId }, 'AlertService');
+      this._log('info', `Alert rule ${enabled ? 'enabled' : 'disabled'}`, { ruleId });
     }
   }
 
@@ -437,7 +451,7 @@ export class AlertService {
    */
   updateConfig(config: Partial<AlertConfig>): void {
     this.config = { ...this.config, ...config };
-    Logger.info('AlertService config updated', this.config as unknown as Record<string, unknown>, 'AlertService');
+    this._log('info', 'AlertService config updated', this.config as unknown as Record<string, unknown>);
   }
 
   /**
@@ -447,12 +461,26 @@ export class AlertService {
     this.clear();
     this.rules.clear();
     this.isInitialized = false;
-    Logger.info('AlertService destroyed', {}, 'AlertService');
+    this._log('info', 'AlertService destroyed', {});
   }
 }
 
-// 创建全局实例
+// 创建全局实例（向后兼容）
+/** @deprecated 请使用 container.resolve('alert') 获取AlertService实例 */
 export const alertService = AlertService.getInstance();
 
 // 默认导出
 export default alertService;
+
+// ================================================================
+// 🎯 DI容器工厂函数
+// ================================================================
+
+/**
+ * 创建AlertService实例的工厂函数
+ * @param logger - LoggerService实例（可选）
+ * @returns AlertService实例
+ */
+export function createAlertService(logger?: ILoggerService): AlertService {
+  return new (AlertService as any)(logger);
+}

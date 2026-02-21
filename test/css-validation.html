@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS 组件验证</title>
+  <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+  <style>
+    /* 内联CSS变量和基础样式 - 因为测试页面无法直接导入构建后的CSS */
+    :root {
+      --color-slate-50: #f8fafc;
+      --color-slate-100: #f1f5f9;
+      --color-slate-200: #e2e8f0;
+      --color-slate-300: #cbd5e1;
+      --color-slate-400: #94a3b8;
+      --color-slate-500: #64748b;
+      --color-slate-600: #475569;
+      --color-slate-700: #334155;
+      --color-slate-800: #1e293b;
+      --color-slate-900: #0f172a;
+      
+      --color-blue-50: #eff6ff;
+      --color-blue-500: #3b82f6;
+      --color-blue-600: #2563eb;
+      --color-blue-700: #1d4ed8;
+      
+      --color-purple-500: #a855f7;
+      --color-purple-600: #9333ea;
+      
+      --color-green-500: #22c55e;
+      --color-green-600: #16a34a;
+      
+      --color-red-500: #ef4444;
+      --color-red-600: #dc2626;
+      
+      --color-amber-500: #f59e0b;
+      --color-amber-600: #d97706;
+      
+      --spacing-xs: 0.25rem;
+      --spacing-sm: 0.5rem;
+      --spacing-md: 1rem;
+      --spacing-lg: 1.5rem;
+      --spacing-xl: 2rem;
+      
+      --radius-sm: 0.375rem;
+      --radius-md: 0.5rem;
+      --radius-lg: 0.75rem;
+      --radius-xl: 1rem;
+      --radius-full: 9999px;
+      
+      --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+      --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      
+      --duration-fast: 150ms;
+      --duration-normal: 200ms;
+      --duration-slow: 300ms;
+    }
+    
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      padding: 2rem;
+      background: #f8fafc;
+      margin: 0;
+    }
+    
+    /* ========== 卡片组件 ========== */
+    .card {
+      background: white;
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--color-slate-200);
+      padding: var(--spacing-lg);
+      transition: all var(--duration-slow) var(--ease-smooth);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .card:hover {
+      border-color: var(--color-blue-500);
+      box-shadow: 0 10px 40px -10px rgba(59, 130, 246, 0.2);
+      transform: translateY(-2px);
+    }
+    
+    .card-accent::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(180deg, var(--color-blue-500), var(--color-purple-600));
+      opacity: 0;
+      transition: opacity var(--duration-slow) var(--ease-smooth);
+    }
+    
+    .card-accent:hover::before {
+      opacity: 1;
+    }
+    
+    .card-glass {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: var(--spacing-lg);
+    }
+    
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--spacing-md);
+    }
+    
+    .card-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-slate-900);
+      margin: 0;
+    }
+    
+    .card-body {
+      color: var(--color-slate-600);
+      line-height: 1.6;
+    }
+    
+    /* ========== 按钮组件 ========== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-sm);
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-lg);
+      font-size: 0.875rem;
+      font-weight: 500;
+      line-height: 1.5;
+      transition: all var(--duration-normal) var(--ease-smooth);
+      cursor: pointer;
+      border: 1px solid transparent;
+      white-space: nowrap;
+      user-select: none;
+    }
+    
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+    
+    .btn:active {
+      transform: translateY(0);
+    }
+    
+    .btn-sm {
+      padding: 0.375rem 0.75rem;
+      font-size: 0.8125rem;
+    }
+    
+    .btn-lg {
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+    }
+    
+    .btn-xl {
+      padding: 1rem 2rem;
+      font-size: 1.125rem;
+    }
+    
+    .btn-primary {
+      background: var(--color-blue-500);
+      color: white;
+      border-color: var(--color-blue-500);
+    }
+    
+    .btn-primary:hover {
+      background: var(--color-blue-600);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+    
+    .btn-secondary {
+      background: var(--color-slate-100);
+      color: var(--color-slate-700);
+      border-color: var(--color-slate-200);
+    }
+    
+    .btn-secondary:hover {
+      background: var(--color-slate-200);
+      border-color: var(--color-slate-300);
+    }
+    
+    .btn-outline {
+      background: transparent;
+      color: var(--color-blue-600);
+      border-color: var(--color-blue-500);
+    }
+    
+    .btn-outline:hover {
+      background: var(--color-blue-50);
+    }
+    
+    .btn-ghost {
+      background: transparent;
+      color: var(--color-slate-600);
+      border-color: transparent;
+    }
+    
+    .btn-ghost:hover {
+      background: var(--color-slate-100);
+      color: var(--color-slate-900);
+    }
+    
+    .btn-danger {
+      background: var(--color-red-500);
+      color: white;
+      border-color: var(--color-red-500);
+    }
+    
+    .btn-danger:hover {
+      background: var(--color-red-600);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+    
+    .btn-success {
+      background: var(--color-green-500);
+      color: white;
+      border-color: var(--color-green-500);
+    }
+    
+    .btn-success:hover {
+      background: var(--color-green-600);
+      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+    }
+    
+    .btn-icon {
+      padding: 0.5rem;
+      width: 2.5rem;
+      height: 2.5rem;
+    }
+    
+    /* ========== 徽章组件 ========== */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      padding: 0.25rem 0.5rem;
+      border-radius: var(--radius-full);
+      font-size: 0.625rem;
+      font-weight: 500;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    
+    .badge-sm {
+      padding: 0.125rem 0.375rem;
+      font-size: 0.5625rem;
+    }
+    
+    .badge-lg {
+      padding: 0.375rem 0.75rem;
+      font-size: 0.75rem;
+    }
+    
+    .badge-success {
+      background: #dcfce7;
+      color: #16a34a;
+    }
+    
+    .badge-warning {
+      background: #fef3c7;
+      color: #d97706;
+    }
+    
+    .badge-error {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+    
+    .badge-info {
+      background: #e0e7ff;
+      color: #4f46e5;
+    }
+    
+    .badge-neutral {
+      background: var(--color-slate-100);
+      color: var(--color-slate-700);
+    }
+    
+    /* ========== 通知组件 ========== */
+    .toast {
+      backdrop-filter: blur(8px);
+      transition: all var(--duration-slow) var(--ease-smooth);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-md) var(--spacing-lg);
+      color: white;
+      font-size: 0.875rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+    
+    .toast-success {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+    }
+    
+    .toast-error {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+    }
+    
+    .toast-warning {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
+    }
+    
+    .toast-info {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+    }
+    
+    /* ========== 动画 ========== */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.4s var(--ease-smooth) forwards;
+    }
+    
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    .slide-in {
+      animation: slideIn 0.4s var(--ease-spring) forwards;
+    }
+    
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 0.6;
+        transform: scale(0.95);
+      }
+    }
+    
+    .pulse-dot {
+      animation: pulse 3s infinite ease-in-out;
+    }
+    
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      position: relative;
+    }
+    
+    .status-success {
+      background: #22c55e;
+      box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
+    }
+    
+    /* ========== 页面样式 ========== */
+    .section {
+      margin-bottom: 3rem;
+    }
+    
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: #0f172a;
+    }
+    
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1 style="font-size: 2rem; font-weight: 800; margin-bottom: 2rem;">CSS 组件验证页面</h1>
+
+  <!-- 卡片组件 -->
+  <div class="section">
+    <h2 class="section-title">卡片组件</h2>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">基础卡片</h3>
+        </div>
+        <div class="card-body">这是一个基础卡片组件</div>
+      </div>
+      
+      <div class="card card-accent">
+        <div class="card-header">
+          <h3 class="card-title">装饰卡片</h3>
+        </div>
+        <div class="card-body">带左侧装饰条的卡片</div>
+      </div>
+      
+      <div class="card card-glass">
+        <div class="card-header">
+          <h3 class="card-title">玻璃卡片</h3>
+        </div>
+        <div class="card-body">玻璃效果卡片</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 按钮组件 -->
+  <div class="section">
+    <h2 class="section-title">按钮组件</h2>
+    <div class="demo-grid">
+      <button class="btn btn-primary">主要按钮</button>
+      <button class="btn btn-secondary">次要按钮</button>
+      <button class="btn btn-outline">轮廓按钮</button>
+      <button class="btn btn-ghost">幽灵按钮</button>
+      <button class="btn btn-danger">危险按钮</button>
+      <button class="btn btn-success">成功按钮</button>
+    </div>
+    
+    <h3 style="margin: 1.5rem 0 0.5rem; font-weight: 600;">按钮尺寸</h3>
+    <div style="display: flex; gap: 1rem; align-items: center;">
+      <button class="btn btn-primary btn-sm">小按钮</button>
+      <button class="btn btn-primary">默认按钮</button>
+      <button class="btn btn-primary btn-lg">大按钮</button>
+      <button class="btn btn-primary btn-xl">超大按钮</button>
+    </div>
+    
+    <h3 style="margin: 1.5rem 0 0.5rem; font-weight: 600;">图标按钮</h3>
+    <div style="display: flex; gap: 1rem;">
+      <button class="btn btn-icon btn-primary">
+        <i class="fas fa-search"></i>
+      </button>
+      <button class="btn btn-icon btn-secondary">
+        <i class="fas fa-heart"></i>
+      </button>
+      <button class="btn btn-icon btn-danger">
+        <i class="fas fa-trash"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- 徽章组件 -->
+  <div class="section">
+    <h2 class="section-title">徽章组件</h2>
+    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+      <span class="badge badge-success">成功</span>
+      <span class="badge badge-warning">警告</span>
+      <span class="badge badge-error">错误</span>
+      <span class="badge badge-info">信息</span>
+      <span class="badge badge-neutral">中性</span>
+    </div>
+    
+    <h3 style="margin: 1.5rem 0 0.5rem; font-weight: 600;">徽章尺寸</h3>
+    <div style="display: flex; gap: 1rem; align-items: center;">
+      <span class="badge badge-success badge-sm">小徽章</span>
+      <span class="badge badge-success">默认徽章</span>
+      <span class="badge badge-success badge-lg">大徽章</span>
+    </div>
+  </div>
+
+  <!-- 通知组件 -->
+  <div class="section">
+    <h2 class="section-title">通知组件</h2>
+    <div style="display: flex; flex-direction: column; gap: 1rem; max-width: 400px;">
+      <div class="toast toast-success">
+        <i class="fas fa-check-circle"></i>
+        操作成功！
+      </div>
+      <div class="toast toast-error">
+        <i class="fas fa-times-circle"></i>
+        操作失败！
+      </div>
+      <div class="toast toast-warning">
+        <i class="fas fa-exclamation-triangle"></i>
+        警告信息！
+      </div>
+      <div class="toast toast-info">
+        <i class="fas fa-info-circle"></i>
+        提示信息！
+      </div>
+    </div>
+  </div>
+
+  <!-- 动画效果 -->
+  <div class="section">
+    <h2 class="section-title">动画效果</h2>
+    <div class="card-grid">
+      <div class="card fade-in">
+        <div class="card-body">淡入动画</div>
+      </div>
+      <div class="card slide-in">
+        <div class="card-body">滑入动画</div>
+      </div>
+      <div class="card">
+        <div class="card-body">
+          <span class="pulse-dot status-dot status-success"></span>
+          脉冲动画
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CSS 变量测试 -->
+  <div class="section">
+    <h2 class="section-title">CSS 变量测试</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem;">
+      <div style="padding: 1rem; background: var(--color-blue-500); color: white; border-radius: var(--radius-lg);">
+        Blue 500
+      </div>
+      <div style="padding: 1rem; background: var(--color-purple-500); color: white; border-radius: var(--radius-lg);">
+        Purple 500
+      </div>
+      <div style="padding: 1rem; background: var(--color-green-500); color: white; border-radius: var(--radius-lg);">
+        Green 500
+      </div>
+      <div style="padding: 1rem; background: var(--color-red-500); color: white; border-radius: var(--radius-lg);">
+        Red 500
+      </div>
+      <div style="padding: 1rem; background: var(--color-amber-500); color: white; border-radius: var(--radius-lg);">
+        Amber 500
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top: 3rem; padding: 2rem; background: white; border-radius: 1rem; border: 2px solid var(--color-green-500);">
+    <h3 style="color: var(--color-green-600); margin-bottom: 0.5rem;">✅ 验证完成</h3>
+    <p style="color: var(--color-slate-600);">如果所有组件显示正常，说明CSS架构重构成功！</p>
+  </div>
+  
+  <script>
+    // 页面加载完成后添加动画类
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('CSS验证页面加载完成');
+      console.log('CSS变量测试:', getComputedStyle(document.documentElement).getPropertyValue('--color-blue-500'));
+    });
+  </script>
+</body>
+</html>

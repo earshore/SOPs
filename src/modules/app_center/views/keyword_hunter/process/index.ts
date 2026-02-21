@@ -1071,8 +1071,14 @@ export async function mount(container: HTMLElement): Promise<void> {
         registeredActionNames = registerActionsWithLegacy({
             kt_syncToInput: () => syncToInput(),
             kt_translateCopyImmersive: () => translateCopyImmersive(),
-            kt_locateKeyword: (params: Record<string, unknown>) => locateKeywordInCopy(params.keyword as string || params[0] as string || ''),
-            kt_locateUnmatchedRoot: (params: Record<string, unknown>) => locateUnmatchedRootInList(params.root as string || params[0] as string || ''),
+            kt_locateKeyword: (params: string | Record<string, unknown>) => {
+                const keyword = typeof params === 'string' ? params : (params.param as string || params.keyword as string || '');
+                return locateKeywordInCopy(keyword);
+            },
+            kt_locateUnmatchedRoot: (params: string | Record<string, unknown>) => {
+                const root = typeof params === 'string' ? params : (params.param as string || params.root as string || '');
+                return locateUnmatchedRootInList(root);
+            },
             kt_minimizeKeywordsWindow: () => minimizeKeywordsWindow(),
             kt_restoreKeywordsWindow: () => restoreKeywordsWindow(),
         });

@@ -315,7 +315,8 @@ class WebVitalsService {
 }
 
 /**
- * 全局实例
+ * 全局实例（向后兼容）
+ * @deprecated 请使用 container.resolve('webVitals') 获取WebVitalsService实例
  */
 export const webVitalsService = new WebVitalsService();
 
@@ -323,3 +324,15 @@ export const webVitalsService = new WebVitalsService();
  * 默认导出
  */
 export default webVitalsService;
+
+// ================================================================
+// 🎯 DI容器工厂函数
+// ================================================================
+
+/**
+ * 创建WebVitalsService实例的工厂函数
+ * @returns WebVitalsService实例
+ */
+export function createWebVitalsService(): WebVitalsService {
+  return new WebVitalsService();
+}

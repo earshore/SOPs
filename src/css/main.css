@@ -1,0 +1,73 @@
+/**
+ * CSS 主入口文件
+ * 按照层级顺序导入所有样式
+ * 
+ * 架构规则:
+ * - 本文件只做 @import 编排，不写任何具体样式
+ * - 导入顺序决定优先级：越靠后优先级越高
+ * - 所有业务样式必须归入对应模块
+ * - 注意: 所有@import必须在@tailwind之前
+ *
+ * 目录:
+ * 1. 基础层    — 变量、Reset
+ * 2. 组件层    — 可复用 UI 组件
+ * 3. 布局层    — 页面级布局
+ * 4. 动画层    — 关键帧 & 过渡
+ * 5. 工具层    — 原子级辅助类
+ * 6. Tailwind  — 最后加载,优先级最高
+ */
+
+
+/* ========================================
+   1. 基础层 - Foundation
+   ======================================== */
+@import './foundation/variables.css';
+@import './foundation/reset.css';
+
+
+/* ========================================
+   2. 组件层 - Components
+   按功能域字母序排列，便于查找
+   ======================================== */
+@import './components/badges.css';
+@import './components/buttons.css';
+@import './components/cards.css';
+@import './components/code-highlight.css';
+@import './components/forms.css';
+@import './components/header.css';
+@import './components/loading.css';
+@import './components/markdown.css';
+@import './components/mega-menu.css';
+@import './components/modals.css';
+@import './components/scrollbar.css';
+@import './components/status.css';
+@import './components/tabs.css';
+@import './components/toast.css';
+
+
+/* ========================================
+   3. 布局层 - Layouts
+   ======================================== */
+@import './layouts/container.css';
+
+
+/* ========================================
+   4. 动画层 - Animations
+   ======================================== */
+@import './animations/keyframes.css';
+
+
+/* ========================================
+   5. 工具层 - Utilities
+   ======================================== */
+@import './utilities/transitions.css';
+@import './utilities/interactive.css';
+@import './utilities/print.css';
+@import './utilities/legacy-compat.css';
+
+
+/* ========================================
+   6. Tailwind 组件和工具类 (最后加载)
+   ======================================== */
+@tailwind components;
+@tailwind utilities;

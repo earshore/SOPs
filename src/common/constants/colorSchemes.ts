@@ -89,12 +89,15 @@ export interface ColorScheme {
  */
 export type ColorSchemeName =
   | 'blue'
+  | 'sky'
   | 'indigo'
   | 'violet'
   | 'purple'
+  | 'fuchsia'
   | 'emerald'
   | 'teal'
   | 'green'
+  | 'lime'
   | 'amber'
   | 'orange'
   | 'red'
@@ -195,11 +198,15 @@ export const COLOR_SCHEMES: Record<ColorSchemeName, ColorScheme> = {
   // ── Primary Blues ──
   blue: createScheme('blue', { gradientTo: 'indigo', secondaryColor: 'indigo' }),
 
+  sky: createScheme('sky', { gradientTo: 'blue', secondaryColor: 'cyan' }),
+
   indigo: createScheme('indigo', { gradientTo: 'violet', secondaryColor: 'violet' }),
 
   violet: createScheme('violet', { gradientTo: 'purple', secondaryColor: 'purple' }),
 
   purple: createScheme('purple', { gradientTo: 'violet', secondaryColor: 'pink' }),
+
+  fuchsia: createScheme('fuchsia', { gradientTo: 'pink', secondaryColor: 'purple' }),
 
   // ── Greens ──
   emerald: createScheme('emerald', { gradientTo: 'teal', secondaryColor: 'teal' }),
@@ -207,6 +214,8 @@ export const COLOR_SCHEMES: Record<ColorSchemeName, ColorScheme> = {
   teal: createScheme('teal', { gradientTo: 'cyan', secondaryColor: 'cyan' }),
 
   green: createScheme('green', { gradientTo: 'emerald', secondaryColor: 'emerald' }),
+
+  lime: createScheme('lime', { gradientTo: 'green', secondaryColor: 'emerald' }),
 
   // ── Warm Tones ──
   amber: createScheme('amber', { gradientTo: 'orange', secondaryColor: 'orange' }),

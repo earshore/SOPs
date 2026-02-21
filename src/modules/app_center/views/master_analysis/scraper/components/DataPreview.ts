@@ -70,39 +70,70 @@ export class DataPreview {
      * 设置事件委托（性能优化）
      */
     setupEventDelegation(onToggle: (asin: string) => void): void {
+        console.log('[DataPreview] 🎯 setupEventDelegation 被调用');
+        
         const cardsContainer = document.getElementById('data-cards');
-        if (!cardsContainer) return;
+        if (!cardsContainer) {
+            console.warn('[DataPreview] ⚠️ data-cards 容器不存在');
+            return;
+        }
+
+        console.log('[DataPreview] 📦 找到 data-cards 容器');
 
         // 移除旧的监听器（如果存在）
         if (this._cardClickHandler) {
+            console.log('[DataPreview] 🗑️ 移除旧的事件监听器');
             cardsContainer.removeEventListener('click', this._cardClickHandler);
         }
 
         // 创建新的事件处理器
         this._cardClickHandler = (e: Event) => {
             const target = e.target as HTMLElement;
+            console.log('[DataPreview] 🖱️ 点击事件触发:', target.tagName, target.className);
+
+            // 检查是否点击了按钮(删除按钮等)
+            const button = target.closest('button');
+            if (button) {
+                console.log('[DataPreview] 🔘 点击了按钮，由Alpine处理');
+                return; // 按钮由 Alpine 的 @click 处理
+            }
+
+            // 检查是否点击了链接
+            const link = target.closest('a');
+            if (link) {
+                console.log('[DataPreview] 🔗 点击了链接，允许默认行为');
+                return; // 链接正常跳转
+            }
 
             // 查找最近的卡片元素
             const card = target.closest('.asin-card');
-            if (card && card.id && card.id.startsWith('card-')) {
-                const asin = card.id.replace('card-', '');
+            if (card) {
+                const asin = card.getAttribute('data-asin');
+                if (asin) {
+                    console.log('[DataPreview] 🎯 找到卡片，ASIN:', asin);
+                    
+                    // 检查是否点击了卡片内容区域(已展开的部分)
+                    const cardBody = target.closest(`#card-body-${asin}`);
+                    if (cardBody) {
+                        console.log('[DataPreview] 📄 点击了卡片内容区域，不触发折叠');
+                        return; // 点击内容区域不触发折叠
+                    }
 
-                // 检查是否点击了删除按钮
-                const deleteBtn = target.closest('button[title*="删除"]');
-                if (deleteBtn) {
-                    e.stopPropagation();
-                    return; // 删除按钮由 Alpine 的 @click 处理
+                    // 展开/收起卡片
+                    console.log('[DataPreview] 📢 调用 onToggle 回调');
+                    onToggle(asin);
+                } else {
+                    console.log('[DataPreview] ⚠️ 卡片缺少 data-asin 属性');
                 }
-
-                // 展开/收起卡片
-                onToggle(asin);
+            } else {
+                console.log('[DataPreview] ⏭️ 未找到有效的卡片元素');
             }
         };
 
         // 添加事件监听器
         cardsContainer.addEventListener('click', this._cardClickHandler);
 
-        console.log('[Scraper] ✅ 事件委托已设置');
+        console.log('[DataPreview] ✅ 事件委托已设置');
     }
 
     /**

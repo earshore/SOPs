@@ -2,38 +2,39 @@ console.log("📋 SOPs Core Module Loading...");
 import './sops_style.css';
 import { createModuleLoader, ModuleLoader } from '../../common/utils/ModuleLoader';
 import type { ModuleMap, ModuleLoaderFn } from '@/types/modules-business';
+import { SOPS_ROUTES } from '@/common/constants/routes';
 
 // ================= 路由配置表 =================
-// 键名对应 menuConfig.js 里的 route id
+// 使用路由常量，避免硬编码
 const MODULE_MAP: ModuleMap = {
     // 总览
-    'sops_overview': () => import('./views/overview/index'),
+    [SOPS_ROUTES.OVERVIEW]: () => import('./views/overview/index'),
 
     // 第一模块：运营与推广体系 (The Growth Layer)
-    'sops_npi_tracker': () => import('./views/growth/npi_tracker/index'),
-    'sops_listing_seo': () => import('./views/growth/listing_seo/index'),
-    'sops_ppc_advertising': () => import('./views/growth/ppc_advertising/index'),
-    'sops_restricted_words': () => import('./views/growth/restricted_words/index'),
-    'sops_promotion_submission': () => import('./views/growth/promotion_submission/index'),
-    'sops_competitor_monitoring': () => import('./views/growth/competitor_monitoring/index'),
+    [SOPS_ROUTES.NPI_TRACKER]: () => import('./views/growth/npi_tracker/index'),
+    [SOPS_ROUTES.LISTING_SEO]: () => import('./views/growth/listing_seo/index'),
+    [SOPS_ROUTES.PPC_ADVERTISING]: () => import('./views/growth/ppc_advertising/index'),
+    [SOPS_ROUTES.RESTRICTED_WORDS]: () => import('./views/growth/restricted_words/index'),
+    [SOPS_ROUTES.PROMOTION_SUBMISSION]: () => import('./views/growth/promotion_submission/index'),
+    [SOPS_ROUTES.COMPETITOR_MONITORING]: () => import('./views/growth/competitor_monitoring/index'),
 
     // 第二模块：供应链与物流体系 (The Backend Layer)
-    'sops_fba_shipping': () => import('./views/backend/fba_shipping/index'),
-    'sops_procurement_qc': () => import('./views/backend/procurement_qc/index'),
-    'sops_inventory_replenishment': () => import('./views/backend/inventory_replenishment/index'),
+    [SOPS_ROUTES.FBA_SHIPPING]: () => import('./views/backend/fba_shipping/index'),
+    [SOPS_ROUTES.PROCUREMENT_QC]: () => import('./views/backend/procurement_qc/index'),
+    [SOPS_ROUTES.INVENTORY_REPLENISHMENT]: () => import('./views/backend/inventory_replenishment/index'),
 
     // 第三模块：账号安全与风控体系 (The Safety Layer)
-    'sops_account_security': () => import('./views/safety/account_security/index'),
-    'sops_permission_management': () => import('./views/safety/permission_management/index'),
-    'sops_brand_infringement': () => import('./views/safety/brand_infringement/index'),
-    'sops_performance_notification': () => import('./views/safety/performance_notification/index'),
-    'sops_product_compliance': () => import('./views/safety/product_compliance/index'),
-    'sops_eu_gpsr_compliance': () => import('./views/safety/eu_gpsr_compliance/index'),
+    [SOPS_ROUTES.ACCOUNT_SECURITY]: () => import('./views/safety/account_security/index'),
+    [SOPS_ROUTES.PERMISSION_MANAGEMENT]: () => import('./views/safety/permission_management/index'),
+    [SOPS_ROUTES.BRAND_INFRINGEMENT]: () => import('./views/safety/brand_infringement/index'),
+    [SOPS_ROUTES.PERFORMANCE_NOTIFICATION]: () => import('./views/safety/performance_notification/index'),
+    [SOPS_ROUTES.PRODUCT_COMPLIANCE]: () => import('./views/safety/product_compliance/index'),
+    [SOPS_ROUTES.EU_GPSR_COMPLIANCE]: () => import('./views/safety/eu_gpsr_compliance/index'),
 
     // 第四模块：客服与客户体验体系 (The Service Layer)
-    'sops_email_templates': () => import('./views/service/email_templates/index'),
-    'sops_negative_review': () => import('./views/service/negative_review/index'),
-    'sops_qa_maintenance': () => import('./views/service/qa_maintenance/index'),
+    [SOPS_ROUTES.EMAIL_TEMPLATES]: () => import('./views/service/email_templates/index'),
+    [SOPS_ROUTES.NEGATIVE_REVIEW]: () => import('./views/service/negative_review/index'),
+    [SOPS_ROUTES.QA_MAINTENANCE]: () => import('./views/service/qa_maintenance/index'),
 };
 
 // ================= 使用通用ModuleLoader =================

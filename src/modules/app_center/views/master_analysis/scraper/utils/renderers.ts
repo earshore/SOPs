@@ -46,7 +46,7 @@ export function renderProductCard(
     rawProduct: ProductData, 
     isExpanded: boolean, 
     globalSiteCode: string,
-    onToggle: string,
+    _onToggle: string,  // 不再使用,通过事件委托处理
     onDelete: string,
     onDeleteReview: string
 ): string {
@@ -71,11 +71,11 @@ export function renderProductCard(
 
     return `
         <div id="card-${p.asin}" 
+             data-asin="${p.asin}"
              class="asin-card group relative p-5 border rounded-2xl transition-all cursor-pointer hover:shadow-md 
-            ${isExpanded ? "border-blue-500 bg-blue-50/30 ring-1 ring-blue-500" : "bg-white border-slate-200 hover:border-blue-300"}" 
-            @click="${onToggle}">
+            ${isExpanded ? "border-blue-500 bg-blue-50/30 ring-1 ring-blue-500" : "bg-white border-slate-200 hover:border-blue-300"}">
             
-            <button @click.stop="${onDelete}" 
+            <button data-action="delete" data-asin="${p.asin}" @click.stop="${onDelete}" 
                 class="absolute -top-2 -right-2 w-7 h-7 flex items-center justify-center bg-white text-slate-400 border border-slate-200 rounded-full shadow-sm opacity-0 group-hover:opacity-100 hover:text-red-500 hover:border-red-200 hover:bg-red-50 transition-all z-30"
                 title="彻底删除该 ASIN">
                 <i class="fas fa-times text-xs"></i>
@@ -115,7 +115,7 @@ export function renderProductCard(
             
             ${p.error ? `<div class="flex items-start gap-2 text-xs text-red-600 mt-2 p-2 bg-red-50 border border-red-100 rounded-lg"><i class="fas fa-bug mt-0.5"></i><span>${getErrorSummary(p.error)}</span></div>` : ""}
             
-            <div id="card-body-${p.asin}" class="mt-4 pt-4 border-t border-slate-200/60 space-y-6 fade-in ${isExpanded ? '' : 'hidden'}" @click.stop>
+            <div id="card-body-${p.asin}" class="mt-4 pt-4 border-t border-slate-200/60 space-y-6 fade-in ${isExpanded ? '' : 'hidden'}">
                 <div>
                     <h5 class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2"><i class="fas fa-list-ul text-blue-500"></i> 五点描述</h5>
                     ${(p.feature_bullets || []).length > 0 ? `
@@ -138,7 +138,7 @@ export function renderProductCard(
                         <div class="max-h-96 overflow-y-auto space-y-3 pr-1 custom-scrollbar">
                             ${(p.customer_reviews || []).map((review: any, i: number) => `
                                 <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm group/review relative hover:border-purple-200 hover:shadow-md transition-all">
-                                    <button @click.stop="${onDeleteReview.replace('INDEX', String(i))}" 
+                                    <button data-action="delete-review" data-asin="${p.asin}" data-index="${i}" @click.stop="${onDeleteReview.replace('INDEX', String(i))}" 
                                         class="absolute top-3 right-3 w-7 h-7 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover/review:opacity-100 z-10">
                                         <i class="fas fa-trash-alt text-xs"></i>
                                     </button>

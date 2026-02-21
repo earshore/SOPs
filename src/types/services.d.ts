@@ -211,3 +211,40 @@ export interface IMonitoringService {
   setUser(user: { id: string; email?: string; username?: string }): void;
   addBreadcrumb(breadcrumb: { message: string; category?: string; level?: string }): void;
 }
+
+/**
+ * HTTP服务接口
+ */
+export interface IHttpService {
+  request<T = any>(url: string, options?: HttpOptions): Promise<T>;
+  get<T = any>(url: string, options?: HttpOptions): Promise<T>;
+  post<T = any>(url: string, body?: any, options?: HttpOptions): Promise<T>;
+  loadTemplate(url: string): Promise<string>;
+  apiRequest<T = any>(url: string, token: string, options?: HttpOptions): Promise<T>;
+  createClient(baseUrl: string, defaultHeaders?: Record<string, string>): {
+    get<T = any>(path: string, options?: HttpOptions): Promise<T>;
+    post<T = any>(path: string, body?: any, options?: HttpOptions): Promise<T>;
+  };
+}
+
+/**
+ * 配置服务接口
+ */
+export interface IConfigService {
+  get<T = any>(key: string, defaultValue?: T): T;
+  set(key: string, value: any): void;
+  has(key: string): boolean;
+  getAll(): Record<string, any>;
+  reset(): void;
+}
+
+/**
+ * 分析服务接口
+ */
+export interface IAnalyticsService {
+  init(config?: any): void;
+  trackPageView(page: string, properties?: Record<string, any>): void;
+  trackEvent(event: string, properties?: Record<string, any>): void;
+  trackError(error: Error, context?: Record<string, any>): void;
+  setUser(userId: string, traits?: Record<string, any>): void;
+}

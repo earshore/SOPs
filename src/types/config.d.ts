@@ -27,6 +27,7 @@ export interface ModuleConfig {
   version: string;
   icon: string;
   description: string;
+  themeColor?: string; // 模块主题色，如 'blue', 'emerald', 'purple' 等
 }
 
 // ==================== Category配置 ====================

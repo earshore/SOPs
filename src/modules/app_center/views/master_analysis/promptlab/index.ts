@@ -11,6 +11,7 @@
 import { escapeHtml } from '@/common/utils/security';
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import state from "../../../../../common/state";
+import { appStore } from '../../../../../stores/useAppStore';
 import { promptlabService } from '../services/promptlabService';
 import SITE_CONFIGS from '../../../../../common/constants/constants';
 import { ANALYSIS_MODULES } from '../constants/prompts';
@@ -132,39 +133,43 @@ function saveInputsToState(): void {
         selectedSections.push(cb.value);
     });
 
-    if (!state.masterPrompt) {
-        state.masterPrompt = {} as any;
-    }
+    // 🔍 调试：保存前的状态
+    console.log("🔍 [Save] Before - state.masterPrompt:", state.masterPrompt);
     
-    if (!state.masterPrompt) return; // Type guard
-
-    state.masterPrompt.promptlab = {
-        userProductProfile: {
-            targetMarket: (document.getElementById("lab-target-market") as HTMLSelectElement)?.value || "",
-            keywordsTier1: (document.getElementById("lab-keywords-tier1") as HTMLInputElement)?.value || "",
-            keywordsTier2: (document.getElementById("lab-keywords-tier2") as HTMLTextAreaElement)?.value || "",
-            audience: (document.getElementById("lab-audience") as HTMLInputElement)?.value || "",
-            usps: (document.getElementById("lab-usps") as HTMLTextAreaElement)?.value || "",
-            specs: (document.getElementById("lab-specs") as HTMLTextAreaElement)?.value || "",
-            socialHook: (document.getElementById("lab-social-hook") as HTMLInputElement)?.value || "",
-            negative: (document.getElementById("negative-keywords") as HTMLInputElement)?.value || "",
-            tone: (document.getElementById("lab-tone") as HTMLSelectElement)?.value || "professional",
-            customStrategy: (document.getElementById("lab-custom-strategy") as HTMLTextAreaElement)?.value || "",
-            useCosmo: (document.getElementById("opt-cosmo") as HTMLInputElement)?.checked || false,
-            useRufus: (document.getElementById("opt-rufus") as HTMLInputElement)?.checked || false,
-            useEmoji: (document.getElementById("opt-emoji") as HTMLInputElement)?.checked || false,
-            selectedReportSections: selectedSections,
-            charLimit: parseInt((document.getElementById("lab-char-limit") as HTMLInputElement)?.value) || 5000,
-        }
+    // ✅ 使用 Zustand store 更新状态
+    const userProductProfile = {
+        targetMarket: (document.getElementById("lab-target-market") as HTMLSelectElement)?.value || "",
+        keywordsTier1: (document.getElementById("lab-keywords-tier1") as HTMLInputElement)?.value || "",
+        keywordsTier2: (document.getElementById("lab-keywords-tier2") as HTMLTextAreaElement)?.value || "",
+        audience: (document.getElementById("lab-audience") as HTMLInputElement)?.value || "",
+        usps: (document.getElementById("lab-usps") as HTMLTextAreaElement)?.value || "",
+        specs: (document.getElementById("lab-specs") as HTMLTextAreaElement)?.value || "",
+        socialHook: (document.getElementById("lab-social-hook") as HTMLInputElement)?.value || "",
+        negative: (document.getElementById("negative-keywords") as HTMLInputElement)?.value || "",
+        tone: (document.getElementById("lab-tone") as HTMLSelectElement)?.value || "professional",
+        customStrategy: (document.getElementById("lab-custom-strategy") as HTMLTextAreaElement)?.value || "",
+        useCosmo: (document.getElementById("opt-cosmo") as HTMLInputElement)?.checked || false,
+        useRufus: (document.getElementById("opt-rufus") as HTMLInputElement)?.checked || false,
+        useEmoji: (document.getElementById("opt-emoji") as HTMLInputElement)?.checked || false,
+        selectedReportSections: selectedSections,
+        charLimit: parseInt((document.getElementById("lab-char-limit") as HTMLInputElement)?.value) || 5000,
     };
+    
+    appStore.getState().setUserProductProfile(userProductProfile);
+    
+    // 🔍 调试：保存后的状态
+    const savedProfile = appStore.getState().promptlab.userProductProfile;
+    console.log("🔍 [Save] After - userProductProfile:", savedProfile);
+    console.log("🔍 [Save] After - targetMarket:", savedProfile?.targetMarket);
+    console.log("🔍 [Save] After - keywordsTier1:", savedProfile?.keywordsTier1);
+    console.log("🔍 [Save] After - keywordsTier2:", savedProfile?.keywordsTier2);
 }
 
 /**
  * 从 state 恢复输入
  */
 function restoreInputsFromState(): void {
-    if (!state.masterPrompt) return;
-    const p = state.masterPrompt.promptlab?.userProductProfile;
+    const p = appStore.getState().promptlab.userProductProfile;
     if (!p) return;
 
     const setVal = (id: string, val: string | number | undefined): void => {
@@ -368,7 +373,7 @@ function renderReportAnalysis(): void {
         }
         
         // 2. 检测是否需要自动更新
-        const isFirstLoad = !state.masterPrompt.promptlab?.userProductProfile?.targetMarket;
+        const isFirstLoad = !appStore.getState().promptlab.userProductProfile?.targetMarket;
         const isMarketplaceChanged = currentMarketplace && currentMarketplace !== lastMarketplace;
         
         // 3. 只在首次加载或数据源变化时自动更新
@@ -386,9 +391,12 @@ function renderReportAnalysis(): void {
                 
                 if (match) {
                     marketSelect.value = match.value;
-                    if (!state.masterPrompt.promptlab) state.masterPrompt.promptlab = { userProductProfile: {} as UserProductProfile };
-                    if (state.masterPrompt.promptlab?.userProductProfile) {
-                        state.masterPrompt.promptlab.userProductProfile.targetMarket = match.value;
+                    const currentProfile = appStore.getState().promptlab.userProductProfile;
+                    if (currentProfile) {
+                        appStore.getState().setUserProductProfile({
+                            ...currentProfile,
+                            targetMarket: match.value
+                        });
                     }
                     
                     // 更新跟踪的 marketplace
@@ -413,7 +421,7 @@ function renderReportAnalysis(): void {
     // ✅ 安全: 静态HTML模板，无用户输入
     container.innerHTML = "";
     container.className = "mt-3 grid grid-cols-1 lg:grid-cols-2 gap-3";
-    const savedSelection = state.masterPrompt?.promptlab?.userProductProfile?.selectedReportSections || [];
+    const savedSelection = appStore.getState().promptlab.userProductProfile?.selectedReportSections || [];
     const isFirstLoad = savedSelection.length === 0;
 
     if (isNewFormat) {
@@ -470,11 +478,12 @@ function renderReportAnalysis(): void {
                     let val = report[key];
                     if (Array.isArray(val)) val = val.join(", ");
                     audienceInput.value = val;
-                    if (!state.masterPrompt) state.masterPrompt = {} as any;
-                    if (!state.masterPrompt) return; // Type guard
-                    if (!state.masterPrompt.promptlab) state.masterPrompt.promptlab = { userProductProfile: {} as UserProductProfile };
-                    if (state.masterPrompt && state.masterPrompt.promptlab?.userProductProfile) {
-                        state.masterPrompt.promptlab.userProductProfile.audience = val;
+                    const currentProfile = appStore.getState().promptlab.userProductProfile;
+                    if (currentProfile) {
+                        appStore.getState().setUserProductProfile({
+                            ...currentProfile,
+                            audience: val
+                        });
                     }
                 }
             }
@@ -535,6 +544,7 @@ function getPreviewText(val: any): string {
  * 生成 Listing Prompt
  */
 function generateMasterPrompt(): void {
+    console.log('[Promptlab] 🎯 调用 generateMasterPrompt');
     const btn = document.getElementById("btn-generate-prompt") as HTMLButtonElement;
     const select = document.getElementById("lab-target-market") as HTMLSelectElement;
     const t1 = (document.getElementById("lab-keywords-tier1") as HTMLInputElement)?.value.trim();
@@ -551,12 +561,26 @@ function generateMasterPrompt(): void {
     }
 
     saveInputsToState();
-    if (!state.masterPrompt?.promptlab?.userProductProfile) {
+    const profile = appStore.getState().promptlab.userProductProfile;
+    
+    // 🔍 调试日志 - Listing Prompt
+    console.log("🔍 [Listing] Debug - profile:", profile);
+    console.log("🔍 [Listing] Debug - targetMarket:", profile?.targetMarket);
+    console.log("🔍 [Listing] Debug - keywordsTier1:", profile?.keywordsTier1);
+    console.log("🔍 [Listing] Debug - keywordsTier2:", profile?.keywordsTier2);
+    
+    if (!profile || !profile.targetMarket || !profile.keywordsTier1 || !profile.keywordsTier2) {
+        console.error("❌ [Listing] 验证失败:", {
+            hasProfile: !!profile,
+            targetMarket: profile?.targetMarket,
+            keywordsTier1: profile?.keywordsTier1,
+            keywordsTier2: profile?.keywordsTier2
+        });
         showToast("配置信息不完整", "warning");
         return;
     }
     const inputs: Partial<PromptInputs> = {
-        ...state.masterPrompt.promptlab.userProductProfile,
+        ...profile,
         useAnalysisData: (document.getElementById("use-analysis-data") as HTMLInputElement)?.checked || false,
     };
     const outEl = document.getElementById("final-prompt-output") as HTMLTextAreaElement;
@@ -579,17 +603,32 @@ function generateMasterPrompt(): void {
  * 生成视觉 Prompt
  */
 function generateVisualPrompt(): void {
+    console.log('[Promptlab] 🎯 调用 generateVisualPrompt');
     if (!state.analysis.analysisReport) {
         showToast("请先生成 Ai 分析报告以获取视觉灵感", "warning");
         return;
     }
     saveInputsToState();
-    if (!state.masterPrompt?.promptlab?.userProductProfile) {
+    const profile = appStore.getState().promptlab.userProductProfile;
+    
+    // 🔍 调试日志 - Visual Prompt
+    console.log("🔍 [Visual] Debug - profile:", profile);
+    console.log("🔍 [Visual] Debug - targetMarket:", profile?.targetMarket);
+    console.log("🔍 [Visual] Debug - keywordsTier1:", profile?.keywordsTier1);
+    console.log("🔍 [Visual] Debug - keywordsTier2:", profile?.keywordsTier2);
+    
+    if (!profile || !profile.targetMarket || !profile.keywordsTier1 || !profile.keywordsTier2) {
+        console.error("❌ [Visual] 验证失败:", {
+            hasProfile: !!profile,
+            targetMarket: profile?.targetMarket,
+            keywordsTier1: profile?.keywordsTier1,
+            keywordsTier2: profile?.keywordsTier2
+        });
         showToast("配置信息不完整", "warning");
         return;
     }
     const inputs: Partial<PromptInputs> = {
-        ...state.masterPrompt.promptlab.userProductProfile,
+        ...profile,
         useAnalysisData: (document.getElementById("use-analysis-data") as HTMLInputElement)?.checked || false,
     };
     const outEl = document.getElementById("final-prompt-output") as HTMLTextAreaElement;
@@ -605,7 +644,7 @@ function generateVisualPrompt(): void {
     updateCharCount();
     outEl.classList.add("bg-pink-50");
     addTimeout(() => outEl.classList.remove("bg-pink-50"), 300);
-    showToast("视觉转化剧本已生成", "success");
+    showToast("Visual Prompt 已生成", "success");
 }
 
 /**
@@ -667,101 +706,6 @@ function toggleConsoleMode(mode: "listing" | "visual"): void {
     }
     updateCharCount();
     updateButtonState();
-}
-
-/**
- * 切换 Prompt 放大视图
- */
-function togglePromptZoom(): void {
-    const modal = document.getElementById('prompt-zoom-modal');
-    const zoomContent = document.getElementById('prompt-zoom-content');
-    const zoomIcon = document.getElementById('zoom-icon');
-    const zoomedContainer = document.getElementById('zoomed-cards-container');
-    
-    if (!modal || !zoomContent || !zoomedContainer) return;
-    
-    const isZoomed = modal.style.display !== 'none' && modal.style.display !== '';
-    
-    if (isZoomed) {
-        // 关闭放大视图 - 缩小动画
-        zoomContent.classList.remove('scale-100', 'opacity-100');
-        zoomContent.classList.add('scale-95', 'opacity-0');
-        modal.style.opacity = '0';
-        
-        addTimeout(() => {
-            const consoleCard = document.querySelector('.zoomed-console-card');
-            const outputCard = document.querySelector('.zoomed-output-card');
-            
-            // 移回翻转卡片
-            if (consoleCard) {
-                const originalParent = document.querySelector('.lg\\:col-span-4 .sticky');
-                if (originalParent) {
-                    consoleCard.classList.remove('zoomed-console-card');
-                    originalParent.insertBefore(consoleCard, originalParent.firstChild);
-                }
-            }
-            
-            // 移回输出卡片
-            if (outputCard) {
-                const originalParent = document.querySelector('.lg\\:col-span-4 .sticky');
-                if (originalParent) {
-                    outputCard.classList.remove('zoomed-output-card');
-                    originalParent.appendChild(outputCard);
-                }
-            }
-            
-            modal.style.display = 'none';
-            modal.classList.remove('flex');
-            modal.style.opacity = '';
-            document.body.style.overflow = '';
-            
-            // 恢复图标和提示
-            if (zoomIcon) {
-                zoomIcon.className = 'fas fa-expand text-sm';
-                const parent = zoomIcon.parentElement;
-                if (parent) parent.title = '放大视图';
-            }
-        }, 300);
-    } else {
-        // 打开放大视图 - 放大动画
-        const consoleCardWrapper = document.querySelector('.lg\\:col-span-4 .sticky > div:first-child');
-        const outputCard = document.getElementById('prompt-output-card');
-        
-        if (!consoleCardWrapper || !outputCard) {
-            console.error('[Promptlab] 未找到卡片元素');
-            return;
-        }
-        
-        // 显示模态框
-        modal.style.display = 'flex';
-        modal.classList.add('flex');
-        modal.style.opacity = '0';
-        document.body.style.overflow = 'hidden';
-        
-        // 清空容器
-        zoomedContainer.innerHTML = '';
-        
-        // 移动元素到模态框
-        (consoleCardWrapper as HTMLElement).classList.add('zoomed-console-card');
-        (outputCard as HTMLElement).classList.add('zoomed-output-card');
-        zoomedContainer.appendChild(consoleCardWrapper);
-        zoomedContainer.appendChild(outputCard);
-        
-        // 触发动画
-        requestAnimationFrame(() => {
-            modal.style.transition = 'opacity 0.3s ease-in';
-            modal.style.opacity = '1';
-            zoomContent.classList.remove('scale-95', 'opacity-0');
-            zoomContent.classList.add('scale-100', 'opacity-100');
-        });
-        
-        // 更改图标和提示
-        if (zoomIcon) {
-            zoomIcon.className = 'fas fa-compress text-sm';
-            const parent = zoomIcon.parentElement;
-            if (parent) parent.title = '恢复视图';
-        }
-    }
 }
 
 /**
@@ -864,7 +808,6 @@ export async function mount(container: HTMLElement): Promise<void> {
             amz_toggleConsoleMode: (params: Record<string, any>) => toggleConsoleMode(params.param as "listing" | "visual"),
             amz_copyMasterPrompt: () => copyMasterPrompt(),
             amz_clearPromptInputs: () => clearPromptInputs(),
-            amz_togglePromptZoom: () => togglePromptZoom(),
             amz_selectAllReportSections: () => selectAllReportSections(),
             amz_clearReportSections: () => clearReportSections(),
         });
@@ -875,16 +818,6 @@ export async function mount(container: HTMLElement): Promise<void> {
         // 3. 设置事件监听器
         setupEventListeners(container);
         
-        // 3.1 设置放大模态框点击背景关闭
-        const modal = document.getElementById('prompt-zoom-modal');
-        if (modal) {
-            addEventListener(modal as HTMLElement, 'click', ((e: Event) => {
-                if (e.target === modal) {
-                    togglePromptZoom();
-                }
-            }) as EventListenerOrEventListenerObject);
-        }
-
         // 4. 从 state 恢复状态
         restoreInputsFromState();
 

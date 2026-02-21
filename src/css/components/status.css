@@ -1,0 +1,126 @@
+/**
+ * Status 状态指示器组件
+ */
+
+/* ========================================
+   基础状态圆点
+   ======================================== */
+.status-dot {
+  --status-color: #9ca3af;
+  --status-glow: rgba(156, 163, 175, 0.2);
+
+  position: relative;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--status-color);
+  box-shadow: 0 0 0 2px var(--status-glow);
+  flex-shrink: 0;
+}
+
+/* ========================================
+   状态变体
+   ======================================== */
+
+/* 成功 / 在线 */
+.status-dot--success,
+.status-success {
+  --status-color: #22c55e;
+  --status-glow: rgba(34, 197, 94, 0.2);
+  background-color: var(--status-color);
+  box-shadow: 0 0 0 2px var(--status-glow);
+}
+
+/* 错误 / 离线 */
+.status-dot--error,
+.status-error {
+  --status-color: #ef4444;
+  --status-glow: rgba(239, 68, 68, 0.2);
+  background-color: var(--status-color);
+  box-shadow: 0 0 0 2px var(--status-glow);
+}
+
+/* 警告 / 待处理 */
+.status-dot--warning,
+.status-pending {
+  --status-color: #f59e0b;
+  --status-glow: rgba(245, 158, 11, 0.2);
+  background-color: var(--status-color);
+  box-shadow: 0 0 0 2px var(--status-glow);
+}
+
+/* 信息 */
+.status-dot--info {
+  --status-color: #3b82f6;
+  --status-glow: rgba(59, 130, 246, 0.2);
+  background-color: var(--status-color);
+  box-shadow: 0 0 0 2px var(--status-glow);
+}
+
+/* 离线 / 灰色 */
+.status-dot--offline {
+  --status-color: #9ca3af;
+  --status-glow: rgba(156, 163, 175, 0.2);
+  background-color: var(--status-color);
+  box-shadow: 0 0 0 2px var(--status-glow);
+}
+
+/* ========================================
+   动画状态（脉冲扩散）
+   ======================================== */
+@keyframes statusPulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 var(--status-glow);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px transparent;
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+.status-dot--animated {
+  animation: statusPulse 2s ease-in-out infinite;
+}
+
+/* ========================================
+   带文字标签的状态
+   ======================================== */
+.status-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.status-label .status-dot {
+  width: 6px;
+  height: 6px;
+}
+
+/* ========================================
+   尺寸变体
+   ======================================== */
+.status-dot--sm {
+  width: 6px;
+  height: 6px;
+}
+
+.status-dot--lg {
+  width: 10px;
+  height: 10px;
+  box-shadow: 0 0 0 3px var(--status-glow);
+}
+
+.status-dot--xl {
+  width: 14px;
+  height: 14px;
+  box-shadow: 0 0 0 3px var(--status-glow);
+}

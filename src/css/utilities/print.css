@@ -1,0 +1,82 @@
+/**
+ * 打印样式
+ */
+
+@media print {
+  /* 隐藏非打印元素 */
+  .no-print {
+    display: none !important;
+  }
+
+  /* 强制显示打印元素 */
+  .print-only {
+    display: block !important;
+  }
+
+  /* 卡片去阴影加边框 */
+  .grid-stack-item-content,
+  .card,
+  [class*="shadow"] {
+    box-shadow: none !important;
+    border: 1px solid #ddd !important;
+  }
+
+  /* 禁用背景色（节省墨水） */
+  * {
+    background: transparent !important;
+    color: #000 !important;
+    text-shadow: none !important;
+  }
+
+  /* 保留必要背景 */
+  .print-keep-bg {
+    background: inherit !important;
+    color: inherit !important;
+  }
+
+  /* 禁止分页断裂 */
+  .print-no-break {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* 链接显示 URL */
+  a[href]::after {
+    content: ' (' attr(href) ')';
+    font-size: 0.8em;
+    color: #666 !important;
+  }
+
+  /* 内部链接不显示 URL */
+  a[href^="#"]::after,
+  a[href^="javascript"]::after {
+    content: '';
+  }
+
+  /* 隐藏导航/侧栏 */
+  header,
+  nav,
+  aside,
+  footer,
+  .sidebar {
+    display: none !important;
+  }
+
+  /* 主内容全宽 */
+  main,
+  .main-content {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* 页面边距 */
+  @page {
+    margin: 2cm;
+  }
+}
+
+/* 默认隐藏仅打印元素 */
+.print-only {
+  display: none;
+}

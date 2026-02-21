@@ -1,300 +1,210 @@
-/* ================================
-   SOPs Module Styles
-   ================================ */
+/**
+ * SOPs Module Styles
+ * 仅包含 SOPs 模块特有的样式
+ * 通用组件样式已提取到 src/css/components/
+ */
 
-/* SOP Overview Container - Centered Limit */
-.sop-overview-container {
-    max-width: 1450px;
-    margin: 0 auto;
-    padding: 0 1rem;
+/* ==================== 容器样式 ==================== */
+.sop-overview-container,
+.sop-module-section,
+#sops_content_area > div {
+  max-width: 1450px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
 }
 
-/* SOP Module Section - Same padding as overview */
-.sop-module-section {
-    max-width: 1450px;
-    margin: 0 auto;
-    padding: 0 1rem;
+@media (max-width: 768px) {
+  .sop-overview-container,
+  .sop-module-section,
+  #sops_content_area > div {
+    padding: 1.5rem 0.75rem;
+  }
 }
 
-#sops_content_area>div {
-    max-width: 1450px;
-    margin: 0 auto;
-    padding: 0 1rem;
-}
-
-/* SOP Card Grid */
-.sop-card-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 1.5rem;
-}
-
-/* SOP Card Styles */
+/* ==================== SOP 卡片特有样式 ==================== */
 .sop-card {
-    background: white;
-    border-radius: 1rem;
-    border: 1px solid #e2e8f0;
-    padding: 1.5rem;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-}
-
-.sop-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 100%;
-    background: linear-gradient(180deg, #3b82f6, #8b5cf6);
-    opacity: 0;
-    transition: opacity 0.3s ease;
+  background: white;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-slate-200);
+  padding: var(--spacing-lg);
+  transition: all var(--duration-slow) var(--ease-smooth);
+  cursor: pointer;
+  position: relative;
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 180px !important;
+  overflow: visible !important;
 }
 
 .sop-card:hover {
-    border-color: #3b82f6;
-    box-shadow: 0 10px 40px -10px rgba(59, 130, 246, 0.2);
-    transform: translateY(-2px);
+  border-color: var(--color-blue-500);
+  box-shadow: 0 10px 40px -10px rgba(59, 130, 246, 0.2);
+  transform: translateY(-2px);
 }
 
-.sop-card:hover::before {
-    opacity: 1;
+/* ==================== SOP 卡片网格 ==================== */
+.sop-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--spacing-lg);
 }
 
-/* SOP Icon Container */
+/* ==================== SOP 图标容器 ==================== */
 .sop-icon-container {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.25rem;
-    transition: transform 0.3s ease;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  transition: transform var(--duration-slow) var(--ease-smooth);
 }
 
 .sop-card:hover .sop-icon-container {
-    transform: scale(1.1);
+  transform: scale(1.1);
 }
 
-/* Status Badge */
+/* ==================== 状态徽章 ==================== */
 .sop-status-badge {
-    font-size: 10px;
-    padding: 2px 8px;
-    border-radius: 9999px;
-    font-weight: 500;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-weight: 500;
 }
 
 .sop-status-active {
-    background: #dcfce7;
-    color: #16a34a;
+  background: #dcfce7;
+  color: #16a34a;
 }
 
 .sop-status-draft {
-    background: #fef3c7;
-    color: #d97706;
+  background: #fef3c7;
+  color: #d97706;
 }
 
 .sop-status-pending {
-    background: #e0e7ff;
-    color: #4f46e5;
+  background: #e0e7ff;
+  color: #4f46e5;
 }
 
-/* SOP Detail View */
+/* ==================== SOP 详情视图 ==================== */
 .sop-detail-header {
-    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-    border-radius: 1rem;
-    padding: 2rem;
-    margin-bottom: 2rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border-radius: var(--radius-xl);
+  padding: 2rem;
+  margin-bottom: 2rem;
 }
 
-/* Timeline Styles */
+/* ==================== 时间线样式 ==================== */
 .sop-timeline {
-    position: relative;
-    padding-left: 2rem;
+  position: relative;
+  padding-left: 2rem;
 }
 
 .sop-timeline::before {
-    content: '';
-    position: absolute;
-    left: 7px;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: linear-gradient(180deg, #3b82f6, #8b5cf6);
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, var(--color-blue-500), var(--color-purple-600));
 }
 
 .sop-timeline-item {
-    position: relative;
-    padding-bottom: 2rem;
+  position: relative;
+  padding-bottom: 2rem;
 }
 
 .sop-timeline-item:last-child {
-    padding-bottom: 0;
+  padding-bottom: 0;
 }
 
 .sop-timeline-dot {
-    position: absolute;
-    left: -25px;
-    top: 0;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: #3b82f6;
-    border: 3px solid white;
-    box-shadow: 0 0 0 2px #3b82f6;
+  position: absolute;
+  left: -25px;
+  top: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-blue-500);
+  border: 3px solid white;
+  box-shadow: 0 0 0 2px var(--color-blue-500);
 }
 
 .sop-timeline-dot.completed {
-    background: #22c55e;
-    box-shadow: 0 0 0 2px #22c55e;
+  background: #22c55e;
+  box-shadow: 0 0 0 2px #22c55e;
 }
 
 .sop-timeline-dot.pending {
-    background: white;
-    box-shadow: 0 0 0 2px #94a3b8;
+  background: white;
+  box-shadow: 0 0 0 2px var(--color-slate-400);
 }
 
-/* Fade in animation */
+/* ==================== 动画 ==================== */
 .sop-fade-in {
-    animation: sopFadeIn 0.4s ease-out forwards;
+  animation: fadeIn 0.4s var(--ease-out) forwards;
 }
 
-@keyframes sopFadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Module highlight animation */
 .sop-module-highlight {
-    animation: sopModuleHighlight 2s ease-out;
+  animation: sopModuleHighlight 2s var(--ease-out);
 }
 
 @keyframes sopModuleHighlight {
-    0% {
-        background-color: transparent;
-    }
-    10% {
-        background-color: rgba(59, 130, 246, 0.1);
-    }
-    100% {
-        background-color: transparent;
-    }
+  0% {
+    background-color: transparent;
+  }
+  10% {
+    background-color: rgba(59, 130, 246, 0.1);
+  }
+  100% {
+    background-color: transparent;
+  }
 }
 
-/* Sidebar active state for category buttons */
-/* Active states are defined below for each color scheme */
-
-/* Emerald active state */
-.sop-sidebar-active.group[data-category="growth"] {
-    background-color: rgb(236 253 245) !important; /* bg-emerald-50 */
-    border-color: rgb(167 243 208) !important; /* border-emerald-200 */
-    color: rgb(4 120 87) !important; /* text-emerald-700 */
-}
-
-.sop-sidebar-active.group[data-category="growth"] i {
-    color: rgb(5 150 105) !important; /* text-emerald-600 */
-}
-
-.sop-sidebar-active.group[data-category="growth"] .fa-chevron-right {
-    opacity: 0.5 !important;
-}
-
-/* Amber active state */
-.sop-sidebar-active.group[data-category="backend"] {
-    background-color: rgb(255 251 235) !important; /* bg-amber-50 */
-    border-color: rgb(253 230 138) !important; /* border-amber-200 */
-    color: rgb(180 83 9) !important; /* text-amber-700 */
-}
-
-.sop-sidebar-active.group[data-category="backend"] i {
-    color: rgb(217 119 6) !important; /* text-amber-600 */
-}
-
-.sop-sidebar-active.group[data-category="backend"] .fa-chevron-right {
-    opacity: 0.5 !important;
-}
-
-/* Red active state */
-.sop-sidebar-active.group[data-category="safety"] {
-    background-color: rgb(254 242 242) !important; /* bg-red-50 */
-    border-color: rgb(254 202 202) !important; /* border-red-200 */
-    color: rgb(185 28 28) !important; /* text-red-700 */
-}
-
-.sop-sidebar-active.group[data-category="safety"] i {
-    color: rgb(220 38 38) !important; /* text-red-600 */
-}
-
-.sop-sidebar-active.group[data-category="safety"] .fa-chevron-right {
-    opacity: 0.5 !important;
-}
-
-/* Blue active state */
-.sop-sidebar-active.group[data-category="service"] {
-    background-color: rgb(239 246 255) !important; /* bg-blue-50 */
-    border-color: rgb(191 219 254) !important; /* border-blue-200 */
-    color: rgb(29 78 216) !important; /* text-blue-700 */
-}
-
-.sop-sidebar-active.group[data-category="service"] i {
-    color: rgb(37 99 235) !important; /* text-blue-600 */
-}
-
-.sop-sidebar-active.group[data-category="service"] .fa-chevron-right {
-    opacity: 0.5 !important;
-}
-
-/* Category Filter Tabs */
+/* ==================== 分类过滤标签 ==================== */
 .sop-category-tab {
-    padding: 0.5rem 1rem;
-    border-radius: 9999px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #64748b;
-    background: transparent;
-    border: 1px solid transparent;
-    transition: all 0.2s ease;
-    cursor: pointer;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-full);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-slate-500);
+  background: transparent;
+  border: 1px solid transparent;
+  transition: all var(--duration-normal) var(--ease-smooth);
+  cursor: pointer;
 }
 
 .sop-category-tab:hover {
-    background: #f1f5f9;
-    color: #334155;
+  background: var(--color-slate-100);
+  color: var(--color-slate-700);
 }
 
 .sop-category-tab.active {
-    background: #3b82f6;
-    color: white;
-    border-color: #3b82f6;
+  background: var(--color-blue-500);
+  color: white;
+  border-color: var(--color-blue-500);
 }
 
-/* Search Box */
+/* ==================== 搜索框 ==================== */
 .sop-search-box {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.75rem;
-    padding: 0.75rem 1rem;
-    transition: all 0.2s ease;
+  background: white;
+  border: 1px solid var(--color-slate-200);
+  border-radius: var(--radius-lg);
+  padding: 0.75rem 1rem;
+  transition: all var(--duration-normal) var(--ease-smooth);
 }
 
 .sop-search-box:focus-within {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--color-blue-500);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .sop-search-box input {
-    border: none;
-    outline: none;
-    width: 100%;
-    background: transparent;
+  border: none;
+  outline: none;
+  width: 100%;
+  background: transparent;
 }

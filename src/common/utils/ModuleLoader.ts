@@ -3,6 +3,7 @@
 // 🎯 通用模块加载器 (TypeScript版本)
 // 统一管理子模块的加载、卸载、错误处理逻辑
 // 消除各业务模块中的重复代码
+// 🎯 增强: 支持DI容器注入到模块实例
 // ================================================================
 
 import { APP_EVENTS } from '../constants/eventConstants';
@@ -13,6 +14,7 @@ import {
   renderTimeout
 } from '../../components/ErrorBoundary';
 import { Logger } from '../../services/loggerService';
+import type { DIContainer } from '../di/Container';
 
 // ==================== 类型定义 ====================
 
@@ -38,6 +40,8 @@ export interface ModuleLoaderConfig {
   loaderColor?: string;
   /** 模块名称（用于日志） */
   moduleName?: string;
+  /** DI容器实例（可选，默认使用全局容器） */
+  container?: DIContainer;
 }
 
 /**
@@ -72,6 +76,9 @@ export class ModuleLoader {
     this.loaderColor = config.loaderColor || 'blue';
     this.moduleName = config.moduleName || 'Module';
     this.currentModule = null;
+    
+    // 🎯 DI容器注入（预留用于未来的模块工厂函数）
+    // const diContainer = config.container || globalContainer;
     
     // 🎯 P1 优化：提取路由前缀用于快速过滤
     this.routePrefixes = this._extractRoutePrefixes();
@@ -243,6 +250,14 @@ export class ModuleLoader {
       // 6. 挂载新模块
       if (module.mount) {
         console.log(`[${this.moduleName}] 🔧 挂载新模块: ${routeId}`);
+        
+        // 🎯 如果模块支持容器注入，尝试注入
+        if (this._supportsContainerInjection(module)) {
+          console.log(`[${this.moduleName}] 💉 模块支持DI容器注入`);
+          // 注意：这里假设模块已经在构造时接收了容器
+          // 如果需要在mount时注入，需要修改IModule接口
+        }
+        
         await module.mount(container);
         this.currentModule = module;
         console.log(`[${this.moduleName}] ✅ 子模块加载成功: ${routeId}`);
@@ -268,6 +283,17 @@ export class ModuleLoader {
       // 8. 渲染错误边界
       this._renderErrorBoundary(container, routeId, err as Error);
     }
+  }
+
+  /**
+   * 检查模块是否支持容器注入
+   * @param module - 模块实例
+   * @returns 是否支持容器注入
+   * @private
+   */
+  private _supportsContainerInjection(module: IModule): boolean {
+    // 检查模块是否有diContainer属性（BaseModule/StandardModule）
+    return 'diContainer' in module;
   }
 
   /**

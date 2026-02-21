@@ -8,6 +8,7 @@ import { generateAnalysisPrompt } from '../prompts/analysisPrompts';
 import { Product } from '../config/sampleData';
 import { mergeProducts } from '../utils/dataTransformers';
 import state from '@common/state';
+import { estimateTokenCount, formatTokenCount } from '../utils/tokenCounter';
 
 /**
  * 获取目标颜色映射
@@ -76,4 +77,26 @@ export function getPromptText(
     console.error('[辅助函数] 生成提示词失败:', error);
     return '提示词生成失败';
   }
+}
+
+/**
+ * 获取提示词的 token 数量
+ */
+export function getPromptTokenCount(
+  targetId: string,
+  currentProducts: Product[]
+): number {
+  const promptText = getPromptText(targetId, currentProducts);
+  return estimateTokenCount(promptText);
+}
+
+/**
+ * 获取格式化的 token 数量显示
+ */
+export function getFormattedTokenCount(
+  targetId: string,
+  currentProducts: Product[]
+): string {
+  const count = getPromptTokenCount(targetId, currentProducts);
+  return formatTokenCount(count);
 }

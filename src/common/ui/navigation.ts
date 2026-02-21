@@ -76,8 +76,8 @@ function renderSidebar(moduleId: string | null): void {
   const sidebar = getEl("dynamic-sidebar");
   if (!sidebar) return;
 
-  // 隐藏逻辑
-  if (!moduleId) {
+  // 隐藏逻辑：无模块ID或home模块不显示侧边栏
+  if (!moduleId || moduleId === 'home') {
     sidebar.classList.add("hidden", "-ml-64");
     sidebar.innerHTML = '';
     return;
@@ -362,24 +362,9 @@ export function scrollToSOPModule(categoryId: string): void {
       moduleElement.classList.remove('sop-module-highlight');
     }, 2000);
 
-    updateSidebarActiveState(categoryId);
     console.log(`✅ 滚动到 SOP 模块: ${categoryId}`);
   } else {
     console.warn(`⚠️ 未找到模块元素: ${moduleId}`);
-  }
-}
-
-/**
- * 更新侧边栏按钮的选中状态
- */
-function updateSidebarActiveState(categoryId: string): void {
-  document.querySelectorAll('[data-action="scroll-to-sop-module"]').forEach(btn => {
-    btn.classList.remove('sop-sidebar-active');
-  });
-
-  const activeBtn = document.querySelector(`[data-action="scroll-to-sop-module"][data-category="${categoryId}"]`);
-  if (activeBtn) {
-    activeBtn.classList.add('sop-sidebar-active');
   }
 }
 
@@ -407,24 +392,9 @@ export function scrollToHubModule(categoryId: string): void {
       moduleElement.classList.remove('hub-module-highlight');
     }, 2000);
 
-    updateHubSidebarActiveState(categoryId);
     console.log(`✅ 滚动到智库模块: ${categoryId}`);
   } else {
     console.warn(`⚠️ 未找到模块元素: ${moduleId}`);
-  }
-}
-
-/**
- * 更新智库侧边栏按钮的选中状态
- */
-function updateHubSidebarActiveState(categoryId: string): void {
-  document.querySelectorAll('[data-action="scroll-to-hub-module"]').forEach(btn => {
-    btn.classList.remove('hub-sidebar-active');
-  });
-
-  const activeBtn = document.querySelector(`[data-action="scroll-to-hub-module"][data-category="${categoryId}"]`);
-  if (activeBtn) {
-    activeBtn.classList.add('hub-sidebar-active');
   }
 }
 
@@ -452,23 +422,9 @@ export function scrollToMoreModule(categoryId: string): void {
       moduleElement.classList.remove('more-module-highlight');
     }, 2000);
 
-    updateMoreSidebarActiveState(categoryId);
     console.log(`✅ 滚动到 More 模块: ${categoryId}`);
   } else {
     console.warn(`⚠️ 未找到模块元素: ${moduleId}`);
   }
 }
 
-/**
- * 更新 More 侧边栏按钮的选中状态
- */
-function updateMoreSidebarActiveState(categoryId: string): void {
-  document.querySelectorAll('[data-action="scroll-to-more-module"]').forEach(btn => {
-    btn.classList.remove('more-sidebar-active');
-  });
-
-  const activeBtn = document.querySelector(`[data-action="scroll-to-more-module"][data-category="${categoryId}"]`);
-  if (activeBtn) {
-    activeBtn.classList.add('more-sidebar-active');
-  }
-}

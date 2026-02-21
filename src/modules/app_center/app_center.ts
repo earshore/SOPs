@@ -6,6 +6,7 @@
 console.log('🎯 App Center Core Module Loading...');
 import './app_center_style.css';
 import { createModuleLoader, ModuleLoader } from '@/common/utils/ModuleLoader';
+import { APP_CENTER_ROUTES } from '@/common/constants/routes';
 
 /**
  * 模块加载器函数类型
@@ -18,22 +19,21 @@ type ModuleLoaderFn = () => Promise<any>;
 type ModuleMap = Record<string, ModuleLoaderFn>;
 
 // ================= 路由配置表 =================
-// 键名对应 menuConfig.ts 里的 route id
+// 使用路由常量，避免硬编码
 const MODULE_MAP: ModuleMap = {
   // App Center Overview
-  app_center_overview: () => import('./views/overview/index'),
+  [APP_CENTER_ROUTES.OVERVIEW]: () => import('./views/overview/index'),
 
   // Master Analysis 子模块
-  scraper: () => import('./views/master_analysis/scraper/index'),
-  // rawdata: () => import('./views/master_analysis/rawdata/index'), // ⚠️ DEPRECATED v2.0.0 - 功能已迁移到 scraper 模块
-  ai_analysis: () => import('./views/master_analysis/ai_analysis/index'),
-  promptlab: () => import('./views/master_analysis/promptlab/index'),
-  qalab: () => import('./views/master_analysis/qalab/index'),
+  [APP_CENTER_ROUTES.SCRAPER]: () => import('./views/master_analysis/scraper/index'),
+  [APP_CENTER_ROUTES.AI_ANALYSIS]: () => import('./views/master_analysis/ai_analysis/index'),
+  [APP_CENTER_ROUTES.PROMPTLAB]: () => import('./views/master_analysis/promptlab/index'),
+  [APP_CENTER_ROUTES.QALAB]: () => import('./views/master_analysis/qalab/index'),
 
   // Keyword Hunter 子模块
-  kw_input: () => import('./views/keyword_hunter/input/index'),
-  kw_process: () => import('./views/keyword_hunter/process/index'),
-  kw_analysis: () => import('./views/keyword_hunter/analysis/index'),
+  [APP_CENTER_ROUTES.KW_INPUT]: () => import('./views/keyword_hunter/input/index'),
+  [APP_CENTER_ROUTES.KW_PROCESS]: () => import('./views/keyword_hunter/process/index'),
+  [APP_CENTER_ROUTES.KW_ANALYSIS]: () => import('./views/keyword_hunter/analysis/index'),
 };
 
 // ================= 使用通用ModuleLoader =================

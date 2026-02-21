@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 
 <head>
@@ -6,12 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Amazing Amazon Architect</title>
 
-    <!-- 🎯 P0-3: Content Security Policy (XSS防护) -->
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self';
         script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.bootcdn.net;
-        style-src 'self' 'unsafe-inline' https://cdn.bootcdn.net;
-        font-src 'self' https://cdn.bootcdn.net data:;
+        style-src 'self' 'unsafe-inline' https://cdn.bootcdn.net https://fonts.googleapis.com;
+        font-src 'self' https://cdn.bootcdn.net https://fonts.gstatic.com data:;
         img-src 'self' data: https: blob:;
         connect-src 'self' 
             https://llm-gateway.hongecb.store
@@ -40,51 +39,836 @@
         form-action 'self';
     ">
 
-    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%234285F4'/%3E%3Cstop offset='50%25' style='stop-color:%239B72F2'/%3E%3Cstop offset='100%25' style='stop-color:%23D96570'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='12' cy='12' r='1' stroke='url(%23g)'/%3E%3Cpath stroke='url(%23g)' d='M20.2 20.2c2.04-2.03.02-7.36-4.5-11.9-4.54-4.52-9.87-6.54-11.9-4.5-2.04 2.03-.02 7.36 4.5 11.9 4.54 4.52 9.87 6.54 11.9 4.5Z'/%3E%3Cpath stroke='url(%23g)' d='M15.7 15.7c4.52-4.54 6.54-9.87 4.5-11.9-2.03-2.04-7.36-.02-11.9 4.5-4.52 4.54-6.54 9.87-4.5 11.9 2.03 2.04 7.36.02 11.9-4.5Z'/%3E%3C/svg%3E">
 
-    <!-- 🚀 P1-7: 性能优化 - 资源预加载 -->
-    <!-- Preconnect to CDN -->
     <link rel="preconnect" href="https://cdn.bootcdn.net" crossorigin>
     <link rel="dns-prefetch" href="https://cdn.bootcdn.net">
-    
-    <!-- Preconnect to API endpoints -->
     <link rel="preconnect" href="https://api.openai.com" crossorigin>
     <link rel="dns-prefetch" href="https://api.openai.com">
     <link rel="preconnect" href="https://generativelanguage.googleapis.com" crossorigin>
     <link rel="dns-prefetch" href="https://generativelanguage.googleapis.com">
 
-    <!-- Preload critical CSS -->
-    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet" media="print" onload="this.media='all'">
+    <link rel="preload" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.2/webfonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.2/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet"></noscript>
 
-    <style>
+    <!-- Google Fonts: Inter + Space Grotesk -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 
+    <style>
+        :root {
+            /* 🎨 全新色彩系统 - 活泼渐变主色调 */
+            --color-primary: #6366f1;
+            --color-primary-light: #818cf8;
+            --color-primary-dark: #4f46e5;
+            --color-secondary: #ec4899;
+            --color-accent: #f59e0b;
+            --color-success: #10b981;
+            --color-warning: #f59e0b;
+            --color-danger: #ef4444;
+            
+            /* 渐变 */
+            --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+            --gradient-warm: linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #ec4899 100%);
+            --gradient-cool: linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #6366f1 100%);
+            --gradient-aurora: linear-gradient(135deg, #6366f1 0%, #ec4899 25%, #f59e0b 50%, #10b981 75%, #06b6d4 100%);
+            --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%);
+            --gradient-mesh: radial-gradient(at 40% 20%, hsla(245,100%,74%,0.08) 0px, transparent 50%),
+                             radial-gradient(at 80% 0%, hsla(189,100%,56%,0.06) 0px, transparent 50%),
+                             radial-gradient(at 0% 50%, hsla(355,100%,93%,0.08) 0px, transparent 50%),
+                             radial-gradient(at 80% 50%, hsla(340,100%,76%,0.06) 0px, transparent 50%),
+                             radial-gradient(at 0% 100%, hsla(22,100%,77%,0.08) 0px, transparent 50%);
+            
+            /* 中性色 */
+            --color-slate-50: #f8fafc;
+            --color-slate-100: #f1f5f9;
+            --color-slate-200: #e2e8f0;
+            --color-slate-300: #cbd5e1;
+            --color-slate-400: #94a3b8;
+            --color-slate-500: #64748b;
+            --color-slate-600: #475569;
+            --color-slate-700: #334155;
+            --color-slate-800: #1e293b;
+            --color-slate-900: #0f172a;
+            
+            /* 间距 */
+            --spacing-xs: 0.5rem;
+            --spacing-sm: 0.75rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            
+            /* 圆角 */
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            --radius-2xl: 24px;
+            --radius-full: 9999px;
+            
+            /* 阴影系统 */
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.05);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.06), 0 4px 6px -4px rgba(0,0,0,0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.08), 0 8px 10px -6px rgba(0,0,0,0.04);
+            --shadow-2xl: 0 25px 50px -12px rgba(0,0,0,0.15);
+            --shadow-glow-primary: 0 0 20px rgba(99,102,241,0.15), 0 0 40px rgba(99,102,241,0.08);
+            --shadow-glow-pink: 0 0 20px rgba(236,72,153,0.12);
+            --shadow-float: 0 20px 60px -15px rgba(0,0,0,0.1), 0 0 1px rgba(0,0,0,0.05);
+            
+            /* 动画 */
+            --duration-fast: 150ms;
+            --duration-normal: 250ms;
+            --duration-slow: 400ms;
+            --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+            --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+            --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            
+            /* 字体 */
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            --font-display: 'Space Grotesk', 'Inter', sans-serif;
+            
+            /* Z-index */
+            --z-header: 40;
+            --z-mega-menu: 60;
+            --z-modal: 100;
+            --z-toast: 200;
+            --z-loading: 300;
+            
+            /* 主题过渡 */
+            --theme-transition-duration: 0ms;
+        }
+        
+        /* ===== Reset ===== */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { 
+            -webkit-font-smoothing: antialiased; 
+            -moz-osx-font-smoothing: grayscale;
+            scroll-behavior: smooth;
+        }
+        body { 
+            font-family: var(--font-sans); 
+            font-size: 14px; 
+            line-height: 1.6; 
+            color: var(--color-slate-700);
+            background: var(--color-slate-50);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== 全局动画 ===== */
+        .loading-ring { animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .loading-dots::after { content: '...'; animation: dots 1.5s steps(4, end) infinite; }
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+        
+        .pulse-dot { animation: pulse-glow 2s ease-in-out infinite; }
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 currentColor; }
+            50% { opacity: 0.7; box-shadow: 0 0 0 4px transparent; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes blob {
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0px, 0px) scale(1); }
+        }
+
+        /* ===== 滚动条美化 ===== */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { 
+            background: var(--color-slate-300); 
+            border-radius: var(--radius-full);
+            transition: background var(--duration-normal) ease;
+        }
+        ::-webkit-scrollbar-thumb:hover { background: var(--color-slate-400); }
+
+        /* ===== Header ===== */
+        .header {
+            position: relative;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+            z-index: var(--z-header);
+        }
+
+        /* 顶部渐变彩带 - 更活泼 */
+        .header-gradient-line {
+            background: var(--gradient-aurora);
+            background-size: 300% 100%;
+            animation: gradient-shift 8s ease infinite;
+            height: 3px !important;
+        }
+
+        /* Logo 区域 */
+        .logo-button {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 0 16px;
+            height: 64px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+            transition: all var(--duration-normal) var(--ease-smooth);
+            position: relative;
+        }
+        .logo-button:hover {
+            background: linear-gradient(135deg, rgba(99,102,241,0.04) 0%, rgba(236,72,153,0.04) 100%);
+        }
+        .logo-button:hover .logo-icon-wrapper {
+            transform: scale(1.05);
+        }
+
+        .logo-icon-wrapper {
+            position: relative;
+            transition: transform var(--duration-normal) var(--ease-bounce);
+        }
+        .logo-icon-wrapper::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            opacity: 0;
+            filter: blur(8px);
+            transition: opacity var(--duration-normal) ease;
+        }
+        .logo-button:hover .logo-icon-wrapper::before {
+            opacity: 0.2;
+        }
+
+        .logo-text-main {
+            font-family: var(--font-display);
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--color-slate-900);
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+        }
+        .logo-text-gradient {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .logo-subtitle {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--color-slate-400);
+            font-weight: 600;
+            margin-top: 3px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .logo-subtitle::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: var(--gradient-warm);
+            flex-shrink: 0;
+        }
+
+        /* ===== 导航 ===== */
+        .nav-wrapper {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            gap: 2px;
+        }
+
+        .nav-group {
+            height: 100%;
+            position: static;
+        }
+
+        .nav-trigger {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 20px;
+            height: 100%;
+            border: none;
+            background: transparent;
+            font-size: 13.5px;
+            font-weight: 600;
+            color: var(--color-slate-500);
+            cursor: pointer;
+            position: relative;
+            transition: all var(--duration-normal) var(--ease-smooth);
+            font-family: var(--font-sans);
+        }
+        .nav-trigger::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2.5px;
+            border-radius: var(--radius-full);
+            background: var(--gradient-primary);
+            transition: width var(--duration-normal) var(--ease-smooth);
+        }
+        .nav-trigger .nav-icon {
+            font-size: 11px;
+            opacity: 0.5;
+            transition: all var(--duration-normal) var(--ease-smooth);
+        }
+        .nav-trigger .nav-chevron {
+            font-size: 9px;
+            opacity: 0.35;
+            transition: all var(--duration-normal) var(--ease-smooth);
+        }
+
+        .nav-group:hover .nav-trigger,
+        .nav-trigger:hover {
+            color: var(--color-primary);
+        }
+        .nav-group:hover .nav-trigger::after,
+        .nav-trigger:hover::after {
+            width: calc(100% - 32px);
+        }
+        .nav-group:hover .nav-trigger .nav-icon,
+        .nav-trigger:hover .nav-icon {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        .nav-group:hover .nav-trigger .nav-chevron,
+        .nav-trigger:hover .nav-chevron {
+            opacity: 0.7;
+            transform: rotate(180deg);
+        }
+        
+        /* 确保非 hover 状态下样式被清除 */
+        .nav-trigger:not(:hover) {
+            color: var(--color-slate-500);
+        }
+        .nav-group:not(:hover) .nav-trigger {
+            color: var(--color-slate-500);
+        }
+
+        /* ===== Mega Menu ===== */
+        .mega-menu {
+            position: fixed;
+            top: 67px;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+            box-shadow: var(--shadow-2xl), 0 1px 0 rgba(255,255,255,0.5) inset;
+            z-index: var(--z-mega-menu);
+            
+            /* 隐藏状态 */
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-4px);
+            transition: all var(--duration-normal) var(--ease-smooth);
+        }
+        .nav-group:hover .mega-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .mega-menu-inner {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 32px 40px;
+        }
+
+        .mega-menu-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .mega-menu-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+        }
+        .mega-menu-icon--sky { background: linear-gradient(135deg, #e0f2fe, #bae6fd); color: #0284c7; }
+        .mega-menu-icon--purple { background: linear-gradient(135deg, #f3e8ff, #e9d5ff); color: #9333ea; }
+        .mega-menu-icon--orange { background: linear-gradient(135deg, #fff7ed, #fed7aa); color: #ea580c; }
+        .mega-menu-icon--lime { background: linear-gradient(135deg, #f0fdf4, #bbf7d0); color: #16a34a; }
+
+        .mega-menu-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--color-slate-400);
+            font-family: var(--font-display);
+        }
+
+        .mega-menu-grid {
+            display: grid;
+            gap: 12px;
+        }
+        .mega-menu-grid--5 { grid-template-columns: repeat(5, 1fr); }
+        .mega-menu-grid--4 { grid-template-columns: repeat(4, 1fr); }
+        .mega-menu-grid--3 { grid-template-columns: repeat(3, 1fr); }
+
+        /* Skeleton 加载态 */
+        .skeleton {
+            border-radius: var(--radius-lg);
+            background: linear-gradient(90deg, 
+                rgba(241,245,249,0.8) 25%, 
+                rgba(226,232,240,0.4) 50%, 
+                rgba(241,245,249,0.8) 75%
+            );
+            background-size: 200% 100%;
+            animation: shimmer 1.8s ease-in-out infinite;
+        }
+
+        /* ===== 更多菜单布局 ===== */
+        .more-menu-layout {
+            display: grid;
+            grid-template-columns: 1fr 280px;
+            gap: 32px;
+        }
+        .more-menu-sidebar {
+            border-left: 1px solid var(--color-slate-100);
+            padding-left: 32px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .quick-access-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--color-slate-400);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .quick-access-title i {
+            color: var(--color-accent);
+            font-size: 10px;
+        }
+
+        .quick-access-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .quick-access-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--color-slate-500);
+            cursor: pointer;
+            border-radius: var(--radius-md);
+            transition: all var(--duration-normal) var(--ease-smooth);
+            font-family: var(--font-sans);
+        }
+        .quick-access-item:hover {
+            background: linear-gradient(135deg, rgba(99,102,241,0.06) 0%, rgba(139,92,246,0.04) 100%);
+            color: var(--color-primary);
+        }
+        .quick-access-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: var(--radius-sm);
+            background: var(--color-slate-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-slate-400);
+            font-size: 12px;
+            transition: all var(--duration-normal) var(--ease-smooth);
+        }
+        .quick-access-item:hover .quick-access-icon {
+            background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+            color: var(--color-primary);
+            transform: scale(1.05);
+        }
+
+        /* Tip Card */
+        .tip-card {
+            margin-top: 24px;
+            padding: 16px;
+            background: linear-gradient(135deg, rgba(99,102,241,0.06) 0%, rgba(236,72,153,0.04) 100%);
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(99,102,241,0.1);
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .tip-card-icon {
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            background: linear-gradient(135deg, #c7d2fe, #a5b4fc);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .tip-card-icon i {
+            font-size: 9px;
+            color: var(--color-primary-dark);
+        }
+        .tip-card-text {
+            font-size: 11.5px;
+            color: var(--color-primary);
+            opacity: 0.8;
+            line-height: 1.6;
+            font-weight: 500;
+        }
+
+        /* ===== Model Status ===== */
+        .model-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            background: var(--color-slate-50);
+            border: 1px solid var(--color-slate-200);
+            border-radius: var(--radius-full);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--color-slate-500);
+            cursor: default;
+            transition: all var(--duration-normal) var(--ease-smooth);
+        }
+        .model-status:hover {
+            border-color: var(--color-slate-300);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .status-dot.status-pending {
+            background: var(--color-slate-300);
+            animation: pulse-glow 2s ease-in-out infinite;
+            color: var(--color-slate-300);
+        }
+        .status-dot.status-active {
+            background: var(--color-success);
+            box-shadow: 0 0 6px rgba(16,185,129,0.4);
+        }
+
+        /* ===== Progress Bar ===== */
+        .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2.5px;
+            background: rgba(241,245,249,0.5);
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-primary);
+            border-radius: 0 var(--radius-full) var(--radius-full) 0;
+            position: relative;
+            transition: width var(--duration-normal) ease;
+        }
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: shimmer 1.5s ease-in-out infinite;
+            background-size: 200% 100%;
+        }
+
+        /* ===== Main Layout ===== */
+        .app-layout {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border-right: 1px solid rgba(226, 232, 240, 0.5);
+            display: flex;
+            flex-direction: column;
+            transition: all var(--duration-slow) var(--ease-smooth);
+            margin-left: -260px;
+        }
+        .sidebar.visible {
+            margin-left: 0;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            position: relative;
+            scroll-behavior: smooth;
+            padding: 32px;
+        }
+        .main-content::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background: var(--gradient-mesh);
+            z-index: 0;
+        }
+
+        /* ===== Toast Container ===== */
+        .toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: var(--z-toast);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            pointer-events: none;
+        }
+
+        /* ===== Global Loading ===== */
+        .global-loading {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.15);
+            backdrop-filter: blur(8px);
+            z-index: var(--z-loading);
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .global-loading.active {
+            display: flex;
+        }
+
+        .loading-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-float);
+            padding: 40px 48px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            min-width: 280px;
+            border: 1px solid rgba(255,255,255,0.8);
+            animation: scaleIn var(--duration-slow) var(--ease-spring);
+        }
+
+        .loading-spinner {
+            position: relative;
+            width: 56px;
+            height: 56px;
+        }
+        .loading-spinner-track {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 3px solid var(--color-slate-100);
+        }
+        .loading-spinner-fill {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: var(--color-primary);
+            border-right-color: var(--color-primary-light);
+            animation: spin 1s linear infinite;
+        }
+        .loading-spinner-dot {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .loading-spinner-dot::before {
+            content: '';
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            opacity: 0.25;
+            animation: pulse-glow 1.5s ease-in-out infinite;
+        }
+
+        .loading-text {
+            text-align: center;
+        }
+        .loading-text-main {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--color-slate-700);
+        }
+        .loading-text-sub {
+            font-size: 12px;
+            color: var(--color-slate-400);
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+        }
+
+        /* ===== Utility ===== */
+        .hidden { display: none !important; }
+        .sr-only { 
+            position: absolute; width: 1px; height: 1px; 
+            padding: 0; margin: -1px; overflow: hidden; 
+            clip: rect(0,0,0,0); white-space: nowrap; border: 0; 
+        }
+
+        /* 主题过渡 */
+        * {
+            transition: 
+                background-color var(--theme-transition-duration) var(--ease-smooth),
+                border-color var(--theme-transition-duration) var(--ease-smooth),
+                color var(--theme-transition-duration) var(--ease-smooth);
+        }
+        
+        /* 排除动画元素，避免transition干扰animation */
+        .logo-icon-wrapper svg,
+        [style*="animation"] {
+            transition: none !important;
+        }
+
+        /* ===== 装饰性背景 Blobs ===== */
+        .bg-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .bg-blob--1 {
+            width: 400px;
+            height: 400px;
+            background: rgba(99, 102, 241, 0.08);
+            top: -100px;
+            right: -100px;
+            animation: blob 12s ease-in-out infinite;
+        }
+        .bg-blob--2 {
+            width: 350px;
+            height: 350px;
+            background: rgba(236, 72, 153, 0.06);
+            bottom: -80px;
+            left: -80px;
+            animation: blob 15s ease-in-out infinite reverse;
+        }
+        .bg-blob--3 {
+            width: 300px;
+            height: 300px;
+            background: rgba(6, 182, 212, 0.05);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: blob 18s ease-in-out infinite;
+        }
     </style>
+
+    <link rel="stylesheet" href="/src/css/foundation/variables.css">
+    <link rel="stylesheet" href="/src/css/foundation/reset.css">
 </head>
 
-<body class="bg-slate-50 h-screen flex flex-col overflow-hidden antialiased">
+<body>
 
     <!-- ========== Header ========== -->
-    <header class="bg-white border-b border-slate-200/80 z-[100] relative">
+    <header class="header">
         <!-- 顶部彩虹渐变线 -->
-        <div class="absolute top-0 left-0 right-0 h-[2px] header-gradient-line opacity-60"></div>
+        <div class="header-gradient-line" style="position:absolute;top:0;left:0;right:0;height:3px;"></div>
 
-        <div class="px-6 h-16 flex items-center justify-between">
+        <div style="padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;">
 
             <!-- ===== Logo ===== -->
-            <button data-action="switch-tab" data-tab="home"
-                class="px-4 h-16 flex items-center gap-3.5 group hover:bg-slate-50/80 transition-all duration-200 cursor-pointer rounded-b-lg -ml-2">
-                <!-- Logo Icon -->
-                <div class="relative logo-glow">
+            <button data-action="switch-tab" data-tab="home" class="logo-button" style="margin-left:-8px;">
+                <div class="logo-icon-wrapper">
                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        class="lucide lucide-atom w-8 h-8 animate-[spin_12s_linear_infinite] group-hover:animate-[spin_3s_linear_infinite] transition-all"
+                        style="animation: spin 12s linear infinite; will-change: transform; fill: none !important;"
                         aria-hidden="true">
                         <defs>
                             <linearGradient id="gemini-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" style="stop-color:#4285F4;stop-opacity:1" />
-                                <stop offset="50%" style="stop-color:#9B72F2;stop-opacity:1" />
-                                <stop offset="100%" style="stop-color:#D96570;stop-opacity:1" />
+                                <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
+                                <stop offset="50%" style="stop-color:#a855f7;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#ec4899;stop-opacity:1" />
                             </linearGradient>
                         </defs>
                         <circle cx="12" cy="12" r="1" stroke="url(#gemini-gradient)"></circle>
@@ -97,184 +881,155 @@
                     </svg>
                 </div>
 
-                <!-- Logo Text -->
-                <div class="flex flex-col">
-                    <span class="text-base font-display font-bold tracking-tight text-slate-900 leading-none">
+                <div style="display:flex;flex-direction:column;">
+                    <span class="logo-text-main">
                         Amazing Amazon
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600">
-                            Architect
-                        </span>
+                        <span class="logo-text-gradient">Architect</span>
                     </span>
-                    <span class="text-[9px] uppercase tracking-[0.2em] text-slate-400 font-semibold mt-0.5">
-                        Prompt by Prompt
-                    </span>
+                    <span class="logo-subtitle">Prompt by Prompt</span>
                 </div>
             </button>
 
             <!-- ===== Navigation ===== -->
-            <nav class="flex items-center h-full">
+            <nav class="nav-wrapper">
 
                 <!-- SOPs 流程中心 -->
-                <div class="group h-full static">
-                    <button id="nav-sops"
-                        class="nav-item px-5 h-full text-sm font-semibold text-slate-500 group-hover:text-blue-600 border-b-2 border-transparent group-hover:border-blue-600 transition-all duration-200 flex items-center gap-2">
-                        <i class="fas fa-project-diagram text-xs opacity-60 group-hover:opacity-100 transition-opacity"></i>
+                <div class="nav-group">
+                    <button id="nav-sops" class="nav-trigger">
+                        <i class="fas fa-project-diagram nav-icon"></i>
                         SOPs 流程中心
-                        <i class="fas fa-chevron-down text-[10px] opacity-40 group-hover:opacity-70 group-hover:rotate-180 transition-all duration-300"></i>
+                        <i class="fas fa-chevron-down nav-chevron"></i>
                     </button>
 
-                    <div class="mega-menu-panel absolute top-16 left-0 w-full bg-white/98 backdrop-blur-xl border-b border-slate-200/80 shadow-xl shadow-slate-900/[0.06]
-                                scale-y-[0.97] opacity-0 invisible translate-y-1
-                                group-hover:scale-y-100 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0
-                                z-[60]">
-                        <div class="max-w-screen-xl mx-auto px-8 py-8">
-                            <div class="flex items-center gap-2.5 mb-5">
-                                <div class="w-6 h-6 rounded-md bg-blue-50 flex items-center justify-center">
-                                    <i class="fas fa-layer-group text-blue-400 text-[10px]"></i>
+                    <div class="mega-menu">
+                        <div class="mega-menu-inner">
+                            <div class="mega-menu-header">
+                                <div class="mega-menu-icon mega-menu-icon--sky">
+                                    <i class="fas fa-layer-group"></i>
                                 </div>
-                                <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">核心 SOP 体系</h3>
+                                <h3 class="mega-menu-title">核心 SOP 体系</h3>
                             </div>
-                            <div id="sops-mega-menu-content" class="grid grid-cols-5 gap-4">
-                                <div class="animate-pulse bg-slate-100/80 h-24 rounded-xl"></div>
-                                <div class="animate-pulse bg-slate-100/80 h-24 rounded-xl" style="animation-delay: 0.1s;"></div>
-                                <div class="animate-pulse bg-slate-100/80 h-24 rounded-xl" style="animation-delay: 0.2s;"></div>
-                                <div class="animate-pulse bg-slate-100/80 h-24 rounded-xl" style="animation-delay: 0.3s;"></div>
-                                <div class="animate-pulse bg-slate-100/80 h-24 rounded-xl" style="animation-delay: 0.4s;"></div>
+                            <div id="sops-mega-menu-content" class="mega-menu-grid mega-menu-grid--5">
+                                <div class="skeleton" style="height:96px;"></div>
+                                <div class="skeleton" style="height:96px;animation-delay:0.1s;"></div>
+                                <div class="skeleton" style="height:96px;animation-delay:0.2s;"></div>
+                                <div class="skeleton" style="height:96px;animation-delay:0.3s;"></div>
+                                <div class="skeleton" style="height:96px;animation-delay:0.4s;"></div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- 应用中心 -->
-                <div class="group h-full static">
-                    <button id="nav-apps"
-                        class="nav-item px-5 h-full text-sm font-semibold text-slate-500 group-hover:text-blue-600 border-b-2 border-transparent group-hover:border-blue-600 transition-all duration-200 flex items-center gap-2">
-                        <i class="fas fa-th-large text-xs opacity-60 group-hover:opacity-100 transition-opacity"></i>
+                <div class="nav-group">
+                    <button id="nav-apps" class="nav-trigger">
+                        <i class="fas fa-th-large nav-icon"></i>
                         应用中心
-                        <i class="fas fa-chevron-down text-[10px] opacity-40 group-hover:opacity-70 group-hover:rotate-180 transition-all duration-300"></i>
+                        <i class="fas fa-chevron-down nav-chevron"></i>
                     </button>
 
-                    <div class="mega-menu-panel absolute top-16 left-0 w-full bg-white/98 backdrop-blur-xl border-b border-slate-200/80 shadow-xl shadow-slate-900/[0.06]
-                                scale-y-[0.97] opacity-0 invisible translate-y-1
-                                group-hover:scale-y-100 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0
-                                z-[60]">
-                        <div class="max-w-screen-xl mx-auto px-8 py-8">
-                            <div class="grid grid-cols-12 gap-8">
-                                <div class="col-span-12">
-                                    <div class="flex items-center gap-2.5 mb-5">
-                                        <div class="w-6 h-6 rounded-md bg-indigo-50 flex items-center justify-center">
-                                            <i class="fas fa-rocket text-indigo-400 text-[10px]"></i>
-                                        </div>
-                                        <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">核心应用模块</h3>
-                                    </div>
-                                    <div id="mega-menu-content" class="grid grid-cols-4 gap-4">
-                                        <div class="animate-pulse bg-slate-100/80 h-32 rounded-xl"></div>
-                                        <div class="animate-pulse bg-slate-100/80 h-32 rounded-xl" style="animation-delay: 0.1s;"></div>
-                                        <div class="animate-pulse bg-slate-100/80 h-32 rounded-xl" style="animation-delay: 0.2s;"></div>
-                                    </div>
+                    <div class="mega-menu">
+                        <div class="mega-menu-inner">
+                            <div class="mega-menu-header">
+                                <div class="mega-menu-icon mega-menu-icon--purple">
+                                    <i class="fas fa-rocket"></i>
                                 </div>
+                                <h3 class="mega-menu-title">核心应用模块</h3>
+                            </div>
+                            <div id="mega-menu-content" class="mega-menu-grid mega-menu-grid--4">
+                                <div class="skeleton" style="height:128px;"></div>
+                                <div class="skeleton" style="height:128px;animation-delay:0.1s;"></div>
+                                <div class="skeleton" style="height:128px;animation-delay:0.2s;"></div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Amazon 智库 -->
-                <div class="group h-full static">
-                    <button id="nav-hub"
-                        class="nav-item px-5 h-full text-sm font-semibold text-slate-500 group-hover:text-blue-600 border-b-2 border-transparent group-hover:border-blue-600 transition-all duration-200 flex items-center gap-2">
-                        <i class="fas fa-book-open text-xs opacity-60 group-hover:opacity-100 transition-opacity"></i>
+                <div class="nav-group">
+                    <button id="nav-hub" class="nav-trigger">
+                        <i class="fas fa-book-open nav-icon"></i>
                         Amazon 智库
-                        <i class="fas fa-chevron-down text-[10px] opacity-40 group-hover:opacity-70 group-hover:rotate-180 transition-all duration-300"></i>
+                        <i class="fas fa-chevron-down nav-chevron"></i>
                     </button>
 
-                    <div class="mega-menu-panel absolute top-16 left-0 w-full bg-white/98 backdrop-blur-xl border-b border-slate-200/80 shadow-xl shadow-slate-900/[0.06]
-                                scale-y-[0.97] opacity-0 invisible translate-y-1
-                                group-hover:scale-y-100 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0
-                                z-[60]">
-                        <div class="max-w-screen-xl mx-auto px-8 py-8">
-                            <div class="flex items-center gap-2.5 mb-5">
-                                <div class="w-6 h-6 rounded-md bg-amber-50 flex items-center justify-center">
-                                    <i class="fas fa-lightbulb text-amber-400 text-[10px]"></i>
+                    <div class="mega-menu">
+                        <div class="mega-menu-inner">
+                            <div class="mega-menu-header">
+                                <div class="mega-menu-icon mega-menu-icon--orange">
+                                    <i class="fas fa-lightbulb"></i>
                                 </div>
-                                <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Amazon 智库体系</h3>
+                                <h3 class="mega-menu-title">Amazon 智库体系</h3>
                             </div>
-                            <div id="hub-mega-menu-content" class="grid grid-cols-4 gap-4">
-                                <div class="animate-pulse bg-slate-100/80 h-24 rounded-xl"></div>
-                                <div class="animate-pulse bg-slate-100/80 h-24 rounded-xl" style="animation-delay: 0.1s;"></div>
-                                <div class="animate-pulse bg-slate-100/80 h-24 rounded-xl" style="animation-delay: 0.2s;"></div>
-                                <div class="animate-pulse bg-slate-100/80 h-24 rounded-xl" style="animation-delay: 0.3s;"></div>
+                            <div id="hub-mega-menu-content" class="mega-menu-grid mega-menu-grid--4">
+                                <div class="skeleton" style="height:96px;"></div>
+                                <div class="skeleton" style="height:96px;animation-delay:0.1s;"></div>
+                                <div class="skeleton" style="height:96px;animation-delay:0.2s;"></div>
+                                <div class="skeleton" style="height:96px;animation-delay:0.3s;"></div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- 更多 -->
-                <div class="group h-full static">
-                    <button id="nav-more"
-                        class="nav-item px-5 h-full text-sm font-semibold text-slate-500 group-hover:text-blue-600 border-b-2 border-transparent group-hover:border-blue-600 transition-all duration-200 flex items-center gap-2">
-                        <i class="fas fa-ellipsis-h text-xs opacity-60 group-hover:opacity-100 transition-opacity"></i>
+                <div class="nav-group">
+                    <button id="nav-more" class="nav-trigger">
+                        <i class="fas fa-ellipsis-h nav-icon"></i>
                         更多
-                        <i class="fas fa-chevron-down text-[10px] opacity-40 group-hover:opacity-70 group-hover:rotate-180 transition-all duration-300"></i>
+                        <i class="fas fa-chevron-down nav-chevron"></i>
                     </button>
 
-                    <div class="mega-menu-panel absolute top-16 left-0 w-full bg-white/98 backdrop-blur-xl border-b border-slate-200/80 shadow-xl shadow-slate-900/[0.06]
-                                scale-y-[0.97] opacity-0 invisible translate-y-1
-                                group-hover:scale-y-100 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0
-                                z-[60]">
-                        <div class="max-w-screen-xl mx-auto px-8 py-8">
-                            <div class="grid grid-cols-12 gap-8">
+                    <div class="mega-menu">
+                        <div class="mega-menu-inner">
+                            <div class="more-menu-layout">
                                 <!-- Main Content -->
-                                <div class="col-span-9">
-                                    <div class="flex items-center gap-2.5 mb-5">
-                                        <div class="w-6 h-6 rounded-md bg-emerald-50 flex items-center justify-center">
-                                            <i class="fas fa-compass text-emerald-400 text-[10px]"></i>
+                                <div>
+                                    <div class="mega-menu-header">
+                                        <div class="mega-menu-icon mega-menu-icon--lime">
+                                            <i class="fas fa-compass"></i>
                                         </div>
-                                        <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">探索模块</h3>
+                                        <h3 class="mega-menu-title">探索模块</h3>
                                     </div>
-                                    <div id="more-menu-content" class="grid grid-cols-3 gap-4">
-                                        <div class="animate-pulse bg-slate-100/80 h-32 rounded-xl"></div>
+                                    <div id="more-menu-content" class="mega-menu-grid mega-menu-grid--3">
+                                        <div class="skeleton" style="height:128px;"></div>
                                     </div>
                                 </div>
 
                                 <!-- Quick Access Sidebar -->
-                                <div class="col-span-3 border-l border-slate-100 pl-8 flex flex-col justify-between">
+                                <div class="more-menu-sidebar">
                                     <div>
-                                        <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                                            <i class="fas fa-bolt text-amber-400 text-[9px]"></i>
+                                        <h3 class="quick-access-title">
+                                            <i class="fas fa-bolt"></i>
                                             快速访问
                                         </h3>
-                                        <ul class="space-y-2">
+                                        <ul class="quick-access-list">
                                             <li>
-                                                <button data-action="openSettings"
-                                                    class="flex items-center gap-3 text-slate-500 hover:text-blue-600 text-sm transition-all w-full text-left group/item px-2 py-2 rounded-lg hover:bg-blue-50/50">
-                                                    <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 group-hover/item:bg-blue-100 group-hover/item:text-blue-600 transition-all">
-                                                        <i class="fas fa-cog text-xs"></i>
+                                                <button data-action="openSettings" class="quick-access-item">
+                                                    <div class="quick-access-icon">
+                                                        <i class="fas fa-cog"></i>
                                                     </div>
-                                                    <span class="font-medium">全局设置</span>
+                                                    <span>全局设置</span>
                                                 </button>
                                             </li>
                                             <li>
-                                                <button data-action="open-user-guide"
-                                                    class="flex items-center gap-3 text-slate-500 hover:text-blue-600 text-sm transition-all w-full text-left group/item px-2 py-2 rounded-lg hover:bg-blue-50/50">
-                                                    <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 group-hover/item:bg-blue-100 group-hover/item:text-blue-600 transition-all">
-                                                        <i class="fas fa-book text-xs"></i>
+                                                <button data-action="open-user-guide" class="quick-access-item">
+                                                    <div class="quick-access-icon">
+                                                        <i class="fas fa-book"></i>
                                                     </div>
-                                                    <span class="font-medium">使用指南</span>
+                                                    <span>使用指南</span>
                                                 </button>
                                             </li>
                                         </ul>
                                     </div>
 
                                     <!-- Tip Card -->
-                                    <div class="mt-6 p-3.5 bg-gradient-to-br from-blue-50 to-indigo-50/50 rounded-xl border border-blue-100/60">
-                                        <div class="flex items-start gap-2">
-                                            <div class="w-5 h-5 rounded-md bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                                <i class="fas fa-lightbulb text-blue-500 text-[9px]"></i>
-                                            </div>
-                                            <p class="text-[11px] text-blue-600/80 leading-relaxed font-medium">
-                                                这里包含系统设置和使用指南等实用功能。
-                                            </p>
+                                    <div class="tip-card">
+                                        <div class="tip-card-icon">
+                                            <i class="fas fa-lightbulb"></i>
                                         </div>
+                                        <p class="tip-card-text">
+                                            这里包含系统设置和使用指南等实用功能。
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -284,29 +1039,28 @@
             </nav>
 
             <!-- ===== Right Actions ===== -->
-            <div class="flex items-center gap-3 w-64 justify-end">
+            <div style="display:flex;align-items:center;gap:12px;min-width:200px;justify-content:flex-end;">
                 <!-- Model Status -->
-                <div id="model-status"
-                    class="flex items-center gap-2.5 px-3.5 py-2 bg-slate-50 rounded-xl text-xs border border-slate-200/80 hover:bg-slate-100 transition-colors cursor-default">
+                <div id="model-status" class="model-status">
                     <span class="status-dot status-pending pulse-dot"></span>
-                    <span class="text-slate-500 font-semibold">未配置模型</span>
+                    <span>未配置模型</span>
                 </div>
             </div>
         </div>
 
         <!-- Global Progress Bar -->
-        <div id="global-progress" class="absolute bottom-0 left-0 w-full h-[2px] bg-slate-100 hidden">
-            <div id="progress-fill"
-                class="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500 transition-all duration-300 relative"
-                style="width: 0%">
-                <!-- Shimmer on progress -->
-                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse"></div>
-            </div>
+        <div id="global-progress" class="progress-bar hidden">
+            <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
         </div>
     </header>
 
     <!-- ========== Main Layout ========== -->
     <div class="flex flex-1 overflow-hidden relative">
+        <!-- 装饰性背景 Blobs -->
+        <div class="bg-blob bg-blob--1"></div>
+        <div class="bg-blob bg-blob--2"></div>
+        <div class="bg-blob bg-blob--3"></div>
+
         <!-- Dynamic Sidebar -->
         <aside id="dynamic-sidebar"
             class="w-64 bg-white border-r border-slate-200/80 flex flex-col transition-all duration-300 -ml-64 hidden">
@@ -320,7 +1074,7 @@
     </div>
 
     <!-- ========== Toast Container ========== -->
-    <div id="toast-container" class="fixed bottom-6 right-6 z-[9999] space-y-3 pointer-events-none"></div>
+    <div id="toast-container" class="toast-container"></div>
 
     <!-- ========== Modal Container ========== -->
     <div id="modal-container"></div>
@@ -329,20 +1083,17 @@
     <div id="user-guide-container"></div>
 
     <!-- ========== Global Loading Overlay ========== -->
-    <div id="global-loading"
-        class="hidden fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-[10000] items-center justify-center">
-        <div class="bg-white rounded-2xl shadow-2xl shadow-slate-900/10 p-8 flex flex-col items-center gap-5 min-w-[280px] border border-slate-100">
+    <div id="global-loading" class="global-loading">
+        <div class="loading-card">
             <!-- Spinner -->
-            <div class="relative">
-                <div class="w-14 h-14 rounded-full border-[3px] border-slate-100"></div>
-                <div class="w-14 h-14 rounded-full border-[3px] border-transparent border-t-blue-500 border-r-indigo-500 loading-ring absolute inset-0"></div>
-                <div class="absolute inset-0 flex items-center justify-center">
-                    <div class="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 opacity-20 animate-ping"></div>
-                </div>
+            <div class="loading-spinner">
+                <div class="loading-spinner-track"></div>
+                <div class="loading-spinner-fill"></div>
+                <div class="loading-spinner-dot"></div>
             </div>
-            <div class="flex flex-col items-center gap-1">
-                <p data-loading-message class="text-sm text-slate-700 font-semibold">加载中</p>
-                <div class="flex items-center gap-0.5 text-xs text-slate-400">
+            <div class="loading-text">
+                <p data-loading-message class="loading-text-main">加载中</p>
+                <div class="loading-text-sub">
                     <span>请稍候</span>
                     <span class="loading-dots"></span>
                 </div>

@@ -5,6 +5,7 @@
 // ================================================================
 
 import type { MenuConfig } from '../../types/config';
+import type { IConfigService } from '../../types/services';
 import { validateConfig } from './schemas/configSchema';
 import { loadRouteConfig } from './loaders/routeConfigLoader';
 
@@ -123,8 +124,9 @@ export type ConfigChangeListener = (key: string, newValue: unknown, oldValue: un
 
 /**
  * 配置中心单例类
+ * 实现 IConfigService 接口
  */
-export class ConfigCenter {
+export class ConfigCenter implements IConfigService {
   private static instance: ConfigCenter;
   private config: AppConfig;
   private listeners: Map<string, Set<ConfigChangeListener>>;
@@ -334,8 +336,9 @@ export class ConfigCenter {
 
   /**
    * 获取指定路径的配置值
+   * 实现 IConfigService.get
    */
-  public get<T = unknown>(path: string): T | undefined {
+  public get<T = unknown>(path: string, defaultValue?: T): T {
     const keys = path.split('.');
     let value: unknown = this.config;
     
@@ -343,11 +346,11 @@ export class ConfigCenter {
       if (value && typeof value === 'object' && key in value) {
         value = (value as Record<string, unknown>)[key];
       } else {
-        return undefined;
+        return defaultValue as T;
       }
     }
     
-    return value as T;
+    return (value !== undefined ? value : defaultValue) as T;
   }
 
   /**
@@ -467,6 +470,42 @@ export class ConfigCenter {
    */
   public isTest(): boolean {
     return this.config.environment === 'test';
+  }
+
+  /**
+   * 检查配置键是否存在
+   * 实现 IConfigService.has
+   */
+  public has(path: string): boolean {
+    const keys = path.split('.');
+    let value: unknown = this.config;
+    
+    for (const key of keys) {
+      if (value && typeof value === 'object' && key in value) {
+        value = (value as Record<string, unknown>)[key];
+      } else {
+        return false;
+      }
+    }
+    
+    return value !== undefined;
+  }
+
+  /**
+   * 获取所有配置
+   * 实现 IConfigService.getAll
+   */
+  public getAll(): Record<string, any> {
+    return { ...this.config };
+  }
+
+  /**
+   * 重置配置到默认值
+   * 实现 IConfigService.reset
+   */
+  public reset(): void {
+    this.config = this.loadConfig();
+    console.log('[ConfigCenter] 配置已重置');
   }
 }
 

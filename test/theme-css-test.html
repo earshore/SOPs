@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>主题与CSS加载测试</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            padding: 2rem;
+            background: #f8fafc;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        h2 {
+            margin-top: 0;
+            color: #1e293b;
+            font-size: 1.25rem;
+        }
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin: 0.25rem;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #475569;
+        }
+        .btn-secondary:hover {
+            background: #cbd5e1;
+        }
+        .status {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+        .status-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+        .status-error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .log {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 1rem;
+        }
+        .log-entry {
+            margin: 0.25rem 0;
+        }
+        .log-success { color: #86efac; }
+        .log-error { color: #fca5a5; }
+        .log-info { color: #93c5fd; }
+        .theme-preview {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            margin: 0.25rem;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .theme-preview:hover {
+            transform: scale(1.1);
+            border-color: #3b82f6;
+        }
+        .theme-preview.active {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 CSS架构优化 - 功能测试</h1>
+        
+        <!-- 主题切换测试 -->
+        <div class="section">
+            <h2>阶段4: 主题切换系统</h2>
+            <p>点击下方色块切换主题，观察页面颜色过渡效果</p>
+            <div id="theme-buttons"></div>
+            <div>
+                <strong>当前主题:</strong>
+                <span id="current-theme">未知</span>
+                <span id="theme-status" class="status status-pending">未初始化</span>
+            </div>
+        </div>
+        
+        <!-- 模块CSS加载测试 -->
+        <div class="section">
+            <h2>阶段5: 模块CSS懒加载</h2>
+            <p>点击按钮加载不同模块的CSS文件</p>
+            <div>
+                <button class="btn btn-primary" onclick="testLoadModule('app_center')">加载 app_center</button>
+                <button class="btn btn-primary" onclick="testLoadModule('keyword_hunter')">加载 keyword_hunter</button>
+                <button class="btn btn-primary" onclick="testLoadModule('sops')">加载 sops</button>
+                <button class="btn btn-primary" onclick="testLoadModule('master_analysis')">加载 master_analysis</button>
+                <button class="btn btn-secondary" onclick="testPreloadHighPriority()">预加载高优先级</button>
+            </div>
+            <div>
+                <strong>加载统计:</strong>
+                <span id="css-stats">-</span>
+            </div>
+        </div>
+        
+        <!-- CSS性能监控 -->
+        <div class="section">
+            <h2>CSS性能监控</h2>
+            <div>
+                <button class="btn btn-primary" onclick="showCSSPerformance()">查看性能报告</button>
+                <button class="btn btn-secondary" onclick="clearLog()">清空日志</button>
+            </div>
+        </div>
+        
+        <!-- 日志输出 -->
+        <div class="section">
+            <h2>操作日志</h2>
+            <div id="log" class="log"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        // 动态导入主题管理器和CSS加载器
+        let ThemeManager, moduleCssLoader, cssLoader;
+        
+        // 日志函数
+        function log(message, type = 'info') {
+            const logEl = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logEl.appendChild(entry);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+        
+        window.clearLog = function() {
+            document.getElementById('log').innerHTML = '';
+            log('日志已清空', 'info');
+        };
+        
+        // 初始化
+        async function init() {
+            try {
+                log('正在初始化测试环境...', 'info');
+                
+                // 导入模块
+                const themeModule = await import('/src/common/config/themeConfig.ts');
+                ThemeManager = themeModule.ThemeManager;
+                
+                const cssLoaderModule = await import('/src/common/utils/cssLoader.ts');
+                cssLoader = cssLoaderModule.cssLoader;
+                
+                const moduleCssLoaderModule = await import('/src/common/utils/moduleCssLoader.ts');
+                moduleCssLoader = moduleCssLoaderModule.moduleCssLoader;
+                
+                log('✓ 模块导入成功', 'success');
+                
+                // 渲染主题按钮
+                renderThemeButtons();
+                
+                // 更新当前主题显示
+                updateCurrentTheme();
+                
+                // 更新CSS统计
+                updateCSSStats();
+                
+                log('✓ 测试环境初始化完成', 'success');
+                
+            } catch (error) {
+                log(`✗ 初始化失败: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+        
+        // 渲染主题按钮
+        function renderThemeButtons() {
+            const themes = ThemeManager.getAllThemes();
+            const container = document.getElementById('theme-buttons');
+            
+            const colorMap = {
+                blue: '#3b82f6',
+                cyan: '#06b6d4',
+                orange: '#f97316',
+                green: '#22c55e',
+                purple: '#a855f7',
+                rose: '#f43f5e'
+            };
+            
+            themes.forEach(theme => {
+                const preview = document.createElement('div');
+                preview.className = 'theme-preview';
+                preview.style.background = colorMap[theme.colorScheme] || '#3b82f6';
+                preview.title = theme.name;
+                preview.onclick = () => switchTheme(theme.id);
+                container.appendChild(preview);
+            });
+        }
+        
+        // 切换主题
+        window.switchTheme = async function(themeId) {
+            try {
+                log(`正在切换主题: ${themeId}`, 'info');
+                ThemeManager.applyTheme(themeId);
+                updateCurrentTheme();
+                log(`✓ 主题切换成功`, 'success');
+                
+                // 更新按钮状态
+                document.querySelectorAll('.theme-preview').forEach((el, i) => {
+                    el.classList.remove('active');
+                });
+                const themes = ThemeManager.getAllThemes();
+                const index = themes.findIndex(t => t.id === themeId);
+                if (index >= 0) {
+                    document.querySelectorAll('.theme-preview')[index].classList.add('active');
+                }
+            } catch (error) {
+                log(`✗ 主题切换失败: ${error.message}`, 'error');
+            }
+        };
+        
+        // 更新当前主题显示
+        function updateCurrentTheme() {
+            const currentId = ThemeManager.getCurrentTheme();
+            const theme = ThemeManager.getTheme(currentId);
+            document.getElementById('current-theme').textContent = theme?.name || currentId;
+            
+            const statusEl = document.getElementById('theme-status');
+            statusEl.textContent = '已激活';
+            statusEl.className = 'status status-success';
+        }
+        
+        // 测试加载模块CSS
+        window.testLoadModule = async function(moduleId) {
+            try {
+                log(`正在加载模块CSS: ${moduleId}`, 'info');
+                const startTime = performance.now();
+                
+                await moduleCssLoader.loadModuleCSS(moduleId);
+                
+                const duration = (performance.now() - startTime).toFixed(2);
+                log(`✓ 模块CSS加载成功: ${moduleId} (${duration}ms)`, 'success');
+                
+                updateCSSStats();
+            } catch (error) {
+                log(`✗ 模块CSS加载失败: ${error.message}`, 'error');
+            }
+        };
+        
+        // 预加载高优先级模块
+        window.testPreloadHighPriority = function() {
+            try {
+                log('正在预加载高优先级模块...', 'info');
+                moduleCssLoader.preloadHighPriorityModules();
+                log('✓ 预加载已触发', 'success');
+                
+                setTimeout(() => {
+                    updateCSSStats();
+                }, 1000);
+            } catch (error) {
+                log(`✗ 预加载失败: ${error.message}`, 'error');
+            }
+        };
+        
+        // 更新CSS统计
+        function updateCSSStats() {
+            const stats = moduleCssLoader.getStats();
+            document.getElementById('css-stats').textContent = 
+                `已加载: ${stats.loaded} | 加载中: ${stats.loading}`;
+        }
+        
+        // 显示CSS性能报告
+        window.showCSSPerformance = function() {
+            if (window.__CSS_PERF__) {
+                const report = window.__CSS_PERF__.getReport();
+                log('=== CSS性能报告 ===', 'info');
+                log(`总加载时间: ${report.totalLoadTime.toFixed(2)}ms`, 'info');
+                log(`成功: ${report.successCount} | 失败: ${report.failureCount}`, 'info');
+                log(`缓存命中: ${report.cacheHits}`, 'info');
+                console.table(report.files);
+            } else {
+                log('CSS性能监控未启用（仅开发环境）', 'info');
+            }
+        };
+        
+        // 启动
+        init();
+    </script>
+</body>
+</html>

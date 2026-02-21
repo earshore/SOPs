@@ -1,0 +1,278 @@
+/**
+ * 滚动条样式
+ * 统一的滚动条外观与行为
+ *
+ * 目录:
+ * 1. 全局默认滚动条
+ * 2. 细滚动条变体
+ * 3. 自定义滚动条 (数据预览区域)
+ * 4. 隐藏滚动条但保留功能
+ * 5. 暗色模式适配
+ * 6. 响应式适配
+ * 7. 无障碍 & 减少动画
+ */
+
+/* ========================================
+   1. 全局默认滚动条
+   ======================================== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 4px;
+  transition:
+    background var(--duration-slow, 400ms) var(--ease-smooth),
+    transform var(--duration-slow, 400ms) var(--ease-smooth);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  min-height: 20px; /* 防止过短 */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.6);
+  transform: scale(1.05);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Firefox 滚动条 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
+}
+
+/* ========================================
+   2. 细滚动条变体
+   ======================================== */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: var(--color-slate-100, #f1f5f9);
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--color-slate-300, #cbd5e1);
+  border-radius: 3px;
+  border: none;
+  transition:
+    background var(--duration-normal, 300ms) var(--ease-smooth),
+    transform var(--duration-normal, 300ms) var(--ease-smooth);
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: var(--color-slate-400, #94a3b8);
+  transform: scale(1.1);
+}
+
+/* Firefox */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-slate-300, #cbd5e1) transparent;
+}
+
+/* ========================================
+   3. 自定义滚动条 - 用于数据预览区域
+   ======================================== */
+.scrollbar-custom::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-track {
+  background: rgba(241, 245, 249, 0.5);
+  border-radius: 4px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 4px;
+  transition:
+    background var(--duration-slow, 400ms) var(--ease-smooth),
+    transform var(--duration-slow, 400ms) var(--ease-smooth);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.6);
+  transform: scale(1.05);
+}
+
+/* Firefox */
+.scrollbar-custom {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.4) rgba(241, 245, 249, 0.5);
+}
+
+/* ========================================
+   4. 隐藏滚动条但保留功能
+   ======================================== */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ========================================
+   5. 暗色模式适配
+   ======================================== */
+.dark ::-webkit-scrollbar-thumb,
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover,
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-track,
+[data-theme="dark"] .scrollbar-thin::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb,
+[data-theme="dark"] .scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb:hover,
+[data-theme="dark"] .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.dark .scrollbar-custom::-webkit-scrollbar-track,
+[data-theme="dark"] .scrollbar-custom::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.dark .scrollbar-custom::-webkit-scrollbar-thumb,
+[data-theme="dark"] .scrollbar-custom::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark .scrollbar-custom::-webkit-scrollbar-thumb:hover,
+[data-theme="dark"] .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Firefox 暗色 */
+.dark,
+[data-theme="dark"] {
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+.dark .scrollbar-thin,
+[data-theme="dark"] .scrollbar-thin {
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+.dark .scrollbar-custom,
+[data-theme="dark"] .scrollbar-custom {
+  scrollbar-color: rgba(255, 255, 255, 0.1) rgba(255, 255, 255, 0.04);
+}
+
+/* ========================================
+   6. 响应式适配
+   ======================================== */
+@media (max-width: 768px) {
+  /* 移动端使用更细的滚动条 */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  /* 增加触摸友好性 */
+  ::-webkit-scrollbar-thumb {
+    min-height: 30px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* 超小屏幕进一步缩小 */
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border-radius: 2px;
+  }
+}
+
+/* ========================================
+   7. 无障碍 & 减少动画
+   ======================================== */
+
+/* --- 减少动画偏好 --- */
+@media (prefers-reduced-motion: reduce) {
+  ::-webkit-scrollbar-thumb,
+  .scrollbar-thin::-webkit-scrollbar-thumb,
+  .scrollbar-custom::-webkit-scrollbar-thumb {
+    transition: none !important;
+    transform: none !important;
+  }
+
+  /* 禁用悬停效果 */
+  ::-webkit-scrollbar-thumb:hover,
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover,
+  .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+    transform: none !important;
+  }
+}
+
+/* --- 高对比度模式 --- */
+@media (forced-colors: active) {
+  ::-webkit-scrollbar-thumb {
+    background: CanvasText;
+    border: 1px solid CanvasText;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: Canvas;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track,
+  .scrollbar-custom::-webkit-scrollbar-track {
+    background: Canvas;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb,
+  .scrollbar-custom::-webkit-scrollbar-thumb {
+    background: CanvasText;
+    border: 1px solid CanvasText;
+  }
+}
+
+/* --- 焦点可见性增强 --- */
+/* 当滚动条获得焦点时（如通过键盘导航） */
+:focus-visible {
+  scrollbar-color: var(--color-focus-ring, #3b82f6) transparent;
+}
+
+/* 针对可滚动区域的焦点样式 */
+[tabindex]:focus-visible {
+  outline: 2px solid var(--color-focus-ring, #3b82f6);
+  outline-offset: 2px;
+}

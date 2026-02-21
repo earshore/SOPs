@@ -161,8 +161,7 @@ export class LoadingManager {
     if (!this.globalLoadingElement) return;
 
     if (this.isLoading) {
-      this.globalLoadingElement.classList.remove('hidden');
-      this.globalLoadingElement.classList.add('flex');
+      this.globalLoadingElement.classList.add('active');
       
       // 更新消息
       const messageEl = this.globalLoadingElement.querySelector('[data-loading-message]');
@@ -170,8 +169,7 @@ export class LoadingManager {
         messageEl.textContent = this.currentMessage;
       }
     } else {
-      this.globalLoadingElement.classList.add('hidden');
-      this.globalLoadingElement.classList.remove('flex');
+      this.globalLoadingElement.classList.remove('active');
     }
   }
 

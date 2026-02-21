@@ -4,7 +4,7 @@
 // 追踪页面浏览、用户操作和自定义事件
 // ================================================================
 
-import { Logger } from './loggerService';
+import type { ILoggerService, IStorageService } from '../types/services';
 
 /**
  * 事件类型
@@ -109,6 +109,7 @@ export interface AnalyticsConfig {
 
 /**
  * 用户行为分析服务
+ * 🎯 DI改造：支持依赖注入Logger和Storage
  */
 export class AnalyticsService {
   private static instance: AnalyticsService;
@@ -118,8 +119,9 @@ export class AnalyticsService {
   private currentPageView: PageViewEvent | null;
   private pageViewStartTime: number;
   private isInitialized: boolean = false;
+  private logger: ILoggerService | null = null;
 
-  private constructor() {
+  private constructor(logger?: ILoggerService, _storage?: IStorageService) {
     this.config = {
       enabled: true,
       trackPageViews: true,
@@ -131,6 +133,8 @@ export class AnalyticsService {
     this.currentSession = null;
     this.currentPageView = null;
     this.pageViewStartTime = 0;
+    this.logger = logger || null;
+    // storage参数保留用于未来扩展
   }
 
   /**
@@ -144,11 +148,22 @@ export class AnalyticsService {
   }
 
   /**
+   * 记录日志（使用注入的Logger或console）
+   */
+  private _log(level: 'debug' | 'info' | 'warn' | 'error', message: string, data: Record<string, unknown> = {}): void {
+    if (this.logger) {
+      this.logger[level](message, data, 'Analytics');
+    } else {
+      console[level](`[Analytics] ${message}`, data);
+    }
+  }
+
+  /**
    * 初始化分析服务
    */
   init(config?: Partial<AnalyticsConfig>): void {
     if (this.isInitialized) {
-      Logger.warn('AnalyticsService already initialized', {}, 'Analytics');
+      this._log('warn', 'AnalyticsService already initialized', {});
       return;
     }
 
@@ -156,7 +171,7 @@ export class AnalyticsService {
     this.config = { ...this.config, ...config };
 
     if (!this.config.enabled) {
-      Logger.info('AnalyticsService is disabled', {}, 'Analytics');
+      this._log('info', 'AnalyticsService is disabled', {});
       return;
     }
 
@@ -172,7 +187,7 @@ export class AnalyticsService {
     this.setupSessionTimeout();
 
     this.isInitialized = true;
-    Logger.info('✅ AnalyticsService initialized', this.config as unknown as Record<string, unknown>, 'Analytics');
+    this._log('info', '✅ AnalyticsService initialized', this.config as unknown as Record<string, unknown>);
   }
 
   /**
@@ -188,7 +203,7 @@ export class AnalyticsService {
       userId
     };
 
-    Logger.debug('New session created', { sessionId: this.currentSession.id }, 'Analytics');
+    this._log('debug', 'New session created', { sessionId: this.currentSession.id });
   }
 
   /**
@@ -298,7 +313,7 @@ export class AnalyticsService {
         const timeSinceLastActivity = now - this.currentSession.lastActivity;
 
         if (timeSinceLastActivity > this.config.sessionTimeout) {
-          Logger.debug('Session timeout, creating new session', {}, 'Analytics');
+          this._log('debug', 'Session timeout, creating new session', {});
           this.createSession(this.currentSession.userId);
         }
       }
@@ -343,7 +358,7 @@ export class AnalyticsService {
       this.currentSession.lastActivity = Date.now();
     }
 
-    Logger.debug('Page view tracked', { path, title }, 'Analytics');
+    this._log('debug', 'Page view tracked', { path, title });
   }
 
   /**
@@ -402,7 +417,7 @@ export class AnalyticsService {
       this.currentSession.lastActivity = Date.now();
     }
 
-    Logger.debug('Custom event tracked', { name, properties }, 'Analytics');
+    this._log('debug', 'Custom event tracked', { name, properties });
   }
 
   /**
@@ -469,7 +484,7 @@ export class AnalyticsService {
     if (this.currentSession) {
       this.currentSession.userId = userId;
     }
-    Logger.debug('User ID set', { userId }, 'Analytics');
+    this._log('debug', 'User ID set', { userId });
   }
 
   /**
@@ -537,7 +552,7 @@ export class AnalyticsService {
    */
   clear(): void {
     this.events = [];
-    Logger.info('Analytics events cleared', {}, 'Analytics');
+    this._log('info', 'Analytics events cleared', {});
   }
 
   /**
@@ -545,7 +560,7 @@ export class AnalyticsService {
    */
   updateConfig(config: Partial<AnalyticsConfig>): void {
     this.config = { ...this.config, ...config };
-    Logger.info('Analytics config updated', this.config as unknown as Record<string, unknown>, 'Analytics');
+    this._log('info', 'Analytics config updated', this.config as unknown as Record<string, unknown>);
   }
 
   /**
@@ -556,12 +571,31 @@ export class AnalyticsService {
     this.currentSession = null;
     this.currentPageView = null;
     this.isInitialized = false;
-    Logger.info('AnalyticsService destroyed', {}, 'Analytics');
+    this._log('info', 'AnalyticsService destroyed', {});
   }
 }
 
-// 创建全局实例
+// 创建全局实例（向后兼容）
+/** @deprecated 请使用 container.resolve('analytics') 获取AnalyticsService实例 */
 export const analyticsService = AnalyticsService.getInstance();
 
 // 默认导出
 export default analyticsService;
+
+// ================================================================
+// 🎯 DI容器工厂函数
+// ================================================================
+
+/**
+ * 创建AnalyticsService实例的工厂函数
+ * @param logger - LoggerService实例（可选）
+ * @param storage - StorageService实例（可选）
+ * @returns AnalyticsService实例
+ */
+export function createAnalyticsService(
+  logger?: ILoggerService,
+  storage?: IStorageService
+): AnalyticsService {
+  const instance = new (AnalyticsService as any)(logger, storage);
+  return instance;
+}

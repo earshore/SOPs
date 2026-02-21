@@ -1,0 +1,17 @@
+/**
+ * 首屏关键CSS - Critical Path CSS (优化版)
+ * 只包含首屏渲染必需的最小样式集
+ * 
+ * 优化策略:
+ * - variables.css 和 reset.css 已内联到 index.html
+ * - 只保留 loading 组件（启动时立即可见）
+ * - header 和 container 移至异步加载
+ * 
+ * 预期体积: ~4KB (从 56KB 减少 93%)
+ */
+
+/* 首屏必需组件 - 仅 Loading */
+@import './components/loading.css';
+
+/* Tailwind基础层 */
+@tailwind base;
