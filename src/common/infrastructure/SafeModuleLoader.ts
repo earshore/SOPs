@@ -327,17 +327,20 @@ export class SafeModuleLoader {
    */
   private async loadTemplateInternal(templatePath: string): Promise<string> {
     try {
-      const response = await fetch(templatePath);
+      // 🎯 修复: 使用 viewLoader 的 loadTemplate 函数，它使用 Vite glob 导入
+      // 避免在生产环境中使用 fetch 导致返回整个 index.html
+      const { loadTemplate: viewLoaderLoadTemplate } = await import('@/common/utils/viewLoader');
       
-      if (!response.ok) {
-        throw new NetworkError(
-          `模板加载失败: HTTP ${response.status}`,
-          'TEMPLATE_LOAD_FAILED',
-          { templatePath, status: response.status }
-        );
+      // 标准化路径：确保以 / 开头
+      let normalizedPath = templatePath;
+      if (!normalizedPath.startsWith('/')) {
+        normalizedPath = '/' + normalizedPath;
       }
-
-      return await response.text();
+      
+      // 使用 viewLoader 的 loadTemplate，禁用淡入动画（SafeRenderer 会处理）
+      const html = await viewLoaderLoadTemplate(normalizedPath, { disableFadeIn: true });
+      
+      return html;
     } catch (error) {
       if (error instanceof AppError) {
         throw error;
