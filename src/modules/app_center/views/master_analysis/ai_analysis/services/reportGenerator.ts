@@ -3,7 +3,7 @@
  * 负责生成各种格式的分析报告
  */
 
-import { AnalysisResult } from '../types';
+import { AnalysisResult, ReportMetadata } from '../types';
 
 /**
  * 格式化历史日期
@@ -144,8 +144,8 @@ export function generateJsonReportData(
   selectedTargets: string[],
   dataSource: string,
   dataSourceMarketplace: string,
-  analysisReport: any
-) {
+  analysisReport: unknown
+): { metadata: ReportMetadata; results: AnalysisResult[]; analysisReport: unknown } {
   return {
     metadata: {
       asins: selectedAsins,

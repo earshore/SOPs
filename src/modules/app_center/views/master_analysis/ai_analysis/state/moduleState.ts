@@ -5,6 +5,7 @@
 
 import { AnalysisResult } from '../types';
 import type { FullAnalysisReport } from '../config/analysisReportData';
+import { ScraperData } from '../types';
 
 /**
  * 模块状态接口
@@ -16,7 +17,7 @@ export interface ModuleState {
   progress: number; // 分析进度 (0-100)
   currentStep: string; // 当前步骤描述
   results: AnalysisResult[]; // 分析结果
-  analysisReport: FullAnalysisReport | null; // 完整分析报告
+  analysisReport: FullAnalysisReport | null | unknown; // 完整分析报告
   expandedPromptIndex: number | null; // 展开的提示词索引
   showPromptPanel: boolean; // 是否显示提示词面板
   showJsonViewer: boolean; // 是否显示 JSON 查看器
@@ -57,12 +58,21 @@ export function resetState(state: ModuleState): void {
 /**
  * 从 Scraper 数据初始化 ASIN 列表
  */
-export function initializeAsinsFromScraperData(state: ModuleState, scrapedData: any): void {
-  if (scrapedData && scrapedData.products && scrapedData.products.length > 0) {
+export function initializeAsinsFromScraperData(state: ModuleState, scrapedData: unknown): void {
+  if (!scrapedData || typeof scrapedData !== 'object') {
+    state.selectedAsins = [];
+    state.dataSource = 'scraper';
+    console.log('[状态管理] 无数据,等待用户从数据采集页面导入');
+    return;
+  }
+  
+  const data = scrapedData as ScraperData;
+  
+  if (data.products && data.products.length > 0) {
     // 自动选中所有产品的 ASIN
-    state.selectedAsins = scrapedData.products
-      .map((p: any) => p.asin)
-      .filter((asin: string) => asin);
+    state.selectedAsins = data.products
+      .map(p => p.asin)
+      .filter((asin): asin is string => !!asin);
     state.dataSource = 'scraper';
     console.log('[状态管理] 已从 Scraper 加载数据:', state.selectedAsins);
   } else {

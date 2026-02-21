@@ -586,8 +586,8 @@ export async function runAnalysis(
     { progress: 100, step: '分析完成！' }
   ];
 
+  // 直接报告进度，不使用 setTimeout 延迟
   for (const { progress, step } of steps) {
-    await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 400));
     onProgress(progress, step);
   }
 

@@ -3,9 +3,11 @@
  * 集成到 Master Analysis 的子页面
  */
 
-import { loadTemplate } from '../../../../../common/utils/viewLoader';
+import { SafeModuleLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
+import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
 import { createInitialState, initializeAsinsFromScraperData, ModuleState } from './state/moduleState';
 import { createAiAnalysisPanel } from './components/AlpinePanel';
+import { AlpineRegistry } from '../../../../../common/infrastructure/AlpineRegistry';
 import state from '../../../../../common/state';
 
 import '../master_analysis_style.css';
@@ -25,27 +27,29 @@ export async function mount(container: HTMLElement): Promise<void> {
     const scrapedData = state.scraper?.scrapedData;
     initializeAsinsFromScraperData(moduleState, scrapedData);
 
-    // 2. 加载模板
-    const html = await loadTemplate('src/modules/app_center/views/master_analysis/ai_analysis/template.html');
-    container.innerHTML = html;
-
-    // 3. 初始化 Alpine.js 组件 (带防御性检查)
-    if (typeof window.Alpine === 'undefined') {
-      console.warn('[AI智能分析] ⚠️ Alpine.js 未加载，延迟注册组件');
-      // 延迟注册,等待 Alpine 加载
-      setTimeout(() => {
-        if (window.Alpine && typeof window.Alpine.data === 'function') {
-          window.Alpine.data('aiAnalysisPanel', () => createAiAnalysisPanel(moduleState));
-          console.log('[AI智能分析] ✅ Alpine 组件延迟注册成功');
+    // 2. 使用 SafeModuleLoader 加载模板
+    const loader = SafeModuleLoader.getInstance();
+    const html = await loader.loadTemplate(
+      'src/modules/app_center/views/master_analysis/ai_analysis/template.html',
+      {
+        retryCount: 3,
+        timeout: 5000,
+        onError: (error) => {
+          console.error('[AI智能分析] 模板加载失败:', error);
         }
-      }, 100);
-    } else if (typeof window.Alpine.data === 'function') {
-      // 立即注册
-      window.Alpine.data('aiAnalysisPanel', () => createAiAnalysisPanel(moduleState));
-      console.log('[AI智能分析] ✅ Alpine 组件注册成功');
-    } else {
-      console.error('[AI智能分析] ❌ Alpine.data 方法不可用');
-    }
+      }
+    );
+    
+    // 使用 SafeRenderer 渲染模板（静态模板，已审计）
+    const renderer = SafeRenderer.getInstance();
+    renderer.renderTemplate(container, html);
+
+    // 3. 使用 AlpineRegistry 注册组件
+    const registry = AlpineRegistry.getInstance();
+    registry.register('aiAnalysisPanel', () => createAiAnalysisPanel(moduleState));
+    
+    // 初始化注册器（如果尚未初始化）
+    registry.init();
 
     console.log('[AI智能分析] ✅ 模块挂载成功');
   } catch (error) {

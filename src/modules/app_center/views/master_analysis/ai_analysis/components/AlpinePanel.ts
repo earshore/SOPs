@@ -3,23 +3,22 @@
  * 整合所有子模块，创建完整的 AI 分析面板组件
  */
 
-import state from '@common/state';
 import { analysisTargets } from '../config/analysisTargets';
 import { checkAndLoadScraperData, checkLoadedReport, loadHistoricalReport } from './dataLoaders';
 import { formatHistoryDate } from '../services/reportGenerator';
 import { getTargetColor, getPromptText } from './helpers';
 import { getPromptTokenCount, getFormattedTokenCount } from './helpers';
-import { formatTokenCount } from '../utils/tokenCounter';
 import { highlightJson } from '../services/reportGenerator';
-import { convertScraperDataToProduct } from '../utils/dataTransformers';
-import { getProductByAsin, Product } from '../config/sampleData';
 import * as actions from './actions';
+import { ModuleState } from '../state/moduleState';
+import { AlpineContext } from '../types';
+import { createComputedProperties, ComputedProperties } from './computedProperties';
 
 /**
  * 创建 Alpine 面板组件
  */
-export function createAiAnalysisPanel(moduleState: any) {
-  const panel: any = {
+export function createAiAnalysisPanel(moduleState: ModuleState): AlpineContext & ComputedProperties & Record<string, unknown> {
+  const panel = {
     // ========== State ==========
     selectedAsins: moduleState.selectedAsins,
     selectedTargets: moduleState.selectedTargets,
@@ -36,7 +35,7 @@ export function createAiAnalysisPanel(moduleState: any) {
     showDataSourceBanner: moduleState.showDataSourceBanner,
 
     // ========== Lifecycle ==========
-    init(this: any) {
+    init(this: AlpineContext & Record<string, unknown>) {
       console.log('[Alpine 组件] 🚀 组件初始化');
       
       // 默认全选所有分析目标（如果当前没有选中任何目标）
@@ -57,12 +56,6 @@ export function createAiAnalysisPanel(moduleState: any) {
         console.log('[Alpine 组件] 🔄 响应式更新完成, selectedTargets:', this.selectedTargets.length);
         console.log('[Alpine 组件] 🔍 this.selectedTargets 数组:', this.selectedTargets);
         console.log('[Alpine 组件] 🔍 canAnalyze 状态:', this.canAnalyze);
-        
-        // 再次尝试强制更新
-        setTimeout(() => {
-          console.log('[Alpine 组件] ⏰ 延迟检查 canAnalyze:', this.canAnalyze);
-          console.log('[Alpine 组件] ⏰ 延迟检查 selectedTargets:', this.selectedTargets.length);
-        }, 100);
       });
       
       // 检查是否有新的 Scraper 数据
@@ -70,13 +63,6 @@ export function createAiAnalysisPanel(moduleState: any) {
 
       // 检查是否有已加载的历史报告
       checkLoadedReport(this, moduleState);
-
-      // 3秒后自动隐藏数据源横幅
-      setTimeout(() => {
-        this.showDataSourceBanner = false;
-        moduleState.showDataSourceBanner = false;
-        console.log('[Alpine 组件] 🎯 数据源横幅已自动隐藏');
-      }, 3000);
     },
 
     // ========== State Sync ==========
@@ -108,7 +94,8 @@ export function createAiAnalysisPanel(moduleState: any) {
 
     // ========== Data Loading ==========
     loadHistoricalReport(detail: { report: any; timestamp: string }) {
-      loadHistoricalReport(this, moduleState, detail);
+      const ctx = this as unknown as AlpineContext & ComputedProperties;
+      loadHistoricalReport(ctx, moduleState, detail);
     },
 
     formatHistoryDate(timestamp: string): string {
@@ -117,63 +104,78 @@ export function createAiAnalysisPanel(moduleState: any) {
 
     // ========== Actions ==========
     toggleAsin(asin: string) {
-      actions.toggleAsin(this, moduleState, asin);
+      const ctx = this as unknown as AlpineContext & ComputedProperties;
+      actions.toggleAsin(ctx, moduleState, asin);
     },
 
     selectAllAsins() {
-      actions.selectAllAsins(this, moduleState, this.availableAsins);
+      const ctx = this as unknown as AlpineContext & ComputedProperties;
+      actions.selectAllAsins(ctx, moduleState, ctx.availableAsins);
     },
 
     clearAllAsins() {
-      actions.clearAllAsins(this, moduleState);
+      const ctx = this as unknown as AlpineContext & ComputedProperties;
+      actions.clearAllAsins(ctx, moduleState);
     },
 
     toggleTarget(targetId: string) {
-      actions.toggleTarget(this, moduleState, targetId);
+      const ctx = this as unknown as AlpineContext & ComputedProperties;
+      actions.toggleTarget(ctx, moduleState, targetId);
     },
 
     selectAllTargets() {
-      actions.selectAllTargets(this, moduleState);
+      const ctx = this as unknown as AlpineContext & ComputedProperties;
+      actions.selectAllTargets(ctx, moduleState);
     },
 
     clearAllTargets() {
-      actions.clearAllTargets(this, moduleState);
+      const ctx = this as unknown as AlpineContext & ComputedProperties;
+      actions.clearAllTargets(ctx, moduleState);
     },
 
     togglePromptPanel() {
-      actions.togglePromptPanel(this, moduleState);
+      const ctx = this as unknown as AlpineContext & ComputedProperties;
+      actions.togglePromptPanel(ctx, moduleState);
     },
 
     togglePromptItem(index: number) {
-      actions.togglePromptItem(this, moduleState, index);
+      const ctx = this as unknown as AlpineContext & ComputedProperties;
+      actions.togglePromptItem(ctx, moduleState, index);
     },
 
     toggleJsonViewer() {
-      actions.toggleJsonViewer(this, moduleState);
+      const ctx = this as unknown as AlpineContext & ComputedProperties;
+      actions.toggleJsonViewer(ctx, moduleState);
     },
 
     toggleDataSource() {
-      actions.toggleDataSource(this, moduleState);
+      const ctx = this as unknown as AlpineContext & ComputedProperties;
+      actions.toggleDataSource(ctx, moduleState);
     },
 
     copyPrompt(index: number) {
-      actions.copyPrompt(this, this.currentProducts, index);
+      const ctx = this as unknown as AlpineContext & ComputedProperties;
+      actions.copyPrompt(ctx, ctx.currentProducts, index);
     },
 
     copyJson() {
-      actions.copyJson(this, this.dataSourceMarketplace);
+      const ctx = this as unknown as AlpineContext & ComputedProperties;
+      actions.copyJson(ctx, ctx.dataSourceMarketplace);
     },
 
     copyMarkdown() {
-      actions.copyMarkdown(this, this.dataSourceMarketplace, this.dataSourceLabel);
+      const ctx = this as unknown as AlpineContext & ComputedProperties;
+      actions.copyMarkdown(ctx, ctx.dataSourceMarketplace, ctx.dataSourceLabel);
     },
 
     downloadJson() {
-      actions.downloadJson(this, this.dataSourceMarketplace);
+      const ctx = this as unknown as AlpineContext & ComputedProperties;
+      actions.downloadJson(ctx, ctx.dataSourceMarketplace);
     },
 
     async runAnalysis() {
-      await actions.runAnalysisAction(this, moduleState, this.currentProducts);
+      const ctx = this as unknown as AlpineContext & ComputedProperties;
+      await actions.runAnalysisAction(ctx, moduleState, ctx.currentProducts);
     },
 
     // ========== Helpers ==========
@@ -182,232 +184,29 @@ export function createAiAnalysisPanel(moduleState: any) {
     },
 
     getPromptText(targetId: string): string {
-      return getPromptText(targetId, this.currentProducts);
+      const ctx = this as unknown as AlpineContext & ComputedProperties;
+      return getPromptText(targetId, ctx.currentProducts);
     },
 
     getPromptTokenCount(targetId: string): number {
-      return getPromptTokenCount(targetId, this.currentProducts);
+      const ctx = this as unknown as AlpineContext & ComputedProperties;
+      return getPromptTokenCount(targetId, ctx.currentProducts);
     },
 
     getFormattedTokenCount(targetId: string): string {
-      return getFormattedTokenCount(targetId, this.currentProducts);
+      const ctx = this as unknown as AlpineContext & ComputedProperties;
+      return getFormattedTokenCount(targetId, ctx.currentProducts);
     },
 
     highlightJson(json: string): string {
       return highlightJson(json);
-    },
-
-    // ========== Computed Properties ==========
-    /**
-     * 获取当前选中的产品列表
-     */
-    get currentProducts(): Product[] {
-      const products: Product[] = [];
-      
-      // 优先从 Scraper 数据获取
-      const scrapedData = state.scraper?.scrapedData;
-      if (scrapedData && scrapedData.products && scrapedData.products.length > 0) {
-        console.log('[计算属性] 开始从 Scraper 数据获取产品, selectedAsins:', this.selectedAsins);
-        for (const asin of this.selectedAsins) {
-          const matchedProduct = scrapedData.products.find((p: any) => p.asin === asin);
-          if (matchedProduct) {
-            console.log('[计算属性] 找到匹配产品:', asin, matchedProduct);
-            const product = convertScraperDataToProduct(matchedProduct);
-            if (product) {
-              console.log('[计算属性] 产品转换成功:', asin);
-              products.push(product);
-            } else {
-              console.warn('[计算属性] 产品转换失败:', asin, matchedProduct);
-            }
-          } else {
-            console.warn('[计算属性] 未找到匹配产品:', asin);
-          }
-        }
-      } else {
-        console.warn('[计算属性] Scraper 数据不可用:', {
-          hasScrapedData: !!scrapedData,
-          hasProducts: !!(scrapedData && scrapedData.products),
-          productsLength: scrapedData?.products?.length
-        });
-      }
-      
-      // 如果没有从 Scraper 获取到，从示例数据获取
-      if (products.length === 0) {
-        console.log('[计算属性] 尝试从示例数据获取产品');
-        for (const asin of this.selectedAsins) {
-          const product = getProductByAsin(asin);
-          if (product) {
-            console.log('[计算属性] 从示例数据获取到产品:', asin);
-            products.push(product);
-          }
-        }
-      }
-      
-      console.log('[计算属性] currentProducts 最终结果:', products.length, '个产品');
-      return products;
-    },
-
-    /**
-     * 获取可用的 ASIN 列表
-     */
-    get availableAsins(): string[] {
-      // 优先从 Scraper 获取 ASIN 列表
-      const scrapedData = state.scraper?.scrapedData;
-      if (scrapedData && scrapedData.products && scrapedData.products.length > 0) {
-        return scrapedData.products.map((p: any) => p.asin).filter((asin: string) => asin);
-      }
-      // 没有真实数据时返回空数组
-      return [];
-    },
-
-    /**
-     * 是否有数据
-     */
-    get hasData(): boolean {
-      return this.currentProducts.length > 0;
-    },
-
-    /**
-     * 是否可以开始分析
-     */
-    get canAnalyze(): boolean {
-      const hasTargets = this.selectedTargets && this.selectedTargets.length > 0;
-      const result = hasTargets && this.hasData && !this.isAnalyzing;
-      console.log('[计算属性] canAnalyze 检查:', {
-        selectedTargets: this.selectedTargets?.length || 0,
-        hasData: this.hasData,
-        currentProducts: this.currentProducts.length,
-        isAnalyzing: this.isAnalyzing,
-        canAnalyze: result
-      });
-      return result;
-    },
-
-    /**
-     * 分析目标配置
-     */
-    get analysisTargets() {
-      return analysisTargets;
-    },
-
-    /**
-     * Listings 分析结果
-     */
-    get listingsResults(): any[] {
-      const filtered = this.results.filter((r: any) => r.source === 'Listings');
-      console.log('[计算属性] listingsResults:', {
-        totalResults: this.results.length,
-        listingsCount: filtered.length,
-        results: this.results
-      });
-      return filtered;
-    },
-
-    /**
-     * Reviews 分析结果
-     */
-    get reviewsResults(): any[] {
-      const filtered = this.results.filter((r: any) => r.source === 'Reviews');
-      console.log('[计算属性] reviewsResults:', {
-        totalResults: this.results.length,
-        reviewsCount: filtered.length
-      });
-      return filtered;
-    },
-
-    /**
-     * 总高亮数量
-     */
-    get totalHighlights(): number {
-      return this.results.reduce((acc: number, r: any) => acc + r.highlights.length, 0);
-    },
-
-    /**
-     * 总详情数量
-     */
-    get totalDetails(): number {
-      return this.results.reduce((acc: number, r: any) => acc + r.details.length, 0);
-    },
-
-    /**
-     * 是否有 Scraper 数据
-     */
-    get hasScraperData(): boolean {
-      const scrapedData = state.scraper?.scrapedData;
-      return !!(scrapedData && scrapedData.products && scrapedData.products.length > 0);
-    },
-
-    /**
-     * 数据源标签
-     */
-    get dataSourceLabel(): string {
-      switch (this.dataSource) {
-        case 'scraper': return '数据采集';
-        case 'sample': return '示例数据';
-        default: return '未知';
-      }
-    },
-
-    /**
-     * 数据源市场
-     */
-    get dataSourceMarketplace(): string {
-      const scrapedData = state.scraper?.scrapedData;
-      if (scrapedData && scrapedData.metadata) {
-        return scrapedData.metadata.marketplace || '未知';
-      }
-      return '未知';
-    },
-
-    /**
-     * 数据源时间戳
-     */
-    get dataSourceTimestamp(): string {
-      const scrapedData = state.scraper?.scrapedData;
-      if (scrapedData && scrapedData.metadata && scrapedData.metadata.scrape_timestamp) {
-        return scrapedData.metadata.scrape_timestamp;
-      }
-      return '未知';
-    },
-
-    /**
-     * 完整报告数据
-     */
-    get fullReportData() {
-      if (!this.analysisReport) return null;
-      
-      return {
-        metadata: {
-          asins: this.selectedAsins,
-          targets: this.selectedTargets,
-          timestamp: new Date().toISOString(),
-          dataSource: this.dataSource,
-          marketplace: this.dataSourceMarketplace
-        },
-        results: this.results,
-        analysisReport: this.analysisReport
-      };
-    },
-
-    /**
-     * 所有选中任务的总 token 数
-     */
-    get totalTokenCount(): number {
-      if (this.selectedTargets.length === 0 || this.currentProducts.length === 0) {
-        return 0;
-      }
-      return this.selectedTargets.reduce((total: number, targetId: string) => {
-        return total + getPromptTokenCount(targetId, this.currentProducts);
-      }, 0);
-    },
-
-    /**
-     * 格式化的总 token 数
-     */
-    get formattedTotalTokenCount(): string {
-      return formatTokenCount(this.totalTokenCount);
     }
   };
   
-  return panel;
+  // 合并计算属性 - 使用 defineProperties 保留 getter 特性
+  const computedProps = createComputedProperties(panel as unknown as AlpineContext);
+  const descriptors = Object.getOwnPropertyDescriptors(computedProps);
+  Object.defineProperties(panel, descriptors);
+  
+  return panel as unknown as AlpineContext & ComputedProperties & Record<string, unknown>;
 }
