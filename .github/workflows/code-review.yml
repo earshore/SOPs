@@ -1,0 +1,153 @@
+name: Code Review Assistant
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  # 自动代码审查
+  auto-review:
+    name: 自动代码审查
+    runs-on: windows-latest
+    
+    steps:
+      - name: Checkout 代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: 设置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+      
+      - name: 安装依赖
+        run: npm ci
+      
+      - name: 分析代码变更
+        id: changes
+        run: |
+          $files = git diff --name-only origin/${{ github.base_ref }}...HEAD
+          $tsFiles = $files | Where-Object { $_ -match '\.(ts|tsx)$' }
+          $jsFiles = $files | Where-Object { $_ -match '\.(js|jsx)$' }
+          $testFiles = $files | Where-Object { $_ -match '\.test\.(ts|js)$' }
+          
+          Write-Host "变更文件统计:"
+          Write-Host "  TypeScript: $($tsFiles.Count)"
+          Write-Host "  JavaScript: $($jsFiles.Count)"
+          Write-Host "  测试文件: $($testFiles.Count)"
+          
+          echo "ts_count=$($tsFiles.Count)" >> $env:GITHUB_OUTPUT
+          echo "js_count=$($jsFiles.Count)" >> $env:GITHUB_OUTPUT
+          echo "test_count=$($testFiles.Count)" >> $env:GITHUB_OUTPUT
+      
+      - name: 检查测试覆盖
+        if: steps.changes.outputs.test_count == '0' && (steps.changes.outputs.ts_count > 0 || steps.changes.outputs.js_count > 0)
+        run: |
+          Write-Warning "⚠️ 代码变更未包含测试文件"
+          echo "::warning::建议为新增代码添加测试用例"
+      
+      - name: 检查大文件
+        run: |
+          $largeFiles = git diff --name-only origin/${{ github.base_ref }}...HEAD | ForEach-Object {
+            if (Test-Path $_) {
+              $size = (Get-Item $_).Length
+              if ($size -gt 500KB) {
+                [PSCustomObject]@{
+                  File = $_
+                  Size = [math]::Round($size / 1KB, 2)
+                }
+              }
+            }
+          }
+          
+          if ($largeFiles) {
+            Write-Warning "发现大文件:"
+            $largeFiles | ForEach-Object {
+              Write-Warning "  $($_.File): $($_.Size) KB"
+            }
+            echo "::warning::建议拆分或优化大文件"
+          }
+      
+      - name: 检查复杂度
+        run: |
+          npm run code:analyze:complexity
+        continue-on-error: true
+      
+      - name: 生成审查报告
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const tsCount = '${{ steps.changes.outputs.ts_count }}';
+            const jsCount = '${{ steps.changes.outputs.js_count }}';
+            const testCount = '${{ steps.changes.outputs.test_count }}';
+            
+            let comment = `## 🤖 自动代码审查报告\n\n`;
+            comment += `### 📊 变更统计\n\n`;
+            comment += `- TypeScript 文件: ${tsCount}\n`;
+            comment += `- JavaScript 文件: ${jsCount}\n`;
+            comment += `- 测试文件: ${testCount}\n\n`;
+            
+            if (testCount === '0' && (parseInt(tsCount) > 0 || parseInt(jsCount) > 0)) {
+              comment += `### ⚠️ 注意事项\n\n`;
+              comment += `- 代码变更未包含测试文件,建议添加测试用例\n\n`;
+            }
+            
+            comment += `### ✅ 检查项\n\n`;
+            comment += `- [x] 代码变更分析\n`;
+            comment += `- [x] 大文件检查\n`;
+            comment += `- [x] 复杂度分析\n\n`;
+            comment += `详细报告请查看工作流日志。\n`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  # 检查 PR 标题
+  check-pr-title:
+    name: 检查 PR 标题
+    runs-on: windows-latest
+    
+    steps:
+      - name: 验证 PR 标题格式
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = context.payload.pull_request.title;
+            const pattern = /^(feat|fix|docs|style|refactor|perf|test|chore|ci)(\(.+\))?: .+/;
+            
+            if (!pattern.test(title)) {
+              core.setFailed(
+                'PR 标题格式不正确。\n' +
+                '正确格式: <type>(<scope>): <subject>\n' +
+                '类型: feat, fix, docs, style, refactor, perf, test, chore, ci\n' +
+                '示例: feat(auth): 添加用户登录功能'
+              );
+            }
+
+  # 检查分支名称
+  check-branch:
+    name: 检查分支名称
+    runs-on: windows-latest
+    
+    steps:
+      - name: 验证分支名称
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branch = context.payload.pull_request.head.ref;
+            const pattern = /^(feature|bugfix|hotfix|release)\/[a-z0-9-]+$/;
+            
+            if (!pattern.test(branch)) {
+              core.warning(
+                '建议使用规范的分支命名:\n' +
+                '- feature/功能名称\n' +
+                '- bugfix/问题描述\n' +
+                '- hotfix/紧急修复\n' +
+                '- release/版本号'
+              );
+            }

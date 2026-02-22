@@ -1,0 +1,174 @@
+name: Dependency Update
+
+on:
+  schedule:
+    # 每周一早上 9 点运行
+    - cron: '0 1 * * 1'
+  workflow_dispatch:
+
+jobs:
+  # 检查依赖更新
+  check-updates:
+    name: 检查依赖更新
+    runs-on: windows-latest
+    
+    steps:
+      - name: Checkout 代码
+        uses: actions/checkout@v4
+      
+      - name: 设置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+      
+      - name: 检查过期依赖
+        id: outdated
+        run: |
+          $outdated = npm outdated --json 2>$null | ConvertFrom-Json
+          
+          if ($outdated) {
+            $count = ($outdated.PSObject.Properties).Count
+            Write-Host "发现 $count 个过期依赖"
+            echo "count=$count" >> $env:GITHUB_OUTPUT
+            
+            $outdated | ConvertTo-Json -Depth 10 | Out-File -FilePath outdated.json
+          } else {
+            Write-Host "所有依赖都是最新的"
+            echo "count=0" >> $env:GITHUB_OUTPUT
+          }
+        continue-on-error: true
+      
+      - name: 安全审计
+        id: audit
+        run: |
+          $audit = npm audit --json 2>$null | ConvertFrom-Json
+          
+          $critical = $audit.metadata.vulnerabilities.critical
+          $high = $audit.metadata.vulnerabilities.high
+          $moderate = $audit.metadata.vulnerabilities.moderate
+          $low = $audit.metadata.vulnerabilities.low
+          
+          Write-Host "安全漏洞统计:"
+          Write-Host "  严重: $critical"
+          Write-Host "  高危: $high"
+          Write-Host "  中危: $moderate"
+          Write-Host "  低危: $low"
+          
+          echo "critical=$critical" >> $env:GITHUB_OUTPUT
+          echo "high=$high" >> $env:GITHUB_OUTPUT
+          echo "moderate=$moderate" >> $env:GITHUB_OUTPUT
+          echo "low=$low" >> $env:GITHUB_OUTPUT
+        continue-on-error: true
+      
+      - name: 生成更新报告
+        if: steps.outdated.outputs.count > 0 || steps.audit.outputs.critical > 0 || steps.audit.outputs.high > 0
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const outdatedCount = '${{ steps.outdated.outputs.count }}';
+            const critical = '${{ steps.audit.outputs.critical }}';
+            const high = '${{ steps.audit.outputs.high }}';
+            const moderate = '${{ steps.audit.outputs.moderate }}';
+            const low = '${{ steps.audit.outputs.low }}';
+            
+            let body = `## 📦 依赖更新报告\n\n`;
+            body += `生成时间: ${new Date().toISOString()}\n\n`;
+            
+            if (outdatedCount > 0) {
+              body += `### 过期依赖\n\n`;
+              body += `发现 ${outdatedCount} 个过期依赖,建议更新。\n\n`;
+            }
+            
+            body += `### 🔒 安全漏洞\n\n`;
+            body += `| 级别 | 数量 | 状态 |\n`;
+            body += `|------|------|------|\n`;
+            body += `| 严重 | ${critical} | ${critical > 0 ? '🔴' : '✅'} |\n`;
+            body += `| 高危 | ${high} | ${high > 0 ? '🟠' : '✅'} |\n`;
+            body += `| 中危 | ${moderate} | ${moderate > 0 ? '🟡' : '✅'} |\n`;
+            body += `| 低危 | ${low} | ${low > 0 ? '⚪' : '✅'} |\n\n`;
+            
+            if (critical > 0 || high > 0) {
+              body += `⚠️ **发现严重或高危漏洞,建议立即处理!**\n\n`;
+            }
+            
+            body += `### 建议操作\n\n`;
+            body += `1. 运行 \`npm outdated\` 查看详细信息\n`;
+            body += `2. 运行 \`npm audit\` 查看安全漏洞\n`;
+            body += `3. 运行 \`npm audit fix\` 自动修复\n`;
+            body += `4. 手动更新主要版本依赖\n`;
+            
+            // 创建 Issue
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `[依赖更新] ${new Date().toISOString().split('T')[0]}`,
+              body: body,
+              labels: ['dependencies', 'maintenance']
+            });
+
+  # 自动更新补丁版本
+  auto-update-patch:
+    name: 自动更新补丁版本
+    runs-on: windows-latest
+    needs: check-updates
+    
+    steps:
+      - name: Checkout 代码
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: 设置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+      
+      - name: 配置 Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      
+      - name: 更新补丁版本
+        run: |
+          npm update --save
+          npm audit fix --audit-level=moderate
+      
+      - name: 检查变更
+        id: changes
+        run: |
+          $changed = git diff --name-only package.json package-lock.json
+          if ($changed) {
+            echo "has_changes=true" >> $env:GITHUB_OUTPUT
+          } else {
+            echo "has_changes=false" >> $env:GITHUB_OUTPUT
+          }
+      
+      - name: 创建 PR
+        if: steps.changes.outputs.has_changes == 'true'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore(deps): 自动更新依赖补丁版本'
+          title: 'chore(deps): 自动更新依赖补丁版本'
+          body: |
+            ## 🤖 自动依赖更新
+            
+            此 PR 由自动化工作流创建,包含以下更新:
+            
+            - 更新所有补丁版本依赖
+            - 自动修复中危及以上安全漏洞
+            
+            ### 检查清单
+            
+            - [ ] 审查依赖变更
+            - [ ] 确认测试通过
+            - [ ] 验证应用正常运行
+            
+            **注意**: 请在合并前仔细审查变更内容。
+          branch: chore/auto-update-dependencies
+          delete-branch: true
+          labels: |
+            dependencies
+            automated
