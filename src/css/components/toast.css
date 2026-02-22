@@ -1,7 +1,31 @@
 /**
  * Toast 通知组件样式
  * 统一的通知提示样式
+ * 
+ * 功能:
+ * - 滑入动画（从右侧滑入，使用弹性缓动）
+ * - 退出动画（淡出+滑出）
+ * - 堆叠容器样式
+ * - GPU加速优化
  */
+
+/* ========================================
+   Toast 容器
+   ======================================== */
+.toast-container {
+  position: fixed;
+  top: var(--spacing-lg);
+  right: var(--spacing-lg);
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  pointer-events: none;
+}
+
+.toast-container > * {
+  pointer-events: auto;
+}
 
 /* ========================================
    基础 Toast
@@ -9,7 +33,6 @@
 .toast {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  transition: all var(--duration-slow) var(--ease-smooth);
   border-radius: var(--radius-lg);
   padding: var(--spacing-md) var(--spacing-lg);
   color: white;
@@ -18,6 +41,11 @@
   box-shadow: var(--shadow-lg);
   /* 确保有背景色，即使变体类未应用 */
   background: rgba(51, 65, 85, 0.95);
+  /* GPU加速优化 */
+  will-change: transform, opacity;
+  /* 最小宽度确保内容可读 */
+  min-width: 280px;
+  max-width: 420px;
 }
 
 /* ========================================
@@ -61,20 +89,17 @@
 }
 
 /* ========================================
-   Toast 动画
+   Toast 进入动画
+   使用弹性缓动函数，从右侧滑入
    ======================================== */
-.toast-slide-in {
-  animation: toastSlideIn var(--duration-slow) var(--ease-spring) forwards;
+.toast-enter {
+  animation: toast-slide-in 400ms var(--micro-ease-modal) forwards;
 }
 
-.toast-slide-out {
-  animation: toastSlideOut var(--duration-slow) var(--ease-in) forwards;
-}
-
-@keyframes toastSlideIn {
+@keyframes toast-slide-in {
   from {
     opacity: 0;
-    transform: translateX(100%) scale(0.9);
+    transform: translateX(100%) scale(0.95);
   }
   to {
     opacity: 1;
@@ -82,13 +107,96 @@
   }
 }
 
-@keyframes toastSlideOut {
+/* ========================================
+   Toast 退出动画
+   淡出+向右滑出
+   ======================================== */
+.toast-exit {
+  animation: toast-slide-out 300ms var(--ease-in) forwards;
+}
+
+@keyframes toast-slide-out {
   from {
     opacity: 1;
     transform: translateX(0) scale(1);
   }
   to {
     opacity: 0;
-    transform: translateX(100%) scale(0.9);
+    transform: translateX(100%) scale(0.95);
   }
+}
+
+/* ========================================
+   Toast 堆叠位移动画
+   当Toast数量变化时，平滑调整位置
+   ======================================== */
+.toast-stack-shift {
+  transition: transform var(--micro-duration-smooth) var(--micro-ease-card);
+}
+
+/* ========================================
+   动画完成后清理 will-change
+   ======================================== */
+.toast:not(.toast-enter):not(.toast-exit) {
+  will-change: auto;
+}
+
+/* ========================================
+   禁用动画时的降级样式
+   ======================================== */
+@media (prefers-reduced-motion: reduce) {
+  .toast-enter,
+  .toast-exit {
+    animation: none;
+  }
+  
+  .toast-enter {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  
+  .toast-exit {
+    opacity: 0;
+  }
+  
+  .toast-stack-shift {
+    transition: none;
+  }
+}
+
+[data-animations="disabled"] .toast-enter,
+[data-animations="disabled"] .toast-exit {
+  animation: none;
+}
+
+[data-animations="disabled"] .toast-enter {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+}
+
+[data-animations="disabled"] .toast-exit {
+  opacity: 0;
+}
+
+[data-animations="disabled"] .toast-stack-shift {
+  transition: none;
+}
+
+/* ========================================
+   动画速度调节
+   ======================================== */
+[data-animation-speed="fast"] .toast-enter {
+  animation-duration: calc(400ms * 0.7);
+}
+
+[data-animation-speed="fast"] .toast-exit {
+  animation-duration: calc(300ms * 0.7);
+}
+
+[data-animation-speed="slow"] .toast-enter {
+  animation-duration: calc(400ms * 1.5);
+}
+
+[data-animation-speed="slow"] .toast-exit {
+  animation-duration: calc(300ms * 1.5);
 }

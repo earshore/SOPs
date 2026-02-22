@@ -1,0 +1,1017 @@
+/**
+ * 微交互动画关键帧定义
+ * 
+ * 本文件定义了所有微交互动画的关键帧，包括：
+ * 1. 按钮涟漪效果
+ * 2. Toast通知滑入滑出
+ * 3. 模态框进入退出
+ * 4. 列表项交错动画
+ * 5. 输入框错误抖动
+ * 
+ * 所有动画遵循以下原则：
+ * - 只使用 transform 和 opacity 属性（GPU加速）
+ * - 使用CSS变量控制时长和缓动函数
+ * - 支持动画禁用和速度调节
+ */
+
+
+/* ========================================
+   1. 按钮涟漪效果
+   ======================================== */
+
+/**
+ * 涟漪扩散动画
+ * 从点击位置向外扩散的圆形波纹效果
+ * 时长: 600ms
+ * 缓动: ease-out
+ */
+@keyframes ripple-expand {
+  from {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0.5;
+  }
+  to {
+    transform: translate(-50%, -50%) scale(4);
+    opacity: 0;
+  }
+}
+
+
+/* ========================================
+   2. Toast通知动画
+   ======================================== */
+
+/**
+ * Toast滑入动画
+ * 从右侧滑入，带有轻微缩放效果
+ * 时长: 400ms
+ * 缓动: spring (弹性)
+ */
+@keyframes toast-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(100%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+/**
+ * Toast滑出动画
+ * 向右滑出并淡出，带有轻微缩小
+ * 时长: 300ms
+ * 缓动: ease-in
+ */
+@keyframes toast-slide-out {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%) scale(0.95);
+  }
+}
+
+
+/* ========================================
+   3. 模态框动画
+   ======================================== */
+
+/**
+ * 模态框背景遮罩淡入
+ * 时长: 250ms
+ * 缓动: ease-out
+ */
+@keyframes modal-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/**
+ * 模态框背景遮罩淡出
+ * 时长: 200ms
+ * 缓动: ease-in
+ */
+@keyframes modal-backdrop-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/**
+ * 模态框内容进入动画
+ * 缩放 + 淡入 + 轻微上移
+ * 时长: 300ms
+ * 缓动: spring (弹性)
+ */
+@keyframes modal-content-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/**
+ * 模态框内容退出动画
+ * 缩小 + 淡出 + 轻微下移
+ * 时长: 200ms
+ * 缓动: ease-in
+ */
+@keyframes modal-content-out {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+}
+
+
+/* ========================================
+   4. 列表项交错动画
+   ======================================== */
+
+/**
+ * 列表项淡入动画
+ * 从下方滑入并淡入
+ * 时长: 350ms (gentle)
+ * 缓动: card (平滑)
+ * 
+ * 使用方式：
+ * - 通过 --stagger-index CSS变量控制延迟
+ * - 每项延迟 50ms
+ * 
+ * 验证需求:
+ * - Requirements 5.3: 列表项从20像素下方滑入
+ * - Requirements 5.4: 列表项从opacity 0淡入到1
+ */
+@keyframes list-item-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/**
+ * 列表项快速淡入动画
+ * 用于虚拟滚动场景，减少动画时长
+ * 时长: 200ms
+ */
+@keyframes list-item-fade-in-fast {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* ========================================
+   5. 输入框错误抖动动画
+   ======================================== */
+
+/**
+ * 输入框错误抖动
+ * 水平方向快速抖动，提示用户输入错误
+ * 时长: 500ms
+ * 缓动: smooth
+ */
+@keyframes input-shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-4px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(4px);
+  }
+}
+
+
+/* ========================================
+   6. 通用淡入淡出动画
+   ======================================== */
+
+/**
+ * 通用淡入动画
+ * 简单的透明度过渡
+ */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/**
+ * 通用淡出动画
+ * 简单的透明度过渡
+ */
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/**
+ * 淡入并缩放
+ * 从小到正常大小，同时淡入
+ */
+@keyframes fade-in-scale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+
+/* ========================================
+   7. 页面和导航动画
+   ======================================== */
+
+/**
+ * 页面淡入动画
+ * 用于页面切换
+ */
+@keyframes page-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/**
+ * 页面淡出动画
+ * 用于页面切换
+ */
+@keyframes page-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/**
+ * 侧边栏滑入动画
+ * 从左侧滑入
+ * 时长: 300ms
+ */
+@keyframes sidebar-slide-in {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/**
+ * 侧边栏滑出动画
+ * 向左侧滑出
+ * 时长: 250ms
+ */
+@keyframes sidebar-slide-out {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+/**
+ * 下拉菜单展开动画
+ * 从上方滑入并缩放
+ * 时长: 250ms
+ * 
+ * 验证需求:
+ * - Requirements 8.3: 下拉菜单展开时height和opacity同时动画
+ */
+@keyframes dropdown-expand {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/**
+ * 下拉菜单收起动画
+ * 向上滑出并缩小
+ * 时长: 200ms
+ */
+@keyframes dropdown-collapse {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+}
+
+/**
+ * 面包屑项淡入动画
+ * 用于面包屑项变化时的过渡
+ * 时长: 250ms
+ * 
+ * 验证需求:
+ * - Requirements 8.4: 面包屑项变化时应用淡入淡出过渡
+ */
+@keyframes breadcrumb-fade-in {
+  from {
+    opacity: 0;
+    transform: translateX(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/**
+ * 面包屑项淡出动画
+ * 用于面包屑项移除时的过渡
+ * 时长: 200ms
+ */
+@keyframes breadcrumb-fade-out {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-4px);
+  }
+}
+
+
+/* ========================================
+   8. 加载动画
+   ======================================== */
+
+/**
+ * Spinner旋转动画
+ * 连续旋转，360度/秒
+ */
+@keyframes spinner-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/**
+ * 骨架屏脉冲动画
+ * 透明度循环变化
+ */
+@keyframes skeleton-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/**
+ * 加载点跳动动画
+ * 垂直方向跳动
+ * 配合不同的 animation-delay 使用
+ */
+@keyframes dot-bounce {
+  0%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-8px);
+  }
+}
+
+/**
+ * 勾选标记绘制动画
+ * 用于表单验证成功
+ */
+@keyframes checkmark-draw {
+  0% {
+    stroke-dashoffset: 20;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+
+/* ========================================
+   9. 动画工具类
+   应用预定义的动画到元素
+   ======================================== */
+
+/* Toast动画类 */
+.toast-enter {
+  animation: toast-slide-in 400ms var(--micro-ease-modal) forwards;
+}
+
+.toast-exit {
+  animation: toast-slide-out 300ms var(--ease-in) forwards;
+}
+
+/* 模态框动画类 */
+.modal-backdrop-enter {
+  animation: modal-backdrop-in 250ms var(--ease-out) forwards;
+}
+
+.modal-backdrop-exit {
+  animation: modal-backdrop-out 200ms var(--ease-in) forwards;
+}
+
+.modal-content-enter {
+  animation: modal-content-in 300ms var(--micro-ease-modal) forwards;
+}
+
+.modal-content-exit {
+  animation: modal-content-out 200ms var(--ease-in) forwards;
+}
+
+/* 列表项交错动画类 */
+.list-stagger-item {
+  opacity: 0;
+  animation: list-item-fade-in var(--micro-duration-gentle) var(--micro-ease-card) forwards;
+  /* 使用CSS变量控制延迟: animation-delay: calc(var(--stagger-index, 0) * 50ms); */
+  animation-delay: calc(var(--stagger-index, 0) * 50ms);
+}
+
+/**
+ * 虚拟滚动优化样式
+ * Requirements 5.5: 虚拟滚动时只对新可见项应用动画
+ * 
+ * 使用方式：
+ * 1. 为虚拟滚动容器添加 .list-virtual-scroll 类
+ * 2. 新可见的项添加 .list-virtual-item 类
+ * 3. 使用更快的动画时长减少性能影响
+ */
+.list-virtual-scroll .list-virtual-item {
+  opacity: 0;
+  animation: list-item-fade-in-fast 200ms var(--micro-ease-card) forwards;
+}
+
+/**
+ * 列表项交错延迟工具类
+ * 提供预定义的延迟值，避免JavaScript计算
+ * Requirements 5.2: 每项延迟50ms
+ */
+.list-stagger-item:nth-child(1) { --stagger-index: 0; }
+.list-stagger-item:nth-child(2) { --stagger-index: 1; }
+.list-stagger-item:nth-child(3) { --stagger-index: 2; }
+.list-stagger-item:nth-child(4) { --stagger-index: 3; }
+.list-stagger-item:nth-child(5) { --stagger-index: 4; }
+.list-stagger-item:nth-child(6) { --stagger-index: 5; }
+.list-stagger-item:nth-child(7) { --stagger-index: 6; }
+.list-stagger-item:nth-child(8) { --stagger-index: 7; }
+.list-stagger-item:nth-child(9) { --stagger-index: 8; }
+.list-stagger-item:nth-child(10) { --stagger-index: 9; }
+.list-stagger-item:nth-child(11) { --stagger-index: 10; }
+.list-stagger-item:nth-child(12) { --stagger-index: 11; }
+.list-stagger-item:nth-child(13) { --stagger-index: 12; }
+.list-stagger-item:nth-child(14) { --stagger-index: 13; }
+.list-stagger-item:nth-child(15) { --stagger-index: 14; }
+.list-stagger-item:nth-child(16) { --stagger-index: 15; }
+.list-stagger-item:nth-child(17) { --stagger-index: 16; }
+.list-stagger-item:nth-child(18) { --stagger-index: 17; }
+.list-stagger-item:nth-child(19) { --stagger-index: 18; }
+.list-stagger-item:nth-child(20) { --stagger-index: 19; }
+
+/**
+ * 列表容器样式
+ * 为列表容器提供基础样式
+ */
+.list-stagger-container {
+  /* 确保列表项按顺序渲染 */
+  display: flex;
+  flex-direction: column;
+}
+
+/**
+ * 禁用列表动画
+ * 当列表动画被禁用时使用
+ */
+[data-animations="disabled"] .list-stagger-item,
+.no-list-animations .list-stagger-item {
+  opacity: 1;
+  animation: none;
+}
+
+/**
+ * 虚拟滚动性能优化
+ * 减少will-change的使用，只在动画期间应用
+ */
+.list-virtual-item {
+  will-change: opacity, transform;
+}
+
+.list-virtual-item.animation-complete {
+  will-change: auto;
+}
+
+/* 输入框错误动画类 */
+.form-input-error {
+  animation: input-shake 500ms var(--ease-smooth);
+}
+
+/* 页面切换动画类 */
+.page-enter {
+  animation: page-fade-in 300ms var(--ease-out) forwards;
+}
+
+.page-exit {
+  animation: page-fade-out 200ms var(--ease-in) forwards;
+}
+
+/* 侧边栏动画类 */
+.sidebar-enter {
+  animation: sidebar-slide-in 300ms var(--micro-ease-card) forwards;
+}
+
+.sidebar-exit {
+  animation: sidebar-slide-out 250ms var(--ease-in) forwards;
+}
+
+/* 下拉菜单动画类 */
+.dropdown-enter {
+  animation: dropdown-expand var(--micro-duration-smooth) var(--micro-ease-button) forwards;
+}
+
+.dropdown-exit {
+  animation: dropdown-collapse 200ms var(--ease-in) forwards;
+}
+
+/* 面包屑动画类 */
+.breadcrumb-item-enter {
+  animation: breadcrumb-fade-in var(--micro-duration-smooth) var(--ease-out) forwards;
+}
+
+.breadcrumb-item-exit {
+  animation: breadcrumb-fade-out 200ms var(--ease-in) forwards;
+}
+
+/* Spinner动画类 */
+.spinner {
+  animation: spinner-rotate 800ms linear infinite;
+  will-change: transform;
+}
+
+/* 骨架屏动画类 */
+.skeleton {
+  animation: skeleton-pulse 2s ease-in-out infinite;
+}
+
+/* 加载点动画类 */
+.loading-dot {
+  animation: dot-bounce 1.4s ease-in-out infinite;
+}
+
+.loading-dot:nth-child(1) {
+  animation-delay: 0ms;
+}
+
+.loading-dot:nth-child(2) {
+  animation-delay: 160ms;
+}
+
+.loading-dot:nth-child(3) {
+  animation-delay: 320ms;
+}
+
+/* 涟漪效果元素 */
+.btn-ripple-effect {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  pointer-events: none;
+  animation: ripple-expand 600ms var(--ease-out);
+}
+
+
+/* ========================================
+   10. 动画禁用支持
+   当动画被禁用时，移除所有动画效果
+   ======================================== */
+
+/* 全局动画禁用 */
+[data-animations="disabled"] *,
+[data-animations="disabled"] *::before,
+[data-animations="disabled"] *::after {
+  animation-duration: 0ms !important;
+  animation-delay: 0ms !important;
+  transition-duration: 0ms !important;
+  transition-delay: 0ms !important;
+}
+
+/* 尊重用户的系统偏好 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+
+/* ========================================
+   11. 动画速度调节
+   通过CSS变量调整动画速度
+   ======================================== */
+
+/* 快速模式 (0.7x) */
+[data-animation-speed="fast"] * {
+  animation-duration: calc(var(--animation-speed-multiplier, 1) * 0.7);
+  transition-duration: calc(var(--animation-speed-multiplier, 1) * 0.7);
+}
+
+/* 慢速模式 (1.5x) */
+[data-animation-speed="slow"] * {
+  animation-duration: calc(var(--animation-speed-multiplier, 1) * 1.5);
+  transition-duration: calc(var(--animation-speed-multiplier, 1) * 1.5);
+}
+
+
+/* ========================================
+   12. 导航组件过渡样式
+   为导航相关组件提供平滑的过渡效果
+   ======================================== */
+
+/**
+ * 页面容器过渡
+ * Requirements 8.1: 页面切换淡入淡出
+ * Requirements 8.5: 页面过渡在400ms内完成
+ */
+.page-container {
+  transition: opacity 300ms var(--ease-out);
+}
+
+.page-container.page-transitioning {
+  opacity: 0;
+}
+
+/**
+ * 侧边栏容器
+ * Requirements 8.2: 侧边栏在300ms内从边缘滑入
+ */
+.sidebar {
+  transition: transform 300ms var(--micro-ease-card);
+  will-change: transform;
+}
+
+.sidebar.sidebar-hidden {
+  transform: translateX(-100%);
+}
+
+.sidebar.sidebar-visible {
+  transform: translateX(0);
+}
+
+/* 右侧侧边栏 */
+.sidebar-right {
+  transition: transform 300ms var(--micro-ease-card);
+  will-change: transform;
+}
+
+.sidebar-right.sidebar-hidden {
+  transform: translateX(100%);
+}
+
+.sidebar-right.sidebar-visible {
+  transform: translateX(0);
+}
+
+/**
+ * 下拉菜单容器
+ * Requirements 8.3: 下拉菜单展开时height和opacity同时动画
+ */
+.dropdown-menu {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.95);
+  transform-origin: top;
+  transition: 
+    opacity var(--micro-duration-smooth) var(--micro-ease-button),
+    transform var(--micro-duration-smooth) var(--micro-ease-button);
+  pointer-events: none;
+}
+
+.dropdown-menu.dropdown-open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+/* 下拉菜单项 */
+.dropdown-item {
+  transition: 
+    background-color var(--micro-duration-quick) var(--ease-smooth),
+    color var(--micro-duration-quick) var(--ease-smooth);
+}
+
+.dropdown-item:hover {
+  background-color: var(--color-bg-hover);
+}
+
+.dropdown-item:active {
+  background-color: var(--color-bg-active);
+}
+
+/**
+ * 面包屑导航
+ * Requirements 8.4: 面包屑项变化时应用淡入淡出过渡
+ */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.breadcrumb-item {
+  transition: 
+    color var(--micro-duration-smooth) var(--ease-smooth),
+    opacity var(--micro-duration-smooth) var(--ease-smooth);
+}
+
+.breadcrumb-item:hover {
+  color: var(--color-primary);
+}
+
+.breadcrumb-item.breadcrumb-active {
+  color: var(--color-text-primary);
+  font-weight: var(--font-medium);
+}
+
+.breadcrumb-separator {
+  color: var(--color-text-tertiary);
+  transition: opacity var(--micro-duration-smooth) var(--ease-smooth);
+}
+
+/**
+ * 导航链接通用过渡
+ * 为所有导航链接提供统一的悬停效果
+ */
+.nav-link {
+  position: relative;
+  transition: 
+    color var(--micro-duration-smooth) var(--ease-smooth),
+    background-color var(--micro-duration-smooth) var(--ease-smooth);
+}
+
+.nav-link:hover {
+  color: var(--color-primary);
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--color-primary);
+  transition: width var(--micro-duration-smooth) var(--micro-ease-button);
+}
+
+.nav-link:hover::after,
+.nav-link.nav-link-active::after {
+  width: 100%;
+}
+
+/**
+ * 标签页导航
+ * 为标签页切换提供平滑过渡
+ */
+.tab-nav {
+  position: relative;
+}
+
+.tab-item {
+  transition: 
+    color var(--micro-duration-smooth) var(--ease-smooth),
+    background-color var(--micro-duration-smooth) var(--ease-smooth);
+}
+
+.tab-item:hover {
+  color: var(--color-primary);
+  background-color: var(--color-bg-hover);
+}
+
+.tab-item.tab-active {
+  color: var(--color-primary);
+}
+
+/* 标签页指示器 */
+.tab-indicator {
+  position: absolute;
+  bottom: 0;
+  height: 2px;
+  background-color: var(--color-primary);
+  transition: 
+    transform var(--micro-duration-smooth) var(--micro-ease-card),
+    width var(--micro-duration-smooth) var(--micro-ease-card);
+  will-change: transform, width;
+}
+
+/**
+ * 移动端导航菜单
+ * 汉堡菜单展开/收起动画
+ */
+.mobile-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-bg-primary);
+  transform: translateX(-100%);
+  transition: transform 300ms var(--micro-ease-card);
+  will-change: transform;
+}
+
+.mobile-nav.mobile-nav-open {
+  transform: translateX(0);
+}
+
+/* 移动端导航项交错动画 */
+.mobile-nav-item {
+  opacity: 0;
+  transform: translateX(-20px);
+  transition: 
+    opacity var(--micro-duration-gentle) var(--micro-ease-card),
+    transform var(--micro-duration-gentle) var(--micro-ease-card);
+}
+
+.mobile-nav-open .mobile-nav-item {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* 为每个导航项添加递增延迟 */
+.mobile-nav-item:nth-child(1) { transition-delay: 50ms; }
+.mobile-nav-item:nth-child(2) { transition-delay: 100ms; }
+.mobile-nav-item:nth-child(3) { transition-delay: 150ms; }
+.mobile-nav-item:nth-child(4) { transition-delay: 200ms; }
+.mobile-nav-item:nth-child(5) { transition-delay: 250ms; }
+.mobile-nav-item:nth-child(6) { transition-delay: 300ms; }
+.mobile-nav-item:nth-child(7) { transition-delay: 350ms; }
+.mobile-nav-item:nth-child(8) { transition-delay: 400ms; }
+
+/**
+ * 汉堡菜单图标动画
+ * 三条线变换为X形状
+ */
+.hamburger-icon {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.hamburger-line {
+  width: 24px;
+  height: 2px;
+  background-color: var(--color-text-primary);
+  transition: 
+    transform var(--micro-duration-smooth) var(--micro-ease-button),
+    opacity var(--micro-duration-smooth) var(--ease-smooth);
+  transform-origin: center;
+}
+
+.hamburger-icon.hamburger-open .hamburger-line:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+
+.hamburger-icon.hamburger-open .hamburger-line:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-icon.hamburger-open .hamburger-line:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+/**
+ * 页面过渡遮罩
+ * 用于页面切换时的过渡效果
+ */
+.page-transition-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-bg-primary);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms var(--ease-out);
+  z-index: var(--z-overlay);
+}
+
+.page-transition-overlay.page-transition-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/**
+ * 导航动画性能优化
+ * 在动画完成后移除will-change
+ */
+.sidebar.animation-complete,
+.sidebar-right.animation-complete,
+.mobile-nav.animation-complete,
+.tab-indicator.animation-complete {
+  will-change: auto;
+}
+
+/**
+ * 导航动画禁用支持
+ * 当动画被禁用时，导航元素立即显示/隐藏
+ */
+[data-animations="disabled"] .sidebar,
+[data-animations="disabled"] .sidebar-right,
+[data-animations="disabled"] .mobile-nav,
+[data-animations="disabled"] .dropdown-menu,
+[data-animations="disabled"] .page-container {
+  transition: none;
+}
+
+[data-animations="disabled"] .sidebar.sidebar-hidden,
+[data-animations="disabled"] .sidebar-right.sidebar-hidden {
+  display: none;
+}
+
+[data-animations="disabled"] .mobile-nav:not(.mobile-nav-open) {
+  display: none;
+}
+
+[data-animations="disabled"] .dropdown-menu:not(.dropdown-open) {
+  display: none;
+}
+
+/**
+ * Reduced Motion支持
+ * 尊重用户的系统偏好设置
+ */
+@media (prefers-reduced-motion: reduce) {
+  .sidebar,
+  .sidebar-right,
+  .mobile-nav,
+  .dropdown-menu,
+  .page-container,
+  .breadcrumb-item,
+  .nav-link,
+  .tab-item,
+  .tab-indicator,
+  .hamburger-line {
+    transition-duration: 0.01ms !important;
+  }
+  
+  .mobile-nav-item {
+    transition-delay: 0ms !important;
+  }
+}

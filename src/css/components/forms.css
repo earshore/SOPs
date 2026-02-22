@@ -55,7 +55,11 @@
   line-height: 1.5;
   color: var(--color-slate-700);
   background: white;
-  transition: all var(--duration-normal) var(--ease-smooth);
+  /* Requirements 6.1: 输入框聚焦边框过渡 - 200ms */
+  transition: 
+    border-color var(--micro-duration-smooth) var(--ease-smooth),
+    box-shadow var(--micro-duration-smooth) var(--ease-smooth),
+    background-color var(--duration-normal) var(--ease-smooth);
   resize: none;
   overflow: hidden;
 }
@@ -63,6 +67,7 @@
 .form-input:focus,
 .editor-input-modern:focus {
   outline: none;
+  /* Requirements 6.1: 聚焦时边框颜色过渡到主色调 */
   border-color: var(--color-blue-500);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   background: white;
@@ -93,13 +98,18 @@
   padding: 0.75rem 1rem;
   border: 1px solid var(--color-slate-200);
   border-radius: var(--radius-lg);
-  transition: all var(--duration-normal) var(--ease-smooth);
+  /* Requirements 6.1: 输入框聚焦边框过渡 - 200ms */
+  transition: 
+    border-color var(--micro-duration-smooth) var(--ease-smooth),
+    box-shadow var(--micro-duration-smooth) var(--ease-smooth),
+    background-color var(--duration-normal) var(--ease-smooth);
   background: white;
   color: var(--color-slate-700);
 }
 
 .form-textarea:focus {
   outline: none;
+  /* Requirements 6.1: 聚焦时边框颜色过渡到主色调 */
   border-color: var(--color-blue-500);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
@@ -145,6 +155,45 @@
   margin-left: 0.25rem;
 }
 
+/* Requirements 6.2: Label上浮动画 */
+.form-label-float {
+  position: absolute;
+  left: 0.75rem;
+  top: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--color-slate-500);
+  pointer-events: none;
+  /* Requirements 6.5: Label动画在250ms内完成 */
+  transition: 
+    transform var(--micro-duration-smooth) var(--micro-ease-button),
+    font-size var(--micro-duration-smooth) var(--micro-ease-button),
+    color var(--micro-duration-smooth) var(--ease-smooth);
+  transform-origin: left top;
+}
+
+/* 浮动标签容器 */
+.form-group-float {
+  position: relative;
+  margin-bottom: 1.25rem;
+}
+
+.form-group-float .form-input,
+.form-group-float .form-textarea {
+  padding-top: 1.25rem;
+  padding-bottom: 0.25rem;
+}
+
+/* Requirements 6.2: 聚焦或有值时Label上浮 */
+.form-input:focus ~ .form-label-float,
+.form-input:not(:placeholder-shown) ~ .form-label-float,
+.form-textarea:focus ~ .form-label-float,
+.form-textarea:not(:placeholder-shown) ~ .form-label-float {
+  transform: translateY(-0.75rem) scale(0.85);
+  font-size: 0.75rem;
+  color: var(--color-primary);
+}
+
 
 /* ========================================
    6. 表单帮助文本
@@ -172,6 +221,13 @@
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
 }
 
+/* Requirements 6.3: 输入验证失败时的抖动动画 */
+.form-input-error,
+.form-input.error.shake,
+.form-textarea.error.shake {
+  animation: input-shake 500ms var(--ease-smooth);
+}
+
 .form-error {
   font-size: 0.8125rem;
   color: var(--color-red-600);
@@ -185,12 +241,49 @@
 .form-input.success,
 .form-textarea.success {
   border-color: var(--color-green-500);
+  position: relative;
 }
 
 .form-input.success:focus,
 .form-textarea.success:focus {
   border-color: var(--color-green-500);
   box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+}
+
+/* Requirements 6.4: 输入验证成功时的勾选图标动画 */
+.form-input-success-icon,
+.form-success-icon {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  color: var(--color-green-500);
+  opacity: 0;
+  /* 淡入 + 缩放动画 */
+  animation: 
+    fade-in-scale var(--micro-duration-smooth) var(--micro-ease-button) forwards,
+    checkmark-draw 300ms var(--ease-smooth) 100ms forwards;
+}
+
+/* 成功图标容器 */
+.form-group-success {
+  position: relative;
+}
+
+.form-group-success .form-input,
+.form-group-success .form-textarea {
+  padding-right: 2.5rem;
+}
+
+/* SVG勾选图标样式 */
+.form-input-success-icon svg,
+.form-success-icon svg {
+  width: 100%;
+  height: 100%;
+  stroke-dasharray: 20;
+  stroke-dashoffset: 20;
 }
 
 
@@ -231,11 +324,16 @@
   background: white url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e") no-repeat right 0.5rem center/1.25rem 1.25rem;
   appearance: none;
   cursor: pointer;
-  transition: all var(--duration-normal) var(--ease-smooth);
+  /* Requirements 6.1: 输入框聚焦边框过渡 - 200ms */
+  transition: 
+    border-color var(--micro-duration-smooth) var(--ease-smooth),
+    box-shadow var(--micro-duration-smooth) var(--ease-smooth),
+    background-color var(--duration-normal) var(--ease-smooth);
 }
 
 .form-select:focus {
   outline: none;
+  /* Requirements 6.1: 聚焦时边框颜色过渡到主色调 */
   border-color: var(--color-blue-500);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }

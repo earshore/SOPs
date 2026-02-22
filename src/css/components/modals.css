@@ -18,12 +18,26 @@
   padding: 1rem;
   opacity: 0;
   visibility: hidden;
-  transition: all var(--duration-slow) var(--ease-smooth);
+  pointer-events: none;
+}
+
+/* 遮罩进入动画 */
+.modal-backdrop-enter {
+  animation: modal-backdrop-in 250ms var(--ease-out) forwards;
+  pointer-events: auto;
+  visibility: visible;
+}
+
+/* 遮罩退出动画 */
+.modal-backdrop-exit {
+  animation: modal-backdrop-out 200ms var(--ease-in) forwards;
+  pointer-events: none;
 }
 
 .modal-backdrop.show {
   opacity: 1;
   visibility: visible;
+  pointer-events: auto;
 }
 
 /* ========================================
@@ -39,15 +53,28 @@
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  transform: scale(0.95) translateY(20px);
+  transform: scale(0.95) translateY(10px);
   opacity: 0;
-  transition: all var(--duration-slow) var(--ease-spring);
   z-index: var(--z-modal);
+  pointer-events: none;
+}
+
+/* 内容进入动画 */
+.modal-content-enter {
+  animation: modal-content-in 300ms var(--micro-ease-modal) forwards;
+  pointer-events: auto;
+}
+
+/* 内容退出动画 */
+.modal-content-exit {
+  animation: modal-content-out 200ms var(--ease-in) forwards;
+  pointer-events: none;
 }
 
 .modal-backdrop.show .modal {
   transform: scale(1) translateY(0);
   opacity: 1;
+  pointer-events: auto;
 }
 
 /* ========================================
@@ -292,7 +319,9 @@
 /* ========================================
    动画关键帧
    ======================================== */
-@keyframes modalFadeIn {
+
+/* 遮罩淡入动画 */
+@keyframes modal-backdrop-in {
   from {
     opacity: 0;
   }
@@ -301,14 +330,37 @@
   }
 }
 
-@keyframes modalSlideUp {
+/* 遮罩淡出动画 */
+@keyframes modal-backdrop-out {
   from {
-    transform: scale(0.95) translateY(20px);
-    opacity: 0;
+    opacity: 1;
   }
   to {
-    transform: scale(1) translateY(0);
+    opacity: 0;
+  }
+}
+
+/* 内容缩放+淡入动画 */
+@keyframes modal-content-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
     opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* 内容缩放+淡出动画（反向） */
+@keyframes modal-content-out {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
   }
 }
 
