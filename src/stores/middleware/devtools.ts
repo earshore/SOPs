@@ -58,20 +58,12 @@ export const devtools = <T extends object>(
     // 连接DevTools
     const extension = window.__REDUX_DEVTOOLS_EXTENSION__.connect({ name });
     
-    // 创建初始状态
-    const initialState = config(set, get);
-    
-    // 初始化DevTools
-    extension.init(initialState);
-
     // 包装set方法以发送action到DevTools
     const devtoolsSet: typeof set = (partial, replace) => {
-      // 根据replace参数调用正确的重载
-      if (replace === true) {
-        (set as any)(partial, true);
-      } else {
-        set(partial, replace);
-      }
+      // 先调用原始set
+      set(partial, replace);
+      
+      // 获取更新后的状态
       const nextState = get();
 
       // 发送action到DevTools
@@ -84,21 +76,24 @@ export const devtools = <T extends object>(
       );
     };
 
+    // 使用包装后的set创建初始状态
+    const initialState = config(devtoolsSet, get);
+    
+    // 初始化DevTools
+    extension.init(initialState);
+
     // 监听DevTools的时间旅行
     extension.subscribe((message: any) => {
       if (message.type === 'DISPATCH' && message.state) {
         try {
           const newState = JSON.parse(message.state);
           // 使用replace=true强制替换整个状态
-          (set as any)(newState, true);
+          set(newState as any, true);
         } catch (error) {
           console.error('[DevTools] 时间旅行失败:', error);
         }
       }
     });
-
-    // 使用包装后的set重新初始化
-    config(devtoolsSet, get);
 
     return initialState;
   };

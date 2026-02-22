@@ -193,6 +193,7 @@ export class LoggerService implements ILoggerService {
       data,
       module,
       timestamp: Date.now(),
+      url: typeof window !== 'undefined' ? window.location.href : undefined,
     };
 
     // 添加到内存日志
@@ -406,11 +407,11 @@ export class LoggerService implements ILoggerService {
   /**
    * 按级别过滤日志（内部方法）
    */
-  private _getLogsByLevel(level: LogLevelValue | null = null): LogEntry[] {
-    if (level === null) {
+  private _getLogsByLevel(level?: LogLevelValue): LogEntry[] {
+    if (level === undefined) {
       return [...this.logs];
     }
-    return this.logs.filter(log => log.level >= level);
+    return this.logs.filter(log => log.level === level);
   }
 
   /**
@@ -438,17 +439,26 @@ export class LoggerService implements ILoggerService {
     }
 
     if (format === 'csv') {
-      const headers = ['时间', '级别', '模块', '消息'];
+      const headers = ['时间', '级别', '模块', '消息', 'URL'];
       const rows = this._getLogsByLevel().map(log => [
         new Date(log.timestamp).toLocaleString('zh-CN'),
-        log.levelName,
+        log.levelName.toUpperCase(),
         log.module,
         log.message,
+        log.url || ''
       ]);
+
+      // CSV转义：将双引号转义为两个双引号
+      const escapeCSV = (cell: string): string => {
+        if (cell.includes('"') || cell.includes(',') || cell.includes('\n')) {
+          return `"${cell.replace(/"/g, '""')}"`;
+        }
+        return cell;
+      };
 
       return [
         headers.join(','),
-        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+        ...rows.map(row => row.map(escapeCSV).join(','))
       ].join('\n');
     }
 

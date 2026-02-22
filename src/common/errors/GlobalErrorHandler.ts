@@ -106,8 +106,9 @@ export class GlobalErrorHandler {
   handle(error: Error | AppError, options: ErrorHandlerOptions = {}): void {
     const appError = isAppError(error) ? error : toAppError(error, options.context);
 
-    // 更新错误计数
+    // 更新错误计数和时间
     this.errorCount++;
+    this.lastErrorTime = Date.now();
 
     // 捕获到错误追踪器
     errorTracker.captureAppError(appError);

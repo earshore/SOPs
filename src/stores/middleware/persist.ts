@@ -50,29 +50,6 @@ export const persist = <T extends object>(
   } = options;
 
   return (set: StoreApi<T>['setState'], get: StoreApi<T>['getState']): T => {
-    // 创建初始状态
-    const initialState = config(set, get);
-
-    // 尝试从存储恢复状态
-    let restoredState = initialState;
-    try {
-      const item = storage.getItem(name);
-      if (item) {
-        const parsed = JSON.parse(item);
-        
-        // 处理版本迁移
-        let persistedState = parsed.state;
-        if (migrate && parsed.version !== version) {
-          persistedState = migrate(persistedState, parsed.version);
-        }
-        
-        // 合并持久化状态和初始状态
-        restoredState = merge(persistedState, initialState);
-      }
-    } catch (error) {
-      console.error('[Persist] 恢复状态失败:', error);
-    }
-
     // 包装set方法以自动持久化
     const persistedSet: typeof set = (partial, replace) => {
       set(partial, replace as any);
@@ -91,10 +68,34 @@ export const persist = <T extends object>(
       }
     };
 
-    // 使用包装后的set重新初始化
-    config(persistedSet, get);
+    // 使用包装后的set创建初始状态
+    const initialState = config(persistedSet, get);
 
-    return restoredState;
+    // 尝试从存储恢复状态
+    try {
+      const item = storage.getItem(name);
+      if (item) {
+        const parsed = JSON.parse(item);
+        
+        // 处理版本迁移
+        let persistedState = parsed.state;
+        if (migrate && parsed.version !== version) {
+          persistedState = migrate(persistedState, parsed.version);
+        }
+        
+        // 合并持久化状态和初始状态
+        const restoredState = merge(persistedState, initialState);
+        
+        // 使用set更新状态（这会触发持久化）
+        persistedSet(restoredState as any, true);
+        
+        return restoredState;
+      }
+    } catch (error) {
+      console.error('[Persist] 恢复状态失败:', error);
+    }
+
+    return initialState;
   };
 };
 

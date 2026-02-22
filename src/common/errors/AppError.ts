@@ -92,8 +92,8 @@ export class AppError extends Error {
     this.timestamp = Date.now();
     this.notify = notify;
 
-    // 保持正确的原型链
-    Object.setPrototypeOf(this, AppError.prototype);
+    // 保持正确的原型链 - 修复instanceof检查
+    Object.setPrototypeOf(this, new.target.prototype);
 
     // 捕获堆栈跟踪
     if (Error.captureStackTrace) {
@@ -150,6 +150,8 @@ export class NetworkError extends AppError {
       true
     );
     this.name = 'NetworkError';
+    // 确保原型链正确
+    Object.setPrototypeOf(this, NetworkError.prototype);
   }
 }
 
@@ -180,6 +182,8 @@ export class ApiError extends AppError {
     this.name = 'ApiError';
     this.statusCode = statusCode;
     this.response = response;
+    // 确保原型链正确
+    Object.setPrototypeOf(this, ApiError.prototype);
   }
 }
 
@@ -209,6 +213,8 @@ export class ValidationError extends AppError {
     this.name = 'ValidationError';
     this.field = field;
     this.value = value;
+    // 确保原型链正确
+    Object.setPrototypeOf(this, ValidationError.prototype);
   }
 }
 
@@ -232,6 +238,8 @@ export class BusinessError extends AppError {
       notify
     );
     this.name = 'BusinessError';
+    // 确保原型链正确
+    Object.setPrototypeOf(this, BusinessError.prototype);
   }
 }
 
@@ -255,6 +263,8 @@ export class SystemError extends AppError {
       true
     );
     this.name = 'SystemError';
+    // 确保原型链正确
+    Object.setPrototypeOf(this, SystemError.prototype);
   }
 }
 

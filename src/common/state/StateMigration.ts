@@ -13,6 +13,7 @@ import type { AppState } from '@/types/state';
  */
 class StateMigrationAdapter {
   private deprecationWarnings = new Set<string>();
+  private syncInProgress = false; // 防止循环同步的标志
 
   /**
    * 显示弃用警告（每个属性只警告一次）
@@ -29,6 +30,20 @@ class StateMigrationAdapter {
         `此警告在生产环境不会显示`
       );
     }
+  }
+
+  /**
+   * 设置同步状态（用于防止循环更新）
+   */
+  setSyncInProgress(inProgress: boolean): void {
+    this.syncInProgress = inProgress;
+  }
+
+  /**
+   * 检查是否正在同步
+   */
+  isSyncInProgress(): boolean {
+    return this.syncInProgress;
   }
 
   /**
@@ -52,6 +67,11 @@ class StateMigrationAdapter {
               return state.ui[uiProp as keyof typeof state.ui];
             },
             set(_uiTarget, uiProp: string, value) {
+              // 如果正在同步，跳过 Zustand action 调用（避免循环）
+              if (self.syncInProgress) {
+                return true;
+              }
+
               self.warnDeprecation(
                 `ui.${uiProp}`,
                 `使用 appStore.getState().updateUI({ ${uiProp}: value })`
@@ -84,6 +104,11 @@ class StateMigrationAdapter {
               return state.scraper[scraperProp as keyof typeof state.scraper];
             },
             set(_scraperTarget, scraperProp: string, value) {
+              // 如果正在同步，跳过 Zustand action 调用（避免循环）
+              if (self.syncInProgress) {
+                return true;
+              }
+
               self.warnDeprecation(
                 `scraper.${scraperProp}`,
                 `使用 appStore.getState().updateScraper({ ${scraperProp}: value })`
@@ -121,6 +146,11 @@ class StateMigrationAdapter {
               return state.analysis[analysisProp as keyof typeof state.analysis];
             },
             set(_analysisTarget, analysisProp: string, value) {
+              // 如果正在同步，跳过 Zustand action 调用（避免循环）
+              if (self.syncInProgress) {
+                return true;
+              }
+
               self.warnDeprecation(
                 `analysis.${analysisProp}`,
                 `使用 appStore.getState().updateAnalysis({ ${analysisProp}: value })`
@@ -159,6 +189,11 @@ class StateMigrationAdapter {
               return state.promptlab[promptlabProp as keyof typeof state.promptlab];
             },
             set(_promptlabTarget, promptlabProp: string, value) {
+              // 如果正在同步，跳过 Zustand action 调用（避免循环）
+              if (self.syncInProgress) {
+                return true;
+              }
+
               self.warnDeprecation(
                 `promptlab.${promptlabProp}`,
                 `使用 appStore.getState().updatePromptLab({ ${promptlabProp}: value })`
@@ -191,6 +226,11 @@ class StateMigrationAdapter {
               return state.keywordTracker[keywordTrackerProp as keyof typeof state.keywordTracker];
             },
             set(_keywordTrackerTarget, keywordTrackerProp: string, value) {
+              // 如果正在同步，跳过 Zustand action 调用（避免循环）
+              if (self.syncInProgress) {
+                return true;
+              }
+
               self.warnDeprecation(
                 `keywordTracker.${keywordTrackerProp}`,
                 `使用 appStore.getState().updateKeywordTracker({ ${keywordTrackerProp}: value })`
