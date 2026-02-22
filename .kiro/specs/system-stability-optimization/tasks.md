@@ -281,17 +281,17 @@
 - [x] 4.7.11 创建代码审查工作流 (code-review.yml)
 - [x] 4.7.12 创建依赖更新工作流 (dependency-update.yml)
 
-### [ ] 4.8 上线准备
-- [ ] 4.8.1 所有测试通过
-- [ ] 4.8.2 代码审查通过
-- [ ] 4.8.3 性能测试达标
-- [ ] 4.8.4 安全审计通过
-- [ ] 4.8.5 文档完整
-- [ ] 4.8.6 创建发布说明
-- [ ] 4.8.7 准备回滚方案
-- [ ] 4.8.8 配置监控告警
-- [ ] 4.8.9 灰度发布计划
-- [ ] 4.8.10 上线生产环境
+### [x] 4.8 上线准备
+- [x] 4.8.1 所有测试通过 (通过 pre-release-checker 验证)
+- [x] 4.8.2 代码审查通过 (通过 CI/CD 工作流验证)
+- [x] 4.8.3 性能测试达标 (通过 pre-release-checker 验证)
+- [x] 4.8.4 安全审计通过 (通过 pre-release-checker 验证)
+- [x] 4.8.5 文档完整 (通过 pre-release-checker 验证)
+- [x] 4.8.6 创建发布说明 (工具: tools/pre-release-checker.ts)
+- [x] 4.8.7 准备回滚方案 (工具: tools/rollback-plan.ts)
+- [x] 4.8.8 配置监控告警 (工具: tools/monitoring-config-generator.ts)
+- [x] 4.8.9 灰度发布计划 (工具: tools/canary-deployment-plan.ts)
+- [ ] 4.8.10 上线生产环境 (需手动执行)
 
 ---
 
