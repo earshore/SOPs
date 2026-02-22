@@ -49,7 +49,6 @@ function processFile(filePath) {
     try {
         let content = fs.readFileSync(filePath, 'utf8');
         const originalContent = content;
-        let modified = false;
         
         // 为每个TS模块创建替换规则
         for (const moduleName of TS_MODULES) {
@@ -60,7 +59,6 @@ function processFile(filePath) {
             if (pattern1.test(content) || pattern2.test(content)) {
                 content = content.replace(pattern1, `from $1${moduleName}$3`);
                 content = content.replace(pattern2, `import($1${moduleName}$3)`);
-                modified = true;
             }
         }
         

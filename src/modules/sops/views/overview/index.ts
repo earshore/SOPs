@@ -1,7 +1,8 @@
 import { loadTemplate } from "../../../../common/utils/viewLoader";
+import { safeMount } from "../../../../common/utils/safeMount";
 
 // SOPs Overview - 总览页面
-export async function mount(container: HTMLElement): Promise<void> {
+const mountInternal = async (container: HTMLElement): Promise<void> => {
     const html = await loadTemplate('src/modules/sops/views/overview/template.html');
     // ✅ 安全: 静态HTML模板，无用户输入
     container.innerHTML = html;
@@ -9,9 +10,9 @@ export async function mount(container: HTMLElement): Promise<void> {
 
     // 初始化事件监听
     initOverviewEvents(container);
+};
 
-    console.log("✅ SOPs 总览模块已挂载");
-}
+export const mount = safeMount(mountInternal, { moduleName: 'SOPs Overview' });
 
 export function unmount(): void {
     console.log("❌ SOPs 总览模块已卸载");

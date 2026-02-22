@@ -529,6 +529,11 @@
   --ease-back-in:   cubic-bezier(0.6, -0.28, 0.735, 0.045);
   --ease-back-out:  cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
+  /* ---- 微交互缓动函数 ---- */
+  --micro-ease-button: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --micro-ease-card:   cubic-bezier(0.22, 1, 0.36, 1);
+  --micro-ease-modal:  cubic-bezier(0.16, 1, 0.3, 1);
+
 
   /* ========================================
      12. 动画时长
@@ -542,6 +547,12 @@
   --duration-slowest:  700ms;
   --duration-1s:       1000ms;
   --duration-2s:       2000ms;
+
+  /* ---- 微交互动画时长 ---- */
+  --micro-duration-instant: 100ms;
+  --micro-duration-quick:   150ms;
+  --micro-duration-smooth:  250ms;
+  --micro-duration-gentle:  350ms;
 
 
   /* ========================================
@@ -631,6 +642,26 @@
   --breakpoint-lg:  1024px;
   --breakpoint-xl:  1280px;
   --breakpoint-2xl: 1536px;
+
+
+  /* ========================================
+     18. 微交互动画变换值
+     ======================================== */
+  
+  /* ---- 缩放变换 ---- */
+  --micro-scale-press: 0.98;
+  --micro-scale-hover: 1.02;
+  
+  /* ---- 位移变换 ---- */
+  --micro-translate-hover: -4px;
+  --micro-translate-press: 0px;
+
+
+  /* ========================================
+     19. 动画控制标志
+     ======================================== */
+  --animations-enabled: 1;
+  --animation-speed-multiplier: 1;
 
 }
 

@@ -23,19 +23,6 @@ const stats = {
     errors: []
 };
 
-// 静态HTML模板的特征模式
-const STATIC_PATTERNS = [
-    // 纯静态HTML（无变量）
-    /\.innerHTML\s*=\s*`[\s\S]*?`\s*;/,
-    // 字符串拼接但无变量
-    /\.innerHTML\s*=\s*['"][\s\S]*?['"]\s*;/,
-    // 多行静态模板
-    /\.innerHTML\s*=\s*`[^$]*`/
-];
-
-// 需要添加注释的模式
-const NEEDS_COMMENT_PATTERN = /(\s*)([\w.]+\.innerHTML\s*=\s*`)/;
-
 function processFile(filePath) {
     try {
         const content = fs.readFileSync(filePath, 'utf-8');

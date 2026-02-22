@@ -60,6 +60,29 @@ playwright-report/
 test-results/
 playwright/.cache/
 
+# Screenshots (保留目录结构，忽略截图文件)
+tests/screenshots/failures/*.png
+tests/screenshots/temp/
+tests/screenshots/index.json
+!tests/screenshots/.gitkeep
+!tests/screenshots/failures/.gitkeep
+
+# Lighthouse CI 报告
+.lighthouseci/*.html
+.lighthouseci/*.json
+
+# 临时快照和截图
+tests/**/*-snapshot.txt
+tests/**/*.png
+!tests/screenshots/**/*.png
+
+# ESLint 和代码质量报告
+eslint-report.json
+eslint-unused*.json
+unused-imports-report-*.html
+unused-imports-report-*.json
+test-output.txt
+
 # ==============================================================================
 # 4. Documentation
 # ==============================================================================

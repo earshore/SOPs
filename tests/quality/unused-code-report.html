@@ -1,0 +1,392 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>未使用代码分析报告</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; padding: 20px; }
+    .container { max-width: 1400px; margin: 0 auto; }
+    .header { background: white; padding: 30px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    h1 { color: #333; margin-bottom: 10px; }
+    .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px; }
+    .stat { background: #f8f9fa; padding: 15px; border-radius: 6px; border-left: 4px solid #007bff; }
+    .stat-label { font-size: 14px; color: #666; margin-bottom: 5px; }
+    .stat-value { font-size: 28px; font-weight: bold; color: #333; }
+    .section { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    h2 { color: #333; margin-bottom: 15px; font-size: 20px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+    th { background: #f8f9fa; font-weight: 600; color: #666; font-size: 14px; }
+    td { font-size: 14px; }
+    .type-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+    .type-variable { background: #e3f2fd; color: #1976d2; }
+    .type-function { background: #f3e5f5; color: #7b1fa2; }
+    .type-parameter { background: #fff3e0; color: #f57c00; }
+    .type-import { background: #e8f5e9; color: #388e3c; }
+    .type-class { background: #fce4ec; color: #c2185b; }
+    .type-other { background: #f5f5f5; color: #666; }
+    .file-path { font-family: 'Courier New', monospace; font-size: 13px; color: #666; }
+    .location { font-family: 'Courier New', monospace; font-size: 12px; color: #999; }
+    .severity-warning { color: #ff9800; }
+    .severity-error { color: #f44336; }
+    .filter-bar { margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .filter-btn { padding: 8px 16px; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer; font-size: 14px; }
+    .filter-btn.active { background: #007bff; color: white; border-color: #007bff; }
+    .filter-btn:hover { background: #f8f9fa; }
+    .filter-btn.active:hover { background: #0056b3; }
+    .search-box { padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; width: 300px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔍 未使用代码分析报告</h1>
+      <p>生成时间: 2026/2/22 20:45:47</p>
+      
+      <div class="summary">
+        <div class="stat">
+          <div class="stat-label">扫描文件数</div>
+          <div class="stat-value">315</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">有问题的文件</div>
+          <div class="stat-value">28</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">未使用项总数</div>
+          <div class="stat-value">31</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">变量</div>
+          <div class="stat-value">15</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">函数</div>
+          <div class="stat-value">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">参数</div>
+          <div class="stat-value">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">导入</div>
+          <div class="stat-value">0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>未使用代码详情</h2>
+      
+      <div class="filter-bar">
+        <button class="filter-btn active" onclick="filterByType('all')">全部 (31)</button>
+        <button class="filter-btn" onclick="filterByType('variable')">变量 (15)</button>
+        <button class="filter-btn" onclick="filterByType('function')">函数 (0)</button>
+        <button class="filter-btn" onclick="filterByType('parameter')">参数 (0)</button>
+        <button class="filter-btn" onclick="filterByType('import')">导入 (0)</button>
+        <button class="filter-btn" onclick="filterByType('class')">类 (0)</button>
+        <input type="text" class="search-box" placeholder="搜索文件或变量名..." onkeyup="searchTable(this.value)">
+      </div>
+
+      <table id="issuesTable">
+        <thead>
+          <tr>
+            <th>类型</th>
+            <th>名称</th>
+            <th>文件</th>
+            <th>位置</th>
+            <th>严重程度</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <tr data-type="variable" data-search="postcss.config.js purgecss">
+            <td><span class="type-badge type-variable">变量</span></td>
+            <td><code>purgecss</code></td>
+            <td class="file-path">postcss.config.js</td>
+            <td class="location">1:8</td>
+            <td class="severity-warning">⚠️ 警告</td>
+          </tr>
+          
+          <tr data-type="variable" data-search="src/modules/amz_hub/views/practice/marketing_calendar/index.js storage_keys">
+            <td><span class="type-badge type-variable">变量</span></td>
+            <td><code>STORAGE_KEYS</code></td>
+            <td class="file-path">src/modules/amz_hub/views/practice/marketing_calendar/index.js</td>
+            <td class="location">9:26</td>
+            <td class="severity-warning">⚠️ 警告</td>
+          </tr>
+          
+          <tr data-type="variable" data-search="src/services/performancestorage.ts id">
+            <td><span class="type-badge type-variable">变量</span></td>
+            <td><code>id</code></td>
+            <td class="file-path">src/services/performanceStorage.ts</td>
+            <td class="location">416:43</td>
+            <td class="severity-error">❌ 错误</td>
+          </tr>
+          
+          <tr data-type="other" data-search="src/services/storageservice.ts apikey">
+            <td><span class="type-badge type-other">其他</span></td>
+            <td><code>apiKey</code></td>
+            <td class="file-path">src/services/storageService.ts</td>
+            <td class="location">512:15</td>
+            <td class="severity-error">❌ 错误</td>
+          </tr>
+          
+          <tr data-type="variable" data-search="tests/check-playwright-env.js path">
+            <td><span class="type-badge type-variable">变量</span></td>
+            <td><code>path</code></td>
+            <td class="file-path">tests/check-playwright-env.js</td>
+            <td class="location">9:13</td>
+            <td class="severity-warning">⚠️ 警告</td>
+          </tr>
+          
+          <tr data-type="other" data-search="tests/diagnose-glob-import.js viewloadermodule">
+            <td><span class="type-badge type-other">其他</span></td>
+            <td><code>viewLoaderModule</code></td>
+            <td class="file-path">tests/diagnose-glob-import.js</td>
+            <td class="location">65:15</td>
+            <td class="severity-warning">⚠️ 警告</td>
+          </tr>
+          
+          <tr data-type="other" data-search="tests/diagnose-glob-import.js logs">
+            <td><span class="type-badge type-other">其他</span></td>
+            <td><code>logs</code></td>
+            <td class="file-path">tests/diagnose-glob-import.js</td>
+            <td class="location">94:13</td>
+            <td class="severity-warning">⚠️ 警告</td>
+          </tr>
+          
+          <tr data-type="variable" data-search="tests/diagnose-promptlab-routing.js _">
+            <td><span class="type-badge type-variable">变量</span></td>
+            <td><code>_</code></td>
+            <td class="file-path">tests/diagnose-promptlab-routing.js</td>
+            <td class="location">22:13</td>
+            <td class="severity-warning">⚠️ 警告</td>
+          </tr>
+          
+          <tr data-type="other" data-search="tests/performance/lighthouse-baseline.js output">
+            <td><span class="type-badge type-other">其他</span></td>
+            <td><code>output</code></td>
+            <td class="file-path">tests/performance/lighthouse-baseline.js</td>
+            <td class="location">50:11</td>
+            <td class="severity-warning">⚠️ 警告</td>
+          </tr>
+          
+          <tr data-type="other" data-search="tests/performance/lighthouse-ci-test.js healthcheck">
+            <td><span class="type-badge type-other">其他</span></td>
+            <td><code>healthcheck</code></td>
+            <td class="file-path">tests/performance/lighthouse-ci-test.js</td>
+            <td class="location">27:11</td>
+            <td class="severity-warning">⚠️ 警告</td>
+          </tr>
+          
+          <tr data-type="other" data-search="tests/performance/quick-baseline.js htmlpath">
+            <td><span class="type-badge type-other">其他</span></td>
+            <td><code>htmlPath</code></td>
+            <td class="file-path">tests/performance/quick-baseline.js</td>
+            <td class="location">59:11</td>
+            <td class="severity-warning">⚠️ 警告</td>
+          </tr>
+          
+          <tr data-type="other" data-search="tests/quality/collect-metrics.js __dirname">
+            <td><span class="type-badge type-other">其他</span></td>
+            <td><code>__dirname</code></td>
+            <td class="file-path">tests/quality/collect-metrics.js</td>
+            <td class="location">12:7</td>
+            <td class="severity-warning">⚠️ 警告</td>
+          </tr>
+          
+          <tr data-type="variable" data-search="tests/quality/fix-inline-handlers.js path">
+            <td><span class="type-badge type-variable">变量</span></td>
+            <td><code>path</code></td>
+            <td class="file-path">tests/quality/fix-inline-handlers.js</td>
+            <td class="location">2:8</td>
+            <td class="severity-warning">⚠️ 警告</td>
+          </tr>
+          
+          <tr data-type="other" data-search="tests/report-manager.js spawn">
+            <td><span class="type-badge type-other">其他</span></td>
+            <td><code>spawn</code></td>
+            <td class="file-path">tests/report-manager.js</td>
+            <td class="location">7:9</td>
+            <td class="severity-warning">⚠️ 警告</td>
+          </tr>
+          
+          <tr data-type="other" data-search="tests/unit/basemodule.test.js firstcontent">
+            <td><span class="type-badge type-other">其他</span></td>
+            <td><code>firstContent</code></td>
+            <td class="file-path">tests/unit/BaseModule.test.js</td>
+            <td class="location">78:13</td>
+            <td class="severity-warning">⚠️ 警告</td>
+          </tr>
+          
+          <tr data-type="variable" data-search="tests/unit/actionregistry.test.js getlegacycallstats">
+            <td><span class="type-badge type-variable">变量</span></td>
+            <td><code>getLegacyCallStats</code></td>
+            <td class="file-path">tests/unit/actionRegistry.test.js</td>
+            <td class="location">14:3</td>
+            <td class="severity-warning">⚠️ 警告</td>
+          </tr>
+          
+          <tr data-type="variable" data-search="tests/unit/app_center_overview.properties.test.js e">
+            <td><span class="type-badge type-variable">变量</span></td>
+            <td><code>e</code></td>
+            <td class="file-path">tests/unit/app_center_overview.properties.test.js</td>
+            <td class="location">1183:51</td>
+            <td class="severity-warning">⚠️ 警告</td>
+          </tr>
+          
+          <tr data-type="other" data-search="tests/unit/lazylibs.test.js error">
+            <td><span class="type-badge type-other">其他</span></td>
+            <td><code>error</code></td>
+            <td class="file-path">tests/unit/lazyLibs.test.js</td>
+            <td class="location">61:13</td>
+            <td class="severity-warning">⚠️ 警告</td>
+          </tr>
+          
+          <tr data-type="other" data-search="tests/unit/pluginloader.test.js mockplugins">
+            <td><span class="type-badge type-other">其他</span></td>
+            <td><code>mockPlugins</code></td>
+            <td class="file-path">tests/unit/pluginLoader.test.js</td>
+            <td class="location">14:13</td>
+            <td class="severity-warning">⚠️ 警告</td>
+          </tr>
+          
+          <tr data-type="variable" data-search="tests/unit/router.test.js id">
+            <td><span class="type-badge type-variable">变量</span></td>
+            <td><code>id</code></td>
+            <td class="file-path">tests/unit/router.test.js</td>
+            <td class="location">132:52</td>
+            <td class="severity-warning">⚠️ 警告</td>
+          </tr>
+          
+          <tr data-type="variable" data-search="tests/unit/security.test.js beforeeach">
+            <td><span class="type-badge type-variable">变量</span></td>
+            <td><code>beforeEach</code></td>
+            <td class="file-path">tests/unit/security.test.js</td>
+            <td class="location">6:32</td>
+            <td class="severity-warning">⚠️ 警告</td>
+          </tr>
+          
+          <tr data-type="variable" data-search="tests/unit/typeguards.test.js routeconfigschema">
+            <td><span class="type-badge type-variable">变量</span></td>
+            <td><code>RouteConfigSchema</code></td>
+            <td class="file-path">tests/unit/typeGuards.test.js</td>
+            <td class="location">19:3</td>
+            <td class="severity-warning">⚠️ 警告</td>
+          </tr>
+          
+          <tr data-type="variable" data-search="tests/unit/ui.test.js aftereach">
+            <td><span class="type-badge type-variable">变量</span></td>
+            <td><code>afterEach</code></td>
+            <td class="file-path">tests/unit/ui.test.js</td>
+            <td class="location">6:48</td>
+            <td class="severity-warning">⚠️ 警告</td>
+          </tr>
+          
+          <tr data-type="other" data-search="tests/unit/ui.test.js start">
+            <td><span class="type-badge type-other">其他</span></td>
+            <td><code>start</code></td>
+            <td class="file-path">tests/unit/ui.test.js</td>
+            <td class="location">232:13</td>
+            <td class="severity-warning">⚠️ 警告</td>
+          </tr>
+          
+          <tr data-type="other" data-search="tests/unit/viewloader.test.js loadlogs">
+            <td><span class="type-badge type-other">其他</span></td>
+            <td><code>loadLogs</code></td>
+            <td class="file-path">tests/unit/viewLoader.test.js</td>
+            <td class="location">28:13</td>
+            <td class="severity-warning">⚠️ 警告</td>
+          </tr>
+          
+          <tr data-type="other" data-search="tools/dev/batch-fix-static-templates.js static_patterns">
+            <td><span class="type-badge type-other">其他</span></td>
+            <td><code>STATIC_PATTERNS</code></td>
+            <td class="file-path">tools/dev/batch-fix-static-templates.js</td>
+            <td class="location">27:7</td>
+            <td class="severity-warning">⚠️ 警告</td>
+          </tr>
+          
+          <tr data-type="other" data-search="tools/dev/batch-fix-static-templates.js needs_comment_pattern">
+            <td><span class="type-badge type-other">其他</span></td>
+            <td><code>NEEDS_COMMENT_PATTERN</code></td>
+            <td class="file-path">tools/dev/batch-fix-static-templates.js</td>
+            <td class="location">37:7</td>
+            <td class="severity-warning">⚠️ 警告</td>
+          </tr>
+          
+          <tr data-type="variable" data-search="tools/dev/fix-basemodule-state-imports.js description">
+            <td><span class="type-badge type-variable">变量</span></td>
+            <td><code>description</code></td>
+            <td class="file-path">tools/dev/fix-basemodule-state-imports.js</td>
+            <td class="location">65:49</td>
+            <td class="severity-warning">⚠️ 警告</td>
+          </tr>
+          
+          <tr data-type="other" data-search="tools/dev/fix-ts-imports.js modified">
+            <td><span class="type-badge type-other">其他</span></td>
+            <td><code>modified</code></td>
+            <td class="file-path">tools/dev/fix-ts-imports.js</td>
+            <td class="location">63:17</td>
+            <td class="severity-warning">⚠️ 警告</td>
+          </tr>
+          
+          <tr data-type="variable" data-search="tools/security/xss-fixer.js risk">
+            <td><span class="type-badge type-variable">变量</span></td>
+            <td><code>risk</code></td>
+            <td class="file-path">tools/security/xss-fixer.js</td>
+            <td class="location">249:28</td>
+            <td class="severity-warning">⚠️ 警告</td>
+          </tr>
+          
+          <tr data-type="variable" data-search="tools/security/xss-scanner.js filecontent">
+            <td><span class="type-badge type-variable">变量</span></td>
+            <td><code>fileContent</code></td>
+            <td class="file-path">tools/security/xss-scanner.js</td>
+            <td class="location">187:55</td>
+            <td class="severity-warning">⚠️ 警告</td>
+          </tr>
+          
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    function filterByType(type) {
+      const rows = document.querySelectorAll('#issuesTable tbody tr');
+      const buttons = document.querySelectorAll('.filter-btn');
+      
+      buttons.forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      rows.forEach(row => {
+        if (type === 'all' || row.dataset.type === type) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+
+    function searchTable(query) {
+      const rows = document.querySelectorAll('#issuesTable tbody tr');
+      const lowerQuery = query.toLowerCase();
+      
+      rows.forEach(row => {
+        const searchText = row.dataset.search;
+        if (searchText.includes(lowerQuery)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+  </script>
+</body>
+</html>
+  

@@ -118,12 +118,33 @@ export function validateUrl(url: string): ValidationResult {
  * @returns 验证结果
  */
 export function validateApiKey(apiKey: string): ValidationResult {
-  return validateString(apiKey, {
-    required: true,
-    minLength: 10,
-    pattern: /^[a-zA-Z0-9_-]+$/,
-    errorMessage: 'API Key格式不正确'
-  });
+  // 必填检查
+  if (!apiKey || apiKey.trim() === '') {
+    return {
+      valid: false,
+      error: 'API Key为必填项'
+    };
+  }
+
+  const trimmed = apiKey.trim();
+
+  // 长度检查
+  if (trimmed.length < 10) {
+    return {
+      valid: false,
+      error: 'API Key最少需要 10 个字符'
+    };
+  }
+
+  // 格式检查
+  if (!/^[a-zA-Z0-9_-]+$/.test(trimmed)) {
+    return {
+      valid: false,
+      error: 'API Key格式不正确'
+    };
+  }
+
+  return { valid: true, sanitized: trimmed };
 }
 
 /**

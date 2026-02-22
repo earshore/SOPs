@@ -4,12 +4,13 @@
 // ================================================================
 
 import { loadTemplate } from '@/common/utils/viewLoader';
+import { safeMount } from '@/common/utils/safeMount';
 import { APP_EVENTS } from '@/common/constants/eventConstants';
 
 /**
  * 挂载 App Center 总览模块
  */
-export async function mount(container: HTMLElement): Promise<void> {
+const mountInternal = async (container: HTMLElement): Promise<void> => {
   const html = await loadTemplate('src/modules/app_center/views/overview/template.html');
   // ✅ 安全: 静态HTML模板，无用户输入
   container.innerHTML = html;
@@ -17,9 +18,9 @@ export async function mount(container: HTMLElement): Promise<void> {
 
   // 初始化事件监听
   initOverviewEvents(container);
+};
 
-  console.log('✅ App Center 总览模块已挂载');
-}
+export const mount = safeMount(mountInternal, { moduleName: 'App Center Overview' });
 
 /**
  * 卸载 App Center 总览模块

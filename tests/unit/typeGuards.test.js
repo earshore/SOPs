@@ -16,7 +16,6 @@ import {
   isHTMLElement
 } from '@/common/utils/typeGuards';
 import {
-  RouteConfigSchema,
   LLMConfigSchema
 } from '@/common/validators/schemas';
 

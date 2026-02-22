@@ -34,8 +34,8 @@
   --card-padding: var(--spacing-lg, 24px);
   --card-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04));
   --card-shadow-hover: 0 10px 40px -10px rgba(59, 130, 246, 0.15),
-                       0 4px 12px -2px rgba(0, 0, 0, 0.05);
-  --card-translate-hover: -2px;
+                       0 4px 12px -2px rgba(0, 0, 0, 0.08);
+  --card-translate-hover: -4px;
 
   position: relative;
   display: flex;
@@ -46,17 +46,18 @@
   padding: var(--card-padding);
   box-shadow: var(--card-shadow);
   transition:
-    border-color var(--duration-slow, 400ms) var(--ease-smooth),
-    box-shadow var(--duration-slow, 400ms) var(--ease-smooth),
-    transform var(--duration-slow, 400ms) var(--ease-smooth),
+    transform var(--micro-duration-gentle, 350ms) var(--micro-ease-card, cubic-bezier(0.22, 1, 0.36, 1)),
+    box-shadow var(--micro-duration-gentle, 350ms) var(--micro-ease-card, cubic-bezier(0.22, 1, 0.36, 1)),
+    border-color var(--micro-duration-gentle, 350ms) var(--micro-ease-card, cubic-bezier(0.22, 1, 0.36, 1)),
     background-color var(--duration-slow, 400ms) var(--ease-smooth);
+  will-change: transform, box-shadow;
   overflow: hidden;
 }
 
 .card:hover {
-  border-color: var(--color-primary-light, rgba(59, 130, 246, 0.3));
+  transform: translateY(var(--micro-translate-hover, -4px));
   box-shadow: var(--card-shadow-hover);
-  transform: translateY(var(--card-translate-hover));
+  border-color: var(--color-primary-light, rgba(59, 130, 246, 0.3));
 }
 
 /* 无悬停效果（静态展示卡片） */
@@ -206,7 +207,8 @@
   justify-content: center;
   font-size: 1.25rem;
   flex-shrink: 0;
-  transition: transform var(--duration-slow, 400ms) var(--ease-smooth);
+  transition: transform var(--micro-duration-smooth, 250ms) var(--micro-ease-button, cubic-bezier(0.34, 1.56, 0.64, 1));
+  will-change: transform;
 }
 
 .card:hover .card-icon {
@@ -698,7 +700,8 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform var(--duration-slow, 400ms) var(--ease-smooth);
+  transition: transform var(--micro-duration-gentle, 350ms) var(--micro-ease-card, cubic-bezier(0.22, 1, 0.36, 1));
+  will-change: transform;
 }
 
 .card:hover .card-media img {
@@ -1339,6 +1342,7 @@
   .card {
     transition: none;
     --card-translate-hover: 0;
+    will-change: auto;
   }
 
   .card:hover .card-icon {
@@ -1347,6 +1351,11 @@
 
   .card:hover .card-media img {
     transform: none;
+  }
+
+  .card-icon,
+  .card-media img {
+    will-change: auto;
   }
 
   .card-selectable[aria-selected="true"]::before,
@@ -1377,4 +1386,32 @@
   .card-selectable.is-selected {
     border-color: Highlight;
   }
+}
+
+/* ========================================
+   19. 动画性能优化
+   ======================================== */
+
+/* 动画禁用时移除will-change */
+[data-animations="disabled"] .card,
+[data-animations="disabled"] .card-icon,
+[data-animations="disabled"] .card-media img {
+  will-change: auto;
+  transition: none;
+}
+
+/* 静态卡片移除will-change */
+.card--static,
+.card-static {
+  will-change: auto;
+}
+
+/* 动画完成后自动移除will-change (通过JavaScript控制) */
+.card.animation-complete {
+  will-change: auto;
+}
+
+.card-icon.animation-complete,
+.card-media img.animation-complete {
+  will-change: auto;
 }

@@ -11,7 +11,6 @@ import {
   getRegisteredActions,
   registerActionWithLegacy,
   registerActionsWithLegacy,
-  getLegacyCallStats,
   initGlobalEventDelegation
 } from '@/common/utils/actionRegistry';
 

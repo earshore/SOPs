@@ -90,25 +90,28 @@
   outline: none;
   overflow: hidden;
 
-  /* 过渡 */
+  /* 过渡 - 使用微交互动画变量优化 */
   transition:
     color var(--duration-fast, 200ms) var(--ease-smooth),
     background-color var(--duration-fast, 200ms) var(--ease-smooth),
     border-color var(--duration-fast, 200ms) var(--ease-smooth),
-    box-shadow var(--duration-fast, 200ms) var(--ease-smooth),
-    transform var(--duration-fast, 200ms) var(--ease-smooth),
+    box-shadow var(--micro-duration-smooth, 250ms) var(--micro-ease-button),
+    transform var(--micro-duration-smooth, 250ms) var(--micro-ease-button),
     opacity var(--duration-fast, 200ms) var(--ease-smooth);
+  
+  /* 性能优化：提示浏览器元素将发生变化 */
+  will-change: transform;
 }
 
-/* 悬停抬升 */
+/* 悬停抬升 + 缩放 */
 .btn:hover {
-  transform: translateY(-1px);
+  transform: translateY(-1px) scale(var(--micro-scale-hover, 1.02));
 }
 
-/* 按压回弹 */
+/* 按压回弹 + 缩放 */
 .btn:active {
-  transform: translateY(0) scale(0.98);
-  transition-duration: var(--duration-fastest, 100ms);
+  transform: translateY(0) scale(var(--micro-scale-press, 0.98));
+  transition-duration: var(--micro-duration-quick, 150ms);
 }
 
 /* 禁用 */
@@ -121,6 +124,57 @@
   transform: none !important;
   box-shadow: none !important;
   filter: grayscale(0.1);
+  /* 禁用时移除will-change以节省资源 */
+  will-change: auto;
+}
+
+
+/* ========================================
+   涟漪效果 (Ripple Effect)
+   ======================================== */
+
+/* 涟漪效果容器 */
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+/* 涟漪动画元素 */
+.btn-ripple-effect {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  pointer-events: none;
+  animation: ripple-expand 600ms var(--ease-out);
+  will-change: transform, opacity;
+}
+
+/* 涟漪扩散动画 */
+@keyframes ripple-expand {
+  from {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0.5;
+  }
+  to {
+    transform: translate(-50%, -50%) scale(4);
+    opacity: 0;
+  }
+}
+
+/* 暗色按钮的涟漪效果 */
+.btn-secondary .btn-ripple-effect,
+.btn-ghost .btn-ripple-effect,
+.btn-outline .btn-ripple-effect,
+.btn-soft .btn-ripple-effect {
+  background: rgba(59, 130, 246, 0.4);
+}
+
+/* 危险按钮的涟漪效果 */
+.btn-danger .btn-ripple-effect,
+.btn-outline-danger .btn-ripple-effect,
+.btn-ghost-danger .btn-ripple-effect,
+.btn-soft-danger .btn-ripple-effect {
+  background: rgba(239, 68, 68, 0.4);
 }
 
 
@@ -1456,6 +1510,8 @@
 @media (prefers-reduced-motion: reduce) {
   .btn {
     transition: none !important;
+    /* 减少动画时移除will-change */
+    will-change: auto !important;
   }
 
   .btn:hover {
@@ -1488,6 +1544,11 @@
 
   .btn-fab:hover {
     transform: none !important;
+  }
+  
+  /* 禁用涟漪效果 */
+  .btn-ripple-effect {
+    display: none !important;
   }
 }
 

@@ -4,6 +4,7 @@
  */
 
 import { Product } from '../config/sampleData';
+import { ScraperData, ScraperProduct } from '../types';
 
 /**
  * 从 Scraper 单个产品数据转换为 Product 格式
@@ -15,7 +16,7 @@ export function convertScraperDataToProduct(productData: unknown): Product | nul
       return null;
     }
 
-    const product = productData as Record<string, unknown>;
+    const product = productData as ScraperProduct;
     
     console.log('[数据转换] 开始转换产品数据:', {
       asin: product.asin,
@@ -25,11 +26,22 @@ export function convertScraperDataToProduct(productData: unknown): Product | nul
       rawData: product
     });
     
-    const converted = {
-      asin: (product.asin as string) || '',
-      productTitle: (product.productTitle as string) || (product.title as string) || '',
-      feature_bullets: (product.feature_bullets as string[]) || (product.bulletPoints as string[]) || (product.bullet_points as string[]) || [],
-      customer_reviews: ((product.customer_reviews as unknown[]) || (product.reviews as unknown[]) || []).map((r: unknown) => {
+    const converted: Product = {
+      asin: product.asin || '',
+      productTitle: product.productTitle || product.title || '',
+      feature_bullets: product.feature_bullets || product.bulletPoints || product.bullet_points || [],
+      customer_reviews: ((product.customer_reviews || product.reviews || []) as unknown[]).map((r: unknown) => {
+        if (!r || typeof r !== 'object') {
+          return {
+            star_rating: 5,
+            headline: '',
+            body: '',
+            origin_country: '',
+            review_date: '',
+            _origin_site: ''
+          };
+        }
+        
         const review = r as Record<string, unknown>;
         return {
           star_rating: (review.star_rating as number) || (review.rating as number) || 5,
@@ -89,28 +101,40 @@ export function mergeProducts(products: Product[]): Product {
 /**
  * 从 Scraper 数据中提取 ASIN 列表
  */
-export function extractAsinsFromScraperData(scrapedData: any): string[] {
-  if (!scrapedData || !scrapedData.products || !Array.isArray(scrapedData.products)) {
+export function extractAsinsFromScraperData(scrapedData: unknown): string[] {
+  if (!scrapedData || typeof scrapedData !== 'object') {
     return [];
   }
   
-  return scrapedData.products
-    .map((p: any) => p.asin)
-    .filter((asin: string) => asin && typeof asin === 'string');
+  const data = scrapedData as ScraperData;
+  
+  if (!data.products || !Array.isArray(data.products)) {
+    return [];
+  }
+  
+  return data.products
+    .map(p => p.asin)
+    .filter((asin): asin is string => !!asin && typeof asin === 'string');
 }
 
 /**
  * 从 Scraper 数据中获取指定 ASIN 的产品
  */
-export function getProductsByAsins(scrapedData: any, asins: string[]): Product[] {
+export function getProductsByAsins(scrapedData: unknown, asins: string[]): Product[] {
   const products: Product[] = [];
   
-  if (!scrapedData || !scrapedData.products || !Array.isArray(scrapedData.products)) {
+  if (!scrapedData || typeof scrapedData !== 'object') {
+    return products;
+  }
+  
+  const data = scrapedData as ScraperData;
+  
+  if (!data.products || !Array.isArray(data.products)) {
     return products;
   }
   
   for (const asin of asins) {
-    const matchedProduct = scrapedData.products.find((p: any) => p.asin === asin);
+    const matchedProduct = data.products.find(p => p.asin === asin);
     if (matchedProduct) {
       const product = convertScraperDataToProduct(matchedProduct);
       if (product) {

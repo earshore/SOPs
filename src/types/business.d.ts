@@ -3,6 +3,12 @@
  * 为业务逻辑提供类型安全
  */
 
+// 从主类型文件导入 AnalysisReport 和 ScrapedData
+import type { AnalysisReport, ScrapedData, ScrapedDataMetadata } from './modules-business';
+
+// 重新导出以保持向后兼容
+export type { AnalysisReport, ScrapedData, ScrapedDataMetadata };
+
 // ==================== Scraper 模块 ====================
 
 /**
@@ -20,19 +26,7 @@ export interface ScrapedProduct {
   [key: string]: unknown;
 }
 
-/**
- * 抓取数据结构
- */
-export interface ScrapedData {
-  products: ScrapedProduct[];
-  metadata?: {
-    scrape_timestamp?: string;
-    marketplace?: string;
-    total_count?: number;
-    [key: string]: unknown;
-  };
-  [key: string]: unknown;
-}
+// ScrapedData 和 ScrapedDataMetadata 已从 modules-business.d.ts 导入并重新导出
 
 // ==================== History 模块 ====================
 
@@ -62,16 +56,7 @@ export interface CachedProduct {
 
 // ==================== Analysis 模块 ====================
 
-/**
- * 分析报告
- */
-export interface AnalysisReport {
-  summary?: string;
-  insights?: string[];
-  recommendations?: string[];
-  timestamp?: string;
-  [key: string]: unknown;
-}
+// AnalysisReport 已从 modules-business.d.ts 导入并重新导出
 
 /**
  * 产品分析数据

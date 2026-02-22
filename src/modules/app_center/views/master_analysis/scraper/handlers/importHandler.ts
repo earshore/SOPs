@@ -2,7 +2,13 @@
  * 数据导入处理器
  */
 
-import type { ScrapedData, ProductData } from '../types';
+import type { 
+    ScrapedData, 
+    ProductData, 
+    ImportResult, 
+    FileReadResult
+} from '../types';
+import type { ScrapedProduct, CustomerReview, ScraperSite } from '@/types/modules-business';
 import { validateScrapedData } from '../utils/validators';
 import { getFlag } from '../utils/formatters';
 import { HistoryService } from '../../services/historyService';
@@ -10,11 +16,12 @@ import { LANGUAGE_HEADERS } from '../../../../../../common/constants/constants';
 import { showToast } from '../../../../../../common/ui';
 import eventBus from '../../../../../../common/EventBus';
 import { APP_EVENTS, MODULE_EVENTS } from '../../../../../../common/constants/eventConstants';
+import { SafeRenderer } from '../../../../../../common/infrastructure/SafeRenderer';
 
 /**
  * 读取文件为JSON
  */
-export function readFileAsJSON(file: File): Promise<{ data: any; filename: string }> {
+export function readFileAsJSON(file: File): Promise<FileReadResult> {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         
@@ -29,7 +36,7 @@ export function readFileAsJSON(file: File): Promise<{ data: any; filename: strin
                 }
                 
                 // 尝试解析JSON
-                let json;
+                let json: unknown;
                 try {
                     json = JSON.parse(content);
                 } catch (parseError) {
@@ -64,18 +71,25 @@ export function readFileAsJSON(file: File): Promise<{ data: any; filename: strin
 /**
  * 获取评论签名（用于去重）
  */
-export function getReviewSignature(review: any): string {
-    if (review.id) return review.id;
-    return `${review.date || review.review_date || ''}_${review.author || ''}_${(review.headline || review.title || '').substring(0, 20)}`.trim();
+export function getReviewSignature(review: CustomerReview): string {
+    // 优先使用 review ID
+    if ('id' in review && review.id) return String(review.id);
+    
+    // 构建签名
+    const date = ('review_date' in review ? review.review_date : '') || '';
+    const author = review.author || '';
+    const headline = review.headline || review.title || '';
+    
+    return `${date}_${author}_${headline.substring(0, 20)}`.trim();
 }
 
 /**
  * 合并多站点产品数据
  */
 export function mergeProducts(
-    productPool: Map<string, any[]>,
+    productPool: Map<string, Array<ScrapedProduct & { _source_site?: string; _filename?: string }>>,
     targetMarketplace: string,
-    currentProductsMap: Map<string, any>
+    currentProductsMap: Map<string, ScrapedProduct>
 ): ProductData[] {
     const finalProducts: ProductData[] = [];
 
@@ -86,33 +100,38 @@ export function mergeProducts(
 
         if (!baseProduct) continue;
 
-        const mergedProduct: any = JSON.parse(JSON.stringify(baseProduct));
+        const mergedProduct: ScrapedProduct = JSON.parse(JSON.stringify(baseProduct));
         if (!mergedProduct.metadata) mergedProduct.metadata = {};
 
-        const allReviewSources: any[] = [];
+        const allReviewSources: Array<ScrapedProduct & { _source_site?: string }> = [];
         if (existingVersion) allReviewSources.push(existingVersion);
         allReviewSources.push(...versions);
 
-        const uniqueReviewsMap = new Map<string, any>();
+        const uniqueReviewsMap = new Map<string, CustomerReview>();
 
         allReviewSources.forEach(ver => {
             if (Array.isArray(ver.customer_reviews)) {
-                ver.customer_reviews.forEach((r: any) => {
+                ver.customer_reviews.forEach((r: CustomerReview) => {
                     const sig = getReviewSignature(r);
                     if (!uniqueReviewsMap.has(sig)) {
+                        const reviewWithOrigin = { ...r } as CustomerReview & { _origin_site?: string };
                         if (ver._source_site && ver._source_site !== "Unknown") {
-                            r._origin_site = ver._source_site;
+                            reviewWithOrigin._origin_site = ver._source_site;
                         }
-                        uniqueReviewsMap.set(sig, r);
+                        uniqueReviewsMap.set(sig, reviewWithOrigin);
                     }
                 });
             }
         });
 
         mergedProduct.customer_reviews = Array.from(uniqueReviewsMap.values());
-        delete mergedProduct._source_site;
-        delete mergedProduct._filename;
-        finalProducts.push(mergedProduct);
+        
+        // 清理临时字段
+        const cleanProduct = { ...mergedProduct };
+        delete (cleanProduct as ScrapedProduct & { _source_site?: string; _filename?: string })._source_site;
+        delete (cleanProduct as ScrapedProduct & { _source_site?: string; _filename?: string })._filename;
+        
+        finalProducts.push(cleanProduct);
     }
 
     return finalProducts;
@@ -173,7 +192,8 @@ export function showMarketplaceSelectionModal(sites: string[]): Promise<string |
             </div>
         `;
 
-        backdrop.innerHTML = content;
+        const renderer = SafeRenderer.getInstance();
+        renderer.renderTemplate(backdrop, content);
         document.body.appendChild(backdrop);
 
         const btnConfirm = document.getElementById(`btn-confirm-${modalId}`) as HTMLButtonElement;
@@ -205,7 +225,7 @@ export function showMarketplaceSelectionModal(sites: string[]): Promise<string |
             const selected = selectedInput ? selectedInput.value : null;
             
             cleanup();
-            setTimeout(() => resolve(selected), 0);
+            resolve(selected);
         };
 
         const handleCancel = (e: Event) => {
@@ -216,7 +236,7 @@ export function showMarketplaceSelectionModal(sites: string[]): Promise<string |
             resolved = true;
             
             cleanup();
-            setTimeout(() => resolve(null), 0);
+            resolve(null);
         };
 
         btnConfirm.addEventListener('click', handleConfirm, { once: true });
@@ -230,8 +250,8 @@ export function showMarketplaceSelectionModal(sites: string[]): Promise<string |
 export async function handleImportFiles(
     files: File[],
     currentScrapedData: ScrapedData | null,
-    selectedSite: string
-): Promise<{ success: boolean; data?: ScrapedData; error?: string }> {
+    selectedSite: ScraperSite
+): Promise<ImportResult> {
     try {
         // 验证文件类型
         const invalidFiles = files.filter(f => !f.name.toLowerCase().endsWith('.json'));
@@ -266,7 +286,7 @@ export async function handleImportFiles(
         showToast(`📂 正在解析 ${files.length} 个文件...`, "info");
 
         const fileContents = await Promise.all(files.map(f => readFileAsJSON(f)));
-        const productPool = new Map<string, any[]>();
+        const productPool = new Map<string, Array<ScrapedProduct & { _source_site?: string; _filename?: string }>>();
         const detectedSites = new Set<string>();
 
         fileContents.forEach(({ data, filename }) => {
@@ -285,24 +305,25 @@ export async function handleImportFiles(
             let fileSite: string | null = null;
             
             // 类型守卫: 检查是否是包含products的对象
-            if (!Array.isArray(data) && 'products' in data) {
-                const dataWithMeta = data as { products: any[]; metadata?: { marketplace?: string } };
+            if (typeof data === 'object' && data !== null && !Array.isArray(data) && 'products' in data) {
+                const dataWithMeta = data as { products: unknown[]; metadata?: { marketplace?: string } };
                 fileSite = dataWithMeta.metadata?.marketplace || null;
-            } else if (!Array.isArray(data) && 'metadata' in data) {
+            } else if (typeof data === 'object' && data !== null && !Array.isArray(data) && 'metadata' in data) {
                 // 单个产品对象
-                fileSite = (data as any).metadata?.marketplace || null;
+                fileSite = (data as { metadata?: { marketplace?: string } }).metadata?.marketplace || null;
             } else if (Array.isArray(data) && data.length > 0 && data[0]) {
                 // 产品数组
-                fileSite = data[0].metadata?.marketplace || null;
+                const firstProduct = data[0] as { metadata?: { marketplace?: string } };
+                fileSite = firstProduct.metadata?.marketplace || null;
             }
 
             const site = fileSite || "Unknown";
             if (fileSite) detectedSites.add(fileSite);
 
             // 使用验证后的产品列表
-            const list: any[] = validation.products || [];
+            const list: ScrapedProduct[] = validation.products || [];
 
-            list.forEach((p: any) => {
+            list.forEach((p: ScrapedProduct) => {
                 if (!p.asin) return;
                 if (!productPool.has(p.asin)) {
                     productPool.set(p.asin, []);
@@ -333,7 +354,7 @@ export async function handleImportFiles(
             targetMarketplace = currentScrapedData.metadata?.marketplace || '';
         }
 
-        const currentProductsMap = new Map<string, any>((currentScrapedData?.products || []).map((p: any) => [p.asin, p]));
+        const currentProductsMap = new Map<string, ScrapedProduct>((currentScrapedData?.products || []).map((p: ScrapedProduct) => [p.asin, p]));
         const finalProducts = mergeProducts(productPool, targetMarketplace, currentProductsMap);
 
         const scrapedData: ScrapedData = {
@@ -342,8 +363,8 @@ export async function handleImportFiles(
                 scrape_timestamp: new Date().toISOString(),
                 total_asins: finalProducts.length,
                 last_action: "multi_site_import_merge",
-                domain: (LANGUAGE_HEADERS as any)[targetMarketplace]?.domain || "unknown",
-                language: (LANGUAGE_HEADERS as any)[targetMarketplace]?.name || "unknown"
+                domain: (LANGUAGE_HEADERS as Record<string, { domain: string; name: string }>)[targetMarketplace]?.domain || "unknown",
+                language: (LANGUAGE_HEADERS as Record<string, { domain: string; name: string }>)[targetMarketplace]?.name || "unknown"
             },
             products: finalProducts
         };

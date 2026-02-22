@@ -53,12 +53,19 @@ export function searchSOPs(query: string): void {
     resultsContainer.innerHTML = '<div class="text-xs text-slate-400 text-center py-2">未找到匹配的 SOP</div>';
   } else {
     resultsContainer.innerHTML = matches.map(route => `
-      <button data-action="switch-tab" data-tab="${route.id}" onclick="window.clearSOPSearch()"
+      <button data-action="switch-tab" data-tab="${route.id}" data-clear-search="sop"
         class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all">
         <i class="${route.icon} w-4 text-center"></i>
         <span class="truncate">${route.label}</span>
       </button>
     `).join('');
+    
+    // 绑定事件处理器
+    resultsContainer.querySelectorAll('[data-clear-search="sop"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        window.clearSOPSearch?.();
+      });
+    });
   }
 
   resultsContainer.classList.remove('hidden');
@@ -122,12 +129,19 @@ export function searchHub(query: string): void {
     resultsContainer.innerHTML = '<div class="text-xs text-slate-400 text-center py-2">未找到匹配的内容</div>';
   } else {
     resultsContainer.innerHTML = matches.map(route => `
-      <button data-action="switch-tab" data-tab="${route.id}" onclick="window.clearHubSearch()"
+      <button data-action="switch-tab" data-tab="${route.id}" data-clear-search="hub"
         class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all">
         <i class="${route.icon} w-4 text-center"></i>
         <span class="truncate">${route.label}</span>
       </button>
     `).join('');
+    
+    // 绑定事件处理器
+    resultsContainer.querySelectorAll('[data-clear-search="hub"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        window.clearHubSearch?.();
+      });
+    });
   }
 
   resultsContainer.classList.remove('hidden');
@@ -210,12 +224,20 @@ export function searchSidebar(query: string): void {
     navContainer.classList.add('hidden');
   } else {
     resultsContainer.innerHTML = matches.map(route => `
-      <button data-action="switch-tab" data-tab="${route.id}" onclick="window.clearSidebarSearch()"
+      <button data-action="switch-tab" data-tab="${route.id}" data-clear-search="sidebar"
         class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all">
         <i class="${route.icon} w-4 text-center"></i>
         <span class="flex-1 text-left">${route.label}</span>
       </button>
     `).join('');
+    
+    // 绑定事件处理器
+    resultsContainer.querySelectorAll('[data-clear-search="sidebar"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        window.clearSidebarSearch?.();
+      });
+    });
+    
     resultsContainer.classList.remove('hidden');
     navContainer.classList.add('hidden');
   }

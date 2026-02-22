@@ -1,15 +1,44 @@
 /**
  * Loading 加载状态组件
+ * 
+ * 本文件定义了所有加载状态的样式，包括：
+ * 1. Spinner旋转加载器
+ * 2. 骨架屏加载
+ * 3. 进度条
+ * 4. 加载点动画
+ * 
+ * 所有动画遵循以下原则：
+ * - 使用GPU加速（transform和opacity）
+ * - 使用CSS变量控制时长和缓动
+ * - 支持动画禁用和速度调节
+ * - Requirements: 7.1, 7.2, 7.3, 7.4, 7.5
  */
 
 /* ========================================
-   旋转加载环
+   旋转加载环 (Spinner)
+   Requirements 7.1: 360度/秒的旋转速度
+   Requirements 7.5: 使用GPU加速
    ======================================== */
+
+/**
+ * Spinner旋转动画关键帧
+ * 使用transform确保GPU加速
+ * 时长: 1000ms (1秒) = 360度/秒
+ */
+@keyframes spinner-rotate-optimized {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .loading-ring {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  animation: spin 0.8s linear infinite;
+  /* 优化后的旋转动画：1秒完成360度旋转 */
+  animation: spinner-rotate-optimized 1s linear infinite;
+  /* GPU加速提示 */
+  will-change: transform;
 }
 
 /* 尺寸变体 */
@@ -72,18 +101,52 @@
   border: 2px solid currentColor;
   border-top-color: transparent;
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  /* 使用优化后的旋转动画 */
+  animation: spinner-rotate-optimized 1s linear infinite;
+  /* GPU加速提示 */
+  will-change: transform;
 }
 
 /* ========================================
    骨架屏加载
-   引用自 animations/keyframes.css
+   Requirements 7.2: 优化脉冲shimmer效果
+   Requirements 7.5: 使用GPU加速
    ======================================== */
+
+/**
+ * 骨架屏脉冲动画关键帧
+ * 使用opacity确保GPU加速
+ * 优化后的脉冲效果更加平滑自然
+ */
+@keyframes skeleton-pulse-optimized {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/**
+ * 骨架屏shimmer扫光动画
+ * 使用transform确保GPU加速
+ */
+@keyframes skeleton-shimmer-optimized {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
 .loading-skeleton {
   position: relative;
   overflow: hidden;
   border-radius: 6px;
   background: var(--color-bg-tertiary, #f3f4f6);
+  /* 优化后的脉冲动画 */
+  animation: skeleton-pulse-optimized 2s ease-in-out infinite;
 }
 
 .loading-skeleton::after {
@@ -92,12 +155,14 @@
   inset: 0;
   background: linear-gradient(
     90deg,
-    transparent 25%,
-    rgba(255, 255, 255, 0.5) 50%,
-    transparent 75%
+    transparent 0%,
+    rgba(255, 255, 255, 0.6) 50%,
+    transparent 100%
   );
-  background-size: 200% 100%;
-  animation: skeletonShimmer 1.8s ease-in-out infinite;
+  /* 优化后的shimmer动画 */
+  animation: skeleton-shimmer-optimized 2s ease-in-out infinite;
+  /* GPU加速提示 */
+  will-change: transform;
 }
 
 .dark .loading-skeleton,
@@ -109,44 +174,158 @@
 [data-theme="dark"] .loading-skeleton::after {
   background: linear-gradient(
     90deg,
-    transparent 25%,
-    rgba(255, 255, 255, 0.08) 50%,
-    transparent 75%
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 100%
   );
-  background-size: 200% 100%;
 }
 
 /* ========================================
-   三点弹跳加载
+   进度条
+   Requirements 7.3: 平滑过渡效果
+   Requirements 7.5: 使用GPU加速
    ======================================== */
-@keyframes loadingDotBounce {
+
+/**
+ * 进度条容器
+ */
+.progress-bar-container {
+  position: relative;
+  width: 100%;
+  height: 8px;
+  background: var(--color-bg-tertiary, #f3f4f6);
+  border-radius: var(--radius-full, 9999px);
+  overflow: hidden;
+}
+
+/**
+ * 进度条填充
+ * 使用transform: scaleX()确保GPU加速
+ */
+.progress-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: var(--color-primary, #3b82f6);
+  border-radius: var(--radius-full, 9999px);
+  transform-origin: left center;
+  /* 平滑过渡 */
+  transition: transform var(--micro-duration-gentle, 350ms) var(--micro-ease-card, cubic-bezier(0.22, 1, 0.36, 1));
+  /* GPU加速提示 */
+  will-change: transform;
+}
+
+/**
+ * 进度条尺寸变体
+ */
+.progress-bar-container--sm {
+  height: 4px;
+}
+
+.progress-bar-container--md {
+  height: 8px;
+}
+
+.progress-bar-container--lg {
+  height: 12px;
+}
+
+/**
+ * 不确定进度条动画
+ * 用于无法确定进度的加载状态
+ */
+@keyframes progress-indeterminate {
+  0% {
+    transform: translateX(-100%) scaleX(0.3);
+  }
+  50% {
+    transform: translateX(0%) scaleX(0.5);
+  }
+  100% {
+    transform: translateX(100%) scaleX(0.3);
+  }
+}
+
+.progress-bar--indeterminate {
+  width: 100%;
+  animation: progress-indeterminate 1.5s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* ========================================
+   加载点动画
+   Requirements 7.4: 顺序跳动效果
+   Requirements 7.5: 使用GPU加速
+   ======================================== */
+
+/**
+ * 加载点跳动动画关键帧
+ * 使用transform确保GPU加速
+ * 优化后的跳动效果更加流畅
+ */
+@keyframes loading-dot-bounce-optimized {
   0%, 80%, 100% {
-    transform: scale(0);
+    transform: translateY(0) scale(1);
     opacity: 0.4;
   }
   40% {
-    transform: scale(1);
+    transform: translateY(-8px) scale(1.1);
     opacity: 1;
   }
 }
 
 .loading-dots-bounce {
   display: inline-flex;
-  gap: 4px;
+  gap: 6px;
   align-items: center;
+  justify-content: center;
 }
 
 .loading-dots-bounce > span {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: currentColor;
-  animation: loadingDotBounce 1.4s ease-in-out infinite both;
+  /* 优化后的跳动动画 */
+  animation: loading-dot-bounce-optimized 1.4s ease-in-out infinite both;
+  /* GPU加速提示 */
+  will-change: transform, opacity;
 }
 
-.loading-dots-bounce > span:nth-child(1) { animation-delay: -0.32s; }
-.loading-dots-bounce > span:nth-child(2) { animation-delay: -0.16s; }
-.loading-dots-bounce > span:nth-child(3) { animation-delay: 0s; }
+/**
+ * 顺序延迟
+ * Requirements 7.4: 每个点有不同的延迟形成顺序效果
+ */
+.loading-dots-bounce > span:nth-child(1) {
+  animation-delay: 0ms;
+}
+
+.loading-dots-bounce > span:nth-child(2) {
+  animation-delay: 160ms;
+}
+
+.loading-dots-bounce > span:nth-child(3) {
+  animation-delay: 320ms;
+}
+
+/**
+ * 加载点尺寸变体
+ */
+.loading-dots-bounce--sm > span {
+  width: 6px;
+  height: 6px;
+}
+
+.loading-dots-bounce--md > span {
+  width: 8px;
+  height: 8px;
+}
+
+.loading-dots-bounce--lg > span {
+  width: 10px;
+  height: 10px;
+}
 
 /* ========================================
    加载文字省略点
@@ -161,4 +340,89 @@
 .loading-text::after {
   content: '';
   animation: loadingDots 1.5s steps(4, end) infinite;
+}
+
+/* ========================================
+   动画禁用支持
+   当动画被禁用时，移除所有加载动画
+   ======================================== */
+
+/**
+ * 全局动画禁用
+ */
+[data-animations="disabled"] .loading-ring,
+[data-animations="disabled"] .loading-inline::before,
+[data-animations="disabled"] .spinner {
+  animation: none;
+  /* 静态显示旋转状态 */
+  transform: rotate(45deg);
+}
+
+[data-animations="disabled"] .loading-skeleton {
+  animation: none;
+  opacity: 0.7;
+}
+
+[data-animations="disabled"] .loading-skeleton::after {
+  display: none;
+}
+
+[data-animations="disabled"] .loading-dots-bounce > span {
+  animation: none;
+  opacity: 1;
+  transform: none;
+}
+
+[data-animations="disabled"] .progress-bar {
+  transition: none;
+}
+
+/**
+ * 尊重用户的系统偏好
+ * Requirements 10.1: prefers-reduced-motion支持
+ */
+@media (prefers-reduced-motion: reduce) {
+  .loading-ring,
+  .loading-inline::before,
+  .spinner {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+  }
+  
+  .loading-skeleton {
+    animation: none;
+    opacity: 0.7;
+  }
+  
+  .loading-skeleton::after {
+    animation: none;
+  }
+  
+  .loading-dots-bounce > span {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  
+  .progress-bar {
+    transition-duration: 0.01ms;
+  }
+}
+
+/* ========================================
+   性能优化
+   动画完成后移除will-change
+   ======================================== */
+
+/**
+ * 当加载完成时，移除will-change提示
+ * 通过JavaScript添加.loading-complete类
+ */
+.loading-complete .loading-ring,
+.loading-complete .loading-inline::before,
+.loading-complete .spinner,
+.loading-complete .loading-skeleton::after,
+.loading-complete .loading-dots-bounce > span,
+.loading-complete .progress-bar {
+  will-change: auto;
 }

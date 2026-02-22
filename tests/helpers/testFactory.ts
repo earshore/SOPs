@@ -12,7 +12,7 @@ import type {
   KeywordTrackerState 
 } from '@/types/state';
 import type { Route, RouteConfig } from '@/types/config';
-import { ErrorLevel, ErrorCategory, type ErrorContext } from '@/common/errors/AppError';
+import type { ErrorContext } from '@/common/errors/AppError';
 
 /**
  * 创建测试用的UI状态

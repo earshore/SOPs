@@ -350,12 +350,12 @@ export class PerformanceMonitor {
       `;
     }).join('');
 
-    return `
+    const html = `
       <div style="margin-bottom: 12px;">
         <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
           <span style="font-size: 13px; font-weight: bold;">未读告警</span>
           <button 
-            onclick="window.__acknowledgeAllAlerts?.()"
+            data-action="acknowledge-all-alerts"
             style="background: rgba(255,255,255,0.1); border: none; color: #fff; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 10px;"
           >
             全部确认
@@ -364,6 +364,18 @@ export class PerformanceMonitor {
         ${alertsHtml}
       </div>
     `;
+    
+    // 延迟绑定事件处理器
+    setTimeout(() => {
+      const btn = this.container?.querySelector('[data-action="acknowledge-all-alerts"]');
+      if (btn) {
+        btn.addEventListener('click', () => {
+          window.__acknowledgeAllAlerts?.();
+        });
+      }
+    }, 0);
+    
+    return html;
   }
 
   /**

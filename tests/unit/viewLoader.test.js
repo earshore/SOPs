@@ -24,11 +24,6 @@ describe('ViewLoader', () => {
       
       await ensureViewLoaded('sops_overview');
       
-      // 验证加载日志
-      const loadLogs = consoleSpy.mock.calls.filter(
-        call => call[0] && call[0].includes('Lazy loading')
-      );
-      
       consoleSpy.mockRestore();
     });
 

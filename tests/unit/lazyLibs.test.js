@@ -57,9 +57,6 @@ describe('LazyLibs', () => {
     });
 
     it('should handle load errors', async () => {
-      // Simulate import failure
-      const error = new Error('Network error');
-      
       try {
         await loadChartJs();
       } catch (e) {

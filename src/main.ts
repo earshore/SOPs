@@ -22,7 +22,7 @@ if (import.meta.env.DEV) {
 
 // Expose to window for legacy compatibility (仅开发环境)
 if (import.meta.env.DEV) {
-  window.marked = marked;
+  (window as any).marked = marked;
 }
 
 // ✅ 导入全局状态对象
@@ -51,6 +51,10 @@ import { registerAllServices } from './common/di/services';
 
 // 🎯 短期优化：导入 LoadingManager
 import { loadingManager } from './common/utils/LoadingManager';
+
+// 🎯 微交互动画系统：导入动画管理器和状态管理
+import { animationManager } from './services/animation-manager';
+import { initializeAnimationStore } from './stores/animation-settings';
 
 // ✅ Import User Guide Modal (Vite Raw Import)
 import userGuideModalHtml from './components/modal/userGuideModal.html?raw';
@@ -112,7 +116,7 @@ import Alpine from 'alpinejs';
 // 这对于动态注册组件至关重要
 // 使用类型断言避免 TypeScript 错误,并确保不被 Terser 优化掉
 (window as any)['Alpine'] = Alpine;
-window.Alpine = Alpine;
+(window as any).Alpine = Alpine;
 
 // 🔧 暴露 Zustand Store 到 window (用于调试和测试)
 (window as any)['useAppStore'] = appStore;
@@ -265,6 +269,33 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     // 🎯 阶段4: 恢复用户主题设置
     ThemeManager.restoreTheme();
 
+    // 🎯 微交互动画系统: 初始化动画管理器
+    try {
+      console.log('🎨 Initializing Animation System...');
+      
+      // AnimationManager 已在导入时自动初始化（单例模式）
+      // 这里只需要初始化 AnimationStore 和设置监听器
+      initializeAnimationStore();
+      
+      // 注册性能降级回调
+      const performanceMonitor = animationManager.getPerformanceMonitor();
+      performanceMonitor.onPerformanceDrop(() => {
+        console.warn('⚠️ Animation performance degradation detected');
+        if (window.showToast) {
+          window.showToast('检测到性能下降，已自动优化动画效果', 'info');
+        }
+      });
+      
+      console.log('✅ Animation System initialized');
+      console.log('   - Animations enabled:', animationManager.getSettings().enabled);
+      console.log('   - Animation speed:', animationManager.getSettings().speed);
+      console.log('   - Respect system preference:', animationManager.getSettings().respectSystemPreference);
+      console.log('   - Reduced motion:', animationManager.shouldReduceMotion());
+    } catch (error) {
+      console.error('❌ Animation System initialization failed:', error);
+      // 动画系统初始化失败不应阻止应用启动
+    }
+
     // 🎯 阶段5: 预加载高优先级模块CSS
     import('./common/utils/moduleCssLoader').then(({ moduleCssLoader }) => {
       moduleCssLoader.preloadHighPriorityModules();
@@ -289,6 +320,35 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
         fadeInDuration: 300
       });
     });
+
+    // 🎯 微交互动画: 初始化按钮涟漪效果
+    import('./components/button-ripple').then(({ initButtonRipple, observeButtonChanges, observeAnimationSettings }) => {
+      initButtonRipple();
+      observeButtonChanges();
+      observeAnimationSettings();
+      console.log('✅ Button ripple effects initialized');
+    }).catch((error) => {
+      console.warn('按钮涟漪效果初始化失败:', error);
+    });
+
+    // 🎯 微交互动画: 初始化表单输入动画
+    import('./components/form-animation').then(({ initializeFormAnimations }) => {
+      initializeFormAnimations();
+      console.log('✅ Form input animations initialized');
+    }).catch((error) => {
+      console.warn('表单输入动画初始化失败:', error);
+    });
+
+    // 🎯 微交互动画: 初始化列表交错动画观察器
+    import('./utils/animation-utils').then(({ observeListAnimations }) => {
+      observeListAnimations();
+      console.log('✅ List stagger animations observer initialized');
+    }).catch((error) => {
+      console.warn('列表交错动画观察器初始化失败:', error);
+    });
+
+    // 🎯 微交互动画: Toast管理器已在导入时自动初始化（单例模式）
+    console.log('✅ Toast manager initialized (singleton)');
 
     // 渲染顶部 Mega Menu
     renderMegaMenu();

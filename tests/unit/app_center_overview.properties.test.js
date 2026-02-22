@@ -1180,7 +1180,7 @@ describe('App Center Overview - Property Tests', () => {
                         
                         let eventTarget = null;
                         
-                        const listener = function(e) {
+                        const listener = function(_e) {
                             eventTarget = this; // 'this' 指向事件目标
                         };
                         

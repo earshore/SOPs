@@ -201,7 +201,7 @@ function renderErrorPlaceholder(container: HTMLElement, key: string, error: Erro
                 <p class="text-sm text-gray-500 max-w-md mt-1">${error.message || '未知错误'}</p>
             </div>
             <button 
-                onclick="location.reload()" 
+                data-action="reload-page-viewloader"
                 class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm font-medium shadow-sm"
             >
                 <i class="fas fa-sync-alt mr-2"></i>刷新页面重试
@@ -209,6 +209,14 @@ function renderErrorPlaceholder(container: HTMLElement, key: string, error: Erro
         </div>
     `;
     container.insertAdjacentHTML('beforeend', errorHtml);
+    
+    // 绑定事件处理器
+    const reloadBtn = container.querySelector('[data-action="reload-page-viewloader"]');
+    if (reloadBtn) {
+        reloadBtn.addEventListener('click', () => {
+            location.reload();
+        });
+    }
 }
 
 /**
@@ -320,44 +328,38 @@ export function registerView(_viewConfig: Partial<ViewConfig>): void {
  * @param options.disableFadeIn - 是否禁用淡入动画（默认false，即启用动画）
  */
 export async function loadTemplate(path: string, options?: { disableFadeIn?: boolean }): Promise<string> {
-    try {
-        // 尝试标准化路径
-        if (!path.startsWith('/')) path = '/' + path;
+    // 尝试标准化路径
+    if (!path.startsWith('/')) path = '/' + path;
 
-        // 1. Check Cache
-        const cachedHtml = checkCache(path);
-        let html: string;
-        
-        if (cachedHtml) {
-            html = cachedHtml;
-        } else {
-            const loader = htmlModules[path];
-            if (!loader) {
-                console.error(`[ViewLoader] Template not found in registry: ${path}`);
-                // Fallback: 尝试不带前导斜杠
-                const altPath = path.substring(1);
-                if (htmlModules[altPath]) {
-                    html = await htmlModules[altPath]();
-                    setCache(path, html); // Cache for original path to avoid retry
-                } else {
-                    throw new Error(`Template path not found: ${path}`);
-                }
+    // 1. Check Cache
+    const cachedHtml = checkCache(path);
+    let html: string;
+    
+    if (cachedHtml) {
+        html = cachedHtml;
+    } else {
+        const loader = htmlModules[path];
+        if (!loader) {
+            console.error(`[ViewLoader] Template not found in registry: ${path}`);
+            // Fallback: 尝试不带前导斜杠
+            const altPath = path.substring(1);
+            if (htmlModules[altPath]) {
+                html = await htmlModules[altPath]();
+                setCache(path, html); // Cache for original path to avoid retry
             } else {
-                html = await loader();
-                setCache(path, html);
+                throw new Error(`Template path not found: ${path}`);
             }
+        } else {
+            html = await loader();
+            setCache(path, html);
         }
-        
-        // 2. 自动包裹淡入动画容器（系统级通用功能）
-        // 除非明确禁用，否则所有页面都应用淡入动画
-        if (!options?.disableFadeIn) {
-            html = `<div class="view-fade-in-initial view-fade-in">${html}</div>`;
-        }
-        
-        return html;
-    } catch (e) {
-        const error = e instanceof Error ? e : new Error(String(e));
-        console.error(`[ViewLoader] Failed to load template [${path}]:`, error);
-        return `<div class="p-4 text-red-500">Error loading template: ${error.message}</div>`;
     }
+    
+    // 2. 自动包裹淡入动画容器（系统级通用功能）
+    // 除非明确禁用，否则所有页面都应用淡入动画
+    if (!options?.disableFadeIn) {
+        html = `<div class="view-fade-in-initial view-fade-in">${html}</div>`;
+    }
+    
+    return html;
 }

@@ -4,12 +4,17 @@
 // 替代分散的 localStorage 直接调用
 // 🎯 P0-4: 已迁移到统一错误处理
 // 🎯 DI改造：移除Logger依赖，使用console直接输出
+// 🎯 P0-4.1.8: 在数据边界使用类型守卫
 // ================================================================
 
 import type { IStorageService } from '../types/services';
 import type { LLMProviderConfig } from '../types/state';
 import type { HistoryItem, ProxyConfig } from '../types/modules-business';
 import { handleSystemError } from '../common/errors';
+import { 
+  isLLMProviderConfig, 
+  isProxyConfig
+} from '../common/guards/typeGuards';
 
 /**
  * 存储键名常量
@@ -80,7 +85,8 @@ class StorageServiceClass implements IStorageService {
   }
 
   /**
-   * 获取存储值
+   * 获取存储值（带类型守卫验证）
+   * 🎯 P0-4.1.8: 在数据边界使用类型守卫
    */
   get<T = unknown>(key: string, defaultValue: T | null = null): T | null {
     try {
@@ -89,7 +95,26 @@ class StorageServiceClass implements IStorageService {
       
       this._updateAccessTime(key);
       
-      return JSON.parse(raw) as T;
+      const parsed = JSON.parse(raw);
+      
+      // 🎯 数据边界验证：对于已知类型，使用类型守卫验证
+      // 注意：这里只对特定的已知键进行验证，避免过度验证影响性能
+      // 排除 llm_active_provider，它存储的是字符串而不是配置对象
+      if (key.startsWith(STORAGE_KEYS.LLM_CONFIG_PREFIX) && key !== STORAGE_KEYS.LLM_ACTIVE_PROVIDER) {
+        if (!isLLMProviderConfig(parsed)) {
+          console.warn(`[StorageService] LLM配置格式无效，已清除: ${key}`);
+          this.remove(key);
+          return defaultValue;
+        }
+      } else if (key === STORAGE_KEYS.PROXY_CONFIG || key === STORAGE_KEYS.SCRAPER_PROXY_CONFIG) {
+        if (!isProxyConfig(parsed)) {
+          console.warn(`[StorageService] 代理配置格式无效，已清除: ${key}`);
+          this.remove(key);
+          return defaultValue;
+        }
+      }
+      
+      return parsed as T;
     } catch (e) {
       handleSystemError('SYS_PARSE_ERROR', {
         module: 'StorageService',
@@ -443,6 +468,7 @@ class StorageServiceClass implements IStorageService {
   /**
    * 获取 LLM 配置（包含加密的API密钥）
    * 🎯 DI改造：移除Logger依赖
+   * 🎯 P0-4.1.8: 在数据边界使用类型守卫
    */
   async getLLMConfigWithKey(provider: string | null = null): Promise<LLMProviderConfig | null> {
     const activeProvider = provider || this.get<string>(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
@@ -453,7 +479,15 @@ class StorageServiceClass implements IStorageService {
     
     try {
       const apiKey = await this.getSecure(`llm_key_${activeProvider}`, '');
-      return { ...config, apiKey: apiKey || '' } as LLMProviderConfig;
+      const fullConfig = { ...config, apiKey: apiKey || '' } as LLMProviderConfig;
+      
+      // 🎯 数据边界验证：验证完整配置
+      if (!isLLMProviderConfig(fullConfig)) {
+        console.warn('[StorageService] LLM完整配置格式无效');
+        return null;
+      }
+      
+      return fullConfig;
     } catch (error) {
       console.warn('[StorageService] Failed to decrypt API key', error);
       return { ...config, apiKey: '' } as LLMProviderConfig;
@@ -462,6 +496,7 @@ class StorageServiceClass implements IStorageService {
 
   /**
    * 获取 LLM 配置
+   * 🎯 P0-4.1.8: 在数据边界使用类型守卫
    */
   getLLMConfig(provider: string | null = null): Partial<LLMProviderConfig> | null {
     const activeProvider = provider || this.get<string>(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
@@ -469,9 +504,12 @@ class StorageServiceClass implements IStorageService {
     
     const config = this.get<LLMProviderConfig>(`${STORAGE_KEYS.LLM_CONFIG_PREFIX}${activeProvider}`, {} as LLMProviderConfig);
     
+    // 🎯 数据边界验证：已在 get() 方法中验证
+    if (!config) return null;
+    
     // 🔐 安全: 移除敏感的 apiKey,返回部分配置
     if (config && 'apiKey' in config) {
-      const { apiKey, ...safeConfig } = config;
+      const { apiKey: _apiKey, ...safeConfig } = config;
       return safeConfig;
     }
     
@@ -488,16 +526,31 @@ class StorageServiceClass implements IStorageService {
 
   /**
    * 获取代理配置
+   * 🎯 P0-4.1.8: 在数据边界使用类型守卫
    */
   getProxyConfig(): ProxyConfig {
     const config = this.get<ProxyConfig>(STORAGE_KEYS.PROXY_CONFIG, null);
-    return config || { type: 'allorigins', enabled: true };
+    
+    // 🎯 数据边界验证：已在 get() 方法中验证
+    // 如果验证失败，返回默认配置
+    if (!config) {
+      return { type: 'allorigins', enabled: true };
+    }
+    
+    return config;
   }
 
   /**
    * 保存代理配置
+   * 🎯 P0-4.1.8: 在数据边界使用类型守卫
    */
   setProxyConfig(config: ProxyConfig): void {
+    // 🎯 数据边界验证：保存前验证
+    if (!isProxyConfig(config)) {
+      console.error('[StorageService] 无法保存：代理配置格式无效');
+      return;
+    }
+    
     this.set(STORAGE_KEYS.PROXY_CONFIG, config);
   }
 

@@ -19,7 +19,7 @@ export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 
 export interface HttpOptions {
   method?: HttpMethod;
   headers?: Record<string, string>;
-  body?: any;
+  body?: unknown;
   timeout?: number;
   retries?: number;
   retryDelay?: number;
@@ -52,19 +52,20 @@ export interface LogEntry {
   levelName: LogLevel;
   module: string;
   message: string;
-  data?: any;
+  data?: unknown;
   error?: Error;
+  url?: string;
 }
 
 /**
  * 日志服务接口
  */
 export interface ILoggerService {
-  debug(message: string, data?: any, module?: string): void;
-  info(message: string, data?: any, module?: string): void;
-  warn(message: string, data?: any, module?: string): void;
-  error(message: string, error?: Error | any, module?: string): void;
-  fatal(message: string, error?: Error | any, module?: string): void;
+  debug(message: string, data?: unknown, module?: string): void;
+  info(message: string, data?: unknown, module?: string): void;
+  warn(message: string, data?: unknown, module?: string): void;
+  error(message: string, error?: Error | unknown, module?: string): void;
+  fatal(message: string, error?: Error | unknown, module?: string): void;
   getLogs(): LogEntry[];
   getErrors(): LogEntry[];
   clear(): void;
@@ -84,8 +85,8 @@ export interface StorageOptions {
  * 存储服务接口
  */
 export interface IStorageService {
-  get<T = any>(key: string, defaultValue?: T): T | null;
-  set<T = any>(key: string, value: T, options?: StorageOptions): void;
+  get<T = unknown>(key: string, defaultValue?: T): T | null;
+  set<T = unknown>(key: string, value: T, options?: StorageOptions): void;
   remove(key: string): void;
   clear(namespace?: string): void;
   has(key: string): boolean;
@@ -99,7 +100,7 @@ export interface PerformanceMetric {
   name: string;
   duration: number;
   timestamp: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -179,7 +180,7 @@ export interface ErrorContext {
   module?: string;
   action?: string;
   notify?: boolean;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -205,7 +206,7 @@ export interface MonitoringEvent {
  * 监控服务接口
  */
 export interface IMonitoringService {
-  captureException(error: Error, context?: Record<string, any>): void;
+  captureException(error: Error, context?: Record<string, unknown>): void;
   captureMessage(message: string, level?: 'info' | 'warning' | 'error'): void;
   captureEvent(event: MonitoringEvent): void;
   setUser(user: { id: string; email?: string; username?: string }): void;
@@ -216,14 +217,14 @@ export interface IMonitoringService {
  * HTTP服务接口
  */
 export interface IHttpService {
-  request<T = any>(url: string, options?: HttpOptions): Promise<T>;
-  get<T = any>(url: string, options?: HttpOptions): Promise<T>;
-  post<T = any>(url: string, body?: any, options?: HttpOptions): Promise<T>;
+  request<T = unknown>(url: string, options?: HttpOptions): Promise<T>;
+  get<T = unknown>(url: string, options?: HttpOptions): Promise<T>;
+  post<T = unknown>(url: string, body?: unknown, options?: HttpOptions): Promise<T>;
   loadTemplate(url: string): Promise<string>;
-  apiRequest<T = any>(url: string, token: string, options?: HttpOptions): Promise<T>;
+  apiRequest<T = unknown>(url: string, options?: HttpOptions, dataGuard?: (data: unknown) => data is T): Promise<import('./api').ApiResponse<T>>;
   createClient(baseUrl: string, defaultHeaders?: Record<string, string>): {
-    get<T = any>(path: string, options?: HttpOptions): Promise<T>;
-    post<T = any>(path: string, body?: any, options?: HttpOptions): Promise<T>;
+    get<T = unknown>(path: string, options?: HttpOptions): Promise<T>;
+    post<T = unknown>(path: string, body?: unknown, options?: HttpOptions): Promise<T>;
   };
 }
 
@@ -231,10 +232,10 @@ export interface IHttpService {
  * 配置服务接口
  */
 export interface IConfigService {
-  get<T = any>(key: string, defaultValue?: T): T;
-  set(key: string, value: any): void;
+  get<T = unknown>(key: string, defaultValue?: T): T;
+  set(key: string, value: unknown): void;
   has(key: string): boolean;
-  getAll(): Record<string, any>;
+  getAll(): Record<string, unknown>;
   reset(): void;
 }
 
@@ -242,9 +243,9 @@ export interface IConfigService {
  * 分析服务接口
  */
 export interface IAnalyticsService {
-  init(config?: any): void;
-  trackPageView(page: string, properties?: Record<string, any>): void;
-  trackEvent(event: string, properties?: Record<string, any>): void;
-  trackError(error: Error, context?: Record<string, any>): void;
-  setUser(userId: string, traits?: Record<string, any>): void;
+  init(config?: Record<string, unknown>): void;
+  trackPageView(page: string, properties?: Record<string, unknown>): void;
+  trackEvent(event: string, properties?: Record<string, unknown>): void;
+  trackError(error: Error, context?: Record<string, unknown>): void;
+  setUser(userId: string, traits?: Record<string, unknown>): void;
 }

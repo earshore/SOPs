@@ -6,7 +6,7 @@
 import { escapeHtml } from '@/common/utils/security';
 import BaseModule from "../../../../../common/BaseModule";
 import { amzf_countries, amzf_months, amzf_events } from "../../../constants/amz_hub_constants.js";
-import { StorageService, STORAGE_KEYS } from "../../../../../services/storageService.ts";
+import { StorageService } from "../../../../../services/storageService.ts";
 import { loadTemplate } from "../../../../../common/utils/viewLoader";
 import { registerActionsWithLegacy } from "../../../../../common/utils/actionRegistry";
 

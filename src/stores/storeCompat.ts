@@ -6,7 +6,7 @@
 // ================================================================
 
 import { appStore } from './useAppStore';
-import type { ValidStatePath } from '../types/state';
+import type { ValidStatePath, AppState } from '../types/state';
 
 /**
  * 路径解析结果
@@ -183,8 +183,8 @@ export class StoreCompat {
     // 处理一级路径(整个模块)
     if (!property) {
       if (module in state) {
-        const update: any = {};
-        update[module] = value;
+        const update: Partial<AppState> = {};
+        (update as any)[module] = value;
         appStore.setState(update);
       }
       return;
@@ -201,7 +201,7 @@ export class StoreCompat {
     // 2. 使用通用updater
     const updaterName = MODULE_UPDATERS[module];
     if (updaterName && typeof (state as any)[updaterName] === 'function') {
-      const updates: any = {};
+      const updates: Record<string, unknown> = {};
       updates[property] = value;
       (state as any)[updaterName](updates);
       return;
@@ -211,8 +211,8 @@ export class StoreCompat {
     console.warn(`[StoreCompat] 未找到setter: ${module}.${property}, 使用直接更新`);
     const moduleState = (state as any)[module];
     if (moduleState && typeof moduleState === 'object') {
-      const update: any = {};
-      update[module] = { ...moduleState, [property]: value };
+      const update: Partial<AppState> = {};
+      (update as any)[module] = { ...moduleState, [property]: value };
       appStore.setState(update);
     }
   }
@@ -282,7 +282,7 @@ export class StoreCompat {
    * const snapshot = storeCompat.snapshot();
    * console.log(snapshot.ui.currentTab);
    */
-  snapshot(): any {
+  snapshot(): AppState {
     return appStore.getState();
   }
 

@@ -3,7 +3,7 @@
 // UI 工具函数测试
 // ================================================================
 
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   showToast,
   showProgress,
@@ -229,7 +229,6 @@ describe('UI Utilities', () => {
     it('should work with different delays', async () => {
       vi.useFakeTimers();
       
-      const start = Date.now();
       const promise = sleep(500);
       
       vi.advanceTimersByTime(500);

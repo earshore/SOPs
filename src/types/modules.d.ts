@@ -123,7 +123,7 @@ export interface CategoryConfig {
 /**
  * 动作处理器
  */
-export type ActionHandler = (...args: any[]) => void | Promise<void>;
+export type ActionHandler = (...args: unknown[]) => void | Promise<void>;
 
 /**
  * 动作映射
@@ -142,7 +142,7 @@ export interface ModuleState {
   mounted: boolean;
   loading: boolean;
   error: Error | null;
-  data: any;
+  data: unknown;
 }
 
 /**
@@ -152,7 +152,7 @@ export interface ScraperData {
   url: string;
   title: string;
   content: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   timestamp: number;
 }
 
@@ -162,8 +162,8 @@ export interface ScraperData {
 export interface HistoryItem {
   id: string;
   timestamp: number;
-  data: any;
-  metadata?: Record<string, any>;
+  data: unknown;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -172,7 +172,7 @@ export interface HistoryItem {
 export interface AnalysisResult {
   id: string;
   type: string;
-  data: any;
+  data: unknown;
   insights?: string[];
   recommendations?: string[];
   timestamp: number;

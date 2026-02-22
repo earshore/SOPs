@@ -8,6 +8,7 @@ import state from '../../../../../../common/state';
 import { appStore } from '../../../../../../stores/useAppStore';
 import { promptlabService } from '../../services/promptlabService';
 import SITE_CONFIGS from '../../../../../../common/constants/constants';
+import type { TargetMarket } from '@/types/state';
 import { ANALYSIS_MODULES } from '../../constants/prompts';
 import { showToast } from '../../../../../../common/ui';
 import { APP_EVENTS, MODULE_EVENTS } from '../../../../../../common/constants/eventConstants';
@@ -241,7 +242,7 @@ export function createPromptlabPanel() {
                     
                     if (match) {
                         marketSelect.value = match.value;
-                        this.profile.targetMarket = match.value;
+                        this.profile.targetMarket = match.value as TargetMarket;
                         this.saveState();
                         this.lastMarketplace = currentMarketplace;
                         console.log('[Promptlab] 已自动选择市场:', match.value, `(${currentMarketplace})`);

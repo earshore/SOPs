@@ -6,18 +6,21 @@
 import state from '@common/state';
 import { showToast } from '@common/ui/index';
 import { formatHistoryDate } from '../services/reportGenerator';
+import { AlpineContext, HistoricalReportDetail } from '../types';
+import type { ScrapedData } from '@/types/modules-business';
+import { ModuleState } from '../state/moduleState';
 
 /**
  * 检查并加载 Scraper 数据
  */
-export function checkAndLoadScraperData(context: any, moduleState: any): void {
-  const scrapedData = state.scraper?.scrapedData;
+export function checkAndLoadScraperData(context: AlpineContext, moduleState: ModuleState): void {
+  const scrapedData = state.scraper?.scrapedData as ScrapedData | null;
   
   if (scrapedData && scrapedData.products && scrapedData.products.length > 0) {
     // 如果有 Scraper 数据，自动选中所有产品的 ASIN
     const asins = scrapedData.products
-      .map((p: any) => p.asin)
-      .filter((asin: string) => asin);
+      .map(p => p.asin)
+      .filter((asin): asin is string => !!asin);
     
     if (asins.length > 0 && JSON.stringify(asins) !== JSON.stringify(context.selectedAsins)) {
       context.selectedAsins = asins;
@@ -40,7 +43,7 @@ export function checkAndLoadScraperData(context: any, moduleState: any): void {
 /**
  * 检查是否有已加载的历史报告（从全局状态）
  */
-export function checkLoadedReport(context: any, moduleState: any): void {
+export function checkLoadedReport(context: AlpineContext, moduleState: ModuleState): void {
   const report = state.analysis?.analysisReport;
   
   // 类型守卫：确保 report 是对象类型
@@ -49,13 +52,13 @@ export function checkLoadedReport(context: any, moduleState: any): void {
   }
   
   // 检测报告格式：AI智能分析的新格式
-  const reportObj = report as any;
+  const reportObj = report as Record<string, unknown>;
   if (reportObj.results && Array.isArray(reportObj.results)) {
     console.log('[数据加载] 检测到已加载的"AI智能分析"报告');
     
     // 加载报告数据到当前组件
-    context.results = reportObj.results || [];
-    context.selectedTargets = reportObj.targets || [];
+    context.results = reportObj.results as typeof context.results;
+    context.selectedTargets = (reportObj.targets as string[]) || [];
     context.analysisReport = reportObj;
     
     // 同步到模块状态
@@ -70,9 +73,9 @@ export function checkLoadedReport(context: any, moduleState: any): void {
  * 加载历史分析报告
  */
 export function loadHistoricalReport(
-  context: any,
-  moduleState: any,
-  detail: { report: any; timestamp: string }
+  context: AlpineContext,
+  moduleState: ModuleState,
+  detail: HistoricalReportDetail
 ): void {
   try {
     if (!detail || !detail.report) {
@@ -80,9 +83,11 @@ export function loadHistoricalReport(
       return;
     }
 
+    const reportData = detail.report as Record<string, unknown>;
+    
     // 加载历史报告数据
-    context.results = detail.report.results || [];
-    context.selectedTargets = detail.report.targets || [];
+    context.results = (reportData.results as typeof context.results) || [];
+    context.selectedTargets = (reportData.targets as string[]) || [];
     context.analysisReport = detail.report;
     
     // 同步到模块状态
@@ -99,7 +104,7 @@ export function loadHistoricalReport(
 /**
  * 同步状态到模块状态
  */
-function syncToModuleState(context: any, moduleState: any): void {
+function syncToModuleState(context: AlpineContext, moduleState: ModuleState): void {
   moduleState.selectedAsins = context.selectedAsins;
   moduleState.selectedTargets = context.selectedTargets;
   moduleState.isAnalyzing = context.isAnalyzing;

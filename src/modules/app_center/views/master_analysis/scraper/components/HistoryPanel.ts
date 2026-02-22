@@ -2,6 +2,7 @@
  * 历史记录面板组件
  */
 
+import type { HistoryItem, ScraperSite } from '@/types/modules-business';
 import { HistoryService } from '../../services/historyService';
 import { StorageService } from '../../../../../../services/storageService';
 import { showToast } from '../../../../../../common/ui';
@@ -14,7 +15,7 @@ import { MODULE_EVENTS } from '../../../../../../common/constants/eventConstants
  * 历史记录面板类
  */
 export class HistoryPanel {
-    private history: any[] = [];
+    private history: HistoryItem[] = [];
 
     constructor() {
         this.loadHistory();
@@ -30,7 +31,7 @@ export class HistoryPanel {
     /**
      * 获取历史记录列表
      */
-    getHistory(): any[] {
+    getHistory(): HistoryItem[] {
         return this.history;
     }
 
@@ -59,7 +60,7 @@ export class HistoryPanel {
     /**
      * 加载历史快照
      */
-    loadHistoryItem(item: any, isScraping: boolean): boolean {
+    loadHistoryItem(item: HistoryItem, isScraping: boolean): boolean {
         if (isScraping) {
             if (!confirm("任务进行中，确定覆盖？")) return false;
         }
@@ -69,8 +70,8 @@ export class HistoryPanel {
             item.data.metadata = {
                 scrape_timestamp: item.timestamp || new Date().toISOString(),
                 marketplace: item.site || 'US',
-                domain: LANGUAGE_HEADERS[item.site]?.domain || 'amazon.com',
-                language: LANGUAGE_HEADERS[item.site]?.name || 'English (US)',
+                domain: (LANGUAGE_HEADERS as Record<string, { domain: string; name: string }>)[item.site]?.domain || 'amazon.com',
+                language: (LANGUAGE_HEADERS as Record<string, { domain: string; name: string }>)[item.site]?.name || 'English (US)',
                 total_asins: item.asins?.length || 0,
             };
         } else if (item.data && item.data.metadata && !item.data.metadata.marketplace) {
@@ -95,7 +96,7 @@ export class HistoryPanel {
         }
 
         state.analysis.translatedReport = null;
-        state.scraper.selectedSite = item.site as any;
+        state.scraper.selectedSite = item.site as ScraperSite;
 
         // 通知其他模块数据已更新
         eventBus.emit(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, item.data);
@@ -113,7 +114,7 @@ export class HistoryPanel {
     /**
      * 从历史快照载入分析报告（跳转到AI智能分析页面查看）
      */
-    async loadAnalysisReport(item: any): Promise<void> {
+    async loadAnalysisReport(item: HistoryItem): Promise<void> {
         if (!item.analysisStatus || !item.analysisStatus.isAnalyzed) {
             showToast("该快照没有分析报告", "warning");
             return;
@@ -130,10 +131,7 @@ export class HistoryPanel {
 
             console.log('[Scraper] 📊 已将"AI智能分析"报告加载到全局状态');
 
-            // 3. 等待状态更新
-            await new Promise(resolve => setTimeout(resolve, 100));
-
-            // 4. 跳转到 AI智能分析页面查看报告
+            // 3. 跳转到 AI智能分析页面查看报告
             if (window.switchTab) {
                 await window.switchTab('ai_analysis', true);
             }

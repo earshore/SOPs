@@ -2,7 +2,86 @@
  * 数据验证工具
  */
 
-import type { ProductData, ValidationResult } from '../types';
+import type { ProductData, ValidationResult, ScrapedData } from '../types';
+
+/**
+ * 验证 ScrapedData 的 metadata 字段
+ */
+export function validateMetadata(metadata: any): { valid: boolean; error?: string } {
+    if (!metadata || typeof metadata !== 'object') {
+        return { valid: false, error: 'metadata 必须是对象' };
+    }
+
+    // 验证必需字段
+    const requiredFields = ['scrape_timestamp', 'marketplace', 'domain', 'language', 'total_asins'];
+    for (const field of requiredFields) {
+        if (!(field in metadata)) {
+            return { valid: false, error: `metadata 缺少必需字段: ${field}` };
+        }
+    }
+
+    // 验证字段类型
+    if (typeof metadata.scrape_timestamp !== 'string') {
+        return { valid: false, error: 'metadata.scrape_timestamp 必须是字符串' };
+    }
+
+    if (typeof metadata.marketplace !== 'string') {
+        return { valid: false, error: 'metadata.marketplace 必须是字符串' };
+    }
+
+    if (typeof metadata.domain !== 'string') {
+        return { valid: false, error: 'metadata.domain 必须是字符串' };
+    }
+
+    if (typeof metadata.language !== 'string') {
+        return { valid: false, error: 'metadata.language 必须是字符串' };
+    }
+
+    if (typeof metadata.total_asins !== 'number') {
+        return { valid: false, error: 'metadata.total_asins 必须是数字' };
+    }
+
+    // 验证时间戳格式（ISO 8601）
+    try {
+        const date = new Date(metadata.scrape_timestamp);
+        if (isNaN(date.getTime())) {
+            return { valid: false, error: 'metadata.scrape_timestamp 不是有效的 ISO 8601 时间戳' };
+        }
+    } catch {
+        return { valid: false, error: 'metadata.scrape_timestamp 格式无效' };
+    }
+
+    // 验证 total_asins 为正数
+    if (metadata.total_asins < 0) {
+        return { valid: false, error: 'metadata.total_asins 必须是非负数' };
+    }
+
+    return { valid: true };
+}
+
+/**
+ * 类型守卫：检查对象是否为有效的 ScrapedData
+ */
+export function isScrapedData(data: any): data is ScrapedData {
+    if (!data || typeof data !== 'object') {
+        return false;
+    }
+
+    // 必须有 products 字段且为数组
+    if (!('products' in data) || !Array.isArray(data.products)) {
+        return false;
+    }
+
+    // 如果有 metadata，验证其结构
+    if ('metadata' in data && data.metadata !== undefined) {
+        const metadataValidation = validateMetadata(data.metadata);
+        if (!metadataValidation.valid) {
+            return false;
+        }
+    }
+
+    return true;
+}
 
 /**
  * 验证产品数据结构
@@ -56,8 +135,11 @@ export function validateProduct(product: any): ValidationResult {
 
 /**
  * 验证导入的数据结构
+ * 
+ * @param data - 待验证的数据
+ * @param strictMetadata - 是否严格验证 metadata（默认 false，兼容旧数据）
  */
-export function validateScrapedData(data: any): ValidationResult {
+export function validateScrapedData(data: any, strictMetadata: boolean = false): ValidationResult {
     if (!data || typeof data !== 'object') {
         return { valid: false, error: '数据不是有效对象' };
     }
@@ -71,6 +153,14 @@ export function validateScrapedData(data: any): ValidationResult {
     } else if ('products' in data && Array.isArray(data.products)) {
         // 格式2: 包含products字段的对象
         products = data.products;
+        
+        // 如果启用严格模式，验证 metadata
+        if (strictMetadata && 'metadata' in data && data.metadata) {
+            const metadataValidation = validateMetadata(data.metadata);
+            if (!metadataValidation.valid) {
+                return { valid: false, error: `metadata 验证失败: ${metadataValidation.error}` };
+            }
+        }
     } else if ('asin' in data) {
         // 格式3: 单个产品对象
         products = [data];

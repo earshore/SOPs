@@ -2,7 +2,15 @@
  * Scraper Panel Alpine.js 组件核心逻辑
  */
 
-import type { Task, ProxyConfig, DataTab } from '../types';
+import type { 
+    Task, 
+    ProxyConfig, 
+    DataTab, 
+    ProxyConfigStatus,
+    ImportResult,
+    DeleteResult
+} from '../types';
+import type { ScraperSite } from '@/types/modules-business';
 import state from '../../../../../../common/state';
 import { StorageService, STORAGE_KEYS } from '../../../../../../services/storageService';
 import { ErrorService } from '../../../../../../services/errorService';
@@ -13,6 +21,7 @@ import { getFlag, getSiteName, formatDate } from '../utils/formatters';
 import { startScrape, handleScrapeComplete, updateTask } from '../handlers/scrapeHandler';
 import { handleImportFiles as handleImportFilesCore } from '../handlers/importHandler';
 import { deleteProduct as deleteProductCore, deleteReview as deleteReviewCore, confirmWithModal } from '../handlers/dataOperations';
+import type { ScrapedData, ScrapedProduct, HistoryItem } from '@/types/modules-business';
 import { DataPreview, DataPreviewState } from './DataPreview';
 import { HistoryPanel } from './HistoryPanel';
 
@@ -23,7 +32,7 @@ export function createScraperPanel() {
     return {
         // ========== State ==========
         inputAsins: '',
-        selectedSite: 'DE',
+        selectedSite: 'DE' as ScraperSite,
         scrapeReviews: true,
         isScraping: false,
         currentDataTab: 'preview' as DataTab, // 添加直接的状态属性
@@ -41,7 +50,7 @@ export function createScraperPanel() {
         _isRendering: false,
 
         // Constants for View
-        sites: ['DE', 'FR', 'IT', 'ES', 'NL', 'SE', 'PL', 'BE', 'IE', 'UK'],
+        sites: ['DE', 'FR', 'IT', 'ES', 'NL', 'SE', 'PL', 'BE', 'IE', 'UK'] as ScraperSite[],
 
         // ========== Computed Properties ==========
 
@@ -59,11 +68,11 @@ export function createScraperPanel() {
         },
 
         get hasData(): boolean {
-            return state.scraper.scrapedData?.products?.length > 0;
+            return (state.scraper.scrapedData?.products?.length ?? 0) > 0;
         },
 
-        get proxyConfigStatus(): { name: string; ready: boolean; type: string } {
-            const config = StorageService.get(STORAGE_KEYS.PROXY_CONFIG) as ProxyConfig || { type: 'allorigins' };
+        get proxyConfigStatus(): ProxyConfigStatus {
+            const config = StorageService.get(STORAGE_KEYS.PROXY_CONFIG) as ProxyConfig | null || { type: 'allorigins' as const };
             const map: Record<string, string> = {
                 scraperapi: 'ScraperAPI', zenrows: 'ZenRows', brightdata: 'Bright Data',
                 custom_api: 'Custom API', allorigins: '自动托管', custom_proxy: 'HTTP 代理'
@@ -82,7 +91,7 @@ export function createScraperPanel() {
             return this.dataPreview?.totalPages || 0;
         },
 
-        get paginatedProducts(): any[] {
+        get paginatedProducts(): ScrapedProduct[] {
             return this.dataPreview?.paginatedProducts || [];
         },
 
@@ -99,7 +108,19 @@ export function createScraperPanel() {
         },
 
         // 历史记录相关计算属性
-        get history(): any[] {
+        get history(): Array<{
+            id: string | number;
+            timestamp: string;
+            site: string;
+            asins: string[];
+            data: ScrapedData;
+            report?: unknown;
+            analysisStatus?: {
+                isAnalyzed: boolean;
+                analyzedAt?: string;
+                analysisReport?: unknown;
+            };
+        }> {
             return this.historyPanel?.getHistory() || [];
         },
 
@@ -138,26 +159,18 @@ export function createScraperPanel() {
             // 如果有数据则渲染预览
             if (this.hasData && this.dataPreview) {
                 console.log('[Scraper] 📦 检测到数据，准备初始化渲染');
-                // 延迟渲染，确保 DOM 已经准备好
-                setTimeout(() => {
-                    console.log('[Scraper] ⏰ 延迟渲染开始');
-                    if (this.dataPreview) {
-                        console.log('[Scraper] 📊 检查大数据集');
-                        this.dataPreview.checkLargeDataset();
-                        
-                        console.log('[Scraper] 🎯 设置事件委托');
-                        this.dataPreview.setupEventDelegation((asin) => {
-                            console.log('[Scraper] 🖱️ 事件委托触发，ASIN:', asin);
-                            this.toggleCardExpand(asin);
-                        });
-                        
-                        console.log('[Scraper] 🎨 执行初始渲染');
-                        this.renderDataPanel();
-                        console.log('[Scraper] ✅ 初始化渲染完成');
-                    } else {
-                        console.warn('[Scraper] ⚠️ dataPreview 在延迟后不存在');
-                    }
-                }, 0);
+                console.log('[Scraper] 📊 检查大数据集');
+                this.dataPreview.checkLargeDataset();
+                
+                console.log('[Scraper] 🎯 设置事件委托');
+                this.dataPreview.setupEventDelegation((asin) => {
+                    console.log('[Scraper] 🖱️ 事件委托触发，ASIN:', asin);
+                    this.toggleCardExpand(asin);
+                });
+                
+                console.log('[Scraper] 🎨 执行初始渲染');
+                this.renderDataPanel();
+                console.log('[Scraper] ✅ 初始化渲染完成');
             } else {
                 console.log('[Scraper] ℹ️ 无数据或 dataPreview 不存在，跳过初始渲染', {
                     hasData: this.hasData,
@@ -191,7 +204,7 @@ export function createScraperPanel() {
             let hasChanges = false;
             
             if (state.scraper.selectedSite !== this.selectedSite) {
-                state.scraper.selectedSite = this.selectedSite as any;
+                state.scraper.selectedSite = this.selectedSite;
                 hasChanges = true;
             }
             
@@ -226,8 +239,8 @@ export function createScraperPanel() {
 
         // ========== Actions ==========
 
-        selectSite(site: string) {
-            this.selectedSite = site as any;
+        selectSite(site: ScraperSite) {
+            this.selectedSite = site;
             this.saveState();
         },
 
@@ -248,12 +261,12 @@ export function createScraperPanel() {
             this.historyPanel?.clearAllHistory();
         },
 
-        loadHistoryItem(item: any) {
+        loadHistoryItem(item: HistoryItem) {
             const success = this.historyPanel?.loadHistoryItem(item, this.isScraping);
             if (success) {
                 // 恢复本地状态
                 this.inputAsins = Array.isArray(item.asins) ? item.asins.join('\n') : '';
-                this.selectedSite = item.site;
+                this.selectedSite = item.site as ScraperSite;
 
                 // 更新数据预览
                 if (this.dataPreview) {
@@ -264,7 +277,7 @@ export function createScraperPanel() {
             }
         },
 
-        async loadAnalysisReport(item: any) {
+        async loadAnalysisReport(item: HistoryItem) {
             await this.historyPanel?.loadAnalysisReport(item);
         },
 
@@ -351,7 +364,7 @@ export function createScraperPanel() {
             if (files.length === 0) return;
 
             try {
-                const result = await handleImportFilesCore(
+                const result: ImportResult = await handleImportFilesCore(
                     files,
                     state.scraper.scrapedData,
                     this.selectedSite
@@ -365,8 +378,8 @@ export function createScraperPanel() {
                     // 如果没有现有数据，更新选中的站点
                     if (!state.scraper.scrapedData || !state.scraper.scrapedData.products || state.scraper.scrapedData.products.length === 0) {
                         const marketplace = result.data.metadata?.marketplace || 'DE';
-                        state.scraper.selectedSite = marketplace as any;
-                        this.selectedSite = marketplace;
+                        state.scraper.selectedSite = marketplace as ScraperSite;
+                        this.selectedSite = marketplace as ScraperSite;
                     }
 
                     // 更新数据预览
@@ -387,7 +400,7 @@ export function createScraperPanel() {
         /**
          * 更新数据并重新设置事件委托
          */
-        updateDataPreview(data: any): void {
+        updateDataPreview(data: ScrapedData | null): void {
             if (!this.dataPreview) return;
             
             console.log('[Scraper] 🔄 更新数据预览');
@@ -487,7 +500,7 @@ export function createScraperPanel() {
         },
 
         async deleteProduct(asin: string): Promise<void> {
-            const result = await deleteProductCore(
+            const result: DeleteResult = await deleteProductCore(
                 asin,
                 state.scraper.scrapedData,
                 confirmWithModal
@@ -509,7 +522,7 @@ export function createScraperPanel() {
         },
 
         async deleteReview(asin: string, index: number): Promise<void> {
-            const result = await deleteReviewCore(
+            const result: DeleteResult = await deleteReviewCore(
                 asin,
                 index,
                 state.scraper.scrapedData,

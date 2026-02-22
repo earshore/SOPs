@@ -4,6 +4,7 @@
 // 替代分散的 fetch 调用
 // 🎯 P1-9: 集成请求去重和取消管理
 // 🎯 DI改造：支持依赖注入Logger和Config
+// 🎯 P0-4.1.8: 在数据边界使用类型守卫
 // ================================================================
 
 import { configCenter } from '../common/config/ConfigCenter';
@@ -11,6 +12,8 @@ import { priorityRequestPool, REQUEST_PRIORITY } from './PriorityRequestPool';
 import { requestManager } from './RequestManager';
 import { httpCacheService, type CacheStrategy } from './HttpCacheService';
 import type { ILoggerService, IConfigService, IHttpService } from '../types/services';
+import type { ApiResponse } from '../types/api';
+import { isApiResponse } from '../common/guards/typeGuards';
 
 /**
  * 请求优先级类型
@@ -265,7 +268,15 @@ class HttpServiceClass implements IHttpService {
 
           // 解析响应
           if (json) {
-            return await response.json();
+            const data = await response.json();
+            
+            // 🎯 数据边界验证：对于 JSON 响应，进行基本验证
+            // 注意：这里只做基本的结构验证，具体的业务类型验证由调用方负责
+            if (data === null || data === undefined) {
+              throw new HttpError(response.status, 'API 返回空响应', response);
+            }
+            
+            return data;
           }
           return await response.text() as T;
 
@@ -399,6 +410,31 @@ class HttpServiceClass implements IHttpService {
   }
 
   /**
+   * 发送 API 请求并验证响应格式
+   * 🎯 P0-4.1.8: 在数据边界使用类型守卫
+   * 
+   * @param url - 请求 URL
+   * @param options - 请求选项
+   * @param dataGuard - 可选的数据类型守卫函数
+   * @returns 验证后的 API 响应
+   */
+  async apiRequest<T = any>(
+    url: string, 
+    options?: HttpOptions,
+    dataGuard?: (data: unknown) => data is T
+  ): Promise<ApiResponse<T>> {
+    const response = await this.request<unknown>(url, options || {});
+    
+    // 🎯 数据边界验证：验证 API 响应格式
+    if (!isApiResponse(response, dataGuard)) {
+      this._log('error', 'API 响应格式无效', { url, response });
+      throw new HttpError(500, 'API 响应格式无效');
+    }
+    
+    return response as ApiResponse<T>;
+  }
+
+  /**
    * 加载 HTML 模板
    */
   async loadTemplate(url: string): Promise<string> {
@@ -406,9 +442,10 @@ class HttpServiceClass implements IHttpService {
   }
 
   /**
-   * 带授权的 API 请求
+   * 带授权的 API 请求（已废弃，使用 apiRequest 代替）
+   * @deprecated 使用 apiRequest 方法代替
    */
-  async apiRequest<T = any>(url: string, token: string, options: HttpOptions = {}): Promise<T> {
+  async apiRequestWithAuth<T = any>(url: string, token: string, options: HttpOptions = {}): Promise<T> {
     const headers = {
       ...options.headers,
       'Authorization': `Bearer ${token}`,

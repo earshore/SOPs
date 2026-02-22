@@ -4,7 +4,7 @@
 // 为应用状态提供完整的类型约束
 // ================================================================
 
-import type { AnalysisReport } from './modules-business';
+import type { AnalysisReport, ScrapedData } from './modules-business';
 
 // ==================== UI状态 ====================
 
@@ -23,9 +23,9 @@ export interface UIState {
 // ==================== Scraper状态 ====================
 
 /**
- * 采集站点类型
+ * 采集站点类型（简短代码）
  */
-export type ScraperSite = 'amazon.com' | 'amazon.de' | 'amazon.co.uk' | 'amazon.fr' | 'amazon.it' | 'amazon.es' | 'amazon.ca' | 'amazon.co.jp';
+export type ScraperSite = 'US' | 'DE' | 'FR' | 'IT' | 'ES' | 'NL' | 'SE' | 'PL' | 'BE' | 'IE' | 'UK' | 'CA' | 'JP';
 
 /**
  * 采集状态
@@ -53,7 +53,7 @@ export interface ScraperState {
   isScraping: boolean;
   status?: ScraperStatus;
   selectedSite: ScraperSite | '';
-  scrapedData: ScrapedDataItem[] | any | null;
+  scrapedData: ScrapedData | null;
   currentHistoryId: string | number | null;
   inputAsins?: string;
   progress?: number;
@@ -108,54 +108,297 @@ export interface AnalysisState {
 // ==================== PromptLab状态 ====================
 
 /**
- * Prompt历史记录
+ * Prompt 历史记录项
+ * 记录每次 Prompt 生成的历史
+ * 
+ * @remarks
+ * 用于追踪和管理用户的 Prompt 生成历史
  */
 export interface PromptHistoryItem {
+  /**
+   * 历史记录唯一标识
+   */
   id: string;
+
+  /**
+   * 生成的 Prompt 内容
+   */
   prompt: string;
+
+  /**
+   * AI 响应内容（如果有）
+   */
   response: string;
+
+  /**
+   * 生成时间戳（毫秒）
+   */
   timestamp: number;
+
+  /**
+   * 使用的 AI 模型
+   * 
+   * @example 'gpt-4', 'claude-3'
+   */
   model?: string;
+
+  /**
+   * 消耗的 Token 数量
+   */
   tokens?: number;
 }
 
 /**
+ * 目标市场类型
+ * 支持的语言市场列表
+ */
+export type TargetMarket = 
+  | 'English'
+  | 'German'
+  | 'French'
+  | 'Italian'
+  | 'Spanish'
+  | 'Japanese'
+  | 'Chinese'
+  | '';
+
+/**
+ * 语气风格类型
+ * 定义 Prompt 生成时的语气风格
+ */
+export type ToneStyle = 
+  | 'professional'
+  | 'casual'
+  | 'friendly'
+  | 'formal'
+  | 'enthusiastic'
+  | 'persuasive'
+  | 'exciting'
+  | 'emotional'
+  | 'minimalist'
+  | '';
+
+/**
  * 用户产品配置
+ * 用于 PromptLab 模块的产品 DNA 配置
+ * 
+ * @remarks
+ * 此接口定义了生成 Amazon Listing 和 Visual Prompt 所需的所有产品信息
+ * 
+ * @example
+ * ```typescript
+ * const profile: UserProductProfile = {
+ *   targetMarket: 'English',
+ *   keywordsTier1: 'wireless earbuds, bluetooth headphones',
+ *   keywordsTier2: 'noise cancelling, waterproof, long battery',
+ *   audience: 'Young professionals and fitness enthusiasts',
+ *   usps: 'Premium sound quality, 48-hour battery life',
+ *   specs: 'Bluetooth 5.3, IPX7 waterproof, USB-C charging',
+ *   socialHook: 'Experience studio-quality sound on the go',
+ *   negative: 'cheap plastic, poor battery life',
+ *   tone: 'professional',
+ *   customStrategy: '',
+ *   useRufus: true,
+ *   useEmoji: true,
+ *   useCosmo: true,
+ *   selectedReportSections: ['features', 'benefits'],
+ *   charLimit: 5000
+ * };
+ * ```
  */
 export interface UserProductProfile {
-  targetMarket: string;
+  /**
+   * 目标市场/语言
+   * 决定生成内容的语言和市场定位
+   */
+  targetMarket: TargetMarket;
+
+  /**
+   * 一级关键词（核心关键词）
+   * 产品的主要搜索词，用逗号分隔
+   * 
+   * @example 'wireless earbuds, bluetooth headphones'
+   */
   keywordsTier1: string;
+
+  /**
+   * 二级关键词（长尾关键词）
+   * 产品的次要搜索词和特性描述，用逗号分隔
+   * 
+   * @example 'noise cancelling, waterproof, long battery'
+   */
   keywordsTier2: string;
+
+  /**
+   * 目标受众
+   * 产品的目标用户群体描述
+   * 
+   * @example 'Young professionals and fitness enthusiasts'
+   */
   audience: string;
+
+  /**
+   * 独特卖点（USPs - Unique Selling Points）
+   * 产品的核心竞争优势
+   * 
+   * @example 'Premium sound quality, 48-hour battery life'
+   */
   usps: string;
+
+  /**
+   * 产品规格
+   * 技术参数和规格说明
+   * 
+   * @example 'Bluetooth 5.3, IPX7 waterproof, USB-C charging'
+   */
   specs: string;
+
+  /**
+   * 社交钩子
+   * 吸引用户注意力的营销语句
+   * 
+   * @example 'Experience studio-quality sound on the go'
+   */
   socialHook: string;
+
+  /**
+   * 负面关键词
+   * 需要避免的词汇或竞品缺点
+   * 
+   * @example 'cheap plastic, poor battery life'
+   */
   negative: string;
-  tone: string;
+
+  /**
+   * 语气风格
+   * Prompt 生成时使用的语气
+   * 
+   * @default 'professional'
+   */
+  tone: ToneStyle;
+
+  /**
+   * 自定义策略
+   * 用户自定义的额外指令或策略
+   */
   customStrategy: string;
+
+  /**
+   * 是否使用 Rufus 优化
+   * 启用 Amazon Rufus AI 助手优化
+   * 
+   * @default true
+   */
   useRufus: boolean;
+
+  /**
+   * 是否使用 Emoji
+   * 在生成的内容中包含 Emoji 表情
+   * 
+   * @default true
+   */
   useEmoji: boolean;
+
+  /**
+   * 是否使用 Cosmo 优化
+   * 启用 Cosmo AI 优化功能
+   * 
+   * @default true
+   */
   useCosmo: boolean;
+
+  /**
+   * 选中的报告章节
+   * 从分析报告中选择要包含的章节
+   * 
+   * @example ['features', 'benefits', 'specifications']
+   */
   selectedReportSections: string[];
+
+  /**
+   * 字符限制
+   * 生成内容的最大字符数
+   * 
+   * @default 5000
+   * @minimum 100
+   * @maximum 10000
+   */
   charLimit: number;
 }
 
 /**
- * Prompt 输入接口（扩展 UserProductProfile）
+ * Prompt 输入接口
+ * 扩展 UserProductProfile，添加分析数据使用标志
+ * 
+ * @remarks
+ * 此接口用于 Prompt 生成时的完整输入参数
+ * 包含产品配置和是否使用分析数据的标志
+ * 
+ * @example
+ * ```typescript
+ * const inputs: PromptInputs = {
+ *   ...userProductProfile,
+ *   useAnalysisData: true
+ * };
+ * ```
  */
 export interface PromptInputs extends UserProductProfile {
+  /**
+   * 是否使用分析数据
+   * 决定是否将 AI 分析报告的数据整合到 Prompt 中
+   * 
+   * @default false
+   */
   useAnalysisData: boolean;
 }
 
 /**
- * PromptLab状态
+ * PromptLab 状态
+ * 管理 PromptLab 模块的所有状态数据
+ * 
+ * @remarks
+ * 包含当前 Prompt、历史记录、用户配置等信息
  */
 export interface PromptLabState {
+  /**
+   * 当前生成的 Prompt 内容
+   */
   currentPrompt?: string;
+
+  /**
+   * Prompt 生成历史记录
+   */
   history?: PromptHistoryItem[];
+
+  /**
+   * 用户产品配置
+   * 存储用户填写的产品 DNA 信息
+   */
   userProductProfile?: UserProductProfile;
+
+  /**
+   * 选中的 AI 模型
+   * 
+   * @example 'gpt-4-turbo', 'claude-3-opus'
+   */
   selectedModel?: string;
+
+  /**
+   * AI 生成温度参数
+   * 控制生成内容的随机性
+   * 
+   * @default 0.7
+   * @minimum 0
+   * @maximum 2
+   */
   temperature?: number;
+
+  /**
+   * 最大 Token 数量
+   * 限制 AI 生成内容的长度
+   * 
+   * @default 4000
+   */
   maxTokens?: number;
 }
 
@@ -469,12 +712,12 @@ export type StateActionType = 'SET' | 'BATCH_UPDATE' | 'RESET' | 'MERGE';
 /**
  * 状态操作
  */
-export interface StateAction<T = any> {
+export interface StateAction<T = unknown> {
   type: StateActionType;
   path: StatePath;
   value: T;
   oldValue?: T;
-  meta?: Record<string, any>;
+  meta?: Record<string, unknown>;
 }
 
 /**
@@ -503,7 +746,7 @@ export interface BatchUpdateOptions {
 /**
  * 状态订阅回调
  */
-export type StateSubscriber<T = any> = (newValue: T, oldValue: T) => void;
+export type StateSubscriber<T = unknown> = (newValue: T, oldValue: T) => void;
 
 /**
  * 状态中间件
@@ -522,22 +765,22 @@ export interface IStateManager {
   /**
    * 获取状态
    */
-  get<T = any>(path?: StatePath): T;
+  get<T = unknown>(path?: StatePath): T;
   
   /**
    * 设置状态
    */
-  set<T = any>(path: StatePath, value: T, meta?: Record<string, any>): void;
+  set<T = unknown>(path: StatePath, value: T, meta?: Record<string, unknown>): void;
   
   /**
    * 批量更新
    */
-  batchUpdate(updates: Record<StatePath, any>): void;
+  batchUpdate(updates: Record<StatePath, unknown>): void;
   
   /**
    * 订阅状态变化
    */
-  subscribe<T = any>(path: StatePath, callback: StateSubscriber<T>): () => void;
+  subscribe<T = unknown>(path: StatePath, callback: StateSubscriber<T>): () => void;
   
   /**
    * 添加中间件
@@ -664,7 +907,7 @@ export interface StateSchema {
   analysis: AnalysisState;
   promptlab: PromptLabState;
   keywordTracker: KeywordTrackerState;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**

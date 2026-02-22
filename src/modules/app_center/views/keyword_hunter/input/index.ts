@@ -8,11 +8,12 @@
  * - 使用 registerActionsWithLegacy 注册全局操作
  */
 
-import { loadTemplate } from '../../../../../common/utils/viewLoader';
+import { SafeModuleLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
+import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
 import { showToast, showProgress } from '../../../../../common/ui';
 import * as KeywordService from '../services/trackerService';
 import state from "../../../../../common/state";
-import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry';
+import { registerActionsWithLegacy, unregisterActions } from '../../../../../common/utils/actionRegistry';
 
 import '../keyword_hunter_style.css';
 
@@ -71,13 +72,9 @@ function cleanup(): void {
     
     // 清理已注册的动作
     if (registeredActions.length > 0) {
-        import('../../../../../common/utils/actionRegistry').then(({ unregisterActions }) => {
-            unregisterActions(registeredActions);
-            console.log(`[Input] 已清理 ${registeredActions.length} 个动作`);
-            registeredActions = [];
-        }).catch(err => {
-            console.warn('[Input] 清理动作失败:', err);
-        });
+        unregisterActions(registeredActions);
+        console.log(`[Input] 已清理 ${registeredActions.length} 个动作`);
+        registeredActions = [];
     }
 }
 
@@ -90,16 +87,6 @@ function debounce<T extends (...args: unknown[]) => void>(func: T, wait: number)
         clearTimeout(timeout);
         timeout = addTimeout(() => func.apply(null, args), wait);
     };
-}
-
-/**
- * HTML 转义
- */
-function escapeHtml(text: string): string {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
 }
 
 // ========================================== 
@@ -204,19 +191,26 @@ function highlightDuplicatesInInput(): void {
 
     const dups = KeywordService.findDuplicateKeywords(input.value);
     const lines = input.value.split('\n');
-    let html = '';
-
+    
+    // 清空容器
+    layer.innerHTML = '';
+    const fragment = document.createDocumentFragment();
+    
     lines.forEach((line, i) => {
         const trimmed = line.trim().toLowerCase();
-        if (trimmed && dups.has(trimmed)) {
-            html += `<span class="duplicate">${escapeHtml(line)}</span>`;
-        } else {
-            html += escapeHtml(line);
+        const isDuplicate = trimmed && dups.has(trimmed);
+        
+        const span = document.createElement('span');
+        if (isDuplicate) span.className = 'duplicate';
+        span.textContent = line;
+        fragment.appendChild(span);
+        
+        if (i < lines.length - 1) {
+            fragment.appendChild(document.createTextNode('\n'));
         }
-        if (i < lines.length - 1) html += '\n';
     });
-    // ✅ 安全: 静态HTML模板，无用户输入
-    layer.innerHTML = html;
+    
+    layer.appendChild(fragment);
 }
 
 /**
@@ -477,10 +471,23 @@ export async function mount(container: HTMLElement): Promise<void> {
     console.log('[Input] 🔧 开始挂载子模块');
 
     try {
-        // 1. 加载模板
-        const html = await loadTemplate('src/modules/app_center/views/keyword_hunter/input/template.html');
-        // ✅ 安全: 静态HTML模板，无用户输入
-        container.innerHTML = html;
+        // 1. 使用 SafeModuleLoader 加载模板
+        const loader = SafeModuleLoader.getInstance();
+        const renderer = SafeRenderer.getInstance();
+        
+        const html = await loader.loadTemplate(
+            'src/modules/app_center/views/keyword_hunter/input/template.html',
+            {
+                retryCount: 3,
+                timeout: 5000,
+                onError: (error) => {
+                    console.error('[Input] 模板加载失败:', error);
+                }
+            }
+        );
+        
+        // 使用 SafeRenderer 渲染模板
+        renderer.renderTemplate(container, html);
 
         // 2. 注册全局操作（用于 HTML onclick 兼容）
         const actionNames = registerActionsWithLegacy({

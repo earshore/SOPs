@@ -75,7 +75,6 @@ describe('BaseModule', () => {
       const module = new TestModule('test-module');
       
       await module.mount(container);
-      const firstContent = container.innerHTML;
       
       await module.mount(container);
       

@@ -12,12 +12,14 @@ import { generateMarkdownReport, generateJsonReportData } from '../services/repo
 import { mergeProducts, getProductsByAsins } from '../utils/dataTransformers';
 import { getMarketLanguage } from './helpers';
 import { Product } from '../config/sampleData';
+import { AlpineContext, AnalysisResult } from '../types';
+import { ModuleState } from '../state/moduleState';
 import state from '@common/state';
 
 /**
  * 切换 ASIN 选择
  */
-export function toggleAsin(context: any, moduleState: any, asin: string): void {
+export function toggleAsin(context: AlpineContext, moduleState: ModuleState, asin: string): void {
   const index = context.selectedAsins.indexOf(asin);
   if (index > -1) {
     context.selectedAsins.splice(index, 1);
@@ -30,7 +32,7 @@ export function toggleAsin(context: any, moduleState: any, asin: string): void {
 /**
  * 全选 ASIN
  */
-export function selectAllAsins(context: any, moduleState: any, availableAsins: string[]): void {
+export function selectAllAsins(context: AlpineContext, moduleState: ModuleState, availableAsins: string[]): void {
   context.selectedAsins = [...availableAsins];
   syncToModuleState(context, moduleState);
 }
@@ -38,7 +40,7 @@ export function selectAllAsins(context: any, moduleState: any, availableAsins: s
 /**
  * 清空 ASIN 选择
  */
-export function clearAllAsins(context: any, moduleState: any): void {
+export function clearAllAsins(context: AlpineContext, moduleState: ModuleState): void {
   context.selectedAsins = [];
   syncToModuleState(context, moduleState);
 }
@@ -46,7 +48,7 @@ export function clearAllAsins(context: any, moduleState: any): void {
 /**
  * 切换分析目标
  */
-export function toggleTarget(context: any, moduleState: any, targetId: string): void {
+export function toggleTarget(context: AlpineContext, moduleState: ModuleState, targetId: string): void {
   const index = context.selectedTargets.indexOf(targetId);
   if (index > -1) {
     context.selectedTargets.splice(index, 1);
@@ -59,7 +61,7 @@ export function toggleTarget(context: any, moduleState: any, targetId: string): 
 /**
  * 全选分析目标
  */
-export function selectAllTargets(context: any, moduleState: any): void {
+export function selectAllTargets(context: AlpineContext, moduleState: ModuleState): void {
   context.selectedTargets = analysisTargets.map(t => t.id);
   syncToModuleState(context, moduleState);
 }
@@ -67,7 +69,7 @@ export function selectAllTargets(context: any, moduleState: any): void {
 /**
  * 清空分析目标
  */
-export function clearAllTargets(context: any, moduleState: any): void {
+export function clearAllTargets(context: AlpineContext, moduleState: ModuleState): void {
   context.selectedTargets = [];
   syncToModuleState(context, moduleState);
 }
@@ -75,7 +77,7 @@ export function clearAllTargets(context: any, moduleState: any): void {
 /**
  * 切换提示词面板
  */
-export function togglePromptPanel(context: any, moduleState: any): void {
+export function togglePromptPanel(context: AlpineContext, moduleState: ModuleState): void {
   context.showPromptPanel = !context.showPromptPanel;
   moduleState.showPromptPanel = context.showPromptPanel;
 }
@@ -83,7 +85,7 @@ export function togglePromptPanel(context: any, moduleState: any): void {
 /**
  * 切换提示词项
  */
-export function togglePromptItem(context: any, moduleState: any, index: number): void {
+export function togglePromptItem(context: AlpineContext, moduleState: ModuleState, index: number): void {
   context.expandedPromptIndex = context.expandedPromptIndex === index ? null : index;
   moduleState.expandedPromptIndex = context.expandedPromptIndex;
 }
@@ -91,7 +93,7 @@ export function togglePromptItem(context: any, moduleState: any, index: number):
 /**
  * 切换 JSON 查看器
  */
-export function toggleJsonViewer(context: any, moduleState: any): void {
+export function toggleJsonViewer(context: AlpineContext, moduleState: ModuleState): void {
   context.showJsonViewer = !context.showJsonViewer;
   moduleState.showJsonViewer = context.showJsonViewer;
 }
@@ -99,7 +101,7 @@ export function toggleJsonViewer(context: any, moduleState: any): void {
 /**
  * 切换数据源
  */
-export function toggleDataSource(context: any, moduleState: any): void {
+export function toggleDataSource(context: AlpineContext, moduleState: ModuleState): void {
   context.useRealData = !context.useRealData;
   moduleState.useRealData = context.useRealData;
   
@@ -118,7 +120,7 @@ export function toggleDataSource(context: any, moduleState: any): void {
 /**
  * 复制提示词
  */
-export function copyPrompt(context: any, currentProducts: Product[], index: number): void {
+export function copyPrompt(context: AlpineContext, currentProducts: Product[], index: number): void {
   if (currentProducts.length === 0) return;
 
   const targetId = context.selectedTargets[index];
@@ -142,7 +144,7 @@ export function copyPrompt(context: any, currentProducts: Product[], index: numb
 /**
  * 复制 JSON 报告
  */
-export function copyJson(context: any, dataSourceMarketplace: string): void {
+export function copyJson(context: AlpineContext, dataSourceMarketplace: string): void {
   if (!context.analysisReport) return;
 
   const reportData = generateJsonReportData(
@@ -166,7 +168,7 @@ export function copyJson(context: any, dataSourceMarketplace: string): void {
  * 复制 Markdown 报告
  */
 export function copyMarkdown(
-  context: any,
+  context: AlpineContext,
   dataSourceMarketplace: string,
   dataSourceLabel: string
 ): void {
@@ -192,7 +194,7 @@ export function copyMarkdown(
 /**
  * 下载 JSON 报告
  */
-export function downloadJson(context: any, dataSourceMarketplace: string): void {
+export function downloadJson(context: AlpineContext, dataSourceMarketplace: string): void {
   if (context.results.length === 0) {
     showToast('没有可下载的报告', 'warning');
     return;
@@ -224,7 +226,7 @@ export function downloadJson(context: any, dataSourceMarketplace: string): void 
 /**
  * 执行分析
  */
-export async function runAnalysisAction(context: any, moduleState: any, currentProducts: Product[]): Promise<void> {
+export async function runAnalysisAction(context: AlpineContext, moduleState: ModuleState, currentProducts: Product[]): Promise<void> {
   if (context.selectedTargets.length === 0 || currentProducts.length === 0 || context.isAnalyzing) {
     return;
   }
@@ -241,7 +243,7 @@ export async function runAnalysisAction(context: any, moduleState: any, currentP
   });
 
   try {
-    let results: any[];
+    let results: AnalysisResult[];
 
     if (context.useRealData) {
       // 使用真实数据进行 AI 分析
@@ -348,7 +350,7 @@ function getRealProducts(selectedAsins: string[]): Product[] {
 /**
  * 同步到模块状态
  */
-function syncToModuleState(context: any, moduleState: any): void {
+function syncToModuleState(context: AlpineContext, moduleState: ModuleState): void {
   moduleState.selectedAsins = context.selectedAsins;
   moduleState.selectedTargets = context.selectedTargets;
   moduleState.isAnalyzing = context.isAnalyzing;

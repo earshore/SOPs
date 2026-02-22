@@ -4,7 +4,7 @@
 // 提供常用的测试辅助方法
 // ================================================================
 
-import { Page, expect } from '@playwright/test';
+import { Page } from '@playwright/test';
 
 /**
  * 等待条件满足

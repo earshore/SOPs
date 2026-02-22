@@ -5,6 +5,7 @@
 // ================================================================
 
 import { chromium, FullConfig } from '@playwright/test';
+import { ScreenshotManager } from './helpers/screenshot-manager';
 
 /**
  * 全局设置函数
@@ -12,6 +13,17 @@ import { chromium, FullConfig } from '@playwright/test';
  */
 async function globalSetup(config: FullConfig) {
   console.log('🎭 Playwright 全局设置开始...');
+
+  // 初始化截图管理器
+  console.log('📸 初始化截图管理器...');
+  const screenshotManager = ScreenshotManager.getInstance({
+    maxAge: 7,        // 保留 7 天
+    maxCount: 100,    // 最多保留 100 个截图
+    fullPage: false   // 默认不全页截图（性能考虑）
+  });
+
+  // 清理过期截图
+  screenshotManager.cleanup();
 
   // 检查开发服务器是否已启动
   const baseURL = config.projects[0].use.baseURL || 'http://localhost:5173';

@@ -6,7 +6,6 @@
 
 import { chromium } from '@playwright/test';
 import * as fs from 'fs';
-import * as path from 'path';
 
 const GREEN = '\x1b[32m';
 const RED = '\x1b[31m';

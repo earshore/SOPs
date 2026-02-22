@@ -1,0 +1,294 @@
+{
+  "totalFiles": 315,
+  "filesWithIssues": 28,
+  "totalUnused": 31,
+  "byType": {
+    "variable": 15,
+    "function": 0,
+    "parameter": 0,
+    "import": 0,
+    "class": 0,
+    "other": 16
+  },
+  "items": [
+    {
+      "file": "postcss.config.js",
+      "line": 1,
+      "column": 8,
+      "name": "purgecss",
+      "type": "variable",
+      "message": "'purgecss' is defined but never used.",
+      "severity": "warning"
+    },
+    {
+      "file": "src/modules/amz_hub/views/practice/marketing_calendar/index.js",
+      "line": 9,
+      "column": 26,
+      "name": "STORAGE_KEYS",
+      "type": "variable",
+      "message": "'STORAGE_KEYS' is defined but never used.",
+      "severity": "warning"
+    },
+    {
+      "file": "src/services/performanceStorage.ts",
+      "line": 416,
+      "column": 43,
+      "name": "id",
+      "type": "variable",
+      "message": "'id' is defined but never used. Allowed unused args must match /^_/u.",
+      "severity": "error"
+    },
+    {
+      "file": "src/services/storageService.ts",
+      "line": 512,
+      "column": 15,
+      "name": "apiKey",
+      "type": "other",
+      "message": "'apiKey' is assigned a value but never used. Allowed unused vars must match /^_/u.",
+      "severity": "error"
+    },
+    {
+      "file": "tests/check-playwright-env.js",
+      "line": 9,
+      "column": 13,
+      "name": "path",
+      "type": "variable",
+      "message": "'path' is defined but never used.",
+      "severity": "warning"
+    },
+    {
+      "file": "tests/diagnose-glob-import.js",
+      "line": 65,
+      "column": 15,
+      "name": "viewLoaderModule",
+      "type": "other",
+      "message": "'viewLoaderModule' is assigned a value but never used.",
+      "severity": "warning"
+    },
+    {
+      "file": "tests/diagnose-glob-import.js",
+      "line": 94,
+      "column": 13,
+      "name": "logs",
+      "type": "other",
+      "message": "'logs' is assigned a value but never used.",
+      "severity": "warning"
+    },
+    {
+      "file": "tests/diagnose-promptlab-routing.js",
+      "line": 22,
+      "column": 13,
+      "name": "_",
+      "type": "variable",
+      "message": "'_' is defined but never used.",
+      "severity": "warning"
+    },
+    {
+      "file": "tests/performance/lighthouse-baseline.js",
+      "line": 50,
+      "column": 11,
+      "name": "output",
+      "type": "other",
+      "message": "'output' is assigned a value but never used.",
+      "severity": "warning"
+    },
+    {
+      "file": "tests/performance/lighthouse-ci-test.js",
+      "line": 27,
+      "column": 11,
+      "name": "healthcheck",
+      "type": "other",
+      "message": "'healthcheck' is assigned a value but never used.",
+      "severity": "warning"
+    },
+    {
+      "file": "tests/performance/quick-baseline.js",
+      "line": 59,
+      "column": 11,
+      "name": "htmlPath",
+      "type": "other",
+      "message": "'htmlPath' is assigned a value but never used.",
+      "severity": "warning"
+    },
+    {
+      "file": "tests/quality/collect-metrics.js",
+      "line": 12,
+      "column": 7,
+      "name": "__dirname",
+      "type": "other",
+      "message": "'__dirname' is assigned a value but never used.",
+      "severity": "warning"
+    },
+    {
+      "file": "tests/quality/fix-inline-handlers.js",
+      "line": 2,
+      "column": 8,
+      "name": "path",
+      "type": "variable",
+      "message": "'path' is defined but never used.",
+      "severity": "warning"
+    },
+    {
+      "file": "tests/report-manager.js",
+      "line": 7,
+      "column": 9,
+      "name": "spawn",
+      "type": "other",
+      "message": "'spawn' is assigned a value but never used.",
+      "severity": "warning"
+    },
+    {
+      "file": "tests/unit/BaseModule.test.js",
+      "line": 78,
+      "column": 13,
+      "name": "firstContent",
+      "type": "other",
+      "message": "'firstContent' is assigned a value but never used.",
+      "severity": "warning"
+    },
+    {
+      "file": "tests/unit/actionRegistry.test.js",
+      "line": 14,
+      "column": 3,
+      "name": "getLegacyCallStats",
+      "type": "variable",
+      "message": "'getLegacyCallStats' is defined but never used.",
+      "severity": "warning"
+    },
+    {
+      "file": "tests/unit/app_center_overview.properties.test.js",
+      "line": 1183,
+      "column": 51,
+      "name": "e",
+      "type": "variable",
+      "message": "'e' is defined but never used.",
+      "severity": "warning"
+    },
+    {
+      "file": "tests/unit/lazyLibs.test.js",
+      "line": 61,
+      "column": 13,
+      "name": "error",
+      "type": "other",
+      "message": "'error' is assigned a value but never used.",
+      "severity": "warning"
+    },
+    {
+      "file": "tests/unit/pluginLoader.test.js",
+      "line": 14,
+      "column": 13,
+      "name": "mockPlugins",
+      "type": "other",
+      "message": "'mockPlugins' is assigned a value but never used.",
+      "severity": "warning"
+    },
+    {
+      "file": "tests/unit/router.test.js",
+      "line": 132,
+      "column": 52,
+      "name": "id",
+      "type": "variable",
+      "message": "'id' is defined but never used.",
+      "severity": "warning"
+    },
+    {
+      "file": "tests/unit/security.test.js",
+      "line": 6,
+      "column": 32,
+      "name": "beforeEach",
+      "type": "variable",
+      "message": "'beforeEach' is defined but never used.",
+      "severity": "warning"
+    },
+    {
+      "file": "tests/unit/typeGuards.test.js",
+      "line": 19,
+      "column": 3,
+      "name": "RouteConfigSchema",
+      "type": "variable",
+      "message": "'RouteConfigSchema' is defined but never used.",
+      "severity": "warning"
+    },
+    {
+      "file": "tests/unit/ui.test.js",
+      "line": 6,
+      "column": 48,
+      "name": "afterEach",
+      "type": "variable",
+      "message": "'afterEach' is defined but never used.",
+      "severity": "warning"
+    },
+    {
+      "file": "tests/unit/ui.test.js",
+      "line": 232,
+      "column": 13,
+      "name": "start",
+      "type": "other",
+      "message": "'start' is assigned a value but never used.",
+      "severity": "warning"
+    },
+    {
+      "file": "tests/unit/viewLoader.test.js",
+      "line": 28,
+      "column": 13,
+      "name": "loadLogs",
+      "type": "other",
+      "message": "'loadLogs' is assigned a value but never used.",
+      "severity": "warning"
+    },
+    {
+      "file": "tools/dev/batch-fix-static-templates.js",
+      "line": 27,
+      "column": 7,
+      "name": "STATIC_PATTERNS",
+      "type": "other",
+      "message": "'STATIC_PATTERNS' is assigned a value but never used.",
+      "severity": "warning"
+    },
+    {
+      "file": "tools/dev/batch-fix-static-templates.js",
+      "line": 37,
+      "column": 7,
+      "name": "NEEDS_COMMENT_PATTERN",
+      "type": "other",
+      "message": "'NEEDS_COMMENT_PATTERN' is assigned a value but never used.",
+      "severity": "warning"
+    },
+    {
+      "file": "tools/dev/fix-basemodule-state-imports.js",
+      "line": 65,
+      "column": 49,
+      "name": "description",
+      "type": "variable",
+      "message": "'description' is defined but never used.",
+      "severity": "warning"
+    },
+    {
+      "file": "tools/dev/fix-ts-imports.js",
+      "line": 63,
+      "column": 17,
+      "name": "modified",
+      "type": "other",
+      "message": "'modified' is assigned a value but never used.",
+      "severity": "warning"
+    },
+    {
+      "file": "tools/security/xss-fixer.js",
+      "line": 249,
+      "column": 28,
+      "name": "risk",
+      "type": "variable",
+      "message": "'risk' is defined but never used.",
+      "severity": "warning"
+    },
+    {
+      "file": "tools/security/xss-scanner.js",
+      "line": 187,
+      "column": 55,
+      "name": "fileContent",
+      "type": "variable",
+      "message": "'fileContent' is defined but never used.",
+      "severity": "warning"
+    }
+  ]
+}

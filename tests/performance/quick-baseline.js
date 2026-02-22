@@ -56,7 +56,6 @@ function runLighthouseForFile(filePath, name) {
   
   try {
     const outputPath = path.join(CONFIG.outputDir, `${name}.json`);
-    const htmlPath = path.join(CONFIG.outputDir, `${name}.html`);
     
     // 使用 Lighthouse CLI 直接测试文件
     const command = `npx lighthouse "file:///${filePath.replace(/\\/g, '/')}" --output=json --output=html --output-path="${outputPath.replace(/\\/g, '/')}" --preset=desktop --quiet --chrome-flags="--headless"`;

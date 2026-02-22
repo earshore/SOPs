@@ -246,7 +246,7 @@ function processFile(relativePath, risks) {
 /**
  * 生成修复代码
  */
-function generateFix(line, risk) {
+function generateFix(line, _risk) {
     const trimmed = line.trim();
     
     // 策略1: 静态模板加载 - 信任内容

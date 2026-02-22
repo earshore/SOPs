@@ -184,7 +184,7 @@ function extractFullCode(lines, lineIndex, firstLine) {
 /**
  * 分析风险等级
  */
-function analyzeRisk(patternName, match, lineContent, fileContent) {
+function analyzeRisk(patternName, match, lineContent, _fileContent) {
     let score = 5; // 默认中等风险
     let reasons = [];
     
