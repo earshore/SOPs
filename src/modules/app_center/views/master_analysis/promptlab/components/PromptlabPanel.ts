@@ -533,25 +533,25 @@ export function createPromptlabPanel() {
             if (mode === 'visual') {
                 cardInner.style.transform = 'rotateY(180deg)';
                 glider.style.transform = 'translateX(100%)';
-                glider.classList.add('bg-pink-500', 'text-white');
-                glider.classList.remove('bg-white');
+                glider.classList.add('bg-white');
+                glider.classList.remove('bg-pink-500');
                 toggleContainer?.classList.add('bg-pink-900/30', 'border-pink-500/30');
                 toggleContainer?.classList.remove('bg-white/20', 'border-white/10');
-                btnListing?.classList.replace('text-blue-600', 'text-pink-200');
+                btnListing?.classList.replace('text-blue-600', 'text-slate-400');
                 btnListing?.classList.add('opacity-60');
-                btnVisual?.classList.replace('text-slate-500', 'text-white');
-                btnVisual?.classList.remove('hover:text-pink-600');
+                btnVisual?.classList.replace('text-slate-400', 'text-pink-500');
+                btnVisual?.classList.remove('hover:text-pink-500');
                 if (outputTitle) outputTitle.textContent = 'Visual Prompt';
             } else {
                 cardInner.style.transform = 'rotateY(0deg)';
                 glider.style.transform = 'translateX(0)';
-                glider.classList.remove('bg-pink-500', 'text-white');
                 glider.classList.add('bg-white');
+                glider.classList.remove('bg-pink-500');
                 toggleContainer?.classList.remove('bg-pink-900/30', 'border-pink-500/30');
                 toggleContainer?.classList.add('bg-white/20', 'border-white/10');
-                btnVisual?.classList.replace('text-white', 'text-slate-500');
-                btnVisual?.classList.add('hover:text-pink-600');
-                btnListing?.classList.replace('text-pink-200', 'text-blue-600');
+                btnVisual?.classList.replace('text-pink-500', 'text-slate-400');
+                btnVisual?.classList.add('hover:text-pink-500');
+                btnListing?.classList.replace('text-slate-400', 'text-blue-600');
                 btnListing?.classList.remove('opacity-60');
                 if (outputTitle) outputTitle.textContent = 'Listing Prompt';
             }
