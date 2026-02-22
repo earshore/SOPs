@@ -6,14 +6,15 @@
 import state from '@common/state';
 import { showToast } from '@common/ui/index';
 import { formatHistoryDate } from '../services/reportGenerator';
-import { AlpineContext, HistoricalReportDetail, ScraperData } from '../types';
+import { AlpineContext, HistoricalReportDetail } from '../types';
+import type { ScrapedData } from '@/types/modules-business';
 import { ModuleState } from '../state/moduleState';
 
 /**
  * 检查并加载 Scraper 数据
  */
 export function checkAndLoadScraperData(context: AlpineContext, moduleState: ModuleState): void {
-  const scrapedData = state.scraper?.scrapedData as ScraperData | undefined;
+  const scrapedData = state.scraper?.scrapedData as ScrapedData | null;
   
   if (scrapedData && scrapedData.products && scrapedData.products.length > 0) {
     // 如果有 Scraper 数据，自动选中所有产品的 ASIN

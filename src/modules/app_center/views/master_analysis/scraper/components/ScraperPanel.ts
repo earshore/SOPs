@@ -21,8 +21,7 @@ import { getFlag, getSiteName, formatDate } from '../utils/formatters';
 import { startScrape, handleScrapeComplete, updateTask } from '../handlers/scrapeHandler';
 import { handleImportFiles as handleImportFilesCore } from '../handlers/importHandler';
 import { deleteProduct as deleteProductCore, deleteReview as deleteReviewCore, confirmWithModal } from '../handlers/dataOperations';
-import type { ScrapedData, ScrapedProduct } from '@/types/modules-business';
-import type { HistoryItem } from '@/types/modules-business';
+import type { ScrapedData, ScrapedProduct, HistoryItem } from '@/types/modules-business';
 import { DataPreview, DataPreviewState } from './DataPreview';
 import { HistoryPanel } from './HistoryPanel';
 
@@ -69,7 +68,7 @@ export function createScraperPanel() {
         },
 
         get hasData(): boolean {
-            return state.scraper.scrapedData?.products?.length > 0;
+            return (state.scraper.scrapedData?.products?.length ?? 0) > 0;
         },
 
         get proxyConfigStatus(): ProxyConfigStatus {

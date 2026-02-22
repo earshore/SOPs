@@ -226,7 +226,7 @@ export class PerformanceService {
     if (!('PerformanceObserver' in window)) return;
 
     let clsValue = 0;
-    let clsEntries: any[] = [];
+    let clsEntries: PerformanceEntry[] = [];
     let lastLoggedValue = 0;
     const LOG_THRESHOLD = 0.05; // 只在 CLS 变化超过 0.05 时才输出日志
 

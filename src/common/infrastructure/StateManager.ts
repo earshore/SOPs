@@ -10,7 +10,7 @@ import type {
   PromptLabState,
   ScraperState
 } from '../../types/state';
-import type { AnalysisReport } from '../../types/modules-business';
+import type { AnalysisReport, ScrapedData } from '../../types/modules-business';
 
 /**
  * 中间件函数类型
@@ -400,16 +400,16 @@ export class StateManager {
    * 获取抓取的数据
    * @returns 抓取的数据或 null
    */
-  public getScrapedData(): any | null {
+  public getScrapedData(): ScrapedData | null {
     const state = appStore.getState();
-    return state.scraper.scrapedData ?? null;
+    return state.scraper.scrapedData;
   }
 
   /**
    * 设置抓取的数据
    * @param data - 抓取的数据
    */
-  public setScrapedData(data: any): void {
+  public setScrapedData(data: ScrapedData | null): void {
     this.applyMiddleware('setScrapedData', data);
     appStore.getState().setScrapedData(data);
     this.syncToLegacyState();

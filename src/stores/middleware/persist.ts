@@ -2,6 +2,7 @@
 // ================================================================
 // 🎯 P1-8 阶段9: Zustand持久化中间件
 // 自定义vanilla版本的persist middleware
+// 🎯 P0-4.1.8: 在数据边界使用类型守卫
 // ================================================================
 
 import type { StoreApi } from 'zustand/vanilla';
@@ -22,6 +23,8 @@ export interface PersistOptions<T> {
   version?: number;
   /** 迁移函数 */
   migrate?: (persistedState: any, version: number) => any;
+  /** 🎯 数据验证函数 */
+  validate?: (state: unknown) => state is Partial<T>;
 }
 
 /**
@@ -46,7 +49,8 @@ export const persist = <T extends object>(
     partialize = (state) => state,
     merge = defaultMerge,
     version = 0,
-    migrate
+    migrate,
+    validate
   } = options;
 
   return (set: StoreApi<T>['setState'], get: StoreApi<T>['getState']): T => {
@@ -71,7 +75,7 @@ export const persist = <T extends object>(
     // 使用包装后的set创建初始状态
     const initialState = config(persistedSet, get);
 
-    // 尝试从存储恢复状态
+    // 🎯 数据边界验证：从存储恢复状态
     try {
       const item = storage.getItem(name);
       if (item) {
@@ -81,6 +85,13 @@ export const persist = <T extends object>(
         let persistedState = parsed.state;
         if (migrate && parsed.version !== version) {
           persistedState = migrate(persistedState, parsed.version);
+        }
+        
+        // 🎯 数据边界验证：如果提供了验证函数，验证持久化状态
+        if (validate && !validate(persistedState)) {
+          console.warn('[Persist] 持久化状态验证失败，使用初始状态:', name);
+          storage.removeItem(name);
+          return initialState;
         }
         
         // 合并持久化状态和初始状态
@@ -93,6 +104,12 @@ export const persist = <T extends object>(
       }
     } catch (error) {
       console.error('[Persist] 恢复状态失败:', error);
+      // 清除损坏的数据
+      try {
+        storage.removeItem(name);
+      } catch (e) {
+        // 忽略清除失败
+      }
     }
 
     return initialState;

@@ -84,14 +84,35 @@ function example3_CustomPersist() {
     ]
   });
 
-  // 恢复之前保存的状态
+  // 恢复之前保存的状态（带 Zod 验证）
+  const { z } = require('zod');
+  
+  const AppStateSchema = z.object({
+    analysis: z.object({
+      analysisReport: z.any().nullable(),
+      selectedAsins: z.array(z.string())
+    }),
+    scraper: z.object({
+      scrapedData: z.any().nullable(),
+      isScraping: z.boolean()
+    })
+  }).partial();
+
   const restoredState = restorePersistedState({
     key: 'my-custom-state',
-    compress: true
+    compress: true,
+    schema: AppStateSchema,
+    useDefaultOnValidationError: true,
+    onError: (error) => {
+      console.error('恢复状态失败:', error);
+    }
   });
 
   if (restoredState) {
+    console.log('✅ 状态恢复成功（已通过 Zod 验证）');
     stateManager.restoreSnapshot(restoredState);
+  } else {
+    console.log('⚠️ 使用默认状态（验证失败或无保存数据）');
   }
 }
 
@@ -152,6 +173,81 @@ function example4_CustomValidation() {
     stateManager.setSelectedAsins(['B08N5WRWNW', 'B07XYZ1234']);
   } catch (error) {
     console.error('状态更新失败:', error);
+  }
+}
+
+// ==================== 示例 4.1: 使用 Zod Schema 验证 ====================
+
+function example4_1_ZodValidation() {
+  // 导入 Zod schemas
+  const { 
+    UserProductProfileSchema, 
+    ScrapedDataItemSchema,
+    AnalysisReportSchema 
+  } = require('../src/common/guards/zodSchemas');
+  const { z } = require('zod');
+
+  const stateManager = StateManager.getInstance({
+    middleware: [
+      createValidationMiddleware({
+        rules: {
+          // 使用 Zod Schema 进行验证
+          setUserProductProfile: UserProductProfileSchema,
+          
+          // 使用 Zod 数组验证
+          setScrapedData: z.array(ScrapedDataItemSchema),
+          
+          // 使用 Zod 联合类型
+          setAnalysisReport: z.union([
+            AnalysisReportSchema,
+            z.string()
+          ]),
+          
+          // 使用 Zod 内置验证器
+          setTemperature: z.number().min(0).max(2),
+          setMaxTokens: z.number().int().positive().max(100000),
+          
+          // 使用 Zod 枚举
+          setTheme: z.enum(['light', 'dark', 'auto']),
+          
+          // 使用 Zod 可选值
+          setExpandedAsin: z.string().nullable(),
+          
+          // 组合使用：Zod + 自定义验证
+          setSelectedAsins: z.array(z.string().regex(/^B[0-9A-Z]{9}$/))
+        },
+        throwOnError: false,
+        preferZod: true,
+        onValidationError: (action, error) => {
+          console.error(`Zod 验证失败 [${action}]:`, error);
+        }
+      })
+    ]
+  });
+
+  try {
+    // 这会触发 Zod 验证
+    stateManager.setUserProductProfile({
+      targetMarket: 'English',
+      keywordsTier1: 'wireless earbuds',
+      keywordsTier2: 'bluetooth headphones',
+      audience: 'Tech enthusiasts',
+      usps: 'Premium sound quality',
+      specs: 'Bluetooth 5.0',
+      socialHook: 'Experience the difference',
+      negative: 'cheap quality',
+      tone: 'professional',
+      customStrategy: '',
+      useRufus: true,
+      useEmoji: false,
+      useCosmo: true,
+      selectedReportSections: ['features'],
+      charLimit: 5000
+    });
+    
+    console.log('✅ Zod 验证通过');
+  } catch (error) {
+    console.error('❌ 状态更新失败:', error);
   }
 }
 
@@ -325,6 +421,7 @@ export {
   example2_CustomLogger,
   example3_CustomPersist,
   example4_CustomValidation,
+  example4_1_ZodValidation,
   example5_CombineMiddleware,
   example6_DynamicMiddleware,
   example7_ErrorHandling,

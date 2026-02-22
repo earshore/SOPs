@@ -4,6 +4,7 @@
 // 🛡️ 增强鲁棒性 - 指数退避重试 (Exponential Backoff)
 // 🌐 环境适配 - 开发/生产环境自动切换
 // 🎯 P0-4: 已迁移到统一错误处理
+// 🎯 P0-4.1.8: 在数据边界使用类型守卫
 // ================================================================
 
 import { ErrorService } from './errorService';
@@ -11,6 +12,10 @@ import { configCenter } from '../common/config/ConfigCenter';
 import { EnvConfig } from '../common/config/envConfig';
 import { ApiError, NetworkError } from '../common/errors';
 import { isDangerousEndpoint, getDangerousEndpoints } from '../common/config/apiEndpoints';
+// 导入统一的 API 响应类型
+import type { LLMChatCompletionResponse, LLMErrorResponse } from '../types/api';
+// 导入类型守卫
+import { isLLMChatCompletionResponse } from '../common/guards/typeGuards';
 
 // ========================
 // 类型定义
@@ -63,6 +68,7 @@ export interface LLMConfig {
 
 /**
  * 模型信息对象
+ * @deprecated 使用 LLMModel 类型代替
  */
 export interface ModelInfo {
   /** 模型 ID */
@@ -71,26 +77,6 @@ export interface ModelInfo {
   context: number;
   /** 支持的特性列表 */
   features: string[];
-}
-
-/**
- * API 错误响应
- */
-interface APIErrorResponse {
-  error?: {
-    message?: string;
-  };
-}
-
-/**
- * API 成功响应
- */
-interface APISuccessResponse {
-  choices?: Array<{
-    message?: {
-      content?: string;
-    };
-  }>;
 }
 
 // ========================
@@ -206,7 +192,7 @@ export async function callLLM(
         let shouldRetry = false;
 
         try {
-          const errorJson: APIErrorResponse = JSON.parse(errorText);
+          const errorJson: LLMErrorResponse = JSON.parse(errorText);
           if (errorJson.error && errorJson.error.message) {
             errorMsg = errorJson.error.message;
           }
@@ -256,11 +242,38 @@ export async function callLLM(
         }
       }
 
-      const data: APISuccessResponse = await response.json();
+      const data: LLMChatCompletionResponse = await response.json();
+
+      // 🎯 数据边界验证：验证 LLM 响应格式
+      if (!isLLMChatCompletionResponse(data)) {
+        throw new ApiError(
+          'LLM API 返回格式异常',
+          'API_INVALID_RESPONSE',
+          response.status,
+          JSON.stringify(data).substring(0, 200),
+          {
+            module: 'LLMService',
+            action: 'callLLM',
+            model,
+            endpoint: normalizedEndpoint
+          }
+        );
+      }
 
       // 兼容性检查：某些非标准 API 可能返回结构不同
       if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-        throw new Error(`API 返回格式异常: ${JSON.stringify(data).substring(0, 100)}...`);
+        throw new ApiError(
+          `API 返回格式异常: 缺少 choices 或 message 字段`,
+          'API_INVALID_RESPONSE',
+          response.status,
+          JSON.stringify(data).substring(0, 200),
+          {
+            module: 'LLMService',
+            action: 'callLLM',
+            model,
+            endpoint: normalizedEndpoint
+          }
+        );
       }
 
       return data.choices[0].message.content || '';
@@ -388,7 +401,7 @@ export async function fetchModelsFromApi(
     }
 
     // 兼容不同厂商的数据结构
-    let list: any[] = [];
+    let list: Array<{ id: string; name?: string; [key: string]: unknown }> = [];
 
     if (Array.isArray(data)) {
       list = data;
@@ -441,7 +454,15 @@ export async function fetchModelsFromApi(
             console.warn(`⚠️ 跳过无效模型 [${index}]:`, m);
             return null;
           }
-          return { id: String(id), context: 128000, features: [] };
+          
+          // 🎯 数据边界验证：验证模型对象基本结构
+          const modelInfo: ModelInfo = { 
+            id: String(id), 
+            context: 128000, 
+            features: [] 
+          };
+          
+          return modelInfo;
         }
 
         // 其他类型，尝试转换为字符串

@@ -5,14 +5,26 @@
  * 参见：src/types/modules-business.d.ts
  */
 
-import type { ScrapedData, ScrapedProduct, CustomerReview, ScraperSite } from '@/types/modules-business';
+import type { 
+    ScrapedData, 
+    ScrapedDataMetadata,
+    ScrapedProduct, 
+    CustomerReview, 
+    ScraperSite 
+} from '@/types/modules-business';
 
 // ==================== 重新导出全局类型 ====================
 
 /**
  * 重新导出全局类型，方便本地使用
  */
-export type { ScrapedData, ScrapedProduct as ProductData, CustomerReview as ReviewData, ScraperSite };
+export type { 
+    ScrapedData, 
+    ScrapedDataMetadata,
+    ScrapedProduct as ProductData, 
+    CustomerReview as ReviewData, 
+    ScraperSite 
+};
 
 // ==================== 采集任务相关类型 ====================
 

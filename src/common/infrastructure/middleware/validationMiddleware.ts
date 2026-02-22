@@ -2,9 +2,21 @@
 // ================================================================
 // 验证中间件
 // 在状态更新前验证数据的有效性
+// 集成 Zod 进行运行时验证
 // ================================================================
 
 import type { Middleware } from '../StateManager';
+import { z, type ZodSchema } from 'zod';
+import {
+  UserProductProfileSchema,
+  ScrapedDataItemSchema,
+  PromptHistoryItemSchema,
+  UIStateSchema,
+  ScraperStateSchema,
+  AnalysisStateSchema,
+  PromptLabStateSchema,
+  AnalysisReportSchema
+} from '../../guards/zodSchemas';
 
 /**
  * 验证规则函数类型
@@ -12,15 +24,21 @@ import type { Middleware } from '../StateManager';
 export type ValidationRule = (payload: any) => boolean | string;
 
 /**
- * 验证规则映射
+ * Zod Schema 验证规则类型
  */
-export type ValidationRules = Record<string, ValidationRule | ValidationRule[]>;
+export type ZodValidationRule = ZodSchema<any>;
+
+/**
+ * 验证规则映射
+ * 支持传统验证函数或 Zod Schema
+ */
+export type ValidationRules = Record<string, ValidationRule | ValidationRule[] | ZodValidationRule>;
 
 /**
  * 验证中间件配置选项
  */
 export interface ValidationMiddlewareOptions {
-  /** 验证规则映射（action -> 验证函数） */
+  /** 验证规则映射（action -> 验证函数或 Zod Schema） */
   rules: ValidationRules;
   /** 验证失败时是否抛出错误，默认为 true */
   throwOnError?: boolean;
@@ -28,6 +46,8 @@ export interface ValidationMiddlewareOptions {
   onValidationError?: (action: string, error: string) => void;
   /** 是否在开发环境启用严格模式，默认为 true */
   strictMode?: boolean;
+  /** 是否优先使用 Zod 验证，默认为 true */
+  preferZod?: boolean;
 }
 
 /**
@@ -38,6 +58,7 @@ export interface ValidationMiddlewareOptions {
  * 
  * @example
  * ```typescript
+ * // 使用传统验证函数
  * const validation = createValidationMiddleware({
  *   rules: {
  *     setAnalysisReport: (payload) => {
@@ -45,11 +66,15 @@ export interface ValidationMiddlewareOptions {
  *         return 'Invalid analysis report';
  *       }
  *       return true;
- *     },
- *     setSelectedAsins: [
- *       (payload) => Array.isArray(payload) || 'Must be an array',
- *       (payload) => payload.every(asin => typeof asin === 'string') || 'All items must be strings'
- *     ]
+ *     }
+ *   }
+ * });
+ * 
+ * // 使用 Zod Schema
+ * const zodValidation = createValidationMiddleware({
+ *   rules: {
+ *     setUserProductProfile: UserProductProfileSchema,
+ *     setScrapedData: z.array(ScrapedDataItemSchema)
  *   }
  * });
  * 
@@ -78,10 +103,45 @@ export function createValidationMiddleware(
       return;
     }
 
-    // 执行验证
+    // 检查是否为 Zod Schema
+    if (isZodSchema(rule)) {
+      const result = rule.safeParse(payload);
+      
+      if (!result.success) {
+        const errorMessage = formatZodError(result.error, action);
+        
+        // 调用错误回调
+        if (onValidationError) {
+          onValidationError(action, errorMessage);
+        }
+        
+        // 抛出错误或记录日志
+        if (throwOnError) {
+          throw new Error(`[ValidationMiddleware] ${errorMessage}`);
+        } else {
+          console.error(`[ValidationMiddleware] ${errorMessage}`, { 
+            action, 
+            payload,
+            zodErrors: result.error.issues 
+          });
+        }
+        
+        return;
+      }
+      
+      // Zod 验证成功
+      return;
+    }
+
+    // 执行传统验证函数
     const validationRules = Array.isArray(rule) ? rule : [rule];
     
     for (const validationFn of validationRules) {
+      // 类型守卫：确保是函数
+      if (typeof validationFn !== 'function') {
+        continue;
+      }
+      
       const result = validationFn(payload);
       
       if (result !== true) {
@@ -108,9 +168,48 @@ export function createValidationMiddleware(
 }
 
 /**
+ * 检查是否为 Zod Schema
+ */
+function isZodSchema(value: any): value is ZodSchema {
+  return value && typeof value === 'object' && '_def' in value && 'safeParse' in value;
+}
+
+/**
+ * 格式化 Zod 错误信息
+ */
+function formatZodError(error: z.ZodError, action: string): string {
+  const issues = error.issues.map((issue: z.ZodIssue) => {
+    const path = issue.path.length > 0 ? issue.path.join('.') : 'root';
+    return `${path}: ${issue.message}`;
+  });
+  
+  return `Validation failed for action "${action}": ${issues.join('; ')}`;
+}
+
+/**
  * 常用验证函数
  */
 export const validators = {
+  /**
+   * 从 Zod Schema 创建验证函数
+   * 
+   * @param schema - Zod Schema
+   * @returns 验证函数
+   * 
+   * @example
+   * ```typescript
+   * const validateProfile = validators.fromZod(UserProductProfileSchema);
+   * const result = validateProfile(data);
+   * ```
+   */
+  fromZod: (schema: ZodSchema) => (payload: any): boolean | string => {
+    const result = schema.safeParse(payload);
+    if (result.success) {
+      return true;
+    }
+    return formatZodError(result.error, 'validation');
+  },
+
   /**
    * 验证是否为非空值
    */
@@ -275,55 +374,66 @@ export const validators = {
 };
 
 /**
- * 默认验证中间件（包含基本的类型验证）
+ * 默认验证中间件（使用 Zod Schema 进行验证）
+ * 
+ * 优先使用 Zod Schema 进行类型安全的运行时验证
+ * 对于没有 Zod Schema 的类型，使用传统验证函数
  */
 export const validationMiddleware = createValidationMiddleware({
   rules: {
-    // Analysis 相关验证
-    setAnalysisReport: validators.required,
-    setSelectedAsins: validators.all(
-      validators.isArray,
-      validators.arrayLength(0, 100)
-    ),
-    setTranslatedReport: validators.required,
-    setIsAnalyzing: validators.isBoolean,
-    setExpandedAsin: (payload) => {
-      if (payload === null) return true;
-      return validators.isValidAsin(payload);
-    },
-    setIsEditing: validators.isBoolean,
-    setShowTranslation: validators.isBoolean,
+    // Analysis 相关验证（使用 Zod Schema）
+    setAnalysisReport: AnalysisReportSchema,
+    setSelectedAsins: z.array(z.string()),
+    setTranslatedReport: AnalysisReportSchema,
+    setIsAnalyzing: z.boolean(),
+    setExpandedAsin: z.string().nullable(),
+    setIsEditing: z.boolean(),
+    setShowTranslation: z.boolean(),
+    setReportData: z.any(), // 报告数据结构复杂，暂时使用 any
 
-    // Scraper 相关验证
-    setScrapedData: validators.required,
-    setIsScraping: validators.isBoolean,
-    setScraperProgress: validators.all(
-      validators.isNumber,
-      validators.inRange(0, 100)
-    ),
-    setInputAsins: validators.isString,
+    // Scraper 相关验证（使用 Zod Schema）
+    setScrapedData: z.union([
+      z.array(ScrapedDataItemSchema),
+      z.any(),
+      z.null()
+    ]),
+    setIsScraping: z.boolean(),
+    setScraperProgress: z.number().min(0).max(100),
+    setInputAsins: z.string(),
+    setScraperStatus: z.enum(['idle', 'scraping', 'success', 'error']).optional(),
+    setSelectedSite: z.union([
+      z.enum(['US', 'DE', 'FR', 'IT', 'ES', 'NL', 'SE', 'PL', 'BE', 'IE', 'UK', 'CA', 'JP']),
+      z.literal('')
+    ]),
+    setCurrentHistoryId: z.union([z.string(), z.number(), z.null()]),
+    setScraperError: z.string().optional(),
+    setScraperExpandedAsin: z.string().nullable(),
+    setCurrentDataTab: z.enum(['preview', 'json']),
 
-    // PromptLab 相关验证
-    setUserProductProfile: validators.required,
-    setCurrentPrompt: validators.isString,
-    setSelectedModel: validators.isString,
-    setTemperature: validators.all(
-      validators.isNumber,
-      validators.inRange(0, 2)
-    ),
-    setMaxTokens: validators.all(
-      validators.isNumber,
-      validators.inRange(1, 100000)
-    ),
+    // PromptLab 相关验证（使用 Zod Schema）
+    setUserProductProfile: UserProductProfileSchema,
+    setCurrentPrompt: z.string(),
+    setSelectedModel: z.string(),
+    setTemperature: z.number().min(0).max(2),
+    setMaxTokens: z.number().min(1).max(100000),
+    addPromptHistory: PromptHistoryItemSchema,
 
-    // UI 相关验证
-    setCurrentTab: validators.isString,
-    setTheme: (payload) => {
-      return ['light', 'dark', 'auto'].includes(payload) 
-        || 'Theme must be one of: light, dark, auto';
-    },
-    setLoading: validators.isBoolean
+    // KeywordTracker 相关验证
+    setKeywords: z.array(z.string()),
+    setProcessedCopy: z.string(),
+
+    // UI 相关验证（使用 Zod Schema）
+    setCurrentTab: z.string(),
+    setTheme: z.enum(['light', 'dark', 'auto']),
+    setLoading: z.boolean(),
+
+    // 批量更新操作（使用 partial schemas）
+    updateScraper: ScraperStateSchema.partial(),
+    updateAnalysis: AnalysisStateSchema.partial(),
+    updatePromptLab: PromptLabStateSchema.partial(),
+    updateUI: UIStateSchema.partial()
   },
   throwOnError: false,
-  strictMode: true
+  strictMode: true,
+  preferZod: true
 });

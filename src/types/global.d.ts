@@ -20,13 +20,21 @@ interface ImportMeta {
 declare global {
   interface Window {
     // Alpine.js
-    Alpine: any;
+    Alpine: {
+      data: (name: string, callback: () => unknown) => void;
+      start: () => void;
+      store: <T>(name: string, value: T) => T;
+      [key: string]: unknown;
+    };
     
     // Marked
-    marked: any;
+    marked: {
+      parse: (markdown: string, options?: Record<string, unknown>) => string;
+      [key: string]: unknown;
+    };
     
     // 全局状态
-    state: any;
+    state: Record<string, unknown>;
     
     // 路由
     router: import('../common/router/Router').Router;
@@ -309,12 +317,12 @@ export interface StorageOptions {
 /**
  * 构造函数类型
  */
-export type Constructor<T = any> = new (...args: any[]) => T;
+export type Constructor<T = unknown> = new (...args: unknown[]) => T;
 
 /**
  * 抽象构造函数类型
  */
-export type AbstractConstructor<T = any> = abstract new (...args: any[]) => T;
+export type AbstractConstructor<T = unknown> = abstract new (...args: unknown[]) => T;
 
 /**
  * 类装饰器

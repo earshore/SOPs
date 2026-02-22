@@ -2,9 +2,11 @@
 // ================================================================
 // 持久化中间件
 // 自动将状态变更持久化到 localStorage
+// 集成 Zod 进行数据验证
 // ================================================================
 
 import type { Middleware } from '../StateManager';
+import { z, type ZodSchema } from 'zod';
 
 /**
  * 持久化中间件配置选项
@@ -26,6 +28,10 @@ export interface PersistMiddlewareOptions {
   onError?: (error: Error) => void;
   /** 是否压缩数据（使用简单的压缩算法），默认为 false */
   compress?: boolean;
+  /** 可选的 Zod Schema 用于验证恢复的状态 */
+  schema?: ZodSchema;
+  /** 验证失败时是否使用默认值，默认为 false */
+  useDefaultOnValidationError?: boolean;
 }
 
 /**
@@ -116,8 +122,16 @@ export function createPersistMiddleware(
  * 
  * @example
  * ```typescript
+ * // 不使用验证
  * const restoredState = restorePersistedState({
  *   key: 'my-app-state'
+ * });
+ * 
+ * // 使用 Zod Schema 验证
+ * const restoredState = restorePersistedState({
+ *   key: 'my-app-state',
+ *   schema: AppStateSchema,
+ *   useDefaultOnValidationError: true
  * });
  * 
  * if (restoredState) {
@@ -126,13 +140,15 @@ export function createPersistMiddleware(
  * ```
  */
 export function restorePersistedState(
-  options: Pick<PersistMiddlewareOptions, 'key' | 'compress' | 'deserialize' | 'onError'> = {}
+  options: Pick<PersistMiddlewareOptions, 'key' | 'compress' | 'deserialize' | 'onError' | 'schema' | 'useDefaultOnValidationError'> = {}
 ): any | null {
   const {
     key = 'state-manager-persist',
     compress = false,
     deserialize = JSON.parse,
-    onError
+    onError,
+    schema,
+    useDefaultOnValidationError = false
   } = options;
 
   try {
@@ -149,7 +165,34 @@ export function restorePersistedState(
     }
 
     // 反序列化状态（使用自定义函数或默认的 JSON.parse）
-    return deserialize(decompressed);
+    const state = deserialize(decompressed);
+
+    // 可选：使用 Zod Schema 验证恢复的状态
+    if (schema) {
+      const result = schema.safeParse(state);
+      
+      if (!result.success) {
+        const errorMessage = `State validation failed: ${formatZodError(result.error)}`;
+        console.warn('[PersistMiddleware]', errorMessage);
+        
+        if (onError) {
+          onError(new Error(errorMessage));
+        }
+        
+        // 如果设置了使用默认值，返回 null（调用方可以使用默认状态）
+        if (useDefaultOnValidationError) {
+          return null;
+        }
+        
+        // 否则抛出错误
+        throw new Error(errorMessage);
+      }
+      
+      // 验证成功，返回验证后的数据
+      return result.data;
+    }
+
+    return state;
   } catch (error) {
     const err = error instanceof Error ? error : new Error(String(error));
     
@@ -161,6 +204,18 @@ export function restorePersistedState(
     
     return null;
   }
+}
+
+/**
+ * 格式化 Zod 错误信息
+ */
+function formatZodError(error: z.ZodError): string {
+  const issues = error.issues.map((issue: z.ZodIssue) => {
+    const path = issue.path.length > 0 ? issue.path.join('.') : 'root';
+    return `${path}: ${issue.message}`;
+  });
+  
+  return issues.join('; ');
 }
 
 /**

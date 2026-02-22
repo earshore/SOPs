@@ -22,7 +22,7 @@ if (import.meta.env.DEV) {
 
 // Expose to window for legacy compatibility (仅开发环境)
 if (import.meta.env.DEV) {
-  window.marked = marked;
+  (window as any).marked = marked;
 }
 
 // ✅ 导入全局状态对象
@@ -112,7 +112,7 @@ import Alpine from 'alpinejs';
 // 这对于动态注册组件至关重要
 // 使用类型断言避免 TypeScript 错误,并确保不被 Terser 优化掉
 (window as any)['Alpine'] = Alpine;
-window.Alpine = Alpine;
+(window as any).Alpine = Alpine;
 
 // 🔧 暴露 Zustand Store 到 window (用于调试和测试)
 (window as any)['useAppStore'] = appStore;

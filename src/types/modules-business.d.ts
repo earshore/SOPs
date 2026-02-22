@@ -7,9 +7,17 @@
 // ==================== 通用模块类型 ====================
 
 /**
+ * 模块接口
+ */
+export interface IModule {
+  mount: (container: HTMLElement) => Promise<void> | void;
+  unmount?: () => void;
+}
+
+/**
  * 模块加载器函数类型
  */
-export type ModuleLoaderFn = () => Promise<any>;
+export type ModuleLoaderFn = () => Promise<IModule>;
 
 /**
  * 模块映射类型
@@ -126,18 +134,286 @@ export interface LLMConfig {
 }
 
 /**
+ * 卖点分析 - 单个要点
+ */
+export interface BulletAnalysis {
+  /** 要点索引 */
+  bullet_index: number;
+  /** 原文摘要 */
+  original_text_summary: string;
+  /** 功能列表 */
+  functions: string[];
+  /** 使用场景 */
+  scenes: string[];
+  /** 可信度评分 */
+  credibility_score: 'high' | 'medium' | 'low';
+}
+
+/**
+ * 整体策略分析
+ */
+export interface OverallStrategy {
+  /** 主要差异化点 */
+  primary_differentiation: string;
+  /** 情感钩子 */
+  emotional_hooks: string[];
+  /** 缺失元素 */
+  missing_elements: string[];
+}
+
+/**
+ * 功能场景矩阵
+ */
+export interface FunctionSceneMatrix {
+  /** 痛点列表 */
+  pain_points: string[];
+}
+
+/**
+ * 卖点分析
+ */
+export interface SellingPoints {
+  /** 要点分析列表 */
+  bullet_analysis: BulletAnalysis[];
+  /** 整体策略 */
+  overall_strategy: OverallStrategy;
+  /** 功能场景矩阵 */
+  function_scene_matrix: FunctionSceneMatrix;
+}
+
+/**
+ * 致命缺陷 - 单个问题
+ */
+export interface CriticalIssue {
+  /** 问题描述 */
+  issue: string;
+  /** 出现频率 */
+  frequency: number;
+  /** 用户引用 */
+  user_quotes: string[];
+  /** 严重程度 */
+  severity: 'critical' | 'major' | 'minor';
+}
+
+/**
+ * 期望差距
+ */
+export interface ExpectationGap {
+  /** 期望 */
+  expected: string;
+  /** 现实 */
+  reality: string;
+  /** 失望程度 */
+  disappointment_level: 'high' | 'medium' | 'low';
+}
+
+/**
+ * 风险评估
+ */
+export interface RiskAssessment {
+  /** 整体风险等级 */
+  overall_risk_level: 'high' | 'medium' | 'low';
+  /** 主要关注点 */
+  primary_concern: string;
+}
+
+/**
+ * 致命缺陷分析
+ */
+export interface FatalFlaws {
+  /** 关键问题列表 */
+  critical_issues: CriticalIssue[];
+  /** 退货触发因素 */
+  return_triggers: string[];
+  /** 期望差距 */
+  expectation_gaps: ExpectationGap[];
+  /** 风险评估 */
+  risk_assessment: RiskAssessment;
+}
+
+/**
+ * 惊喜时刻
+ */
+export interface WowMoment {
+  /** 时刻描述 */
+  moment_description: string;
+  /** 用户引用 */
+  user_quote: string;
+  /** 情感类型 */
+  emotion_type: 'surprise' | 'delight' | 'satisfaction' | 'excitement';
+  /** 相关方面 */
+  aspect: 'smell' | 'value' | 'packaging' | 'quality' | 'service';
+  /** 营销潜力 */
+  marketing_potential: 'high' | 'medium' | 'low';
+}
+
+/**
+ * 惊喜时刻分析
+ */
+export interface WowMoments {
+  /** 惊喜时刻列表 */
+  moments: WowMoment[];
+}
+
+/**
+ * 犹豫点
+ */
+export interface HesitationPoint {
+  /** 购买前担忧 */
+  pre_purchase_worry: string;
+  /** 购买后解决方案 */
+  post_purchase_resolution: string;
+  /** 转化影响 */
+  conversion_impact: 'high' | 'medium' | 'low';
+}
+
+/**
+ * 犹豫点分析
+ */
+export interface HesitationPoints {
+  /** 犹豫点列表 */
+  hesitations: HesitationPoint[];
+}
+
+/**
+ * 买家类型
+ */
+export interface BuyerType {
+  /** 类型名称 */
+  type: string;
+  /** 百分比估计 */
+  percentage_estimate: string;
+  /** 动机 */
+  motivation: string;
+}
+
+/**
+ * 人口统计信息
+ */
+export interface Demographics {
+  /** 可能的性别 */
+  likely_gender: 'male' | 'female' | 'mixed' | 'unknown';
+  /** 年龄范围估计 */
+  age_range_estimate: string;
+}
+
+/**
+ * 买家画像
+ */
+export interface BuyerProfile {
+  /** 人口统计 */
+  demographics: Demographics;
+  /** 买家类型列表 */
+  buyer_types: BuyerType[];
+}
+
+/**
+ * 分析报告元数据
+ */
+export interface AnalysisReportMetadata {
+  /** ASIN 列表 */
+  asins?: string[];
+  /** 市场代码 */
+  marketplace?: string;
+  /** 生成时间戳 */
+  generated_at?: string;
+  /** 模板 ID */
+  template_id?: string;
+  /** 模板名称 */
+  template_name?: string;
+  /** 语言 */
+  language?: string;
+  /** 其他元数据 */
+  [key: string]: unknown;
+}
+
+/**
  * 分析报告
+ * 
+ * 这是 AI 分析服务生成的完整报告结构。
+ * 报告可能包含多个分析模块，每个模块都是可选的。
+ * 
+ * @example
+ * ```typescript
+ * const report: AnalysisReport = {
+ *   asin: "B0FVM8J662",
+ *   product_title: "Example Product",
+ *   market: "US",
+ *   analysis_timestamp: "2024-01-01T00:00:00Z",
+ *   "selling-points": {
+ *     bullet_analysis: [...],
+ *     overall_strategy: {...}
+ *   }
+ * };
+ * ```
  */
 export interface AnalysisReport {
+  // ==================== 基础信息 ====================
+  
+  /** ASIN（单个或逗号分隔的多个） */
+  asin?: string;
+  
+  /** 产品标题 */
+  product_title?: string;
+  
+  /** 分析时间戳（ISO 8601 格式） */
+  analysis_timestamp?: string;
+  
+  /** 市场代码（如 US, DE, UK） */
+  market?: string;
+  
+  /** 目标市场（用于 Promptlab） */
   targetMarket?: string;
+  
+  /** 语言 */
   language?: string;
+  
+  /** 使用的模板 */
   templateUsed?: string;
+  
+  /** 模板 ID */
   templateId?: string;
+  
+  /** 生成时间（Unix 时间戳） */
   generatedAt?: number;
-  meta?: Record<string, unknown>;
+  
+  /** 元数据 */
+  meta?: AnalysisReportMetadata;
+  
+  // ==================== 分析模块 ====================
+  
+  /** 卖点分析 */
+  'selling-points'?: SellingPoints;
+  
+  /** 致命缺陷分析 */
+  'fatal-flaws'?: FatalFlaws;
+  
+  /** 惊喜时刻分析 */
+  'wow-moments'?: WowMoments;
+  
+  /** 犹豫点分析 */
+  'hesitation-points'?: HesitationPoints;
+  
+  /** 买家画像 */
+  'buyer-profile'?: BuyerProfile;
+  
+  // ==================== 错误处理 ====================
+  
+  /** 是否解析错误 */
   parse_error?: boolean;
+  
+  /** 原始响应（当解析失败时） */
   raw_response?: string;
+  
+  /** 错误详情 */
   error_detail?: string;
+  
+  // ==================== 扩展字段 ====================
+  
+  /**
+   * 允许动态添加其他分析模块
+   * 例如：'price-analysis', 'review-sentiment', 'seo-keywords' 等
+   */
   [key: string]: unknown;
 }
 
@@ -223,16 +499,70 @@ export interface HistoryItem {
 }
 
 /**
+ * 抓取数据元数据
+ * 包含采集过程的上下文信息
+ */
+export interface ScrapedDataMetadata {
+  /** 采集时间戳（ISO 8601 格式） */
+  scrape_timestamp: string;
+  
+  /** 市场代码（如 US, DE, UK） */
+  marketplace: string;
+  
+  /** Amazon 域名（如 amazon.com, amazon.de） */
+  domain: string;
+  
+  /** 语言名称（如 English, German） */
+  language: string;
+  
+  /** 采集的 ASIN 总数 */
+  total_asins: number;
+  
+  /** 总产品数量（已废弃，使用 total_asins） */
+  total_count?: number;
+  
+  /** 扩展字段：允许添加其他元数据 */
+  [key: string]: unknown;
+}
+
+/**
  * 抓取数据结构
+ * 
+ * 这是 Scraper 模块的核心数据结构，包含采集的产品列表和元数据。
+ * 
+ * @example
+ * ```typescript
+ * const scrapedData: ScrapedData = {
+ *   products: [
+ *     {
+ *       asin: "B08N5WRWNW",
+ *       url: "https://amazon.com/dp/B08N5WRWNW",
+ *       language: "English",
+ *       productTitle: "Example Product",
+ *       feature_bullets: ["Feature 1", "Feature 2"],
+ *       customer_reviews: [],
+ *       scrape_status: "success",
+ *       error: ""
+ *     }
+ *   ],
+ *   metadata: {
+ *     scrape_timestamp: "2024-01-01T00:00:00Z",
+ *     marketplace: "US",
+ *     domain: "amazon.com",
+ *     language: "English",
+ *     total_asins: 1
+ *   }
+ * };
+ * ```
  */
 export interface ScrapedData {
+  /** 采集的产品列表 */
   products: ScrapedProduct[];
-  metadata?: {
-    scrape_timestamp?: string;
-    marketplace?: string;
-    total_count?: number;
-    [key: string]: unknown;
-  };
+  
+  /** 采集元数据（可选，但强烈建议提供） */
+  metadata?: ScrapedDataMetadata;
+  
+  /** 扩展字段：允许添加其他数据 */
   [key: string]: unknown;
 }
 
@@ -492,7 +822,7 @@ export interface WorkflowStep {
   name: string;
   description: string;
   action: string;
-  params?: Record<string, any>;
+  params?: Record<string, unknown>;
 }
 
 // ==================== Home 模块类型 ====================
@@ -542,6 +872,8 @@ export type {
   ScraperStatus,
   CustomerReview,
   ScrapedProduct,
+  ScrapedData,
+  ScrapedDataMetadata,
   ProxyConfig,
   FetchOptions,
   StatusCallback,
@@ -549,6 +881,22 @@ export type {
   DataOptions,
   LLMConfig,
   AnalysisReport,
+  AnalysisReportMetadata,
+  BulletAnalysis,
+  OverallStrategy,
+  FunctionSceneMatrix,
+  SellingPoints,
+  CriticalIssue,
+  ExpectationGap,
+  RiskAssessment,
+  FatalFlaws,
+  WowMoment,
+  WowMoments,
+  HesitationPoint,
+  HesitationPoints,
+  BuyerType,
+  Demographics,
+  BuyerProfile,
   AnalysisModuleConfig,
   GridStackNode,
   GridStackInstance,

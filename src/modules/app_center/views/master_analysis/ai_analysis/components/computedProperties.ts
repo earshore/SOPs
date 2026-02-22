@@ -7,7 +7,8 @@ import state from '@common/state';
 import { analysisTargets } from '../config/analysisTargets';
 import { getProductByAsin, Product } from '../config/sampleData';
 import { convertScraperDataToProduct } from '../utils/dataTransformers';
-import { AnalysisResult, AlpineContext, ScraperData, FullReportData } from '../types';
+import { AnalysisResult, AlpineContext, FullReportData } from '../types';
+import type { ScrapedData } from '@/types/modules-business';
 import { getPromptTokenCount } from './helpers';
 import { formatTokenCount } from '../utils/tokenCounter';
 
@@ -45,7 +46,7 @@ export function createComputedProperties(context: AlpineContext): ComputedProper
       const products: Product[] = [];
       
       // 优先从 Scraper 数据获取
-      const scrapedData = state.scraper?.scrapedData as ScraperData | undefined;
+      const scrapedData = state.scraper?.scrapedData as ScrapedData | null;
       if (scrapedData && scrapedData.products && scrapedData.products.length > 0) {
         console.log('[计算属性] 开始从 Scraper 数据获取产品, selectedAsins:', context.selectedAsins);
         for (const asin of context.selectedAsins) {
@@ -92,7 +93,7 @@ export function createComputedProperties(context: AlpineContext): ComputedProper
      */
     get availableAsins(): string[] {
       // 优先从 Scraper 获取 ASIN 列表
-      const scrapedData = state.scraper?.scrapedData as ScraperData | undefined;
+      const scrapedData = state.scraper?.scrapedData as ScrapedData | null;
       if (scrapedData && scrapedData.products && scrapedData.products.length > 0) {
         return scrapedData.products
           .map(p => p.asin)
@@ -179,7 +180,7 @@ export function createComputedProperties(context: AlpineContext): ComputedProper
      * 是否有 Scraper 数据
      */
     get hasScraperData(): boolean {
-      const scrapedData = state.scraper?.scrapedData as ScraperData | undefined;
+      const scrapedData = state.scraper?.scrapedData as ScrapedData | null;
       return !!(scrapedData && scrapedData.products && scrapedData.products.length > 0);
     },
 
@@ -198,7 +199,7 @@ export function createComputedProperties(context: AlpineContext): ComputedProper
      * 数据源市场
      */
     get dataSourceMarketplace(): string {
-      const scrapedData = state.scraper?.scrapedData as ScraperData | undefined;
+      const scrapedData = state.scraper?.scrapedData as ScrapedData | null;
       if (scrapedData?.metadata?.marketplace) {
         return scrapedData.metadata.marketplace;
       }
@@ -209,7 +210,7 @@ export function createComputedProperties(context: AlpineContext): ComputedProper
      * 数据源时间戳
      */
     get dataSourceTimestamp(): string {
-      const scrapedData = state.scraper?.scrapedData as ScraperData | undefined;
+      const scrapedData = state.scraper?.scrapedData as ScrapedData | null;
       if (scrapedData?.metadata?.scrape_timestamp) {
         return scrapedData.metadata.scrape_timestamp;
       }
