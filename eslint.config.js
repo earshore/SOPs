@@ -35,6 +35,12 @@ export default [
             // 禁用no-dupe-class-members，因为TypeScript支持方法重载
             "no-dupe-class-members": "off",
             
+            // 🎯 代码复杂度检查
+            "complexity": ["warn", 10],  // 圈复杂度阈值
+            "@typescript-eslint/max-params": ["warn", { max: 5 }],  // 最大参数数量
+            "max-depth": ["warn", 4],  // 最大嵌套深度
+            "max-lines-per-function": ["warn", { max: 100, skipBlankLines: true, skipComments: true }],  // 最大函数行数
+            
             // 🎯 禁止直接访问localStorage
             "no-restricted-globals": ["error", {
                 name: "localStorage",
@@ -68,6 +74,12 @@ export default [
             "no-console": "off",
             "no-undef": "warn",
             "no-case-declarations": "warn",
+            
+            // 🎯 代码复杂度检查
+            "complexity": ["warn", 10],  // 圈复杂度阈值
+            "max-params": ["warn", 5],  // 最大参数数量
+            "max-depth": ["warn", 4],  // 最大嵌套深度
+            "max-lines-per-function": ["warn", { max: 100, skipBlankLines: true, skipComments: true }],  // 最大函数行数
             
             // ================================================================
             // 🎯 防止全局变量污染

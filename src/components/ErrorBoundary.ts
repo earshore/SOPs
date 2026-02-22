@@ -44,7 +44,7 @@ export function renderErrorBoundary(
     const errorId = `error-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     
     const reloadButton = showReload ? `
-        <button onclick="window.location.reload()" 
+        <button data-action="reload-page-error" 
             class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors">
             <i class="fas fa-redo mr-2"></i>刷新页面
         </button>
@@ -70,6 +70,18 @@ export function renderErrorBoundary(
             </div>
         </div>
     `;
+
+    // 绑定重载按钮
+    if (showReload) {
+        setTimeout(() => {
+            const reloadBtn = container.querySelector('[data-action="reload-page-error"]');
+            if (reloadBtn) {
+                reloadBtn.addEventListener('click', () => {
+                    window.location.reload();
+                });
+            }
+        }, 0);
+    }
 
     // 绑定重试按钮
     if (showRetry && onRetry) {
@@ -152,12 +164,20 @@ export function renderTimeout(container: HTMLElement): void {
             </div>
             <h3 class="text-lg font-bold text-slate-800 mb-2">加载超时</h3>
             <p class="text-sm text-slate-500 mb-4">内容容器加载超时，请刷新重试</p>
-            <button onclick="window.location.reload()" 
+            <button data-action="reload-page-timeout"
                 class="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-sm font-medium transition-colors">
                 <i class="fas fa-redo mr-2"></i>刷新页面
             </button>
         </div>
     `;
+    
+    // 绑定事件处理器
+    const reloadBtn = container.querySelector('[data-action="reload-page-timeout"]');
+    if (reloadBtn) {
+        reloadBtn.addEventListener('click', () => {
+            window.location.reload();
+        });
+    }
 }
 
 export default {

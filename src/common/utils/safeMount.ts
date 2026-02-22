@@ -34,7 +34,7 @@ function renderErrorFallback(container: HTMLElement, moduleName: string, error: 
         <p class="text-sm text-gray-500 max-w-md mt-1">${error.message || '未知错误'}</p>
       </div>
       <button 
-        onclick="location.reload()" 
+        data-action="reload-page-safemount"
         class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm font-medium shadow-sm"
       >
         <i class="fas fa-sync-alt mr-2"></i>刷新页面重试
@@ -42,6 +42,14 @@ function renderErrorFallback(container: HTMLElement, moduleName: string, error: 
     </div>
   `;
   container.innerHTML = errorHtml;
+  
+  // 绑定事件处理器
+  const reloadBtn = container.querySelector('[data-action="reload-page-safemount"]');
+  if (reloadBtn) {
+    reloadBtn.addEventListener('click', () => {
+      location.reload();
+    });
+  }
 }
 
 /**

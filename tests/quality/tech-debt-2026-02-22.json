@@ -1,9 +1,9 @@
 {
   "summary": {
-    "totalIssues": 1595,
+    "totalIssues": 1597,
     "bySeverity": {
       "low": 708,
-      "medium": 887,
+      "medium": 889,
       "high": 0,
       "critical": 0
     },
@@ -51,7 +51,7 @@
       "src\\common\\ui\\index.ts": 1,
       "src\\common\\ui\\megaMenu.ts": 11,
       "src\\common\\ui\\navigation.ts": 17,
-      "src\\common\\ui\\search.ts": 10,
+      "src\\common\\ui\\search.ts": 7,
       "src\\common\\utils\\actionRegistry.ts": 9,
       "src\\common\\utils\\ColorContext.ts": 4,
       "src\\common\\utils\\cssLoader.ts": 6,
@@ -136,7 +136,7 @@
       "src\\modules\\sops\\views\\backend\\procurement_qc\\index.ts": 2,
       "src\\modules\\sops\\views\\growth\\competitor_monitoring\\index.ts": 2,
       "src\\modules\\sops\\views\\growth\\listing_seo\\index.ts": 2,
-      "src\\modules\\sops\\views\\growth\\npi_tracker\\index.ts": 8,
+      "src\\modules\\sops\\views\\growth\\npi_tracker\\index.ts": 13,
       "src\\modules\\sops\\views\\growth\\ppc_advertising\\index.ts": 2,
       "src\\modules\\sops\\views\\growth\\promotion_submission\\index.ts": 6,
       "src\\modules\\sops\\views\\growth\\restricted_words\\index.ts": 2,
@@ -1220,7 +1220,7 @@
       "severity": "medium",
       "message": "使用了 any 类型",
       "file": "src\\common\\devtools\\PerformanceMonitor.ts",
-      "line": 373,
+      "line": 385,
       "column": 21,
       "code": "performance as any"
     },
@@ -1229,7 +1229,7 @@
       "severity": "medium",
       "message": "使用了 any 类型",
       "file": "src\\common\\devtools\\PerformanceMonitor.ts",
-      "line": 373,
+      "line": 385,
       "column": 36,
       "code": "any"
     },
@@ -1238,7 +1238,7 @@
       "severity": "medium",
       "message": "使用了 any 类型",
       "file": "src\\common\\devtools\\PerformanceMonitor.ts",
-      "line": 474,
+      "line": 486,
       "column": 4,
       "code": "window as any"
     },
@@ -1247,7 +1247,7 @@
       "severity": "medium",
       "message": "使用了 any 类型",
       "file": "src\\common\\devtools\\PerformanceMonitor.ts",
-      "line": 474,
+      "line": 486,
       "column": 14,
       "code": "any"
     },
@@ -4982,7 +4982,7 @@
       "severity": "low",
       "message": "存在 console.warn 语句",
       "file": "src\\common\\ui\\search.ts",
-      "line": 161,
+      "line": 175,
       "column": 5,
       "code": "console.warn('[searchSidebar] 未找到搜索容器');"
     },
@@ -4991,7 +4991,7 @@
       "severity": "low",
       "message": "存在 console.warn 语句",
       "file": "src\\common\\ui\\search.ts",
-      "line": 180,
+      "line": 194,
       "column": 5,
       "code": "console.warn('[searchSidebar] 当前路由未找到');"
     },
@@ -5000,7 +5000,7 @@
       "severity": "low",
       "message": "存在 console.warn 语句",
       "file": "src\\common\\ui\\search.ts",
-      "line": 186,
+      "line": 200,
       "column": 5,
       "code": "console.warn('[searchSidebar] 当前模块ID未找到');"
     },
@@ -5039,33 +5039,6 @@
       "line": 20,
       "column": 1,
       "code": "    navContainer?.classList.remove('hidden');\n    clearBtn?.classList.add('hidden');\n    return;\n..."
-    },
-    {
-      "ruleId": "duplicate-code",
-      "severity": "medium",
-      "message": "发现重复代码块（共 2 处，行数 ≥ 10）",
-      "file": "src\\common\\ui\\search.ts",
-      "line": 57,
-      "column": 1,
-      "code": "        class=\"w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-slate-600 hover:bg-blue-50 hover:text-bl..."
-    },
-    {
-      "ruleId": "duplicate-code",
-      "severity": "medium",
-      "message": "发现重复代码块（共 2 处，行数 ≥ 10）",
-      "file": "src\\common\\ui\\search.ts",
-      "line": 58,
-      "column": 1,
-      "code": "        <i class=\"${route.icon} w-4 text-center\"></i>\n        <span class=\"truncate\">${route.label}</span>\n      </butto..."
-    },
-    {
-      "ruleId": "duplicate-code",
-      "severity": "medium",
-      "message": "发现重复代码块（共 2 处，行数 ≥ 10）",
-      "file": "src\\common\\ui\\search.ts",
-      "line": 59,
-      "column": 1,
-      "code": "        <span class=\"truncate\">${route.label}</span>\n      </button>\n    `).join('');\n..."
     },
     {
       "ruleId": "console-log",
@@ -5756,7 +5729,7 @@
       "severity": "low",
       "message": "存在调试用的 console 语句",
       "file": "src\\common\\utils\\safeMount.ts",
-      "line": 76,
+      "line": 84,
       "column": 7,
       "code": "console.log(`✅ ${moduleName} 模块已挂载`);"
     },
@@ -5864,7 +5837,7 @@
       "severity": "low",
       "message": "存在调试用的 console 语句",
       "file": "src\\common\\utils\\viewLoader.ts",
-      "line": 255,
+      "line": 263,
       "column": 9,
       "code": "console.log(`✅ [ViewLoader] Loaded & Mounted: ${key} -> ${config.target}`);"
     },
@@ -5873,7 +5846,7 @@
       "severity": "low",
       "message": "存在调试用的 console 语句",
       "file": "src\\common\\utils\\viewLoader.ts",
-      "line": 272,
+      "line": 280,
       "column": 5,
       "code": "console.log(\"🚀 [ViewLoader] Initializing Critical Views (Bundled)...\");"
     },
@@ -5882,7 +5855,7 @@
       "severity": "low",
       "message": "存在调试用的 console 语句",
       "file": "src\\common\\utils\\viewLoader.ts",
-      "line": 281,
+      "line": 289,
       "column": 5,
       "code": "console.log(`✅ [ViewLoader] Critical Views Ready (${elapsed}ms)`);"
     },
@@ -5891,7 +5864,7 @@
       "severity": "low",
       "message": "存在调试用的 console 语句",
       "file": "src\\common\\utils\\viewLoader.ts",
-      "line": 303,
+      "line": 311,
       "column": 13,
       "code": "console.log(`⏳ [ViewLoader] Lazy loading module: ${moduleKey} (Mapped from ${routeId})...`);"
     },
@@ -5936,7 +5909,7 @@
       "severity": "medium",
       "message": "发现重复代码块（共 2 处，行数 ≥ 10）",
       "file": "src\\common\\utils\\viewLoader.ts",
-      "line": 235,
+      "line": 243,
       "column": 1,
       "code": "        \n        // 1. Check Cache\n        const cachedHtml = checkCache(path);\n..."
     },
@@ -7320,18 +7293,18 @@
     {
       "ruleId": "long-function",
       "severity": "medium",
-      "message": "方法 'renderSectionBody' 超过 100 行（实际: 176 行）",
+      "message": "方法 'renderSectionBody' 超过 100 行（实际: 190 行）",
       "file": "src\\modules\\amz_hub\\views\\practice\\promotions\\index.ts",
-      "line": 555,
+      "line": 566,
       "column": 5,
       "code": "private renderSectionBody(contentArray: ContentBlock[]): string"
     },
     {
       "ruleId": "long-function",
       "severity": "medium",
-      "message": "箭头函数 超过 100 行（实际: 173 行）",
+      "message": "箭头函数 超过 100 行（实际: 187 行）",
       "file": "src\\modules\\amz_hub\\views\\practice\\promotions\\index.ts",
-      "line": 558,
+      "line": 569,
       "column": 33,
       "code": "block => => {"
     },
@@ -11219,7 +11192,7 @@
       "severity": "low",
       "message": "存在调试用的 console 语句",
       "file": "src\\modules\\more\\views\\explore\\prompts\\index.ts",
-      "line": 338,
+      "line": 362,
       "column": 9,
       "code": "console.log('✅ 提示词模块已挂载');"
     },
@@ -11228,7 +11201,7 @@
       "severity": "low",
       "message": "存在调试用的 console 语句",
       "file": "src\\modules\\more\\views\\explore\\prompts\\index.ts",
-      "line": 355,
+      "line": 379,
       "column": 9,
       "code": "console.log('❌ 提示词模块已卸载');"
     },
@@ -11399,7 +11372,7 @@
       "severity": "low",
       "message": "存在调试用的 console 语句",
       "file": "src\\modules\\sops\\views\\growth\\npi_tracker\\index.ts",
-      "line": 433,
+      "line": 488,
       "column": 5,
       "code": "console.log('[NPITracker] 🔧 开始挂载模块');"
     },
@@ -11408,7 +11381,7 @@
       "severity": "low",
       "message": "存在调试用的 console 语句",
       "file": "src\\modules\\sops\\views\\growth\\npi_tracker\\index.ts",
-      "line": 469,
+      "line": 524,
       "column": 9,
       "code": "console.log(`[NPITracker] 已注册 ${registeredActions.length} 个动作到 ActionRegistry`);"
     },
@@ -11417,7 +11390,7 @@
       "severity": "low",
       "message": "存在调试用的 console 语句",
       "file": "src\\modules\\sops\\views\\growth\\npi_tracker\\index.ts",
-      "line": 476,
+      "line": 531,
       "column": 9,
       "code": "console.log('[NPITracker] ✅ 模块挂载成功');"
     },
@@ -11426,7 +11399,7 @@
       "severity": "low",
       "message": "存在调试用的 console 语句",
       "file": "src\\modules\\sops\\views\\growth\\npi_tracker\\index.ts",
-      "line": 487,
+      "line": 542,
       "column": 5,
       "code": "console.log('[NPITracker] 🔄 开始卸载模块');"
     },
@@ -11435,7 +11408,7 @@
       "severity": "low",
       "message": "存在调试用的 console 语句",
       "file": "src\\modules\\sops\\views\\growth\\npi_tracker\\index.ts",
-      "line": 493,
+      "line": 548,
       "column": 13,
       "code": "console.log(`[NPITracker] 已清理 ${registeredActions.length} 个动作`);"
     },
@@ -11444,25 +11417,70 @@
       "severity": "low",
       "message": "存在调试用的 console 语句",
       "file": "src\\modules\\sops\\views\\growth\\npi_tracker\\index.ts",
-      "line": 500,
+      "line": 555,
       "column": 9,
       "code": "console.log('[NPITracker] ✅ 模块卸载成功');"
     },
     {
       "ruleId": "long-function",
       "severity": "medium",
-      "message": "函数 'renderTable' 超过 100 行（实际: 107 行）",
+      "message": "函数 'renderTable' 超过 100 行（实际: 109 行）",
       "file": "src\\modules\\sops\\views\\growth\\npi_tracker\\index.ts",
       "line": 70,
       "column": 1,
       "code": "function renderTable(): void"
     },
     {
+      "ruleId": "any-type",
+      "severity": "medium",
+      "message": "使用了 any 类型",
+      "file": "src\\modules\\sops\\views\\growth\\npi_tracker\\index.ts",
+      "line": 205,
+      "column": 25,
+      "code": "tbody as any"
+    },
+    {
+      "ruleId": "any-type",
+      "severity": "medium",
+      "message": "使用了 any 类型",
+      "file": "src\\modules\\sops\\views\\growth\\npi_tracker\\index.ts",
+      "line": 205,
+      "column": 34,
+      "code": "any"
+    },
+    {
+      "ruleId": "deep-nesting",
+      "severity": "medium",
+      "message": "if 语句 嵌套深度超过 4 层（实际: 5 层）",
+      "file": "src\\modules\\sops\\views\\growth\\npi_tracker\\index.ts",
+      "line": 241,
+      "column": 16,
+      "code": "if (action === 'open-next-step-editor') {"
+    },
+    {
+      "ruleId": "any-type",
+      "severity": "medium",
+      "message": "使用了 any 类型",
+      "file": "src\\modules\\sops\\views\\growth\\npi_tracker\\index.ts",
+      "line": 247,
+      "column": 6,
+      "code": "tbody as any"
+    },
+    {
+      "ruleId": "any-type",
+      "severity": "medium",
+      "message": "使用了 any 类型",
+      "file": "src\\modules\\sops\\views\\growth\\npi_tracker\\index.ts",
+      "line": 247,
+      "column": 15,
+      "code": "any"
+    },
+    {
       "ruleId": "long-function",
       "severity": "medium",
       "message": "函数 'exportToExcel' 超过 100 行（实际: 120 行）",
       "file": "src\\modules\\sops\\views\\growth\\npi_tracker\\index.ts",
-      "line": 263,
+      "line": 318,
       "column": 1,
       "code": "function exportToExcel(): void"
     },
@@ -14529,8 +14547,8 @@
   ],
   "metrics": {
     "totalFiles": 208,
-    "totalLines": 58016,
-    "debtRatio": 0.027492415885273028
+    "totalLines": 58224,
+    "debtRatio": 0.02742855179994504
   },
-  "generatedAt": "2026-02-22T08:57:29.078Z"
+  "generatedAt": "2026-02-22T10:43:49.963Z"
 }

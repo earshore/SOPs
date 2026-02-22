@@ -501,27 +501,27 @@ class PromotionsModule extends BaseModule {
             if (node.type === 'root') {
                 return `
                     <div class="amzp_nav_group" id="nav_group_${node.id}">
-                        <a href="javascript:void(0)" class="amzp_nav_header" 
+                        <a href="#${node.id}" class="amzp_nav_header" 
                            id="nav_header_${node.id}"
-                           onclick="window.amzp_scrollTo('${node.id}')">
+                           data-scroll-target="${node.id}">
                            ${node.label}
                         </a>
                     </div>
                 `;
             } else if (node.type === 'group') {
                 const childrenHtml = (node.children || []).map(child => `
-                    <a href="javascript:void(0)" class="amzp_sub_link" 
+                    <a href="#${child.id}" class="amzp_sub_link" 
                        id="nav_link_${child.id}"
-                       onclick="window.amzp_scrollTo('${child.id}')">
+                       data-scroll-target="${child.id}">
                        ${child.label}
                     </a>
                 `).join('');
 
                 return `
                     <div class="amzp_nav_group" id="nav_group_${node.id}">
-                        <a href="javascript:void(0)" class="amzp_nav_header" 
+                        <a href="#${node.targetId}" class="amzp_nav_header" 
                            id="nav_header_${node.targetId}"
-                           onclick="window.amzp_scrollTo('${node.targetId}')">
+                           data-scroll-target="${node.targetId}">
                            ${node.label}
                         </a>
                         <div class="amzp_nav_children">
@@ -534,6 +534,17 @@ class PromotionsModule extends BaseModule {
             }
             return '';
         }).join('');
+
+        // 添加事件监听器
+        navContainer.querySelectorAll('[data-scroll-target]').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = (e.currentTarget as HTMLElement).getAttribute('data-scroll-target');
+                if (target && window.amzp_scrollTo) {
+                    window.amzp_scrollTo(target);
+                }
+            });
+        });
     }
 
     // 2. 渲染内容区 (扁平渲染)
@@ -593,10 +604,25 @@ class PromotionsModule extends BaseModule {
 
             // 5. 快捷入口 Grid
             if (block.type === 'grid_links') {
+                const gridId = `grid-${Math.random().toString(36).substr(2, 9)}`;
+                setTimeout(() => {
+                    const gridContainer = document.getElementById(gridId);
+                    if (gridContainer) {
+                        gridContainer.querySelectorAll('[data-scroll-to-name]').forEach(item => {
+                            item.addEventListener('click', () => {
+                                const targetName = (item as HTMLElement).getAttribute('data-scroll-to-name');
+                                if (targetName && window.amzp_scrollTo_Name) {
+                                    window.amzp_scrollTo_Name(targetName);
+                                }
+                            });
+                        });
+                    }
+                }, 0);
+                
                 return `
-                    <div class="amzp_grid" style="margin-top: 10px;">
+                    <div class="amzp_grid" id="${gridId}" style="margin-top: 10px;">
                         ${(block.items || []).map(item => `
-                            <div class="amzp_sub_item" style="cursor: pointer; padding: 20px;" onclick="window.amzp_scrollTo_Name('${item.title}')">
+                            <div class="amzp_sub_item" style="cursor: pointer; padding: 20px;" data-scroll-to-name="${item.title}">
                                 <div class="amzp_sub_header" style="margin-bottom: 8px;">
                                     <div class="amzp_sub_icon"><i class="fas ${item.icon}"></i></div>
                                     <div class="amzp_sub_title" style="font-size: 1rem;">${item.title}</div>

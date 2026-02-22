@@ -22,18 +22,35 @@ export function render404(container: HTMLElement | null, routeId: string = ''): 
       </p>
       <div class="flex gap-4">
         <button 
-          onclick="window.location.hash = ''; window.location.reload()" 
+          data-action="go-home"
           class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-sm">
           <i class="fas fa-home mr-2"></i>返回首页
         </button>
         <button 
-          onclick="window.history.back()" 
+          data-action="go-back"
           class="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors">
           <i class="fas fa-arrow-left mr-2"></i>返回上一页
         </button>
       </div>
     </div>
   `;
+  
+  // 绑定事件处理器
+  const homeBtn = container.querySelector('[data-action="go-home"]');
+  const backBtn = container.querySelector('[data-action="go-back"]');
+  
+  if (homeBtn) {
+    homeBtn.addEventListener('click', () => {
+      window.location.hash = '';
+      window.location.reload();
+    });
+  }
+  
+  if (backBtn) {
+    backBtn.addEventListener('click', () => {
+      window.history.back();
+    });
+  }
 }
 
 /**
@@ -76,16 +93,32 @@ export function renderError(
       </div>
       <div class="flex gap-4">
         <button 
-          onclick="window.location.reload()" 
+          data-action="reload-page"
           class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-sm">
           <i class="fas fa-redo mr-2"></i>刷新页面
         </button>
         <button 
-          onclick="window.location.hash = ''" 
+          data-action="go-home-error"
           class="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors">
           <i class="fas fa-home mr-2"></i>返回首页
         </button>
       </div>
     </div>
   `;
+  
+  // 绑定事件处理器
+  const reloadBtn = container.querySelector('[data-action="reload-page"]');
+  const homeBtn = container.querySelector('[data-action="go-home-error"]');
+  
+  if (reloadBtn) {
+    reloadBtn.addEventListener('click', () => {
+      window.location.reload();
+    });
+  }
+  
+  if (homeBtn) {
+    homeBtn.addEventListener('click', () => {
+      window.location.hash = '';
+    });
+  }
 }

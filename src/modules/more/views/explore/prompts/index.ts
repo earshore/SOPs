@@ -162,11 +162,11 @@ function renderPromptList(prompts: Prompt[] | null = null): void {
                         <span>${model.name}</span>
                     </div>
                     <div class="flex gap-2">
-                        <button onclick="window.viewPrompt('${prompt.id}')" 
+                        <button data-action="view-prompt" data-prompt-id="${prompt.id}"
                                 class="btn-icon" title="查看详情">
                             <i class="fas fa-eye"></i>
                         </button>
-                        <button onclick="window.copyPrompt('${prompt.id}')" 
+                        <button data-action="copy-prompt" data-prompt-id="${prompt.id}"
                                 class="btn-icon" title="复制提示词">
                             <i class="fas fa-copy"></i>
                         </button>
@@ -176,6 +176,30 @@ function renderPromptList(prompts: Prompt[] | null = null): void {
         `;
         })
         .join('');
+    
+    // 绑定事件处理器
+    setTimeout(() => {
+        const container = document.getElementById('prompts-grid');
+        if (container) {
+            container.querySelectorAll('[data-action="view-prompt"]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const promptId = btn.getAttribute('data-prompt-id');
+                    if (promptId && window.viewPrompt) {
+                        window.viewPrompt(promptId);
+                    }
+                });
+            });
+            
+            container.querySelectorAll('[data-action="copy-prompt"]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const promptId = btn.getAttribute('data-prompt-id');
+                    if (promptId && window.copyPrompt) {
+                        window.copyPrompt(promptId);
+                    }
+                });
+            });
+        }
+    }, 0);
 }
 
 /**

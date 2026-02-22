@@ -81,13 +81,13 @@
   <div class="container">
     <div class="header">
       <h1>📊 技术债务扫描报告</h1>
-      <div class="meta">生成时间: 2026/2/22 16:57:29</div>
+      <div class="meta">生成时间: 2026/2/22 18:43:49</div>
     </div>
 
     <div class="stats">
       <div class="stat-card">
         <div class="stat-label">总问题数</div>
-        <div class="stat-value">1595</div>
+        <div class="stat-value">1597</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">扫描文件数</div>
@@ -95,11 +95,11 @@
       </div>
       <div class="stat-card">
         <div class="stat-label">总代码行数</div>
-        <div class="stat-value">58,016</div>
+        <div class="stat-value">58,224</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">债务比率</div>
-        <div class="stat-value">2.75%</div>
+        <div class="stat-value">2.74%</div>
       </div>
     </div>
 
@@ -114,7 +114,7 @@
       </div>
       <div class="stat-card">
         <div class="stat-label">🟡 中</div>
-        <div class="stat-value" style="color: #f59e0b">887</div>
+        <div class="stat-value" style="color: #f59e0b">889</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">🟢 低</div>
@@ -1646,7 +1646,7 @@
             <span class="issue-message">使用了 any 类型</span>
           </div>
           <div class="issue-location">
-            📁 src\common\devtools\PerformanceMonitor.ts (行 373, 列 21)
+            📁 src\common\devtools\PerformanceMonitor.ts (行 385, 列 21)
           </div>
           <div class="issue-code">performance as any</div>
         </div>
@@ -1659,7 +1659,7 @@
             <span class="issue-message">使用了 any 类型</span>
           </div>
           <div class="issue-location">
-            📁 src\common\devtools\PerformanceMonitor.ts (行 373, 列 36)
+            📁 src\common\devtools\PerformanceMonitor.ts (行 385, 列 36)
           </div>
           <div class="issue-code">any</div>
         </div>
@@ -1672,7 +1672,7 @@
             <span class="issue-message">使用了 any 类型</span>
           </div>
           <div class="issue-location">
-            📁 src\common\devtools\PerformanceMonitor.ts (行 474, 列 4)
+            📁 src\common\devtools\PerformanceMonitor.ts (行 486, 列 4)
           </div>
           <div class="issue-code">window as any</div>
         </div>
@@ -1685,7 +1685,7 @@
             <span class="issue-message">使用了 any 类型</span>
           </div>
           <div class="issue-location">
-            📁 src\common\devtools\PerformanceMonitor.ts (行 474, 列 14)
+            📁 src\common\devtools\PerformanceMonitor.ts (行 486, 列 14)
           </div>
           <div class="issue-code">any</div>
         </div>
@@ -7238,7 +7238,7 @@
             <span class="issue-message">存在 console.warn 语句</span>
           </div>
           <div class="issue-location">
-            📁 src\common\ui\search.ts (行 161, 列 5)
+            📁 src\common\ui\search.ts (行 175, 列 5)
           </div>
           <div class="issue-code">console.warn(&#039;[searchSidebar] 未找到搜索容器&#039;);</div>
         </div>
@@ -7251,7 +7251,7 @@
             <span class="issue-message">存在 console.warn 语句</span>
           </div>
           <div class="issue-location">
-            📁 src\common\ui\search.ts (行 180, 列 5)
+            📁 src\common\ui\search.ts (行 194, 列 5)
           </div>
           <div class="issue-code">console.warn(&#039;[searchSidebar] 当前路由未找到&#039;);</div>
         </div>
@@ -7264,7 +7264,7 @@
             <span class="issue-message">存在 console.warn 语句</span>
           </div>
           <div class="issue-location">
-            📁 src\common\ui\search.ts (行 186, 列 5)
+            📁 src\common\ui\search.ts (行 200, 列 5)
           </div>
           <div class="issue-code">console.warn(&#039;[searchSidebar] 当前模块ID未找到&#039;);</div>
         </div>
@@ -7329,50 +7329,6 @@
           <div class="issue-code">    navContainer?.classList.remove(&#039;hidden&#039;);
     clearBtn?.classList.add(&#039;hidden&#039;);
     return;
-...</div>
-        </div>
-      
-        <div class="issue">
-          <div class="issue-header">
-            <span class="severity-badge" style="background: #f59e0b">
-              🟡 MEDIUM
-            </span>
-            <span class="issue-message">发现重复代码块（共 2 处，行数 ≥ 10）</span>
-          </div>
-          <div class="issue-location">
-            📁 src\common\ui\search.ts (行 57, 列 1)
-          </div>
-          <div class="issue-code">        class=&quot;w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-slate-600 hover:bg-blue-50 hover:text-bl...</div>
-        </div>
-      
-        <div class="issue">
-          <div class="issue-header">
-            <span class="severity-badge" style="background: #f59e0b">
-              🟡 MEDIUM
-            </span>
-            <span class="issue-message">发现重复代码块（共 2 处，行数 ≥ 10）</span>
-          </div>
-          <div class="issue-location">
-            📁 src\common\ui\search.ts (行 58, 列 1)
-          </div>
-          <div class="issue-code">        &lt;i class=&quot;${route.icon} w-4 text-center&quot;&gt;&lt;/i&gt;
-        &lt;span class=&quot;truncate&quot;&gt;${route.label}&lt;/span&gt;
-      &lt;/butto...</div>
-        </div>
-      
-        <div class="issue">
-          <div class="issue-header">
-            <span class="severity-badge" style="background: #f59e0b">
-              🟡 MEDIUM
-            </span>
-            <span class="issue-message">发现重复代码块（共 2 处，行数 ≥ 10）</span>
-          </div>
-          <div class="issue-location">
-            📁 src\common\ui\search.ts (行 59, 列 1)
-          </div>
-          <div class="issue-code">        &lt;span class=&quot;truncate&quot;&gt;${route.label}&lt;/span&gt;
-      &lt;/button&gt;
-    `).join(&#039;&#039;);
 ...</div>
         </div>
       
@@ -8372,7 +8328,7 @@
             <span class="issue-message">存在调试用的 console 语句</span>
           </div>
           <div class="issue-location">
-            📁 src\common\utils\safeMount.ts (行 76, 列 7)
+            📁 src\common\utils\safeMount.ts (行 84, 列 7)
           </div>
           <div class="issue-code">console.log(`✅ ${moduleName} 模块已挂载`);</div>
         </div>
@@ -8528,7 +8484,7 @@
             <span class="issue-message">存在调试用的 console 语句</span>
           </div>
           <div class="issue-location">
-            📁 src\common\utils\viewLoader.ts (行 255, 列 9)
+            📁 src\common\utils\viewLoader.ts (行 263, 列 9)
           </div>
           <div class="issue-code">console.log(`✅ [ViewLoader] Loaded &amp; Mounted: ${key} -&gt; ${config.target}`);</div>
         </div>
@@ -8541,7 +8497,7 @@
             <span class="issue-message">存在调试用的 console 语句</span>
           </div>
           <div class="issue-location">
-            📁 src\common\utils\viewLoader.ts (行 272, 列 5)
+            📁 src\common\utils\viewLoader.ts (行 280, 列 5)
           </div>
           <div class="issue-code">console.log(&quot;🚀 [ViewLoader] Initializing Critical Views (Bundled)...&quot;);</div>
         </div>
@@ -8554,7 +8510,7 @@
             <span class="issue-message">存在调试用的 console 语句</span>
           </div>
           <div class="issue-location">
-            📁 src\common\utils\viewLoader.ts (行 281, 列 5)
+            📁 src\common\utils\viewLoader.ts (行 289, 列 5)
           </div>
           <div class="issue-code">console.log(`✅ [ViewLoader] Critical Views Ready (${elapsed}ms)`);</div>
         </div>
@@ -8567,7 +8523,7 @@
             <span class="issue-message">存在调试用的 console 语句</span>
           </div>
           <div class="issue-location">
-            📁 src\common\utils\viewLoader.ts (行 303, 列 13)
+            📁 src\common\utils\viewLoader.ts (行 311, 列 13)
           </div>
           <div class="issue-code">console.log(`⏳ [ViewLoader] Lazy loading module: ${moduleKey} (Mapped from ${routeId})...`);</div>
         </div>
@@ -8632,7 +8588,7 @@
             <span class="issue-message">发现重复代码块（共 2 处，行数 ≥ 10）</span>
           </div>
           <div class="issue-location">
-            📁 src\common\utils\viewLoader.ts (行 235, 列 1)
+            📁 src\common\utils\viewLoader.ts (行 243, 列 1)
           </div>
           <div class="issue-code">        
         // 1. Check Cache
@@ -10634,10 +10590,10 @@
             <span class="severity-badge" style="background: #f59e0b">
               🟡 MEDIUM
             </span>
-            <span class="issue-message">方法 'renderSectionBody' 超过 100 行（实际: 176 行）</span>
+            <span class="issue-message">方法 'renderSectionBody' 超过 100 行（实际: 190 行）</span>
           </div>
           <div class="issue-location">
-            📁 src\modules\amz_hub\views\practice\promotions\index.ts (行 555, 列 5)
+            📁 src\modules\amz_hub\views\practice\promotions\index.ts (行 566, 列 5)
           </div>
           <div class="issue-code">private renderSectionBody(contentArray: ContentBlock[]): string</div>
         </div>
@@ -10647,10 +10603,10 @@
             <span class="severity-badge" style="background: #f59e0b">
               🟡 MEDIUM
             </span>
-            <span class="issue-message">箭头函数 超过 100 行（实际: 173 行）</span>
+            <span class="issue-message">箭头函数 超过 100 行（实际: 187 行）</span>
           </div>
           <div class="issue-location">
-            📁 src\modules\amz_hub\views\practice\promotions\index.ts (行 558, 列 33)
+            📁 src\modules\amz_hub\views\practice\promotions\index.ts (行 569, 列 33)
           </div>
           <div class="issue-code">block =&gt; =&gt; {</div>
         </div>
@@ -16575,7 +16531,7 @@
             <span class="issue-message">存在调试用的 console 语句</span>
           </div>
           <div class="issue-location">
-            📁 src\modules\more\views\explore\prompts\index.ts (行 338, 列 9)
+            📁 src\modules\more\views\explore\prompts\index.ts (行 362, 列 9)
           </div>
           <div class="issue-code">console.log(&#039;✅ 提示词模块已挂载&#039;);</div>
         </div>
@@ -16588,7 +16544,7 @@
             <span class="issue-message">存在调试用的 console 语句</span>
           </div>
           <div class="issue-location">
-            📁 src\modules\more\views\explore\prompts\index.ts (行 355, 列 9)
+            📁 src\modules\more\views\explore\prompts\index.ts (行 379, 列 9)
           </div>
           <div class="issue-code">console.log(&#039;❌ 提示词模块已卸载&#039;);</div>
         </div>
@@ -16835,7 +16791,7 @@
             <span class="issue-message">存在调试用的 console 语句</span>
           </div>
           <div class="issue-location">
-            📁 src\modules\sops\views\growth\npi_tracker\index.ts (行 433, 列 5)
+            📁 src\modules\sops\views\growth\npi_tracker\index.ts (行 488, 列 5)
           </div>
           <div class="issue-code">console.log(&#039;[NPITracker] 🔧 开始挂载模块&#039;);</div>
         </div>
@@ -16848,7 +16804,7 @@
             <span class="issue-message">存在调试用的 console 语句</span>
           </div>
           <div class="issue-location">
-            📁 src\modules\sops\views\growth\npi_tracker\index.ts (行 469, 列 9)
+            📁 src\modules\sops\views\growth\npi_tracker\index.ts (行 524, 列 9)
           </div>
           <div class="issue-code">console.log(`[NPITracker] 已注册 ${registeredActions.length} 个动作到 ActionRegistry`);</div>
         </div>
@@ -16861,7 +16817,7 @@
             <span class="issue-message">存在调试用的 console 语句</span>
           </div>
           <div class="issue-location">
-            📁 src\modules\sops\views\growth\npi_tracker\index.ts (行 476, 列 9)
+            📁 src\modules\sops\views\growth\npi_tracker\index.ts (行 531, 列 9)
           </div>
           <div class="issue-code">console.log(&#039;[NPITracker] ✅ 模块挂载成功&#039;);</div>
         </div>
@@ -16874,7 +16830,7 @@
             <span class="issue-message">存在调试用的 console 语句</span>
           </div>
           <div class="issue-location">
-            📁 src\modules\sops\views\growth\npi_tracker\index.ts (行 487, 列 5)
+            📁 src\modules\sops\views\growth\npi_tracker\index.ts (行 542, 列 5)
           </div>
           <div class="issue-code">console.log(&#039;[NPITracker] 🔄 开始卸载模块&#039;);</div>
         </div>
@@ -16887,7 +16843,7 @@
             <span class="issue-message">存在调试用的 console 语句</span>
           </div>
           <div class="issue-location">
-            📁 src\modules\sops\views\growth\npi_tracker\index.ts (行 493, 列 13)
+            📁 src\modules\sops\views\growth\npi_tracker\index.ts (行 548, 列 13)
           </div>
           <div class="issue-code">console.log(`[NPITracker] 已清理 ${registeredActions.length} 个动作`);</div>
         </div>
@@ -16900,7 +16856,7 @@
             <span class="issue-message">存在调试用的 console 语句</span>
           </div>
           <div class="issue-location">
-            📁 src\modules\sops\views\growth\npi_tracker\index.ts (行 500, 列 9)
+            📁 src\modules\sops\views\growth\npi_tracker\index.ts (行 555, 列 9)
           </div>
           <div class="issue-code">console.log(&#039;[NPITracker] ✅ 模块卸载成功&#039;);</div>
         </div>
@@ -16910,7 +16866,7 @@
             <span class="severity-badge" style="background: #f59e0b">
               🟡 MEDIUM
             </span>
-            <span class="issue-message">函数 'renderTable' 超过 100 行（实际: 107 行）</span>
+            <span class="issue-message">函数 'renderTable' 超过 100 行（实际: 109 行）</span>
           </div>
           <div class="issue-location">
             📁 src\modules\sops\views\growth\npi_tracker\index.ts (行 70, 列 1)
@@ -16923,10 +16879,75 @@
             <span class="severity-badge" style="background: #f59e0b">
               🟡 MEDIUM
             </span>
+            <span class="issue-message">使用了 any 类型</span>
+          </div>
+          <div class="issue-location">
+            📁 src\modules\sops\views\growth\npi_tracker\index.ts (行 205, 列 25)
+          </div>
+          <div class="issue-code">tbody as any</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #f59e0b">
+              🟡 MEDIUM
+            </span>
+            <span class="issue-message">使用了 any 类型</span>
+          </div>
+          <div class="issue-location">
+            📁 src\modules\sops\views\growth\npi_tracker\index.ts (行 205, 列 34)
+          </div>
+          <div class="issue-code">any</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #f59e0b">
+              🟡 MEDIUM
+            </span>
+            <span class="issue-message">if 语句 嵌套深度超过 4 层（实际: 5 层）</span>
+          </div>
+          <div class="issue-location">
+            📁 src\modules\sops\views\growth\npi_tracker\index.ts (行 241, 列 16)
+          </div>
+          <div class="issue-code">if (action === &#039;open-next-step-editor&#039;) {</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #f59e0b">
+              🟡 MEDIUM
+            </span>
+            <span class="issue-message">使用了 any 类型</span>
+          </div>
+          <div class="issue-location">
+            📁 src\modules\sops\views\growth\npi_tracker\index.ts (行 247, 列 6)
+          </div>
+          <div class="issue-code">tbody as any</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #f59e0b">
+              🟡 MEDIUM
+            </span>
+            <span class="issue-message">使用了 any 类型</span>
+          </div>
+          <div class="issue-location">
+            📁 src\modules\sops\views\growth\npi_tracker\index.ts (行 247, 列 15)
+          </div>
+          <div class="issue-code">any</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #f59e0b">
+              🟡 MEDIUM
+            </span>
             <span class="issue-message">函数 'exportToExcel' 超过 100 行（实际: 120 行）</span>
           </div>
           <div class="issue-location">
-            📁 src\modules\sops\views\growth\npi_tracker\index.ts (行 263, 列 1)
+            📁 src\modules\sops\views\growth\npi_tracker\index.ts (行 318, 列 1)
           </div>
           <div class="issue-code">function exportToExcel(): void</div>
         </div>

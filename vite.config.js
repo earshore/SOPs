@@ -55,7 +55,7 @@ export default defineConfig({
     build: {
         outDir: 'dist',
         emptyOutDir: true,
-        sourcemap: false, // 生产环境关闭sourcemap减小体积
+        sourcemap: true, // 生产环境关闭sourcemap减小体积
         // 代码分割优化
         rollupOptions: {
             input: {

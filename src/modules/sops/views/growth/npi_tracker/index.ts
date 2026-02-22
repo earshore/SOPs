@@ -93,7 +93,7 @@ function renderTable(): void {
             <td class="px-3 py-3 sticky left-0 bg-white z-10 border-r">
                 <span class="px-2 py-1 rounded text-xs font-medium ${stageConfig.color}">${stageConfig.label}</span>
             </td>
-            <td class="px-3 py-3 text-sm font-mono text-blue-600 cursor-pointer hover:underline" onclick="window.open('https://www.${domain}/dp/${row.asin}', '_blank')">
+            <td class="px-3 py-3 text-sm font-mono text-blue-600 cursor-pointer hover:underline" data-action="open-product" data-domain="${domain}" data-asin="${row.asin}">
                 ${row.sku}
             </td>
             <td class="px-3 py-3 text-sm">${row.cn_name}</td>
@@ -111,19 +111,19 @@ function renderTable(): void {
             
             <!-- SOP合规 (6列: 泛欧 + 4项检查 + 状态) -->
             <td class="px-3 py-3 text-center border-l">
-                <input type="checkbox" ${row.is_pan_eu ? 'checked' : ''} class="w-4 h-4 rounded" onchange="updateField(${index}, 'is_pan_eu', this.checked)">
+                <input type="checkbox" ${row.is_pan_eu ? 'checked' : ''} class="w-4 h-4 rounded" data-action="update-field" data-field="is_pan_eu">
             </td>
             <td class="px-3 py-3 text-center">
-                <input type="checkbox" ${row.check_content ? 'checked' : ''} class="w-4 h-4 rounded text-emerald-600" onchange="updateField(${index}, 'check_content', this.checked)">
+                <input type="checkbox" ${row.check_content ? 'checked' : ''} class="w-4 h-4 rounded text-emerald-600" data-action="update-field" data-field="check_content">
             </td>
             <td class="px-3 py-3 text-center">
-                <input type="checkbox" ${row.check_sensitive ? 'checked' : ''} class="w-4 h-4 rounded text-emerald-600" onchange="updateField(${index}, 'check_sensitive', this.checked)">
+                <input type="checkbox" ${row.check_sensitive ? 'checked' : ''} class="w-4 h-4 rounded text-emerald-600" data-action="update-field" data-field="check_sensitive">
             </td>
             <td class="px-3 py-3 text-center">
-                <input type="checkbox" ${row.check_creative ? 'checked' : ''} class="w-4 h-4 rounded text-emerald-600" onchange="updateField(${index}, 'check_creative', this.checked)">
+                <input type="checkbox" ${row.check_creative ? 'checked' : ''} class="w-4 h-4 rounded text-emerald-600" data-action="update-field" data-field="check_creative">
             </td>
             <td class="px-3 py-3 text-center">
-                <input type="checkbox" ${row.check_ebc ? 'checked' : ''} class="w-4 h-4 rounded text-emerald-600" onchange="updateField(${index}, 'check_ebc', this.checked)">
+                <input type="checkbox" ${row.check_ebc ? 'checked' : ''} class="w-4 h-4 rounded text-emerald-600" data-action="update-field" data-field="check_ebc">
             </td>
             <td class="px-3 py-3 text-center">
                 ${
@@ -138,7 +138,7 @@ function renderTable(): void {
             <td class="px-3 py-3 border-l">
                 <input type="number" step="0.1" value="${row.delivery_fee}" 
                     class="w-16 px-2 py-1 border rounded text-sm text-center" 
-                    onchange="updateDeliveryFee(${index}, this.value)">
+                    data-action="update-delivery-fee">
             </td>
             <td class="px-3 py-3 text-center text-sm text-slate-500">${deliveryPercent}%</td>
             <td class="px-3 py-3 text-center text-red-600 font-bold">€${clearancePrice}</td>
@@ -156,21 +156,21 @@ function renderTable(): void {
             <!-- 决策 (4列: Vine进度 + 广告 + 保留 + Next Step) -->
             <td class="px-3 py-3 text-center text-sm border-l">${row.vine_status}</td>
             <td class="px-3 py-3">
-                <select class="px-2 py-1 border rounded text-xs" onchange="updateField(${index}, 'ads_strategy', this.value)">
+                <select class="px-2 py-1 border rounded text-xs" data-action="update-field" data-field="ads_strategy">
                     <option value="auto" ${row.ads_strategy === 'auto' ? 'selected' : ''}>自动</option>
                     <option value="manual" ${row.ads_strategy === 'manual' ? 'selected' : ''}>手动</option>
                     <option value="mixed" ${row.ads_strategy === 'mixed' ? 'selected' : ''}>混合</option>
                 </select>
             </td>
             <td class="px-3 py-3 text-center">
-                <button onclick="toggleDecision(${index})" class="px-2 py-1 rounded text-xs font-medium ${row.decision === 'keep' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}">
+                <button data-action="toggle-decision" class="px-2 py-1 rounded text-xs font-medium ${row.decision === 'keep' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}">
                     ${row.decision === 'keep' ? '保留' : '放弃'}
                 </button>
             </td>
             <td class="px-3 py-3">
                 <div class="flex flex-wrap gap-1">
                     ${row.next_step.map((step: string) => `<span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">${step}</span>`).join('')}
-                    <button onclick="openNextStepEditor(${index})" class="px-2 py-0.5 border border-dashed border-slate-300 rounded text-xs text-slate-400 hover:border-blue-400 hover:text-blue-500">
+                    <button data-action="open-next-step-editor" class="px-2 py-0.5 border border-dashed border-slate-300 rounded text-xs text-slate-400 hover:border-blue-400 hover:text-blue-500">
                         <i class="fas fa-plus"></i>
                     </button>
                 </div>
@@ -182,6 +182,9 @@ function renderTable(): void {
     
     // 使用 SafeRenderer 渲染（静态模板，已审计）
     renderer.renderTemplate(tbody, tableHTML);
+    
+    // 使用事件委托绑定所有事件
+    setupTableEventDelegation(tbody);
 }
 
 // Update field
@@ -194,6 +197,58 @@ function updateField(index: number, field: keyof NPIProductRecord, value: unknow
             renderTable();
         }
     }
+}
+
+// 设置表格事件委托
+function setupTableEventDelegation(tbody: HTMLElement): void {
+    // 移除旧的事件监听器（如果存在）
+    const oldHandler = (tbody as any)._eventHandler;
+    if (oldHandler) {
+        tbody.removeEventListener('click', oldHandler);
+        tbody.removeEventListener('change', oldHandler);
+    }
+    
+    // 创建新的事件处理器
+    const eventHandler = (e: Event) => {
+        const target = e.target as HTMLElement;
+        const row = target.closest('tr[data-index]') as HTMLElement;
+        if (!row) return;
+        
+        const index = parseInt(row.dataset.index || '-1');
+        if (index < 0) return;
+        
+        const action = target.getAttribute('data-action');
+        
+        if (action === 'open-product') {
+            const domain = target.getAttribute('data-domain');
+            const asin = target.getAttribute('data-asin');
+            if (domain && asin) {
+                window.open(`https://www.${domain}/dp/${asin}`, '_blank');
+            }
+        } else if (action === 'update-field') {
+            const field = target.getAttribute('data-field') as keyof NPIProductRecord;
+            if (field) {
+                const value = (target as HTMLInputElement).type === 'checkbox' 
+                    ? (target as HTMLInputElement).checked 
+                    : (target as HTMLInputElement).value;
+                updateField(index, field, value);
+            }
+        } else if (action === 'update-delivery-fee') {
+            const value = (target as HTMLInputElement).value;
+            updateDeliveryFee(index, value);
+        } else if (action === 'toggle-decision') {
+            toggleDecision(index);
+        } else if (action === 'open-next-step-editor') {
+            openNextStepEditor(index);
+        }
+    };
+    
+    // 保存处理器引用以便后续移除
+    (tbody as any)._eventHandler = eventHandler;
+    
+    // 绑定事件
+    tbody.addEventListener('click', eventHandler);
+    tbody.addEventListener('change', eventHandler);
 }
 
 // Update delivery fee and recalculate prices
