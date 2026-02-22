@@ -124,12 +124,12 @@ function updateAnalyzeButtonState(): void {
     if (btn) {
         if (hasContent) {
             btn.disabled = false;
-            btn.classList.remove('bg-gray-300', 'text-gray-500', 'cursor-not-allowed', 'opacity-50', 'grayscale');
-            btn.classList.add('bg-purple-600', 'text-white', 'hover:bg-purple-700', 'shadow-sm', 'cursor-pointer');
+            btn.classList.remove('bg-slate-100', 'text-slate-400', 'border-slate-200', 'cursor-not-allowed');
+            btn.classList.add('bg-gradient-to-r', 'from-purple-600', 'via-purple-500', 'to-pink-600', 'hover:from-purple-500', 'hover:via-purple-400', 'hover:to-pink-500', 'text-white', 'border-purple-500', 'shadow-md', 'shadow-purple-500/20', 'hover:shadow-lg', 'hover:shadow-purple-500/30', 'cursor-pointer', 'hover:scale-[1.02]', 'hover:-translate-y-0.5');
         } else {
             btn.disabled = true;
-            btn.classList.remove('bg-purple-600', 'text-white', 'hover:bg-purple-700', 'shadow-sm', 'cursor-pointer');
-            btn.classList.add('bg-gray-300', 'text-gray-500', 'cursor-not-allowed', 'opacity-50', 'grayscale');
+            btn.classList.remove('bg-gradient-to-r', 'from-purple-600', 'via-purple-500', 'to-pink-600', 'hover:from-purple-500', 'hover:via-purple-400', 'hover:to-pink-500', 'text-white', 'border-purple-500', 'shadow-md', 'shadow-purple-500/20', 'hover:shadow-lg', 'hover:shadow-purple-500/30', 'cursor-pointer', 'hover:scale-[1.02]', 'hover:-translate-y-0.5');
+            btn.classList.add('bg-slate-100', 'text-slate-400', 'border-slate-200', 'cursor-not-allowed');
         }
     }
 }
@@ -154,8 +154,8 @@ async function runLLMAnalysis(): Promise<void> {
     // 更新按钮状态 - 分析中（灰度冻结）
     if (btn) {
         btn.disabled = true;
-        btn.classList.remove('bg-purple-600', 'hover:bg-purple-700', 'cursor-pointer');
-        btn.classList.add('bg-gray-400', 'cursor-wait', 'opacity-75', 'grayscale');
+        btn.classList.remove('bg-gradient-to-r', 'from-purple-600', 'via-purple-500', 'to-pink-600', 'hover:from-purple-500', 'hover:via-purple-400', 'hover:to-pink-500', 'text-white', 'border-purple-500', 'shadow-md', 'shadow-purple-500/20', 'hover:shadow-lg', 'hover:shadow-purple-500/30', 'cursor-pointer', 'hover:scale-[1.02]', 'hover:-translate-y-0.5');
+        btn.classList.add('bg-slate-300', 'text-slate-500', 'border-slate-300', 'cursor-wait');
     }
 
     // 显示加载状态
@@ -193,8 +193,8 @@ async function runLLMAnalysis(): Promise<void> {
         // 更新按钮状态为已完成（绿色）
         if (btn) {
             btn.disabled = true;
-            btn.classList.remove('bg-gray-400', 'cursor-wait', 'opacity-75', 'grayscale');
-            btn.classList.add('bg-green-500', 'text-white', 'cursor-not-allowed');
+            btn.classList.remove('bg-slate-300', 'text-slate-500', 'border-slate-300', 'cursor-wait');
+            btn.classList.add('bg-emerald-500', 'text-white', 'border-emerald-500', 'cursor-not-allowed');
         }
 
         // 保存状态
@@ -248,11 +248,11 @@ async function runLLMAnalysis(): Promise<void> {
             resultDiv.appendChild(errorDiv);
         }
 
-        // 恢复按钮状态为可点击（紫色）
+        // 恢复按钮状态为可点击（紫色渐变）
         if (btn) {
             btn.disabled = false;
-            btn.classList.remove('bg-gray-400', 'cursor-wait', 'opacity-75', 'grayscale', 'cursor-not-allowed');
-            btn.classList.add('bg-purple-600', 'text-white', 'hover:bg-purple-700', 'cursor-pointer');
+            btn.classList.remove('bg-slate-300', 'text-slate-500', 'border-slate-300', 'cursor-wait', 'cursor-not-allowed', 'bg-emerald-500', 'border-emerald-500');
+            btn.classList.add('bg-gradient-to-r', 'from-purple-600', 'via-purple-500', 'to-pink-600', 'hover:from-purple-500', 'hover:via-purple-400', 'hover:to-pink-500', 'text-white', 'border-purple-500', 'shadow-md', 'shadow-purple-500/20', 'hover:shadow-lg', 'hover:shadow-purple-500/30', 'cursor-pointer', 'hover:scale-[1.02]', 'hover:-translate-y-0.5');
         }
     }
 }
