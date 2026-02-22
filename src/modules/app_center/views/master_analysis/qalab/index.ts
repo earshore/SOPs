@@ -3,12 +3,15 @@
  * 负责 Rufus Q&A 智能预研系统功能
  * 
  * 架构说明：
+ * - 使用 SafeModuleLoader 加载模板
+ * - 使用 SafeRenderer 进行安全渲染
  * - 状态保存到 qalabState 单例
  * - 通过 EventBus 与其他模块通信
  * - 使用 registerActionsWithLegacy 注册全局操作
  */
 
-import { loadTemplate } from '../../../../../common/utils/viewLoader';
+import { SafeModuleLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
+import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
 import state from "../../../../../common/state";
 import { registerActionsWithLegacy, unregisterActions } from '../../../../../common/utils/actionRegistry';
 import { MODULE_EVENTS } from '../../../../../common/constants/eventConstants';
@@ -35,9 +38,23 @@ export async function mount(container: HTMLElement): Promise<void> {
     console.log('[QALab] 🔧 开始挂载子模块');
 
     try {
-        // 1. 加载模板
-        const html = await loadTemplate('src/modules/app_center/views/master_analysis/qalab/template.html');
-        container.innerHTML = html;
+        // 1. 使用 SafeModuleLoader 加载模板
+        const loader = SafeModuleLoader.getInstance();
+        const renderer = SafeRenderer.getInstance();
+        
+        const html = await loader.loadTemplate(
+            'src/modules/app_center/views/master_analysis/qalab/template.html',
+            {
+                retryCount: 3,
+                timeout: 5000,
+                onError: (error) => {
+                    console.error('[QALab] 模板加载失败:', error);
+                }
+            }
+        );
+        
+        // 使用 SafeRenderer 渲染模板（静态模板，已审计）
+        renderer.renderTemplate(container, html);
 
         // 2. 注册全局操作
         const actionNames = registerActionsWithLegacy({

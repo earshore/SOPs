@@ -54,6 +54,7 @@ export interface LogEntry {
   message: string;
   data?: any;
   error?: Error;
+  url?: string;
 }
 
 /**

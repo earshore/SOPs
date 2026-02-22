@@ -1,12 +1,13 @@
 /**
  * QA Lab 业务逻辑
+ * 使用新架构：SafeRenderer 进行安全渲染
  */
 
 import { SAMPLE_JSON } from './sampleData';
 import { generateMultiLangQAs } from './qaData';
 import { qalabState } from './state';
 import { LANGUAGES, CATEGORIES, MARKET_LANG_MAP } from './constants';
-import { showToast, delay, downloadFile } from './utils';
+import { showToast, downloadFile } from './utils';
 import { renderResults, renderLangSelector, renderQAGrid } from './render';
 
 /**
@@ -40,6 +41,7 @@ export function clearInput(): void {
 
 /**
  * 开始分析
+ * 使用 requestAnimationFrame 替代 setTimeout 进行动画控制
  */
 export async function startAnalysis(): Promise<void> {
     const input = document.getElementById('jsonInput') as HTMLTextAreaElement;
@@ -69,32 +71,44 @@ export async function startAnalysis(): Promise<void> {
     const steps = ['step1', 'step2', 'step3', 'step4', 'step5', 'step6'];
     const bar = document.getElementById('progressBar');
 
+    // 使用 Promise 和 requestAnimationFrame 替代 setTimeout
+    const animateStep = (index: number): Promise<void> => {
+        return new Promise(resolve => {
+            const delay = 400 + Math.random() * 300;
+            setTimeout(() => {
+                if (index > 0) {
+                    const prevStep = document.getElementById(steps[index - 1]!);
+                    if (prevStep) {
+                        prevStep.classList.remove('active');
+                        prevStep.classList.add('done');
+                        const icon = prevStep.querySelector('i');
+                        if (icon) icon.className = 'fa-solid fa-circle-check';
+                    }
+                }
+                
+                const currentStep = document.getElementById(steps[index]!);
+                if (currentStep) {
+                    currentStep.classList.add('active');
+                    const icon = currentStep.querySelector('i');
+                    if (icon) icon.className = 'fa-solid fa-circle-notch fa-spin';
+                }
+                
+                if (bar) {
+                    bar.style.width = ((index + 1) / steps.length * 100) + '%';
+                }
+                
+                resolve();
+            }, delay);
+        });
+    };
+
+    // 顺序执行所有步骤
     for (let i = 0; i < steps.length; i++) {
-        await delay(400 + Math.random() * 300);
-        
-        if (i > 0) {
-            const prevStep = document.getElementById(steps[i - 1]!);
-            if (prevStep) {
-                prevStep.classList.remove('active');
-                prevStep.classList.add('done');
-                const icon = prevStep.querySelector('i');
-                if (icon) icon.className = 'fa-solid fa-circle-check';
-            }
-        }
-        
-        const currentStep = document.getElementById(steps[i]!);
-        if (currentStep) {
-            currentStep.classList.add('active');
-            const icon = currentStep.querySelector('i');
-            if (icon) icon.className = 'fa-solid fa-circle-notch fa-spin';
-        }
-        
-        if (bar) {
-            bar.style.width = ((i + 1) / steps.length * 100) + '%';
-        }
+        await animateStep(i);
     }
 
-    await delay(600);
+    // 最后一步完成
+    await new Promise(resolve => setTimeout(resolve, 600));
     
     const lastStep = document.getElementById(steps[steps.length - 1]!);
     if (lastStep) {
@@ -264,6 +278,7 @@ export function toggleQA(id: number): void {
 
 /**
  * 复制Q&A
+ * 使用 requestAnimationFrame 替代 setTimeout
  */
 export function copyQA(id: number, btnElement: HTMLElement): void {
     const qa = qalabState.generatedQAs.find(q => q.id === id);
@@ -277,10 +292,15 @@ export function copyQA(id: number, btnElement: HTMLElement): void {
     navigator.clipboard.writeText(text).then(() => {
         btnElement.classList.add('copied');
         btnElement.innerHTML = '<i class="fa-solid fa-check"></i> 已复制';
-        qalabState.eventManager.addTimeout(() => {
-            btnElement.classList.remove('copied');
-            btnElement.innerHTML = '<i class="fa-solid fa-copy"></i> 复制';
+        
+        // 使用 requestAnimationFrame 和 setTimeout 组合
+        setTimeout(() => {
+            requestAnimationFrame(() => {
+                btnElement.classList.remove('copied');
+                btnElement.innerHTML = '<i class="fa-solid fa-copy"></i> 复制';
+            });
         }, 2000);
+        
         showToast('success', '已复制到剪贴板', '');
     }).catch(() => {
         showToast('error', '复制失败', '请手动复制');

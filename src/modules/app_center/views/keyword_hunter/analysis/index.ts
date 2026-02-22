@@ -8,12 +8,13 @@
  * - 使用 registerActionsWithLegacy 注册全局操作
  */
 
-import { loadTemplate } from '../../../../../common/utils/viewLoader';
+import { SafeModuleLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
+import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
 import { showToast } from '../../../../../common/ui';
 import * as KeywordService from '../services/trackerService';
 import state from "../../../../../common/state";
 import { ErrorService } from '../../../../../services/errorService';
-import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry';
+import { registerActionsWithLegacy, unregisterActions } from '../../../../../common/utils/actionRegistry';
 
 import '../keyword_hunter_style.css';
 
@@ -29,6 +30,7 @@ interface EventListener {
 
 let eventListeners: EventListener[] = []; // 用于清理事件监听器
 let timeouts: number[] = []; // 用于清理定时器
+let registeredActionNames: string[] = []; // 用于清理已注册的动作
 
 // ========================================== 
 // Helper Functions
@@ -55,16 +57,13 @@ function cleanup(): void {
     // 清理定时器
     timeouts.forEach(id => clearTimeout(id));
     timeouts = [];
-}
-
-/**
- * HTML 转义
- */
-function escapeHtml(text: string): string {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+    
+    // 清理已注册的动作
+    if (registeredActionNames.length > 0) {
+        unregisterActions(registeredActionNames);
+        console.log(`[Analysis] 已清理 ${registeredActionNames.length} 个动作`);
+        registeredActionNames = [];
+    }
 }
 
 // ========================================== 
@@ -94,9 +93,9 @@ function restoreAnalysisStateFromState(): void {
     // 恢复 AI 分析报告
     const resultDiv = document.getElementById('kt-llm-analysis-result');
     if (resultDiv && state.keywordTracker && state.keywordTracker.llmAnalysisResult) {
-        // ✅ 安全: 静态HTML模板，无用户输入
-        resultDiv.innerHTML = state.keywordTracker.llmAnalysisResult;
-        highlightScores(resultDiv); // ← 改动：恢复状态时也染色
+        const renderer = SafeRenderer.getInstance();
+        renderer.renderTemplate(resultDiv, state.keywordTracker.llmAnalysisResult);
+        highlightScores(resultDiv);
     }
 
     // 渲染分析模块
@@ -161,13 +160,14 @@ async function runLLMAnalysis(): Promise<void> {
 
     // 显示加载状态
     if (resultDiv) {
-        // ✅ 安全: 静态HTML模板，无用户输入
-        resultDiv.innerHTML = `
+        const renderer = SafeRenderer.getInstance();
+        const loadingHtml = `
             <div class="text-center py-10">
                 <i class="fas fa-circle-notch fa-spin text-purple-500 text-2xl"></i>
                 <p class="mt-2 text-slate-500">AI 正在深度分析您的 Listing ...</p>
             </div>
         `;
+        renderer.renderTemplate(resultDiv, loadingHtml);
     }
 
     try {
@@ -180,8 +180,10 @@ async function runLLMAnalysis(): Promise<void> {
 
         // 渲染分析结果
         if (resultDiv) {
+            const renderer = SafeRenderer.getInstance();
             if ((window as any).marked) {
-                resultDiv.innerHTML = (window as any).marked.parse(response);
+                const parsedHtml = (window as any).marked.parse(response);
+                renderer.renderTemplate(resultDiv, parsedHtml);
                 highlightScores(resultDiv);
             } else {
                 resultDiv.textContent = response;
@@ -219,15 +221,31 @@ async function runLLMAnalysis(): Promise<void> {
             const icon = isValidationError ? "fa-exclamation-circle" : "fa-exclamation-triangle";
             const title = isValidationError ? "无法进行分析" : "分析失败";
 
-            resultDiv.innerHTML = `
-                <div class="p-4 bg-${colorClass}-50 border border-${colorClass}-200 rounded-lg">
-                    <div class="flex items-center gap-2 text-${colorClass}-700 font-bold mb-2">
-                        <i class="fas ${icon}"></i> ${title}
-                    </div>
-                    <p class="text-sm text-${colorClass}-800">${escapeHtml(errorMsg)}</p>
-                    <button onclick="window.kt_runLLMAnalysis()" class="mt-3 px-3 py-1 bg-white border border-${colorClass}-200 text-${colorClass}-700 text-xs rounded hover:bg-${colorClass}-50">重试</button>
-                </div>
-            `;
+            const errorDiv = document.createElement('div');
+            errorDiv.className = `p-4 bg-${colorClass}-50 border border-${colorClass}-200 rounded-lg`;
+            
+            const headerDiv = document.createElement('div');
+            headerDiv.className = `flex items-center gap-2 text-${colorClass}-700 font-bold mb-2`;
+            const iconEl = document.createElement('i');
+            iconEl.className = `fas ${icon}`;
+            headerDiv.appendChild(iconEl);
+            headerDiv.appendChild(document.createTextNode(` ${title}`));
+            
+            const msgP = document.createElement('p');
+            msgP.className = `text-sm text-${colorClass}-800`;
+            msgP.textContent = errorMsg;
+            
+            const retryBtn = document.createElement('button');
+            retryBtn.className = `mt-3 px-3 py-1 bg-white border border-${colorClass}-200 text-${colorClass}-700 text-xs rounded hover:bg-${colorClass}-50`;
+            retryBtn.textContent = '重试';
+            retryBtn.onclick = () => (window as any).kt_runLLMAnalysis();
+            
+            errorDiv.appendChild(headerDiv);
+            errorDiv.appendChild(msgP);
+            errorDiv.appendChild(retryBtn);
+            
+            resultDiv.innerHTML = '';
+            resultDiv.appendChild(errorDiv);
         }
 
         // 恢复按钮状态为可点击（紫色）
@@ -284,7 +302,11 @@ function highlightScores(container: HTMLElement): void {
             const totalMatch = text.match(/(\d+)\s*\/\s*(\d+)/);
             if (totalMatch) {
                 const score = parseInt(totalMatch[1]!, 10);
-                td2.innerHTML = '<span class="score-badge score-badge-total">⭐ ' + score + '/' + totalMatch[2] + '</span>';
+                const span = document.createElement('span');
+                span.className = 'score-badge score-badge-total';
+                span.textContent = `⭐ ${score}/${totalMatch[2]}`;
+                td2.innerHTML = '';
+                td2.appendChild(span);
             }
             return;
         }
@@ -292,13 +314,21 @@ function highlightScores(container: HTMLElement): void {
         // ——— 违规行 ———
         if (text.includes('-10') || text.includes('🚨')) {
             tr.classList.add('row-risk');
-            td2.innerHTML = '<span class="score-badge score-badge-risk">🚨 -10</span>';
+            const span = document.createElement('span');
+            span.className = 'score-badge score-badge-risk';
+            span.textContent = '🚨 -10';
+            td2.innerHTML = '';
+            td2.appendChild(span);
             return;
         }
 
         // ——— 通过行（违规检查通过） ———
         if (text.includes('✅') || text.includes('+0') || text.includes('通过')) {
-            td2.innerHTML = '<span class="score-badge score-badge-pass">✅ 通过</span>';
+            const span = document.createElement('span');
+            span.className = 'score-badge score-badge-pass';
+            span.textContent = '✅ 通过';
+            td2.innerHTML = '';
+            td2.appendChild(span);
             return;
         }
 
@@ -325,7 +355,11 @@ function highlightScores(container: HTMLElement): void {
             tr.classList.add('row-low');
         }
 
-        td2.innerHTML = '<span class="score-badge ' + badgeClass + '">' + icon + ' ' + score + '/' + max + '</span>';
+        const span = document.createElement('span');
+        span.className = `score-badge ${badgeClass}`;
+        span.textContent = `${icon} ${score}/${max}`;
+        td2.innerHTML = '';
+        td2.appendChild(span);
     });
 
     // ——— 总分标题处理 ———
@@ -387,10 +421,23 @@ export async function mount(container: HTMLElement): Promise<void> {
     console.log('[Analysis] 🔧 开始挂载子模块');
 
     try {
-        // 1. 加载模板
-        const html = await loadTemplate('src/modules/app_center/views/keyword_hunter/analysis/template.html');
-        // ✅ 安全: 静态HTML模板，无用户输入
-        container.innerHTML = html;
+        // 1. 使用 SafeModuleLoader 加载模板
+        const loader = SafeModuleLoader.getInstance();
+        const renderer = SafeRenderer.getInstance();
+        
+        const html = await loader.loadTemplate(
+            'src/modules/app_center/views/keyword_hunter/analysis/template.html',
+            {
+                retryCount: 3,
+                timeout: 5000,
+                onError: (error) => {
+                    console.error('[Analysis] 模板加载失败:', error);
+                }
+            }
+        );
+        
+        // 使用 SafeRenderer 渲染模板
+        renderer.renderTemplate(container, html);
 
         // 2. 注册全局操作（用于 HTML onclick 兼容）
         registerActionsWithLegacy({

@@ -1,10 +1,14 @@
 /**
  * QA Lab 渲染函数
+ * 使用 SafeRenderer 进行安全渲染
  */
 
+import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
 import { LANGUAGES, CATEGORIES } from './constants';
 import { qalabState } from './state';
-import { escapeHtml } from './utils';
+
+// 获取 SafeRenderer 实例
+const renderer = SafeRenderer.getInstance();
 
 /**
  * 渲染产品信息栏
@@ -17,14 +21,23 @@ export function renderProductBar(): void {
     const title = ar?.product_title || '产品分析';
     const asins = qalabState.reportData?.metadata?.asins || [];
 
-    const html = `
+    // 使用 SafeRenderer 渲染动态内容
+    const template = `
         <div class="product-bar-label">分析产品</div>
-        <div class="product-bar-title">${escapeHtml(title.substring(0, 150))}${title.length > 150 ? '...' : ''}</div>
+        <div class="product-bar-title">{{title}}</div>
         <div class="product-asins">
-            ${asins.map((asin: string) => `<div class="asin-chip">${escapeHtml(asin)}</div>`).join('')}
+            {{asins}}
         </div>
     `;
-    container.innerHTML = html;
+    
+    const asinChips = asins.map((asin: string) => 
+        `<div class="asin-chip">${renderer.escapeHtml(asin)}</div>`
+    ).join('');
+    
+    renderer.renderDynamic(container, template, {
+        title: title.substring(0, 150) + (title.length > 150 ? '...' : ''),
+        asins: asinChips
+    }, { sanitize: false }); // asins 已经手动转义
 }
 
 /**
@@ -44,6 +57,7 @@ export function renderStats(): void {
     const ar = qalabState.reportData?.analysisReport || qalabState.reportData;
     const criticalIssues = ar?.['fatal-flaws']?.critical_issues?.length || 0;
 
+    // 使用 SafeRenderer 渲染静态模板（无用户输入）
     const html = `
         <div class="stat-card purple animate-fade-up" style="animation-delay:0s">
             <div class="stat-icon"><i class="fa-solid fa-comments"></i></div>
@@ -71,7 +85,7 @@ export function renderStats(): void {
             <div class="stat-label">关键问题</div>
         </div>
     `;
-    container.innerHTML = html;
+    renderer.renderTemplate(container, html);
 }
 
 /**
@@ -115,17 +129,21 @@ export function renderInsights(): void {
         });
     }
 
-    const html = insights.map((ins, i) => `
-        <div class="insight-card animate-fade-up" style="animation-delay:${i * 0.1}s">
-            <div class="insight-icon ${ins.icon}"><i class="${ins.iconClass}"></i></div>
-            <div>
-                <div class="insight-title">${escapeHtml(ins.title)}</div>
-                <div class="insight-desc">${escapeHtml(ins.desc)}</div>
+    // 使用 SafeRenderer 渲染列表
+    renderer.renderList(
+        container,
+        insights,
+        (ins, i) => `
+            <div class="insight-card animate-fade-up" style="animation-delay:${i * 0.1}s">
+                <div class="insight-icon ${ins.icon}"><i class="${ins.iconClass}"></i></div>
+                <div>
+                    <div class="insight-title">${renderer.escapeHtml(ins.title)}</div>
+                    <div class="insight-desc">${renderer.escapeHtml(ins.desc)}</div>
+                </div>
             </div>
-        </div>
-    `).join('');
-
-    container.innerHTML = html;
+        `,
+        { sanitize: false, containerTag: 'div' }
+    );
 }
 
 /**
@@ -135,15 +153,19 @@ export function renderLangSelector(onLangChange: (lang: string) => void): void {
     const container = document.getElementById('langSelector');
     if (!container) return;
 
-    const html = LANGUAGES.map(lang => `
-        <button class="lang-btn ${lang.code === qalabState.currentLang ? 'active' : ''}"
-                data-lang="${lang.code}">
-            <span class="lang-flag">${lang.flag}</span>
-            <span>${lang.label}</span>
-        </button>
-    `).join('');
-    
-    container.innerHTML = html;
+    // 使用 SafeRenderer 渲染列表
+    renderer.renderList(
+        container,
+        LANGUAGES,
+        (lang) => `
+            <button class="lang-btn ${lang.code === qalabState.currentLang ? 'active' : ''}"
+                    data-lang="${lang.code}">
+                <span class="lang-flag">${lang.flag}</span>
+                <span>${lang.label}</span>
+            </button>
+        `,
+        { sanitize: false, containerTag: 'div' }
+    );
 
     container.querySelectorAll('.lang-btn').forEach(btn => {
         qalabState.eventManager.addEventListener(btn as HTMLElement, 'click', () => {
@@ -167,16 +189,20 @@ export function renderCategoryTabs(onCategoryChange: (cat: string) => void): voi
             : qalabState.generatedQAs.filter(qa => qa.category === cat.id).length;
     });
 
-    const html = CATEGORIES.map(cat => `
-        <button class="cat-tab ${cat.id === qalabState.currentCategory ? 'active' : ''}"
-                data-category="${cat.id}">
-            <i class="${cat.icon}"></i>
-            <span>${cat.label}</span>
-            <span class="count">${counts[cat.id]}</span>
-        </button>
-    `).join('');
-    
-    container.innerHTML = html;
+    // 使用 SafeRenderer 渲染列表
+    renderer.renderList(
+        container,
+        CATEGORIES,
+        (cat) => `
+            <button class="cat-tab ${cat.id === qalabState.currentCategory ? 'active' : ''}"
+                    data-category="${cat.id}">
+                <i class="${cat.icon}"></i>
+                <span>${cat.label}</span>
+                <span class="count">${counts[cat.id]}</span>
+            </button>
+        `,
+        { sanitize: false, containerTag: 'div' }
+    );
 
     container.querySelectorAll('.cat-tab').forEach(btn => {
         qalabState.eventManager.addEventListener(btn as HTMLElement, 'click', () => {
@@ -201,58 +227,66 @@ export function renderQAGrid(
         ? qalabState.generatedQAs
         : qalabState.generatedQAs.filter(qa => qa.category === qalabState.currentCategory);
 
-    const html = filtered.map((qa, index) => {
-        const trans = qa.translations[qalabState.currentLang];
-        if (!trans) return '';
+    // 使用 SafeRenderer 渲染列表
+    renderer.renderList(
+        container,
+        filtered,
+        (qa, index) => {
+            const trans = qa.translations[qalabState.currentLang];
+            if (!trans) return '';
 
-        const confDots = Array(5).fill(0).map((_, i) =>
-            `<div class="conf-dot ${i < qa.confidence ? 'filled' : ''}"></div>`
-        ).join('');
+            const confDots = Array(5).fill(0).map((_, i) =>
+                `<div class="conf-dot ${i < qa.confidence ? 'filled' : ''}"></div>`
+            ).join('');
 
-        const catLabel = CATEGORIES.find(c => c.id === qa.category)?.label || qa.category;
+            const catLabel = CATEGORIES.find(c => c.id === qa.category)?.label || qa.category;
+            
+            const sourcesHtml = qa.sources.map(src => 
+                `<div class="qa-source"><i class="fa-solid fa-database"></i>${renderer.escapeHtml(src)}</div>`
+            ).join('');
 
-        return `
-            <div class="qa-card" data-qa-id="${qa.id}" style="animation-delay:${index * 0.05}s">
-                <div class="qa-header" data-qa-toggle="${qa.id}">
-                    <div class="qa-number">${qa.id}</div>
-                    <div class="qa-question-wrap">
-                        <div class="qa-meta">
-                            <div class="qa-tag ${qa.category}">${escapeHtml(catLabel)}</div>
-                            <div class="qa-confidence">
-                                <span>置信度</span>
-                                <div class="conf-dots">${confDots}</div>
+            return `
+                <div class="qa-card" data-qa-id="${qa.id}" style="animation-delay:${index * 0.05}s">
+                    <div class="qa-header" data-qa-toggle="${qa.id}">
+                        <div class="qa-number">${qa.id}</div>
+                        <div class="qa-question-wrap">
+                            <div class="qa-meta">
+                                <div class="qa-tag ${qa.category}">${renderer.escapeHtml(catLabel)}</div>
+                                <div class="qa-confidence">
+                                    <span>置信度</span>
+                                    <div class="conf-dots">${confDots}</div>
+                                </div>
+                            </div>
+                            <div class="qa-question">${renderer.escapeHtml(trans.q)}</div>
+                        </div>
+                        <div class="qa-toggle"><i class="fa-solid fa-chevron-down"></i></div>
+                    </div>
+                    <div class="qa-body">
+                        <div class="qa-answer-wrap">
+                            <div class="qa-answer-inner">
+                                <div class="qa-answer-label">
+                                    <i class="fa-solid fa-robot"></i> Rufus AI 答复
+                                </div>
+                                <div class="qa-answer">${renderer.escapeHtml(trans.a)}</div>
+                                <div class="qa-sources">
+                                    ${sourcesHtml}
+                                </div>
+                                <div class="qa-actions">
+                                    <button class="qa-action-btn" data-qa-copy="${qa.id}">
+                                        <i class="fa-solid fa-copy"></i> 复制
+                                    </button>
+                                    <button class="qa-action-btn" data-qa-edit="${qa.id}">
+                                        <i class="fa-solid fa-pen"></i> 编辑
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                        <div class="qa-question">${escapeHtml(trans.q)}</div>
-                    </div>
-                    <div class="qa-toggle"><i class="fa-solid fa-chevron-down"></i></div>
-                </div>
-                <div class="qa-body">
-                    <div class="qa-answer-wrap">
-                        <div class="qa-answer-inner">
-                            <div class="qa-answer-label">
-                                <i class="fa-solid fa-robot"></i> Rufus AI 答复
-                            </div>
-                            <div class="qa-answer">${escapeHtml(trans.a)}</div>
-                            <div class="qa-sources">
-                                ${qa.sources.map(src => `<div class="qa-source"><i class="fa-solid fa-database"></i>${escapeHtml(src)}</div>`).join('')}
-                            </div>
-                            <div class="qa-actions">
-                                <button class="qa-action-btn" data-qa-copy="${qa.id}">
-                                    <i class="fa-solid fa-copy"></i> 复制
-                                </button>
-                                <button class="qa-action-btn" data-qa-edit="${qa.id}">
-                                    <i class="fa-solid fa-pen"></i> 编辑
-                                </button>
-                            </div>
-                        </div>
                     </div>
                 </div>
-            </div>
-        `;
-    }).join('');
-
-    container.innerHTML = html;
+            `;
+        },
+        { sanitize: false, containerTag: 'div' }
+    );
 
     container.querySelectorAll('[data-qa-toggle]').forEach(el => {
         qalabState.eventManager.addEventListener(el as HTMLElement, 'click', () => {
@@ -277,9 +311,10 @@ export function renderQAGrid(
         });
     });
 
-    qalabState.eventManager.addTimeout(() => {
+    // 使用 requestAnimationFrame 替代 setTimeout
+    requestAnimationFrame(() => {
         container.querySelectorAll('.qa-card').forEach(card => card.classList.add('visible'));
-    }, 50);
+    });
 }
 
 /**

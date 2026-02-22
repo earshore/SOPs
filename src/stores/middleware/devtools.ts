@@ -61,7 +61,7 @@ export const devtools = <T extends object>(
     // 包装set方法以发送action到DevTools
     const devtoolsSet: typeof set = (partial, replace) => {
       // 先调用原始set
-      set(partial, replace);
+      set(partial, replace as any);
       
       // 获取更新后的状态
       const nextState = get();

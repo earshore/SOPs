@@ -1,27 +1,13 @@
 /**
  * QA Lab 工具函数
+ * 已迁移到新架构：移除 escapeHtml（使用 SafeRenderer）和 delay（使用原生 Promise）
  */
 
+import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
 import type { EventListenerRecord } from './types';
 
-/**
- * HTML转义
- */
-export function escapeHtml(text: string): string {
-    return text
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-}
-
-/**
- * 延迟函数
- */
-export function delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
+// 获取 SafeRenderer 实例
+const renderer = SafeRenderer.getInstance();
 
 /**
  * 显示Toast提示
@@ -41,7 +27,12 @@ export function showToast(type: 'success' | 'error' | 'info' | 'warning', title:
     };
     
     const icon = iconMap[type] || 'fa-circle-info';
-    toast.innerHTML = `<i class="fa-solid ${icon}"></i><div><strong>${escapeHtml(title)}</strong>${desc ? '<br><span style="font-size:11px;color:var(--text3)">' + escapeHtml(desc) + '</span>' : ''}</div>`;
+    
+    // 使用 SafeRenderer 转义用户输入
+    const escapedTitle = renderer.escapeHtml(title);
+    const escapedDesc = desc ? renderer.escapeHtml(desc) : '';
+    
+    toast.innerHTML = `<i class="fa-solid ${icon}"></i><div><strong>${escapedTitle}</strong>${desc ? '<br><span style="font-size:11px;color:var(--text3)">' + escapedDesc + '</span>' : ''}</div>`;
     
     container.appendChild(toast);
     
