@@ -33,6 +33,7 @@
         "quality:monitor:ci": "tsx tools/quality-monitor.ts",
         "quality:trend": "tsx tools/quality-monitor.ts",
         "quality:report": "tsx tools/quality-monitor.ts",
+        "unused-imports:scan": "tsx tools/unused-imports-cleaner.ts",
         "test:e2e": "playwright test",
         "test:e2e:ui": "playwright test --ui",
         "test:e2e:debug": "playwright test --debug",

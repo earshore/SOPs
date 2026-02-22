@@ -1,5 +1,4 @@
 import fs from 'fs';
-import path from 'path';
 
 // 读取审计报告
 const report = JSON.parse(fs.readFileSync('tests/quality/security-audit-2026-02-22.json', 'utf-8'));

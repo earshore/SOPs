@@ -7,7 +7,6 @@
 import { 
   isUserProductProfile,
   isLLMProviderConfig,
-  isProxyConfig,
   isApiResponse,
   isLLMChatCompletionResponse,
   isAmazonProductData,
@@ -15,14 +14,10 @@ import {
 } from '../src/common/guards/typeGuards';
 
 import type { 
-  UserProductProfile,
-  LLMProviderConfig,
-  ProxyConfig 
+  UserProductProfile
 } from '../src/types/state';
 
 import type { 
-  ApiResponse,
-  LLMChatCompletionResponse,
   AmazonProductData 
 } from '../src/types/api';
 

@@ -4,7 +4,6 @@
 // 用于生成、查看和管理测试报告
 // ================================================================
 
-const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const http = require('http');

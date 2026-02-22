@@ -509,7 +509,7 @@ class StorageServiceClass implements IStorageService {
     
     // 🔐 安全: 移除敏感的 apiKey,返回部分配置
     if (config && 'apiKey' in config) {
-      const { apiKey, ...safeConfig } = config;
+      const { apiKey: _apiKey, ...safeConfig } = config;
       return safeConfig;
     }
     

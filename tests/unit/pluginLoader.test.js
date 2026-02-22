@@ -10,13 +10,6 @@ describe('PluginLoader', () => {
 
   describe('loadPlugins', () => {
     it('should scan and load plugins using Vite glob import', () => {
-      // Mock import.meta.glob
-      const mockPlugins = {
-        '/src/modules/home/plugin.js': { default: {} },
-        '/src/modules/sops/plugin.js': { default: {} },
-        '/src/modules/amz_hub/plugin.js': { default: {} }
-      };
-
       // Since import.meta.glob is compile-time, we test the function behavior
       loadPlugins();
 

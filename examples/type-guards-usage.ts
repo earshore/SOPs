@@ -8,10 +8,8 @@
 import {
   isUserProductProfile,
   isScrapedDataItem,
-  isApiResponse,
   isLLMChatCompletionResponse,
   isAmazonProductData,
-  isAnalysisReport,
   isArrayOf,
   isOptional,
   isString,
@@ -21,13 +19,12 @@ import {
 // 导入 Zod schemas
 import {
   UserProductProfileSchema,
-  ScrapedDataItemSchema,
   AmazonProductDataSchema,
   LLMChatCompletionResponseSchema
 } from '../src/common/guards/zodSchemas';
 
 import type { UserProductProfile, ScrapedDataItem } from '../src/types/state';
-import type { ApiResponse, AmazonProductData } from '../src/types/api';
+import type { AmazonProductData } from '../src/types/api';
 
 // ==================== 示例 1: API 响应验证 ====================
 

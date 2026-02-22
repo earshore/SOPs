@@ -129,7 +129,7 @@ describe('Router System', () => {
     });
 
     it('should have required properties for each route', () => {
-      Object.entries(MENU_CONFIG.routes).forEach(([id, config]) => {
+      Object.entries(MENU_CONFIG.routes).forEach(([_id, config]) => {
         expect(config).toHaveProperty('moduleId');
         expect(config).toHaveProperty('label');
         expect(config).toHaveProperty('icon');

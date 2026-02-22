@@ -1,0 +1,109 @@
+{
+  "totalFiles": 237,
+  "filesWithUnusedImports": 6,
+  "unusedImports": [
+    {
+      "file": "D:\\Users\\Administrator\\Documents\\GitHub\\AihangSOP\\examples\\data-boundary-guards-usage.ts",
+      "line": 7,
+      "importName": "isProxyConfig",
+      "importPath": "../src/common/guards/typeGuards",
+      "type": "named"
+    },
+    {
+      "file": "D:\\Users\\Administrator\\Documents\\GitHub\\AihangSOP\\examples\\data-boundary-guards-usage.ts",
+      "line": 17,
+      "importName": "LLMProviderConfig",
+      "importPath": "../src/types/state",
+      "type": "named"
+    },
+    {
+      "file": "D:\\Users\\Administrator\\Documents\\GitHub\\AihangSOP\\examples\\data-boundary-guards-usage.ts",
+      "line": 17,
+      "importName": "ProxyConfig",
+      "importPath": "../src/types/state",
+      "type": "named"
+    },
+    {
+      "file": "D:\\Users\\Administrator\\Documents\\GitHub\\AihangSOP\\examples\\data-boundary-guards-usage.ts",
+      "line": 23,
+      "importName": "ApiResponse",
+      "importPath": "../src/types/api",
+      "type": "named"
+    },
+    {
+      "file": "D:\\Users\\Administrator\\Documents\\GitHub\\AihangSOP\\examples\\data-boundary-guards-usage.ts",
+      "line": 23,
+      "importName": "LLMChatCompletionResponse",
+      "importPath": "../src/types/api",
+      "type": "named"
+    },
+    {
+      "file": "D:\\Users\\Administrator\\Documents\\GitHub\\AihangSOP\\examples\\type-guards-usage.ts",
+      "line": 8,
+      "importName": "isAnalysisReport",
+      "importPath": "../src/common/guards/typeGuards",
+      "type": "named"
+    },
+    {
+      "file": "D:\\Users\\Administrator\\Documents\\GitHub\\AihangSOP\\examples\\type-guards-usage.ts",
+      "line": 22,
+      "importName": "ScrapedDataItemSchema",
+      "importPath": "../src/common/guards/zodSchemas",
+      "type": "named"
+    },
+    {
+      "file": "D:\\Users\\Administrator\\Documents\\GitHub\\AihangSOP\\examples\\type-guards-usage.ts",
+      "line": 30,
+      "importName": "ApiResponse",
+      "importPath": "../src/types/api",
+      "type": "named"
+    },
+    {
+      "file": "D:\\Users\\Administrator\\Documents\\GitHub\\AihangSOP\\tests\\helpers\\playwright-utils.ts",
+      "line": 7,
+      "importName": "expect",
+      "importPath": "@playwright/test",
+      "type": "named"
+    },
+    {
+      "file": "D:\\Users\\Administrator\\Documents\\GitHub\\AihangSOP\\tests\\helpers\\screenshot-fixture.ts",
+      "line": 7,
+      "importName": "Page",
+      "importPath": "@playwright/test",
+      "type": "named"
+    },
+    {
+      "file": "D:\\Users\\Administrator\\Documents\\GitHub\\AihangSOP\\tests\\helpers\\testFactory.ts",
+      "line": 15,
+      "importName": "ErrorLevel",
+      "importPath": "@/common/errors/AppError",
+      "type": "named"
+    },
+    {
+      "file": "D:\\Users\\Administrator\\Documents\\GitHub\\AihangSOP\\tests\\helpers\\testFactory.ts",
+      "line": 15,
+      "importName": "ErrorCategory",
+      "importPath": "@/common/errors/AppError",
+      "type": "named"
+    },
+    {
+      "file": "D:\\Users\\Administrator\\Documents\\GitHub\\AihangSOP\\tests\\playwright-teardown.ts",
+      "line": 10,
+      "importName": "path",
+      "importPath": "path",
+      "type": "namespace"
+    }
+  ],
+  "summary": {
+    "byType": {
+      "named": 12,
+      "default": 0,
+      "namespace": 1
+    },
+    "byDirectory": {
+      "D:\\Users\\Administrator\\Documents\\GitHub\\AihangSOP\\examples": 8,
+      "D:\\Users\\Administrator\\Documents\\GitHub\\AihangSOP\\tests\\helpers": 4,
+      "D:\\Users\\Administrator\\Documents\\GitHub\\AihangSOP\\tests": 1
+    }
+  }
+}

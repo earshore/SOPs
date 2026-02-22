@@ -47,7 +47,7 @@ function runLighthouse() {
     const command = 'npx lhci autorun --config=lighthouserc.js';
     console.log(`执行命令: ${command}\n`);
     
-    const output = execSync(command, {
+    execSync(command, {
       encoding: 'utf-8',
       stdio: 'inherit',
       cwd: path.join(__dirname, '../..')

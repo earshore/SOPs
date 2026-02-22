@@ -62,7 +62,7 @@ filesToFix.forEach(filePath => {
   let fileChanged = false;
   let fileChanges = 0;
   
-  replacements.forEach(({ pattern, replacement, description }) => {
+  replacements.forEach(({ pattern, replacement, description: _description }) => {
     const matches = content.match(pattern);
     if (matches) {
       content = content.replace(pattern, replacement);

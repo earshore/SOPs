@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>未使用导入扫描报告</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .header {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h1 { color: #333; margin-bottom: 10px; }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .summary-card {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .summary-card h3 { color: #666; font-size: 14px; margin-bottom: 10px; }
+    .summary-card .value { font-size: 32px; font-weight: bold; color: #e74c3c; }
+    .section {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .section h2 { color: #333; margin-bottom: 15px; font-size: 18px; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    th {
+      background: #f8f9fa;
+      font-weight: 600;
+      color: #666;
+    }
+    tr:hover { background: #f8f9fa; }
+    .type-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .type-named { background: #e3f2fd; color: #1976d2; }
+    .type-default { background: #f3e5f5; color: #7b1fa2; }
+    .type-namespace { background: #fff3e0; color: #f57c00; }
+    .file-path { font-family: 'Courier New', monospace; font-size: 13px; color: #666; }
+    .import-name { font-family: 'Courier New', monospace; font-weight: 600; color: #e74c3c; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔍 未使用导入扫描报告</h1>
+      <p>生成时间: 2026/2/22 20:26:08</p>
+    </div>
+
+    <div class="summary">
+      <div class="summary-card">
+        <h3>扫描文件数</h3>
+        <div class="value">237</div>
+      </div>
+      <div class="summary-card">
+        <h3>包含未使用导入的文件</h3>
+        <div class="value">6</div>
+      </div>
+      <div class="summary-card">
+        <h3>未使用导入总数</h3>
+        <div class="value">13</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>📊 按类型统计</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>导入类型</th>
+            <th>数量</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="type-badge type-named">Named Import</span></td>
+            <td>12</td>
+          </tr>
+          <tr>
+            <td><span class="type-badge type-default">Default Import</span></td>
+            <td>0</td>
+          </tr>
+          <tr>
+            <td><span class="type-badge type-namespace">Namespace Import</span></td>
+            <td>1</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>📁 按目录统计</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>目录</th>
+            <th>未使用导入数</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+              <tr>
+                <td class="file-path">D:\Users\Administrator\Documents\GitHub\AihangSOP\examples</td>
+                <td>8</td>
+              </tr>
+            
+              <tr>
+                <td class="file-path">D:\Users\Administrator\Documents\GitHub\AihangSOP\tests\helpers</td>
+                <td>4</td>
+              </tr>
+            
+              <tr>
+                <td class="file-path">D:\Users\Administrator\Documents\GitHub\AihangSOP\tests</td>
+                <td>1</td>
+              </tr>
+            
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>📝 详细列表</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>文件</th>
+            <th>行号</th>
+            <th>导入名称</th>
+            <th>导入路径</th>
+            <th>类型</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+            <tr>
+              <td class="file-path">D:\Users\Administrator\Documents\GitHub\AihangSOP\examples\data-boundary-guards-usage.ts</td>
+              <td>7</td>
+              <td class="import-name">isProxyConfig</td>
+              <td class="file-path">../src/common/guards/typeGuards</td>
+              <td><span class="type-badge type-named">named</span></td>
+            </tr>
+          
+            <tr>
+              <td class="file-path">D:\Users\Administrator\Documents\GitHub\AihangSOP\examples\data-boundary-guards-usage.ts</td>
+              <td>17</td>
+              <td class="import-name">LLMProviderConfig</td>
+              <td class="file-path">../src/types/state</td>
+              <td><span class="type-badge type-named">named</span></td>
+            </tr>
+          
+            <tr>
+              <td class="file-path">D:\Users\Administrator\Documents\GitHub\AihangSOP\examples\data-boundary-guards-usage.ts</td>
+              <td>17</td>
+              <td class="import-name">ProxyConfig</td>
+              <td class="file-path">../src/types/state</td>
+              <td><span class="type-badge type-named">named</span></td>
+            </tr>
+          
+            <tr>
+              <td class="file-path">D:\Users\Administrator\Documents\GitHub\AihangSOP\examples\data-boundary-guards-usage.ts</td>
+              <td>23</td>
+              <td class="import-name">ApiResponse</td>
+              <td class="file-path">../src/types/api</td>
+              <td><span class="type-badge type-named">named</span></td>
+            </tr>
+          
+            <tr>
+              <td class="file-path">D:\Users\Administrator\Documents\GitHub\AihangSOP\examples\data-boundary-guards-usage.ts</td>
+              <td>23</td>
+              <td class="import-name">LLMChatCompletionResponse</td>
+              <td class="file-path">../src/types/api</td>
+              <td><span class="type-badge type-named">named</span></td>
+            </tr>
+          
+            <tr>
+              <td class="file-path">D:\Users\Administrator\Documents\GitHub\AihangSOP\examples\type-guards-usage.ts</td>
+              <td>8</td>
+              <td class="import-name">isAnalysisReport</td>
+              <td class="file-path">../src/common/guards/typeGuards</td>
+              <td><span class="type-badge type-named">named</span></td>
+            </tr>
+          
+            <tr>
+              <td class="file-path">D:\Users\Administrator\Documents\GitHub\AihangSOP\examples\type-guards-usage.ts</td>
+              <td>22</td>
+              <td class="import-name">ScrapedDataItemSchema</td>
+              <td class="file-path">../src/common/guards/zodSchemas</td>
+              <td><span class="type-badge type-named">named</span></td>
+            </tr>
+          
+            <tr>
+              <td class="file-path">D:\Users\Administrator\Documents\GitHub\AihangSOP\examples\type-guards-usage.ts</td>
+              <td>30</td>
+              <td class="import-name">ApiResponse</td>
+              <td class="file-path">../src/types/api</td>
+              <td><span class="type-badge type-named">named</span></td>
+            </tr>
+          
+            <tr>
+              <td class="file-path">D:\Users\Administrator\Documents\GitHub\AihangSOP\tests\helpers\playwright-utils.ts</td>
+              <td>7</td>
+              <td class="import-name">expect</td>
+              <td class="file-path">@playwright/test</td>
+              <td><span class="type-badge type-named">named</span></td>
+            </tr>
+          
+            <tr>
+              <td class="file-path">D:\Users\Administrator\Documents\GitHub\AihangSOP\tests\helpers\screenshot-fixture.ts</td>
+              <td>7</td>
+              <td class="import-name">Page</td>
+              <td class="file-path">@playwright/test</td>
+              <td><span class="type-badge type-named">named</span></td>
+            </tr>
+          
+            <tr>
+              <td class="file-path">D:\Users\Administrator\Documents\GitHub\AihangSOP\tests\helpers\testFactory.ts</td>
+              <td>15</td>
+              <td class="import-name">ErrorLevel</td>
+              <td class="file-path">@/common/errors/AppError</td>
+              <td><span class="type-badge type-named">named</span></td>
+            </tr>
+          
+            <tr>
+              <td class="file-path">D:\Users\Administrator\Documents\GitHub\AihangSOP\tests\helpers\testFactory.ts</td>
+              <td>15</td>
+              <td class="import-name">ErrorCategory</td>
+              <td class="file-path">@/common/errors/AppError</td>
+              <td><span class="type-badge type-named">named</span></td>
+            </tr>
+          
+            <tr>
+              <td class="file-path">D:\Users\Administrator\Documents\GitHub\AihangSOP\tests\playwright-teardown.ts</td>
+              <td>10</td>
+              <td class="import-name">path</td>
+              <td class="file-path">path</td>
+              <td><span class="type-badge type-namespace">namespace</span></td>
+            </tr>
+          
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

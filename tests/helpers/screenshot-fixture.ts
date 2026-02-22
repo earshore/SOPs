@@ -4,7 +4,7 @@
 // 为 Playwright 测试提供自动失败截图功能
 // ================================================================
 
-import { test as base, TestInfo, Page } from '@playwright/test';
+import { test as base, TestInfo } from '@playwright/test';
 import { ScreenshotManager } from './screenshot-manager';
 
 /**

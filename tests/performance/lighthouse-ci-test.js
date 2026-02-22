@@ -24,7 +24,7 @@ function testLighthouseCIConfig() {
     
     // 2. 运行健康检查
     console.log('✓ 步骤 2: 运行健康检查');
-    const healthcheck = execSync('npx lhci healthcheck --config=lighthouserc.js', {
+    execSync('npx lhci healthcheck --config=lighthouserc.js', {
       encoding: 'utf-8',
       stdio: 'pipe'
     });

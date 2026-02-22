@@ -1,0 +1,30 @@
+{
+  "totalFiles": 237,
+  "filesWithUnusedImports": 1,
+  "unusedImports": [
+    {
+      "file": "D:\\Users\\Administrator\\Documents\\GitHub\\AihangSOP\\examples\\data-boundary-guards-usage.ts",
+      "line": 16,
+      "importName": "LLMProviderConfig",
+      "importPath": "../src/types/state",
+      "type": "named"
+    },
+    {
+      "file": "D:\\Users\\Administrator\\Documents\\GitHub\\AihangSOP\\examples\\data-boundary-guards-usage.ts",
+      "line": 21,
+      "importName": "LLMChatCompletionResponse",
+      "importPath": "../src/types/api",
+      "type": "named"
+    }
+  ],
+  "summary": {
+    "byType": {
+      "named": 2,
+      "default": 0,
+      "namespace": 0
+    },
+    "byDirectory": {
+      "D:\\Users\\Administrator\\Documents\\GitHub\\AihangSOP\\examples": 2
+    }
+  }
+}

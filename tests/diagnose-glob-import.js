@@ -62,7 +62,7 @@ async function diagnoseGlobImport() {
       // 尝试访问viewLoader模块
       try {
         // 通过动态导入获取htmlModules
-        const viewLoaderModule = await import('/src/common/utils/viewLoader.ts');
+        await import('/src/common/utils/viewLoader.ts');
         
         // 检查是否能访问htmlModules (它是私有的,但我们可以通过其他方式检查)
         // 尝试加载app_center模板
@@ -90,9 +90,6 @@ async function diagnoseGlobImport() {
     // 6. 检查loadHtml函数的执行
     console.log('\n📍 步骤6: 检查 loadHtml 执行过程');
     const loadHtmlTrace = await page.evaluate(() => {
-      // 检查VIEW_REGISTRY
-      const logs = [];
-      
       // 尝试触发一次loadHtml (通过重新加载promptlab)
       window.dispatchEvent(new CustomEvent('route:changed', {
         detail: {

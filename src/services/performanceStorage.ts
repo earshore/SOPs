@@ -413,7 +413,7 @@ export class PerformanceStorage {
   async import(data: string): Promise<number> {
     try {
       const records = JSON.parse(data) as PerformanceRecord[];
-      await this.saveBatch(records.map(({ id, ...rest }) => rest));
+      await this.saveBatch(records.map(({ id: _id, ...rest }) => rest));
       return records.length;
     } catch (error) {
       this._log('error', 'Failed to import data', { error: (error as Error).message });

@@ -7,7 +7,6 @@
 import { FullConfig } from '@playwright/test';
 import { ScreenshotManager } from './helpers/screenshot-manager';
 import * as fs from 'fs';
-import * as path from 'path';
 
 /**
  * 全局清理函数

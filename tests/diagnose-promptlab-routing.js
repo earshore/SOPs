@@ -19,7 +19,7 @@ console.log('   promptlab配置:', MENU_CONFIG.routes[APP_CENTER_ROUTES.PROMPTLA
 // 3. 检查所有app_center相关路由
 console.log('\n3. App Center所有路由:');
 Object.entries(MENU_CONFIG.routes)
-  .filter(([_, config]) => config.panelId === 'panel-app_center')
+  .filter(([_id, config]) => config.panelId === 'panel-app_center')
   .forEach(([id, config]) => {
     console.log(`   - ${id}: ${config.label} (moduleId: ${config.moduleId})`);
   });
