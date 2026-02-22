@@ -69,9 +69,14 @@ declare global {
     
     // 调试工具
     __DIContainer?: import('../common/di/Container').DIContainer;
+    __acknowledgeAllAlerts?: () => void;
     
     // 错误节流
     _errorThrottle?: number;
+    
+    // Promotions 滚动函数
+    amzp_scrollTo?: (target: string) => void;
+    amzp_scrollTo_Name?: (targetName: string) => void;
   }
 }
 
