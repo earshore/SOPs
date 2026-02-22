@@ -1,0 +1,37 @@
+# Dependencies
+node_modules
+package-lock.json
+
+# Build outputs
+dist
+build
+html
+coverage
+.lighthouseci
+
+# Generated files
+*.min.js
+*.min.css
+
+# Reports
+*-report.html
+*-report.json
+*-report.md
+
+# Logs
+*.log
+
+# IDE
+.vscode
+.idea
+
+# Git
+.git
+
+# Kiro
+.kiro
+
+# Test artifacts
+test-results
+playwright-report
+screenshots
