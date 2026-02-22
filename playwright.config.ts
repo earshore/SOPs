@@ -51,7 +51,8 @@ export default defineConfig({
   testMatch: [
     '**/startup/**/*.test.ts',
     '**/e2e/**/*.spec.ts',
-    '**/visual/**/*.test.ts'
+    '**/visual/**/*.test.ts',
+    '**/performance/**/*.test.ts'
   ],
 
   // 最大失败次数（0 = 不限制）
