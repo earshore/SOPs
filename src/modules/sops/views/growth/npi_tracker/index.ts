@@ -1,14 +1,17 @@
 /**
  * 亚马逊新品生命周期跟踪 SOP - NPI Tracker
  * Amazon New Product Introduction Tracker (EU Focus)
- * Phase 4: 迁移 window 全局函数到 ActionRegistry
- * 🎯 P0优化: 使用统一类型定义
- * 优化: 示例数据已移至独立文件
+ * 
+ * 架构说明：
+ * - 使用 SafeModuleLoader 加载模板
+ * - 使用 SafeRenderer 进行安全渲染
+ * - 使用 registerActionsWithLegacy 注册全局操作
+ * - 已迁移到新架构（系统稳定性优化）
  */
 
-import BaseModule from '../../../../../common/BaseModule';
-import { loadTemplate } from '../../../../../common/utils/viewLoader';
-import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry';
+import { SafeModuleLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
+import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
+import { registerActionsWithLegacy, unregisterActions } from '../../../../../common/utils/actionRegistry';
 import type {
   NPIProductRecord,
   StageConfig,
@@ -40,6 +43,10 @@ const NEXT_STEP_OPTIONS: string[] = [
     '清仓 (扶不起)',
 ];
 
+// 模块状态
+let tableData: NPIProductRecord[] = [...SAMPLE_DATA];
+let registeredActions: string[] = [];
+
 // Pricing calculation functions
 const calcClearancePrice = (deliveryFee: number): string => (deliveryFee / 0.5).toFixed(2);
 const calcMovingPrice = (deliveryFee: number): string => (deliveryFee / 0.5 + 1).toFixed(2);
@@ -59,16 +66,14 @@ const getComplianceStatus = (record: NPIProductRecord): ComplianceStatus => {
     return { completed, total: 4, isComplete: completed === 4 };
 };
 
-// Current data state
-let tableData: NPIProductRecord[] = [...SAMPLE_DATA];
-
 // Render the table
 function renderTable(): void {
     const tbody = document.getElementById('npi-table-body');
     if (!tbody) return;
 
-    // ✅ 安全: 静态HTML模板，无用户输入
-    tbody.innerHTML = tableData
+    // 使用 SafeRenderer 渲染表格（静态模板，已审计）
+    const renderer = SafeRenderer.getInstance();
+    const tableHTML = tableData
         .map((row: NPIProductRecord, index) => {
             const stageConfig: StageConfig = stageConfigMap[row.stage] || stageConfigMap['new-test'];
             const clearancePrice = calcClearancePrice(row.delivery_fee);
@@ -174,6 +179,9 @@ function renderTable(): void {
         `;
         })
         .join('');
+    
+    // 使用 SafeRenderer 渲染（静态模板，已审计）
+    renderer.renderTemplate(tbody, tableHTML);
 }
 
 // Update field
@@ -403,7 +411,7 @@ function filterByStage(stage: string): void {
     renderTable();
 }
 
-// 扩展 Window 接口以支持全局函数
+// 扩展 Window 接口以支持全局函数（兼容性）
 declare global {
     interface Window {
         updateField?: (index: number, field: keyof NPIProductRecord, value: unknown) => void;
@@ -418,74 +426,79 @@ declare global {
     }
 }
 
-// Expose to window for inline event handlers
-window.updateField = updateField;
-window.updateDeliveryFee = updateDeliveryFee;
-window.toggleDecision = toggleDecision;
-window.openNextStepEditor = openNextStepEditor;
-window.saveNextSteps = saveNextSteps;
-window.closeNextStepModal = closeNextStepModal;
-window.exportToExcel = exportToExcel;
-window.filterByStore = filterByStore;
-window.filterByStage = filterByStage;
+/**
+ * 挂载模块
+ */
+export async function mount(container: HTMLElement): Promise<void> {
+    console.log('[NPITracker] 🔧 开始挂载模块');
 
-// Module class
-class NPITrackerModule extends BaseModule {
-    /**
-     * 挂载模块
-     */
-    async mount(container: HTMLElement): Promise<void> {
-        const html = await loadTemplate('src/modules/sops/views/growth/npi_tracker/template.html');
-        // ✅ 安全: 静态HTML模板，无用户输入
-        container.innerHTML = html;
+    try {
+        // 1. 使用 SafeModuleLoader 加载模板
+        const loader = SafeModuleLoader.getInstance();
+        const renderer = SafeRenderer.getInstance();
+        
+        const html = await loader.loadTemplate(
+            'src/modules/sops/views/growth/npi_tracker/template.html',
+            {
+                retryCount: 3,
+                timeout: 5000,
+                onError: (error) => {
+                    console.error('[NPITracker] 模板加载失败:', error);
+                }
+            }
+        );
+        
+        // 2. 使用 SafeRenderer 渲染模板（静态模板，已审计）
+        renderer.renderTemplate(container, html);
         container.classList.add('fade-in');
 
-        // Initialize table after DOM is ready
+        // 3. 注册全局操作
+        const npiTrackerActions: Record<string, (...args: unknown[]) => void> = {
+            updateField: updateField as (...args: unknown[]) => void,
+            updateDeliveryFee: updateDeliveryFee as (...args: unknown[]) => void,
+            toggleDecision: toggleDecision as (...args: unknown[]) => void,
+            openNextStepEditor: openNextStepEditor as (...args: unknown[]) => void,
+            saveNextSteps: saveNextSteps as (...args: unknown[]) => void,
+            closeNextStepModal: closeNextStepModal as (...args: unknown[]) => void,
+            exportToExcel: exportToExcel as (...args: unknown[]) => void,
+            filterByStore: filterByStore as (...args: unknown[]) => void,
+            filterByStage: filterByStage as (...args: unknown[]) => void,
+        };
+
+        registeredActions = registerActionsWithLegacy(npiTrackerActions);
+        console.log(`[NPITracker] 已注册 ${registeredActions.length} 个动作到 ActionRegistry`);
+
+        // 4. 初始化表格（延迟渲染，确保 DOM 就绪）
         setTimeout(() => {
             renderTable();
         }, 100);
 
-        console.log('✅ 新品生命周期跟踪 SOP 模块已挂载');
-    }
-
-    /**
-     * 卸载模块
-     */
-    unmount(): void {
-        // Clean up global functions
-        delete window.updateField;
-        delete window.updateDeliveryFee;
-        delete window.toggleDecision;
-        delete window.openNextStepEditor;
-        delete window.saveNextSteps;
-        delete window.closeNextStepModal;
-        delete window.exportToExcel;
-        delete window.filterByStore;
-        delete window.filterByStage;
-
-        console.log('❌ 新品生命周期跟踪 SOP 模块已卸载');
+        console.log('[NPITracker] ✅ 模块挂载成功');
+    } catch (error) {
+        console.error('[NPITracker] ❌ 模块挂载失败:', error);
+        throw error;
     }
 }
 
-// Phase 4: 集中注册所有动作到 ActionRegistry
-const npiTrackerActions: Record<string, (...args: unknown[]) => void> = {
-    updateField: updateField as (...args: unknown[]) => void,
-    updateDeliveryFee: updateDeliveryFee as (...args: unknown[]) => void,
-    toggleDecision: toggleDecision as (...args: unknown[]) => void,
-    openNextStepEditor: openNextStepEditor as (...args: unknown[]) => void,
-    saveNextSteps: saveNextSteps as (...args: unknown[]) => void,
-    closeNextStepModal: closeNextStepModal as (...args: unknown[]) => void,
-    exportToExcel: exportToExcel as (...args: unknown[]) => void,
-    filterByStore: filterByStore as (...args: unknown[]) => void,
-    filterByStage: filterByStage as (...args: unknown[]) => void,
-};
+/**
+ * 卸载模块
+ */
+export function unmount(): void {
+    console.log('[NPITracker] 🔄 开始卸载模块');
 
-registerActionsWithLegacy(npiTrackerActions);
+    try {
+        // 1. 清理注册的动作
+        if (registeredActions.length > 0) {
+            unregisterActions(registeredActions);
+            console.log(`[NPITracker] 已清理 ${registeredActions.length} 个动作`);
+            registeredActions = [];
+        }
 
-console.log('✅ [npi_tracker] 已注册 ' + Object.keys(npiTrackerActions).length + ' 个动作到 ActionRegistry');
+        // 2. 重置表格数据
+        tableData = [...SAMPLE_DATA];
 
-// 导出模块实例
-const npiTrackerModule = new NPITrackerModule('npi_tracker');
-
-export const mount = (container: HTMLElement) => npiTrackerModule.mount(container);
-export const unmount = () => npiTrackerModule.unmount();
+        console.log('[NPITracker] ✅ 模块卸载成功');
+    } catch (error) {
+        console.error('[NPITracker] ❌ 模块卸载失败:', error);
+    }
+}

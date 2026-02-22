@@ -1,7 +1,7 @@
 /**
  * 高危词库搜索、筛选、渲染逻辑
  * Restricted Words Search, Filter, and Rendering Logic
- * Phase 4: 迁移 window 全局函数到 ActionRegistry
+ * Phase 5: 迁移到新架构 (SafeModuleLoader, AlpineRegistry, SafeRenderer)
  */
 
 import {
@@ -10,7 +10,8 @@ import {
     WORD_CATEGORIES,
 } from './constants/restrictedWordsConstants';
 import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry';
-import { escapeHtml } from '../../../../../common/utils/security';
+import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
+import { AlpineRegistry } from '../../../../../common/infrastructure/AlpineRegistry';
 
 type SearchMode = 'fuzzy' | 'exact' | 'fulltext' | 'regex';
 type SiteContext = string;
@@ -32,6 +33,9 @@ let activeFilters: ActiveFilters = {
     searchQuery: '',
 };
 
+// 获取 SafeRenderer 实例
+const renderer = SafeRenderer.getInstance();
+
 /**
  * 初始化面板
  */
@@ -51,7 +55,8 @@ function populateFilterDropdowns(): void {
         const options = Object.entries(WORD_CATEGORIES)
             .map(([code, cat]) => `<option value="${code}">${cat.label}</option>`)
             .join('');
-        catSelect.innerHTML = `<option value="">全部分类</option>` + options;
+        // ✅ 使用 SafeRenderer 渲染静态模板
+        renderer.renderTemplate(catSelect, `<option value="">全部分类</option>` + options);
     }
 
     // 风险等级下拉
@@ -64,8 +69,8 @@ function populateFilterDropdowns(): void {
                     `<option value="${level}">${(RISK_LEVELS as any)[level].icon} ${(RISK_LEVELS as any)[level].label}</option>`
             )
             .join('');
-        // ✅ 安全: 静态HTML模板，无用户输入
-        riskSelect.innerHTML = `<option value="">全部</option>` + options;
+        // ✅ 使用 SafeRenderer 渲染静态模板
+        renderer.renderTemplate(riskSelect, `<option value="">全部</option>` + options);
     }
 }
 
@@ -257,8 +262,8 @@ function renderResults(): void {
     if (!tbody) return;
 
     if (currentResults.length === 0) {
-        // ✅ 安全: 静态HTML模板，无用户输入
-        tbody.innerHTML = `
+        // ✅ 使用 SafeRenderer 渲染静态模板
+        renderer.renderTemplate(tbody, `
             <tr>
                 <td colspan="6" class="text-center py-12 text-slate-400">
                     <div class="flex flex-col items-center">
@@ -268,74 +273,118 @@ function renderResults(): void {
                     </div>
                 </td>
             </tr>
-        `;
+        `);
         return;
     }
 
-    // ✅ 安全: 静态HTML模板，无用户输入
-    tbody.innerHTML = currentResults
-        .map((word) => {
-            const risk = (RISK_LEVELS as any)[word.riskLevel];
-            const category = (WORD_CATEGORIES as any)[word.category];
+    // ✅ 使用 SafeRenderer 渲染列表
+    const rows = currentResults.map((word) => {
+        const risk = (RISK_LEVELS as any)[word.riskLevel];
+        const category = (WORD_CATEGORIES as any)[word.category];
 
-            // 智能显示关键词：如果有选中站点且有对应的本地化词，优先显示本地化词
-            let displayKeyword = word.keyword;
-            let subDisplay = word.variants.slice(0, 3).join(', ');
+        // 智能显示关键词：如果有选中站点且有对应的本地化词，优先显示本地化词
+        let displayKeyword = word.keyword;
+        let subDisplay = word.variants.slice(0, 3).join(', ');
 
-            if (
-                currentSiteContext !== 'ALL' &&
-                word.localizedKeywords &&
-                (word.localizedKeywords as any)[currentSiteContext]
-            ) {
-                const localWord = (word.localizedKeywords as any)[currentSiteContext];
-                displayKeyword = localWord;
-                // 在副标显示英文原词
-                if (localWord !== word.keyword) {
-                    subDisplay = `${word.keyword}${subDisplay ? ', ' + subDisplay : ''}`;
-                }
+        if (
+            currentSiteContext !== 'ALL' &&
+            word.localizedKeywords &&
+            (word.localizedKeywords as any)[currentSiteContext]
+        ) {
+            const localWord = (word.localizedKeywords as any)[currentSiteContext];
+            displayKeyword = localWord;
+            // 在副标显示英文原词
+            if (localWord !== word.keyword) {
+                subDisplay = `${word.keyword}${subDisplay ? ', ' + subDisplay : ''}`;
             }
+        }
 
-            return `
-                <tr class="hover:bg-slate-50 border-b border-slate-100 transition-colors">
-                    <td class="px-4 py-3 align-top">
-                        <div class="font-bold text-slate-800 text-base mb-0.5 break-all">${escapeHtml(displayKeyword)}</div>
-                        <div class="text-xs text-slate-500 line-clamp-2">${escapeHtml(subDisplay || '-')}</div>
-                    </td>
-                    <td class="px-4 py-3 align-top">
-                        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium bg-${category.color}-50 text-${category.color}-700 border border-${category.color}-100">
-                            <i class="fas ${category.icon}"></i> ${escapeHtml(category.label)}
-                        </span>
-                        ${word.subCategory ? `<div class="text-[10px] text-slate-400 mt-1 pl-1">${escapeHtml(word.subCategory)}</div>` : ''}
-                    </td>
-                    <td class="px-4 py-3 align-top text-center">
-                        <div class="flex flex-col items-center">
-                            <span class="text-xl mb-0.5" title="${escapeHtml(risk.label)}">${risk.icon}</span>
-                            <span class="px-1.5 text-[10px] font-bold rounded bg-${risk.color}-100 text-${risk.color}-700">
-                                ${word.riskLevel}级
-                            </span>
-                        </div>
-                    </td>
-                    <td class="px-4 py-3 align-top">
-                        <div class="flex flex-wrap gap-1">
-                            ${renderAffectedSites(word.affectedSites)}
-                        </div>
-                    </td>
-                    <td class="px-4 py-3 align-top text-xs text-slate-600">
-                        <div class="line-clamp-2" title="${escapeHtml(word.commonProducts.join(', '))}">
-                            ${escapeHtml(word.commonProducts.join(', '))}
-                        </div>
-                    </td>
-                    <td class="px-4 py-3 align-top text-center">
-                        <button 
-                            onclick="showWordDetail('${word.id}')"
-                            class="px-3 py-1.5 bg-white border border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 rounded-md text-xs font-medium transition-all shadow-sm">
-                            详情
-                        </button>
-                    </td>
-                </tr>
-            `;
-        })
-        .join('');
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 border-b border-slate-100 transition-colors';
+
+        // 关键词列
+        const keywordTd = document.createElement('td');
+        keywordTd.className = 'px-4 py-3 align-top';
+        const keywordDiv = document.createElement('div');
+        keywordDiv.className = 'font-bold text-slate-800 text-base mb-0.5 break-all';
+        keywordDiv.textContent = displayKeyword;
+        const subDiv = document.createElement('div');
+        subDiv.className = 'text-xs text-slate-500 line-clamp-2';
+        subDiv.textContent = subDisplay || '-';
+        keywordTd.appendChild(keywordDiv);
+        keywordTd.appendChild(subDiv);
+
+        // 分类列
+        const categoryTd = document.createElement('td');
+        categoryTd.className = 'px-4 py-3 align-top';
+        const categorySpan = document.createElement('span');
+        categorySpan.className = `inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium bg-${category.color}-50 text-${category.color}-700 border border-${category.color}-100`;
+        categorySpan.innerHTML = `<i class="fas ${category.icon}"></i>`;
+        const categoryText = document.createTextNode(' ' + category.label);
+        categorySpan.appendChild(categoryText);
+        categoryTd.appendChild(categorySpan);
+        if (word.subCategory) {
+            const subCatDiv = document.createElement('div');
+            subCatDiv.className = 'text-[10px] text-slate-400 mt-1 pl-1';
+            subCatDiv.textContent = word.subCategory;
+            categoryTd.appendChild(subCatDiv);
+        }
+
+        // 风险等级列
+        const riskTd = document.createElement('td');
+        riskTd.className = 'px-4 py-3 align-top text-center';
+        const riskDiv = document.createElement('div');
+        riskDiv.className = 'flex flex-col items-center';
+        const riskIcon = document.createElement('span');
+        riskIcon.className = 'text-xl mb-0.5';
+        riskIcon.title = risk.label;
+        riskIcon.textContent = risk.icon;
+        const riskBadge = document.createElement('span');
+        riskBadge.className = `px-1.5 text-[10px] font-bold rounded bg-${risk.color}-100 text-${risk.color}-700`;
+        riskBadge.textContent = `${word.riskLevel}级`;
+        riskDiv.appendChild(riskIcon);
+        riskDiv.appendChild(riskBadge);
+        riskTd.appendChild(riskDiv);
+
+        // 受影响站点列
+        const sitesTd = document.createElement('td');
+        sitesTd.className = 'px-4 py-3 align-top';
+        const sitesDiv = document.createElement('div');
+        sitesDiv.className = 'flex flex-wrap gap-1';
+        sitesDiv.innerHTML = renderAffectedSites(word.affectedSites);
+        sitesTd.appendChild(sitesDiv);
+
+        // 常见产品列
+        const productsTd = document.createElement('td');
+        productsTd.className = 'px-4 py-3 align-top text-xs text-slate-600';
+        const productsDiv = document.createElement('div');
+        productsDiv.className = 'line-clamp-2';
+        productsDiv.textContent = word.commonProducts.join(', ');
+        productsDiv.title = word.commonProducts.join(', ');
+        productsTd.appendChild(productsDiv);
+
+        // 操作列
+        const actionTd = document.createElement('td');
+        actionTd.className = 'px-4 py-3 align-top text-center';
+        const detailBtn = document.createElement('button');
+        detailBtn.className = 'px-3 py-1.5 bg-white border border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 rounded-md text-xs font-medium transition-all shadow-sm';
+        detailBtn.textContent = '详情';
+        detailBtn.onclick = () => showWordDetail(word.id);
+        actionTd.appendChild(detailBtn);
+
+        tr.appendChild(keywordTd);
+        tr.appendChild(categoryTd);
+        tr.appendChild(riskTd);
+        tr.appendChild(sitesTd);
+        tr.appendChild(productsTd);
+        tr.appendChild(actionTd);
+
+        return tr;
+    });
+
+    // 清空并添加所有行
+    tbody.innerHTML = '';
+    rows.forEach(row => tbody.appendChild(row));
 }
 
 /**
@@ -379,126 +428,189 @@ function showWordDetail(wordId: string): void {
     const risk = (RISK_LEVELS as any)[word.riskLevel];
     const category = (WORD_CATEGORIES as any)[word.category];
 
-    // 渲染 Header
-    header.innerHTML = `
-        <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-lg bg-${escapeHtml(risk.color)}-100 flex items-center justify-center text-2xl">
-                ${escapeHtml(risk.icon)}
-            </div>
-            <div>
-                <h3 class="text-xl font-bold text-slate-800 flex items-center gap-3">
-                    ${escapeHtml(word.keyword)}
-                    <span class="text-xs font-normal text-slate-400 border border-slate-200 rounded px-1.5 py-0.5">ID: ${escapeHtml(word.id)}</span>
-                </h3>
-                <div class="flex items-center gap-2 mt-1">
-                    <span class="px-2 py-0.5 rounded text-xs font-medium bg-${escapeHtml(category.color)}-50 text-${escapeHtml(category.color)}-700 border border-${escapeHtml(category.color)}-100">
-                        ${escapeHtml(category.label)}
-                    </span>
-                    <span class="px-2 py-0.5 rounded text-xs font-medium bg-${escapeHtml(risk.color)}-50 text-${escapeHtml(risk.color)}-700 border border-${escapeHtml(risk.color)}-100">
-                        风险等级 ${escapeHtml(word.riskLevel.toString())}: ${escapeHtml(risk.label)}
-                    </span>
-                </div>
-            </div>
-        </div>
-    `;
+    // 渲染 Header - 使用 DOM 操作
+    header.innerHTML = '';
+    const headerDiv = document.createElement('div');
+    headerDiv.className = 'flex items-center gap-4';
+    
+    const iconDiv = document.createElement('div');
+    iconDiv.className = `w-12 h-12 rounded-lg bg-${risk.color}-100 flex items-center justify-center text-2xl`;
+    iconDiv.textContent = risk.icon;
+    
+    const infoDiv = document.createElement('div');
+    
+    const h3 = document.createElement('h3');
+    h3.className = 'text-xl font-bold text-slate-800 flex items-center gap-3';
+    h3.textContent = word.keyword;
+    
+    const idSpan = document.createElement('span');
+    idSpan.className = 'text-xs font-normal text-slate-400 border border-slate-200 rounded px-1.5 py-0.5';
+    idSpan.textContent = `ID: ${word.id}`;
+    h3.appendChild(idSpan);
+    
+    const badgesDiv = document.createElement('div');
+    badgesDiv.className = 'flex items-center gap-2 mt-1';
+    
+    const categoryBadge = document.createElement('span');
+    categoryBadge.className = `px-2 py-0.5 rounded text-xs font-medium bg-${category.color}-50 text-${category.color}-700 border border-${category.color}-100`;
+    categoryBadge.textContent = category.label;
+    
+    const riskBadge = document.createElement('span');
+    riskBadge.className = `px-2 py-0.5 rounded text-xs font-medium bg-${risk.color}-50 text-${risk.color}-700 border border-${risk.color}-100`;
+    riskBadge.textContent = `风险等级 ${word.riskLevel}: ${risk.label}`;
+    
+    badgesDiv.appendChild(categoryBadge);
+    badgesDiv.appendChild(riskBadge);
+    infoDiv.appendChild(h3);
+    infoDiv.appendChild(badgesDiv);
+    headerDiv.appendChild(iconDiv);
+    headerDiv.appendChild(infoDiv);
+    header.appendChild(headerDiv);
 
-    // 渲染 Content
-    content.innerHTML = `
-        <div class="space-y-6">
-            
-            <!-- 变体与本地化 -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="bg-slate-50 p-4 rounded-lg border border-slate-100">
-                    <h4 class="text-xs font-bold text-slate-500 uppercase mb-2">站点本地化写法</h4>
-                    <div class="space-y-1">
-                        ${
-                            Object.entries(word.localizedKeywords || {})
-                                .map(
-                                    ([site, localKw]) => `
-                                <div class="flex justify-between text-sm">
-                                    <span class="font-medium text-slate-600">${site}:</span>
-                                    <span class="text-slate-800 font-bold">${localKw}</span>
-                                </div>
-                            `
-                                )
-                                .join('') || '<span class="text-slate-400 text-sm">无特定本地化差异</span>'
-                        }
-                    </div>
-                </div>
-                
-                <div class="bg-slate-50 p-4 rounded-lg border border-slate-100">
-                    <h4 class="text-xs font-bold text-slate-500 uppercase mb-2">其他搜索变体</h4>
-                    <p class="text-sm text-slate-800 font-mono leading-relaxed">
-                        ${word.variants.length ? word.variants.join(', ') : '<span class="text-slate-400">无</span>'}
-                    </p>
-                </div>
-            </div>
-
-            <!-- 核心风险描述 -->
-            <div class="border-l-4 border-red-400 bg-red-50 p-4 rounded-r-lg">
-                <h4 class="font-bold text-red-800 mb-1 flex items-center gap-2">
-                    <i class="fas fa-triangle-exclamation"></i> 风险解读
-                </h4>
-                <p class="text-sm text-red-900 leading-relaxed">${word.riskDescription}</p>
-                
-                <div class="mt-3 pt-3 border-t border-red-100 flex items-start gap-2">
-                   <i class="fas fa-gavel text-red-400 mt-0.5 text-xs"></i>
-                   <div>
-                     <span class="text-xs font-bold text-red-800">法规依据:</span>
-                     <span class="text-xs text-red-700 italic">${word.legalBasis}</span>
-                   </div>
-                </div>
-            </div>
-
-            <!-- 替代方案 & 场景 -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <h4 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
-                        <i class="fas fa-check-circle text-green-500"></i> 安全替代方案
-                    </h4>
-                    <ul class="space-y-2">
-                        ${word.alternatives
-                            .map(
-                                (alt) => `
-                            <li class="flex items-start gap-2 text-sm bg-green-50 text-green-800 px-3 py-2 rounded border border-green-100">
-                                <i class="fas fa-check mt-0.5 text-xs"></i>
-                                <span>${alt}</span>
-                            </li>
-                        `
-                            )
-                            .join('')}
-                    </ul>
-                </div>
-                
-                <div>
-                   <h4 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
-                    <i class="fas fa-bullseye text-blue-500"></i> 常见触雷场景
-                  </h4>
-                  <div class="flex flex-wrap gap-2">
-                    ${word.commonProducts
-                        .map(
-                            (prod) => `
-                        <span class="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full text-xs border border-slate-200">
-                            ${prod}
-                        </span>
-                    `
-                        )
-                        .join('')}
-                  </div>
-                </div>
-            </div>
-
-            <!-- 运营 Tips -->
-            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                <h4 class="font-bold text-amber-800 mb-2 flex items-center gap-2">
-                    <i class="fas fa-lightbulb text-amber-500"></i> 资深运营小贴士
-                </h4>
-                <p class="text-sm text-amber-900">
-                    ${word.tips}
-                </p>
-            </div>
-        </div>
-    `;
+    // 渲染 Content - 使用 DOM 操作
+    content.innerHTML = '';
+    const contentContainer = document.createElement('div');
+    contentContainer.className = 'space-y-6';
+    
+    // 变体与本地化部分
+    const variantsGrid = document.createElement('div');
+    variantsGrid.className = 'grid grid-cols-1 md:grid-cols-2 gap-4';
+    
+    // 本地化部分
+    const localizedDiv = document.createElement('div');
+    localizedDiv.className = 'bg-slate-50 p-4 rounded-lg border border-slate-100';
+    const localizedTitle = document.createElement('h4');
+    localizedTitle.className = 'text-xs font-bold text-slate-500 uppercase mb-2';
+    localizedTitle.textContent = '站点本地化写法';
+    localizedDiv.appendChild(localizedTitle);
+    
+    const localizedContent = document.createElement('div');
+    localizedContent.className = 'space-y-1';
+    const localizedEntries = Object.entries(word.localizedKeywords || {});
+    if (localizedEntries.length > 0) {
+        localizedEntries.forEach(([site, localKw]) => {
+            const entryDiv = document.createElement('div');
+            entryDiv.className = 'flex justify-between text-sm';
+            const siteSpan = document.createElement('span');
+            siteSpan.className = 'font-medium text-slate-600';
+            siteSpan.textContent = `${site}:`;
+            const kwSpan = document.createElement('span');
+            kwSpan.className = 'text-slate-800 font-bold';
+            kwSpan.textContent = localKw as string;
+            entryDiv.appendChild(siteSpan);
+            entryDiv.appendChild(kwSpan);
+            localizedContent.appendChild(entryDiv);
+        });
+    } else {
+        const noDataSpan = document.createElement('span');
+        noDataSpan.className = 'text-slate-400 text-sm';
+        noDataSpan.textContent = '无特定本地化差异';
+        localizedContent.appendChild(noDataSpan);
+    }
+    localizedDiv.appendChild(localizedContent);
+    
+    // 变体部分
+    const variantsDiv = document.createElement('div');
+    variantsDiv.className = 'bg-slate-50 p-4 rounded-lg border border-slate-100';
+    const variantsTitle = document.createElement('h4');
+    variantsTitle.className = 'text-xs font-bold text-slate-500 uppercase mb-2';
+    variantsTitle.textContent = '其他搜索变体';
+    variantsDiv.appendChild(variantsTitle);
+    const variantsP = document.createElement('p');
+    variantsP.className = 'text-sm text-slate-800 font-mono leading-relaxed';
+    variantsP.textContent = word.variants.length ? word.variants.join(', ') : '无';
+    variantsDiv.appendChild(variantsP);
+    
+    variantsGrid.appendChild(localizedDiv);
+    variantsGrid.appendChild(variantsDiv);
+    contentContainer.appendChild(variantsGrid);
+    
+    // 风险描述部分
+    const riskDiv = document.createElement('div');
+    riskDiv.className = 'border-l-4 border-red-400 bg-red-50 p-4 rounded-r-lg';
+    const riskTitle = document.createElement('h4');
+    riskTitle.className = 'font-bold text-red-800 mb-1 flex items-center gap-2';
+    riskTitle.innerHTML = '<i class="fas fa-triangle-exclamation"></i> 风险解读';
+    riskDiv.appendChild(riskTitle);
+    const riskDesc = document.createElement('p');
+    riskDesc.className = 'text-sm text-red-900 leading-relaxed';
+    riskDesc.textContent = word.riskDescription;
+    riskDiv.appendChild(riskDesc);
+    
+    const legalDiv = document.createElement('div');
+    legalDiv.className = 'mt-3 pt-3 border-t border-red-100 flex items-start gap-2';
+    legalDiv.innerHTML = '<i class="fas fa-gavel text-red-400 mt-0.5 text-xs"></i>';
+    const legalContent = document.createElement('div');
+    const legalLabel = document.createElement('span');
+    legalLabel.className = 'text-xs font-bold text-red-800';
+    legalLabel.textContent = '法规依据:';
+    const legalText = document.createElement('span');
+    legalText.className = 'text-xs text-red-700 italic';
+    legalText.textContent = word.legalBasis;
+    legalContent.appendChild(legalLabel);
+    legalContent.appendChild(document.createTextNode(' '));
+    legalContent.appendChild(legalText);
+    legalDiv.appendChild(legalContent);
+    riskDiv.appendChild(legalDiv);
+    contentContainer.appendChild(riskDiv);
+    
+    // 替代方案和场景部分
+    const solutionsGrid = document.createElement('div');
+    solutionsGrid.className = 'grid grid-cols-1 md:grid-cols-2 gap-6';
+    
+    // 替代方案
+    const alternativesDiv = document.createElement('div');
+    const altTitle = document.createElement('h4');
+    altTitle.className = 'font-bold text-slate-800 mb-3 flex items-center gap-2';
+    altTitle.innerHTML = '<i class="fas fa-check-circle text-green-500"></i> 安全替代方案';
+    alternativesDiv.appendChild(altTitle);
+    const altList = document.createElement('ul');
+    altList.className = 'space-y-2';
+    word.alternatives.forEach(alt => {
+        const li = document.createElement('li');
+        li.className = 'flex items-start gap-2 text-sm bg-green-50 text-green-800 px-3 py-2 rounded border border-green-100';
+        li.innerHTML = '<i class="fas fa-check mt-0.5 text-xs"></i>';
+        const span = document.createElement('span');
+        span.textContent = alt;
+        li.appendChild(span);
+        altList.appendChild(li);
+    });
+    alternativesDiv.appendChild(altList);
+    
+    // 常见场景
+    const productsDiv = document.createElement('div');
+    const prodTitle = document.createElement('h4');
+    prodTitle.className = 'font-bold text-slate-800 mb-3 flex items-center gap-2';
+    prodTitle.innerHTML = '<i class="fas fa-bullseye text-blue-500"></i> 常见触雷场景';
+    productsDiv.appendChild(prodTitle);
+    const prodContainer = document.createElement('div');
+    prodContainer.className = 'flex flex-wrap gap-2';
+    word.commonProducts.forEach(prod => {
+        const span = document.createElement('span');
+        span.className = 'px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full text-xs border border-slate-200';
+        span.textContent = prod;
+        prodContainer.appendChild(span);
+    });
+    productsDiv.appendChild(prodContainer);
+    
+    solutionsGrid.appendChild(alternativesDiv);
+    solutionsGrid.appendChild(productsDiv);
+    contentContainer.appendChild(solutionsGrid);
+    
+    // Tips部分
+    const tipsDiv = document.createElement('div');
+    tipsDiv.className = 'bg-amber-50 border border-amber-200 rounded-lg p-4';
+    const tipsTitle = document.createElement('h4');
+    tipsTitle.className = 'font-bold text-amber-800 mb-2 flex items-center gap-2';
+    tipsTitle.innerHTML = '<i class="fas fa-lightbulb text-amber-500"></i> 资深运营小贴士';
+    tipsDiv.appendChild(tipsTitle);
+    const tipsP = document.createElement('p');
+    tipsP.className = 'text-sm text-amber-900';
+    tipsP.textContent = word.tips;
+    tipsDiv.appendChild(tipsP);
+    contentContainer.appendChild(tipsDiv);
+    
+    content.appendChild(contentContainer);
 
     // 显示动画
     modal.classList.remove('hidden');
@@ -541,3 +653,71 @@ console.log(
         Object.keys(restrictedWordsActions).length +
         ' 个动作到 ActionRegistry'
 );
+
+// ================================================================
+// Phase 5: 使用 AlpineRegistry 注册组件
+// ================================================================
+
+const registry = AlpineRegistry.getInstance();
+
+// 注册 Restricted Words 面板组件
+registry.register('restrictedWordsPanel', () => ({
+    // 初始化
+    init() {
+        console.log('✅ [Alpine] Restricted Words 面板组件已初始化');
+        initRestrictedWordsPanel();
+    },
+    
+    // 搜索关键词
+    searchKeyword: '',
+    
+    // 搜索模式
+    searchMode: 'fuzzy' as SearchMode,
+    
+    // 选中的分类
+    selectedCategory: '',
+    
+    // 选中的风险等级
+    selectedRiskLevel: '',
+    
+    // 选中的站点
+    selectedSite: 'ALL',
+    
+    // 执行搜索
+    performSearch() {
+        const input = document.getElementById('rw-search-input') as HTMLInputElement;
+        if (input) {
+            input.value = this.searchKeyword;
+        }
+        
+        const searchBtn = document.getElementById('rw-search-btn') as HTMLButtonElement;
+        if (searchBtn) {
+            searchBtn.click();
+        }
+    },
+    
+    // 清空搜索
+    clearFilters() {
+        this.searchKeyword = '';
+        this.selectedCategory = '';
+        this.selectedRiskLevel = '';
+        this.selectedSite = 'ALL';
+        
+        const clearBtn = document.getElementById('rw-clear-btn') as HTMLButtonElement;
+        if (clearBtn) {
+            clearBtn.click();
+        }
+    },
+    
+    // 查看详情
+    viewDetail(wordId: string) {
+        showWordDetail(wordId);
+    },
+    
+    // 关闭详情
+    closeDetailModal() {
+        closeWordDetail();
+    }
+}));
+
+console.log('✅ [restrictedWordsHandler] Restricted Words 组件已注册到 AlpineRegistry');

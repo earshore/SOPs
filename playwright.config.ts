@@ -50,7 +50,8 @@ export default defineConfig({
   // 测试文件匹配模式
   testMatch: [
     '**/startup/**/*.test.ts',
-    '**/e2e/**/*.spec.ts'
+    '**/e2e/**/*.spec.ts',
+    '**/visual/**/*.test.ts'
   ],
 
   // 最大失败次数（0 = 不限制）
@@ -170,24 +171,20 @@ export default defineConfig({
             '--disable-features=IsolateOrigins,site-per-process'
           ]
         }
-      },
-      // 为 Chromium 项目分配更多 worker
-      // 因为它是主要测试浏览器
-      testMatch: process.env.BROWSER_ONLY === 'chromium' ? undefined : '**/e2e/**/*.spec.ts'
+      }
+      // 移除 testMatch 限制，使用全局 testMatch 配置
     },
 
     // 可选：Firefox 测试（通过环境变量控制）
     ...(process.env.SKIP_FIREFOX ? [] : [{
       name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-      testMatch: process.env.BROWSER_ONLY === 'firefox' ? undefined : '**/e2e/**/*.spec.ts'
+      use: { ...devices['Desktop Firefox'] }
     }]),
 
     // 可选：WebKit 测试（通过环境变量控制）
     ...(process.env.SKIP_WEBKIT ? [] : [{
       name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-      testMatch: process.env.BROWSER_ONLY === 'webkit' ? undefined : '**/e2e/**/*.spec.ts'
+      use: { ...devices['Desktop Safari'] }
     }]),
 
     // 可选：移动端浏览器测试（默认跳过，通过环境变量启用）
