@@ -27,6 +27,7 @@
         "quality:coverage": "node tests/quality/coverage-stats.js",
         "quality:dashboard": "node tests/quality/generate-dashboard.js",
         "quality:baseline": "node tests/quality/run-all-checks.js",
+        "tech-debt:scan": "tsx tools/tech-debt-scanner.ts",
         "test:e2e": "playwright test",
         "test:e2e:ui": "playwright test --ui",
         "test:e2e:debug": "playwright test --debug",
