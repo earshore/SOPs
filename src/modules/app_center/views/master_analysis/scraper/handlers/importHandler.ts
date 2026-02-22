@@ -341,16 +341,20 @@ export async function handleImportFiles(
         let targetMarketplace: string = selectedSite || '';
         const hasExistingData = currentScrapedData && currentScrapedData.products && currentScrapedData.products.length > 0;
 
-        if (!hasExistingData && detectedSites.size > 1) {
+        // 决定基准站点的逻辑
+        if (detectedSites.size > 1) {
+            // 多站点数据，弹窗让用户选择（无论是否有现有数据）
             const selected = await showMarketplaceSelectionModal([...detectedSites]);
             if (!selected) {
                 showToast("用户取消导入", "info");
                 return { success: false };
             }
             targetMarketplace = selected;
-        } else if (!hasExistingData && detectedSites.size === 1) {
+        } else if (detectedSites.size === 1) {
+            // 单站点数据，直接使用新导入的站点（无论是否有现有数据）
             targetMarketplace = [...detectedSites][0] || '';
         } else if (hasExistingData && currentScrapedData) {
+            // 新导入的数据没有站点信息，保留旧数据的站点
             targetMarketplace = currentScrapedData.metadata?.marketplace || '';
         }
 

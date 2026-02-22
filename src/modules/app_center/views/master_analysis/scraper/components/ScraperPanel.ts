@@ -375,12 +375,10 @@ export function createScraperPanel() {
                     state.scraper.scrapedData = result.data;
                     state.analysis.analysisReport = null;
 
-                    // 如果没有现有数据，更新选中的站点
-                    if (!state.scraper.scrapedData || !state.scraper.scrapedData.products || state.scraper.scrapedData.products.length === 0) {
-                        const marketplace = result.data.metadata?.marketplace || 'DE';
-                        state.scraper.selectedSite = marketplace as ScraperSite;
-                        this.selectedSite = marketplace as ScraperSite;
-                    }
+                    // 根据新导入的数据更新选中的站点
+                    const marketplace = result.data.metadata?.marketplace || 'DE';
+                    state.scraper.selectedSite = marketplace as ScraperSite;
+                    this.selectedSite = marketplace as ScraperSite;
 
                     // 更新数据预览
                     if (this.dataPreview) {
