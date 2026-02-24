@@ -168,9 +168,20 @@
             <div class="text-xs text-slate-500">基于报告内容智能回答</div>
           </div>
         </div>
-        <button class="btn btn-secondary btn-sm" data-action="amz_qalab_clearRufusChat">
-          <i class="fa-solid fa-trash"></i> 清空对话
-        </button>
+        <div class="flex items-center gap-2">
+          <button 
+            class="mode-toggle rule-mode" 
+            id="rufusModeToggle"
+            data-action="amz_qalab_toggleRufusMode"
+            title="切换回答模式"
+          >
+            <i class="fa-solid fa-list-check"></i>
+            规则模式
+          </button>
+          <button class="btn btn-secondary btn-sm" data-action="amz_qalab_clearRufusChat">
+            <i class="fa-solid fa-trash"></i> 清空对话
+          </button>
+        </div>
       </div>
       
       <div class="rufus-messages-container" id="rufusMessages">
@@ -196,7 +207,8 @@
       <div class="rufus-tips">
         <i class="fa-solid fa-lightbulb text-amber-500"></i>
         <span class="text-xs text-slate-500">
-          提示：Rufus AI 会基于当前加载的分析报告内容生成回答，回答完全仿真 Amazon Rufus 的风格和逻辑
+          <strong>规则模式</strong>：基于预设规则快速回答，无需联网 · 
+          <strong>AI 模式</strong>：调用大模型智能分析，更懂用户意图（需配置 LLM）
         </span>
       </div>
     </div>

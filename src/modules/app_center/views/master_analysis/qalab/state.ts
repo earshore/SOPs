@@ -4,6 +4,7 @@
 
 import type { QA } from './qaData';
 import { EventManager } from './utils';
+import type { RufusMode } from './rufusSimulator';
 
 export class QALabState {
     currentLang: string = 'de';
@@ -18,6 +19,7 @@ export class QALabState {
     // Rufus AI 模拟器状态
     rufusMessages: Array<{ role: 'user' | 'assistant'; content: string; timestamp: number }> = [];
     rufusThinking: boolean = false;
+    rufusMode: RufusMode = 'ai'; // 默认 AI 模式
 
     reset(): void {
         this.currentLang = 'de';
@@ -28,6 +30,7 @@ export class QALabState {
         this.dataUpdateHandler = null;
         this.rufusMessages = [];
         this.rufusThinking = false;
+        this.rufusMode = 'ai';
     }
 
     cleanup(): void {

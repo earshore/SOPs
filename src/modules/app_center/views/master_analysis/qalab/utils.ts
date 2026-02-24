@@ -12,7 +12,7 @@ const renderer = SafeRenderer.getInstance();
 /**
  * 显示Toast提示
  */
-export function showToast(type: 'success' | 'error' | 'info' | 'warning', title: string, desc?: string): void {
+export function showToast(type: 'success' | 'error' | 'info' | 'warning', title: string, desc?: string, duration: number = 3500): void {
     const container = document.getElementById('toastContainer');
     if (!container) return;
 
@@ -41,7 +41,7 @@ export function showToast(type: 'success' | 'error' | 'info' | 'warning', title:
         toast.style.transform = 'translateX(40px)';
         toast.style.transition = 'all .4s';
         setTimeout(() => toast.remove(), 400);
-    }, 3500);
+    }, duration);
 }
 
 /**

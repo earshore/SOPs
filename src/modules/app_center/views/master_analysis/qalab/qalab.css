@@ -275,3 +275,144 @@ footer a{color:var(--primary2);text-decoration:none}
 .rufus-input:focus{border-color:var(--primary)}
 .rufus-input::placeholder{color:var(--text3)}
 .rufus-tips{padding:12px 24px;background:rgba(245,158,11,.05);border-top:1px solid rgba(245,158,11,.1);display:flex;align-items:center;gap:8px}
+
+/* Rufus Mode Toggle - 开关样式 */
+.mode-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: var(--card);
+  user-select: none;
+}
+
+.mode-toggle:hover {
+  border-color: var(--primary);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.mode-toggle:active {
+  transform: translateY(0);
+}
+
+/* 模式标签 */
+.mode-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text3);
+  transition: all 0.3s ease;
+  font-size: 11px;
+}
+
+.mode-label i {
+  font-size: 12px;
+}
+
+.mode-label.active {
+  color: var(--text);
+  font-weight: 700;
+}
+
+/* AI 模式激活状态 */
+.mode-toggle.ai-mode .mode-label:first-child {
+  color: #7e22ce;
+  font-weight: 700;
+}
+
+.mode-toggle.ai-mode {
+  border-color: #a855f7;
+  background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+}
+
+.mode-toggle.ai-mode:hover {
+  border-color: #9333ea;
+  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.25);
+}
+
+/* 规则模式激活状态 */
+.mode-toggle.rule-mode .mode-label:last-child {
+  color: #0369a1;
+  font-weight: 700;
+}
+
+.mode-toggle.rule-mode {
+  border-color: #0ea5e9;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+}
+
+.mode-toggle.rule-mode:hover {
+  border-color: #0284c7;
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
+}
+
+/* 开关图标 */
+.mode-switch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.mode-toggle.ai-mode .mode-switch {
+  color: #a855f7;
+}
+
+.mode-toggle.rule-mode .mode-switch {
+  color: #0ea5e9;
+}
+
+.mode-toggle.ai-mode .mode-switch i {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Message Mode Badge */
+.message-mode-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.message-mode-badge.rule-mode {
+  background: rgba(14, 165, 233, 0.1);
+  color: #0369a1;
+  border: 1px solid rgba(14, 165, 233, 0.2);
+}
+
+.message-mode-badge.ai-mode {
+  background: rgba(168, 85, 247, 0.1);
+  color: #7e22ce;
+  border: 1px solid rgba(168, 85, 247, 0.2);
+  animation: glow 2s ease-in-out infinite;
+}
+
+/* AI Mode Thinking Animation */
+.rufus-message.thinking .message-mode-badge.ai-mode {
+  animation: glow 1s ease-in-out infinite, pulse 1.5s ease-in-out infinite;
+}
+
+/* Enhanced thinking message for AI mode */
+.rufus-message.thinking .message-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--primary2);
+  font-weight: 500;
+}
+
+.rufus-message.thinking .message-content i {
+  color: var(--primary);
+}
