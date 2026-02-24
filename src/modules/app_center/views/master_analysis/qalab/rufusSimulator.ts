@@ -244,73 +244,133 @@ export class RufusSimulator {
      * 构建用户提示词（包含报告上下文）
      */
     private buildUserPrompt(question: string): string {
+        console.log('[Rufus AI] 📝 开始构建用户提示词...');
+        console.log('[Rufus AI] - reportData 存在:', !!this.reportData);
+        
+        if (!this.reportData) {
+            console.warn('[Rufus AI] ⚠️ reportData 为空，返回基础提示词');
+            return `用户问题: ${question}\n\n请回答用户的问题。由于没有产品分析报告，请诚实地告知用户。`;
+        }
+        
         // 提取报告关键信息
-        const productTitle = this.reportData?.product_title || '未知产品';
-        const sellingPoints = this.reportData?.['selling-points']?.bullet_analysis || [];
-        const fatalFlaws = this.reportData?.['fatal-flaws']?.critical_issues || [];
-        const wowMoments = this.reportData?.['wow-moments']?.moments || [];
-        const hesitations = this.reportData?.['hesitation-points']?.hesitations || [];
-        const buyerProfile = this.reportData?.['buyer-profile']?.buyer_types || [];
+        const productTitle = this.reportData?.product_title || this.reportData?.title || '未知产品';
+        console.log('[Rufus AI] - 产品标题:', productTitle);
         
         // 构建简洁的报告摘要
         let reportSummary = `# 产品分析报告\n\n`;
         reportSummary += `产品: ${productTitle}\n\n`;
         
-        // 卖点（最多3个）
-        if (sellingPoints.length > 0) {
+        let hasData = false;
+        
+        // 从 results 格式的数据中提取信息
+        // AI Analysis 模块将数据存储为: { targetId, title, details: [...] }
+        
+        // 卖点
+        const sellingPointsData = this.reportData?.['selling-points'];
+        if (sellingPointsData?.details && Array.isArray(sellingPointsData.details)) {
+            console.log('[Rufus AI] ✅ 找到卖点数据:', sellingPointsData.details.length, '条');
             reportSummary += `## 主要卖点\n`;
-            sellingPoints.slice(0, 3).forEach((bullet: any, index: number) => {
-                reportSummary += `${index + 1}. ${bullet.original_text_summary}\n`;
-                if (bullet.functions && bullet.functions.length > 0) {
-                    reportSummary += `   功能: ${bullet.functions.join(', ')}\n`;
-                }
+            sellingPointsData.details.slice(0, 5).forEach((item: any, index: number) => {
+                reportSummary += `${index + 1}. ${item.text || item.content || item.description || JSON.stringify(item)}\n`;
             });
             reportSummary += `\n`;
+            hasData = true;
+        } else {
+            console.log('[Rufus AI] ⚠️ 未找到卖点数据');
         }
         
         // 致命缺陷
-        if (fatalFlaws.length > 0) {
+        const fatalFlawsData = this.reportData?.['fatal-flaws'];
+        if (fatalFlawsData?.details && Array.isArray(fatalFlawsData.details)) {
+            console.log('[Rufus AI] ✅ 找到致命缺陷数据:', fatalFlawsData.details.length, '条');
             reportSummary += `## 关键问题\n`;
-            fatalFlaws.forEach((flaw: any) => {
-                reportSummary += `- ${flaw.issue} (${flaw.frequency} 次报告, 严重程度: ${flaw.severity})\n`;
-                if (flaw.user_quotes && flaw.user_quotes.length > 0) {
-                    reportSummary += `  客户反馈: "${flaw.user_quotes[0]}"\n`;
-                }
+            fatalFlawsData.details.forEach((item: any) => {
+                reportSummary += `- ${item.text || item.content || item.description || JSON.stringify(item)}\n`;
             });
             reportSummary += `\n`;
+            hasData = true;
+        } else {
+            console.log('[Rufus AI] ⚠️ 未找到致命缺陷数据');
         }
         
         // Wow 时刻
-        if (wowMoments.length > 0) {
+        const wowMomentsData = this.reportData?.['wow-moments'];
+        if (wowMomentsData?.details && Array.isArray(wowMomentsData.details)) {
+            console.log('[Rufus AI] ✅ 找到 Wow 时刻数据:', wowMomentsData.details.length, '条');
             reportSummary += `## 惊喜时刻\n`;
-            wowMoments.forEach((wow: any) => {
-                reportSummary += `- ${wow.moment_description}\n`;
-                reportSummary += `  客户评价: "${wow.user_quote}"\n`;
+            wowMomentsData.details.forEach((item: any) => {
+                reportSummary += `- ${item.text || item.content || item.description || JSON.stringify(item)}\n`;
             });
             reportSummary += `\n`;
+            hasData = true;
+        } else {
+            console.log('[Rufus AI] ⚠️ 未找到 Wow 时刻数据');
         }
         
         // 犹豫点
-        if (hesitations.length > 0) {
+        const hesitationsData = this.reportData?.['hesitation-points'];
+        if (hesitationsData?.details && Array.isArray(hesitationsData.details)) {
+            console.log('[Rufus AI] ✅ 找到犹豫点数据:', hesitationsData.details.length, '条');
             reportSummary += `## 常见顾虑\n`;
-            hesitations.forEach((h: any) => {
-                reportSummary += `- 顾虑: ${h.pre_purchase_worry}\n`;
-                reportSummary += `  实际体验: ${h.post_purchase_resolution}\n`;
+            hesitationsData.details.forEach((item: any) => {
+                reportSummary += `- ${item.text || item.content || item.description || JSON.stringify(item)}\n`;
             });
             reportSummary += `\n`;
+            hasData = true;
+        } else {
+            console.log('[Rufus AI] ⚠️ 未找到犹豫点数据');
         }
         
         // 买家画像
-        if (buyerProfile.length > 0) {
+        const buyerProfileData = this.reportData?.['buyer-profile'];
+        if (buyerProfileData?.details && Array.isArray(buyerProfileData.details)) {
+            console.log('[Rufus AI] ✅ 找到买家画像数据:', buyerProfileData.details.length, '条');
             reportSummary += `## 典型买家\n`;
-            buyerProfile.forEach((buyer: any) => {
-                reportSummary += `- ${buyer.type} (${buyer.percentage_estimate}): ${buyer.motivation}\n`;
+            buyerProfileData.details.forEach((item: any) => {
+                reportSummary += `- ${item.text || item.content || item.description || JSON.stringify(item)}\n`;
             });
             reportSummary += `\n`;
+            hasData = true;
+        } else {
+            console.log('[Rufus AI] ⚠️ 未找到买家画像数据');
+        }
+        
+        // 如果没有找到任何数据，尝试使用 highlights
+        if (!hasData) {
+            console.log('[Rufus AI] ⚠️ 未找到 details 数据，尝试使用 highlights...');
+            
+            const allFields = ['selling-points', 'fatal-flaws', 'wow-moments', 'hesitation-points', 'buyer-profile'];
+            allFields.forEach(field => {
+                const fieldData = this.reportData?.[field];
+                if (fieldData?.highlights && Array.isArray(fieldData.highlights)) {
+                    console.log(`[Rufus AI] ✅ 找到 ${field} 的 highlights:`, fieldData.highlights.length, '条');
+                    reportSummary += `## ${fieldData.title || field}\n`;
+                    fieldData.highlights.forEach((item: any) => {
+                        reportSummary += `- ${item.text || JSON.stringify(item)}\n`;
+                    });
+                    reportSummary += `\n`;
+                    hasData = true;
+                }
+            });
+        }
+        
+        // 如果还是没有数据，记录完整的 reportData 结构
+        if (!hasData) {
+            console.warn('[Rufus AI] ⚠️ 未找到任何可用的分析数据');
+            console.warn('[Rufus AI] 📋 reportData 字段:', Object.keys(this.reportData));
+            console.warn('[Rufus AI] 📄 reportData 完整结构:', JSON.stringify(this.reportData, null, 2).substring(0, 500));
+            
+            reportSummary += `\n⚠️ 注意: 当前报告数据不完整，可能无法提供详细的产品分析。\n\n`;
+        } else {
+            console.log('[Rufus AI] ✅ 报告摘要构建完成，长度:', reportSummary.length, '字符');
         }
         
         // 组合最终提示词
-        return `${reportSummary}\n---\n\n用户问题: ${question}\n\n请基于以上产品分析报告，用德语回答用户的问题。回答要专业、友好、基于事实。`;
+        const finalPrompt = `${reportSummary}\n---\n\n用户问题: ${question}\n\n请基于以上产品分析报告，用德语回答用户的问题。回答要专业、友好、基于事实。如果报告中没有相关信息，请诚实地告知用户。`;
+        
+        console.log('[Rufus AI] ✅ 最终提示词长度:', finalPrompt.length, '字符');
+        
+        return finalPrompt;
     }
     
     /**
