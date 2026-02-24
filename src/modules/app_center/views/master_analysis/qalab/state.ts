@@ -14,6 +14,10 @@ export class QALabState {
     registeredActions: string[] = [];
     dataUpdateHandler: (() => void) | null = null;
     eventManager: EventManager = new EventManager();
+    
+    // Rufus AI 模拟器状态
+    rufusMessages: Array<{ role: 'user' | 'assistant'; content: string; timestamp: number }> = [];
+    rufusThinking: boolean = false;
 
     reset(): void {
         this.currentLang = 'de';
@@ -22,6 +26,8 @@ export class QALabState {
         this.reportData = null;
         this.generatedQAs = [];
         this.dataUpdateHandler = null;
+        this.rufusMessages = [];
+        this.rufusThinking = false;
     }
 
     cleanup(): void {

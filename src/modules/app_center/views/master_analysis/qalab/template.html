@@ -148,6 +148,60 @@
     </div>
   </section>
 
+  <!-- Rufus AI Simulator Section -->
+  <section class="rufus-simulator-section animate-fade-in-up delay-400" id="rufusSimulatorSection">
+    <div class="section-title">
+      <i class="fa-solid fa-robot"></i> Rufus AI 问答模拟器
+      <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-sm">
+        <i class="fa-solid fa-sparkles mr-1 text-[8px]"></i>BETA
+      </span>
+    </div>
+    
+    <div class="rufus-simulator-card">
+      <div class="rufus-simulator-header">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
+            <i class="fa-solid fa-robot text-white text-sm"></i>
+          </div>
+          <div>
+            <div class="font-semibold text-slate-800">Rufus AI 助手</div>
+            <div class="text-xs text-slate-500">基于报告内容智能回答</div>
+          </div>
+        </div>
+        <button class="btn btn-secondary btn-sm" data-action="amz_qalab_clearRufusChat">
+          <i class="fa-solid fa-trash"></i> 清空对话
+        </button>
+      </div>
+      
+      <div class="rufus-messages-container" id="rufusMessages">
+        <div class="text-center text-gray-500 py-8">
+          <i class="fa-solid fa-comments text-4xl mb-3 opacity-50"></i>
+          <p>还没有对话记录</p>
+          <p class="text-sm mt-1">向 Rufus AI 提问，获取基于报告的智能回答</p>
+        </div>
+      </div>
+      
+      <div class="rufus-input-container">
+        <textarea 
+          class="rufus-input" 
+          id="rufusInput" 
+          placeholder="向 Rufus AI 提问...（例如：这个产品的香味持久吗？）&#10;按 Enter 发送，Shift+Enter 换行"
+          rows="2"
+        ></textarea>
+        <button class="btn btn-primary" data-action="amz_qalab_sendRufusQuestion">
+          <i class="fa-solid fa-paper-plane"></i> 发送
+        </button>
+      </div>
+      
+      <div class="rufus-tips">
+        <i class="fa-solid fa-lightbulb text-amber-500"></i>
+        <span class="text-xs text-slate-500">
+          提示：Rufus AI 会基于当前加载的分析报告内容生成回答，回答完全仿真 Amazon Rufus 的风格和逻辑
+        </span>
+      </div>
+    </div>
+  </section>
+
   <footer>
     <p>Rufus Q&A 智能预研系统 · 基于竞品多维分析驱动 · 适用于 Amazon EU 全站点 · Built with <i class="fa-solid fa-heart" style="color:var(--danger);margin:0 2px"></i></p>
   </footer>

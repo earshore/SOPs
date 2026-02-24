@@ -3,12 +3,74 @@
  * 使用新架构：SafeRenderer 进行安全渲染
  */
 
+import state from '../../../../../common/state';
 import { SAMPLE_JSON } from './sampleData';
 import { generateMultiLangQAs } from './qaData';
 import { qalabState } from './state';
 import { LANGUAGES, CATEGORIES, MARKET_LANG_MAP } from './constants';
 import { showToast, downloadFile } from './utils';
 import { renderResults, renderLangSelector, renderQAGrid } from './render';
+import { rufusSimulator } from './rufusSimulator';
+
+/**
+ * 自动加载分析报告
+ * 从全局状态中检测并加载分析报告到输入框
+ */
+export function autoLoadAnalysisReport(): void {
+    const analysisReport = state.analysis?.analysisReport;
+    
+    if (!analysisReport) {
+        console.log('[QALab] 未检测到分析报告');
+        return;
+    }
+    
+    const input = document.getElementById('jsonInput') as HTMLTextAreaElement;
+    if (!input) {
+        console.log('[QALab] 输入框未就绪');
+        return;
+    }
+    
+    try {
+        // 处理不同格式的报告数据
+        let reportJSON: string;
+        
+        if (typeof analysisReport === 'string') {
+            reportJSON = analysisReport;
+        } else {
+            // 转换为与 Promptlab 一致的格式
+            const reportObj = analysisReport as any;
+            const results = reportObj.results;
+            const firstResult = results && Array.isArray(results) && results.length > 0 ? results[0] : null;
+            
+            const formattedReport = {
+                metadata: {
+                    asins: firstResult?.asin?.split(', ') || [],
+                    marketplace: reportObj.marketplace || 'DE'
+                },
+                analysisReport: firstResult || reportObj
+            };
+            reportJSON = JSON.stringify(formattedReport, null, 2);
+        }
+        
+        // 检查是否与当前内容相同，避免重复加载
+        if (input.value.trim() === reportJSON.trim()) {
+            console.log('[QALab] 报告已加载，跳过重复加载');
+            return;
+        }
+        
+        input.value = reportJSON;
+        qalabState.reportData = JSON.parse(reportJSON);
+        
+        // 显示加载提示
+        const reportSource = qalabState.reportData?.metadata?.asins?.join(', ') || '未知';
+        showToast('success', '分析报告已自动加载', `来源: ${reportSource}`);
+        
+        console.log('[QALab] 分析报告已自动加载');
+    } catch (error) {
+        console.error('[QALab] 加载分析报告失败:', error);
+        showToast('error', '报告加载失败', '数据格式可能不正确');
+    }
+}
 
 /**
  * 加载示例数据
@@ -122,6 +184,9 @@ export async function startAnalysis(): Promise<void> {
 
     if (progressSection) progressSection.classList.remove('active');
     if (inputSection) inputSection.style.opacity = '1';
+    
+    // 初始化 Rufus 模拟器
+    rufusSimulator.initialize(qalabState.reportData);
     
     renderResults(toggleQA, copyQA, editQA, switchLang, switchCategory);
     
@@ -312,4 +377,148 @@ export function copyQA(id: number, btnElement: HTMLElement): void {
  */
 export function editQA(_id: number): void {
     showToast('info', '编辑功能', '此功能将在后续版本中提供');
+}
+
+/**
+ * Rufus AI 模拟器 - 发送问题
+ */
+export async function sendRufusQuestion(question: string): Promise<void> {
+    if (!question.trim()) {
+        showToast('error', '请输入问题', '');
+        return;
+    }
+    
+    // 添加用户消息
+    qalabState.rufusMessages.push({
+        role: 'user',
+        content: question,
+        timestamp: Date.now()
+    });
+    
+    // 更新UI显示用户消息
+    renderRufusMessages();
+    
+    // 清空输入框
+    const input = document.getElementById('rufusInput') as HTMLTextAreaElement;
+    if (input) {
+        input.value = '';
+    }
+    
+    // 显示思考状态
+    qalabState.rufusThinking = true;
+    renderRufusThinking();
+    
+    try {
+        // 初始化模拟器
+        if (qalabState.reportData) {
+            rufusSimulator.initialize(qalabState.reportData);
+        }
+        
+        // 模拟思考延迟（500-1500ms）
+        const thinkingDelay = 500 + Math.random() * 1000;
+        await new Promise(resolve => setTimeout(resolve, thinkingDelay));
+        
+        // 生成回答
+        const answer = await rufusSimulator.generateAnswer(question);
+        
+        // 添加助手消息
+        qalabState.rufusMessages.push({
+            role: 'assistant',
+            content: answer,
+            timestamp: Date.now()
+        });
+        
+        qalabState.rufusThinking = false;
+        renderRufusMessages();
+        
+    } catch (error) {
+        console.error('[QALab] Rufus 回答生成失败:', error);
+        qalabState.rufusThinking = false;
+        showToast('error', '回答生成失败', '请稍后重试');
+    }
+}
+
+/**
+ * 清空 Rufus 对话历史
+ */
+export function clearRufusChat(): void {
+    qalabState.rufusMessages = [];
+    renderRufusMessages();
+    showToast('success', '对话已清空', '');
+}
+
+/**
+ * 渲染 Rufus 消息列表
+ */
+function renderRufusMessages(): void {
+    const container = document.getElementById('rufusMessages');
+    if (!container) return;
+    
+    if (qalabState.rufusMessages.length === 0) {
+        container.innerHTML = `
+            <div class="text-center text-gray-500 py-8">
+                <i class="fa-solid fa-comments text-4xl mb-3 opacity-50"></i>
+                <p>还没有对话记录</p>
+                <p class="text-sm mt-1">向 Rufus AI 提问，获取基于报告的智能回答</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = qalabState.rufusMessages.map(msg => {
+        const isUser = msg.role === 'user';
+        const time = new Date(msg.timestamp).toLocaleTimeString('zh-CN', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+        });
+        
+        return `
+            <div class="rufus-message ${isUser ? 'user' : 'assistant'}">
+                <div class="message-header">
+                    <span class="message-role">
+                        <i class="fa-solid fa-${isUser ? 'user' : 'robot'}"></i>
+                        ${isUser ? '您' : 'Rufus AI'}
+                    </span>
+                    <span class="message-time">${time}</span>
+                </div>
+                <div class="message-content">${msg.content.replace(/\n/g, '<br>')}</div>
+            </div>
+        `;
+    }).join('');
+    
+    // 滚动到底部
+    container.scrollTop = container.scrollHeight;
+}
+
+/**
+ * 渲染 Rufus 思考状态
+ */
+function renderRufusThinking(): void {
+    const container = document.getElementById('rufusMessages');
+    if (!container) return;
+    
+    if (qalabState.rufusThinking) {
+        const thinkingDiv = document.createElement('div');
+        thinkingDiv.id = 'rufusThinking';
+        thinkingDiv.className = 'rufus-message assistant thinking';
+        thinkingDiv.innerHTML = `
+            <div class="message-header">
+                <span class="message-role">
+                    <i class="fa-solid fa-robot"></i>
+                    Rufus AI
+                </span>
+            </div>
+            <div class="message-content">
+                <i class="fa-solid fa-circle-notch fa-spin"></i>
+                正在思考...
+            </div>
+        `;
+        container.appendChild(thinkingDiv);
+        container.scrollTop = container.scrollHeight;
+    } else {
+        const thinkingDiv = document.getElementById('rufusThinking');
+        if (thinkingDiv) {
+            thinkingDiv.remove();
+        }
+    }
 }

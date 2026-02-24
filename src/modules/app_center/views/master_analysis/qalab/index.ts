@@ -12,7 +12,6 @@
 
 import { SafeModuleLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
-import state from "../../../../../common/state";
 import { registerActionsWithLegacy, unregisterActions } from '../../../../../common/utils/actionRegistry';
 import { MODULE_EVENTS } from '../../../../../common/constants/eventConstants';
 import eventBus from '../../../../../common/EventBus';
@@ -25,7 +24,10 @@ import {
     toggleExpandAll,
     exportJSON,
     exportCSV,
-    exportText
+    exportText,
+    autoLoadAnalysisReport,
+    sendRufusQuestion,
+    clearRufusChat
 } from './actions';
 
 import './qalab.css';
@@ -64,7 +66,14 @@ export async function mount(container: HTMLElement): Promise<void> {
             amz_qalab_toggleExpandAll: () => toggleExpandAll(),
             amz_qalab_exportJSON: () => exportJSON(),
             amz_qalab_exportCSV: () => exportCSV(),
-            amz_qalab_exportText: () => exportText()
+            amz_qalab_exportText: () => exportText(),
+            amz_qalab_sendRufusQuestion: () => {
+                const input = document.getElementById('rufusInput') as HTMLTextAreaElement;
+                if (input && input.value.trim()) {
+                    sendRufusQuestion(input.value.trim());
+                }
+            },
+            amz_qalab_clearRufusChat: () => clearRufusChat()
         });
         
         qalabState.registeredActions = actionNames;
@@ -84,17 +93,30 @@ export async function mount(container: HTMLElement): Promise<void> {
                 }
             }
         }) as EventListener);
-
-        // 4. 监听数据更新事件
-        qalabState.dataUpdateHandler = () => {
-            console.log('[QALab] 检测到数据更新');
-            const input = document.getElementById('jsonInput') as HTMLTextAreaElement;
-            if (input && state.analysis?.analysisReport) {
-                console.log('[QALab] 检测到新的分析报告');
+        
+        // 监听 Rufus 输入框的回车键
+        qalabState.eventManager.addEventListener(container, 'keydown', ((e: KeyboardEvent) => {
+            const target = e.target as HTMLElement;
+            if (target.id === 'rufusInput' && e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                const input = target as HTMLTextAreaElement;
+                if (input.value.trim()) {
+                    sendRufusQuestion(input.value.trim());
+                }
             }
+        }) as EventListener);
+
+        // 4. 监听数据更新事件 - 自动加载分析报告
+        qalabState.dataUpdateHandler = () => {
+            console.log('[QALab] 检测到数据更新事件');
+            autoLoadAnalysisReport();
         };
         
         eventBus.on(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, qalabState.dataUpdateHandler);
+        eventBus.on(MODULE_EVENTS.ANALYSIS.ANALYZE_SUCCESS, qalabState.dataUpdateHandler);
+        
+        // 5. 模块挂载时检查是否有现有报告
+        autoLoadAnalysisReport();
 
         console.log('[QALab] ✅ 子模块挂载成功');
     } catch (error) {
@@ -113,6 +135,7 @@ export function unmount(): void {
         // 1. 清理 EventBus 监听器
         if (qalabState.dataUpdateHandler) {
             eventBus.off(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, qalabState.dataUpdateHandler);
+            eventBus.off(MODULE_EVENTS.ANALYSIS.ANALYZE_SUCCESS, qalabState.dataUpdateHandler);
         }
 
         // 2. 清理注册的动作

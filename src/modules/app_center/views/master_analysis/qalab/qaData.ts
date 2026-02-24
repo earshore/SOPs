@@ -17,11 +17,74 @@ export interface QA {
 }
 
 /**
- * 生成多语言Q&A数据
- * 基于分析报告生成15个常见问题及答案
+ * 从报告中提取关键信息
  */
-export function generateMultiLangQAs(_report: any): QA[] {
+function extractReportInsights(report: any): any {
+    const analysisReport = report?.analysisReport || report;
+    
+    return {
+        productTitle: analysisReport?.product_title || '产品',
+        market: analysisReport?.market || report?.metadata?.marketplace || 'DE',
+        sellingPoints: analysisReport?.['selling-points'] || {},
+        fatalFlaws: analysisReport?.['fatal-flaws'] || {},
+        wowMoments: analysisReport?.['wow-moments'] || {},
+        hesitationPoints: analysisReport?.['hesitation-points'] || {},
+        buyerProfile: analysisReport?.['buyer-profile'] || {}
+    };
+}
+
+/**
+ * 基于报告内容智能生成 Q&A 答案
+ * 预留接口，未来可扩展更多智能生成逻辑
+ * @internal
+ */
+/*
+function generateSmartAnswer(insights: any, questionType: string, lang: string): string {
+    const { sellingPoints, fatalFlaws } = insights;
+    
+    // 根据问题类型和报告内容生成答案
+    switch (questionType) {
+        case 'longevity': {
+            const flaws = fatalFlaws?.critical_issues?.filter((issue: any) => 
+                issue.issue?.toLowerCase().includes('longevity') || 
+                issue.issue?.toLowerCase().includes('disappear')
+            ) || [];
+            
+            if (flaws.length > 0 && lang === 'de') {
+                return `Transparenzhinweis: Einige Kunden berichten, dass der Duft schneller verfliegt als erwartet. Die Erfahrungen variieren jedoch stark.\n\n⚠️ Kritische Rückmeldungen:\n${flaws.map((f: any) => `• ${f.user_quotes?.[0] || f.issue}`).join('\n')}\n\n💡 Empfehlung: Testen Sie das Produkt und nutzen Sie ggf. das Rückgaberecht, falls die Haltbarkeit nicht Ihren Erwartungen entspricht.`;
+            }
+            break;
+        }
+        
+        case 'value': {
+            const bulletAnalysis = sellingPoints?.bullet_analysis || [];
+            if (bulletAnalysis.length > 0 && lang === 'de') {
+                return `Das Preis-Leistungs-Verhältnis wird positiv bewertet:\n\n${bulletAnalysis.map((b: any) => `• ${b.original_text_summary}`).slice(0, 3).join('\n') || ''}`;
+            }
+            break;
+        }
+    }
+    
+    return '';
+}
+*/
+
+/**
+ * 生成多语言Q&A数据
+ * 基于分析报告智能生成问题和答案
+ */
+export function generateMultiLangQAs(report: any): QA[] {
     const qas: QA[] = [];
+    const insights = extractReportInsights(report);
+    
+    // 检查是否有有效的报告数据
+    const hasValidReport = insights.sellingPoints?.bullet_analysis || 
+                          insights.fatalFlaws?.critical_issues ||
+                          insights.wowMoments?.moments;
+    
+    if (!hasValidReport) {
+        console.warn('[QALab] 报告数据不完整，使用默认模板');
+    }
 
     // Q1: Longevity (持久度)
     qas.push({
