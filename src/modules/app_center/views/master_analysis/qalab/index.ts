@@ -19,7 +19,6 @@ import eventBus from '../../../../../common/EventBus';
 import { qalabState } from './state';
 import {
     startAnalysis,
-    loadSample,
     clearInput,
     toggleExpandAll,
     exportJSON,
@@ -78,7 +77,6 @@ export async function mount(container: HTMLElement): Promise<void> {
         console.log('[QALab] 🔧 开始注册全局操作...');
         const actionNames = registerActionsWithLegacy({
             amz_qalab_startAnalysis: () => startAnalysis(),
-            amz_qalab_loadSample: () => loadSample(),
             amz_qalab_clearInput: () => clearInput(),
             amz_qalab_toggleExpandAll: () => toggleExpandAll(),
             amz_qalab_exportJSON: () => exportJSON(),

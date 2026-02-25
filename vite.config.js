@@ -37,7 +37,7 @@ export default defineConfig({
     // 开发服务器配置
     server: {
         port: 5173,
-        open: true,
+        open: false,
         cors: true,
         // 代理配置 - 解决开发环境 CORS 问题
         proxy: {

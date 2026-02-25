@@ -4,7 +4,6 @@
  */
 
 import state from '../../../../../common/state';
-import { SAMPLE_JSON } from './sampleData';
 import { generateMultiLangQAs } from './qaData';
 import { qalabState } from './state';
 import { LANGUAGES, CATEGORIES, MARKET_LANG_MAP } from './constants';
@@ -261,16 +260,7 @@ export function autoLoadAnalysisReport(): void {
     }
 }
 
-/**
- * 加载示例数据
- */
-export function loadSample(): void {
-    const input = document.getElementById('jsonInput') as HTMLTextAreaElement;
-    if (input) {
-        input.value = SAMPLE_JSON;
-        showToast('success', '示例数据已加载', '点击「智能分析」开始生成 Q&A');
-    }
-}
+
 
 /**
  * 清空输入
