@@ -6,9 +6,7 @@ import { callLLM, type ChatMessage } from '../../../../../../services/llmService
 import { StorageService, STORAGE_KEYS } from '../../../../../../services/storageService';
 import { configCenter } from '../../../../../../common/config/ConfigCenter';
 import type { FullAnalysisReport } from '../config/analysisReportData';
-import { parseAnalysisReport } from './analysisService';
 import type { Product } from '../config/sampleData';
-import type { AnalysisResult } from '../types';
 import { generateAnalysisPrompt } from '../prompts/analysisPrompts';
 
 /**
@@ -111,21 +109,16 @@ async function analyzeTarget(
 
 /**
  * 执行完整的 AI 分析
- * @returns 返回包含结果数组和完整报告的对象
+ * @returns 返回完整的原始报告
  */
 export async function runAIAnalysis(
   targetIds: string[],
   product: Product,
   onProgress: (progress: number, step: string) => void,
   language: string = 'en'
-): Promise<{ results: AnalysisResult[]; report: FullAnalysisReport }> {
+): Promise<FullAnalysisReport> {
   const config = await getLLMConfig();
-  const report: Partial<FullAnalysisReport> = {
-    asin: product.asin,
-    product_title: product.productTitle,
-    analysis_timestamp: new Date().toISOString(),
-    market: 'US'
-  };
+  const report: Partial<FullAnalysisReport> = {};
 
   const totalTargets = targetIds.length;
   let completedTargets = 0;
@@ -183,14 +176,8 @@ export async function runAIAnalysis(
 
   onProgress(100, '分析完成!');
 
-  // 解析报告为展示格式
-  const results = parseAnalysisReport(report as FullAnalysisReport, targetIds);
-  
-  // 返回结果数组和完整报告
-  return {
-    results,
-    report: report as FullAnalysisReport
-  };
+  // 返回完整的原始报告
+  return report as FullAnalysisReport;
 }
 
 /**

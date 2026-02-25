@@ -6,15 +6,16 @@
 import { showToast } from '@common/ui/index';
 import { analysisTargets } from '../config/analysisTargets';
 import { generateAnalysisPrompt } from '../prompts/analysisPrompts';
-import { runAnalysis, getSampleReport } from '../services/analysisService';
+import { runAnalysis, getSampleReport, parseAnalysisReport } from '../services/analysisService';
 import { runAIAnalysis } from '../services/aiAnalysisService';
 import { generateMarkdownReport, generateJsonReportData } from '../services/reportGenerator';
 import { mergeProducts, getProductsByAsins } from '../utils/dataTransformers';
 import { getMarketLanguage } from './helpers';
 import { Product } from '../config/sampleData';
-import { AlpineContext, AnalysisResult } from '../types';
+import { AlpineContext } from '../types';
 import { ModuleState } from '../state/moduleState';
 import state from '@common/state';
+import type { FullAnalysisReport } from '../config/analysisReportData';
 
 /**
  * 切换 ASIN 选择
@@ -106,10 +107,10 @@ export function toggleDataSource(context: AlpineContext, moduleState: ModuleStat
   moduleState.useRealData = context.useRealData;
   
   // 清空之前的结果
-  context.results = [];
   context.analysisReport = null;
-  moduleState.results = [];
+  context.hasReport = false;
   moduleState.analysisReport = null;
+  moduleState.hasReport = false;
   
   showToast(
     context.useRealData ? '已切换到真实数据分析模式' : '已切换到示例数据模式',
@@ -148,7 +149,6 @@ export function copyJson(context: AlpineContext, dataSourceMarketplace: string):
   if (!context.analysisReport) return;
 
   const reportData = generateJsonReportData(
-    context.results,
     context.selectedAsins,
     context.selectedTargets,
     context.dataSource,
@@ -172,13 +172,19 @@ export function copyMarkdown(
   dataSourceMarketplace: string,
   dataSourceLabel: string
 ): void {
-  if (context.results.length === 0) {
+  if (!context.analysisReport) {
     showToast('没有可复制的报告', 'warning');
     return;
   }
 
+  // 实时解析报告为展示格式
+  const results = parseAnalysisReport(
+    context.analysisReport as FullAnalysisReport,
+    context.selectedTargets
+  );
+
   const markdown = generateMarkdownReport(
-    context.results,
+    results,
     context.selectedAsins,
     dataSourceMarketplace,
     dataSourceLabel
@@ -195,13 +201,12 @@ export function copyMarkdown(
  * 下载 JSON 报告
  */
 export function downloadJson(context: AlpineContext, dataSourceMarketplace: string): void {
-  if (context.results.length === 0) {
+  if (!context.analysisReport) {
     showToast('没有可下载的报告', 'warning');
     return;
   }
 
   const reportData = generateJsonReportData(
-    context.results,
     context.selectedAsins,
     context.selectedTargets,
     context.dataSource,
@@ -233,7 +238,6 @@ export async function runAnalysisAction(context: AlpineContext, moduleState: Mod
 
   context.isAnalyzing = true;
   context.progress = 0;
-  context.results = [];
   syncToModuleState(context, moduleState);
   
   console.log('[用户动作] 开始分析:', {
@@ -243,7 +247,7 @@ export async function runAnalysisAction(context: AlpineContext, moduleState: Mod
   });
 
   try {
-    let results: AnalysisResult[];
+    let analysisReport: FullAnalysisReport;
 
     if (context.useRealData) {
       // 使用真实数据进行 AI 分析
@@ -261,7 +265,7 @@ export async function runAnalysisAction(context: AlpineContext, moduleState: Mod
       // 获取正确的语言代码
       const language = getMarketLanguage();
 
-      const analysisResult = await runAIAnalysis(
+      analysisReport = await runAIAnalysis(
         context.selectedTargets,
         mergedProduct,
         (progress: number, step: string) => {
@@ -271,13 +275,9 @@ export async function runAnalysisAction(context: AlpineContext, moduleState: Mod
         },
         language
       );
-
-      // 保存完整的分析报告和结果
-      results = analysisResult.results;
-      context.analysisReport = analysisResult.report;
     } else {
       // 使用示例数据进行模拟分析
-      results = await runAnalysis(
+      await runAnalysis(
         context.selectedTargets,
         context.selectedAsins[0] || 'B0DNMZ2MLG',
         (progress: number, step: string) => {
@@ -287,39 +287,34 @@ export async function runAnalysisAction(context: AlpineContext, moduleState: Mod
         }
       );
 
-      context.analysisReport = getSampleReport();
+      analysisReport = getSampleReport();
     }
 
-    // 直接赋值，让 Alpine.js 追踪新数组
-    context.results = results;
-    // analysisReport 已在上面的 if/else 中设置
-    syncToModuleState(context, moduleState);
+    // 保存原始报告并设置显示标志
+    context.analysisReport = analysisReport;
+    context.hasReport = true;
     
-    console.log('[用户动作] 分析结果已设置:', {
-      resultsLength: context.results.length,
-      results: context.results
-    });
+    console.log('[用户动作] 分析报告已设置，selectedTargets:', context.selectedTargets.length);
+    console.log('[用户动作] analysisReport 已保存:', !!context.analysisReport);
+    console.log('[用户动作] hasReport 标志已设置:', context.hasReport);
+    
+    // 同步到模块状态
+    syncToModuleState(context, moduleState);
 
     // 将分析报告加载到全局状态
     const scrapedData = state.scraper?.scrapedData;
     const marketplace = scrapedData?.metadata?.marketplace || 'US';
     
-    const reportData = {
-      results: results,
-      targets: context.selectedTargets,
-      timestamp: new Date().toISOString(),
-      dataSource: context.dataSource,
-      marketplace: marketplace
-    };
-    state.analysis.analysisReport = reportData;
+    // 使用类型断言，因为 state.analysis.analysisReport 接受多种格式
+    state.analysis.analysisReport = analysisReport as any;
     console.log('[用户动作] 已将分析报告加载到全局状态，marketplace:', marketplace);
 
     // 分析成功后自动更新历史快照的分析状态
-    if (results.length > 0 && state.scraper?.currentHistoryId) {
+    if (analysisReport && state.scraper?.currentHistoryId) {
       const { HistoryService } = await import('../../services/historyService');
       const success = HistoryService.updateAnalysisStatus(
         state.scraper.currentHistoryId,
-        reportData
+        analysisReport as any
       );
       
       if (success) {
@@ -329,7 +324,7 @@ export async function runAnalysisAction(context: AlpineContext, moduleState: Mod
       }
     }
 
-    showToast(`分析完成！生成了 ${results.length} 个洞察报告`, 'success');
+    showToast(`分析完成！`, 'success');
   } catch (error) {
     console.error('[用户动作] 分析失败:', error);
     showToast(`分析失败: ${(error as Error).message}`, 'error');
@@ -356,6 +351,6 @@ function syncToModuleState(context: AlpineContext, moduleState: ModuleState): vo
   moduleState.isAnalyzing = context.isAnalyzing;
   moduleState.progress = context.progress;
   moduleState.currentStep = context.currentStep;
-  moduleState.results = context.results;
   moduleState.analysisReport = context.analysisReport;
+  moduleState.hasReport = context.hasReport;
 }

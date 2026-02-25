@@ -54,92 +54,12 @@ export function autoLoadAnalysisReport(): void {
             console.log('[QALab] 📄 报告格式: 对象');
             const reportObj = analysisReport as any;
             
-            // 检查是否是 AI Analysis 模块的格式（包含 results 数组和 marketplace）
-            if (reportObj.results && Array.isArray(reportObj.results) && reportObj.marketplace) {
-                console.log('[QALab] 🔍 检测到 AI Analysis 格式');
-                console.log('[QALab] - marketplace:', reportObj.marketplace);
-                console.log('[QALab] - results 数组长度:', reportObj.results.length);
-                console.log('[QALab] - targets:', reportObj.targets);
-                
-                // AI Analysis 格式说明:
-                // - results 数组包含所有分析结果的卡片数据
-                // - 每个 result 对应一个分析维度(title-keywords, selling-points 等)
-                // - 需要将 results 数组转换为标准的 FullAnalysisReport 格式
-                
-                // 构建完整的 FullAnalysisReport 格式
-                const fullReport: any = {
-                    marketplace: reportObj.marketplace,
-                    asin: reportObj.asin || '',
-                    product_title: reportObj.product_title || reportObj.productTitle || ''
-                };
-                
-                // 从 results 数组中提取所有分析字段
-                console.log('[QALab] 📊 开始从 results 数组提取分析字段...');
-                let foundFieldsCount = 0;
-                
-                reportObj.results.forEach((result: any, index: number) => {
-                    if (result.targetId) {
-                        console.log(`[QALab] - 处理 result[${index}]: ${result.targetId}`);
-                        
-                        // 将整个 result 对象存储到对应的字段
-                        fullReport[result.targetId] = result;
-                        foundFieldsCount++;
-                        
-                        // 显示该字段的详细信息
-                        if (result.details && Array.isArray(result.details)) {
-                            console.log(`[QALab]   ✅ ${result.targetId}: ${result.details.length} 条详细数据`);
-                        } else if (result.highlights && Array.isArray(result.highlights)) {
-                            console.log(`[QALab]   ✅ ${result.targetId}: ${result.highlights.length} 条高亮数据`);
-                        } else {
-                            console.log(`[QALab]   ✅ ${result.targetId}: 已加载`);
-                        }
-                    }
-                });
-                
-                console.log('[QALab] ✅ 从 results 数组提取了', foundFieldsCount, '个分析字段');
-                
-                // 如果 results 数组为空，尝试从根级别提取
-                if (foundFieldsCount === 0) {
-                    console.log('[QALab] ⚠️ results 数组为空，尝试从根级别提取...');
-                    const analysisFields = [
-                        'title-keywords',
-                        'selling-points',
-                        'fatal-flaws',
-                        'wow-moments',
-                        'hesitation-points',
-                        'buyer-profile',
-                        'competitive-moats',
-                        'market-fit'
-                    ];
-                    
-                    analysisFields.forEach(field => {
-                        if (reportObj[field]) {
-                            fullReport[field] = reportObj[field];
-                            foundFieldsCount++;
-                            console.log('[QALab] ✅ 从根级别找到字段:', field);
-                        }
-                    });
-                    
-                    if (foundFieldsCount === 0) {
-                        console.warn('[QALab] ⚠️ 未找到任何分析字段');
-                        console.warn('[QALab] 💡 建议: 请在 AI Analysis 页面重新运行完整分析');
-                    }
-                }
-                
-                reportData = {
-                    metadata: {
-                        asins: fullReport.asin ? [fullReport.asin] : [],
-                        marketplace: fullReport.marketplace
-                    },
-                    analysisReport: fullReport
-                };
-            }
-            // 检查是否已经是标准格式
-            else if (reportObj.metadata && reportObj.analysisReport) {
-                console.log('[QALab] 📦 已经是标准格式');
+            // 检查是否已经是标准格式（包含 metadata 和 analysisReport）
+            if (reportObj.metadata && reportObj.analysisReport) {
+                console.log('[QALab] 📦 标准 FullReportData 格式');
                 reportData = reportObj;
             }
-            // 检查是否是单个 FullAnalysisReport
+            // 检查是否是单个 FullAnalysisReport（包含分析字段）
             else if (reportObj.asin || reportObj.product_title || reportObj['selling-points']) {
                 console.log('[QALab] 📦 单个 FullAnalysisReport 格式');
                 reportData = {
@@ -150,7 +70,7 @@ export function autoLoadAnalysisReport(): void {
                     analysisReport: reportObj
                 };
             }
-            // 其他格式
+            // 其他格式，尝试包装
             else {
                 console.log('[QALab] ⚠️ 未知格式，尝试包装');
                 console.log('[QALab] - 可用字段:', Object.keys(reportObj));

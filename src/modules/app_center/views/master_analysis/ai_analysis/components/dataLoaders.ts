@@ -51,15 +51,26 @@ export function checkLoadedReport(context: AlpineContext, moduleState: ModuleSta
     return;
   }
   
-  // 检测报告格式：AI智能分析的新格式
+  // 检测报告格式：标准 FullAnalysisReport 格式
+  // 检查是否包含任何分析目标字段
   const reportObj = report as Record<string, unknown>;
-  if (reportObj.results && Array.isArray(reportObj.results)) {
-    console.log('[数据加载] 检测到已加载的"AI智能分析"报告');
+  const hasAnalysisData = [
+    'title-keywords',
+    'selling-points',
+    'fatal-flaws',
+    'wow-moments',
+    'hesitation-points',
+    'buyer-profile',
+    'vocab-gap',
+    'promise-reality'
+  ].some(key => reportObj[key]);
+  
+  if (hasAnalysisData) {
+    console.log('[数据加载] 检测到已加载的分析报告');
     
     // 加载报告数据到当前组件
-    context.results = reportObj.results as typeof context.results;
-    context.selectedTargets = (reportObj.targets as string[]) || [];
     context.analysisReport = reportObj;
+    context.hasReport = true;
     
     // 同步到模块状态
     syncToModuleState(context, moduleState);
@@ -83,12 +94,9 @@ export function loadHistoricalReport(
       return;
     }
 
-    const reportData = detail.report as Record<string, unknown>;
-    
-    // 加载历史报告数据
-    context.results = (reportData.results as typeof context.results) || [];
-    context.selectedTargets = (reportData.targets as string[]) || [];
+    // 加载历史报告数据（只保存原始报告）
     context.analysisReport = detail.report;
+    context.hasReport = true;
     
     // 同步到模块状态
     syncToModuleState(context, moduleState);
@@ -110,6 +118,6 @@ function syncToModuleState(context: AlpineContext, moduleState: ModuleState): vo
   moduleState.isAnalyzing = context.isAnalyzing;
   moduleState.progress = context.progress;
   moduleState.currentStep = context.currentStep;
-  moduleState.results = context.results;
   moduleState.analysisReport = context.analysisReport;
+  moduleState.hasReport = context.hasReport;
 }

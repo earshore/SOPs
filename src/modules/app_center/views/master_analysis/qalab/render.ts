@@ -17,9 +17,9 @@ export function renderProductBar(): void {
     const container = document.getElementById('productBar');
     if (!container) return;
 
-    const ar = qalabState.reportData?.analysisReport || qalabState.reportData;
-    const title = ar?.product_title || '产品分析';
-    const asins = qalabState.reportData?.metadata?.asins || [];
+    const metadata = qalabState.reportData?.metadata;
+    const title = metadata?.productTitle || '产品分析';
+    const asins = metadata?.asins || [];
 
     // 使用 SafeRenderer 渲染动态内容
     const template = `

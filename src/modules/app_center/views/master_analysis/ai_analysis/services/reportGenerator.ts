@@ -139,13 +139,12 @@ export function generateMarkdownReport(
  * 生成完整的 JSON 报告数据
  */
 export function generateJsonReportData(
-  results: AnalysisResult[],
   selectedAsins: string[],
   selectedTargets: string[],
   dataSource: string,
   dataSourceMarketplace: string,
   analysisReport: unknown
-): { metadata: ReportMetadata; results: AnalysisResult[]; analysisReport: unknown } {
+): { metadata: ReportMetadata; analysisReport: unknown } {
   return {
     metadata: {
       asins: selectedAsins,
@@ -154,7 +153,6 @@ export function generateJsonReportData(
       dataSource: dataSource,
       marketplace: dataSourceMarketplace
     },
-    results: results,
     analysisReport: analysisReport
   };
 }

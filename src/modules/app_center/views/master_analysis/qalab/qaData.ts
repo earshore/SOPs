@@ -21,10 +21,11 @@ export interface QA {
  */
 function extractReportInsights(report: any): any {
     const analysisReport = report?.analysisReport || report;
+    const metadata = report?.metadata;
     
     return {
-        productTitle: analysisReport?.product_title || '产品',
-        market: analysisReport?.market || report?.metadata?.marketplace || 'DE',
+        productTitle: metadata?.productTitle || '产品',
+        market: metadata?.marketplace || 'DE',
         sellingPoints: analysisReport?.['selling-points'] || {},
         fatalFlaws: analysisReport?.['fatal-flaws'] || {},
         wowMoments: analysisReport?.['wow-moments'] || {},

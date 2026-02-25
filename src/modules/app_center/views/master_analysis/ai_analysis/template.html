@@ -617,7 +617,7 @@
     <!-- JSON 查看器 - 已移动到分析报告卡片内 -->
 
     <!-- 分析结果展示 -->
-    <template x-if="results.length > 0">
+    <template x-if="hasReport && results.length > 0">
       <div class="space-y-10 animate-fade-in-up delay-400">
         <!-- 结果 Header -->
         <div class="relative overflow-hidden rounded-2xl">
@@ -1002,7 +1002,7 @@
                       <template x-for="detail in result.details" :key="detail.category">
                         <div>
                           <span class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full mb-3"
-                                :class="'bg-' + result.color + '-50 text-' + result.color + '-700'">
+                                :class="'bg-' + resultColor + '-50 text-' + resultColor + '-700'">
                             <i class="fa-solid fa-quote-left opacity-60"></i>
                             <span x-text="detail.category"></span>
                           </span>
@@ -1025,7 +1025,7 @@
     </template>
 
     <!-- 空状态 -->
-    <template x-if="results.length === 0 && !isAnalyzing">
+    <template x-if="!hasReport && !isAnalyzing">
       <div class="text-center py-20">
         <div class="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl mb-8 shadow-inner">
           <i class="fa-solid fa-lightbulb text-slate-400 text-4xl"></i>

@@ -83,8 +83,8 @@ export interface AlpineContext {
   isAnalyzing: boolean;
   progress: number;
   currentStep: string;
-  results: AnalysisResult[];
   analysisReport: unknown;
+  hasReport: boolean; // 是否有报告（用于强制触发 UI 更新）
   expandedPromptIndex: number | null;
   showPromptPanel: boolean;
   showJsonViewer: boolean;
@@ -116,13 +116,14 @@ export interface ReportMetadata {
   timestamp: string;
   dataSource: string;
   marketplace: string;
+  productTitle?: string; // 产品标题（用于显示）
 }
 
 /**
  * 完整报告数据
+ * 注意：只保留原始 analysisReport，不包含转换后的 results
  */
 export interface FullReportData {
   metadata: ReportMetadata;
-  results: AnalysisResult[];
   analysisReport: unknown;
 }

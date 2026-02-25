@@ -7,8 +7,10 @@ import state from '@common/state';
 import { analysisTargets } from '../config/analysisTargets';
 import { getProductByAsin, Product } from '../config/sampleData';
 import { convertScraperDataToProduct } from '../utils/dataTransformers';
+import { parseAnalysisReport } from '../services/analysisService';
 import { AnalysisResult, AlpineContext, FullReportData } from '../types';
 import type { ScrapedData } from '@/types/modules-business';
+import type { FullAnalysisReport } from '../config/analysisReportData';
 import { getPromptTokenCount } from './helpers';
 import { formatTokenCount } from '../utils/tokenCounter';
 
@@ -21,6 +23,7 @@ export interface ComputedProperties {
   hasData: boolean;
   canAnalyze: boolean;
   analysisTargets: typeof analysisTargets;
+  results: AnalysisResult[];
   listingsResults: AnalysisResult[];
   reviewsResults: AnalysisResult[];
   totalHighlights: number;
@@ -138,14 +141,35 @@ export function createComputedProperties(context: AlpineContext): ComputedProper
     },
 
     /**
+     * 实时解析分析结果
+     * 从原始 analysisReport 动态生成展示格式
+     */
+    get results(): AnalysisResult[] {
+      if (!context.analysisReport || !context.selectedTargets || context.selectedTargets.length === 0) {
+        return [];
+      }
+      
+      try {
+        const results = parseAnalysisReport(
+          context.analysisReport as FullAnalysisReport,
+          context.selectedTargets
+        );
+        console.log('[计算属性] results 实时解析:', results.length, '个结果');
+        return results;
+      } catch (error) {
+        console.error('[计算属性] results 解析失败:', error);
+        return [];
+      }
+    },
+
+    /**
      * Listings 分析结果
      */
     get listingsResults(): AnalysisResult[] {
-      const filtered = context.results.filter(r => r.source === 'Listings');
+      const filtered = this.results.filter(r => r.source === 'Listings');
       console.log('[计算属性] listingsResults:', {
-        totalResults: context.results.length,
-        listingsCount: filtered.length,
-        results: context.results
+        totalResults: this.results.length,
+        listingsCount: filtered.length
       });
       return filtered;
     },
@@ -154,9 +178,9 @@ export function createComputedProperties(context: AlpineContext): ComputedProper
      * Reviews 分析结果
      */
     get reviewsResults(): AnalysisResult[] {
-      const filtered = context.results.filter(r => r.source === 'Reviews');
+      const filtered = this.results.filter(r => r.source === 'Reviews');
       console.log('[计算属性] reviewsResults:', {
-        totalResults: context.results.length,
+        totalResults: this.results.length,
         reviewsCount: filtered.length
       });
       return filtered;
@@ -166,14 +190,14 @@ export function createComputedProperties(context: AlpineContext): ComputedProper
      * 总高亮数量
      */
     get totalHighlights(): number {
-      return context.results.reduce((acc, r) => acc + r.highlights.length, 0);
+      return this.results.reduce((acc, r) => acc + r.highlights.length, 0);
     },
 
     /**
      * 总详情数量
      */
     get totalDetails(): number {
-      return context.results.reduce((acc, r) => acc + r.details.length, 0);
+      return this.results.reduce((acc, r) => acc + r.details.length, 0);
     },
 
     /**
@@ -219,9 +243,15 @@ export function createComputedProperties(context: AlpineContext): ComputedProper
 
     /**
      * 完整报告数据
+     * 只包含原始 analysisReport，不包含转换后的 results
      */
     get fullReportData(): FullReportData | null {
       if (!context.analysisReport) return null;
+      
+      // 获取产品标题（用于显示）
+      const productTitle = this.currentProducts.length > 0
+        ? this.currentProducts.map(p => p.productTitle).join(' | ')
+        : undefined;
       
       return {
         metadata: {
@@ -229,9 +259,9 @@ export function createComputedProperties(context: AlpineContext): ComputedProper
           targets: context.selectedTargets,
           timestamp: new Date().toISOString(),
           dataSource: context.dataSource,
-          marketplace: this.dataSourceMarketplace
+          marketplace: this.dataSourceMarketplace,
+          productTitle
         },
-        results: context.results,
         analysisReport: context.analysisReport
       };
     },
