@@ -5,12 +5,14 @@
 
 import { appStore } from '@/stores/useAppStore';
 import { generateMultiLangQAs } from './qaData';
-import { qalabState } from './state';
 import { LANGUAGES, CATEGORIES, MARKET_LANG_MAP } from './constants';
 import { downloadFile } from './utils';
 import { showToast } from '../../../../../common/ui/notifications';
 import { renderResults, renderLangSelector, renderQAGrid } from './render';
 import { rufusSimulator } from './rufusSimulator';
+
+// 获取 qalab 状态的辅助函数
+const getQalabState = () => appStore.getState().qalab;
 
 /**
  * 自动加载分析报告
@@ -105,6 +107,7 @@ export function autoLoadAnalysisReport(): void {
         }
         
         input.value = reportJSON;
+        const qalabState = getQalabState();
         qalabState.reportData = reportData;
         
         console.log('[QALab] ✅ 报告已加载到 qalabState.reportData');
@@ -232,6 +235,8 @@ export async function startAnalysis(): Promise<void> {
         return;
     }
 
+    const qalabState = getQalabState();
+    
     try {
         qalabState.reportData = JSON.parse(input.value);
     } catch (e) {
@@ -328,6 +333,7 @@ export async function startAnalysis(): Promise<void> {
  * 切换全部展开/折叠
  */
 export function toggleExpandAll(): void {
+    const qalabState = getQalabState();
     qalabState.allExpanded = !qalabState.allExpanded;
     const cards = document.querySelectorAll('.qa-card');
     const btn = document.getElementById('expandAllBtn');
@@ -351,6 +357,7 @@ export function toggleExpandAll(): void {
  * 导出JSON
  */
 export function exportJSON(): void {
+    const qalabState = getQalabState();
     const filtered = qalabState.currentCategory === 'all'
         ? qalabState.generatedQAs
         : qalabState.generatedQAs.filter(qa => qa.category === qalabState.currentCategory);
@@ -384,6 +391,7 @@ export function exportJSON(): void {
  * 导出CSV
  */
 export function exportCSV(): void {
+    const qalabState = getQalabState();
     const filtered = qalabState.currentCategory === 'all'
         ? qalabState.generatedQAs
         : qalabState.generatedQAs.filter(qa => qa.category === qalabState.currentCategory);
@@ -416,6 +424,7 @@ export function exportCSV(): void {
  * 导出文本
  */
 export function exportText(): void {
+    const qalabState = getQalabState();
     const filtered = qalabState.currentCategory === 'all'
         ? qalabState.generatedQAs
         : qalabState.generatedQAs.filter(qa => qa.category === qalabState.currentCategory);
@@ -454,6 +463,7 @@ export function exportText(): void {
  * 切换语言
  */
 export function switchLang(lang: string): void {
+    const qalabState = getQalabState();
     qalabState.currentLang = lang;
     renderLangSelector(switchLang);
     renderQAGrid(toggleQA, copyQA, editQA);
@@ -468,6 +478,7 @@ export function switchLang(lang: string): void {
  * 切换分类
  */
 export function switchCategory(cat: string): void {
+    const qalabState = getQalabState();
     qalabState.currentCategory = cat;
     renderResults(toggleQA, copyQA, editQA, switchLang, switchCategory);
 }
@@ -487,6 +498,7 @@ export function toggleQA(id: number): void {
  * 使用 requestAnimationFrame 替代 setTimeout
  */
 export function copyQA(id: number, btnElement: HTMLElement): void {
+    const qalabState = getQalabState();
     const qa = qalabState.generatedQAs.find(q => q.id === id);
     if (!qa) return;
 
@@ -540,6 +552,8 @@ export async function sendRufusQuestion(question: string): Promise<void> {
         showToast('请输入问题', { type: 'error' });
         return;
     }
+    
+    const qalabState = getQalabState();
     
     console.log('[QALab] 📝 用户问题:');
     console.log('[QALab] - 长度:', question.length, '字符');
@@ -777,6 +791,7 @@ export async function sendRufusQuestion(question: string): Promise<void> {
  * 清空 Rufus 对话历史
  */
 export function clearRufusChat(): void {
+    const qalabState = getQalabState();
     qalabState.rufusMessages.length = 0;
     renderRufusMessages();
     showToast('对话已清空', { type: 'success' });
@@ -790,6 +805,7 @@ export function toggleRufusMode(): void {
     console.log('[QALab] 🔄 开始切换 Rufus 模式');
     console.log('[QALab] 时间:', new Date().toLocaleTimeString());
     
+    const qalabState = getQalabState();
     const oldMode = qalabState.rufusMode;
     qalabState.rufusMode = qalabState.rufusMode === 'rule' ? 'ai' : 'rule';
     
@@ -850,6 +866,7 @@ async function checkLLMConfiguration(): Promise<void> {
             
             // 在对话中添加配置提示
             setTimeout(() => {
+                const qalabState = getQalabState();
                 qalabState.rufusMessages.push({
                     role: 'assistant',
                     content: '👋 您好！我是 Rufus AI。\n\n' +
@@ -877,6 +894,7 @@ async function checkLLMConfiguration(): Promise<void> {
             });
             
             setTimeout(() => {
+                const qalabState = getQalabState();
                 qalabState.rufusMessages.push({
                     role: 'assistant',
                     content: '⚠️ LLM 配置不完整\n\n' +
@@ -900,8 +918,10 @@ async function checkLLMConfiguration(): Promise<void> {
         });
         
         // 在对话中添加欢迎消息
+        const qalabState = getQalabState();
         if (qalabState.rufusMessages.length === 0) {
             setTimeout(() => {
+                const qalabState = getQalabState();
                 qalabState.rufusMessages.push({
                     role: 'assistant',
                     content: '👋 您好！我是 Rufus AI，您的智能产品问答助手。\n\n' +
@@ -934,6 +954,7 @@ export function updateRufusModeToggle(): void {
     }
     console.log('[QALab] ✅ 找到模式切换按钮');
     
+    const qalabState = getQalabState();
     const isAI = qalabState.rufusMode === 'ai';
     console.log('[QALab] - 当前模式:', qalabState.rufusMode);
     console.log('[QALab] - isAI:', isAI);
@@ -963,6 +984,7 @@ function renderRufusMessages(): void {
     const container = document.getElementById('rufusMessages');
     if (!container) return;
     
+    const qalabState = getQalabState();
     if (qalabState.rufusMessages.length === 0) {
         container.innerHTML = `
             <div class="text-center text-gray-500 py-8">
@@ -1014,6 +1036,7 @@ function renderRufusThinking(): void {
     const container = document.getElementById('rufusMessages');
     if (!container) return;
     
+    const qalabState = getQalabState();
     if (qalabState.rufusThinking) {
         const thinkingDiv = document.createElement('div');
         thinkingDiv.id = 'rufusThinking';

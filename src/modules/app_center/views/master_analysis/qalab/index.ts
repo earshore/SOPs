@@ -15,8 +15,8 @@ import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer'
 import { registerActionsWithLegacy, unregisterActions } from '../../../../../common/utils/actionRegistry';
 import { MODULE_EVENTS } from '../../../../../common/constants/eventConstants';
 import eventBus from '../../../../../common/EventBus';
+import { appStore } from '@/stores/useAppStore';
 
-import { qalabState } from './state';
 import {
     startAnalysis,
     clearInput,
@@ -44,7 +44,10 @@ export async function mount(container: HTMLElement): Promise<void> {
     console.log('[QALab] 时间:', new Date().toLocaleTimeString());
 
     try {
-        // 0. 立即暴露全局对象（在任何异步操作之前）
+        // 0. 获取qalab状态
+        const qalabState = appStore.getState().qalab;
+        
+        // 立即暴露全局对象（在任何异步操作之前）
         (window as any).qalabState = qalabState;
         (window as any).rufusSimulator = rufusSimulator;
         console.log('[QALab] ✅ 已暴露全局对象: window.qalabState, window.rufusSimulator');
@@ -75,7 +78,7 @@ export async function mount(container: HTMLElement): Promise<void> {
 
         // 2. 注册全局操作
         console.log('[QALab] 🔧 开始注册全局操作...');
-        const actionNames = registerActionsWithLegacy({
+        const registeredActions = registerActionsWithLegacy({
             amz_qalab_startAnalysis: () => startAnalysis(),
             amz_qalab_clearInput: () => clearInput(),
             amz_qalab_toggleExpandAll: () => toggleExpandAll(),
@@ -92,9 +95,8 @@ export async function mount(container: HTMLElement): Promise<void> {
             amz_qalab_toggleRufusMode: () => toggleRufusMode()
         });
         
-        qalabState.registeredActions = actionNames;
-        console.log('[QALab] ✅ 已注册', actionNames.length, '个全局操作');
-        console.log('[QALab] 注册的操作:', actionNames);
+        console.log('[QALab] ✅ 已注册', registeredActions.length, '个全局操作');
+        console.log('[QALab] 注册的操作:', registeredActions);
         
         // 验证关键操作是否注册成功
         const toggleAction = (window as any).amz_qalab_toggleRufusMode;
@@ -106,7 +108,9 @@ export async function mount(container: HTMLElement): Promise<void> {
 
         // 3. 设置事件监听器 - 使用事件委托处理data-action
         console.log('[QALab] 🔧 设置事件监听器...');
-        qalabState.eventManager.addEventListener(container, 'click', ((e: Event) => {
+        const eventManager = { listeners: [] as Array<{ element: any; event: string; handler: any }> };
+        
+        const clickHandler = (e: Event) => {
             const target = e.target as HTMLElement;
             const actionBtn = target.closest('[data-action]') as HTMLElement;
             
@@ -119,11 +123,14 @@ export async function mount(container: HTMLElement): Promise<void> {
                     }
                 }
             }
-        }) as EventListener);
+        };
+        
+        container.addEventListener('click', clickHandler);
+        eventManager.listeners.push({ element: container, event: 'click', handler: clickHandler });
         console.log('[QALab] ✅ 点击事件监听器已设置');
         
         // 监听 Rufus 输入框的回车键
-        qalabState.eventManager.addEventListener(container, 'keydown', ((e: KeyboardEvent) => {
+        const keydownHandler = (e: KeyboardEvent) => {
             const target = e.target as HTMLElement;
             if (target.id === 'rufusInput' && e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -132,19 +139,29 @@ export async function mount(container: HTMLElement): Promise<void> {
                     sendRufusQuestion(input.value.trim());
                 }
             }
-        }) as EventListener);
+        };
+        
+        container.addEventListener('keydown', keydownHandler);
+        eventManager.listeners.push({ element: container, event: 'keydown', handler: keydownHandler });
         console.log('[QALab] ✅ 键盘事件监听器已设置');
 
         // 4. 监听数据更新事件 - 自动加载分析报告
         console.log('[QALab] 🔧 设置数据更新监听器...');
-        qalabState.dataUpdateHandler = () => {
+        const dataUpdateHandler = () => {
             console.log('[QALab] 检测到数据更新事件');
             autoLoadAnalysisReport();
         };
         
-        eventBus.on(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, qalabState.dataUpdateHandler);
-        eventBus.on(MODULE_EVENTS.ANALYSIS.ANALYZE_SUCCESS, qalabState.dataUpdateHandler);
+        eventBus.on(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, dataUpdateHandler);
+        eventBus.on(MODULE_EVENTS.ANALYSIS.ANALYZE_SUCCESS, dataUpdateHandler);
         console.log('[QALab] ✅ 数据更新监听器已设置');
+        
+        // 保存清理函数到容器
+        (container as any).__qalabCleanup = {
+            registeredActions,
+            eventManager,
+            dataUpdateHandler
+        };
         
         // 5. 模块挂载时检查是否有现有报告
         console.log('[QALab] 🔍 检查现有报告...');
@@ -170,24 +187,42 @@ export async function mount(container: HTMLElement): Promise<void> {
 /**
  * 卸载子模块
  */
-export function unmount(): void {
+export function unmount(container?: HTMLElement): void {
     console.log('[QALab] 🔄 开始卸载子模块');
 
     try {
+        if (!container) {
+            console.warn('[QALab] 未提供container，跳过清理');
+            return;
+        }
+        
+        const cleanup = (container as any).__qalabCleanup;
+        if (!cleanup) {
+            console.warn('[QALab] 未找到清理数据');
+            return;
+        }
+        
         // 1. 清理 EventBus 监听器
-        if (qalabState.dataUpdateHandler) {
-            eventBus.off(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, qalabState.dataUpdateHandler);
-            eventBus.off(MODULE_EVENTS.ANALYSIS.ANALYZE_SUCCESS, qalabState.dataUpdateHandler);
+        if (cleanup.dataUpdateHandler) {
+            eventBus.off(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, cleanup.dataUpdateHandler);
+            eventBus.off(MODULE_EVENTS.ANALYSIS.ANALYZE_SUCCESS, cleanup.dataUpdateHandler);
         }
 
-        // 2. 清理注册的动作
-        if (qalabState.registeredActions.length > 0) {
-            unregisterActions(qalabState.registeredActions);
-            console.log(`[QALab] 已清理 ${qalabState.registeredActions.length} 个动作`);
+        // 2. 清理DOM事件监听器
+        if (cleanup.eventManager && cleanup.eventManager.listeners) {
+            cleanup.eventManager.listeners.forEach((listener: any) => {
+                listener.element.removeEventListener(listener.event, listener.handler);
+            });
         }
 
-        // 3. 清理状态
-        qalabState.cleanup();
+        // 3. 清理注册的动作
+        if (cleanup.registeredActions && cleanup.registeredActions.length > 0) {
+            unregisterActions(cleanup.registeredActions);
+            console.log(`[QALab] 已清理 ${cleanup.registeredActions.length} 个动作`);
+        }
+
+        // 4. 清理容器数据
+        delete (container as any).__qalabCleanup;
 
         console.log('[QALab] ✅ 子模块卸载成功');
     } catch (error) {
