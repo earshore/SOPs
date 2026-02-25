@@ -70,8 +70,8 @@ const SettingsPanel = (): SettingsPanelData => ({
     // LLM Config State
     llm: {
         provider: 'llmgateway',
-        endpoint: '',
-        apiKey: '',
+        endpoint: 'https://ai-gateway.hongecb.store',
+        apiKey: 'AI2026',
         model: '',
         models: [],
         showKey: false,

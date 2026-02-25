@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LLM连接诊断工具</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #333;
+      border-bottom: 2px solid #4CAF50;
+      padding-bottom: 10px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: #555;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-right: 10px;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 4px;
+      white-space: pre-wrap;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+    }
+    .success {
+      background: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+    }
+    .error {
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+    }
+    .info {
+      background: #d1ecf1;
+      border: 1px solid #bee5eb;
+      color: #0c5460;
+    }
+    .warning {
+      background: #fff3cd;
+      border: 1px solid #ffeaa7;
+      color: #856404;
+    }
+    .section {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔍 LLM连接诊断工具</h1>
+    
+    <div class="form-group">
+      <label>测试环境:</label>
+      <select id="environment">
+        <option value="development">开发环境 (Development)</option>
+        <option value="production">生产环境 (Production)</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>API端点 (Endpoint):</label>
+      <input type="text" id="endpoint" value="https://ai-gateway.earshore.workers.dev" placeholder="https://api.example.com">
+    </div>
+
+    <div class="form-group">
+      <label>API密钥 (API Key):</label>
+      <input type="password" id="apiKey" value="AI2026" placeholder="sk-...">
+    </div>
+
+    <div class="form-group">
+      <label>模型名称 (Model):</label>
+      <input type="text" id="model" value="glm-4-air" placeholder="gpt-3.5-turbo">
+    </div>
+
+    <div>
+      <button onclick="testConnection()">🧪 测试连接</button>
+      <button onclick="testModels()">📋 获取模型列表</button>
+      <button onclick="testChat()">💬 测试对话</button>
+      <button onclick="clearResults()">🗑️ 清空结果</button>
+    </div>
+
+    <div id="results"></div>
+  </div>
+
+  <script>
+    function addResult(message, type = 'info') {
+      const results = document.getElementById('results');
+      const div = document.createElement('div');
+      div.className = `result ${type}`;
+      div.textContent = message;
+      results.appendChild(div);
+      results.scrollTop = results.scrollHeight;
+    }
+
+    function clearResults() {
+      document.getElementById('results').innerHTML = '';
+    }
+
+    async function testConnection() {
+      clearResults();
+      const endpoint = document.getElementById('endpoint').value.trim();
+      const apiKey = document.getElementById('apiKey').value.trim();
+      const env = document.getElementById('environment').value;
+
+      addResult(`=== 开始连接测试 ===\n环境: ${env}\n端点: ${endpoint}\nAPI Key: ${apiKey.substring(0, 10)}...`, 'info');
+
+      // 测试1: 基础网络连通性
+      addResult('\n[测试1] 检查端点可达性...', 'info');
+      try {
+        const response = await fetch(endpoint, { method: 'HEAD' });
+        addResult(`✅ 端点可达 (状态码: ${response.status})`, 'success');
+      } catch (error) {
+        addResult(`❌ 端点不可达: ${error.message}`, 'error');
+        return;
+      }
+
+      // 测试2: CORS配置
+      addResult('\n[测试2] 检查CORS配置...', 'info');
+      try {
+        const response = await fetch(`${endpoint}/models`, {
+          method: 'OPTIONS',
+          headers: {
+            'Origin': window.location.origin,
+            'Access-Control-Request-Method': 'GET',
+            'Access-Control-Request-Headers': 'Authorization'
+          }
+        });
+        const corsHeaders = {
+          'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+          'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+          'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers')
+        };
+        addResult(`✅ CORS配置:\n${JSON.stringify(corsHeaders, null, 2)}`, 'success');
+      } catch (error) {
+        addResult(`⚠️ CORS检查失败: ${error.message}`, 'warning');
+      }
+
+      // 测试3: 认证测试
+      addResult('\n[测试3] 测试API认证...', 'info');
+      try {
+        const response = await fetch(`${endpoint}/models`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        addResult(`状态码: ${response.status} ${response.statusText}`, 'info');
+        addResult(`响应头:\n${JSON.stringify(Object.fromEntries(response.headers.entries()), null, 2)}`, 'info');
+
+        if (response.ok) {
+          const data = await response.json();
+          addResult(`✅ 认证成功!\n响应数据:\n${JSON.stringify(data, null, 2).substring(0, 500)}...`, 'success');
+        } else {
+          const errorText = await response.text();
+          addResult(`❌ 认证失败:\n${errorText}`, 'error');
+        }
+      } catch (error) {
+        addResult(`❌ 请求失败: ${error.message}\n堆栈: ${error.stack}`, 'error');
+      }
+    }
+
+    async function testModels() {
+      const endpoint = document.getElementById('endpoint').value.trim();
+      const apiKey = document.getElementById('apiKey').value.trim();
+
+      addResult('\n=== 获取模型列表 ===', 'info');
+
+      try {
+        const response = await fetch(`${endpoint}/models`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        addResult(`状态码: ${response.status}`, 'info');
+
+        if (response.ok) {
+          const data = await response.json();
+          addResult(`✅ 成功获取模型列表:\n${JSON.stringify(data, null, 2)}`, 'success');
+        } else {
+          const errorText = await response.text();
+          addResult(`❌ 获取失败:\n${errorText}`, 'error');
+        }
+      } catch (error) {
+        addResult(`❌ 请求失败: ${error.message}`, 'error');
+      }
+    }
+
+    async function testChat() {
+      const endpoint = document.getElementById('endpoint').value.trim();
+      const apiKey = document.getElementById('apiKey').value.trim();
+      const model = document.getElementById('model').value.trim();
+
+      addResult('\n=== 测试对话接口 ===', 'info');
+
+      const requestBody = {
+        model: model,
+        messages: [
+          { role: 'user', content: '你好，请回复"测试成功"' }
+        ],
+        temperature: 0.3
+      };
+
+      addResult(`请求体:\n${JSON.stringify(requestBody, null, 2)}`, 'info');
+
+      try {
+        const response = await fetch(`${endpoint}/chat/completions`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(requestBody)
+        });
+
+        addResult(`状态码: ${response.status}`, 'info');
+
+        if (response.ok) {
+          const data = await response.json();
+          addResult(`✅ 对话成功!\n完整响应:\n${JSON.stringify(data, null, 2)}`, 'success');
+          
+          if (data.choices && data.choices[0] && data.choices[0].message) {
+            addResult(`\n💬 AI回复: ${data.choices[0].message.content}`, 'success');
+          }
+        } else {
+          const errorText = await response.text();
+          addResult(`❌ 对话失败:\n${errorText}`, 'error');
+        }
+      } catch (error) {
+        addResult(`❌ 请求失败: ${error.message}\n堆栈: ${error.stack}`, 'error');
+      }
+    }
+  </script>
+</body>
+</html>
