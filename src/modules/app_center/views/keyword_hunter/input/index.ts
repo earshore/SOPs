@@ -12,7 +12,7 @@ import { SafeModuleLoader } from '../../../../../common/infrastructure/SafeModul
 import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
 import { showToast, showProgress } from '../../../../../common/ui';
 import * as KeywordService from '../services/trackerService';
-import state from "../../../../../common/state";
+import { appStore } from '../../../../../stores/useAppStore';
 import { registerActionsWithLegacy, unregisterActions } from '../../../../../common/utils/actionRegistry';
 
 import '../keyword_hunter_style.css';
@@ -100,33 +100,10 @@ function saveInputsToState(): void {
     const kwInput = document.getElementById('kt-keywords-input') as HTMLTextAreaElement | null;
     const copyInput = document.getElementById('kt-copy-input') as HTMLTextAreaElement | null;
 
-    if (!state.keywordTracker) {
-        state.keywordTracker = {
-            keywords: [],
-            processedCopy: '',
-            formattedCopy: '',
-            matchedKeywords: [],
-            unmatchedKeywords: [],
-            wordFrequency: [],
-            paragraphs: [],
-            translationMode: false,
-            keywordLocationIndex: {},
-            settings: {
-                matchPlural: false,
-                matchStem: false,
-                matchCase: false,
-                matchPartial: false
-            },
-            isWindowMinimized: false
-        };
-    }
-
-    if (kwInput) {
-        state.keywordTracker.keywordsInputText = kwInput.value;
-    }
-    if (copyInput) {
-        state.keywordTracker.copyInputText = copyInput.value;
-    }
+    appStore.getState().updateKeywordTracker({
+        keywordsInputText: kwInput?.value || '',
+        copyInputText: copyInput?.value || ''
+    });
 }
 
 /**
@@ -135,14 +112,13 @@ function saveInputsToState(): void {
 function restoreInputsFromState(): void {
     const kwInput = document.getElementById('kt-keywords-input') as HTMLTextAreaElement | null;
     const copyInput = document.getElementById('kt-copy-input') as HTMLTextAreaElement | null;
+    const tracker = appStore.getState().keywordTracker;
 
-    if (state.keywordTracker) {
-        if (kwInput && state.keywordTracker.keywordsInputText !== undefined) {
-            kwInput.value = state.keywordTracker.keywordsInputText;
-        }
-        if (copyInput && state.keywordTracker.copyInputText !== undefined) {
-            copyInput.value = state.keywordTracker.copyInputText;
-        }
+    if (kwInput && tracker.keywordsInputText !== undefined) {
+        kwInput.value = tracker.keywordsInputText;
+    }
+    if (copyInput && tracker.copyInputText !== undefined) {
+        copyInput.value = tracker.copyInputText;
     }
 
     // 更新统计信息
@@ -234,7 +210,7 @@ function updateCopyCharCount(): void {
 function cleanKeywordsUI(): void {
     const inputEl = document.getElementById('kt-keywords-input') as HTMLTextAreaElement | null;
     if (!inputEl || !inputEl.value.trim()) {
-        showToast("关键词列表为空", "warning");
+        showToast("关键词列表为空", { type: 'warning' });
         return;
     }
 
@@ -254,9 +230,9 @@ function cleanKeywordsUI(): void {
     const removedCount = originalKeywords.length - finalKeywords.length;
     
     if (removedCount > 0) {
-        showToast(`已清理格式并去重，移除 ${removedCount} 个重复项`, "success");
+        showToast(`已清理格式并去重，移除 ${removedCount} 个重复项`, { type: 'success' });
     } else {
-        showToast("已清理格式", "success");
+        showToast("已清理格式", { type: 'success' });
     }
 }
 
@@ -287,7 +263,7 @@ async function pasteFromClipboard(): Promise<void> {
         }
         showToast("已粘贴");
     } catch (e) {
-        showToast("无法访问剪贴板", "error");
+        showToast("无法访问剪贴板", { type: 'error' });
     }
 }
 
@@ -310,7 +286,7 @@ function clearCopyInput(): void {
 function cleanCopyFormat(): void {
     const copyInput = document.getElementById('kt-copy-input') as HTMLTextAreaElement | null;
     if (!copyInput || !copyInput.value.trim()) {
-        showToast("文案为空，无需清理", "warning");
+        showToast("文案为空，无需清理", { type: 'warning' });
         return;
     }
 
@@ -350,9 +326,9 @@ function cleanCopyFormat(): void {
 
     const cleanedCount = originalLength - text.length;
     if (cleanedCount > 0) {
-        showToast(`已清理 ${cleanedCount} 个格式字符`, "success");
+        showToast(`已清理 ${cleanedCount} 个格式字符`, { type: 'success' });
     } else {
-        showToast("未发现需要清理的格式", "info");
+        showToast("未发现需要清理的格式", { type: 'info' });
     }
 }
 
@@ -364,7 +340,7 @@ async function startAnalysis(): Promise<void> {
     const copyText = (document.getElementById('kt-copy-input') as HTMLTextAreaElement | null)?.value;
 
     if (!kwText || !kwText.trim() || !copyText || !copyText.trim()) {
-        showToast(`请先输入关键词和文案`, "warning");
+        showToast(`请先输入关键词和文案`, { type: 'warning' });
         return;
     }
 
@@ -372,10 +348,12 @@ async function startAnalysis(): Promise<void> {
     saveInputsToState();
 
     // 更新全局状态
-    state.keywordTracker.keywords = KeywordService.parseKeywords(kwText);
-    state.keywordTracker.processedCopy = copyText;
-    state.keywordTracker.translationMode = false;
-    state.keywordTracker.paragraphs = [];
+    appStore.getState().updateKeywordTracker({
+        keywords: KeywordService.parseKeywords(kwText),
+        processedCopy: copyText,
+        translationMode: false,
+        paragraphs: []
+    });
 
     showProgress(true, 50);
 
@@ -383,18 +361,19 @@ async function startAnalysis(): Promise<void> {
     // 注意：Worker 的初始化在核心模块中完成，这里我们使用主线程回退
     try {
         const analysisResult = KeywordService.analyzeKeywordMatching(
-            state.keywordTracker.processedCopy,
-            state.keywordTracker.keywords
+            appStore.getState().keywordTracker.processedCopy,
+            appStore.getState().keywordTracker.keywords
         );
-        state.keywordTracker.matchedKeywords = analysisResult.matched;
-        state.keywordTracker.unmatchedKeywords = analysisResult.unmatched;
-        state.keywordTracker.wordFrequency = KeywordService.calculateWordFrequency(state.keywordTracker.processedCopy);
-
-        // 重置分析报告状态
-        state.keywordTracker.isWindowMinimized = false;
+        const tracker = appStore.getState().keywordTracker;
+        appStore.getState().updateKeywordTracker({
+            matchedKeywords: analysisResult.matched,
+            unmatchedKeywords: analysisResult.unmatched,
+            wordFrequency: KeywordService.calculateWordFrequency(tracker.processedCopy),
+            isWindowMinimized: false
+        });
 
         showProgress(false);
-        showToast("分析完成", "success");
+        showToast("分析完成", { type: 'success' });
 
         // 切换到 process 模块
         if (window.switchTab) {
@@ -402,7 +381,7 @@ async function startAnalysis(): Promise<void> {
         }
     } catch (error) {
         showProgress(false);
-        showToast("分析失败: " + (error as Error).message, "error");
+        showToast("分析失败: " + (error as Error).message, { type: 'error' });
         console.error('[Input] 分析失败:', error);
     }
 }

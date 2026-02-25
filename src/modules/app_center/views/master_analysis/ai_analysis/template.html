@@ -617,7 +617,7 @@
     <!-- JSON 查看器 - 已移动到分析报告卡片内 -->
 
     <!-- 分析结果展示 -->
-    <template x-if="results.length > 0">
+    <template x-if="hasReport && results.length > 0">
       <div class="space-y-10 animate-fade-in-up delay-400">
         <!-- 结果 Header -->
         <div class="relative overflow-hidden rounded-2xl">
@@ -803,18 +803,19 @@
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <template x-for="(result, index) in listingsResults" :key="result.targetId">
-                <div class="group bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden hover:shadow-2xl hover:border-slate-300/60 transition-all duration-500 animate-fade-in-up" :style="'animation-delay: ' + (index * 100) + 'ms'">
+                <div class="group bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden hover:shadow-2xl hover:border-slate-300/60 transition-all duration-500 animate-fade-in-up" :style="'animation-delay: ' + (index * 100) + 'ms'"
+                     x-data="{ resultIcon: getResultIcon(result.targetId), resultColor: getResultColor(result.targetId) }">
                   <!-- Header -->
                   <div class="relative overflow-hidden p-6 text-white"
-                       :class="'bg-gradient-to-r from-' + result.color + '-500 via-' + result.color + '-600 to-indigo-600'">
+                       :class="'bg-gradient-to-r from-' + resultColor + '-500 via-' + resultColor + '-600 to-indigo-600'">
                     <div class="absolute inset-0 opacity-10">
                       <div class="absolute top-0 right-0 w-40 h-40 bg-white rounded-full filter blur-3xl translate-x-1/2 -translate-y-1/2"></div>
                       <div class="absolute bottom-0 left-0 w-32 h-32 bg-white rounded-full filter blur-2xl -translate-x-1/2 translate-y-1/2"></div>
                     </div>
                     <div class="relative flex items-center gap-4">
                       <div class="w-14 h-14 rounded-2xl flex items-center justify-center border border-white/20 backdrop-blur-sm shadow-lg"
-                           :class="'bg-' + result.color + '-500/20'">
-                        <i :class="result.icon + ' text-xl'"></i>
+                           :class="'bg-' + resultColor + '-500/20'">
+                        <i :class="resultIcon + ' text-xl'"></i>
                       </div>
                       <div class="flex-1">
                         <h3 class="font-bold text-xl tracking-tight" x-text="result.title"></h3>
@@ -885,7 +886,7 @@
                       <template x-for="detail in result.details" :key="detail.category">
                         <div>
                           <span class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full mb-3"
-                                :class="'bg-' + result.color + '-50 text-' + result.color + '-700'">
+                                :class="'bg-' + resultColor + '-50 text-' + resultColor + '-700'">
                             <i class="fa-solid fa-quote-left opacity-60"></i>
                             <span x-text="detail.category"></span>
                           </span>
@@ -918,18 +919,19 @@
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
               <template x-for="(result, index) in reviewsResults" :key="result.targetId">
-                <div class="group bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden hover:shadow-2xl hover:border-slate-300/60 transition-all duration-500 animate-fade-in-up" :style="'animation-delay: ' + (index * 100) + 'ms'">
+                <div class="group bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden hover:shadow-2xl hover:border-slate-300/60 transition-all duration-500 animate-fade-in-up" :style="'animation-delay: ' + (index * 100) + 'ms'"
+                     x-data="{ resultIcon: getResultIcon(result.targetId), resultColor: getResultColor(result.targetId), resultColorEnd: (getResultColor(result.targetId) === 'amber' ? 'orange' : getResultColor(result.targetId) === 'orange' ? 'red' : getResultColor(result.targetId) === 'purple' ? 'indigo' : getResultColor(result.targetId) === 'teal' ? 'cyan' : getResultColor(result.targetId) === 'rose' ? 'pink' : 'indigo') }">
                   <!-- Header -->
                   <div class="relative overflow-hidden p-6 text-white"
-                       :class="'bg-gradient-to-r from-' + result.color + '-500 via-' + result.color + '-600 to-' + (result.color === 'amber' ? 'orange' : result.color === 'orange' ? 'red' : result.color === 'purple' ? 'indigo' : result.color === 'teal' ? 'cyan' : result.color === 'rose' ? 'pink' : 'indigo') + '-600'">
+                       :class="'bg-gradient-to-r from-' + resultColor + '-500 via-' + resultColor + '-600 to-' + resultColorEnd + '-600'">
                     <div class="absolute inset-0 opacity-10">
                       <div class="absolute top-0 right-0 w-40 h-40 bg-white rounded-full filter blur-3xl translate-x-1/2 -translate-y-1/2"></div>
                       <div class="absolute bottom-0 left-0 w-32 h-32 bg-white rounded-full filter blur-2xl -translate-x-1/2 translate-y-1/2"></div>
                     </div>
                     <div class="relative flex items-center gap-4">
                       <div class="w-14 h-14 rounded-2xl flex items-center justify-center border border-white/20 backdrop-blur-sm shadow-lg"
-                           :class="'bg-' + result.color + '-500/20'">
-                        <i :class="result.icon + ' text-xl'"></i>
+                           :class="'bg-' + resultColor + '-500/20'">
+                        <i :class="resultIcon + ' text-xl'"></i>
                       </div>
                       <div class="flex-1">
                         <h3 class="font-bold text-xl tracking-tight" x-text="result.title"></h3>
@@ -1000,7 +1002,7 @@
                       <template x-for="detail in result.details" :key="detail.category">
                         <div>
                           <span class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full mb-3"
-                                :class="'bg-' + result.color + '-50 text-' + result.color + '-700'">
+                                :class="'bg-' + resultColor + '-50 text-' + resultColor + '-700'">
                             <i class="fa-solid fa-quote-left opacity-60"></i>
                             <span x-text="detail.category"></span>
                           </span>
@@ -1023,7 +1025,7 @@
     </template>
 
     <!-- 空状态 -->
-    <template x-if="results.length === 0 && !isAnalyzing">
+    <template x-if="!hasReport && !isAnalyzing">
       <div class="text-center py-20">
         <div class="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl mb-8 shadow-inner">
           <i class="fa-solid fa-lightbulb text-slate-400 text-4xl"></i>

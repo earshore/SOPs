@@ -11,7 +11,7 @@ import type {
     DeleteResult
 } from '../types';
 import type { ScraperSite } from '@/types/modules-business';
-import state from '../../../../../../common/state';
+import { appStore } from '@/stores/useAppStore';
 import { StorageService, STORAGE_KEYS } from '../../../../../../services/storageService';
 import { ErrorService } from '../../../../../../services/errorService';
 import { showToast } from '../../../../../../common/ui';
@@ -68,7 +68,7 @@ export function createScraperPanel() {
         },
 
         get hasData(): boolean {
-            return (state.scraper.scrapedData?.products?.length ?? 0) > 0;
+            return (appStore.getState().scraper.scrapedData?.products?.length ?? 0) > 0;
         },
 
         get proxyConfigStatus(): ProxyConfigStatus {
@@ -130,16 +130,16 @@ export function createScraperPanel() {
             console.log("[Scraper] 🚀 Alpine 组件初始化");
 
             // 从 state 初始化 currentDataTab
-            this.currentDataTab = state.scraper.currentDataTab || 'preview';
+            this.currentDataTab = appStore.getState().scraper.currentDataTab || 'preview';
 
             // 初始化数据预览组件
             const previewState: DataPreviewState = {
-                expandedAsin: state.scraper.expandedAsin || null,
+                expandedAsin: appStore.getState().scraper.expandedAsin || null,
                 currentDataTab: this.currentDataTab,
                 currentPage: 1,
                 itemsPerPage: 50
             };
-            this.dataPreview = new DataPreview(previewState, state.scraper.scrapedData);
+            this.dataPreview = new DataPreview(previewState, appStore.getState().scraper.scrapedData);
 
             // 初始化历史记录组件
             this.historyPanel = new HistoryPanel();
@@ -185,12 +185,13 @@ export function createScraperPanel() {
          * 从 state 恢复状态
          */
         restoreState() {
-            if (state.scraper.selectedSite) {
-                this.selectedSite = state.scraper.selectedSite;
+            const currentState = appStore.getState();
+            if (currentState.scraper.selectedSite) {
+                this.selectedSite = currentState.scraper.selectedSite;
             }
 
-            if (state.scraper.inputAsins) {
-                this.inputAsins = state.scraper.inputAsins;
+            if (currentState.scraper.inputAsins) {
+                this.inputAsins = currentState.scraper.inputAsins;
             }
 
             console.log("[Scraper] ✅ 状态已恢复");
@@ -203,31 +204,31 @@ export function createScraperPanel() {
             // 只在状态真正改变时才保存，避免触发不必要的响应式更新
             let hasChanges = false;
             
-            if (state.scraper.selectedSite !== this.selectedSite) {
-                state.scraper.selectedSite = this.selectedSite;
+            if (appStore.getState().scraper.selectedSite !== this.selectedSite) {
+                appStore.getState().scraper.selectedSite = this.selectedSite;
                 hasChanges = true;
             }
             
-            if (state.scraper.inputAsins !== this.inputAsins) {
-                state.scraper.inputAsins = this.inputAsins;
+            if (appStore.getState().scraper.inputAsins !== this.inputAsins) {
+                appStore.getState().scraper.inputAsins = this.inputAsins;
                 hasChanges = true;
             }
             
-            if (state.scraper.isScraping !== this.isScraping) {
-                state.scraper.isScraping = this.isScraping;
+            if (appStore.getState().scraper.isScraping !== this.isScraping) {
+                appStore.getState().scraper.isScraping = this.isScraping;
                 hasChanges = true;
             }
 
             if (this.dataPreview) {
                 const previewState = this.dataPreview.getState();
                 
-                if (state.scraper.expandedAsin !== previewState.expandedAsin) {
-                    state.scraper.expandedAsin = previewState.expandedAsin;
+                if (appStore.getState().scraper.expandedAsin !== previewState.expandedAsin) {
+                    appStore.getState().scraper.expandedAsin = previewState.expandedAsin;
                     hasChanges = true;
                 }
                 
-                if (state.scraper.currentDataTab !== previewState.currentDataTab) {
-                    state.scraper.currentDataTab = previewState.currentDataTab;
+                if (appStore.getState().scraper.currentDataTab !== previewState.currentDataTab) {
+                    appStore.getState().scraper.currentDataTab = previewState.currentDataTab;
                     hasChanges = true;
                 }
             }
@@ -270,7 +271,7 @@ export function createScraperPanel() {
 
                 // 更新数据预览
                 if (this.dataPreview) {
-                    this.updateDataPreview(state.scraper.scrapedData);
+                    this.updateDataPreview(appStore.getState().scraper.scrapedData);
                 }
 
                 this.saveState();
@@ -317,7 +318,7 @@ export function createScraperPanel() {
             } catch (e) {
                 console.error('[Scraper] startScrape 异常:', e);
                 ErrorService.handle(e as Error, { action: 'startScrape', module: 'scraper' });
-                showToast("采集任务异常中断", "error");
+                showToast("采集任务异常中断", { type: 'error' });
             } finally {
                 console.log('[Scraper] 进入 finally 块', { productsCount: products.length });
                 // 完成采集
@@ -325,14 +326,14 @@ export function createScraperPanel() {
                 console.log('[Scraper] handleScrapeComplete 完成', scrapedData);
 
                 // 更新全局状态
-                state.scraper.scrapedData = scrapedData;
-                state.analysis.analysisReport = null; // 重置分析报告
+                appStore.getState().setScrapedData(scrapedData);
+                appStore.getState().setAnalysisReport(null); // 重置分析报告
 
                 const successCount = products.filter(p => p.scrape_status === 'success').length;
                 if (successCount > 0) {
-                    showToast(`采集完成: ${successCount} 成功`, "success");
+                    showToast(`采集完成: ${successCount} 成功`, { type: 'success' });
                 } else {
-                    showToast("采集完成，但全部失败", "error");
+                    showToast("采集完成，但全部失败", { type: 'error' });
                 }
 
                 // 更新数据预览
@@ -366,18 +367,18 @@ export function createScraperPanel() {
             try {
                 const result: ImportResult = await handleImportFilesCore(
                     files,
-                    state.scraper.scrapedData,
+                    appStore.getState().scraper.scrapedData,
                     this.selectedSite
                 );
 
                 if (result.success && result.data) {
                     // 更新全局状态
-                    state.scraper.scrapedData = result.data;
-                    state.analysis.analysisReport = null;
+                    appStore.getState().setScrapedData(result.data);
+                    appStore.getState().setAnalysisReport(null);
 
                     // 根据新导入的数据更新选中的站点
                     const marketplace = result.data.metadata?.marketplace || 'DE';
-                    state.scraper.selectedSite = marketplace as ScraperSite;
+                    appStore.getState().scraper.selectedSite = marketplace as ScraperSite;
                     this.selectedSite = marketplace as ScraperSite;
 
                     // 更新数据预览
@@ -500,19 +501,19 @@ export function createScraperPanel() {
         async deleteProduct(asin: string): Promise<void> {
             const result: DeleteResult = await deleteProductCore(
                 asin,
-                state.scraper.scrapedData,
+                appStore.getState().scraper.scrapedData,
                 confirmWithModal
             );
 
             if (result.success && result.data) {
-                state.scraper.scrapedData = result.data;
+                appStore.getState().setScrapedData(result.data);
                 if (this.dataPreview) {
                     this.updateDataPreview(result.data);
                 }
                 this.loadHistory();
             } else if (result.data) {
                 // 回滚
-                state.scraper.scrapedData = result.data;
+                appStore.getState().setScrapedData(result.data);
                 if (this.dataPreview) {
                     this.updateDataPreview(result.data);
                 }
@@ -523,19 +524,19 @@ export function createScraperPanel() {
             const result: DeleteResult = await deleteReviewCore(
                 asin,
                 index,
-                state.scraper.scrapedData,
+                appStore.getState().scraper.scrapedData,
                 confirmWithModal
             );
 
             if (result.success && result.data) {
-                state.scraper.scrapedData = result.data;
+                appStore.getState().setScrapedData(result.data);
                 if (this.dataPreview) {
                     this.updateDataPreview(result.data);
                 }
                 this.loadHistory();
             } else if (result.data) {
                 // 回滚
-                state.scraper.scrapedData = result.data;
+                appStore.getState().setScrapedData(result.data);
                 if (this.dataPreview) {
                     this.updateDataPreview(result.data);
                 }

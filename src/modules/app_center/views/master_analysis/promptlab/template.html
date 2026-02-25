@@ -499,9 +499,9 @@
                             </div>
                             <div class="flex items-center gap-1.5 text-xs text-slate-400 bg-slate-50 px-2.5 py-1 rounded-full border border-slate-100">
                                 <span id="prompt-word-count" 
-                                      x-text="charCount"
+                                      x-text="formattedTokenCount"
                                       :class="isOverLimit ? 'font-medium text-red-600 animate-pulse' : 'font-bold text-slate-600'">0</span>
-                                <span class="text-[10px]">chars</span>
+                                <span class="text-[10px]">tokens</span>
                             </div>
                         </div>
                     </div>

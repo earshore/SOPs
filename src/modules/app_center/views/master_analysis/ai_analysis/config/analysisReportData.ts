@@ -147,11 +147,11 @@ export interface PromiseRealityReport {
   listing_revision_suggestions: string[];
 }
 
+/**
+ * 完整分析报告接口
+ * 只包含纯粹的分析结果数据，不包含业务元数据
+ */
 export interface FullAnalysisReport {
-  asin: string;
-  product_title: string;
-  analysis_timestamp: string;
-  market: string;
   'title-keywords'?: TitleKeywordsReport;
   'selling-points'?: SellingPointsReport;
   'fatal-flaws'?: FatalFlawsReport;
@@ -167,10 +167,6 @@ export interface FullAnalysisReport {
  * ASIN: B0DNMZ2MLG - Ycz CLUB GENT'S AROMA Perfume
  */
 export const SAMPLE_ANALYSIS_REPORT: FullAnalysisReport = {
-  asin: "B0DNMZ2MLG",
-  product_title: "Ycz CLUB GENT'S AROMA Perfume Men, 1.7oz(50ml), Nightclub Essential Fragrance, Long Lasting Cologne for Men with Aromatic Woody Notes of Mint, and Lemon, Ideal Occasions Daily Elegance",
-  analysis_timestamp: "2026-02-10T19:30:00.000Z",
-  market: "DE",
   
   'title-keywords': {
     primary_keywords: [

@@ -3,7 +3,7 @@
 // 🎯 Phase 4: 已迁移使用 StorageService
 // ================================================================
 
-import state from "../../../../../common/state";
+import { appStore } from '@/stores/useAppStore';
 import { StorageService, STORAGE_KEYS } from "../../../../../services/storageService";
 import { configCenter } from '../../../../../common/config/ConfigCenter';
 import type { HistoryItem, ScrapedProduct, ScrapedData, AnalysisReport } from "../../../../../types/modules-business";
@@ -44,14 +44,15 @@ export const HistoryService = {
    */
   save(data: ScrapedData, report?: AnalysisReport): HistoryItem[] {
     const history = this.getAll();
+    const currentState = appStore.getState();
     // 使用当前 state 中的 ID，如果是新抓取则用时间戳生成新 ID
-    const rawId = state.scraper.currentHistoryId || Date.now();
+    const rawId = currentState.scraper.currentHistoryId || Date.now();
     const id = typeof rawId === 'number' ? rawId : Number(rawId);
 
     const historyItem: HistoryItem = {
       id: id,
       timestamp: data.metadata?.scrape_timestamp || new Date().toISOString(),
-      site: data.metadata?.marketplace || state.scraper?.selectedSite || 'US',
+      site: data.metadata?.marketplace || currentState.scraper?.selectedSite || 'US',
       asins: data.products?.map(p => p.asin) || [],
       data,
       report,
@@ -64,7 +65,7 @@ export const HistoryService = {
     } else {
       // 新记录插到最前面
       history.unshift(historyItem);
-      state.scraper.currentHistoryId = historyItem.id;
+      appStore.getState().setCurrentHistoryId(historyItem.id);
     }
 
     // 保持存储空间整洁，只留最新的

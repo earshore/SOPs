@@ -246,7 +246,7 @@ export const authGuard: RouteGuard = {
         
         // 显示提示
         if (typeof (window as any).showToast === 'function') {
-          (window as any).showToast('请先登录', 'warning');
+          (window as any).showToast('请先登录', { type: 'warning' });
         }
         
         return {

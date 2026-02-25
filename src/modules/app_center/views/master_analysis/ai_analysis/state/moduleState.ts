@@ -3,7 +3,6 @@
  * 定义和管理 AI 智能分析模块的状态
  */
 
-import { AnalysisResult } from '../types';
 import type { FullAnalysisReport } from '../config/analysisReportData';
 import { ScraperData } from '../types';
 
@@ -16,8 +15,8 @@ export interface ModuleState {
   isAnalyzing: boolean; // 是否正在分析
   progress: number; // 分析进度 (0-100)
   currentStep: string; // 当前步骤描述
-  results: AnalysisResult[]; // 分析结果
-  analysisReport: FullAnalysisReport | null | unknown; // 完整分析报告
+  analysisReport: FullAnalysisReport | null | unknown; // 完整分析报告（原始数据）
+  hasReport: boolean; // 是否有报告（用于强制触发 UI 更新）
   expandedPromptIndex: number | null; // 展开的提示词索引
   showPromptPanel: boolean; // 是否显示提示词面板
   showJsonViewer: boolean; // 是否显示 JSON 查看器
@@ -36,8 +35,8 @@ export function createInitialState(): ModuleState {
     isAnalyzing: false,
     progress: 0,
     currentStep: '',
-    results: [],
     analysisReport: null,
+    hasReport: false,
     expandedPromptIndex: null,
     showPromptPanel: false,
     showJsonViewer: false,

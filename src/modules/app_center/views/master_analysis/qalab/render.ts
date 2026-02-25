@@ -5,10 +5,13 @@
 
 import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
 import { LANGUAGES, CATEGORIES } from './constants';
-import { qalabState } from './state';
+import { appStore } from '@/stores/useAppStore';
 
 // 获取 SafeRenderer 实例
 const renderer = SafeRenderer.getInstance();
+
+// 获取 qalab 状态的辅助函数
+const getQalabState = () => appStore.getState().qalab;
 
 /**
  * 渲染产品信息栏
@@ -17,9 +20,10 @@ export function renderProductBar(): void {
     const container = document.getElementById('productBar');
     if (!container) return;
 
-    const ar = qalabState.reportData?.analysisReport || qalabState.reportData;
-    const title = ar?.product_title || '产品分析';
-    const asins = qalabState.reportData?.metadata?.asins || [];
+    const qalabState = getQalabState();
+    const metadata = qalabState.reportData?.metadata;
+    const title = metadata?.productTitle || '产品分析';
+    const asins = metadata?.asins || [];
 
     // 使用 SafeRenderer 渲染动态内容
     const template = `
@@ -47,10 +51,11 @@ export function renderStats(): void {
     const container = document.getElementById('dashboardStats');
     if (!container) return;
 
+    const qalabState = getQalabState();
     const totalQAs = qalabState.generatedQAs.length;
-    const categories = [...new Set(qalabState.generatedQAs.map(qa => qa.category))];
+    const categories = [...new Set(qalabState.generatedQAs.map((qa: any) => qa.category))];
     const avgConfidence = totalQAs > 0 
-        ? (qalabState.generatedQAs.reduce((sum, qa) => sum + qa.confidence, 0) / totalQAs).toFixed(1)
+        ? (qalabState.generatedQAs.reduce((sum: any, qa: any) => sum + qa.confidence, 0) / totalQAs).toFixed(1)
         : '0';
     const languages = LANGUAGES.length;
 
@@ -95,6 +100,7 @@ export function renderInsights(): void {
     const container = document.getElementById('insightsStrip');
     if (!container) return;
 
+    const qalabState = getQalabState();
     const ar = qalabState.reportData?.analysisReport || qalabState.reportData;
     const ff = ar?.['fatal-flaws'] || {};
     const wm = ar?.['wow-moments'] || {};
@@ -153,6 +159,7 @@ export function renderLangSelector(onLangChange: (lang: string) => void): void {
     const container = document.getElementById('langSelector');
     if (!container) return;
 
+    const qalabState = getQalabState();
     // 使用 SafeRenderer 渲染列表
     renderer.renderList(
         container,
@@ -168,7 +175,7 @@ export function renderLangSelector(onLangChange: (lang: string) => void): void {
     );
 
     container.querySelectorAll('.lang-btn').forEach(btn => {
-        qalabState.eventManager.addEventListener(btn as HTMLElement, 'click', () => {
+        btn.addEventListener('click', () => {
             const lang = (btn as HTMLElement).dataset.lang;
             if (lang) onLangChange(lang);
         });
@@ -182,11 +189,12 @@ export function renderCategoryTabs(onCategoryChange: (cat: string) => void): voi
     const container = document.getElementById('categoryTabs');
     if (!container) return;
 
+    const qalabState = getQalabState();
     const counts: Record<string, number> = {};
     CATEGORIES.forEach(cat => {
         counts[cat.id] = cat.id === 'all'
             ? qalabState.generatedQAs.length
-            : qalabState.generatedQAs.filter(qa => qa.category === cat.id).length;
+            : qalabState.generatedQAs.filter((qa: any) => qa.category === cat.id).length;
     });
 
     // 使用 SafeRenderer 渲染列表
@@ -205,7 +213,7 @@ export function renderCategoryTabs(onCategoryChange: (cat: string) => void): voi
     );
 
     container.querySelectorAll('.cat-tab').forEach(btn => {
-        qalabState.eventManager.addEventListener(btn as HTMLElement, 'click', () => {
+        btn.addEventListener('click', () => {
             const category = (btn as HTMLElement).dataset.category;
             if (category) onCategoryChange(category);
         });
@@ -223,15 +231,16 @@ export function renderQAGrid(
     const container = document.getElementById('qaGrid');
     if (!container) return;
 
+    const qalabState = getQalabState();
     const filtered = qalabState.currentCategory === 'all'
         ? qalabState.generatedQAs
-        : qalabState.generatedQAs.filter(qa => qa.category === qalabState.currentCategory);
+        : qalabState.generatedQAs.filter((qa: any) => qa.category === qalabState.currentCategory);
 
     // 使用 SafeRenderer 渲染列表
     renderer.renderList(
         container,
         filtered,
-        (qa, index) => {
+        (qa: any, index: number) => {
             const trans = qa.translations[qalabState.currentLang];
             if (!trans) return '';
 
@@ -241,7 +250,7 @@ export function renderQAGrid(
 
             const catLabel = CATEGORIES.find(c => c.id === qa.category)?.label || qa.category;
             
-            const sourcesHtml = qa.sources.map(src => 
+            const sourcesHtml = qa.sources.map((src: string) => 
                 `<div class="qa-source"><i class="fa-solid fa-database"></i>${renderer.escapeHtml(src)}</div>`
             ).join('');
 
@@ -289,14 +298,14 @@ export function renderQAGrid(
     );
 
     container.querySelectorAll('[data-qa-toggle]').forEach(el => {
-        qalabState.eventManager.addEventListener(el as HTMLElement, 'click', () => {
+        el.addEventListener('click', () => {
             const id = (el as HTMLElement).dataset.qaToggle;
             if (id) onToggle(parseInt(id));
         });
     });
 
     container.querySelectorAll('[data-qa-copy]').forEach(el => {
-        qalabState.eventManager.addEventListener(el as HTMLElement, 'click', (e) => {
+        el.addEventListener('click', (e: any) => {
             e.stopPropagation();
             const id = (el as HTMLElement).dataset.qaCopy;
             if (id) onCopy(parseInt(id), el as HTMLElement);
@@ -304,7 +313,7 @@ export function renderQAGrid(
     });
 
     container.querySelectorAll('[data-qa-edit]').forEach(el => {
-        qalabState.eventManager.addEventListener(el as HTMLElement, 'click', (e) => {
+        el.addEventListener('click', (e: any) => {
             e.stopPropagation();
             const id = (el as HTMLElement).dataset.qaEdit;
             if (id) onEdit(parseInt(id));

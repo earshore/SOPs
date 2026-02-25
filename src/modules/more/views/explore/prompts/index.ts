@@ -318,10 +318,10 @@ window.copyPrompt = function (promptId: string): void {
     navigator.clipboard
         .writeText(prompt.prompt)
         .then(() => {
-            showToast('提示词已复制到剪贴板', 'success');
+            showToast('提示词已复制到剪贴板', { type: 'success' });
         })
         .catch(() => {
-            showToast('复制失败,请手动复制', 'error');
+            showToast('复制失败,请手动复制', { type: 'error' });
         });
 };
 
@@ -337,10 +337,10 @@ window.copyModalPrompt = function (): void {
         .writeText(promptText)
         .then(() => {
             const langName = currentLang === 'zh' ? '中文' : '英文';
-            showToast(`${langName}提示词已复制到剪贴板`, 'success');
+            showToast(`${langName}提示词已复制到剪贴板`, { type: 'success' });
         })
         .catch(() => {
-            showToast('复制失败,请手动复制', 'error');
+            showToast('复制失败,请手动复制', { type: 'error' });
         });
 };
 

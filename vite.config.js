@@ -37,16 +37,27 @@ export default defineConfig({
     // 开发服务器配置
     server: {
         port: 5173,
-        open: true,
+        open: false,
         cors: true,
         // 代理配置 - 解决开发环境 CORS 问题
         proxy: {
-            // 代理 /v1 路径到生产环境的 LLM Gateway
+            // 代理 /v1 路径到自定义 AI Gateway
             '/v1': {
-                target: 'https://llm-gateway.hongecb.store',
+                target: 'https://ai-gateway.hongecb.store',
                 changeOrigin: true,
                 secure: true,
-                rewrite: (path) => path
+                rewrite: (path) => path,
+                configure: (proxy, _options) => {
+                    proxy.on('error', (err, _req, _res) => {
+                        console.log('🔴 [Proxy Error]', err);
+                    });
+                    proxy.on('proxyReq', (proxyReq, req, _res) => {
+                        console.log('🔵 [Proxy Request]', req.method, req.url, '→', proxyReq.path);
+                    });
+                    proxy.on('proxyRes', (proxyRes, req, _res) => {
+                        console.log('🟢 [Proxy Response]', proxyRes.statusCode, req.url);
+                    });
+                }
             }
         }
     },

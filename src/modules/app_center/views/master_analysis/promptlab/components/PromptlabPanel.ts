@@ -4,8 +4,7 @@
  */
 
 import { escapeHtml } from '@/common/utils/security';
-import state from '../../../../../../common/state';
-import { appStore } from '../../../../../../stores/useAppStore';
+import { appStore } from '@/stores/useAppStore';
 import { promptlabService } from '../../services/promptlabService';
 import SITE_CONFIGS from '../../../../../../common/constants/constants';
 import type { TargetMarket } from '@/types/state';
@@ -16,6 +15,7 @@ import type { AnalysisReport } from '../../../../../../types/modules-business';
 import type { UserProductProfile, PromptInputs } from '../../../../../../types/state';
 import eventBus from '../../../../../../common/EventBus';
 import { SafeRenderer } from '../../../../../../common/infrastructure/SafeRenderer';
+import { estimateTokenCount, formatTokenCount } from '../../ai_analysis/utils/tokenCounter';
 
 /**
  * 控制台模式类型
@@ -64,7 +64,15 @@ export function createPromptlabPanel() {
          * 是否有分析报告
          */
         get hasReport(): boolean {
-            return !!state.analysis.analysisReport;
+            const report = appStore.getState().analysis.analysisReport;
+            console.log('[Promptlab] hasReport 检查:', { 
+                report, 
+                type: typeof report,
+                hasMetadata: typeof report === 'object' && report !== null ? (report as any).metadata : undefined,
+                hasAnalysisReport: typeof report === 'object' && report !== null ? (report as any).analysisReport : undefined,
+                result: !!report
+            });
+            return !!appStore.getState().analysis.analysisReport;
         },
         
         /**
@@ -87,17 +95,24 @@ export function createPromptlabPanel() {
         },
         
         /**
-         * 字符计数
+         * Token 计数
          */
-        get charCount(): number {
-            return this.currentPrompt.length;
+        get tokenCount(): number {
+            return estimateTokenCount(this.currentPrompt);
+        },
+        
+        /**
+         * 格式化的 Token 计数
+         */
+        get formattedTokenCount(): string {
+            return formatTokenCount(this.tokenCount);
         },
         
         /**
          * 是否超出字符限制
          */
         get isOverLimit(): boolean {
-            return this.charCount > this.profile.charLimit;
+            return this.tokenCount > this.profile.charLimit;
         },
         
         // ========== Lifecycle ==========
@@ -177,16 +192,22 @@ export function createPromptlabPanel() {
          * 渲染报告分析
          */
         renderReportAnalysis() {
+            console.log('[Promptlab] renderReportAnalysis 调用, hasReport:', this.hasReport);
+            
             const container = document.getElementById('report-sections-container');
             const statusDiv = document.getElementById('lab-analysis-status');
             const marketSelect = document.getElementById('lab-target-market') as HTMLSelectElement;
             
-            if (!container) return;
+            if (!container) {
+                console.log('[Promptlab] 容器元素未找到');
+                return;
+            }
             
             const renderer = SafeRenderer.getInstance();
             
             // 如果没有报告，显示提示
             if (!this.hasReport) {
+                console.log('[Promptlab] 没有报告，显示提示');
                 if (statusDiv) {
                     statusDiv.className = 'px-2 py-1 bg-slate-100 text-slate-500 rounded text-xs flex items-center gap-1';
                     renderer.renderTemplate(statusDiv, '<i class="fas fa-exclamation-circle"></i> 未检测到分析报告');
@@ -213,16 +234,17 @@ export function createPromptlabPanel() {
          * 智能自动选择市场
          */
         autoSelectMarket(marketSelect: HTMLSelectElement | null) {
-            if (!marketSelect || !state.masterPrompt) return;
+            const currentState = appStore.getState();
+            if (!marketSelect) return;
             
             // 获取当前数据源的 marketplace
             let currentMarketplace = '';
-            const analysisReport = state.analysis.analysisReport as any;
+            const analysisReport = currentState.analysis.analysisReport as any;
             
             if (analysisReport && analysisReport.marketplace) {
                 currentMarketplace = analysisReport.marketplace;
-            } else if (state.scraper?.scrapedData?.metadata?.marketplace) {
-                currentMarketplace = state.scraper.scrapedData.metadata.marketplace;
+            } else if (currentState.scraper?.scrapedData?.metadata?.marketplace) {
+                currentMarketplace = currentState.scraper.scrapedData.metadata.marketplace;
             } else if (analysisReport) {
                 currentMarketplace = analysisReport.targetMarket || analysisReport.language || '';
             }
@@ -257,8 +279,12 @@ export function createPromptlabPanel() {
          * 渲染报告模块
          */
         renderReportModules(container: HTMLElement) {
-            const report = state.analysis.analysisReport as any;
-            const isNewFormat = report.results && Array.isArray(report.results);
+            const report = appStore.getState().analysis.analysisReport as any;
+            
+            console.log('[Promptlab] renderReportModules 调用:', { 
+                report, 
+                reportKeys: report ? Object.keys(report) : null 
+            });
             
             const renderer = SafeRenderer.getInstance();
             
@@ -268,9 +294,19 @@ export function createPromptlabPanel() {
             
             const isFirstLoad = this.profile.selectedReportSections.length === 0;
             
-            if (isNewFormat) {
-                // 处理新格式报告（AI智能分析）
-                this.renderNewFormatModules(container, report.results, isFirstLoad);
+            // 检测报告格式：
+            // 新格式直接是分析目标对象: { 'title-keywords': {...}, 'selling-points': {...}, ... }
+            // 旧格式是包装格式: { metadata: {...}, analysisReport: {...} }
+            const hasMetadata = report?.metadata && report?.analysisReport;
+            
+            if (hasMetadata) {
+                // 处理包装格式报告
+                console.log('[Promptlab] 检测到包装格式报告');
+                this.renderNewFormatModules(container, report.analysisReport, isFirstLoad);
+            } else if (report && typeof report === 'object') {
+                // 处理直接格式报告（当前格式）
+                console.log('[Promptlab] 检测到直接格式报告');
+                this.renderNewFormatModules(container, report, isFirstLoad);
             } else {
                 // 处理旧格式报告（向后兼容）
                 this.renderLegacyFormatModules(container, report, isFirstLoad);
@@ -278,34 +314,236 @@ export function createPromptlabPanel() {
         },
         
         /**
-         * 渲染新格式报告模块
+         * 从分析数据中智能提取预览文本
+         * @param targetId 分析目标ID
+         * @param data 分析数据
+         * @returns 预览文本
          */
-        renderNewFormatModules(container: HTMLElement, results: any[], isFirstLoad: boolean) {
+        extractPreviewText(targetId: string, data: any): string {
+            console.log('[Promptlab] extractPreviewText 调用:', { targetId, dataType: typeof data, data });
+            
+            try {
+                switch (targetId) {
+                    case 'title-keywords':
+                        console.log('[Promptlab] 处理 title-keywords:', data);
+                        // 提取主要关键词
+                        if (data.primary_keywords && Array.isArray(data.primary_keywords)) {
+                            const keywords = data.primary_keywords
+                                .slice(0, 3)
+                                .map((k: any) => k.keyword)
+                                .filter(Boolean)
+                                .join(', ');
+                            console.log('[Promptlab] title-keywords 提取结果:', keywords);
+                            return keywords || '无主要关键词';
+                        }
+                        console.log('[Promptlab] title-keywords 无 primary_keywords');
+                        break;
+                    
+                    case 'selling-points':
+                        console.log('[Promptlab] 处理 selling-points:', data);
+                        // 提取主要差异化角度
+                        if (data.overall_strategy?.primary_differentiation) {
+                            console.log('[Promptlab] selling-points 提取结果:', data.overall_strategy.primary_differentiation);
+                            return data.overall_strategy.primary_differentiation;
+                        }
+                        if (data.bullet_analysis && Array.isArray(data.bullet_analysis) && data.bullet_analysis.length > 0) {
+                            const result = data.bullet_analysis[0].differentiation_angle || '卖点分析';
+                            console.log('[Promptlab] selling-points 提取结果(备选):', result);
+                            return result;
+                        }
+                        console.log('[Promptlab] selling-points 无可用数据');
+                        break;
+                    
+                    case 'fatal-flaws':
+                        // 提取关键问题
+                        if (data.critical_issues && Array.isArray(data.critical_issues)) {
+                            const issues = data.critical_issues
+                                .slice(0, 2)
+                                .map((i: any) => i.issue)
+                                .filter(Boolean)
+                                .join('; ');
+                            return issues || '无致命缺陷';
+                        }
+                        if (data.risk_assessment?.primary_concern) {
+                            return data.risk_assessment.primary_concern;
+                        }
+                        break;
+                    
+                    case 'wow-moments':
+                        // 提取Wow时刻描述
+                        if (data.moments && Array.isArray(data.moments) && data.moments.length > 0) {
+                            return data.moments[0].moment_description || 'Wow时刻分析';
+                        }
+                        if (data.emotional_triggers && Array.isArray(data.emotional_triggers)) {
+                            return data.emotional_triggers.slice(0, 2).join(', ');
+                        }
+                        break;
+                    
+                    case 'hesitation-points':
+                        // 提取主要犹豫点
+                        if (data.hesitations && Array.isArray(data.hesitations) && data.hesitations.length > 0) {
+                            return data.hesitations[0].pre_purchase_worry || '犹豫点分析';
+                        }
+                        if (data.common_doubts && Array.isArray(data.common_doubts)) {
+                            return data.common_doubts.slice(0, 2).join('; ');
+                        }
+                        break;
+                    
+                    case 'buyer-profile':
+                        // 提取买家类型
+                        if (data.buyer_types && Array.isArray(data.buyer_types) && data.buyer_types.length > 0) {
+                            const types = data.buyer_types
+                                .slice(0, 2)
+                                .map((t: any) => t.type)
+                                .filter(Boolean)
+                                .join(', ');
+                            return types || '买家画像分析';
+                        }
+                        if (data.demographics?.lifestyle_indicators && Array.isArray(data.demographics.lifestyle_indicators)) {
+                            return data.demographics.lifestyle_indicators.slice(0, 2).join(', ');
+                        }
+                        break;
+                    
+                    case 'vocab-gap':
+                        // 提取词汇缺口
+                        if (data.missing_keywords && Array.isArray(data.missing_keywords)) {
+                            const keywords = data.missing_keywords
+                                .slice(0, 3)
+                                .map((k: any) => k.keyword || k)
+                                .filter(Boolean)
+                                .join(', ');
+                            return keywords || '词汇缺口分析';
+                        }
+                        break;
+                    
+                    case 'promise-reality':
+                        // 提取承诺与现实差距
+                        if (data.gaps && Array.isArray(data.gaps) && data.gaps.length > 0) {
+                            return data.gaps[0].promise || data.gaps[0].gap_description || '承诺与现实分析';
+                        }
+                        break;
+                }
+                
+                // 默认：尝试提取第一个有意义的字符串值
+                console.log('[Promptlab] 使用默认提取逻辑');
+                const firstValue = this.findFirstStringValue(data);
+                console.log('[Promptlab] findFirstStringValue 结果:', firstValue);
+                if (firstValue) {
+                    return firstValue.length > 80 ? firstValue.substring(0, 80) + '...' : firstValue;
+                }
+                
+                console.log('[Promptlab] 无法提取预览文本，返回默认值');
+                return '分析数据已加载';
+            } catch (error) {
+                console.error('[Promptlab] 提取预览文本失败:', error);
+                return '分析数据已加载';
+            }
+        },
+        
+        /**
+         * 递归查找对象中第一个有意义的字符串值
+         * @param obj 对象
+         * @param depth 递归深度限制
+         * @returns 字符串值或null
+         */
+        findFirstStringValue(obj: any, depth: number = 0): string | null {
+            console.log('[Promptlab] findFirstStringValue 调用:', { depth, objType: typeof obj, isArray: Array.isArray(obj) });
+            
+            if (depth > 3) {
+                console.log('[Promptlab] 达到最大递归深度');
+                return null; // 限制递归深度
+            }
+            
+            if (typeof obj === 'string' && obj.trim().length > 0) {
+                console.log('[Promptlab] 找到字符串值:', obj.substring(0, 50));
+                return obj.trim();
+            }
+            
+            if (Array.isArray(obj) && obj.length > 0) {
+                console.log('[Promptlab] 处理数组，长度:', obj.length);
+                return this.findFirstStringValue(obj[0], depth + 1);
+            }
+            
+            if (obj && typeof obj === 'object') {
+                console.log('[Promptlab] 处理对象，键:', Object.keys(obj).slice(0, 5));
+                for (const key in obj) {
+                    if (obj.hasOwnProperty(key)) {
+                        const result = this.findFirstStringValue(obj[key], depth + 1);
+                        if (result) return result;
+                    }
+                }
+            }
+            
+            console.log('[Promptlab] 未找到字符串值');
+            return null;
+        },
+        
+        /**
+         * 渲染新格式报告模块
+         * @param container 容器元素
+         * @param analysisReport 分析报告对象 { 'title-keywords': {...}, 'selling-points': {...}, ... }
+         * @param isFirstLoad 是否首次加载
+         */
+        renderNewFormatModules(container: HTMLElement, analysisReport: any, isFirstLoad: boolean) {
+            console.log('[Promptlab] renderNewFormatModules 调用:', { 
+                analysisReport, 
+                reportType: typeof analysisReport,
+                keys: Object.keys(analysisReport || {}),
+                isFirstLoad 
+            });
+            
             const renderer = SafeRenderer.getInstance();
+            
+            // 分析目标配置（用于显示标题和图标）
+            const targetConfig: Record<string, { title: string; icon: string }> = {
+                'title-keywords': { title: '标题核心词根', icon: '🔑' },
+                'selling-points': { title: '卖点结构拆解', icon: '💎' },
+                'fatal-flaws': { title: '致命缺陷', icon: '⚠️' },
+                'wow-moments': { title: 'Wow时刻', icon: '✨' },
+                'hesitation-points': { title: '犹豫点', icon: '🤔' },
+                'buyer-profile': { title: '买家画像', icon: '👤' },
+                'vocab-gap': { title: '词汇缺口', icon: '📝' },
+                'promise-reality': { title: '承诺与现实', icon: '🎯' }
+            };
+            
+            // 获取所有可用的分析目标
+            const availableTargets = Object.keys(analysisReport).filter(key => 
+                targetConfig[key] && analysisReport[key]
+            );
+            
+            console.log('[Promptlab] 可用的分析目标:', availableTargets);
+            console.log('[Promptlab] 每个目标的数据:', availableTargets.map(id => ({
+                id,
+                dataType: typeof analysisReport[id],
+                isArray: Array.isArray(analysisReport[id]),
+                keys: analysisReport[id] && typeof analysisReport[id] === 'object' ? Object.keys(analysisReport[id]).slice(0, 5) : null
+            })));
             
             // 如果是首次加载,自动选中所有模块
             if (isFirstLoad) {
-                const allKeys = results.map(r => r.targetId);
-                this.profile.selectedReportSections = allKeys;
+                this.profile.selectedReportSections = availableTargets;
                 this.saveState();
             }
             
-            results.forEach((result) => {
-                const key = result.targetId;
-                const label = result.title;
+            availableTargets.forEach((targetId) => {
+                const config = targetConfig[targetId];
+                if (!config) return; // 类型守卫
                 
-                // 生成预览文本
-                const previewParts: string[] = [];
-                if (result.highlights?.[0]?.text) {
-                    previewParts.push(result.highlights[0].text);
-                }
-                if (result.details?.[0]?.items?.[0]) {
-                    previewParts.push(result.details[0].items[0]);
-                }
-                const previewText = previewParts.join(' | ').substring(0, 80) + 
-                    (previewParts.join(' | ').length > 80 ? '...' : '');
+                const data = analysisReport[targetId];
+                console.log(`[Promptlab] 渲染目标 ${targetId}:`, { 
+                    dataType: typeof data, 
+                    isArray: Array.isArray(data),
+                    data 
+                });
                 
-                const isChecked = this.profile.selectedReportSections.includes(key);
+                // 生成预览文本 - 智能提取关键信息
+                let previewText = '';
+                if (data) {
+                    previewText = this.extractPreviewText(targetId, data);
+                }
+                console.log(`[Promptlab] ${targetId} 最终预览文本:`, previewText);
+                
+                const isChecked = this.profile.selectedReportSections.includes(targetId);
                 
                 const div = document.createElement('div');
                 div.className = 'relative flex items-start p-3 rounded-lg border border-slate-200 bg-white hover:border-blue-300 hover:shadow-sm transition-all';
@@ -315,15 +553,15 @@ export function createPromptlabPanel() {
                     <div class="flex h-5 items-center">
                         <input type="checkbox" 
                                name="report-section" 
-                               value="${escapeHtml(key)}" 
-                               id="sect-${escapeHtml(key)}" 
+                               value="${escapeHtml(targetId)}" 
+                               id="sect-${escapeHtml(targetId)}" 
                                class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" 
                                ${isChecked ? 'checked' : ''}
                                @change="onReportSectionChange">
                     </div>
                     <div class="ml-3 text-sm flex-1 min-w-0">
-                        <label for="sect-${escapeHtml(key)}" class="cursor-pointer select-none w-full block">
-                            <span class="font-medium text-slate-700 block mb-0.5 leading-snug">${escapeHtml(label)}</span>
+                        <label for="sect-${escapeHtml(targetId)}" class="cursor-pointer select-none w-full block">
+                            <span class="font-medium text-slate-700 block mb-0.5 leading-snug">${config.icon} ${escapeHtml(config.title)}</span>
                             <p class="text-xs text-slate-400 truncate font-normal" title="${escapeHtml(previewText)}">${escapeHtml(previewText)}</p>
                         </label>
                     </div>
@@ -458,7 +696,7 @@ export function createPromptlabPanel() {
                 else if (!this.profile.targetMarket) msg = '请先选择目标语言/站点 (Card 1)';
                 else if (!this.profile.keywordsTier1.trim()) msg = 'Tier 1 核心大词不能为空';
                 else if (!this.profile.keywordsTier2.trim()) msg = 'Tier 2 长尾词不能为空';
-                showToast(msg, 'warning');
+                showToast(msg, { type: 'warning' });
                 return;
             }
             
@@ -469,13 +707,13 @@ export function createPromptlabPanel() {
                 useAnalysisData: true,
             };
             
-            const analysisReport = state.analysis.analysisReport;
+            const analysisReport = appStore.getState().analysis.analysisReport;
             const reportToUse: AnalysisReport | null = (typeof analysisReport === 'string' || !analysisReport) ? null : analysisReport;
             
             const result = promptlabService.generateMasterPrompt(inputs as any, reportToUse);
             this.listingPromptCache = result;
             
-            showToast('Listing Prompt 已生成', 'success');
+            showToast('Listing Prompt 已生成', { type: 'success' });
         },
         
         /**
@@ -485,7 +723,7 @@ export function createPromptlabPanel() {
             console.log('[Promptlab] 🎯 生成 Visual Prompt');
             
             if (!this.hasReport) {
-                showToast('请先生成 Ai 分析报告以获取视觉灵感', 'warning');
+                showToast('请先生成 Ai 分析报告以获取视觉灵感', { type: 'warning' });
                 return;
             }
             
@@ -494,7 +732,7 @@ export function createPromptlabPanel() {
                 if (!this.profile.targetMarket) msg = '请先选择目标语言/站点';
                 else if (!this.profile.keywordsTier1.trim()) msg = 'Tier 1 核心大词不能为空';
                 else if (!this.profile.keywordsTier2.trim()) msg = 'Tier 2 长尾词不能为空';
-                showToast(msg, 'warning');
+                showToast(msg, { type: 'warning' });
                 return;
             }
             
@@ -505,13 +743,13 @@ export function createPromptlabPanel() {
                 useAnalysisData: true,
             };
             
-            const analysisReport = state.analysis.analysisReport;
+            const analysisReport = appStore.getState().analysis.analysisReport;
             const reportToUse: AnalysisReport | null = (typeof analysisReport === 'string' || !analysisReport) ? null : analysisReport;
             
             const result = promptlabService.generateVisualPrompt(inputs as any, reportToUse);
             this.visualPromptCache = result;
             
-            showToast('Visual Prompt 已生成', 'success');
+            showToast('Visual Prompt 已生成', { type: 'success' });
         },
         
         /**
@@ -565,7 +803,7 @@ export function createPromptlabPanel() {
             if (copyText && copyText.value.length > 10) {
                 copyText.select();
                 document.execCommand('copy');
-                showToast('Prompt 已复制', 'success');
+                showToast('Prompt 已复制', { type: 'success' });
             }
         },
         
@@ -592,7 +830,7 @@ export function createPromptlabPanel() {
                     charLimit: 5000,
                 };
                 this.saveState();
-                showToast('已清空', 'success');
+                showToast('已清空', { type: 'success' });
             }
         },
         
@@ -604,7 +842,7 @@ export function createPromptlabPanel() {
                 cb.checked = true;
             });
             this.onReportSectionChange();
-            showToast('已全选模块', 'success');
+            showToast('已全选模块', { type: 'success' });
         },
         
         /**
@@ -615,7 +853,7 @@ export function createPromptlabPanel() {
                 cb.checked = false;
             });
             this.onReportSectionChange();
-            showToast('已清空选择', 'success');
+            showToast('已清空选择', { type: 'success' });
         },
     };
 }

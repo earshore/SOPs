@@ -6,7 +6,7 @@
 import { analysisTargets } from '../config/analysisTargets';
 import { checkAndLoadScraperData, checkLoadedReport, loadHistoricalReport } from './dataLoaders';
 import { formatHistoryDate } from '../services/reportGenerator';
-import { getTargetColor, getPromptText } from './helpers';
+import { getTargetColorClass, getPromptText, getResultIcon, getResultColor } from './helpers';
 import { getPromptTokenCount, getFormattedTokenCount } from './helpers';
 import { highlightJson } from '../services/reportGenerator';
 import * as actions from './actions';
@@ -25,8 +25,8 @@ export function createAiAnalysisPanel(moduleState: ModuleState): AlpineContext &
     isAnalyzing: moduleState.isAnalyzing,
     progress: moduleState.progress,
     currentStep: moduleState.currentStep,
-    results: moduleState.results,
     analysisReport: moduleState.analysisReport,
+    hasReport: moduleState.hasReport,
     expandedPromptIndex: moduleState.expandedPromptIndex,
     showPromptPanel: moduleState.showPromptPanel,
     showJsonViewer: moduleState.showJsonViewer,
@@ -58,6 +58,22 @@ export function createAiAnalysisPanel(moduleState: ModuleState): AlpineContext &
         console.log('[Alpine 组件] 🔍 canAnalyze 状态:', this.canAnalyze);
       });
       
+      // 监听 analysisReport 变化，自动更新 hasReport 标志
+      (this as any).$watch('analysisReport', (newValue: any) => {
+        console.log('[Alpine 组件] 📊 analysisReport 变化检测:', !!newValue);
+        // 自动更新 hasReport 标志
+        (this as any).hasReport = !!newValue;
+        if (newValue) {
+          // 强制触发 results 计算属性重新计算
+          // 通过访问 results 来触发 getter
+          const resultsCount = (this as any).results?.length || 0;
+          console.log('[Alpine 组件] 📊 results 重新计算:', resultsCount, '个结果');
+          console.log('[Alpine 组件] ✅ hasReport 标志已设置为 true');
+        } else {
+          console.log('[Alpine 组件] ❌ hasReport 标志已设置为 false');
+        }
+      });
+      
       // 检查是否有新的 Scraper 数据
       checkAndLoadScraperData(this, moduleState);
 
@@ -73,12 +89,13 @@ export function createAiAnalysisPanel(moduleState: ModuleState): AlpineContext &
       this.isAnalyzing = moduleState.isAnalyzing;
       this.progress = moduleState.progress;
       this.currentStep = moduleState.currentStep;
-      this.results = [...moduleState.results];
       this.analysisReport = moduleState.analysisReport;
+      this.hasReport = moduleState.hasReport;
       
       console.log('[Alpine 组件] 📊 状态同步完成:', {
         selectedAsins: this.selectedAsins.length,
-        selectedTargets: this.selectedTargets.length
+        selectedTargets: this.selectedTargets.length,
+        hasReport: this.hasReport
       });
     },
 
@@ -88,8 +105,8 @@ export function createAiAnalysisPanel(moduleState: ModuleState): AlpineContext &
       moduleState.isAnalyzing = this.isAnalyzing;
       moduleState.progress = this.progress;
       moduleState.currentStep = this.currentStep;
-      moduleState.results = this.results;
       moduleState.analysisReport = this.analysisReport;
+      moduleState.hasReport = this.hasReport;
     },
 
     // ========== Data Loading ==========
@@ -180,7 +197,15 @@ export function createAiAnalysisPanel(moduleState: ModuleState): AlpineContext &
 
     // ========== Helpers ==========
     getTargetColor(color: string): string {
-      return getTargetColor(color);
+      return getTargetColorClass(color);
+    },
+
+    getResultIcon(targetId: string): string {
+      return getResultIcon(targetId);
+    },
+
+    getResultColor(targetId: string): string {
+      return getResultColor(targetId);
     },
 
     getPromptText(targetId: string): string {

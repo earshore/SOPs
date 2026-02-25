@@ -23,7 +23,7 @@ export interface ApiEndpointConfig {
  */
 export const API_ENDPOINTS: Record<string, ApiEndpointConfig> = {
   openai: {
-    domain: 'api.openai.com',
+    domain: 'api.chatanywhere.org',
     requiresProxy: true,
     displayName: 'OpenAI',
     isDangerous: true
@@ -81,6 +81,19 @@ export const API_ENDPOINTS: Record<string, ApiEndpointConfig> = {
     domain: 'llm-gateway.hongecb.store',
     requiresProxy: false,
     displayName: 'LLM Gateway'
+  },
+  // 自定义 AI 网关（智能路由）
+  customAiGateway: {
+    domain: 'ai-gateway.hongecb.store',
+    requiresProxy: false,
+    displayName: 'Custom AI Gateway',
+    isDangerous: false
+  },
+  // 腾讯混元
+  hunyuan: {
+    domain: 'api.hunyuan.cloud.tencent.com',
+    requiresProxy: false,
+    displayName: 'Tencent Hunyuan'
   }
 };
 

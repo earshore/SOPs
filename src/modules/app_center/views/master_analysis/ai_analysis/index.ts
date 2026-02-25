@@ -8,7 +8,7 @@ import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer'
 import { createInitialState, initializeAsinsFromScraperData, ModuleState } from './state/moduleState';
 import { createAiAnalysisPanel } from './components/AlpinePanel';
 import { AlpineRegistry } from '../../../../../common/infrastructure/AlpineRegistry';
-import state from '../../../../../common/state';
+import { appStore } from '@/stores/useAppStore';
 
 import '../master_analysis_style.css';
 import './ai_analysis_style.css';
@@ -24,7 +24,7 @@ export async function mount(container: HTMLElement): Promise<void> {
 
   try {
     // 1. 初始化状态 - 从 scraper 数据加载
-    const scrapedData = state.scraper?.scrapedData;
+    const scrapedData = appStore.getState().scraper?.scrapedData;
     initializeAsinsFromScraperData(moduleState, scrapedData);
 
     // 2. 使用 SafeModuleLoader 加载模板

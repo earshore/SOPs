@@ -180,9 +180,27 @@ export function reinitButtonRipple(): void {
  * 当用户更改动画设置时，自动重新初始化
  */
 export function observeAnimationSettings(): void {
+  let isReinitializing = false; // 防止循环触发
+  let lastReinitTime = 0;
+  
   // 监听自定义事件（由AnimationManager触发）
   window.addEventListener('animation-settings-changed', () => {
+    const now = Date.now();
+    
+    // 防止短时间内重复初始化（1秒内只初始化一次）
+    if (isReinitializing || (now - lastReinitTime < 1000)) {
+      return;
+    }
+    
+    isReinitializing = true;
+    lastReinitTime = now;
+    
     console.info('[ButtonRipple] 动画设置已更改，重新初始化涟漪效果');
-    reinitButtonRipple();
+    
+    // 使用 requestAnimationFrame 延迟执行，避免阻塞主线程
+    requestAnimationFrame(() => {
+      reinitButtonRipple();
+      isReinitializing = false;
+    });
   });
 }

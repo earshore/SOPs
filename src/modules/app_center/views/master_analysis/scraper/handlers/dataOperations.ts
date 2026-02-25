@@ -84,7 +84,7 @@ export async function deleteProduct(
             console.error('[Scraper] 触发事件失败:', eventError);
         }
 
-        showToast(`ASIN ${asin} 已移除`, "info");
+        showToast(`ASIN ${asin} 已移除`, { type: 'info' });
         console.log(`[Scraper] 成功删除产品: ${asin}`);
 
         return { success: true, data: scrapedData };
@@ -98,7 +98,7 @@ export async function deleteProduct(
             hasOriginalData: !!originalData
         });
         
-        showToast(`删除操作失败: ${errorMessage}`, 'error');
+        showToast(`删除操作失败: ${errorMessage}`, { type: 'error' });
         
         // 回滚数据
         if (originalData) {
@@ -194,7 +194,7 @@ export async function deleteReview(
             console.error('[Scraper] 触发事件失败:', eventError);
         }
 
-        showToast('评论已删除', 'info');
+        showToast('评论已删除', { type: 'info' });
         console.log(`[Scraper] 成功删除评论: ASIN=${asin}, index=${index}`);
 
         return { success: true, data: scrapedData };
@@ -209,7 +209,7 @@ export async function deleteReview(
             hasOriginalData: !!originalData
         });
         
-        showToast(`删除操作失败: ${errorMessage}`, 'error');
+        showToast(`删除操作失败: ${errorMessage}`, { type: 'error' });
         
         // 回滚数据
         if (originalData) {

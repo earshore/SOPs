@@ -262,6 +262,51 @@ class StateMigrationAdapter {
           });
         }
         
+        // QALab状态
+        if (prop === 'qalab') {
+          return new Proxy(state.qalab, {
+            get(_qalabTarget, qalabProp: string) {
+              self.warnDeprecation(
+                `qalab.${qalabProp}`,
+                `使用 appStore.getState().qalab.${qalabProp}`
+              );
+              return state.qalab[qalabProp as keyof typeof state.qalab];
+            },
+            set(_qalabTarget, qalabProp: string, value) {
+              // 如果正在同步，跳过 Zustand action 调用（避免循环）
+              if (self.syncInProgress) {
+                return true;
+              }
+
+              self.warnDeprecation(
+                `qalab.${qalabProp}`,
+                `使用 appStore.getState().updateQALab({ ${qalabProp}: value })`
+              );
+              
+              // 映射到Zustand action
+              if (qalabProp === 'currentLang') {
+                appStore.getState().setQALabLang(value);
+              } else if (qalabProp === 'currentCategory') {
+                appStore.getState().setQALabCategory(value);
+              } else if (qalabProp === 'allExpanded') {
+                appStore.getState().setQALabAllExpanded(value);
+              } else if (qalabProp === 'reportData') {
+                appStore.getState().setQALabReportData(value);
+              } else if (qalabProp === 'generatedQAs') {
+                appStore.getState().setQALabGeneratedQAs(value);
+              } else if (qalabProp === 'rufusThinking') {
+                appStore.getState().setRufusThinking(value);
+              } else if (qalabProp === 'rufusMode') {
+                appStore.getState().setRufusMode(value);
+              } else {
+                appStore.getState().updateQALab({ [qalabProp]: value });
+              }
+              
+              return true;
+            }
+          });
+        }
+        
         // MasterPrompt状态（向后兼容）
         if (prop === 'masterPrompt') {
           self.warnDeprecation(

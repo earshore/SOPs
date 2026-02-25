@@ -86,7 +86,7 @@ export async function callLLMWithTimeout(
         }, 'LLMService');
 
         if (showUserNotification) {
-          showToast('请求超时，正在自动重试...', 'warning');
+          showToast('请求超时，正在自动重试...', { type: 'warning' });
         }
 
         try {
@@ -110,13 +110,13 @@ export async function callLLMWithTimeout(
       onSuccess: () => {
         Logger.info(`LLM调用成功: ${description}`, { taskId }, 'LLMService');
         if (showUserNotification) {
-          showToast('请求成功', 'success');
+          showToast('请求成功', { type: 'success' });
         }
       },
       onFinalFailure: (error) => {
         Logger.error(`LLM调用最终失败: ${description}`, error, 'LLMService');
         if (showUserNotification) {
-          showToast(`请求失败: ${error.message}`, 'error');
+          showToast(`请求失败: ${error.message}`, { type: 'error' });
         }
         reject(error);
       }

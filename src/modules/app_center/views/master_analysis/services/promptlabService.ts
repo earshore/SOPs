@@ -21,32 +21,18 @@ const buildContextSection = (inputs: PromptInputs, analysisReport: AnalysisRepor
   ) {
     const cleanReport = JSON.parse(JSON.stringify(analysisReport));
     
-    // ✅ 检测报告格式：AI智能分析 vs 旧版AI分析
-    const isNewFormat = cleanReport.results && Array.isArray(cleanReport.results);
+    // ✅ 检测报告格式：新格式（带 metadata 和 analysisReport）vs 旧格式
+    const hasMetadata = cleanReport.metadata && cleanReport.analysisReport;
     
-    if (isNewFormat) {
-      // 处理"AI智能分析"的新格式报告
-      const results = cleanReport.results as Array<{
-        targetId: string;
-        title: string;
-        highlights: Array<{ text: string }>;
-        details: Array<{ category: string; items: string[] }>;
-      }>;
-      
+    if (hasMetadata) {
+      // 处理新格式：{ metadata: {...}, analysisReport: { 'title-keywords': {...}, ... } }
+      const report = cleanReport.analysisReport;
       const finalContextObj: Record<string, any> = {};
       
-      // 根据 selectedReportSections 筛选对应的分析结果
+      // 根据 selectedReportSections 筛选对应的分析目标
       selectedReportSections.forEach((targetId) => {
-        const result = results.find(r => r.targetId === targetId);
-        if (result) {
-          // 将分析结果转换为易读的格式
-          finalContextObj[result.title] = {
-            highlights: result.highlights.map(h => h.text),
-            details: result.details.reduce((acc, detail) => {
-              acc[detail.category] = detail.items;
-              return acc;
-            }, {} as Record<string, string[]>)
-          };
+        if (report[targetId]) {
+          finalContextObj[targetId] = report[targetId];
         }
       });
       
@@ -58,7 +44,7 @@ const buildContextSection = (inputs: PromptInputs, analysisReport: AnalysisRepor
         )}\n`;
       }
     } else {
-      // 处理旧版"AI分析"的报告格式（向后兼容）
+      // 处理旧格式（向后兼容）
       // 删除不必要的元数据
       [
         "meta",

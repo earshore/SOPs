@@ -352,6 +352,19 @@
   --color-info-dark:         var(--color-blue-600);
   --color-info-contrast:     #ffffff;
 
+  /* ---- Toast 专用别名（兼容 Q&A Lab 设计） ---- */
+  --accent:  #10b981;  /* 翠绿色 - Success */
+  --danger:  #ef4444;  /* 红色 - Error */
+  --warning: #f59e0b;  /* 橙色 - Warning */
+  --info:    #3b82f6;  /* 蓝色 - Info */
+
+  /* ---- 通用别名（兼容简短命名） ---- */
+  --card:   var(--color-bg-elevated);
+  --border: var(--color-border-default);
+  --text:   var(--color-text-primary);
+  --text3:  var(--color-text-tertiary);
+  --ease:   var(--ease-smooth);
+
 
   /* ========================================
      4. 间距系统

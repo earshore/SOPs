@@ -7,7 +7,7 @@ import { HistoryService } from '../../services/historyService';
 import { StorageService } from '../../../../../../services/storageService';
 import { showToast } from '../../../../../../common/ui';
 import { LANGUAGE_HEADERS } from '../../../../../../common/constants/constants';
-import state from '../../../../../../common/state';
+import { appStore } from '@/stores/useAppStore';
 import eventBus from '../../../../../../common/EventBus';
 import { MODULE_EVENTS } from '../../../../../../common/constants/eventConstants';
 
@@ -44,7 +44,7 @@ export class HistoryPanel {
         const newHistory = this.history.filter(h => h.id !== id);
         StorageService.setScrapeHistory(newHistory);
         this.loadHistory();
-        showToast("记录已删除", "success");
+        showToast("记录已删除", { type: 'success' });
     }
 
     /**
@@ -54,7 +54,7 @@ export class HistoryPanel {
         if (!confirm("确定清空所有历史记录？")) return;
         HistoryService.clear();
         this.loadHistory();
-        showToast("历史已清空", "success");
+        showToast("历史已清空", { type: 'success' });
     }
 
     /**
@@ -80,23 +80,23 @@ export class HistoryPanel {
         }
 
         // 恢复全局状态（供所有页面使用）
-        state.scraper.currentHistoryId = item.id;
-        state.scraper.scrapedData = item.data;
+        appStore.getState().setCurrentHistoryId(item.id);
+        appStore.getState().setScrapedData(item.data);
 
         // 优先加载"AI智能分析"的报告，如果不存在则回退到旧的"AI分析"报告
         if (item.analysisStatus?.isAnalyzed && item.analysisStatus?.analysisReport) {
-            state.analysis.analysisReport = item.analysisStatus.analysisReport;
+            appStore.getState().setAnalysisReport(item.analysisStatus.analysisReport);
             console.log('[Scraper] 已加载"AI智能分析"报告到全局状态');
         } else if (item.report) {
-            state.analysis.analysisReport = item.report;
+            appStore.getState().setAnalysisReport(item.report);
             console.log('[Scraper] 已加载旧版"AI分析"报告到全局状态');
         } else {
-            state.analysis.analysisReport = null;
+            appStore.getState().setAnalysisReport(null);
             console.log('[Scraper] 该快照无分析报告');
         }
 
-        state.analysis.translatedReport = null;
-        state.scraper.selectedSite = item.site as ScraperSite;
+        appStore.getState().setTranslatedReport(null);
+        appStore.getState().scraper.selectedSite = item.site as ScraperSite;
 
         // 通知其他模块数据已更新
         eventBus.emit(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, item.data);
@@ -106,7 +106,7 @@ export class HistoryPanel {
         const message = hasReport
             ? `历史快照已加载（包含分析报告）`
             : `历史快照已加载`;
-        showToast(message, "success");
+        showToast(message, { type: 'success' });
 
         return true;
     }
@@ -116,7 +116,7 @@ export class HistoryPanel {
      */
     async loadAnalysisReport(item: HistoryItem): Promise<void> {
         if (!item.analysisStatus || !item.analysisStatus.isAnalyzed) {
-            showToast("该快照没有分析报告", "warning");
+            showToast("该快照没有分析报告", { type: 'warning' });
             return;
         }
 
@@ -125,7 +125,7 @@ export class HistoryPanel {
             this.loadHistoryItem(item, false);
 
             // 2. 确保报告数据已正确加载到全局状态
-            if (!state.analysis.analysisReport) {
+            if (!appStore.getState().analysis.analysisReport) {
                 throw new Error('报告数据加载失败');
             }
 
@@ -136,10 +136,10 @@ export class HistoryPanel {
                 await window.switchTab('ai_analysis', true);
             }
 
-            showToast("已跳转到 AI智能分析查看报告", "success");
+            showToast("已跳转到 AI智能分析查看报告", { type: 'success' });
         } catch (error) {
             console.error('[Scraper] 载入分析报告失败:', error);
-            showToast("载入分析报告失败", "error");
+            showToast("载入分析报告失败", { type: 'error' });
         }
     }
 }
