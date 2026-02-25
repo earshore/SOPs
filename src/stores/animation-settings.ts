@@ -252,7 +252,15 @@ export function initializeAnimationStore(): void {
   const performanceMonitor = animationManager.getPerformanceMonitor();
   
   // 注册性能降级回调
+  let isHandlingPerformanceDrop = false; // 防止循环触发
   performanceMonitor.onPerformanceDrop(() => {
+    // 防止重复触发
+    if (isHandlingPerformanceDrop) {
+      return;
+    }
+    
+    isHandlingPerformanceDrop = true;
+    
     const currentFPS = performanceMonitor.getCurrentFPS();
     animationSettingsStore.setState({ 
       currentFPS,
@@ -267,6 +275,11 @@ export function initializeAnimationStore(): void {
     animationSettingsStore.getState().syncFromManager();
     
     console.info('Performance degradation detected, non-critical animations disabled');
+    
+    // 延迟重置标志，避免短时间内重复触发
+    setTimeout(() => {
+      isHandlingPerformanceDrop = false;
+    }, 5000); // 5秒内不再处理性能降级
   });
   
   // 监听系统偏好变化

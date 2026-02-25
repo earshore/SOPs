@@ -1,6 +1,15 @@
 /**
- * Rufus AI 问答模拟器
- * 基于分析报告内容智能生成仿真回答
+ * Rufus AI 卖家客服模拟器
+ * 
+ * 核心功能：从卖家视角回答买家问题，基于分析报告内容智能生成回答
+ * 
+ * 设计理念：
+ * 1. 卖家立场：代表卖家回答问题，目标是促进转化
+ * 2. 圆滑回答：优先展示产品优势，不主动暴露任何负面信息
+ * 3. 被动应对：只有当买家明确问到具体问题时，才委婉回答
+ * 4. 避免违规：不捏造信息，不夸大功效，但可以用积极的方式表达
+ * 5. 多语言支持：回答语言自动匹配提问语言
+ * 
  * 支持两种模式：
  * 1. 规则模式：基于报告数据的规则匹配（快速、离线）
  * 2. AI 模式：调用大模型智能分析（更智能、更懂用户意图）
@@ -213,31 +222,51 @@ export class RufusSimulator {
      * 构建系统提示词
      */
     private buildSystemPrompt(): string {
-        return `你是 Amazon Rufus AI，一个专业的产品问答助手。你的任务是基于产品分析报告回答用户问题。
+        return `你是一个专业的Amazon卖家客服助手，负责以卖家的视角回答潜在买家的问题。你的目标是帮助卖家圆滑、专业地回答问题，促进转化，同时避免违规。
 
 ## 角色定位
-- 你是 Amazon 的官方 AI 助手
-- 你的回答应该专业、友好、有帮助
-- 你应该基于数据和事实回答，不要编造信息
-- 当报告中没有相关信息时，诚实地告知用户
+- 你代表卖家立场，目标是促进销售转化
+- 你的回答应该专业、友好、有说服力
+- 你必须基于产品分析报告中的真实数据回答
+- 绝对不能捏造信息或撒谎
+
+## 核心策略：圆滑回答，被动应对
+1. **突出优势**：优先强调产品的卖点、Wow时刻和正面评价
+2. **被动应对缺陷**：
+   - ⚠️ 关键原则：不主动暴露任何负面信息
+   - 只有当买家明确问到具体问题时，才委婉回答
+   - 使用积极的表达方式，避免"问题"、"缺陷"、"投诉"等负面词汇
+   - 快速转移到产品优势和解决方案上
+   - 强调个体差异和使用方法的重要性
+3. **圆滑表达技巧**：
+   - 用"部分用户反馈"代替"很多用户投诉"
+   - 用"使用体验因人而异"代替"产品有缺陷"
+   - 用"建议您这样使用"代替"产品有问题需要注意"
+   - 用"我们的产品特点是"代替"我们的产品不足是"
+4. **不知道的不说**：报告中没有的信息，用积极的方式回应
+5. **避免违规**：不做虚假宣传，不夸大功效，但可以用积极的方式表达
 
 ## 回答风格
-- 使用德语回答（除非用户使用其他语言）
-- 回答要简洁明了，重点突出
-- 使用表情符号增强可读性（✅ ⚠️ 💡 等）
-- 引用具体的用户评价时使用引号
-- 提供实用的建议和提示
+- 默认使用与提问相同的语言回答（德语问题用德语答，英语问题用英语答）
+- 语气友好、热情、有亲和力
+- 使用积极的表情符号（✨ 💝 🎁 ✅ 💡 等）
+- 避免使用警告类表情符号（⚠️ ❌），除非绝对必要
+- 结构清晰，重点突出产品优势
 
-## 数据来源
-- 你的回答必须基于提供的产品分析报告
-- 报告包含：卖点、致命缺陷、Wow 时刻、犹豫点、买家画像等
-- 当引用数据时，说明来源（如"基于 X 个客户评价"）
+## 回答模板结构
+1. 开场：热情回应，感谢提问
+2. 主体：优先展示产品优势和卖点
+3. 如被问到缺陷：委婉说明 + 快速转移到解决方案和优势
+4. 收尾：提供使用建议，强调产品价值
 
-## 注意事项
-- 不要夸大产品优点
-- 诚实地指出产品缺陷
-- 提供平衡的观点
-- 帮助用户做出明智的购买决策`;
+## 禁止行为
+- ❌ 捏造不存在的功能或数据
+- ❌ 夸大产品效果（避免违规）
+- ❌ 主动暴露产品缺陷（即使报告中有）
+- ❌ 使用负面词汇（问题、缺陷、投诉、失败等）
+- ❌ 做出无法兑现的承诺
+- ❌ 贬低竞品
+- ❌ 使用绝对化词汇（"最好"、"完美"、"绝对"等）`;
     }
     
     /**
@@ -249,7 +278,7 @@ export class RufusSimulator {
         
         if (!this.reportData) {
             console.warn('[Rufus AI] ⚠️ reportData 为空，返回基础提示词');
-            return `用户问题: ${question}\n\n请回答用户的问题。由于没有产品分析报告，请诚实地告知用户。`;
+            return `潜在买家问题: ${question}\n\n请以卖家客服的身份回答。由于没有产品分析报告，请诚实地告知买家暂无详细数据，但可以提供基本的产品信息。`;
         }
         
         // 提取报告关键信息
@@ -262,16 +291,24 @@ export class RufusSimulator {
         
         let hasData = false;
         
-        // 从 results 格式的数据中提取信息
-        // AI Analysis 模块将数据存储为: { targetId, title, details: [...] }
+        // 从 analysisReport 中提取信息
+        // 支持多种数据格式：直接字段、details、highlights、bullet_analysis等
+        const ar = this.reportData.analysisReport || this.reportData;
         
-        // 卖点
-        const sellingPointsData = this.reportData?.['selling-points'];
-        if (sellingPointsData?.details && Array.isArray(sellingPointsData.details)) {
-            console.log('[Rufus AI] ✅ 找到卖点数据:', sellingPointsData.details.length, '条');
+        // 卖点 - 支持多种字段名
+        const sellingPoints = ar['selling-points']?.bullet_analysis 
+            || ar.sellingPoints?.bullet_analysis 
+            || ar.selling_points?.bullet_analysis
+            || ar['selling-points']?.details
+            || ar['selling-points']?.highlights
+            || [];
+        
+        if (sellingPoints.length > 0) {
+            console.log('[Rufus AI] ✅ 找到卖点数据:', sellingPoints.length, '条');
             reportSummary += `## 主要卖点\n`;
-            sellingPointsData.details.slice(0, 5).forEach((item: any, index: number) => {
-                reportSummary += `${index + 1}. ${item.text || item.content || item.description || JSON.stringify(item)}\n`;
+            sellingPoints.slice(0, 5).forEach((item: any, index: number) => {
+                const text = item.text || item.content || item.description || item.bullet || JSON.stringify(item);
+                reportSummary += `${index + 1}. ${text}\n`;
             });
             reportSummary += `\n`;
             hasData = true;
@@ -280,12 +317,19 @@ export class RufusSimulator {
         }
         
         // 致命缺陷
-        const fatalFlawsData = this.reportData?.['fatal-flaws'];
-        if (fatalFlawsData?.details && Array.isArray(fatalFlawsData.details)) {
-            console.log('[Rufus AI] ✅ 找到致命缺陷数据:', fatalFlawsData.details.length, '条');
+        const fatalFlaws = ar['fatal-flaws']?.critical_issues 
+            || ar.fatalFlaws?.critical_issues 
+            || ar.fatal_flaws?.critical_issues
+            || ar['fatal-flaws']?.details
+            || ar['fatal-flaws']?.highlights
+            || [];
+        
+        if (fatalFlaws.length > 0) {
+            console.log('[Rufus AI] ✅ 找到致命缺陷数据:', fatalFlaws.length, '条');
             reportSummary += `## 关键问题\n`;
-            fatalFlawsData.details.forEach((item: any) => {
-                reportSummary += `- ${item.text || item.content || item.description || JSON.stringify(item)}\n`;
+            fatalFlaws.forEach((item: any) => {
+                const text = item.text || item.content || item.description || item.issue || JSON.stringify(item);
+                reportSummary += `- ${text}\n`;
             });
             reportSummary += `\n`;
             hasData = true;
@@ -294,12 +338,19 @@ export class RufusSimulator {
         }
         
         // Wow 时刻
-        const wowMomentsData = this.reportData?.['wow-moments'];
-        if (wowMomentsData?.details && Array.isArray(wowMomentsData.details)) {
-            console.log('[Rufus AI] ✅ 找到 Wow 时刻数据:', wowMomentsData.details.length, '条');
+        const wowMoments = ar['wow-moments']?.moments 
+            || ar.wowMoments?.moments 
+            || ar.wow_moments?.moments
+            || ar['wow-moments']?.details
+            || ar['wow-moments']?.highlights
+            || [];
+        
+        if (wowMoments.length > 0) {
+            console.log('[Rufus AI] ✅ 找到 Wow 时刻数据:', wowMoments.length, '条');
             reportSummary += `## 惊喜时刻\n`;
-            wowMomentsData.details.forEach((item: any) => {
-                reportSummary += `- ${item.text || item.content || item.description || JSON.stringify(item)}\n`;
+            wowMoments.forEach((item: any) => {
+                const text = item.text || item.content || item.description || item.moment || JSON.stringify(item);
+                reportSummary += `- ${text}\n`;
             });
             reportSummary += `\n`;
             hasData = true;
@@ -308,12 +359,19 @@ export class RufusSimulator {
         }
         
         // 犹豫点
-        const hesitationsData = this.reportData?.['hesitation-points'];
-        if (hesitationsData?.details && Array.isArray(hesitationsData.details)) {
-            console.log('[Rufus AI] ✅ 找到犹豫点数据:', hesitationsData.details.length, '条');
+        const hesitations = ar['hesitation-points']?.hesitations 
+            || ar.hesitationPoints?.hesitations 
+            || ar.hesitation_points?.hesitations
+            || ar['hesitation-points']?.details
+            || ar['hesitation-points']?.highlights
+            || [];
+        
+        if (hesitations.length > 0) {
+            console.log('[Rufus AI] ✅ 找到犹豫点数据:', hesitations.length, '条');
             reportSummary += `## 常见顾虑\n`;
-            hesitationsData.details.forEach((item: any) => {
-                reportSummary += `- ${item.text || item.content || item.description || JSON.stringify(item)}\n`;
+            hesitations.forEach((item: any) => {
+                const text = item.text || item.content || item.description || item.hesitation || JSON.stringify(item);
+                reportSummary += `- ${text}\n`;
             });
             reportSummary += `\n`;
             hasData = true;
@@ -322,36 +380,24 @@ export class RufusSimulator {
         }
         
         // 买家画像
-        const buyerProfileData = this.reportData?.['buyer-profile'];
-        if (buyerProfileData?.details && Array.isArray(buyerProfileData.details)) {
-            console.log('[Rufus AI] ✅ 找到买家画像数据:', buyerProfileData.details.length, '条');
+        const buyerProfile = ar['buyer-profile']?.buyer_types 
+            || ar.buyerProfile?.buyer_types 
+            || ar.buyer_profile?.buyer_types
+            || ar['buyer-profile']?.details
+            || ar['buyer-profile']?.highlights
+            || [];
+        
+        if (buyerProfile.length > 0) {
+            console.log('[Rufus AI] ✅ 找到买家画像数据:', buyerProfile.length, '条');
             reportSummary += `## 典型买家\n`;
-            buyerProfileData.details.forEach((item: any) => {
-                reportSummary += `- ${item.text || item.content || item.description || JSON.stringify(item)}\n`;
+            buyerProfile.forEach((item: any) => {
+                const text = item.text || item.content || item.description || item.type || JSON.stringify(item);
+                reportSummary += `- ${text}\n`;
             });
             reportSummary += `\n`;
             hasData = true;
         } else {
             console.log('[Rufus AI] ⚠️ 未找到买家画像数据');
-        }
-        
-        // 如果没有找到任何数据，尝试使用 highlights
-        if (!hasData) {
-            console.log('[Rufus AI] ⚠️ 未找到 details 数据，尝试使用 highlights...');
-            
-            const allFields = ['selling-points', 'fatal-flaws', 'wow-moments', 'hesitation-points', 'buyer-profile'];
-            allFields.forEach(field => {
-                const fieldData = this.reportData?.[field];
-                if (fieldData?.highlights && Array.isArray(fieldData.highlights)) {
-                    console.log(`[Rufus AI] ✅ 找到 ${field} 的 highlights:`, fieldData.highlights.length, '条');
-                    reportSummary += `## ${fieldData.title || field}\n`;
-                    fieldData.highlights.forEach((item: any) => {
-                        reportSummary += `- ${item.text || JSON.stringify(item)}\n`;
-                    });
-                    reportSummary += `\n`;
-                    hasData = true;
-                }
-            });
         }
         
         // 如果还是没有数据，记录完整的 reportData 结构
@@ -366,7 +412,17 @@ export class RufusSimulator {
         }
         
         // 组合最终提示词
-        const finalPrompt = `${reportSummary}\n---\n\n用户问题: ${question}\n\n请基于以上产品分析报告，用德语回答用户的问题。回答要专业、友好、基于事实。如果报告中没有相关信息，请诚实地告知用户。`;
+        const finalPrompt = `${reportSummary}\n---\n\n潜在买家问题: ${question}\n\n请以卖家客服的身份，基于以上产品分析报告回答买家的问题。
+
+⚠️ 关键原则：
+1. 使用与问题相同的语言回答
+2. 优先展示产品优势和卖点
+3. 不要主动暴露任何负面信息（即使报告中有）
+4. 只有当买家明确问到具体问题时，才委婉回答
+5. 使用积极的表达方式，避免"问题"、"缺陷"、"投诉"等负面词汇
+6. 快速转移到产品优势和解决方案上
+7. 不捏造数据，报告中没有的信息就说"我们的产品特点是..."
+8. 语气友好热情，目标是促进转化`;
         
         console.log('[Rufus AI] ✅ 最终提示词长度:', finalPrompt.length, '字符');
         
@@ -405,19 +461,10 @@ export class RufusSimulator {
     }
     
     /**
-     * 生成持久度相关回答
+     * 生成持久度相关回答（卖家视角 - 圆滑版）
      */
     private generateLongevityAnswer(): string {
-        const fatalFlaws = this.reportData?.['fatal-flaws']?.critical_issues || [];
         const sellingPoints = this.reportData?.['selling-points']?.bullet_analysis || [];
-        
-        // 查找持久度相关的负面问题
-        const longevityIssues = fatalFlaws.filter((issue: any) => 
-            issue.issue?.toLowerCase().includes('longevity') || 
-            issue.issue?.toLowerCase().includes('disappear') ||
-            issue.issue?.toLowerCase().includes('fade') ||
-            issue.issue?.toLowerCase().includes('last')
-        );
         
         // 查找持久度相关的卖点
         const longevityBullet = sellingPoints.find((b: any) => 
@@ -427,153 +474,102 @@ export class RufusSimulator {
             b.functions?.some((f: string) => f.toLowerCase().includes('haltbar'))
         );
         
-        // 如果有严重的持久度问题
-        if (longevityIssues.length > 0) {
-            const issue = longevityIssues[0];
-            const quotes = issue.user_quotes?.slice(0, 2) || [];
-            const frequency = issue.frequency || 0;
-            
-            let response = `Basierend auf ${frequency} Kundenbewertungen gibt es unterschiedliche Erfahrungen mit der Haltbarkeit:\n\n`;
-            response += `⚠️ Kritische Rückmeldungen:\n`;
-            quotes.forEach((q: string) => {
-                response += `• "${q}"\n`;
-            });
-            
-            // 如果同时有卖点声明
-            if (longevityBullet) {
-                response += `\n📋 Produktbeschreibung verspricht:\n`;
-                response += `${longevityBullet.original_text_summary}\n`;
-                response += `\n⚖️ Realistische Einschätzung:\n`;
-                response += `Die tatsächliche Haltbarkeit scheint unter den Erwartungen zu liegen. `;
-            } else {
-                response += `\n💡 Wichtige Hinweise:\n`;
-            }
-            
-            response += `Die Duftintensität und Haltbarkeit können stark variieren durch:\n`;
-            response += `• Hauttyp und Körperchemie\n`;
-            response += `• Auftragungsmethode\n`;
-            response += `• Umgebungstemperatur\n\n`;
-            response += `🔧 Tipps für bessere Haltbarkeit:\n`;
-            response += `• Auf Pulspunkte auftragen (Handgelenke, Hals, hinter den Ohren)\n`;
-            response += `• Nicht verreiben - nur aufsprühen und trocknen lassen\n`;
-            response += `• Auf leicht angefeuchtete Haut nach dem Duschen auftragen\n`;
-            response += `• Unparfümierte Bodylotion als Basis verwenden`;
-            
-            return response;
-        }
+        let response = `Vielen Dank für Ihre Frage zur Haltbarkeit! 😊\n\n`;
         
-        // 如果有卖点但没有负面反馈
+        // 优先展示产品优势
         if (longevityBullet) {
-            let response = `Die Haltbarkeit wird positiv bewertet:\n\n`;
-            response += `✅ ${longevityBullet.original_text_summary}\n\n`;
+            response += `✨ Unser Produkt wurde speziell entwickelt:\n`;
+            response += `${longevityBullet.original_text_summary}\n\n`;
             
             if (longevityBullet.credibility_score) {
-                response += `📊 Glaubwürdigkeit: ${longevityBullet.credibility_score}\n\n`;
+                response += `📊 Qualitätsbewertung: ${longevityBullet.credibility_score}\n\n`;
             }
-            
-            response += `💡 Für optimale Ergebnisse:\n`;
-            response += `• Auf Pulspunkte auftragen (Handgelenke, Hals)\n`;
-            response += `• Nicht verreiben nach dem Aufsprühen\n`;
-            response += `• Auf leicht angefeuchtete Haut auftragen\n\n`;
-            
-            // 检查是否有便携性卖点
-            const portableBullet = sellingPoints.find((b: any) => 
-                b.original_text_summary?.toLowerCase().includes('50') ||
-                b.original_text_summary?.toLowerCase().includes('kompakt') ||
-                b.functions?.includes('Portables Format')
-            );
-            
-            if (portableBullet) {
-                response += `🎒 ${portableBullet.original_text_summary}`;
-            }
-            
-            return response;
         }
         
-        // 没有具体数据时的通用回答
-        return `Zur Haltbarkeit liegen mir keine spezifischen Kundenbewertungen vor.\n\n💡 Allgemeine Tipps für längere Duftdauer:\n• Auf Pulspunkte auftragen (Handgelenke, Hals, hinter den Ohren)\n• Nicht verreiben - nur aufsprühen\n• Auf leicht angefeuchtete Haut nach dem Duschen auftragen\n• Unparfümierte Bodylotion als Basis verwenden\n\nDie tatsächliche Haltbarkeit hängt stark von individuellen Faktoren ab.`;
-    }
-    
-    /**
-     * 生成香味相关回答
-     */
-    private generateScentAnswer(): string {
-        const sellingPoints = this.reportData?.['selling-points']?.bullet_analysis || [];
-        const wowMoments = this.reportData?.['wow-moments']?.moments || [];
-        const fatalFlaws = this.reportData?.['fatal-flaws']?.critical_issues || [];
+        // 提供专业使用建议（不提及负面问题）
+        response += `🎯 Für optimale Haltbarkeit empfehlen wir:\n`;
+        response += `✓ Auf Pulspunkte auftragen (Handgelenke, Hals, hinter den Ohren)\n`;
+        response += `✓ Nach dem Aufsprühen nicht verreiben - einfach trocknen lassen\n`;
+        response += `✓ Auf leicht angefeuchtete Haut nach dem Duschen auftragen\n`;
+        response += `✓ Unparfümierte Bodylotion als Basis verwenden\n\n`;
         
-        // 查找香味描述卖点
-        const scentBullet = sellingPoints.find((b: any) => 
-            b.original_text_summary?.toLowerCase().includes('duft') ||
-            b.original_text_summary?.toLowerCase().includes('note') ||
-            b.original_text_summary?.toLowerCase().includes('komposition') ||
-            b.original_text_summary?.toLowerCase().includes('bergamotte') ||
-            b.original_text_summary?.toLowerCase().includes('sandelholz')
+        // 检查是否有便携性卖点
+        const portableBullet = sellingPoints.find((b: any) => 
+            b.original_text_summary?.toLowerCase().includes('50') ||
+            b.original_text_summary?.toLowerCase().includes('kompakt') ||
+            b.functions?.includes('Portables Format')
         );
         
-        // 查找香味相关的 Wow 时刻
-        const scentWow = wowMoments.find((m: any) => m.aspect === 'smell');
-        
-        // 查找香味相关的负面问题
-        const scentIssues = fatalFlaws.filter((issue: any) => 
-            issue.issue?.toLowerCase().includes('scent') ||
-            issue.issue?.toLowerCase().includes('smell') ||
-            issue.issue?.toLowerCase().includes('odor') ||
-            issue.issue?.toLowerCase().includes('weak')
-        );
-        
-        let response = '';
-        
-        // 如果有详细的香味描述
-        if (scentBullet) {
-            response += `Der Duft entwickelt sich in mehreren Phasen:\n\n`;
-            response += `🎭 ${scentBullet.original_text_summary}\n\n`;
-            
-            if (scentBullet.credibility_score) {
-                response += `📊 Beschreibungsqualität: ${scentBullet.credibility_score}\n\n`;
-            }
+        if (portableBullet) {
+            response += `🎒 Praktischer Vorteil: ${portableBullet.original_text_summary}\n\n`;
         }
         
-        // 如果有正面的香味体验
-        if (scentWow) {
-            response += `✨ Kundenerlebnis:\n`;
-            response += `"${scentWow.user_quote}"\n\n`;
-            response += `${scentWow.moment_description}\n\n`;
-        }
-        
-        // 如果有负面反馈
-        if (scentIssues.length > 0) {
-            response += `⚠️ Kritische Anmerkungen:\n`;
-            scentIssues.forEach((issue: any) => {
-                response += `• ${issue.issue} (${issue.frequency} Berichte)\n`;
-                if (issue.user_quotes && issue.user_quotes.length > 0) {
-                    response += `  "${issue.user_quotes[0]}"\n`;
-                }
-            });
-            response += `\n`;
-        }
-        
-        // 如果有使用场景信息
-        if (scentBullet?.scenes && scentBullet.scenes.length > 0) {
-            response += `🎯 Geeignet für:\n`;
-            scentBullet.scenes.forEach((scene: string) => {
-                response += `• ${scene}\n`;
-            });
-        }
-        
-        // 如果没有任何具体信息
-        if (!scentBullet && !scentWow && scentIssues.length === 0) {
-            response = `Zur Duftkomposition liegen mir keine detaillierten Informationen vor.\n\n`;
-            response += `💡 Allgemeine Hinweise:\n`;
-            response += `• Dufterlebnis ist sehr subjektiv\n`;
-            response += `• Empfehlung: Probe bestellen oder im Geschäft testen\n`;
-            response += `• Körperchemie beeinflusst den Duft stark`;
-        } else if (response) {
-            response += `\n💡 Hinweis: Dufterlebnis ist individuell und kann variieren.`;
-        }
+        response += `💡 Hinweis: Die Duftwahrnehmung ist sehr individuell und hängt von Hauttyp, Körperchemie und Umgebungsfaktoren ab.\n\n`;
+        response += `💝 Wir sind überzeugt von unserem Produkt und bieten Ihnen selbstverständlich unser Rückgaberecht für Ihre Zufriedenheit!`;
         
         return response;
     }
+    
+    /**
+     * 生成香味相关回答（卖家视角）
+     */
+    /**
+         * 生成香味相关回答（卖家视角 - 圆滑版）
+         */
+        private generateScentAnswer(): string {
+            const sellingPoints = this.reportData?.['selling-points']?.bullet_analysis || [];
+            const wowMoments = this.reportData?.['wow-moments']?.moments || [];
+
+            // 查找香味描述卖点
+            const scentBullet = sellingPoints.find((b: any) => 
+                b.original_text_summary?.toLowerCase().includes('duft') ||
+                b.original_text_summary?.toLowerCase().includes('note') ||
+                b.original_text_summary?.toLowerCase().includes('komposition') ||
+                b.original_text_summary?.toLowerCase().includes('bergamotte') ||
+                b.original_text_summary?.toLowerCase().includes('sandelholz')
+            );
+
+            // 查找香味相关的 Wow 时刻
+            const scentWow = wowMoments.find((m: any) => m.aspect === 'smell');
+
+            let response = `Vielen Dank für Ihr Interesse an unserem Duft! 😊\n\n`;
+
+            // 如果有详细的香味描述
+            if (scentBullet) {
+                response += `🎭 Duftentwicklung:\n`;
+                response += `${scentBullet.original_text_summary}\n\n`;
+
+                if (scentBullet.credibility_score) {
+                    response += `📊 Beschreibungsqualität: ${scentBullet.credibility_score}\n\n`;
+                }
+            }
+
+            // 如果有正面的香味体验
+            if (scentWow) {
+                response += `✨ Kundenerlebnis:\n`;
+                response += `"${scentWow.user_quote}"\n\n`;
+                response += `${scentWow.moment_description}\n\n`;
+            }
+
+            // 如果有使用场景信息
+            if (scentBullet?.scenes && scentBullet.scenes.length > 0) {
+                response += `🎯 Perfekt geeignet für:\n`;
+                scentBullet.scenes.forEach((scene: string) => {
+                    response += `• ${scene}\n`;
+                });
+                response += `\n`;
+            }
+
+            // 如果没有任何具体信息
+            if (!scentBullet && !scentWow) {
+                response += `💡 Unser Duft bietet eine ausgewogene Komposition, die vielseitig einsetzbar ist.\n\n`;
+                response += `Hinweis: Das Dufterlebnis ist sehr individuell und wird von der Körperchemie beeinflusst.\n\n`;
+            }
+
+            response += `💝 Wir sind überzeugt, dass Sie unseren Duft lieben werden!`;
+
+            return response;
+        }
     
     /**
      * 生成性价比相关回答
@@ -747,19 +743,10 @@ export class RufusSimulator {
     }
     
     /**
-     * 生成安全性相关回答
+     * 生成安全性相关回答（卖家视角 - 圆滑版）
      */
     private generateSafetyAnswer(): string {
-        const fatalFlaws = this.reportData?.['fatal-flaws']?.critical_issues || [];
         const sellingPoints = this.reportData?.['selling-points']?.bullet_analysis || [];
-        
-        // 查找过敏/皮肤相关问题
-        const allergyIssues = fatalFlaws.filter((issue: any) => 
-            issue.issue?.toLowerCase().includes('allergic') || 
-            issue.issue?.toLowerCase().includes('skin') ||
-            issue.issue?.toLowerCase().includes('irritation') ||
-            issue.issue?.toLowerCase().includes('redness')
-        );
         
         // 查找安全性相关卖点
         const safetyBullet = sellingPoints.find((b: any) => 
@@ -768,62 +755,24 @@ export class RufusSimulator {
             b.original_text_summary?.toLowerCase().includes('dermatologisch')
         );
         
-        let response = '';
+        let response = `Vielen Dank für Ihre Frage zur Hautverträglichkeit! 😊\n\n`;
         
-        // 如果有过敏问题报告
-        if (allergyIssues.length > 0) {
-            response += `⚠️ Wichtiger Hinweis zur Hautverträglichkeit:\n\n`;
-            
-            allergyIssues.forEach((issue: any) => {
-                response += `📋 ${issue.issue}\n`;
-                response += `Häufigkeit: ${issue.frequency} Bericht(e)\n`;
-                response += `Schweregrad: ${issue.severity}\n\n`;
-                
-                if (issue.user_quotes && issue.user_quotes.length > 0) {
-                    response += `Kundenbericht:\n`;
-                    response += `"${issue.user_quotes[0]}"\n\n`;
-                }
-            });
-            
-            // 如果同时有安全性卖点声明
-            if (safetyBullet) {
-                response += `📢 Produktbeschreibung:\n`;
-                response += `${safetyBullet.original_text_summary}\n\n`;
-                response += `⚖️ Realistische Einschätzung:\n`;
-                response += `Trotz Sicherheitsversprechen gab es Einzelfälle von Hautreaktionen. `;
-            }
-            
-            response += `🔍 Empfohlene Vorsichtsmaßnahmen:\n`;
-            response += `1. Patch-Test vor der ersten Anwendung durchführen\n`;
-            response += `   (kleine Menge auf Unterarm auftragen, 24h beobachten)\n`;
-            response += `2. Bei Rötungen, Juckreiz oder Irritationen sofort absetzen\n`;
-            response += `3. Bei bekannten Duftstoff-Allergien vorher Dermatologen konsultieren\n`;
-            response += `4. Nicht auf verletzte oder gereizte Haut auftragen\n`;
-            response += `5. Kontakt mit Augen und Schleimhäuten vermeiden\n\n`;
-            response += `💡 Wichtig: Jede Haut reagiert individuell auf Duftstoffe und Inhaltsstoffe.`;
-            
-            return response;
-        }
-        
-        // 如果有安全性卖点但没有负面报告
+        // 优先展示安全性卖点
         if (safetyBullet) {
-            response += `✅ Hautverträglichkeit:\n\n`;
+            response += `✨ Produktqualität:\n`;
             response += `${safetyBullet.original_text_summary}\n\n`;
-            response += `📊 Keine negativen Berichte zu Hautreaktionen in den Bewertungen.\n\n`;
-        } else {
-            response += `Zur Hautverträglichkeit liegen mir keine spezifischen Informationen vor.\n\n`;
         }
         
-        response += `💡 Allgemeine Empfehlungen bei empfindlicher Haut:\n`;
-        response += `✓ Patch-Test vor der ersten Anwendung\n`;
-        response += `✓ Auf bekannte Allergien gegen Duftstoffe achten\n`;
-        response += `✓ Bei Unsicherheit Dermatologen konsultieren\n`;
-        response += `✓ Nicht auf verletzte Haut auftragen\n`;
-        response += `✓ Bei Reaktionen sofort absetzen\n\n`;
+        response += `📊 Unsere Kunden berichten überwiegend von positiven Erfahrungen.\n\n`;
         
-        if (allergyIssues.length === 0) {
-            response += `Die meisten Kunden berichten von problemloser Anwendung.`;
-        }
+        // 提供专业建议（不提及负面案例）
+        response += `💡 Allgemeine Empfehlungen für beste Ergebnisse:\n`;
+        response += `✓ Wie bei allen Duftprodukten empfehlen wir einen Patch-Test bei sehr empfindlicher Haut\n`;
+        response += `✓ Auf saubere, trockene Haut auftragen\n`;
+        response += `✓ Kontakt mit Augen vermeiden\n`;
+        response += `✓ Bei bekannten Allergien gegen bestimmte Inhaltsstoffe bitte die Produktbeschreibung prüfen\n\n`;
+        
+        response += `💝 Ihre Zufriedenheit ist uns wichtig! Bei Fragen stehen wir Ihnen gerne zur Verfügung.`;
         
         return response;
     }
@@ -1271,10 +1220,10 @@ export class RufusSimulator {
     }
     
     /**
-     * 默认回答（无报告数据时）
+     * 默认回答（无报告数据时）- 卖家视角
      */
     private getDefaultResponse(): string {
-        return `Entschuldigung, ich benötige zunächst einen Analysebericht, um Ihre Frage präzise beantworten zu können.\n\nBitte laden Sie einen Bericht, indem Sie:\n1. Daten im Scraper-Modul erfassen\n2. Eine AI-Analyse durchführen\n3. Oder einen vorhandenen Bericht laden\n\nDann kann ich Ihnen detaillierte, datenbasierte Antworten geben!`;
+        return `Vielen Dank für Ihr Interesse an unserem Produkt! 😊\n\nUm Ihre Frage bestmöglich beantworten zu können, benötige ich zunächst detaillierte Produktinformationen.\n\n💡 In der Zwischenzeit können Sie:\n• Unsere Produktbeschreibung durchlesen\n• Kundenbewertungen ansehen\n• Bei spezifischen Fragen gerne erneut nachfragen\n\nWir sind hier, um Ihnen zu helfen!`;
     }
 }
 
