@@ -16,13 +16,12 @@ export interface AnalysisTarget {
 
 /**
  * 分析结果
+ * 注意：icon 和 color 已从此接口移除，应通过 targetId 从 analysisTargets 配置中查找
  */
 export interface AnalysisResult {
   targetId: string;
   title: string;
   source: 'Listings' | 'Reviews';
-  icon: string;
-  color: string;
   stats: { label: string; value: string }[];
   highlights: { text: string; type: 'danger' | 'success' | 'warning' | 'info' }[];
   details: { category: string; items: string[] }[];

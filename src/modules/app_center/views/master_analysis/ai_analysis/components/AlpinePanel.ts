@@ -6,7 +6,7 @@
 import { analysisTargets } from '../config/analysisTargets';
 import { checkAndLoadScraperData, checkLoadedReport, loadHistoricalReport } from './dataLoaders';
 import { formatHistoryDate } from '../services/reportGenerator';
-import { getTargetColor, getPromptText } from './helpers';
+import { getTargetColorClass, getPromptText, getResultIcon, getResultColor } from './helpers';
 import { getPromptTokenCount, getFormattedTokenCount } from './helpers';
 import { highlightJson } from '../services/reportGenerator';
 import * as actions from './actions';
@@ -180,7 +180,15 @@ export function createAiAnalysisPanel(moduleState: ModuleState): AlpineContext &
 
     // ========== Helpers ==========
     getTargetColor(color: string): string {
-      return getTargetColor(color);
+      return getTargetColorClass(color);
+    },
+
+    getResultIcon(targetId: string): string {
+      return getResultIcon(targetId);
+    },
+
+    getResultColor(targetId: string): string {
+      return getResultColor(targetId);
     },
 
     getPromptText(targetId: string): string {

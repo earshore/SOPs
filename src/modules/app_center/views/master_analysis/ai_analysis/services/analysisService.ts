@@ -3,7 +3,6 @@
  */
 
 import { AnalysisResult } from '../types';
-import { analysisTargets } from '../config/analysisTargets';
 import { 
   FullAnalysisReport, 
   SAMPLE_ANALYSIS_REPORT,
@@ -16,9 +15,6 @@ import {
   VocabGapReport,
   PromiseRealityReport
 } from '../config/analysisReportData';
-
-// 获取目标配置
-const getTarget = (id: string) => analysisTargets.find(t => t.id === id);
 
 /**
  * 安全获取数组，如果不存在则返回空数组
@@ -34,8 +30,6 @@ const safeObject = <T extends object>(obj: T | undefined | null): T => obj || ({
  * 将标题关键词报告转换为展示格式
  */
 function parseTitleKeywords(report: TitleKeywordsReport): AnalysisResult {
-  const target = getTarget('title-keywords')!;
-  
   // 防御性检查：确保所有必需字段存在
   const primaryKeywords = report.primary_keywords || [];
   const secondaryKeywords = report.secondary_keywords || [];
@@ -49,8 +43,6 @@ function parseTitleKeywords(report: TitleKeywordsReport): AnalysisResult {
     targetId: 'title-keywords',
     title: '标题核心词根',
     source: 'Listings',
-    icon: target.icon,
-    color: target.color,
     stats: [
       { label: '核心词根', value: `${primaryKeywords.length}个` },
       { label: '场景词', value: `${sceneKeywords.length}个` },
@@ -95,8 +87,6 @@ function parseTitleKeywords(report: TitleKeywordsReport): AnalysisResult {
  * 将卖点结构报告转换为展示格式
  */
 function parseSellingPoints(report: SellingPointsReport): AnalysisResult {
-  const target = getTarget('selling-points')!;
-  
   // 防御性检查
   const overallStrategy = safeObject(report.overall_strategy);
   const functionSceneMatrix = safeObject(report.function_scene_matrix);
@@ -109,8 +99,6 @@ function parseSellingPoints(report: SellingPointsReport): AnalysisResult {
     targetId: 'selling-points',
     title: '卖点结构拆解',
     source: 'Listings',
-    icon: target.icon,
-    color: target.color,
     stats: [
       { label: '功能卖点', value: `${funcCount}个` },
       { label: '场景覆盖', value: `${sceneCount}个` },
@@ -159,8 +147,6 @@ function parseSellingPoints(report: SellingPointsReport): AnalysisResult {
  * 将致命劝退点报告转换为展示格式
  */
 function parseFatalFlaws(report: FatalFlawsReport): AnalysisResult {
-  const target = getTarget('fatal-flaws')!;
-  
   // 防御性检查
   const criticalIssues = safeArray(report.critical_issues);
   const returnTriggers = safeArray(report.return_triggers);
@@ -175,8 +161,6 @@ function parseFatalFlaws(report: FatalFlawsReport): AnalysisResult {
     targetId: 'fatal-flaws',
     title: '致命劝退点',
     source: 'Reviews',
-    icon: target.icon,
-    color: target.color,
     stats: [
       { label: '严重问题', value: `${criticalCount}个` },
       { label: '一般问题', value: `${majorCount}个` },
@@ -211,8 +195,6 @@ function parseFatalFlaws(report: FatalFlawsReport): AnalysisResult {
  * 将惊喜时刻报告转换为展示格式
  */
 function parseWowMoments(report: WowMomentsReport): AnalysisResult {
-  const target = getTarget('wow-moments')!;
-  
   // 防御性检查
   const moments = safeArray(report.moments);
   const emotionalTriggers = safeArray(report.emotional_triggers);
@@ -224,8 +206,6 @@ function parseWowMoments(report: WowMomentsReport): AnalysisResult {
     targetId: 'wow-moments',
     title: '惊喜顿悟时刻',
     source: 'Reviews',
-    icon: target.icon,
-    color: target.color,
     stats: [
       { label: '惊喜时刻', value: `${moments.length}个` },
       { label: '情感触发词', value: `${emotionalTriggers.length}个` },
@@ -260,8 +240,6 @@ function parseWowMoments(report: WowMomentsReport): AnalysisResult {
  * 将购买前犹豫点报告转换为展示格式
  */
 function parseHesitationPoints(report: HesitationPointsReport): AnalysisResult {
-  const target = getTarget('hesitation-points')!;
-  
   // 防御性检查
   const hesitations = safeArray(report.hesitations);
   const commonDoubts = safeArray(report.common_doubts);
@@ -272,8 +250,6 @@ function parseHesitationPoints(report: HesitationPointsReport): AnalysisResult {
     targetId: 'hesitation-points',
     title: '购买前犹豫点',
     source: 'Reviews',
-    icon: target.icon,
-    color: target.color,
     stats: [
       { label: '识别犹豫点', value: `${hesitations.length}个` },
       { label: '常见疑虑', value: `${commonDoubts.length}个` },
@@ -308,8 +284,6 @@ function parseHesitationPoints(report: HesitationPointsReport): AnalysisResult {
  * 将买家画像报告转换为展示格式
  */
 function parseBuyerProfile(report: BuyerProfileReport): AnalysisResult {
-  const target = getTarget('buyer-profile')!;
-  
   // 防御性检查
   const demographics = safeObject(report.demographics);
   const buyerTypes = safeArray(report.buyer_types);
@@ -324,8 +298,6 @@ function parseBuyerProfile(report: BuyerProfileReport): AnalysisResult {
     targetId: 'buyer-profile',
     title: '画像与场景侧写',
     source: 'Reviews',
-    icon: target.icon,
-    color: target.color,
     stats: [
       { label: '买家类型', value: `${buyerTypes.length}类` },
       { label: '使用场景', value: `${usageScenes.length}个` },
@@ -374,8 +346,6 @@ function parseBuyerProfile(report: BuyerProfileReport): AnalysisResult {
  * 将词汇鸿沟报告转换为展示格式
  */
 function parseVocabGap(report: VocabGapReport): AnalysisResult {
-  const target = getTarget('vocab-gap')!;
-  
   // 防御性检查
   const sellerTerms = safeArray(report.seller_terms);
   const buyerTerms = safeArray(report.buyer_terms);
@@ -389,8 +359,6 @@ function parseVocabGap(report: VocabGapReport): AnalysisResult {
     targetId: 'vocab-gap',
     title: '词汇鸿沟分析',
     source: 'Reviews',
-    icon: target.icon,
-    color: target.color,
     stats: [
       { label: '商家词汇', value: `${sellerTerms.length}个` },
       { label: '买家词汇', value: `${buyerTerms.length}个` },
@@ -429,8 +397,6 @@ function parseVocabGap(report: VocabGapReport): AnalysisResult {
  * 将承诺/现实断层报告转换为展示格式
  */
 function parsePromiseReality(report: PromiseRealityReport): AnalysisResult {
-  const target = getTarget('promise-reality')!;
-  
   // 防御性检查
   const gaps = safeArray(report.gaps);
   const verifiedClaims = safeArray(report.verified_claims);
@@ -444,8 +410,6 @@ function parsePromiseReality(report: PromiseRealityReport): AnalysisResult {
     targetId: 'promise-reality',
     title: '承诺/现实断层',
     source: 'Reviews',
-    icon: target.icon,
-    color: target.color,
     stats: [
       { label: '严重断层', value: `${severeCount}处` },
       { label: '可信度评分', value: overallCredibility.score || '未知' },
