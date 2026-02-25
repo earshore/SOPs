@@ -28,7 +28,7 @@ export function checkAndLoadScraperData(context: AlpineContext, moduleState: Mod
       moduleState.selectedAsins = context.selectedAsins;
       moduleState.dataSource = 'scraper';
       console.log('[数据加载] 自动加载 Scraper 数据:', context.selectedAsins);
-      showToast(`已自动加载 ${asins.length} 个产品 ASIN`, 'success');
+      showToast(`已自动加载 ${asins.length} 个产品 ASIN`, { type: 'success' });
     }
     
     // 自动启用真实数据分析模式
@@ -76,7 +76,7 @@ export function checkLoadedReport(context: AlpineContext, moduleState: ModuleSta
     syncToModuleState(context, moduleState);
     
     console.log('[数据加载] 已显示历史分析报告');
-    showToast('已加载历史分析报告', 'success');
+    showToast('已加载历史分析报告', { type: 'success' });
   }
 }
 
@@ -90,7 +90,7 @@ export function loadHistoricalReport(
 ): void {
   try {
     if (!detail || !detail.report) {
-      showToast('历史报告数据无效', 'error');
+      showToast('历史报告数据无效', { type: 'error' });
       return;
     }
 
@@ -102,10 +102,10 @@ export function loadHistoricalReport(
     syncToModuleState(context, moduleState);
 
     console.log('[数据加载] 已加载历史分析报告:', detail.timestamp);
-    showToast(`已加载历史分析报告 (${formatHistoryDate(detail.timestamp)})`, 'success');
+    showToast(`已加载历史分析报告 (${formatHistoryDate(detail.timestamp)})`, { type: 'success' });
   } catch (error) {
     console.error('[数据加载] 加载历史报告失败:', error);
-    showToast('加载历史报告失败', 'error');
+    showToast('加载历史报告失败', { type: 'error' });
   }
 }
 

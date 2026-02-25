@@ -160,7 +160,7 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     
     if (!result.success) {
       console.error('❌ 部分服务初始化失败，应用可能无法正常工作');
-      showToast('应用初始化失败，请刷新页面重试', 'error');
+      showToast('应用初始化失败，请刷新页面重试', { type: 'error' });
       return;
     }
 
@@ -282,7 +282,7 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
       performanceMonitor.onPerformanceDrop(() => {
         console.warn('⚠️ Animation performance degradation detected');
         if (window.showToast) {
-          window.showToast('检测到性能下降，已自动优化动画效果', 'info');
+          window.showToast('检测到性能下降，已自动优化动画效果', { type: 'info' });
         }
       });
       
@@ -379,7 +379,7 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
 
   } catch (error) {
     console.error('❌ 应用启动失败:', error);
-    showToast('应用启动失败，请刷新页面重试', 'error');
+    showToast('应用启动失败，请刷新页面重试', { type: 'error' });
   }
 });
 
@@ -416,7 +416,7 @@ registerActionsWithLegacy({
     if (typeof params === 'string') {
       showToast(params as string);
     } else if (params.message) {
-      showToast(params.message as string, params.type as ToastType | undefined);
+      showToast(params.message as string, { type: params.type as ToastType });
     }
   },
 
@@ -454,7 +454,7 @@ registerActionsWithLegacy({
       console.table(report.summary);
       
       if (window.showToast) {
-        window.showToast('性能报告已输出到控制台 (F12)', 'info');
+        window.showToast('性能报告已输出到控制台 (F12)', { type: 'info' });
       }
       
       return report;
@@ -470,7 +470,7 @@ registerActionsWithLegacy({
     ThemeManager.applyTheme(themeId);
     if (window.showToast) {
       const theme = ThemeManager.getTheme(themeId);
-      window.showToast(`已切换到${theme?.name || themeId}`, 'success');
+      window.showToast(`已切换到${theme?.name || themeId}`, { type: 'success' });
     }
   },
 
@@ -494,7 +494,7 @@ registerActionsWithLegacy({
     })));
     
     if (window.showToast) {
-      window.showToast(`共 ${logs.length} 条日志，已输出到控制台`, 'info');
+      window.showToast(`共 ${logs.length} 条日志，已输出到控制台`, { type: 'info' });
     }
     
     return logs;
@@ -511,7 +511,7 @@ registerActionsWithLegacy({
     })));
     
     if (window.showToast) {
-      window.showToast(`共 ${errors.length} 条错误，已输出到控制台`, errors.length > 0 ? 'warning' : 'info');
+      window.showToast(`共 ${errors.length} 条错误，已输出到控制台`, { type: errors.length > 0 ? 'warning' : 'info' });
     }
     
     return errors;
@@ -520,7 +520,7 @@ registerActionsWithLegacy({
   clearLogs: async () => {
     Logger.clear();
     if (window.showToast) {
-      window.showToast('日志已清除', 'success');
+      window.showToast('日志已清除', { type: 'success' });
     }
   },
 
@@ -528,7 +528,7 @@ registerActionsWithLegacy({
     const format = (params?.format || 'json') as 'json' | 'csv';
     Logger.download(format);
     if (window.showToast) {
-      window.showToast(`日志已导出为 ${format.toUpperCase()} 格式`, 'success');
+      window.showToast(`日志已导出为 ${format.toUpperCase()} 格式`, { type: 'success' });
     }
   },
 

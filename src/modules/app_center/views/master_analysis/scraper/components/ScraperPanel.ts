@@ -317,7 +317,7 @@ export function createScraperPanel() {
             } catch (e) {
                 console.error('[Scraper] startScrape 异常:', e);
                 ErrorService.handle(e as Error, { action: 'startScrape', module: 'scraper' });
-                showToast("采集任务异常中断", "error");
+                showToast("采集任务异常中断", { type: 'error' });
             } finally {
                 console.log('[Scraper] 进入 finally 块', { productsCount: products.length });
                 // 完成采集
@@ -330,9 +330,9 @@ export function createScraperPanel() {
 
                 const successCount = products.filter(p => p.scrape_status === 'success').length;
                 if (successCount > 0) {
-                    showToast(`采集完成: ${successCount} 成功`, "success");
+                    showToast(`采集完成: ${successCount} 成功`, { type: 'success' });
                 } else {
-                    showToast("采集完成，但全部失败", "error");
+                    showToast("采集完成，但全部失败", { type: 'error' });
                 }
 
                 // 更新数据预览

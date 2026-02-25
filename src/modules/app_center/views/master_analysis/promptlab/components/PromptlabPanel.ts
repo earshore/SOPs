@@ -16,6 +16,7 @@ import type { AnalysisReport } from '../../../../../../types/modules-business';
 import type { UserProductProfile, PromptInputs } from '../../../../../../types/state';
 import eventBus from '../../../../../../common/EventBus';
 import { SafeRenderer } from '../../../../../../common/infrastructure/SafeRenderer';
+import { estimateTokenCount, formatTokenCount } from '../../ai_analysis/utils/tokenCounter';
 
 /**
  * 控制台模式类型
@@ -95,17 +96,24 @@ export function createPromptlabPanel() {
         },
         
         /**
-         * 字符计数
+         * Token 计数
          */
-        get charCount(): number {
-            return this.currentPrompt.length;
+        get tokenCount(): number {
+            return estimateTokenCount(this.currentPrompt);
+        },
+        
+        /**
+         * 格式化的 Token 计数
+         */
+        get formattedTokenCount(): string {
+            return formatTokenCount(this.tokenCount);
         },
         
         /**
          * 是否超出字符限制
          */
         get isOverLimit(): boolean {
-            return this.charCount > this.profile.charLimit;
+            return this.tokenCount > this.profile.charLimit;
         },
         
         // ========== Lifecycle ==========
@@ -688,7 +696,7 @@ export function createPromptlabPanel() {
                 else if (!this.profile.targetMarket) msg = '请先选择目标语言/站点 (Card 1)';
                 else if (!this.profile.keywordsTier1.trim()) msg = 'Tier 1 核心大词不能为空';
                 else if (!this.profile.keywordsTier2.trim()) msg = 'Tier 2 长尾词不能为空';
-                showToast(msg, 'warning');
+                showToast(msg, { type: 'warning' });
                 return;
             }
             
@@ -705,7 +713,7 @@ export function createPromptlabPanel() {
             const result = promptlabService.generateMasterPrompt(inputs as any, reportToUse);
             this.listingPromptCache = result;
             
-            showToast('Listing Prompt 已生成', 'success');
+            showToast('Listing Prompt 已生成', { type: 'success' });
         },
         
         /**
@@ -715,7 +723,7 @@ export function createPromptlabPanel() {
             console.log('[Promptlab] 🎯 生成 Visual Prompt');
             
             if (!this.hasReport) {
-                showToast('请先生成 Ai 分析报告以获取视觉灵感', 'warning');
+                showToast('请先生成 Ai 分析报告以获取视觉灵感', { type: 'warning' });
                 return;
             }
             
@@ -724,7 +732,7 @@ export function createPromptlabPanel() {
                 if (!this.profile.targetMarket) msg = '请先选择目标语言/站点';
                 else if (!this.profile.keywordsTier1.trim()) msg = 'Tier 1 核心大词不能为空';
                 else if (!this.profile.keywordsTier2.trim()) msg = 'Tier 2 长尾词不能为空';
-                showToast(msg, 'warning');
+                showToast(msg, { type: 'warning' });
                 return;
             }
             
@@ -741,7 +749,7 @@ export function createPromptlabPanel() {
             const result = promptlabService.generateVisualPrompt(inputs as any, reportToUse);
             this.visualPromptCache = result;
             
-            showToast('Visual Prompt 已生成', 'success');
+            showToast('Visual Prompt 已生成', { type: 'success' });
         },
         
         /**
@@ -795,7 +803,7 @@ export function createPromptlabPanel() {
             if (copyText && copyText.value.length > 10) {
                 copyText.select();
                 document.execCommand('copy');
-                showToast('Prompt 已复制', 'success');
+                showToast('Prompt 已复制', { type: 'success' });
             }
         },
         
@@ -822,7 +830,7 @@ export function createPromptlabPanel() {
                     charLimit: 5000,
                 };
                 this.saveState();
-                showToast('已清空', 'success');
+                showToast('已清空', { type: 'success' });
             }
         },
         
@@ -834,7 +842,7 @@ export function createPromptlabPanel() {
                 cb.checked = true;
             });
             this.onReportSectionChange();
-            showToast('已全选模块', 'success');
+            showToast('已全选模块', { type: 'success' });
         },
         
         /**
@@ -845,7 +853,7 @@ export function createPromptlabPanel() {
                 cb.checked = false;
             });
             this.onReportSectionChange();
-            showToast('已清空选择', 'success');
+            showToast('已清空选择', { type: 'success' });
         },
     };
 }

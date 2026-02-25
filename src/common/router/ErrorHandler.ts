@@ -66,7 +66,7 @@ export class RouteErrorHandlerManager {
     // 尝试显示错误提示
     const w = window as Window & { showToast?: (message: string, type: string) => void };
     if (typeof window !== 'undefined' && w.showToast) {
-      w.showToast('页面加载失败，请重试', 'error');
+      w.showToast('页面加载失败，请重试', { type: 'error' });
     }
   }
 
@@ -112,7 +112,7 @@ export class RouteErrorHandlerManager {
         switchTab?: (tab: string, updateHistory: boolean) => void;
       };
       if (typeof window !== 'undefined' && w.showToast) {
-        w.showToast('您没有权限访问此页面', 'warning');
+        w.showToast('您没有权限访问此页面', { type: 'warning' });
       }
       // 重定向到首页
       if (typeof window !== 'undefined' && w.switchTab) {
@@ -142,7 +142,7 @@ export class RouteErrorHandlerManager {
     this.register('TIMEOUT', (_error: Error, _context: RouteErrorContext) => {
       const w = window as Window & { showToast?: (message: string, type: string) => void };
       if (typeof window !== 'undefined' && w.showToast) {
-        w.showToast('页面加载超时，请检查网络连接', 'error');
+        w.showToast('页面加载超时，请检查网络连接', { type: 'error' });
       }
     });
 
@@ -150,7 +150,7 @@ export class RouteErrorHandlerManager {
     this.register('NETWORK_ERROR', (_error: Error, _context: RouteErrorContext) => {
       const w = window as Window & { showToast?: (message: string, type: string) => void };
       if (typeof window !== 'undefined' && w.showToast) {
-        w.showToast('网络连接失败，请检查网络设置', 'error');
+        w.showToast('网络连接失败，请检查网络设置', { type: 'error' });
       }
     });
   }

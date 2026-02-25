@@ -728,7 +728,7 @@ function syncToInput(): void {
         console.log('[Process] 同步的文本长度:', text.length);
     } else {
         console.warn('[Process] 没有可同步的文本');
-        showToast("没有可同步的内容", 'warning');
+        showToast("没有可同步的内容", { type: 'warning' });
         return;
     }
 
@@ -798,7 +798,7 @@ function locateKeywordInCopy(keyword: string): void {
     });
 
     if (spans.length === 0) {
-        showToast(`未找到关键词: ${keyword}`, 'warning');
+        showToast(`未找到关键词: ${keyword}`, { type: 'warning' });
         return;
     }
 
@@ -923,7 +923,7 @@ function highlightRootKeywords(root: string, container: HTMLElement): void {
 
     if (matchedDivs.length === 0) {
         console.warn('[Process] 未找到包含词根的关键词');
-        showToast(`未找到包含词根 "${root}" 的关键词`, 'warning');
+        showToast(`未找到包含词根 "${root}" 的关键词`, { type: 'warning' });
         return;
     }
 

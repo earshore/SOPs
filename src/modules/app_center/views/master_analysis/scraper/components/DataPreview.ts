@@ -59,12 +59,12 @@ export class DataPreview {
 
         if (productCount > 100) {
             console.warn(`[Scraper] ⚠️ 检测到大数据集: ${productCount} 个产品`);
-            showToast(`⚠️ 数据集较大 (${productCount} 个产品)，已启用分页显示以优化性能`, "info");
+            showToast(`⚠️ 数据集较大 (${productCount} 个产品)，已启用分页显示以优化性能`, { type: 'info' });
         }
 
         if (productCount > 500) {
             console.warn(`[Scraper] ⚠️ 数据集非常大: ${productCount} 个产品，建议清理历史记录`);
-            showToast(`⚠️ 数据集非常大 (${productCount} 个产品)，建议定期清理历史记录以释放内存`, "warning");
+            showToast(`⚠️ 数据集非常大 (${productCount} 个产品)，建议定期清理历史记录以释放内存`, { type: 'warning' });
         }
     }
 

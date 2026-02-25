@@ -145,7 +145,7 @@ async function runLLMAnalysis(): Promise<void> {
     const btn = document.getElementById('kt-analyze-btn') as HTMLButtonElement | null;
 
     if (!state.keywordTracker.processedCopy || !state.keywordTracker.processedCopy.trim()) {
-        showToast("文案内容为空，无法进行AI分析", "warning");
+        showToast("文案内容为空，无法进行AI分析", { type: 'warning' });
         return;
     }
 
@@ -200,7 +200,7 @@ async function runLLMAnalysis(): Promise<void> {
         // 保存状态
         saveAnalysisStateToState();
 
-        showToast("报告生成成功", "success");
+        showToast("报告生成成功", { type: 'success' });
 
     } catch (e) {
         const error = e as Error;

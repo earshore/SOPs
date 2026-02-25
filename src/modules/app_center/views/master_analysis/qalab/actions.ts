@@ -7,7 +7,8 @@ import state from '../../../../../common/state';
 import { generateMultiLangQAs } from './qaData';
 import { qalabState } from './state';
 import { LANGUAGES, CATEGORIES, MARKET_LANG_MAP } from './constants';
-import { showToast, downloadFile } from './utils';
+import { downloadFile } from './utils';
+import { showToast } from '../../../../../common/ui/notifications';
 import { renderResults, renderLangSelector, renderQAGrid } from './render';
 import { rufusSimulator } from './rufusSimulator';
 
@@ -54,34 +55,42 @@ export function autoLoadAnalysisReport(): void {
             console.log('[QALab] 📄 报告格式: 对象');
             const reportObj = analysisReport as any;
             
-            // 检查是否已经是标准格式（包含 metadata 和 analysisReport）
-            if (reportObj.metadata && reportObj.analysisReport) {
-                console.log('[QALab] 📦 标准 FullReportData 格式');
-                reportData = reportObj;
+            // 从 state 中获取完整的 metadata 信息
+            const scrapedData = state.scraper?.scrapedData as any;
+            
+            // 获取 ASINs：优先从 state.analysis.selectedAsins，否则从 scrapedData.products 提取
+            let selectedAsins = state.analysis?.selectedAsins || [];
+            if (selectedAsins.length === 0 && scrapedData?.products) {
+                selectedAsins = scrapedData.products
+                    .map((p: any) => p.asin)
+                    .filter((asin: string) => !!asin);
             }
-            // 检查是否是单个 FullAnalysisReport（包含分析字段）
-            else if (reportObj.asin || reportObj.product_title || reportObj['selling-points']) {
-                console.log('[QALab] 📦 单个 FullAnalysisReport 格式');
-                reportData = {
-                    metadata: {
-                        asins: reportObj.asin ? [reportObj.asin] : [],
-                        marketplace: reportObj.marketplace || reportObj.market || 'DE'
-                    },
-                    analysisReport: reportObj
-                };
-            }
-            // 其他格式，尝试包装
-            else {
-                console.log('[QALab] ⚠️ 未知格式，尝试包装');
-                console.log('[QALab] - 可用字段:', Object.keys(reportObj));
-                reportData = {
-                    metadata: {
-                        asins: [],
-                        marketplace: reportObj.marketplace || 'DE'
-                    },
-                    analysisReport: reportObj
-                };
-            }
+            
+            // 从报告对象推断 selectedTargets（分析目标）
+            const selectedTargets = Object.keys(reportObj).filter(key => 
+                key.includes('-') && typeof reportObj[key] === 'object'
+            );
+            
+            // 数据源判断：如果有 scraper 数据则为 scraper，否则为 sample
+            const dataSource = scrapedData?.products?.length > 0 ? 'scraper' : 'sample';
+            
+            // 构建完整的 metadata
+            const metadata = {
+                asins: selectedAsins,
+                targets: selectedTargets,
+                timestamp: new Date().toISOString(),
+                dataSource: dataSource,
+                marketplace: scrapedData?.metadata?.marketplace || 'DE',
+                productTitle: scrapedData?.products?.map((p: any) => p.productTitle).join(' | ') || undefined
+            };
+            
+            console.log('[QALab] 📦 构建完整的 FullReportData 格式');
+            console.log('[QALab] - metadata:', metadata);
+            
+            reportData = {
+                metadata,
+                analysisReport: reportObj
+            };
             
             reportJSON = JSON.stringify(reportData, null, 2);
         }
@@ -168,7 +177,10 @@ export function autoLoadAnalysisReport(): void {
         
         // 显示加载提示
         const reportSource = qalabState.reportData?.metadata?.asins?.join(', ') || '未知';
-        showToast('success', '分析报告已自动加载', `来源: ${reportSource}`);
+        showToast('分析报告已自动加载', { 
+            type: 'success', 
+            description: `来源: ${reportSource}` 
+        });
         
         console.log('[QALab] ✅ 分析报告已自动加载');
         console.log('[QALab] ========================================');
@@ -176,7 +188,10 @@ export function autoLoadAnalysisReport(): void {
         console.error('[QALab] ❌ 加载分析报告失败:', error);
         console.error('[QALab] 错误详情:', (error as Error).message);
         console.log('[QALab] ========================================');
-        showToast('error', '报告加载失败', '数据格式可能不正确');
+        showToast('报告加载失败', { 
+            type: 'error', 
+            description: '数据格式可能不正确' 
+        });
     }
 }
 
@@ -197,7 +212,10 @@ export function clearInput(): void {
     if (resultsSection) resultsSection.classList.remove('active');
     if (progressSection) progressSection.classList.remove('active');
     
-    showToast('success', '已清空', '准备接收新的报告数据');
+    showToast('已清空', { 
+        type: 'success', 
+        description: '准备接收新的报告数据' 
+    });
 }
 
 /**
@@ -207,14 +225,20 @@ export function clearInput(): void {
 export async function startAnalysis(): Promise<void> {
     const input = document.getElementById('jsonInput') as HTMLTextAreaElement;
     if (!input || !input.value.trim()) {
-        showToast('error', '请先粘贴报告 JSON', '或点击「加载示例数据」');
+        showToast('请先粘贴报告 JSON', { 
+            type: 'error', 
+            description: '或点击「加载示例数据」' 
+        });
         return;
     }
 
     try {
         qalabState.reportData = JSON.parse(input.value);
     } catch (e) {
-        showToast('error', 'JSON 格式错误', '请检查数据格式是否正确');
+        showToast('JSON 格式错误', { 
+            type: 'error', 
+            description: '请检查数据格式是否正确' 
+        });
         return;
     }
 
@@ -294,7 +318,10 @@ export async function startAnalysis(): Promise<void> {
     
     if (resultsSection) resultsSection.classList.add('active');
     
-    showToast('success', '分析完成!', `已生成 ${qalabState.generatedQAs.length} 个 Q&A`);
+    showToast('分析完成!', { 
+        type: 'success', 
+        description: `已生成 ${qalabState.generatedQAs.length} 个 Q&A` 
+    });
 }
 
 /**
@@ -347,7 +374,10 @@ export function exportJSON(): void {
 
     const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
     downloadFile(blob, `rufus-qa-${qalabState.currentLang}-${qalabState.currentCategory}-${Date.now()}.json`);
-    showToast('success', '导出成功', 'JSON 文件已下载');
+    showToast('导出成功', { 
+        type: 'success', 
+        description: 'JSON 文件已下载' 
+    });
 }
 
 /**
@@ -376,7 +406,10 @@ export function exportCSV(): void {
 
     const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
     downloadFile(blob, `rufus-qa-${qalabState.currentLang}-${qalabState.currentCategory}-${Date.now()}.csv`);
-    showToast('success', '导出成功', 'CSV 文件已下载');
+    showToast('导出成功', { 
+        type: 'success', 
+        description: 'CSV 文件已下载' 
+    });
 }
 
 /**
@@ -411,7 +444,10 @@ export function exportText(): void {
 
     const blob = new Blob([text], { type: 'text/plain;charset=utf-8;' });
     downloadFile(blob, `rufus-qa-${qalabState.currentLang}-${qalabState.currentCategory}-${Date.now()}.txt`);
-    showToast('success', '导出成功', '文本文件已下载');
+    showToast('导出成功', { 
+        type: 'success', 
+        description: '文本文件已下载' 
+    });
 }
 
 /**
@@ -422,7 +458,10 @@ export function switchLang(lang: string): void {
     renderLangSelector(switchLang);
     renderQAGrid(toggleQA, copyQA, editQA);
     const langName = LANGUAGES.find(l => l.code === lang)?.name || lang;
-    showToast('success', '语言已切换', `当前: ${langName}`);
+    showToast('语言已切换', { 
+        type: 'success', 
+        description: `当前: ${langName}` 
+    });
 }
 
 /**
@@ -468,9 +507,12 @@ export function copyQA(id: number, btnElement: HTMLElement): void {
             });
         }, 2000);
         
-        showToast('success', '已复制到剪贴板', '');
+        showToast('已复制到剪贴板', { type: 'success' });
     }).catch(() => {
-        showToast('error', '复制失败', '请手动复制');
+        showToast('复制失败', { 
+            type: 'error', 
+            description: '请手动复制' 
+        });
     });
 }
 
@@ -478,7 +520,10 @@ export function copyQA(id: number, btnElement: HTMLElement): void {
  * 编辑Q&A
  */
 export function editQA(_id: number): void {
-    showToast('info', '编辑功能', '此功能将在后续版本中提供');
+    showToast('编辑功能', { 
+        type: 'info', 
+        description: '此功能将在后续版本中提供' 
+    });
 }
 
 /**
@@ -492,7 +537,7 @@ export async function sendRufusQuestion(question: string): Promise<void> {
     
     if (!question.trim()) {
         console.warn('[QALab] ⚠️ 问题为空');
-        showToast('error', '请输入问题', '');
+        showToast('请输入问题', { type: 'error' });
         return;
     }
     
@@ -619,7 +664,10 @@ export async function sendRufusQuestion(question: string): Promise<void> {
         
         // 显示成功提示（仅 AI 模式）
         if (qalabState.rufusMode === 'ai') {
-            showToast('success', 'AI 回答生成成功', '基于大模型智能分析');
+            showToast('AI 回答生成成功', { 
+                type: 'success', 
+                description: '基于大模型智能分析' 
+            });
             console.log('[QALab] 💡 已显示 AI 成功提示');
         }
         
@@ -649,7 +697,11 @@ export async function sendRufusQuestion(question: string): Promise<void> {
                 userFriendlyMsg += '4. 返回此页面切换到 AI 模式\n\n';
                 userFriendlyMsg += '💡 提示：您可以先使用「规则模式」进行快速问答';
                 
-                showToast('warning', 'AI 模式需要配置', '请先配置 LLM 服务', 8000);
+                showToast('AI 模式需要配置', { 
+                    type: 'warning', 
+                    description: '请先配置 LLM 服务', 
+                    duration: 8000 
+                });
             } else if (errorMsg.includes('配置不完整')) {
                 userFriendlyMsg += '❌ 原因：LLM 配置不完整\n\n';
                 userFriendlyMsg += '📝 解决方案：\n';
@@ -658,12 +710,20 @@ export async function sendRufusQuestion(question: string): Promise<void> {
                 userFriendlyMsg += '3. 确认模型名称是否正确\n\n';
                 userFriendlyMsg += '💡 提示：您可以先使用「规则模式」进行快速问答';
                 
-                showToast('warning', 'LLM 配置不完整', '请检查配置', 8000);
+                showToast('LLM 配置不完整', { 
+                    type: 'warning', 
+                    description: '请检查配置', 
+                    duration: 8000 
+                });
             } else {
                 userFriendlyMsg += `❌ 错误信息：${errorMsg}\n\n`;
                 userFriendlyMsg += '💡 提示：已自动切换到规则模式继续回答';
                 
-                showToast('error', 'AI 模式调用失败', '已降级到规则模式', 6000);
+                showToast('AI 模式调用失败', { 
+                    type: 'error', 
+                    description: '已降级到规则模式', 
+                    duration: 6000 
+                });
                 
                 // 自动降级到规则模式并重试
                 console.log('[QALab] 自动降级到规则模式');
@@ -699,7 +759,10 @@ export async function sendRufusQuestion(question: string): Promise<void> {
             });
             renderRufusMessages();
         } else {
-            showToast('error', '回答生成失败', '请稍后重试');
+            showToast('回答生成失败', { 
+                type: 'error', 
+                description: '请稍后重试' 
+            });
             qalabState.rufusMessages.push({
                 role: 'assistant',
                 content: '抱歉，回答生成失败。请稍后重试。\n\n错误信息: ' + (error as Error).message,
@@ -716,7 +779,7 @@ export async function sendRufusQuestion(question: string): Promise<void> {
 export function clearRufusChat(): void {
     qalabState.rufusMessages = [];
     renderRufusMessages();
-    showToast('success', '对话已清空', '');
+    showToast('对话已清空', { type: 'success' });
 }
 
 /**
@@ -762,7 +825,10 @@ export function toggleRufusMode(): void {
         checkLLMConfiguration();
     }
     
-    showToast('success', `已切换到${modeName}`, modeDesc);
+    showToast(`已切换到${modeName}`, { 
+        type: 'success', 
+        description: modeDesc 
+    });
     console.log('[QALab] ========================================');
 }
 
@@ -776,7 +842,11 @@ async function checkLLMConfiguration(): Promise<void> {
         
         if (!activeProvider) {
             console.warn('[QALab] ⚠️ 未配置 LLM 提供商');
-            showToast('warning', 'AI 模式需要配置', '请先在设置中配置 LLM 服务', 6000);
+            showToast('AI 模式需要配置', { 
+                type: 'warning', 
+                description: '请先在设置中配置 LLM 服务', 
+                duration: 6000 
+            });
             
             // 在对话中添加配置提示
             setTimeout(() => {
@@ -800,7 +870,11 @@ async function checkLLMConfiguration(): Promise<void> {
         const config = await StorageService.getLLMConfigWithKey(activeProvider);
         if (!config || !config.apiKey) {
             console.warn('[QALab] ⚠️ LLM 配置不完整');
-            showToast('warning', 'LLM 配置不完整', '请检查 API Key 等配置', 6000);
+            showToast('LLM 配置不完整', { 
+                type: 'warning', 
+                description: '请检查 API Key 等配置', 
+                duration: 6000 
+            });
             
             setTimeout(() => {
                 qalabState.rufusMessages.push({
@@ -819,7 +893,11 @@ async function checkLLMConfiguration(): Promise<void> {
         }
         
         console.log('[QALab] ✅ LLM 配置正常:', activeProvider);
-        showToast('success', 'AI 模式已就绪', `使用 ${activeProvider} 提供智能回答`, 4000);
+        showToast('AI 模式已就绪', { 
+            type: 'success', 
+            description: `使用 ${activeProvider} 提供智能回答`, 
+            duration: 4000 
+        });
         
         // 在对话中添加欢迎消息
         if (qalabState.rufusMessages.length === 0) {

@@ -2004,44 +2004,6 @@ body::before {
 }
 
 /* ================================================================
-   TOAST
-   ================================================================ */
-.qalab-toast-container {
-  position: fixed;
-  top: 24px;
-  right: 24px;
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.qalab-toast {
-  padding: 14px 22px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--text);
-  font-size: 13px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  box-shadow: var(--shadow-md);
-  animation: slideRight .4s var(--ease);
-  min-width: 260px;
-  backdrop-filter: blur(12px);
-}
-
-.qalab-toast.success { border-left: 3px solid var(--accent); }
-.qalab-toast.success i { color: var(--accent); }
-.qalab-toast.error { border-left: 3px solid var(--danger); }
-.qalab-toast.error i { color: var(--danger); }
-.qalab-toast.info { border-left: 3px solid var(--info); }
-.qalab-toast.info i { color: var(--info); }
-.qalab-toast.warning { border-left: 3px solid var(--warning); }
-.qalab-toast.warning i { color: var(--warning); }
-
-/* ================================================================
    EMPTY STATE
    ================================================================ */
 .empty-state {

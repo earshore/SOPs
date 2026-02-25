@@ -114,7 +114,7 @@ export function toggleDataSource(context: AlpineContext, moduleState: ModuleStat
   
   showToast(
     context.useRealData ? '已切换到真实数据分析模式' : '已切换到示例数据模式',
-    'info'
+    { type: 'info' }
   );
 }
 
@@ -136,9 +136,9 @@ export function copyPrompt(context: AlpineContext, currentProducts: Product[], i
   const prompt = generateAnalysisPrompt(targetId, mergedProduct, language);
   
   navigator.clipboard.writeText(prompt).then(() => {
-    showToast('提示词已复制', 'success');
+    showToast('提示词已复制', { type: 'success' });
   }).catch(() => {
-    showToast('复制失败', 'error');
+    showToast('复制失败', { type: 'error' });
   });
 }
 
@@ -158,9 +158,9 @@ export function copyJson(context: AlpineContext, dataSourceMarketplace: string):
 
   const json = JSON.stringify(reportData, null, 2);
   navigator.clipboard.writeText(json).then(() => {
-    showToast('完整 JSON 报告已复制', 'success');
+    showToast('完整 JSON 报告已复制', { type: 'success' });
   }).catch(() => {
-    showToast('复制失败', 'error');
+    showToast('复制失败', { type: 'error' });
   });
 }
 
@@ -173,7 +173,7 @@ export function copyMarkdown(
   dataSourceLabel: string
 ): void {
   if (!context.analysisReport) {
-    showToast('没有可复制的报告', 'warning');
+    showToast('没有可复制的报告', { type: 'warning' });
     return;
   }
 
@@ -191,9 +191,9 @@ export function copyMarkdown(
   );
   
   navigator.clipboard.writeText(markdown).then(() => {
-    showToast('Markdown 报告已复制', 'success');
+    showToast('Markdown 报告已复制', { type: 'success' });
   }).catch(() => {
-    showToast('复制失败', 'error');
+    showToast('复制失败', { type: 'error' });
   });
 }
 
@@ -202,7 +202,7 @@ export function copyMarkdown(
  */
 export function downloadJson(context: AlpineContext, dataSourceMarketplace: string): void {
   if (!context.analysisReport) {
-    showToast('没有可下载的报告', 'warning');
+    showToast('没有可下载的报告', { type: 'warning' });
     return;
   }
 
@@ -225,7 +225,7 @@ export function downloadJson(context: AlpineContext, dataSourceMarketplace: stri
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
   
-  showToast('JSON 报告已下载', 'success');
+  showToast('JSON 报告已下载', { type: 'success' });
 }
 
 /**
@@ -257,7 +257,7 @@ export async function runAnalysisAction(context: AlpineContext, moduleState: Mod
         throw new Error('无法获取产品数据,请确保已从数据采集或数据管理导入数据');
       }
 
-      showToast(`正在调用 AI 分析 ${products.length} 个产品...`, 'info');
+      showToast(`正在调用 AI 分析 ${products.length} 个产品...`, { type: 'info' });
 
       // 合并多个产品的数据
       const mergedProduct = mergeProducts(products);
@@ -324,10 +324,10 @@ export async function runAnalysisAction(context: AlpineContext, moduleState: Mod
       }
     }
 
-    showToast(`分析完成！`, 'success');
+    showToast(`分析完成！`, { type: 'success' });
   } catch (error) {
     console.error('[用户动作] 分析失败:', error);
-    showToast(`分析失败: ${(error as Error).message}`, 'error');
+    showToast(`分析失败: ${(error as Error).message}`, { type: 'error' });
   } finally {
     context.isAnalyzing = false;
     syncToModuleState(context, moduleState);

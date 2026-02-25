@@ -234,7 +234,7 @@ function updateCopyCharCount(): void {
 function cleanKeywordsUI(): void {
     const inputEl = document.getElementById('kt-keywords-input') as HTMLTextAreaElement | null;
     if (!inputEl || !inputEl.value.trim()) {
-        showToast("关键词列表为空", "warning");
+        showToast("关键词列表为空", { type: 'warning' });
         return;
     }
 
@@ -254,9 +254,9 @@ function cleanKeywordsUI(): void {
     const removedCount = originalKeywords.length - finalKeywords.length;
     
     if (removedCount > 0) {
-        showToast(`已清理格式并去重，移除 ${removedCount} 个重复项`, "success");
+        showToast(`已清理格式并去重，移除 ${removedCount} 个重复项`, { type: 'success' });
     } else {
-        showToast("已清理格式", "success");
+        showToast("已清理格式", { type: 'success' });
     }
 }
 
@@ -287,7 +287,7 @@ async function pasteFromClipboard(): Promise<void> {
         }
         showToast("已粘贴");
     } catch (e) {
-        showToast("无法访问剪贴板", "error");
+        showToast("无法访问剪贴板", { type: 'error' });
     }
 }
 
@@ -310,7 +310,7 @@ function clearCopyInput(): void {
 function cleanCopyFormat(): void {
     const copyInput = document.getElementById('kt-copy-input') as HTMLTextAreaElement | null;
     if (!copyInput || !copyInput.value.trim()) {
-        showToast("文案为空，无需清理", "warning");
+        showToast("文案为空，无需清理", { type: 'warning' });
         return;
     }
 
@@ -350,9 +350,9 @@ function cleanCopyFormat(): void {
 
     const cleanedCount = originalLength - text.length;
     if (cleanedCount > 0) {
-        showToast(`已清理 ${cleanedCount} 个格式字符`, "success");
+        showToast(`已清理 ${cleanedCount} 个格式字符`, { type: 'success' });
     } else {
-        showToast("未发现需要清理的格式", "info");
+        showToast("未发现需要清理的格式", { type: 'info' });
     }
 }
 
@@ -364,7 +364,7 @@ async function startAnalysis(): Promise<void> {
     const copyText = (document.getElementById('kt-copy-input') as HTMLTextAreaElement | null)?.value;
 
     if (!kwText || !kwText.trim() || !copyText || !copyText.trim()) {
-        showToast(`请先输入关键词和文案`, "warning");
+        showToast(`请先输入关键词和文案`, { type: 'warning' });
         return;
     }
 
@@ -394,7 +394,7 @@ async function startAnalysis(): Promise<void> {
         state.keywordTracker.isWindowMinimized = false;
 
         showProgress(false);
-        showToast("分析完成", "success");
+        showToast("分析完成", { type: 'success' });
 
         // 切换到 process 模块
         if (window.switchTab) {
@@ -402,7 +402,7 @@ async function startAnalysis(): Promise<void> {
         }
     } catch (error) {
         showProgress(false);
-        showToast("分析失败: " + (error as Error).message, "error");
+        showToast("分析失败: " + (error as Error).message, { type: 'error' });
         console.error('[Input] 分析失败:', error);
     }
 }

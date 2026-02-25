@@ -162,10 +162,10 @@ const SettingsPanel = (): SettingsPanelData => ({
         try {
             const { performanceMonitor } = await import('../../common/devtools/PerformanceMonitor');
             performanceMonitor.show();
-            showToast('监控面板已打开', 'success');
+            showToast('监控面板已打开', { type: 'success' });
         } catch (error) {
             console.error('Failed to open performance monitor:', error);
-            showToast('打开监控面板失败', 'error');
+            showToast('打开监控面板失败', { type: 'error' });
         }
     },
 
@@ -222,12 +222,12 @@ const SettingsPanel = (): SettingsPanelData => ({
 
     async fetchModels(): Promise<void> {
         if (!this.llm.apiKey) {
-            showToast('请先输入API Key', 'warning');
+            showToast('请先输入API Key', { type: 'warning' });
             return;
         }
 
         if (!this.llm.endpoint) {
-            showToast('请先输入API端点地址', 'warning');
+            showToast('请先输入API端点地址', { type: 'warning' });
             return;
         }
 
@@ -293,7 +293,7 @@ const SettingsPanel = (): SettingsPanelData => ({
             console.log(`✅ 模型列表获取成功！共 ${this.llm.models.length} 个模型`);
             console.log(`${'='.repeat(60)}\n`);
 
-            showToast(`成功同步 ${this.llm.models.length} 个模型`, 'success');
+            showToast(`成功同步 ${this.llm.models.length} 个模型`, { type: 'success' });
         } catch (e) {
             const error = e as Error;
             console.error(`\n${'='.repeat(60)}`);
@@ -316,7 +316,7 @@ const SettingsPanel = (): SettingsPanelData => ({
                 errorMsg = '请求超时，请检查网络连接';
             }
             
-            showToast(`获取模型失败: ${errorMsg}`, 'error');
+            showToast(`获取模型失败: ${errorMsg}`, { type: 'error' });
             ErrorService.handle(error, { action: 'fetchModels', module: 'settings' });
         } finally {
             this.llm.isFetching = false;
@@ -325,13 +325,13 @@ const SettingsPanel = (): SettingsPanelData => ({
 
     async testConnection(): Promise<void> {
         if (!this.llm.apiKey || !this.llm.model) {
-            showToast('请先完善配置 (Key + 模型)', 'warning');
+            showToast('请先完善配置 (Key + 模型)', { type: 'warning' });
             return;
         }
 
         this.llm.isTesting = true;
         try {
-            showToast('正在发送测试请求...', 'info');
+            showToast('正在发送测试请求...', { type: 'info' });
             const messages = [{ role: 'user' as const, content: "Hello! Reply 'OK'." }];
 
             const response = await callLLM(
@@ -344,7 +344,7 @@ const SettingsPanel = (): SettingsPanelData => ({
             );
 
             console.log('Test Response:', response);
-            showToast('连接成功！', 'success');
+            showToast('连接成功！', { type: 'success' });
         } catch (error) {
             ErrorService.handle(error as Error, { action: 'testConnection', module: 'settings' });
         } finally {
@@ -354,7 +354,7 @@ const SettingsPanel = (): SettingsPanelData => ({
 
     async saveProviderConfig(): Promise<void> {
         if (!this.llm.apiKey && this.llm.provider !== 'custom') {
-            showToast('请填写 API Key', 'warning');
+            showToast('请填写 API Key', { type: 'warning' });
             return;
         }
 
@@ -378,7 +378,7 @@ const SettingsPanel = (): SettingsPanelData => ({
             // Update global status UI
             updateModelStatus();
 
-            showToast('LLM 配置已保存 (API Key 已加密)', 'success');
+            showToast('LLM 配置已保存 (API Key 已加密)', { type: 'success' });
             setTimeout(() => this.close(), 500);
         } catch (error) {
             ErrorService.handle(error as Error, { action: 'saveProviderConfig', module: 'settings' });
@@ -409,7 +409,7 @@ const SettingsPanel = (): SettingsPanelData => ({
         const config = { type: this.proxy.type, customUrl: this.proxy.customUrl };
         StorageService.set(STORAGE_KEYS.SCRAPER_PROXY_CONFIG, config);
 
-        showToast('网络配置已更新', 'success');
+        showToast('网络配置已更新', { type: 'success' });
     },
 
     getProxyDisplayName(type: string): string {
@@ -482,10 +482,10 @@ export async function openPerformanceMonitor(): Promise<void> {
     try {
         const { performanceMonitor } = await import('../../common/devtools/PerformanceMonitor');
         performanceMonitor.show();
-        showToast('监控面板已打开', 'success');
+        showToast('监控面板已打开', { type: 'success' });
     } catch (error) {
         console.error('Failed to open performance monitor:', error);
-        showToast('打开监控面板失败', 'error');
+        showToast('打开监控面板失败', { type: 'error' });
     }
 }
 

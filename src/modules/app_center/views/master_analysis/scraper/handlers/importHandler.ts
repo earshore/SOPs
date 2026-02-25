@@ -273,7 +273,7 @@ export async function handleImportFiles(
         const largeFiles = files.filter(f => f.size > LARGE_FILE_SIZE && f.size <= MAX_FILE_SIZE);
         if (largeFiles.length > 0) {
             console.warn('[Scraper] 检测到大文件:', largeFiles.map(f => `${f.name} (${(f.size / 1024 / 1024).toFixed(2)}MB)`));
-            showToast(`⚠️ 检测到大文件，处理可能需要较长时间`, "warning");
+            showToast(`⚠️ 检测到大文件，处理可能需要较长时间`, { type: 'warning' });
         }
         
         // 检查空文件
@@ -283,7 +283,7 @@ export async function handleImportFiles(
             throw new Error(`文件内容为空: ${emptyFiles.map(f => f.name).join(', ')}`);
         }
 
-        showToast(`📂 正在解析 ${files.length} 个文件...`, "info");
+        showToast(`📂 正在解析 ${files.length} 个文件...`, { type: 'info' });
 
         const fileContents = await Promise.all(files.map(f => readFileAsJSON(f)));
         const productPool = new Map<string, Array<ScrapedProduct & { _source_site?: string; _filename?: string }>>();
@@ -346,7 +346,7 @@ export async function handleImportFiles(
             // 多站点数据，弹窗让用户选择（无论是否有现有数据）
             const selected = await showMarketplaceSelectionModal([...detectedSites]);
             if (!selected) {
-                showToast("用户取消导入", "info");
+                showToast("用户取消导入", { type: 'info' });
                 return { success: false };
             }
             targetMarketplace = selected;
@@ -380,7 +380,7 @@ export async function handleImportFiles(
         eventBus.emit(APP_EVENTS.DATA_UPDATED);
         window.dispatchEvent(new CustomEvent(APP_EVENTS.HISTORY_UPDATED));
 
-        showToast(`✅ 成功导入并合并 ${finalProducts.length} 个ASIN (基准站点: ${targetMarketplace})`, "success");
+        showToast(`✅ 成功导入并合并 ${finalProducts.length} 个ASIN (基准站点: ${targetMarketplace})`, { type: 'success' });
         
         return { success: true, data: scrapedData };
 
@@ -405,7 +405,7 @@ export async function handleImportFiles(
             userMessage = `❌ 导入出错: ${errorMessage}`;
         }
         
-        showToast(userMessage, "error");
+        showToast(userMessage, { type: 'error' });
         
         return { success: false, error: errorMessage };
     }

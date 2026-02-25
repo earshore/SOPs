@@ -44,7 +44,7 @@ export class HistoryPanel {
         const newHistory = this.history.filter(h => h.id !== id);
         StorageService.setScrapeHistory(newHistory);
         this.loadHistory();
-        showToast("记录已删除", "success");
+        showToast("记录已删除", { type: 'success' });
     }
 
     /**
@@ -54,7 +54,7 @@ export class HistoryPanel {
         if (!confirm("确定清空所有历史记录？")) return;
         HistoryService.clear();
         this.loadHistory();
-        showToast("历史已清空", "success");
+        showToast("历史已清空", { type: 'success' });
     }
 
     /**
@@ -106,7 +106,7 @@ export class HistoryPanel {
         const message = hasReport
             ? `历史快照已加载（包含分析报告）`
             : `历史快照已加载`;
-        showToast(message, "success");
+        showToast(message, { type: 'success' });
 
         return true;
     }
@@ -116,7 +116,7 @@ export class HistoryPanel {
      */
     async loadAnalysisReport(item: HistoryItem): Promise<void> {
         if (!item.analysisStatus || !item.analysisStatus.isAnalyzed) {
-            showToast("该快照没有分析报告", "warning");
+            showToast("该快照没有分析报告", { type: 'warning' });
             return;
         }
 
@@ -136,10 +136,10 @@ export class HistoryPanel {
                 await window.switchTab('ai_analysis', true);
             }
 
-            showToast("已跳转到 AI智能分析查看报告", "success");
+            showToast("已跳转到 AI智能分析查看报告", { type: 'success' });
         } catch (error) {
             console.error('[Scraper] 载入分析报告失败:', error);
-            showToast("载入分析报告失败", "error");
+            showToast("载入分析报告失败", { type: 'error' });
         }
     }
 }

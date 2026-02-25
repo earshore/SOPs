@@ -222,7 +222,7 @@ export async function switchTab(tab: string, updateHistory: boolean = true): Pro
     await ensureViewLoaded(cleanTab);
   } catch (err) {
     console.error("View lazy load failed:", err);
-    showToast("页面资源加载失败，请重试", "error");
+    showToast("页面资源加载失败，请重试", { type: 'error' });
     return;
   }
 
