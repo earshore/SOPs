@@ -58,7 +58,7 @@ export interface ProviderConfig {
 /** LLM提供商映射 */
 export const PROVIDERS: Record<string, ProviderConfig> = {
   llmgateway: {
-    name: "LLM-Gateway",
+    name: "AI-Gateway",
     endpoint: "https://ai-gateway.hongecb.store",
     models: [
       { id: "glm-4.5-air", context: 128000, features: ["function"] },
