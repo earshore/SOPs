@@ -290,27 +290,35 @@ export async function runAnalysisAction(context: AlpineContext, moduleState: Mod
       analysisReport = getSampleReport();
     }
 
-    // 保存原始报告并设置显示标志
-    context.analysisReport = analysisReport;
-    context.hasReport = true;
-    
-    console.log('[用户动作] 分析报告已设置，selectedTargets:', context.selectedTargets.length);
-    console.log('[用户动作] analysisReport 已保存:', !!context.analysisReport);
-    console.log('[用户动作] hasReport 标志已设置:', context.hasReport);
-    
-    // 同步到模块状态
+    // 先清空旧报告，确保触发响应式更新
+    context.analysisReport = null;
+    context.hasReport = false;
     syncToModuleState(context, moduleState);
     
-    // 强制触发 Alpine.js 响应式更新
-    // 使用 $nextTick 确保在 DOM 更新周期中触发
+    // 使用 $nextTick 确保清空操作完成后再设置新报告
     if ((context as any).$nextTick) {
       (context as any).$nextTick(() => {
-        // 通过重新赋值触发响应式
-        const report = context.analysisReport;
-        context.analysisReport = null;
-        context.analysisReport = report;
-        console.log('[用户动作] 已强制触发响应式更新');
+        // 设置新报告
+        context.analysisReport = analysisReport;
+        context.hasReport = true;
+        
+        console.log('[用户动作] 分析报告已设置，selectedTargets:', context.selectedTargets.length);
+        console.log('[用户动作] analysisReport 已保存:', !!context.analysisReport);
+        console.log('[用户动作] hasReport 标志已设置:', context.hasReport);
+        
+        // 同步到模块状态
+        syncToModuleState(context, moduleState);
+        
+        // 再次使用 $nextTick 确保视图完全更新
+        (context as any).$nextTick(() => {
+          console.log('[用户动作] 视图更新完成');
+        });
       });
+    } else {
+      // 如果没有 $nextTick，直接设置
+      context.analysisReport = analysisReport;
+      context.hasReport = true;
+      syncToModuleState(context, moduleState);
     }
 
     // 将分析报告加载到全局状态
