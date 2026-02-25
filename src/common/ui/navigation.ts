@@ -4,6 +4,7 @@
  */
 
 import state from '../state';
+import { appStore } from '@/stores/useAppStore';
 import { MENU_CONFIG, getRoutesByModule, getRouteFullConfig, type RouteWithId, type ModuleConfig, type RouteFullConfig } from '../config/menuConfig';
 import { createSidebarRenderer, type SidebarRenderer } from '../components/SidebarRenderer';
 import { ensureViewLoaded } from '../utils/viewLoader';
@@ -228,7 +229,7 @@ export async function switchTab(tab: string, updateHistory: boolean = true): Pro
 
   // 更新全局状态
   if (state.ui) {
-    state.ui.currentTab = cleanTab;
+    appStore.getState().setCurrentTab(cleanTab);
   }
   const fullConfig = getRouteFullConfig(cleanTab);
 

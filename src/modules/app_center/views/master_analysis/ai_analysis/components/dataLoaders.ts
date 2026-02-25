@@ -3,7 +3,7 @@
  * 负责从各种数据源加载和检查数据
  */
 
-import state from '@common/state';
+import { appStore } from '@/stores/useAppStore';
 import { showToast } from '@common/ui/index';
 import { formatHistoryDate } from '../services/reportGenerator';
 import { AlpineContext, HistoricalReportDetail } from '../types';
@@ -14,7 +14,7 @@ import { ModuleState } from '../state/moduleState';
  * 检查并加载 Scraper 数据
  */
 export function checkAndLoadScraperData(context: AlpineContext, moduleState: ModuleState): void {
-  const scrapedData = state.scraper?.scrapedData as ScrapedData | null;
+  const scrapedData = appStore.getState().scraper?.scrapedData as ScrapedData | null;
   
   if (scrapedData && scrapedData.products && scrapedData.products.length > 0) {
     // 如果有 Scraper 数据，自动选中所有产品的 ASIN
@@ -44,7 +44,7 @@ export function checkAndLoadScraperData(context: AlpineContext, moduleState: Mod
  * 检查是否有已加载的历史报告（从全局状态）
  */
 export function checkLoadedReport(context: AlpineContext, moduleState: ModuleState): void {
-  const report = state.analysis?.analysisReport;
+  const report = appStore.getState().analysis?.analysisReport;
   
   // 类型守卫：确保 report 是对象类型
   if (!report || typeof report === 'string') {

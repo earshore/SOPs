@@ -1,6 +1,14 @@
 // examples/middleware-usage.ts
 // ================================================================
-// StateManager 中间件使用示例
+// ⚠️ DEPRECATED - StateManager 中间件使用示例（已废弃）
+// 
+// 此示例展示旧的 StateManager 中间件系统
+// 新项目请使用 Zustand 中间件
+// 
+// 参考新的实现:
+// - src/stores/middleware/persist.ts
+// - src/stores/middleware/devtools.ts
+// - src/stores/useAppStore.ts
 // ================================================================
 
 import { StateManager } from '../src/common/infrastructure/StateManager';

@@ -12,12 +12,13 @@ import type {
   ScraperState, 
   AnalysisState, 
   PromptLabState, 
-  KeywordTrackerState 
+  KeywordTrackerState,
+  QALabState
 } from '../types/state';
 
 /**
  * 应用状态Store
- * 管理全局状态(UI、Scraper、Analysis、PromptLab、KeywordTracker)
+ * 管理全局状态(UI、Scraper、Analysis、PromptLab、KeywordTracker、QALab)
  */
 interface AppStore {
   // UI状态
@@ -34,6 +35,9 @@ interface AppStore {
   
   // KeywordTracker状态
   keywordTracker: KeywordTrackerState;
+  
+  // QALab状态
+  qalab: QALabState;
   
   // UI Actions
   setCurrentTab: (tab: string) => void;
@@ -82,6 +86,18 @@ interface AppStore {
   updateKeywordTrackerSettings: (settings: Partial<KeywordTrackerState['settings']>) => void;
   updateKeywordTracker: (updates: Partial<KeywordTrackerState>) => void;
   resetKeywordTracker: () => void;
+  
+  // QALab Actions
+  setQALabLang: (lang: string) => void;
+  setQALabCategory: (category: string) => void;
+  setQALabAllExpanded: (expanded: boolean) => void;
+  setQALabReportData: (data: any) => void;
+  setQALabGeneratedQAs: (qas: any[]) => void;
+  addRufusMessage: (message: QALabState['rufusMessages'][0]) => void;
+  setRufusThinking: (thinking: boolean) => void;
+  setRufusMode: (mode: QALabState['rufusMode']) => void;
+  updateQALab: (updates: Partial<QALabState>) => void;
+  resetQALab: () => void;
 }
 
 /**
@@ -157,6 +173,20 @@ const initialKeywordTrackerState: KeywordTrackerState = {
 };
 
 /**
+ * 初始QALab状态
+ */
+const initialQALabState: QALabState = {
+  currentLang: 'de',
+  currentCategory: 'all',
+  allExpanded: false,
+  reportData: null,
+  generatedQAs: [],
+  rufusMessages: [],
+  rufusThinking: false,
+  rufusMode: 'ai'
+};
+
+/**
  * 创建应用Store
  * 使用持久化和DevTools中间件
  */
@@ -185,6 +215,9 @@ export const appStore = createStore<AppStore>()(
         
         // 初始KeywordTracker状态
         keywordTracker: initialKeywordTrackerState,
+        
+        // 初始QALab状态
+        qalab: initialQALabState,
         
         // UI Actions
         setCurrentTab: (tab) => 
@@ -377,7 +410,59 @@ export const appStore = createStore<AppStore>()(
           })),
         
         resetKeywordTracker: () =>
-          set({ keywordTracker: initialKeywordTrackerState })
+          set({ keywordTracker: initialKeywordTrackerState }),
+        
+        // QALab Actions
+        setQALabLang: (currentLang) =>
+          set((state) => ({
+            qalab: { ...state.qalab, currentLang }
+          })),
+        
+        setQALabCategory: (currentCategory) =>
+          set((state) => ({
+            qalab: { ...state.qalab, currentCategory }
+          })),
+        
+        setQALabAllExpanded: (allExpanded) =>
+          set((state) => ({
+            qalab: { ...state.qalab, allExpanded }
+          })),
+        
+        setQALabReportData: (reportData) =>
+          set((state) => ({
+            qalab: { ...state.qalab, reportData }
+          })),
+        
+        setQALabGeneratedQAs: (generatedQAs) =>
+          set((state) => ({
+            qalab: { ...state.qalab, generatedQAs }
+          })),
+        
+        addRufusMessage: (message) =>
+          set((state) => ({
+            qalab: { 
+              ...state.qalab, 
+              rufusMessages: [...state.qalab.rufusMessages, message] 
+            }
+          })),
+        
+        setRufusThinking: (rufusThinking) =>
+          set((state) => ({
+            qalab: { ...state.qalab, rufusThinking }
+          })),
+        
+        setRufusMode: (rufusMode) =>
+          set((state) => ({
+            qalab: { ...state.qalab, rufusMode }
+          })),
+        
+        updateQALab: (updates) =>
+          set((state) => ({
+            qalab: { ...state.qalab, ...updates }
+          })),
+        
+        resetQALab: () =>
+          set({ qalab: initialQALabState })
       }),
       {
         name: 'app-storage',
@@ -449,7 +534,17 @@ export const selectors = {
   matchedKeywords: (state: AppStore) => state.keywordTracker.matchedKeywords,
   unmatchedKeywords: (state: AppStore) => state.keywordTracker.unmatchedKeywords,
   translationMode: (state: AppStore) => state.keywordTracker.translationMode,
-  keywordTrackerSettings: (state: AppStore) => state.keywordTracker.settings
+  keywordTrackerSettings: (state: AppStore) => state.keywordTracker.settings,
+  
+  // QALab选择器
+  qalabLang: (state: AppStore) => state.qalab.currentLang,
+  qalabCategory: (state: AppStore) => state.qalab.currentCategory,
+  qalabAllExpanded: (state: AppStore) => state.qalab.allExpanded,
+  qalabReportData: (state: AppStore) => state.qalab.reportData,
+  qalabGeneratedQAs: (state: AppStore) => state.qalab.generatedQAs,
+  rufusMessages: (state: AppStore) => state.qalab.rufusMessages,
+  rufusThinking: (state: AppStore) => state.qalab.rufusThinking,
+  rufusMode: (state: AppStore) => state.qalab.rufusMode
 };
 
 // 向后兼容: 导出uiStore别名

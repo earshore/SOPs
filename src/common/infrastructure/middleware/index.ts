@@ -1,7 +1,12 @@
 // src/common/infrastructure/middleware/index.ts
 // ================================================================
-// StateManager 中间件系统
-// 提供日志、持久化、验证等标准中间件
+// ⚠️ DEPRECATED - StateManager 中间件系统已废弃
+// 
+// 请使用 Zustand 中间件:
+// - 持久化: src/stores/middleware/persist.ts
+// - DevTools: src/stores/middleware/devtools.ts
+// 
+// 此文件仅保留用于向后兼容
 // ================================================================
 
 // 日志中间件

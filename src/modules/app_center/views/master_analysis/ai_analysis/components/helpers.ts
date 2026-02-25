@@ -7,7 +7,7 @@ import { LANGUAGE_HEADERS } from '@common/constants/constants';
 import { generateAnalysisPrompt } from '../prompts/analysisPrompts';
 import { Product } from '../config/sampleData';
 import { mergeProducts } from '../utils/dataTransformers';
-import state from '@common/state';
+import { appStore } from '@/stores/useAppStore';
 import { estimateTokenCount, formatTokenCount } from '../utils/tokenCounter';
 import { getTargetIcon, getTargetColor } from '../utils/targetHelpers';
 
@@ -46,7 +46,7 @@ export function getTargetColorClass(color: string): string {
  * 获取市场对应的语言代码
  */
 export function getMarketLanguage(): string {
-  const scrapedData = state.scraper?.scrapedData;
+  const scrapedData = appStore.getState().scraper?.scrapedData;
   if (scrapedData && scrapedData.metadata && scrapedData.metadata.marketplace) {
     const marketplace = scrapedData.metadata.marketplace;
     

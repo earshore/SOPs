@@ -12,7 +12,7 @@ import { SafeModuleLoader } from '../../../../../common/infrastructure/SafeModul
 import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
 import { showToast } from '../../../../../common/ui';
 import * as KeywordService from '../services/trackerService';
-import state from "../../../../../common/state";
+import { appStore } from '@/stores/useAppStore';
 import { ErrorService } from '../../../../../services/errorService';
 import { registerActionsWithLegacy, unregisterActions } from '../../../../../common/utils/actionRegistry';
 
@@ -74,15 +74,16 @@ function cleanup(): void {
  * 保存分析状态到 state
  */
 function saveAnalysisStateToState(): void {
-    if (!state.keywordTracker) {
-        state.keywordTracker = {} as any;
+    const currentState = appStore.getState();
+    if (!currentState.keywordTracker) {
+        currentState.updateKeywordTracker({} as any);
     }
 
     // 保存 AI 分析报告内容
     const resultDiv = document.getElementById('kt-llm-analysis-result');
     if (resultDiv) {
         // ✅ 安全: 静态HTML模板，无用户输入
-        state.keywordTracker.llmAnalysisResult = resultDiv.innerHTML;
+        appStore.getState().updateKeywordTracker({ llmAnalysisResult: resultDiv.innerHTML });
     }
 }
 
@@ -92,9 +93,10 @@ function saveAnalysisStateToState(): void {
 function restoreAnalysisStateFromState(): void {
     // 恢复 AI 分析报告
     const resultDiv = document.getElementById('kt-llm-analysis-result');
-    if (resultDiv && state.keywordTracker && state.keywordTracker.llmAnalysisResult) {
+    const currentState = appStore.getState();
+    if (resultDiv && currentState.keywordTracker && currentState.keywordTracker.llmAnalysisResult) {
         const renderer = SafeRenderer.getInstance();
-        renderer.renderTemplate(resultDiv, state.keywordTracker.llmAnalysisResult);
+        renderer.renderTemplate(resultDiv, currentState.keywordTracker.llmAnalysisResult);
         highlightScores(resultDiv);
     }
 
@@ -119,7 +121,7 @@ function renderAnalysisModule(): void {
  */
 function updateAnalyzeButtonState(): void {
     const btn = document.getElementById('kt-analyze-btn') as HTMLButtonElement | null;
-    const hasContent = state.keywordTracker.processedCopy && state.keywordTracker.processedCopy.trim().length > 0;
+    const hasContent = appStore.getState().keywordTracker.processedCopy && appStore.getState().keywordTracker.processedCopy.trim().length > 0;
 
     if (btn) {
         if (hasContent) {
@@ -144,7 +146,7 @@ function updateAnalyzeButtonState(): void {
 async function runLLMAnalysis(): Promise<void> {
     const btn = document.getElementById('kt-analyze-btn') as HTMLButtonElement | null;
 
-    if (!state.keywordTracker.processedCopy || !state.keywordTracker.processedCopy.trim()) {
+    if (!appStore.getState().keywordTracker.processedCopy || !appStore.getState().keywordTracker.processedCopy.trim()) {
         showToast("文案内容为空，无法进行AI分析", { type: 'warning' });
         return;
     }
@@ -172,10 +174,10 @@ async function runLLMAnalysis(): Promise<void> {
 
     try {
         const response = await KeywordService.fetchListingAnalysis(
-            state.keywordTracker.processedCopy,
-            state.keywordTracker.keywords,
-            state.keywordTracker.matchedKeywords,
-            state.keywordTracker.unmatchedKeywords
+            appStore.getState().keywordTracker.processedCopy,
+            appStore.getState().keywordTracker.keywords,
+            appStore.getState().keywordTracker.matchedKeywords,
+            appStore.getState().keywordTracker.unmatchedKeywords
         );
 
         // 渲染分析结果

@@ -1,7 +1,16 @@
 // src/common/infrastructure/StateManager.ts
 // ================================================================
-// 统一状态管理器
-// 提供类型安全的状态访问接口，封装 Zustand store
+// ⚠️ DEPRECATED - 此文件已废弃
+// 
+// 状态管理已完全迁移到 Zustand
+// 请使用: import { appStore } from '@/stores/useAppStore'
+// 
+// 迁移指南:
+// - 读取状态: appStore.getState().ui.currentTab
+// - 更新状态: appStore.getState().setCurrentTab('home')
+// - 订阅变化: appStore.subscribe((state) => { ... })
+// 
+// 此文件仅保留用于向后兼容，将在未来版本中移除
 // ================================================================
 
 import { appStore } from '../../stores/useAppStore';
@@ -14,6 +23,7 @@ import type { AnalysisReport, ScrapedData } from '../../types/modules-business';
 
 /**
  * 中间件函数类型
+ * @deprecated 使用 Zustand 中间件代替
  * @param state - 当前状态
  * @param action - 操作名称
  * @param payload - 操作数据
@@ -62,6 +72,19 @@ export interface HistoryItem {
 
 /**
  * 统一状态管理器
+ * 
+ * @deprecated 此类已废弃，请使用 Zustand store
+ * 
+ * 迁移示例:
+ * ```typescript
+ * // 旧方式
+ * const stateManager = StateManager.getInstance();
+ * const report = stateManager.getAnalysisReport();
+ * 
+ * // 新方式
+ * import { appStore } from '@/stores/useAppStore';
+ * const report = appStore.getState().analysis.analysisReport;
+ * ```
  * 
  * 职责：
  * - 封装 Zustand store 访问

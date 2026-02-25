@@ -14,7 +14,7 @@ import { getMarketLanguage } from './helpers';
 import { Product } from '../config/sampleData';
 import { AlpineContext } from '../types';
 import { ModuleState } from '../state/moduleState';
-import state from '@common/state';
+import { appStore } from '@/stores/useAppStore';
 import type { FullAnalysisReport } from '../config/analysisReportData';
 
 /**
@@ -322,18 +322,19 @@ export async function runAnalysisAction(context: AlpineContext, moduleState: Mod
     }
 
     // 将分析报告加载到全局状态
-    const scrapedData = state.scraper?.scrapedData;
+    const scrapedData = appStore.getState().scraper?.scrapedData;
     const marketplace = scrapedData?.metadata?.marketplace || 'US';
     
-    // 使用类型断言，因为 state.analysis.analysisReport 接受多种格式
-    state.analysis.analysisReport = analysisReport as any;
+    // 使用类型断言，因为 appStore.getState().analysis.analysisReport 接受多种格式
+    appStore.getState().setAnalysisReport(analysisReport as any);
     console.log('[用户动作] 已将分析报告加载到全局状态，marketplace:', marketplace);
 
     // 分析成功后自动更新历史快照的分析状态
-    if (analysisReport && state.scraper?.currentHistoryId) {
+    const currentHistoryId = appStore.getState().scraper?.currentHistoryId;
+    if (analysisReport && currentHistoryId) {
       const { HistoryService } = await import('../../services/historyService');
       const success = HistoryService.updateAnalysisStatus(
-        state.scraper.currentHistoryId,
+        currentHistoryId,
         analysisReport as any
       );
       
@@ -358,7 +359,7 @@ export async function runAnalysisAction(context: AlpineContext, moduleState: Mod
  * 获取真实产品数据
  */
 function getRealProducts(selectedAsins: string[]): Product[] {
-  const scrapedData = state.scraper?.scrapedData;
+  const scrapedData = appStore.getState().scraper?.scrapedData;
   return getProductsByAsins(scrapedData, selectedAsins);
 }
 

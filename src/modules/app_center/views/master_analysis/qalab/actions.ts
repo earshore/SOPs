@@ -3,7 +3,7 @@
  * 使用新架构：SafeRenderer 进行安全渲染
  */
 
-import state from '../../../../../common/state';
+import { appStore } from '@/stores/useAppStore';
 import { generateMultiLangQAs } from './qaData';
 import { qalabState } from './state';
 import { LANGUAGES, CATEGORIES, MARKET_LANG_MAP } from './constants';
@@ -21,11 +21,11 @@ export function autoLoadAnalysisReport(): void {
     console.log('[QALab] 🔍 autoLoadAnalysisReport 被调用');
     console.log('[QALab] 时间:', new Date().toLocaleTimeString());
     
-    const analysisReport = state.analysis?.analysisReport;
+    const analysisReport = appStore.getState().analysis?.analysisReport;
     
     if (!analysisReport) {
         console.log('[QALab] ⚠️ 未检测到分析报告');
-        console.log('[QALab] - state.analysis:', state.analysis ? '存在但无 analysisReport' : '不存在');
+        console.log('[QALab] - state.analysis:', appStore.getState().analysis ? '存在但无 analysisReport' : '不存在');
         console.log('[QALab] ========================================');
         return;
     }
@@ -56,10 +56,10 @@ export function autoLoadAnalysisReport(): void {
             const reportObj = analysisReport as any;
             
             // 从 state 中获取完整的 metadata 信息
-            const scrapedData = state.scraper?.scrapedData as any;
+            const scrapedData = appStore.getState().scraper?.scrapedData as any;
             
-            // 获取 ASINs：优先从 state.analysis.selectedAsins，否则从 scrapedData.products 提取
-            let selectedAsins = state.analysis?.selectedAsins || [];
+            // 获取 ASINs：优先从 appStore.getState().analysis.selectedAsins，否则从 scrapedData.products 提取
+            let selectedAsins = appStore.getState().analysis?.selectedAsins || [];
             if (selectedAsins.length === 0 && scrapedData?.products) {
                 selectedAsins = scrapedData.products
                     .map((p: any) => p.asin)
@@ -777,7 +777,7 @@ export async function sendRufusQuestion(question: string): Promise<void> {
  * 清空 Rufus 对话历史
  */
 export function clearRufusChat(): void {
-    qalabState.rufusMessages = [];
+    qalabState.rufusMessages.length = 0;
     renderRufusMessages();
     showToast('对话已清空', { type: 'success' });
 }

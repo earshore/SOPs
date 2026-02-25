@@ -13,7 +13,7 @@ import { SafeModuleLoader } from '../../../../../common/infrastructure/SafeModul
 import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
 import { showToast } from '../../../../../common/ui';
 import * as KeywordService from '../services/trackerService';
-import state from "../../../../../common/state";
+import { appStore } from '../../../../../stores/useAppStore';
 import { ErrorService } from '../../../../../services/errorService';
 import { registerActionsWithLegacy, unregisterActions } from '../../../../../common/utils/actionRegistry';
 
@@ -133,8 +133,9 @@ function escapeRegex(string: string): string {
  * 保存处理状态到 state
  */
 function saveProcessStateToState(): void {
-    if (!state.keywordTracker) {
-        state.keywordTracker = {
+    const currentState = appStore.getState();
+    if (!currentState.keywordTracker) {
+        currentState.updateKeywordTracker({
             keywords: [],
             processedCopy: '',
             formattedCopy: '',
@@ -151,19 +152,19 @@ function saveProcessStateToState(): void {
                 matchPartial: false
             },
             isWindowMinimized: false
-        };
+        });
     }
 
     // 保存文案显示内容
     const displayEl = document.getElementById('kt-copy-display');
     if (displayEl) {
-        state.keywordTracker.processedCopy = displayEl.innerText;
+        appStore.getState().setProcessedCopy(displayEl.innerText);
     }
 
     // 保存翻译显示状态
     const showTransCheckbox = document.getElementById('kt-show-translation') as HTMLInputElement | null;
     if (showTransCheckbox) {
-        state.keywordTracker.showTranslation = showTransCheckbox.checked;
+        appStore.getState().updateKeywordTracker({ showTranslation: showTransCheckbox.checked });
     }
 }
 
@@ -173,13 +174,14 @@ function saveProcessStateToState(): void {
 function restoreProcessStateFromState(): void {
     // 恢复翻译显示状态
     const showTransCheckbox = document.getElementById('kt-show-translation') as HTMLInputElement | null;
-    if (showTransCheckbox && state.keywordTracker) {
-        if (state.keywordTracker.showTranslation !== undefined) {
-            showTransCheckbox.checked = state.keywordTracker.showTranslation;
+    const currentState = appStore.getState();
+    if (showTransCheckbox && currentState.keywordTracker) {
+        if (currentState.keywordTracker.showTranslation !== undefined) {
+            showTransCheckbox.checked = currentState.keywordTracker.showTranslation;
         }
         
         // 根据是否有翻译数据启用/禁用复选框
-        const hasTranslationData = state.keywordTracker.paragraphs && state.keywordTracker.paragraphs.length > 0;
+        const hasTranslationData = appStore.getState().keywordTracker.paragraphs && appStore.getState().keywordTracker.paragraphs.length > 0;
         showTransCheckbox.disabled = !hasTranslationData;
     }
 
@@ -206,8 +208,9 @@ function renderProcessModule(): void {
  * 渲染分析统计数据（从 analysis 模块移动过来）
  */
 function renderAnalysisStats(): void {
-    if (!state.keywordTracker) {
-        state.keywordTracker = {
+    const currentState = appStore.getState();
+    if (!currentState.keywordTracker) {
+        currentState.updateKeywordTracker({
             keywords: [],
             processedCopy: '',
             formattedCopy: '',
@@ -224,11 +227,11 @@ function renderAnalysisStats(): void {
                 matchPartial: false
             },
             isWindowMinimized: false
-        };
+        });
     }
 
-    const total = state.keywordTracker.keywords ? state.keywordTracker.keywords.length : 0;
-    const matched = state.keywordTracker.matchedKeywords ? state.keywordTracker.matchedKeywords.length : 0;
+    const total = appStore.getState().keywordTracker.keywords ? appStore.getState().keywordTracker.keywords.length : 0;
+    const matched = appStore.getState().keywordTracker.matchedKeywords ? appStore.getState().keywordTracker.matchedKeywords.length : 0;
     const rate = total === 0 ? 0 : Math.round((matched / total) * 100);
 
     // 更新覆盖率
@@ -244,7 +247,7 @@ function renderAnalysisStats(): void {
 
     const unmatchedEl = document.getElementById('kt-stat-unmatched');
     if (unmatchedEl) {
-        const unmatchedCount = state.keywordTracker.unmatchedKeywords ? state.keywordTracker.unmatchedKeywords.length : 0;
+        const unmatchedCount = appStore.getState().keywordTracker.unmatchedKeywords ? appStore.getState().keywordTracker.unmatchedKeywords.length : 0;
         unmatchedEl.textContent = unmatchedCount.toString();
     }
 
@@ -253,11 +256,11 @@ function renderAnalysisStats(): void {
 
     // 渲染高频词云（带关键词命中标注）
     const freqList = document.getElementById('kt-word-frequency-list');
-    if (freqList && state.keywordTracker.wordFrequency) {
+    if (freqList && appStore.getState().keywordTracker.wordFrequency) {
         // 构建已匹配关键词的词根集合
         const matchedKeywordRoots = new Set<string>();
-        if (state.keywordTracker.matchedKeywords && state.keywordTracker.matchedKeywords.length > 0) {
-            state.keywordTracker.matchedKeywords.forEach(item => {
+        if (appStore.getState().keywordTracker.matchedKeywords && appStore.getState().keywordTracker.matchedKeywords.length > 0) {
+            appStore.getState().keywordTracker.matchedKeywords.forEach(item => {
                 const kw = typeof item === 'object' ? item.keyword : item;
                 if (kw) {
                     const words = kw.toLowerCase().match(/[\p{L}\p{M}]+/gu) || [];
@@ -272,10 +275,10 @@ function renderAnalysisStats(): void {
 
         // 构建未匹配关键词的词根集合
         const unmatchedKeywordRoots = new Set<string>();
-        const highFreqWordsSet = new Set(state.keywordTracker.wordFrequency.map(([w]) => w.toLowerCase()));
+        const highFreqWordsSet = new Set(appStore.getState().keywordTracker.wordFrequency.map(([w]) => w.toLowerCase()));
         
-        if (state.keywordTracker.unmatchedKeywords && state.keywordTracker.unmatchedKeywords.length > 0) {
-            state.keywordTracker.unmatchedKeywords.forEach(kw => {
+        if (appStore.getState().keywordTracker.unmatchedKeywords && appStore.getState().keywordTracker.unmatchedKeywords.length > 0) {
+            appStore.getState().keywordTracker.unmatchedKeywords.forEach(kw => {
                 if (kw) {
                     const words = kw.toLowerCase().match(/[\p{L}\p{M}]+/gu) || [];
                     words.forEach((w: string) => {
@@ -298,7 +301,7 @@ function renderAnalysisStats(): void {
         wordCloudDiv.className = 'flex flex-wrap gap-3';
         const wordFragment = document.createDocumentFragment();
         
-        state.keywordTracker.wordFrequency.forEach(([w, c]: [string, number]) => {
+        appStore.getState().keywordTracker.wordFrequency.forEach(([w, c]: [string, number]) => {
             const span = document.createElement('span');
             const isMatched = matchedKeywordRoots.has(w.toLowerCase());
             
@@ -385,8 +388,8 @@ function updateTranslateButton(): void {
     const transBtnText = document.getElementById('kt-translate-btn-text');
     const transCheckbox = document.getElementById('kt-show-translation') as HTMLInputElement | null;
 
-    const hasContent = state.keywordTracker.processedCopy && state.keywordTracker.processedCopy.trim().length > 0;
-    const hasTranslationData = state.keywordTracker.paragraphs && state.keywordTracker.paragraphs.length > 0;
+    const hasContent = appStore.getState().keywordTracker.processedCopy && appStore.getState().keywordTracker.processedCopy.trim().length > 0;
+    const hasTranslationData = appStore.getState().keywordTracker.paragraphs && appStore.getState().keywordTracker.paragraphs.length > 0;
 
     // A. 翻译按钮
     if (transBtn && transBtnText) {
@@ -407,7 +410,7 @@ function updateTranslateButton(): void {
     if (transCheckbox) {
         if (hasTranslationData) {
             transCheckbox.disabled = false;
-            if (state.keywordTracker.translationMode) {
+            if (appStore.getState().keywordTracker.translationMode) {
                 transCheckbox.checked = true;
             }
         } else {
@@ -428,8 +431,8 @@ function renderCopyDisplay(): void {
     const showTrans = (document.getElementById('kt-show-translation') as HTMLInputElement | null)?.checked;
 
     // 如果是翻译模式且有翻译数据
-    if (state.keywordTracker.translationMode && state.keywordTracker.paragraphs && state.keywordTracker.paragraphs.length > 0) {
-        const paragraphs = state.keywordTracker.paragraphs
+    if (appStore.getState().keywordTracker.translationMode && appStore.getState().keywordTracker.paragraphs && appStore.getState().keywordTracker.paragraphs.length > 0) {
+        const paragraphs = appStore.getState().keywordTracker.paragraphs
             .filter(p => typeof p === 'object' && 'original' in p)
             .map(p => ({
                 original: highlightText(p.original),
@@ -468,8 +471,8 @@ function renderCopyDisplay(): void {
     }
 
     // 普通模式：显示高亮的文案
-    if (state.keywordTracker.processedCopy) {
-        const highlighted = highlightText(state.keywordTracker.processedCopy);
+    if (appStore.getState().keywordTracker.processedCopy) {
+        const highlighted = highlightText(appStore.getState().keywordTracker.processedCopy);
         renderer.renderTemplate(display, highlighted);
     } else {
         display.innerHTML = '';
@@ -481,7 +484,7 @@ function renderCopyDisplay(): void {
  */
 function highlightText(text: string): string {
     if (!text) return '';
-    if (!state.keywordTracker.matchedKeywords || state.keywordTracker.matchedKeywords.length === 0) {
+    if (!appStore.getState().keywordTracker.matchedKeywords || appStore.getState().keywordTracker.matchedKeywords.length === 0) {
         return escapeHtml(text).replace(/\n/g, '<br>');
     }
 
@@ -495,7 +498,7 @@ function highlightText(text: string): string {
     }
 
     // 对每个关键词，找出它在文本中的所有匹配位置
-    state.keywordTracker.matchedKeywords.forEach(item => {
+    appStore.getState().keywordTracker.matchedKeywords.forEach(item => {
         const kw = item.keyword;
         const kwLower = kw.toLowerCase();
         const regex = new RegExp(escapeRegex(kw), 'gi');
@@ -588,8 +591,8 @@ function renderFloatingKeywords(): void {
     const allKeywords: KeywordItem[] = [];
     
     // 添加已匹配的关键词
-    if (state.keywordTracker.matchedKeywords && state.keywordTracker.matchedKeywords.length > 0) {
-        state.keywordTracker.matchedKeywords.forEach(item => {
+    if (appStore.getState().keywordTracker.matchedKeywords && appStore.getState().keywordTracker.matchedKeywords.length > 0) {
+        appStore.getState().keywordTracker.matchedKeywords.forEach(item => {
             allKeywords.push({
                 keyword: item.keyword,
                 count: item.count,
@@ -599,8 +602,8 @@ function renderFloatingKeywords(): void {
     }
     
     // 添加未匹配的关键词
-    if (state.keywordTracker.unmatchedKeywords && state.keywordTracker.unmatchedKeywords.length > 0) {
-        state.keywordTracker.unmatchedKeywords.forEach(kw => {
+    if (appStore.getState().keywordTracker.unmatchedKeywords && appStore.getState().keywordTracker.unmatchedKeywords.length > 0) {
+        appStore.getState().keywordTracker.unmatchedKeywords.forEach(kw => {
             allKeywords.push({
                 keyword: kw,
                 count: 0,
@@ -673,13 +676,13 @@ function renderFloatingKeywords(): void {
 
     // 更新计数显示
     const matchedCount = document.getElementById('kt-tab-matched-count');
-    if (matchedCount && state.keywordTracker.matchedKeywords) {
-        matchedCount.textContent = state.keywordTracker.matchedKeywords.length.toString();
+    if (matchedCount && appStore.getState().keywordTracker.matchedKeywords) {
+        matchedCount.textContent = appStore.getState().keywordTracker.matchedKeywords.length.toString();
     }
 
     const unmatchedCount = document.getElementById('kt-tab-unmatched-count');
-    if (unmatchedCount && state.keywordTracker.unmatchedKeywords) {
-        unmatchedCount.textContent = state.keywordTracker.unmatchedKeywords.length.toString();
+    if (unmatchedCount && appStore.getState().keywordTracker.unmatchedKeywords) {
+        unmatchedCount.textContent = appStore.getState().keywordTracker.unmatchedKeywords.length.toString();
     }
 }
 
@@ -688,8 +691,8 @@ function renderFloatingKeywords(): void {
  */
 function updateMinimizedBadge(): void {
     const badge = document.getElementById('kt-minimized-badge');
-    if (badge && state.keywordTracker.matchedKeywords) {
-        badge.textContent = state.keywordTracker.matchedKeywords.length.toString();
+    if (badge && appStore.getState().keywordTracker.matchedKeywords) {
+        badge.textContent = appStore.getState().keywordTracker.matchedKeywords.length.toString();
     }
 }
 
@@ -704,9 +707,9 @@ function syncToInput(): void {
     let text = '';
 
     // 如果是翻译模式，只提取原文
-    if (state.keywordTracker.translationMode && state.keywordTracker.paragraphs && state.keywordTracker.paragraphs.length > 0) {
+    if (appStore.getState().keywordTracker.translationMode && appStore.getState().keywordTracker.paragraphs && appStore.getState().keywordTracker.paragraphs.length > 0) {
         // 从 paragraphs 中提取所有原文
-        text = state.keywordTracker.paragraphs
+        text = appStore.getState().keywordTracker.paragraphs
             .map(p => typeof p === 'object' && 'original' in p ? p.original : p)
             .filter(t => t && t.trim())
             .join('\n');
@@ -722,8 +725,8 @@ function syncToInput(): void {
 
     // 保存到 state
     if (text && text.trim()) {
-        state.keywordTracker.processedCopy = text;
-        state.keywordTracker.copyInputText = text;
+        appStore.getState().setProcessedCopy(text);
+        appStore.getState().updateKeywordTracker({ copyInputText: text });
         
         console.log('[Process] 同步的文本长度:', text.length);
     } else {
@@ -756,15 +759,15 @@ async function translateCopyImmersive(): Promise<void> {
     if (btnText) btnText.textContent = "正在翻译...";
 
     try {
-        const response = await KeywordService.fetchImmersionTranslation(state.keywordTracker.processedCopy);
+        const response = await KeywordService.fetchImmersionTranslation(appStore.getState().keywordTracker.processedCopy);
 
         const transLines = response.split(/\n+/).filter(t => t.trim());
-        state.keywordTracker.paragraphs = state.keywordTracker.processedCopy.split(/\n+/).filter(t => t.trim()).map((original, i) => ({
+        appStore.getState().keywordTracker.paragraphs = appStore.getState().keywordTracker.processedCopy.split(/\n+/).filter(t => t.trim()).map((original, i) => ({
             original,
             translation: transLines[i] || ""
         }));
 
-        state.keywordTracker.translationMode = true;
+        appStore.getState().setTranslationMode(true);
 
         renderProcessModule();
 
@@ -822,10 +825,10 @@ function locateKeywordInCopy(keyword: string): void {
     groups.push(currentGroup);
 
     // 管理循环定位索引
-    if (!state.keywordTracker.keywordLocationIndex) {
-        state.keywordTracker.keywordLocationIndex = {};
+    if (!appStore.getState().keywordTracker.keywordLocationIndex) {
+        appStore.getState().updateKeywordTracker({ keywordLocationIndex: {} });
     }
-    let idx = state.keywordTracker.keywordLocationIndex[targetKw] as number || 0;
+    let idx = appStore.getState().keywordTracker.keywordLocationIndex[targetKw] as number || 0;
     if (idx >= groups.length) idx = 0;
 
     // 移除之前的聚焦高亮
@@ -843,7 +846,7 @@ function locateKeywordInCopy(keyword: string): void {
     (targetGroup[0] as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'center' });
 
     // 更新索引
-    state.keywordTracker.keywordLocationIndex[targetKw] = (idx + 1) % groups.length;
+    appStore.getState().keywordTracker.keywordLocationIndex[targetKw] = (idx + 1) % groups.length;
 
     showToast(`定位: ${keyword} (${idx + 1}/${groups.length})`);
 }
@@ -956,7 +959,7 @@ function minimizeKeywordsWindow(): void {
 
             if (minBtn) {
                 minBtn.classList.add('show');
-                state.keywordTracker.isWindowMinimized = true;
+                appStore.getState().updateKeywordTracker({ isWindowMinimized: true });
             }
         }, 200);
     }
@@ -979,7 +982,7 @@ function restoreKeywordsWindow(): void {
         });
     }
 
-    state.keywordTracker.isWindowMinimized = false;
+    appStore.getState().updateKeywordTracker({ isWindowMinimized: false });
 }
 
 // ========================================== 
@@ -1054,13 +1057,13 @@ function manageFloatingWindowVisibility(): void {
     if (!floatWin || !minBtn) return;
 
     // 确保状态初始化
-    if (state.keywordTracker.isWindowMinimized === undefined) {
-        state.keywordTracker.isWindowMinimized = false;
+    if (appStore.getState().keywordTracker.isWindowMinimized === undefined) {
+        appStore.getState().updateKeywordTracker({ isWindowMinimized: false });
     }
 
     // 只有在有分析数据时才显示浮动窗口
-    const hasAnalysisData = state.keywordTracker.matchedKeywords && 
-                           state.keywordTracker.matchedKeywords.length > 0;
+    const hasAnalysisData = appStore.getState().keywordTracker.matchedKeywords && 
+                           appStore.getState().keywordTracker.matchedKeywords.length > 0;
 
     if (!hasAnalysisData) {
         // 没有数据时隐藏浮动窗口和最小化按钮
@@ -1070,7 +1073,7 @@ function manageFloatingWindowVisibility(): void {
     }
 
     // Process 模块显示浮动窗口
-    if (state.keywordTracker.isWindowMinimized) {
+    if (appStore.getState().keywordTracker.isWindowMinimized) {
         floatWin.classList.remove('show');
         minBtn.classList.add('show');
     } else {
@@ -1170,8 +1173,8 @@ export async function mount(container: HTMLElement): Promise<void> {
         setTimeout(() => {
             manageFloatingWindowVisibility();
             console.log('[Process] 浮动窗口状态:', {
-                hasMatchedKeywords: state.keywordTracker.matchedKeywords?.length > 0,
-                isMinimized: state.keywordTracker.isWindowMinimized,
+                hasMatchedKeywords: appStore.getState().keywordTracker.matchedKeywords?.length > 0,
+                isMinimized: appStore.getState().keywordTracker.isWindowMinimized,
                 floatWinExists: !!document.getElementById('kt-keywords-floating'),
                 minBtnExists: !!document.getElementById('kt-keywords-minimized'),
                 floatWinParent: document.getElementById('kt-keywords-floating')?.parentElement?.tagName

@@ -1,3 +1,6 @@
+// ⚠️ DEPRECATED - 此文件已废弃，请使用 Zustand 中间件
+// 参考: src/stores/middleware/persist.ts 和 devtools.ts
+
 // src/common/infrastructure/middleware/validationMiddleware.ts
 // ================================================================
 // 验证中间件

@@ -4,8 +4,7 @@
  */
 
 import { escapeHtml } from '@/common/utils/security';
-import state from '../../../../../../common/state';
-import { appStore } from '../../../../../../stores/useAppStore';
+import { appStore } from '@/stores/useAppStore';
 import { promptlabService } from '../../services/promptlabService';
 import SITE_CONFIGS from '../../../../../../common/constants/constants';
 import type { TargetMarket } from '@/types/state';
@@ -65,7 +64,7 @@ export function createPromptlabPanel() {
          * 是否有分析报告
          */
         get hasReport(): boolean {
-            const report = state.analysis.analysisReport;
+            const report = appStore.getState().analysis.analysisReport;
             console.log('[Promptlab] hasReport 检查:', { 
                 report, 
                 type: typeof report,
@@ -73,7 +72,7 @@ export function createPromptlabPanel() {
                 hasAnalysisReport: typeof report === 'object' && report !== null ? (report as any).analysisReport : undefined,
                 result: !!report
             });
-            return !!state.analysis.analysisReport;
+            return !!appStore.getState().analysis.analysisReport;
         },
         
         /**
@@ -235,16 +234,17 @@ export function createPromptlabPanel() {
          * 智能自动选择市场
          */
         autoSelectMarket(marketSelect: HTMLSelectElement | null) {
-            if (!marketSelect || !state.masterPrompt) return;
+            const currentState = appStore.getState();
+            if (!marketSelect) return;
             
             // 获取当前数据源的 marketplace
             let currentMarketplace = '';
-            const analysisReport = state.analysis.analysisReport as any;
+            const analysisReport = currentState.analysis.analysisReport as any;
             
             if (analysisReport && analysisReport.marketplace) {
                 currentMarketplace = analysisReport.marketplace;
-            } else if (state.scraper?.scrapedData?.metadata?.marketplace) {
-                currentMarketplace = state.scraper.scrapedData.metadata.marketplace;
+            } else if (currentState.scraper?.scrapedData?.metadata?.marketplace) {
+                currentMarketplace = currentState.scraper.scrapedData.metadata.marketplace;
             } else if (analysisReport) {
                 currentMarketplace = analysisReport.targetMarket || analysisReport.language || '';
             }
@@ -279,7 +279,7 @@ export function createPromptlabPanel() {
          * 渲染报告模块
          */
         renderReportModules(container: HTMLElement) {
-            const report = state.analysis.analysisReport as any;
+            const report = appStore.getState().analysis.analysisReport as any;
             
             console.log('[Promptlab] renderReportModules 调用:', { 
                 report, 
@@ -707,7 +707,7 @@ export function createPromptlabPanel() {
                 useAnalysisData: true,
             };
             
-            const analysisReport = state.analysis.analysisReport;
+            const analysisReport = appStore.getState().analysis.analysisReport;
             const reportToUse: AnalysisReport | null = (typeof analysisReport === 'string' || !analysisReport) ? null : analysisReport;
             
             const result = promptlabService.generateMasterPrompt(inputs as any, reportToUse);
@@ -743,7 +743,7 @@ export function createPromptlabPanel() {
                 useAnalysisData: true,
             };
             
-            const analysisReport = state.analysis.analysisReport;
+            const analysisReport = appStore.getState().analysis.analysisReport;
             const reportToUse: AnalysisReport | null = (typeof analysisReport === 'string' || !analysisReport) ? null : analysisReport;
             
             const result = promptlabService.generateVisualPrompt(inputs as any, reportToUse);
