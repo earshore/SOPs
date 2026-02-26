@@ -59,12 +59,11 @@ console.log('     - 模型: 如 gpt-4, claude-3-sonnet 等');
 console.log('  5. 点击「激活」按钮');
 console.log('  6. 保存配置\n');
 
-console.log('步骤 2: 切换到 AI 模式');
+console.log('步骤 2: 使用 AI 模式');
 console.log('  1. 返回 QA Lab 页面');
 console.log('  2. 找到 Rufus AI 对话框');
-console.log('  3. 点击对话框标题栏右侧的模式切换按钮');
-console.log('  4. 按钮应该从「📋 规则模式」变为「🤖 AI 模式」');
-console.log('  5. 如果配置正确,会显示「AI 模式已就绪」提示\n');
+console.log('  3. AI 模式已默认启用');
+console.log('  4. 如果配置正确,会显示「AI 模式已就绪」提示\n');
 
 console.log('步骤 3: 测试 AI 回答');
 console.log('  1. 确保已加载分析报告(点击「智能分析」按钮)');
@@ -83,11 +82,7 @@ console.log('  ✓ 消息头部显示「🤖 AI 模式」徽章');
 console.log('  ✓ 回答完成后显示「AI 回答生成成功」提示');
 console.log('  ✓ 回答内容更自然、更符合用户意图\n');
 
-console.log('📋 规则模式的特征(对比):');
-console.log('  ✓ 思考状态只显示「正在思考...」');
-console.log('  ✓ 消息头部显示「📋 规则模式」徽章');
-console.log('  ✓ 回答速度更快(500-1000ms)');
-console.log('  ✓ 回答基于预定义规则\n');
+
 
 console.log('='.repeat(70));
 console.log('\n🔍 调试方法:\n');
@@ -122,8 +117,7 @@ console.log('  解决: 检查浏览器控制台是否有 JavaScript 错误\n');
 console.log('问题 2: 切换到 AI 模式后提示"未配置 LLM"');
 console.log('  解决: 按照步骤 1 配置 LLM 服务\n');
 
-console.log('问题 3: AI 模式失败后自动降级到规则模式');
-console.log('  解决: 这是正常的降级机制,检查错误提示中的具体原因\n');
+
 
 console.log('问题 4: 看不到"正在连接大模型"等状态提示');
 console.log('  解决: 清除浏览器缓存(Ctrl+Shift+Delete),硬刷新(Ctrl+F5)\n');
@@ -135,12 +129,11 @@ console.log('='.repeat(70));
 console.log('\n✨ 验证成功的标志:\n');
 
 console.log('当您看到以下现象时,说明 AI 模式工作正常:');
-console.log('  1. ✅ 模式切换按钮显示「🤖 AI 模式」');
-console.log('  2. ✅ 思考过程显示三个阶段的状态消息');
-console.log('  3. ✅ 消息头部有「🤖 AI 模式」徽章(紫色)');
-console.log('  4. ✅ 控制台有完整的 LLM 调用日志');
-console.log('  5. ✅ 回答内容更智能、更符合上下文');
-console.log('  6. ✅ 显示「AI 回答生成成功」的成功提示\n');
+console.log('  1. ✅ 思考过程显示三个阶段的状态消息');
+console.log('  2. ✅ 消息头部有「🤖 AI 模式」徽章(紫色)');
+console.log('  3. ✅ 控制台有完整的 LLM 调用日志');
+console.log('  4. ✅ 回答内容更智能、更符合上下文');
+console.log('  5. ✅ 显示「AI 回答生成成功」的成功提示\n');
 
 console.log('='.repeat(70));
 console.log('\n📞 如果问题仍未解决:\n');
