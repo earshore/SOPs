@@ -26,9 +26,7 @@ import {
     exportText,
     autoLoadAnalysisReport,
     sendRufusQuestion,
-    clearRufusChat,
-    toggleRufusMode,
-    updateRufusModeToggle
+    clearRufusChat
 } from './actions';
 import { rufusSimulator } from './rufusSimulator';
 
@@ -96,14 +94,6 @@ export async function mount(container: HTMLElement): Promise<void> {
         
         console.log('[QALab] ✅ 已注册', registeredActions.length, '个全局操作');
         console.log('[QALab] 注册的操作:', registeredActions);
-        
-        // 验证关键操作是否注册成功
-        const toggleAction = (window as any).amz_qalab_toggleRufusMode;
-        if (typeof toggleAction === 'function') {
-            console.log('[QALab] ✅ amz_qalab_toggleRufusMode 已成功注册');
-        } else {
-            console.error('[QALab] ❌ amz_qalab_toggleRufusMode 注册失败!');
-        }
 
         // 3. 设置事件监听器 - 使用事件委托处理data-action
         console.log('[QALab] 🔧 设置事件监听器...');
