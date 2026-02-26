@@ -219,8 +219,6 @@
                 
                 if (newMode === 'ai' && buttonClass.includes('ai-mode')) {
                     console.log('✅ UI 已更新为 AI 模式');
-                } else if (newMode === 'rule' && buttonClass.includes('rule-mode')) {
-                    console.log('✅ UI 已更新为规则模式');
                 } else {
                     console.warn('⚠️ UI 状态与模式不匹配');
                 }

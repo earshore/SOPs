@@ -10,6 +10,8 @@ import { downloadFile } from './utils';
 import { showToast } from '../../../../../common/ui/notifications';
 import { renderResults, renderLangSelector, renderQAGrid } from './render';
 import { rufusSimulator } from './rufusSimulator';
+import { triggerFileImport } from './importHandler';
+import { renderDataPreview, renderJSONPreview } from './dataPreview';
 
 // 获取 qalab 状态的辅助函数
 const getQalabState = () => appStore.getState().qalab;
@@ -185,6 +187,9 @@ export function autoLoadAnalysisReport(): void {
             description: `来源: ${reportSource}` 
         });
         
+        // 刷新数据预览
+        refreshDataPreview();
+        
         console.log('[QALab] ✅ 分析报告已自动加载');
         console.log('[QALab] ========================================');
     } catch (error) {
@@ -313,11 +318,8 @@ export async function startAnalysis(): Promise<void> {
     if (progressSection) progressSection.classList.remove('active');
     if (inputSection) inputSection.style.opacity = '1';
     
-    // 初始化 Rufus 模拟器（使用当前模式）
-    rufusSimulator.initialize(qalabState.reportData, qalabState.rufusMode);
-    
-    // 初始化模式切换按钮显示
-    updateRufusModeToggle();
+    // 初始化 Rufus 模拟器（使用 AI 模式）
+    rufusSimulator.initialize(qalabState.reportData, 'ai');
     
     renderResults(toggleQA, copyQA, editQA, switchLang, switchCategory);
     
@@ -588,8 +590,8 @@ export async function sendRufusQuestion(question: string): Promise<void> {
     
     try {
         console.log('[QALab] ----------------------------------------');
-        console.log('[QALab] � 当前配置:');
-        console.log('[QALab] - Rufus 模式:', qalabState.rufusMode);
+        console.log('[QALab] 🚀 当前配置:');
+        console.log('[QALab] - Rufus 模式: AI');
         console.log('[QALab] - 报告数据存在:', !!qalabState.reportData);
         
         if (qalabState.reportData) {
@@ -601,42 +603,30 @@ export async function sendRufusQuestion(question: string): Promise<void> {
         
         console.log('[QALab] ----------------------------------------');
         
-        // 初始化模拟器（使用当前模式）
+        // 初始化模拟器（使用 AI 模式）
         if (qalabState.reportData) {
             console.log('[QALab] 🔧 初始化 Rufus 模拟器...');
-            console.log('[QALab] - 模式:', qalabState.rufusMode);
-            rufusSimulator.initialize(qalabState.reportData, qalabState.rufusMode);
+            console.log('[QALab] - 模式: AI');
+            rufusSimulator.initialize(qalabState.reportData, 'ai');
             console.log('[QALab] ✅ 模拟器初始化完成');
         } else {
             console.warn('[QALab] ⚠️ 没有报告数据');
         }
         
-        // AI 模式下显示更详细的状态
-        if (qalabState.rufusMode === 'ai') {
-            console.log('[QALab] 🤖 使用 AI 模式生成回答');
-            updateRufusThinkingMessage('正在连接大模型...');
-            await new Promise(resolve => setTimeout(resolve, 300));
-        } else {
-            console.log('[QALab] 📋 使用规则模式生成回答');
-        }
+        // AI 模式显示详细状态
+        console.log('[QALab] 🤖 使用 AI 模式生成回答');
+        updateRufusThinkingMessage('正在连接大模型...');
+        await new Promise(resolve => setTimeout(resolve, 300));
         
-        // 模拟思考延迟（AI 模式稍长）
-        const thinkingDelay = qalabState.rufusMode === 'ai' 
-            ? 800 + Math.random() * 500  // AI: 800-1300ms
-            : 500 + Math.random() * 500; // 规则: 500-1000ms
+        // 模拟思考延迟
+        const thinkingDelay = 800 + Math.random() * 500;  // 800-1300ms
         
         console.log('[QALab] ⏱️ 思考延迟:', Math.round(thinkingDelay), 'ms');
         
-        if (qalabState.rufusMode === 'ai') {
-            updateRufusThinkingMessage('正在分析报告内容...');
-        }
-        
+        updateRufusThinkingMessage('正在分析报告内容...');
         await new Promise(resolve => setTimeout(resolve, thinkingDelay / 2));
         
-        if (qalabState.rufusMode === 'ai') {
-            updateRufusThinkingMessage('正在生成智能回答...');
-        }
-        
+        updateRufusThinkingMessage('正在生成智能回答...');
         await new Promise(resolve => setTimeout(resolve, thinkingDelay / 2));
         
         console.log('[QALab] ----------------------------------------');
@@ -655,7 +645,7 @@ export async function sendRufusQuestion(question: string): Promise<void> {
         console.log('[QALab] 📊 回答统计:');
         console.log('[QALab] - 长度:', answer.length, '字符');
         console.log('[QALab] - 行数:', answer.split('\n').length);
-        console.log('[QALab] - 使用模式:', qalabState.rufusMode);
+        console.log('[QALab] - 使用模式: AI');
         console.log('[QALab] ----------------------------------------');
         console.log('[QALab] 📄 回答内容预览 (前 200 字符):');
         console.log('[QALab]', answer.substring(0, 200) + (answer.length > 200 ? '...' : ''));
@@ -676,14 +666,12 @@ export async function sendRufusQuestion(question: string): Promise<void> {
         
         console.log('[QALab] ✅ UI 已更新显示助手回答');
         
-        // 显示成功提示（仅 AI 模式）
-        if (qalabState.rufusMode === 'ai') {
-            showToast('AI 回答生成成功', { 
-                type: 'success', 
-                description: '基于大模型智能分析' 
-            });
-            console.log('[QALab] 💡 已显示 AI 成功提示');
-        }
+        // 显示成功提示
+        showToast('AI 回答生成成功', { 
+            type: 'success', 
+            description: '基于大模型智能分析' 
+        });
+        console.log('[QALab] 💡 已显示 AI 成功提示');
         
         console.log('[QALab] ========================================');
         
@@ -697,93 +685,52 @@ export async function sendRufusQuestion(question: string): Promise<void> {
         
         qalabState.rufusThinking = false;
         
-        // 如果是 AI 模式失败，提示用户
-        if (qalabState.rufusMode === 'ai') {
-            const errorMsg = (error as Error).message;
-            let userFriendlyMsg = '抱歉，AI 模式暂时不可用。\n\n';
+        // AI 模式失败，提示用户
+        const errorMsg = (error as Error).message;
+        let userFriendlyMsg = '抱歉，AI 模式暂时不可用。\n\n';
+        
+        if (errorMsg.includes('未配置 LLM')) {
+            userFriendlyMsg += '❌ 原因：未配置大语言模型\n\n';
+            userFriendlyMsg += '📝 解决方案：\n';
+            userFriendlyMsg += '1. 点击右上角设置按钮\n';
+            userFriendlyMsg += '2. 进入「LLM 配置」\n';
+            userFriendlyMsg += '3. 添加并激活一个 LLM 提供商\n';
+            userFriendlyMsg += '4. 返回此页面重新提问';
             
-            if (errorMsg.includes('未配置 LLM')) {
-                userFriendlyMsg += '❌ 原因：未配置大语言模型\n\n';
-                userFriendlyMsg += '📝 解决方案：\n';
-                userFriendlyMsg += '1. 点击右上角设置按钮\n';
-                userFriendlyMsg += '2. 进入「LLM 配置」\n';
-                userFriendlyMsg += '3. 添加并激活一个 LLM 提供商\n';
-                userFriendlyMsg += '4. 返回此页面切换到 AI 模式\n\n';
-                userFriendlyMsg += '💡 提示：您可以先使用「规则模式」进行快速问答';
-                
-                showToast('AI 模式需要配置', { 
-                    type: 'warning', 
-                    description: '请先配置 LLM 服务', 
-                    duration: 8000 
-                });
-            } else if (errorMsg.includes('配置不完整')) {
-                userFriendlyMsg += '❌ 原因：LLM 配置不完整\n\n';
-                userFriendlyMsg += '📝 解决方案：\n';
-                userFriendlyMsg += '1. 检查 API Key 是否正确填写\n';
-                userFriendlyMsg += '2. 检查 API 端点是否可访问\n';
-                userFriendlyMsg += '3. 确认模型名称是否正确\n\n';
-                userFriendlyMsg += '💡 提示：您可以先使用「规则模式」进行快速问答';
-                
-                showToast('LLM 配置不完整', { 
-                    type: 'warning', 
-                    description: '请检查配置', 
-                    duration: 8000 
-                });
-            } else {
-                userFriendlyMsg += `❌ 错误信息：${errorMsg}\n\n`;
-                userFriendlyMsg += '💡 提示：已自动切换到规则模式继续回答';
-                
-                showToast('AI 模式调用失败', { 
-                    type: 'error', 
-                    description: '已降级到规则模式', 
-                    duration: 6000 
-                });
-                
-                // 自动降级到规则模式并重试
-                console.log('[QALab] 自动降级到规则模式');
-                qalabState.rufusMode = 'rule';
-                updateRufusModeToggle();
-                
-                // 重新生成回答（规则模式）
-                qalabState.rufusThinking = true;
-                renderRufusThinking();
-                
-                try {
-                    rufusSimulator.initialize(qalabState.reportData, 'rule');
-                    const answer = await rufusSimulator.generateAnswer(question);
-                    
-                    qalabState.rufusMessages.push({
-                        role: 'assistant',
-                        content: `⚠️ AI 模式失败，已使用规则模式回答：\n\n${answer}`,
-                        timestamp: Date.now()
-                    });
-                    
-                    qalabState.rufusThinking = false;
-                    renderRufusMessages();
-                    return;
-                } catch (retryError) {
-                    console.error('[QALab] 规则模式也失败:', retryError);
-                }
-            }
-            
-            qalabState.rufusMessages.push({
-                role: 'assistant',
-                content: userFriendlyMsg,
-                timestamp: Date.now()
+            showToast('AI 模式需要配置', { 
+                type: 'warning', 
+                description: '请先配置 LLM 服务', 
+                duration: 8000 
             });
-            renderRufusMessages();
+        } else if (errorMsg.includes('配置不完整')) {
+            userFriendlyMsg += '❌ 原因：LLM 配置不完整\n\n';
+            userFriendlyMsg += '📝 解决方案：\n';
+            userFriendlyMsg += '1. 检查 API Key 是否正确填写\n';
+            userFriendlyMsg += '2. 检查 API 端点是否可访问\n';
+            userFriendlyMsg += '3. 确认模型名称是否正确';
+            
+            showToast('LLM 配置不完整', { 
+                type: 'warning', 
+                description: '请检查配置', 
+                duration: 8000 
+            });
         } else {
-            showToast('回答生成失败', { 
+            userFriendlyMsg += `❌ 错误信息：${errorMsg}\n\n`;
+            userFriendlyMsg += '💡 提示：请检查网络连接或稍后重试';
+            
+            showToast('AI 模式调用失败', { 
                 type: 'error', 
-                description: '请稍后重试' 
+                description: '请稍后重试', 
+                duration: 6000 
             });
-            qalabState.rufusMessages.push({
-                role: 'assistant',
-                content: '抱歉，回答生成失败。请稍后重试。\n\n错误信息: ' + (error as Error).message,
-                timestamp: Date.now()
-            });
-            renderRufusMessages();
         }
+        
+        qalabState.rufusMessages.push({
+            role: 'assistant',
+            content: userFriendlyMsg,
+            timestamp: Date.now()
+        });
+        renderRufusMessages();
     }
 }
 
@@ -798,189 +745,34 @@ export function clearRufusChat(): void {
 }
 
 /**
- * 切换 Rufus 模式
+ * 检查 LLM 配置状态（在模块初始化时调用）
  */
-export function toggleRufusMode(): void {
-    console.log('[QALab] ========================================');
-    console.log('[QALab] 🔄 开始切换 Rufus 模式');
-    console.log('[QALab] 时间:', new Date().toLocaleTimeString());
-    
-    const qalabState = getQalabState();
-    const oldMode = qalabState.rufusMode;
-    qalabState.rufusMode = qalabState.rufusMode === 'rule' ? 'ai' : 'rule';
-    
-    console.log('[QALab] ✅ 模式切换完成');
-    console.log('[QALab] - 旧模式:', oldMode);
-    console.log('[QALab] - 新模式:', qalabState.rufusMode);
-    
-    // 重新初始化模拟器
-    console.log('[QALab] 🔧 重新初始化模拟器...');
-    if (qalabState.reportData) {
-        rufusSimulator.initialize(qalabState.reportData, qalabState.rufusMode);
-        console.log('[QALab] ✅ 模拟器已重新初始化');
-    } else {
-        console.warn('[QALab] ⚠️ 没有报告数据，跳过模拟器初始化');
-    }
-    
-    // 更新 UI
-    console.log('[QALab] 🎨 更新 UI 显示...');
-    updateRufusModeToggle();
-    console.log('[QALab] ✅ UI 更新完成');
-    
-    const modeName = qalabState.rufusMode === 'ai' ? 'AI 智能模式' : '规则模式';
-    const modeDesc = qalabState.rufusMode === 'ai' 
-        ? '使用大模型智能分析，更懂用户意图' 
-        : '基于规则快速回答，无需联网';
-    
-    console.log('[QALab] 📢 模式名称:', modeName);
-    console.log('[QALab] 📢 模式描述:', modeDesc);
-    
-    // 如果切换到 AI 模式，检查 LLM 配置
-    if (qalabState.rufusMode === 'ai') {
-        console.log('[QALab] 🔍 检查 LLM 配置...');
-        checkLLMConfiguration();
-    }
-    
-    showToast(`已切换到${modeName}`, { 
-        type: 'success', 
-        description: modeDesc 
-    });
-    console.log('[QALab] ========================================');
-}
-
-/**
- * 检查 LLM 配置状态
- */
-async function checkLLMConfiguration(): Promise<void> {
+export async function checkLLMConfiguration(): Promise<void> {
     try {
         const { StorageService, STORAGE_KEYS } = await import('../../../../../services/storageService');
         const activeProvider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER) as string | null;
         
         if (!activeProvider) {
             console.warn('[QALab] ⚠️ 未配置 LLM 提供商');
-            showToast('AI 模式需要配置', { 
-                type: 'warning', 
-                description: '请先在设置中配置 LLM 服务', 
-                duration: 6000 
-            });
-            
-            // 在对话中添加配置提示
-            setTimeout(() => {
-                const qalabState = getQalabState();
-                qalabState.rufusMessages.push({
-                    role: 'assistant',
-                    content: '👋 您好！我是 Rufus AI。\n\n' +
-                        '⚠️ 检测到您还未配置大语言模型服务。\n\n' +
-                        '📝 配置步骤：\n' +
-                        '1. 点击右上角设置按钮 ⚙️\n' +
-                        '2. 进入「LLM 配置」\n' +
-                        '3. 添加并激活一个 LLM 提供商（如 OpenAI、Claude 等）\n' +
-                        '4. 返回此页面即可使用 AI 模式\n\n' +
-                        '💡 在配置完成前，您可以切换到「规则模式」进行快速问答。',
-                    timestamp: Date.now()
-                });
-                renderRufusMessages();
-            }, 500);
             return;
         }
         
         const config = await StorageService.getLLMConfigWithKey(activeProvider);
         if (!config || !config.apiKey) {
             console.warn('[QALab] ⚠️ LLM 配置不完整');
-            showToast('LLM 配置不完整', { 
-                type: 'warning', 
-                description: '请检查 API Key 等配置', 
-                duration: 6000 
-            });
-            
-            setTimeout(() => {
-                const qalabState = getQalabState();
-                qalabState.rufusMessages.push({
-                    role: 'assistant',
-                    content: '⚠️ LLM 配置不完整\n\n' +
-                        '请检查以下配置项：\n' +
-                        '• API Key 是否正确填写\n' +
-                        '• API 端点是否可访问\n' +
-                        '• 模型名称是否正确\n\n' +
-                        '💡 配置完成后，AI 模式将自动可用。',
-                    timestamp: Date.now()
-                });
-                renderRufusMessages();
-            }, 500);
             return;
         }
         
         console.log('[QALab] ✅ LLM 配置正常:', activeProvider);
-        showToast('AI 模式已就绪', { 
-            type: 'success', 
-            description: `使用 ${activeProvider} 提供智能回答`, 
-            duration: 4000 
-        });
-        
-        // 在对话中添加欢迎消息
-        const qalabState = getQalabState();
-        if (qalabState.rufusMessages.length === 0) {
-            setTimeout(() => {
-                const qalabState = getQalabState();
-                qalabState.rufusMessages.push({
-                    role: 'assistant',
-                    content: '👋 您好！我是 Rufus AI，您的智能产品问答助手。\n\n' +
-                        '🤖 当前使用 AI 智能模式，我会基于产品分析报告，使用大语言模型为您提供更智能、更懂您意图的回答。\n\n' +
-                        '💡 您可以问我关于产品的任何问题，例如：\n' +
-                        '• 这个产品的持久度如何？\n' +
-                        '• 香味是什么样的？\n' +
-                        '• 性价比怎么样？\n' +
-                        '• 适合送礼吗？\n\n' +
-                        '让我们开始吧！',
-                    timestamp: Date.now()
-                });
-                renderRufusMessages();
-            }, 500);
-        }
     } catch (error) {
         console.error('[QALab] 检查 LLM 配置失败:', error);
     }
 }
 
 /**
- * 更新模式切换按钮显示
- */
-export function updateRufusModeToggle(): void {
-    console.log('[QALab] 🎨 updateRufusModeToggle 被调用');
-    const toggleBtn = document.getElementById('rufusModeToggle');
-    if (!toggleBtn) {
-        console.warn('[QALab] ⚠️ 找不到模式切换按钮 #rufusModeToggle');
-        return;
-    }
-    console.log('[QALab] ✅ 找到模式切换按钮');
-    
-    const qalabState = getQalabState();
-    const isAI = qalabState.rufusMode === 'ai';
-    console.log('[QALab] - 当前模式:', qalabState.rufusMode);
-    console.log('[QALab] - isAI:', isAI);
-    
-    // 新的开关样式显示：AI模式 ⚡ 规则模式
-    toggleBtn.innerHTML = `
-        <span class="mode-label ${isAI ? 'active' : ''}">
-            <i class="fa-solid fa-robot"></i> AI模式
-        </span>
-        <span class="mode-switch">
-            <i class="fa-solid fa-toggle-${isAI ? 'on' : 'off'}"></i>
-        </span>
-        <span class="mode-label ${!isAI ? 'active' : ''}">
-            <i class="fa-solid fa-list-check"></i> 规则模式
-        </span>
-    `;
-    toggleBtn.className = `mode-toggle ${isAI ? 'ai-mode' : 'rule-mode'}`;
-    
-    console.log('[QALab] ✅ 按钮 HTML 已更新');
-    console.log('[QALab] ✅ 按钮 className:', toggleBtn.className);
-}
-
-/**
  * 渲染 Rufus 消息列表
  */
-function renderRufusMessages(): void {
+export function renderRufusMessages(): void {
     const container = document.getElementById('rufusMessages');
     if (!container) return;
     
@@ -1003,21 +795,14 @@ function renderRufusMessages(): void {
             minute: '2-digit' 
         });
         
-        // 为助手消息添加模式徽章
-        const modeBadge = !isUser ? `
-            <span class="message-mode-badge ${qalabState.rufusMode}-mode">
-                ${qalabState.rufusMode === 'ai' ? '🤖 AI 模式' : '📋 规则模式'}
-            </span>
-        ` : '';
-        
+        // 消息内容不显示模式徽章
         return `
             <div class="rufus-message ${isUser ? 'user' : 'assistant'}">
                 <div class="message-header">
                     <span class="message-role">
-                        <i class="fa-solid fa-${isUser ? 'user' : (qalabState.rufusMode === 'ai' ? 'robot' : 'list-check')}"></i>
+                        <i class="fa-solid fa-${isUser ? 'user' : 'robot'}"></i>
                         ${isUser ? '您' : 'Rufus AI'}
                     </span>
-                    ${modeBadge}
                     <span class="message-time">${time}</span>
                 </div>
                 <div class="message-content">${msg.content.replace(/\n/g, '<br>')}</div>
@@ -1042,17 +827,13 @@ function renderRufusThinking(): void {
         thinkingDiv.id = 'rufusThinking';
         thinkingDiv.className = 'rufus-message assistant thinking';
         
-        const modeIcon = qalabState.rufusMode === 'ai' ? 'robot' : 'list-check';
-        const modeName = qalabState.rufusMode === 'ai' ? 'Rufus AI' : 'Rufus';
-        
         thinkingDiv.innerHTML = `
             <div class="message-header">
                 <span class="message-role">
-                    <i class="fa-solid fa-${modeIcon}"></i>
-                    ${modeName}
+                    <i class="fa-solid fa-robot"></i>
+                    Rufus AI
                 </span>
-                <span class="message-mode-badge ${qalabState.rufusMode}-mode">
-                    ${qalabState.rufusMode === 'ai' ? '🤖 AI 模式' : '📋 规则模式'}
+            </div>
                 </span>
             </div>
             <div class="message-content" id="rufusThinkingContent">
@@ -1081,4 +862,59 @@ function updateRufusThinkingMessage(message: string): void {
             ${message}
         `;
     }
+}
+
+/**
+ * 切换数据Tab
+ */
+export function switchDataTab(tab: 'preview' | 'json'): void {
+    console.log('[QALab] 切换数据Tab:', tab);
+    
+    // 更新Tab按钮状态
+    const tabs = document.querySelectorAll('.data-tab');
+    tabs.forEach(t => {
+        const tabElement = t as HTMLElement;
+        const tabName = tabElement.dataset.tab;
+        if (tabName === tab) {
+            tabElement.classList.add('active');
+        } else {
+            tabElement.classList.remove('active');
+        }
+    });
+    
+    // 更新Tab内容显示
+    const previewTab = document.getElementById('dataPreviewTab');
+    const jsonTab = document.getElementById('jsonTab');
+    
+    if (tab === 'preview') {
+        previewTab?.classList.add('active');
+        jsonTab?.classList.remove('active');
+    } else {
+        previewTab?.classList.remove('active');
+        jsonTab?.classList.add('active');
+    }
+}
+
+/**
+ * 刷新数据预览
+ */
+export function refreshDataPreview(): void {
+    const qalabState = getQalabState();
+    const reportData = qalabState.reportData;
+    
+    console.log('[QALab] 刷新数据预览:', reportData ? '有数据' : '无数据');
+    
+    // 渲染数据预览
+    renderDataPreview(reportData);
+    
+    // 渲染JSON预览
+    renderJSONPreview(reportData);
+}
+
+/**
+ * 触发导入（暴露给全局）
+ */
+export function triggerImport(): void {
+    console.log('[QALab] 触发文件导入');
+    triggerFileImport();
 }

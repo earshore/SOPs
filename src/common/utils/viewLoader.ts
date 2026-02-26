@@ -62,6 +62,11 @@ function getCacheKey(path: string): string {
  * 检查缓存
  */
 function checkCache(path: string): string | null {
+    // 开发环境下禁用缓存，确保模板修改后能立即生效
+    if (import.meta.env.DEV) {
+        return null;
+    }
+    
     try {
         const key = getCacheKey(path);
         const cached = StorageService.getRaw(key, null);
@@ -79,6 +84,11 @@ function checkCache(path: string): string | null {
  * 设置缓存
  */
 function setCache(path: string, content: string): void {
+    // 开发环境下禁用缓存写入
+    if (import.meta.env.DEV) {
+        return;
+    }
+    
     try {
         const key = getCacheKey(path);
         StorageService.setRaw(key, content);

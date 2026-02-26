@@ -1,0 +1,122 @@
+{
+  "metadata": {
+    "marketplace": "DE",
+    "dataSource": "import",
+    "timestamp": "2026-02-27T01:13:00.000Z",
+    "asins": ["B0TESTASI1"],
+    "productTitle": "测试产品 - 高品质蓝牙耳机"
+  },
+  "analysisReport": {
+    "title-keywords": {
+      "primary_keywords": ["bluetooth", "headphones", "wireless"],
+      "scene_keywords": ["sports", "gaming"],
+      "removed_brand_terms": ["Sony"],
+      "removed_modifiers": ["premium", "professional"]
+    },
+    "selling-points": {
+      "bullet_analysis": [
+        {
+          "function": "降噪功能",
+          "scene": "通勤场景",
+          "differentiation_angle": "主动降噪技术"
+        },
+        {
+          "function": "长续航",
+          "scene": "长途旅行",
+          "differentiation_angle": "30小时续航"
+        },
+        {
+          "function": "快速充电",
+          "scene": null,
+          "differentiation_angle": "15分钟充电3小时使用"
+        }
+      ]
+    },
+    "fatal-flaws": {
+      "critical_issues": [
+        {
+          "text": "连接不稳定，经常断连",
+          "severity": "high",
+          "actionable": true
+        },
+        {
+          "text": "耳罩材质容易破损",
+          "severity": "medium",
+          "actionable": false
+        },
+        {
+          "text": "降噪效果不如宣传",
+          "severity": "high",
+          "actionable": true
+        }
+      ]
+    },
+    "wow-moments": {
+      "moments": [
+        {
+          "text": "音质超出预期，低音浑厚",
+          "type": "exceeded",
+          "category": "feature"
+        },
+        {
+          "text": "佩戴舒适度比想象中好很多",
+          "type": "exceeded",
+          "category": "quality"
+        },
+        {
+          "text": "包装精美，送礼体面",
+          "type": "normal",
+          "category": "feature"
+        }
+      ]
+    },
+    "hesitation-points": {
+      "hesitations": [
+        {
+          "text": "担心音质不好，但实际很满意",
+          "resolved": true,
+          "priority": "high"
+        },
+        {
+          "text": "怕不舒服，但戴着很轻",
+          "resolved": false,
+          "priority": "medium"
+        },
+        {
+          "text": "价格偏高，但物有所值",
+          "resolved": true,
+          "priority": "high"
+        }
+      ]
+    },
+    "buyer-profile": {
+      "buyer_types": ["上班族", "学生", "运动爱好者"],
+      "usage_scenarios": ["通勤", "健身"],
+      "demographics": ["25-35岁", "男性为主", "中高收入", "追求品质"]
+    },
+    "vocab-gap": {
+      "missing_terms": ["入耳式", "头戴式"],
+      "buyer_slang": ["煲机", "推力", "解析力"],
+      "recommendations": ["增加音质描述", "补充佩戴方式", "添加适用场景", "强调性价比"]
+    },
+    "promise-reality": {
+      "gaps": [
+        {
+          "text": "宣传30小时续航，实际只有20小时",
+          "type": "overpromise",
+          "actionable": true
+        },
+        {
+          "text": "降噪效果一般",
+          "type": "normal",
+          "actionable": false
+        },
+        {
+          "text": "防水等级不如描述",
+          "type": "overpromise",
+          "actionable": true
+        }
+      ]
+    }
+  }
+}

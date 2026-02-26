@@ -11,7 +11,7 @@
  */
 
 import { MENU_CONFIG, type RouteConfig, type CategoryConfig, type ModuleConfig } from '../config/menuConfig';
-import state from '../state';
+import { appStore } from '@/stores/useAppStore';
 import { COLOR_SCHEMES, type ColorSchemeName } from '../constants/colorSchemes';
 import ColorContext from '../utils/ColorContext';
 
@@ -63,7 +63,7 @@ export class SidebarRenderer {
   // ═══════════════════════════════════════════════════════
 
   render(sidebar: HTMLElement, moduleConfig: ModuleConfig, routes: RouteConfig[]): void {
-    const currentTab = state.ui?.currentTab || '';
+    const currentTab = appStore.getState().ui.currentTab || '';
     const currentRouteConfig = MENU_CONFIG.routes[currentTab];
 
     let activeCategory: string | null = null;

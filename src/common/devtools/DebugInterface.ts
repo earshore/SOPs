@@ -72,9 +72,9 @@ class DebugInterfaceManager {
       // 工具函数
       utils: {
         showState: () => {
-          import('../state').then(({ default: state }) => {
+          import('@/stores/useAppStore').then(({ appStore }) => {
             console.group('📊 应用状态');
-            console.log(state);
+            console.log(appStore.getState());
             console.groupEnd();
           });
         },
@@ -139,38 +139,6 @@ class DebugInterfaceManager {
   registerState(state: any): void {
     if (import.meta.env.DEV) {
       this.debugInterface.state = state;
-      
-      // 添加状态迁移统计工具
-      if (!this.debugInterface.utils) {
-        this.debugInterface.utils = {};
-      }
-      
-      this.debugInterface.utils.showMigrationStats = () => {
-        try {
-          const { stateMigration } = require('../state/StateMigration');
-          const stats = stateMigration.getDeprecationStats();
-          console.group('📊 状态迁移统计');
-          console.log(`总警告数: ${stats.total}`);
-          if (stats.warnings.length > 0) {
-            console.table(stats.warnings.map((w: string) => ({ 路径: w })));
-          } else {
-            console.log('✅ 无弃用警告');
-          }
-          console.groupEnd();
-        } catch (e) {
-          console.error('❌ 获取迁移统计失败:', e);
-        }
-      };
-      
-      this.debugInterface.utils.clearMigrationWarnings = () => {
-        try {
-          const { stateMigration } = require('../state/StateMigration');
-          stateMigration.clearDeprecationWarnings();
-          console.log('✅ 迁移警告已清除');
-        } catch (e) {
-          console.error('❌ 清除迁移警告失败:', e);
-        }
-      };
     }
   }
 

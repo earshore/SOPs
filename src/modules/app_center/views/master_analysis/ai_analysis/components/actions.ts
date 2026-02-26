@@ -13,104 +13,96 @@ import { mergeProducts, getProductsByAsins } from '../utils/dataTransformers';
 import { getMarketLanguage } from './helpers';
 import { Product } from '../config/sampleData';
 import { AlpineContext } from '../types';
-import { ModuleState } from '../state/moduleState';
 import { appStore } from '@/stores/useAppStore';
 import type { FullAnalysisReport } from '../config/analysisReportData';
 
 /**
  * 切换 ASIN 选择
  */
-export function toggleAsin(context: AlpineContext, moduleState: ModuleState, asin: string): void {
+export function toggleAsin(context: AlpineContext, asin: string): void {
   const index = context.selectedAsins.indexOf(asin);
   if (index > -1) {
     context.selectedAsins.splice(index, 1);
   } else {
     context.selectedAsins.push(asin);
   }
-  syncToModuleState(context, moduleState);
+  // 直接更新 Zustand store
+  appStore.getState().setSelectedAsins([...context.selectedAsins]);
 }
 
 /**
  * 全选 ASIN
  */
-export function selectAllAsins(context: AlpineContext, moduleState: ModuleState, availableAsins: string[]): void {
+export function selectAllAsins(context: AlpineContext, availableAsins: string[]): void {
   context.selectedAsins = [...availableAsins];
-  syncToModuleState(context, moduleState);
+  appStore.getState().setSelectedAsins(context.selectedAsins);
 }
 
 /**
  * 清空 ASIN 选择
  */
-export function clearAllAsins(context: AlpineContext, moduleState: ModuleState): void {
+export function clearAllAsins(context: AlpineContext): void {
   context.selectedAsins = [];
-  syncToModuleState(context, moduleState);
+  appStore.getState().setSelectedAsins([]);
 }
 
 /**
  * 切换分析目标
  */
-export function toggleTarget(context: AlpineContext, moduleState: ModuleState, targetId: string): void {
+export function toggleTarget(context: AlpineContext, targetId: string): void {
   const index = context.selectedTargets.indexOf(targetId);
   if (index > -1) {
     context.selectedTargets.splice(index, 1);
   } else {
     context.selectedTargets.push(targetId);
   }
-  syncToModuleState(context, moduleState);
 }
 
 /**
  * 全选分析目标
  */
-export function selectAllTargets(context: AlpineContext, moduleState: ModuleState): void {
+export function selectAllTargets(context: AlpineContext): void {
   context.selectedTargets = analysisTargets.map(t => t.id);
-  syncToModuleState(context, moduleState);
 }
 
 /**
  * 清空分析目标
  */
-export function clearAllTargets(context: AlpineContext, moduleState: ModuleState): void {
+export function clearAllTargets(context: AlpineContext): void {
   context.selectedTargets = [];
-  syncToModuleState(context, moduleState);
 }
 
 /**
  * 切换提示词面板
  */
-export function togglePromptPanel(context: AlpineContext, moduleState: ModuleState): void {
+export function togglePromptPanel(context: AlpineContext): void {
   context.showPromptPanel = !context.showPromptPanel;
-  moduleState.showPromptPanel = context.showPromptPanel;
 }
 
 /**
  * 切换提示词项
  */
-export function togglePromptItem(context: AlpineContext, moduleState: ModuleState, index: number): void {
+export function togglePromptItem(context: AlpineContext, index: number): void {
   context.expandedPromptIndex = context.expandedPromptIndex === index ? null : index;
-  moduleState.expandedPromptIndex = context.expandedPromptIndex;
 }
 
 /**
  * 切换 JSON 查看器
  */
-export function toggleJsonViewer(context: AlpineContext, moduleState: ModuleState): void {
+export function toggleJsonViewer(context: AlpineContext): void {
   context.showJsonViewer = !context.showJsonViewer;
-  moduleState.showJsonViewer = context.showJsonViewer;
 }
 
 /**
  * 切换数据源
  */
-export function toggleDataSource(context: AlpineContext, moduleState: ModuleState): void {
+export function toggleDataSource(context: AlpineContext): void {
   context.useRealData = !context.useRealData;
-  moduleState.useRealData = context.useRealData;
   
   // 清空之前的结果
   context.analysisReport = null;
   context.hasReport = false;
-  moduleState.analysisReport = null;
-  moduleState.hasReport = false;
+  appStore.getState().setAnalysisReport(null);
   
   showToast(
     context.useRealData ? '已切换到真实数据分析模式' : '已切换到示例数据模式',
@@ -231,14 +223,14 @@ export function downloadJson(context: AlpineContext, dataSourceMarketplace: stri
 /**
  * 执行分析
  */
-export async function runAnalysisAction(context: AlpineContext, moduleState: ModuleState, currentProducts: Product[]): Promise<void> {
+export async function runAnalysisAction(context: AlpineContext, currentProducts: Product[]): Promise<void> {
   if (context.selectedTargets.length === 0 || currentProducts.length === 0 || context.isAnalyzing) {
     return;
   }
 
   context.isAnalyzing = true;
   context.progress = 0;
-  syncToModuleState(context, moduleState);
+  appStore.getState().updateAnalysis({ isAnalyzing: true });
   
   console.log('[用户动作] 开始分析:', {
     selectedTargets: context.selectedTargets.length,
@@ -271,7 +263,6 @@ export async function runAnalysisAction(context: AlpineContext, moduleState: Mod
         (progress: number, step: string) => {
           context.progress = progress;
           context.currentStep = step;
-          syncToModuleState(context, moduleState);
         },
         language
       );
@@ -283,7 +274,6 @@ export async function runAnalysisAction(context: AlpineContext, moduleState: Mod
         (progress: number, step: string) => {
           context.progress = progress;
           context.currentStep = step;
-          syncToModuleState(context, moduleState);
         }
       );
 
@@ -293,7 +283,7 @@ export async function runAnalysisAction(context: AlpineContext, moduleState: Mod
     // 先清空旧报告，确保触发响应式更新
     context.analysisReport = null;
     context.hasReport = false;
-    syncToModuleState(context, moduleState);
+    appStore.getState().setAnalysisReport(null);
     
     // 使用 $nextTick 确保清空操作完成后再设置新报告
     if ((context as any).$nextTick) {
@@ -306,8 +296,8 @@ export async function runAnalysisAction(context: AlpineContext, moduleState: Mod
         console.log('[用户动作] analysisReport 已保存:', !!context.analysisReport);
         console.log('[用户动作] hasReport 标志已设置:', context.hasReport);
         
-        // 同步到模块状态
-        syncToModuleState(context, moduleState);
+        // 同步到 Zustand store
+        appStore.getState().setAnalysisReport(analysisReport as any);
         
         // 再次使用 $nextTick 确保视图完全更新
         (context as any).$nextTick(() => {
@@ -318,16 +308,8 @@ export async function runAnalysisAction(context: AlpineContext, moduleState: Mod
       // 如果没有 $nextTick，直接设置
       context.analysisReport = analysisReport;
       context.hasReport = true;
-      syncToModuleState(context, moduleState);
+      appStore.getState().setAnalysisReport(analysisReport as any);
     }
-
-    // 将分析报告加载到全局状态
-    const scrapedData = appStore.getState().scraper?.scrapedData;
-    const marketplace = scrapedData?.metadata?.marketplace || 'US';
-    
-    // 使用类型断言，因为 appStore.getState().analysis.analysisReport 接受多种格式
-    appStore.getState().setAnalysisReport(analysisReport as any);
-    console.log('[用户动作] 已将分析报告加载到全局状态，marketplace:', marketplace);
 
     // 分析成功后自动更新历史快照的分析状态
     const currentHistoryId = appStore.getState().scraper?.currentHistoryId;
@@ -351,7 +333,7 @@ export async function runAnalysisAction(context: AlpineContext, moduleState: Mod
     showToast(`分析失败: ${(error as Error).message}`, { type: 'error' });
   } finally {
     context.isAnalyzing = false;
-    syncToModuleState(context, moduleState);
+    appStore.getState().updateAnalysis({ isAnalyzing: false });
   }
 }
 
@@ -361,17 +343,4 @@ export async function runAnalysisAction(context: AlpineContext, moduleState: Mod
 function getRealProducts(selectedAsins: string[]): Product[] {
   const scrapedData = appStore.getState().scraper?.scrapedData;
   return getProductsByAsins(scrapedData, selectedAsins);
-}
-
-/**
- * 同步到模块状态
- */
-function syncToModuleState(context: AlpineContext, moduleState: ModuleState): void {
-  moduleState.selectedAsins = context.selectedAsins;
-  moduleState.selectedTargets = context.selectedTargets;
-  moduleState.isAnalyzing = context.isAnalyzing;
-  moduleState.progress = context.progress;
-  moduleState.currentStep = context.currentStep;
-  moduleState.analysisReport = context.analysisReport;
-  moduleState.hasReport = context.hasReport;
 }

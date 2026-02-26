@@ -25,9 +25,6 @@ if (import.meta.env.DEV) {
   (window as any).marked = marked;
 }
 
-// ✅ 导入全局状态对象
-import state from './common/state';
-
 // 🎯 导入 Zustand Store
 import { appStore } from './stores/useAppStore';
 
@@ -122,14 +119,10 @@ import Alpine from 'alpinejs';
 (window as any)['useAppStore'] = appStore;
 (window as any)['appStore'] = appStore;
 
-// 🔧 暴露 state 对象到 window (用于向后兼容和测试)
-(window as any)['state'] = state;
-
 // 开发环境额外日志
 if (import.meta.env.DEV) {
   console.log('[Alpine] ✅ Alpine.js loaded and exposed to window');
   console.log('[Store] ✅ Zustand store exposed to window');
-  console.log('[State] ✅ Compat state exposed to window');
 }
 
 // ========================
@@ -371,7 +364,6 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     if (import.meta.env.DEV) {
       debugInterface.initialize();
       debugInterface.registerContainer(container);
-      debugInterface.registerState(state);
       debugInterface.registerRouter(await import('./common/router/Router').then(m => m.router));
     }
 

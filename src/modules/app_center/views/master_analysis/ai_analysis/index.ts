@@ -5,16 +5,11 @@
 
 import { SafeModuleLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
-import { createInitialState, initializeAsinsFromScraperData, ModuleState } from './state/moduleState';
 import { createAiAnalysisPanel } from './components/AlpinePanel';
 import { AlpineRegistry } from '../../../../../common/infrastructure/AlpineRegistry';
-import { appStore } from '@/stores/useAppStore';
 
 import '../master_analysis_style.css';
 import './ai_analysis_style.css';
-
-// 模块状态
-let moduleState: ModuleState = createInitialState();
 
 /**
  * 挂载模块
@@ -23,11 +18,7 @@ export async function mount(container: HTMLElement): Promise<void> {
   console.log('[AI智能分析] 🔧 开始挂载模块');
 
   try {
-    // 1. 初始化状态 - 从 scraper 数据加载
-    const scrapedData = appStore.getState().scraper?.scrapedData;
-    initializeAsinsFromScraperData(moduleState, scrapedData);
-
-    // 2. 使用 SafeModuleLoader 加载模板
+    // 1. 使用 SafeModuleLoader 加载模板
     const loader = SafeModuleLoader.getInstance();
     const html = await loader.loadTemplate(
       'src/modules/app_center/views/master_analysis/ai_analysis/template.html',
@@ -40,13 +31,13 @@ export async function mount(container: HTMLElement): Promise<void> {
       }
     );
     
-    // 使用 SafeRenderer 渲染模板（静态模板，已审计）
+    // 2. 使用 SafeRenderer 渲染模板（静态模板，已审计）
     const renderer = SafeRenderer.getInstance();
     renderer.renderTemplate(container, html);
 
-    // 3. 使用 AlpineRegistry 注册组件
+    // 3. 使用 AlpineRegistry 注册组件（直接使用 Zustand 作为数据源）
     const registry = AlpineRegistry.getInstance();
-    registry.register('aiAnalysisPanel', () => createAiAnalysisPanel(moduleState));
+    registry.register('aiAnalysisPanel', createAiAnalysisPanel);
     
     // 初始化注册器（如果尚未初始化）
     registry.init();
@@ -62,8 +53,6 @@ export async function mount(container: HTMLElement): Promise<void> {
  * 卸载模块
  */
 export function unmount(): void {
-  console.log('[AI智能分析] 🔄 开始卸载模块');
-  // 重置状态
-  moduleState = createInitialState();
-  console.log('[AI智能分析] ✅ 模块卸载成功');
+  console.log('[AI智能分析] 🔄 模块卸载');
+  // 状态由 Zustand 管理，无需手动重置
 }

@@ -3,7 +3,6 @@
  * 负责页面切换、侧边栏渲染、历史记录管理
  */
 
-import state from '../state';
 import { appStore } from '@/stores/useAppStore';
 import { MENU_CONFIG, getRoutesByModule, getRouteFullConfig, type RouteWithId, type ModuleConfig, type RouteFullConfig } from '../config/menuConfig';
 import { createSidebarRenderer, type SidebarRenderer } from '../components/SidebarRenderer';
@@ -129,7 +128,7 @@ function renderSidebarContent(
  */
 function renderDefaultSidebar(sidebar: HTMLElement, moduleConfig: ModuleConfig, routes: RouteWithId[]): void {
   try {
-    const currentTab = state.ui?.currentTab || '';
+    const currentTab = appStore.getState().ui.currentTab || '';
 
     const html = `
       <div class="flex flex-col h-full bg-white">
@@ -228,9 +227,7 @@ export async function switchTab(tab: string, updateHistory: boolean = true): Pro
   }
 
   // 更新全局状态
-  if (state.ui) {
-    appStore.getState().setCurrentTab(cleanTab);
-  }
+  appStore.getState().setCurrentTab(cleanTab);
   const fullConfig = getRouteFullConfig(cleanTab);
 
   // 渲染侧边栏

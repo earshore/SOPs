@@ -27,8 +27,9 @@ import {
     autoLoadAnalysisReport,
     sendRufusQuestion,
     clearRufusChat,
-    toggleRufusMode,
-    updateRufusModeToggle
+    switchDataTab,
+    refreshDataPreview,
+    triggerImport
 } from './actions';
 import { rufusSimulator } from './rufusSimulator';
 
@@ -76,6 +77,16 @@ export async function mount(container: HTMLElement): Promise<void> {
         renderer.renderTemplate(container, html);
         console.log('[QALab] ✅ 模板渲染完成');
 
+        // 处理动画完成后的类添加，防止子元素transition冲突
+        const animatedSections = container.querySelectorAll('.animate-fade-up, .animate-scale-in');
+        animatedSections.forEach((section) => {
+            section.addEventListener('animationend', function handleAnimationEnd() {
+                section.classList.add('animation-complete');
+                section.removeEventListener('animationend', handleAnimationEnd);
+            }, { once: true });
+        });
+        console.log('[QALab] ✅ 动画完成监听器已设置');
+
         // 2. 注册全局操作
         console.log('[QALab] 🔧 开始注册全局操作...');
         const registeredActions = registerActionsWithLegacy({
@@ -92,19 +103,16 @@ export async function mount(container: HTMLElement): Promise<void> {
                 }
             },
             amz_qalab_clearRufusChat: () => clearRufusChat(),
-            amz_qalab_toggleRufusMode: () => toggleRufusMode()
+            amz_qalab_switchDataTab: () => {
+                // Tab切换通过事件委托处理
+            }
         });
+        
+        // 暴露triggerImport到全局，供HTML onclick使用
+        (window as any).qalabTriggerImport = triggerImport;
         
         console.log('[QALab] ✅ 已注册', registeredActions.length, '个全局操作');
         console.log('[QALab] 注册的操作:', registeredActions);
-        
-        // 验证关键操作是否注册成功
-        const toggleAction = (window as any).amz_qalab_toggleRufusMode;
-        if (typeof toggleAction === 'function') {
-            console.log('[QALab] ✅ amz_qalab_toggleRufusMode 已成功注册');
-        } else {
-            console.error('[QALab] ❌ amz_qalab_toggleRufusMode 注册失败!');
-        }
 
         // 3. 设置事件监听器 - 使用事件委托处理data-action
         console.log('[QALab] 🔧 设置事件监听器...');
@@ -116,6 +124,17 @@ export async function mount(container: HTMLElement): Promise<void> {
             
             if (actionBtn) {
                 const action = actionBtn.dataset.action;
+                
+                // 特殊处理Tab切换
+                if (action === 'amz_qalab_switchDataTab') {
+                    const tab = actionBtn.dataset.tab as 'preview' | 'json';
+                    if (tab) {
+                        switchDataTab(tab);
+                    }
+                    return;
+                }
+                
+                // 其他动作
                 if (action) {
                     const actionFn = (window as any)[action];
                     if (typeof actionFn === 'function') {
@@ -144,6 +163,47 @@ export async function mount(container: HTMLElement): Promise<void> {
         container.addEventListener('keydown', keydownHandler);
         eventManager.listeners.push({ element: container, event: 'keydown', handler: keydownHandler });
         console.log('[QALab] ✅ 键盘事件监听器已设置');
+        
+        // 监听 Rufus 输入框的焦点事件 - 首次焦点时显示欢迎语
+        let hasShownWelcome = false;
+        const focusHandler = (e: FocusEvent) => {
+            const target = e.target as HTMLElement;
+            if (target.id === 'rufusInput' && !hasShownWelcome) {
+                hasShownWelcome = true;
+                const qalabState = appStore.getState().qalab;
+                
+                // 只在没有消息历史时显示欢迎语
+                if (qalabState.rufusMessages.length === 0) {
+                    const welcomeMessage = {
+                        role: 'assistant' as const,
+                        content: '👋 您好！我是 Rufus AI，您的智能产品问答助手。\n\n我可以帮您：\n• 从卖家视角回答买家的产品问题\n• 基于竞品分析报告智能生成回答\n• 扬长避短，促进产品转化\n\n请随时向我提问！',
+                        timestamp: Date.now()
+                    };
+                    
+                    qalabState.rufusMessages.push(welcomeMessage);
+                    
+                    // 动态导入 renderRufusMessages
+                    import('./actions').then(({ renderRufusMessages }) => {
+                        renderRufusMessages();
+                        console.log('[QALab] ✅ 已显示欢迎语');
+                    });
+                }
+            }
+        };
+        
+        container.addEventListener('focus', focusHandler, true); // 使用捕获阶段
+        eventManager.listeners.push({ element: container, event: 'focus', handler: focusHandler });
+        console.log('[QALab] ✅ 焦点事件监听器已设置');
+        
+        // 监听数据导入事件
+        const dataImportHandler = () => {
+            console.log('[QALab] 检测到数据导入事件');
+            refreshDataPreview();
+        };
+        
+        window.addEventListener('qalab:data-imported', dataImportHandler);
+        eventManager.listeners.push({ element: window, event: 'qalab:data-imported', handler: dataImportHandler });
+        console.log('[QALab] ✅ 数据导入事件监听器已设置');
 
         // 4. 监听数据更新事件 - 自动加载分析报告
         console.log('[QALab] 🔧 设置数据更新监听器...');
@@ -167,13 +227,9 @@ export async function mount(container: HTMLElement): Promise<void> {
         console.log('[QALab] 🔍 检查现有报告...');
         autoLoadAnalysisReport();
         
-        // 6. 初始化 Rufus 模式切换按钮显示
-        console.log('[QALab] 🎨 初始化模式切换按钮...');
-        // 使用 setTimeout 确保 DOM 完全渲染后再更新
-        setTimeout(() => {
-            updateRufusModeToggle();
-            console.log('[QALab] ✅ 模式切换按钮初始化完成');
-        }, 100);
+        // 6. 初始化数据预览
+        console.log('[QALab] 🎨 初始化数据预览...');
+        refreshDataPreview();
 
         console.log('[QALab] ========================================');
         console.log('[QALab] ✅ 子模块挂载成功');

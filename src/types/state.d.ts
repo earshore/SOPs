@@ -477,9 +477,9 @@ export interface KeywordTrackerState {
 // ==================== QALab状态 ====================
 
 /**
- * Rufus AI 模式
+ * Rufus AI 模式（固定为 AI）
  */
-export type RufusMode = 'rule' | 'ai';
+export type RufusMode = 'ai';
 
 /**
  * Rufus 消息
