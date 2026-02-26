@@ -91,8 +91,7 @@ export async function mount(container: HTMLElement): Promise<void> {
                     sendRufusQuestion(input.value.trim());
                 }
             },
-            amz_qalab_clearRufusChat: () => clearRufusChat(),
-            amz_qalab_toggleRufusMode: () => toggleRufusMode()
+            amz_qalab_clearRufusChat: () => clearRufusChat()
         });
         
         console.log('[QALab] ✅ 已注册', registeredActions.length, '个全局操作');
@@ -144,6 +143,37 @@ export async function mount(container: HTMLElement): Promise<void> {
         container.addEventListener('keydown', keydownHandler);
         eventManager.listeners.push({ element: container, event: 'keydown', handler: keydownHandler });
         console.log('[QALab] ✅ 键盘事件监听器已设置');
+        
+        // 监听 Rufus 输入框的焦点事件 - 首次焦点时显示欢迎语
+        let hasShownWelcome = false;
+        const focusHandler = (e: FocusEvent) => {
+            const target = e.target as HTMLElement;
+            if (target.id === 'rufusInput' && !hasShownWelcome) {
+                hasShownWelcome = true;
+                const qalabState = appStore.getState().qalab;
+                
+                // 只在没有消息历史时显示欢迎语
+                if (qalabState.rufusMessages.length === 0) {
+                    const welcomeMessage = {
+                        role: 'assistant' as const,
+                        content: '👋 您好！我是 Rufus AI，您的智能产品问答助手。\n\n我可以帮您：\n• 从卖家视角回答买家的产品问题\n• 基于竞品分析报告智能生成回答\n• 扬长避短，促进产品转化\n\n请随时向我提问！',
+                        timestamp: Date.now()
+                    };
+                    
+                    qalabState.rufusMessages.push(welcomeMessage);
+                    
+                    // 动态导入 renderRufusMessages
+                    import('./actions').then(({ renderRufusMessages }) => {
+                        renderRufusMessages();
+                        console.log('[QALab] ✅ 已显示欢迎语');
+                    });
+                }
+            }
+        };
+        
+        container.addEventListener('focus', focusHandler, true); // 使用捕获阶段
+        eventManager.listeners.push({ element: container, event: 'focus', handler: focusHandler });
+        console.log('[QALab] ✅ 焦点事件监听器已设置');
 
         // 4. 监听数据更新事件 - 自动加载分析报告
         console.log('[QALab] 🔧 设置数据更新监听器...');
@@ -166,14 +196,6 @@ export async function mount(container: HTMLElement): Promise<void> {
         // 5. 模块挂载时检查是否有现有报告
         console.log('[QALab] 🔍 检查现有报告...');
         autoLoadAnalysisReport();
-        
-        // 6. 初始化 Rufus 模式切换按钮显示
-        console.log('[QALab] 🎨 初始化模式切换按钮...');
-        // 使用 setTimeout 确保 DOM 完全渲染后再更新
-        setTimeout(() => {
-            updateRufusModeToggle();
-            console.log('[QALab] ✅ 模式切换按钮初始化完成');
-        }, 100);
 
         console.log('[QALab] ========================================');
         console.log('[QALab] ✅ 子模块挂载成功');
