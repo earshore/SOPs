@@ -10,6 +10,8 @@ import { downloadFile } from './utils';
 import { showToast } from '../../../../../common/ui/notifications';
 import { renderResults, renderLangSelector, renderQAGrid } from './render';
 import { rufusSimulator } from './rufusSimulator';
+import { triggerFileImport } from './importHandler';
+import { renderDataPreview, renderJSONPreview } from './dataPreview';
 
 // 获取 qalab 状态的辅助函数
 const getQalabState = () => appStore.getState().qalab;
@@ -184,6 +186,9 @@ export function autoLoadAnalysisReport(): void {
             type: 'success', 
             description: `来源: ${reportSource}` 
         });
+        
+        // 刷新数据预览
+        refreshDataPreview();
         
         console.log('[QALab] ✅ 分析报告已自动加载');
         console.log('[QALab] ========================================');
@@ -857,4 +862,59 @@ function updateRufusThinkingMessage(message: string): void {
             ${message}
         `;
     }
+}
+
+/**
+ * 切换数据Tab
+ */
+export function switchDataTab(tab: 'preview' | 'json'): void {
+    console.log('[QALab] 切换数据Tab:', tab);
+    
+    // 更新Tab按钮状态
+    const tabs = document.querySelectorAll('.data-tab');
+    tabs.forEach(t => {
+        const tabElement = t as HTMLElement;
+        const tabName = tabElement.dataset.tab;
+        if (tabName === tab) {
+            tabElement.classList.add('active');
+        } else {
+            tabElement.classList.remove('active');
+        }
+    });
+    
+    // 更新Tab内容显示
+    const previewTab = document.getElementById('dataPreviewTab');
+    const jsonTab = document.getElementById('jsonTab');
+    
+    if (tab === 'preview') {
+        previewTab?.classList.add('active');
+        jsonTab?.classList.remove('active');
+    } else {
+        previewTab?.classList.remove('active');
+        jsonTab?.classList.add('active');
+    }
+}
+
+/**
+ * 刷新数据预览
+ */
+export function refreshDataPreview(): void {
+    const qalabState = getQalabState();
+    const reportData = qalabState.reportData;
+    
+    console.log('[QALab] 刷新数据预览:', reportData ? '有数据' : '无数据');
+    
+    // 渲染数据预览
+    renderDataPreview(reportData);
+    
+    // 渲染JSON预览
+    renderJSONPreview(reportData);
+}
+
+/**
+ * 触发导入（暴露给全局）
+ */
+export function triggerImport(): void {
+    console.log('[QALab] 触发文件导入');
+    triggerFileImport();
 }

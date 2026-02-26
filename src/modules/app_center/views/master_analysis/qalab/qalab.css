@@ -176,6 +176,20 @@ body::before {
 .delay-300 { animation-delay: .3s; }
 .delay-400 { animation-delay: .4s; }
 
+/* 防止父容器动画期间子元素transition导致的视觉问题 */
+.animate-fade-up *,
+.animate-scale-in * {
+  transition: none !important;
+  animation-duration: 0s !important;
+}
+
+/* 动画结束后恢复子元素的transition */
+.animate-fade-up.animation-complete *,
+.animate-scale-in.animation-complete * {
+  transition: revert !important;
+  animation-duration: revert !important;
+}
+
 /* ===== Layout ===== */
 .app-container {
   position: relative;
@@ -2023,4 +2037,189 @@ body::before {
   .wb-features { flex-direction: column; }
   .rufus-empty-suggestions { flex-direction: column; }
   .suggestion-chip { justify-content: center; }
+}
+
+
+/* ===== Data Management Section ===== */
+.data-management-section {
+  background: white;
+  border-radius: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.section-header-with-tabs {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 1.5rem 1.5rem 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.section-header-left {
+  flex: 1;
+}
+
+/* Data Tabs */
+.data-tabs {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.data-tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #94a3b8;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: -1px;
+}
+
+.data-tab:hover {
+  color: #64748b;
+  background: #f8fafc;
+}
+
+.data-tab.active {
+  color: #3b82f6;
+  border-bottom-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.data-tab .tab-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+  background: #f1f5f9;
+  transition: all 0.2s;
+}
+
+.data-tab.active .tab-icon {
+  background: #dbeafe;
+}
+
+.data-tab .tab-icon i {
+  font-size: 0.6875rem;
+  color: #94a3b8;
+  transition: color 0.2s;
+}
+
+.data-tab.active .tab-icon i {
+  color: #3b82f6;
+}
+
+/* Tab Content */
+.tab-content-wrapper {
+  position: relative;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* Data Preview Styles */
+#data-preview-content {
+  min-height: 320px;
+}
+
+.import-trigger {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.data-card {
+  animation: fadeIn 0.4s ease-out;
+}
+
+.stat-item {
+  animation: scaleIn 0.3s ease-out;
+}
+
+/* JSON Container */
+.json-container {
+  margin: 1.5rem;
+}
+
+.json-header {
+  user-select: none;
+}
+
+.mac-dot {
+  transition: all 0.2s;
+}
+
+.mac-dot:hover {
+  transform: scale(1.1);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #1e293b;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Section Actions */
+.section-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+/* Empty State */
+.empty-state {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }

@@ -26,7 +26,10 @@ import {
     exportText,
     autoLoadAnalysisReport,
     sendRufusQuestion,
-    clearRufusChat
+    clearRufusChat,
+    switchDataTab,
+    refreshDataPreview,
+    triggerImport
 } from './actions';
 import { rufusSimulator } from './rufusSimulator';
 
@@ -74,6 +77,16 @@ export async function mount(container: HTMLElement): Promise<void> {
         renderer.renderTemplate(container, html);
         console.log('[QALab] ✅ 模板渲染完成');
 
+        // 处理动画完成后的类添加，防止子元素transition冲突
+        const animatedSections = container.querySelectorAll('.animate-fade-up, .animate-scale-in');
+        animatedSections.forEach((section) => {
+            section.addEventListener('animationend', function handleAnimationEnd() {
+                section.classList.add('animation-complete');
+                section.removeEventListener('animationend', handleAnimationEnd);
+            }, { once: true });
+        });
+        console.log('[QALab] ✅ 动画完成监听器已设置');
+
         // 2. 注册全局操作
         console.log('[QALab] 🔧 开始注册全局操作...');
         const registeredActions = registerActionsWithLegacy({
@@ -89,8 +102,14 @@ export async function mount(container: HTMLElement): Promise<void> {
                     sendRufusQuestion(input.value.trim());
                 }
             },
-            amz_qalab_clearRufusChat: () => clearRufusChat()
+            amz_qalab_clearRufusChat: () => clearRufusChat(),
+            amz_qalab_switchDataTab: () => {
+                // Tab切换通过事件委托处理
+            }
         });
+        
+        // 暴露triggerImport到全局，供HTML onclick使用
+        (window as any).qalabTriggerImport = triggerImport;
         
         console.log('[QALab] ✅ 已注册', registeredActions.length, '个全局操作');
         console.log('[QALab] 注册的操作:', registeredActions);
@@ -105,6 +124,17 @@ export async function mount(container: HTMLElement): Promise<void> {
             
             if (actionBtn) {
                 const action = actionBtn.dataset.action;
+                
+                // 特殊处理Tab切换
+                if (action === 'amz_qalab_switchDataTab') {
+                    const tab = actionBtn.dataset.tab as 'preview' | 'json';
+                    if (tab) {
+                        switchDataTab(tab);
+                    }
+                    return;
+                }
+                
+                // 其他动作
                 if (action) {
                     const actionFn = (window as any)[action];
                     if (typeof actionFn === 'function') {
@@ -164,6 +194,16 @@ export async function mount(container: HTMLElement): Promise<void> {
         container.addEventListener('focus', focusHandler, true); // 使用捕获阶段
         eventManager.listeners.push({ element: container, event: 'focus', handler: focusHandler });
         console.log('[QALab] ✅ 焦点事件监听器已设置');
+        
+        // 监听数据导入事件
+        const dataImportHandler = () => {
+            console.log('[QALab] 检测到数据导入事件');
+            refreshDataPreview();
+        };
+        
+        window.addEventListener('qalab:data-imported', dataImportHandler);
+        eventManager.listeners.push({ element: window, event: 'qalab:data-imported', handler: dataImportHandler });
+        console.log('[QALab] ✅ 数据导入事件监听器已设置');
 
         // 4. 监听数据更新事件 - 自动加载分析报告
         console.log('[QALab] 🔧 设置数据更新监听器...');
@@ -186,6 +226,10 @@ export async function mount(container: HTMLElement): Promise<void> {
         // 5. 模块挂载时检查是否有现有报告
         console.log('[QALab] 🔍 检查现有报告...');
         autoLoadAnalysisReport();
+        
+        // 6. 初始化数据预览
+        console.log('[QALab] 🎨 初始化数据预览...');
+        refreshDataPreview();
 
         console.log('[QALab] ========================================');
         console.log('[QALab] ✅ 子模块挂载成功');

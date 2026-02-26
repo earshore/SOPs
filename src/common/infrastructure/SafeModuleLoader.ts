@@ -238,8 +238,11 @@ export class SafeModuleLoader {
     this.logger.info(`加载模板: ${templatePath}`, {}, this.moduleName);
 
     try {
-      // 检查缓存
-      if (this.loadedModules.has(templatePath)) {
+      // 开发环境下禁用缓存，确保模板修改后能立即生效
+      const isDevelopment = import.meta.env.DEV;
+      
+      // 检查缓存（生产环境）
+      if (!isDevelopment && this.loadedModules.has(templatePath)) {
         this.logger.debug(`从缓存加载模板: ${templatePath}`, undefined, this.moduleName);
         return this.loadedModules.get(templatePath);
       }
@@ -252,10 +255,15 @@ export class SafeModuleLoader {
 
       const template = loadResult.data;
 
-      // 缓存模板
-      this.loadedModules.set(templatePath, template);
+      // 缓存模板（仅生产环境）
+      if (!isDevelopment) {
+        this.loadedModules.set(templatePath, template);
+      }
 
-      this.logger.info(`模板加载成功: ${templatePath}`, { retryAttempts: loadResult.retryAttempts }, this.moduleName);
+      this.logger.info(`模板加载成功: ${templatePath}`, { 
+        retryAttempts: loadResult.retryAttempts,
+        cached: !isDevelopment 
+      }, this.moduleName);
       return template;
 
     } catch (error) {
