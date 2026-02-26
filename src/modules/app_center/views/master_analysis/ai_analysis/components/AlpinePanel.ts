@@ -10,109 +10,95 @@ import { getTargetColorClass, getPromptText, getResultIcon, getResultColor } fro
 import { getPromptTokenCount, getFormattedTokenCount } from './helpers';
 import { highlightJson } from '../services/reportGenerator';
 import * as actions from './actions';
-import { ModuleState } from '../state/moduleState';
 import { AlpineContext } from '../types';
 import { createComputedProperties, ComputedProperties } from './computedProperties';
+import { createMultipleStateSyncs, cleanupSubscriptions } from '@common/utils/stateSync';
 
 /**
  * 创建 Alpine 面板组件
  */
-export function createAiAnalysisPanel(moduleState: ModuleState): AlpineContext & ComputedProperties & Record<string, unknown> {
+export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Record<string, unknown> {
   const panel = {
-    // ========== State ==========
-    selectedAsins: moduleState.selectedAsins,
-    selectedTargets: moduleState.selectedTargets,
-    isAnalyzing: moduleState.isAnalyzing,
-    progress: moduleState.progress,
-    currentStep: moduleState.currentStep,
-    analysisReport: moduleState.analysisReport,
-    hasReport: moduleState.hasReport,
-    expandedPromptIndex: moduleState.expandedPromptIndex,
-    showPromptPanel: moduleState.showPromptPanel,
-    showJsonViewer: moduleState.showJsonViewer,
-    useRealData: moduleState.useRealData,
-    dataSource: moduleState.dataSource,
-    showDataSourceBanner: moduleState.showDataSourceBanner,
+    // ========== State (从 Zustand 同步) ==========
+    selectedAsins: [] as string[],
+    selectedTargets: [] as string[],
+    isAnalyzing: false,
+    progress: 0,
+    currentStep: '',
+    analysisReport: null as unknown,
+    hasReport: false,
+    expandedPromptIndex: null as number | null,
+    showPromptPanel: false,
+    showJsonViewer: false,
+    useRealData: true,
+    dataSource: 'scraper' as 'sample' | 'scraper',
+    showDataSourceBanner: true,
+    
+    // ========== 订阅清理函数 ==========
+    _unsubscribes: [] as Array<() => void>,
 
     // ========== Lifecycle ==========
     init(this: AlpineContext & Record<string, unknown>) {
       console.log('[Alpine 组件] 🚀 组件初始化');
       
-      // 默认全选所有分析目标（如果当前没有选中任何目标）
-      // 必须在 syncFromModuleState 之前设置，确保初始状态正确
-      if (moduleState.selectedTargets.length === 0) {
-        moduleState.selectedTargets = analysisTargets.map(t => t.id);
-        console.log('[Alpine 组件] ✅ 已默认全选所有分析目标:', moduleState.selectedTargets.length);
+      // 设置自动状态同步（Zustand → Alpine）
+      this._unsubscribes = createMultipleStateSyncs([
+        {
+          selector: (state) => state.analysis.selectedAsins,
+          onChange: (asins) => { this.selectedAsins = [...asins]; },
+          immediate: true
+        },
+        {
+          selector: (state) => state.analysis.isAnalyzing,
+          onChange: (isAnalyzing) => { this.isAnalyzing = isAnalyzing; },
+          immediate: true
+        },
+        {
+          selector: (state) => state.analysis.analysisReport,
+          onChange: (report) => { 
+            this.analysisReport = report;
+            this.hasReport = !!report;
+          },
+          immediate: true
+        }
+      ]);
+      
+      // 初始化 selectedTargets（默认全选）
+      const currentTargets = this.selectedTargets;
+      if (currentTargets.length === 0) {
+        this.selectedTargets = analysisTargets.map(t => t.id);
+        console.log('[Alpine 组件] ✅ 已默认全选所有分析目标:', this.selectedTargets.length);
       }
-      
-      this.syncFromModuleState();
-      
-      // 强制触发响应式更新
-      // 使用 $nextTick 确保在 DOM 更新后执行
-      this.$nextTick(() => {
-        // 通过重新赋值触发响应式
-        const targets = [...this.selectedTargets];
-        this.selectedTargets = targets;
-        console.log('[Alpine 组件] 🔄 响应式更新完成, selectedTargets:', this.selectedTargets.length);
-        console.log('[Alpine 组件] 🔍 this.selectedTargets 数组:', this.selectedTargets);
-        console.log('[Alpine 组件] 🔍 canAnalyze 状态:', this.canAnalyze);
-      });
       
       // 监听 analysisReport 变化，自动更新 hasReport 标志
       (this as any).$watch('analysisReport', (newValue: any) => {
         console.log('[Alpine 组件] 📊 analysisReport 变化检测:', !!newValue);
-        // 自动更新 hasReport 标志
         (this as any).hasReport = !!newValue;
         if (newValue) {
-          // 强制触发 results 计算属性重新计算
-          // 通过访问 results 来触发 getter
           const resultsCount = (this as any).results?.length || 0;
           console.log('[Alpine 组件] 📊 results 重新计算:', resultsCount, '个结果');
-          console.log('[Alpine 组件] ✅ hasReport 标志已设置为 true');
-        } else {
-          console.log('[Alpine 组件] ❌ hasReport 标志已设置为 false');
         }
       });
       
       // 检查是否有新的 Scraper 数据
-      checkAndLoadScraperData(this, moduleState);
+      checkAndLoadScraperData(this);
 
       // 检查是否有已加载的历史报告
-      checkLoadedReport(this, moduleState);
+      checkLoadedReport(this);
     },
-
-    // ========== State Sync ==========
-    syncFromModuleState() {
-      // 直接赋值新数组，触发 Alpine.js 响应式
-      this.selectedAsins = [...moduleState.selectedAsins];
-      this.selectedTargets = [...moduleState.selectedTargets];
-      this.isAnalyzing = moduleState.isAnalyzing;
-      this.progress = moduleState.progress;
-      this.currentStep = moduleState.currentStep;
-      this.analysisReport = moduleState.analysisReport;
-      this.hasReport = moduleState.hasReport;
-      
-      console.log('[Alpine 组件] 📊 状态同步完成:', {
-        selectedAsins: this.selectedAsins.length,
-        selectedTargets: this.selectedTargets.length,
-        hasReport: this.hasReport
-      });
-    },
-
-    syncToModuleState() {
-      moduleState.selectedAsins = this.selectedAsins;
-      moduleState.selectedTargets = this.selectedTargets;
-      moduleState.isAnalyzing = this.isAnalyzing;
-      moduleState.progress = this.progress;
-      moduleState.currentStep = this.currentStep;
-      moduleState.analysisReport = this.analysisReport;
-      moduleState.hasReport = this.hasReport;
+    
+    // ========== 清理 ==========
+    destroy(this: AlpineContext & Record<string, unknown>) {
+      console.log('[Alpine 组件] 🧹 组件销毁，清理订阅');
+      if (Array.isArray(this._unsubscribes)) {
+        cleanupSubscriptions(this._unsubscribes);
+      }
     },
 
     // ========== Data Loading ==========
     loadHistoricalReport(detail: { report: any; timestamp: string }) {
       const ctx = this as unknown as AlpineContext & ComputedProperties;
-      loadHistoricalReport(ctx, moduleState, detail);
+      loadHistoricalReport(ctx, detail);
     },
 
     formatHistoryDate(timestamp: string): string {
@@ -122,52 +108,52 @@ export function createAiAnalysisPanel(moduleState: ModuleState): AlpineContext &
     // ========== Actions ==========
     toggleAsin(asin: string) {
       const ctx = this as unknown as AlpineContext & ComputedProperties;
-      actions.toggleAsin(ctx, moduleState, asin);
+      actions.toggleAsin(ctx, asin);
     },
 
     selectAllAsins() {
       const ctx = this as unknown as AlpineContext & ComputedProperties;
-      actions.selectAllAsins(ctx, moduleState, ctx.availableAsins);
+      actions.selectAllAsins(ctx, ctx.availableAsins);
     },
 
     clearAllAsins() {
       const ctx = this as unknown as AlpineContext & ComputedProperties;
-      actions.clearAllAsins(ctx, moduleState);
+      actions.clearAllAsins(ctx);
     },
 
     toggleTarget(targetId: string) {
       const ctx = this as unknown as AlpineContext & ComputedProperties;
-      actions.toggleTarget(ctx, moduleState, targetId);
+      actions.toggleTarget(ctx, targetId);
     },
 
     selectAllTargets() {
       const ctx = this as unknown as AlpineContext & ComputedProperties;
-      actions.selectAllTargets(ctx, moduleState);
+      actions.selectAllTargets(ctx);
     },
 
     clearAllTargets() {
       const ctx = this as unknown as AlpineContext & ComputedProperties;
-      actions.clearAllTargets(ctx, moduleState);
+      actions.clearAllTargets(ctx);
     },
 
     togglePromptPanel() {
       const ctx = this as unknown as AlpineContext & ComputedProperties;
-      actions.togglePromptPanel(ctx, moduleState);
+      actions.togglePromptPanel(ctx);
     },
 
     togglePromptItem(index: number) {
       const ctx = this as unknown as AlpineContext & ComputedProperties;
-      actions.togglePromptItem(ctx, moduleState, index);
+      actions.togglePromptItem(ctx, index);
     },
 
     toggleJsonViewer() {
       const ctx = this as unknown as AlpineContext & ComputedProperties;
-      actions.toggleJsonViewer(ctx, moduleState);
+      actions.toggleJsonViewer(ctx);
     },
 
     toggleDataSource() {
       const ctx = this as unknown as AlpineContext & ComputedProperties;
-      actions.toggleDataSource(ctx, moduleState);
+      actions.toggleDataSource(ctx);
     },
 
     copyPrompt(index: number) {
@@ -192,7 +178,7 @@ export function createAiAnalysisPanel(moduleState: ModuleState): AlpineContext &
 
     async runAnalysis() {
       const ctx = this as unknown as AlpineContext & ComputedProperties;
-      await actions.runAnalysisAction(ctx, moduleState, ctx.currentProducts);
+      await actions.runAnalysisAction(ctx, ctx.currentProducts);
     },
 
     // ========== Helpers ==========

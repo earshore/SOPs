@@ -8,12 +8,11 @@ import { showToast } from '@common/ui/index';
 import { formatHistoryDate } from '../services/reportGenerator';
 import { AlpineContext, HistoricalReportDetail } from '../types';
 import type { ScrapedData } from '@/types/modules-business';
-import { ModuleState } from '../state/moduleState';
 
 /**
  * 检查并加载 Scraper 数据
  */
-export function checkAndLoadScraperData(context: AlpineContext, moduleState: ModuleState): void {
+export function checkAndLoadScraperData(context: AlpineContext): void {
   const scrapedData = appStore.getState().scraper?.scrapedData as ScrapedData | null;
   
   if (scrapedData && scrapedData.products && scrapedData.products.length > 0) {
@@ -25,8 +24,8 @@ export function checkAndLoadScraperData(context: AlpineContext, moduleState: Mod
     if (asins.length > 0 && JSON.stringify(asins) !== JSON.stringify(context.selectedAsins)) {
       context.selectedAsins = asins;
       context.dataSource = 'scraper';
-      moduleState.selectedAsins = context.selectedAsins;
-      moduleState.dataSource = 'scraper';
+      // 同步到 Zustand store
+      appStore.getState().setSelectedAsins(asins);
       console.log('[数据加载] 自动加载 Scraper 数据:', context.selectedAsins);
       showToast(`已自动加载 ${asins.length} 个产品 ASIN`, { type: 'success' });
     }
@@ -34,7 +33,6 @@ export function checkAndLoadScraperData(context: AlpineContext, moduleState: Mod
     // 自动启用真实数据分析模式
     if (!context.useRealData) {
       context.useRealData = true;
-      moduleState.useRealData = true;
       console.log('[数据加载] 已自动启用真实数据分析模式');
     }
   }
@@ -43,7 +41,7 @@ export function checkAndLoadScraperData(context: AlpineContext, moduleState: Mod
 /**
  * 检查是否有已加载的历史报告（从全局状态）
  */
-export function checkLoadedReport(context: AlpineContext, moduleState: ModuleState): void {
+export function checkLoadedReport(context: AlpineContext): void {
   const report = appStore.getState().analysis?.analysisReport;
   
   // 类型守卫：确保 report 是对象类型
@@ -72,9 +70,6 @@ export function checkLoadedReport(context: AlpineContext, moduleState: ModuleSta
     context.analysisReport = reportObj;
     context.hasReport = true;
     
-    // 同步到模块状态
-    syncToModuleState(context, moduleState);
-    
     console.log('[数据加载] 已显示历史分析报告');
     showToast('已加载历史分析报告', { type: 'success' });
   }
@@ -85,7 +80,6 @@ export function checkLoadedReport(context: AlpineContext, moduleState: ModuleSta
  */
 export function loadHistoricalReport(
   context: AlpineContext,
-  moduleState: ModuleState,
   detail: HistoricalReportDetail
 ): void {
   try {
@@ -98,8 +92,8 @@ export function loadHistoricalReport(
     context.analysisReport = detail.report;
     context.hasReport = true;
     
-    // 同步到模块状态
-    syncToModuleState(context, moduleState);
+    // 同步到 Zustand store
+    appStore.getState().setAnalysisReport(detail.report as any);
 
     console.log('[数据加载] 已加载历史分析报告:', detail.timestamp);
     showToast(`已加载历史分析报告 (${formatHistoryDate(detail.timestamp)})`, { type: 'success' });
@@ -107,17 +101,4 @@ export function loadHistoricalReport(
     console.error('[数据加载] 加载历史报告失败:', error);
     showToast('加载历史报告失败', { type: 'error' });
   }
-}
-
-/**
- * 同步状态到模块状态
- */
-function syncToModuleState(context: AlpineContext, moduleState: ModuleState): void {
-  moduleState.selectedAsins = context.selectedAsins;
-  moduleState.selectedTargets = context.selectedTargets;
-  moduleState.isAnalyzing = context.isAnalyzing;
-  moduleState.progress = context.progress;
-  moduleState.currentStep = context.currentStep;
-  moduleState.analysisReport = context.analysisReport;
-  moduleState.hasReport = context.hasReport;
 }

@@ -11,7 +11,6 @@ import { SafeModuleLoader } from '@/common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
 import { AlpineRegistry } from '@/common/infrastructure/AlpineRegistry';
 import { appStore } from '@/stores/useAppStore';
-import state from '@/common/state';
 import eventBus from '@/common/EventBus';
 import { MODULE_EVENTS, APP_EVENTS } from '@/common/constants/eventConstants';
 import type { UserProductProfile } from '@/types/state';
@@ -234,14 +233,14 @@ describe('Promptlab Module', () => {
     it('should compute hasReport correctly', () => {
       expect(component.hasReport).toBe(false);
 
-      state.analysis.analysisReport = { marketplace: 'US', results: [] } as any;
+      appStore.getState().updateAnalysis({ analysisReport: { marketplace: 'US', results: [] } as any });
       expect(component.hasReport).toBe(true);
     });
 
     it('should compute isReady correctly', () => {
       expect(component.isReady).toBe(false);
 
-      state.analysis.analysisReport = { marketplace: 'US' } as any;
+      appStore.getState().updateAnalysis({ analysisReport: { marketplace: 'US' } as any });
       component.profile.targetMarket = 'English';
       component.profile.keywordsTier1 = 'keyword1';
       component.profile.keywordsTier2 = 'keyword2';
@@ -292,7 +291,7 @@ describe('Promptlab Module', () => {
     });
 
     it('should render empty state when no report', () => {
-      state.analysis.analysisReport = null;
+      appStore.getState().updateAnalysis({ analysisReport: null });
       
       component.renderReportAnalysis();
 
@@ -304,17 +303,19 @@ describe('Promptlab Module', () => {
     });
 
     it('should render report ready state', () => {
-      state.analysis.analysisReport = {
-        marketplace: 'US',
-        results: [
-          {
-            targetId: 'test-section',
-            title: 'Test Section',
-            highlights: [{ text: 'Test highlight' }],
-            details: [{ category: 'Test', items: ['Item 1'] }],
-          },
-        ],
-      } as any;
+      appStore.getState().updateAnalysis({
+        analysisReport: {
+          marketplace: 'US',
+          results: [
+            {
+              targetId: 'test-section',
+              title: 'Test Section',
+              highlights: [{ text: 'Test highlight' }],
+              details: [{ category: 'Test', items: ['Item 1'] }],
+            },
+          ],
+        } as any
+      });
 
       component.renderReportAnalysis();
 
@@ -346,7 +347,7 @@ describe('Promptlab Module', () => {
       container.innerHTML = mockTemplate;
 
       // 设置就绪状态
-      state.analysis.analysisReport = { marketplace: 'US' } as any;
+      appStore.getState().updateAnalysis({ analysisReport: { marketplace: 'US' } as any });
       component.profile.targetMarket = 'English';
       component.profile.keywordsTier1 = 'test keyword';
       component.profile.keywordsTier2 = 'test longtail';
@@ -624,15 +625,9 @@ describe('Promptlab Module', () => {
     it('should auto-select market on first load', () => {
       const select = document.getElementById('lab-target-market') as HTMLSelectElement;
       const option = document.createElement('option');
-      option.value = 'English (US)';  // 修正：应该是 "English (US)" 而不是 "English"
+      option.value = 'English (US)';
       option.textContent = 'English (US) (amazon.com)';
       select.appendChild(option);
-
-      // Mock state.masterPrompt 为 true（通过 Object.defineProperty）
-      Object.defineProperty(state, 'masterPrompt', {
-        get: () => true,
-        configurable: true
-      });
 
       appStore.getState().updateAnalysis({ 
         analysisReport: { marketplace: 'US' } as any 
@@ -654,7 +649,7 @@ describe('Promptlab Module', () => {
       component.lastMarketplace = 'US';
       component.profile.targetMarket = 'English';
       
-      state.analysis.analysisReport = { marketplace: 'DE' } as any;
+      appStore.getState().updateAnalysis({ analysisReport: { marketplace: 'DE' } as any });
       
       component.autoSelectMarket(select);
 
@@ -668,7 +663,7 @@ describe('Promptlab Module', () => {
       component.lastMarketplace = 'US';
       component.profile.targetMarket = 'English';
       
-      state.analysis.analysisReport = { marketplace: 'US' } as any;
+      appStore.getState().updateAnalysis({ analysisReport: { marketplace: 'US' } as any });
       
       const initialMarket = component.profile.targetMarket;
       component.autoSelectMarket(select);
@@ -690,17 +685,19 @@ describe('Promptlab Module', () => {
     });
 
     it('should handle new format report (AI智能分析)', () => {
-      state.analysis.analysisReport = {
-        marketplace: 'US',
-        results: [
-          {
-            targetId: 'test-id',
-            title: 'Test Title',
-            highlights: [{ text: 'Highlight 1' }],
-            details: [{ category: 'Category 1', items: ['Item 1', 'Item 2'] }],
-          },
-        ],
-      } as any;
+      appStore.getState().updateAnalysis({
+        analysisReport: {
+          marketplace: 'US',
+          results: [
+            {
+              targetId: 'test-id',
+              title: 'Test Title',
+              highlights: [{ text: 'Highlight 1' }],
+              details: [{ category: 'Category 1', items: ['Item 1', 'Item 2'] }],
+            },
+          ],
+        } as any
+      });
 
       component.renderReportAnalysis();
 
@@ -709,11 +706,13 @@ describe('Promptlab Module', () => {
     });
 
     it('should handle legacy format report (旧版AI分析)', () => {
-      state.analysis.analysisReport = {
-        marketplace: 'US',
-        target_audience: 'Test Audience',
-        key_features: ['Feature 1', 'Feature 2'],
-      } as any;
+      appStore.getState().updateAnalysis({
+        analysisReport: {
+          marketplace: 'US',
+          target_audience: 'Test Audience',
+          key_features: ['Feature 1', 'Feature 2'],
+        } as any
+      });
 
       component.renderReportAnalysis();
 
@@ -722,10 +721,12 @@ describe('Promptlab Module', () => {
     });
 
     it('should auto-fill audience from legacy report', () => {
-      state.analysis.analysisReport = {
-        marketplace: 'US',
-        target_audience: 'Young professionals',
-      } as any;
+      appStore.getState().updateAnalysis({
+        analysisReport: {
+          marketplace: 'US',
+          target_audience: 'Young professionals',
+        } as any
+      });
 
       component.profile.audience = '';
       component.renderReportAnalysis();

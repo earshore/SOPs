@@ -94,9 +94,8 @@ export interface AlpineContext {
   availableAsins: string[];
   hasData: boolean;
   canAnalyze: boolean;
-  syncFromModuleState: () => void;
-  syncToModuleState: () => void;
   $nextTick: (callback: () => void) => void;
+  _unsubscribes: Array<() => void>;
 }
 
 /**
