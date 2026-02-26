@@ -2136,7 +2136,7 @@ body::before {
 
 /* Data Preview Styles */
 #data-preview-content {
-  min-height: 320px;
+  min-height: 240px;
 }
 
 .import-trigger {
