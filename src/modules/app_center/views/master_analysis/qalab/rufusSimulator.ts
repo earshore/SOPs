@@ -1,5 +1,5 @@
 /**
- * Rufus AI 卖家客服模拟器
+ * Rufus AI 智能回答生成器
  * 
  * 核心功能：从卖家视角回答买家问题，基于分析报告内容智能生成回答
  * 
@@ -10,9 +10,7 @@
  * 4. 避免违规：不捏造信息，不夸大功效，但可以用积极的方式表达
  * 5. 多语言支持：回答语言自动匹配提问语言
  * 
- * 支持两种模式：
- * 1. 规则模式：基于报告数据的规则匹配（快速、离线）
- * 2. AI 模式：调用大模型智能分析（更智能、更懂用户意图）
+ * 使用 AI 模式：调用大模型智能分析（更智能、更懂用户意图）
  */
 
 import { callLLM, type ChatMessage } from '../../../../../services/llmService';
@@ -25,9 +23,9 @@ export interface RufusMessage {
 }
 
 /**
- * Rufus 回答模式
+ * Rufus 回答模式（固定为 AI）
  */
-export type RufusMode = 'rule' | 'ai';
+export type RufusMode = 'ai';
 
 /**
  * Rufus AI 智能回答生成器
@@ -61,12 +59,12 @@ export class RufusSimulator {
     }
     
     /**
-     * 生成 Rufus 风格的回答
+     * 生成 Rufus 风格的回答（使用 AI 模式）
      */
     async generateAnswer(question: string): Promise<string> {
         console.log('[Rufus Simulator] ========================================');
         console.log('[Rufus Simulator] 开始生成回答');
-        console.log('[Rufus Simulator] - 当前模式:', this.mode);
+        console.log('[Rufus Simulator] - 当前模式: AI');
         console.log('[Rufus Simulator] - 问题:', question);
         console.log('[Rufus Simulator] - 报告数据存在:', !!this.reportData);
         
@@ -75,29 +73,11 @@ export class RufusSimulator {
             return this.getDefaultResponse();
         }
         
-        // 根据模式选择生成方式
-        if (this.mode === 'ai') {
-            console.log('[Rufus Simulator] 🤖 使用 AI 模式生成回答');
-            try {
-                const answer = await this.generateAIAnswer(question);
-                console.log('[Rufus Simulator] ✅ AI 回答生成成功，长度:', answer.length);
-                console.log('[Rufus Simulator] ========================================');
-                return answer;
-            } catch (error) {
-                console.error('[Rufus Simulator] ❌ AI 模式失败，降级到规则模式:', error);
-                console.log('[Rufus Simulator] 🔄 开始使用规则模式生成回答');
-                const answer = this.generateRuleBasedAnswer(question);
-                console.log('[Rufus Simulator] ✅ 规则模式回答生成成功，长度:', answer.length);
-                console.log('[Rufus Simulator] ========================================');
-                return answer;
-            }
-        } else {
-            console.log('[Rufus Simulator] 📋 使用规则模式生成回答');
-            const answer = this.generateRuleBasedAnswer(question);
-            console.log('[Rufus Simulator] ✅ 规则模式回答生成成功，长度:', answer.length);
-            console.log('[Rufus Simulator] ========================================');
-            return answer;
-        }
+        console.log('[Rufus Simulator] 🤖 使用 AI 模式生成回答');
+        const answer = await this.generateAIAnswer(question);
+        console.log('[Rufus Simulator] ✅ AI 回答生成成功，长度:', answer.length);
+        console.log('[Rufus Simulator] ========================================');
+        return answer;
     }
     
     /**
