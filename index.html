@@ -102,16 +102,15 @@
     <!-- ========== Header ========== -->
     <header class="header">
         <!-- 顶部彩虹渐变线 -->
-        <div class="header-gradient-line" style="position:absolute;top:0;left:0;right:0;height:3px;"></div>
+        <div class="header-gradient-line"></div>
 
-        <div style="padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;">
+        <div class="header-inner">
 
             <!-- ===== Logo ===== -->
-            <button data-action="switch-tab" data-tab="home" class="logo-button" style="margin-left:-8px;">
+            <button data-action="switch-tab" data-tab="home" class="logo-button">
                 <div class="logo-icon-wrapper">
                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        style="animation: spin 12s linear infinite; will-change: transform; fill: none !important;"
                         aria-hidden="true">
                         <defs>
                             <linearGradient id="gemini-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -130,7 +129,7 @@
                     </svg>
                 </div>
 
-                <div style="display:flex;flex-direction:column;">
+                <div class="logo-text-wrapper">
                     <span class="logo-text-main">
                         Amazing Amazon
                         <span class="logo-text-gradient">Architect</span>
@@ -288,7 +287,7 @@
             </nav>
 
             <!-- ===== Right Actions ===== -->
-            <div style="display:flex;align-items:center;gap:12px;min-width:200px;justify-content:flex-end;">
+            <div class="header-actions">
                 <!-- Model Status -->
                 <div id="model-status" class="model-status">
                     <span class="status-dot status-pending pulse-dot"></span>

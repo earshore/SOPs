@@ -16,12 +16,32 @@
     z-index: var(--z-header, 40);
 }
 
+.header-inner {
+    padding: 0 24px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 200px;
+    justify-content: flex-end;
+}
+
 /* 顶部渐变彩带 */
 .header-gradient-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
     background: var(--gradient-aurora, linear-gradient(135deg, #6366f1 0%, #ec4899 25%, #f59e0b 50%, #10b981 75%, #06b6d4 100%));
     background-size: 300% 100%;
     animation: gradient-shift 8s ease infinite;
-    height: 3px !important;
 }
 
 /* ========================================
@@ -31,6 +51,7 @@
     display: flex;
     align-items: center;
     gap: 14px;
+    margin-left: -8px;
     padding: 0 16px;
     height: 64px;
     border: none;
@@ -39,6 +60,11 @@
     border-radius: 0 0 var(--radius-lg, 12px) var(--radius-lg, 12px);
     transition: all var(--duration-normal, 250ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
     position: relative;
+}
+
+.logo-text-wrapper {
+    display: flex;
+    flex-direction: column;
 }
 
 .logo-button:hover {
@@ -52,6 +78,12 @@
 .logo-icon-wrapper {
     position: relative;
     transition: transform var(--duration-normal, 250ms) var(--ease-bounce, cubic-bezier(0.34, 1.56, 0.64, 1));
+}
+
+.logo-icon-wrapper svg {
+    animation: spin 12s linear infinite;
+    will-change: transform;
+    fill: none !important;
 }
 
 .logo-icon-wrapper::before {
