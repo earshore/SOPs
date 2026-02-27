@@ -19,7 +19,6 @@ import {
   ANIMATION_CLASSES,
   DATA_ATTRIBUTES,
 } from '../config/animation-config';
-import { PerformanceMonitor } from '../utils/performance-monitor';
 
 /**
  * 动画管理器类
@@ -27,7 +26,6 @@ import { PerformanceMonitor } from '../utils/performance-monitor';
  */
 export class AnimationManager {
   private settings: AnimationSettings;
-  private performanceMonitor: PerformanceMonitor;
   private static instance: AnimationManager | null = null;
 
   /**
@@ -40,9 +38,6 @@ export class AnimationManager {
       disabledCategories: new Set(DEFAULT_ANIMATION_SETTINGS.disabledCategories),
     };
 
-    // 初始化性能监控器
-    this.performanceMonitor = new PerformanceMonitor();
-
     // 从localStorage加载配置
     this.loadSettings();
 
@@ -51,9 +46,6 @@ export class AnimationManager {
 
     // 监听系统偏好变化
     this.observeSystemPreference();
-
-    // 启动性能监控
-    this.performanceMonitor.start();
   }
 
   /**
@@ -210,12 +202,7 @@ export class AnimationManager {
     return !this.settings.disabledCategories.has(category);
   }
 
-  /**
-   * 获取性能监控器实例
-   */
-  getPerformanceMonitor(): PerformanceMonitor {
-    return this.performanceMonitor;
-  }
+
 
   /**
    * 应用当前配置到DOM
@@ -318,10 +305,9 @@ export class AnimationManager {
 
   /**
    * 销毁管理器
-   * 停止性能监控，清理资源
+   * 清理资源
    */
   destroy(): void {
-    this.performanceMonitor.stop();
     AnimationManager.instance = null;
   }
 

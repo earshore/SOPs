@@ -267,17 +267,8 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
       console.log('🎨 Initializing Animation System...');
       
       // AnimationManager 已在导入时自动初始化（单例模式）
-      // 这里只需要初始化 AnimationStore 和设置监听器
+      // 这里只需要初始化 AnimationStore
       initializeAnimationStore();
-      
-      // 注册性能降级回调
-      const performanceMonitor = animationManager.getPerformanceMonitor();
-      performanceMonitor.onPerformanceDrop(() => {
-        console.warn('⚠️ Animation performance degradation detected');
-        if (window.showToast) {
-          window.showToast('检测到性能下降，已自动优化动画效果', { type: 'info' });
-        }
-      });
       
       console.log('✅ Animation System initialized');
       console.log('   - Animations enabled:', animationManager.getSettings().enabled);

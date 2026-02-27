@@ -246,42 +246,9 @@ export const animationSelectors = {
 
 /**
  * 初始化动画设置store
- * 设置性能监控回调和系统偏好监听
+ * 设置系统偏好监听
  */
 export function initializeAnimationStore(): void {
-  const performanceMonitor = animationManager.getPerformanceMonitor();
-  
-  // 注册性能降级回调
-  let isHandlingPerformanceDrop = false; // 防止循环触发
-  performanceMonitor.onPerformanceDrop(() => {
-    // 防止重复触发
-    if (isHandlingPerformanceDrop) {
-      return;
-    }
-    
-    isHandlingPerformanceDrop = true;
-    
-    const currentFPS = performanceMonitor.getCurrentFPS();
-    animationSettingsStore.setState({ 
-      currentFPS,
-      isPerformanceDegraded: true 
-    });
-    
-    // 自动禁用非关键动画类别
-    animationManager.disableCategory('card');
-    animationManager.disableCategory('list');
-    
-    // 同步设置
-    animationSettingsStore.getState().syncFromManager();
-    
-    console.info('Performance degradation detected, non-critical animations disabled');
-    
-    // 延迟重置标志，避免短时间内重复触发
-    setTimeout(() => {
-      isHandlingPerformanceDrop = false;
-    }, 5000); // 5秒内不再处理性能降级
-  });
-  
   // 监听系统偏好变化
   const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
   const handlePreferenceChange = () => {
@@ -291,15 +258,6 @@ export function initializeAnimationStore(): void {
   if (mediaQuery.addEventListener) {
     mediaQuery.addEventListener('change', handlePreferenceChange);
   }
-  
-  // 定期更新FPS
-  const updateFPS = () => {
-    const currentFPS = performanceMonitor.getCurrentFPS();
-    animationSettingsStore.setState({ currentFPS });
-  };
-  
-  // 每秒更新一次FPS
-  setInterval(updateFPS, 1000);
 }
 
 /**
