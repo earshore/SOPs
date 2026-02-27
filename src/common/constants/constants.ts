@@ -61,9 +61,9 @@ export const PROVIDERS: Record<string, ProviderConfig> = {
     name: "AI-Gateway",
     endpoint: "https://ai-gateway.hongecb.store",
     models: [
+      { id: "gpt-5-mini", context: 16385, features: ["function"] },
       { id: "glm-4.5-air", context: 128000, features: ["function"] },
       { id: "z-ai/glm5", context: 128000, features: ["function"] },
-      { id: "gpt-5-mini", context: 16385, features: ["function"] },
       { id: "hunyuan-lite", context: 32000, features: ["function"] },
     ],
   },
