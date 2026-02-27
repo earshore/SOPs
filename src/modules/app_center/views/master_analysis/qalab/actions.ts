@@ -899,16 +899,21 @@ export function switchDataTab(tab: 'preview' | 'json'): void {
  * 刷新数据预览
  */
 export function refreshDataPreview(): void {
+    console.log('[QALab] 🔄 refreshDataPreview 被调用');
+    console.log('[QALab] - 调用栈:', new Error().stack);
+    
     const qalabState = getQalabState();
     const reportData = qalabState.reportData;
     
-    console.log('[QALab] 刷新数据预览:', reportData ? '有数据' : '无数据');
+    console.log('[QALab] - reportData 存在:', !!reportData);
     
     // 渲染数据预览
     renderDataPreview(reportData);
     
     // 渲染JSON预览
     renderJSONPreview(reportData);
+    
+    console.log('[QALab] ✅ refreshDataPreview 完成');
 }
 
 /**

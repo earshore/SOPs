@@ -4,7 +4,8 @@
 // 集中管理所有应用级事件名称，避免硬编码字符串
 // ================================================================
 
-import type { RouteConfig, Route } from '@/types/config';
+import type { Route } from '@/common/router/navigo/types';
+import type { RouteConfig } from '@/types/config';
 
 /**
  * 应用级事件常量

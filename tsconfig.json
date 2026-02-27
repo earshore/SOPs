@@ -34,7 +34,10 @@
       "@services/*": ["src/services/*"],
       "@components/*": ["src/components/*"],
       "@modules/*": ["src/modules/*"],
-      "@types/*": ["src/types/*"]
+      "@types/*": ["src/types/*"],
+      "@router/*": ["src/common/router/*"],
+      "@router/navigo/*": ["src/common/router/navigo/*"],
+      "@router/legacy/*": ["src/common/router/legacy/*"]
     },
     "allowJs": true,
     "checkJs": false,

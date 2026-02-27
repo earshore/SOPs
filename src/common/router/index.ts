@@ -1,38 +1,23 @@
 /**
  * index.ts - 路由系统统一导出
+ *
+ * 导出新的 Navigo 路由系统
  */
 
-// 先导入需要的模块
-import { 
-  routeMiddleware, 
-  createTitleMiddleware, 
-  createScrollMiddleware, 
-  createLoggerMiddleware 
-} from './RouteMiddleware';
+// 导出新的 Navigo 路由系统
+export * from './navigo';
 
-// 导出所有路由相关模块
-export { Router, router } from './Router';
-export { 
-  RouteGuardManager, 
-  routeGuard, 
-  createAuthGuard, 
-  createPreloadGuard, 
-  createValidationGuard 
-} from './RouteGuard';
-export { 
-  RouteMiddlewareManager, 
-  routeMiddleware, 
-  createTitleMiddleware, 
-  createAnalyticsMiddleware, 
-  createScrollMiddleware, 
-  createLoggerMiddleware, 
-  createLoadingMiddleware 
-} from './RouteMiddleware';
-export { 
-  RouteErrorHandlerManager as RouteErrorHandler, 
-  routeErrorHandler 
-} from './ErrorHandler';
-export { render404, renderError } from './NotFound';
+// 导出路由初始化函数
+export {
+  initRouter,
+  getRouter,
+  navigateTo,
+  getCurrentRoute,
+  hasRoute,
+} from './initRouter';
+
+// 导入用于向后兼容函数
+import { initRouter as initRouterFn } from './initRouter';
 
 /**
  * 路由系统初始化选项
@@ -47,28 +32,13 @@ export interface RouterSystemOptions {
 }
 
 /**
- * 初始化路由系统
- * @param options - 配置选项
+ * 初始化路由系统（向后兼容接口）
+ * @deprecated 使用 initRouter() 代替
  */
-export function initRouterSystem(options: RouterSystemOptions = {}): void {
-  const {
-    enableLogging = true,
-    enableScrollRestoration = true,
-    defaultTitle = 'Amazing Amazon Architect'
-  } = options;
+export function initRouterSystem(): void {
+  // eslint-disable-next-line no-console
+  console.warn('[Router] initRouterSystem() 已弃用，请使用 initRouter()');
 
-  // 1. 注册中间件
-  if (enableLogging) {
-    routeMiddleware.addAfterEach(createLoggerMiddleware(false));
-  }
-
-  if (enableScrollRestoration) {
-    const scrollMiddleware = createScrollMiddleware();
-    routeMiddleware.addBeforeEach(scrollMiddleware.beforeEach);
-    routeMiddleware.addAfterEach(scrollMiddleware.afterEach);
-  }
-
-  routeMiddleware.addAfterEach(createTitleMiddleware(defaultTitle));
-
-  console.log('✅ [Router] System initialized');
+  // 调用新的初始化函数
+  initRouterFn();
 }

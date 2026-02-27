@@ -164,7 +164,10 @@ export default defineConfig({
             '@services': resolve(__dirname, 'src/services'),
             '@modules': resolve(__dirname, 'src/modules'),
             '@components': resolve(__dirname, 'src/components'),
-            '@types': resolve(__dirname, 'src/types')
+            '@types': resolve(__dirname, 'src/types'),
+            '@router': resolve(__dirname, 'src/common/router'),
+            '@router/navigo': resolve(__dirname, 'src/common/router/navigo'),
+            '@router/legacy': resolve(__dirname, 'src/common/router/legacy')
         },
         // 支持 .ts 和 .js 文件扩展名解析
         extensions: ['.ts', '.js', '.json']

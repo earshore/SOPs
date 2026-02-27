@@ -343,65 +343,22 @@ export type {
 };
 
 // ==================== 路由系统类型 ====================
+// 注意：路由系统已迁移到 Navigo
+// 新的路由类型定义位于: src/common/router/navigo/types.ts
+// 以下类型保留用于向后兼容
 
 /**
- * 路由对象
- */
-export interface Route {
-  path: string;
-  config: RouteConfig;
-  state?: Record<string, any>;
-}
-
-/**
- * 路由守卫
- */
-export interface RouteGuard {
-  name: string;
-  check: (to: Route, from: Route | null) => Promise<boolean | RouteGuardResult>;
-}
-
-/**
- * 路由守卫结果
- */
-export interface RouteGuardResult {
-  redirect?: string;
-  reason?: string;
-}
-
-/**
- * 路由中间件
- */
-export type RouteMiddlewareFunction = (to: Route, from: Route | null) => void | Promise<void>;
-
-/**
- * 路由导航选项
- */
-export interface NavigationOptions {
-  updateHistory?: boolean;
-  replace?: boolean;
-  state?: Record<string, any>;
-}
-
-/**
- * 路由历史记录
- */
-export interface RouteHistory extends Route {
-  timestamp: number;
-}
-
-/**
- * 路由错误上下文
+ * @deprecated 使用 src/common/router/navigo/types.ts 中的类型
  */
 export interface RouteErrorContext {
   routeId?: string;
-  from?: Route | null;
-  to?: Route;
+  from?: any;
+  to?: any;
   action?: string;
   retryCount?: number;
 }
 
 /**
- * 路由错误处理器
+ * @deprecated 使用 src/common/router/navigo/types.ts 中的类型
  */
 export type RouteErrorHandler = (error: Error, context: RouteErrorContext) => void;

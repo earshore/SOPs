@@ -376,9 +376,7 @@ async function startAnalysis(): Promise<void> {
         showToast("分析完成", { type: 'success' });
 
         // 切换到 process 模块
-        if (window.switchTab) {
-            window.switchTab('kw_process');
-        }
+        await window.navigateTo('/kw_process');
     } catch (error) {
         showProgress(false);
         showToast("分析失败: " + (error as Error).message, { type: 'error' });

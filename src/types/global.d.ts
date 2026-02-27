@@ -41,7 +41,7 @@ declare global {
     
     // 工具函数
     showToast: (message: string, type?: 'success' | 'error' | 'warning' | 'info') => void;
-    switchTab: (tab: string, updateHistory?: boolean) => Promise<void>;
+    navigateTo: (path: string, options?: { replace?: boolean }) => Promise<boolean>;
     renderMegaMenu: () => void;
     renderSopsMegaMenu: () => void;
     renderHubMegaMenu: () => void;

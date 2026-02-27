@@ -16,8 +16,7 @@ export {
 
 // 导航和路由
 export {
-  switchTab,
-  initRouter,
+  updateUIForRoute,
   registerSidebarRenderer,
   toggleSOPGroup,
   scrollToSOPModule,
@@ -49,18 +48,21 @@ export {
   switchGuideTab
 } from './userGuide';
 
+// 新路由系统（推荐使用）
+export { navigateTo, getRouter, getCurrentRoute, hasRoute } from '../router/initRouter';
+
 // 向后兼容：注册到 window
 // ========================
 
-import { switchTab } from './navigation';
 import { renderMegaMenu, renderMoreMenu, renderHubMegaMenu, renderSopsMegaMenu } from './megaMenu';
 import { showToast } from './notifications';
 import { searchSOPs, clearSOPSearch, searchHub, clearHubSearch, searchSidebar, clearSidebarSearch } from './search';
+import { navigateTo } from '../router/initRouter';
 
 // 挂载到 window 供 legacy 代码使用
 declare global {
   interface Window {
-    switchTab: typeof switchTab;
+    navigateTo: typeof navigateTo;
     renderMegaMenu: typeof renderMegaMenu;
     renderSopsMegaMenu: typeof renderSopsMegaMenu;
     renderHubMegaMenu: typeof renderHubMegaMenu;
@@ -75,7 +77,7 @@ declare global {
   }
 }
 
-window.switchTab = switchTab;
+window.navigateTo = navigateTo;
 window.renderMegaMenu = renderMegaMenu;
 window.renderSopsMegaMenu = renderSopsMegaMenu;
 window.renderHubMegaMenu = renderHubMegaMenu;
@@ -97,7 +99,16 @@ import { toggleSOPGroup, scrollToSOPModule, scrollToHubModule, scrollToMoreModul
 import { openUserGuide, closeUserGuide, switchGuideTab } from './userGuide';
 
 registerActions({
-  'switch-tab': (params: Record<string, unknown>) => switchTab((params.tab as string) || ''),
+  // 路由导航（通过 data-action="switch-tab" data-tab="xxx" 触发）
+  'switch-tab': async (params: Record<string, unknown>) => {
+    const tab = (params.tab as string) || '';
+    if (!tab) {
+      console.warn('[ActionRegistry] switch-tab: missing tab parameter');
+      return;
+    }
+    const path = tab.startsWith('/') ? tab : `/${tab}`;
+    await navigateTo(path);
+  },
   'toggle-sop-group': (params: Record<string, unknown>) => toggleSOPGroup({ category: params.group as string || params.category as string }),
   'clear-sop-search': clearSOPSearch,
   'clear-hub-search': clearHubSearch,

@@ -87,6 +87,7 @@
         "@lhci/cli": "^0.15.1",
         "@playwright/test": "^1.58.2",
         "@types/marked": "^5.0.2",
+        "@types/navigo": "^8.1.1",
         "@types/node": "^20.0.0",
         "@types/pixelmatch": "^5.2.6",
         "@types/pngjs": "^6.0.5",
@@ -125,6 +126,7 @@
         "gridstack": "^12.4.2",
         "jsonrepair": "^3.13.2",
         "marked": "^17.0.1",
+        "navigo": "^8.11.1",
         "tailwind-merge": "^3.4.0",
         "zod": "^4.3.6",
         "zustand": "^5.0.11"

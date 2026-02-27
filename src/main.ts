@@ -96,7 +96,7 @@ import {
   openPerformanceMonitor // [NEW] 性能监控面板
 } from "./components/settings/systemSettings";
 
-import { switchTab, renderMegaMenu, renderSopsMegaMenu, renderHubMegaMenu, renderMoreMenu, showToast, initRouter } from "./common/ui";
+import { renderMegaMenu, renderSopsMegaMenu, renderHubMegaMenu, renderMoreMenu, showToast } from "./common/ui";
 import { APP_EVENTS } from './common/constants/eventConstants';
 import { initHomeSplash } from "./modules/home/homeDisplay";
 
@@ -285,16 +285,6 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
       moduleCssLoader.preloadHighPriorityModules();
     });
 
-    // 🎯 性能优化: 初始化路由预加载器
-    import('./common/router/RoutePreloader').then(({ routePreloader }) => {
-      routePreloader.initialize({
-        enableHoverPreload: true,
-        enableIdlePreload: true,
-        hoverDelay: 100,
-        highFrequencyRoutes: ['home', 'app_center_overview', 'sops_overview']
-      });
-    });
-
     // 🎯 性能优化: 初始化图片懒加载
     import('./common/utils/ImageLazyLoader').then(({ imageLazyLoader }) => {
       imageLazyLoader.initialize({
@@ -348,14 +338,13 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     // 初始化默认状态
     updateModelStatus();
 
-    // 初始化路由
-    initRouter();
-
     // 🎯 开发环境：初始化调试接口
     if (import.meta.env.DEV) {
       debugInterface.initialize();
       debugInterface.registerContainer(container);
-      debugInterface.registerRouter(await import('./common/router/Router').then(m => m.router));
+      // Router 已在 Bootstrap 中初始化
+      const router = container.resolve('router');
+      debugInterface.registerRouter(router);
     }
 
     console.log("✅ System: Ready");
@@ -383,14 +372,8 @@ type ToastType = 'success' | 'error' | 'warning' | 'info';
 
 registerActionsWithLegacy({
   // === Navigation 导航 ===
-  switchTab: (params: string | ActionParams) => {
-    // Handle both direct calls (legacy) and data-action calls
-    const tab = typeof params === 'string' ? params : (params.tab || params.param || '');
-    const updateHistory = typeof params === 'object' && params.updateHistory !== undefined 
-      ? params.updateHistory 
-      : true;
-    return switchTab(tab, updateHistory);
-  },
+  // switchTab 已废弃，使用 navigateTo 代替
+  
   // switchDataTab, // Owned by DataModule
   renderMegaMenu,
 
