@@ -33,9 +33,9 @@ export default {
                 info: '#3b82f6',             // blue-500
             },
             fontFamily: {
-                sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'system-ui', 'sans-serif'],
-                display: ['Space Grotesk', 'Inter', 'sans-serif'],
-                mono: ['Fira Code', 'Cascadia Code', 'JetBrains Mono', 'SF Mono', 'Consolas', 'monospace'],
+                sans: ['DM Sans', 'system-ui', '-apple-system', 'sans-serif'],
+                display: ['Syne', 'DM Sans', 'sans-serif'],
+                mono: ['JetBrains Mono', 'Fira Code', 'Cascadia Code', 'monospace'],
             },
             fontSize: {
                 '2xs': '0.625rem',   // 10px
