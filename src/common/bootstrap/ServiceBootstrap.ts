@@ -11,7 +11,6 @@ import { errorTracker } from '@/services/errorTracker';
 import { analyticsService } from '@/services/analyticsService';
 import { performanceStorage } from '@/services/performanceStorage';
 import { alertService, AlertType } from '@/services/alertService';
-import { performanceMonitor } from '../devtools/PerformanceMonitor';
 
 /**
  * 失败的服务信息
@@ -291,10 +290,7 @@ export class ServiceBootstrap {
         showBrowserNotification: false
       });
 
-      // 5. 性能监控面板
-      performanceMonitor.initialize();
-
-      // 6. 连接数据流: webVitals -> storage
+      // 5. 连接数据流: webVitals -> storage
       this._connectMonitoringDataFlow();
 
       console.log('✅ [Bootstrap] 监控服务初始化完成');

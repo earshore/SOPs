@@ -18,12 +18,6 @@ interface AnimationSettingsStore {
   /** 当前动画配置 */
   settings: AnimationSettings;
   
-  /** 当前FPS（由性能监控器更新） */
-  currentFPS: number;
-  
-  /** 是否处于性能降级模式 */
-  isPerformanceDegraded: boolean;
-  
   // Actions
   
   /**
@@ -82,18 +76,6 @@ interface AnimationSettingsStore {
   resetToDefaults: () => void;
   
   /**
-   * 更新当前FPS
-   * @param fps - 当前帧率
-   */
-  updateFPS: (fps: number) => void;
-  
-  /**
-   * 设置性能降级状态
-   * @param degraded - 是否降级
-   */
-  setPerformanceDegraded: (degraded: boolean) => void;
-  
-  /**
    * 从AnimationManager同步设置
    */
   syncFromManager: () => void;
@@ -108,8 +90,6 @@ export const animationSettingsStore = createStore<AnimationSettingsStore>()(
     (set, get) => ({
       // 初始状态：从AnimationManager获取
       settings: animationManager.getSettings(),
-      currentFPS: 60,
-      isPerformanceDegraded: false,
       
       // 启用所有动画
       enableAnimations: () => {
@@ -179,20 +159,7 @@ export const animationSettingsStore = createStore<AnimationSettingsStore>()(
       // 重置为默认配置
       resetToDefaults: () => {
         animationManager.resetToDefaults();
-        set({ 
-          settings: animationManager.getSettings(),
-          isPerformanceDegraded: false
-        });
-      },
-      
-      // 更新当前FPS
-      updateFPS: (fps) => {
-        set({ currentFPS: fps });
-      },
-      
-      // 设置性能降级状态
-      setPerformanceDegraded: (degraded) => {
-        set({ isPerformanceDegraded: degraded });
+        set({ settings: animationManager.getSettings() });
       },
       
       // 从AnimationManager同步设置
@@ -226,12 +193,6 @@ export const animationSelectors = {
   
   /** 是否尊重系统偏好 */
   respectSystemPreference: (state: AnimationSettingsStore) => state.settings.respectSystemPreference,
-  
-  /** 当前FPS */
-  currentFPS: (state: AnimationSettingsStore) => state.currentFPS,
-  
-  /** 是否性能降级 */
-  isPerformanceDegraded: (state: AnimationSettingsStore) => state.isPerformanceDegraded,
   
   /** 检查特定类别是否启用 */
   isCategoryEnabled: (category: AnimationCategory) => (state: AnimationSettingsStore) => 
@@ -280,55 +241,10 @@ export function subscribeToAnimationSettings(
 }
 
 /**
- * 订阅FPS变化
- * @param callback - 回调函数
- * @returns 取消订阅函数
- */
-export function subscribeToFPS(
-  callback: (fps: number) => void
-): () => void {
-  let previousFPS = animationSettingsStore.getState().currentFPS;
-  
-  return animationSettingsStore.subscribe((state) => {
-    const currentFPS = state.currentFPS;
-    if (currentFPS !== previousFPS) {
-      previousFPS = currentFPS;
-      callback(currentFPS);
-    }
-  });
-}
-
-/**
- * 订阅性能降级状态
- * @param callback - 回调函数
- * @returns 取消订阅函数
- */
-export function subscribeToPerformanceDegradation(
-  callback: (degraded: boolean) => void
-): () => void {
-  let previousDegraded = animationSettingsStore.getState().isPerformanceDegraded;
-  
-  return animationSettingsStore.subscribe((state) => {
-    const currentDegraded = state.isPerformanceDegraded;
-    if (currentDegraded !== previousDegraded) {
-      previousDegraded = currentDegraded;
-      callback(currentDegraded);
-    }
-  });
-}
-
-/**
  * 获取当前动画设置（快照）
  */
 export function getAnimationSettings(): AnimationSettings {
   return animationSettingsStore.getState().settings;
-}
-
-/**
- * 获取当前FPS（快照）
- */
-export function getCurrentFPS(): number {
-  return animationSettingsStore.getState().currentFPS;
 }
 
 /**

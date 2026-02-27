@@ -89,31 +89,6 @@ export interface StoredAnimationSettings {
 }
 
 /**
- * 性能监控数据接口
- */
-export interface PerformanceMetrics {
-  /** 当前FPS */
-  currentFPS: number;
-  
-  /** 平均FPS */
-  averageFPS: number;
-  
-  /** 最低FPS */
-  minFPS: number;
-  
-  /** 最高FPS */
-  maxFPS: number;
-  
-  /** 采样数量 */
-  sampleCount: number;
-}
-
-/**
  * 动画事件回调类型
  */
 export type AnimationCallback = () => void;
-
-/**
- * 性能降级回调类型
- */
-export type PerformanceDegradationCallback = (metrics: PerformanceMetrics) => void;
