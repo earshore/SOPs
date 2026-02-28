@@ -112,6 +112,10 @@ body::before {
   from { opacity: 0; transform: translateY(28px); }
   to { opacity: 1; transform: translateY(0); }
 }
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -170,6 +174,7 @@ body::before {
 }
 
 .animate-fade-up { animation: fadeUp .6s var(--ease) forwards; }
+.animate-fade-in-up { animation: fadeInUp .6s var(--ease) forwards; }
 .animate-scale-in { animation: scaleIn .4s var(--ease) forwards; }
 .delay-100 { animation-delay: .1s; }
 .delay-200 { animation-delay: .2s; }
