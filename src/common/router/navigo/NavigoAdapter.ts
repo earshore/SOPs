@@ -232,7 +232,9 @@ export class NavigoAdapter {
    * ```
    */
   async navigate(path: string, options: NavigateOptions = {}): Promise<boolean> {
-    console.log(`[NavigoAdapter] 🚀 navigate() called with path: ${path}`, options);
+    if (this.config.enableLogging) {
+      console.log(`[NavigoAdapter] 🚀 navigate() called with path: ${path}`, options);
+    }
     
     // 验证选项
     if (!isNavigateOptions(options)) {
@@ -241,22 +243,30 @@ export class NavigoAdapter {
 
     // 防止重复导航
     if (this.isNavigating) {
-      console.log('[NavigoAdapter] ⚠️ Navigation in progress, skipping');
+      if (this.config.enableLogging) {
+        console.log('[NavigoAdapter] ⚠️ Navigation in progress, skipping');
+      }
       this._log('Navigation in progress, skipping');
       return false;
     }
 
     this.isNavigating = true;
-    console.log('[NavigoAdapter] 🔒 isNavigating set to true');
+    if (this.config.enableLogging) {
+      console.log('[NavigoAdapter] 🔒 isNavigating set to true');
+    }
 
     try {
       // 解析别名
       const resolvedPath = this._resolveAlias(path);
-      console.log(`[NavigoAdapter] 🔗 Resolved path: ${resolvedPath}`);
+      if (this.config.enableLogging) {
+        console.log(`[NavigoAdapter] 🔗 Resolved path: ${resolvedPath}`);
+      }
 
       // 标准化路径
       const normalizedPath = this._normalizePath(resolvedPath);
-      console.log(`[NavigoAdapter] 📝 Normalized path: ${normalizedPath}`);
+      if (this.config.enableLogging) {
+        console.log(`[NavigoAdapter] 📝 Normalized path: ${normalizedPath}`);
+      }
 
       // 获取路由配置
       const config = this.routes.get(normalizedPath);
@@ -265,7 +275,9 @@ export class NavigoAdapter {
         this._log(`Route not found: ${normalizedPath}`, 'error');
         return false;
       }
-      console.log(`[NavigoAdapter] ✓ Route config found:`, config);
+      if (this.config.enableLogging) {
+        console.log(`[NavigoAdapter] ✓ Route config found:`, config);
+      }
 
       // 解析 URL 参数
       const currentUrl = window.location.href;
@@ -296,19 +308,25 @@ export class NavigoAdapter {
 
       // 执行 before 中间件
       if (!options.skipMiddleware) {
-        console.log('[NavigoAdapter] 🔄 Running before middleware...');
+        if (this.config.enableLogging) {
+          console.log('[NavigoAdapter] 🔄 Running before middleware...');
+        }
         const middlewareResult = await this.middlewareManager.runBefore(to, from);
         if (!middlewareResult) {
           console.warn('[NavigoAdapter] ⛔ Navigation blocked by middleware');
           this._log('Navigation blocked by middleware', 'warn');
           return false;
         }
-        console.log('[NavigoAdapter] ✓ Before middleware passed');
+        if (this.config.enableLogging) {
+          console.log('[NavigoAdapter] ✓ Before middleware passed');
+        }
       }
 
       // 执行守卫
       if (!options.skipGuards) {
-        console.log('[NavigoAdapter] 🛡️ Running guards...');
+        if (this.config.enableLogging) {
+          console.log('[NavigoAdapter] 🛡️ Running guards...');
+        }
         const guardResult = await this.guardManager.runGuards(to, from);
 
         if (!guardResult.allowed) {
@@ -317,33 +335,45 @@ export class NavigoAdapter {
 
           // 处理重定向
           if (guardResult.redirect) {
-            console.log(`[NavigoAdapter] 🔀 Redirecting to: ${guardResult.redirect}`);
+            if (this.config.enableLogging) {
+              console.log(`[NavigoAdapter] 🔀 Redirecting to: ${guardResult.redirect}`);
+            }
             this._log(`Redirecting to: ${guardResult.redirect}`);
             return this.navigate(guardResult.redirect, { ...options, skipGuards: false });
           }
 
           return false;
         }
-        console.log('[NavigoAdapter] ✓ Guards passed');
+        if (this.config.enableLogging) {
+          console.log('[NavigoAdapter] ✓ Guards passed');
+        }
       }
 
       // 更新当前路由
-      console.log('[NavigoAdapter] 📍 Updating current route');
+      if (this.config.enableLogging) {
+        console.log('[NavigoAdapter] 📍 Updating current route');
+      }
       this.currentRoute = to;
 
       // 同步到 Store
       if (this.storeSync) {
-        console.log('[NavigoAdapter] 💾 Syncing to store');
+        if (this.config.enableLogging) {
+          console.log('[NavigoAdapter] 💾 Syncing to store');
+        }
         this.storeSync.syncCurrentRoute(to);
       }
 
       // 记录历史
-      console.log('[NavigoAdapter] 📚 Recording history');
+      if (this.config.enableLogging) {
+        console.log('[NavigoAdapter] 📚 Recording history');
+      }
       this._recordHistory(to);
 
       // 更新浏览器历史
       if (options.updateHistory !== false) {
-        console.log('[NavigoAdapter] 🌐 Updating browser history');
+        if (this.config.enableLogging) {
+          console.log('[NavigoAdapter] 🌐 Updating browser history');
+        }
         if (options.replace) {
           this.navigo.navigate(normalizedPath, { historyAPIMethod: 'replaceState' });
         } else {
@@ -353,12 +383,18 @@ export class NavigoAdapter {
 
       // 执行 after 中间件
       if (!options.skipMiddleware) {
-        console.log('[NavigoAdapter] 🔄 Running after middleware...');
+        if (this.config.enableLogging) {
+          console.log('[NavigoAdapter] 🔄 Running after middleware...');
+        }
         await this.middlewareManager.runAfter(to, from);
-        console.log('[NavigoAdapter] ✓ After middleware completed');
+        if (this.config.enableLogging) {
+          console.log('[NavigoAdapter] ✓ After middleware completed');
+        }
       }
 
-      console.log(`[NavigoAdapter] ✅ Navigation completed: ${from?.path || 'null'} -> ${normalizedPath}`);
+      if (this.config.enableLogging) {
+        console.log(`[NavigoAdapter] ✅ Navigation completed: ${from?.path || 'null'} -> ${normalizedPath}`);
+      }
       this._log(`Navigated: ${from?.path || 'null'} -> ${normalizedPath}`);
 
       return true;
@@ -373,7 +409,9 @@ export class NavigoAdapter {
 
       return false;
     } finally {
-      console.log('[NavigoAdapter] 🔓 isNavigating set to false');
+      if (this.config.enableLogging) {
+        console.log('[NavigoAdapter] 🔓 isNavigating set to false');
+      }
       this.isNavigating = false;
 
       // 同步导航状态到 Store

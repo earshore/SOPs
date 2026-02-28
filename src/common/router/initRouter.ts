@@ -99,15 +99,21 @@ export function initRouter(): NavigoAdapter {
 
   routerInstance.useAfter(async (context, next) => {
     // After 中间件：更新 UI 状态
-    console.log(`[Middleware After] 🎯 Navigation complete: ${context.to.path}`);
+    if (import.meta.env.DEV) {
+      console.log(`[Middleware After] 🎯 Navigation complete: ${context.to.path}`);
+    }
     
     // 调用 UI 更新函数
     try {
       const { updateUIForRoute } = await import('../ui/navigation');
       const routeId = context.to.path.replace(/^\//, '') || 'home';
-      console.log(`[Middleware After] 🔄 Calling updateUIForRoute with routeId: ${routeId}`);
+      if (import.meta.env.DEV) {
+        console.log(`[Middleware After] 🔄 Calling updateUIForRoute with routeId: ${routeId}`);
+      }
       await updateUIForRoute(routeId);
-      console.log(`[Middleware After] ✓ UI update completed for: ${routeId}`);
+      if (import.meta.env.DEV) {
+        console.log(`[Middleware After] ✓ UI update completed for: ${routeId}`);
+      }
     } catch (error) {
       console.error('[initRouter] ❌ UI update failed:', error);
     }
@@ -141,14 +147,23 @@ export function initRouter(): NavigoAdapter {
 
   // 9. 处理根路径：如果当前是根路径，导航到默认路由
   const currentHash = window.location.hash.replace('#', '');
-  console.log('[initRouter] 🔍 Current URL hash:', currentHash);
-  console.log('[initRouter] 🔍 Full URL:', window.location.href);
+  
+  if (import.meta.env.DEV) {
+    console.log('[initRouter] 🔍 Current URL hash:', currentHash);
+    console.log('[initRouter] 🔍 Full URL:', window.location.href);
+  }
   
   if (!currentHash || currentHash === '/' || currentHash === '') {
-    console.log('[initRouter] ⚠️ Root path detected, will navigate to default route: /home');
+    if (import.meta.env.DEV) {
+      console.log('[initRouter] ⚠️ Root path detected, will navigate to default route: /home');
+    }
+    
     // 使用 requestAnimationFrame 确保 DOM 已完全渲染
     requestAnimationFrame(() => {
-      console.log('[initRouter] 🚀 Executing delayed navigation to /home');
+      if (import.meta.env.DEV) {
+        console.log('[initRouter] 🚀 Executing delayed navigation to /home');
+      }
+      
       if (routerInstance) {
         routerInstance.navigate('/home', {
           updateHistory: true,
@@ -157,7 +172,9 @@ export function initRouter(): NavigoAdapter {
       }
     });
   } else {
-    console.log('[initRouter] ✓ Non-root path detected, resolving current route:', currentHash);
+    if (import.meta.env.DEV) {
+      console.log('[initRouter] ✓ Non-root path detected, resolving current route:', currentHash);
+    }
     // 10. 启动路由系统（解析当前 URL）
     routerInstance.resolve();
   }

@@ -212,19 +212,14 @@ let currentActivePanel: string | null = null;
  * @internal 此函数仅供路由系统内部使用
  */
 export async function updateUIForRoute(routeId: string): Promise<void> {
-  console.log(`[updateUIForRoute] 🎯 Called with routeId: ${routeId}`);
   const cleanTab = String(routeId).trim();
-  console.log(`[updateUIForRoute] 📝 Cleaned tab: ${cleanTab}`);
 
   // 按需加载视图
   try {
-    console.log(`[updateUIForRoute] 🔄 Loading view for: ${cleanTab}`);
     await ensureViewLoaded(cleanTab);
-    console.log(`[updateUIForRoute] ✓ View loaded successfully`);
     
     // 等待 DOM 更新完成
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-    console.log(`[updateUIForRoute] ✓ DOM update completed`);
   } catch (err) {
     console.error("[Navigation] ❌ View lazy load failed:", err);
     showToast("页面资源加载失败，请重试", { type: 'error' });
@@ -232,14 +227,11 @@ export async function updateUIForRoute(routeId: string): Promise<void> {
   }
 
   // 更新全局状态
-  console.log(`[updateUIForRoute] 💾 Setting current tab in store: ${cleanTab}`);
   appStore.getState().setCurrentTab(cleanTab);
   const fullConfig = getRouteFullConfig(cleanTab);
-  console.log(`[updateUIForRoute] 📋 Full config:`, fullConfig);
 
   // 渲染侧边栏
   const targetModuleId = fullConfig ? fullConfig.module.id : null;
-  console.log(`[updateUIForRoute] 🔄 Rendering sidebar for module: ${targetModuleId}`);
   renderSidebar(targetModuleId);
 
   // 面板显隐
@@ -247,11 +239,12 @@ export async function updateUIForRoute(routeId: string): Promise<void> {
   if (fullConfig && fullConfig.route.panelId) {
     targetPanelId = fullConfig.route.panelId;
   }
-  console.log(`[updateUIForRoute] 🎯 Target panel ID: ${targetPanelId}`);
 
   // 主模块生命周期管理
   if (currentActivePanel && currentActivePanel !== targetPanelId) {
-    console.log(`[Navigation] 🔄 主模块切换: ${currentActivePanel} -> ${targetPanelId}`);
+    if (import.meta.env.DEV) {
+      console.log(`[Navigation] 🔄 主模块切换: ${currentActivePanel} -> ${targetPanelId}`);
+    }
     emitAppEvent(APP_EVENTS.MODULE_UNLOAD, {
       panelId: currentActivePanel,
       nextPanelId: targetPanelId
@@ -260,37 +253,34 @@ export async function updateUIForRoute(routeId: string): Promise<void> {
   currentActivePanel = targetPanelId;
 
   // 隐藏所有面板
-  console.log(`[updateUIForRoute] 🙈 Hiding all panels`);
   document.querySelectorAll(".panel").forEach(p => p.classList.add("hidden"));
 
   const targetPanel = getEl(targetPanelId);
   if (targetPanel) {
-    console.log(`[updateUIForRoute] ✓ Target panel found, showing: ${targetPanelId}`);
     targetPanel.classList.remove("hidden");
   } else {
     console.warn(`⚠️ [Navigation] 目标面板 [${targetPanelId}] 未找到，回退至 Home`);
     const home = getEl('panel-home');
     if (home) {
-      console.log(`[updateUIForRoute] 🏠 Showing home panel as fallback`);
       home.classList.remove("hidden");
     }
   }
 
   // 更新导航高亮
   if (fullConfig) {
-    console.log(`[updateUIForRoute] 🔄 Updating header nav`);
     updateHeaderNav(fullConfig);
   }
 
   // 分发路由变更事件
-  console.log(`[updateUIForRoute] 📢 Emitting ROUTE_CHANGED event`);
   emitAppEvent(APP_EVENTS.ROUTE_CHANGED, {
     routeId: cleanTab,
     moduleId: targetModuleId,
     config: fullConfig
   });
 
-  console.log(`📡 [Navigation] ✅ 路由切换事件已广播: ${cleanTab} (Module: ${targetModuleId})`);
+  if (import.meta.env.DEV) {
+    console.log(`📡 [Navigation] ✅ 路由切换事件已广播: ${cleanTab} (Module: ${targetModuleId})`);
+  }
 }
 
 // ========================
