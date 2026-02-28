@@ -138,17 +138,49 @@
       </div>
     </div>
     
-    <!-- Action Buttons -->
-    <div class="section-actions">
-      <button class="action-btn action-btn-secondary" data-action="amz_qalab_clearInput">
-        <i class="fa-solid fa-eraser"></i> 清空数据
-      </button>
-      <button class="action-btn action-btn-primary" id="btnAnalyze" data-action="amz_qalab_startAnalysis">
-        <i class="fa-solid fa-wand-magic-sparkles"></i> 智能分析并生成 Q&A
-      </button>
-    </div>
   </section>
 
+  <!-- ========== AI Analysis Action Section ========== -->
+  <div class="qa-analysis-action-section">
+    <div class="qa-analysis-card">
+      <!-- 背景装饰 -->
+      <div class="qa-analysis-bg-gradient"></div>
+      <div class="qa-analysis-bg-orb qa-orb-1"></div>
+      <div class="qa-analysis-bg-orb qa-orb-2"></div>
+      <div class="qa-analysis-bg-grid"></div>
+      
+      <!-- 内容 -->
+      <div class="qa-analysis-content">
+        <div class="qa-analysis-info">
+          <div class="qa-analysis-icon-wrap">
+            <div class="qa-analysis-icon">
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+            </div>
+            <div class="qa-analysis-icon-ring"></div>
+          </div>
+          <div class="qa-analysis-text">
+            <h3 class="qa-analysis-title">智能分析并生成 Q&A</h3>
+            <p class="qa-analysis-desc">
+              <i class="fa-solid fa-robot"></i>
+              基于竞品分析报告，AI 智能预判 Rufus 高频问题并生成多语言答复
+            </p>
+          </div>
+        </div>
+        
+        <div class="qa-analysis-actions">
+          <button class="action-btn action-btn-secondary" data-action="amz_qalab_clearInput">
+            <i class="fa-solid fa-eraser"></i>
+            <span>清空数据</span>
+          </button>
+          <button class="action-btn action-btn-primary action-btn-glow" id="btnAnalyze" data-action="amz_qalab_startAnalysis">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span>开始分析</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+    
   <!-- ========== Legacy Input (Hidden, for compatibility) ========== -->
   <textarea class="hidden" id="jsonInput"></textarea>
 
