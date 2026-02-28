@@ -145,7 +145,7 @@ export function initRouter(): NavigoAdapter {
     }
   });
 
-  // 9. 处理根路径：如果当前是根路径，导航到默认路由
+  // 9. 处理根路径：延迟导航直到视图加载完成
   const currentHash = window.location.hash.replace('#', '');
   
   if (import.meta.env.DEV) {
@@ -153,33 +153,19 @@ export function initRouter(): NavigoAdapter {
     console.log('[initRouter] 🔍 Full URL:', window.location.href);
   }
   
+  // 标记路由系统已初始化，但不立即导航
+  // 导航将在 main.ts 中 initViews() 完成后触发
   if (!currentHash || currentHash === '/' || currentHash === '') {
     if (import.meta.env.DEV) {
-      console.log('[initRouter] ⚠️ Root path detected, will navigate to default route: /home');
+      console.log('[initRouter] ⚠️ Root path detected, navigation will be triggered after views are loaded');
     }
-    
-    // 使用 requestAnimationFrame 确保 DOM 已完全渲染
-    requestAnimationFrame(() => {
-      if (import.meta.env.DEV) {
-        console.log('[initRouter] 🚀 Executing delayed navigation to /home');
-      }
-      
-      if (routerInstance) {
-        routerInstance.navigate('/home', {
-          updateHistory: true,
-          skipMiddleware: false,
-        });
-      }
-    });
   } else {
     if (import.meta.env.DEV) {
-      console.log('[initRouter] ✓ Non-root path detected, resolving current route:', currentHash);
+      console.log('[initRouter] ✓ Non-root path detected:', currentHash);
     }
-    // 10. 启动路由系统（解析当前 URL）
-    routerInstance.resolve();
   }
 
-  console.log('✅ [initRouter] Router system initialized successfully');
+  console.log('✅ [initRouter] Router system initialized successfully (navigation pending)');
 
   return routerInstance;
 }
@@ -224,6 +210,35 @@ export function destroyRouter(): void {
   }
 
   console.log('✓ [destroyRouter] Router system destroyed');
+}
+
+/**
+ * 触发初始路由导航
+ * 应在视图加载完成后调用
+ */
+export function triggerInitialNavigation(): void {
+  if (!routerInstance) {
+    console.error('[triggerInitialNavigation] Router not initialized');
+    return;
+  }
+
+  const currentHash = window.location.hash.replace('#', '');
+  
+  if (!currentHash || currentHash === '/' || currentHash === '') {
+    if (import.meta.env.DEV) {
+      console.log('[triggerInitialNavigation] 🚀 Navigating to default route: /home');
+    }
+    
+    routerInstance.navigate('/home', {
+      updateHistory: true,
+      skipMiddleware: false,
+    });
+  } else {
+    if (import.meta.env.DEV) {
+      console.log('[triggerInitialNavigation] 🚀 Resolving current route:', currentHash);
+    }
+    routerInstance.resolve();
+  }
 }
 
 /**

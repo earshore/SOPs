@@ -226,6 +226,15 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     await initViews();
     console.log("✅ Critical views loaded");
     
+    // 🔧 关键修复: 视图加载完成后，触发路由的初始导航
+    try {
+      const { triggerInitialNavigation } = await import('./common/router/initRouter');
+      triggerInitialNavigation();
+      console.log("✅ Initial navigation triggered");
+    } catch (e) {
+      console.error('❌ Initial navigation failed:', e);
+    }
+    
     // 初始化全局事件委托
     const { initGlobalEventDelegation } = await import('./common/utils/actionRegistry');
     initGlobalEventDelegation();
