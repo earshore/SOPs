@@ -30,10 +30,10 @@ import {
     switchDataTab,
     refreshDataPreview,
     triggerImport
-} from './actions';
-import { rufusSimulator } from './rufusSimulator';
+} from './components/actions';
+import { rufusSimulator } from './services/rufusSimulator';
 
-import './qalab.css';
+import './qalab_style.css';
 import '../master_analysis_style.css';
 
 /**
@@ -157,7 +157,7 @@ export async function mount(container: HTMLElement): Promise<void> {
                     qalabState.rufusMessages.push(welcomeMessage);
                     
                     // 动态导入 renderRufusMessages
-                    import('./actions').then(({ renderRufusMessages }) => {
+                    import('./components/actions').then(({ renderRufusMessages }) => {
                         renderRufusMessages();
                         console.log('[QALab] ✅ 已显示欢迎语');
                     });
@@ -198,6 +198,26 @@ export async function mount(container: HTMLElement): Promise<void> {
         
         // 7. 初始化数据预览
         refreshDataPreview();
+        
+        // 8. 确保按钮容器在数据预览渲染后仍然可见
+        // 使用 Promise.resolve() 确保在当前微任务队列清空后执行
+        Promise.resolve().then(() => {
+            const sectionActions = container.querySelector('.section-actions') as HTMLElement;
+            if (sectionActions) {
+                // 检查按钮容器的计算样式
+                const computedStyle = window.getComputedStyle(sectionActions);
+                const isHidden = computedStyle.display === 'none' || 
+                                computedStyle.visibility === 'hidden' || 
+                                computedStyle.opacity === '0';
+                
+                if (isHidden) {
+                    console.warn('[QALab] ⚠️ 检测到按钮容器被隐藏，强制显示');
+                    sectionActions.style.display = 'flex';
+                    sectionActions.style.visibility = 'visible';
+                    sectionActions.style.opacity = '1';
+                }
+            }
+        });
 
         console.log('[QALab] ✅ 子模块挂载成功');
     } catch (error) {

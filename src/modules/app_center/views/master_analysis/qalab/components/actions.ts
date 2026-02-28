@@ -4,13 +4,13 @@
  */
 
 import { appStore } from '@/stores/useAppStore';
-import { generateMultiLangQAs } from './qaData';
-import { LANGUAGES, CATEGORIES, MARKET_LANG_MAP } from './constants';
-import { downloadFile } from './utils';
-import { showToast } from '../../../../../common/ui/notifications';
+import { generateMultiLangQAs } from '../services/qaData';
+import { LANGUAGES, CATEGORIES, MARKET_LANG_MAP } from '../config/constants';
+import { downloadFile } from '../utils/utils';
+import { showToast } from '../../../../../../common/ui/notifications';
 import { renderResults, renderLangSelector, renderQAGrid } from './render';
-import { rufusSimulator } from './rufusSimulator';
-import { triggerFileImport } from './importHandler';
+import { rufusSimulator } from '../services/rufusSimulator';
+import { triggerFileImport } from '../services/importHandler';
 import { renderDataPreview, renderJSONPreview } from './dataPreview';
 
 // 获取 qalab 状态的辅助函数
@@ -749,7 +749,7 @@ export function clearRufusChat(): void {
  */
 export async function checkLLMConfiguration(): Promise<void> {
     try {
-        const { StorageService, STORAGE_KEYS } = await import('../../../../../services/storageService');
+        const { StorageService, STORAGE_KEYS } = await import('../../../../../../services/storageService');
         const activeProvider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER) as string | null;
         
         if (!activeProvider) {

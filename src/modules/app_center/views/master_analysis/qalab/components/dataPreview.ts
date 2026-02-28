@@ -3,8 +3,8 @@
  * 负责生成分析报告的预览卡片
  */
 
-import type { AnalysisReportData } from './importHandler';
-import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
+import type { AnalysisReportData } from '../services/importHandler';
+import { SafeRenderer } from '../../../../../../common/infrastructure/SafeRenderer';
 
 /**
  * 分析目标配置（与AI Analysis保持一致）

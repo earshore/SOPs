@@ -4,7 +4,7 @@
  * Toast 功能已迁移到全局 notifications 系统
  */
 
-import type { EventListenerRecord } from './types';
+import type { EventListenerRecord } from '../types';
 
 /**
  * 下载文件
