@@ -138,16 +138,22 @@
       </div>
     </div>
     
-    
     <!-- Action Buttons -->
-    <!-- <div class="section-actions">
-      <button class="btn btn-secondary" data-action="amz_qalab_clearInput">
+    <div class="section-actions">
+      <button data-action="amz_qalab_clearInput">
+        <i class="fa-solid fa-eraser"></i> 清空数据
+      </button>
+      <button id="btnAnalyze" data-action="amz_qalab_startAnalysis">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> 智能分析并生成 Q&A
+      </button>
+      
+      <!-- <button class="btn btn-secondary" data-action="amz_qalab_clearInput">
         <i class="fa-solid fa-eraser"></i> 清空数据
       </button>
       <button class="btn btn-primary btn-glow" id="btnAnalyze" data-action="amz_qalab_startAnalysis">
         <i class="fa-solid fa-wand-magic-sparkles"></i> 智能分析并生成 Q&A
-      </button>
-    </div> -->
+      </button> -->
+    </div>
   </section>
 
   <!-- ========== Legacy Input (Hidden, for compatibility) ========== -->
@@ -253,7 +259,7 @@
         <button class="btn btn-secondary btn-sm" data-action="amz_qalab_exportCSV">
           <i class="fa-solid fa-table"></i> CSV
         </button>
-        <button class="btn btn-accent btn-sm" data-action="amz_qalab_exportText">
+        <button class="btn btn-primary btn-sm" data-action="amz_qalab_exportText">
           <i class="fa-solid fa-file-lines"></i> 导出文本
         </button>
       </div>
