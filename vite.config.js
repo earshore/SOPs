@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
 import checker from 'vite-plugin-checker';
+import viteCompression from 'vite-plugin-compression';
 
 export default defineConfig({
     plugins: [
@@ -9,6 +10,24 @@ export default defineConfig({
                 tsconfigPath: 'tsconfig.json',
                 buildMode: false // 只在构建时检查,开发时跳过
             }
+        }),
+        // Gzip 压缩
+        viteCompression({
+            verbose: true,
+            disable: false,
+            threshold: 10240, // 大于 10KB 的文件才压缩
+            algorithm: 'gzip',
+            ext: '.gz',
+            deleteOriginFile: false
+        }),
+        // Brotli 压缩（更高压缩率）
+        viteCompression({
+            verbose: true,
+            disable: false,
+            threshold: 10240,
+            algorithm: 'brotliCompress',
+            ext: '.br',
+            deleteOriginFile: false
         })
     ],
     root: './',
@@ -108,7 +127,7 @@ export default defineConfig({
                 drop_console: true,
                 drop_debugger: true,
                 pure_funcs: ['console.log', 'console.info', 'console.debug'],
-                passes: 2,
+                passes: 3,
                 arrows: true,
                 booleans: true,
                 collapse_vars: true,
@@ -133,7 +152,11 @@ export default defineConfig({
                 conditionals: true,
                 dead_code: true,
                 evaluate: true,
-                inline: 2
+                inline: 3,
+                unsafe: true,
+                unsafe_comps: true,
+                unsafe_math: true,
+                unsafe_proto: true
             },
             mangle: {
                 safari10: true,
@@ -145,7 +168,7 @@ export default defineConfig({
             }
         },
         // Chunk大小警告阈值
-        chunkSizeWarningLimit: 500,
+        chunkSizeWarningLimit: 300,
         // CSS代码分割
         cssCodeSplit: true,
         // 启用CSS压缩 - 使用lightningcss获得更好的性能
