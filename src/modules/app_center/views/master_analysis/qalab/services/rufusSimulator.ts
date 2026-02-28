@@ -13,8 +13,8 @@
  * 使用 AI 模式：调用大模型智能分析（更智能、更懂用户意图）
  */
 
-import { callLLM, type ChatMessage } from '../../../../../services/llmService';
-import { StorageService, STORAGE_KEYS } from '../../../../../services/storageService';
+import { callLLM, type ChatMessage } from '../../../../../../services/llmService';
+import { StorageService, STORAGE_KEYS } from '../../../../../../services/storageService';
 
 export interface RufusMessage {
     role: 'user' | 'assistant';

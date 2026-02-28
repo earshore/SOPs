@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Amazing Amazon Architect</title>
+    <meta name="description" content="Amazing Amazon Architect - 专业的亚马逊运营 SOP 管理系统，提供智能化的流程管理、数据分析和运营工具，助力卖家提升运营效率。" />
+    <title>Amazing Amazon Architect - 亚马逊运营 SOP 管理系统</title>
 
     <!-- CSP已移至HTTP响应头 (public/_headers) 以避免DOM操作导致的问题 -->
 
@@ -12,6 +13,11 @@
 
     <link rel="preconnect" href="https://cdn.bootcdn.net" crossorigin>
     <link rel="dns-prefetch" href="https://cdn.bootcdn.net">
+    
+    <!-- 预加载关键资源 -->
+    <link rel="modulepreload" href="/src/main.ts">
+    <link rel="preload" href="/src/css/main.css" as="style">
+    
     <link rel="preconnect" href="https://api.openai.com" crossorigin>
     <link rel="dns-prefetch" href="https://api.openai.com">
     <link rel="preconnect" href="https://generativelanguage.googleapis.com" crossorigin>
@@ -21,10 +27,11 @@
     <link rel="preload" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.2/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet"></noscript>
 
-    <!-- Google Fonts: 独特字体组合 -->
+    <!-- Google Fonts: 独特字体组合 - 异步加载 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
 
     <!-- 关键内联样式 - 仅首屏必需 -->
     <style>
@@ -57,7 +64,7 @@
         html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; scroll-behavior: smooth; }
         body { 
             font-family: var(--font-sans); 
-            font-size: 14px; 
+            font-size: 16px; 
             line-height: 1.6; 
             color: var(--color-slate-700);
             background: var(--color-slate-50);
@@ -91,6 +98,58 @@
             position: absolute; width: 1px; height: 1px; 
             padding: 0; margin: -1px; overflow: hidden; 
             clip: rect(0,0,0,0); white-space: nowrap; border: 0; 
+        }
+        
+        /* 首屏关键样式 - Header */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: var(--z-header);
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .header-inner {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            padding: 0 2rem;
+            height: 64px;
+        }
+        
+        .logo-button {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            transition: background var(--duration-normal) var(--ease-smooth);
+        }
+        
+        .logo-button:hover {
+            background: var(--color-slate-50);
+        }
+        
+        /* 布局 */
+        .flex { display: flex; }
+        .flex-1 { flex: 1; }
+        .overflow-hidden { overflow: hidden; }
+        .relative { position: relative; }
+        
+        /* 加载动画 */
+        .skeleton {
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 0.5rem;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
     </style>
 

@@ -118,12 +118,12 @@ export function registerCoreServices(registry: ServiceRegistry): void {
     dependencies: [SERVICE_NAMES.EVENT_BUS]
   });
 
-  // Router - 路由器
+  // Router - 路由器（Navigo 适配器）
   registry.register({
     name: SERVICE_NAMES.ROUTER,
     factory: async () => {
-      const { router } = await import('@/common/router/Router');
-      return router;
+      const { initRouter } = await import('@/common/router/initRouter');
+      return initRouter();
     },
     lifetime: 'singleton',
     dependencies: [SERVICE_NAMES.EVENT_BUS]

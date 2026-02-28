@@ -3,8 +3,8 @@
  * 使用 SafeRenderer 进行安全渲染
  */
 
-import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
-import { LANGUAGES, CATEGORIES } from './constants';
+import { SafeRenderer } from '../../../../../../common/infrastructure/SafeRenderer';
+import { LANGUAGES, CATEGORIES } from '../config/constants';
 import { appStore } from '@/stores/useAppStore';
 
 // 获取 SafeRenderer 实例
@@ -16,141 +16,141 @@ const getQalabState = () => appStore.getState().qalab;
 /**
  * 渲染产品信息栏
  */
-export function renderProductBar(): void {
-    const container = document.getElementById('productBar');
-    if (!container) return;
+// export function renderProductBar(): void {
+//     const container = document.getElementById('productBar');
+//     if (!container) return;
 
-    const qalabState = getQalabState();
-    const metadata = qalabState.reportData?.metadata;
-    const title = metadata?.productTitle || '产品分析';
-    const asins = metadata?.asins || [];
+//     const qalabState = getQalabState();
+//     const metadata = qalabState.reportData?.metadata;
+//     const title = metadata?.productTitle || '产品分析';
+//     const asins = metadata?.asins || [];
 
-    // 使用 SafeRenderer 渲染动态内容
-    const template = `
-        <div class="product-bar-label">分析产品</div>
-        <div class="product-bar-title">{{title}}</div>
-        <div class="product-asins">
-            {{asins}}
-        </div>
-    `;
+//     // 使用 SafeRenderer 渲染动态内容
+//     const template = `
+//         <div class="product-bar-label">分析产品</div>
+//         <div class="product-bar-title">{{title}}</div>
+//         <div class="product-asins">
+//             {{asins}}
+//         </div>
+//     `;
     
-    const asinChips = asins.map((asin: string) => 
-        `<div class="asin-chip">${renderer.escapeHtml(asin)}</div>`
-    ).join('');
+//     const asinChips = asins.map((asin: string) => 
+//         `<div class="asin-chip">${renderer.escapeHtml(asin)}</div>`
+//     ).join('');
     
-    renderer.renderDynamic(container, template, {
-        title: title.substring(0, 150) + (title.length > 150 ? '...' : ''),
-        asins: asinChips
-    }, { sanitize: false }); // asins 已经手动转义
-}
+//     renderer.renderDynamic(container, template, {
+//         title: title.substring(0, 150) + (title.length > 150 ? '...' : ''),
+//         asins: asinChips
+//     }, { sanitize: false }); // asins 已经手动转义
+// }
 
 /**
  * 渲染统计卡片
  */
-export function renderStats(): void {
-    const container = document.getElementById('dashboardStats');
-    if (!container) return;
+// export function renderStats(): void {
+//     const container = document.getElementById('dashboardStats');
+//     if (!container) return;
 
-    const qalabState = getQalabState();
-    const totalQAs = qalabState.generatedQAs.length;
-    const categories = [...new Set(qalabState.generatedQAs.map((qa: any) => qa.category))];
-    const avgConfidence = totalQAs > 0 
-        ? (qalabState.generatedQAs.reduce((sum: any, qa: any) => sum + qa.confidence, 0) / totalQAs).toFixed(1)
-        : '0';
-    const languages = LANGUAGES.length;
+//     const qalabState = getQalabState();
+//     const totalQAs = qalabState.generatedQAs.length;
+//     const categories = [...new Set(qalabState.generatedQAs.map((qa: any) => qa.category))];
+//     const avgConfidence = totalQAs > 0 
+//         ? (qalabState.generatedQAs.reduce((sum: any, qa: any) => sum + qa.confidence, 0) / totalQAs).toFixed(1)
+//         : '0';
+//     const languages = LANGUAGES.length;
 
-    const ar = qalabState.reportData?.analysisReport || qalabState.reportData;
-    const criticalIssues = ar?.['fatal-flaws']?.critical_issues?.length || 0;
+//     const ar = qalabState.reportData?.analysisReport || qalabState.reportData;
+//     const criticalIssues = ar?.['fatal-flaws']?.critical_issues?.length || 0;
 
-    // 使用 SafeRenderer 渲染静态模板（无用户输入）
-    const html = `
-        <div class="stat-card purple animate-fade-up" style="animation-delay:0s">
-            <div class="stat-icon"><i class="fa-solid fa-comments"></i></div>
-            <div class="stat-value">${totalQAs}</div>
-            <div class="stat-label">Top Q&A</div>
-        </div>
-        <div class="stat-card green animate-fade-up" style="animation-delay:0.1s">
-            <div class="stat-icon"><i class="fa-solid fa-language"></i></div>
-            <div class="stat-value">${languages}</div>
-            <div class="stat-label">语言版本</div>
-        </div>
-        <div class="stat-card orange animate-fade-up" style="animation-delay:0.2s">
-            <div class="stat-icon"><i class="fa-solid fa-star"></i></div>
-            <div class="stat-value">${avgConfidence}</div>
-            <div class="stat-label">平均置信度</div>
-        </div>
-        <div class="stat-card blue animate-fade-up" style="animation-delay:0.3s">
-            <div class="stat-icon"><i class="fa-solid fa-layer-group"></i></div>
-            <div class="stat-value">${categories.length}</div>
-            <div class="stat-label">问题分类</div>
-        </div>
-        <div class="stat-card red animate-fade-up" style="animation-delay:0.4s">
-            <div class="stat-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
-            <div class="stat-value">${criticalIssues}</div>
-            <div class="stat-label">关键问题</div>
-        </div>
-    `;
-    renderer.renderTemplate(container, html);
-}
+//     // 使用 SafeRenderer 渲染静态模板（无用户输入）
+//     const html = `
+//         <div class="stat-card purple animate-fade-up" style="animation-delay:0s">
+//             <div class="stat-icon"><i class="fa-solid fa-comments"></i></div>
+//             <div class="stat-value">${totalQAs}</div>
+//             <div class="stat-label">Top Q&A</div>
+//         </div>
+//         <div class="stat-card green animate-fade-up" style="animation-delay:0.1s">
+//             <div class="stat-icon"><i class="fa-solid fa-language"></i></div>
+//             <div class="stat-value">${languages}</div>
+//             <div class="stat-label">语言版本</div>
+//         </div>
+//         <div class="stat-card orange animate-fade-up" style="animation-delay:0.2s">
+//             <div class="stat-icon"><i class="fa-solid fa-star"></i></div>
+//             <div class="stat-value">${avgConfidence}</div>
+//             <div class="stat-label">平均置信度</div>
+//         </div>
+//         <div class="stat-card blue animate-fade-up" style="animation-delay:0.3s">
+//             <div class="stat-icon"><i class="fa-solid fa-layer-group"></i></div>
+//             <div class="stat-value">${categories.length}</div>
+//             <div class="stat-label">问题分类</div>
+//         </div>
+//         <div class="stat-card red animate-fade-up" style="animation-delay:0.4s">
+//             <div class="stat-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+//             <div class="stat-value">${criticalIssues}</div>
+//             <div class="stat-label">关键问题</div>
+//         </div>
+//     `;
+//     renderer.renderTemplate(container, html);
+// }
 
 /**
  * 渲染洞察卡片
  */
-export function renderInsights(): void {
-    const container = document.getElementById('insightsStrip');
-    if (!container) return;
+// export function renderInsights(): void {
+//     const container = document.getElementById('insightsStrip');
+//     if (!container) return;
 
-    const qalabState = getQalabState();
-    const ar = qalabState.reportData?.analysisReport || qalabState.reportData;
-    const ff = ar?.['fatal-flaws'] || {};
-    const wm = ar?.['wow-moments'] || {};
+//     const qalabState = getQalabState();
+//     const ar = qalabState.reportData?.analysisReport || qalabState.reportData;
+//     const ff = ar?.['fatal-flaws'] || {};
+//     const wm = ar?.['wow-moments'] || {};
 
-    const insights: Array<{icon: string; iconClass: string; title: string; desc: string}> = [];
+//     const insights: Array<{icon: string; iconClass: string; title: string; desc: string}> = [];
 
-    if (ff.critical_issues && ff.critical_issues.length > 0) {
-        const topIssue = ff.critical_issues[0];
-        insights.push({
-            icon: 'hot',
-            iconClass: 'fa-solid fa-fire',
-            title: '高频致命缺陷',
-            desc: topIssue.issue.substring(0, 80) + (topIssue.issue.length > 80 ? '...' : '')
-        });
-    }
+//     if (ff.critical_issues && ff.critical_issues.length > 0) {
+//         const topIssue = ff.critical_issues[0];
+//         insights.push({
+//             icon: 'hot',
+//             iconClass: 'fa-solid fa-fire',
+//             title: '高频致命缺陷',
+//             desc: topIssue.issue.substring(0, 80) + (topIssue.issue.length > 80 ? '...' : '')
+//         });
+//     }
 
-    if (wm.moments && wm.moments.length > 0) {
-        insights.push({
-            icon: 'good',
-            iconClass: 'fa-solid fa-sparkles',
-            title: '惊喜时刻',
-            desc: wm.moments[0].moment_description.substring(0, 80)
-        });
-    }
+//     if (wm.moments && wm.moments.length > 0) {
+//         insights.push({
+//             icon: 'good',
+//             iconClass: 'fa-solid fa-sparkles',
+//             title: '惊喜时刻',
+//             desc: wm.moments[0].moment_description.substring(0, 80)
+//         });
+//     }
 
-    if (ff.overall_risk_level) {
-        insights.push({
-            icon: 'warn',
-            iconClass: 'fa-solid fa-shield-halved',
-            title: '风险评估',
-            desc: `整体风险等级: ${ff.overall_risk_level.toUpperCase()}`
-        });
-    }
+//     if (ff.overall_risk_level) {
+//         insights.push({
+//             icon: 'warn',
+//             iconClass: 'fa-solid fa-shield-halved',
+//             title: '风险评估',
+//             desc: `整体风险等级: ${ff.overall_risk_level.toUpperCase()}`
+//         });
+//     }
 
-    // 使用 SafeRenderer 渲染列表
-    renderer.renderList(
-        container,
-        insights,
-        (ins, i) => `
-            <div class="insight-card animate-fade-up" style="animation-delay:${i * 0.1}s">
-                <div class="insight-icon ${ins.icon}"><i class="${ins.iconClass}"></i></div>
-                <div>
-                    <div class="insight-title">${renderer.escapeHtml(ins.title)}</div>
-                    <div class="insight-desc">${renderer.escapeHtml(ins.desc)}</div>
-                </div>
-            </div>
-        `,
-        { sanitize: false, containerTag: 'div' }
-    );
-}
+//     // 使用 SafeRenderer 渲染列表
+//     renderer.renderList(
+//         container,
+//         insights,
+//         (ins, i) => `
+//             <div class="insight-card animate-fade-up" style="animation-delay:${i * 0.1}s">
+//                 <div class="insight-icon ${ins.icon}"><i class="${ins.iconClass}"></i></div>
+//                 <div>
+//                     <div class="insight-title">${renderer.escapeHtml(ins.title)}</div>
+//                     <div class="insight-desc">${renderer.escapeHtml(ins.desc)}</div>
+//                 </div>
+//             </div>
+//         `,
+//         { sanitize: false, containerTag: 'div' }
+//     );
+// }
 
 /**
  * 渲染语言选择器
@@ -336,9 +336,9 @@ export function renderResults(
     onLangChange: (lang: string) => void,
     onCategoryChange: (cat: string) => void
 ): void {
-    renderProductBar();
-    renderStats();
-    renderInsights();
+    // renderProductBar();
+    // renderStats();
+    // renderInsights();
     renderLangSelector(onLangChange);
     renderCategoryTabs(onCategoryChange);
     renderQAGrid(onToggle, onCopy, onEdit);

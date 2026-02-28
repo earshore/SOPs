@@ -45,7 +45,7 @@ const NAMING_CONVENTIONS: NamingConventions = {
   // 全局动作（无前缀）- UI 核心功能和系统级操作
   global: [
     // 核心导航
-    'switchTab',
+    'switch-tab', // 通过 ActionRegistry 事件委托，内部调用 navigateTo
     'renderMegaMenu',
     // 通用 UI
     'showToast',

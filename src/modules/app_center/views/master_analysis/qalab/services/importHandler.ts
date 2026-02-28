@@ -3,7 +3,7 @@
  * 负责处理分析报告JSON文件的导入、验证和解析
  */
 
-import { showToast } from '../../../../../common/ui';
+import { showToast } from '../../../../../../common/ui';
 import { appStore } from '@/stores/useAppStore';
 
 /**

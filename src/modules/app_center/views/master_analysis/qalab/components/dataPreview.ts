@@ -3,8 +3,8 @@
  * 负责生成分析报告的预览卡片
  */
 
-import type { AnalysisReportData } from './importHandler';
-import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
+import type { AnalysisReportData } from '../services/importHandler';
+import { SafeRenderer } from '../../../../../../common/infrastructure/SafeRenderer';
 
 /**
  * 分析目标配置（与AI Analysis保持一致）
@@ -187,11 +187,16 @@ function getFlag(site: string): string {
  * 渲染数据预览卡片（遍历所有分析目标）
  */
 export function renderDataPreview(reportData: AnalysisReportData | null): void {
+    console.log('[QALab] 📊 renderDataPreview 被调用');
+    console.log('[QALab] - reportData 存在:', !!reportData);
+    
     const container = document.getElementById('data-preview-content');
     if (!container) {
-        console.warn('[QALab] 数据预览容器未找到');
+        console.warn('[QALab] ⚠️ 数据预览容器未找到');
         return;
     }
+    
+    console.log('[QALab] ✅ 数据预览容器已找到');
     
     const renderer = SafeRenderer.getInstance();
     
@@ -220,6 +225,7 @@ export function renderDataPreview(reportData: AnalysisReportData | null): void {
             </div>
         `;
         renderer.renderTemplate(container, emptyHTML);
+        console.log('[QALab] ✅ 空状态已渲染');
         return;
     }
     
@@ -367,6 +373,7 @@ export function renderDataPreview(reportData: AnalysisReportData | null): void {
     `;
     
     renderer.renderTemplate(container, finalHTML);
+    console.log('[QALab] ✅ 数据预览已渲染，卡片数量:', cards.length);
 }
 
 /**

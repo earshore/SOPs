@@ -703,7 +703,7 @@ function updateMinimizedBadge(): void {
 /**
  * 同步到输入模块
  */
-function syncToInput(): void {
+async function syncToInput(): Promise<void> {
     let text = '';
 
     // 如果是翻译模式，只提取原文
@@ -736,9 +736,7 @@ function syncToInput(): void {
     }
 
     // 切换到输入模块
-    if (window.switchTab) {
-        window.switchTab('kw_input');
-    }
+    await window.navigateTo('/kw_input');
 
     showToast("已同步原文到输入模块");
 }

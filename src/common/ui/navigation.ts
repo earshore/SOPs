@@ -199,31 +199,31 @@ function updateHeaderNav(fullConfig: RouteFullConfig): void {
 }
 
 // ========================
-// 路由切换
+// 路由切换（已废弃，仅用于内部 UI 更新）
 // ========================
 
 // 记录当前激活的主模块 Panel
 let currentActivePanel: string | null = null;
 
 /**
- * 全能路由切换函数
+ * 内部 UI 更新函数
+ * 由新路由系统的中间件调用，负责更新侧边栏、面板显隐等 UI 状态
+ * 
+ * @internal 此函数仅供路由系统内部使用
  */
-export async function switchTab(tab: string, updateHistory: boolean = true): Promise<void> {
-  const cleanTab = String(tab).trim();
-
-  // 处理别名
-  if (cleanTab === 'amz_hub') {
-    switchTab('amz_hub_overview', updateHistory);
-    return;
-  }
+export async function updateUIForRoute(routeId: string): Promise<void> {
+  const cleanTab = String(routeId).trim();
 
   // 按需加载视图
   try {
     await ensureViewLoaded(cleanTab);
+    
+    // 等待 DOM 更新完成
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   } catch (err) {
-    console.error("View lazy load failed:", err);
+    console.error("[Navigation] ❌ View lazy load failed:", err);
     showToast("页面资源加载失败，请重试", { type: 'error' });
-    return;
+    throw err;
   }
 
   // 更新全局状态
@@ -242,7 +242,9 @@ export async function switchTab(tab: string, updateHistory: boolean = true): Pro
 
   // 主模块生命周期管理
   if (currentActivePanel && currentActivePanel !== targetPanelId) {
-    console.log(`[Router] 主模块切换: ${currentActivePanel} -> ${targetPanelId}`);
+    if (import.meta.env.DEV) {
+      console.log(`[Navigation] 🔄 主模块切换: ${currentActivePanel} -> ${targetPanelId}`);
+    }
     emitAppEvent(APP_EVENTS.MODULE_UNLOAD, {
       panelId: currentActivePanel,
       nextPanelId: targetPanelId
@@ -257,28 +259,16 @@ export async function switchTab(tab: string, updateHistory: boolean = true): Pro
   if (targetPanel) {
     targetPanel.classList.remove("hidden");
   } else {
-    console.warn(`⚠️ 目标面板 [${targetPanelId}] 未找到，回退至 Home`);
+    console.warn(`⚠️ [Navigation] 目标面板 [${targetPanelId}] 未找到，回退至 Home`);
     const home = getEl('panel-home');
-    if (home) home.classList.remove("hidden");
+    if (home) {
+      home.classList.remove("hidden");
+    }
   }
 
   // 更新导航高亮
   if (fullConfig) {
     updateHeaderNav(fullConfig);
-  }
-
-  // URL History Management
-  if (updateHistory) {
-    const newHash = cleanTab === 'home' ? '' : `#${cleanTab}`;
-    const currentHash = window.location.hash;
-
-    if (currentHash !== newHash) {
-      const newUrl = newHash === ''
-        ? window.location.pathname + window.location.search
-        : newHash;
-
-      history.pushState({ routeId: cleanTab }, '', newUrl);
-    }
   }
 
   // 分发路由变更事件
@@ -288,31 +278,8 @@ export async function switchTab(tab: string, updateHistory: boolean = true): Pro
     config: fullConfig
   });
 
-  console.log(`📡 路由切换事件已广播: ${cleanTab} (Module: ${targetModuleId})`);
-}
-
-/**
- * 初始化路由系统
- */
-export function initRouter(): void {
-  // 监听 popstate 事件（浏览器前进/后退）
-  window.addEventListener('popstate', (event) => {
-    const hash = window.location.hash.slice(1);
-    const target = hash || 'home';
-
-    console.log(`[Router] popstate detected, navigating to: ${target}`);
-
-    const routeId = event.state?.routeId || target;
-    switchTab(routeId, false);
-  });
-
-  // 处理页面首次加载的 Deep Link
-  const initialHash = window.location.hash.slice(1);
-  if (initialHash) {
-    console.log(`[Router] Booting with Deep Link: ${initialHash}`);
-    switchTab(initialHash, true);
-  } else {
-    switchTab('home', true);
+  if (import.meta.env.DEV) {
+    console.log(`📡 [Navigation] ✅ 路由切换事件已广播: ${cleanTab} (Module: ${targetModuleId})`);
   }
 }
 

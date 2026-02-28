@@ -62,16 +62,18 @@ export function renderHubMegaMenu(): void;
 export function renderSopsMegaMenu(): void;
 
 /**
- * 切换标签页
- * @param tab - 标签页ID或路由ID
- * @param updateHistory - 是否更新浏览器历史记录
+ * 更新路由对应的 UI 状态
+ * @param routeId - 路由ID
+ * @internal 此函数仅供路由系统内部使用
  */
-export function switchTab(tab: string, updateHistory?: boolean): Promise<void>;
+export function updateUIForRoute(routeId: string): Promise<void>;
 
 /**
- * 初始化路由系统
+ * 导航到指定路由
+ * @param path - 路由路径（如 '/home', '/scraper'）
+ * @param options - 导航选项
  */
-export function initRouter(): void;
+export function navigateTo(path: string, options?: { replace?: boolean }): Promise<boolean>;
 
 /**
  * 显示 Toast 提示消息

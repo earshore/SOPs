@@ -68,6 +68,8 @@ export class ModuleLoader {
   private moduleName: string;
   private currentModule: IModule | null;
   private routePrefixes: Set<string>;
+  private currentRouteId: string | null; // 🔧 新增：记录当前加载的路由ID
+  private isLoading: boolean; // 🔧 新增：标记是否正在加载
 
   constructor(config: ModuleLoaderConfig) {
     this.containerId = config.containerId;
@@ -76,6 +78,8 @@ export class ModuleLoader {
     this.loaderColor = config.loaderColor || 'blue';
     this.moduleName = config.moduleName || 'Module';
     this.currentModule = null;
+    this.currentRouteId = null; // 🔧 初始化
+    this.isLoading = false; // 🔧 初始化
     
     // 🎯 DI容器注入（预留用于未来的模块工厂函数）
     // const diContainer = config.container || globalContainer;
@@ -162,13 +166,14 @@ export class ModuleLoader {
   private _unmountCurrentModule(): void {
     if (this.currentModule && this.currentModule.unmount) {
       try {
-        console.log(`[${this.moduleName}] 🔄 卸载旧模块`);
+        console.log(`[${this.moduleName}] 🔄 卸载旧模块: ${this.currentRouteId}`);
         this.currentModule.unmount();
       } catch (unmountErr) {
         console.warn(`[${this.moduleName}] 卸载模块时出错:`, unmountErr);
       }
     }
     this.currentModule = null;
+    this.currentRouteId = null; // 🔧 清除路由ID记录
   }
 
   /**
@@ -213,34 +218,51 @@ export class ModuleLoader {
    * @param retryCount - 重试次数
    */
   async loadModule(routeId: string, retryCount: number = 0): Promise<void> {
+    // 🔧 防重复加载：如果正在加载相同的路由，直接返回
+    if (this.isLoading && this.currentRouteId === routeId) {
+      console.log(`[${this.moduleName}] ⚠️ 模块 ${routeId} 正在加载中，跳过重复加载`);
+      return;
+    }
+
+    // 🔧 防重复加载：如果已经加载了相同的路由，直接返回
+    if (this.currentRouteId === routeId && this.currentModule) {
+      console.log(`[${this.moduleName}] ⚠️ 模块 ${routeId} 已加载，跳过重复加载`);
+      return;
+    }
+
     console.log(`[${this.moduleName}] 🔄 开始加载子模块: ${routeId}`);
 
-    // 1. 等待容器渲染
-    const container = await this._waitForContainer(this.containerId);
-
-    if (!container) {
-      console.error(`[${this.moduleName}] 容器 #${this.containerId} 未找到 (超时)`);
-      const shell = document.getElementById(this.shellId);
-      if (shell) {
-        renderTimeout(shell);
-      }
-      return;
-    }
-
-    // 2. 卸载旧模块
-    this._unmountCurrentModule();
-
-    // 3. 显示加载动画
-    this._renderLoading(container);
-
-    // 4. 检查模块是否注册
-    const loader = this.moduleMap[routeId];
-    if (!loader) {
-      this._renderNotRegistered(container, routeId);
-      return;
-    }
+    // 🔧 标记正在加载
+    this.isLoading = true;
 
     try {
+      // 1. 等待容器渲染
+      const container = await this._waitForContainer(this.containerId);
+
+      if (!container) {
+        console.error(`[${this.moduleName}] 容器 #${this.containerId} 未找到 (超时)`);
+        const shell = document.getElementById(this.shellId);
+        if (shell) {
+          renderTimeout(shell);
+        }
+        return;
+      }
+
+      // 2. 卸载旧模块（只有在切换到不同模块时才卸载）
+      if (this.currentRouteId !== routeId) {
+        this._unmountCurrentModule();
+      }
+
+      // 3. 显示加载动画
+      this._renderLoading(container);
+
+      // 4. 检查模块是否注册
+      const loader = this.moduleMap[routeId];
+      if (!loader) {
+        this._renderNotRegistered(container, routeId);
+        return;
+      }
+
       // 5. 动态导入模块（集成性能监控）
       console.log(`[${this.moduleName}] 📦 动态导入模块: ${routeId}`);
       
@@ -260,6 +282,7 @@ export class ModuleLoader {
         
         await module.mount(container);
         this.currentModule = module;
+        this.currentRouteId = routeId; // 🔧 记录当前路由ID
         console.log(`[${this.moduleName}] ✅ 子模块加载成功: ${routeId}`);
       } else {
         throw new Error(`模块接口不完整: 缺少 mount() 函数`);
@@ -269,19 +292,28 @@ export class ModuleLoader {
 
       // 7. 自动重试机制（最多1次）
       if (retryCount < 1) {
-        // ✅ 安全: 静态HTML模板，无用户输入
-        container.innerHTML = `
-          <div class="p-10 text-center">
-            <i class="fas fa-circle-notch fa-spin text-orange-500"></i>
-            <span class="ml-2 text-slate-500">连接超时，正在重试...</span>
-          </div>
-        `;
+        const container = await this._waitForContainer(this.containerId);
+        if (container) {
+          // ✅ 安全: 静态HTML模板，无用户输入
+          container.innerHTML = `
+            <div class="p-10 text-center">
+              <i class="fas fa-circle-notch fa-spin text-orange-500"></i>
+              <span class="ml-2 text-slate-500">连接超时，正在重试...</span>
+            </div>
+          `;
+        }
         setTimeout(() => this.loadModule(routeId, retryCount + 1), 1000);
         return;
       }
 
       // 8. 渲染错误边界
-      this._renderErrorBoundary(container, routeId, err as Error);
+      const container = await this._waitForContainer(this.containerId);
+      if (container) {
+        this._renderErrorBoundary(container, routeId, err as Error);
+      }
+    } finally {
+      // 🔧 清除加载标记
+      this.isLoading = false;
     }
   }
 

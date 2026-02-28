@@ -132,9 +132,7 @@ export class HistoryPanel {
             console.log('[Scraper] 📊 已将"AI智能分析"报告加载到全局状态');
 
             // 3. 跳转到 AI智能分析页面查看报告
-            if (window.switchTab) {
-                await window.switchTab('ai_analysis', true);
-            }
+            await window.navigateTo('/ai_analysis');
 
             showToast("已跳转到 AI智能分析查看报告", { type: 'success' });
         } catch (error) {
