@@ -44,6 +44,11 @@
   animation: scaleIn var(--duration-normal) var(--ease-smooth) forwards;
 }
 
+.animate-fade-up {
+  animation: fadeInUp var(--duration-slow) var(--ease-smooth) forwards;
+  opacity: 0;
+}
+
 .delay-100 { animation-delay: .1s; }
 .delay-200 { animation-delay: .2s; }
 .delay-300 { animation-delay: .3s; }
