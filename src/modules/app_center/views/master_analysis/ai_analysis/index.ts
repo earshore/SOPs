@@ -33,6 +33,7 @@ export async function mount(container: HTMLElement): Promise<void> {
     
     // 2. 使用 SafeRenderer 渲染模板（静态模板，已审计）
     const renderer = SafeRenderer.getInstance();
+    container.classList.add('fade-in');
     renderer.renderTemplate(container, html);
 
     // 3. 使用 AlpineRegistry 注册组件（直接使用 Zustand 作为数据源）

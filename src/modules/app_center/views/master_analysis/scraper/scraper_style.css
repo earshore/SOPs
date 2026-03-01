@@ -25,30 +25,8 @@
 }
 
 /* ---- Keyframe Animations ---- */
-
-/* Fade in from below */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Fade in scale */
-@keyframes fadeInScale {
-  from {
-    opacity: 0;
-    transform: scale(0.92);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
+/* 注意：fadeInUp、fadeInScale 等通用动画已统一定义在全局 CSS（src/css/animations/keyframes.css） */
+/* 只保留模块特有的动画，避免覆盖全局动画 */
 
 /* Subtle float */
 @keyframes subtleFloat {
@@ -238,10 +216,7 @@
 }
 
 /* ---- Animation Utility Classes ---- */
-
-.animate-fade-in-up {
-  animation: fadeInUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
+/* 注意：通用动画辅助类（animate-fade-in-up、delay-100 等）已统一定义在全局 CSS（src/css/animations/keyframes.css） */
 
 .animate-fade-in-scale {
   animation: fadeInScale 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -258,15 +233,6 @@
 .animate-card-enter {
   animation: cardEnter 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
-
-/* Staggered delays */
-.delay-75  { animation-delay: 75ms; }
-.delay-100 { animation-delay: 100ms; }
-.delay-150 { animation-delay: 150ms; }
-.delay-200 { animation-delay: 200ms; }
-.delay-300 { animation-delay: 300ms; }
-.delay-400 { animation-delay: 400ms; }
-.delay-500 { animation-delay: 500ms; }
 
 /* ---- Floating Particles (Enhanced) ---- */
 

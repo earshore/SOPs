@@ -285,7 +285,7 @@ export async function startAnalysis(): Promise<void> {
                 if (currentStep) {
                     currentStep.classList.add('active');
                     const icon = currentStep.querySelector('i');
-                    if (icon) icon.className = 'fa-solid fa-circle-notch fa-spin';
+                    if (icon) icon.className = 'fa-solid fa-spinner fa-spin';
                 }
                 
                 if (bar) {
@@ -837,7 +837,7 @@ function renderRufusThinking(): void {
                 </span>
             </div>
             <div class="message-content" id="rufusThinkingContent">
-                <i class="fa-solid fa-circle-notch fa-spin"></i>
+                <i class="fa-solid fa-spinner fa-spin"></i>
                 正在思考...
             </div>
         `;
@@ -858,7 +858,7 @@ function updateRufusThinkingMessage(message: string): void {
     const thinkingContent = document.getElementById('rufusThinkingContent');
     if (thinkingContent) {
         thinkingContent.innerHTML = `
-            <i class="fa-solid fa-circle-notch fa-spin"></i>
+            <i class="fa-solid fa-spinner fa-spin"></i>
             ${message}
         `;
     }

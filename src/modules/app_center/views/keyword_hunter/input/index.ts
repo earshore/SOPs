@@ -464,6 +464,8 @@ export async function mount(container: HTMLElement): Promise<void> {
         );
         
         // 使用 SafeRenderer 渲染模板
+        // 添加淡入动画（在渲染前添加）
+        container.classList.add('fade-in');
         renderer.renderTemplate(container, html);
 
         // 2. 注册全局操作（用于 HTML onclick 兼容）

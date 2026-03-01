@@ -16,25 +16,8 @@
 }
 
 /* ========== 动画效果 ========== */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
+/* 注意：fadeInUp、fadeIn、scaleIn 等通用动画辅助类已统一定义在全局 CSS（src/css/animations/keyframes.css） */
+/* 只保留模块特有的动画，避免覆盖全局动画 */
 
 @keyframes pulse {
   0%, 100% {
@@ -72,35 +55,12 @@
   }
 }
 
-@keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.animate-fade-in-up {
-  animation: fadeInUp 0.5s ease-out forwards;
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.3s ease-out forwards;
-}
-
 .animate-pulse-glow {
   animation: pulse-glow 2s ease-in-out infinite;
 }
 
 .animate-float {
   animation: float 3s ease-in-out infinite;
-}
-
-.animate-scale-in {
-  animation: scaleIn 0.3s ease-out forwards;
 }
 
 /* ========== Shimmer 效果 ========== */

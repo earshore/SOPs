@@ -13,8 +13,9 @@ import { APP_EVENTS } from '@/common/constants/eventConstants';
 const mountInternal = async (container: HTMLElement): Promise<void> => {
   const html = await loadTemplate('src/modules/app_center/views/overview/template.html');
   // ✅ 安全: 静态HTML模板，无用户输入
-  container.innerHTML = html;
+  // 为overview页面添加淡入动画（在渲染前添加）
   container.classList.add('fade-in');
+  container.innerHTML = html;
 
   // 初始化事件监听
   initOverviewEvents(container);

@@ -269,7 +269,14 @@ export class ModuleLoader {
       // 🎯 阶段1: 性能监控 - 测量模块加载时间
       const module = await this._measureModuleLoad(routeId, loader);
 
-      // 6. 挂载新模块
+      // 6. 清空容器，准备挂载（移除加载动画，避免闪烁）
+      container.innerHTML = '';
+      
+      // 🎯 强制浏览器重排，确保动画能够重新触发
+      // 通过读取 offsetHeight 触发 reflow，这样新插入的内容会重新播放动画
+      void container.offsetHeight;
+      
+      // 7. 挂载新模块
       if (module.mount) {
         console.log(`[${this.moduleName}] 🔧 挂载新模块: ${routeId}`);
         

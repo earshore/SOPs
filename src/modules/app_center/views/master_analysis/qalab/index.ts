@@ -66,6 +66,7 @@ export async function mount(container: HTMLElement): Promise<void> {
         );
         
         // 使用 SafeRenderer 渲染模板（静态模板，已审计）
+        container.classList.add('fade-in');
         renderer.renderTemplate(container, html);
 
         // 3. 注册全局操作
@@ -194,10 +195,16 @@ export async function mount(container: HTMLElement): Promise<void> {
         };
         
         // 6. 模块挂载时检查是否有现有报告
-        autoLoadAnalysisReport();
+        // 延迟执行，避免干扰页面初始动画
+        requestAnimationFrame(() => {
+            autoLoadAnalysisReport();
+        });
         
         // 7. 初始化数据预览
-        refreshDataPreview();
+        // 延迟执行，避免干扰页面初始动画
+        requestAnimationFrame(() => {
+            refreshDataPreview();
+        });
         
         // 8. 确保按钮容器在数据预览渲染后仍然可见
         // 使用 Promise.resolve() 确保在当前微任务队列清空后执行

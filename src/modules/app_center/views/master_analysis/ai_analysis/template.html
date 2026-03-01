@@ -107,7 +107,7 @@
     </div>
 
     <!-- ASIN 选择和分析目标 -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8 animate-fade-in-up delay-100">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
       
       <!-- ASIN 输入区 -->
       <div class="lg:col-span-4">
@@ -355,7 +355,7 @@
 
     <!-- 提示词预览面板 -->
     <template x-if="selectedTargets.length > 0 && currentProducts.length > 0">
-      <div class="mb-8 animate-fade-in-up delay-200">
+      <div class="mb-8">
         <button @click="togglePromptPanel()" class="flex items-center gap-2 text-sm text-slate-600 hover:text-indigo-600 transition-colors mb-4">
           <i class="fa-solid fa-code"></i>
           <span class="font-medium" x-text="(showPromptPanel ? '隐藏' : '查看') + ' AI 提示词模板'"></span>
@@ -371,7 +371,7 @@
         </button>
         
         <template x-if="showPromptPanel">
-          <div class="space-y-3 animate-fade-in-up">
+          <div class="space-y-3">
             <template x-for="(targetId, index) in selectedTargets" :key="targetId">
               <div class="bg-slate-900 rounded-xl overflow-hidden border border-slate-700">
                 <button @click="togglePromptItem(index)" class="w-full flex items-center justify-between p-4 hover:bg-slate-800/50 transition-colors">
@@ -482,7 +482,7 @@
     </div>
 
     <!-- 分析按钮 -->
-    <div class="mb-10 animate-fade-in-up delay-300">
+    <div class="mb-10">
       <div class="relative overflow-hidden rounded-2xl shadow-xl">
         <div class="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600"></div>
         <div class="absolute inset-0 overflow-hidden">
@@ -618,7 +618,7 @@
 
     <!-- 分析结果展示 -->
     <template x-if="hasReport && results.length > 0">
-      <div class="space-y-10 animate-fade-in-up delay-400">
+      <div class="space-y-10">
         <!-- 结果 Header -->
         <div class="relative overflow-hidden rounded-2xl">
           <div class="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900"></div>
@@ -803,7 +803,7 @@
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <template x-for="(result, index) in listingsResults" :key="result.targetId">
-                <div class="group bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden hover:shadow-2xl hover:border-slate-300/60 transition-all duration-500 animate-fade-in-up" :style="'animation-delay: ' + (index * 100) + 'ms'"
+                <div class="group bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden hover:shadow-2xl hover:border-slate-300/60 transition-all duration-500"
                      x-data="{ resultIcon: getResultIcon(result.targetId), resultColor: getResultColor(result.targetId) }">
                   <!-- Header -->
                   <div class="relative overflow-hidden p-6 text-white"
@@ -919,7 +919,7 @@
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
               <template x-for="(result, index) in reviewsResults" :key="result.targetId">
-                <div class="group bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden hover:shadow-2xl hover:border-slate-300/60 transition-all duration-500 animate-fade-in-up" :style="'animation-delay: ' + (index * 100) + 'ms'"
+                <div class="group bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden hover:shadow-2xl hover:border-slate-300/60 transition-all duration-500"
                      x-data="{ resultIcon: getResultIcon(result.targetId), resultColor: getResultColor(result.targetId), resultColorEnd: (getResultColor(result.targetId) === 'amber' ? 'orange' : getResultColor(result.targetId) === 'orange' ? 'red' : getResultColor(result.targetId) === 'purple' ? 'indigo' : getResultColor(result.targetId) === 'teal' ? 'cyan' : getResultColor(result.targetId) === 'rose' ? 'pink' : 'indigo') }">
                   <!-- Header -->
                   <div class="relative overflow-hidden p-6 text-white"

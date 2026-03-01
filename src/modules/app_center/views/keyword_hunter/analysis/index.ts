@@ -165,7 +165,7 @@ async function runLLMAnalysis(): Promise<void> {
         const renderer = SafeRenderer.getInstance();
         const loadingHtml = `
             <div class="text-center py-10">
-                <i class="fas fa-circle-notch fa-spin text-purple-500 text-2xl"></i>
+                <i class="fas fa-spinner fa-spin text-purple-500 text-2xl"></i>
                 <p class="mt-2 text-slate-500">AI 正在深度分析您的 Listing ...</p>
             </div>
         `;
@@ -439,6 +439,8 @@ export async function mount(container: HTMLElement): Promise<void> {
         );
         
         // 使用 SafeRenderer 渲染模板
+        // 添加淡入动画（在渲染前添加）
+        container.classList.add('fade-in');
         renderer.renderTemplate(container, html);
 
         // 2. 注册全局操作（用于 HTML onclick 兼容）
