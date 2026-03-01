@@ -21,7 +21,8 @@
 /* ========================================
    1. 基础层 - Foundation
    ======================================== */
-@import './foundation/variables.css';
+@import './foundation/variables.generated.css';  /* 自动生成的设计令牌 */
+@import './foundation/variables.css';            /* 手动维护的变量（逐步迁移） */
 @import './foundation/reset.css';
 
 
@@ -36,6 +37,7 @@
 @import './components/forms.css';
 @import './components/header.css';
 @import './components/header-main.css';      /* 主页 Header 专用样式 */
+@import './components/icon-container.css';   /* Phase 3: 图标容器组件 */
 @import './components/loading.css';
 @import './components/markdown.css';
 @import './components/mega-menu.css';
@@ -43,6 +45,7 @@
 @import './components/scrollbar.css';
 @import './components/status.css';
 @import './components/tabs.css';
+@import './components/timeline.css';         /* Phase 3: 时间线组件 */
 @import './components/toast.css';
 
 
@@ -62,6 +65,7 @@
 /* ========================================
    5. 工具层 - Utilities
    ======================================== */
+@import './utilities/containers.css';        /* Phase 3: 容器工具类 */
 @import './utilities/transitions.css';
 @import './utilities/animation-controls.css';
 @import './utilities/interactive.css';

@@ -2,29 +2,16 @@
  * SOPs Module Styles
  * 仅包含 SOPs 模块特有的样式
  * 通用组件样式已提取到 src/css/components/
+ * 
+ * Phase 3 优化:
+ * - 时间线样式已移至 src/css/components/timeline.css
+ * - 容器样式使用 .module-container 工具类
  */
-
-/* ==================== 容器样式 ==================== */
-.sop-overview-container,
-.sop-module-section,
-#sops_content_area > div {
-  max-width: 1450px;
-  margin: 0 auto;
-  padding: 2rem 1rem;
-}
-
-@media (max-width: 768px) {
-  .sop-overview-container,
-  .sop-module-section,
-  #sops_content_area > div {
-    padding: 1.5rem 0.75rem;
-  }
-}
 
 /* ==================== SOP 卡片特有样式 ==================== */
 .sop-card {
   background: white;
-  border-radius: var(--radius-xl);
+  border-radius: var(--rounded-xl);
   border: 1px solid var(--color-slate-200);
   padding: var(--spacing-lg);
   transition: all var(--duration-slow) var(--ease-smooth);
@@ -38,7 +25,7 @@
 
 .sop-card:hover {
   border-color: var(--color-blue-500);
-  box-shadow: 0 10px 40px -10px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 10px 40px -10px var(--color-primary-light);
   transform: translateY(-2px);
 }
 
@@ -50,10 +37,11 @@
 }
 
 /* ==================== SOP 图标容器 ==================== */
+/* 使用 .icon-container 替代 */
 .sop-icon-container {
   width: 48px;
   height: 48px;
-  border-radius: var(--radius-lg);
+  border-radius: var(--rounded-lg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -69,105 +57,37 @@
 .sop-status-badge {
   font-size: 10px;
   padding: 2px 8px;
-  border-radius: var(--radius-full);
+  border-radius: var(--rounded-full);
   font-weight: 500;
 }
 
 .sop-status-active {
-  background: #dcfce7;
-  color: #16a34a;
+  background: var(--color-green-100);
+  color: var(--color-green-600);
 }
 
 .sop-status-draft {
-  background: #fef3c7;
-  color: #d97706;
+  background: var(--color-amber-100);
+  color: var(--color-amber-600);
 }
 
 .sop-status-pending {
-  background: #e0e7ff;
-  color: #4f46e5;
+  background: var(--color-indigo-100);
+  color: var(--color-indigo-600);
 }
 
 /* ==================== SOP 详情视图 ==================== */
 .sop-detail-header {
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  border-radius: var(--radius-xl);
+  background: linear-gradient(135deg, var(--color-slate-50) 0%, var(--color-slate-200) 100%);
+  border-radius: var(--rounded-xl);
   padding: 2rem;
   margin-bottom: 2rem;
-}
-
-/* ==================== 时间线样式 ==================== */
-.sop-timeline {
-  position: relative;
-  padding-left: 2rem;
-}
-
-.sop-timeline::before {
-  content: '';
-  position: absolute;
-  left: 7px;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: linear-gradient(180deg, var(--color-blue-500), var(--color-purple-600));
-}
-
-.sop-timeline-item {
-  position: relative;
-  padding-bottom: 2rem;
-}
-
-.sop-timeline-item:last-child {
-  padding-bottom: 0;
-}
-
-.sop-timeline-dot {
-  position: absolute;
-  left: -25px;
-  top: 0;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--color-blue-500);
-  border: 3px solid white;
-  box-shadow: 0 0 0 2px var(--color-blue-500);
-}
-
-.sop-timeline-dot.completed {
-  background: #22c55e;
-  box-shadow: 0 0 0 2px #22c55e;
-}
-
-.sop-timeline-dot.pending {
-  background: white;
-  box-shadow: 0 0 0 2px var(--color-slate-400);
-}
-
-/* ==================== 动画 ==================== */
-.sop-fade-in {
-  animation: fadeIn 0.4s var(--ease-out) forwards;
-}
-
-.sop-module-highlight {
-  animation: sopModuleHighlight 2s var(--ease-out);
-}
-
-@keyframes sopModuleHighlight {
-  0% {
-    background-color: transparent;
-  }
-  10% {
-    background-color: rgba(59, 130, 246, 0.1);
-  }
-  100% {
-    background-color: transparent;
-  }
 }
 
 /* ==================== 分类过滤标签 ==================== */
 .sop-category-tab {
   padding: 0.5rem 1rem;
-  border-radius: var(--radius-full);
+  border-radius: var(--rounded-full);
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--color-slate-500);
@@ -192,14 +112,14 @@
 .sop-search-box {
   background: white;
   border: 1px solid var(--color-slate-200);
-  border-radius: var(--radius-lg);
+  border-radius: var(--rounded-lg);
   padding: 0.75rem 1rem;
   transition: all var(--duration-normal) var(--ease-smooth);
 }
 
 .sop-search-box:focus-within {
   border-color: var(--color-blue-500);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
 }
 
 .sop-search-box input {

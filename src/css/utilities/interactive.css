@@ -60,7 +60,7 @@
   color: white;
   font-size: 0.6875rem;
   font-weight: 600;
-  border-radius: var(--radius-sm, 4px);
+  border-radius: var(--rounded-sm, 4px);
   white-space: nowrap;
   pointer-events: none;
   opacity: 0;
@@ -358,7 +358,7 @@
 .drag-placeholder {
   border: 2px dashed var(--color-primary, #3b82f6);
   background: var(--color-primary-light, rgba(59, 130, 246, 0.04));
-  border-radius: var(--radius-md, 8px);
+  border-radius: var(--rounded-md, 8px);
   opacity: 0.6;
 }
 
@@ -366,7 +366,7 @@
 .drag-handle {
   cursor: grab;
   padding: 4px;
-  border-radius: var(--radius-sm, 4px);
+  border-radius: var(--rounded-sm, 4px);
   color: var(--color-text-tertiary, #9ca3af);
   touch-action: none;
   transition:
@@ -387,7 +387,7 @@
 /* --- 拖拽目标区域 --- */
 .drop-zone {
   border: 2px dashed var(--color-border-default, rgba(0, 0, 0, 0.1));
-  border-radius: var(--radius-lg, 12px);
+  border-radius: var(--rounded-lg, 12px);
   padding: var(--spacing-xl, 32px);
   text-align: center;
   transition:
@@ -505,7 +505,7 @@
   color: white;
   font-weight: 600;
   font-size: 0.875rem;
-  border-radius: 0 0 var(--radius-md, 8px) var(--radius-md, 8px);
+  border-radius: 0 0 var(--rounded-md, 8px) var(--rounded-md, 8px);
   z-index: var(--z-max, 9999);
   transition: top var(--duration-fast, 200ms) var(--ease-smooth);
 }
@@ -1004,7 +1004,7 @@
 
 /* --- 箭头键导航高亮 --- */
 .nav-focus {
-  border-radius: var(--radius-sm, 4px);
+  border-radius: var(--rounded-sm, 4px);
   transition: background-color var(--duration-fast, 200ms) var(--ease-smooth);
 }
 

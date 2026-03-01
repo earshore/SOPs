@@ -30,7 +30,7 @@
 .card {
   --card-bg: #ffffff;
   --card-border: var(--color-border-light, rgba(0, 0, 0, 0.06));
-  --card-radius: var(--radius-xl, 16px);
+  --card-radius: var(--rounded-xl, 16px);
   --card-padding: var(--spacing-lg, 24px);
   --card-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04));
   --card-shadow-hover: 0 10px 40px -10px rgba(59, 130, 246, 0.15),
@@ -197,7 +197,7 @@
    ======================================== */
 .card-icon {
   --icon-size: 48px;
-  --icon-radius: var(--radius-lg, 12px);
+  --icon-radius: var(--rounded-lg, 12px);
 
   width: var(--icon-size);
   height: var(--icon-size);
@@ -218,19 +218,19 @@
 /* 图标尺寸变体 */
 .card-icon--sm {
   --icon-size: 36px;
-  --icon-radius: var(--radius-md, 8px);
+  --icon-radius: var(--rounded-md, 8px);
   font-size: 1rem;
 }
 
 .card-icon--lg {
   --icon-size: 56px;
-  --icon-radius: var(--radius-xl, 16px);
+  --icon-radius: var(--rounded-xl, 16px);
   font-size: 1.5rem;
 }
 
 .card-icon--xl {
   --icon-size: 72px;
-  --icon-radius: var(--radius-xl, 16px);
+  --icon-radius: var(--rounded-xl, 16px);
   font-size: 2rem;
 }
 
@@ -531,7 +531,7 @@
 .card-drag-handle {
   cursor: grab;
   padding: 4px;
-  border-radius: var(--radius-sm, 4px);
+  border-radius: var(--rounded-sm, 4px);
   color: var(--color-text-tertiary, #9ca3af);
   transition: color var(--duration-fast, 200ms) var(--ease-smooth);
 }
@@ -786,7 +786,7 @@
   font-size: 0.75rem;
   font-weight: 600;
   padding: 2px 8px;
-  border-radius: var(--radius-full, 9999px);
+  border-radius: var(--rounded-full, 9999px);
 }
 
 .card-stat-trend--up {
@@ -1077,7 +1077,7 @@
 
 .card-skeleton-rect {
   aspect-ratio: 16 / 9;
-  border-radius: var(--radius-md, 8px);
+  border-radius: var(--rounded-md, 8px);
   background: var(--color-bg-tertiary, #f3f4f6);
   position: relative;
   overflow: hidden;
@@ -1245,7 +1245,7 @@
 @media (max-width: 768px) {
   .card {
     --card-padding: var(--spacing-md, 16px);
-    --card-radius: var(--radius-lg, 12px);
+    --card-radius: var(--rounded-lg, 12px);
   }
 
   .card-spacious {

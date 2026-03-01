@@ -13,15 +13,15 @@
 }
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
-  border-radius: 10px;
+  border-radius: var(--rounded-lg);
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #cbd5e1, #94a3b8);
-  border-radius: 10px;
-  transition: background 0.3s;
+  background: linear-gradient(180deg, var(--color-slate-300), var(--color-slate-400));
+  border-radius: var(--rounded-lg);
+  transition: background var(--duration-normal);
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #94a3b8, #64748b);
+  background: linear-gradient(180deg, var(--color-slate-400), var(--color-slate-500));
 }
 
 /* ---- Keyframe Animations ---- */
@@ -219,19 +219,19 @@
 /* 注意：通用动画辅助类（animate-fade-in-up、delay-100 等）已统一定义在全局 CSS（src/css/animations/keyframes.css） */
 
 .animate-fade-in-scale {
-  animation: fadeInScale 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: fadeInScale var(--duration-slower) var(--ease-smooth) both;
 }
 
 .animate-float {
-  animation: subtleFloat 4s ease-in-out infinite;
+  animation: subtleFloat 4s var(--ease-in-out) infinite;
 }
 
 .animate-pulse-glow {
-  animation: pulseGlow 3s ease-in-out infinite;
+  animation: pulseGlow 3s var(--ease-in-out) infinite;
 }
 
 .animate-card-enter {
-  animation: cardEnter 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: cardEnter var(--duration-slower) var(--ease-smooth) both;
 }
 
 /* ---- Floating Particles (Enhanced) ---- */
@@ -242,20 +242,20 @@
   pointer-events: none;
 }
 .particle--1 {
-  animation: particleDrift1 6s ease-in-out infinite;
+  animation: particleDrift1 6s var(--ease-in-out) infinite;
 }
 .particle--2 {
-  animation: particleDrift2 8s ease-in-out infinite;
+  animation: particleDrift2 8s var(--ease-in-out) infinite;
 }
 .particle--3 {
-  animation: particleDrift3 7s ease-in-out infinite;
+  animation: particleDrift3 7s var(--ease-in-out) infinite;
 }
 
 /* ---- Dot Grid Background ---- */
 .dot-grid-bg {
-  background-image: radial-gradient(circle, #0ea5e9 1px, transparent 1px);
+  background-image: radial-gradient(circle, var(--color-sky-500) 1px, transparent 1px);
   background-size: 24px 24px;
-  animation: dotGridPulse 6s ease-in-out infinite;
+  animation: dotGridPulse 6s var(--ease-in-out) infinite;
 }
 
 /* ---- Banner Gradient Animation ---- */
@@ -266,12 +266,12 @@
     rgba(239, 246, 255, 0.6) 60%, 
     rgba(236, 254, 255, 0.4) 100%);
   background-size: 200% 200%;
-  animation: gradientShift 8s ease-in-out infinite;
+  animation: gradientShift 8s var(--ease-in-out) infinite;
 }
 
 /* ---- Glass Morphism Card ---- */
 .glass-card {
-  background: rgba(255, 255, 255, 0.85);
+  background: var(--color-white);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -279,18 +279,18 @@
 
 /* ---- Enhanced Card Styles ---- */
 .card-elevated {
-  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: all var(--duration-normal) var(--ease-smooth);
 }
 .card-elevated:hover {
   transform: translateY(-2px);
   box-shadow: 
-    0 12px 28px -8px rgba(0, 0, 0, 0.08),
-    0 4px 10px -4px rgba(0, 0, 0, 0.04);
+    0 12px 28px -8px var(--color-black-alpha-10),
+    0 4px 10px -4px var(--color-black-alpha-5);
 }
 
 /* ---- Site Selection Buttons ---- */
 .site-btn {
-  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: all var(--duration-fast) var(--ease-smooth);
   position: relative;
   overflow: visible;
 }
@@ -300,8 +300,8 @@
   inset: 0;
   border-radius: inherit;
   opacity: 0;
-  transition: opacity 0.3s;
-  background: radial-gradient(circle at center, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
+  transition: opacity var(--duration-normal);
+  background: radial-gradient(circle at center, var(--color-primary-light) 0%, transparent 70%);
   z-index: 1;
 }
 .site-btn:hover::after {
@@ -311,7 +311,7 @@
   transform: scale(0.95);
 }
 .site-btn .site-flag {
-  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform var(--duration-normal) var(--ease-smooth);
   position: relative;
   z-index: 2;
 }
@@ -319,12 +319,12 @@
   transform: scale(1.15) translateY(-1px);
 }
 .site-btn.selected .site-flag {
-  animation: iconBounce 0.4s ease-out;
+  animation: iconBounce var(--duration-slow) var(--ease-out);
 }
 
 /* ---- Selected Check Badge ---- */
 .site-check-badge {
-  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all var(--duration-fast) var(--ease-spring);
   transform: scale(0);
   z-index: 20;
 }
@@ -337,21 +337,21 @@
   position: relative;
   width: 48px;
   height: 26px;
-  background: #e2e8f0;
+  background: var(--color-slate-200);
   border-radius: 9999px;
-  transition: background 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: background var(--duration-normal) var(--ease-smooth);
   cursor: pointer;
   flex-shrink: 0;
 }
 .toggle-track.active {
-  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  background: linear-gradient(135deg, var(--color-blue-500), var(--color-indigo-500));
 }
 .toggle-track.active::before {
   content: '';
   position: absolute;
   inset: -3px;
   border-radius: 9999px;
-  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  background: linear-gradient(135deg, var(--color-blue-500), var(--color-indigo-500));
   opacity: 0.2;
   filter: blur(4px);
 }
@@ -363,8 +363,8 @@
   height: 20px;
   background: white;
   border-radius: 50%;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 1px 4px var(--color-black-alpha-20);
+  transition: transform var(--duration-normal) var(--ease-spring);
 }
 .toggle-track.active .toggle-thumb {
   transform: translateX(22px);
@@ -374,7 +374,7 @@
 .btn-start {
   position: relative;
   overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: all var(--duration-slow) var(--ease-smooth);
 }
 .btn-start::before {
   content: '';
@@ -389,7 +389,7 @@
     rgba(255, 255, 255, 0.12) 50%, 
     transparent 100%
   );
-  transition: left 0.6s ease;
+  transition: left var(--duration-slower) ease;
 }
 .btn-start:hover::before {
   left: 100%;
@@ -398,7 +398,7 @@
   transform: translateY(-2px) scale(1.005);
   box-shadow: 
     0 16px 32px -8px rgba(59, 130, 246, 0.35),
-    0 8px 16px -8px rgba(59, 130, 246, 0.2);
+    0 8px 16px -8px var(--color-primary-light);
 }
 .btn-start:not(:disabled):active {
   transform: translateY(0) scale(0.98);
@@ -415,20 +415,20 @@
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.3);
   transform: scale(0);
-  animation: ripple 0.6s linear;
+  animation: ripple var(--duration-slower) linear;
   pointer-events: none;
 }
 
 /* ---- Task Cards ---- */
 .task-card {
-  animation: cardEnter 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
-  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: cardEnter var(--duration-slow) var(--ease-smooth) both;
+  transition: all var(--duration-normal) var(--ease-smooth);
 }
 .task-card:hover {
   transform: translateY(-1px);
 }
 .task-card .task-icon {
-  transition: all 0.3s ease;
+  transition: all var(--duration-normal) ease;
 }
 .task-card:hover .task-icon {
   transform: scale(1.1);
@@ -447,7 +447,7 @@
   width: 50%;
   height: 100%;
   background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.06), transparent);
-  animation: shimmerSweep 2s infinite;
+  animation: shimmerSweep var(--duration-2s) infinite;
 }
 
 /* ---- Progress Bar (Enhanced) ---- */
@@ -457,7 +457,7 @@
   border-radius: 9999px;
 }
 .progress-bar-fill {
-  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: width var(--duration-slower) var(--ease-smooth);
   position: relative;
   overflow: hidden;
 }
@@ -477,7 +477,7 @@
 
 /* ---- History Cards ---- */
 .history-card {
-  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: all var(--duration-normal) var(--ease-smooth);
   position: relative;
 }
 .history-card::before {
@@ -489,8 +489,8 @@
   width: 3px;
   height: 0;
   border-radius: 0 4px 4px 0;
-  background: linear-gradient(180deg, #6366f1, #8b5cf6);
-  transition: height 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  background: linear-gradient(180deg, var(--color-indigo-500), var(--color-violet-500));
+  transition: height var(--duration-normal) var(--ease-smooth);
 }
 .history-card:hover::before {
   height: 60%;
@@ -499,14 +499,14 @@
   transform: translateX(4px);
   border-color: rgba(99, 102, 241, 0.25);
   box-shadow: 
-    0 8px 24px -8px rgba(99, 102, 241, 0.12),
+    0 8px 24px -8px var(--color-indigo-200),
     0 4px 8px -4px rgba(99, 102, 241, 0.06);
 }
 .history-card.analyzed {
   border-color: rgba(16, 185, 129, 0.2);
 }
 .history-card.analyzed::before {
-  background: linear-gradient(180deg, #10b981, #34d399);
+  background: linear-gradient(180deg, var(--color-emerald-500), var(--color-emerald-400));
 }
 .history-card.analyzed:hover {
   border-color: rgba(16, 185, 129, 0.3);
@@ -517,12 +517,12 @@
 
 /* ---- Analyzed Badge Animation ---- */
 .analyzed-badge {
-  animation: badgePulse 2s ease-in-out infinite;
+  animation: badgePulse var(--duration-2s) var(--ease-in-out) infinite;
 }
 
 /* ---- Upload Area ---- */
 .upload-area {
-  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: all var(--duration-normal) var(--ease-smooth);
   position: relative;
 }
 .upload-area::before {
@@ -531,12 +531,12 @@
   inset: 6px;
   border-radius: 14px;
   border: 2px dashed transparent;
-  transition: border-color 0.3s;
+  transition: border-color var(--duration-normal);
 }
 .upload-area:hover {
   transform: translateY(-2px);
   border-color: rgba(59, 130, 246, 0.4);
-  box-shadow: 0 12px 32px -8px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 12px 32px -8px var(--color-primary-light);
 }
 .upload-area:hover .upload-icon {
   transform: scale(1.08) translateY(-2px);
@@ -546,16 +546,16 @@
   transition-duration: 0.1s;
 }
 .upload-icon {
-  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: all var(--duration-slow) var(--ease-smooth);
 }
 
 /* ---- Import Button (floating) ---- */
 .import-trigger {
-  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: all var(--duration-normal) var(--ease-smooth);
 }
 .import-trigger:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 20px -6px rgba(59, 130, 246, 0.15);
+  box-shadow: 0 8px 20px -6px var(--color-primary-light);
 }
 .import-trigger:active {
   transform: translateY(0) scale(0.98);
@@ -563,7 +563,7 @@
 
 /* ---- Plugin Download Card ---- */
 .plugin-card {
-  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: all var(--duration-normal) var(--ease-smooth);
   position: relative;
   overflow: hidden;
 }
@@ -573,7 +573,7 @@
   inset: 0;
   background: linear-gradient(135deg, transparent 50%, rgba(99, 102, 241, 0.03) 100%);
   opacity: 0;
-  transition: opacity 0.3s;
+  transition: opacity var(--duration-normal);
 }
 .plugin-card:hover::after {
   opacity: 1;
@@ -582,11 +582,11 @@
   transform: translateY(-2px);
   border-color: rgba(99, 102, 241, 0.3);
   box-shadow: 
-    0 12px 28px -8px rgba(99, 102, 241, 0.12),
+    0 12px 28px -8px var(--color-indigo-200),
     0 4px 12px -4px rgba(99, 102, 241, 0.06);
 }
 .plugin-card .plugin-icon {
-  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: all var(--duration-slow) var(--ease-smooth);
 }
 .plugin-card:hover .plugin-icon {
   transform: rotate(-8deg) scale(1.05);
@@ -594,7 +594,7 @@
 
 /* ---- Download Button ---- */
 .download-btn {
-  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: all var(--duration-fast) var(--ease-smooth);
   position: relative;
   overflow: hidden;
 }
@@ -607,16 +607,16 @@
 
 /* ---- JSON Display ---- */
 .json-container {
-  transition: all 0.3s;
+  transition: all var(--duration-normal);
 }
 .json-container .json-header {
-  transition: background 0.3s;
+  transition: background var(--duration-normal);
 }
 .json-container:hover .json-header {
-  background: #1f2937;
+  background: var(--color-gray-800);
 }
 .json-container .mac-dot {
-  transition: transform 0.3s;
+  transition: transform var(--duration-normal);
 }
 .json-container:hover .mac-dot:nth-child(1) { transform: scale(1.1); }
 .json-container:hover .mac-dot:nth-child(2) { transform: scale(1.1); transition-delay: 50ms; }
@@ -635,18 +635,18 @@
   width: 3px;
   height: 0;
   border-radius: 0 4px 4px 0;
-  background: linear-gradient(180deg, #8b5cf6, #a78bfa);
-  transition: height 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  background: linear-gradient(180deg, var(--color-violet-500), var(--color-violet-400));
+  transition: height var(--duration-normal) var(--ease-smooth);
   z-index: 10;
 }
 .textarea-wrapper:focus-within::before {
   height: 60%;
 }
 .textarea-wrapper textarea {
-  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: all var(--duration-normal) var(--ease-smooth);
 }
 .textarea-wrapper textarea:focus {
-  background: #ffffff;
+  background: var(--color-white);
   border-color: rgba(139, 92, 246, 0.25);
   outline: none;
   box-shadow: 
@@ -656,12 +656,12 @@
 
 /* ---- Chevron Animation ---- */
 .chevron-animated {
-  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform var(--duration-normal) var(--ease-spring);
 }
 
 /* ---- ASIN Tag Hover ---- */
 .asin-tag {
-  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: all var(--duration-fast) var(--ease-smooth);
 }
 .asin-tag:hover {
   transform: translateY(-1px) scale(1.02);
@@ -670,20 +670,20 @@
 /* ---- Expand/Collapse Content ---- */
 .collapsible-content {
   overflow: hidden;
-  transition: max-height 0.5s cubic-bezier(0.22, 1, 0.36, 1), 
-              opacity 0.4s ease;
+  transition: max-height var(--duration-slower) var(--ease-smooth), 
+              opacity var(--duration-slow) ease;
 }
 
 /* ---- Strategy Cards ---- */
 .strategy-card {
-  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: all var(--duration-normal) var(--ease-smooth);
 }
 .strategy-card:hover {
   transform: translateY(-3px);
 }
 
 .strategy-item {
-  transition: all 0.25s ease;
+  transition: all var(--duration-fast) ease;
   position: relative;
 }
 .strategy-item::before {
@@ -693,17 +693,17 @@
   top: 0;
   bottom: 0;
   width: 0;
-  border-radius: 12px 0 0 12px;
-  transition: width 0.25s ease;
+  border-radius: var(--rounded-lg) 0 0 12px;
+  transition: width var(--duration-fast) ease;
 }
 .strategy-item:hover::before {
   width: 3px;
 }
-.strategy-item.emerald:hover::before { background: #10b981; }
-.strategy-item.blue:hover::before { background: #3b82f6; }
-.strategy-item.violet:hover::before { background: #8b5cf6; }
-.strategy-item.orange:hover::before { background: #f97316; }
-.strategy-item.rose:hover::before { background: #f43f5e; }
+.strategy-item.emerald:hover::before { background: var(--color-emerald-500); }
+.strategy-item.blue:hover::before { background: var(--color-blue-500); }
+.strategy-item.violet:hover::before { background: var(--color-violet-500); }
+.strategy-item.orange:hover::before { background: var(--color-orange-500); }
+.strategy-item.rose:hover::before { background: var(--color-rose-500); }
 
 /* ---- Status Dot with Ping ---- */
 .status-dot-live {
@@ -715,7 +715,7 @@
   inset: 0;
   border-radius: 50%;
   background: inherit;
-  animation: statusPing 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+  animation: statusPing var(--duration-2s) var(--ease-out) infinite;
 }
 
 /* ---- Section Headers ---- */
@@ -723,7 +723,7 @@
   position: relative;
 }
 .section-header .header-icon {
-  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: all var(--duration-normal) var(--ease-smooth);
 }
 .section-header:hover .header-icon {
   transform: rotate(-5deg) scale(1.05);
@@ -732,7 +732,7 @@
 /* ---- Tab Buttons ---- */
 .tab-btn {
   position: relative;
-  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: all var(--duration-fast) var(--ease-smooth);
 }
 .tab-btn::after {
   content: '';
@@ -741,9 +741,9 @@
   left: 50%;
   width: 0;
   height: 2px;
-  background: linear-gradient(90deg, #3b82f6, #6366f1);
-  border-radius: 2px 2px 0 0;
-  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  background: linear-gradient(90deg, var(--color-blue-500), var(--color-indigo-500));
+  border-radius: var(--rounded-xs) 2px 0 0;
+  transition: all var(--duration-normal) var(--ease-smooth);
   transform: translateX(-50%);
 }
 .tab-btn.active::after {
@@ -751,10 +751,10 @@
 }
 .tab-btn:hover:not(.active)::after {
   width: 40%;
-  background: #cbd5e1;
+  background: var(--color-slate-300);
 }
 .tab-btn .tab-icon {
-  transition: transform 0.25s ease;
+  transition: transform var(--duration-fast) ease;
 }
 .tab-btn:hover .tab-icon {
   transform: scale(1.1);
@@ -771,15 +771,15 @@
   left: 50%;
   transform: translateX(-50%) translateY(4px);
   padding: 4px 10px;
-  border-radius: 6px;
-  background: #1e293b;
+  border-radius: var(--rounded-md);
+  background: var(--color-slate-800);
   color: white;
   font-size: 11px;
   font-weight: 500;
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
-  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: all var(--duration-fast) var(--ease-smooth);
   z-index: 50;
 }
 .tooltip-wrapper:hover::after {
@@ -790,7 +790,7 @@
 /* ---- Quick Stats Dots ---- */
 .stat-dot {
   position: relative;
-  transition: transform 0.2s;
+  transition: transform var(--duration-fast);
 }
 .stat-dot:hover {
   transform: scale(1.5);
@@ -798,7 +798,7 @@
 
 /* ---- Empty State ---- */
 .empty-state-icon {
-  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: all var(--duration-slow) var(--ease-smooth);
 }
 .empty-state:hover .empty-state-icon {
   transform: translateY(-4px) rotate(-3deg);
@@ -806,7 +806,7 @@
 
 /* ---- Load History Button ---- */
 .load-btn {
-  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: all var(--duration-fast) var(--ease-smooth);
 }
 .load-btn:hover {
   transform: translateX(2px);
@@ -814,7 +814,7 @@
 
 /* ---- Report Button ---- */
 .report-btn {
-  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: all var(--duration-fast) var(--ease-smooth);
   position: relative;
   overflow: hidden;
 }
@@ -824,7 +824,7 @@
   inset: 0;
   background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.15));
   opacity: 0;
-  transition: opacity 0.2s;
+  transition: opacity var(--duration-fast);
 }
 .report-btn:hover::before {
   opacity: 1;
@@ -835,7 +835,7 @@
 
 /* ---- Delete Button ---- */
 .delete-btn {
-  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: all var(--duration-fast) var(--ease-smooth);
 }
 .delete-btn:hover {
   transform: rotate(8deg) scale(1.1);
@@ -843,7 +843,7 @@
 
 /* ---- Clear Button ---- */
 .clear-btn {
-  transition: all 0.2s ease;
+  transition: all var(--duration-fast) ease;
   position: relative;
 }
 .clear-btn::after {
@@ -853,8 +853,8 @@
   left: 0;
   width: 0;
   height: 1px;
-  background: #f43f5e;
-  transition: width 0.2s ease;
+  background: var(--color-rose-500);
+  transition: width var(--duration-fast) ease;
 }
 .clear-btn:hover::after {
   width: 100%;
@@ -862,17 +862,17 @@
 
 /* ---- Guide Toggle Group Hover ---- */
 .guide-toggle {
-  transition: background 0.2s;
+  transition: background var(--duration-fast);
 }
 .guide-toggle:hover {
   background: rgba(251, 191, 36, 0.04);
 }
 .guide-toggle .toggle-chevron-wrap {
-  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: all var(--duration-fast) var(--ease-smooth);
 }
 .guide-toggle:hover .toggle-chevron-wrap {
-  background: #1e293b;
-  border-color: #1e293b;
+  background: var(--color-slate-800);
+  border-color: var(--color-slate-800);
 }
 .guide-toggle:hover .toggle-chevron-wrap i {
   color: white;
@@ -880,17 +880,17 @@
 
 /* ---- Config Card Hover ---- */
 .config-header {
-  transition: background 0.2s;
+  transition: background var(--duration-fast);
 }
 .config-header:hover {
   background: rgba(248, 250, 252, 0.8);
 }
 .config-header .config-chevron-wrap {
-  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: all var(--duration-fast) var(--ease-smooth);
 }
 .config-header:hover .config-chevron-wrap {
-  background: #1e293b;
-  border-color: #1e293b;
+  background: var(--color-slate-800);
+  border-color: var(--color-slate-800);
 }
 .config-header:hover .config-chevron-wrap i {
   color: white;
@@ -898,11 +898,11 @@
 
 /* ---- Warning Banner ---- */
 .warning-banner {
-  transition: all 0.3s;
-  animation: fadeInScale 0.4s ease-out;
+  transition: all var(--duration-normal);
+  animation: fadeInScale var(--duration-slow) var(--ease-out);
 }
 .warning-banner:hover {
-  box-shadow: 0 4px 12px -2px rgba(245, 158, 11, 0.15);
+  box-shadow: 0 4px 12px -2px var(--color-amber-200);
 }
 
 /* ---- Responsive Fine-tuning ---- */
@@ -933,7 +933,7 @@
 button:focus-visible,
 a:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid #3b82f6;
+  outline: 2px solid var(--color-blue-500);
   outline-offset: 2px;
-  border-radius: 8px;
+  border-radius: var(--rounded-md);
 }

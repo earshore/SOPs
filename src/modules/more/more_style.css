@@ -5,6 +5,7 @@
  */
 
 /* ==================== 容器样式 ==================== */
+/* 使用通用容器工具类 - 见 src/css/utilities/containers.css */
 .more-overview-container,
 .more-module-section,
 .more-content-container,
@@ -24,20 +25,9 @@
 }
 
 /* ==================== 模块高亮动画 ==================== */
+/* 使用全局模块高亮动画 - 见 src/css/animations/keyframes.css */
 .more-module-highlight {
-  animation: moreModuleHighlight 2s var(--ease-out);
-}
-
-@keyframes moreModuleHighlight {
-  0% {
-    background-color: transparent;
-  }
-  10% {
-    background-color: rgba(34, 197, 94, 0.1);
-  }
-  100% {
-    background-color: transparent;
-  }
+  animation: moduleHighlightGreen var(--duration-2s) var(--ease-out);
 }
 
 /* ==================== Agent Card 特有样式 ==================== */
@@ -63,7 +53,7 @@
 }
 
 .agent-card:hover .agent-card-gradient {
-  animation: agentCardPulse 2s ease-in-out infinite;
+  animation: agentCardPulse var(--duration-2s) var(--ease-in-out) infinite;
 }
 
 @keyframes agentCardPulse {
@@ -82,7 +72,7 @@
 
 .agent-card button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px var(--color-black-alpha-10);
 }
 
 .agent-card a:hover {

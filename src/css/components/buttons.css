@@ -42,9 +42,9 @@
   --btn-icon-size:      40px;
 
   /* 圆角 */
-  --btn-radius:         var(--radius-lg, 12px);
-  --btn-radius-sm:      var(--radius-md, 8px);
-  --btn-radius-pill:    var(--radius-full, 9999px);
+  --btn-radius:         var(--rounded-lg, 12px);
+  --btn-radius-sm:      var(--rounded-md, 8px);
+  --btn-radius-pill:    var(--rounded-full, 9999px);
 
   /* 焦点环 */
   --btn-focus-ring-width:  2px;
@@ -189,7 +189,7 @@
   --btn-padding-y: 2px;
   --btn-font-size: var(--text-2xs, 0.625rem);
   --btn-gap: 4px;
-  --btn-radius: var(--radius-sm, 4px);
+  --btn-radius: var(--rounded-sm, 4px);
 }
 
 /* --- 极小 (xs) --- */
@@ -199,7 +199,7 @@
   --btn-padding-y: 4px;
   --btn-font-size: var(--text-xs, 0.75rem);
   --btn-gap: 4px;
-  --btn-radius: var(--radius-sm, 4px);
+  --btn-radius: var(--rounded-sm, 4px);
 }
 
 /* --- 小 (sm) --- */
@@ -209,7 +209,7 @@
   --btn-padding-y: 6px;
   --btn-font-size: var(--text-sm, 0.8125rem);
   --btn-gap: 6px;
-  --btn-radius: var(--radius-md, 8px);
+  --btn-radius: var(--rounded-md, 8px);
 }
 
 /* --- 中 (md) — 默认，无需覆盖 --- */
@@ -230,7 +230,7 @@
   --btn-padding-y: 16px;
   --btn-font-size: var(--text-lg, 1.125rem);
   --btn-gap: 12px;
-  --btn-radius: var(--radius-xl, 16px);
+  --btn-radius: var(--rounded-xl, 16px);
 }
 
 /* --- 巨大 (2xl) --- */
@@ -240,7 +240,7 @@
   --btn-padding-y: 20px;
   --btn-font-size: var(--text-xl, 1.25rem);
   --btn-gap: 14px;
-  --btn-radius: var(--radius-xl, 16px);
+  --btn-radius: var(--rounded-xl, 16px);
   font-weight: var(--font-semibold, 600);
 }
 
@@ -387,7 +387,7 @@
 }
 
 .btn-outline:hover {
-  background: var(--color-primary-lighter, rgba(59, 130, 246, 0.06));
+  background: var(--color-primary-light, rgba(59, 130, 246, 0.06));
   border-color: var(--color-primary-dark, #2563eb);
   color: var(--color-primary-dark, #2563eb);
 }
@@ -429,7 +429,7 @@
 }
 
 .btn-outline-warning:hover {
-  background: var(--color-warning-light, rgba(245, 158, 11, 0.1));
+  background: var(--color-amber-400, rgba(245, 158, 11, 0.1));
 }
 
 /* 轮廓 — Danger */
@@ -471,7 +471,7 @@
 }
 
 .btn-ghost-primary:hover {
-  background: var(--color-primary-lighter, rgba(59, 130, 246, 0.06));
+  background: var(--color-primary-light, rgba(59, 130, 246, 0.06));
   color: var(--color-primary-dark, #2563eb);
 }
 
@@ -537,7 +537,7 @@
 
 /* 柔和 — Warning */
 .btn-soft-warning {
-  background: var(--color-warning-light, rgba(245, 158, 11, 0.1));
+  background: var(--color-amber-400, rgba(245, 158, 11, 0.1));
   color: var(--color-warning-dark, #d97706);
   border-color: transparent;
 }
@@ -765,7 +765,7 @@
 
 /* 圆形图标按钮 */
 .btn-icon-circle {
-  border-radius: var(--radius-full, 9999px);
+  border-radius: var(--rounded-full, 9999px);
 }
 
 
@@ -809,7 +809,7 @@
   min-width: 18px;
   height: 18px;
   padding: 0 5px;
-  border-radius: var(--radius-full, 9999px);
+  border-radius: var(--rounded-full, 9999px);
   font-size: var(--text-2xs, 0.625rem);
   font-weight: var(--font-bold, 700);
   line-height: 1;
@@ -967,7 +967,7 @@
 
 /* --- 方形 (覆盖圆角) --- */
 .btn-square {
-  border-radius: var(--radius-sm, 4px);
+  border-radius: var(--rounded-sm, 4px);
 }
 
 /* --- 无圆角 --- */
@@ -1085,7 +1085,7 @@
   /* 圆形 */
   width: 56px;
   height: 56px;
-  border-radius: var(--radius-full, 9999px);
+  border-radius: var(--rounded-full, 9999px);
   padding: 0;
 
   /* 外观 */
@@ -1242,7 +1242,7 @@
 
 .btn-upload-zone:hover {
   border-color: var(--color-primary, #3b82f6);
-  background: var(--color-primary-lighter, rgba(59, 130, 246, 0.04));
+  background: var(--color-primary-light, rgba(59, 130, 246, 0.04));
   transform: none;
 }
 

@@ -194,7 +194,7 @@
   width: 100%;
   height: 8px;
   background: var(--color-bg-tertiary, #f3f4f6);
-  border-radius: var(--radius-full, 9999px);
+  border-radius: var(--rounded-full, 9999px);
   overflow: hidden;
 }
 
@@ -208,7 +208,7 @@
   top: 0;
   height: 100%;
   background: var(--color-primary, #3b82f6);
-  border-radius: var(--radius-full, 9999px);
+  border-radius: var(--rounded-full, 9999px);
   transform-origin: left center;
   /* 平滑过渡 */
   transition: transform var(--micro-duration-gentle, 350ms) var(--micro-ease-card, cubic-bezier(0.22, 1, 0.36, 1));

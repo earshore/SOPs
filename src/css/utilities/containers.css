@@ -1,0 +1,124 @@
+/**
+ * 容器工具类
+ * 统一的容器样式，适用于所有模块
+ */
+
+/* ========================================
+   模块容器
+   ======================================== */
+
+/* 标准模块容器 */
+.module-container {
+  max-width: 1450px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+/* 紧凑容器 */
+.module-container--compact {
+  padding: 1.5rem 1rem;
+}
+
+/* 宽松容器 */
+.module-container--spacious {
+  padding: 3rem 1.5rem;
+}
+
+/* 无内边距容器 */
+.module-container--flush {
+  padding: 0;
+}
+
+/* ========================================
+   内容区域容器
+   ======================================== */
+
+/* 内容区域 */
+.content-area {
+  max-width: 1450px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* 窄内容区域 */
+.content-area--narrow {
+  max-width: 1200px;
+}
+
+/* 宽内容区域 */
+.content-area--wide {
+  max-width: 1600px;
+}
+
+/* 全宽内容区域 */
+.content-area--full {
+  max-width: none;
+}
+
+/* ========================================
+   概览容器
+   ======================================== */
+
+/* 概览容器 (用于模块首页) */
+.overview-container {
+  max-width: 1450px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+/* ========================================
+   章节容器
+   ======================================== */
+
+/* 章节容器 */
+.section-container {
+  max-width: 1450px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  margin-bottom: var(--spacing-2xl, 48px);
+}
+
+.section-container:last-child {
+  margin-bottom: 0;
+}
+
+/* ========================================
+   响应式适配
+   ======================================== */
+
+@media (max-width: 768px) {
+  .module-container,
+  .overview-container,
+  .content-area {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .module-container {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+  }
+
+  .module-container--compact {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+
+  .module-container--spacious {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+
+  .section-container {
+    margin-bottom: var(--spacing-xl, 32px);
+  }
+}
+
+@media (min-width: 1536px) {
+  .module-container,
+  .overview-container,
+  .content-area {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}

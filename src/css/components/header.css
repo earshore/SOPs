@@ -161,7 +161,7 @@
   color: var(--header-text);
   text-decoration: none;
   padding: 8px 12px;
-  border-radius: var(--radius-md, 8px);
+  border-radius: var(--rounded-md, 8px);
   transition:
     background-color var(--duration-fast, 200ms) var(--ease-smooth),
     color var(--duration-fast, 200ms) var(--ease-smooth);
@@ -210,7 +210,7 @@
   background: none;
   border: none;
   padding: 8px 12px;
-  border-radius: var(--radius-md, 8px);
+  border-radius: var(--rounded-md, 8px);
   cursor: pointer;
   transition:
     background-color var(--duration-fast, 200ms) var(--ease-smooth),
@@ -230,7 +230,7 @@
   min-width: 200px;
   background: var(--color-bg-elevated, #ffffff);
   border: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.06));
-  border-radius: var(--radius-lg, 12px);
+  border-radius: var(--rounded-lg, 12px);
   box-shadow: var(--shadow-lg, 0 10px 25px -5px rgba(0, 0, 0, 0.08));
   opacity: 0;
   visibility: hidden;
@@ -292,7 +292,7 @@
   padding: 10px 40px 10px 40px;
   font-size: var(--text-base, 0.875rem);
   border: 1px solid var(--color-border-default, rgba(0, 0, 0, 0.1));
-  border-radius: var(--radius-full, 9999px);
+  border-radius: var(--rounded-full, 9999px);
   background: var(--color-bg-secondary, #fafafa);
   color: var(--header-text);
   transition:
@@ -330,7 +330,7 @@
   color: var(--color-text-tertiary, #9ca3af);
   padding: 2px 8px;
   border: 1px solid var(--color-border-default, rgba(0, 0, 0, 0.1));
-  border-radius: var(--radius-sm, 4px);
+  border-radius: var(--rounded-sm, 4px);
   background: var(--color-bg-secondary, #fafafa);
 }
 
@@ -382,7 +382,7 @@
   background: none;
   border: none;
   padding: 8px;
-  border-radius: var(--radius-md, 8px);
+  border-radius: var(--rounded-md, 8px);
   cursor: pointer;
   color: var(--header-text);
   transition: background-color var(--duration-fast, 200ms) var(--ease-smooth);
@@ -400,7 +400,7 @@
   min-width: 200px;
   background: var(--color-bg-elevated, #ffffff);
   border: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.06));
-  border-radius: var(--radius-lg, 12px);
+  border-radius: var(--rounded-lg, 12px);
   box-shadow: var(--shadow-lg, 0 10px 25px -5px rgba(0, 0, 0, 0.08));
   opacity: 0;
   visibility: hidden;
@@ -454,7 +454,7 @@
   background: none;
   border: none;
   padding: 8px;
-  border-radius: var(--radius-md, 8px);
+  border-radius: var(--rounded-md, 8px);
   cursor: pointer;
   color: var(--header-text);
   transition: background-color var(--duration-fast, 200ms) var(--ease-smooth);
@@ -531,7 +531,7 @@
   display: block;
   width: 100%;
   padding: 12px 16px;
-  border-radius: var(--radius-md, 8px);
+  border-radius: var(--rounded-md, 8px);
   margin-bottom: 8px;
 }
 
@@ -571,7 +571,7 @@
   background: none;
   border: none;
   padding: 8px;
-  border-radius: var(--radius-md, 8px);
+  border-radius: var(--rounded-md, 8px);
   cursor: pointer;
   color: var(--header-text);
   transition: background-color var(--duration-fast, 200ms) var(--ease-smooth);
@@ -601,7 +601,7 @@
   width: 320px;
   background: var(--color-bg-elevated, #ffffff);
   border: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.06));
-  border-radius: var(--radius-lg, 12px);
+  border-radius: var(--rounded-lg, 12px);
   box-shadow: var(--shadow-lg, 0 10px 25px -5px rgba(0, 0, 0, 0.08));
   opacity: 0;
   visibility: hidden;
@@ -686,7 +686,7 @@
   background: none;
   border: none;
   padding: 8px;
-  border-radius: var(--radius-md, 8px);
+  border-radius: var(--rounded-md, 8px);
   cursor: pointer;
   color: var(--header-text);
   transition: background-color var(--duration-fast, 200ms) var(--ease-smooth);

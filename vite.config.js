@@ -171,8 +171,8 @@ export default defineConfig({
         chunkSizeWarningLimit: 300,
         // CSS代码分割
         cssCodeSplit: true,
-        // 启用CSS压缩 - 使用lightningcss获得更好的性能
-        cssMinify: 'lightningcss',
+        // 启用CSS压缩 - 临时使用esbuild进行测试
+        cssMinify: 'esbuild',
         // 资源内联阈值(小于4KB的资源内联为base64)
         assetsInlineLimit: 4096,
         // 启用gzip压缩提示

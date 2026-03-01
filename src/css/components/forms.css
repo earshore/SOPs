@@ -50,7 +50,7 @@
   width: 100%;
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--color-slate-200);
-  border-radius: var(--radius-lg);
+  border-radius: var(--rounded-lg);
   font-size: 0.875rem;
   line-height: 1.5;
   color: var(--color-slate-700);
@@ -97,7 +97,7 @@
   line-height: 1.75;
   padding: 0.75rem 1rem;
   border: 1px solid var(--color-slate-200);
-  border-radius: var(--radius-lg);
+  border-radius: var(--rounded-lg);
   /* Requirements 6.1: 输入框聚焦边框过渡 - 200ms */
   transition: 
     border-color var(--micro-duration-smooth) var(--ease-smooth),
@@ -317,7 +317,7 @@
   width: 100%;
   padding: 0.5rem 2rem 0.5rem 0.75rem;
   border: 1px solid var(--color-slate-200);
-  border-radius: var(--radius-lg);
+  border-radius: var(--rounded-lg);
   font-size: 0.875rem;
   line-height: 1.5;
   color: var(--color-slate-700);
@@ -684,7 +684,7 @@ input[type="checkbox"]:disabled:checked {
 /* 带边框包裹 */
 .form-checkbox-group--bordered {
   border: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.06));
-  border-radius: var(--radius-lg, 12px);
+  border-radius: var(--rounded-lg, 12px);
   padding: var(--spacing-md, 16px);
 }
 
@@ -703,7 +703,7 @@ input[type="checkbox"]:disabled:checked {
   gap: var(--spacing-sm, 12px);
   padding: var(--spacing-md, 16px);
   border: 1.5px solid var(--color-slate-200, #e2e8f0);
-  border-radius: var(--radius-lg, 12px);
+  border-radius: var(--rounded-lg, 12px);
   background: white;
   cursor: pointer;
   position: relative;
@@ -792,7 +792,7 @@ input[type="checkbox"]:disabled:checked {
   right: -1px;
   width: 22px;
   height: 22px;
-  border-radius: 0 var(--radius-lg, 12px) 0 var(--radius-md, 8px);
+  border-radius: 0 var(--rounded-lg, 12px) 0 var(--rounded-md, 8px);
   background: var(--color-primary, #3b82f6);
   color: white;
   font-size: 0.625rem;
@@ -827,7 +827,7 @@ input[type="checkbox"]:disabled:checked {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-lg, 12px);
+  border-radius: var(--rounded-lg, 12px);
   background: var(--color-slate-100, #f1f5f9);
   font-size: 1.25rem;
   color: var(--color-slate-500, #64748b);
@@ -990,7 +990,7 @@ input[type="checkbox"]:disabled:checked {
   padding: var(--spacing-xs, 8px) var(--spacing-md, 16px);
   background: var(--color-primary-light, rgba(59, 130, 246, 0.06));
   border: 1px solid rgba(59, 130, 246, 0.15);
-  border-radius: var(--radius-lg, 12px);
+  border-radius: var(--rounded-lg, 12px);
   font-size: 0.8125rem;
   color: var(--color-primary, #3b82f6);
   animation: fadeInUp var(--duration-fast, 200ms) var(--ease-spring) forwards;
