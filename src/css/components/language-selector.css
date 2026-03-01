@@ -1,0 +1,52 @@
+/**
+ * 语言选择器组件
+ * 用于多语言切换
+ */
+
+.lang-selector {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2xs);
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--rounded-lg);
+  padding: 5px;
+}
+
+.lang-btn {
+  padding: var(--spacing-2xs) var(--spacing-sm);
+  border: none;
+  background: transparent;
+  color: var(--color-text-tertiary);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  border-radius: var(--rounded-md);
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-smooth);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-sans);
+}
+
+.lang-btn:hover {
+  color: var(--color-text-secondary);
+  background: var(--color-bg-secondary);
+}
+
+.lang-btn.active {
+  background: var(--color-primary);
+  color: white;
+  box-shadow: var(--shadow-primary-sm);
+}
+
+.lang-flag { 
+  font-size: 15px; 
+}
+
+/* ===== 响应式 ===== */
+@media (max-width: 768px) {
+  .lang-selector { 
+    flex-wrap: wrap; 
+  }
+}
