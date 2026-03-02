@@ -47,7 +47,7 @@ export function createComputedProperties(context: AlpineContext): ComputedProper
      */
     get currentProducts(): Product[] {
       const products: Product[] = [];
-      
+
       // 优先从 Scraper 数据获取
       const scrapedData = appStore.getState().scraper?.scrapedData as ScrapedData | null;
       if (scrapedData && scrapedData.products && scrapedData.products.length > 0) {
@@ -74,7 +74,7 @@ export function createComputedProperties(context: AlpineContext): ComputedProper
           productsLength: scrapedData?.products?.length
         });
       }
-      
+
       // 如果没有从 Scraper 获取到，从示例数据获取
       if (products.length === 0) {
         console.log('[计算属性] 尝试从示例数据获取产品');
@@ -86,7 +86,7 @@ export function createComputedProperties(context: AlpineContext): ComputedProper
           }
         }
       }
-      
+
       console.log('[计算属性] currentProducts 最终结果:', products.length, '个产品');
       return products;
     },
@@ -148,7 +148,7 @@ export function createComputedProperties(context: AlpineContext): ComputedProper
       if (!context.analysisReport || !context.selectedTargets || context.selectedTargets.length === 0) {
         return [];
       }
-      
+
       try {
         const results = parseAnalysisReport(
           context.analysisReport as FullAnalysisReport,
@@ -247,12 +247,12 @@ export function createComputedProperties(context: AlpineContext): ComputedProper
      */
     get fullReportData(): FullReportData | null {
       if (!context.analysisReport) return null;
-      
+
       // 获取产品标题（用于显示）
       const productTitle = this.currentProducts.length > 0
         ? this.currentProducts.map(p => p.productTitle).join(' | ')
         : undefined;
-      
+
       return {
         metadata: {
           asins: context.selectedAsins,

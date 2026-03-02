@@ -167,7 +167,7 @@ export interface FullAnalysisReport {
  * ASIN: B0DNMZ2MLG - Ycz CLUB GENT'S AROMA Perfume
  */
 export const SAMPLE_ANALYSIS_REPORT: FullAnalysisReport = {
-  
+
   'title-keywords': {
     primary_keywords: [
       { keyword: "Perfume Men", weight: "high", search_volume_estimate: "极高 - 核心类目词" },

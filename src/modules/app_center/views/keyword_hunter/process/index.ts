@@ -179,7 +179,7 @@ function restoreProcessStateFromState(): void {
         if (currentState.keywordTracker.showTranslation !== undefined) {
             showTransCheckbox.checked = currentState.keywordTracker.showTranslation;
         }
-        
+
         // 根据是否有翻译数据启用/禁用复选框
         const hasTranslationData = appStore.getState().keywordTracker.paragraphs && appStore.getState().keywordTracker.paragraphs.length > 0;
         showTransCheckbox.disabled = !hasTranslationData;
@@ -276,7 +276,7 @@ function renderAnalysisStats(): void {
         // 构建未匹配关键词的词根集合
         const unmatchedKeywordRoots = new Set<string>();
         const highFreqWordsSet = new Set(appStore.getState().keywordTracker.wordFrequency.map(([w]) => w.toLowerCase()));
-        
+
         if (appStore.getState().keywordTracker.unmatchedKeywords && appStore.getState().keywordTracker.unmatchedKeywords.length > 0) {
             appStore.getState().keywordTracker.unmatchedKeywords.forEach(kw => {
                 if (kw) {
@@ -295,16 +295,16 @@ function renderAnalysisStats(): void {
 
         // 清空容器
         freqList.innerHTML = '';
-        
+
         // 渲染高频词云
         const wordCloudDiv = document.createElement('div');
         wordCloudDiv.className = 'flex flex-wrap gap-3';
         const wordFragment = document.createDocumentFragment();
-        
+
         appStore.getState().keywordTracker.wordFrequency.forEach(([w, c]: [string, number]) => {
             const span = document.createElement('span');
             const isMatched = matchedKeywordRoots.has(w.toLowerCase());
-            
+
             if (isMatched) {
                 span.className = 'px-2 py-1 bg-green-100 text-green-700 text-xs rounded-md flex items-center gap-1';
                 const checkIcon = document.createElement('span');
@@ -324,10 +324,10 @@ function renderAnalysisStats(): void {
                 countSpan.textContent = `(${c})`;
                 span.appendChild(countSpan);
             }
-            
+
             wordFragment.appendChild(span);
         });
-        
+
         wordCloudDiv.appendChild(wordFragment);
         freqList.appendChild(wordCloudDiv);
 
@@ -335,10 +335,10 @@ function renderAnalysisStats(): void {
         if (unmatchedKeywordRoots.size > 0) {
             const unmatchedRootsArray = Array.from(unmatchedKeywordRoots).sort();
             console.log('[Process] 准备渲染未匹配词根:', unmatchedRootsArray);
-            
+
             const unmatchedSection = document.createElement('div');
             unmatchedSection.className = 'mt-4 pt-4 border-t border-slate-200';
-            
+
             const header = document.createElement('div');
             header.className = 'text-xs text-slate-500 mb-2 font-medium flex items-center gap-2';
             const icon = document.createElement('i');
@@ -348,29 +348,29 @@ function renderAnalysisStats(): void {
             headerText.textContent = `未在文案中出现的关键词词根 (${unmatchedRootsArray.length})`;
             header.appendChild(headerText);
             unmatchedSection.appendChild(header);
-            
+
             const rootsContainer = document.createElement('div');
             rootsContainer.className = 'flex flex-wrap gap-2';
             const rootsFragment = document.createDocumentFragment();
-            
+
             unmatchedRootsArray.forEach((root: string) => {
                 const span = document.createElement('span');
                 span.className = 'px-2 py-1 bg-red-100 text-red-700 text-xs rounded-md inline-flex items-center gap-1 cursor-pointer hover:bg-red-200 transition-colors';
                 span.title = '点击在关键词监控中定位';
                 span.onclick = () => (window as any).kt_locateUnmatchedRoot(root);
-                
+
                 const icon = document.createElement('span');
                 icon.className = 'font-bold';
                 icon.textContent = '✗';
                 span.appendChild(icon);
-                
+
                 const text = document.createElement('span');
                 text.textContent = root;
                 span.appendChild(text);
-                
+
                 rootsFragment.appendChild(span);
             });
-            
+
             rootsContainer.appendChild(rootsFragment);
             unmatchedSection.appendChild(rootsContainer);
             freqList.appendChild(unmatchedSection);
@@ -438,15 +438,15 @@ function renderCopyDisplay(): void {
                 original: highlightText(p.original),
                 translation: showTrans && p.translation ? p.translation : null
             }));
-        
+
         // 清空容器
         display.innerHTML = '';
         const fragment = document.createDocumentFragment();
-        
+
         paragraphs.forEach(para => {
             const div = document.createElement('div');
             div.className = 'mb-4';
-            
+
             const originalDiv = document.createElement('div');
             originalDiv.className = 'paragraph-original leading-relaxed';
             const tempDiv = document.createElement('div');
@@ -455,17 +455,17 @@ function renderCopyDisplay(): void {
                 originalDiv.appendChild(tempDiv.firstChild);
             }
             div.appendChild(originalDiv);
-            
+
             if (para.translation) {
                 const transDiv = document.createElement('div');
                 transDiv.className = 'sentence-translation';
                 transDiv.textContent = para.translation;
                 div.appendChild(transDiv);
             }
-            
+
             fragment.appendChild(div);
         });
-        
+
         display.appendChild(fragment);
         return;
     }
@@ -518,7 +518,7 @@ function highlightText(text: string): string {
         keywords: Set<string>;
         isHighlight: boolean;
     }
-    
+
     const segments: Segment[] = [];
     let segStart = 0;
 
@@ -578,7 +578,7 @@ function setsEqual(a: Set<string>, b: Set<string>): boolean {
  */
 function renderFloatingKeywords(): void {
     const allContainer = document.getElementById('kt-all-keywords');
-    
+
     if (!allContainer) return;
 
     // 合并已匹配和未匹配的关键词
@@ -587,9 +587,9 @@ function renderFloatingKeywords(): void {
         count: number;
         matched: boolean;
     }
-    
+
     const allKeywords: KeywordItem[] = [];
-    
+
     // 添加已匹配的关键词
     if (appStore.getState().keywordTracker.matchedKeywords && appStore.getState().keywordTracker.matchedKeywords.length > 0) {
         appStore.getState().keywordTracker.matchedKeywords.forEach(item => {
@@ -600,7 +600,7 @@ function renderFloatingKeywords(): void {
             });
         });
     }
-    
+
     // 添加未匹配的关键词
     if (appStore.getState().keywordTracker.unmatchedKeywords && appStore.getState().keywordTracker.unmatchedKeywords.length > 0) {
         appStore.getState().keywordTracker.unmatchedKeywords.forEach(kw => {
@@ -617,48 +617,48 @@ function renderFloatingKeywords(): void {
         // 清空容器
         allContainer.innerHTML = '';
         const fragment = document.createDocumentFragment();
-        
+
         allKeywords.forEach((item: KeywordItem) => {
             const div = document.createElement('div');
             div.className = 'keyword-item';
             div.dataset.keyword = item.keyword.toLowerCase();
-            
+
             if (item.matched) {
                 // 已匹配 - 绿色背景，可点击定位
                 div.className += ' bg-green-50 border-l-4 border-green-500 rounded p-2 flex justify-between items-center cursor-pointer hover:bg-green-100 transition-colors shadow-sm';
                 div.onclick = () => (window as any).kt_locateKeyword(item.keyword);
-                
+
                 const span = document.createElement('span');
                 span.className = 'text-sm text-green-800 font-medium flex items-center gap-2';
                 const icon = document.createElement('i');
                 icon.className = 'fas fa-check-circle text-green-600';
                 span.appendChild(icon);
                 span.appendChild(document.createTextNode(item.keyword));
-                
+
                 const badge = document.createElement('span');
                 badge.className = 'text-xs bg-green-600 text-white px-2 py-0.5 rounded-full font-semibold';
                 badge.textContent = item.count.toString();
-                
+
                 div.appendChild(span);
                 div.appendChild(badge);
             } else {
                 // 未匹配 - 红色背景
                 div.className += ' keyword-unmatched bg-red-50 border-l-4 border-red-500 rounded p-2 flex items-center gap-2 shadow-sm';
-                
+
                 const icon = document.createElement('i');
                 icon.className = 'fas fa-times-circle text-red-600';
-                
+
                 const span = document.createElement('span');
                 span.className = 'text-sm text-red-800 font-medium';
                 span.textContent = item.keyword;
-                
+
                 div.appendChild(icon);
                 div.appendChild(span);
             }
-            
+
             fragment.appendChild(div);
         });
-        
+
         allContainer.appendChild(fragment);
     } else {
         const emptyDiv = document.createElement('div');
@@ -713,13 +713,13 @@ async function syncToInput(): Promise<void> {
             .map(p => typeof p === 'object' && 'original' in p ? p.original : p)
             .filter(t => t && t.trim())
             .join('\n');
-        
+
         console.log('[Process] 翻译模式：只同步原文，不包含译文');
     } else {
         // 普通模式：直接获取显示区域的文本
         const display = document.getElementById('kt-copy-display');
         text = display ? display.innerText : '';
-        
+
         console.log('[Process] 普通模式：同步显示区域文本');
     }
 
@@ -727,7 +727,7 @@ async function syncToInput(): Promise<void> {
     if (text && text.trim()) {
         appStore.getState().setProcessedCopy(text);
         appStore.getState().updateKeywordTracker({ copyInputText: text });
-        
+
         console.log('[Process] 同步的文本长度:', text.length);
     } else {
         console.warn('[Process] 没有可同步的文本');
@@ -856,7 +856,7 @@ function locateKeywordInCopy(keyword: string): void {
 function locateUnmatchedRootInList(root: string): void {
     const floatWin = document.getElementById('kt-keywords-floating');
     const allKeywordsContainer = document.getElementById('kt-all-keywords');
-    
+
     if (!allKeywordsContainer) {
         console.error('[Process] 未找到关键词容器');
         return;
@@ -887,13 +887,13 @@ function highlightRootKeywords(root: string, container: HTMLElement): void {
     // 查找所有未匹配的关键词元素
     const unmatchedKeywordDivs = container.querySelectorAll('.keyword-unmatched');
     console.log('[Process] 找到未匹配关键词元素数量:', unmatchedKeywordDivs.length);
-    
+
     const matchedDivs: Element[] = [];
 
     unmatchedKeywordDivs.forEach((div, index) => {
         const keyword = div.getAttribute('data-keyword');
         console.log(`[Process] 检查第${index + 1}个关键词:`, keyword);
-        
+
         if (!keyword) {
             console.warn('[Process] 关键词为空，跳过');
             return;
@@ -902,7 +902,7 @@ function highlightRootKeywords(root: string, container: HTMLElement): void {
         // 将关键词拆分为单词进行匹配
         const words = keyword.match(/[\p{L}\p{M}]+/gu) || [];
         console.log('[Process] 拆分的单词:', words);
-        
+
         const hasRoot = words.some(w => {
             const wordLower = w.toLowerCase();
             const matched = wordLower === rootLower || wordLower.includes(rootLower);
@@ -911,7 +911,7 @@ function highlightRootKeywords(root: string, container: HTMLElement): void {
             }
             return matched;
         });
-        
+
         if (hasRoot) {
             console.log('[Process] ✓ 匹配到关键词:', keyword);
             div.classList.add('keyword-root-highlight');
@@ -1060,8 +1060,8 @@ function manageFloatingWindowVisibility(): void {
     }
 
     // 只有在有分析数据时才显示浮动窗口
-    const hasAnalysisData = appStore.getState().keywordTracker.matchedKeywords && 
-                           appStore.getState().keywordTracker.matchedKeywords.length > 0;
+    const hasAnalysisData = appStore.getState().keywordTracker.matchedKeywords &&
+        appStore.getState().keywordTracker.matchedKeywords.length > 0;
 
     if (!hasAnalysisData) {
         // 没有数据时隐藏浮动窗口和最小化按钮
@@ -1118,7 +1118,7 @@ export async function mount(container: HTMLElement): Promise<void> {
         // 1. 使用 SafeModuleLoader 加载模板
         const loader = SafeModuleLoader.getInstance();
         const renderer = SafeRenderer.getInstance();
-        
+
         const html = await loader.loadTemplate(
             'src/modules/app_center/views/keyword_hunter/process/template.html',
             {
@@ -1129,7 +1129,7 @@ export async function mount(container: HTMLElement): Promise<void> {
                 }
             }
         );
-        
+
         // 使用 SafeRenderer 渲染模板
         // 添加淡入动画（在渲染前添加）
         container.classList.add('fade-in');
@@ -1138,7 +1138,7 @@ export async function mount(container: HTMLElement): Promise<void> {
         // 2. 将浮动窗口移到 body 级别(避免被容器限制)
         const floatWin = document.getElementById('kt-keywords-floating');
         const minBtn = document.getElementById('kt-keywords-minimized');
-        
+
         // 如果浮动窗口不在 body 中，则移动到 body
         if (floatWin && floatWin.parentElement !== document.body) {
             document.body.appendChild(floatWin);

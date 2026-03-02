@@ -242,7 +242,7 @@
   position: absolute;
   inset: 0;
   opacity: 0.05;
-  background-image: 
+  background-image:
     linear-gradient(rgba(255, 255, 255, 0.2) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.2) 1px, transparent 1px);
   background-size: 30px 30px;
@@ -675,7 +675,9 @@
   box-shadow: var(--shadow-primary-sm);
 }
 
-.qa-question-wrap { flex: 1; }
+.qa-question-wrap {
+  flex: 1;
+}
 
 .qa-meta {
   display: flex;
@@ -694,12 +696,35 @@
   letter-spacing: var(--tracking-wide);
 }
 
-.qa-tag.performance { background: var(--color-red-100); color: var(--color-red-600); }
-.qa-tag.feature { background: var(--color-indigo-100); color: var(--color-indigo-600); }
-.qa-tag.scenario { background: var(--color-green-100); color: var(--color-green-600); }
-.qa-tag.trust { background: var(--color-amber-100); color: var(--color-amber-600); }
-.qa-tag.safety { background: var(--color-blue-100); color: var(--color-blue-600); }
-.qa-tag.gift { background: var(--color-pink-100); color: var(--color-pink-600); }
+.qa-tag.performance {
+  background: var(--color-red-100);
+  color: var(--color-red-600);
+}
+
+.qa-tag.feature {
+  background: var(--color-indigo-100);
+  color: var(--color-indigo-600);
+}
+
+.qa-tag.scenario {
+  background: var(--color-green-100);
+  color: var(--color-green-600);
+}
+
+.qa-tag.trust {
+  background: var(--color-amber-100);
+  color: var(--color-amber-600);
+}
+
+.qa-tag.safety {
+  background: var(--color-blue-100);
+  color: var(--color-blue-600);
+}
+
+.qa-tag.gift {
+  background: var(--color-pink-100);
+  color: var(--color-pink-600);
+}
 
 .qa-confidence {
   font-size: var(--text-2xs);
@@ -709,9 +734,21 @@
   gap: var(--spacing-2xs);
 }
 
-.conf-dots { display: flex; gap: 2px; }
-.conf-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--color-border-default); }
-.conf-dot.filled { background: var(--color-success); }
+.conf-dots {
+  display: flex;
+  gap: 2px;
+}
+
+.conf-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-border-default);
+}
+
+.conf-dot.filled {
+  background: var(--color-success);
+}
 
 .qa-question {
   font-size: var(--text-md);
@@ -831,7 +868,9 @@
   color: var(--color-orange-500);
 }
 
-.rufus-badge i { font-size: var(--text-sm); }
+.rufus-badge i {
+  font-size: var(--text-sm);
+}
 
 .beta-badge {
   display: inline-flex;
@@ -847,7 +886,9 @@
   letter-spacing: var(--tracking-wide);
 }
 
-.beta-badge i { font-size: 9px; }
+.beta-badge i {
+  font-size: 9px;
+}
 
 /* ================================================================
    RUFUS AI SIMULATOR - QA Lab 特有
@@ -989,24 +1030,53 @@
    RESPONSIVE
    ================================================================ */
 @media (max-width: 768px) {
-  .app-container { padding: 0 var(--spacing-md) var(--spacing-xl); }
+  .app-container {
+    padding: 0 var(--spacing-md) var(--spacing-xl);
+  }
 
-  .toolbar { flex-direction: column; align-items: stretch; }
-  .toolbar-right-wrap { align-items: stretch; }
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
 
-  .product-bar { flex-direction: column; align-items: flex-start; }
+  .toolbar-right-wrap {
+    align-items: stretch;
+  }
 
-  .qa-header { padding: var(--spacing-md) var(--spacing-lg); }
-  .qa-answer-wrap { padding: 0 var(--spacing-lg) var(--spacing-md); margin: 0 var(--spacing-xs); }
+  .product-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 
-  .input-actions { flex-direction: column; }
-  .input-actions-left { order: 2; }
-  .input-actions-right { order: 1; width: 100%; justify-content: flex-end; }
+  .qa-header {
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
 
-  .section-subtitle { margin-left: 0; margin-top: var(--spacing-2xs); }
+  .qa-answer-wrap {
+    padding: 0 var(--spacing-lg) var(--spacing-md);
+    margin: 0 var(--spacing-xs);
+  }
+
+  .input-actions {
+    flex-direction: column;
+  }
+
+  .input-actions-left {
+    order: 2;
+  }
+
+  .input-actions-right {
+    order: 1;
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .section-subtitle {
+    margin-left: 0;
+    margin-top: var(--spacing-2xs);
+  }
 }
 
 @media (max-width: 480px) {
   /* 移动端特定样式 */
 }
-

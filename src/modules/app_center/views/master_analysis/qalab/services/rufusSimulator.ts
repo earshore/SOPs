@@ -33,7 +33,7 @@ export type RufusMode = 'ai';
 export class RufusSimulator {
     private reportData: any = null;
     private mode: RufusMode = 'ai'; // 默认 AI 模式
-    
+
     /**
      * 初始化模拟器
      */
@@ -48,7 +48,7 @@ export class RufusSimulator {
         }
         // 注：当前版本主要支持德语，未来可根据市场扩展到其他语言
     }
-    
+
     /**
      * 设置回答模式
      */
@@ -57,7 +57,7 @@ export class RufusSimulator {
         this.mode = mode;
         console.log('[Rufus Simulator] 模式已更新:', oldMode, '->', mode);
     }
-    
+
     /**
      * 生成 Rufus 风格的回答（使用 AI 模式）
      */
@@ -67,24 +67,24 @@ export class RufusSimulator {
         console.log('[Rufus Simulator] - 当前模式: AI');
         console.log('[Rufus Simulator] - 问题:', question);
         console.log('[Rufus Simulator] - 报告数据存在:', !!this.reportData);
-        
+
         if (!this.reportData) {
             console.warn('[Rufus Simulator] 无报告数据，返回默认回答');
             return this.getDefaultResponse();
         }
-        
+
         console.log('[Rufus Simulator] 🤖 使用 AI 模式生成回答');
         const answer = await this.generateAIAnswer(question);
         console.log('[Rufus Simulator] ✅ AI 回答生成成功，长度:', answer.length);
         console.log('[Rufus Simulator] ========================================');
         return answer;
     }
-    
+
     /**
      * 基于规则的回答生成（原有逻辑）
      */
 
-    
+
     /**
      * 基于 AI 的智能回答生成
      */
@@ -93,59 +93,59 @@ export class RufusSimulator {
         console.log('[Rufus AI] 🤖 开始生成 AI 回答');
         console.log('[Rufus AI] 时间:', new Date().toLocaleTimeString());
         console.log('[Rufus AI] ========================================');
-        
+
         // 获取 LLM 配置
         const activeProvider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER) as string | null;
         console.log('[Rufus AI] 🔍 检查 LLM 配置...');
         console.log('[Rufus AI] - 活跃提供商:', activeProvider || '未配置');
-        
+
         if (!activeProvider) {
             console.error('[Rufus AI] ❌ 未配置 LLM 服务');
             throw new Error('未配置 LLM 服务');
         }
-        
+
         const config = await StorageService.getLLMConfigWithKey(activeProvider);
         console.log('[Rufus AI] - 配置获取:', config ? '成功' : '失败');
-        
+
         if (!config || !config.apiKey) {
             console.error('[Rufus AI] ❌ LLM 配置不完整');
             console.error('[Rufus AI] - config 存在:', !!config);
             console.error('[Rufus AI] - apiKey 存在:', !!config?.apiKey);
             throw new Error('LLM 配置不完整');
         }
-        
+
         console.log('[Rufus AI] ✅ LLM 配置验证通过');
         console.log('[Rufus AI] - 提供商:', config.provider);
         console.log('[Rufus AI] - 端点:', config.endpoint);
         console.log('[Rufus AI] - 模型:', config.model);
         console.log('[Rufus AI] - API Key 长度:', config.apiKey.length, '字符');
         console.log('[Rufus AI] ----------------------------------------');
-        
+
         // 构建系统提示词
         console.log('[Rufus AI] 📝 构建系统提示词...');
         const systemPrompt = this.buildSystemPrompt();
         console.log('[Rufus AI] ✅ 系统提示词长度:', systemPrompt.length, '字符');
         console.log('[Rufus AI] ----------------------------------------');
-        
+
         // 构建用户问题（包含报告上下文）
         console.log('[Rufus AI] 📝 构建用户提示词...');
         const userPrompt = this.buildUserPrompt(question);
         console.log('[Rufus AI] ✅ 用户提示词长度:', userPrompt.length, '字符');
         console.log('[Rufus AI] ----------------------------------------');
-        
+
         const messages: ChatMessage[] = [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userPrompt }
         ];
-        
+
         console.log('[Rufus AI] 📦 消息数组:');
         console.log('[Rufus AI] - 消息数量:', messages.length);
         console.log('[Rufus AI] - 总字符数:', messages.reduce((sum, m) => sum + m.content.length, 0));
         console.log('[Rufus AI] ========================================');
         console.log('[Rufus AI] 🚀 开始调用 LLM...');
-        
+
         const callStartTime = Date.now();
-        
+
         // 调用 LLM
         const response = await callLLM(
             messages,
@@ -159,10 +159,10 @@ export class RufusSimulator {
                 retries: 1 // 只重试1次
             }
         );
-        
+
         const callEndTime = Date.now();
         const callDuration = callEndTime - callStartTime;
-        
+
         console.log('[Rufus AI] ========================================');
         console.log('[Rufus AI] ✅ LLM 调用成功');
         console.log('[Rufus AI] ⏱️ 调用耗时:', callDuration, 'ms');
@@ -173,10 +173,10 @@ export class RufusSimulator {
         console.log('[Rufus AI] 📄 回答内容预览 (前 150 字符):');
         console.log('[Rufus AI]', response.substring(0, 150).trim() + (response.length > 150 ? '...' : ''));
         console.log('[Rufus AI] ========================================');
-        
+
         return response.trim();
     }
-    
+
     /**
      * 构建系统提示词
      */
@@ -227,41 +227,41 @@ export class RufusSimulator {
 - ❌ 贬低竞品
 - ❌ 使用绝对化词汇（"最好"、"完美"、"绝对"等）`;
     }
-    
+
     /**
      * 构建用户提示词（包含报告上下文）
      */
     private buildUserPrompt(question: string): string {
         console.log('[Rufus AI] 📝 开始构建用户提示词...');
         console.log('[Rufus AI] - reportData 存在:', !!this.reportData);
-        
+
         if (!this.reportData) {
             console.warn('[Rufus AI] ⚠️ reportData 为空，返回基础提示词');
             return `潜在买家问题: ${question}\n\n请以卖家客服的身份回答。由于没有产品分析报告，请诚实地告知买家暂无详细数据，但可以提供基本的产品信息。`;
         }
-        
+
         // 提取报告关键信息
         const productTitle = this.reportData?.product_title || this.reportData?.title || '未知产品';
         console.log('[Rufus AI] - 产品标题:', productTitle);
-        
+
         // 构建简洁的报告摘要
         let reportSummary = `# 产品分析报告\n\n`;
         reportSummary += `产品: ${productTitle}\n\n`;
-        
+
         let hasData = false;
-        
+
         // 从 analysisReport 中提取信息
         // 支持多种数据格式：直接字段、details、highlights、bullet_analysis等
         const ar = this.reportData.analysisReport || this.reportData;
-        
+
         // 卖点 - 支持多种字段名
-        const sellingPoints = ar['selling-points']?.bullet_analysis 
-            || ar.sellingPoints?.bullet_analysis 
+        const sellingPoints = ar['selling-points']?.bullet_analysis
+            || ar.sellingPoints?.bullet_analysis
             || ar.selling_points?.bullet_analysis
             || ar['selling-points']?.details
             || ar['selling-points']?.highlights
             || [];
-        
+
         if (sellingPoints.length > 0) {
             console.log('[Rufus AI] ✅ 找到卖点数据:', sellingPoints.length, '条');
             reportSummary += `## 主要卖点\n`;
@@ -274,15 +274,15 @@ export class RufusSimulator {
         } else {
             console.log('[Rufus AI] ⚠️ 未找到卖点数据');
         }
-        
+
         // 致命缺陷
-        const fatalFlaws = ar['fatal-flaws']?.critical_issues 
-            || ar.fatalFlaws?.critical_issues 
+        const fatalFlaws = ar['fatal-flaws']?.critical_issues
+            || ar.fatalFlaws?.critical_issues
             || ar.fatal_flaws?.critical_issues
             || ar['fatal-flaws']?.details
             || ar['fatal-flaws']?.highlights
             || [];
-        
+
         if (fatalFlaws.length > 0) {
             console.log('[Rufus AI] ✅ 找到致命缺陷数据:', fatalFlaws.length, '条');
             reportSummary += `## 关键问题\n`;
@@ -295,15 +295,15 @@ export class RufusSimulator {
         } else {
             console.log('[Rufus AI] ⚠️ 未找到致命缺陷数据');
         }
-        
+
         // Wow 时刻
-        const wowMoments = ar['wow-moments']?.moments 
-            || ar.wowMoments?.moments 
+        const wowMoments = ar['wow-moments']?.moments
+            || ar.wowMoments?.moments
             || ar.wow_moments?.moments
             || ar['wow-moments']?.details
             || ar['wow-moments']?.highlights
             || [];
-        
+
         if (wowMoments.length > 0) {
             console.log('[Rufus AI] ✅ 找到 Wow 时刻数据:', wowMoments.length, '条');
             reportSummary += `## 惊喜时刻\n`;
@@ -316,15 +316,15 @@ export class RufusSimulator {
         } else {
             console.log('[Rufus AI] ⚠️ 未找到 Wow 时刻数据');
         }
-        
+
         // 犹豫点
-        const hesitations = ar['hesitation-points']?.hesitations 
-            || ar.hesitationPoints?.hesitations 
+        const hesitations = ar['hesitation-points']?.hesitations
+            || ar.hesitationPoints?.hesitations
             || ar.hesitation_points?.hesitations
             || ar['hesitation-points']?.details
             || ar['hesitation-points']?.highlights
             || [];
-        
+
         if (hesitations.length > 0) {
             console.log('[Rufus AI] ✅ 找到犹豫点数据:', hesitations.length, '条');
             reportSummary += `## 常见顾虑\n`;
@@ -337,15 +337,15 @@ export class RufusSimulator {
         } else {
             console.log('[Rufus AI] ⚠️ 未找到犹豫点数据');
         }
-        
+
         // 买家画像
-        const buyerProfile = ar['buyer-profile']?.buyer_types 
-            || ar.buyerProfile?.buyer_types 
+        const buyerProfile = ar['buyer-profile']?.buyer_types
+            || ar.buyerProfile?.buyer_types
             || ar.buyer_profile?.buyer_types
             || ar['buyer-profile']?.details
             || ar['buyer-profile']?.highlights
             || [];
-        
+
         if (buyerProfile.length > 0) {
             console.log('[Rufus AI] ✅ 找到买家画像数据:', buyerProfile.length, '条');
             reportSummary += `## 典型买家\n`;
@@ -358,18 +358,18 @@ export class RufusSimulator {
         } else {
             console.log('[Rufus AI] ⚠️ 未找到买家画像数据');
         }
-        
+
         // 如果还是没有数据，记录完整的 reportData 结构
         if (!hasData) {
             console.warn('[Rufus AI] ⚠️ 未找到任何可用的分析数据');
             console.warn('[Rufus AI] 📋 reportData 字段:', Object.keys(this.reportData));
             console.warn('[Rufus AI] 📄 reportData 完整结构:', JSON.stringify(this.reportData, null, 2).substring(0, 500));
-            
+
             reportSummary += `\n⚠️ 注意: 当前报告数据不完整，可能无法提供详细的产品分析。\n\n`;
         } else {
             console.log('[Rufus AI] ✅ 报告摘要构建完成，长度:', reportSummary.length, '字符');
         }
-        
+
         // 组合最终提示词
         const finalPrompt = `${reportSummary}\n---\n\n潜在买家问题: ${question}\n\n请以卖家客服的身份，基于以上产品分析报告回答买家的问题。
 
@@ -382,34 +382,34 @@ export class RufusSimulator {
 6. 快速转移到产品优势和解决方案上
 7. 不捏造数据，报告中没有的信息就说"我们的产品特点是..."
 8. 语气友好热情，目标是促进转化`;
-        
+
         console.log('[Rufus AI] ✅ 最终提示词长度:', finalPrompt.length, '字符');
-        
+
         return finalPrompt;
     }
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
+
+
+
+
+
+
+
+
+
+
+
+
     /**
      * 默认回答（无报告数据时）
      */

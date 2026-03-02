@@ -98,12 +98,12 @@ export function toggleJsonViewer(context: AlpineContext): void {
  */
 export function toggleDataSource(context: AlpineContext): void {
   context.useRealData = !context.useRealData;
-  
+
   // 清空之前的结果
   context.analysisReport = null;
   context.hasReport = false;
   appStore.getState().setAnalysisReport(null);
-  
+
   showToast(
     context.useRealData ? '已切换到真实数据分析模式' : '已切换到示例数据模式',
     { type: 'info' }
@@ -118,15 +118,15 @@ export function copyPrompt(context: AlpineContext, currentProducts: Product[], i
 
   const targetId = context.selectedTargets[index];
   if (!targetId) return;
-  
+
   // 如果有多个产品，合并后生成提示词
   const mergedProduct = currentProducts.length > 1 ? mergeProducts(currentProducts) : currentProducts[0];
   if (!mergedProduct) return;
-  
+
   // 获取正确的语言代码
   const language = getMarketLanguage();
   const prompt = generateAnalysisPrompt(targetId, mergedProduct, language);
-  
+
   navigator.clipboard.writeText(prompt).then(() => {
     showToast('提示词已复制', { type: 'success' });
   }).catch(() => {
@@ -181,7 +181,7 @@ export function copyMarkdown(
     dataSourceMarketplace,
     dataSourceLabel
   );
-  
+
   navigator.clipboard.writeText(markdown).then(() => {
     showToast('Markdown 报告已复制', { type: 'success' });
   }).catch(() => {
@@ -216,7 +216,7 @@ export function downloadJson(context: AlpineContext, dataSourceMarketplace: stri
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  
+
   showToast('JSON 报告已下载', { type: 'success' });
 }
 
@@ -231,7 +231,7 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
   context.isAnalyzing = true;
   context.progress = 0;
   appStore.getState().updateAnalysis({ isAnalyzing: true });
-  
+
   console.log('[用户动作] 开始分析:', {
     selectedTargets: context.selectedTargets.length,
     selectedAsins: context.selectedAsins.length,
@@ -244,7 +244,7 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
     if (context.useRealData) {
       // 使用真实数据进行 AI 分析
       const products = getRealProducts(context.selectedAsins);
-      
+
       if (products.length === 0) {
         throw new Error('无法获取产品数据,请确保已从数据采集或数据管理导入数据');
       }
@@ -284,21 +284,21 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
     context.analysisReport = null;
     context.hasReport = false;
     appStore.getState().setAnalysisReport(null);
-    
+
     // 使用 $nextTick 确保清空操作完成后再设置新报告
     if ((context as any).$nextTick) {
       (context as any).$nextTick(() => {
         // 设置新报告
         context.analysisReport = analysisReport;
         context.hasReport = true;
-        
+
         console.log('[用户动作] 分析报告已设置，selectedTargets:', context.selectedTargets.length);
         console.log('[用户动作] analysisReport 已保存:', !!context.analysisReport);
         console.log('[用户动作] hasReport 标志已设置:', context.hasReport);
-        
+
         // 同步到 Zustand store
         appStore.getState().setAnalysisReport(analysisReport as any);
-        
+
         // 再次使用 $nextTick 确保视图完全更新
         (context as any).$nextTick(() => {
           console.log('[用户动作] 视图更新完成');
@@ -319,7 +319,7 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
         currentHistoryId,
         analysisReport as any
       );
-      
+
       if (success) {
         console.log('[用户动作] 已自动标记历史快照为"已分析"');
         // 触发历史记录更新事件

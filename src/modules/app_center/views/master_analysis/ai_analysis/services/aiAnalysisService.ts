@@ -36,7 +36,7 @@ async function getLLMConfig(): Promise<LLMConfig> {
   }
 
   const model = config.model || (config.models && config.models[0] ? (typeof config.models[0] === 'string' ? config.models[0] : config.models[0].id) : undefined);
-  
+
   if (!model) {
     throw new Error('未选择模型，请在设置中同步或选择模型');
   }
@@ -99,7 +99,7 @@ async function analyzeTarget(
     // 解析 JSON 响应
     const result = JSON.parse(response);
     console.log(`[AI分析] ${targetId} 解析后的结果键:`, Object.keys(result));
-    
+
     return result;
   } catch (error) {
     console.error(`[AI分析] ${targetId} 分析失败:`, error);
@@ -158,7 +158,7 @@ export async function runAIAnalysis(
             actualResult = resultObj[fieldName];
             console.log(`[AI分析] ${targetId} 检测到嵌套结构，已提取内层数据`);
           }
-          
+
           (report as any)[fieldName] = actualResult;
           console.log(`[AI分析] ${targetId} 分析成功，数据已添加到报告`);
         } else {
@@ -194,41 +194,41 @@ export function validateAnalysisResult(targetId: string, result: unknown): boole
   // 根据不同的目标进行特定验证
   switch (targetId) {
     case 'title-keywords':
-      return Array.isArray(data.primary_keywords) && 
-             Array.isArray(data.secondary_keywords);
-    
+      return Array.isArray(data.primary_keywords) &&
+        Array.isArray(data.secondary_keywords);
+
     case 'selling-points':
-      return Array.isArray(data.bullet_analysis) && 
-             !!data.overall_strategy && 
-             !!data.function_scene_matrix;
-    
+      return Array.isArray(data.bullet_analysis) &&
+        !!data.overall_strategy &&
+        !!data.function_scene_matrix;
+
     case 'fatal-flaws':
-      return Array.isArray(data.critical_issues) && 
-             Array.isArray(data.return_triggers);
-    
+      return Array.isArray(data.critical_issues) &&
+        Array.isArray(data.return_triggers);
+
     case 'wow-moments':
-      return Array.isArray(data.moments) && 
-             Array.isArray(data.emotional_triggers);
-    
+      return Array.isArray(data.moments) &&
+        Array.isArray(data.emotional_triggers);
+
     case 'hesitation-points':
-      return Array.isArray(data.hesitations) && 
-             Array.isArray(data.common_doubts);
-    
+      return Array.isArray(data.hesitations) &&
+        Array.isArray(data.common_doubts);
+
     case 'buyer-profile':
-      return !!data.demographics && 
-             Array.isArray(data.buyer_types) && 
-             Array.isArray(data.usage_scenes);
-    
+      return !!data.demographics &&
+        Array.isArray(data.buyer_types) &&
+        Array.isArray(data.usage_scenes);
+
     case 'vocab-gap':
-      return Array.isArray(data.seller_terms) && 
-             Array.isArray(data.buyer_terms) && 
-             Array.isArray(data.term_translations);
-    
+      return Array.isArray(data.seller_terms) &&
+        Array.isArray(data.buyer_terms) &&
+        Array.isArray(data.term_translations);
+
     case 'promise-reality':
-      return Array.isArray(data.gaps) && 
-             Array.isArray(data.verified_claims) && 
-             !!data.overall_credibility;
-    
+      return Array.isArray(data.gaps) &&
+        Array.isArray(data.verified_claims) &&
+        !!data.overall_credibility;
+
     default:
       return true;
   }

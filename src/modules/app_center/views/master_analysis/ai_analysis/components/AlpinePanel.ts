@@ -33,14 +33,14 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
     useRealData: true,
     dataSource: 'scraper' as 'sample' | 'scraper',
     showDataSourceBanner: true,
-    
+
     // ========== 订阅清理函数 ==========
     _unsubscribes: [] as Array<() => void>,
 
     // ========== Lifecycle ==========
     init(this: AlpineContext & Record<string, unknown>) {
       console.log('[Alpine 组件] 🚀 组件初始化');
-      
+
       // 设置自动状态同步（Zustand → Alpine）
       this._unsubscribes = createMultipleStateSyncs([
         {
@@ -55,21 +55,21 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
         },
         {
           selector: (state) => state.analysis.analysisReport,
-          onChange: (report) => { 
+          onChange: (report) => {
             this.analysisReport = report;
             this.hasReport = !!report;
           },
           immediate: true
         }
       ]);
-      
+
       // 初始化 selectedTargets（默认全选）
       const currentTargets = this.selectedTargets;
       if (currentTargets.length === 0) {
         this.selectedTargets = analysisTargets.map(t => t.id);
         console.log('[Alpine 组件] ✅ 已默认全选所有分析目标:', this.selectedTargets.length);
       }
-      
+
       // 监听 analysisReport 变化，自动更新 hasReport 标志
       (this as any).$watch('analysisReport', (newValue: any) => {
         console.log('[Alpine 组件] 📊 analysisReport 变化检测:', !!newValue);
@@ -79,14 +79,14 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
           console.log('[Alpine 组件] 📊 results 重新计算:', resultsCount, '个结果');
         }
       });
-      
+
       // 检查是否有新的 Scraper 数据
       checkAndLoadScraperData(this);
 
       // 检查是否有已加载的历史报告
       checkLoadedReport(this);
     },
-    
+
     // ========== 清理 ==========
     destroy(this: AlpineContext & Record<string, unknown>) {
       console.log('[Alpine 组件] 🧹 组件销毁，清理订阅');
@@ -213,11 +213,11 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
       return highlightJson(json);
     }
   };
-  
+
   // 合并计算属性 - 使用 defineProperties 保留 getter 特性
   const computedProps = createComputedProperties(panel as unknown as AlpineContext);
   const descriptors = Object.getOwnPropertyDescriptors(computedProps);
   Object.defineProperties(panel, descriptors);
-  
+
   return panel as unknown as AlpineContext & ComputedProperties & Record<string, unknown>;
 }

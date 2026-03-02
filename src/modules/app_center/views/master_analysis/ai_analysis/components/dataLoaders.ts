@@ -14,13 +14,13 @@ import type { ScrapedData } from '@/types/modules-business';
  */
 export function checkAndLoadScraperData(context: AlpineContext): void {
   const scrapedData = appStore.getState().scraper?.scrapedData as ScrapedData | null;
-  
+
   if (scrapedData && scrapedData.products && scrapedData.products.length > 0) {
     // 如果有 Scraper 数据，自动选中所有产品的 ASIN
     const asins = scrapedData.products
       .map(p => p.asin)
       .filter((asin): asin is string => !!asin);
-    
+
     if (asins.length > 0 && JSON.stringify(asins) !== JSON.stringify(context.selectedAsins)) {
       context.selectedAsins = asins;
       context.dataSource = 'scraper';
@@ -29,7 +29,7 @@ export function checkAndLoadScraperData(context: AlpineContext): void {
       console.log('[数据加载] 自动加载 Scraper 数据:', context.selectedAsins);
       showToast(`已自动加载 ${asins.length} 个产品 ASIN`, { type: 'success' });
     }
-    
+
     // 自动启用真实数据分析模式
     if (!context.useRealData) {
       context.useRealData = true;
@@ -43,12 +43,12 @@ export function checkAndLoadScraperData(context: AlpineContext): void {
  */
 export function checkLoadedReport(context: AlpineContext): void {
   const report = appStore.getState().analysis?.analysisReport;
-  
+
   // 类型守卫：确保 report 是对象类型
   if (!report || typeof report === 'string') {
     return;
   }
-  
+
   // 检测报告格式：标准 FullAnalysisReport 格式
   // 检查是否包含任何分析目标字段
   const reportObj = report as Record<string, unknown>;
@@ -62,14 +62,14 @@ export function checkLoadedReport(context: AlpineContext): void {
     'vocab-gap',
     'promise-reality'
   ].some(key => reportObj[key]);
-  
+
   if (hasAnalysisData) {
     console.log('[数据加载] 检测到已加载的分析报告');
-    
+
     // 加载报告数据到当前组件
     context.analysisReport = reportObj;
     context.hasReport = true;
-    
+
     console.log('[数据加载] 已显示历史分析报告');
     showToast('已加载历史分析报告', { type: 'success' });
   }
@@ -91,7 +91,7 @@ export function loadHistoricalReport(
     // 加载历史报告数据（只保存原始报告）
     context.analysisReport = detail.report;
     context.hasReport = true;
-    
+
     // 同步到 Zustand store
     appStore.getState().setAnalysisReport(detail.report as any);
 

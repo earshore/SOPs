@@ -124,6 +124,7 @@
         opacity: 0;
         transform: translateY(24px) scale(0.96);
     }
+
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -208,10 +209,12 @@
         opacity: 0;
         transform: scale(0.3) translateY(10px);
     }
+
     60% {
         opacity: 1;
         transform: scale(1.05) translateY(-2px);
     }
+
     100% {
         transform: scale(1) translateY(0);
     }
@@ -323,10 +326,12 @@
         box-shadow: 0 0 0 0 var(--color-amber-400);
         transform: scale(1);
     }
+
     50% {
         box-shadow: 0 0 0 6px var(--color-amber-100);
         transform: scale(1.05);
     }
+
     100% {
         box-shadow: 0 0 0 3px var(--color-amber-200);
         transform: scale(1.03);
@@ -390,10 +395,12 @@
         box-shadow: 0 0 0 0 var(--color-amber-500);
         transform: scale(1);
     }
+
     50% {
         box-shadow: 0 0 0 6px var(--color-amber-200);
         transform: scale(1.05);
     }
+
     100% {
         box-shadow: 0 0 0 3px var(--color-amber-300);
         transform: scale(1.03);
@@ -523,7 +530,7 @@
 
 /* === Blockquote 装饰图标 === */
 #kt-llm-analysis-result.markdown-content blockquote:first-of-type::before,
-#kt-llm-analysis-result.markdown-content h3:nth-of-type(1) + blockquote::before {
+#kt-llm-analysis-result.markdown-content h3:nth-of-type(1)+blockquote::before {
     content: '💡';
     position: absolute;
     top: -0.625rem;
@@ -535,7 +542,7 @@
     line-height: 1;
 }
 
-#kt-llm-analysis-result.markdown-content h3:nth-of-type(2) + blockquote::before {
+#kt-llm-analysis-result.markdown-content h3:nth-of-type(2)+blockquote::before {
     content: '⚠️';
     position: absolute;
     top: -0.625rem;
@@ -675,7 +682,7 @@
 }
 
 /* === 胶囊标签 (改写建议编号) === */
-#kt-llm-analysis-result.markdown-content h3:nth-of-type(3) ~ p > strong:first-child {
+#kt-llm-analysis-result.markdown-content h3:nth-of-type(3)~p>strong:first-child {
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;

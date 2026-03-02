@@ -8,15 +8,15 @@
  * 分析模块定义
  */
 export interface AnalysisModule {
-    id: string;
-    category: 'listing' | 'reviews' | 'cross';
-    label_cn: string;
-    desc_cn: string;
-    label_en: string;
-    desc_en: string;
-    taskPrompt: string;
-    schemaTemplate: string;
-    color?: string; // 视觉设计颜色
+  id: string;
+  category: 'listing' | 'reviews' | 'cross';
+  label_cn: string;
+  desc_cn: string;
+  label_en: string;
+  desc_en: string;
+  taskPrompt: string;
+  schemaTemplate: string;
+  color?: string; // 视觉设计颜色
 }
 
 /**

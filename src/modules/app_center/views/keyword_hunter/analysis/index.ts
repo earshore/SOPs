@@ -57,7 +57,7 @@ function cleanup(): void {
     // 清理定时器
     timeouts.forEach(id => clearTimeout(id));
     timeouts = [];
-    
+
     // 清理已注册的动作
     if (registeredActionNames.length > 0) {
         unregisterActions(registeredActionNames);
@@ -225,27 +225,27 @@ async function runLLMAnalysis(): Promise<void> {
 
             const errorDiv = document.createElement('div');
             errorDiv.className = `p-4 bg-${colorClass}-50 border border-${colorClass}-200 rounded-lg`;
-            
+
             const headerDiv = document.createElement('div');
             headerDiv.className = `flex items-center gap-2 text-${colorClass}-700 font-bold mb-2`;
             const iconEl = document.createElement('i');
             iconEl.className = `fas ${icon}`;
             headerDiv.appendChild(iconEl);
             headerDiv.appendChild(document.createTextNode(` ${title}`));
-            
+
             const msgP = document.createElement('p');
             msgP.className = `text-sm text-${colorClass}-800`;
             msgP.textContent = errorMsg;
-            
+
             const retryBtn = document.createElement('button');
             retryBtn.className = `mt-3 px-3 py-1 bg-white border border-${colorClass}-200 text-${colorClass}-700 text-xs rounded hover:bg-${colorClass}-50`;
             retryBtn.textContent = '重试';
             retryBtn.onclick = () => (window as any).kt_runLLMAnalysis();
-            
+
             errorDiv.appendChild(headerDiv);
             errorDiv.appendChild(msgP);
             errorDiv.appendChild(retryBtn);
-            
+
             resultDiv.innerHTML = '';
             resultDiv.appendChild(errorDiv);
         }
@@ -396,7 +396,7 @@ function highlightScores(container: HTMLElement): void {
     const progressBar = document.createElement('div');
     progressBar.className = 'score-progress-bar';
     progressBar.style.cssText = 'margin-top:0.75rem;background:rgba(255,255,255,0.15);border-radius:1rem;height:6px;overflow:hidden;width:100%;';
-    
+
     const progressFill = document.createElement('div');
     progressFill.style.cssText = 'width:0%;height:100%;background:rgba(255,255,255,0.7);border-radius:1rem;transition:width 1s ease-out;';
     progressBar.appendChild(progressFill);
@@ -426,7 +426,7 @@ export async function mount(container: HTMLElement): Promise<void> {
         // 1. 使用 SafeModuleLoader 加载模板
         const loader = SafeModuleLoader.getInstance();
         const renderer = SafeRenderer.getInstance();
-        
+
         const html = await loader.loadTemplate(
             'src/modules/app_center/views/keyword_hunter/analysis/template.html',
             {
@@ -437,7 +437,7 @@ export async function mount(container: HTMLElement): Promise<void> {
                 }
             }
         );
-        
+
         // 使用 SafeRenderer 渲染模板
         // 添加淡入动画（在渲染前添加）
         container.classList.add('fade-in');

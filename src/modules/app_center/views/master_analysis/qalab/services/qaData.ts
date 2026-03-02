@@ -22,7 +22,7 @@ export interface QA {
 function extractReportInsights(report: any): any {
     const analysisReport = report?.analysisReport || report;
     const metadata = report?.metadata;
-    
+
     return {
         productTitle: metadata?.productTitle || '产品',
         market: metadata?.marketplace || 'DE',
@@ -77,12 +77,12 @@ function generateSmartAnswer(insights: any, questionType: string, lang: string):
 export function generateMultiLangQAs(report: any): QA[] {
     const qas: QA[] = [];
     const insights = extractReportInsights(report);
-    
+
     // 检查是否有有效的报告数据
-    const hasValidReport = insights.sellingPoints?.bullet_analysis || 
-                          insights.fatalFlaws?.critical_issues ||
-                          insights.wowMoments?.moments;
-    
+    const hasValidReport = insights.sellingPoints?.bullet_analysis ||
+        insights.fatalFlaws?.critical_issues ||
+        insights.wowMoments?.moments;
+
     if (!hasValidReport) {
         console.warn('[QALab] 报告数据不完整，使用默认模板');
     }
@@ -207,7 +207,7 @@ export function generateMultiLangQAs(report: any): QA[] {
 
     // Q6-Q15: 继续添加剩余Q&A...
     // 由于篇幅限制，这里展示结构
-    
+
     // Q6: Allergies/Safety
     qas.push({
         id: 6,

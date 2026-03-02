@@ -20,18 +20,24 @@
 /* 只保留模块特有的动画，避免覆盖全局动画 */
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.5;
   }
 }
 
 @keyframes pulse-glow {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
   }
+
   50% {
     box-shadow: 0 0 40px rgba(99, 102, 241, 0.5);
   }
@@ -41,15 +47,19 @@
   0% {
     background-position: -200% 0;
   }
+
   100% {
     background-position: 200% 0;
   }
 }
 
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-10px);
   }
@@ -65,7 +75,7 @@
 
 /* ========== Shimmer 效果 ========== */
 .shimmer {
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
   background-size: 200% 100%;
   animation: shimmer var(--duration-2s) infinite;
 }
@@ -233,11 +243,11 @@ pre code {
   .ai-main-content {
     padding: 1rem;
   }
-  
+
   .ai-header-content {
     padding: 1.5rem 1rem;
   }
-  
+
   .ai-footer-content {
     padding: 1.5rem 1rem;
   }

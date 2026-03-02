@@ -45,15 +45,15 @@ export async function mount(container: HTMLElement): Promise<void> {
     try {
         // 1. 获取qalab状态
         const qalabState = appStore.getState().qalab;
-        
+
         // 暴露全局对象（在任何异步操作之前）
         (window as any).qalabState = qalabState;
         (window as any).rufusSimulator = rufusSimulator;
-        
+
         // 2. 使用 SafeModuleLoader 加载模板
         const loader = SafeModuleLoader.getInstance();
         const renderer = SafeRenderer.getInstance();
-        
+
         const html = await loader.loadTemplate(
             'src/modules/app_center/views/master_analysis/qalab/template.html',
             {
@@ -64,7 +64,7 @@ export async function mount(container: HTMLElement): Promise<void> {
                 }
             }
         );
-        
+
         // 使用 SafeRenderer 渲染模板（静态模板，已审计）
         container.classList.add('fade-in');
         renderer.renderTemplate(container, html);
@@ -88,20 +88,20 @@ export async function mount(container: HTMLElement): Promise<void> {
                 // Tab切换通过事件委托处理
             }
         });
-        
+
         // 暴露triggerImport到全局，供HTML onclick使用
         (window as any).qalabTriggerImport = triggerImport;
 
         // 4. 设置事件监听器 - 使用事件委托处理data-action
         const eventManager = { listeners: [] as Array<{ element: any; event: string; handler: any }> };
-        
+
         const clickHandler = (e: Event) => {
             const target = e.target as HTMLElement;
             const actionBtn = target.closest('[data-action]') as HTMLElement;
-            
+
             if (actionBtn) {
                 const action = actionBtn.dataset.action;
-                
+
                 // 特殊处理Tab切换
                 if (action === 'amz_qalab_switchDataTab') {
                     const tab = actionBtn.dataset.tab as 'preview' | 'json';
@@ -110,7 +110,7 @@ export async function mount(container: HTMLElement): Promise<void> {
                     }
                     return;
                 }
-                
+
                 // 其他动作
                 if (action) {
                     const actionFn = (window as any)[action];
@@ -120,10 +120,10 @@ export async function mount(container: HTMLElement): Promise<void> {
                 }
             }
         };
-        
+
         container.addEventListener('click', clickHandler);
         eventManager.listeners.push({ element: container, event: 'click', handler: clickHandler });
-        
+
         // 监听 Rufus 输入框的回车键
         const keydownHandler = (e: KeyboardEvent) => {
             const target = e.target as HTMLElement;
@@ -135,10 +135,10 @@ export async function mount(container: HTMLElement): Promise<void> {
                 }
             }
         };
-        
+
         container.addEventListener('keydown', keydownHandler);
         eventManager.listeners.push({ element: container, event: 'keydown', handler: keydownHandler });
-        
+
         // 监听 Rufus 输入框的焦点事件 - 首次焦点时显示欢迎语
         let hasShownWelcome = false;
         const focusHandler = (e: FocusEvent) => {
@@ -146,7 +146,7 @@ export async function mount(container: HTMLElement): Promise<void> {
             if (target.id === 'rufusInput' && !hasShownWelcome) {
                 hasShownWelcome = true;
                 const qalabState = appStore.getState().qalab;
-                
+
                 // 只在没有消息历史时显示欢迎语
                 if (qalabState.rufusMessages.length === 0) {
                     const welcomeMessage = {
@@ -154,9 +154,9 @@ export async function mount(container: HTMLElement): Promise<void> {
                         content: '👋 您好！我是 Rufus AI，您的智能产品问答助手。\n\n我可以帮您：\n• 从卖家视角回答买家的产品问题\n• 基于竞品分析报告智能生成回答\n• 扬长避短，促进产品转化\n\n请随时向我提问！',
                         timestamp: Date.now()
                     };
-                    
+
                     qalabState.rufusMessages.push(welcomeMessage);
-                    
+
                     // 动态导入 renderRufusMessages
                     import('./components/actions').then(({ renderRufusMessages }) => {
                         renderRufusMessages();
@@ -165,16 +165,16 @@ export async function mount(container: HTMLElement): Promise<void> {
                 }
             }
         };
-        
+
         container.addEventListener('focus', focusHandler, true); // 使用捕获阶段
         eventManager.listeners.push({ element: container, event: 'focus', handler: focusHandler });
-        
+
         // 监听数据导入事件
         const dataImportHandler = () => {
             console.log('[QALab] 检测到数据导入事件');
             refreshDataPreview();
         };
-        
+
         window.addEventListener('qalab:data-imported', dataImportHandler);
         eventManager.listeners.push({ element: window, event: 'qalab:data-imported', handler: dataImportHandler });
 
@@ -183,29 +183,29 @@ export async function mount(container: HTMLElement): Promise<void> {
             console.log('[QALab] 检测到数据更新事件');
             autoLoadAnalysisReport();
         };
-        
+
         eventBus.on(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, dataUpdateHandler);
         eventBus.on(MODULE_EVENTS.ANALYSIS.ANALYZE_SUCCESS, dataUpdateHandler);
-        
+
         // 保存清理函数到容器
         (container as any).__qalabCleanup = {
             registeredActions,
             eventManager,
             dataUpdateHandler
         };
-        
+
         // 6. 模块挂载时检查是否有现有报告
         // 延迟执行，避免干扰页面初始动画
         requestAnimationFrame(() => {
             autoLoadAnalysisReport();
         });
-        
+
         // 7. 初始化数据预览
         // 延迟执行，避免干扰页面初始动画
         requestAnimationFrame(() => {
             refreshDataPreview();
         });
-        
+
         // 8. 确保按钮容器在数据预览渲染后仍然可见
         // 使用 Promise.resolve() 确保在当前微任务队列清空后执行
         Promise.resolve().then(() => {
@@ -213,10 +213,10 @@ export async function mount(container: HTMLElement): Promise<void> {
             if (sectionActions) {
                 // 检查按钮容器的计算样式
                 const computedStyle = window.getComputedStyle(sectionActions);
-                const isHidden = computedStyle.display === 'none' || 
-                                computedStyle.visibility === 'hidden' || 
-                                computedStyle.opacity === '0';
-                
+                const isHidden = computedStyle.display === 'none' ||
+                    computedStyle.visibility === 'hidden' ||
+                    computedStyle.opacity === '0';
+
                 if (isHidden) {
                     console.warn('[QALab] ⚠️ 检测到按钮容器被隐藏，强制显示');
                     sectionActions.style.display = 'flex';
@@ -244,13 +244,13 @@ export function unmount(container?: HTMLElement): void {
             console.warn('[QALab] ⚠️ 未提供container，跳过清理');
             return;
         }
-        
+
         const cleanup = (container as any).__qalabCleanup;
         if (!cleanup) {
             console.warn('[QALab] ⚠️ 未找到清理数据');
             return;
         }
-        
+
         // 1. 清理 EventBus 监听器
         if (cleanup.dataUpdateHandler) {
             eventBus.off(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, cleanup.dataUpdateHandler);

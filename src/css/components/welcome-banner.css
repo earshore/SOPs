@@ -177,7 +177,7 @@
   /* 6.5 确保流式布局,避免水平滚动 */
   max-width: 100%;
   overflow-x: hidden;
-  
+
   /* 5.6 定义暗色模式 CSS 变量 */
   --wb-text-primary: var(--color-text-primary, #0f172a);
   --wb-text-secondary: var(--color-text-secondary, #64748b);
@@ -203,7 +203,7 @@
   /* 8.3 优化渲染性能 */
   backface-visibility: hidden;
   perspective: 1000px;
-  
+
   /* 5.6 定义暗色模式 CSS 变量 */
   --wb-text-primary: var(--color-text-primary, #0f172a);
   --wb-text-secondary: var(--color-text-secondary, #64748b);
@@ -225,13 +225,11 @@
 .wb-bg-gradient {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    135deg,
-    var(--wb-gradient-1, var(--wb-gradient-start, var(--color-primary-light, rgba(59, 130, 246, 0.10)))) 0%,
-    var(--wb-gradient-mid, rgba(255, 255, 255, .95)) 35%,
-    var(--wb-gradient-2, var(--wb-gradient-end, var(--color-success-light, rgba(34, 197, 94, 0.10)))) 65%,
-    var(--wb-gradient-accent, var(--color-amber-400, #fbbf24)) 100%
-  );
+  background: linear-gradient(135deg,
+      var(--wb-gradient-1, var(--wb-gradient-start, var(--color-primary-light, rgba(59, 130, 246, 0.10)))) 0%,
+      var(--wb-gradient-mid, rgba(255, 255, 255, .95)) 35%,
+      var(--wb-gradient-2, var(--wb-gradient-end, var(--color-success-light, rgba(34, 197, 94, 0.10)))) 65%,
+      var(--wb-gradient-accent, var(--color-amber-400, #fbbf24)) 100%);
   /* 8.1 为装饰元素添加 pointer-events: none */
   pointer-events: none;
   /* 8.3 优化渲染性能 */
@@ -256,11 +254,9 @@
   right: -5%;
   width: 380px;
   height: 380px;
-  background: radial-gradient(
-    circle,
-    var(--wb-gradient-1, var(--wb-orb-1-color, var(--color-primary-light, rgba(59, 130, 246, 0.10)))) 0%,
-    transparent 70%
-  );
+  background: radial-gradient(circle,
+      var(--wb-gradient-1, var(--wb-orb-1-color, var(--color-primary-light, rgba(59, 130, 246, 0.10)))) 0%,
+      transparent 70%);
   animation-delay: 0s;
 }
 
@@ -269,11 +265,9 @@
   left: -5%;
   width: 300px;
   height: 300px;
-  background: radial-gradient(
-    circle,
-    var(--wb-gradient-2, var(--wb-orb-2-color, var(--color-success-light, rgba(34, 197, 94, 0.10)))) 0%,
-    transparent 70%
-  );
+  background: radial-gradient(circle,
+      var(--wb-gradient-2, var(--wb-orb-2-color, var(--color-success-light, rgba(34, 197, 94, 0.10)))) 0%,
+      transparent 70%);
   animation-delay: -4s;
 }
 
@@ -282,11 +276,9 @@
   right: 30%;
   width: 200px;
   height: 200px;
-  background: radial-gradient(
-    circle,
-    var(--wb-orb-3-color, var(--color-amber-400, #fbbf24)) 0%,
-    transparent 70%
-  );
+  background: radial-gradient(circle,
+      var(--wb-orb-3-color, var(--color-amber-400, #fbbf24)) 0%,
+      transparent 70%);
   animation-delay: -8s;
 }
 
@@ -294,11 +286,9 @@
   position: absolute;
   inset: 0;
   opacity: .03;
-  background-image: radial-gradient(
-    circle,
-    var(--color-primary, #3b82f6) 1px,
-    transparent 1px
-  );
+  background-image: radial-gradient(circle,
+      var(--color-primary, #3b82f6) 1px,
+      transparent 1px);
   background-size: 32px 32px;
   /* 8.1 为装饰元素添加 pointer-events: none */
   pointer-events: none;
@@ -411,11 +401,9 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: linear-gradient(
-    135deg,
-    var(--color-amber-400, #fbbf24),
-    var(--color-warning, #f59e0b)
-  );
+  background: linear-gradient(135deg,
+      var(--color-amber-400, #fbbf24),
+      var(--color-warning, #f59e0b));
   border: 3px solid white;
   display: flex;
   align-items: center;
@@ -444,8 +432,10 @@
 /* ===== 文本内容样式 ===== */
 .wb-text {
   flex: 1;
-  min-width: 0; /* 6.5 允许 flex 项目收缩以避免溢出 */
-  max-width: 100%; /* 6.5 确保不超出容器宽度 */
+  min-width: 0;
+  /* 6.5 允许 flex 项目收缩以避免溢出 */
+  max-width: 100%;
+  /* 6.5 确保不超出容器宽度 */
 }
 
 .wb-title-row {
@@ -482,8 +472,8 @@
   text-transform: uppercase;
   transition: all 200ms ease;
   /* 6.4 确保触摸目标尺寸 ≥ 44x44px */
-  min-height: 44px;
-  min-width: 44px;
+  /* min-height: 44px;
+  min-width: 44px; */
   justify-content: center;
 }
 
@@ -646,7 +636,8 @@
   /* 6.1 平板断点徽章样式 */
   .wb-badge {
     padding: 3px 8px;
-    font-size: 0.5625rem; /* 9px */
+    font-size: 0.5625rem;
+    /* 9px */
   }
 
   .wb-badge i {
@@ -677,10 +668,12 @@
 }
 
 @media (max-width: 480px) {
+
   /* 6.2 移动端断点样式 */
   .wb-badge {
     padding: 2px 6px;
-    font-size: 0.5rem; /* 8px */
+    font-size: 0.5rem;
+    /* 8px */
   }
 
   /* 6.2 特性标签垂直排列 */
@@ -690,6 +683,7 @@
 }
 
 @media (max-width: 375px) {
+
   /* 6.3 超小屏幕断点样式 */
   .wb-icon-main {
     width: 48px;
@@ -697,7 +691,8 @@
   }
 
   .wb-title {
-    font-size: 1rem; /* 16px */
+    font-size: 1rem;
+    /* 16px */
   }
 }
 
@@ -706,9 +701,12 @@
 
 /* 脉冲动画 - 用于 Safety 徽章 */
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1) translateZ(0);
   }
+
   50% {
     transform: scale(1.05) translateZ(0);
   }
@@ -721,9 +719,12 @@
 
 /* 闪烁动画 - 用于 Growth 徽章 */
 @keyframes blink {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.7;
   }
@@ -739,9 +740,11 @@
   0% {
     background-position: 0% 50%;
   }
+
   50% {
     background-position: 100% 50%;
   }
+
   100% {
     background-position: 0% 50%;
   }
@@ -756,6 +759,7 @@
 
 /* ===== 无障碍支持 ===== */
 @media (prefers-reduced-motion: reduce) {
+
   .wb-orb,
   .wb-particle,
   .wb-icon-ring,
@@ -784,15 +788,16 @@
 .wb-tag,
 .wb-tag span,
 .wb-badge {
-  transition: background-color 300ms ease, 
-              color 300ms ease, 
-              border-color 300ms ease,
-              background 300ms ease;
+  transition: background-color 300ms ease,
+    color 300ms ease,
+    border-color 300ms ease,
+    background 300ms ease;
 }
 
 
 /* ===== 暗色模式适配 ===== */
 @media (prefers-color-scheme: dark) {
+
   /* 5.6 使用 CSS 变量覆盖暗色模式样式 */
   .wb-container,
   .wb-card {
@@ -808,48 +813,38 @@
   /* 5.1 背景适配 */
   .wb-container,
   .wb-card {
-    background: linear-gradient(
-      135deg,
-      rgba(30, 58, 138, 0.15) 0%,
-      rgba(17, 24, 39, 0.95) 35%,
-      rgba(6, 78, 59, 0.15) 65%,
-      rgba(120, 53, 15, 0.10) 100%
-    );
+    background: linear-gradient(135deg,
+        rgba(30, 58, 138, 0.15) 0%,
+        rgba(17, 24, 39, 0.95) 35%,
+        rgba(6, 78, 59, 0.15) 65%,
+        rgba(120, 53, 15, 0.10) 100%);
     border-color: var(--wb-border-color);
   }
 
   .wb-bg-gradient {
-    background: linear-gradient(
-      135deg,
-      rgba(30, 58, 138, 0.15) 0%,
-      rgba(17, 24, 39, 0.95) 35%,
-      rgba(6, 78, 59, 0.15) 65%,
-      rgba(120, 53, 15, 0.10) 100%
-    );
+    background: linear-gradient(135deg,
+        rgba(30, 58, 138, 0.15) 0%,
+        rgba(17, 24, 39, 0.95) 35%,
+        rgba(6, 78, 59, 0.15) 65%,
+        rgba(120, 53, 15, 0.10) 100%);
   }
 
   .wb-orb-1 {
-    background: radial-gradient(
-      circle,
-      rgba(59, 130, 246, 0.15) 0%,
-      transparent 70%
-    );
+    background: radial-gradient(circle,
+        rgba(59, 130, 246, 0.15) 0%,
+        transparent 70%);
   }
 
   .wb-orb-2 {
-    background: radial-gradient(
-      circle,
-      rgba(34, 197, 94, 0.15) 0%,
-      transparent 70%
-    );
+    background: radial-gradient(circle,
+        rgba(34, 197, 94, 0.15) 0%,
+        transparent 70%);
   }
 
   .wb-orb-3 {
-    background: radial-gradient(
-      circle,
-      rgba(251, 191, 36, 0.15) 0%,
-      transparent 70%
-    );
+    background: radial-gradient(circle,
+        rgba(251, 191, 36, 0.15) 0%,
+        transparent 70%);
   }
 
   /* 5.2 徽章适配 - 调整为更亮的色调以提高可见度 */
@@ -926,13 +921,11 @@
   border-radius: var(--rounded-2xl, 24px);
   border: 1px solid rgba(226, 232, 240, 0.8);
   overflow: hidden;
-  background: linear-gradient(
-    135deg,
-    var(--wb-gradient-1, rgba(59, 130, 246, 0.08)) 0%,
-    rgba(255, 255, 255, 0.95) 35%,
-    var(--wb-gradient-2, rgba(34, 197, 94, 0.08)) 65%,
-    rgba(251, 191, 36, 0.05) 100%
-  );
+  background: linear-gradient(135deg,
+      var(--wb-gradient-1, rgba(59, 130, 246, 0.08)) 0%,
+      rgba(255, 255, 255, 0.95) 35%,
+      var(--wb-gradient-2, rgba(34, 197, 94, 0.08)) 65%,
+      rgba(251, 191, 36, 0.05) 100%);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
   margin-bottom: var(--spacing-2xl, 3rem);
   padding: var(--spacing-lg, 1.5rem) var(--spacing-xl, 2rem);
