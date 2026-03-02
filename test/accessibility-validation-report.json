@@ -1,0 +1,476 @@
+{
+  "summary": {
+    "total_files": 45,
+    "files_with_issues": 27,
+    "total_issues": 59
+  },
+  "issues": [
+    {
+      "file": "src/modules/app_center/views/keyword_hunter/analysis/template.html",
+      "line": 33,
+      "type": "missing_theme_class",
+      "element": "<span class=\"wb-badge\">\n<i class=\"fas fa-flag-checkered\"></i>STEP 3\n                                ...",
+      "message": "徽章缺少主题类(wb-badge-*)"
+    },
+    {
+      "file": "src/modules/app_center/views/keyword_hunter/analysis/template.html",
+      "line": 33,
+      "type": "missing_aria_label",
+      "element": "<span class=\"wb-badge\">\n<i class=\"fas fa-flag-checkered\"></i>STEP 3\n                                ...",
+      "message": "徽章元素缺少 aria-label 属性",
+      "suggestion": "添加 aria-label 属性描述徽章含义,例如: aria-label=\"人工智能功能\""
+    },
+    {
+      "file": "src/modules/app_center/views/keyword_hunter/analysis/template.html",
+      "line": 34,
+      "type": "missing_aria_hidden",
+      "element": "<i class=\"fas fa-flag-checkered\"></i>",
+      "message": "装饰性图标元素缺少 aria-hidden=\"true\" 属性",
+      "suggestion": "为装饰性图标添加 aria-hidden=\"true\" 属性,避免屏幕阅读器读取"
+    },
+    {
+      "file": "src/modules/app_center/views/keyword_hunter/process/template.html",
+      "line": 31,
+      "type": "missing_theme_class",
+      "element": "<span class=\"wb-badge\">\n<i class=\"fas fa-microchip\"></i>STEP 2\n                                </spa...",
+      "message": "徽章缺少主题类(wb-badge-*)"
+    },
+    {
+      "file": "src/modules/app_center/views/keyword_hunter/process/template.html",
+      "line": 31,
+      "type": "missing_aria_label",
+      "element": "<span class=\"wb-badge\">\n<i class=\"fas fa-microchip\"></i>STEP 2\n                                </spa...",
+      "message": "徽章元素缺少 aria-label 属性",
+      "suggestion": "添加 aria-label 属性描述徽章含义,例如: aria-label=\"人工智能功能\""
+    },
+    {
+      "file": "src/modules/app_center/views/keyword_hunter/process/template.html",
+      "line": 32,
+      "type": "missing_aria_hidden",
+      "element": "<i class=\"fas fa-microchip\"></i>",
+      "message": "装饰性图标元素缺少 aria-hidden=\"true\" 属性",
+      "suggestion": "为装饰性图标添加 aria-hidden=\"true\" 属性,避免屏幕阅读器读取"
+    },
+    {
+      "file": "src/modules/app_center/views/master_analysis/scraper/template.html",
+      "line": 30,
+      "type": "missing_theme_class",
+      "element": "<span class=\"wb-badge\">\n<i class=\"fa-solid fa-arrows-to-dot\"></i>LIVE\n                            </...",
+      "message": "徽章缺少主题类(wb-badge-*)"
+    },
+    {
+      "file": "src/modules/app_center/views/master_analysis/scraper/template.html",
+      "line": 30,
+      "type": "missing_aria_label",
+      "element": "<span class=\"wb-badge\">\n<i class=\"fa-solid fa-arrows-to-dot\"></i>LIVE\n                            </...",
+      "message": "徽章元素缺少 aria-label 属性",
+      "suggestion": "添加 aria-label 属性描述徽章含义,例如: aria-label=\"人工智能功能\""
+    },
+    {
+      "file": "src/modules/app_center/views/master_analysis/scraper/template.html",
+      "line": 31,
+      "type": "missing_aria_hidden",
+      "element": "<i class=\"fa-solid fa-arrows-to-dot\"></i>",
+      "message": "装饰性图标元素缺少 aria-hidden=\"true\" 属性",
+      "suggestion": "为装饰性图标添加 aria-hidden=\"true\" 属性,避免屏幕阅读器读取"
+    },
+    {
+      "file": "src/modules/app_center/views/master_analysis/ai_analysis/template.html",
+      "line": 33,
+      "type": "missing_theme_class",
+      "element": "<span class=\"wb-badge\">\n<i class=\"fa-solid fa-circle-up\"></i>PRO\n              </span>",
+      "message": "徽章缺少主题类(wb-badge-*)"
+    },
+    {
+      "file": "src/modules/app_center/views/master_analysis/ai_analysis/template.html",
+      "line": 33,
+      "type": "missing_aria_label",
+      "element": "<span class=\"wb-badge\">\n<i class=\"fa-solid fa-circle-up\"></i>PRO\n              </span>",
+      "message": "徽章元素缺少 aria-label 属性",
+      "suggestion": "添加 aria-label 属性描述徽章含义,例如: aria-label=\"人工智能功能\""
+    },
+    {
+      "file": "src/modules/app_center/views/master_analysis/ai_analysis/template.html",
+      "line": 34,
+      "type": "missing_aria_hidden",
+      "element": "<i class=\"fa-solid fa-circle-up\"></i>",
+      "message": "装饰性图标元素缺少 aria-hidden=\"true\" 属性",
+      "suggestion": "为装饰性图标添加 aria-hidden=\"true\" 属性,避免屏幕阅读器读取"
+    },
+    {
+      "file": "src/modules/app_center/views/master_analysis/promptlab/template.html",
+      "line": 30,
+      "type": "missing_theme_class",
+      "element": "<span class=\"wb-badge\">\n<i class=\"fas fa-flask\"></i>Master Prompt\n                            </span...",
+      "message": "徽章缺少主题类(wb-badge-*)"
+    },
+    {
+      "file": "src/modules/app_center/views/master_analysis/promptlab/template.html",
+      "line": 30,
+      "type": "missing_aria_label",
+      "element": "<span class=\"wb-badge\">\n<i class=\"fas fa-flask\"></i>Master Prompt\n                            </span...",
+      "message": "徽章元素缺少 aria-label 属性",
+      "suggestion": "添加 aria-label 属性描述徽章含义,例如: aria-label=\"人工智能功能\""
+    },
+    {
+      "file": "src/modules/app_center/views/master_analysis/promptlab/template.html",
+      "line": 31,
+      "type": "missing_aria_hidden",
+      "element": "<i class=\"fas fa-flask\"></i>",
+      "message": "装饰性图标元素缺少 aria-hidden=\"true\" 属性",
+      "suggestion": "为装饰性图标添加 aria-hidden=\"true\" 属性,避免屏幕阅读器读取"
+    },
+    {
+      "file": "src/modules/amz_hub/views/advanced/new_product_30days/template.html",
+      "line": 14,
+      "type": "missing_aria_label",
+      "element": "<span class=\"wb-badge wb-badge-hub\">\n<i class=\"fa-lightbulb\"></i>GUIDE\n                </span>",
+      "message": "徽章元素缺少 aria-label 属性",
+      "suggestion": "添加 aria-label 属性描述徽章含义,例如: aria-label=\"人工智能功能\""
+    },
+    {
+      "file": "src/modules/amz_hub/views/advanced/new_product_30days/template.html",
+      "line": 15,
+      "type": "missing_aria_hidden",
+      "element": "<i class=\"fa-lightbulb\"></i>",
+      "message": "装饰性图标元素缺少 aria-hidden=\"true\" 属性",
+      "suggestion": "为装饰性图标添加 aria-hidden=\"true\" 属性,避免屏幕阅读器读取"
+    },
+    {
+      "file": "src/modules/amz_hub/views/overview/template.html",
+      "line": 13,
+      "type": "missing_aria_label",
+      "element": "<span class=\"wb-badge wb-badge-hub\">\n<i class=\"fa-star\"></i>HUB\n                </span>",
+      "message": "徽章元素缺少 aria-label 属性",
+      "suggestion": "添加 aria-label 属性描述徽章含义,例如: aria-label=\"人工智能功能\""
+    },
+    {
+      "file": "src/modules/amz_hub/views/overview/template.html",
+      "line": 14,
+      "type": "missing_aria_hidden",
+      "element": "<i class=\"fa-star\"></i>",
+      "message": "装饰性图标元素缺少 aria-hidden=\"true\" 属性",
+      "suggestion": "为装饰性图标添加 aria-hidden=\"true\" 属性,避免屏幕阅读器读取"
+    },
+    {
+      "file": "src/modules/more/views/overview/template.html",
+      "line": 13,
+      "type": "missing_aria_label",
+      "element": "<span class=\"wb-badge wb-badge-hub\">\n<i class=\"fa-grid\"></i>MORE\n                </span>",
+      "message": "徽章元素缺少 aria-label 属性",
+      "suggestion": "添加 aria-label 属性描述徽章含义,例如: aria-label=\"人工智能功能\""
+    },
+    {
+      "file": "src/modules/more/views/overview/template.html",
+      "line": 14,
+      "type": "missing_aria_hidden",
+      "element": "<i class=\"fa-grid\"></i>",
+      "message": "装饰性图标元素缺少 aria-hidden=\"true\" 属性",
+      "suggestion": "为装饰性图标添加 aria-hidden=\"true\" 属性,避免屏幕阅读器读取"
+    },
+    {
+      "file": "src/modules/sops/views/backend/procurement_qc/template.html",
+      "line": 14,
+      "type": "missing_aria_label",
+      "element": "<span class=\"wb-badge wb-badge-supply\">\n<i class=\"fa-boxes\"></i>SUPPLY\n                </span>",
+      "message": "徽章元素缺少 aria-label 属性",
+      "suggestion": "添加 aria-label 属性描述徽章含义,例如: aria-label=\"人工智能功能\""
+    },
+    {
+      "file": "src/modules/sops/views/backend/procurement_qc/template.html",
+      "line": 15,
+      "type": "missing_aria_hidden",
+      "element": "<i class=\"fa-boxes\"></i>",
+      "message": "装饰性图标元素缺少 aria-hidden=\"true\" 属性",
+      "suggestion": "为装饰性图标添加 aria-hidden=\"true\" 属性,避免屏幕阅读器读取"
+    },
+    {
+      "file": "src/modules/sops/views/backend/fba_shipping/template.html",
+      "line": 14,
+      "type": "missing_aria_label",
+      "element": "<span class=\"wb-badge wb-badge-supply\">\n<i class=\"fa-truck\"></i>SHIP\n                </span>",
+      "message": "徽章元素缺少 aria-label 属性",
+      "suggestion": "添加 aria-label 属性描述徽章含义,例如: aria-label=\"人工智能功能\""
+    },
+    {
+      "file": "src/modules/sops/views/backend/fba_shipping/template.html",
+      "line": 15,
+      "type": "missing_aria_hidden",
+      "element": "<i class=\"fa-truck\"></i>",
+      "message": "装饰性图标元素缺少 aria-hidden=\"true\" 属性",
+      "suggestion": "为装饰性图标添加 aria-hidden=\"true\" 属性,避免屏幕阅读器读取"
+    },
+    {
+      "file": "src/modules/sops/views/backend/inventory_replenishment/template.html",
+      "line": 14,
+      "type": "missing_aria_label",
+      "element": "<span class=\"wb-badge wb-badge-supply\">\n<i class=\"fa-warehouse\"></i>STOCK\n                </span>",
+      "message": "徽章元素缺少 aria-label 属性",
+      "suggestion": "添加 aria-label 属性描述徽章含义,例如: aria-label=\"人工智能功能\""
+    },
+    {
+      "file": "src/modules/sops/views/backend/inventory_replenishment/template.html",
+      "line": 15,
+      "type": "missing_aria_hidden",
+      "element": "<i class=\"fa-warehouse\"></i>",
+      "message": "装饰性图标元素缺少 aria-hidden=\"true\" 属性",
+      "suggestion": "为装饰性图标添加 aria-hidden=\"true\" 属性,避免屏幕阅读器读取"
+    },
+    {
+      "file": "src/modules/sops/views/growth/competitor_monitoring/template.html",
+      "line": 14,
+      "type": "missing_aria_label",
+      "element": "<span class=\"wb-badge wb-badge-analytics\">\n<i class=\"fa-magnifying-glass-chart\"></i>MONITOR\n        ...",
+      "message": "徽章元素缺少 aria-label 属性",
+      "suggestion": "添加 aria-label 属性描述徽章含义,例如: aria-label=\"人工智能功能\""
+    },
+    {
+      "file": "src/modules/sops/views/growth/competitor_monitoring/template.html",
+      "line": 15,
+      "type": "missing_aria_hidden",
+      "element": "<i class=\"fa-magnifying-glass-chart\"></i>",
+      "message": "装饰性图标元素缺少 aria-hidden=\"true\" 属性",
+      "suggestion": "为装饰性图标添加 aria-hidden=\"true\" 属性,避免屏幕阅读器读取"
+    },
+    {
+      "file": "src/modules/sops/views/growth/ppc_advertising/template.html",
+      "line": 14,
+      "type": "missing_aria_label",
+      "element": "<span class=\"wb-badge wb-badge-growth\">\n<i class=\"fa-chart-line\"></i>GROWTH\n                </span>",
+      "message": "徽章元素缺少 aria-label 属性",
+      "suggestion": "添加 aria-label 属性描述徽章含义,例如: aria-label=\"人工智能功能\""
+    },
+    {
+      "file": "src/modules/sops/views/growth/ppc_advertising/template.html",
+      "line": 15,
+      "type": "missing_aria_hidden",
+      "element": "<i class=\"fa-chart-line\"></i>",
+      "message": "装饰性图标元素缺少 aria-hidden=\"true\" 属性",
+      "suggestion": "为装饰性图标添加 aria-hidden=\"true\" 属性,避免屏幕阅读器读取"
+    },
+    {
+      "file": "src/modules/sops/views/growth/listing_seo/template.html",
+      "line": 14,
+      "type": "missing_aria_label",
+      "element": "<span class=\"wb-badge wb-badge-growth\">\n<i class=\"fa-rocket\"></i>SEO\n                </span>",
+      "message": "徽章元素缺少 aria-label 属性",
+      "suggestion": "添加 aria-label 属性描述徽章含义,例如: aria-label=\"人工智能功能\""
+    },
+    {
+      "file": "src/modules/sops/views/growth/listing_seo/template.html",
+      "line": 15,
+      "type": "missing_aria_hidden",
+      "element": "<i class=\"fa-rocket\"></i>",
+      "message": "装饰性图标元素缺少 aria-hidden=\"true\" 属性",
+      "suggestion": "为装饰性图标添加 aria-hidden=\"true\" 属性,避免屏幕阅读器读取"
+    },
+    {
+      "file": "src/modules/sops/views/growth/npi_tracker/template.html",
+      "line": 128,
+      "type": "missing_aria_label",
+      "element": "<span class=\"wb-badge wb-badge-growth\">\n<i class=\"fa-chart-line\"></i>GROWTH\n                </span>",
+      "message": "徽章元素缺少 aria-label 属性",
+      "suggestion": "添加 aria-label 属性描述徽章含义,例如: aria-label=\"人工智能功能\""
+    },
+    {
+      "file": "src/modules/sops/views/growth/npi_tracker/template.html",
+      "line": 129,
+      "type": "missing_aria_hidden",
+      "element": "<i class=\"fa-chart-line\"></i>",
+      "message": "装饰性图标元素缺少 aria-hidden=\"true\" 属性",
+      "suggestion": "为装饰性图标添加 aria-hidden=\"true\" 属性,避免屏幕阅读器读取"
+    },
+    {
+      "file": "src/modules/sops/views/growth/promotion_submission/template.html",
+      "line": 14,
+      "type": "missing_aria_label",
+      "element": "<span class=\"wb-badge wb-badge-growth\">\n<i class=\"fa-tags\"></i>PROMO\n                </span>",
+      "message": "徽章元素缺少 aria-label 属性",
+      "suggestion": "添加 aria-label 属性描述徽章含义,例如: aria-label=\"人工智能功能\""
+    },
+    {
+      "file": "src/modules/sops/views/growth/promotion_submission/template.html",
+      "line": 15,
+      "type": "missing_aria_hidden",
+      "element": "<i class=\"fa-tags\"></i>",
+      "message": "装饰性图标元素缺少 aria-hidden=\"true\" 属性",
+      "suggestion": "为装饰性图标添加 aria-hidden=\"true\" 属性,避免屏幕阅读器读取"
+    },
+    {
+      "file": "src/modules/sops/views/growth/restricted_words/template.html",
+      "line": 14,
+      "type": "missing_aria_label",
+      "element": "<span class=\"wb-badge wb-badge-analytics\">\n<i class=\"fa-chart-bar\"></i>DATA\n                </span>",
+      "message": "徽章元素缺少 aria-label 属性",
+      "suggestion": "添加 aria-label 属性描述徽章含义,例如: aria-label=\"人工智能功能\""
+    },
+    {
+      "file": "src/modules/sops/views/growth/restricted_words/template.html",
+      "line": 15,
+      "type": "missing_aria_hidden",
+      "element": "<i class=\"fa-chart-bar\"></i>",
+      "message": "装饰性图标元素缺少 aria-hidden=\"true\" 属性",
+      "suggestion": "为装饰性图标添加 aria-hidden=\"true\" 属性,避免屏幕阅读器读取"
+    },
+    {
+      "file": "src/modules/sops/views/safety/permission_management/template.html",
+      "line": 14,
+      "type": "missing_aria_label",
+      "element": "<span class=\"wb-badge wb-badge-safety\">\n<i class=\"fa-lock\"></i>SECURE\n                </span>",
+      "message": "徽章元素缺少 aria-label 属性",
+      "suggestion": "添加 aria-label 属性描述徽章含义,例如: aria-label=\"人工智能功能\""
+    },
+    {
+      "file": "src/modules/sops/views/safety/permission_management/template.html",
+      "line": 15,
+      "type": "missing_aria_hidden",
+      "element": "<i class=\"fa-lock\"></i>",
+      "message": "装饰性图标元素缺少 aria-hidden=\"true\" 属性",
+      "suggestion": "为装饰性图标添加 aria-hidden=\"true\" 属性,避免屏幕阅读器读取"
+    },
+    {
+      "file": "src/modules/sops/views/safety/performance_notification/template.html",
+      "line": 14,
+      "type": "missing_aria_label",
+      "element": "<span class=\"wb-badge wb-badge-safety\">\n<i class=\"fa-exclamation-triangle\"></i>ALERT\n               ...",
+      "message": "徽章元素缺少 aria-label 属性",
+      "suggestion": "添加 aria-label 属性描述徽章含义,例如: aria-label=\"人工智能功能\""
+    },
+    {
+      "file": "src/modules/sops/views/safety/performance_notification/template.html",
+      "line": 15,
+      "type": "missing_aria_hidden",
+      "element": "<i class=\"fa-exclamation-triangle\"></i>",
+      "message": "装饰性图标元素缺少 aria-hidden=\"true\" 属性",
+      "suggestion": "为装饰性图标添加 aria-hidden=\"true\" 属性,避免屏幕阅读器读取"
+    },
+    {
+      "file": "src/modules/sops/views/safety/eu_gpsr_compliance/template.html",
+      "line": 14,
+      "type": "missing_aria_label",
+      "element": "<span class=\"wb-badge wb-badge-safety\">\n<i class=\"fa-certificate\"></i>COMPLIANCE\n                </s...",
+      "message": "徽章元素缺少 aria-label 属性",
+      "suggestion": "添加 aria-label 属性描述徽章含义,例如: aria-label=\"人工智能功能\""
+    },
+    {
+      "file": "src/modules/sops/views/safety/eu_gpsr_compliance/template.html",
+      "line": 15,
+      "type": "missing_aria_hidden",
+      "element": "<i class=\"fa-certificate\"></i>",
+      "message": "装饰性图标元素缺少 aria-hidden=\"true\" 属性",
+      "suggestion": "为装饰性图标添加 aria-hidden=\"true\" 属性,避免屏幕阅读器读取"
+    },
+    {
+      "file": "src/modules/sops/views/safety/brand_infringement/template.html",
+      "line": 14,
+      "type": "missing_aria_label",
+      "element": "<span class=\"wb-badge wb-badge-safety\">\n<i class=\"fa-shield-halved\"></i>SAFE\n                </span>",
+      "message": "徽章元素缺少 aria-label 属性",
+      "suggestion": "添加 aria-label 属性描述徽章含义,例如: aria-label=\"人工智能功能\""
+    },
+    {
+      "file": "src/modules/sops/views/safety/brand_infringement/template.html",
+      "line": 15,
+      "type": "missing_aria_hidden",
+      "element": "<i class=\"fa-shield-halved\"></i>",
+      "message": "装饰性图标元素缺少 aria-hidden=\"true\" 属性",
+      "suggestion": "为装饰性图标添加 aria-hidden=\"true\" 属性,避免屏幕阅读器读取"
+    },
+    {
+      "file": "src/modules/sops/views/safety/product_compliance/template.html",
+      "line": 14,
+      "type": "missing_aria_label",
+      "element": "<span class=\"wb-badge wb-badge-safety\">\n<i class=\"fa-shield-halved\"></i>SAFE\n                </span>",
+      "message": "徽章元素缺少 aria-label 属性",
+      "suggestion": "添加 aria-label 属性描述徽章含义,例如: aria-label=\"人工智能功能\""
+    },
+    {
+      "file": "src/modules/sops/views/safety/product_compliance/template.html",
+      "line": 15,
+      "type": "missing_aria_hidden",
+      "element": "<i class=\"fa-shield-halved\"></i>",
+      "message": "装饰性图标元素缺少 aria-hidden=\"true\" 属性",
+      "suggestion": "为装饰性图标添加 aria-hidden=\"true\" 属性,避免屏幕阅读器读取"
+    },
+    {
+      "file": "src/modules/sops/views/safety/account_security/template.html",
+      "line": 14,
+      "type": "missing_aria_label",
+      "element": "<span class=\"wb-badge wb-badge-safety\">\n<i class=\"fa-shield-halved\"></i>SAFE\n                </span>",
+      "message": "徽章元素缺少 aria-label 属性",
+      "suggestion": "添加 aria-label 属性描述徽章含义,例如: aria-label=\"人工智能功能\""
+    },
+    {
+      "file": "src/modules/sops/views/safety/account_security/template.html",
+      "line": 15,
+      "type": "missing_aria_hidden",
+      "element": "<i class=\"fa-shield-halved\"></i>",
+      "message": "装饰性图标元素缺少 aria-hidden=\"true\" 属性",
+      "suggestion": "为装饰性图标添加 aria-hidden=\"true\" 属性,避免屏幕阅读器读取"
+    },
+    {
+      "file": "src/modules/sops/views/service/negative_review/template.html",
+      "line": 14,
+      "type": "missing_aria_label",
+      "element": "<span class=\"wb-badge wb-badge-service\">\n<i class=\"fa-comments\"></i>SUPPORT\n                </span>",
+      "message": "徽章元素缺少 aria-label 属性",
+      "suggestion": "添加 aria-label 属性描述徽章含义,例如: aria-label=\"人工智能功能\""
+    },
+    {
+      "file": "src/modules/sops/views/service/negative_review/template.html",
+      "line": 15,
+      "type": "missing_aria_hidden",
+      "element": "<i class=\"fa-comments\"></i>",
+      "message": "装饰性图标元素缺少 aria-hidden=\"true\" 属性",
+      "suggestion": "为装饰性图标添加 aria-hidden=\"true\" 属性,避免屏幕阅读器读取"
+    },
+    {
+      "file": "src/modules/sops/views/service/email_templates/template.html",
+      "line": 14,
+      "type": "missing_aria_label",
+      "element": "<span class=\"wb-badge wb-badge-service\">\n<i class=\"fa-envelope\"></i>EMAIL\n                </span>",
+      "message": "徽章元素缺少 aria-label 属性",
+      "suggestion": "添加 aria-label 属性描述徽章含义,例如: aria-label=\"人工智能功能\""
+    },
+    {
+      "file": "src/modules/sops/views/service/email_templates/template.html",
+      "line": 15,
+      "type": "missing_aria_hidden",
+      "element": "<i class=\"fa-envelope\"></i>",
+      "message": "装饰性图标元素缺少 aria-hidden=\"true\" 属性",
+      "suggestion": "为装饰性图标添加 aria-hidden=\"true\" 属性,避免屏幕阅读器读取"
+    },
+    {
+      "file": "src/modules/sops/views/service/qa_maintenance/template.html",
+      "line": 14,
+      "type": "missing_aria_label",
+      "element": "<span class=\"wb-badge wb-badge-service\">\n<i class=\"fa-headset\"></i>SERVICE\n                </span>",
+      "message": "徽章元素缺少 aria-label 属性",
+      "suggestion": "添加 aria-label 属性描述徽章含义,例如: aria-label=\"人工智能功能\""
+    },
+    {
+      "file": "src/modules/sops/views/service/qa_maintenance/template.html",
+      "line": 15,
+      "type": "missing_aria_hidden",
+      "element": "<i class=\"fa-headset\"></i>",
+      "message": "装饰性图标元素缺少 aria-hidden=\"true\" 属性",
+      "suggestion": "为装饰性图标添加 aria-hidden=\"true\" 属性,避免屏幕阅读器读取"
+    },
+    {
+      "file": "src/modules/sops/views/overview/template.html",
+      "line": 13,
+      "type": "missing_aria_label",
+      "element": "<span class=\"wb-badge wb-badge-hub\">\n<i class=\"fa-book\"></i>DOCS\n                </span>",
+      "message": "徽章元素缺少 aria-label 属性",
+      "suggestion": "添加 aria-label 属性描述徽章含义,例如: aria-label=\"人工智能功能\""
+    },
+    {
+      "file": "src/modules/sops/views/overview/template.html",
+      "line": 14,
+      "type": "missing_aria_hidden",
+      "element": "<i class=\"fa-book\"></i>",
+      "message": "装饰性图标元素缺少 aria-hidden=\"true\" 属性",
+      "suggestion": "为装饰性图标添加 aria-hidden=\"true\" 属性,避免屏幕阅读器读取"
+    }
+  ]
+}

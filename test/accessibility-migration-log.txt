@@ -1,0 +1,136 @@
+[2026-03-02 14:31:51] 开始迁移
+[2026-03-02 14:31:51] 扫描目录: src/modules
+[2026-03-02 14:31:51] 操作: 添加 ARIA 属性
+[2026-03-02 14:31:51] 备份: 启用
+[2026-03-02 14:31:51] 找到 45 个 HTML 文件
+[2026-03-02 14:31:51] 处理文件: src/modules/app_center/views/keyword_hunter/analysis/template.html
+[2026-03-02 14:31:51]   - 找到 1 个徽章元素
+[2026-03-02 14:31:51] 处理文件: src/modules/app_center/views/keyword_hunter/input/template.html
+[2026-03-02 14:31:51]   - 找到 1 个徽章元素
+[2026-03-02 14:31:51] 处理文件: src/modules/app_center/views/keyword_hunter/process/template.html
+[2026-03-02 14:31:51]   - 找到 1 个徽章元素
+[2026-03-02 14:31:51] 处理文件: src/modules/app_center/views/master_analysis/scraper/template.html
+[2026-03-02 14:31:51]   - 找到 1 个徽章元素
+[2026-03-02 14:31:52] 处理文件: src/modules/app_center/views/master_analysis/ai_analysis/template.html
+[2026-03-02 14:31:52]   - 找到 1 个徽章元素
+[2026-03-02 14:31:52] 处理文件: src/modules/app_center/views/master_analysis/qalab/template.html
+[2026-03-02 14:31:52]   - 找到 1 个徽章元素
+[2026-03-02 14:31:52] 处理文件: src/modules/app_center/views/master_analysis/promptlab/template.html
+[2026-03-02 14:31:52]   - 找到 1 个徽章元素
+[2026-03-02 14:31:52] 处理文件: src/modules/app_center/views/overview/template.html
+[2026-03-02 14:31:52]   - 找到 1 个徽章元素
+[2026-03-02 14:31:52] 处理文件: src/modules/amz_hub/views/advanced/new_product_30days/template.html
+[2026-03-02 14:31:52]   - 找到 1 个徽章元素
+[2026-03-02 14:31:52]   - 变更: 添加 aria-label: 中心功能, 添加 aria-hidden 到 1 个图标
+[2026-03-02 14:31:52]   - 创建备份: template.html.bak
+[2026-03-02 14:31:52]   - 文件已更新
+[2026-03-02 14:31:52] 处理文件: src/modules/amz_hub/views/overview/template.html
+[2026-03-02 14:31:52]   - 找到 1 个徽章元素
+[2026-03-02 14:31:52]   - 变更: 添加 aria-label: 中心功能, 添加 aria-hidden 到 1 个图标
+[2026-03-02 14:31:52]   - 创建备份: template.html.bak
+[2026-03-02 14:31:52]   - 文件已更新
+[2026-03-02 14:31:52] 处理文件: src/modules/more/views/overview/template.html
+[2026-03-02 14:31:52]   - 找到 1 个徽章元素
+[2026-03-02 14:31:52]   - 变更: 添加 aria-label: 中心功能, 添加 aria-hidden 到 1 个图标
+[2026-03-02 14:31:52]   - 创建备份: template.html.bak
+[2026-03-02 14:31:52]   - 文件已更新
+[2026-03-02 14:31:52] 处理文件: src/modules/sops/views/backend/procurement_qc/template.html
+[2026-03-02 14:31:52]   - 找到 1 个徽章元素
+[2026-03-02 14:31:52]   - 变更: 添加 aria-label: 供应链功能, 添加 aria-hidden 到 1 个图标
+[2026-03-02 14:31:52]   - 创建备份: template.html.bak
+[2026-03-02 14:31:52]   - 文件已更新
+[2026-03-02 14:31:52] 处理文件: src/modules/sops/views/backend/fba_shipping/template.html
+[2026-03-02 14:31:52]   - 找到 1 个徽章元素
+[2026-03-02 14:31:52]   - 变更: 添加 aria-label: 供应链功能, 添加 aria-hidden 到 1 个图标
+[2026-03-02 14:31:52]   - 创建备份: template.html.bak
+[2026-03-02 14:31:52]   - 文件已更新
+[2026-03-02 14:31:52] 处理文件: src/modules/sops/views/backend/inventory_replenishment/template.html
+[2026-03-02 14:31:52]   - 找到 1 个徽章元素
+[2026-03-02 14:31:52]   - 变更: 添加 aria-label: 供应链功能, 添加 aria-hidden 到 1 个图标
+[2026-03-02 14:31:52]   - 创建备份: template.html.bak
+[2026-03-02 14:31:52]   - 文件已更新
+[2026-03-02 14:31:52] 处理文件: src/modules/sops/views/growth/competitor_monitoring/template.html
+[2026-03-02 14:31:52]   - 找到 1 个徽章元素
+[2026-03-02 14:31:52]   - 变更: 添加 aria-label: 分析功能, 添加 aria-hidden 到 1 个图标
+[2026-03-02 14:31:52]   - 创建备份: template.html.bak
+[2026-03-02 14:31:52]   - 文件已更新
+[2026-03-02 14:31:52] 处理文件: src/modules/sops/views/growth/ppc_advertising/template.html
+[2026-03-02 14:31:52]   - 找到 1 个徽章元素
+[2026-03-02 14:31:52]   - 变更: 添加 aria-label: 增长功能, 添加 aria-hidden 到 1 个图标
+[2026-03-02 14:31:52]   - 创建备份: template.html.bak
+[2026-03-02 14:31:52]   - 文件已更新
+[2026-03-02 14:31:52] 处理文件: src/modules/sops/views/growth/listing_seo/template.html
+[2026-03-02 14:31:52]   - 找到 1 个徽章元素
+[2026-03-02 14:31:52]   - 变更: 添加 aria-label: 增长功能, 添加 aria-hidden 到 1 个图标
+[2026-03-02 14:31:52]   - 创建备份: template.html.bak
+[2026-03-02 14:31:52]   - 文件已更新
+[2026-03-02 14:31:52] 处理文件: src/modules/sops/views/growth/npi_tracker/template.html
+[2026-03-02 14:31:52]   - 找到 1 个徽章元素
+[2026-03-02 14:31:52]   - 变更: 添加 aria-label: 增长功能, 添加 aria-hidden 到 1 个图标
+[2026-03-02 14:31:52]   - 创建备份: template.html.bak
+[2026-03-02 14:31:52]   - 文件已更新
+[2026-03-02 14:31:52] 处理文件: src/modules/sops/views/growth/promotion_submission/template.html
+[2026-03-02 14:31:52]   - 找到 1 个徽章元素
+[2026-03-02 14:31:52]   - 变更: 添加 aria-label: 增长功能, 添加 aria-hidden 到 1 个图标
+[2026-03-02 14:31:52]   - 创建备份: template.html.bak
+[2026-03-02 14:31:52]   - 文件已更新
+[2026-03-02 14:31:52] 处理文件: src/modules/sops/views/growth/restricted_words/template.html
+[2026-03-02 14:31:52]   - 找到 1 个徽章元素
+[2026-03-02 14:31:52]   - 变更: 添加 aria-label: 分析功能, 添加 aria-hidden 到 1 个图标
+[2026-03-02 14:31:52]   - 创建备份: template.html.bak
+[2026-03-02 14:31:52]   - 文件已更新
+[2026-03-02 14:31:52] 处理文件: src/modules/sops/views/safety/permission_management/template.html
+[2026-03-02 14:31:52]   - 找到 1 个徽章元素
+[2026-03-02 14:31:52]   - 变更: 添加 aria-label: 安全警告, 添加 aria-hidden 到 1 个图标
+[2026-03-02 14:31:52]   - 创建备份: template.html.bak
+[2026-03-02 14:31:52]   - 文件已更新
+[2026-03-02 14:31:52] 处理文件: src/modules/sops/views/safety/performance_notification/template.html
+[2026-03-02 14:31:52]   - 找到 1 个徽章元素
+[2026-03-02 14:31:52]   - 变更: 添加 aria-label: 安全警告, 添加 aria-hidden 到 1 个图标
+[2026-03-02 14:31:52]   - 创建备份: template.html.bak
+[2026-03-02 14:31:52]   - 文件已更新
+[2026-03-02 14:31:52] 处理文件: src/modules/sops/views/safety/eu_gpsr_compliance/template.html
+[2026-03-02 14:31:52]   - 找到 1 个徽章元素
+[2026-03-02 14:31:52]   - 变更: 添加 aria-label: 安全警告, 添加 aria-hidden 到 1 个图标
+[2026-03-02 14:31:52]   - 创建备份: template.html.bak
+[2026-03-02 14:31:52]   - 文件已更新
+[2026-03-02 14:31:52] 处理文件: src/modules/sops/views/safety/brand_infringement/template.html
+[2026-03-02 14:31:52]   - 找到 1 个徽章元素
+[2026-03-02 14:31:52]   - 变更: 添加 aria-label: 安全警告, 添加 aria-hidden 到 1 个图标
+[2026-03-02 14:31:52]   - 创建备份: template.html.bak
+[2026-03-02 14:31:52]   - 文件已更新
+[2026-03-02 14:31:52] 处理文件: src/modules/sops/views/safety/product_compliance/template.html
+[2026-03-02 14:31:52]   - 找到 1 个徽章元素
+[2026-03-02 14:31:52]   - 变更: 添加 aria-label: 安全警告, 添加 aria-hidden 到 1 个图标
+[2026-03-02 14:31:52]   - 创建备份: template.html.bak
+[2026-03-02 14:31:52]   - 文件已更新
+[2026-03-02 14:31:52] 处理文件: src/modules/sops/views/safety/account_security/template.html
+[2026-03-02 14:31:52]   - 找到 1 个徽章元素
+[2026-03-02 14:31:52]   - 变更: 添加 aria-label: 安全警告, 添加 aria-hidden 到 1 个图标
+[2026-03-02 14:31:52]   - 创建备份: template.html.bak
+[2026-03-02 14:31:52]   - 文件已更新
+[2026-03-02 14:31:52] 处理文件: src/modules/sops/views/service/negative_review/template.html
+[2026-03-02 14:31:52]   - 找到 1 个徽章元素
+[2026-03-02 14:31:52]   - 变更: 添加 aria-label: 服务功能, 添加 aria-hidden 到 1 个图标
+[2026-03-02 14:31:52]   - 创建备份: template.html.bak
+[2026-03-02 14:31:52]   - 文件已更新
+[2026-03-02 14:31:52] 处理文件: src/modules/sops/views/service/email_templates/template.html
+[2026-03-02 14:31:52]   - 找到 1 个徽章元素
+[2026-03-02 14:31:52]   - 变更: 添加 aria-label: 服务功能, 添加 aria-hidden 到 1 个图标
+[2026-03-02 14:31:52]   - 创建备份: template.html.bak
+[2026-03-02 14:31:52]   - 文件已更新
+[2026-03-02 14:31:52] 处理文件: src/modules/sops/views/service/qa_maintenance/template.html
+[2026-03-02 14:31:52]   - 找到 1 个徽章元素
+[2026-03-02 14:31:52]   - 变更: 添加 aria-label: 服务功能, 添加 aria-hidden 到 1 个图标
+[2026-03-02 14:31:52]   - 创建备份: template.html.bak
+[2026-03-02 14:31:52]   - 文件已更新
+[2026-03-02 14:31:52] 处理文件: src/modules/sops/views/overview/template.html
+[2026-03-02 14:31:52]   - 找到 1 个徽章元素
+[2026-03-02 14:31:52]   - 变更: 添加 aria-label: 中心功能, 添加 aria-hidden 到 1 个图标
+[2026-03-02 14:31:52]   - 创建备份: template.html.bak
+[2026-03-02 14:31:52]   - 文件已更新
+[2026-03-02 14:31:52] 
+迁移完成!
+[2026-03-02 14:31:52]   总文件数: 45
+[2026-03-02 14:31:52]   修改的文件数: 22
+[2026-03-02 14:31:52]   总变更数: 44

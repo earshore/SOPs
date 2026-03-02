@@ -1,0 +1,91 @@
+{
+  "summary": {
+    "total_files": 4,
+    "files_with_issues": 2,
+    "total_issues": 8
+  },
+  "issues": [
+    {
+      "file": "test/test-badge-validation.html",
+      "line": 8,
+      "type": "missing_theme_class",
+      "element": "<span class=\"wb-badge\">\n<i class=\"fas fa-star\"></i>TEST\n    </span>",
+      "message": "徽章缺少主题类(wb-badge-*)"
+    },
+    {
+      "file": "test/test-badge-validation.html",
+      "line": 18,
+      "type": "invalid_theme_class",
+      "element": "<span class=\"wb-badge wb-badge-invalid\">\n<i class=\"fas fa-bug\"></i>INVALID\n    </span>",
+      "message": "徽章使用了无效的主题类: wb-badge-invalid",
+      "invalid_themes": [
+        "wb-badge-invalid"
+      ],
+      "valid_themes": [
+        "wb-badge-ai",
+        "wb-badge-growth",
+        "wb-badge-safety",
+        "wb-badge-service",
+        "wb-badge-supply",
+        "wb-badge-analytics",
+        "wb-badge-pro",
+        "wb-badge-hub"
+      ]
+    },
+    {
+      "file": "test/test-badge-validation.html",
+      "line": 23,
+      "type": "invalid_theme_class",
+      "element": "<span class=\"wb-badge wb-badge-pro wb-badge-wrong\">\n<i class=\"fas fa-crown\"></i>PRO\n    </span>",
+      "message": "徽章使用了无效的主题类: wb-badge-wrong",
+      "invalid_themes": [
+        "wb-badge-wrong"
+      ],
+      "valid_themes": [
+        "wb-badge-ai",
+        "wb-badge-growth",
+        "wb-badge-safety",
+        "wb-badge-service",
+        "wb-badge-supply",
+        "wb-badge-analytics",
+        "wb-badge-pro",
+        "wb-badge-hub"
+      ]
+    },
+    {
+      "file": "test/welcome-banner-badge-test.html",
+      "line": 56,
+      "type": "missing_theme_class",
+      "element": "<span class=\"wb-badge\">\n<i class=\"fa-solid fa-clipboard-question\"></i>AI\n                           ...",
+      "message": "徽章缺少主题类(wb-badge-*)"
+    },
+    {
+      "file": "test/welcome-banner-badge-test.html",
+      "line": 56,
+      "type": "missing_theme_class",
+      "element": "<span class=\"wb-badge\">\n<i class=\"fa-solid fa-sparkles\"></i>AI\n                    </span>",
+      "message": "徽章缺少主题类(wb-badge-*)"
+    },
+    {
+      "file": "test/welcome-banner-badge-test.html",
+      "line": 56,
+      "type": "missing_theme_class",
+      "element": "<span class=\"wb-badge\" style=\"margin-right: 1rem;\">\n<i class=\"fa-solid fa-clipboard-question\"></i>AI...",
+      "message": "徽章缺少主题类(wb-badge-*)"
+    },
+    {
+      "file": "test/welcome-banner-badge-test.html",
+      "line": 56,
+      "type": "missing_theme_class",
+      "element": "<span class=\"wb-badge\">\n<i class=\"fa-solid fa-sparkles\"></i>AI\n            </span>",
+      "message": "徽章缺少主题类(wb-badge-*)"
+    },
+    {
+      "file": "test/welcome-banner-badge-test.html",
+      "line": 56,
+      "type": "missing_theme_class",
+      "element": "<span class=\"wb-badge\">\n<i class=\"fa-solid fa-sparkles\"></i>AI\n                </span>",
+      "message": "徽章缺少主题类(wb-badge-*)"
+    }
+  ]
+}

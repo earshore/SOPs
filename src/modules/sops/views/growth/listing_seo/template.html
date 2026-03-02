@@ -1,582 +1,524 @@
-<!-- Listing 极致优化 (SEO) SOP Template -->
 <div class="sop-widescreen-container">
-    <!-- Header -->
-        <!-- Welcome Banner -->
-    <div class="wb-container" style="--wb-gradient-1: #10b981; --wb-gradient-2: #059669;">
-        <div class="wb-orb wb-orb-1"></div>
-        <div class="wb-orb wb-orb-2"></div>
-        <div class="wb-content">
-            <div class="wb-icon">
-                <i class="fas fa-magnifying-glass-chart"></i>
-            </div>
-            <div class="wb-title-row">
-                <h1 class="wb-title">Listing 极致优化 (SEO) SOP</h1>
-                <span class="wb-badge wb-badge-growth">
-                    <i class="fa-rocket"></i>SEO
+<!-- Header -->
+<!-- Welcome Banner -->
+<div class="wb-container" style="--wb-gradient-1: #10b981; --wb-gradient-2: #059669;">
+<div class="wb-orb wb-orb-1"></div>
+<div class="wb-orb wb-orb-2"></div>
+<div class="wb-content">
+<div class="wb-icon">
+<i class="fas fa-magnifying-glass-chart"></i>
+</div>
+<div class="wb-title-row">
+<h1 class="wb-title">Listing 极致优化 (SEO) SOP</h1>
+<span aria-label="增长功能" class="wb-badge wb-badge-growth">
+<i aria-hidden="true" class="fa-rocket"></i>SEO
                 </span>
-            </div>
-            <p class="wb-description">标题公式、五点埋词逻辑、A+排版规范、移动端确认 - 采集竞品 → 分析报告 → AI生成文案</p>
-            <div class="wb-meta">
-                <span><i class="fas fa-tag mr-1"></i>运营与推广体系</span>
-                <span><i class="fas fa-tag mr-1"></i>SEO优化</span>
-                <span><i class="fas fa-tag mr-1"></i>更新日期：2024-01</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Workflow Banner -->
-    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 mb-6">
-        <div class="flex flex-col md:flex-row items-stretch justify-between gap-4">
-
-            <div class="flex-1 bg-white rounded-lg border border-blue-200 shadow-sm flex flex-col h-full">
-                <div class="p-4 flex-1">
-                    <div class="flex items-center gap-2 mb-3">
-                        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                            <i class="fas fa-spider text-blue-500"></i>
-                        </div>
-                        <h3 class="font-bold text-gray-800">Step 1: 采集竞品原始数据</h3>
-                    </div>
-                    <p class="text-xs text-gray-500 mb-3 bg-gray-50 p-2 rounded border border-gray-100">
-                        <span class="font-semibold">工具：</span>前台插件 / 数据采集 / 卖家精灵 (JSON/CSV)
+</div>
+<p class="wb-description">标题公式、五点埋词逻辑、A+排版规范、移动端确认 - 采集竞品 → 分析报告 → AI生成文案</p>
+<div class="wb-meta">
+<span><i class="fas fa-tag mr-1"></i>运营与推广体系</span>
+<span><i class="fas fa-tag mr-1"></i>SEO优化</span>
+<span><i class="fas fa-tag mr-1"></i>更新日期：2024-01</span>
+</div>
+</div>
+</div>
+<!-- Workflow Banner -->
+<div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 mb-6">
+<div class="flex flex-col md:flex-row items-stretch justify-between gap-4">
+<div class="flex-1 bg-white rounded-lg border border-blue-200 shadow-sm flex flex-col h-full">
+<div class="p-4 flex-1">
+<div class="flex items-center gap-2 mb-3">
+<div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+<i class="fas fa-spider text-blue-500"></i>
+</div>
+<h3 class="font-bold text-gray-800">Step 1: 采集竞品原始数据</h3>
+</div>
+<p class="text-xs text-gray-500 mb-3 bg-gray-50 p-2 rounded border border-gray-100">
+<span class="font-semibold">工具：</span>前台插件 / 数据采集 / 卖家精灵 (JSON/CSV)
                     </p>
-                    <div class="bg-slate-50 p-3 rounded text-sm text-gray-600 leading-relaxed border border-slate-100">
+<div class="bg-slate-50 p-3 rounded text-sm text-gray-600 leading-relaxed border border-slate-100">
                         收集 Top 20-50 的竞品 Listing 内容和最近 3 个月的 Review。不要贪多，要精。
                         <div class="mt-2 pt-2 border-t border-slate-200 text-xs">
-                            <span class="text-blue-600 font-bold">目标：</span> 获取竞品Listing和Review原始语料
+<span class="text-blue-600 font-bold">目标：</span> 获取竞品Listing和Review原始语料
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex items-center justify-center text-blue-300 md:rotate-0 rotate-90 py-2 md:py-0">
-                <i class="fas fa-chevron-right text-xl"></i>
-            </div>
-
-            <div class="flex-1 bg-white rounded-lg border border-blue-200 shadow-sm flex flex-col h-full">
-                <div class="p-4 flex-1">
-                    <div class="flex items-center gap-2 mb-3">
-                        <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
-                            <i class="fas fa-chart-pie text-indigo-500"></i>
-                        </div>
-                        <h3 class="font-bold text-gray-800">Step 2: LLM 结构化清洗提取</h3>
-                    </div>
-                    <p class="text-xs text-gray-500 mb-3 bg-gray-50 p-2 rounded border border-gray-100">
-                        <span class="font-semibold">工具：</span>GPT-5-mini
+</div>
+</div>
+</div>
+<div class="flex items-center justify-center text-blue-300 md:rotate-0 rotate-90 py-2 md:py-0">
+<i class="fas fa-chevron-right text-xl"></i>
+</div>
+<div class="flex-1 bg-white rounded-lg border border-blue-200 shadow-sm flex flex-col h-full">
+<div class="p-4 flex-1">
+<div class="flex items-center gap-2 mb-3">
+<div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
+<i class="fas fa-chart-pie text-indigo-500"></i>
+</div>
+<h3 class="font-bold text-gray-800">Step 2: LLM 结构化清洗提取</h3>
+</div>
+<p class="text-xs text-gray-500 mb-3 bg-gray-50 p-2 rounded border border-gray-100">
+<span class="font-semibold">工具：</span>GPT-5-mini
                     </p>
-                    <div class="bg-slate-50 p-3 rounded text-sm text-gray-600 leading-relaxed border border-slate-100">
+<div class="bg-slate-50 p-3 rounded text-sm text-gray-600 leading-relaxed border border-slate-100">
                         上传 JSON/CSV，选择合适的分析模板策略，生成 JSON 格式的使用场景、负面痛点、积极用户原话。
                         <div class="mt-2 pt-2 border-t border-slate-200 text-xs">
-                            <span class="text-blue-600 font-bold">目标：</span> 将非结构化文本转化为 COSMO 可理解的"意图节点"。
+<span class="text-blue-600 font-bold">目标：</span> 将非结构化文本转化为 COSMO 可理解的"意图节点"。
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex items-center justify-center text-blue-300 md:rotate-0 rotate-90 py-2 md:py-0">
-                <i class="fas fa-chevron-right text-xl"></i>
-            </div>
-
-            <div class="flex-1 bg-white rounded-lg border border-blue-200 shadow-sm flex flex-col h-full">
-                <div class="p-4 flex-1">
-                    <div class="flex items-center gap-2 mb-3">
-                        <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                            <i class="fas fa-check-double text-emerald-500"></i>
-                        </div>
-                        <h3 class="font-bold text-gray-800">Step 3: ABA 交叉验证</h3>
-                    </div>
-                    <p class="text-xs text-gray-500 mb-3 bg-gray-50 p-2 rounded border border-gray-100">
-                        <span class="font-semibold">工具：</span>ABA (Amazon Brand Analytics) + Excel
+</div>
+</div>
+</div>
+<div class="flex items-center justify-center text-blue-300 md:rotate-0 rotate-90 py-2 md:py-0">
+<i class="fas fa-chevron-right text-xl"></i>
+</div>
+<div class="flex-1 bg-white rounded-lg border border-blue-200 shadow-sm flex flex-col h-full">
+<div class="p-4 flex-1">
+<div class="flex items-center gap-2 mb-3">
+<div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+<i class="fas fa-check-double text-emerald-500"></i>
+</div>
+<h3 class="font-bold text-gray-800">Step 3: ABA 交叉验证</h3>
+</div>
+<p class="text-xs text-gray-500 mb-3 bg-gray-50 p-2 rounded border border-gray-100">
+<span class="font-semibold">工具：</span>ABA (Amazon Brand Analytics) + Excel
                     </p>
-                    <div class="bg-slate-50 p-3 rounded text-sm text-gray-600 leading-relaxed border border-slate-100">
+<div class="bg-slate-50 p-3 rounded text-sm text-gray-600 leading-relaxed border border-slate-100">
                         拿着 LLM 提取的"原生词"去 ABA 验证流量。确定主推词（高流量+高相关）和长尾词（高转化+特定场景），融合 Prompting。
                         <div class="mt-2 pt-2 border-t border-slate-200 text-xs">
-                            <span class="text-blue-600 font-bold">目标：</span> 确认哪些"意图"是有市场需求的，确认埋词策略。
+<span class="text-blue-600 font-bold">目标：</span> 确认哪些"意图"是有市场需求的，确认埋词策略。
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex items-center justify-center text-blue-300 md:rotate-0 rotate-90 py-2 md:py-0">
-                <i class="fas fa-chevron-right text-xl"></i>
-            </div>
-
-            <div class="flex-1 bg-white rounded-lg border border-blue-200 shadow-sm flex flex-col h-full">
-                <div class="p-4 flex-1">
-                    <div class="flex items-center gap-2 mb-3">
-                        <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
-                            <i class="fas fa-robot text-purple-500"></i>
-                        </div>
-                        <h3 class="font-bold text-gray-800">Step 4: AI 生成文案</h3>
-                    </div>
-                    <p class="text-xs text-gray-500 mb-3 bg-gray-50 p-2 rounded border border-gray-100">
-                        <span class="font-semibold">工具：</span>Gemini 3 Pro
+</div>
+</div>
+</div>
+<div class="flex items-center justify-center text-blue-300 md:rotate-0 rotate-90 py-2 md:py-0">
+<i class="fas fa-chevron-right text-xl"></i>
+</div>
+<div class="flex-1 bg-white rounded-lg border border-blue-200 shadow-sm flex flex-col h-full">
+<div class="p-4 flex-1">
+<div class="flex items-center gap-2 mb-3">
+<div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+<i class="fas fa-robot text-purple-500"></i>
+</div>
+<h3 class="font-bold text-gray-800">Step 4: AI 生成文案</h3>
+</div>
+<p class="text-xs text-gray-500 mb-3 bg-gray-50 p-2 rounded border border-gray-100">
+<span class="font-semibold">工具：</span>Gemini 3 Pro
                     </p>
-                    <div class="bg-slate-50 p-3 rounded text-sm text-gray-600 leading-relaxed border border-slate-100">
+<div class="bg-slate-50 p-3 rounded text-sm text-gray-600 leading-relaxed border border-slate-100">
                         基于 A10/COSMO/Rufus 的逻辑，让 Gemini 撰写 Listing。
                         <ul class="list-disc pl-4 mt-2 text-gray-500 text-xs">
-                            <li>Title: 包含 ABA 核心词 + 核心场景</li>
-                            <li>Bullets: 前 3 点针对 COSMO 场景化，后 2 点针对 Rufus 解决痛点/参数</li>
-                            <li>Description/A+: 讲述品牌故事，增加停留时间（A10 因素）</li>
-                        </ul>
-                        <div class="mt-2 pt-2 border-t border-slate-200 text-xs">
-                            <span class="text-blue-600 font-bold">目标：</span> 产出Listing成品
+<li>Title: 包含 ABA 核心词 + 核心场景</li>
+<li>Bullets: 前 3 点针对 COSMO 场景化，后 2 点针对 Rufus 解决痛点/参数</li>
+<li>Description/A+: 讲述品牌故事，增加停留时间（A10 因素）</li>
+</ul>
+<div class="mt-2 pt-2 border-t border-slate-200 text-xs">
+<span class="text-blue-600 font-bold">目标：</span> 产出Listing成品
                         </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- Divider -->
-    <div class="flex items-center gap-4 py-8">
-        <div class="h-0.5 bg-slate-200 flex-1"></div>
-        <span class="text-slate-400 font-bold text-sm">以下为Listing编写/生成指引</span>
-        <div class="h-0.5 bg-slate-200 flex-1"></div>
-    </div>
-
-    <!-- Two Column Layout -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <!-- Left Column -->
-        <div class="space-y-6">
-            <!-- Title Formula -->
-            <div class="bg-white rounded-xl border border-slate-200 p-6">
-                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <i class="fas fa-heading text-blue-500"></i>标题 (Title) 编写公式
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Divider -->
+<div class="flex items-center gap-4 py-8">
+<div class="h-0.5 bg-slate-200 flex-1"></div>
+<span class="text-slate-400 font-bold text-sm">以下为Listing编写/生成指引</span>
+<div class="h-0.5 bg-slate-200 flex-1"></div>
+</div>
+<!-- Two Column Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+<!-- Left Column -->
+<div class="space-y-6">
+<!-- Title Formula -->
+<div class="bg-white rounded-xl border border-slate-200 p-6">
+<h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+<i class="fas fa-heading text-blue-500"></i>标题 (Title) 编写公式
                 </h2>
-                <div class="bg-slate-50 rounded-lg p-4 mb-4">
-                    <p class="font-mono text-sm text-slate-700">
-                        <span class="text-blue-600 font-bold">[品牌]</span> +
+<div class="bg-slate-50 rounded-lg p-4 mb-4">
+<p class="font-mono text-sm text-slate-700">
+<span class="text-blue-600 font-bold">[品牌]</span> +
                         <span class="text-emerald-600 font-bold">[核心词]</span> +
                         <span class="text-amber-600 font-bold">[场景/人群]</span> +
                         <span class="text-purple-600 font-bold">[卖点]</span> +
                         <span class="text-rose-600 font-bold">[规格]</span>
-                    </p>
-                </div>
-                <div class="space-y-3">
-                    <div class="border-l-4 border-emerald-400 pl-3 bg-emerald-50/50 py-2 rounded-r">
-                        <h4 class="font-semibold text-emerald-800">✅ 正确示例</h4>
-                        <p class="text-xs text-slate-600 mt-1">BrandX Wireless Bluetooth Headphones for Running, Active
+</p>
+</div>
+<div class="space-y-3">
+<div class="border-l-4 border-emerald-400 pl-3 bg-emerald-50/50 py-2 rounded-r">
+<h4 class="font-semibold text-emerald-800">✅ 正确示例</h4>
+<p class="text-xs text-slate-600 mt-1">BrandX Wireless Bluetooth Headphones for Running, Active
                             Noise Cancelling, 40H Battery, Black</p>
-                    </div>
-                    <div class="border-l-4 border-red-400 pl-3 bg-red-50/50 py-2 rounded-r">
-                        <h4 class="font-semibold text-red-800">❌ 错误示例</h4>
-                        <p class="text-xs text-slate-600 mt-1">Best Headphones 2024 NEW!!! Amazing Quality Cheap Price
+</div>
+<div class="border-l-4 border-red-400 pl-3 bg-red-50/50 py-2 rounded-r">
+<h4 class="font-semibold text-red-800">❌ 错误示例</h4>
+<p class="text-xs text-slate-600 mt-1">Best Headphones 2024 NEW!!! Amazing Quality Cheap Price
                             Free Shipping</p>
-                    </div>
-                </div>
-                <div class="mt-4 p-3 bg-amber-50 rounded-lg text-sm">
-                    <strong class="text-amber-800">字符限制：</strong>
-                    <span class="text-slate-600">200字符内，移动端显示前70字符</span>
-                </div>
-            </div>
-
-            <!-- Bullet Points (EU Anti-Return Logic) -->
-            <div class="bg-white rounded-xl border border-slate-200 p-6">
-                <h2 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2">
-                    <i class="fas fa-list-ul text-blue-500"></i>五点描述 (Bullet Points)
+</div>
+</div>
+<div class="mt-4 p-3 bg-amber-50 rounded-lg text-sm">
+<strong class="text-amber-800">字符限制：</strong>
+<span class="text-slate-600">200字符内，移动端显示前70字符</span>
+</div>
+</div>
+<!-- Bullet Points (EU Anti-Return Logic) -->
+<div class="bg-white rounded-xl border border-slate-200 p-6">
+<h2 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2">
+<i class="fas fa-list-ul text-blue-500"></i>五点描述 (Bullet Points)
                 </h2>
-                <p class="text-xs text-slate-500 mb-4">核心原则：移动端只展示前3点的前70字符，把最硬核信息（尺寸/兼容性/材质）前置。</p>
-
-                <div class="space-y-3">
-                    <!-- Bullet 1 -->
-                    <div class="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span
-                                class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
-                            <span class="font-bold text-slate-800">核心功能 + 强兼容性 (流量入口)</span>
-                        </div>
-                        <div class="text-xs text-slate-600 space-y-1 pl-8">
-                            <div><strong>公式：</strong>[核心大词] + [适配对象/核心参数]</div>
-                            <div class="bg-white rounded p-2 border mt-1">
-                                <strong class="text-blue-700">🇩🇪 示例：</strong>
-                                <span class="font-mono text-slate-700">Passgenau für iPhone 15 Pro Max: Hülle aus echtem
+<p class="text-xs text-slate-500 mb-4">核心原则：移动端只展示前3点的前70字符，把最硬核信息（尺寸/兼容性/材质）前置。</p>
+<div class="space-y-3">
+<!-- Bullet 1 -->
+<div class="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+<div class="flex items-center gap-2 mb-2">
+<span class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
+<span class="font-bold text-slate-800">核心功能 + 强兼容性 (流量入口)</span>
+</div>
+<div class="text-xs text-slate-600 space-y-1 pl-8">
+<div><strong>公式：</strong>[核心大词] + [适配对象/核心参数]</div>
+<div class="bg-white rounded p-2 border mt-1">
+<strong class="text-blue-700">🇩🇪 示例：</strong>
+<span class="font-mono text-slate-700">Passgenau für iPhone 15 Pro Max: Hülle aus echtem
                                     Leder...</span>
-                                <div class="text-slate-500 mt-1">→ 直接告诉客户给谁用，减少买错退货</div>
+<div class="text-slate-500 mt-1">→ 直接告诉客户给谁用，减少买错退货</div>
+</div>
+</div>
+</div>
+<!-- Bullet 2 -->
+<div class="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+<div class="flex items-center gap-2 mb-2">
+<span class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
+<span class="font-bold text-slate-800">材质工艺 + 欧标合规 (转化信任)</span>
+</div>
+<div class="text-xs text-slate-600 space-y-1 pl-8">
+<div><strong>策略：</strong>避免虚词(Super durable)，用<strong class="text-emerald-600">实词</strong>(304 Stainless Steel, OEKO-TEX Standard 100)
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Bullet 2 -->
-                    <div class="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span
-                                class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
-                            <span class="font-bold text-slate-800">材质工艺 + 欧标合规 (转化信任)</span>
-                        </div>
-                        <div class="text-xs text-slate-600 space-y-1 pl-8">
-                            <div><strong>策略：</strong>避免虚词(Super durable)，用<strong
-                                    class="text-emerald-600">实词</strong>(304 Stainless Steel, OEKO-TEX Standard 100)
-                            </div>
-                            <div class="text-red-600 mt-1">⚠️ 避坑：别写 Bamboo，别乱写 Antibacterial (参考受限词库)</div>
-                        </div>
-                    </div>
-
-                    <!-- Bullet 3 -->
-                    <div class="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span
-                                class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
-                            <span class="font-bold text-slate-800">使用场景 + 解决痛点 (COSMO匹配)</span>
-                        </div>
-                        <div class="text-xs text-slate-600 space-y-1 pl-8">
-                            <div><strong>策略：</strong>欧洲本土化场景，捕捉长尾流量</div>
-                            <div class="bg-white rounded p-2 border mt-1">
-                                <strong class="text-purple-700">对比：</strong>
+<div class="text-red-600 mt-1">⚠️ 避坑：别写 Bamboo，别乱写 Antibacterial (参考受限词库)</div>
+</div>
+</div>
+<!-- Bullet 3 -->
+<div class="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+<div class="flex items-center gap-2 mb-2">
+<span class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
+<span class="font-bold text-slate-800">使用场景 + 解决痛点 (COSMO匹配)</span>
+</div>
+<div class="text-xs text-slate-600 space-y-1 pl-8">
+<div><strong>策略：</strong>欧洲本土化场景，捕捉长尾流量</div>
+<div class="bg-white rounded p-2 border mt-1">
+<strong class="text-purple-700">对比：</strong>
                                 🇺🇸 Camping → 🇩🇪 <span class="font-mono">Wandern in den Alpen</span> (阿尔卑斯徒步)
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Bullet 4 -->
-                    <div class="p-3 bg-amber-50 rounded-lg border-l-4 border-amber-500">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span
-                                class="w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold">4</span>
-                            <span class="font-bold text-slate-800">⭐ 供货范围 (Box Contents) — 减少退货！</span>
-                        </div>
-                        <div class="text-xs text-slate-600 space-y-1 pl-8">
-                            <div><strong>逻辑：</strong>很多退货是因为"我以为有电池，结果没有"</div>
-                            <div class="bg-white rounded p-2 border mt-1">
-                                <strong class="text-amber-700">🇩🇪 Lieferumfang：</strong>
-                                <span class="font-mono text-slate-700">1x 主机, 1x Type-C线 (不含适配器)</span>
-                                <div class="text-amber-600 mt-1">→ 对降低欧洲站差评至关重要，预埋Rufus AI问答</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Bullet 5 -->
-                    <div class="p-3 bg-amber-50 rounded-lg border-l-4 border-amber-500">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span
-                                class="w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold">5</span>
-                            <span class="font-bold text-slate-800">技术参数 + 售后 (预埋Rufus AI问答)</span>
-                        </div>
-                        <div class="text-xs text-slate-600 space-y-1 pl-8">
-                            <div><strong>🇩🇪 Technische Daten：</strong>尺寸、重量、电压 (220V-240V，别写美规110V)</div>
-                            <div class="text-red-600 mt-1">🚫 <strong>禁写：</strong>"Lifetime Warranty" / "100%
+</div>
+</div>
+<!-- Bullet 4 -->
+<div class="p-3 bg-amber-50 rounded-lg border-l-4 border-amber-500">
+<div class="flex items-center gap-2 mb-2">
+<span class="w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold">4</span>
+<span class="font-bold text-slate-800">⭐ 供货范围 (Box Contents) — 减少退货！</span>
+</div>
+<div class="text-xs text-slate-600 space-y-1 pl-8">
+<div><strong>逻辑：</strong>很多退货是因为"我以为有电池，结果没有"</div>
+<div class="bg-white rounded p-2 border mt-1">
+<strong class="text-amber-700">🇩🇪 Lieferumfang：</strong>
+<span class="font-mono text-slate-700">1x 主机, 1x Type-C线 (不含适配器)</span>
+<div class="text-amber-600 mt-1">→ 对降低欧洲站差评至关重要，预埋Rufus AI问答</div>
+</div>
+</div>
+</div>
+<!-- Bullet 5 -->
+<div class="p-3 bg-amber-50 rounded-lg border-l-4 border-amber-500">
+<div class="flex items-center gap-2 mb-2">
+<span class="w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold">5</span>
+<span class="font-bold text-slate-800">技术参数 + 售后 (预埋Rufus AI问答)</span>
+</div>
+<div class="text-xs text-slate-600 space-y-1 pl-8">
+<div><strong>🇩🇪 Technische Daten：</strong>尺寸、重量、电压 (220V-240V，别写美规110V)</div>
+<div class="text-red-600 mt-1">🚫 <strong>禁写：</strong>"Lifetime Warranty" / "100%
                                 Satisfaction"</div>
-                            <div class="text-emerald-600">✅ <strong>可写：</strong>"24-Month Support" / "Customer Service
+<div class="text-emerald-600">✅ <strong>可写：</strong>"24-Month Support" / "Customer Service
                                 via Amazon"</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Algorithm Tips (Upgraded) -->
-            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-5">
-                <h3 class="font-bold text-blue-800 mb-4 flex items-center gap-2 text-base">
-                    <i class="fas fa-brain"></i>A10/COSMO/Rufus 算法底层逻辑
+</div>
+</div>
+</div>
+</div>
+<!-- Algorithm Tips (Upgraded) -->
+<div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-5">
+<h3 class="font-bold text-blue-800 mb-4 flex items-center gap-2 text-base">
+<i class="fas fa-brain"></i>A10/COSMO/Rufus 算法底层逻辑
                 </h3>
-                <div class="space-y-4 text-xs">
-                    <!-- A10 -->
-                    <div class="bg-white rounded-lg p-3 border border-blue-100">
-                        <div class="font-bold text-blue-700 mb-1">🎯 A10 (权重核心): "客户体验优先"</div>
-                        <ul class="text-slate-600 space-y-1">
-                            <li>• <strong>CTR+CR：</strong>图片/价格→点击；文案/A+→转化</li>
-                            <li>• <strong>Sales History：</strong>断货恢复权重极慢</li>
-                            <li>• <strong class="text-red-600">退货率：</strong>欧洲站高退货率=直接降权</li>
-                        </ul>
-                    </div>
-                    <!-- COSMO -->
-                    <div class="bg-white rounded-lg p-3 border border-purple-100">
-                        <div class="font-bold text-purple-700 mb-1">🌐 COSMO (意图识别): "关键词→用户意图"</div>
-                        <ul class="text-slate-600 space-y-1">
-                            <li>• <strong>埋词位置：</strong>标题 + 前3点</li>
-                            <li>• <strong>场景化：</strong>告诉AI产品"怎么用" (如: for Gardening)</li>
-                        </ul>
-                    </div>
-                    <!-- Rufus -->
-                    <div class="bg-white rounded-lg p-3 border border-amber-100">
-                        <div class="font-bold text-amber-700 mb-1">🤖 Rufus (AI问答): "生成式引擎"</div>
-                        <ul class="text-slate-600 space-y-1">
-                            <li>• <strong>数据源：</strong>后2点五点 + A+参数表 + 用户评论</li>
-                            <li>• <strong>防守：</strong>避免模糊描述，否则Rufus回答"不确定"</li>
-                        </ul>
-                    </div>
-                </div>
-                <!-- Mantra -->
-                <div class="mt-4 p-3 bg-slate-800 rounded-lg text-xs text-white">
-                    <strong class="block mb-1">🎯 算法适配口诀：</strong>
-                    <div class="grid grid-cols-3 gap-2 text-center">
-                        <div class="bg-blue-600/30 rounded p-1">A10抓权重<br />压低退货率</div>
-                        <div class="bg-purple-600/30 rounded p-1">COSMO抓流量<br />前3点写场景</div>
-                        <div class="bg-amber-600/30 rounded p-1">Rufus抓转化<br />后2点填参数</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Mobile Check (Upgraded) -->
-            <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border border-amber-200 p-5">
-                <h3 class="font-bold text-amber-800 mb-4 flex items-center gap-2 text-base">
-                    <i class="fas fa-mobile-screen"></i>移动端优化 (70%+流量来源)
+<div class="space-y-4 text-xs">
+<!-- A10 -->
+<div class="bg-white rounded-lg p-3 border border-blue-100">
+<div class="font-bold text-blue-700 mb-1">🎯 A10 (权重核心): "客户体验优先"</div>
+<ul class="text-slate-600 space-y-1">
+<li>• <strong>CTR+CR：</strong>图片/价格→点击；文案/A+→转化</li>
+<li>• <strong>Sales History：</strong>断货恢复权重极慢</li>
+<li>• <strong class="text-red-600">退货率：</strong>欧洲站高退货率=直接降权</li>
+</ul>
+</div>
+<!-- COSMO -->
+<div class="bg-white rounded-lg p-3 border border-purple-100">
+<div class="font-bold text-purple-700 mb-1">🌐 COSMO (意图识别): "关键词→用户意图"</div>
+<ul class="text-slate-600 space-y-1">
+<li>• <strong>埋词位置：</strong>标题 + 前3点</li>
+<li>• <strong>场景化：</strong>告诉AI产品"怎么用" (如: for Gardening)</li>
+</ul>
+</div>
+<!-- Rufus -->
+<div class="bg-white rounded-lg p-3 border border-amber-100">
+<div class="font-bold text-amber-700 mb-1">🤖 Rufus (AI问答): "生成式引擎"</div>
+<ul class="text-slate-600 space-y-1">
+<li>• <strong>数据源：</strong>后2点五点 + A+参数表 + 用户评论</li>
+<li>• <strong>防守：</strong>避免模糊描述，否则Rufus回答"不确定"</li>
+</ul>
+</div>
+</div>
+<!-- Mantra -->
+<div class="mt-4 p-3 bg-slate-800 rounded-lg text-xs text-white">
+<strong class="block mb-1">🎯 算法适配口诀：</strong>
+<div class="grid grid-cols-3 gap-2 text-center">
+<div class="bg-blue-600/30 rounded p-1">A10抓权重<br/>压低退货率</div>
+<div class="bg-purple-600/30 rounded p-1">COSMO抓流量<br/>前3点写场景</div>
+<div class="bg-amber-600/30 rounded p-1">Rufus抓转化<br/>后2点填参数</div>
+</div>
+</div>
+</div>
+<!-- Mobile Check (Upgraded) -->
+<div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border border-amber-200 p-5">
+<h3 class="font-bold text-amber-800 mb-4 flex items-center gap-2 text-base">
+<i class="fas fa-mobile-screen"></i>移动端优化 (70%+流量来源)
                 </h3>
-                <div class="space-y-3 text-xs">
-                    <div class="flex items-start gap-3 p-3 bg-white rounded-lg border border-amber-100">
-                        <span
-                            class="w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">1</span>
-                        <div>
-                            <div class="font-bold text-slate-700">标题首屏法则</div>
-                            <div class="text-slate-500">核心信息在前 <strong class="text-amber-600">70字符</strong>，否则被截断</div>
-                        </div>
-                    </div>
-                    <div class="flex items-start gap-3 p-3 bg-white rounded-lg border border-amber-100">
-                        <span
-                            class="w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">2</span>
-                        <div>
-                            <div class="font-bold text-slate-700">主图聚焦度</div>
-                            <div class="text-slate-500">竖屏模式下产品主体占比 <strong class="text-amber-600">&gt;85%</strong>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex items-start gap-3 p-3 bg-white rounded-lg border border-amber-100">
-                        <span
-                            class="w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">3</span>
-                        <div>
-                            <div class="font-bold text-slate-700">前三点折叠</div>
-                            <div class="text-slate-500">手机默认只显示前3点，最强卖点必须在此</div>
-                        </div>
-                    </div>
-                    <div class="flex items-start gap-3 p-3 bg-white rounded-lg border border-amber-100">
-                        <span
-                            class="w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">4</span>
-                        <div>
-                            <div class="font-bold text-slate-700">虚拟捆绑</div>
-                            <div class="text-slate-500">检查"经常一起购买"，用自家A+B产品占位</div>
-                        </div>
-                    </div>
+<div class="space-y-3 text-xs">
+<div class="flex items-start gap-3 p-3 bg-white rounded-lg border border-amber-100">
+<span class="w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">1</span>
+<div>
+<div class="font-bold text-slate-700">标题首屏法则</div>
+<div class="text-slate-500">核心信息在前 <strong class="text-amber-600">70字符</strong>，否则被截断</div>
+</div>
+</div>
+<div class="flex items-start gap-3 p-3 bg-white rounded-lg border border-amber-100">
+<span class="w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">2</span>
+<div>
+<div class="font-bold text-slate-700">主图聚焦度</div>
+<div class="text-slate-500">竖屏模式下产品主体占比 <strong class="text-amber-600">&gt;85%</strong>
+</div>
+</div>
+</div>
+<div class="flex items-start gap-3 p-3 bg-white rounded-lg border border-amber-100">
+<span class="w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">3</span>
+<div>
+<div class="font-bold text-slate-700">前三点折叠</div>
+<div class="text-slate-500">手机默认只显示前3点，最强卖点必须在此</div>
+</div>
+</div>
+<div class="flex items-start gap-3 p-3 bg-white rounded-lg border border-amber-100">
+<span class="w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">4</span>
+<div>
+<div class="font-bold text-slate-700">虚拟捆绑</div>
+<div class="text-slate-500">检查"经常一起购买"，用自家A+B产品占位</div>
+</div>
+</div>
+</div>
+<!-- Mobile Mantra -->
+<div class="mt-4 p-3 bg-amber-100 rounded-lg text-xs text-amber-900">
+<strong>📱 手机端必查：</strong> 前70字符卖点明确？主图小屏C位？前3点抓眼球？
                 </div>
-                <!-- Mobile Mantra -->
-                <div class="mt-4 p-3 bg-amber-100 rounded-lg text-xs text-amber-900">
-                    <strong>📱 手机端必查：</strong> 前70字符卖点明确？主图小屏C位？前3点抓眼球？
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Right Column -->
-        <div class="space-y-6">
-
-            <!-- Search Terms -->
-            <div class="bg-white rounded-xl border border-slate-200 p-6">
-                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <i class="fas fa-search text-blue-500"></i>Search Terms 填充规范
+</div>
+</div>
+<!-- Right Column -->
+<div class="space-y-6">
+<!-- Search Terms -->
+<div class="bg-white rounded-xl border border-slate-200 p-6">
+<h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+<i class="fas fa-search text-blue-500"></i>Search Terms 填充规范
                 </h2>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
-                        <h4 class="font-bold text-emerald-800 mb-2">✅ 正确做法</h4>
-                        <ul class="text-sm text-emerald-700 space-y-1">
-                            <li>• 空格分隔关键词</li>
-                            <li>• 不重复Title中的词</li>
-                            <li>• 包含拼写变体/同义词</li>
-                            <li>• 小写即可</li>
-                            <li>• 用满250字节</li>
-                        </ul>
-                    </div>
-                    <div class="bg-red-50 rounded-lg p-4 border border-red-200">
-                        <h4 class="font-bold text-red-800 mb-2">❌ 禁止事项</h4>
-                        <ul class="text-sm text-red-700 space-y-1">
-                            <li>• 逗号或标点分隔</li>
-                            <li>• 竞品品牌名</li>
-                            <li>• 主观词(best,amazing)</li>
-                            <li>• 重复堆砌</li>
-                            <li>• ASIN或价格</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <!-- A+ Content (EU Jingpu Strategy) -->
-            <div class="bg-white rounded-xl border border-purple-200 p-6">
-                <h2 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2">
-                    <i class="fas fa-palette text-purple-500"></i>A+ 内容排版规范
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
+<h4 class="font-bold text-emerald-800 mb-2">✅ 正确做法</h4>
+<ul class="text-sm text-emerald-700 space-y-1">
+<li>• 空格分隔关键词</li>
+<li>• 不重复Title中的词</li>
+<li>• 包含拼写变体/同义词</li>
+<li>• 小写即可</li>
+<li>• 用满250字节</li>
+</ul>
+</div>
+<div class="bg-red-50 rounded-lg p-4 border border-red-200">
+<h4 class="font-bold text-red-800 mb-2">❌ 禁止事项</h4>
+<ul class="text-sm text-red-700 space-y-1">
+<li>• 逗号或标点分隔</li>
+<li>• 竞品品牌名</li>
+<li>• 主观词(best,amazing)</li>
+<li>• 重复堆砌</li>
+<li>• ASIN或价格</li>
+</ul>
+</div>
+</div>
+</div>
+<!-- A+ Content (EU Jingpu Strategy) -->
+<div class="bg-white rounded-xl border border-purple-200 p-6">
+<h2 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2">
+<i class="fas fa-palette text-purple-500"></i>A+ 内容排版规范
                 </h2>
-                <p class="text-xs text-slate-500 mb-4">核心目的：1. 消除语言障碍；2. 锁住流量（防止跳出到竞品）。采用"模块化积木"思维。</p>
-
-                <div class="space-y-3">
-                    <!-- Module 1 -->
-                    <div class="p-3 bg-purple-50 rounded-lg border-l-4 border-purple-400">
-                        <div class="flex items-start gap-3">
-                            <span
-                                class="w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">1</span>
-                            <div class="flex-1 text-xs">
-                                <div class="font-bold text-slate-800">品牌/场景 Banner</div>
-                                <div class="text-slate-600">沉浸式场景图，无文字或极少文字 → 建立第一眼好感</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Module 2 -->
-                    <div class="p-3 bg-purple-50 rounded-lg border-l-4 border-purple-400">
-                        <div class="flex items-start gap-3">
-                            <span
-                                class="w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">2</span>
-                            <div class="flex-1 text-xs">
-                                <div class="font-bold text-slate-800">Standard 3/4 Images & Text — 核心卖点图标化</div>
-                                <div class="text-slate-600 mt-1">策略：<strong>Icon(图标) + 短语</strong>，用视觉语言跨越德法意西语言障碍</div>
-                                <div class="bg-white rounded p-2 border mt-2">
-                                    <strong class="text-purple-700">示例：</strong>
+<p class="text-xs text-slate-500 mb-4">核心目的：1. 消除语言障碍；2. 锁住流量（防止跳出到竞品）。采用"模块化积木"思维。</p>
+<div class="space-y-3">
+<!-- Module 1 -->
+<div class="p-3 bg-purple-50 rounded-lg border-l-4 border-purple-400">
+<div class="flex items-start gap-3">
+<span class="w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">1</span>
+<div class="flex-1 text-xs">
+<div class="font-bold text-slate-800">品牌/场景 Banner</div>
+<div class="text-slate-600">沉浸式场景图，无文字或极少文字 → 建立第一眼好感</div>
+</div>
+</div>
+</div>
+<!-- Module 2 -->
+<div class="p-3 bg-purple-50 rounded-lg border-l-4 border-purple-400">
+<div class="flex items-start gap-3">
+<span class="w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">2</span>
+<div class="flex-1 text-xs">
+<div class="font-bold text-slate-800">Standard 3/4 Images &amp; Text — 核心卖点图标化</div>
+<div class="text-slate-600 mt-1">策略：<strong>Icon(图标) + 短语</strong>，用视觉语言跨越德法意西语言障碍</div>
+<div class="bg-white rounded p-2 border mt-2">
+<strong class="text-purple-700">示例：</strong>
                                     水滴图标 → 🇩🇪 Wasserdicht / 🇫🇷 Imperméable / 🇬🇧 Waterproof
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Module 3 -->
-                    <div class="p-3 bg-purple-50 rounded-lg border-l-4 border-purple-400">
-                        <div class="flex items-start gap-3">
-                            <span
-                                class="w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">3</span>
-                            <div class="flex-1 text-xs">
-                                <div class="font-bold text-slate-800">Single Image & Highlights — 深度解析</div>
-                                <div class="text-slate-600">左边：产品爆炸图/细节特写；右边：3-4个核心功能点</div>
-                                <div class="text-emerald-600 mt-1">💡 这里的文字会被谷歌收录，增加Listing的SEO权重</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Module 4 (Core) -->
-                    <div class="p-3 bg-emerald-50 rounded-lg border-l-4 border-emerald-500">
-                        <div class="flex items-start gap-3">
-                            <span
-                                class="w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">4</span>
-                            <div class="flex-1 text-xs">
-                                <div class="font-bold text-emerald-800">⭐ Comparison Chart — 精铺卖家的"护城河" (最重要！)</div>
-                                <div class="text-slate-600 mt-1"><strong>逻辑：</strong>横向展示 3-5 个自家产品（类似款/升级款/配件）</div>
-                                <div class="bg-white rounded p-2 border mt-2 text-emerald-700">
-                                    <strong>目的：</strong>客户不喜欢当前款 → 点击跳到<strong>你店里的</strong>另一款，而非竞品广告。<br />
-                                    <span class="font-bold">这叫"流量闭环"，精铺模式流量利用率最高的工具！</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Module 5 -->
-                    <div class="p-3 bg-purple-50 rounded-lg border-l-4 border-purple-400">
-                        <div class="flex items-start gap-3">
-                            <span
-                                class="w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">5</span>
-                            <div class="flex-1 text-xs">
-                                <div class="font-bold text-slate-800">Technical Specifications / FAQ — 针对德国买家</div>
-                                <div class="text-slate-600">纯表格形式，列出长宽高、材质、适用标准</div>
-                                <div class="text-amber-600 mt-1">💡 德国人极其理性，喜欢看表格对比参数。看起来枯燥，但德国站转化率极高！</div>
-                            </div>
-                        </div>
-                    </div>
+</div>
+</div>
+</div>
+<!-- Module 3 -->
+<div class="p-3 bg-purple-50 rounded-lg border-l-4 border-purple-400">
+<div class="flex items-start gap-3">
+<span class="w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">3</span>
+<div class="flex-1 text-xs">
+<div class="font-bold text-slate-800">Single Image &amp; Highlights — 深度解析</div>
+<div class="text-slate-600">左边：产品爆炸图/细节特写；右边：3-4个核心功能点</div>
+<div class="text-emerald-600 mt-1">💡 这里的文字会被谷歌收录，增加Listing的SEO权重</div>
+</div>
+</div>
+</div>
+<!-- Module 4 (Core) -->
+<div class="p-3 bg-emerald-50 rounded-lg border-l-4 border-emerald-500">
+<div class="flex items-start gap-3">
+<span class="w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">4</span>
+<div class="flex-1 text-xs">
+<div class="font-bold text-emerald-800">⭐ Comparison Chart — 精铺卖家的"护城河" (最重要！)</div>
+<div class="text-slate-600 mt-1"><strong>逻辑：</strong>横向展示 3-5 个自家产品（类似款/升级款/配件）</div>
+<div class="bg-white rounded p-2 border mt-2 text-emerald-700">
+<strong>目的：</strong>客户不喜欢当前款 → 点击跳到<strong>你店里的</strong>另一款，而非竞品广告。<br/>
+<span class="font-bold">这叫"流量闭环"，精铺模式流量利用率最高的工具！</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Module 5 -->
+<div class="p-3 bg-purple-50 rounded-lg border-l-4 border-purple-400">
+<div class="flex items-start gap-3">
+<span class="w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">5</span>
+<div class="flex-1 text-xs">
+<div class="font-bold text-slate-800">Technical Specifications / FAQ — 针对德国买家</div>
+<div class="text-slate-600">纯表格形式，列出长宽高、材质、适用标准</div>
+<div class="text-amber-600 mt-1">💡 德国人极其理性，喜欢看表格对比参数。看起来枯燥，但德国站转化率极高！</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Summary -->
+<div class="mt-4 p-3 bg-slate-800 rounded-lg text-xs text-white">
+<strong class="block mb-2">🚀 给运营团队的执行指令：</strong>
+<div class="grid grid-cols-3 gap-2 text-center">
+<div class="bg-purple-600/30 rounded p-2">必含Comparison Chart<br/>(流量闭环)</div>
+<div class="bg-blue-600/30 rounded p-2">善用Icon图标<br/>(跨越语言)</div>
+<div class="bg-amber-600/30 rounded p-2">模块化模板<br/>(一套套用全SKU)</div>
+</div>
+</div>
+<div class="mt-3 p-3 bg-amber-50 rounded-lg text-xs text-amber-800">
+<strong>图片规范：</strong>970×600px / 300dpi / 白底 / 文字占比≤20%
                 </div>
-
-                <!-- Summary -->
-                <div class="mt-4 p-3 bg-slate-800 rounded-lg text-xs text-white">
-                    <strong class="block mb-2">🚀 给运营团队的执行指令：</strong>
-                    <div class="grid grid-cols-3 gap-2 text-center">
-                        <div class="bg-purple-600/30 rounded p-2">必含Comparison Chart<br />(流量闭环)</div>
-                        <div class="bg-blue-600/30 rounded p-2">善用Icon图标<br />(跨越语言)</div>
-                        <div class="bg-amber-600/30 rounded p-2">模块化模板<br />(一套套用全SKU)</div>
-                    </div>
-                </div>
-
-                <div class="mt-3 p-3 bg-amber-50 rounded-lg text-xs text-amber-800">
-                    <strong>图片规范：</strong>970×600px / 300dpi / 白底 / 文字占比≤20%
-                </div>
-            </div>
-
-            <!-- Brand Story -->
-            <div class="bg-white rounded-xl border border-rose-200 p-6">
-                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <i class="fas fa-book-open text-rose-500"></i>品牌故事 (Brand Story) 规范
+</div>
+<!-- Brand Story -->
+<div class="bg-white rounded-xl border border-rose-200 p-6">
+<h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+<i class="fas fa-book-open text-rose-500"></i>品牌故事 (Brand Story) 规范
                 </h2>
-
-                <!-- Specs -->
-                <div class="mb-4 bg-rose-50 rounded-lg p-3 border border-rose-100">
-                    <h4 class="font-bold text-rose-800 mb-2">📐 硬性尺寸要求 (背景图)</h4>
-                    <div class="grid grid-cols-2 gap-4 text-xs">
-                        <div>
-                            <span class="block font-bold text-slate-700">🖥️ 电脑端 (Desktop)</span>
-                            <span class="block font-mono text-rose-600 mt-1">1464 x 625 px</span>
-                            <span class="block text-slate-500 mt-1">Logo放极左/极右 (中间会被挡)</span>
-                        </div>
-                        <div>
-                            <span class="block font-bold text-slate-700">📱 移动端 (Mobile)</span>
-                            <span class="block font-mono text-rose-600 mt-1">463 x 625 px</span>
-                            <span class="block text-slate-500 mt-1">独立设计，禁止直接缩放</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Strategy -->
-                <div class="space-y-3 mb-4">
-                    <h4 class="font-bold text-slate-800 text-sm">🃏 卡片组合策略 (精铺版)</h4>
-
-                    <div class="p-3 bg-white border border-slate-200 rounded-lg flex gap-3">
-                        <div
-                            class="w-8 h-8 rounded bg-blue-100 text-blue-500 flex items-center justify-center flex-shrink-0 font-bold">
+<!-- Specs -->
+<div class="mb-4 bg-rose-50 rounded-lg p-3 border border-rose-100">
+<h4 class="font-bold text-rose-800 mb-2">📐 硬性尺寸要求 (背景图)</h4>
+<div class="grid grid-cols-2 gap-4 text-xs">
+<div>
+<span class="block font-bold text-slate-700">🖥️ 电脑端 (Desktop)</span>
+<span class="block font-mono text-rose-600 mt-1">1464 x 625 px</span>
+<span class="block text-slate-500 mt-1">Logo放极左/极右 (中间会被挡)</span>
+</div>
+<div>
+<span class="block font-bold text-slate-700">📱 移动端 (Mobile)</span>
+<span class="block font-mono text-rose-600 mt-1">463 x 625 px</span>
+<span class="block text-slate-500 mt-1">独立设计，禁止直接缩放</span>
+</div>
+</div>
+</div>
+<!-- Strategy -->
+<div class="space-y-3 mb-4">
+<h4 class="font-bold text-slate-800 text-sm">🃏 卡片组合策略 (精铺版)</h4>
+<div class="p-3 bg-white border border-slate-200 rounded-lg flex gap-3">
+<div class="w-8 h-8 rounded bg-blue-100 text-blue-500 flex items-center justify-center flex-shrink-0 font-bold">
                             1</div>
-                        <div>
-                            <div class="font-bold text-sm text-slate-700">品牌起源卡 (About Brand)</div>
-                            <div class="text-xs text-slate-500 mt-1">虚：讲情怀/设计理念。配图：创始人/氛围图 (315x460px)。</div>
-                        </div>
-                    </div>
-
-                    <div class="p-3 bg-white border border-slate-200 rounded-lg flex gap-3">
-                        <div
-                            class="w-8 h-8 rounded bg-emerald-100 text-emerald-500 flex items-center justify-center flex-shrink-0 font-bold">
+<div>
+<div class="font-bold text-sm text-slate-700">品牌起源卡 (About Brand)</div>
+<div class="text-xs text-slate-500 mt-1">虚：讲情怀/设计理念。配图：创始人/氛围图 (315x460px)。</div>
+</div>
+</div>
+<div class="p-3 bg-white border border-slate-200 rounded-lg flex gap-3">
+<div class="w-8 h-8 rounded bg-emerald-100 text-emerald-500 flex items-center justify-center flex-shrink-0 font-bold">
                             2</div>
-                        <div>
-                            <div class="font-bold text-sm text-slate-700">四图ASIN卡 (Killer)</div>
-                            <div class="text-xs text-slate-500 mt-1">实：免费关联流量位！放互补爆款或新款，交叉引流。</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Checklist -->
-                <div class="p-3 bg-slate-50 rounded-lg text-xs text-slate-600">
-                    <strong class="block text-slate-700 mb-1">⚠️ 美工避坑 Checklist:</strong>
-                    <ul class="space-y-1 list-disc pl-4">
-                        <li>背景图中央区域会被挡住，<span class="text-red-500 font-bold">严禁放文字</span></li>
-                        <li>卡片文字要少，移动端滑动快</li>
-                        <li>移动端背景图必须单独裁剪设计</li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- EU Localization Strategy -->
-            <div class="bg-white rounded-xl border border-indigo-200 p-5 mb-6">
-                <h2 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <i class="fas fa-language text-indigo-500"></i>欧洲站本地化 (Localization) 策略
+<div>
+<div class="font-bold text-sm text-slate-700">四图ASIN卡 (Killer)</div>
+<div class="text-xs text-slate-500 mt-1">实：免费关联流量位！放互补爆款或新款，交叉引流。</div>
+</div>
+</div>
+</div>
+<!-- Checklist -->
+<div class="p-3 bg-slate-50 rounded-lg text-xs text-slate-600">
+<strong class="block text-slate-700 mb-1">⚠️ 美工避坑 Checklist:</strong>
+<ul class="space-y-1 list-disc pl-4">
+<li>背景图中央区域会被挡住，<span class="text-red-500 font-bold">严禁放文字</span></li>
+<li>卡片文字要少，移动端滑动快</li>
+<li>移动端背景图必须单独裁剪设计</li>
+</ul>
+</div>
+</div>
+<!-- EU Localization Strategy -->
+<div class="bg-white rounded-xl border border-indigo-200 p-5 mb-6">
+<h2 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+<i class="fas fa-language text-indigo-500"></i>欧洲站本地化 (Localization) 策略
                 </h2>
-                <!-- <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs"> -->
-                <div class="bg-indigo-50 rounded-lg p-3 text-xs">
-                    <h4 class="font-bold text-indigo-800 mb-2">🚫 拒绝机翻 (No Machine Translation)</h4>
-                    <p class="text-slate-700 mb-2">直接翻译会导致关键词失效。必须基于当地用户用语习惯埋词。</p>
-                    <ul class="space-y-1 text-slate-600">
-                        <li>• <strong>英文：</strong>Mobile Phone Case</li>
-                        <li>• <strong>德文直译：</strong>Mobiltelefon-Fall (错误)</li>
-                        <li>• <strong>德文地道：</strong>Handyhülle (正确流量词)</li>
-                    </ul>
-                </div>
-                <div class="bg-purple-50 rounded-lg p-3 text-xs">
-                    <h4 class="font-bold text-purple-800 mb-2">🌍 统一运营 (Pan-EU Listing)</h4>
-                    <ul class="space-y-1 text-slate-700">
-                        <li>• <strong>ASIN共享：</strong>使用相同ASIN在5国上架，共享评论(Review)</li>
-                        <li>• <strong>图片文案：</strong>主图/A+尽量使用图标或英语通用词，减少翻译工作量</li>
-                        <li>• <strong>小语种：</strong>雇佣本地人或使用高级AI(ChatGPT-5)进行润色</li>
-                    </ul>
-                </div>
-                <!-- </div> -->
-            </div>
-
-        </div>
-    </div>
-
-    <!-- Video Resource -->
-    <div class="bg-blue-50 rounded-xl border border-blue-200 p-4">
-        <div class="flex items-center gap-3">
-            <i class="fas fa-video text-blue-500 text-xl"></i>
-            <div>
-                <h3 class="font-bold text-slate-800">操作视频教程</h3>
-                <p class="text-sm text-slate-600">访问公司网盘(待完善)观看详细操作录屏：<a href="http://192.168.1.99"
-                        class="text-blue-600 underline">192.168.1.99</a>（仅限内网访问）→ 培训资料 → Listing优化专题</p>
-            </div>
-        </div>
-    </div>
+<!-- <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs"> -->
+<div class="bg-indigo-50 rounded-lg p-3 text-xs">
+<h4 class="font-bold text-indigo-800 mb-2">🚫 拒绝机翻 (No Machine Translation)</h4>
+<p class="text-slate-700 mb-2">直接翻译会导致关键词失效。必须基于当地用户用语习惯埋词。</p>
+<ul class="space-y-1 text-slate-600">
+<li>• <strong>英文：</strong>Mobile Phone Case</li>
+<li>• <strong>德文直译：</strong>Mobiltelefon-Fall (错误)</li>
+<li>• <strong>德文地道：</strong>Handyhülle (正确流量词)</li>
+</ul>
+</div>
+<div class="bg-purple-50 rounded-lg p-3 text-xs">
+<h4 class="font-bold text-purple-800 mb-2">🌍 统一运营 (Pan-EU Listing)</h4>
+<ul class="space-y-1 text-slate-700">
+<li>• <strong>ASIN共享：</strong>使用相同ASIN在5国上架，共享评论(Review)</li>
+<li>• <strong>图片文案：</strong>主图/A+尽量使用图标或英语通用词，减少翻译工作量</li>
+<li>• <strong>小语种：</strong>雇佣本地人或使用高级AI(ChatGPT-5)进行润色</li>
+</ul>
+</div>
+<!-- </div> -->
+</div>
+</div>
+</div>
+<!-- Video Resource -->
+<div class="bg-blue-50 rounded-xl border border-blue-200 p-4">
+<div class="flex items-center gap-3">
+<i class="fas fa-video text-blue-500 text-xl"></i>
+<div>
+<h3 class="font-bold text-slate-800">操作视频教程</h3>
+<p class="text-sm text-slate-600">访问公司网盘(待完善)观看详细操作录屏：<a class="text-blue-600 underline" href="http://192.168.1.99">192.168.1.99</a>（仅限内网访问）→ 培训资料 → Listing优化专题</p>
+</div>
+</div>
+</div>
 </div>

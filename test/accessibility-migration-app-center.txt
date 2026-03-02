@@ -1,0 +1,48 @@
+[2026-03-02 14:32:35] 开始迁移
+[2026-03-02 14:32:35] 扫描目录: src/modules/app_center/views
+[2026-03-02 14:32:35] 操作: 添加徽章主题类
+[2026-03-02 14:32:35] 操作: 添加 ARIA 属性
+[2026-03-02 14:32:35] 备份: 启用
+[2026-03-02 14:32:35] 找到 8 个 HTML 文件
+[2026-03-02 14:32:35] 处理文件: src/modules/app_center/views/keyword_hunter/analysis/template.html
+[2026-03-02 14:32:35]   - 找到 1 个徽章元素
+[2026-03-02 14:32:35]   - 从路径推断主题: wb-badge-analytics
+[2026-03-02 14:32:35]   - 变更: 添加主题类: wb-badge-analytics, 添加 aria-label: 分析功能, 添加 aria-hidden 到 1 个图标
+[2026-03-02 14:32:35]   - 创建备份: template.html.bak
+[2026-03-02 14:32:35]   - 文件已更新
+[2026-03-02 14:32:35] 处理文件: src/modules/app_center/views/keyword_hunter/input/template.html
+[2026-03-02 14:32:35]   - 找到 1 个徽章元素
+[2026-03-02 14:32:35] 处理文件: src/modules/app_center/views/keyword_hunter/process/template.html
+[2026-03-02 14:32:35]   - 找到 1 个徽章元素
+[2026-03-02 14:32:35]   - 从路径推断主题: wb-badge-pro
+[2026-03-02 14:32:35]   - 变更: 添加主题类: wb-badge-pro, 添加 aria-label: 专业功能, 添加 aria-hidden 到 1 个图标
+[2026-03-02 14:32:35]   - 创建备份: template.html.bak
+[2026-03-02 14:32:35]   - 文件已更新
+[2026-03-02 14:32:35] 处理文件: src/modules/app_center/views/master_analysis/scraper/template.html
+[2026-03-02 14:32:35]   - 找到 1 个徽章元素
+[2026-03-02 14:32:35]   - 从路径推断主题: wb-badge-analytics
+[2026-03-02 14:32:35]   - 变更: 添加主题类: wb-badge-analytics, 添加 aria-label: 分析功能, 添加 aria-hidden 到 1 个图标
+[2026-03-02 14:32:35]   - 创建备份: template.html.bak
+[2026-03-02 14:32:35]   - 文件已更新
+[2026-03-02 14:32:35] 处理文件: src/modules/app_center/views/master_analysis/ai_analysis/template.html
+[2026-03-02 14:32:35]   - 找到 1 个徽章元素
+[2026-03-02 14:32:35]   - 从路径推断主题: wb-badge-ai
+[2026-03-02 14:32:35]   - 变更: 添加主题类: wb-badge-ai, 添加 aria-label: 人工智能功能, 添加 aria-hidden 到 1 个图标
+[2026-03-02 14:32:35]   - 创建备份: template.html.bak
+[2026-03-02 14:32:35]   - 文件已更新
+[2026-03-02 14:32:35] 处理文件: src/modules/app_center/views/master_analysis/qalab/template.html
+[2026-03-02 14:32:35]   - 找到 1 个徽章元素
+[2026-03-02 14:32:35]   - 从路径推断主题: wb-badge-analytics
+[2026-03-02 14:32:35] 处理文件: src/modules/app_center/views/master_analysis/promptlab/template.html
+[2026-03-02 14:32:35]   - 找到 1 个徽章元素
+[2026-03-02 14:32:35]   - 从路径推断主题: wb-badge-analytics
+[2026-03-02 14:32:35]   - 变更: 添加主题类: wb-badge-analytics, 添加 aria-label: 分析功能, 添加 aria-hidden 到 1 个图标
+[2026-03-02 14:32:35]   - 创建备份: template.html.bak
+[2026-03-02 14:32:35]   - 文件已更新
+[2026-03-02 14:32:35] 处理文件: src/modules/app_center/views/overview/template.html
+[2026-03-02 14:32:35]   - 找到 1 个徽章元素
+[2026-03-02 14:32:35] 
+迁移完成!
+[2026-03-02 14:32:35]   总文件数: 8
+[2026-03-02 14:32:35]   修改的文件数: 5
+[2026-03-02 14:32:35]   总变更数: 15

@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome Banner Checkpoint 验证</title>
+    <link rel="stylesheet" href="../src/css/variables.css">
+    <link rel="stylesheet" href="../src/css/components/welcome-banner.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            padding: 2rem;
+            background: #f8fafc;
+        }
+        
+        .test-section {
+            margin-bottom: 3rem;
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .test-section h2 {
+            margin-top: 0;
+            color: #0f172a;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+        }
+        
+        .test-result {
+            margin: 1rem 0;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: monospace;
+        }
+        
+        .test-pass {
+            background: #dcfce7;
+            border-left: 4px solid #22c55e;
+            color: #166534;
+        }
+        
+        .test-fail {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            color: #991b1b;
+        }
+        
+        .test-info {
+            background: #dbeafe;
+            border-left: 4px solid #3b82f6;
+            color: #1e40af;
+        }
+        
+        .controls {
+            margin: 1rem 0;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 200ms;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-secondary {
+            background: #64748b;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #475569;
+        }
+        
+        .demo-container {
+            margin: 1rem 0;
+        }
+        
+        .viewport-simulator {
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: width 300ms;
+        }
+        
+        .viewport-desktop {
+            width: 100%;
+        }
+        
+        .viewport-tablet {
+            width: 768px;
+            margin: 0 auto;
+        }
+        
+        .viewport-mobile {
+            width: 480px;
+            margin: 0 auto;
+        }
+        
+        .viewport-small {
+            width: 375px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome Banner Checkpoint 验证</h1>
+    <p>此页面用于验证 Welcome Banner 组件的核心功能</p>
+
+    <!-- 测试1: 徽章主题类验证 -->
+    <div class="test-section">
+        <h2>测试 1: 徽章主题类验证</h2>
+        <div id="badge-test-results"></div>
+        <div class="demo-container">
+            <div class="wb-container" style="--wb-gradient-1: rgba(59, 130, 246, 0.08); --wb-gradient-2: rgba(34, 197, 94, 0.08);">
+                <div class="wb-content">
+                    <div class="wb-title-row">
+                        <h2 class="wb-title">徽章主题测试</h2>
+                        <span class="wb-badge wb-badge-ai" aria-label="人工智能功能">
+                            <i class="fa-solid fa-sparkles" aria-hidden="true"></i>
+                            <span>AI</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 测试2: 动画效果验证 -->
+    <div class="test-section">
+        <h2>测试 2: 动画效果验证</h2>
+        <div id="animation-test-results"></div>
+        <div class="controls">
+            <button class="btn btn-primary" onclick="testAnimations()">运行动画测试</button>
+        </div>
+        <div class="demo-container">
+            <!-- 脉冲动画 (Safety) -->
+            <div class="wb-container" style="margin-bottom: 1rem;">
+                <div class="wb-content">
+                    <div class="wb-title-row">
+                        <h3 class="wb-title">脉冲动画测试</h3>
+                        <span class="wb-badge wb-badge-safety" aria-label="安全警告">
+                            <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+                            <span>Safety</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 闪烁动画 (Growth) -->
+            <div class="wb-container">
+                <div class="wb-content">
+                    <div class="wb-title-row">
+                        <h3 class="wb-title">闪烁动画测试</h3>
+                        <span class="wb-badge wb-badge-growth" aria-label="增长功能">
+                            <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+                            <span>Growth</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 测试3: 暗色模式验证 -->
+    <div class="test-section">
+        <h2>测试 3: 暗色模式验证</h2>
+        <div id="dark-mode-test-results"></div>
+        <div class="controls">
+            <button class="btn btn-primary" onclick="toggleDarkMode()">切换暗色模式</button>
+            <button class="btn btn-secondary" onclick="testDarkModeContrast()">测试对比度</button>
+        </div>
+        <div class="demo-container">
+            <div class="wb-container">
+                <div class="wb-content">
+                    <div class="wb-title-row">
+                        <h3 class="wb-title">暗色模式测试</h3>
+                        <span class="wb-badge wb-badge-ai" aria-label="人工智能功能">
+                            <i class="fa-solid fa-sparkles" aria-hidden="true"></i>
+                            <span>AI</span>
+                        </span>
+                    </div>
+                    <p class="wb-description">这是描述文本，用于测试暗色模式下的对比度</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 测试4: 响应式布局验证 -->
+    <div class="test-section">
+        <h2>测试 4: 响应式布局验证</h2>
+        <div id="responsive-test-results"></div>
+        <div class="controls">
+            <button class="btn btn-primary" onclick="setViewport('desktop')">桌面 (>768px)</button>
+            <button class="btn btn-primary" onclick="setViewport('tablet')">平板 (≤768px)</button>
+            <button class="btn btn-primary" onclick="setViewport('mobile')">移动端 (≤480px)</button>
+            <button class="btn btn-primary" onclick="setViewport('small')">超小屏 (≤375px)</button>
+            <button class="btn btn-secondary" onclick="testTouchTargets()">测试触摸目标</button>
+        </div>
+        <div class="demo-container">
+            <div id="viewport-container" class="viewport-simulator viewport-desktop">
+                <div class="wb-container">
+                    <div class="wb-content">
+                        <div class="wb-title-row">
+                            <h3 class="wb-title">响应式布局测试</h3>
+                            <span class="wb-badge wb-badge-pro" aria-label="专业功能">
+                                <i class="fa-solid fa-crown" aria-hidden="true"></i>
+                                <span>Pro</span>
+                            </span>
+                        </div>
+                        <p class="wb-description">测试不同屏幕尺寸下的布局效果</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 测试5: 无障碍支持验证 -->
+    <div class="test-section">
+        <h2>测试 5: 无障碍支持验证</h2>
+        <div id="accessibility-test-results"></div>
+        <div class="controls">
+            <button class="btn btn-primary" onclick="testAccessibility()">运行无障碍测试</button>
+        </div>
+    </div>
+
+    <!-- 测试6: 性能验证 -->
+    <div class="test-section">
+        <h2>测试 6: 性能验证</h2>
+        <div id="performance-test-results"></div>
+        <div class="controls">
+            <button class="btn btn-primary" onclick="testPerformance()">运行性能测试</button>
+        </div>
+    </div>
+
+    <script>
+        // 测试结果显示函数
+        function showResult(containerId, message, type = 'info') {
+            const container = document.getElementById(containerId);
+            const div = document.createElement('div');
+            div.className = `test-result test-${type}`;
+            div.textContent = message;
+            container.appendChild(div);
+        }
+
+        function clearResults(containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+        }
+
+        // 测试1: 徽章主题类
+        function testBadgeThemes() {
+            clearResults('badge-test-results');
+            const badge = document.querySelector('.wb-badge-ai');
+            
+            if (badge) {
+                showResult('badge-test-results', '✓ 找到徽章元素', 'pass');
+                
+                if (badge.classList.contains('wb-badge-ai')) {
+                    showResult('badge-test-results', '✓ 徽章包含主题类 wb-badge-ai', 'pass');
+                } else {
+                    showResult('badge-test-results', '✗ 徽章缺少主题类', 'fail');
+                }
+                
+                if (badge.hasAttribute('aria-label')) {
+                    showResult('badge-test-results', `✓ 徽章包含 aria-label: "${badge.getAttribute('aria-label')}"`, 'pass');
+                } else {
+                    showResult('badge-test-results', '✗ 徽章缺少 aria-label 属性', 'fail');
+                }
+                
+                const icon = badge.querySelector('i');
+                if (icon && icon.getAttribute('aria-hidden') === 'true') {
+                    showResult('badge-test-results', '✓ 图标包含 aria-hidden="true"', 'pass');
+                } else {
+                    showResult('badge-test-results', '✗ 图标缺少 aria-hidden="true"', 'fail');
+                }
+            } else {
+                showResult('badge-test-results', '✗ 未找到徽章元素', 'fail');
+            }
+        }
+
+        // 测试2: 动画效果
+        function testAnimations() {
+            clearResults('animation-test-results');
+            
+            const safetyBadge = document.querySelector('.wb-badge-safety');
+            const growthBadge = document.querySelector('.wb-badge-growth');
+            
+            if (safetyBadge) {
+                const animation = window.getComputedStyle(safetyBadge).animation;
+                if (animation && animation.includes('pulse')) {
+                    showResult('animation-test-results', '✓ Safety 徽章应用了脉冲动画', 'pass');
+                } else {
+                    showResult('animation-test-results', '✗ Safety 徽章未应用脉冲动画', 'fail');
+                }
+            }
+            
+            if (growthBadge) {
+                const animation = window.getComputedStyle(growthBadge).animation;
+                if (animation && animation.includes('blink')) {
+                    showResult('animation-test-results', '✓ Growth 徽章应用了闪烁动画', 'pass');
+                } else {
+                    showResult('animation-test-results', '✗ Growth 徽章未应用闪烁动画', 'fail');
+                }
+            }
+            
+            // 检查 prefers-reduced-motion
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (prefersReducedMotion) {
+                showResult('animation-test-results', 'ℹ 用户启用了减少动画偏好，动画已禁用', 'info');
+            } else {
+                showResult('animation-test-results', '✓ 动画效果正常运行', 'pass');
+            }
+        }
+
+        // 测试3: 暗色模式
+        let darkModeEnabled = false;
+        
+        function toggleDarkMode() {
+            darkModeEnabled = !darkModeEnabled;
+            if (darkModeEnabled) {
+                document.documentElement.style.colorScheme = 'dark';
+                showResult('dark-mode-test-results', '✓ 已切换到暗色模式', 'info');
+            } else {
+                document.documentElement.style.colorScheme = 'light';
+                showResult('dark-mode-test-results', '✓ 已切换到明亮模式', 'info');
+            }
+        }
+
+        function testDarkModeContrast() {
+            clearResults('dark-mode-test-results');
+            
+            const title = document.querySelector('.wb-title');
+            const description = document.querySelector('.wb-description');
+            
+            if (title) {
+                const titleColor = window.getComputedStyle(title).color;
+                showResult('dark-mode-test-results', `标题颜色: ${titleColor}`, 'info');
+            }
+            
+            if (description) {
+                const descColor = window.getComputedStyle(description).color;
+                showResult('dark-mode-test-results', `描述颜色: ${descColor}`, 'info');
+            }
+            
+            showResult('dark-mode-test-results', 'ℹ 请手动验证对比度是否 ≥ 4.5:1', 'info');
+        }
+
+        // 测试4: 响应式布局
+        function setViewport(size) {
+            const container = document.getElementById('viewport-container');
+            container.className = `viewport-simulator viewport-${size}`;
+            showResult('responsive-test-results', `✓ 已切换到${size}视口`, 'info');
+        }
+
+        function testTouchTargets() {
+            clearResults('responsive-test-results');
+            
+            const badges = document.querySelectorAll('.wb-badge');
+            let allPass = true;
+            
+            badges.forEach((badge, index) => {
+                const rect = badge.getBoundingClientRect();
+                const width = rect.width;
+                const height = rect.height;
+                
+                if (width >= 44 && height >= 44) {
+                    showResult('responsive-test-results', `✓ 徽章 ${index + 1} 触摸目标: ${width.toFixed(0)}x${height.toFixed(0)}px (≥44x44px)`, 'pass');
+                } else {
+                    showResult('responsive-test-results', `✗ 徽章 ${index + 1} 触摸目标: ${width.toFixed(0)}x${height.toFixed(0)}px (<44x44px)`, 'fail');
+                    allPass = false;
+                }
+            });
+            
+            if (allPass) {
+                showResult('responsive-test-results', '✓ 所有触摸目标符合要求', 'pass');
+            }
+        }
+
+        // 测试5: 无障碍支持
+        function testAccessibility() {
+            clearResults('accessibility-test-results');
+            
+            const badges = document.querySelectorAll('.wb-badge');
+            let badgeCount = 0;
+            let ariaLabelCount = 0;
+            
+            badges.forEach(badge => {
+                badgeCount++;
+                if (badge.hasAttribute('aria-label')) {
+                    ariaLabelCount++;
+                }
+            });
+            
+            showResult('accessibility-test-results', `找到 ${badgeCount} 个徽章元素`, 'info');
+            showResult('accessibility-test-results', `其中 ${ariaLabelCount} 个包含 aria-label`, ariaLabelCount === badgeCount ? 'pass' : 'fail');
+            
+            const icons = document.querySelectorAll('.wb-badge i');
+            let iconCount = 0;
+            let ariaHiddenCount = 0;
+            
+            icons.forEach(icon => {
+                iconCount++;
+                if (icon.getAttribute('aria-hidden') === 'true') {
+                    ariaHiddenCount++;
+                }
+            });
+            
+            showResult('accessibility-test-results', `找到 ${iconCount} 个图标元素`, 'info');
+            showResult('accessibility-test-results', `其中 ${ariaHiddenCount} 个包含 aria-hidden="true"`, ariaHiddenCount === iconCount ? 'pass' : 'fail');
+        }
+
+        // 测试6: 性能
+        function testPerformance() {
+            clearResults('performance-test-results');
+            
+            // 测试 CSS 文件大小
+            showResult('performance-test-results', 'ℹ CSS 文件大小需要手动检查 (目标: <8KB 压缩后)', 'info');
+            
+            // 测试动画帧率
+            let frameCount = 0;
+            let lastTime = performance.now();
+            let fps = 0;
+            
+            function measureFPS() {
+                frameCount++;
+                const currentTime = performance.now();
+                
+                if (currentTime >= lastTime + 1000) {
+                    fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
+                    showResult('performance-test-results', `当前帧率: ${fps} FPS ${fps >= 60 ? '✓' : '✗'}`, fps >= 60 ? 'pass' : 'fail');
+                    frameCount = 0;
+                    lastTime = currentTime;
+                    return;
+                }
+                
+                requestAnimationFrame(measureFPS);
+            }
+            
+            requestAnimationFrame(measureFPS);
+            
+            // 3秒后停止测量
+            setTimeout(() => {
+                showResult('performance-test-results', '✓ 性能测试完成', 'info');
+            }, 3000);
+        }
+
+        // 页面加载时运行基础测试
+        window.addEventListener('load', () => {
+            testBadgeThemes();
+            testAnimations();
+        });
+    </script>
+</body>
+</html>

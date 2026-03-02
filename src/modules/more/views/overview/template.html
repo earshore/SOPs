@@ -1,139 +1,125 @@
-<!-- More Overview Template - 更多总览 -->
 <div class="more-overview-container">
-    <!-- Welcome Banner -->
-    <div class="wb-container" style="--wb-gradient-1: #10b981; --wb-gradient-2: #059669;">
-        <div class="wb-orb wb-orb-1"></div>
-        <div class="wb-orb wb-orb-2"></div>
-        <div class="wb-content">
-            <div class="wb-icon">
-                <i class="fas fa-compass"></i>
-            </div>
-            <div class="wb-title-row">
-                <h1 class="wb-title">更多功能</h1>
-                <span class="wb-badge wb-badge-hub">
-                    <i class="fa-grid"></i>MORE
+<!-- Welcome Banner -->
+<div class="wb-container" style="--wb-gradient-1: #10b981; --wb-gradient-2: #059669;">
+<div class="wb-orb wb-orb-1"></div>
+<div class="wb-orb wb-orb-2"></div>
+<div class="wb-content">
+<div class="wb-icon">
+<i class="fas fa-compass"></i>
+</div>
+<div class="wb-title-row">
+<h1 class="wb-title">更多功能</h1>
+<span aria-label="中心功能" class="wb-badge wb-badge-hub">
+<i aria-hidden="true" class="fa-grid"></i>MORE
                 </span>
+</div>
+<p class="wb-description">探索更多实用功能和工具，提升工作效率，发现无限可能。</p>
+</div>
+</div>
+<!-- 使用指南 -->
+<div class="bg-gradient-to-br from-slate-50 to-green-50 border border-slate-200 rounded-2xl p-6 mb-8">
+<div class="flex items-center gap-3 mb-5">
+<div class="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-green-500/20">
+<i class="fas fa-lightbulb text-xl"></i>
+</div>
+<div>
+<h3 class="text-lg font-bold text-slate-800">功能指南：发现更多可能性</h3>
+<p class="text-sm text-slate-500">持续更新中，敬请期待更多实用功能</p>
+</div>
+</div>
+<!-- 底部提示 -->
+<div class="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-slate-200">
+<div class="flex items-center gap-4 text-xs text-slate-500">
+<span class="flex items-center gap-1">
+<i class="fas fa-rocket text-green-400"></i>
+<span>持续更新中，敬请期待更多功能</span>
+</span>
+</div>
+<div class="text-xs text-slate-400">
+<i class="fas fa-star mr-1"></i>探索新功能，提升工作效率
             </div>
-            <p class="wb-description">探索更多实用功能和工具，提升工作效率，发现无限可能。</p>
-        </div>
-    </div>
-
-    <!-- 使用指南 -->
-    <div class="bg-gradient-to-br from-slate-50 to-green-50 border border-slate-200 rounded-2xl p-6 mb-8">
-        <div class="flex items-center gap-3 mb-5">
-            <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-green-500/20">
-                <i class="fas fa-lightbulb text-xl"></i>
-            </div>
-            <div>
-                <h3 class="text-lg font-bold text-slate-800">功能指南：发现更多可能性</h3>
-                <p class="text-sm text-slate-500">持续更新中，敬请期待更多实用功能</p>
-            </div>
-        </div>
-
-        <!-- 底部提示 -->
-        <div class="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-slate-200">
-            <div class="flex items-center gap-4 text-xs text-slate-500">
-                <span class="flex items-center gap-1">
-                    <i class="fas fa-rocket text-green-400"></i>
-                    <span>持续更新中，敬请期待更多功能</span>
-                </span>
-            </div>
-            <div class="text-xs text-slate-400">
-                <i class="fas fa-star mr-1"></i>探索新功能，提升工作效率
-            </div>
-        </div>
-    </div>
-
-    <!-- 分类筛选器 -->
-    <div class="mb-6 flex items-center gap-3 overflow-x-auto pb-2">
-        <button 
-            class="category-filter-btn active px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-medium transition-all whitespace-nowrap hover:bg-green-600"
-            data-category="all"
-        >
-            <i class="fas fa-th mr-2"></i>全部
+</div>
+</div>
+<!-- 分类筛选器 -->
+<div class="mb-6 flex items-center gap-3 overflow-x-auto pb-2">
+<button class="category-filter-btn active px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-medium transition-all whitespace-nowrap hover:bg-green-600" data-category="all">
+<i class="fas fa-th mr-2"></i>全部
         </button>
-        <button 
-            class="category-filter-btn px-4 py-2 bg-white text-slate-700 border border-slate-300 rounded-lg text-sm font-medium transition-all whitespace-nowrap hover:bg-slate-50"
-            data-category="explore"
-        >
-            <i class="fas fa-compass mr-2"></i>探索
+<button class="category-filter-btn px-4 py-2 bg-white text-slate-700 border border-slate-300 rounded-lg text-sm font-medium transition-all whitespace-nowrap hover:bg-slate-50" data-category="explore">
+<i class="fas fa-compass mr-2"></i>探索
         </button>
-    </div>
-
-    <!-- Module: 探索体系 (The Explore Layer) -->
-    <section id="more-module-explore" class="mb-10" data-category="explore">
-        <div class="more-module-section">
-            <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center text-green-600">
-                    <i class="fas fa-compass"></i>
-                </div>
-                <div>
-                    <h2 class="text-xl font-bold text-slate-800">探索</h2>
-                    <p class="text-sm text-slate-500">The Explore Layer · 智能体、提示词、工作流等实用功能</p>
-                </div>
-            </div>
-            <div class="sop-card-grid">
-                <!-- 智能体 -->
-                <div class="sop-card border-l-4 border-l-green-400" data-action="switch-tab" data-tab="more_agents">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="sop-icon-container bg-green-50 text-green-600">
-                            <i class="fas fa-robot"></i>
-                        </div>
-                        <span class="sop-status-badge sop-status-pending">建设中</span>
+</div>
+<!-- Module: 探索体系 (The Explore Layer) -->
+<section class="mb-10" data-category="explore" id="more-module-explore">
+<div class="more-module-section">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center text-green-600">
+<i class="fas fa-compass"></i>
+</div>
+<div>
+<h2 class="text-xl font-bold text-slate-800">探索</h2>
+<p class="text-sm text-slate-500">The Explore Layer · 智能体、提示词、工作流等实用功能</p>
+</div>
+</div>
+<div class="sop-card-grid">
+<!-- 智能体 -->
+<div class="sop-card border-l-4 border-l-green-400" data-action="switch-tab" data-tab="more_agents">
+<div class="flex items-start justify-between mb-3">
+<div class="sop-icon-container bg-green-50 text-green-600">
+<i class="fas fa-robot"></i>
+</div>
+<span class="sop-status-badge sop-status-pending">建设中</span>
+</div>
+<h3 class="font-bold text-lg text-slate-800 mb-2">智能体</h3>
+<p class="text-sm text-slate-500 mb-3">探索和使用各种智能体，提升工作效率和自动化水平</p>
+<div class="text-xs text-slate-400">
+<i class="fas fa-robot mr-1"></i>AI 驱动的智能助手
                     </div>
-                    <h3 class="font-bold text-lg text-slate-800 mb-2">智能体</h3>
-                    <p class="text-sm text-slate-500 mb-3">探索和使用各种智能体，提升工作效率和自动化水平</p>
-                    <div class="text-xs text-slate-400">
-                        <i class="fas fa-robot mr-1"></i>AI 驱动的智能助手
+</div>
+<!-- 提示词 -->
+<div class="sop-card border-l-4 border-l-green-400" data-action="switch-tab" data-tab="more_prompts">
+<div class="flex items-start justify-between mb-3">
+<div class="sop-icon-container bg-green-50 text-green-600">
+<i class="fas fa-message"></i>
+</div>
+<span class="sop-status-badge sop-status-pending">建设中</span>
+</div>
+<h3 class="font-bold text-lg text-slate-800 mb-2">提示词</h3>
+<p class="text-sm text-slate-500 mb-3">管理和使用各种提示词模板，优化AI交互体验</p>
+<div class="text-xs text-slate-400">
+<i class="fas fa-message mr-1"></i>提示词模板库
                     </div>
-                </div>
-
-                <!-- 提示词 -->
-                <div class="sop-card border-l-4 border-l-green-400" data-action="switch-tab" data-tab="more_prompts">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="sop-icon-container bg-green-50 text-green-600">
-                            <i class="fas fa-message"></i>
-                        </div>
-                        <span class="sop-status-badge sop-status-pending">建设中</span>
+</div>
+<!-- 工作流 -->
+<div class="sop-card border-l-4 border-l-green-400" data-action="switch-tab" data-tab="more_workflows">
+<div class="flex items-start justify-between mb-3">
+<div class="sop-icon-container bg-green-50 text-green-600">
+<i class="fas fa-diagram-project"></i>
+</div>
+<span class="sop-status-badge sop-status-pending">建设中</span>
+</div>
+<h3 class="font-bold text-lg text-slate-800 mb-2">工作流</h3>
+<p class="text-sm text-slate-500 mb-3">创建和管理自动化工作流，简化复杂业务流程</p>
+<div class="text-xs text-slate-400">
+<i class="fas fa-diagram-project mr-1"></i>自动化流程管理
                     </div>
-                    <h3 class="font-bold text-lg text-slate-800 mb-2">提示词</h3>
-                    <p class="text-sm text-slate-500 mb-3">管理和使用各种提示词模板，优化AI交互体验</p>
-                    <div class="text-xs text-slate-400">
-                        <i class="fas fa-message mr-1"></i>提示词模板库
-                    </div>
-                </div>
-
-                <!-- 工作流 -->
-                <div class="sop-card border-l-4 border-l-green-400" data-action="switch-tab" data-tab="more_workflows">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="sop-icon-container bg-green-50 text-green-600">
-                            <i class="fas fa-diagram-project"></i>
-                        </div>
-                        <span class="sop-status-badge sop-status-pending">建设中</span>
-                    </div>
-                    <h3 class="font-bold text-lg text-slate-800 mb-2">工作流</h3>
-                    <p class="text-sm text-slate-500 mb-3">创建和管理自动化工作流，简化复杂业务流程</p>
-                    <div class="text-xs text-slate-400">
-                        <i class="fas fa-diagram-project mr-1"></i>自动化流程管理
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Quick Stats -->
-    <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-white rounded-xl p-4 border border-slate-200 text-center">
-            <div class="text-2xl font-bold text-green-500">3</div>
-            <div class="text-xs text-slate-500 mt-1">探索功能</div>
-        </div>
-        <div class="bg-white rounded-xl p-4 border border-slate-200 text-center">
-            <div class="text-2xl font-bold text-slate-400">0</div>
-            <div class="text-xs text-slate-500 mt-1">已启用功能</div>
-        </div>
-        <div class="bg-white rounded-xl p-4 border border-slate-200 text-center">
-            <div class="text-2xl font-bold text-slate-400">持续更新</div>
-            <div class="text-xs text-slate-500 mt-1">敬请期待</div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
+</section>
+<!-- Quick Stats -->
+<div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+<div class="bg-white rounded-xl p-4 border border-slate-200 text-center">
+<div class="text-2xl font-bold text-green-500">3</div>
+<div class="text-xs text-slate-500 mt-1">探索功能</div>
+</div>
+<div class="bg-white rounded-xl p-4 border border-slate-200 text-center">
+<div class="text-2xl font-bold text-slate-400">0</div>
+<div class="text-xs text-slate-500 mt-1">已启用功能</div>
+</div>
+<div class="bg-white rounded-xl p-4 border border-slate-200 text-center">
+<div class="text-2xl font-bold text-slate-400">持续更新</div>
+<div class="text-xs text-slate-500 mt-1">敬请期待</div>
+</div>
+</div>
 </div>
