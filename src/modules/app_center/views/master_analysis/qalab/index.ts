@@ -12,11 +12,13 @@
 
 import { SafeModuleLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
+import { AlpineRegistry } from '../../../../../common/infrastructure/AlpineRegistry';
 import { registerActionsWithLegacy, unregisterActions } from '../../../../../common/utils/actionRegistry';
 import { MODULE_EVENTS } from '../../../../../common/constants/eventConstants';
 import eventBus from '../../../../../common/EventBus';
 import { appStore } from '@/stores/useAppStore';
 
+import { createQalabPanel } from './components/AlpinePanel';
 import {
     startAnalysis,
     clearInput,
@@ -69,7 +71,16 @@ export async function mount(container: HTMLElement): Promise<void> {
         container.classList.add('fade-in');
         renderer.renderTemplate(container, html);
 
-        // 3. 注册全局操作
+        // 3. 使用 AlpineRegistry 注册组件
+        const registry = AlpineRegistry.getInstance();
+        registry.register('qalabPanel', createQalabPanel);
+        
+        // 初始化注册器（如果尚未初始化）
+        registry.init();
+
+        console.log('[QALab] ✅ Alpine 组件已注册');
+
+        // 4. 注册全局操作（保留用于向后兼容）
         const registeredActions = registerActionsWithLegacy({
             amz_qalab_startAnalysis: () => startAnalysis(),
             amz_qalab_clearInput: () => clearInput(),
@@ -92,7 +103,7 @@ export async function mount(container: HTMLElement): Promise<void> {
         // 暴露triggerImport到全局，供HTML onclick使用
         (window as any).qalabTriggerImport = triggerImport;
 
-        // 4. 设置事件监听器 - 使用事件委托处理data-action
+        // 5. 设置事件监听器 - 使用事件委托处理data-action
         const eventManager = { listeners: [] as Array<{ element: any; event: string; handler: any }> };
 
         const clickHandler = (e: Event) => {
@@ -194,37 +205,8 @@ export async function mount(container: HTMLElement): Promise<void> {
             dataUpdateHandler
         };
 
-        // 6. 模块挂载时检查是否有现有报告
-        // 延迟执行，避免干扰页面初始动画
-        requestAnimationFrame(() => {
-            autoLoadAnalysisReport();
-        });
-
-        // 7. 初始化数据预览
-        // 延迟执行，避免干扰页面初始动画
-        requestAnimationFrame(() => {
-            refreshDataPreview();
-        });
-
-        // 8. 确保按钮容器在数据预览渲染后仍然可见
-        // 使用 Promise.resolve() 确保在当前微任务队列清空后执行
-        Promise.resolve().then(() => {
-            const sectionActions = container.querySelector('.section-actions') as HTMLElement;
-            if (sectionActions) {
-                // 检查按钮容器的计算样式
-                const computedStyle = window.getComputedStyle(sectionActions);
-                const isHidden = computedStyle.display === 'none' ||
-                    computedStyle.visibility === 'hidden' ||
-                    computedStyle.opacity === '0';
-
-                if (isHidden) {
-                    console.warn('[QALab] ⚠️ 检测到按钮容器被隐藏，强制显示');
-                    sectionActions.style.display = 'flex';
-                    sectionActions.style.visibility = 'visible';
-                    sectionActions.style.opacity = '1';
-                }
-            }
-        });
+        // 注意：模块挂载时的初始化（autoLoadAnalysisReport、refreshDataPreview）
+        // 已由 Alpine 组件的 init() 方法处理，无需在此重复调用
 
         console.log('[QALab] ✅ 子模块挂载成功');
     } catch (error) {
