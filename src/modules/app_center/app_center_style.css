@@ -11,13 +11,14 @@
 }
 
 /* 使用统一的容器类 */
-#app_center_content_area > div,
+#app_center_content_area>div,
 .app-overview-container {
   /* 使用 .module-container 替代 */
 }
 
 @media (max-width: 768px) {
-  #app_center_content_area > div,
+
+  #app_center_content_area>div,
   .app-overview-container {
     padding: 1.5rem 0.75rem;
   }

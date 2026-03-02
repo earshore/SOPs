@@ -73,7 +73,7 @@ export class DataPreview {
      */
     setupEventDelegation(onToggle: (asin: string) => void): void {
         console.log('[DataPreview] 🎯 setupEventDelegation 被调用');
-        
+
         const cardsContainer = document.getElementById('data-cards');
         if (!cardsContainer) {
             console.warn('[DataPreview] ⚠️ data-cards 容器不存在');
@@ -113,7 +113,7 @@ export class DataPreview {
                 const asin = card.getAttribute('data-asin');
                 if (asin) {
                     console.log('[DataPreview] 🎯 找到卡片，ASIN:', asin);
-                    
+
                     // 检查是否点击了卡片内容区域(已展开的部分)
                     const cardBody = target.closest(`#card-body-${asin}`);
                     if (cardBody) {

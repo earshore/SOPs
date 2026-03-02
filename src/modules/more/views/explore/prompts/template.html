@@ -1,7 +1,7 @@
 <!-- More - 提示词 Template -->
 <div class="more-content-container">
     <!-- Header Section -->
-        <!-- Welcome Banner -->
+    <!-- Welcome Banner -->
     <div class="wb-container" style="--wb-gradient-1: #10b981; --wb-gradient-2: #059669;">
         <div class="wb-orb wb-orb-1"></div>
         <div class="wb-orb wb-orb-2"></div>
@@ -22,12 +22,8 @@
     <!-- Search Bar -->
     <div class="mb-6">
         <div class="relative max-w-2xl mx-auto">
-            <input 
-                type="text" 
-                id="prompt-search"
-                placeholder="搜索提示词..." 
-                class="w-full px-5 py-3 pl-12 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            />
+            <input type="text" id="prompt-search" placeholder="搜索提示词..."
+                class="w-full px-5 py-3 pl-12 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" />
             <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
         </div>
     </div>
@@ -45,7 +41,8 @@
     </div>
 
     <!-- Prompt Detail Modal -->
-    <div id="prompt-detail-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div id="prompt-detail-modal"
+        class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
             <!-- Modal Header -->
             <div class="bg-gradient-to-r from-green-600 to-emerald-600 p-6 text-white">
@@ -62,8 +59,8 @@
                             </span>
                         </div>
                     </div>
-                    <button onclick="window.closePromptModal()" 
-                            class="text-white/80 hover:text-white transition-colors">
+                    <button onclick="window.closePromptModal()"
+                        class="text-white/80 hover:text-white transition-colors">
                         <i class="fas fa-times text-2xl"></i>
                     </button>
                 </div>
@@ -80,19 +77,18 @@
                         </h3>
                         <!-- 语言切换按钮 -->
                         <div class="flex bg-slate-200 rounded-lg p-0.5">
-                            <button onclick="window.switchPromptLang('zh')" 
-                                    data-lang="zh"
-                                    class="lang-btn active px-3 py-1 text-xs font-medium rounded-md transition-all">
+                            <button onclick="window.switchPromptLang('zh')" data-lang="zh"
+                                class="lang-btn active px-3 py-1 text-xs font-medium rounded-md transition-all">
                                 中文
                             </button>
-                            <button onclick="window.switchPromptLang('en')" 
-                                    data-lang="en"
-                                    class="lang-btn px-3 py-1 text-xs font-medium rounded-md transition-all">
+                            <button onclick="window.switchPromptLang('en')" data-lang="en"
+                                class="lang-btn px-3 py-1 text-xs font-medium rounded-md transition-all">
                                 English
                             </button>
                         </div>
                     </div>
-                    <pre id="modal-prompt-content" class="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed font-mono"></pre>
+                    <pre id="modal-prompt-content"
+                        class="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed font-mono"></pre>
                 </div>
 
                 <!-- Usage Tips -->
@@ -124,12 +120,12 @@
 
             <!-- Modal Footer -->
             <div class="border-t border-slate-200 p-4 bg-slate-50 flex justify-end gap-3">
-                <button onclick="window.closePromptModal()" 
-                        class="px-4 py-2 text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors">
+                <button onclick="window.closePromptModal()"
+                    class="px-4 py-2 text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors">
                     关闭
                 </button>
-                <button onclick="window.copyModalPrompt()" 
-                        class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center gap-2">
+                <button onclick="window.copyModalPrompt()"
+                    class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center gap-2">
                     <i class="fas fa-copy"></i>
                     复制提示词
                 </button>

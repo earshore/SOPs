@@ -13,9 +13,9 @@ import { sleep } from '../../../../../../common/ui';
  * 更新任务状态
  */
 export function updateTask(
-    tasks: Task[], 
-    asin: string, 
-    status: Task['status'], 
+    tasks: Task[],
+    asin: string,
+    status: Task['status'],
     message: string
 ): void {
     const task = tasks.find(t => t.asin === asin);
@@ -66,13 +66,13 @@ export function handleScrapeComplete(
     let finalProducts = products;
     if (!products || products.length === 0) {
         finalProducts = validAsins.map(asin => ({
-            asin, 
+            asin,
             url: '',
             language: '',
             productTitle: '',
             feature_bullets: [],
             customer_reviews: [],
-            scrape_status: 'failed' as const, 
+            scrape_status: 'failed' as const,
             error: 'Unknown Error'
         }));
     }

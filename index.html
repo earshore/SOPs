@@ -9,29 +9,40 @@
 
     <!-- CSP已移至HTTP响应头 (public/_headers) 以避免DOM操作导致的问题 -->
 
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%234285F4'/%3E%3Cstop offset='50%25' style='stop-color:%239B72F2'/%3E%3Cstop offset='100%25' style='stop-color:%23D96570'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='12' cy='12' r='1' stroke='url(%23g)'/%3E%3Cpath stroke='url(%23g)' d='M20.2 20.2c2.04-2.03.02-7.36-4.5-11.9-4.54-4.52-9.87-6.54-11.9-4.5-2.04 2.03-.02 7.36 4.5 11.9 4.54 4.52 9.87 6.54 11.9 4.5Z'/%3E%3Cpath stroke='url(%23g)' d='M15.7 15.7c4.52-4.54 6.54-9.87 4.5-11.9-2.03-2.04-7.36-.02-11.9 4.5-4.52 4.54-6.54 9.87-4.5 11.9 2.03 2.04 7.36.02 11.9-4.5Z'/%3E%3C/svg%3E">
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%234285F4'/%3E%3Cstop offset='50%25' style='stop-color:%239B72F2'/%3E%3Cstop offset='100%25' style='stop-color:%23D96570'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='12' cy='12' r='1' stroke='url(%23g)'/%3E%3Cpath stroke='url(%23g)' d='M20.2 20.2c2.04-2.03.02-7.36-4.5-11.9-4.54-4.52-9.87-6.54-11.9-4.5-2.04 2.03-.02 7.36 4.5 11.9 4.54 4.52 9.87 6.54 11.9 4.5Z'/%3E%3Cpath stroke='url(%23g)' d='M15.7 15.7c4.52-4.54 6.54-9.87 4.5-11.9-2.03-2.04-7.36-.02-11.9 4.5-4.52 4.54-6.54 9.87-4.5 11.9 2.03 2.04 7.36.02 11.9-4.5Z'/%3E%3C/svg%3E">
 
     <link rel="preconnect" href="https://cdn.bootcdn.net" crossorigin>
     <link rel="dns-prefetch" href="https://cdn.bootcdn.net">
-    
+
     <!-- 预加载关键资源 -->
     <link rel="modulepreload" href="/src/main.ts">
     <link rel="preload" href="/src/css/main.css" as="style">
-    
+
     <link rel="preconnect" href="https://api.openai.com" crossorigin>
     <link rel="dns-prefetch" href="https://api.openai.com">
     <link rel="preconnect" href="https://generativelanguage.googleapis.com" crossorigin>
     <link rel="dns-prefetch" href="https://generativelanguage.googleapis.com">
 
-    <link rel="preload" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.2/webfonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.2/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet"></noscript>
+    <link rel="preload" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.2/webfonts/fa-solid-900.woff2"
+        as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.2/css/all.min.css" as="style"
+        onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    </noscript>
 
     <!-- Google Fonts: 独特字体组合 - 异步加载 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-    <noscript><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link
+            href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+            rel="stylesheet">
+    </noscript>
 
     <!-- 关键内联样式 - 仅首屏必需 -->
     <style>
@@ -41,31 +52,43 @@
             --color-primary: #6366f1;
             --color-slate-50: #f8fafc;
             --color-slate-700: #334155;
-            
+
             /* 渐变 */
             --gradient-aurora: linear-gradient(135deg, #6366f1 0%, #ec4899 25%, #f59e0b 50%, #10b981 75%, #06b6d4 100%);
-            
+
             /* 动画 */
             --duration-normal: 250ms;
             --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
-            
+
             /* 字体 */
             --font-sans: 'DM Sans', system-ui, -apple-system, sans-serif;
             --font-display: 'Syne', 'DM Sans', sans-serif;
-            
+
             /* Z-index */
             --z-header: 40;
             --z-mega-menu: 60;
             --z-loading: 300;
         }
-        
+
         /* 基础重置 */
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; scroll-behavior: smooth; }
-        body { 
-            font-family: var(--font-sans); 
-            font-size: 16px; 
-            line-height: 1.6; 
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            font-size: 16px;
+            line-height: 1.6;
             color: var(--color-slate-700);
             background: var(--color-slate-50);
             overflow: hidden;
@@ -75,31 +98,76 @@
         }
 
         /* 核心动画 */
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes gradient-shift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
         }
+
+        @keyframes gradient-shift {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
         @keyframes pulse-glow {
-            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 currentColor; }
-            50% { opacity: 0.7; box-shadow: 0 0 0 4px transparent; }
+
+            0%,
+            100% {
+                opacity: 1;
+                box-shadow: 0 0 0 0 currentColor;
+            }
+
+            50% {
+                opacity: 0.7;
+                box-shadow: 0 0 0 4px transparent;
+            }
         }
 
         /* 滚动条 */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
 
         /* 工具类 */
-        .hidden { display: none !important; }
-        .sr-only { 
-            position: absolute; width: 1px; height: 1px; 
-            padding: 0; margin: -1px; overflow: hidden; 
-            clip: rect(0,0,0,0); white-space: nowrap; border: 0; 
+        .hidden {
+            display: none !important;
         }
-        
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
         /* 首屏关键样式 - Header */
         .header {
             position: sticky;
@@ -108,7 +176,7 @@
             background: white;
             border-bottom: 1px solid #e2e8f0;
         }
-        
+
         .header-inner {
             display: flex;
             align-items: center;
@@ -116,7 +184,7 @@
             padding: 0 2rem;
             height: 64px;
         }
-        
+
         .logo-button {
             display: flex;
             align-items: center;
@@ -128,17 +196,28 @@
             border-radius: 0.5rem;
             transition: background var(--duration-normal) var(--ease-smooth);
         }
-        
+
         .logo-button:hover {
             background: var(--color-slate-50);
         }
-        
+
         /* 布局 */
-        .flex { display: flex; }
-        .flex-1 { flex: 1; }
-        .overflow-hidden { overflow: hidden; }
-        .relative { position: relative; }
-        
+        .flex {
+            display: flex;
+        }
+
+        .flex-1 {
+            flex: 1;
+        }
+
+        .overflow-hidden {
+            overflow: hidden;
+        }
+
+        .relative {
+            position: relative;
+        }
+
         /* 加载动画 */
         .skeleton {
             background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
@@ -146,10 +225,15 @@
             animation: shimmer 1.5s infinite;
             border-radius: 0.5rem;
         }
-        
+
         @keyframes shimmer {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
         }
     </style>
 
@@ -170,8 +254,7 @@
             <button data-action="switch-tab" data-tab="home" class="logo-button">
                 <div class="logo-icon-wrapper">
                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        aria-hidden="true">
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <defs>
                             <linearGradient id="gemini-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
                                 <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />

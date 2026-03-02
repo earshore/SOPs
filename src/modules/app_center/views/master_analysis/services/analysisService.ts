@@ -25,7 +25,7 @@ import type {
  */
 function robustParseJSON(text: string): any {
   if (!text) return null;
-  
+
   // 1. 尝试直接解析
   try {
     return JSON.parse(text);
@@ -87,7 +87,7 @@ export const AnalysisService = {
         }
 
         if (includeBullets) {
-          const bullets = 
+          const bullets =
             p.feature_bullets && p.feature_bullets.length > 0
               ? p.feature_bullets.join("; ")
               : "N/A";
@@ -128,10 +128,10 @@ export const AnalysisService = {
     } catch (e) {
       const error = e as Error;
       console.warn("Analysis JSON Parse Failed:", error.message);
-      return { 
-        raw_response: response, 
-        parse_error: true, 
-        error_detail: error.message 
+      return {
+        raw_response: response,
+        parse_error: true,
+        error_detail: error.message
       };
     }
   },
@@ -145,8 +145,8 @@ export const AnalysisService = {
    * @returns 翻译后的报告
    */
   async translateReport(
-    report: AnalysisReport, 
-    language: string, 
+    report: AnalysisReport,
+    language: string,
     llmConfig: LLMConfig
   ): Promise<AnalysisReport> {
     // 深拷贝并移除 meta 字段，减少 Token 消耗
@@ -172,10 +172,10 @@ export const AnalysisService = {
     } catch (e) {
       const error = e as Error;
       console.warn("Translation JSON Parse Failed:", error.message);
-      return { 
+      return {
         ...report, // 返回原报告，但标记错误
-        parse_error: true, 
-        raw_response: response 
+        parse_error: true,
+        raw_response: response
       };
     }
   },

@@ -1,245 +1,250 @@
 <div class="sop-widescreen-container">
-<!-- Header -->
-<!-- Welcome Banner -->
-<div class="wb-container" style="--wb-gradient-1: #ef4444; --wb-gradient-2: #dc2626;">
-<div class="wb-orb wb-orb-1"></div>
-<div class="wb-orb wb-orb-2"></div>
-<div class="wb-content">
-<div class="wb-icon">
-<i class="fas fa-user-lock"></i>
-</div>
-<div class="wb-title-row">
-<h1 class="wb-title">后台权限管理 SOP</h1>
-<span aria-label="安全警告" class="wb-badge wb-badge-safety">
-<i aria-hidden="true" class="fa-lock"></i>SECURE
+    <!-- Header -->
+    <!-- Welcome Banner -->
+    <div class="wb-container" style="--wb-gradient-1: #ef4444; --wb-gradient-2: #dc2626;">
+        <div class="wb-orb wb-orb-1"></div>
+        <div class="wb-orb wb-orb-2"></div>
+        <div class="wb-content">
+            <div class="wb-icon">
+                <i class="fas fa-user-lock"></i>
+            </div>
+            <div class="wb-title-row">
+                <h1 class="wb-title">后台权限管理 SOP</h1>
+                <span aria-label="安全警告" class="wb-badge wb-badge-safety">
+                    <i aria-hidden="true" class="fa-lock"></i>SECURE
                 </span>
-</div>
-<p class="wb-description">子账号授权范围、最小权限原则、核心权限屏蔽 - Payments/Settings 权限仅限Boss</p>
-<div class="wb-meta">
-<span><i class="fas fa-tag mr-1"></i>账号安全与风控体系</span>
-<span><i class="fas fa-tag mr-1"></i>权限管理</span>
-<span><i class="fas fa-tag mr-1"></i>更新日期：2024-01</span>
-</div>
-</div>
-</div>
-<!-- Core Principle Warning -->
-<div class="bg-red-50 border border-red-200 rounded-xl p-5 mb-6">
-<div class="flex items-start gap-4">
-<div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center text-red-600 flex-shrink-0">
-<i class="fas fa-shield-halved text-xl"></i>
-</div>
-<div class="flex-1">
-<h3 class="font-bold text-red-800 mb-2 text-lg">核心原则：最小权限 (Least Privilege)</h3>
-<p class="text-red-700 mb-3">
+            </div>
+            <p class="wb-description">子账号授权范围、最小权限原则、核心权限屏蔽 - Payments/Settings 权限仅限Boss</p>
+            <div class="wb-meta">
+                <span><i class="fas fa-tag mr-1"></i>账号安全与风控体系</span>
+                <span><i class="fas fa-tag mr-1"></i>权限管理</span>
+                <span><i class="fas fa-tag mr-1"></i>更新日期：2024-01</span>
+            </div>
+        </div>
+    </div>
+    <!-- Core Principle Warning -->
+    <div class="bg-red-50 border border-red-200 rounded-xl p-5 mb-6">
+        <div class="flex items-start gap-4">
+            <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center text-red-600 flex-shrink-0">
+                <i class="fas fa-shield-halved text-xl"></i>
+            </div>
+            <div class="flex-1">
+                <h3 class="font-bold text-red-800 mb-2 text-lg">核心原则：最小权限 (Least Privilege)</h3>
+                <p class="text-red-700 mb-3">
                     员工仅获得完成工作所需的最小权限集合。<strong>Payments（结算）</strong>和<strong>Settings（账号设置）</strong>权限仅限Boss本人，任何情况不得下放。
                 </p>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-<div class="bg-red-100 rounded-lg p-3 flex items-center gap-2">
-<i class="fas fa-ban text-red-600"></i>
-<span class="text-red-800"><strong>Payments</strong> - 银行账户、提现、账单</span>
-</div>
-<div class="bg-red-100 rounded-lg p-3 flex items-center gap-2">
-<i class="fas fa-ban text-red-600"></i>
-<span class="text-red-800"><strong>Settings</strong> - 店铺信息、税务、用户权限</span>
-</div>
-</div>
-</div>
-</div>
-</div>
-<!-- Two Column Layout -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-<!-- Permission Matrix (2 columns wide) -->
-<div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-6">
-<h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-<i class="fas fa-table text-blue-500"></i>岗位权限矩阵
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                    <div class="bg-red-100 rounded-lg p-3 flex items-center gap-2">
+                        <i class="fas fa-ban text-red-600"></i>
+                        <span class="text-red-800"><strong>Payments</strong> - 银行账户、提现、账单</span>
+                    </div>
+                    <div class="bg-red-100 rounded-lg p-3 flex items-center gap-2">
+                        <i class="fas fa-ban text-red-600"></i>
+                        <span class="text-red-800"><strong>Settings</strong> - 店铺信息、税务、用户权限</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Two Column Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <!-- Permission Matrix (2 columns wide) -->
+        <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-6">
+            <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <i class="fas fa-table text-blue-500"></i>岗位权限矩阵
             </h2>
-<div class="overflow-x-auto">
-<table class="w-full text-sm">
-<thead>
-<tr class="bg-slate-100">
-<th class="px-4 py-3 text-left font-bold text-slate-700">权限模块</th>
-<th class="px-4 py-3 text-center font-bold text-slate-700">运营专员</th>
-<th class="px-4 py-3 text-center font-bold text-slate-700">客服专员</th>
-<th class="px-4 py-3 text-center font-bold text-slate-700">采购/仓储</th>
-<th class="px-4 py-3 text-center font-bold text-slate-700">运营主管</th>
-<th class="px-4 py-3 text-center font-bold text-slate-700">Boss</th>
-</tr>
-</thead>
-<tbody class="divide-y divide-slate-100">
-<tr class="hover:bg-slate-50">
-<td class="px-4 py-3 font-medium">Catalog (Listing管理)</td>
-<td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
-<td class="px-4 py-3 text-center"><i class="fas fa-minus text-slate-300"></i></td>
-<td class="px-4 py-3 text-center"><i class="fas fa-eye text-amber-500"></i></td>
-<td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
-<td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
-</tr>
-<tr class="hover:bg-slate-50">
-<td class="px-4 py-3 font-medium">Inventory (库存管理)</td>
-<td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
-<td class="px-4 py-3 text-center"><i class="fas fa-eye text-amber-500"></i></td>
-<td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
-<td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
-<td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
-</tr>
-<tr class="hover:bg-slate-50">
-<td class="px-4 py-3 font-medium">Orders (订单管理)</td>
-<td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
-<td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
-<td class="px-4 py-3 text-center"><i class="fas fa-eye text-amber-500"></i></td>
-<td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
-<td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
-</tr>
-<tr class="hover:bg-slate-50">
-<td class="px-4 py-3 font-medium">Advertising (广告投放)</td>
-<td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
-<td class="px-4 py-3 text-center"><i class="fas fa-minus text-slate-300"></i></td>
-<td class="px-4 py-3 text-center"><i class="fas fa-minus text-slate-300"></i></td>
-<td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
-<td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
-</tr>
-<tr class="hover:bg-slate-50">
-<td class="px-4 py-3 font-medium">Reports (业务报表)</td>
-<td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
-<td class="px-4 py-3 text-center"><i class="fas fa-eye text-amber-500"></i></td>
-<td class="px-4 py-3 text-center"><i class="fas fa-eye text-amber-500"></i></td>
-<td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
-<td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
-</tr>
-<tr class="hover:bg-slate-50">
-<td class="px-4 py-3 font-medium">Messages (买家消息)</td>
-<td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
-<td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
-<td class="px-4 py-3 text-center"><i class="fas fa-minus text-slate-300"></i></td>
-<td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
-<td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
-</tr>
-<tr class="hover:bg-slate-50">
-<td class="px-4 py-3 font-medium">Brand Registry (品牌)</td>
-<td class="px-4 py-3 text-center"><i class="fas fa-eye text-amber-500"></i></td>
-<td class="px-4 py-3 text-center"><i class="fas fa-minus text-slate-300"></i></td>
-<td class="px-4 py-3 text-center"><i class="fas fa-minus text-slate-300"></i></td>
-<td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
-<td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
-</tr>
-<tr class="bg-red-50 hover:bg-red-100/50">
-<td class="px-4 py-3 font-bold text-red-700"><i class="fas fa-ban mr-1"></i>Payments (结算)
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="bg-slate-100">
+                            <th class="px-4 py-3 text-left font-bold text-slate-700">权限模块</th>
+                            <th class="px-4 py-3 text-center font-bold text-slate-700">运营专员</th>
+                            <th class="px-4 py-3 text-center font-bold text-slate-700">客服专员</th>
+                            <th class="px-4 py-3 text-center font-bold text-slate-700">采购/仓储</th>
+                            <th class="px-4 py-3 text-center font-bold text-slate-700">运营主管</th>
+                            <th class="px-4 py-3 text-center font-bold text-slate-700">Boss</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-4 py-3 font-medium">Catalog (Listing管理)</td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-minus text-slate-300"></i></td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-eye text-amber-500"></i></td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-4 py-3 font-medium">Inventory (库存管理)</td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-eye text-amber-500"></i></td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-4 py-3 font-medium">Orders (订单管理)</td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-eye text-amber-500"></i></td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-4 py-3 font-medium">Advertising (广告投放)</td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-minus text-slate-300"></i></td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-minus text-slate-300"></i></td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-4 py-3 font-medium">Reports (业务报表)</td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-eye text-amber-500"></i></td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-eye text-amber-500"></i></td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-4 py-3 font-medium">Messages (买家消息)</td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-minus text-slate-300"></i></td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-4 py-3 font-medium">Brand Registry (品牌)</td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-eye text-amber-500"></i></td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-minus text-slate-300"></i></td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-minus text-slate-300"></i></td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                        </tr>
+                        <tr class="bg-red-50 hover:bg-red-100/50">
+                            <td class="px-4 py-3 font-bold text-red-700"><i class="fas fa-ban mr-1"></i>Payments (结算)
                             </td>
-<td class="px-4 py-3 text-center"><i class="fas fa-ban text-red-500"></i></td>
-<td class="px-4 py-3 text-center"><i class="fas fa-ban text-red-500"></i></td>
-<td class="px-4 py-3 text-center"><i class="fas fa-ban text-red-500"></i></td>
-<td class="px-4 py-3 text-center"><i class="fas fa-ban text-red-500"></i></td>
-<td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
-</tr>
-<tr class="bg-red-50 hover:bg-red-100/50">
-<td class="px-4 py-3 font-bold text-red-700"><i class="fas fa-ban mr-1"></i>Settings (账号设置)
+                            <td class="px-4 py-3 text-center"><i class="fas fa-ban text-red-500"></i></td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-ban text-red-500"></i></td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-ban text-red-500"></i></td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-ban text-red-500"></i></td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                        </tr>
+                        <tr class="bg-red-50 hover:bg-red-100/50">
+                            <td class="px-4 py-3 font-bold text-red-700"><i class="fas fa-ban mr-1"></i>Settings (账号设置)
                             </td>
-<td class="px-4 py-3 text-center"><i class="fas fa-ban text-red-500"></i></td>
-<td class="px-4 py-3 text-center"><i class="fas fa-ban text-red-500"></i></td>
-<td class="px-4 py-3 text-center"><i class="fas fa-ban text-red-500"></i></td>
-<td class="px-4 py-3 text-center"><i class="fas fa-ban text-red-500"></i></td>
-<td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="mt-4 flex flex-wrap items-center gap-6 text-xs text-slate-500">
-<span><i class="fas fa-check text-emerald-500 mr-1"></i>完全权限 (View + Edit)</span>
-<span><i class="fas fa-eye text-amber-500 mr-1"></i>只读权限 (View Only)</span>
-<span><i class="fas fa-minus text-slate-300 mr-1"></i>无权限</span>
-<span><i class="fas fa-ban text-red-500 mr-1"></i>禁止开放</span>
-</div>
-</div>
-<!-- Right Side: Process & Notes -->
-<div class="space-y-6">
-<!-- Application Process -->
-<div class="bg-white rounded-xl border border-slate-200 p-5">
-<h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-<i class="fas fa-route text-blue-500"></i>权限申请流程
+                            <td class="px-4 py-3 text-center"><i class="fas fa-ban text-red-500"></i></td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-ban text-red-500"></i></td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-ban text-red-500"></i></td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-ban text-red-500"></i></td>
+                            <td class="px-4 py-3 text-center"><i class="fas fa-check text-emerald-500"></i></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-4 flex flex-wrap items-center gap-6 text-xs text-slate-500">
+                <span><i class="fas fa-check text-emerald-500 mr-1"></i>完全权限 (View + Edit)</span>
+                <span><i class="fas fa-eye text-amber-500 mr-1"></i>只读权限 (View Only)</span>
+                <span><i class="fas fa-minus text-slate-300 mr-1"></i>无权限</span>
+                <span><i class="fas fa-ban text-red-500 mr-1"></i>禁止开放</span>
+            </div>
+        </div>
+        <!-- Right Side: Process & Notes -->
+        <div class="space-y-6">
+            <!-- Application Process -->
+            <div class="bg-white rounded-xl border border-slate-200 p-5">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-route text-blue-500"></i>权限申请流程
                 </h2>
-<div class="space-y-3">
-<div class="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-<div class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                <div class="space-y-3">
+                    <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                        <div
+                            class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
                             1</div>
-<div>
-<div class="font-semibold text-slate-800">提交申请</div>
-<div class="text-xs text-slate-500">填写《权限申请表》说明理由</div>
-</div>
-</div>
-<div class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-<div class="w-8 h-8 bg-slate-400 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                        <div>
+                            <div class="font-semibold text-slate-800">提交申请</div>
+                            <div class="text-xs text-slate-500">填写《权限申请表》说明理由</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                        <div
+                            class="w-8 h-8 bg-slate-400 text-white rounded-full flex items-center justify-center text-sm font-bold">
                             2</div>
-<div>
-<div class="font-semibold text-slate-800">主管审核</div>
-<div class="text-xs text-slate-500">确认权限必要性</div>
-</div>
-</div>
-<div class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-<div class="w-8 h-8 bg-slate-400 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                        <div>
+                            <div class="font-semibold text-slate-800">主管审核</div>
+                            <div class="text-xs text-slate-500">确认权限必要性</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                        <div
+                            class="w-8 h-8 bg-slate-400 text-white rounded-full flex items-center justify-center text-sm font-bold">
                             3</div>
-<div>
-<div class="font-semibold text-slate-800">Boss审批</div>
-<div class="text-xs text-slate-500">最终授权并开通</div>
-</div>
-</div>
-<div class="flex items-center gap-3 p-3 bg-emerald-50 rounded-lg">
-<div class="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                        <div>
+                            <div class="font-semibold text-slate-800">Boss审批</div>
+                            <div class="text-xs text-slate-500">最终授权并开通</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 bg-emerald-50 rounded-lg">
+                        <div
+                            class="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
                             4</div>
-<div>
-<div class="font-semibold text-slate-800">登记备案</div>
-<div class="text-xs text-slate-500">更新权限登记表</div>
-</div>
-</div>
-</div>
-</div>
-<!-- Important Notes -->
-<div class="bg-amber-50 rounded-xl border border-amber-200 p-5">
-<h3 class="font-bold text-amber-800 mb-3 flex items-center gap-2">
-<i class="fas fa-exclamation-triangle"></i>重要提醒
+                        <div>
+                            <div class="font-semibold text-slate-800">登记备案</div>
+                            <div class="text-xs text-slate-500">更新权限登记表</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Important Notes -->
+            <div class="bg-amber-50 rounded-xl border border-amber-200 p-5">
+                <h3 class="font-bold text-amber-800 mb-3 flex items-center gap-2">
+                    <i class="fas fa-exclamation-triangle"></i>重要提醒
                 </h3>
-<ul class="text-sm text-slate-700 space-y-2">
-<li class="flex items-start gap-2">
-<i class="fas fa-check text-amber-600 mt-1 flex-shrink-0"></i>
-<span>员工离职时，<strong>立即删除</strong>其子账号（当天完成）</span>
-</li>
-<li class="flex items-start gap-2">
-<i class="fas fa-check text-amber-600 mt-1 flex-shrink-0"></i>
-<span>每季度进行一次<strong>权限审计</strong>，清理不必要的权限</span>
-</li>
-<li class="flex items-start gap-2">
-<i class="fas fa-check text-amber-600 mt-1 flex-shrink-0"></i>
-<span>岗位变动时及时<strong>调整权限范围</strong></span>
-</li>
-<li class="flex items-start gap-2">
-<i class="fas fa-check text-amber-600 mt-1 flex-shrink-0"></i>
-<span>主账号密码每<strong>90天</strong>强制更换</span>
-</li>
-</ul>
-</div>
-<!-- Sub-account Creation -->
-<div class="bg-purple-50 rounded-xl border border-purple-200 p-5">
-<h3 class="font-bold text-purple-800 mb-3 flex items-center gap-2">
-<i class="fas fa-user-plus"></i>创建子账号步骤
+                <ul class="text-sm text-slate-700 space-y-2">
+                    <li class="flex items-start gap-2">
+                        <i class="fas fa-check text-amber-600 mt-1 flex-shrink-0"></i>
+                        <span>员工离职时，<strong>立即删除</strong>其子账号（当天完成）</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <i class="fas fa-check text-amber-600 mt-1 flex-shrink-0"></i>
+                        <span>每季度进行一次<strong>权限审计</strong>，清理不必要的权限</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <i class="fas fa-check text-amber-600 mt-1 flex-shrink-0"></i>
+                        <span>岗位变动时及时<strong>调整权限范围</strong></span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <i class="fas fa-check text-amber-600 mt-1 flex-shrink-0"></i>
+                        <span>主账号密码每<strong>90天</strong>强制更换</span>
+                    </li>
+                </ul>
+            </div>
+            <!-- Sub-account Creation -->
+            <div class="bg-purple-50 rounded-xl border border-purple-200 p-5">
+                <h3 class="font-bold text-purple-800 mb-3 flex items-center gap-2">
+                    <i class="fas fa-user-plus"></i>创建子账号步骤
                 </h3>
-<ol class="text-sm text-slate-700 space-y-1">
-<li>1. Settings → User Permissions</li>
-<li>2. 点击 "Add a New User"</li>
-<li>3. 输入员工邮箱（公司邮箱）</li>
-<li>4. 勾选对应权限模块</li>
-<li>5. 发送邀请链接</li>
-<li>6. 员工完成激活</li>
-</ol>
-</div>
-</div>
-</div>
-<!-- Video Resource -->
-<div class="bg-blue-50 rounded-xl border border-blue-200 p-4">
-<div class="flex items-center gap-3">
-<i class="fas fa-video text-blue-500 text-xl"></i>
-<div>
-<h3 class="font-bold text-slate-800">操作视频教程</h3>
-<p class="text-sm text-slate-600">访问公司网盘(待完善)观看详细操作录屏：<a class="text-blue-600 underline" href="http://192.168.1.99">192.168.1.99</a>（仅限内网访问）→ 培训资料 → 权限管理专题</p>
-</div>
-</div>
-</div>
+                <ol class="text-sm text-slate-700 space-y-1">
+                    <li>1. Settings → User Permissions</li>
+                    <li>2. 点击 "Add a New User"</li>
+                    <li>3. 输入员工邮箱（公司邮箱）</li>
+                    <li>4. 勾选对应权限模块</li>
+                    <li>5. 发送邀请链接</li>
+                    <li>6. 员工完成激活</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+    <!-- Video Resource -->
+    <div class="bg-blue-50 rounded-xl border border-blue-200 p-4">
+        <div class="flex items-center gap-3">
+            <i class="fas fa-video text-blue-500 text-xl"></i>
+            <div>
+                <h3 class="font-bold text-slate-800">操作视频教程</h3>
+                <p class="text-sm text-slate-600">访问公司网盘(待完善)观看详细操作录屏：<a class="text-blue-600 underline"
+                        href="http://192.168.1.99">192.168.1.99</a>（仅限内网访问）→ 培训资料 → 权限管理专题</p>
+            </div>
+        </div>
+    </div>
 </div>
