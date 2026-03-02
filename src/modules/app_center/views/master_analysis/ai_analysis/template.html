@@ -2,59 +2,54 @@
 <div x-data="aiAnalysisPanel" class="ai-analysis-wrapper">
   
   <!-- Welcome Banner -->
-  <div class="mb-8">
-    <div class="relative rounded-2xl border border-slate-200/60 overflow-hidden bg-white">
-      <!-- 背景装饰 -->
-      <div class="absolute inset-0 bg-gradient-to-br from-indigo-50/80 via-white to-purple-50/60"></div>
-      <div class="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-indigo-100/40 to-purple-200/30 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
-      <div class="absolute bottom-0 left-0 w-72 h-72 bg-gradient-to-tr from-purple-100/40 to-indigo-100/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4"></div>
-      
-      <!-- 动态网格装饰 -->
-      <div class="absolute inset-0 opacity-[0.03]" style="background-image: radial-gradient(circle, #6366f1 1px, transparent 1px); background-size: 24px 24px;"></div>
-      
-      <!-- 浮动粒子装饰 -->
-      <div class="absolute top-8 right-24 w-2 h-2 rounded-full bg-indigo-300/60 animate-pulse"></div>
-      <div class="absolute top-16 right-48 w-1.5 h-1.5 rounded-full bg-purple-300/50 animate-pulse" style="animation-delay: 0.5s;"></div>
-      <div class="absolute bottom-12 right-36 w-1 h-1 rounded-full bg-pink-300/60 animate-pulse" style="animation-delay: 1s;"></div>
+  <div class="wb-container mb-8" style="--wb-gradient-1: #6366f1; --wb-gradient-2: #a855f7;">
+    <div class="wb-card">
+      <div class="wb-bg-gradient"></div>
+      <div class="wb-orb wb-orb-1"></div>
+      <div class="wb-orb wb-orb-2"></div>
+      <div class="wb-grid-pattern"></div>
+      <div class="wb-particle wb-particle-1"></div>
+      <div class="wb-particle wb-particle-2"></div>
+      <div class="wb-particle wb-particle-3"></div>
+      <div class="wb-particle wb-particle-4"></div>
 
-      <div class="relative z-10 p-8 md:p-10">
-        <div class="flex items-start gap-5">
-          <!-- Icon -->
-          <div class="relative flex-shrink-0">
-            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/25">
-              <i class="fa-solid fa-brain text-[22px] text-white"></i>
+      <div class="wb-content">
+        <div class="wb-header">
+          <div class="wb-icon-wrapper">
+            <div class="wb-icon-main">
+              <i class="fa-solid fa-brain"></i>
             </div>
-            <div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-400 border-2 border-white flex items-center justify-center">
-              <i class="fa-solid fa-microchip text-[8px] text-white"></i>
+            <div class="wb-icon-badge">
+              <i class="fa-solid fa-microchip"></i>
             </div>
           </div>
-          <!-- Content -->
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-3 mb-2">
-              <h2 class="text-xl font-bold text-slate-800 tracking-tight">
+
+          <div class="wb-text">
+            <div class="wb-title-row">
+              <h2 class="wb-title">
                 <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">AI</span> 
-                智能分析</h2>
-              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-sm">
-                <i class="fa-solid fa-circle-up mr-1 text-[8px]"></i>PRO
+                智能分析
+              </h2>
+              <span class="wb-badge">
+                <i class="fa-solid fa-circle-up"></i>PRO
               </span>
             </div>
-            <p class="text-slate-500 text-sm leading-relaxed max-w-2xl">
+            <p class="wb-description">
               基于大语言模型的 Listings & Reviews 深度洞察，从标题关键词到用户评论，全方位解构产品竞争力。
             </p>
-            
-            <!-- Quick Stats -->
-            <div class="flex items-center gap-5 mt-4">
-              <div class="flex items-center gap-1.5">
-                <div class="w-1.5 h-1.5 rounded-full bg-indigo-400"></div>
-                <span class="text-xs text-slate-400">支持 <span class="font-semibold text-slate-600">Listings & Reviews</span> 分析维度</span>
+
+            <div class="wb-tags">
+              <div class="wb-tag">
+                <div class="wb-tag-dot"></div>
+                <span>支持 Listings & Reviews 分析维度</span>
               </div>
-              <div class="flex items-center gap-1.5">
-                <div class="w-1.5 h-1.5 rounded-full bg-purple-400"></div>
-                <span class="text-xs text-slate-400">AI 大模型驱动</span>
+              <div class="wb-tag">
+                <div class="wb-tag-dot" style="background-color: var(--wb-tag-dot-2, #a855f7);"></div>
+                <span>AI 大模型驱动</span>
               </div>
-              <div class="flex items-center gap-1.5">
-                <div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
-                <span class="text-xs text-slate-400">一键导出报告</span>
+              <div class="wb-tag">
+                <div class="wb-tag-dot" style="background-color: var(--wb-tag-dot-3, #10b981);"></div>
+                <span>一键导出报告</span>
               </div>
             </div>
           </div>

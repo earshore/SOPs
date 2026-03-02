@@ -53,6 +53,7 @@
 @import './components/tabs.css';
 @import './components/timeline.css';         /* Phase 3: 时间线组件 */
 @import './components/toast.css';
+@import './components/welcome-banner.css';   /* 全局 Welcome Banner 组件 */
 
 
 /* ========================================

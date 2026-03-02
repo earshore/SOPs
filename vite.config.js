@@ -91,6 +91,8 @@ export default defineConfig({
             input: {
                 main: resolve(__dirname, 'index.html')
             },
+            // 确保.ts文件被正确处理为.js
+            external: [],
             output: {
                 // 手动分包策略 - 回退到简单对象形式避免 Alpine 组件问题
                 manualChunks: {

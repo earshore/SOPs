@@ -3,61 +3,55 @@
     <div class="app-center-container">
 
         <!-- ========== Welcome Banner ========== -->
-        <div class="mb-8">
-            <div class="relative rounded-2xl border border-slate-200/60 overflow-hidden bg-white">
-                <!-- 背景装饰 -->
-                <div class="absolute inset-0 bg-gradient-to-br from-slate-50 via-emerald-50/40 to-teal-50/40"></div>
-                <div class="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-green-100/30 to-teal-200/25 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
-                <div class="absolute bottom-0 left-0 w-72 h-72 bg-gradient-to-tr from-emerald-100/30 to-green-100/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4"></div>
-                <div class="absolute inset-0 opacity-[0.02]" style="background-image: radial-gradient(circle, #059669 1px, transparent 1px); background-size: 24px 24px;"></div>
+        <div class="wb-container mb-8" style="--wb-gradient-1: #10b981; --wb-gradient-2: #14b8a6;">
+            <div class="wb-card">
+                <div class="wb-bg-gradient"></div>
+                <div class="wb-orb wb-orb-1"></div>
+                <div class="wb-orb wb-orb-2"></div>
+                <div class="wb-grid-pattern"></div>
+                <div class="wb-particle wb-particle-1"></div>
+                <div class="wb-particle wb-particle-2"></div>
+                <div class="wb-particle wb-particle-3"></div>
+                <div class="wb-particle wb-particle-4"></div>
 
-                <!-- 浮动粒子 -->
-                <div class="absolute top-8 right-24 w-2 h-2 rounded-full bg-emerald-300/50 animate-pulse"></div>
-                <div class="absolute top-20 right-52 w-1.5 h-1.5 rounded-full bg-teal-300/40 animate-pulse" style="animation-delay: 0.5s;"></div>
-                <div class="absolute bottom-10 right-36 w-1 h-1 rounded-full bg-green-400/50 animate-pulse" style="animation-delay: 1s;"></div>
-                <div class="absolute top-14 left-1/4 w-1.5 h-1.5 rounded-full bg-emerald-300/30 animate-pulse" style="animation-delay: 1.4s;"></div>
-
-                <div class="relative z-10 p-8 md:p-10">
-                    <div class="flex items-start gap-5">
-                        <!-- Icon -->
-                        <div class="relative flex-shrink-0">
-                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/25">
-                                <i class="fas fa-tasks text-[22px] text-white"></i>
+                <div class="wb-content">
+                    <div class="wb-header">
+                        <div class="wb-icon-wrapper">
+                            <div class="wb-icon-main">
+                                <i class="fas fa-tasks"></i>
                             </div>
-                            <div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center">
-                                <i class="fas fa-cogs text-[7px] text-white"></i>
+                            <div class="wb-icon-badge">
+                                <i class="fas fa-cogs"></i>
                             </div>
                         </div>
 
-                        <!-- Content -->
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center gap-3 mb-2">
-                                <h2 class="text-xl font-bold text-slate-800 tracking-tight">SEO 处理中心</h2>
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-sm">
-                                    <i class="fas fa-microchip mr-1 text-[8px]"></i>STEP 2
+                        <div class="wb-text">
+                            <div class="wb-title-row">
+                                <h2 class="wb-title">SEO 处理中心</h2>
+                                <span class="wb-badge">
+                                    <i class="fas fa-microchip"></i>STEP 2
                                 </span>
                             </div>
-                            <p class="text-slate-500 text-sm leading-relaxed">
+                            <p class="wb-description">
                                 自动化 SEO 覆盖标注、高频词云分析与快速定位，结合 AI 逐行翻译服务，方便审核、补充和优化，确保最大化 SEO 覆盖率与语义丰富度。
                             </p>
 
-                            <!-- Quick Tags -->
-                            <div class="flex items-center gap-5 mt-4">
-                                <div class="flex items-center gap-1.5">
-                                    <div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
-                                    <span class="text-xs text-slate-400">覆盖标注</span>
+                            <div class="wb-tags">
+                                <div class="wb-tag">
+                                    <div class="wb-tag-dot"></div>
+                                    <span>覆盖标注</span>
                                 </div>
-                                <div class="flex items-center gap-1.5">
-                                    <div class="w-1.5 h-1.5 rounded-full bg-teal-400"></div>
-                                    <span class="text-xs text-slate-400">词云分析</span>
+                                <div class="wb-tag">
+                                    <div class="wb-tag-dot" style="background-color: var(--wb-tag-dot-2, #14b8a6);"></div>
+                                    <span>词云分析</span>
                                 </div>
-                                <div class="flex items-center gap-1.5">
-                                    <div class="w-1.5 h-1.5 rounded-full bg-violet-400"></div>
-                                    <span class="text-xs text-slate-400">关键词定位</span>
+                                <div class="wb-tag">
+                                    <div class="wb-tag-dot" style="background-color: var(--wb-tag-dot-3, #8b5cf6);"></div>
+                                    <span>关键词定位</span>
                                 </div>
-                                <div class="flex items-center gap-1.5">
-                                    <div class="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
-                                    <span class="text-xs text-slate-400">AI 沉浸翻译</span>
+                                <div class="wb-tag">
+                                    <div class="wb-tag-dot" style="background-color: var(--wb-tag-dot-4, #3b82f6);"></div>
+                                    <span>AI 沉浸翻译</span>
                                 </div>
                             </div>
                         </div>

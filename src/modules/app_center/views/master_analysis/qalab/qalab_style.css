@@ -11,6 +11,7 @@
  * - Language Selector → src/css/components/language-selector.css
  * - Category Tabs → src/css/components/tabs.css
  * - Chat/Message Components → src/css/components/chat.css
+ * - Welcome Banner → src/css/components/welcome-banner.css
  * 
  * 注意：通用动画已移至 src/css/animations/keyframes.css
  * - floatSlow, pulseRing, borderGlow, twinkle, gradientFlow
@@ -26,263 +27,18 @@
   padding: 0 var(--spacing-lg) var(--spacing-2xl);
 }
 
-/* ================================================================
-   WELCOME BANNER - QA Lab 特有
-   ================================================================ */
-.welcome-banner-wrap {
-  margin-bottom: var(--spacing-2xl);
-}
-
-.welcome-banner {
-  position: relative;
-  border-radius: var(--rounded-2xl);
-  border: 1px solid var(--color-primary-light);
-  overflow: hidden;
-  background: var(--color-bg-primary);
-  box-shadow: var(--shadow-md);
-  transition: all var(--duration-normal) var(--ease-smooth);
-}
-
-.welcome-banner:hover {
-  border-color: var(--color-primary-light);
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
-}
-
-
-.wb-bg-gradient {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    135deg,
-    var(--color-primary-light) 0%,
-    rgba(255, 255, 255, .95) 35%,
-    var(--color-success-light) 65%,
-    var(--color-amber-400) 100%
-  );
-}
-
-.wb-orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(60px);
-  animation: floatSlow 12s var(--ease-in-out) infinite;
-}
-
-.wb-orb-1 {
-  top: -30%; right: -5%;
-  width: 380px; height: 380px;
-  background: radial-gradient(circle, var(--color-primary-light) 0%, transparent 70%);
-  animation-delay: 0s;
-}
-
-.wb-orb-2 {
-  bottom: -40%; left: -5%;
-  width: 300px; height: 300px;
-  background: radial-gradient(circle, var(--color-success-light) 0%, transparent 70%);
-  animation-delay: -4s;
-}
-
-.wb-orb-3 {
-  top: 20%; right: 30%;
-  width: 200px; height: 200px;
-  background: radial-gradient(circle, var(--color-amber-400) 0%, transparent 70%);
-  animation-delay: -8s;
-}
-
-.wb-grid-dots {
-  position: absolute;
-  inset: 0;
-  opacity: .03;
-  background-image: radial-gradient(circle, var(--color-primary) 1px, transparent 1px);
-  background-size: 32px 32px;
-}
-
-.wb-particle {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-
-.wb-p1 { top: 15%; right: 10%; width: 8px; height: 8px; background: var(--color-primary-light); animation: twinkle 3s var(--ease-in-out) infinite; }
-.wb-p2 { top: 55%; right: 18%; width: 6px; height: 6px; background: var(--color-success-light); animation: twinkle 3s var(--ease-in-out) var(--duration-slower) infinite; }
-.wb-p3 { bottom: 25%; right: 35%; width: 5px; height: 5px; background: var(--color-amber-400); animation: twinkle 3s var(--ease-in-out) 1s infinite; }
-.wb-p4 { top: 30%; left: 20%; width: 6px; height: 6px; background: var(--color-primary-light); animation: twinkle 3s var(--ease-in-out) var(--duration-2s) infinite; }
-.wb-p5 { top: 20%; right: 45%; width: 4px; height: 4px; background: var(--color-pink-300); animation: twinkle 3s var(--ease-in-out) var(--duration-2s) infinite; }
-.wb-p6 { bottom: 30%; left: 35%; width: 5px; height: 5px; background: var(--color-green-400); animation: twinkle 3s var(--ease-in-out) var(--duration-2s) infinite; }
-
-.wb-content {
-  position: relative;
-  z-index: 10;
-  padding: var(--spacing-2xl) var(--spacing-3xl);
-}
-
-.wb-layout {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--spacing-lg);
-}
-
-.wb-icon-badge {
-  position: relative;
-  flex-shrink: 0;
-}
-
-.wb-icon-main {
-  width: 64px;
-  height: 64px;
-  border-radius: var(--rounded-xl);
-  background: var(--gradient-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: var(--shadow-primary-md);
-  transition: all var(--duration-normal) var(--ease-smooth);
-  position: relative;
-  z-index: 2;
-}
-
-.wb-icon-badge:hover .wb-icon-main {
-  transform: scale(1.06) rotate(-3deg);
-  box-shadow: var(--shadow-primary-lg);
-}
-
-.wb-icon-main i {
-  font-size: 26px;
-  color: white;
-}
-
-.wb-icon-status {
-  position: absolute;
-  bottom: -4px;
-  right: -4px;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-amber-400), var(--color-warning));
-  border: 3px solid white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 3px 10px var(--color-amber-400);
-  z-index: 3;
-}
-
-
-.wb-icon-status i {
-  font-size: 9px;
-  color: white;
-}
-
-.wb-icon-ring {
-  position: absolute;
-  inset: -6px;
-  border-radius: var(--rounded-2xl);
-  border: 2px solid var(--color-primary-light);
-  animation: pulseRing var(--duration-2s) var(--ease-out) infinite;
-  z-index: 1;
-}
-
-.wb-text-content {
-  flex: 1;
-  min-width: 0;
-}
-
-.wb-title-row {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-sm);
-  flex-wrap: wrap;
-}
-
-.wb-title {
-  font-size: var(--text-2xl);
-  font-weight: var(--font-extrabold);
-  color: var(--color-text-primary);
-  letter-spacing: var(--tracking-tight);
-  line-height: var(--leading-tight);
-}
-
-.wb-ai-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 4px 12px;
-  border-radius: var(--rounded-full);
-  font-size: var(--text-2xs);
-  font-weight: var(--font-bold);
-  color: white;
-  background: var(--gradient-primary);
-  box-shadow: var(--shadow-primary-sm);
-  letter-spacing: var(--tracking-wider);
-  text-transform: uppercase;
-}
-
-.wb-ai-badge i { font-size: 9px; }
-
-.wb-version-badge {
-  padding: 3px 10px;
-  border-radius: var(--rounded-full);
-  font-size: var(--text-2xs);
-  font-weight: var(--font-semibold);
-  color: var(--color-text-tertiary);
-  background: var(--color-bg-tertiary);
-  border: 1px solid var(--color-border-light);
-}
-
-.wb-desc {
-  color: var(--color-text-secondary);
-  font-size: var(--text-base);
-  line-height: var(--leading-relaxed);
-  max-width: 640px;
-}
-
-.wb-features {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-sm);
-  margin-top: var(--spacing-lg);
-}
-
-.wb-feature-tag {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  padding: 7px 16px;
-  border-radius: var(--rounded-full);
-  background: rgba(255, 255, 255, .7);
-  border: 1px solid var(--color-border-default);
-  backdrop-filter: blur(10px);
-  transition: all var(--duration-normal) var(--ease-smooth);
-  cursor: default;
-}
-
-.wb-feature-tag:hover {
-  background: white;
-  border-color: var(--color-primary-light);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-xs);
-}
-
-.wb-feature-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.dot-emerald { background: var(--color-green-500); box-shadow: 0 0 0 3px var(--color-green-100); }
-.dot-teal { background: var(--color-teal-500); box-shadow: 0 0 0 3px var(--color-teal-100); }
-.dot-cyan { background: var(--color-cyan-500); box-shadow: 0 0 0 3px var(--color-cyan-100); }
-.dot-amber { background: var(--color-amber-500); box-shadow: 0 0 0 3px var(--color-amber-100); }
-
-.wb-feature-tag span {
-  font-size: var(--text-xs);
-  color: var(--color-text-secondary);
-  font-weight: var(--font-medium);
-}
+/**
+ * ================================================================
+ * WELCOME BANNER 样式已迁移到全局组件
+ * ================================================================
+ * 
+ * 新位置: src/css/components/welcome-banner.css
+ * 迁移日期: 2024
+ * 迁移原因: 提取为全局可复用组件，供其他页面使用
+ * 
+ * 使用方法: HTML 结构保持不变，样式自动从全局组件加载
+ * ================================================================
+ */
 
 
 /* ================================================================
@@ -1235,13 +991,6 @@
 @media (max-width: 768px) {
   .app-container { padding: 0 var(--spacing-md) var(--spacing-xl); }
 
-  .wb-content { padding: var(--spacing-lg) var(--spacing-md); }
-  .wb-layout { flex-direction: column; gap: var(--spacing-md); }
-  .wb-title { font-size: var(--text-xl); }
-  .wb-features { gap: var(--spacing-xs); }
-  .wb-feature-tag { padding: 5px 12px; }
-  .wb-orb { display: none; }
-
   .toolbar { flex-direction: column; align-items: stretch; }
   .toolbar-right-wrap { align-items: stretch; }
 
@@ -1258,5 +1007,6 @@
 }
 
 @media (max-width: 480px) {
-  .wb-features { flex-direction: column; }
+  /* 移动端特定样式 */
 }
+
