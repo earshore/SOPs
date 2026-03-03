@@ -1,104 +1,63 @@
 <!-- Input Module Template -->
 
 <section id="kt-module-input" class="flex-1 overflow-y-auto pb-20">
-    <div class="app-center-container">
+    <div class="module-container">
 
         <!-- ========== Welcome Banner ========== -->
-        <div class="mb-8">
-            <div class="relative rounded-2xl border border-slate-200/60 overflow-hidden bg-white">
-                <!-- 背景装饰 -->
-                <div class="absolute inset-0 bg-gradient-to-br from-slate-50 via-blue-50/40 to-indigo-50/40"></div>
-                <div class="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-blue-100/30 to-indigo-200/25 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
-                <div class="absolute bottom-0 left-0 w-72 h-72 bg-gradient-to-tr from-indigo-100/30 to-blue-100/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4"></div>
-                <div class="absolute inset-0 opacity-[0.02]" style="background-image: radial-gradient(circle, #4f46e5 1px, transparent 1px); background-size: 24px 24px;"></div>
+        <div class="wb-container mb-8" style="--wb-gradient-1: #3b82f6; --wb-gradient-2: #6366f1;">
+            <div class="wb-card">
+                <div class="wb-bg-gradient"></div>
+                <div class="wb-orb wb-orb-1"></div>
+                <div class="wb-orb wb-orb-2"></div>
+                <div class="wb-grid-pattern"></div>
+                <div class="wb-particle wb-particle-1"></div>
+                <div class="wb-particle wb-particle-2"></div>
+                <div class="wb-particle wb-particle-3"></div>
+                <div class="wb-particle wb-particle-4"></div>
 
-                <!-- 浮动粒子 -->
-                <div class="absolute top-8 right-24 w-2 h-2 rounded-full bg-blue-300/50 animate-pulse"></div>
-                <div class="absolute top-20 right-52 w-1.5 h-1.5 rounded-full bg-indigo-300/40 animate-pulse" style="animation-delay: 0.5s;"></div>
-                <div class="absolute bottom-10 right-36 w-1 h-1 rounded-full bg-violet-400/50 animate-pulse" style="animation-delay: 1s;"></div>
-                <div class="absolute top-14 left-1/3 w-1.5 h-1.5 rounded-full bg-blue-300/30 animate-pulse" style="animation-delay: 1.4s;"></div>
-
-                <div class="relative z-10 p-8 md:p-10">
-                    <div class="flex items-start gap-5">
-                        <!-- Icon -->
-                        <div class="relative flex-shrink-0">
-                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
-                                <i class="fas fa-keyboard text-[22px] text-white"></i>
+                <div class="wb-content">
+                    <div class="wb-header">
+                        <div class="wb-icon-wrapper">
+                            <div class="wb-icon-main" aria-label="关键词输入功能图标">
+                                <i class="fas fa-keyboard" aria-hidden="true"></i>
                             </div>
-                            <div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-400 border-2 border-white flex items-center justify-center">
-                                <i class="fas fa-check text-[8px] text-white"></i>
+                            <div class="wb-icon-badge" aria-label="完成状态">
+                                <i class="fas fa-check" aria-hidden="true"></i>
                             </div>
                         </div>
 
-                        <!-- Content -->
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center gap-3 mb-2">
-                                <h2 class="text-xl font-bold text-slate-800 tracking-tight">关键词与 Listing 文案输入</h2>
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-sm">
-                                    <i class="fas fa-keyboard mr-1 text-[8px]"></i>STEP 1
+                        <div class="wb-text">
+                            <div class="wb-title-row">
+                                <h2 class="wb-title">关键词与 Listing 文案输入</h2>
+                                <span class="wb-badge wb-badge-service" aria-label="服务功能">
+                                    <i class="fas fa-keyboard" aria-hidden="true"></i>STEP 1
                                 </span>
                             </div>
-                            <p class="text-slate-500 text-sm leading-relaxed max-w-2xl">
+                            <p class="wb-description">
                                 输入或粘贴关键词与目标 Listing 文案，一键去重、格式化处理，为您准备高质量的分析数据源。
                             </p>
 
-                            <!-- Quick Tags -->
-                            <div class="flex items-center gap-5 mt-4">
-                                <div class="flex items-center gap-1.5">
-                                    <div class="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
-                                    <span class="text-xs text-slate-400">多语种支持</span>
-                                </div>
-                                <div class="flex items-center gap-1.5">
-                                    <div class="w-1.5 h-1.5 rounded-full bg-indigo-400"></div>
-                                    <span class="text-xs text-slate-400">智能去重</span>
-                                </div>
-                                <div class="flex items-center gap-1.5">
-                                    <div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
-                                    <span class="text-xs text-slate-400">格式清洗</span>
-                                </div>
-                                <div class="flex items-center gap-1.5">
-                                    <div class="w-1.5 h-1.5 rounded-full bg-violet-400"></div>
-                                    <span class="text-xs text-slate-400">一键分析</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Step Guide -->
-                    <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <!-- Step 1 -->
-                        <div class="relative flex items-center gap-3.5 bg-white/70 backdrop-blur-sm rounded-xl px-4 py-3.5 border border-slate-200/60 hover:border-blue-200 hover:shadow-md hover:shadow-blue-50/50 transition-all duration-200 group">
-                            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center text-xs font-bold shadow-sm shadow-blue-500/20 flex-shrink-0 group-hover:scale-110 transition-transform">
-                                1
-                            </div>
-                            <div class="flex flex-col min-w-0">
-                                <span class="text-sm font-semibold text-slate-700">输入数据</span>
-                                <span class="text-[10px] text-slate-400 mt-0.5">关键词 + Listing 文案</span>
-                            </div>
-                            <div class="hidden sm:block absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-[2px] bg-slate-200 z-20"></div>
-                        </div>
-
-                        <!-- Step 2 -->
-                        <div class="relative flex items-center gap-3.5 bg-white/70 backdrop-blur-sm rounded-xl px-4 py-3.5 border border-slate-200/60 hover:border-indigo-200 hover:shadow-md hover:shadow-indigo-50/50 transition-all duration-200 group">
-                            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 text-white flex items-center justify-center text-xs font-bold shadow-sm shadow-indigo-500/20 flex-shrink-0 group-hover:scale-110 transition-transform">
-                                2
-                            </div>
-                            <div class="flex flex-col min-w-0">
-                                <span class="text-sm font-semibold text-slate-700">清理格式</span>
-                                <span class="text-[10px] text-slate-400 mt-0.5">去重 & 规范化</span>
-                            </div>
-                            <div class="hidden sm:block absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-[2px] bg-slate-200 z-20"></div>
-                        </div>
-
-                        <!-- Step 3 -->
-                        <div class="flex items-center gap-3.5 bg-white/70 backdrop-blur-sm rounded-xl px-4 py-3.5 border border-slate-200/60 hover:border-emerald-200 hover:shadow-md hover:shadow-emerald-50/50 transition-all duration-200 group">
-                            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-green-600 text-white flex items-center justify-center text-xs font-bold shadow-sm shadow-emerald-500/20 flex-shrink-0 group-hover:scale-110 transition-transform">
-                                3
-                            </div>
-                            <div class="flex flex-col min-w-0">
-                                <span class="text-sm font-semibold text-slate-700">开始分析</span>
-                                <span class="text-[10px] text-slate-400 mt-0.5">SEO 覆盖检查</span>
-                            </div>
+                            <ul class="wb-tags" role="list">
+                                <li class="wb-tag" role="listitem">
+                                    <div class="wb-tag-dot" aria-hidden="true"></div>
+                                    <span>多语种支持</span>
+                                </li>
+                                <li class="wb-tag" role="listitem">
+                                    <div class="wb-tag-dot" style="background-color: var(--wb-tag-dot-2, #6366f1);"
+                                        aria-hidden="true"></div>
+                                    <span>智能去重</span>
+                                </li>
+                                <li class="wb-tag" role="listitem">
+                                    <div class="wb-tag-dot" style="background-color: var(--wb-tag-dot-3, #10b981);"
+                                        aria-hidden="true"></div>
+                                    <span>格式清洗</span>
+                                </li>
+                                <li class="wb-tag" role="listitem">
+                                    <div class="wb-tag-dot" style="background-color: var(--wb-tag-dot-4, #8b5cf6);"
+                                        aria-hidden="true"></div>
+                                    <span>一键分析</span>
+                                </li>
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -106,16 +65,18 @@
         </div>
 
         <!-- ========== Input Cards Grid ========== -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 kt-input-grid animate-fade-in-up delay-100">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 kt-input-grid">
 
             <!-- ===== Keywords Input (1/3) ===== -->
-            <div class="lg:col-span-1 kt-input-card rounded-2xl shadow-sm shadow-slate-200/50 border border-slate-200/80 bg-white overflow-hidden">
+            <div
+                class="lg:col-span-1 kt-input-card rounded-2xl shadow-sm shadow-slate-200/50 border border-slate-200/80 bg-white overflow-hidden">
                 <!-- Card Header -->
                 <div class="px-5 pt-5 pb-4 border-b border-slate-100">
                     <div class="flex items-center justify-between">
                         <h2 class="text-base font-bold text-slate-800 flex items-center gap-2.5">
                             <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
-                                <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                                 </svg>
@@ -132,7 +93,8 @@
                 <!-- Card Body -->
                 <div class="p-5">
                     <div class="relative kt-textarea-container">
-                        <div class="keyword-input-wrapper rounded-xl overflow-hidden border-2 border-slate-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all duration-200">
+                        <div
+                            class="keyword-input-wrapper rounded-xl overflow-hidden border-2 border-slate-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all duration-200">
                             <div id="kt-keyword-highlight-layer" class="keyword-input-highlight"></div>
                             <textarea id="kt-keywords-input"
                                 class="keyword-input-textarea w-full p-4 border-0 focus:ring-0 text-sm scrollbar-thin bg-slate-50/50 focus:bg-white transition-colors placeholder:text-slate-300 leading-relaxed"
@@ -142,7 +104,8 @@
                         <!-- Stats Bar -->
                         <div class="absolute bottom-4 left-4 right-4 z-10 flex items-center justify-between">
                             <div class="flex gap-2">
-                                <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full font-semibold text-[11px] border border-blue-100">
+                                <span
+                                    class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full font-semibold text-[11px] border border-blue-100">
                                     <i class="fas fa-hashtag text-[8px] text-blue-400"></i>
                                     <span id="kt-keyword-count">0</span>
                                     <span class="text-blue-400 font-normal">词</span>
@@ -160,7 +123,8 @@
             </div>
 
             <!-- ===== Listing Copy Input (2/3) ===== -->
-            <div class="lg:col-span-2 kt-input-card rounded-2xl shadow-sm shadow-slate-200/50 border border-slate-200/80 bg-white overflow-hidden">
+            <div
+                class="lg:col-span-2 kt-input-card rounded-2xl shadow-sm shadow-slate-200/50 border border-slate-200/80 bg-white overflow-hidden">
                 <!-- Card Header -->
                 <div class="px-5 pt-5 pb-4 border-b border-slate-100">
                     <div class="flex items-center justify-between">
@@ -192,7 +156,9 @@
                             <!-- Start Analysis Button -->
                             <button id="kt-btn-start-analysis"
                                 class="relative inline-flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 hover:from-blue-500 hover:via-blue-400 hover:to-indigo-500 text-white rounded-xl text-sm font-bold shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-0.5 group cursor-pointer overflow-hidden active:scale-[0.98]">
-                                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                                <div
+                                    class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700">
+                                </div>
                                 <i class="fas fa-play text-[10px] relative z-10"></i>
                                 <span class="relative z-10">开始分析</span>
                             </button>
@@ -203,15 +169,18 @@
                 <!-- Card Body -->
                 <div class="p-5">
                     <div class="textarea-wrapper relative kt-textarea-container">
-                        <div class="rounded-xl overflow-hidden border-2 border-slate-200 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all duration-200">
+                        <div
+                            class="rounded-xl overflow-hidden border-2 border-slate-200 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all duration-200">
                             <textarea id="kt-copy-input"
                                 class="w-full p-4 border-0 focus:ring-0 text-sm scrollbar-thin bg-slate-50/50 focus:bg-white transition-colors placeholder:text-slate-300 leading-relaxed"
                                 placeholder="请粘贴您的 Amazon 产品文案&#10;包括标题、五点描述、产品描述等&#10;&#10;示例：&#10;【Premium Wireless Earbuds】Experience crystal-clear sound&#10;with our Bluetooth headphones featuring advanced noise&#10;cancelling technology..."></textarea>
                         </div>
 
                         <!-- Stats Bar -->
-                        <div class="textarea-stats absolute bottom-4 left-4 right-4 z-10 flex items-center justify-between">
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full font-semibold text-[11px] border border-emerald-100">
+                        <div
+                            class="textarea-stats absolute bottom-4 left-4 right-4 z-10 flex items-center justify-between">
+                            <span
+                                class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full font-semibold text-[11px] border border-emerald-100">
                                 <i class="fas fa-font text-[8px] text-emerald-400"></i>
                                 <span id="copy-char-count">0</span>
                                 <span class="text-emerald-400 font-normal">字符</span>

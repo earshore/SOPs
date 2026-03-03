@@ -281,7 +281,7 @@
   /* ---- 主色 (Primary) ---- */
   --color-primary:           var(--color-blue-500);
   --color-primary-light:     rgba(59, 130, 246, 0.10);
-  --color-primary-lighter:   rgba(59, 130, 246, 0.06);
+  --color-primary-light:   rgba(59, 130, 246, 0.06);
   --color-primary-dark:      var(--color-blue-600);
   --color-primary-darker:    var(--color-blue-700);
   --color-primary-contrast:  #ffffff;   /* 主色上的文字色 */
@@ -338,7 +338,7 @@
   --color-success-contrast:  #ffffff;
 
   --color-warning:           var(--color-amber-500);
-  --color-warning-light:     rgba(245, 158, 11, 0.10);
+  --color-amber-400:     rgba(245, 158, 11, 0.10);
   --color-warning-dark:      var(--color-amber-600);
   --color-warning-contrast:  var(--color-slate-900);
 
@@ -424,15 +424,15 @@
   /* ========================================
      6. 圆角
      ======================================== */
-  --radius-none: 0;
-  --radius-xs:   2px;
-  --radius-sm:   4px;
-  --radius-md:   8px;
-  --radius-lg:   12px;
-  --radius-xl:   16px;
-  --radius-2xl:  24px;
-  --radius-3xl:  32px;
-  --radius-full: 9999px;
+  --rounded-none: 0;
+  --rounded-xs:   2px;
+  --rounded-sm:   4px;
+  --rounded-md:   8px;
+  --rounded-lg:   12px;
+  --rounded-xl:   16px;
+  --rounded-2xl:  24px;
+  --rounded-3xl:  32px;
+  --rounded-full: 9999px;
 
 
   /* ========================================
@@ -689,7 +689,7 @@
   /* ---- 主色 ---- */
   --color-primary:           var(--color-indigo-400);
   --color-primary-light:     rgba(129, 140, 248, 0.12);
-  --color-primary-lighter:   rgba(129, 140, 248, 0.06);
+  --color-primary-light:   rgba(129, 140, 248, 0.06);
   --color-primary-dark:      var(--color-indigo-500);
   --color-primary-darker:    var(--color-indigo-600);
   --color-primary-contrast:  #ffffff;
@@ -744,7 +744,7 @@
   --color-success-dark:      var(--color-green-500);
 
   --color-warning:           var(--color-amber-400);
-  --color-warning-light:     rgba(251, 191, 36, 0.12);
+  --color-amber-400:     rgba(251, 191, 36, 0.12);
   --color-warning-dark:      var(--color-amber-500);
   --color-warning-contrast:  var(--color-slate-900);
 

@@ -2,29 +2,16 @@
  * SOPs Module Styles
  * 仅包含 SOPs 模块特有的样式
  * 通用组件样式已提取到 src/css/components/
+ * 
+ * Phase 3 优化:
+ * - 时间线样式已移至 src/css/components/timeline.css
+ * - 容器样式使用 .module-container 工具类
  */
-
-/* ==================== 容器样式 ==================== */
-.sop-overview-container,
-.sop-module-section,
-#sops_content_area > div {
-  max-width: 1450px;
-  margin: 0 auto;
-  padding: 2rem 1rem;
-}
-
-@media (max-width: 768px) {
-  .sop-overview-container,
-  .sop-module-section,
-  #sops_content_area > div {
-    padding: 1.5rem 0.75rem;
-  }
-}
 
 /* ==================== SOP 卡片特有样式 ==================== */
 .sop-card {
   background: white;
-  border-radius: var(--radius-xl);
+  border-radius: var(--rounded-xl);
   border: 1px solid var(--color-slate-200);
   padding: var(--spacing-lg);
   transition: all var(--duration-slow) var(--ease-smooth);
@@ -38,7 +25,7 @@
 
 .sop-card:hover {
   border-color: var(--color-blue-500);
-  box-shadow: 0 10px 40px -10px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 10px 40px -10px var(--color-primary-light);
   transform: translateY(-2px);
 }
 
@@ -50,10 +37,11 @@
 }
 
 /* ==================== SOP 图标容器 ==================== */
+/* 使用 .icon-container 替代 */
 .sop-icon-container {
   width: 48px;
   height: 48px;
-  border-radius: var(--radius-lg);
+  border-radius: var(--rounded-lg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -69,105 +57,82 @@
 .sop-status-badge {
   font-size: 10px;
   padding: 2px 8px;
-  border-radius: var(--radius-full);
+  border-radius: var(--rounded-full);
   font-weight: 500;
 }
 
 .sop-status-active {
-  background: #dcfce7;
-  color: #16a34a;
+  background: var(--color-green-100);
+  color: var(--color-green-600);
 }
 
 .sop-status-draft {
-  background: #fef3c7;
-  color: #d97706;
+  background: var(--color-amber-100);
+  color: var(--color-amber-600);
 }
 
 .sop-status-pending {
-  background: #e0e7ff;
-  color: #4f46e5;
+  background: var(--color-indigo-100);
+  color: var(--color-indigo-600);
+}
+
+/* ==================== 阶段标签样式 ==================== */
+/* 用于新品生命周期跟踪页面的阶段标识 */
+.stage-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.stage-test {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.stage-growth {
+  background: #d1fae5;
+  color: #047857;
+}
+
+.stage-stable {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.stage-clearance {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+/* ==================== 步骤圆圈样式 ==================== */
+/* 用于显示步骤编号的圆形标识 */
+.step-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 13px;
+  flex-shrink: 0;
 }
 
 /* ==================== SOP 详情视图 ==================== */
 .sop-detail-header {
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  border-radius: var(--radius-xl);
+  background: linear-gradient(135deg, var(--color-slate-50) 0%, var(--color-slate-200) 100%);
+  border-radius: var(--rounded-xl);
   padding: 2rem;
   margin-bottom: 2rem;
-}
-
-/* ==================== 时间线样式 ==================== */
-.sop-timeline {
-  position: relative;
-  padding-left: 2rem;
-}
-
-.sop-timeline::before {
-  content: '';
-  position: absolute;
-  left: 7px;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: linear-gradient(180deg, var(--color-blue-500), var(--color-purple-600));
-}
-
-.sop-timeline-item {
-  position: relative;
-  padding-bottom: 2rem;
-}
-
-.sop-timeline-item:last-child {
-  padding-bottom: 0;
-}
-
-.sop-timeline-dot {
-  position: absolute;
-  left: -25px;
-  top: 0;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--color-blue-500);
-  border: 3px solid white;
-  box-shadow: 0 0 0 2px var(--color-blue-500);
-}
-
-.sop-timeline-dot.completed {
-  background: #22c55e;
-  box-shadow: 0 0 0 2px #22c55e;
-}
-
-.sop-timeline-dot.pending {
-  background: white;
-  box-shadow: 0 0 0 2px var(--color-slate-400);
-}
-
-/* ==================== 动画 ==================== */
-.sop-fade-in {
-  animation: fadeIn 0.4s var(--ease-out) forwards;
-}
-
-.sop-module-highlight {
-  animation: sopModuleHighlight 2s var(--ease-out);
-}
-
-@keyframes sopModuleHighlight {
-  0% {
-    background-color: transparent;
-  }
-  10% {
-    background-color: rgba(59, 130, 246, 0.1);
-  }
-  100% {
-    background-color: transparent;
-  }
 }
 
 /* ==================== 分类过滤标签 ==================== */
 .sop-category-tab {
   padding: 0.5rem 1rem;
-  border-radius: var(--radius-full);
+  border-radius: var(--rounded-full);
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--color-slate-500);
@@ -192,14 +157,14 @@
 .sop-search-box {
   background: white;
   border: 1px solid var(--color-slate-200);
-  border-radius: var(--radius-lg);
+  border-radius: var(--rounded-lg);
   padding: 0.75rem 1rem;
   transition: all var(--duration-normal) var(--ease-smooth);
 }
 
 .sop-search-box:focus-within {
   border-color: var(--color-blue-500);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
 }
 
 .sop-search-box input {
@@ -207,4 +172,320 @@
   outline: none;
   width: 100%;
   background: transparent;
+}
+
+/* ==================== SOP 流程步骤组件 ==================== */
+/**
+ * 展示SOP核心流程的步骤卡片，包含步骤编号、标题、描述和箭头连接
+ * 适用于流程展示、步骤说明等场景
+ * 
+ * HTML 结构:
+ * <div class="sop-process-section">
+ *   <div class="sop-process-container">
+ *     <div class="sop-process-step">
+ *       <div class="sop-step-number">1</div>
+ *       <div class="sop-step-content">
+ *         <h3 class="sop-step-title">选品建档</h3>
+ *         <p class="sop-step-desc">选品+建档+关注<br>立项前准备</p>
+ *       </div>
+ *     </div>
+ *     <div class="sop-process-arrow">
+ *       <i class="fa-solid fa-chevron-right"></i>
+ *     </div>
+ *     <!-- 重复其他步骤 -->
+ *   </div>
+ * </div>
+ */
+
+/* 流程区域容器 */
+.sop-process-section {
+  margin-bottom: var(--spacing-2xl, 3rem);
+  padding: 0;
+}
+
+/* 流程步骤容器 */
+.sop-process-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md, 1rem);
+  padding: var(--spacing-xl, 2rem) 0;
+  overflow-x: auto;
+  overflow-y: visible;
+  /* 隐藏滚动条但保持滚动功能 */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.sop-process-container::-webkit-scrollbar {
+  display: none;
+}
+
+/* 单个步骤卡片 */
+.sop-process-step {
+  position: relative;
+  flex: 1;
+  min-width: 180px;
+  max-width: 220px;
+  background: var(--color-bg-primary, #ffffff);
+  border: 1.5px solid var(--color-border-default, rgba(0, 0, 0, 0.10));
+  border-radius: var(--rounded-xl, 16px);
+  padding: var(--spacing-lg, 1.5rem) var(--spacing-md, 1rem);
+  text-align: center;
+  transition: all var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+  box-shadow: var(--shadow-xs, 0 1px 2px rgba(0, 0, 0, 0.04));
+  cursor: pointer;
+}
+
+.sop-process-step:hover {
+  transform: translateY(-4px);
+  border-color: var(--color-primary, #3b82f6);
+  box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.07));
+}
+
+/* 步骤编号 */
+.sop-step-number {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto var(--spacing-sm, 0.75rem);
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary, #3b82f6), #6366f1);
+  color: white;
+  font-size: var(--text-md, 1rem);
+  font-weight: var(--font-bold, 700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+  transition: all var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.sop-process-step:hover .sop-step-number {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.35);
+}
+
+/* 步骤内容 */
+.sop-step-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs, 0.5rem);
+}
+
+/* 步骤标题 */
+.sop-step-title {
+  font-size: var(--text-base, 0.9375rem);
+  font-weight: var(--font-semibold, 600);
+  color: var(--color-text-primary, #0f172a);
+  line-height: 1.4;
+  margin: 0;
+  transition: color var(--duration-fast, 200ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.sop-process-step:hover .sop-step-title {
+  color: var(--color-primary, #3b82f6);
+}
+
+/* 步骤描述 */
+.sop-step-desc {
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--color-text-secondary, #64748b);
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-line;
+}
+
+/* 步骤间箭头 */
+.sop-process-arrow {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-tertiary, #94a3b8);
+  font-size: var(--text-sm, 0.875rem);
+  transition: all var(--duration-fast, 200ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.sop-process-arrow i {
+  transition: transform var(--duration-fast, 200ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+/* 当相邻步骤悬停时，箭头也有动画效果 */
+.sop-process-step:hover + .sop-process-arrow,
+.sop-process-arrow:has(+ .sop-process-step:hover) {
+  color: var(--color-primary, #3b82f6);
+}
+
+.sop-process-step:hover + .sop-process-arrow i,
+.sop-process-arrow:has(+ .sop-process-step:hover) i {
+  transform: translateX(4px);
+}
+
+/* 步骤编号颜色变体 */
+.sop-process-step:nth-child(4n+1) .sop-step-number {
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+}
+
+.sop-process-step:nth-child(4n+3) .sop-step-number {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.sop-process-step:nth-child(4n+5) .sop-step-number {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.sop-process-step:nth-child(4n+7) .sop-step-number {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+}
+
+.sop-process-step:nth-child(4n+9) .sop-step-number {
+  background: linear-gradient(135deg, #ec4899, #db2777);
+}
+
+/* ==================== 响应式适配 ==================== */
+
+/* 平板 (≤1024px) */
+@media (max-width: 1024px) {
+  .sop-process-container {
+    gap: var(--spacing-sm, 0.75rem);
+  }
+
+  .sop-process-step {
+    min-width: 160px;
+    max-width: 200px;
+    padding: var(--spacing-md, 1rem) var(--spacing-sm, 0.75rem);
+  }
+
+  .sop-step-number {
+    width: 36px;
+    height: 36px;
+    font-size: var(--text-sm, 0.875rem);
+  }
+
+  .sop-step-title {
+    font-size: var(--text-sm, 0.875rem);
+  }
+
+  .sop-step-desc {
+    font-size: 0.6875rem;
+  }
+}
+
+/* 移动端 (≤768px) */
+@media (max-width: 768px) {
+  .sop-process-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-md, 1rem);
+    padding: var(--spacing-lg, 1.5rem) 0;
+  }
+
+  .sop-process-step {
+    max-width: none;
+    min-width: 0;
+  }
+
+  /* 箭头改为向下 */
+  .sop-process-arrow {
+    width: 100%;
+    height: 24px;
+    transform: rotate(90deg);
+  }
+
+  .sop-process-step:hover + .sop-process-arrow i,
+  .sop-process-arrow:has(+ .sop-process-step:hover) i {
+    transform: translateX(4px) rotate(-90deg);
+  }
+}
+
+/* 小屏移动端 (≤480px) */
+@media (max-width: 480px) {
+  .sop-process-step {
+    padding: var(--spacing-md, 1rem);
+  }
+
+  .sop-step-number {
+    width: 32px;
+    height: 32px;
+    font-size: var(--text-xs, 0.75rem);
+    margin-bottom: var(--spacing-xs, 0.5rem);
+  }
+
+  .sop-step-title {
+    font-size: var(--text-xs, 0.75rem);
+  }
+
+  .sop-step-desc {
+    font-size: 0.625rem;
+  }
+}
+
+/* ==================== 暗色模式适配 ==================== */
+@media (prefers-color-scheme: dark) {
+  .sop-process-step {
+    background: var(--color-bg-secondary, #1e293b);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .sop-process-step:hover {
+    border-color: var(--color-primary, #818cf8);
+  }
+
+  .sop-step-title {
+    color: var(--color-text-primary, #f1f5f9);
+  }
+
+  .sop-step-desc {
+    color: var(--color-text-secondary, #cbd5e1);
+  }
+
+  .sop-process-arrow {
+    color: var(--color-text-tertiary, #64748b);
+  }
+
+  .sop-process-step:hover + .sop-process-arrow,
+  .sop-process-arrow:has(+ .sop-process-step:hover) {
+    color: var(--color-primary, #818cf8);
+  }
+}
+
+/* ==================== 无障碍支持 ==================== */
+@media (prefers-reduced-motion: reduce) {
+  .sop-process-step,
+  .sop-step-number,
+  .sop-process-arrow i {
+    transition: none !important;
+  }
+
+  .sop-process-step:hover {
+    transform: none;
+  }
+
+  .sop-process-step:hover .sop-step-number {
+    transform: none;
+  }
+
+  .sop-process-step:hover + .sop-process-arrow i,
+  .sop-process-arrow:has(+ .sop-process-step:hover) i {
+    transform: none;
+  }
+}
+
+/* ==================== 打印适配 ==================== */
+@media print {
+  .sop-process-container {
+    flex-direction: row;
+    gap: var(--spacing-sm, 0.75rem);
+  }
+
+  .sop-process-step {
+    box-shadow: none;
+    border: 1px solid #e2e8f0;
+  }
+
+  .sop-process-arrow {
+    transform: none;
+  }
 }

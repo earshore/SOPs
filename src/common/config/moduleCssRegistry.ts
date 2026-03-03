@@ -4,6 +4,10 @@
  * 支持按需懒加载和预加载策略
  * 
  * 注意：生产环境中CSS通过import动态导入，路径由Vite处理
+ * 
+ * Phase 3 优化：
+ * - 所有模块自动依赖全局组件CSS (timeline, icon-container, badges, containers)
+ * - 全局动画已整合到 keyframes.css
  */
 
 export interface ModuleCssConfig {
@@ -13,6 +17,16 @@ export interface ModuleCssConfig {
   preload?: boolean;
   dependencies?: (() => Promise<any>)[]; // 依赖的CSS导入函数
 }
+
+/**
+ * 通用组件CSS依赖说明
+ * 这些组件已在 main.css 中全局导入，模块无需重复导入:
+ * - src/css/components/timeline.css
+ * - src/css/components/icon-container.css
+ * - src/css/components/badges.css
+ * - src/css/utilities/containers.css
+ * - src/css/animations/keyframes.css
+ */
 
 /**
  * 模块CSS配置注册表

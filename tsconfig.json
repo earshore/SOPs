@@ -2,7 +2,11 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "ESNext",
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": [
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "moduleResolution": "bundler",
     "strict": true,
     "noImplicitAny": true,
@@ -29,20 +33,44 @@
     "jsx": "preserve",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "@common/*": ["src/common/*"],
-      "@services/*": ["src/services/*"],
-      "@components/*": ["src/components/*"],
-      "@modules/*": ["src/modules/*"],
-      "@types/*": ["src/types/*"],
-      "@router/*": ["src/common/router/*"],
-      "@router/navigo/*": ["src/common/router/navigo/*"],
-      "@router/legacy/*": ["src/common/router/legacy/*"]
+      "@/*": [
+        "src/*"
+      ],
+      "@common/*": [
+        "src/common/*"
+      ],
+      "@services/*": [
+        "src/services/*"
+      ],
+      "@components/*": [
+        "src/components/*"
+      ],
+      "@modules/*": [
+        "src/modules/*"
+      ],
+      "@types/*": [
+        "src/types/*"
+      ],
+      "@router/*": [
+        "src/common/router/*"
+      ],
+      "@router/navigo/*": [
+        "src/common/router/navigo/*"
+      ],
+      "@router/legacy/*": [
+        "src/common/router/legacy/*"
+      ]
     },
     "allowJs": true,
     "checkJs": false,
-    "types": ["vite/client", "node"],
-    "typeRoots": ["./node_modules/@types", "./src/types"]
+    "types": [
+      "vite/client",
+      "node"
+    ],
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/types"
+    ]
   },
   "include": [
     "src/**/*",

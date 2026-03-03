@@ -19,6 +19,11 @@ out/
 .output/
 html/
 
+# Generated files
+tailwind.config.generated.js
+src/css/foundation/variables.generated.css
+src/common/config/design-tokens.generated.ts
+
 # Cache
 .cache/
 .parcel-cache/
@@ -52,6 +57,12 @@ test-*.html
 tests/**/*.local.js
 tests/**/temp-*.js
 tests/**/.temp/
+
+# 测试报告文件
+test-validation-report.json
+validation-report.json
+*-validation-report.json
+*-report.json
 
 # Playwright
 tests/playwright-report/
@@ -194,7 +205,6 @@ tools/backups/
 # ==============================================================================
 # AI Assistants
 .agent/
-.kiro/
 .gemini/
 .cursor/
 .copilot/
@@ -214,8 +224,19 @@ wrangler.toml.local
 # Functions build output
 functions/dist/
 
+# Naming Validator
+tools/naming-validator/dist/
+tools/naming-validator/node_modules/
+tools/naming-validator/css_report.md
 
-qa-pro/
-# Public downloads (如果是用户上传的文件)
-# public/downloads/*
-# !public/downloads/.gitkeep
+# Performance test reports
+tests/performance/baseline-reports/
+tests/performance/lighthouse-reports/
+tests/performance/performance-score-reports/
+tests/performance/baseline-scores.json
+
+# Screenshots (保留结构，忽略具体截图)
+tests/screenshots/*.png
+tests/screenshots/*.jpg
+tests/screenshots/index.html
+tests/screenshots/index.json

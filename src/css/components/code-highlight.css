@@ -37,7 +37,7 @@
   --code-font-size:     0.8125rem;      /* 13px */
   --code-line-height:   1.7;
   --code-tab-size:      2;
-  --code-radius:        var(--radius-lg, 12px);
+  --code-radius:        var(--rounded-lg, 12px);
   --code-padding-x:     var(--spacing-md, 16px);
   --code-padding-y:     var(--spacing-md, 16px);
 
@@ -54,7 +54,7 @@
   --code-inline-bg:     rgba(0, 0, 0, 0.06);
   --code-inline-text:   var(--color-rose-600, #e11d48);
   --code-inline-border: rgba(0, 0, 0, 0.06);
-  --code-inline-radius: var(--radius-sm, 4px);
+  --code-inline-radius: var(--rounded-sm, 4px);
 
   /* ---- 高亮行 ---- */
   --code-highlight-bg:         rgba(137, 180, 250, 0.08);
@@ -251,7 +251,7 @@
   text-transform: uppercase;
   letter-spacing: var(--tracking-wider, 0.05em);
   padding: 2px 8px;
-  border-radius: var(--radius-sm, 4px);
+  border-radius: var(--rounded-sm, 4px);
   background: var(--code-toolbar-bg);
   line-height: 1.4;
   flex-shrink: 0;
@@ -656,7 +656,7 @@
   margin: 0 4px;
   background: var(--code-toolbar-bg);
   color: var(--code-gutter-active);
-  border-radius: var(--radius-sm, 4px);
+  border-radius: var(--rounded-sm, 4px);
   font-size: 0.75em;
   cursor: pointer;
   border: 1px solid var(--code-border);
@@ -711,7 +711,7 @@
   height: 28px;
   padding: 0;
   border: none;
-  border-radius: var(--radius-sm, 4px);
+  border-radius: var(--rounded-sm, 4px);
   background: var(--code-toolbar-bg);
   color: var(--code-toolbar-text);
   cursor: pointer;

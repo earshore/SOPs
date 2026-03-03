@@ -2,10 +2,10 @@
  * Scraper Panel Alpine.js 组件核心逻辑
  */
 
-import type { 
-    Task, 
-    ProxyConfig, 
-    DataTab, 
+import type {
+    Task,
+    ProxyConfig,
+    DataTab,
     ProxyConfigStatus,
     ImportResult,
     DeleteResult
@@ -161,13 +161,13 @@ export function createScraperPanel() {
                 console.log('[Scraper] 📦 检测到数据，准备初始化渲染');
                 console.log('[Scraper] 📊 检查大数据集');
                 this.dataPreview.checkLargeDataset();
-                
+
                 console.log('[Scraper] 🎯 设置事件委托');
                 this.dataPreview.setupEventDelegation((asin) => {
                     console.log('[Scraper] 🖱️ 事件委托触发，ASIN:', asin);
                     this.toggleCardExpand(asin);
                 });
-                
+
                 console.log('[Scraper] 🎨 执行初始渲染');
                 this.renderDataPanel();
                 console.log('[Scraper] ✅ 初始化渲染完成');
@@ -203,17 +203,17 @@ export function createScraperPanel() {
         saveState() {
             // 只在状态真正改变时才保存，避免触发不必要的响应式更新
             let hasChanges = false;
-            
+
             if (appStore.getState().scraper.selectedSite !== this.selectedSite) {
                 appStore.getState().scraper.selectedSite = this.selectedSite;
                 hasChanges = true;
             }
-            
+
             if (appStore.getState().scraper.inputAsins !== this.inputAsins) {
                 appStore.getState().scraper.inputAsins = this.inputAsins;
                 hasChanges = true;
             }
-            
+
             if (appStore.getState().scraper.isScraping !== this.isScraping) {
                 appStore.getState().scraper.isScraping = this.isScraping;
                 hasChanges = true;
@@ -221,12 +221,12 @@ export function createScraperPanel() {
 
             if (this.dataPreview) {
                 const previewState = this.dataPreview.getState();
-                
+
                 if (appStore.getState().scraper.expandedAsin !== previewState.expandedAsin) {
                     appStore.getState().scraper.expandedAsin = previewState.expandedAsin;
                     hasChanges = true;
                 }
-                
+
                 if (appStore.getState().scraper.currentDataTab !== previewState.currentDataTab) {
                     appStore.getState().scraper.currentDataTab = previewState.currentDataTab;
                     hasChanges = true;
@@ -401,38 +401,38 @@ export function createScraperPanel() {
          */
         updateDataPreview(data: ScrapedData | null): void {
             if (!this.dataPreview) return;
-            
+
             console.log('[Scraper] 🔄 更新数据预览');
             this.dataPreview.updateData(data);
             this.dataPreview.checkLargeDataset();
-            
+
             // 重新设置事件委托
             console.log('[Scraper] 🎯 重新设置事件委托');
             this.dataPreview.setupEventDelegation((asin) => {
                 console.log('[Scraper] 🖱️ 事件委托触发，ASIN:', asin);
                 this.toggleCardExpand(asin);
             });
-            
+
             this.renderDataPanel();
         },
 
         renderDataPanel(): void {
             console.log('[Scraper] 🎨 renderDataPanel 被调用');
-            
+
             if (!this.dataPreview) {
                 console.warn('[Scraper] ⚠️ dataPreview 不存在，无法渲染');
                 return;
             }
-            
+
             // 防止重复渲染
             if (this._isRendering) {
                 console.warn('[Scraper] ⚠️ 渲染已在进行中，跳过本次调用');
                 return;
             }
-            
+
             this._isRendering = true;
             console.log('[Scraper] 🔒 设置渲染锁');
-            
+
             try {
                 console.log('[Scraper] 📝 开始渲染数据面板');
                 this.dataPreview.renderDataPanel(
@@ -451,21 +451,21 @@ export function createScraperPanel() {
 
         toggleCardExpand(asin: string): void {
             console.log('[Scraper] 🔄 toggleCardExpand 被调用:', asin);
-            
+
             if (!this.dataPreview) {
                 console.warn('[Scraper] ⚠️ dataPreview 不存在');
                 return;
             }
-            
+
             const oldExpandedAsin = this.dataPreview.getState().expandedAsin;
             console.log('[Scraper] 📊 当前展开的 ASIN:', oldExpandedAsin);
-            
+
             // 切换展开状态
             this.dataPreview.toggleCardExpand(asin);
-            
+
             const newExpandedAsin = this.dataPreview.getState().expandedAsin;
             console.log('[Scraper] 📊 新的展开 ASIN:', newExpandedAsin);
-            
+
             // 重新渲染以更新UI
             console.log('[Scraper] 🎨 重新渲染数据面板');
             this.renderDataPanel();

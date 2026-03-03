@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>命名规范示例</title>
+  <link rel="stylesheet" href="sample.css">
+</head>
+<body>
+  <!-- ========== 正确的命名示例 ========== -->
+  
+  <!-- 模块级ID -->
+  <header id="app-header-container" class="header">
+    <div id="app-header-logo" class="header__logo">Logo</div>
+    <nav id="app-header-nav" class="header__nav">
+      <button id="app-header-toggle" class="header__toggle">Menu</button>
+    </nav>
+  </header>
+
+  <!-- 全局级ID -->
+  <div id="modal-overlay" class="modal">
+    <div id="modal-content" class="modal__content">
+      <button id="modal-close" class="modal__close">Close</button>
+    </div>
+  </div>
+
+  <!-- BEM命名 -->
+  <div class="card">
+    <div class="card__header">
+      <h2 class="card__title">Title</h2>
+    </div>
+    <div class="card__body">
+      <p class="card__text">Content</p>
+    </div>
+    <div class="card__footer">
+      <button class="card__button card__button--primary">Submit</button>
+      <button class="card__button card__button--secondary">Cancel</button>
+    </div>
+  </div>
+
+  <!-- 状态类 -->
+  <button class="button is-active">Active Button</button>
+  <div class="dropdown has-error">Dropdown with Error</div>
+
+  <!-- data属性 -->
+  <button 
+    data-action-click="submit"
+    data-action-hover="highlight"
+    data-state-loading="false"
+    data-config-theme="dark"
+    data-user-id="123">
+    Action Button
+  </button>
+
+  <!-- ========== 错误的命名示例（需要修复） ========== -->
+  
+  <!-- 驼峰命名 - 错误 -->
+  <div id="userProfile" class="userCard">
+    <input id="searchInput" class="searchBox" placeholder="Search">
+    <button id="submitButton" class="submitBtn">Submit</button>
+  </div>
+
+  <!-- 下划线命名 - 错误 -->
+  <div id="main_content" class="main_section">
+    <span id="user_name" class="user_info">Name</span>
+    <div id="product_list" class="product_item">Product</div>
+  </div>
+
+  <!-- 混合命名 - 错误 -->
+  <div id="navBar_container" class="nav-Bar_Item">
+    <a id="homeLink_1" class="link_Active">Home</a>
+  </div>
+
+  <!-- 数字后缀 - 特殊情况 -->
+  <div class="wb-orb-1">Orb 1</div>
+  <div class="wb-orb-2">Orb 2</div>
+  <div class="wb-orb-3">Orb 3</div>
+
+</body>
+</html>

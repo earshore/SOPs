@@ -396,7 +396,7 @@
   align-items: center;
   gap: var(--spacing-sm, 12px);
   padding: 8px 12px;
-  border-radius: var(--radius-md, 8px);
+  border-radius: var(--rounded-md, 8px);
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--color-text-secondary, #6b7280);

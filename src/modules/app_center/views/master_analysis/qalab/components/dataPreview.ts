@@ -25,11 +25,11 @@ const ANALYSIS_TARGETS = [
  */
 function hasValidData(targetData: any): boolean {
     if (!targetData || typeof targetData !== 'object') return false;
-    
+
     // 检查是否是空对象
     const keys = Object.keys(targetData);
     if (keys.length === 0) return false;
-    
+
     // 检查是否所有值都是空的
     const hasNonEmptyValue = keys.some(key => {
         const value = targetData[key];
@@ -39,7 +39,7 @@ function hasValidData(targetData: any): boolean {
         if (typeof value === 'string') return value.trim().length > 0;
         return true;
     });
-    
+
     return hasNonEmptyValue;
 }
 
@@ -51,9 +51,9 @@ function extractTargetStats(targetId: string, targetData: any): Array<{ label: s
         console.log(`[QALab] extractTargetStats: targetData 为空，targetId=${targetId}`);
         return [];
     }
-    
+
     console.log(`[QALab] extractTargetStats: targetId=${targetId}, targetData keys=`, Object.keys(targetData));
-    
+
     switch (targetId) {
         case 'title-keywords':
             // 兼容两种格式：对象数组和字符串数组
@@ -61,7 +61,7 @@ function extractTargetStats(targetId: string, targetData: any): Array<{ label: s
             const sceneKeywords = targetData.scene_keywords || [];
             const removedBrandTerms = targetData.removed_brand_terms || [];
             const removedModifiers = targetData.removed_modifiers || [];
-            
+
             const titleStats = [
                 { label: '核心词根', value: `${primaryKeywords.length}个` },
                 { label: '场景词', value: `${sceneKeywords.length}个` },
@@ -74,7 +74,7 @@ function extractTargetStats(targetId: string, targetData: any): Array<{ label: s
                 removed_modifiers: removedModifiers.length
             });
             return titleStats;
-            
+
         case 'selling-points':
             const bulletAnalysis = targetData.bullet_analysis || [];
             const sellingStats = [
@@ -84,7 +84,7 @@ function extractTargetStats(targetId: string, targetData: any): Array<{ label: s
             ];
             console.log(`[QALab] selling-points stats:`, sellingStats, 'bullet_analysis sample:', bulletAnalysis[0]);
             return sellingStats;
-            
+
         case 'fatal-flaws':
             const criticalIssues = targetData.critical_issues || [];
             // 真实数据结构：没有actionable字段，使用severity判断
@@ -95,7 +95,7 @@ function extractTargetStats(targetId: string, targetData: any): Array<{ label: s
             ];
             console.log(`[QALab] fatal-flaws stats:`, flawStats, 'sample keys:', criticalIssues[0] ? Object.keys(criticalIssues[0]) : []);
             return flawStats;
-            
+
         case 'wow-moments':
             const moments = targetData.moments || [];
             const wowStats = [
@@ -105,7 +105,7 @@ function extractTargetStats(targetId: string, targetData: any): Array<{ label: s
             ];
             console.log(`[QALab] wow-moments stats:`, wowStats, 'moments sample:', moments[0]);
             return wowStats;
-            
+
         case 'hesitation-points':
             const hesitations = targetData.hesitations || [];
             // 真实数据结构：pre_purchase_worry, post_purchase_resolution, resolution_status
@@ -116,16 +116,16 @@ function extractTargetStats(targetId: string, targetData: any): Array<{ label: s
             ];
             console.log(`[QALab] hesitation-points stats:`, hesitationStats, 'sample keys:', hesitations[0] ? Object.keys(hesitations[0]) : []);
             return hesitationStats;
-            
+
         case 'buyer-profile':
             // 真实数据结构：demographics是对象，buyer_types是数组，usage_scenes不是usage_scenarios
             const buyerTypes = targetData.buyer_types || [];
             const usageScenes = targetData.usage_scenes || targetData.usage_scenarios || [];
             // demographics是对象，统计lifestyle_indicators数组长度
-            const demographicsCount = targetData.demographics?.lifestyle_indicators?.length || 
-                                     (targetData.demographics ? 1 : 0) ||
-                                     (Array.isArray(targetData.demographics) ? targetData.demographics.length : 0);
-            
+            const demographicsCount = targetData.demographics?.lifestyle_indicators?.length ||
+                (targetData.demographics ? 1 : 0) ||
+                (Array.isArray(targetData.demographics) ? targetData.demographics.length : 0);
+
             const profileStats = [
                 { label: '买家类型', value: `${buyerTypes.length}种` },
                 { label: '使用场景', value: `${usageScenes.length}个` },
@@ -138,15 +138,15 @@ function extractTargetStats(targetId: string, targetData: any): Array<{ label: s
                 demographics_type: typeof targetData.demographics
             });
             return profileStats;
-            
+
         case 'vocab-gap':
             // 真实数据结构：seller_terms, buyer_terms, uncovered_buyer_terms, listing_optimization(对象)
             const missingTerms = targetData.missing_terms || targetData.uncovered_buyer_terms || [];
             const buyerSlang = targetData.buyer_slang || targetData.buyer_terms || [];
-            const recommendations = targetData.recommendations || 
-                                   (targetData.listing_optimization && Array.isArray(targetData.listing_optimization) ? targetData.listing_optimization : 
-                                    targetData.listing_optimization?.recommendations || []);
-            
+            const recommendations = targetData.recommendations ||
+                (targetData.listing_optimization && Array.isArray(targetData.listing_optimization) ? targetData.listing_optimization :
+                    targetData.listing_optimization?.recommendations || []);
+
             const vocabStats = [
                 { label: '词汇缺口', value: `${missingTerms.length}个` },
                 { label: '买家黑话', value: `${buyerSlang.length}个` },
@@ -154,7 +154,7 @@ function extractTargetStats(targetId: string, targetData: any): Array<{ label: s
             ];
             console.log(`[QALab] vocab-gap stats:`, vocabStats, 'data keys:', Object.keys(targetData));
             return vocabStats;
-            
+
         case 'promise-reality':
             const gaps = targetData.gaps || [];
             // 真实数据结构：listing_claim, review_reality, contradiction_severity, false_advertising_risk
@@ -165,7 +165,7 @@ function extractTargetStats(targetId: string, targetData: any): Array<{ label: s
             ];
             console.log(`[QALab] promise-reality stats:`, promiseStats, 'sample keys:', gaps[0] ? Object.keys(gaps[0]) : []);
             return promiseStats;
-            
+
         default:
             console.log(`[QALab] extractTargetStats: 未知的 targetId=${targetId}`);
             return [];
@@ -189,17 +189,17 @@ function getFlag(site: string): string {
 export function renderDataPreview(reportData: AnalysisReportData | null): void {
     console.log('[QALab] 📊 renderDataPreview 被调用');
     console.log('[QALab] - reportData 存在:', !!reportData);
-    
+
     const container = document.getElementById('data-preview-content');
     if (!container) {
         console.warn('[QALab] ⚠️ 数据预览容器未找到');
         return;
     }
-    
+
     console.log('[QALab] ✅ 数据预览容器已找到');
-    
+
     const renderer = SafeRenderer.getInstance();
-    
+
     if (!reportData) {
         // 空状态（超紧凑版）
         const emptyHTML = `
@@ -228,13 +228,13 @@ export function renderDataPreview(reportData: AnalysisReportData | null): void {
         console.log('[QALab] ✅ 空状态已渲染');
         return;
     }
-    
+
     // 提取数据
     const metadata = reportData.metadata || {};
     const marketplace = metadata.marketplace || 'DE';
     const dataSource = metadata.dataSource || 'import';
     const analysisReport = reportData.analysisReport || reportData;
-    
+
     // 数据源标签
     const sourceLabels: Record<string, { text: string; color: string }> = {
         scraper: { text: '数据采集', color: 'emerald' },
@@ -242,34 +242,34 @@ export function renderDataPreview(reportData: AnalysisReportData | null): void {
         import: { text: '手动导入', color: 'blue' }
     };
     const sourceLabel = (sourceLabels[dataSource] || sourceLabels['import'])!;
-    
+
     // 遍历所有分析目标，生成卡片
     const cards: string[] = [];
-    
+
     console.log('[QALab] 开始遍历分析目标，analysisReport keys:', Object.keys(analysisReport));
-    
+
     for (const target of ANALYSIS_TARGETS) {
         // 尝试多种命名方式获取目标数据
-        const targetData = analysisReport[target.id] 
-            || analysisReport[target.id.replace(/-/g, '_')] 
+        const targetData = analysisReport[target.id]
+            || analysisReport[target.id.replace(/-/g, '_')]
             || analysisReport[target.id.replace(/-/g, '')];
-        
+
         console.log(`[QALab] 检查目标 ${target.id}:`, {
             found: !!targetData,
             hasValidData: targetData ? hasValidData(targetData) : false,
             keys: targetData ? Object.keys(targetData) : []
         });
-        
+
         // 如果该目标没有数据或数据为空，跳过
         if (!hasValidData(targetData)) {
             console.log(`[QALab] 跳过目标 ${target.id}: 无有效数据`);
             continue;
         }
-        
+
         // 提取统计数据
         const stats = extractTargetStats(target.id, targetData);
         console.log(`[QALab] 目标 ${target.id} 统计数据:`, stats);
-        
+
         // 生成卡片HTML（3列紧凑版）
         const cardHTML = `
             <div class="analysis-card rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden hover:shadow-md transition-shadow">
@@ -315,10 +315,10 @@ export function renderDataPreview(reportData: AnalysisReportData | null): void {
                 </div>
             </div>
         `;
-        
+
         cards.push(cardHTML);
     }
-    
+
     // 如果没有任何卡片，显示提示
     if (cards.length === 0) {
         const noDataHTML = `
@@ -333,7 +333,7 @@ export function renderDataPreview(reportData: AnalysisReportData | null): void {
         renderer.renderTemplate(container, noDataHTML);
         return;
     }
-    
+
     // 渲染所有卡片（超紧凑布局）
     const finalHTML = `
         <!-- 重新导入触发器 -->
@@ -371,7 +371,7 @@ export function renderDataPreview(reportData: AnalysisReportData | null): void {
             </div>
         </div>
     `;
-    
+
     renderer.renderTemplate(container, finalHTML);
     console.log('[QALab] ✅ 数据预览已渲染，卡片数量:', cards.length);
 }
@@ -385,12 +385,12 @@ export function renderJSONPreview(reportData: AnalysisReportData | null): void {
         console.warn('[QALab] JSON预览容器未找到');
         return;
     }
-    
+
     if (!reportData) {
         container.textContent = '// 暂无数据';
         return;
     }
-    
+
     try {
         const jsonString = JSON.stringify(reportData, null, 2);
         container.textContent = jsonString;

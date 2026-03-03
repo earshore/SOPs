@@ -1,0 +1,409 @@
+/**
+ * 时间线组件
+ * 统一的时间线样式，适用于所有模块
+ */
+
+/* ========================================
+   基础时间线
+   ======================================== */
+.timeline {
+  position: relative;
+  padding-left: 2rem;
+}
+
+/* 时间线主线 */
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(
+    180deg,
+    var(--color-blue-500, #3b82f6),
+    var(--color-purple-600, #9333ea)
+  );
+}
+
+/* 时间线项目 */
+.timeline-item {
+  position: relative;
+  padding-bottom: 2rem;
+}
+
+.timeline-item:last-child {
+  padding-bottom: 0;
+}
+
+/* 时间线节点 */
+.timeline-dot {
+  position: absolute;
+  left: -25px;
+  top: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-blue-500, #3b82f6);
+  border: 3px solid white;
+  box-shadow: 0 0 0 2px var(--color-blue-500, #3b82f6);
+  transition: all var(--duration-normal, 300ms) var(--ease-smooth);
+}
+
+/* 节点悬停效果 */
+.timeline-item:hover .timeline-dot {
+  transform: scale(1.2);
+  box-shadow: 0 0 0 4px var(--color-blue-500, #3b82f6);
+}
+
+/* ========================================
+   时间线状态变体
+   ======================================== */
+
+/* 已完成 */
+.timeline-dot--completed {
+  background: var(--color-success, #22c55e);
+  box-shadow: 0 0 0 2px var(--color-success, #22c55e);
+}
+
+/* 进行中 */
+.timeline-dot--active {
+  background: var(--color-primary, #3b82f6);
+  box-shadow: 0 0 0 2px var(--color-primary, #3b82f6);
+  animation: timeline-pulse 2s ease-in-out infinite;
+}
+
+/* 待处理 */
+.timeline-dot--pending {
+  background: white;
+  box-shadow: 0 0 0 2px var(--color-slate-400, #94a3b8);
+}
+
+/* 错误 */
+.timeline-dot--error {
+  background: var(--color-error, #ef4444);
+  box-shadow: 0 0 0 2px var(--color-error, #ef4444);
+}
+
+/* 警告 */
+.timeline-dot--warning {
+  background: var(--color-warning, #f59e0b);
+  box-shadow: 0 0 0 2px var(--color-warning, #f59e0b);
+}
+
+/* ========================================
+   时间线颜色变体
+   ======================================== */
+
+/* 绿色时间线 */
+.timeline--success::before {
+  background: linear-gradient(
+    180deg,
+    var(--color-green-500, #22c55e),
+    var(--color-emerald-600, #059669)
+  );
+}
+
+.timeline--success .timeline-dot {
+  background: var(--color-green-500, #22c55e);
+  box-shadow: 0 0 0 2px var(--color-green-500, #22c55e);
+}
+
+/* 紫色时间线 */
+.timeline--purple::before {
+  background: linear-gradient(
+    180deg,
+    var(--color-purple-500, #a855f7),
+    var(--color-purple-700, #7e22ce)
+  );
+}
+
+.timeline--purple .timeline-dot {
+  background: var(--color-purple-500, #a855f7);
+  box-shadow: 0 0 0 2px var(--color-purple-500, #a855f7);
+}
+
+/* 橙色时间线 */
+.timeline--warning::before {
+  background: linear-gradient(
+    180deg,
+    var(--color-amber-500, #f59e0b),
+    var(--color-orange-600, #ea580c)
+  );
+}
+
+.timeline--warning .timeline-dot {
+  background: var(--color-amber-500, #f59e0b);
+  box-shadow: 0 0 0 2px var(--color-amber-500, #f59e0b);
+}
+
+/* ========================================
+   时间线尺寸变体
+   ======================================== */
+
+/* 紧凑时间线 */
+.timeline--compact {
+  padding-left: 1.5rem;
+}
+
+.timeline--compact::before {
+  left: 5px;
+  width: 1.5px;
+}
+
+.timeline--compact .timeline-dot {
+  left: -20px;
+  width: 12px;
+  height: 12px;
+  border-width: 2px;
+}
+
+.timeline--compact .timeline-item {
+  padding-bottom: 1.5rem;
+}
+
+/* 宽松时间线 */
+.timeline--spacious {
+  padding-left: 2.5rem;
+}
+
+.timeline--spacious::before {
+  left: 9px;
+  width: 3px;
+}
+
+.timeline--spacious .timeline-dot {
+  left: -28px;
+  width: 20px;
+  height: 20px;
+  border-width: 4px;
+}
+
+.timeline--spacious .timeline-item {
+  padding-bottom: 2.5rem;
+}
+
+/* ========================================
+   时间线内容区域
+   ======================================== */
+
+.timeline-content {
+  padding-left: var(--spacing-sm, 12px);
+}
+
+.timeline-title {
+  font-size: var(--text-base, 0.875rem);
+  font-weight: var(--font-semibold, 600);
+  color: var(--color-text-primary, #1a1a2e);
+  margin-bottom: var(--spacing-2xs, 4px);
+}
+
+.timeline-description {
+  font-size: var(--text-sm, 0.8125rem);
+  color: var(--color-text-secondary, #6b7280);
+  line-height: var(--leading-relaxed, 1.625);
+}
+
+.timeline-time {
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--color-text-tertiary, #9ca3af);
+  margin-top: var(--spacing-xs, 8px);
+}
+
+/* ========================================
+   水平时间线
+   ======================================== */
+
+.timeline--horizontal {
+  display: flex;
+  padding-left: 0;
+  padding-top: 2rem;
+  overflow-x: auto;
+}
+
+.timeline--horizontal::before {
+  top: 7px;
+  left: 0;
+  right: 0;
+  bottom: auto;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--color-blue-500, #3b82f6),
+    var(--color-purple-600, #9333ea)
+  );
+}
+
+.timeline--horizontal .timeline-item {
+  flex: 1;
+  min-width: 150px;
+  padding-bottom: 0;
+  padding-right: 2rem;
+  text-align: center;
+}
+
+.timeline--horizontal .timeline-item:last-child {
+  padding-right: 0;
+}
+
+.timeline--horizontal .timeline-dot {
+  left: 50%;
+  top: -25px;
+  transform: translateX(-50%);
+}
+
+.timeline--horizontal .timeline-content {
+  padding-left: 0;
+  padding-top: var(--spacing-sm, 12px);
+}
+
+/* ========================================
+   时间线动画
+   ======================================== */
+
+@keyframes timeline-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 2px var(--color-primary, #3b82f6);
+  }
+  50% {
+    box-shadow: 0 0 0 6px var(--color-primary, #3b82f6);
+  }
+}
+
+/* 时间线项目淡入动画 */
+.timeline-item--animated {
+  opacity: 0;
+  animation: timeline-fade-in 0.5s var(--ease-smooth) forwards;
+}
+
+.timeline-item--animated:nth-child(1) { animation-delay: 0.1s; }
+.timeline-item--animated:nth-child(2) { animation-delay: 0.2s; }
+.timeline-item--animated:nth-child(3) { animation-delay: 0.3s; }
+.timeline-item--animated:nth-child(4) { animation-delay: 0.4s; }
+.timeline-item--animated:nth-child(5) { animation-delay: 0.5s; }
+
+@keyframes timeline-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========================================
+   响应式适配
+   ======================================== */
+
+@media (max-width: 768px) {
+  .timeline {
+    padding-left: 1.5rem;
+  }
+
+  .timeline::before {
+    left: 5px;
+  }
+
+  .timeline-dot {
+    left: -20px;
+    width: 12px;
+    height: 12px;
+    border-width: 2px;
+  }
+
+  .timeline-item {
+    padding-bottom: 1.5rem;
+  }
+
+  /* 水平时间线在移动端转为垂直 */
+  .timeline--horizontal {
+    flex-direction: column;
+    padding-top: 0;
+    padding-left: 1.5rem;
+  }
+
+  .timeline--horizontal::before {
+    top: 0;
+    left: 5px;
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(
+      180deg,
+      var(--color-blue-500, #3b82f6),
+      var(--color-purple-600, #9333ea)
+    );
+  }
+
+  .timeline--horizontal .timeline-item {
+    text-align: left;
+    padding-right: 0;
+    padding-bottom: 1.5rem;
+  }
+
+  .timeline--horizontal .timeline-dot {
+    left: -20px;
+    top: 0;
+    transform: none;
+  }
+
+  .timeline--horizontal .timeline-content {
+    padding-left: var(--spacing-sm, 12px);
+    padding-top: 0;
+  }
+}
+
+/* ========================================
+   暗色模式
+   ======================================== */
+
+.dark .timeline-dot,
+[data-theme="dark"] .timeline-dot {
+  border-color: var(--color-bg-secondary, #1e293b);
+}
+
+.dark .timeline-dot--pending,
+[data-theme="dark"] .timeline-dot--pending {
+  background: var(--color-bg-secondary, #1e293b);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+}
+
+.dark .timeline-title,
+[data-theme="dark"] .timeline-title {
+  color: var(--color-text-primary, #f9fafb);
+}
+
+.dark .timeline-description,
+[data-theme="dark"] .timeline-description {
+  color: var(--color-text-secondary, #d1d5db);
+}
+
+.dark .timeline-time,
+[data-theme="dark"] .timeline-time {
+  color: var(--color-text-tertiary, #9ca3af);
+}
+
+/* ========================================
+   无障碍 & 减少动画
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .timeline-dot {
+    transition: none;
+  }
+
+  .timeline-dot--active {
+    animation: none;
+  }
+
+  .timeline-item--animated {
+    animation: none;
+    opacity: 1;
+  }
+
+  .timeline-item:hover .timeline-dot {
+    transform: none;
+  }
+}

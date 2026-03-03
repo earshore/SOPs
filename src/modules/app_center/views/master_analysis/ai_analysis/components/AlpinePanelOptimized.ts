@@ -228,7 +228,7 @@ export function createAiAnalysisPanelOptimized(): Record<string, any> {
       try {
         // 调用分析服务
         // ... 分析逻辑
-        
+
         this.progress = 100;
         this.currentStep = '分析完成';
       } catch (error) {

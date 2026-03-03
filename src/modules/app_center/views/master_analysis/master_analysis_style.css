@@ -2,7 +2,7 @@
 
 /* === 内容区域背景 === */
 #master_analysis_content_area {
-    background: linear-gradient(to bottom, rgba(248, 250, 252, 0.5), rgba(241, 245, 249, 0.3));
+    background: linear-gradient(to bottom, var(--color-slate-50), var(--color-slate-100));
 }
 
 @media (max-width: 768px) {
@@ -14,18 +14,18 @@
 /* === Analysis Widget Card === */
 .analysis-widget-card {
     background: white;
-    border-radius: 1rem;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
-    transition: all 0.3s ease;
+    border-radius: var(--rounded-xl);
+    border: 1px solid var(--color-slate-200);
+    box-shadow: 0 1px 3px 0 var(--color-black-alpha-5);
+    transition: all var(--duration-normal) ease;
     overflow: hidden;
     display: flex;
     flex-direction: column;
 }
 
 .analysis-widget-card:hover {
-    border-color: #cbd5e1;
-    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.1);
+    border-color: var(--color-slate-300);
+    box-shadow: 0 4px 12px -2px var(--color-black-alpha-10);
 }
 
 /* === Widget 容器 === */
@@ -35,46 +35,46 @@
 }
 
 .widget-content-area {
-    background: #fafafa;
+    background: var(--color-slate-50);
 }
 
 /* === 对象数组卡片 === */
 .widget-content-area .group\/card {
     background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.75rem;
-    transition: all 0.2s ease;
+    border: 1px solid var(--color-slate-200);
+    border-radius: var(--rounded-lg);
+    transition: all var(--duration-fast) ease;
 }
 
 .widget-content-area .group\/card:hover {
-    border-color: #cbd5e1;
-    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08);
+    border-color: var(--color-slate-300);
+    box-shadow: 0 4px 12px -2px var(--color-black-alpha-10);
 }
 
 /* === 编辑模式卡片 === */
 .edit-row {
     background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.75rem;
-    transition: all 0.2s ease;
+    border: 1px solid var(--color-slate-200);
+    border-radius: var(--rounded-lg);
+    transition: all var(--duration-fast) ease;
 }
 
 .edit-row:hover {
-    border-color: #cbd5e1;
-    box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.06);
+    border-color: var(--color-slate-300);
+    box-shadow: 0 2px 8px -2px var(--color-black-alpha-5);
 }
 
 /* === Glass Card === */
 .glass-card {
     background: white;
-    border-radius: 1rem;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
-    transition: all 0.3s ease;
+    border-radius: var(--rounded-xl);
+    border: 1px solid var(--color-slate-200);
+    box-shadow: 0 1px 3px 0 var(--color-black-alpha-5);
+    transition: all var(--duration-normal) ease;
 }
 
 .glass-card:hover {
-    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 12px -2px var(--color-black-alpha-10);
 }
 
 /* === GridStack 调整模式 === */
@@ -83,8 +83,8 @@
 }
 
 .grid-stack-item-resizing .widget-card-container {
-    box-shadow: 0 0 0 2px #3b82f6, 0 8px 24px -4px rgba(59, 130, 246, 0.3) !important;
-    transition: box-shadow 0.2s ease;
+    box-shadow: 0 0 0 2px var(--color-blue-500), 0 8px 24px -4px var(--color-primary-light) !important;
+    transition: box-shadow var(--duration-fast) ease;
 }
 
 .grid-stack-item.is-resizing .drag-handle {
@@ -107,21 +107,21 @@
 }
 
 /* === Promptlab 3D 翻转卡片修复 === */
-#console-card-inner > div {
+#console-card-inner>div {
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
 }
 
 /* 确保背面元素不响应点击 */
-#console-card-inner > div:last-child {
+#console-card-inner>div:last-child {
     pointer-events: none;
 }
 
 /* 翻转后，背面变成正面，恢复点击 */
-#console-card-inner[style*="rotateY(180deg)"] > div:last-child {
+#console-card-inner[style*="rotateY(180deg)"]>div:last-child {
     pointer-events: auto;
 }
 
-#console-card-inner[style*="rotateY(180deg)"] > div:first-child {
+#console-card-inner[style*="rotateY(180deg)"]>div:first-child {
     pointer-events: none;
 }

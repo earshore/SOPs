@@ -1,0 +1,50 @@
+{
+  "name": "@aihang-sop/naming-validator",
+  "version": "1.0.0",
+  "description": "HTML和CSS命名规范验证和迁移工具",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "naming-validator": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "node build.js",
+    "build:tsc": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest --run",
+    "test:watch": "vitest",
+    "test:quick": "node test/quick-test.js",
+    "test:e2e": "node test/e2e-test.js",
+    "validate": "node dist/cli.js validate",
+    "validate:project": "node dist/cli.js validate ../../",
+    "migrate": "node dist/cli.js migrate",
+    "migrate:preview": "node dist/cli.js migrate --dry-run",
+    "list-backups": "node dist/cli.js list-backups",
+    "setup": "npm install && npm run build && npm run test:quick"
+  },
+  "keywords": [
+    "naming-convention",
+    "html",
+    "css",
+    "validator",
+    "migrator",
+    "bem"
+  ],
+  "author": "AihangSOP Team",
+  "license": "MIT",
+  "dependencies": {
+    "jsdom": "^24.0.0",
+    "postcss": "^8.4.35",
+    "commander": "^12.0.0",
+    "chalk": "^5.3.0",
+    "minimatch": "^9.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.19",
+    "@types/jsdom": "^21.1.6",
+    "typescript": "^5.3.3",
+    "vitest": "^1.3.1",
+    "fast-check": "^3.15.1",
+    "esbuild": "^0.20.0"
+  }
+}

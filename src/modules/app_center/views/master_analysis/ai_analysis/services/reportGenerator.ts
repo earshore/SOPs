@@ -12,19 +12,19 @@ export function formatHistoryDate(timestamp: string): string {
   try {
     const date = new Date(timestamp);
     const now = new Date();
-    
+
     // 如果是今天
     if (date.toDateString() === now.toDateString()) {
       return `今天 ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
     }
-    
+
     // 如果是昨天
     const yesterday = new Date(now);
     yesterday.setDate(yesterday.getDate() - 1);
     if (date.toDateString() === yesterday.toDateString()) {
       return `昨天 ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
     }
-    
+
     // 其他日期
     return `${date.getMonth() + 1}月${date.getDate()}日 ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
   } catch (error) {
@@ -42,7 +42,7 @@ export function generateMarkdownReport(
   dataSourceLabel: string
 ): string {
   const lines: string[] = [];
-  
+
   // 标题
   lines.push('# AI 智能分析报告\n');
   lines.push(`**产品 ASIN**: ${selectedAsins.join(', ')}\n`);
@@ -50,14 +50,14 @@ export function generateMarkdownReport(
   lines.push(`**市场**: ${dataSourceMarketplace}\n`);
   lines.push(`**数据源**: ${dataSourceLabel}\n`);
   lines.push('\n---\n');
-  
+
   // Listings 分析结果
   const listingsResults = results.filter(r => r.source === 'Listings');
   if (listingsResults.length > 0) {
     lines.push('\n## 📦 Listings 分析\n');
     for (const result of listingsResults) {
       lines.push(`\n### ${result.title}\n`);
-      
+
       // 统计数据
       if (result.stats && result.stats.length > 0) {
         lines.push('\n**统计数据**:\n');
@@ -66,7 +66,7 @@ export function generateMarkdownReport(
         }
         lines.push('');
       }
-      
+
       // 核心发现
       if (result.highlights && result.highlights.length > 0) {
         lines.push('\n**核心发现**:\n');
@@ -75,7 +75,7 @@ export function generateMarkdownReport(
         }
         lines.push('');
       }
-      
+
       // 详细分析
       if (result.details && result.details.length > 0) {
         lines.push('\n**详细分析**:\n');
@@ -89,14 +89,14 @@ export function generateMarkdownReport(
       }
     }
   }
-  
+
   // Reviews 分析结果
   const reviewsResults = results.filter(r => r.source === 'Reviews');
   if (reviewsResults.length > 0) {
     lines.push('\n## ⭐ Reviews 分析\n');
     for (const result of reviewsResults) {
       lines.push(`\n### ${result.title}\n`);
-      
+
       // 统计数据
       if (result.stats && result.stats.length > 0) {
         lines.push('\n**统计数据**:\n');
@@ -105,7 +105,7 @@ export function generateMarkdownReport(
         }
         lines.push('');
       }
-      
+
       // 核心发现
       if (result.highlights && result.highlights.length > 0) {
         lines.push('\n**核心发现**:\n');
@@ -114,7 +114,7 @@ export function generateMarkdownReport(
         }
         lines.push('');
       }
-      
+
       // 详细分析
       if (result.details && result.details.length > 0) {
         lines.push('\n**详细分析**:\n');
@@ -128,10 +128,10 @@ export function generateMarkdownReport(
       }
     }
   }
-  
+
   lines.push('\n---\n');
   lines.push(`\n*报告生成于 ${new Date().toLocaleString('zh-CN')}*\n`);
-  
+
   return lines.join('\n');
 }
 

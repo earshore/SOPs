@@ -138,7 +138,7 @@
     position: relative;
 }
 
-/* 实体字：蓝青渐变 */
+/* 实体字：蓝青渐变 - 使用全局fadeUp动画 */
 .slogan-line.highlight {
     background: linear-gradient(120deg, var(--accent-blue), var(--accent-cyan));
     -webkit-background-clip: text;
@@ -148,7 +148,7 @@
     animation: fadeUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
-/* 描边字：深色空心 */
+/* 描边字：深色空心 - 使用全局fadeUp动画 */
 .slogan-line.outline {
     color: transparent;
     -webkit-text-stroke: 1.5px var(--text-primary);
@@ -183,7 +183,7 @@
     font-weight: 700;
 }
 
-/* 状态胶囊 - 极简风格 */
+/* 状态胶囊 - 极简风格 - 使用全局fadeIn动画 */
 .ai-status {
     display: inline-flex;
     align-items: center;
@@ -206,6 +206,7 @@
     position: relative;
 }
 
+/* 使用全局pulseRing动画 */
 .status-dot-inner::after {
     content: '';
     position: absolute;
@@ -215,7 +216,7 @@
     height: 16px;
     border: 1px solid var(--accent-cyan);
     border-radius: 50%;
-    animation: ripple 2s infinite;
+    animation: pulseRing 2s infinite;
 }
 
 .status-text {
@@ -225,38 +226,8 @@
     color: var(--text-primary);
 }
 
-@keyframes fadeUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes fadeIn {
-    to {
-        opacity: 1;
-    }
-}
-
-@keyframes ripple {
-    0% {
-        transform: scale(0.5);
-        opacity: 1;
-    }
-
-    100% {
-        transform: scale(1.5);
-        opacity: 0;
-    }
-}
-
 /* =========================================
-   4. 底部 & 装饰
+   4. 底部 & 装饰 - 使用全局fadeIn和breathe动画
    ========================================= */
 .brand-footer {
     position: absolute;
@@ -296,6 +267,7 @@
     opacity: 0.6;
 }
 
+/* 使用全局breathe动画 */
 .pulse-ring {
     transform-origin: center;
     animation: breathe 8s ease-in-out infinite;
@@ -303,20 +275,6 @@
 
 .delay-1 {
     animation-delay: -4s;
-}
-
-@keyframes breathe {
-
-    0%,
-    100% {
-        transform: scale(1);
-        opacity: 0.5;
-    }
-
-    50% {
-        transform: scale(1.05);
-        opacity: 1;
-    }
 }
 
 /* =========================================

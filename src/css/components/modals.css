@@ -46,7 +46,7 @@
 .modal {
   position: relative;
   background: white;
-  border-radius: var(--radius-2xl);
+  border-radius: var(--rounded-2xl);
   box-shadow: 
     0 25px 50px -12px rgba(0, 0, 0, 0.25),
     0 0 0 1px rgba(0, 0, 0, 0.05);
@@ -132,7 +132,7 @@
   justify-content: center;
   width: 2rem;
   height: 2rem;
-  border-radius: var(--radius-md);
+  border-radius: var(--rounded-md);
   color: var(--color-slate-400);
   background: transparent;
   border: none;
@@ -184,7 +184,7 @@
   padding: 1.25rem 1.5rem;
   border-top: 1px solid var(--color-slate-200);
   background: var(--color-slate-50);
-  border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
+  border-radius: 0 0 var(--rounded-2xl) var(--rounded-2xl);
   flex-shrink: 0;
 }
 
@@ -192,14 +192,14 @@
    模态框变体 - 无头部
    ======================================== */
 .modal-no-header .modal-body {
-  border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+  border-radius: var(--rounded-2xl) var(--rounded-2xl) 0 0;
 }
 
 /* ========================================
    模态框变体 - 无底部
    ======================================== */
 .modal-no-footer .modal-body {
-  border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
+  border-radius: 0 0 var(--rounded-2xl) var(--rounded-2xl);
 }
 
 /* ========================================
@@ -285,7 +285,7 @@
   }
 
   .modal {
-    border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+    border-radius: var(--rounded-2xl) var(--rounded-2xl) 0 0;
     max-height: 95vh;
   }
 

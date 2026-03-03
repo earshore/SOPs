@@ -2,10 +2,10 @@
  * 数据导入处理器
  */
 
-import type { 
-    ScrapedData, 
-    ProductData, 
-    ImportResult, 
+import type {
+    ScrapedData,
+    ProductData,
+    ImportResult,
     FileReadResult
 } from '../types';
 import type { ScrapedProduct, CustomerReview, ScraperSite } from '@/types/modules-business';
@@ -24,17 +24,17 @@ import { SafeRenderer } from '../../../../../../common/infrastructure/SafeRender
 export function readFileAsJSON(file: File): Promise<FileReadResult> {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        
+
         reader.onload = (e) => {
             try {
                 const content = e.target?.result as string;
-                
+
                 // 验证内容不为空
                 if (!content || content.trim().length === 0) {
                     reject(new Error(`文件 ${file.name} 内容为空`));
                     return;
                 }
-                
+
                 // 尝试解析JSON
                 let json: unknown;
                 try {
@@ -43,13 +43,13 @@ export function readFileAsJSON(file: File): Promise<FileReadResult> {
                     reject(new Error(`文件 ${file.name} 不是有效的JSON格式: ${parseError instanceof Error ? parseError.message : String(parseError)}`));
                     return;
                 }
-                
+
                 // 验证JSON不为null或undefined
                 if (json === null || json === undefined) {
                     reject(new Error(`文件 ${file.name} JSON内容无效`));
                     return;
                 }
-                
+
                 resolve({ data: json, filename: file.name });
             } catch (err) {
                 const errorMsg = err instanceof Error ? err.message : String(err);
@@ -57,13 +57,13 @@ export function readFileAsJSON(file: File): Promise<FileReadResult> {
                 reject(new Error(`文件 ${file.name} 解析失败: ${errorMsg}`));
             }
         };
-        
+
         reader.onerror = () => {
             const errorMsg = reader.error?.message || '未知错误';
             console.error(`[Scraper] 读取文件 ${file.name} 失败:`, reader.error);
             reject(new Error(`无法读取文件 ${file.name}: ${errorMsg}`));
         };
-        
+
         reader.readAsText(file);
     });
 }
@@ -74,12 +74,12 @@ export function readFileAsJSON(file: File): Promise<FileReadResult> {
 export function getReviewSignature(review: CustomerReview): string {
     // 优先使用 review ID
     if ('id' in review && review.id) return String(review.id);
-    
+
     // 构建签名
     const date = ('review_date' in review ? review.review_date : '') || '';
     const author = review.author || '';
     const headline = review.headline || review.title || '';
-    
+
     return `${date}_${author}_${headline.substring(0, 20)}`.trim();
 }
 
@@ -125,12 +125,12 @@ export function mergeProducts(
         });
 
         mergedProduct.customer_reviews = Array.from(uniqueReviewsMap.values());
-        
+
         // 清理临时字段
         const cleanProduct = { ...mergedProduct };
         delete (cleanProduct as ScrapedProduct & { _source_site?: string; _filename?: string })._source_site;
         delete (cleanProduct as ScrapedProduct & { _source_site?: string; _filename?: string })._filename;
-        
+
         finalProducts.push(cleanProduct);
     }
 
@@ -204,7 +204,7 @@ export function showMarketplaceSelectionModal(sites: string[]): Promise<string |
         const cleanup = () => {
             if (btnConfirm) btnConfirm.removeEventListener('click', handleConfirm);
             if (btnCancel) btnCancel.removeEventListener('click', handleCancel);
-            
+
             try {
                 if (backdrop && document.body.contains(backdrop)) {
                     document.body.removeChild(backdrop);
@@ -217,13 +217,13 @@ export function showMarketplaceSelectionModal(sites: string[]): Promise<string |
         const handleConfirm = (e: Event) => {
             e.preventDefault();
             e.stopPropagation();
-            
+
             if (resolved) return;
             resolved = true;
-            
+
             const selectedInput = backdrop.querySelector('input[name="site_choice"]:checked') as HTMLInputElement;
             const selected = selectedInput ? selectedInput.value : null;
-            
+
             cleanup();
             resolve(selected);
         };
@@ -231,10 +231,10 @@ export function showMarketplaceSelectionModal(sites: string[]): Promise<string |
         const handleCancel = (e: Event) => {
             e.preventDefault();
             e.stopPropagation();
-            
+
             if (resolved) return;
             resolved = true;
-            
+
             cleanup();
             resolve(null);
         };
@@ -259,7 +259,7 @@ export async function handleImportFiles(
             console.error('[Scraper] 文件类型错误:', invalidFiles.map(f => f.name));
             throw new Error(`只支持JSON文件，以下文件被忽略: ${invalidFiles.map(f => f.name).join(', ')}`);
         }
-        
+
         // 验证文件大小（最大10MB）
         const MAX_FILE_SIZE = 10 * 1024 * 1024;
         const oversizedFiles = files.filter(f => f.size > MAX_FILE_SIZE);
@@ -267,7 +267,7 @@ export async function handleImportFiles(
             console.error('[Scraper] 文件过大:', oversizedFiles.map(f => `${f.name} (${(f.size / 1024 / 1024).toFixed(2)}MB)`));
             throw new Error(`文件大小不能超过10MB，以下文件被忽略: ${oversizedFiles.map(f => f.name).join(', ')}`);
         }
-        
+
         // 大文件警告（5MB以上）
         const LARGE_FILE_SIZE = 5 * 1024 * 1024;
         const largeFiles = files.filter(f => f.size > LARGE_FILE_SIZE && f.size <= MAX_FILE_SIZE);
@@ -275,7 +275,7 @@ export async function handleImportFiles(
             console.warn('[Scraper] 检测到大文件:', largeFiles.map(f => `${f.name} (${(f.size / 1024 / 1024).toFixed(2)}MB)`));
             showToast(`⚠️ 检测到大文件，处理可能需要较长时间`, { type: 'warning' });
         }
-        
+
         // 检查空文件
         const emptyFiles = files.filter(f => f.size === 0);
         if (emptyFiles.length > 0) {
@@ -294,16 +294,16 @@ export async function handleImportFiles(
                 console.warn(`[Scraper] 文件 ${filename} 数据为空，跳过`);
                 return;
             }
-            
+
             // 验证数据结构
             const validation = validateScrapedData(data);
             if (!validation.valid) {
                 console.error(`[Scraper] 文件 ${filename} 数据验证失败:`, validation.error);
                 throw new Error(`文件 ${filename} 数据验证失败: ${validation.error}`);
             }
-            
+
             let fileSite: string | null = null;
-            
+
             // 类型守卫: 检查是否是包含products的对象
             if (typeof data === 'object' && data !== null && !Array.isArray(data) && 'products' in data) {
                 const dataWithMeta = data as { products: unknown[]; metadata?: { marketplace?: string } };
@@ -381,7 +381,7 @@ export async function handleImportFiles(
         window.dispatchEvent(new CustomEvent(APP_EVENTS.HISTORY_UPDATED));
 
         showToast(`✅ 成功导入并合并 ${finalProducts.length} 个ASIN (基准站点: ${targetMarketplace})`, { type: 'success' });
-        
+
         return { success: true, data: scrapedData };
 
     } catch (error) {
@@ -392,7 +392,7 @@ export async function handleImportFiles(
             filesCount: files.length,
             fileNames: files.map(f => f.name)
         });
-        
+
         // 根据错误类型提供友好的错误提示
         let userMessage = "❌ 导入出错";
         if (errorMessage.includes('格式错误') || errorMessage.includes('JSON')) {
@@ -404,9 +404,9 @@ export async function handleImportFiles(
         } else {
             userMessage = `❌ 导入出错: ${errorMessage}`;
         }
-        
+
         showToast(userMessage, { type: 'error' });
-        
+
         return { success: false, error: errorMessage };
     }
 }

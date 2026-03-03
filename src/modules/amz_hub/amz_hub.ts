@@ -10,17 +10,17 @@ import { AMZ_HUB_ROUTES } from '@/common/constants/routes';
 const MODULE_MAP: ModuleMap = {
     // 总览
     [AMZ_HUB_ROUTES.OVERVIEW]: () => import('./views/overview/index'),
-    
+
     // Amazon知识早知道 (knowledge)
     [AMZ_HUB_ROUTES.EU_INSIGHTS]: () => import('./views/knowledge/eu_insights/index'),
     [AMZ_HUB_ROUTES.SEO_STRATEGY]: () => import('./views/knowledge/seo_strategy/index'),
     [AMZ_HUB_ROUTES.ECOSYSTEM]: () => import('./views/knowledge/ecosystem/index'),
-    
+
     // 入门实操宝典 (practice)
     [AMZ_HUB_ROUTES.QUALITY_LISTING]: () => import('./views/practice/quality_listing/index'),
     [AMZ_HUB_ROUTES.MARKETING_CALENDAR]: () => import('./views/practice/marketing_calendar/index'),
     [AMZ_HUB_ROUTES.SEASONS_TOOLS]: () => import('./views/practice/promotions/index'),
-    
+
     // 运营提升全攻略 (advanced)
     [AMZ_HUB_ROUTES.NEW_PRODUCT_30DAYS]: () => import('./views/advanced/new_product_30days/index'),
     [AMZ_HUB_ROUTES.CONVERSION_OPTIMIZATION]: () => import('./views/advanced/conversion_optimization/index'),

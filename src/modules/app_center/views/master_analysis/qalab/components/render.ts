@@ -33,11 +33,11 @@ const getQalabState = () => appStore.getState().qalab;
 //             {{asins}}
 //         </div>
 //     `;
-    
+
 //     const asinChips = asins.map((asin: string) => 
 //         `<div class="asin-chip">${renderer.escapeHtml(asin)}</div>`
 //     ).join('');
-    
+
 //     renderer.renderDynamic(container, template, {
 //         title: title.substring(0, 150) + (title.length > 150 ? '...' : ''),
 //         asins: asinChips
@@ -249,8 +249,8 @@ export function renderQAGrid(
             ).join('');
 
             const catLabel = CATEGORIES.find(c => c.id === qa.category)?.label || qa.category;
-            
-            const sourcesHtml = qa.sources.map((src: string) => 
+
+            const sourcesHtml = qa.sources.map((src: string) =>
                 `<div class="qa-source"><i class="fa-solid fa-database"></i>${renderer.escapeHtml(src)}</div>`
             ).join('');
 

@@ -3,8 +3,8 @@
  */
 
 import { AnalysisResult } from '../types';
-import { 
-  FullAnalysisReport, 
+import {
+  FullAnalysisReport,
   SAMPLE_ANALYSIS_REPORT,
   TitleKeywordsReport,
   SellingPointsReport,
@@ -38,7 +38,7 @@ function parseTitleKeywords(report: TitleKeywordsReport): AnalysisResult {
   const removedBrandTerms = report.removed_brand_terms || [];
   const removedModifiers = report.removed_modifiers || [];
   const optimizationSuggestions = report.optimization_suggestions || [];
-  
+
   return {
     targetId: 'title-keywords',
     title: '标题核心词根',
@@ -59,24 +59,24 @@ function parseTitleKeywords(report: TitleKeywordsReport): AnalysisResult {
       }))
     ],
     details: [
-      { 
-        category: '一级核心词（高权重）', 
+      {
+        category: '一级核心词（高权重）',
         items: primaryKeywords.map(k => `${k.keyword} [${k.weight}]`)
       },
-      { 
-        category: '二级功能词', 
+      {
+        category: '二级功能词',
         items: secondaryKeywords.map(k => k.keyword)
       },
-      { 
-        category: '场景/人群词', 
+      {
+        category: '场景/人群词',
         items: [...sceneKeywords.map(k => k.keyword), ...audienceKeywords.map(k => k.keyword)]
       },
-      { 
-        category: '已剔除的修饰词和品牌词', 
+      {
+        category: '已剔除的修饰词和品牌词',
         items: [...removedBrandTerms, ...removedModifiers]
       },
-      { 
-        category: '优化建议', 
+      {
+        category: '优化建议',
         items: optimizationSuggestions
       }
     ]
@@ -90,11 +90,11 @@ function parseSellingPoints(report: SellingPointsReport): AnalysisResult {
   // 防御性检查
   const overallStrategy = safeObject(report.overall_strategy);
   const functionSceneMatrix = safeObject(report.function_scene_matrix);
-  
+
   const funcCount = safeArray(functionSceneMatrix.functions).length;
   const sceneCount = safeArray(functionSceneMatrix.scenes).length;
   const painCount = safeArray(functionSceneMatrix.pain_points).length;
-  
+
   return {
     targetId: 'selling-points',
     title: '卖点结构拆解',
@@ -105,13 +105,13 @@ function parseSellingPoints(report: SellingPointsReport): AnalysisResult {
       { label: '痛点解决', value: `${painCount}个` }
     ],
     highlights: [
-      { 
-        text: `核心差异化：${overallStrategy.primary_differentiation || '未知'}`, 
-        type: 'success' 
+      {
+        text: `核心差异化：${overallStrategy.primary_differentiation || '未知'}`,
+        type: 'success'
       },
-      { 
-        text: `目标人群：${overallStrategy.target_positioning || '未知'}`, 
-        type: 'info' 
+      {
+        text: `目标人群：${overallStrategy.target_positioning || '未知'}`,
+        type: 'info'
       },
       ...safeArray(overallStrategy.missing_elements).slice(0, 2).map(m => ({
         text: `缺失：${m}`,
@@ -119,24 +119,24 @@ function parseSellingPoints(report: SellingPointsReport): AnalysisResult {
       }))
     ],
     details: [
-      { 
-        category: '功能维度', 
+      {
+        category: '功能维度',
         items: safeArray(functionSceneMatrix.functions)
       },
-      { 
-        category: '场景维度', 
+      {
+        category: '场景维度',
         items: safeArray(functionSceneMatrix.scenes)
       },
-      { 
-        category: '痛点解决', 
+      {
+        category: '痛点解决',
         items: safeArray(functionSceneMatrix.pain_points)
       },
-      { 
-        category: '情感钩子', 
+      {
+        category: '情感钩子',
         items: safeArray(overallStrategy.emotional_hooks)
       },
-      { 
-        category: '待改进项', 
+      {
+        category: '待改进项',
         items: safeArray(overallStrategy.missing_elements)
       }
     ]
@@ -153,10 +153,10 @@ function parseFatalFlaws(report: FatalFlawsReport): AnalysisResult {
   const expectationGaps = safeArray(report.expectation_gaps);
   const actionableFixes = safeArray(report.actionable_fixes);
   const riskAssessment = safeObject(report.risk_assessment);
-  
+
   const criticalCount = criticalIssues.filter(i => i.severity === 'critical').length;
   const majorCount = criticalIssues.filter(i => i.severity === 'major').length;
-  
+
   return {
     targetId: 'fatal-flaws',
     title: '致命劝退点',
@@ -171,20 +171,20 @@ function parseFatalFlaws(report: FatalFlawsReport): AnalysisResult {
       type: issue.severity === 'critical' ? 'danger' as const : 'warning' as const
     })),
     details: [
-      { 
-        category: '退货触发原因', 
+      {
+        category: '退货触发原因',
         items: returnTriggers
       },
-      { 
-        category: '期望落差', 
+      {
+        category: '期望落差',
         items: expectationGaps.map(g => `期望: ${g.expected} → 现实: ${g.reality}`)
       },
-      { 
-        category: '用户原话', 
+      {
+        category: '用户原话',
         items: criticalIssues.flatMap(i => safeArray(i.user_quotes))
       },
-      { 
-        category: '改进建议', 
+      {
+        category: '改进建议',
         items: actionableFixes
       }
     ]
@@ -201,7 +201,7 @@ function parseWowMoments(report: WowMomentsReport): AnalysisResult {
   const highConversionPhrases = safeArray(report.high_conversion_phrases);
   const unexpectedBenefits = safeArray(report.unexpected_benefits);
   const copywritingAngles = safeArray(report.copywriting_angles);
-  
+
   return {
     targetId: 'wow-moments',
     title: '惊喜顿悟时刻',
@@ -216,20 +216,20 @@ function parseWowMoments(report: WowMomentsReport): AnalysisResult {
       type: 'success' as const
     })),
     details: [
-      { 
-        category: '情感触发词', 
+      {
+        category: '情感触发词',
         items: emotionalTriggers
       },
-      { 
-        category: '高转化文案素材', 
+      {
+        category: '高转化文案素材',
         items: highConversionPhrases
       },
-      { 
-        category: '超预期亮点', 
+      {
+        category: '超预期亮点',
         items: unexpectedBenefits
       },
-      { 
-        category: '文案创意角度', 
+      {
+        category: '文案创意角度',
         items: copywritingAngles
       }
     ]
@@ -245,7 +245,7 @@ function parseHesitationPoints(report: HesitationPointsReport): AnalysisResult {
   const commonDoubts = safeArray(report.common_doubts);
   const trustBuilders = safeArray(report.trust_builders);
   const qaOptimizationItems = safeArray(report.qa_optimization_items);
-  
+
   return {
     targetId: 'hesitation-points',
     title: '购买前犹豫点',
@@ -260,20 +260,20 @@ function parseHesitationPoints(report: HesitationPointsReport): AnalysisResult {
       type: 'warning' as const
     })),
     details: [
-      { 
-        category: '购前常见疑虑', 
+      {
+        category: '购前常见疑虑',
         items: commonDoubts
       },
-      { 
-        category: '信任建立要素', 
+      {
+        category: '信任建立要素',
         items: trustBuilders
       },
-      { 
-        category: 'Q&A优化建议', 
+      {
+        category: 'Q&A优化建议',
         items: qaOptimizationItems.map(q => `Q: ${q.question || '未知'}`)
       },
-      { 
-        category: '建议回答要点', 
+      {
+        category: '建议回答要点',
         items: qaOptimizationItems.map(q => (q.suggested_answer || '').substring(0, 60) + '...')
       }
     ]
@@ -293,7 +293,7 @@ function parseBuyerProfile(report: BuyerProfileReport): AnalysisResult {
   const primaryMarkets = safeArray(geographicInsights.primary_markets);
   const culturalConsiderations = safeArray(geographicInsights.cultural_considerations);
   const lifestyleIndicators = safeArray(demographics.lifestyle_indicators);
-  
+
   return {
     targetId: 'buyer-profile',
     title: '画像与场景侧写',
@@ -304,38 +304,38 @@ function parseBuyerProfile(report: BuyerProfileReport): AnalysisResult {
       { label: '覆盖市场', value: `${primaryMarkets.length}个` }
     ],
     highlights: [
-      { 
-        text: `核心用户：${demographics.age_range_estimate || '未知'}${demographics.likely_gender === 'male' ? '男性' : demographics.likely_gender === 'female' ? '女性' : ''}`, 
-        type: 'info' 
+      {
+        text: `核心用户：${demographics.age_range_estimate || '未知'}${demographics.likely_gender === 'male' ? '男性' : demographics.likely_gender === 'female' ? '女性' : ''}`,
+        type: 'info'
       },
       ...buyerTypes.slice(0, 2).map(t => ({
         text: `${t.type || '未知'} (${t.percentage_estimate || '未知'}) - ${(t.evidence || '').substring(0, 40)}...`,
         type: 'info' as const
       })),
-      { 
-        text: `主要市场：${primaryMarkets.join('、') || '未知'}`, 
-        type: 'success' 
+      {
+        text: `主要市场：${primaryMarkets.join('、') || '未知'}`,
+        type: 'success'
       }
     ],
     details: [
-      { 
-        category: '生活方式特征', 
+      {
+        category: '生活方式特征',
         items: lifestyleIndicators
       },
-      { 
-        category: '买家类型分布', 
+      {
+        category: '买家类型分布',
         items: buyerTypes.map(t => `${t.type || '未知'} (${t.percentage_estimate || '未知'})`)
       },
-      { 
-        category: '使用场景', 
+      {
+        category: '使用场景',
         items: usageScenes.map(s => `${s.scene || '未知'} [${s.frequency || '未知'}]`)
       },
-      { 
-        category: '购买动机', 
+      {
+        category: '购买动机',
         items: purchaseMotivations
       },
-      { 
-        category: '市场文化洞察', 
+      {
+        category: '市场文化洞察',
         items: culturalConsiderations
       }
     ]
@@ -354,7 +354,7 @@ function parseVocabGap(report: VocabGapReport): AnalysisResult {
   const listingOptimization = safeObject(report.listing_optimization);
   const titleAdditions = safeArray(listingOptimization.title_additions);
   const keywordOpportunities = safeArray(listingOptimization.keyword_opportunities);
-  
+
   return {
     targetId: 'vocab-gap',
     title: '词汇鸿沟分析',
@@ -369,24 +369,24 @@ function parseVocabGap(report: VocabGapReport): AnalysisResult {
       type: (t.buyer_says || '').includes('scam') || (t.buyer_says || '').includes('doesn\'t') ? 'danger' as const : 'warning' as const
     })),
     details: [
-      { 
-        category: '商家高频词（Listing）', 
+      {
+        category: '商家高频词（Listing）',
         items: sellerTerms
       },
-      { 
-        category: '买家高频词（Reviews）', 
+      {
+        category: '买家高频词（Reviews）',
         items: buyerTerms
       },
-      { 
-        category: '未覆盖的买家词（需关注）', 
+      {
+        category: '未覆盖的买家词（需关注）',
         items: uncoveredBuyerTerms.map(t => `${t.term || '未知'} - ${t.recommendation || '未知'}`)
       },
-      { 
-        category: '标题优化建议', 
+      {
+        category: '标题优化建议',
         items: titleAdditions
       },
-      { 
-        category: '关键词机会', 
+      {
+        category: '关键词机会',
         items: keywordOpportunities
       }
     ]
@@ -403,9 +403,9 @@ function parsePromiseReality(report: PromiseRealityReport): AnalysisResult {
   const unverifiedClaims = safeArray(report.unverified_claims);
   const listingRevisionSuggestions = safeArray(report.listing_revision_suggestions);
   const overallCredibility = safeObject(report.overall_credibility);
-  
+
   const severeCount = gaps.filter(g => g.contradiction_severity === 'severe').length;
-  
+
   return {
     targetId: 'promise-reality',
     title: '承诺/现实断层',
@@ -417,24 +417,24 @@ function parsePromiseReality(report: PromiseRealityReport): AnalysisResult {
     ],
     highlights: gaps.map(gap => ({
       text: `宣称 "${(gap.listing_claim || '').substring(0, 25)}..." → 现实 "${(gap.review_reality || '').substring(0, 30)}..."`,
-      type: gap.contradiction_severity === 'severe' ? 'danger' as const : 
-            gap.contradiction_severity === 'moderate' ? 'warning' as const : 'info' as const
+      type: gap.contradiction_severity === 'severe' ? 'danger' as const :
+        gap.contradiction_severity === 'moderate' ? 'warning' as const : 'info' as const
     })),
     details: [
-      { 
-        category: '严重断层点', 
+      {
+        category: '严重断层点',
         items: gaps.filter(g => g.contradiction_severity === 'severe').map(g => g.listing_claim || '未知')
       },
-      { 
-        category: '已验证的真实承诺', 
+      {
+        category: '已验证的真实承诺',
         items: verifiedClaims
       },
-      { 
-        category: '待验证的承诺', 
+      {
+        category: '待验证的承诺',
         items: unverifiedClaims
       },
-      { 
-        category: 'Listing修订建议', 
+      {
+        category: 'Listing修订建议',
         items: listingRevisionSuggestions
       }
     ]
@@ -445,14 +445,14 @@ function parsePromiseReality(report: PromiseRealityReport): AnalysisResult {
  * 从完整分析报告中解析指定的分析结果
  */
 export function parseAnalysisReport(
-  report: FullAnalysisReport, 
+  report: FullAnalysisReport,
   targetIds: string[]
 ): AnalysisResult[] {
   const results: AnalysisResult[] = [];
-  
+
   console.log('[AI分析] 开始解析分析报告，目标数量:', targetIds.length);
   console.log('[AI分析] 报告对象键:', Object.keys(report));
-  
+
   for (const targetId of targetIds) {
     try {
       switch (targetId) {
@@ -519,7 +519,7 @@ export function parseAnalysisReport(
       // 继续处理其他目标
     }
   }
-  
+
   console.log('[AI分析] 解析完成，成功解析:', results.length, '个目标');
   return results;
 }

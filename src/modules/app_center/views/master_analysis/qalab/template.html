@@ -1,394 +1,384 @@
 <!-- QA Lab Template -->
-<div class="app-container">
-  
+<div class="module-container" x-data="qalabPanel">
+
   <!-- ========== Welcome Banner ========== -->
-  <div class="welcome-banner-wrap">
-    <div class="welcome-banner">
-      <!-- 背景装饰层 -->
+  <div class="wb-container mb-8"
+    style="--wb-gradient-1: rgba(59, 130, 246, 0.10); --wb-gradient-2: rgba(34, 197, 94, 0.10);">
+    <div class="wb-card">
       <div class="wb-bg-gradient"></div>
       <div class="wb-orb wb-orb-1"></div>
       <div class="wb-orb wb-orb-2"></div>
-      <div class="wb-orb wb-orb-3"></div>
-      <div class="wb-grid-dots"></div>
-      
-      <!-- 浮动粒子 -->
-      <div class="wb-particle wb-p1"></div>
-      <div class="wb-particle wb-p2"></div>
-      <div class="wb-particle wb-p3"></div>
-      <div class="wb-particle wb-p4"></div>
-      <div class="wb-particle wb-p5"></div>
-      <div class="wb-particle wb-p6"></div>
+      <div class="wb-grid-pattern"></div>
+      <div class="wb-particle wb-particle-1"></div>
+      <div class="wb-particle wb-particle-2"></div>
+      <div class="wb-particle wb-particle-3"></div>
+      <div class="wb-particle wb-particle-4"></div>
 
-      <!-- 内容区 -->
       <div class="wb-content">
-        <div class="wb-layout">
-          <!-- Icon Badge -->
-          <div class="wb-icon-badge">
-            <div class="wb-icon-main">
-              <i class="fa-solid fa-robot"></i>
+        <div class="wb-header">
+          <div class="wb-icon-wrapper">
+            <div class="wb-icon-main" aria-label="Q&A智能预研功能图标">
+              <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
             </div>
-            <div class="wb-icon-status">
-              <i class="fa-solid fa-bolt"></i>
+            <div class="wb-icon-badge" aria-label="活跃状态">
+              <i class="fa-solid fa-bolt" aria-hidden="true"></i>
             </div>
-            <div class="wb-icon-ring"></div>
           </div>
 
-          <!-- Text Content -->
-          <div class="wb-text-content">
+          <div class="wb-text">
             <div class="wb-title-row">
               <h2 class="wb-title">Rufus Q&A 智能预研系统</h2>
-              <span class="wb-ai-badge">
-                <i class="fa-solid fa-sparkles"></i>
-                <span>AI</span>
+              <span class="wb-badge wb-badge-pro" aria-label="专业功能">
+                <i class="fa-clipboard-question" aria-hidden="true"></i>AI
               </span>
-              <span class="wb-version-badge">v2.0</span>
+              <!-- <span class="wb-badge" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);">
+                v2.0
+              </span> -->
             </div>
-            <p class="wb-desc">
+            <p class="wb-description">
               基于竞品多维分析报告，智能预判 Amazon Rufus AI 高频问题，从卖家视角自动生成多语言 Q&A 答复，扬长避短，助力 Listing 优化与转化提升。
             </p>
 
-            <!-- Feature Tags -->
-            <div class="wb-features">
-              <div class="wb-feature-tag">
-                <div class="wb-feature-dot dot-emerald"></div>
+            <ul class="wb-tags" role="list">
+              <li class="wb-tag" role="listitem">
+                <div class="wb-tag-dot" aria-hidden="true"></div>
                 <span>卖家视角回答</span>
-              </div>
-              <div class="wb-feature-tag">
-                <div class="wb-feature-dot dot-teal"></div>
+              </li>
+              <li class="wb-tag" role="listitem">
+                <div class="wb-tag-dot" style="background-color: var(--wb-tag-dot-2, #14b8a6);" aria-hidden="true">
+                </div>
                 <span>扬长避短策略</span>
-              </div>
-              <div class="wb-feature-tag">
-                <div class="wb-feature-dot dot-cyan"></div>
+              </li>
+              <li class="wb-tag" role="listitem">
+                <div class="wb-tag-dot" style="background-color: var(--wb-tag-dot-3, #06b6d4);" aria-hidden="true">
+                </div>
                 <span>多语言生成</span>
-              </div>
-              <div class="wb-feature-tag">
-                <div class="wb-feature-dot dot-amber"></div>
+              </li>
+              <li class="wb-tag" role="listitem">
+                <div class="wb-tag-dot" style="background-color: var(--wb-tag-dot-4, #f59e0b);" aria-hidden="true">
+                </div>
                 <span>Amazon EU 全站点</span>
-              </div>
-            </div>
+              </li>
+            </ul>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ========== Data Management Section ========== -->
-  <section class="data-management-section animate-fade-in-up delay-100" id="dataManagementSection">
-    <!-- Section Header with Tabs -->
-    <div class="section-header-with-tabs">
-      <div class="section-header-left">
-        <div class="section-title">
-          <div class="section-title-icon">
-            <i class="fa-solid fa-database"></i>
-          </div>
-          <span>分析报告管理</span>
+<!-- ========== Data Management Section ========== -->
+<section class="data-management-section" id="dataManagementSection">
+  <!-- Section Header with Tabs -->
+  <div class="section-header-with-tabs">
+    <div class="section-header-left">
+      <div class="section-title">
+        <div class="section-title-icon">
+          <i class="fa-solid fa-database"></i>
         </div>
-        <!-- <div class="section-subtitle">导入或预览竞品分析报告</div> -->
+        <span>分析报告管理</span>
       </div>
-      
-      <!-- Tabs -->
-      <div class="data-tabs" id="dataTabs">
-        <button class="data-tab active" data-tab="preview" data-action="amz_qalab_switchDataTab">
-          <div class="tab-icon">
-            <i class="fa-solid fa-table"></i>
-          </div>
-          <span>数据预览</span>
-        </button>
-        <button class="data-tab" data-tab="json" data-action="amz_qalab_switchDataTab">
-          <div class="tab-icon">
-            <i class="fa-solid fa-code"></i>
-          </div>
-          <span>JSON数据</span>
-        </button>
-      </div>
+      <!-- <div class="section-subtitle">导入或预览竞品分析报告</div> -->
     </div>
-    
-    <!-- Tab Content -->
-    <div class="tab-content-wrapper">
-      <!-- Data Preview Tab -->
-      <div class="tab-content active" id="dataPreviewTab">
-        <div id="data-preview-content" class="p-6">
-          <!-- 数据预览内容将由 dataPreview.ts 渲染 -->
-        </div>
-      </div>
-      
-      <!-- JSON Tab -->
-      <div class="tab-content" id="jsonTab">
-        <div class="json-container rounded-xl overflow-hidden border border-slate-700/20 shadow-lg">
-          <!-- JSON Header Bar -->
-          <div class="json-header bg-slate-800 px-4 py-2.5 flex items-center justify-between border-b border-slate-700">
-            <div class="flex items-center gap-2">
-              <!-- macOS-style dots -->
-              <div class="flex items-center gap-1.5">
-                <div class="mac-dot w-3 h-3 rounded-full bg-rose-500/80"></div>
-                <div class="mac-dot w-3 h-3 rounded-full bg-amber-500/80"></div>
-                <div class="mac-dot w-3 h-3 rounded-full bg-emerald-500/80"></div>
-              </div>
-              <span class="text-xs text-slate-400 font-mono ml-2">analysis_report.json</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="text-[10px] text-slate-500 bg-slate-700 px-2 py-0.5 rounded font-mono">JSON</span>
-            </div>
-          </div>
-          <!-- JSON Content -->
-          <div class="bg-slate-900 p-5 overflow-auto custom-scrollbar" style="height: 320px;">
-            <pre id="json-preview-content" class="text-xs font-mono text-slate-300 leading-relaxed">// 暂无数据</pre>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-  </section>
 
-  <!-- ========== AI Analysis Action Section ========== -->
-  <div class="qa-analysis-action-section">
-    <div class="qa-analysis-card">
-      <!-- 背景装饰 -->
-      <div class="qa-analysis-bg-gradient"></div>
-      <div class="qa-analysis-bg-orb qa-orb-1"></div>
-      <div class="qa-analysis-bg-orb qa-orb-2"></div>
-      <div class="qa-analysis-bg-grid"></div>
-      
-      <!-- 内容 -->
-      <div class="qa-analysis-content">
-        <div class="qa-analysis-info">
-          <div class="qa-analysis-icon-wrap">
-            <div class="qa-analysis-icon">
-              <i class="fa-solid fa-wand-magic-sparkles"></i>
+    <!-- Tabs -->
+    <div class="data-tabs" id="dataTabs">
+      <button class="data-tab active" data-tab="preview" data-action="amz_qalab_switchDataTab">
+        <div class="tab-icon">
+          <i class="fa-solid fa-table"></i>
+        </div>
+        <span>数据预览</span>
+      </button>
+      <button class="data-tab" data-tab="json" data-action="amz_qalab_switchDataTab">
+        <div class="tab-icon">
+          <i class="fa-solid fa-code"></i>
+        </div>
+        <span>JSON数据</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Tab Content -->
+  <div class="tab-content-wrapper">
+    <!-- Data Preview Tab -->
+    <div class="tab-content active" id="dataPreviewTab">
+      <div id="data-preview-content" class="p-6">
+        <!-- 数据预览内容将由 dataPreview.ts 渲染 -->
+      </div>
+    </div>
+
+    <!-- JSON Tab -->
+    <div class="tab-content" id="jsonTab">
+      <div class="json-container rounded-xl overflow-hidden border border-slate-700/20 shadow-lg">
+        <!-- JSON Header Bar -->
+        <div class="json-header bg-slate-800 px-4 py-2.5 flex items-center justify-between border-b border-slate-700">
+          <div class="flex items-center gap-2">
+            <!-- macOS-style dots -->
+            <div class="flex items-center gap-1.5">
+              <div class="mac-dot w-3 h-3 rounded-full bg-rose-500/80"></div>
+              <div class="mac-dot w-3 h-3 rounded-full bg-amber-500/80"></div>
+              <div class="mac-dot w-3 h-3 rounded-full bg-emerald-500/80"></div>
             </div>
-            <div class="qa-analysis-icon-ring"></div>
+            <span class="text-xs text-slate-400 font-mono ml-2">analysis_report.json</span>
           </div>
-          <div class="qa-analysis-text">
-            <h3 class="qa-analysis-title">智能分析并生成 Q&A</h3>
-            <p class="qa-analysis-desc">
-              <i class="fa-solid fa-robot"></i>
-              基于竞品分析报告，AI 智能预判 Rufus 高频问题并生成多语言答复
-            </p>
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] text-slate-500 bg-slate-700 px-2 py-0.5 rounded font-mono">JSON</span>
           </div>
         </div>
-        
-        <div class="qa-analysis-actions">
-          <!-- <button class="action-btn action-btn-secondary" data-action="amz_qalab_clearInput">
+        <!-- JSON Content -->
+        <div class="bg-slate-900 p-5 overflow-auto custom-scrollbar" style="height: 320px;">
+          <pre id="json-preview-content" class="text-xs font-mono text-slate-300 leading-relaxed">// 暂无数据</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ========== AI Analysis Action Section ========== -->
+<div class="qa-analysis-action-section">
+  <div class="qa-analysis-card">
+    <!-- 背景装饰 -->
+    <div class="qa-analysis-bg-gradient"></div>
+    <div class="qa-analysis-bg-orb qa-orb-1"></div>
+    <div class="qa-analysis-bg-orb qa-orb-2"></div>
+    <div class="qa-analysis-bg-grid"></div>
+
+    <!-- 内容 -->
+    <div class="qa-analysis-content">
+      <div class="qa-analysis-info">
+        <div class="qa-analysis-icon-wrap">
+          <div class="qa-analysis-icon">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+          </div>
+          <div class="qa-analysis-icon-ring"></div>
+        </div>
+        <div class="qa-analysis-text">
+          <h3 class="qa-analysis-title">智能分析并生成 Q&A</h3>
+          <p class="qa-analysis-desc">
+            <i class="fa-solid fa-robot"></i>
+            基于竞品分析报告，AI 智能预判 Rufus 高频问题并生成多语言答复
+          </p>
+        </div>
+      </div>
+
+      <div class="qa-analysis-actions">
+        <!-- <button class="action-btn action-btn-secondary" data-action="amz_qalab_clearInput">
             <i class="fa-solid fa-eraser"></i>
             <span>清空数据</span>
           </button> -->
-          <button class="action-btn action-btn-primary action-btn-glow" id="btnAnalyze" data-action="amz_qalab_startAnalysis">
-            <i class="fa-solid fa-wand-magic-sparkles"></i>
-            <span>开始分析</span>
-          </button>
-        </div>
+        <button class="action-btn action-btn-primary action-btn-glow" id="btnAnalyze"
+          data-action="amz_qalab_startAnalysis">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          <span>开始分析</span>
+        </button>
       </div>
     </div>
   </div>
-    
-  <!-- ========== Legacy Input (Hidden, for compatibility) ========== -->
-  <textarea class="hidden" id="jsonInput"></textarea>
+</div>
 
-  <!-- ========== Analysis Progress ========== -->
-  <section class="analysis-progress" id="progressSection">
-    <div class="progress-card">
-      <div class="progress-visual">
-        <div class="progress-spinner">
-          <div class="spinner-ring ring-outer"></div>
-          <div class="spinner-ring ring-inner"></div>
-          <div class="spinner-icon">
-            <i class="fa-solid fa-brain"></i>
-          </div>
-        </div>
-      </div>
-      <div class="progress-title">正在智能分析报告</div>
-      <div class="progress-desc">AI 引擎正在解析竞品数据，预判用户问题...</div>
-      <div class="progress-steps">
-        <div class="progress-step" id="step1">
-          <div class="step-indicator"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
-          <span>解析报告 JSON 结构...</span>
-        </div>
-        <div class="progress-step" id="step2">
-          <div class="step-indicator"><i class="fa-regular fa-circle"></i></div>
-          <span>提取产品多维特征...</span>
-        </div>
-        <div class="progress-step" id="step3">
-          <div class="step-indicator"><i class="fa-regular fa-circle"></i></div>
-          <span>分析用户痛点与犹豫点...</span>
-        </div>
-        <div class="progress-step" id="step4">
-          <div class="step-indicator"><i class="fa-regular fa-circle"></i></div>
-          <span>预判 Rufus 高频问题...</span>
-        </div>
-        <div class="progress-step" id="step5">
-          <div class="step-indicator"><i class="fa-regular fa-circle"></i></div>
-          <span>生成多语言 Q&A 答复...</span>
-        </div>
-        <div class="progress-step" id="step6">
-          <div class="step-indicator"><i class="fa-regular fa-circle"></i></div>
-          <span>优化排序与置信度评分...</span>
-        </div>
-      </div>
-      <div class="progress-bar-wrap">
-        <div class="progress-bar-fill" id="progressBar"></div>
-      </div>
-      <div class="progress-percentage" id="progressPercent">0%</div>
-    </div>
-  </section>
+<!-- ========== Legacy Input (Hidden, for compatibility) ========== -->
+<textarea class="hidden" id="jsonInput"></textarea>
 
-  <!-- ========== Results Section ========== -->
-  <section class="results-section animate-fade-in-up delay-200" id="resultsSection">
-    <!-- Product Info -->
-    <!-- <div class="product-bar" id="productBar"></div> -->
-
-    <!-- Stats Dashboard -->
-    <!-- <div class="dashboard-stats" id="dashboardStats"></div> -->
-
-    <!-- Key Insights -->
-    <!-- <div class="insights-strip" id="insightsStrip"></div> -->
-
-    <!-- Toolbar -->
-    <div class="toolbar">
-      <div class="toolbar-left">
-        <div class="section-title" style="margin-bottom:12px">
-          <div class="section-title-icon">
-            <i class="fa-solid fa-comments"></i>
-          </div>
-          <span>Top Q&A 预研结果</span>
-        </div>
-        <div class="category-tabs" id="categoryTabs"></div>
-      </div>
-      <div class="toolbar-right-wrap">
-        <div class="lang-selector" id="langSelector"></div>
-        <div class="toolbar-right">
-          <button class="expand-all-btn" id="expandAllBtn" data-action="amz_qalab_toggleExpandAll">
-            <i class="fa-solid fa-expand"></i> 全部展开
-          </button>
+<!-- ========== Analysis Progress ========== -->
+<section class="analysis-progress" id="progressSection">
+  <div class="progress-card">
+    <div class="progress-visual">
+      <div class="progress-spinner">
+        <div class="spinner-ring ring-outer"></div>
+        <div class="spinner-ring ring-inner"></div>
+        <div class="spinner-icon">
+          <i class="fa-solid fa-brain"></i>
         </div>
       </div>
     </div>
-
-    <!-- QA Grid -->
-    <div class="qa-grid" id="qaGrid"></div>
-
-    <!-- Export -->
-    <div class="export-panel">
-      <div class="export-info">
-        <div class="export-icon-wrap">
-          <i class="fa-solid fa-file-export"></i>
-        </div>
-        <div class="export-text">
-          <div class="export-title">导出 Q&A 结果</div>
-          <div class="export-desc">导出当前语言版本的 Q&A 结果，可直接用于 Listing 优化和 Rufus 预判准备</div>
-        </div>
+    <div class="progress-title">正在智能分析报告</div>
+    <div class="progress-desc">AI 引擎正在解析竞品数据，预判用户问题...</div>
+    <div class="progress-steps">
+      <div class="progress-step" id="step1">
+        <div class="step-indicator"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
+        <span>解析报告 JSON 结构...</span>
       </div>
-      <div class="export-actions">
-        <button class="btn btn-secondary btn-sm" data-action="amz_qalab_exportJSON">
-          <i class="fa-solid fa-code"></i> JSON
-        </button>
-        <button class="btn btn-secondary btn-sm" data-action="amz_qalab_exportCSV">
-          <i class="fa-solid fa-table"></i> CSV
-        </button>
-        <button class="btn btn-primary btn-sm" data-action="amz_qalab_exportText">
-          <i class="fa-solid fa-file-lines"></i> 导出文本
+      <div class="progress-step" id="step2">
+        <div class="step-indicator"><i class="fa-regular fa-circle"></i></div>
+        <span>提取产品多维特征...</span>
+      </div>
+      <div class="progress-step" id="step3">
+        <div class="step-indicator"><i class="fa-regular fa-circle"></i></div>
+        <span>分析用户痛点与犹豫点...</span>
+      </div>
+      <div class="progress-step" id="step4">
+        <div class="step-indicator"><i class="fa-regular fa-circle"></i></div>
+        <span>预判 Rufus 高频问题...</span>
+      </div>
+      <div class="progress-step" id="step5">
+        <div class="step-indicator"><i class="fa-regular fa-circle"></i></div>
+        <span>生成多语言 Q&A 答复...</span>
+      </div>
+      <div class="progress-step" id="step6">
+        <div class="step-indicator"><i class="fa-regular fa-circle"></i></div>
+        <span>优化排序与置信度评分...</span>
+      </div>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressBar"></div>
+    </div>
+    <div class="progress-percentage" id="progressPercent">0%</div>
+  </div>
+</section>
+
+<!-- ========== Results Section ========== -->
+<section class="results-section" id="resultsSection">
+  <!-- Product Info -->
+  <!-- <div class="product-bar" id="productBar"></div> -->
+
+  <!-- Stats Dashboard -->
+  <!-- <div class="dashboard-stats" id="dashboardStats"></div> -->
+
+  <!-- Key Insights -->
+  <!-- <div class="insights-strip" id="insightsStrip"></div> -->
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <div class="section-title" style="margin-bottom:12px">
+        <div class="section-title-icon">
+          <i class="fa-solid fa-comments"></i>
+        </div>
+        <span>Top Q&A 预研结果</span>
+      </div>
+      <div class="category-tabs" id="categoryTabs"></div>
+    </div>
+    <div class="toolbar-right-wrap">
+      <div class="lang-selector" id="langSelector"></div>
+      <div class="toolbar-right">
+        <button class="expand-all-btn" id="expandAllBtn" data-action="amz_qalab_toggleExpandAll">
+          <i class="fa-solid fa-expand"></i> 全部展开
         </button>
       </div>
     </div>
-  </section>
+  </div>
 
-  <!-- ========== Rufus AI Simulator Section ========== -->
-  <section class="rufus-simulator-section animate-fade-in-up delay-300" id="rufusSimulatorSection">
-    <div class="section-header">
-      <div class="section-title">
-        <div class="section-title-icon rufus-icon">
-          <i class="fa-solid fa-robot"></i>
-        </div>
-        <span>Rufus AI 卖家客服模拟器</span>
-        <span class="beta-badge">
-          <i class="fa-solid fa-sparkles"></i> BETA
-        </span>
+  <!-- QA Grid -->
+  <div class="qa-grid" id="qaGrid"></div>
+
+  <!-- Export -->
+  <div class="export-panel">
+    <div class="export-info">
+      <div class="export-icon-wrap">
+        <i class="fa-solid fa-file-export"></i>
       </div>
-      <div class="section-subtitle">模拟卖家客服回答买家问题，扬长避短，促进转化</div>
-    </div>
-    
-    <div class="rufus-simulator-card">
-      <!-- Header -->
-      <div class="rufus-simulator-header">
-        <div class="rufus-header-left">
-          <div class="rufus-avatar">
-            <i class="fa-solid fa-robot"></i>
-            <div class="rufus-avatar-status"></div>
-          </div>
-          <div class="rufus-header-info">
-            <div class="rufus-header-name">卖家客服助手</div>
-            <div class="rufus-header-desc">
-              <span class="online-dot"></span>
-              基于报告内容智能回答买家问题
-            </div>
-          </div>
-        </div>
-        <div class="rufus-header-actions">
-          <button class="btn btn-secondary btn-sm" data-action="amz_qalab_clearRufusChat">
-            <i class="fa-solid fa-trash"></i> 清空
-          </button>
-        </div>
-      </div>
-      
-      <!-- Messages Area -->
-      <div class="rufus-messages-container" id="rufusMessages">
-        <div class="rufus-empty-state">
-          <div class="rufus-empty-icon">
-            <i class="fa-solid fa-comments"></i>
-          </div>
-          <div class="rufus-empty-title">还没有对话记录</div>
-          <div class="rufus-empty-desc">模拟买家提问，查看卖家客服如何基于报告智能回答</div>
-          <div class="rufus-empty-suggestions">
-            <div class="suggestion-chip" data-question="这个产品质量怎么样？">
-              <i class="fa-solid fa-lightbulb"></i> 这个产品质量怎么样？
-            </div>
-            <div class="suggestion-chip" data-question="有什么缺点吗？">
-              <i class="fa-solid fa-lightbulb"></i> 有什么缺点吗？
-            </div>
-            <div class="suggestion-chip" data-question="适合送礼吗？">
-              <i class="fa-solid fa-lightbulb"></i> 适合送礼吗？
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Input Area -->
-      <div class="rufus-input-container">
-        <div class="rufus-input-wrap">
-          <textarea 
-            class="rufus-input" 
-            id="rufusInput" 
-            placeholder="模拟买家提问...（按 Enter 发送）"
-            rows="1"
-          ></textarea>
-          <button class="rufus-send-btn" data-action="amz_qalab_sendRufusQuestion">
-            <i class="fa-solid fa-paper-plane"></i>
-          </button>
-        </div>
-      </div>
-      
-      <!-- Tips -->
-      <div class="rufus-tips">
-        <i class="fa-solid fa-lightbulb"></i>
-        <span>
-          <strong>AI 智能模式</strong>：调用大模型智能分析，从卖家视角回答买家问题，扬长避短，促进转化
-        </span>
+      <div class="export-text">
+        <div class="export-title">导出 Q&A 结果</div>
+        <div class="export-desc">导出当前语言版本的 Q&A 结果，可直接用于 Listing 优化和 Rufus 预判准备</div>
       </div>
     </div>
-  </section>
+    <div class="export-actions">
+      <button class="btn btn-secondary btn-sm" data-action="amz_qalab_exportJSON">
+        <i class="fa-solid fa-code"></i> JSON
+      </button>
+      <button class="btn btn-secondary btn-sm" data-action="amz_qalab_exportCSV">
+        <i class="fa-solid fa-table"></i> CSV
+      </button>
+      <button class="btn btn-primary btn-sm" data-action="amz_qalab_exportText">
+        <i class="fa-solid fa-file-lines"></i> 导出文本
+      </button>
+    </div>
+  </div>
+</section>
 
-  <!-- ========== Footer ========== -->
-  <footer class="app-footer animate-fade-in-up delay-400">
-    <div class="footer-content">
-      <div class="footer-brand">
+<!-- ========== Rufus AI Simulator Section ========== -->
+<section class="rufus-simulator-section" id="rufusSimulatorSection">
+  <div class="section-header">
+    <div class="section-title">
+      <div class="section-title-icon rufus-icon">
         <i class="fa-solid fa-robot"></i>
-        <span>Rufus Q&A 智能预研系统</span>
       </div>
-      <div class="footer-divider">·</div>
-      <span>基于竞品多维分析驱动</span>
-      <div class="footer-divider">·</div>
-      <span>Amazon EU 全站点</span>
-      <div class="footer-divider">·</div>
-      <span>Built with <i class="fa-solid fa-heart footer-heart"></i></span>
+      <span>Rufus AI 卖家客服模拟器</span>
+      <span class="beta-badge">
+        <i class="fa-solid fa-sparkles"></i> BETA
+      </span>
     </div>
-  </footer>
+    <div class="section-subtitle">模拟卖家客服回答买家问题，扬长避短，促进转化</div>
+  </div>
+
+  <div class="rufus-simulator-card">
+    <!-- Header -->
+    <div class="rufus-simulator-header">
+      <div class="rufus-header-left">
+        <div class="rufus-avatar">
+          <i class="fa-solid fa-robot"></i>
+          <div class="rufus-avatar-status"></div>
+        </div>
+        <div class="rufus-header-info">
+          <div class="rufus-header-name">卖家客服助手</div>
+          <div class="rufus-header-desc">
+            <span class="online-dot"></span>
+            基于报告内容智能回答买家问题
+          </div>
+        </div>
+      </div>
+      <div class="rufus-header-actions">
+        <button class="btn btn-secondary btn-sm" data-action="amz_qalab_clearRufusChat">
+          <i class="fa-solid fa-trash"></i> 清空
+        </button>
+      </div>
+    </div>
+
+    <!-- Messages Area -->
+    <div class="rufus-messages-container" id="rufusMessages">
+      <div class="rufus-empty-state">
+        <div class="rufus-empty-icon">
+          <i class="fa-solid fa-comments"></i>
+        </div>
+        <div class="rufus-empty-title">还没有对话记录</div>
+        <div class="rufus-empty-desc">模拟买家提问，查看卖家客服如何基于报告智能回答</div>
+        <div class="rufus-empty-suggestions">
+          <div class="suggestion-chip" data-question="这个产品质量怎么样？">
+            <i class="fa-solid fa-lightbulb"></i> 这个产品质量怎么样？
+          </div>
+          <div class="suggestion-chip" data-question="有什么缺点吗？">
+            <i class="fa-solid fa-lightbulb"></i> 有什么缺点吗？
+          </div>
+          <div class="suggestion-chip" data-question="适合送礼吗？">
+            <i class="fa-solid fa-lightbulb"></i> 适合送礼吗？
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Input Area -->
+    <div class="rufus-input-container">
+      <div class="rufus-input-wrap">
+        <textarea class="rufus-input" id="rufusInput" placeholder="模拟买家提问...（按 Enter 发送）" rows="1"></textarea>
+        <button class="rufus-send-btn" data-action="amz_qalab_sendRufusQuestion">
+          <i class="fa-solid fa-paper-plane"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Tips -->
+    <div class="rufus-tips">
+      <i class="fa-solid fa-lightbulb"></i>
+      <span>
+        <strong>AI 智能模式</strong>：调用大模型智能分析，从卖家视角回答买家问题，扬长避短，促进转化
+      </span>
+    </div>
+  </div>
+</section>
+
+<!-- ========== Footer ========== -->
+<footer class="app-footer">
+  <div class="footer-content">
+    <div class="footer-brand">
+      <i class="fa-solid fa-robot"></i>
+      <span>Rufus Q&A 智能预研系统</span>
+    </div>
+    <div class="footer-divider">·</div>
+    <span>基于竞品多维分析驱动</span>
+    <div class="footer-divider">·</div>
+    <span>Amazon EU 全站点</span>
+    <div class="footer-divider">·</div>
+    <span>Built with <i class="fa-solid fa-heart footer-heart"></i></span>
+  </div>
+</footer>
 </div>

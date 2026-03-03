@@ -1,0 +1,27 @@
+# 依赖
+node_modules/
+
+# 构建输出
+dist/
+*.tsbuildinfo
+
+# 测试覆盖率
+coverage/
+
+# 日志
+*.log
+npm-debug.log*
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 操作系统
+.DS_Store
+Thumbs.db
+
+# 临时文件
+*.tmp
+.temp/

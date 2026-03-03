@@ -152,7 +152,7 @@ export const HistoryService = {
 
       // 保存更新后的历史记录
       StorageService.setScrapeHistory(history);
-      
+
       console.log(`[HistoryService] 已更新历史记录 ${id} 的分析状态`);
       return true;
     } catch (error) {

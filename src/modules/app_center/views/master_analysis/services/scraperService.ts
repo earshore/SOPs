@@ -11,11 +11,11 @@ import { HistoryService } from "./historyService";
 import { StorageService } from "../../../../../services/storageService";
 import { configCenter } from '../../../../../common/config/ConfigCenter';
 import type {
-  ProxyConfig,
-  FetchOptions,
-  ScrapedProduct,
-  StatusCallback,
-  ScraperSite
+    ProxyConfig,
+    FetchOptions,
+    ScrapedProduct,
+    StatusCallback,
+    ScraperSite
 } from '@/types/modules-business';
 
 const CACHE_DURATION_MS = configCenter.get<number>('scraper.cacheDuration') || 24 * 60 * 60 * 1000;
@@ -129,7 +129,7 @@ async function fetchWithProxy(url: string, site: string, options: FetchOptions =
     if (!headers) {
         throw new Error(`未找到站点 ${site} 的配置`);
     }
-    
+
     const separator = url.includes("?") ? "&" : "?";
     const urlWithLang = `${url}${separator}language=${headers.locale}`;
 
@@ -208,10 +208,10 @@ async function fetchWithProxy(url: string, site: string, options: FetchOptions =
  * 并行评论抓取
  */
 async function fetchReviewsParallel(
-  asin: string, 
-  site: ScraperSite, 
-  fetchOptions: FetchOptions, 
-  lang: { domain: string; locale: string; name: string }
+    asin: string,
+    site: ScraperSite,
+    fetchOptions: FetchOptions,
+    lang: { domain: string; locale: string; name: string }
 ): Promise<any[]> {
     const reviewUrls = [
         `https://www.${lang.domain}/product-reviews/${asin}/ref=cm_cr_dp_d_show_all_btm?ie=UTF8&reviewerType=all_reviews&sortBy=recent`,
@@ -243,9 +243,9 @@ async function fetchReviewsParallel(
  * @returns 抓取的产品数据
  */
 export async function scrapeAsin(
-    asin: string, 
-    site: ScraperSite, 
-    scrapeReviews: boolean, 
+    asin: string,
+    site: ScraperSite,
+    scrapeReviews: boolean,
     updateStatusCallback: StatusCallback
 ): Promise<ScrapedProduct> {
     // 使用 StorageService 获取代理配置
@@ -283,10 +283,10 @@ export async function scrapeAsin(
         console.warn("缓存读取失败，转为网络请求");
     }
 
-    const fetchOptions: FetchOptions = { 
-        retries: configCenter.get<number>('scraper.maxRetries') || 3, 
-        delay: configCenter.get<number>('scraper.retryDelay') || 500, 
-        proxyConfig 
+    const fetchOptions: FetchOptions = {
+        retries: configCenter.get<number>('scraper.maxRetries') || 3,
+        delay: configCenter.get<number>('scraper.retryDelay') || 500,
+        proxyConfig
     };
     const lang = LANGUAGE_HEADERS[site];
     const baseUrl = `https://www.${lang.domain}/dp/${asin}`;
@@ -369,9 +369,9 @@ export async function scrapeAsin(
  * @returns 抓取的产品数据列表
  */
 export async function scrapeMultipleAsins(
-    asins: string[], 
-    site: ScraperSite, 
-    scrapeReviews: boolean, 
+    asins: string[],
+    site: ScraperSite,
+    scrapeReviews: boolean,
     updateStatusCallback: StatusCallback
 ): Promise<ScrapedProduct[]> {
     const BATCH_SIZE = configCenter.get<number>('scraper.batchSize') || 3;

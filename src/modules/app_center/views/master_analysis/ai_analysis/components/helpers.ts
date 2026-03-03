@@ -49,10 +49,10 @@ export function getMarketLanguage(): string {
   const scrapedData = appStore.getState().scraper?.scrapedData;
   if (scrapedData && scrapedData.metadata && scrapedData.metadata.marketplace) {
     const marketplace = scrapedData.metadata.marketplace;
-    
+
     // 从 LANGUAGE_HEADERS 获取语言配置
     const langConfig = LANGUAGE_HEADERS[marketplace];
-    
+
     if (langConfig && langConfig.locale) {
       // 从 locale (如 "de_DE") 提取语言代码 (如 "de")
       const language = langConfig.locale.split('_')[0];
@@ -60,7 +60,7 @@ export function getMarketLanguage(): string {
       return language || 'en';
     }
   }
-  
+
   // 默认返回英语
   return 'en';
 }
@@ -73,18 +73,18 @@ export function getPromptText(
   currentProducts: Product[]
 ): string {
   if (currentProducts.length === 0) return '无产品数据';
-  
+
   try {
     // 如果有多个产品，合并后生成提示词
-    const mergedProduct = currentProducts.length > 1 
-      ? mergeProducts(currentProducts) 
+    const mergedProduct = currentProducts.length > 1
+      ? mergeProducts(currentProducts)
       : currentProducts[0];
-    
+
     // 确保 mergedProduct 存在
     if (!mergedProduct) {
       return '无产品数据';
     }
-    
+
     // 获取正确的语言代码
     const language = getMarketLanguage();
     return generateAnalysisPrompt(targetId, mergedProduct, language);

@@ -67,7 +67,7 @@
     border: none;
     background: transparent;
     cursor: pointer;
-    border-radius: 0 0 var(--radius-lg, 12px) var(--radius-lg, 12px);
+    border-radius: 0 0 var(--rounded-lg, 12px) var(--rounded-lg, 12px);
     transition: all var(--duration-normal, 250ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
     position: relative;
 }
@@ -198,7 +198,7 @@
     transform: translateX(-50%);
     width: 0;
     height: 3px;
-    border-radius: var(--radius-full, 9999px);
+    border-radius: var(--rounded-full, 9999px);
     background: linear-gradient(90deg, #6366f1 0%, #ec4899 50%, #f59e0b 100%);
     transition: width var(--duration-normal, 250ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
     box-shadow: 0 0 12px rgba(99, 102, 241, 0.5);
@@ -291,7 +291,7 @@
 .mega-menu-icon {
     width: 28px;
     height: 28px;
-    border-radius: var(--radius-sm, 8px);
+    border-radius: var(--rounded-sm, 8px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -391,7 +391,7 @@
     font-weight: 500;
     color: var(--color-slate-500, #64748b);
     cursor: pointer;
-    border-radius: var(--radius-md, 12px);
+    border-radius: var(--rounded-md, 12px);
     transition: all var(--duration-normal, 250ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
     font-family: var(--font-sans, 'Inter', sans-serif);
 }
@@ -404,7 +404,7 @@
 .quick-access-icon {
     width: 34px;
     height: 34px;
-    border-radius: var(--radius-sm, 8px);
+    border-radius: var(--rounded-sm, 8px);
     background: var(--color-slate-100, #f1f5f9);
     display: flex;
     align-items: center;
@@ -425,7 +425,7 @@
     margin-top: 24px;
     padding: 16px;
     background: linear-gradient(135deg, rgba(99,102,241,0.06) 0%, rgba(236,72,153,0.04) 100%);
-    border-radius: var(--radius-lg, 16px);
+    border-radius: var(--rounded-lg, 16px);
     border: 1px solid rgba(99,102,241,0.1);
     display: flex;
     align-items: flex-start;
@@ -467,7 +467,7 @@
     padding: 8px 16px;
     background: var(--color-slate-50, #f8fafc);
     border: 1px solid var(--color-slate-200, #e2e8f0);
-    border-radius: var(--radius-full, 9999px);
+    border-radius: var(--rounded-full, 9999px);
     font-size: 12px;
     font-weight: 600;
     color: var(--color-slate-500, #64748b);
@@ -513,7 +513,7 @@
 .progress-fill {
     height: 100%;
     background: var(--gradient-primary, linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%));
-    border-radius: 0 var(--radius-full, 9999px) var(--radius-full, 9999px) 0;
+    border-radius: 0 var(--rounded-full, 9999px) var(--rounded-full, 9999px) 0;
     position: relative;
     transition: width var(--duration-normal, 250ms) ease;
 }

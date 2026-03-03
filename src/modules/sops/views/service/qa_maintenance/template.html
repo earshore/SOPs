@@ -1,1105 +1,1274 @@
-<!-- QA 问答维护 SOP Template — 欧洲站实战版 v3.0 -->
-<div class="sop-widescreen-container">
-    <!-- Header -->
-    <div class="mb-6">
-        <div class="sop-detail-header bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50">
-            <div class="flex items-start gap-4">
-                <div class="sop-icon-container bg-indigo-100 text-indigo-600 w-16 h-16 text-2xl">
-                    <i class="fas fa-comments"></i>
+<div class="module-container">
+        <!-- Header -->
+        <!-- Welcome Banner -->
+        <div class="wb-container" style="--wb-gradient-1: #3b82f6; --wb-gradient-2: #2563eb;">
+                <div class="wb-orb wb-orb-1"></div>
+                <div class="wb-orb wb-orb-2"></div>
+                <div class="wb-content">
+                        <div class="wb-icon">
+                                <i class="fas fa-comments"></i>
+                        </div>
+                        <div class="wb-title-row">
+                                <h1 class="wb-title">QA 问答维护 SOP</h1>
+                                <span aria-label="服务功能" class="wb-badge wb-badge-service">
+                                        <i aria-hidden="true" class="fa-headset"></i>SERVICE
+                                </span>
+                        </div>
+                        <p class="wb-description">定期检查前台QA、未回复问题官方解答 - 每周巡检一次</p>
+                        <div class="wb-meta">
+                                <span><i class="fas fa-tag mr-1"></i>客服与客户体验体系</span>
+                                <span><i class="fas fa-tag mr-1"></i>QA维护</span>
+                                <span><i class="fas fa-tag mr-1"></i>更新日期：2024-01</span>
+                        </div>
                 </div>
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <h1 class="text-2xl font-bold text-slate-900">QA 问答维护 SOP</h1>
-                        <span class="sop-status-badge sop-status-active">v3.0 已发布</span>
-                        <span class="px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded text-xs font-semibold">欧洲全站通用</span>
-                    </div>
-                    <p class="text-slate-600 mb-3">
-                        覆盖 QA 监控 → 分类回复 → 关键词布局 → 竞品 QA 挖掘 → Listing 反哺优化的完整闭环。
-                        <strong class="text-indigo-700">QA 是唯一一个卖家可以主动向 Listing 注入关键词、影响购买决策的"免费广告位"。</strong>
-                    </p>
-                    <div class="flex items-center gap-6 text-sm text-slate-500 flex-wrap">
-                        <span><i class="fas fa-layer-group mr-1"></i>客服与客户体验体系 + Listing 优化</span>
-                        <span><i class="fas fa-globe-europe mr-1"></i>DE / UK / FR / IT / ES</span>
-                        <span><i class="fas fa-calendar-check mr-1"></i>每周二巡检</span>
-                        <span><i class="fas fa-clock mr-1"></i>更新：2025-06</span>
-                    </div>
-                </div>
-            </div>
         </div>
-    </div>
-
-    <!-- ========== 核心指标 ========== -->
-    <div class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
-        <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 text-center">
-            <div class="text-xl font-bold text-blue-600">100%</div>
-            <div class="text-xs text-slate-600 mt-1">官方回复覆盖率</div>
+        <!-- ========== 核心指标 ========== -->
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 text-center">
+                        <div class="text-xl font-bold text-blue-600">100%</div>
+                        <div class="text-xs text-slate-600 mt-1">官方回复覆盖率</div>
+                </div>
+                <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-center">
+                        <div class="text-xl font-bold text-emerald-600">&lt;48h</div>
+                        <div class="text-xs text-slate-600 mt-1">新问题响应时效</div>
+                </div>
+                <div class="bg-purple-50 border border-purple-200 rounded-xl p-3 text-center">
+                        <div class="text-xl font-bold text-purple-600">≥20</div>
+                        <div class="text-xs text-slate-600 mt-1">核心ASIN QA数量</div>
+                </div>
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-center">
+                        <div class="text-xl font-bold text-amber-600">3-5个</div>
+                        <div class="text-xs text-slate-600 mt-1">每答案植入关键词</div>
+                </div>
+                <div class="bg-red-50 border border-red-200 rounded-xl p-3 text-center">
+                        <div class="text-xl font-bold text-red-600">0</div>
+                        <div class="text-xs text-slate-600 mt-1">未回复负面问题</div>
+                </div>
+                <div class="bg-teal-50 border border-teal-200 rounded-xl p-3 text-center">
+                        <div class="text-xl font-bold text-teal-600">每周二</div>
+                        <div class="text-xs text-slate-600 mt-1">固定巡检日</div>
+                </div>
         </div>
-        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-center">
-            <div class="text-xl font-bold text-emerald-600">&lt;48h</div>
-            <div class="text-xs text-slate-600 mt-1">新问题响应时效</div>
+        <!-- ========== 为什么QA极其重要 ========== -->
+        <div class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl p-5 mb-6">
+                <h3 class="font-bold text-lg mb-3 flex items-center gap-2">
+                        <i class="fas fa-gem"></i>QA 是被严重低估的 Listing 武器
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                        <div class="bg-white/10 rounded-lg p-3">
+                                <div class="font-bold mb-1">📈 直接影响转化率</div>
+                                <div class="text-xs opacity-90">买家在犹豫时最常看的就是 QA。一个精准的回答可能直接促成下单。实测：完善的QA可提升转化率 5-15%。
+                                </div>
+                        </div>
+                        <div class="bg-white/10 rounded-lg p-3">
+                                <div class="font-bold mb-1">🔍 免费 SEO 关键词入口</div>
+                                <div class="text-xs opacity-90">QA 内容被亚马逊 A10 算法索引。你在回答中自然植入的关键词，会增加该 ASIN
+                                        的搜索可见度——这是免费的。</div>
+                        </div>
+                        <div class="bg-white/10 rounded-lg p-3">
+                                <div class="font-bold mb-1">🛡️ 控制产品叙事权</div>
+                                <div class="text-xs opacity-90">如果你不回答，其他买家会替你回答——而他们的回答可能不准确甚至有害。主动回答=控制产品信息的主导权。</div>
+                        </div>
+                        <div class="bg-white/10 rounded-lg p-3">
+                                <div class="font-bold mb-1">🏆 品牌信任 + 专业度</div>
+                                <div class="text-xs opacity-90">带有 "Manufacturer" 标签的官方回答，可信度远高于普通买家回答。这是品牌卖家的独家优势。
+                                </div>
+                        </div>
+                </div>
+                <div class="mt-3 bg-white/10 rounded-lg p-3 text-sm">
+                        <i class="fas fa-brain mr-1"></i>
+                        <strong>真相：</strong>大多数卖家完全忽略 QA 维护。你每周花 20 分钟做竞品不做的事，就能在转化和 SEO 上持续拉开差距。这是运营的杠杆效率最高的工作之一。
+                </div>
         </div>
-        <div class="bg-purple-50 border border-purple-200 rounded-xl p-3 text-center">
-            <div class="text-xl font-bold text-purple-600">≥20</div>
-            <div class="text-xs text-slate-600 mt-1">核心ASIN QA数量</div>
-        </div>
-        <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-center">
-            <div class="text-xl font-bold text-amber-600">3-5个</div>
-            <div class="text-xs text-slate-600 mt-1">每答案植入关键词</div>
-        </div>
-        <div class="bg-red-50 border border-red-200 rounded-xl p-3 text-center">
-            <div class="text-xl font-bold text-red-600">0</div>
-            <div class="text-xs text-slate-600 mt-1">未回复负面问题</div>
-        </div>
-        <div class="bg-teal-50 border border-teal-200 rounded-xl p-3 text-center">
-            <div class="text-xl font-bold text-teal-600">每周二</div>
-            <div class="text-xs text-slate-600 mt-1">固定巡检日</div>
-        </div>
-    </div>
-
-    <!-- ========== 为什么QA极其重要 ========== -->
-    <div class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl p-5 mb-6">
-        <h3 class="font-bold text-lg mb-3 flex items-center gap-2">
-            <i class="fas fa-gem"></i>QA 是被严重低估的 Listing 武器
-        </h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-            <div class="bg-white/10 rounded-lg p-3">
-                <div class="font-bold mb-1">📈 直接影响转化率</div>
-                <div class="text-xs opacity-90">买家在犹豫时最常看的就是 QA。一个精准的回答可能直接促成下单。实测：完善的QA可提升转化率 5-15%。</div>
-            </div>
-            <div class="bg-white/10 rounded-lg p-3">
-                <div class="font-bold mb-1">🔍 免费 SEO 关键词入口</div>
-                <div class="text-xs opacity-90">QA 内容被亚马逊 A10 算法索引。你在回答中自然植入的关键词，会增加该 ASIN 的搜索可见度——这是免费的。</div>
-            </div>
-            <div class="bg-white/10 rounded-lg p-3">
-                <div class="font-bold mb-1">🛡️ 控制产品叙事权</div>
-                <div class="text-xs opacity-90">如果你不回答，其他买家会替你回答——而他们的回答可能不准确甚至有害。主动回答=控制产品信息的主导权。</div>
-            </div>
-            <div class="bg-white/10 rounded-lg p-3">
-                <div class="font-bold mb-1">🏆 品牌信任 + 专业度</div>
-                <div class="text-xs opacity-90">带有 "Manufacturer" 标签的官方回答，可信度远高于普通买家回答。这是品牌卖家的独家优势。</div>
-            </div>
-        </div>
-        <div class="mt-3 bg-white/10 rounded-lg p-3 text-sm">
-            <i class="fas fa-brain mr-1"></i>
-            <strong>真相：</strong>大多数卖家完全忽略 QA 维护。你每周花 20 分钟做竞品不做的事，就能在转化和 SEO 上持续拉开差距。这是运营的杠杆效率最高的工作之一。
-        </div>
-    </div>
-
-    <!-- ========== 铁律红线 ========== -->
-    <div class="bg-red-50 border-2 border-red-300 rounded-xl p-5 mb-6">
-        <h2 class="text-lg font-bold text-red-800 mb-3 flex items-center gap-2">
-            <i class="fas fa-exclamation-triangle text-red-600"></i>
-            QA 回复绝对红线
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="space-y-2">
-                <div class="flex items-start gap-2 text-sm">
-                    <i class="fas fa-ban text-red-500 mt-0.5 flex-shrink-0"></i>
-                    <span><strong>严禁</strong>在 QA 中要求/暗示/引导买家留评价或好评</span>
-                </div>
-                <div class="flex items-start gap-2 text-sm">
-                    <i class="fas fa-ban text-red-500 mt-0.5 flex-shrink-0"></i>
-                    <span><strong>严禁</strong>放置站外链接（官网/社媒/WhatsApp 等）</span>
-                </div>
-                <div class="flex items-start gap-2 text-sm">
-                    <i class="fas fa-ban text-red-500 mt-0.5 flex-shrink-0"></i>
-                    <span><strong>严禁</strong>攻击/贬低竞品品牌或产品</span>
-                </div>
-                <div class="flex items-start gap-2 text-sm">
-                    <i class="fas fa-ban text-red-500 mt-0.5 flex-shrink-0"></i>
-                    <span><strong>严禁</strong>用多个买家账号自问自答</span>
-                </div>
-            </div>
-            <div class="space-y-2">
-                <div class="flex items-start gap-2 text-sm">
-                    <i class="fas fa-ban text-red-500 mt-0.5 flex-shrink-0"></i>
-                    <span><strong>严禁</strong>在回答中植入促销信息/折扣码/优惠券</span>
-                </div>
-                <div class="flex items-start gap-2 text-sm">
-                    <i class="fas fa-ban text-red-500 mt-0.5 flex-shrink-0"></i>
-                    <span><strong>严禁</strong>承诺产品不具备的功能/参数</span>
-                </div>
-                <div class="flex items-start gap-2 text-sm">
-                    <i class="fas fa-ban text-red-500 mt-0.5 flex-shrink-0"></i>
-                    <span><strong>严禁</strong>与提问者在 QA 中争论/对峙</span>
-                </div>
-                <div class="flex items-start gap-2 text-sm bg-red-100 rounded p-2">
-                    <i class="fas fa-gavel text-red-600 mt-0.5 flex-shrink-0"></i>
-                    <span class="text-red-800"><strong>后果：</strong>QA 回复权限被移除 → 品牌信誉受损 → 严重者影响品牌注册状态。自问自答一旦被检测，历史QA全部清除。</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ========== 主流程 - 三列布局 ========== -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-
-        <!-- Column 1: 每周流程 -->
-        <div class="lg:col-span-1 bg-white rounded-xl border border-slate-200 p-6">
-            <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                <i class="fas fa-calendar-week text-blue-500"></i>每周巡检流程（周二）
-            </h2>
-            <div class="sop-timeline">
-                <!-- Step 1 -->
-                <div class="sop-timeline-item">
-                    <div class="sop-timeline-dot completed"></div>
-                    <div class="bg-blue-50/50 rounded-lg p-3 ml-2 border-l-4 border-blue-400">
-                        <h3 class="font-bold text-slate-800 text-sm mb-1">Step 1: 扫描新问题</h3>
-                        <p class="text-xs text-blue-600 mb-2">⏱ 5 分钟</p>
-                        <ul class="text-xs text-slate-600 space-y-1">
-                            <li>• 逐个打开核心 ASIN 的产品页面</li>
-                            <li>• 滚动到 "Customer Questions & Answers"</li>
-                            <li>• 筛选没有官方（Manufacturer）回复的问题</li>
-                            <li>• 记录新增问题到 QA 管理表</li>
-                            <li class="text-blue-700 font-semibold">• 五站都要检查（DE/UK/FR/IT/ES）</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Step 2 -->
-                <div class="sop-timeline-item">
-                    <div class="sop-timeline-dot"></div>
-                    <div class="bg-emerald-50/50 rounded-lg p-3 ml-2 border-l-4 border-emerald-400">
-                        <h3 class="font-bold text-slate-800 text-sm mb-1">Step 2: 分类 + 优先级</h3>
-                        <p class="text-xs text-emerald-600 mb-2">⏱ 3 分钟</p>
-                        <ul class="text-xs text-slate-600 space-y-1">
-                            <li>• 按类型分类（见右侧分类体系）</li>
-                            <li>• 判定是否有投票（votes 多 = 更多人关心）</li>
-                            <li>• 优先回复：高票 → 负面倾向 → 产品参数 → 一般</li>
-                            <li>• 标记可用于 SEO 布局的问题</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Step 3 -->
-                <div class="sop-timeline-item">
-                    <div class="sop-timeline-dot"></div>
-                    <div class="bg-purple-50/50 rounded-lg p-3 ml-2 border-l-4 border-purple-400">
-                        <h3 class="font-bold text-slate-800 text-sm mb-1">Step 3: 撰写 + 发布回答</h3>
-                        <p class="text-xs text-purple-600 mb-2">⏱ 10-15 分钟</p>
-                        <ul class="text-xs text-slate-600 space-y-1">
-                            <li>• 用对应站点语言撰写</li>
-                            <li>• 以品牌官方身份回答</li>
-                            <li>• 植入 2-3 个目标关键词（自然！）</li>
-                            <li>• 对照模板检查质量</li>
-                            <li>• 发布前通读一遍确认无违规</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Step 4 -->
-                <div class="sop-timeline-item">
-                    <div class="sop-timeline-dot"></div>
-                    <div class="bg-amber-50/50 rounded-lg p-3 ml-2 border-l-4 border-amber-400">
-                        <h3 class="font-bold text-slate-800 text-sm mb-1">Step 4: 处理问题 QA</h3>
-                        <p class="text-xs text-amber-600 mb-2">⏱ 5 分钟</p>
-                        <ul class="text-xs text-slate-600 space-y-1">
-                            <li>• 负面倾向问题 → 专业化解（见模板）</li>
-                            <li>• 错误信息 → 用正确数据纠正</li>
-                            <li>• 竞对恶意提问 → 举报 + 正面回答</li>
-                            <li>• 涉及安全 → 最高优先级处理</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Step 5 -->
-                <div class="sop-timeline-item">
-                    <div class="sop-timeline-dot"></div>
-                    <div class="bg-teal-50/50 rounded-lg p-3 ml-2 border-l-4 border-teal-400">
-                        <h3 class="font-bold text-slate-800 text-sm mb-1">Step 5: 反哺 Listing 优化</h3>
-                        <p class="text-xs text-teal-600 mb-2">⏱ 3 分钟</p>
-                        <ul class="text-xs text-slate-600 space-y-1">
-                            <li>• 同一问题被问 3+ 次 → 更新 Listing/A+</li>
-                            <li>• 高频参数问题 → 加入 Bullet Points</li>
-                            <li>• 使用问题 → 更新说明书/产品卡片</li>
-                            <li>• 记录到 VOC 分析表（与差评处理联动）</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Step 6 -->
-                <div class="sop-timeline-item">
-                    <div class="sop-timeline-dot pending"></div>
-                    <div class="bg-pink-50/50 rounded-lg p-3 ml-2 border-l-4 border-pink-400">
-                        <h3 class="font-bold text-slate-800 text-sm mb-1">Step 6: 竞品 QA 挖掘（月度）</h3>
-                        <p class="text-xs text-pink-600 mb-2">⏱ 15 分钟/月</p>
-                        <ul class="text-xs text-slate-600 space-y-1">
-                            <li>• 浏览 TOP 3 竞品的 QA 页面</li>
-                            <li>• 提取竞品高频问题 → 预先准备</li>
-                            <li>• 发现竞品弱点 → 在你的回答中差异化</li>
-                            <li>• 收集买家关心的真实需求点</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <div class="mt-4 p-3 bg-blue-50 rounded-lg text-xs text-blue-800 border border-blue-200">
-                <i class="fas fa-clock mr-1"></i><strong>总耗时：</strong>每周约 25-30 分钟。竞品挖掘每月追加 15 分钟。固定在周二上午处理——周一是欧洲下单高峰，周二新问题刚好沉淀出来。
-            </div>
-        </div>
-
-        <!-- Column 2: 问题分类 + 优先级 -->
-        <div class="lg:col-span-1 space-y-5">
-            <!-- 问题分类体系 -->
-            <div class="bg-white rounded-xl border border-slate-200 p-5">
-                <h2 class="text-base font-bold text-slate-800 mb-3 flex items-center gap-2">
-                    <i class="fas fa-tags text-amber-500"></i>问题分类 + 回答策略
+        <!-- ========== 铁律红线 ========== -->
+        <div class="bg-red-50 border-2 border-red-300 rounded-xl p-5 mb-6">
+                <h2 class="text-lg font-bold text-red-800 mb-3 flex items-center gap-2">
+                        <i class="fas fa-exclamation-triangle text-red-600"></i>
+                        QA 回复绝对红线
                 </h2>
-                <div class="space-y-3">
-                    <!-- A类 -->
-                    <div class="bg-blue-50 rounded-lg p-3 border border-blue-200">
-                        <div class="flex items-center gap-2 mb-1">
-                            <i class="fas fa-ruler-combined text-blue-500 text-sm"></i>
-                            <h4 class="font-bold text-blue-800 text-sm">A. 产品参数/规格</h4>
-                            <span class="text-xs bg-blue-200 text-blue-700 px-1.5 rounded">最高频</span>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                                <div class="flex items-start gap-2 text-sm">
+                                        <i class="fas fa-ban text-red-500 mt-0.5 flex-shrink-0"></i>
+                                        <span><strong>严禁</strong>在 QA 中要求/暗示/引导买家留评价或好评</span>
+                                </div>
+                                <div class="flex items-start gap-2 text-sm">
+                                        <i class="fas fa-ban text-red-500 mt-0.5 flex-shrink-0"></i>
+                                        <span><strong>严禁</strong>放置站外链接（官网/社媒/WhatsApp 等）</span>
+                                </div>
+                                <div class="flex items-start gap-2 text-sm">
+                                        <i class="fas fa-ban text-red-500 mt-0.5 flex-shrink-0"></i>
+                                        <span><strong>严禁</strong>攻击/贬低竞品品牌或产品</span>
+                                </div>
+                                <div class="flex items-start gap-2 text-sm">
+                                        <i class="fas fa-ban text-red-500 mt-0.5 flex-shrink-0"></i>
+                                        <span><strong>严禁</strong>用多个买家账号自问自答</span>
+                                </div>
                         </div>
-                        <p class="text-xs text-slate-500 mb-1">尺寸/重量/材质/兼容性/电压/颜色等</p>
-                        <ul class="text-xs text-blue-700 space-y-0.5 ml-5">
-                            <li>• 策略：<strong>精确数据 + 使用场景</strong></li>
-                            <li>• 关键词植入点：在参数描述中自然嵌入</li>
-                            <li>• 例：不只说"重量500g"，而说"轻便设计仅500g，非常适合旅行携带"</li>
-                        </ul>
-                    </div>
-                    <!-- B类 -->
-                    <div class="bg-emerald-50 rounded-lg p-3 border border-emerald-200">
-                        <div class="flex items-center gap-2 mb-1">
-                            <i class="fas fa-cogs text-emerald-500 text-sm"></i>
-                            <h4 class="font-bold text-emerald-800 text-sm">B. 使用方法/功能</h4>
-                            <span class="text-xs bg-emerald-200 text-emerald-700 px-1.5 rounded">高频</span>
+                        <div class="space-y-2">
+                                <div class="flex items-start gap-2 text-sm">
+                                        <i class="fas fa-ban text-red-500 mt-0.5 flex-shrink-0"></i>
+                                        <span><strong>严禁</strong>在回答中植入促销信息/折扣码/优惠券</span>
+                                </div>
+                                <div class="flex items-start gap-2 text-sm">
+                                        <i class="fas fa-ban text-red-500 mt-0.5 flex-shrink-0"></i>
+                                        <span><strong>严禁</strong>承诺产品不具备的功能/参数</span>
+                                </div>
+                                <div class="flex items-start gap-2 text-sm">
+                                        <i class="fas fa-ban text-red-500 mt-0.5 flex-shrink-0"></i>
+                                        <span><strong>严禁</strong>与提问者在 QA 中争论/对峙</span>
+                                </div>
+                                <div class="flex items-start gap-2 text-sm bg-red-100 rounded p-2">
+                                        <i class="fas fa-gavel text-red-600 mt-0.5 flex-shrink-0"></i>
+                                        <span class="text-red-800"><strong>后果：</strong>QA 回复权限被移除 → 品牌信誉受损 →
+                                                严重者影响品牌注册状态。自问自答一旦被检测，历史QA全部清除。</span>
+                                </div>
                         </div>
-                        <p class="text-xs text-slate-500 mb-1">"怎么用""能不能做XX""是否支持XX"</p>
-                        <ul class="text-xs text-emerald-700 space-y-0.5 ml-5">
-                            <li>• 策略：<strong>步骤化回答 + 突出易用性</strong></li>
-                            <li>• 关键词植入点：功能描述中嵌入长尾词</li>
-                            <li>• 被问 3+ 次 → 必须更新 Listing Bullet Points</li>
-                        </ul>
-                    </div>
-                    <!-- C类 -->
-                    <div class="bg-amber-50 rounded-lg p-3 border border-amber-200">
-                        <div class="flex items-center gap-2 mb-1">
-                            <i class="fas fa-check-double text-amber-500 text-sm"></i>
-                            <h4 class="font-bold text-amber-800 text-sm">C. 兼容性/适配</h4>
-                            <span class="text-xs bg-amber-200 text-amber-700 px-1.5 rounded">中频</span>
-                        </div>
-                        <p class="text-xs text-slate-500 mb-1">"适合XX型号吗""能用在XX上吗"</p>
-                        <ul class="text-xs text-amber-700 space-y-0.5 ml-5">
-                            <li>• 策略：<strong>明确是/否 + 列出兼容清单</strong></li>
-                            <li>• 如果不兼容，诚实说明→ 避免退货和差评</li>
-                            <li>• 关键词植入点：列出兼容设备型号名称</li>
-                        </ul>
-                    </div>
-                    <!-- D类 -->
-                    <div class="bg-red-50 rounded-lg p-3 border border-red-200">
-                        <div class="flex items-center gap-2 mb-1">
-                            <i class="fas fa-exclamation-circle text-red-500 text-sm"></i>
-                            <h4 class="font-bold text-red-800 text-sm">D. 质量/耐用性疑虑</h4>
-                            <span class="text-xs bg-red-200 text-red-700 px-1.5 rounded">需谨慎</span>
-                        </div>
-                        <p class="text-xs text-slate-500 mb-1">"质量好吗""能用多久""容易坏吗"</p>
-                        <ul class="text-xs text-red-700 space-y-0.5 ml-5">
-                            <li>• 策略：<strong>用事实+认证+售后承诺回应</strong></li>
-                            <li>• 提及认证（CE/GS/LFGB 等欧洲标准）</li>
-                            <li>• 避免过度承诺（不要说"终身使用"）</li>
-                        </ul>
-                    </div>
-                    <!-- E类 -->
-                    <div class="bg-purple-50 rounded-lg p-3 border border-purple-200">
-                        <div class="flex items-center gap-2 mb-1">
-                            <i class="fas fa-shipping-fast text-purple-500 text-sm"></i>
-                            <h4 class="font-bold text-purple-800 text-sm">E. 物流/售后/发票</h4>
-                            <span class="text-xs bg-slate-200 text-slate-700 px-1.5 rounded">低价值</span>
-                        </div>
-                        <p class="text-xs text-slate-500 mb-1">"多久到""有保修吗""能开发票吗"</p>
-                        <ul class="text-xs text-purple-700 space-y-0.5 ml-5">
-                            <li>• 策略：<strong>简短专业回答 + 引导联系售后</strong></li>
-                            <li>• FBA 物流问题引导去亚马逊客服</li>
-                            <li>• 发票问题可提及 VAT Invoice 可在订单页下载</li>
-                        </ul>
-                    </div>
-                    <!-- F类 -->
-                    <div class="bg-slate-100 rounded-lg p-3 border border-slate-300">
-                        <div class="flex items-center gap-2 mb-1">
-                            <i class="fas fa-flag text-slate-500 text-sm"></i>
-                            <h4 class="font-bold text-slate-700 text-sm">F. 恶意/竞对/不相关</h4>
-                            <span class="text-xs bg-red-200 text-red-700 px-1.5 rounded">需举报</span>
-                        </div>
-                        <p class="text-xs text-slate-500 mb-1">引导去竞品/与产品无关/误导性问题</p>
-                        <ul class="text-xs text-slate-600 space-y-0.5 ml-5">
-                            <li>• 策略：<strong>先正面回答 → 再举报</strong></li>
-                            <li>• 举报按钮在问题旁边 → "Report"</li>
-                            <li>• 举报的同时必须回答（防止只有负面信息）</li>
-                        </ul>
-                    </div>
                 </div>
-            </div>
-
-            <!-- 回复优先级矩阵 -->
-            <div class="bg-white rounded-xl border border-slate-200 p-5">
-                <h2 class="text-base font-bold text-slate-800 mb-3 flex items-center gap-2">
-                    <i class="fas fa-sort-amount-down text-indigo-500"></i>回复优先级排序
+        </div>
+        <!-- ========== 主流程 - 三列布局 ========== -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                <!-- Column 1: 每周流程 -->
+                <div class="lg:col-span-1 bg-white rounded-xl border border-slate-200 p-6">
+                        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                                <i class="fas fa-calendar-week text-blue-500"></i>每周巡检流程（周二）
+                        </h2>
+                        <div class="sop-timeline">
+                                <!-- Step 1 -->
+                                <div class="sop-timeline-item">
+                                        <div class="sop-timeline-dot completed"></div>
+                                        <div class="bg-blue-50/50 rounded-lg p-3 ml-2 border-l-4 border-blue-400">
+                                                <h3 class="font-bold text-slate-800 text-sm mb-1">Step 1: 扫描新问题</h3>
+                                                <p class="text-xs text-blue-600 mb-2">⏱ 5 分钟</p>
+                                                <ul class="text-xs text-slate-600 space-y-1">
+                                                        <li>• 逐个打开核心 ASIN 的产品页面</li>
+                                                        <li>• 滚动到 "Customer Questions &amp; Answers"</li>
+                                                        <li>• 筛选没有官方（Manufacturer）回复的问题</li>
+                                                        <li>• 记录新增问题到 QA 管理表</li>
+                                                        <li class="text-blue-700 font-semibold">• 五站都要检查（DE/UK/FR/IT/ES）
+                                                        </li>
+                                                </ul>
+                                        </div>
+                                </div>
+                                <!-- Step 2 -->
+                                <div class="sop-timeline-item">
+                                        <div class="sop-timeline-dot"></div>
+                                        <div class="bg-emerald-50/50 rounded-lg p-3 ml-2 border-l-4 border-emerald-400">
+                                                <h3 class="font-bold text-slate-800 text-sm mb-1">Step 2: 分类 + 优先级</h3>
+                                                <p class="text-xs text-emerald-600 mb-2">⏱ 3 分钟</p>
+                                                <ul class="text-xs text-slate-600 space-y-1">
+                                                        <li>• 按类型分类（见右侧分类体系）</li>
+                                                        <li>• 判定是否有投票（votes 多 = 更多人关心）</li>
+                                                        <li>• 优先回复：高票 → 负面倾向 → 产品参数 → 一般</li>
+                                                        <li>• 标记可用于 SEO 布局的问题</li>
+                                                </ul>
+                                        </div>
+                                </div>
+                                <!-- Step 3 -->
+                                <div class="sop-timeline-item">
+                                        <div class="sop-timeline-dot"></div>
+                                        <div class="bg-purple-50/50 rounded-lg p-3 ml-2 border-l-4 border-purple-400">
+                                                <h3 class="font-bold text-slate-800 text-sm mb-1">Step 3: 撰写 + 发布回答</h3>
+                                                <p class="text-xs text-purple-600 mb-2">⏱ 10-15 分钟</p>
+                                                <ul class="text-xs text-slate-600 space-y-1">
+                                                        <li>• 用对应站点语言撰写</li>
+                                                        <li>• 以品牌官方身份回答</li>
+                                                        <li>• 植入 2-3 个目标关键词（自然！）</li>
+                                                        <li>• 对照模板检查质量</li>
+                                                        <li>• 发布前通读一遍确认无违规</li>
+                                                </ul>
+                                        </div>
+                                </div>
+                                <!-- Step 4 -->
+                                <div class="sop-timeline-item">
+                                        <div class="sop-timeline-dot"></div>
+                                        <div class="bg-amber-50/50 rounded-lg p-3 ml-2 border-l-4 border-amber-400">
+                                                <h3 class="font-bold text-slate-800 text-sm mb-1">Step 4: 处理问题 QA</h3>
+                                                <p class="text-xs text-amber-600 mb-2">⏱ 5 分钟</p>
+                                                <ul class="text-xs text-slate-600 space-y-1">
+                                                        <li>• 负面倾向问题 → 专业化解（见模板）</li>
+                                                        <li>• 错误信息 → 用正确数据纠正</li>
+                                                        <li>• 竞对恶意提问 → 举报 + 正面回答</li>
+                                                        <li>• 涉及安全 → 最高优先级处理</li>
+                                                </ul>
+                                        </div>
+                                </div>
+                                <!-- Step 5 -->
+                                <div class="sop-timeline-item">
+                                        <div class="sop-timeline-dot"></div>
+                                        <div class="bg-teal-50/50 rounded-lg p-3 ml-2 border-l-4 border-teal-400">
+                                                <h3 class="font-bold text-slate-800 text-sm mb-1">Step 5: 反哺 Listing 优化
+                                                </h3>
+                                                <p class="text-xs text-teal-600 mb-2">⏱ 3 分钟</p>
+                                                <ul class="text-xs text-slate-600 space-y-1">
+                                                        <li>• 同一问题被问 3+ 次 → 更新 Listing/A+</li>
+                                                        <li>• 高频参数问题 → 加入 Bullet Points</li>
+                                                        <li>• 使用问题 → 更新说明书/产品卡片</li>
+                                                        <li>• 记录到 VOC 分析表（与差评处理联动）</li>
+                                                </ul>
+                                        </div>
+                                </div>
+                                <!-- Step 6 -->
+                                <div class="sop-timeline-item">
+                                        <div class="sop-timeline-dot pending"></div>
+                                        <div class="bg-pink-50/50 rounded-lg p-3 ml-2 border-l-4 border-pink-400">
+                                                <h3 class="font-bold text-slate-800 text-sm mb-1">Step 6: 竞品 QA 挖掘（月度）
+                                                </h3>
+                                                <p class="text-xs text-pink-600 mb-2">⏱ 15 分钟/月</p>
+                                                <ul class="text-xs text-slate-600 space-y-1">
+                                                        <li>• 浏览 TOP 3 竞品的 QA 页面</li>
+                                                        <li>• 提取竞品高频问题 → 预先准备</li>
+                                                        <li>• 发现竞品弱点 → 在你的回答中差异化</li>
+                                                        <li>• 收集买家关心的真实需求点</li>
+                                                </ul>
+                                        </div>
+                                </div>
+                        </div>
+                        <div class="mt-4 p-3 bg-blue-50 rounded-lg text-xs text-blue-800 border border-blue-200">
+                                <i class="fas fa-clock mr-1"></i><strong>总耗时：</strong>每周约 25-30 分钟。竞品挖掘每月追加 15
+                                分钟。固定在周二上午处理——周一是欧洲下单高峰，周二新问题刚好沉淀出来。
+                        </div>
+                </div>
+                <!-- Column 2: 问题分类 + 优先级 -->
+                <div class="lg:col-span-1 space-y-5">
+                        <!-- 问题分类体系 -->
+                        <div class="bg-white rounded-xl border border-slate-200 p-5">
+                                <h2 class="text-base font-bold text-slate-800 mb-3 flex items-center gap-2">
+                                        <i class="fas fa-tags text-amber-500"></i>问题分类 + 回答策略
+                                </h2>
+                                <div class="space-y-3">
+                                        <!-- A类 -->
+                                        <div class="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                                                <div class="flex items-center gap-2 mb-1">
+                                                        <i class="fas fa-ruler-combined text-blue-500 text-sm"></i>
+                                                        <h4 class="font-bold text-blue-800 text-sm">A. 产品参数/规格</h4>
+                                                        <span
+                                                                class="text-xs bg-blue-200 text-blue-700 px-1.5 rounded">最高频</span>
+                                                </div>
+                                                <p class="text-xs text-slate-500 mb-1">尺寸/重量/材质/兼容性/电压/颜色等</p>
+                                                <ul class="text-xs text-blue-700 space-y-0.5 ml-5">
+                                                        <li>• 策略：<strong>精确数据 + 使用场景</strong></li>
+                                                        <li>• 关键词植入点：在参数描述中自然嵌入</li>
+                                                        <li>• 例：不只说"重量500g"，而说"轻便设计仅500g，非常适合旅行携带"</li>
+                                                </ul>
+                                        </div>
+                                        <!-- B类 -->
+                                        <div class="bg-emerald-50 rounded-lg p-3 border border-emerald-200">
+                                                <div class="flex items-center gap-2 mb-1">
+                                                        <i class="fas fa-cogs text-emerald-500 text-sm"></i>
+                                                        <h4 class="font-bold text-emerald-800 text-sm">B. 使用方法/功能</h4>
+                                                        <span
+                                                                class="text-xs bg-emerald-200 text-emerald-700 px-1.5 rounded">高频</span>
+                                                </div>
+                                                <p class="text-xs text-slate-500 mb-1">"怎么用""能不能做XX""是否支持XX"</p>
+                                                <ul class="text-xs text-emerald-700 space-y-0.5 ml-5">
+                                                        <li>• 策略：<strong>步骤化回答 + 突出易用性</strong></li>
+                                                        <li>• 关键词植入点：功能描述中嵌入长尾词</li>
+                                                        <li>• 被问 3+ 次 → 必须更新 Listing Bullet Points</li>
+                                                </ul>
+                                        </div>
+                                        <!-- C类 -->
+                                        <div class="bg-amber-50 rounded-lg p-3 border border-amber-200">
+                                                <div class="flex items-center gap-2 mb-1">
+                                                        <i class="fas fa-check-double text-amber-500 text-sm"></i>
+                                                        <h4 class="font-bold text-amber-800 text-sm">C. 兼容性/适配</h4>
+                                                        <span
+                                                                class="text-xs bg-amber-200 text-amber-700 px-1.5 rounded">中频</span>
+                                                </div>
+                                                <p class="text-xs text-slate-500 mb-1">"适合XX型号吗""能用在XX上吗"</p>
+                                                <ul class="text-xs text-amber-700 space-y-0.5 ml-5">
+                                                        <li>• 策略：<strong>明确是/否 + 列出兼容清单</strong></li>
+                                                        <li>• 如果不兼容，诚实说明→ 避免退货和差评</li>
+                                                        <li>• 关键词植入点：列出兼容设备型号名称</li>
+                                                </ul>
+                                        </div>
+                                        <!-- D类 -->
+                                        <div class="bg-red-50 rounded-lg p-3 border border-red-200">
+                                                <div class="flex items-center gap-2 mb-1">
+                                                        <i class="fas fa-exclamation-circle text-red-500 text-sm"></i>
+                                                        <h4 class="font-bold text-red-800 text-sm">D. 质量/耐用性疑虑</h4>
+                                                        <span
+                                                                class="text-xs bg-red-200 text-red-700 px-1.5 rounded">需谨慎</span>
+                                                </div>
+                                                <p class="text-xs text-slate-500 mb-1">"质量好吗""能用多久""容易坏吗"</p>
+                                                <ul class="text-xs text-red-700 space-y-0.5 ml-5">
+                                                        <li>• 策略：<strong>用事实+认证+售后承诺回应</strong></li>
+                                                        <li>• 提及认证（CE/GS/LFGB 等欧洲标准）</li>
+                                                        <li>• 避免过度承诺（不要说"终身使用"）</li>
+                                                </ul>
+                                        </div>
+                                        <!-- E类 -->
+                                        <div class="bg-purple-50 rounded-lg p-3 border border-purple-200">
+                                                <div class="flex items-center gap-2 mb-1">
+                                                        <i class="fas fa-shipping-fast text-purple-500 text-sm"></i>
+                                                        <h4 class="font-bold text-purple-800 text-sm">E. 物流/售后/发票</h4>
+                                                        <span
+                                                                class="text-xs bg-slate-200 text-slate-700 px-1.5 rounded">低价值</span>
+                                                </div>
+                                                <p class="text-xs text-slate-500 mb-1">"多久到""有保修吗""能开发票吗"</p>
+                                                <ul class="text-xs text-purple-700 space-y-0.5 ml-5">
+                                                        <li>• 策略：<strong>简短专业回答 + 引导联系售后</strong></li>
+                                                        <li>• FBA 物流问题引导去亚马逊客服</li>
+                                                        <li>• 发票问题可提及 VAT Invoice 可在订单页下载</li>
+                                                </ul>
+                                        </div>
+                                        <!-- F类 -->
+                                        <div class="bg-slate-100 rounded-lg p-3 border border-slate-300">
+                                                <div class="flex items-center gap-2 mb-1">
+                                                        <i class="fas fa-flag text-slate-500 text-sm"></i>
+                                                        <h4 class="font-bold text-slate-700 text-sm">F. 恶意/竞对/不相关</h4>
+                                                        <span
+                                                                class="text-xs bg-red-200 text-red-700 px-1.5 rounded">需举报</span>
+                                                </div>
+                                                <p class="text-xs text-slate-500 mb-1">引导去竞品/与产品无关/误导性问题</p>
+                                                <ul class="text-xs text-slate-600 space-y-0.5 ml-5">
+                                                        <li>• 策略：<strong>先正面回答 → 再举报</strong></li>
+                                                        <li>• 举报按钮在问题旁边 → "Report"</li>
+                                                        <li>• 举报的同时必须回答（防止只有负面信息）</li>
+                                                </ul>
+                                        </div>
+                                </div>
+                        </div>
+                        <!-- 回复优先级矩阵 -->
+                        <div class="bg-white rounded-xl border border-slate-200 p-5">
+                                <h2 class="text-base font-bold text-slate-800 mb-3 flex items-center gap-2">
+                                        <i class="fas fa-sort-amount-down text-indigo-500"></i>回复优先级排序
+                                </h2>
+                                <div class="space-y-2">
+                                        <div
+                                                class="flex items-center gap-3 p-2 bg-red-50 rounded-lg border border-red-200">
+                                                <span
+                                                        class="px-2 py-0.5 bg-red-600 text-white rounded text-xs font-bold flex-shrink-0">P0</span>
+                                                <div class="text-xs">
+                                                        <strong>负面/质量疑虑问题</strong> — 不回答会阻碍购买决策
+                                                </div>
+                                        </div>
+                                        <div
+                                                class="flex items-center gap-3 p-2 bg-amber-50 rounded-lg border border-amber-200">
+                                                <span
+                                                        class="px-2 py-0.5 bg-amber-500 text-white rounded text-xs font-bold flex-shrink-0">P1</span>
+                                                <div class="text-xs">
+                                                        <strong>高票数问题（≥5 votes）</strong> — 代表多人关心，影响面广
+                                                </div>
+                                        </div>
+                                        <div
+                                                class="flex items-center gap-3 p-2 bg-blue-50 rounded-lg border border-blue-200">
+                                                <span
+                                                        class="px-2 py-0.5 bg-blue-500 text-white rounded text-xs font-bold flex-shrink-0">P2</span>
+                                                <div class="text-xs">
+                                                        <strong>产品参数/兼容性问题</strong> — SEO 价值高 + 减少退货
+                                                </div>
+                                        </div>
+                                        <div
+                                                class="flex items-center gap-3 p-2 bg-slate-50 rounded-lg border border-slate-200">
+                                                <span
+                                                        class="px-2 py-0.5 bg-slate-400 text-white rounded text-xs font-bold flex-shrink-0">P3</span>
+                                                <div class="text-xs">
+                                                        <strong>使用方法/物流/一般问题</strong> — 正常排队处理
+                                                </div>
+                                        </div>
+                                </div>
+                                <div class="mt-3 p-2 bg-indigo-50 rounded text-xs text-indigo-800">
+                                        <i class="fas fa-brain mr-1"></i><strong>经验：</strong>一个有 10+ votes
+                                        的负面疑虑问题如果没有官方回答，相当于 Listing 上挂了一个"劝退广告"。必须第一时间处理。
+                                </div>
+                        </div>
+                </div>
+                <!-- Column 3: 回答模板 + 技巧 -->
+                <div class="lg:col-span-1 space-y-5">
+                        <!-- 回答撰写公式 -->
+                        <div class="bg-white rounded-xl border-2 border-emerald-200 p-5">
+                                <h2 class="text-base font-bold text-slate-800 mb-3 flex items-center gap-2">
+                                        <i class="fas fa-magic text-emerald-500"></i>万能回答公式
+                                </h2>
+                                <div class="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
+                                        <div class="space-y-3">
+                                                <div class="flex items-start gap-2">
+                                                        <span
+                                                                class="w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">1</span>
+                                                        <div class="text-xs">
+                                                                <strong>感谢 + 直接回答</strong><br />
+                                                                <span class="text-slate-500">"Thank you for your
+                                                                        question! Yes/No, [直接回答]."</span>
+                                                        </div>
+                                                </div>
+                                                <div class="flex items-start gap-2">
+                                                        <span
+                                                                class="w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">2</span>
+                                                        <div class="text-xs">
+                                                                <strong>补充细节 + 植入关键词</strong><br />
+                                                                <span class="text-slate-500">"Our [product] features
+                                                                        [specification + keyword], which
+                                                                        [benefit]."</span>
+                                                        </div>
+                                                </div>
+                                                <div class="flex items-start gap-2">
+                                                        <span
+                                                                class="w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">3</span>
+                                                        <div class="text-xs">
+                                                                <strong>增值信息 / 使用场景</strong><br />
+                                                                <span class="text-slate-500">"Many of our customers use
+                                                                        it for [scenario], and..."</span>
+                                                        </div>
+                                                </div>
+                                                <div class="flex items-start gap-2">
+                                                        <span
+                                                                class="w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">4</span>
+                                                        <div class="text-xs">
+                                                                <strong>结尾 — 品牌签名</strong><br />
+                                                                <span class="text-slate-500">"If you have any other
+                                                                        questions, please don't hesitate to ask. —
+                                                                        [Brand] Team"</span>
+                                                        </div>
+                                                </div>
+                                        </div>
+                                </div>
+                                <div class="mt-3 p-2 bg-amber-50 rounded text-xs text-amber-800">
+                                        <i class="fas fa-lightbulb mr-1"></i><strong>长度建议：</strong>50-150
+                                        词最佳。太短显得敷衍，太长没人看完。回答要能在手机屏幕上一屏看完。
+                                </div>
+                        </div>
+                        <!-- SEO 关键词植入技巧 -->
+                        <div class="bg-white rounded-xl border-2 border-blue-200 p-5">
+                                <h2 class="text-base font-bold text-slate-800 mb-3 flex items-center gap-2">
+                                        <i class="fas fa-search text-blue-500"></i>SEO 关键词植入技巧
+                                </h2>
+                                <div class="space-y-3 text-xs">
+                                        <div class="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                                                <h4 class="font-bold text-blue-800 mb-1">✅ 正确示范（自然植入）</h4>
+                                                <div
+                                                        class="bg-white rounded p-2 font-mono text-slate-700 leading-relaxed">
+                                                        Q: "Is this suitable for camping?"<br /><br />
+                                                        A: "Great question! Yes, our <strong>portable LED camping
+                                                                lantern</strong> is specifically designed for
+                                                        <strong>outdoor camping and hiking</strong>. It features an
+                                                        <strong>IP65 waterproof rating</strong> and <strong>rechargeable
+                                                                battery lasting up to 12 hours</strong>, making it ideal
+                                                        for <strong>tent lighting, backyard, and emergency
+                                                                use</strong>..."
+                                                </div>
+                                                <p class="mt-1 text-emerald-700">→ 自然植入了：portable LED camping lantern /
+                                                        outdoor camping and hiking / IP65 waterproof / rechargeable
+                                                        battery / tent lighting / emergency use</p>
+                                        </div>
+                                        <div class="bg-red-50 rounded-lg p-3 border border-red-200">
+                                                <h4 class="font-bold text-red-800 mb-1">❌ 错误示范（堆砌关键词）</h4>
+                                                <div
+                                                        class="bg-white rounded p-2 font-mono text-slate-700 leading-relaxed">
+                                                        A: "Yes, this camping lantern LED rechargeable waterproof
+                                                        portable outdoor camping light tent lamp is suitable for
+                                                        camping."
+                                                </div>
+                                                <p class="mt-1 text-red-700">→ 明显堆砌，不自然，可能被系统标记为spam</p>
+                                        </div>
+                                        <div class="p-2 bg-indigo-50 rounded border border-indigo-200">
+                                                <strong class="text-indigo-800">关键词来源：</strong>
+                                                <ul class="mt-1 ml-3 space-y-0.5 text-slate-600">
+                                                        <li>• 你的 Search Term 报告中的高转化词</li>
+                                                        <li>• 竞品 Listing 标题中的关键词</li>
+                                                        <li>• Brand Analytics 搜索词排名</li>
+                                                        <li>• 卖家精灵/Helium10 反查出的流量词</li>
+                                                        <li>• <strong>买家提问本身就是关键词灵感</strong></li>
+                                                </ul>
+                                        </div>
+                                </div>
+                        </div>
+                        <!-- 负面问题化解 -->
+                        <div class="bg-white rounded-xl border-2 border-amber-200 p-5">
+                                <h2 class="text-base font-bold text-slate-800 mb-3 flex items-center gap-2">
+                                        <i class="fas fa-shield-alt text-amber-500"></i>负面问题化解模板
+                                </h2>
+                                <div class="space-y-3 text-xs">
+                                        <div class="bg-amber-50 rounded-lg p-3 border border-amber-200">
+                                                <p class="font-bold text-amber-800 mb-1">Q: "Is this product cheap
+                                                        quality?"</p>
+                                                <div
+                                                        class="bg-white rounded p-2 font-mono text-slate-700 leading-relaxed">
+                                                        Thank you for your concern about quality — it's something we
+                                                        take very seriously. Our [Product Name] is manufactured using
+                                                        [specific material, e.g., "premium 304 stainless steel"] and has
+                                                        passed rigorous [CE/GS/TÜV] safety certification for the
+                                                        European market. Each unit undergoes a multi-point quality
+                                                        inspection before shipping. We also offer a [12-month/24-month]
+                                                        warranty for your peace of mind. If you ever have any issues,
+                                                        our customer service team is ready to help. — [Brand] Team
+                                                </div>
+                                                <p class="mt-1 text-emerald-700 font-semibold">→
+                                                        不否认问题，用事实（材质+认证+检验+保修）回应</p>
+                                        </div>
+                                        <div class="bg-red-50 rounded-lg p-3 border border-red-200">
+                                                <p class="font-bold text-red-800 mb-1">Q: "I've seen reviews saying this
+                                                        breaks easily?"</p>
+                                                <div
+                                                        class="bg-white rounded p-2 font-mono text-slate-700 leading-relaxed">
+                                                        We appreciate you raising this. We continuously monitor customer
+                                                        feedback and have made improvements to [specific component,
+                                                        e.g., "the hinge mechanism"] based on earlier feedback. The
+                                                        current version features [improvement detail]. We stand behind
+                                                        our product with a full [warranty period] warranty — if you
+                                                        experience any issues, we will replace it or refund you, no
+                                                        questions asked. — [Brand] Team
+                                                </div>
+                                                <p class="mt-1 text-emerald-700 font-semibold">→ 承认改进过 + 展示当前版本升级 + 兜底保障
+                                                </p>
+                                        </div>
+                                </div>
+                        </div>
+                </div>
+        </div>
+        <!-- ========== 6大场景回答模板 ========== -->
+        <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+                <h2 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2">
+                        <i class="fas fa-file-alt text-blue-500"></i>6 大场景回答模板 — 复制即用
                 </h2>
-                <div class="space-y-2">
-                    <div class="flex items-center gap-3 p-2 bg-red-50 rounded-lg border border-red-200">
-                        <span class="px-2 py-0.5 bg-red-600 text-white rounded text-xs font-bold flex-shrink-0">P0</span>
-                        <div class="text-xs">
-                            <strong>负面/质量疑虑问题</strong> — 不回答会阻碍购买决策
+                <p class="text-xs text-slate-500 mb-4">
+                        以下为英语主版，使用时替换 [占位符] 并用 DeepL 翻译为对应站点语言。每个回答都已植入关键词位占位，标记为 <strong
+                                class="text-blue-600">[KW:xxx]</strong>。
+                </p>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <!-- 模板1: 产品尺寸/规格 -->
+                        <div class="border border-slate-200 rounded-xl overflow-hidden">
+                                <div class="bg-blue-50 px-4 py-3 flex items-center justify-between cursor-pointer"
+                                        onclick="this.nextElementSibling.classList.toggle('hidden')">
+                                        <div class="flex items-center gap-2">
+                                                <span
+                                                        class="px-2 py-0.5 bg-blue-500 text-white rounded text-xs font-bold">A类</span>
+                                                <span class="font-bold text-slate-800 text-sm">#1 产品尺寸/规格</span>
+                                        </div>
+                                        <i class="fas fa-chevron-down text-slate-400 text-xs"></i>
+                                </div>
+                                <div class="p-3 border-t border-slate-100">
+                                        <p class="text-xs text-slate-500 mb-2">Q: "What are the exact dimensions?"</p>
+                                        <div
+                                                class="bg-slate-50 rounded p-3 text-xs font-mono text-slate-700 leading-relaxed border">
+                                                Thank you for your question! The [KW:Product Name] measures [L × W × H]
+                                                cm and weighs [X] g. The [KW:compact/portable design] makes it ideal for
+                                                [KW:use scenario, e.g., travel/home office/small spaces]. For detailed
+                                                dimensions of each component, please refer to the size chart in our
+                                                product images. If you need any specific measurements, please feel free
+                                                to ask! — [Brand] Team
+                                        </div>
+                                        <p class="mt-2 text-xs text-blue-700"><i
+                                                        class="fas fa-search mr-1"></i><strong>SEO 植入点：</strong>产品名 +
+                                                核心属性词 + 使用场景词</p>
+                                </div>
                         </div>
-                    </div>
-                    <div class="flex items-center gap-3 p-2 bg-amber-50 rounded-lg border border-amber-200">
-                        <span class="px-2 py-0.5 bg-amber-500 text-white rounded text-xs font-bold flex-shrink-0">P1</span>
-                        <div class="text-xs">
-                            <strong>高票数问题（≥5 votes）</strong> — 代表多人关心，影响面广
+                        <!-- 模板2: 兼容性 -->
+                        <div class="border border-slate-200 rounded-xl overflow-hidden">
+                                <div class="bg-amber-50 px-4 py-3 flex items-center justify-between cursor-pointer"
+                                        onclick="this.nextElementSibling.classList.toggle('hidden')">
+                                        <div class="flex items-center gap-2">
+                                                <span
+                                                        class="px-2 py-0.5 bg-amber-500 text-white rounded text-xs font-bold">C类</span>
+                                                <span class="font-bold text-slate-800 text-sm">#2 兼容性/适配</span>
+                                        </div>
+                                        <i class="fas fa-chevron-down text-slate-400 text-xs"></i>
+                                </div>
+                                <div class="p-3 border-t border-slate-100">
+                                        <p class="text-xs text-slate-500 mb-2">Q: "Does this work with [specific
+                                                device]?"</p>
+                                        <div
+                                                class="bg-slate-50 rounded p-3 text-xs font-mono text-slate-700 leading-relaxed border">
+                                                Great question! Yes, our [KW:Product Name] is fully compatible with
+                                                [specific device]. It also works with [KW:list of compatible
+                                                devices/models]. The [KW:universal design / standard connector type]
+                                                ensures seamless compatibility with most [device category]. Please check
+                                                the compatibility list in our product description for the full list. If
+                                                your specific model isn't listed, feel free to ask us! — [Brand] Team
+                                        </div>
+                                        <p class="mt-2 text-xs text-amber-700"><i
+                                                        class="fas fa-search mr-1"></i><strong>SEO 植入点：</strong>兼容设备名称 =
+                                                长尾关键词金矿</p>
+                                </div>
                         </div>
-                    </div>
-                    <div class="flex items-center gap-3 p-2 bg-blue-50 rounded-lg border border-blue-200">
-                        <span class="px-2 py-0.5 bg-blue-500 text-white rounded text-xs font-bold flex-shrink-0">P2</span>
-                        <div class="text-xs">
-                            <strong>产品参数/兼容性问题</strong> — SEO 价值高 + 减少退货
+                        <!-- 模板3: 使用方法 -->
+                        <div class="border border-slate-200 rounded-xl overflow-hidden">
+                                <div class="bg-emerald-50 px-4 py-3 flex items-center justify-between cursor-pointer"
+                                        onclick="this.nextElementSibling.classList.toggle('hidden')">
+                                        <div class="flex items-center gap-2">
+                                                <span
+                                                        class="px-2 py-0.5 bg-emerald-500 text-white rounded text-xs font-bold">B类</span>
+                                                <span class="font-bold text-slate-800 text-sm">#3 使用方法/功能</span>
+                                        </div>
+                                        <i class="fas fa-chevron-down text-slate-400 text-xs"></i>
+                                </div>
+                                <div class="p-3 border-t border-slate-100">
+                                        <p class="text-xs text-slate-500 mb-2">Q: "How do I set this up?"</p>
+                                        <div
+                                                class="bg-slate-50 rounded p-3 text-xs font-mono text-slate-700 leading-relaxed border">
+                                                Thank you for asking! Setting up your [KW:Product Name] is very
+                                                straightforward — most customers have it ready in under [X]
+                                                minutes:<br /><br />
+                                                1. [Step 1 — clear instruction]<br />
+                                                2. [Step 2 — clear instruction]<br />
+                                                3. [Step 3 — clear instruction]<br /><br />
+                                                A detailed instruction manual is included in the package, and you can
+                                                also find a setup guide in our product images. Our [KW:easy-to-use /
+                                                quick-setup design] was specifically created for hassle-free use. If you
+                                                need further help, our customer care team is always here. — [Brand] Team
+                                        </div>
+                                        <p class="mt-2 text-xs text-emerald-700"><i
+                                                        class="fas fa-search mr-1"></i><strong>SEO 植入点：</strong>easy to
+                                                use / quick setup 等体验词 + 产品名</p>
+                                </div>
                         </div>
-                    </div>
-                    <div class="flex items-center gap-3 p-2 bg-slate-50 rounded-lg border border-slate-200">
-                        <span class="px-2 py-0.5 bg-slate-400 text-white rounded text-xs font-bold flex-shrink-0">P3</span>
-                        <div class="text-xs">
-                            <strong>使用方法/物流/一般问题</strong> — 正常排队处理
+                        <!-- 模板4: 质量/认证 -->
+                        <div class="border border-slate-200 rounded-xl overflow-hidden">
+                                <div class="bg-red-50 px-4 py-3 flex items-center justify-between cursor-pointer"
+                                        onclick="this.nextElementSibling.classList.toggle('hidden')">
+                                        <div class="flex items-center gap-2">
+                                                <span
+                                                        class="px-2 py-0.5 bg-red-500 text-white rounded text-xs font-bold">D类</span>
+                                                <span class="font-bold text-slate-800 text-sm">#4 质量保证/安全认证</span>
+                                        </div>
+                                        <i class="fas fa-chevron-down text-slate-400 text-xs"></i>
+                                </div>
+                                <div class="p-3 border-t border-slate-100">
+                                        <p class="text-xs text-slate-500 mb-2">Q: "Is this product safe to use? What
+                                                certifications does it have?"</p>
+                                        <div
+                                                class="bg-slate-50 rounded p-3 text-xs font-mono text-slate-700 leading-relaxed border">
+                                                Absolutely! Safety is our top priority. Our [KW:Product Name] is [KW:CE
+                                                certified / GS certified / LFGB approved / RoHS compliant] and meets all
+                                                applicable European safety standards. It's manufactured from
+                                                [KW:material, e.g., BPA-free / food-grade / medical-grade] materials and
+                                                undergoes thorough quality inspection at multiple stages of production.
+                                                We also offer a [X]-month warranty for your peace of mind. If you'd like
+                                                to see our certification documentation, please contact us. — [Brand]
+                                                Team
+                                        </div>
+                                        <p class="mt-2 text-xs text-red-700"><i
+                                                        class="fas fa-search mr-1"></i><strong>SEO 植入点：</strong>认证名称 +
+                                                材质安全词 = 高转化信任词</p>
+                                </div>
                         </div>
-                    </div>
+                        <!-- 模板5: 包含内容/配件 -->
+                        <div class="border border-slate-200 rounded-xl overflow-hidden">
+                                <div class="bg-purple-50 px-4 py-3 flex items-center justify-between cursor-pointer"
+                                        onclick="this.nextElementSibling.classList.toggle('hidden')">
+                                        <div class="flex items-center gap-2">
+                                                <span
+                                                        class="px-2 py-0.5 bg-purple-500 text-white rounded text-xs font-bold">A类</span>
+                                                <span class="font-bold text-slate-800 text-sm">#5 包装内容/配件</span>
+                                        </div>
+                                        <i class="fas fa-chevron-down text-slate-400 text-xs"></i>
+                                </div>
+                                <div class="p-3 border-t border-slate-100">
+                                        <p class="text-xs text-slate-500 mb-2">Q: "What's included in the package?"</p>
+                                        <div
+                                                class="bg-slate-50 rounded p-3 text-xs font-mono text-slate-700 leading-relaxed border">
+                                                Great question! Your [KW:Product Name] package includes:<br /><br />
+                                                • 1x [Main product]<br />
+                                                • 1x [Accessory 1, e.g., USB-C charging cable]<br />
+                                                • 1x [Accessory 2, e.g., carrying pouch]<br />
+                                                • 1x User manual (English/German/French/Italian/Spanish)<br /><br />
+                                                Everything you need to get started is right in the box — [KW:no
+                                                additional purchase required / all-in-one kit]. If anything is missing
+                                                from your package, please contact us and we'll send replacements
+                                                immediately. — [Brand] Team
+                                        </div>
+                                        <p class="mt-2 text-xs text-purple-700"><i
+                                                        class="fas fa-search mr-1"></i><strong>SEO 植入点：</strong>配件名称 +
+                                                all-in-one / complete kit 等词</p>
+                                </div>
+                        </div>
+                        <!-- 模板6: 物流/保修 -->
+                        <div class="border border-slate-200 rounded-xl overflow-hidden">
+                                <div class="bg-slate-50 px-4 py-3 flex items-center justify-between cursor-pointer"
+                                        onclick="this.nextElementSibling.classList.toggle('hidden')">
+                                        <div class="flex items-center gap-2">
+                                                <span
+                                                        class="px-2 py-0.5 bg-slate-400 text-white rounded text-xs font-bold">E类</span>
+                                                <span class="font-bold text-slate-800 text-sm">#6 配送/保修/售后</span>
+                                        </div>
+                                        <i class="fas fa-chevron-down text-slate-400 text-xs"></i>
+                                </div>
+                                <div class="p-3 border-t border-slate-100">
+                                        <p class="text-xs text-slate-500 mb-2">Q: "How long is the warranty?"</p>
+                                        <div
+                                                class="bg-slate-50 rounded p-3 text-xs font-mono text-slate-700 leading-relaxed border">
+                                                Thank you for asking! We offer a [X]-month manufacturer's warranty on
+                                                our [KW:Product Name]. This covers any manufacturing defects or
+                                                functional issues. Additionally, your purchase is covered by Amazon's
+                                                A-to-Z Guarantee for extra peace of mind. If you experience any issues
+                                                at any time, simply contact us through Amazon — we'll arrange a
+                                                replacement or full refund, hassle-free. Your satisfaction is our top
+                                                priority. — [Brand] Team
+                                        </div>
+                                        <p class="mt-2 text-xs text-slate-600"><i
+                                                        class="fas fa-info-circle mr-1"></i><strong>注意：</strong>保修承诺请确保你能实际履行。欧洲消费者法律规定最低
+                                                2 年法定保修（Gewährleistung）。</p>
+                                </div>
+                        </div>
                 </div>
-                <div class="mt-3 p-2 bg-indigo-50 rounded text-xs text-indigo-800">
-                    <i class="fas fa-brain mr-1"></i><strong>经验：</strong>一个有 10+ votes 的负面疑虑问题如果没有官方回答，相当于 Listing 上挂了一个"劝退广告"。必须第一时间处理。
-                </div>
-            </div>
         </div>
-
-        <!-- Column 3: 回答模板 + 技巧 -->
-        <div class="lg:col-span-1 space-y-5">
-            <!-- 回答撰写公式 -->
-            <div class="bg-white rounded-xl border-2 border-emerald-200 p-5">
-                <h2 class="text-base font-bold text-slate-800 mb-3 flex items-center gap-2">
-                    <i class="fas fa-magic text-emerald-500"></i>万能回答公式
+        <!-- ========== 竞品 QA 挖掘策略 ========== -->
+        <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-binoculars text-purple-500"></i>竞品 QA 挖掘 — 每月必做
                 </h2>
-                <div class="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
-                    <div class="space-y-3">
-                        <div class="flex items-start gap-2">
-                            <span class="w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">1</span>
-                            <div class="text-xs">
-                                <strong>感谢 + 直接回答</strong><br>
-                                <span class="text-slate-500">"Thank you for your question! Yes/No, [直接回答]."</span>
-                            </div>
+                <p class="text-xs text-slate-500 mb-4">竞品的 QA 是免费的市场调研报告。买家问竞品的问题 = 买家对这个品类的真实关注点。</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                                <h4 class="font-bold text-purple-800 text-sm mb-2 flex items-center gap-1">
+                                        <i class="fas fa-search"></i>Step 1: 识别 + 提取
+                                </h4>
+                                <ul class="text-xs text-slate-600 space-y-1">
+                                        <li>• 进入 TOP 3-5 竞品的 QA 页面</li>
+                                        <li>• 按 "Most Votes" 排序</li>
+                                        <li>• 记录 TOP 10 高票问题</li>
+                                        <li>• 关注竞品<strong>未回答</strong>的问题（=竞品忽略的需求）</li>
+                                        <li>• 注意竞品<strong>回答不好</strong>的问题（=你的差异化机会）</li>
+                                </ul>
                         </div>
-                        <div class="flex items-start gap-2">
-                            <span class="w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">2</span>
-                            <div class="text-xs">
-                                <strong>补充细节 + 植入关键词</strong><br>
-                                <span class="text-slate-500">"Our [product] features [specification + keyword], which [benefit]."</span>
-                            </div>
+                        <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                                <h4 class="font-bold text-blue-800 text-sm mb-2 flex items-center gap-1">
+                                        <i class="fas fa-lightbulb"></i>Step 2: 分析 + 应用
+                                </h4>
+                                <ul class="text-xs text-slate-600 space-y-1">
+                                        <li>• 竞品高频问题 → 确认你的 Listing 是否已解答</li>
+                                        <li>• 未覆盖 → 立即补充到 Listing / A+ / QA</li>
+                                        <li>• 竞品弱点 → 在你的回答中重点强调你的优势</li>
+                                        <li>• 例：竞品被频繁问"防水吗？" → 你在 QA 中主动说明 IP 等级</li>
+                                </ul>
                         </div>
-                        <div class="flex items-start gap-2">
-                            <span class="w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">3</span>
-                            <div class="text-xs">
-                                <strong>增值信息 / 使用场景</strong><br>
-                                <span class="text-slate-500">"Many of our customers use it for [scenario], and..."</span>
-                            </div>
+                        <div class="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
+                                <h4 class="font-bold text-emerald-800 text-sm mb-2 flex items-center gap-1">
+                                        <i class="fas fa-key"></i>Step 3: 关键词收割
+                                </h4>
+                                <ul class="text-xs text-slate-600 space-y-1">
+                                        <li>• 买家提问用的自然语言 = 长尾关键词</li>
+                                        <li>• "Is this good for arthritis?" → 关键词 "for arthritis"</li>
+                                        <li>• "Can I use this on a camping trip?" → "camping trip"</li>
+                                        <li>• 收集这些词 → 植入你的 QA 回答 + Search Terms</li>
+                                        <li class="font-semibold text-emerald-800">• 这是最真实的用户搜索意图数据，比工具数据更有价值</li>
+                                </ul>
                         </div>
-                        <div class="flex items-start gap-2">
-                            <span class="w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">4</span>
-                            <div class="text-xs">
-                                <strong>结尾 — 品牌签名</strong><br>
-                                <span class="text-slate-500">"If you have any other questions, please don't hesitate to ask. — [Brand] Team"</span>
-                            </div>
-                        </div>
-                    </div>
                 </div>
-                <div class="mt-3 p-2 bg-amber-50 rounded text-xs text-amber-800">
-                    <i class="fas fa-lightbulb mr-1"></i><strong>长度建议：</strong>50-150 词最佳。太短显得敷衍，太长没人看完。回答要能在手机屏幕上一屏看完。
-                </div>
-            </div>
-
-            <!-- SEO 关键词植入技巧 -->
-            <div class="bg-white rounded-xl border-2 border-blue-200 p-5">
-                <h2 class="text-base font-bold text-slate-800 mb-3 flex items-center gap-2">
-                    <i class="fas fa-search text-blue-500"></i>SEO 关键词植入技巧
+        </div>
+        <!-- ========== 多语言回答注意事项 ========== -->
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-6 mb-6">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-globe-europe text-blue-500"></i>欧洲多站点 QA 回复注意事项
                 </h2>
-                <div class="space-y-3 text-xs">
-                    <div class="bg-blue-50 rounded-lg p-3 border border-blue-200">
-                        <h4 class="font-bold text-blue-800 mb-1">✅ 正确示范（自然植入）</h4>
-                        <div class="bg-white rounded p-2 font-mono text-slate-700 leading-relaxed">
-                            Q: "Is this suitable for camping?"<br><br>
-                            A: "Great question! Yes, our <strong>portable LED camping lantern</strong> is specifically designed for <strong>outdoor camping and hiking</strong>. It features an <strong>IP65 waterproof rating</strong> and <strong>rechargeable battery lasting up to 12 hours</strong>, making it ideal for <strong>tent lighting, backyard, and emergency use</strong>..."
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="bg-white rounded-lg p-4 border border-slate-200">
+                                <h4 class="font-bold text-slate-800 text-sm mb-2 flex items-center gap-1">
+                                        <span class="text-lg">🇩🇪</span> 德国站 (DE)
+                                </h4>
+                                <ul class="text-xs text-slate-600 space-y-1">
+                                        <li>• <strong>QA 数量最多</strong>，德国买家爱研究产品</li>
+                                        <li>• 必须用德语回复，Siezen（尊称 Sie）</li>
+                                        <li>• 提及认证（CE/GS/TÜV）德国人非常看重</li>
+                                        <li>• 单位用 cm / kg / °C（欧洲公制）</li>
+                                        <li>• 被问发票频率很高，直接引导下载 VAT Invoice</li>
+                                        <li class="text-blue-700 font-semibold">→ 最需要投入精力的站点</li>
+                                </ul>
                         </div>
-                        <p class="mt-1 text-emerald-700">→ 自然植入了：portable LED camping lantern / outdoor camping and hiking / IP65 waterproof / rechargeable battery / tent lighting / emergency use</p>
-                    </div>
-                    <div class="bg-red-50 rounded-lg p-3 border border-red-200">
-                        <h4 class="font-bold text-red-800 mb-1">❌ 错误示范（堆砌关键词）</h4>
-                        <div class="bg-white rounded p-2 font-mono text-slate-700 leading-relaxed">
-                            A: "Yes, this camping lantern LED rechargeable waterproof portable outdoor camping light tent lamp is suitable for camping."
+                        <div class="bg-white rounded-lg p-4 border border-slate-200">
+                                <h4 class="font-bold text-slate-800 text-sm mb-2 flex items-center gap-1">
+                                        <span class="text-lg">🇬🇧</span> 英国站 (UK)
+                                </h4>
+                                <ul class="text-xs text-slate-600 space-y-1">
+                                        <li>• QA 活跃度高，英语回复即可</li>
+                                        <li>• 英式拼写（colour, centre, metre）</li>
+                                        <li>• 脱欧后 UK 和 EU 的 QA 不再共享</li>
+                                        <li>• 提及 UKCA（代替CE）如果是 UK 独有要求</li>
+                                        <li>• 语气保持友好且略带幽默（英式风格）</li>
+                                        <li class="text-blue-700 font-semibold">→ 注意用词与美式英语的区别</li>
+                                </ul>
                         </div>
-                        <p class="mt-1 text-red-700">→ 明显堆砌，不自然，可能被系统标记为spam</p>
-                    </div>
-                    <div class="p-2 bg-indigo-50 rounded border border-indigo-200">
-                        <strong class="text-indigo-800">关键词来源：</strong>
-                        <ul class="mt-1 ml-3 space-y-0.5 text-slate-600">
-                            <li>• 你的 Search Term 报告中的高转化词</li>
-                            <li>• 竞品 Listing 标题中的关键词</li>
-                            <li>• Brand Analytics 搜索词排名</li>
-                            <li>• 卖家精灵/Helium10 反查出的流量词</li>
-                            <li>• <strong>买家提问本身就是关键词灵感</strong></li>
-                        </ul>
-                    </div>
+                        <div class="bg-white rounded-lg p-4 border border-slate-200">
+                                <h4 class="font-bold text-slate-800 text-sm mb-2 flex items-center gap-1">
+                                        <span class="text-lg">🇫🇷</span> 法国站 (FR)
+                                </h4>
+                                <ul class="text-xs text-slate-600 space-y-1">
+                                        <li>• 法国买家提问风格偏详细</li>
+                                        <li>• 必须用法语，Vouvoiement（用 Vous）</li>
+                                        <li>• 法国人对产品原产地/品牌故事感兴趣</li>
+                                        <li>• 环保/可回收相关问题较多</li>
+                                        <li>• 回答风格可以稍微详细/优美一些</li>
+                                        <li class="text-blue-700 font-semibold">→ 回答长度可以比德国站略长</li>
+                                </ul>
+                        </div>
+                        <div class="bg-white rounded-lg p-4 border border-slate-200">
+                                <h4 class="font-bold text-slate-800 text-sm mb-2 flex items-center gap-1">
+                                        <span class="text-lg">🇮🇹</span> 意大利站 (IT)
+                                </h4>
+                                <ul class="text-xs text-slate-600 space-y-1">
+                                        <li>• QA 数量相对较少</li>
+                                        <li>• 用意大利语回复效果更好</li>
+                                        <li>• 意大利买家重视设计/美观</li>
+                                        <li>• 可以在回答中强调产品的设计美感</li>
+                                        <li>• 语气亲切热情</li>
+                                        <li class="text-blue-700 font-semibold">→ QA 少但每条影响力大</li>
+                                </ul>
+                        </div>
+                        <div class="bg-white rounded-lg p-4 border border-slate-200">
+                                <h4 class="font-bold text-slate-800 text-sm mb-2 flex items-center gap-1">
+                                        <span class="text-lg">🇪🇸</span> 西班牙站 (ES)
+                                </h4>
+                                <ul class="text-xs text-slate-600 space-y-1">
+                                        <li>• QA 活跃度中等</li>
+                                        <li>• 用西班牙语（Castellano）</li>
+                                        <li>• 西班牙买家较直接，喜欢简洁明了</li>
+                                        <li>• 价格相关问题较多（价格敏感市场）</li>
+                                        <li>• 电压规格经常被问（220V/欧标插头）</li>
+                                        <li class="text-blue-700 font-semibold">→ 简洁清晰最重要</li>
+                                </ul>
+                        </div>
+                        <div class="bg-white rounded-lg p-4 border border-blue-200 border-2">
+                                <h4 class="font-bold text-blue-800 text-sm mb-2 flex items-center gap-1">
+                                        <i class="fas fa-sync-alt text-blue-500"></i> 跨站 QA 同步
+                                </h4>
+                                <ul class="text-xs text-slate-600 space-y-1">
+                                        <li>• 欧洲站（DE/FR/IT/ES/NL）的 QA 会<strong>自动翻译展示</strong></li>
+                                        <li>• DE站的 QA 可能出现在 FR/IT/ES/NL 页面</li>
+                                        <li>• <strong>但你的官方回复只在原站显示</strong></li>
+                                        <li>• 策略：同一高频问题在各站都做官方回复</li>
+                                        <li>• UK站独立，不与EU共享</li>
+                                        <li class="text-blue-700 font-semibold">→ 优先在 DE 站完善，辐射最广</li>
+                                </ul>
+                        </div>
                 </div>
-            </div>
-
-            <!-- 负面问题化解 -->
-            <div class="bg-white rounded-xl border-2 border-amber-200 p-5">
-                <h2 class="text-base font-bold text-slate-800 mb-3 flex items-center gap-2">
-                    <i class="fas fa-shield-alt text-amber-500"></i>负面问题化解模板
+        </div>
+        <!-- ========== QA 主动布局策略 ========== -->
+        <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-chess text-indigo-500"></i>QA 主动布局策略 — 不只是被动回答
                 </h2>
-                <div class="space-y-3 text-xs">
-                    <div class="bg-amber-50 rounded-lg p-3 border border-amber-200">
-                        <p class="font-bold text-amber-800 mb-1">Q: "Is this product cheap quality?"</p>
-                        <div class="bg-white rounded p-2 font-mono text-slate-700 leading-relaxed">
-                            Thank you for your concern about quality — it's something we take very seriously. Our [Product Name] is manufactured using [specific material, e.g., "premium 304 stainless steel"] and has passed rigorous [CE/GS/TÜV] safety certification for the European market. Each unit undergoes a multi-point quality inspection before shipping. We also offer a [12-month/24-month] warranty for your peace of mind. If you ever have any issues, our customer service team is ready to help. — [Brand] Team
+                <p class="text-xs text-slate-500 mb-4">除了被动等买家提问，你还可以主动引导 QA 的内容和方向。以下是合规擦边的策略。</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- 合规策略 -->
+                        <div class="space-y-3">
+                                <div class="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
+                                        <h4 class="font-bold text-emerald-800 text-sm mb-2 flex items-center gap-1">
+                                                <i class="fas fa-check-circle"></i>✅ 合规操作
+                                        </h4>
+                                        <div class="space-y-2 text-xs text-slate-700">
+                                                <div class="flex items-start gap-2">
+                                                        <span class="font-bold text-emerald-600 flex-shrink-0">1.</span>
+                                                        <div>
+                                                                <strong>预判式回答</strong>：分析竞品高频 QA 和你的客服邮件高频问题，整理出 10
+                                                                个"最可能被问的问题"。当这些问题出现时，你已经有完美的回答模板了——秒回。
+                                                        </div>
+                                                </div>
+                                                <div class="flex items-start gap-2">
+                                                        <span class="font-bold text-emerald-600 flex-shrink-0">2.</span>
+                                                        <div>
+                                                                <strong>Listing 倒逼 QA</strong>：在 Listing 的 Bullet Points
+                                                                或 A+ 中提及一些细节参数但不完全展开，引导买家来 QA
+                                                                追问细节——然后你用官方回答详细展开（植入更多关键词）。
+                                                        </div>
+                                                </div>
+                                                <div class="flex items-start gap-2">
+                                                        <span class="font-bold text-emerald-600 flex-shrink-0">3.</span>
+                                                        <div>
+                                                                <strong>利用"Upvote"机制</strong>：亚马逊 QA 排序依据
+                                                                votes。你作为买家账户（个人购物账号）可以对有价值的问题点
+                                                                "Upvote"，让好问题排到前面——但不要操纵。
+                                                        </div>
+                                                </div>
+                                                <div class="flex items-start gap-2">
+                                                        <span class="font-bold text-emerald-600 flex-shrink-0">4.</span>
+                                                        <div>
+                                                                <strong>产品卡片引导提问</strong>：在产品内附卡片上写"Have questions about
+                                                                your product? Ask in the Q&amp;A section on our Amazon
+                                                                product page!"——完全合规。
+                                                        </div>
+                                                </div>
+                                        </div>
+                                </div>
                         </div>
-                        <p class="mt-1 text-emerald-700 font-semibold">→ 不否认问题，用事实（材质+认证+检验+保修）回应</p>
-                    </div>
-                    <div class="bg-red-50 rounded-lg p-3 border border-red-200">
-                        <p class="font-bold text-red-800 mb-1">Q: "I've seen reviews saying this breaks easily?"</p>
-                        <div class="bg-white rounded p-2 font-mono text-slate-700 leading-relaxed">
-                            We appreciate you raising this. We continuously monitor customer feedback and have made improvements to [specific component, e.g., "the hinge mechanism"] based on earlier feedback. The current version features [improvement detail]. We stand behind our product with a full [warranty period] warranty — if you experience any issues, we will replace it or refund you, no questions asked. — [Brand] Team
+                        <!-- 灰色地带警告 -->
+                        <div class="space-y-3">
+                                <div class="bg-amber-50 rounded-lg p-4 border border-amber-200">
+                                        <h4 class="font-bold text-amber-800 text-sm mb-2 flex items-center gap-1">
+                                                <i class="fas fa-exclamation-triangle"></i>⚠️ 灰色地带 / 不建议
+                                        </h4>
+                                        <div class="space-y-2 text-xs text-slate-700">
+                                                <div class="flex items-start gap-2">
+                                                        <i
+                                                                class="fas fa-exclamation-circle text-amber-500 mt-0.5 flex-shrink-0"></i>
+                                                        <div>
+                                                                <strong>让朋友/家人提问然后你回答</strong> — 技术上难以被检测，但如果被发现属于操纵
+                                                                QA。风险不高但不推荐大量操作。如果做，间隔要长，内容要自然，且问题确实有价值。
+                                                        </div>
+                                                </div>
+                                                <div class="flex items-start gap-2">
+                                                        <i
+                                                                class="fas fa-exclamation-circle text-amber-500 mt-0.5 flex-shrink-0"></i>
+                                                        <div>
+                                                                <strong>用买家账号给自己的回答点 Helpful</strong> —
+                                                                低风险但不建议频繁操作。偶尔可以，但不要用多个账号刷。
+                                                        </div>
+                                                </div>
+                                        </div>
+                                </div>
+                                <div class="bg-red-50 rounded-lg p-4 border border-red-200">
+                                        <h4 class="font-bold text-red-800 text-sm mb-2 flex items-center gap-1">
+                                                <i class="fas fa-ban"></i>❌ 绝对不做
+                                        </h4>
+                                        <div class="space-y-2 text-xs text-slate-700">
+                                                <div class="flex items-start gap-2">
+                                                        <i class="fas fa-times text-red-500 mt-0.5 flex-shrink-0"></i>
+                                                        <span>用多个账号批量自问自答/刷 QA 数量</span>
+                                                </div>
+                                                <div class="flex items-start gap-2">
+                                                        <i class="fas fa-times text-red-500 mt-0.5 flex-shrink-0"></i>
+                                                        <span>在竞品 QA 中恶意提问/回答引导买家来你这</span>
+                                                </div>
+                                                <div class="flex items-start gap-2">
+                                                        <i class="fas fa-times text-red-500 mt-0.5 flex-shrink-0"></i>
+                                                        <span>使用第三方服务/软件批量操作 QA</span>
+                                                </div>
+                                                <div class="flex items-start gap-2">
+                                                        <i class="fas fa-times text-red-500 mt-0.5 flex-shrink-0"></i>
+                                                        <span>在回答中嵌入跟踪链接/缩短链接</span>
+                                                </div>
+                                        </div>
+                                </div>
                         </div>
-                        <p class="mt-1 text-emerald-700 font-semibold">→ 承认改进过 + 展示当前版本升级 + 兜底保障</p>
-                    </div>
                 </div>
-            </div>
         </div>
-    </div>
-
-    <!-- ========== 6大场景回答模板 ========== -->
-    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-        <h2 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2">
-            <i class="fas fa-file-alt text-blue-500"></i>6 大场景回答模板 — 复制即用
-        </h2>
-        <p class="text-xs text-slate-500 mb-4">
-            以下为英语主版，使用时替换 [占位符] 并用 DeepL 翻译为对应站点语言。每个回答都已植入关键词位占位，标记为 <strong class="text-blue-600">[KW:xxx]</strong>。
-        </p>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <!-- 模板1: 产品尺寸/规格 -->
-            <div class="border border-slate-200 rounded-xl overflow-hidden">
-                <div class="bg-blue-50 px-4 py-3 flex items-center justify-between cursor-pointer" onclick="this.nextElementSibling.classList.toggle('hidden')">
-                    <div class="flex items-center gap-2">
-                        <span class="px-2 py-0.5 bg-blue-500 text-white rounded text-xs font-bold">A类</span>
-                        <span class="font-bold text-slate-800 text-sm">#1 产品尺寸/规格</span>
-                    </div>
-                    <i class="fas fa-chevron-down text-slate-400 text-xs"></i>
+        <!-- ========== QA 管理表 ========== -->
+        <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-table text-teal-500"></i>QA 管理追踪表（Google Sheet）
+                </h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                                <h3 class="font-bold text-slate-700 text-sm mb-3">📊 字段设计</h3>
+                                <div class="overflow-x-auto">
+                                        <table class="w-full text-xs border-collapse">
+                                                <thead>
+                                                        <tr class="bg-teal-100">
+                                                                <th
+                                                                        class="border border-teal-200 px-2 py-1.5 text-left">
+                                                                        字段</th>
+                                                                <th
+                                                                        class="border border-teal-200 px-2 py-1.5 text-left">
+                                                                        说明</th>
+                                                                <th
+                                                                        class="border border-teal-200 px-2 py-1.5 text-left">
+                                                                        示例</th>
+                                                        </tr>
+                                                </thead>
+                                                <tbody>
+                                                        <tr>
+                                                                <td
+                                                                        class="border border-slate-200 px-2 py-1.5 font-semibold">
+                                                                        日期</td>
+                                                                <td class="border border-slate-200 px-2 py-1.5">发现日期
+                                                                </td>
+                                                                <td
+                                                                        class="border border-slate-200 px-2 py-1.5 text-slate-500">
+                                                                        2025-06-10</td>
+                                                        </tr>
+                                                        <tr class="bg-slate-50">
+                                                                <td
+                                                                        class="border border-slate-200 px-2 py-1.5 font-semibold">
+                                                                        站点</td>
+                                                                <td class="border border-slate-200 px-2 py-1.5">哪个站</td>
+                                                                <td
+                                                                        class="border border-slate-200 px-2 py-1.5 text-slate-500">
+                                                                        DE</td>
+                                                        </tr>
+                                                        <tr>
+                                                                <td
+                                                                        class="border border-slate-200 px-2 py-1.5 font-semibold">
+                                                                        ASIN</td>
+                                                                <td class="border border-slate-200 px-2 py-1.5">产品</td>
+                                                                <td
+                                                                        class="border border-slate-200 px-2 py-1.5 text-slate-500">
+                                                                        B0XXXXXXXX</td>
+                                                        </tr>
+                                                        <tr class="bg-slate-50">
+                                                                <td
+                                                                        class="border border-slate-200 px-2 py-1.5 font-semibold">
+                                                                        问题原文</td>
+                                                                <td class="border border-slate-200 px-2 py-1.5">买家提问
+                                                                </td>
+                                                                <td
+                                                                        class="border border-slate-200 px-2 py-1.5 text-slate-500">
+                                                                        Ist das wasserdicht?</td>
+                                                        </tr>
+                                                        <tr>
+                                                                <td
+                                                                        class="border border-slate-200 px-2 py-1.5 font-semibold">
+                                                                        问题分类</td>
+                                                                <td class="border border-slate-200 px-2 py-1.5">A-F类
+                                                                </td>
+                                                                <td
+                                                                        class="border border-slate-200 px-2 py-1.5 text-slate-500">
+                                                                        A-产品参数</td>
+                                                        </tr>
+                                                        <tr class="bg-slate-50">
+                                                                <td
+                                                                        class="border border-slate-200 px-2 py-1.5 font-semibold">
+                                                                        投票数</td>
+                                                                <td class="border border-slate-200 px-2 py-1.5">有多少人关心
+                                                                </td>
+                                                                <td
+                                                                        class="border border-slate-200 px-2 py-1.5 text-slate-500">
+                                                                        12</td>
+                                                        </tr>
+                                                        <tr>
+                                                                <td
+                                                                        class="border border-slate-200 px-2 py-1.5 font-semibold">
+                                                                        是否已回复</td>
+                                                                <td class="border border-slate-200 px-2 py-1.5">官方回复状态
+                                                                </td>
+                                                                <td
+                                                                        class="border border-slate-200 px-2 py-1.5 text-slate-500">
+                                                                        ✅ 已回复</td>
+                                                        </tr>
+                                                        <tr class="bg-slate-50">
+                                                                <td
+                                                                        class="border border-slate-200 px-2 py-1.5 font-semibold">
+                                                                        植入关键词</td>
+                                                                <td class="border border-slate-200 px-2 py-1.5">回答中的SEO词
+                                                                </td>
+                                                                <td
+                                                                        class="border border-slate-200 px-2 py-1.5 text-slate-500">
+                                                                        waterproof IP65</td>
+                                                        </tr>
+                                                        <tr>
+                                                                <td
+                                                                        class="border border-slate-200 px-2 py-1.5 font-semibold">
+                                                                        Listing反哺</td>
+                                                                <td class="border border-slate-200 px-2 py-1.5">
+                                                                        是否需更新Listing</td>
+                                                                <td
+                                                                        class="border border-slate-200 px-2 py-1.5 text-slate-500">
+                                                                        → 加入Bullet #3</td>
+                                                        </tr>
+                                                </tbody>
+                                        </table>
+                                </div>
+                        </div>
+                        <div>
+                                <h3 class="font-bold text-slate-700 text-sm mb-3">📋 月度 QA 分析要点</h3>
+                                <div class="bg-teal-50 rounded-lg p-4 border border-teal-200 space-y-3">
+                                        <div>
+                                                <h4 class="font-bold text-teal-800 text-xs mb-1">一、QA 健康度检查</h4>
+                                                <ul class="text-xs text-slate-600 space-y-0.5 ml-3">
+                                                        <li>• 各核心 ASIN 的 QA 总数量</li>
+                                                        <li>• 官方回复覆盖率（目标 100%）</li>
+                                                        <li>• 是否有过期/不准确的旧回答需要更新</li>
+                                                </ul>
+                                        </div>
+                                        <div>
+                                                <h4 class="font-bold text-teal-800 text-xs mb-1">二、高频问题 TOP 5</h4>
+                                                <ul class="text-xs text-slate-600 space-y-0.5 ml-3">
+                                                        <li>• 本月被问最多的 5 个问题</li>
+                                                        <li>• 对应的 Listing 是否已覆盖这些信息</li>
+                                                        <li>• 需要更新的 Listing / A+ / 说明书</li>
+                                                </ul>
+                                        </div>
+                                        <div>
+                                                <h4 class="font-bold text-teal-800 text-xs mb-1">三、SEO 关键词收获</h4>
+                                                <ul class="text-xs text-slate-600 space-y-0.5 ml-3">
+                                                        <li>• 从 QA 中发现的新关键词/长尾词</li>
+                                                        <li>• 是否已加入 Search Terms / Backend</li>
+                                                        <li>• 竞品 QA 中挖掘到的有价值信息</li>
+                                                </ul>
+                                        </div>
+                                        <div>
+                                                <h4 class="font-bold text-teal-800 text-xs mb-1">四、异常信号监控</h4>
+                                                <ul class="text-xs text-slate-600 space-y-0.5 ml-3">
+                                                        <li>• 是否出现竞对恶意提问</li>
+                                                        <li>• 是否有安全相关问题</li>
+                                                        <li>• 是否有买家在 QA 中留下负面体验</li>
+                                                </ul>
+                                        </div>
+                                </div>
+                                <div
+                                        class="mt-3 bg-amber-50 rounded-lg p-3 text-xs text-amber-800 border border-amber-200">
+                                        <i class="fas fa-lightbulb mr-1"></i>
+                                        <strong>效率技巧：</strong>用 Google Sheet 的 COUNTIF 函数自动统计各分类问题数量。
+                                        条件格式高亮"未回复"的行。月度分析只需 10 分钟。
+                                </div>
+                        </div>
                 </div>
-                <div class="p-3 border-t border-slate-100">
-                    <p class="text-xs text-slate-500 mb-2">Q: "What are the exact dimensions?"</p>
-                    <div class="bg-slate-50 rounded p-3 text-xs font-mono text-slate-700 leading-relaxed border">
-                        Thank you for your question! The [KW:Product Name] measures [L × W × H] cm and weighs [X] g. The [KW:compact/portable design] makes it ideal for [KW:use scenario, e.g., travel/home office/small spaces]. For detailed dimensions of each component, please refer to the size chart in our product images. If you need any specific measurements, please feel free to ask! — [Brand] Team
-                    </div>
-                    <p class="mt-2 text-xs text-blue-700"><i class="fas fa-search mr-1"></i><strong>SEO 植入点：</strong>产品名 + 核心属性词 + 使用场景词</p>
-                </div>
-            </div>
-
-            <!-- 模板2: 兼容性 -->
-            <div class="border border-slate-200 rounded-xl overflow-hidden">
-                <div class="bg-amber-50 px-4 py-3 flex items-center justify-between cursor-pointer" onclick="this.nextElementSibling.classList.toggle('hidden')">
-                    <div class="flex items-center gap-2">
-                        <span class="px-2 py-0.5 bg-amber-500 text-white rounded text-xs font-bold">C类</span>
-                        <span class="font-bold text-slate-800 text-sm">#2 兼容性/适配</span>
-                    </div>
-                    <i class="fas fa-chevron-down text-slate-400 text-xs"></i>
-                </div>
-                <div class="p-3 border-t border-slate-100">
-                    <p class="text-xs text-slate-500 mb-2">Q: "Does this work with [specific device]?"</p>
-                    <div class="bg-slate-50 rounded p-3 text-xs font-mono text-slate-700 leading-relaxed border">
-                        Great question! Yes, our [KW:Product Name] is fully compatible with [specific device]. It also works with [KW:list of compatible devices/models]. The [KW:universal design / standard connector type] ensures seamless compatibility with most [device category]. Please check the compatibility list in our product description for the full list. If your specific model isn't listed, feel free to ask us! — [Brand] Team
-                    </div>
-                    <p class="mt-2 text-xs text-amber-700"><i class="fas fa-search mr-1"></i><strong>SEO 植入点：</strong>兼容设备名称 = 长尾关键词金矿</p>
-                </div>
-            </div>
-
-            <!-- 模板3: 使用方法 -->
-            <div class="border border-slate-200 rounded-xl overflow-hidden">
-                <div class="bg-emerald-50 px-4 py-3 flex items-center justify-between cursor-pointer" onclick="this.nextElementSibling.classList.toggle('hidden')">
-                    <div class="flex items-center gap-2">
-                        <span class="px-2 py-0.5 bg-emerald-500 text-white rounded text-xs font-bold">B类</span>
-                        <span class="font-bold text-slate-800 text-sm">#3 使用方法/功能</span>
-                    </div>
-                    <i class="fas fa-chevron-down text-slate-400 text-xs"></i>
-                </div>
-                <div class="p-3 border-t border-slate-100">
-                    <p class="text-xs text-slate-500 mb-2">Q: "How do I set this up?"</p>
-                    <div class="bg-slate-50 rounded p-3 text-xs font-mono text-slate-700 leading-relaxed border">
-                        Thank you for asking! Setting up your [KW:Product Name] is very straightforward — most customers have it ready in under [X] minutes:<br><br>
-                        1. [Step 1 — clear instruction]<br>
-                        2. [Step 2 — clear instruction]<br>
-                        3. [Step 3 — clear instruction]<br><br>
-                        A detailed instruction manual is included in the package, and you can also find a setup guide in our product images. Our [KW:easy-to-use / quick-setup design] was specifically created for hassle-free use. If you need further help, our customer care team is always here. — [Brand] Team
-                    </div>
-                    <p class="mt-2 text-xs text-emerald-700"><i class="fas fa-search mr-1"></i><strong>SEO 植入点：</strong>easy to use / quick setup 等体验词 + 产品名</p>
-                </div>
-            </div>
-
-            <!-- 模板4: 质量/认证 -->
-            <div class="border border-slate-200 rounded-xl overflow-hidden">
-                <div class="bg-red-50 px-4 py-3 flex items-center justify-between cursor-pointer" onclick="this.nextElementSibling.classList.toggle('hidden')">
-                    <div class="flex items-center gap-2">
-                        <span class="px-2 py-0.5 bg-red-500 text-white rounded text-xs font-bold">D类</span>
-                        <span class="font-bold text-slate-800 text-sm">#4 质量保证/安全认证</span>
-                    </div>
-                    <i class="fas fa-chevron-down text-slate-400 text-xs"></i>
-                </div>
-                <div class="p-3 border-t border-slate-100">
-                    <p class="text-xs text-slate-500 mb-2">Q: "Is this product safe to use? What certifications does it have?"</p>
-                    <div class="bg-slate-50 rounded p-3 text-xs font-mono text-slate-700 leading-relaxed border">
-                        Absolutely! Safety is our top priority. Our [KW:Product Name] is [KW:CE certified / GS certified / LFGB approved / RoHS compliant] and meets all applicable European safety standards. It's manufactured from [KW:material, e.g., BPA-free / food-grade / medical-grade] materials and undergoes thorough quality inspection at multiple stages of production. We also offer a [X]-month warranty for your peace of mind. If you'd like to see our certification documentation, please contact us. — [Brand] Team
-                    </div>
-                    <p class="mt-2 text-xs text-red-700"><i class="fas fa-search mr-1"></i><strong>SEO 植入点：</strong>认证名称 + 材质安全词 = 高转化信任词</p>
-                </div>
-            </div>
-
-            <!-- 模板5: 包含内容/配件 -->
-            <div class="border border-slate-200 rounded-xl overflow-hidden">
-                <div class="bg-purple-50 px-4 py-3 flex items-center justify-between cursor-pointer" onclick="this.nextElementSibling.classList.toggle('hidden')">
-                    <div class="flex items-center gap-2">
-                        <span class="px-2 py-0.5 bg-purple-500 text-white rounded text-xs font-bold">A类</span>
-                        <span class="font-bold text-slate-800 text-sm">#5 包装内容/配件</span>
-                    </div>
-                    <i class="fas fa-chevron-down text-slate-400 text-xs"></i>
-                </div>
-                <div class="p-3 border-t border-slate-100">
-                    <p class="text-xs text-slate-500 mb-2">Q: "What's included in the package?"</p>
-                    <div class="bg-slate-50 rounded p-3 text-xs font-mono text-slate-700 leading-relaxed border">
-                        Great question! Your [KW:Product Name] package includes:<br><br>
-                        • 1x [Main product]<br>
-                        • 1x [Accessory 1, e.g., USB-C charging cable]<br>
-                        • 1x [Accessory 2, e.g., carrying pouch]<br>
-                        • 1x User manual (English/German/French/Italian/Spanish)<br><br>
-                        Everything you need to get started is right in the box — [KW:no additional purchase required / all-in-one kit]. If anything is missing from your package, please contact us and we'll send replacements immediately. — [Brand] Team
-                    </div>
-                    <p class="mt-2 text-xs text-purple-700"><i class="fas fa-search mr-1"></i><strong>SEO 植入点：</strong>配件名称 + all-in-one / complete kit 等词</p>
-                </div>
-            </div>
-
-            <!-- 模板6: 物流/保修 -->
-            <div class="border border-slate-200 rounded-xl overflow-hidden">
-                <div class="bg-slate-50 px-4 py-3 flex items-center justify-between cursor-pointer" onclick="this.nextElementSibling.classList.toggle('hidden')">
-                    <div class="flex items-center gap-2">
-                        <span class="px-2 py-0.5 bg-slate-400 text-white rounded text-xs font-bold">E类</span>
-                        <span class="font-bold text-slate-800 text-sm">#6 配送/保修/售后</span>
-                    </div>
-                    <i class="fas fa-chevron-down text-slate-400 text-xs"></i>
-                </div>
-                <div class="p-3 border-t border-slate-100">
-                    <p class="text-xs text-slate-500 mb-2">Q: "How long is the warranty?"</p>
-                    <div class="bg-slate-50 rounded p-3 text-xs font-mono text-slate-700 leading-relaxed border">
-                        Thank you for asking! We offer a [X]-month manufacturer's warranty on our [KW:Product Name]. This covers any manufacturing defects or functional issues. Additionally, your purchase is covered by Amazon's A-to-Z Guarantee for extra peace of mind. If you experience any issues at any time, simply contact us through Amazon — we'll arrange a replacement or full refund, hassle-free. Your satisfaction is our top priority. — [Brand] Team
-                    </div>
-                    <p class="mt-2 text-xs text-slate-600"><i class="fas fa-info-circle mr-1"></i><strong>注意：</strong>保修承诺请确保你能实际履行。欧洲消费者法律规定最低 2 年法定保修（Gewährleistung）。</p>
-                </div>
-            </div>
         </div>
-    </div>
-
-    <!-- ========== 竞品 QA 挖掘策略 ========== -->
-    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <i class="fas fa-binoculars text-purple-500"></i>竞品 QA 挖掘 — 每月必做
-        </h2>
-        <p class="text-xs text-slate-500 mb-4">竞品的 QA 是免费的市场调研报告。买家问竞品的问题 = 买家对这个品类的真实关注点。</p>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div class="bg-purple-50 rounded-lg p-4 border border-purple-200">
-                <h4 class="font-bold text-purple-800 text-sm mb-2 flex items-center gap-1">
-                    <i class="fas fa-search"></i>Step 1: 识别 + 提取
-                </h4>
-                <ul class="text-xs text-slate-600 space-y-1">
-                    <li>• 进入 TOP 3-5 竞品的 QA 页面</li>
-                    <li>• 按 "Most Votes" 排序</li>
-                    <li>• 记录 TOP 10 高票问题</li>
-                    <li>• 关注竞品<strong>未回答</strong>的问题（=竞品忽略的需求）</li>
-                    <li>• 注意竞品<strong>回答不好</strong>的问题（=你的差异化机会）</li>
-                </ul>
-            </div>
-            <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                <h4 class="font-bold text-blue-800 text-sm mb-2 flex items-center gap-1">
-                    <i class="fas fa-lightbulb"></i>Step 2: 分析 + 应用
-                </h4>
-                <ul class="text-xs text-slate-600 space-y-1">
-                    <li>• 竞品高频问题 → 确认你的 Listing 是否已解答</li>
-                    <li>• 未覆盖 → 立即补充到 Listing / A+ / QA</li>
-                    <li>• 竞品弱点 → 在你的回答中重点强调你的优势</li>
-                    <li>• 例：竞品被频繁问"防水吗？" → 你在 QA 中主动说明 IP 等级</li>
-                </ul>
-            </div>
-            <div class="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
-                <h4 class="font-bold text-emerald-800 text-sm mb-2 flex items-center gap-1">
-                    <i class="fas fa-key"></i>Step 3: 关键词收割
-                </h4>
-                <ul class="text-xs text-slate-600 space-y-1">
-                    <li>• 买家提问用的自然语言 = 长尾关键词</li>
-                    <li>• "Is this good for arthritis?" → 关键词 "for arthritis"</li>
-                    <li>• "Can I use this on a camping trip?" → "camping trip"</li>
-                    <li>• 收集这些词 → 植入你的 QA 回答 + Search Terms</li>
-                    <li class="font-semibold text-emerald-800">• 这是最真实的用户搜索意图数据，比工具数据更有价值</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <!-- ========== 多语言回答注意事项 ========== -->
-    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-6 mb-6">
-        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <i class="fas fa-globe-europe text-blue-500"></i>欧洲多站点 QA 回复注意事项
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div class="bg-white rounded-lg p-4 border border-slate-200">
-                <h4 class="font-bold text-slate-800 text-sm mb-2 flex items-center gap-1">
-                    <span class="text-lg">🇩🇪</span> 德国站 (DE)
-                </h4>
-                <ul class="text-xs text-slate-600 space-y-1">
-                    <li>• <strong>QA 数量最多</strong>，德国买家爱研究产品</li>
-                    <li>• 必须用德语回复，Siezen（尊称 Sie）</li>
-                    <li>• 提及认证（CE/GS/TÜV）德国人非常看重</li>
-                    <li>• 单位用 cm / kg / °C（欧洲公制）</li>
-                    <li>• 被问发票频率很高，直接引导下载 VAT Invoice</li>
-                    <li class="text-blue-700 font-semibold">→ 最需要投入精力的站点</li>
-                </ul>
-            </div>
-            <div class="bg-white rounded-lg p-4 border border-slate-200">
-                <h4 class="font-bold text-slate-800 text-sm mb-2 flex items-center gap-1">
-                    <span class="text-lg">🇬🇧</span> 英国站 (UK)
-                </h4>
-                <ul class="text-xs text-slate-600 space-y-1">
-                    <li>• QA 活跃度高，英语回复即可</li>
-                    <li>• 英式拼写（colour, centre, metre）</li>
-                    <li>• 脱欧后 UK 和 EU 的 QA 不再共享</li>
-                    <li>• 提及 UKCA（代替CE）如果是 UK 独有要求</li>
-                    <li>• 语气保持友好且略带幽默（英式风格）</li>
-                    <li class="text-blue-700 font-semibold">→ 注意用词与美式英语的区别</li>
-                </ul>
-            </div>
-            <div class="bg-white rounded-lg p-4 border border-slate-200">
-                <h4 class="font-bold text-slate-800 text-sm mb-2 flex items-center gap-1">
-                    <span class="text-lg">🇫🇷</span> 法国站 (FR)
-                </h4>
-                <ul class="text-xs text-slate-600 space-y-1">
-                    <li>• 法国买家提问风格偏详细</li>
-                    <li>• 必须用法语，Vouvoiement（用 Vous）</li>
-                    <li>• 法国人对产品原产地/品牌故事感兴趣</li>
-                    <li>• 环保/可回收相关问题较多</li>
-                    <li>• 回答风格可以稍微详细/优美一些</li>
-                    <li class="text-blue-700 font-semibold">→ 回答长度可以比德国站略长</li>
-                </ul>
-            </div>
-            <div class="bg-white rounded-lg p-4 border border-slate-200">
-                <h4 class="font-bold text-slate-800 text-sm mb-2 flex items-center gap-1">
-                    <span class="text-lg">🇮🇹</span> 意大利站 (IT)
-                </h4>
-                <ul class="text-xs text-slate-600 space-y-1">
-                    <li>• QA 数量相对较少</li>
-                    <li>• 用意大利语回复效果更好</li>
-                    <li>• 意大利买家重视设计/美观</li>
-                    <li>• 可以在回答中强调产品的设计美感</li>
-                    <li>• 语气亲切热情</li>
-                    <li class="text-blue-700 font-semibold">→ QA 少但每条影响力大</li>
-                </ul>
-            </div>
-            <div class="bg-white rounded-lg p-4 border border-slate-200">
-                <h4 class="font-bold text-slate-800 text-sm mb-2 flex items-center gap-1">
-                    <span class="text-lg">🇪🇸</span> 西班牙站 (ES)
-                </h4>
-                <ul class="text-xs text-slate-600 space-y-1">
-                    <li>• QA 活跃度中等</li>
-                    <li>• 用西班牙语（Castellano）</li>
-                    <li>• 西班牙买家较直接，喜欢简洁明了</li>
-                    <li>• 价格相关问题较多（价格敏感市场）</li>
-                    <li>• 电压规格经常被问（220V/欧标插头）</li>
-                    <li class="text-blue-700 font-semibold">→ 简洁清晰最重要</li>
-                </ul>
-            </div>
-            <div class="bg-white rounded-lg p-4 border border-blue-200 border-2">
-                <h4 class="font-bold text-blue-800 text-sm mb-2 flex items-center gap-1">
-                    <i class="fas fa-sync-alt text-blue-500"></i> 跨站 QA 同步
-                </h4>
-                <ul class="text-xs text-slate-600 space-y-1">
-                    <li>• 欧洲站（DE/FR/IT/ES/NL）的 QA 会<strong>自动翻译展示</strong></li>
-                    <li>• DE站的 QA 可能出现在 FR/IT/ES/NL 页面</li>
-                    <li>• <strong>但你的官方回复只在原站显示</strong></li>
-                    <li>• 策略：同一高频问题在各站都做官方回复</li>
-                    <li>• UK站独立，不与EU共享</li>
-                    <li class="text-blue-700 font-semibold">→ 优先在 DE 站完善，辐射最广</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <!-- ========== QA 主动布局策略 ========== -->
-    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <i class="fas fa-chess text-indigo-500"></i>QA 主动布局策略 — 不只是被动回答
-        </h2>
-        <p class="text-xs text-slate-500 mb-4">除了被动等买家提问，你还可以主动引导 QA 的内容和方向。以下是合规擦边的策略。</p>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- 合规策略 -->
-            <div class="space-y-3">
-                <div class="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
-                    <h4 class="font-bold text-emerald-800 text-sm mb-2 flex items-center gap-1">
-                        <i class="fas fa-check-circle"></i>✅ 合规操作
-                    </h4>
-                    <div class="space-y-2 text-xs text-slate-700">
-                        <div class="flex items-start gap-2">
-                            <span class="font-bold text-emerald-600 flex-shrink-0">1.</span>
-                            <div>
-                                <strong>预判式回答</strong>：分析竞品高频 QA 和你的客服邮件高频问题，整理出 10 个"最可能被问的问题"。当这些问题出现时，你已经有完美的回答模板了——秒回。
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-2">
-                            <span class="font-bold text-emerald-600 flex-shrink-0">2.</span>
-                            <div>
-                                <strong>Listing 倒逼 QA</strong>：在 Listing 的 Bullet Points 或 A+ 中提及一些细节参数但不完全展开，引导买家来 QA 追问细节——然后你用官方回答详细展开（植入更多关键词）。
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-2">
-                            <span class="font-bold text-emerald-600 flex-shrink-0">3.</span>
-                            <div>
-                                <strong>利用"Upvote"机制</strong>：亚马逊 QA 排序依据 votes。你作为买家账户（个人购物账号）可以对有价值的问题点 "Upvote"，让好问题排到前面——但不要操纵。
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-2">
-                            <span class="font-bold text-emerald-600 flex-shrink-0">4.</span>
-                            <div>
-                                <strong>产品卡片引导提问</strong>：在产品内附卡片上写"Have questions about your product? Ask in the Q&A section on our Amazon product page!"——完全合规。
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 灰色地带警告 -->
-            <div class="space-y-3">
-                <div class="bg-amber-50 rounded-lg p-4 border border-amber-200">
-                    <h4 class="font-bold text-amber-800 text-sm mb-2 flex items-center gap-1">
-                        <i class="fas fa-exclamation-triangle"></i>⚠️ 灰色地带 / 不建议
-                    </h4>
-                    <div class="space-y-2 text-xs text-slate-700">
-                        <div class="flex items-start gap-2">
-                            <i class="fas fa-exclamation-circle text-amber-500 mt-0.5 flex-shrink-0"></i>
-                            <div>
-                                <strong>让朋友/家人提问然后你回答</strong> — 技术上难以被检测，但如果被发现属于操纵 QA。风险不高但不推荐大量操作。如果做，间隔要长，内容要自然，且问题确实有价值。
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-2">
-                            <i class="fas fa-exclamation-circle text-amber-500 mt-0.5 flex-shrink-0"></i>
-                            <div>
-                                <strong>用买家账号给自己的回答点 Helpful</strong> — 低风险但不建议频繁操作。偶尔可以，但不要用多个账号刷。
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-red-50 rounded-lg p-4 border border-red-200">
-                    <h4 class="font-bold text-red-800 text-sm mb-2 flex items-center gap-1">
-                        <i class="fas fa-ban"></i>❌ 绝对不做
-                    </h4>
-                    <div class="space-y-2 text-xs text-slate-700">
-                        <div class="flex items-start gap-2">
-                            <i class="fas fa-times text-red-500 mt-0.5 flex-shrink-0"></i>
-                            <span>用多个账号批量自问自答/刷 QA 数量</span>
-                        </div>
-                        <div class="flex items-start gap-2">
-                            <i class="fas fa-times text-red-500 mt-0.5 flex-shrink-0"></i>
-                            <span>在竞品 QA 中恶意提问/回答引导买家来你这</span>
-                        </div>
-                        <div class="flex items-start gap-2">
-                            <i class="fas fa-times text-red-500 mt-0.5 flex-shrink-0"></i>
-                            <span>使用第三方服务/软件批量操作 QA</span>
-                        </div>
-                        <div class="flex items-start gap-2">
-                            <i class="fas fa-times text-red-500 mt-0.5 flex-shrink-0"></i>
-                            <span>在回答中嵌入跟踪链接/缩短链接</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ========== QA 管理表 ========== -->
-    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <i class="fas fa-table text-teal-500"></i>QA 管理追踪表（Google Sheet）
-        </h2>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div>
-                <h3 class="font-bold text-slate-700 text-sm mb-3">📊 字段设计</h3>
+        <!-- ========== QA 数量建设目标 ========== -->
+        <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-chart-line text-emerald-500"></i>QA 数量建设基准线
+                </h2>
+                <p class="text-xs text-slate-500 mb-4">QA 数量反映产品的信息丰富度。越多高质量 QA = 越少客服邮件 + 越高转化率。</p>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-xs border-collapse">
-                        <thead>
-                            <tr class="bg-teal-100">
-                                <th class="border border-teal-200 px-2 py-1.5 text-left">字段</th>
-                                <th class="border border-teal-200 px-2 py-1.5 text-left">说明</th>
-                                <th class="border border-teal-200 px-2 py-1.5 text-left">示例</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="border border-slate-200 px-2 py-1.5 font-semibold">日期</td>
-                                <td class="border border-slate-200 px-2 py-1.5">发现日期</td>
-                                <td class="border border-slate-200 px-2 py-1.5 text-slate-500">2025-06-10</td>
-                            </tr>
-                            <tr class="bg-slate-50">
-                                <td class="border border-slate-200 px-2 py-1.5 font-semibold">站点</td>
-                                <td class="border border-slate-200 px-2 py-1.5">哪个站</td>
-                                <td class="border border-slate-200 px-2 py-1.5 text-slate-500">DE</td>
-                            </tr>
-                            <tr>
-                                <td class="border border-slate-200 px-2 py-1.5 font-semibold">ASIN</td>
-                                <td class="border border-slate-200 px-2 py-1.5">产品</td>
-                                <td class="border border-slate-200 px-2 py-1.5 text-slate-500">B0XXXXXXXX</td>
-                            </tr>
-                            <tr class="bg-slate-50">
-                                <td class="border border-slate-200 px-2 py-1.5 font-semibold">问题原文</td>
-                                <td class="border border-slate-200 px-2 py-1.5">买家提问</td>
-                                <td class="border border-slate-200 px-2 py-1.5 text-slate-500">Ist das wasserdicht?</td>
-                            </tr>
-                            <tr>
-                                <td class="border border-slate-200 px-2 py-1.5 font-semibold">问题分类</td>
-                                <td class="border border-slate-200 px-2 py-1.5">A-F类</td>
-                                <td class="border border-slate-200 px-2 py-1.5 text-slate-500">A-产品参数</td>
-                            </tr>
-                            <tr class="bg-slate-50">
-                                <td class="border border-slate-200 px-2 py-1.5 font-semibold">投票数</td>
-                                <td class="border border-slate-200 px-2 py-1.5">有多少人关心</td>
-                                <td class="border border-slate-200 px-2 py-1.5 text-slate-500">12</td>
-                            </tr>
-                            <tr>
-                                <td class="border border-slate-200 px-2 py-1.5 font-semibold">是否已回复</td>
-                                <td class="border border-slate-200 px-2 py-1.5">官方回复状态</td>
-                                <td class="border border-slate-200 px-2 py-1.5 text-slate-500">✅ 已回复</td>
-                            </tr>
-                            <tr class="bg-slate-50">
-                                <td class="border border-slate-200 px-2 py-1.5 font-semibold">植入关键词</td>
-                                <td class="border border-slate-200 px-2 py-1.5">回答中的SEO词</td>
-                                <td class="border border-slate-200 px-2 py-1.5 text-slate-500">waterproof IP65</td>
-                            </tr>
-                            <tr>
-                                <td class="border border-slate-200 px-2 py-1.5 font-semibold">Listing反哺</td>
-                                <td class="border border-slate-200 px-2 py-1.5">是否需更新Listing</td>
-                                <td class="border border-slate-200 px-2 py-1.5 text-slate-500">→ 加入Bullet #3</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                        <table class="w-full text-sm border-collapse">
+                                <thead>
+                                        <tr class="bg-emerald-100">
+                                                <th class="border border-emerald-200 px-3 py-2 text-left">ASIN 类型</th>
+                                                <th class="border border-emerald-200 px-3 py-2 text-center">当前 QA 数</th>
+                                                <th class="border border-emerald-200 px-3 py-2 text-center">目标 QA 数</th>
+                                                <th class="border border-emerald-200 px-3 py-2 text-center">官方回复覆盖</th>
+                                                <th class="border border-emerald-200 px-3 py-2 text-left">行动</th>
+                                        </tr>
+                                </thead>
+                                <tbody>
+                                        <tr class="bg-red-50">
+                                                <td class="border border-slate-200 px-3 py-2 font-semibold">核心利润 ASIN
+                                                </td>
+                                                <td class="border border-slate-200 px-3 py-2 text-center">&lt;10</td>
+                                                <td
+                                                        class="border border-slate-200 px-3 py-2 text-center font-bold text-emerald-600">
+                                                        ≥20-30</td>
+                                                <td class="border border-slate-200 px-3 py-2 text-center">100%</td>
+                                                <td class="border border-slate-200 px-3 py-2 text-xs">产品卡片引导提问 +
+                                                        确保每条都有官方回答</td>
+                                        </tr>
+                                        <tr>
+                                                <td class="border border-slate-200 px-3 py-2 font-semibold">次核心 ASIN
+                                                </td>
+                                                <td class="border border-slate-200 px-3 py-2 text-center">&lt;5</td>
+                                                <td
+                                                        class="border border-slate-200 px-3 py-2 text-center font-bold text-blue-600">
+                                                        ≥10-15</td>
+                                                <td class="border border-slate-200 px-3 py-2 text-center">100%</td>
+                                                <td class="border border-slate-200 px-3 py-2 text-xs">自然积累 + 及时回复</td>
+                                        </tr>
+                                        <tr class="bg-slate-50">
+                                                <td class="border border-slate-200 px-3 py-2 font-semibold">长尾/新品 ASIN
+                                                </td>
+                                                <td class="border border-slate-200 px-3 py-2 text-center">0-3</td>
+                                                <td
+                                                        class="border border-slate-200 px-3 py-2 text-center font-bold text-slate-500">
+                                                        ≥5</td>
+                                                <td class="border border-slate-200 px-3 py-2 text-center">100%</td>
+                                                <td class="border border-slate-200 px-3 py-2 text-xs">有新问题就回，不强求数量</td>
+                                        </tr>
+                                </tbody>
+                        </table>
                 </div>
-            </div>
-            <div>
-                <h3 class="font-bold text-slate-700 text-sm mb-3">📋 月度 QA 分析要点</h3>
-                <div class="bg-teal-50 rounded-lg p-4 border border-teal-200 space-y-3">
-                    <div>
-                        <h4 class="font-bold text-teal-800 text-xs mb-1">一、QA 健康度检查</h4>
-                        <ul class="text-xs text-slate-600 space-y-0.5 ml-3">
-                            <li>• 各核心 ASIN 的 QA 总数量</li>
-                            <li>• 官方回复覆盖率（目标 100%）</li>
-                            <li>• 是否有过期/不准确的旧回答需要更新</li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-teal-800 text-xs mb-1">二、高频问题 TOP 5</h4>
-                        <ul class="text-xs text-slate-600 space-y-0.5 ml-3">
-                            <li>• 本月被问最多的 5 个问题</li>
-                            <li>• 对应的 Listing 是否已覆盖这些信息</li>
-                            <li>• 需要更新的 Listing / A+ / 说明书</li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-teal-800 text-xs mb-1">三、SEO 关键词收获</h4>
-                        <ul class="text-xs text-slate-600 space-y-0.5 ml-3">
-                            <li>• 从 QA 中发现的新关键词/长尾词</li>
-                            <li>• 是否已加入 Search Terms / Backend</li>
-                            <li>• 竞品 QA 中挖掘到的有价值信息</li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-teal-800 text-xs mb-1">四、异常信号监控</h4>
-                        <ul class="text-xs text-slate-600 space-y-0.5 ml-3">
-                            <li>• 是否出现竞对恶意提问</li>
-                            <li>• 是否有安全相关问题</li>
-                            <li>• 是否有买家在 QA 中留下负面体验</li>
-                        </ul>
-                    </div>
+                <div class="mt-3 p-3 bg-emerald-50 rounded-lg text-xs text-emerald-800 border border-emerald-200">
+                        <i class="fas fa-chart-bar mr-1"></i>
+                        <strong>参考数据：</strong>在欧洲站，同品类 Best Seller 的 QA 数量通常在 30-100 条之间。
+                        你的核心 ASIN 达到 20+ 条高质量 QA 就已经超过 80% 的竞品。
+                        QA 数量 0-5 条的产品，转化率平均比 20+ 条的低 10-20%。
                 </div>
-                <div class="mt-3 bg-amber-50 rounded-lg p-3 text-xs text-amber-800 border border-amber-200">
-                    <i class="fas fa-lightbulb mr-1"></i>
-                    <strong>效率技巧：</strong>用 Google Sheet 的 COUNTIF 函数自动统计各分类问题数量。
-                    条件格式高亮"未回复"的行。月度分析只需 10 分钟。
+        </div>
+        <!-- ========== 时间管理 ========== -->
+        <div class="bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl border border-slate-200 p-6 mb-6">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-user-clock text-slate-600"></i>运营 QA 时间投入规划
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-white rounded-lg p-4 border border-slate-200">
+                                <h4 class="font-bold text-blue-700 text-sm mb-2">📅 每周二（25-30 分钟）</h4>
+                                <ul class="text-xs text-slate-600 space-y-1.5">
+                                        <li>• 扫描所有核心 ASIN 的 QA（5 分钟）</li>
+                                        <li>• 分类 + 排优先级（3 分钟）</li>
+                                        <li>• 撰写 + 发布回答（10-15 分钟）</li>
+                                        <li>• 处理问题 QA + 举报（5 分钟）</li>
+                                        <li>• 更新管理表（2 分钟）</li>
+                                </ul>
+                        </div>
+                        <div class="bg-white rounded-lg p-4 border border-slate-200">
+                                <h4 class="font-bold text-amber-700 text-sm mb-2">📅 每月初（30 分钟）</h4>
+                                <ul class="text-xs text-slate-600 space-y-1.5">
+                                        <li>• 月度 QA 分析（10 分钟）</li>
+                                        <li>• 竞品 QA 挖掘（15 分钟）</li>
+                                        <li>• 更新关键词列表（5 分钟）</li>
+                                </ul>
+                        </div>
+                        <div class="bg-white rounded-lg p-4 border border-slate-200">
+                                <h4 class="font-bold text-purple-700 text-sm mb-2">📅 每季度（30 分钟）</h4>
+                                <ul class="text-xs text-slate-600 space-y-1.5">
+                                        <li>• 全面审计所有 ASIN 的 QA 健康度</li>
+                                        <li>• 更新/删除过期回答</li>
+                                        <li>• 对比竞品 QA 差距</li>
+                                        <li>• 规划下季度 QA 建设重点</li>
+                                </ul>
+                        </div>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ========== QA 数量建设目标 ========== -->
-    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <i class="fas fa-chart-line text-emerald-500"></i>QA 数量建设基准线
-        </h2>
-        <p class="text-xs text-slate-500 mb-4">QA 数量反映产品的信息丰富度。越多高质量 QA = 越少客服邮件 + 越高转化率。</p>
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm border-collapse">
-                <thead>
-                    <tr class="bg-emerald-100">
-                        <th class="border border-emerald-200 px-3 py-2 text-left">ASIN 类型</th>
-                        <th class="border border-emerald-200 px-3 py-2 text-center">当前 QA 数</th>
-                        <th class="border border-emerald-200 px-3 py-2 text-center">目标 QA 数</th>
-                        <th class="border border-emerald-200 px-3 py-2 text-center">官方回复覆盖</th>
-                        <th class="border border-emerald-200 px-3 py-2 text-left">行动</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr class="bg-red-50">
-                        <td class="border border-slate-200 px-3 py-2 font-semibold">核心利润 ASIN</td>
-                        <td class="border border-slate-200 px-3 py-2 text-center">&lt;10</td>
-                        <td class="border border-slate-200 px-3 py-2 text-center font-bold text-emerald-600">≥20-30</td>
-                        <td class="border border-slate-200 px-3 py-2 text-center">100%</td>
-                        <td class="border border-slate-200 px-3 py-2 text-xs">产品卡片引导提问 + 确保每条都有官方回答</td>
-                    </tr>
-                    <tr>
-                        <td class="border border-slate-200 px-3 py-2 font-semibold">次核心 ASIN</td>
-                        <td class="border border-slate-200 px-3 py-2 text-center">&lt;5</td>
-                        <td class="border border-slate-200 px-3 py-2 text-center font-bold text-blue-600">≥10-15</td>
-                        <td class="border border-slate-200 px-3 py-2 text-center">100%</td>
-                        <td class="border border-slate-200 px-3 py-2 text-xs">自然积累 + 及时回复</td>
-                    </tr>
-                    <tr class="bg-slate-50">
-                        <td class="border border-slate-200 px-3 py-2 font-semibold">长尾/新品 ASIN</td>
-                        <td class="border border-slate-200 px-3 py-2 text-center">0-3</td>
-                        <td class="border border-slate-200 px-3 py-2 text-center font-bold text-slate-500">≥5</td>
-                        <td class="border border-slate-200 px-3 py-2 text-center">100%</td>
-                        <td class="border border-slate-200 px-3 py-2 text-xs">有新问题就回，不强求数量</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="mt-3 p-3 bg-emerald-50 rounded-lg text-xs text-emerald-800 border border-emerald-200">
-            <i class="fas fa-chart-bar mr-1"></i>
-            <strong>参考数据：</strong>在欧洲站，同品类 Best Seller 的 QA 数量通常在 30-100 条之间。
-            你的核心 ASIN 达到 20+ 条高质量 QA 就已经超过 80% 的竞品。
-            QA 数量 0-5 条的产品，转化率平均比 20+ 条的低 10-20%。
-        </div>
-    </div>
-
-    <!-- ========== 时间管理 ========== -->
-    <div class="bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl border border-slate-200 p-6 mb-6">
-        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <i class="fas fa-user-clock text-slate-600"></i>运营 QA 时间投入规划
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="bg-white rounded-lg p-4 border border-slate-200">
-                <h4 class="font-bold text-blue-700 text-sm mb-2">📅 每周二（25-30 分钟）</h4>
-                <ul class="text-xs text-slate-600 space-y-1.5">
-                    <li>• 扫描所有核心 ASIN 的 QA（5 分钟）</li>
-                    <li>• 分类 + 排优先级（3 分钟）</li>
-                    <li>• 撰写 + 发布回答（10-15 分钟）</li>
-                    <li>• 处理问题 QA + 举报（5 分钟）</li>
-                    <li>• 更新管理表（2 分钟）</li>
-                </ul>
-            </div>
-            <div class="bg-white rounded-lg p-4 border border-slate-200">
-                <h4 class="font-bold text-amber-700 text-sm mb-2">📅 每月初（30 分钟）</h4>
-                <ul class="text-xs text-slate-600 space-y-1.5">
-                    <li>• 月度 QA 分析（10 分钟）</li>
-                    <li>• 竞品 QA 挖掘（15 分钟）</li>
-                    <li>• 更新关键词列表（5 分钟）</li>
-                </ul>
-            </div>
-            <div class="bg-white rounded-lg p-4 border border-slate-200">
-                <h4 class="font-bold text-purple-700 text-sm mb-2">📅 每季度（30 分钟）</h4>
-                <ul class="text-xs text-slate-600 space-y-1.5">
-                    <li>• 全面审计所有 ASIN 的 QA 健康度</li>
-                    <li>• 更新/删除过期回答</li>
-                    <li>• 对比竞品 QA 差距</li>
-                    <li>• 规划下季度 QA 建设重点</li>
-                </ul>
-            </div>
-        </div>
-        <div class="mt-4 p-3 bg-white rounded-lg border border-slate-200 text-xs text-slate-700">
-            <i class="fas fa-lightbulb text-amber-500 mr-1"></i>
-            <strong>效率心法：</strong>
-            QA 维护是"做一次受益长久"的工作。一条好的 QA 回答可能在未来 1-2 年里持续帮助转化。
-            每周 25 分钟的投入，年化 ROI 极高——这是运营最值得坚持的"慢功夫"之一。
-        </div>
-    </div>
-
-    <!-- ========== 工具清单 ========== -->
-    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <i class="fas fa-toolbox text-amber-500"></i>工具 & 资源
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-            <div class="bg-slate-50 rounded-lg p-3">
-                <h4 class="font-bold text-slate-700 text-xs mb-2">QA 监控</h4>
-                <ul class="text-xs text-slate-600 space-y-1">
-                    <li>• 手动检查产品页面（最可靠）</li>
-                    <li>• 卖家精灵 QA 监控提醒</li>
-                    <li>• Helium10 Listing Alerts</li>
-                    <li>• 亚马逊会邮件通知新 QA（品牌注册）</li>
-                </ul>
-            </div>
-            <div class="bg-slate-50 rounded-lg p-3">
-                <h4 class="font-bold text-slate-700 text-xs mb-2">翻译工具</h4>
-                <ul class="text-xs text-slate-600 space-y-1">
-                    <li>• DeepL（首选，欧洲语言最准）</li>
-                    <li>• ChatGPT/Claude（润色+关键词植入）</li>
-                    <li>• Prompt: "Translate to German, keep keywords intact, natural customer service tone"</li>
-                </ul>
-            </div>
-            <div class="bg-slate-50 rounded-lg p-3">
-                <h4 class="font-bold text-slate-700 text-xs mb-2">关键词工具</h4>
-                <ul class="text-xs text-slate-600 space-y-1">
-                    <li>• Brand Analytics 搜索词报告</li>
-                    <li>• 卖家精灵关键词反查</li>
-                    <li>• Helium10 Cerebro/Magnet</li>
-                    <li>• Search Term Report（广告后台）</li>
-                </ul>
-            </div>
-            <div class="bg-slate-50 rounded-lg p-3">
-                <h4 class="font-bold text-slate-700 text-xs mb-2">管理工具</h4>
-                <ul class="text-xs text-slate-600 space-y-1">
-                    <li>• Google Sheet（QA 管理表）</li>
-                    <li>• 条件格式高亮未回复</li>
-                    <li>• COUNTIF 统计分类数据</li>
-                    <li>• 每周/月自动生成图表</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <!-- ========== 底部资源 ========== -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <div class="bg-blue-50 rounded-xl border border-blue-200 p-4">
-            <div class="flex items-center gap-3">
-                <i class="fas fa-video text-blue-500 text-xl"></i>
-                <div>
-                    <h3 class="font-bold text-slate-800 text-sm">操作视频教程</h3>
-                    <p class="text-xs text-slate-600">公司网盘(待完善)：<a href="http://192.168.1.99"
-                            class="text-blue-600 underline">192.168.1.99</a>（内网）→ 培训资料 → QA维护专题</p>
+                <div class="mt-4 p-3 bg-white rounded-lg border border-slate-200 text-xs text-slate-700">
+                        <i class="fas fa-lightbulb text-amber-500 mr-1"></i>
+                        <strong>效率心法：</strong>
+                        QA 维护是"做一次受益长久"的工作。一条好的 QA 回答可能在未来 1-2 年里持续帮助转化。
+                        每周 25 分钟的投入，年化 ROI 极高——这是运营最值得坚持的"慢功夫"之一。
                 </div>
-            </div>
         </div>
-        <div class="bg-slate-50 rounded-xl border border-slate-200 p-4">
-            <div class="flex items-center gap-3">
-                <i class="fas fa-book text-slate-500 text-xl"></i>
-                <div>
-                    <h3 class="font-bold text-slate-800 text-sm">亚马逊官方参考</h3>
-                    <p class="text-xs text-slate-600">
-                        <a href="https://sellercentral.amazon.com/help/hub/reference/external/G202130610" class="text-blue-600 underline" target="_blank">Customer Q&A Policy</a> ·
-                        <a href="https://sellercentral.amazon.com/help/hub/reference/external/G1801" class="text-blue-600 underline" target="_blank">Community Guidelines</a>
-                    </p>
+        <!-- ========== 工具清单 ========== -->
+        <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-toolbox text-amber-500"></i>工具 &amp; 资源
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                        <div class="bg-slate-50 rounded-lg p-3">
+                                <h4 class="font-bold text-slate-700 text-xs mb-2">QA 监控</h4>
+                                <ul class="text-xs text-slate-600 space-y-1">
+                                        <li>• 手动检查产品页面（最可靠）</li>
+                                        <li>• 卖家精灵 QA 监控提醒</li>
+                                        <li>• Helium10 Listing Alerts</li>
+                                        <li>• 亚马逊会邮件通知新 QA（品牌注册）</li>
+                                </ul>
+                        </div>
+                        <div class="bg-slate-50 rounded-lg p-3">
+                                <h4 class="font-bold text-slate-700 text-xs mb-2">翻译工具</h4>
+                                <ul class="text-xs text-slate-600 space-y-1">
+                                        <li>• DeepL（首选，欧洲语言最准）</li>
+                                        <li>• ChatGPT/Claude（润色+关键词植入）</li>
+                                        <li>• Prompt: "Translate to German, keep keywords intact, natural customer
+                                                service tone"</li>
+                                </ul>
+                        </div>
+                        <div class="bg-slate-50 rounded-lg p-3">
+                                <h4 class="font-bold text-slate-700 text-xs mb-2">关键词工具</h4>
+                                <ul class="text-xs text-slate-600 space-y-1">
+                                        <li>• Brand Analytics 搜索词报告</li>
+                                        <li>• 卖家精灵关键词反查</li>
+                                        <li>• Helium10 Cerebro/Magnet</li>
+                                        <li>• Search Term Report（广告后台）</li>
+                                </ul>
+                        </div>
+                        <div class="bg-slate-50 rounded-lg p-3">
+                                <h4 class="font-bold text-slate-700 text-xs mb-2">管理工具</h4>
+                                <ul class="text-xs text-slate-600 space-y-1">
+                                        <li>• Google Sheet（QA 管理表）</li>
+                                        <li>• 条件格式高亮未回复</li>
+                                        <li>• COUNTIF 统计分类数据</li>
+                                        <li>• 每周/月自动生成图表</li>
+                                </ul>
+                        </div>
                 </div>
-            </div>
         </div>
-    </div>
-
-    <!-- 版本记录 -->
-    <div class="text-xs text-slate-400 border-t border-slate-100 pt-3">
-        <p><strong>版本历史：</strong>v1.0 (2024-01) 基础巡检流程 → v2.0 (2024-08) 增加分类体系+模板 → v3.0 (2025-06) 重构SEO策略+竞品挖掘+主动布局+多站注意事项+管理追踪表</p>
-    </div>
+        <!-- ========== 底部资源 ========== -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div class="bg-blue-50 rounded-xl border border-blue-200 p-4">
+                        <div class="flex items-center gap-3">
+                                <i class="fas fa-video text-blue-500 text-xl"></i>
+                                <div>
+                                        <h3 class="font-bold text-slate-800 text-sm">操作视频教程</h3>
+                                        <p class="text-xs text-slate-600">公司网盘(待完善)：<a class="text-blue-600 underline"
+                                                        href="http://192.168.1.99">192.168.1.99</a>（内网）→ 培训资料 → QA维护专题
+                                        </p>
+                                </div>
+                        </div>
+                </div>
+                <div class="bg-slate-50 rounded-xl border border-slate-200 p-4">
+                        <div class="flex items-center gap-3">
+                                <i class="fas fa-book text-slate-500 text-xl"></i>
+                                <div>
+                                        <h3 class="font-bold text-slate-800 text-sm">亚马逊官方参考</h3>
+                                        <p class="text-xs text-slate-600">
+                                                <a class="text-blue-600 underline"
+                                                        href="https://sellercentral.amazon.com/help/hub/reference/external/G202130610"
+                                                        target="_blank">Customer Q&amp;A Policy</a> ·
+                                                <a class="text-blue-600 underline"
+                                                        href="https://sellercentral.amazon.com/help/hub/reference/external/G1801"
+                                                        target="_blank">Community Guidelines</a>
+                                        </p>
+                                </div>
+                        </div>
+                </div>
+        </div>
+        <!-- 版本记录 -->
+        <div class="text-xs text-slate-400 border-t border-slate-100 pt-3">
+                <p><strong>版本历史：</strong>v1.0 (2024-01) 基础巡检流程 → v2.0 (2024-08) 增加分类体系+模板 → v3.0 (2025-06)
+                        重构SEO策略+竞品挖掘+主动布局+多站注意事项+管理追踪表</p>
+        </div>
 </div>

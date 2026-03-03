@@ -8,9 +8,9 @@ import { callLLM } from "../../../../../services/llmService";
 import { ANALYSIS_PROMPT_TEMPLATE, TRANSLATE_PROMPT_TEMPLATE as TRANSLATE_PROMPT_TEMPLATE2 } from "../constants/prompts";
 import { StorageService, STORAGE_KEYS } from "../../../../../services/storageService";
 import type {
-  KeywordMatchResult,
-  AnalysisResult,
-  WordFrequency
+    KeywordMatchResult,
+    AnalysisResult,
+    WordFrequency
 } from '@/types/modules-business';
 
 // ==========================================
@@ -197,9 +197,9 @@ function isValidListing(text: string): boolean {
  * @returns AI分析结果
  */
 export async function fetchListingAnalysis(
-    copyText: string, 
-    _keywords: string[], 
-    matchedKeywords: KeywordMatchResult[], 
+    copyText: string,
+    _keywords: string[],
+    matchedKeywords: KeywordMatchResult[],
     unmatchedKeywords: string[]
 ): Promise<string> {
     // 🔥🔥🔥 新增校验：检查文案是否为空 🔥🔥🔥

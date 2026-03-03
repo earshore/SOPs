@@ -32,6 +32,51 @@ export default defineConfig({
     ],
     root: './',
 
+    // ================================================================
+    // Vitest 测试配置
+    // ================================================================
+    test: {
+        environment: 'jsdom',
+        include: [
+            'src/**/*.test.ts',
+            'src/**/*.test.tsx',
+            'src/**/*.spec.ts',
+            'tests/**/*.test.ts',
+            'tests/**/*.spec.ts'
+        ],
+        setupFiles: ['./tests/setup.ts'],
+        coverage: {
+            provider: 'v8',
+            reporter: ['text', 'html', 'lcov', 'json-summary'],
+            include: [
+                'src/**/*.ts',
+                'src/**/*.tsx'
+            ],
+            exclude: [
+                'src/**/*.test.ts',
+                'src/**/*.test.tsx',
+                'src/**/*.spec.ts',
+                'src/**/*.d.ts',
+                'src/main.ts',
+                'src/workers/**',
+                'src/**/mockData/**',
+                'src/**/types/**'
+            ],
+            thresholds: {
+                lines: 60,
+                functions: 60,
+                branches: 55,
+                statements: 60
+            }
+        },
+        globals: true,
+        reporters: ['verbose', 'html'],
+        testTimeout: 10000,
+        hookTimeout: 10000,
+        threads: true,
+        isolate: true
+    },
+
     // 依赖优化配置
     optimizeDeps: {
         include: [
@@ -91,6 +136,8 @@ export default defineConfig({
             input: {
                 main: resolve(__dirname, 'index.html')
             },
+            // 确保.ts文件被正确处理为.js
+            external: [],
             output: {
                 // 手动分包策略 - 回退到简单对象形式避免 Alpine 组件问题
                 manualChunks: {
@@ -171,8 +218,8 @@ export default defineConfig({
         chunkSizeWarningLimit: 300,
         // CSS代码分割
         cssCodeSplit: true,
-        // 启用CSS压缩 - 使用lightningcss获得更好的性能
-        cssMinify: 'lightningcss',
+        // 启用CSS压缩 - 临时使用esbuild进行测试
+        cssMinify: 'esbuild',
         // 资源内联阈值(小于4KB的资源内联为base64)
         assetsInlineLimit: 4096,
         // 启用gzip压缩提示

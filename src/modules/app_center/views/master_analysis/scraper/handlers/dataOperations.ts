@@ -20,7 +20,7 @@ export async function deleteProduct(
 ): Promise<DeleteResult> {
     // 保存原始数据用于回滚
     const originalData = scrapedData ? JSON.parse(JSON.stringify(scrapedData)) : null;
-    
+
     try {
         // 验证ASIN参数
         if (!asin || typeof asin !== 'string') {
@@ -97,15 +97,15 @@ export async function deleteProduct(
             asin: asin,
             hasOriginalData: !!originalData
         });
-        
+
         showToast(`删除操作失败: ${errorMessage}`, { type: 'error' });
-        
+
         // 回滚数据
         if (originalData) {
             console.warn('[Scraper] 正在回滚数据...');
             return { success: false, data: originalData, error: errorMessage };
         }
-        
+
         return { success: false, error: errorMessage };
     }
 }
@@ -121,13 +121,13 @@ export async function deleteReview(
 ): Promise<DeleteResult> {
     // 保存原始数据用于回滚
     const originalData = scrapedData ? JSON.parse(JSON.stringify(scrapedData)) : null;
-    
+
     try {
         // 验证参数
         if (!asin || typeof asin !== 'string') {
             throw new Error('无效的ASIN参数');
         }
-        
+
         if (typeof index !== 'number' || index < 0) {
             throw new Error('无效的评论索引');
         }
@@ -208,15 +208,15 @@ export async function deleteReview(
             index: index,
             hasOriginalData: !!originalData
         });
-        
+
         showToast(`删除操作失败: ${errorMessage}`, { type: 'error' });
-        
+
         // 回滚数据
         if (originalData) {
             console.warn('[Scraper] 正在回滚数据...');
             return { success: false, data: originalData, error: errorMessage };
         }
-        
+
         return { success: false, error: errorMessage };
     }
 }
@@ -280,7 +280,7 @@ export function confirmWithModal(title: string, content: string, storageKey: str
         const cleanup = () => {
             if (btnConfirm) btnConfirm.removeEventListener('click', handleConfirm);
             if (btnCancel) btnCancel.removeEventListener('click', handleCancel);
-            
+
             try {
                 if (backdrop && document.body.contains(backdrop)) {
                     document.body.removeChild(backdrop);
@@ -293,7 +293,7 @@ export function confirmWithModal(title: string, content: string, storageKey: str
         const handleConfirm = (e: Event) => {
             e.preventDefault();
             e.stopPropagation();
-            
+
             if (resolved) return;
             resolved = true;
 
@@ -301,7 +301,7 @@ export function confirmWithModal(title: string, content: string, storageKey: str
             if (dontAskCheckbox && dontAskCheckbox.checked) {
                 StorageService.set(ignoreKey, true);
             }
-            
+
             cleanup();
             resolve(true);
         };
@@ -309,10 +309,10 @@ export function confirmWithModal(title: string, content: string, storageKey: str
         const handleCancel = (e: Event) => {
             e.preventDefault();
             e.stopPropagation();
-            
+
             if (resolved) return;
             resolved = true;
-            
+
             cleanup();
             resolve(false);
         };

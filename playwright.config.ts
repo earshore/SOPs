@@ -97,30 +97,30 @@ export default defineConfig({
   // 报告配置
   reporter: [
     // HTML 报告（主要报告格式）
-    ['html', { 
-      outputFolder: 'tests/playwright-report', 
+    ['html', {
+      outputFolder: 'tests/playwright-report',
       open: 'never',
       host: 'localhost',
       port: 9323
     }],
-    
+
     // JSON 报告（用于自定义处理）
-    ['json', { 
-      outputFile: 'tests/playwright-report/results.json' 
+    ['json', {
+      outputFile: 'tests/playwright-report/results.json'
     }],
-    
+
     // JUnit XML 报告（用于 CI/CD 集成）
-    ['junit', { 
+    ['junit', {
       outputFile: 'tests/playwright-report/junit.xml',
       embedAnnotationsAsProperties: true,
       embedAttachmentsAsProperty: 'testrun.attachments'
     }],
-    
+
     // 控制台列表报告
     ['list', {
       printSteps: true
     }],
-    
+
     // CI 环境使用 GitHub Actions 报告
     ...(process.env.CI && process.env.GITHUB_ACTIONS ? [['github']] : [])
   ],
@@ -148,7 +148,7 @@ export default defineConfig({
 
     // 浏览器上下文选项
     viewport: { width: 1280, height: 720 },
-    
+
     // 忽略 HTTPS 错误
     ignoreHTTPSErrors: true,
 
@@ -163,7 +163,7 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { 
+      use: {
         ...devices['Desktop Chrome'],
         // Chrome 特定配置
         launchOptions: {

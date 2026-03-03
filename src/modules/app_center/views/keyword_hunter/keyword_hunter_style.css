@@ -2,7 +2,7 @@
 
 /* === 全局基础 === */
 #keyword_hunter_content_area {
-    background: linear-gradient(180deg, rgba(248, 250, 252, 0.5) 0%, rgba(241, 245, 249, 0.3) 100%);
+    background: linear-gradient(180deg, var(--color-slate-50) 0%, var(--color-slate-100) 100%);
 }
 
 @media (max-width: 768px) {
@@ -21,15 +21,15 @@
     display: flex;
     flex-direction: column;
     background: white;
-    border-radius: 1rem;
-    border: 1px solid rgba(226, 232, 240, 0.8);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
+    border-radius: var(--rounded-xl);
+    border: 1px solid var(--color-slate-200);
+    transition: all var(--duration-normal) var(--ease-in-out);
+    box-shadow: 0 1px 3px 0 var(--color-black-alpha-5);
 }
 
 .kt-input-card:hover {
-    border-color: #93c5fd;
-    box-shadow: 0 10px 40px -10px rgba(59, 130, 246, 0.15), 0 4px 12px -4px rgba(59, 130, 246, 0.08);
+    border-color: var(--color-blue-300);
+    box-shadow: 0 10px 40px -10px var(--color-primary-light), 0 4px 12px -4px var(--color-primary-light);
 }
 
 /* --- Textarea 容器 --- */
@@ -48,8 +48,8 @@
     line-height: 1.75;
     padding: 1.25rem;
     border: none;
-    border-radius: 0.75rem;
-    transition: all 0.2s ease;
+    border-radius: var(--rounded-lg);
+    transition: all var(--duration-fast) ease;
     background: transparent;
 }
 
@@ -100,14 +100,14 @@
     bottom: 80px;
     right: 20px;
     background: white;
-    border-radius: 1rem;
-    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: var(--rounded-xl);
+    border: 1px solid var(--color-slate-200);
     box-shadow:
         0 25px 50px -12px rgba(0, 0, 0, 0.12),
-        0 12px 24px -8px rgba(0, 0, 0, 0.06),
+        0 12px 24px -8px var(--color-black-alpha-5),
         0 0 0 1px rgba(0, 0, 0, 0.03);
     z-index: 9999;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition: all var(--duration-normal) var(--ease-smooth);
     display: none;
     overflow: hidden;
     pointer-events: auto;
@@ -116,7 +116,7 @@
 .kt-floating-window.show {
     display: flex;
     flex-direction: column;
-    animation: slideInUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: slideInUp var(--duration-normal) var(--ease-spring);
 }
 
 @keyframes slideInUp {
@@ -124,6 +124,7 @@
         opacity: 0;
         transform: translateY(24px) scale(0.96);
     }
+
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -133,7 +134,7 @@
 .floating-header {
     cursor: move;
     user-select: none;
-    border-radius: 1rem 1rem 0 0;
+    border-radius: var(--rounded-xl) 1rem 0 0;
     flex-shrink: 0;
     padding: 0.875rem 1.25rem;
     display: flex;
@@ -187,20 +188,20 @@
     align-items: center;
     gap: 0.625rem;
     padding: 0.875rem 1.25rem;
-    border-radius: 1rem;
+    border-radius: var(--rounded-xl);
     font-size: 0.875rem;
     font-weight: 600;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all var(--duration-normal) var(--ease-in-out);
     border: none;
     cursor: pointer;
     box-shadow:
-        0 10px 25px -5px rgba(59, 130, 246, 0.25),
-        0 8px 10px -6px rgba(59, 130, 246, 0.1);
+        0 10px 25px -5px var(--color-primary-light),
+        0 8px 10px -6px var(--color-primary-light);
 }
 
 .kt-minimized-btn.show {
     display: flex;
-    animation: bounceIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: bounceIn var(--duration-slow) var(--ease-spring);
 }
 
 @keyframes bounceIn {
@@ -208,10 +209,12 @@
         opacity: 0;
         transform: scale(0.3) translateY(10px);
     }
+
     60% {
         opacity: 1;
         transform: scale(1.05) translateY(-2px);
     }
+
     100% {
         transform: scale(1) translateY(0);
     }
@@ -220,8 +223,8 @@
 .kt-minimized-btn:hover {
     transform: translateY(-3px) scale(1.03);
     box-shadow:
-        0 15px 35px -5px rgba(59, 130, 246, 0.3),
-        0 10px 15px -6px rgba(59, 130, 246, 0.15);
+        0 15px 35px -5px var(--color-primary-light),
+        0 10px 15px -6px var(--color-primary-light);
 }
 
 
@@ -233,12 +236,12 @@
     word-wrap: break-word;
     font-size: 0.875rem;
     position: relative;
-    color: #334155;
+    color: var(--color-slate-700);
 }
 
 .copy-content:empty:before {
     content: attr(data-placeholder);
-    color: #cbd5e1;
+    color: var(--color-slate-300);
     font-style: italic;
     position: absolute;
     top: 50%;
@@ -260,16 +263,16 @@
 /* --- 基础高亮 --- */
 .keyword-bold {
     font-weight: 600;
-    color: #047857;
-    background: linear-gradient(120deg, rgba(16, 185, 129, 0.18) 0%, rgba(16, 185, 129, 0.08) 100%);
-    border-bottom: 2px solid rgba(16, 185, 129, 0.5);
+    color: var(--color-emerald-700);
+    background: linear-gradient(120deg, var(--color-green-200) 0%, var(--color-green-100) 100%);
+    border-bottom: 2px solid var(--color-green-400);
     padding: 1px 0;
     border-radius: 0;
     margin: 0;
     display: inline;
     box-decoration-break: clone;
     -webkit-box-decoration-break: clone;
-    transition: all 0.2s ease;
+    transition: all var(--duration-fast) ease;
 }
 
 .keyword-bold.kw-solo {
@@ -298,21 +301,21 @@
 }
 
 .highlightable:hover {
-    background: linear-gradient(120deg, rgba(16, 185, 129, 0.28) 0%, rgba(16, 185, 129, 0.15) 100%);
-    border-bottom-color: rgba(16, 185, 129, 0.7);
+    background: linear-gradient(120deg, var(--color-green-200) 0%, var(--color-green-200) 100%);
+    border-bottom-color: var(--color-green-500);
 }
 
 /* --- 聚焦高亮（点击定位） --- */
 .keyword-bold.highlight-focus,
 .highlight-focus {
-    background: linear-gradient(120deg, rgba(251, 191, 36, 0.35) 0%, rgba(251, 191, 36, 0.2) 100%) !important;
-    border-bottom-color: rgba(234, 179, 8, 0.8) !important;
-    color: #92400e !important;
+    background: linear-gradient(120deg, var(--color-amber-300) 0%, var(--color-amber-200) 100%) !important;
+    border-bottom-color: var(--color-amber-600) !important;
+    color: var(--color-amber-800) !important;
     font-weight: 700 !important;
     padding: 2px 5px !important;
-    border-radius: 4px !important;
-    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.15), 0 2px 8px -2px rgba(251, 191, 36, 0.25) !important;
-    animation: highlightPulse 0.5s ease-out;
+    border-radius: var(--rounded-sm) !important;
+    box-shadow: 0 0 0 3px var(--color-amber-200), 0 2px 8px -2px var(--color-amber-300) !important;
+    animation: highlightPulse var(--duration-slower) var(--ease-out);
     transform: scale(1.03) !important;
     z-index: 10;
     position: relative;
@@ -320,15 +323,17 @@
 
 @keyframes highlightPulse {
     0% {
-        box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4);
+        box-shadow: 0 0 0 0 var(--color-amber-400);
         transform: scale(1);
     }
+
     50% {
-        box-shadow: 0 0 0 6px rgba(251, 191, 36, 0.08);
+        box-shadow: 0 0 0 6px var(--color-amber-100);
         transform: scale(1.05);
     }
+
     100% {
-        box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.15);
+        box-shadow: 0 0 0 3px var(--color-amber-200);
         transform: scale(1.03);
     }
 }
@@ -337,65 +342,67 @@
 /* ==================== 翻译模式 ==================== */
 
 .paragraph-original {
-    color: #334155;
+    color: var(--color-slate-700);
     margin-bottom: 0.375rem;
 }
 
 .sentence-translation {
-    color: #4f46e5;
+    color: var(--color-indigo-600);
     font-size: 0.8125rem;
     font-style: normal;
     padding: 0.625rem 1rem;
     margin-top: 0.5rem;
     margin-bottom: 0.25rem;
-    background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
-    border-left: 3px solid #6366f1;
+    background: linear-gradient(135deg, var(--color-indigo-50) 0%, var(--color-indigo-100) 100%);
+    border-left: 3px solid var(--color-indigo-500);
     border-radius: 0 0.5rem 0.5rem 0;
     line-height: 1.65;
-    box-shadow: 0 1px 3px rgba(99, 102, 241, 0.08);
-    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px var(--color-indigo-100);
+    transition: all var(--duration-fast) ease;
 }
 
 .sentence-translation:hover {
-    background: linear-gradient(135deg, #e8ecff 0%, #dbe0fe 100%);
-    box-shadow: 0 2px 6px rgba(99, 102, 241, 0.12);
+    background: linear-gradient(135deg, var(--color-indigo-100) 0%, var(--color-indigo-200) 100%);
+    box-shadow: 0 2px 6px var(--color-indigo-200);
 }
 
 
 /* ==================== 关键词监控 - 词根高亮 ==================== */
 
 .keyword-root-highlight {
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%) !important;
-    border-left-color: #f59e0b !important;
+    background: linear-gradient(135deg, var(--color-amber-100) 0%, var(--color-amber-200) 100%) !important;
+    border-left-color: var(--color-amber-500) !important;
     border-left-width: 5px !important;
-    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.3), 0 6px 12px -4px rgba(245, 158, 11, 0.2) !important;
+    box-shadow: 0 0 0 3px var(--color-amber-300), 0 6px 12px -4px var(--color-amber-200) !important;
     transform: scale(1.03) !important;
-    animation: keyword-root-pulse 0.7s ease-in-out !important;
+    animation: keyword-root-pulse 0.7s var(--ease-in-out) !important;
     position: relative;
     z-index: 10;
 }
 
 .keyword-root-highlight .text-red-800 {
-    color: #92400e !important;
+    color: var(--color-amber-800) !important;
     font-weight: 700 !important;
 }
 
 .keyword-root-highlight .fa-times-circle {
-    color: #f59e0b !important;
+    color: var(--color-amber-500) !important;
     font-size: 1.05rem !important;
 }
 
 @keyframes keyword-root-pulse {
     0% {
-        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.6);
+        box-shadow: 0 0 0 0 var(--color-amber-500);
         transform: scale(1);
     }
+
     50% {
-        box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.15);
+        box-shadow: 0 0 0 6px var(--color-amber-200);
         transform: scale(1.05);
     }
+
     100% {
-        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.3);
+        box-shadow: 0 0 0 3px var(--color-amber-300);
         transform: scale(1.03);
     }
 }
@@ -418,7 +425,7 @@
     font-size: 1.3rem;
     padding: 1.5rem 1.75rem;
     /* Keyword Hunter 紫粉主题渐变 */
-    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4c1d95 100%);
+    background: linear-gradient(135deg, var(--color-indigo-950) 0%, var(--color-indigo-900) 40%, var(--color-purple-900) 100%);
     box-shadow:
         0 12px 28px -8px rgba(76, 29, 149, 0.25),
         0 4px 10px -4px rgba(30, 27, 75, 0.15);
@@ -452,7 +459,7 @@
     left: 0;
     width: 3rem;
     height: 2px;
-    background: linear-gradient(to right, #7c3aed, #ec4899);
+    background: linear-gradient(to right, var(--color-purple-600), var(--color-pink-500));
     border-radius: 1px;
 }
 
@@ -460,7 +467,7 @@
 #kt-llm-analysis-result.markdown-content h3 {
     font-size: 0.975rem;
     padding: 0.75rem 1rem;
-    border-left: 4px solid #cbd5e1;
+    border-left: 4px solid var(--color-slate-300);
     background: linear-gradient(to right, rgba(241, 245, 249, 0.8), transparent 70%);
 }
 
@@ -471,49 +478,49 @@
 
 /* 📊 评分类 H3 - 靛蓝 */
 #kt-llm-analysis-result.markdown-content h3:nth-of-type(1) {
-    border-left-color: #6366f1;
+    border-left-color: var(--color-indigo-500);
     background: linear-gradient(to right, rgba(238, 242, 255, 0.9), transparent 60%);
-    color: #4338ca;
+    color: var(--color-indigo-700);
 }
 
 /* 🚨 致命问题 H3 - 红色 */
 #kt-llm-analysis-result.markdown-content h3:nth-of-type(2) {
-    border-left-color: #ef4444;
+    border-left-color: var(--color-red-500);
     background: linear-gradient(to right, rgba(254, 242, 242, 0.9), transparent 60%);
-    color: #dc2626;
+    color: var(--color-red-600);
 }
 
 /* 🔧 改写建议 H3 - 紫色 */
 #kt-llm-analysis-result.markdown-content h3:nth-of-type(3) {
-    border-left-color: #8b5cf6;
+    border-left-color: var(--color-violet-500);
     background: linear-gradient(to right, rgba(245, 243, 255, 0.9), transparent 60%);
-    color: #7c3aed;
+    color: var(--color-purple-600);
 }
 
 /* 后续 H3 - 交替色系 */
 #kt-llm-analysis-result.markdown-content h3:nth-of-type(4) {
-    border-left-color: #f59e0b;
+    border-left-color: var(--color-amber-500);
     background: linear-gradient(to right, rgba(255, 251, 235, 0.9), transparent 60%);
-    color: #d97706;
+    color: var(--color-amber-600);
 }
 
 #kt-llm-analysis-result.markdown-content h3:nth-of-type(5) {
-    border-left-color: #06b6d4;
+    border-left-color: var(--color-cyan-500);
     background: linear-gradient(to right, rgba(236, 254, 255, 0.9), transparent 60%);
-    color: #0891b2;
+    color: var(--color-cyan-600);
 }
 
 #kt-llm-analysis-result.markdown-content h3:nth-of-type(n+6) {
-    border-left-color: #64748b;
+    border-left-color: var(--color-slate-500);
     background: linear-gradient(to right, rgba(248, 250, 252, 0.9), transparent 60%);
-    color: #475569;
+    color: var(--color-slate-600);
 }
 
 /* === H4 - 子章节 === */
 #kt-llm-analysis-result.markdown-content h4 {
     font-size: 0.9rem;
     font-weight: 600;
-    color: #334155;
+    color: var(--color-slate-700);
     margin: 1.25rem 0 0.5rem 0;
     padding: 0;
     display: flex;
@@ -523,7 +530,7 @@
 
 /* === Blockquote 装饰图标 === */
 #kt-llm-analysis-result.markdown-content blockquote:first-of-type::before,
-#kt-llm-analysis-result.markdown-content h3:nth-of-type(1) + blockquote::before {
+#kt-llm-analysis-result.markdown-content h3:nth-of-type(1)+blockquote::before {
     content: '💡';
     position: absolute;
     top: -0.625rem;
@@ -535,7 +542,7 @@
     line-height: 1;
 }
 
-#kt-llm-analysis-result.markdown-content h3:nth-of-type(2) + blockquote::before {
+#kt-llm-analysis-result.markdown-content h3:nth-of-type(2)+blockquote::before {
     content: '⚠️';
     position: absolute;
     top: -0.625rem;
@@ -549,11 +556,11 @@
 
 /* === 表格 - 总分行特殊样式 === */
 #kt-llm-analysis-result.markdown-content tbody tr:last-child td {
-    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
-    color: #f8fafc;
+    background: linear-gradient(135deg, var(--color-indigo-950) 0%, var(--color-indigo-900) 100%);
+    color: var(--color-slate-50);
     font-weight: 700;
     font-size: 0.925rem;
-    border-top: 2px solid #4338ca;
+    border-top: 2px solid var(--color-indigo-700);
 }
 
 #kt-llm-analysis-result.markdown-content tbody tr:last-child td:first-child {
@@ -577,7 +584,7 @@
     right: 0.75rem;
     font-size: 0.65rem;
     font-weight: 800;
-    color: #fca5a5;
+    color: var(--color-red-300);
     width: 1.25rem;
     height: 1.25rem;
     display: flex;
@@ -595,7 +602,7 @@
     right: 0.75rem;
     font-size: 0.7rem;
     font-weight: 800;
-    color: #6ee7b7;
+    color: var(--color-emerald-300);
     width: 1.25rem;
     height: 1.25rem;
     display: flex;
@@ -613,7 +620,7 @@
     right: 0.75rem;
     font-size: 0.7rem;
     font-weight: 700;
-    color: #a5b4fc;
+    color: var(--color-indigo-300);
     width: 1.25rem;
     height: 1.25rem;
     display: flex;
@@ -630,8 +637,8 @@
 
 /* === 内联代码特殊样式 === */
 #kt-llm-analysis-result.markdown-content li:nth-child(3n) code {
-    background: rgba(99, 102, 241, 0.08);
-    color: #4338ca;
+    background: var(--color-indigo-100);
+    color: var(--color-indigo-700);
     border: 1px solid rgba(99, 102, 241, 0.1);
 }
 
@@ -648,45 +655,45 @@
     letter-spacing: 0.02em;
     font-variant-numeric: tabular-nums;
     border: 1px solid transparent;
-    transition: all 0.2s ease;
+    transition: all var(--duration-fast) ease;
 }
 
 #kt-llm-analysis-result .score-badge:hover {
     transform: scale(1.08);
-    box-shadow: 0 2px 6px -1px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 6px -1px var(--color-black-alpha-10);
 }
 
 #kt-llm-analysis-result .score-badge-high {
-    background: linear-gradient(135deg, #dcfce7, #bbf7d0);
-    color: #15803d;
+    background: linear-gradient(135deg, var(--color-green-100), var(--color-green-200));
+    color: var(--color-green-700);
     border-color: rgba(34, 197, 94, 0.2);
 }
 
 #kt-llm-analysis-result .score-badge-mid {
-    background: linear-gradient(135deg, #fef3c7, #fde68a);
-    color: #b45309;
-    border-color: rgba(245, 158, 11, 0.2);
+    background: linear-gradient(135deg, var(--color-amber-100), var(--color-amber-200));
+    color: var(--color-amber-700);
+    border-color: var(--color-amber-200);
 }
 
 #kt-llm-analysis-result .score-badge-low {
-    background: linear-gradient(135deg, #fee2e2, #fecaca);
-    color: #b91c1c;
+    background: linear-gradient(135deg, var(--color-red-100), var(--color-red-200));
+    color: var(--color-red-700);
     border-color: rgba(239, 68, 68, 0.2);
 }
 
 /* === 胶囊标签 (改写建议编号) === */
-#kt-llm-analysis-result.markdown-content h3:nth-of-type(3) ~ p > strong:first-child {
+#kt-llm-analysis-result.markdown-content h3:nth-of-type(3)~p>strong:first-child {
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
-    background: linear-gradient(135deg, #f3e8ff, #ede9fe);
-    color: #7c3aed;
+    background: linear-gradient(135deg, var(--color-purple-100), var(--color-violet-100));
+    color: var(--color-purple-600);
     padding: 0.2rem 0.75rem;
     border-radius: 0.375rem;
     font-size: 0.8rem;
     font-weight: 700;
     margin-bottom: 0.25rem;
-    border: 1px solid #ddd6fe;
+    border: 1px solid var(--color-violet-200);
 }
 
 /* === 响应式适配 === */

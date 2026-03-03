@@ -35,7 +35,7 @@
   padding: 14px 22px;
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--rounded-sm);
   color: var(--text);
   font-size: 13px;
   display: flex;

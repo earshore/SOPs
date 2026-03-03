@@ -1,0 +1,133 @@
+/**
+ * 统计卡片组件
+ * 用于显示关键指标和统计数据
+ */
+
+/* ===== Dashboard Stats Grid ===== */
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--spacing-sm);
+}
+
+/* ===== Stat Card ===== */
+.stat-card {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--rounded-lg);
+  padding: var(--spacing-lg);
+  position: relative;
+  overflow: hidden;
+  transition: all var(--duration-normal) var(--ease-smooth);
+  box-shadow: var(--shadow-xs);
+}
+
+.stat-card:hover {
+  border-color: var(--color-primary-light);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+}
+
+/* ===== 颜色变体 ===== */
+.stat-card.purple::before { 
+  background: linear-gradient(90deg, var(--color-indigo-500), var(--color-indigo-400)); 
+}
+
+.stat-card.green::before { 
+  background: linear-gradient(90deg, var(--color-green-500), var(--color-green-400)); 
+}
+
+.stat-card.orange::before { 
+  background: linear-gradient(90deg, var(--color-orange-500), var(--color-amber-400)); 
+}
+
+.stat-card.red::before { 
+  background: linear-gradient(90deg, var(--color-red-500), var(--color-rose-400)); 
+}
+
+.stat-card.blue::before { 
+  background: linear-gradient(90deg, var(--color-blue-500), var(--color-cyan-400)); 
+}
+
+/* ===== Stat Icon ===== */
+.stat-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--rounded-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-md);
+  margin-bottom: var(--spacing-sm);
+}
+
+.stat-card.purple .stat-icon { 
+  background: var(--color-indigo-100); 
+  color: var(--color-indigo-600); 
+}
+
+.stat-card.green .stat-icon { 
+  background: var(--color-green-100); 
+  color: var(--color-green-600); 
+}
+
+.stat-card.orange .stat-icon { 
+  background: var(--color-orange-100); 
+  color: var(--color-orange-600); 
+}
+
+.stat-card.red .stat-icon { 
+  background: var(--color-red-100); 
+  color: var(--color-red-600); 
+}
+
+.stat-card.blue .stat-icon { 
+  background: var(--color-blue-100); 
+  color: var(--color-blue-600); 
+}
+
+/* ===== Stat Value ===== */
+.stat-value {
+  font-size: var(--text-3xl);
+  font-weight: var(--font-extrabold);
+  margin-bottom: var(--spacing-2xs);
+  letter-spacing: var(--tracking-tight);
+}
+
+.stat-card.purple .stat-value { color: var(--color-indigo-600); }
+.stat-card.green .stat-value { color: var(--color-green-600); }
+.stat-card.orange .stat-value { color: var(--color-orange-600); }
+.stat-card.red .stat-value { color: var(--color-red-600); }
+.stat-card.blue .stat-value { color: var(--color-blue-600); }
+
+/* ===== Stat Label ===== */
+.stat-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  font-weight: var(--font-medium);
+}
+
+/* ===== 响应式 ===== */
+@media (max-width: 768px) {
+  .dashboard-stats { 
+    grid-template-columns: repeat(2, 1fr); 
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-stats { 
+    grid-template-columns: 1fr; 
+  }
+}

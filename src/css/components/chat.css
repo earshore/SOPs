@@ -1,0 +1,303 @@
+/**
+ * 聊天/消息组件
+ * 用于聊天界面、AI对话等场景
+ */
+
+/* ===== 聊天容器 ===== */
+.chat-messages-container,
+.rufus-messages-container {
+  min-height: 280px;
+  max-height: 420px;
+  overflow-y: auto;
+  padding: var(--spacing-lg);
+  background: var(--color-bg-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.chat-messages-container::-webkit-scrollbar,
+.rufus-messages-container::-webkit-scrollbar { 
+  width: 5px; 
+}
+
+.chat-messages-container::-webkit-scrollbar-track,
+.rufus-messages-container::-webkit-scrollbar-track { 
+  background: transparent; 
+}
+
+.chat-messages-container::-webkit-scrollbar-thumb,
+.rufus-messages-container::-webkit-scrollbar-thumb { 
+  background: var(--color-text-placeholder); 
+  border-radius: var(--rounded-md); 
+}
+
+/* ===== 空状态 ===== */
+.chat-empty-state,
+.rufus-empty-state {
+  text-align: center;
+  padding: var(--spacing-2xl) var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.chat-empty-icon,
+.rufus-empty-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--color-purple-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.chat-empty-icon i,
+.rufus-empty-icon i {
+  font-size: var(--text-3xl);
+  color: var(--color-text-placeholder);
+}
+
+.chat-empty-title,
+.rufus-empty-title {
+  font-size: var(--text-md);
+  font-weight: var(--font-bold);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-2xs);
+}
+
+.chat-empty-desc,
+.rufus-empty-desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-tertiary);
+  margin-bottom: var(--spacing-lg);
+}
+
+.chat-empty-suggestions,
+.rufus-empty-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  justify-content: center;
+}
+
+.suggestion-chip {
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--rounded-full);
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-default);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-smooth);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2xs);
+}
+
+.suggestion-chip:hover {
+  border-color: var(--color-purple-300);
+  color: var(--color-purple-700);
+  background: var(--color-purple-50);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-xs);
+}
+
+.suggestion-chip i {
+  font-size: var(--text-xs);
+  color: var(--color-warning);
+}
+
+/* ===== 消息气泡 ===== */
+.chat-message,
+.rufus-message {
+  max-width: 85%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--rounded-lg);
+  animation: fadeInUp var(--duration-normal) var(--ease-smooth);
+  position: relative;
+}
+
+.chat-message.user,
+.rufus-message.user {
+  align-self: flex-end;
+  background: var(--gradient-primary);
+  color: white;
+  border-bottom-right-radius: var(--rounded-xs);
+  box-shadow: var(--shadow-primary-sm);
+}
+
+.chat-message.assistant,
+.rufus-message.assistant {
+  align-self: flex-start;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-default);
+  border-bottom-left-radius: var(--rounded-xs);
+  box-shadow: var(--shadow-xs);
+}
+
+.chat-message.thinking,
+.rufus-message.thinking {
+  background: var(--color-bg-tertiary);
+  border: 1.5px dashed var(--color-border-default);
+  animation: pulse var(--duration-2s) infinite;
+}
+
+/* ===== 消息头部 ===== */
+.message-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-xs);
+  font-size: var(--text-xs);
+}
+
+.message-role {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2xs);
+  font-weight: var(--font-semibold);
+}
+
+.chat-message.user .message-role,
+.rufus-message.user .message-role { 
+  color: rgba(255, 255, 255, .9); 
+}
+
+.chat-message.assistant .message-role,
+.rufus-message.assistant .message-role { 
+  color: var(--color-primary); 
+}
+
+.message-time { 
+  opacity: .6; 
+  font-size: var(--text-2xs); 
+}
+
+/* ===== 消息内容 ===== */
+.message-content {
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.chat-message.user .message-content,
+.rufus-message.user .message-content { 
+  color: white; 
+}
+
+.chat-message.assistant .message-content,
+.rufus-message.assistant .message-content { 
+  color: var(--color-text-primary); 
+}
+
+/* ===== 输入区域 ===== */
+.chat-input-container,
+.rufus-input-container {
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-top: 1px solid var(--color-border-default);
+  background: var(--color-bg-primary);
+}
+
+.chat-input-wrap,
+.rufus-input-wrap {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: flex-end;
+  background: var(--color-bg-secondary);
+  border: 1.5px solid var(--color-border-default);
+  border-radius: var(--rounded-lg);
+  padding: var(--spacing-2xs) var(--spacing-2xs) var(--spacing-2xs) var(--spacing-md);
+  transition: all var(--duration-normal) var(--ease-smooth);
+}
+
+.chat-input-wrap:focus-within,
+.rufus-input-wrap:focus-within {
+  border-color: var(--color-purple-400);
+  box-shadow: 0 0 0 4px var(--color-purple-100);
+  background: var(--color-bg-primary);
+}
+
+.chat-input,
+.rufus-input {
+  flex: 1;
+  min-height: 40px;
+  max-height: 120px;
+  background: transparent;
+  border: none;
+  padding: var(--spacing-xs) 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  resize: none;
+  outline: none;
+}
+
+.chat-input::placeholder,
+.rufus-input::placeholder { 
+  color: var(--color-text-placeholder); 
+}
+
+.chat-send-btn,
+.rufus-send-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--rounded-md);
+  border: none;
+  background: linear-gradient(135deg, var(--color-purple-500), var(--color-purple-600));
+  color: white;
+  font-size: var(--text-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--duration-normal) var(--ease-smooth);
+  flex-shrink: 0;
+  box-shadow: 0 3px 12px var(--color-purple-200);
+}
+
+.chat-send-btn:hover,
+.rufus-send-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 5px 20px var(--color-purple-300);
+}
+
+.chat-send-btn:active,
+.rufus-send-btn:active {
+  transform: scale(.95);
+}
+
+/* ===== 提示信息 ===== */
+.chat-tips,
+.rufus-tips {
+  padding: var(--spacing-sm) var(--spacing-xl);
+  background: var(--color-amber-400);
+  border-top: 1px solid var(--color-amber-400);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.chat-tips > i,
+.rufus-tips > i {
+  color: var(--color-warning);
+  font-size: var(--text-sm);
+  flex-shrink: 0;
+}
+
+.chat-tips span,
+.rufus-tips span {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  line-height: var(--leading-relaxed);
+}
+
+.chat-tips strong,
+.rufus-tips strong {
+  color: var(--color-text-secondary);
+  font-weight: var(--font-semibold);
+}

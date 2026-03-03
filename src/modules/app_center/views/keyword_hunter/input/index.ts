@@ -69,7 +69,7 @@ function cleanup(): void {
 
     // 清理 debounced handler
     debouncedInputHandler = null;
-    
+
     // 清理已注册的动作
     if (registeredActions.length > 0) {
         unregisterActions(registeredActions);
@@ -167,25 +167,25 @@ function highlightDuplicatesInInput(): void {
 
     const dups = KeywordService.findDuplicateKeywords(input.value);
     const lines = input.value.split('\n');
-    
+
     // 清空容器
     layer.innerHTML = '';
     const fragment = document.createDocumentFragment();
-    
+
     lines.forEach((line, i) => {
         const trimmed = line.trim().toLowerCase();
         const isDuplicate = trimmed && dups.has(trimmed);
-        
+
         const span = document.createElement('span');
         if (isDuplicate) span.className = 'duplicate';
         span.textContent = line;
         fragment.appendChild(span);
-        
+
         if (i < lines.length - 1) {
             fragment.appendChild(document.createTextNode('\n'));
         }
     });
-    
+
     layer.appendChild(fragment);
 }
 
@@ -216,19 +216,19 @@ function cleanKeywordsUI(): void {
 
     const originalText = inputEl.value;
     const originalKeywords = KeywordService.parseKeywords(originalText);
-    
+
     // 先清理格式，再去重
     let cleanedText = KeywordService.cleanKeywordsText(originalText);
     cleanedText = KeywordService.deduplicateKeywordsText(cleanedText);
-    
+
     inputEl.value = cleanedText;
     updateInputStats();
     highlightDuplicatesInInput();
     saveInputsToState();
-    
+
     const finalKeywords = KeywordService.parseKeywords(cleanedText);
     const removedCount = originalKeywords.length - finalKeywords.length;
-    
+
     if (removedCount > 0) {
         showToast(`已清理格式并去重，移除 ${removedCount} 个重复项`, { type: 'success' });
     } else {
@@ -297,26 +297,26 @@ function cleanCopyFormat(): void {
     // 1. 去除粗体标记 **text** 或 __text__
     text = text.replace(/\*\*(.+?)\*\*/g, '$1');
     text = text.replace(/__(.+?)__/g, '$1');
-    
+
     // 2. 去除斜体标记 *text* 或 _text_
     text = text.replace(/\*(.+?)\*/g, '$1');
     text = text.replace(/_(.+?)_/g, '$1');
-    
+
     // 3. 去除代码标记 `text`
     text = text.replace(/`(.+?)`/g, '$1');
-    
+
     // 4. 去除删除线 ~~text~~
     text = text.replace(/~~(.+?)~~/g, '$1');
-    
+
     // 5. 去除多余的星号和反引号（未配对的）
     text = text.replace(/[*`~_]+/g, '');
-    
+
     // 6. 清理多余的空行（保留最多一个空行）
     text = text.replace(/\n{3,}/g, '\n\n');
-    
+
     // 7. 清理行首行尾的空格
     text = text.split('\n').map(line => line.trim()).join('\n');
-    
+
     // 8. 清理首尾空白
     text = text.trim();
 
@@ -451,7 +451,7 @@ export async function mount(container: HTMLElement): Promise<void> {
         // 1. 使用 SafeModuleLoader 加载模板
         const loader = SafeModuleLoader.getInstance();
         const renderer = SafeRenderer.getInstance();
-        
+
         const html = await loader.loadTemplate(
             'src/modules/app_center/views/keyword_hunter/input/template.html',
             {
@@ -462,8 +462,10 @@ export async function mount(container: HTMLElement): Promise<void> {
                 }
             }
         );
-        
+
         // 使用 SafeRenderer 渲染模板
+        // 添加淡入动画（在渲染前添加）
+        container.classList.add('fade-in');
         renderer.renderTemplate(container, html);
 
         // 2. 注册全局操作（用于 HTML onclick 兼容）
@@ -475,7 +477,7 @@ export async function mount(container: HTMLElement): Promise<void> {
             kt_clearCopyInput: () => clearCopyInput(),
             kt_startAnalysis: () => startAnalysis(),
         });
-        
+
         // 保存已注册的动作名称，用于卸载时清理
         registeredActions = actionNames;
 

@@ -1,0 +1,1198 @@
+/**
+ * ============================================================================
+ * Welcome Banner 组件
+ * ============================================================================
+ * 
+ * 用途:
+ * 页面顶部的欢迎横幅组件,包含精美的背景装饰、图标徽章、标题、描述和特性标签。
+ * 适用于应用中心、功能模块首页等需要突出展示功能特点的页面。
+ * 
+ * ============================================================================
+ * HTML 结构示例:
+ * ============================================================================
+ * 
+ * <div class="welcome-banner-wrap">
+ *   <div class="welcome-banner">
+ *     <!-- 背景装饰层 -->
+ *     <div class="wb-bg-gradient"></div>
+ *     <div class="wb-orb wb-orb-1"></div>
+ *     <div class="wb-orb wb-orb-2"></div>
+ *     <div class="wb-orb wb-orb-3"></div>
+ *     <div class="wb-grid-dots"></div>
+ *     <div class="wb-particle wb-p1"></div>
+ *     <div class="wb-particle wb-p2"></div>
+ *     <div class="wb-particle wb-p3"></div>
+ *     <div class="wb-particle wb-p4"></div>
+ *     <div class="wb-particle wb-p5"></div>
+ *     <div class="wb-particle wb-p6"></div>
+ *     
+ *     <!-- 内容区 -->
+ *     <div class="wb-content">
+ *       <div class="wb-layout">
+ *         <!-- 图标徽章 -->
+ *         <div class="wb-icon-badge">
+ *           <div class="wb-icon-main">
+ *             <i class="fa-solid fa-robot"></i>
+ *           </div>
+ *           <div class="wb-icon-status">
+ *             <i class="fa-solid fa-bolt"></i>
+ *           </div>
+ *           <div class="wb-icon-ring"></div>
+ *         </div>
+ *         
+ *         <!-- 文本内容 -->
+ *         <div class="wb-text-content">
+ *           <div class="wb-title-row">
+ *             <h2 class="wb-title">Q&A 预研实验室</h2>
+ *             <span class="wb-ai-badge">
+ *               <i class="fa-solid fa-sparkles"></i>
+ *               <span>AI</span>
+ *             </span>
+ *             <span class="wb-version-badge">Beta</span>
+ *           </div>
+ *           <p class="wb-desc">
+ *             基于 Rufus AI 的智能问答预研工具,帮助您快速生成高质量的产品 Q&A 内容
+ *           </p>
+ *           
+ *           <!-- 特性标签 -->
+ *           <div class="wb-features">
+ *             <div class="wb-feature-tag">
+ *               <div class="wb-feature-dot dot-emerald"></div>
+ *               <span>智能生成</span>
+ *             </div>
+ *             <div class="wb-feature-tag">
+ *               <div class="wb-feature-dot dot-teal"></div>
+ *               <span>多维度分析</span>
+ *             </div>
+ *             <div class="wb-feature-tag">
+ *               <div class="wb-feature-dot dot-cyan"></div>
+ *               <span>实时预览</span>
+ *             </div>
+ *             <div class="wb-feature-tag">
+ *               <div class="wb-feature-dot dot-amber"></div>
+ *               <span>一键导出</span>
+ *             </div>
+ *           </div>
+ *         </div>
+ *       </div>
+ *     </div>
+ *   </div>
+ * </div>
+ * 
+ * ============================================================================
+ * 定制化方法:
+ * ============================================================================
+ * 
+ * 1. 图标定制:
+ *    修改 .wb-icon-main i 的类名,使用 FontAwesome 图标
+ *    示例: <i class="fa-solid fa-chart-line"></i>
+ * 
+ * 2. 标题和描述定制:
+ *    修改 .wb-title 和 .wb-desc 的文本内容
+ * 
+ * 3. 徽章定制:
+ *    - AI 徽章: 添加/移除 .wb-ai-badge 元素
+ *    - 版本徽章: 添加/移除 .wb-version-badge 元素
+ *    - 自定义徽章: 参考现有徽章样式创建新的徽章类
+ * 
+ * 4. 特性标签定制:
+ *    - 添加/移除 .wb-feature-tag 元素
+ *    - 圆点颜色: 使用 .dot-emerald, .dot-teal, .dot-cyan, .dot-amber
+ *    - 自定义颜色: 参考现有圆点样式创建新的颜色类
+ * 
+ * 5. 背景配色定制:
+ *    通过 CSS 变量覆盖渐变色,在页面特定样式中添加:
+ *    
+ *    .custom-page .welcome-banner {
+ *      --wb-gradient-start: var(--color-purple-100);
+ *      --wb-gradient-mid: rgba(255, 255, 255, .95);
+ *      --wb-gradient-end: var(--color-pink-100);
+ *      --wb-gradient-accent: var(--color-rose-400);
+ *    }
+ * 
+ * 6. 简化版本:
+ *    如需简化版本,可省略以下可选元素:
+ *    - 背景装饰层 (.wb-orb, .wb-particle, .wb-grid-dots)
+ *    - 状态指示器 (.wb-icon-status)
+ *    - 脉冲环 (.wb-icon-ring)
+ *    - 徽章 (.wb-ai-badge, .wb-version-badge)
+ *    - 特性标签 (.wb-features)
+ * 
+ * ============================================================================
+ * 依赖说明:
+ * ============================================================================
+ * 
+ * CSS 变量 (来自 src/css/foundation/variables.css):
+ * - 颜色: --color-primary, --color-primary-light, --color-success-light,
+ *         --color-amber-400, --color-green-400/500/100, --color-teal-500/100,
+ *         --color-cyan-500/100, --color-pink-300, --color-text-primary/secondary/tertiary,
+ *         --color-bg-primary/secondary/tertiary, --color-border-default/light
+ * - 间距: --spacing-xs/sm/md/lg/xl/2xl/3xl
+ * - 字体: --text-xs/sm/base/md/xl/2xl, --font-medium/semibold/bold/extrabold,
+ *         --leading-tight/snug/relaxed, --tracking-tight/wide/wider
+ * - 圆角: --rounded-sm/md/lg/xl/2xl/full
+ * - 阴影: --shadow-xs/sm/md/lg, --shadow-primary-sm/md/lg
+ * - 动画: --duration-normal/slow/slower/2s, --ease-smooth/in-out/out
+ * 
+ * 动画 (来自 src/css/animations/keyframes.css):
+ * - floatSlow: 光球缓慢浮动动画 (12秒循环)
+ * - pulseRing: 脉冲环扩散动画 (2秒循环)
+ * - twinkle: 粒子闪烁动画 (3秒循环)
+ * 
+ * 图标库:
+ * - FontAwesome (fa-solid, fa-regular 等)
+ * 
+ * ============================================================================
+ * 响应式行为:
+ * ============================================================================
+ * 
+ * 桌面 (>768px):
+ * - 完整布局,所有装饰元素可见
+ * - 水平排列图标和文本内容
+ * 
+ * 平板/移动端 (≤768px):
+ * - 隐藏浮动光球
+ * - 垂直排列图标和文本内容
+ * - 调整内边距和间距
+ * 
+ * 小屏幕移动端 (≤480px):
+ * - 特性标签垂直排列
+ * 
+ * ============================================================================
+ * 无障碍支持:
+ * ============================================================================
+ * 
+ * - 使用语义化 HTML 标签 (如 <h2> 用于标题)
+ * - 为图标徽章添加 aria-label 属性描述图标含义
+ * - 遵循 prefers-reduced-motion 媒体查询,在用户启用减少动画偏好时禁用动画
+ * - 确保文本颜色与背景颜色的对比度 ≥ 4.5:1 (WCAG AA 标准)
+ * 
+ * ============================================================================
+ */
+
+
+/* ===== 容器样式 ===== */
+.wb-container {
+  margin-bottom: var(--spacing-2xl, 3rem);
+  /* 6.5 确保流式布局,避免水平滚动 */
+  max-width: 100%;
+  overflow-x: hidden;
+
+  /* 5.6 定义暗色模式 CSS 变量 */
+  --wb-text-primary: var(--color-text-primary, #0f172a);
+  --wb-text-secondary: var(--color-text-secondary, #64748b);
+  --wb-border-color: var(--color-border-default, rgba(0, 0, 0, 0.10));
+  --wb-tag-bg: rgba(255, 255, 255, .7);
+  --wb-tag-border: var(--color-border-default, rgba(0, 0, 0, 0.10));
+  --wb-tag-hover-bg: white;
+  --wb-tag-hover-border: var(--color-primary-light, rgba(59, 130, 246, 0.10));
+}
+
+.wb-card {
+  position: relative;
+  border-radius: var(--rounded-2xl, 24px);
+  border: 1px solid var(--color-primary-light, rgba(59, 130, 246, 0.10));
+  overflow: hidden;
+  background: var(--color-bg-primary, #ffffff);
+  box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.07));
+  transition: all var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+  min-height: auto;
+  height: auto;
+  /* 6.5 确保流式布局,避免水平滚动 */
+  max-width: 100%;
+  /* 8.3 优化渲染性能 */
+  backface-visibility: hidden;
+  perspective: 1000px;
+
+  /* 5.6 定义暗色模式 CSS 变量 */
+  --wb-text-primary: var(--color-text-primary, #0f172a);
+  --wb-text-secondary: var(--color-text-secondary, #64748b);
+  --wb-border-color: var(--color-border-default, rgba(0, 0, 0, 0.10));
+  --wb-tag-bg: rgba(255, 255, 255, .7);
+  --wb-tag-border: var(--color-border-default, rgba(0, 0, 0, 0.10));
+  --wb-tag-hover-bg: white;
+  --wb-tag-hover-border: var(--color-primary-light, rgba(59, 130, 246, 0.10));
+}
+
+.wb-card:hover {
+  border-color: var(--color-primary-light, rgba(59, 130, 246, 0.10));
+  box-shadow: var(--shadow-lg, 0 10px 25px -5px rgba(0, 0, 0, 0.08));
+  transform: translateY(-2px);
+}
+
+
+/* ===== 背景装饰层 ===== */
+.wb-bg-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg,
+      var(--wb-gradient-1, var(--wb-gradient-start, var(--color-primary-light, rgba(59, 130, 246, 0.10)))) 0%,
+      var(--wb-gradient-mid, rgba(255, 255, 255, .95)) 35%,
+      var(--wb-gradient-2, var(--wb-gradient-end, var(--color-success-light, rgba(34, 197, 94, 0.10)))) 65%,
+      var(--wb-gradient-accent, var(--color-amber-400, #fbbf24)) 100%);
+  /* 8.1 为装饰元素添加 pointer-events: none */
+  pointer-events: none;
+  /* 8.3 优化渲染性能 */
+  contain: layout style paint;
+}
+
+.wb-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  animation: floatSlow 12s var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1)) infinite;
+  will-change: transform;
+  transform: translateZ(0);
+  /* 8.1 为装饰元素添加 pointer-events: none */
+  pointer-events: none;
+  /* 8.3 优化渲染性能 */
+  contain: layout style paint;
+}
+
+.wb-orb-1 {
+  top: -30%;
+  right: -5%;
+  width: 380px;
+  height: 380px;
+  background: radial-gradient(circle,
+      var(--wb-gradient-1, var(--wb-orb-1-color, var(--color-primary-light, rgba(59, 130, 246, 0.10)))) 0%,
+      transparent 70%);
+  animation-delay: 0s;
+}
+
+.wb-orb-2 {
+  bottom: -40%;
+  left: -5%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle,
+      var(--wb-gradient-2, var(--wb-orb-2-color, var(--color-success-light, rgba(34, 197, 94, 0.10)))) 0%,
+      transparent 70%);
+  animation-delay: -4s;
+}
+
+.wb-orb-3 {
+  top: 20%;
+  right: 30%;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle,
+      var(--wb-orb-3-color, var(--color-amber-400, #fbbf24)) 0%,
+      transparent 70%);
+  animation-delay: -8s;
+}
+
+.wb-grid-pattern {
+  position: absolute;
+  inset: 0;
+  opacity: .03;
+  background-image: radial-gradient(circle,
+      var(--color-primary, #3b82f6) 1px,
+      transparent 1px);
+  background-size: 32px 32px;
+  /* 8.1 为装饰元素添加 pointer-events: none */
+  pointer-events: none;
+}
+
+.wb-particle {
+  position: absolute;
+  border-radius: 50%;
+  /* 8.1 为装饰元素添加 pointer-events: none */
+  pointer-events: none;
+  /* 8.3 优化渲染性能 */
+  contain: layout style paint;
+}
+
+.wb-particle-1 {
+  top: 15%;
+  right: 10%;
+  width: 8px;
+  height: 8px;
+  background: var(--color-primary-light, rgba(59, 130, 246, 0.10));
+  animation: twinkle 3s var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1)) infinite;
+  /* 8.1 添加 will-change 属性优化性能 */
+  will-change: opacity;
+}
+
+.wb-particle-2 {
+  top: 55%;
+  right: 18%;
+  width: 6px;
+  height: 6px;
+  background: var(--color-success-light, rgba(34, 197, 94, 0.10));
+  animation: twinkle 3s var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1)) var(--duration-slower, 500ms) infinite;
+  /* 8.1 添加 will-change 属性优化性能 */
+  will-change: opacity;
+}
+
+.wb-particle-3 {
+  bottom: 25%;
+  right: 35%;
+  width: 5px;
+  height: 5px;
+  background: var(--color-amber-400, #fbbf24);
+  animation: twinkle 3s var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1)) 1s infinite;
+  /* 8.1 添加 will-change 属性优化性能 */
+  will-change: opacity;
+}
+
+.wb-particle-4 {
+  top: 30%;
+  left: 20%;
+  width: 6px;
+  height: 6px;
+  background: var(--color-primary-light, rgba(59, 130, 246, 0.10));
+  animation: twinkle 3s var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1)) var(--duration-2s, 2000ms) infinite;
+  /* 8.1 添加 will-change 属性优化性能 */
+  will-change: opacity;
+}
+
+
+/* ===== 内容区样式 ===== */
+.wb-content {
+  position: relative;
+  z-index: 10;
+  padding: var(--spacing-2xl, 3rem) var(--spacing-3xl, 4rem);
+  min-height: auto;
+  height: auto;
+}
+
+.wb-header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-lg, 1.5rem);
+}
+
+
+/* ===== 图标徽章样式 ===== */
+.wb-icon-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.wb-icon-main {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--rounded-xl, 16px);
+  background: var(--gradient-primary, linear-gradient(135deg, #3b82f6, #6366f1));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-primary-md, 0 4px 14px rgba(59, 130, 246, 0.20));
+  transition: all var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+  position: relative;
+  z-index: 2;
+}
+
+.wb-icon-wrapper:hover .wb-icon-main {
+  transform: scale(1.06) rotate(-3deg);
+  box-shadow: var(--shadow-primary-lg, 0 8px 25px rgba(59, 130, 246, 0.25));
+}
+
+.wb-icon-main i {
+  font-size: 26px;
+  color: white;
+}
+
+.wb-icon-badge {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg,
+      var(--color-amber-400, #fbbf24),
+      var(--color-warning, #f59e0b));
+  border: 3px solid white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 10px var(--color-amber-400, #fbbf24);
+  z-index: 3;
+}
+
+.wb-icon-badge i {
+  font-size: 9px;
+  color: white;
+}
+
+.wb-icon-ring {
+  position: absolute;
+  inset: -6px;
+  border-radius: var(--rounded-2xl, 24px);
+  border: 2px solid var(--color-primary-light, rgba(59, 130, 246, 0.10));
+  animation: pulseRing var(--duration-2s, 2000ms) var(--ease-out, cubic-bezier(0, 0, 0.2, 1)) infinite;
+  z-index: 1;
+  /* 8.1 添加 will-change 属性优化性能 */
+  will-change: transform, opacity;
+}
+
+
+/* ===== 文本内容样式 ===== */
+.wb-text {
+  flex: 1;
+  min-width: 0;
+  /* 6.5 允许 flex 项目收缩以避免溢出 */
+  max-width: 100%;
+  /* 6.5 确保不超出容器宽度 */
+}
+
+.wb-title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm, 0.75rem);
+  margin-bottom: var(--spacing-sm, 0.75rem);
+  flex-wrap: wrap;
+}
+
+.wb-title {
+  font-size: var(--text-2xl, 1.5rem);
+  font-weight: var(--font-extrabold, 800);
+  color: var(--wb-text-primary, var(--color-text-primary, #0f172a));
+  letter-spacing: var(--tracking-tight, -0.025em);
+  line-height: var(--leading-tight, 1.25);
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.wb-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: var(--rounded-full, 9999px);
+  font-size: var(--text-2xs, 0.625rem);
+  font-weight: var(--font-bold, 700);
+  color: white;
+  background: var(--badge-gradient, linear-gradient(135deg, #3b82f6, #6366f1));
+  box-shadow: var(--badge-shadow, 0 2px 8px rgba(59, 130, 246, 0.15));
+  letter-spacing: var(--tracking-wider, 0.05em);
+  text-transform: uppercase;
+  transition: all 200ms ease;
+  /* 6.4 确保触摸目标尺寸 ≥ 44x44px */
+  /* min-height: 44px;
+  min-width: 44px; */
+  justify-content: center;
+}
+
+.wb-badge i {
+  font-size: 9px;
+}
+
+.wb-badge:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+}
+
+/* 7.4 可点击徽章的键盘导航支持 */
+.wb-badge:focus-visible {
+  outline: 2px solid var(--color-primary, #3b82f6);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+/* 7.4 移除鼠标点击时的焦点样式 */
+.wb-badge:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: var(--badge-shadow, 0 2px 8px rgba(59, 130, 246, 0.15));
+}
+
+/* 徽章主题变体 */
+.wb-badge-ai {
+  --badge-gradient: linear-gradient(135deg, #3b82f6, #6366f1);
+  --badge-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+}
+
+.wb-badge-growth {
+  --badge-gradient: linear-gradient(135deg, #10b981, #059669);
+  --badge-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+}
+
+.wb-badge-safety {
+  --badge-gradient: linear-gradient(135deg, #f43f5e, #dc2626);
+  --badge-shadow: 0 2px 8px rgba(244, 63, 94, 0.15);
+}
+
+.wb-badge-service {
+  --badge-gradient: linear-gradient(135deg, #a855f7, #7c3aed);
+  --badge-shadow: 0 2px 8px rgba(168, 85, 247, 0.15);
+}
+
+.wb-badge-supply {
+  --badge-gradient: linear-gradient(135deg, #f97316, #ea580c);
+  --badge-shadow: 0 2px 8px rgba(249, 115, 22, 0.15);
+}
+
+.wb-badge-analytics {
+  --badge-gradient: linear-gradient(135deg, #06b6d4, #0891b2);
+  --badge-shadow: 0 2px 8px rgba(6, 182, 212, 0.15);
+}
+
+.wb-badge-pro {
+  --badge-gradient: linear-gradient(135deg, #f59e0b, #d97706);
+  --badge-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);
+}
+
+.wb-badge-hub {
+  --badge-gradient: linear-gradient(135deg, #64748b, #475569);
+  --badge-shadow: 0 2px 8px rgba(100, 116, 139, 0.15);
+}
+
+.wb-description {
+  color: var(--wb-text-secondary, var(--color-text-secondary, #64748b));
+  font-size: var(--text-base, 0.875rem);
+  line-height: var(--leading-relaxed, 1.625);
+  max-width: 100%;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+
+/* ===== 特性标签样式 ===== */
+.wb-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm, 0.75rem);
+  margin-top: var(--spacing-lg, 1.5rem);
+}
+
+.wb-tag {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs, 0.5rem);
+  padding: 7px 16px;
+  border-radius: var(--rounded-full, 9999px);
+  background: var(--wb-tag-bg, rgba(255, 255, 255, .7));
+  border: 1px solid var(--wb-tag-border, var(--color-border-default, rgba(0, 0, 0, 0.10)));
+  backdrop-filter: blur(10px);
+  transition: all var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+  cursor: default;
+  /* 6.4 确保触摸目标尺寸 ≥ 44x44px */
+  min-height: 44px;
+}
+
+.wb-tag:hover {
+  background: var(--wb-tag-hover-bg, white);
+  border-color: var(--wb-tag-hover-border, var(--color-primary-light, rgba(59, 130, 246, 0.10)));
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-xs, 0 1px 2px rgba(0, 0, 0, 0.04));
+}
+
+/* 7.4 标签的键盘导航支持 */
+.wb-tag:focus-visible {
+  outline: 2px solid var(--color-primary, #3b82f6);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+/* 7.4 移除鼠标点击时的焦点样式 */
+.wb-tag:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.wb-tag-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--wb-tag-dot-1, var(--color-green-500, #22c55e));
+  box-shadow: 0 0 0 3px var(--color-green-100, #dcfce7);
+}
+
+.wb-tag span {
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--wb-text-secondary, var(--color-text-secondary, #64748b));
+  font-weight: var(--font-medium, 500);
+}
+
+
+/* ===== 响应式样式 ===== */
+@media (max-width: 768px) {
+  .wb-content {
+    padding: var(--spacing-lg, 1.5rem) var(--spacing-md, 1rem);
+  }
+
+  .wb-header {
+    flex-direction: column;
+    gap: var(--spacing-md, 1rem);
+  }
+
+  .wb-icon-main {
+    width: 56px;
+    height: 56px;
+  }
+
+  .wb-icon-main i {
+    font-size: 24px;
+  }
+
+  .wb-title {
+    font-size: var(--text-xl, 1.25rem);
+  }
+
+  /* 6.1 平板断点徽章样式 */
+  .wb-badge {
+    padding: 3px 8px;
+    font-size: 0.5625rem;
+    /* 9px */
+  }
+
+  .wb-badge i {
+    font-size: 7px;
+  }
+
+  .wb-tags {
+    gap: var(--spacing-xs, 0.5rem);
+  }
+
+  .wb-tag {
+    padding: 5px 12px;
+  }
+
+  /* 6.1 隐藏浮动光球以提升性能 */
+  .wb-orb {
+    display: none;
+  }
+
+  /* 6.4 移动端增加内边距以满足触摸目标要求 */
+  .wb-badge {
+    padding: 8px 12px;
+  }
+
+  .wb-tag {
+    padding: 8px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+
+  /* 6.2 移动端断点样式 */
+  .wb-badge {
+    padding: 2px 6px;
+    font-size: 0.5rem;
+    /* 8px */
+  }
+
+  /* 6.2 特性标签垂直排列 */
+  .wb-tags {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 375px) {
+
+  /* 6.3 超小屏幕断点样式 */
+  .wb-icon-main {
+    width: 48px;
+    height: 48px;
+  }
+
+  .wb-title {
+    font-size: 1rem;
+    /* 16px */
+  }
+}
+
+
+/* ===== 徽章动画效果 ===== */
+
+/* 脉冲动画 - 用于 Safety 徽章 */
+@keyframes pulse {
+
+  0%,
+  100% {
+    transform: scale(1) translateZ(0);
+  }
+
+  50% {
+    transform: scale(1.05) translateZ(0);
+  }
+}
+
+.wb-badge-safety {
+  animation: pulse 2s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* 闪烁动画 - 用于 Growth 徽章 */
+@keyframes blink {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.wb-badge-growth {
+  animation: blink 1.5s ease-in-out infinite;
+  will-change: opacity;
+}
+
+/* 渐变背景动画 - 用于支持渐变动画的徽章 */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* 为支持渐变动画的徽章添加背景尺寸 */
+.wb-badge-animated {
+  background-size: 200% 200%;
+  animation: gradientShift 3s linear infinite;
+}
+
+
+/* ===== 无障碍支持 ===== */
+@media (prefers-reduced-motion: reduce) {
+
+  .wb-orb,
+  .wb-particle,
+  .wb-icon-ring,
+  .wb-badge-safety,
+  .wb-badge-growth,
+  .wb-badge-animated {
+    animation: none !important;
+  }
+
+  .wb-card:hover,
+  .wb-icon-main:hover,
+  .wb-tag:hover {
+    transform: none;
+  }
+}
+
+
+/* ===== 暗色模式平滑过渡 ===== */
+/* 5.5 为所有受暗色模式影响的元素添加平滑过渡 */
+.wb-container,
+.wb-card,
+.wb-bg-gradient,
+.wb-orb,
+.wb-title,
+.wb-description,
+.wb-tag,
+.wb-tag span,
+.wb-badge {
+  transition: background-color 300ms ease,
+    color 300ms ease,
+    border-color 300ms ease,
+    background 300ms ease;
+}
+
+
+/* ===== 暗色模式适配 ===== */
+@media (prefers-color-scheme: dark) {
+
+  /* 5.6 使用 CSS 变量覆盖暗色模式样式 */
+  .wb-container,
+  .wb-card {
+    --wb-text-primary: #f1f5f9;
+    --wb-text-secondary: #cbd5e1;
+    --wb-border-color: rgba(255, 255, 255, 0.1);
+    --wb-tag-bg: rgba(0, 0, 0, 0.3);
+    --wb-tag-border: rgba(255, 255, 255, 0.1);
+    --wb-tag-hover-bg: rgba(0, 0, 0, 0.5);
+    --wb-tag-hover-border: rgba(255, 255, 255, 0.2);
+  }
+
+  /* 5.1 背景适配 */
+  .wb-container,
+  .wb-card {
+    background: linear-gradient(135deg,
+        rgba(30, 58, 138, 0.15) 0%,
+        rgba(17, 24, 39, 0.95) 35%,
+        rgba(6, 78, 59, 0.15) 65%,
+        rgba(120, 53, 15, 0.10) 100%);
+    border-color: var(--wb-border-color);
+  }
+
+  .wb-bg-gradient {
+    background: linear-gradient(135deg,
+        rgba(30, 58, 138, 0.15) 0%,
+        rgba(17, 24, 39, 0.95) 35%,
+        rgba(6, 78, 59, 0.15) 65%,
+        rgba(120, 53, 15, 0.10) 100%);
+  }
+
+  .wb-orb-1 {
+    background: radial-gradient(circle,
+        rgba(59, 130, 246, 0.15) 0%,
+        transparent 70%);
+  }
+
+  .wb-orb-2 {
+    background: radial-gradient(circle,
+        rgba(34, 197, 94, 0.15) 0%,
+        transparent 70%);
+  }
+
+  .wb-orb-3 {
+    background: radial-gradient(circle,
+        rgba(251, 191, 36, 0.15) 0%,
+        transparent 70%);
+  }
+
+  /* 5.2 徽章适配 - 调整为更亮的色调以提高可见度 */
+  .wb-badge-ai {
+    --badge-gradient: linear-gradient(135deg, #60a5fa, #818cf8);
+    --badge-shadow: 0 2px 8px rgba(96, 165, 250, 0.25);
+  }
+
+  .wb-badge-growth {
+    --badge-gradient: linear-gradient(135deg, #34d399, #10b981);
+    --badge-shadow: 0 2px 8px rgba(52, 211, 153, 0.25);
+  }
+
+  .wb-badge-safety {
+    --badge-gradient: linear-gradient(135deg, #fb7185, #f43f5e);
+    --badge-shadow: 0 2px 8px rgba(251, 113, 133, 0.25);
+  }
+
+  .wb-badge-service {
+    --badge-gradient: linear-gradient(135deg, #c084fc, #a855f7);
+    --badge-shadow: 0 2px 8px rgba(192, 132, 252, 0.25);
+  }
+
+  .wb-badge-supply {
+    --badge-gradient: linear-gradient(135deg, #fb923c, #f97316);
+    --badge-shadow: 0 2px 8px rgba(251, 146, 60, 0.25);
+  }
+
+  .wb-badge-analytics {
+    --badge-gradient: linear-gradient(135deg, #22d3ee, #06b6d4);
+    --badge-shadow: 0 2px 8px rgba(34, 211, 238, 0.25);
+  }
+
+  .wb-badge-pro {
+    --badge-gradient: linear-gradient(135deg, #fbbf24, #f59e0b);
+    --badge-shadow: 0 2px 8px rgba(251, 191, 36, 0.25);
+  }
+
+  .wb-badge-hub {
+    --badge-gradient: linear-gradient(135deg, #94a3b8, #64748b);
+    --badge-shadow: 0 2px 8px rgba(148, 163, 184, 0.25);
+  }
+
+  /* 5.3 和 5.4 的样式现在通过 CSS 变量自动应用 */
+  /* 文字颜色通过 --wb-text-primary 和 --wb-text-secondary 控制 */
+  /* 边框和标签样式通过 --wb-border-color, --wb-tag-bg, --wb-tag-border 控制 */
+}
+
+
+/* ============================================================================
+ * 简化版本样式 (用于 Python 脚本迁移的页面)
+ * ============================================================================
+ * 
+ * HTML 结构:
+ * <div class="wb-container" style="--wb-gradient-1: #color1; --wb-gradient-2: #color2;">
+ *   <div class="wb-orb wb-orb-1"></div>
+ *   <div class="wb-orb wb-orb-2"></div>
+ *   <div class="wb-content">
+ *     <div class="wb-icon"><i class="fas fa-icon"></i></div>
+ *     <h1 class="wb-title">标题</h1>
+ *     <p class="wb-description">描述</p>
+ *     <div class="wb-meta">
+ *       <span><i class="fas fa-tag"></i>标签1</span>
+ *       <span><i class="fas fa-tag"></i>标签2</span>
+ *     </div>
+ *   </div>
+ * </div>
+ * ============================================================================
+ */
+
+/* 当 .wb-container 作为直接容器时的样式 */
+.wb-container:not(:has(.wb-card)) {
+  position: relative;
+  border-radius: var(--rounded-2xl, 24px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  overflow: hidden;
+  background: linear-gradient(135deg,
+      var(--wb-gradient-1, rgba(59, 130, 246, 0.08)) 0%,
+      rgba(255, 255, 255, 0.95) 35%,
+      var(--wb-gradient-2, rgba(34, 197, 94, 0.08)) 65%,
+      rgba(251, 191, 36, 0.05) 100%);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  margin-bottom: var(--spacing-2xl, 3rem);
+  padding: var(--spacing-lg, 1.5rem) var(--spacing-xl, 2rem);
+  transition: all 300ms cubic-bezier(0.22, 1, 0.36, 1);
+  min-height: auto;
+  height: auto;
+}
+
+.wb-container:not(:has(.wb-card)):hover {
+  border-color: rgba(59, 130, 246, 0.15);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  transform: translateY(-2px);
+}
+
+/* 简化版本的内容区 - 使用 CSS Grid 实现横向布局 */
+.wb-container:not(:has(.wb-card)) .wb-content {
+  position: relative;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto auto;
+  column-gap: var(--spacing-lg, 1.5rem);
+  row-gap: 0;
+  align-items: start;
+}
+
+/* 图标占据第一列，跨越所有行 */
+.wb-container:not(:has(.wb-card)) .wb-icon {
+  grid-column: 1;
+  grid-row: 1 / -1;
+  align-self: start;
+}
+
+/* 标题行在第二列第一行 */
+.wb-container:not(:has(.wb-card)) .wb-title-row {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+/* 描述在第二列第二行 */
+.wb-container:not(:has(.wb-card)) .wb-description {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+/* 标签在第二列第三行 */
+.wb-container:not(:has(.wb-card)) .wb-meta {
+  grid-column: 2;
+  grid-row: 3;
+}
+
+/* 简化版本的图标 - 添加渐变背景和右下角徽章 */
+.wb-container:not(:has(.wb-card)) .wb-icon {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: var(--rounded-xl, 16px);
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.20);
+  transition: all 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.wb-container:not(:has(.wb-card)) .wb-icon i {
+  font-size: 24px;
+  color: white;
+}
+
+/* 图标右下角的小徽章 - 使用伪元素 */
+.wb-container:not(:has(.wb-card)) .wb-icon::after {
+  content: '\f0e7';
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  border: 2px solid white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  color: white;
+  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.4);
+  z-index: 3;
+}
+
+.wb-container:not(:has(.wb-card)):hover .wb-icon {
+  transform: scale(1.06) rotate(-3deg);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.25);
+}
+
+/* 简化版本的标题行 - 支持标题+徽章并排 */
+.wb-container:not(:has(.wb-card)) .wb-title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm, 0.75rem);
+  margin-bottom: var(--spacing-xs, 0.5rem);
+  flex-wrap: wrap;
+}
+
+/* 简化版本的标题 */
+.wb-container:not(:has(.wb-card)) .wb-title {
+  font-size: var(--text-xl, 1.25rem);
+  font-weight: var(--font-extrabold, 800);
+  color: var(--color-text-primary, #0f172a);
+  letter-spacing: var(--tracking-tight, -0.025em);
+  line-height: var(--leading-tight, 1.25);
+  margin: 0;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* 简化版本的徽章 */
+.wb-container:not(:has(.wb-card)) .wb-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: var(--rounded-full, 9999px);
+  font-size: var(--text-2xs, 0.625rem);
+  font-weight: var(--font-bold, 700);
+  color: white;
+  background: var(--badge-gradient, linear-gradient(135deg, #3b82f6, #6366f1));
+  box-shadow: var(--badge-shadow, 0 2px 8px rgba(59, 130, 246, 0.15));
+  letter-spacing: var(--tracking-wider, 0.05em);
+  text-transform: uppercase;
+  transition: all 200ms ease;
+}
+
+.wb-container:not(:has(.wb-card)) .wb-badge i {
+  font-size: 8px;
+}
+
+.wb-container:not(:has(.wb-card)) .wb-badge:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+}
+
+/* 简化版本的描述 */
+.wb-container:not(:has(.wb-card)) .wb-description {
+  color: var(--color-text-secondary, #64748b);
+  font-size: var(--text-sm, 0.8125rem);
+  line-height: var(--leading-relaxed, 1.625);
+  max-width: 100%;
+  margin: 0 0 var(--spacing-md, 1rem) 0;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* 简化版本的元数据标签 */
+.wb-container:not(:has(.wb-card)) .wb-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs, 0.5rem);
+  margin: 0;
+}
+
+.wb-container:not(:has(.wb-card)) .wb-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs, 0.5rem);
+  padding: 5px 12px;
+  border-radius: var(--rounded-full, 9999px);
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--color-border-default, rgba(0, 0, 0, 0.10));
+  backdrop-filter: blur(10px);
+  font-size: var(--text-2xs, 0.6875rem);
+  color: var(--color-text-secondary, #64748b);
+  font-weight: var(--font-medium, 500);
+  transition: all var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+  cursor: default;
+}
+
+.wb-container:not(:has(.wb-card)) .wb-meta span:hover {
+  background: white;
+  border-color: var(--color-primary-light, rgba(59, 130, 246, 0.10));
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-xs, 0 1px 2px rgba(0, 0, 0, 0.04));
+}
+
+.wb-container:not(:has(.wb-card)) .wb-meta span i {
+  font-size: 9px;
+  color: var(--color-primary, #3b82f6);
+}
+
+/* 简化版本的响应式 */
+@media (max-width: 768px) {
+  .wb-container:not(:has(.wb-card)) {
+    padding: var(--spacing-md, 1rem) var(--spacing-lg, 1.5rem);
+  }
+
+  .wb-container:not(:has(.wb-card)) .wb-content {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto auto;
+    row-gap: var(--spacing-sm, 0.75rem);
+  }
+
+  .wb-container:not(:has(.wb-card)) .wb-icon {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .wb-container:not(:has(.wb-card)) .wb-title-row {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .wb-container:not(:has(.wb-card)) .wb-title {
+    font-size: var(--text-lg, 1.125rem);
+  }
+
+  .wb-container:not(:has(.wb-card)) .wb-description {
+    grid-column: 1;
+    grid-row: 3;
+  }
+
+  .wb-container:not(:has(.wb-card)) .wb-meta {
+    grid-column: 1;
+    grid-row: 4;
+  }
+
+  .wb-container:not(:has(.wb-card)) .wb-meta span {
+    padding: 4px 10px;
+    font-size: 0.625rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .wb-container:not(:has(.wb-card)) {
+    padding: var(--spacing-sm, 0.75rem) var(--spacing-md, 1rem);
+  }
+
+  .wb-container:not(:has(.wb-card)) .wb-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .wb-container:not(:has(.wb-card)) .wb-icon i {
+    font-size: 20px;
+  }
+
+  .wb-container:not(:has(.wb-card)) .wb-icon::after {
+    width: 18px;
+    height: 18px;
+    font-size: 7px;
+  }
+
+  .wb-container:not(:has(.wb-card)) .wb-badge {
+    padding: 2px 8px;
+    font-size: 0.5625rem;
+  }
+
+  .wb-container:not(:has(.wb-card)) .wb-badge i {
+    font-size: 7px;
+  }
+
+  .wb-container:not(:has(.wb-card)) .wb-meta {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

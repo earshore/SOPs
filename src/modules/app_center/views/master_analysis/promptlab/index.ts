@@ -39,7 +39,7 @@ export async function mount(container: HTMLElement): Promise<void> {
         // 1. 使用 SafeModuleLoader 加载模板
         const loader = SafeModuleLoader.getInstance();
         const renderer = SafeRenderer.getInstance();
-        
+
         const html = await loader.loadTemplate(
             'src/modules/app_center/views/master_analysis/promptlab/template.html',
             {
@@ -48,14 +48,16 @@ export async function mount(container: HTMLElement): Promise<void> {
                 }
             }
         );
-        
+
         // 2. 使用 SafeRenderer 渲染模板（静态模板，已审计）
+        // 添加淡入动画（在渲染前添加）
+        container.classList.add('fade-in');
         renderer.renderTemplate(container, html);
 
         // 3. 使用 AlpineRegistry 注册组件
         const registry = AlpineRegistry.getInstance();
         registry.register('promptlabPanel', createPromptlabPanel);
-        
+
         console.log('[Promptlab] ✅ Alpine 组件已通过 AlpineRegistry 注册');
         console.log('[Promptlab] ✅ 子模块挂载成功');
     } catch (error) {
@@ -74,7 +76,7 @@ export function unmount(): void {
         // 使用 AlpineRegistry 卸载组件
         const registry = AlpineRegistry.getInstance();
         registry.unregister('promptlabPanel');
-        
+
         console.log('[Promptlab] ✅ 子模块卸载成功');
     } catch (error) {
         console.error('[Promptlab] ❌ 子模块卸载失败:', error);
