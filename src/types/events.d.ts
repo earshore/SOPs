@@ -342,7 +342,7 @@ export interface DataDeletedEventPayload {
 /**
  * 数据更新事件
  */
-export interface DataUpdatedEventPayload<T = any> {
+export interface DataUpdatedEventPayload<T = unknown> {
   dataType: string;
   data: T;
   oldData?: T;
@@ -448,7 +448,7 @@ export interface SettingsCloseEventPayload {
 /**
  * 历史记录更新事件
  */
-export interface HistoryUpdatedEventPayload<T = any> {
+export interface HistoryUpdatedEventPayload<T = unknown> {
   action: 'add' | 'remove' | 'clear' | 'update';
   item?: T;
   items?: T[];
@@ -460,8 +460,8 @@ export interface HistoryUpdatedEventPayload<T = any> {
  */
 export interface ConfigChangeEventPayload {
   key: string;
-  value: any;
-  oldValue?: any;
+  value: unknown;
+  oldValue?: unknown;
   timestamp: number;
 }
 
@@ -537,7 +537,7 @@ export interface UIModalOpenEventPayload {
  */
 export interface UIModalCloseEventPayload {
   modalId: string;
-  result?: any;
+  result?: unknown;
   timestamp: number;
 }
 
@@ -1009,12 +1009,12 @@ export interface IEventValidator {
 /**
  * 事件过滤器函数
  */
-export type EventFilter<T = any> = (payload: T) => boolean;
+export type EventFilter<T = unknown> = (payload: T) => boolean;
 
 /**
  * 事件转换器函数
  */
-export type EventTransformer<T = any, R = any> = (payload: T) => R;
+export type EventTransformer<T = unknown, R = unknown> = (payload: T) => R;
 
 /**
  * 事件中间件

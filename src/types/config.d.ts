@@ -266,7 +266,7 @@ export interface IConfigValidator {
   /**
    * 验证配置
    */
-  validate<T>(config: any, schema: any): config is T;
+  validate<T>(config: unknown, schema: unknown): config is T;
   
   /**
    * 获取验证错误
@@ -283,12 +283,12 @@ export interface IConfigCenter {
   /**
    * 获取配置
    */
-  get<T = any>(path: string): T | undefined;
+  get<T = unknown>(path: string): T | undefined;
   
   /**
    * 设置配置
    */
-  set<T = any>(path: string, value: T): void;
+  set<T = unknown>(path: string, value: T): void;
   
   /**
    * 合并配置
@@ -313,7 +313,7 @@ export interface IConfigCenter {
   /**
    * 监听配置变化
    */
-  watch(path: string, callback: (newValue: any, oldValue: any) => void): () => void;
+  watch(path: string, callback: (newValue: unknown, oldValue: unknown) => void): () => void;
 }
 
 // ==================== 导出 ====================

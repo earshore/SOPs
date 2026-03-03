@@ -10,7 +10,7 @@
  * 标准 API 响应包装器
  * @template T - 响应数据类型
  */
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   /** 是否成功 */
   success: boolean;
   /** 响应数据 */
@@ -493,7 +493,7 @@ export interface AnalyticsStatsResponse {
 /**
  * 存储操作响应
  */
-export interface StorageResponse<T = any> {
+export interface StorageResponse<T = unknown> {
   /** 是否成功 */
   success: boolean;
   /** 数据 */
@@ -573,7 +573,7 @@ export interface HealthCheckResponse {
 /**
  * 批量操作结果
  */
-export interface BatchOperationResult<T = any> {
+export interface BatchOperationResult<T = unknown> {
   /** 成功的项 */
   succeeded: T[];
   /** 失败的项 */
