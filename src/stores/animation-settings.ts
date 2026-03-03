@@ -17,64 +17,64 @@ import { animationManager } from '../services/animation-manager';
 interface AnimationSettingsStore {
   /** 当前动画配置 */
   settings: AnimationSettings;
-  
+
   // Actions
-  
+
   /**
    * 启用所有动画
    */
   enableAnimations: () => void;
-  
+
   /**
    * 禁用所有动画
    */
   disableAnimations: () => void;
-  
+
   /**
    * 切换动画启用状态
    */
   toggleAnimations: () => void;
-  
+
   /**
    * 设置动画速度
    * @param speed - 'fast' | 'normal' | 'slow'
    */
   setAnimationSpeed: (speed: AnimationSpeed) => void;
-  
+
   /**
    * 禁用特定类别的动画
    * @param category - 动画类别
    */
   disableCategory: (category: AnimationCategory) => void;
-  
+
   /**
    * 启用特定类别的动画
    * @param category - 动画类别
    */
   enableCategory: (category: AnimationCategory) => void;
-  
+
   /**
    * 切换特定类别的动画
    * @param category - 动画类别
    */
   toggleCategory: (category: AnimationCategory) => void;
-  
+
   /**
    * 设置是否尊重系统偏好
    * @param respect - 是否尊重
    */
   setRespectSystemPreference: (respect: boolean) => void;
-  
+
   /**
    * 切换系统偏好设置
    */
   toggleRespectSystemPreference: () => void;
-  
+
   /**
    * 重置为默认配置
    */
   resetToDefaults: () => void;
-  
+
   /**
    * 从AnimationManager同步设置
    */
@@ -90,19 +90,19 @@ export const animationSettingsStore = createStore<AnimationSettingsStore>()(
     (set, get) => ({
       // 初始状态：从AnimationManager获取
       settings: animationManager.getSettings(),
-      
+
       // 启用所有动画
       enableAnimations: () => {
         animationManager.enableAnimations();
         set({ settings: animationManager.getSettings() });
       },
-      
+
       // 禁用所有动画
       disableAnimations: () => {
         animationManager.disableAnimations();
         set({ settings: animationManager.getSettings() });
       },
-      
+
       // 切换动画启用状态
       toggleAnimations: () => {
         const { settings } = get();
@@ -113,25 +113,25 @@ export const animationSettingsStore = createStore<AnimationSettingsStore>()(
         }
         set({ settings: animationManager.getSettings() });
       },
-      
+
       // 设置动画速度
       setAnimationSpeed: (speed) => {
         animationManager.setAnimationSpeed(speed);
         set({ settings: animationManager.getSettings() });
       },
-      
+
       // 禁用特定类别
       disableCategory: (category) => {
         animationManager.disableCategory(category);
         set({ settings: animationManager.getSettings() });
       },
-      
+
       // 启用特定类别
       enableCategory: (category) => {
         animationManager.enableCategory(category);
         set({ settings: animationManager.getSettings() });
       },
-      
+
       // 切换特定类别
       toggleCategory: (category) => {
         const { settings } = get();
@@ -142,26 +142,26 @@ export const animationSettingsStore = createStore<AnimationSettingsStore>()(
         }
         set({ settings: animationManager.getSettings() });
       },
-      
+
       // 设置是否尊重系统偏好
       setRespectSystemPreference: (respect) => {
         animationManager.setRespectSystemPreference(respect);
         set({ settings: animationManager.getSettings() });
       },
-      
+
       // 切换系统偏好设置
       toggleRespectSystemPreference: () => {
         const { settings } = get();
         animationManager.setRespectSystemPreference(!settings.respectSystemPreference);
         set({ settings: animationManager.getSettings() });
       },
-      
+
       // 重置为默认配置
       resetToDefaults: () => {
         animationManager.resetToDefaults();
         set({ settings: animationManager.getSettings() });
       },
-      
+
       // 从AnimationManager同步设置
       syncFromManager: () => {
         set({ settings: animationManager.getSettings() });
@@ -181,28 +181,28 @@ export const animationSettingsStore = createStore<AnimationSettingsStore>()(
 export const animationSelectors = {
   /** 获取完整设置 */
   settings: (state: AnimationSettingsStore) => state.settings,
-  
+
   /** 动画是否启用 */
   enabled: (state: AnimationSettingsStore) => state.settings.enabled,
-  
+
   /** 当前速度 */
   speed: (state: AnimationSettingsStore) => state.settings.speed,
-  
+
   /** 禁用的类别 */
   disabledCategories: (state: AnimationSettingsStore) => state.settings.disabledCategories,
-  
+
   /** 是否尊重系统偏好 */
   respectSystemPreference: (state: AnimationSettingsStore) => state.settings.respectSystemPreference,
-  
+
   /** 检查特定类别是否启用 */
-  isCategoryEnabled: (category: AnimationCategory) => (state: AnimationSettingsStore) => 
+  isCategoryEnabled: (category: AnimationCategory) => (state: AnimationSettingsStore) =>
     !state.settings.disabledCategories.has(category),
-  
+
   /** 是否应该减少动画 */
-  shouldReduceMotion: (state: AnimationSettingsStore) => 
-    !state.settings.enabled || 
-    (state.settings.respectSystemPreference && 
-     window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+  shouldReduceMotion: (state: AnimationSettingsStore) =>
+    !state.settings.enabled ||
+    (state.settings.respectSystemPreference &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches)
 };
 
 /**
@@ -215,7 +215,7 @@ export function initializeAnimationStore(): void {
   const handlePreferenceChange = () => {
     animationSettingsStore.getState().syncFromManager();
   };
-  
+
   if (mediaQuery.addEventListener) {
     mediaQuery.addEventListener('change', handlePreferenceChange);
   }
@@ -230,7 +230,7 @@ export function subscribeToAnimationSettings(
   callback: (settings: AnimationSettings) => void
 ): () => void {
   let previousSettings = animationSettingsStore.getState().settings;
-  
+
   return animationSettingsStore.subscribe((state) => {
     const currentSettings = state.settings;
     if (currentSettings !== previousSettings) {

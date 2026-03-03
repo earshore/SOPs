@@ -129,7 +129,7 @@ class HttpServiceClass implements IHttpService {
   constructor(logger?: ILoggerService, config?: IConfigService) {
     this.logger = logger || null;
     this.configService = config || null;
-    
+
     // 尝试从config服务或configCenter获取配置
     const getConfig = <T>(key: string, defaultValue: T): T => {
       if (this.configService) {
@@ -205,7 +205,7 @@ class HttpServiceClass implements IHttpService {
 
     // 生成请求key(用于去重和取消)
     const requestKey = deduplicateKey || `${method}:${url}`;
-    
+
     // 生成缓存key
     const finalCacheKey = cacheKey || requestKey;
 
@@ -215,7 +215,7 @@ class HttpServiceClass implements IHttpService {
         strategy: cache,
         ttl: cacheTTL
       });
-      
+
       if (cached !== null) {
         this._log('debug', '使用缓存响应', { url, cacheKey: finalCacheKey });
         return cached as T;
@@ -228,17 +228,17 @@ class HttpServiceClass implements IHttpService {
     // 执行请求的函数
     const executeRequest = async (abortSignal?: AbortSignal): Promise<T> => {
       let lastError: Error | null = null;
-      
+
       for (let attempt = 0; attempt <= retries; attempt++) {
         // 创建独立的 AbortController
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), timeout);
-        
+
         // 如果提供了外部signal,监听其abort事件
         if (signal) {
           signal.addEventListener('abort', () => controller.abort(), { once: true });
         }
-        
+
         // 🎯 P1-9: 如果提供了RequestManager的signal,也监听它
         if (abortSignal) {
           abortSignal.addEventListener('abort', () => controller.abort(), { once: true });
@@ -269,13 +269,13 @@ class HttpServiceClass implements IHttpService {
           // 解析响应
           if (json) {
             const data = await response.json();
-            
+
             // 🎯 数据边界验证：对于 JSON 响应，进行基本验证
             // 注意：这里只做基本的结构验证，具体的业务类型验证由调用方负责
             if (data === null || data === undefined) {
               throw new HttpError(response.status, 'API 返回空响应', response);
             }
-            
+
             return data;
           }
           return await response.text() as T;
@@ -307,17 +307,17 @@ class HttpServiceClass implements IHttpService {
           if (measurePerformance) {
             return this._executeWithPerformance(url, method, usePool, priority, () => executeRequest(signal));
           }
-          
+
           // 使用优先级请求池
           if (usePool) {
             return priorityRequestPool.add(() => executeRequest(signal), priority, { url, method });
           }
-          
+
           return executeRequest(signal);
         },
         { deduplicate, cancelPrevious }
       );
-      
+
       // 🎯 优化C: 缓存响应(仅GET请求)
       if (method === 'GET' && cache) {
         await httpCacheService.set(finalCacheKey, result, {
@@ -325,13 +325,13 @@ class HttpServiceClass implements IHttpService {
           ttl: cacheTTL
         });
       }
-      
+
       return result;
     }
 
     // 执行请求
     let result: T;
-    
+
     // 性能监控
     if (measurePerformance) {
       result = await this._executeWithPerformance(url, method, usePool, priority, executeRequest);
@@ -341,7 +341,7 @@ class HttpServiceClass implements IHttpService {
     } else {
       result = await executeRequest();
     }
-    
+
     // 🎯 优化C: 缓存响应(仅GET请求)
     if (method === 'GET' && cache) {
       await httpCacheService.set(finalCacheKey, result, {
@@ -349,7 +349,7 @@ class HttpServiceClass implements IHttpService {
         ttl: cacheTTL
       });
     }
-    
+
     return result;
   }
 
@@ -367,13 +367,13 @@ class HttpServiceClass implements IHttpService {
     try {
       const { performanceService } = await import('./performanceService');
       const apiName = this._extractApiName(url);
-      
+
       if (usePool) {
-        return await performanceService.measureApiCall(apiName, () => 
+        return await performanceService.measureApiCall(apiName, () =>
           priorityRequestPool.add(fn, priority, { url, method })
         );
       }
-      
+
       return await performanceService.measureApiCall(apiName, fn);
     } catch (e) {
       this._log('debug', '性能监控不可用，直接执行请求', {});
@@ -419,18 +419,18 @@ class HttpServiceClass implements IHttpService {
    * @returns 验证后的 API 响应
    */
   async apiRequest<T = any>(
-    url: string, 
+    url: string,
     options?: HttpOptions,
     dataGuard?: (data: unknown) => data is T
   ): Promise<ApiResponse<T>> {
     const response = await this.request<unknown>(url, options || {});
-    
+
     // 🎯 数据边界验证：验证 API 响应格式
     if (!isApiResponse(response, dataGuard)) {
       this._log('error', 'API 响应格式无效', { url, response });
       throw new HttpError(500, 'API 响应格式无效');
     }
-    
+
     return response as ApiResponse<T>;
   }
 

@@ -135,13 +135,13 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
   // ================================================================
   // 🎯 DI容器整合: 使用ServiceRegistry统一管理服务
   // ================================================================
-  
+
   // 1. 注册所有服务配置到注册表
   registerAllServices(serviceRegistry);
-  
+
   // 2. 将所有服务注册到DI容器
   serviceRegistry.registerAll(container);
-  
+
   // 3. 创建ServiceBootstrap实例（使用容器和注册表）
   const bootstrap = new ServiceBootstrap(container, serviceRegistry);
 
@@ -150,7 +150,7 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
   // ================================================================
   try {
     const result = await bootstrap.initialize();
-    
+
     if (!result.success) {
       console.error('❌ 部分服务初始化失败，应用可能无法正常工作');
       showToast('应用初始化失败，请刷新页面重试', { type: 'error' });
@@ -160,7 +160,7 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     // ================================================================
     // 初始化成功，继续启动流程
     // ================================================================
-    
+
     // 🔧 暴露核心服务到 window (用于测试和调试)
     try {
       // 服务已经在 bootstrap.initialize() 中初始化并缓存
@@ -168,12 +168,12 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
       const eventBusResult = container.resolve('eventBus');
       const actionRegistryResult = container.resolve('actionRegistry');
       const routerResult = container.resolve('router');
-      
+
       // await所有可能的Promise
       const eventBus = eventBusResult instanceof Promise ? await eventBusResult : eventBusResult;
       const actionRegistry = actionRegistryResult instanceof Promise ? await actionRegistryResult : actionRegistryResult;
       const router = routerResult instanceof Promise ? await routerResult : routerResult;
-      
+
       (window as any)['eventBus'] = eventBus;
       (window as any)['EventBus'] = eventBus;
       (window as any)['actionRegistry'] = actionRegistry;
@@ -182,7 +182,7 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
       (window as any)['Router'] = router;
       (window as any)['loadingManager'] = loadingManager;
       (window as any)['LoadingManager'] = loadingManager;
-      
+
       if (import.meta.env.DEV) {
         console.log('[Services] ✅ Core services exposed to window');
         console.log('[Services] EventBus:', typeof eventBus);
@@ -199,18 +199,18 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
       console.error('[Services] ❌ Failed to expose some services to window:', e);
       // 即使暴露失败,也继续启动流程
     }
-    
+
     // ✅ 关键修复: 确保 Alpine 组件注册和启动的正确顺序
     console.log("🎨 Initializing Alpine.js...");
-    
+
     // 1. 注册所有 Alpine 组件 (必须在 Alpine.start() 之前)
     initAlpineSettings();
     console.log("✅ Alpine components registered");
-    
+
     // 2. 启动 Alpine.js (此时组件已注册,可以处理任何 HTML)
     Alpine.start();
     console.log("✅ Alpine.js started");
-    
+
     // 🔧 修复: 初始化 AlpineRegistry (处理动态注册的组件)
     try {
       const { AlpineRegistry } = await import('./common/infrastructure/AlpineRegistry');
@@ -220,12 +220,12 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     } catch (e) {
       console.error('❌ AlpineRegistry initialization failed:', e);
     }
-    
+
     // 3. 现在可以安全地加载包含 Alpine 组件的视图
     console.log("📦 Loading critical views...");
     await initViews();
     console.log("✅ Critical views loaded");
-    
+
     // 🔧 关键修复: 视图加载完成后，触发路由的初始导航
     try {
       const { triggerInitialNavigation } = await import('./common/router/initRouter');
@@ -234,18 +234,18 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     } catch (e) {
       console.error('❌ Initial navigation failed:', e);
     }
-    
+
     // 初始化全局事件委托
     const { initGlobalEventDelegation } = await import('./common/utils/actionRegistry');
     initGlobalEventDelegation();
-    
+
     // 初始化LoadingManager
     const globalLoading = document.getElementById('global-loading');
     if (globalLoading) {
       loadingManager.setGlobalLoadingElement(globalLoading);
       console.log("✅ LoadingManager initialized");
     }
-    
+
     // 可选：初始化事件日志
     try {
       const { initEventLogger } = await import('./common/utils/eventLogger');
@@ -253,7 +253,7 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     } catch (e) {
       console.warn('事件日志初始化失败:', e);
     }
-    
+
     // 可选：加载插件
     try {
       const { loadPlugins } = await import('./common/utils/pluginLoader');
@@ -261,10 +261,10 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     } catch (e) {
       console.warn('插件加载失败:', e);
     }
-    
+
     // 🎯 P1-8: 状态管理已完全切换到Zustand
     // StateManager和stateAdapter已移除
-    
+
     // 初始化首页
     initHomeSplash();
 
@@ -274,11 +274,11 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     // 🎯 微交互动画系统: 初始化动画管理器
     try {
       console.log('🎨 Initializing Animation System...');
-      
+
       // AnimationManager 已在导入时自动初始化（单例模式）
       // 这里只需要初始化 AnimationStore
       initializeAnimationStore();
-      
+
       console.log('✅ Animation System initialized');
       console.log('   - Animations enabled:', animationManager.getSettings().enabled);
       console.log('   - Animation speed:', animationManager.getSettings().speed);
@@ -382,7 +382,7 @@ type ToastType = 'success' | 'error' | 'warning' | 'info';
 registerActionsWithLegacy({
   // === Navigation 导航 ===
   // switchTab 已废弃，使用 navigateTo 代替
-  
+
   // switchDataTab, // Owned by DataModule
   renderMegaMenu,
 
@@ -400,7 +400,7 @@ registerActionsWithLegacy({
     // 通用的 close 动作：查找最近的 app-modal 并关闭
     const target = event?.target as HTMLElement | null;
     if (!target) return;
-    
+
     // 向上查找最近的 app-modal 元素
     const modal = target.closest('app-modal') as any;
     if (modal && typeof modal.close === 'function') {
@@ -424,14 +424,14 @@ registerActionsWithLegacy({
     try {
       const { performanceService } = await import('./services/performanceService');
       const report = performanceService.getReport();
-      
+
       console.log('📊 性能报告:', report);
       console.table(report.summary);
-      
+
       if (window.showToast) {
         window.showToast('性能报告已输出到控制台 (F12)', { type: 'info' });
       }
-      
+
       return report;
     } catch (e) {
       console.error('获取性能报告失败:', e);
@@ -467,11 +467,11 @@ registerActionsWithLegacy({
       模块: log.module,
       消息: log.message,
     })));
-    
+
     if (window.showToast) {
       window.showToast(`共 ${logs.length} 条日志，已输出到控制台`, { type: 'info' });
     }
-    
+
     return logs;
   },
 
@@ -484,11 +484,11 @@ registerActionsWithLegacy({
       模块: log.module,
       消息: log.message,
     })));
-    
+
     if (window.showToast) {
       window.showToast(`共 ${errors.length} 条错误，已输出到控制台`, { type: errors.length > 0 ? 'warning' : 'info' });
     }
-    
+
     return errors;
   },
 

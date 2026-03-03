@@ -117,14 +117,14 @@ export async function callLLM(
     const dangerousEndpoints = getDangerousEndpoints();
     throw new Error(
       '⛔ 安全限制: 生产环境禁止直接调用外部API\n\n' +
-        '可能的原因:\n' +
-        '1. 未配置代理服务器\n' +
-        '2. API端点配置错误\n\n' +
-        '解决方案:\n' +
-        '- 请在设置中配置企业代理\n' +
-        '- 或联系管理员配置 Cloudflare Workers 代理\n\n' +
-        `检测到的危险端点: ${dangerousEndpoints.join(', ')}\n` +
-        '这是为了保护您的API密钥安全。'
+      '可能的原因:\n' +
+      '1. 未配置代理服务器\n' +
+      '2. API端点配置错误\n\n' +
+      '解决方案:\n' +
+      '- 请在设置中配置企业代理\n' +
+      '- 或联系管理员配置 Cloudflare Workers 代理\n\n' +
+      `检测到的危险端点: ${dangerousEndpoints.join(', ')}\n` +
+      '这是为了保护您的API密钥安全。'
     );
   }
 
@@ -401,7 +401,7 @@ export async function fetchModelsFromApi(
     }
 
     // 兼容不同厂商的数据结构
-    let list: Array<{ id: string; name?: string; [key: string]: unknown }> = [];
+    let list: Array<{ id: string; name?: string;[key: string]: unknown }> = [];
 
     if (Array.isArray(data)) {
       list = data;
@@ -454,14 +454,14 @@ export async function fetchModelsFromApi(
             console.warn(`⚠️ 跳过无效模型 [${index}]:`, m);
             return null;
           }
-          
+
           // 🎯 数据边界验证：验证模型对象基本结构
-          const modelInfo: ModelInfo = { 
-            id: String(id), 
-            context: 128000, 
-            features: [] 
+          const modelInfo: ModelInfo = {
+            id: String(id),
+            context: 128000,
+            features: []
           };
-          
+
           return modelInfo;
         }
 

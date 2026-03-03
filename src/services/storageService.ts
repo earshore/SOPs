@@ -11,8 +11,8 @@ import type { IStorageService } from '../types/services';
 import type { LLMProviderConfig } from '../types/state';
 import type { HistoryItem, ProxyConfig } from '../types/modules-business';
 import { handleSystemError } from '../common/errors';
-import { 
-  isLLMProviderConfig, 
+import {
+  isLLMProviderConfig,
   isProxyConfig
 } from '../common/guards/typeGuards';
 
@@ -92,11 +92,11 @@ class StorageServiceClass implements IStorageService {
     try {
       const raw = localStorage.getItem(key);
       if (raw === null) return defaultValue;
-      
+
       this._updateAccessTime(key);
-      
+
       const parsed = JSON.parse(raw);
-      
+
       // 🎯 数据边界验证：对于已知类型，使用类型守卫验证
       // 注意：这里只对特定的已知键进行验证，避免过度验证影响性能
       // 排除 llm_active_provider，它存储的是字符串而不是配置对象
@@ -113,7 +113,7 @@ class StorageServiceClass implements IStorageService {
           return defaultValue;
         }
       }
-      
+
       return parsed as T;
     } catch (e) {
       handleSystemError('SYS_PARSE_ERROR', {
@@ -134,16 +134,16 @@ class StorageServiceClass implements IStorageService {
   set(key: string, value: unknown): boolean {
     try {
       const serialized = JSON.stringify(value);
-      
+
       this._checkCacheSize(serialized.length * 2);
-      
+
       localStorage.setItem(key, serialized);
       this._updateAccessTime(key);
-      
+
       return true;
     } catch (e) {
       const error = e as Error & { name: string };
-      
+
       if (error.name === 'QuotaExceededError') {
         handleSystemError('SYS_STORAGE_FULL', {
           module: 'StorageService',
@@ -154,7 +154,7 @@ class StorageServiceClass implements IStorageService {
           log: true,
           notify: true
         });
-        
+
         // 尝试清理后重试
         this._handleQuotaExceeded();
         try {
@@ -174,7 +174,7 @@ class StorageServiceClass implements IStorageService {
           return false;
         }
       }
-      
+
       handleSystemError('SYS_STORAGE_ERROR', {
         module: 'StorageService',
         action: 'set',
@@ -193,11 +193,11 @@ class StorageServiceClass implements IStorageService {
   getRaw(key: string, defaultValue: string | null = null): string | null {
     try {
       const raw = localStorage.getItem(key);
-      
+
       if (raw !== null) {
         this._updateAccessTime(key);
       }
-      
+
       return raw !== null ? raw : defaultValue;
     } catch (e) {
       handleSystemError('SYS_STORAGE_ERROR', {
@@ -218,14 +218,14 @@ class StorageServiceClass implements IStorageService {
   setRaw(key: string, value: string): boolean {
     try {
       this._checkCacheSize(value.length * 2);
-      
+
       localStorage.setItem(key, value);
       this._updateAccessTime(key);
-      
+
       return true;
     } catch (e) {
       const error = e as Error & { name: string };
-      
+
       if (error.name === 'QuotaExceededError') {
         handleSystemError('SYS_STORAGE_FULL', {
           module: 'StorageService',
@@ -236,7 +236,7 @@ class StorageServiceClass implements IStorageService {
           log: true,
           notify: true
         });
-        
+
         this._handleQuotaExceeded();
         try {
           localStorage.setItem(key, value);
@@ -255,7 +255,7 @@ class StorageServiceClass implements IStorageService {
           return false;
         }
       }
-      
+
       handleSystemError('SYS_STORAGE_ERROR', {
         module: 'StorageService',
         action: 'setRaw',
@@ -334,28 +334,28 @@ class StorageServiceClass implements IStorageService {
    */
   private _getAccessTimes(): AccessTimeRecord[] {
     const items: AccessTimeRecord[] = [];
-    
+
     try {
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        
+
         if (key && key.startsWith('_lru_access_')) {
           continue;
         }
-        
+
         if (key) {
           const accessKey = `_lru_access_${key}`;
           const accessTime = parseInt(localStorage.getItem(accessKey) || '0', 10);
           const value = localStorage.getItem(key) || '';
           const size = value.length * 2;
-          
+
           items.push({ key, accessTime, size });
         }
       }
     } catch (e) {
       console.warn('[StorageService] 获取访问时间失败', e);
     }
-    
+
     return items.sort((a, b) => a.accessTime - b.accessTime);
   }
 
@@ -367,7 +367,7 @@ class StorageServiceClass implements IStorageService {
     const usage = this.getUsage();
     const projectedUsage = usage.used + newItemSize;
     const threshold = this._lruConfig.maxSize * this._lruConfig.warningThreshold;
-    
+
     if (projectedUsage > threshold) {
       console.warn('[StorageService] 缓存使用量接近上限，开始清理', {
         current: `${(projectedUsage / 1024 / 1024).toFixed(2)}MB`,
@@ -386,24 +386,24 @@ class StorageServiceClass implements IStorageService {
       const items = this._getAccessTimes();
       const usage = this.getUsage();
       const targetSize = usage.used * (1 - this._lruConfig.cleanupRatio);
-      
+
       let currentSize = usage.used;
       let removedCount = 0;
-      
+
       for (const item of items) {
         if (this._isProtectedKey(item.key)) {
           continue;
         }
-        
+
         this.remove(item.key);
         currentSize -= item.size;
         removedCount++;
-        
+
         if (currentSize <= targetSize) {
           break;
         }
       }
-      
+
       console.info('[StorageService] LRU清理完成', {
         removedCount,
         freedSpace: `${((usage.used - currentSize) / 1024).toFixed(2)}KB`
@@ -424,7 +424,7 @@ class StorageServiceClass implements IStorageService {
       'feature_',
       'layout_config_',
     ];
-    
+
     return protectedPrefixes.some(prefix => key.startsWith(prefix));
   }
 
@@ -451,9 +451,9 @@ class StorageServiceClass implements IStorageService {
    */
   private _handleQuotaExceeded(): void {
     console.warn('[StorageService] 存储空间不足，尝试清理数据');
-    
+
     this._cleanupLRU();
-    
+
     const history = this.get<unknown[]>(STORAGE_KEYS.SCRAPE_HISTORY, []);
     if (history && history.length > 10) {
       this.set(STORAGE_KEYS.SCRAPE_HISTORY, history.slice(0, 10));
@@ -473,20 +473,20 @@ class StorageServiceClass implements IStorageService {
   async getLLMConfigWithKey(provider: string | null = null): Promise<LLMProviderConfig | null> {
     const activeProvider = provider || this.get<string>(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
     if (!activeProvider) return null;
-    
+
     const config = this.getLLMConfig(activeProvider);
     if (!config) return null;
-    
+
     try {
       const apiKey = await this.getSecure(`llm_key_${activeProvider}`, '');
       const fullConfig = { ...config, apiKey: apiKey || '' } as LLMProviderConfig;
-      
+
       // 🎯 数据边界验证：验证完整配置
       if (!isLLMProviderConfig(fullConfig)) {
         console.warn('[StorageService] LLM完整配置格式无效');
         return null;
       }
-      
+
       return fullConfig;
     } catch (error) {
       console.warn('[StorageService] Failed to decrypt API key', error);
@@ -501,18 +501,18 @@ class StorageServiceClass implements IStorageService {
   getLLMConfig(provider: string | null = null): Partial<LLMProviderConfig> | null {
     const activeProvider = provider || this.get<string>(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
     if (!activeProvider) return null;
-    
+
     const config = this.get<LLMProviderConfig>(`${STORAGE_KEYS.LLM_CONFIG_PREFIX}${activeProvider}`, {} as LLMProviderConfig);
-    
+
     // 🎯 数据边界验证：已在 get() 方法中验证
     if (!config) return null;
-    
+
     // 🔐 安全: 移除敏感的 apiKey,返回部分配置
     if (config && 'apiKey' in config) {
       const { apiKey: _apiKey, ...safeConfig } = config;
       return safeConfig;
     }
-    
+
     return config;
   }
 
@@ -530,13 +530,13 @@ class StorageServiceClass implements IStorageService {
    */
   getProxyConfig(): ProxyConfig {
     const config = this.get<ProxyConfig>(STORAGE_KEYS.PROXY_CONFIG, null);
-    
+
     // 🎯 数据边界验证：已在 get() 方法中验证
     // 如果验证失败，返回默认配置
     if (!config) {
       return { type: 'allorigins', enabled: true };
     }
-    
+
     return config;
   }
 
@@ -550,7 +550,7 @@ class StorageServiceClass implements IStorageService {
       console.error('[StorageService] 无法保存：代理配置格式无效');
       return;
     }
-    
+
     this.set(STORAGE_KEYS.PROXY_CONFIG, config);
   }
 
@@ -575,7 +575,7 @@ class StorageServiceClass implements IStorageService {
    */
   getLayoutConfig(templateId: string): Array<{ id: string; x: number; y: number; w: number; h: number }> {
     return this.get<Array<{ id: string; x: number; y: number; w: number; h: number }>>(
-      `${STORAGE_KEYS.LAYOUT_CONFIG_PREFIX}${templateId}`, 
+      `${STORAGE_KEYS.LAYOUT_CONFIG_PREFIX}${templateId}`,
       []
     ) || [];
   }

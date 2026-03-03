@@ -110,7 +110,7 @@ class WebVitalsService {
   private collectFCP(): void {
     const paintEntries = performance.getEntriesByType('paint');
     const fcpEntry = paintEntries.find(entry => entry.name === 'first-contentful-paint');
-    
+
     if (fcpEntry) {
       this.handleMetric({
         name: 'FCP',
@@ -130,7 +130,7 @@ class WebVitalsService {
     const observer = new PerformanceObserver((list) => {
       const entries = list.getEntries();
       const lastEntry = entries[entries.length - 1] as PerformanceEntry & { renderTime?: number; loadTime?: number };
-      
+
       if (lastEntry) {
         const value = lastEntry.renderTime || lastEntry.loadTime || lastEntry.startTime;
         this.handleMetric({
@@ -156,7 +156,7 @@ class WebVitalsService {
    */
   private collectTTFB(): void {
     const navigationEntry = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
-    
+
     if (navigationEntry) {
       const value = navigationEntry.responseStart - navigationEntry.requestStart;
       this.handleMetric({

@@ -32,13 +32,13 @@ export type AnimationCategory =
 export interface AnimationSettings {
   /** 是否启用动画 */
   enabled: boolean;
-  
+
   /** 动画速度预设 */
   speed: AnimationSpeed;
-  
+
   /** 禁用的动画类别集合 */
   disabledCategories: Set<AnimationCategory>;
-  
+
   /** 是否尊重系统的减少动画偏好 (prefers-reduced-motion) */
   respectSystemPreference: boolean;
 }
@@ -50,15 +50,15 @@ export interface AnimationSettings {
 export interface AnimationConfig {
   /** 速度倍数映射 */
   speedMultipliers: Record<AnimationSpeed, number>;
-  
+
   /** 默认配置 */
   defaults: AnimationSettings;
-  
+
   /** 性能相关配置 */
   performance: {
     /** FPS阈值,低于此值触发性能降级 */
     fpsThreshold: number;
-    
+
     /** 同时执行的最大动画数量 */
     maxAnimationCount: number;
   };
@@ -71,19 +71,19 @@ export interface AnimationConfig {
 export interface StoredAnimationSettings {
   /** 配置版本号 */
   version: string;
-  
+
   /** 是否启用动画 */
   enabled: boolean;
-  
+
   /** 动画速度预设 */
   speed: AnimationSpeed;
-  
+
   /** 禁用的动画类别数组 */
   disabledCategories: string[];
-  
+
   /** 是否尊重系统偏好 */
   respectSystemPreference: boolean;
-  
+
   /** 最后更新时间戳 */
   lastUpdated: number;
 }
