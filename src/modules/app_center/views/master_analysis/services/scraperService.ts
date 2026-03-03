@@ -212,7 +212,7 @@ async function fetchReviewsParallel(
     site: ScraperSite,
     fetchOptions: FetchOptions,
     lang: { domain: string; locale: string; name: string }
-): Promise<any[]> {
+): Promise<unknown[]> {
     const reviewUrls = [
         `https://www.${lang.domain}/product-reviews/${asin}/ref=cm_cr_dp_d_show_all_btm?ie=UTF8&reviewerType=all_reviews&sortBy=recent`,
         `https://www.${lang.domain}/product-reviews/${asin}`
@@ -329,13 +329,16 @@ export async function scrapeAsin(
                     reviews = parseReviews(productHtml);
                 }
 
-                result.customer_reviews = reviews.map(r => ({
-                    headline: r.title || "",
-                    body: r.content || "",
-                    star_rating: r.rating || 0,
-                    is_verified: r.isVerified || false,
-                    review_date: ""
-                }));
+                result.customer_reviews = reviews.map(r => {
+                    const review = r as { title?: string; content?: string; rating?: number; isVerified?: boolean };
+                    return {
+                        headline: review.title || "",
+                        body: review.content || "",
+                        star_rating: review.rating || 0,
+                        is_verified: review.isVerified || false,
+                        review_date: ""
+                    };
+                });
             }
 
             result.scrape_status = "success";

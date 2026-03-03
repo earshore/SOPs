@@ -12,7 +12,7 @@ export interface ModuleState {
     currentLang: string;
     currentCategory: string;
     allExpanded: boolean;
-    reportData: any;
+    reportData: unknown;
     generatedQAs: unknown[];
     eventListeners: EventListenerRecord[];
     timeouts: number[];

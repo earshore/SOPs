@@ -92,7 +92,7 @@ export function unmount(): void {
 /**
  * 获取 Alpine 组件实例的辅助函数
  */
-function getScraperPanelInstance(): any {
+function getScraperPanelInstance(): Record<string, unknown> | null {
     const element = document.querySelector('[x-data="scraperPanel"]');
     if (!element) {
         console.warn('[Scraper] Alpine 组件实例未找到');
