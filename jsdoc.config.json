@@ -1,0 +1,60 @@
+{
+  "source": {
+    "include": [
+      "src/common/infrastructure",
+      "src/common/di",
+      "src/common/router",
+      "src/common/utils",
+      "src/services",
+      "src/stores"
+    ],
+    "includePattern": ".+\\.ts(x)?$",
+    "excludePattern": "(node_modules/|test/|dist/)"
+  },
+  "opts": {
+    "template": "node_modules/docdash",
+    "encoding": "utf8",
+    "destination": "docs/api",
+    "recurse": true,
+    "readme": "README.md"
+  },
+  "plugins": [
+    "plugins/markdown"
+  ],
+  "templates": {
+    "cleverLinks": true,
+    "monospaceLinks": false,
+    "default": {
+      "outputSourceFiles": true
+    }
+  },
+  "docdash": {
+    "static": true,
+    "sort": true,
+    "search": true,
+    "collapse": true,
+    "typedefs": true,
+    "removeQuotes": "none",
+    "scripts": [],
+    "menu": {
+      "核心基础设施": {
+        "href": "module-SafeModuleLoader.html",
+        "target": "_self",
+        "class": "menu-item",
+        "id": "infrastructure"
+      },
+      "依赖注入": {
+        "href": "module-DIContainer.html",
+        "target": "_self"
+      },
+      "状态管理": {
+        "href": "module-StateManagement.html",
+        "target": "_self"
+      },
+      "路由系统": {
+        "href": "module-Router.html",
+        "target": "_self"
+      }
+    }
+  }
+}

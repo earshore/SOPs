@@ -91,7 +91,9 @@
         "css:migrate-hardcoded": "tsx scripts/migrate-hardcoded-values.ts --apply",
         "css:migrate-hardcoded:dry": "tsx scripts/migrate-hardcoded-values.ts",
         "css:analyze": "tsx scripts/analyze-module-css.ts",
-        "css:cleanup": "tsx scripts/cleanup-unused-css.ts"
+        "css:cleanup": "tsx scripts/cleanup-unused-css.ts",
+        "docs:api": "node scripts/generate-api-docs.js",
+        "docs:serve": "npx http-server docs/api -p 8080 -o"
     },
     "devDependencies": {
         "@fullhuman/postcss-purgecss": "^8.0.0",
