@@ -1,19 +1,7 @@
 /**
  * AI智能分析模块专属样式
+ * 使用统一的 module-container 容器类
  */
-
-/* ========== 容器样式 ========== */
-.ai-analysis-wrapper {
-  width: 100%;
-  min-height: 100vh;
-  background: linear-gradient(to bottom, var(--color-slate-50), var(--color-slate-100));
-}
-
-.ai-main-content {
-  max-width: 1450px;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
 
 /* ========== 动画效果 ========== */
 /* 注意：fadeInUp、fadeIn、scaleIn 等通用动画辅助类已统一定义在全局 CSS（src/css/animations/keyframes.css） */

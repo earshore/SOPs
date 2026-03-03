@@ -2,15 +2,6 @@
  * 关键词: 磨砂 (Glass), 流光 (Glow), Q弹 (Bouncy)
  */
 
-/* 使用通用容器工具类 - 见 src/css/utilities/containers.css */
-.hub-overview-container,
-.hub-module-section,
-#amz_hub_content_area>div {
-  max-width: 1450px;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
-
 /* 使用全局模块高亮动画 - 见 src/css/animations/keyframes.css */
 .hub-module-highlight {
   animation: moduleHighlight var(--duration-2s) var(--ease-out);

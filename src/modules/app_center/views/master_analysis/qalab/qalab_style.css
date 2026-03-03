@@ -17,17 +17,10 @@
  * - floatSlow, pulseRing, borderGlow, twinkle, gradientFlow
  * - fadeInUp, shimmer 等动画辅助类
  */
-
-/* ===== 布局容器 ===== */
-.app-container {
-  position: relative;
-  z-index: 1;
-  max-width: var(--container-2xl);
-  margin: 0 auto;
-  padding: 0 var(--spacing-lg) var(--spacing-2xl);
-}
-
 /**
+ * QA Lab 样式
+ * 使用统一的 module-container 容器类
+ */
  * ================================================================
  * WELCOME BANNER 样式已迁移到全局组件
  * ================================================================
