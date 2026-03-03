@@ -18,7 +18,7 @@ export interface AnalysisReportData {
         marketplace?: string;
         productTitle?: string;
     };
-    analysisReport?: Record<string, any>;
+    analysisReport?: Record<string, unknown>;
     // 兼容直接是分析报告的情况
     [key: string]: any;
 }

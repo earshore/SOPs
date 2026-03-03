@@ -408,7 +408,7 @@ export class PerformanceService {
   /**
    * 记录性能指标
    */
-  recordMetric(name: string, duration: number, metadata: Record<string, any> = {}): void {
+  recordMetric(name: string, duration: number, metadata: Record<string, unknown> = {}): void {
     const metric: PerformanceMetric = {
       name,
       duration,

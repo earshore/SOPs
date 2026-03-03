@@ -387,7 +387,7 @@ registerActionsWithLegacy({
   renderMegaMenu,
 
   // === Utilities 工具函数 ===
-  showToast: (params: Record<string, any>) => {
+  showToast: (params: Record<string, unknown>) => {
     if (typeof params === 'string') {
       showToast(params as string);
     } else if (params.message) {

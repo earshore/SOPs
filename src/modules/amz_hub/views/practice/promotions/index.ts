@@ -11,7 +11,7 @@ interface ContentBlock {
     style?: string;
     headers?: string[];
     rows?: string[][];
-    items?: any[];
+    items?: Array<Record<string, unknown>>;
 }
 
 interface PromoSection {
@@ -647,7 +647,7 @@ class PromotionsModule extends BaseModule {
                                 <div class="amzp_sub_desc">${item.desc}</div>
                                 ${item.tags ? `
                                     <div style="margin-top:auto">
-                                        ${item.tags.map((t: string) => `<span class="amzp_tag">${t}</span>`).join('')}
+                                        ${(item.tags as string[]).map((t: string) => `<span class="amzp_tag">${t}</span>`).join('')}
                                     </div>
                                 ` : ''}
                             </div>

@@ -657,7 +657,7 @@ function closeWordDetail(): void {
 // Phase 4: 集中注册所有动作到 ActionRegistry
 // ================================================================
 
-const restrictedWordsActions: Record<string, (...args: any[]) => void> = {
+const restrictedWordsActions: Record<string, (...args: unknown[]) => void> = {
     showWordDetail: showWordDetail as any,
     closeWordDetail: closeWordDetail as any,
 };

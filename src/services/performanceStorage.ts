@@ -13,7 +13,7 @@ export interface PerformanceRecord {
   id: string;
   timestamp: number;
   type: 'webvitals' | 'memory' | 'custom';
-  data: Record<string, any>;
+  data: Record<string, unknown>;
 }
 
 /**

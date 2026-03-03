@@ -92,7 +92,7 @@ interface AppStore {
   setQALabCategory: (category: string) => void;
   setQALabAllExpanded: (expanded: boolean) => void;
   setQALabReportData: (data: any) => void;
-  setQALabGeneratedQAs: (qas: any[]) => void;
+  setQALabGeneratedQAs: (qas: unknown[]) => void;
   addRufusMessage: (message: QALabState['rufusMessages'][0]) => void;
   setRufusThinking: (thinking: boolean) => void;
   setRufusMode: (mode: QALabState['rufusMode']) => void;

@@ -27,7 +27,7 @@ interface QalabAlpineContext {
     currentCategory: string;
     allExpanded: boolean;
     reportData: any;
-    generatedQAs: any[];
+    generatedQAs: unknown[];
     activeTab: 'preview' | 'json';
     
     // ========== 订阅清理函数 ==========

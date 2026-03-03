@@ -142,7 +142,7 @@ export async function callLLM(
     (callLLM as any)._configLogged = true;
   }
 
-  const requestBody: Record<string, any> = {
+  const requestBody: Record<string, unknown> = {
     model: model,
     messages: messages,
     temperature: temperature,

@@ -12,7 +12,7 @@ import { createComputedProperties } from './computedProperties';
  * 创建 AI 分析面板组件（优化版）
  * 使用 Zustand 订阅自动同步状态
  */
-export function createAiAnalysisPanelOptimized(): Record<string, any> {
+export function createAiAnalysisPanelOptimized(): Record<string, unknown> {
   return {
     // ========== 响应式状态 ==========
     // 这些状态直接从 Zustand 读取，不需要本地副本
@@ -23,8 +23,8 @@ export function createAiAnalysisPanelOptimized(): Record<string, any> {
       appStore.getState().setSelectedAsins(value);
     },
 
-    get selectedTargets() {
-      return this._selectedTargets;
+    get selectedTargets(): string[] {
+      return this._selectedTargets as string[];
     },
     set selectedTargets(value: string[]) {
       this._selectedTargets = value;
@@ -63,7 +63,7 @@ export function createAiAnalysisPanelOptimized(): Record<string, any> {
     showDataSourceBanner: true,
 
     // Zustand 订阅清理函数
-    _unsubscribe: null as (() => void) | null,
+    _unsubscribe: null as (() => void) | null | undefined,
 
     // ========== 生命周期 ==========
     init() {
@@ -99,12 +99,14 @@ export function createAiAnalysisPanelOptimized(): Record<string, any> {
     destroy() {
       console.log('[Alpine 组件] 🔄 销毁组件');
       // 清理订阅
-      this._unsubscribe?.();
+      if (typeof this._unsubscribe === 'function') {
+        this._unsubscribe();
+      }
     },
 
     // ========== Actions ==========
     toggleAsin(asin: string) {
-      const current = this.selectedAsins;
+      const current = this.selectedAsins as string[];
       const index = current.indexOf(asin);
       if (index > -1) {
         appStore.getState().setSelectedAsins(current.filter((a: string) => a !== asin));
@@ -128,11 +130,12 @@ export function createAiAnalysisPanelOptimized(): Record<string, any> {
     },
 
     toggleTarget(targetId: string) {
-      const index = this._selectedTargets.indexOf(targetId);
+      const targets = this._selectedTargets as string[];
+      const index = targets.indexOf(targetId);
       if (index > -1) {
-        this._selectedTargets.splice(index, 1);
+        targets.splice(index, 1);
       } else {
-        this._selectedTargets.push(targetId);
+        targets.push(targetId);
       }
     },
 
@@ -211,12 +214,12 @@ export function createAiAnalysisPanelOptimized(): Record<string, any> {
 
     // ========== 数据加载 ==========
     async startAnalysis() {
-      if (this.selectedAsins.length === 0) {
+      if ((this.selectedAsins as string[]).length === 0) {
         console.warn('[Alpine 组件] ⚠️ 未选择任何 ASIN');
         return;
       }
 
-      if (this._selectedTargets.length === 0) {
+      if ((this._selectedTargets as string[]).length === 0) {
         console.warn('[Alpine 组件] ⚠️ 未选择任何分析目标');
         return;
       }

@@ -33,7 +33,7 @@ export interface CacheConfig {
 /**
  * 缓存项
  */
-interface CacheEntry<T = any> {
+interface CacheEntry<T = unknown> {
   /** 缓存数据 */
   data: T;
   /** 创建时间 */
@@ -77,7 +77,7 @@ class HttpCacheService {
   /**
    * 获取缓存
    */
-  async get<T = any>(key: string, config?: Partial<CacheConfig>): Promise<T | null> {
+  async get<T = unknown>(key: string, config?: Partial<CacheConfig>): Promise<T | null> {
     const cfg = { ...this.defaultConfig, ...config };
     const cacheKey = this.buildKey(key, cfg.prefix);
 
@@ -115,7 +115,7 @@ class HttpCacheService {
   /**
    * 设置缓存
    */
-  async set<T = any>(
+  async set<T = unknown>(
     key: string, 
     data: T, 
     config?: Partial<CacheConfig>

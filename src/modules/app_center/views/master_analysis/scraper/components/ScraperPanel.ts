@@ -303,7 +303,7 @@ export function createScraperPanel() {
 
             const site = this.selectedSite;
             const scrapeReviews = this.scrapeReviews;
-            let products: any[] = [];
+            let products: unknown[] = [];
 
             try {
                 console.log('[Scraper] 调用 startScrape 函数');
@@ -322,14 +322,14 @@ export function createScraperPanel() {
             } finally {
                 console.log('[Scraper] 进入 finally 块', { productsCount: products.length });
                 // 完成采集
-                const scrapedData = handleScrapeComplete(products, this.validAsins, this.selectedSite);
+                const scrapedData = handleScrapeComplete(products as ScrapedProduct[], this.validAsins, this.selectedSite);
                 console.log('[Scraper] handleScrapeComplete 完成', scrapedData);
 
                 // 更新全局状态
                 appStore.getState().setScrapedData(scrapedData);
                 appStore.getState().setAnalysisReport(null); // 重置分析报告
 
-                const successCount = products.filter(p => p.scrape_status === 'success').length;
+                const successCount = products.filter((p: unknown) => (p as ScrapedProduct).scrape_status === 'success').length;
                 if (successCount > 0) {
                     showToast(`采集完成: ${successCount} 成功`, { type: 'success' });
                 } else {

@@ -99,8 +99,8 @@ export class HttpError extends Error {
  * HTTP 客户端接口
  */
 export interface HttpClient {
-  get<T = any>(path: string, options?: HttpOptions): Promise<T>;
-  post<T = any>(path: string, body?: any, options?: HttpOptions): Promise<T>;
+  get<T = unknown>(path: string, options?: HttpOptions): Promise<T>;
+  post<T = unknown>(path: string, body?: any, options?: HttpOptions): Promise<T>;
 }
 
 /**
@@ -179,7 +179,7 @@ class HttpServiceClass implements IHttpService {
   /**
    * 发送 HTTP 请求
    */
-  async request<T = any>(url: string, options: HttpOptions = {}): Promise<T> {
+  async request<T = unknown>(url: string, options: HttpOptions = {}): Promise<T> {
     const {
       method = 'GET',
       headers = {},
@@ -398,14 +398,14 @@ class HttpServiceClass implements IHttpService {
   /**
    * GET 请求快捷方法
    */
-  async get<T = any>(url: string, options: HttpOptions = {}): Promise<T> {
+  async get<T = unknown>(url: string, options: HttpOptions = {}): Promise<T> {
     return this.request<T>(url, { ...options, method: 'GET' });
   }
 
   /**
    * POST 请求快捷方法
    */
-  async post<T = any>(url: string, body?: any, options: HttpOptions = {}): Promise<T> {
+  async post<T = unknown>(url: string, body?: any, options: HttpOptions = {}): Promise<T> {
     return this.request<T>(url, { ...options, method: 'POST', body });
   }
 
@@ -418,7 +418,7 @@ class HttpServiceClass implements IHttpService {
    * @param dataGuard - 可选的数据类型守卫函数
    * @returns 验证后的 API 响应
    */
-  async apiRequest<T = any>(
+  async apiRequest<T = unknown>(
     url: string,
     options?: HttpOptions,
     dataGuard?: (data: unknown) => data is T
@@ -445,7 +445,7 @@ class HttpServiceClass implements IHttpService {
    * 带授权的 API 请求（已废弃，使用 apiRequest 代替）
    * @deprecated 使用 apiRequest 方法代替
    */
-  async apiRequestWithAuth<T = any>(url: string, token: string, options: HttpOptions = {}): Promise<T> {
+  async apiRequestWithAuth<T = unknown>(url: string, token: string, options: HttpOptions = {}): Promise<T> {
     const headers = {
       ...options.headers,
       'Authorization': `Bearer ${token}`,
@@ -465,13 +465,13 @@ class HttpServiceClass implements IHttpService {
    */
   createClient(baseUrl: string, defaultHeaders: Record<string, string> = {}): HttpClient {
     return {
-      get: <T = any>(path: string, options: HttpOptions = {}) =>
+      get: <T = unknown>(path: string, options: HttpOptions = {}) =>
         this.request<T>(`${baseUrl}${path}`, {
           ...options,
           method: 'GET',
           headers: { ...defaultHeaders, ...options.headers }
         }),
-      post: <T = any>(path: string, body?: any, options: HttpOptions = {}) =>
+      post: <T = unknown>(path: string, body?: any, options: HttpOptions = {}) =>
         this.request<T>(`${baseUrl}${path}`, {
           ...options,
           method: 'POST',

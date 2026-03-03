@@ -40,7 +40,7 @@ export interface ErrorRecord {
   timestamp: number;
   url: string;
   userAgent: string;
-  context: Record<string, any>;
+  context: Record<string, unknown>;
   count: number;
   firstOccurrence: number;
   lastOccurrence: number;
@@ -193,7 +193,7 @@ export class ErrorTracker {
     type: ErrorType;
     message: string;
     stack?: string;
-    context?: Record<string, any>;
+    context?: Record<string, unknown>;
     severity?: ErrorSeverity;
   }): void {
     if (!this.config.enabled) return;

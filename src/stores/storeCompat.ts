@@ -131,7 +131,7 @@ export class StoreCompat {
    * storeCompat.get('scraper') // { isScraping: false, ... }
    * storeCompat.get() // 完整状态树
    */
-  get<T = any>(path?: ValidStatePath | string): T {
+  get<T = unknown>(path?: ValidStatePath | string): T {
     if (!path) {
       return appStore.getState() as T;
     }
@@ -171,7 +171,7 @@ export class StoreCompat {
    * storeCompat.set('ui.currentTab', 'scraper');
    * storeCompat.set('scraper.isScraping', true);
    */
-  set<T = any>(path: ValidStatePath | string, value: T): void {
+  set<T = unknown>(path: ValidStatePath | string, value: T): void {
     const { module, property, isValid } = parsePath(path);
 
     if (!isValid) {
@@ -234,7 +234,7 @@ export class StoreCompat {
    * // 取消订阅
    * unsubscribe();
    */
-  subscribe<T = any>(
+  subscribe<T = unknown>(
     path: ValidStatePath | string,
     callback: (newValue: T, oldValue: T) => void
   ): () => void {
@@ -267,7 +267,7 @@ export class StoreCompat {
    *   'scraper.isScraping': true
    * });
    */
-  batchUpdate(updates: Record<string, any>): void {
+  batchUpdate(updates: Record<string, unknown>): void {
     // Zustand的setState会自动批量更新
     Object.entries(updates).forEach(([path, value]) => {
       this.set(path, value);

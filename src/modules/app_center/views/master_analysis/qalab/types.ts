@@ -13,7 +13,7 @@ export interface ModuleState {
     currentCategory: string;
     allExpanded: boolean;
     reportData: any;
-    generatedQAs: any[];
+    generatedQAs: unknown[];
     eventListeners: EventListenerRecord[];
     timeouts: number[];
     registeredActions: string[];
