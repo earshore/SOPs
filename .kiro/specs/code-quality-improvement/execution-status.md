@@ -29,7 +29,7 @@
 - ✅ 开发服务器运行正常
 - ✅ 网页测试通过
 
-### 4. any 类型优化（六批次）✅
+### 4. any 类型优化（九批次）✅
 
 #### 第一批：DI 容器和基础模块
 - ✅ 修复 `src/common/di/Container.ts` (4 处)
@@ -60,6 +60,38 @@
 - ✅ 修复 `src/common/errors/GlobalErrorHandler.ts` (3 处)
 - ✅ 修复 `src/common/di/ServiceRegistry.ts` (1 处)
 
+#### 第六批：基础设施和路由
+- ✅ 修复 `src/common/bootstrap/ServiceBootstrap.ts` (1 处)
+- ✅ 修复 `src/common/config/ConfigCenter.ts` (1 处)
+- ✅ 修复 `src/common/devtools/PerformanceMonitor.ts` (2 处)
+- ✅ 修复 `src/common/guards/zodSchemas.ts` (2 处)
+- ✅ 修复 `src/common/infrastructure/SafeModuleLoader.ts` (7 处)
+- ✅ 修复 `src/common/router/navigo/LegacyAdapter.ts` (5 处)
+- ✅ 修复 `src/common/router/navigo/builtinGuards.ts` (4 处)
+- ✅ 修复 `src/common/router/navigo/builtinMiddlewares.ts` (1 处)
+
+#### 第七批：工具函数和状态同步
+- ✅ 修复 `src/common/utils/MemoryLeakDetector.ts` (5 处)
+- ✅ 修复 `src/common/utils/eventLogger.ts` (5 处)
+- ✅ 修复 `src/common/utils/stateSync.ts` (13 处)
+
+#### 第八批：UI组件和工具函数
+- ✅ 修复 `src/common/ui/megaMenu.ts` (11 处)
+- ✅ 修复 `src/modules/sops/views/growth/restricted_words/restrictedWordsHandler.ts` (5 处)
+
+#### 第九批：自动化批量替换（安全规则）✅
+- ✅ 使用批量替换脚本应用5个安全规则
+- ✅ Record<string, any> → Record<string, unknown>: 11 处
+- ✅ <T = any> → <T = unknown>: 15 处
+- ✅ : any[] → : unknown[]: 6 处
+- ✅ 修复自动化替换产生的类型错误
+- ✅ 修复文件:
+  - `src/modules/app_center/views/master_analysis/ai_analysis/components/AlpinePanelOptimized.ts`
+  - `src/modules/app_center/views/master_analysis/scraper/components/ScraperPanel.ts`
+  - `src/modules/amz_hub/views/practice/promotions/index.ts`
+- ✅ 类型检查通过
+- ✅ 构建测试通过
+
 ---
 
 ## 📊 修复结果
@@ -72,18 +104,18 @@
 - any 类型警告: 483
 
 ### 修复后
-- 总问题: 1,694 (-135, 7.4%)
+- 总问题: 1,662 (-167, 9.1%)
 - 错误: 1,133 (-17, 1.5%)
-- 警告: 561 (-118, 17.4%)
+- 警告: 529 (-150, 22.1%)
 - localStorage 安全问题: 0 ✅ (100% 修复)
-- any 类型警告: 365 (-118, 24.4%)
+- any 类型警告: 299 (-184, 38.1%)
 
 ### 改进率
-- 总问题减少: 7.4%
+- 总问题减少: 9.1%
 - 错误减少: 1.5%
-- 警告减少: 17.4%
+- 警告减少: 22.1%
 - localStorage 安全问题: 100% 修复 ✅
-- any 类型: 24.4% 改进
+- any 类型: 38.1% 改进
 
 ---
 
@@ -372,8 +404,8 @@ npm run dev
 ---
 
 **创建时间**: 2026-03-04  
-**最后更新**: 2026-03-04 (any 类型优化六批次完成 + 构建错误修复)  
-**状态**: ✅ Phase 1 localStorage 修复完成 | ✅ Phase 3 any 类型优化持续改进 | ✅ 构建测试通过
+**最后更新**: 2026-03-04 (any 类型优化九批次完成 + 自动化批量替换)  
+**状态**: ✅ Phase 1 localStorage 修复完成 | ✅ Phase 3 any 类型优化持续改进 | ✅ 批次9自动化替换完成
 
 ---
 
