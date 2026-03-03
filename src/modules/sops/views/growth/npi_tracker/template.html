@@ -1,4 +1,4 @@
-<div class="npi-tracker-container">
+<div class="module-container">
         <!-- Welcome Banner -->
         <div class="wb-container" style="--wb-gradient-1: #10b981; --wb-gradient-2: #059669;">
                 <div class="wb-orb wb-orb-1"></div>
@@ -22,55 +22,76 @@
                         </div>
                 </div>
         </div>
-        <!-- ==================== 新增：SOP核心流程总览 ==================== -->
+        <!-- ==================== SOP核心流程总览（实战版） sop-process-section ==================== -->
         <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
                 <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
                         <i class="fas fa-project-diagram text-indigo-500"></i>SOP 核心流程总览（实战版）
                 </h2>
-                <div class="grid grid-cols-1 md:grid-cols-9 gap-0 items-start">
-                        <!-- Step 1 -->
-                        <div class="flex flex-col items-center text-center p-3">
-                                <div class="step-circle bg-blue-100 text-blue-700 mb-2">1</div>
-                                <span class="text-xs font-bold text-slate-700 mb-1">选品建档</span>
-                                <span class="text-[10px] text-slate-500 leading-tight">录入SKU/ASIN<br />设定配送费基准</span>
+                
+                <!-- 使用新的流程步骤组件 -->
+                <div class="sop-process-container">
+                        <!-- 步骤 1: 选品建档 -->
+                        <div class="sop-process-step">
+                                <div class="sop-step-number">1</div>
+                                <div class="sop-step-content">
+                                        <h3 class="sop-step-title">选品建档</h3>
+                                        <p class="sop-step-desc">录入SKU/ASIN<br>设定配送费基准</p>
+                                </div>
                         </div>
-                        <div class="hidden md:flex items-center justify-center text-slate-300 text-xl pt-4">
-                                <i class="fas fa-chevron-right"></i>
+                        
+                        <div class="sop-process-arrow">
+                                <i class="fa-solid fa-chevron-right"></i>
                         </div>
-                        <!-- Step 2 -->
-                        <div class="flex flex-col items-center text-center p-3">
-                                <div class="step-circle bg-purple-100 text-purple-700 mb-2">2</div>
-                                <span class="text-xs font-bold text-slate-700 mb-1">合规检查</span>
-                                <span class="text-[10px] text-slate-500 leading-tight">5项Checklist<br />全部✓方可推广</span>
+                        
+                        <!-- 步骤 2: 合规检查 -->
+                        <div class="sop-process-step">
+                                <div class="sop-step-number">2</div>
+                                <div class="sop-step-content">
+                                        <h3 class="sop-step-title">合规检查</h3>
+                                        <p class="sop-step-desc">5项Checklist<br>全部✓方可推广</p>
+                                </div>
                         </div>
-                        <div class="hidden md:flex items-center justify-center text-slate-300 text-xl pt-4">
-                                <i class="fas fa-chevron-right"></i>
+                        
+                        <div class="sop-process-arrow">
+                                <i class="fa-solid fa-chevron-right"></i>
                         </div>
-                        <!-- Step 3 -->
-                        <div class="flex flex-col items-center text-center p-3">
-                                <div class="step-circle bg-emerald-100 text-emerald-700 mb-2">3</div>
-                                <span class="text-xs font-bold text-slate-700 mb-1">定价计算</span>
-                                <span class="text-[10px] text-slate-500 leading-tight">配送费→清仓线<br />→动销价→建议价</span>
+                        
+                        <!-- 步骤 3: 定价计算 -->
+                        <div class="sop-process-step">
+                                <div class="sop-step-number">3</div>
+                                <div class="sop-step-content">
+                                        <h3 class="sop-step-title">定价计算</h3>
+                                        <p class="sop-step-desc">配送费→清仓线<br>→动销价→建议价</p>
+                                </div>
                         </div>
-                        <div class="hidden md:flex items-center justify-center text-slate-300 text-xl pt-4">
-                                <i class="fas fa-chevron-right"></i>
+                        
+                        <div class="sop-process-arrow">
+                                <i class="fa-solid fa-chevron-right"></i>
                         </div>
-                        <!-- Step 4 -->
-                        <div class="flex flex-col items-center text-center p-3">
-                                <div class="step-circle bg-amber-100 text-amber-700 mb-2">4</div>
-                                <span class="text-xs font-bold text-slate-700 mb-1">推广执行</span>
-                                <span class="text-[10px] text-slate-500 leading-tight">Vine+广告<br />阶段性推进</span>
+                        
+                        <!-- 步骤 4: 推广执行 -->
+                        <div class="sop-process-step">
+                                <div class="sop-step-number">4</div>
+                                <div class="sop-step-content">
+                                        <h3 class="sop-step-title">推广执行</h3>
+                                        <p class="sop-step-desc">Vine+广告<br>阶段性推进</p>
+                                </div>
                         </div>
-                        <div class="hidden md:flex items-center justify-center text-slate-300 text-xl pt-4">
-                                <i class="fas fa-chevron-right"></i>
+                        
+                        <div class="sop-process-arrow">
+                                <i class="fa-solid fa-chevron-right"></i>
                         </div>
-                        <!-- Step 5 -->
-                        <div class="flex flex-col items-center text-center p-3">
-                                <div class="step-circle bg-red-100 text-red-700 mb-2">5</div>
-                                <span class="text-xs font-bold text-slate-700 mb-1">数据复盘</span>
-                                <span class="text-[10px] text-slate-500 leading-tight">每周看板复盘<br />保留/放弃决策</span>
+                        
+                        <!-- 步骤 5: 数据复盘 -->
+                        <div class="sop-process-step">
+                                <div class="sop-step-number">5</div>
+                                <div class="sop-step-content">
+                                        <h3 class="sop-step-title">数据复盘</h3>
+                                        <p class="sop-step-desc">每周看板复盘<br>保留/放弃决策</p>
+                                </div>
                         </div>
                 </div>
+
         </div>
         <!-- SOP Guidance Section -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">

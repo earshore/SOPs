@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SOP 流程步骤组件示例</title>
+  
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- 项目样式 -->
+  <link rel="stylesheet" href="../src/css/foundation/variables.css">
+  <link rel="stylesheet" href="../src/modules/sops/sops_style.css">
+  
+  <style>
+    /* 必要的CSS变量定义 */
+    :root {
+      /* 颜色 */
+      --color-primary: #3b82f6;
+      --color-bg-primary: #ffffff;
+      --color-bg-secondary: #f8fafc;
+      --color-text-primary: #0f172a;
+      --color-text-secondary: #64748b;
+      --color-text-tertiary: #94a3b8;
+      --color-border-default: rgba(0, 0, 0, 0.10);
+      --color-border-light: #e2e8f0;
+      
+      /* 间距 */
+      --spacing-xs: 0.5rem;
+      --spacing-sm: 0.75rem;
+      --spacing-md: 1rem;
+      --spacing-lg: 1.5rem;
+      --spacing-xl: 2rem;
+      --spacing-2xl: 3rem;
+      --spacing-3xl: 4rem;
+      
+      /* 字体 */
+      --text-xs: 0.75rem;
+      --text-sm: 0.875rem;
+      --text-base: 0.9375rem;
+      --text-md: 1rem;
+      --font-medium: 500;
+      --font-semibold: 600;
+      --font-bold: 700;
+      
+      /* 圆角 */
+      --rounded-md: 8px;
+      --rounded-lg: 12px;
+      --rounded-xl: 16px;
+      --rounded-2xl: 24px;
+      
+      /* 阴影 */
+      --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07);
+      
+      /* 动画 */
+      --duration-fast: 200ms;
+      --duration-normal: 300ms;
+      --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f8fafc;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+
+    .demo-container {
+      max-width: 1450px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .demo-header {
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    .demo-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 0.5rem;
+    }
+
+    .demo-desc {
+      font-size: 0.9375rem;
+      color: #64748b;
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #0f172a;
+      margin: 2rem 0 1rem;
+    }
+
+    .code-block {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 0.875rem;
+      line-height: 1.6;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-container">
+    <div class="demo-header">
+      <h1 class="demo-title">SOP 流程步骤组件示例</h1>
+      <p class="demo-desc">展示 SOP 核心流程的步骤卡片，包含步骤编号、标题、描述和箭头连接</p>
+    </div>
+
+    <!-- 示例 1: 新品生命周期跟踪流程 (5步骤) -->
+    <h2 class="section-title">示例 1: 新品生命周期跟踪流程</h2>
+    <div class="sop-process-section">
+      <div class="sop-process-container">
+        <div class="sop-process-step">
+          <div class="sop-step-number">1</div>
+          <div class="sop-step-content">
+            <h3 class="sop-step-title">选品建档</h3>
+            <p class="sop-step-desc">选品+建档+关注<br>立项前准备</p>
+          </div>
+        </div>
+        
+        <div class="sop-process-arrow">
+          <i class="fa-solid fa-chevron-right"></i>
+        </div>
+        
+        <div class="sop-process-step">
+          <div class="sop-step-number">2</div>
+          <div class="sop-step-content">
+            <h3 class="sop-step-title">合规检查</h3>
+            <p class="sop-step-desc">合规+审核+确认<br>立项前审核</p>
+          </div>
+        </div>
+        
+        <div class="sop-process-arrow">
+          <i class="fa-solid fa-chevron-right"></i>
+        </div>
+        
+        <div class="sop-process-step">
+          <div class="sop-step-number">3</div>
+          <div class="sop-step-content">
+            <h3 class="sop-step-title">采购计划</h3>
+            <p class="sop-step-desc">采购+备货+物流<br>供应链准备</p>
+          </div>
+        </div>
+        
+        <div class="sop-process-arrow">
+          <i class="fa-solid fa-chevron-right"></i>
+        </div>
+        
+        <div class="sop-process-step">
+          <div class="sop-step-number">4</div>
+          <div class="sop-step-content">
+            <h3 class="sop-step-title">推广执行</h3>
+            <p class="sop-step-desc">推广+运营+优化<br>市场推广</p>
+          </div>
+        </div>
+        
+        <div class="sop-process-arrow">
+          <i class="fa-solid fa-chevron-right"></i>
+        </div>
+        
+        <div class="sop-process-step">
+          <div class="sop-step-number">5</div>
+          <div class="sop-step-content">
+            <h3 class="sop-step-title">数据监控</h3>
+            <p class="sop-step-desc">监控+分析+复盘<br>效果评估</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 示例 2: 简化版 3 步骤流程 -->
+    <h2 class="section-title">示例 2: 简化版 3 步骤流程</h2>
+    <div class="sop-process-section">
+      <div class="sop-process-container">
+        <div class="sop-process-step">
+          <div class="sop-step-number">1</div>
+          <div class="sop-step-content">
+            <h3 class="sop-step-title">需求分析</h3>
+            <p class="sop-step-desc">收集需求<br>分析可行性</p>
+          </div>
+        </div>
+        
+        <div class="sop-process-arrow">
+          <i class="fa-solid fa-chevron-right"></i>
+        </div>
+        
+        <div class="sop-process-step">
+          <div class="sop-step-number">2</div>
+          <div class="sop-step-content">
+            <h3 class="sop-step-title">方案设计</h3>
+            <p class="sop-step-desc">制定方案<br>评审确认</p>
+          </div>
+        </div>
+        
+        <div class="sop-process-arrow">
+          <i class="fa-solid fa-chevron-right"></i>
+        </div>
+        
+        <div class="sop-process-step">
+          <div class="sop-step-number">3</div>
+          <div class="sop-step-content">
+            <h3 class="sop-step-title">执行落地</h3>
+            <p class="sop-step-desc">实施执行<br>验收交付</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 使用说明 -->
+    <h2 class="section-title">使用说明</h2>
+    <div class="code-block">
+&lt;!-- 基本结构 --&gt;
+&lt;div class="sop-process-section"&gt;
+  &lt;div class="sop-process-container"&gt;
+    &lt;!-- 步骤 1 --&gt;
+    &lt;div class="sop-process-step"&gt;
+      &lt;div class="sop-step-number"&gt;1&lt;/div&gt;
+      &lt;div class="sop-step-content"&gt;
+        &lt;h3 class="sop-step-title"&gt;步骤标题&lt;/h3&gt;
+        &lt;p class="sop-step-desc"&gt;步骤描述&lt;br&gt;第二行描述&lt;/p&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    
+    &lt;!-- 箭头 --&gt;
+    &lt;div class="sop-process-arrow"&gt;
+      &lt;i class="fa-solid fa-chevron-right"&gt;&lt;/i&gt;
+    &lt;/div&gt;
+    
+    &lt;!-- 步骤 2 --&gt;
+    &lt;div class="sop-process-step"&gt;
+      &lt;div class="sop-step-number"&gt;2&lt;/div&gt;
+      &lt;div class="sop-step-content"&gt;
+        &lt;h3 class="sop-step-title"&gt;步骤标题&lt;/h3&gt;
+        &lt;p class="sop-step-desc"&gt;步骤描述&lt;br&gt;第二行描述&lt;/p&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    
+    &lt;!-- 继续添加更多步骤... --&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+    </div>
+
+    <!-- 特性说明 -->
+    <h2 class="section-title">组件特性</h2>
+    <ul style="color: #64748b; font-size: 0.9375rem; line-height: 1.8; padding-left: 1.5rem;">
+      <li>响应式设计：桌面端横向排列，移动端自动切换为纵向排列</li>
+      <li>悬停效果：卡片悬停时有上浮动画，相邻箭头也会响应</li>
+      <li>颜色变体：步骤编号自动应用不同的渐变色，增加视觉层次</li>
+      <li>暗色模式：自动适配系统暗色模式</li>
+      <li>无障碍支持：遵循 prefers-reduced-motion 媒体查询</li>
+      <li>打印友好：打印时自动优化布局</li>
+    </ul>
+  </div>
+</body>
+</html>
