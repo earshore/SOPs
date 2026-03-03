@@ -32,15 +32,15 @@ function parsePath(path: string): ParsedPath {
   }
 
   const keys = path.split('.');
-  
+
   if (keys.length === 1) {
     return { module: keys[0] || '', property: undefined, isValid: true };
   }
-  
+
   if (keys.length === 2) {
     return { module: keys[0] || '', property: keys[1], isValid: true };
   }
-  
+
   // 不支持超过2级的路径
   return { module: '', property: undefined, isValid: false };
 }
@@ -235,14 +235,14 @@ export class StoreCompat {
    * unsubscribe();
    */
   subscribe<T = any>(
-    path: ValidStatePath | string, 
+    path: ValidStatePath | string,
     callback: (newValue: T, oldValue: T) => void
   ): () => void {
     let previousValue = this.get<T>(path);
 
     const unsubscribe = appStore.subscribe(() => {
       const currentValue = this.get<T>(path);
-      
+
       // 只在值真正改变时触发回调
       if (currentValue !== previousValue) {
         const oldValue = previousValue;
@@ -297,7 +297,7 @@ export class StoreCompat {
    */
   reset(module: 'ui' | 'scraper' | 'analysis' | 'promptlab' | 'keywordTracker' | 'qalab'): void {
     const state = appStore.getState();
-    
+
     switch (module) {
       case 'scraper':
         state.resetScraper();

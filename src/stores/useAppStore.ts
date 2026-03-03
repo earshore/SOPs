@@ -7,11 +7,11 @@
 import { createStore } from 'zustand/vanilla';
 import { persist } from './middleware/persist';
 import { devtools } from './middleware/devtools';
-import type { 
-  UIState, 
-  ScraperState, 
-  AnalysisState, 
-  PromptLabState, 
+import type {
+  UIState,
+  ScraperState,
+  AnalysisState,
+  PromptLabState,
   KeywordTrackerState,
   QALabState
 } from '../types/state';
@@ -23,22 +23,22 @@ import type {
 interface AppStore {
   // UI状态
   ui: UIState;
-  
+
   // Scraper状态
   scraper: ScraperState;
-  
+
   // Analysis状态
   analysis: AnalysisState;
-  
+
   // PromptLab状态
   promptlab: PromptLabState;
-  
+
   // KeywordTracker状态
   keywordTracker: KeywordTrackerState;
-  
+
   // QALab状态
   qalab: QALabState;
-  
+
   // UI Actions
   setCurrentTab: (tab: string) => void;
   setCurrentDataTab: (tab: string) => void;
@@ -47,7 +47,7 @@ interface AppStore {
   setTheme: (theme: 'light' | 'dark' | 'auto') => void;
   setLoading: (loading: boolean) => void;
   updateUI: (updates: Partial<UIState>) => void;
-  
+
   // Scraper Actions
   setIsScraping: (isScraping: boolean) => void;
   setScraperStatus: (status: ScraperState['status']) => void;
@@ -56,7 +56,7 @@ interface AppStore {
   setCurrentHistoryId: (id: ScraperState['currentHistoryId']) => void;
   updateScraper: (updates: Partial<ScraperState>) => void;
   resetScraper: () => void;
-  
+
   // Analysis Actions
   setSelectedAsins: (asins: string[]) => void;
   setReportData: (data: AnalysisState['reportData']) => void;
@@ -67,7 +67,7 @@ interface AppStore {
   setShowTranslation: (show: boolean) => void;
   updateAnalysis: (updates: Partial<AnalysisState>) => void;
   resetAnalysis: () => void;
-  
+
   // PromptLab Actions
   setCurrentPrompt: (prompt: string) => void;
   addPromptHistory: (item: NonNullable<PromptLabState['history']>[0]) => void;
@@ -75,7 +75,7 @@ interface AppStore {
   setSelectedModel: (model: string) => void;
   updatePromptLab: (updates: Partial<PromptLabState>) => void;
   resetPromptLab: () => void;
-  
+
   // KeywordTracker Actions
   setKeywords: (keywords: string[]) => void;
   setProcessedCopy: (copy: string) => void;
@@ -86,7 +86,7 @@ interface AppStore {
   updateKeywordTrackerSettings: (settings: Partial<KeywordTrackerState['settings']>) => void;
   updateKeywordTracker: (updates: Partial<KeywordTrackerState>) => void;
   resetKeywordTracker: () => void;
-  
+
   // QALab Actions
   setQALabLang: (lang: string) => void;
   setQALabCategory: (category: string) => void;
@@ -203,264 +203,264 @@ export const appStore = createStore<AppStore>()(
           theme: 'light',
           loading: false
         },
-        
+
         // 初始Scraper状态
         scraper: initialScraperState,
-        
+
         // 初始Analysis状态
         analysis: initialAnalysisState,
-        
+
         // 初始PromptLab状态
         promptlab: initialPromptLabState,
-        
+
         // 初始KeywordTracker状态
         keywordTracker: initialKeywordTrackerState,
-        
+
         // 初始QALab状态
         qalab: initialQALabState,
-        
+
         // UI Actions
-        setCurrentTab: (tab) => 
-          set((state) => ({ 
-            ui: { ...state.ui, currentTab: tab } 
+        setCurrentTab: (tab) =>
+          set((state) => ({
+            ui: { ...state.ui, currentTab: tab }
           })),
-        
-        setCurrentDataTab: (tab) => 
-          set((state) => ({ 
-            ui: { ...state.ui, currentDataTab: tab } 
+
+        setCurrentDataTab: (tab) =>
+          set((state) => ({
+            ui: { ...state.ui, currentDataTab: tab }
           })),
-        
-        setCurrentReportTab: (tab) => 
-          set((state) => ({ 
-            ui: { ...state.ui, currentReportTab: tab } 
+
+        setCurrentReportTab: (tab) =>
+          set((state) => ({
+            ui: { ...state.ui, currentReportTab: tab }
           })),
-        
-        setSidebarCollapsed: (collapsed) => 
-          set((state) => ({ 
-            ui: { ...state.ui, sidebarCollapsed: collapsed } 
+
+        setSidebarCollapsed: (collapsed) =>
+          set((state) => ({
+            ui: { ...state.ui, sidebarCollapsed: collapsed }
           })),
-        
-        setTheme: (theme) => 
-          set((state) => ({ 
-            ui: { ...state.ui, theme } 
+
+        setTheme: (theme) =>
+          set((state) => ({
+            ui: { ...state.ui, theme }
           })),
-        
-        setLoading: (loading) => 
-          set((state) => ({ 
-            ui: { ...state.ui, loading } 
+
+        setLoading: (loading) =>
+          set((state) => ({
+            ui: { ...state.ui, loading }
           })),
-        
-        updateUI: (updates) => 
-          set((state) => ({ 
-            ui: { ...state.ui, ...updates } 
+
+        updateUI: (updates) =>
+          set((state) => ({
+            ui: { ...state.ui, ...updates }
           })),
-        
+
         // Scraper Actions
         setIsScraping: (isScraping) =>
           set((state) => ({
             scraper: { ...state.scraper, isScraping }
           })),
-        
+
         setScraperStatus: (status) =>
           set((state) => ({
             scraper: { ...state.scraper, status }
           })),
-        
+
         setSelectedSite: (selectedSite) =>
           set((state) => ({
             scraper: { ...state.scraper, selectedSite }
           })),
-        
+
         setScrapedData: (scrapedData) =>
           set((state) => ({
             scraper: { ...state.scraper, scrapedData }
           })),
-        
+
         setCurrentHistoryId: (currentHistoryId) =>
           set((state) => ({
             scraper: { ...state.scraper, currentHistoryId }
           })),
-        
+
         updateScraper: (updates) =>
           set((state) => ({
             scraper: { ...state.scraper, ...updates }
           })),
-        
+
         resetScraper: () =>
           set({ scraper: initialScraperState }),
-        
+
         // Analysis Actions
         setSelectedAsins: (selectedAsins) =>
           set((state) => ({
             analysis: { ...state.analysis, selectedAsins }
           })),
-        
+
         setReportData: (reportData) =>
           set((state) => ({
             analysis: { ...state.analysis, reportData }
           })),
-        
+
         setAnalysisReport: (analysisReport) =>
           set((state) => ({
             analysis: { ...state.analysis, analysisReport }
           })),
-        
+
         setTranslatedReport: (translatedReport) =>
           set((state) => ({
             analysis: { ...state.analysis, translatedReport }
           })),
-        
+
         setExpandedAsin: (expandedAsin) =>
           set((state) => ({
             analysis: { ...state.analysis, expandedAsin }
           })),
-        
+
         setIsEditing: (isEditing) =>
           set((state) => ({
             analysis: { ...state.analysis, isEditing }
           })),
-        
+
         setShowTranslation: (showTranslation) =>
           set((state) => ({
             analysis: { ...state.analysis, showTranslation }
           })),
-        
+
         updateAnalysis: (updates) =>
           set((state) => ({
             analysis: { ...state.analysis, ...updates }
           })),
-        
+
         resetAnalysis: () =>
           set({ analysis: initialAnalysisState }),
-        
+
         // PromptLab Actions
         setCurrentPrompt: (currentPrompt) =>
           set((state) => ({
             promptlab: { ...state.promptlab, currentPrompt }
           })),
-        
+
         addPromptHistory: (item) =>
           set((state) => ({
-            promptlab: { 
-              ...state.promptlab, 
-              history: [...(state.promptlab.history || []), item] 
+            promptlab: {
+              ...state.promptlab,
+              history: [...(state.promptlab.history || []), item]
             }
           })),
-        
+
         setUserProductProfile: (userProductProfile) =>
           set((state) => ({
             promptlab: { ...state.promptlab, userProductProfile }
           })),
-        
+
         setSelectedModel: (selectedModel) =>
           set((state) => ({
             promptlab: { ...state.promptlab, selectedModel }
           })),
-        
+
         updatePromptLab: (updates) =>
           set((state) => ({
             promptlab: { ...state.promptlab, ...updates }
           })),
-        
+
         resetPromptLab: () =>
           set({ promptlab: initialPromptLabState }),
-        
+
         // KeywordTracker Actions
         setKeywords: (keywords) =>
           set((state) => ({
             keywordTracker: { ...state.keywordTracker, keywords }
           })),
-        
+
         setProcessedCopy: (processedCopy) =>
           set((state) => ({
             keywordTracker: { ...state.keywordTracker, processedCopy }
           })),
-        
+
         setFormattedCopy: (formattedCopy) =>
           set((state) => ({
             keywordTracker: { ...state.keywordTracker, formattedCopy }
           })),
-        
+
         setMatchedKeywords: (matchedKeywords) =>
           set((state) => ({
             keywordTracker: { ...state.keywordTracker, matchedKeywords }
           })),
-        
+
         setUnmatchedKeywords: (unmatchedKeywords) =>
           set((state) => ({
             keywordTracker: { ...state.keywordTracker, unmatchedKeywords }
           })),
-        
+
         setTranslationMode: (translationMode) =>
           set((state) => ({
             keywordTracker: { ...state.keywordTracker, translationMode }
           })),
-        
+
         updateKeywordTrackerSettings: (settingsUpdate) =>
           set((state) => ({
-            keywordTracker: { 
-              ...state.keywordTracker, 
+            keywordTracker: {
+              ...state.keywordTracker,
               settings: { ...state.keywordTracker.settings, ...settingsUpdate }
             }
           })),
-        
+
         updateKeywordTracker: (updates) =>
           set((state) => ({
             keywordTracker: { ...state.keywordTracker, ...updates }
           })),
-        
+
         resetKeywordTracker: () =>
           set({ keywordTracker: initialKeywordTrackerState }),
-        
+
         // QALab Actions
         setQALabLang: (currentLang) =>
           set((state) => ({
             qalab: { ...state.qalab, currentLang }
           })),
-        
+
         setQALabCategory: (currentCategory) =>
           set((state) => ({
             qalab: { ...state.qalab, currentCategory }
           })),
-        
+
         setQALabAllExpanded: (allExpanded) =>
           set((state) => ({
             qalab: { ...state.qalab, allExpanded }
           })),
-        
+
         setQALabReportData: (reportData) =>
           set((state) => ({
             qalab: { ...state.qalab, reportData }
           })),
-        
+
         setQALabGeneratedQAs: (generatedQAs) =>
           set((state) => ({
             qalab: { ...state.qalab, generatedQAs }
           })),
-        
+
         addRufusMessage: (message) =>
           set((state) => ({
-            qalab: { 
-              ...state.qalab, 
-              rufusMessages: [...state.qalab.rufusMessages, message] 
+            qalab: {
+              ...state.qalab,
+              rufusMessages: [...state.qalab.rufusMessages, message]
             }
           })),
-        
+
         setRufusThinking: (rufusThinking) =>
           set((state) => ({
             qalab: { ...state.qalab, rufusThinking }
           })),
-        
+
         setRufusMode: (rufusMode) =>
           set((state) => ({
             qalab: { ...state.qalab, rufusMode }
           })),
-        
+
         updateQALab: (updates) =>
           set((state) => ({
             qalab: { ...state.qalab, ...updates }
           })),
-        
+
         resetQALab: () =>
           set({ qalab: initialQALabState })
       }),
@@ -503,14 +503,14 @@ export const selectors = {
   sidebarCollapsed: (state: AppStore) => state.ui.sidebarCollapsed,
   theme: (state: AppStore) => state.ui.theme,
   loading: (state: AppStore) => state.ui.loading,
-  
+
   // Scraper选择器
   isScraping: (state: AppStore) => state.scraper.isScraping,
   scraperStatus: (state: AppStore) => state.scraper.status,
   selectedSite: (state: AppStore) => state.scraper.selectedSite,
   scrapedData: (state: AppStore) => state.scraper.scrapedData,
   currentHistoryId: (state: AppStore) => state.scraper.currentHistoryId,
-  
+
   // Analysis选择器
   selectedAsins: (state: AppStore) => state.analysis.selectedAsins,
   reportData: (state: AppStore) => state.analysis.reportData,
@@ -520,13 +520,13 @@ export const selectors = {
   isEditing: (state: AppStore) => state.analysis.isEditing,
   showTranslation: (state: AppStore) => state.analysis.showTranslation,
   isAnalyzing: (state: AppStore) => state.analysis.isAnalyzing,
-  
+
   // PromptLab选择器
   currentPrompt: (state: AppStore) => state.promptlab.currentPrompt,
   promptHistory: (state: AppStore) => state.promptlab.history,
   userProductProfile: (state: AppStore) => state.promptlab.userProductProfile,
   selectedModel: (state: AppStore) => state.promptlab.selectedModel,
-  
+
   // KeywordTracker选择器
   keywords: (state: AppStore) => state.keywordTracker.keywords,
   processedCopy: (state: AppStore) => state.keywordTracker.processedCopy,
@@ -535,7 +535,7 @@ export const selectors = {
   unmatchedKeywords: (state: AppStore) => state.keywordTracker.unmatchedKeywords,
   translationMode: (state: AppStore) => state.keywordTracker.translationMode,
   keywordTrackerSettings: (state: AppStore) => state.keywordTracker.settings,
-  
+
   // QALab选择器
   qalabLang: (state: AppStore) => state.qalab.currentLang,
   qalabCategory: (state: AppStore) => state.qalab.currentCategory,

@@ -63,8 +63,9 @@ export const PROVIDERS: Record<string, ProviderConfig> = {
     models: [
       { id: "gpt-5-mini", context: 16385, features: ["function"] },
       { id: "glm-4.5-air", context: 128000, features: ["function"] },
-      { id: "z-ai/glm5", context: 128000, features: ["function"] },
+      { id: "z-ai/glm-4.5-air:free", context: 128000, features: ["function"] },
       { id: "hunyuan-lite", context: 32000, features: ["function"] },
+      { id: "gemini-2.5-pro", context: 32000, features: ["function"] },
     ],
   },
   openai: {
