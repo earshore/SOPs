@@ -471,8 +471,8 @@ export interface ConfigChangeEventPayload {
 export interface ConfigChangedEventPayload {
   changes: Array<{
     key: string;
-    value: any;
-    oldValue?: any;
+    value: unknown;
+    oldValue?: unknown;
   }>;
   timestamp: number;
 }
@@ -838,7 +838,7 @@ export type TypedEventHandler<K extends keyof EventPayloadMap> = (
 /**
  * 通用事件处理器
  */
-export type GenericEventHandler = (payload: any) => void;
+export type GenericEventHandler = (payload: unknown) => void;
 
 // ==================== 事件订阅类型 ====================
 
@@ -859,7 +859,7 @@ export interface EventSubscribeOptions {
   /**
    * 过滤器函数
    */
-  filter?: (payload: any) => boolean;
+  filter?: (payload: unknown) => boolean;
 }
 
 /**
@@ -915,7 +915,7 @@ export interface IEventBus {
   /**
    * 发布事件（通用版本）
    */
-  emit(event: string, payload: any): void;
+  emit(event: string, payload: unknown): void;
   
   /**
    * 移除事件的所有监听器
@@ -966,10 +966,10 @@ export interface IEventBus {
 /**
  * 事件Schema
  */
-export interface EventSchema<T = any> {
+export interface EventSchema<T = unknown> {
   name: string;
   description?: string;
-  validate: (payload: any) => payload is T;
+  validate: (payload: unknown) => payload is T;
   example?: T;
 }
 
@@ -990,7 +990,7 @@ export interface IEventValidator {
    */
   validate<K extends keyof EventPayloadMap>(
     event: K,
-    payload: any
+    payload: unknown
   ): payload is EventPayloadMap[K];
   
   /**
@@ -1044,7 +1044,7 @@ export interface EventMiddleware {
   /**
    * 错误处理
    */
-  onError?: (error: Error, event: string, payload: any) => void;
+  onError?: (error: Error, event: string, payload: unknown) => void;
 }
 
 // ==================== 事件批处理 ====================

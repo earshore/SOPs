@@ -9,22 +9,22 @@
  */
 export interface DebugInterface {
   // 容器相关
-  container?: any;
+  container?: unknown;
   
   // 状态相关
-  state?: any;
-  stores?: any;
+  state?: unknown;
+  stores?: unknown;
   
   // 路由相关
-  router?: any;
+  router?: unknown;
   
   // 服务相关
   services?: {
-    [key: string]: any;
-    storage?: any;
-    http?: any;
-    logger?: any;
-    performance?: any;
+    [key: string]: unknown;
+    storage?: unknown;
+    http?: unknown;
+    logger?: unknown;
+    performance?: unknown;
   };
   
   // 工具函数
@@ -121,13 +121,13 @@ class DebugInterfaceManager {
    * 暴露到window
    */
   private exposeToWindow(): void {
-    (window as any).__DEBUG__ = this.debugInterface;
+    (window as unknown as Record<string, unknown>).__DEBUG__ = this.debugInterface;
   }
 
   /**
    * 注册容器
    */
-  registerContainer(container: any): void {
+  registerContainer(container: unknown): void {
     if (import.meta.env.DEV) {
       this.debugInterface.container = container;
     }
@@ -136,7 +136,7 @@ class DebugInterfaceManager {
   /**
    * 注册状态
    */
-  registerState(state: any): void {
+  registerState(state: unknown): void {
     if (import.meta.env.DEV) {
       this.debugInterface.state = state;
     }
@@ -145,7 +145,7 @@ class DebugInterfaceManager {
   /**
    * 注册路由
    */
-  registerRouter(router: any): void {
+  registerRouter(router: unknown): void {
     if (import.meta.env.DEV) {
       this.debugInterface.router = router;
     }
@@ -154,7 +154,7 @@ class DebugInterfaceManager {
   /**
    * 注册服务
    */
-  registerService(name: string, service: any): void {
+  registerService(name: string, service: unknown): void {
     if (import.meta.env.DEV) {
       if (!this.debugInterface.services) {
         this.debugInterface.services = {};
@@ -168,7 +168,7 @@ class DebugInterfaceManager {
    */
   cleanup(): void {
     if (import.meta.env.DEV) {
-      delete (window as any).__DEBUG__;
+      delete (window as unknown as Record<string, unknown>).__DEBUG__;
       this.debugInterface = {};
       this.isInitialized = false;
       console.log('🔧 [DebugInterface] 调试接口已清理');

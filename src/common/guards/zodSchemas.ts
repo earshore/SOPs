@@ -211,8 +211,14 @@ export const AmazonProductDataSchema = z.object({
 
 /**
  * AnalysisSection Schema (递归)
+ * 使用 z.lazy 处理递归类型
  */
-export const AnalysisSectionSchema: z.ZodType<any> = z.lazy(() =>
+export const AnalysisSectionSchema: z.ZodType<{
+  id: string;
+  title: string;
+  content: string;
+  subsections?: unknown[];
+}> = z.lazy(() =>
   z.object({
     id: z.string(),
     title: z.string(),

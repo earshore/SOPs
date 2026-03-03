@@ -226,7 +226,7 @@ export abstract class StandardModule implements IModule {
    * @param name - 服务名称
    * @returns 服务实例
    */
-  protected getService<T = any>(name: ServiceName): T {
+  protected getService<T = unknown>(name: ServiceName): T {
     try {
       return this.diContainer.resolve<T>(name);
     } catch (error) {
@@ -293,7 +293,7 @@ export abstract class StandardModule implements IModule {
   /**
    * 更新模块数据
    */
-  protected updateData(data: any): void {
+  protected updateData(data: unknown): void {
     this.state.data = data;
   }
 

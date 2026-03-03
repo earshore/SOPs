@@ -423,7 +423,7 @@ export const workingStateManager = new WorkingStateManager();
 export default workingStateManager;
 
 // 向后兼容：暴露到 window (开发调试用)
-if (typeof window !== 'undefined' && (import.meta as any).env?.DEV) {
-  (window as any).__WorkingStateManager = workingStateManager;
+if (typeof window !== 'undefined' && (import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV) {
+  (window as unknown as Record<string, unknown>).__WorkingStateManager = workingStateManager;
   console.log('✅ [WorkingStateManager] 开发模式：管理器已暴露到 window.__WorkingStateManager');
 }

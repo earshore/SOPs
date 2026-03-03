@@ -13,7 +13,7 @@ import { configCenter } from '../config/ConfigCenter';
 interface EventLogEntry {
   timestamp: string;
   eventName: string;
-  detail: any;
+  detail: unknown;
   target: string;
 }
 
@@ -118,7 +118,7 @@ export function clearEventHistory(): void {
 /**
  * 手动记录自定义事件（用于业务埋点）
  */
-export function logCustomEvent(eventName: string, detail: any = {}): void {
+export function logCustomEvent(eventName: string, detail: unknown = {}): void {
   const logEntry: EventLogEntry = {
     timestamp: new Date().toISOString(),
     eventName,

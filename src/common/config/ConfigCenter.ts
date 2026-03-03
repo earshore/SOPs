@@ -495,7 +495,7 @@ export class ConfigCenter implements IConfigService {
    * 获取所有配置
    * 实现 IConfigService.getAll
    */
-  public getAll(): Record<string, any> {
+  public getAll(): Record<string, unknown> {
     return { ...this.config };
   }
 

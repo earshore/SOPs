@@ -45,12 +45,12 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
       this._unsubscribes = createMultipleStateSyncs([
         {
           selector: (state) => state.analysis.selectedAsins,
-          onChange: (asins) => { this.selectedAsins = [...asins]; },
+          onChange: (asins) => { this.selectedAsins = [...(asins as string[])]; },
           immediate: true
         },
         {
           selector: (state) => state.analysis.isAnalyzing,
-          onChange: (isAnalyzing) => { this.isAnalyzing = isAnalyzing; },
+          onChange: (isAnalyzing) => { this.isAnalyzing = isAnalyzing as boolean; },
           immediate: true
         },
         {

@@ -99,7 +99,7 @@ export function setTextContent(element: HTMLElement | null, text: string): void 
  * safeTemplate('<div class="item">${title}</div>', { title: '<script>bad</script>' })
  * // 返回: '<div class="item">&lt;script&gt;bad&lt;/script&gt;</div>'
  */
-export function safeTemplate(template: string, data: Record<string, any>): string {
+export function safeTemplate(template: string, data: Record<string, unknown>): string {
   return template.replace(/\$\{(\w+)\}/g, (_match, key) => {
     const value = data[key];
     if (value === undefined || value === null) return '';

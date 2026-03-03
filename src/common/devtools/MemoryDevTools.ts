@@ -309,7 +309,7 @@ if (typeof window !== 'undefined') {
     setTimeout(() => {
       const devtools = new MemoryDevTools();
       devtools.init();
-      (window as any).__MemoryDevTools = devtools;
+      (window as unknown as Record<string, unknown>).__MemoryDevTools = devtools;
     }, 1500);
   }
 }

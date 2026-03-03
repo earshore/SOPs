@@ -38,7 +38,7 @@ export interface LeakReport {
   type: 'memory' | 'listeners' | 'timers';
   severity: 'warning' | 'critical';
   message: string;
-  details: Record<string, any>;
+  details: Record<string, unknown>;
   timestamp: number;
 }
 
@@ -126,7 +126,15 @@ export class MemoryLeakDetector {
   private _checkMemoryGrowth(): void {
     if (!this._isMemoryAPIAvailable()) return;
 
-    const memory = (performance as any).memory;
+    const perfWithMemory = performance as unknown as {
+      memory: {
+        usedJSHeapSize: number;
+        totalJSHeapSize: number;
+        jsHeapSizeLimit: number;
+      };
+    };
+    
+    const memory = perfWithMemory.memory;
     const snapshot: MemorySnapshot = {
       timestamp: Date.now(),
       heapUsed: memory.usedJSHeapSize / 1024 / 1024, // MB
@@ -237,7 +245,7 @@ export class MemoryLeakDetector {
   private _isMemoryAPIAvailable(): boolean {
     return typeof performance !== 'undefined' && 
            'memory' in performance &&
-           typeof (performance as any).memory === 'object';
+           typeof (performance as unknown as { memory?: unknown }).memory === 'object';
   }
 
   /**
@@ -250,7 +258,14 @@ export class MemoryLeakDetector {
   } | null {
     if (!this._isMemoryAPIAvailable()) return null;
 
-    const memory = (performance as any).memory;
+    const perfWithMemory = performance as unknown as {
+      memory: {
+        usedJSHeapSize: number;
+        totalJSHeapSize: number;
+      };
+    };
+    
+    const memory = perfWithMemory.memory;
     return {
       heapUsed: memory.usedJSHeapSize / 1024 / 1024,
       heapTotal: memory.totalJSHeapSize / 1024 / 1024,
@@ -276,8 +291,9 @@ export class MemoryLeakDetector {
    * 手动触发垃圾回收（仅在开发环境）
    */
   forceGC(): void {
-    if (typeof (window as any).gc === 'function') {
-      (window as any).gc();
+    const windowWithGC = window as unknown as { gc?: () => void };
+    if (typeof windowWithGC.gc === 'function') {
+      windowWithGC.gc();
       Logger.info('已触发垃圾回收', {}, 'MemoryLeakDetector');
     } else {
       Logger.warn('垃圾回收不可用（需要 --expose-gc 标志）', {}, 'MemoryLeakDetector');
@@ -292,7 +308,7 @@ export const memoryLeakDetector = new MemoryLeakDetector();
 export default memoryLeakDetector;
 
 // 向后兼容：暴露到 window (开发调试用)
-if (typeof window !== 'undefined' && (import.meta as any).env?.DEV) {
-  (window as any).__MemoryLeakDetector = memoryLeakDetector;
+if (typeof window !== 'undefined' && (import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV) {
+  (window as unknown as Record<string, unknown>).__MemoryLeakDetector = memoryLeakDetector;
   console.log('✅ [MemoryLeakDetector] 开发模式：检测器已暴露到 window.__MemoryLeakDetector');
 }

@@ -73,17 +73,17 @@ export function createQalabPanel(): QalabAlpineContext & Record<string, unknown>
             this._unsubscribes = createMultipleStateSyncs([
                 {
                     selector: (state) => state.qalab.currentLang,
-                    onChange: (lang) => { this.currentLang = lang; },
+                    onChange: (lang) => { this.currentLang = lang as string; },
                     immediate: true
                 },
                 {
                     selector: (state) => state.qalab.currentCategory,
-                    onChange: (category) => { this.currentCategory = category; },
+                    onChange: (category) => { this.currentCategory = category as string; },
                     immediate: true
                 },
                 {
                     selector: (state) => state.qalab.allExpanded,
-                    onChange: (expanded) => { this.allExpanded = expanded; },
+                    onChange: (expanded) => { this.allExpanded = expanded as boolean; },
                     immediate: true
                 },
                 {
@@ -93,7 +93,7 @@ export function createQalabPanel(): QalabAlpineContext & Record<string, unknown>
                 },
                 {
                     selector: (state) => state.qalab.generatedQAs,
-                    onChange: (qas) => { this.generatedQAs = [...qas]; },
+                    onChange: (qas) => { this.generatedQAs = [...(qas as unknown[])]; },
                     immediate: true
                 }
             ]);

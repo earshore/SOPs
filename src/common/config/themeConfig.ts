@@ -128,11 +128,10 @@ export class ThemeManager {
     }
     
     // 性能监控
-    if ((window as any).__CSS_PERF__) {
-      (window as any).__CSS_PERF__.trackThemeSwitch(
-        this.currentTheme,
-        themeId
-      );
+    const windowWithPerf = window as unknown as Record<string, unknown>;
+    if (windowWithPerf.__CSS_PERF__) {
+      const cssPerf = windowWithPerf.__CSS_PERF__ as { trackThemeSwitch: (from: string, to: string) => void };
+      cssPerf.trackThemeSwitch(this.currentTheme, themeId);
     }
     
     // 触发事件

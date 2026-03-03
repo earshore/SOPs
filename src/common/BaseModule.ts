@@ -79,7 +79,7 @@ export default class BaseModule {
      * @param name - 服务名称
      * @returns 服务实例
      */
-    protected getService<T = any>(name: ServiceName): T {
+    protected getService<T = unknown>(name: ServiceName): T {
         try {
             return this.diContainer.resolve<T>(name);
         } catch (error) {
@@ -87,6 +87,7 @@ export default class BaseModule {
             throw error;
         }
     }
+
 
     /**
      * 检查服务是否存在
@@ -307,7 +308,7 @@ export default class BaseModule {
 
         try {
             // 使用依赖注入容器获取actionRegistry
-            const actionRegistry = this.diContainer.resolve('actionRegistry');
+            const actionRegistry = this.diContainer.resolve<{ unregisterAction: (name: string) => void }>('actionRegistry');
             
             // 清理每个动作
             this._registeredActions.forEach(actionName => {

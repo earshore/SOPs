@@ -43,7 +43,7 @@ export function setInnerHTML(element: HTMLElement, html: string, trusted: boolea
 export function setTemplate(
   element: HTMLElement,
   template: string,
-  data: Record<string, any>,
+  data: Record<string, unknown>,
   trustedKeys: string[] = []
 ): void {
   if (!element) return;

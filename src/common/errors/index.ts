@@ -72,7 +72,7 @@ export function handleNetworkError(
 export function handleApiError(
   code: ErrorCode,
   statusCode?: number,
-  response?: any,
+  response?: unknown,
   context?: ErrorContext,
   originalError?: Error,
   options?: ErrorHandlerOptions
@@ -88,7 +88,7 @@ export function handleApiError(
 export function handleValidationError(
   code: ErrorCode,
   field?: string,
-  value?: any,
+  value?: unknown,
   context?: ErrorContext,
   options?: ErrorHandlerOptions
 ): void {
@@ -128,11 +128,11 @@ export function handleSystemError(
  * 异步函数错误包装器
  * 自动捕获并处理异步函数中的错误
  */
-export function withErrorHandler<T extends (...args: any[]) => Promise<any>>(
+export function withErrorHandler<T extends (...args: unknown[]) => Promise<unknown>>(
   fn: T,
   options?: ErrorHandlerOptions
 ): T {
-  return (async (...args: any[]) => {
+  return (async (...args: unknown[]) => {
     try {
       return await fn(...args);
     } catch (error) {
@@ -146,11 +146,11 @@ export function withErrorHandler<T extends (...args: any[]) => Promise<any>>(
  * 同步函数错误包装器
  * 自动捕获并处理同步函数中的错误
  */
-export function withErrorHandlerSync<T extends (...args: any[]) => any>(
+export function withErrorHandlerSync<T extends (...args: unknown[]) => unknown>(
   fn: T,
   options?: ErrorHandlerOptions
 ): T {
-  return ((...args: any[]) => {
+  return ((...args: unknown[]) => {
     try {
       return fn(...args);
     } catch (error) {

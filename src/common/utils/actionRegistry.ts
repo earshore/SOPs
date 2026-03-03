@@ -300,13 +300,15 @@ export function getLegacyCallStats(): string[] {
 // ================================================================
 
 // 监听注册事件
-eventBus.on(APP_EVENTS.REGISTER_ACTIONS, ({ moduleId, actions }: { moduleId: string; actions: ActionMap }) => {
+eventBus.on(APP_EVENTS.REGISTER_ACTIONS, (payload: unknown) => {
+  const { moduleId, actions } = payload as { moduleId: string; actions: ActionMap };
   const actionNames = registerActionsWithLegacy(actions);
   console.log(`[ActionRegistry] 已注册 ${actionNames.length} 个动作 (模块: ${moduleId})`);
 });
 
 // 监听清理事件
-eventBus.on('unregisterActions', ({ moduleId, actionNames }: { moduleId: string; actionNames: string[] }) => {
+eventBus.on('unregisterActions', (payload: unknown) => {
+  const { moduleId, actionNames } = payload as { moduleId: string; actionNames: string[] };
   unregisterActions(actionNames);
   console.log(`[ActionRegistry] 已清理 ${actionNames.length} 个动作 (模块: ${moduleId})`);
 });

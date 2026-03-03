@@ -169,7 +169,7 @@ export class ServiceBootstrap {
    * @returns 服务实例
    * @private
    */
-  private async _initService(name: string): Promise<any> {
+  private async _initService(name: string): Promise<unknown> {
     const config = this.registry.getConfig(name as ServiceName);
     if (!config) {
       throw new Error(`服务 "${name}" 未在注册表中找到`);

@@ -46,7 +46,7 @@ export type ServiceName = typeof SERVICE_NAMES[keyof typeof SERVICE_NAMES];
 /**
  * 服务配置定义
  */
-export interface ServiceConfig<T = any> {
+export interface ServiceConfig<T = unknown> {
   /** 服务名称 */
   name: ServiceName;
   /** 工厂函数 */
@@ -71,7 +71,7 @@ export class ServiceRegistry {
   /**
    * 注册服务配置
    */
-  register<T = any>(config: ServiceConfig<T>): void {
+  register<T = unknown>(config: ServiceConfig<T>): void {
     if (this.configs.has(config.name)) {
       console.warn(`[ServiceRegistry] 服务 "${config.name}" 已注册，将被覆盖`);
     }

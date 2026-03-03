@@ -4,6 +4,9 @@
 // 提供智能的HTTP请求缓存管理
 // ================================================================
 
+import { StorageService } from './storageService';
+import { Logger } from './loggerService';
+
 /**
  * 缓存策略
  */
@@ -154,7 +157,7 @@ class HttpCacheService {
     
     // 从持久化删除
     try {
-      localStorage.removeItem(cacheKey);
+      StorageService.remove(cacheKey);
     } catch (e) {
       // 忽略错误
     }
@@ -177,10 +180,10 @@ class HttpCacheService {
       
       // 清空持久化缓存
       try {
-        const keys = Object.keys(localStorage);
+        const keys = this.getAllStorageKeys();
         for (const key of keys) {
           if (key.startsWith(pattern)) {
-            localStorage.removeItem(key);
+            StorageService.remove(key);
           }
         }
       } catch (e) {
@@ -192,10 +195,10 @@ class HttpCacheService {
       
       try {
         // 只清空http-cache前缀的项
-        const keys = Object.keys(localStorage);
+        const keys = this.getAllStorageKeys();
         for (const key of keys) {
           if (key.startsWith('http-cache:')) {
-            localStorage.removeItem(key);
+            StorageService.remove(key);
           }
         }
       } catch (e) {
@@ -240,25 +243,37 @@ class HttpCacheService {
     
     // 清理持久化缓存
     try {
-      const keys = Object.keys(localStorage);
+      const keys = this.getAllStorageKeys();
       for (const key of keys) {
         if (key.startsWith('http-cache:')) {
-          const item = localStorage.getItem(key);
+          const item = StorageService.getRaw(key);
           if (item) {
             try {
               const entry = JSON.parse(item) as CacheEntry;
               if (entry.expiresAt < now) {
-                localStorage.removeItem(key);
+                StorageService.remove(key);
               }
             } catch (e) {
               // 解析失败,删除
-              localStorage.removeItem(key);
+              StorageService.remove(key);
             }
           }
         }
       }
     } catch (e) {
       // 忽略错误
+    }
+  }
+
+  /**
+   * 获取所有存储键
+   * 通过 StorageService 间接访问，避免直接使用 localStorage
+   */
+  private getAllStorageKeys(): string[] {
+    try {
+      return StorageService.keys();
+    } catch (e) {
+      return [];
     }
   }
 
@@ -286,7 +301,7 @@ class HttpCacheService {
    */
   private getFromStorage<T>(key: string): CacheEntry<T> | null {
     try {
-      const item = localStorage.getItem(key);
+      const item = StorageService.getRaw(key);
       if (!item) {
         return null;
       }
@@ -301,10 +316,10 @@ class HttpCacheService {
    */
   private setToStorage<T>(key: string, entry: CacheEntry<T>): void {
     try {
-      localStorage.setItem(key, JSON.stringify(entry));
+      StorageService.setRaw(key, JSON.stringify(entry));
     } catch (e) {
       // 存储失败(可能空间不足),忽略
-      console.warn('[HttpCache] 持久化缓存失败:', e);
+      Logger.error('[HttpCache] 持久化缓存失败:', e as Error);
     }
   }
 }

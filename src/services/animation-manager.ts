@@ -5,6 +5,8 @@
  * Requirements: 10.1, 10.2, 11.1, 11.2, 11.3, 11.4, 11.5
  */
 
+import { StorageService } from './storageService';
+import { Logger } from './loggerService';
 import type {
   AnimationSettings,
   AnimationSpeed,
@@ -130,9 +132,9 @@ export class AnimationManager {
         lastUpdated: Date.now(),
       };
 
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(storedSettings));
+      StorageService.set(STORAGE_KEY, storedSettings);
     } catch (error) {
-      console.warn('Failed to save animation settings:', error);
+      Logger.error('Failed to save animation settings:', error as Error);
     }
   }
 
@@ -141,16 +143,14 @@ export class AnimationManager {
    */
   loadSettings(): void {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (!stored) {
+      const storedSettings = StorageService.get<StoredAnimationSettings>(STORAGE_KEY);
+      if (!storedSettings) {
         return;
       }
 
-      const storedSettings: StoredAnimationSettings = JSON.parse(stored);
-
       // 验证版本号
       if (storedSettings.version !== CONFIG_VERSION) {
-        console.info('Animation settings version mismatch, using defaults');
+        Logger.info('Animation settings version mismatch, using defaults');
         return;
       }
 
@@ -165,7 +165,7 @@ export class AnimationManager {
       this.settings.disabledCategories = new Set(filteredCategories);
       this.settings.respectSystemPreference = storedSettings.respectSystemPreference;
     } catch (error) {
-      console.warn('Failed to load animation settings:', error);
+      Logger.error('Failed to load animation settings:', error as Error);
       // 加载失败时使用默认配置
     }
   }

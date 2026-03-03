@@ -80,7 +80,7 @@ export function createAnalyticsMiddleware(): RouteMiddleware {
 export function createLoadingMiddleware(): RouteMiddleware {
   return async (context, next) => {
     const taskId = `route-${context.to.path}`;
-    let manager: any = null;
+    let manager: { start: (id: string, opts: { message: string }) => void; stop: (id: string) => void } | null = null;
 
     try {
       // 显示加载指示器
@@ -178,8 +178,11 @@ export function createErrorHandlingMiddleware(): RouteMiddleware {
       console.error('[Router] Middleware error:', error);
 
       // 显示错误提示
-      if (typeof (window as any).showToast === 'function') {
-        (window as any).showToast('页面加载失败', { type: 'error' });
+      const windowWithToast = window as unknown as { 
+        showToast?: (message: string, options: { type: string }) => void 
+      };
+      if (typeof windowWithToast.showToast === 'function') {
+        windowWithToast.showToast('页面加载失败', { type: 'error' });
       }
 
       // 可以选择重定向到错误页面

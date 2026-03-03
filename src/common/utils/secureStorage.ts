@@ -60,7 +60,7 @@ export const SecureStorage = {
   /**
    * 加密并存储数据
    */
-  async setSecure(key: string, data: any): Promise<boolean> {
+  async setSecure(key: string, data: unknown): Promise<boolean> {
     try {
       // 1. 获取设备指纹作为密钥
       const fingerprint = await getDeviceFingerprint();
@@ -99,7 +99,7 @@ export const SecureStorage = {
   /**
    * 读取并解密数据
    */
-  async getSecure<T = any>(key: string, defaultValue: T | null = null): Promise<T | null> {
+  async getSecure<T = unknown>(key: string, defaultValue: T | null = null): Promise<T | null> {
     try {
       // 1. 读取加密数据
       const encryptedData = StorageService.get<EncryptedData>(`secure_${key}`, null);

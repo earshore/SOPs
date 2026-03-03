@@ -183,7 +183,7 @@ export function isNumber(value: unknown): value is number {
  * @param value - 待检查的值
  * @returns 类型守卫结果
  */
-export function isObject(value: unknown): value is Record<string, any> {
+export function isObject(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
@@ -192,7 +192,7 @@ export function isObject(value: unknown): value is Record<string, any> {
  * @param value - 待检查的值
  * @returns 类型守卫结果
  */
-export function isArray(value: unknown): value is Array<any> {
+export function isArray(value: unknown): value is Array<unknown> {
   return Array.isArray(value);
 }
 

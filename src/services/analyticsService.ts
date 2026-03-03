@@ -37,7 +37,7 @@ export interface AnalyticsEvent {
   timestamp: number;
   sessionId: string;
   userId?: string;
-  properties: Record<string, any>;
+  properties: Record<string, unknown>;
   context: {
     url: string;
     referrer: string;
@@ -405,7 +405,7 @@ export class AnalyticsService {
   /**
    * 追踪自定义事件
    */
-  trackEvent(name: string, properties: Record<string, any> = {}): void {
+  trackEvent(name: string, properties: Record<string, unknown> = {}): void {
     if (!this.config.enabled) return;
     if (!this.shouldSample()) return;
 

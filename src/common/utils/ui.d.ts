@@ -20,7 +20,7 @@ export interface SidebarRenderer {
  */
 export interface SidebarRendererConfig {
   moduleId: string;
-  categories: any[];
+  categories: unknown[];
   overviewRouteId: string;
   enableSearch?: boolean;
   searchPlaceholder?: string;

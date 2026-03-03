@@ -23,6 +23,22 @@ interface ActiveFilters {
     searchQuery: string;
 }
 
+/**
+ * Restricted Words Panel Alpine 组件接口
+ */
+interface RestrictedWordsPanelComponent {
+    searchKeyword: string;
+    searchMode: SearchMode;
+    selectedCategory: string;
+    selectedRiskLevel: string;
+    selectedSite: string;
+    init(): void;
+    performSearch(): void;
+    clearFilters(): void;
+    viewDetail(wordId: string): void;
+    closeDetailModal(): void;
+}
+
 let currentResults = [...RESTRICTED_WORDS_DATABASE];
 let currentSiteContext: SiteContext = 'ALL';
 
@@ -661,7 +677,7 @@ console.log(
 const registry = AlpineRegistry.getInstance();
 
 // 注册 Restricted Words 面板组件
-registry.register('restrictedWordsPanel', () => ({
+registry.register('restrictedWordsPanel', (): RestrictedWordsPanelComponent => ({
     // 初始化
     init() {
         console.log('✅ [Alpine] Restricted Words 面板组件已初始化');
@@ -684,7 +700,7 @@ registry.register('restrictedWordsPanel', () => ({
     selectedSite: 'ALL',
     
     // 执行搜索
-    performSearch() {
+    performSearch(this: RestrictedWordsPanelComponent) {
         const input = document.getElementById('rw-search-input') as HTMLInputElement;
         if (input) {
             input.value = this.searchKeyword;
@@ -697,7 +713,7 @@ registry.register('restrictedWordsPanel', () => ({
     },
     
     // 清空搜索
-    clearFilters() {
+    clearFilters(this: RestrictedWordsPanelComponent) {
         this.searchKeyword = '';
         this.selectedCategory = '';
         this.selectedRiskLevel = '';

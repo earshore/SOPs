@@ -168,7 +168,10 @@ export class CSSPerformanceMonitor {
   /**
    * 生成优化建议
    */
-  private getRecommendations(loadMetrics: any, runtimeMetrics: any): string[] {
+  private getRecommendations(
+    loadMetrics: ReturnType<typeof this.getLoadMetrics>,
+    runtimeMetrics: ReturnType<typeof this.getRuntimeMetrics>
+  ): string[] {
     const recommendations: string[] = [];
     
     // CSS加载建议
@@ -255,10 +258,9 @@ export const cssPerformanceMonitor = new CSSPerformanceMonitor();
 
 // 在开发环境暴露到全局
 if (import.meta.env.DEV && typeof window !== 'undefined') {
-  (window as any).__CSS_PERF__ = cssPerformanceMonitor;
-  
-  // 添加快捷命令
-  (window as any).printCSSPerf = () => cssPerformanceMonitor.printReport();
+  const windowWithPerf = window as unknown as Record<string, unknown>;
+  windowWithPerf.__CSS_PERF__ = cssPerformanceMonitor;
+  windowWithPerf.printCSSPerf = () => cssPerformanceMonitor.printReport();
   
   console.log('💡 CSS性能监控已启用，使用 printCSSPerf() 查看报告');
 }

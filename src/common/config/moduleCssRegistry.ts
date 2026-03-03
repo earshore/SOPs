@@ -12,10 +12,10 @@
 
 export interface ModuleCssConfig {
   moduleId: string;
-  cssImporter: () => Promise<any>; // 动态import函数
+  cssImporter: () => Promise<unknown>; // 动态import函数
   priority: 'critical' | 'high' | 'normal' | 'low';
   preload?: boolean;
-  dependencies?: (() => Promise<any>)[]; // 依赖的CSS导入函数
+  dependencies?: (() => Promise<unknown>)[]; // 依赖的CSS导入函数
 }
 
 /**
@@ -144,7 +144,7 @@ export function getModulesByPriority(priority: ModuleCssConfig['priority']): Mod
 /**
  * 获取模块的所有CSS导入函数（包括依赖）
  */
-export function getModuleAllCssImporters(moduleId: string): (() => Promise<any>)[] {
+export function getModuleAllCssImporters(moduleId: string): (() => Promise<unknown>)[] {
   const config = MODULE_CSS_REGISTRY[moduleId];
   if (!config) return [];
   

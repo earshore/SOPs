@@ -115,8 +115,9 @@ class CSSLoader {
         const loadTime = performance.now() - startTime;
         
         // 性能监控
-        if ((window as any).__CSS_PERF__) {
-          (window as any).__CSS_PERF__.trackCSSLoad(href, startTime);
+        const windowWithPerf = window as unknown as { __CSS_PERF__?: { trackCSSLoad: (href: string, startTime: number) => void } };
+        if (windowWithPerf.__CSS_PERF__) {
+          windowWithPerf.__CSS_PERF__.trackCSSLoad(href, startTime);
         }
         
         resolve({

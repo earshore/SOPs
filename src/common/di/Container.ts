@@ -12,7 +12,7 @@ export type ServiceLifetime = 'transient' | 'singleton';
 /**
  * 服务工厂函数类型
  */
-export type ServiceFactory<T = any> = (container: DIContainer) => T;
+export type ServiceFactory<T = unknown> = (container: DIContainer) => T;
 
 /**
  * 服务注册选项
@@ -48,7 +48,7 @@ export class DIContainer {
   private factories: Map<string, ServiceFactory>;
   
   /** 单例实例缓存 */
-  private singletons: Map<string, any>;
+  private singletons: Map<string, unknown>;
   
   /** 服务生命周期 */
   private lifetimes: Map<string, ServiceLifetime>;
@@ -73,7 +73,7 @@ export class DIContainer {
    * @param factory - 工厂函数 (container) => instance
    * @param options - 配置选项
    */
-  register<T = any>(
+  register<T = unknown>(
     name: string,
     factory: ServiceFactory<T>,
     options: RegisterOptions = {}
@@ -105,7 +105,7 @@ export class DIContainer {
    * @returns 服务实例
    * @throws 服务未注册时抛出错误
    */
-  resolve<T = any>(name: string): T {
+  resolve<T = unknown>(name: string): T {
     // 1. 检查服务是否已注册
     if (!this.factories.has(name)) {
       throw new Error(`[DIContainer] 服务未注册: ${name}`);

@@ -17,7 +17,7 @@ export interface AlpineComponent {
   /** 组件名称 */
   name: string;
   /** 组件工厂函数 */
-  factory: () => any;
+  factory: () => unknown;
   /** 依赖的其他组件名称列表 */
   dependencies?: string[];
 }
@@ -121,7 +121,7 @@ export class AlpineRegistry {
    */
   public register(
     name: string,
-    factory: () => any,
+    factory: () => unknown,
     dependencies: string[] = []
   ): void {
     this.log('debug', `开始注册组件 "${name}"`, {
@@ -442,7 +442,7 @@ export class AlpineRegistry {
    * @param data - 附加数据
    * @private
    */
-  private log(level: 'debug' | 'info' | 'warn' | 'error', message: string, data?: any): void {
+  private log(level: 'debug' | 'info' | 'warn' | 'error', message: string, data?: unknown): void {
     const levels = { debug: 0, info: 1, warn: 2, error: 3 };
     const configLevel = levels[this.options.logLevel || 'info'];
     const currentLevel = levels[level];

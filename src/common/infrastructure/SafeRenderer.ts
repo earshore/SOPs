@@ -130,7 +130,7 @@ export class SafeRenderer {
   public renderDynamic(
     container: HTMLElement,
     template: string,
-    data: Record<string, any>,
+    data: Record<string, unknown>,
     options?: RenderOptions
   ): void {
     if (!container) {
@@ -251,7 +251,7 @@ export class SafeRenderer {
   public renderComponent(
     container: HTMLElement,
     componentName: string,
-    props?: Record<string, any>
+    props?: Record<string, unknown>
   ): void {
     if (!container) {
       throw new Error('SafeRenderer: container is required');
@@ -405,7 +405,7 @@ export class SafeRenderer {
    */
   private interpolate(
     template: string,
-    data: Record<string, any>,
+    data: Record<string, unknown>,
     sanitize: boolean = true
   ): string {
     return template.replace(/\{\{(\w+)\}\}/g, (_match, key) => {

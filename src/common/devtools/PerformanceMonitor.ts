@@ -382,7 +382,8 @@ export class PerformanceMonitor {
    * 渲染内存信息
    */
   private renderMemoryInfo(): string {
-    const memory = (performance as any).memory;
+    const performanceWithMemory = performance as unknown as { memory?: { usedJSHeapSize: number; jsHeapSizeLimit: number } };
+    const memory = performanceWithMemory.memory;
     if (!memory) {
       return '<div style="color: #888; font-size: 11px; margin-top: 12px;">Memory API不可用</div>';
     }
@@ -483,7 +484,7 @@ export const performanceMonitor = new PerformanceMonitor();
 
 // 暴露到window用于按钮点击
 if (typeof window !== 'undefined') {
-  (window as any).__acknowledgeAllAlerts = () => {
+  (window as unknown as Record<string, unknown>).__acknowledgeAllAlerts = () => {
     alertService.acknowledgeAll();
     performanceMonitor.toggle();
     performanceMonitor.toggle();

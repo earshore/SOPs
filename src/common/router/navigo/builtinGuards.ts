@@ -119,8 +119,9 @@ export const authGuard: RouteGuard = {
         console.warn('[authGuard] Unauthorized access attempt:', to.path);
 
         // 显示提示
-        if (typeof (window as any).showToast === 'function') {
-          (window as any).showToast('请先登录', { type: 'warning' });
+        const windowWithToast = window as unknown as Record<string, unknown>;
+        if (typeof windowWithToast.showToast === 'function') {
+          (windowWithToast.showToast as (msg: string, opts: { type: string }) => void)('请先登录', { type: 'warning' });
         }
 
         return {
@@ -140,8 +141,9 @@ export const authGuard: RouteGuard = {
             required: to.config.meta.permissions,
           });
 
-          if (typeof (window as any).showToast === 'function') {
-            (window as any).showToast('权限不足', { type: 'warning' });
+          const windowWithToast = window as unknown as Record<string, unknown>;
+          if (typeof windowWithToast.showToast === 'function') {
+            (windowWithToast.showToast as (msg: string, opts: { type: string }) => void)('权限不足', { type: 'warning' });
           }
 
           return {
