@@ -75,25 +75,26 @@ class MarketingCalendarModule extends BaseModule {
     bindGlobalProxies(): void {
         // Register actions with ActionRegistry (handles data-param correctly)
         registerActionsWithLegacy({
-            amzf_selectCountry: (params: Record<string, unknown>) => {
-                const code = typeof params.param === 'string' ? params.param : String(params.param || 'ALL');
+            amzf_selectCountry: (params: Record<string, unknown> | string) => {
+                // 兼容直接调用 amzf_selectCountry('DE') 和 data-action 调用
+                const code = typeof params === 'string' ? params : String(params.param || 'ALL');
                 this.selectCountry(code);
             },
-            amzf_switchView: (params: Record<string, unknown>) => {
-                const view = typeof params.param === 'string' ? params.param : String(params.param || 'country');
+            amzf_switchView: (params: Record<string, unknown> | string) => {
+                const view = typeof params === 'string' ? params : String(params.param || 'country');
                 this.switchView(view);
             },
             amzf_clearSearch: () => this.clearSearch(),
-            amzf_toggleSection: (params: Record<string, unknown>) => {
-                const id = typeof params.param === 'string' ? params.param : String(params.param || '');
+            amzf_toggleSection: (params: Record<string, unknown> | string) => {
+                const id = typeof params === 'string' ? params : String(params.param || '');
                 this.toggleSection(id);
             },
-            amzf_selectHistoryItem: (params: Record<string, unknown>) => {
-                const term = typeof params.param === 'string' ? params.param : String(params.param || '');
+            amzf_selectHistoryItem: (params: Record<string, unknown> | string) => {
+                const term = typeof params === 'string' ? params : String(params.param || '');
                 this.selectHistoryItem(term);
             },
-            amzf_deleteHistoryItem: (params: Record<string, unknown>) => {
-                const idx = typeof params.param === 'number' ? params.param : parseInt(String(params.param || '0'));
+            amzf_deleteHistoryItem: (params: Record<string, unknown> | number) => {
+                const idx = typeof params === 'number' ? params : parseInt(String(params.param || '0'));
                 this.deleteHistoryItem(idx);
             },
             amzf_clearAllHistory: () => this.clearAllHistory(),

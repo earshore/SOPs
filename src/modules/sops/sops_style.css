@@ -76,6 +76,51 @@
   color: var(--color-indigo-600);
 }
 
+/* ==================== 阶段标签样式 ==================== */
+/* 用于新品生命周期跟踪页面的阶段标识 */
+.stage-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.stage-test {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.stage-growth {
+  background: #d1fae5;
+  color: #047857;
+}
+
+.stage-stable {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.stage-clearance {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+/* ==================== 步骤圆圈样式 ==================== */
+/* 用于显示步骤编号的圆形标识 */
+.step-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
 /* ==================== SOP 详情视图 ==================== */
 .sop-detail-header {
   background: linear-gradient(135deg, var(--color-slate-50) 0%, var(--color-slate-200) 100%);
