@@ -177,7 +177,6 @@
   /* 6.5 确保流式布局,避免水平滚动 */
   max-width: 100%;
   overflow-x: hidden;
-  overflow-y: visible;
 
   /* 5.6 定义暗色模式 CSS 变量 */
   --wb-text-primary: var(--color-text-primary, #0f172a);
