@@ -1097,6 +1097,7 @@
             /* 或者 space-between */
             margin-top: 15px;
         }
+    }
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.3.2/css/flag-icons.min.css" />
 
@@ -1105,16 +1106,46 @@
     <div class="wb-container" style="--wb-gradient-1: #10b981; --wb-gradient-2: #059669;">
         <div class="wb-orb wb-orb-1"></div>
         <div class="wb-orb wb-orb-2"></div>
-        <div class="wb-content">
-            <div class="wb-icon">
-                <i class="fas fa-calendar-alt"></i>
+        <div class="wb-content" style="display: flex !important; justify-content: space-between; align-items: flex-start; gap: 40px; flex-wrap: wrap;">
+            <!-- 左侧：图标、标题、描述、标签 -->
+            <div style="display: flex; gap: var(--spacing-lg, 1.5rem); flex: 1; min-width: 400px;">
+                <div class="wb-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div>
+                    <h1 class="wb-title" style="margin-top: 0;">EU营销日历</h1>
+                    <p class="wb-description">欧洲全年营销节点、促销时机、备货计划 - 把握每个营销机会</p>
+                    <div class="wb-meta">
+                        <span><i class="fas fa-tag mr-1"></i>入门实操宝典</span>
+                        <span><i class="fas fa-tag mr-1"></i>营销日历</span>
+                        <span><i class="fas fa-tag mr-1"></i>更新日期：2024-01</span>
+                    </div>
+                </div>
             </div>
-            <h1 class="wb-title">EU营销日历</h1>
-            <p class="wb-description">欧洲全年营销节点、促销时机、备货计划 - 把握每个营销机会</p>
-            <div class="wb-meta">
-                <span><i class="fas fa-tag mr-1"></i>入门实操宝典</span>
-                <span><i class="fas fa-tag mr-1"></i>营销日历</span>
-                <span><i class="fas fa-tag mr-1"></i>更新日期：2024-01</span>
+
+            <!-- 右侧：搜索框和统计卡片 -->
+            <div style="display: flex; flex-direction: column; gap: 16px; min-width: 420px; max-width: 480px; flex-shrink: 0;">
+                <!-- 搜索框 -->
+                <div class="amzf_search_wrapper">
+                    <div class="amzf_search_box" id="amzf_search_box">
+                        <span class="amzf_search_icon"><i class="fas fa-search"></i></span>
+                        <input 
+                            type="text" 
+                            class="amzf_search_input" 
+                            id="amzf_search" 
+                            placeholder="搜索节日、国家或关键词... (如: 圣诞, Prime, 德国)"
+                            autocomplete="off"
+                        />
+                        <button class="amzf_search_clear" id="amzf_clear" data-action="amzf_clearSearch">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <!-- 搜索历史下拉框 -->
+                    <div class="amzf_search_history" id="amzf_search_history"></div>
+                </div>
+
+                <!-- 统计卡片 -->
+                <div class="amzf_stats" id="amzf_stats" style="margin-bottom: 0;"></div>
             </div>
         </div>
     </div>
