@@ -2,7 +2,7 @@
  * Tailwind 配置 - 自动生成文件
  * ⚠️ 请勿手动编辑此文件！
  * 修改 src/common/config/design-tokens.ts 后运行 npm run generate:tokens
- * 生成时间: 2026-03-01T14:49:40.726Z
+ * 生成时间: 2026-03-03T01:39:29.525Z
  */
 
 /** @type {import('tailwindcss').Config} */
@@ -337,18 +337,18 @@ export default {
       },
 
       fontSize: {
-        '2xs': ['0.625rem', { "lineHeight": "0.875rem" }],
-        'xs': ['0.75rem', { "lineHeight": "1rem" }],
-        'sm': ['0.8125rem', { "lineHeight": "1.125rem" }],
-        'base': ['0.875rem', { "lineHeight": "1.25rem" }],
-        'md': ['1rem', { "lineHeight": "1.5rem" }],
-        'lg': ['1.125rem', { "lineHeight": "1.75rem" }],
-        'xl': ['1.25rem', { "lineHeight": "1.875rem" }],
-        '2xl': ['1.5rem', { "lineHeight": "2rem" }],
-        '3xl': ['1.875rem', { "lineHeight": "2.25rem" }],
-        '4xl': ['2.25rem', { "lineHeight": "2.5rem" }],
-        '5xl': ['3rem', { "lineHeight": "1" }],
-        '6xl': ['3.75rem', { "lineHeight": "1" }],
+        '2xs': ['0.625rem', {"lineHeight":"0.875rem"}],
+        'xs': ['0.75rem', {"lineHeight":"1rem"}],
+        'sm': ['0.8125rem', {"lineHeight":"1.125rem"}],
+        'base': ['0.875rem', {"lineHeight":"1.25rem"}],
+        'md': ['1rem', {"lineHeight":"1.5rem"}],
+        'lg': ['1.125rem', {"lineHeight":"1.75rem"}],
+        'xl': ['1.25rem', {"lineHeight":"1.875rem"}],
+        '2xl': ['1.5rem', {"lineHeight":"2rem"}],
+        '3xl': ['1.875rem', {"lineHeight":"2.25rem"}],
+        '4xl': ['2.25rem', {"lineHeight":"2.5rem"}],
+        '5xl': ['3rem', {"lineHeight":"1"}],
+        '6xl': ['3.75rem', {"lineHeight":"1"}],
       },
 
       fontWeight: {

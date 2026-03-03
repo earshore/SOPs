@@ -48,7 +48,9 @@ function generateCSSVariables(): string {
   lines.push('');
   
   for (const [key, value] of Object.entries(DESIGN_TOKENS.spacing)) {
-    lines.push(`  --spacing-${key}: ${value};`);
+    // 将小数点转换为连字符，符合CSS变量命名规范
+    const cssKey = key.replace('.', '-');
+    lines.push(`  --spacing-${cssKey}: ${value};`);
   }
   lines.push('');
   

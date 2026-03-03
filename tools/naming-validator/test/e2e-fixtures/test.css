@@ -1,0 +1,16 @@
+.header {
+  background: #333;
+}
+
+.header__toggle {
+  padding: 0.5rem;
+}
+
+/* 错误命名 */
+.userCard {
+  border: 1px solid #ccc;
+}
+
+.searchBox {
+  width: 100%;
+}

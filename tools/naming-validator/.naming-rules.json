@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "description": "HTML和CSS命名规范验证器配置文件",
+  "validator": {
+    "include": [
+      "**/*.html",
+      "**/*.css"
+    ],
+    "exclude": [
+      "node_modules/**",
+      "dist/**",
+      "build/**",
+      ".git/**",
+      "coverage/**"
+    ],
+    "rules": {
+      "html-id": true,
+      "css-class": true,
+      "data-attr": true
+    },
+    "severity": {
+      "html-id": "error",
+      "css-class": "error",
+      "data-attr": "warning"
+    },
+    "ignorePatterns": [
+      "^test-",
+      "^tmp-",
+      "^debug-"
+    ]
+  },
+  "migrator": {
+    "backup": {
+      "enabled": true,
+      "directory": ".naming-backup"
+    },
+    "dryRun": false,
+    "updateReferences": true,
+    "modules": [
+      {
+        "name": "app",
+        "prefix": "app",
+        "paths": ["src/app/**"]
+      },
+      {
+        "name": "sop",
+        "prefix": "sop",
+        "paths": ["src/sop/**"]
+      },
+      {
+        "name": "hub",
+        "prefix": "hub",
+        "paths": ["src/hub/**"]
+      }
+    ],
+    "compatibility": {
+      "createAliases": false,
+      "deprecationWarnings": true
+    }
+  }
+}
