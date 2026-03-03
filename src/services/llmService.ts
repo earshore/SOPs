@@ -391,7 +391,7 @@ export async function fetchModelsFromApi(
     const rawText = await res.text();
     console.log(`📦 API返回原始数据 (前500字符):`, rawText.substring(0, 500));
 
-    let data: any;
+    let data: unknown;
     try {
       data = JSON.parse(rawText);
       console.log(`📦 解析后的数据结构:`, JSON.stringify(data, null, 2).substring(0, 1000));
@@ -402,15 +402,16 @@ export async function fetchModelsFromApi(
 
     // 兼容不同厂商的数据结构
     let list: Array<{ id: string; name?: string;[key: string]: unknown }> = [];
+    const dataObj = data as Record<string, unknown>;
 
     if (Array.isArray(data)) {
       list = data;
       console.log(`✅ 数据是数组格式，包含 ${list.length} 个元素`);
-    } else if (data.data && Array.isArray(data.data)) {
-      list = data.data;
+    } else if (dataObj.data && Array.isArray(dataObj.data)) {
+      list = dataObj.data as Array<{ id: string; name?: string;[key: string]: unknown }>;
       console.log(`✅ 数据在 .data 字段中，包含 ${list.length} 个元素`);
-    } else if (data.models && Array.isArray(data.models)) {
-      list = data.models;
+    } else if (dataObj.models && Array.isArray(dataObj.models)) {
+      list = dataObj.models as Array<{ id: string; name?: string;[key: string]: unknown }>;
       console.log(`✅ 数据在 .models 字段中，包含 ${list.length} 个元素`);
     } else if (typeof data === 'object' && data !== null) {
       console.warn(`⚠️ 未识别的数据结构，对象键:`, Object.keys(data));
@@ -441,7 +442,7 @@ export async function fetchModelsFromApi(
 
     // 处理模型数据，兼容不同的字段名
     const models = list
-      .map((m: any, index: number): ModelInfo | null => {
+      .map((m: unknown, index: number): ModelInfo | null => {
         // 如果是字符串，直接使用
         if (typeof m === 'string') {
           return { id: m, context: 128000, features: [] };
@@ -449,7 +450,8 @@ export async function fetchModelsFromApi(
 
         // 如果是对象，尝试提取ID
         if (typeof m === 'object' && m !== null) {
-          const id = m.id || m.model || m.name;
+          const modelObj = m as Record<string, unknown>;
+          const id = modelObj.id || modelObj.model || modelObj.name;
           if (!id) {
             console.warn(`⚠️ 跳过无效模型 [${index}]:`, m);
             return null;

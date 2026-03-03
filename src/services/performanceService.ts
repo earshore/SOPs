@@ -201,12 +201,13 @@ export class PerformanceService {
     try {
       const observer = new PerformanceObserver((list) => {
         const entries = list.getEntries();
-        entries.forEach((entry: any) => {
-          const value = Math.round(entry.processingStart - entry.startTime);
+        entries.forEach((entry: unknown) => {
+          const perfEntry = entry as PerformanceEntry & { processingStart?: number };
+          const value = Math.round((perfEntry.processingStart || 0) - perfEntry.startTime);
 
           console.log('[Performance] FID:', value, 'ms');
           this.recordMetric(METRIC_TYPES.FID, value, {
-            eventType: entry.name,
+            eventType: perfEntry.name,
           });
         });
       });
@@ -234,11 +235,12 @@ export class PerformanceService {
       const observer = new PerformanceObserver((list) => {
         const entries = list.getEntries();
 
-        entries.forEach((entry: any) => {
+        entries.forEach((entry: unknown) => {
+          const layoutShift = entry as PerformanceEntry & { value?: number; hadRecentInput?: boolean };
           // 只统计非用户输入导致的布局偏移
-          if (!entry.hadRecentInput) {
-            clsValue += entry.value;
-            clsEntries.push(entry);
+          if (!layoutShift.hadRecentInput) {
+            clsValue += layoutShift.value || 0;
+            clsEntries.push(entry as PerformanceEntry);
           }
         });
 

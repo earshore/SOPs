@@ -378,7 +378,7 @@ export class AnalyticsService {
   trackUserAction(properties: {
     action: ActionType;
     target: string;
-    value?: any;
+    value?: unknown;
   }): void {
     if (!this.config.enabled || !this.config.trackUserActions) return;
     if (!this.shouldSample()) return;

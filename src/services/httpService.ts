@@ -26,7 +26,7 @@ export type RequestPriority = 0 | 1 | 2 | 3 | 4;
 export interface HttpOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   headers?: Record<string, string>;
-  body?: any;
+  body?: unknown;
   timeout?: number;
   retries?: number;
   retryDelay?: number;
@@ -100,7 +100,7 @@ export class HttpError extends Error {
  */
 export interface HttpClient {
   get<T = unknown>(path: string, options?: HttpOptions): Promise<T>;
-  post<T = unknown>(path: string, body?: any, options?: HttpOptions): Promise<T>;
+  post<T = unknown>(path: string, body?: unknown, options?: HttpOptions): Promise<T>;
 }
 
 /**
@@ -405,7 +405,7 @@ class HttpServiceClass implements IHttpService {
   /**
    * POST 请求快捷方法
    */
-  async post<T = unknown>(url: string, body?: any, options: HttpOptions = {}): Promise<T> {
+  async post<T = unknown>(url: string, body?: unknown, options: HttpOptions = {}): Promise<T> {
     return this.request<T>(url, { ...options, method: 'POST', body });
   }
 
