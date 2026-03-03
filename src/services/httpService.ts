@@ -471,7 +471,7 @@ class HttpServiceClass implements IHttpService {
           method: 'GET',
           headers: { ...defaultHeaders, ...options.headers }
         }),
-      post: <T = unknown>(path: string, body?: any, options: HttpOptions = {}) =>
+      post: <T = unknown>(path: string, body?: unknown, options: HttpOptions = {}) =>
         this.request<T>(`${baseUrl}${path}`, {
           ...options,
           method: 'POST',

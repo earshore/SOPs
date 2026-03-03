@@ -22,10 +22,10 @@ export interface DevtoolsOptions {
  * Redux DevTools Extension接口
  */
 interface ReduxDevtoolsExtension {
-  connect(options: any): {
-    init(state: any): void;
-    send(action: any, state: any): void;
-    subscribe(listener: (message: any) => void): () => void;
+  connect(options: unknown): {
+    init(state: unknown): void;
+    send(action: unknown, state: unknown): void;
+    subscribe(listener: (message: unknown) => void): () => void;
   };
 }
 
@@ -83,10 +83,11 @@ export const devtools = <T extends object>(
     extension.init(initialState);
 
     // 监听DevTools的时间旅行
-    extension.subscribe((message: any) => {
-      if (message.type === 'DISPATCH' && message.state) {
+    extension.subscribe((message: unknown) => {
+      const msg = message as { type?: string; state?: string };
+      if (msg.type === 'DISPATCH' && msg.state) {
         try {
-          const newState = JSON.parse(message.state);
+          const newState = JSON.parse(msg.state);
           // 使用replace=true强制替换整个状态
           set(newState as any, true);
         } catch (error) {
@@ -113,7 +114,7 @@ export const devtoolsHelper = {
   /**
    * 记录状态变化
    */
-  logStateChange(storeName: string, action: string, prevState: any, nextState: any): void {
+  logStateChange(storeName: string, action: string, prevState: unknown, nextState: unknown): void {
     if (process.env.NODE_ENV === 'development') {
       console.group(`[${storeName}] ${action}`);
       console.log('Previous State:', prevState);

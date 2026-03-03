@@ -18,11 +18,11 @@ export interface PersistOptions<T> {
   /** 部分持久化 - 选择要持久化的字段 */
   partialize?: (state: T) => Partial<T>;
   /** 合并策略 */
-  merge?: (persistedState: any, currentState: T) => T;
+  merge?: (persistedState: unknown, currentState: T) => T;
   /** 版本号 (用于迁移) */
   version?: number;
   /** 迁移函数 */
-  migrate?: (persistedState: any, version: number) => any;
+  migrate?: (persistedState: unknown, version: number) => unknown;
   /** 🎯 数据验证函数 */
   validate?: (state: unknown) => state is Partial<T>;
 }
@@ -30,9 +30,9 @@ export interface PersistOptions<T> {
 /**
  * 默认合并策略
  */
-const defaultMerge = <T>(persistedState: any, currentState: T): T => ({
+const defaultMerge = <T>(persistedState: unknown, currentState: T): T => ({
   ...currentState,
-  ...persistedState
+  ...(persistedState as Partial<T>)
 });
 
 /**

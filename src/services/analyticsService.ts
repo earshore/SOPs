@@ -67,7 +67,7 @@ export interface UserActionEvent extends AnalyticsEvent {
   properties: {
     action: ActionType;
     target: string;
-    value?: any;
+    value?: unknown;
   };
 }
 
