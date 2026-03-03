@@ -4,6 +4,7 @@ import checker from 'vite-plugin-checker';
 import viteCompression from 'vite-plugin-compression';
 
 export default defineConfig({
+    publicDir: 'public',
     plugins: [
         checker({
             typescript: {
@@ -103,6 +104,11 @@ export default defineConfig({
         port: 5173,
         open: false,
         cors: true,
+        // 静态资源服务
+        fs: {
+            strict: false,
+            allow: ['..']
+        },
         // 代理配置 - 解决开发环境 CORS 问题
         proxy: {
             // 代理 /v1 路径到自定义 AI Gateway

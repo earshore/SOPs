@@ -227,6 +227,17 @@ export class AnalyticsService {
     // 点击事件
     document.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
+      
+      // 🔥 排除外部链接和下载按钮，避免拦截 window.open()
+      // 检查是否是带有 onclick 的外部链接按钮
+      const hasOnclick = target.hasAttribute('onclick') || target.closest('[onclick]');
+      const isExternalLink = target.closest('a[target="_blank"]') || target.closest('button[onclick*="window.open"]');
+      
+      if (hasOnclick || isExternalLink) {
+        // 不追踪，让事件正常传播
+        return;
+      }
+      
       this.trackUserAction({
         action: ActionType.CLICK,
         target: this.getElementSelector(target),
