@@ -108,6 +108,9 @@ export function validateAnalysisReport(data: unknown): { valid: boolean; error?:
         return { valid: true, normalizedData: data as AnalysisReportData };
     }
 
+    // 类型断言：将 object 转换为可索引类型
+    const dataObj = data as Record<string, unknown>;
+
     // 检查是否是纯分析报告对象（包含分析维度字段）
     const analysisKeys = [
         'selling-points', 'sellingPoints', 'selling_points',
@@ -118,7 +121,7 @@ export function validateAnalysisReport(data: unknown): { valid: boolean; error?:
         'title-keywords', 'titleKeywords', 'title_keywords'
     ];
 
-    const hasAnalysisKeys = analysisKeys.some(key => key in data);
+    const hasAnalysisKeys = analysisKeys.some(key => key in dataObj);
 
     if (hasAnalysisKeys) {
         // 是纯分析报告，需要包装成完整格式
@@ -126,11 +129,11 @@ export function validateAnalysisReport(data: unknown): { valid: boolean; error?:
             metadata: {
                 timestamp: new Date().toISOString(),
                 dataSource: 'import',
-                asins: data.asin ? [data.asin] : [],
-                marketplace: data.market || data.marketplace || 'DE',
-                productTitle: data.product_title || data.productTitle || data.title
+                asins: dataObj.asin ? [String(dataObj.asin)] : [],
+                marketplace: String(dataObj.market || dataObj.marketplace || 'DE'),
+                productTitle: String(dataObj.product_title || dataObj.productTitle || dataObj.title || '')
             },
-            analysisReport: data
+            analysisReport: dataObj
         };
 
         return { valid: true, normalizedData };
