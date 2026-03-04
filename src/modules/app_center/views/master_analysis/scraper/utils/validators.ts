@@ -12,38 +12,41 @@ export function validateMetadata(metadata: unknown): { valid: boolean; error?: s
         return { valid: false, error: 'metadata 必须是对象' };
     }
 
+    // 类型断言：将 unknown 转换为可索引类型
+    const meta = metadata as Record<string, unknown>;
+
     // 验证必需字段
     const requiredFields = ['scrape_timestamp', 'marketplace', 'domain', 'language', 'total_asins'];
     for (const field of requiredFields) {
-        if (!(field in metadata)) {
+        if (!(field in meta)) {
             return { valid: false, error: `metadata 缺少必需字段: ${field}` };
         }
     }
 
     // 验证字段类型
-    if (typeof metadata.scrape_timestamp !== 'string') {
+    if (typeof meta.scrape_timestamp !== 'string') {
         return { valid: false, error: 'metadata.scrape_timestamp 必须是字符串' };
     }
 
-    if (typeof metadata.marketplace !== 'string') {
+    if (typeof meta.marketplace !== 'string') {
         return { valid: false, error: 'metadata.marketplace 必须是字符串' };
     }
 
-    if (typeof metadata.domain !== 'string') {
+    if (typeof meta.domain !== 'string') {
         return { valid: false, error: 'metadata.domain 必须是字符串' };
     }
 
-    if (typeof metadata.language !== 'string') {
+    if (typeof meta.language !== 'string') {
         return { valid: false, error: 'metadata.language 必须是字符串' };
     }
 
-    if (typeof metadata.total_asins !== 'number') {
+    if (typeof meta.total_asins !== 'number') {
         return { valid: false, error: 'metadata.total_asins 必须是数字' };
     }
 
     // 验证时间戳格式（ISO 8601）
     try {
-        const date = new Date(metadata.scrape_timestamp);
+        const date = new Date(meta.scrape_timestamp as string);
         if (isNaN(date.getTime())) {
             return { valid: false, error: 'metadata.scrape_timestamp 不是有效的 ISO 8601 时间戳' };
         }
@@ -52,7 +55,7 @@ export function validateMetadata(metadata: unknown): { valid: boolean; error?: s
     }
 
     // 验证 total_asins 为正数
-    if (metadata.total_asins < 0) {
+    if ((meta.total_asins as number) < 0) {
         return { valid: false, error: 'metadata.total_asins 必须是非负数' };
     }
 
