@@ -323,15 +323,27 @@ export function createPromptlabPanel() {
         extractPreviewText(targetId: string, data: unknown): string {
             Logger.debug('[Promptlab] extractPreviewText 调用:', { targetId, dataType: typeof data, data });
 
+            // 类型守卫：确保 data 是对象
+            if (!data || typeof data !== 'object') {
+                return '数据格式错误';
+            }
+
+            const dataObj = data as Record<string, unknown>;
+
             try {
                 switch (targetId) {
                     case 'title-keywords':
                         Logger.debug('[Promptlab] 处理 title-keywords:', data);
                         // 提取主要关键词
-                        if (data.primary_keywords && Array.isArray(data.primary_keywords)) {
-                            const keywords = data.primary_keywords
+                        if (dataObj.primary_keywords && Array.isArray(dataObj.primary_keywords)) {
+                            const keywords = dataObj.primary_keywords
                                 .slice(0, 3)
-                                .map((k: unknown) => k.keyword)
+                                .map((k: unknown) => {
+                                    if (k && typeof k === 'object' && 'keyword' in k) {
+                                        return (k as { keyword: unknown }).keyword;
+                                    }
+                                    return null;
+                                })
                                 .filter(Boolean)
                                 .join(', ');
                             Logger.debug('[Promptlab] title-keywords 提取结果:', keywords);
@@ -343,75 +355,107 @@ export function createPromptlabPanel() {
                     case 'selling-points':
                         Logger.debug('[Promptlab] 处理 selling-points:', data);
                         // 提取主要差异化角度
-                        if (data.overall_strategy?.primary_differentiation) {
-                            Logger.debug('[Promptlab] selling-points 提取结果:', data.overall_strategy.primary_differentiation);
-                            return data.overall_strategy.primary_differentiation;
+                        const overallStrategy = dataObj.overall_strategy;
+                        if (overallStrategy && typeof overallStrategy === 'object' && 'primary_differentiation' in overallStrategy) {
+                            const primaryDiff = (overallStrategy as { primary_differentiation: unknown }).primary_differentiation;
+                            Logger.debug('[Promptlab] selling-points 提取结果:', primaryDiff);
+                            return String(primaryDiff);
                         }
-                        if (data.bullet_analysis && Array.isArray(data.bullet_analysis) && data.bullet_analysis.length > 0) {
-                            const result = data.bullet_analysis[0].differentiation_angle || '卖点分析';
-                            Logger.debug('[Promptlab] selling-points 提取结果(备选):', result);
-                            return result;
+                        if (dataObj.bullet_analysis && Array.isArray(dataObj.bullet_analysis) && dataObj.bullet_analysis.length > 0) {
+                            const firstBullet = dataObj.bullet_analysis[0];
+                            if (firstBullet && typeof firstBullet === 'object' && 'differentiation_angle' in firstBullet) {
+                                const result = (firstBullet as { differentiation_angle: unknown }).differentiation_angle || '卖点分析';
+                                Logger.debug('[Promptlab] selling-points 提取结果(备选):', result);
+                                return String(result);
+                            }
                         }
                         Logger.debug('[Promptlab] selling-points 无可用数据');
                         break;
 
                     case 'fatal-flaws':
                         // 提取关键问题
-                        if (data.critical_issues && Array.isArray(data.critical_issues)) {
-                            const issues = data.critical_issues
+                        if (dataObj.critical_issues && Array.isArray(dataObj.critical_issues)) {
+                            const issues = dataObj.critical_issues
                                 .slice(0, 2)
-                                .map((i: unknown) => i.issue)
+                                .map((i: unknown) => {
+                                    if (i && typeof i === 'object' && 'issue' in i) {
+                                        return (i as { issue: unknown }).issue;
+                                    }
+                                    return null;
+                                })
                                 .filter(Boolean)
                                 .join('; ');
                             return issues || '无致命缺陷';
                         }
-                        if (data.risk_assessment?.primary_concern) {
-                            return data.risk_assessment.primary_concern;
+                        const riskAssessment = dataObj.risk_assessment;
+                        if (riskAssessment && typeof riskAssessment === 'object' && 'primary_concern' in riskAssessment) {
+                            return String((riskAssessment as { primary_concern: unknown }).primary_concern);
                         }
                         break;
 
                     case 'wow-moments':
                         // 提取Wow时刻描述
-                        if (data.moments && Array.isArray(data.moments) && data.moments.length > 0) {
-                            return data.moments[0].moment_description || 'Wow时刻分析';
+                        if (dataObj.moments && Array.isArray(dataObj.moments) && dataObj.moments.length > 0) {
+                            const firstMoment = dataObj.moments[0];
+                            if (firstMoment && typeof firstMoment === 'object' && 'moment_description' in firstMoment) {
+                                return String((firstMoment as { moment_description: unknown }).moment_description) || 'Wow时刻分析';
+                            }
                         }
-                        if (data.emotional_triggers && Array.isArray(data.emotional_triggers)) {
-                            return data.emotional_triggers.slice(0, 2).join(', ');
+                        if (dataObj.emotional_triggers && Array.isArray(dataObj.emotional_triggers)) {
+                            return dataObj.emotional_triggers.slice(0, 2).map(String).join(', ');
                         }
                         break;
 
                     case 'hesitation-points':
                         // 提取主要犹豫点
-                        if (data.hesitations && Array.isArray(data.hesitations) && data.hesitations.length > 0) {
-                            return data.hesitations[0].pre_purchase_worry || '犹豫点分析';
+                        if (dataObj.hesitations && Array.isArray(dataObj.hesitations) && dataObj.hesitations.length > 0) {
+                            const firstHesitation = dataObj.hesitations[0];
+                            if (firstHesitation && typeof firstHesitation === 'object' && 'pre_purchase_worry' in firstHesitation) {
+                                return String((firstHesitation as { pre_purchase_worry: unknown }).pre_purchase_worry) || '犹豫点分析';
+                            }
                         }
-                        if (data.common_doubts && Array.isArray(data.common_doubts)) {
-                            return data.common_doubts.slice(0, 2).join('; ');
+                        if (dataObj.common_doubts && Array.isArray(dataObj.common_doubts)) {
+                            return dataObj.common_doubts.slice(0, 2).map(String).join('; ');
                         }
                         break;
 
                     case 'buyer-profile':
                         // 提取买家类型
-                        if (data.buyer_types && Array.isArray(data.buyer_types) && data.buyer_types.length > 0) {
-                            const types = data.buyer_types
+                        if (dataObj.buyer_types && Array.isArray(dataObj.buyer_types) && dataObj.buyer_types.length > 0) {
+                            const types = dataObj.buyer_types
                                 .slice(0, 2)
-                                .map((t: unknown) => t.type)
+                                .map((t: unknown) => {
+                                    if (t && typeof t === 'object' && 'type' in t) {
+                                        return (t as { type: unknown }).type;
+                                    }
+                                    return null;
+                                })
                                 .filter(Boolean)
                                 .join(', ');
                             return types || '买家画像分析';
                         }
-                        if (data.demographics?.lifestyle_indicators && Array.isArray(data.demographics.lifestyle_indicators)) {
-                            return data.demographics.lifestyle_indicators.slice(0, 2).join(', ');
+                        const demographics = dataObj.demographics;
+                        if (demographics && typeof demographics === 'object' && 'lifestyle_indicators' in demographics) {
+                            const lifestyleIndicators = (demographics as { lifestyle_indicators: unknown }).lifestyle_indicators;
+                            if (Array.isArray(lifestyleIndicators)) {
+                                return lifestyleIndicators.slice(0, 2).map(String).join(', ');
+                            }
                         }
                         break;
 
                     case 'vocab-gap':
                         // 提取词汇缺口
-                        if (data.missing_keywords && Array.isArray(data.missing_keywords)) {
-                            const keywords = data.missing_keywords
+                        if (dataObj.missing_keywords && Array.isArray(dataObj.missing_keywords)) {
+                            const keywords = dataObj.missing_keywords
                                 .slice(0, 3)
-                                .map((k: unknown) => k.keyword || k)
+                                .map((k: unknown) => {
+                                    if (k && typeof k === 'object' && 'keyword' in k) {
+                                        return (k as { keyword: unknown }).keyword;
+                                    }
+                                    return k;
+                                })
                                 .filter(Boolean)
+                                .map(String)
                                 .join(', ');
                             return keywords || '词汇缺口分析';
                         }
@@ -419,8 +463,12 @@ export function createPromptlabPanel() {
 
                     case 'promise-reality':
                         // 提取承诺与现实差距
-                        if (data.gaps && Array.isArray(data.gaps) && data.gaps.length > 0) {
-                            return data.gaps[0].promise || data.gaps[0].gap_description || '承诺与现实分析';
+                        if (dataObj.gaps && Array.isArray(dataObj.gaps) && dataObj.gaps.length > 0) {
+                            const firstGap = dataObj.gaps[0];
+                            if (firstGap && typeof firstGap === 'object') {
+                                const gapObj = firstGap as Record<string, unknown>;
+                                return String(gapObj.promise || gapObj.gap_description || '承诺与现实分析');
+                            }
                         }
                         break;
                 }
