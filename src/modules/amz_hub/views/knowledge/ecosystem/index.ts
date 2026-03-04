@@ -7,8 +7,13 @@ import { A10_CHART_DATA } from '../../../constants/amz_hub_constants';
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import { loadChartJs } from '../../../../../common/utils/lazyLibs';
 
+// Chart.js 实例类型定义
+interface ChartInstance {
+    destroy(): void;
+}
+
 class EcosystemModule extends BaseModule {
-    private chartInstance: unknown = null;
+    private chartInstance: ChartInstance | null = null;
 
     constructor() {
         super('amz_ecosystem');

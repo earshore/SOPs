@@ -7,6 +7,7 @@
 import { appStore } from '@/stores/useAppStore';
 import { analysisTargets } from '../config/analysisTargets';
 import { createComputedProperties } from './computedProperties';
+import type { AnalysisReport } from '@/types/modules-business';
 
 import { Logger } from '../../../../../../services/loggerService';
 /**
@@ -46,7 +47,12 @@ export function createAiAnalysisPanelOptimized(): Record<string, unknown> {
       return appStore.getState().analysis.analysisReport;
     },
     set analysisReport(value: unknown) {
-      appStore.getState().setAnalysisReport(value);
+      // 类型守卫：确保 value 是有效的分析报告对象
+      if (value && typeof value === 'object') {
+        appStore.getState().setAnalysisReport(value as AnalysisReport);
+      } else {
+        appStore.getState().setAnalysisReport(null);
+      }
     },
 
     get hasReport() {
@@ -74,7 +80,13 @@ export function createAiAnalysisPanelOptimized(): Record<string, unknown> {
       const scrapedData = appStore.getState().scraper.scrapedData;
       if (scrapedData?.products && scrapedData.products.length > 0) {
         const asins = scrapedData.products
-          .map((p: unknown) => p.asin)
+          .map((p: unknown) => {
+            // 类型守卫：确保 p 是对象且有 asin 属性
+            if (p && typeof p === 'object' && 'asin' in p) {
+              return (p as { asin: string }).asin;
+            }
+            return '';
+          })
           .filter((asin: string) => !!asin);
         appStore.getState().setSelectedAsins(asins);
         this.dataSource = 'scraper';
@@ -120,7 +132,13 @@ export function createAiAnalysisPanelOptimized(): Record<string, unknown> {
       const scrapedData = appStore.getState().scraper.scrapedData;
       if (scrapedData?.products) {
         const asins = scrapedData.products
-          .map((p: unknown) => p.asin)
+          .map((p: unknown) => {
+            // 类型守卫：确保 p 是对象且有 asin 属性
+            if (p && typeof p === 'object' && 'asin' in p) {
+              return (p as { asin: string }).asin;
+            }
+            return '';
+          })
           .filter((asin: string) => !!asin);
         appStore.getState().setSelectedAsins(asins);
       }

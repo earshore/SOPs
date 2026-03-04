@@ -8,8 +8,14 @@ import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import { loadChartJs } from '../../../../../common/utils/lazyLibs';
 
 import { Logger } from '../../../../../services/loggerService';
+
+// Chart.js 实例类型定义
+interface ChartInstance {
+    destroy(): void;
+}
+
 class SeoStrategyModule extends BaseModule {
-    private chartInstance: unknown = null;
+    private chartInstance: ChartInstance | null = null;
 
     constructor() {
         super('amz_seo_strategy');

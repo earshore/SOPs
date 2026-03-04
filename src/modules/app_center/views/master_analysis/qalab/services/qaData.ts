@@ -115,10 +115,23 @@ export function generateMultiLangQAs(report: unknown): QA[] {
     const qas: QA[] = [];
     const insights = extractReportInsights(report);
 
+    // 类型守卫：确保 insights 是对象
+    if (!insights || typeof insights !== 'object') {
+        Logger.warn('[QALab] 报告数据不完整，使用默认模板');
+        // 返回空数组或默认数据
+        return qas;
+    }
+
+    const insightsObj = insights as Record<string, unknown>;
+
     // 检查是否有有效的报告数据
-    const hasValidReport = insights.sellingPoints?.bullet_analysis ||
-        insights.fatalFlaws?.critical_issues ||
-        insights.wowMoments?.moments;
+    const sellingPoints = insightsObj.sellingPoints as Record<string, unknown> | undefined;
+    const fatalFlaws = insightsObj.fatalFlaws as Record<string, unknown> | undefined;
+    const wowMoments = insightsObj.wowMoments as Record<string, unknown> | undefined;
+
+    const hasValidReport = sellingPoints?.bullet_analysis ||
+        fatalFlaws?.critical_issues ||
+        wowMoments?.moments;
 
     if (!hasValidReport) {
         Logger.warn('[QALab] 报告数据不完整，使用默认模板');

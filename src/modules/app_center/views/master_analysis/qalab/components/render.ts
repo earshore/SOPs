@@ -344,7 +344,10 @@ export function renderQAGrid(
 
     container.querySelectorAll('[data-qa-edit]').forEach(el => {
         el.addEventListener('click', (e: unknown) => {
-            e.stopPropagation();
+            // 类型守卫：确保 e 是 Event 对象
+            if (e && typeof e === 'object' && 'stopPropagation' in e) {
+                (e as Event).stopPropagation();
+            }
             const id = (el as HTMLElement).dataset.qaEdit;
             if (id) onEdit(parseInt(id));
         });

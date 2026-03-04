@@ -243,7 +243,12 @@ export function unmount(container?: HTMLElement): void {
         // 2. 清理DOM事件监听器
         if (cleanup.eventManager && cleanup.eventManager.listeners) {
             cleanup.eventManager.listeners.forEach((listener: unknown) => {
-                listener.element.removeEventListener(listener.event, listener.handler);
+                // 类型守卫：确保 listener 是有效的事件监听器对象
+                if (listener && typeof listener === 'object' &&
+                    'element' in listener && 'event' in listener && 'handler' in listener) {
+                    const listenerObj = listener as { element: HTMLElement; event: string; handler: EventListener };
+                    listenerObj.element.removeEventListener(listenerObj.event, listenerObj.handler);
+                }
             });
         }
 

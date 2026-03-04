@@ -469,7 +469,7 @@ export async function fetchModelsFromApi(
         }
 
         // 其他类型，尝试转换为字符串
-        Logger.warn(`⚠️ 未知模型类型 [${index}]:`, typeof m, m);
+        Logger.warn(`⚠️ 未知模型类型 [${index}]:`, { type: typeof m, value: m });
         return null;
       })
       .filter((m): m is ModelInfo => m !== null)

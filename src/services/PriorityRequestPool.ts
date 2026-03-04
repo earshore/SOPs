@@ -202,7 +202,7 @@ export class PriorityRequestPool {
       }
       this.stats.byPriority[task.priority].failed++;
 
-      Logger.error('[RequestPool] 请求失败:', task.meta, error);
+      Logger.error('[RequestPool] 请求失败:', { meta: task.meta, error });
       task.reject(error);
     } finally {
       this.running--;

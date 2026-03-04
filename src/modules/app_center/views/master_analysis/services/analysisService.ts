@@ -125,7 +125,9 @@ export const AnalysisService = {
     );
 
     try {
-      return robustParseJSON(response);
+      const parsed = robustParseJSON(response);
+      // 类型断言：robustParseJSON 返回的对象作为 AnalysisReport
+      return parsed as AnalysisReport;
     } catch (e) {
       const error = e as Error;
       Logger.warn("Analysis JSON Parse Failed:", error.message);
@@ -169,7 +171,9 @@ export const AnalysisService = {
     );
 
     try {
-      return robustParseJSON(response);
+      const parsed = robustParseJSON(response);
+      // 类型断言：robustParseJSON 返回的对象作为 AnalysisReport
+      return parsed as AnalysisReport;
     } catch (e) {
       const error = e as Error;
       Logger.warn("Translation JSON Parse Failed:", error.message);

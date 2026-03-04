@@ -634,9 +634,16 @@ export function createPromptlabPanel() {
          * 渲染旧格式报告模块
          */
         renderLegacyFormatModules(container: HTMLElement, report: unknown, isFirstLoad: boolean) {
+            // 类型守卫：确保 report 是对象
+            if (!report || typeof report !== 'object') {
+                Logger.warn('[Promptlab] report 不是有效对象');
+                return;
+            }
+
+            const reportObj = report as Record<string, unknown>;
             const renderer = SafeRenderer.getInstance();
             const ignoreKeys = ['meta', 'generatedByModel', 'generatedAt', 'templateUsed', 'templateId', 'raw_response'];
-            const keys = Object.keys(report).filter((k) => !ignoreKeys.includes(k));
+            const keys = Object.keys(reportObj).filter((k) => !ignoreKeys.includes(k));
 
             // 如果是首次加载,自动选中所有模块
             if (isFirstLoad) {
@@ -647,14 +654,14 @@ export function createPromptlabPanel() {
             keys.forEach((key) => {
                 // 自动填充 audience 字段
                 if (key === 'target_audience' && !this.profile.audience) {
-                    let val = report[key];
+                    let val = reportObj[key];
                     if (Array.isArray(val)) val = val.join(', ');
-                    this.profile.audience = val;
+                    this.profile.audience = String(val || '');
                     this.saveState();
                 }
 
                 const label = this.getFieldTitle(key);
-                const previewText = this.getPreviewText(report[key]);
+                const previewText = this.getPreviewText(reportObj[key]);
                 const isChecked = this.profile.selectedReportSections.includes(key);
 
                 const div = document.createElement('div');

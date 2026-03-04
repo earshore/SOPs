@@ -49,14 +49,26 @@ export async function deleteProduct(
         }
 
         // 验证产品是否存在
-        const productExists = scrapedData.products.some((p: unknown) => p.asin === asin);
+        const productExists = scrapedData.products.some((p: unknown) => {
+            // 类型守卫：确保 p 是对象且有 asin 属性
+            if (p && typeof p === 'object' && 'asin' in p) {
+                return (p as { asin: string }).asin === asin;
+            }
+            return false;
+        });
         if (!productExists) {
             throw new Error(`产品不存在：${asin}`);
         }
 
         // 从数据集中移除产品
         const beforeCount = scrapedData.products.length;
-        scrapedData.products = scrapedData.products.filter((p: unknown) => p.asin !== asin);
+        scrapedData.products = scrapedData.products.filter((p: unknown) => {
+            // 类型守卫：确保 p 是对象且有 asin 属性
+            if (p && typeof p === 'object' && 'asin' in p) {
+                return (p as { asin: string }).asin !== asin;
+            }
+            return true;
+        });
         const afterCount = scrapedData.products.length;
 
         // 验证删除是否成功
@@ -154,7 +166,13 @@ export async function deleteReview(
         }
 
         // 找到产品
-        const product = scrapedData.products.find((p: unknown) => p.asin === asin);
+        const product = scrapedData.products.find((p: unknown) => {
+            // 类型守卫：确保 p 是对象且有 asin 属性
+            if (p && typeof p === 'object' && 'asin' in p) {
+                return (p as { asin: string }).asin === asin;
+            }
+            return false;
+        });
         if (!product) {
             throw new Error(`产品不存在：${asin}`);
         }

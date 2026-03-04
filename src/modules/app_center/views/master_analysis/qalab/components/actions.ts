@@ -67,7 +67,13 @@ export function autoLoadAnalysisReport(): void {
             let selectedAsins = appStore.getState().analysis?.selectedAsins || [];
             if (selectedAsins.length === 0 && scrapedData?.products) {
                 selectedAsins = scrapedData.products
-                    .map((p: unknown) => p.asin)
+                    .map((p: unknown) => {
+                        // 类型守卫：确保 p 是对象且有 asin 属性
+                        if (p && typeof p === 'object' && 'asin' in p) {
+                            return (p as { asin: string }).asin;
+                        }
+                        return '';
+                    })
                     .filter((asin: string) => !!asin);
             }
 
@@ -86,7 +92,13 @@ export function autoLoadAnalysisReport(): void {
                 timestamp: new Date().toISOString(),
                 dataSource: dataSource,
                 marketplace: scrapedData?.metadata?.marketplace || 'DE',
-                productTitle: scrapedData?.products?.map((p: unknown) => p.productTitle).join(' | ') || undefined
+                productTitle: scrapedData?.products?.map((p: unknown) => {
+                    // 类型守卫：确保 p 是对象且有 productTitle 属性
+                    if (p && typeof p === 'object' && 'productTitle' in p) {
+                        return String((p as { productTitle: unknown }).productTitle || '');
+                    }
+                    return '';
+                }).join(' | ') || undefined
             };
 
             Logger.debug('[QALab] 📦 构建完整的 FullReportData 格式');

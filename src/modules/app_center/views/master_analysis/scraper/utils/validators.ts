@@ -169,7 +169,8 @@ export function validateScrapedData(data: unknown, strictMetadata: boolean = fal
         }
     } else if ('asin' in data) {
         // 格式3: 单个产品对象
-        products = [data];
+        // 类型断言：已验证有 asin 属性，可以作为 ProductData
+        products = [data as ProductData];
     } else {
         return { valid: false, error: '无法识别的数据格式，需要包含products数组或单个产品对象' };
     }

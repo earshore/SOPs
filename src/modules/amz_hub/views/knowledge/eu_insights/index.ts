@@ -8,8 +8,19 @@ import { AMZ_COUNTRY_DATA } from '../../../constants/amz_hub_constants';
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import { loadChartJs } from '../../../../../common/utils/lazyLibs';
 
+// Chart.js 实例类型定义
+interface ChartInstance {
+    destroy(): void;
+    update(): void;
+    data: {
+        datasets: Array<{
+            data: number[];
+        }>;
+    };
+}
+
 class EuInsightsModule extends BaseModule {
-    private radarChart: unknown = null;
+    private radarChart: ChartInstance | null = null;
 
     constructor() {
         super('amz_eu_insights');
@@ -78,8 +89,11 @@ class EuInsightsModule extends BaseModule {
         if (!ctx) return;
 
         if (this.radarChart) {
-            this.radarChart.data.datasets[0].data = dataset;
-            this.radarChart.update();
+            // 类型守卫：确保 datasets 数组存在且有元素
+            if (this.radarChart.data.datasets && this.radarChart.data.datasets[0]) {
+                this.radarChart.data.datasets[0].data = dataset;
+                this.radarChart.update();
+            }
         } else {
             if (typeof (window as any).Chart === 'undefined') return;
 

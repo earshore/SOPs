@@ -56,16 +56,16 @@ export function createComputedProperties(context: AlpineContext): ComputedProper
         for (const asin of context.selectedAsins) {
           const matchedProduct = scrapedData.products.find(p => p.asin === asin);
           if (matchedProduct) {
-            Logger.debug('[计算属性] 找到匹配产品:', asin, matchedProduct);
+            Logger.debug('[计算属性] 找到匹配产品:', { asin, matchedProduct });
             const product = convertScraperDataToProduct(matchedProduct);
             if (product) {
-              Logger.debug('[计算属性] 产品转换成功:', asin);
+              Logger.debug('[计算属性] 产品转换成功:', { asin });
               products.push(product);
             } else {
-              Logger.warn('[计算属性] 产品转换失败:', asin, matchedProduct);
+              Logger.warn('[计算属性] 产品转换失败:', { asin, matchedProduct });
             }
           } else {
-            Logger.warn('[计算属性] 未找到匹配产品:', asin);
+            Logger.warn('[计算属性] 未找到匹配产品:', { asin });
           }
         }
       } else {

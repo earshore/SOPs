@@ -66,7 +66,7 @@ export function convertScraperDataToProduct(productData: unknown): Product | nul
     
     return converted;
   } catch (error) {
-    Logger.error('[数据转换] 转换产品数据失败:', error, productData);
+    Logger.error('[数据转换] 转换产品数据失败:', { error, productData });
     return null;
   }
 }
