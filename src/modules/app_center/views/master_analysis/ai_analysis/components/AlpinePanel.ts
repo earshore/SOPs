@@ -37,6 +37,7 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
 
     // ========== 订阅清理函数 ==========
     _unsubscribes: [] as Array<() => void>,
+    _navigationHandler: null as (() => void) | null,
 
     // ========== Lifecycle ==========
     init(this: AlpineContext & Record<string, unknown>) {
@@ -81,6 +82,12 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
         }
       });
 
+      // 监听导航事件
+      this._navigationHandler = () => {
+        this.navigateToScraper();
+      };
+      window.addEventListener('navigate-to-scraper', this._navigationHandler);
+
       // 检查是否有新的 Scraper 数据
       checkAndLoadScraperData(this);
 
@@ -93,6 +100,11 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
       Logger.debug('[Alpine 组件] 🧹 组件销毁，清理订阅');
       if (Array.isArray(this._unsubscribes)) {
         cleanupSubscriptions(this._unsubscribes);
+      }
+      // 清理导航事件监听器
+      if (this._navigationHandler) {
+        window.removeEventListener('navigate-to-scraper', this._navigationHandler);
+        this._navigationHandler = null;
       }
     },
 
@@ -180,6 +192,14 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
     async runAnalysis() {
       const ctx = this as unknown as AlpineContext & ComputedProperties;
       await actions.runAnalysisAction(ctx, ctx.currentProducts);
+    },
+
+    navigateToScraper() {
+      Logger.debug('[Alpine 组件] 🔄 导航到数据采集页面');
+      // 使用路由系统导航到 scraper 页面
+      if (window.location.hash !== '#scraper') {
+        window.location.hash = '#scraper';
+      }
     },
 
     // ========== Helpers ==========
