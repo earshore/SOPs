@@ -78,7 +78,7 @@
                                 目标语言/站点
                             </label>
                             <select @change="onInputChange"
-                                class="text-xs border-2 border-slate-200 rounded-xl focus:border-indigo-500 p-2 w-48 bg-slate-50 text-slate-700 font-semibold transition-all hover:border-slate-300 cursor-pointer appearance-none"
+                                class="text-xs border-2 border-slate-200 rounded-xl p-2 w-48 bg-slate-50 text-slate-700 font-semibold transition-all hover:border-slate-300 cursor-pointer appearance-none"
                                 id="lab-target-market" x-model="profile.targetMarket">
                                 <option selected="" value=""></option>
                             </select>
@@ -96,7 +96,7 @@
                                     Tier 1 核心大词 <span class="text-slate-400 font-normal">- 1-2个</span>
                                 </label>
                                 <input @input="onInputChange"
-                                    class="w-full text-sm border-2 border-slate-200 rounded-xl focus:border-indigo-500 p-3 bg-slate-50/50 focus:bg-white transition-all placeholder:text-slate-300 font-mono"
+                                    class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all placeholder:text-slate-300 font-mono"
                                     id="lab-keywords-tier1" placeholder="humidifiers for bedroom, cool mist humidifier"
                                     type="text" x-model="profile.keywordsTier1" />
                             </div>
@@ -108,7 +108,7 @@
                                     限制词 <span class="text-slate-400 font-normal">- 不允许出现</span>
                                 </label>
                                 <input @input="onInputChange"
-                                    class="w-full text-sm border-2 border-slate-200 rounded-xl focus:border-indigo-500 p-3 bg-slate-50/50 focus:bg-white transition-all placeholder:text-slate-300"
+                                    class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all placeholder:text-slate-300"
                                     id="negative-keywords" placeholder="例如: bestseller / cure" type="text"
                                     x-model="profile.negative" />
                             </div>
@@ -121,7 +121,7 @@
                                 <textarea @input="onInputChange"
                                     @focus="expandInput($event)"
                                     @blur="restoreInput($event)"
-                                    class="w-full text-sm border-2 border-slate-200 rounded-xl focus:border-indigo-500 p-3 bg-slate-50/50 focus:bg-white transition-all resize-none placeholder:text-slate-300 font-mono"
+                                    class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all resize-none placeholder:text-slate-300 font-mono"
                                     id="lab-keywords-tier2"
                                     placeholder="baby humidifier, easy to clean, quiet operation" rows="1"
                                     x-model="profile.keywordsTier2"></textarea>
@@ -134,7 +134,7 @@
                                     目标受众 <span class="text-slate-400 font-normal">- 客户特征</span>
                                 </label>
                                 <input @input="onInputChange"
-                                    class="w-full text-sm border-2 border-slate-200 rounded-xl focus:border-indigo-500 p-3 bg-slate-50/50 focus:bg-white transition-all placeholder:text-slate-300"
+                                    class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all placeholder:text-slate-300"
                                     id="lab-audience" placeholder="e.g. Busy moms, Tech enthusiasts" type="text"
                                     x-model="profile.audience" />
                             </div>
@@ -148,7 +148,7 @@
                                 <textarea @input="onInputChange"
                                     @focus="expandInput($event)"
                                     @blur="restoreInput($event)"
-                                    class="w-full text-sm border-2 border-slate-200 rounded-xl focus:border-indigo-500 p-3 bg-slate-50/50 focus:bg-white transition-all resize-none placeholder:text-slate-300"
+                                    class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all resize-none placeholder:text-slate-300"
                                     id="lab-usps" placeholder="- 专利静音技术 (&lt;28dB)
 - 360度旋转喷嘴" rows="2" x-model="profile.usps"></textarea>
                             </div>
@@ -162,7 +162,7 @@
                                 <textarea @input="onInputChange"
                                     @focus="expandInput($event)"
                                     @blur="restoreInput($event)"
-                                    class="w-full text-sm border-2 border-slate-200 rounded-xl focus:border-indigo-500 p-3 bg-slate-50/50 focus:bg-white transition-all resize-none placeholder:text-slate-300 font-mono"
+                                    class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all resize-none placeholder:text-slate-300 font-mono"
                                     id="lab-specs" placeholder="材质: ABS + PP
 尺寸: 20x20x30cm" rows="2" x-model="profile.specs"></textarea>
                             </div>
@@ -175,7 +175,7 @@
                                 植入社媒 Hook / 节日词 <span class="text-purple-400 font-normal">- 可补充</span>
                             </label>
                             <input @input="onInputChange"
-                                class="w-full text-sm border-2 border-purple-200 rounded-xl focus:border-purple-500 p-3 bg-purple-50/30 focus:bg-purple-50/50 text-purple-700 transition-all placeholder:text-purple-300"
+                                class="w-full text-sm border-2 border-purple-200 rounded-xl p-3 bg-purple-50/30 text-purple-700 transition-all placeholder:text-purple-300"
                                 id="lab-social-hook" placeholder="例如: 🔥限时半价 / 🎄圣诞特供 / #SummerVibes" type="text"
                                 x-model="profile.socialHook" />
                         </div>
@@ -269,7 +269,7 @@
                                 文案语气 Tone
                             </label>
                             <select @change="onInputChange"
-                                class="w-full text-sm border-2 border-slate-200 rounded-xl focus:border-orange-500 p-3 bg-slate-50/50 transition-all hover:border-slate-300 cursor-pointer font-medium text-slate-700"
+                                class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all hover:border-slate-300 cursor-pointer font-medium text-slate-700"
                                 id="lab-tone" x-model="profile.tone">
                                 <option value="professional">Professional (专业)</option>
                                 <option value="exciting">Exciting (激动人心)</option>
@@ -286,7 +286,7 @@
                             <textarea @input="onInputChange"
                                 @focus="expandInput($event)"
                                 @blur="restoreInput($event)"
-                                class="w-full text-sm border-2 border-slate-200 rounded-xl focus:border-orange-500 p-3 bg-slate-50/50 focus:bg-white transition-all resize-none placeholder:text-slate-300"
+                                class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all resize-none placeholder:text-slate-300"
                                 id="lab-custom-strategy" placeholder="例如: 禁止使用'Best Seller'词汇..." rows="1"
                                 x-model="profile.customStrategy"></textarea>
                         </div>
