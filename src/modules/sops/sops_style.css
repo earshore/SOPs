@@ -17,10 +17,10 @@
   transition: all var(--duration-slow) var(--ease-smooth);
   cursor: pointer;
   position: relative;
-  display: flex !important;
-  flex-direction: column !important;
-  min-height: 180px !important;
-  overflow: visible !important;
+  display: flex;
+  flex-direction: column;
+  min-height: 180px;
+  overflow: visible;
 }
 
 .sop-card:hover {
