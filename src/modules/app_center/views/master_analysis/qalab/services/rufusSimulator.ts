@@ -351,19 +351,24 @@ export class RufusSimulator {
         }
 
         // 犹豫点
-        const hesitations = ar['hesitation-points']?.hesitations
-            || ar.hesitationPoints?.hesitations
-            || ar.hesitation_points?.hesitations
-            || ar['hesitation-points']?.details
-            || ar['hesitation-points']?.highlights
-            || [];
+        const hesitationPointsData = ar['hesitation-points'] || ar['hesitationPoints'] || ar['hesitation_points'];
+        let hesitations: unknown[] = [];
+        if (hesitationPointsData && typeof hesitationPointsData === 'object') {
+            const hpObj = hesitationPointsData as Record<string, unknown>;
+            hesitations = Array.isArray(hpObj.hesitations) ? hpObj.hesitations :
+                         (Array.isArray(hpObj.details) ? hpObj.details :
+                         (Array.isArray(hpObj.highlights) ? hpObj.highlights : []));
+        }
 
         if (hesitations.length > 0) {
             Logger.debug('[Rufus AI] ✅ 找到犹豫点数据:', hesitations.length, '条');
             reportSummary += `## 常见顾虑\n`;
             hesitations.forEach((item: unknown) => {
-                const text = item.text || item.content || item.description || item.hesitation || JSON.stringify(item);
-                reportSummary += `- ${text}\n`;
+                if (item && typeof item === 'object') {
+                    const itemObj = item as Record<string, unknown>;
+                    const text = itemObj.text || itemObj.content || itemObj.description || itemObj.hesitation || JSON.stringify(item);
+                    reportSummary += `- ${text}\n`;
+                }
             });
             reportSummary += `\n`;
             hasData = true;
@@ -372,19 +377,24 @@ export class RufusSimulator {
         }
 
         // 买家画像
-        const buyerProfile = ar['buyer-profile']?.buyer_types
-            || ar.buyerProfile?.buyer_types
-            || ar.buyer_profile?.buyer_types
-            || ar['buyer-profile']?.details
-            || ar['buyer-profile']?.highlights
-            || [];
+        const buyerProfileData = ar['buyer-profile'] || ar['buyerProfile'] || ar['buyer_profile'];
+        let buyerProfile: unknown[] = [];
+        if (buyerProfileData && typeof buyerProfileData === 'object') {
+            const bpObj = buyerProfileData as Record<string, unknown>;
+            buyerProfile = Array.isArray(bpObj.buyer_types) ? bpObj.buyer_types :
+                          (Array.isArray(bpObj.details) ? bpObj.details :
+                          (Array.isArray(bpObj.highlights) ? bpObj.highlights : []));
+        }
 
         if (buyerProfile.length > 0) {
             Logger.debug('[Rufus AI] ✅ 找到买家画像数据:', buyerProfile.length, '条');
             reportSummary += `## 典型买家\n`;
             buyerProfile.forEach((item: unknown) => {
-                const text = item.text || item.content || item.description || item.type || JSON.stringify(item);
-                reportSummary += `- ${text}\n`;
+                if (item && typeof item === 'object') {
+                    const itemObj = item as Record<string, unknown>;
+                    const text = itemObj.text || itemObj.content || itemObj.description || itemObj.type || JSON.stringify(item);
+                    reportSummary += `- ${text}\n`;
+                }
             });
             reportSummary += `\n`;
             hasData = true;

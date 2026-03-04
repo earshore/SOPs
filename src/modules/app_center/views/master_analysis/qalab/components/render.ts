@@ -194,7 +194,12 @@ export function renderCategoryTabs(onCategoryChange: (cat: string) => void): voi
     CATEGORIES.forEach(cat => {
         counts[cat.id] = cat.id === 'all'
             ? qalabState.generatedQAs.length
-            : qalabState.generatedQAs.filter((qa: unknown) => qa.category === cat.id).length;
+            : qalabState.generatedQAs.filter((qa: unknown) => {
+                if (qa && typeof qa === 'object' && 'category' in qa) {
+                    return (qa as { category: unknown }).category === cat.id;
+                }
+                return false;
+            }).length;
     });
 
     // 使用 SafeRenderer 渲染列表
@@ -234,39 +239,62 @@ export function renderQAGrid(
     const qalabState = getQalabState();
     const filtered = qalabState.currentCategory === 'all'
         ? qalabState.generatedQAs
-        : qalabState.generatedQAs.filter((qa: unknown) => qa.category === qalabState.currentCategory);
+        : qalabState.generatedQAs.filter((qa: unknown) => {
+            if (qa && typeof qa === 'object' && 'category' in qa) {
+                return (qa as { category: unknown }).category === qalabState.currentCategory;
+            }
+            return false;
+        });
 
     // 使用 SafeRenderer 渲染列表
     renderer.renderList(
         container,
         filtered,
         (qa: unknown, index: number) => {
-            const trans = qa.translations[qalabState.currentLang];
-            if (!trans) return '';
+            // 类型守卫：确保 qa 是对象
+            if (!qa || typeof qa !== 'object') return '';
 
+            const qaObj = qa as Record<string, unknown>;
+
+            // 安全访问 translations
+            const translations = qaObj.translations;
+            if (!translations || typeof translations !== 'object') return '';
+            const trans = (translations as Record<string, unknown>)[qalabState.currentLang];
+            if (!trans || typeof trans !== 'object') return '';
+            const transObj = trans as Record<string, unknown>;
+
+            // 安全访问 confidence
+            const confidence = typeof qaObj.confidence === 'number' ? qaObj.confidence : 0;
             const confDots = Array(5).fill(0).map((_, i) =>
-                `<div class="conf-dot ${i < qa.confidence ? 'filled' : ''}"></div>`
+                `<div class="conf-dot ${i < confidence ? 'filled' : ''}"></div>`
             ).join('');
 
-            const catLabel = CATEGORIES.find(c => c.id === qa.category)?.label || qa.category;
+            // 安全访问 category
+            const category = String(qaObj.category || '');
+            const catLabel = CATEGORIES.find(c => c.id === category)?.label || category;
 
-            const sourcesHtml = qa.sources.map((src: string) =>
-                `<div class="qa-source"><i class="fa-solid fa-database"></i>${renderer.escapeHtml(src)}</div>`
+            // 安全访问 sources
+            const sources = Array.isArray(qaObj.sources) ? qaObj.sources : [];
+            const sourcesHtml = sources.map((src: unknown) =>
+                `<div class="qa-source"><i class="fa-solid fa-database"></i>${renderer.escapeHtml(String(src))}</div>`
             ).join('');
+
+            // 安全访问 id
+            const id = String(qaObj.id || '');
 
             return `
-                <div class="qa-card" data-qa-id="${qa.id}" style="animation-delay:${index * 0.05}s">
-                    <div class="qa-header" data-qa-toggle="${qa.id}">
-                        <div class="qa-number">${qa.id}</div>
+                <div class="qa-card" data-qa-id="${id}" style="animation-delay:${index * 0.05}s">
+                    <div class="qa-header" data-qa-toggle="${id}">
+                        <div class="qa-number">${id}</div>
                         <div class="qa-question-wrap">
                             <div class="qa-meta">
-                                <div class="qa-tag ${qa.category}">${renderer.escapeHtml(catLabel)}</div>
+                                <div class="qa-tag ${category}">${renderer.escapeHtml(catLabel)}</div>
                                 <div class="qa-confidence">
                                     <span>置信度</span>
                                     <div class="conf-dots">${confDots}</div>
                                 </div>
                             </div>
-                            <div class="qa-question">${renderer.escapeHtml(trans.q)}</div>
+                            <div class="qa-question">${renderer.escapeHtml(String(transObj.q || ''))}</div>
                         </div>
                         <div class="qa-toggle"><i class="fa-solid fa-chevron-down"></i></div>
                     </div>
@@ -276,15 +304,15 @@ export function renderQAGrid(
                                 <div class="qa-answer-label">
                                     <i class="fa-solid fa-robot"></i> Rufus AI 答复
                                 </div>
-                                <div class="qa-answer">${renderer.escapeHtml(trans.a)}</div>
+                                <div class="qa-answer">${renderer.escapeHtml(String(transObj.a || ''))}</div>
                                 <div class="qa-sources">
                                     ${sourcesHtml}
                                 </div>
                                 <div class="qa-actions">
-                                    <button class="qa-action-btn" data-qa-copy="${qa.id}">
+                                    <button class="qa-action-btn" data-qa-copy="${id}">
                                         <i class="fa-solid fa-copy"></i> 复制
                                     </button>
-                                    <button class="qa-action-btn" data-qa-edit="${qa.id}">
+                                    <button class="qa-action-btn" data-qa-edit="${id}">
                                         <i class="fa-solid fa-pen"></i> 编辑
                                     </button>
                                 </div>
@@ -306,7 +334,9 @@ export function renderQAGrid(
 
     container.querySelectorAll('[data-qa-copy]').forEach(el => {
         el.addEventListener('click', (e: unknown) => {
-            e.stopPropagation();
+            if (e && typeof e === 'object' && 'stopPropagation' in e) {
+                (e as Event).stopPropagation();
+            }
             const id = (el as HTMLElement).dataset.qaCopy;
             if (id) onCopy(parseInt(id), el as HTMLElement);
         });
