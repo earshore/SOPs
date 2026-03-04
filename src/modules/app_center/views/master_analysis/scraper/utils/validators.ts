@@ -94,39 +94,42 @@ export function validateProduct(product: unknown): ValidationResult {
         return { valid: false, error: '产品数据不是有效对象' };
     }
 
+    // 类型断言：将 unknown 转换为可索引类型
+    const prod = product as Record<string, unknown>;
+
     // 验证必需字段：ASIN
-    if (!product.asin || typeof product.asin !== 'string') {
+    if (!prod.asin || typeof prod.asin !== 'string') {
         return { valid: false, error: '缺少必需字段: asin' };
     }
 
     // 验证ASIN格式
-    if (!/^B0[A-Z0-9]{8}$/.test(product.asin)) {
-        return { valid: false, error: `ASIN格式无效: ${product.asin}` };
+    if (!/^B0[A-Z0-9]{8}$/.test(prod.asin)) {
+        return { valid: false, error: `ASIN格式无效: ${prod.asin}` };
     }
 
     // 验证产品标题
-    if (product.productTitle && typeof product.productTitle !== 'string') {
+    if (prod.productTitle && typeof prod.productTitle !== 'string') {
         return { valid: false, error: 'productTitle必须是字符串' };
     }
 
     // 验证五点描述
-    if (product.feature_bullets) {
-        if (!Array.isArray(product.feature_bullets)) {
+    if (prod.feature_bullets) {
+        if (!Array.isArray(prod.feature_bullets)) {
             return { valid: false, error: 'feature_bullets必须是数组' };
         }
-        if (!product.feature_bullets.every((b: unknown) => typeof b === 'string')) {
+        if (!prod.feature_bullets.every((b: unknown) => typeof b === 'string')) {
             return { valid: false, error: 'feature_bullets中的元素必须是字符串' };
         }
     }
 
     // 验证评论数据
-    if (product.customer_reviews) {
-        if (!Array.isArray(product.customer_reviews)) {
+    if (prod.customer_reviews) {
+        if (!Array.isArray(prod.customer_reviews)) {
             return { valid: false, error: 'customer_reviews必须是数组' };
         }
         // 验证每个评论的基本结构
-        for (let i = 0; i < product.customer_reviews.length; i++) {
-            const review = product.customer_reviews[i];
+        for (let i = 0; i < prod.customer_reviews.length; i++) {
+            const review = prod.customer_reviews[i];
             if (!review || typeof review !== 'object') {
                 return { valid: false, error: `评论[${i}]不是有效对象` };
             }

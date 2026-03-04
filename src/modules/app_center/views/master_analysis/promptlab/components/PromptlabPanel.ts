@@ -515,9 +515,10 @@ export function createPromptlabPanel() {
 
             if (obj && typeof obj === 'object') {
                 Logger.debug('[Promptlab] 处理对象，键:', Object.keys(obj).slice(0, 5));
-                for (const key in obj) {
-                    if (obj.hasOwnProperty(key)) {
-                        const result = this.findFirstStringValue(obj[key], depth + 1);
+                const objRecord = obj as Record<string, unknown>;
+                for (const key in objRecord) {
+                    if (objRecord.hasOwnProperty(key)) {
+                        const result = this.findFirstStringValue(objRecord[key], depth + 1);
                         if (result) return result;
                     }
                 }
@@ -537,9 +538,17 @@ export function createPromptlabPanel() {
             Logger.debug('[Promptlab] renderNewFormatModules 调用:', {
                 analysisReport,
                 reportType: typeof analysisReport,
-                keys: Object.keys(analysisReport || {}),
+                keys: analysisReport && typeof analysisReport === 'object' ? Object.keys(analysisReport) : [],
                 isFirstLoad
             });
+
+            // 类型守卫：确保 analysisReport 是对象
+            if (!analysisReport || typeof analysisReport !== 'object') {
+                Logger.warn('[Promptlab] analysisReport 不是有效对象');
+                return;
+            }
+
+            const reportObj = analysisReport as Record<string, unknown>;
 
             const renderer = SafeRenderer.getInstance();
 
@@ -556,16 +565,16 @@ export function createPromptlabPanel() {
             };
 
             // 获取所有可用的分析目标
-            const availableTargets = Object.keys(analysisReport).filter(key =>
-                targetConfig[key] && analysisReport[key]
+            const availableTargets = Object.keys(reportObj).filter(key =>
+                targetConfig[key] && reportObj[key]
             );
 
             Logger.debug('[Promptlab] 可用的分析目标:', availableTargets);
             Logger.debug('[Promptlab] 每个目标的数据:', availableTargets.map(id => ({
                 id,
-                dataType: typeof analysisReport[id],
-                isArray: Array.isArray(analysisReport[id]),
-                keys: analysisReport[id] && typeof analysisReport[id] === 'object' ? Object.keys(analysisReport[id]).slice(0, 5) : null
+                dataType: typeof reportObj[id],
+                isArray: Array.isArray(reportObj[id]),
+                keys: reportObj[id] && typeof reportObj[id] === 'object' ? Object.keys(reportObj[id] as object).slice(0, 5) : null
             })));
 
             // 如果是首次加载,自动选中所有模块
@@ -578,7 +587,7 @@ export function createPromptlabPanel() {
                 const config = targetConfig[targetId];
                 if (!config) return; // 类型守卫
 
-                const data = analysisReport[targetId];
+                const data = reportObj[targetId];
                 Logger.debug(`[Promptlab] 渲染目标 ${targetId}:`, {
                     dataType: typeof data,
                     isArray: Array.isArray(data),
