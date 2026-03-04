@@ -768,8 +768,10 @@ B0EXAMPLE1" rows="5" x-model="inputAsins"></textarea>
                         </div>
                         <button
                             @click="downloadPlugin()"
+                            @mouseenter="console.log('鼠标进入下载按钮')"
                             class="download-btn w-9 h-9 flex items-center justify-center rounded-xl bg-white border-2 border-slate-200 text-slate-400 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 hover:shadow-lg hover:shadow-indigo-200 transition-all duration-200 cursor-pointer"
-                            title="前往 GitHub 下载">
+                            title="前往 GitHub 下载"
+                            style="position: relative; z-index: 100;">
                             <i class="fa-solid fa-download text-sm"></i>
                         </button>
                     </div>
