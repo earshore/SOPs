@@ -76,7 +76,7 @@ class DebugInterfaceManager {
         showState: () => {
           import('@/stores/useAppStore').then(({ appStore }) => {
             console.group('📊 应用状态');
-            Logger.debug(appStore.getState());
+            Logger.debug('应用状态', appStore.getState());
             console.groupEnd();
           });
         },
@@ -97,7 +97,7 @@ class DebugInterfaceManager {
         showServices: () => {
           import('../di/Container').then(({ container }) => {
             console.group('🔧 已注册服务');
-            Logger.debug(container.getRegisteredServices());
+            Logger.debug('已注册服务', { services: container.getRegisteredServices() });
             console.groupEnd();
           });
         },

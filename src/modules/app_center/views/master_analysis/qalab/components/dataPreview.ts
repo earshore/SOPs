@@ -83,7 +83,7 @@ function extractTargetStats(targetId: string, targetData: unknown): Array<{ labe
                 { label: '功能点', value: `${bulletAnalysis.filter((b: unknown) => b.function || b.functions).length}个` },
                 { label: '场景覆盖', value: `${bulletAnalysis.filter((b: unknown) => b.scene || (b.scenes && b.scenes.length > 0)).length}个` }
             ];
-            Logger.debug(`[QALab] selling-points stats:`, sellingStats, 'bullet_analysis sample:', bulletAnalysis[0]);
+            Logger.debug(`[QALab] selling-points stats`, { sellingStats, sample: bulletAnalysis[0] });
             return sellingStats;
 
         case 'fatal-flaws':
@@ -94,7 +94,7 @@ function extractTargetStats(targetId: string, targetData: unknown): Array<{ labe
                 { label: '高频缺陷', value: `${criticalIssues.filter((i: unknown) => i.severity === 'high' || i.severity === 'critical' || i.severity === 'major').length}个` },
                 { label: '需规避', value: `${criticalIssues.filter((i: unknown) => i.actionable === true || i.severity === 'critical').length}个` }
             ];
-            Logger.debug(`[QALab] fatal-flaws stats:`, flawStats, 'sample keys:', criticalIssues[0] ? Object.keys(criticalIssues[0]) : []);
+            Logger.debug(`[QALab] fatal-flaws stats`, { flawStats, sampleKeys: criticalIssues[0] ? Object.keys(criticalIssues[0]) : [] });
             return flawStats;
 
         case 'wow-moments':
@@ -104,7 +104,7 @@ function extractTargetStats(targetId: string, targetData: unknown): Array<{ labe
                 { label: '超预期点', value: `${moments.filter((m: unknown) => m.type === 'exceeded' || m.emotion_type === 'delight').length}个` },
                 { label: '惊喜功能', value: `${moments.filter((m: unknown) => m.category === 'feature' || m.aspect === 'smell' || m.aspect === 'overall').length}个` }
             ];
-            Logger.debug(`[QALab] wow-moments stats:`, wowStats, 'moments sample:', moments[0]);
+            Logger.debug(`[QALab] wow-moments stats`, { wowStats, sample: moments[0] });
             return wowStats;
 
         case 'hesitation-points':
@@ -115,7 +115,7 @@ function extractTargetStats(targetId: string, targetData: unknown): Array<{ labe
                 { label: '已解决', value: `${hesitations.filter((h: unknown) => h.resolved === true || h.resolution_status === 'resolved' || h.post_purchase_resolution).length}个` },
                 { label: '高优先级', value: `${hesitations.filter((h: unknown) => h.priority === 'high' || h.severity === 'high').length}个` }
             ];
-            Logger.debug(`[QALab] hesitation-points stats:`, hesitationStats, 'sample keys:', hesitations[0] ? Object.keys(hesitations[0]) : []);
+            Logger.debug(`[QALab] hesitation-points stats`, { hesitationStats, sampleKeys: hesitations[0] ? Object.keys(hesitations[0]) : [] });
             return hesitationStats;
 
         case 'buyer-profile':
@@ -132,11 +132,14 @@ function extractTargetStats(targetId: string, targetData: unknown): Array<{ labe
                 { label: '使用场景', value: `${usageScenes.length}个` },
                 { label: '人群画像', value: `${demographicsCount}个` }
             ];
-            Logger.debug(`[QALab] buyer-profile stats:`, profileStats, 'data:', {
-                buyer_types: buyerTypes.length,
-                usage_scenes: usageScenes.length,
-                demographics: demographicsCount,
-                demographics_type: typeof targetData.demographics
+            Logger.debug(`[QALab] buyer-profile stats`, {
+                profileStats,
+                data: {
+                    buyer_types: buyerTypes.length,
+                    usage_scenes: usageScenes.length,
+                    demographics: demographicsCount,
+                    demographics_type: typeof targetData.demographics
+                }
             });
             return profileStats;
 
@@ -153,7 +156,7 @@ function extractTargetStats(targetId: string, targetData: unknown): Array<{ labe
                 { label: '买家黑话', value: `${buyerSlang.length}个` },
                 { label: '建议补充', value: `${Array.isArray(recommendations) ? recommendations.length : 0}个` }
             ];
-            Logger.debug(`[QALab] vocab-gap stats:`, vocabStats, 'data keys:', Object.keys(targetData));
+            Logger.debug(`[QALab] vocab-gap stats`, { vocabStats, dataKeys: Object.keys(targetData) });
             return vocabStats;
 
         case 'promise-reality':
@@ -164,7 +167,7 @@ function extractTargetStats(targetId: string, targetData: unknown): Array<{ labe
                 { label: '过度承诺', value: `${gaps.filter((g: unknown) => g.type === 'overpromise' || g.gap_type === 'overpromise' || g.contradiction_severity === 'high' || g.false_advertising_risk === 'high').length}个` },
                 { label: '需修正', value: `${gaps.filter((g: unknown) => g.actionable === true || g.contradiction_severity === 'high' || g.contradiction_severity === 'medium' || g.recommended_action).length}个` }
             ];
-            Logger.debug(`[QALab] promise-reality stats:`, promiseStats, 'sample keys:', gaps[0] ? Object.keys(gaps[0]) : []);
+            Logger.debug(`[QALab] promise-reality stats`, { promiseStats, sampleKeys: gaps[0] ? Object.keys(gaps[0]) : [] });
             return promiseStats;
 
         default:

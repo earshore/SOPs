@@ -908,7 +908,7 @@ function highlightRootKeywords(root: string, container: HTMLElement): void {
             const wordLower = w.toLowerCase();
             const matched = wordLower === rootLower || wordLower.includes(rootLower);
             if (matched) {
-                Logger.debug('[Process] 词根匹配成功:', w, '包含', rootLower);
+                Logger.debug(`[Process] 词根匹配成功: ${w} 包含 ${rootLower}`);
             }
             return matched;
         });

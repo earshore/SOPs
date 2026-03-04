@@ -56,7 +56,7 @@ export class RufusSimulator {
     setMode(mode: RufusMode): void {
         const oldMode = this.mode;
         this.mode = mode;
-        Logger.debug('[Rufus Simulator] 模式已更新:', oldMode, '->', mode);
+        Logger.debug(`[Rufus Simulator] 模式已更新: ${oldMode} -> ${mode}`);
     }
 
     /**

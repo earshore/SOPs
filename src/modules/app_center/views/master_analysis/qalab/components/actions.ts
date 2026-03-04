@@ -175,7 +175,7 @@ export function autoLoadAnalysisReport(): void {
                 // 尝试查找可能的字段名
                 for (const key of Object.keys(ar)) {
                     if (typeof ar[key] === 'object' && ar[key] !== null) {
-                        Logger.debug('[QALab] - 对象字段', key, ':', Object.keys(ar[key]));
+                        Logger.debug(`[QALab] - 对象字段 ${key}: ${Object.keys(ar[key]).join(', ')}`);
                     }
                 }
             }

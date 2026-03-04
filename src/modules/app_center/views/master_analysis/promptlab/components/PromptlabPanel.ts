@@ -255,7 +255,7 @@ export function createPromptlabPanel() {
             const isMarketplaceChanged = currentMarketplace && currentMarketplace !== this.lastMarketplace;
 
             if (currentMarketplace && (isFirstLoad || isMarketplaceChanged)) {
-                Logger.debug('[Promptlab] 检测到市场变化:', this.lastMarketplace, '→', currentMarketplace);
+                Logger.debug(`[Promptlab] 检测到市场变化: ${this.lastMarketplace} → ${currentMarketplace}`);
 
                 const siteConfig = SITE_CONFIGS[currentMarketplace];
                 if (siteConfig) {
