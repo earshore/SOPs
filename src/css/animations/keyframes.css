@@ -853,30 +853,6 @@
   }
 }
 
-.skeleton {
-  background: linear-gradient(
-    90deg,
-    rgba(0, 0, 0, 0.06) 25%,
-    rgba(0, 0, 0, 0.12) 37%,
-    rgba(0, 0, 0, 0.06) 63%
-  );
-  background-size: 200% 100%;
-  animation: skeletonShimmer 1.8s ease-in-out infinite;
-  border-radius: 4px;
-}
-
-/* 暗色模式骨架屏 */
-.dark .skeleton,
-[data-theme="dark"] .skeleton {
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.06) 25%,
-    rgba(255, 255, 255, 0.12) 37%,
-    rgba(255, 255, 255, 0.06) 63%
-  );
-  background-size: 200% 100%;
-}
-
 /* --- 加载点动画 --- */
 @keyframes dots {
   0%  { content: ''; }
@@ -1770,22 +1746,6 @@
   animation: fadeUp var(--duration-slow) var(--ease-smooth) forwards;
 }
 
-/* --- 脉冲环 (pulseRing) --- */
-@keyframes pulseRing {
-  0% {
-    transform: scale(1);
-    opacity: 0.6;
-  }
-  100% {
-    transform: scale(1.6);
-    opacity: 0;
-  }
-}
-
-.pulse-ring {
-  animation: pulseRing 2.5s ease-out infinite;
-}
-
 /* --- 边框发光 (borderGlow) --- */
 @keyframes borderGlow {
   0%, 100% {
@@ -1814,24 +1774,6 @@
 
 .twinkle {
   animation: twinkle 3s ease-in-out infinite;
-}
-
-/* --- 渐变流动 (gradientFlow) --- */
-@keyframes gradientFlow {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-.gradient-flow {
-  background-size: 200% 100%;
-  animation: gradientFlow 4s ease infinite;
 }
 
 /* --- 缓慢浮动 (floatSlow) --- */
@@ -1901,22 +1843,6 @@
   animation: moduleHighlightPurple 2s ease-out;
 }
 
-/* --- 淡入缩放 (fade-in-scale) --- */
-@keyframes fadeInScale {
-  from {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.fade-in-scale {
-  animation: fadeInScale var(--duration-normal) var(--ease-spring) forwards;
-}
-
 /* --- 勾选标记绘制 (checkmark-draw) --- */
 @keyframes checkmarkDraw {
   from {
@@ -1942,22 +1868,6 @@
 
 .input-shake {
   animation: inputShake 500ms var(--ease-smooth);
-}
-
-/* --- 呼吸效果 (breathe) --- */
-@keyframes breathe {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 0.5;
-  }
-  50% {
-    transform: scale(1.05);
-    opacity: 1;
-  }
-}
-
-.breathe {
-  animation: breathe 8s ease-in-out infinite;
 }
 
 /* --- 卡片脉冲 (card-pulse) --- */
