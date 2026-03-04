@@ -55,45 +55,6 @@
   </div>
   <!-- 主要内容区域 -->
   <div>
-    <!-- 数据源横幅 -->
-    <div
-      class="mb-6 flex items-center gap-4 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl border border-indigo-100"
-      x-show="showDataSourceBanner" x-transition:enter="transition ease-out duration-300"
-      x-transition:enter-end="opacity-100 transform translate-y-0"
-      x-transition:enter-start="opacity-0 transform -translate-y-2" x-transition:leave="transition ease-in duration-300"
-      x-transition:leave-end="opacity-0 transform -translate-y-2"
-      x-transition:leave-start="opacity-100 transform translate-y-0">
-      <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
-        <i class="fa-solid fa-database text-indigo-600"></i>
-      </div>
-      <div class="flex-1">
-        <template x-if="hasScraperData">
-          <div>
-            <p class="text-sm text-slate-700">
-              <span class="font-semibold">数据源已加载：</span>
-              <span
-                x-text="'包含 ' + currentProducts.length + ' 个产品，共 ' + currentProducts.reduce((sum, p) =&gt; sum + p.customer_reviews.length, 0) + ' 条评论'"></span>
-            </p>
-            <p class="text-xs text-slate-500 mt-0.5">
-              <i class="fa-solid fa-globe"></i>
-              <span x-text="'市场: ' + dataSourceMarketplace + ' · 抓取时间: ' + dataSourceTimestamp"></span>
-            </p>
-          </div>
-        </template>
-        <template x-if="!hasScraperData">
-          <div>
-            <p class="text-sm text-slate-700">
-              <span class="font-semibold">数据源已加载：</span>
-              <span>包含产品数据和评论</span>
-            </p>
-            <p class="text-xs text-slate-500 mt-0.5">
-              <i class="fa-solid fa-globe"></i>
-              可从"数据采集"模块获取真实产品数据
-            </p>
-          </div>
-        </template>
-      </div>
-    </div>
     <!-- ASIN 选择和分析目标 -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
       <!-- ASIN 输入区 -->
@@ -128,13 +89,34 @@
                 已选择 <span x-text="selectedAsins.length"></span> 个产品
               </span>
             </div>
+            <!-- 可用 ASIN 列表（复选框） -->
+            <template x-if="availableAsins.length &gt; 0">
+              <div class="mt-3">
+                <!-- <p class="text-xs text-slate-500 mb-3 font-medium">已加载的产品（<span x-text="availableAsins.length"></span> 个）：
+                </p> -->
+                <div class="space-y-2 max-h-48 overflow-y-auto">
+                  <template :key="asinItem" x-for="asinItem in availableAsins">
+                    <label
+                      :class="selectedAsins.includes(asinItem) ? 'bg-indigo-50 border-indigo-300' : 'bg-slate-50 border-slate-200 hover:border-indigo-200'"
+                      class="flex items-center gap-3 p-3 rounded-lg border-2 transition-all cursor-pointer hover:bg-indigo-50">
+                      <input :checked="selectedAsins.includes(asinItem)" :disabled="isAnalyzing"
+                        @change="toggleAsin(asinItem)"
+                        class="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500" type="checkbox" />
+                      <span :class="selectedAsins.includes(asinItem) ? 'text-indigo-700' : 'text-slate-700'"
+                        class="flex-1 font-mono text-sm font-semibold" x-text="asinItem"></span>
+                      <i class="fa-solid fa-check text-indigo-600" x-show="selectedAsins.includes(asinItem)"></i>
+                    </label>
+                  </template>
+                </div>
+              </div>
+            </template>
           </div>
           <!-- 产品信息摘要 -->
           <template x-if="currentProducts.length &gt; 0">
             <div class="mt-4 p-4 bg-gradient-to-r from-slate-50 to-indigo-50/50 rounded-xl border border-slate-100">
               <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                 <i class="fa-solid fa-box-open"></i>
-                已选产品信息
+                已加载产品信息
               </h4>
               <div class="space-y-2">
                 <template :key="product.asin" x-for="product in currentProducts.slice(0, 2)">
@@ -158,27 +140,42 @@
                   <i class="fa-solid fa-comments text-amber-500"></i>
                   <span x-text="currentProducts.reduce((sum, p) =&gt; sum + p.customer_reviews.length, 0)"></span> 条评论
                 </span>
-              </div>
-            </div>
-          </template>
-          <!-- 可用 ASIN 列表（复选框） -->
-          <template x-if="availableAsins.length &gt; 0">
-            <div class="mt-4 pt-4 border-t border-slate-100">
-              <p class="text-xs text-slate-500 mb-3 font-medium">已加载的产品（<span x-text="availableAsins.length"></span> 个）：
-              </p>
-              <div class="space-y-2 max-h-48 overflow-y-auto">
-                <template :key="asinItem" x-for="asinItem in availableAsins">
-                  <label
-                    :class="selectedAsins.includes(asinItem) ? 'bg-indigo-50 border-indigo-300' : 'bg-slate-50 border-slate-200 hover:border-indigo-200'"
-                    class="flex items-center gap-3 p-3 rounded-lg border-2 transition-all cursor-pointer hover:bg-indigo-50">
-                    <input :checked="selectedAsins.includes(asinItem)" :disabled="isAnalyzing"
-                      @change="toggleAsin(asinItem)"
-                      class="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500" type="checkbox" />
-                    <span :class="selectedAsins.includes(asinItem) ? 'text-indigo-700' : 'text-slate-700'"
-                      class="flex-1 font-mono text-sm font-semibold" x-text="asinItem"></span>
-                    <i class="fa-solid fa-check text-indigo-600" x-show="selectedAsins.includes(asinItem)"></i>
-                  </label>
-                </template>
+                <div class="relative ml-auto" x-data="{ showTooltip: false }">
+                  <i @mouseenter="showTooltip = true" @mouseleave="showTooltip = false"
+                    class="fa-solid fa-circle-exclamation text-indigo-500 cursor-help"></i>
+                  <div x-show="showTooltip" x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 transform scale-95"
+                    x-transition:enter-end="opacity-100 transform scale-100"
+                    x-transition:leave="transition ease-in duration-150"
+                    x-transition:leave-start="opacity-100 transform scale-100"
+                    x-transition:leave-end="opacity-0 transform scale-95"
+                    class="absolute left-0 bottom-full mb-2 w-72 p-3 bg-slate-800 text-white rounded-lg shadow-xl z-50"
+                    style="display: none;">
+                    <div class="text-xs space-y-2">
+                      <template x-if="hasScraperData">
+                        <div>
+                          <p class="font-semibold mb-1">数据源已加载</p>
+                          <p x-text="'包含 ' + currentProducts.length + ' 个产品，共 ' + currentProducts.reduce((sum, p) =&gt; sum + p.customer_reviews.length, 0) + ' 条评论'"></p>
+                          <p class="text-slate-300 mt-1.5 flex items-center gap-1">
+                            <i class="fa-solid fa-globe"></i>
+                            <span x-text="'市场: ' + dataSourceMarketplace + ' · 抓取时间: ' + dataSourceTimestamp"></span>
+                          </p>
+                        </div>
+                      </template>
+                      <template x-if="!hasScraperData">
+                        <div>
+                          <p class="font-semibold mb-1">数据源已加载</p>
+                          <p>包含产品数据和评论</p>
+                          <p class="text-slate-300 mt-1.5 flex items-center gap-1">
+                            <i class="fa-solid fa-globe"></i>
+                            可从"数据采集"模块获取真实产品数据
+                          </p>
+                        </div>
+                      </template>
+                    </div>
+                    <div class="absolute left-4 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-slate-800"></div>
+                  </div>
+                </div>
               </div>
             </div>
           </template>
@@ -782,8 +779,8 @@
                           <span>analysis_report.json</span>
                         </div>
                         <div class="flex items-center gap-4 text-xs text-slate-500">
-                          <span>行数: <span
-                              x-text="JSON.stringify(fullReportData, null, 2).split('\\n').length"></span></span>
+                          <span>tokens: <span
+                              x-text="Math.ceil(JSON.stringify(fullReportData).length / 4).toLocaleString()"></span></span>
                           <span>字符: <span x-text="JSON.stringify(fullReportData).length.toLocaleString()"></span></span>
                         </div>
                       </div>
@@ -798,8 +795,7 @@
                       <div class="flex items-center gap-2 text-xs text-slate-500">
                         <i class="fa-solid fa-code"></i>
                         <span class="font-mono truncate">{ "metadata": { "asins": [<span
-                            x-text="`&quot;${selectedAsins.join('&quot;, &quot;')}&quot;`"></span>], ... }, "results":
-                          [...], "analysisReport": {...} }</span>
+                            x-text="`&quot;${selectedAsins.join('&quot;, &quot;')}&quot;`"></span>], ... }, "analysisReport": {...} }</span>
                       </div>
                     </div>
                   </template>
