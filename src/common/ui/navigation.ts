@@ -11,6 +11,7 @@ import { APP_EVENTS, emitAppEvent } from '../constants/eventConstants';
 import { getEl } from './utils';
 import { showToast } from './notifications';
 
+import { Logger } from '../../services/loggerService';
 // ========================
 // 侧边栏渲染器注册表
 // ========================
@@ -59,10 +60,10 @@ const SIDEBAR_RENDERER_REGISTRY: Record<string, SidebarRenderer> = {
  */
 export function registerSidebarRenderer(moduleId: string, renderer: SidebarRenderer): void {
   if (SIDEBAR_RENDERER_REGISTRY[moduleId]) {
-    console.warn(`[UI] 覆盖已存在的侧边栏渲染器: ${moduleId}`);
+    Logger.warn(`[UI] 覆盖已存在的侧边栏渲染器: ${moduleId}`);
   }
   SIDEBAR_RENDERER_REGISTRY[moduleId] = renderer;
-  console.log(`[UI] 注册侧边栏渲染器: ${moduleId}`);
+  Logger.debug(`[UI] 注册侧边栏渲染器: ${moduleId}`);
 }
 
 // ========================
@@ -90,7 +91,7 @@ function renderSidebar(moduleId: string | null): void {
   // 数据获取与防御
   const effectiveModuleConfig = MENU_CONFIG.modules[effectiveModuleId];
   if (!effectiveModuleConfig) {
-    console.warn(`⚠️ 未找到模块配置: ${effectiveModuleId}`);
+    Logger.warn(`⚠️ 未找到模块配置: ${effectiveModuleId}`);
     sidebar.classList.add("hidden", "-ml-64");
     return;
   }
@@ -163,7 +164,7 @@ function renderDefaultSidebar(sidebar: HTMLElement, moduleConfig: ModuleConfig, 
     `;
     sidebar.innerHTML = html;
   } catch (e) {
-    console.error(`❌ 侧边栏渲染错误:`, e);
+    Logger.error(`❌ 侧边栏渲染错误:`, e);
   }
 }
 
@@ -221,7 +222,7 @@ export async function updateUIForRoute(routeId: string): Promise<void> {
     // 等待 DOM 更新完成
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   } catch (err) {
-    console.error("[Navigation] ❌ View lazy load failed:", err);
+    Logger.error("[Navigation] ❌ View lazy load failed:", err);
     showToast("页面资源加载失败，请重试", { type: 'error' });
     throw err;
   }
@@ -243,7 +244,7 @@ export async function updateUIForRoute(routeId: string): Promise<void> {
   // 主模块生命周期管理
   if (currentActivePanel && currentActivePanel !== targetPanelId) {
     if (import.meta.env.DEV) {
-      console.log(`[Navigation] 🔄 主模块切换: ${currentActivePanel} -> ${targetPanelId}`);
+      Logger.debug(`[Navigation] 🔄 主模块切换: ${currentActivePanel} -> ${targetPanelId}`);
     }
     emitAppEvent(APP_EVENTS.MODULE_UNLOAD, {
       panelId: currentActivePanel,
@@ -259,7 +260,7 @@ export async function updateUIForRoute(routeId: string): Promise<void> {
   if (targetPanel) {
     targetPanel.classList.remove("hidden");
   } else {
-    console.warn(`⚠️ [Navigation] 目标面板 [${targetPanelId}] 未找到，回退至 Home`);
+    Logger.warn(`⚠️ [Navigation] 目标面板 [${targetPanelId}] 未找到，回退至 Home`);
     const home = getEl('panel-home');
     if (home) {
       home.classList.remove("hidden");
@@ -279,7 +280,7 @@ export async function updateUIForRoute(routeId: string): Promise<void> {
   });
 
   if (import.meta.env.DEV) {
-    console.log(`📡 [Navigation] ✅ 路由切换事件已广播: ${cleanTab} (Module: ${targetModuleId})`);
+    Logger.debug(`📡 [Navigation] ✅ 路由切换事件已广播: ${cleanTab} (Module: ${targetModuleId})`);
   }
 }
 
@@ -308,7 +309,7 @@ export function toggleSOPGroup(params: { category: string }): void {
  */
 export function scrollToSOPModule(categoryId: string): void {
   if (!categoryId) {
-    console.warn('⚠️ scrollToSOPModule: categoryId 为空');
+    Logger.warn('⚠️ scrollToSOPModule: categoryId 为空');
     return;
   }
 
@@ -327,9 +328,9 @@ export function scrollToSOPModule(categoryId: string): void {
       moduleElement.classList.remove('sop-module-highlight');
     }, 2000);
 
-    console.log(`✅ 滚动到 SOP 模块: ${categoryId}`);
+    Logger.debug(`✅ 滚动到 SOP 模块: ${categoryId}`);
   } else {
-    console.warn(`⚠️ 未找到模块元素: ${moduleId}`);
+    Logger.warn(`⚠️ 未找到模块元素: ${moduleId}`);
   }
 }
 
@@ -338,7 +339,7 @@ export function scrollToSOPModule(categoryId: string): void {
  */
 export function scrollToHubModule(categoryId: string): void {
   if (!categoryId) {
-    console.warn('⚠️ scrollToHubModule: categoryId 为空');
+    Logger.warn('⚠️ scrollToHubModule: categoryId 为空');
     return;
   }
 
@@ -357,9 +358,9 @@ export function scrollToHubModule(categoryId: string): void {
       moduleElement.classList.remove('hub-module-highlight');
     }, 2000);
 
-    console.log(`✅ 滚动到智库模块: ${categoryId}`);
+    Logger.debug(`✅ 滚动到智库模块: ${categoryId}`);
   } else {
-    console.warn(`⚠️ 未找到模块元素: ${moduleId}`);
+    Logger.warn(`⚠️ 未找到模块元素: ${moduleId}`);
   }
 }
 
@@ -368,7 +369,7 @@ export function scrollToHubModule(categoryId: string): void {
  */
 export function scrollToMoreModule(categoryId: string): void {
   if (!categoryId) {
-    console.warn('⚠️ scrollToMoreModule: categoryId 为空');
+    Logger.warn('⚠️ scrollToMoreModule: categoryId 为空');
     return;
   }
 
@@ -387,9 +388,9 @@ export function scrollToMoreModule(categoryId: string): void {
       moduleElement.classList.remove('more-module-highlight');
     }, 2000);
 
-    console.log(`✅ 滚动到 More 模块: ${categoryId}`);
+    Logger.debug(`✅ 滚动到 More 模块: ${categoryId}`);
   } else {
-    console.warn(`⚠️ 未找到模块元素: ${moduleId}`);
+    Logger.warn(`⚠️ 未找到模块元素: ${moduleId}`);
   }
 }
 

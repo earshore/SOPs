@@ -35,6 +35,7 @@ import {
 } from './components/actions';
 import { rufusSimulator } from './services/rufusSimulator';
 
+import { Logger } from '../../../../../services/loggerService';
 import './qalab_style.css';
 import '../master_analysis_style.css';
 
@@ -42,7 +43,7 @@ import '../master_analysis_style.css';
  * 挂载子模块
  */
 export async function mount(container: HTMLElement): Promise<void> {
-    console.log('[QALab] 🔧 开始挂载子模块');
+    Logger.debug('[QALab] 🔧 开始挂载子模块');
 
     try {
         // 1. 获取qalab状态
@@ -62,7 +63,7 @@ export async function mount(container: HTMLElement): Promise<void> {
                 retryCount: 3,
                 timeout: 5000,
                 onError: (error) => {
-                    console.error('[QALab] ❌ 模板加载失败:', error);
+                    Logger.error('[QALab] ❌ 模板加载失败:', error);
                 }
             }
         );
@@ -78,7 +79,7 @@ export async function mount(container: HTMLElement): Promise<void> {
         // 初始化注册器（如果尚未初始化）
         registry.init();
 
-        console.log('[QALab] ✅ Alpine 组件已注册');
+        Logger.debug('[QALab] ✅ Alpine 组件已注册');
 
         // 4. 注册全局操作（保留用于向后兼容）
         const registeredActions = registerActionsWithLegacy({
@@ -104,7 +105,7 @@ export async function mount(container: HTMLElement): Promise<void> {
         (window as any).qalabTriggerImport = triggerImport;
 
         // 5. 设置事件监听器 - 使用事件委托处理data-action
-        const eventManager = { listeners: [] as Array<{ element: any; event: string; handler: any }> };
+        const eventManager = { listeners: [] as Array<{ element: unknown; event: string; handler: unknown }> };
 
         const clickHandler = (e: Event) => {
             const target = e.target as HTMLElement;
@@ -171,7 +172,7 @@ export async function mount(container: HTMLElement): Promise<void> {
                     // 动态导入 renderRufusMessages
                     import('./components/actions').then(({ renderRufusMessages }) => {
                         renderRufusMessages();
-                        console.log('[QALab] ✅ 已显示欢迎语');
+                        Logger.debug('[QALab] ✅ 已显示欢迎语');
                     });
                 }
             }
@@ -182,7 +183,7 @@ export async function mount(container: HTMLElement): Promise<void> {
 
         // 监听数据导入事件
         const dataImportHandler = () => {
-            console.log('[QALab] 检测到数据导入事件');
+            Logger.debug('[QALab] 检测到数据导入事件');
             refreshDataPreview();
         };
 
@@ -191,7 +192,7 @@ export async function mount(container: HTMLElement): Promise<void> {
 
         // 5. 监听数据更新事件 - 自动加载分析报告
         const dataUpdateHandler = () => {
-            console.log('[QALab] 检测到数据更新事件');
+            Logger.debug('[QALab] 检测到数据更新事件');
             autoLoadAnalysisReport();
         };
 
@@ -208,9 +209,9 @@ export async function mount(container: HTMLElement): Promise<void> {
         // 注意：模块挂载时的初始化（autoLoadAnalysisReport、refreshDataPreview）
         // 已由 Alpine 组件的 init() 方法处理，无需在此重复调用
 
-        console.log('[QALab] ✅ 子模块挂载成功');
+        Logger.debug('[QALab] ✅ 子模块挂载成功');
     } catch (error) {
-        console.error('[QALab] ❌ 子模块挂载失败:', error);
+        Logger.error('[QALab] ❌ 子模块挂载失败:', error);
         throw error;
     }
 }
@@ -219,17 +220,17 @@ export async function mount(container: HTMLElement): Promise<void> {
  * 卸载子模块
  */
 export function unmount(container?: HTMLElement): void {
-    console.log('[QALab] 🔄 开始卸载子模块');
+    Logger.debug('[QALab] 🔄 开始卸载子模块');
 
     try {
         if (!container) {
-            console.warn('[QALab] ⚠️ 未提供container，跳过清理');
+            Logger.warn('[QALab] ⚠️ 未提供container，跳过清理');
             return;
         }
 
         const cleanup = (container as any).__qalabCleanup;
         if (!cleanup) {
-            console.warn('[QALab] ⚠️ 未找到清理数据');
+            Logger.warn('[QALab] ⚠️ 未找到清理数据');
             return;
         }
 
@@ -241,7 +242,7 @@ export function unmount(container?: HTMLElement): void {
 
         // 2. 清理DOM事件监听器
         if (cleanup.eventManager && cleanup.eventManager.listeners) {
-            cleanup.eventManager.listeners.forEach((listener: any) => {
+            cleanup.eventManager.listeners.forEach((listener: unknown) => {
                 listener.element.removeEventListener(listener.event, listener.handler);
             });
         }
@@ -257,8 +258,8 @@ export function unmount(container?: HTMLElement): void {
         // 5. 清理容器数据
         delete (container as any).__qalabCleanup;
 
-        console.log('[QALab] ✅ 子模块卸载成功');
+        Logger.debug('[QALab] ✅ 子模块卸载成功');
     } catch (error) {
-        console.error('[QALab] ❌ 子模块卸载失败:', error);
+        Logger.error('[QALab] ❌ 子模块卸载失败:', error);
     }
 }

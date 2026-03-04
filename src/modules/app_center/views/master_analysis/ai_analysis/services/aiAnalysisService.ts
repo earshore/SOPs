@@ -9,6 +9,7 @@ import type { FullAnalysisReport } from '../config/analysisReportData';
 import type { Product } from '../config/sampleData';
 import { generateAnalysisPrompt } from '../prompts/analysisPrompts';
 
+import { Logger } from '../../../../../../services/loggerService';
 /**
  * LLM 配置接口
  */
@@ -93,16 +94,16 @@ async function analyzeTarget(
       }
     );
 
-    console.log(`[AI分析] ${targetId} 原始响应长度:`, response.length);
-    console.log(`[AI分析] ${targetId} 原始响应前500字符:`, response.substring(0, 500));
+    Logger.debug(`[AI分析] ${targetId} 原始响应长度:`, response.length);
+    Logger.debug(`[AI分析] ${targetId} 原始响应前500字符:`, response.substring(0, 500));
 
     // 解析 JSON 响应
     const result = JSON.parse(response);
-    console.log(`[AI分析] ${targetId} 解析后的结果键:`, Object.keys(result));
+    Logger.debug(`[AI分析] ${targetId} 解析后的结果键:`, Object.keys(result));
 
     return result;
   } catch (error) {
-    console.error(`[AI分析] ${targetId} 分析失败:`, error);
+    Logger.error(`[AI分析] ${targetId} 分析失败:`, error);
     throw new Error(`${targetId} 分析失败: ${(error as Error).message}`);
   }
 }
@@ -156,19 +157,19 @@ export async function runAIAnalysis(
           if (resultObj[fieldName]) {
             // 如果存在嵌套，提取内层数据
             actualResult = resultObj[fieldName];
-            console.log(`[AI分析] ${targetId} 检测到嵌套结构，已提取内层数据`);
+            Logger.debug(`[AI分析] ${targetId} 检测到嵌套结构，已提取内层数据`);
           }
 
           (report as any)[fieldName] = actualResult;
-          console.log(`[AI分析] ${targetId} 分析成功，数据已添加到报告`);
+          Logger.debug(`[AI分析] ${targetId} 分析成功，数据已添加到报告`);
         } else {
-          console.warn(`[AI分析] ${targetId} 返回的数据格式无效:`, result);
+          Logger.warn(`[AI分析] ${targetId} 返回的数据格式无效:`, result);
         }
       }
 
       completedTargets++;
     } catch (error) {
-      console.error(`[AI分析] ${targetId} 失败:`, error);
+      Logger.error(`[AI分析] ${targetId} 失败:`, error);
       // 继续分析其他目标,不中断整个流程
       completedTargets++;
     }

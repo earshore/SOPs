@@ -310,5 +310,5 @@ export default memoryLeakDetector;
 // 向后兼容：暴露到 window (开发调试用)
 if (typeof window !== 'undefined' && (import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV) {
   (window as unknown as Record<string, unknown>).__MemoryLeakDetector = memoryLeakDetector;
-  console.log('✅ [MemoryLeakDetector] 开发模式：检测器已暴露到 window.__MemoryLeakDetector');
+  Logger.debug('✅ [MemoryLeakDetector] 开发模式：检测器已暴露到 window.__MemoryLeakDetector');
 }

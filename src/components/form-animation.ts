@@ -8,6 +8,7 @@
 import { animationManager } from '../services/animation-manager';
 import { ANIMATION_CLASSES } from '../config/animation-config';
 
+import { Logger } from '../services/loggerService';
 /**
  * 初始化表单输入动画
  * 为所有表单输入添加动画效果
@@ -348,7 +349,7 @@ export async function validateInput(
       return false;
     }
   } catch (error) {
-    console.error('Validation error:', error);
+    Logger.error('Validation error:', error);
     showInputError(input, '验证失败');
     return false;
   }

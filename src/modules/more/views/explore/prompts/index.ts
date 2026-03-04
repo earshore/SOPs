@@ -17,6 +17,7 @@ import {
     type PromptCategoryId,
 } from './constants/promptLibrary';
 import { showToast } from '../../../../../common/ui';
+import { Logger } from '../../../../../services/loggerService';
 import './prompts_style.css';
 
 // 使用导入的类型别名
@@ -359,7 +360,7 @@ class PromptsModule extends BaseModule {
         renderCategories();
         renderPromptList();
 
-        console.log('✅ 提示词模块已挂载');
+        Logger.debug('✅ 提示词模块已挂载');
     }
 
     /**
@@ -376,7 +377,7 @@ class PromptsModule extends BaseModule {
         delete window.copyPrompt;
         delete window.copyModalPrompt;
 
-        console.log('❌ 提示词模块已卸载');
+        Logger.debug('❌ 提示词模块已卸载');
     }
 }
 

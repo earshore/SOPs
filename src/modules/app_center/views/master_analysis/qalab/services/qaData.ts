@@ -3,6 +3,8 @@
  * 包含QA类型定义和QA生成逻辑
  */
 
+import { Logger } from '@services/loggerService';
+
 export interface QATranslation {
     q: string;
     a: string;
@@ -19,7 +21,7 @@ export interface QA {
 /**
  * 从报告中提取关键信息
  */
-function extractReportInsights(report: any): any {
+function extractReportInsights(report: unknown): unknown {
     const analysisReport = report?.analysisReport || report;
     const metadata = report?.metadata;
 
@@ -40,19 +42,19 @@ function extractReportInsights(report: any): any {
  * @internal
  */
 /*
-function generateSmartAnswer(insights: any, questionType: string, lang: string): string {
+function generateSmartAnswer(insights: unknown, questionType: string, lang: string): string {
     const { sellingPoints, fatalFlaws } = insights;
     
     // 根据问题类型和报告内容生成答案
     switch (questionType) {
         case 'longevity': {
-            const flaws = fatalFlaws?.critical_issues?.filter((issue: any) => 
+            const flaws = fatalFlaws?.critical_issues?.filter((issue: unknown) => 
                 issue.issue?.toLowerCase().includes('longevity') || 
                 issue.issue?.toLowerCase().includes('disappear')
             ) || [];
             
             if (flaws.length > 0 && lang === 'de') {
-                return `Transparenzhinweis: Einige Kunden berichten, dass der Duft schneller verfliegt als erwartet. Die Erfahrungen variieren jedoch stark.\n\n⚠️ Kritische Rückmeldungen:\n${flaws.map((f: any) => `• ${f.user_quotes?.[0] || f.issue}`).join('\n')}\n\n💡 Empfehlung: Testen Sie das Produkt und nutzen Sie ggf. das Rückgaberecht, falls die Haltbarkeit nicht Ihren Erwartungen entspricht.`;
+                return `Transparenzhinweis: Einige Kunden berichten, dass der Duft schneller verfliegt als erwartet. Die Erfahrungen variieren jedoch stark.\n\n⚠️ Kritische Rückmeldungen:\n${flaws.map((f: unknown) => `• ${f.user_quotes?.[0] || f.issue}`).join('\n')}\n\n💡 Empfehlung: Testen Sie das Produkt und nutzen Sie ggf. das Rückgaberecht, falls die Haltbarkeit nicht Ihren Erwartungen entspricht.`;
             }
             break;
         }
@@ -60,7 +62,7 @@ function generateSmartAnswer(insights: any, questionType: string, lang: string):
         case 'value': {
             const bulletAnalysis = sellingPoints?.bullet_analysis || [];
             if (bulletAnalysis.length > 0 && lang === 'de') {
-                return `Das Preis-Leistungs-Verhältnis wird positiv bewertet:\n\n${bulletAnalysis.map((b: any) => `• ${b.original_text_summary}`).slice(0, 3).join('\n') || ''}`;
+                return `Das Preis-Leistungs-Verhältnis wird positiv bewertet:\n\n${bulletAnalysis.map((b: unknown) => `• ${b.original_text_summary}`).slice(0, 3).join('\n') || ''}`;
             }
             break;
         }
@@ -74,7 +76,7 @@ function generateSmartAnswer(insights: any, questionType: string, lang: string):
  * 生成多语言Q&A数据
  * 基于分析报告智能生成问题和答案
  */
-export function generateMultiLangQAs(report: any): QA[] {
+export function generateMultiLangQAs(report: unknown): QA[] {
     const qas: QA[] = [];
     const insights = extractReportInsights(report);
 
@@ -84,7 +86,7 @@ export function generateMultiLangQAs(report: any): QA[] {
         insights.wowMoments?.moments;
 
     if (!hasValidReport) {
-        console.warn('[QALab] 报告数据不完整，使用默认模板');
+        Logger.warn('[QALab] 报告数据不完整，使用默认模板');
     }
 
     // Q1: Longevity (持久度)

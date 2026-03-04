@@ -14,6 +14,7 @@ import type { FullAnalysisReport } from '../config/analysisReportData';
 import { getPromptTokenCount } from './helpers';
 import { formatTokenCount } from '../utils/tokenCounter';
 
+import { Logger } from '../../../../../../services/loggerService';
 /**
  * 计算属性接口
  */
@@ -51,24 +52,24 @@ export function createComputedProperties(context: AlpineContext): ComputedProper
       // 优先从 Scraper 数据获取
       const scrapedData = appStore.getState().scraper?.scrapedData as ScrapedData | null;
       if (scrapedData && scrapedData.products && scrapedData.products.length > 0) {
-        console.log('[计算属性] 开始从 Scraper 数据获取产品, selectedAsins:', context.selectedAsins);
+        Logger.debug('[计算属性] 开始从 Scraper 数据获取产品, selectedAsins:', context.selectedAsins);
         for (const asin of context.selectedAsins) {
           const matchedProduct = scrapedData.products.find(p => p.asin === asin);
           if (matchedProduct) {
-            console.log('[计算属性] 找到匹配产品:', asin, matchedProduct);
+            Logger.debug('[计算属性] 找到匹配产品:', asin, matchedProduct);
             const product = convertScraperDataToProduct(matchedProduct);
             if (product) {
-              console.log('[计算属性] 产品转换成功:', asin);
+              Logger.debug('[计算属性] 产品转换成功:', asin);
               products.push(product);
             } else {
-              console.warn('[计算属性] 产品转换失败:', asin, matchedProduct);
+              Logger.warn('[计算属性] 产品转换失败:', asin, matchedProduct);
             }
           } else {
-            console.warn('[计算属性] 未找到匹配产品:', asin);
+            Logger.warn('[计算属性] 未找到匹配产品:', asin);
           }
         }
       } else {
-        console.warn('[计算属性] Scraper 数据不可用:', {
+        Logger.warn('[计算属性] Scraper 数据不可用:', {
           hasScrapedData: !!scrapedData,
           hasProducts: !!(scrapedData && scrapedData.products),
           productsLength: scrapedData?.products?.length
@@ -77,17 +78,17 @@ export function createComputedProperties(context: AlpineContext): ComputedProper
 
       // 如果没有从 Scraper 获取到，从示例数据获取
       if (products.length === 0) {
-        console.log('[计算属性] 尝试从示例数据获取产品');
+        Logger.debug('[计算属性] 尝试从示例数据获取产品');
         for (const asin of context.selectedAsins) {
           const product = getProductByAsin(asin);
           if (product) {
-            console.log('[计算属性] 从示例数据获取到产品:', asin);
+            Logger.debug('[计算属性] 从示例数据获取到产品:', asin);
             products.push(product);
           }
         }
       }
 
-      console.log('[计算属性] currentProducts 最终结果:', products.length, '个产品');
+      Logger.debug('[计算属性] currentProducts 最终结果:', products.length, '个产品');
       return products;
     },
 
@@ -123,7 +124,7 @@ export function createComputedProperties(context: AlpineContext): ComputedProper
       // 这种情况下暂时返回 false，等待 init() 完成后会重新计算
       const hasTargets = context.selectedTargets && context.selectedTargets.length > 0;
       const result = hasTargets && this.hasData && !context.isAnalyzing;
-      console.log('[计算属性] canAnalyze 检查:', {
+      Logger.debug('[计算属性] canAnalyze 检查:', {
         selectedTargets: context.selectedTargets?.length || 0,
         hasData: this.hasData,
         currentProducts: this.currentProducts.length,
@@ -154,10 +155,10 @@ export function createComputedProperties(context: AlpineContext): ComputedProper
           context.analysisReport as FullAnalysisReport,
           context.selectedTargets
         );
-        console.log('[计算属性] results 实时解析:', results.length, '个结果');
+        Logger.debug('[计算属性] results 实时解析:', results.length, '个结果');
         return results;
       } catch (error) {
-        console.error('[计算属性] results 解析失败:', error);
+        Logger.error('[计算属性] results 解析失败:', error);
         return [];
       }
     },
@@ -167,7 +168,7 @@ export function createComputedProperties(context: AlpineContext): ComputedProper
      */
     get listingsResults(): AnalysisResult[] {
       const filtered = this.results.filter(r => r.source === 'Listings');
-      console.log('[计算属性] listingsResults:', {
+      Logger.debug('[计算属性] listingsResults:', {
         totalResults: this.results.length,
         listingsCount: filtered.length
       });
@@ -179,7 +180,7 @@ export function createComputedProperties(context: AlpineContext): ComputedProper
      */
     get reviewsResults(): AnalysisResult[] {
       const filtered = this.results.filter(r => r.source === 'Reviews');
-      console.log('[计算属性] reviewsResults:', {
+      Logger.debug('[计算属性] reviewsResults:', {
         totalResults: this.results.length,
         reviewsCount: filtered.length
       });

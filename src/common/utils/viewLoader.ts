@@ -8,6 +8,7 @@
 import { APP_VERSION } from '../constants/constants';
 import { StorageService } from '../../services/storageService';
 
+import { Logger } from '../../services/loggerService';
 const CACHE_PREFIX = 'view_cache_';
 
 /**
@@ -71,11 +72,11 @@ function checkCache(path: string): string | null {
         const key = getCacheKey(path);
         const cached = StorageService.getRaw(key, null);
         if (cached) {
-            // console.log(`[ViewLoader] Cache Hit: ${path}`);
+            // Logger.debug(`[ViewLoader] Cache Hit: ${path}`);
             return cached;
         }
     } catch (e) {
-        console.warn('Cache read error:', e);
+        Logger.warn('Cache read error:', e);
     }
     return null;
 }
@@ -98,7 +99,7 @@ function setCache(path: string, content: string): void {
         // 仅在首次设置时偶尔执行，避免性能损耗？或者简单点，每次都检查太重了。
         // 这里仅简单设置。清理逻辑可以放在应用启动时统一执行一次。
     } catch (e) {
-        console.warn('Cache write error:', e);
+        Logger.warn('Cache write error:', e);
     }
 }
 
@@ -124,10 +125,10 @@ export function clearOldCache(): void {
         keysToRemove.forEach(k => StorageService.remove(k));
         
         if (keysToRemove.length > 0) {
-            console.log(`[ViewLoader] 清理了 ${keysToRemove.length} 个旧版本缓存项`);
+            Logger.debug(`[ViewLoader] 清理了 ${keysToRemove.length} 个旧版本缓存项`);
         }
     } catch (e) {
-        console.warn('[ViewLoader] 缓存清理失败:', e);
+        Logger.warn('[ViewLoader] 缓存清理失败:', e);
     }
 }
 
@@ -158,7 +159,7 @@ export function getCacheStats(): CacheStats {
             }
         }
     } catch (e) {
-        console.warn('[ViewLoader] 获取缓存统计失败:', e);
+        Logger.warn('[ViewLoader] 获取缓存统计失败:', e);
     }
     
     return stats;
@@ -244,7 +245,7 @@ async function loadHtml(key: string): Promise<HTMLElement | null> {
 
     const container = document.querySelector<HTMLElement>(config.target);
     if (!container) {
-        console.error(`[ViewLoader] Target container not found: ${config.target}`);
+        Logger.error(`[ViewLoader] Target container not found: ${config.target}`);
         return null;
     }
 
@@ -270,11 +271,11 @@ async function loadHtml(key: string): Promise<HTMLElement | null> {
 
         container.insertAdjacentHTML('beforeend', html);
         config.isLoaded = true;
-        console.log(`✅ [ViewLoader] Loaded & Mounted: ${key} -> ${config.target}`);
+        Logger.debug(`✅ [ViewLoader] Loaded & Mounted: ${key} -> ${config.target}`);
         return container;
     } catch (e) {
         const error = e instanceof Error ? e : new Error(String(e));
-        console.error(`[ViewLoader] Failed to load [${key}]:`, error);
+        Logger.error(`[ViewLoader] Failed to load [${key}]:`, error);
         renderErrorPlaceholder(container, key, error);
         return null;
     }
@@ -287,7 +288,7 @@ async function loadHtml(key: string): Promise<HTMLElement | null> {
 export async function initViews(): Promise<void> {
     clearOldCache();
     const startTime = performance.now();
-    console.log("🚀 [ViewLoader] Initializing Critical Views (Bundled)...");
+    Logger.debug("🚀 [ViewLoader] Initializing Critical Views (Bundled)...");
 
     await Promise.all([
         loadHtml('home'),
@@ -296,7 +297,7 @@ export async function initViews(): Promise<void> {
     ]);
 
     const elapsed = (performance.now() - startTime).toFixed(0);
-    console.log(`✅ [ViewLoader] Critical Views Ready (${elapsed}ms)`);
+    Logger.debug(`✅ [ViewLoader] Critical Views Ready (${elapsed}ms)`);
 }
 
 /**
@@ -318,7 +319,7 @@ export async function ensureViewLoaded(routeId: string): Promise<void> {
     
     if (moduleKey && VIEW_REGISTRY[moduleKey]) {
         if (!VIEW_REGISTRY[moduleKey].isLoaded) {
-            console.log(`⏳ [ViewLoader] Lazy loading module: ${moduleKey} (Mapped from ${routeId})...`);
+            Logger.debug(`⏳ [ViewLoader] Lazy loading module: ${moduleKey} (Mapped from ${routeId})...`);
             await loadHtml(moduleKey);
         }
     }
@@ -350,7 +351,7 @@ export async function loadTemplate(path: string, options?: { disableFadeIn?: boo
     } else {
         const loader = htmlModules[path];
         if (!loader) {
-            console.error(`[ViewLoader] Template not found in registry: ${path}`);
+            Logger.error(`[ViewLoader] Template not found in registry: ${path}`);
             // Fallback: 尝试不带前导斜杠
             const altPath = path.substring(1);
             if (htmlModules[altPath]) {

@@ -14,6 +14,7 @@ import { AlpineContext } from '../types';
 import { createComputedProperties, ComputedProperties } from './computedProperties';
 import { createMultipleStateSyncs, cleanupSubscriptions } from '@common/utils/stateSync';
 
+import { Logger } from '../../../../../../services/loggerService';
 /**
  * 创建 Alpine 面板组件
  */
@@ -39,7 +40,7 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
 
     // ========== Lifecycle ==========
     init(this: AlpineContext & Record<string, unknown>) {
-      console.log('[Alpine 组件] 🚀 组件初始化');
+      Logger.debug('[Alpine 组件] 🚀 组件初始化');
 
       // 设置自动状态同步（Zustand → Alpine）
       this._unsubscribes = createMultipleStateSyncs([
@@ -67,16 +68,16 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
       const currentTargets = this.selectedTargets;
       if (currentTargets.length === 0) {
         this.selectedTargets = analysisTargets.map(t => t.id);
-        console.log('[Alpine 组件] ✅ 已默认全选所有分析目标:', this.selectedTargets.length);
+        Logger.debug('[Alpine 组件] ✅ 已默认全选所有分析目标:', this.selectedTargets.length);
       }
 
       // 监听 analysisReport 变化，自动更新 hasReport 标志
-      (this as any).$watch('analysisReport', (newValue: any) => {
-        console.log('[Alpine 组件] 📊 analysisReport 变化检测:', !!newValue);
+      (this as any).$watch('analysisReport', (newValue: unknown) => {
+        Logger.debug('[Alpine 组件] 📊 analysisReport 变化检测:', !!newValue);
         (this as any).hasReport = !!newValue;
         if (newValue) {
           const resultsCount = (this as any).results?.length || 0;
-          console.log('[Alpine 组件] 📊 results 重新计算:', resultsCount, '个结果');
+          Logger.debug('[Alpine 组件] 📊 results 重新计算:', resultsCount, '个结果');
         }
       });
 
@@ -89,14 +90,14 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
 
     // ========== 清理 ==========
     destroy(this: AlpineContext & Record<string, unknown>) {
-      console.log('[Alpine 组件] 🧹 组件销毁，清理订阅');
+      Logger.debug('[Alpine 组件] 🧹 组件销毁，清理订阅');
       if (Array.isArray(this._unsubscribes)) {
         cleanupSubscriptions(this._unsubscribes);
       }
     },
 
     // ========== Data Loading ==========
-    loadHistoricalReport(detail: { report: any; timestamp: string }) {
+    loadHistoricalReport(detail: { report: unknown; timestamp: string }) {
       const ctx = this as unknown as AlpineContext & ComputedProperties;
       loadHistoricalReport(ctx, detail);
     },

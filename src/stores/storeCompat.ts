@@ -8,6 +8,7 @@
 import { appStore } from './useAppStore';
 import type { ValidStatePath, AppState } from '../types/state';
 
+import { Logger } from '../services/loggerService';
 /**
  * 路径解析结果
  */
@@ -115,7 +116,7 @@ const MODULE_UPDATERS: Record<string, string> = {
  * 
  * // 订阅变化
  * const unsubscribe = storeCompat.subscribe('ui.currentTab', (newVal, oldVal) => {
- *   console.log('Tab changed:', oldVal, '->', newVal);
+ *   Logger.debug('Tab changed:', oldVal, '->', newVal);
  * });
  */
 export class StoreCompat {
@@ -140,7 +141,7 @@ export class StoreCompat {
     const { module, property, isValid } = parsePath(path);
 
     if (!isValid) {
-      console.warn(`[StoreCompat] 无效路径: ${path}`);
+      Logger.warn(`[StoreCompat] 无效路径: ${path}`);
       return undefined as T;
     }
 
@@ -175,7 +176,7 @@ export class StoreCompat {
     const { module, property, isValid } = parsePath(path);
 
     if (!isValid) {
-      console.warn(`[StoreCompat] 无效路径: ${path}`);
+      Logger.warn(`[StoreCompat] 无效路径: ${path}`);
       return;
     }
 
@@ -209,7 +210,7 @@ export class StoreCompat {
     }
 
     // 3. 兜底:直接更新(不推荐,但保证兼容性)
-    console.warn(`[StoreCompat] 未找到setter: ${module}.${property}, 使用直接更新`);
+    Logger.warn(`[StoreCompat] 未找到setter: ${module}.${property}, 使用直接更新`);
     const moduleState = (state as any)[module];
     if (moduleState && typeof moduleState === 'object') {
       const update: Partial<AppState> = {};
@@ -228,7 +229,7 @@ export class StoreCompat {
    * 
    * @example
    * const unsubscribe = storeCompat.subscribe('ui.currentTab', (newVal, oldVal) => {
-   *   console.log('Tab changed:', oldVal, '->', newVal);
+   *   Logger.debug('Tab changed:', oldVal, '->', newVal);
    * });
    * 
    * // 取消订阅
@@ -281,7 +282,7 @@ export class StoreCompat {
    * 
    * @example
    * const snapshot = storeCompat.snapshot();
-   * console.log(snapshot.ui.currentTab);
+   * Logger.debug(snapshot.ui.currentTab);
    */
   snapshot(): AppState {
     return appStore.getState();
@@ -315,7 +316,7 @@ export class StoreCompat {
         state.resetQALab();
         break;
       default:
-        console.warn(`[StoreCompat] 不支持重置模块: ${module}`);
+        Logger.warn(`[StoreCompat] 不支持重置模块: ${module}`);
     }
   }
 
@@ -365,7 +366,7 @@ export class StoreCompat {
  * 
  * // 订阅变化
  * const unsubscribe = storeCompat.subscribe('ui.currentTab', (newVal) => {
- *   console.log('Tab changed to:', newVal);
+ *   Logger.debug('Tab changed to:', newVal);
  * });
  */
 export const storeCompat = new StoreCompat();

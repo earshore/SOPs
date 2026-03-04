@@ -3,6 +3,7 @@
 import BaseModule from "../../../../../common/BaseModule";
 import { loadTemplate } from "../../../../../common/utils/viewLoader";
 
+import { Logger } from '../../../../../services/loggerService';
 // ==================== 类型定义 ====================
 interface ContentBlock {
     type: string;
@@ -476,7 +477,7 @@ class PromotionsModule extends BaseModule {
         this.renderContent();
         this.setupIntersectionObserver();
 
-        console.log("✅ Promotions Module Loaded (实战版)");
+        Logger.debug("✅ Promotions Module Loaded (实战版)");
     }
 
     protected onUnmount(): void {
@@ -486,7 +487,7 @@ class PromotionsModule extends BaseModule {
         }
         delete (window as any).amzp_scrollTo;
         delete (window as any).amzp_scrollTo_Name;
-        console.log("❌ Promotions Module Unmounted");
+        Logger.debug("❌ Promotions Module Unmounted");
     }
 
     // ==================== Logic ====================

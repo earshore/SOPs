@@ -9,6 +9,7 @@ import type { IConfigService } from '../../types/services';
 import { validateConfig } from './schemas/configSchema';
 import { loadRouteConfig } from './loaders/routeConfigLoader';
 
+import { Logger } from '../../services/loggerService';
 // ==================== 类型定义 ====================
 
 /**
@@ -135,7 +136,7 @@ export class ConfigCenter implements IConfigService {
     this.listeners = new Map();
     this.config = this.loadConfig();
     // 延迟日志记录，避免循环依赖
-    console.log(`[ConfigCenter] 配置中心已初始化, 环境: ${this.config.environment}`);
+    Logger.debug(`[ConfigCenter] 配置中心已初始化, 环境: ${this.config.environment}`);
   }
 
   /**
@@ -378,7 +379,7 @@ export class ConfigCenter implements IConfigService {
     // 触发监听器
     this.notifyListeners(path, value, oldValue);
 
-    console.log(`[ConfigCenter] 配置已更新: ${path}`);
+    Logger.debug(`[ConfigCenter] 配置已更新: ${path}`);
   }
 
   /**
@@ -413,7 +414,7 @@ export class ConfigCenter implements IConfigService {
         try {
           listener(path, newValue, oldValue);
         } catch (error) {
-          console.error('[ConfigCenter] 配置监听器执行失败', { path, error });
+          Logger.error('[ConfigCenter] 配置监听器执行失败', { path, error });
         }
       });
     }
@@ -425,9 +426,9 @@ export class ConfigCenter implements IConfigService {
   public validate(): boolean {
     const isValid = validateConfig(this.config);
     if (isValid) {
-      console.log('[ConfigCenter] 配置验证通过');
+      Logger.debug('[ConfigCenter] 配置验证通过');
     } else {
-      console.error('[ConfigCenter] 配置验证失败');
+      Logger.error('[ConfigCenter] 配置验证失败');
     }
     return isValid;
   }
@@ -438,7 +439,7 @@ export class ConfigCenter implements IConfigService {
   public reload(): void {
     const oldConfig = this.config;
     this.config = this.loadConfig();
-    console.log('[ConfigCenter] 配置已重新加载', {
+    Logger.debug('[ConfigCenter] 配置已重新加载', {
       oldEnv: oldConfig.environment,
       newEnv: this.config.environment
     });
@@ -505,7 +506,7 @@ export class ConfigCenter implements IConfigService {
    */
   public reset(): void {
     this.config = this.loadConfig();
-    console.log('[ConfigCenter] 配置已重置');
+    Logger.debug('[ConfigCenter] 配置已重置');
   }
 }
 

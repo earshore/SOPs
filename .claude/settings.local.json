@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run:*)",
+      "Bash(npm audit:*)",
+      "Bash(find src:*)"
+    ]
+  }
+}

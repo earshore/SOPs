@@ -17,6 +17,7 @@ import eventBus from '../../../../../../common/EventBus';
 import { SafeRenderer } from '../../../../../../common/infrastructure/SafeRenderer';
 import { estimateTokenCount, formatTokenCount } from '../../ai_analysis/utils/tokenCounter';
 
+import { Logger } from '../../../../../../services/loggerService';
 /**
  * 控制台模式类型
  */
@@ -65,7 +66,7 @@ export function createPromptlabPanel() {
          */
         get hasReport(): boolean {
             const report = appStore.getState().analysis.analysisReport;
-            console.log('[Promptlab] hasReport 检查:', {
+            Logger.debug('[Promptlab] hasReport 检查:', {
                 report,
                 type: typeof report,
                 hasMetadata: typeof report === 'object' && report !== null ? (report as any).metadata : undefined,
@@ -118,7 +119,7 @@ export function createPromptlabPanel() {
         // ========== Lifecycle ==========
 
         init() {
-            console.log('[Promptlab] 🚀 Alpine 组件初始化');
+            Logger.debug('[Promptlab] 🚀 Alpine 组件初始化');
 
             // 从 Zustand store 恢复状态
             this.restoreState();
@@ -131,16 +132,16 @@ export function createPromptlabPanel() {
 
             // 监听数据更新事件
             eventBus.on(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, () => {
-                console.log('[Promptlab] 检测到数据更新，重新渲染报告分析');
+                Logger.debug('[Promptlab] 检测到数据更新，重新渲染报告分析');
                 this.renderReportAnalysis();
             });
 
             window.addEventListener(APP_EVENTS.HISTORY_UPDATED, () => {
-                console.log('[Promptlab] 检测到历史更新，重新渲染报告分析');
+                Logger.debug('[Promptlab] 检测到历史更新，重新渲染报告分析');
                 this.renderReportAnalysis();
             });
 
-            console.log('[Promptlab] ✅ Alpine 组件初始化完成');
+            Logger.debug('[Promptlab] ✅ Alpine 组件初始化完成');
         },
 
         // ========== State Management ==========
@@ -152,7 +153,7 @@ export function createPromptlabPanel() {
             const savedProfile = appStore.getState().promptlab.userProductProfile;
             if (savedProfile) {
                 this.profile = { ...savedProfile };
-                console.log('[Promptlab] ✅ 状态已从 store 恢复');
+                Logger.debug('[Promptlab] ✅ 状态已从 store 恢复');
             }
         },
 
@@ -161,7 +162,7 @@ export function createPromptlabPanel() {
          */
         saveState() {
             appStore.getState().setUserProductProfile(this.profile);
-            console.log('[Promptlab] ✅ 状态已保存到 store');
+            Logger.debug('[Promptlab] ✅ 状态已保存到 store');
         },
 
         // ========== UI Functions ==========
@@ -192,14 +193,14 @@ export function createPromptlabPanel() {
          * 渲染报告分析
          */
         renderReportAnalysis() {
-            console.log('[Promptlab] renderReportAnalysis 调用, hasReport:', this.hasReport);
+            Logger.debug('[Promptlab] renderReportAnalysis 调用, hasReport:', this.hasReport);
 
             const container = document.getElementById('report-sections-container');
             const statusDiv = document.getElementById('lab-analysis-status');
             const marketSelect = document.getElementById('lab-target-market') as HTMLSelectElement;
 
             if (!container) {
-                console.log('[Promptlab] 容器元素未找到');
+                Logger.debug('[Promptlab] 容器元素未找到');
                 return;
             }
 
@@ -207,7 +208,7 @@ export function createPromptlabPanel() {
 
             // 如果没有报告，显示提示
             if (!this.hasReport) {
-                console.log('[Promptlab] 没有报告，显示提示');
+                Logger.debug('[Promptlab] 没有报告，显示提示');
                 if (statusDiv) {
                     statusDiv.className = 'px-2 py-1 bg-slate-100 text-slate-500 rounded text-xs flex items-center gap-1';
                     renderer.renderTemplate(statusDiv, '<i class="fas fa-exclamation-circle"></i> 未检测到分析报告');
@@ -254,7 +255,7 @@ export function createPromptlabPanel() {
             const isMarketplaceChanged = currentMarketplace && currentMarketplace !== this.lastMarketplace;
 
             if (currentMarketplace && (isFirstLoad || isMarketplaceChanged)) {
-                console.log('[Promptlab] 检测到市场变化:', this.lastMarketplace, '→', currentMarketplace);
+                Logger.debug('[Promptlab] 检测到市场变化:', this.lastMarketplace, '→', currentMarketplace);
 
                 const siteConfig = SITE_CONFIGS[currentMarketplace];
                 if (siteConfig) {
@@ -267,7 +268,7 @@ export function createPromptlabPanel() {
                         this.profile.targetMarket = match.value as TargetMarket;
                         this.saveState();
                         this.lastMarketplace = currentMarketplace;
-                        console.log('[Promptlab] 已自动选择市场:', match.value, `(${currentMarketplace})`);
+                        Logger.debug('[Promptlab] 已自动选择市场:', match.value, `(${currentMarketplace})`);
                     }
                 }
             } else if (currentMarketplace) {
@@ -281,7 +282,7 @@ export function createPromptlabPanel() {
         renderReportModules(container: HTMLElement) {
             const report = appStore.getState().analysis.analysisReport as any;
 
-            console.log('[Promptlab] renderReportModules 调用:', {
+            Logger.debug('[Promptlab] renderReportModules 调用:', {
                 report,
                 reportKeys: report ? Object.keys(report) : null
             });
@@ -301,11 +302,11 @@ export function createPromptlabPanel() {
 
             if (hasMetadata) {
                 // 处理包装格式报告
-                console.log('[Promptlab] 检测到包装格式报告');
+                Logger.debug('[Promptlab] 检测到包装格式报告');
                 this.renderNewFormatModules(container, report.analysisReport, isFirstLoad);
             } else if (report && typeof report === 'object') {
                 // 处理直接格式报告（当前格式）
-                console.log('[Promptlab] 检测到直接格式报告');
+                Logger.debug('[Promptlab] 检测到直接格式报告');
                 this.renderNewFormatModules(container, report, isFirstLoad);
             } else {
                 // 处理旧格式报告（向后兼容）
@@ -319,39 +320,39 @@ export function createPromptlabPanel() {
          * @param data 分析数据
          * @returns 预览文本
          */
-        extractPreviewText(targetId: string, data: any): string {
-            console.log('[Promptlab] extractPreviewText 调用:', { targetId, dataType: typeof data, data });
+        extractPreviewText(targetId: string, data: unknown): string {
+            Logger.debug('[Promptlab] extractPreviewText 调用:', { targetId, dataType: typeof data, data });
 
             try {
                 switch (targetId) {
                     case 'title-keywords':
-                        console.log('[Promptlab] 处理 title-keywords:', data);
+                        Logger.debug('[Promptlab] 处理 title-keywords:', data);
                         // 提取主要关键词
                         if (data.primary_keywords && Array.isArray(data.primary_keywords)) {
                             const keywords = data.primary_keywords
                                 .slice(0, 3)
-                                .map((k: any) => k.keyword)
+                                .map((k: unknown) => k.keyword)
                                 .filter(Boolean)
                                 .join(', ');
-                            console.log('[Promptlab] title-keywords 提取结果:', keywords);
+                            Logger.debug('[Promptlab] title-keywords 提取结果:', keywords);
                             return keywords || '无主要关键词';
                         }
-                        console.log('[Promptlab] title-keywords 无 primary_keywords');
+                        Logger.debug('[Promptlab] title-keywords 无 primary_keywords');
                         break;
 
                     case 'selling-points':
-                        console.log('[Promptlab] 处理 selling-points:', data);
+                        Logger.debug('[Promptlab] 处理 selling-points:', data);
                         // 提取主要差异化角度
                         if (data.overall_strategy?.primary_differentiation) {
-                            console.log('[Promptlab] selling-points 提取结果:', data.overall_strategy.primary_differentiation);
+                            Logger.debug('[Promptlab] selling-points 提取结果:', data.overall_strategy.primary_differentiation);
                             return data.overall_strategy.primary_differentiation;
                         }
                         if (data.bullet_analysis && Array.isArray(data.bullet_analysis) && data.bullet_analysis.length > 0) {
                             const result = data.bullet_analysis[0].differentiation_angle || '卖点分析';
-                            console.log('[Promptlab] selling-points 提取结果(备选):', result);
+                            Logger.debug('[Promptlab] selling-points 提取结果(备选):', result);
                             return result;
                         }
-                        console.log('[Promptlab] selling-points 无可用数据');
+                        Logger.debug('[Promptlab] selling-points 无可用数据');
                         break;
 
                     case 'fatal-flaws':
@@ -359,7 +360,7 @@ export function createPromptlabPanel() {
                         if (data.critical_issues && Array.isArray(data.critical_issues)) {
                             const issues = data.critical_issues
                                 .slice(0, 2)
-                                .map((i: any) => i.issue)
+                                .map((i: unknown) => i.issue)
                                 .filter(Boolean)
                                 .join('; ');
                             return issues || '无致命缺陷';
@@ -394,7 +395,7 @@ export function createPromptlabPanel() {
                         if (data.buyer_types && Array.isArray(data.buyer_types) && data.buyer_types.length > 0) {
                             const types = data.buyer_types
                                 .slice(0, 2)
-                                .map((t: any) => t.type)
+                                .map((t: unknown) => t.type)
                                 .filter(Boolean)
                                 .join(', ');
                             return types || '买家画像分析';
@@ -409,7 +410,7 @@ export function createPromptlabPanel() {
                         if (data.missing_keywords && Array.isArray(data.missing_keywords)) {
                             const keywords = data.missing_keywords
                                 .slice(0, 3)
-                                .map((k: any) => k.keyword || k)
+                                .map((k: unknown) => k.keyword || k)
                                 .filter(Boolean)
                                 .join(', ');
                             return keywords || '词汇缺口分析';
@@ -425,17 +426,17 @@ export function createPromptlabPanel() {
                 }
 
                 // 默认：尝试提取第一个有意义的字符串值
-                console.log('[Promptlab] 使用默认提取逻辑');
+                Logger.debug('[Promptlab] 使用默认提取逻辑');
                 const firstValue = this.findFirstStringValue(data);
-                console.log('[Promptlab] findFirstStringValue 结果:', firstValue);
+                Logger.debug('[Promptlab] findFirstStringValue 结果:', firstValue);
                 if (firstValue) {
                     return firstValue.length > 80 ? firstValue.substring(0, 80) + '...' : firstValue;
                 }
 
-                console.log('[Promptlab] 无法提取预览文本，返回默认值');
+                Logger.debug('[Promptlab] 无法提取预览文本，返回默认值');
                 return '分析数据已加载';
             } catch (error) {
-                console.error('[Promptlab] 提取预览文本失败:', error);
+                Logger.error('[Promptlab] 提取预览文本失败:', error);
                 return '分析数据已加载';
             }
         },
@@ -446,26 +447,26 @@ export function createPromptlabPanel() {
          * @param depth 递归深度限制
          * @returns 字符串值或null
          */
-        findFirstStringValue(obj: any, depth: number = 0): string | null {
-            console.log('[Promptlab] findFirstStringValue 调用:', { depth, objType: typeof obj, isArray: Array.isArray(obj) });
+        findFirstStringValue(obj: unknown, depth: number = 0): string | null {
+            Logger.debug('[Promptlab] findFirstStringValue 调用:', { depth, objType: typeof obj, isArray: Array.isArray(obj) });
 
             if (depth > 3) {
-                console.log('[Promptlab] 达到最大递归深度');
+                Logger.debug('[Promptlab] 达到最大递归深度');
                 return null; // 限制递归深度
             }
 
             if (typeof obj === 'string' && obj.trim().length > 0) {
-                console.log('[Promptlab] 找到字符串值:', obj.substring(0, 50));
+                Logger.debug('[Promptlab] 找到字符串值:', obj.substring(0, 50));
                 return obj.trim();
             }
 
             if (Array.isArray(obj) && obj.length > 0) {
-                console.log('[Promptlab] 处理数组，长度:', obj.length);
+                Logger.debug('[Promptlab] 处理数组，长度:', obj.length);
                 return this.findFirstStringValue(obj[0], depth + 1);
             }
 
             if (obj && typeof obj === 'object') {
-                console.log('[Promptlab] 处理对象，键:', Object.keys(obj).slice(0, 5));
+                Logger.debug('[Promptlab] 处理对象，键:', Object.keys(obj).slice(0, 5));
                 for (const key in obj) {
                     if (obj.hasOwnProperty(key)) {
                         const result = this.findFirstStringValue(obj[key], depth + 1);
@@ -474,7 +475,7 @@ export function createPromptlabPanel() {
                 }
             }
 
-            console.log('[Promptlab] 未找到字符串值');
+            Logger.debug('[Promptlab] 未找到字符串值');
             return null;
         },
 
@@ -484,8 +485,8 @@ export function createPromptlabPanel() {
          * @param analysisReport 分析报告对象 { 'title-keywords': {...}, 'selling-points': {...}, ... }
          * @param isFirstLoad 是否首次加载
          */
-        renderNewFormatModules(container: HTMLElement, analysisReport: any, isFirstLoad: boolean) {
-            console.log('[Promptlab] renderNewFormatModules 调用:', {
+        renderNewFormatModules(container: HTMLElement, analysisReport: unknown, isFirstLoad: boolean) {
+            Logger.debug('[Promptlab] renderNewFormatModules 调用:', {
                 analysisReport,
                 reportType: typeof analysisReport,
                 keys: Object.keys(analysisReport || {}),
@@ -511,8 +512,8 @@ export function createPromptlabPanel() {
                 targetConfig[key] && analysisReport[key]
             );
 
-            console.log('[Promptlab] 可用的分析目标:', availableTargets);
-            console.log('[Promptlab] 每个目标的数据:', availableTargets.map(id => ({
+            Logger.debug('[Promptlab] 可用的分析目标:', availableTargets);
+            Logger.debug('[Promptlab] 每个目标的数据:', availableTargets.map(id => ({
                 id,
                 dataType: typeof analysisReport[id],
                 isArray: Array.isArray(analysisReport[id]),
@@ -530,7 +531,7 @@ export function createPromptlabPanel() {
                 if (!config) return; // 类型守卫
 
                 const data = analysisReport[targetId];
-                console.log(`[Promptlab] 渲染目标 ${targetId}:`, {
+                Logger.debug(`[Promptlab] 渲染目标 ${targetId}:`, {
                     dataType: typeof data,
                     isArray: Array.isArray(data),
                     data
@@ -541,7 +542,7 @@ export function createPromptlabPanel() {
                 if (data) {
                     previewText = this.extractPreviewText(targetId, data);
                 }
-                console.log(`[Promptlab] ${targetId} 最终预览文本:`, previewText);
+                Logger.debug(`[Promptlab] ${targetId} 最终预览文本:`, previewText);
 
                 const isChecked = this.profile.selectedReportSections.includes(targetId);
 
@@ -575,7 +576,7 @@ export function createPromptlabPanel() {
         /**
          * 渲染旧格式报告模块
          */
-        renderLegacyFormatModules(container: HTMLElement, report: any, isFirstLoad: boolean) {
+        renderLegacyFormatModules(container: HTMLElement, report: unknown, isFirstLoad: boolean) {
             const renderer = SafeRenderer.getInstance();
             const ignoreKeys = ['meta', 'generatedByModel', 'generatedAt', 'templateUsed', 'templateId', 'raw_response'];
             const keys = Object.keys(report).filter((k) => !ignoreKeys.includes(k));
@@ -638,7 +639,7 @@ export function createPromptlabPanel() {
         /**
          * 获取预览文本
          */
-        getPreviewText(val: any): string {
+        getPreviewText(val: unknown): string {
             if (!val) return '';
             if (typeof val === 'string') return val.length > 50 ? val.substring(0, 50) + '...' : val;
 
@@ -688,7 +689,7 @@ export function createPromptlabPanel() {
          * 生成 Listing Prompt
          */
         generateListingPrompt() {
-            console.log('[Promptlab] 🎯 生成 Listing Prompt');
+            Logger.debug('[Promptlab] 🎯 生成 Listing Prompt');
 
             if (!this.isReady) {
                 let msg = '未就绪';
@@ -720,7 +721,7 @@ export function createPromptlabPanel() {
          * 生成 Visual Prompt
          */
         generateVisualPrompt() {
-            console.log('[Promptlab] 🎯 生成 Visual Prompt');
+            Logger.debug('[Promptlab] 🎯 生成 Visual Prompt');
 
             if (!this.hasReport) {
                 showToast('请先生成 Ai 分析报告以获取视觉灵感', { type: 'warning' });

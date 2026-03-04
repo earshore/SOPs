@@ -8,6 +8,7 @@ import { appStore } from '@/stores/useAppStore';
 import { analysisTargets } from '../config/analysisTargets';
 import { createComputedProperties } from './computedProperties';
 
+import { Logger } from '../../../../../../services/loggerService';
 /**
  * 创建 AI 分析面板组件（优化版）
  * 使用 Zustand 订阅自动同步状态
@@ -44,7 +45,7 @@ export function createAiAnalysisPanelOptimized(): Record<string, unknown> {
     get analysisReport() {
       return appStore.getState().analysis.analysisReport;
     },
-    set analysisReport(value: any) {
+    set analysisReport(value: unknown) {
       appStore.getState().setAnalysisReport(value);
     },
 
@@ -67,13 +68,13 @@ export function createAiAnalysisPanelOptimized(): Record<string, unknown> {
 
     // ========== 生命周期 ==========
     init() {
-      console.log('[Alpine 组件] 🚀 初始化 AI 分析面板（优化版）');
+      Logger.debug('[Alpine 组件] 🚀 初始化 AI 分析面板（优化版）');
 
       // 从 Zustand 初始化状态
       const scrapedData = appStore.getState().scraper.scrapedData;
       if (scrapedData?.products && scrapedData.products.length > 0) {
         const asins = scrapedData.products
-          .map((p: any) => p.asin)
+          .map((p: unknown) => p.asin)
           .filter((asin: string) => !!asin);
         appStore.getState().setSelectedAsins(asins);
         this.dataSource = 'scraper';
@@ -93,11 +94,11 @@ export function createAiAnalysisPanelOptimized(): Record<string, unknown> {
         }
       });
 
-      console.log('[Alpine 组件] ✅ 初始化完成');
+      Logger.debug('[Alpine 组件] ✅ 初始化完成');
     },
 
     destroy() {
-      console.log('[Alpine 组件] 🔄 销毁组件');
+      Logger.debug('[Alpine 组件] 🔄 销毁组件');
       // 清理订阅
       if (typeof this._unsubscribe === 'function') {
         this._unsubscribe();
@@ -119,7 +120,7 @@ export function createAiAnalysisPanelOptimized(): Record<string, unknown> {
       const scrapedData = appStore.getState().scraper.scrapedData;
       if (scrapedData?.products) {
         const asins = scrapedData.products
-          .map((p: any) => p.asin)
+          .map((p: unknown) => p.asin)
           .filter((asin: string) => !!asin);
         appStore.getState().setSelectedAsins(asins);
       }
@@ -215,12 +216,12 @@ export function createAiAnalysisPanelOptimized(): Record<string, unknown> {
     // ========== 数据加载 ==========
     async startAnalysis() {
       if ((this.selectedAsins as string[]).length === 0) {
-        console.warn('[Alpine 组件] ⚠️ 未选择任何 ASIN');
+        Logger.warn('[Alpine 组件] ⚠️ 未选择任何 ASIN');
         return;
       }
 
       if ((this._selectedTargets as string[]).length === 0) {
-        console.warn('[Alpine 组件] ⚠️ 未选择任何分析目标');
+        Logger.warn('[Alpine 组件] ⚠️ 未选择任何分析目标');
         return;
       }
 
@@ -235,7 +236,7 @@ export function createAiAnalysisPanelOptimized(): Record<string, unknown> {
         this.progress = 100;
         this.currentStep = '分析完成';
       } catch (error) {
-        console.error('[Alpine 组件] ❌ 分析失败:', error);
+        Logger.error('[Alpine 组件] ❌ 分析失败:', error);
       } finally {
         this.isAnalyzing = false;
       }

@@ -10,6 +10,7 @@ import eventBus from '../../../../../../common/EventBus';
 import { APP_EVENTS } from '../../../../../../common/constants/eventConstants';
 import { SafeRenderer } from '../../../../../../common/infrastructure/SafeRenderer';
 
+import { Logger } from '../../../../../../services/loggerService';
 /**
  * 删除产品
  */
@@ -34,7 +35,7 @@ export async function deleteProduct(
         );
 
         if (!confirmed) {
-            console.log('[Scraper] 用户取消删除产品操作');
+            Logger.debug('[Scraper] 用户取消删除产品操作');
             return { success: false };
         }
 
@@ -48,14 +49,14 @@ export async function deleteProduct(
         }
 
         // 验证产品是否存在
-        const productExists = scrapedData.products.some((p: any) => p.asin === asin);
+        const productExists = scrapedData.products.some((p: unknown) => p.asin === asin);
         if (!productExists) {
             throw new Error(`产品不存在：${asin}`);
         }
 
         // 从数据集中移除产品
         const beforeCount = scrapedData.products.length;
-        scrapedData.products = scrapedData.products.filter((p: any) => p.asin !== asin);
+        scrapedData.products = scrapedData.products.filter((p: unknown) => p.asin !== asin);
         const afterCount = scrapedData.products.length;
 
         // 验证删除是否成功
@@ -72,7 +73,7 @@ export async function deleteProduct(
         try {
             HistoryService.save(scrapedData);
         } catch (saveError) {
-            console.error('[Scraper] 保存历史记录失败:', saveError);
+            Logger.error('[Scraper] 保存历史记录失败:', saveError);
             throw new Error('保存历史记录失败');
         }
 
@@ -81,17 +82,17 @@ export async function deleteProduct(
             eventBus.emit(APP_EVENTS.DATA_UPDATED);
             window.dispatchEvent(new CustomEvent(APP_EVENTS.HISTORY_UPDATED));
         } catch (eventError) {
-            console.error('[Scraper] 触发事件失败:', eventError);
+            Logger.error('[Scraper] 触发事件失败:', eventError);
         }
 
         showToast(`ASIN ${asin} 已移除`, { type: 'info' });
-        console.log(`[Scraper] 成功删除产品: ${asin}`);
+        Logger.debug(`[Scraper] 成功删除产品: ${asin}`);
 
         return { success: true, data: scrapedData };
 
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        console.error('[Scraper] 删除产品失败:', {
+        Logger.error('[Scraper] 删除产品失败:', {
             error: error,
             errorMessage: errorMessage,
             asin: asin,
@@ -102,7 +103,7 @@ export async function deleteProduct(
 
         // 回滚数据
         if (originalData) {
-            console.warn('[Scraper] 正在回滚数据...');
+            Logger.warn('[Scraper] 正在回滚数据...');
             return { success: false, data: originalData, error: errorMessage };
         }
 
@@ -139,7 +140,7 @@ export async function deleteReview(
         );
 
         if (!confirmed) {
-            console.log('[Scraper] 用户取消删除评论操作');
+            Logger.debug('[Scraper] 用户取消删除评论操作');
             return { success: false };
         }
 
@@ -153,7 +154,7 @@ export async function deleteReview(
         }
 
         // 找到产品
-        const product = scrapedData.products.find((p: any) => p.asin === asin);
+        const product = scrapedData.products.find((p: unknown) => p.asin === asin);
         if (!product) {
             throw new Error(`产品不存在：${asin}`);
         }
@@ -182,7 +183,7 @@ export async function deleteReview(
         try {
             HistoryService.save(scrapedData);
         } catch (saveError) {
-            console.error('[Scraper] 保存历史记录失败:', saveError);
+            Logger.error('[Scraper] 保存历史记录失败:', saveError);
             throw new Error('保存历史记录失败');
         }
 
@@ -191,17 +192,17 @@ export async function deleteReview(
             eventBus.emit(APP_EVENTS.DATA_UPDATED);
             window.dispatchEvent(new CustomEvent(APP_EVENTS.HISTORY_UPDATED));
         } catch (eventError) {
-            console.error('[Scraper] 触发事件失败:', eventError);
+            Logger.error('[Scraper] 触发事件失败:', eventError);
         }
 
         showToast('评论已删除', { type: 'info' });
-        console.log(`[Scraper] 成功删除评论: ASIN=${asin}, index=${index}`);
+        Logger.debug(`[Scraper] 成功删除评论: ASIN=${asin}, index=${index}`);
 
         return { success: true, data: scrapedData };
 
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        console.error('[Scraper] 删除评论失败:', {
+        Logger.error('[Scraper] 删除评论失败:', {
             error: error,
             errorMessage: errorMessage,
             asin: asin,
@@ -213,7 +214,7 @@ export async function deleteReview(
 
         // 回滚数据
         if (originalData) {
-            console.warn('[Scraper] 正在回滚数据...');
+            Logger.warn('[Scraper] 正在回滚数据...');
             return { success: false, data: originalData, error: errorMessage };
         }
 
@@ -286,7 +287,7 @@ export function confirmWithModal(title: string, content: string, storageKey: str
                     document.body.removeChild(backdrop);
                 }
             } catch (error) {
-                console.error('[Scraper] 清理确认对话框失败:', error);
+                Logger.error('[Scraper] 清理确认对话框失败:', error);
             }
         };
 

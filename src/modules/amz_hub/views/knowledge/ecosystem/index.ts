@@ -8,7 +8,7 @@ import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import { loadChartJs } from '../../../../../common/utils/lazyLibs';
 
 class EcosystemModule extends BaseModule {
-    private chartInstance: any = null;
+    private chartInstance: unknown = null;
 
     constructor() {
         super('amz_ecosystem');

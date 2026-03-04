@@ -82,7 +82,7 @@ export class GlobalErrorHandler {
       });
     });
 
-    console.log('✅ [GlobalErrorHandler] 全局错误处理器已初始化');
+    Logger.debug('✅ [GlobalErrorHandler] 全局错误处理器已初始化');
   }
 
   /**
@@ -203,7 +203,7 @@ export class GlobalErrorHandler {
       });
     } catch (e) {
       // 静默失败,避免监控服务错误影响主流程
-      console.warn('[GlobalErrorHandler] 上报错误失败:', e);
+      Logger.warn('[GlobalErrorHandler] 上报错误失败:', e);
     }
   }
 

@@ -5,6 +5,7 @@
 // ================================================================
 
 import type { ZodSchema } from 'zod';
+import { Logger } from '../../services/loggerService';
 import {
   RouteConfigSchema,
   ModuleConfigSchema,
@@ -51,7 +52,7 @@ export function validateRouteConfig(config: unknown): boolean {
     return true;
   } catch (error: unknown) {
     const zodError = error as { errors?: unknown[]; message?: string };
-    console.error('[TypeGuard] Invalid route config:', zodError.errors);
+    Logger.error('[TypeGuard] Invalid route config:', zodError.errors);
     throw new Error(`Route config validation failed: ${zodError.message || 'Unknown error'}`);
   }
 }
@@ -68,7 +69,7 @@ export function validateModuleConfig(config: unknown): boolean {
     return true;
   } catch (error: unknown) {
     const zodError = error as { errors?: unknown[]; message?: string };
-    console.error('[TypeGuard] Invalid module config:', zodError.errors);
+    Logger.error('[TypeGuard] Invalid module config:', zodError.errors);
     throw new Error(`Module config validation failed: ${zodError.message || 'Unknown error'}`);
   }
 }
@@ -85,7 +86,7 @@ export function validateLLMConfig(config: unknown): boolean {
     return true;
   } catch (error: unknown) {
     const zodError = error as { errors?: unknown[]; message?: string };
-    console.error('[TypeGuard] Invalid LLM config:', zodError.errors);
+    Logger.error('[TypeGuard] Invalid LLM config:', zodError.errors);
     throw new Error(`LLM config validation failed: ${zodError.message || 'Unknown error'}`);
   }
 }
@@ -102,7 +103,7 @@ export function validateProxyConfig(config: unknown): boolean {
     return true;
   } catch (error: unknown) {
     const zodError = error as { errors?: unknown[]; message?: string };
-    console.error('[TypeGuard] Invalid proxy config:', zodError.errors);
+    Logger.error('[TypeGuard] Invalid proxy config:', zodError.errors);
     throw new Error(`Proxy config validation failed: ${zodError.message || 'Unknown error'}`);
   }
 }
@@ -125,7 +126,7 @@ export function safeParse<T>(value: unknown, schema: ZodSchema<T>, defaultValue:
   if (result.success) {
     return result.data;
   }
-  console.warn('[TypeGuard] Parse failed, using default:', result.error);
+  Logger.warn('[TypeGuard] Parse failed, using default:', result.error);
   return defaultValue;
 }
 

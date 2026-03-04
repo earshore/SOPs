@@ -1,9 +1,10 @@
-console.log("📋 SOPs Core Module Loading...");
+Logger.debug("📋 SOPs Core Module Loading...");
 import './sops_style.css';
 import { createModuleLoader, ModuleLoader } from '../../common/utils/ModuleLoader';
 import type { ModuleMap, ModuleLoaderFn } from '@/types/modules-business';
 import { SOPS_ROUTES } from '@/common/constants/routes';
 
+import { Logger } from '../../services/loggerService';
 // ================= 路由配置表 =================
 // 使用路由常量，避免硬编码
 const MODULE_MAP: ModuleMap = {

@@ -5,6 +5,7 @@
 
 import BaseModule from '@/common/BaseModule';
 import { loadTemplate } from '@/common/utils/viewLoader';
+import { Logger } from '../../services/loggerService';
 import './homeDisplay.css';
 
 /**
@@ -157,7 +158,7 @@ class HomeModule extends BaseModule {
    * 初始化模块
    */
   async init(): Promise<void> {
-    console.log('🚀 Initializing Clean Water Ripple Splash (BaseModule)...');
+    Logger.debug('🚀 Initializing Clean Water Ripple Splash (BaseModule)...');
 
     const canvas = document.getElementById('particles-canvas') as HTMLCanvasElement | null;
     if (!canvas) return;
@@ -184,7 +185,7 @@ class HomeModule extends BaseModule {
    * 卸载模块时的清理工作
    */
   onUnmount(): void {
-    console.log('💤 Home Module Unmounting...');
+    Logger.debug('💤 Home Module Unmounting...');
 
     // 1. 停止动画循环
     if (this.animationFrameId !== null) {

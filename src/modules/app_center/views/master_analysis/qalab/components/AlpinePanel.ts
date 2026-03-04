@@ -4,6 +4,7 @@
  */
 
 import { createMultipleStateSyncs, cleanupSubscriptions } from '@common/utils/stateSync';
+import { Logger } from '../../../../../../services/loggerService';
 import {
     startAnalysis,
     clearInput,
@@ -26,7 +27,7 @@ interface QalabAlpineContext {
     currentLang: string;
     currentCategory: string;
     allExpanded: boolean;
-    reportData: any;
+    reportData: unknown;
     generatedQAs: unknown[];
     activeTab: 'preview' | 'json';
     
@@ -67,7 +68,7 @@ export function createQalabPanel(): QalabAlpineContext & Record<string, unknown>
         
         // ========== Lifecycle ==========
         init(this: QalabAlpineContext & Record<string, unknown>) {
-            console.log('[QALab Alpine] 🚀 组件初始化');
+            Logger.debug('[QALab Alpine] 🚀 组件初始化');
             
             // 设置自动状态同步（Zustand → Alpine）
             this._unsubscribes = createMultipleStateSyncs([
@@ -108,12 +109,12 @@ export function createQalabPanel(): QalabAlpineContext & Record<string, unknown>
                 refreshDataPreview();
             });
             
-            console.log('[QALab Alpine] ✅ 组件初始化完成');
+            Logger.debug('[QALab Alpine] ✅ 组件初始化完成');
         },
         
         // ========== 清理 ==========
         destroy(this: QalabAlpineContext & Record<string, unknown>) {
-            console.log('[QALab Alpine] 🧹 组件销毁，清理订阅');
+            Logger.debug('[QALab Alpine] 🧹 组件销毁，清理订阅');
             if (Array.isArray(this._unsubscribes)) {
                 cleanupSubscriptions(this._unsubscribes);
             }
@@ -121,47 +122,47 @@ export function createQalabPanel(): QalabAlpineContext & Record<string, unknown>
         
         // ========== Actions ==========
         handleStartAnalysis() {
-            console.log('[QALab Alpine] 🚀 开始分析');
+            Logger.debug('[QALab Alpine] 🚀 开始分析');
             startAnalysis();
         },
         
         handleClearInput() {
-            console.log('[QALab Alpine] 🗑️ 清空输入');
+            Logger.debug('[QALab Alpine] 🗑️ 清空输入');
             clearInput();
         },
         
         handleToggleExpandAll() {
-            console.log('[QALab Alpine] 📖 切换展开/收起');
+            Logger.debug('[QALab Alpine] 📖 切换展开/收起');
             toggleExpandAll();
         },
         
         handleExportJSON() {
-            console.log('[QALab Alpine] 📥 导出 JSON');
+            Logger.debug('[QALab Alpine] 📥 导出 JSON');
             exportJSON();
         },
         
         handleExportCSV() {
-            console.log('[QALab Alpine] 📥 导出 CSV');
+            Logger.debug('[QALab Alpine] 📥 导出 CSV');
             exportCSV();
         },
         
         handleExportText() {
-            console.log('[QALab Alpine] 📥 导出文本');
+            Logger.debug('[QALab Alpine] 📥 导出文本');
             exportText();
         },
         
         handleSendRufusQuestion(question: string) {
-            console.log('[QALab Alpine] 💬 发送 Rufus 问题:', question);
+            Logger.debug('[QALab Alpine] 💬 发送 Rufus 问题:', question);
             sendRufusQuestion(question);
         },
         
         handleClearRufusChat() {
-            console.log('[QALab Alpine] 🗑️ 清空 Rufus 聊天');
+            Logger.debug('[QALab Alpine] 🗑️ 清空 Rufus 聊天');
             clearRufusChat();
         },
         
         handleSwitchDataTab(tab: 'preview' | 'json') {
-            console.log('[QALab Alpine] 🔄 切换数据标签:', tab);
+            Logger.debug('[QALab Alpine] 🔄 切换数据标签:', tab);
             this.activeTab = tab;
             switchDataTab(tab);
         }

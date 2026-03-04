@@ -9,6 +9,7 @@ import { errorTracker } from '../../services/errorTracker';
 import { analyticsService } from '../../services/analyticsService';
 import { alertService } from '../../services/alertService';
 
+import { Logger } from '../../services/loggerService';
 type TabType = 'overview' | 'performance' | 'errors' | 'analytics' | 'alerts';
 
 /**
@@ -26,7 +27,7 @@ export class PerformanceMonitor {
    */
   initialize(): void {
     if (process.env.NODE_ENV !== 'development') {
-      console.log('[PerformanceMonitor] 仅在开发环境启用');
+      Logger.debug('[PerformanceMonitor] 仅在开发环境启用');
       return;
     }
 
@@ -47,7 +48,7 @@ export class PerformanceMonitor {
       }
     }, 2000);
 
-    console.log('[PerformanceMonitor] ✅ 性能监控面板已初始化 (Ctrl+Shift+P 切换)');
+    Logger.debug('[PerformanceMonitor] ✅ 性能监控面板已初始化 (Ctrl+Shift+P 切换)');
   }
 
   /**

@@ -6,6 +6,7 @@
 
 import type { ILoggerService, IStorageService } from '../types/services';
 
+import { Logger } from './loggerService';
 /**
  * 事件类型
  */
@@ -464,7 +465,7 @@ export class AnalyticsService {
       });
     } catch (e) {
       // 静默失败
-      console.warn('[Analytics] Failed to send event:', e);
+      Logger.warn('[Analytics] Failed to send event:', e);
     }
   }
 

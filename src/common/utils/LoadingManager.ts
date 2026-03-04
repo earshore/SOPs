@@ -6,6 +6,7 @@
 
 import { APP_EVENTS, emitAppEvent } from '../constants/eventConstants';
 
+import { Logger } from '../../services/loggerService';
 // ==================== 类型定义 ====================
 
 /**
@@ -77,7 +78,7 @@ export class LoadingManager {
     // 触发事件
     emitAppEvent(APP_EVENTS.LOADING_START, { taskId, task });
 
-    console.log(`⏳ [LoadingManager] 开始任务: ${taskId} (${task.message})`);
+    Logger.debug(`⏳ [LoadingManager] 开始任务: ${taskId} (${task.message})`);
   }
 
   /**
@@ -87,7 +88,7 @@ export class LoadingManager {
   stop(taskId: string): void {
     const task = this.tasks.get(taskId);
     if (!task) {
-      console.warn(`⚠️ [LoadingManager] 任务不存在: ${taskId}`);
+      Logger.warn(`⚠️ [LoadingManager] 任务不存在: ${taskId}`);
       return;
     }
 
@@ -98,7 +99,7 @@ export class LoadingManager {
     // 触发事件
     emitAppEvent(APP_EVENTS.LOADING_STOP, { taskId, duration });
 
-    console.log(`✅ [LoadingManager] 完成任务: ${taskId} (耗时 ${duration}ms)`);
+    Logger.debug(`✅ [LoadingManager] 完成任务: ${taskId} (耗时 ${duration}ms)`);
   }
 
   /**
@@ -142,7 +143,7 @@ export class LoadingManager {
     this.tasks.clear();
     this._updateUI();
 
-    console.log(`🧹 [LoadingManager] 清空所有任务 (${taskIds.length} 个)`);
+    Logger.debug(`🧹 [LoadingManager] 清空所有任务 (${taskIds.length} 个)`);
   }
 
   /**

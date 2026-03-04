@@ -3,6 +3,8 @@
  * 用于追踪CSS加载性能和运行时性能
  */
 
+import { Logger } from '@services/loggerService';
+
 interface CSSLoadMetric {
   href: string;
   loadTime: number;
@@ -59,7 +61,7 @@ export class CSSPerformanceMonitor {
     
     // 警告慢加载
     if (duration > 500) {
-      console.warn(`⚠️ CSS加载过慢: ${href} (${duration.toFixed(2)}ms)`);
+      Logger.warn(`⚠️ CSS加载过慢: ${href} (${duration.toFixed(2)}ms)`);
     }
     
     // 限制存储数量
@@ -88,7 +90,7 @@ export class CSSPerformanceMonitor {
       
       // 警告慢切换
       if (duration > 100) {
-        console.warn(`⚠️ 主题切换过慢: ${fromTheme} → ${toTheme} (${duration.toFixed(2)}ms)`);
+        Logger.warn(`⚠️ 主题切换过慢: ${fromTheme} → ${toTheme} (${duration.toFixed(2)}ms)`);
       }
       
       // 限制存储数量
@@ -209,27 +211,27 @@ export class CSSPerformanceMonitor {
     console.group('📊 CSS性能报告');
     
     console.group('📥 加载性能');
-    console.log(`总加载次数: ${report.loadMetrics.totalLoaded}`);
-    console.log(`平均加载时间: ${report.loadMetrics.averageLoadTime.toFixed(2)}ms`);
-    console.log(`总加载时间: ${report.loadMetrics.totalLoadTime.toFixed(2)}ms`);
+    Logger.debug(`总加载次数: ${report.loadMetrics.totalLoaded}`);
+    Logger.debug(`平均加载时间: ${report.loadMetrics.averageLoadTime.toFixed(2)}ms`);
+    Logger.debug(`总加载时间: ${report.loadMetrics.totalLoadTime.toFixed(2)}ms`);
     if (report.loadMetrics.slowestLoad) {
-      console.log(`最慢加载: ${report.loadMetrics.slowestLoad.href} (${report.loadMetrics.slowestLoad.loadTime.toFixed(2)}ms)`);
+      Logger.debug(`最慢加载: ${report.loadMetrics.slowestLoad.href} (${report.loadMetrics.slowestLoad.loadTime.toFixed(2)}ms)`);
     }
     console.groupEnd();
     
     console.group('🎨 运行时性能');
-    console.log(`主题切换次数: ${report.runtimeMetrics.themeSwitches}`);
+    Logger.debug(`主题切换次数: ${report.runtimeMetrics.themeSwitches}`);
     if (report.runtimeMetrics.themeSwitches > 0) {
-      console.log(`平均切换时间: ${report.runtimeMetrics.averageThemeSwitchTime.toFixed(2)}ms`);
+      Logger.debug(`平均切换时间: ${report.runtimeMetrics.averageThemeSwitchTime.toFixed(2)}ms`);
       if (report.runtimeMetrics.slowestThemeSwitch) {
         const { fromTheme, toTheme, duration } = report.runtimeMetrics.slowestThemeSwitch;
-        console.log(`最慢切换: ${fromTheme} → ${toTheme} (${duration.toFixed(2)}ms)`);
+        Logger.debug(`最慢切换: ${fromTheme} → ${toTheme} (${duration.toFixed(2)}ms)`);
       }
     }
     console.groupEnd();
     
     console.group('💡 优化建议');
-    report.recommendations.forEach(rec => console.log(rec));
+    report.recommendations.forEach(rec => Logger.debug(rec));
     console.groupEnd();
     
     console.groupEnd();
@@ -241,7 +243,7 @@ export class CSSPerformanceMonitor {
   clear(): void {
     this.loadMetrics = [];
     this.themeSwitchMetrics = [];
-    console.log('✅ CSS性能指标已清除');
+    Logger.debug('✅ CSS性能指标已清除');
   }
   
   /**
@@ -249,7 +251,7 @@ export class CSSPerformanceMonitor {
    */
   setEnabled(enabled: boolean): void {
     this.enabled = enabled;
-    console.log(`CSS性能监控已${enabled ? '启用' : '禁用'}`);
+    Logger.debug(`CSS性能监控已${enabled ? '启用' : '禁用'}`);
   }
 }
 
@@ -262,5 +264,5 @@ if (import.meta.env.DEV && typeof window !== 'undefined') {
   windowWithPerf.__CSS_PERF__ = cssPerformanceMonitor;
   windowWithPerf.printCSSPerf = () => cssPerformanceMonitor.printReport();
   
-  console.log('💡 CSS性能监控已启用，使用 printCSSPerf() 查看报告');
+  Logger.debug('💡 CSS性能监控已启用，使用 printCSSPerf() 查看报告');
 }

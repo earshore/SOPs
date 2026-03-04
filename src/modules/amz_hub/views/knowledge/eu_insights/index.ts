@@ -9,7 +9,7 @@ import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import { loadChartJs } from '../../../../../common/utils/lazyLibs';
 
 class EuInsightsModule extends BaseModule {
-    private radarChart: any = null;
+    private radarChart: unknown = null;
 
     constructor() {
         super('amz_eu_insights');

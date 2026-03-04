@@ -17,6 +17,7 @@ import { MENU_CONFIG, getRoutesByModule, type RouteConfig, type ModuleConfig } f
 import { APP_EVENTS } from '../constants/eventConstants';
 import type { CategoryConfig } from './SidebarRenderer';
 
+import { Logger } from '../../services/loggerService';
 /**
  * 布局类型
  */
@@ -111,7 +112,7 @@ export class OverviewRenderer {
     // 初始化事件监听
     this._initEvents();
     
-    console.log(`✅ ${this.moduleConfig.title} 总览页面已渲染`);
+    Logger.debug(`✅ ${this.moduleConfig.title} 总览页面已渲染`);
   }
 
   /**
@@ -594,6 +595,6 @@ export class OverviewRenderer {
    * 卸载
    */
   unmount(): void {
-    console.log(`🧹 ${this.moduleConfig.title} 总览页面已卸载`);
+    Logger.debug(`🧹 ${this.moduleConfig.title} 总览页面已卸载`);
   }
 }

@@ -12,6 +12,7 @@ import { analyticsService } from '@/services/analyticsService';
 import { performanceStorage } from '@/services/performanceStorage';
 import { alertService, AlertType } from '@/services/alertService';
 
+import { Logger } from '../../services/loggerService';
 /**
  * 失败的服务信息
  */
@@ -47,7 +48,7 @@ export class ServiceBootstrap {
     private container: DIContainer,
     private registry: ServiceRegistry
   ) {
-    console.log('[Bootstrap] 服务初始化管理器已创建');
+    Logger.debug('[Bootstrap] 服务初始化管理器已创建');
   }
 
   /**
@@ -55,22 +56,22 @@ export class ServiceBootstrap {
    * @returns 初始化结果
    */
   async initialize(): Promise<InitializeResult> {
-    console.log('\n🚀 [Bootstrap] 开始初始化服务...\n');
+    Logger.debug('\n🚀 [Bootstrap] 开始初始化服务...\n');
     
     try {
       // 0. 初始化监控服务(优先,所有环境) - 异步不阻塞
       this._initMonitoringServices().catch(err => {
-        console.warn('⚠️ [Bootstrap] 监控服务初始化失败:', err);
+        Logger.warn('⚠️ [Bootstrap] 监控服务初始化失败:', err);
       });
 
       // 1. 验证依赖关系
       const validation = this.container.validateDependencies();
       if (!validation.valid) {
-        console.error('❌ [Bootstrap] 依赖验证失败:');
-        validation.errors.forEach(err => console.error(`  - ${err}`));
+        Logger.error('❌ [Bootstrap] 依赖验证失败:');
+        validation.errors.forEach(err => Logger.error(`  - ${err}`));
         throw new Error(`依赖验证失败:\n${validation.errors.join('\n')}`);
       }
-      console.log('✅ [Bootstrap] 依赖验证通过');
+      Logger.debug('✅ [Bootstrap] 依赖验证通过');
 
       // 2. 按依赖层级分组并初始化
       await this._initServicesInParallel();
@@ -84,7 +85,7 @@ export class ServiceBootstrap {
         initialized: Array.from(this.initializedServices)
       };
     } catch (error) {
-      console.error('❌ [Bootstrap] 初始化流程失败:', error);
+      Logger.error('❌ [Bootstrap] 初始化流程失败:', error);
       throw error;
     }
   }
@@ -97,14 +98,14 @@ export class ServiceBootstrap {
     // 按依赖层级分组
     const levels = this._groupByDependencyLevel();
     
-    console.log(`📊 [Bootstrap] 共 ${levels.length} 个并行层级`);
+    Logger.debug(`📊 [Bootstrap] 共 ${levels.length} 个并行层级`);
     
     // 逐层初始化，同层服务并行
     for (let i = 0; i < levels.length; i++) {
       const level = levels[i];
       if (!level || level.length === 0) continue;
       
-      console.log(`⚡ [Bootstrap] 并行初始化第 ${i + 1} 层 (${level.length} 个服务)`);
+      Logger.debug(`⚡ [Bootstrap] 并行初始化第 ${i + 1} 层 (${level.length} 个服务)`);
       
       // 同层服务并行初始化
       await Promise.all(
@@ -180,7 +181,7 @@ export class ServiceBootstrap {
       return;
     }
 
-    console.log(`⏳ [Bootstrap] 初始化服务: ${name}`);
+    Logger.debug(`⏳ [Bootstrap] 初始化服务: ${name}`);
     const startTime = performance.now();
 
     try {
@@ -192,7 +193,7 @@ export class ServiceBootstrap {
       ]);
 
       const duration = Math.round(performance.now() - startTime);
-      console.log(`✅ [Bootstrap] ${name} 初始化成功 (${duration}ms)`);
+      Logger.debug(`✅ [Bootstrap] ${name} 初始化成功 (${duration}ms)`);
       
       this.initializedServices.add(name);
       return result;
@@ -200,11 +201,11 @@ export class ServiceBootstrap {
     } catch (error) {
       const duration = Math.round(performance.now() - startTime);
       const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error(`❌ [Bootstrap] ${name} 初始化失败 (${duration}ms):`, errorMessage);
+      Logger.error(`❌ [Bootstrap] ${name} 初始化失败 (${duration}ms):`, errorMessage);
 
       // 如果是可选服务，记录但不抛出错误
       if (config.optional) {
-        console.warn(`[Bootstrap] ${name} 是可选服务，跳过`);
+        Logger.warn(`[Bootstrap] ${name} 是可选服务，跳过`);
         return null;
       }
 
@@ -243,17 +244,17 @@ export class ServiceBootstrap {
     const failed = this.failedServices.length;
     const success = total - failed;
 
-    console.log(`\n📊 [Bootstrap] 初始化完成:`);
-    console.log(`   ✅ 成功: ${success}/${total}`);
+    Logger.debug(`\n📊 [Bootstrap] 初始化完成:`);
+    Logger.debug(`   ✅ 成功: ${success}/${total}`);
     
     if (failed > 0) {
-      console.log(`   ❌ 失败: ${failed}/${total}`);
+      Logger.debug(`   ❌ 失败: ${failed}/${total}`);
       this.failedServices.forEach(({ name, error, duration }) => {
-        console.log(`      - ${name}: ${error} (${duration}ms)`);
+        Logger.debug(`      - ${name}: ${error} (${duration}ms)`);
       });
     }
     
-    console.log('');
+    Logger.debug('');
   }
 
   /**
@@ -261,7 +262,7 @@ export class ServiceBootstrap {
    * @private
    */
   private async _initMonitoringServices(): Promise<void> {
-    console.log('📊 [Bootstrap] 初始化监控服务...');
+    Logger.debug('📊 [Bootstrap] 初始化监控服务...');
 
     try {
       // 1. 错误追踪
@@ -293,9 +294,9 @@ export class ServiceBootstrap {
       // 5. 连接数据流: webVitals -> storage
       this._connectMonitoringDataFlow();
 
-      console.log('✅ [Bootstrap] 监控服务初始化完成');
+      Logger.debug('✅ [Bootstrap] 监控服务初始化完成');
     } catch (error) {
-      console.warn('⚠️ [Bootstrap] 监控服务初始化失败:', error);
+      Logger.warn('⚠️ [Bootstrap] 监控服务初始化失败:', error);
       // 监控服务失败不影响主流程
     }
   }
@@ -332,7 +333,7 @@ export class ServiceBootstrap {
           alertService.check(AlertType.PERFORMANCE, { cls: metric.value });
         }
       } catch (error) {
-        console.warn('[Bootstrap] 保存性能指标失败:', error);
+        Logger.warn('[Bootstrap] 保存性能指标失败:', error);
       }
     });
 
@@ -371,7 +372,7 @@ export class ServiceBootstrap {
       }, 300000);
     }
 
-    console.log('✅ [Bootstrap] 监控数据流已连接');
+    Logger.debug('✅ [Bootstrap] 监控数据流已连接');
   }
 
   /**
@@ -397,7 +398,7 @@ export class ServiceBootstrap {
   reset(): void {
     this.failedServices = [];
     this.initializedServices.clear();
-    console.log('✅ [Bootstrap] 已重置');
+    Logger.debug('✅ [Bootstrap] 已重置');
   }
 }
 

@@ -16,6 +16,7 @@ import { AlpineContext } from '../types';
 import { appStore } from '@/stores/useAppStore';
 import type { FullAnalysisReport } from '../config/analysisReportData';
 
+import { Logger } from '../../../../../../services/loggerService';
 /**
  * 切换 ASIN 选择
  */
@@ -232,7 +233,7 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
   context.progress = 0;
   appStore.getState().updateAnalysis({ isAnalyzing: true });
 
-  console.log('[用户动作] 开始分析:', {
+  Logger.debug('[用户动作] 开始分析:', {
     selectedTargets: context.selectedTargets.length,
     selectedAsins: context.selectedAsins.length,
     currentProducts: currentProducts.length
@@ -292,16 +293,16 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
         context.analysisReport = analysisReport;
         context.hasReport = true;
 
-        console.log('[用户动作] 分析报告已设置，selectedTargets:', context.selectedTargets.length);
-        console.log('[用户动作] analysisReport 已保存:', !!context.analysisReport);
-        console.log('[用户动作] hasReport 标志已设置:', context.hasReport);
+        Logger.debug('[用户动作] 分析报告已设置，selectedTargets:', context.selectedTargets.length);
+        Logger.debug('[用户动作] analysisReport 已保存:', !!context.analysisReport);
+        Logger.debug('[用户动作] hasReport 标志已设置:', context.hasReport);
 
         // 同步到 Zustand store
         appStore.getState().setAnalysisReport(analysisReport as any);
 
         // 再次使用 $nextTick 确保视图完全更新
         (context as any).$nextTick(() => {
-          console.log('[用户动作] 视图更新完成');
+          Logger.debug('[用户动作] 视图更新完成');
         });
       });
     } else {
@@ -321,7 +322,7 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
       );
 
       if (success) {
-        console.log('[用户动作] 已自动标记历史快照为"已分析"');
+        Logger.debug('[用户动作] 已自动标记历史快照为"已分析"');
         // 触发历史记录更新事件
         window.dispatchEvent(new CustomEvent('history-updated'));
       }
@@ -329,7 +330,7 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
 
     showToast(`分析完成！`, { type: 'success' });
   } catch (error) {
-    console.error('[用户动作] 分析失败:', error);
+    Logger.error('[用户动作] 分析失败:', error);
     showToast(`分析失败: ${(error as Error).message}`, { type: 'error' });
   } finally {
     context.isAnalyzing = false;

@@ -136,7 +136,7 @@ export function renderProductCard(
                     </h5>
                     ${(p.customer_reviews || []).length > 0 ? `
                         <div class="max-h-96 overflow-y-auto space-y-3 pr-1 custom-scrollbar">
-                            ${(p.customer_reviews || []).map((review: any, i: number) => `
+                            ${(p.customer_reviews || []).map((review: unknown, i: number) => `
                                 <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm group/review relative hover:border-purple-200 hover:shadow-md transition-all">
                                     <button data-action="delete-review" data-asin="${p.asin}" data-index="${i}" @click.stop="${onDeleteReview.replace('INDEX', String(i))}" 
                                         class="absolute top-3 right-3 w-7 h-7 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover/review:opacity-100 z-10">

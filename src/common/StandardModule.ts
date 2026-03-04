@@ -12,6 +12,7 @@ import type { ServiceName } from './di/ServiceRegistry';
 import { SERVICE_NAMES } from './di/ServiceRegistry';
 import type { ILoggerService, IStorageService, IHttpService } from '@/types/services';
 
+import { Logger } from '../services/loggerService';
 /**
  * 标准化模块配置
  */
@@ -111,7 +112,7 @@ export abstract class StandardModule implements IModule {
    */
   async mount(container: HTMLElement): Promise<void> {
     if (this.state.mounted) {
-      console.warn(`[${this.id}] 模块已挂载,跳过`);
+      Logger.warn(`[${this.id}] 模块已挂载,跳过`);
       return;
     }
 
@@ -131,7 +132,7 @@ export abstract class StandardModule implements IModule {
       // 生命周期: 挂载完成
       await this.onMounted?.();
 
-      console.log(`[${this.id}] ✅ 模块已挂载`);
+      Logger.debug(`[${this.id}] ✅ 模块已挂载`);
     } catch (error) {
       this.state.loading = false;
       this.state.error = error as Error;
@@ -170,7 +171,7 @@ export abstract class StandardModule implements IModule {
       // 向后兼容
       this.onUnmount?.();
 
-      console.log(`[${this.id}] ✅ 模块已卸载`);
+      Logger.debug(`[${this.id}] ✅ 模块已卸载`);
     } catch (error) {
       this.state.error = error as Error;
       this.onError?.(error as Error);
@@ -183,12 +184,12 @@ export abstract class StandardModule implements IModule {
    */
   async activate(): Promise<void> {
     if (!this.state.mounted) {
-      console.warn(`[${this.id}] 模块未挂载,无法激活`);
+      Logger.warn(`[${this.id}] 模块未挂载,无法激活`);
       return;
     }
 
     await this.onActivated?.();
-    console.log(`[${this.id}] 模块已激活`);
+    Logger.debug(`[${this.id}] 模块已激活`);
   }
 
   /**
@@ -200,7 +201,7 @@ export abstract class StandardModule implements IModule {
     }
 
     await this.onDeactivated?.();
-    console.log(`[${this.id}] 模块已失活`);
+    Logger.debug(`[${this.id}] 模块已失活`);
   }
 
   /**
@@ -230,7 +231,7 @@ export abstract class StandardModule implements IModule {
     try {
       return this.diContainer.resolve<T>(name);
     } catch (error) {
-      console.error(`[${this.id}] 获取服务失败: ${name}`, error);
+      Logger.error(`[${this.id}] 获取服务失败: ${name}`, error);
       throw error;
     }
   }
@@ -284,7 +285,7 @@ export abstract class StandardModule implements IModule {
       try {
         dispose();
       } catch (error) {
-        console.warn(`[${this.id}] 清理资源失败:`, error);
+        Logger.warn(`[${this.id}] 清理资源失败:`, error);
       }
     });
     this.disposables = [];

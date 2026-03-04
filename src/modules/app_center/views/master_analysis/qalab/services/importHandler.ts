@@ -6,6 +6,7 @@
 import { showToast } from '../../../../../../common/ui';
 import { appStore } from '@/stores/useAppStore';
 
+import { Logger } from '../../../../../../services/loggerService';
 /**
  * 分析报告数据结构
  */
@@ -20,14 +21,14 @@ export interface AnalysisReportData {
     };
     analysisReport?: Record<string, unknown>;
     // 兼容直接是分析报告的情况
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 /**
  * 文件读取结果
  */
 interface FileReadResult {
-    data: any;
+    data: unknown;
     filename: string;
 }
 
@@ -75,14 +76,14 @@ export function readFileAsJSON(file: File): Promise<FileReadResult> {
                 resolve({ data: json, filename: file.name });
             } catch (err) {
                 const errorMsg = err instanceof Error ? err.message : String(err);
-                console.error(`[QALab] 解析文件 ${file.name} 失败:`, err);
+                Logger.error(`[QALab] 解析文件 ${file.name} 失败:`, err);
                 reject(new Error(`文件 ${file.name} 解析失败: ${errorMsg}`));
             }
         };
 
         reader.onerror = () => {
             const errorMsg = reader.error?.message || '未知错误';
-            console.error(`[QALab] 读取文件 ${file.name} 失败:`, reader.error);
+            Logger.error(`[QALab] 读取文件 ${file.name} 失败:`, reader.error);
             reject(new Error(`无法读取文件 ${file.name}: ${errorMsg}`));
         };
 
@@ -93,7 +94,7 @@ export function readFileAsJSON(file: File): Promise<FileReadResult> {
 /**
  * 验证分析报告数据结构
  */
-export function validateAnalysisReport(data: any): { valid: boolean; error?: string; normalizedData?: AnalysisReportData } {
+export function validateAnalysisReport(data: unknown): { valid: boolean; error?: string; normalizedData?: AnalysisReportData } {
     if (!data || typeof data !== 'object') {
         return { valid: false, error: '数据格式错误：必须是JSON对象' };
     }
@@ -146,7 +147,7 @@ export function validateAnalysisReport(data: any): { valid: boolean; error?: str
  */
 export async function handleImportFile(file: File): Promise<ImportResult> {
     try {
-        console.log('[QALab] 开始导入文件:', file.name);
+        Logger.debug('[QALab] 开始导入文件:', file.name);
 
         // 验证文件类型
         if (!file.name.toLowerCase().endsWith('.json')) {
@@ -167,7 +168,7 @@ export async function handleImportFile(file: File): Promise<ImportResult> {
         // 大文件警告（5MB以上）
         const LARGE_FILE_SIZE = 5 * 1024 * 1024;
         if (file.size > LARGE_FILE_SIZE) {
-            console.warn('[QALab] 检测到大文件:', `${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`);
+            Logger.warn('[QALab] 检测到大文件:', `${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`);
             showToast('⚠️ 检测到大文件，处理可能需要较长时间', { type: 'warning' });
         }
 
@@ -184,7 +185,7 @@ export async function handleImportFile(file: File): Promise<ImportResult> {
 
         const normalizedData = validation.normalizedData!;
 
-        console.log('[QALab] 文件导入成功:', {
+        Logger.debug('[QALab] 文件导入成功:', {
             filename: file.name,
             hasMetadata: !!normalizedData.metadata,
             marketplace: normalizedData.metadata?.marketplace,
@@ -210,7 +211,7 @@ export async function handleImportFile(file: File): Promise<ImportResult> {
 
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        console.error('[QALab] 导入失败:', {
+        Logger.error('[QALab] 导入失败:', {
             error: error,
             errorMessage: errorMessage,
             fileName: file.name

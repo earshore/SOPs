@@ -53,9 +53,9 @@ const getQalabState = () => appStore.getState().qalab;
 
 //     const qalabState = getQalabState();
 //     const totalQAs = qalabState.generatedQAs.length;
-//     const categories = [...new Set(qalabState.generatedQAs.map((qa: any) => qa.category))];
+//     const categories = [...new Set(qalabState.generatedQAs.map((qa: unknown) => qa.category))];
 //     const avgConfidence = totalQAs > 0 
-//         ? (qalabState.generatedQAs.reduce((sum: any, qa: any) => sum + qa.confidence, 0) / totalQAs).toFixed(1)
+//         ? (qalabState.generatedQAs.reduce((sum: unknown, qa: unknown) => sum + qa.confidence, 0) / totalQAs).toFixed(1)
 //         : '0';
 //     const languages = LANGUAGES.length;
 
@@ -194,7 +194,7 @@ export function renderCategoryTabs(onCategoryChange: (cat: string) => void): voi
     CATEGORIES.forEach(cat => {
         counts[cat.id] = cat.id === 'all'
             ? qalabState.generatedQAs.length
-            : qalabState.generatedQAs.filter((qa: any) => qa.category === cat.id).length;
+            : qalabState.generatedQAs.filter((qa: unknown) => qa.category === cat.id).length;
     });
 
     // 使用 SafeRenderer 渲染列表
@@ -234,13 +234,13 @@ export function renderQAGrid(
     const qalabState = getQalabState();
     const filtered = qalabState.currentCategory === 'all'
         ? qalabState.generatedQAs
-        : qalabState.generatedQAs.filter((qa: any) => qa.category === qalabState.currentCategory);
+        : qalabState.generatedQAs.filter((qa: unknown) => qa.category === qalabState.currentCategory);
 
     // 使用 SafeRenderer 渲染列表
     renderer.renderList(
         container,
         filtered,
-        (qa: any, index: number) => {
+        (qa: unknown, index: number) => {
             const trans = qa.translations[qalabState.currentLang];
             if (!trans) return '';
 
@@ -305,7 +305,7 @@ export function renderQAGrid(
     });
 
     container.querySelectorAll('[data-qa-copy]').forEach(el => {
-        el.addEventListener('click', (e: any) => {
+        el.addEventListener('click', (e: unknown) => {
             e.stopPropagation();
             const id = (el as HTMLElement).dataset.qaCopy;
             if (id) onCopy(parseInt(id), el as HTMLElement);
@@ -313,7 +313,7 @@ export function renderQAGrid(
     });
 
     container.querySelectorAll('[data-qa-edit]').forEach(el => {
-        el.addEventListener('click', (e: any) => {
+        el.addEventListener('click', (e: unknown) => {
             e.stopPropagation();
             const id = (el as HTMLElement).dataset.qaEdit;
             if (id) onEdit(parseInt(id));

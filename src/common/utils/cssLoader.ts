@@ -1,13 +1,15 @@
 /**
  * CSS懒加载工具 - 增强版
  * 用于按需加载非关键CSS，提升首屏性能
- * 
+ *
  * 新增功能:
  * - 优先级队列加载
  * - 错误降级策略
  * - 性能监控埋点
  * - 加载状态管理
  */
+
+import { Logger } from '@services/loggerService';
 
 interface CSSLoadOptions {
   priority?: 'critical' | 'high' | 'normal' | 'low';
@@ -87,7 +89,7 @@ class CSSLoader {
         link.remove();
         
         if (fallback) {
-          console.warn(`CSS加载超时，使用降级方案: ${href}`);
+          Logger.warn(`CSS加载超时，使用降级方案: ${href}`);
           this.loadCSS(fallback, { ...options, fallback: undefined })
             .then(resolve)
             .catch(() => {
@@ -133,7 +135,7 @@ class CSSLoader {
         link.remove();
         
         if (fallback) {
-          console.warn(`CSS加载失败，使用降级方案: ${href}`);
+          Logger.warn(`CSS加载失败，使用降级方案: ${href}`);
           this.loadCSS(fallback, { ...options, fallback: undefined })
             .then(resolve)
             .catch(() => {

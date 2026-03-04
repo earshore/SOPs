@@ -6,6 +6,7 @@
 
 import type { StoreApi } from 'zustand/vanilla';
 
+import { Logger } from '../../services/loggerService';
 /**
  * DevTools配置
  */
@@ -91,7 +92,7 @@ export const devtools = <T extends object>(
           // 使用replace=true强制替换整个状态
           set(newState as any, true);
         } catch (error) {
-          console.error('[DevTools] 时间旅行失败:', error);
+          Logger.error('[DevTools] 时间旅行失败:', error);
         }
       }
     });
@@ -117,8 +118,8 @@ export const devtoolsHelper = {
   logStateChange(storeName: string, action: string, prevState: unknown, nextState: unknown): void {
     if (process.env.NODE_ENV === 'development') {
       console.group(`[${storeName}] ${action}`);
-      console.log('Previous State:', prevState);
-      console.log('Next State:', nextState);
+      Logger.debug('Previous State:', prevState);
+      Logger.debug('Next State:', nextState);
       console.groupEnd();
     }
   }

@@ -7,6 +7,7 @@
 import { configCenter } from '../common/config/ConfigCenter';
 import type { ILoggerService, PerformanceMetric as IPerformanceMetric, PerformanceReport as IPerformanceReport } from '../types/services';
 
+import { Logger } from './loggerService';
 /**
  * 性能指标类型
  */
@@ -98,7 +99,7 @@ export class PerformanceService {
   init(): void {
     if (this.isInitialized) return;
 
-    console.log('[Performance] 初始化性能监控...');
+    Logger.debug('[Performance] 初始化性能监控...');
 
     // 监控页面加载
     this.measurePageLoad();
@@ -113,7 +114,7 @@ export class PerformanceService {
     this.measureLongTasks();
 
     this.isInitialized = true;
-    console.log('[Performance] 性能监控已启动');
+    Logger.debug('[Performance] 性能监控已启动');
   }
 
   /**
@@ -136,7 +137,7 @@ export class PerformanceService {
   private _collectPageLoadMetrics(): void {
     const entries = performance.getEntriesByType('navigation');
     if (entries.length === 0) {
-      console.warn('[Performance] Navigation timing not available');
+      Logger.warn('[Performance] Navigation timing not available');
       return;
     }
 
@@ -153,7 +154,7 @@ export class PerformanceService {
       [METRIC_TYPES.PAGE_LOAD]: Math.round(perfData.loadEventEnd - perfData.fetchStart),
     };
 
-    console.log('[Performance] 页面加载指标:', metrics);
+    Logger.debug('[Performance] 页面加载指标:', metrics);
 
     // 记录指标
     Object.entries(metrics).forEach(([type, value]) => {
@@ -177,7 +178,7 @@ export class PerformanceService {
         const lastEntry = entries[entries.length - 1] as any;
         const value = Math.round(lastEntry.renderTime || lastEntry.loadTime);
 
-        console.log('[Performance] LCP:', value, 'ms');
+        Logger.debug('[Performance] LCP:', value, 'ms');
         this.recordMetric(METRIC_TYPES.LCP, value, {
           element: lastEntry.element?.tagName,
           url: lastEntry.url,
@@ -187,7 +188,7 @@ export class PerformanceService {
       observer.observe({ entryTypes: ['largest-contentful-paint'] });
       this.observers.push(observer);
     } catch (e) {
-      console.warn('[Performance] LCP measurement failed:', e);
+      Logger.warn('[Performance] LCP measurement failed:', e);
     }
   }
 
@@ -205,7 +206,7 @@ export class PerformanceService {
           const perfEntry = entry as PerformanceEntry & { processingStart?: number };
           const value = Math.round((perfEntry.processingStart || 0) - perfEntry.startTime);
 
-          console.log('[Performance] FID:', value, 'ms');
+          Logger.debug('[Performance] FID:', value, 'ms');
           this.recordMetric(METRIC_TYPES.FID, value, {
             eventType: perfEntry.name,
           });
@@ -215,7 +216,7 @@ export class PerformanceService {
       observer.observe({ entryTypes: ['first-input'] });
       this.observers.push(observer);
     } catch (e) {
-      console.warn('[Performance] FID measurement failed:', e);
+      Logger.warn('[Performance] FID measurement failed:', e);
     }
   }
 
@@ -246,7 +247,7 @@ export class PerformanceService {
 
         // 只在 CLS 值变化显著时才输出日志,避免刷屏
         if (Math.abs(clsValue - lastLoggedValue) >= LOG_THRESHOLD) {
-          console.log('[Performance] CLS:', clsValue.toFixed(3));
+          Logger.debug('[Performance] CLS:', clsValue.toFixed(3));
           lastLoggedValue = clsValue;
         }
 
@@ -258,7 +259,7 @@ export class PerformanceService {
       observer.observe({ entryTypes: ['layout-shift'] });
       this.observers.push(observer);
     } catch (e) {
-      console.warn('[Performance] CLS measurement failed:', e);
+      Logger.warn('[Performance] CLS measurement failed:', e);
     }
   }
 
@@ -276,7 +277,7 @@ export class PerformanceService {
           if (entry.name === 'first-contentful-paint') {
             const value = Math.round(entry.startTime);
 
-            console.log('[Performance] FCP:', value, 'ms');
+            Logger.debug('[Performance] FCP:', value, 'ms');
             this.recordMetric(METRIC_TYPES.FCP, value);
           }
         });
@@ -285,7 +286,7 @@ export class PerformanceService {
       observer.observe({ entryTypes: ['paint'] });
       this.observers.push(observer);
     } catch (e) {
-      console.warn('[Performance] FCP measurement failed:', e);
+      Logger.warn('[Performance] FCP measurement failed:', e);
     }
   }
 
@@ -302,7 +303,7 @@ export class PerformanceService {
           const duration = Math.round(entry.duration);
 
           if (duration > 50) {
-            console.warn('[Performance] 长任务检测:', duration, 'ms');
+            Logger.warn('[Performance] 长任务检测:', duration, 'ms');
             this.recordMetric('long_task', duration, {
               name: entry.name,
               startTime: Math.round(entry.startTime),
@@ -329,7 +330,7 @@ export class PerformanceService {
       const result = await loader();
       const duration = Math.round(performance.now() - startTime);
 
-      console.log(`[Performance] 模块加载 ${moduleName}:`, duration, 'ms');
+      Logger.debug(`[Performance] 模块加载 ${moduleName}:`, duration, 'ms');
       this.recordMetric(METRIC_TYPES.MODULE_LOAD, duration, {
         module: moduleName,
       });
@@ -337,7 +338,7 @@ export class PerformanceService {
       return result;
     } catch (error) {
       const duration = Math.round(performance.now() - startTime);
-      console.error(`[Performance] 模块加载失败 ${moduleName}:`, duration, 'ms', error);
+      Logger.error(`[Performance] 模块加载失败 ${moduleName}:`, duration, 'ms', error);
 
       this.recordMetric(METRIC_TYPES.MODULE_LOAD, duration, {
         module: moduleName,
@@ -358,7 +359,7 @@ export class PerformanceService {
       const result = await apiCall();
       const duration = Math.round(performance.now() - startTime);
 
-      console.log(`[Performance] API调用 ${apiName}:`, duration, 'ms');
+      Logger.debug(`[Performance] API调用 ${apiName}:`, duration, 'ms');
       this.recordMetric(METRIC_TYPES.API_CALL, duration, {
         api: apiName,
         success: true,
@@ -367,7 +368,7 @@ export class PerformanceService {
       return result;
     } catch (error) {
       const duration = Math.round(performance.now() - startTime);
-      console.error(`[Performance] API调用失败 ${apiName}:`, duration, 'ms', error);
+      Logger.error(`[Performance] API调用失败 ${apiName}:`, duration, 'ms', error);
 
       this.recordMetric(METRIC_TYPES.API_CALL, duration, {
         api: apiName,
@@ -389,7 +390,7 @@ export class PerformanceService {
       const result = await action();
       const duration = Math.round(performance.now() - startTime);
 
-      console.log(`[Performance] 用户操作 ${actionName}:`, duration, 'ms');
+      Logger.debug(`[Performance] 用户操作 ${actionName}:`, duration, 'ms');
       this.recordMetric(METRIC_TYPES.USER_ACTION, duration, {
         action: actionName,
       });
@@ -473,7 +474,7 @@ export class PerformanceService {
         StorageService.set('performance_metrics', recentMetrics);
       });
     } catch (e) {
-      console.warn('[Performance] 保存指标失败:', e);
+      Logger.warn('[Performance] 保存指标失败:', e);
     }
   }
 
@@ -490,7 +491,7 @@ export class PerformanceService {
     // 📊 性能指标上报
     // 未来功能: 集成分析服务 (Google Analytics, Sentry, 自建服务等)
     // 当前: 仅在开发环境输出到控制台
-    console.log('[Performance] 指标上报:', metrics);
+    Logger.debug('[Performance] 指标上报:', metrics);
 
     // 预留接口: 可通过配置启用远程上报
     // if (configCenter.get('monitoring.performanceEndpoint')) {

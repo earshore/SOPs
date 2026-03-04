@@ -10,6 +10,7 @@ import { sleep, getErrorSummary } from '../../../../../common/ui';
 import { HistoryService } from "./historyService";
 import { StorageService } from "../../../../../services/storageService";
 import { configCenter } from '../../../../../common/config/ConfigCenter';
+import { Logger } from '../../../../../services/loggerService';
 import type {
     ProxyConfig,
     FetchOptions,
@@ -194,10 +195,10 @@ async function fetchWithProxy(url: string, site: string, options: FetchOptions =
             lastError = e as Error;
             // 超时错误特殊处理
             if ((e as any).name === 'AbortError') {
-                console.warn(`请求超时 (attempt ${i + 1})`);
+                Logger.warn(`请求超时 (attempt ${i + 1})`);
                 lastError = new Error(`请求超时 (${timeout}ms)`);
             } else {
-                console.warn(`Fetch attempt ${i + 1} failed:`, (e as Error).message);
+                Logger.warn(`Fetch attempt ${i + 1} failed:`, (e as Error).message);
             }
         }
     }
@@ -280,7 +281,7 @@ export async function scrapeAsin(
             }
         }
     } catch (err) {
-        console.warn("缓存读取失败，转为网络请求");
+        Logger.warn("缓存读取失败，转为网络请求");
     }
 
     const fetchOptions: FetchOptions = {
@@ -345,7 +346,7 @@ export async function scrapeAsin(
             break;
 
         } catch (e) {
-            console.error(`Task Error ${asin}:`, e);
+            Logger.error(`Task Error ${asin}:`, e);
             if (attempt === MAX_TASK_RETRIES) {
                 result.scrape_status = "failed";
                 result.error = (e as Error).message;

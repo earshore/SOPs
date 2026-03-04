@@ -4,12 +4,13 @@
 // 提供类型安全的事件发布/订阅机制
 // ================================================================
 
-import type { 
-  EventPayloadMap, 
-  TypedEventHandler, 
+import type {
+  EventPayloadMap,
+  TypedEventHandler,
   GenericEventHandler,
-  EventUnsubscribe 
+  EventUnsubscribe
 } from '../types/events';
+import { Logger } from '@services/loggerService';
 
 /**
  * EventBus配置选项
@@ -112,7 +113,7 @@ class EventBus {
     const currentCount = this.events[event].length;
     
     if (currentCount >= this._config.maxListenersPerEvent) {
-      console.error(
+      Logger.error(
         `[EventBus] 事件 "${event}" 的监听器数量已达上限 (${this._config.maxListenersPerEvent})，` +
         `可能存在内存泄漏！请检查是否正确移除了监听器。`
       );
@@ -120,7 +121,7 @@ class EventBus {
     }
     
     if (currentCount >= this._config.warningThreshold) {
-      console.warn(
+      Logger.warn(
         `[EventBus] 警告：事件 "${event}" 的监听器数量过多 (${currentCount})，` +
         `可能存在内存泄漏风险。建议检查监听器是否正确移除。`
       );
@@ -196,7 +197,7 @@ class EventBus {
       try {
         callback(data);
       } catch (error) {
-        console.error(`[EventBus] Error in listener for event "${event}":`, error);
+        Logger.error(`[EventBus] Error in listener for event "${event}":`, error);
       }
     });
   }
@@ -213,7 +214,7 @@ class EventBus {
     delete this.events[event];
     delete this._stats.eventCounts[event];
     
-    console.log(`[EventBus] 已移除事件 "${event}" 的所有监听器 (${count} 个)`);
+    Logger.debug(`[EventBus] 已移除事件 "${event}" 的所有监听器 (${count} 个)`);
   }
   
   /**
@@ -291,15 +292,15 @@ class EventBus {
     const leaks = this.detectLeaks();
     
     console.group('[EventBus] 调试信息');
-    console.log('总监听器数量:', stats.totalListeners);
-    console.log('事件数量:', Object.keys(this.events).length);
+    Logger.debug('总监听器数量:', stats.totalListeners);
+    Logger.debug('事件数量:', Object.keys(this.events).length);
     console.table(stats.events);
     
     if (leaks.length > 0) {
-      console.warn('检测到潜在的内存泄漏:');
+      Logger.warn('检测到潜在的内存泄漏:');
       console.table(leaks);
     } else {
-      console.log('✅ 未检测到内存泄漏');
+      Logger.debug('✅ 未检测到内存泄漏');
     }
     
     console.groupEnd();
@@ -311,7 +312,7 @@ class EventBus {
    */
   configure(config: Partial<EventBusConfig>): void {
     this._config = { ...this._config, ...config };
-    console.log('[EventBus] 配置已更新:', this._config);
+    Logger.debug('[EventBus] 配置已更新:', this._config);
   }
 }
 

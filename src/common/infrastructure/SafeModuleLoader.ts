@@ -7,10 +7,11 @@
 import { createLoggerService } from '@/services/loggerService';
 import { createErrorTracker } from '@/services/errorTracker';
 import type { ILoggerService } from '@/types/services';
-import { 
-  AppError, 
+import { Logger } from '@services/loggerService';
+import {
+  AppError,
   NetworkError,
-  SystemError 
+  SystemError
 } from '@/common/errors/AppError';
 
 /**
@@ -1183,7 +1184,7 @@ export class SafeModuleLoader {
         // 重新加载模块
         this.showLoadingIndicator(container, '正在重试...');
         this.loadModule(container, modulePath).catch(err => {
-          console.error('重试失败:', err);
+          Logger.error('重试失败:', err);
         });
         break;
       case 'reload':
@@ -1195,7 +1196,7 @@ export class SafeModuleLoader {
         window.location.href = '/';
         break;
       default:
-        console.warn('未知的错误 UI 操作:', action);
+        Logger.warn('未知的错误 UI 操作:', action);
     }
   }
 

@@ -4,6 +4,8 @@
 // 仅在开发环境暴露必要的调试接口到window
 // ================================================================
 
+import { Logger } from '@services/loggerService';
+
 /**
  * 调试接口类型
  */
@@ -51,7 +53,7 @@ class DebugInterfaceManager {
    */
   initialize(): void {
     if (this.isInitialized) {
-      console.warn('[DebugInterface] 已初始化，跳过');
+      Logger.warn('[DebugInterface] 已初始化，跳过');
       return;
     }
 
@@ -60,7 +62,7 @@ class DebugInterfaceManager {
       this.setupDebugInterface();
       this.exposeToWindow();
       this.isInitialized = true;
-      console.log('🔧 [DebugInterface] 调试接口已启用，使用 window.__DEBUG__ 访问');
+      Logger.debug('🔧 [DebugInterface] 调试接口已启用，使用 window.__DEBUG__ 访问');
     }
   }
 
@@ -74,7 +76,7 @@ class DebugInterfaceManager {
         showState: () => {
           import('@/stores/useAppStore').then(({ appStore }) => {
             console.group('📊 应用状态');
-            console.log(appStore.getState());
+            Logger.debug(appStore.getState());
             console.groupEnd();
           });
         },
@@ -95,7 +97,7 @@ class DebugInterfaceManager {
         showServices: () => {
           import('../di/Container').then(({ container }) => {
             console.group('🔧 已注册服务');
-            console.log(container.getRegisteredServices());
+            Logger.debug(container.getRegisteredServices());
             console.groupEnd();
           });
         },
@@ -104,7 +106,7 @@ class DebugInterfaceManager {
           if (confirm('确定要清除所有本地存储吗？')) {
             localStorage.clear();
             sessionStorage.clear();
-            console.log('✅ 本地存储已清除');
+            Logger.debug('✅ 本地存储已清除');
           }
         },
         
@@ -171,7 +173,7 @@ class DebugInterfaceManager {
       delete (window as unknown as Record<string, unknown>).__DEBUG__;
       this.debugInterface = {};
       this.isInitialized = false;
-      console.log('🔧 [DebugInterface] 调试接口已清理');
+      Logger.debug('🔧 [DebugInterface] 调试接口已清理');
     }
   }
 }

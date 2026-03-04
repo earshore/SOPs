@@ -12,6 +12,7 @@ import { MENU_CONFIG, getRoutesByModule, type ModuleConfig, type MenuConfig } fr
 import type { ColorSchemeName } from '../constants/colorSchemes';
 import type { CategoryConfig } from '../components/SidebarRenderer';
 
+import { Logger } from '../../services/loggerService';
 // ═══════════════════════════════════════════════════════════
 // ColorContext 管理器
 // ═══════════════════════════════════════════════════════════
@@ -58,7 +59,7 @@ export class ColorContext {
 
     const module = MENU_CONFIG.modules[moduleId];
     if (!module) {
-      console.warn(`[ColorContext] 模块未找到: ${moduleId}, 使用默认颜色`);
+      Logger.warn(`[ColorContext] 模块未找到: ${moduleId}, 使用默认颜色`);
       return 'blue';
     }
 
@@ -83,7 +84,7 @@ export class ColorContext {
     // 缓存结果
     this.colorCache.set(moduleId, inferredColor);
 
-    console.log(`[ColorContext] 模块 "${moduleId}" 推断颜色: ${inferredColor}`);
+    Logger.debug(`[ColorContext] 模块 "${moduleId}" 推断颜色: ${inferredColor}`);
     return inferredColor;
   }
 
@@ -149,7 +150,7 @@ export class ColorContext {
       return color as ColorSchemeName;
     }
 
-    console.warn(`[ColorContext] 无效的颜色名称: ${color}, 使用默认颜色 blue`);
+    Logger.warn(`[ColorContext] 无效的颜色名称: ${color}, 使用默认颜色 blue`);
     return 'blue';
   }
 
@@ -159,7 +160,7 @@ export class ColorContext {
    */
   static clearCache(): void {
     this.colorCache.clear();
-    console.log('[ColorContext] 颜色缓存已清除');
+    Logger.debug('[ColorContext] 颜色缓存已清除');
   }
 
   /**
@@ -223,7 +224,7 @@ export class ColorContext {
       try {
         listener(color);
       } catch (error) {
-        console.error('[ColorContext] 主题变化监听器执行失败:', error);
+        Logger.error('[ColorContext] 主题变化监听器执行失败:', error);
       }
     });
   }

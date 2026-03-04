@@ -6,6 +6,7 @@
 
 import { StorageService } from '../../services/storageService';
 
+import { Logger } from '../../services/loggerService';
 /**
  * 加密数据结构
  */
@@ -91,7 +92,7 @@ export const SecureStorage = {
       // 6. 存储
       return StorageService.set(`secure_${key}`, encryptedData);
     } catch (error) {
-      console.error('[SecureStorage] Encryption failed:', error);
+      Logger.error('[SecureStorage] Encryption failed:', error);
       return false;
     }
   },
@@ -123,7 +124,7 @@ export const SecureStorage = {
       const dataString = decoder.decode(decryptedBuffer);
       return JSON.parse(dataString);
     } catch (error) {
-      console.error('[SecureStorage] Decryption failed:', error);
+      Logger.error('[SecureStorage] Decryption failed:', error);
       return defaultValue;
     }
   },

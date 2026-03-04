@@ -6,6 +6,7 @@
 import BaseModule from '../../../../../common/BaseModule';
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
 
+import { Logger } from '../../../../../services/loggerService';
 class EmailTemplatesModule extends BaseModule {
     /**
      * 挂载模块
@@ -14,14 +15,14 @@ class EmailTemplatesModule extends BaseModule {
         const html = await loadTemplate('src/modules/sops/views/service/email_templates/template.html');
         container.innerHTML = html;
         container.classList.add('fade-in');
-        console.log('✅ 邮件回复模板 SOP 模块已挂载');
+        Logger.debug('✅ 邮件回复模板 SOP 模块已挂载');
     }
 
     /**
      * 卸载模块
      */
     unmount(): void {
-        console.log('❌ 邮件回复模板 SOP 模块已卸载');
+        Logger.debug('❌ 邮件回复模板 SOP 模块已卸载');
     }
 }
 

@@ -13,6 +13,7 @@ import { rufusSimulator } from '../services/rufusSimulator';
 import { triggerFileImport } from '../services/importHandler';
 import { renderDataPreview, renderJSONPreview } from './dataPreview';
 
+import { Logger } from '../../../../../../services/loggerService';
 // 获取 qalab 状态的辅助函数
 const getQalabState = () => appStore.getState().qalab;
 
@@ -21,42 +22,42 @@ const getQalabState = () => appStore.getState().qalab;
  * 从全局状态中检测并加载分析报告到输入框
  */
 export function autoLoadAnalysisReport(): void {
-    console.log('[QALab] ========================================');
-    console.log('[QALab] 🔍 autoLoadAnalysisReport 被调用');
-    console.log('[QALab] 时间:', new Date().toLocaleTimeString());
+    Logger.debug('[QALab] ========================================');
+    Logger.debug('[QALab] 🔍 autoLoadAnalysisReport 被调用');
+    Logger.debug('[QALab] 时间:', new Date().toLocaleTimeString());
 
     const analysisReport = appStore.getState().analysis?.analysisReport;
 
     if (!analysisReport) {
-        console.log('[QALab] ⚠️ 未检测到分析报告');
-        console.log('[QALab] - state.analysis:', appStore.getState().analysis ? '存在但无 analysisReport' : '不存在');
-        console.log('[QALab] ========================================');
+        Logger.debug('[QALab] ⚠️ 未检测到分析报告');
+        Logger.debug('[QALab] - state.analysis:', appStore.getState().analysis ? '存在但无 analysisReport' : '不存在');
+        Logger.debug('[QALab] ========================================');
         return;
     }
 
-    console.log('[QALab] ✅ 检测到分析报告');
-    console.log('[QALab] - 报告类型:', typeof analysisReport);
+    Logger.debug('[QALab] ✅ 检测到分析报告');
+    Logger.debug('[QALab] - 报告类型:', typeof analysisReport);
 
     const input = document.getElementById('jsonInput') as HTMLTextAreaElement;
     if (!input) {
-        console.log('[QALab] ⚠️ 输入框未就绪');
-        console.log('[QALab] ========================================');
+        Logger.debug('[QALab] ⚠️ 输入框未就绪');
+        Logger.debug('[QALab] ========================================');
         return;
     }
 
-    console.log('[QALab] ✅ 输入框已就绪');
+    Logger.debug('[QALab] ✅ 输入框已就绪');
 
     try {
         // 处理不同格式的报告数据
         let reportJSON: string;
-        let reportData: any;
+        let reportData: unknown;
 
         if (typeof analysisReport === 'string') {
-            console.log('[QALab] 📄 报告格式: 字符串');
+            Logger.debug('[QALab] 📄 报告格式: 字符串');
             reportJSON = analysisReport;
             reportData = JSON.parse(reportJSON);
         } else {
-            console.log('[QALab] 📄 报告格式: 对象');
+            Logger.debug('[QALab] 📄 报告格式: 对象');
             const reportObj = analysisReport as any;
 
             // 从 state 中获取完整的 metadata 信息
@@ -66,7 +67,7 @@ export function autoLoadAnalysisReport(): void {
             let selectedAsins = appStore.getState().analysis?.selectedAsins || [];
             if (selectedAsins.length === 0 && scrapedData?.products) {
                 selectedAsins = scrapedData.products
-                    .map((p: any) => p.asin)
+                    .map((p: unknown) => p.asin)
                     .filter((asin: string) => !!asin);
             }
 
@@ -85,11 +86,11 @@ export function autoLoadAnalysisReport(): void {
                 timestamp: new Date().toISOString(),
                 dataSource: dataSource,
                 marketplace: scrapedData?.metadata?.marketplace || 'DE',
-                productTitle: scrapedData?.products?.map((p: any) => p.productTitle).join(' | ') || undefined
+                productTitle: scrapedData?.products?.map((p: unknown) => p.productTitle).join(' | ') || undefined
             };
 
-            console.log('[QALab] 📦 构建完整的 FullReportData 格式');
-            console.log('[QALab] - metadata:', metadata);
+            Logger.debug('[QALab] 📦 构建完整的 FullReportData 格式');
+            Logger.debug('[QALab] - metadata:', metadata);
 
             reportData = {
                 metadata,
@@ -99,12 +100,12 @@ export function autoLoadAnalysisReport(): void {
             reportJSON = JSON.stringify(reportData, null, 2);
         }
 
-        console.log('[QALab] 📊 报告 JSON 长度:', reportJSON.length, '字符');
+        Logger.debug('[QALab] 📊 报告 JSON 长度:', reportJSON.length, '字符');
 
         // 检查是否与当前内容相同，避免重复加载
         if (input.value.trim() === reportJSON.trim()) {
-            console.log('[QALab] ⚠️ 报告已加载，跳过重复加载');
-            console.log('[QALab] ========================================');
+            Logger.debug('[QALab] ⚠️ 报告已加载，跳过重复加载');
+            Logger.debug('[QALab] ========================================');
             return;
         }
 
@@ -112,27 +113,27 @@ export function autoLoadAnalysisReport(): void {
         const qalabState = getQalabState();
         qalabState.reportData = reportData;
 
-        console.log('[QALab] ✅ 报告已加载到 qalabState.reportData');
-        console.log('[QALab] 📋 报告详细信息:');
+        Logger.debug('[QALab] ✅ 报告已加载到 qalabState.reportData');
+        Logger.debug('[QALab] 📋 报告详细信息:');
 
         // 详细记录报告内容
         if (qalabState.reportData) {
             // 获取实际的分析报告数据
             const ar = qalabState.reportData.analysisReport || qalabState.reportData;
 
-            console.log('[QALab] - 报告根字段:', Object.keys(qalabState.reportData));
-            console.log('[QALab] - 分析报告字段:', Object.keys(ar));
-            console.log('[QALab] ----------------------------------------');
+            Logger.debug('[QALab] - 报告根字段:', Object.keys(qalabState.reportData));
+            Logger.debug('[QALab] - 分析报告字段:', Object.keys(ar));
+            Logger.debug('[QALab] ----------------------------------------');
 
             // 产品信息
             const productTitle = ar.product_title || ar.productTitle || ar.title || 'N/A';
             const market = qalabState.reportData.metadata?.marketplace || ar.market || ar.marketplace || 'N/A';
             const asins = qalabState.reportData.metadata?.asins || (ar.asin ? [ar.asin] : []);
 
-            console.log('[QALab] - 产品标题:', productTitle);
-            console.log('[QALab] - 市场:', market);
-            console.log('[QALab] - ASINs:', asins);
-            console.log('[QALab] ----------------------------------------');
+            Logger.debug('[QALab] - 产品标题:', productTitle);
+            Logger.debug('[QALab] - 市场:', market);
+            Logger.debug('[QALab] - ASINs:', asins);
+            Logger.debug('[QALab] ----------------------------------------');
 
             // 检查关键数据字段（支持多种命名格式）
             const sellingPoints = ar['selling-points']?.bullet_analysis
@@ -160,21 +161,21 @@ export function autoLoadAnalysisReport(): void {
                 || ar.buyer_profile?.buyer_types
                 || [];
 
-            console.log('[QALab] - 卖点数量:', sellingPoints.length);
-            console.log('[QALab] - 致命缺陷数量:', fatalFlaws.length);
-            console.log('[QALab] - Wow 时刻数量:', wowMoments.length);
-            console.log('[QALab] - 犹豫点数量:', hesitations.length);
-            console.log('[QALab] - 买家画像数量:', buyerProfile.length);
+            Logger.debug('[QALab] - 卖点数量:', sellingPoints.length);
+            Logger.debug('[QALab] - 致命缺陷数量:', fatalFlaws.length);
+            Logger.debug('[QALab] - Wow 时刻数量:', wowMoments.length);
+            Logger.debug('[QALab] - 犹豫点数量:', hesitations.length);
+            Logger.debug('[QALab] - 买家画像数量:', buyerProfile.length);
 
             // 如果所有字段都是空的，列出所有可用字段帮助调试
             if (sellingPoints.length === 0 && fatalFlaws.length === 0 && wowMoments.length === 0) {
-                console.warn('[QALab] ⚠️ 所有业务字段都为空，列出可用字段:');
-                console.log('[QALab] - 可用字段:', Object.keys(ar));
+                Logger.warn('[QALab] ⚠️ 所有业务字段都为空，列出可用字段:');
+                Logger.debug('[QALab] - 可用字段:', Object.keys(ar));
 
                 // 尝试查找可能的字段名
                 for (const key of Object.keys(ar)) {
                     if (typeof ar[key] === 'object' && ar[key] !== null) {
-                        console.log('[QALab] - 对象字段', key, ':', Object.keys(ar[key]));
+                        Logger.debug('[QALab] - 对象字段', key, ':', Object.keys(ar[key]));
                     }
                 }
             }
@@ -190,12 +191,12 @@ export function autoLoadAnalysisReport(): void {
         // 刷新数据预览
         refreshDataPreview();
 
-        console.log('[QALab] ✅ 分析报告已自动加载');
-        console.log('[QALab] ========================================');
+        Logger.debug('[QALab] ✅ 分析报告已自动加载');
+        Logger.debug('[QALab] ========================================');
     } catch (error) {
-        console.error('[QALab] ❌ 加载分析报告失败:', error);
-        console.error('[QALab] 错误详情:', (error as Error).message);
-        console.log('[QALab] ========================================');
+        Logger.error('[QALab] ❌ 加载分析报告失败:', error);
+        Logger.error('[QALab] 错误详情:', (error as Error).message);
+        Logger.debug('[QALab] ========================================');
         showToast('报告加载失败', {
             type: 'error',
             description: '数据格式可能不正确'
@@ -544,23 +545,23 @@ export function editQA(_id: number): void {
  * Rufus AI 模拟器 - 发送问题
  */
 export async function sendRufusQuestion(question: string): Promise<void> {
-    console.log('[QALab] ========================================');
-    console.log('[QALab] 💬 sendRufusQuestion 被调用');
-    console.log('[QALab] 时间:', new Date().toLocaleTimeString());
-    console.log('[QALab] ========================================');
+    Logger.debug('[QALab] ========================================');
+    Logger.debug('[QALab] 💬 sendRufusQuestion 被调用');
+    Logger.debug('[QALab] 时间:', new Date().toLocaleTimeString());
+    Logger.debug('[QALab] ========================================');
 
     if (!question.trim()) {
-        console.warn('[QALab] ⚠️ 问题为空');
+        Logger.warn('[QALab] ⚠️ 问题为空');
         showToast('请输入问题', { type: 'error' });
         return;
     }
 
     const qalabState = getQalabState();
 
-    console.log('[QALab] 📝 用户问题:');
-    console.log('[QALab] - 长度:', question.length, '字符');
-    console.log('[QALab] - 内容:', question);
-    console.log('[QALab] ----------------------------------------');
+    Logger.debug('[QALab] 📝 用户问题:');
+    Logger.debug('[QALab] - 长度:', question.length, '字符');
+    Logger.debug('[QALab] - 内容:', question);
+    Logger.debug('[QALab] ----------------------------------------');
 
     // 添加用户消息
     qalabState.rufusMessages.push({
@@ -569,59 +570,59 @@ export async function sendRufusQuestion(question: string): Promise<void> {
         timestamp: Date.now()
     });
 
-    console.log('[QALab] ✅ 用户消息已添加到历史');
-    console.log('[QALab] - 当前消息总数:', qalabState.rufusMessages.length);
+    Logger.debug('[QALab] ✅ 用户消息已添加到历史');
+    Logger.debug('[QALab] - 当前消息总数:', qalabState.rufusMessages.length);
 
     // 更新UI显示用户消息
     renderRufusMessages();
-    console.log('[QALab] ✅ UI 已更新显示用户消息');
+    Logger.debug('[QALab] ✅ UI 已更新显示用户消息');
 
     // 清空输入框
     const input = document.getElementById('rufusInput') as HTMLTextAreaElement;
     if (input) {
         input.value = '';
-        console.log('[QALab] ✅ 输入框已清空');
+        Logger.debug('[QALab] ✅ 输入框已清空');
     }
 
     // 显示思考状态
     qalabState.rufusThinking = true;
     renderRufusThinking();
-    console.log('[QALab] � 开始思考状态...');
+    Logger.debug('[QALab] � 开始思考状态...');
 
     try {
-        console.log('[QALab] ----------------------------------------');
-        console.log('[QALab] 🚀 当前配置:');
-        console.log('[QALab] - Rufus 模式: AI');
-        console.log('[QALab] - 报告数据存在:', !!qalabState.reportData);
+        Logger.debug('[QALab] ----------------------------------------');
+        Logger.debug('[QALab] 🚀 当前配置:');
+        Logger.debug('[QALab] - Rufus 模式: AI');
+        Logger.debug('[QALab] - 报告数据存在:', !!qalabState.reportData);
 
         if (qalabState.reportData) {
             const ar = qalabState.reportData.analysisReport || qalabState.reportData;
-            console.log('[QALab] - 产品标题:', ar.product_title || 'N/A');
-            console.log('[QALab] - 卖点数:', ar['selling-points']?.bullet_analysis?.length || 0);
-            console.log('[QALab] - 缺陷数:', ar['fatal-flaws']?.critical_issues?.length || 0);
+            Logger.debug('[QALab] - 产品标题:', ar.product_title || 'N/A');
+            Logger.debug('[QALab] - 卖点数:', ar['selling-points']?.bullet_analysis?.length || 0);
+            Logger.debug('[QALab] - 缺陷数:', ar['fatal-flaws']?.critical_issues?.length || 0);
         }
 
-        console.log('[QALab] ----------------------------------------');
+        Logger.debug('[QALab] ----------------------------------------');
 
         // 初始化模拟器（使用 AI 模式）
         if (qalabState.reportData) {
-            console.log('[QALab] 🔧 初始化 Rufus 模拟器...');
-            console.log('[QALab] - 模式: AI');
+            Logger.debug('[QALab] 🔧 初始化 Rufus 模拟器...');
+            Logger.debug('[QALab] - 模式: AI');
             rufusSimulator.initialize(qalabState.reportData, 'ai');
-            console.log('[QALab] ✅ 模拟器初始化完成');
+            Logger.debug('[QALab] ✅ 模拟器初始化完成');
         } else {
-            console.warn('[QALab] ⚠️ 没有报告数据');
+            Logger.warn('[QALab] ⚠️ 没有报告数据');
         }
 
         // AI 模式显示详细状态
-        console.log('[QALab] 🤖 使用 AI 模式生成回答');
+        Logger.debug('[QALab] 🤖 使用 AI 模式生成回答');
         updateRufusThinkingMessage('正在连接大模型...');
         await new Promise(resolve => setTimeout(resolve, 300));
 
         // 模拟思考延迟
         const thinkingDelay = 800 + Math.random() * 500;  // 800-1300ms
 
-        console.log('[QALab] ⏱️ 思考延迟:', Math.round(thinkingDelay), 'ms');
+        Logger.debug('[QALab] ⏱️ 思考延迟:', Math.round(thinkingDelay), 'ms');
 
         updateRufusThinkingMessage('正在分析报告内容...');
         await new Promise(resolve => setTimeout(resolve, thinkingDelay / 2));
@@ -629,8 +630,8 @@ export async function sendRufusQuestion(question: string): Promise<void> {
         updateRufusThinkingMessage('正在生成智能回答...');
         await new Promise(resolve => setTimeout(resolve, thinkingDelay / 2));
 
-        console.log('[QALab] ----------------------------------------');
-        console.log('[QALab] 🚀 开始生成回答...');
+        Logger.debug('[QALab] ----------------------------------------');
+        Logger.debug('[QALab] 🚀 开始生成回答...');
         const startTime = Date.now();
 
         // 生成回答
@@ -639,17 +640,17 @@ export async function sendRufusQuestion(question: string): Promise<void> {
         const endTime = Date.now();
         const duration = endTime - startTime;
 
-        console.log('[QALab] ========================================');
-        console.log('[QALab] ✅ 回答生成完成');
-        console.log('[QALab] ⏱️ 生成耗时:', duration, 'ms');
-        console.log('[QALab] 📊 回答统计:');
-        console.log('[QALab] - 长度:', answer.length, '字符');
-        console.log('[QALab] - 行数:', answer.split('\n').length);
-        console.log('[QALab] - 使用模式: AI');
-        console.log('[QALab] ----------------------------------------');
-        console.log('[QALab] 📄 回答内容预览 (前 200 字符):');
-        console.log('[QALab]', answer.substring(0, 200) + (answer.length > 200 ? '...' : ''));
-        console.log('[QALab] ========================================');
+        Logger.debug('[QALab] ========================================');
+        Logger.debug('[QALab] ✅ 回答生成完成');
+        Logger.debug('[QALab] ⏱️ 生成耗时:', duration, 'ms');
+        Logger.debug('[QALab] 📊 回答统计:');
+        Logger.debug('[QALab] - 长度:', answer.length, '字符');
+        Logger.debug('[QALab] - 行数:', answer.split('\n').length);
+        Logger.debug('[QALab] - 使用模式: AI');
+        Logger.debug('[QALab] ----------------------------------------');
+        Logger.debug('[QALab] 📄 回答内容预览 (前 200 字符):');
+        Logger.debug('[QALab]', answer.substring(0, 200) + (answer.length > 200 ? '...' : ''));
+        Logger.debug('[QALab] ========================================');
 
         // 添加助手消息
         qalabState.rufusMessages.push({
@@ -658,30 +659,30 @@ export async function sendRufusQuestion(question: string): Promise<void> {
             timestamp: Date.now()
         });
 
-        console.log('[QALab] ✅ 助手消息已添加到历史');
-        console.log('[QALab] - 当前消息总数:', qalabState.rufusMessages.length);
+        Logger.debug('[QALab] ✅ 助手消息已添加到历史');
+        Logger.debug('[QALab] - 当前消息总数:', qalabState.rufusMessages.length);
 
         qalabState.rufusThinking = false;
         renderRufusMessages();
 
-        console.log('[QALab] ✅ UI 已更新显示助手回答');
+        Logger.debug('[QALab] ✅ UI 已更新显示助手回答');
 
         // 显示成功提示
         showToast('AI 回答生成成功', {
             type: 'success',
             description: '基于大模型智能分析'
         });
-        console.log('[QALab] 💡 已显示 AI 成功提示');
+        Logger.debug('[QALab] 💡 已显示 AI 成功提示');
 
-        console.log('[QALab] ========================================');
+        Logger.debug('[QALab] ========================================');
 
     } catch (error) {
-        console.error('[QALab] ========================================');
-        console.error('[QALab] ❌ Rufus 回答生成失败');
-        console.error('[QALab] 错误类型:', (error as Error).name);
-        console.error('[QALab] 错误信息:', (error as Error).message);
-        console.error('[QALab] 错误堆栈:', (error as Error).stack);
-        console.error('[QALab] ========================================');
+        Logger.error('[QALab] ========================================');
+        Logger.error('[QALab] ❌ Rufus 回答生成失败');
+        Logger.error('[QALab] 错误类型:', (error as Error).name);
+        Logger.error('[QALab] 错误信息:', (error as Error).message);
+        Logger.error('[QALab] 错误堆栈:', (error as Error).stack);
+        Logger.error('[QALab] ========================================');
 
         qalabState.rufusThinking = false;
 
@@ -753,19 +754,19 @@ export async function checkLLMConfiguration(): Promise<void> {
         const activeProvider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER) as string | null;
 
         if (!activeProvider) {
-            console.warn('[QALab] ⚠️ 未配置 LLM 提供商');
+            Logger.warn('[QALab] ⚠️ 未配置 LLM 提供商');
             return;
         }
 
         const config = await StorageService.getLLMConfigWithKey(activeProvider);
         if (!config || !config.apiKey) {
-            console.warn('[QALab] ⚠️ LLM 配置不完整');
+            Logger.warn('[QALab] ⚠️ LLM 配置不完整');
             return;
         }
 
-        console.log('[QALab] ✅ LLM 配置正常:', activeProvider);
+        Logger.debug('[QALab] ✅ LLM 配置正常:', activeProvider);
     } catch (error) {
-        console.error('[QALab] 检查 LLM 配置失败:', error);
+        Logger.error('[QALab] 检查 LLM 配置失败:', error);
     }
 }
 
@@ -868,7 +869,7 @@ function updateRufusThinkingMessage(message: string): void {
  * 切换数据Tab
  */
 export function switchDataTab(tab: 'preview' | 'json'): void {
-    console.log('[QALab] 切换数据Tab:', tab);
+    Logger.debug('[QALab] 切换数据Tab:', tab);
 
     // 更新Tab按钮状态
     const tabs = document.querySelectorAll('.data-tab');
@@ -899,13 +900,13 @@ export function switchDataTab(tab: 'preview' | 'json'): void {
  * 刷新数据预览
  */
 export function refreshDataPreview(): void {
-    console.log('[QALab] 🔄 refreshDataPreview 被调用');
-    console.log('[QALab] - 调用栈:', new Error().stack);
+    Logger.debug('[QALab] 🔄 refreshDataPreview 被调用');
+    Logger.debug('[QALab] - 调用栈:', new Error().stack);
 
     const qalabState = getQalabState();
     const reportData = qalabState.reportData;
 
-    console.log('[QALab] - reportData 存在:', !!reportData);
+    Logger.debug('[QALab] - reportData 存在:', !!reportData);
 
     // 渲染数据预览
     renderDataPreview(reportData);
@@ -913,13 +914,13 @@ export function refreshDataPreview(): void {
     // 渲染JSON预览
     renderJSONPreview(reportData);
 
-    console.log('[QALab] ✅ refreshDataPreview 完成');
+    Logger.debug('[QALab] ✅ refreshDataPreview 完成');
 }
 
 /**
  * 触发导入（暴露给全局）
  */
 export function triggerImport(): void {
-    console.log('[QALab] 触发文件导入');
+    Logger.debug('[QALab] 触发文件导入');
     triggerFileImport();
 }

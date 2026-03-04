@@ -7,7 +7,7 @@ import type { ProductData, ValidationResult, ScrapedData } from '../types';
 /**
  * 验证 ScrapedData 的 metadata 字段
  */
-export function validateMetadata(metadata: any): { valid: boolean; error?: string } {
+export function validateMetadata(metadata: unknown): { valid: boolean; error?: string } {
     if (!metadata || typeof metadata !== 'object') {
         return { valid: false, error: 'metadata 必须是对象' };
     }
@@ -62,7 +62,7 @@ export function validateMetadata(metadata: any): { valid: boolean; error?: strin
 /**
  * 类型守卫：检查对象是否为有效的 ScrapedData
  */
-export function isScrapedData(data: any): data is ScrapedData {
+export function isScrapedData(data: unknown): data is ScrapedData {
     if (!data || typeof data !== 'object') {
         return false;
     }
@@ -86,7 +86,7 @@ export function isScrapedData(data: any): data is ScrapedData {
 /**
  * 验证产品数据结构
  */
-export function validateProduct(product: any): ValidationResult {
+export function validateProduct(product: unknown): ValidationResult {
     if (!product || typeof product !== 'object') {
         return { valid: false, error: '产品数据不是有效对象' };
     }
@@ -111,7 +111,7 @@ export function validateProduct(product: any): ValidationResult {
         if (!Array.isArray(product.feature_bullets)) {
             return { valid: false, error: 'feature_bullets必须是数组' };
         }
-        if (!product.feature_bullets.every((b: any) => typeof b === 'string')) {
+        if (!product.feature_bullets.every((b: unknown) => typeof b === 'string')) {
             return { valid: false, error: 'feature_bullets中的元素必须是字符串' };
         }
     }
@@ -139,7 +139,7 @@ export function validateProduct(product: any): ValidationResult {
  * @param data - 待验证的数据
  * @param strictMetadata - 是否严格验证 metadata（默认 false，兼容旧数据）
  */
-export function validateScrapedData(data: any, strictMetadata: boolean = false): ValidationResult {
+export function validateScrapedData(data: unknown, strictMetadata: boolean = false): ValidationResult {
     if (!data || typeof data !== 'object') {
         return { valid: false, error: '数据不是有效对象' };
     }

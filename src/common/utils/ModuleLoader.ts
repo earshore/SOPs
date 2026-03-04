@@ -126,10 +126,10 @@ export class ModuleLoader {
    */
   registerSubModule(routeId: string, loader: () => Promise<IModule>): void {
     if (this.moduleMap[routeId]) {
-      console.warn(`[${this.moduleName}] 覆盖已存在的子模块: ${routeId}`);
+      Logger.warn(`[${this.moduleName}] 覆盖已存在的子模块: ${routeId}`);
     }
     this.moduleMap[routeId] = loader;
-    console.log(`[${this.moduleName}] 注册子模块: ${routeId}`);
+    Logger.debug(`[${this.moduleName}] 注册子模块: ${routeId}`);
   }
 
   /**
@@ -166,10 +166,10 @@ export class ModuleLoader {
   private _unmountCurrentModule(): void {
     if (this.currentModule && this.currentModule.unmount) {
       try {
-        console.log(`[${this.moduleName}] 🔄 卸载旧模块: ${this.currentRouteId}`);
+        Logger.debug(`[${this.moduleName}] 🔄 卸载旧模块: ${this.currentRouteId}`);
         this.currentModule.unmount();
       } catch (unmountErr) {
-        console.warn(`[${this.moduleName}] 卸载模块时出错:`, unmountErr);
+        Logger.warn(`[${this.moduleName}] 卸载模块时出错:`, unmountErr);
       }
     }
     this.currentModule = null;
@@ -220,17 +220,17 @@ export class ModuleLoader {
   async loadModule(routeId: string, retryCount: number = 0): Promise<void> {
     // 🔧 防重复加载：如果正在加载相同的路由，直接返回
     if (this.isLoading && this.currentRouteId === routeId) {
-      console.log(`[${this.moduleName}] ⚠️ 模块 ${routeId} 正在加载中，跳过重复加载`);
+      Logger.debug(`[${this.moduleName}] ⚠️ 模块 ${routeId} 正在加载中，跳过重复加载`);
       return;
     }
 
     // 🔧 防重复加载：如果已经加载了相同的路由，直接返回
     if (this.currentRouteId === routeId && this.currentModule) {
-      console.log(`[${this.moduleName}] ⚠️ 模块 ${routeId} 已加载，跳过重复加载`);
+      Logger.debug(`[${this.moduleName}] ⚠️ 模块 ${routeId} 已加载，跳过重复加载`);
       return;
     }
 
-    console.log(`[${this.moduleName}] 🔄 开始加载子模块: ${routeId}`);
+    Logger.debug(`[${this.moduleName}] 🔄 开始加载子模块: ${routeId}`);
 
     // 🔧 标记正在加载
     this.isLoading = true;
@@ -240,7 +240,7 @@ export class ModuleLoader {
       const container = await this._waitForContainer(this.containerId);
 
       if (!container) {
-        console.error(`[${this.moduleName}] 容器 #${this.containerId} 未找到 (超时)`);
+        Logger.error(`[${this.moduleName}] 容器 #${this.containerId} 未找到 (超时)`);
         const shell = document.getElementById(this.shellId);
         if (shell) {
           renderTimeout(shell);
@@ -264,7 +264,7 @@ export class ModuleLoader {
       }
 
       // 5. 动态导入模块（集成性能监控）
-      console.log(`[${this.moduleName}] 📦 动态导入模块: ${routeId}`);
+      Logger.debug(`[${this.moduleName}] 📦 动态导入模块: ${routeId}`);
       
       // 🎯 阶段1: 性能监控 - 测量模块加载时间
       const module = await this._measureModuleLoad(routeId, loader);
@@ -278,11 +278,11 @@ export class ModuleLoader {
       
       // 7. 挂载新模块
       if (module.mount) {
-        console.log(`[${this.moduleName}] 🔧 挂载新模块: ${routeId}`);
+        Logger.debug(`[${this.moduleName}] 🔧 挂载新模块: ${routeId}`);
         
         // 🎯 如果模块支持容器注入，尝试注入
         if (this._supportsContainerInjection(module)) {
-          console.log(`[${this.moduleName}] 💉 模块支持DI容器注入`);
+          Logger.debug(`[${this.moduleName}] 💉 模块支持DI容器注入`);
           // 注意：这里假设模块已经在构造时接收了容器
           // 如果需要在mount时注入，需要修改IModule接口
         }
@@ -290,12 +290,12 @@ export class ModuleLoader {
         await module.mount(container);
         this.currentModule = module;
         this.currentRouteId = routeId; // 🔧 记录当前路由ID
-        console.log(`[${this.moduleName}] ✅ 子模块加载成功: ${routeId}`);
+        Logger.debug(`[${this.moduleName}] ✅ 子模块加载成功: ${routeId}`);
       } else {
         throw new Error(`模块接口不完整: 缺少 mount() 函数`);
       }
     } catch (err) {
-      console.error(`[${this.moduleName}] 加载子模块失败 (重试 ${retryCount}):`, err);
+      Logger.error(`[${this.moduleName}] 加载子模块失败 (重试 ${retryCount}):`, err);
 
       // 7. 自动重试机制（最多1次）
       if (retryCount < 1) {
@@ -369,16 +369,16 @@ export class ModuleLoader {
         return; // 前缀不匹配，直接跳过
       }
 
-      console.log(`📡 [${this.moduleName} 调试] 收到路由: ${routeId}, 模块ID: ${config?.module?.id}`);
+      Logger.debug(`📡 [${this.moduleName} 调试] 收到路由: ${routeId}, 模块ID: ${config?.module?.id}`);
 
       // 只处理在moduleMap中注册的路由
       if (this.moduleMap[routeId]) {
-        console.log(`✅ [${this.moduleName}] 匹配成功，准备加载子模块: ${routeId}`);
+        Logger.debug(`✅ [${this.moduleName}] 匹配成功，准备加载子模块: ${routeId}`);
 
         // 确保Shell已经存在
         const shell = document.getElementById(this.shellId);
         if (!shell) {
-          console.warn(`⚠️ [${this.moduleName}] Shell 容器 #${this.shellId} 未找到`);
+          Logger.warn(`⚠️ [${this.moduleName}] Shell 容器 #${this.shellId} 未找到`);
           return;
         }
 
@@ -394,12 +394,12 @@ export class ModuleLoader {
       
       // 只处理当前模块的卸载
       if (panelId === this.shellId) {
-        console.log(`[${this.moduleName}] 🔄 收到模块卸载请求，开始清理子模块`);
+        Logger.debug(`[${this.moduleName}] 🔄 收到模块卸载请求，开始清理子模块`);
         this._unmountCurrentModule();
       }
     });
 
-    console.log(`✅ [${this.moduleName}] 路由监听器已初始化 (前缀: ${Array.from(this.routePrefixes).join(', ')})`);
+    Logger.debug(`✅ [${this.moduleName}] 路由监听器已初始化 (前缀: ${Array.from(this.routePrefixes).join(', ')})`);
   }
 
   /**
@@ -407,7 +407,7 @@ export class ModuleLoader {
    */
   destroy(): void {
     this._unmountCurrentModule();
-    console.log(`✅ [${this.moduleName}] 加载器已销毁`);
+    Logger.debug(`✅ [${this.moduleName}] 加载器已销毁`);
   }
 }
 
