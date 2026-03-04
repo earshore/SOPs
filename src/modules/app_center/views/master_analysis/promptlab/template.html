@@ -119,6 +119,8 @@
                                     Tier 2 长尾词 <span class="text-slate-400 font-normal">- 2-5个</span>
                                 </label>
                                 <textarea @input="onInputChange"
+                                    @focus="expandInput($event)"
+                                    @blur="restoreInput($event)"
                                     class="w-full text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 p-3 bg-slate-50/50 focus:bg-white transition-all resize-none placeholder:text-slate-300 font-mono"
                                     id="lab-keywords-tier2"
                                     placeholder="baby humidifier, easy to clean, quiet operation" rows="1"
@@ -144,6 +146,8 @@
                                     核心卖点 (USPs) <span class="text-slate-400 font-normal">- 可补充</span>
                                 </label>
                                 <textarea @input="onInputChange"
+                                    @focus="expandInput($event)"
+                                    @blur="restoreInput($event)"
                                     class="w-full text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 p-3 bg-slate-50/50 focus:bg-white transition-all resize-none placeholder:text-slate-300"
                                     id="lab-usps" placeholder="- 专利静音技术 (&lt;28dB)
 - 360度旋转喷嘴" rows="2" x-model="profile.usps"></textarea>
@@ -156,6 +160,8 @@
                                     详细参数 (Specs) <span class="text-slate-400 font-normal">- 产品特征</span>
                                 </label>
                                 <textarea @input="onInputChange"
+                                    @focus="expandInput($event)"
+                                    @blur="restoreInput($event)"
                                     class="w-full text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 p-3 bg-slate-50/50 focus:bg-white transition-all resize-none placeholder:text-slate-300 font-mono"
                                     id="lab-specs" placeholder="材质: ABS + PP
 尺寸: 20x20x30cm" rows="2" x-model="profile.specs"></textarea>
@@ -278,6 +284,8 @@
                                 自定义规则 <span class="text-slate-400 font-normal">- 有就填</span>
                             </label>
                             <textarea @input="onInputChange"
+                                @focus="expandInput($event)"
+                                @blur="restoreInput($event)"
                                 class="w-full text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 p-3 bg-slate-50/50 focus:bg-white transition-all resize-none placeholder:text-slate-300"
                                 id="lab-custom-strategy" placeholder="例如: 禁止使用'Best Seller'词汇..." rows="1"
                                 x-model="profile.customStrategy"></textarea>

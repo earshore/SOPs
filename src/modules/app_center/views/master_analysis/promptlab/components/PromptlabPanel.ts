@@ -40,6 +40,9 @@ export function createPromptlabPanel() {
         // 市场跟踪（用于检测数据源变化）
         lastMarketplace: '',
 
+        // 输入框原始高度存储
+        originalHeights: new Map<HTMLElement, number>(),
+
         // 用户产品配置
         profile: {
             targetMarket: '',
@@ -130,6 +133,9 @@ export function createPromptlabPanel() {
             // 渲染报告分析
             this.renderReportAnalysis();
 
+            // 初始化输入框自动高度调整
+            this.initAutoHeightInputs();
+
             // 监听数据更新事件
             eventBus.on(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, () => {
                 Logger.debug('[Promptlab] 检测到数据更新，重新渲染报告分析');
@@ -142,6 +148,69 @@ export function createPromptlabPanel() {
             });
 
             Logger.debug('[Promptlab] ✅ Alpine 组件初始化完成');
+        },
+
+        // ========== Auto Height Input Management ==========
+
+        /**
+         * 初始化所有输入框的自动高度调整
+         */
+        initAutoHeightInputs() {
+            // 等待 DOM 渲染完成
+            setTimeout(() => {
+                const textareas = document.querySelectorAll('#card-product-dna textarea, #card-strategy textarea');
+                textareas.forEach((textarea) => {
+                    const el = textarea as HTMLTextAreaElement;
+                    // 存储原始高度
+                    if (!this.originalHeights.has(el)) {
+                        const computedStyle = window.getComputedStyle(el);
+                        const originalHeight = parseInt(computedStyle.height);
+                        this.originalHeights.set(el, originalHeight);
+                    }
+                });
+                Logger.debug('[Promptlab] ✅ 已初始化输入框自动高度调整');
+            }, 100);
+        },
+
+        /**
+         * 输入框获得焦点时自动扩展高度
+         */
+        expandInput(event: FocusEvent) {
+            const target = event.target as HTMLTextAreaElement;
+
+            // 存储原始高度（如果还没存储）
+            if (!this.originalHeights.has(target)) {
+                const computedStyle = window.getComputedStyle(target);
+                const originalHeight = parseInt(computedStyle.height);
+                this.originalHeights.set(target, originalHeight);
+            }
+
+            // 计算内容所需高度
+            target.style.height = 'auto';
+            const scrollHeight = target.scrollHeight;
+            const minHeight = this.originalHeights.get(target) || 40;
+            const maxHeight = 300; // 最大高度限制
+
+            // 设置新高度（在最小和最大高度之间）
+            const newHeight = Math.min(Math.max(scrollHeight + 4, minHeight), maxHeight);
+            target.style.height = `${newHeight}px`;
+            target.style.transition = 'height 0.2s ease-out';
+
+            Logger.debug('[Promptlab] 输入框扩展:', { originalHeight: minHeight, newHeight });
+        },
+
+        /**
+         * 输入框失去焦点时恢复原始高度
+         */
+        restoreInput(event: FocusEvent) {
+            const target = event.target as HTMLTextAreaElement;
+            const originalHeight = this.originalHeights.get(target);
+
+            if (originalHeight) {
+                target.style.height = `${originalHeight}px`;
+                target.style.transition = 'height 0.2s ease-in';
+                Logger.debug('[Promptlab] 输入框恢复:', { height: originalHeight });
+            }
         },
 
         // ========== State Management ==========
