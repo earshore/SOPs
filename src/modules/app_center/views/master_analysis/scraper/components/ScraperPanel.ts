@@ -360,6 +360,24 @@ export function createScraperPanel() {
             }
         },
 
+        downloadPlugin(): void {
+            Logger.debug('[Scraper] 🔽 下载插件按钮被点击');
+            const url = 'https://github.com/earshore/Amazon-Scraper/releases';
+            try {
+                Logger.debug('[Scraper] 🌐 尝试打开 URL:', url);
+                const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
+                if (newWindow) {
+                    Logger.debug('[Scraper] ✅ 窗口打开成功');
+                } else {
+                    Logger.warn('[Scraper] ⚠️ 窗口被浏览器拦截，请检查弹窗设置');
+                    showToast('请允许浏览器弹窗以打开下载页面', 'warning');
+                }
+            } catch (error) {
+                Logger.error('[Scraper] ❌ 打开窗口失败:', error);
+                showToast('打开下载页面失败', 'error');
+            }
+        },
+
         async handleImportFiles(event: Event): Promise<void> {
             const target = event.target as HTMLInputElement;
             const files = Array.from(target.files || []);
