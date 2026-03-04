@@ -39,13 +39,21 @@ export class RufusSimulator {
      * 初始化模拟器
      */
     initialize(reportData: unknown, mode: RufusMode = 'ai'): void {
-        this.reportData = reportData?.analysisReport || reportData;
+        // 类型守卫：提取 analysisReport
+        if (reportData && typeof reportData === 'object' && 'analysisReport' in reportData) {
+            this.reportData = (reportData as { analysisReport: unknown }).analysisReport;
+        } else {
+            this.reportData = reportData;
+        }
+
         this.mode = mode;
         Logger.debug('[Rufus Simulator] 初始化完成');
         Logger.debug('[Rufus Simulator] - 模式:', mode);
         Logger.debug('[Rufus Simulator] - 报告数据:', this.reportData ? '已加载' : '未加载');
-        if (this.reportData) {
-            Logger.debug('[Rufus Simulator] - 产品标题:', this.reportData.product_title || 'N/A');
+
+        if (this.reportData && typeof this.reportData === 'object') {
+            const dataObj = this.reportData as Record<string, unknown>;
+            Logger.debug('[Rufus Simulator] - 产品标题:', dataObj.product_title || 'N/A');
         }
         // 注：当前版本主要支持德语，未来可根据市场扩展到其他语言
     }
@@ -241,8 +249,15 @@ export class RufusSimulator {
             return `潜在买家问题: ${question}\n\n请以卖家客服的身份回答。由于没有产品分析报告，请诚实地告知买家暂无详细数据，但可以提供基本的产品信息。`;
         }
 
+        if (typeof this.reportData !== 'object') {
+            Logger.warn('[Rufus AI] ⚠️ reportData 不是对象');
+            return `潜在买家问题: ${question}\n\n请以卖家客服的身份回答。`;
+        }
+
+        const dataObj = this.reportData as Record<string, unknown>;
+
         // 提取报告关键信息
-        const productTitle = this.reportData?.product_title || this.reportData?.title || '未知产品';
+        const productTitle = String(dataObj.product_title || dataObj.title || '未知产品');
         Logger.debug('[Rufus AI] - 产品标题:', productTitle);
 
         // 构建简洁的报告摘要
@@ -253,22 +268,29 @@ export class RufusSimulator {
 
         // 从 analysisReport 中提取信息
         // 支持多种数据格式：直接字段、details、highlights、bullet_analysis等
-        const ar = this.reportData.analysisReport || this.reportData;
+        const ar = (dataObj.analysisReport && typeof dataObj.analysisReport === 'object')
+            ? dataObj.analysisReport as Record<string, unknown>
+            : dataObj;
 
         // 卖点 - 支持多种字段名
-        const sellingPoints = ar['selling-points']?.bullet_analysis
-            || ar.sellingPoints?.bullet_analysis
-            || ar.selling_points?.bullet_analysis
-            || ar['selling-points']?.details
-            || ar['selling-points']?.highlights
-            || [];
+        const sellingPointsData = ar['selling-points'] || ar['sellingPoints'] || ar['selling_points'];
+        let sellingPoints: unknown[] = [];
+        if (sellingPointsData && typeof sellingPointsData === 'object') {
+            const spObj = sellingPointsData as Record<string, unknown>;
+            sellingPoints = Array.isArray(spObj.bullet_analysis) ? spObj.bullet_analysis :
+                           (Array.isArray(spObj.details) ? spObj.details :
+                           (Array.isArray(spObj.highlights) ? spObj.highlights : []));
+        }
 
         if (sellingPoints.length > 0) {
             Logger.debug('[Rufus AI] ✅ 找到卖点数据:', sellingPoints.length, '条');
             reportSummary += `## 主要卖点\n`;
             sellingPoints.slice(0, 5).forEach((item: unknown, index: number) => {
-                const text = item.text || item.content || item.description || item.bullet || JSON.stringify(item);
-                reportSummary += `${index + 1}. ${text}\n`;
+                if (item && typeof item === 'object') {
+                    const itemObj = item as Record<string, unknown>;
+                    const text = itemObj.text || itemObj.content || itemObj.description || itemObj.bullet || JSON.stringify(item);
+                    reportSummary += `${index + 1}. ${text}\n`;
+                }
             });
             reportSummary += `\n`;
             hasData = true;
@@ -277,19 +299,24 @@ export class RufusSimulator {
         }
 
         // 致命缺陷
-        const fatalFlaws = ar['fatal-flaws']?.critical_issues
-            || ar.fatalFlaws?.critical_issues
-            || ar.fatal_flaws?.critical_issues
-            || ar['fatal-flaws']?.details
-            || ar['fatal-flaws']?.highlights
-            || [];
+        const fatalFlawsData = ar['fatal-flaws'] || ar['fatalFlaws'] || ar['fatal_flaws'];
+        let fatalFlaws: unknown[] = [];
+        if (fatalFlawsData && typeof fatalFlawsData === 'object') {
+            const ffObj = fatalFlawsData as Record<string, unknown>;
+            fatalFlaws = Array.isArray(ffObj.critical_issues) ? ffObj.critical_issues :
+                        (Array.isArray(ffObj.details) ? ffObj.details :
+                        (Array.isArray(ffObj.highlights) ? ffObj.highlights : []));
+        }
 
         if (fatalFlaws.length > 0) {
             Logger.debug('[Rufus AI] ✅ 找到致命缺陷数据:', fatalFlaws.length, '条');
             reportSummary += `## 关键问题\n`;
             fatalFlaws.forEach((item: unknown) => {
-                const text = item.text || item.content || item.description || item.issue || JSON.stringify(item);
-                reportSummary += `- ${text}\n`;
+                if (item && typeof item === 'object') {
+                    const itemObj = item as Record<string, unknown>;
+                    const text = itemObj.text || itemObj.content || itemObj.description || itemObj.issue || JSON.stringify(item);
+                    reportSummary += `- ${text}\n`;
+                }
             });
             reportSummary += `\n`;
             hasData = true;
@@ -298,19 +325,24 @@ export class RufusSimulator {
         }
 
         // Wow 时刻
-        const wowMoments = ar['wow-moments']?.moments
-            || ar.wowMoments?.moments
-            || ar.wow_moments?.moments
-            || ar['wow-moments']?.details
-            || ar['wow-moments']?.highlights
-            || [];
+        const wowMomentsData = ar['wow-moments'] || ar['wowMoments'] || ar['wow_moments'];
+        let wowMoments: unknown[] = [];
+        if (wowMomentsData && typeof wowMomentsData === 'object') {
+            const wmObj = wowMomentsData as Record<string, unknown>;
+            wowMoments = Array.isArray(wmObj.moments) ? wmObj.moments :
+                        (Array.isArray(wmObj.details) ? wmObj.details :
+                        (Array.isArray(wmObj.highlights) ? wmObj.highlights : []));
+        }
 
         if (wowMoments.length > 0) {
             Logger.debug('[Rufus AI] ✅ 找到 Wow 时刻数据:', wowMoments.length, '条');
             reportSummary += `## 惊喜时刻\n`;
             wowMoments.forEach((item: unknown) => {
-                const text = item.text || item.content || item.description || item.moment || JSON.stringify(item);
-                reportSummary += `- ${text}\n`;
+                if (item && typeof item === 'object') {
+                    const itemObj = item as Record<string, unknown>;
+                    const text = itemObj.text || itemObj.content || itemObj.description || itemObj.moment || JSON.stringify(item);
+                    reportSummary += `- ${text}\n`;
+                }
             });
             reportSummary += `\n`;
             hasData = true;
