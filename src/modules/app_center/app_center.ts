@@ -3,11 +3,12 @@
 // 🎯 App Center 核心模块 (TypeScript版本)
 // ================================================================
 
-console.log('🎯 App Center Core Module Loading...');
+Logger.debug('🎯 App Center Core Module Loading...');
 import './app_center_style.css';
 import { createModuleLoader, ModuleLoader } from '@/common/utils/ModuleLoader';
 import { APP_CENTER_ROUTES } from '@/common/constants/routes';
 
+import { Logger } from '../../services/loggerService';
 /**
  * 模块加载器函数类型
  */
@@ -54,13 +55,13 @@ const moduleLoader: ModuleLoader = createModuleLoader({
 export function registerSubModule(routeId: string, loader: ModuleLoaderFn): boolean {
   // 检查路由ID是否已存在
   if (MODULE_MAP[routeId]) {
-    console.warn(`⚠️ 路由 "${routeId}" 已存在，跳过注册`);
+    Logger.warn(`⚠️ 路由 "${routeId}" 已存在，跳过注册`);
     return false;
   }
 
   // 验证loader参数是否为函数类型
   if (typeof loader !== 'function') {
-    console.error(`❌ 无效的loader函数:`, loader);
+    Logger.error(`❌ 无效的loader函数:`, loader);
     return false;
   }
 
@@ -70,8 +71,8 @@ export function registerSubModule(routeId: string, loader: ModuleLoaderFn): bool
   // 同时注册到moduleLoader
   moduleLoader.registerSubModule(routeId, loader);
 
-  console.log(`✅ 动态注册子模块: ${routeId}`);
+  Logger.debug(`✅ 动态注册子模块: ${routeId}`);
   return true;
 }
 
-console.log('✅ App Center Module 加载完成');
+Logger.debug('✅ App Center Module 加载完成');

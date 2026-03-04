@@ -121,8 +121,8 @@ import Alpine from 'alpinejs';
 
 // 开发环境额外日志
 if (import.meta.env.DEV) {
-  console.log('[Alpine] ✅ Alpine.js loaded and exposed to window');
-  console.log('[Store] ✅ Zustand store exposed to window');
+  Logger.debug('[Alpine] ✅ Alpine.js loaded and exposed to window');
+  Logger.debug('[Store] ✅ Zustand store exposed to window');
 }
 
 // ========================
@@ -130,7 +130,7 @@ if (import.meta.env.DEV) {
 // ========================
 
 document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
-  console.log("🚀 System: Application Booting...");
+  Logger.debug("🚀 System: Application Booting...");
 
   // ================================================================
   // 🎯 DI容器整合: 使用ServiceRegistry统一管理服务
@@ -152,7 +152,7 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     const result = await bootstrap.initialize();
 
     if (!result.success) {
-      console.error('❌ 部分服务初始化失败，应用可能无法正常工作');
+      Logger.error('❌ 部分服务初始化失败，应用可能无法正常工作');
       showToast('应用初始化失败，请刷新页面重试', { type: 'error' });
       return;
     }
@@ -184,11 +184,11 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
       (window as any)['LoadingManager'] = loadingManager;
 
       if (import.meta.env.DEV) {
-        console.log('[Services] ✅ Core services exposed to window');
-        console.log('[Services] EventBus:', typeof eventBus);
-        console.log('[Services] ActionRegistry:', typeof actionRegistry);
-        console.log('[Services] Router:', typeof router);
-        console.log('[Services] Router methods:', {
+        Logger.debug('[Services] ✅ Core services exposed to window');
+        Logger.debug('[Services] EventBus:', typeof eventBus);
+        Logger.debug('[Services] ActionRegistry:', typeof actionRegistry);
+        Logger.debug('[Services] Router:', typeof router);
+        Logger.debug('[Services] Router methods:', {
           navigate: typeof router?.navigate,
           back: typeof router?.back,
           forward: typeof router?.forward,
@@ -196,43 +196,43 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
         });
       }
     } catch (e) {
-      console.error('[Services] ❌ Failed to expose some services to window:', e);
+      Logger.error('[Services] ❌ Failed to expose some services to window:', e);
       // 即使暴露失败,也继续启动流程
     }
 
     // ✅ 关键修复: 确保 Alpine 组件注册和启动的正确顺序
-    console.log("🎨 Initializing Alpine.js...");
+    Logger.debug("🎨 Initializing Alpine.js...");
 
     // 1. 注册所有 Alpine 组件 (必须在 Alpine.start() 之前)
     initAlpineSettings();
-    console.log("✅ Alpine components registered");
+    Logger.debug("✅ Alpine components registered");
 
     // 2. 启动 Alpine.js (此时组件已注册,可以处理任何 HTML)
     Alpine.start();
-    console.log("✅ Alpine.js started");
+    Logger.debug("✅ Alpine.js started");
 
     // 🔧 修复: 初始化 AlpineRegistry (处理动态注册的组件)
     try {
       const { AlpineRegistry } = await import('./common/infrastructure/AlpineRegistry');
       const registry = AlpineRegistry.getInstance();
       registry.init();
-      console.log("✅ AlpineRegistry initialized");
+      Logger.debug("✅ AlpineRegistry initialized");
     } catch (e) {
-      console.error('❌ AlpineRegistry initialization failed:', e);
+      Logger.error('❌ AlpineRegistry initialization failed:', e);
     }
 
     // 3. 现在可以安全地加载包含 Alpine 组件的视图
-    console.log("📦 Loading critical views...");
+    Logger.debug("📦 Loading critical views...");
     await initViews();
-    console.log("✅ Critical views loaded");
+    Logger.debug("✅ Critical views loaded");
 
     // 🔧 关键修复: 视图加载完成后，触发路由的初始导航
     try {
       const { triggerInitialNavigation } = await import('./common/router/initRouter');
       triggerInitialNavigation();
-      console.log("✅ Initial navigation triggered");
+      Logger.debug("✅ Initial navigation triggered");
     } catch (e) {
-      console.error('❌ Initial navigation failed:', e);
+      Logger.error('❌ Initial navigation failed:', e);
     }
 
     // 初始化全局事件委托
@@ -243,7 +243,7 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     const globalLoading = document.getElementById('global-loading');
     if (globalLoading) {
       loadingManager.setGlobalLoadingElement(globalLoading);
-      console.log("✅ LoadingManager initialized");
+      Logger.debug("✅ LoadingManager initialized");
     }
 
     // 可选：初始化事件日志
@@ -251,7 +251,7 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
       const { initEventLogger } = await import('./common/utils/eventLogger');
       initEventLogger();
     } catch (e) {
-      console.warn('事件日志初始化失败:', e);
+      Logger.warn('事件日志初始化失败:', e);
     }
 
     // 可选：加载插件
@@ -259,7 +259,7 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
       const { loadPlugins } = await import('./common/utils/pluginLoader');
       loadPlugins();
     } catch (e) {
-      console.warn('插件加载失败:', e);
+      Logger.warn('插件加载失败:', e);
     }
 
     // 🎯 P1-8: 状态管理已完全切换到Zustand
@@ -273,19 +273,19 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
 
     // 🎯 微交互动画系统: 初始化动画管理器
     try {
-      console.log('🎨 Initializing Animation System...');
+      Logger.debug('🎨 Initializing Animation System...');
 
       // AnimationManager 已在导入时自动初始化（单例模式）
       // 这里只需要初始化 AnimationStore
       initializeAnimationStore();
 
-      console.log('✅ Animation System initialized');
-      console.log('   - Animations enabled:', animationManager.getSettings().enabled);
-      console.log('   - Animation speed:', animationManager.getSettings().speed);
-      console.log('   - Respect system preference:', animationManager.getSettings().respectSystemPreference);
-      console.log('   - Reduced motion:', animationManager.shouldReduceMotion());
+      Logger.debug('✅ Animation System initialized');
+      Logger.debug('   - Animations enabled:', animationManager.getSettings().enabled);
+      Logger.debug('   - Animation speed:', animationManager.getSettings().speed);
+      Logger.debug('   - Respect system preference:', animationManager.getSettings().respectSystemPreference);
+      Logger.debug('   - Reduced motion:', animationManager.shouldReduceMotion());
     } catch (error) {
-      console.error('❌ Animation System initialization failed:', error);
+      Logger.error('❌ Animation System initialization failed:', error);
       // 动画系统初始化失败不应阻止应用启动
     }
 
@@ -309,29 +309,29 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
       initButtonRipple();
       observeButtonChanges();
       observeAnimationSettings();
-      console.log('✅ Button ripple effects initialized');
+      Logger.debug('✅ Button ripple effects initialized');
     }).catch((error) => {
-      console.warn('按钮涟漪效果初始化失败:', error);
+      Logger.warn('按钮涟漪效果初始化失败:', error);
     });
 
     // 🎯 微交互动画: 初始化表单输入动画
     import('./components/form-animation').then(({ initializeFormAnimations }) => {
       initializeFormAnimations();
-      console.log('✅ Form input animations initialized');
+      Logger.debug('✅ Form input animations initialized');
     }).catch((error) => {
-      console.warn('表单输入动画初始化失败:', error);
+      Logger.warn('表单输入动画初始化失败:', error);
     });
 
     // 🎯 微交互动画: 初始化列表交错动画观察器
     import('./utils/animation-utils').then(({ observeListAnimations }) => {
       observeListAnimations();
-      console.log('✅ List stagger animations observer initialized');
+      Logger.debug('✅ List stagger animations observer initialized');
     }).catch((error) => {
-      console.warn('列表交错动画观察器初始化失败:', error);
+      Logger.warn('列表交错动画观察器初始化失败:', error);
     });
 
     // 🎯 微交互动画: Toast管理器已在导入时自动初始化（单例模式）
-    console.log('✅ Toast manager initialized (singleton)');
+    Logger.debug('✅ Toast manager initialized (singleton)');
 
     // 渲染顶部 Mega Menu
     renderMegaMenu();
@@ -356,10 +356,10 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
       debugInterface.registerRouter(router);
     }
 
-    console.log("✅ System: Ready");
+    Logger.debug("✅ System: Ready");
 
   } catch (error) {
-    console.error('❌ 应用启动失败:', error);
+    Logger.error('❌ 应用启动失败:', error);
     showToast('应用启动失败，请刷新页面重试', { type: 'error' });
   }
 });
@@ -387,7 +387,7 @@ registerActionsWithLegacy({
   renderMegaMenu,
 
   // === Utilities 工具函数 ===
-  showToast: (params: Record<string, any>) => {
+  showToast: (params: Record<string, unknown>) => {
     if (typeof params === 'string') {
       showToast(params as string);
     } else if (params.message) {
@@ -425,7 +425,7 @@ registerActionsWithLegacy({
       const { performanceService } = await import('./services/performanceService');
       const report = performanceService.getReport();
 
-      console.log('📊 性能报告:', report);
+      Logger.debug('📊 性能报告:', report);
       console.table(report.summary);
 
       if (window.showToast) {
@@ -434,7 +434,7 @@ registerActionsWithLegacy({
 
       return report;
     } catch (e) {
-      console.error('获取性能报告失败:', e);
+      Logger.error('获取性能报告失败:', e);
       return undefined;
     }
   },
@@ -460,7 +460,7 @@ registerActionsWithLegacy({
   // 🎯 阶段1: 日志管理
   showLogs: async () => {
     const logs = Logger.getLogs();
-    console.log('📋 所有日志:', logs);
+    Logger.debug('📋 所有日志:', logs);
     console.table(logs.map(log => ({
       时间: new Date(log.timestamp).toLocaleTimeString('zh-CN'),
       级别: log.levelName,
@@ -477,7 +477,7 @@ registerActionsWithLegacy({
 
   showErrors: async () => {
     const errors = Logger.getErrors();
-    console.log('❌ 错误日志:', errors);
+    Logger.debug('❌ 错误日志:', errors);
     console.table(errors.map(log => ({
       时间: new Date(log.timestamp).toLocaleTimeString('zh-CN'),
       级别: log.levelName,
@@ -510,4 +510,4 @@ registerActionsWithLegacy({
   // Scraper, Data, Analysis actions are now self-registered by their respective modules
 });
 
-console.log("✅ [ActionRegistry] 全局动作已注册");
+Logger.debug("✅ [ActionRegistry] 全局动作已注册");

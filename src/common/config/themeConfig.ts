@@ -6,6 +6,7 @@
 import type { ColorSchemeName } from '../constants/colorSchemes';
 import { ColorContext } from '../utils/ColorContext';
 
+import { Logger } from '../../services/loggerService';
 export interface ThemeColors {
   primary: string;
   primaryLight: string;
@@ -82,7 +83,7 @@ export class ThemeManager {
   static applyTheme(themeId: string, options: { animate?: boolean } = {}): void {
     const theme = this.getTheme(themeId);
     if (!theme) {
-      console.error(`主题不存在: ${themeId}`);
+      Logger.error(`主题不存在: ${themeId}`);
       return;
     }
     
@@ -128,11 +129,10 @@ export class ThemeManager {
     }
     
     // 性能监控
-    if ((window as any).__CSS_PERF__) {
-      (window as any).__CSS_PERF__.trackThemeSwitch(
-        this.currentTheme,
-        themeId
-      );
+    const windowWithPerf = window as unknown as Record<string, unknown>;
+    if (windowWithPerf.__CSS_PERF__) {
+      const cssPerf = windowWithPerf.__CSS_PERF__ as { trackThemeSwitch: (from: string, to: string) => void };
+      cssPerf.trackThemeSwitch(this.currentTheme, themeId);
     }
     
     // 触发事件
@@ -141,7 +141,7 @@ export class ThemeManager {
     }));
     
     const duration = performance.now() - startTime;
-    console.log(`✓ 主题已切换: ${theme.name} (${duration.toFixed(2)}ms)`);
+    Logger.debug(`✓ 主题已切换: ${theme.name} (${duration.toFixed(2)}ms)`);
   }
   
   /**
@@ -162,7 +162,7 @@ export class ThemeManager {
    */
   static registerTheme(config: ThemeConfig): void {
     this.customThemes.set(config.id, config);
-    console.log(`✓ 自定义主题已注册: ${config.name}`);
+    Logger.debug(`✓ 自定义主题已注册: ${config.name}`);
   }
   
   /**

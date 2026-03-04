@@ -3,6 +3,8 @@
  * 提供统一的错误处理和降级UI渲染
  */
 
+import { Logger } from '@services/loggerService';
+
 /**
  * 模块挂载函数类型
  */
@@ -81,18 +83,18 @@ export function safeMount(
   return async (container: HTMLElement): Promise<void> => {
     try {
       await mountFn(container);
-      console.log(`✅ ${moduleName} 模块已挂载`);
+      Logger.debug(`✅ ${moduleName} 模块已挂载`);
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
       
-      console.error(`❌ ${moduleName} 模块挂载失败:`, err);
+      Logger.error(`❌ ${moduleName} 模块挂载失败:`, err);
       
       // 调用自定义错误处理
       if (onError) {
         try {
           onError(err);
         } catch (callbackError) {
-          console.error(`${moduleName} 错误回调执行失败:`, callbackError);
+          Logger.error(`${moduleName} 错误回调执行失败:`, callbackError);
         }
       }
       

@@ -51,7 +51,7 @@ export interface ErrorContext {
   /** 请求ID */
   requestId?: string;
   /** 额外数据 */
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -104,7 +104,7 @@ export class AppError extends Error {
   /**
    * 转换为JSON对象
    */
-  toJSON(): Record<string, any> {
+  toJSON(): Record<string, unknown> {
     return {
       name: this.name,
       message: this.message,
@@ -160,13 +160,13 @@ export class NetworkError extends AppError {
  */
 export class ApiError extends AppError {
   public readonly statusCode?: number;
-  public readonly response?: any;
+  public readonly response?: unknown;
 
   constructor(
     message: string,
     code: string,
     statusCode?: number,
-    response?: any,
+    response?: unknown,
     context: ErrorContext = {},
     originalError?: Error
   ) {
@@ -192,13 +192,13 @@ export class ApiError extends AppError {
  */
 export class ValidationError extends AppError {
   public readonly field?: string;
-  public readonly value?: any;
+  public readonly value?: unknown;
 
   constructor(
     message: string,
     code: string,
     field?: string,
-    value?: any,
+    value?: unknown,
     context: ErrorContext = {}
   ) {
     super(
@@ -271,14 +271,14 @@ export class SystemError extends AppError {
 /**
  * 判断是否为AppError
  */
-export function isAppError(error: any): error is AppError {
+export function isAppError(error: unknown): error is AppError {
   return error instanceof AppError;
 }
 
 /**
  * 将任意错误转换为AppError
  */
-export function toAppError(error: any, context: ErrorContext = {}): AppError {
+export function toAppError(error: unknown, context: ErrorContext = {}): AppError {
   if (isAppError(error)) {
     return error;
   }

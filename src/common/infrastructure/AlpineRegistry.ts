@@ -1,14 +1,16 @@
 /**
  * AlpineRegistry - Alpine.js 组件注册管理器
- * 
+ *
  * 职责：
  * - 统一管理 Alpine.js 组件注册
  * - 处理 Alpine 未就绪时的延迟注册
  * - 支持组件依赖声明和自动解析
  * - 提供热重载支持
- * 
+ *
  * @module AlpineRegistry
  */
+
+import { Logger } from '@services/loggerService';
 
 /**
  * Alpine 组件定义
@@ -17,7 +19,7 @@ export interface AlpineComponent {
   /** 组件名称 */
   name: string;
   /** 组件工厂函数 */
-  factory: () => any;
+  factory: () => unknown;
   /** 依赖的其他组件名称列表 */
   dependencies?: string[];
 }
@@ -121,7 +123,7 @@ export class AlpineRegistry {
    */
   public register(
     name: string,
-    factory: () => any,
+    factory: () => unknown,
     dependencies: string[] = []
   ): void {
     this.log('debug', `开始注册组件 "${name}"`, {
@@ -442,7 +444,7 @@ export class AlpineRegistry {
    * @param data - 附加数据
    * @private
    */
-  private log(level: 'debug' | 'info' | 'warn' | 'error', message: string, data?: any): void {
+  private log(level: 'debug' | 'info' | 'warn' | 'error', message: string, data?: unknown): void {
     const levels = { debug: 0, info: 1, warn: 2, error: 3 };
     const configLevel = levels[this.options.logLevel || 'info'];
     const currentLevel = levels[level];
@@ -462,30 +464,30 @@ export class AlpineRegistry {
     switch (level) {
       case 'debug':
         if (data !== undefined) {
-          console.debug(fullMessage, data);
+          Logger.debug(fullMessage, data);
         } else {
-          console.debug(fullMessage);
+          Logger.debug(fullMessage);
         }
         break;
       case 'info':
         if (data !== undefined) {
-          console.info(fullMessage, data);
+          Logger.info(fullMessage, data);
         } else {
-          console.info(fullMessage);
+          Logger.info(fullMessage);
         }
         break;
       case 'warn':
         if (data !== undefined) {
-          console.warn(fullMessage, data);
+          Logger.warn(fullMessage, data);
         } else {
-          console.warn(fullMessage);
+          Logger.warn(fullMessage);
         }
         break;
       case 'error':
         if (data !== undefined) {
-          console.error(fullMessage, data);
+          Logger.error(fullMessage, data);
         } else {
-          console.error(fullMessage);
+          Logger.error(fullMessage);
         }
         break;
     }

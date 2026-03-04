@@ -7,43 +7,46 @@ import type { ProductData, ValidationResult, ScrapedData } from '../types';
 /**
  * 验证 ScrapedData 的 metadata 字段
  */
-export function validateMetadata(metadata: any): { valid: boolean; error?: string } {
+export function validateMetadata(metadata: unknown): { valid: boolean; error?: string } {
     if (!metadata || typeof metadata !== 'object') {
         return { valid: false, error: 'metadata 必须是对象' };
     }
 
+    // 类型断言：将 unknown 转换为可索引类型
+    const meta = metadata as Record<string, unknown>;
+
     // 验证必需字段
     const requiredFields = ['scrape_timestamp', 'marketplace', 'domain', 'language', 'total_asins'];
     for (const field of requiredFields) {
-        if (!(field in metadata)) {
+        if (!(field in meta)) {
             return { valid: false, error: `metadata 缺少必需字段: ${field}` };
         }
     }
 
     // 验证字段类型
-    if (typeof metadata.scrape_timestamp !== 'string') {
+    if (typeof meta.scrape_timestamp !== 'string') {
         return { valid: false, error: 'metadata.scrape_timestamp 必须是字符串' };
     }
 
-    if (typeof metadata.marketplace !== 'string') {
+    if (typeof meta.marketplace !== 'string') {
         return { valid: false, error: 'metadata.marketplace 必须是字符串' };
     }
 
-    if (typeof metadata.domain !== 'string') {
+    if (typeof meta.domain !== 'string') {
         return { valid: false, error: 'metadata.domain 必须是字符串' };
     }
 
-    if (typeof metadata.language !== 'string') {
+    if (typeof meta.language !== 'string') {
         return { valid: false, error: 'metadata.language 必须是字符串' };
     }
 
-    if (typeof metadata.total_asins !== 'number') {
+    if (typeof meta.total_asins !== 'number') {
         return { valid: false, error: 'metadata.total_asins 必须是数字' };
     }
 
     // 验证时间戳格式（ISO 8601）
     try {
-        const date = new Date(metadata.scrape_timestamp);
+        const date = new Date(meta.scrape_timestamp as string);
         if (isNaN(date.getTime())) {
             return { valid: false, error: 'metadata.scrape_timestamp 不是有效的 ISO 8601 时间戳' };
         }
@@ -52,7 +55,7 @@ export function validateMetadata(metadata: any): { valid: boolean; error?: strin
     }
 
     // 验证 total_asins 为正数
-    if (metadata.total_asins < 0) {
+    if ((meta.total_asins as number) < 0) {
         return { valid: false, error: 'metadata.total_asins 必须是非负数' };
     }
 
@@ -62,7 +65,7 @@ export function validateMetadata(metadata: any): { valid: boolean; error?: strin
 /**
  * 类型守卫：检查对象是否为有效的 ScrapedData
  */
-export function isScrapedData(data: any): data is ScrapedData {
+export function isScrapedData(data: unknown): data is ScrapedData {
     if (!data || typeof data !== 'object') {
         return false;
     }
@@ -86,44 +89,47 @@ export function isScrapedData(data: any): data is ScrapedData {
 /**
  * 验证产品数据结构
  */
-export function validateProduct(product: any): ValidationResult {
+export function validateProduct(product: unknown): ValidationResult {
     if (!product || typeof product !== 'object') {
         return { valid: false, error: '产品数据不是有效对象' };
     }
 
+    // 类型断言：将 unknown 转换为可索引类型
+    const prod = product as Record<string, unknown>;
+
     // 验证必需字段：ASIN
-    if (!product.asin || typeof product.asin !== 'string') {
+    if (!prod.asin || typeof prod.asin !== 'string') {
         return { valid: false, error: '缺少必需字段: asin' };
     }
 
     // 验证ASIN格式
-    if (!/^B0[A-Z0-9]{8}$/.test(product.asin)) {
-        return { valid: false, error: `ASIN格式无效: ${product.asin}` };
+    if (!/^B0[A-Z0-9]{8}$/.test(prod.asin)) {
+        return { valid: false, error: `ASIN格式无效: ${prod.asin}` };
     }
 
     // 验证产品标题
-    if (product.productTitle && typeof product.productTitle !== 'string') {
+    if (prod.productTitle && typeof prod.productTitle !== 'string') {
         return { valid: false, error: 'productTitle必须是字符串' };
     }
 
     // 验证五点描述
-    if (product.feature_bullets) {
-        if (!Array.isArray(product.feature_bullets)) {
+    if (prod.feature_bullets) {
+        if (!Array.isArray(prod.feature_bullets)) {
             return { valid: false, error: 'feature_bullets必须是数组' };
         }
-        if (!product.feature_bullets.every((b: any) => typeof b === 'string')) {
+        if (!prod.feature_bullets.every((b: unknown) => typeof b === 'string')) {
             return { valid: false, error: 'feature_bullets中的元素必须是字符串' };
         }
     }
 
     // 验证评论数据
-    if (product.customer_reviews) {
-        if (!Array.isArray(product.customer_reviews)) {
+    if (prod.customer_reviews) {
+        if (!Array.isArray(prod.customer_reviews)) {
             return { valid: false, error: 'customer_reviews必须是数组' };
         }
         // 验证每个评论的基本结构
-        for (let i = 0; i < product.customer_reviews.length; i++) {
-            const review = product.customer_reviews[i];
+        for (let i = 0; i < prod.customer_reviews.length; i++) {
+            const review = prod.customer_reviews[i];
             if (!review || typeof review !== 'object') {
                 return { valid: false, error: `评论[${i}]不是有效对象` };
             }
@@ -139,7 +145,7 @@ export function validateProduct(product: any): ValidationResult {
  * @param data - 待验证的数据
  * @param strictMetadata - 是否严格验证 metadata（默认 false，兼容旧数据）
  */
-export function validateScrapedData(data: any, strictMetadata: boolean = false): ValidationResult {
+export function validateScrapedData(data: unknown, strictMetadata: boolean = false): ValidationResult {
     if (!data || typeof data !== 'object') {
         return { valid: false, error: '数据不是有效对象' };
     }
@@ -163,7 +169,8 @@ export function validateScrapedData(data: any, strictMetadata: boolean = false):
         }
     } else if ('asin' in data) {
         // 格式3: 单个产品对象
-        products = [data];
+        // 类型断言：已验证有 asin 属性，可以作为 ProductData
+        products = [data as ProductData];
     } else {
         return { valid: false, error: '无法识别的数据格式，需要包含products数组或单个产品对象' };
     }

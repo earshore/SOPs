@@ -6,6 +6,7 @@
 
 import type { Route, RouteGuard, GuardResult } from './types';
 
+import { Logger } from '../../../services/loggerService';
 // ==================== 元信息验证守卫 ====================
 
 /**
@@ -20,7 +21,7 @@ export const metaValidationGuard: RouteGuard = {
   async check(to: Route, _from: Route | null): Promise<GuardResult> {
     // 检查路由配置是否存在
     if (!to.config) {
-      console.error('[metaValidationGuard] Route config missing:', to.path);
+      Logger.error('[metaValidationGuard] Route config missing:', to.path);
       return {
         allow: false,
         reason: 'invalid_route_config',
@@ -32,7 +33,7 @@ export const metaValidationGuard: RouteGuard = {
     const missing = requiredFields.filter(field => !to.config[field]);
 
     if (missing.length > 0) {
-      console.error('[metaValidationGuard] Route config incomplete:', {
+      Logger.error('[metaValidationGuard] Route config incomplete:', {
         path: to.path,
         missing,
       });
@@ -76,13 +77,13 @@ export const dependencyGuard: RouteGuard = {
           missing.push(dep);
         }
       } catch (error) {
-        console.error(`[dependencyGuard] Failed to check dependency "${dep}":`, error);
+        Logger.error(`[dependencyGuard] Failed to check dependency "${dep}":`, error);
         missing.push(dep);
       }
     }
 
     if (missing.length > 0) {
-      console.error('[dependencyGuard] Missing dependencies:', missing);
+      Logger.error('[dependencyGuard] Missing dependencies:', missing);
       return {
         allow: false,
         redirect: '/home',
@@ -116,11 +117,12 @@ export const authGuard: RouteGuard = {
       const isAuthenticated = await checkAuthentication();
 
       if (!isAuthenticated) {
-        console.warn('[authGuard] Unauthorized access attempt:', to.path);
+        Logger.warn('[authGuard] Unauthorized access attempt:', to.path);
 
         // 显示提示
-        if (typeof (window as any).showToast === 'function') {
-          (window as any).showToast('请先登录', { type: 'warning' });
+        const windowWithToast = window as unknown as Record<string, unknown>;
+        if (typeof windowWithToast.showToast === 'function') {
+          (windowWithToast.showToast as (msg: string, opts: { type: string }) => void)('请先登录', { type: 'warning' });
         }
 
         return {
@@ -135,13 +137,14 @@ export const authGuard: RouteGuard = {
         const hasPermission = await checkPermissions(to.config.meta.permissions);
 
         if (!hasPermission) {
-          console.warn('[authGuard] Insufficient permissions:', {
+          Logger.warn('[authGuard] Insufficient permissions:', {
             path: to.path,
             required: to.config.meta.permissions,
           });
 
-          if (typeof (window as any).showToast === 'function') {
-            (window as any).showToast('权限不足', { type: 'warning' });
+          const windowWithToast = window as unknown as Record<string, unknown>;
+          if (typeof windowWithToast.showToast === 'function') {
+            (windowWithToast.showToast as (msg: string, opts: { type: string }) => void)('权限不足', { type: 'warning' });
           }
 
           return {
@@ -154,7 +157,7 @@ export const authGuard: RouteGuard = {
 
       return true;
     } catch (error) {
-      console.error('[authGuard] Authentication check failed:', error);
+      Logger.error('[authGuard] Authentication check failed:', error);
       return {
         allow: false,
         reason: 'auth_check_failed',
@@ -183,21 +186,21 @@ export const dataPreloadGuard: RouteGuard = {
     }
 
     try {
-      console.log(`[dataPreloadGuard] Preloading data for: ${to.path}`);
+      Logger.debug(`[dataPreloadGuard] Preloading data for: ${to.path}`);
       const startTime = performance.now();
 
       await preloadFn();
 
       const duration = Math.round(performance.now() - startTime);
-      console.log(`[dataPreloadGuard] Preload completed: ${to.path} (${duration}ms)`);
+      Logger.debug(`[dataPreloadGuard] Preload completed: ${to.path} (${duration}ms)`);
 
       return true;
     } catch (error) {
-      console.error('[dataPreloadGuard] Preload failed:', error);
+      Logger.error('[dataPreloadGuard] Preload failed:', error);
 
       // 如果预加载失败，根据配置决定是否继续
       if (to.config.meta?.preloadRequired === false) {
-        console.warn('[dataPreloadGuard] Preload failed but not required, continuing');
+        Logger.warn('[dataPreloadGuard] Preload failed but not required, continuing');
         return true;
       }
 

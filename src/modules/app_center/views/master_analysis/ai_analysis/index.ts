@@ -8,6 +8,7 @@ import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer'
 import { createAiAnalysisPanel } from './components/AlpinePanel';
 import { AlpineRegistry } from '../../../../../common/infrastructure/AlpineRegistry';
 
+import { Logger } from '../../../../../services/loggerService';
 import '../master_analysis_style.css';
 import './ai_analysis_style.css';
 
@@ -15,7 +16,7 @@ import './ai_analysis_style.css';
  * 挂载模块
  */
 export async function mount(container: HTMLElement): Promise<void> {
-  console.log('[AI智能分析] 🔧 开始挂载模块');
+  Logger.debug('[AI智能分析] 🔧 开始挂载模块');
 
   try {
     // 1. 使用 SafeModuleLoader 加载模板
@@ -26,7 +27,7 @@ export async function mount(container: HTMLElement): Promise<void> {
         retryCount: 3,
         timeout: 5000,
         onError: (error) => {
-          console.error('[AI智能分析] 模板加载失败:', error);
+          Logger.error('[AI智能分析] 模板加载失败:', error);
         }
       }
     );
@@ -43,9 +44,9 @@ export async function mount(container: HTMLElement): Promise<void> {
     // 初始化注册器（如果尚未初始化）
     registry.init();
 
-    console.log('[AI智能分析] ✅ 模块挂载成功');
+    Logger.debug('[AI智能分析] ✅ 模块挂载成功');
   } catch (error) {
-    console.error('[AI智能分析] ❌ 模块挂载失败:', error);
+    Logger.error('[AI智能分析] ❌ 模块挂载失败:', error);
     throw error;
   }
 }
@@ -54,6 +55,6 @@ export async function mount(container: HTMLElement): Promise<void> {
  * 卸载模块
  */
 export function unmount(): void {
-  console.log('[AI智能分析] 🔄 模块卸载');
+  Logger.debug('[AI智能分析] 🔄 模块卸载');
   // 状态由 Zustand 管理，无需手动重置
 }

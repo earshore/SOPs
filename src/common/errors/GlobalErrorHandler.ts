@@ -82,13 +82,13 @@ export class GlobalErrorHandler {
       });
     });
 
-    console.log('✅ [GlobalErrorHandler] 全局错误处理器已初始化');
+    Logger.debug('✅ [GlobalErrorHandler] 全局错误处理器已初始化');
   }
 
   /**
    * 处理全局错误
    */
-  private handleGlobalError(error: any, options: ErrorHandlerOptions = {}): void {
+  private handleGlobalError(error: unknown, options: ErrorHandlerOptions = {}): void {
     // 节流:避免错误刷屏
     const now = Date.now();
     if (now - this.lastErrorTime < this.errorThrottleMs) {
@@ -181,8 +181,9 @@ export class GlobalErrorHandler {
     }
 
     // 显示Toast
-    if (typeof window !== 'undefined' && (window as any).showToast) {
-      (window as any).showToast(message, toastType);
+    const windowWithToast = window as unknown as Record<string, unknown>;
+    if (typeof window !== 'undefined' && typeof windowWithToast.showToast === 'function') {
+      (windowWithToast.showToast as (msg: string, type: string) => void)(message, toastType);
     }
   }
 
@@ -202,7 +203,7 @@ export class GlobalErrorHandler {
       });
     } catch (e) {
       // 静默失败,避免监控服务错误影响主流程
-      console.warn('[GlobalErrorHandler] 上报错误失败:', e);
+      Logger.warn('[GlobalErrorHandler] 上报错误失败:', e);
     }
   }
 
@@ -240,5 +241,5 @@ export default globalErrorHandler;
 
 // 向后兼容:暴露到window
 if (typeof window !== 'undefined') {
-  (window as any).__GlobalErrorHandler = globalErrorHandler;
+  (window as unknown as Record<string, unknown>).__GlobalErrorHandler = globalErrorHandler;
 }

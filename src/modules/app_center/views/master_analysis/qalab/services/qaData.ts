@@ -3,6 +3,8 @@
  * 包含QA类型定义和QA生成逻辑
  */
 
+import { Logger } from '@services/loggerService';
+
 export interface QATranslation {
     q: string;
     a: string;
@@ -19,18 +21,46 @@ export interface QA {
 /**
  * 从报告中提取关键信息
  */
-function extractReportInsights(report: any): any {
-    const analysisReport = report?.analysisReport || report;
-    const metadata = report?.metadata;
+function extractReportInsights(report: unknown): unknown {
+    // 类型守卫：确保 report 是对象
+    if (!report || typeof report !== 'object') {
+        return {
+            productTitle: '产品',
+            market: 'DE',
+            sellingPoints: {},
+            fatalFlaws: {},
+            wowMoments: {},
+            hesitationPoints: {},
+            buyerProfile: {}
+        };
+    }
+
+    const reportObj = report as Record<string, unknown>;
+    const analysisReport = reportObj.analysisReport || reportObj;
+    const metadata = reportObj.metadata;
+
+    // 安全访问 metadata 属性
+    let productTitle = '产品';
+    let market = 'DE';
+    if (metadata && typeof metadata === 'object') {
+        const metaObj = metadata as Record<string, unknown>;
+        productTitle = String(metaObj.productTitle || '产品');
+        market = String(metaObj.marketplace || 'DE');
+    }
+
+    // 安全访问 analysisReport 属性
+    const analysisObj = (analysisReport && typeof analysisReport === 'object')
+        ? analysisReport as Record<string, unknown>
+        : {};
 
     return {
-        productTitle: metadata?.productTitle || '产品',
-        market: metadata?.marketplace || 'DE',
-        sellingPoints: analysisReport?.['selling-points'] || {},
-        fatalFlaws: analysisReport?.['fatal-flaws'] || {},
-        wowMoments: analysisReport?.['wow-moments'] || {},
-        hesitationPoints: analysisReport?.['hesitation-points'] || {},
-        buyerProfile: analysisReport?.['buyer-profile'] || {}
+        productTitle,
+        market,
+        sellingPoints: analysisObj['selling-points'] || {},
+        fatalFlaws: analysisObj['fatal-flaws'] || {},
+        wowMoments: analysisObj['wow-moments'] || {},
+        hesitationPoints: analysisObj['hesitation-points'] || {},
+        buyerProfile: analysisObj['buyer-profile'] || {}
     };
 }
 
@@ -40,19 +70,26 @@ function extractReportInsights(report: any): any {
  * @internal
  */
 /*
-function generateSmartAnswer(insights: any, questionType: string, lang: string): string {
+function generateSmartAnswer(insights: unknown, questionType: string, lang: string): string {
     const { sellingPoints, fatalFlaws } = insights;
     
     // 根据问题类型和报告内容生成答案
     switch (questionType) {
         case 'longevity': {
-            const flaws = fatalFlaws?.critical_issues?.filter((issue: any) => 
+            const flaws = fatalFlaws?.critical_issues?.filter((issue: unknown) => 
                 issue.issue?.toLowerCase().includes('longevity') || 
                 issue.issue?.toLowerCase().includes('disappear')
             ) || [];
             
             if (flaws.length > 0 && lang === 'de') {
-                return `Transparenzhinweis: Einige Kunden berichten, dass der Duft schneller verfliegt als erwartet. Die Erfahrungen variieren jedoch stark.\n\n⚠️ Kritische Rückmeldungen:\n${flaws.map((f: any) => `• ${f.user_quotes?.[0] || f.issue}`).join('\n')}\n\n💡 Empfehlung: Testen Sie das Produkt und nutzen Sie ggf. das Rückgaberecht, falls die Haltbarkeit nicht Ihren Erwartungen entspricht.`;
+                return `Transparenzhinweis: Einige Kunden berichten, dass der Duft schneller verfliegt als erwartet. Die Erfahrungen variieren jedoch stark.\n\n⚠️ Kritische Rückmeldungen:\n${flaws.map((f: unknown) => {
+                    if (f && typeof f === 'object') {
+                        const fObj = f as Record<string, unknown>;
+                        const userQuotes = Array.isArray(fObj.user_quotes) ? fObj.user_quotes : [];
+                        return `• ${userQuotes[0] || fObj.issue || ''}`;
+                    }
+                    return '';
+                }).join('\n')}\n\n💡 Empfehlung: Testen Sie das Produkt und nutzen Sie ggf. das Rückgaberecht, falls die Haltbarkeit nicht Ihren Erwartungen entspricht.`;
             }
             break;
         }
@@ -60,7 +97,7 @@ function generateSmartAnswer(insights: any, questionType: string, lang: string):
         case 'value': {
             const bulletAnalysis = sellingPoints?.bullet_analysis || [];
             if (bulletAnalysis.length > 0 && lang === 'de') {
-                return `Das Preis-Leistungs-Verhältnis wird positiv bewertet:\n\n${bulletAnalysis.map((b: any) => `• ${b.original_text_summary}`).slice(0, 3).join('\n') || ''}`;
+                return `Das Preis-Leistungs-Verhältnis wird positiv bewertet:\n\n${bulletAnalysis.map((b: unknown) => `• ${b.original_text_summary}`).slice(0, 3).join('\n') || ''}`;
             }
             break;
         }
@@ -74,17 +111,30 @@ function generateSmartAnswer(insights: any, questionType: string, lang: string):
  * 生成多语言Q&A数据
  * 基于分析报告智能生成问题和答案
  */
-export function generateMultiLangQAs(report: any): QA[] {
+export function generateMultiLangQAs(report: unknown): QA[] {
     const qas: QA[] = [];
     const insights = extractReportInsights(report);
 
+    // 类型守卫：确保 insights 是对象
+    if (!insights || typeof insights !== 'object') {
+        Logger.warn('[QALab] 报告数据不完整，使用默认模板');
+        // 返回空数组或默认数据
+        return qas;
+    }
+
+    const insightsObj = insights as Record<string, unknown>;
+
     // 检查是否有有效的报告数据
-    const hasValidReport = insights.sellingPoints?.bullet_analysis ||
-        insights.fatalFlaws?.critical_issues ||
-        insights.wowMoments?.moments;
+    const sellingPoints = insightsObj.sellingPoints as Record<string, unknown> | undefined;
+    const fatalFlaws = insightsObj.fatalFlaws as Record<string, unknown> | undefined;
+    const wowMoments = insightsObj.wowMoments as Record<string, unknown> | undefined;
+
+    const hasValidReport = sellingPoints?.bullet_analysis ||
+        fatalFlaws?.critical_issues ||
+        wowMoments?.moments;
 
     if (!hasValidReport) {
-        console.warn('[QALab] 报告数据不完整，使用默认模板');
+        Logger.warn('[QALab] 报告数据不完整，使用默认模板');
     }
 
     // Q1: Longevity (持久度)

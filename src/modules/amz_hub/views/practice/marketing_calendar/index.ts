@@ -14,6 +14,7 @@ import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry';
 import type { MarketingEvent, CountryInfo } from '@/types/modules-business';
 
+import { Logger } from '../../../../../services/loggerService';
 const AMZF_HISTORY_KEY = 'amzf_search_history';
 const AMZF_MAX_HISTORY = configCenter.get<number>('history.maxSearchHistory') || 10;
 const AMZF_QUICK_TAGS = ['圣诞', 'Prime Day', '黑五', '复活节', '情人节', '母亲节']; // 快捷搜索标签
@@ -61,13 +62,13 @@ class MarketingCalendarModule extends BaseModule {
         this.renderContent();
         this.bindSearchEvents();
 
-        console.log('✅ Marketing Calendar Loaded');
+        Logger.debug('✅ Marketing Calendar Loaded');
     }
 
     onUnmount(): void {
         // 清理全局代理
         this.unbindGlobalProxies();
-        console.log('❌ Marketing Calendar Unmounted');
+        Logger.debug('❌ Marketing Calendar Unmounted');
     }
 
     // ==================== Global Proxies (Bridge for HTML onclicks) ====================
@@ -129,7 +130,7 @@ class MarketingCalendarModule extends BaseModule {
             const saved = storageService.get(AMZF_HISTORY_KEY, []) as string[];
             this.state.searchHistory = saved || [];
         } catch (e) {
-            console.warn('Failed to load search history:', e);
+            Logger.warn('Failed to load search history:', e);
             this.state.searchHistory = [];
         }
     }
@@ -140,7 +141,7 @@ class MarketingCalendarModule extends BaseModule {
             const storageService = this.getService<IStorageService>(SERVICE_NAMES.STORAGE);
             storageService.set(AMZF_HISTORY_KEY, this.state.searchHistory);
         } catch (e) {
-            console.warn('Failed to save search history:', e);
+            Logger.warn('Failed to save search history:', e);
         }
     }
 

@@ -16,6 +16,7 @@ import { appStore } from '@/stores/useAppStore';
 import { ErrorService } from '../../../../../services/errorService';
 import { registerActionsWithLegacy, unregisterActions } from '../../../../../common/utils/actionRegistry';
 
+import { Logger } from '../../../../../services/loggerService';
 import '../keyword_hunter_style.css';
 
 // ========================================== 
@@ -61,7 +62,7 @@ function cleanup(): void {
     // 清理已注册的动作
     if (registeredActionNames.length > 0) {
         unregisterActions(registeredActionNames);
-        console.log(`[Analysis] 已清理 ${registeredActionNames.length} 个动作`);
+        Logger.debug(`[Analysis] 已清理 ${registeredActionNames.length} 个动作`);
         registeredActionNames = [];
     }
 }
@@ -420,7 +421,7 @@ function highlightScores(container: HTMLElement): void {
  * @param {HTMLElement} container - 容器元素
  */
 export async function mount(container: HTMLElement): Promise<void> {
-    console.log('[Analysis] 🔧 开始挂载子模块');
+    Logger.debug('[Analysis] 🔧 开始挂载子模块');
 
     try {
         // 1. 使用 SafeModuleLoader 加载模板
@@ -433,7 +434,7 @@ export async function mount(container: HTMLElement): Promise<void> {
                 retryCount: 3,
                 timeout: 5000,
                 onError: (error) => {
-                    console.error('[Analysis] 模板加载失败:', error);
+                    Logger.error('[Analysis] 模板加载失败:', error);
                 }
             }
         );
@@ -454,9 +455,9 @@ export async function mount(container: HTMLElement): Promise<void> {
         // 4. 从 state 恢复状态
         restoreAnalysisStateFromState();
 
-        console.log('[Analysis] ✅ 子模块挂载成功');
+        Logger.debug('[Analysis] ✅ 子模块挂载成功');
     } catch (error) {
-        console.error('[Analysis] ❌ 子模块挂载失败:', error);
+        Logger.error('[Analysis] ❌ 子模块挂载失败:', error);
         throw error;
     }
 }
@@ -465,7 +466,7 @@ export async function mount(container: HTMLElement): Promise<void> {
  * 卸载子模块
  */
 export function unmount(): void {
-    console.log('[Analysis] 🔄 开始卸载子模块');
+    Logger.debug('[Analysis] 🔄 开始卸载子模块');
 
     try {
         // 1. 保存状态到 state
@@ -474,8 +475,8 @@ export function unmount(): void {
         // 2. 清理事件监听器和定时器
         cleanup();
 
-        console.log('[Analysis] ✅ 子模块卸载成功');
+        Logger.debug('[Analysis] ✅ 子模块卸载成功');
     } catch (error) {
-        console.error('[Analysis] ❌ 子模块卸载失败:', error);
+        Logger.error('[Analysis] ❌ 子模块卸载失败:', error);
     }
 }

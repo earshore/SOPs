@@ -6,6 +6,7 @@
 import { validateRouteConfig, validateModuleConfig } from '../utils/typeGuards';
 import { SOPS_ROUTES, APP_CENTER_ROUTES, AMZ_HUB_ROUTES, MORE_ROUTES, SYSTEM_ROUTES } from '../constants/routes';
 
+import { Logger } from '../../services/loggerService';
 // ==================== 类型定义 ====================
 
 /**
@@ -695,17 +696,17 @@ export function registerRoute(routeId: string, config: RouteConfig): boolean {
   try {
     validateRouteConfig(config);
   } catch (error) {
-    console.error(`[MenuConfig] 路由注册失败 "${routeId}":`, (error as Error).message);
+    Logger.error(`[MenuConfig] 路由注册失败 "${routeId}":`, (error as Error).message);
     return false;
   }
 
   if (MENU_CONFIG.routes[routeId]) {
-    console.warn(`[MenuConfig] 路由 "${routeId}" 已存在，跳过注册`);
+    Logger.warn(`[MenuConfig] 路由 "${routeId}" 已存在，跳过注册`);
     return false;
   }
 
   MENU_CONFIG.routes[routeId] = config;
-  console.log(`✅ [MenuConfig] 动态注册路由: ${routeId}`);
+  Logger.debug(`✅ [MenuConfig] 动态注册路由: ${routeId}`);
   return true;
 }
 
@@ -723,12 +724,12 @@ export function registerModule(moduleId: string, config: Omit<ModuleConfig, 'id'
       ...config
     });
   } catch (error) {
-    console.error(`[MenuConfig] 模块注册失败 "${moduleId}":`, (error as Error).message);
+    Logger.error(`[MenuConfig] 模块注册失败 "${moduleId}":`, (error as Error).message);
     return false;
   }
 
   if (MENU_CONFIG.modules[moduleId]) {
-    console.warn(`[MenuConfig] 模块 "${moduleId}" 已存在，跳过注册`);
+    Logger.warn(`[MenuConfig] 模块 "${moduleId}" 已存在，跳过注册`);
     return false;
   }
 
@@ -736,7 +737,7 @@ export function registerModule(moduleId: string, config: Omit<ModuleConfig, 'id'
     id: moduleId,
     ...config
   };
-  console.log(`✅ [MenuConfig] 动态注册模块: ${moduleId}`);
+  Logger.debug(`✅ [MenuConfig] 动态注册模块: ${moduleId}`);
   return true;
 }
 

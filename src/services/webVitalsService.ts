@@ -4,6 +4,8 @@
 // 监控核心Web性能指标(CLS/FID/LCP/FCP/TTFB)
 // ================================================================
 
+import { Logger } from '@services/loggerService';
+
 /**
  * Web Vitals指标类型
  */
@@ -68,13 +70,13 @@ class WebVitalsService {
    */
   async initialize(): Promise<void> {
     if (this.isInitialized) {
-      console.warn('[WebVitals] 已初始化,跳过');
+      Logger.warn('[WebVitals] 已初始化,跳过');
       return;
     }
 
     // 直接使用降级方案(Performance API)
     // web-vitals库为可选依赖,如需使用请安装: npm install web-vitals
-    console.log('[WebVitals] 使用Performance API监控方案');
+    Logger.debug('[WebVitals] 使用Performance API监控方案');
     this.initializeFallback();
   }
 
@@ -83,7 +85,7 @@ class WebVitalsService {
    */
   private initializeFallback(): void {
     if (typeof window === 'undefined' || !window.performance) {
-      console.warn('[WebVitals] Performance API不可用');
+      Logger.warn('[WebVitals] Performance API不可用');
       return;
     }
 
@@ -101,7 +103,7 @@ class WebVitalsService {
     this.collectCLS();
 
     this.isInitialized = true;
-    console.log('[WebVitals] ✅ 性能监控已启动(降级模式)');
+    Logger.debug('[WebVitals] ✅ 性能监控已启动(降级模式)');
   }
 
   /**
@@ -147,7 +149,7 @@ class WebVitalsService {
     try {
       observer.observe({ type: 'largest-contentful-paint', buffered: true });
     } catch (e) {
-      console.warn('[WebVitals] LCP监控不支持');
+      Logger.warn('[WebVitals] LCP监控不支持');
     }
   }
 
@@ -204,7 +206,7 @@ class WebVitalsService {
     try {
       observer.observe({ type: 'layout-shift', buffered: true });
     } catch (e) {
-      console.warn('[WebVitals] CLS监控不支持');
+      Logger.warn('[WebVitals] CLS监控不支持');
     }
   }
 
@@ -220,13 +222,13 @@ class WebVitalsService {
       try {
         callback(metric);
       } catch (error) {
-        console.error('[WebVitals] 回调执行失败:', error);
+        Logger.error('[WebVitals] 回调执行失败:', error);
       }
     });
 
     // 输出到控制台(开发环境)
     if (process.env.NODE_ENV === 'development') {
-      console.log(`[WebVitals] ${metric.name}:`, {
+      Logger.debug(`[WebVitals] ${metric.name}:`, {
         value: Math.round(metric.value),
         rating: metric.rating
       });
@@ -289,7 +291,7 @@ class WebVitalsService {
    */
   async reportMetrics(endpoint?: string): Promise<void> {
     if (!endpoint) {
-      console.warn('[WebVitals] 未配置上报端点');
+      Logger.warn('[WebVitals] 未配置上报端点');
       return;
     }
 
@@ -307,9 +309,9 @@ class WebVitalsService {
         })
       });
 
-      console.log('[WebVitals] 指标已上报');
+      Logger.debug('[WebVitals] 指标已上报');
     } catch (error) {
-      console.error('[WebVitals] 指标上报失败:', error);
+      Logger.error('[WebVitals] 指标上报失败:', error);
     }
   }
 }

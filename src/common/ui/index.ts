@@ -98,12 +98,13 @@ import { registerActions } from '../utils/actionRegistry';
 import { toggleSOPGroup, scrollToSOPModule, scrollToHubModule, scrollToMoreModule } from './navigation';
 import { openUserGuide, closeUserGuide, switchGuideTab } from './userGuide';
 
+import { Logger } from '../../services/loggerService';
 registerActions({
   // 路由导航（通过 data-action="switch-tab" data-tab="xxx" 触发）
   'switch-tab': async (params: Record<string, unknown>) => {
     const tab = (params.tab as string) || '';
     if (!tab) {
-      console.warn('[ActionRegistry] switch-tab: missing tab parameter');
+      Logger.warn('[ActionRegistry] switch-tab: missing tab parameter');
       return;
     }
     const path = tab.startsWith('/') ? tab : `/${tab}`;
@@ -121,4 +122,4 @@ registerActions({
   'scroll-to-more-module': (params: Record<string, unknown>) => scrollToMoreModule(params.category as string),
 });
 
-console.log("✅ [UI] 模块已加载并注册到 ActionRegistry");
+Logger.debug("✅ [UI] 模块已加载并注册到 ActionRegistry");

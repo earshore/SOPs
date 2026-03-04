@@ -9,7 +9,7 @@ import { appStore } from '@/stores/useAppStore';
 /**
  * 状态同步配置
  */
-interface StateSyncConfig<T = any> {
+interface StateSyncConfig<T = unknown> {
   /** 状态选择器 */
   selector: (state: ReturnType<typeof appStore.getState>) => T;
   /** 状态变化回调 */
@@ -150,14 +150,14 @@ export function createTwoWayBinding<T>(config: {
  * });
  * ```
  */
-export function createComputedSync<T extends any[], R>(config: {
-  deps: Array<(state: ReturnType<typeof appStore.getState>) => any>;
+export function createComputedSync<T extends unknown[], R>(config: {
+  deps: Array<(state: ReturnType<typeof appStore.getState>) => unknown>;
   compute: (...args: T) => R;
   onChange: (value: R) => void;
 }): () => void {
   const { deps, compute, onChange } = config;
   
-  let previousDeps: any[] = [];
+  let previousDeps: unknown[] = [];
   let previousResult: R;
   
   const update = () => {

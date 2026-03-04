@@ -235,7 +235,7 @@ export function validateNumber(
  * @returns 验证结果映射
  */
 export function validateObject(
-  data: Record<string, any>,
+  data: Record<string, unknown>,
   rules: Record<string, ValidationRule>
 ): Record<string, ValidationResult> {
   const results: Record<string, ValidationResult> = {};

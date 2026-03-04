@@ -7,8 +7,15 @@ import { SEO_RADAR_DATA } from '../../../constants/amz_hub_constants';
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import { loadChartJs } from '../../../../../common/utils/lazyLibs';
 
+import { Logger } from '../../../../../services/loggerService';
+
+// Chart.js 实例类型定义
+interface ChartInstance {
+    destroy(): void;
+}
+
 class SeoStrategyModule extends BaseModule {
-    private chartInstance: any = null;
+    private chartInstance: ChartInstance | null = null;
 
     constructor() {
         super('amz_seo_strategy');
@@ -40,7 +47,7 @@ class SeoStrategyModule extends BaseModule {
         if (this.chartInstance) this.chartInstance.destroy();
 
         if (typeof (window as any).Chart === 'undefined') {
-            console.warn('Chart.js missing');
+            Logger.warn('Chart.js missing');
             return;
         }
 

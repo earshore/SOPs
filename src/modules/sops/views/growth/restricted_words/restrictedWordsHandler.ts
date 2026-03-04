@@ -13,6 +13,7 @@ import { registerActionsWithLegacy } from '../../../../../common/utils/actionReg
 import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
 import { AlpineRegistry } from '../../../../../common/infrastructure/AlpineRegistry';
 
+import { Logger } from '../../../../../services/loggerService';
 type SearchMode = 'fuzzy' | 'exact' | 'fulltext' | 'regex';
 type SiteContext = string;
 
@@ -21,6 +22,22 @@ interface ActiveFilters {
     riskLevel: string;
     searchMode: SearchMode;
     searchQuery: string;
+}
+
+/**
+ * Restricted Words Panel Alpine 组件接口
+ */
+interface RestrictedWordsPanelComponent {
+    searchKeyword: string;
+    searchMode: SearchMode;
+    selectedCategory: string;
+    selectedRiskLevel: string;
+    selectedSite: string;
+    init(): void;
+    performSearch(): void;
+    clearFilters(): void;
+    viewDetail(wordId: string): void;
+    closeDetailModal(): void;
 }
 
 let currentResults = [...RESTRICTED_WORDS_DATABASE];
@@ -641,14 +658,14 @@ function closeWordDetail(): void {
 // Phase 4: 集中注册所有动作到 ActionRegistry
 // ================================================================
 
-const restrictedWordsActions: Record<string, (...args: any[]) => void> = {
+const restrictedWordsActions: Record<string, (...args: unknown[]) => void> = {
     showWordDetail: showWordDetail as any,
     closeWordDetail: closeWordDetail as any,
 };
 
 registerActionsWithLegacy(restrictedWordsActions);
 
-console.log(
+Logger.debug(
     '✅ [restrictedWordsHandler] 已注册 ' +
         Object.keys(restrictedWordsActions).length +
         ' 个动作到 ActionRegistry'
@@ -661,10 +678,10 @@ console.log(
 const registry = AlpineRegistry.getInstance();
 
 // 注册 Restricted Words 面板组件
-registry.register('restrictedWordsPanel', () => ({
+registry.register('restrictedWordsPanel', (): RestrictedWordsPanelComponent => ({
     // 初始化
     init() {
-        console.log('✅ [Alpine] Restricted Words 面板组件已初始化');
+        Logger.debug('✅ [Alpine] Restricted Words 面板组件已初始化');
         initRestrictedWordsPanel();
     },
     
@@ -684,7 +701,7 @@ registry.register('restrictedWordsPanel', () => ({
     selectedSite: 'ALL',
     
     // 执行搜索
-    performSearch() {
+    performSearch(this: RestrictedWordsPanelComponent) {
         const input = document.getElementById('rw-search-input') as HTMLInputElement;
         if (input) {
             input.value = this.searchKeyword;
@@ -697,7 +714,7 @@ registry.register('restrictedWordsPanel', () => ({
     },
     
     // 清空搜索
-    clearFilters() {
+    clearFilters(this: RestrictedWordsPanelComponent) {
         this.searchKeyword = '';
         this.selectedCategory = '';
         this.selectedRiskLevel = '';
@@ -720,4 +737,4 @@ registry.register('restrictedWordsPanel', () => ({
     }
 }));
 
-console.log('✅ [restrictedWordsHandler] Restricted Words 组件已注册到 AlpineRegistry');
+Logger.debug('✅ [restrictedWordsHandler] Restricted Words 组件已注册到 AlpineRegistry');

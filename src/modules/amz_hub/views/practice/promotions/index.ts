@@ -3,6 +3,7 @@
 import BaseModule from "../../../../../common/BaseModule";
 import { loadTemplate } from "../../../../../common/utils/viewLoader";
 
+import { Logger } from '../../../../../services/loggerService';
 // ==================== 类型定义 ====================
 interface ContentBlock {
     type: string;
@@ -11,7 +12,7 @@ interface ContentBlock {
     style?: string;
     headers?: string[];
     rows?: string[][];
-    items?: any[];
+    items?: Array<Record<string, unknown>>;
 }
 
 interface PromoSection {
@@ -476,7 +477,7 @@ class PromotionsModule extends BaseModule {
         this.renderContent();
         this.setupIntersectionObserver();
 
-        console.log("✅ Promotions Module Loaded (实战版)");
+        Logger.debug("✅ Promotions Module Loaded (实战版)");
     }
 
     protected onUnmount(): void {
@@ -486,7 +487,7 @@ class PromotionsModule extends BaseModule {
         }
         delete (window as any).amzp_scrollTo;
         delete (window as any).amzp_scrollTo_Name;
-        console.log("❌ Promotions Module Unmounted");
+        Logger.debug("❌ Promotions Module Unmounted");
     }
 
     // ==================== Logic ====================
@@ -647,7 +648,7 @@ class PromotionsModule extends BaseModule {
                                 <div class="amzp_sub_desc">${item.desc}</div>
                                 ${item.tags ? `
                                     <div style="margin-top:auto">
-                                        ${item.tags.map((t: string) => `<span class="amzp_tag">${t}</span>`).join('')}
+                                        ${(item.tags as string[]).map((t: string) => `<span class="amzp_tag">${t}</span>`).join('')}
                                     </div>
                                 ` : ''}
                             </div>

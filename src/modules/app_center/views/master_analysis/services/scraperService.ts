@@ -10,6 +10,7 @@ import { sleep, getErrorSummary } from '../../../../../common/ui';
 import { HistoryService } from "./historyService";
 import { StorageService } from "../../../../../services/storageService";
 import { configCenter } from '../../../../../common/config/ConfigCenter';
+import { Logger } from '../../../../../services/loggerService';
 import type {
     ProxyConfig,
     FetchOptions,
@@ -194,10 +195,10 @@ async function fetchWithProxy(url: string, site: string, options: FetchOptions =
             lastError = e as Error;
             // 超时错误特殊处理
             if ((e as any).name === 'AbortError') {
-                console.warn(`请求超时 (attempt ${i + 1})`);
+                Logger.warn(`请求超时 (attempt ${i + 1})`);
                 lastError = new Error(`请求超时 (${timeout}ms)`);
             } else {
-                console.warn(`Fetch attempt ${i + 1} failed:`, (e as Error).message);
+                Logger.warn(`Fetch attempt ${i + 1} failed:`, (e as Error).message);
             }
         }
     }
@@ -212,7 +213,7 @@ async function fetchReviewsParallel(
     site: ScraperSite,
     fetchOptions: FetchOptions,
     lang: { domain: string; locale: string; name: string }
-): Promise<any[]> {
+): Promise<unknown[]> {
     const reviewUrls = [
         `https://www.${lang.domain}/product-reviews/${asin}/ref=cm_cr_dp_d_show_all_btm?ie=UTF8&reviewerType=all_reviews&sortBy=recent`,
         `https://www.${lang.domain}/product-reviews/${asin}`
@@ -280,7 +281,7 @@ export async function scrapeAsin(
             }
         }
     } catch (err) {
-        console.warn("缓存读取失败，转为网络请求");
+        Logger.warn("缓存读取失败，转为网络请求");
     }
 
     const fetchOptions: FetchOptions = {
@@ -329,20 +330,23 @@ export async function scrapeAsin(
                     reviews = parseReviews(productHtml);
                 }
 
-                result.customer_reviews = reviews.map(r => ({
-                    headline: r.title || "",
-                    body: r.content || "",
-                    star_rating: r.rating || 0,
-                    is_verified: r.isVerified || false,
-                    review_date: ""
-                }));
+                result.customer_reviews = reviews.map(r => {
+                    const review = r as { title?: string; content?: string; rating?: number; isVerified?: boolean };
+                    return {
+                        headline: review.title || "",
+                        body: review.content || "",
+                        star_rating: review.rating || 0,
+                        is_verified: review.isVerified || false,
+                        review_date: ""
+                    };
+                });
             }
 
             result.scrape_status = "success";
             break;
 
         } catch (e) {
-            console.error(`Task Error ${asin}:`, e);
+            Logger.error(`Task Error ${asin}:`, e);
             if (attempt === MAX_TASK_RETRIES) {
                 result.scrape_status = "failed";
                 result.error = (e as Error).message;

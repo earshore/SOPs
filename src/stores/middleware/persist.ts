@@ -7,6 +7,7 @@
 
 import type { StoreApi } from 'zustand/vanilla';
 
+import { Logger } from '../../services/loggerService';
 /**
  * 持久化配置
  */
@@ -18,11 +19,11 @@ export interface PersistOptions<T> {
   /** 部分持久化 - 选择要持久化的字段 */
   partialize?: (state: T) => Partial<T>;
   /** 合并策略 */
-  merge?: (persistedState: any, currentState: T) => T;
+  merge?: (persistedState: unknown, currentState: T) => T;
   /** 版本号 (用于迁移) */
   version?: number;
   /** 迁移函数 */
-  migrate?: (persistedState: any, version: number) => any;
+  migrate?: (persistedState: unknown, version: number) => unknown;
   /** 🎯 数据验证函数 */
   validate?: (state: unknown) => state is Partial<T>;
 }
@@ -30,9 +31,9 @@ export interface PersistOptions<T> {
 /**
  * 默认合并策略
  */
-const defaultMerge = <T>(persistedState: any, currentState: T): T => ({
+const defaultMerge = <T>(persistedState: unknown, currentState: T): T => ({
   ...currentState,
-  ...persistedState
+  ...(persistedState as Partial<T>)
 });
 
 /**
@@ -68,7 +69,7 @@ export const persist = <T extends object>(
         });
         storage.setItem(name, item);
       } catch (error) {
-        console.error('[Persist] 保存状态失败:', error);
+        Logger.error('[Persist] 保存状态失败:', error);
       }
     };
 
@@ -89,7 +90,7 @@ export const persist = <T extends object>(
         
         // 🎯 数据边界验证：如果提供了验证函数，验证持久化状态
         if (validate && !validate(persistedState)) {
-          console.warn('[Persist] 持久化状态验证失败，使用初始状态:', name);
+          Logger.warn('[Persist] 持久化状态验证失败，使用初始状态:', name);
           storage.removeItem(name);
           return initialState;
         }
@@ -103,7 +104,7 @@ export const persist = <T extends object>(
         return restoredState;
       }
     } catch (error) {
-      console.error('[Persist] 恢复状态失败:', error);
+      Logger.error('[Persist] 恢复状态失败:', error);
       // 清除损坏的数据
       try {
         storage.removeItem(name);
@@ -122,8 +123,8 @@ export const persist = <T extends object>(
 export const clearPersistedState = (name: string, storage: Storage = localStorage): void => {
   try {
     storage.removeItem(name);
-    console.log(`[Persist] 已清除持久化数据: ${name}`);
+    Logger.debug(`[Persist] 已清除持久化数据: ${name}`);
   } catch (error) {
-    console.error('[Persist] 清除持久化数据失败:', error);
+    Logger.error('[Persist] 清除持久化数据失败:', error);
   }
 };

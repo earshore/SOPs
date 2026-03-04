@@ -6,6 +6,7 @@
 import BaseModule from '../../../../../common/BaseModule';
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
 
+import { Logger } from '../../../../../services/loggerService';
 interface PromotionInputs {
     originalPrice: number;
     cost: number;
@@ -190,7 +191,7 @@ class PromotionSubmissionModule extends BaseModule {
             this.calculateProfit();
         }, 100);
 
-        console.log('✅ 促销活动提报 SOP 模块已挂载');
+        Logger.debug('✅ 促销活动提报 SOP 模块已挂载');
     }
 
     /**
@@ -199,7 +200,7 @@ class PromotionSubmissionModule extends BaseModule {
     unmount(): void {
         // Clean up global function
         delete (window as any).calculateProfit;
-        console.log('❌ 促销活动提报 SOP 模块已卸载');
+        Logger.debug('❌ 促销活动提报 SOP 模块已卸载');
     }
 }
 

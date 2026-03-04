@@ -7,6 +7,7 @@ import BaseModule from '../../../../../common/BaseModule';
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import { initRestrictedWordsPanel } from './restrictedWordsHandler';
 
+import { Logger } from '../../../../../services/loggerService';
 class RestrictedWordsModule extends BaseModule {
     /**
      * 挂载模块
@@ -20,14 +21,14 @@ class RestrictedWordsModule extends BaseModule {
         // 初始化词库面板功能
         initRestrictedWordsPanel();
 
-        console.log('✅ 欧洲本土化高危词库 SOP 模块已挂载');
+        Logger.debug('✅ 欧洲本土化高危词库 SOP 模块已挂载');
     }
 
     /**
      * 卸载模块
      */
     unmount(): void {
-        console.log('❌ 欧洲本土化高危词库 SOP 模块已卸载');
+        Logger.debug('❌ 欧洲本土化高危词库 SOP 模块已卸载');
     }
 }
 

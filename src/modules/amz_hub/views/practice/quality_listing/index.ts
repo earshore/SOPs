@@ -5,26 +5,27 @@
 import BaseModule from '../../../../../common/BaseModule';
 import templateHTML from './template.html?raw';
 
+import { Logger } from '../../../../../services/loggerService';
 // Module class
 class QualityListingModule extends BaseModule {
     /**
      * 挂载模块
      */
     async mount(container: HTMLElement): Promise<void> {
-        console.log('📦 [Quality Listing] 模块挂载中...');
+        Logger.debug('📦 [Quality Listing] 模块挂载中...');
 
         // 渲染模板
         // ✅ 安全: 静态HTML模板，无用户输入
         container.innerHTML = templateHTML;
 
-        console.log('✅ [Quality Listing] 模块挂载完成');
+        Logger.debug('✅ [Quality Listing] 模块挂载完成');
     }
 
     /**
      * 卸载模块
      */
     unmount(): void {
-        console.log('🔌 [Quality Listing] 模块卸载');
+        Logger.debug('🔌 [Quality Listing] 模块卸载');
     }
 }
 

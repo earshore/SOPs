@@ -27,7 +27,7 @@ const buildContextSection = (inputs: PromptInputs, analysisReport: AnalysisRepor
     if (hasMetadata) {
       // 处理新格式：{ metadata: {...}, analysisReport: { 'title-keywords': {...}, ... } }
       const report = cleanReport.analysisReport;
-      const finalContextObj: Record<string, any> = {};
+      const finalContextObj: Record<string, unknown> = {};
 
       // 根据 selectedReportSections 筛选对应的分析目标
       selectedReportSections.forEach((targetId) => {
@@ -57,7 +57,7 @@ const buildContextSection = (inputs: PromptInputs, analysisReport: AnalysisRepor
         "marketplace",
       ].forEach((k) => delete cleanReport[k]);
 
-      const finalContextObj: Record<string, any> = {};
+      const finalContextObj: Record<string, unknown> = {};
       selectedReportSections.forEach((key) => {
         if (cleanReport[key]) finalContextObj[key] = cleanReport[key];
       });

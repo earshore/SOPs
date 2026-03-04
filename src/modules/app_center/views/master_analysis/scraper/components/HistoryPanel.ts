@@ -11,6 +11,7 @@ import { appStore } from '@/stores/useAppStore';
 import eventBus from '../../../../../../common/EventBus';
 import { MODULE_EVENTS } from '../../../../../../common/constants/eventConstants';
 
+import { Logger } from '../../../../../../services/loggerService';
 /**
  * 历史记录面板类
  */
@@ -86,13 +87,13 @@ export class HistoryPanel {
         // 优先加载"AI智能分析"的报告，如果不存在则回退到旧的"AI分析"报告
         if (item.analysisStatus?.isAnalyzed && item.analysisStatus?.analysisReport) {
             appStore.getState().setAnalysisReport(item.analysisStatus.analysisReport);
-            console.log('[Scraper] 已加载"AI智能分析"报告到全局状态');
+            Logger.debug('[Scraper] 已加载"AI智能分析"报告到全局状态');
         } else if (item.report) {
             appStore.getState().setAnalysisReport(item.report);
-            console.log('[Scraper] 已加载旧版"AI分析"报告到全局状态');
+            Logger.debug('[Scraper] 已加载旧版"AI分析"报告到全局状态');
         } else {
             appStore.getState().setAnalysisReport(null);
-            console.log('[Scraper] 该快照无分析报告');
+            Logger.debug('[Scraper] 该快照无分析报告');
         }
 
         appStore.getState().setTranslatedReport(null);
@@ -129,14 +130,14 @@ export class HistoryPanel {
                 throw new Error('报告数据加载失败');
             }
 
-            console.log('[Scraper] 📊 已将"AI智能分析"报告加载到全局状态');
+            Logger.debug('[Scraper] 📊 已将"AI智能分析"报告加载到全局状态');
 
             // 3. 跳转到 AI智能分析页面查看报告
             await window.navigateTo('/ai_analysis');
 
             showToast("已跳转到 AI智能分析查看报告", { type: 'success' });
         } catch (error) {
-            console.error('[Scraper] 载入分析报告失败:', error);
+            Logger.error('[Scraper] 载入分析报告失败:', error);
             showToast("载入分析报告失败", { type: 'error' });
         }
     }

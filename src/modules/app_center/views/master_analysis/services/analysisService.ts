@@ -8,6 +8,7 @@
 import { callLLM } from "../../../../../services/llmService";
 import { configCenter } from '../../../../../common/config/ConfigCenter';
 import { TRANSLATE_PROMPT_TEMPLATE } from "../constants/prompts";
+import { Logger } from '../../../../../services/loggerService';
 import type {
   ProductData,
   DataOptions,
@@ -23,7 +24,7 @@ import type {
  * 鲁棒性 JSON 提取器
  * 处理 Markdown 代码块及杂余文本
  */
-function robustParseJSON(text: string): any {
+function robustParseJSON(text: string): unknown {
   if (!text) return null;
 
   // 1. 尝试直接解析
@@ -124,10 +125,12 @@ export const AnalysisService = {
     );
 
     try {
-      return robustParseJSON(response);
+      const parsed = robustParseJSON(response);
+      // 类型断言：robustParseJSON 返回的对象作为 AnalysisReport
+      return parsed as AnalysisReport;
     } catch (e) {
       const error = e as Error;
-      console.warn("Analysis JSON Parse Failed:", error.message);
+      Logger.warn("Analysis JSON Parse Failed:", error.message);
       return {
         raw_response: response,
         parse_error: true,
@@ -168,10 +171,12 @@ export const AnalysisService = {
     );
 
     try {
-      return robustParseJSON(response);
+      const parsed = robustParseJSON(response);
+      // 类型断言：robustParseJSON 返回的对象作为 AnalysisReport
+      return parsed as AnalysisReport;
     } catch (e) {
       const error = e as Error;
-      console.warn("Translation JSON Parse Failed:", error.message);
+      Logger.warn("Translation JSON Parse Failed:", error.message);
       return {
         ...report, // 返回原报告，但标记错误
         parse_error: true,

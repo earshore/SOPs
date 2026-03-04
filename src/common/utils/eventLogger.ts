@@ -7,13 +7,14 @@
 import { StorageService } from '../../services/storageService';
 import { configCenter } from '../config/ConfigCenter';
 
+import { Logger } from '../../services/loggerService';
 /**
  * 事件日志条目
  */
 interface EventLogEntry {
   timestamp: string;
   eventName: string;
-  detail: any;
+  detail: unknown;
   target: string;
 }
 
@@ -71,13 +72,13 @@ function formatEventForLog(event: CustomEvent): EventLogEntry {
  */
 export function initEventLogger(): void {
   if (!isDebugEnabled()) {
-    console.log(
+    Logger.debug(
       '💡 [EventLogger] 调试模式未开启。启用方式: StorageService.set("debug_events", "true")'
     );
     return;
   }
 
-  console.log('🔍 [EventLogger] 事件调试模式已启用');
+  Logger.debug('🔍 [EventLogger] 事件调试模式已启用');
 
   TRACKED_EVENTS.forEach((eventName) => {
     window.addEventListener(eventName, (event) => {
@@ -92,8 +93,8 @@ export function initEventLogger(): void {
 
       // 控制台输出
       console.group(`📡 ${eventName}`);
-      console.log('Detail:', customEvent.detail);
-      console.log('Timestamp:', logEntry.timestamp);
+      Logger.debug('Detail:', customEvent.detail);
+      Logger.debug('Timestamp:', logEntry.timestamp);
       console.trace('Call Stack');
       console.groupEnd();
     });
@@ -112,13 +113,13 @@ export function getEventHistory(limit: number = 20): EventLogEntry[] {
  */
 export function clearEventHistory(): void {
   eventHistory.length = 0;
-  console.log('🗑️ [EventLogger] 事件历史已清空');
+  Logger.debug('🗑️ [EventLogger] 事件历史已清空');
 }
 
 /**
  * 手动记录自定义事件（用于业务埋点）
  */
-export function logCustomEvent(eventName: string, detail: any = {}): void {
+export function logCustomEvent(eventName: string, detail: unknown = {}): void {
   const logEntry: EventLogEntry = {
     timestamp: new Date().toISOString(),
     eventName,
@@ -132,7 +133,7 @@ export function logCustomEvent(eventName: string, detail: any = {}): void {
   }
 
   if (isDebugEnabled()) {
-    console.log(`📝 [EventLogger] ${eventName}`, detail);
+    Logger.debug(`📝 [EventLogger] ${eventName}`, detail);
   }
 }
 

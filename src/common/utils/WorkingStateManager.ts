@@ -402,8 +402,8 @@ export class WorkingStateManager {
    */
   debug(): void {
     console.group('[WorkingStateManager] 调试信息');
-    console.log('活跃任务:', this.getActiveTasks());
-    console.log('统计信息:', this.getStats());
+    Logger.debug('活跃任务:', this.getActiveTasks());
+    Logger.debug('统计信息:', this.getStats());
     console.table(
       Array.from(this.states.entries()).map(([id, state]) => ({
         任务ID: id,
@@ -423,7 +423,7 @@ export const workingStateManager = new WorkingStateManager();
 export default workingStateManager;
 
 // 向后兼容：暴露到 window (开发调试用)
-if (typeof window !== 'undefined' && (import.meta as any).env?.DEV) {
-  (window as any).__WorkingStateManager = workingStateManager;
-  console.log('✅ [WorkingStateManager] 开发模式：管理器已暴露到 window.__WorkingStateManager');
+if (typeof window !== 'undefined' && (import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV) {
+  (window as unknown as Record<string, unknown>).__WorkingStateManager = workingStateManager;
+  Logger.debug('✅ [WorkingStateManager] 开发模式：管理器已暴露到 window.__WorkingStateManager');
 }

@@ -6,6 +6,7 @@
 
 import type { RouteMiddleware } from './types';
 
+import { Logger } from '../../../services/loggerService';
 // ==================== 日志中间件 ====================
 
 /**
@@ -18,10 +19,10 @@ export function createLoggingMiddleware(verbose: boolean = false): RouteMiddlewa
   return async (context, next) => {
     const { to, from } = context;
 
-    console.log(`[Router] ${from?.path || 'null'} -> ${to.path}`);
+    Logger.debug(`[Router] ${from?.path || 'null'} -> ${to.path}`);
 
     if (verbose) {
-      console.log('[Router] Route details:', {
+      Logger.debug('[Router] Route details:', {
         to: {
           path: to.path,
           moduleId: to.config.moduleId,
@@ -61,7 +62,7 @@ export function createAnalyticsMiddleware(): RouteMiddleware {
       // 记录页面浏览
       analyticsService.trackPageView(to.path, to.config.label || to.path);
     } catch (error) {
-      console.warn('[analyticsMiddleware] Failed to track page view:', error);
+      Logger.warn('[analyticsMiddleware] Failed to track page view:', error);
     }
 
     await next();
@@ -80,7 +81,7 @@ export function createAnalyticsMiddleware(): RouteMiddleware {
 export function createLoadingMiddleware(): RouteMiddleware {
   return async (context, next) => {
     const taskId = `route-${context.to.path}`;
-    let manager: any = null;
+    let manager: { start: (id: string, opts: { message: string }) => void; stop: (id: string) => void } | null = null;
 
     try {
       // 显示加载指示器
@@ -90,7 +91,7 @@ export function createLoadingMiddleware(): RouteMiddleware {
 
       await next();
     } catch (error) {
-      console.warn('[loadingMiddleware] Error:', error);
+      Logger.warn('[loadingMiddleware] Error:', error);
       await next();
     } finally {
       // 隐藏加载指示器
@@ -175,11 +176,14 @@ export function createErrorHandlingMiddleware(): RouteMiddleware {
     try {
       await next();
     } catch (error) {
-      console.error('[Router] Middleware error:', error);
+      Logger.error('[Router] Middleware error:', error);
 
       // 显示错误提示
-      if (typeof (window as any).showToast === 'function') {
-        (window as any).showToast('页面加载失败', { type: 'error' });
+      const windowWithToast = window as unknown as { 
+        showToast?: (message: string, options: { type: string }) => void 
+      };
+      if (typeof windowWithToast.showToast === 'function') {
+        windowWithToast.showToast('页面加载失败', { type: 'error' });
       }
 
       // 可以选择重定向到错误页面

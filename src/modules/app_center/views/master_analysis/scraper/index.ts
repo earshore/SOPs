@@ -13,6 +13,7 @@ import { SafeModuleLoader } from '../../../../../common/infrastructure/SafeModul
 import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
 import { AlpineRegistry } from '../../../../../common/infrastructure/AlpineRegistry';
 import { createScraperPanel } from './components/ScraperPanel';
+import { Logger } from '../../../../../services/loggerService';
 import '../master_analysis_style.css';
 import './scraper_style.css';
 
@@ -25,7 +26,7 @@ import './scraper_style.css';
  * @param container - 容器元素
  */
 export async function mount(container: HTMLElement): Promise<void> {
-    console.log('[Scraper] 🔧 开始挂载子模块');
+    Logger.debug('[Scraper] 🔧 开始挂载子模块');
 
     try {
         // 1. 使用 SafeModuleLoader 加载模板
@@ -36,7 +37,7 @@ export async function mount(container: HTMLElement): Promise<void> {
             'src/modules/app_center/views/master_analysis/scraper/template.html',
             {
                 onError: (error) => {
-                    console.error('[Scraper] 模板加载失败:', error);
+                    Logger.error('[Scraper] 模板加载失败:', error);
                 }
             }
         );
@@ -50,10 +51,10 @@ export async function mount(container: HTMLElement): Promise<void> {
         const registry = AlpineRegistry.getInstance();
         registry.register('scraperPanel', createScraperPanel);
         
-        console.log('[Scraper] ✅ Alpine 组件已通过 AlpineRegistry 注册');
-        console.log('[Scraper] ✅ 子模块挂载成功');
+        Logger.debug('[Scraper] ✅ Alpine 组件已通过 AlpineRegistry 注册');
+        Logger.debug('[Scraper] ✅ 子模块挂载成功');
     } catch (error) {
-        console.error('[Scraper] ❌ 子模块挂载失败:', error);
+        Logger.error('[Scraper] ❌ 子模块挂载失败:', error);
         throw error;
     }
 }
@@ -62,7 +63,7 @@ export async function mount(container: HTMLElement): Promise<void> {
  * 卸载子模块
  */
 export function unmount(): void {
-    console.log('[Scraper] 🔄 开始卸载子模块');
+    Logger.debug('[Scraper] 🔄 开始卸载子模块');
 
     try {
         // 清理事件监听器
@@ -79,9 +80,9 @@ export function unmount(): void {
         const registry = AlpineRegistry.getInstance();
         registry.unregister('scraperPanel');
 
-        console.log('[Scraper] ✅ 子模块卸载成功');
+        Logger.debug('[Scraper] ✅ 子模块卸载成功');
     } catch (error) {
-        console.error('[Scraper] ❌ 子模块卸载失败:', error);
+        Logger.error('[Scraper] ❌ 子模块卸载失败:', error);
     }
 }
 
@@ -92,10 +93,10 @@ export function unmount(): void {
 /**
  * 获取 Alpine 组件实例的辅助函数
  */
-function getScraperPanelInstance(): any {
+function getScraperPanelInstance(): Record<string, unknown> | null {
     const element = document.querySelector('[x-data="scraperPanel"]');
     if (!element) {
-        console.warn('[Scraper] Alpine 组件实例未找到');
+        Logger.warn('[Scraper] Alpine 组件实例未找到');
         return null;
     }
     return (window as any).Alpine?.$data(element);
@@ -119,7 +120,7 @@ export const renderDataPanel = (): void => {
     if (panel && typeof panel.renderDataPanel === 'function') {
         panel.renderDataPanel();
     } else {
-        console.warn('[Scraper] renderDataPanel 方法不可用');
+        Logger.warn('[Scraper] renderDataPanel 方法不可用');
     }
 };
 
@@ -131,7 +132,7 @@ export const triggerImport = (): void => {
     if (panel && typeof panel.triggerImport === 'function') {
         panel.triggerImport();
     } else {
-        console.warn('[Scraper] triggerImport 方法不可用');
+        Logger.warn('[Scraper] triggerImport 方法不可用');
     }
 };
 
@@ -143,7 +144,7 @@ export const switchDataTab = (tab: string): void => {
     if (panel && typeof panel.switchDataTab === 'function') {
         panel.switchDataTab(tab as 'preview' | 'json');
     } else {
-        console.warn('[Scraper] switchDataTab 方法不可用');
+        Logger.warn('[Scraper] switchDataTab 方法不可用');
     }
 };
 
@@ -155,7 +156,7 @@ export const handleImportFiles = (e: Event): void => {
     if (panel && typeof panel.handleImportFiles === 'function') {
         panel.handleImportFiles(e);
     } else {
-        console.warn('[Scraper] handleImportFiles 方法不可用');
+        Logger.warn('[Scraper] handleImportFiles 方法不可用');
     }
 };
 
@@ -167,7 +168,7 @@ export const toggleCardExpand = (asin: string): void => {
     if (panel && typeof panel.toggleCardExpand === 'function') {
         panel.toggleCardExpand(asin);
     } else {
-        console.warn('[Scraper] toggleCardExpand 方法不可用');
+        Logger.warn('[Scraper] toggleCardExpand 方法不可用');
     }
 };
 
@@ -179,7 +180,7 @@ export const deleteProduct = (asin: string): void => {
     if (panel && typeof panel.deleteProduct === 'function') {
         panel.deleteProduct(asin);
     } else {
-        console.warn('[Scraper] deleteProduct 方法不可用');
+        Logger.warn('[Scraper] deleteProduct 方法不可用');
     }
 };
 
@@ -191,6 +192,6 @@ export const deleteReview = (asin: string, index: number): void => {
     if (panel && typeof panel.deleteReview === 'function') {
         panel.deleteReview(asin, index);
     } else {
-        console.warn('[Scraper] deleteReview 方法不可用');
+        Logger.warn('[Scraper] deleteReview 方法不可用');
     }
 };

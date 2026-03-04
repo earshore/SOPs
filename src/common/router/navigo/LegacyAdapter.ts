@@ -15,6 +15,7 @@
 import type { NavigoAdapter } from './NavigoAdapter';
 import type { Route } from './types';
 
+import { Logger } from '../../../services/loggerService';
 /**
  * 旧版 switchTab 函数签名
  */
@@ -47,7 +48,7 @@ export class LegacyAdapter {
     
     // 显示移除计划警告
     if (showWarnings && LegacyAdapter.REMOVAL_PHASE === 1) {
-      console.warn(
+      Logger.warn(
         `[LegacyAdapter] 向后兼容层将在 ${LegacyAdapter.REMOVAL_DATE} 移除。` +
         `请尽快迁移到新的路由 API。`
       );
@@ -146,12 +147,13 @@ export class LegacyAdapter {
     if (typeof window === 'undefined') return;
 
     // 挂载 switchTab
-    (window as any).switchTab = this.createSwitchTab();
+    const windowWithLegacy = window as unknown as Record<string, unknown>;
+    windowWithLegacy.switchTab = this.createSwitchTab();
 
     // 挂载 router
-    (window as any).router = this.createLegacyRouter();
+    windowWithLegacy.router = this.createLegacyRouter();
 
-    console.warn(
+    Logger.warn(
       '[LegacyAdapter] Global APIs installed. ' +
         'Please migrate to ES modules: import { router } from "@router/navigo". ' +
         `These APIs will be removed on ${LegacyAdapter.REMOVAL_DATE}.`
@@ -164,10 +166,11 @@ export class LegacyAdapter {
   uninstallGlobalAPI(): void {
     if (typeof window === 'undefined') return;
 
-    delete (window as any).switchTab;
-    delete (window as any).router;
+    const windowWithLegacy = window as unknown as Record<string, unknown>;
+    delete windowWithLegacy.switchTab;
+    delete windowWithLegacy.router;
 
-    console.log('[LegacyAdapter] Global APIs uninstalled');
+    Logger.debug('[LegacyAdapter] Global APIs uninstalled');
   }
 
   /**
@@ -193,12 +196,16 @@ export class LegacyAdapter {
     if (typeof window === 'undefined') return;
 
     // 检查是否存在 APP_EVENTS
-    const APP_EVENTS = (window as any).APP_EVENTS;
+    const windowWithEvents = window as unknown as Record<string, unknown>;
+    const APP_EVENTS = windowWithEvents.APP_EVENTS;
     if (!APP_EVENTS) return;
 
     // 触发事件
-    if (typeof APP_EVENTS.emit === 'function') {
-      APP_EVENTS.emit(eventName, data);
+    if (typeof APP_EVENTS === 'object' && APP_EVENTS !== null && 'emit' in APP_EVENTS) {
+      const emitter = APP_EVENTS as { emit?: (name: string, data: unknown) => void };
+      if (typeof emitter.emit === 'function') {
+        emitter.emit(eventName, data);
+      }
     }
   }
 
@@ -225,7 +232,7 @@ export class LegacyAdapter {
 
     this.deprecationWarnings.add(key);
 
-    console.warn(
+    Logger.warn(
       `[DEPRECATED] "${oldAPI}" is deprecated and will be removed in the next major version. ` +
         `Please use "${newAPI}" instead.`
     );

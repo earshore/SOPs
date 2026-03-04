@@ -8,6 +8,7 @@ import { StorageService, STORAGE_KEYS } from "../../../../../services/storageSer
 import { configCenter } from '../../../../../common/config/ConfigCenter';
 import type { HistoryItem, ScrapedProduct, ScrapedData, AnalysisReport } from "../../../../../types/modules-business";
 
+import { Logger } from '../../../../../services/loggerService';
 const MAX_HISTORY_ITEMS = configCenter.get<number>('history.maxItems') || 20;
 
 // ----------------------------------------
@@ -32,7 +33,7 @@ export const HistoryService = {
     try {
       return StorageService.getScrapeHistory();
     } catch (e) {
-      console.error("读取历史记录失败", e);
+      Logger.error("读取历史记录失败", e);
       return [];
     }
   },
@@ -132,14 +133,14 @@ export const HistoryService = {
       const targetIndex = history.findIndex((h) => h.id === Number(id));
 
       if (targetIndex === -1) {
-        console.warn(`[HistoryService] 未找到ID为 ${id} 的历史记录`);
+        Logger.warn(`[HistoryService] 未找到ID为 ${id} 的历史记录`);
         return false;
       }
 
       // 获取目标历史记录
       const targetItem = history[targetIndex];
       if (!targetItem) {
-        console.warn(`[HistoryService] 历史记录项为空`);
+        Logger.warn(`[HistoryService] 历史记录项为空`);
         return false;
       }
 
@@ -153,10 +154,10 @@ export const HistoryService = {
       // 保存更新后的历史记录
       StorageService.setScrapeHistory(history);
 
-      console.log(`[HistoryService] 已更新历史记录 ${id} 的分析状态`);
+      Logger.debug(`[HistoryService] 已更新历史记录 ${id} 的分析状态`);
       return true;
     } catch (error) {
-      console.error(`[HistoryService] 更新分析状态失败:`, error);
+      Logger.error(`[HistoryService] 更新分析状态失败:`, error);
       return false;
     }
   }

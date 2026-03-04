@@ -4,6 +4,8 @@
 // 提供安全的 HTML 渲染方法
 // ================================================================
 
+import { Logger } from '@services/loggerService';
+
 // ==================== 类型定义 ====================
 
 /**
@@ -99,7 +101,7 @@ export function setTextContent(element: HTMLElement | null, text: string): void 
  * safeTemplate('<div class="item">${title}</div>', { title: '<script>bad</script>' })
  * // 返回: '<div class="item">&lt;script&gt;bad&lt;/script&gt;</div>'
  */
-export function safeTemplate(template: string, data: Record<string, any>): string {
+export function safeTemplate(template: string, data: Record<string, unknown>): string {
   return template.replace(/\$\{(\w+)\}/g, (_match, key) => {
     const value = data[key];
     if (value === undefined || value === null) return '';
@@ -169,7 +171,7 @@ export function setSafeHtml(element: HTMLElement | null, html: string): void {
  */
 export function safeMarkdown(markdown: string, markdownParser?: MarkdownParser): string {
   if (!markdownParser) {
-    console.warn('[Security] markdownParser not provided, returning escaped text');
+    Logger.warn('[Security] markdownParser not provided, returning escaped text');
     return escapeHtml(markdown);
   }
 

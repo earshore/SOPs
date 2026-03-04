@@ -6,6 +6,7 @@
 import type { AnalysisReportData } from '../services/importHandler';
 import { SafeRenderer } from '../../../../../../common/infrastructure/SafeRenderer';
 
+import { Logger } from '../../../../../../services/loggerService';
 /**
  * 分析目标配置（与AI Analysis保持一致）
  */
@@ -23,19 +24,21 @@ const ANALYSIS_TARGETS = [
 /**
  * 检查目标数据是否有实际内容
  */
-function hasValidData(targetData: any): boolean {
+function hasValidData(targetData: unknown): boolean {
     if (!targetData || typeof targetData !== 'object') return false;
 
+    const dataObj = targetData as Record<string, unknown>;
+
     // 检查是否是空对象
-    const keys = Object.keys(targetData);
+    const keys = Object.keys(dataObj);
     if (keys.length === 0) return false;
 
     // 检查是否所有值都是空的
     const hasNonEmptyValue = keys.some(key => {
-        const value = targetData[key];
+        const value = dataObj[key];
         if (value === null || value === undefined) return false;
         if (Array.isArray(value)) return value.length > 0;
-        if (typeof value === 'object') return Object.keys(value).length > 0;
+        if (typeof value === 'object') return Object.keys(value as object).length > 0;
         if (typeof value === 'string') return value.trim().length > 0;
         return true;
     });
@@ -46,128 +49,226 @@ function hasValidData(targetData: any): boolean {
 /**
  * 提取单个分析目标的统计数据
  */
-function extractTargetStats(targetId: string, targetData: any): Array<{ label: string; value: string }> {
+function extractTargetStats(targetId: string, targetData: unknown): Array<{ label: string; value: string }> {
     if (!targetData) {
-        console.log(`[QALab] extractTargetStats: targetData 为空，targetId=${targetId}`);
+        Logger.debug(`[QALab] extractTargetStats: targetData 为空，targetId=${targetId}`);
         return [];
     }
 
-    console.log(`[QALab] extractTargetStats: targetId=${targetId}, targetData keys=`, Object.keys(targetData));
+    if (typeof targetData !== 'object') {
+        Logger.debug(`[QALab] extractTargetStats: targetData 不是对象，targetId=${targetId}`);
+        return [];
+    }
+
+    const dataObj = targetData as Record<string, unknown>;
+    Logger.debug(`[QALab] extractTargetStats: targetId=${targetId}, targetData keys=`, Object.keys(dataObj));
 
     switch (targetId) {
         case 'title-keywords':
             // 兼容两种格式：对象数组和字符串数组
-            const primaryKeywords = targetData.primary_keywords || [];
-            const sceneKeywords = targetData.scene_keywords || [];
-            const removedBrandTerms = targetData.removed_brand_terms || [];
-            const removedModifiers = targetData.removed_modifiers || [];
+            const primaryKeywords = Array.isArray(dataObj.primary_keywords) ? dataObj.primary_keywords : [];
+            const sceneKeywords = Array.isArray(dataObj.scene_keywords) ? dataObj.scene_keywords : [];
+            const removedBrandTerms = Array.isArray(dataObj.removed_brand_terms) ? dataObj.removed_brand_terms : [];
+            const removedModifiers = Array.isArray(dataObj.removed_modifiers) ? dataObj.removed_modifiers : [];
 
             const titleStats = [
                 { label: '核心词根', value: `${primaryKeywords.length}个` },
                 { label: '场景词', value: `${sceneKeywords.length}个` },
                 { label: '已剔除', value: `${removedBrandTerms.length + removedModifiers.length}个` }
             ];
-            console.log(`[QALab] title-keywords stats:`, titleStats, 'data:', {
-                primary_keywords: primaryKeywords.length,
-                scene_keywords: sceneKeywords.length,
-                removed_brand_terms: removedBrandTerms.length,
-                removed_modifiers: removedModifiers.length
+            Logger.debug(`[QALab] title-keywords stats`, {
+                titleStats,
+                data: {
+                    primary_keywords: primaryKeywords.length,
+                    scene_keywords: sceneKeywords.length,
+                    removed_brand_terms: removedBrandTerms.length,
+                    removed_modifiers: removedModifiers.length
+                }
             });
             return titleStats;
 
         case 'selling-points':
-            const bulletAnalysis = targetData.bullet_analysis || [];
+            const bulletAnalysis = Array.isArray(dataObj.bullet_analysis) ? dataObj.bullet_analysis : [];
             const sellingStats = [
                 { label: '卖点数量', value: `${bulletAnalysis.length}个` },
-                { label: '功能点', value: `${bulletAnalysis.filter((b: any) => b.function || b.functions).length}个` },
-                { label: '场景覆盖', value: `${bulletAnalysis.filter((b: any) => b.scene || (b.scenes && b.scenes.length > 0)).length}个` }
+                { label: '功能点', value: `${bulletAnalysis.filter((b: unknown) => {
+                    if (b && typeof b === 'object') {
+                        const bObj = b as Record<string, unknown>;
+                        return bObj.function || bObj.functions;
+                    }
+                    return false;
+                }).length}个` },
+                { label: '场景覆盖', value: `${bulletAnalysis.filter((b: unknown) => {
+                    if (b && typeof b === 'object') {
+                        const bObj = b as Record<string, unknown>;
+                        return bObj.scene || (Array.isArray(bObj.scenes) && bObj.scenes.length > 0);
+                    }
+                    return false;
+                }).length}个` }
             ];
-            console.log(`[QALab] selling-points stats:`, sellingStats, 'bullet_analysis sample:', bulletAnalysis[0]);
+            Logger.debug(`[QALab] selling-points stats`, { sellingStats, sample: bulletAnalysis[0] });
             return sellingStats;
 
         case 'fatal-flaws':
-            const criticalIssues = targetData.critical_issues || [];
+            const criticalIssues = Array.isArray(dataObj.critical_issues) ? dataObj.critical_issues : [];
             // 真实数据结构：没有actionable字段，使用severity判断
             const flawStats = [
                 { label: '致命问题', value: `${criticalIssues.length}个` },
-                { label: '高频缺陷', value: `${criticalIssues.filter((i: any) => i.severity === 'high' || i.severity === 'critical' || i.severity === 'major').length}个` },
-                { label: '需规避', value: `${criticalIssues.filter((i: any) => i.actionable === true || i.severity === 'critical').length}个` }
+                { label: '高频缺陷', value: `${criticalIssues.filter((i: unknown) => {
+                    if (i && typeof i === 'object') {
+                        const iObj = i as Record<string, unknown>;
+                        return iObj.severity === 'high' || iObj.severity === 'critical' || iObj.severity === 'major';
+                    }
+                    return false;
+                }).length}个` },
+                { label: '需规避', value: `${criticalIssues.filter((i: unknown) => {
+                    if (i && typeof i === 'object') {
+                        const iObj = i as Record<string, unknown>;
+                        return iObj.actionable === true || iObj.severity === 'critical';
+                    }
+                    return false;
+                }).length}个` }
             ];
-            console.log(`[QALab] fatal-flaws stats:`, flawStats, 'sample keys:', criticalIssues[0] ? Object.keys(criticalIssues[0]) : []);
+            Logger.debug(`[QALab] fatal-flaws stats`, { flawStats, sampleKeys: criticalIssues[0] && typeof criticalIssues[0] === 'object' ? Object.keys(criticalIssues[0] as object) : [] });
             return flawStats;
 
         case 'wow-moments':
-            const moments = targetData.moments || [];
+            const moments = Array.isArray(dataObj.moments) ? dataObj.moments : [];
             const wowStats = [
                 { label: 'Wow时刻', value: `${moments.length}个` },
-                { label: '超预期点', value: `${moments.filter((m: any) => m.type === 'exceeded' || m.emotion_type === 'delight').length}个` },
-                { label: '惊喜功能', value: `${moments.filter((m: any) => m.category === 'feature' || m.aspect === 'smell' || m.aspect === 'overall').length}个` }
+                { label: '超预期点', value: `${moments.filter((m: unknown) => {
+                    if (m && typeof m === 'object') {
+                        const mObj = m as Record<string, unknown>;
+                        return mObj.type === 'exceeded' || mObj.emotion_type === 'delight';
+                    }
+                    return false;
+                }).length}个` },
+                { label: '惊喜功能', value: `${moments.filter((m: unknown) => {
+                    if (m && typeof m === 'object') {
+                        const mObj = m as Record<string, unknown>;
+                        return mObj.category === 'feature' || mObj.aspect === 'smell' || mObj.aspect === 'overall';
+                    }
+                    return false;
+                }).length}个` }
             ];
-            console.log(`[QALab] wow-moments stats:`, wowStats, 'moments sample:', moments[0]);
+            Logger.debug(`[QALab] wow-moments stats`, { wowStats, sample: moments[0] });
             return wowStats;
 
         case 'hesitation-points':
-            const hesitations = targetData.hesitations || [];
+            const hesitations = Array.isArray(dataObj.hesitations) ? dataObj.hesitations : [];
             // 真实数据结构：pre_purchase_worry, post_purchase_resolution, resolution_status
             const hesitationStats = [
                 { label: '犹豫点', value: `${hesitations.length}个` },
-                { label: '已解决', value: `${hesitations.filter((h: any) => h.resolved === true || h.resolution_status === 'resolved' || h.post_purchase_resolution).length}个` },
-                { label: '高优先级', value: `${hesitations.filter((h: any) => h.priority === 'high' || h.severity === 'high').length}个` }
+                { label: '已解决', value: `${hesitations.filter((h: unknown) => {
+                    if (h && typeof h === 'object') {
+                        const hObj = h as Record<string, unknown>;
+                        return hObj.resolved === true || hObj.resolution_status === 'resolved' || hObj.post_purchase_resolution;
+                    }
+                    return false;
+                }).length}个` },
+                { label: '高优先级', value: `${hesitations.filter((h: unknown) => {
+                    if (h && typeof h === 'object') {
+                        const hObj = h as Record<string, unknown>;
+                        return hObj.priority === 'high' || hObj.severity === 'high';
+                    }
+                    return false;
+                }).length}个` }
             ];
-            console.log(`[QALab] hesitation-points stats:`, hesitationStats, 'sample keys:', hesitations[0] ? Object.keys(hesitations[0]) : []);
+            Logger.debug(`[QALab] hesitation-points stats`, { hesitationStats, sampleKeys: hesitations[0] && typeof hesitations[0] === 'object' ? Object.keys(hesitations[0] as object) : [] });
             return hesitationStats;
 
         case 'buyer-profile':
             // 真实数据结构：demographics是对象，buyer_types是数组，usage_scenes不是usage_scenarios
-            const buyerTypes = targetData.buyer_types || [];
-            const usageScenes = targetData.usage_scenes || targetData.usage_scenarios || [];
+            const buyerTypes = Array.isArray(dataObj.buyer_types) ? dataObj.buyer_types : [];
+            const usageScenes = Array.isArray(dataObj.usage_scenes) ? dataObj.usage_scenes :
+                                (Array.isArray(dataObj.usage_scenarios) ? dataObj.usage_scenarios : []);
             // demographics是对象，统计lifestyle_indicators数组长度
-            const demographicsCount = targetData.demographics?.lifestyle_indicators?.length ||
-                (targetData.demographics ? 1 : 0) ||
-                (Array.isArray(targetData.demographics) ? targetData.demographics.length : 0);
+            const demographics = dataObj.demographics;
+            let demographicsCount = 0;
+            if (demographics && typeof demographics === 'object') {
+                const demoObj = demographics as Record<string, unknown>;
+                if (Array.isArray(demoObj.lifestyle_indicators)) {
+                    demographicsCount = demoObj.lifestyle_indicators.length;
+                } else {
+                    demographicsCount = 1;
+                }
+            } else if (Array.isArray(demographics)) {
+                demographicsCount = demographics.length;
+            }
 
             const profileStats = [
                 { label: '买家类型', value: `${buyerTypes.length}种` },
                 { label: '使用场景', value: `${usageScenes.length}个` },
                 { label: '人群画像', value: `${demographicsCount}个` }
             ];
-            console.log(`[QALab] buyer-profile stats:`, profileStats, 'data:', {
-                buyer_types: buyerTypes.length,
-                usage_scenes: usageScenes.length,
-                demographics: demographicsCount,
-                demographics_type: typeof targetData.demographics
+            Logger.debug(`[QALab] buyer-profile stats`, {
+                profileStats,
+                data: {
+                    buyer_types: buyerTypes.length,
+                    usage_scenes: usageScenes.length,
+                    demographics: demographicsCount,
+                    demographics_type: typeof dataObj.demographics
+                }
             });
             return profileStats;
 
         case 'vocab-gap':
             // 真实数据结构：seller_terms, buyer_terms, uncovered_buyer_terms, listing_optimization(对象)
-            const missingTerms = targetData.missing_terms || targetData.uncovered_buyer_terms || [];
-            const buyerSlang = targetData.buyer_slang || targetData.buyer_terms || [];
-            const recommendations = targetData.recommendations ||
-                (targetData.listing_optimization && Array.isArray(targetData.listing_optimization) ? targetData.listing_optimization :
-                    targetData.listing_optimization?.recommendations || []);
+            const missingTerms = Array.isArray(dataObj.missing_terms) ? dataObj.missing_terms :
+                                (Array.isArray(dataObj.uncovered_buyer_terms) ? dataObj.uncovered_buyer_terms : []);
+            const buyerSlang = Array.isArray(dataObj.buyer_slang) ? dataObj.buyer_slang :
+                              (Array.isArray(dataObj.buyer_terms) ? dataObj.buyer_terms : []);
+
+            let recommendations: unknown[] = [];
+            if (Array.isArray(dataObj.recommendations)) {
+                recommendations = dataObj.recommendations;
+            } else if (dataObj.listing_optimization) {
+                const listingOpt = dataObj.listing_optimization;
+                if (Array.isArray(listingOpt)) {
+                    recommendations = listingOpt;
+                } else if (listingOpt && typeof listingOpt === 'object') {
+                    const optObj = listingOpt as Record<string, unknown>;
+                    if (Array.isArray(optObj.recommendations)) {
+                        recommendations = optObj.recommendations;
+                    }
+                }
+            }
 
             const vocabStats = [
                 { label: '词汇缺口', value: `${missingTerms.length}个` },
                 { label: '买家黑话', value: `${buyerSlang.length}个` },
-                { label: '建议补充', value: `${Array.isArray(recommendations) ? recommendations.length : 0}个` }
+                { label: '建议补充', value: `${recommendations.length}个` }
             ];
-            console.log(`[QALab] vocab-gap stats:`, vocabStats, 'data keys:', Object.keys(targetData));
+            Logger.debug(`[QALab] vocab-gap stats`, { vocabStats, dataKeys: Object.keys(dataObj) });
             return vocabStats;
 
         case 'promise-reality':
-            const gaps = targetData.gaps || [];
+            const gaps = Array.isArray(dataObj.gaps) ? dataObj.gaps : [];
             // 真实数据结构：listing_claim, review_reality, contradiction_severity, false_advertising_risk
             const promiseStats = [
                 { label: '断层点', value: `${gaps.length}个` },
-                { label: '过度承诺', value: `${gaps.filter((g: any) => g.type === 'overpromise' || g.gap_type === 'overpromise' || g.contradiction_severity === 'high' || g.false_advertising_risk === 'high').length}个` },
-                { label: '需修正', value: `${gaps.filter((g: any) => g.actionable === true || g.contradiction_severity === 'high' || g.contradiction_severity === 'medium' || g.recommended_action).length}个` }
+                { label: '过度承诺', value: `${gaps.filter((g: unknown) => {
+                    if (g && typeof g === 'object') {
+                        const gObj = g as Record<string, unknown>;
+                        return gObj.type === 'overpromise' || gObj.gap_type === 'overpromise' ||
+                               gObj.contradiction_severity === 'high' || gObj.false_advertising_risk === 'high';
+                    }
+                    return false;
+                }).length}个` },
+                { label: '需修正', value: `${gaps.filter((g: unknown) => {
+                    if (g && typeof g === 'object') {
+                        const gObj = g as Record<string, unknown>;
+                        return gObj.actionable === true || gObj.contradiction_severity === 'high' ||
+                               gObj.contradiction_severity === 'medium' || gObj.recommended_action;
+                    }
+                    return false;
+                }).length}个` }
             ];
-            console.log(`[QALab] promise-reality stats:`, promiseStats, 'sample keys:', gaps[0] ? Object.keys(gaps[0]) : []);
+            Logger.debug(`[QALab] promise-reality stats`, { promiseStats, sampleKeys: gaps[0] && typeof gaps[0] === 'object' ? Object.keys(gaps[0] as object) : [] });
             return promiseStats;
 
         default:
-            console.log(`[QALab] extractTargetStats: 未知的 targetId=${targetId}`);
+            Logger.debug(`[QALab] extractTargetStats: 未知的 targetId=${targetId}`);
             return [];
     }
 }
@@ -187,16 +288,16 @@ function getFlag(site: string): string {
  * 渲染数据预览卡片（遍历所有分析目标）
  */
 export function renderDataPreview(reportData: AnalysisReportData | null): void {
-    console.log('[QALab] 📊 renderDataPreview 被调用');
-    console.log('[QALab] - reportData 存在:', !!reportData);
+    Logger.debug('[QALab] 📊 renderDataPreview 被调用');
+    Logger.debug('[QALab] - reportData 存在:', !!reportData);
 
     const container = document.getElementById('data-preview-content');
     if (!container) {
-        console.warn('[QALab] ⚠️ 数据预览容器未找到');
+        Logger.warn('[QALab] ⚠️ 数据预览容器未找到');
         return;
     }
 
-    console.log('[QALab] ✅ 数据预览容器已找到');
+    Logger.debug('[QALab] ✅ 数据预览容器已找到');
 
     const renderer = SafeRenderer.getInstance();
 
@@ -225,7 +326,7 @@ export function renderDataPreview(reportData: AnalysisReportData | null): void {
             </div>
         `;
         renderer.renderTemplate(container, emptyHTML);
-        console.log('[QALab] ✅ 空状态已渲染');
+        Logger.debug('[QALab] ✅ 空状态已渲染');
         return;
     }
 
@@ -246,7 +347,7 @@ export function renderDataPreview(reportData: AnalysisReportData | null): void {
     // 遍历所有分析目标，生成卡片
     const cards: string[] = [];
 
-    console.log('[QALab] 开始遍历分析目标，analysisReport keys:', Object.keys(analysisReport));
+    Logger.debug('[QALab] 开始遍历分析目标，analysisReport keys:', Object.keys(analysisReport));
 
     for (const target of ANALYSIS_TARGETS) {
         // 尝试多种命名方式获取目标数据
@@ -254,7 +355,7 @@ export function renderDataPreview(reportData: AnalysisReportData | null): void {
             || analysisReport[target.id.replace(/-/g, '_')]
             || analysisReport[target.id.replace(/-/g, '')];
 
-        console.log(`[QALab] 检查目标 ${target.id}:`, {
+        Logger.debug(`[QALab] 检查目标 ${target.id}:`, {
             found: !!targetData,
             hasValidData: targetData ? hasValidData(targetData) : false,
             keys: targetData ? Object.keys(targetData) : []
@@ -262,13 +363,13 @@ export function renderDataPreview(reportData: AnalysisReportData | null): void {
 
         // 如果该目标没有数据或数据为空，跳过
         if (!hasValidData(targetData)) {
-            console.log(`[QALab] 跳过目标 ${target.id}: 无有效数据`);
+            Logger.debug(`[QALab] 跳过目标 ${target.id}: 无有效数据`);
             continue;
         }
 
         // 提取统计数据
         const stats = extractTargetStats(target.id, targetData);
-        console.log(`[QALab] 目标 ${target.id} 统计数据:`, stats);
+        Logger.debug(`[QALab] 目标 ${target.id} 统计数据:`, stats);
 
         // 生成卡片HTML（3列紧凑版）
         const cardHTML = `
@@ -373,7 +474,7 @@ export function renderDataPreview(reportData: AnalysisReportData | null): void {
     `;
 
     renderer.renderTemplate(container, finalHTML);
-    console.log('[QALab] ✅ 数据预览已渲染，卡片数量:', cards.length);
+    Logger.debug('[QALab] ✅ 数据预览已渲染，卡片数量:', cards.length);
 }
 
 /**
@@ -382,7 +483,7 @@ export function renderDataPreview(reportData: AnalysisReportData | null): void {
 export function renderJSONPreview(reportData: AnalysisReportData | null): void {
     const container = document.getElementById('json-preview-content');
     if (!container) {
-        console.warn('[QALab] JSON预览容器未找到');
+        Logger.warn('[QALab] JSON预览容器未找到');
         return;
     }
 
@@ -395,7 +496,7 @@ export function renderJSONPreview(reportData: AnalysisReportData | null): void {
         const jsonString = JSON.stringify(reportData, null, 2);
         container.textContent = jsonString;
     } catch (error) {
-        console.error('[QALab] JSON序列化失败:', error);
+        Logger.error('[QALab] JSON序列化失败:', error);
         container.textContent = '// JSON序列化失败';
     }
 }

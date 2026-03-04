@@ -37,7 +37,7 @@ export interface Alert {
   title: string;
   message: string;
   timestamp: number;
-  data: Record<string, any>;
+  data: Record<string, unknown>;
   acknowledged: boolean;
   count: number;
 }
@@ -49,10 +49,10 @@ export interface AlertRule {
   id: string;
   type: AlertType;
   enabled: boolean;
-  condition: (data: any) => boolean;
+  condition: (data: unknown) => boolean;
   level: AlertLevel;
   title: string;
-  message: (data: any) => string;
+  message: (data: unknown) => string;
   cooldown: number; // 冷却时间(毫秒)
   lastTriggered: number;
 }
@@ -152,10 +152,16 @@ export class AlertService {
       id: 'lcp_threshold',
       type: AlertType.PERFORMANCE,
       enabled: true,
-      condition: (data) => data.lcp > 4000,
+      condition: (data) => {
+        const perfData = data as { lcp: number };
+        return perfData.lcp > 4000;
+      },
       level: AlertLevel.WARNING,
       title: 'LCP性能告警',
-      message: (data) => `LCP超过阈值: ${(data.lcp / 1000).toFixed(2)}s (阈值: 4s)`,
+      message: (data) => {
+        const perfData = data as { lcp: number };
+        return `LCP超过阈值: ${(perfData.lcp / 1000).toFixed(2)}s (阈值: 4s)`;
+      },
       cooldown: 300000, // 5分钟
       lastTriggered: 0
     });
@@ -165,10 +171,16 @@ export class AlertService {
       id: 'fid_threshold',
       type: AlertType.PERFORMANCE,
       enabled: true,
-      condition: (data) => data.fid > 300,
+      condition: (data) => {
+        const perfData = data as { fid: number };
+        return perfData.fid > 300;
+      },
       level: AlertLevel.WARNING,
       title: 'FID性能告警',
-      message: (data) => `FID超过阈值: ${data.fid}ms (阈值: 300ms)`,
+      message: (data) => {
+        const perfData = data as { fid: number };
+        return `FID超过阈值: ${perfData.fid}ms (阈值: 300ms)`;
+      },
       cooldown: 300000,
       lastTriggered: 0
     });
@@ -178,10 +190,16 @@ export class AlertService {
       id: 'cls_threshold',
       type: AlertType.PERFORMANCE,
       enabled: true,
-      condition: (data) => data.cls > 0.25,
+      condition: (data) => {
+        const perfData = data as { cls: number };
+        return perfData.cls > 0.25;
+      },
       level: AlertLevel.WARNING,
       title: 'CLS性能告警',
-      message: (data) => `CLS超过阈值: ${data.cls.toFixed(3)} (阈值: 0.25)`,
+      message: (data) => {
+        const perfData = data as { cls: number };
+        return `CLS超过阈值: ${perfData.cls.toFixed(3)} (阈值: 0.25)`;
+      },
       cooldown: 300000,
       lastTriggered: 0
     });
@@ -191,10 +209,16 @@ export class AlertService {
       id: 'error_rate_threshold',
       type: AlertType.ERROR_RATE,
       enabled: true,
-      condition: (data) => data.errorRate > 0.01,
+      condition: (data) => {
+        const errorData = data as { errorRate: number };
+        return errorData.errorRate > 0.01;
+      },
       level: AlertLevel.ERROR,
       title: '错误率告警',
-      message: (data) => `错误率超过阈值: ${(data.errorRate * 100).toFixed(2)}% (阈值: 1%)`,
+      message: (data) => {
+        const errorData = data as { errorRate: number };
+        return `错误率超过阈值: ${(errorData.errorRate * 100).toFixed(2)}% (阈值: 1%)`;
+      },
       cooldown: 600000, // 10分钟
       lastTriggered: 0
     });
@@ -204,10 +228,16 @@ export class AlertService {
       id: 'memory_leak_threshold',
       type: AlertType.MEMORY_LEAK,
       enabled: true,
-      condition: (data) => data.memoryGrowth > 50 * 1024 * 1024,
+      condition: (data) => {
+        const memData = data as { memoryGrowth: number };
+        return memData.memoryGrowth > 50 * 1024 * 1024;
+      },
       level: AlertLevel.CRITICAL,
       title: '内存泄漏告警',
-      message: (data) => `内存增长超过阈值: ${(data.memoryGrowth / 1024 / 1024).toFixed(2)}MB (阈值: 50MB)`,
+      message: (data) => {
+        const memData = data as { memoryGrowth: number };
+        return `内存增长超过阈值: ${(memData.memoryGrowth / 1024 / 1024).toFixed(2)}MB (阈值: 50MB)`;
+      },
       cooldown: 600000,
       lastTriggered: 0
     });
@@ -224,7 +254,7 @@ export class AlertService {
   /**
    * 检查告警条件
    */
-  check(type: AlertType, data: any): void {
+  check(type: AlertType, data: unknown): void {
     if (!this.config.enabled) return;
 
     // 遍历所有规则
@@ -246,7 +276,7 @@ export class AlertService {
   /**
    * 触发告警
    */
-  private trigger(rule: AlertRule, data: any): void {
+  private trigger(rule: AlertRule, data: unknown): void {
     const alertId = this.generateAlertId(rule.id);
     const existingAlert = this.alerts.get(alertId);
 
@@ -263,7 +293,7 @@ export class AlertService {
         title: rule.title,
         message: rule.message(data),
         timestamp: Date.now(),
-        data,
+        data: (typeof data === 'object' && data !== null) ? data as Record<string, unknown> : {},
         acknowledged: false,
         count: 1
       };

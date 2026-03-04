@@ -140,12 +140,12 @@ export type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
 /**
  * 函数类型
  */
-export type AnyFunction = (...args: any[]) => any;
+export type AnyFunction = (...args: unknown[]) => unknown;
 
 /**
  * 对象类型
  */
-export type AnyObject = Record<string, any>;
+export type AnyObject = Record<string, unknown>;
 
 /**
  * 空对象类型
@@ -172,14 +172,14 @@ export type MaybePromise<T> = T | Promise<T>;
 /**
  * 自定义事件详情
  */
-export interface CustomEventDetail<T = any> {
+export interface CustomEventDetail<T = unknown> {
   detail: T;
 }
 
 /**
  * 事件处理器
  */
-export type EventHandler<T = any> = (event: CustomEvent<T>) => void;
+export type EventHandler<T = unknown> = (event: CustomEvent<T>) => void;
 
 /**
  * 取消订阅函数
@@ -194,7 +194,7 @@ export type Unsubscribe = () => void;
 export interface ComponentProps {
   className?: string;
   style?: Partial<CSSStyleDeclaration>;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -229,7 +229,7 @@ export interface RouteMeta {
   title?: string;
   requiresAuth?: boolean;
   permissions?: string[];
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // ==================== 状态类型 ====================
@@ -237,12 +237,12 @@ export interface RouteMeta {
 /**
  * 状态订阅回调
  */
-export type StateSubscriber<T = any> = (newValue: T, oldValue: T) => void;
+export type StateSubscriber<T = unknown> = (newValue: T, oldValue: T) => void;
 
 /**
  * 状态中间件
  */
-export type StateMiddleware = (action: any, next: () => any) => any;
+export type StateMiddleware = (action: unknown, next: () => unknown) => unknown;
 
 // ==================== HTTP类型 ====================
 
@@ -277,7 +277,7 @@ export interface LogEntry {
   levelName: string;
   module: string;
   message: string;
-  data?: any;
+  data?: unknown;
   error?: Error;
 }
 
@@ -338,7 +338,7 @@ export type ClassDecorator = <T extends Constructor>(target: T) => T | void;
  * 方法装饰器
  */
 export type MethodDecorator = <T>(
-  target: any,
+  target: unknown,
   propertyKey: string | symbol,
   descriptor: TypedPropertyDescriptor<T>
 ) => TypedPropertyDescriptor<T> | void;
@@ -346,13 +346,13 @@ export type MethodDecorator = <T>(
 /**
  * 属性装饰器
  */
-export type PropertyDecorator = (target: any, propertyKey: string | symbol) => void;
+export type PropertyDecorator = (target: unknown, propertyKey: string | symbol) => void;
 
 /**
  * 参数装饰器
  */
 export type ParameterDecorator = (
-  target: any,
+  target: unknown,
   propertyKey: string | symbol,
   parameterIndex: number
 ) => void;

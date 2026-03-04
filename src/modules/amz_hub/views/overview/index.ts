@@ -5,6 +5,7 @@
 import BaseModule from '../../../../common/BaseModule';
 import { loadTemplate } from '../../../../common/utils/viewLoader';
 
+import { Logger } from '../../../../services/loggerService';
 /**
  * 初始化事件监听
  */
@@ -60,7 +61,7 @@ function filterByCategory(container: HTMLElement, category: string): void {
  */
 export function scrollToModule(categoryId: string): void {
     if (!categoryId) {
-        console.warn('⚠️ scrollToModule: categoryId 为空');
+        Logger.warn('⚠️ scrollToModule: categoryId 为空');
         return;
     }
 
@@ -81,9 +82,9 @@ export function scrollToModule(categoryId: string): void {
             moduleElement.classList.remove('hub-module-highlight');
         }, 2000);
 
-        console.log(`✅ 滚动到模块: ${categoryId}`);
+        Logger.debug(`✅ 滚动到模块: ${categoryId}`);
     } else {
-        console.warn(`⚠️ 未找到模块元素: ${moduleId}`);
+        Logger.warn(`⚠️ 未找到模块元素: ${moduleId}`);
     }
 }
 
@@ -93,7 +94,7 @@ class HubOverviewModule extends BaseModule {
      * 挂载模块
      */
     async mount(container: HTMLElement): Promise<void> {
-        console.log('📚 [Hub Overview] 模块挂载中...');
+        Logger.debug('📚 [Hub Overview] 模块挂载中...');
 
         // 渲染模板
         const html = await loadTemplate('src/modules/amz_hub/views/overview/template.html');
@@ -104,14 +105,14 @@ class HubOverviewModule extends BaseModule {
         // 初始化事件监听
         initOverviewEvents(container);
 
-        console.log('✅ [Hub Overview] 模块挂载完成');
+        Logger.debug('✅ [Hub Overview] 模块挂载完成');
     }
 
     /**
      * 卸载模块
      */
     unmount(): void {
-        console.log('🔌 [Hub Overview] 模块卸载');
+        Logger.debug('🔌 [Hub Overview] 模块卸载');
     }
 }
 

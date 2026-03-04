@@ -6,6 +6,7 @@
 
 import { MODULE_CSS_REGISTRY, getModuleAllCssImporters, type ModuleCssConfig } from '../config/moduleCssRegistry';
 
+import { Logger } from '../../services/loggerService';
 class ModuleCssLoader {
   private loadedModules = new Set<string>();
   private loadingModules = new Map<string, Promise<void>>();
@@ -27,7 +28,7 @@ class ModuleCssLoader {
     // 获取模块配置
     const config = MODULE_CSS_REGISTRY[moduleId];
     if (!config) {
-      console.warn(`[ModuleCssLoader] 模块CSS配置未找到: ${moduleId}`);
+      Logger.warn(`[ModuleCssLoader] 模块CSS配置未找到: ${moduleId}`);
       return;
     }
     
@@ -53,13 +54,13 @@ class ModuleCssLoader {
       return;
     }
     
-    console.log(`[ModuleCssLoader] 加载模块CSS: ${config.moduleId}`);
+    Logger.debug(`[ModuleCssLoader] 加载模块CSS: ${config.moduleId}`);
     
     try {
       // 并行加载所有CSS
       await Promise.all(allImporters.map(importer => importer()));
     } catch (error) {
-      console.error(`[ModuleCssLoader] 模块CSS加载失败: ${config.moduleId}`, error);
+      Logger.error(`[ModuleCssLoader] 模块CSS加载失败: ${config.moduleId}`, error);
       throw error;
     }
   }

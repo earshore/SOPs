@@ -3,6 +3,7 @@ import {
   SELECTOR_MAP,
   VERIFIED_PURCHASE_PATTERNS,
 } from '../../../../../common/constants/constants';
+import { Logger } from '@services/loggerService';
 
 // ----------------------------------------
 // 1. 类型定义
@@ -122,7 +123,7 @@ export function parseReviews(html: string): ParsedReview[] {
 
   // 2. 兜底策略：未找到容器，尝试直接提取 Body
   if (reviewContainers.length === 0) {
-    console.warn(
+    Logger.warn(
       "Parser: No review containers found, fallback to direct body extraction."
     );
     // 这种情况下通常无法提取评分和标题，只能提取内容

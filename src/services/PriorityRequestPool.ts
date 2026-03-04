@@ -4,6 +4,8 @@
 // 确保用户操作优先执行，后台任务不阻塞交互
 // ================================================================
 
+import { Logger } from '@services/loggerService';
+
 /**
  * 请求优先级枚举
  */
@@ -23,7 +25,7 @@ export type RequestPriority = typeof REQUEST_PRIORITY[keyof typeof REQUEST_PRIOR
 export interface TaskMeta {
   name?: string;
   module?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -32,7 +34,7 @@ export interface TaskMeta {
 interface Task<T> {
   fn: () => Promise<T>;
   resolve: (value: T) => void;
-  reject: (reason: any) => void;
+  reject: (reason: unknown) => void;
   priority: RequestPriority;
   meta: TaskMeta;
   createdAt: number;
@@ -93,7 +95,7 @@ export interface PoolReport {
 export class PriorityRequestPool {
   private max: number;
   private running: number = 0;
-  private queues: Record<RequestPriority, Task<any>[]>;
+  private queues: Record<RequestPriority, Array<Task<unknown>>>;
   private stats: Stats;
 
   constructor(maxConcurrent: number = 6) {
@@ -134,7 +136,7 @@ export class PriorityRequestPool {
       };
 
       // 加入对应优先级队列
-      this.queues[priority].push(task);
+      (this.queues[priority] as Array<Task<T>>).push(task);
 
       // 尝试执行
       this._tryExecute();
@@ -189,7 +191,7 @@ export class PriorityRequestPool {
 
       // 调试日志
       if (duration > 1000) {
-        console.warn(`[RequestPool] 慢请求 (${duration}ms):`, task.meta);
+        Logger.warn(`[RequestPool] 慢请求 (${duration}ms):`, task.meta);
       }
 
       task.resolve(result);
@@ -200,7 +202,7 @@ export class PriorityRequestPool {
       }
       this.stats.byPriority[task.priority].failed++;
 
-      console.error('[RequestPool] 请求失败:', task.meta, error);
+      Logger.error('[RequestPool] 请求失败:', { meta: task.meta, error });
       task.reject(error);
     } finally {
       this.running--;
@@ -213,7 +215,7 @@ export class PriorityRequestPool {
    */
   getStatus(): PoolStatus {
     const queueLengths: Record<RequestPriority, number> = {} as Record<RequestPriority, number>;
-    (Object.entries(this.queues) as [string, Task<any>[]][]).forEach(([priority, queue]) => {
+    (Object.entries(this.queues) as [string, Task<unknown>[]][]).forEach(([priority, queue]) => {
       queueLengths[parseInt(priority) as RequestPriority] = queue.length;
     });
 
@@ -237,7 +239,13 @@ export class PriorityRequestPool {
         successRate:
           this.stats.total > 0 ? Math.round((this.stats.completed / this.stats.total) * 100) : 0,
       },
-      byPriority: {} as any,
+      byPriority: {} as Record<
+        RequestPriority,
+        PriorityStats & {
+          avgDuration: number;
+          successRate: number;
+        }
+      >,
     };
 
     (Object.entries(this.stats.byPriority) as [string, PriorityStats][]).forEach(
@@ -265,7 +273,7 @@ export class PriorityRequestPool {
       });
       queue.length = 0;
     });
-    console.log('[RequestPool] 已清空所有队列');
+    Logger.debug('[RequestPool] 已清空所有队列');
   }
 
   /**
@@ -278,7 +286,7 @@ export class PriorityRequestPool {
       failed: 0,
       byPriority: {} as Record<RequestPriority, PriorityStats>,
     };
-    console.log('[RequestPool] 统计数据已重置');
+    Logger.debug('[RequestPool] 统计数据已重置');
   }
 }
 

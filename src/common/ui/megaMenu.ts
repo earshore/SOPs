@@ -10,6 +10,7 @@ import { MENU_CONFIG } from '../config/menuConfig';
 import { getEl } from './utils';
 import type { ColorSchemeName } from '../constants/colorSchemes';
 
+import { Logger } from '../../services/loggerService';
 // ═══════════════════════════════════════════════════════════
 // Utilities
 // ═══════════════════════════════════════════════════════════
@@ -420,7 +421,7 @@ interface MenuRendererConfig {
   overviewLabel: string;
   overviewDescription: string;
   overviewColor: ColorSchemeName;
-  categories: Record<string, any>;
+  categories: Record<string, unknown>;
   logLabel: string;
 }
 
@@ -431,13 +432,20 @@ function renderCategoryMenu(config: MenuRendererConfig): void {
   try {
     const overviewRoute = MENU_CONFIG.routes[config.overviewRouteId];
     const categories = Object.values(config.categories || {})
-      .sort((a: any, b: any) => a.order - b.order);
+      .sort((a: unknown, b: unknown) => {
+        const catA = a as { order: number };
+        const catB = b as { order: number };
+        return catA.order - catB.order;
+      });
 
     let html = '';
 
     if (overviewRoute) {
       const totalRoutes = categories.reduce(
-        (sum: number, cat: any) => sum + countCategoryRoutes(cat.id), 0
+        (sum: number, cat: unknown) => {
+          const category = cat as { id: string };
+          return sum + countCategoryRoutes(category.id);
+        }, 0
       );
       html += renderCard({
         target: config.overviewRouteId,
@@ -451,23 +459,31 @@ function renderCategoryMenu(config: MenuRendererConfig): void {
       });
     }
 
-    categories.forEach((cat: any) => {
-      const target = getFirstRouteForCategory(cat.id);
+    categories.forEach((cat: unknown) => {
+      const category = cat as {
+        id: string;
+        label: string;
+        icon: string;
+        color?: string;
+        version?: string;
+        description?: string;
+      };
+      const target = getFirstRouteForCategory(category.id);
       if (!target) return;
       html += renderCard({
         target,
-        label: cat.label,
-        icon: cat.icon,
-        color: cat.color || 'blue',
-        version: cat.version || 'v1.0',
-        description: cat.description || '',
-        childCount: countCategoryRoutes(cat.id),
+        label: category.label,
+        icon: category.icon,
+        color: (category.color || 'blue') as ColorSchemeName,
+        version: category.version || 'v1.0',
+        description: category.description || '',
+        childCount: countCategoryRoutes(category.id),
       });
     });
 
     container.innerHTML = html;
   } catch (e) {
-    console.error(`❌ ${config.logLabel} 渲染失败:`, e);
+    Logger.error(`❌ ${config.logLabel} 渲染失败:`, e);
     container.innerHTML = renderErrorCard();
   }
 }
@@ -487,11 +503,12 @@ export function renderMegaMenu(): void {
     const html = modules.map(mod => {
       const targetRoute = getDefaultRouteForModule(mod.id);
       if (!targetRoute) return '';
+      const module = mod as unknown as { themeColor?: string };
       return renderCard({
         target: targetRoute,
         label: mod.title || 'Unknown Module',
         icon: mod.icon || 'fas fa-cube',
-        color: (mod as any).themeColor || 'blue', // ✅ 修复：使用 themeColor 字段
+        color: (module.themeColor || 'blue') as ColorSchemeName,
         version: mod.version || 'v1.0',
         description: mod.description || '暂无描述',
       });
@@ -499,7 +516,7 @@ export function renderMegaMenu(): void {
 
     container.innerHTML = html;
   } catch (e) {
-    console.error('❌ MegaMenu 渲染失败:', e);
+    Logger.error('❌ MegaMenu 渲染失败:', e);
     container.innerHTML = renderErrorCard();
   }
 }

@@ -6,6 +6,7 @@
 
 import type { ILoggerService, IStorageService } from '../types/services';
 
+import { Logger } from './loggerService';
 /**
  * 事件类型
  */
@@ -37,7 +38,7 @@ export interface AnalyticsEvent {
   timestamp: number;
   sessionId: string;
   userId?: string;
-  properties: Record<string, any>;
+  properties: Record<string, unknown>;
   context: {
     url: string;
     referrer: string;
@@ -67,7 +68,7 @@ export interface UserActionEvent extends AnalyticsEvent {
   properties: {
     action: ActionType;
     target: string;
-    value?: any;
+    value?: unknown;
   };
 }
 
@@ -227,6 +228,17 @@ export class AnalyticsService {
     // 点击事件
     document.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
+      
+      // 🔥 排除外部链接和下载按钮，避免拦截 window.open()
+      // 检查是否是带有 onclick 的外部链接按钮
+      const hasOnclick = target.hasAttribute('onclick') || target.closest('[onclick]');
+      const isExternalLink = target.closest('a[target="_blank"]') || target.closest('button[onclick*="window.open"]');
+      
+      if (hasOnclick || isExternalLink) {
+        // 不追踪，让事件正常传播
+        return;
+      }
+      
       this.trackUserAction({
         action: ActionType.CLICK,
         target: this.getElementSelector(target),
@@ -367,7 +379,7 @@ export class AnalyticsService {
   trackUserAction(properties: {
     action: ActionType;
     target: string;
-    value?: any;
+    value?: unknown;
   }): void {
     if (!this.config.enabled || !this.config.trackUserActions) return;
     if (!this.shouldSample()) return;
@@ -394,7 +406,7 @@ export class AnalyticsService {
   /**
    * 追踪自定义事件
    */
-  trackEvent(name: string, properties: Record<string, any> = {}): void {
+  trackEvent(name: string, properties: Record<string, unknown> = {}): void {
     if (!this.config.enabled) return;
     if (!this.shouldSample()) return;
 
@@ -453,7 +465,7 @@ export class AnalyticsService {
       });
     } catch (e) {
       // 静默失败
-      console.warn('[Analytics] Failed to send event:', e);
+      Logger.warn('[Analytics] Failed to send event:', e);
     }
   }
 

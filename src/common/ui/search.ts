@@ -7,6 +7,7 @@ import { MENU_CONFIG } from '../config/menuConfig';
 import { appStore } from '@/stores/useAppStore';
 import { getEl } from './utils';
 
+import { Logger } from '../../services/loggerService';
 /**
  * 搜索 SOPs
  */
@@ -172,7 +173,7 @@ export function searchSidebar(query: string): void {
   const clearBtn = getEl('sidebar-search-clear');
 
   if (!resultsContainer || !navContainer) {
-    console.warn('[searchSidebar] 未找到搜索容器');
+    Logger.warn('[searchSidebar] 未找到搜索容器');
     return;
   }
 
@@ -191,13 +192,13 @@ export function searchSidebar(query: string): void {
   const currentTab = appStore.getState().ui.currentTab || '';
   const currentRoute = MENU_CONFIG.routes[currentTab];
   if (!currentRoute) {
-    console.warn('[searchSidebar] 当前路由未找到');
+    Logger.warn('[searchSidebar] 当前路由未找到');
     return;
   }
 
   const currentModuleId = currentRoute.moduleId;
   if (!currentModuleId) {
-    console.warn('[searchSidebar] 当前模块ID未找到');
+    Logger.warn('[searchSidebar] 当前模块ID未找到');
     return;
   }
 

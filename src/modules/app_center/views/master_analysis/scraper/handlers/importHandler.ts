@@ -18,6 +18,7 @@ import eventBus from '../../../../../../common/EventBus';
 import { APP_EVENTS, MODULE_EVENTS } from '../../../../../../common/constants/eventConstants';
 import { SafeRenderer } from '../../../../../../common/infrastructure/SafeRenderer';
 
+import { Logger } from '../../../../../../services/loggerService';
 /**
  * 读取文件为JSON
  */
@@ -53,14 +54,14 @@ export function readFileAsJSON(file: File): Promise<FileReadResult> {
                 resolve({ data: json, filename: file.name });
             } catch (err) {
                 const errorMsg = err instanceof Error ? err.message : String(err);
-                console.error(`[Scraper] 解析文件 ${file.name} 失败:`, err);
+                Logger.error(`[Scraper] 解析文件 ${file.name} 失败:`, err);
                 reject(new Error(`文件 ${file.name} 解析失败: ${errorMsg}`));
             }
         };
 
         reader.onerror = () => {
             const errorMsg = reader.error?.message || '未知错误';
-            console.error(`[Scraper] 读取文件 ${file.name} 失败:`, reader.error);
+            Logger.error(`[Scraper] 读取文件 ${file.name} 失败:`, reader.error);
             reject(new Error(`无法读取文件 ${file.name}: ${errorMsg}`));
         };
 
@@ -210,7 +211,7 @@ export function showMarketplaceSelectionModal(sites: string[]): Promise<string |
                     document.body.removeChild(backdrop);
                 }
             } catch (error) {
-                console.error('[Scraper] 清理弹窗失败:', error);
+                Logger.error('[Scraper] 清理弹窗失败:', error);
             }
         };
 
@@ -256,7 +257,7 @@ export async function handleImportFiles(
         // 验证文件类型
         const invalidFiles = files.filter(f => !f.name.toLowerCase().endsWith('.json'));
         if (invalidFiles.length > 0) {
-            console.error('[Scraper] 文件类型错误:', invalidFiles.map(f => f.name));
+            Logger.error('[Scraper] 文件类型错误:', invalidFiles.map(f => f.name));
             throw new Error(`只支持JSON文件，以下文件被忽略: ${invalidFiles.map(f => f.name).join(', ')}`);
         }
 
@@ -264,7 +265,7 @@ export async function handleImportFiles(
         const MAX_FILE_SIZE = 10 * 1024 * 1024;
         const oversizedFiles = files.filter(f => f.size > MAX_FILE_SIZE);
         if (oversizedFiles.length > 0) {
-            console.error('[Scraper] 文件过大:', oversizedFiles.map(f => `${f.name} (${(f.size / 1024 / 1024).toFixed(2)}MB)`));
+            Logger.error('[Scraper] 文件过大:', oversizedFiles.map(f => `${f.name} (${(f.size / 1024 / 1024).toFixed(2)}MB)`));
             throw new Error(`文件大小不能超过10MB，以下文件被忽略: ${oversizedFiles.map(f => f.name).join(', ')}`);
         }
 
@@ -272,14 +273,14 @@ export async function handleImportFiles(
         const LARGE_FILE_SIZE = 5 * 1024 * 1024;
         const largeFiles = files.filter(f => f.size > LARGE_FILE_SIZE && f.size <= MAX_FILE_SIZE);
         if (largeFiles.length > 0) {
-            console.warn('[Scraper] 检测到大文件:', largeFiles.map(f => `${f.name} (${(f.size / 1024 / 1024).toFixed(2)}MB)`));
+            Logger.warn('[Scraper] 检测到大文件:', largeFiles.map(f => `${f.name} (${(f.size / 1024 / 1024).toFixed(2)}MB)`));
             showToast(`⚠️ 检测到大文件，处理可能需要较长时间`, { type: 'warning' });
         }
 
         // 检查空文件
         const emptyFiles = files.filter(f => f.size === 0);
         if (emptyFiles.length > 0) {
-            console.error('[Scraper] 空文件:', emptyFiles.map(f => f.name));
+            Logger.error('[Scraper] 空文件:', emptyFiles.map(f => f.name));
             throw new Error(`文件内容为空: ${emptyFiles.map(f => f.name).join(', ')}`);
         }
 
@@ -291,14 +292,14 @@ export async function handleImportFiles(
 
         fileContents.forEach(({ data, filename }) => {
             if (!data) {
-                console.warn(`[Scraper] 文件 ${filename} 数据为空，跳过`);
+                Logger.warn(`[Scraper] 文件 ${filename} 数据为空，跳过`);
                 return;
             }
 
             // 验证数据结构
             const validation = validateScrapedData(data);
             if (!validation.valid) {
-                console.error(`[Scraper] 文件 ${filename} 数据验证失败:`, validation.error);
+                Logger.error(`[Scraper] 文件 ${filename} 数据验证失败:`, validation.error);
                 throw new Error(`文件 ${filename} 数据验证失败: ${validation.error}`);
             }
 
@@ -386,7 +387,7 @@ export async function handleImportFiles(
 
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        console.error('[Scraper] 导入失败:', {
+        Logger.error('[Scraper] 导入失败:', {
             error: error,
             errorMessage: errorMessage,
             filesCount: files.length,

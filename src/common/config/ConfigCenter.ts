@@ -8,7 +8,6 @@ import type { MenuConfig } from '../../types/config';
 import type { IConfigService } from '../../types/services';
 import { validateConfig } from './schemas/configSchema';
 import { loadRouteConfig } from './loaders/routeConfigLoader';
-
 // ==================== 类型定义 ====================
 
 /**
@@ -134,8 +133,7 @@ export class ConfigCenter implements IConfigService {
   private constructor() {
     this.listeners = new Map();
     this.config = this.loadConfig();
-    // 延迟日志记录，避免循环依赖
-    console.log(`[ConfigCenter] 配置中心已初始化, 环境: ${this.config.environment}`);
+    // ConfigCenter 是基础服务，不依赖 Logger 避免循环依赖
   }
 
   /**
@@ -374,11 +372,9 @@ export class ConfigCenter implements IConfigService {
     
     // 设置新值
     target[lastKey] = value;
-    
+
     // 触发监听器
     this.notifyListeners(path, value, oldValue);
-
-    console.log(`[ConfigCenter] 配置已更新: ${path}`);
   }
 
   /**
@@ -413,6 +409,7 @@ export class ConfigCenter implements IConfigService {
         try {
           listener(path, newValue, oldValue);
         } catch (error) {
+          // 静默失败，避免循环依赖
           console.error('[ConfigCenter] 配置监听器执行失败', { path, error });
         }
       });
@@ -424,11 +421,7 @@ export class ConfigCenter implements IConfigService {
    */
   public validate(): boolean {
     const isValid = validateConfig(this.config);
-    if (isValid) {
-      console.log('[ConfigCenter] 配置验证通过');
-    } else {
-      console.error('[ConfigCenter] 配置验证失败');
-    }
+    // 移除日志调用，避免循环依赖
     return isValid;
   }
 
@@ -436,12 +429,8 @@ export class ConfigCenter implements IConfigService {
    * 重新加载配置
    */
   public reload(): void {
-    const oldConfig = this.config;
     this.config = this.loadConfig();
-    console.log('[ConfigCenter] 配置已重新加载', {
-      oldEnv: oldConfig.environment,
-      newEnv: this.config.environment
-    });
+    // 移除日志调用，避免循环依赖
   }
 
   /**
@@ -495,7 +484,7 @@ export class ConfigCenter implements IConfigService {
    * 获取所有配置
    * 实现 IConfigService.getAll
    */
-  public getAll(): Record<string, any> {
+  public getAll(): Record<string, unknown> {
     return { ...this.config };
   }
 
@@ -505,7 +494,7 @@ export class ConfigCenter implements IConfigService {
    */
   public reset(): void {
     this.config = this.loadConfig();
-    console.log('[ConfigCenter] 配置已重置');
+    // 移除日志调用，避免循环依赖
   }
 }
 

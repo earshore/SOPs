@@ -7,6 +7,7 @@
 import type { AppError } from '@/common/errors/AppError';
 import type { ILoggerService } from '../types/services';
 
+import { Logger } from './loggerService';
 /**
  * 错误类型
  */
@@ -40,7 +41,7 @@ export interface ErrorRecord {
   timestamp: number;
   url: string;
   userAgent: string;
-  context: Record<string, any>;
+  context: Record<string, unknown>;
   count: number;
   firstOccurrence: number;
   lastOccurrence: number;
@@ -193,7 +194,7 @@ export class ErrorTracker {
     type: ErrorType;
     message: string;
     stack?: string;
-    context?: Record<string, any>;
+    context?: Record<string, unknown>;
     severity?: ErrorSeverity;
   }): void {
     if (!this.config.enabled) return;
@@ -362,7 +363,7 @@ export class ErrorTracker {
       });
     } catch (e) {
       // 静默失败,避免递归错误
-      console.warn('[ErrorTracker] Failed to report error:', e);
+      Logger.warn('[ErrorTracker] Failed to report error:', e);
     }
   }
 

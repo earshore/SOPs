@@ -136,23 +136,29 @@ export function renderProductCard(
                     </h5>
                     ${(p.customer_reviews || []).length > 0 ? `
                         <div class="max-h-96 overflow-y-auto space-y-3 pr-1 custom-scrollbar">
-                            ${(p.customer_reviews || []).map((review: any, i: number) => `
+                            ${(p.customer_reviews || []).map((review: unknown, i: number) => {
+                                // 类型守卫：确保 review 是对象
+                                if (!review || typeof review !== 'object') return '';
+                                const reviewObj = review as Record<string, unknown>;
+
+                                return `
                                 <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm group/review relative hover:border-purple-200 hover:shadow-md transition-all">
-                                    <button data-action="delete-review" data-asin="${p.asin}" data-index="${i}" @click.stop="${onDeleteReview.replace('INDEX', String(i))}" 
+                                    <button data-action="delete-review" data-asin="${p.asin}" data-index="${i}" @click.stop="${onDeleteReview.replace('INDEX', String(i))}"
                                         class="absolute top-3 right-3 w-7 h-7 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover/review:opacity-100 z-10">
                                         <i class="fas fa-trash-alt text-xs"></i>
                                     </button>
                                     <div class="flex flex-wrap justify-between items-start gap-2 mb-2 pr-8">
                                         <div class="flex items-center gap-3">
                                             <span class="text-xs font-mono text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded border border-purple-100">#${i + 1}</span>
-                                            ${renderStars(review.star_rating)}
+                                            ${renderStars(reviewObj.star_rating as number)}
                                         </div>
-                                        ${(review.is_verified || review.isVerified) ? `<span class="flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-full"><i class="fas fa-check-circle"></i> Verified Purchase</span>` : ""}
+                                        ${(reviewObj.is_verified || reviewObj.isVerified) ? `<span class="flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-full"><i class="fas fa-check-circle"></i> Verified Purchase</span>` : ""}
                                     </div>
-                                    ${review.headline ? `<h6 class="text-sm font-bold text-slate-800 mb-1.5">${review.headline}</h6>` : ""}
-                                    <p class="text-sm text-slate-600 leading-relaxed text-justify">${review.body}</p>
+                                    ${reviewObj.headline ? `<h6 class="text-sm font-bold text-slate-800 mb-1.5">${String(reviewObj.headline)}</h6>` : ""}
+                                    <p class="text-sm text-slate-600 leading-relaxed text-justify">${String(reviewObj.body || '')}</p>
                                 </div>
-                            `).join("")}
+                            `;
+                            }).join("")}
                         </div>
                     ` : '<p class="text-sm text-slate-400 italic pl-6">无评论数据</p>'} 
                 </div>

@@ -160,10 +160,10 @@ class ErrorServiceClass {
   /**
    * 包装异步函数，自动处理错误 (向后兼容)
    */
-  wrap<T extends (...args: any[]) => Promise<any>>(
+  wrap<T extends (...args: never[]) => Promise<R>, R = unknown>(
     fn: T,
     context: ErrorContext = {}
-  ): (...args: Parameters<T>) => Promise<ReturnType<T> | null> {
+  ): (...args: Parameters<T>) => Promise<R | null> {
     return async (...args: Parameters<T>) => {
       try {
         return await fn(...args);
@@ -199,6 +199,6 @@ export default ErrorService;
 // 🔄 向后兼容：暴露到 window
 // ================================================================
 if (typeof window !== 'undefined') {
-  (window as any).ErrorService = ErrorService;
-  (window as any).ERROR_TYPES = ERROR_TYPES;
+  (window as unknown as Record<string, unknown>).ErrorService = ErrorService;
+  (window as unknown as Record<string, unknown>).ERROR_TYPES = ERROR_TYPES;
 }

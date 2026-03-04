@@ -239,7 +239,7 @@ export function isApiError(value: unknown): value is ApiError {
 /**
  * 检查是否为 ApiResponse
  */
-export function isApiResponse<T = any>(
+export function isApiResponse<T = unknown>(
   value: unknown,
   dataGuard?: (data: unknown) => data is T
 ): value is ApiResponse<T> {
@@ -339,7 +339,7 @@ export function isModuleLoadedEventPayload(value: unknown): value is ModuleLoade
 /**
  * 检查是否为 StateChangedEventPayload
  */
-export function isStateChangedEventPayload<T = any>(
+export function isStateChangedEventPayload<T = unknown>(
   value: unknown,
   valueGuard?: (val: unknown) => val is T
 ): value is StateChangedEventPayload<T> {

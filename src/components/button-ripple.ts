@@ -8,6 +8,7 @@
 import { animationManager } from '../services/animation-manager';
 import { createRipple } from '../utils/animation-utils';
 
+import { Logger } from '../services/loggerService';
 /**
  * 初始化按钮涟漪效果
  * 为页面上所有符合条件的按钮添加涟漪效果
@@ -15,13 +16,13 @@ import { createRipple } from '../utils/animation-utils';
 export function initButtonRipple(): void {
   // 检查动画是否启用
   if (animationManager.shouldReduceMotion()) {
-    console.info('[ButtonRipple] 动画已禁用，跳过涟漪效果初始化');
+    Logger.info('[ButtonRipple] 动画已禁用，跳过涟漪效果初始化');
     return;
   }
 
   // 检查按钮动画类别是否启用
   if (!animationManager.isCategoryEnabled('button')) {
-    console.info('[ButtonRipple] 按钮动画已禁用，跳过涟漪效果初始化');
+    Logger.info('[ButtonRipple] 按钮动画已禁用，跳过涟漪效果初始化');
     return;
   }
 
@@ -31,7 +32,7 @@ export function initButtonRipple(): void {
     '.btn:not([data-ripple-initialized]):not(.btn-link):not(.btn-link-neutral):not(.btn-link-danger):not([disabled])'
   );
 
-  console.info(`[ButtonRipple] 初始化 ${buttons.length} 个按钮的涟漪效果`);
+  Logger.info(`[ButtonRipple] 初始化 ${buttons.length} 个按钮的涟漪效果`);
 
   buttons.forEach((button) => {
     addRippleToButton(button);
@@ -90,7 +91,7 @@ function handleButtonClick(event: MouseEvent): void {
   try {
     createRipple(button, event);
   } catch (error) {
-    console.warn('[ButtonRipple] 创建涟漪效果失败:', error);
+    Logger.warn('[ButtonRipple] 创建涟漪效果失败:', error);
     // 失败时静默降级，不影响按钮功能
   }
 }
@@ -157,7 +158,7 @@ export function observeButtonChanges(): void {
     subtree: true,
   });
 
-  console.info('[ButtonRipple] DOM变化观察器已启动');
+  Logger.info('[ButtonRipple] DOM变化观察器已启动');
 }
 
 /**
@@ -195,7 +196,7 @@ export function observeAnimationSettings(): void {
     isReinitializing = true;
     lastReinitTime = now;
     
-    console.info('[ButtonRipple] 动画设置已更改，重新初始化涟漪效果');
+    Logger.info('[ButtonRipple] 动画设置已更改，重新初始化涟漪效果');
     
     // 使用 requestAnimationFrame 延迟执行，避免阻塞主线程
     requestAnimationFrame(() => {

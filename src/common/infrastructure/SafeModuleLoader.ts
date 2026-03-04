@@ -7,10 +7,11 @@
 import { createLoggerService } from '@/services/loggerService';
 import { createErrorTracker } from '@/services/errorTracker';
 import type { ILoggerService } from '@/types/services';
-import { 
-  AppError, 
+import { Logger } from '@services/loggerService';
+import {
+  AppError,
   NetworkError,
-  SystemError 
+  SystemError
 } from '@/common/errors/AppError';
 
 /**
@@ -44,7 +45,7 @@ export interface ModuleLoadResult {
   /** 实际重试次数 */
   retryAttempts?: number;
   /** 模块数据 */
-  data?: any;
+  data?: unknown;
 }
 
 /**
@@ -79,8 +80,8 @@ export enum ModuleErrorType {
  */
 export class SafeModuleLoader {
   private static instance: SafeModuleLoader;
-  private loadedModules: Map<string, any>;
-  private loadingModules: Map<string, Promise<any>>;
+  private loadedModules: Map<string, unknown>;
+  private loadingModules: Map<string, Promise<unknown>>;
   private logger: ILoggerService;
   private errorTrackerInstance: ReturnType<typeof createErrorTracker>;
   private readonly moduleName = 'SafeModuleLoader';
@@ -244,7 +245,15 @@ export class SafeModuleLoader {
       // 检查缓存（生产环境）
       if (!isDevelopment && this.loadedModules.has(templatePath)) {
         this.logger.debug(`从缓存加载模板: ${templatePath}`, undefined, this.moduleName);
-        return this.loadedModules.get(templatePath);
+        const cached = this.loadedModules.get(templatePath);
+        if (typeof cached === 'string') {
+          return cached;
+        }
+        throw new SystemError(
+          `缓存的模板类型错误: ${templatePath}`,
+          'INVALID_CACHE_TYPE',
+          { templatePath, cachedType: typeof cached }
+        );
       }
 
       // 加载模板（带重试）
@@ -285,7 +294,7 @@ export class SafeModuleLoader {
   private async loadModuleWithTimeout(
     modulePath: string,
     timeout: number
-  ): Promise<any> {
+  ): Promise<unknown> {
     return Promise.race([
       this.loadModuleInternal(modulePath),
       this.createTimeoutPromise(timeout, modulePath)
@@ -313,7 +322,7 @@ export class SafeModuleLoader {
    * @param modulePath - 模块路径
    * @returns 模块数据
    */
-  private async loadModuleInternal(modulePath: string): Promise<any> {
+  private async loadModuleInternal(modulePath: string): Promise<unknown> {
     try {
       // 动态导入模块
       const module = await import(/* @vite-ignore */ modulePath);
@@ -822,18 +831,24 @@ export class SafeModuleLoader {
    * @param container - 容器元素
    * @param moduleData - 模块数据
    */
-  private renderModule(container: HTMLElement, moduleData: any): void {
+  private renderModule(container: HTMLElement, moduleData: unknown): void {
     try {
-      // 如果模块有 render 方法，调用它
-      if (moduleData && typeof moduleData.render === 'function') {
-        moduleData.render(container);
-        return;
+      // 类型守卫：检查是否有 render 方法
+      if (moduleData && typeof moduleData === 'object' && 'render' in moduleData) {
+        const mod = moduleData as { render?: (container: HTMLElement) => void };
+        if (typeof mod.render === 'function') {
+          mod.render(container);
+          return;
+        }
       }
 
-      // 如果模块有 mount 方法，调用它
-      if (moduleData && typeof moduleData.mount === 'function') {
-        moduleData.mount(container);
-        return;
+      // 类型守卫：检查是否有 mount 方法
+      if (moduleData && typeof moduleData === 'object' && 'mount' in moduleData) {
+        const mod = moduleData as { mount?: (container: HTMLElement) => void };
+        if (typeof mod.mount === 'function') {
+          mod.mount(container);
+          return;
+        }
       }
 
       // 如果模块是字符串，直接设置为 innerHTML
@@ -1169,7 +1184,7 @@ export class SafeModuleLoader {
         // 重新加载模块
         this.showLoadingIndicator(container, '正在重试...');
         this.loadModule(container, modulePath).catch(err => {
-          console.error('重试失败:', err);
+          Logger.error('重试失败:', err);
         });
         break;
       case 'reload':
@@ -1181,7 +1196,7 @@ export class SafeModuleLoader {
         window.location.href = '/';
         break;
       default:
-        console.warn('未知的错误 UI 操作:', action);
+        Logger.warn('未知的错误 UI 操作:', action);
     }
   }
 

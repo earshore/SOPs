@@ -3,6 +3,7 @@
  */
 
 import { AnalysisResult } from '../types';
+import { Logger } from '../../../../../../services/loggerService';
 import {
   FullAnalysisReport,
   SAMPLE_ANALYSIS_REPORT,
@@ -450,77 +451,77 @@ export function parseAnalysisReport(
 ): AnalysisResult[] {
   const results: AnalysisResult[] = [];
 
-  console.log('[AI分析] 开始解析分析报告，目标数量:', targetIds.length);
-  console.log('[AI分析] 报告对象键:', Object.keys(report));
+  Logger.debug('[AI分析] 开始解析分析报告，目标数量:', targetIds.length);
+  Logger.debug('[AI分析] 报告对象键:', Object.keys(report));
 
   for (const targetId of targetIds) {
     try {
       switch (targetId) {
         case 'title-keywords':
           if (report['title-keywords']) {
-            console.log('[AI分析] 解析 title-keywords，数据:', report['title-keywords']);
+            Logger.debug('[AI分析] 解析 title-keywords，数据:', report['title-keywords']);
             results.push(parseTitleKeywords(report['title-keywords']));
           } else {
-            console.warn('[AI分析] title-keywords 数据不存在');
+            Logger.warn('[AI分析] title-keywords 数据不存在');
           }
           break;
         case 'selling-points':
           if (report['selling-points']) {
             results.push(parseSellingPoints(report['selling-points']));
           } else {
-            console.warn('[AI分析] selling-points 数据不存在');
+            Logger.warn('[AI分析] selling-points 数据不存在');
           }
           break;
         case 'fatal-flaws':
           if (report['fatal-flaws']) {
             results.push(parseFatalFlaws(report['fatal-flaws']));
           } else {
-            console.warn('[AI分析] fatal-flaws 数据不存在');
+            Logger.warn('[AI分析] fatal-flaws 数据不存在');
           }
           break;
         case 'wow-moments':
           if (report['wow-moments']) {
             results.push(parseWowMoments(report['wow-moments']));
           } else {
-            console.warn('[AI分析] wow-moments 数据不存在');
+            Logger.warn('[AI分析] wow-moments 数据不存在');
           }
           break;
         case 'hesitation-points':
           if (report['hesitation-points']) {
             results.push(parseHesitationPoints(report['hesitation-points']));
           } else {
-            console.warn('[AI分析] hesitation-points 数据不存在');
+            Logger.warn('[AI分析] hesitation-points 数据不存在');
           }
           break;
         case 'buyer-profile':
           if (report['buyer-profile']) {
             results.push(parseBuyerProfile(report['buyer-profile']));
           } else {
-            console.warn('[AI分析] buyer-profile 数据不存在');
+            Logger.warn('[AI分析] buyer-profile 数据不存在');
           }
           break;
         case 'vocab-gap':
           if (report['vocab-gap']) {
             results.push(parseVocabGap(report['vocab-gap']));
           } else {
-            console.warn('[AI分析] vocab-gap 数据不存在');
+            Logger.warn('[AI分析] vocab-gap 数据不存在');
           }
           break;
         case 'promise-reality':
           if (report['promise-reality']) {
             results.push(parsePromiseReality(report['promise-reality']));
           } else {
-            console.warn('[AI分析] promise-reality 数据不存在');
+            Logger.warn('[AI分析] promise-reality 数据不存在');
           }
           break;
       }
     } catch (error) {
-      console.error(`[AI分析] 解析 ${targetId} 时出错:`, error);
+      Logger.error(`[AI分析] 解析 ${targetId} 时出错:`, error);
       // 继续处理其他目标
     }
   }
 
-  console.log('[AI分析] 解析完成，成功解析:', results.length, '个目标');
+  Logger.debug('[AI分析] 解析完成，成功解析:', results.length, '个目标');
   return results;
 }
 

@@ -9,6 +9,7 @@ import { errorTracker } from '../../services/errorTracker';
 import { analyticsService } from '../../services/analyticsService';
 import { alertService } from '../../services/alertService';
 
+import { Logger } from '../../services/loggerService';
 type TabType = 'overview' | 'performance' | 'errors' | 'analytics' | 'alerts';
 
 /**
@@ -26,7 +27,7 @@ export class PerformanceMonitor {
    */
   initialize(): void {
     if (process.env.NODE_ENV !== 'development') {
-      console.log('[PerformanceMonitor] 仅在开发环境启用');
+      Logger.debug('[PerformanceMonitor] 仅在开发环境启用');
       return;
     }
 
@@ -47,7 +48,7 @@ export class PerformanceMonitor {
       }
     }, 2000);
 
-    console.log('[PerformanceMonitor] ✅ 性能监控面板已初始化 (Ctrl+Shift+P 切换)');
+    Logger.debug('[PerformanceMonitor] ✅ 性能监控面板已初始化 (Ctrl+Shift+P 切换)');
   }
 
   /**
@@ -382,7 +383,8 @@ export class PerformanceMonitor {
    * 渲染内存信息
    */
   private renderMemoryInfo(): string {
-    const memory = (performance as any).memory;
+    const performanceWithMemory = performance as unknown as { memory?: { usedJSHeapSize: number; jsHeapSizeLimit: number } };
+    const memory = performanceWithMemory.memory;
     if (!memory) {
       return '<div style="color: #888; font-size: 11px; margin-top: 12px;">Memory API不可用</div>';
     }
@@ -483,7 +485,7 @@ export const performanceMonitor = new PerformanceMonitor();
 
 // 暴露到window用于按钮点击
 if (typeof window !== 'undefined') {
-  (window as any).__acknowledgeAllAlerts = () => {
+  (window as unknown as Record<string, unknown>).__acknowledgeAllAlerts = () => {
     alertService.acknowledgeAll();
     performanceMonitor.toggle();
     performanceMonitor.toggle();

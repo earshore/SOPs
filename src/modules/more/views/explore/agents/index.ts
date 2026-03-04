@@ -6,6 +6,7 @@
 import BaseModule from '../../../../../common/BaseModule';
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
 
+import { Logger } from '../../../../../services/loggerService';
 // 存储事件监听器引用，用于清理
 interface MouseTrackingHandler {
     element: HTMLElement;
@@ -86,7 +87,7 @@ class AgentsModule extends BaseModule {
         // 初始化鼠标跟踪效果
         initMouseTrackingEffect();
 
-        console.log('✅ 智能体模块已挂载');
+        Logger.debug('✅ 智能体模块已挂载');
     }
 
     /**
@@ -95,7 +96,7 @@ class AgentsModule extends BaseModule {
     unmount(): void {
         // 清理事件监听器
         cleanupMouseTrackingEffect();
-        console.log('❌ 智能体模块已卸载');
+        Logger.debug('❌ 智能体模块已卸载');
     }
 }
 

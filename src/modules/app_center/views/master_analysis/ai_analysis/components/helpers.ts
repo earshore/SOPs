@@ -11,6 +11,7 @@ import { appStore } from '@/stores/useAppStore';
 import { estimateTokenCount, formatTokenCount } from '../utils/tokenCounter';
 import { getTargetIcon, getTargetColor } from '../utils/targetHelpers';
 
+import { Logger } from '../../../../../../services/loggerService';
 /**
  * 通过 targetId 获取 icon
  */
@@ -56,7 +57,7 @@ export function getMarketLanguage(): string {
     if (langConfig && langConfig.locale) {
       // 从 locale (如 "de_DE") 提取语言代码 (如 "de")
       const language = langConfig.locale.split('_')[0];
-      console.log(`[辅助函数] 市场 ${marketplace} 对应语言: ${language}`);
+      Logger.debug(`[辅助函数] 市场 ${marketplace} 对应语言: ${language}`);
       return language || 'en';
     }
   }
@@ -89,7 +90,7 @@ export function getPromptText(
     const language = getMarketLanguage();
     return generateAnalysisPrompt(targetId, mergedProduct, language);
   } catch (error) {
-    console.error('[辅助函数] 生成提示词失败:', error);
+    Logger.error('[辅助函数] 生成提示词失败:', error);
     return '提示词生成失败';
   }
 }

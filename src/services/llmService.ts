@@ -17,6 +17,7 @@ import type { LLMChatCompletionResponse, LLMErrorResponse } from '../types/api';
 // 导入类型守卫
 import { isLLMChatCompletionResponse } from '../common/guards/typeGuards';
 
+import { Logger } from './loggerService';
 // ========================
 // 类型定义
 // ========================
@@ -133,16 +134,16 @@ export async function callLLM(
 
   // 🔍 调试：始终输出配置信息（用于诊断生产环境问题）
   if (!(callLLM as any)._configLogged) {
-    console.log(`🌐 [LLM] 环境: ${configCenter.get('environment')}`);
-    console.log(`🌐 [LLM] 原始 Endpoint: ${endpoint}`);
-    console.log(`🌐 [LLM] api.baseUrl: ${configCenter.get('api.baseUrl')}`);
-    console.log(`🌐 [LLM] 标准化 Endpoint: ${normalizedEndpoint}`);
-    console.log(`🌐 [LLM] 最终请求 URL: ${normalizedEndpoint}/chat/completions`);
-    console.log(`🌐 [LLM] API Key (前10字符): ${apiKey.substring(0, 10)}...`);
+    Logger.debug(`🌐 [LLM] 环境: ${configCenter.get('environment')}`);
+    Logger.debug(`🌐 [LLM] 原始 Endpoint: ${endpoint}`);
+    Logger.debug(`🌐 [LLM] api.baseUrl: ${configCenter.get('api.baseUrl')}`);
+    Logger.debug(`🌐 [LLM] 标准化 Endpoint: ${normalizedEndpoint}`);
+    Logger.debug(`🌐 [LLM] 最终请求 URL: ${normalizedEndpoint}/chat/completions`);
+    Logger.debug(`🌐 [LLM] API Key (前10字符): ${apiKey.substring(0, 10)}...`);
     (callLLM as any)._configLogged = true;
   }
 
-  const requestBody: Record<string, any> = {
+  const requestBody: Record<string, unknown> = {
     model: model,
     messages: messages,
     temperature: temperature,
@@ -168,7 +169,7 @@ export async function callLLM(
       if (attempt > 0) {
         // 指数退避: 1s, 2s, 4s... 加少量 jitter 防止惊群
         const delay = retryDelay * Math.pow(2, attempt - 1) * (1 + Math.random() * 0.2);
-        console.log(`⏳ LLM 调用重试 [${attempt}/${retries}]，等待 ${Math.round(delay)}ms...`);
+        Logger.debug(`⏳ LLM 调用重试 [${attempt}/${retries}]，等待 ${Math.round(delay)}ms...`);
         await sleep(delay);
       }
 
@@ -235,7 +236,7 @@ export async function callLLM(
 
         if (shouldRetry && attempt < retries) {
           lastError = error;
-          console.warn(`⚠️ LLM 调用失败 (${response.status})，准备重试:`, errorMsg);
+          Logger.warn(`⚠️ LLM 调用失败 (${response.status})，准备重试:`, errorMsg);
           continue;
         } else {
           throw error;
@@ -285,7 +286,7 @@ export async function callLLM(
       // 如果已经是ApiError,直接处理
       if (error instanceof ApiError) {
         if (attempt < retries && (error.statusCode === 429 || (error.statusCode && error.statusCode >= 500))) {
-          console.warn(`⚠️ LLM 调用失败，准备重试...`);
+          Logger.warn(`⚠️ LLM 调用失败，准备重试...`);
           continue;
         }
         throw error;
@@ -308,7 +309,7 @@ export async function callLLM(
 
         if (attempt < retries) {
           lastError = timeoutError;
-          console.warn(`⚠️ LLM 超时，准备重试...`);
+          Logger.warn(`⚠️ LLM 超时，准备重试...`);
           continue;
         }
         throw timeoutError;
@@ -327,7 +328,7 @@ export async function callLLM(
           },
           error
         );
-        console.warn(`⚠️ 网络错误，准备重试:`, error.message);
+        Logger.warn(`⚠️ 网络错误，准备重试:`, error.message);
         continue;
       }
 
@@ -359,11 +360,11 @@ export async function fetchModelsFromApi(
 
     // 🔍 调试：始终输出配置信息（用于诊断生产环境问题）
     if (!(fetchModelsFromApi as any)._configLogged) {
-      console.log(`🌐 [Models] 环境: ${configCenter.get('environment')}`);
-      console.log(`🌐 [Models] 原始 Endpoint: ${endpoint}`);
-      console.log(`🌐 [Models] api.baseUrl: ${configCenter.get('api.baseUrl')}`);
-      console.log(`🌐 [Models] 标准化 Endpoint: ${normalizedEndpoint}`);
-      console.log(`🌐 [Models] 最终请求 URL: ${normalizedEndpoint}/models`);
+      Logger.debug(`🌐 [Models] 环境: ${configCenter.get('environment')}`);
+      Logger.debug(`🌐 [Models] 原始 Endpoint: ${endpoint}`);
+      Logger.debug(`🌐 [Models] api.baseUrl: ${configCenter.get('api.baseUrl')}`);
+      Logger.debug(`🌐 [Models] 标准化 Endpoint: ${normalizedEndpoint}`);
+      Logger.debug(`🌐 [Models] 最终请求 URL: ${normalizedEndpoint}/models`);
       (fetchModelsFromApi as any)._configLogged = true;
     }
 
@@ -371,55 +372,56 @@ export async function fetchModelsFromApi(
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-    console.log(`🔄 正在从 ${normalizedEndpoint}/models 获取模型列表...`);
-    console.log(`📋 请求详情: Provider=${provider}`);
+    Logger.debug(`🔄 正在从 ${normalizedEndpoint}/models 获取模型列表...`);
+    Logger.debug(`📋 请求详情: Provider=${provider}`);
 
     const res = await fetch(`${normalizedEndpoint}/models`, {
       headers: { Authorization: `Bearer ${apiKey}` },
       signal: controller.signal,
     }).finally(() => clearTimeout(timeoutId));
 
-    console.log(`📡 API响应状态: ${res.status} ${res.statusText}`);
-    console.log(`📡 响应头:`, Object.fromEntries(res.headers.entries()));
+    Logger.debug(`📡 API响应状态: ${res.status} ${res.statusText}`);
+    Logger.debug(`📡 响应头:`, Object.fromEntries(res.headers.entries()));
 
     if (!res.ok) {
       const errorText = await res.text();
-      console.error(`❌ API返回错误: ${res.status}`, errorText);
+      Logger.error(`❌ API返回错误: ${res.status}`, errorText);
       throw new Error(`HTTP ${res.status}: ${errorText.substring(0, 200)}`);
     }
 
     const rawText = await res.text();
-    console.log(`📦 API返回原始数据 (前500字符):`, rawText.substring(0, 500));
+    Logger.debug(`📦 API返回原始数据 (前500字符):`, rawText.substring(0, 500));
 
-    let data: any;
+    let data: unknown;
     try {
       data = JSON.parse(rawText);
-      console.log(`📦 解析后的数据结构:`, JSON.stringify(data, null, 2).substring(0, 1000));
+      Logger.debug(`📦 解析后的数据结构:`, JSON.stringify(data, null, 2).substring(0, 1000));
     } catch (parseError) {
-      console.error(`❌ JSON解析失败:`, parseError);
+      Logger.error(`❌ JSON解析失败:`, parseError);
       throw new Error(`API返回的不是有效的JSON格式: ${rawText.substring(0, 100)}`);
     }
 
     // 兼容不同厂商的数据结构
     let list: Array<{ id: string; name?: string;[key: string]: unknown }> = [];
+    const dataObj = data as Record<string, unknown>;
 
     if (Array.isArray(data)) {
       list = data;
-      console.log(`✅ 数据是数组格式，包含 ${list.length} 个元素`);
-    } else if (data.data && Array.isArray(data.data)) {
-      list = data.data;
-      console.log(`✅ 数据在 .data 字段中，包含 ${list.length} 个元素`);
-    } else if (data.models && Array.isArray(data.models)) {
-      list = data.models;
-      console.log(`✅ 数据在 .models 字段中，包含 ${list.length} 个元素`);
+      Logger.debug(`✅ 数据是数组格式，包含 ${list.length} 个元素`);
+    } else if (dataObj.data && Array.isArray(dataObj.data)) {
+      list = dataObj.data as Array<{ id: string; name?: string;[key: string]: unknown }>;
+      Logger.debug(`✅ 数据在 .data 字段中，包含 ${list.length} 个元素`);
+    } else if (dataObj.models && Array.isArray(dataObj.models)) {
+      list = dataObj.models as Array<{ id: string; name?: string;[key: string]: unknown }>;
+      Logger.debug(`✅ 数据在 .models 字段中，包含 ${list.length} 个元素`);
     } else if (typeof data === 'object' && data !== null) {
-      console.warn(`⚠️ 未识别的数据结构，对象键:`, Object.keys(data));
+      Logger.warn(`⚠️ 未识别的数据结构，对象键:`, Object.keys(data));
       // 尝试从对象中提取可能的模型列表
       const possibleArrays = Object.entries(data)
         .filter(([_key, value]) => Array.isArray(value))
         .map(([key, value]) => ({ key, value: value as any[], length: (value as any[]).length }));
 
-      console.log(
+      Logger.debug(
         `🔍 找到的数组字段:`,
         possibleArrays.map((p) => `${p.key}(${p.length})`)
       );
@@ -428,20 +430,20 @@ export async function fetchModelsFromApi(
         // 选择最长的数组，通常是模型列表
         const longest = possibleArrays.reduce((a, b) => (a.length > b.length ? a : b));
         list = longest.value;
-        console.log(`✅ 使用字段 "${longest.key}"，包含 ${list.length} 个元素`);
+        Logger.debug(`✅ 使用字段 "${longest.key}"，包含 ${list.length} 个元素`);
       }
     }
 
     if (list.length === 0) {
-      console.warn(`⚠️ 模型列表为空，完整响应:`, JSON.stringify(data));
+      Logger.warn(`⚠️ 模型列表为空，完整响应:`, JSON.stringify(data));
       throw new Error('API返回的模型列表为空，请检查API配置是否正确');
     }
 
-    console.log(`📋 原始列表前3个元素:`, list.slice(0, 3));
+    Logger.debug(`📋 原始列表前3个元素:`, list.slice(0, 3));
 
     // 处理模型数据，兼容不同的字段名
     const models = list
-      .map((m: any, index: number): ModelInfo | null => {
+      .map((m: unknown, index: number): ModelInfo | null => {
         // 如果是字符串，直接使用
         if (typeof m === 'string') {
           return { id: m, context: 128000, features: [] };
@@ -449,9 +451,10 @@ export async function fetchModelsFromApi(
 
         // 如果是对象，尝试提取ID
         if (typeof m === 'object' && m !== null) {
-          const id = m.id || m.model || m.name;
+          const modelObj = m as Record<string, unknown>;
+          const id = modelObj.id || modelObj.model || modelObj.name;
           if (!id) {
-            console.warn(`⚠️ 跳过无效模型 [${index}]:`, m);
+            Logger.warn(`⚠️ 跳过无效模型 [${index}]:`, m);
             return null;
           }
 
@@ -466,22 +469,22 @@ export async function fetchModelsFromApi(
         }
 
         // 其他类型，尝试转换为字符串
-        console.warn(`⚠️ 未知模型类型 [${index}]:`, typeof m, m);
+        Logger.warn(`⚠️ 未知模型类型 [${index}]:`, { type: typeof m, value: m });
         return null;
       })
       .filter((m): m is ModelInfo => m !== null)
       .sort((a, b) => a.id.localeCompare(b.id));
 
-    console.log(`✅ 成功解析 ${models.length} 个模型`);
-    console.log(
+    Logger.debug(`✅ 成功解析 ${models.length} 个模型`);
+    Logger.debug(
       `📋 前5个模型:`,
       models.slice(0, 5).map((m) => m.id)
     );
 
     return models;
   } catch (error) {
-    console.error(`❌ fetchModelsFromApi 失败:`, error);
-    console.error(`❌ 错误堆栈:`, (error as Error).stack);
+    Logger.error(`❌ fetchModelsFromApi 失败:`, error);
+    Logger.error(`❌ 错误堆栈:`, (error as Error).stack);
     ErrorService.handle(error as Error, {
       action: 'fetchModelsFromApi',
       module: 'llm',

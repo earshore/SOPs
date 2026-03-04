@@ -6,6 +6,7 @@
 
 import { escapeHtml, setSafeHtml, createSafeFragment } from './security';
 
+import { Logger } from '../../services/loggerService';
 /**
  * XSS风险点类型
  */
@@ -23,7 +24,7 @@ export interface XSSRisk {
  */
 export function setInnerHTML(element: HTMLElement, html: string, trusted: boolean = false): void {
   if (!element) {
-    console.warn('[XSSFixer] Element is null or undefined');
+    Logger.warn('[XSSFixer] Element is null or undefined');
     return;
   }
 
@@ -43,7 +44,7 @@ export function setInnerHTML(element: HTMLElement, html: string, trusted: boolea
 export function setTemplate(
   element: HTMLElement,
   template: string,
-  data: Record<string, any>,
+  data: Record<string, unknown>,
   trustedKeys: string[] = []
 ): void {
   if (!element) return;
@@ -119,14 +120,14 @@ export function setAttr(element: HTMLElement, attr: string, value: string): void
   if (attr === 'href' || attr === 'src') {
     // 验证URL安全性
     if (value && !isSafeUrl(value)) {
-      console.warn(`[XSSFixer] Unsafe URL blocked: ${value}`);
+      Logger.warn(`[XSSFixer] Unsafe URL blocked: ${value}`);
       return;
     }
   }
 
   // 禁止设置事件处理器属性
   if (attr.startsWith('on')) {
-    console.warn(`[XSSFixer] Event handler attribute blocked: ${attr}`);
+    Logger.warn(`[XSSFixer] Event handler attribute blocked: ${attr}`);
     return;
   }
 

@@ -15,6 +15,7 @@ import type { ILoggerService, IConfigService, IHttpService } from '../types/serv
 import type { ApiResponse } from '../types/api';
 import { isApiResponse } from '../common/guards/typeGuards';
 
+import { Logger } from './loggerService';
 /**
  * 请求优先级类型
  */
@@ -26,7 +27,7 @@ export type RequestPriority = 0 | 1 | 2 | 3 | 4;
 export interface HttpOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   headers?: Record<string, string>;
-  body?: any;
+  body?: unknown;
   timeout?: number;
   retries?: number;
   retryDelay?: number;
@@ -99,8 +100,8 @@ export class HttpError extends Error {
  * HTTP 客户端接口
  */
 export interface HttpClient {
-  get<T = any>(path: string, options?: HttpOptions): Promise<T>;
-  post<T = any>(path: string, body?: any, options?: HttpOptions): Promise<T>;
+  get<T = unknown>(path: string, options?: HttpOptions): Promise<T>;
+  post<T = unknown>(path: string, body?: unknown, options?: HttpOptions): Promise<T>;
 }
 
 /**
@@ -162,7 +163,7 @@ class HttpServiceClass implements IHttpService {
    */
   setLoggerService(logger: ILoggerService): void {
     this.logger = logger;
-    console.log('[HttpService] LoggerService已注入');
+    Logger.debug('[HttpService] LoggerService已注入');
   }
 
   /**
@@ -179,7 +180,7 @@ class HttpServiceClass implements IHttpService {
   /**
    * 发送 HTTP 请求
    */
-  async request<T = any>(url: string, options: HttpOptions = {}): Promise<T> {
+  async request<T = unknown>(url: string, options: HttpOptions = {}): Promise<T> {
     const {
       method = 'GET',
       headers = {},
@@ -291,7 +292,7 @@ class HttpServiceClass implements IHttpService {
 
           // 等待后重试
           await this._delay(retryDelay * (attempt + 1));
-          console.log(`[HttpService] Retry ${attempt + 1}/${retries}: ${url}`);
+          Logger.debug(`[HttpService] Retry ${attempt + 1}/${retries}: ${url}`);
         }
       }
 
@@ -398,14 +399,14 @@ class HttpServiceClass implements IHttpService {
   /**
    * GET 请求快捷方法
    */
-  async get<T = any>(url: string, options: HttpOptions = {}): Promise<T> {
+  async get<T = unknown>(url: string, options: HttpOptions = {}): Promise<T> {
     return this.request<T>(url, { ...options, method: 'GET' });
   }
 
   /**
    * POST 请求快捷方法
    */
-  async post<T = any>(url: string, body?: any, options: HttpOptions = {}): Promise<T> {
+  async post<T = unknown>(url: string, body?: unknown, options: HttpOptions = {}): Promise<T> {
     return this.request<T>(url, { ...options, method: 'POST', body });
   }
 
@@ -418,7 +419,7 @@ class HttpServiceClass implements IHttpService {
    * @param dataGuard - 可选的数据类型守卫函数
    * @returns 验证后的 API 响应
    */
-  async apiRequest<T = any>(
+  async apiRequest<T = unknown>(
     url: string,
     options?: HttpOptions,
     dataGuard?: (data: unknown) => data is T
@@ -445,7 +446,7 @@ class HttpServiceClass implements IHttpService {
    * 带授权的 API 请求（已废弃，使用 apiRequest 代替）
    * @deprecated 使用 apiRequest 方法代替
    */
-  async apiRequestWithAuth<T = any>(url: string, token: string, options: HttpOptions = {}): Promise<T> {
+  async apiRequestWithAuth<T = unknown>(url: string, token: string, options: HttpOptions = {}): Promise<T> {
     const headers = {
       ...options.headers,
       'Authorization': `Bearer ${token}`,
@@ -465,13 +466,13 @@ class HttpServiceClass implements IHttpService {
    */
   createClient(baseUrl: string, defaultHeaders: Record<string, string> = {}): HttpClient {
     return {
-      get: <T = any>(path: string, options: HttpOptions = {}) =>
+      get: <T = unknown>(path: string, options: HttpOptions = {}) =>
         this.request<T>(`${baseUrl}${path}`, {
           ...options,
           method: 'GET',
           headers: { ...defaultHeaders, ...options.headers }
         }),
-      post: <T = any>(path: string, body?: any, options: HttpOptions = {}) =>
+      post: <T = unknown>(path: string, body?: unknown, options: HttpOptions = {}) =>
         this.request<T>(`${baseUrl}${path}`, {
           ...options,
           method: 'POST',

@@ -6,6 +6,7 @@
 
 import { z } from 'zod';
 
+import { Logger } from '../../../services/loggerService';
 /**
  * 环境类型Schema
  */
@@ -62,9 +63,9 @@ export function validateConfig(config: unknown): boolean {
     return true;
   } catch (error) {
     if (error instanceof z.ZodError) {
-      console.error('配置验证失败:', error.issues);
+      Logger.error('配置验证失败:', error.issues);
       error.issues.forEach((issue) => {
-        console.error(`  - ${issue.path.join('.')}: ${issue.message}`);
+        Logger.error(`  - ${issue.path.join('.')}: ${issue.message}`);
       });
     }
     return false;
