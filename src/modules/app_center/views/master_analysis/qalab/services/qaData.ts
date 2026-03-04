@@ -22,17 +22,45 @@ export interface QA {
  * 从报告中提取关键信息
  */
 function extractReportInsights(report: unknown): unknown {
-    const analysisReport = report?.analysisReport || report;
-    const metadata = report?.metadata;
+    // 类型守卫：确保 report 是对象
+    if (!report || typeof report !== 'object') {
+        return {
+            productTitle: '产品',
+            market: 'DE',
+            sellingPoints: {},
+            fatalFlaws: {},
+            wowMoments: {},
+            hesitationPoints: {},
+            buyerProfile: {}
+        };
+    }
+
+    const reportObj = report as Record<string, unknown>;
+    const analysisReport = reportObj.analysisReport || reportObj;
+    const metadata = reportObj.metadata;
+
+    // 安全访问 metadata 属性
+    let productTitle = '产品';
+    let market = 'DE';
+    if (metadata && typeof metadata === 'object') {
+        const metaObj = metadata as Record<string, unknown>;
+        productTitle = String(metaObj.productTitle || '产品');
+        market = String(metaObj.marketplace || 'DE');
+    }
+
+    // 安全访问 analysisReport 属性
+    const analysisObj = (analysisReport && typeof analysisReport === 'object')
+        ? analysisReport as Record<string, unknown>
+        : {};
 
     return {
-        productTitle: metadata?.productTitle || '产品',
-        market: metadata?.marketplace || 'DE',
-        sellingPoints: analysisReport?.['selling-points'] || {},
-        fatalFlaws: analysisReport?.['fatal-flaws'] || {},
-        wowMoments: analysisReport?.['wow-moments'] || {},
-        hesitationPoints: analysisReport?.['hesitation-points'] || {},
-        buyerProfile: analysisReport?.['buyer-profile'] || {}
+        productTitle,
+        market,
+        sellingPoints: analysisObj['selling-points'] || {},
+        fatalFlaws: analysisObj['fatal-flaws'] || {},
+        wowMoments: analysisObj['wow-moments'] || {},
+        hesitationPoints: analysisObj['hesitation-points'] || {},
+        buyerProfile: analysisObj['buyer-profile'] || {}
     };
 }
 
@@ -54,7 +82,14 @@ function generateSmartAnswer(insights: unknown, questionType: string, lang: stri
             ) || [];
             
             if (flaws.length > 0 && lang === 'de') {
-                return `Transparenzhinweis: Einige Kunden berichten, dass der Duft schneller verfliegt als erwartet. Die Erfahrungen variieren jedoch stark.\n\n⚠️ Kritische Rückmeldungen:\n${flaws.map((f: unknown) => `• ${f.user_quotes?.[0] || f.issue}`).join('\n')}\n\n💡 Empfehlung: Testen Sie das Produkt und nutzen Sie ggf. das Rückgaberecht, falls die Haltbarkeit nicht Ihren Erwartungen entspricht.`;
+                return `Transparenzhinweis: Einige Kunden berichten, dass der Duft schneller verfliegt als erwartet. Die Erfahrungen variieren jedoch stark.\n\n⚠️ Kritische Rückmeldungen:\n${flaws.map((f: unknown) => {
+                    if (f && typeof f === 'object') {
+                        const fObj = f as Record<string, unknown>;
+                        const userQuotes = Array.isArray(fObj.user_quotes) ? fObj.user_quotes : [];
+                        return `• ${userQuotes[0] || fObj.issue || ''}`;
+                    }
+                    return '';
+                }).join('\n')}\n\n💡 Empfehlung: Testen Sie das Produkt und nutzen Sie ggf. das Rückgaberecht, falls die Haltbarkeit nicht Ihren Erwartungen entspricht.`;
             }
             break;
         }

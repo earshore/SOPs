@@ -216,14 +216,18 @@ export class DataPreview {
 
         // 渲染产品卡片
         const cardsHtml = productsToRender.map((rawProduct: unknown) => {
-            const isExpanded = this.state.expandedAsin === rawProduct.asin;
+            // 类型守卫：确保 rawProduct 是对象
+            if (!rawProduct || typeof rawProduct !== 'object') return '';
+
+            const product = rawProduct as ScrapedProduct;
+            const isExpanded = this.state.expandedAsin === product.asin;
             return renderProductCard(
-                rawProduct,
+                product,
                 isExpanded,
                 globalSiteCode,
-                `toggleCardExpand('${rawProduct.asin}')`,
-                `deleteProduct('${rawProduct.asin}')`,
-                `deleteReview('${rawProduct.asin}', INDEX)`
+                `toggleCardExpand('${product.asin}')`,
+                `deleteProduct('${product.asin}')`,
+                `deleteReview('${product.asin}', INDEX)`
             );
         }).join("");
 
