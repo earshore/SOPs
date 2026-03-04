@@ -50,11 +50,11 @@ export type LogEntry = ILogEntry;
  * 模块日志记录器
  */
 export interface ModuleLogger {
-  debug: (message: string, data?: Record<string, unknown>) => void;
-  info: (message: string, data?: Record<string, unknown>) => void;
-  warn: (message: string, data?: Record<string, unknown>) => void;
-  error: (message: string, error?: Error | Record<string, unknown>) => void;
-  fatal: (message: string, error?: Error | Record<string, unknown>) => void;
+  debug: (message: string, data?: unknown) => void;
+  info: (message: string, data?: unknown) => void;
+  warn: (message: string, data?: unknown) => void;
+  error: (message: string, error?: unknown) => void;
+  fatal: (message: string, error?: unknown) => void;
 }
 
 /**
@@ -112,7 +112,7 @@ export class LoggerService implements ILoggerService {
    */
   setStorageService(storage: IStorageService): void {
     this.storageService = storage;
-    Logger.debug('[Logger] StorageService已注入');
+    console.debug('[Logger] StorageService已注入');
   }
 
   /**
@@ -165,7 +165,7 @@ export class LoggerService implements ILoggerService {
     } catch {
       // ConfigService 未初始化，跳过
     }
-    Logger.debug(`[Logger] 最小日志级别设置为: ${newLevel}`);
+    console.debug(`[Logger] 最小日志级别设置为: ${newLevel}`);
   }
 
   /**
@@ -173,23 +173,29 @@ export class LoggerService implements ILoggerService {
    */
   setRemoteEndpoint(endpoint: string): void {
     this.remoteEndpoint = endpoint;
-    Logger.debug(`[Logger] 远程日志端点设置为: ${endpoint}`);
+    console.debug(`[Logger] 远程日志端点设置为: ${endpoint}`);
   }
 
   /**
    * 记录日志
    */
-  private _log(level: LogLevelValue, message: string, data: Record<string, unknown> = {}, module = 'App'): void {
+  private _log(level: LogLevelValue, message: string, data: unknown = {}, module = 'App'): void {
     // 过滤低于最小级别的日志
     if (level < this.getMinLogLevel()) {
       return;
     }
 
+    // 安全转换 data 为 Record<string, unknown>
+    const safeData: Record<string, unknown> =
+      data && typeof data === 'object' && !Array.isArray(data)
+        ? data as Record<string, unknown>
+        : { value: data };
+
     const entry: LogEntry = {
       level,
       levelName: LEVEL_NAMES[level],
       message,
-      data,
+      data: safeData,
       module,
       timestamp: Date.now(),
       url: typeof window !== 'undefined' ? window.location.href : undefined,
@@ -223,21 +229,21 @@ export class LoggerService implements ILoggerService {
 
     const prefix = `%c[${time}] [${levelName.toUpperCase()}] [${module}]`;
     const style = `color: ${color}; font-weight: bold;`;
-    const formattedMessage = `${prefix} ${message}`;
 
+    // 使用原生 console 方法，避免递归调用
     switch (level) {
       case LOG_LEVELS.DEBUG:
-        Logger.debug(formattedMessage, data);
+        console.debug(prefix, style, message, data);
         break;
       case LOG_LEVELS.INFO:
-        Logger.info(formattedMessage, data);
+        console.info(prefix, style, message, data);
         break;
       case LOG_LEVELS.WARN:
-        Logger.warn(formattedMessage, data);
+        console.warn(prefix, style, message, data);
         break;
       case LOG_LEVELS.ERROR:
       case LOG_LEVELS.FATAL:
-        Logger.error(formattedMessage, data instanceof Error ? data : data);
+        console.error(prefix, style, message, data instanceof Error ? data : data);
         break;
     }
   }
@@ -277,7 +283,7 @@ export class LoggerService implements ILoggerService {
       const trimmed = storedLogs.slice(-50);
       this.storageService.set('error_logs', trimmed);
     } catch (e) {
-      Logger.warn('[Logger] 保存日志到本地存储失败:', e);
+      console.warn('[Logger] 保存日志到本地存储失败:', e);
     }
   }
 
@@ -331,7 +337,7 @@ export class LoggerService implements ILoggerService {
         }),
       });
     } catch (e) {
-      Logger.warn('[Logger] 发送日志到远程服务失败:', e);
+      console.warn('[Logger] 发送日志到远程服务失败:', e);
       this.pendingLogs.unshift(...logsToSend);
     }
   }
@@ -339,33 +345,55 @@ export class LoggerService implements ILoggerService {
   /**
    * DEBUG 级别日志
    */
-  debug(message: string, data: Record<string, unknown> = {}, module = 'App'): void {
-    this._log(LOG_LEVELS.DEBUG, message, data, module);
+  debug(message: string, data?: unknown, module = 'App'): void {
+    const safeData: Record<string, unknown> =
+      data && typeof data === 'object' && !Array.isArray(data)
+        ? data as Record<string, unknown>
+        : data !== undefined ? { value: data } : {};
+    this._log(LOG_LEVELS.DEBUG, message, safeData, module);
   }
 
   /**
    * INFO 级别日志
    */
-  info(message: string, data: Record<string, unknown> = {}, module = 'App'): void {
-    this._log(LOG_LEVELS.INFO, message, data, module);
+  info(message: string, data?: unknown, module = 'App'): void {
+    const safeData: Record<string, unknown> =
+      data && typeof data === 'object' && !Array.isArray(data)
+        ? data as Record<string, unknown>
+        : data !== undefined ? { value: data } : {};
+    this._log(LOG_LEVELS.INFO, message, safeData, module);
   }
 
   /**
    * WARN 级别日志
    */
-  warn(message: string, data: Record<string, unknown> = {}, module = 'App'): void {
-    this._log(LOG_LEVELS.WARN, message, data, module);
+  warn(message: string, data?: unknown, module = 'App'): void {
+    const safeData: Record<string, unknown> =
+      data && typeof data === 'object' && !Array.isArray(data)
+        ? data as Record<string, unknown>
+        : data !== undefined ? { value: data } : {};
+    this._log(LOG_LEVELS.WARN, message, safeData, module);
   }
 
   /**
    * ERROR 级别日志
    */
-  error(message: string, error: Error | Record<string, unknown> = {}, module = 'App'): void {
-    const data = error instanceof Error ? {
-      name: error.name,
-      message: error.message,
-      stack: error.stack,
-    } : error;
+  error(message: string, error?: unknown, module = 'App'): void {
+    let data: Record<string, unknown>;
+
+    if (error instanceof Error) {
+      data = {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      };
+    } else if (error && typeof error === 'object' && !Array.isArray(error)) {
+      data = error as Record<string, unknown>;
+    } else if (error !== undefined) {
+      data = { value: error };
+    } else {
+      data = {};
+    }
 
     this._log(LOG_LEVELS.ERROR, message, data, module);
   }
@@ -373,12 +401,22 @@ export class LoggerService implements ILoggerService {
   /**
    * FATAL 级别日志
    */
-  fatal(message: string, error: Error | Record<string, unknown> = {}, module = 'App'): void {
-    const data = error instanceof Error ? {
-      name: error.name,
-      message: error.message,
-      stack: error.stack,
-    } : error;
+  fatal(message: string, error?: unknown, module = 'App'): void {
+    let data: Record<string, unknown>;
+
+    if (error instanceof Error) {
+      data = {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      };
+    } else if (error && typeof error === 'object' && !Array.isArray(error)) {
+      data = error as Record<string, unknown>;
+    } else if (error !== undefined) {
+      data = { value: error };
+    } else {
+      data = {};
+    }
 
     this._log(LOG_LEVELS.FATAL, message, data, module);
   }
@@ -388,11 +426,11 @@ export class LoggerService implements ILoggerService {
    */
   createModuleLogger(moduleName: string): ModuleLogger {
     return {
-      debug: (message: string, data?: Record<string, unknown>) => this.debug(message, data, moduleName),
-      info: (message: string, data?: Record<string, unknown>) => this.info(message, data, moduleName),
-      warn: (message: string, data?: Record<string, unknown>) => this.warn(message, data, moduleName),
-      error: (message: string, error?: Error | Record<string, unknown>) => this.error(message, error, moduleName),
-      fatal: (message: string, error?: Error | Record<string, unknown>) => this.fatal(message, error, moduleName),
+      debug: (message: string, data?: unknown) => this.debug(message, data, moduleName),
+      info: (message: string, data?: unknown) => this.info(message, data, moduleName),
+      warn: (message: string, data?: unknown) => this.warn(message, data, moduleName),
+      error: (message: string, error?: unknown) => this.error(message, error, moduleName),
+      fatal: (message: string, error?: unknown) => this.fatal(message, error, moduleName),
     };
   }
 
@@ -427,7 +465,7 @@ export class LoggerService implements ILoggerService {
    */
   clear(): void {
     this.logs = [];
-    Logger.debug('[Logger] 日志已清除');
+    console.debug('[Logger] 日志已清除');
   }
 
   /**

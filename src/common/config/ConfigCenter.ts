@@ -429,7 +429,6 @@ export class ConfigCenter implements IConfigService {
    * 重新加载配置
    */
   public reload(): void {
-    const oldConfig = this.config;
     this.config = this.loadConfig();
     // 移除日志调用，避免循环依赖
   }

@@ -338,7 +338,7 @@ export class PerformanceService {
       return result;
     } catch (error) {
       const duration = Math.round(performance.now() - startTime);
-      Logger.error(`[Performance] 模块加载失败 ${moduleName}:`, duration, 'ms', error);
+      Logger.error(`[Performance] 模块加载失败 ${moduleName}: ${duration}ms`, error);
 
       this.recordMetric(METRIC_TYPES.MODULE_LOAD, duration, {
         module: moduleName,
@@ -368,7 +368,7 @@ export class PerformanceService {
       return result;
     } catch (error) {
       const duration = Math.round(performance.now() - startTime);
-      Logger.error(`[Performance] API调用失败 ${apiName}:`, duration, 'ms', error);
+      Logger.error(`[Performance] API调用失败 ${apiName}: ${duration}ms`, error);
 
       this.recordMetric(METRIC_TYPES.API_CALL, duration, {
         api: apiName,
