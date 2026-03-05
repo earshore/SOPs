@@ -8,6 +8,7 @@ import type { MenuConfig } from '../../types/config';
 import type { IConfigService } from '../../types/services';
 import { validateConfig } from './schemas/configSchema';
 import { loadRouteConfig } from './loaders/routeConfigLoader';
+import { Logger } from '../../services/loggerService';
 // ==================== 类型定义 ====================
 
 /**
@@ -410,7 +411,7 @@ export class ConfigCenter implements IConfigService {
           listener(path, newValue, oldValue);
         } catch (error) {
           // 静默失败，避免循环依赖
-          console.error('[ConfigCenter] 配置监听器执行失败', { path, error });
+          Logger.error('[ConfigCenter] 配置监听器执行失败', { path, error });
         }
       });
     }

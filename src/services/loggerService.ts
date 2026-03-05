@@ -8,6 +8,7 @@
 import { configCenter, type LoggerConfig } from '../common/config/ConfigCenter';
 // 从types/services导入统一的类型定义
 import type { IStorageService, IConfigService, ILoggerService, LogEntry as ILogEntry } from '../types/services';
+import { Logger } from './loggerService';
 /**
  * 日志级别（数字枚举，用于内部比较）
  */
@@ -112,7 +113,7 @@ export class LoggerService implements ILoggerService {
    */
   setStorageService(storage: IStorageService): void {
     this.storageService = storage;
-    console.debug('[Logger] StorageService已注入');
+    Logger.debug('[Logger] StorageService已注入');
   }
 
   /**
@@ -165,7 +166,7 @@ export class LoggerService implements ILoggerService {
     } catch {
       // ConfigService 未初始化，跳过
     }
-    console.debug(`[Logger] 最小日志级别设置为: ${newLevel}`);
+    Logger.debug(`[Logger] 最小日志级别设置为: ${newLevel}`);
   }
 
   /**
@@ -173,7 +174,7 @@ export class LoggerService implements ILoggerService {
    */
   setRemoteEndpoint(endpoint: string): void {
     this.remoteEndpoint = endpoint;
-    console.debug(`[Logger] 远程日志端点设置为: ${endpoint}`);
+    Logger.debug(`[Logger] 远程日志端点设置为: ${endpoint}`);
   }
 
   /**
@@ -233,17 +234,17 @@ export class LoggerService implements ILoggerService {
     // 使用原生 console 方法，避免递归调用
     switch (level) {
       case LOG_LEVELS.DEBUG:
-        console.debug(prefix, style, message, data);
+        Logger.debug(prefix, style, message, data);
         break;
       case LOG_LEVELS.INFO:
-        console.info(prefix, style, message, data);
+        Logger.info(prefix, style, message, data);
         break;
       case LOG_LEVELS.WARN:
-        console.warn(prefix, style, message, data);
+        Logger.warn(prefix, style, message, data);
         break;
       case LOG_LEVELS.ERROR:
       case LOG_LEVELS.FATAL:
-        console.error(prefix, style, message, data instanceof Error ? data : data);
+        Logger.error(prefix, style, message, data instanceof Error ? data : data);
         break;
     }
   }
@@ -283,7 +284,7 @@ export class LoggerService implements ILoggerService {
       const trimmed = storedLogs.slice(-50);
       this.storageService.set('error_logs', trimmed);
     } catch (e) {
-      console.warn('[Logger] 保存日志到本地存储失败:', e);
+      Logger.warn('[Logger] 保存日志到本地存储失败:', e);
     }
   }
 
@@ -337,7 +338,7 @@ export class LoggerService implements ILoggerService {
         }),
       });
     } catch (e) {
-      console.warn('[Logger] 发送日志到远程服务失败:', e);
+      Logger.warn('[Logger] 发送日志到远程服务失败:', e);
       this.pendingLogs.unshift(...logsToSend);
     }
   }
@@ -465,7 +466,7 @@ export class LoggerService implements ILoggerService {
    */
   clear(): void {
     this.logs = [];
-    console.debug('[Logger] 日志已清除');
+    Logger.debug('[Logger] 日志已清除');
   }
 
   /**
