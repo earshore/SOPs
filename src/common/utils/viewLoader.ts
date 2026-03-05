@@ -7,6 +7,7 @@
 
 import { APP_VERSION } from '../constants/constants';
 import { StorageService } from '../../services/storageService';
+import { getViewPathByRoute } from '../config/menuConfig';
 
 import { Logger } from '../../services/loggerService';
 const CACHE_PREFIX = 'view_cache_';
@@ -111,19 +112,19 @@ export function clearOldCache(): void {
     try {
         const keysToRemove: string[] = [];
         const currentVersionPrefix = `${CACHE_PREFIX}${APP_VERSION}_`;
-        
+
         // 获取所有存储的键
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            
-            // 只清除旧版本的缓存，保留当前版本
-            if (key && key.startsWith(CACHE_PREFIX) && !key.startsWith(currentVersionPrefix)) {
+        const allKeys = StorageService.keys();
+
+        // 只清除旧版本的缓存，保留当前版本
+        for (const key of allKeys) {
+            if (key.startsWith(CACHE_PREFIX) && !key.startsWith(currentVersionPrefix)) {
                 keysToRemove.push(key);
             }
         }
-        
+
         keysToRemove.forEach(k => StorageService.remove(k));
-        
+
         if (keysToRemove.length > 0) {
             Logger.debug(`[ViewLoader] 清理了 ${keysToRemove.length} 个旧版本缓存项`);
         }
@@ -141,14 +142,15 @@ export function getCacheStats(): CacheStats {
         size: 0,
         items: []
     };
-    
+
     try {
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key && key.startsWith(CACHE_PREFIX)) {
-                const value = localStorage.getItem(key);
+        const allKeys = StorageService.keys();
+
+        for (const key of allKeys) {
+            if (key.startsWith(CACHE_PREFIX)) {
+                const value = StorageService.getRaw(key, null);
                 const itemSize = value ? value.length * 2 : 0; // UTF-16编码，每字符2字节
-                
+
                 stats.count++;
                 stats.size += itemSize;
                 stats.items.push({
@@ -161,7 +163,7 @@ export function getCacheStats(): CacheStats {
     } catch (e) {
         Logger.warn('[ViewLoader] 获取缓存统计失败:', e);
     }
-    
+
     return stats;
 }
 
@@ -305,8 +307,7 @@ export async function initViews(): Promise<void> {
  * @param routeId - 路由ID
  */
 export async function ensureViewLoaded(routeId: string): Promise<void> {
-    // 动态导入menuConfig以获取视图路径
-    const { getViewPathByRoute } = await import('../config/menuConfig');
+    // 获取视图路径
     const viewPath = getViewPathByRoute(routeId);
     
     if (!viewPath) {

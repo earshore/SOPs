@@ -8,7 +8,27 @@
       "Bash(cut -d'\\(' -f1)",
       "Bash(npx tsc:*)",
       "mcp__plugin_playwright_playwright__browser_navigate",
-      "Bash(git config:*)"
+      "Bash(git config:*)",
+      "Bash(xargs grep:*)",
+      "Bash(ls:*)",
+      "Bash(bc)",
+      "Bash(git mv:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(curl:*)",
+      "Bash(npx playwright:*)",
+      "Bash(node:*)",
+      "Bash(npx:*)",
+      "Bash(python:*)",
+      "Read(//d/Users/Administrator/Documents/GitHub/AihangSOP/$HOME/**)",
+      "Read(//d/Users/Administrator/Documents/GitHub/AihangSOP/$USERPROFILE/**)",
+      "Read(//d/Users/Administrator/Documents/GitHub/AihangSOP/$HOME/.config/**)",
+      "Read(//d/Users/Administrator/Documents/GitHub/AihangSOP/$USERPROFILE/.config/**)",
+      "Bash(winget install:*)",
+      "Bash(powershell.exe:*)",
+      "Bash(npm list:*)",
+      "Bash(ping:*)"
     ]
   }
 }

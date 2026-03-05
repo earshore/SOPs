@@ -12,6 +12,7 @@ import { renderResults, renderLangSelector, renderQAGrid } from './render';
 import { rufusSimulator } from '../services/rufusSimulator';
 import { triggerFileImport } from '../services/importHandler';
 import { renderDataPreview, renderJSONPreview } from './dataPreview';
+import { StorageService, STORAGE_KEYS } from '../../../../../../services/storageService';
 
 import { Logger } from '../../../../../../services/loggerService';
 // 获取 qalab 状态的辅助函数
@@ -762,7 +763,6 @@ export function clearRufusChat(): void {
  */
 export async function checkLLMConfiguration(): Promise<void> {
     try {
-        const { StorageService, STORAGE_KEYS } = await import('../../../../../../services/storageService');
         const activeProvider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER) as string | null;
 
         if (!activeProvider) {

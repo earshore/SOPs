@@ -1,6 +1,6 @@
-/* ============================================
+﻿/* ----------------------------------------
    Scraper Panel - Enhanced UI & Animations
-   ============================================ */
+   ---------------------------------------- */
 
 /* ---- Base & Reset ---- */
 * {
@@ -223,11 +223,11 @@
 }
 
 .animate-float {
-  animation: subtleFloat 4s var(--ease-in-out) infinite;
+  animation: subtleFloat 4s var(--var(--ease-in-out)) infinite;
 }
 
 .animate-pulse-glow {
-  animation: pulseGlow 3s var(--ease-in-out) infinite;
+  animation: pulseGlow 3s var(--var(--ease-in-out)) infinite;
 }
 
 .animate-card-enter {
@@ -242,20 +242,20 @@
   pointer-events: none;
 }
 .particle--1 {
-  animation: particleDrift1 6s var(--ease-in-out) infinite;
+  animation: particleDrift1 6s var(--var(--ease-in-out)) infinite;
 }
 .particle--2 {
-  animation: particleDrift2 8s var(--ease-in-out) infinite;
+  animation: particleDrift2 8s var(--var(--ease-in-out)) infinite;
 }
 .particle--3 {
-  animation: particleDrift3 7s var(--ease-in-out) infinite;
+  animation: particleDrift3 7s var(--var(--ease-in-out)) infinite;
 }
 
 /* ---- Dot Grid Background ---- */
 .dot-grid-bg {
   background-image: radial-gradient(circle, var(--color-sky-500) 1px, transparent 1px);
   background-size: 24px 24px;
-  animation: dotGridPulse 6s var(--ease-in-out) infinite;
+  animation: dotGridPulse 6s var(--var(--ease-in-out)) infinite;
 }
 
 /* ---- Banner Gradient Animation ---- */
@@ -266,7 +266,7 @@
     rgba(239, 246, 255, 0.6) 60%, 
     rgba(236, 254, 255, 0.4) 100%);
   background-size: 200% 200%;
-  animation: gradientShift 8s var(--ease-in-out) infinite;
+  animation: gradientShift 8s var(--var(--ease-in-out)) infinite;
 }
 
 /* ---- Glass Morphism Card ---- */
@@ -319,7 +319,7 @@
   transform: scale(1.15) translateY(-1px);
 }
 .site-btn.selected .site-flag {
-  animation: iconBounce var(--duration-slow) var(--ease-out);
+  animation: iconBounce var(--duration-slow) var(--var(--ease-out));
 }
 
 /* ---- Selected Check Badge ---- */
@@ -447,7 +447,7 @@
   width: 50%;
   height: 100%;
   background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.06), transparent);
-  animation: shimmerSweep var(--duration-2s) infinite;
+  animation: shimmerSweep var(--duration-var(--duration-2s)) infinite;
 }
 
 /* ---- Progress Bar (Enhanced) ---- */
@@ -517,7 +517,7 @@
 
 /* ---- Analyzed Badge Animation ---- */
 .analyzed-badge {
-  animation: badgePulse var(--duration-2s) var(--ease-in-out) infinite;
+  animation: badgePulse var(--duration-var(--duration-2s)) var(--var(--ease-in-out)) infinite;
 }
 
 /* ---- Upload Area ---- */
@@ -715,7 +715,7 @@
   inset: 0;
   border-radius: 50%;
   background: inherit;
-  animation: statusPing var(--duration-2s) var(--ease-out) infinite;
+  animation: statusPing var(--duration-var(--duration-2s)) var(--var(--ease-out)) infinite;
 }
 
 /* ---- Section Headers ---- */
@@ -899,7 +899,7 @@
 /* ---- Warning Banner ---- */
 .warning-banner {
   transition: all var(--duration-normal);
-  animation: fadeInScale var(--duration-slow) var(--ease-out);
+  animation: fadeInScale var(--duration-slow) var(--var(--ease-out));
 }
 .warning-banner:hover {
   box-shadow: 0 4px 12px -2px var(--color-amber-200);

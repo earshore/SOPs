@@ -1,4 +1,33 @@
 {
-  "mcpServers": {
+    "mcpServers": {
+      "filesystem": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-filesystem",
+          "D:/Users/Administrator/Documents/GitHub/AihangSOP"
+        ]
+      },
+      "memory": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-memory"
+        ]
+      },
+      "sequential-thinking": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-sequential-thinking"
+        ]
+      },
+      "fetch": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-fetch"
+        ]
+      }
+    }
   }
-}

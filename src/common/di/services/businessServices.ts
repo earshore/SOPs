@@ -9,6 +9,10 @@ import { SERVICE_NAMES } from '../ServiceRegistry';
 import type { ILoggerService } from '@/types/services';
 
 import { Logger } from '../../../services/loggerService';
+import { analyticsService } from '@/services/analyticsService';
+import { createErrorTracker } from '@/services/errorTracker';
+import { createAlertService } from '@/services/alertService';
+import { createPerformanceStorage } from '@/services/performanceStorage';
 /**
  * 注册业务服务到注册表
  */
@@ -36,7 +40,6 @@ export function registerBusinessServices(registry: ServiceRegistry): void {
   registry.register({
     name: SERVICE_NAMES.ANALYTICS,
     factory: async () => {
-      const { analyticsService } = await import('@/services/analyticsService');
       return analyticsService;
     },
     lifetime: 'singleton',
@@ -48,7 +51,6 @@ export function registerBusinessServices(registry: ServiceRegistry): void {
   registry.register({
     name: SERVICE_NAMES.ERROR_TRACKER,
     factory: async (c) => {
-      const { createErrorTracker } = await import('@/services/errorTracker');
       const logger = c.resolve<ILoggerService>(SERVICE_NAMES.LOGGER);
       return createErrorTracker(logger);
     },
@@ -86,7 +88,6 @@ export function registerBusinessServices(registry: ServiceRegistry): void {
   registry.register({
     name: SERVICE_NAMES.ALERT,
     factory: async (c) => {
-      const { createAlertService } = await import('@/services/alertService');
       const logger = c.resolve<ILoggerService>(SERVICE_NAMES.LOGGER);
       return createAlertService(logger);
     },
@@ -99,7 +100,6 @@ export function registerBusinessServices(registry: ServiceRegistry): void {
   registry.register({
     name: SERVICE_NAMES.PERFORMANCE_STORAGE,
     factory: async (c) => {
-      const { createPerformanceStorage } = await import('@/services/performanceStorage');
       const logger = c.resolve<ILoggerService>(SERVICE_NAMES.LOGGER);
       return createPerformanceStorage(logger);
     },

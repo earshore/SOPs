@@ -13,6 +13,7 @@ import {
   type NavigoAdapter,
 } from './navigo';
 import { MENU_CONFIG } from '../config/menuConfig';
+import { updateUIForRoute } from '../ui/navigation';
 
 import { Logger } from '../../services/loggerService';
 // 全局路由实例
@@ -106,7 +107,6 @@ export function initRouter(): NavigoAdapter {
     
     // 调用 UI 更新函数
     try {
-      const { updateUIForRoute } = await import('../ui/navigation');
       const routeId = context.to.path.replace(/^\//, '') || 'home';
       if (import.meta.env.DEV) {
         Logger.debug(`[Middleware After] 🔄 Calling updateUIForRoute with routeId: ${routeId}`);
