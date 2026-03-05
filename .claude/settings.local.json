@@ -24,7 +24,11 @@
       "Read(//d/Users/Administrator/Documents/GitHub/AihangSOP/$HOME/**)",
       "Read(//d/Users/Administrator/Documents/GitHub/AihangSOP/$USERPROFILE/**)",
       "Read(//d/Users/Administrator/Documents/GitHub/AihangSOP/$HOME/.config/**)",
-      "Read(//d/Users/Administrator/Documents/GitHub/AihangSOP/$USERPROFILE/.config/**)"
+      "Read(//d/Users/Administrator/Documents/GitHub/AihangSOP/$USERPROFILE/.config/**)",
+      "Bash(winget install:*)",
+      "Bash(powershell.exe:*)",
+      "Bash(npm list:*)",
+      "Bash(ping:*)"
     ]
   }
 }
