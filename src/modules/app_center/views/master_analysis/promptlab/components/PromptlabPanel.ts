@@ -18,6 +18,7 @@ import { SafeRenderer } from '../../../../../../common/infrastructure/SafeRender
 import { estimateTokenCount, formatTokenCount } from '../../ai_analysis/utils/tokenCounter';
 
 import { Logger } from '../../../../../../services/loggerService';
+import { extractProductDNA, canExtractDNA } from '../../services/dnaExtractor';
 /**
  * 控制台模式类型
  */
@@ -988,6 +989,91 @@ export function createPromptlabPanel() {
             });
             this.onReportSectionChange();
             showToast('已清空选择', { type: 'success' });
+        },
+
+        /**
+         * 检查是否可以提取 DNA
+         */
+        get canExtractDNA(): boolean {
+            const report = appStore.getState().analysis.analysisReport;
+            return canExtractDNA(report as any);
+        },
+
+        /**
+         * 自动填充产品 DNA
+         */
+        autoPopulateDNA() {
+            Logger.debug('[Promptlab] 🧬 开始自动填充产品 DNA');
+
+            const report = appStore.getState().analysis.analysisReport;
+            if (!report) {
+                showToast('未检测到分析报告', { type: 'warning' });
+                return;
+            }
+
+            // 提取 DNA
+            const dna = extractProductDNA(report as any);
+            if (!dna) {
+                showToast('无法从报告中提取产品 DNA', { type: 'warning' });
+                return;
+            }
+
+            // 检查是否已有内容
+            const hasExistingContent =
+                this.profile.audience.trim() ||
+                this.profile.usps.trim() ||
+                this.profile.specs.trim();
+
+            if (hasExistingContent) {
+                // 显示确认对话框
+                if (!confirm('检测到已有内容，是否覆盖现有的产品 DNA？')) {
+                    return;
+                }
+            }
+
+            // 填充字段
+            this.profile.audience = dna.audience;
+            this.profile.usps = dna.usps;
+            this.profile.specs = dna.specs;
+
+            // 保存状态
+            this.saveState();
+
+            // 显示提示
+            const confidenceAvg = (
+                dna.confidence.audience +
+                dna.confidence.usps +
+                dna.confidence.specs
+            ) / 3;
+            const confidencePercent = Math.round(confidenceAvg * 100);
+
+            showToast(`已自动提取产品 DNA (置信度: ${confidencePercent}%)`, { type: 'success' });
+
+            // 添加视觉反馈
+            this.highlightAutoFilledFields();
+
+            Logger.debug('[Promptlab] ✅ DNA 填充完成:', {
+                audienceLength: dna.audience.length,
+                uspsLength: dna.usps.length,
+                specsLength: dna.specs.length,
+                confidence: dna.confidence
+            });
+        },
+
+        /**
+         * 高亮自动填充的字段
+         */
+        highlightAutoFilledFields() {
+            const fields = ['lab-audience', 'lab-usps', 'lab-specs'];
+            fields.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.classList.add('bg-blue-50', 'border-blue-300');
+                    setTimeout(() => {
+                        el.classList.remove('bg-blue-50', 'border-blue-300');
+                    }, 2000);
+                }
+            });
         },
     };
 }
