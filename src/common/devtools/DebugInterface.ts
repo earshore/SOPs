@@ -5,6 +5,7 @@
 // ================================================================
 
 import { Logger } from '@services/loggerService';
+import { StorageService } from '@services/storageService';
 
 /**
  * 调试接口类型
@@ -104,8 +105,7 @@ class DebugInterfaceManager {
         
         clearStorage: () => {
           if (confirm('确定要清除所有本地存储吗？')) {
-            localStorage.clear();
-            sessionStorage.clear();
+            StorageService.clear();
             Logger.debug('✅ 本地存储已清除');
           }
         },

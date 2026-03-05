@@ -5,7 +5,7 @@
 
 import type { ColorSchemeName } from '../constants/colorSchemes';
 import { ColorContext } from '../utils/ColorContext';
-
+import { StorageService } from '../../services/storageService';
 import { Logger } from '../../services/loggerService';
 export interface ThemeColors {
   primary: string;
@@ -118,7 +118,7 @@ export class ThemeManager {
     root.dataset.theme = themeId;
     
     // 持久化
-    localStorage.setItem('app-theme', themeId);
+    StorageService.set('app-theme', themeId);
     this.currentTheme = themeId;
     
     // 移除过渡
@@ -193,7 +193,7 @@ export class ThemeManager {
    * 从本地存储恢复主题
    */
   static restoreTheme(): void {
-    const savedTheme = localStorage.getItem('app-theme');
+    const savedTheme = StorageService.get<string>('app-theme', null);
     if (savedTheme && this.getTheme(savedTheme)) {
       this.applyTheme(savedTheme, { animate: false });
     }

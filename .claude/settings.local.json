@@ -8,7 +8,12 @@
       "Bash(cut -d'\\(' -f1)",
       "Bash(npx tsc:*)",
       "mcp__plugin_playwright_playwright__browser_navigate",
-      "Bash(git config:*)"
+      "Bash(git config:*)",
+      "Bash(xargs grep:*)",
+      "Bash(ls:*)",
+      "Bash(bc)",
+      "Bash(git mv:*)",
+      "Bash(git add:*)"
     ]
   }
 }

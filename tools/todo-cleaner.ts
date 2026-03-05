@@ -5,8 +5,11 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { glob } from 'glob';
+import glob from 'glob';
 import { execSync } from 'child_process';
+import { promisify } from 'util';
+
+const globAsync = promisify(glob);
 
 interface TodoIssue {
   file: string;
@@ -90,7 +93,7 @@ class TodoCleaner {
 
     const files: string[] = [];
     for (const pattern of patterns) {
-      const matches = await glob(pattern, {
+      const matches = await globAsync(pattern, {
         ignore: this.excludeDirs.map(dir => `**/${dir}/**`),
       });
       files.push(...matches);

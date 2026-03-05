@@ -5,6 +5,7 @@
 // ================================================================
 
 import { Logger } from '@services/loggerService';
+import { StorageService } from '@services/storageService';
 
 /**
  * 主题颜色配置
@@ -250,7 +251,8 @@ export function applyTheme(themeId: string): void {
  */
 export function loadThemeFromStorage(): string {
   try {
-    return localStorage.getItem('app_theme') || 'blue';
+    const theme = StorageService.get<string>('app_theme', null);
+    return theme || 'blue';
   } catch (e) {
     return 'blue';
   }
@@ -261,7 +263,7 @@ export function loadThemeFromStorage(): string {
  */
 export function saveThemeToStorage(themeId: string): void {
   try {
-    localStorage.setItem('app_theme', themeId);
+    StorageService.set('app_theme', themeId);
   } catch (e) {
     Logger.warn('[Theme] 保存主题失败:', e);
   }
