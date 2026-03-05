@@ -17,7 +17,14 @@
       "Bash(git commit:*)",
       "Bash(git push:*)",
       "Bash(curl:*)",
-      "Bash(npx playwright:*)"
+      "Bash(npx playwright:*)",
+      "Bash(node:*)",
+      "Bash(npx:*)",
+      "Bash(python:*)",
+      "Read(//d/Users/Administrator/Documents/GitHub/AihangSOP/$HOME/**)",
+      "Read(//d/Users/Administrator/Documents/GitHub/AihangSOP/$USERPROFILE/**)",
+      "Read(//d/Users/Administrator/Documents/GitHub/AihangSOP/$HOME/.config/**)",
+      "Read(//d/Users/Administrator/Documents/GitHub/AihangSOP/$USERPROFILE/.config/**)"
     ]
   }
 }
