@@ -7,6 +7,8 @@
 import type { RouteMiddleware } from './types';
 
 import { Logger } from '../../../services/loggerService';
+import { analyticsService } from '@/services/analyticsService';
+import { loadingManager } from '@/common/utils/LoadingManager';
 // ==================== 日志中间件 ====================
 
 /**
@@ -56,9 +58,6 @@ export function createAnalyticsMiddleware(): RouteMiddleware {
     const { to } = context;
 
     try {
-      // 动态导入分析服务
-      const { analyticsService } = await import('@/services/analyticsService');
-
       // 记录页面浏览
       analyticsService.trackPageView(to.path, to.config.label || to.path);
     } catch (error) {
@@ -81,13 +80,10 @@ export function createAnalyticsMiddleware(): RouteMiddleware {
 export function createLoadingMiddleware(): RouteMiddleware {
   return async (context, next) => {
     const taskId = `route-${context.to.path}`;
-    let manager: { start: (id: string, opts: { message: string }) => void; stop: (id: string) => void } | null = null;
 
     try {
       // 显示加载指示器
-      const { LoadingManager } = await import('@/common/utils/LoadingManager');
-      manager = new LoadingManager();
-      manager.start(taskId, { message: '正在加载...' });
+      loadingManager.start(taskId, { message: '正在加载...' });
 
       await next();
     } catch (error) {
@@ -95,9 +91,7 @@ export function createLoadingMiddleware(): RouteMiddleware {
       await next();
     } finally {
       // 隐藏加载指示器
-      if (manager) {
-        manager.stop(taskId);
-      }
+      loadingManager.stop(taskId);
     }
   };
 }

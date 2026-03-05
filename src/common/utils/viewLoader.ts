@@ -7,6 +7,7 @@
 
 import { APP_VERSION } from '../constants/constants';
 import { StorageService } from '../../services/storageService';
+import { getViewPathByRoute } from '../config/menuConfig';
 
 import { Logger } from '../../services/loggerService';
 const CACHE_PREFIX = 'view_cache_';
@@ -306,8 +307,7 @@ export async function initViews(): Promise<void> {
  * @param routeId - 路由ID
  */
 export async function ensureViewLoaded(routeId: string): Promise<void> {
-    // 动态导入menuConfig以获取视图路径
-    const { getViewPathByRoute } = await import('../config/menuConfig');
+    // 获取视图路径
     const viewPath = getViewPathByRoute(routeId);
     
     if (!viewPath) {

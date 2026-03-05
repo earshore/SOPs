@@ -75,8 +75,15 @@ document.addEventListener('DOMContentLoaded', (): void => {
 
 // ✅ P1: 导入动作注册中心
 import {
-  registerActionsWithLegacy
+  registerActionsWithLegacy,
+  initGlobalEventDelegation
 } from './common/utils/actionRegistry';
+
+import { AlpineRegistry } from './common/infrastructure/AlpineRegistry';
+import { triggerInitialNavigation } from './common/router/initRouter';
+import { initEventLogger } from './common/utils/eventLogger';
+import { loadPlugins } from './common/utils/pluginLoader';
+import { performanceService } from './services/performanceService';
 
 // ✅ 全局错误兜底已由GlobalErrorHandler统一处理
 // 见 src/common/errors/GlobalErrorHandler.ts
@@ -213,7 +220,6 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
 
     // 🔧 修复: 初始化 AlpineRegistry (处理动态注册的组件)
     try {
-      const { AlpineRegistry } = await import('./common/infrastructure/AlpineRegistry');
       const registry = AlpineRegistry.getInstance();
       registry.init();
       Logger.debug("✅ AlpineRegistry initialized");
@@ -228,7 +234,6 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
 
     // 🔧 关键修复: 视图加载完成后，触发路由的初始导航
     try {
-      const { triggerInitialNavigation } = await import('./common/router/initRouter');
       triggerInitialNavigation();
       Logger.debug("✅ Initial navigation triggered");
     } catch (e) {
@@ -236,7 +241,6 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     }
 
     // 初始化全局事件委托
-    const { initGlobalEventDelegation } = await import('./common/utils/actionRegistry');
     initGlobalEventDelegation();
 
     // 初始化LoadingManager
@@ -248,7 +252,6 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
 
     // 可选：初始化事件日志
     try {
-      const { initEventLogger } = await import('./common/utils/eventLogger');
       initEventLogger();
     } catch (e) {
       Logger.warn('事件日志初始化失败:', e);
@@ -256,7 +259,6 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
 
     // 可选：加载插件
     try {
-      const { loadPlugins } = await import('./common/utils/pluginLoader');
       loadPlugins();
     } catch (e) {
       Logger.warn('插件加载失败:', e);
@@ -422,7 +424,6 @@ registerActionsWithLegacy({
   // 🎯 阶段1: 性能监控
   showPerformanceReport: async () => {
     try {
-      const { performanceService } = await import('./services/performanceService');
       const report = performanceService.getReport();
 
       Logger.debug('📊 性能报告:', report);

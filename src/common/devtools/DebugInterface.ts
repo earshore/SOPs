@@ -6,6 +6,9 @@
 
 import { Logger } from '@services/loggerService';
 import { StorageService } from '@services/storageService';
+import { appStore } from '@/stores/useAppStore';
+import { MENU_CONFIG } from '../config/menuConfig';
+import { container } from '../di/Container';
 
 /**
  * 调试接口类型
@@ -75,32 +78,26 @@ class DebugInterfaceManager {
       // 工具函数
       utils: {
         showState: () => {
-          import('@/stores/useAppStore').then(({ appStore }) => {
-            console.group('📊 应用状态');
-            Logger.debug('应用状态', appStore.getState());
-            console.groupEnd();
-          });
+          console.group('📊 应用状态');
+          Logger.debug('应用状态', appStore.getState());
+          console.groupEnd();
         },
         
         showRoutes: () => {
-          import('../config/menuConfig').then(({ MENU_CONFIG }) => {
-            console.group('🗺️ 路由配置');
-            console.table(Object.entries(MENU_CONFIG.routes).map(([id, config]) => ({
-              id,
-              label: config.label,
-              moduleId: config.moduleId,
-              panelId: config.panelId
-            })));
-            console.groupEnd();
-          });
+          console.group('🗺️ 路由配置');
+          console.table(Object.entries(MENU_CONFIG.routes).map(([id, config]) => ({
+            id,
+            label: config.label,
+            moduleId: config.moduleId,
+            panelId: config.panelId
+          })));
+          console.groupEnd();
         },
         
         showServices: () => {
-          import('../di/Container').then(({ container }) => {
-            console.group('🔧 已注册服务');
-            Logger.debug('已注册服务', { services: container.getRegisteredServices() });
-            console.groupEnd();
-          });
+          console.group('🔧 已注册服务');
+          Logger.debug('已注册服务', { services: container.getRegisteredServices() });
+          console.groupEnd();
         },
         
         clearStorage: () => {
@@ -111,9 +108,7 @@ class DebugInterfaceManager {
         },
         
         exportLogs: () => {
-          import('../../services/loggerService').then(({ Logger }) => {
-            Logger.download('json');
-          });
+          Logger.download('json');
         }
       }
     };

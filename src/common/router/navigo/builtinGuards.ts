@@ -7,6 +7,7 @@
 import type { Route, RouteGuard, GuardResult } from './types';
 
 import { Logger } from '../../../services/loggerService';
+import { container } from '@/common/di/Container';
 // ==================== 元信息验证守卫 ====================
 
 /**
@@ -70,9 +71,6 @@ export const dependencyGuard: RouteGuard = {
     // 检查依赖是否存在
     for (const dep of dependencies) {
       try {
-        // 动态导入 DI 容器
-        const { container } = await import('@/common/di/Container');
-
         if (!container.has(dep)) {
           missing.push(dep);
         }

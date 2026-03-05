@@ -9,6 +9,12 @@ import { SERVICE_NAMES } from '../ServiceRegistry';
 import type { IStorageService, IConfigService, ILoggerService } from '@/types/services';
 
 import { Logger } from '../../../services/loggerService';
+import { createStorageService } from '@/services/storageService';
+import eventBus from '@/common/EventBus';
+import { globalErrorHandler } from '@/common/errors/GlobalErrorHandler';
+import { loadingManager } from '@/common/utils/LoadingManager';
+import actionRegistry from '@/common/utils/actionRegistry';
+import { initRouter } from '@/common/router/initRouter';
 /**
  * 注册核心服务到注册表
  */
@@ -34,7 +40,6 @@ export function registerCoreServices(registry: ServiceRegistry): void {
   registry.register({
     name: SERVICE_NAMES.STORAGE,
     factory: async () => {
-      const { createStorageService } = await import('@/services/storageService');
       return createStorageService();
     },
     lifetime: 'singleton',
@@ -45,7 +50,6 @@ export function registerCoreServices(registry: ServiceRegistry): void {
   registry.register({
     name: SERVICE_NAMES.EVENT_BUS,
     factory: async () => {
-      const eventBus = (await import('@/common/EventBus')).default;
       return eventBus;
     },
     lifetime: 'singleton',
@@ -84,7 +88,6 @@ export function registerCoreServices(registry: ServiceRegistry): void {
   registry.register({
     name: SERVICE_NAMES.GLOBAL_ERROR_HANDLER,
     factory: async () => {
-      const { globalErrorHandler } = await import('@/common/errors/GlobalErrorHandler');
       return globalErrorHandler;
     },
     lifetime: 'singleton',
@@ -112,7 +115,6 @@ export function registerCoreServices(registry: ServiceRegistry): void {
   registry.register({
     name: SERVICE_NAMES.ACTION_REGISTRY,
     factory: async () => {
-      const { default: actionRegistry } = await import('@/common/utils/actionRegistry');
       return actionRegistry;
     },
     lifetime: 'singleton',
@@ -123,7 +125,6 @@ export function registerCoreServices(registry: ServiceRegistry): void {
   registry.register({
     name: SERVICE_NAMES.ROUTER,
     factory: async () => {
-      const { initRouter } = await import('@/common/router/initRouter');
       return initRouter();
     },
     lifetime: 'singleton',
@@ -134,7 +135,6 @@ export function registerCoreServices(registry: ServiceRegistry): void {
   registry.register({
     name: SERVICE_NAMES.LOADING_MANAGER,
     factory: async () => {
-      const { loadingManager } = await import('@/common/utils/LoadingManager');
       return loadingManager;
     },
     lifetime: 'singleton',
