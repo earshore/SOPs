@@ -7,7 +7,7 @@
 /* ==================== 模块高亮动画 ==================== */
 /* 使用全局模块高亮动画 - 见 src/css/animations/keyframes.css */
 .more-module-highlight {
-  animation: moduleHighlightGreen var(--duration-2s) var(--ease-out);
+  animation: moduleHighlightGreen var(--duration-var(--duration-2s)) var(--var(--ease-out));
 }
 
 /* ==================== Agent Card 特有样式 ==================== */
@@ -33,7 +33,7 @@
 }
 
 .agent-card:hover .agent-card-gradient {
-  animation: agentCardPulse var(--duration-2s) var(--ease-in-out) infinite;
+  animation: agentCardPulse var(--duration-var(--duration-2s)) var(--var(--ease-in-out)) infinite;
 }
 
 @keyframes agentCardPulse {

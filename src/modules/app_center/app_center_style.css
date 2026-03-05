@@ -23,7 +23,7 @@
 }
 
 .app-center-error-boundary .w-16 {
-  animation: pulse var(--duration-2s) cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation: pulse var(--duration-var(--duration-2s)) cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 /* ==================== Markdown 内容样式 ==================== */

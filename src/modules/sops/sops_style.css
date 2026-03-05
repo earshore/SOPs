@@ -81,15 +81,15 @@
 .stage-badge {
   display: inline-block;
   padding: 2px 8px;
-  border-radius: 4px;
+  border-radius: var(--rounded);
   font-weight: 700;
   font-size: 11px;
   white-space: nowrap;
 }
 
 .stage-test {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: var(--color-blue-100);
+  color: var(--color-blue-700);
 }
 
 .stage-growth {
@@ -232,14 +232,14 @@
   border-radius: var(--rounded-xl, 16px);
   padding: var(--spacing-lg, 1.5rem) var(--spacing-md, 1rem);
   text-align: center;
-  transition: all var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
-  box-shadow: var(--shadow-xs, 0 1px 2px rgba(0, 0, 0, 0.04));
+  transition: all var(--duration-normal, var(--duration-normal)) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+  box-shadow: var(--shadow-xs, 0 1px 2px var(--color-black-alpha-5));
   cursor: pointer;
 }
 
 .sop-process-step:hover {
   transform: translateY(-4px);
-  border-color: var(--color-primary, #3b82f6);
+  border-color: var(--color-primary, var(--color-blue-500));
   box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.07));
 }
 
@@ -249,7 +249,7 @@
   height: 40px;
   margin: 0 auto var(--spacing-sm, 0.75rem);
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-primary, #3b82f6), #6366f1);
+  background: linear-gradient(135deg, var(--color-primary, var(--color-blue-500)), #6366f1);
   color: white;
   font-size: var(--text-md, 1rem);
   font-weight: var(--font-bold, 700);
@@ -257,7 +257,7 @@
   align-items: center;
   justify-content: center;
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
-  transition: all var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+  transition: all var(--duration-normal, var(--duration-normal)) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
 .sop-process-step:hover .sop-step-number {
@@ -279,17 +279,17 @@
   color: var(--color-text-primary, #0f172a);
   line-height: 1.4;
   margin: 0;
-  transition: color var(--duration-fast, 200ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+  transition: color var(--duration-fast, var(--duration-fast)) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
 .sop-process-step:hover .sop-step-title {
-  color: var(--color-primary, #3b82f6);
+  color: var(--color-primary, var(--color-blue-500));
 }
 
 /* 步骤描述 */
 .sop-step-desc {
   font-size: var(--text-xs, 0.75rem);
-  color: var(--color-text-secondary, #64748b);
+  color: var(--color-text-secondary, var(--color-slate-500));
   line-height: 1.6;
   margin: 0;
   white-space: pre-line;
@@ -303,19 +303,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-text-tertiary, #94a3b8);
+  color: var(--color-text-tertiary, var(--color-slate-400));
   font-size: var(--text-sm, 0.875rem);
-  transition: all var(--duration-fast, 200ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+  transition: all var(--duration-fast, var(--duration-fast)) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
 .sop-process-arrow i {
-  transition: transform var(--duration-fast, 200ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+  transition: transform var(--duration-fast, var(--duration-fast)) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
 /* 当相邻步骤悬停时，箭头也有动画效果 */
 .sop-process-step:hover + .sop-process-arrow,
 .sop-process-arrow:has(+ .sop-process-step:hover) {
-  color: var(--color-primary, #3b82f6);
+  color: var(--color-primary, var(--color-blue-500));
 }
 
 .sop-process-step:hover + .sop-process-arrow i,
@@ -325,7 +325,7 @@
 
 /* 步骤编号颜色变体 */
 .sop-process-step:nth-child(4n+1) .sop-step-number {
-  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  background: linear-gradient(135deg, var(--color-blue-500), #6366f1);
 }
 
 .sop-process-step:nth-child(4n+3) .sop-step-number {
@@ -333,11 +333,11 @@
 }
 
 .sop-process-step:nth-child(4n+5) .sop-step-number {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+  background: linear-gradient(135deg, var(--color-amber-500), var(--color-amber-600));
 }
 
 .sop-process-step:nth-child(4n+7) .sop-step-number {
-  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  background: linear-gradient(135deg, #8b5cf6, var(--color-purple-600));
 }
 
 .sop-process-step:nth-child(4n+9) .sop-step-number {
@@ -425,7 +425,7 @@
 /* ==================== 暗色模式适配 ==================== */
 @media (prefers-color-scheme: dark) {
   .sop-process-step {
-    background: var(--color-bg-secondary, #1e293b);
+    background: var(--color-bg-secondary, var(--color-slate-800));
     border-color: rgba(255, 255, 255, 0.1);
   }
 
@@ -438,11 +438,11 @@
   }
 
   .sop-step-desc {
-    color: var(--color-text-secondary, #cbd5e1);
+    color: var(--color-text-secondary, var(--color-slate-300));
   }
 
   .sop-process-arrow {
-    color: var(--color-text-tertiary, #64748b);
+    color: var(--color-text-tertiary, var(--color-slate-500));
   }
 
   .sop-process-step:hover + .sop-process-arrow,
@@ -482,7 +482,7 @@
 
   .sop-process-step {
     box-shadow: none;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-slate-200);
   }
 
   .sop-process-arrow {
