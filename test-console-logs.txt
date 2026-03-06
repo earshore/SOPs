@@ -1,0 +1,39 @@
+Total messages: 193 (Errors: 0, Warnings: 0)
+Returning 28 messages for level "info"
+
+[LOG] [MiddlewareManager] Running 1 before middlewares @ http://localhost:5175/src/common/router/navigo/MiddlewareManager.ts:159
+[LOG] [NavigoAdapter] Navigation in progress, skipping @ http://localhost:5175/src/common/router/navigo/NavigoAdapter.ts:559
+[LOG] [GuardManager] Running guards: /home -> /promptlab @ http://localhost:5175/src/common/router/navigo/GuardManager.ts:260
+[LOG] [GuardManager] Executing global guard: metaValidation @ http://localhost:5175/src/common/router/navigo/GuardManager.ts:260
+[LOG] [GuardManager] Guard metaValidation completed in 0ms @ http://localhost:5175/src/common/router/navigo/GuardManager.ts:260
+[LOG] [GuardManager] Executing global guard: dependency @ http://localhost:5175/src/common/router/navigo/GuardManager.ts:260
+[LOG] [GuardManager] Guard dependency completed in 0ms @ http://localhost:5175/src/common/router/navigo/GuardManager.ts:260
+[LOG] [GuardManager] Executing global guard: auth @ http://localhost:5175/src/common/router/navigo/GuardManager.ts:260
+[LOG] [GuardManager] Guard auth completed in 0ms @ http://localhost:5175/src/common/router/navigo/GuardManager.ts:260
+[LOG] [GuardManager] Executing global guard: dataPreload @ http://localhost:5175/src/common/router/navigo/GuardManager.ts:260
+[LOG] [GuardManager] Guard dataPreload completed in 0ms @ http://localhost:5175/src/common/router/navigo/GuardManager.ts:260
+[LOG] [GuardManager] Executing global guard: navigation-logger @ http://localhost:5175/src/common/router/navigo/GuardManager.ts:260
+[LOG] [GuardManager] Guard navigation-logger completed in 0ms @ http://localhost:5175/src/common/router/navigo/GuardManager.ts:260
+[LOG] [GuardManager] All guards passed @ http://localhost:5175/src/common/router/navigo/GuardManager.ts:260
+[LOG] [MiddlewareManager] Running 1 after middlewares @ http://localhost:5175/src/common/router/navigo/MiddlewareManager.ts:159
+[LOG] [NavigoAdapter] Navigated: /home -> /promptlab @ http://localhost:5175/src/common/router/navigo/NavigoAdapter.ts:559
+[INFO] %c[10:58:44] [INFO] [SafeModuleLoader] color: #3B82F6; font-weight: bold; SafeModuleLoader 已初始化 {} @ http://localhost:5175/src/services/loggerService.ts:164
+[INFO] %c[10:58:44] [INFO] [SafeModuleLoader] color: #3B82F6; font-weight: bold; 加载模板: src/modules/app_center/views/master_analysis/promptlab/template.html {} @ http://localhost:5175/src/services/loggerService.ts:164
+[INFO] %c[10:58:44] [INFO] [SafeModuleLoader] color: #3B82F6; font-weight: bold; 模板加载成功: src/modules/app_center/views/master_analysis/promptlab/template.html {retryAttempts: 0, cached: false} @ http://localhost:5175/src/services/loggerService.ts:164
+[INFO] %c[10:58:44] [INFO] [App] color: #3B82F6; font-weight: bold; [02:58:44] [AlpineRegistry] ✓ 组件 "promptlabPanel" 已立即注册到 Alpine {} @ http://localhost:5175/src/services/loggerService.ts:164
+[LOG] 🧬 测试 1: 完整 DNA 提取 @ :6
+[LOG] 提取前状态: {audience: , usps: , specs: , confidence: Proxy(Object)} @ :7
+[LOG] 提取后状态: {audience: 25-35岁男性, 科技爱好者, 健身达人, 音乐发烧友, 早期采用者, 品质追求者, usps: - 40小时超长续航
+- 主动降噪技术
+- IPX7防水等级
+- 蓝牙5.3连接
+- 快速充电功能
+- 行业领先的续航能力, specs: 容量: 40小时
+特性: IPX7, 蓝牙5.3
+- 40小时续航
+- 快充15分钟用3小时, confidence: Proxy(Object)} @ :19
+[LOG] 🔄 测试 2: 单字段提取功能 @ :6
+[LOG] 修改后的受众: 测试修改的内容 @ :10
+[LOG] 重新提取目标受众字段... @ :14
+[LOG] 重新提取后的受众: 25-35岁男性, 科技爱好者, 健身达人, 音乐发烧友, 早期采用者, 品质追求者 @ :18
+[LOG] 置信度: 80 @ :19

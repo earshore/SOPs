@@ -59,6 +59,98 @@ export function createAiAnalysisPanelOptimized(): Record<string, unknown> {
       return !!appStore.getState().analysis.analysisReport;
     },
 
+    // 置信度相关
+    get reportConfidence() {
+      const report = appStore.getState().analysis.analysisReport;
+      if (!report || typeof report === 'string') {
+        console.debug('[置信度] reportConfidence: 报告不存在或为字符串');
+        return null;
+      }
+      if (!report._metadata) {
+        console.warn('[置信度] reportConfidence: 报告缺少 _metadata 字段');
+        return null;
+      }
+      const confidence = report._metadata.confidence || null;
+      console.debug('[置信度] reportConfidence:', confidence);
+      return confidence;
+    },
+
+    get overallConfidence() {
+      const report = appStore.getState().analysis.analysisReport;
+      if (!report || typeof report === 'string') {
+        console.debug('[置信度] overallConfidence: 报告不存在或为字符串');
+        return 0;
+      }
+      if (!report._metadata) {
+        console.warn('[置信度] overallConfidence: 报告缺少 _metadata 字段');
+        return 0;
+      }
+      const overall = report._metadata.overallConfidence || 0;
+      console.debug('[置信度] overallConfidence:', overall);
+      return overall;
+    },
+
+    get overallConfidencePercent() {
+      const percent = Math.round((this.overallConfidence as number) * 100);
+      console.debug('[置信度] overallConfidencePercent:', percent + '%');
+      return percent;
+    },
+
+    get hasConfidenceData() {
+      const hasData = !!this.reportConfidence;
+      console.debug('[置信度] hasConfidenceData:', hasData);
+      return hasData;
+    },
+
+    // 获取特定目标的置信度
+    getTargetConfidence(targetId: string): number {
+      const confidence = this.reportConfidence as Record<string, number> | null;
+      if (!confidence || !confidence[targetId]) return 0;
+      return Math.round(confidence[targetId] * 100);
+    },
+
+    // 获取置信度颜色类（使用设计令牌）
+    getConfidenceColorClass(targetId: string): string {
+      const percent = (this as any).getTargetConfidence(targetId);
+      if (percent >= 70) return 'confidence-high-bg confidence-high-text confidence-high-border';
+      if (percent >= 50) return 'confidence-medium-bg confidence-medium-text confidence-medium-border';
+      return 'confidence-low-bg confidence-low-text confidence-low-border';
+    },
+
+    // 获取置信度背景颜色类（带透明度）
+    getConfidenceBgAlphaClass(percent: number): string {
+      if (percent >= 70) return 'confidence-high-bg-alpha';
+      if (percent >= 50) return 'confidence-medium-bg-alpha';
+      return 'confidence-low-bg-alpha';
+    },
+
+    // 获取置信度文本颜色类（浅色版本）
+    getConfidenceTextLightClass(percent: number): string {
+      if (percent >= 70) return 'confidence-high-text-light';
+      if (percent >= 50) return 'confidence-medium-text-light';
+      return 'confidence-low-text-light';
+    },
+
+    // 获取置信度文本和边框颜色类（用于徽章）
+    getConfidenceTextBorderClass(percent: number): string {
+      if (percent >= 70) return 'confidence-high-text confidence-high-border';
+      if (percent >= 50) return 'confidence-medium-text confidence-medium-border';
+      return 'confidence-low-text confidence-low-border';
+    },
+
+    // 获取置信度等级文本（用于可访问性）
+    getConfidenceLevel(percent: number): string {
+      if (percent >= 70) return '高';
+      if (percent >= 50) return '中';
+      return '低';
+    },
+
+    // 获取置信度 ARIA 标签
+    getConfidenceAriaLabel(percent: number): string {
+      const level = (this as any).getConfidenceLevel(percent);
+      return `置信度: ${percent}%, 等级: ${level}`;
+    },
+
     // UI 状态
     expandedPromptIndex: null as number | null,
     showPromptPanel: false,

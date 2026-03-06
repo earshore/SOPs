@@ -319,6 +319,31 @@ export const SEMANTIC_COLORS = {
     light: 'var(--color-slate-100)',
     dark: 'var(--color-slate-300)',
     focus: 'var(--color-blue-500)'
+  },
+
+  // 置信度色系
+  confidence: {
+    high: {
+      bg: 'var(--color-green-100)',
+      bgAlpha: 'var(--color-green-500)',
+      text: 'var(--color-green-700)',
+      textLight: 'var(--color-green-400)',
+      border: 'var(--color-green-200)'
+    },
+    medium: {
+      bg: 'var(--color-yellow-100)',
+      bgAlpha: 'var(--color-yellow-500)',
+      text: 'var(--color-yellow-700)',
+      textLight: 'var(--color-yellow-400)',
+      border: 'var(--color-yellow-300)'
+    },
+    low: {
+      bg: 'var(--color-orange-100)',
+      bgAlpha: 'var(--color-orange-500)',
+      text: 'var(--color-orange-700)',
+      textLight: 'var(--color-orange-400)',
+      border: 'var(--color-orange-300)'
+    }
   }
 } as const;
 

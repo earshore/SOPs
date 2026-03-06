@@ -370,11 +370,11 @@ export function createScraperPanel() {
                     Logger.debug('[Scraper] ✅ 窗口打开成功');
                 } else {
                     Logger.warn('[Scraper] ⚠️ 窗口被浏览器拦截，请检查弹窗设置');
-                    showToast('请允许浏览器弹窗以打开下载页面', 'warning');
+                    showToast('请允许浏览器弹窗以打开下载页面', { type: 'warning' });
                 }
             } catch (error) {
                 Logger.error('[Scraper] ❌ 打开窗口失败:', error);
-                showToast('打开下载页面失败', 'error');
+                showToast('打开下载页面失败', { type: 'error' });
             }
         },
 

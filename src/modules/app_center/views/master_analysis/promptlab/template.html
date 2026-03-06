@@ -72,6 +72,16 @@
                             <span class="text-[10px] text-slate-400 font-normal ml-1">Product DNA</span>
                         </h3>
                         <div class="flex items-center gap-2">
+                            <!-- 从报告加载按钮 -->
+                            <button
+                                @click="autoPopulateDNA"
+                                :disabled="!hasReport"
+                                :class="hasReport ? 'bg-blue-500 hover:bg-blue-600 text-white cursor-pointer' : 'bg-slate-200 text-slate-400 cursor-not-allowed'"
+                                class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5"
+                                title="从AI分析报告自动提取产品DNA">
+                                <i class="fas fa-magic text-[10px]"></i>
+                                <span>从报告加载</span>
+                            </button>
                             <label class="flex items-center text-xs font-bold text-slate-700 gap-1.5"
                                 for="lab-target-market">
                                 <span class="w-1 h-3.5 bg-indigo-400 rounded-full"></span>
@@ -132,6 +142,23 @@
                                     <span class="w-1 h-3.5 bg-slate-300 rounded-full"></span>
                                     <i class="fa-solid fa-users text-slate-400 text-[10px]"></i>
                                     目标受众 <span class="text-slate-400 font-normal">- 客户特征</span>
+
+                                    <!-- 置信度徽章 -->
+                                    <span x-show="dnaConfidence.audience > 0"
+                                          :class="dnaConfidence.audience >= 70 ? 'bg-green-100 text-green-700' : dnaConfidence.audience >= 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-orange-100 text-orange-700'"
+                                          class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold">
+                                        <i class="fas fa-chart-line text-[8px]"></i>
+                                        <span x-text="`${dnaConfidence.audience}%`"></span>
+                                    </span>
+
+                                    <!-- 单字段提取按钮 -->
+                                    <button @click="extractSingleField('audience')"
+                                            :disabled="!hasReport"
+                                            :class="hasReport ? 'text-blue-600 hover:bg-blue-50' : 'text-slate-300 cursor-not-allowed'"
+                                            class="text-[10px] px-2 py-1 rounded transition-all"
+                                            title="仅重新提取此字段">
+                                        <i class="fas fa-rotate text-[8px]"></i>
+                                    </button>
                                 </label>
                                 <input @input="onInputChange"
                                     class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all placeholder:text-slate-300"
@@ -144,6 +171,23 @@
                                     <span class="w-1 h-3.5 bg-slate-300 rounded-full"></span>
                                     <i class="fa-solid fa-list-check text-slate-400 text-[10px]"></i>
                                     核心卖点 (USPs) <span class="text-slate-400 font-normal">- 可补充</span>
+
+                                    <!-- 置信度徽章 -->
+                                    <span x-show="dnaConfidence.usps > 0"
+                                          :class="dnaConfidence.usps >= 70 ? 'bg-green-100 text-green-700' : dnaConfidence.usps >= 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-orange-100 text-orange-700'"
+                                          class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold">
+                                        <i class="fas fa-chart-line text-[8px]"></i>
+                                        <span x-text="`${dnaConfidence.usps}%`"></span>
+                                    </span>
+
+                                    <!-- 单字段提取按钮 -->
+                                    <button @click="extractSingleField('usps')"
+                                            :disabled="!hasReport"
+                                            :class="hasReport ? 'text-blue-600 hover:bg-blue-50' : 'text-slate-300 cursor-not-allowed'"
+                                            class="text-[10px] px-2 py-1 rounded transition-all"
+                                            title="仅重新提取此字段">
+                                        <i class="fas fa-rotate text-[8px]"></i>
+                                    </button>
                                 </label>
                                 <textarea @input="onInputChange"
                                     @focus="expandInput($event)"
@@ -158,6 +202,23 @@
                                     <span class="w-1 h-3.5 bg-slate-300 rounded-full"></span>
                                     <i class="fa-solid fa-circle-info text-slate-400 text-[10px]"></i>
                                     详细参数 (Specs) <span class="text-slate-400 font-normal">- 产品特征</span>
+
+                                    <!-- 置信度徽章 -->
+                                    <span x-show="dnaConfidence.specs > 0"
+                                          :class="dnaConfidence.specs >= 70 ? 'bg-green-100 text-green-700' : dnaConfidence.specs >= 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-orange-100 text-orange-700'"
+                                          class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold">
+                                        <i class="fas fa-chart-line text-[8px]"></i>
+                                        <span x-text="`${dnaConfidence.specs}%`"></span>
+                                    </span>
+
+                                    <!-- 单字段提取按钮 -->
+                                    <button @click="extractSingleField('specs')"
+                                            :disabled="!hasReport"
+                                            :class="hasReport ? 'text-blue-600 hover:bg-blue-50' : 'text-slate-300 cursor-not-allowed'"
+                                            class="text-[10px] px-2 py-1 rounded transition-all"
+                                            title="仅重新提取此字段">
+                                        <i class="fas fa-rotate text-[8px]"></i>
+                                    </button>
                                 </label>
                                 <textarea @input="onInputChange"
                                     @focus="expandInput($event)"
@@ -228,6 +289,25 @@
                                     <i class="fas fa-times text-[10px]"></i>
                                     <span>清空</span>
                                 </button>
+                            </div>
+                        </div>
+                        <!-- 置信度筛选控制 -->
+                        <div x-show="hasConfidenceData" class="mx-4 mb-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                            <div class="flex items-center gap-4 flex-wrap">
+                                <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                    <input type="checkbox"
+                                           x-model="confidenceFilter.showHighOnly"
+                                           @change="onConfidenceFilterChange"
+                                           class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                                    <span class="text-slate-700 font-medium">仅显示高置信度 (≥70%)</span>
+                                </label>
+                                <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                    <input type="checkbox"
+                                           x-model="confidenceFilter.hideLow"
+                                           @change="onConfidenceFilterChange"
+                                           class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                                    <span class="text-slate-700 font-medium">隐藏低置信度 (<50%)</span>
+                                </label>
                             </div>
                         </div>
                         <!-- Report Sections -->

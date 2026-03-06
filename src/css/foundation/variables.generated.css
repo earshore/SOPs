@@ -2,7 +2,7 @@
  * CSS 变量 - 自动生成文件
  * ⚠️ 请勿手动编辑此文件！
  * 修改 src/common/config/design-tokens.ts 后运行 npm run generate:tokens
- * 生成时间: 2026-03-03T01:38:30.404Z
+ * 生成时间: 2026-03-06T04:07:15.513Z
  */
 
 :root {
@@ -442,7 +442,6 @@
    ======================================== */
 
 :root {
-  /* 主色系 */
   --color-primary: var(--color-blue-500);
   --color-primary-light: var(--color-blue-400);
   --color-primary-dark: var(--color-blue-600);
@@ -456,30 +455,44 @@
   --color-accent-light: var(--color-indigo-400);
   --color-accent-dark: var(--color-indigo-600);
 
-  /* 状态色 */
   --color-success: var(--color-green-500);
   --color-warning: var(--color-amber-500);
   --color-danger: var(--color-red-500);
   --color-error: var(--color-red-500);
   --color-info: var(--color-blue-500);
-
-  /* 文本色 */
   --text-primary: var(--color-slate-900);
   --text-secondary: var(--color-slate-600);
   --text-tertiary: var(--color-slate-500);
   --text-disabled: var(--color-slate-400);
-  --text-inverse: #ffffff;
+  --text-inverse: var(--color-white);
 
-  /* 背景色 */
-  --bg-primary: #ffffff;
+  --bg-primary: var(--color-white);
   --bg-secondary: var(--color-slate-50);
   --bg-tertiary: var(--color-slate-100);
-  --bg-surface: #ffffff;
+  --bg-surface: var(--color-white);
   --bg-overlay: rgba(0, 0, 0, 0.5);
 
-  /* 边框色 */
-  --border-default: var(--color-slate-200);
+  --border: var(--color-slate-200);
   --border-light: var(--color-slate-100);
   --border-dark: var(--color-slate-300);
   --border-focus: var(--color-blue-500);
+
+
+  /* 置信度色系 */
+  --confidence-high-bg: var(--color-green-100);
+  --confidence-high-bg-alpha: var(--color-green-500);
+  --confidence-high-text: var(--color-green-700);
+  --confidence-high-text-light: var(--color-green-400);
+  --confidence-high-border: var(--color-green-200);
+  --confidence-medium-bg: var(--color-yellow-100);
+  --confidence-medium-bg-alpha: var(--color-yellow-500);
+  --confidence-medium-text: var(--color-yellow-700);
+  --confidence-medium-text-light: var(--color-yellow-400);
+  --confidence-medium-border: var(--color-yellow-300);
+  --confidence-low-bg: var(--color-orange-100);
+  --confidence-low-bg-alpha: var(--color-orange-500);
+  --confidence-low-text: var(--color-orange-700);
+  --confidence-low-text-light: var(--color-orange-400);
+  --confidence-low-border: var(--color-orange-300);
+
 }

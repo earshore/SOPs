@@ -545,6 +545,47 @@ export class PromptlabPage extends BasePage {
     return tier1.length > 0 && tier2.length > 0;
   }
 
+  // ========== DNA 自动提取方法 ==========
+
+  /**
+   * 点击"从报告加载"按钮，自动提取产品 DNA
+   */
+  async autoPopulateDNA(): Promise<void> {
+    const button = this.page.locator('button:has-text("从报告加载")');
+    await button.click();
+    await this.wait(1000); // 等待填充完成
+  }
+
+  /**
+   * 检查"从报告加载"按钮是否可用
+   */
+  async isAutoPopulateButtonEnabled(): Promise<boolean> {
+    const button = this.page.locator('button:has-text("从报告加载")');
+    return await button.isEnabled();
+  }
+
+  /**
+   * 检查 DNA 字段是否已自动填充
+   */
+  async isDNAAutoFilled(): Promise<boolean> {
+    const audience = await this.getValue(this.selectors.audience);
+    const usps = await this.getValue(this.selectors.usps);
+    const specs = await this.getValue(this.selectors.specs);
+
+    return audience.length > 0 || usps.length > 0 || specs.length > 0;
+  }
+
+  /**
+   * 获取自动填充的 DNA 数据
+   */
+  async getAutoFilledDNA(): Promise<{ audience: string; usps: string; specs: string }> {
+    return {
+      audience: await this.getValue(this.selectors.audience),
+      usps: await this.getValue(this.selectors.usps),
+      specs: await this.getValue(this.selectors.specs)
+    };
+  }
+
   // ========== 完整流程方法 ==========
 
   /**

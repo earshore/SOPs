@@ -18,6 +18,7 @@ import { SafeRenderer } from '../../../../../../common/infrastructure/SafeRender
 import { estimateTokenCount, formatTokenCount } from '../../ai_analysis/utils/tokenCounter';
 
 import { Logger } from '../../../../../../services/loggerService';
+import { extractProductDNA, canExtractDNA } from '../../services/dnaExtractor';
 /**
  * 控制台模式类型
  */
@@ -61,6 +62,23 @@ export function createPromptlabPanel() {
             selectedReportSections: [] as string[],
             charLimit: 5000,
         } as UserProductProfile,
+
+        // DNA 提取置信度
+        dnaConfidence: {
+            audience: 0,
+            usps: 0,
+            specs: 0,
+            overall: 0
+        },
+
+        // 置信度筛选配置
+        confidenceFilter: {
+            showHighOnly: false,  // 仅显示高置信度 (≥70%)
+            hideLow: false        // 隐藏低置信度 (<50%)
+        },
+
+        // 标记是否已经渲染过报告（用于区分首次加载和用户清空）
+        hasRenderedReportOnce: false,
 
         // ========== Computed Properties ==========
 
@@ -119,6 +137,125 @@ export function createPromptlabPanel() {
             return this.tokenCount > this.profile.charLimit;
         },
 
+        // ========== 置信度相关 ==========
+
+        /**
+         * 获取报告置信度数据
+         */
+        get reportConfidence() {
+            const report = appStore.getState().analysis.analysisReport;
+            if (!report || typeof report === 'string') {
+                console.debug('[Promptlab 置信度] reportConfidence: 报告不存在或为字符串');
+                return null;
+            }
+            const reportObj = report as any;
+            if (!reportObj._metadata) {
+                console.warn('[Promptlab 置信度] reportConfidence: 报告缺少 _metadata 字段');
+                return null;
+            }
+            const confidence = reportObj._metadata.confidence || null;
+            console.debug('[Promptlab 置信度] reportConfidence:', confidence);
+            return confidence;
+        },
+
+        /**
+         * 获取总体置信度
+         */
+        get overallConfidence() {
+            const report = appStore.getState().analysis.analysisReport;
+            if (!report || typeof report === 'string') {
+                console.debug('[Promptlab 置信度] overallConfidence: 报告不存在或为字符串');
+                return 0;
+            }
+            const reportObj = report as any;
+            if (!reportObj._metadata) {
+                console.warn('[Promptlab 置信度] overallConfidence: 报告缺少 _metadata 字段');
+                return 0;
+            }
+            const overall = reportObj._metadata.overallConfidence || 0;
+            console.debug('[Promptlab 置信度] overallConfidence:', overall);
+            return overall;
+        },
+
+        /**
+         * 获取总体置信度百分比
+         */
+        get overallConfidencePercent() {
+            const percent = Math.round((this.overallConfidence as number) * 100);
+            console.debug('[Promptlab 置信度] overallConfidencePercent:', percent + '%');
+            return percent;
+        },
+
+        /**
+         * 检查是否有置信度数据
+         */
+        get hasConfidenceData() {
+            const hasData = !!this.reportConfidence;
+            console.debug('[Promptlab 置信度] hasConfidenceData:', hasData);
+            return hasData;
+        },
+
+        /**
+         * 获取特定目标的置信度（百分比）
+         */
+        getTargetConfidence(targetId: string): number {
+            const confidence = this.reportConfidence as Record<string, number> | null;
+            if (!confidence || !confidence[targetId]) return 0;
+            return Math.round(confidence[targetId] * 100);
+        },
+
+        /**
+         * 获取置信度颜色类
+         */
+        getConfidenceColorClass(percent: number): string {
+            if (percent >= 70) return 'bg-green-100 text-green-700 border-green-300';
+            if (percent >= 50) return 'bg-yellow-100 text-yellow-700 border-yellow-300';
+            return 'bg-orange-100 text-orange-700 border-orange-300';
+        },
+
+        /**
+         * 获取置信度等级文本
+         */
+        getConfidenceLevel(percent: number): string {
+            if (percent >= 70) return '高';
+            if (percent >= 50) return '中';
+            return '低';
+        },
+
+        /**
+         * 获取置信度 ARIA 标签
+         */
+        getConfidenceAriaLabel(percent: number): string {
+            const level = this.getConfidenceLevel(percent);
+            return `置信度: ${percent}%, 等级: ${level}`;
+        },
+
+        /**
+         * 判断是否应该显示该分析目标（基于置信度筛选）
+         */
+        shouldShowTarget(targetId: string): boolean {
+            const confidence = this.getTargetConfidence(targetId);
+
+            if ((this.confidenceFilter as any).showHighOnly && confidence < 70) {
+                return false;
+            }
+
+            if ((this.confidenceFilter as any).hideLow && confidence < 50) {
+                return false;
+            }
+
+            return true;
+        },
+
+        /**
+         * 置信度筛选变化处理
+         */
+        onConfidenceFilterChange() {
+            Logger.debug('[Promptlab] 置信度筛选变化:', this.confidenceFilter);
+            // 重新渲染报告分析以应用筛选
+            this.renderReportAnalysis();
+        },
+
         // ========== Lifecycle ==========
 
         init() {
@@ -146,6 +283,27 @@ export function createPromptlabPanel() {
                 Logger.debug('[Promptlab] 检测到历史更新，重新渲染报告分析');
                 this.renderReportAnalysis();
             });
+
+            // 监听 appStore 分析报告变化
+            if (appStore && typeof appStore.subscribe === 'function') {
+                appStore.subscribe((state) => {
+                    // 当分析报告变化时，强制更新组件
+                    if (state.analysis?.analysisReport) {
+                        // 使用 Alpine 的 nextTick 确保响应式更新
+                        if (typeof (this as any).$nextTick === 'function') {
+                            (this as any).$nextTick(() => {
+                                this.renderReportAnalysis();
+                            });
+                        } else {
+                            // 备用方案：使用 setTimeout
+                            setTimeout(() => {
+                                this.renderReportAnalysis();
+                            }, 0);
+                        }
+                    }
+                });
+                Logger.debug('[Promptlab] ✅ 已订阅 appStore 变化');
+            }
 
             Logger.debug('[Promptlab] ✅ Alpine 组件初始化完成');
         },
@@ -362,7 +520,7 @@ export function createPromptlabPanel() {
             renderer.renderTemplate(container, '');
             container.className = 'mt-3 grid grid-cols-1 lg:grid-cols-2 gap-3';
 
-            const isFirstLoad = this.profile.selectedReportSections.length === 0;
+            const isFirstLoad = !this.hasRenderedReportOnce && this.profile.selectedReportSections.length === 0;
 
             // 检测报告格式：
             // 新格式直接是分析目标对象: { 'title-keywords': {...}, 'selling-points': {...}, ... }
@@ -652,9 +810,18 @@ export function createPromptlabPanel() {
                 this.saveState();
             }
 
+            // 标记已经渲染过一次
+            this.hasRenderedReportOnce = true;
+
             availableTargets.forEach((targetId) => {
                 const config = targetConfig[targetId];
                 if (!config) return; // 类型守卫
+
+                // 应用置信度筛选
+                if (!this.shouldShowTarget(targetId)) {
+                    Logger.debug(`[Promptlab] ${targetId} 被置信度筛选过滤`);
+                    return;
+                }
 
                 const data = reportObj[targetId];
                 Logger.debug(`[Promptlab] 渲染目标 ${targetId}:`, {
@@ -678,17 +845,28 @@ export function createPromptlabPanel() {
                 // 使用 SafeRenderer 渲染模板
                 const template = `
                     <div class="flex h-5 items-center">
-                        <input type="checkbox" 
-                               name="report-section" 
-                               value="${escapeHtml(targetId)}" 
-                               id="sect-${escapeHtml(targetId)}" 
-                               class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" 
+                        <input type="checkbox"
+                               name="report-section"
+                               value="${escapeHtml(targetId)}"
+                               id="sect-${escapeHtml(targetId)}"
+                               class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                                ${isChecked ? 'checked' : ''}
                                @change="onReportSectionChange">
                     </div>
                     <div class="ml-3 text-sm flex-1 min-w-0">
                         <label for="sect-${escapeHtml(targetId)}" class="cursor-pointer select-none w-full block">
-                            <span class="font-medium text-slate-700 block mb-0.5 leading-snug">${config.icon} ${escapeHtml(config.title)}</span>
+                            <div class="flex items-center justify-between gap-2 mb-0.5">
+                                <span class="font-medium text-slate-700 leading-snug">${config.icon} ${escapeHtml(config.title)}</span>
+                                <span x-show="hasConfidenceData && getTargetConfidence('${escapeHtml(targetId)}') > 0"
+                                      class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold border shrink-0"
+                                      :class="getConfidenceColorClass(getTargetConfidence('${escapeHtml(targetId)}'))"
+                                      role="status"
+                                      :aria-label="getConfidenceAriaLabel(getTargetConfidence('${escapeHtml(targetId)}'))">
+                                    <i class="fa-solid fa-chart-line text-[10px]" aria-hidden="true"></i>
+                                    <span x-text="getTargetConfidence('${escapeHtml(targetId)}') + '%'"></span>
+                                    <span x-text="getConfidenceLevel(getTargetConfidence('${escapeHtml(targetId)}'))"></span>
+                                </span>
+                            </div>
                             <p class="text-xs text-slate-400 truncate font-normal" title="${escapeHtml(previewText)}">${escapeHtml(previewText)}</p>
                         </label>
                     </div>
@@ -972,10 +1150,24 @@ export function createPromptlabPanel() {
          * 全选报告模块
          */
         selectAllReportSections() {
-            document.querySelectorAll<HTMLInputElement>('input[name="report-section"]').forEach((cb) => {
-                cb.checked = true;
-            });
-            this.onReportSectionChange();
+            // 获取所有可用的分析维度（不受置信度筛选影响）
+            const report = appStore.getState().analysis.analysisReport;
+            if (!report || typeof report === 'string') {
+                showToast('暂无可选模块', { type: 'warning' });
+                return;
+            }
+
+            const reportObj = report as Record<string, unknown>;
+            // 直接从报告对象获取所有维度（排除 _metadata）
+            const availableTargets = Object.keys(reportObj).filter((id) => id !== '_metadata');
+
+            // 直接设置所有可用维度为选中状态
+            this.profile.selectedReportSections = [...availableTargets];
+            this.saveState();
+
+            // 重新渲染以更新复选框状态
+            this.renderReportAnalysis();
+
             showToast('已全选模块', { type: 'success' });
         },
 
@@ -983,11 +1175,161 @@ export function createPromptlabPanel() {
          * 清空报告模块选择
          */
         clearReportSections() {
-            document.querySelectorAll<HTMLInputElement>('input[name="report-section"]').forEach((cb) => {
-                cb.checked = false;
-            });
-            this.onReportSectionChange();
+            // 直接清空选择数组，避免因置信度筛选导致的 DOM 查询不完整
+            this.profile.selectedReportSections = [];
+            this.saveState();
+
+            // 重新渲染以更新复选框状态
+            this.renderReportAnalysis();
+
             showToast('已清空选择', { type: 'success' });
+        },
+
+        /**
+         * 检查是否可以提取 DNA
+         */
+        get canExtractDNA(): boolean {
+            const report = appStore.getState().analysis.analysisReport;
+            return canExtractDNA(report as any);
+        },
+
+        /**
+         * 自动填充产品 DNA
+         */
+        autoPopulateDNA() {
+            Logger.debug('[Promptlab] 🧬 开始自动填充产品 DNA');
+
+            const report = appStore.getState().analysis.analysisReport;
+            if (!report) {
+                showToast('未检测到分析报告', { type: 'warning' });
+                return;
+            }
+
+            // 提取 DNA
+            const dna = extractProductDNA(report as any);
+            if (!dna) {
+                showToast('无法从报告中提取产品 DNA', { type: 'warning' });
+                return;
+            }
+
+            // 检查是否已有内容
+            const hasExistingContent =
+                this.profile.audience.trim() ||
+                this.profile.usps.trim() ||
+                this.profile.specs.trim();
+
+            if (hasExistingContent) {
+                // 显示确认对话框
+                if (!confirm('检测到已有内容，是否覆盖现有的产品 DNA？')) {
+                    return;
+                }
+            }
+
+            // 填充字段
+            this.profile.audience = dna.audience;
+            this.profile.usps = dna.usps;
+            this.profile.specs = dna.specs;
+
+            // 保存置信度信息
+            this.dnaConfidence = {
+                audience: Math.round(dna.confidence.audience * 100),
+                usps: Math.round(dna.confidence.usps * 100),
+                specs: Math.round(dna.confidence.specs * 100),
+                overall: Math.round(((dna.confidence.audience + dna.confidence.usps + dna.confidence.specs) / 3) * 100)
+            };
+
+            // 保存状态
+            this.saveState();
+
+            // 显示增强的提示信息
+            const confidenceAvg = (
+                dna.confidence.audience +
+                dna.confidence.usps +
+                dna.confidence.specs
+            ) / 3;
+            const confidencePercent = Math.round(confidenceAvg * 100);
+
+            showToast(
+                `✅ DNA 提取成功 (总体置信度: ${confidencePercent}%)\n` +
+                `受众: ${this.dnaConfidence.audience}% | 卖点: ${this.dnaConfidence.usps}% | 参数: ${this.dnaConfidence.specs}%`,
+                { type: 'success' }
+            );
+
+            // 添加视觉反馈
+            this.highlightAutoFilledFields();
+
+            Logger.debug('[Promptlab] ✅ DNA 填充完成:', {
+                audienceLength: dna.audience.length,
+                uspsLength: dna.usps.length,
+                specsLength: dna.specs.length,
+                confidence: dna.confidence,
+                confidencePercent: this.dnaConfidence
+            });
+        },
+
+        /**
+         * 高亮自动填充的字段
+         */
+        highlightAutoFilledFields() {
+            const fields = ['lab-audience', 'lab-usps', 'lab-specs'];
+            fields.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.classList.add('bg-blue-50', 'border-blue-300');
+                    setTimeout(() => {
+                        el.classList.remove('bg-blue-50', 'border-blue-300');
+                    }, 2000);
+                }
+            });
+        },
+
+        /**
+         * 提取单个字段的 DNA
+         */
+        extractSingleField(fieldName: 'audience' | 'usps' | 'specs') {
+            Logger.debug('[Promptlab] 🔄 提取单个字段:', fieldName);
+
+            const report = appStore.getState().analysis.analysisReport;
+            if (!report) {
+                showToast('未检测到分析报告', { type: 'warning' });
+                return;
+            }
+
+            const dna = extractProductDNA(report as any);
+            if (!dna) {
+                showToast('无法从报告中提取产品 DNA', { type: 'warning' });
+                return;
+            }
+
+            // 只更新指定字段
+            this.profile[fieldName] = dna[fieldName];
+
+            // 更新该字段的置信度
+            const confidenceKey = fieldName as keyof typeof dna.confidence;
+            this.dnaConfidence[fieldName] = Math.round(dna.confidence[confidenceKey] * 100);
+
+            // 保存状态
+            this.saveState();
+
+            // 高亮该字段
+            const fieldId = fieldName === 'audience' ? 'lab-audience' :
+                            fieldName === 'usps' ? 'lab-usps' : 'lab-specs';
+            const el = document.getElementById(fieldId);
+            if (el) {
+                el.classList.add('bg-green-50', 'border-green-300');
+                setTimeout(() => {
+                    el.classList.remove('bg-green-50', 'border-green-300');
+                }, 2000);
+            }
+
+            const fieldLabel = fieldName === 'audience' ? '目标受众' :
+                              fieldName === 'usps' ? '核心卖点' : '技术参数';
+            showToast(`✅ 已重新提取${fieldLabel} (置信度: ${this.dnaConfidence[fieldName]}%)`, { type: 'success' });
+
+            Logger.debug('[Promptlab] ✅ 单字段提取完成:', {
+                field: fieldName,
+                confidence: this.dnaConfidence[fieldName]
+            });
         },
     };
 }

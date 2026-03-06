@@ -37,7 +37,7 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
 
     // ========== 订阅清理函数 ==========
     _unsubscribes: [] as Array<() => void>,
-    _navigationHandler: null as (() => void) | null,
+    _navigationHandler: null as EventListener | null,
 
     // ========== Lifecycle ==========
     init(this: AlpineContext & Record<string, unknown>) {
@@ -83,10 +83,10 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
       });
 
       // 监听导航事件
-      this._navigationHandler = () => {
-        this.navigateToScraper();
-      };
-      window.addEventListener('navigate-to-scraper', this._navigationHandler);
+      this._navigationHandler = (() => {
+        (this as any).navigateToScraper();
+      }) as EventListener;
+      window.addEventListener('navigate-to-scraper' as any, this._navigationHandler as EventListener);
 
       // 检查是否有新的 Scraper 数据
       checkAndLoadScraperData(this);
@@ -103,7 +103,7 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
       }
       // 清理导航事件监听器
       if (this._navigationHandler) {
-        window.removeEventListener('navigate-to-scraper', this._navigationHandler);
+        window.removeEventListener('navigate-to-scraper' as any, this._navigationHandler as EventListener);
         this._navigationHandler = null;
       }
     },
@@ -232,6 +232,93 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
 
     highlightJson(json: string): string {
       return highlightJson(json);
+    },
+
+    // ========== 置信度相关 ==========
+    get reportConfidence() {
+      const report = this.analysisReport;
+      if (!report || typeof report === 'string') {
+        console.debug('[置信度] reportConfidence: 报告不存在或为字符串');
+        return null;
+      }
+      const reportObj = report as any;
+      if (!reportObj._metadata) {
+        console.warn('[置信度] reportConfidence: 报告缺少 _metadata 字段');
+        return null;
+      }
+      const confidence = reportObj._metadata.confidence || null;
+      console.debug('[置信度] reportConfidence:', confidence);
+      return confidence;
+    },
+
+    get overallConfidence() {
+      const report = this.analysisReport;
+      if (!report || typeof report === 'string') {
+        console.debug('[置信度] overallConfidence: 报告不存在或为字符串');
+        return 0;
+      }
+      const reportObj = report as any;
+      if (!reportObj._metadata) {
+        console.warn('[置信度] overallConfidence: 报告缺少 _metadata 字段');
+        return 0;
+      }
+      const overall = reportObj._metadata.overallConfidence || 0;
+      console.debug('[置信度] overallConfidence:', overall);
+      return overall;
+    },
+
+    get overallConfidencePercent() {
+      const percent = Math.round((this.overallConfidence as number) * 100);
+      console.debug('[置信度] overallConfidencePercent:', percent + '%');
+      return percent;
+    },
+
+    get hasConfidenceData() {
+      const hasData = !!this.reportConfidence;
+      console.debug('[置信度] hasConfidenceData:', hasData);
+      return hasData;
+    },
+
+    getTargetConfidence(targetId: string): number {
+      const confidence = this.reportConfidence as Record<string, number> | null;
+      if (!confidence || !confidence[targetId]) return 0;
+      return Math.round(confidence[targetId] * 100);
+    },
+
+    getConfidenceColorClass(targetId: string): string {
+      const percent = this.getTargetConfidence(targetId);
+      if (percent >= 70) return 'confidence-high-bg confidence-high-text confidence-high-border';
+      if (percent >= 50) return 'confidence-medium-bg confidence-medium-text confidence-medium-border';
+      return 'confidence-low-bg confidence-low-text confidence-low-border';
+    },
+
+    getConfidenceBgAlphaClass(percent: number): string {
+      if (percent >= 70) return 'confidence-high-bg-alpha';
+      if (percent >= 50) return 'confidence-medium-bg-alpha';
+      return 'confidence-low-bg-alpha';
+    },
+
+    getConfidenceTextLightClass(percent: number): string {
+      if (percent >= 70) return 'confidence-high-text-light';
+      if (percent >= 50) return 'confidence-medium-text-light';
+      return 'confidence-low-text-light';
+    },
+
+    getConfidenceTextBorderClass(percent: number): string {
+      if (percent >= 70) return 'confidence-high-text confidence-high-border';
+      if (percent >= 50) return 'confidence-medium-text confidence-medium-border';
+      return 'confidence-low-text confidence-low-border';
+    },
+
+    getConfidenceLevel(percent: number): string {
+      if (percent >= 70) return '高';
+      if (percent >= 50) return '中';
+      return '低';
+    },
+
+    getConfidenceAriaLabel(percent: number): string {
+      const level = this.getConfidenceLevel(percent);
+      return `置信度: ${percent}%, 等级: ${level}`;
     }
   };
 

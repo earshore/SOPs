@@ -407,7 +407,23 @@ export interface AnalysisReport {
   
   /** 错误详情 */
   error_detail?: string;
-  
+
+  // ==================== 置信度元数据 ====================
+
+  /** 置信度元数据（AI 分析报告质量评估） */
+  _metadata?: {
+    /** 各报告类型的置信度分数 (0-1) */
+    confidence?: Record<string, number>;
+    /** 总体置信度 (0-1) */
+    overallConfidence?: number;
+    /** 分析时间 */
+    analyzedAt?: string;
+    /** 分析的目标ID列表 */
+    targetIds?: string[];
+    /** 分析语言 */
+    language?: string;
+  };
+
   // ==================== 扩展字段 ====================
   
   /**

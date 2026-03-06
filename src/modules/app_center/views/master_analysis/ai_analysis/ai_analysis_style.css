@@ -245,3 +245,67 @@ pre code {
 [x-cloak] {
   display: none !important;
 }
+
+/* ========== 置信度颜色系统（使用设计令牌） ========== */
+/* 高置信度 */
+.confidence-high-bg {
+  background-color: var(--confidence-high-bg);
+}
+
+.confidence-high-bg-alpha {
+  background-color: rgba(34, 197, 94, 0.2); /* green-500 with 20% opacity */
+}
+
+.confidence-high-text {
+  color: var(--confidence-high-text);
+}
+
+.confidence-high-text-light {
+  color: var(--confidence-high-text-light);
+}
+
+.confidence-high-border {
+  border-color: var(--confidence-high-border);
+}
+
+/* 中等置信度 */
+.confidence-medium-bg {
+  background-color: var(--confidence-medium-bg);
+}
+
+.confidence-medium-bg-alpha {
+  background-color: rgba(234, 179, 8, 0.2); /* yellow-500 with 20% opacity */
+}
+
+.confidence-medium-text {
+  color: var(--confidence-medium-text);
+}
+
+.confidence-medium-text-light {
+  color: var(--confidence-medium-text-light);
+}
+
+.confidence-medium-border {
+  border-color: var(--confidence-medium-border);
+}
+
+/* 低置信度 */
+.confidence-low-bg {
+  background-color: var(--confidence-low-bg);
+}
+
+.confidence-low-bg-alpha {
+  background-color: rgba(249, 115, 22, 0.2); /* orange-500 with 20% opacity */
+}
+
+.confidence-low-text {
+  color: var(--confidence-low-text);
+}
+
+.confidence-low-text-light {
+  color: var(--confidence-low-text-light);
+}
+
+.confidence-low-border {
+  border-color: var(--confidence-low-border);
+}
