@@ -291,25 +291,6 @@
                                 </button>
                             </div>
                         </div>
-                        <!-- 置信度筛选控制 -->
-                        <div x-show="hasConfidenceData" class="mx-4 mb-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
-                            <div class="flex items-center gap-4 flex-wrap">
-                                <label class="flex items-center gap-2 text-sm cursor-pointer">
-                                    <input type="checkbox"
-                                           x-model="confidenceFilter.showHighOnly"
-                                           @change="onConfidenceFilterChange"
-                                           class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
-                                    <span class="text-slate-700 font-medium">仅显示高置信度 (≥70%)</span>
-                                </label>
-                                <label class="flex items-center gap-2 text-sm cursor-pointer">
-                                    <input type="checkbox"
-                                           x-model="confidenceFilter.hideLow"
-                                           @change="onConfidenceFilterChange"
-                                           class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
-                                    <span class="text-slate-700 font-medium">隐藏低置信度 (<50%)</span>
-                                </label>
-                            </div>
-                        </div>
                         <!-- Report Sections -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto custom-scrollbar p-4"
                             id="report-sections-container">

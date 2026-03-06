@@ -72,10 +72,6 @@ export function createPromptlabPanel() {
         },
 
         // 置信度筛选配置
-        confidenceFilter: {
-            showHighOnly: false,  // 仅显示高置信度 (≥70%)
-            hideLow: false        // 隐藏低置信度 (<50%)
-        },
 
         // 标记是否已经渲染过报告（用于区分首次加载和用户清空）
         hasRenderedReportOnce: false,
@@ -230,31 +226,6 @@ export function createPromptlabPanel() {
             return `置信度: ${percent}%, 等级: ${level}`;
         },
 
-        /**
-         * 判断是否应该显示该分析目标（基于置信度筛选）
-         */
-        shouldShowTarget(targetId: string): boolean {
-            const confidence = this.getTargetConfidence(targetId);
-
-            if ((this.confidenceFilter as any).showHighOnly && confidence < 70) {
-                return false;
-            }
-
-            if ((this.confidenceFilter as any).hideLow && confidence < 50) {
-                return false;
-            }
-
-            return true;
-        },
-
-        /**
-         * 置信度筛选变化处理
-         */
-        onConfidenceFilterChange() {
-            Logger.debug('[Promptlab] 置信度筛选变化:', this.confidenceFilter);
-            // 重新渲染报告分析以应用筛选
-            this.renderReportAnalysis();
-        },
 
         // ========== Lifecycle ==========
 
@@ -816,12 +787,6 @@ export function createPromptlabPanel() {
             availableTargets.forEach((targetId) => {
                 const config = targetConfig[targetId];
                 if (!config) return; // 类型守卫
-
-                // 应用置信度筛选
-                if (!this.shouldShowTarget(targetId)) {
-                    Logger.debug(`[Promptlab] ${targetId} 被置信度筛选过滤`);
-                    return;
-                }
 
                 const data = reportObj[targetId];
                 Logger.debug(`[Promptlab] 渲染目标 ${targetId}:`, {
