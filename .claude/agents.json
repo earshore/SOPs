@@ -1,0 +1,407 @@
+{
+  "$schema": "https://modelcontextprotocol.io/schemas/agent-team.json",
+  "version": "1.0",
+  "teamName": "AihangSOP 开发团队",
+  "description": "精简高效的 Agent Team，专注于业务开发和快速迭代",
+  
+  "agents": {
+    "tech-lead": {
+      "name": "技术负责人 (Tech Lead)",
+      "description": "项目技术决策、架构设计、代码审查和团队协调",
+      "role": "lead",
+      "responsibilities": [
+        "技术方案设计和评审",
+        "代码审查和质量把控",
+        "协调各 agent 工作",
+        "解决技术难题和冲突",
+        "制定开发规范"
+      ],
+      "fileOwnership": {
+        "primary": [
+          "README.md",
+          "CLAUDE.md",
+          "package.json",
+          "vite.config.js",
+          "tsconfig.json"
+        ],
+        "review": ["**/*"]
+      },
+      "canModify": ["**/*"],
+      "mustReview": true
+    },
+    
+    "ui-developer": {
+      "name": "UI 开发工程师 (UI Developer)",
+      "description": "负责视觉设计、样式系统、UI 组件开发和用户交互实现",
+      "role": "developer",
+      "responsibilities": [
+        "设计令牌和配色方案管理",
+        "CSS 架构和样式开发",
+        "UI 组件开发和优化",
+        "交互逻辑实现",
+        "响应式设计",
+        "视觉一致性保证"
+      ],
+      "fileOwnership": {
+        "primary": [
+          "src/common/config/design-tokens.ts",
+          "src/css/**/*.css",
+          "tailwind.config.generated.js",
+          "src/components/**/*.html",
+          "src/modules/**/template.html",
+          "src/modules/**/*.css"
+        ],
+        "canModify": [
+          "src/common/config/design-tokens.ts",
+          "src/css/**/*",
+          "src/components/**/*.html",
+          "src/modules/**/template.html",
+          "src/modules/**/*.css"
+        ]
+      },
+      "cannotModify": [
+        "src/**/*.ts",
+        "src/services/**/*",
+        "test/**/*",
+        "tools/**/*"
+      ],
+      "designPrinciples": {
+        "colorSystem": {
+          "primary": "品牌主色，对比度 ≥ 4.5:1",
+          "secondary": "辅助色，与主色协调",
+          "neutral": "灰度色板，确保可读性",
+          "semantic": "语义化颜色（成功/警告/错误/信息）"
+        },
+        "spacing": "使用设计令牌，避免硬编码",
+        "typography": "保持字体层级清晰",
+        "interaction": "所有交互必须有即时反馈",
+        "consistency": "遵循设计系统，保持一致性"
+      },
+      "collaboratesWith": ["feature-developer"],
+      "reportsTo": "tech-lead"
+    },
+    
+    "feature-developer": {
+      "name": "功能开发工程师 (Feature Developer)",
+      "description": "负责业务功能开发、模块实现、数据流设计和业务逻辑",
+      "role": "developer",
+      "responsibilities": [
+        "业务模块开发",
+        "功能需求实现",
+        "数据流和状态管理",
+        "API 集成",
+        "业务逻辑实现",
+        "模块测试"
+      ],
+      "fileOwnership": {
+        "primary": [
+          "src/modules/**/*.ts",
+          "src/modules/**/*.js",
+          "src/services/**/*.ts",
+          "src/stores/**/*.ts",
+          "src/common/utils/**/*.ts"
+        ],
+        "canModify": [
+          "src/modules/**/*.ts",
+          "src/modules/**/*.js",
+          "src/services/**/*.ts",
+          "src/stores/**/*.ts",
+          "src/common/utils/**/*.ts",
+          "src/common/BaseModule.ts",
+          "src/common/StandardModule.ts"
+        ]
+      },
+      "cannotModify": [
+        "src/css/**/*",
+        "src/common/config/design-tokens.ts",
+        "tailwind.config.generated.js",
+        "vite.config.js",
+        "package.json"
+      ],
+      "mustFollow": [
+        "继承 BaseModule 或 StandardModule",
+        "使用 DI 容器获取服务",
+        "实现完整的生命周期方法",
+        "使用设计令牌而非硬编码样式",
+        "所有用户输入必须验证和转义"
+      ],
+      "collaboratesWith": ["ui-developer", "qa-engineer"],
+      "reportsTo": "tech-lead"
+    },
+    
+    "qa-engineer": {
+      "name": "质量保证工程师 (QA Engineer)",
+      "description": "负责测试、代码质量、安全审查和技术债务管理",
+      "role": "quality",
+      "responsibilities": [
+        "编写和执行测试用例",
+        "代码质量检查",
+        "安全漏洞扫描",
+        "性能测试",
+        "技术债务识别",
+        "质量报告"
+      ],
+      "fileOwnership": {
+        "primary": [
+          "test/**/*",
+          "tests/**/*",
+          "vitest.config.ts",
+          "playwright.config.ts",
+          "src/**/*.test.ts",
+          "src/**/*.spec.ts"
+        ],
+        "canModify": [
+          "test/**/*",
+          "tests/**/*",
+          "src/**/*.test.ts",
+          "src/**/*.spec.ts"
+        ]
+      },
+      "cannotModify": [
+        "src/modules/**/*.ts",
+        "src/services/**/*.ts",
+        "src/css/**/*"
+      ],
+      "qualityChecks": {
+        "preCommit": ["lint", "type-check", "format-check"],
+        "preMerge": ["unit-tests", "integration-tests", "security-scan"],
+        "preRelease": ["all-tests", "e2e-tests", "performance-tests"]
+      },
+      "collaboratesWith": ["feature-developer"],
+      "reportsTo": "tech-lead"
+    }
+  },
+  
+  "teamRules": {
+    "fileConflictPrevention": {
+      "principle": "每个 agent 只修改自己负责的文件",
+      "rules": [
+        "ui-developer 只修改样式和模板文件",
+        "feature-developer 只修改 TypeScript 业务逻辑",
+        "qa-engineer 只修改测试文件",
+        "跨职责修改必须经过 tech-lead 审批"
+      ],
+      "conflictResolution": "由 tech-lead 协调解决文件冲突"
+    },
+    
+    "collaborationProtocol": {
+      "ui-feature-collaboration": {
+        "scenario": "新功能开发",
+        "workflow": [
+          "1. ui-developer 设计 UI 和交互，更新 template.html 和 CSS",
+          "2. feature-developer 实现业务逻辑，更新 .ts 文件",
+          "3. qa-engineer 编写测试用例",
+          "4. tech-lead 代码审查和合并"
+        ]
+      },
+      "design-system-update": {
+        "scenario": "设计系统更新",
+        "workflow": [
+          "1. ui-developer 更新 design-tokens.ts",
+          "2. ui-developer 运行 npm run generate:tokens",
+          "3. ui-developer 更新相关 CSS 文件",
+          "4. tech-lead 审查设计变更"
+        ]
+      }
+    },
+    
+    "codeReview": {
+      "required": true,
+      "reviewer": "tech-lead",
+      "criteria": [
+        "代码符合规范",
+        "没有文件冲突",
+        "测试通过",
+        "性能可接受",
+        "安全无漏洞"
+      ]
+    }
+  },
+  
+  "workflowTemplates": {
+    "new-feature": {
+      "name": "新功能开发",
+      "steps": [
+        {
+          "step": 1,
+          "agent": "tech-lead",
+          "action": "需求分析和技术方案设计",
+          "output": "技术方案文档"
+        },
+        {
+          "step": 2,
+          "agent": "ui-developer",
+          "action": "UI 设计和样式开发",
+          "files": ["template.html", "*.css", "design-tokens.ts"],
+          "output": "UI 组件和样式"
+        },
+        {
+          "step": 3,
+          "agent": "feature-developer",
+          "action": "业务逻辑实现",
+          "files": ["*.ts", "services/*.ts", "stores/*.ts"],
+          "output": "功能代码"
+        },
+        {
+          "step": 4,
+          "agent": "qa-engineer",
+          "action": "测试用例编写和执行",
+          "files": ["*.test.ts", "*.spec.ts"],
+          "output": "测试报告"
+        },
+        {
+          "step": 5,
+          "agent": "tech-lead",
+          "action": "代码审查和合并",
+          "output": "合并到主分支"
+        }
+      ]
+    },
+    
+    "bug-fix": {
+      "name": "Bug 修复",
+      "steps": [
+        {
+          "step": 1,
+          "agent": "qa-engineer",
+          "action": "Bug 复现和测试用例",
+          "output": "Bug 报告"
+        },
+        {
+          "step": 2,
+          "agent": "feature-developer",
+          "action": "Bug 修复（如果是逻辑问题）",
+          "files": ["*.ts"]
+        },
+        {
+          "step": 2,
+          "agent": "ui-developer",
+          "action": "Bug 修复（如果是样式问题）",
+          "files": ["*.css", "*.html"]
+        },
+        {
+          "step": 3,
+          "agent": "qa-engineer",
+          "action": "修复验证",
+          "output": "验证通过"
+        },
+        {
+          "step": 4,
+          "agent": "tech-lead",
+          "action": "代码审查和合并"
+        }
+      ]
+    },
+    
+    "design-update": {
+      "name": "设计系统更新",
+      "steps": [
+        {
+          "step": 1,
+          "agent": "ui-developer",
+          "action": "更新设计令牌",
+          "files": ["design-tokens.ts"]
+        },
+        {
+          "step": 2,
+          "agent": "ui-developer",
+          "action": "生成配置文件",
+          "command": "npm run generate:tokens"
+        },
+        {
+          "step": 3,
+          "agent": "ui-developer",
+          "action": "更新相关样式",
+          "files": ["src/css/**/*.css"]
+        },
+        {
+          "step": 4,
+          "agent": "qa-engineer",
+          "action": "视觉回归测试",
+          "command": "npm run test:visual"
+        },
+        {
+          "step": 5,
+          "agent": "tech-lead",
+          "action": "设计审查和合并"
+        }
+      ]
+    }
+  },
+  
+  "communicationChannels": {
+    "dailyStandup": {
+      "participants": ["tech-lead", "ui-developer", "feature-developer", "qa-engineer"],
+      "format": "每日进度同步",
+      "duration": "15分钟"
+    },
+    "codeReview": {
+      "reviewer": "tech-lead",
+      "reviewers": ["tech-lead"],
+      "approvalRequired": 1
+    },
+    "designReview": {
+      "reviewer": "tech-lead",
+      "participants": ["tech-lead", "ui-developer"],
+      "approvalRequired": 1
+    }
+  },
+  
+  "tooling": {
+    "sharedTools": [
+      "git",
+      "vite",
+      "typescript",
+      "eslint",
+      "prettier"
+    ],
+    "agentSpecificTools": {
+      "ui-developer": [
+        "design-tokens",
+        "tailwind",
+        "css-variables",
+        "figma"
+      ],
+      "feature-developer": [
+        "alpine.js",
+        "zustand",
+        "di-container",
+        "vitest"
+      ],
+      "qa-engineer": [
+        "vitest",
+        "playwright",
+        "lighthouse",
+        "security-scanner"
+      ]
+    }
+  },
+  
+  "qualityGates": {
+    "preCommit": {
+      "enforcer": "qa-engineer",
+      "checks": ["lint", "type-check", "format-check"],
+      "autoFix": true
+    },
+    "preMerge": {
+      "enforcer": "tech-lead",
+      "checks": [
+        "unit-tests",
+        "no-file-conflicts",
+        "code-review-approved",
+        "security-scan-passed"
+      ],
+      "blocking": true
+    },
+    "preRelease": {
+      "enforcer": "tech-lead",
+      "checks": [
+        "all-tests-passed",
+        "e2e-tests-passed",
+        "performance-acceptable",
+        "no-critical-issues"
+      ],
+      "blocking": true
+    }
+  }
+}

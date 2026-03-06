@@ -169,46 +169,46 @@ function generateCSSVariables(): string {
   lines.push('   ======================================== */');
   lines.push('');
   lines.push(':root {');
-  lines.push('  /* 主色系 */');
-  lines.push('  --color-primary: var(--color-blue-500);');
-  lines.push('  --color-primary-light: var(--color-blue-400);');
-  lines.push('  --color-primary-dark: var(--color-blue-600);');
-  lines.push('  --color-primary-darker: var(--color-blue-700);');
-  lines.push('');
-  lines.push('  --color-secondary: var(--color-slate-500);');
-  lines.push('  --color-secondary-light: var(--color-slate-400);');
-  lines.push('  --color-secondary-dark: var(--color-slate-600);');
-  lines.push('');
-  lines.push('  --color-accent: var(--color-indigo-500);');
-  lines.push('  --color-accent-light: var(--color-indigo-400);');
-  lines.push('  --color-accent-dark: var(--color-indigo-600);');
-  lines.push('');
-  lines.push('  /* 状态色 */');
-  lines.push('  --color-success: var(--color-green-500);');
-  lines.push('  --color-warning: var(--color-amber-500);');
-  lines.push('  --color-danger: var(--color-red-500);');
-  lines.push('  --color-error: var(--color-red-500);');
-  lines.push('  --color-info: var(--color-blue-500);');
-  lines.push('');
-  lines.push('  /* 文本色 */');
-  lines.push('  --text-primary: var(--color-slate-900);');
-  lines.push('  --text-secondary: var(--color-slate-600);');
-  lines.push('  --text-tertiary: var(--color-slate-500);');
-  lines.push('  --text-disabled: var(--color-slate-400);');
-  lines.push('  --text-inverse: #ffffff;');
-  lines.push('');
-  lines.push('  /* 背景色 */');
-  lines.push('  --bg-primary: #ffffff;');
-  lines.push('  --bg-secondary: var(--color-slate-50);');
-  lines.push('  --bg-tertiary: var(--color-slate-100);');
-  lines.push('  --bg-surface: #ffffff;');
-  lines.push('  --bg-overlay: rgba(0, 0, 0, 0.5);');
-  lines.push('');
-  lines.push('  /* 边框色 */');
-  lines.push('  --border-default: var(--color-slate-200);');
-  lines.push('  --border-light: var(--color-slate-100);');
-  lines.push('  --border-dark: var(--color-slate-300);');
-  lines.push('  --border-focus: var(--color-blue-500);');
+
+  // 动态生成语义颜色
+  function generateSemanticColors(obj: any, prefix: string = 'color') {
+    for (const [key, value] of Object.entries(obj)) {
+      if (typeof value === 'string') {
+        // 简单值：--color-success: var(--color-green-500)
+        lines.push(`  --${prefix}-${key}: ${value};`);
+      } else if (typeof value === 'object' && value !== null) {
+        // 嵌套对象
+        if (key === 'text' || key === 'bg' || key === 'border') {
+          // 特殊前缀处理
+          for (const [subKey, subValue] of Object.entries(value)) {
+            const varName = subKey === 'DEFAULT' ? key : `${key}-${subKey}`;
+            lines.push(`  --${varName}: ${subValue};`);
+          }
+        } else if (key === 'confidence') {
+          // 置信度颜色
+          lines.push('');
+          lines.push('  /* 置信度色系 */');
+          for (const [level, colors] of Object.entries(value as Record<string, any>)) {
+            for (const [colorKey, colorValue] of Object.entries(colors)) {
+              // 转换驼峰命名：bgAlpha -> bg-alpha
+              const cssKey = colorKey.replace(/([A-Z])/g, '-$1').toLowerCase();
+              lines.push(`  --confidence-${level}-${cssKey}: ${colorValue};`);
+            }
+          }
+        } else {
+          // 其他嵌套对象：primary.light, primary.dark 等
+          for (const [subKey, subValue] of Object.entries(value)) {
+            const varName = subKey === 'DEFAULT' ? key : `${key}-${subKey}`;
+            lines.push(`  --${prefix}-${varName}: ${subValue};`);
+          }
+        }
+        lines.push('');
+      }
+    }
+  }
+
+  generateSemanticColors(DESIGN_TOKENS.colors.semantic);
+
   lines.push('}');
   
   return lines.join('\n');

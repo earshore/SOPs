@@ -148,8 +148,19 @@ export interface PromiseRealityReport {
 }
 
 /**
+ * 分析报告元数据接口
+ */
+export interface AnalysisReportMetadata {
+  confidence: Record<string, number>; // 各报告类型的置信度分数
+  overallConfidence: number; // 总体置信度
+  analyzedAt: string; // 分析时间
+  targetIds: string[]; // 分析的目标ID列表
+  language: string; // 分析语言
+}
+
+/**
  * 完整分析报告接口
- * 只包含纯粹的分析结果数据，不包含业务元数据
+ * 包含分析结果数据和置信度元数据
  */
 export interface FullAnalysisReport {
   'title-keywords'?: TitleKeywordsReport;
@@ -160,6 +171,7 @@ export interface FullAnalysisReport {
   'buyer-profile'?: BuyerProfileReport;
   'vocab-gap'?: VocabGapReport;
   'promise-reality'?: PromiseRealityReport;
+  _metadata?: AnalysisReportMetadata; // 置信度和分析元数据
 }
 
 /**
