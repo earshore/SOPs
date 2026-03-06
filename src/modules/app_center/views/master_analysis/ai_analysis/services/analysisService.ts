@@ -16,6 +16,7 @@ import {
   VocabGapReport,
   PromiseRealityReport
 } from '../config/analysisReportData';
+import { ANALYSIS_DISPLAY_LIMITS } from '../../config/displayLimits';
 
 /**
  * 安全获取数组，如果不存在则返回空数组
@@ -50,11 +51,11 @@ function parseTitleKeywords(report: TitleKeywordsReport): AnalysisResult {
       { label: '已剔除', value: `${removedBrandTerms.length + removedModifiers.length}个` }
     ],
     highlights: [
-      ...primaryKeywords.slice(0, 2).map(k => ({
+      ...primaryKeywords.slice(0, ANALYSIS_DISPLAY_LIMITS.PRIMARY_KEYWORDS).map(k => ({
         text: `${k.keyword} - ${k.search_volume_estimate}`,
         type: 'info' as const
       })),
-      ...secondaryKeywords.slice(0, 2).map(k => ({
+      ...secondaryKeywords.slice(0, ANALYSIS_DISPLAY_LIMITS.SECONDARY_KEYWORDS).map(k => ({
         text: `${k.keyword} - ${k.importance}`,
         type: 'success' as const
       }))
@@ -114,7 +115,7 @@ function parseSellingPoints(report: SellingPointsReport): AnalysisResult {
         text: `目标人群：${overallStrategy.target_positioning || '未知'}`,
         type: 'info'
       },
-      ...safeArray(overallStrategy.missing_elements).slice(0, 2).map(m => ({
+      ...safeArray(overallStrategy.missing_elements).slice(0, ANALYSIS_DISPLAY_LIMITS.MISSING_ELEMENTS).map(m => ({
         text: `缺失：${m}`,
         type: 'warning' as const
       }))
@@ -256,7 +257,7 @@ function parseHesitationPoints(report: HesitationPointsReport): AnalysisResult {
       { label: '常见疑虑', value: `${commonDoubts.length}个` },
       { label: 'Q&A优化项', value: `${qaOptimizationItems.length}条` }
     ],
-    highlights: hesitations.slice(0, 4).map(h => ({
+    highlights: hesitations.slice(0, ANALYSIS_DISPLAY_LIMITS.HESITATION_POINTS).map(h => ({
       text: `${h.pre_purchase_worry || '未知'} → ${(h.post_purchase_resolution || '').substring(0, 50)}...`,
       type: 'warning' as const
     })),
@@ -309,7 +310,7 @@ function parseBuyerProfile(report: BuyerProfileReport): AnalysisResult {
         text: `核心用户：${demographics.age_range_estimate || '未知'}${demographics.likely_gender === 'male' ? '男性' : demographics.likely_gender === 'female' ? '女性' : ''}`,
         type: 'info'
       },
-      ...buyerTypes.slice(0, 2).map(t => ({
+      ...buyerTypes.slice(0, ANALYSIS_DISPLAY_LIMITS.BUYER_TYPES).map(t => ({
         text: `${t.type || '未知'} (${t.percentage_estimate || '未知'}) - ${(t.evidence || '').substring(0, 40)}...`,
         type: 'info' as const
       })),
@@ -365,7 +366,7 @@ function parseVocabGap(report: VocabGapReport): AnalysisResult {
       { label: '买家词汇', value: `${buyerTerms.length}个` },
       { label: '待覆盖词', value: `${uncoveredBuyerTerms.length}个` }
     ],
-    highlights: termTranslations.slice(0, 4).map(t => ({
+    highlights: termTranslations.slice(0, ANALYSIS_DISPLAY_LIMITS.TERM_TRANSLATIONS).map(t => ({
       text: `商家说 "${t.seller_says || '未知'}" → 买家说 "${t.buyer_says || '未知'}"`,
       type: (t.buyer_says || '').includes('scam') || (t.buyer_says || '').includes('doesn\'t') ? 'danger' as const : 'warning' as const
     })),

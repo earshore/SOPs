@@ -16,9 +16,11 @@ import type { UserProductProfile, PromptInputs } from '../../../../../../types/s
 import eventBus from '../../../../../../common/EventBus';
 import { SafeRenderer } from '../../../../../../common/infrastructure/SafeRenderer';
 import { estimateTokenCount, formatTokenCount } from '../../ai_analysis/utils/tokenCounter';
+import { PROMPTLAB_DISPLAY_LIMITS } from '../../config/displayLimits';
 
 import { Logger } from '../../../../../../services/loggerService';
 import { extractProductDNA, canExtractDNA } from '../../services/dnaExtractor';
+import { extractDNAFromDownloadsReport, canExtractDNAFromDownloadsReport } from '../../services/UniversalDNAExtractor';
 /**
  * 控制台模式类型
  */
@@ -68,6 +70,7 @@ export function createPromptlabPanel() {
             audience: 0,
             usps: 0,
             specs: 0,
+            keywords: 0,
             overall: 0
         },
 
@@ -535,7 +538,7 @@ export function createPromptlabPanel() {
                         // 提取主要关键词
                         if (dataObj.primary_keywords && Array.isArray(dataObj.primary_keywords)) {
                             const keywords = dataObj.primary_keywords
-                                .slice(0, 3)
+                                .slice(0, PROMPTLAB_DISPLAY_LIMITS.HIGH_FREQUENCY_PHRASES)
                                 .map((k: unknown) => {
                                     if (k && typeof k === 'object' && 'keyword' in k) {
                                         return (k as { keyword: unknown }).keyword;
@@ -574,7 +577,7 @@ export function createPromptlabPanel() {
                         // 提取关键问题
                         if (dataObj.critical_issues && Array.isArray(dataObj.critical_issues)) {
                             const issues = dataObj.critical_issues
-                                .slice(0, 2)
+                                .slice(0, PROMPTLAB_DISPLAY_LIMITS.PAIN_POINTS)
                                 .map((i: unknown) => {
                                     if (i && typeof i === 'object' && 'issue' in i) {
                                         return (i as { issue: unknown }).issue;
@@ -600,7 +603,7 @@ export function createPromptlabPanel() {
                             }
                         }
                         if (dataObj.emotional_triggers && Array.isArray(dataObj.emotional_triggers)) {
-                            return dataObj.emotional_triggers.slice(0, 2).map(String).join(', ');
+                            return dataObj.emotional_triggers.slice(0, PROMPTLAB_DISPLAY_LIMITS.EMOTIONAL_TRIGGERS).map(String).join(', ');
                         }
                         break;
 
@@ -613,7 +616,7 @@ export function createPromptlabPanel() {
                             }
                         }
                         if (dataObj.common_doubts && Array.isArray(dataObj.common_doubts)) {
-                            return dataObj.common_doubts.slice(0, 2).map(String).join('; ');
+                            return dataObj.common_doubts.slice(0, PROMPTLAB_DISPLAY_LIMITS.COMMON_DOUBTS).map(String).join('; ');
                         }
                         break;
 
@@ -621,7 +624,7 @@ export function createPromptlabPanel() {
                         // 提取买家类型
                         if (dataObj.buyer_types && Array.isArray(dataObj.buyer_types) && dataObj.buyer_types.length > 0) {
                             const types = dataObj.buyer_types
-                                .slice(0, 2)
+                                .slice(0, PROMPTLAB_DISPLAY_LIMITS.PAIN_POINTS)
                                 .map((t: unknown) => {
                                     if (t && typeof t === 'object' && 'type' in t) {
                                         return (t as { type: unknown }).type;
@@ -636,7 +639,7 @@ export function createPromptlabPanel() {
                         if (demographics && typeof demographics === 'object' && 'lifestyle_indicators' in demographics) {
                             const lifestyleIndicators = (demographics as { lifestyle_indicators: unknown }).lifestyle_indicators;
                             if (Array.isArray(lifestyleIndicators)) {
-                                return lifestyleIndicators.slice(0, 2).map(String).join(', ');
+                                return lifestyleIndicators.slice(0, PROMPTLAB_DISPLAY_LIMITS.LIFESTYLE_INDICATORS).map(String).join(', ');
                             }
                         }
                         break;
@@ -1155,7 +1158,8 @@ export function createPromptlabPanel() {
          */
         get canExtractDNA(): boolean {
             const report = appStore.getState().analysis.analysisReport;
-            return canExtractDNA(report as any);
+            // 尝试新提取器，如果不支持则尝试旧提取器
+            return canExtractDNAFromDownloadsReport(report as any) || canExtractDNA(report as any);
         },
 
         /**
@@ -1170,12 +1174,39 @@ export function createPromptlabPanel() {
                 return;
             }
 
-            // 提取 DNA
-            const dna = extractProductDNA(report as any);
+            // 解包报告：检查是否有 analysisReport 包装层
+            const unwrappedReport = (report as any).analysisReport || report;
+
+            Logger.debug('[Promptlab] 报告结构检查:', {
+                hasAnalysisReportWrapper: !!(report as any).analysisReport,
+                topLevelKeys: Object.keys(report as any).slice(0, 10),
+                unwrappedKeys: Object.keys(unwrappedReport).slice(0, 10)
+            });
+
+            // 提取语言信息（优先级：报告元数据 > 用户选择的市场 > 默认中文）
+            const language = unwrappedReport._metadata?.language ||
+                           this.profile.targetMarket ||
+                           'zh';
+
+            Logger.debug('[Promptlab] 使用语言:', language);
+
+            // 尝试使用新的 DNA 提取器（支持 Downloads 报告格式）
+            let dna: any = extractDNAFromDownloadsReport(unwrappedReport, language);
+            let isNewExtractor = !!dna;
+
+            // 如果新提取器无法提取，回退到旧提取器
+            if (!dna) {
+                Logger.debug('[Promptlab] 新提取器无法提取，尝试旧提取器');
+                dna = extractProductDNA(unwrappedReport);
+                isNewExtractor = false;
+            }
+
             if (!dna) {
                 showToast('无法从报告中提取产品 DNA', { type: 'warning' });
                 return;
             }
+
+            Logger.debug('[Promptlab] 使用提取器:', isNewExtractor ? '新提取器 (universalDNAExtractor)' : '旧提取器 (dnaExtractor)');
 
             // 检查是否已有内容
             const hasExistingContent =
@@ -1191,16 +1222,36 @@ export function createPromptlabPanel() {
             }
 
             // 填充字段
-            this.profile.audience = dna.audience;
-            this.profile.usps = dna.usps;
-            this.profile.specs = dna.specs;
+            this.profile.audience = dna.audience || '';
+            this.profile.usps = dna.usps || '';
+            this.profile.specs = dna.specs || '';
+
+            // 如果是新提取器的结果，填充关键词字段
+            if (isNewExtractor && dna.keywords) {
+                // 将核心关键词映射到一级关键词
+                if (dna.keywords.core && dna.keywords.core.length > 0) {
+                    this.profile.keywordsTier1 = dna.keywords.core.join(', ');
+                }
+                // 将长尾关键词映射到二级关键词
+                if (dna.keywords.longTail && dna.keywords.longTail.length > 0) {
+                    this.profile.keywordsTier2 = dna.keywords.longTail.join(', ');
+                }
+
+                Logger.debug('[Promptlab] ✅ 已填充关键词:', {
+                    tier1Count: dna.keywords.core?.length || 0,
+                    tier2Count: dna.keywords.longTail?.length || 0,
+                    tier1Preview: this.profile.keywordsTier1.substring(0, 50),
+                    tier2Preview: this.profile.keywordsTier2.substring(0, 50)
+                });
+            }
 
             // 保存置信度信息
             this.dnaConfidence = {
                 audience: Math.round(dna.confidence.audience * 100),
                 usps: Math.round(dna.confidence.usps * 100),
                 specs: Math.round(dna.confidence.specs * 100),
-                overall: Math.round(((dna.confidence.audience + dna.confidence.usps + dna.confidence.specs) / 3) * 100)
+                keywords: Math.round(dna.confidence.keywords * 100),
+                overall: Math.round(((dna.confidence.audience + dna.confidence.usps + dna.confidence.specs + dna.confidence.keywords) / 4) * 100)
             };
 
             // 保存状态
@@ -1210,13 +1261,14 @@ export function createPromptlabPanel() {
             const confidenceAvg = (
                 dna.confidence.audience +
                 dna.confidence.usps +
-                dna.confidence.specs
-            ) / 3;
+                dna.confidence.specs +
+                dna.confidence.keywords
+            ) / 4;
             const confidencePercent = Math.round(confidenceAvg * 100);
 
             showToast(
                 `✅ DNA 提取成功 (总体置信度: ${confidencePercent}%)\n` +
-                `受众: ${this.dnaConfidence.audience}% | 卖点: ${this.dnaConfidence.usps}% | 参数: ${this.dnaConfidence.specs}%`,
+                `受众: ${this.dnaConfidence.audience}% | 卖点: ${this.dnaConfidence.usps}% | 参数: ${this.dnaConfidence.specs}% | 关键词: ${this.dnaConfidence.keywords}%`,
                 { type: 'success' }
             );
 
@@ -1260,7 +1312,22 @@ export function createPromptlabPanel() {
                 return;
             }
 
-            const dna = extractProductDNA(report as any);
+            // 解包报告：检查是否有 analysisReport 包装层
+            const unwrappedReport = (report as any).analysisReport || report;
+
+            // 提取语言信息
+            const language = unwrappedReport._metadata?.language ||
+                           this.profile.targetMarket ||
+                           'zh';
+
+            // 尝试使用新提取器
+            let dna: any = extractDNAFromDownloadsReport(unwrappedReport, language);
+
+            // 如果新提取器无法提取，回退到旧提取器
+            if (!dna) {
+                dna = extractProductDNA(unwrappedReport);
+            }
+
             if (!dna) {
                 showToast('无法从报告中提取产品 DNA', { type: 'warning' });
                 return;
