@@ -1,6 +1,11 @@
 /**
  * DNA 提取器 - 从 AI 分析报告中自动提取产品 DNA
  *
+ * 架构特点（零硬编码设计）：
+ * - 零硬编码：不预设任何产品属性名称，完全数据驱动
+ * - 品类无关：适用于假发、电子产品、化妆品、服装等所有品类
+ * - 动态提取：直接使用 AI 报告中的原始字段值，不做翻译或转换
+ *
  * 功能：
  * - 从 buyer-profile 提取目标受众
  * - 从 selling-points 提取核心卖点
@@ -147,59 +152,129 @@ function extractUSPs(report: SellingPointsReport): { text: string; confidence: n
   }
 }
 
+
+/**
+ * 判断文本是否包含技术规格信息
+ * 使用通用模式匹配，不依赖硬编码单位列表
+ */
+function isTechnicalSpec(text: string): boolean {
+  // 模式 1: 包含数字和单位 (如 "50ml", "20 inch", "5000mAh", "150density")
+  const hasNumberWithUnit = /\d+\s*[a-zA-Z]+/.test(text);
+
+  // 模式 2: 包含字母和数字 (如 "SPF 50", "Shade 3", "Type-C")
+  const hasUnitWithNumber = /[a-zA-Z]+\s*\d+/.test(text);
+
+  // 模式 3: 包含数字和百分号 (如 "99% 纯度", "150% density")
+  const hasPercentage = /\d+\s*%/.test(text);
+
+  // 模式 4: 包含范围 (如 "20-30cm", "100-240V", "13x4 lace")
+  const hasRange = /\d+\s*[-~x]\s*\d+/i.test(text);
+
+  // 模式 5: 包含小数 (如 "6.5 inch", "1.7oz")
+  const hasDecimal = /\d+\.\d+/.test(text);
+
+  // 模式 6: 包含数字-连字符-单位 (如 "24-hour", "8-day", "3-year")
+  const hasNumberHyphenUnit = /\d+\s*-\s*[a-zA-Z]+/.test(text);
+
+  return hasNumberWithUnit || hasUnitWithNumber || hasPercentage || hasRange || hasDecimal || hasNumberHyphenUnit;
+}
+
+/**
+ * 从 secondary_keywords 按 type 动态提取规格
+ * 零硬编码：直接使用 AI 返回的原始 type，不做任何翻译
+ */
+function extractSpecsByType(keywords: TitleKeywordsReport['secondary_keywords']): string[] {
+  const specs: string[] = [];
+
+  // 按 type 分组
+  const grouped = new Map<string, string[]>();
+
+  keywords.forEach(k => {
+    const type = k.type || 'other';
+    if (!grouped.has(type)) {
+      grouped.set(type, []);
+    }
+    grouped.get(type)!.push(k.keyword);
+  });
+
+  // 为每个 type 生成一行规格（直接使用原始 type）
+  grouped.forEach((kws, type) => {
+    specs.push(`${type}: ${kws.join(', ')}`);
+  });
+
+  return specs;
+}
+
+/**
+ * 从 bullet_analysis 智能提取技术规格
+ * 使用模式匹配而非硬编码单位
+ */
+function extractTechnicalSpecs(bulletAnalysis: SellingPointsReport['bullet_analysis']): string[] {
+  if (!bulletAnalysis) return [];
+
+  // 提取所有 functions
+  const allFunctions = bulletAnalysis
+    .filter(b => b.functions && b.functions.length > 0)
+    .flatMap(b => b.functions);
+
+  // 使用智能模式匹配筛选技术规格
+  const techSpecs = allFunctions
+    .filter(f => isTechnicalSpec(f))
+    .slice(0, 5)
+    .map(s => `- ${s}`);
+
+  return techSpecs;
+}
+
 /**
  * 从 title-keywords 和 selling-points 提取技术参数
+ * 重构版本：零硬编码，完全基于实际数据动态提取
  */
 function extractSpecs(
   titleKeywords: TitleKeywordsReport | undefined,
   sellingPoints: SellingPointsReport | undefined
 ): { text: string; confidence: number } {
   const specs: string[] = [];
-  let confidence = 0;
+  let keywordsCount = 0;
+  let techSpecsCount = 0;
 
   try {
-    // 1. 从 title-keywords 提取规格词
-    if (titleKeywords && titleKeywords.secondary_keywords) {
-      const sizeKeywords = titleKeywords.secondary_keywords
-        .filter(k => k.type === 'size')
-        .map(k => k.keyword);
-
-      const featureKeywords = titleKeywords.secondary_keywords
-        .filter(k => k.type === 'feature')
-        .map(k => k.keyword);
-
-      const scentKeywords = titleKeywords.secondary_keywords
-        .filter(k => k.type === 'scent')
-        .map(k => k.keyword);
-
-      if (sizeKeywords.length > 0) {
-        specs.push(`容量: ${sizeKeywords.join(', ')}`);
-        confidence += 0.3;
-      }
-
-      if (scentKeywords.length > 0) {
-        specs.push(`香调: ${scentKeywords.join(', ')}`);
-        confidence += 0.2;
-      }
-
-      if (featureKeywords.length > 0) {
-        specs.push(`特性: ${featureKeywords.join(', ')}`);
-        confidence += 0.2;
-      }
+    // 1. 从 title-keywords 动态提取所有规格（按 type 分组）
+    if (titleKeywords && titleKeywords.secondary_keywords && titleKeywords.secondary_keywords.length > 0) {
+      const keywordSpecs = extractSpecsByType(titleKeywords.secondary_keywords);
+      specs.push(...keywordSpecs);
+      keywordsCount = keywordSpecs.length;
     }
 
-    // 2. 从 selling-points 的 bullet_analysis 提取技术规格
-    if (sellingPoints && sellingPoints.bullet_analysis && specs.length < 5) {
-      const techSpecs = sellingPoints.bullet_analysis
-        .filter(b => b.functions && b.functions.length > 0)
-        .slice(0, 3)
-        .flatMap(b => b.functions)
-        .filter(f => f.includes('小时') || f.includes('dB') || f.includes('cm') || f.includes('ml'));
+    // 2. 从 selling-points 智能提取技术规格（如果规格还不够多）
+    if (sellingPoints && sellingPoints.bullet_analysis && specs.length < 8) {
+      const techSpecs = extractTechnicalSpecs(sellingPoints.bullet_analysis);
+      specs.push(...techSpecs);
+      techSpecsCount = techSpecs.length;
+    }
 
-      if (techSpecs.length > 0) {
-        specs.push(...techSpecs.map(s => `- ${s}`));
-        confidence += 0.3;
-      }
+    // 3. 计算置信度（基于提取到的数据量和质量）
+    let confidence = 0;
+
+    // 基础分：有数据就给分
+    if (specs.length > 0) {
+      confidence += 0.3;
+    }
+
+    // 数量分：提取的规格越多，置信度越高
+    if (specs.length >= 3) {
+      confidence += 0.2;
+    }
+    if (specs.length >= 5) {
+      confidence += 0.2;
+    }
+
+    // 来源分：从多个来源提取更可靠
+    if (keywordsCount > 0) {
+      confidence += 0.15;
+    }
+    if (techSpecsCount > 0) {
+      confidence += 0.15;
     }
 
     const text = specs.join('\n');
