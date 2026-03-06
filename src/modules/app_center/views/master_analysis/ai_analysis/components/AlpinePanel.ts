@@ -37,7 +37,7 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
 
     // ========== 订阅清理函数 ==========
     _unsubscribes: [] as Array<() => void>,
-    _navigationHandler: null as (() => void) | null,
+    _navigationHandler: null as EventListener | null,
 
     // ========== Lifecycle ==========
     init(this: AlpineContext & Record<string, unknown>) {
@@ -83,10 +83,10 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
       });
 
       // 监听导航事件
-      this._navigationHandler = () => {
-        this.navigateToScraper();
-      };
-      window.addEventListener('navigate-to-scraper', this._navigationHandler);
+      this._navigationHandler = (() => {
+        (this as any).navigateToScraper();
+      }) as EventListener;
+      window.addEventListener('navigate-to-scraper' as any, this._navigationHandler as EventListener);
 
       // 检查是否有新的 Scraper 数据
       checkAndLoadScraperData(this);
@@ -103,7 +103,7 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
       }
       // 清理导航事件监听器
       if (this._navigationHandler) {
-        window.removeEventListener('navigate-to-scraper', this._navigationHandler);
+        window.removeEventListener('navigate-to-scraper' as any, this._navigationHandler as EventListener);
         this._navigationHandler = null;
       }
     },
