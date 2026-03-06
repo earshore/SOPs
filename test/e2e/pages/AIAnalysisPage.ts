@@ -600,11 +600,109 @@ export class AIAnalysisPage extends BasePage {
     return hasAsins && hasTargets && isEnabled;
   }
 
+  // ========== 置信度相关方法 ==========
+
+  /**
+   * 检查总体置信度卡片是否显示
+   */
+  async isOverallConfidenceCardVisible(): Promise<boolean> {
+    return await this.page.locator('text=总体置信度').isVisible();
+  }
+
+  /**
+   * 获取总体置信度百分比
+   */
+  async getOverallConfidencePercent(): Promise<number> {
+    const element = this.page.locator('[x-text="overallConfidencePercent"]');
+    const text = await element.textContent();
+    return parseInt(text || '0', 10);
+  }
+
+  /**
+   * 获取总体置信度颜色类
+   */
+  async getOverallConfidenceColorClass(): Promise<string> {
+    const indicator = this.page.locator('.w-10.h-10.rounded-lg').first();
+    const classes = await indicator.getAttribute('class');
+
+    if (classes?.includes('bg-green-500/20')) return 'green';
+    if (classes?.includes('bg-yellow-500/20')) return 'yellow';
+    if (classes?.includes('bg-orange-500/20')) return 'orange';
+
+    return 'unknown';
+  }
+
+  /**
+   * 获取特定结果卡片的置信度百分比
+   *
+   * @param index - 结果卡片索引
+   */
+  async getResultConfidencePercent(index: number): Promise<number> {
+    const card = this.page.locator('.analysis-result-card, [class*="bg-white"][class*="rounded-2xl"]').nth(index);
+    const badge = card.locator('span:has-text("%")').first();
+
+    if (await badge.isVisible()) {
+      const text = await badge.textContent();
+      const match = text?.match(/(\d+)%/);
+      return match ? parseInt(match[1], 10) : 0;
+    }
+
+    return 0;
+  }
+
+  /**
+   * 获取特定结果卡片的置信度颜色
+   *
+   * @param index - 结果卡片索引
+   */
+  async getResultConfidenceColor(index: number): Promise<string> {
+    const card = this.page.locator('.analysis-result-card, [class*="bg-white"][class*="rounded-2xl"]').nth(index);
+    const badge = card.locator('span:has-text("%")').first();
+
+    if (await badge.isVisible()) {
+      const classes = await badge.getAttribute('class');
+
+      if (classes?.includes('text-green-700')) return 'green';
+      if (classes?.includes('text-yellow-700')) return 'yellow';
+      if (classes?.includes('text-orange-700')) return 'orange';
+    }
+
+    return 'unknown';
+  }
+
+  /**
+   * 检查置信度徽章是否显示
+   *
+   * @param index - 结果卡片索引
+   */
+  async hasConfidenceBadge(index: number): Promise<boolean> {
+    const card = this.page.locator('.analysis-result-card, [class*="bg-white"][class*="rounded-2xl"]').nth(index);
+    const badge = card.locator('span:has-text("%")').first();
+    return await badge.isVisible();
+  }
+
+  /**
+   * 获取置信度卡片的可访问性属性
+   */
+  async getConfidenceAccessibilityAttributes(): Promise<{
+    hasAriaLabel: boolean;
+    ariaLabel: string | null;
+    role: string | null;
+  }> {
+    const card = this.page.locator('text=总体置信度').locator('..').locator('..');
+
+    return {
+      hasAriaLabel: await card.getAttribute('aria-label') !== null,
+      ariaLabel: await card.getAttribute('aria-label'),
+      role: await card.getAttribute('role')
+    };
+  }
+
   // ========== 完整流程方法 ==========
 
   /**
    * 完整的分析流程
-   * 
+   *
    * @param config - 分析配置
    * @returns 分析结果摘要
    */

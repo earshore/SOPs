@@ -672,7 +672,7 @@
               </div>
             </div>
             <!-- 统计概览栏 -->
-            <div class="mt-6 pt-6 border-t border-slate-700/50 grid grid-cols-4 gap-4">
+            <div class="mt-6 pt-6 border-t border-slate-700/50 grid grid-cols-5 gap-4">
               <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
                 <div class="flex items-center gap-3">
                   <div class="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
@@ -714,6 +714,35 @@
                   <div>
                     <div class="text-xl font-bold text-white" x-text="totalDetails"></div>
                     <div class="text-xs text-slate-400">分析维度</div>
+                  </div>
+                </div>
+              </div>
+              <!-- 置信度卡片 -->
+              <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50"
+                   x-show="hasConfidenceData"
+                   role="status"
+                   aria-live="polite"
+                   aria-label="分析置信度">
+                <div class="flex items-center gap-3"
+                     role="progressbar"
+                     :aria-valuenow="overallConfidencePercent"
+                     aria-valuemin="0"
+                     aria-valuemax="100"
+                     :aria-label="`总体置信度 ${overallConfidencePercent}%`">
+                  <div class="w-10 h-10 rounded-lg flex items-center justify-center"
+                       :class="getConfidenceBgAlphaClass(overallConfidencePercent)">
+                    <i class="fa-solid fa-chart-line"
+                       aria-hidden="true"
+                       :class="getConfidenceTextLightClass(overallConfidencePercent)"></i>
+                  </div>
+                  <div>
+                    <div class="text-xl font-bold"
+                         :class="getConfidenceTextLightClass(overallConfidencePercent)">
+                      <span x-text="overallConfidencePercent"></span>%
+                      <span class="text-xs ml-2" x-text="getConfidenceLevel(overallConfidencePercent)"></span>
+                    </div>
+                    <div class="text-xs text-slate-400">总体置信度</div>
+                    <span class="sr-only" x-text="`置信度等级: ${getConfidenceLevel(overallConfidencePercent)}`"></span>
                   </div>
                 </div>
               </div>
@@ -845,6 +874,15 @@
                           <span
                             class="text-xs px-2.5 py-1 rounded-full bg-white/20 border border-white/20 font-medium backdrop-blur-sm"
                             x-text="result.source"></span>
+                          <!-- 置信度徽章 -->
+                          <span x-show="hasConfidenceData && getTargetConfidence(result.targetId) > 0"
+                                class="text-xs px-2.5 py-1 rounded-full bg-white/90 border font-semibold backdrop-blur-sm flex items-center gap-1"
+                                :class="getConfidenceTextBorderClass(getTargetConfidence(result.targetId))"
+                                :aria-label="getConfidenceAriaLabel(getTargetConfidence(result.targetId))">
+                            <i class="fa-solid fa-chart-line text-[10px]" aria-hidden="true"></i>
+                            <span x-text="`${getTargetConfidence(result.targetId)}%`"></span>
+                            <span class="text-[10px] ml-0.5" x-text="getConfidenceLevel(getTargetConfidence(result.targetId))"></span>
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -970,6 +1008,15 @@
                           <span
                             class="text-xs px-2.5 py-1 rounded-full bg-white/20 border border-white/20 font-medium backdrop-blur-sm"
                             x-text="result.source"></span>
+                          <!-- 置信度徽章 -->
+                          <span x-show="hasConfidenceData && getTargetConfidence(result.targetId) > 0"
+                                class="text-xs px-2.5 py-1 rounded-full bg-white/90 border font-semibold backdrop-blur-sm flex items-center gap-1"
+                                :class="getConfidenceTextBorderClass(getTargetConfidence(result.targetId))"
+                                :aria-label="getConfidenceAriaLabel(getTargetConfidence(result.targetId))">
+                            <i class="fa-solid fa-chart-line text-[10px]" aria-hidden="true"></i>
+                            <span x-text="`${getTargetConfidence(result.targetId)}%`"></span>
+                            <span class="text-[10px] ml-0.5" x-text="getConfidenceLevel(getTargetConfidence(result.targetId))"></span>
+                          </span>
                         </div>
                       </div>
                     </div>

@@ -8,6 +8,7 @@ import { configCenter } from '../../../../../../common/config/ConfigCenter';
 import type { FullAnalysisReport } from '../config/analysisReportData';
 import type { Product } from '../config/sampleData';
 import { generateAnalysisPrompt } from '../prompts/analysisPrompts';
+import { calculateFullReportConfidence, calculateOverallConfidence } from './confidenceCalculator';
 
 import { Logger } from '../../../../../../services/loggerService';
 /**
@@ -177,8 +178,48 @@ export async function runAIAnalysis(
 
   onProgress(100, '分析完成!');
 
-  // 返回完整的原始报告
-  return report as FullAnalysisReport;
+  // 计算置信度
+  Logger.debug('[AI分析] 开始计算置信度...');
+  Logger.debug('[AI分析] 报告键:', Object.keys(report).join(', '));
+
+  let confidenceScores: Record<string, number> = {};
+  let overallConfidence = 0;
+
+  try {
+    confidenceScores = calculateFullReportConfidence(report as Record<string, unknown>);
+    overallConfidence = calculateOverallConfidence(confidenceScores);
+
+    Logger.debug('[AI分析] 置信度计算完成:', {
+      individual: confidenceScores,
+      overall: overallConfidence.toFixed(2),
+      percent: Math.round(overallConfidence * 100) + '%'
+    });
+  } catch (error) {
+    Logger.error('[AI分析] 置信度计算失败:', error);
+    // 使用默认值
+    confidenceScores = {};
+    overallConfidence = 0;
+  }
+
+  // 将置信度附加到报告元数据
+  const reportWithConfidence = {
+    ...report,
+    _metadata: {
+      confidence: confidenceScores,
+      overallConfidence: overallConfidence,
+      analyzedAt: new Date().toISOString(),
+      targetIds: targetIds,
+      language: language
+    }
+  };
+
+  // 验证 _metadata 已正确附加
+  Logger.debug('[AI分析] 报告包含 _metadata:', !!reportWithConfidence._metadata);
+  Logger.debug('[AI分析] _metadata.confidence:', reportWithConfidence._metadata.confidence);
+  Logger.debug('[AI分析] _metadata.overallConfidence:', reportWithConfidence._metadata.overallConfidence);
+
+  // 返回完整的原始报告（包含置信度）
+  return reportWithConfidence as FullAnalysisReport;
 }
 
 /**
