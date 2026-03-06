@@ -1,9 +1,56 @@
 /**
  * AI 分析提示词模板系统
- * 基于 PromptLab 动态模板架构
+ *
+ * ## 功能概述
+ * 本模块负责生成用于 AI 分析的结构化提示词（prompts）。
+ * 支持 8 种不同的分析任务，每种任务都有专门的提示词模板和 JSON Schema。
+ *
+ * ## 核心功能
+ * 1. **动态模板生成**: 根据产品数据动态填充提示词模板
+ * 2. **多语言支持**: 强制 AI 输出统一语言，避免多语言混搭
+ * 3. **安全防护**: 集成 prompt injection 防护机制
+ * 4. **输入验证**: 严格验证产品数据完整性
+ * 5. **批量处理**: 支持一次生成多个分析任务的提示词
+ *
+ * ## 支持的分析任务
+ * 1. **title-keywords** - 标题核心词根提取
+ * 2. **selling-points** - 卖点结构拆解
+ * 3. **fatal-flaws** - 致命劝退点识别
+ * 4. **wow-moments** - 惊喜顿悟时刻提取
+ * 5. **hesitation-points** - 购买前犹豫点分析
+ * 6. **buyer-profile** - 画像与场景侧写
+ * 7. **vocab-gap** - 词汇鸿沟分析
+ * 8. **promise-reality** - 承诺/现实断层检测
+ *
+ * ## 使用示例
+ * ```typescript
+ * // 单任务分析
+ * const prompt = generateAnalysisPrompt('title-keywords', product, 'zh');
+ *
+ * // 批量分析
+ * const batchPrompt = generateBatchAnalysisPrompt(
+ *   ['title-keywords', 'selling-points', 'buyer-profile'],
+ *   product,
+ *   'de'
+ * );
+ * ```
+ *
+ * ## 安全特性
+ * - **Prompt Injection 防护**: 自动清洗用户输入，移除恶意指令
+ * - **长度限制**: 防止超长输入导致 token 溢出
+ * - **特殊字符转义**: 保护 prompt 模板结构
+ *
+ * ## 多语言强制要求
+ * 所有生成的 prompt 都包含 CRITICAL LANGUAGE REQUIREMENT 部分，
+ * 强制 AI 将所有分析结果翻译为目标语言，避免保留原始评论的多语言内容。
+ *
+ * @module analysisPrompts
+ * @see {@link Product} 产品数据类型定义
+ * @see {@link AnalysisTaskDefinition} 分析任务定义类型
  */
 
 import { Product } from '../config/sampleData';
+import { sanitizePromptInput } from './promptSanitizer';
 
 // 核心 JSON 规则
 export const CORE_JSON_RULES = `
@@ -375,35 +422,64 @@ export function generateAnalysisPrompt(
   product: Product,
   language: string = 'en'
 ): string {
+  // 验证 taskId
   const taskDef = ANALYSIS_TASK_DEFINITIONS[taskId];
   if (!taskDef) {
     throw new Error(`Unknown task ID: ${taskId}`);
   }
 
-  // 准备数据替换
+  // 验证 product 对象
+  if (!product || typeof product !== 'object') {
+    throw new Error('Invalid product object: product is required');
+  }
+
+  // 验证必需字段
+  if (!product.asin) {
+    throw new Error('Invalid product object: asin is required');
+  }
+
+  if (!product.productTitle) {
+    throw new Error('Invalid product object: productTitle is required');
+  }
+
+  if (!Array.isArray(product.customer_reviews)) {
+    throw new Error('Invalid product object: customer_reviews must be an array');
+  }
+
+  if (!Array.isArray(product.feature_bullets)) {
+    throw new Error('Invalid product object: feature_bullets must be an array');
+  }
+
+  // 验证 language 参数（可选，但记录警告）
+  const validLanguages = ['en', 'zh', 'de', 'fr', 'es', 'ja', 'it'];
+  if (language && !validLanguages.includes(language)) {
+    console.warn(`[generateAnalysisPrompt] Unusual language code: ${language}. Expected one of: ${validLanguages.join(', ')}`);
+  }
+
+  // 准备数据替换（应用 prompt injection 防护）
   const lowStarReviews = product.customer_reviews
     .filter(r => r.star_rating <= 3)
-    .map(r => `[${r.star_rating}★] ${r.headline}: ${r.body}`)
+    .map(r => `[${r.star_rating}★] ${sanitizePromptInput(r.headline)}: ${sanitizePromptInput(r.body)}`)
     .join('\n');
 
   const highStarReviews = product.customer_reviews
     .filter(r => r.star_rating === 5)
-    .map(r => `[${r.star_rating}★] ${r.headline}: ${r.body}`)
+    .map(r => `[${r.star_rating}★] ${sanitizePromptInput(r.headline)}: ${sanitizePromptInput(r.body)}`)
     .join('\n');
 
   const allReviews = product.customer_reviews
-    .map(r => `[${r.star_rating}★ - ${r.origin_country}] ${r.headline}: ${r.body}`)
+    .map(r => `[${r.star_rating}★ - ${r.origin_country}] ${sanitizePromptInput(r.headline)}: ${sanitizePromptInput(r.body)}`)
     .join('\n');
 
   const reviewerCountries = [...new Set(product.customer_reviews.map(r => r.origin_country))].join(', ');
 
   const featureBullets = product.feature_bullets
-    .map((b, i) => `${i + 1}. ${b}`)
+    .map((b, i) => `${i + 1}. ${sanitizePromptInput(b)}`)
     .join('\n');
 
-  // 替换模板变量
+  // 替换模板变量（清洗后的数据）
   let taskPrompt = taskDef.taskPrompt
-    .replace('{{productTitle}}', product.productTitle)
+    .replace('{{productTitle}}', sanitizePromptInput(product.productTitle))
     .replace('{{featureBullets}}', featureBullets)
     .replace('{{lowStarReviews}}', lowStarReviews || 'No 1-3 star reviews available')
     .replace('{{highStarReviews}}', highStarReviews || 'No 5 star reviews available')
@@ -414,6 +490,13 @@ export function generateAnalysisPrompt(
   const fullPrompt = `
 You are a Data Extraction Engine specialized in E-commerce Analysis.
 Your sole purpose is to convert unstructured text into a strict JSON object based on the schema provided below.
+
+## CRITICAL LANGUAGE REQUIREMENT
+- Input data may contain multiple languages (reviews from different countries)
+- You MUST output ALL analysis results in **${language}** language ONLY
+- Do NOT preserve original language from reviews/listings
+- Translate all extracted terms, phrases, descriptions, and keywords to **${language}**
+- This applies to ALL fields in the JSON output
 
 ## Inputs
 - Market language: **${language}**
@@ -442,6 +525,11 @@ export function generateBatchAnalysisPrompt(
   product: Product,
   language: string = 'en'
 ): string {
+  // 验证 taskIds
+  if (!Array.isArray(taskIds) || taskIds.length === 0) {
+    throw new Error('Invalid taskIds: must be a non-empty array');
+  }
+
   const tasks = taskIds
     .map(id => ANALYSIS_TASK_DEFINITIONS[id])
     .filter(Boolean);
@@ -450,32 +538,60 @@ export function generateBatchAnalysisPrompt(
     throw new Error('No valid tasks provided');
   }
 
-  // 准备数据
+  // 验证 product 对象
+  if (!product || typeof product !== 'object') {
+    throw new Error('Invalid product object: product is required');
+  }
+
+  // 验证必需字段
+  if (!product.asin) {
+    throw new Error('Invalid product object: asin is required');
+  }
+
+  if (!product.productTitle) {
+    throw new Error('Invalid product object: productTitle is required');
+  }
+
+  if (!Array.isArray(product.customer_reviews)) {
+    throw new Error('Invalid product object: customer_reviews must be an array');
+  }
+
+  if (!Array.isArray(product.feature_bullets)) {
+    throw new Error('Invalid product object: feature_bullets must be an array');
+  }
+
+  // 验证 language 参数
+  const validLanguages = ['en', 'zh', 'de', 'fr', 'es', 'ja', 'it'];
+  if (language && !validLanguages.includes(language)) {
+    console.warn(`[generateBatchAnalysisPrompt] Unusual language code: ${language}. Expected one of: ${validLanguages.join(', ')}`);
+  }
+
+  // 准备数据（应用 prompt injection 防护）
   const lowStarReviews = product.customer_reviews
     .filter(r => r.star_rating <= 3)
-    .map(r => `[${r.star_rating}★] ${r.headline}: ${r.body}`)
+    .map(r => `[${r.star_rating}★] ${sanitizePromptInput(r.headline)}: ${sanitizePromptInput(r.body)}`)
     .join('\n');
 
   const highStarReviews = product.customer_reviews
     .filter(r => r.star_rating === 5)
-    .map(r => `[${r.star_rating}★] ${r.headline}: ${r.body}`)
+    .map(r => `[${r.star_rating}★] ${sanitizePromptInput(r.headline)}: ${sanitizePromptInput(r.body)}`)
     .join('\n');
 
   const allReviews = product.customer_reviews
-    .map(r => `[${r.star_rating}★ - ${r.origin_country}] ${r.headline}: ${r.body}`)
+    .map(r => `[${r.star_rating}★ - ${r.origin_country}] ${sanitizePromptInput(r.headline)}: ${sanitizePromptInput(r.body)}`)
     .join('\n');
 
   const reviewerCountries = [...new Set(product.customer_reviews.map(r => r.origin_country))].join(', ');
 
   const featureBullets = product.feature_bullets
-    .map((b, i) => `${i + 1}. ${b}`)
+    .map((b, i) => `${i + 1}. ${sanitizePromptInput(b)}`)
     .join('\n');
 
-  // 构建动态任务
+  // 构建动态任务（清洗后的数据）
   const dynamicTasks = tasks.map(task => {
     if (!task) return '';
     let prompt = task.taskPrompt
-      .replace('{{productTitle}}', product.productTitle)
+      .replace('{{productTitle}}', sanitizePromptInput(product.productTitle))
       .replace('{{featureBullets}}', featureBullets)
       .replace('{{lowStarReviews}}', lowStarReviews || 'No 1-3 star reviews available')
       .replace('{{highStarReviews}}', highStarReviews || 'No 5 star reviews available')
@@ -491,6 +607,13 @@ export function generateBatchAnalysisPrompt(
   const fullPrompt = `
 You are a Data Extraction Engine specialized in E-commerce Analysis.
 Your sole purpose is to convert unstructured text into a strict JSON object based on the schema provided below.
+
+## CRITICAL LANGUAGE REQUIREMENT
+- Input data may contain multiple languages (reviews from different countries)
+- You MUST output ALL analysis results in **${language}** language ONLY
+- Do NOT preserve original language from reviews/listings
+- Translate all extracted terms, phrases, descriptions, and keywords to **${language}**
+- This applies to ALL fields in the JSON output
 
 ## Inputs
 - Market language: **${language}**
