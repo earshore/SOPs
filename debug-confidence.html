@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>置信度调试工具</title>
+  <style>
+    body {
+      font-family: monospace;
+      padding: 20px;
+      background: #1e293b;
+      color: #e2e8f0;
+    }
+    .section {
+      background: #334155;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 8px;
+    }
+    .success { color: #10b981; }
+    .error { color: #ef4444; }
+    .warning { color: #f59e0b; }
+    pre {
+      background: #1e293b;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+    button {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background: #2563eb;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 AI 分析置信度调试工具</h1>
+
+  <div class="section">
+    <h2>使用说明</h2>
+    <ol>
+      <li>在 AI 智能分析页面完成一次分析</li>
+      <li>打开浏览器控制台（F12）</li>
+      <li>复制下面的调试代码到控制台执行</li>
+    </ol>
+  </div>
+
+  <div class="section">
+    <h2>📋 调试代码</h2>
+    <button onclick="copyDebugCode()">复制调试代码</button>
+    <pre id="debugCode">// ========== 置信度调试脚本 ==========
+
+console.log('🔍 开始置信度调试...\n');
+
+// 1. 检查 Alpine 数据
+console.log('1️⃣ 检查 Alpine 组件数据:');
+const alpineEl = document.querySelector('[x-data*="aiAnalysisPanel"]');
+if (alpineEl && alpineEl.__x) {
+  const data = alpineEl.__x.$data;
+  console.log('  ✅ Alpine 组件找到');
+  console.log('  - hasReport:', data.hasReport);
+  console.log('  - analysisReport 存在:', !!data.analysisReport);
+  console.log('  - hasConfidenceData:', data.hasConfidenceData);
+  console.log('  - overallConfidence:', data.overallConfidence);
+  console.log('  - overallConfidencePercent:', data.overallConfidencePercent);
+
+  if (data.analysisReport) {
+    console.log('\n  📊 分析报告结构:');
+    console.log('  - 报告类型:', typeof data.analysisReport);
+    console.log('  - 是否有 _metadata:', !!data.analysisReport._metadata);
+
+    if (data.analysisReport._metadata) {
+      console.log('  - _metadata.confidence:', data.analysisReport._metadata.confidence);
+      console.log('  - _metadata.overallConfidence:', data.analysisReport._metadata.overallConfidence);
+    } else {
+      console.error('  ❌ 缺少 _metadata 字段！');
+    }
+  }
+} else {
+  console.error('  ❌ Alpine 组件未找到');
+}
+
+// 2. 检查 Zustand Store
+console.log('\n2️⃣ 检查 Zustand Store:');
+if (window.Alpine && window.Alpine.store) {
+  const appStore = window.Alpine.store('app');
+  if (appStore) {
+    console.log('  ✅ Zustand Store 找到');
+    const report = appStore.analysis?.analysisReport;
+    console.log('  - analysisReport 存在:', !!report);
+
+    if (report) {
+      console.log('  - 报告类型:', typeof report);
+      console.log('  - 是否有 _metadata:', !!report._metadata);
+
+      if (report._metadata) {
+        console.log('  - _metadata.confidence:', report._metadata.confidence);
+        console.log('  - _metadata.overallConfidence:', report._metadata.overallConfidence);
+      } else {
+        console.error('  ❌ Store 中的报告缺少 _metadata！');
+      }
+    }
+  } else {
+    console.error('  ❌ Zustand Store 未找到');
+  }
+}
+
+// 3. 检查 UI 元素
+console.log('\n3️⃣ 检查置信度 UI 元素:');
+const confidenceCard = document.querySelector('[x-show="hasConfidenceData"]');
+if (confidenceCard) {
+  console.log('  ✅ 置信度卡片元素找到');
+  const isVisible = confidenceCard.style.display !== 'none';
+  console.log('  - 是否可见:', isVisible);
+  console.log('  - display 样式:', confidenceCard.style.display);
+
+  if (!isVisible) {
+    console.warn('  ⚠️ 置信度卡片被隐藏（x-show="hasConfidenceData" 为 false）');
+  }
+} else {
+  console.error('  ❌ 置信度卡片元素未找到');
+}
+
+// 4. 检查置信度计算函数
+console.log('\n4️⃣ 检查置信度计算:');
+try {
+  const { calculateFullReportConfidence, calculateOverallConfidence } = await import('/src/modules/app_center/views/master_analysis/ai_analysis/services/confidenceCalculator.ts');
+  console.log('  ✅ 置信度计算模块加载成功');
+
+  if (alpineEl && alpineEl.__x && alpineEl.__x.$data.analysisReport) {
+    const report = alpineEl.__x.$data.analysisReport;
+    console.log('\n  🧮 手动计算置信度:');
+    const confidence = calculateFullReportConfidence(report);
+    const overall = calculateOverallConfidence(confidence);
+    console.log('  - 计算结果:', confidence);
+    console.log('  - 总体置信度:', overall);
+    console.log('  - 百分比:', Math.round(overall * 100) + '%');
+  }
+} catch (error) {
+  console.error('  ❌ 无法加载置信度计算模块:', error.message);
+}
+
+// 5. 完整报告数据
+console.log('\n5️⃣ 完整报告数据（展开查看）:');
+if (alpineEl && alpineEl.__x && alpineEl.__x.$data.analysisReport) {
+  console.log(alpineEl.__x.$data.analysisReport);
+}
+
+console.log('\n✅ 调试完成！');
+console.log('📝 如果发现问题，请截图发送给开发团队。');</pre>
+  </div>
+
+  <div class="section">
+    <h2>🔧 快速修复脚本</h2>
+    <p>如果调试发现报告缺少 _metadata，可以尝试这个修复脚本：</p>
+    <button onclick="copyFixCode()">复制修复代码</button>
+    <pre id="fixCode">// ========== 置信度修复脚本 ==========
+
+console.log('🔧 开始修复置信度数据...\n');
+
+const alpineEl = document.querySelector('[x-data*="aiAnalysisPanel"]');
+if (!alpineEl || !alpineEl.__x) {
+  console.error('❌ 无法找到 Alpine 组件');
+} else {
+  const data = alpineEl.__x.$data;
+  const report = data.analysisReport;
+
+  if (!report) {
+    console.error('❌ 没有分析报告');
+  } else if (report._metadata && report._metadata.confidence) {
+    console.log('✅ 置信度数据已存在，无需修复');
+  } else {
+    console.log('⚠️ 检测到缺少置信度数据，开始修复...');
+
+    // 动态导入并计算置信度
+    import('/src/modules/app_center/views/master_analysis/ai_analysis/services/confidenceCalculator.ts')
+      .then(({ calculateFullReportConfidence, calculateOverallConfidence }) => {
+        const confidence = calculateFullReportConfidence(report);
+        const overall = calculateOverallConfidence(confidence);
+
+        // 添加 _metadata
+        report._metadata = {
+          ...report._metadata,
+          confidence: confidence,
+          overallConfidence: overall,
+          analyzedAt: new Date().toISOString(),
+          targetIds: data.selectedTargets || [],
+          language: 'zh'
+        };
+
+        // 触发更新
+        data.analysisReport = { ...report };
+
+        console.log('✅ 置信度数据已修复！');
+        console.log('  - 总体置信度:', Math.round(overall * 100) + '%');
+        console.log('  - 刷新页面查看效果');
+      })
+      .catch(error => {
+        console.error('❌ 修复失败:', error);
+      });
+  }
+}</pre>
+  </div>
+
+  <div class="section">
+    <h2>📖 常见问题</h2>
+    <ul>
+      <li><strong>Q: 为什么看不到置信度？</strong><br>
+          A: 可能原因：1) 报告缺少 _metadata 字段；2) hasConfidenceData 返回 false；3) UI 元素被隐藏</li>
+      <li><strong>Q: 如何验证置信度计算是否正常？</strong><br>
+          A: 运行调试脚本，查看第 4 步的手动计算结果</li>
+      <li><strong>Q: 修复脚本是临时的吗？</strong><br>
+          A: 是的，刷新页面后需要重新运行。永久修复需要修改后端代码。</li>
+    </ul>
+  </div>
+
+  <script>
+    function copyDebugCode() {
+      const code = document.getElementById('debugCode').textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        alert('✅ 调试代码已复制！\n\n请在 AI 分析页面打开控制台（F12）并粘贴执行。');
+      });
+    }
+
+    function copyFixCode() {
+      const code = document.getElementById('fixCode').textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        alert('✅ 修复代码已复制！\n\n请在 AI 分析页面打开控制台（F12）并粘贴执行。');
+      });
+    }
+  </script>
+</body>
+</html>
