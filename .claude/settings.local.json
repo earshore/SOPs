@@ -47,7 +47,18 @@
       "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" auth:*)",
       "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" pr:*)",
       "Bash(git fetch:*)",
-      "Bash(git merge:*)"
+      "Bash(git merge:*)",
+      "Bash(pkill:*)",
+      "Bash(for f in report*.json competitor_report*.json)",
+      "Bash(do echo \"=== $f ===\")",
+      "Read(//d/Users/Administrator/Documents/GitHub/AihangSOP/**)",
+      "Bash(done)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)",
+      "Bash(rm:*)",
+      "Bash(git restore:*)",
+      "Bash(git checkout:*)",
+      "Bash(git pull:*)"
     ]
   }
 }
