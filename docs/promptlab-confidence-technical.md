@@ -32,22 +32,11 @@ template.html (UI 显示)
 - `getConfidenceColorClass(percent)` - 获取颜色类
 - `getConfidenceLevel(percent)` - 获取等级文字
 - `getConfidenceAriaLabel(percent)` - 获取 ARIA 标签
-- `shouldShowTarget(targetId)` - 判断是否显示（筛选）
-- `onConfidenceFilterChange()` - 处理筛选变化
-
-**新增状态**:
-```typescript
-confidenceFilter: {
-  showHighOnly: false,  // 仅显示高置信度 (≥70%)
-  hideLow: false        // 隐藏低置信度 (<50%)
-}
-```
 
 ### 2. template.html
 **路径**: `src/modules/app_center/views/master_analysis/promptlab/template.html`
 
 **新增 UI 元素**:
-- 置信度筛选控制面板 (第 294-308 行)
 - 置信度徽章 (在 renderNewFormatModules 生成的 HTML 中)
 
 ---
@@ -110,26 +99,6 @@ getConfidenceColorClass(percent: number): string {
 - 中等置信度: 50-69%
 - 低置信度: <50%
 
-### 筛选逻辑
-
-```typescript
-shouldShowTarget(targetId: string): boolean {
-  const confidence = this.getTargetConfidence(targetId);
-
-  if (this.confidenceFilter.showHighOnly && confidence < 70) {
-    return false;
-  }
-
-  if (this.confidenceFilter.hideLow && confidence < 50) {
-    return false;
-  }
-
-  return true;
-}
-```
-
-**应用位置**: `renderNewFormatModules` 方法中的 `forEach` 循环
-
 ---
 
 ## 🎨 UI 组件
@@ -154,34 +123,6 @@ shouldShowTarget(targetId: string): boolean {
 - `x-text` - 文本绑定
 - `:class` - 动态类绑定
 - `:aria-label` - 可访问性标签
-
-### 筛选控制面板
-
-**HTML 结构**:
-```html
-<div x-show="hasConfidenceData" class="mx-4 mb-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
-  <div class="flex items-center gap-4 flex-wrap">
-    <label class="flex items-center gap-2 text-sm cursor-pointer">
-      <input type="checkbox"
-             x-model="confidenceFilter.showHighOnly"
-             @change="onConfidenceFilterChange"
-             class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
-      <span class="text-slate-700 font-medium">仅显示高置信度 (≥70%)</span>
-    </label>
-    <label class="flex items-center gap-2 text-sm cursor-pointer">
-      <input type="checkbox"
-             x-model="confidenceFilter.hideLow"
-             @change="onConfidenceFilterChange"
-             class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
-      <span class="text-slate-700 font-medium">隐藏低置信度 (<50%)</span>
-    </label>
-  </div>
-</div>
-```
-
-**Alpine.js 指令**:
-- `x-model` - 双向数据绑定
-- `@change` - 事件监听
 
 ---
 
@@ -242,11 +183,6 @@ console.log('hasConfidenceData:', data?.hasConfidenceData);
 console.log('reportConfidence:', data?.reportConfidence);
 ```
 
-3. **检查筛选状态**:
-```javascript
-console.log('confidenceFilter:', data?.confidenceFilter);
-```
-
 ---
 
 ## 🔧 维护指南
@@ -269,54 +205,6 @@ getConfidenceLevel(percent: number): string {
   if (percent >= 60) return '中'; // 改为 60%
   return '低';
 }
-
-// 修改筛选阈值
-shouldShowTarget(targetId: string): boolean {
-  const confidence = this.getTargetConfidence(targetId);
-
-  if ((this.confidenceFilter as any).showHighOnly && confidence < 80) { // 改为 80
-    return false;
-  }
-
-  if ((this.confidenceFilter as any).hideLow && confidence < 60) { // 改为 60
-    return false;
-  }
-
-  return true;
-}
-```
-
-**注意**: 修改后需要同步更新 UI 文本（template.html 中的"≥70%"等）。
-
-### 添加新的筛选选项
-
-**步骤**:
-
-1. 在 `confidenceFilter` 状态中添加新字段:
-```typescript
-confidenceFilter: {
-  showHighOnly: false,
-  hideLow: false,
-  showMediumOnly: false  // 新增
-}
-```
-
-2. 在 `shouldShowTarget` 中添加逻辑:
-```typescript
-if ((this.confidenceFilter as any).showMediumOnly && (confidence < 50 || confidence >= 70)) {
-  return false;
-}
-```
-
-3. 在 template.html 中添加 UI 控件:
-```html
-<label class="flex items-center gap-2 text-sm cursor-pointer">
-  <input type="checkbox"
-         x-model="confidenceFilter.showMediumOnly"
-         @change="onConfidenceFilterChange"
-         class="h-4 w-4 rounded border-slate-300 text-blue-600">
-  <span class="text-slate-700 font-medium">仅显示中等置信度 (50-69%)</span>
-</label>
 ```
 
 ### 自定义徽章样式
@@ -345,12 +233,6 @@ describe('PromptlabPanel - Confidence', () => {
     // Mock appStore
     // Test getTargetConfidence
   });
-
-  it('should filter targets based on confidence', () => {
-    const panel = createPromptlabPanel();
-    panel.confidenceFilter.showHighOnly = true;
-    // Test shouldShowTarget
-  });
 });
 ```
 
@@ -359,8 +241,7 @@ describe('PromptlabPanel - Confidence', () => {
 1. 完成 AI 分析（确保有置信度数据）
 2. 导航到 Prompt 生成页面
 3. 验证置信度徽章显示
-4. 测试筛选功能
-5. 验证筛选后的渲染结果
+4. 验证颜色编码正确
 
 ---
 
@@ -372,15 +253,10 @@ describe('PromptlabPanel - Confidence', () => {
 
 2. **条件渲染**: 使用 `x-show` 而不是 `x-if`，避免频繁的 DOM 操作
 
-3. **筛选性能**: 筛选在渲染时执行，不会影响数据源
-
 ### 潜在问题
 
 1. **大量分析维度**: 如果有 20+ 个分析维度，渲染可能较慢
    - **解决**: 考虑虚拟滚动或分页
-
-2. **频繁筛选**: 每次筛选都会重新渲染
-   - **解决**: 添加防抖（debounce）
 
 ---
 

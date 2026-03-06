@@ -4,8 +4,8 @@
 
 在 Prompt 生成页面的 AI 分析报告区域，为每个分析维度添加置信度显示，帮助用户：
 1. 快速识别高质量分析结果
-2. 筛选置信度高的维度用于 Prompt 生成
-3. 避免使用低质量的分析数据
+2. 直观了解每个维度的数据质量
+3. 做出更明智的维度选择决策
 
 ---
 
@@ -159,79 +159,11 @@
 
 ---
 
-## 🔍 筛选功能设计
-
-### 筛选控制面板
-
-**位置**：在 AI 分析报告区域上方
-
-**HTML 结构**：
-```html
-<div class="mb-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
-  <div class="flex items-center justify-between">
-    <div class="flex items-center gap-4">
-      <!-- 仅显示高置信度 -->
-      <label class="flex items-center gap-2 text-sm cursor-pointer">
-        <input type="checkbox"
-               x-model="confidenceFilter.showHighOnly"
-               @change="onConfidenceFilterChange"
-               class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
-        <span class="text-slate-700 font-medium">仅显示高置信度 (≥70%)</span>
-      </label>
-
-      <!-- 隐藏低置信度 -->
-      <label class="flex items-center gap-2 text-sm cursor-pointer">
-        <input type="checkbox"
-               x-model="confidenceFilter.hideLow"
-               @change="onConfidenceFilterChange"
-               class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
-        <span class="text-slate-700 font-medium">隐藏低置信度 (<50%)</span>
-      </label>
-    </div>
-
-    <!-- 筛选状态 -->
-    <div x-show="confidenceFilter.showHighOnly || confidenceFilter.hideLow"
-         class="text-xs text-slate-500">
-      <span x-text="filteredCount"></span> / <span x-text="totalCount"></span> 项
-    </div>
-  </div>
-</div>
-```
-
-### 筛选逻辑
-
-**状态定义**：
-```typescript
-confidenceFilter: {
-  showHighOnly: false,  // 仅显示高置信度
-  hideLow: false        // 隐藏低置信度
-}
-```
-
-**筛选方法**：
-```typescript
-shouldShowTarget(targetId: string): boolean {
-  const confidence = this.getTargetConfidence(targetId);
-
-  if (this.confidenceFilter.showHighOnly && confidence < 70) {
-    return false;
-  }
-
-  if (this.confidenceFilter.hideLow && confidence < 50) {
-    return false;
-  }
-
-  return true;
-}
-```
-
----
-
 ## 📊 统计信息显示
 
 ### 置信度分布摘要
 
-**位置**：在筛选控制面板上方（可选）
+**位置**：在 AI 分析报告区域上方（可选）
 
 **HTML 结构**：
 ```html
