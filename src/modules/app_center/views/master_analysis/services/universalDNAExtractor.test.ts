@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { UniversalDNAExtractor } from '../services/universalDNAExtractor';
+import { UniversalDNAExtractor } from '../services/UniversalDNAExtractor';
 import type { CompetitorReport, ProductOverviewReport, SemanticAnalysisReport } from '../types/downloadsReportTypes';
 
 describe('UniversalDNAExtractor', () => {

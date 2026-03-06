@@ -20,7 +20,7 @@ import { PROMPTLAB_DISPLAY_LIMITS } from '../../config/displayLimits';
 
 import { Logger } from '../../../../../../services/loggerService';
 import { extractProductDNA, canExtractDNA } from '../../services/dnaExtractor';
-import { extractDNAFromDownloadsReport, canExtractDNAFromDownloadsReport } from '../../services/universalDNAExtractor';
+import { extractDNAFromDownloadsReport, canExtractDNAFromDownloadsReport } from '../../services/UniversalDNAExtractor';
 /**
  * 控制台模式类型
  */
