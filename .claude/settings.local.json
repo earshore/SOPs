@@ -28,7 +28,23 @@
       "Bash(winget install:*)",
       "Bash(powershell.exe:*)",
       "Bash(npm list:*)",
-      "Bash(ping:*)"
+      "Bash(ping:*)",
+      "Bash(claude config:*)",
+      "mcp__plugin_playwright_playwright__browser_take_screenshot",
+      "mcp__plugin_playwright_playwright__browser_click",
+      "mcp__plugin_playwright_playwright__browser_snapshot",
+      "mcp__plugin_playwright_playwright__browser_evaluate",
+      "mcp__plugin_playwright_playwright__browser_wait_for",
+      "mcp__plugin_playwright_playwright__browser_console_messages",
+      "mcp__plugin_playwright_playwright__browser_close",
+      "Bash(grep:*)",
+      "mcp__plugin_playwright_playwright__browser_run_code",
+      "mcp__plugin_playwright_playwright__browser_file_upload",
+      "Bash(git remote:*)",
+      "Bash(winget:*)",
+      "Bash(gh:*)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\":*)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" auth:*)"
     ]
   }
 }
