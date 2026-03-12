@@ -1,0 +1,376 @@
+/**
+ * 并行分析服务 - 加速 AI 分析执行
+ * 
+ * 核心优化：
+ * 1. 并行执行多个分析目标（最高 8x 加速）
+ * 2. 智能缓存机制（避免重复分析）
+ * 3. 流式结果返回（实时展示）
+ * 4. 失败隔离（单个失败不影响整体）
+ */
+
+import { callLLM, type ChatMessage } from '../../../../../../services/llmService';
+import { StorageService, STORAGE_KEYS } from '../../../../../../services/storageService';
+import { configCenter } from '../../../../../../common/config/ConfigCenter';
+import type { FullAnalysisReport } from '../config/analysisReportData';
+import type { Product } from '../config/sampleData';
+import { generateAnalysisPrompt } from '../prompts/analysisPrompts';
+import { Logger } from '../../../../../../services/loggerService';
+
+/**
+ * LLM 配置接口
+ */
+interface LLMConfig {
+  provider: string;
+  endpoint: string;
+  apiKey: string;
+  model: string;
+}
+
+/**
+ * 分析任务结果
+ */
+interface AnalysisTask {
+  targetId: string;
+  status: 'pending' | 'running' | 'success' | 'failed';
+  result?: unknown;
+  error?: string;
+  startTime?: number;
+  endTime?: number;
+}
+
+/**
+ * 并行分析配置
+ */
+interface ParallelAnalysisConfig {
+  maxConcurrency: number; // 最大并发数
+  enableCache: boolean; // 是否启用缓存
+  streamResults: boolean; // 是否流式返回结果
+  failureStrategy: 'abort' | 'continue'; // 失败策略
+}
+
+/**
+ * 缓存键生成
+ */
+export function generateCacheKey(targetId: string, product: Product, language: string): string {
+  const productHash = `${product.asin}_${product.productTitle?.substring(0, 50)}_${product.customer_reviews?.length || 0}`;
+  return `ai_analysis_${targetId}_${productHash}_${language}`;
+}
+
+/**
+ * 从缓存获取结果
+ */
+export async function getCachedResult(cacheKey: string): Promise<unknown | null> {
+  try {
+    const cached = StorageService.get(cacheKey);
+    if (cached && typeof cached === 'object' && (cached as any).timestamp) {
+      const age = Date.now() - (cached as any).timestamp;
+      // 缓存有效期：24小时
+      if (age < 24 * 60 * 60 * 1000) {
+        Logger.debug(`[并行分析] 缓存命中: ${cacheKey}`);
+        return (cached as any).data;
+      }
+    }
+  } catch (error) {
+    Logger.warn(`[并行分析] 缓存读取失败:`, error);
+  }
+  return null;
+}
+
+/**
+ * 保存结果到缓存
+ */
+export async function setCachedResult(cacheKey: string, result: unknown): Promise<void> {
+  try {
+    StorageService.set(cacheKey, {
+      data: result,
+      timestamp: Date.now()
+    });
+    Logger.debug(`[并行分析] 结果已缓存: ${cacheKey}`);
+  } catch (error) {
+    Logger.warn(`[并行分析] 缓存写入失败:`, error);
+  }
+}
+
+/**
+ * 获取 LLM 配置
+ */
+async function getLLMConfig(): Promise<LLMConfig> {
+  const activeProvider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER) as string | null;
+
+  if (!activeProvider || typeof activeProvider !== 'string') {
+    throw new Error('请先在系统设置中选择 LLM 提供商');
+  }
+
+  const config = await StorageService.getLLMConfigWithKey(activeProvider);
+
+  if (!config || !config.apiKey) {
+    throw new Error('所选提供商未配置 API Key');
+  }
+
+  const model = config.model || (config.models && config.models[0] ? (typeof config.models[0] === 'string' ? config.models[0] : config.models[0].id) : undefined);
+
+  if (!model) {
+    throw new Error('未选择模型，请在设置中同步或选择模型');
+  }
+
+  return {
+    provider: activeProvider,
+    endpoint: config.endpoint,
+    apiKey: config.apiKey,
+    model: model
+  };
+}
+
+/**
+ * 执行单个分析任务
+ */
+async function executeAnalysisTask(
+  task: AnalysisTask,
+  product: Product,
+  config: LLMConfig,
+  language: string,
+  enableCache: boolean
+): Promise<void> {
+  task.status = 'running';
+  task.startTime = Date.now();
+
+  try {
+    // 检查缓存
+    if (enableCache) {
+      const cacheKey = generateCacheKey(task.targetId, product, language);
+      const cachedResult = await getCachedResult(cacheKey);
+      if (cachedResult) {
+        task.result = cachedResult;
+        task.status = 'success';
+        task.endTime = Date.now();
+        Logger.debug(`[并行分析] ${task.targetId} 使用缓存结果`);
+        return;
+      }
+    }
+
+    // 生成提示词
+    const prompt = generateAnalysisPrompt(task.targetId, product, language);
+
+    const messages: ChatMessage[] = [
+      {
+        role: 'system',
+        content: '你是一个专业的亚马逊产品分析专家,擅长从 Listings 和 Reviews 中提取关键洞察。请严格按照要求的 JSON 格式返回分析结果。'
+      },
+      {
+        role: 'user',
+        content: prompt
+      }
+    ];
+
+    // 调用 LLM
+    const response = await callLLM(
+      messages,
+      config.provider,
+      config.endpoint,
+      config.apiKey,
+      config.model,
+      {
+        temperature: 0.3,
+        jsonMode: true,
+        timeout: configCenter.get<number>('llm.analysisTimeout') || 120000,
+        retries: configCenter.get<number>('llm.maxRetries') || 2
+      }
+    );
+
+    // 解析结果
+    const result = JSON.parse(response);
+    
+    // 处理可能的嵌套结构
+    let actualResult = result;
+    if (result[task.targetId]) {
+      actualResult = result[task.targetId];
+    }
+
+    task.result = actualResult;
+    task.status = 'success';
+    task.endTime = Date.now();
+
+    // 保存到缓存
+    if (enableCache) {
+      const cacheKey = generateCacheKey(task.targetId, product, language);
+      await setCachedResult(cacheKey, actualResult);
+    }
+
+    Logger.debug(`[并行分析] ${task.targetId} 分析成功，耗时: ${task.endTime - task.startTime}ms`);
+  } catch (error) {
+    task.status = 'failed';
+    task.error = (error as Error).message;
+    task.endTime = Date.now();
+    Logger.error(`[并行分析] ${task.targetId} 分析失败:`, error);
+  }
+}
+
+/**
+ * 并行执行分析任务（带并发控制）
+ */
+async function executeTasksWithConcurrency(
+  tasks: AnalysisTask[],
+  product: Product,
+  config: LLMConfig,
+  language: string,
+  maxConcurrency: number,
+  enableCache: boolean,
+  onProgress?: (completedCount: number, totalCount: number, currentTasks: string[]) => void
+): Promise<void> {
+  const totalTasks = tasks.length;
+  let completedCount = 0;
+  const runningTasks = new Set<Promise<void>>();
+
+  for (const task of tasks) {
+    // 等待直到有空闲槽位
+    while (runningTasks.size >= maxConcurrency) {
+      await Promise.race(runningTasks);
+    }
+
+    // 启动新任务
+    const taskPromise = executeAnalysisTask(task, product, config, language, enableCache)
+      .finally(() => {
+        runningTasks.delete(taskPromise);
+        completedCount++;
+        
+        // 报告进度
+        const currentRunning = tasks
+          .filter(t => t.status === 'running')
+          .map(t => t.targetId);
+        onProgress?.(completedCount, totalTasks, currentRunning);
+      });
+
+    runningTasks.add(taskPromise);
+  }
+
+  // 等待所有任务完成
+  await Promise.all(runningTasks);
+}
+
+/**
+ * 并行 AI 分析主函数
+ */
+export async function runParallelAIAnalysis(
+  targetIds: string[],
+  product: Product,
+  onProgress: (progress: number, step: string) => void,
+  language: string = 'en',
+  config: Partial<ParallelAnalysisConfig> = {}
+): Promise<FullAnalysisReport> {
+  const {
+    maxConcurrency = 4, // 默认4个并发
+    enableCache = true,
+    failureStrategy = 'continue'
+  } = config;
+
+  Logger.debug(`[并行分析] 开始分析，目标数: ${targetIds.length}，并发数: ${maxConcurrency}`);
+
+  // 获取 LLM 配置
+  const llmConfig = await getLLMConfig();
+
+  // 创建任务列表
+  const tasks: AnalysisTask[] = targetIds.map(targetId => ({
+    targetId,
+    status: 'pending' as const
+  }));
+
+  // 目标ID到报告字段的映射
+  const targetToField: Record<string, keyof FullAnalysisReport> = {
+    'title-keywords': 'title-keywords',
+    'selling-points': 'selling-points',
+    'fatal-flaws': 'fatal-flaws',
+    'wow-moments': 'wow-moments',
+    'hesitation-points': 'hesitation-points',
+    'buyer-profile': 'buyer-profile',
+    'vocab-gap': 'vocab-gap',
+    'promise-reality': 'promise-reality'
+  };
+
+  const report: Partial<FullAnalysisReport> = {};
+  const totalTasks = tasks.length;
+
+  // 执行并行分析
+  await executeTasksWithConcurrency(
+    tasks,
+    product,
+    llmConfig,
+    language,
+    maxConcurrency,
+    enableCache,
+    (completedCount, _totalCount, currentTasks) => {
+      const progress = Math.round((completedCount / totalTasks) * 100);
+      const runningInfo = currentTasks.length > 0 
+        ? `正在分析: ${currentTasks.join(', ')}` 
+        : '准备分析...';
+      onProgress(progress, `${runningInfo} (${completedCount}/${totalTasks})`);
+    }
+  );
+
+  // 收集结果
+  let successCount = 0;
+  let failedCount = 0;
+
+  for (const task of tasks) {
+    if (task.status === 'success' && task.result) {
+      const fieldName = targetToField[task.targetId];
+      if (fieldName) {
+        (report as any)[fieldName] = task.result;
+        successCount++;
+      }
+    } else if (task.status === 'failed') {
+      failedCount++;
+      Logger.warn(`[并行分析] ${task.targetId} 失败: ${task.error}`);
+    }
+  }
+
+  // 根据失败策略处理
+  if (failedCount > 0 && failureStrategy === 'abort') {
+    throw new Error(`分析失败: ${failedCount}/${totalTasks} 个目标分析失败`);
+  }
+
+  onProgress(100, `分析完成! 成功: ${successCount}, 失败: ${failedCount}`);
+
+  Logger.debug(`[并行分析] 分析完成，成功: ${successCount}, 失败: ${failedCount}`);
+
+  return report as FullAnalysisReport;
+}
+
+/**
+ * 清除分析缓存
+ */
+export function clearAnalysisCache(): void {
+  try {
+    const allKeys = Object.keys(localStorage);
+    const cacheKeys = allKeys.filter(key => key.startsWith('ai_analysis_'));
+    cacheKeys.forEach(key => localStorage.removeItem(key));
+    Logger.debug(`[并行分析] 已清除 ${cacheKeys.length} 个缓存项`);
+  } catch (error) {
+    Logger.error('[并行分析] 清除缓存失败:', error);
+  }
+}
+
+/**
+ * 获取缓存统计信息
+ */
+export function getCacheStats(): { count: number; totalSize: number } {
+  try {
+    const allKeys = Object.keys(localStorage);
+    const cacheKeys = allKeys.filter(key => key.startsWith('ai_analysis_'));
+    let totalSize = 0;
+    
+    cacheKeys.forEach(key => {
+      const value = localStorage.getItem(key);
+      if (value) {
+        totalSize += value.length;
+      }
+    });
+
+    return {
+      count: cacheKeys.length,
+      totalSize: totalSize
+    };
+  } catch (error) {
+    Logger.error('[并行分析] 获取缓存统计失败:', error);
+    return { count: 0, totalSize: 0 };
+  }
+}

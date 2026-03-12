@@ -13,6 +13,7 @@ import * as actions from './actions';
 import { AlpineContext } from '../types';
 import { createComputedProperties, ComputedProperties } from './computedProperties';
 import { createMultipleStateSyncs, cleanupSubscriptions } from '@common/utils/stateSync';
+import { createPerformanceSettingsPanel } from './PerformanceSettings';
 
 import { Logger } from '../../../../../../services/loggerService';
 /**
@@ -319,7 +320,10 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
     getConfidenceAriaLabel(percent: number): string {
       const level = this.getConfidenceLevel(percent);
       return `置信度: ${percent}%, 等级: ${level}`;
-    }
+    },
+
+    // ========== 性能设置 ==========
+    perfSettings: createPerformanceSettingsPanel()
   };
 
   // 合并计算属性 - 使用 defineProperties 保留 getter 特性
