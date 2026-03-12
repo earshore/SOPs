@@ -30,10 +30,10 @@
  * const dna = extractor.extractDNA(report, 'zh');
  *
  * if (dna) {
- *   console.log('受众:', dna.audience);
- *   console.log('卖点:', dna.usps);
- *   console.log('规格:', dna.specs);
- *   console.log('置信度:', dna.confidence);
+ *   Logger.debug('受众:', dna.audience);
+ *   Logger.debug('卖点:', dna.usps);
+ *   Logger.debug('规格:', dna.specs);
+ *   Logger.debug('置信度:', dna.confidence);
  * }
  * ```
  *
@@ -121,10 +121,10 @@ export class UniversalDNAExtractor {
    *
    * // 检查提取结果
    * if (dna) {
-   *   console.log(`受众: ${dna.audience.join(', ')}`);
-   *   console.log(`置信度: ${JSON.stringify(dna.confidence)}`);
+   *   Logger.debug(`受众: ${dna.audience.join(', ')}`);
+   *   Logger.debug(`置信度: ${JSON.stringify(dna.confidence)}`);
    * } else {
-   *   console.error('DNA 提取失败');
+   *   Logger.error('DNA 提取失败');
    * }
    * ```
    *

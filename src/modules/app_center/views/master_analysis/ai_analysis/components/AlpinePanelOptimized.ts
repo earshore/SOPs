@@ -63,42 +63,42 @@ export function createAiAnalysisPanelOptimized(): Record<string, unknown> {
     get reportConfidence() {
       const report = appStore.getState().analysis.analysisReport;
       if (!report || typeof report === 'string') {
-        console.debug('[置信度] reportConfidence: 报告不存在或为字符串');
+        Logger.debug('[置信度] reportConfidence: 报告不存在或为字符串');
         return null;
       }
       if (!report._metadata) {
-        console.warn('[置信度] reportConfidence: 报告缺少 _metadata 字段');
+        Logger.warn('[置信度] reportConfidence: 报告缺少 _metadata 字段');
         return null;
       }
       const confidence = report._metadata.confidence || null;
-      console.debug('[置信度] reportConfidence:', confidence);
+      Logger.debug('[置信度] reportConfidence:', confidence);
       return confidence;
     },
 
     get overallConfidence() {
       const report = appStore.getState().analysis.analysisReport;
       if (!report || typeof report === 'string') {
-        console.debug('[置信度] overallConfidence: 报告不存在或为字符串');
+        Logger.debug('[置信度] overallConfidence: 报告不存在或为字符串');
         return 0;
       }
       if (!report._metadata) {
-        console.warn('[置信度] overallConfidence: 报告缺少 _metadata 字段');
+        Logger.warn('[置信度] overallConfidence: 报告缺少 _metadata 字段');
         return 0;
       }
       const overall = report._metadata.overallConfidence || 0;
-      console.debug('[置信度] overallConfidence:', overall);
+      Logger.debug('[置信度] overallConfidence:', overall);
       return overall;
     },
 
     get overallConfidencePercent() {
       const percent = Math.round((this.overallConfidence as number) * 100);
-      console.debug('[置信度] overallConfidencePercent:', percent + '%');
+      Logger.debug('[置信度] overallConfidencePercent:', percent + '%');
       return percent;
     },
 
     get hasConfidenceData() {
       const hasData = !!this.reportConfidence;
-      console.debug('[置信度] hasConfidenceData:', hasData);
+      Logger.debug('[置信度] hasConfidenceData:', hasData);
       return hasData;
     },
 
