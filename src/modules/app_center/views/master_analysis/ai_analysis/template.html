@@ -541,7 +541,17 @@
                 </p>
               </div>
             </div>
-            <div class="relative">
+            <div class="relative flex items-center gap-3">
+              <!-- 性能设置按钮 -->
+              <button
+                @click="perfSettings.toggleSettings()"
+                class="px-4 py-5 rounded-xl font-medium text-sm transition-all duration-300 flex items-center gap-2 bg-white/10 text-white hover:bg-white/20 border border-white/20 hover:border-white/30"
+                title="性能设置">
+                <i class="fa-solid fa-sliders"></i>
+                <span class="hidden sm:inline">性能设置</span>
+              </button>
+              
+              <!-- 开始分析按钮 -->
               <button
                 :class="isAnalyzing ? 'bg-white/20 text-white cursor-wait backdrop-blur-sm border border-white/30' : !(selectedTargets.length &gt; 0 &amp;&amp; hasData &amp;&amp; !isAnalyzing) ? 'bg-white/10 text-white/40 cursor-not-allowed border border-white/10' : 'bg-white text-indigo-600 hover:bg-indigo-50 hover:scale-105 border border-white/50'"
                 :disabled="!(selectedTargets.length &gt; 0 &amp;&amp; hasData &amp;&amp; !isAnalyzing)"
@@ -621,6 +631,159 @@
         </div>
       </div>
     </div>
+    
+    <!-- 性能设置模态框 -->
+    <template x-if="perfSettings.showSettings">
+      <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+        @click.self="perfSettings.toggleSettings()">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+          @click.stop>
+          <!-- Header -->
+          <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <i class="fa-solid fa-sliders text-2xl"></i>
+                <h2 class="text-2xl font-bold">性能设置</h2>
+              </div>
+              <button @click="perfSettings.toggleSettings()"
+                class="hover:bg-white/20 rounded-lg p-2 transition-colors">
+                <i class="fa-solid fa-times text-xl"></i>
+              </button>
+            </div>
+            <p class="mt-2 text-white/80 text-sm">优化 AI 分析速度和质量平衡</p>
+          </div>
+
+          <!-- Content -->
+          <div class="p-6 space-y-6">
+            <!-- 并发数设置 -->
+            <div class="space-y-3">
+              <label class="block text-sm font-semibold text-slate-700">
+                <i class="fa-solid fa-gauge-high text-indigo-600 mr-2"></i>
+                最大并发数
+              </label>
+              <div class="flex items-center gap-4">
+                <input type="range" min="1" max="8" step="1"
+                  x-model.number="perfSettings.settings.maxConcurrency"
+                  class="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                <span class="text-2xl font-bold text-indigo-600 min-w-[3rem] text-center"
+                  x-text="perfSettings.settings.maxConcurrency"></span>
+              </div>
+              <div class="flex items-start gap-2 text-sm text-slate-600 bg-slate-50 p-3 rounded-lg">
+                <i class="fa-solid fa-lightbulb text-amber-500 mt-0.5"></i>
+                <span x-text="perfSettings.getConcurrencyHint()"></span>
+              </div>
+              <div class="grid grid-cols-2 gap-3 text-xs">
+                <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
+                  <div class="font-semibold text-emerald-700 mb-1">
+                    <i class="fa-solid fa-rocket mr-1"></i>
+                    预计加速
+                  </div>
+                  <div class="text-emerald-600"
+                    x-text="perfSettings.settings.maxConcurrency + 'x 倍'"></div>
+                </div>
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <div class="font-semibold text-blue-700 mb-1">
+                    <i class="fa-solid fa-clock mr-1"></i>
+                    预计耗时
+                  </div>
+                  <div class="text-blue-600"
+                    x-text="Math.round(120 / perfSettings.settings.maxConcurrency) + ' 秒'"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 缓存设置 -->
+            <div class="space-y-3">
+              <label class="flex items-center justify-between cursor-pointer group">
+                <div class="flex items-center gap-3">
+                  <i class="fa-solid fa-database text-indigo-600 text-lg"></i>
+                  <div>
+                    <div class="text-sm font-semibold text-slate-700 group-hover:text-indigo-600 transition-colors">
+                      启用智能缓存
+                    </div>
+                    <div class="text-xs text-slate-500 mt-0.5">
+                      相同产品的分析结果将被缓存 24 小时
+                    </div>
+                  </div>
+                </div>
+                <input type="checkbox" x-model="perfSettings.settings.enableCache"
+                  class="w-5 h-5 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+              </label>
+              
+              <!-- 缓存统计 -->
+              <div class="bg-slate-50 rounded-lg p-4 space-y-2">
+                <div class="flex items-center justify-between text-sm">
+                  <span class="text-slate-600">缓存项数量</span>
+                  <span class="font-semibold text-slate-800"
+                    x-text="perfSettings.cacheStats.count"></span>
+                </div>
+                <div class="flex items-center justify-between text-sm">
+                  <span class="text-slate-600">占用空间</span>
+                  <span class="font-semibold text-slate-800"
+                    x-text="perfSettings.formatSize(perfSettings.cacheStats.totalSize)"></span>
+                </div>
+                <button @click="perfSettings.clearCache()"
+                  class="w-full mt-2 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-sm font-medium transition-colors">
+                  <i class="fa-solid fa-trash mr-2"></i>
+                  清除所有缓存
+                </button>
+              </div>
+            </div>
+
+            <!-- 失败策略 -->
+            <div class="space-y-3">
+              <label class="block text-sm font-semibold text-slate-700">
+                <i class="fa-solid fa-shield-halved text-indigo-600 mr-2"></i>
+                失败处理策略
+              </label>
+              <div class="space-y-2">
+                <label class="flex items-center gap-3 p-3 border-2 rounded-lg cursor-pointer transition-all"
+                  :class="perfSettings.settings.failureStrategy === 'continue' ? 'border-indigo-600 bg-indigo-50' : 'border-slate-200 hover:border-slate-300'">
+                  <input type="radio" name="failureStrategy" value="continue"
+                    x-model="perfSettings.settings.failureStrategy"
+                    class="w-4 h-4 text-indigo-600 focus:ring-2 focus:ring-indigo-500">
+                  <div class="flex-1">
+                    <div class="font-medium text-slate-800">继续执行（推荐）</div>
+                    <div class="text-xs text-slate-500 mt-0.5">单个目标失败不影响其他目标</div>
+                  </div>
+                </label>
+                <label class="flex items-center gap-3 p-3 border-2 rounded-lg cursor-pointer transition-all"
+                  :class="perfSettings.settings.failureStrategy === 'abort' ? 'border-indigo-600 bg-indigo-50' : 'border-slate-200 hover:border-slate-300'">
+                  <input type="radio" name="failureStrategy" value="abort"
+                    x-model="perfSettings.settings.failureStrategy"
+                    class="w-4 h-4 text-indigo-600 focus:ring-2 focus:ring-indigo-500">
+                  <div class="flex-1">
+                    <div class="font-medium text-slate-800">立即中止</div>
+                    <div class="text-xs text-slate-500 mt-0.5">任何失败都会终止整个分析</div>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="bg-slate-50 p-6 flex items-center justify-between gap-3 border-t">
+            <button @click="perfSettings.resetSettings()"
+              class="px-4 py-2 text-slate-600 hover:text-slate-800 font-medium transition-colors">
+              <i class="fa-solid fa-rotate-left mr-2"></i>
+              恢复默认
+            </button>
+            <div class="flex gap-3">
+              <button @click="perfSettings.toggleSettings()"
+                class="px-6 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-100 font-medium transition-colors">
+                取消
+              </button>
+              <button @click="perfSettings.saveSettings()"
+                class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors shadow-lg">
+                <i class="fa-solid fa-check mr-2"></i>
+                保存设置
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+    
     <!-- JSON 查看器 - 已移动到分析报告卡片内 -->
     <!-- 分析结果展示 -->
     <template x-if="hasReport &amp;&amp; results.length &gt; 0">

@@ -8,6 +8,7 @@ import { analysisTargets } from '../config/analysisTargets';
 import { generateAnalysisPrompt } from '../prompts/analysisPrompts';
 import { runAnalysis, getSampleReport, parseAnalysisReport } from '../services/analysisService';
 import { runAIAnalysis } from '../services/aiAnalysisService';
+import { runParallelAIAnalysis } from '../services/parallelAnalysisService';
 import { generateMarkdownReport, generateJsonReportData } from '../services/reportGenerator';
 import { mergeProducts, getProductsByAsins } from '../utils/dataTransformers';
 import { getMarketLanguage } from './helpers';
@@ -258,14 +259,25 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
       // 获取正确的语言代码
       const language = getMarketLanguage();
 
-      analysisReport = await runAIAnalysis(
+      // 获取用户的性能设置
+      const { getPerformanceSettings } = await import('./PerformanceSettings');
+      const perfSettings = getPerformanceSettings();
+
+      // 使用并行分析服务（最高8倍加速）
+      analysisReport = await runParallelAIAnalysis(
         context.selectedTargets,
         mergedProduct,
         (progress: number, step: string) => {
           context.progress = progress;
           context.currentStep = step;
         },
-        language
+        language,
+        {
+          maxConcurrency: perfSettings.maxConcurrency,
+          enableCache: perfSettings.enableCache,
+          streamResults: true,
+          failureStrategy: perfSettings.failureStrategy
+        }
       );
     } else {
       // 使用示例数据进行模拟分析
