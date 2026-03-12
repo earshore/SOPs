@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>快速测试 - 下拉框修复</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+        }
+        
+        .test-info {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .test-info h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        
+        .test-info code {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .test-info ul {
+            line-height: 1.8;
+        }
+        
+        .highlight {
+            background: #fff3cd;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+            margin: 15px 0;
+        }
+        
+        .success {
+            background: #d4edda;
+            padding: 15px;
+            border-left: 4px solid #28a745;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-info">
+        <h2>🔧 下拉框修复说明</h2>
+        
+        <div class="highlight">
+            <strong>⚠️ 重要提示：</strong> 修复已完成，但需要刷新页面才能生效！
+        </div>
+        
+        <h3>修复内容：</h3>
+        <ul>
+            <li>✅ 移除了CSS中的 <code>top: calc(100% + 8px)</code></li>
+            <li>✅ 移除了CSS中的 <code>left: 0; right: 0;</code></li>
+            <li>✅ 改用JavaScript动态设置位置</li>
+            <li>✅ 优化了动画效果（使用opacity和transform）</li>
+            <li>✅ 添加了 <code>requestAnimationFrame</code> 确保样式应用</li>
+        </ul>
+        
+        <h3>测试步骤：</h3>
+        <ol>
+            <li>确保开发服务器正在运行：<code>npm run dev</code></li>
+            <li>访问：<code>http://localhost:5177/</code></li>
+            <li>导航到：<strong>AMAZON智库 → 入门实操宝典 → EU营销日历</strong></li>
+            <li><strong>强制刷新页面</strong>（Ctrl+Shift+R 或 Cmd+Shift+R）</li>
+            <li>点击搜索框</li>
+            <li>观察下拉框是否完整显示</li>
+        </ol>
+        
+        <div class="success">
+            <strong>✅ 预期结果：</strong>
+            <ul style="margin: 10px 0 0 0;">
+                <li>下拉框应该完整显示在搜索框正下方</li>
+                <li>所有选项都可见</li>
+                <li>不会被裁切</li>
+                <li>位置正确，不会跑到奇怪的地方</li>
+            </ul>
+        </div>
+        
+        <h3>如果还是有问题：</h3>
+        <ol>
+            <li>打开浏览器开发者工具（F12）</li>
+            <li>切换到Console标签</li>
+            <li>点击搜索框</li>
+            <li>在Console中运行以下代码查看下拉框位置：</li>
+        </ol>
+        
+        <pre style="background: #f0f0f0; padding: 15px; border-radius: 4px; overflow-x: auto;">
+const dropdown = document.getElementById('amzf_search_history');
+const searchBox = document.querySelector('.amzf_search_box');
+
+console.log('下拉框元素:', dropdown);
+console.log('搜索框元素:', searchBox);
+
+if (dropdown && searchBox) {
+    const searchRect = searchBox.getBoundingClientRect();
+    const dropdownRect = dropdown.getBoundingClientRect();
+    
+    console.log('搜索框位置:', {
+        top: searchRect.top,
+        bottom: searchRect.bottom,
+        left: searchRect.left,
+        width: searchRect.width
+    });
+    
+    console.log('下拉框位置:', {
+        top: dropdownRect.top,
+        left: dropdownRect.left,
+        width: dropdownRect.width,
+        height: dropdownRect.height
+    });
+    
+    console.log('下拉框样式:', {
+        position: dropdown.style.position,
+        top: dropdown.style.top,
+        left: dropdown.style.left,
+        width: dropdown.style.width,
+        maxHeight: dropdown.style.maxHeight,
+        zIndex: dropdown.style.zIndex
+    });
+    
+    console.log('下拉框类名:', dropdown.className);
+}
+        </pre>
+        
+        <h3>关键修复点：</h3>
+        <div style="background: #e7f3ff; padding: 15px; border-left: 4px solid #2196F3; margin: 15px 0;">
+            <p><strong>问题根源：</strong></p>
+            <p>使用 <code>position: fixed</code> 时，<code>top: calc(100% + 8px)</code> 是相对于视口的，不是相对于父元素的。这导致下拉框位置计算错误。</p>
+            
+            <p><strong>解决方案：</strong></p>
+            <p>完全由JavaScript动态计算并设置 <code>top</code>、<code>left</code>、<code>width</code>、<code>maxHeight</code>，不在CSS中预设这些值。</p>
+        </div>
+    </div>
+    
+    <div class="test-info">
+        <h2>📞 需要帮助？</h2>
+        <p>如果按照上述步骤操作后仍然有问题，请提供以下信息：</p>
+        <ul>
+            <li>浏览器类型和版本</li>
+            <li>屏幕分辨率</li>
+            <li>Console中的输出信息</li>
+            <li>下拉框的截图</li>
+        </ul>
+    </div>
+</body>
+</html>

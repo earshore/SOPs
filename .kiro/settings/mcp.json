@@ -8,7 +8,8 @@
         "D:/Users/Administrator/Documents/GitHub/AihangSOP"
       ],
       "autoApprove": [
-        "read_text_file"
+        "read_text_file",
+        "read_media_file"
       ]
     },
     "memory": {
@@ -30,6 +31,10 @@
       "args": [
         "-y",
         "mcp-server-fetch-typescript"
+      ],
+      "autoApprove": [
+        "get_markdown",
+        "get_raw_text"
       ]
     }
   }
