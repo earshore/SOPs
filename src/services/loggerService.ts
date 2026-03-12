@@ -8,6 +8,7 @@
 import { configCenter, type LoggerConfig } from '../common/config/ConfigCenter';
 // 从types/services导入统一的类型定义
 import type { IStorageService, IConfigService, ILoggerService, LogEntry as ILogEntry } from '../types/services';
+// 移除循环导入
 /**
  * 日志级别（数字枚举，用于内部比较）
  */
@@ -231,19 +232,25 @@ export class LoggerService implements ILoggerService {
     const style = `color: ${color}; font-weight: bold;`;
 
     // 使用原生 console 方法，避免递归调用
+    const fullMessage = `${prefix} ${message}`;
+    const logData = {
+      style,
+      ...(data && typeof data === 'object' && !Array.isArray(data) ? data as Record<string, unknown> : { data })
+    };
+
     switch (level) {
       case LOG_LEVELS.DEBUG:
-        console.debug(prefix, style, message, data);
+        Logger.debug(fullMessage, logData);
         break;
       case LOG_LEVELS.INFO:
-        console.info(prefix, style, message, data);
+        Logger.info(fullMessage, logData);
         break;
       case LOG_LEVELS.WARN:
-        console.warn(prefix, style, message, data);
+        Logger.warn(fullMessage, logData);
         break;
       case LOG_LEVELS.ERROR:
       case LOG_LEVELS.FATAL:
-        console.error(prefix, style, message, data instanceof Error ? data : data);
+        Logger.error(fullMessage, data instanceof Error ? data : logData);
         break;
     }
   }
