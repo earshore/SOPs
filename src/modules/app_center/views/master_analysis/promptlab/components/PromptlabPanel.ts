@@ -144,16 +144,16 @@ export function createPromptlabPanel() {
         get reportConfidence() {
             const report = appStore.getState().analysis.analysisReport;
             if (!report || typeof report === 'string') {
-                console.debug('[Promptlab 置信度] reportConfidence: 报告不存在或为字符串');
+                Logger.debug('[Promptlab 置信度] reportConfidence: 报告不存在或为字符串');
                 return null;
             }
             const reportObj = report as any;
             if (!reportObj._metadata) {
-                console.warn('[Promptlab 置信度] reportConfidence: 报告缺少 _metadata 字段');
+                Logger.warn('[Promptlab 置信度] reportConfidence: 报告缺少 _metadata 字段');
                 return null;
             }
             const confidence = reportObj._metadata.confidence || null;
-            console.debug('[Promptlab 置信度] reportConfidence:', confidence);
+            Logger.debug('[Promptlab 置信度] reportConfidence:', confidence);
             return confidence;
         },
 
@@ -163,16 +163,16 @@ export function createPromptlabPanel() {
         get overallConfidence() {
             const report = appStore.getState().analysis.analysisReport;
             if (!report || typeof report === 'string') {
-                console.debug('[Promptlab 置信度] overallConfidence: 报告不存在或为字符串');
+                Logger.debug('[Promptlab 置信度] overallConfidence: 报告不存在或为字符串');
                 return 0;
             }
             const reportObj = report as any;
             if (!reportObj._metadata) {
-                console.warn('[Promptlab 置信度] overallConfidence: 报告缺少 _metadata 字段');
+                Logger.warn('[Promptlab 置信度] overallConfidence: 报告缺少 _metadata 字段');
                 return 0;
             }
             const overall = reportObj._metadata.overallConfidence || 0;
-            console.debug('[Promptlab 置信度] overallConfidence:', overall);
+            Logger.debug('[Promptlab 置信度] overallConfidence:', overall);
             return overall;
         },
 
@@ -181,7 +181,7 @@ export function createPromptlabPanel() {
          */
         get overallConfidencePercent() {
             const percent = Math.round((this.overallConfidence as number) * 100);
-            console.debug('[Promptlab 置信度] overallConfidencePercent:', percent + '%');
+            Logger.debug('[Promptlab 置信度] overallConfidencePercent:', percent + '%');
             return percent;
         },
 
@@ -190,7 +190,7 @@ export function createPromptlabPanel() {
          */
         get hasConfidenceData() {
             const hasData = !!this.reportConfidence;
-            console.debug('[Promptlab 置信度] hasConfidenceData:', hasData);
+            Logger.debug('[Promptlab 置信度] hasConfidenceData:', hasData);
             return hasData;
         },
 

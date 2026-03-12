@@ -293,10 +293,9 @@
 
     /* ==================== Search History Dropdown ==================== */
     .amzf_search_history {
-        position: absolute;
-        top: calc(100% + 8px);
-        left: 0;
-        right: 0;
+        position: fixed;
+        /* 改为 fixed 避免被父容器裁切 */
+        /* top, left, width, maxHeight 将由JavaScript动态设置 */
         background: rgba(255, 255, 255, 0.98);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
@@ -307,21 +306,20 @@
             inset 0 1px 0 rgba(255, 255, 255, 0.8);
         border: 1px solid rgba(102, 126, 234, 0.1);
         padding: 8px 0;
-        z-index: 1000;
-        max-height: 0;
+        z-index: 99999;
+        /* 提升层级确保在最上层 */
         opacity: 0;
         overflow: hidden;
-        transform: translateY(-10px);
-        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: opacity 0.2s ease;
         pointer-events: none;
+        visibility: hidden;
     }
 
     .amzf_search_history.amzf_show {
-        max-height: 320px;
         opacity: 1;
-        transform: translateY(0);
         pointer-events: auto;
         overflow-y: auto;
+        visibility: visible;
     }
 
     .amzf_history_header {

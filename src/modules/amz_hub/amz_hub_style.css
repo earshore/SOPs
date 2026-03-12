@@ -4,7 +4,12 @@
 
 /* 使用全局模块高亮动画 - 见 src/css/animations/keyframes.css */
 .hub-module-highlight {
-  animation: moduleHighlight var(--duration-var(--duration-2s)) var(--var(--ease-out));
+  animation: moduleHighlight var(--duration-var(--duration-var(--duration-2s))) var(--var(--var(--ease-out)));
+}
+
+/* 确保模块容器允许下拉框溢出 */
+.module-container {
+  overflow: visible !important;
 }
 
 /* ----------------------------------------
@@ -95,7 +100,7 @@
 .editing-mode .editable-item {
   background: var(--color-amber-50);
   /* 极淡的黄色背景提示 */
-  animation: pulse var(--duration-var(--duration-2s)) infinite;
+  animation: pulse var(--duration-var(--duration-var(--duration-2s))) infinite;
 }
 
 /* ----------------------------------------
@@ -108,7 +113,7 @@
   color: var(--color-slate-500);
   font-weight: 600;
   font-size: 0.875rem;
-  transition: all var(--duration-normal) var(--var(--ease-in-out));
+  transition: all var(--duration-normal) var(--var(--var(--ease-in-out)));
   border: 1px solid transparent;
 }
 

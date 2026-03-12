@@ -40,6 +40,7 @@ export class GlobalErrorHandler {
   private errorCount: number = 0;
   private lastErrorTime: number = 0;
   private errorThrottleMs: number = 2000;
+  private isHandlingError: boolean = false; // 🔧 添加：防止循环调用标志
 
   private constructor() {
     this.initGlobalHandlers();
@@ -104,35 +105,50 @@ export class GlobalErrorHandler {
    * 处理错误
    */
   handle(error: Error | AppError, options: ErrorHandlerOptions = {}): void {
-    const appError = isAppError(error) ? error : toAppError(error, options.context);
-
-    // 更新错误计数和时间
-    this.errorCount++;
-    this.lastErrorTime = Date.now();
-
-    // 捕获到错误追踪器
-    errorTracker.captureAppError(appError);
-
-    // 记录日志
-    if (options.log !== false) {
-      this.logError(appError);
+    // 🔧 防止循环调用
+    if (this.isHandlingError) {
+      console.error('[GlobalErrorHandler] Recursive error detected, skipping:', error.message);
+      return;
     }
 
-    // 显示用户通知
-    if (options.notify !== false && appError.notify) {
-      this.notifyUser(appError, options.userMessage);
-    }
+    try {
+      this.isHandlingError = true;
 
-    // 上报到监控服务
-    if (options.report !== false) {
-      this.reportError(appError);
-    }
+      const appError = isAppError(error) ? error : toAppError(error, options.context);
 
-    // 触发错误事件
-    eventBus.emit(APP_EVENTS.ERROR_OCCURRED, {
-      error: appError,
-      timestamp: Date.now()
-    });
+      // 更新错误计数和时间
+      this.errorCount++;
+      this.lastErrorTime = Date.now();
+
+      // 捕获到错误追踪器
+      errorTracker.captureAppError(appError);
+
+      // 记录日志
+      if (options.log !== false) {
+        this.logError(appError);
+      }
+
+      // 显示用户通知
+      if (options.notify !== false && appError.notify) {
+        this.notifyUser(appError, options.userMessage);
+      }
+
+      // 上报到监控服务
+      if (options.report !== false) {
+        this.reportError(appError);
+      }
+
+      // 触发错误事件
+      eventBus.emit(APP_EVENTS.ERROR_OCCURRED, {
+        error: appError,
+        timestamp: Date.now()
+      });
+    } catch (innerError) {
+      // 如果错误处理本身出错，直接输出到console
+      console.error('[GlobalErrorHandler] Error in error handler:', innerError);
+    } finally {
+      this.isHandlingError = false;
+    }
   }
 
   /**

@@ -1,0 +1,13 @@
+{
+  "name": "Test Dropdown Fix",
+  "version": "1.0.0",
+  "description": "Automatically test the EU Marketing Calendar dropdown positioning after file edits",
+  "when": {
+    "type": "fileEdited",
+    "patterns": ["src/modules/amz_hub/views/practice/marketing_calendar/index.ts"]
+  },
+  "then": {
+    "type": "runCommand",
+    "command": "node test-dropdown-automated.js"
+  }
+}

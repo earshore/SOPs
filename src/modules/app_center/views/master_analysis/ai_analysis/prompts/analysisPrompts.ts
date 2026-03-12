@@ -52,6 +52,7 @@
 import { Product } from '../config/sampleData';
 import { sanitizePromptInput } from './promptSanitizer';
 
+import { Logger } from '../../../../../../services/loggerService';
 // 核心 JSON 规则
 export const CORE_JSON_RULES = `
 ## Critical JSON Rules
@@ -453,7 +454,7 @@ export function generateAnalysisPrompt(
   // 验证 language 参数（可选，但记录警告）
   const validLanguages = ['en', 'zh', 'de', 'fr', 'es', 'ja', 'it'];
   if (language && !validLanguages.includes(language)) {
-    console.warn(`[generateAnalysisPrompt] Unusual language code: ${language}. Expected one of: ${validLanguages.join(', ')}`);
+    Logger.warn(`[generateAnalysisPrompt] Unusual language code: ${language}. Expected one of: ${validLanguages.join(', ')}`);
   }
 
   // 准备数据替换（应用 prompt injection 防护）
@@ -563,7 +564,7 @@ export function generateBatchAnalysisPrompt(
   // 验证 language 参数
   const validLanguages = ['en', 'zh', 'de', 'fr', 'es', 'ja', 'it'];
   if (language && !validLanguages.includes(language)) {
-    console.warn(`[generateBatchAnalysisPrompt] Unusual language code: ${language}. Expected one of: ${validLanguages.join(', ')}`);
+    Logger.warn(`[generateBatchAnalysisPrompt] Unusual language code: ${language}. Expected one of: ${validLanguages.join(', ')}`);
   }
 
   // 准备数据（应用 prompt injection 防护）
