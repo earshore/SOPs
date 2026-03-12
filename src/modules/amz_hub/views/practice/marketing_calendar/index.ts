@@ -30,6 +30,7 @@ interface MarketingCalendarState {
 class MarketingCalendarModule extends BaseModule {
     private state: MarketingCalendarState;
     private debounceTimer: number | null = null;
+    private dropdownMovedToBody = false; // 标志位：下拉框是否已移到body
 
     constructor() {
         super('amz_marketing_calendar');
@@ -66,6 +67,15 @@ class MarketingCalendarModule extends BaseModule {
     }
 
     onUnmount(): void {
+        // 清理：将下拉框从 body 移除
+        const container = document.getElementById('amzf_search_history');
+        if (container && container.parentElement === document.body) {
+            container.remove();
+        }
+        
+        // 重置标志位
+        this.dropdownMovedToBody = false;
+        
         // 清理全局代理
         this.unbindGlobalProxies();
         Logger.debug('❌ Marketing Calendar Unmounted');
@@ -299,9 +309,54 @@ class MarketingCalendarModule extends BaseModule {
 
     showSearchHistory(): void {
         const container = document.getElementById('amzf_search_history');
-        if (container) {
+        const searchBox = document.querySelector('.amzf_search_box') as HTMLElement;
+        
+        if (container && searchBox) {
             this.renderSearchHistory();
-            container.classList.add('amzf_show');
+            
+            // ✅ 关键修复：将下拉框移到 body，避免父元素 transform 影响
+            if (container.parentElement !== document.body) {
+                document.body.appendChild(container);
+            }
+            
+            // 动态计算下拉框位置
+            const searchRect = searchBox.getBoundingClientRect();
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+
+            // 响应式宽度计算
+            const containerWidth = Math.min(420, viewportWidth - 40);
+
+            // 计算水平位置
+            let left = searchRect.left;
+            if (left + containerWidth > viewportWidth - 20) {
+                left = Math.max(20, viewportWidth - containerWidth - 20);
+            }
+
+            // 计算垂直位置
+            let top = searchRect.bottom + 8;
+            const availableHeight = viewportHeight - top - 20;
+            const maxHeight = Math.min(320, availableHeight);
+
+            // 如果下方空间不足，尝试显示在上方
+            if (maxHeight < 200 && searchRect.top > 220) {
+                const topSpace = searchRect.top - 20;
+                top = searchRect.top - Math.min(320, topSpace);
+            }
+
+            // 应用样式 - 先设置位置和尺寸，再显示
+            container.style.position = 'fixed';
+            container.style.top = `${top}px`;
+            container.style.left = `${left}px`;
+            container.style.width = `${containerWidth}px`;
+            container.style.zIndex = '99999';
+            container.style.transform = 'none';  // 强制重置transform
+            
+            // 使用requestAnimationFrame确保样式应用后再添加show类
+            requestAnimationFrame(() => {
+                container.style.maxHeight = `${maxHeight}px`;
+                container.classList.add('amzf_show');
+            });
         }
     }
 
@@ -319,6 +374,7 @@ class MarketingCalendarModule extends BaseModule {
         const clearBtn = document.getElementById('amzf_clear');
         const searchBox = document.getElementById('amzf_search_box');
         const searchWrapper = document.querySelector('.amzf_search_wrapper');
+        const searchHistory = document.getElementById('amzf_search_history');
 
         if (!input) return;
 
@@ -369,6 +425,18 @@ class MarketingCalendarModule extends BaseModule {
                 this.clearSearch();
             });
         }
+
+        // 窗口大小变化时重新计算下拉框位置
+        this.addEventListener(window, 'resize', () => {
+            if (searchHistory?.classList.contains('amzf_show')) {
+                this.showSearchHistory();
+            }
+        });
+
+        // 滚动时隐藏下拉框
+        this.addEventListener(window, 'scroll', () => {
+            this.hideSearchHistory();
+        }, true);
     }
 
     // ==================== Rendering ====================
