@@ -330,21 +330,22 @@ export class ErrorTracker {
    * 记录错误日志
    */
   private logError(error: ErrorRecord): void {
+    // 🔧 修复：避免循环调用 - 直接使用console而不是Logger
+    // Logger可能会触发错误，导致无限递归
     const logLevel = error.severity === ErrorSeverity.CRITICAL || error.severity === ErrorSeverity.HIGH
       ? 'error'
       : 'warn';
 
-    this._log(
-      logLevel,
-      `[${error.type}] ${error.message}`,
-      {
-        id: error.id,
-        severity: error.severity,
-        count: error.count,
-        stack: error.stack,
-        context: error.context
-      } as Record<string, unknown>
-    );
+    const logData = {
+      id: error.id,
+      severity: error.severity,
+      count: error.count,
+      stack: error.stack,
+      context: error.context
+    };
+
+    // 直接使用console，避免通过Logger触发新的错误
+    console[logLevel](`[ErrorTracker] [${error.type}] ${error.message}`, logData);
   }
 
   /**

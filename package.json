@@ -4,7 +4,8 @@
     "description": "Amazing Amazon Architect - 亚马逊运营管理平台",
     "type": "module",
     "scripts": {
-        "dev": "vite & sleep 2 && open -na 'Google Chrome' --args --incognito http://localhost:5173",
+        "dev": "vite",
+        "dev:open": "vite --open",
         "build": "vite build",
         "preview": "vite preview",
         "test": "vitest",

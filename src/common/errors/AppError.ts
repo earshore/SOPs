@@ -95,9 +95,15 @@ export class AppError extends Error {
     // 保持正确的原型链 - 修复instanceof检查
     Object.setPrototypeOf(this, new.target.prototype);
 
-    // 捕获堆栈跟踪
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, this.constructor);
+    // 🔧 修复：捕获堆栈跟踪时避免循环
+    // 使用try-catch保护，防止captureStackTrace本身出错
+    try {
+      if (Error.captureStackTrace) {
+        Error.captureStackTrace(this, this.constructor);
+      }
+    } catch (e) {
+      // 静默失败，避免在错误处理中再次触发错误
+      console.warn('[AppError] Failed to capture stack trace:', e);
     }
   }
 
@@ -105,21 +111,34 @@ export class AppError extends Error {
    * 转换为JSON对象
    */
   toJSON(): Record<string, unknown> {
-    return {
-      name: this.name,
-      message: this.message,
-      code: this.code,
-      level: this.level,
-      category: this.category,
-      context: this.context,
-      timestamp: this.timestamp,
-      stack: this.stack,
-      originalError: this.originalError ? {
-        name: this.originalError.name,
-        message: this.originalError.message,
-        stack: this.originalError.stack
-      } : undefined
-    };
+    // 🔧 修复：避免循环引用
+    try {
+      return {
+        name: this.name,
+        message: this.message,
+        code: this.code,
+        level: this.level,
+        category: this.category,
+        context: this.context,
+        timestamp: this.timestamp,
+        stack: this.stack,
+        originalError: this.originalError ? {
+          name: this.originalError.name,
+          message: this.originalError.message,
+          // 不包含stack，避免可能的循环引用
+        } : undefined
+      };
+    } catch (e) {
+      // 如果序列化失败，返回最小信息
+      return {
+        name: this.name,
+        message: this.message,
+        code: this.code,
+        level: this.level,
+        category: this.category,
+        timestamp: this.timestamp
+      };
+    }
   }
 
   /**

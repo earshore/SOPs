@@ -231,26 +231,22 @@ export class LoggerService implements ILoggerService {
     const prefix = `%c[${time}] [${levelName.toUpperCase()}] [${module}]`;
     const style = `color: ${color}; font-weight: bold;`;
 
-    // 使用原生 console 方法，避免递归调用
+    // 🔧 修复：直接使用原生 console 方法，避免递归调用
     const fullMessage = `${prefix} ${message}`;
-    const logData = {
-      style,
-      ...(data && typeof data === 'object' && !Array.isArray(data) ? data as Record<string, unknown> : { data })
-    };
-
+    
     switch (level) {
       case LOG_LEVELS.DEBUG:
-        Logger.debug(fullMessage, logData);
+        console.debug(fullMessage, style, data);
         break;
       case LOG_LEVELS.INFO:
-        Logger.info(fullMessage, logData);
+        console.info(fullMessage, style, data);
         break;
       case LOG_LEVELS.WARN:
-        Logger.warn(fullMessage, logData);
+        console.warn(fullMessage, style, data);
         break;
       case LOG_LEVELS.ERROR:
       case LOG_LEVELS.FATAL:
-        Logger.error(fullMessage, data instanceof Error ? data : logData);
+        console.error(fullMessage, style, data);
         break;
     }
   }
