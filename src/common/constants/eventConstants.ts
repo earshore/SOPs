@@ -80,6 +80,9 @@ export const APP_EVENTS = {
   REGISTER_ACTIONS: 'registerActions',
   UNREGISTER_ACTIONS: 'unregisterActions',
   
+  // 动画相关
+  ANIMATION_SETTINGS_CHANGED: 'animation-settings-changed',
+  
   // 配置相关
   CONFIG_CHANGE: 'app:config-change',
   CONFIG_CHANGED: 'app:config-changed',

@@ -7,7 +7,8 @@
 
 import { animationManager } from '../services/animation-manager';
 import { createRipple } from '../utils/animation-utils';
-
+import eventBus from '@common/EventBus';
+import { APP_EVENTS } from '@common/constants/eventConstants';
 import { Logger } from '../services/loggerService';
 /**
  * 初始化按钮涟漪效果
@@ -184,8 +185,8 @@ export function observeAnimationSettings(): void {
   let isReinitializing = false; // 防止循环触发
   let lastReinitTime = 0;
   
-  // 监听自定义事件（由AnimationManager触发）
-  window.addEventListener('animation-settings-changed', () => {
+  // 监听EventBus事件（由AnimationManager触发）
+  const unsubscribe = eventBus.on(APP_EVENTS.ANIMATION_SETTINGS_CHANGED, () => {
     const now = Date.now();
     
     // 防止短时间内重复初始化（1秒内只初始化一次）
@@ -204,4 +205,7 @@ export function observeAnimationSettings(): void {
       isReinitializing = false;
     });
   });
+  
+  // 注意：在实际应用中，应该在适当的时候调用 unsubscribe() 清理监听器
+  // 例如在模块卸载时
 }

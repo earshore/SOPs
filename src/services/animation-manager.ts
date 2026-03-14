@@ -7,6 +7,8 @@
 
 import { StorageService } from './storageService';
 import { Logger } from './loggerService';
+import eventBus from '@common/EventBus';
+import { APP_EVENTS } from '@common/constants/eventConstants';
 import type {
   AnimationSettings,
   AnimationSpeed,
@@ -316,13 +318,13 @@ export class AnimationManager {
    * 通知其他模块动画设置已更改
    */
   private dispatchSettingsChangedEvent(): void {
-    const event = new CustomEvent('animation-settings-changed', {
-      detail: {
-        settings: this.getSettings(),
-        timestamp: Date.now(),
-      },
+    const settings = this.getSettings();
+    eventBus.emit(APP_EVENTS.ANIMATION_SETTINGS_CHANGED, {
+      enabled: settings.enabled,
+      reducedMotion: this.shouldReduceMotion(),
+      speed: settings.speed,
+      disabledCategories: Array.from(settings.disabledCategories)
     });
-    window.dispatchEvent(event);
   }
 }
 
