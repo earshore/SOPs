@@ -50,6 +50,9 @@ export function createScraperPanel() {
         // 渲染防抖标志
         _isRendering: false,
 
+        // 清理函数数组
+        _unsubscribers: [] as Array<() => void>,
+
         // Constants for View
         sites: ['DE', 'FR', 'IT', 'ES', 'NL', 'SE', 'PL', 'BE', 'IE', 'UK'] as ScraperSite[],
 
@@ -148,16 +151,46 @@ export function createScraperPanel() {
             // 从 state 恢复状态
             this.restoreState();
 
-            // 监听外部历史更新事件
-            window.addEventListener(APP_EVENTS.HISTORY_UPDATED, () => this.loadHistory());
-
-            // 监听自定义历史更新事件（来自 AI 分析模块）
-            window.addEventListener('history-updated', () => {
-                Logger.debug('[Scraper] 收到历史更新事件，重新加载历史记录');
+            // 保存事件处理函数引用
+            const historyUpdatedHandler = () => {
+                Logger.debug('[Scraper] 收到标准历史更新事件');
                 this.loadHistory();
-            });
+            };
+            
+            const customHistoryHandler = () => {
+                Logger.debug('[Scraper] 收到自定义历史更新事件');
+                this.loadHistory();
+            };
+            
+            // 添加事件监听器
+            window.addEventListener(APP_EVENTS.HISTORY_UPDATED, historyUpdatedHandler);
+            window.addEventListener('history-updated', customHistoryHandler);
+            
+            // 保存清理函数
+            this._unsubscribers.push(
+                () => window.removeEventListener(APP_EVENTS.HISTORY_UPDATED, historyUpdatedHandler),
+                () => window.removeEventListener('history-updated', customHistoryHandler)
+            );
 
-            // 如果有数据则渲染预览
+            Logger.debug('[Scraper] ✅ Alpine 组件初始化完成');
+        },
+
+        // 组件销毁时清理资源
+        destroy() {
+            Logger.debug('[Scraper] 🔄 清理事件监听器');
+            this._unsubscribers.forEach(unsub => {
+                try {
+                    unsub();
+                } catch (error) {
+                    Logger.warn('[Scraper] 清理订阅时出错:', error);
+                }
+            });
+            this._unsubscribers = [];
+            Logger.debug('[Scraper] ✅ 资源清理完成');
+        },
+
+        // 如果有数据则渲染预览（这部分代码应该在 init 方法内）
+        _renderInitialData() {
             if (this.hasData && this.dataPreview) {
                 Logger.debug('[Scraper] 📦 检测到数据，准备初始化渲染');
                 Logger.debug('[Scraper] 📊 检查大数据集');

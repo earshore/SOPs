@@ -79,6 +79,10 @@ export function createPromptlabPanel() {
         // 标记是否已经渲染过报告（用于区分首次加载和用户清空）
         hasRenderedReportOnce: false,
 
+        // 清理函数数组
+        _unsubscribers: [] as Array<() => void>,
+        _appStoreUnsubscribe: null as (() => void) | null,
+
         // ========== Computed Properties ==========
 
         /**
@@ -247,20 +251,24 @@ export function createPromptlabPanel() {
             // 初始化输入框自动高度调整
             this.initAutoHeightInputs();
 
-            // 监听数据更新事件
-            eventBus.on(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, () => {
+            // 监听数据更新事件，保存清理函数
+            const unsubScrapeSuccess = eventBus.on(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, () => {
                 Logger.debug('[Promptlab] 检测到数据更新，重新渲染报告分析');
                 this.renderReportAnalysis();
             });
 
-            window.addEventListener(APP_EVENTS.HISTORY_UPDATED, () => {
+            // 监听历史更新事件（使用 EventBus 而不是 window.addEventListener）
+            const unsubHistoryUpdated = eventBus.on(APP_EVENTS.HISTORY_UPDATED, () => {
                 Logger.debug('[Promptlab] 检测到历史更新，重新渲染报告分析');
                 this.renderReportAnalysis();
             });
 
+            // 保存 EventBus 清理函数
+            this._unsubscribers = [unsubScrapeSuccess, unsubHistoryUpdated];
+
             // 监听 appStore 分析报告变化
             if (appStore && typeof appStore.subscribe === 'function') {
-                appStore.subscribe((state) => {
+                this._appStoreUnsubscribe = appStore.subscribe((state) => {
                     // 当分析报告变化时，强制更新组件
                     if (state.analysis?.analysisReport) {
                         // 使用 Alpine 的 nextTick 确保响应式更新
@@ -280,6 +288,32 @@ export function createPromptlabPanel() {
             }
 
             Logger.debug('[Promptlab] ✅ Alpine 组件初始化完成');
+        },
+
+        // 组件销毁时清理资源
+        destroy() {
+            Logger.debug('[Promptlab] 🔄 清理所有订阅');
+
+            // 清理 EventBus 订阅
+            this._unsubscribers.forEach(unsub => {
+                try {
+                    unsub();
+                } catch (error) {
+                    Logger.warn('[Promptlab] 清理订阅时出错:', error);
+                }
+            });
+            this._unsubscribers = [];
+
+            // 清理 appStore 订阅
+            if (this._appStoreUnsubscribe) {
+                this._appStoreUnsubscribe();
+                this._appStoreUnsubscribe = null;
+            }
+
+            // 清理 DOM 元素引用
+            this.originalHeights.clear();
+
+            Logger.debug('[Promptlab] ✅ 资源清理完成');
         },
 
         // ========== Auto Height Input Management ==========

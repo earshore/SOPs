@@ -14,6 +14,7 @@ import { configCenter } from '../../common/config/ConfigCenter';
 import { APP_EVENTS } from '../../common/constants/eventConstants';
 import type { LLMProviderConfig } from '../../types/state';
 import eventBus from '@common/EventBus';
+import { ApiError } from '@common/errors/AppError';
 import { Logger } from '../../services/loggerService';
 // ==========================================
 // 类型定义
@@ -47,9 +48,11 @@ interface SettingsPanelData {
     proxyNeedsInput: boolean;
     proxyInputLabel: string;
     proxyInputPlaceholder: string;
+    _unsubscribers?: Array<() => void>;  // 新增：存储清理函数
     init(): void;
     open(): void;
     close(): void;
+    destroy(): void;  // 新增：清理方法
     openPerformanceMonitor(): Promise<void>;
     loadProviderConfig(provider: string): Promise<void>;
     fetchModels(): Promise<void>;
@@ -67,6 +70,9 @@ interface SettingsPanelData {
 
 const SettingsPanel = (): SettingsPanelData => ({
     isOpen: false,
+
+    // 新增：清理函数数组
+    _unsubscribers: [],
 
     // LLM Config State
     llm: {
@@ -138,6 +144,18 @@ const SettingsPanel = (): SettingsPanelData => ({
         this.loadProxyConfig();
         this.loadProviderConfig(this.llm.provider);
 
+        // 订阅 EventBus 事件，保存清理函数
+        const unsubOpen = eventBus.on(APP_EVENTS.SETTINGS_OPEN, () => {
+            this.open();
+        });
+        
+        const unsubClose = eventBus.on(APP_EVENTS.SETTINGS_CLOSE, () => {
+            this.close();
+        });
+        
+        // 保存清理函数
+        this._unsubscribers = [unsubOpen, unsubClose];
+
         // Watch for provider changes to load its config
         // @ts-expect-error - Alpine.js $watch is injected at runtime
         this.$watch('llm.provider', (val: string) => this.loadProviderConfig(val));
@@ -156,6 +174,13 @@ const SettingsPanel = (): SettingsPanelData => ({
 
     close() {
         this.isOpen = false;
+    },
+
+    destroy() {
+        // 清理 EventBus 订阅
+        Logger.debug('[Settings] 清理 EventBus 订阅');
+        this._unsubscribers?.forEach(unsub => unsub());
+        this._unsubscribers = [];
     },
 
     // 打开性能监控面板
@@ -258,7 +283,13 @@ const SettingsPanel = (): SettingsPanelData => ({
 
             if (models.length === 0) {
                 Logger.warn('⚠️ 模型列表为空，可能是API配置错误或网络问题');
-                throw new Error('未能获取到有效模型列表，请检查API配置和网络连接');
+                throw new ApiError(
+                    '未能获取到有效模型列表，请检查API配置和网络连接',
+                    'SETTINGS_001',
+                    undefined,
+                    undefined,
+                    { module: 'SystemSettings', action: 'fetchModels', provider: this.llm.provider }
+                );
             }
 
             // Deduplicate models

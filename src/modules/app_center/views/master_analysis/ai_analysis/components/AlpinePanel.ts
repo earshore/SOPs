@@ -98,15 +98,20 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
 
     // ========== 清理 ==========
     destroy(this: AlpineContext & Record<string, unknown>) {
-      Logger.debug('[Alpine 组件] 🧹 组件销毁，清理订阅');
+      Logger.debug('[Alpine 组件] 🔄 Alpine 组件销毁，清理资源');
+
+      // 清理状态同步订阅
       if (Array.isArray(this._unsubscribes)) {
         cleanupSubscriptions(this._unsubscribes);
       }
+
       // 清理导航事件监听器
       if (this._navigationHandler) {
         window.removeEventListener('navigate-to-scraper' as any, this._navigationHandler as EventListener);
         this._navigationHandler = null;
       }
+
+      Logger.debug('[Alpine 组件] ✅ 资源清理完成');
     },
 
     // ========== Data Loading ==========
@@ -197,9 +202,9 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
 
     navigateToScraper() {
       Logger.debug('[Alpine 组件] 🔄 导航到数据采集页面');
-      // 使用路由系统导航到 scraper 页面
-      if (window.location.hash !== '#scraper') {
-        window.location.hash = '#scraper';
+      // 使用正确的路由路径
+      if (window.location.hash !== '#/app-center/scraper') {
+        window.location.hash = '#/app-center/scraper';
       }
     },
 
