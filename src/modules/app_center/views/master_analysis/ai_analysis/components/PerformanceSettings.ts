@@ -6,8 +6,7 @@
 import { StorageService } from '../../../../../../services/storageService';
 import { getCacheStats, clearAnalysisCache } from '../services/parallelAnalysisService';
 import { showToast } from '@common/ui/index';
-import { container } from '../../../../../../common/di/Container';
-import type { ILoggerService } from '../../../../../../types/services';
+import { Logger } from '../../../../../../services/loggerService';
 
 const SETTINGS_KEY = 'ai_analysis_performance_settings';
 
@@ -39,8 +38,7 @@ export function getPerformanceSettings(): PerformanceSettings {
       return { ...DEFAULT_SETTINGS, ...saved };
     }
   } catch (error) {
-    const logger = container.resolve<ILoggerService>('logger');
-    logger.warn('[性能设置] 读取失败，使用默认值:', error);
+    Logger.warn('[性能设置] 读取失败，使用默认值:', error);
   }
   return DEFAULT_SETTINGS;
 }
@@ -51,11 +49,9 @@ export function getPerformanceSettings(): PerformanceSettings {
 export function savePerformanceSettings(settings: PerformanceSettings): void {
   try {
     StorageService.set(SETTINGS_KEY, settings);
-    const logger = container.resolve<ILoggerService>('logger');
-    logger.debug('[性能设置] 已保存:', settings);
+    Logger.debug('[性能设置] 已保存:', settings);
   } catch (error) {
-    const logger = container.resolve<ILoggerService>('logger');
-    logger.error('[性能设置] 保存失败:', error);
+    Logger.error('[性能设置] 保存失败:', error);
     throw error;
   }
 }
