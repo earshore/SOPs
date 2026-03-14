@@ -9,7 +9,7 @@ import { showToast } from '../../../../../../common/ui';
 import eventBus from '../../../../../../common/EventBus';
 import { APP_EVENTS } from '../../../../../../common/constants/eventConstants';
 import { SafeRenderer } from '../../../../../../common/infrastructure/SafeRenderer';
-
+import { ValidationError, BusinessError, SystemError } from '@common/errors/AppError';
 import { Logger } from '../../../../../../services/loggerService';
 /**
  * 删除产品
@@ -25,7 +25,13 @@ export async function deleteProduct(
     try {
         // 验证ASIN参数
         if (!asin || typeof asin !== 'string') {
-            throw new Error('无效的ASIN参数');
+            throw new ValidationError(
+                '无效的ASIN参数',
+                'SCRAPER_DEL_001',
+                'asin',
+                asin,
+                { module: 'Scraper', action: 'deleteProduct' }
+            );
         }
 
         const confirmed = await confirmModal(
@@ -41,11 +47,19 @@ export async function deleteProduct(
 
         // 验证数据状态
         if (!scrapedData) {
-            throw new Error('数据状态异常：scrapedData为空');
+            throw new SystemError(
+                '数据状态异常：scrapedData为空',
+                'SCRAPER_DEL_005',
+                { module: 'ScraperDataOperations', action: 'deleteProduct', asin }
+            );
         }
 
         if (!scrapedData.products || !Array.isArray(scrapedData.products)) {
-            throw new Error('数据状态异常：products不是有效数组');
+            throw new SystemError(
+                '数据状态异常：products不是有效数组',
+                'SCRAPER_DEL_006',
+                { module: 'ScraperDataOperations', action: 'deleteProduct', asin }
+            );
         }
 
         // 验证产品是否存在
@@ -57,7 +71,11 @@ export async function deleteProduct(
             return false;
         });
         if (!productExists) {
-            throw new Error(`产品不存在：${asin}`);
+            throw new BusinessError(
+                `产品不存在：${asin}`,
+                'SCRAPER_DEL_009',
+                { module: 'ScraperDataOperations', action: 'deleteProduct', asin }
+            );
         }
 
         // 从数据集中移除产品
@@ -73,7 +91,11 @@ export async function deleteProduct(
 
         // 验证删除是否成功
         if (beforeCount === afterCount) {
-            throw new Error(`删除失败：产品数量未变化`);
+            throw new SystemError(
+                `删除失败：产品数量未变化`,
+                'SCRAPER_DEL_011',
+                { module: 'ScraperDataOperations', action: 'deleteProduct', asin, beforeCount, afterCount }
+            );
         }
 
         // 更新元数据
@@ -86,7 +108,12 @@ export async function deleteProduct(
             HistoryService.save(scrapedData);
         } catch (saveError) {
             Logger.error('[Scraper] 保存历史记录失败:', saveError);
-            throw new Error('保存历史记录失败');
+            throw new SystemError(
+                '保存历史记录失败',
+                'SCRAPER_DEL_013',
+                { module: 'ScraperDataOperations', action: 'deleteProduct', asin },
+                saveError instanceof Error ? saveError : undefined
+            );
         }
 
         // 触发事件通知其他模块
@@ -138,11 +165,23 @@ export async function deleteReview(
     try {
         // 验证参数
         if (!asin || typeof asin !== 'string') {
-            throw new Error('无效的ASIN参数');
+            throw new ValidationError(
+                '无效的ASIN参数',
+                'SCRAPER_DEL_001',
+                'asin',
+                asin,
+                { module: 'ScraperDataOperations', action: 'deleteReview' }
+            );
         }
 
         if (typeof index !== 'number' || index < 0) {
-            throw new Error('无效的评论索引');
+            throw new ValidationError(
+                '无效的评论索引',
+                'SCRAPER_DEL_002',
+                'index',
+                index,
+                { module: 'ScraperDataOperations', action: 'deleteReview', asin }
+            );
         }
 
         const confirmed = await confirmModal(
@@ -158,11 +197,19 @@ export async function deleteReview(
 
         // 验证数据状态
         if (!scrapedData) {
-            throw new Error('数据状态异常：scrapedData为空');
+            throw new SystemError(
+                '数据状态异常：scrapedData为空',
+                'SCRAPER_DEL_005',
+                { module: 'ScraperDataOperations', action: 'deleteReview', asin, index }
+            );
         }
 
         if (!scrapedData.products || !Array.isArray(scrapedData.products)) {
-            throw new Error('数据状态异常：products不是有效数组');
+            throw new SystemError(
+                '数据状态异常：products不是有效数组',
+                'SCRAPER_DEL_006',
+                { module: 'ScraperDataOperations', action: 'deleteReview', asin, index }
+            );
         }
 
         // 找到产品
@@ -174,17 +221,31 @@ export async function deleteReview(
             return false;
         });
         if (!product) {
-            throw new Error(`产品不存在：${asin}`);
+            throw new BusinessError(
+                `产品不存在：${asin}`,
+                'SCRAPER_DEL_009',
+                { module: 'ScraperDataOperations', action: 'deleteReview', asin, index }
+            );
         }
 
         // 验证评论数组
         if (!product.customer_reviews || !Array.isArray(product.customer_reviews)) {
-            throw new Error('产品的评论数据无效');
+            throw new SystemError(
+                '产品的评论数据无效',
+                'SCRAPER_DEL_007',
+                { module: 'ScraperDataOperations', action: 'deleteReview', asin, index }
+            );
         }
 
         // 验证索引范围
         if (index >= product.customer_reviews.length) {
-            throw new Error(`评论索引超出范围：${index} >= ${product.customer_reviews.length}`);
+            throw new ValidationError(
+                `评论索引超出范围：${index} >= ${product.customer_reviews.length}`,
+                'SCRAPER_DEL_003',
+                'index',
+                index,
+                { module: 'ScraperDataOperations', action: 'deleteReview', asin, maxIndex: product.customer_reviews.length - 1 }
+            );
         }
 
         // 删除评论
@@ -194,7 +255,11 @@ export async function deleteReview(
 
         // 验证删除是否成功
         if (beforeCount === afterCount) {
-            throw new Error('删除失败：评论数量未变化');
+            throw new SystemError(
+                '删除失败：评论数量未变化',
+                'SCRAPER_DEL_012',
+                { module: 'ScraperDataOperations', action: 'deleteReview', asin, index, beforeCount, afterCount }
+            );
         }
 
         // 保存到历史记录
@@ -202,7 +267,12 @@ export async function deleteReview(
             HistoryService.save(scrapedData);
         } catch (saveError) {
             Logger.error('[Scraper] 保存历史记录失败:', saveError);
-            throw new Error('保存历史记录失败');
+            throw new SystemError(
+                '保存历史记录失败',
+                'SCRAPER_DEL_013',
+                { module: 'ScraperDataOperations', action: 'deleteReview', asin, index },
+                saveError instanceof Error ? saveError : undefined
+            );
         }
 
         // 触发事件通知其他模块

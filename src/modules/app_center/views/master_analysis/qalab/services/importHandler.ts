@@ -5,7 +5,7 @@
 
 import { showToast } from '../../../../../../common/ui';
 import { appStore } from '@/stores/useAppStore';
-
+import { ValidationError, SystemError } from '@common/errors/AppError';
 import { Logger } from '../../../../../../services/loggerService';
 /**
  * 分析报告数据结构
@@ -54,7 +54,13 @@ export function readFileAsJSON(file: File): Promise<FileReadResult> {
 
                 // 验证内容不为空
                 if (!content || content.trim().length === 0) {
-                    reject(new Error(`文件 ${file.name} 内容为空`));
+                    reject(new ValidationError(
+                        `文件 ${file.name} 内容为空`,
+                        'QALAB_IMPORT_003',
+                        'file',
+                        file.name,
+                        { module: 'QALab', action: 'readFileAsJSON', filename: file.name }
+                    ));
                     return;
                 }
 
@@ -63,13 +69,25 @@ export function readFileAsJSON(file: File): Promise<FileReadResult> {
                 try {
                     json = JSON.parse(content);
                 } catch (parseError) {
-                    reject(new Error(`文件 ${file.name} 不是有效的JSON格式: ${parseError instanceof Error ? parseError.message : String(parseError)}`));
+                    // ValidationError 不支持 originalError 参数，使用 SystemError 包装解析错误
+                    reject(new SystemError(
+                        `文件 ${file.name} 不是有效的JSON格式`,
+                        'QALAB_IMPORT_004',
+                        { module: 'QALab', action: 'readFileAsJSON', filename: file.name },
+                        parseError as Error
+                    ));
                     return;
                 }
 
                 // 验证JSON不为null或undefined
                 if (json === null || json === undefined) {
-                    reject(new Error(`文件 ${file.name} JSON内容无效`));
+                    reject(new ValidationError(
+                        `文件 ${file.name} JSON内容无效`,
+                        'QALAB_IMPORT_005',
+                        'file',
+                        file.name,
+                        { module: 'QALab', action: 'readFileAsJSON', filename: file.name }
+                    ));
                     return;
                 }
 
@@ -77,14 +95,24 @@ export function readFileAsJSON(file: File): Promise<FileReadResult> {
             } catch (err) {
                 const errorMsg = err instanceof Error ? err.message : String(err);
                 Logger.error(`[QALab] 解析文件 ${file.name} 失败:`, err);
-                reject(new Error(`文件 ${file.name} 解析失败: ${errorMsg}`));
+                reject(new SystemError(
+                    `文件 ${file.name} 解析失败: ${errorMsg}`,
+                    'QALAB_IMPORT_007',
+                    { module: 'QALab', action: 'readFileAsJSON', filename: file.name },
+                    err as Error
+                ));
             }
         };
 
         reader.onerror = () => {
             const errorMsg = reader.error?.message || '未知错误';
             Logger.error(`[QALab] 读取文件 ${file.name} 失败:`, reader.error);
-            reject(new Error(`无法读取文件 ${file.name}: ${errorMsg}`));
+            reject(new SystemError(
+                `无法读取文件 ${file.name}: ${errorMsg}`,
+                'QALAB_IMPORT_006',
+                { module: 'QALab', action: 'readFileAsJSON', filename: file.name, errorMsg },
+                reader.error || undefined
+            ));
         };
 
         reader.readAsText(file);
@@ -154,18 +182,36 @@ export async function handleImportFile(file: File): Promise<ImportResult> {
 
         // 验证文件类型
         if (!file.name.toLowerCase().endsWith('.json')) {
-            throw new Error('只支持JSON文件');
+            throw new ValidationError(
+                '只支持JSON文件',
+                'QALAB_IMPORT_001',
+                'fileType',
+                file.name,
+                { module: 'QALab', action: 'handleImportFile', filename: file.name }
+            );
         }
 
         // 验证文件大小（最大10MB）
         const MAX_FILE_SIZE = 10 * 1024 * 1024;
         if (file.size > MAX_FILE_SIZE) {
-            throw new Error(`文件大小不能超过10MB (当前: ${(file.size / 1024 / 1024).toFixed(2)}MB)`);
+            throw new ValidationError(
+                `文件大小不能超过10MB (当前: ${(file.size / 1024 / 1024).toFixed(2)}MB)`,
+                'QALAB_IMPORT_002',
+                'fileSize',
+                file.size,
+                { module: 'QALab', action: 'handleImportFile', filename: file.name, maxSize: MAX_FILE_SIZE }
+            );
         }
 
         // 检查空文件
         if (file.size === 0) {
-            throw new Error('文件内容为空');
+            throw new ValidationError(
+                '文件内容为空',
+                'QALAB_IMPORT_003',
+                'fileSize',
+                0,
+                { module: 'QALab', action: 'handleImportFile', filename: file.name }
+            );
         }
 
         // 大文件警告（5MB以上）
@@ -183,7 +229,13 @@ export async function handleImportFile(file: File): Promise<ImportResult> {
         // 验证数据结构
         const validation = validateAnalysisReport(data);
         if (!validation.valid) {
-            throw new Error(validation.error || '数据验证失败');
+            throw new ValidationError(
+                validation.error || '数据验证失败',
+                'QALAB_IMPORT_005',
+                'reportData',
+                data,
+                { module: 'QALabImportHandler', action: 'handleImportFile', fileName: file.name }
+            );
         }
 
         const normalizedData = validation.normalizedData!;

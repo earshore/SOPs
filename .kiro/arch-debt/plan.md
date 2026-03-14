@@ -144,17 +144,159 @@ npm run test
 
 ## 🔄 第二批修复计划（待第一批完成后制定）
 
-### 候选文件（5-6个）
-1. `src/modules/app_center/views/master_analysis/qalab/services/importHandler.ts` - 7处错误
-2. `src/modules/app_center/views/master_analysis/scraper/handlers/dataOperations.ts` - 14处错误
-3. `src/modules/app_center/views/master_analysis/qalab/index.ts` - 事件机制
-4. `src/modules/app_center/views/master_analysis/ai_analysis/components/actions.ts` - 事件机制
-5. `src/modules/app_center/views/overview/index.ts` - 事件机制
-
-### 风险评估
+### 批次信息
+- **批次编号**: Batch #2
+- **状态**: ✅ 已规划，等待执行
+- **文件数量**: 6个文件
 - **风险等级**: 中风险
-- **原因**: 涉及数据导入和模块间通信
-- **注意事项**: 需要仔细测试数据导入和事件传递
+- **优先级**: P1
+- **预计影响**: QALab、Scraper、AI Analysis、Overview模块
+
+### 修复清单
+
+#### 1. `src/modules/app_center/views/master_analysis/qalab/services/importHandler.ts`
+- **债务类型**: 错误处理 + 事件机制
+- **问题**: 
+  - 7处使用 `throw new Error()`
+  - 1处触发 `qalab:data-imported` 事件
+- **修复方案**:
+  - 错误处理: 根据错误类型分类（ValidationError、ApiError、BusinessError）
+  - 事件机制: 需要在 `APP_EVENTS` 中新增 `QALAB_DATA_IMPORTED` 常量
+- **风险评估**: 中风险 - 数据导入核心逻辑
+- **依赖关系**: 被 qalab/index.ts 监听
+
+#### 2. `src/modules/app_center/views/master_analysis/scraper/handlers/dataOperations.ts`
+- **债务类型**: 错误处理 + 事件机制
+- **问题**: 
+  - 14处使用 `throw new Error()`
+  - 2处触发 `HISTORY_UPDATED` 事件
+- **修复方案**:
+  - 错误处理: 根据错误类型分类
+  - 事件机制: `window.dispatchEvent` → `eventBus.emit(APP_EVENTS.HISTORY_UPDATED)`
+- **风险评估**: 中风险 - Scraper核心数据操作
+- **依赖关系**: 被 ScraperPanel 和 importHandler 调用
+
+#### 3. `src/modules/app_center/views/master_analysis/qalab/index.ts`
+- **债务类型**: 事件机制
+- **问题**: 监听 `qalab:data-imported` 事件
+- **修复方案**: 
+  ```typescript
+  // 修改前
+  window.addEventListener('qalab:data-imported', handler);
+  
+  // 修改后
+  const unsubscribe = eventBus.on(APP_EVENTS.QALAB_DATA_IMPORTED, handler);
+  ```
+- **风险评估**: 中风险 - 必须与 importHandler 配对修复
+- **依赖关系**: 与 importHandler 配合使用
+
+#### 4. `src/modules/app_center/views/master_analysis/ai_analysis/components/actions.ts`
+- **债务类型**: 事件机制
+- **问题**: 触发 `history-updated` 事件
+- **修复方案**:
+  ```typescript
+  // 修改前
+  window.dispatchEvent(new CustomEvent('history-updated'));
+  
+  // 修改后
+  eventBus.emit(APP_EVENTS.HISTORY_UPDATED);
+  ```
+- **风险评估**: 中风险 - 影响历史记录更新
+- **依赖关系**: 被其他组件监听
+
+#### 5. `src/modules/app_center/views/overview/index.ts`
+- **债务类型**: 事件机制（已部分使用APP_EVENTS）
+- **问题**: 2处使用 `window.dispatchEvent` 触发 `APP_EVENTS.ROUTE_CHANGE`
+- **修复方案**:
+  ```typescript
+  // 修改前
+  window.dispatchEvent(new CustomEvent(APP_EVENTS.ROUTE_CHANGE, { detail }));
+  
+  // 修改后
+  eventBus.emit(APP_EVENTS.ROUTE_CHANGE, detail);
+  ```
+- **风险评估**: 中风险 - 影响页面导航
+- **依赖关系**: 路由系统
+- **注意**: 已经使用 APP_EVENTS 常量，只需改用 eventBus
+
+#### 6. `src/modules/app_center/views/master_analysis/ai_analysis/components/AlpinePanel.ts`
+- **债务类型**: 事件机制
+- **问题**: 监听 `navigate-to-scraper` 事件（可能是未使用的功能）
+- **修复方案**:
+  ```typescript
+  // 修改前
+  window.addEventListener('navigate-to-scraper', handler);
+  
+  // 修改后
+  const unsubscribe = eventBus.on(APP_EVENTS.NAVIGATE_TO_SCRAPER, handler);
+  ```
+- **风险评估**: 低风险 - 该事件目前无触发方，可能是预留功能
+- **依赖关系**: 无
+- **注意**: 需要确认是否保留此功能
+
+### 修复策略
+
+#### 前置准备
+1. 在 `eventConstants.ts` 中新增事件常量：
+   ```typescript
+   // QALab 相关
+   QALAB_DATA_IMPORTED: 'app:qalab-data-imported',
+   
+   // 导航相关
+   NAVIGATE_TO_SCRAPER: 'app:navigate-to-scraper',
+   ```
+
+#### 阶段1: 错误处理（2个文件）
+1. `importHandler.ts` - QALab数据导入
+2. `dataOperations.ts` - Scraper数据操作（仅错误处理部分）
+
+**验证点**:
+- 数据导入功能正常
+- 错误信息准确
+- 构建通过
+
+#### 阶段2: 事件机制（5个文件）
+1. 完成 `eventConstants.ts` 新增常量
+2. `importHandler.ts` - 完成事件触发部分
+3. `qalab/index.ts` - QALab事件监听
+4. `dataOperations.ts` - 完成事件触发部分
+5. `actions.ts` - AI Analysis事件触发
+6. `overview/index.ts` - Overview导航事件
+7. `AlpinePanel.ts` - AI Analysis导航监听（可选）
+
+**验证点**:
+- 事件触发和监听正常
+- 模块间通信正常
+- 历史记录更新正常
+- 页面导航正常
+
+### 需要新增的事件常量
+```typescript
+// 在 APP_EVENTS 中新增：
+QALAB_DATA_IMPORTED: 'app:qalab-data-imported',
+NAVIGATE_TO_SCRAPER: 'app:navigate-to-scraper',
+```
+
+### 风险控制
+- **配对修复**: importHandler 和 qalab/index.ts 必须同时修复
+- **事件清理**: 确保在组件销毁时调用 `unsubscribe()`
+- **分阶段验证**: 每个阶段完成后进行功能测试
+- **独立commit**: 每个阶段独立提交，便于回滚
+
+### 验证方式
+```bash
+# 构建验证
+npm run build
+
+# 类型检查
+npm run type-check
+
+# 功能测试
+# - QALab 数据导入
+# - Scraper 数据操作
+# - 历史记录更新
+# - 页面导航
+```
 
 ---
 
