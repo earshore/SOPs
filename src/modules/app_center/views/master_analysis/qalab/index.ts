@@ -14,7 +14,7 @@ import { SafeModuleLoader } from '../../../../../common/infrastructure/SafeModul
 import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
 import { AlpineRegistry } from '../../../../../common/infrastructure/AlpineRegistry';
 import { registerActionsWithLegacy, unregisterActions } from '../../../../../common/utils/actionRegistry';
-import { MODULE_EVENTS } from '../../../../../common/constants/eventConstants';
+import { MODULE_EVENTS, APP_EVENTS } from '../../../../../common/constants/eventConstants';
 import eventBus from '../../../../../common/EventBus';
 import { appStore } from '@/stores/useAppStore';
 
@@ -187,8 +187,8 @@ export async function mount(container: HTMLElement): Promise<void> {
             refreshDataPreview();
         };
 
-        window.addEventListener('qalab:data-imported', dataImportHandler);
-        eventManager.listeners.push({ element: window, event: 'qalab:data-imported', handler: dataImportHandler });
+        const unsubscribeDataImport = eventBus.on(APP_EVENTS.QALAB_DATA_IMPORTED, dataImportHandler);
+        eventManager.listeners.push({ element: 'eventBus', event: APP_EVENTS.QALAB_DATA_IMPORTED, handler: unsubscribeDataImport });
 
         // 5. 监听数据更新事件 - 自动加载分析报告
         const dataUpdateHandler = () => {
@@ -240,14 +240,22 @@ export function unmount(container?: HTMLElement): void {
             eventBus.off(MODULE_EVENTS.ANALYSIS.ANALYZE_SUCCESS, cleanup.dataUpdateHandler);
         }
 
-        // 2. 清理DOM事件监听器
+        // 2. 清理DOM事件监听器和EventBus监听器
         if (cleanup.eventManager && cleanup.eventManager.listeners) {
             cleanup.eventManager.listeners.forEach((listener: unknown) => {
                 // 类型守卫：确保 listener 是有效的事件监听器对象
                 if (listener && typeof listener === 'object' &&
                     'element' in listener && 'event' in listener && 'handler' in listener) {
-                    const listenerObj = listener as { element: HTMLElement; event: string; handler: EventListener };
-                    listenerObj.element.removeEventListener(listenerObj.event, listenerObj.handler);
+                    const listenerObj = listener as { element: HTMLElement | string; event: string; handler: EventListener | (() => void) };
+                    
+                    // 如果是EventBus监听器
+                    if (listenerObj.element === 'eventBus' && typeof listenerObj.handler === 'function') {
+                        listenerObj.handler(); // 调用unsubscribe函数
+                    } 
+                    // 如果是DOM事件监听器
+                    else if (listenerObj.element instanceof HTMLElement && typeof listenerObj.handler === 'function') {
+                        listenerObj.element.removeEventListener(listenerObj.event, listenerObj.handler as EventListener);
+                    }
                 }
             });
         }

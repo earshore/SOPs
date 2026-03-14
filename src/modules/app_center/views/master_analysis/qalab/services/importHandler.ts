@@ -6,6 +6,8 @@
 import { showToast } from '../../../../../../common/ui';
 import { appStore } from '@/stores/useAppStore';
 import { ValidationError, SystemError } from '@common/errors/AppError';
+import eventBus from '@common/EventBus';
+import { APP_EVENTS } from '@common/constants/eventConstants';
 import { Logger } from '../../../../../../services/loggerService';
 /**
  * 分析报告数据结构
@@ -307,7 +309,7 @@ export function triggerFileImport(): void {
             await handleImportFile(file);
 
             // 触发数据预览更新
-            window.dispatchEvent(new CustomEvent('qalab:data-imported'));
+            eventBus.emit(APP_EVENTS.QALAB_DATA_IMPORTED);
         }
 
         // 清理

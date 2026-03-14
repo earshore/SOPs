@@ -336,7 +336,9 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
       if (success) {
         Logger.debug('[用户动作] 已自动标记历史快照为"已分析"');
         // 触发历史记录更新事件
-        window.dispatchEvent(new CustomEvent('history-updated'));
+        const eventBus = (await import('@common/EventBus')).default;
+        const { APP_EVENTS } = await import('@common/constants/eventConstants');
+        eventBus.emit(APP_EVENTS.HISTORY_UPDATED);
       }
     }
 

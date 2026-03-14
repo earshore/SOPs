@@ -6,7 +6,7 @@
 import { loadTemplate } from '@/common/utils/viewLoader';
 import { safeMount } from '@/common/utils/safeMount';
 import { APP_EVENTS } from '@/common/constants/eventConstants';
-
+import eventBus from '@/common/EventBus';
 import { Logger } from '../../../../services/loggerService';
 /**
  * 挂载 App Center 总览模块
@@ -63,11 +63,7 @@ function initOverviewEvents(container: HTMLElement): void {
     link.addEventListener('click', () => {
       const targetTab = link.dataset.quickLink;
       if (targetTab) {
-        window.dispatchEvent(
-          new CustomEvent(APP_EVENTS.ROUTE_CHANGE, {
-            detail: { routeId: targetTab },
-          })
-        );
+        eventBus.emit(APP_EVENTS.ROUTE_CHANGE, { routeId: targetTab });
       }
     });
   });
@@ -78,11 +74,7 @@ function initOverviewEvents(container: HTMLElement): void {
     card.addEventListener('click', () => {
       const targetTab = card.dataset.tab;
       if (targetTab) {
-        window.dispatchEvent(
-          new CustomEvent(APP_EVENTS.ROUTE_CHANGE, {
-            detail: { routeId: targetTab },
-          })
-        );
+        eventBus.emit(APP_EVENTS.ROUTE_CHANGE, { routeId: targetTab });
       }
     });
   });
