@@ -17,7 +17,7 @@ import { MENU_CONFIG, getRoutesByModule, type RouteConfig, type ModuleConfig } f
 import { APP_EVENTS } from '../constants/eventConstants';
 import type { CategoryConfig } from './SidebarRenderer';
 import { SystemError } from '@/common/errors/AppError';
-
+import eventBus from '@common/EventBus';
 import { Logger } from '../../services/loggerService';
 /**
  * 布局类型
@@ -491,9 +491,7 @@ export class OverviewRenderer {
       card.addEventListener('click', () => {
         const targetTab = (card as HTMLElement).dataset.tab;
         if (targetTab) {
-          window.dispatchEvent(new CustomEvent(APP_EVENTS.ROUTE_CHANGE, {
-            detail: { routeId: targetTab }
-          }));
+          eventBus.emit(APP_EVENTS.ROUTE_CHANGE, { routeId: targetTab });
         }
       });
     });

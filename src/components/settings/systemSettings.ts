@@ -13,7 +13,7 @@ import { EnvConfig } from '../../common/config/envConfig';
 import { configCenter } from '../../common/config/ConfigCenter';
 import { APP_EVENTS } from '../../common/constants/eventConstants';
 import type { LLMProviderConfig } from '../../types/state';
-
+import eventBus from '@common/EventBus';
 import { Logger } from '../../services/loggerService';
 // ==========================================
 // 类型定义
@@ -469,11 +469,11 @@ export function initAlpineSettings(): void {
 
 // Legacy Bridge for ActionRegistry
 export function openSettings(): void {
-    window.dispatchEvent(new CustomEvent(APP_EVENTS.SETTINGS_OPEN));
+    eventBus.emit(APP_EVENTS.SETTINGS_OPEN);
 }
 
 export function closeSettings(): void {
-    window.dispatchEvent(new CustomEvent(APP_EVENTS.SETTINGS_CLOSE));
+    eventBus.emit(APP_EVENTS.SETTINGS_CLOSE);
 }
 
 /**
