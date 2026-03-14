@@ -5,6 +5,7 @@
 // ================================================================
 
 import { Logger } from '@services/loggerService';
+import { SystemError } from '@/common/errors/AppError';
 
 /**
  * 服务生命周期类型
@@ -81,7 +82,11 @@ export class DIContainer {
     options: RegisterOptions = {}
   ): void {
     if (typeof factory !== 'function') {
-      throw new Error(`[DIContainer] Factory must be a function: ${name}`);
+      throw new SystemError(
+        `Factory must be a function: ${name}`,
+        'DI_INVALID_FACTORY',
+        { module: 'DIContainer', action: 'register', serviceName: name }
+      );
     }
 
     const lifetime = options.lifetime || 'singleton';
@@ -110,7 +115,11 @@ export class DIContainer {
   resolve<T = unknown>(name: string): T {
     // 1. 检查服务是否已注册
     if (!this.factories.has(name)) {
-      throw new Error(`[DIContainer] 服务未注册: ${name}`);
+      throw new SystemError(
+        `服务未注册: ${name}`,
+        'DI_SERVICE_NOT_FOUND',
+        { module: 'DIContainer', action: 'resolve', serviceName: name }
+      );
     }
 
     const lifetime = this.lifetimes.get(name);
@@ -192,7 +201,11 @@ export class DIContainer {
    */
   private checkCircularDependency(name: string, visited: Set<string> = new Set()): void {
     if (visited.has(name)) {
-      throw new Error(`[DIContainer] 检测到循环依赖: ${Array.from(visited).join(' -> ')} -> ${name}`);
+      throw new SystemError(
+        `检测到循环依赖: ${Array.from(visited).join(' -> ')} -> ${name}`,
+        'DI_CIRCULAR_DEPENDENCY',
+        { module: 'DIContainer', action: 'checkCircularDependency', serviceName: name, chain: Array.from(visited) }
+      );
     }
     
     visited.add(name);
