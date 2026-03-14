@@ -8,6 +8,7 @@ import type { CompetitorReport } from '../../types/downloadsReportTypes';
 import type { ExtendedDNA } from '../../types/extendedDNA';
 import { Logger } from '../../../../../../services/loggerService';
 import { isTechnicalSpec } from '../../utils/specUtils';
+import { ValidationError } from '../../../../../../common/errors/AppError';
 
 /**
  * Competitor Report 适配器实现
@@ -124,7 +125,13 @@ export class CompetitorReportAdapter implements ReportAdapter {
   private normalizeReport(report: unknown): CompetitorReport {
     // 类型守卫
     if (!report || typeof report !== 'object') {
-      throw new Error('[CompetitorAdapter] Invalid report object');
+      throw new ValidationError(
+        '[CompetitorAdapter] Invalid report object',
+        'COMPETITOR_ADAPTER_001',
+        'report',
+        report,
+        { module: 'CompetitorReportAdapter', action: 'normalizeReport' }
+      );
     }
 
     const reportObj = report as Record<string, unknown>;

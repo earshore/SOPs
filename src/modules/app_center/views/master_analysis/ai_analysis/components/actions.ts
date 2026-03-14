@@ -16,7 +16,7 @@ import { Product } from '../config/sampleData';
 import { AlpineContext } from '../types';
 import { appStore } from '@/stores/useAppStore';
 import type { FullAnalysisReport } from '../config/analysisReportData';
-
+import { BusinessError } from '@common/errors/AppError';
 import { Logger } from '../../../../../../services/loggerService';
 /**
  * 切换 ASIN 选择
@@ -248,7 +248,11 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
       const products = getRealProducts(context.selectedAsins);
 
       if (products.length === 0) {
-        throw new Error('无法获取产品数据,请确保已从数据采集或数据管理导入数据');
+        throw new BusinessError(
+          '无法获取产品数据,请确保已从数据采集或数据管理导入数据',
+          'AI_ACTIONS_001',
+          { module: 'AIAnalysisActions', action: 'runAnalysisAction', selectedAsins: context.selectedAsins }
+        );
       }
 
       showToast(`正在调用 AI 分析 ${products.length} 个产品...`, { type: 'info' });

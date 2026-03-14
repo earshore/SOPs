@@ -21,6 +21,8 @@ import {
   DIFFERENTIATION_CONFIDENCE_WEIGHTS,
   CONFIDENCE_THRESHOLDS
 } from '../../config/confidenceWeights';
+import { ValidationError } from '../../../../../../common/errors/AppError';
+import { ValidationError } from '../../../../../../common/errors/AppError';
 
 /**
  * Full Analysis Report 适配器实现
@@ -143,7 +145,13 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
   private normalizeReport(report: unknown): FullAnalysisReport {
     // 类型守卫
     if (!report || typeof report !== 'object') {
-      throw new Error('[FullAnalysisReportAdapter] Invalid report object');
+      throw new ValidationError(
+        '[FullAnalysisReportAdapter] Invalid report object',
+        'FULL_ANALYSIS_ADAPTER_001',
+        'report',
+        report,
+        { module: 'FullAnalysisReportAdapter', action: 'normalizeReport' }
+      );
     }
 
     const reportObj = report as Record<string, unknown>;

@@ -8,6 +8,7 @@
 import { configCenter, type LoggerConfig } from '../common/config/ConfigCenter';
 // 从types/services导入统一的类型定义
 import type { IStorageService, IConfigService, ILoggerService, LogEntry as ILogEntry } from '../types/services';
+import { ValidationError } from '../common/errors/AppError';
 // 移除循环导入
 /**
  * 日志级别（数字枚举，用于内部比较）
@@ -503,7 +504,13 @@ export class LoggerService implements ILoggerService {
       ].join('\n');
     }
 
-    throw new Error(`不支持的导出格式: ${format}`);
+    throw new ValidationError(
+      `不支持的导出格式: ${format}`,
+      'LOGGER_001',
+      'format',
+      format,
+      { module: 'LoggerService', action: 'export' }
+    );
   }
 
   /**

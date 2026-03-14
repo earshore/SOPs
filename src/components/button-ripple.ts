@@ -10,6 +10,9 @@ import { createRipple } from '../utils/animation-utils';
 import eventBus from '@common/EventBus';
 import { APP_EVENTS } from '@common/constants/eventConstants';
 import { Logger } from '../services/loggerService';
+
+// ========== 模块级清理函数存储 ==========
+let animationSettingsUnsubscribe: (() => void) | null = null;
 /**
  * 初始化按钮涟漪效果
  * 为页面上所有符合条件的按钮添加涟漪效果
@@ -182,11 +185,17 @@ export function reinitButtonRipple(): void {
  * 当用户更改动画设置时，自动重新初始化
  */
 export function observeAnimationSettings(): void {
-  let isReinitializing = false; // 防止循环触发
+  // 防止重复订阅
+  if (animationSettingsUnsubscribe) {
+    Logger.warn('[ButtonRipple] 动画设置监听器已存在，跳过重复订阅');
+    return;
+  }
+  
+  let isReinitializing = false;
   let lastReinitTime = 0;
   
   // 监听EventBus事件（由AnimationManager触发）
-  const unsubscribe = eventBus.on(APP_EVENTS.ANIMATION_SETTINGS_CHANGED, () => {
+  animationSettingsUnsubscribe = eventBus.on(APP_EVENTS.ANIMATION_SETTINGS_CHANGED, () => {
     const now = Date.now();
     
     // 防止短时间内重复初始化（1秒内只初始化一次）
@@ -206,6 +215,28 @@ export function observeAnimationSettings(): void {
     });
   });
   
-  // 注意：在实际应用中，应该在适当的时候调用 unsubscribe() 清理监听器
-  // 例如在模块卸载时
+  Logger.debug('[ButtonRipple] ✅ 已订阅动画设置变化事件');
+}
+
+/**
+ * 清理按钮涟漪效果的所有资源
+ * 包括事件监听器和DOM观察器
+ */
+export function cleanupButtonRipple(): void {
+  Logger.debug('[ButtonRipple] 🔄 清理按钮涟漪效果资源');
+  
+  // 清理动画设置监听器
+  if (animationSettingsUnsubscribe) {
+    animationSettingsUnsubscribe();
+    animationSettingsUnsubscribe = null;
+    Logger.debug('[ButtonRipple] ✅ 已清理动画设置监听器');
+  }
+  
+  // 移除所有按钮的涟漪效果
+  const initializedButtons = document.querySelectorAll<HTMLElement>('[data-ripple-initialized="true"]');
+  initializedButtons.forEach((button) => {
+    removeRippleFromButton(button);
+  });
+  
+  Logger.debug('[ButtonRipple] ✅ 按钮涟漪效果资源已清理');
 }

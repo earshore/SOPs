@@ -17,6 +17,7 @@ import { showToast } from '../../../../../../common/ui';
 import eventBus from '../../../../../../common/EventBus';
 import { APP_EVENTS, MODULE_EVENTS } from '../../../../../../common/constants/eventConstants';
 import { SafeRenderer } from '../../../../../../common/infrastructure/SafeRenderer';
+import { ValidationError, BusinessError, SystemError } from '@common/errors/AppError';
 import { Logger } from '../../../../../../services/loggerService';
 /**
  * 读取文件为JSON
@@ -31,7 +32,13 @@ export function readFileAsJSON(file: File): Promise<FileReadResult> {
 
                 // 验证内容不为空
                 if (!content || content.trim().length === 0) {
-                    reject(new Error(`文件 ${file.name} 内容为空`));
+                    reject(new ValidationError(
+                        `文件 ${file.name} 内容为空`,
+                        'SCRAPER_IMP_001',
+                        'content',
+                        content,
+                        { module: 'ScraperImportHandler', action: 'readFileAsJSON', filename: file.name }
+                    ));
                     return;
                 }
 
@@ -40,28 +47,47 @@ export function readFileAsJSON(file: File): Promise<FileReadResult> {
                 try {
                     json = JSON.parse(content);
                 } catch (parseError) {
-                    reject(new Error(`文件 ${file.name} 不是有效的JSON格式: ${parseError instanceof Error ? parseError.message : String(parseError)}`));
+                    reject(new SystemError(
+                        `文件 ${file.name} 不是有效的JSON格式: ${parseError instanceof Error ? parseError.message : String(parseError)}`,
+                        'SCRAPER_IMP_002',
+                        { module: 'ScraperImportHandler', action: 'readFileAsJSON', filename: file.name, contentPreview: content.substring(0, 100) },
+                        parseError instanceof Error ? parseError : undefined
+                    ));
                     return;
                 }
 
                 // 验证JSON不为null或undefined
                 if (json === null || json === undefined) {
-                    reject(new Error(`文件 ${file.name} JSON内容无效`));
+                    reject(new ValidationError(
+                        `文件 ${file.name} JSON内容无效`,
+                        'SCRAPER_IMP_003',
+                        'json',
+                        json,
+                        { module: 'ScraperImportHandler', action: 'readFileAsJSON', filename: file.name }
+                    ));
                     return;
                 }
 
                 resolve({ data: json, filename: file.name });
             } catch (err) {
-                const errorMsg = err instanceof Error ? err.message : String(err);
                 Logger.error(`[Scraper] 解析文件 ${file.name} 失败:`, err);
-                reject(new Error(`文件 ${file.name} 解析失败: ${errorMsg}`));
+                reject(new SystemError(
+                    `文件 ${file.name} 解析失败: ${err instanceof Error ? err.message : String(err)}`,
+                    'SCRAPER_IMP_004',
+                    { module: 'ScraperImportHandler', action: 'readFileAsJSON', filename: file.name },
+                    err instanceof Error ? err : undefined
+                ));
             }
         };
 
         reader.onerror = () => {
-            const errorMsg = reader.error?.message || '未知错误';
             Logger.error(`[Scraper] 读取文件 ${file.name} 失败:`, reader.error);
-            reject(new Error(`无法读取文件 ${file.name}: ${errorMsg}`));
+            reject(new SystemError(
+                `无法读取文件 ${file.name}: ${reader.error?.message || '未知错误'}`,
+                'SCRAPER_IMP_005',
+                { module: 'ScraperImportHandler', action: 'readFileAsJSON', filename: file.name },
+                reader.error || undefined
+            ));
         };
 
         reader.readAsText(file);
@@ -257,7 +283,13 @@ export async function handleImportFiles(
         const invalidFiles = files.filter(f => !f.name.toLowerCase().endsWith('.json'));
         if (invalidFiles.length > 0) {
             Logger.error('[Scraper] 文件类型错误:', invalidFiles.map(f => f.name));
-            throw new Error(`只支持JSON文件，以下文件被忽略: ${invalidFiles.map(f => f.name).join(', ')}`);
+            throw new ValidationError(
+                `只支持JSON文件`,
+                'SCRAPER_IMP_006',
+                'files',
+                invalidFiles.map(f => f.name),
+                { module: 'ScraperImportHandler', action: 'handleImportFiles', invalidFiles: invalidFiles.map(f => f.name) }
+            );
         }
 
         // 验证文件大小（最大10MB）
@@ -265,7 +297,13 @@ export async function handleImportFiles(
         const oversizedFiles = files.filter(f => f.size > MAX_FILE_SIZE);
         if (oversizedFiles.length > 0) {
             Logger.error('[Scraper] 文件过大:', oversizedFiles.map(f => `${f.name} (${(f.size / 1024 / 1024).toFixed(2)}MB)`));
-            throw new Error(`文件大小不能超过10MB，以下文件被忽略: ${oversizedFiles.map(f => f.name).join(', ')}`);
+            throw new ValidationError(
+                `文件大小不能超过10MB`,
+                'SCRAPER_IMP_007',
+                'files',
+                oversizedFiles.map(f => ({ name: f.name, size: f.size })),
+                { module: 'ScraperImportHandler', action: 'handleImportFiles', maxSize: MAX_FILE_SIZE }
+            );
         }
 
         // 大文件警告（5MB以上）
@@ -280,7 +318,13 @@ export async function handleImportFiles(
         const emptyFiles = files.filter(f => f.size === 0);
         if (emptyFiles.length > 0) {
             Logger.error('[Scraper] 空文件:', emptyFiles.map(f => f.name));
-            throw new Error(`文件内容为空: ${emptyFiles.map(f => f.name).join(', ')}`);
+            throw new ValidationError(
+                `文件内容为空`,
+                'SCRAPER_IMP_008',
+                'files',
+                emptyFiles.map(f => f.name),
+                { module: 'ScraperImportHandler', action: 'handleImportFiles', emptyFiles: emptyFiles.map(f => f.name) }
+            );
         }
 
         showToast(`📂 正在解析 ${files.length} 个文件...`, { type: 'info' });
@@ -299,7 +343,13 @@ export async function handleImportFiles(
             const validation = validateScrapedData(data);
             if (!validation.valid) {
                 Logger.error(`[Scraper] 文件 ${filename} 数据验证失败:`, validation.error);
-                throw new Error(`文件 ${filename} 数据验证失败: ${validation.error}`);
+                throw new ValidationError(
+                    `文件 ${filename} 数据验证失败`,
+                    'SCRAPER_IMP_009',
+                    'data',
+                    validation.error,
+                    { module: 'ScraperImportHandler', action: 'handleImportFiles', filename }
+                );
             }
 
             let fileSite: string | null = null;
@@ -336,7 +386,13 @@ export async function handleImportFiles(
             });
         });
 
-        if (productPool.size === 0) throw new Error("未找到有效的产品数据");
+        if (productPool.size === 0) {
+            throw new BusinessError(
+                "未找到有效的产品数据",
+                'SCRAPER_IMP_010',
+                { module: 'ScraperImportHandler', action: 'handleImportFiles', filesCount: files.length }
+            );
+        }
 
         let targetMarketplace: string = selectedSite || '';
         const hasExistingData = currentScrapedData && currentScrapedData.products && currentScrapedData.products.length > 0;

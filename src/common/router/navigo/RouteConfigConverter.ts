@@ -124,7 +124,7 @@ export class RouteConfigConverter {
    * @returns Navigo 路由配置
    */
   private _convertRoute(
-    _routeId: string,
+    routeId: string,
     menuRoute: MenuRouteConfig,
     menuConfig: MenuConfig
   ): NavigoRouteConfig | null {
@@ -147,6 +147,7 @@ export class RouteConfigConverter {
 
     // 构建 Navigo 路由配置
     const navigoRoute: NavigoRouteConfig = {
+      routeId, // 保存原始路由ID
       moduleId: menuRoute.moduleId,
       label: menuRoute.label,
       icon: menuRoute.icon,

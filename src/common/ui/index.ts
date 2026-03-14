@@ -107,7 +107,31 @@ registerActions({
       Logger.warn('[ActionRegistry] switch-tab: missing tab parameter');
       return;
     }
-    const path = tab.startsWith('/') ? tab : `/${tab}`;
+    
+    // 将路由 ID 转换为实际路径
+    let path = tab;
+    
+    // 应用中心路由映射
+    if (tab === 'app_center_overview') {
+      path = '/app-center';
+    } else if (tab === 'scraper') {
+      path = '/app-center/scraper';
+    } else if (tab === 'ai_analysis') {
+      path = '/app-center/ai-analysis';
+    } else if (tab === 'promptlab') {
+      path = '/app-center/promptlab';
+    } else if (tab === 'qalab') {
+      path = '/app-center/qalab';
+    } else if (tab === 'kw_input') {
+      path = '/app-center/keyword-hunter/input';
+    } else if (tab === 'kw_process') {
+      path = '/app-center/keyword-hunter/process';
+    } else if (tab === 'kw_analysis') {
+      path = '/app-center/keyword-hunter/analysis';
+    } else if (!tab.startsWith('/')) {
+      path = `/${tab}`;
+    }
+    
     await navigateTo(path);
   },
   'toggle-sop-group': (params: Record<string, unknown>) => toggleSOPGroup({ category: params.group as string || params.category as string }),

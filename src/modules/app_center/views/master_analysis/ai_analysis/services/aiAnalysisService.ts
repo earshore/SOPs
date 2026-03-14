@@ -9,8 +9,13 @@ import type { FullAnalysisReport } from '../config/analysisReportData';
 import type { Product } from '../config/sampleData';
 import { generateAnalysisPrompt } from '../prompts/analysisPrompts';
 import { calculateFullReportConfidence, calculateOverallConfidence } from './confidenceCalculator';
+import { ValidationError, AppError, ErrorLevel, ErrorCategory } from '@common/errors/AppError';
+import { container } from '@common/di/Container';
+import type { ILoggerService } from '@/types/services';
 
-import { Logger } from '../../../../../../services/loggerService';
+// 获取 logger 实例
+const logger = container.resolve<ILoggerService>('logger');
+
 /**
  * LLM 配置接口
  */
@@ -28,19 +33,37 @@ async function getLLMConfig(): Promise<LLMConfig> {
   const activeProvider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER) as string | null;
 
   if (!activeProvider || typeof activeProvider !== 'string') {
-    throw new Error('请先在系统设置中选择 LLM 提供商');
+    throw new ValidationError(
+      '请先在系统设置中选择 LLM 提供商',
+      'AI_ANALYSIS_001',
+      'activeProvider',
+      activeProvider,
+      { module: 'AIAnalysisService', action: 'getLLMConfig' }
+    );
   }
 
   const config = await StorageService.getLLMConfigWithKey(activeProvider);
 
   if (!config || !config.apiKey) {
-    throw new Error('所选提供商未配置 API Key');
+    throw new ValidationError(
+      '所选提供商未配置 API Key',
+      'AI_ANALYSIS_002',
+      'config',
+      config,
+      { module: 'AIAnalysisService', action: 'getLLMConfig', provider: activeProvider }
+    );
   }
 
   const model = config.model || (config.models && config.models[0] ? (typeof config.models[0] === 'string' ? config.models[0] : config.models[0].id) : undefined);
 
   if (!model) {
-    throw new Error('未选择模型，请在设置中同步或选择模型');
+    throw new ValidationError(
+      '未选择模型，请在设置中同步或选择模型',
+      'AI_ANALYSIS_003',
+      'model',
+      model,
+      { module: 'AIAnalysisService', action: 'getLLMConfig', provider: activeProvider }
+    );
   }
 
   return {
@@ -95,17 +118,24 @@ async function analyzeTarget(
       }
     );
 
-    Logger.debug(`[AI分析] ${targetId} 原始响应长度:`, response.length);
-    Logger.debug(`[AI分析] ${targetId} 原始响应前500字符:`, response.substring(0, 500));
+    logger.debug('[AI分析] 原始响应长度:', response.length, 'AIAnalysisService');
+    logger.debug('[AI分析] 原始响应前500字符:', response.substring(0, 500), 'AIAnalysisService');
 
     // 解析 JSON 响应
     const result = JSON.parse(response);
-    Logger.debug(`[AI分析] ${targetId} 解析后的结果键:`, Object.keys(result));
+    logger.debug('[AI分析] 解析后的结果键:', Object.keys(result), 'AIAnalysisService');
 
     return result;
   } catch (error) {
-    Logger.error(`[AI分析] ${targetId} 分析失败:`, error);
-    throw new Error(`${targetId} 分析失败: ${(error as Error).message}`);
+    logger.error('[AI分析] 分析失败:', error, 'AIAnalysisService');
+    throw new AppError(
+      `${targetId} 分析失败`,
+      'AI_ANALYSIS_004',
+      ErrorLevel.ERROR,
+      ErrorCategory.BUSINESS,
+      { module: 'AIAnalysisService', action: 'analyzeTarget', targetId },
+      error instanceof Error ? error : undefined
+    );
   }
 }
 
@@ -158,19 +188,19 @@ export async function runAIAnalysis(
           if (resultObj[fieldName]) {
             // 如果存在嵌套，提取内层数据
             actualResult = resultObj[fieldName];
-            Logger.debug(`[AI分析] ${targetId} 检测到嵌套结构，已提取内层数据`);
+            logger.debug('[AI分析] 检测到嵌套结构，已提取内层数据', undefined, 'AIAnalysisService');
           }
 
           (report as any)[fieldName] = actualResult;
-          Logger.debug(`[AI分析] ${targetId} 分析成功，数据已添加到报告`);
+          logger.debug('[AI分析] 分析成功，数据已添加到报告', undefined, 'AIAnalysisService');
         } else {
-          Logger.warn(`[AI分析] ${targetId} 返回的数据格式无效:`, result);
+          logger.warn('[AI分析] 返回的数据格式无效:', result, 'AIAnalysisService');
         }
       }
 
       completedTargets++;
     } catch (error) {
-      Logger.error(`[AI分析] ${targetId} 失败:`, error);
+      logger.error('[AI分析] 失败:', error, 'AIAnalysisService');
       // 继续分析其他目标,不中断整个流程
       completedTargets++;
     }
@@ -179,8 +209,8 @@ export async function runAIAnalysis(
   onProgress(100, '分析完成!');
 
   // 计算置信度
-  Logger.debug('[AI分析] 开始计算置信度...');
-  Logger.debug('[AI分析] 报告键:', Object.keys(report).join(', '));
+  logger.debug('[AI分析] 开始计算置信度...', undefined, 'AIAnalysisService');
+  logger.debug('[AI分析] 报告键:', Object.keys(report).join(', '), 'AIAnalysisService');
 
   let confidenceScores: Record<string, number> = {};
   let overallConfidence = 0;
@@ -189,13 +219,13 @@ export async function runAIAnalysis(
     confidenceScores = calculateFullReportConfidence(report as Record<string, unknown>);
     overallConfidence = calculateOverallConfidence(confidenceScores);
 
-    Logger.debug('[AI分析] 置信度计算完成:', {
+    logger.debug('[AI分析] 置信度计算完成:', {
       individual: confidenceScores,
       overall: overallConfidence.toFixed(2),
       percent: Math.round(overallConfidence * 100) + '%'
-    });
+    }, 'AIAnalysisService');
   } catch (error) {
-    Logger.error('[AI分析] 置信度计算失败:', error);
+    logger.error('[AI分析] 置信度计算失败:', error, 'AIAnalysisService');
     // 使用默认值
     confidenceScores = {};
     overallConfidence = 0;
@@ -214,9 +244,9 @@ export async function runAIAnalysis(
   };
 
   // 验证 _metadata 已正确附加
-  Logger.debug('[AI分析] 报告包含 _metadata:', !!reportWithConfidence._metadata);
-  Logger.debug('[AI分析] _metadata.confidence:', reportWithConfidence._metadata.confidence);
-  Logger.debug('[AI分析] _metadata.overallConfidence:', reportWithConfidence._metadata.overallConfidence);
+  logger.debug('[AI分析] 报告包含 _metadata:', !!reportWithConfidence._metadata, 'AIAnalysisService');
+  logger.debug('[AI分析] _metadata.confidence:', reportWithConfidence._metadata.confidence, 'AIAnalysisService');
+  logger.debug('[AI分析] _metadata.overallConfidence:', reportWithConfidence._metadata.overallConfidence, 'AIAnalysisService');
 
   // 返回完整的原始报告（包含置信度）
   return reportWithConfidence as FullAnalysisReport;

@@ -10,6 +10,7 @@ import { sleep, getErrorSummary } from '../../../../../common/ui';
 import { HistoryService } from "./historyService";
 import { StorageService } from "../../../../../services/storageService";
 import { configCenter } from '../../../../../common/config/ConfigCenter';
+import { ValidationError, ApiError, SystemError } from '@common/errors/AppError';
 import { Logger } from '../../../../../services/loggerService';
 import type {
     ProxyConfig,
@@ -100,7 +101,15 @@ function constructFetchUrl(targetUrl: string, proxyConfig: ProxyConfig): string 
 
     if (strategy) {
         if (['scraperapi', 'zenrows', 'brightdata', 'custom_api', 'custom_proxy', 'custom'].includes(type)) {
-            if (!customUrl) throw new Error(`未配置 API Key 或 URL`);
+            if (!customUrl) {
+                throw new ValidationError(
+                    `未配置 API Key 或 URL`,
+                    'SCRAPER_SVC_001',
+                    'customUrl',
+                    undefined,
+                    { module: 'ScraperService', action: 'constructFetchUrl', proxyType: type }
+                );
+            }
             return strategy(targetUrl, customUrl);
         }
         return strategy(targetUrl);
@@ -128,7 +137,13 @@ async function fetchWithProxy(url: string, site: string, options: FetchOptions =
 
     const headers = LANGUAGE_HEADERS[site];
     if (!headers) {
-        throw new Error(`未找到站点 ${site} 的配置`);
+        throw new ValidationError(
+            `未找到站点 ${site} 的配置`,
+            'SCRAPER_SVC_002',
+            'site',
+            site,
+            { module: 'ScraperService', action: 'fetchWithProxy' }
+        );
     }
 
     const separator = url.includes("?") ? "&" : "?";
@@ -167,14 +182,34 @@ async function fetchWithProxy(url: string, site: string, options: FetchOptions =
             );
 
             if (res.status === 403 || res.status === 401) {
-                throw new Error("API Key 无效或访问被拒绝");
+                throw new ApiError(
+                    "API Key 无效或访问被拒绝",
+                    'SCRAPER_SVC_003',
+                    res.status,
+                    undefined,
+                    { module: 'ScraperService', action: 'fetchWithProxy', url, site, proxyType: proxyConfig.type }
+                );
             }
             if (res.status === 429) {
                 // 处理限流，等待后重试
                 await sleep(2000 + Math.random() * 1000);
-                throw new Error("请求过于频繁 (429)");
+                throw new ApiError(
+                    "请求过于频繁 (429)",
+                    'SCRAPER_SVC_004',
+                    429,
+                    undefined,
+                    { module: 'ScraperService', action: 'fetchWithProxy', url, site }
+                );
             }
-            if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
+            if (!res.ok) {
+                throw new ApiError(
+                    `HTTP Error ${res.status}`,
+                    'SCRAPER_SVC_005',
+                    res.status,
+                    undefined,
+                    { module: 'ScraperService', action: 'fetchWithProxy', url, site }
+                );
+            }
 
             let text = await res.text();
 
@@ -186,7 +221,15 @@ async function fetchWithProxy(url: string, site: string, options: FetchOptions =
             }
 
             if (!text || text.length < 200) {
-                if (!isCommercial) throw new Error("返回内容过短，可能无效");
+                if (!isCommercial) {
+                    throw new ApiError(
+                        "返回内容过短，可能无效",
+                        'SCRAPER_SVC_006',
+                        undefined,
+                        text,
+                        { module: 'ScraperService', action: 'fetchWithProxy', url, site, contentLength: text?.length || 0 }
+                    );
+                }
             }
 
             return text;
@@ -313,7 +356,11 @@ export async function scrapeAsin(
             const { title, bullets } = parseProductPage(productHtml, asin, site);
 
             if (!title || title.includes("Robot Check")) {
-                throw new Error("触发反爬验证 (Robot Check)");
+                throw new SystemError(
+                    "触发反爬验证 (Robot Check)",
+                    'SCRAPER_SVC_007',
+                    { module: 'ScraperService', action: 'scrapeAsin', asin, site, attempt }
+                );
             }
 
             result.productTitle = title;

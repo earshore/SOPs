@@ -737,7 +737,7 @@ async function syncToInput(): Promise<void> {
     }
 
     // 切换到输入模块
-    await window.navigateTo('/kw_input');
+    await window.navigateTo('/app-center/keyword-hunter/input');
 
     showToast("已同步原文到输入模块");
 }

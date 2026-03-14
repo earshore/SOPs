@@ -10,7 +10,7 @@
 
 import { callLLM, type ChatMessage } from '../../../../../../services/llmService';
 import { StorageService, STORAGE_KEYS } from '../../../../../../services/storageService';
-import { ValidationError } from '@common/errors/AppError';
+import { ValidationError, BusinessError } from '@common/errors/AppError';
 import { configCenter } from '../../../../../../common/config/ConfigCenter';
 import type { FullAnalysisReport } from '../config/analysisReportData';
 import type { Product } from '../config/sampleData';
@@ -347,7 +347,11 @@ export async function runParallelAIAnalysis(
 
   // 根据失败策略处理
   if (failedCount > 0 && failureStrategy === 'abort') {
-    throw new Error(`分析失败: ${failedCount}/${totalTasks} 个目标分析失败`);
+    throw new BusinessError(
+      `分析失败: ${failedCount}/${totalTasks} 个目标分析失败`,
+      'PARALLEL_ANALYSIS_001',
+      { module: 'ParallelAnalysisService', action: 'runParallelAnalysis', failedCount, totalTasks }
+    );
   }
 
   onProgress(100, `分析完成! 成功: ${successCount}, 失败: ${failedCount}`);

@@ -5,7 +5,7 @@
 
 import { Product } from '../config/sampleData';
 import { ScraperData, ScraperProduct } from '../types';
-
+import { ValidationError } from '@common/errors/AppError';
 import { Logger } from '../../../../../../services/loggerService';
 /**
  * 从 Scraper 单个产品数据转换为 Product 格式
@@ -76,7 +76,13 @@ export function convertScraperDataToProduct(productData: unknown): Product | nul
  */
 export function mergeProducts(products: Product[]): Product {
   if (products.length === 0) {
-    throw new Error('没有可合并的产品数据');
+    throw new ValidationError(
+      '没有可合并的产品数据',
+      'DATA_TRANSFORMER_001',
+      'products',
+      products,
+      { module: 'DataTransformers', action: 'mergeProducts' }
+    );
   }
 
   // 合并多个产品的数据

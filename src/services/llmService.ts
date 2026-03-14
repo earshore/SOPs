@@ -10,7 +10,7 @@
 import { ErrorService } from './errorService';
 import { configCenter } from '../common/config/ConfigCenter';
 import { EnvConfig } from '../common/config/envConfig';
-import { ApiError, NetworkError } from '../common/errors';
+import { ApiError, NetworkError, SystemError } from '../common/errors';
 import { isDangerousEndpoint, getDangerousEndpoints } from '../common/config/apiEndpoints';
 // 导入统一的 API 响应类型
 import type { LLMChatCompletionResponse, LLMErrorResponse } from '../types/api';
@@ -116,7 +116,7 @@ export async function callLLM(
   // 🔒 P0修复: 生产环境安全检查
   if (configCenter.isProduction() && isDangerousEndpoint(endpoint)) {
     const dangerousEndpoints = getDangerousEndpoints();
-    throw new Error(
+    throw new SystemError(
       '⛔ 安全限制: 生产环境禁止直接调用外部API\n\n' +
       '可能的原因:\n' +
       '1. 未配置代理服务器\n' +
@@ -125,7 +125,15 @@ export async function callLLM(
       '- 请在设置中配置企业代理\n' +
       '- 或联系管理员配置 Cloudflare Workers 代理\n\n' +
       `检测到的危险端点: ${dangerousEndpoints.join(', ')}\n` +
-      '这是为了保护您的API密钥安全。'
+      '这是为了保护您的API密钥安全。',
+      'LLM_DANGEROUS_ENDPOINT',
+      {
+        module: 'LLMService',
+        action: 'callLLM',
+        endpoint,
+        dangerousEndpoints: dangerousEndpoints.join(', '),
+        environment: 'production'
+      }
     );
   }
 
@@ -336,7 +344,17 @@ export async function callLLM(
     }
   }
 
-  throw lastError || new Error('LLM 调用失败 (未知原因)');
+  throw lastError || new SystemError(
+    'LLM 调用失败 (未知原因)',
+    'LLM_UNKNOWN_FAILURE',
+    {
+      module: 'LLMService',
+      action: 'callLLM',
+      model,
+      endpoint: normalizedEndpoint,
+      retries
+    }
+  );
 }
 
 /**
@@ -350,8 +368,16 @@ export async function fetchModelsFromApi(
   try {
     // 🔒 P0修复: 生产环境安全检查
     if (configCenter.isProduction() && isDangerousEndpoint(endpoint)) {
-      throw new Error(
-        '⛔ 安全限制: 生产环境禁止直接调用外部API\n' + '请配置企业代理或联系管理员'
+      throw new SystemError(
+        '⛔ 安全限制: 生产环境禁止直接调用外部API\n' +
+        '请配置企业代理或联系管理员',
+        'LLM_DANGEROUS_ENDPOINT',
+        {
+          module: 'LLMService',
+          action: 'fetchModelsFromApi',
+          endpoint,
+          environment: 'production'
+        }
       );
     }
 
@@ -386,7 +412,13 @@ export async function fetchModelsFromApi(
     if (!res.ok) {
       const errorText = await res.text();
       Logger.error(`❌ API返回错误: ${res.status}`, errorText);
-      throw new Error(`HTTP ${res.status}: ${errorText.substring(0, 200)}`);
+      throw new ApiError(
+        `HTTP ${res.status}: ${errorText.substring(0, 200)}`,
+        'LLM_API_ERROR',
+        res.status,
+        errorText,
+        { module: 'LLMService', action: 'fetchModelsFromApi', provider, endpoint }
+      );
     }
 
     const rawText = await res.text();
@@ -398,7 +430,14 @@ export async function fetchModelsFromApi(
       Logger.debug(`📦 解析后的数据结构:`, JSON.stringify(data, null, 2).substring(0, 1000));
     } catch (parseError) {
       Logger.error(`❌ JSON解析失败:`, parseError);
-      throw new Error(`API返回的不是有效的JSON格式: ${rawText.substring(0, 100)}`);
+      throw new ApiError(
+        `API返回的不是有效的JSON格式`,
+        'LLM_JSON_PARSE_ERROR',
+        undefined,
+        rawText.substring(0, 100),
+        { module: 'LLMService', action: 'fetchModelsFromApi', provider, endpoint },
+        parseError instanceof Error ? parseError : undefined
+      );
     }
 
     // 兼容不同厂商的数据结构
@@ -436,7 +475,18 @@ export async function fetchModelsFromApi(
 
     if (list.length === 0) {
       Logger.warn(`⚠️ 模型列表为空，完整响应:`, JSON.stringify(data));
-      throw new Error('API返回的模型列表为空，请检查API配置是否正确');
+      throw new ApiError(
+        'API返回的模型列表为空，请检查API配置是否正确',
+        'API_EMPTY_MODEL_LIST',
+        undefined,
+        JSON.stringify(data),
+        {
+          module: 'LLMService',
+          action: 'fetchModelsFromApi',
+          provider,
+          endpoint: normalizedEndpoint
+        }
+      );
     }
 
     Logger.debug(`📋 原始列表前3个元素:`, list.slice(0, 3));

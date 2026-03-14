@@ -51,7 +51,7 @@
 
 import { Product } from '../config/sampleData';
 import { sanitizePromptInput } from './promptSanitizer';
-
+import { ValidationError } from '@common/errors/AppError';
 import { Logger } from '../../../../../../services/loggerService';
 // 核心 JSON 规则
 export const CORE_JSON_RULES = `
@@ -426,29 +426,65 @@ export function generateAnalysisPrompt(
   // 验证 taskId
   const taskDef = ANALYSIS_TASK_DEFINITIONS[taskId];
   if (!taskDef) {
-    throw new Error(`Unknown task ID: ${taskId}`);
+    throw new ValidationError(
+      `未知的任务ID: ${taskId}`,
+      'ANALYSIS_PROMPT_001',
+      'taskId',
+      taskId,
+      { module: 'AnalysisPrompts', action: 'generateAnalysisPrompt', validTaskIds: Object.keys(ANALYSIS_TASK_DEFINITIONS) }
+    );
   }
 
   // 验证 product 对象
   if (!product || typeof product !== 'object') {
-    throw new Error('Invalid product object: product is required');
+    throw new ValidationError(
+      '无效的产品对象',
+      'ANALYSIS_PROMPT_002',
+      'product',
+      product,
+      { module: 'AnalysisPrompts', action: 'generateAnalysisPrompt', taskId }
+    );
   }
 
   // 验证必需字段
   if (!product.asin) {
-    throw new Error('Invalid product object: asin is required');
+    throw new ValidationError(
+      '产品对象缺少必需字段: asin',
+      'ANALYSIS_PROMPT_003',
+      'product.asin',
+      product.asin,
+      { module: 'AnalysisPrompts', action: 'generateAnalysisPrompt', taskId }
+    );
   }
 
   if (!product.productTitle) {
-    throw new Error('Invalid product object: productTitle is required');
+    throw new ValidationError(
+      '产品对象缺少必需字段: productTitle',
+      'ANALYSIS_PROMPT_004',
+      'product.productTitle',
+      product.productTitle,
+      { module: 'AnalysisPrompts', action: 'generateAnalysisPrompt', taskId }
+    );
   }
 
   if (!Array.isArray(product.customer_reviews)) {
-    throw new Error('Invalid product object: customer_reviews must be an array');
+    throw new ValidationError(
+      '产品对象的 customer_reviews 必须是数组',
+      'ANALYSIS_PROMPT_005',
+      'product.customer_reviews',
+      product.customer_reviews,
+      { module: 'AnalysisPrompts', action: 'generateAnalysisPrompt', taskId }
+    );
   }
 
   if (!Array.isArray(product.feature_bullets)) {
-    throw new Error('Invalid product object: feature_bullets must be an array');
+    throw new ValidationError(
+      '产品对象的 feature_bullets 必须是数组',
+      'ANALYSIS_PROMPT_006',
+      'product.feature_bullets',
+      product.feature_bullets,
+      { module: 'AnalysisPrompts', action: 'generateAnalysisPrompt', taskId }
+    );
   }
 
   // 验证 language 参数（可选，但记录警告）
@@ -528,7 +564,13 @@ export function generateBatchAnalysisPrompt(
 ): string {
   // 验证 taskIds
   if (!Array.isArray(taskIds) || taskIds.length === 0) {
-    throw new Error('Invalid taskIds: must be a non-empty array');
+    throw new ValidationError(
+      '无效的任务ID数组',
+      'ANALYSIS_PROMPT_007',
+      'taskIds',
+      taskIds,
+      { module: 'AnalysisPrompts', action: 'generateBatchAnalysisPrompt' }
+    );
   }
 
   const tasks = taskIds
@@ -536,29 +578,65 @@ export function generateBatchAnalysisPrompt(
     .filter(Boolean);
 
   if (tasks.length === 0) {
-    throw new Error('No valid tasks provided');
+    throw new ValidationError(
+      '没有有效的任务',
+      'ANALYSIS_PROMPT_008',
+      'taskIds',
+      taskIds,
+      { module: 'AnalysisPrompts', action: 'generateBatchAnalysisPrompt', validTaskIds: Object.keys(ANALYSIS_TASK_DEFINITIONS) }
+    );
   }
 
   // 验证 product 对象
   if (!product || typeof product !== 'object') {
-    throw new Error('Invalid product object: product is required');
+    throw new ValidationError(
+      '无效的产品对象',
+      'ANALYSIS_PROMPT_009',
+      'product',
+      product,
+      { module: 'AnalysisPrompts', action: 'generateBatchAnalysisPrompt' }
+    );
   }
 
   // 验证必需字段
   if (!product.asin) {
-    throw new Error('Invalid product object: asin is required');
+    throw new ValidationError(
+      '产品对象缺少必需字段: asin',
+      'ANALYSIS_PROMPT_010',
+      'product.asin',
+      product.asin,
+      { module: 'AnalysisPrompts', action: 'generateBatchAnalysisPrompt' }
+    );
   }
 
   if (!product.productTitle) {
-    throw new Error('Invalid product object: productTitle is required');
+    throw new ValidationError(
+      '产品对象缺少必需字段: productTitle',
+      'ANALYSIS_PROMPT_011',
+      'product.productTitle',
+      product.productTitle,
+      { module: 'AnalysisPrompts', action: 'generateBatchAnalysisPrompt' }
+    );
   }
 
   if (!Array.isArray(product.customer_reviews)) {
-    throw new Error('Invalid product object: customer_reviews must be an array');
+    throw new ValidationError(
+      '产品对象的 customer_reviews 必须是数组',
+      'ANALYSIS_PROMPT_012',
+      'product.customer_reviews',
+      product.customer_reviews,
+      { module: 'AnalysisPrompts', action: 'generateBatchAnalysisPrompt' }
+    );
   }
 
   if (!Array.isArray(product.feature_bullets)) {
-    throw new Error('Invalid product object: feature_bullets must be an array');
+    throw new ValidationError(
+      '产品对象的 feature_bullets 必须是数组',
+      'ANALYSIS_PROMPT_013',
+      'product.feature_bullets',
+      product.feature_bullets,
+      { module: 'AnalysisPrompts', action: 'generateBatchAnalysisPrompt' }
+    );
   }
 
   // 验证 language 参数

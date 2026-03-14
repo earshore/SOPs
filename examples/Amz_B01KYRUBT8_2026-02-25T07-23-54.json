@@ -1,0 +1,94 @@
+{
+  "metadata": {
+    "domain": "www.amazon.se",
+    "language": "Swedish",
+    "marketplace": "SE",
+    "scrape_timestamp": "2026-02-25T07:23:54.498Z",
+    "total_asins": 1
+  },
+  "products": [
+    {
+      "asin": "B01KYRUBT8",
+      "customer_reviews": [
+        {
+          "body": "Väldigt härlig doft",
+          "headline": "Härlig doft",
+          "origin_country": "Global",
+          "review_date": "Granskad i Sverige den 14 februari 2026",
+          "star_rating": 5
+        },
+        {
+          "body": "Lovely basic but well made scent of chocolate and a quite heavy vanilla on musc base. Excellent to wear on its own but also for those who wants to add some extra \"flavor\" to another scent! It's quite heavy so go easy with the sprayer. Price point is excellent! Shipped with usual Amazon-speed, next day delivery!",
+          "headline": "Lovely chocolate/vanilla!!",
+          "origin_country": "Global",
+          "review_date": "Granskad i Sverige den 30 maj 2025",
+          "star_rating": 5
+        },
+        {
+          "body": "Top notes very chocolatey but it will fade to a stronger vanilla throughout the day. If you're looking for a sweet scent at a low price, this is an incredible find. The scent is a bit strong but doesn't feel synthetic or too much like alcohol like other similar perfumes. I purposefully only use one spray on my chest to keep it a bit faint. Something nice someone might notice if they lean in or get a hug but not something that will turn heads.",
+          "headline": "Best chocolate scent",
+          "origin_country": "Global",
+          "review_date": "Granskad i Sverige den 14 oktober 2025",
+          "star_rating": 4
+        },
+        {
+          "body": "Min första reaktion var att den hade den där noten som jag personligen kan vara överväldigande söt. Men efter att ha låtit den sitta ett tag så är jag såld.. den luktar verkligen aså marshmallows. Oljan luktar dock starkare och håller betydligt längre.",
+          "headline": "Bra",
+          "origin_country": "Global",
+          "review_date": "Granskad i Sverige den 13 juni 2025",
+          "star_rating": 5
+        },
+        {
+          "body": "The biggest issue I had with this product is the condition it arrived in. The perfume bottle itself wasn't harmed at all but the packaging was when it arrived in my mailbox. It looked like it had been opened and the bottom was clearly damaged. This was a Christmas present for a friend of mine so it felt a bit embarrassing to gift it to her in the condition it was. The perfume lid was so extremely hard to open that my friend had to ask her boyfriend for help- and even he struggled with it. Other than that, the product itself seemed to be very good. My friend loved the smell a lot and said that it had a unique charisma to it.",
+          "headline": "Horrible package condition",
+          "origin_country": "Global",
+          "review_date": "Granskad i Sverige den 19 december 2025",
+          "star_rating": 3
+        },
+        {
+          "body": "Me and 3 of my friends tried this on Wednesday. Now it is friday 3/4 of us have gotten really bad rashes that have been evolving since wednesday. It does smell really good but not worth the pain and itchiness",
+          "headline": "Irritable and itchy but smells good",
+          "origin_country": "Global",
+          "review_date": "Granskad i Sverige den 24 oktober 2025",
+          "star_rating": 1
+        },
+        {
+          "body": "Luktar lika gott som vanligt. En av mina layering favoriter",
+          "headline": "Underbar doft perfekt för layering",
+          "origin_country": "Global",
+          "review_date": "Granskad i Sverige den 19 augusti 2025",
+          "star_rating": 5
+        },
+        {
+          "body": "Dock föll den inte i smaken riktigt, jag hade förväntat mig mer åt kakaohållet men det är verkligen doften av just mjölkchoklad som märks mest. Den har även några undertoner av lite sträv \"kärringparfym\" a la Östermalmstant, även om det är väldigt subtilt. Allt detta står dock beskrivet i produktens specifikationer så det är helt mitt misstag att inte uppmärksamma det. Nu några timmar senare är det framförallt doften av mjölkchoklad som hänger kvar.",
+          "headline": "Som beskrivet, därav fem stjärnor.",
+          "origin_country": "Global",
+          "review_date": "Granskad i Sverige den 8 oktober 2024",
+          "star_rating": 5
+        },
+        {
+          "body": "Fajny zapach😃",
+          "headline": "POLECAM",
+          "origin_country": "Global",
+          "review_date": "Recenserad i Polen den 13 december 2025",
+          "star_rating": 5
+        },
+        {
+          "body": "Smells nice. Nice for work, subtle smell. It reminds me of Palmers cocoa butter lotion, smells exactly like that.",
+          "headline": "Cheap and nice",
+          "origin_country": "Global",
+          "review_date": "Granskad i Storbritannien den 20 februari 2026",
+          "star_rating": 5
+        }
+      ],
+      "feature_bullets": [
+        "Intensiv, aromatisk doft",
+        "Långvarig",
+        "Idealisk som present",
+        "Med söta noter"
+      ],
+      "productTitle": "Al Rehab Dam Choco Musk Eau de Parfum, 50 ml",
+      "scrape_status": "success"
+    }
+  ]
+}

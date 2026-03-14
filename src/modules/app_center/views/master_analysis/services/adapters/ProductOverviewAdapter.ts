@@ -8,6 +8,7 @@ import type { ProductOverviewReport } from '../../types/downloadsReportTypes';
 import type { ExtendedDNA } from '../../types/extendedDNA';
 import { Logger } from '../../../../../../services/loggerService';
 import { isTechnicalSpec } from '../../utils/specUtils';
+import { ValidationError } from '../../../../../../common/errors/AppError';
 
 /**
  * Product Overview Report 适配器实现
@@ -311,7 +312,13 @@ export class ProductOverviewAdapter implements ReportAdapter {
   private normalizeReport(report: unknown): ProductOverviewReport {
     // 类型守卫
     if (!report || typeof report !== 'object') {
-      throw new Error('[ProductOverviewAdapter] Invalid report object');
+      throw new ValidationError(
+        '[ProductOverviewAdapter] Invalid report object',
+        'PRODUCT_OVERVIEW_ADAPTER_001',
+        'report',
+        report,
+        { module: 'ProductOverviewAdapter', action: 'normalizeReport' }
+      );
     }
 
     const reportObj = report as Record<string, unknown>;

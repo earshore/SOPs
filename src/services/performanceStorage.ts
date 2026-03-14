@@ -5,6 +5,7 @@
 // ================================================================
 
 import type { ILoggerService } from '../types/services';
+import { SystemError } from '../common/errors/AppError';
 
 /**
  * 性能数据记录
@@ -139,7 +140,11 @@ export class PerformanceStorage {
    */
   async save(record: Omit<PerformanceRecord, 'id'>): Promise<string> {
     if (!this.db) {
-      throw new Error('Database not initialized');
+      throw new SystemError(
+        'Database not initialized',
+        'PERF_STORAGE_001',
+        { module: 'PerformanceStorage', action: 'save' }
+      );
     }
 
     const id = this.generateId();
@@ -168,7 +173,11 @@ export class PerformanceStorage {
    */
   async saveBatch(records: Array<Omit<PerformanceRecord, 'id'>>): Promise<string[]> {
     if (!this.db) {
-      throw new Error('Database not initialized');
+      throw new SystemError(
+        'Database not initialized',
+        'PERF_STORAGE_002',
+        { module: 'PerformanceStorage', action: 'saveBatch' }
+      );
     }
 
     const ids: string[] = [];
@@ -199,7 +208,11 @@ export class PerformanceStorage {
    */
   async get(id: string): Promise<PerformanceRecord | null> {
     if (!this.db) {
-      throw new Error('Database not initialized');
+      throw new SystemError(
+        'Database not initialized',
+        'PERF_STORAGE_003',
+        { module: 'PerformanceStorage', action: 'get', id }
+      );
     }
 
     return new Promise((resolve, reject) => {
@@ -227,7 +240,11 @@ export class PerformanceStorage {
     limit?: number;
   }): Promise<PerformanceRecord[]> {
     if (!this.db) {
-      throw new Error('Database not initialized');
+      throw new SystemError(
+        'Database not initialized',
+        'PERF_STORAGE_004',
+        { module: 'PerformanceStorage', action: 'getAll', options }
+      );
     }
 
     return new Promise((resolve, reject) => {
@@ -284,7 +301,11 @@ export class PerformanceStorage {
    */
   async delete(id: string): Promise<void> {
     if (!this.db) {
-      throw new Error('Database not initialized');
+      throw new SystemError(
+        'Database not initialized',
+        'PERF_STORAGE_005',
+        { module: 'PerformanceStorage', action: 'delete', id }
+      );
     }
 
     return new Promise((resolve, reject) => {
@@ -307,7 +328,11 @@ export class PerformanceStorage {
    */
   async clear(): Promise<void> {
     if (!this.db) {
-      throw new Error('Database not initialized');
+      throw new SystemError(
+        'Database not initialized',
+        'PERF_STORAGE_006',
+        { module: 'PerformanceStorage', action: 'clear' }
+      );
     }
 
     return new Promise((resolve, reject) => {
@@ -331,7 +356,11 @@ export class PerformanceStorage {
    */
   async cleanupOldRecords(): Promise<number> {
     if (!this.db) {
-      throw new Error('Database not initialized');
+      throw new SystemError(
+        'Database not initialized',
+        'PERF_STORAGE_007',
+        { module: 'PerformanceStorage', action: 'cleanupOldRecords' }
+      );
     }
 
     const cutoffTime = Date.now() - (this.config.retentionDays * 24 * 60 * 60 * 1000);

@@ -59,7 +59,21 @@ export function initRouter(): NavigoAdapter {
   }
 
   // 注册所有路由
-  routerInstance.registerRoutes(conversionResult.routes);
+  for (const [routeId, config] of Object.entries(conversionResult.routes)) {
+    // 为应用中心路由添加路径前缀
+    let routePath = routeId;
+    
+    // 应用中心路由需要 /app-center 前缀
+    if (routeId === 'app_center_overview') {
+      routePath = '/app-center';
+    } else if (['scraper', 'ai_analysis', 'promptlab', 'qalab'].includes(routeId)) {
+      routePath = `/app-center/${routeId.replace(/_/g, '-')}`;
+    } else if (routeId.startsWith('kw_')) {
+      routePath = `/app-center/keyword-hunter/${routeId.replace('kw_', '').replace(/_/g, '-')}`;
+    }
+    
+    routerInstance.register(routePath, config);
+  }
 
   // 注册别名
   for (const [alias, target] of Object.entries(conversionResult.aliases)) {
@@ -108,7 +122,8 @@ export function initRouter(): NavigoAdapter {
     
     // 调用 UI 更新函数
     try {
-      const routeId = context.to.path.replace(/^\//, '') || 'home';
+      // 优先使用路由配置中的 routeId，如果没有则使用 moduleId
+      const routeId = context.to.config.routeId || context.to.config.moduleId;
       if (import.meta.env.DEV) {
         Logger.debug(`[Middleware After] 🔄 Calling updateUIForRoute with routeId: ${routeId}`);
       }
@@ -147,7 +162,52 @@ export function initRouter(): NavigoAdapter {
     }
   });
 
-  // 9. 处理根路径：延迟导航直到视图加载完成
+  // 9. 监听 EventBus 的 ROUTE_CHANGE 事件（用于概览页面卡片点击）
+  import('../EventBus').then(({ default: eventBus }) => {
+    eventBus.on('route-change', (data: unknown) => {
+      const payload = data as { routeId: string } | undefined;
+      if (payload && payload.routeId && routerInstance) {
+        if (import.meta.env.DEV) {
+          Logger.debug(`[initRouter] 📡 Received ROUTE_CHANGE event for routeId: ${payload.routeId}`);
+        }
+        
+        // 将路由 ID 转换为路径
+        let path = payload.routeId;
+        
+        // 应用中心路由映射
+        if (payload.routeId === 'app_center_overview') {
+          path = '/app-center';
+        } else if (payload.routeId === 'scraper') {
+          path = '/app-center/scraper';
+        } else if (payload.routeId === 'ai_analysis') {
+          path = '/app-center/ai-analysis';
+        } else if (payload.routeId === 'promptlab') {
+          path = '/app-center/promptlab';
+        } else if (payload.routeId === 'qalab') {
+          path = '/app-center/qalab';
+        } else if (payload.routeId === 'kw_input') {
+          path = '/app-center/keyword-hunter/input';
+        } else if (payload.routeId === 'kw_process') {
+          path = '/app-center/keyword-hunter/process';
+        } else if (payload.routeId === 'kw_analysis') {
+          path = '/app-center/keyword-hunter/analysis';
+        } else if (!payload.routeId.startsWith('/')) {
+          path = `/${payload.routeId}`;
+        }
+        
+        if (import.meta.env.DEV) {
+          Logger.debug(`[initRouter] 🔀 Converting routeId "${payload.routeId}" to path: ${path}`);
+        }
+        
+        routerInstance.navigate(path);
+      }
+    });
+    
+    Logger.debug('✓ [initRouter] EventBus ROUTE_CHANGE listener registered');
+  });
+
+
+  // 10. 处理根路径：延迟导航直到视图加载完成
   const currentHash = window.location.hash.replace('#', '');
   
   if (import.meta.env.DEV) {

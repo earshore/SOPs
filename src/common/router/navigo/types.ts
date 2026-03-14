@@ -55,6 +55,8 @@ export interface RouteMeta {
  * 路由配置
  */
 export interface RouteConfig {
+  /** 路由ID（原始ID，如 'scraper', 'ai_analysis'） */
+  routeId?: string;
   /** 模块ID */
   moduleId: string;
   /** 路由标签 */

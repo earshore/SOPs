@@ -10,7 +10,7 @@ import { LANGUAGE_HEADERS } from '../../../../../../common/constants/constants';
 import { appStore } from '@/stores/useAppStore';
 import eventBus from '../../../../../../common/EventBus';
 import { MODULE_EVENTS } from '../../../../../../common/constants/eventConstants';
-
+import { SystemError } from '@common/errors/AppError';
 import { Logger } from '../../../../../../services/loggerService';
 /**
  * 历史记录面板类
@@ -127,13 +127,17 @@ export class HistoryPanel {
 
             // 2. 确保报告数据已正确加载到全局状态
             if (!appStore.getState().analysis.analysisReport) {
-                throw new Error('报告数据加载失败');
+                throw new SystemError(
+                    '报告数据加载失败',
+                    'HISTORY_PANEL_001',
+                    { module: 'HistoryPanel', action: 'viewAnalysisReport', itemId: item.id }
+                );
             }
 
             Logger.debug('[Scraper] 📊 已将"AI智能分析"报告加载到全局状态');
 
             // 3. 跳转到 AI智能分析页面查看报告
-            await window.navigateTo('/ai_analysis');
+            await window.navigateTo('/app-center/ai-analysis');
 
             showToast("已跳转到 AI智能分析查看报告", { type: 'success' });
         } catch (error) {

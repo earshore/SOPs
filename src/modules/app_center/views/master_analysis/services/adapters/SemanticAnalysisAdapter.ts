@@ -8,6 +8,7 @@ import type { SemanticAnalysisReport } from '../../types/downloadsReportTypes';
 import type { ExtendedDNA } from '../../types/extendedDNA';
 import { Logger } from '../../../../../../services/loggerService';
 import { isTechnicalSpec } from '../../utils/specUtils';
+import { ValidationError } from '../../../../../../common/errors/AppError';
 
 /**
  * Semantic Analysis Report 适配器实现
@@ -299,7 +300,13 @@ export class SemanticAnalysisAdapter implements ReportAdapter {
   private normalizeReport(report: unknown): SemanticAnalysisReport {
     // 类型守卫
     if (!report || typeof report !== 'object') {
-      throw new Error('[SemanticAnalysisAdapter] Invalid report object');
+      throw new ValidationError(
+        '[SemanticAnalysisAdapter] Invalid report object',
+        'SEMANTIC_ADAPTER_001',
+        'report',
+        report,
+        { module: 'SemanticAnalysisAdapter', action: 'normalizeReport' }
+      );
     }
 
     const reportObj = report as Record<string, unknown>;
