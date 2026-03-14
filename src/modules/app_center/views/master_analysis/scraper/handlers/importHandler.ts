@@ -17,7 +17,6 @@ import { showToast } from '../../../../../../common/ui';
 import eventBus from '../../../../../../common/EventBus';
 import { APP_EVENTS, MODULE_EVENTS } from '../../../../../../common/constants/eventConstants';
 import { SafeRenderer } from '../../../../../../common/infrastructure/SafeRenderer';
-
 import { Logger } from '../../../../../../services/loggerService';
 /**
  * 读取文件为JSON
@@ -379,7 +378,7 @@ export async function handleImportFiles(
         // 触发事件通知其他模块更新
         eventBus.emit(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, scrapedData);
         eventBus.emit(APP_EVENTS.DATA_UPDATED);
-        window.dispatchEvent(new CustomEvent(APP_EVENTS.HISTORY_UPDATED));
+        eventBus.emit(APP_EVENTS.HISTORY_UPDATED);
 
         showToast(`✅ 成功导入并合并 ${finalProducts.length} 个ASIN (基准站点: ${targetMarketplace})`, { type: 'success' });
 

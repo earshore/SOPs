@@ -119,7 +119,7 @@ export async function deleteProduct(
         // 触发事件通知其他模块
         try {
             eventBus.emit(APP_EVENTS.DATA_UPDATED);
-            window.dispatchEvent(new CustomEvent(APP_EVENTS.HISTORY_UPDATED));
+            eventBus.emit(APP_EVENTS.HISTORY_UPDATED);
         } catch (eventError) {
             Logger.error('[Scraper] 触发事件失败:', eventError);
         }
@@ -278,7 +278,7 @@ export async function deleteReview(
         // 触发事件通知其他模块
         try {
             eventBus.emit(APP_EVENTS.DATA_UPDATED);
-            window.dispatchEvent(new CustomEvent(APP_EVENTS.HISTORY_UPDATED));
+            eventBus.emit(APP_EVENTS.HISTORY_UPDATED);
         } catch (eventError) {
             Logger.error('[Scraper] 触发事件失败:', eventError);
         }
