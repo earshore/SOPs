@@ -7,6 +7,7 @@
 
 import type { Route, RouteGuard } from './types';
 import { isRouteGuard, isGuardResult } from './guards';
+import { ValidationError } from '@/common/errors/AppError';
 
 /**
  * 守卫管理器
@@ -42,7 +43,7 @@ export class GuardManager {
    * 添加全局守卫
    *
    * @param guard - 路由守卫
-   * @throws {Error} 如果守卫无效
+   * @throws {ValidationError} 如果守卫无效
    *
    * @example
    * ```typescript
@@ -57,7 +58,13 @@ export class GuardManager {
    */
   addGlobalGuard(guard: RouteGuard): void {
     if (!isRouteGuard(guard)) {
-      throw new Error(`Invalid guard: ${JSON.stringify(guard)}`);
+      throw new ValidationError(
+        `Invalid guard: ${JSON.stringify(guard)}`,
+        'ROUTER_INVALID_GUARD',
+        'guard',
+        guard,
+        { module: 'GuardManager', action: 'addGlobalGuard' }
+      );
     }
 
     // 检查是否已存在同名守卫
@@ -107,7 +114,13 @@ export class GuardManager {
    */
   addRouteGuard(path: string, guard: RouteGuard): void {
     if (!isRouteGuard(guard)) {
-      throw new Error(`Invalid guard: ${JSON.stringify(guard)}`);
+      throw new ValidationError(
+        `Invalid guard: ${JSON.stringify(guard)}`,
+        'ROUTER_INVALID_GUARD',
+        'guard',
+        guard,
+        { module: 'GuardManager', action: 'addRouteGuard', path }
+      );
     }
 
     // 获取或创建路由守卫列表
@@ -250,7 +263,13 @@ export class GuardManager {
 
         // 验证结果
         if (!isGuardResult(result)) {
-          throw new Error(`Invalid guard result from ${guard.name}`);
+          throw new ValidationError(
+            `Invalid guard result from ${guard.name}`,
+            'ROUTER_INVALID_GUARD_RESULT',
+            'result',
+            result,
+            { module: 'GuardManager', action: 'runGuards', guardName: guard.name }
+          );
         }
 
         // 处理布尔结果

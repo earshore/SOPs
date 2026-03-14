@@ -26,6 +26,7 @@ import { ErrorHandler } from './ErrorHandler';
 import type { RouterStoreSync } from './RouterStore';
 
 import { Logger } from '../../../services/loggerService';
+import { ValidationError } from '@/common/errors/AppError';
 /**
  * Navigo 路由适配器
  *
@@ -155,7 +156,12 @@ export class NavigoAdapter {
   register(path: string, config: RouteConfig): void {
     // 验证配置
     if (!isRouteConfig(config)) {
-      throw new Error(`Invalid route config for path: ${path}`);
+      throw new ValidationError(
+        `Invalid route config for path: ${path}`,
+        'INVALID_ROUTE_CONFIG',
+        'config',
+        config
+      );
     }
 
     // 标准化路径
@@ -239,7 +245,12 @@ export class NavigoAdapter {
     
     // 验证选项
     if (!isNavigateOptions(options)) {
-      throw new Error('Invalid navigate options');
+      throw new ValidationError(
+        'Invalid navigate options',
+        'INVALID_NAVIGATE_OPTIONS',
+        'options',
+        options
+      );
     }
 
     // 防止重复导航

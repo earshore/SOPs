@@ -13,6 +13,8 @@
  *   }
  */
 
+import { ValidationError } from '@/common/errors/AppError';
+
 /**
  * 所有可用的路由 ID（联合类型）
  *
@@ -140,7 +142,12 @@ export function isValidRouteId(id: string): id is RouteId {
  */
 export function assertValidRouteId(id: string): asserts id is RouteId {
   if (!isValidRouteId(id)) {
-    throw new Error(`Invalid route ID: "${id}". Must be one of: ${ALL_ROUTE_IDS.join(', ')}`);
+    throw new ValidationError(
+      `Invalid route ID: "${id}". Must be one of: ${ALL_ROUTE_IDS.join(', ')}`,
+      'INVALID_ROUTE_ID',
+      'id',
+      id
+    );
   }
 }
 

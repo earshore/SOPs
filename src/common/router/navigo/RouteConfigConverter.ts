@@ -6,6 +6,7 @@
 
 import type { RouteConfig as NavigoRouteConfig } from './types';
 import type { RouteConfig as MenuRouteConfig, MenuConfig } from '../../config/menuConfig';
+import { SystemError } from '@/common/errors/AppError';
 
 /**
  * 转换选项
@@ -130,7 +131,11 @@ export class RouteConfigConverter {
     // 获取模块信息
     const module = menuConfig.modules[menuRoute.moduleId];
     if (!module) {
-      throw new Error(`Module not found: ${menuRoute.moduleId}`);
+      throw new SystemError(
+        `Module not found: ${menuRoute.moduleId}`,
+        'ROUTE_MODULE_NOT_FOUND',
+        { module: 'RouteConfigConverter', action: 'convertRoute', moduleId: menuRoute.moduleId }
+      );
     }
 
     // 构建路由元信息
