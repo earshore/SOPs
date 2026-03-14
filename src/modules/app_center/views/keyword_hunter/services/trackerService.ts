@@ -5,6 +5,7 @@
 // ================================================================
 
 import { callLLM } from "../../../../../services/llmService";
+import { ValidationError } from '@common/errors/AppError';
 import { ANALYSIS_PROMPT_TEMPLATE, TRANSLATE_PROMPT_TEMPLATE as TRANSLATE_PROMPT_TEMPLATE2 } from "../constants/prompts";
 import { StorageService, STORAGE_KEYS } from "../../../../../services/storageService";
 import type {
@@ -127,7 +128,13 @@ async function bridgeCallLLM(systemPrompt: string, userPrompt: string, options: 
     const activeProvider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER) as string | null;
 
     if (!activeProvider || typeof activeProvider !== 'string') {
-        throw new Error("请先在全局设置中选择 LLM 提供商");
+        throw new ValidationError(
+            '请先在全局设置中选择 LLM 提供商',
+            'ERR_LLM_PROVIDER_NOT_SELECTED',
+            undefined,
+            undefined,
+            { module: 'TrackerService', action: 'bridgeCallLLM' }
+        );
     }
 
     // 🔐 P0优化: 使用安全存储读取配置
@@ -138,11 +145,25 @@ async function bridgeCallLLM(systemPrompt: string, userPrompt: string, options: 
     if (!config || !config.apiKey) {
         // 特殊处理：如果是 serverless 模式，允许前端 key 为空或随意值，但为了通过校验建议前端填个占位符
         // 这里抛出错误提示用户去设置里检查
-        throw new Error("所选提供商未配置 API Key");
+        throw new ValidationError(
+            '所选提供商未配置 API Key',
+            'ERR_LLM_API_KEY_MISSING',
+            undefined,
+            undefined,
+            { module: 'TrackerService', action: 'bridgeCallLLM', provider: activeProvider }
+        );
     }
 
     const targetModel = config.model || (config.models && config.models[0] ? (typeof config.models[0] === 'string' ? config.models[0] : config.models[0].id) : undefined);
-    if (!targetModel) throw new Error("未选择模型，请在设置中同步或选择模型");
+    if (!targetModel) {
+        throw new ValidationError(
+            '未选择模型，请在设置中同步或选择模型',
+            'ERR_LLM_MODEL_NOT_SELECTED',
+            undefined,
+            undefined,
+            { module: 'TrackerService', action: 'bridgeCallLLM', provider: activeProvider }
+        );
+    }
 
     const messages = [
         { role: 'system' as const, content: systemPrompt },
@@ -204,12 +225,24 @@ export async function fetchListingAnalysis(
 ): Promise<string> {
     // 🔥🔥🔥 新增校验：检查文案是否为空 🔥🔥🔥
     if (!copyText || !copyText.trim()) {
-        throw new Error("文案内容为空，无法进行AI分析。请先在左侧输入框填入Listing文案。");
+        throw new ValidationError(
+            '文案内容为空，无法进行AI分析',
+            'ERR_EMPTY_LISTING_TEXT',
+            undefined,
+            undefined,
+            { module: 'TrackerService', action: 'fetchListingAnalysis' }
+        );
     }
 
     // 🔥🔥🔥 新增校验：检查文案有效性 🔥🔥🔥
     if (!isValidListing(copyText)) {
-        throw new Error("输入内容过短或不具备 Amazon Listing 特征，无法生成有效报告。请输入完整的五点描述或产品具体介绍。");
+        throw new ValidationError(
+            '输入内容过短或不具备 Amazon Listing 特征',
+            'ERR_INVALID_LISTING_TEXT',
+            undefined,
+            undefined,
+            { module: 'TrackerService', action: 'fetchListingAnalysis', textLength: copyText.length }
+        );
     }
 
     const systemPrompt = ANALYSIS_PROMPT_TEMPLATE;
@@ -234,7 +267,13 @@ export async function fetchListingAnalysis(
 export async function fetchImmersionTranslation(copyText: string): Promise<string> {
     // 🔥🔥🔥 新增校验：检查文案是否为空 🔥🔥🔥
     if (!copyText || !copyText.trim()) {
-        throw new Error("文案内容为空，无法进行翻译。请先在左侧输入框填入Listing文案。");
+        throw new ValidationError(
+            '文案内容为空，无法进行翻译',
+            'ERR_EMPTY_TRANSLATION_TEXT',
+            undefined,
+            undefined,
+            { module: 'TrackerService', action: 'fetchImmersionTranslation' }
+        );
     }
 
     const systemPrompt = TRANSLATE_PROMPT_TEMPLATE2;

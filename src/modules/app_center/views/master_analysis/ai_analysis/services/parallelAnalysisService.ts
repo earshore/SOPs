@@ -10,6 +10,7 @@
 
 import { callLLM, type ChatMessage } from '../../../../../../services/llmService';
 import { StorageService, STORAGE_KEYS } from '../../../../../../services/storageService';
+import { ValidationError } from '@common/errors/AppError';
 import { configCenter } from '../../../../../../common/config/ConfigCenter';
 import type { FullAnalysisReport } from '../config/analysisReportData';
 import type { Product } from '../config/sampleData';
@@ -61,13 +62,16 @@ export function generateCacheKey(targetId: string, product: Product, language: s
  */
 export async function getCachedResult(cacheKey: string): Promise<unknown | null> {
   try {
-    const cached = StorageService.get(cacheKey);
-    if (cached && typeof cached === 'object' && (cached as any).timestamp) {
-      const age = Date.now() - (cached as any).timestamp;
+    const cached = StorageService.getRaw(cacheKey);
+    if (!cached) return null;
+    
+    const parsedCache = JSON.parse(cached);
+    if (parsedCache && typeof parsedCache === 'object' && parsedCache.timestamp) {
+      const age = Date.now() - parsedCache.timestamp;
       // 缓存有效期：24小时
       if (age < 24 * 60 * 60 * 1000) {
         Logger.debug(`[并行分析] 缓存命中: ${cacheKey}`);
-        return (cached as any).data;
+        return parsedCache.data;
       }
     }
   } catch (error) {
@@ -98,19 +102,37 @@ async function getLLMConfig(): Promise<LLMConfig> {
   const activeProvider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER) as string | null;
 
   if (!activeProvider || typeof activeProvider !== 'string') {
-    throw new Error('请先在系统设置中选择 LLM 提供商');
+    throw new ValidationError(
+      '请先在系统设置中选择 LLM 提供商',
+      'ERR_LLM_PROVIDER_NOT_SELECTED',
+      undefined,
+      undefined,
+      { module: 'ParallelAnalysisService', action: 'getLLMConfig' }
+    );
   }
 
   const config = await StorageService.getLLMConfigWithKey(activeProvider);
 
   if (!config || !config.apiKey) {
-    throw new Error('所选提供商未配置 API Key');
+    throw new ValidationError(
+      '所选提供商未配置 API Key',
+      'ERR_LLM_API_KEY_MISSING',
+      undefined,
+      undefined,
+      { module: 'ParallelAnalysisService', action: 'getLLMConfig', provider: activeProvider }
+    );
   }
 
   const model = config.model || (config.models && config.models[0] ? (typeof config.models[0] === 'string' ? config.models[0] : config.models[0].id) : undefined);
 
   if (!model) {
-    throw new Error('未选择模型，请在设置中同步或选择模型');
+    throw new ValidationError(
+      '未选择模型，请在设置中同步或选择模型',
+      'ERR_LLM_MODEL_NOT_SELECTED',
+      undefined,
+      undefined,
+      { module: 'ParallelAnalysisService', action: 'getLLMConfig', provider: activeProvider }
+    );
   }
 
   return {

@@ -5,6 +5,7 @@
  * 支持鼠标悬停预加载、空闲时预加载等策略
  */
 
+import { AppError, ErrorLevel, ErrorCategory } from '@common/errors/AppError';
 import type { RouteConfig, PreloadOptions, PreloadStats, PreloadStrategy } from './types';
 
 /**
@@ -337,7 +338,16 @@ export class PreloadManager {
       this.stats.failedCount++;
 
       this._log(`Preload failed: ${task.path}`, error, 'error');
-      return false;
+      
+      // 抛出标准错误以便上层处理
+      throw new AppError(
+        '路由预加载失败',
+        'ERR_PRELOAD_FAILED',
+        ErrorLevel.ERROR,
+        ErrorCategory.SYSTEM,
+        { path: task.path, timeout },
+        error as Error
+      );
     } finally {
       this.loading.delete(task.path);
       this._removeFromQueue(task.path);
