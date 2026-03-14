@@ -656,38 +656,160 @@
           <!-- Content -->
           <div class="p-6 space-y-6">
             <!-- 并发数设置 -->
-            <div class="space-y-3">
+            <div class="space-y-4">
               <label class="block text-sm font-semibold text-slate-700">
                 <i class="fa-solid fa-gauge-high text-indigo-600 mr-2"></i>
                 最大并发数
               </label>
-              <div class="flex items-center gap-4">
+              
+              <!-- 自定义滑块容器 -->
+              <div class="relative py-6">
+                <!-- 渐变轨道背景 -->
+                <div class="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-3 bg-gradient-to-r from-blue-100 via-indigo-100 to-purple-100 rounded-full shadow-inner pointer-events-none"></div>
+                
+                <!-- 激活部分的渐变轨道 -->
+                <div class="absolute left-0 top-1/2 -translate-y-1/2 h-3 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 rounded-full transition-all duration-300 shadow-md pointer-events-none"
+                  :style="`width: calc(${((perfSettings.settings.maxConcurrency - 1) / 7) * 100}%)`"></div>
+                
+                <!-- 刻度标记 -->
+                <div class="absolute left-0 right-0 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none">
+                  <template x-for="i in 8" :key="i">
+                    <div class="relative flex flex-col items-center">
+                      <!-- 刻度点 -->
+                      <div class="w-2.5 h-2.5 rounded-full transition-all duration-200"
+                        :class="i <= perfSettings.settings.maxConcurrency ? 'bg-white shadow-lg scale-110' : 'bg-slate-300'"></div>
+                    </div>
+                  </template>
+                </div>
+                
+                <!-- 原生滑块（透明覆盖） -->
                 <input type="range" min="1" max="8" step="1"
                   x-model.number="perfSettings.settings.maxConcurrency"
-                  class="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
-                <span class="text-2xl font-bold text-indigo-600 min-w-[3rem] text-center"
-                  x-text="perfSettings.settings.maxConcurrency"></span>
-              </div>
-              <div class="flex items-start gap-2 text-sm text-slate-600 bg-slate-50 p-3 rounded-lg">
-                <i class="fa-solid fa-lightbulb text-amber-500 mt-0.5"></i>
-                <span x-text="perfSettings.getConcurrencyHint()"></span>
-              </div>
-              <div class="grid grid-cols-2 gap-3 text-xs">
-                <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
-                  <div class="font-semibold text-emerald-700 mb-1">
-                    <i class="fa-solid fa-rocket mr-1"></i>
-                    预计加速
-                  </div>
-                  <div class="text-emerald-600"
-                    x-text="perfSettings.settings.maxConcurrency + 'x 倍'"></div>
+                  class="concurrency-slider absolute left-0 right-0 top-1/2 -translate-y-1/2 w-full bg-transparent appearance-none cursor-pointer z-10"
+                  aria-label="最大并发数"
+                  @input="perfSettings.updateCacheStats()">
+                
+                <!-- 档位标签 -->
+                <div class="absolute left-0 right-0 -bottom-6 flex justify-between text-xs font-medium">
+                  <span class="transition-colors duration-200"
+                    :class="perfSettings.settings.maxConcurrency <= 2 ? 'text-blue-600' : 'text-slate-400'">
+                    <i class="fa-solid fa-turtle mr-1"></i>慢速
+                  </span>
+                  <span class="transition-colors duration-200"
+                    :class="perfSettings.settings.maxConcurrency >= 3 && perfSettings.settings.maxConcurrency <= 4 ? 'text-indigo-600' : 'text-slate-400'">
+                    <i class="fa-solid fa-gauge mr-1"></i>标准
+                  </span>
+                  <span class="transition-colors duration-200"
+                    :class="perfSettings.settings.maxConcurrency >= 5 && perfSettings.settings.maxConcurrency <= 6 ? 'text-purple-600' : 'text-slate-400'">
+                    <i class="fa-solid fa-bolt mr-1"></i>快速
+                  </span>
+                  <span class="transition-colors duration-200"
+                    :class="perfSettings.settings.maxConcurrency >= 7 ? 'text-purple-700' : 'text-slate-400'">
+                    <i class="fa-solid fa-rocket mr-1"></i>极速
+                  </span>
                 </div>
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                  <div class="font-semibold text-blue-700 mb-1">
-                    <i class="fa-solid fa-clock mr-1"></i>
-                    预计耗时
+              </div>
+              
+              <!-- 当前值显示 -->
+              <div class="flex items-center justify-center gap-3 py-2">
+                <div class="flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300"
+                  :class="{
+                    'bg-blue-50 border-2 border-blue-200': perfSettings.settings.maxConcurrency <= 2,
+                    'bg-indigo-50 border-2 border-indigo-200': perfSettings.settings.maxConcurrency >= 3 && perfSettings.settings.maxConcurrency <= 4,
+                    'bg-purple-50 border-2 border-purple-200': perfSettings.settings.maxConcurrency >= 5 && perfSettings.settings.maxConcurrency <= 6,
+                    'bg-purple-100 border-2 border-purple-300': perfSettings.settings.maxConcurrency >= 7
+                  }">
+                  <i class="text-xl transition-colors duration-300"
+                    :class="{
+                      'fa-solid fa-turtle text-blue-600': perfSettings.settings.maxConcurrency <= 2,
+                      'fa-solid fa-gauge text-indigo-600': perfSettings.settings.maxConcurrency >= 3 && perfSettings.settings.maxConcurrency <= 4,
+                      'fa-solid fa-bolt text-purple-600': perfSettings.settings.maxConcurrency >= 5 && perfSettings.settings.maxConcurrency <= 6,
+                      'fa-solid fa-rocket text-purple-700': perfSettings.settings.maxConcurrency >= 7
+                    }"></i>
+                  <span class="text-3xl font-bold transition-colors duration-300"
+                    :class="{
+                      'text-blue-600': perfSettings.settings.maxConcurrency <= 2,
+                      'text-indigo-600': perfSettings.settings.maxConcurrency >= 3 && perfSettings.settings.maxConcurrency <= 4,
+                      'text-purple-600': perfSettings.settings.maxConcurrency >= 5 && perfSettings.settings.maxConcurrency <= 6,
+                      'text-purple-700': perfSettings.settings.maxConcurrency >= 7
+                    }"
+                    x-text="perfSettings.settings.maxConcurrency"></span>
+                  <span class="text-sm font-medium transition-colors duration-300"
+                    :class="{
+                      'text-blue-600': perfSettings.settings.maxConcurrency <= 2,
+                      'text-indigo-600': perfSettings.settings.maxConcurrency >= 3 && perfSettings.settings.maxConcurrency <= 4,
+                      'text-purple-600': perfSettings.settings.maxConcurrency >= 5 && perfSettings.settings.maxConcurrency <= 6,
+                      'text-purple-700': perfSettings.settings.maxConcurrency >= 7
+                    }">并发</span>
+                </div>
+              </div>
+              
+              <!-- 档位说明卡片 -->
+              <div class="relative overflow-hidden rounded-xl border-2 transition-all duration-300"
+                :class="{
+                  'bg-blue-50 border-blue-200': perfSettings.settings.maxConcurrency <= 2,
+                  'bg-indigo-50 border-indigo-200': perfSettings.settings.maxConcurrency >= 3 && perfSettings.settings.maxConcurrency <= 4,
+                  'bg-purple-50 border-purple-200': perfSettings.settings.maxConcurrency >= 5 && perfSettings.settings.maxConcurrency <= 6,
+                  'bg-purple-100 border-purple-300': perfSettings.settings.maxConcurrency >= 7
+                }">
+                <div class="p-4">
+                  <div class="flex items-start gap-3">
+                    <i class="fa-solid fa-lightbulb text-amber-500 text-lg mt-0.5"></i>
+                    <div class="flex-1 space-y-2">
+                      <p class="text-sm font-semibold transition-colors duration-300"
+                        :class="{
+                          'text-blue-800': perfSettings.settings.maxConcurrency <= 2,
+                          'text-indigo-800': perfSettings.settings.maxConcurrency >= 3 && perfSettings.settings.maxConcurrency <= 4,
+                          'text-purple-800': perfSettings.settings.maxConcurrency >= 5 && perfSettings.settings.maxConcurrency <= 6,
+                          'text-purple-900': perfSettings.settings.maxConcurrency >= 7
+                        }"
+                        x-text="perfSettings.getConcurrencyHint()"></p>
+                      <div class="flex items-center gap-4 text-xs">
+                        <div class="flex items-center gap-1.5">
+                          <i class="fa-solid fa-gauge-high"></i>
+                          <span class="font-medium">速度:</span>
+                          <div class="flex gap-0.5">
+                            <template x-for="i in 8" :key="i">
+                              <div class="w-1 h-3 rounded-full transition-all duration-200"
+                                :class="i <= perfSettings.settings.maxConcurrency ? 'bg-current opacity-100' : 'bg-current opacity-20'"></div>
+                            </template>
+                          </div>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                          <i class="fa-solid fa-shield-halved"></i>
+                          <span class="font-medium">稳定:</span>
+                          <div class="flex gap-0.5">
+                            <template x-for="i in 8" :key="i">
+                              <div class="w-1 h-3 rounded-full transition-all duration-200"
+                                :class="i <= (9 - perfSettings.settings.maxConcurrency) ? 'bg-current opacity-100' : 'bg-current opacity-20'"></div>
+                            </template>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div class="text-blue-600"
-                    x-text="Math.round(120 / perfSettings.settings.maxConcurrency) + ' 秒'"></div>
+                </div>
+              </div>
+              
+              <!-- 性能预览卡片 -->
+              <div class="grid grid-cols-2 gap-3">
+                <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 transition-all duration-300 hover:shadow-md cursor-pointer">
+                  <div class="font-semibold text-emerald-700 mb-1 flex items-center gap-1.5">
+                    <i class="fa-solid fa-rocket"></i>
+                    <span>预计加速</span>
+                  </div>
+                  <div class="text-2xl font-bold text-emerald-600 transition-all duration-300"
+                    x-text="perfSettings.settings.maxConcurrency + 'x'"></div>
+                  <div class="text-xs text-emerald-600 mt-1">相比串行执行</div>
+                </div>
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 transition-all duration-300 hover:shadow-md cursor-pointer">
+                  <div class="font-semibold text-blue-700 mb-1 flex items-center gap-1.5">
+                    <i class="fa-solid fa-clock"></i>
+                    <span>预计耗时</span>
+                  </div>
+                  <div class="text-2xl font-bold text-blue-600 transition-all duration-300"
+                    x-text="Math.round(120 / perfSettings.settings.maxConcurrency) + '秒'"></div>
+                  <div class="text-xs text-blue-600 mt-1">基于平均速度</div>
                 </div>
               </div>
             </div>

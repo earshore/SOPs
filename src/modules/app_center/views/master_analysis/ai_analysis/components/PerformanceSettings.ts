@@ -4,8 +4,10 @@
  */
 
 import { StorageService } from '../../../../../../services/storageService';
-import { Logger } from '../../../../../../services/loggerService';
 import { getCacheStats, clearAnalysisCache } from '../services/parallelAnalysisService';
+import { showToast } from '@common/ui/index';
+import { container } from '../../../../../../common/di/Container';
+import type { ILoggerService } from '../../../../../../types/services';
 
 const SETTINGS_KEY = 'ai_analysis_performance_settings';
 
@@ -37,7 +39,8 @@ export function getPerformanceSettings(): PerformanceSettings {
       return { ...DEFAULT_SETTINGS, ...saved };
     }
   } catch (error) {
-    Logger.warn('[性能设置] 读取失败，使用默认值:', error);
+    const logger = container.resolve<ILoggerService>('logger');
+    logger.warn('[性能设置] 读取失败，使用默认值:', error);
   }
   return DEFAULT_SETTINGS;
 }
@@ -48,9 +51,11 @@ export function getPerformanceSettings(): PerformanceSettings {
 export function savePerformanceSettings(settings: PerformanceSettings): void {
   try {
     StorageService.set(SETTINGS_KEY, settings);
-    Logger.debug('[性能设置] 已保存:', settings);
+    const logger = container.resolve<ILoggerService>('logger');
+    logger.debug('[性能设置] 已保存:', settings);
   } catch (error) {
-    Logger.error('[性能设置] 保存失败:', error);
+    const logger = container.resolve<ILoggerService>('logger');
+    logger.error('[性能设置] 保存失败:', error);
     throw error;
   }
 }
@@ -97,10 +102,8 @@ export function createPerformanceSettingsPanel() {
         this.showSettings = false;
         
         // 显示成功提示
-        const { showToast } = require('@common/ui/index');
         showToast('性能设置已保存', { type: 'success' });
       } catch (error) {
-        const { showToast } = require('@common/ui/index');
         showToast('保存失败: ' + (error as Error).message, { type: 'error' });
       }
     },
@@ -116,10 +119,8 @@ export function createPerformanceSettingsPanel() {
         clearAnalysisCache();
         this.updateCacheStats();
         
-        const { showToast } = require('@common/ui/index');
         showToast('缓存已清除', { type: 'success' });
       } catch (error) {
-        const { showToast } = require('@common/ui/index');
         showToast('清除失败: ' + (error as Error).message, { type: 'error' });
       }
     },
