@@ -14,6 +14,7 @@ import {
   renderTimeout
 } from '../../components/ErrorBoundary';
 import { Logger } from '../../services/loggerService';
+import { ValidationError } from '@/common/errors/AppError';
 import type { DIContainer } from '../di/Container';
 
 // ==================== 类型定义 ====================
@@ -292,7 +293,13 @@ export class ModuleLoader {
         this.currentRouteId = routeId; // 🔧 记录当前路由ID
         Logger.debug(`[${this.moduleName}] ✅ 子模块加载成功: ${routeId}`);
       } else {
-        throw new Error(`模块接口不完整: 缺少 mount() 函数`);
+        throw new ValidationError(
+          `模块接口不完整: 缺少 mount() 函数`,
+          'MODULE_INVALID_INTERFACE',
+          'module',
+          module,
+          { module: 'ModuleLoader', action: 'loadModule', routeId, moduleName: this.moduleName }
+        );
       }
     } catch (err) {
       Logger.error(`[${this.moduleName}] 加载子模块失败 (重试 ${retryCount}):`, err);

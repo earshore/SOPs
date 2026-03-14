@@ -4,6 +4,8 @@
 // 提供多种预设骨架屏样式，提升加载体验
 // ================================================================
 
+import { ValidationError } from '@/common/errors/AppError';
+
 /**
  * 骨架屏类型
  */
@@ -293,7 +295,13 @@ export class SkeletonLoader {
       : target;
 
     if (!element) {
-      throw new Error(`[SkeletonLoader] 目标元素未找到: ${target}`);
+      throw new ValidationError(
+        `目标元素未找到: ${target}`,
+        'SKELETON_TARGET_NOT_FOUND',
+        'target',
+        target,
+        { module: 'SkeletonLoader', action: 'show' }
+      );
     }
 
     const skeleton = this.create(config);
