@@ -104,7 +104,7 @@ export default defineConfig({
     // 开发服务器配置
     server: {
         port: 5173,
-        open: false,
+        open: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome --incognito',
         cors: true,
         // 静态资源服务
         fs: {
