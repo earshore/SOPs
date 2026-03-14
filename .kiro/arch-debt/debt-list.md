@@ -7,14 +7,14 @@
 
 ## 📊 统计概览
 
-| 债务类型 | 文件数量 | 优先级分布 | 风险评估 |
-|---------|---------|-----------|---------|
-| **错误处理** | 12个文件 | P0: 3, P1: 6, P2: 3 | 高风险: 3, 中风险: 6, 低风险: 3 |
-| **存储访问** | 2个文件 | P1: 2 | 低风险: 2 |
-| **事件机制** | 18个文件 | P0: 4, P1: 8, P2: 6 | 高风险: 4, 中风险: 8, 低风险: 6 |
-| **日志记录** | 3个文件 | P2: 3 | 低风险: 3 |
+| 债务类型 | 文件数量 | 已完成 | 剩余 | 完成率 |
+|---------|---------|--------|------|--------|
+| **错误处理** | 12个文件 | 5个 | 7个 | 42% |
+| **存储访问** | 2个文件 | 1个 | 1个 | 50% |
+| **事件机制** | 18个文件 | 0个 | 18个 | 0% |
+| **日志记录** | 3个文件 | 0个 | 3个 | 0% |
 
-**总计**: 35个文件需要修复
+**总计**: 35个文件，已完成 6个，剩余 29个，整体完成率 **17%**
 
 ---
 
@@ -27,15 +27,15 @@
   - 依赖: 被多个模块依赖
 
 ### P1 - 业务模块 (6个文件)
-- [ ] `src/modules/app_center/views/master_analysis/services/analysisService.ts` - **中风险**
+- [x] `src/modules/app_center/views/master_analysis/services/analysisService.ts` - **中风险** ✅ 第一批已完成
   - 问题: 1处使用 `throw new Error()`
   - 影响: AI分析服务
   
-- [ ] `src/modules/app_center/views/keyword_hunter/services/trackerService.ts` - **中风险**
+- [x] `src/modules/app_center/views/keyword_hunter/services/trackerService.ts` - **中风险** ✅ 第一批已完成
   - 问题: 4处使用 `throw new Error()`
   - 影响: Keyword Hunter追踪服务
   
-- [ ] `src/modules/app_center/views/master_analysis/qalab/services/rufusSimulator.ts` - **中风险**
+- [x] `src/modules/app_center/views/master_analysis/qalab/services/rufusSimulator.ts` - **中风险** ✅ 第一批已完成
   - 问题: 2处使用 `throw new Error()`
   - 影响: QALab Rufus模拟器
   
@@ -52,11 +52,11 @@
   - 影响: Scraper数据导入
 
 ### P2 - 工具模块 (3个文件)
-- [ ] `src/common/router/navigo/PreloadManager.ts` - **低风险**
+- [x] `src/common/router/navigo/PreloadManager.ts` - **低风险** ✅ 第一批已完成
   - 问题: 1处使用 `new Error()` (超时错误)
   - 影响: 路由预加载
   
-- [ ] `src/common/utils/WorkingStateManager.ts` - **低风险**
+- [x] `src/common/utils/WorkingStateManager.ts` - **低风险** ✅ 第一批已完成
   - 问题: 2处使用 `new Error()` (超时错误)
   - 影响: 工作状态管理
   
@@ -156,7 +156,7 @@
 ## 🟢 存储访问债务 (2个文件)
 
 ### P1 - 业务模块 (2个文件)
-- [ ] `src/modules/app_center/views/master_analysis/ai_analysis/services/parallelAnalysisService.ts` - **低风险**
+- [x] `src/modules/app_center/views/master_analysis/ai_analysis/services/parallelAnalysisService.ts` - **低风险** ✅ 第一批已完成
   - 问题: 1处使用 `localStorage.getItem`
   - 影响: 并行分析服务缓存检查
   - 建议: 简单读取操作，低风险
