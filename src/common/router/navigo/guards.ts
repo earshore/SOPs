@@ -18,6 +18,7 @@ import type {
   RouterConfig,
   GuardResult,
 } from './types';
+import { ValidationError } from '@/common/errors/AppError';
 
 // ==================== 基础类型守卫 ====================
 
@@ -399,11 +400,17 @@ export function validateRouteParams(params: Record<string, unknown>, config: Rou
 // ==================== 工具函数 ====================
 
 /**
- * 断言值为真，否则抛出错误
+ * 断言值为真,否则抛出错误
  */
 export function assert(condition: boolean, message: string): asserts condition {
   if (!condition) {
-    throw new Error(`Assertion failed: ${message}`);
+    throw new ValidationError(
+      `Assertion failed: ${message}`,
+      'ROUTER_ASSERTION_FAILED',
+      'condition',
+      condition,
+      { module: 'guards', action: 'assert', message }
+    );
   }
 }
 
@@ -412,7 +419,13 @@ export function assert(condition: boolean, message: string): asserts condition {
  */
 export function assertExists<T>(value: T | null | undefined, message: string): asserts value is T {
   if (value === null || value === undefined) {
-    throw new Error(`Assertion failed: ${message}`);
+    throw new ValidationError(
+      `Assertion failed: ${message}`,
+      'ROUTER_VALUE_NOT_EXISTS',
+      'value',
+      value,
+      { module: 'guards', action: 'assertExists', message }
+    );
   }
 }
 
@@ -425,6 +438,12 @@ export function assertType<T>(
   message: string
 ): asserts value is T {
   if (!guard(value)) {
-    throw new Error(`Type assertion failed: ${message}`);
+    throw new ValidationError(
+      `Type assertion failed: ${message}`,
+      'ROUTER_TYPE_ASSERTION_FAILED',
+      'value',
+      value,
+      { module: 'guards', action: 'assertType', message }
+    );
   }
 }

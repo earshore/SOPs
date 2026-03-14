@@ -7,6 +7,7 @@
 
 import type { Route, RouteMiddleware, RouteContext } from './types';
 import { isRouteMiddleware } from './guards';
+import { ValidationError } from '@/common/errors/AppError';
 
 /**
  * 中间件管理器
@@ -42,11 +43,17 @@ export class MiddlewareManager {
    * 添加 before 中间件
    *
    * @param middleware - 路由中间件
-   * @throws {Error} 如果中间件无效
+   * @throws {ValidationError} 如果中间件无效
    */
   addBefore(middleware: RouteMiddleware): void {
     if (!isRouteMiddleware(middleware)) {
-      throw new Error('Invalid middleware');
+      throw new ValidationError(
+        'Invalid middleware',
+        'ROUTER_INVALID_MIDDLEWARE',
+        'middleware',
+        typeof middleware,
+        { module: 'MiddlewareManager', action: 'addBefore' }
+      );
     }
 
     this.beforeMiddlewares.push(middleware);
@@ -57,11 +64,17 @@ export class MiddlewareManager {
    * 添加 after 中间件
    *
    * @param middleware - 路由中间件
-   * @throws {Error} 如果中间件无效
+   * @throws {ValidationError} 如果中间件无效
    */
   addAfter(middleware: RouteMiddleware): void {
     if (!isRouteMiddleware(middleware)) {
-      throw new Error('Invalid middleware');
+      throw new ValidationError(
+        'Invalid middleware',
+        'ROUTER_INVALID_MIDDLEWARE',
+        'middleware',
+        typeof middleware,
+        { module: 'MiddlewareManager', action: 'addAfter' }
+      );
     }
 
     this.afterMiddlewares.push(middleware);

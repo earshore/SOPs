@@ -14,6 +14,7 @@ import {
 } from './navigo';
 import { MENU_CONFIG } from '../config/menuConfig';
 import { updateUIForRoute } from '../ui/navigation';
+import { SystemError } from '@/common/errors/AppError';
 
 import { Logger } from '../../services/loggerService';
 // 全局路由实例
@@ -176,7 +177,11 @@ export function initRouter(): NavigoAdapter {
  */
 export function getRouter(): NavigoAdapter {
   if (!routerInstance) {
-    throw new Error('Router not initialized. Call initRouter() first.');
+    throw new SystemError(
+      'Router not initialized. Call initRouter() first.',
+      'ROUTER_NOT_INITIALIZED',
+      { module: 'initRouter', action: 'getRouter' }
+    );
   }
   return routerInstance;
 }
@@ -186,7 +191,11 @@ export function getRouter(): NavigoAdapter {
  */
 export function getRouterStore(): ReturnType<typeof createRouterStore> {
   if (!storeInstance) {
-    throw new Error('Router store not initialized. Call initRouter() first.');
+    throw new SystemError(
+      'Router store not initialized. Call initRouter() first.',
+      'ROUTER_STORE_NOT_INITIALIZED',
+      { module: 'initRouter', action: 'getRouterStore' }
+    );
   }
   return storeInstance;
 }
