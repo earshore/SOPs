@@ -7,7 +7,7 @@
 
 import { callLLM } from "../../../../../services/llmService";
 import { configCenter } from '../../../../../common/config/ConfigCenter';
-import { ApiError } from '@common/errors/AppError';
+import { ApiError, ValidationError } from '@common/errors/AppError';
 import { TRANSLATE_PROMPT_TEMPLATE } from "../constants/prompts";
 import { Logger } from '../../../../../services/loggerService';
 import type {
@@ -44,7 +44,14 @@ function robustParseJSON(text: string): unknown {
       try { return JSON.parse(braceMatch[0]); } catch (e3) { /* ignore */ }
     }
   }
-  throw new Error("无法从响应中解析有效的 JSON 数据");
+  
+  throw new ValidationError(
+    "无法从响应中解析有效的 JSON 数据",
+    'ERR_JSON_PARSE_FAILED',
+    'response',
+    text,
+    { module: 'AnalysisService', action: 'robustParseJSON' }
+  );
 }
 
 // ======================== 

@@ -66,12 +66,12 @@ export async function getCachedResult(cacheKey: string): Promise<unknown | null>
     if (!cached) return null;
     
     const parsedCache = JSON.parse(cached);
-    if (parsedCache && typeof parsedCache === 'object' && parsedCache.timestamp) {
-      const age = Date.now() - parsedCache.timestamp;
+    if (parsedCache && typeof parsedCache === 'object' && 'timestamp' in parsedCache) {
+      const age = Date.now() - (parsedCache.timestamp as number);
       // 缓存有效期：24小时
       if (age < 24 * 60 * 60 * 1000) {
         Logger.debug(`[并行分析] 缓存命中: ${cacheKey}`);
-        return parsedCache.data;
+        return (parsedCache as { data: unknown }).data;
       }
     }
   } catch (error) {
@@ -362,9 +362,9 @@ export async function runParallelAIAnalysis(
  */
 export function clearAnalysisCache(): void {
   try {
-    const allKeys = Object.keys(localStorage);
+    const allKeys = StorageService.keys();
     const cacheKeys = allKeys.filter(key => key.startsWith('ai_analysis_'));
-    cacheKeys.forEach(key => localStorage.removeItem(key));
+    cacheKeys.forEach(key => StorageService.remove(key));
     Logger.debug(`[并行分析] 已清除 ${cacheKeys.length} 个缓存项`);
   } catch (error) {
     Logger.error('[并行分析] 清除缓存失败:', error);
@@ -376,12 +376,12 @@ export function clearAnalysisCache(): void {
  */
 export function getCacheStats(): { count: number; totalSize: number } {
   try {
-    const allKeys = Object.keys(localStorage);
+    const allKeys = StorageService.keys();
     const cacheKeys = allKeys.filter(key => key.startsWith('ai_analysis_'));
     let totalSize = 0;
     
     cacheKeys.forEach(key => {
-      const value = localStorage.getItem(key);
+      const value = StorageService.getRaw(key);
       if (value) {
         totalSize += value.length;
       }
