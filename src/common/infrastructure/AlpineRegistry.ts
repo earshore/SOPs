@@ -11,6 +11,7 @@
  */
 
 import { Logger } from '@services/loggerService';
+import { SystemError, ValidationError } from '@/common/errors/AppError';
 
 /**
  * Alpine 组件定义
@@ -135,13 +136,25 @@ export class AlpineRegistry {
     if (!name || typeof name !== 'string') {
       const error = '[AlpineRegistry] 组件名称必须是非空字符串';
       this.log('error', error);
-      throw new Error(error);
+      throw new ValidationError(
+        '组件名称必须是非空字符串',
+        'ALPINE_INVALID_COMPONENT_NAME',
+        'name',
+        name,
+        { module: 'AlpineRegistry', action: 'register' }
+      );
     }
     
     if (typeof factory !== 'function') {
       const error = `[AlpineRegistry] 组件 "${name}" 的工厂函数必须是函数类型`;
       this.log('error', error);
-      throw new Error(error);
+      throw new ValidationError(
+        `组件 "${name}" 的工厂函数必须是函数类型`,
+        'ALPINE_INVALID_FACTORY',
+        'factory',
+        typeof factory,
+        { module: 'AlpineRegistry', action: 'register', componentName: name }
+      );
     }
     
     const component: AlpineComponent = {
@@ -222,7 +235,11 @@ export class AlpineRegistry {
     // 检查 Alpine 是否可用
     if (!this.isAlpineAvailable()) {
       this.log('error', 'Alpine.js 未加载或 Alpine.data 方法不可用');
-      throw new Error('[AlpineRegistry] Alpine.js 未就绪');
+      throw new SystemError(
+        'Alpine.js 未就绪',
+        'ALPINE_NOT_READY',
+        { module: 'AlpineRegistry', action: 'init' }
+      );
     }
     
     this.isReady = true;
@@ -313,7 +330,11 @@ export class AlpineRegistry {
       if (visiting.has(component.name)) {
         const error = `检测到循环依赖: ${component.name}`;
         this.log('error', error);
-        throw new Error(`[AlpineRegistry] ${error}`);
+        throw new SystemError(
+          `检测到循环依赖: ${component.name}`,
+          'ALPINE_CIRCULAR_DEPENDENCY',
+          { module: 'AlpineRegistry', action: 'resolveDependencies', componentName: component.name, visitingChain: Array.from(visiting) }
+        );
       }
       
       // 已访问过，跳过
@@ -375,7 +396,13 @@ export class AlpineRegistry {
     if (!Array.isArray(component.dependencies)) {
       const error = `组件 "${component.name}" 的依赖必须是数组`;
       this.log('error', error);
-      throw new Error(`[AlpineRegistry] ${error}`);
+      throw new ValidationError(
+        `组件 "${component.name}" 的依赖必须是数组`,
+        'ALPINE_INVALID_DEPENDENCIES_TYPE',
+        'dependencies',
+        typeof component.dependencies,
+        { module: 'AlpineRegistry', action: 'validateDependencies', componentName: component.name }
+      );
     }
     
     // 检查依赖项是否为字符串
@@ -383,7 +410,13 @@ export class AlpineRegistry {
       if (typeof dep !== 'string' || !dep) {
         const error = `组件 "${component.name}" 的依赖项必须是非空字符串`;
         this.log('error', error, { invalidDependency: dep });
-        throw new Error(`[AlpineRegistry] ${error}`);
+        throw new ValidationError(
+          `组件 "${component.name}" 的依赖项必须是非空字符串`,
+          'ALPINE_INVALID_DEPENDENCY_ITEM',
+          'dependency',
+          dep,
+          { module: 'AlpineRegistry', action: 'validateDependencies', componentName: component.name }
+        );
       }
     }
     
@@ -391,7 +424,13 @@ export class AlpineRegistry {
     if (component.dependencies.includes(component.name)) {
       const error = `组件 "${component.name}" 不能依赖自己`;
       this.log('error', error);
-      throw new Error(`[AlpineRegistry] ${error}`);
+      throw new ValidationError(
+        `组件 "${component.name}" 不能依赖自己`,
+        'ALPINE_SELF_DEPENDENCY',
+        'dependencies',
+        component.dependencies,
+        { module: 'AlpineRegistry', action: 'validateDependencies', componentName: component.name }
+      );
     }
     
     this.log('debug', `✓ 组件 "${component.name}" 的依赖验证通过`);
@@ -409,7 +448,11 @@ export class AlpineRegistry {
     if (!this.isAlpineAvailable()) {
       const error = 'Alpine.data 方法不可用';
       this.log('error', error);
-      throw new Error(`[AlpineRegistry] ${error}`);
+      throw new SystemError(
+        'Alpine.data 方法不可用',
+        'ALPINE_DATA_UNAVAILABLE',
+        { module: 'AlpineRegistry', action: 'registerToAlpine', componentName: component.name }
+      );
     }
     
     try {
@@ -418,7 +461,12 @@ export class AlpineRegistry {
     } catch (error) {
       const errorMsg = `注册组件 "${component.name}" 到 Alpine 失败: ${error}`;
       this.log('error', errorMsg);
-      throw new Error(`[AlpineRegistry] ${errorMsg}`);
+      throw new SystemError(
+        `注册组件 "${component.name}" 到 Alpine 失败`,
+        'ALPINE_REGISTER_FAILED',
+        { module: 'AlpineRegistry', action: 'registerToAlpine', componentName: component.name },
+        error instanceof Error ? error : undefined
+      );
     }
   }
   

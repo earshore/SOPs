@@ -4,6 +4,8 @@
  * 包含应用版本、LLM提供商、站点配置、选择器映射等
  */
 
+import { SystemError } from '@/common/errors/AppError';
+
 // ========================
 // CONFIGURATION CONSTANTS
 // ========================
@@ -29,7 +31,11 @@ export const getRandomUserAgent = (): string => {
   const index = Math.floor(Math.random() * USER_AGENTS.length);
   const agent = USER_AGENTS[index];
   if (!agent) {
-    throw new Error('USER_AGENTS array is empty');
+    throw new SystemError(
+      'USER_AGENTS array is empty',
+      'USER_AGENTS_EMPTY',
+      { module: 'constants', action: 'getRandomUserAgent', arrayLength: USER_AGENTS.length }
+    );
   }
   return agent;
 };

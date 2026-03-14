@@ -16,6 +16,7 @@
 import { MENU_CONFIG, getRoutesByModule, type RouteConfig, type ModuleConfig } from '../config/menuConfig';
 import { APP_EVENTS } from '../constants/eventConstants';
 import type { CategoryConfig } from './SidebarRenderer';
+import { SystemError } from '@/common/errors/AppError';
 
 import { Logger } from '../../services/loggerService';
 /**
@@ -84,7 +85,11 @@ export class OverviewRenderer {
     // 从配置中获取模块信息
     const moduleConfig = MENU_CONFIG.modules[moduleId];
     if (!moduleConfig) {
-      throw new Error(`模块配置未找到: ${moduleId}`);
+      throw new SystemError(
+        `模块配置未找到: ${moduleId}`,
+        'MODULE_CONFIG_NOT_FOUND',
+        { module: 'OverviewRenderer', action: 'constructor', moduleId }
+      );
     }
     this.moduleConfig = moduleConfig;
 

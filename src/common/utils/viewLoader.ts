@@ -8,6 +8,7 @@
 import { APP_VERSION } from '../constants/constants';
 import { StorageService } from '../../services/storageService';
 import { getViewPathByRoute } from '../config/menuConfig';
+import { SystemError } from '@/common/errors/AppError';
 
 import { Logger } from '../../services/loggerService';
 const CACHE_PREFIX = 'view_cache_';
@@ -263,7 +264,11 @@ async function loadHtml(key: string): Promise<HTMLElement | null> {
         } else {
             const loader = htmlModules[path];
             if (!loader) {
-                throw new Error(`Module path not found in glob registry: ${path}`);
+                throw new SystemError(
+                    `Module path not found in glob registry: ${path}`,
+                    'VIEW_MODULE_NOT_FOUND',
+                    { module: 'viewLoader', action: 'loadView', path }
+                );
             }
             // 2. Load
             html = await loader();
@@ -359,7 +364,11 @@ export async function loadTemplate(path: string, options?: { disableFadeIn?: boo
                 html = await htmlModules[altPath]();
                 setCache(path, html); // Cache for original path to avoid retry
             } else {
-                throw new Error(`Template path not found: ${path}`);
+                throw new SystemError(
+                    `Template path not found: ${path}`,
+                    'VIEW_TEMPLATE_NOT_FOUND',
+                    { module: 'viewLoader', action: 'loadView', path, attemptedPaths: [path, altPath] }
+                );
             }
         } else {
             html = await loader();

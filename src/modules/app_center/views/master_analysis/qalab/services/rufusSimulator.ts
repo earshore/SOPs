@@ -15,7 +15,7 @@
 
 import { callLLM, type ChatMessage } from '../../../../../../services/llmService';
 import { StorageService, STORAGE_KEYS } from '../../../../../../services/storageService';
-
+import { ValidationError } from '@common/errors/AppError';
 import { Logger } from '../../../../../../services/loggerService';
 export interface RufusMessage {
     role: 'user' | 'assistant';
@@ -110,7 +110,14 @@ export class RufusSimulator {
 
         if (!activeProvider) {
             Logger.error('[Rufus AI] ❌ 未配置 LLM 服务');
-            throw new Error('未配置 LLM 服务');
+            
+            throw new ValidationError(
+                '未配置 LLM 服务',
+                'ERR_LLM_NOT_CONFIGURED',
+                undefined,
+                undefined,
+                { module: 'RufusSimulator', action: 'generateAIAnswer' }
+            );
         }
 
         const config = await StorageService.getLLMConfigWithKey(activeProvider);
@@ -120,7 +127,14 @@ export class RufusSimulator {
             Logger.error('[Rufus AI] ❌ LLM 配置不完整');
             Logger.error('[Rufus AI] - config 存在:', !!config);
             Logger.error('[Rufus AI] - apiKey 存在:', !!config?.apiKey);
-            throw new Error('LLM 配置不完整');
+            
+            throw new ValidationError(
+                'LLM 配置不完整',
+                'ERR_LLM_CONFIG_INCOMPLETE',
+                undefined,
+                undefined,
+                { module: 'RufusSimulator', action: 'generateAIAnswer', provider: activeProvider, hasConfig: !!config, hasApiKey: !!config?.apiKey }
+            );
         }
 
         Logger.debug('[Rufus AI] ✅ LLM 配置验证通过');

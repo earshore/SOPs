@@ -6,6 +6,8 @@
  * @module SafeRenderer
  */
 
+import { ValidationError } from '@/common/errors/AppError';
+
 /**
  * 渲染选项接口
  */
@@ -96,11 +98,23 @@ export class SafeRenderer {
    */
   public renderTemplate(container: HTMLElement, template: string): void {
     if (!container) {
-      throw new Error('SafeRenderer: container is required');
+      throw new ValidationError(
+        'container is required',
+        'SAFE_RENDERER_NO_CONTAINER',
+        'container',
+        container,
+        { module: 'SafeRenderer', action: 'renderTemplate' }
+      );
     }
     
     if (typeof template !== 'string') {
-      throw new Error('SafeRenderer: template must be a string');
+      throw new ValidationError(
+        'template must be a string',
+        'SAFE_RENDERER_INVALID_TEMPLATE',
+        'template',
+        typeof template,
+        { module: 'SafeRenderer', action: 'renderTemplate' }
+      );
     }
 
     container.innerHTML = template;
@@ -134,11 +148,23 @@ export class SafeRenderer {
     options?: RenderOptions
   ): void {
     if (!container) {
-      throw new Error('SafeRenderer: container is required');
+      throw new ValidationError(
+        'container is required',
+        'SAFE_RENDERER_NO_CONTAINER',
+        'container',
+        container,
+        { module: 'SafeRenderer', action: 'renderDynamic' }
+      );
     }
 
     if (typeof template !== 'string') {
-      throw new Error('SafeRenderer: template must be a string');
+      throw new ValidationError(
+        'template must be a string',
+        'SAFE_RENDERER_INVALID_TEMPLATE',
+        'template',
+        typeof template,
+        { module: 'SafeRenderer', action: 'renderDynamic' }
+      );
     }
 
     const sanitize = options?.sanitize !== false; // 默认为 true
@@ -182,15 +208,33 @@ export class SafeRenderer {
     options?: ListRenderOptions
   ): void {
     if (!container) {
-      throw new Error('SafeRenderer: container is required');
+      throw new ValidationError(
+        'container is required',
+        'SAFE_RENDERER_NO_CONTAINER',
+        'container',
+        container,
+        { module: 'SafeRenderer', action: 'renderList' }
+      );
     }
 
     if (!Array.isArray(items)) {
-      throw new Error('SafeRenderer: items must be an array');
+      throw new ValidationError(
+        'items must be an array',
+        'SAFE_RENDERER_INVALID_ITEMS',
+        'items',
+        typeof items,
+        { module: 'SafeRenderer', action: 'renderList' }
+      );
     }
 
     if (typeof renderer !== 'function') {
-      throw new Error('SafeRenderer: renderer must be a function');
+      throw new ValidationError(
+        'renderer must be a function',
+        'SAFE_RENDERER_INVALID_RENDERER',
+        'renderer',
+        typeof renderer,
+        { module: 'SafeRenderer', action: 'renderList' }
+      );
     }
 
     // 清空容器
@@ -254,11 +298,23 @@ export class SafeRenderer {
     props?: Record<string, unknown>
   ): void {
     if (!container) {
-      throw new Error('SafeRenderer: container is required');
+      throw new ValidationError(
+        'container is required',
+        'SAFE_RENDERER_NO_CONTAINER',
+        'container',
+        container,
+        { module: 'SafeRenderer', action: 'renderComponent' }
+      );
     }
 
     if (!componentName) {
-      throw new Error('SafeRenderer: componentName is required');
+      throw new ValidationError(
+        'componentName is required',
+        'SAFE_RENDERER_NO_COMPONENT_NAME',
+        'componentName',
+        componentName,
+        { module: 'SafeRenderer', action: 'renderComponent' }
+      );
     }
 
     // 创建组件容器

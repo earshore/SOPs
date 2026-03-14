@@ -7,6 +7,7 @@
 
 import { callLLM } from "../../../../../services/llmService";
 import { configCenter } from '../../../../../common/config/ConfigCenter';
+import { ApiError } from '@common/errors/AppError';
 import { TRANSLATE_PROMPT_TEMPLATE } from "../constants/prompts";
 import { Logger } from '../../../../../services/loggerService';
 import type {
@@ -131,11 +132,15 @@ export const AnalysisService = {
     } catch (e) {
       const error = e as Error;
       Logger.warn("Analysis JSON Parse Failed:", error.message);
-      return {
-        raw_response: response,
-        parse_error: true,
-        error_detail: error.message
-      };
+      
+      throw new ApiError(
+        'AI分析响应解析失败',
+        'ERR_ANALYSIS_PARSE_FAILED',
+        500,
+        { raw_response: response },
+        { module: 'AnalysisService', action: 'generateReport', language },
+        error
+      );
     }
   },
 
@@ -177,11 +182,15 @@ export const AnalysisService = {
     } catch (e) {
       const error = e as Error;
       Logger.warn("Translation JSON Parse Failed:", error.message);
-      return {
-        ...report, // 返回原报告，但标记错误
-        parse_error: true,
-        raw_response: response
-      };
+      
+      throw new ApiError(
+        '翻译响应解析失败',
+        'ERR_TRANSLATION_PARSE_FAILED',
+        500,
+        { raw_response: response },
+        { module: 'AnalysisService', action: 'translateReport', language },
+        error
+      );
     }
   },
 };

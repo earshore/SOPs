@@ -14,6 +14,7 @@ import { SERVICE_NAMES } from './di/ServiceRegistry';
 import eventBus from './EventBus';
 import { APP_EVENTS } from './constants/eventConstants';
 import type { ILoggerService, IStorageService, IHttpService } from '@/types/services';
+import { SystemError } from '@/common/errors/AppError';
 
 import { Logger } from '../services/loggerService';
 /**
@@ -168,7 +169,11 @@ export default class BaseModule {
      * 渲染 HTML（必须由子类实现）
      */
     protected async render(): Promise<void> {
-        throw new Error('BaseModule.render() must be implemented');
+        throw new SystemError(
+            'BaseModule.render() must be implemented',
+            'MODULE_NOT_IMPLEMENTED',
+            { module: this.moduleId, action: 'render' }
+        );
     }
 
     /**

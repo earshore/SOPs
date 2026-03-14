@@ -6,6 +6,7 @@
 
 import type { ZodSchema } from 'zod';
 import { Logger } from '../../services/loggerService';
+import { ValidationError } from '@/common/errors/AppError';
 import {
   RouteConfigSchema,
   ModuleConfigSchema,
@@ -44,7 +45,7 @@ export interface LLMRequestOptions {
  * 验证路由配置
  * @param config - 待验证的配置
  * @returns 验证是否成功
- * @throws {Error} 验证失败时抛出详细错误
+ * @throws {ValidationError} 验证失败时抛出详细错误
  */
 export function validateRouteConfig(config: unknown): boolean {
   try {
@@ -53,7 +54,13 @@ export function validateRouteConfig(config: unknown): boolean {
   } catch (error: unknown) {
     const zodError = error as { errors?: unknown[]; message?: string };
     Logger.error('[TypeGuard] Invalid route config:', zodError.errors);
-    throw new Error(`Route config validation failed: ${zodError.message || 'Unknown error'}`);
+    throw new ValidationError(
+      `Route config validation failed: ${zodError.message || 'Unknown error'}`,
+      'ROUTE_CONFIG_VALIDATION_FAILED',
+      'config',
+      config,
+      { module: 'typeGuards', action: 'validateRouteConfig', zodErrors: zodError.errors }
+    );
   }
 }
 
@@ -61,7 +68,7 @@ export function validateRouteConfig(config: unknown): boolean {
  * 验证模块配置
  * @param config - 待验证的配置
  * @returns 验证是否成功
- * @throws {Error} 验证失败时抛出详细错误
+ * @throws {ValidationError} 验证失败时抛出详细错误
  */
 export function validateModuleConfig(config: unknown): boolean {
   try {
@@ -70,7 +77,13 @@ export function validateModuleConfig(config: unknown): boolean {
   } catch (error: unknown) {
     const zodError = error as { errors?: unknown[]; message?: string };
     Logger.error('[TypeGuard] Invalid module config:', zodError.errors);
-    throw new Error(`Module config validation failed: ${zodError.message || 'Unknown error'}`);
+    throw new ValidationError(
+      `Module config validation failed: ${zodError.message || 'Unknown error'}`,
+      'MODULE_CONFIG_VALIDATION_FAILED',
+      'config',
+      config,
+      { module: 'typeGuards', action: 'validateModuleConfig', zodErrors: zodError.errors }
+    );
   }
 }
 
@@ -78,7 +91,7 @@ export function validateModuleConfig(config: unknown): boolean {
  * 验证 LLM 配置
  * @param config - 待验证的配置
  * @returns 验证是否成功
- * @throws {Error} 验证失败时抛出详细错误
+ * @throws {ValidationError} 验证失败时抛出详细错误
  */
 export function validateLLMConfig(config: unknown): boolean {
   try {
@@ -87,7 +100,13 @@ export function validateLLMConfig(config: unknown): boolean {
   } catch (error: unknown) {
     const zodError = error as { errors?: unknown[]; message?: string };
     Logger.error('[TypeGuard] Invalid LLM config:', zodError.errors);
-    throw new Error(`LLM config validation failed: ${zodError.message || 'Unknown error'}`);
+    throw new ValidationError(
+      `LLM config validation failed: ${zodError.message || 'Unknown error'}`,
+      'LLM_CONFIG_VALIDATION_FAILED',
+      'config',
+      config,
+      { module: 'typeGuards', action: 'validateLLMConfig', zodErrors: zodError.errors }
+    );
   }
 }
 
@@ -95,7 +114,7 @@ export function validateLLMConfig(config: unknown): boolean {
  * 验证代理配置
  * @param config - 待验证的配置
  * @returns 验证是否成功
- * @throws {Error} 验证失败时抛出详细错误
+ * @throws {ValidationError} 验证失败时抛出详细错误
  */
 export function validateProxyConfig(config: unknown): boolean {
   try {
@@ -104,7 +123,13 @@ export function validateProxyConfig(config: unknown): boolean {
   } catch (error: unknown) {
     const zodError = error as { errors?: unknown[]; message?: string };
     Logger.error('[TypeGuard] Invalid proxy config:', zodError.errors);
-    throw new Error(`Proxy config validation failed: ${zodError.message || 'Unknown error'}`);
+    throw new ValidationError(
+      `Proxy config validation failed: ${zodError.message || 'Unknown error'}`,
+      'PROXY_CONFIG_VALIDATION_FAILED',
+      'config',
+      config,
+      { module: 'typeGuards', action: 'validateProxyConfig', zodErrors: zodError.errors }
+    );
   }
 }
 

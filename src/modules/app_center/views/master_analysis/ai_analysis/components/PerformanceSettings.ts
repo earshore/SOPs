@@ -4,8 +4,9 @@
  */
 
 import { StorageService } from '../../../../../../services/storageService';
-import { Logger } from '../../../../../../services/loggerService';
 import { getCacheStats, clearAnalysisCache } from '../services/parallelAnalysisService';
+import { showToast } from '@common/ui/index';
+import { Logger } from '../../../../../../services/loggerService';
 
 const SETTINGS_KEY = 'ai_analysis_performance_settings';
 
@@ -97,10 +98,8 @@ export function createPerformanceSettingsPanel() {
         this.showSettings = false;
         
         // 显示成功提示
-        const { showToast } = require('@common/ui/index');
         showToast('性能设置已保存', { type: 'success' });
       } catch (error) {
-        const { showToast } = require('@common/ui/index');
         showToast('保存失败: ' + (error as Error).message, { type: 'error' });
       }
     },
@@ -116,10 +115,8 @@ export function createPerformanceSettingsPanel() {
         clearAnalysisCache();
         this.updateCacheStats();
         
-        const { showToast } = require('@common/ui/index');
         showToast('缓存已清除', { type: 'success' });
       } catch (error) {
-        const { showToast } = require('@common/ui/index');
         showToast('清除失败: ' + (error as Error).message, { type: 'error' });
       }
     },

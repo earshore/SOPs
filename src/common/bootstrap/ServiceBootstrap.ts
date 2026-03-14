@@ -11,6 +11,7 @@ import { errorTracker } from '@/services/errorTracker';
 import { analyticsService } from '@/services/analyticsService';
 import { performanceStorage } from '@/services/performanceStorage';
 import { alertService, AlertType } from '@/services/alertService';
+import { SystemError } from '@/common/errors/AppError';
 
 import { Logger } from '../../services/loggerService';
 /**
@@ -69,7 +70,11 @@ export class ServiceBootstrap {
       if (!validation.valid) {
         Logger.error('❌ [Bootstrap] 依赖验证失败:');
         validation.errors.forEach(err => Logger.error(`  - ${err}`));
-        throw new Error(`依赖验证失败:\n${validation.errors.join('\n')}`);
+        throw new SystemError(
+          `依赖验证失败:\n${validation.errors.join('\n')}`,
+          'BOOTSTRAP_DEPENDENCY_VALIDATION_FAILED',
+          { module: 'ServiceBootstrap', action: 'initialize', errors: validation.errors }
+        );
       }
       Logger.debug('✅ [Bootstrap] 依赖验证通过');
 
@@ -173,7 +178,11 @@ export class ServiceBootstrap {
   private async _initService(name: string): Promise<unknown> {
     const config = this.registry.getConfig(name as ServiceName);
     if (!config) {
-      throw new Error(`服务 "${name}" 未在注册表中找到`);
+      throw new SystemError(
+        `服务 "${name}" 未在注册表中找到`,
+        'BOOTSTRAP_SERVICE_NOT_FOUND',
+        { module: 'ServiceBootstrap', action: '_initService', serviceName: name }
+      );
     }
 
     // 跳过已初始化的服务
@@ -230,7 +239,11 @@ export class ServiceBootstrap {
   private _timeout(ms: number, serviceName: string): Promise<never> {
     return new Promise((_, reject) => {
       setTimeout(() => {
-        reject(new Error(`服务 ${serviceName} 初始化超时 (${ms}ms)`));
+        reject(new SystemError(
+          `服务 ${serviceName} 初始化超时 (${ms}ms)`,
+          'BOOTSTRAP_SERVICE_TIMEOUT',
+          { module: 'ServiceBootstrap', action: '_timeout', serviceName, timeout: ms }
+        ));
       }, ms);
     });
   }

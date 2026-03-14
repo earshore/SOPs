@@ -5,6 +5,7 @@
 // ================================================================
 
 import { Logger } from '@/services/loggerService';
+import { SystemError } from '@common/errors/AppError';
 import eventBus from '../EventBus';
 import { APP_EVENTS } from '../constants/eventConstants';
 
@@ -317,13 +318,23 @@ export class WorkingStateManager {
             setTimeout(() => this._handleTimeout(id), 1000);
           } else {
             // 重试耗尽，标记为失败
-            this.setFailure(id, new Error(`任务超时，已重试${currentState.maxRetries}次仍失败`));
+            const systemError = new SystemError(
+              `任务超时，已重试${currentState.maxRetries}次仍失败`,
+              'ERR_TASK_RETRY_EXHAUSTED',
+              { taskId: id, maxRetries: currentState.maxRetries },
+              error as Error
+            );
+            this.setFailure(id, systemError);
           }
         }
       }, delay);
     } else {
       // 重试耗尽
-      const error = new Error(`任务超时，已达到最大重试次数 (${state.maxRetries})`);
+      const error = new SystemError(
+        `任务超时，已达到最大重试次数`,
+        'ERR_TASK_TIMEOUT_MAX_RETRIES',
+        { taskId: id, maxRetries: state.maxRetries, elapsed }
+      );
       this.setFailure(id, error);
     }
   }
