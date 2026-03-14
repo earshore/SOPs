@@ -753,37 +753,35 @@
                   'bg-purple-100 border-purple-300': perfSettings.settings.maxConcurrency >= 7
                 }">
                 <div class="p-4">
-                  <div class="flex items-start gap-3">
-                    <i class="fa-solid fa-lightbulb text-amber-500 text-lg mt-0.5"></i>
-                    <div class="flex-1 space-y-2">
-                      <p class="text-sm font-semibold transition-colors duration-300"
-                        :class="{
-                          'text-blue-800': perfSettings.settings.maxConcurrency <= 2,
-                          'text-indigo-800': perfSettings.settings.maxConcurrency >= 3 && perfSettings.settings.maxConcurrency <= 4,
-                          'text-purple-800': perfSettings.settings.maxConcurrency >= 5 && perfSettings.settings.maxConcurrency <= 6,
-                          'text-purple-900': perfSettings.settings.maxConcurrency >= 7
-                        }"
-                        x-text="perfSettings.getConcurrencyHint()"></p>
-                      <div class="flex items-center gap-4 text-xs">
-                        <div class="flex items-center gap-1.5">
-                          <i class="fa-solid fa-gauge-high"></i>
-                          <span class="font-medium">速度:</span>
-                          <div class="flex gap-0.5">
-                            <template x-for="i in 8" :key="i">
-                              <div class="w-1 h-3 rounded-full transition-all duration-200"
-                                :class="i <= perfSettings.settings.maxConcurrency ? 'bg-current opacity-100' : 'bg-current opacity-20'"></div>
-                            </template>
-                          </div>
+                  <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-lightbulb text-amber-500 text-lg"></i>
+                    <p class="text-sm font-semibold transition-colors duration-300 flex-shrink-0"
+                      :class="{
+                        'text-blue-800': perfSettings.settings.maxConcurrency <= 2,
+                        'text-indigo-800': perfSettings.settings.maxConcurrency >= 3 && perfSettings.settings.maxConcurrency <= 4,
+                        'text-purple-800': perfSettings.settings.maxConcurrency >= 5 && perfSettings.settings.maxConcurrency <= 6,
+                        'text-purple-900': perfSettings.settings.maxConcurrency >= 7
+                      }"
+                      x-text="perfSettings.getConcurrencyHint()"></p>
+                    <div class="flex items-center gap-4 text-xs ml-auto">
+                      <div class="flex items-center gap-1.5">
+                        <i class="fa-solid fa-gauge-high"></i>
+                        <span class="font-medium">速度:</span>
+                        <div class="flex gap-0.5">
+                          <template x-for="i in 8" :key="i">
+                            <div class="w-1 h-3 rounded-full transition-all duration-200"
+                              :class="i <= perfSettings.settings.maxConcurrency ? 'bg-current opacity-100' : 'bg-current opacity-20'"></div>
+                          </template>
                         </div>
-                        <div class="flex items-center gap-1.5">
-                          <i class="fa-solid fa-shield-halved"></i>
-                          <span class="font-medium">稳定:</span>
-                          <div class="flex gap-0.5">
-                            <template x-for="i in 8" :key="i">
-                              <div class="w-1 h-3 rounded-full transition-all duration-200"
-                                :class="i <= (9 - perfSettings.settings.maxConcurrency) ? 'bg-current opacity-100' : 'bg-current opacity-20'"></div>
-                            </template>
-                          </div>
+                      </div>
+                      <div class="flex items-center gap-1.5">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span class="font-medium">稳定:</span>
+                        <div class="flex gap-0.5">
+                          <template x-for="i in 8" :key="i">
+                            <div class="w-1 h-3 rounded-full transition-all duration-200"
+                              :class="i <= (9 - perfSettings.settings.maxConcurrency) ? 'bg-current opacity-100' : 'bg-current opacity-20'"></div>
+                          </template>
                         </div>
                       </div>
                     </div>
