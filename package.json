@@ -4,7 +4,8 @@
     "description": "Amazing Amazon Architect - 亚马逊运营管理平台",
     "type": "module",
     "scripts": {
-        "dev": "vite",
+        "dev": ".\\scripts\\dev.bat",
+        "dev:simple": "vite",
         "dev:open": "vite --open",
         "build": "vite build",
         "preview": "vite preview",

@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import { resolve } from 'path';
 import checker from 'vite-plugin-checker';
 import viteCompression from 'vite-plugin-compression';
+import os from 'os';
 
 export default defineConfig({
     publicDir: 'public',
@@ -104,7 +105,8 @@ export default defineConfig({
     // 开发服务器配置
     server: {
         port: 5173,
-        open: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome --incognito',
+        // 禁用自动打开浏览器，改用 package.json 脚本控制
+        open: false,
         cors: true,
         // 静态资源服务
         fs: {
