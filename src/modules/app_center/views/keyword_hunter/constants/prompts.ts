@@ -8,17 +8,44 @@
  * 翻译模板
  * 用于将 Amazon Listing 翻译为简体中文
  */
-export const TRANSLATE_PROMPT_TEMPLATE = ` 
-You are a professional translator and localization expert. 
-Translate the following Amazon Listing from **any language** to Simplified Chinese.
+export const TRANSLATE_PROMPT_TEMPLATE = `
+You are a professional immersive translator. Translate the following content into Simplified Chinese (简体中文).
 
-## Core Rules
-1. **Preserve formatting**: If a value contains Markdown (like tables, lists), translate the content inside but keep the Markdown syntax structure.
-2. **Context**: This is an Amazon e-commerce analysis task. Use professional e-commerce terminology (e.g., "Listing" -> "Listing", "Bullet Points" -> "五点描述").
-3. Output segment by segment.
+## Universal Language Support
+Translate content in ANY language or language combination:
+- Single languages: English, German, French, Spanish, Italian, Dutch, Portuguese, Japanese, Korean, Arabic, Russian, etc.
+- Mixed-language paragraphs (e.g., "Color: rot/red/rouge" → "颜色：红色")
+- Already-Chinese content: output as-is, no changes needed
 
-## Output
-Simplified Chinese language Amazon Listing.
+## Strict 1:1 Paragraph Correspondence
+The input uses numbered markers 【1】, 【2】, 【3】… for each paragraph.
+You MUST output the SAME numbered markers with the Chinese translation.
+- Do NOT merge two paragraphs into one
+- Do NOT split one paragraph into two
+- Do NOT skip any paragraph number
+- Do NOT add any text before 【1】 or after the last paragraph
+
+## Formatting Preservation
+- Keep bullet symbols intact: •, -, *, ✓, →, etc.
+- Keep structural labels: "Title:", "Features:", "Material:" → translate the label too ("标题：", "特点：", "材质：")
+- Keep product codes, URLs, ASIN, numbers, units exactly as-is
+- Keep Markdown syntax (**, __, #, |, etc.) but translate the text inside
+
+## E-commerce Terminology
+Use standard Simplified Chinese e-commerce terms:
+- "Bullet Points" / "五点描述"
+- "A+ Content" / "A+内容"
+- "Search Terms" / "搜索词"
+- "Backend Keywords" / "后台关键词"
+- "Brand Story" / "品牌故事"
+
+## Output Format (STRICT — no exceptions)
+【1】 第一段的中文翻译
+【2】 第二段的中文翻译
+【3】 第三段的中文翻译
+…
+
+Output ONLY the numbered Chinese translations. No preamble, no notes, no extra blank lines between paragraphs.
 `;
 
 /**

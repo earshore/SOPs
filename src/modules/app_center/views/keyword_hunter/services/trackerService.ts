@@ -5,14 +5,22 @@
 // ================================================================
 
 import { callLLM } from "../../../../../services/llmService";
-import { ValidationError } from '@common/errors/AppError';
-import { ANALYSIS_PROMPT_TEMPLATE, TRANSLATE_PROMPT_TEMPLATE as TRANSLATE_PROMPT_TEMPLATE2 } from "../constants/prompts";
-import { StorageService, STORAGE_KEYS } from "../../../../../services/storageService";
+import { ValidationError } from "@common/errors/AppError";
+import {
+  ANALYSIS_PROMPT_TEMPLATE,
+  TRANSLATE_PROMPT_TEMPLATE as TRANSLATE_PROMPT_TEMPLATE2,
+} from "../constants/prompts";
+import {
+  StorageService,
+  STORAGE_KEYS,
+} from "../../../../../services/storageService";
+import { Logger } from "../../../../../services/loggerService";
 import type {
-    KeywordMatchResult,
-    AnalysisResult,
-    WordFrequency
-} from '@/types/modules-business';
+  KeywordMatchResult,
+  AnalysisResult,
+  WordFrequency,
+} from "@/types/modules-business";
+import type { ParagraphData } from "@/types/state";
 
 // ==========================================
 // 1. 基础文本处理工具
@@ -22,47 +30,51 @@ import type {
  * 将文本解析为关键词数组
  */
 export function parseKeywords(text: string): string[] {
-    if (!text) return [];
-    return text.split(/[\n,;]/).map(k => k.trim()).filter(k => k.length > 0);
+  if (!text) return [];
+  return text
+    .split(/[\n,;]/)
+    .map((k) => k.trim())
+    .filter((k) => k.length > 0);
 }
 
 /**
  * 清洗关键词文本（去除特殊字符，标准化格式）
  */
 export function cleanKeywordsText(text: string): string {
-    if (!text) return '';
-    return text.replace(/[^\w\s\-\u00C0-\u024F\u1E00-\u1EFF]/g, ' ') // 允许欧洲字符
-        .split('\n')
-        .map(l => l.trim().replace(/\s+/g, ' '))
-        .filter(l => l)
-        .join('\n');
+  if (!text) return "";
+  return text
+    .replace(/[^\w\s\-\u00C0-\u024F\u1E00-\u1EFF]/g, " ") // 允许欧洲字符
+    .split("\n")
+    .map((l) => l.trim().replace(/\s+/g, " "))
+    .filter((l) => l)
+    .join("\n");
 }
 
 /**
  * 去重关键词
  */
 export function deduplicateKeywordsText(text: string): string {
-    const keywords = parseKeywords(text);
-    const unique = [...new Set(keywords.map(k => k.toLowerCase()))]; // 简单去重（统一小写）
-    // 注意：这里返回的是去重后的字符串，丢失了原始的大小写，这是为了标准化的权衡
-    return unique.join('\n');
+  const keywords = parseKeywords(text);
+  const unique = [...new Set(keywords.map((k) => k.toLowerCase()))]; // 简单去重（统一小写）
+  // 注意：这里返回的是去重后的字符串，丢失了原始的大小写，这是为了标准化的权衡
+  return unique.join("\n");
 }
 
 /**
  * 检查输入中的重复项（返回 Set 供 UI 高亮使用）
  */
 export function findDuplicateKeywords(text: string): Set<string> {
-    const keywords = parseKeywords(text);
-    const seen = new Set<string>();
-    const dups = new Set<string>();
+  const keywords = parseKeywords(text);
+  const seen = new Set<string>();
+  const dups = new Set<string>();
 
-    keywords.forEach(k => {
-        const lower = k.toLowerCase();
-        if (seen.has(lower)) dups.add(lower);
-        seen.add(lower);
-    });
+  keywords.forEach((k) => {
+    const lower = k.toLowerCase();
+    if (seen.has(lower)) dups.add(lower);
+    seen.add(lower);
+  });
 
-    return dups;
+  return dups;
 }
 
 // ==========================================
@@ -75,117 +87,140 @@ export function findDuplicateKeywords(text: string): Set<string> {
  * @param {Array} keywordList - 关键词数组
  * @returns {Object} { matched: [], unmatched: [] }
  */
-export function analyzeKeywordMatching(copyText: string, keywordList: string[]): AnalysisResult {
-    const textLower = copyText.toLowerCase();
-    const matched: KeywordMatchResult[] = [];
-    const unmatched: string[] = [];
+export function analyzeKeywordMatching(
+  copyText: string,
+  keywordList: string[],
+): AnalysisResult {
+  const textLower = copyText.toLowerCase();
+  const matched: KeywordMatchResult[] = [];
+  const unmatched: string[] = [];
 
-    keywordList.forEach(kw => {
-        const kwLower = kw.toLowerCase();
-        let count = 0;
-        let pos = textLower.indexOf(kwLower);
+  keywordList.forEach((kw) => {
+    const kwLower = kw.toLowerCase();
+    let count = 0;
+    let pos = textLower.indexOf(kwLower);
 
-        while (pos !== -1) {
-            count++;
-            pos = textLower.indexOf(kwLower, pos + 1);
-        }
+    while (pos !== -1) {
+      count++;
+      pos = textLower.indexOf(kwLower, pos + 1);
+    }
 
-        if (count > 0) {
-            matched.push({ keyword: kw, count: count });
-        } else {
-            unmatched.push(kw);
-        }
-    });
+    if (count > 0) {
+      matched.push({ keyword: kw, count: count });
+    } else {
+      unmatched.push(kw);
+    }
+  });
 
-    // 按频率降序排序
-    matched.sort((a, b) => b.count - a.count);
+  // 按频率降序排序
+  matched.sort((a, b) => b.count - a.count);
 
-    return { matched, unmatched };
+  return { matched, unmatched };
 }
 
 /**
  * 分析词频
- * @param {string} text 
+ * @param {string} text
  * @returns {Array} [[word, count], ...]
  */
 export function calculateWordFrequency(text: string): WordFrequency[] {
-    // 支持欧洲全语种：包括拉丁字母、扩展拉丁字符、变音符号等
-    // \p{L} 匹配任何语言的字母字符（需要 u 标志）
-    const words = text.toLowerCase().match(/[\p{L}\p{M}]+/gu) || [];
-    const freq: Record<string, number> = {};
-    words.forEach(w => {
-        if (w.length > 2) freq[w] = (freq[w] || 0) + 1;
-    });
-    return Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 50);
+  // 支持欧洲全语种：包括拉丁字母、扩展拉丁字符、变音符号等
+  // \p{L} 匹配任何语言的字母字符（需要 u 标志）
+  const words = text.toLowerCase().match(/[\p{L}\p{M}]+/gu) || [];
+  const freq: Record<string, number> = {};
+  words.forEach((w) => {
+    if (w.length > 2) freq[w] = (freq[w] || 0) + 1;
+  });
+  return Object.entries(freq)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 50);
 }
 
 // ==========================================
 // 3. LLM 服务封装
 // ==========================================
 
-async function bridgeCallLLM(systemPrompt: string, userPrompt: string, options: { temperature?: number; jsonMode?: boolean } = {}): Promise<string> {
-    // 使用 StorageService 获取 LLM 配置
-    const activeProvider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER) as string | null;
+async function bridgeCallLLM(
+  systemPrompt: string,
+  userPrompt: string,
+  options: { temperature?: number; jsonMode?: boolean } = {},
+): Promise<string> {
+  // 使用 StorageService 获取 LLM 配置
+  const activeProvider = StorageService.get(
+    STORAGE_KEYS.LLM_ACTIVE_PROVIDER,
+  ) as string | null;
 
-    if (!activeProvider || typeof activeProvider !== 'string') {
-        throw new ValidationError(
-            '请先在全局设置中选择 LLM 提供商',
-            'ERR_LLM_PROVIDER_NOT_SELECTED',
-            undefined,
-            undefined,
-            { module: 'TrackerService', action: 'bridgeCallLLM' }
-        );
-    }
-
-    // 🔐 P0优化: 使用安全存储读取配置
-    const config = await StorageService.getLLMConfigWithKey(activeProvider);
-
-
-    // 检查 Key
-    if (!config || !config.apiKey) {
-        // 特殊处理：如果是 serverless 模式，允许前端 key 为空或随意值，但为了通过校验建议前端填个占位符
-        // 这里抛出错误提示用户去设置里检查
-        throw new ValidationError(
-            '所选提供商未配置 API Key',
-            'ERR_LLM_API_KEY_MISSING',
-            undefined,
-            undefined,
-            { module: 'TrackerService', action: 'bridgeCallLLM', provider: activeProvider }
-        );
-    }
-
-    const targetModel = config.model || (config.models && config.models[0] ? (typeof config.models[0] === 'string' ? config.models[0] : config.models[0].id) : undefined);
-    if (!targetModel) {
-        throw new ValidationError(
-            '未选择模型，请在设置中同步或选择模型',
-            'ERR_LLM_MODEL_NOT_SELECTED',
-            undefined,
-            undefined,
-            { module: 'TrackerService', action: 'bridgeCallLLM', provider: activeProvider }
-        );
-    }
-
-    const messages = [
-        { role: 'system' as const, content: systemPrompt },
-        { role: 'user' as const, content: userPrompt }
-    ];
-
-    const finalOptions = {
-        temperature: 0.3,
-        jsonMode: false,
-        ...options
-    };
-
-    return await callLLM(
-        messages,
-        activeProvider as string,
-        config.endpoint,
-        config.apiKey,
-        targetModel,
-        finalOptions
+  if (!activeProvider || typeof activeProvider !== "string") {
+    throw new ValidationError(
+      "请先在全局设置中选择 LLM 提供商",
+      "ERR_LLM_PROVIDER_NOT_SELECTED",
+      undefined,
+      undefined,
+      { module: "TrackerService", action: "bridgeCallLLM" },
     );
-}
+  }
 
+  // 🔐 P0优化: 使用安全存储读取配置
+  const config = await StorageService.getLLMConfigWithKey(activeProvider);
+
+  // 检查 Key
+  if (!config || !config.apiKey) {
+    // 特殊处理：如果是 serverless 模式，允许前端 key 为空或随意值，但为了通过校验建议前端填个占位符
+    // 这里抛出错误提示用户去设置里检查
+    throw new ValidationError(
+      "所选提供商未配置 API Key",
+      "ERR_LLM_API_KEY_MISSING",
+      undefined,
+      undefined,
+      {
+        module: "TrackerService",
+        action: "bridgeCallLLM",
+        provider: activeProvider,
+      },
+    );
+  }
+
+  const targetModel =
+    config.model ||
+    (config.models && config.models[0]
+      ? typeof config.models[0] === "string"
+        ? config.models[0]
+        : config.models[0].id
+      : undefined);
+  if (!targetModel) {
+    throw new ValidationError(
+      "未选择模型，请在设置中同步或选择模型",
+      "ERR_LLM_MODEL_NOT_SELECTED",
+      undefined,
+      undefined,
+      {
+        module: "TrackerService",
+        action: "bridgeCallLLM",
+        provider: activeProvider,
+      },
+    );
+  }
+
+  const messages = [
+    { role: "system" as const, content: systemPrompt },
+    { role: "user" as const, content: userPrompt },
+  ];
+
+  const finalOptions = {
+    temperature: 0.3,
+    jsonMode: false,
+    ...options,
+  };
+
+  return await callLLM(
+    messages,
+    activeProvider as string,
+    config.endpoint,
+    config.apiKey,
+    targetModel,
+    finalOptions,
+  );
+}
 
 /**
  * 执行 AI 深度诊断
@@ -201,12 +236,12 @@ async function bridgeCallLLM(systemPrompt: string, userPrompt: string, options: 
  * 2. 包含空格（说明有分词，不是乱码长串）
  */
 function isValidListing(text: string): boolean {
-    if (!text) return false;
-    const cleanText = text.trim();
-    if (cleanText.length < 50) return false;
-    // 检查是否有空格，简单的判断是否为自然语言句子
-    if (!cleanText.includes(' ')) return false;
-    return true;
+  if (!text) return false;
+  const cleanText = text.trim();
+  if (cleanText.length < 50) return false;
+  // 检查是否有空格，简单的判断是否为自然语言句子
+  if (!cleanText.includes(" ")) return false;
+  return true;
 }
 
 /**
@@ -218,45 +253,49 @@ function isValidListing(text: string): boolean {
  * @returns AI分析结果
  */
 export async function fetchListingAnalysis(
-    copyText: string,
-    _keywords: string[],
-    matchedKeywords: KeywordMatchResult[],
-    unmatchedKeywords: string[]
+  copyText: string,
+  _keywords: string[],
+  matchedKeywords: KeywordMatchResult[],
+  unmatchedKeywords: string[],
 ): Promise<string> {
-    // 🔥🔥🔥 新增校验：检查文案是否为空 🔥🔥🔥
-    if (!copyText || !copyText.trim()) {
-        throw new ValidationError(
-            '文案内容为空，无法进行AI分析',
-            'ERR_EMPTY_LISTING_TEXT',
-            undefined,
-            undefined,
-            { module: 'TrackerService', action: 'fetchListingAnalysis' }
-        );
-    }
+  // 🔥🔥🔥 新增校验：检查文案是否为空 🔥🔥🔥
+  if (!copyText || !copyText.trim()) {
+    throw new ValidationError(
+      "文案内容为空，无法进行AI分析",
+      "ERR_EMPTY_LISTING_TEXT",
+      undefined,
+      undefined,
+      { module: "TrackerService", action: "fetchListingAnalysis" },
+    );
+  }
 
-    // 🔥🔥🔥 新增校验：检查文案有效性 🔥🔥🔥
-    if (!isValidListing(copyText)) {
-        throw new ValidationError(
-            '输入内容过短或不具备 Amazon Listing 特征',
-            'ERR_INVALID_LISTING_TEXT',
-            undefined,
-            undefined,
-            { module: 'TrackerService', action: 'fetchListingAnalysis', textLength: copyText.length }
-        );
-    }
+  // 🔥🔥🔥 新增校验：检查文案有效性 🔥🔥🔥
+  if (!isValidListing(copyText)) {
+    throw new ValidationError(
+      "输入内容过短或不具备 Amazon Listing 特征",
+      "ERR_INVALID_LISTING_TEXT",
+      undefined,
+      undefined,
+      {
+        module: "TrackerService",
+        action: "fetchListingAnalysis",
+        textLength: copyText.length,
+      },
+    );
+  }
 
-    const systemPrompt = ANALYSIS_PROMPT_TEMPLATE;
+  const systemPrompt = ANALYSIS_PROMPT_TEMPLATE;
 
-    // 截取部分文案防止 token 超限
-    const userPrompt = `
+  // 截取部分文案防止 token 超限
+  const userPrompt = `
     # INPUT DATA
     **Amazon Listing:** ${copyText}
-    **Matched Keywords:** ${matchedKeywords.map(k => k.keyword).join(', ')}
-    **Unmatched Keywords:** ${unmatchedKeywords.join(', ')}
+    **Matched Keywords:** ${matchedKeywords.map((k) => k.keyword).join(", ")}
+    **Unmatched Keywords:** ${unmatchedKeywords.join(", ")}
     `;
 
-    // 🔥 调整：temperature 0.5 -> 0.1 提高稳定性
-    return await bridgeCallLLM(systemPrompt, userPrompt, { temperature: 0.1 });
+  // 🔥 调整：temperature 0.5 -> 0.1 提高稳定性
+  return await bridgeCallLLM(systemPrompt, userPrompt, { temperature: 0.1 });
 }
 
 /**
@@ -264,20 +303,141 @@ export async function fetchListingAnalysis(
  * @param copyText - 待翻译的文案
  * @returns 翻译结果
  */
-export async function fetchImmersionTranslation(copyText: string): Promise<string> {
-    // 🔥🔥🔥 新增校验：检查文案是否为空 🔥🔥🔥
-    if (!copyText || !copyText.trim()) {
-        throw new ValidationError(
-            '文案内容为空，无法进行翻译',
-            'ERR_EMPTY_TRANSLATION_TEXT',
-            undefined,
-            undefined,
-            { module: 'TrackerService', action: 'fetchImmersionTranslation' }
-        );
+// ==========================================
+// 4b. 沉浸式翻译解析工具
+// ==========================================
+
+/**
+ * 将 LLM 返回的编号格式响应解析为 翻译 Map
+ * 格式：【N】 翻译内容
+ *
+ * @param response   - LLM 原始响应文本
+ * @param totalCount - 原始段落总数（用于越界校验）
+ * @returns          - { [段落编号]: 翻译文本 }
+ */
+function parseNumberedTranslations(
+  response: string,
+  totalCount: number,
+): Record<number, string> {
+  const result: Record<number, string> = {};
+
+  // 主格式：【N】 内容（支持多行，直到下一个 【N】 或末尾）
+  const primaryRegex = /【(\d+)】\s*([\s\S]*?)(?=【\d+】|$)/g;
+  let match: RegExpExecArray | null;
+  while ((match = primaryRegex.exec(response)) !== null) {
+    const num = parseInt(match[1]!, 10);
+    const text = match[2]!.trim();
+    if (num >= 1 && num <= totalCount) {
+      result[num] = text;
     }
+  }
 
-    const systemPrompt = TRANSLATE_PROMPT_TEMPLATE2;
-    const userPrompt = `## Input：\n\n${copyText}`;
+  if (Object.keys(result).length > 0) {
+    Logger.debug(
+      `[TrackerService] 编号解析成功，命中 ${Object.keys(result).length}/${totalCount} 段`,
+    );
+    return result;
+  }
 
-    return await bridgeCallLLM(systemPrompt, userPrompt, { jsonMode: false });
+  // Fallback A：尝试方括号格式 [N] 内容
+  const fallbackRegexA = /\[(\d+)\]\s*([\s\S]*?)(?=\[\d+\]|$)/g;
+  while ((match = fallbackRegexA.exec(response)) !== null) {
+    const num = parseInt(match[1]!, 10);
+    const text = match[2]!.trim();
+    if (num >= 1 && num <= totalCount) {
+      result[num] = text;
+    }
+  }
+
+  if (Object.keys(result).length > 0) {
+    Logger.debug(
+      `[TrackerService] Fallback A 解析成功（方括号格式），命中 ${Object.keys(result).length}/${totalCount} 段`,
+    );
+    return result;
+  }
+
+  // Fallback B：按行分割逐行对应（LLM 未遵守编号格式时）
+  Logger.warn("[TrackerService] LLM 未遵守编号格式，退回行数对齐模式");
+  const lines = response.split(/\n+/).filter((t) => t.trim());
+  lines.forEach((line, i) => {
+    if (i + 1 <= totalCount) {
+      result[i + 1] = line.trim();
+    }
+  });
+
+  return result;
+}
+
+/**
+ * 执行 AI 沉浸式翻译
+ *
+ * 工作原理：
+ * 1. 将文案按自然段落拆分，给每段加上编号标记 【N】
+ * 2. 发给 LLM，要求按相同编号逐一返回中文翻译
+ * 3. 解析响应，构建 ParagraphData[] 数组
+ * 4. 支持多语言混排、任意格式文案
+ *
+ * @param copyText - 待翻译的原始文案（支持任意语言/格式）
+ * @returns        - ParagraphData[]，每项含 original + translation
+ */
+export async function fetchImmersionTranslation(
+  copyText: string,
+): Promise<ParagraphData[]> {
+  if (!copyText || !copyText.trim()) {
+    throw new ValidationError(
+      "文案内容为空，无法进行翻译",
+      "ERR_EMPTY_TRANSLATION_TEXT",
+      undefined,
+      undefined,
+      { module: "TrackerService", action: "fetchImmersionTranslation" },
+    );
+  }
+
+  // 1. 拆分段落，过滤纯空行
+  const paragraphs = copyText.split(/\n+/).filter((t) => t.trim());
+
+  if (paragraphs.length === 0) {
+    throw new ValidationError(
+      "文案内容过滤后为空，无法进行翻译",
+      "ERR_EMPTY_PARAGRAPHS",
+      undefined,
+      undefined,
+      { module: "TrackerService", action: "fetchImmersionTranslation" },
+    );
+  }
+
+  Logger.debug(`[TrackerService] 沉浸式翻译：共 ${paragraphs.length} 段`);
+
+  // 2. 给每段加编号，构造结构化输入
+  const numberedInput = paragraphs
+    .map((p, i) => `【${i + 1}】 ${p}`)
+    .join("\n");
+
+  const systemPrompt = TRANSLATE_PROMPT_TEMPLATE2;
+  const userPrompt = `## 待翻译内容：\n\n${numberedInput}`;
+
+  // 3. 调用 LLM
+  const response = await bridgeCallLLM(systemPrompt, userPrompt, {
+    jsonMode: false,
+  });
+  Logger.debug(
+    "[TrackerService] LLM 原始响应（前 300 字）:",
+    response.slice(0, 300),
+  );
+
+  // 4. 解析编号格式响应
+  const translationMap = parseNumberedTranslations(response, paragraphs.length);
+
+  // 5. 组装 ParagraphData[]
+  const pairs: ParagraphData[] = paragraphs.map((original, i) => ({
+    original,
+    translation: translationMap[i + 1] ?? "",
+  }));
+
+  const translatedCount = pairs.filter((p) => p.translation).length;
+  Logger.debug(
+    `[TrackerService] 翻译完成：${translatedCount}/${pairs.length} 段有译文`,
+  );
+
+  return pairs;
 }
