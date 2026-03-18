@@ -1,0 +1,253 @@
+/**
+ * Promptlab UI 辅助模块
+ *
+ * 管理所有与纯渲染/交互相关的辅助逻辑：
+ * - 输入框高度自适应（initAutoHeightInputs / expandInput / restoreInput）
+ * - 控制台模式切换（toggleConsoleMode）
+ * - 复制 Prompt（copyPrompt）
+ * - 清空输入（clearInputs）
+ * - 报告模块全选 / 清空（selectAllReportSections / clearReportSections）
+ * - 表单变化事件（onReportSectionChange / onInputChange）
+ */
+
+import { appStore } from '@/stores/useAppStore';
+import { showToast } from '../../../../../../common/ui';
+import { Logger } from '../../../../../../services/loggerService';
+import type { PromptlabAlpineContext, ConsoleMode } from './types';
+import type { UserProductProfile } from '@/types/state';
+
+// ==========================================
+// 输入框高度自适应
+// ==========================================
+
+/**
+ * 初始化所有 DNA / Strategy 卡片 textarea 的原始高度记录
+ * 需在 DOM 渲染完成后（setTimeout 100ms）调用
+ */
+export function initAutoHeightInputs(
+  originalHeights: Map<HTMLElement, number>,
+): void {
+  setTimeout(() => {
+    const textareas = document.querySelectorAll(
+      '#card-product-dna textarea, #card-strategy textarea',
+    );
+    textareas.forEach((textarea) => {
+      const el = textarea as HTMLTextAreaElement;
+      if (!originalHeights.has(el)) {
+        const h = parseInt(window.getComputedStyle(el).height, 10);
+        originalHeights.set(el, h);
+      }
+    });
+    Logger.debug('[uiHelpers] ✅ 已初始化输入框自动高度调整');
+  }, 100);
+}
+
+/**
+ * 输入框获得焦点时自动扩展到内容所需高度（最大 300px）
+ */
+export function expandInput(
+  originalHeights: Map<HTMLElement, number>,
+  event: FocusEvent,
+): void {
+  const target = event.target as HTMLTextAreaElement;
+
+  if (!originalHeights.has(target)) {
+    const h = parseInt(window.getComputedStyle(target).height, 10);
+    originalHeights.set(target, h);
+  }
+
+  target.style.height = 'auto';
+  const scrollHeight = target.scrollHeight;
+  const minHeight = originalHeights.get(target) ?? 40;
+  const maxHeight = 300;
+  const newHeight = Math.min(Math.max(scrollHeight + 4, minHeight), maxHeight);
+
+  target.style.height = `${newHeight}px`;
+  target.style.transition = 'height 0.2s ease-out';
+
+  Logger.debug('[uiHelpers] 输入框扩展:', { minHeight, newHeight });
+}
+
+/**
+ * 输入框失去焦点时恢复到原始高度
+ */
+export function restoreInput(
+  originalHeights: Map<HTMLElement, number>,
+  event: FocusEvent,
+): void {
+  const target = event.target as HTMLTextAreaElement;
+  const originalHeight = originalHeights.get(target);
+
+  if (originalHeight) {
+    target.style.height = `${originalHeight}px`;
+    target.style.transition = 'height 0.2s ease-in';
+    Logger.debug('[uiHelpers] 输入框恢复:', { height: originalHeight });
+  }
+}
+
+// ==========================================
+// 控制台模式切换
+// ==========================================
+
+/**
+ * 在 Listing 模式和 Visual 模式之间切换
+ * 控制 3D 翻转卡片、滑块指示器、按钮样式和输出标题
+ */
+export function toggleConsoleMode(
+  ctx: Pick<PromptlabAlpineContext, 'currentConsoleMode'>,
+  mode: ConsoleMode,
+): void {
+  if (ctx.currentConsoleMode === mode) return;
+  ctx.currentConsoleMode = mode;
+
+  const cardInner       = document.getElementById('console-card-inner');
+  const toggleContainer = document.getElementById('embed-toggle-container');
+  const glider          = document.getElementById('mode-toggle-glider');
+  const btnListing      = document.getElementById('btn-mode-listing');
+  const btnVisual       = document.getElementById('btn-mode-visual');
+  const outputTitle     = document.querySelector('#output-preview-title');
+
+  if (!cardInner || !glider) return;
+
+  if (mode === 'visual') {
+    cardInner.style.transform = 'rotateY(180deg)';
+    glider.style.transform    = 'translateX(100%)';
+    glider.classList.add('bg-white');
+    glider.classList.remove('bg-pink-500');
+
+    toggleContainer?.classList.add('bg-pink-900/30', 'border-pink-500/30');
+    toggleContainer?.classList.remove('bg-white/20', 'border-white/10');
+
+    btnListing?.classList.replace('text-blue-600', 'text-slate-400');
+    btnListing?.classList.add('opacity-60');
+
+    btnVisual?.classList.replace('text-slate-400', 'text-pink-500');
+    btnVisual?.classList.remove('hover:text-pink-500');
+
+    if (outputTitle) outputTitle.textContent = 'Visual Prompt';
+  } else {
+    cardInner.style.transform = 'rotateY(0deg)';
+    glider.style.transform    = 'translateX(0)';
+    glider.classList.add('bg-white');
+    glider.classList.remove('bg-pink-500');
+
+    toggleContainer?.classList.remove('bg-pink-900/30', 'border-pink-500/30');
+    toggleContainer?.classList.add('bg-white/20', 'border-white/10');
+
+    btnVisual?.classList.replace('text-pink-500', 'text-slate-400');
+    btnVisual?.classList.add('hover:text-pink-500');
+
+    btnListing?.classList.replace('text-slate-400', 'text-blue-600');
+    btnListing?.classList.remove('opacity-60');
+
+    if (outputTitle) outputTitle.textContent = 'Listing Prompt';
+  }
+}
+
+// ==========================================
+// 复制 Prompt
+// ==========================================
+
+/**
+ * 复制 #final-prompt-output textarea 的内容到剪贴板
+ */
+export function copyPrompt(): void {
+  const el = document.getElementById('final-prompt-output') as HTMLTextAreaElement | null;
+  if (el && el.value.length > 10) {
+    el.select();
+    document.execCommand('copy');
+    showToast('Prompt 已复制', { type: 'success' });
+  }
+}
+
+// ==========================================
+// 清空输入
+// ==========================================
+
+/** 默认空白 profile，用于清空操作 */
+const EMPTY_PROFILE: UserProductProfile = {
+  targetMarket: '',
+  keywordsTier1: '',
+  keywordsTier2: '',
+  audience: '',
+  usps: '',
+  specs: '',
+  socialHook: '',
+  negative: '',
+  tone: 'professional',
+  customStrategy: '',
+  useCosmo: true,
+  useRufus: true,
+  useEmoji: true,
+  selectedReportSections: [],
+  charLimit: 5000,
+};
+
+/**
+ * 弹窗确认后清空所有输入字段并保存
+ */
+export function clearInputs(ctx: PromptlabAlpineContext): void {
+  if (!confirm('确定要清空所有输入框吗？')) return;
+  ctx.profile = { ...EMPTY_PROFILE };
+  ctx.saveState();
+  showToast('已清空', { type: 'success' });
+}
+
+// ==========================================
+// 报告模块全选 / 清空
+// ==========================================
+
+/**
+ * 选中报告中所有可用分析维度（排除 _metadata）
+ */
+export function selectAllReportSections(ctx: PromptlabAlpineContext): void {
+  const report = appStore.getState().analysis.analysisReport;
+  if (!report || typeof report === 'string') {
+    showToast('暂无可选模块', { type: 'warning' });
+    return;
+  }
+
+  const reportObj = report as Record<string, unknown>;
+  const availableTargets = Object.keys(reportObj).filter((id) => id !== '_metadata');
+
+  ctx.profile.selectedReportSections = [...availableTargets];
+  ctx.saveState();
+  ctx.renderReportAnalysis();
+
+  showToast('已全选模块', { type: 'success' });
+}
+
+/**
+ * 清空所有已选的报告分析维度
+ */
+export function clearReportSections(ctx: PromptlabAlpineContext): void {
+  ctx.profile.selectedReportSections = [];
+  ctx.saveState();
+  ctx.renderReportAnalysis();
+
+  showToast('已清空选择', { type: 'success' });
+}
+
+// ==========================================
+// 表单事件处理
+// ==========================================
+
+/**
+ * 读取所有已选中的 report-section 复选框，同步到 ctx.profile
+ */
+export function onReportSectionChange(ctx: PromptlabAlpineContext): void {
+  const checked: string[] = [];
+  document
+    .querySelectorAll<HTMLInputElement>('input[name="report-section"]:checked')
+    .forEach((cb) => checked.push(cb.value));
+
+  ctx.profile.selectedReportSections = checked;
+  ctx.saveState();
+}
+
+/**
+ * 任意输入变化时保存 profile 到 store
+ */
+export function onInputChange(ctx: PromptlabAlpineContext): void {
+  ctx.saveState();
+}
