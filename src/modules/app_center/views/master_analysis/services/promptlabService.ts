@@ -579,7 +579,7 @@ const buildContextSection = (
 
   if (markdownSections.length === 0) return "";
 
-  return `\n## Market Context\n### Competitor Intelligence Report\n\n${markdownSections.join("\n\n")}\n`;
+  return `\n## Market Context\n### Competitor Insights Report\n\n${markdownSections.join("\n\n")}\n`;
 };
 
 /**
@@ -593,7 +593,9 @@ const buildProductSection = (inputs: PromptInputs): string => {
   if (usps) dnaParts.push(`- **Core USPs**: \n${usps}`);
   if (specs) dnaParts.push(`- **Technical Specs**: \n${specs}`);
 
-  return dnaParts.length > 0 ? `\n## Product DNA\n${dnaParts.join("\n")}\n` : "";
+  return dnaParts.length > 0
+    ? `\n## Product DNA\n${dnaParts.join("\n")}\n`
+    : "";
 };
 
 /**
