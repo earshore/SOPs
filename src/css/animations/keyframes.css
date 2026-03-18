@@ -1941,3 +1941,27 @@
 .ease-elastic { animation-timing-function: var(--ease-elastic); }
 .ease-back-in { animation-timing-function: var(--ease-back-in); }
 .ease-back-out { animation-timing-function: var(--ease-back-out); }
+
+/* --- 粒子浮动动画 (floatParticle) --- */
+@keyframes floatParticle {
+  0%, 100% {
+    transform: translate(0, 0);
+    opacity: 0.6;
+  }
+  25% {
+    transform: translate(15px, -20px);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translate(30px, -10px);
+    opacity: 0.4;
+  }
+  75% {
+    transform: translate(15px, 5px);
+    opacity: 0.7;
+  }
+}
+
+.float-particle {
+  animation: floatParticle 8s ease-in-out infinite;
+}
