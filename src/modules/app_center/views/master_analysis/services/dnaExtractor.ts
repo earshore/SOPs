@@ -16,18 +16,19 @@ import type {
   FullAnalysisReport,
   BuyerProfileReport,
   SellingPointsReport,
-  TitleKeywordsReport
-} from '../ai_analysis/config/analysisReportData';
-import { Logger } from '../../../../../services/loggerService';
+  TitleKeywordsReport,
+} from "../ai_analysis/config/analysisReportData";
+import { Logger } from "../../../../../services/loggerService";
 
 /**
  * 提取的产品 DNA 接口
  */
 export interface ExtractedDNA {
-  audience: string;      // 目标受众描述
-  usps: string;          // 核心卖点（多行）
-  specs: string;         // 技术参数（多行）
-  confidence: {          // 提取置信度 (0-1)
+  audience: string; // 目标受众描述
+  usps: string; // 核心卖点（多行）
+  specs: string; // 技术参数（多行）
+  confidence: {
+    // 提取置信度 (0-1)
     audience: number;
     usps: number;
     specs: number;
@@ -62,7 +63,10 @@ export interface ExtractedDNA {
  * @param report buyer-profile 报告
  * @returns 提取的受众描述和置信度 (0-1)
  */
-function extractAudience(report: BuyerProfileReport): { text: string; confidence: number } {
+function extractAudience(report: BuyerProfileReport): {
+  text: string;
+  confidence: number;
+} {
   const parts: string[] = [];
   let confidence = 0;
 
@@ -75,10 +79,11 @@ function extractAudience(report: BuyerProfileReport): { text: string; confidence
       const lifestyle = demographics.lifestyle_indicators || [];
 
       if (ageRange || gender) {
-        let demographic = '';
+        let demographic = "";
         if (ageRange) demographic += ageRange;
         if (gender) {
-          const genderText = gender === 'male' ? '男性' : gender === 'female' ? '女性' : '';
+          const genderText =
+            gender === "male" ? "男性" : gender === "female" ? "女性" : "";
           demographic += genderText;
         }
         if (demographic) {
@@ -99,7 +104,7 @@ function extractAudience(report: BuyerProfileReport): { text: string; confidence
     if (buyerTypes.length > 0) {
       const topTypes = buyerTypes
         .slice(0, 2)
-        .map(t => t.type)
+        .map((t) => t.type)
         .filter(Boolean);
       if (topTypes.length > 0) {
         parts.push(...topTypes);
@@ -114,14 +119,14 @@ function extractAudience(report: BuyerProfileReport): { text: string; confidence
       confidence += 0.2;
     }
 
-    const text = parts.join(', ');
+    const text = parts.join(", ");
     return {
-      text: text || '未能提取目标受众信息',
-      confidence: Math.min(confidence, 1.0)
+      text: text || "",
+      confidence: Math.min(confidence, 1.0),
     };
   } catch (error) {
-    Logger.error('[DNA提取器] 提取受众失败:', error);
-    return { text: '', confidence: 0 };
+    Logger.error("[DNA提取器] 提取受众失败:", error);
+    return { text: "", confidence: 0 };
   }
 }
 
@@ -146,7 +151,10 @@ function extractAudience(report: BuyerProfileReport): { text: string; confidence
  * @param report selling-points 报告
  * @returns 提取的卖点列表（多行）和置信度 (0-1)
  */
-function extractUSPs(report: SellingPointsReport): { text: string; confidence: number } {
+function extractUSPs(report: SellingPointsReport): {
+  text: string;
+  confidence: number;
+} {
   const usps: string[] = [];
   let confidence = 0;
 
@@ -155,7 +163,7 @@ function extractUSPs(report: SellingPointsReport): { text: string; confidence: n
     const functionSceneMatrix = report.function_scene_matrix;
     if (functionSceneMatrix && functionSceneMatrix.functions) {
       const functions = functionSceneMatrix.functions.slice(0, 5);
-      usps.push(...functions.map(f => `- ${f}`));
+      usps.push(...functions.map((f) => `- ${f}`));
       confidence += 0.4;
     }
 
@@ -169,10 +177,13 @@ function extractUSPs(report: SellingPointsReport): { text: string; confidence: n
     // 3. 如果卖点不足，从 bullet_analysis 补充
     if (usps.length < 3 && report.bullet_analysis) {
       const bullets = report.bullet_analysis
-        .filter(b => b.credibility_score === 'high' || b.credibility_score === 'medium')
+        .filter(
+          (b) =>
+            b.credibility_score === "high" || b.credibility_score === "medium",
+        )
         .slice(0, 3 - usps.length);
 
-      bullets.forEach(b => {
+      bullets.forEach((b) => {
         if (b.functions && b.functions.length > 0) {
           usps.push(`- ${b.functions[0]}`);
         }
@@ -180,17 +191,16 @@ function extractUSPs(report: SellingPointsReport): { text: string; confidence: n
       confidence += 0.3;
     }
 
-    const text = usps.join('\n');
+    const text = usps.join("\n");
     return {
-      text: text || '未能提取核心卖点',
-      confidence: Math.min(confidence, 1.0)
+      text: text || "",
+      confidence: Math.min(confidence, 1.0),
     };
   } catch (error) {
-    Logger.error('[DNA提取器] 提取卖点失败:', error);
-    return { text: '', confidence: 0 };
+    Logger.error("[DNA提取器] 提取卖点失败:", error);
+    return { text: "", confidence: 0 };
   }
 }
-
 
 /**
  * 判断文本是否包含技术规格信息
@@ -230,7 +240,14 @@ function isTechnicalSpec(text: string): boolean {
   // 模式 6: 包含数字-连字符-单位 (如 "24-hour", "8-day", "3-year")
   const hasNumberHyphenUnit = /\d+\s*-\s*[a-zA-Z]+/.test(text);
 
-  return hasNumberWithUnit || hasUnitWithNumber || hasPercentage || hasRange || hasDecimal || hasNumberHyphenUnit;
+  return (
+    hasNumberWithUnit ||
+    hasUnitWithNumber ||
+    hasPercentage ||
+    hasRange ||
+    hasDecimal ||
+    hasNumberHyphenUnit
+  );
 }
 
 /**
@@ -254,14 +271,16 @@ function isTechnicalSpec(text: string): boolean {
  * @param keywords secondary_keywords 数组
  * @returns 按 type 分组的规格列表（格式：type: keyword1, keyword2）
  */
-function extractSpecsByType(keywords: TitleKeywordsReport['secondary_keywords']): string[] {
+function extractSpecsByType(
+  keywords: TitleKeywordsReport["secondary_keywords"],
+): string[] {
   const specs: string[] = [];
 
   // 按 type 分组
   const grouped = new Map<string, string[]>();
 
-  keywords.forEach(k => {
-    const type = k.type || 'other';
+  keywords.forEach((k) => {
+    const type = k.type || "other";
     if (!grouped.has(type)) {
       grouped.set(type, []);
     }
@@ -270,7 +289,7 @@ function extractSpecsByType(keywords: TitleKeywordsReport['secondary_keywords'])
 
   // 为每个 type 生成一行规格（直接使用原始 type）
   grouped.forEach((kws, type) => {
-    specs.push(`${type}: ${kws.join(', ')}`);
+    specs.push(`${type}: ${kws.join(", ")}`);
   });
 
   return specs;
@@ -297,19 +316,21 @@ function extractSpecsByType(keywords: TitleKeywordsReport['secondary_keywords'])
  * @param bulletAnalysis bullet_analysis 数组
  * @returns 技术规格列表（带 "- " 前缀）
  */
-function extractTechnicalSpecs(bulletAnalysis: SellingPointsReport['bullet_analysis']): string[] {
+function extractTechnicalSpecs(
+  bulletAnalysis: SellingPointsReport["bullet_analysis"],
+): string[] {
   if (!bulletAnalysis) return [];
 
   // 提取所有 functions
   const allFunctions = bulletAnalysis
-    .filter(b => b.functions && b.functions.length > 0)
-    .flatMap(b => b.functions);
+    .filter((b) => b.functions && b.functions.length > 0)
+    .flatMap((b) => b.functions);
 
   // 使用智能模式匹配筛选技术规格
   const techSpecs = allFunctions
-    .filter(f => isTechnicalSpec(f))
+    .filter((f) => isTechnicalSpec(f))
     .slice(0, 5)
-    .map(s => `- ${s}`);
+    .map((s) => `- ${s}`);
 
   return techSpecs;
 }
@@ -344,7 +365,7 @@ function extractTechnicalSpecs(bulletAnalysis: SellingPointsReport['bullet_analy
  */
 function extractSpecs(
   titleKeywords: TitleKeywordsReport | undefined,
-  sellingPoints: SellingPointsReport | undefined
+  sellingPoints: SellingPointsReport | undefined,
 ): { text: string; confidence: number } {
   const specs: string[] = [];
   let keywordsCount = 0;
@@ -352,7 +373,11 @@ function extractSpecs(
 
   try {
     // 1. 从 title-keywords 动态提取所有规格（按 type 分组）
-    if (titleKeywords && titleKeywords.secondary_keywords && titleKeywords.secondary_keywords.length > 0) {
+    if (
+      titleKeywords &&
+      titleKeywords.secondary_keywords &&
+      titleKeywords.secondary_keywords.length > 0
+    ) {
       const keywordSpecs = extractSpecsByType(titleKeywords.secondary_keywords);
       specs.push(...keywordSpecs);
       keywordsCount = keywordSpecs.length;
@@ -389,14 +414,14 @@ function extractSpecs(
       confidence += 0.15;
     }
 
-    const text = specs.join('\n');
+    const text = specs.join("\n");
     return {
-      text: text || '未能提取技术参数',
-      confidence: Math.min(confidence, 1.0)
+      text: text || "",
+      confidence: Math.min(confidence, 1.0),
     };
   } catch (error) {
-    Logger.error('[DNA提取器] 提取规格失败:', error);
-    return { text: '', confidence: 0 };
+    Logger.error("[DNA提取器] 提取规格失败:", error);
+    return { text: "", confidence: 0 };
   }
 }
 
@@ -406,39 +431,41 @@ function extractSpecs(
  * @param report 完整的 AI 分析报告
  * @returns 提取的产品 DNA，如果提取失败返回 null
  */
-export function extractProductDNA(report: FullAnalysisReport | null | undefined): ExtractedDNA | null {
+export function extractProductDNA(
+  report: FullAnalysisReport | null | undefined,
+): ExtractedDNA | null {
   if (!report) {
-    Logger.warn('[DNA提取器] 报告为空，无法提取');
+    Logger.warn("[DNA提取器] 报告为空，无法提取");
     return null;
   }
 
-  Logger.debug('[DNA提取器] 开始提取产品 DNA');
+  Logger.debug("[DNA提取器] 开始提取产品 DNA");
 
   try {
     // 提取各个部分
-    const audienceResult = report['buyer-profile']
-      ? extractAudience(report['buyer-profile'])
-      : { text: '', confidence: 0 };
+    const audienceResult = report["buyer-profile"]
+      ? extractAudience(report["buyer-profile"])
+      : { text: "", confidence: 0 };
 
-    const uspsResult = report['selling-points']
-      ? extractUSPs(report['selling-points'])
-      : { text: '', confidence: 0 };
+    const uspsResult = report["selling-points"]
+      ? extractUSPs(report["selling-points"])
+      : { text: "", confidence: 0 };
 
     const specsResult = extractSpecs(
-      report['title-keywords'],
-      report['selling-points']
+      report["title-keywords"],
+      report["selling-points"],
     );
 
     // 计算总体置信度
-    const avgConfidence = (
-      audienceResult.confidence +
-      uspsResult.confidence +
-      specsResult.confidence
-    ) / 3;
+    const avgConfidence =
+      (audienceResult.confidence +
+        uspsResult.confidence +
+        specsResult.confidence) /
+      3;
 
     // 如果总体置信度太低，返回 null
     if (avgConfidence < 0.2) {
-      Logger.warn('[DNA提取器] 提取置信度过低，放弃提取');
+      Logger.warn("[DNA提取器] 提取置信度过低，放弃提取");
       return null;
     }
 
@@ -449,28 +476,28 @@ export function extractProductDNA(report: FullAnalysisReport | null | undefined)
       confidence: {
         audience: audienceResult.confidence,
         usps: uspsResult.confidence,
-        specs: specsResult.confidence
+        specs: specsResult.confidence,
       },
       metadata: {
         extractedAt: new Date().toISOString(),
         sourceFields: [
-          report['buyer-profile'] ? 'buyer-profile' : '',
-          report['selling-points'] ? 'selling-points' : '',
-          report['title-keywords'] ? 'title-keywords' : ''
-        ].filter(Boolean)
-      }
+          report["buyer-profile"] ? "buyer-profile" : "",
+          report["selling-points"] ? "selling-points" : "",
+          report["title-keywords"] ? "title-keywords" : "",
+        ].filter(Boolean),
+      },
     };
 
-    Logger.debug('[DNA提取器] 提取完成:', {
+    Logger.debug("[DNA提取器] 提取完成:", {
       audienceLength: dna.audience.length,
       uspsLength: dna.usps.length,
       specsLength: dna.specs.length,
-      confidence: dna.confidence
+      confidence: dna.confidence,
     });
 
     return dna;
   } catch (error) {
-    Logger.error('[DNA提取器] 提取过程出错:', error);
+    Logger.error("[DNA提取器] 提取过程出错:", error);
     return null;
   }
 }
@@ -478,9 +505,11 @@ export function extractProductDNA(report: FullAnalysisReport | null | undefined)
 /**
  * 检查报告是否包含足够的数据用于 DNA 提取
  */
-export function canExtractDNA(report: FullAnalysisReport | null | undefined): boolean {
+export function canExtractDNA(
+  report: FullAnalysisReport | null | undefined,
+): boolean {
   if (!report) return false;
 
   // 至少需要有 buyer-profile 或 selling-points 之一
-  return !!(report['buyer-profile'] || report['selling-points']);
+  return !!(report["buyer-profile"] || report["selling-points"]);
 }
