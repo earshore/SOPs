@@ -1100,11 +1100,24 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.3.2/css/flag-icons.min.css" />
 
 <div class="module-container fade-in">
-        <!-- Welcome Banner -->
-    <div class="wb-container" style="--wb-gradient-1: rgba(248, 250, 252, 0.95); --wb-gradient-2: rgba(241, 245, 249, 0.90);">
+    <!-- Welcome Banner -->
+    <div class="wb-container"
+        style="--wb-gradient-1: rgba(248, 250, 252, 0.95); --wb-gradient-2: rgba(241, 245, 249, 0.90);">
         <div class="wb-orb wb-orb-1"></div>
         <div class="wb-orb wb-orb-2"></div>
-        <div class="wb-content" style="display: flex !important; justify-content: space-between; align-items: flex-start; gap: 40px; flex-wrap: wrap;">
+        <div class="wb-orb wb-orb-3"></div>
+
+        <!-- 浮动粒子 -->
+        <div class="wb-particle wb-particle-1"></div>
+        <div class="wb-particle wb-particle-2"></div>
+        <div class="wb-particle wb-particle-3"></div>
+        <div class="wb-particle wb-particle-4"></div>
+        <div class="wb-particle wb-particle-5"></div>
+        <div class="wb-particle wb-particle-6"></div>
+        <div class="wb-particle wb-particle-7"></div>
+        <div class="wb-particle wb-particle-8"></div>
+        <div class="wb-content"
+            style="display: flex !important; justify-content: space-between; align-items: flex-start; gap: 40px; flex-wrap: wrap;">
             <!-- 左侧：图标、标题、描述、标签 -->
             <div style="display: flex; gap: var(--spacing-lg, 1.5rem); flex: 1; min-width: 400px;">
                 <div class="wb-icon">
@@ -1122,18 +1135,14 @@
             </div>
 
             <!-- 右侧：搜索框和统计卡片 -->
-            <div style="display: flex; flex-direction: column; gap: 16px; min-width: 420px; max-width: 480px; flex-shrink: 0;">
+            <div
+                style="display: flex; flex-direction: column; gap: 16px; min-width: 420px; max-width: 480px; flex-shrink: 0;">
                 <!-- 搜索框 -->
                 <div class="amzf_search_wrapper">
                     <div class="amzf_search_box" id="amzf_search_box">
                         <span class="amzf_search_icon"><i class="fas fa-search"></i></span>
-                        <input 
-                            type="text" 
-                            class="amzf_search_input" 
-                            id="amzf_search" 
-                            placeholder="搜索节日、国家或关键词... (如: 圣诞, Prime, 德国)"
-                            autocomplete="off"
-                        />
+                        <input type="text" class="amzf_search_input" id="amzf_search"
+                            placeholder="搜索节日、国家或关键词... (如: 圣诞, Prime, 德国)" autocomplete="off" />
                         <button class="amzf_search_clear" id="amzf_clear" data-action="amzf_clearSearch">
                             <i class="fas fa-times"></i>
                         </button>
@@ -1149,7 +1158,8 @@
     </div>
     <div class="amzf_controls">
         <div class="amzf_view_toggle">
-            <button class="amzf_view_btn amzf_active" id="amzf_btn_country" data-action="amzf_switchView" data-param="country">
+            <button class="amzf_view_btn amzf_active" id="amzf_btn_country" data-action="amzf_switchView"
+                data-param="country">
                 <i class="fas fa-globe"></i> 按国家/地区
             </button>
             <button class="amzf_view_btn" id="amzf_btn_event" data-action="amzf_switchView" data-param="event">

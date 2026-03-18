@@ -1,11 +1,23 @@
 <!--SEO & Keywords-->
 <!-- <div id="amz_seo_strategy" class="amz_tab-content hidden space-y-8 fade-in"> -->
 
-    <!-- Welcome Banner -->
+<!-- Welcome Banner -->
 <div class="module-container">
-    <div class="wb-container" style="--wb-gradient-1: rgba(248, 250, 252, 0.95); --wb-gradient-2: rgba(241, 245, 249, 0.90);">
+    <div class="wb-container"
+        style="--wb-gradient-1: rgba(248, 250, 252, 0.95); --wb-gradient-2: rgba(241, 245, 249, 0.90);">
         <div class="wb-orb wb-orb-1"></div>
         <div class="wb-orb wb-orb-2"></div>
+        <div class="wb-orb wb-orb-3"></div>
+
+        <!-- 浮动粒子 -->
+        <div class="wb-particle wb-particle-1"></div>
+        <div class="wb-particle wb-particle-2"></div>
+        <div class="wb-particle wb-particle-3"></div>
+        <div class="wb-particle wb-particle-4"></div>
+        <div class="wb-particle wb-particle-5"></div>
+        <div class="wb-particle wb-particle-6"></div>
+        <div class="wb-particle wb-particle-7"></div>
+        <div class="wb-particle wb-particle-8"></div>
         <div class="wb-content">
             <div class="wb-icon">
                 <i class="fas fa-magnifying-glass-chart"></i>
@@ -20,51 +32,52 @@
         </div>
     </div>
 
-<div class="flex flex-col lg:flex-row gap-8 items-center">
-    <div class="w-full lg:w-1/2">
-        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"
-            style="position: relative; height:400px; width:100%">
-            <canvas id="amz_keywordRadarChart"></canvas>
+    <div class="flex flex-col lg:flex-row gap-8 items-center">
+        <div class="w-full lg:w-1/2">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"
+                style="position: relative; height:400px; width:100%">
+                <canvas id="amz_keywordRadarChart"></canvas>
+            </div>
+            <div class="text-center mt-4 text-xs text-slate-500">
+                图表展示了三种关键词来源在不同维度的表现能力
+            </div>
         </div>
-        <div class="text-center mt-4 text-xs text-slate-500">
-            图表展示了三种关键词来源在不同维度的表现能力
+
+        <div class="w-full lg:w-1/2 space-y-4">
+            <div
+                class="bg-white p-5 rounded-lg border border-slate-200 hover:border-orange-300 transition-colors shadow-sm">
+                <h4 class="font-bold text-lg text-slate-800">1. Listing/Review 扒词 (Mining)</h4>
+                <div class="flex items-center mt-2 mb-2">
+                    <span class="text-xs font-bold bg-green-100 text-green-800 px-2 py-1 rounded mr-2">语义极强</span>
+                    <span class="text-xs font-bold bg-red-100 text-red-800 px-2 py-1 rounded">流量未知</span>
+                </div>
+                <p class="text-sm text-slate-600">
+                    <span class="font-bold">靠谱吗？</span> 非常靠谱，但仅限于<b>相关性</b>和<b>转化率</b>优化。这是喂给 COSMO 和 Rufus
+                    建立“产品-需求”连接的最佳燃料。Review 里的词往往是用户真实的搜索意图。
+                </p>
+            </div>
+
+            <div
+                class="bg-white p-5 rounded-lg border border-slate-200 hover:border-blue-300 transition-colors shadow-sm">
+                <h4 class="font-bold text-lg text-slate-800">2. ABA / 前台下拉框 (Backend Data)</h4>
+                <div class="flex items-center mt-2 mb-2">
+                    <span class="text-xs font-bold bg-green-100 text-green-800 px-2 py-1 rounded mr-2">流量精准</span>
+                    <span class="text-xs font-bold bg-yellow-100 text-yellow-800 px-2 py-1 rounded">竞争激烈</span>
+                </div>
+                <p class="text-sm text-slate-600">
+                    <span class="font-bold">靠谱吗？</span> 数据绝对真实，但大家都在用。这是<b>红海战场</b>。你必须用它来验证从 Review 扒来的词是否有搜索量。
+                </p>
+            </div>
+
+            <div class="bg-gradient-to-r from-slate-800 to-slate-900 p-5 rounded-lg text-white shadow-md">
+                <h4 class="font-bold text-lg">🚀 关键词的混合策略</h4>
+                <p class="text-sm mt-2 opacity-90">
+                    不要二选一。先用 LLM 从 Top竞品 Review 提取“高频场景词”（Scenario Keywords），再将这些词扔进 ABA 或工具反查搜索频率排名（SFR）。
+                    <br><br>
+                    <b>公式：</b> Review 场景词 + ABA 中长尾修饰词 = COSMO 友好型高转化词。
+                </p>
+            </div>
         </div>
     </div>
-
-    <div class="w-full lg:w-1/2 space-y-4">
-        <div
-            class="bg-white p-5 rounded-lg border border-slate-200 hover:border-orange-300 transition-colors shadow-sm">
-            <h4 class="font-bold text-lg text-slate-800">1. Listing/Review 扒词 (Mining)</h4>
-            <div class="flex items-center mt-2 mb-2">
-                <span class="text-xs font-bold bg-green-100 text-green-800 px-2 py-1 rounded mr-2">语义极强</span>
-                <span class="text-xs font-bold bg-red-100 text-red-800 px-2 py-1 rounded">流量未知</span>
-            </div>
-            <p class="text-sm text-slate-600">
-                <span class="font-bold">靠谱吗？</span> 非常靠谱，但仅限于<b>相关性</b>和<b>转化率</b>优化。这是喂给 COSMO 和 Rufus
-                建立“产品-需求”连接的最佳燃料。Review 里的词往往是用户真实的搜索意图。
-            </p>
-        </div>
-
-        <div class="bg-white p-5 rounded-lg border border-slate-200 hover:border-blue-300 transition-colors shadow-sm">
-            <h4 class="font-bold text-lg text-slate-800">2. ABA / 前台下拉框 (Backend Data)</h4>
-            <div class="flex items-center mt-2 mb-2">
-                <span class="text-xs font-bold bg-green-100 text-green-800 px-2 py-1 rounded mr-2">流量精准</span>
-                <span class="text-xs font-bold bg-yellow-100 text-yellow-800 px-2 py-1 rounded">竞争激烈</span>
-            </div>
-            <p class="text-sm text-slate-600">
-                <span class="font-bold">靠谱吗？</span> 数据绝对真实，但大家都在用。这是<b>红海战场</b>。你必须用它来验证从 Review 扒来的词是否有搜索量。
-            </p>
-        </div>
-
-        <div class="bg-gradient-to-r from-slate-800 to-slate-900 p-5 rounded-lg text-white shadow-md">
-            <h4 class="font-bold text-lg">🚀 关键词的混合策略</h4>
-            <p class="text-sm mt-2 opacity-90">
-                不要二选一。先用 LLM 从 Top竞品 Review 提取“高频场景词”（Scenario Keywords），再将这些词扔进 ABA 或工具反查搜索频率排名（SFR）。
-                <br><br>
-                <b>公式：</b> Review 场景词 + ABA 中长尾修饰词 = COSMO 友好型高转化词。
-            </p>
-        </div>
-    </div>
-</div>
 </div>
 <!-- </div> -->
