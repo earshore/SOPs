@@ -5,9 +5,12 @@ import checker from 'vite-plugin-checker';
 import viteCompression from 'vite-plugin-compression';
 import os from 'os';
 
-// ES 模块兼容的 __dirname 定义
+// ES 模块兼容的 __dirname 定义 - 使用 new URL() 方式
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+// 项目根目录（config 目录的上一级）
+const projectRoot = resolve(__dirname, '..');
 
 export default defineConfig({
     publicDir: 'public',
@@ -149,7 +152,7 @@ export default defineConfig({
         // 代码分割优化
         rollupOptions: {
             input: {
-                main: resolve(__dirname, '../index.html')
+                main: resolve(projectRoot, 'index.html')
             },
             // 确保.ts文件被正确处理为.js
             external: [],
@@ -244,15 +247,15 @@ export default defineConfig({
     // 路径别名 (与 tsconfig.json 保持一致)
     resolve: {
         alias: {
-            '@': resolve(__dirname, '../src'),
-            '@common': resolve(__dirname, '../src/common'),
-            '@services': resolve(__dirname, '../src/services'),
-            '@modules': resolve(__dirname, '../src/modules'),
-            '@components': resolve(__dirname, '../src/components'),
-            '@types': resolve(__dirname, '../src/types'),
-            '@router': resolve(__dirname, '../src/common/router'),
-            '@router/navigo': resolve(__dirname, '../src/common/router/navigo'),
-            '@router/legacy': resolve(__dirname, '../src/common/router/legacy')
+            '@': resolve(projectRoot, 'src'),
+            '@common': resolve(projectRoot, 'src/common'),
+            '@services': resolve(projectRoot, 'src/services'),
+            '@modules': resolve(projectRoot, 'src/modules'),
+            '@components': resolve(projectRoot, 'src/components'),
+            '@types': resolve(projectRoot, 'src/types'),
+            '@router': resolve(projectRoot, 'src/common/router'),
+            '@router/navigo': resolve(projectRoot, 'src/common/router/navigo'),
+            '@router/legacy': resolve(projectRoot, 'src/common/router/legacy')
         },
         // 支持 .ts 和 .js 文件扩展名解析
         extensions: ['.ts', '.js', '.json']
