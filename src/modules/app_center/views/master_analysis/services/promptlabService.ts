@@ -555,19 +555,19 @@ const buildContextSection = (
   const report: Record<string, unknown> = hasMetadata
     ? (cleanReport.analysisReport as Record<string, unknown>)
     : (() => {
-        // 旧格式：删除不必要的元数据字段后直接使用
-        [
-          "meta",
-          "GeneratedByModel",
-          "GeneratedAt",
-          "templateUsed",
-          "raw_response",
-          "language",
-          "targetMarket",
-          "marketplace",
-        ].forEach((k) => delete cleanReport[k]);
-        return cleanReport;
-      })();
+      // 旧格式：删除不必要的元数据字段后直接使用
+      [
+        "meta",
+        "GeneratedByModel",
+        "GeneratedAt",
+        "templateUsed",
+        "raw_response",
+        "language",
+        "targetMarket",
+        "marketplace",
+      ].forEach((k) => delete cleanReport[k]);
+      return cleanReport;
+    })();
 
   const markdownSections: string[] = [];
 
@@ -579,7 +579,7 @@ const buildContextSection = (
 
   if (markdownSections.length === 0) return "";
 
-  return `\n[MARKET CONTEXT]\n### Competitor Intelligence Report\n\n${markdownSections.join("\n\n")}\n`;
+  return `\n## Market Context\n### Competitor Intelligence Report\n\n${markdownSections.join("\n\n")}\n`;
 };
 
 /**
@@ -593,7 +593,7 @@ const buildProductSection = (inputs: PromptInputs): string => {
   if (usps) dnaParts.push(`- **Core USPs**: \n${usps}`);
   if (specs) dnaParts.push(`- **Technical Specs**: \n${specs}`);
 
-  return dnaParts.length > 0 ? `\n[PRODUCT DNA]\n${dnaParts.join("\n")}\n` : "";
+  return dnaParts.length > 0 ? `\n## Product DNA\n${dnaParts.join("\n")}\n` : "";
 };
 
 /**
@@ -634,7 +634,7 @@ const buildSeoSection = (
     : "Integrate **All** these keywords naturally:";
 
   return seoParts.length > 0
-    ? `\n[SEO MANDATE]\n${introText}\n${seoParts.join("\n")}\n`
+    ? `\n## SEO Mandate\n${introText}\n${seoParts.join("\n")}\n`
     : "";
 };
 
