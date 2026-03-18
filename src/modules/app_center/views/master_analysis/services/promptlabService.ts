@@ -1,77 +1,585 @@
 // src/modules/app_center/views/master_analysis/services/promptlabService.ts
 
-import type { PromptInputs } from '../../../../../types/state';
-import type { AnalysisReport } from '../../../../../types/modules-business';
+import type { PromptInputs } from "../../../../../types/state";
+import type { AnalysisReport } from "../../../../../types/modules-business";
+
+// ============================================================
+// Markdown 转换工具函数
+// ============================================================
+
+/** 将字符串数组转换为逗号分隔文本 */
+const arrToInline = (arr: unknown[] | undefined, max = 10): string => {
+  if (!arr || !Array.isArray(arr)) return "";
+  return arr
+    .slice(0, max)
+    .filter((v) => v != null && v !== "")
+    .map(String)
+    .join(", ");
+};
+
+/** 将字符串数组转换为 Markdown 缩进列表行 */
+const arrToListLines = (arr: unknown[] | undefined, max = 8): string => {
+  if (!arr || !Array.isArray(arr)) return "";
+  return arr
+    .slice(0, max)
+    .filter((v) => v != null && v !== "")
+    .map((v) => `  - ${String(v)}`)
+    .join("\n");
+};
 
 // ----------------------------------------
-// 内部 Helper 函数
+// 各分析模块 → Markdown 转换器
 // ----------------------------------------
 
 /**
- * 构建竞品/市场分析上下文 (Context Section)
+ * title-keywords → Markdown
  */
-const buildContextSection = (inputs: PromptInputs, analysisReport: AnalysisReport | null): string => {
+const titleKeywordsToMarkdown = (data: Record<string, unknown>): string => {
+  const lines: string[] = ["#### 🔑 Title Core Keywords"];
+
+  if (Array.isArray(data.primary_keywords) && data.primary_keywords.length) {
+    const kw = (data.primary_keywords as Array<Record<string, unknown>>)
+      .slice(0, 8)
+      .map((k) => `${k.keyword} [${k.weight ?? ""}]`)
+      .filter(Boolean)
+      .join(", ");
+    if (kw) lines.push(`- **Primary Keywords:** ${kw}`);
+  }
+
+  if (
+    Array.isArray(data.secondary_keywords) &&
+    data.secondary_keywords.length
+  ) {
+    const kw = (data.secondary_keywords as Array<Record<string, unknown>>)
+      .slice(0, 8)
+      .map((k) => `${k.keyword} (${k.type ?? ""})`)
+      .filter(Boolean)
+      .join(", ");
+    if (kw) lines.push(`- **Secondary Keywords:** ${kw}`);
+  }
+
+  if (Array.isArray(data.scene_keywords) && data.scene_keywords.length) {
+    const kw = (data.scene_keywords as Array<Record<string, unknown>>)
+      .slice(0, 5)
+      .map((k) => String(k.keyword ?? ""))
+      .filter(Boolean)
+      .join(", ");
+    if (kw) lines.push(`- **Scene Keywords:** ${kw}`);
+  }
+
+  if (Array.isArray(data.audience_keywords) && data.audience_keywords.length) {
+    const kw = (data.audience_keywords as Array<Record<string, unknown>>)
+      .slice(0, 5)
+      .map((k) => String(k.keyword ?? ""))
+      .filter(Boolean)
+      .join(", ");
+    if (kw) lines.push(`- **Audience Keywords:** ${kw}`);
+  }
+
+  if (
+    Array.isArray(data.optimization_suggestions) &&
+    data.optimization_suggestions.length
+  ) {
+    const list = arrToListLines(data.optimization_suggestions as unknown[], 5);
+    if (list) lines.push(`- **Optimization Suggestions:**\n${list}`);
+  }
+
+  return lines.join("\n");
+};
+
+/**
+ * selling-points → Markdown
+ */
+const sellingPointsToMarkdown = (data: Record<string, unknown>): string => {
+  const lines: string[] = ["#### 💎 Selling Points Structure"];
+
+  if (data.overall_strategy && typeof data.overall_strategy === "object") {
+    const s = data.overall_strategy as Record<string, unknown>;
+    if (s.primary_differentiation)
+      lines.push(`- **Primary Differentiation:** ${s.primary_differentiation}`);
+    if (s.target_positioning)
+      lines.push(`- **Target Positioning:** ${s.target_positioning}`);
+    if (Array.isArray(s.emotional_hooks) && s.emotional_hooks.length)
+      lines.push(
+        `- **Emotional Hooks:** ${arrToInline(s.emotional_hooks as unknown[])}`,
+      );
+    if (Array.isArray(s.missing_elements) && s.missing_elements.length)
+      lines.push(
+        `- **Missing Elements:** ${arrToInline(s.missing_elements as unknown[])}`,
+      );
+  }
+
+  if (
+    data.function_scene_matrix &&
+    typeof data.function_scene_matrix === "object"
+  ) {
+    const m = data.function_scene_matrix as Record<string, unknown>;
+    if (Array.isArray(m.pain_points) && m.pain_points.length)
+      lines.push(
+        `- **Pain Points Addressed:** ${arrToInline(m.pain_points as unknown[])}`,
+      );
+  }
+
+  if (Array.isArray(data.bullet_analysis) && data.bullet_analysis.length) {
+    const bulletLines = (data.bullet_analysis as Array<Record<string, unknown>>)
+      .slice(0, 5)
+      .map((b) => {
+        const parts: string[] = [];
+        if (b.differentiation_angle)
+          parts.push(`Differentiation: ${b.differentiation_angle}`);
+        if (
+          Array.isArray(b.pain_points_addressed) &&
+          (b.pain_points_addressed as unknown[]).length
+        )
+          parts.push(
+            `Pain Points: ${arrToInline(b.pain_points_addressed as unknown[], 3)}`,
+          );
+        if (b.credibility_score)
+          parts.push(`Credibility: ${b.credibility_score}`);
+        return `  - Bullet ${b.bullet_index ?? ""}: ${parts.join(" | ")}`;
+      });
+    if (bulletLines.length)
+      lines.push(`- **Bullet Analysis:**\n${bulletLines.join("\n")}`);
+  }
+
+  return lines.join("\n");
+};
+
+/**
+ * fatal-flaws → Markdown
+ */
+const fatalFlawsToMarkdown = (data: Record<string, unknown>): string => {
+  const lines: string[] = ["#### ⚠️ Fatal Flaws (Competitor Issues)"];
+
+  if (data.risk_assessment && typeof data.risk_assessment === "object") {
+    const r = data.risk_assessment as Record<string, unknown>;
+    const parts: string[] = [];
+    if (r.overall_risk_level)
+      parts.push(`Risk Level: **${r.overall_risk_level}**`);
+    if (r.primary_concern) parts.push(`Primary Concern: ${r.primary_concern}`);
+    if (parts.length) lines.push(`- ${parts.join(" | ")}`);
+  }
+
+  if (Array.isArray(data.critical_issues) && data.critical_issues.length) {
+    const issueLines = (data.critical_issues as Array<Record<string, unknown>>)
+      .slice(0, 5)
+      .map((i) => {
+        const parts: string[] = [];
+        if (i.issue) parts.push(String(i.issue));
+        if (i.severity) parts.push(`[${i.severity}]`);
+        if (Array.isArray(i.user_quotes) && (i.user_quotes as string[]).length)
+          parts.push(`"${(i.user_quotes as string[])[0]}"`);
+        return `  - ${parts.join(" ")}`;
+      });
+    if (issueLines.length)
+      lines.push(`- **Critical Issues:**\n${issueLines.join("\n")}`);
+  }
+
+  if (Array.isArray(data.return_triggers) && data.return_triggers.length)
+    lines.push(
+      `- **Return Triggers:** ${arrToInline(data.return_triggers as unknown[])}`,
+    );
+
+  if (Array.isArray(data.expectation_gaps) && data.expectation_gaps.length) {
+    const gapLines = (data.expectation_gaps as Array<Record<string, unknown>>)
+      .slice(0, 3)
+      .map((g) => `  - Expected: "${g.expected}" → Reality: "${g.reality}"`);
+    if (gapLines.length)
+      lines.push(`- **Expectation Gaps:**\n${gapLines.join("\n")}`);
+  }
+
+  if (Array.isArray(data.actionable_fixes) && data.actionable_fixes.length) {
+    const list = arrToListLines(data.actionable_fixes as unknown[], 4);
+    if (list) lines.push(`- **Actionable Fixes:**\n${list}`);
+  }
+
+  return lines.join("\n");
+};
+
+/**
+ * wow-moments → Markdown
+ */
+const wowMomentsToMarkdown = (data: Record<string, unknown>): string => {
+  const lines: string[] = ["#### ✨ Wow Moments (Customer Delight)"];
+
+  if (
+    Array.isArray(data.high_conversion_phrases) &&
+    data.high_conversion_phrases.length
+  )
+    lines.push(
+      `- **High Conversion Phrases:** ${arrToInline(data.high_conversion_phrases as unknown[])}`,
+    );
+
+  if (Array.isArray(data.copywriting_angles) && data.copywriting_angles.length)
+    lines.push(
+      `- **Copywriting Angles:** ${arrToInline(data.copywriting_angles as unknown[])}`,
+    );
+
+  if (
+    Array.isArray(data.unexpected_benefits) &&
+    data.unexpected_benefits.length
+  )
+    lines.push(
+      `- **Unexpected Benefits:** ${arrToInline(data.unexpected_benefits as unknown[])}`,
+    );
+
+  if (Array.isArray(data.emotional_triggers) && data.emotional_triggers.length)
+    lines.push(
+      `- **Emotional Triggers:** ${arrToInline(data.emotional_triggers as unknown[])}`,
+    );
+
+  if (Array.isArray(data.moments) && data.moments.length) {
+    const momentLines = (data.moments as Array<Record<string, unknown>>)
+      .slice(0, 4)
+      .map((m) => {
+        const tag = [m.emotion_type, m.aspect].filter(Boolean).join("/");
+        const quote = m.user_quote ? `"${m.user_quote}"` : "";
+        const potential = m.marketing_potential
+          ? `→ Potential: ${m.marketing_potential}`
+          : "";
+        return `  - ${tag ? `[${tag}] ` : ""}${quote}${potential ? " " + potential : ""}`;
+      });
+    if (momentLines.length)
+      lines.push(`- **Key Moments:**\n${momentLines.join("\n")}`);
+  }
+
+  return lines.join("\n");
+};
+
+/**
+ * hesitation-points → Markdown
+ */
+const hesitationPointsToMarkdown = (data: Record<string, unknown>): string => {
+  const lines: string[] = ["#### 🤔 Hesitation Points (Pre-Purchase Worries)"];
+
+  if (Array.isArray(data.common_doubts) && data.common_doubts.length)
+    lines.push(
+      `- **Common Doubts:** ${arrToInline(data.common_doubts as unknown[])}`,
+    );
+
+  if (Array.isArray(data.trust_builders) && data.trust_builders.length)
+    lines.push(
+      `- **Trust Builders:** ${arrToInline(data.trust_builders as unknown[])}`,
+    );
+
+  if (Array.isArray(data.hesitations) && data.hesitations.length) {
+    const hesLines = (data.hesitations as Array<Record<string, unknown>>)
+      .slice(0, 4)
+      .map(
+        (h) =>
+          `  - Worry: "${h.pre_purchase_worry}" → Resolution: "${h.post_purchase_resolution}"`,
+      );
+    if (hesLines.length)
+      lines.push(`- **Hesitation Patterns:**\n${hesLines.join("\n")}`);
+  }
+
+  if (
+    Array.isArray(data.qa_optimization_items) &&
+    data.qa_optimization_items.length
+  ) {
+    const qaLines = (
+      data.qa_optimization_items as Array<Record<string, unknown>>
+    )
+      .slice(0, 3)
+      .map((qa) => `  - Q: "${qa.question}" → A: "${qa.suggested_answer}"`);
+    if (qaLines.length)
+      lines.push(`- **Q&A Optimization:**\n${qaLines.join("\n")}`);
+  }
+
+  return lines.join("\n");
+};
+
+/**
+ * buyer-profile → Markdown
+ */
+const buyerProfileToMarkdown = (data: Record<string, unknown>): string => {
+  const lines: string[] = ["#### 👤 Buyer Profile"];
+
+  if (data.demographics && typeof data.demographics === "object") {
+    const d = data.demographics as Record<string, unknown>;
+    const parts: string[] = [];
+    if (d.likely_gender) parts.push(`Gender: ${d.likely_gender}`);
+    if (d.age_range_estimate) parts.push(`Age: ${d.age_range_estimate}`);
+    if (
+      Array.isArray(d.lifestyle_indicators) &&
+      (d.lifestyle_indicators as unknown[]).length
+    )
+      parts.push(
+        `Lifestyle: ${arrToInline(d.lifestyle_indicators as unknown[], 4)}`,
+      );
+    if (parts.length) lines.push(`- **Demographics:** ${parts.join(" | ")}`);
+  }
+
+  if (
+    data.geographic_insights &&
+    typeof data.geographic_insights === "object"
+  ) {
+    const g = data.geographic_insights as Record<string, unknown>;
+    if (
+      Array.isArray(g.primary_markets) &&
+      (g.primary_markets as unknown[]).length
+    )
+      lines.push(
+        `- **Primary Markets:** ${arrToInline(g.primary_markets as unknown[])}`,
+      );
+    if (
+      Array.isArray(g.cultural_considerations) &&
+      (g.cultural_considerations as unknown[]).length
+    )
+      lines.push(
+        `- **Cultural Considerations:** ${arrToInline(g.cultural_considerations as unknown[], 4)}`,
+      );
+  }
+
+  if (Array.isArray(data.buyer_types) && data.buyer_types.length) {
+    const typeLines = (data.buyer_types as Array<Record<string, unknown>>)
+      .slice(0, 3)
+      .map(
+        (t) =>
+          `  - ${t.type} (${t.percentage_estimate ?? ""}): ${t.evidence ?? ""}`,
+      );
+    if (typeLines.length)
+      lines.push(`- **Buyer Types:**\n${typeLines.join("\n")}`);
+  }
+
+  if (Array.isArray(data.usage_scenes) && data.usage_scenes.length) {
+    const sceneLines = (data.usage_scenes as Array<Record<string, unknown>>)
+      .slice(0, 3)
+      .map((s) => `  - [${s.frequency ?? ""}] ${s.scene}: ${s.context ?? ""}`);
+    if (sceneLines.length)
+      lines.push(`- **Usage Scenes:**\n${sceneLines.join("\n")}`);
+  }
+
+  if (
+    Array.isArray(data.purchase_motivations) &&
+    data.purchase_motivations.length
+  )
+    lines.push(
+      `- **Purchase Motivations:** ${arrToInline(data.purchase_motivations as unknown[])}`,
+    );
+
+  return lines.join("\n");
+};
+
+/**
+ * vocab-gap → Markdown
+ */
+const vocabGapToMarkdown = (data: Record<string, unknown>): string => {
+  const lines: string[] = ["#### 📝 Vocabulary Gap Analysis"];
+
+  if (
+    Array.isArray(data.uncovered_buyer_terms) &&
+    data.uncovered_buyer_terms.length
+  ) {
+    const termLines = (
+      data.uncovered_buyer_terms as Array<Record<string, unknown>>
+    )
+      .slice(0, 5)
+      .map(
+        (t) =>
+          `  - "${t.term}" [${t.frequency ?? ""}] → ${t.recommendation ?? ""}`,
+      );
+    if (termLines.length)
+      lines.push(
+        `- **Uncovered Buyer Terms (Add to Listing):**\n${termLines.join("\n")}`,
+      );
+  }
+
+  if (Array.isArray(data.term_translations) && data.term_translations.length) {
+    const transLines = (
+      data.term_translations as Array<Record<string, unknown>>
+    )
+      .slice(0, 4)
+      .map((t) => `  - "${t.seller_says}" → "${t.buyer_says}"`);
+    if (transLines.length)
+      lines.push(`- **Seller → Buyer Language:**\n${transLines.join("\n")}`);
+  }
+
+  if (
+    data.listing_optimization &&
+    typeof data.listing_optimization === "object"
+  ) {
+    const opt = data.listing_optimization as Record<string, unknown>;
+    if (
+      Array.isArray(opt.title_additions) &&
+      (opt.title_additions as unknown[]).length
+    )
+      lines.push(
+        `- **Title Additions:** ${arrToInline(opt.title_additions as unknown[])}`,
+      );
+    if (
+      Array.isArray(opt.bullet_additions) &&
+      (opt.bullet_additions as unknown[]).length
+    )
+      lines.push(
+        `- **Bullet Additions:** ${arrToInline(opt.bullet_additions as unknown[])}`,
+      );
+    if (
+      Array.isArray(opt.keyword_opportunities) &&
+      (opt.keyword_opportunities as unknown[]).length
+    )
+      lines.push(
+        `- **Keyword Opportunities:** ${arrToInline(opt.keyword_opportunities as unknown[])}`,
+      );
+  }
+
+  return lines.join("\n");
+};
+
+/**
+ * promise-reality → Markdown
+ */
+const promiseRealityToMarkdown = (data: Record<string, unknown>): string => {
+  const lines: string[] = ["#### 🎯 Promise vs Reality"];
+
+  if (
+    data.overall_credibility &&
+    typeof data.overall_credibility === "object"
+  ) {
+    const c = data.overall_credibility as Record<string, unknown>;
+    if (c.score || c.assessment)
+      lines.push(
+        `- **Overall Credibility:** ${c.score ?? "?"}/10 — ${c.assessment ?? ""}`,
+      );
+  }
+
+  if (Array.isArray(data.gaps) && data.gaps.length) {
+    const gapLines = (data.gaps as Array<Record<string, unknown>>)
+      .slice(0, 4)
+      .map((g) => {
+        const sev = g.contradiction_severity
+          ? `[${g.contradiction_severity}] `
+          : "";
+        return `  - ${sev}Claim: "${g.listing_claim}" vs Reality: "${g.review_reality}"`;
+      });
+    if (gapLines.length)
+      lines.push(`- **Critical Gaps:**\n${gapLines.join("\n")}`);
+  }
+
+  if (Array.isArray(data.verified_claims) && data.verified_claims.length)
+    lines.push(
+      `- **Verified Claims:** ${arrToInline(data.verified_claims as unknown[], 5)}`,
+    );
+
+  if (
+    Array.isArray(data.listing_revision_suggestions) &&
+    data.listing_revision_suggestions.length
+  ) {
+    const list = arrToListLines(
+      data.listing_revision_suggestions as unknown[],
+      4,
+    );
+    if (list) lines.push(`- **Revision Suggestions:**\n${list}`);
+  }
+
+  return lines.join("\n");
+};
+
+/**
+ * 将单个分析模块数据转换为统一 Markdown 格式。
+ * 对于未知模块 id，执行通用的键值平铺，避免 JSON 块混入。
+ */
+const convertSectionToMarkdown = (targetId: string, data: unknown): string => {
+  if (!data || typeof data !== "object") return "";
+  const obj = data as Record<string, unknown>;
+
+  switch (targetId) {
+    case "title-keywords":
+      return titleKeywordsToMarkdown(obj);
+    case "selling-points":
+      return sellingPointsToMarkdown(obj);
+    case "fatal-flaws":
+      return fatalFlawsToMarkdown(obj);
+    case "wow-moments":
+      return wowMomentsToMarkdown(obj);
+    case "hesitation-points":
+      return hesitationPointsToMarkdown(obj);
+    case "buyer-profile":
+      return buyerProfileToMarkdown(obj);
+    case "vocab-gap":
+      return vocabGapToMarkdown(obj);
+    case "promise-reality":
+      return promiseRealityToMarkdown(obj);
+    default: {
+      // 通用降级：将对象顶层值以可读文本平铺，不输出原始 JSON
+      const lines: string[] = [`#### ${targetId}`];
+      for (const [k, v] of Object.entries(obj)) {
+        if (v == null) continue;
+        if (Array.isArray(v)) {
+          lines.push(`- **${k}:** ${arrToInline(v as unknown[])}`);
+        } else if (typeof v === "object") {
+          lines.push(`- **${k}:** ${JSON.stringify(v)}`);
+        } else {
+          lines.push(`- **${k}:** ${String(v)}`);
+        }
+      }
+      return lines.join("\n");
+    }
+  }
+};
+
+// ============================================================
+// 内部 Helper 函数
+// ============================================================
+
+/**
+ * 构建竞品/市场分析上下文 (Context Section)
+ * 所有分析数据均以统一 Markdown 格式注入，不混入原始 JSON。
+ */
+const buildContextSection = (
+  inputs: PromptInputs,
+  analysisReport: AnalysisReport | null,
+): string => {
   const { useAnalysisData, selectedReportSections } = inputs;
 
   if (
-    useAnalysisData &&
-    analysisReport &&
-    selectedReportSections &&
-    selectedReportSections.length > 0
+    !useAnalysisData ||
+    !analysisReport ||
+    !selectedReportSections ||
+    selectedReportSections.length === 0
   ) {
-    const cleanReport = JSON.parse(JSON.stringify(analysisReport));
-
-    // ✅ 检测报告格式：新格式（带 metadata 和 analysisReport）vs 旧格式
-    const hasMetadata = cleanReport.metadata && cleanReport.analysisReport;
-
-    if (hasMetadata) {
-      // 处理新格式：{ metadata: {...}, analysisReport: { 'title-keywords': {...}, ... } }
-      const report = cleanReport.analysisReport;
-      const finalContextObj: Record<string, unknown> = {};
-
-      // 根据 selectedReportSections 筛选对应的分析目标
-      selectedReportSections.forEach((targetId) => {
-        if (report[targetId]) {
-          finalContextObj[targetId] = report[targetId];
-        }
-      });
-
-      if (Object.keys(finalContextObj).length > 0) {
-        return `\n[MARKET CONTEXT]\n**Competitor Insights (JSON):**\n${JSON.stringify(
-          finalContextObj,
-          null,
-          2
-        )}\n`;
-      }
-    } else {
-      // 处理旧格式（向后兼容）
-      // 删除不必要的元数据
-      [
-        "meta",
-        "GeneratedByModel",
-        "GeneratedAt",
-        "templateUsed",
-        "raw_response",
-        "language",
-        "targetMarket",
-        "marketplace",
-      ].forEach((k) => delete cleanReport[k]);
-
-      const finalContextObj: Record<string, unknown> = {};
-      selectedReportSections.forEach((key) => {
-        if (cleanReport[key]) finalContextObj[key] = cleanReport[key];
-      });
-
-      if (Object.keys(finalContextObj).length > 0) {
-        return `\n[MARKET CONTEXT]\n**Competitor Insights (JSON):**\n${JSON.stringify(
-          finalContextObj,
-          null,
-          2
-        )}\n`;
-      }
-    }
+    return "";
   }
-  return "";
+
+  const cleanReport = JSON.parse(JSON.stringify(analysisReport)) as Record<
+    string,
+    unknown
+  >;
+
+  // ✅ 检测报告格式：新格式（带 metadata 和 analysisReport）vs 旧格式
+  const hasMetadata =
+    cleanReport.metadata &&
+    cleanReport.analysisReport &&
+    typeof cleanReport.analysisReport === "object";
+
+  const report: Record<string, unknown> = hasMetadata
+    ? (cleanReport.analysisReport as Record<string, unknown>)
+    : (() => {
+        // 旧格式：删除不必要的元数据字段后直接使用
+        [
+          "meta",
+          "GeneratedByModel",
+          "GeneratedAt",
+          "templateUsed",
+          "raw_response",
+          "language",
+          "targetMarket",
+          "marketplace",
+        ].forEach((k) => delete cleanReport[k]);
+        return cleanReport;
+      })();
+
+  const markdownSections: string[] = [];
+
+  selectedReportSections.forEach((targetId) => {
+    if (!report[targetId]) return;
+    const md = convertSectionToMarkdown(targetId, report[targetId]);
+    if (md) markdownSections.push(md);
+  });
+
+  if (markdownSections.length === 0) return "";
+
+  return `\n[MARKET CONTEXT]\n### Competitor Intelligence Report\n\n${markdownSections.join("\n\n")}\n`;
 };
 
 /**
@@ -91,7 +599,10 @@ const buildProductSection = (inputs: PromptInputs): string => {
 /**
  * 构建 SEO 部分 (SEO Section)
  */
-const buildSeoSection = (inputs: PromptInputs, mode: 'master' | 'visual' = "master"): string => {
+const buildSeoSection = (
+  inputs: PromptInputs,
+  mode: "master" | "visual" = "master",
+): string => {
   const { keywordsTier1, keywordsTier2, socialHook, negative } = inputs;
   const seoParts: string[] = [];
   const isVisual = mode === "visual";
@@ -127,16 +638,20 @@ const buildSeoSection = (inputs: PromptInputs, mode: 'master' | 'visual' = "mast
     : "";
 };
 
-// ----------------------------------------
+// ============================================================
 // 主服务导出
-// ----------------------------------------
+// ============================================================
 
 export const promptlabService = {
   /**
    * 生成 Listing Prompt
    */
-  generateMasterPrompt: (inputs: PromptInputs, analysisReport: AnalysisReport | null): string => {
-    const { tone, targetMarket, useCosmo, useRufus, useEmoji, customStrategy } = inputs;
+  generateMasterPrompt: (
+    inputs: PromptInputs,
+    analysisReport: AnalysisReport | null,
+  ): string => {
+    const { tone, targetMarket, useCosmo, useRufus, useEmoji, customStrategy } =
+      inputs;
 
     // 复用 Helper 函数生成基础模块
     const contextSection = buildContextSection(inputs, analysisReport);
@@ -149,14 +664,14 @@ export const promptlabService = {
     // 语言
     if (targetMarket) {
       styleInstructions.push(
-        `**LANGUAGE:** Aimming at ${targetMarket} market (Use native idioms and phrasing, correct grammar, and cultural relevance, instead of translating).`
+        `**LANGUAGE:** Aimming at ${targetMarket} market (Use native idioms and phrasing, correct grammar, and cultural relevance, instead of translating).`,
       );
     }
 
     // 语气
     if (tone === "professional")
       styleInstructions.push(
-        "Tone: Professional, authoritative, yet approachable."
+        "Tone: Professional, authoritative, yet approachable.",
       );
     if (tone === "exciting")
       styleInstructions.push("Tone: Energetic, exciting.");
@@ -222,7 +737,10 @@ Generate the complete Amazon Listing following the structure below:
   /**
    * 生成 Visual Blueprint
    */
-  generateVisualPrompt: (inputs: PromptInputs, analysisReport: AnalysisReport | null): string => {
+  generateVisualPrompt: (
+    inputs: PromptInputs,
+    analysisReport: AnalysisReport | null,
+  ): string => {
     const { targetMarket } = inputs;
 
     // 复用 Helper 函数生成基础模块
@@ -248,7 +766,7 @@ You must map the "Competitor Insights" directly to visual elements:
 3. **Buying Hesitations** -> Convert into **"Comparison Tables"** or **"Info-graphic Breakdowns"**.
 
 # OUTPUT TASK
-Create a structured **A+ Content Blueprint** (Standard 5-Module Layout + Brand Story). 
+Create a structured **A+ Content Blueprint** (Standard 5-Module Layout + Brand Story).
 For EACH module, provide:
 1.  **Module Type**: (e.g., Standard Header Image, Four Image/Text, Comparison Chart).
 2.  **Visual Goal**: What psychological trigger are we hitting?
@@ -256,7 +774,7 @@ For EACH module, provide:
 4.  **Overlay Copy**: The minimal text text/headline on the image.
 
 # OUTPUT FORMAT (Strict Markdown)
- 
+
 ## 1. Brand Story (Background Strategy)
 * **Hero Image**: [Describe the mood/setting]
 * **Slogan**: [Short, punchy brand statement]
