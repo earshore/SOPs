@@ -1933,7 +1933,7 @@ export function getPromptById(promptId: string): PromptItem | undefined {
  */
 export function searchPrompts(keyword: string): PromptItem[] {
     const lowerKeyword = keyword.toLowerCase();
-    return PROMPT_LIBRARY.filter(p => 
+    return PROMPT_LIBRARY.filter(p =>
         p.title.toLowerCase().includes(lowerKeyword) ||
         p.description.toLowerCase().includes(lowerKeyword) ||
         p.prompt.toLowerCase().includes(lowerKeyword)

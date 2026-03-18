@@ -1,6 +1,7 @@
 <div class="module-container" x-data="promptlabPanel">
     <!-- ========== Welcome Banner ========== -->
-    <div class="wb-container mb-8" style="--wb-gradient-1: rgba(239, 246, 255, 0.95); --wb-gradient-2: rgba(219, 234, 254, 0.90);">
+    <div class="wb-container mb-8"
+        style="--wb-gradient-1: rgba(239, 246, 255, 0.95); --wb-gradient-2: rgba(219, 234, 254, 0.90);">
         <div class="wb-card">
             <div class="wb-bg-gradient"></div>
             <div class="wb-orb wb-orb-1"></div>
@@ -73,9 +74,7 @@
                         </h3>
                         <div class="flex items-center gap-2">
                             <!-- 从报告加载按钮 -->
-                            <button
-                                @click="autoPopulateDNA"
-                                :disabled="!hasReport"
+                            <button @click="autoPopulateDNA" :disabled="!hasReport"
                                 :class="hasReport ? 'bg-blue-500 hover:bg-blue-600 text-white cursor-pointer' : 'bg-slate-200 text-slate-400 cursor-not-allowed'"
                                 class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5"
                                 title="从AI分析报告自动提取产品DNA">
@@ -107,8 +106,8 @@
 
                                     <!-- 置信度徽章 -->
                                     <span x-show="dnaConfidence.keywords > 0"
-                                          :class="dnaConfidence.keywords >= 70 ? 'bg-green-100 text-green-700' : dnaConfidence.keywords >= 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-orange-100 text-orange-700'"
-                                          class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold">
+                                        :class="dnaConfidence.keywords >= 70 ? 'bg-green-100 text-green-700' : dnaConfidence.keywords >= 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-orange-100 text-orange-700'"
+                                        class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold">
                                         <i class="fas fa-chart-line text-[8px]"></i>
                                         <span x-text="`${dnaConfidence.keywords}%`"></span>
                                     </span>
@@ -138,14 +137,13 @@
 
                                     <!-- 置信度徽章 -->
                                     <span x-show="dnaConfidence.keywords > 0"
-                                          :class="dnaConfidence.keywords >= 70 ? 'bg-green-100 text-green-700' : dnaConfidence.keywords >= 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-orange-100 text-orange-700'"
-                                          class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold">
+                                        :class="dnaConfidence.keywords >= 70 ? 'bg-green-100 text-green-700' : dnaConfidence.keywords >= 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-orange-100 text-orange-700'"
+                                        class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold">
                                         <i class="fas fa-chart-line text-[8px]"></i>
                                         <span x-text="`${dnaConfidence.keywords}%`"></span>
                                     </span>
                                 </label>
-                                <textarea @input="onInputChange"
-                                    @focus="expandInput($event)"
+                                <textarea @input="onInputChange" @focus="expandInput($event)"
                                     @blur="restoreInput($event)"
                                     class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all resize-none placeholder:text-slate-300 font-mono"
                                     id="lab-keywords-tier2"
@@ -161,18 +159,16 @@
 
                                     <!-- 置信度徽章 -->
                                     <span x-show="dnaConfidence.audience > 0"
-                                          :class="dnaConfidence.audience >= 70 ? 'bg-green-100 text-green-700' : dnaConfidence.audience >= 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-orange-100 text-orange-700'"
-                                          class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold">
+                                        :class="dnaConfidence.audience >= 70 ? 'bg-green-100 text-green-700' : dnaConfidence.audience >= 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-orange-100 text-orange-700'"
+                                        class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold">
                                         <i class="fas fa-chart-line text-[8px]"></i>
                                         <span x-text="`${dnaConfidence.audience}%`"></span>
                                     </span>
 
                                     <!-- 单字段提取按钮 -->
-                                    <button @click="extractSingleField('audience')"
-                                            :disabled="!hasReport"
-                                            :class="hasReport ? 'text-blue-600 hover:bg-blue-50' : 'text-slate-300 cursor-not-allowed'"
-                                            class="text-[10px] px-2 py-1 rounded transition-all"
-                                            title="仅重新提取此字段">
+                                    <button @click="extractSingleField('audience')" :disabled="!hasReport"
+                                        :class="hasReport ? 'text-blue-600 hover:bg-blue-50' : 'text-slate-300 cursor-not-allowed'"
+                                        class="text-[10px] px-2 py-1 rounded transition-all" title="仅重新提取此字段">
                                         <i class="fas fa-rotate text-[8px]"></i>
                                     </button>
                                 </label>
@@ -190,23 +186,20 @@
 
                                     <!-- 置信度徽章 -->
                                     <span x-show="dnaConfidence.usps > 0"
-                                          :class="dnaConfidence.usps >= 70 ? 'bg-green-100 text-green-700' : dnaConfidence.usps >= 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-orange-100 text-orange-700'"
-                                          class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold">
+                                        :class="dnaConfidence.usps >= 70 ? 'bg-green-100 text-green-700' : dnaConfidence.usps >= 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-orange-100 text-orange-700'"
+                                        class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold">
                                         <i class="fas fa-chart-line text-[8px]"></i>
                                         <span x-text="`${dnaConfidence.usps}%`"></span>
                                     </span>
 
                                     <!-- 单字段提取按钮 -->
-                                    <button @click="extractSingleField('usps')"
-                                            :disabled="!hasReport"
-                                            :class="hasReport ? 'text-blue-600 hover:bg-blue-50' : 'text-slate-300 cursor-not-allowed'"
-                                            class="text-[10px] px-2 py-1 rounded transition-all"
-                                            title="仅重新提取此字段">
+                                    <button @click="extractSingleField('usps')" :disabled="!hasReport"
+                                        :class="hasReport ? 'text-blue-600 hover:bg-blue-50' : 'text-slate-300 cursor-not-allowed'"
+                                        class="text-[10px] px-2 py-1 rounded transition-all" title="仅重新提取此字段">
                                         <i class="fas fa-rotate text-[8px]"></i>
                                     </button>
                                 </label>
-                                <textarea @input="onInputChange"
-                                    @focus="expandInput($event)"
+                                <textarea @input="onInputChange" @focus="expandInput($event)"
                                     @blur="restoreInput($event)"
                                     class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all resize-none placeholder:text-slate-300"
                                     id="lab-usps" placeholder="- 专利静音技术 (&lt;28dB)
@@ -221,23 +214,20 @@
 
                                     <!-- 置信度徽章 -->
                                     <span x-show="dnaConfidence.specs > 0"
-                                          :class="dnaConfidence.specs >= 70 ? 'bg-green-100 text-green-700' : dnaConfidence.specs >= 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-orange-100 text-orange-700'"
-                                          class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold">
+                                        :class="dnaConfidence.specs >= 70 ? 'bg-green-100 text-green-700' : dnaConfidence.specs >= 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-orange-100 text-orange-700'"
+                                        class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold">
                                         <i class="fas fa-chart-line text-[8px]"></i>
                                         <span x-text="`${dnaConfidence.specs}%`"></span>
                                     </span>
 
                                     <!-- 单字段提取按钮 -->
-                                    <button @click="extractSingleField('specs')"
-                                            :disabled="!hasReport"
-                                            :class="hasReport ? 'text-blue-600 hover:bg-blue-50' : 'text-slate-300 cursor-not-allowed'"
-                                            class="text-[10px] px-2 py-1 rounded transition-all"
-                                            title="仅重新提取此字段">
+                                    <button @click="extractSingleField('specs')" :disabled="!hasReport"
+                                        :class="hasReport ? 'text-blue-600 hover:bg-blue-50' : 'text-slate-300 cursor-not-allowed'"
+                                        class="text-[10px] px-2 py-1 rounded transition-all" title="仅重新提取此字段">
                                         <i class="fas fa-rotate text-[8px]"></i>
                                     </button>
                                 </label>
-                                <textarea @input="onInputChange"
-                                    @focus="expandInput($event)"
+                                <textarea @input="onInputChange" @focus="expandInput($event)"
                                     @blur="restoreInput($event)"
                                     class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all resize-none placeholder:text-slate-300 font-mono"
                                     id="lab-specs" placeholder="材质: ABS + PP
@@ -360,9 +350,7 @@
                                 <span class="w-1 h-3.5 bg-slate-300 rounded-full"></span>
                                 自定义规则 <span class="text-slate-400 font-normal">- 有就填</span>
                             </label>
-                            <textarea @input="onInputChange"
-                                @focus="expandInput($event)"
-                                @blur="restoreInput($event)"
+                            <textarea @input="onInputChange" @focus="expandInput($event)" @blur="restoreInput($event)"
                                 class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all resize-none placeholder:text-slate-300"
                                 id="lab-custom-strategy" placeholder="例如: 禁止使用'Best Seller'词汇..." rows="1"
                                 x-model="profile.customStrategy"></textarea>

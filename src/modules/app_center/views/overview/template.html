@@ -1,6 +1,7 @@
 <div class="module-container">
     <!-- Welcome Banner -->
-    <div class="wb-container mb-8" style="--wb-gradient-1: rgba(239, 246, 255, 0.95); --wb-gradient-2: rgba(219, 234, 254, 0.90); --wb-orb-1-color: rgba(96, 165, 250, 0.15); --wb-orb-2-color: rgba(147, 197, 253, 0.12); --wb-orb-3-color: rgba(59, 130, 246, 0.08); --wb-particle-color: rgba(59, 130, 246, 0.6);">
+    <div class="wb-container mb-8"
+        style="--wb-gradient-1: rgba(239, 246, 255, 0.95); --wb-gradient-2: rgba(219, 234, 254, 0.90); --wb-orb-1-color: rgba(96, 165, 250, 0.15); --wb-orb-2-color: rgba(147, 197, 253, 0.12); --wb-orb-3-color: rgba(59, 130, 246, 0.08); --wb-particle-color: rgba(59, 130, 246, 0.6);">
         <div class="wb-card">
             <!-- 背景装饰 -->
             <div class="wb-bg-gradient"></div>
@@ -50,15 +51,18 @@
                                 <span>数据采集</span>
                             </li>
                             <li class="wb-tag" role="listitem">
-                                <div class="wb-tag-dot" style="background-color: var(--wb-tag-dot-2, #06b6d4);" aria-hidden="true"></div>
+                                <div class="wb-tag-dot" style="background-color: var(--wb-tag-dot-2, #06b6d4);"
+                                    aria-hidden="true"></div>
                                 <span>AI 分析</span>
                             </li>
                             <li class="wb-tag" role="listitem">
-                                <div class="wb-tag-dot" style="background-color: var(--wb-tag-dot-3, #8b5cf6);" aria-hidden="true"></div>
+                                <div class="wb-tag-dot" style="background-color: var(--wb-tag-dot-3, #8b5cf6);"
+                                    aria-hidden="true"></div>
                                 <span>关键词优化</span>
                             </li>
                             <li class="wb-tag" role="listitem">
-                                <div class="wb-tag-dot" style="background-color: var(--wb-tag-dot-4, #3b82f6);" aria-hidden="true"></div>
+                                <div class="wb-tag-dot" style="background-color: var(--wb-tag-dot-4, #3b82f6);"
+                                    aria-hidden="true"></div>
                                 <span>数据管理</span>
                             </li>
                         </ul>
@@ -70,22 +74,19 @@
 
     <!-- 分类筛选器 -->
     <div class="mb-6 flex items-center gap-3 overflow-x-auto pb-2">
-        <button 
+        <button
             class="category-filter-btn active px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium transition-all whitespace-nowrap hover:bg-blue-600"
-            data-category="all"
-        >
+            data-category="all">
             <i class="fas fa-th mr-2"></i>全部应用
         </button>
-        <button 
+        <button
             class="category-filter-btn px-4 py-2 bg-white text-slate-700 border border-slate-300 rounded-lg text-sm font-medium transition-all whitespace-nowrap hover:bg-slate-50"
-            data-category="master_analysis"
-        >
+            data-category="master_analysis">
             <i class="fas fa-robot mr-2"></i>Master Analysis
         </button>
-        <button 
+        <button
             class="category-filter-btn px-4 py-2 bg-white text-slate-700 border border-slate-300 rounded-lg text-sm font-medium transition-all whitespace-nowrap hover:bg-slate-50"
-            data-category="keyword_tracker"
-        >
+            data-category="keyword_tracker">
             <i class="fas fa-search mr-2"></i>Keyword Hunter
         </button>
     </div>
@@ -102,31 +103,33 @@
                     <p class="text-sm text-slate-500">集成数据采集、分析与关键词优化的专业工具套件</p>
                 </div>
             </div>
-            
+
             <div class="app-center-card-grid">
                 <!-- Master Analysis 卡片 -->
                 <div class="bg-white rounded-xl border-l-4 border-blue-500 shadow-sm hover:shadow-md transition-all duration-300 p-6 cursor-pointer group"
-                     data-action="switch-tab"
-                     data-tab="scraper"
-                     data-category="master_analysis">
+                    data-action="switch-tab" data-tab="scraper" data-category="master_analysis">
                     <div class="flex items-start justify-between mb-3">
                         <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white">
+                            <div
+                                class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white">
                                 <i class="fas fa-robot text-xl"></i>
                             </div>
                             <div>
-                                <h3 class="text-lg font-bold text-slate-800 group-hover:text-blue-600 transition-colors">
+                                <h3
+                                    class="text-lg font-bold text-slate-800 group-hover:text-blue-600 transition-colors">
                                     Master Analysis
                                 </h3>
                                 <div class="flex items-center gap-2 mt-1">
-                                    <span class="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-medium">
+                                    <span
+                                        class="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-medium">
                                         <i class="fas fa-check-circle mr-1"></i>Active
                                     </span>
                                     <span class="text-xs text-slate-500">v1.0</span>
                                 </div>
                             </div>
                         </div>
-                        <i class="fas fa-arrow-right text-slate-400 group-hover:text-blue-500 group-hover:translate-x-1 transition-all"></i>
+                        <i
+                            class="fas fa-arrow-right text-slate-400 group-hover:text-blue-500 group-hover:translate-x-1 transition-all"></i>
                     </div>
                     <p class="text-slate-600 text-sm leading-relaxed mb-4">
                         强大的数据采集与AI分析工具，支持竞品数据抓取、数据管理、智能分析和Prompt实验室功能。
@@ -142,27 +145,29 @@
 
                 <!-- Keyword Hunter 卡片 -->
                 <div class="bg-white rounded-xl border-l-4 border-purple-500 shadow-sm hover:shadow-md transition-all duration-300 p-6 cursor-pointer group"
-                     data-action="switch-tab"
-                     data-tab="kw_input"
-                     data-category="keyword_tracker">
+                    data-action="switch-tab" data-tab="kw_input" data-category="keyword_tracker">
                     <div class="flex items-start justify-between mb-3">
                         <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center text-white">
+                            <div
+                                class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center text-white">
                                 <i class="fas fa-search text-xl"></i>
                             </div>
                             <div>
-                                <h3 class="text-lg font-bold text-slate-800 group-hover:text-purple-600 transition-colors">
+                                <h3
+                                    class="text-lg font-bold text-slate-800 group-hover:text-purple-600 transition-colors">
                                     Keyword Hunter
                                 </h3>
                                 <div class="flex items-center gap-2 mt-1">
-                                    <span class="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-medium">
+                                    <span
+                                        class="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-medium">
                                         <i class="fas fa-check-circle mr-1"></i>Active
                                     </span>
                                     <span class="text-xs text-slate-500">v1.0</span>
                                 </div>
                             </div>
                         </div>
-                        <i class="fas fa-arrow-right text-slate-400 group-hover:text-purple-500 group-hover:translate-x-1 transition-all"></i>
+                        <i
+                            class="fas fa-arrow-right text-slate-400 group-hover:text-purple-500 group-hover:translate-x-1 transition-all"></i>
                     </div>
                     <p class="text-slate-600 text-sm leading-relaxed mb-4">
                         专业的关键词优化与追踪工具，提供关键词输入、处理分析和数据可视化功能，助力SEO优化。

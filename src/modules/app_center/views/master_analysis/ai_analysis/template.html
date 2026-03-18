@@ -1,6 +1,7 @@
 <div class="module-container" x-data="aiAnalysisPanel">
   <!-- Welcome Banner -->
-  <div class="wb-container mb-8" style="--wb-gradient-1: rgba(239, 246, 255, 0.95); --wb-gradient-2: rgba(219, 234, 254, 0.90); --wb-orb-1-color: rgba(96, 165, 250, 0.15); --wb-orb-2-color: rgba(147, 197, 253, 0.12); --wb-orb-3-color: rgba(59, 130, 246, 0.08); --wb-particle-color: rgba(59, 130, 246, 0.6);">
+  <div class="wb-container mb-8"
+    style="--wb-gradient-1: rgba(239, 246, 255, 0.95); --wb-gradient-2: rgba(219, 234, 254, 0.90); --wb-orb-1-color: rgba(96, 165, 250, 0.15); --wb-orb-2-color: rgba(147, 197, 253, 0.12); --wb-orb-3-color: rgba(59, 130, 246, 0.08); --wb-particle-color: rgba(59, 130, 246, 0.6);">
     <div class="wb-card">
       <div class="wb-bg-gradient"></div>
       <div class="wb-orb wb-orb-1"></div>
@@ -106,7 +107,8 @@
                       class="flex items-center gap-3 p-3 rounded-lg border-2 transition-all cursor-pointer hover:bg-indigo-50">
                       <input :checked="selectedAsins.includes(asinItem)" :disabled="isAnalyzing"
                         @change="toggleAsin(asinItem)"
-                        class="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500" type="checkbox" />
+                        class="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500"
+                        type="checkbox" />
                       <span :class="selectedAsins.includes(asinItem) ? 'text-indigo-700' : 'text-slate-700'"
                         class="flex-1 font-mono text-sm font-semibold" x-text="asinItem"></span>
                       <i class="fa-solid fa-check text-indigo-600" x-show="selectedAsins.includes(asinItem)"></i>
@@ -160,7 +162,9 @@
                       <template x-if="hasScraperData">
                         <div>
                           <p class="font-semibold mb-1">数据源已加载</p>
-                          <p x-text="'包含 ' + currentProducts.length + ' 个产品，共 ' + currentProducts.reduce((sum, p) =&gt; sum + p.customer_reviews.length, 0) + ' 条评论'"></p>
+                          <p
+                            x-text="'包含 ' + currentProducts.length + ' 个产品，共 ' + currentProducts.reduce((sum, p) =&gt; sum + p.customer_reviews.length, 0) + ' 条评论'">
+                          </p>
                           <p class="text-slate-300 mt-1.5 flex items-center gap-1">
                             <i class="fa-solid fa-globe"></i>
                             <span x-text="'市场: ' + dataSourceMarketplace + ' · 抓取时间: ' + dataSourceTimestamp"></span>
@@ -178,7 +182,9 @@
                         </div>
                       </template>
                     </div>
-                    <div class="absolute left-4 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-slate-800"></div>
+                    <div
+                      class="absolute left-4 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-slate-800">
+                    </div>
                   </div>
                 </div>
               </div>
@@ -548,14 +554,13 @@
             </div>
             <div class="relative flex items-center gap-3">
               <!-- 性能设置按钮 -->
-              <button
-                @click="perfSettings.toggleSettings()"
+              <button @click="perfSettings.toggleSettings()"
                 class="px-4 py-5 rounded-xl font-medium text-sm transition-all duration-300 flex items-center gap-2 bg-white/10 text-white hover:bg-white/20 border border-white/20 hover:border-white/30"
                 title="性能设置">
                 <i class="fa-solid fa-sliders"></i>
                 <span class="hidden sm:inline">性能设置</span>
               </button>
-              
+
               <!-- 开始分析按钮 -->
               <button
                 :class="isAnalyzing ? 'bg-white/20 text-white cursor-wait backdrop-blur-sm border border-white/30' : !(selectedTargets.length &gt; 0 &amp;&amp; hasData &amp;&amp; !isAnalyzing) ? 'bg-white/10 text-white/40 cursor-not-allowed border border-white/10' : 'bg-white text-indigo-600 hover:bg-indigo-50 hover:scale-105 border border-white/50'"
@@ -636,13 +641,12 @@
         </div>
       </div>
     </div>
-    
+
     <!-- 性能设置模态框 -->
     <template x-if="perfSettings.showSettings">
       <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
         @click.self="perfSettings.toggleSettings()">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-          @click.stop>
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" @click.stop>
           <!-- Header -->
           <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white">
             <div class="flex items-center justify-between">
@@ -650,8 +654,7 @@
                 <i class="fa-solid fa-sliders text-2xl"></i>
                 <h2 class="text-2xl font-bold">性能设置</h2>
               </div>
-              <button @click="perfSettings.toggleSettings()"
-                class="hover:bg-white/20 rounded-lg p-2 transition-colors">
+              <button @click="perfSettings.toggleSettings()" class="hover:bg-white/20 rounded-lg p-2 transition-colors">
                 <i class="fa-solid fa-times text-xl"></i>
               </button>
             </div>
@@ -666,39 +669,41 @@
                 <i class="fa-solid fa-gauge-high text-indigo-600 mr-2"></i>
                 最大并发数
               </label>
-              
               <!-- 自定义滑块容器 -->
               <div class="relative py-6">
+
                 <!-- 渐变轨道背景 -->
-                <div class="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-3 bg-gradient-to-r from-blue-100 via-indigo-100 to-purple-100 rounded-full shadow-inner pointer-events-none"></div>
-                
+                <div
+                  class="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-3 bg-gradient-to-r from-blue-100 via-indigo-100 to-purple-100 rounded-full shadow-inner pointer-events-none">
+                </div>
+
                 <!-- 激活部分的渐变轨道 -->
-                <div class="absolute left-0 top-1/2 -translate-y-1/2 h-3 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 rounded-full transition-all duration-300 shadow-md pointer-events-none"
+                <div
+                  class="absolute left-0 top-1/2 -translate-y-1/2 h-3 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 rounded-full transition-all duration-300 shadow-md pointer-events-none"
                   :style="`width: calc(${((perfSettings.settings.maxConcurrency - 1) / 7) * 100}%)`"></div>
-                
+
                 <!-- 刻度标记 -->
                 <div class="absolute left-0 right-0 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none">
                   <template x-for="i in 8" :key="i">
                     <div class="relative flex flex-col items-center">
                       <!-- 刻度点 -->
                       <div class="w-2.5 h-2.5 rounded-full transition-all duration-200"
-                        :class="i <= perfSettings.settings.maxConcurrency ? 'bg-white shadow-lg scale-110' : 'bg-slate-300'"></div>
+                        :class="i <= perfSettings.settings.maxConcurrency ? 'bg-white shadow-lg scale-110' : 'bg-slate-300'">
+                      </div>
                     </div>
                   </template>
                 </div>
-                
+
                 <!-- 原生滑块（透明覆盖） -->
-                <input type="range" min="1" max="8" step="1"
-                  x-model.number="perfSettings.settings.maxConcurrency"
+                <input type="range" min="1" max="8" step="1" x-model.number="perfSettings.settings.maxConcurrency"
                   class="concurrency-slider absolute left-0 right-0 top-1/2 -translate-y-1/2 w-full bg-transparent appearance-none cursor-pointer z-10"
-                  aria-label="最大并发数"
-                  @input="perfSettings.updateCacheStats()">
-                
+                  aria-label="最大并发数" @input="perfSettings.updateCacheStats()">
+
                 <!-- 档位标签 -->
                 <div class="absolute left-0 right-0 -bottom-6 flex justify-between text-xs font-medium">
                   <span class="transition-colors duration-200"
                     :class="perfSettings.settings.maxConcurrency <= 2 ? 'text-blue-600' : 'text-slate-400'">
-                    <i class="fa-solid fa-turtle mr-1"></i>慢速
+                    <i class="fa-solid fa-hourglass-start mr-1"></i>慢速
                   </span>
                   <span class="transition-colors duration-200"
                     :class="perfSettings.settings.maxConcurrency >= 3 && perfSettings.settings.maxConcurrency <= 4 ? 'text-indigo-600' : 'text-slate-400'">
@@ -714,33 +719,28 @@
                   </span>
                 </div>
               </div>
-              
+
               <!-- 当前值显示 -->
-              <div class="flex items-center justify-center gap-3 py-2">
-                <div class="flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300"
-                  :class="{
+              <div class="flex items-center justify-center gap-3">
+                <div class="flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300" :class="{
                     'bg-blue-50 border-2 border-blue-200': perfSettings.settings.maxConcurrency <= 2,
                     'bg-indigo-50 border-2 border-indigo-200': perfSettings.settings.maxConcurrency >= 3 && perfSettings.settings.maxConcurrency <= 4,
                     'bg-purple-50 border-2 border-purple-200': perfSettings.settings.maxConcurrency >= 5 && perfSettings.settings.maxConcurrency <= 6,
                     'bg-purple-100 border-2 border-purple-300': perfSettings.settings.maxConcurrency >= 7
                   }">
-                  <i class="text-xl transition-colors duration-300"
-                    :class="{
-                      'fa-solid fa-turtle text-blue-600': perfSettings.settings.maxConcurrency <= 2,
+                  <i class="text-xl transition-colors duration-300" :class="{
+                      'fa-solid fa-hourglass-start text-blue-600': perfSettings.settings.maxConcurrency <= 2,
                       'fa-solid fa-gauge text-indigo-600': perfSettings.settings.maxConcurrency >= 3 && perfSettings.settings.maxConcurrency <= 4,
                       'fa-solid fa-bolt text-purple-600': perfSettings.settings.maxConcurrency >= 5 && perfSettings.settings.maxConcurrency <= 6,
                       'fa-solid fa-rocket text-purple-700': perfSettings.settings.maxConcurrency >= 7
                     }"></i>
-                  <span class="text-3xl font-bold transition-colors duration-300"
-                    :class="{
+                  <span class="text-3xl font-bold transition-colors duration-300" :class="{
                       'text-blue-600': perfSettings.settings.maxConcurrency <= 2,
                       'text-indigo-600': perfSettings.settings.maxConcurrency >= 3 && perfSettings.settings.maxConcurrency <= 4,
                       'text-purple-600': perfSettings.settings.maxConcurrency >= 5 && perfSettings.settings.maxConcurrency <= 6,
                       'text-purple-700': perfSettings.settings.maxConcurrency >= 7
-                    }"
-                    x-text="perfSettings.settings.maxConcurrency"></span>
-                  <span class="text-sm font-medium transition-colors duration-300"
-                    :class="{
+                    }" x-text="perfSettings.settings.maxConcurrency"></span>
+                  <span class="text-sm font-medium transition-colors duration-300" :class="{
                       'text-blue-600': perfSettings.settings.maxConcurrency <= 2,
                       'text-indigo-600': perfSettings.settings.maxConcurrency >= 3 && perfSettings.settings.maxConcurrency <= 4,
                       'text-purple-600': perfSettings.settings.maxConcurrency >= 5 && perfSettings.settings.maxConcurrency <= 6,
@@ -748,10 +748,8 @@
                     }">并发</span>
                 </div>
               </div>
-              
               <!-- 档位说明卡片 -->
-              <div class="relative overflow-hidden rounded-xl border-2 transition-all duration-300"
-                :class="{
+              <div class="relative overflow-hidden rounded-xl border-1 transition-all duration-300" :class="{
                   'bg-blue-50 border-blue-200': perfSettings.settings.maxConcurrency <= 2,
                   'bg-indigo-50 border-indigo-200': perfSettings.settings.maxConcurrency >= 3 && perfSettings.settings.maxConcurrency <= 4,
                   'bg-purple-50 border-purple-200': perfSettings.settings.maxConcurrency >= 5 && perfSettings.settings.maxConcurrency <= 6,
@@ -760,14 +758,12 @@
                 <div class="p-4">
                   <div class="flex items-center gap-3">
                     <i class="fa-solid fa-lightbulb text-amber-500 text-lg"></i>
-                    <p class="text-sm font-semibold transition-colors duration-300 flex-shrink-0"
-                      :class="{
+                    <p class="text-sm font-semibold transition-colors duration-300 flex-shrink-0" :class="{
                         'text-blue-800': perfSettings.settings.maxConcurrency <= 2,
                         'text-indigo-800': perfSettings.settings.maxConcurrency >= 3 && perfSettings.settings.maxConcurrency <= 4,
                         'text-purple-800': perfSettings.settings.maxConcurrency >= 5 && perfSettings.settings.maxConcurrency <= 6,
                         'text-purple-900': perfSettings.settings.maxConcurrency >= 7
-                      }"
-                      x-text="perfSettings.getConcurrencyHint()"></p>
+                      }" x-text="perfSettings.getConcurrencyHint()"></p>
                     <div class="flex items-center gap-4 text-xs ml-auto">
                       <div class="flex items-center gap-1.5">
                         <i class="fa-solid fa-gauge-high"></i>
@@ -775,7 +771,8 @@
                         <div class="flex gap-0.5">
                           <template x-for="i in 8" :key="i">
                             <div class="w-1 h-3 rounded-full transition-all duration-200"
-                              :class="i <= perfSettings.settings.maxConcurrency ? 'bg-current opacity-100' : 'bg-current opacity-20'"></div>
+                              :class="i <= perfSettings.settings.maxConcurrency ? 'bg-current opacity-100' : 'bg-current opacity-20'">
+                            </div>
                           </template>
                         </div>
                       </div>
@@ -785,7 +782,8 @@
                         <div class="flex gap-0.5">
                           <template x-for="i in 8" :key="i">
                             <div class="w-1 h-3 rounded-full transition-all duration-200"
-                              :class="i <= (9 - perfSettings.settings.maxConcurrency) ? 'bg-current opacity-100' : 'bg-current opacity-20'"></div>
+                              :class="i <= (9 - perfSettings.settings.maxConcurrency) ? 'bg-current opacity-100' : 'bg-current opacity-20'">
+                            </div>
                           </template>
                         </div>
                       </div>
@@ -793,10 +791,11 @@
                   </div>
                 </div>
               </div>
-              
+
               <!-- 性能预览卡片 -->
-              <div class="grid grid-cols-2 gap-3">
-                <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 transition-all duration-300 hover:shadow-md cursor-pointer">
+              <!-- <div class="grid grid-cols-2 gap-3">
+                <div
+                  class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 transition-all duration-300 hover:shadow-md cursor-pointer">
                   <div class="font-semibold text-emerald-700 mb-1 flex items-center gap-1.5">
                     <i class="fa-solid fa-rocket"></i>
                     <span>预计加速</span>
@@ -805,7 +804,8 @@
                     x-text="perfSettings.settings.maxConcurrency + 'x'"></div>
                   <div class="text-xs text-emerald-600 mt-1">相比串行执行</div>
                 </div>
-                <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 transition-all duration-300 hover:shadow-md cursor-pointer">
+                <div
+                  class="bg-blue-50 border border-blue-200 rounded-xl p-3 transition-all duration-300 hover:shadow-md cursor-pointer">
                   <div class="font-semibold text-blue-700 mb-1 flex items-center gap-1.5">
                     <i class="fa-solid fa-clock"></i>
                     <span>预计耗时</span>
@@ -814,7 +814,7 @@
                     x-text="Math.round(120 / perfSettings.settings.maxConcurrency) + '秒'"></div>
                   <div class="text-xs text-blue-600 mt-1">基于平均速度</div>
                 </div>
-              </div>
+              </div> -->
             </div>
 
             <!-- 缓存设置 -->
@@ -834,13 +834,12 @@
                 <input type="checkbox" x-model="perfSettings.settings.enableCache"
                   class="w-5 h-5 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-500 cursor-pointer">
               </label>
-              
+
               <!-- 缓存统计 -->
               <div class="bg-slate-50 rounded-lg p-4 space-y-2">
                 <div class="flex items-center justify-between text-sm">
                   <span class="text-slate-600">缓存项数量</span>
-                  <span class="font-semibold text-slate-800"
-                    x-text="perfSettings.cacheStats.count"></span>
+                  <span class="font-semibold text-slate-800" x-text="perfSettings.cacheStats.count"></span>
                 </div>
                 <div class="flex items-center justify-between text-sm">
                   <span class="text-slate-600">占用空间</span>
@@ -908,7 +907,7 @@
         </div>
       </div>
     </template>
-    
+
     <!-- JSON 查看器 - 已移动到分析报告卡片内 -->
     <!-- 分析结果展示 -->
     <template x-if="hasReport &amp;&amp; results.length &gt; 0">
@@ -1006,26 +1005,17 @@
                 </div>
               </div>
               <!-- 置信度卡片 -->
-              <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50"
-                   x-show="hasConfidenceData"
-                   role="status"
-                   aria-live="polite"
-                   aria-label="分析置信度">
-                <div class="flex items-center gap-3"
-                     role="progressbar"
-                     :aria-valuenow="overallConfidencePercent"
-                     aria-valuemin="0"
-                     aria-valuemax="100"
-                     :aria-label="`总体置信度 ${overallConfidencePercent}%`">
+              <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50" x-show="hasConfidenceData"
+                role="status" aria-live="polite" aria-label="分析置信度">
+                <div class="flex items-center gap-3" role="progressbar" :aria-valuenow="overallConfidencePercent"
+                  aria-valuemin="0" aria-valuemax="100" :aria-label="`总体置信度 ${overallConfidencePercent}%`">
                   <div class="w-10 h-10 rounded-lg flex items-center justify-center"
-                       :class="getConfidenceBgAlphaClass(overallConfidencePercent)">
-                    <i class="fa-solid fa-chart-line"
-                       aria-hidden="true"
-                       :class="getConfidenceTextLightClass(overallConfidencePercent)"></i>
+                    :class="getConfidenceBgAlphaClass(overallConfidencePercent)">
+                    <i class="fa-solid fa-chart-line" aria-hidden="true"
+                      :class="getConfidenceTextLightClass(overallConfidencePercent)"></i>
                   </div>
                   <div>
-                    <div class="text-xl font-bold"
-                         :class="getConfidenceTextLightClass(overallConfidencePercent)">
+                    <div class="text-xl font-bold" :class="getConfidenceTextLightClass(overallConfidencePercent)">
                       <span x-text="overallConfidencePercent"></span>%
                       <span class="text-xs ml-2" x-text="getConfidenceLevel(overallConfidencePercent)"></span>
                     </div>
@@ -1112,7 +1102,8 @@
                       <div class="flex items-center gap-2 text-xs text-slate-500">
                         <i class="fa-solid fa-code"></i>
                         <span class="font-mono truncate">{ "metadata": { "asins": [<span
-                            x-text="`&quot;${selectedAsins.join('&quot;, &quot;')}&quot;`"></span>], ... }, "analysisReport": {...} }</span>
+                            x-text="`&quot;${selectedAsins.join('&quot;, &quot;')}&quot;`"></span>], ... },
+                          "analysisReport": {...} }</span>
                       </div>
                     </div>
                   </template>
@@ -1164,12 +1155,13 @@
                             x-text="result.source"></span>
                           <!-- 置信度徽章 -->
                           <span x-show="hasConfidenceData && getTargetConfidence(result.targetId) > 0"
-                                class="text-xs px-2.5 py-1 rounded-full bg-white/90 border font-semibold backdrop-blur-sm flex items-center gap-1"
-                                :class="getConfidenceTextBorderClass(getTargetConfidence(result.targetId))"
-                                :aria-label="getConfidenceAriaLabel(getTargetConfidence(result.targetId))">
+                            class="text-xs px-2.5 py-1 rounded-full bg-white/90 border font-semibold backdrop-blur-sm flex items-center gap-1"
+                            :class="getConfidenceTextBorderClass(getTargetConfidence(result.targetId))"
+                            :aria-label="getConfidenceAriaLabel(getTargetConfidence(result.targetId))">
                             <i class="fa-solid fa-chart-line text-[10px]" aria-hidden="true"></i>
                             <span x-text="`${getTargetConfidence(result.targetId)}%`"></span>
-                            <span class="text-[10px] ml-0.5" x-text="getConfidenceLevel(getTargetConfidence(result.targetId))"></span>
+                            <span class="text-[10px] ml-0.5"
+                              x-text="getConfidenceLevel(getTargetConfidence(result.targetId))"></span>
                           </span>
                         </div>
                       </div>
@@ -1298,12 +1290,13 @@
                             x-text="result.source"></span>
                           <!-- 置信度徽章 -->
                           <span x-show="hasConfidenceData && getTargetConfidence(result.targetId) > 0"
-                                class="text-xs px-2.5 py-1 rounded-full bg-white/90 border font-semibold backdrop-blur-sm flex items-center gap-1"
-                                :class="getConfidenceTextBorderClass(getTargetConfidence(result.targetId))"
-                                :aria-label="getConfidenceAriaLabel(getTargetConfidence(result.targetId))">
+                            class="text-xs px-2.5 py-1 rounded-full bg-white/90 border font-semibold backdrop-blur-sm flex items-center gap-1"
+                            :class="getConfidenceTextBorderClass(getTargetConfidence(result.targetId))"
+                            :aria-label="getConfidenceAriaLabel(getTargetConfidence(result.targetId))">
                             <i class="fa-solid fa-chart-line text-[10px]" aria-hidden="true"></i>
                             <span x-text="`${getTargetConfidence(result.targetId)}%`"></span>
-                            <span class="text-[10px] ml-0.5" x-text="getConfidenceLevel(getTargetConfidence(result.targetId))"></span>
+                            <span class="text-[10px] ml-0.5"
+                              x-text="getConfidenceLevel(getTargetConfidence(result.targetId))"></span>
                           </span>
                         </div>
                       </div>
