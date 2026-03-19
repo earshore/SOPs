@@ -1,0 +1,1097 @@
+    /* 为了防止污染全局，建议保留原本的类名命名空间 amzf_ */
+    :root {
+        /* --amzf-primary: #4285f4; */
+        --amzf-primary: #667eea;
+        /* 统一主色调 */
+        --amzf-secondary: #34a853;
+        --amzf-accent: #fbbc04;
+        --amzf-danger: #ea4335;
+        --amzf-purple: #9c27b0;
+        --amzf-bg: #f8f9fa;
+        --amzf-card: #ffffff;
+        --amzf-text: #202124;
+        --amzf-text-secondary: #5f6368;
+        --amzf-border: #e8eaed;
+        --amzf-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+        --amzf-shadow-hover: 0 10px 40px rgba(0, 0, 0, 0.15);
+        --amzf-radius: 16px;
+        --amzf-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* 容器微调：移除 min-height: 100vh，因为是嵌入在 Panel 里的 */
+    /* 1. 修复滚动问题：确保容器撑满并允许内部滚动 */
+    .amzf_container {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        background: var(--amzf-bg);
+        color: var(--amzf-text);
+        line-height: 1.6;
+        width: 100%;
+        height: 100%;
+        /* 撑满父容器 */
+        overflow-y: auto;
+        /* 允许垂直滚动 */
+        padding: 20px;
+        /* 隐藏滚动条但保留功能 (可选) */
+        scrollbar-width: thin;
+    }
+
+    /* Header 主容器：移除 overflow: hidden，移除背景 */
+    .amzf_header {
+        /* ✅ 关键修改：允许溢出，这样下拉框才能显示 */
+        overflow: visible;
+        position: relative;
+
+        /* 布局属性保持不变 */
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-bottom: 30px;
+
+        /* 移除背景和圆角，移交给 bg 层 */
+        /* background: linear-gradient... (删除) */
+        /* border-radius... (删除) */
+        /* padding 也可以保留在这里，或者调整 */
+        padding: 30px;
+    }
+
+    /* ✅ 新增：独立的背景装饰层 */
+    .amzf_header_bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+        /* 在最底层 */
+
+        /* 原本 header 的背景样式移到这里 */
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: var(--amzf-radius);
+
+        /* ✅ 关键：只在背景层裁切，不影响内容层 */
+        overflow: hidden;
+    }
+
+    /* 修改伪元素选择器，挂载到 bg 层上 */
+    .amzf_header_bg::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 400px;
+        height: 400px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        pointer-events: none;
+        /* 防止遮挡点击 */
+    }
+
+    .amzf_header_bg::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        left: 10%;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    /* 确保内容在背景之上 */
+    .amzf_header_content {
+        flex: 1;
+        z-index: 1;
+        /* ✅ 确保文字在背景之上 */
+        position: relative;
+        /* ✅ 新增：让该区域内所有文字变白 */
+        color: #ffffff;
+    }
+
+    .amzf_header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 400px;
+        height: 400px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        align-items: center;
+        /* ✅ 确保垂直居中 */
+    }
+
+    .amzf_header::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        left: 10%;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 50%;
+    }
+
+    .amzf_header_content {
+        flex: 1;
+        /* width: 100%; */
+        /* position: relative; */
+        z-index: 1;
+    }
+
+    /* 3. 右侧功能容器：负责垂直排列卡片和搜索框 */
+    .amzf_header_right {
+        display: flex;
+        flex-direction: column;
+        /* 纵向排列：上统计，下搜索 */
+        align-items: flex-end;
+        /* 靠右对齐 */
+        gap: 15px;
+        /* 统计卡片和搜索框之间的垂直间距 */
+        flex-shrink: 0;
+        /* 防止被挤压 */
+        z-index: 1;
+        /* ✅ 确保搜索框在背景之上 */
+        position: relative;
+    }
+
+    .amzf_title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .amzf_title_icon {
+        width: 50px;
+        height: 50px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+    }
+
+    .amzf_subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        max-width: 600px;
+    }
+
+    /* ==================== Enhanced Search Bar ==================== */
+    .amzf_search_wrapper {
+        position: relative;
+        width: 100%;
+        max-width: 420px;
+    }
+
+    .amzf_search_box {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        padding: 14px 20px;
+        /* Glassmorphism effect */
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-radius: 50px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        box-shadow:
+            0 4px 24px rgba(102, 126, 234, 0.15),
+            0 1px 3px rgba(0, 0, 0, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: text;
+    }
+
+    .amzf_search_box:hover {
+        border-color: rgba(102, 126, 234, 0.3);
+        box-shadow:
+            0 8px 32px rgba(102, 126, 234, 0.2),
+            0 2px 8px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        transform: translateY(-1px);
+    }
+
+    .amzf_search_box:focus-within {
+        border-color: var(--amzf-primary);
+        box-shadow:
+            0 8px 32px rgba(102, 126, 234, 0.25),
+            0 0 0 4px rgba(102, 126, 234, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        transform: translateY(-2px);
+    }
+
+    .amzf_search_icon {
+        font-size: 1.1rem;
+        transition: transform 0.3s ease;
+        flex-shrink: 0;
+    }
+
+    .amzf_search_box:focus-within .amzf_search_icon {
+        transform: scale(1.1);
+    }
+
+    .amzf_search_input {
+        flex: 1;
+        border: none;
+        background: transparent;
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: var(--amzf-text);
+        outline: none;
+        min-width: 0;
+    }
+
+    .amzf_search_input::placeholder {
+        color: var(--amzf-text-secondary);
+        font-weight: 400;
+        transition: opacity 0.3s ease;
+    }
+
+    .amzf_search_box:focus-within .amzf_search_input::placeholder {
+        opacity: 0.6;
+    }
+
+    .amzf_search_clear {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        background: var(--amzf-bg);
+        border: none;
+        border-radius: 50%;
+        color: var(--amzf-text-secondary);
+        font-size: 0.75rem;
+        cursor: pointer;
+        opacity: 0;
+        visibility: hidden;
+        transform: scale(0.8);
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        flex-shrink: 0;
+    }
+
+    .amzf_search_clear.amzf_visible {
+        opacity: 1;
+        visibility: visible;
+        transform: scale(1);
+    }
+
+    .amzf_search_clear:hover {
+        background: var(--amzf-danger);
+        color: white;
+        transform: scale(1.1);
+    }
+
+    /* ==================== Search History Dropdown ==================== */
+    .amzf_search_history {
+        position: fixed;
+        /* 改为 fixed 避免被父容器裁切 */
+        /* top, left, width, maxHeight 将由JavaScript动态设置 */
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-radius: 16px;
+        box-shadow:
+            0 12px 48px rgba(102, 126, 234, 0.2),
+            0 4px 16px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        border: 1px solid rgba(102, 126, 234, 0.1);
+        padding: 8px 0;
+        z-index: 99999;
+        /* 提升层级确保在最上层 */
+        opacity: 0;
+        overflow: hidden;
+        transition: opacity 0.2s ease;
+        pointer-events: none;
+        visibility: hidden;
+    }
+
+    .amzf_search_history.amzf_show {
+        opacity: 1;
+        pointer-events: auto;
+        overflow-y: auto;
+        visibility: visible;
+    }
+
+    .amzf_history_header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 16px 8px;
+        border-bottom: 1px solid var(--amzf-border);
+        margin-bottom: 4px;
+    }
+
+    .amzf_history_title {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--amzf-text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .amzf_history_clear_all {
+        font-size: 0.7rem;
+        color: var(--amzf-danger);
+        background: rgba(234, 67, 53, 0.1);
+        border: none;
+        padding: 4px 10px;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-weight: 500;
+    }
+
+    .amzf_history_clear_all:hover {
+        background: var(--amzf-danger);
+        color: white;
+    }
+
+    .amzf_history_item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 16px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative;
+    }
+
+    .amzf_history_item:hover {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+    }
+
+    .amzf_history_item_icon {
+        font-size: 0.9rem;
+        opacity: 0.6;
+        flex-shrink: 0;
+    }
+
+    .amzf_history_item_text {
+        flex: 1;
+        font-size: 0.9rem;
+        color: var(--amzf-text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .amzf_history_item_delete {
+        opacity: 0;
+        font-size: 0.7rem;
+        color: var(--amzf-text-secondary);
+        padding: 4px 8px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+    }
+
+    .amzf_history_item:hover .amzf_history_item_delete {
+        opacity: 1;
+    }
+
+    .amzf_history_item_delete:hover {
+        background: rgba(234, 67, 53, 0.15);
+        color: var(--amzf-danger);
+    }
+
+    .amzf_history_empty {
+        text-align: center;
+        padding: 24px 16px;
+        color: var(--amzf-text-secondary);
+        font-size: 0.85rem;
+    }
+
+    .amzf_history_empty_icon {
+        font-size: 2rem;
+        margin-bottom: 8px;
+        opacity: 0.5;
+    }
+
+    /* Quick search suggestions */
+    .amzf_quick_tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 12px 16px;
+        border-top: 1px solid var(--amzf-border);
+    }
+
+    .amzf_quick_tag {
+        font-size: 0.75rem;
+        padding: 6px 12px;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        color: var(--amzf-primary);
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-weight: 500;
+    }
+
+    .amzf_quick_tag:hover {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        transform: translateY(-1px);
+    }
+
+    @media (max-width: 768px) {
+        .amzf_header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .amzf_stats,
+        .amzf_search_wrapper {
+            width: 100%;
+            max-width: none;
+            flex: none;
+        }
+
+        .amzf_search_box {
+            border-radius: 14px;
+        }
+
+        .amzf_search_history {
+            border-radius: 14px;
+        }
+    }
+
+    /* View Toggle */
+    .amzf_controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 25px;
+    }
+
+    .amzf_view_toggle {
+        display: flex;
+        background: var(--amzf-card);
+        border-radius: 50px;
+        padding: 5px;
+        box-shadow: var(--amzf-shadow);
+    }
+
+    .amzf_view_btn {
+        padding: 12px 24px;
+        border: none;
+        background: transparent;
+        border-radius: 50px;
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: var(--amzf-text-secondary);
+        cursor: pointer;
+        transition: var(--amzf-transition);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .amzf_view_btn.amzf_active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .amzf_view_btn:hover:not(.amzf_active) {
+        background: var(--amzf-bg);
+    }
+
+    /* Country Tabs */
+    .amzf_country_tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .amzf_country_tab {
+        padding: 10px 18px;
+        border: 2px solid var(--amzf-border);
+        background: var(--amzf-card);
+        border-radius: 50px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--amzf-transition);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .amzf_country_tab:hover {
+        border-color: var(--amzf-primary);
+        transform: translateY(-2px);
+    }
+
+    .amzf_country_tab.amzf_active {
+        background: var(--amzf-primary);
+        border-color: var(--amzf-primary);
+        color: white;
+    }
+
+    /* ✅ 优化点 2：增强国旗图标效果 */
+    .amzf_country_flag i {
+        font-size: 1.1rem;
+        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+        margin-right: 2px;
+    }
+
+    /* Stats Bar */
+    .amzf_stats {
+        display: flex;
+        gap: 12px;
+        /* 减小间距 */
+        /* margin-bottom: 25px; */
+        /* ❌ 删除原本的底部边距 */
+        margin-bottom: 0;
+        /* ✅ 设为 0 */
+        flex-wrap: wrap;
+        position: relative;
+        /* ✅ 确保在背景层之上 */
+        z-index: 2;
+        /* ✅ 确保层级高于背景装饰 */
+    }
+
+    /* 修改卡片容器样式 */
+    .amzf_stat_item {
+        /* ✅ 恢复纯白，不要透明度 */
+        background: #ffffff;
+        padding: 10px 20px;
+        /* ✅ 减小内边距，使其更紧凑 */
+        border-radius: 12px;
+        /* 稍微减小圆角 */
+        /* ✅ 增强阴影，让它在紫色背景上更有层次感 */
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 140px;
+        /* 限制最小宽度 */
+        /* ✅ 关键：强制重置文字颜色为黑色，防止继承 Header 的白色 */
+        color: var(--amzf-text);
+    }
+
+    /* 稍微缩小图标 */
+    .amzf_stat_icon {
+        width: 40px;
+        /* 原 45px */
+        height: 36px;
+        /* 原 45px */
+        font-size: 1.2rem;
+        /* 原 1.3rem */
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        /* font-size: 1.3rem; */
+        flex-shrink: 0;
+        /* 防止被压缩 */
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.03);
+        /* 内阴影增加层次 */
+    }
+
+    .amzf_stat_icon i {
+        /* 统计栏图标单独设置颜色，或者跟随父级颜色类 */
+        font-size: 1.2rem;
+    }
+
+    /* 搜索框图标微调 */
+    .amzf_search_icon i {
+        color: var(--amzf-primary);
+        opacity: 0.8;
+    }
+
+    /* 历史记录图标微调 */
+    .amzf_history_item_icon i {
+        color: var(--amzf-text-secondary);
+    }
+
+    /* 标题图标微调 */
+    .amzf_title_icon i {
+        color: #fff;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .amzf_stat_icon.amzf_blue {
+        background: rgba(66, 133, 244, 0.15);
+    }
+
+    .amzf_stat_icon.amzf_green {
+        background: rgba(52, 168, 83, 0.15);
+    }
+
+    .amzf_stat_icon.amzf_orange {
+        background: rgba(251, 188, 4, 0.15);
+    }
+
+    /* 3. 数字：强制深色，加粗 */
+    .amzf_stat_value {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #202124;
+        /* ✅ 强制指定为深黑色，确保清晰 */
+        line-height: 1.2;
+    }
+
+    /* 4. 标签文字：强制灰色 */
+    .amzf_stat_label {
+        font-size: 0.8rem;
+        color: #5f6368;
+        /* ✅ 强制指定为灰色 */
+        font-weight: 500;
+    }
+
+    /* Timeline View */
+    .amzf_timeline {
+        display: grid;
+        gap: 20px;
+    }
+
+    .amzf_month_section {
+        background: var(--amzf-card);
+        border-radius: var(--amzf-radius);
+        overflow: hidden;
+        box-shadow: var(--amzf-shadow);
+        transition: var(--amzf-transition);
+    }
+
+    .amzf_month_section:hover {
+        box-shadow: var(--amzf-shadow-hover);
+    }
+
+    .amzf_month_header {
+        padding: 20px 25px;
+        background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        user-select: none;
+        transition: var(--amzf-transition);
+    }
+
+    .amzf_month_header:hover {
+        background: linear-gradient(135deg, #e8ecf0 0%, #d8dce0 100%);
+    }
+
+    .amzf_month_info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .amzf_month_name {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--amzf-text);
+    }
+
+    .amzf_month_badge {
+        background: var(--amzf-primary);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    /* 箭头旋转动画 */
+    .amzf_month_toggle {
+        transition: transform 0.3s ease;
+    }
+
+    /* 旋转动画 */
+    .amzf_expanded .amzf_month_toggle {
+        transform: rotate(180deg);
+    }
+
+    .amzf_month_section.amzf_expanded .amzf_month_toggle {
+        transform: rotate(180deg);
+    }
+
+    /* 3. 展开/收起的核心过渡 (保持你原有的逻辑，稍作参数优化) */
+    .amzf_month_content,
+    .amzf_comparison_content {
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+        /* 贝塞尔曲线优化，让展开动作更有弹性 */
+        transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease-in-out;
+        will-change: max-height, opacity;
+        /* 性能优化：告诉浏览器这俩属性会变 */
+    }
+
+    /* 展开状态 */
+    .amzf_expanded .amzf_month_content,
+    .amzf_expanded .amzf_comparison_content {
+        max-height: 3000px;
+        /* 稍微给大一点，防止内容截断 */
+        opacity: 1;
+    }
+
+    .amzf_month_content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .amzf_month_section.amzf_expanded .amzf_month_content {
+        max-height: 2000px;
+    }
+
+    .amzf_events_grid {
+        padding: 20px;
+        display: grid;
+        gap: 15px;
+    }
+
+    /* Event Card */
+    .amzf_event_card {
+        background: var(--amzf-bg);
+        border-radius: 12px;
+        padding: 20px;
+        border-left: 4px solid var(--amzf-primary);
+        transition: var(--amzf-transition);
+        cursor: pointer;
+    }
+
+    .amzf_event_card:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .amzf_event_card.amzf_type_holiday {
+        border-left-color: var(--amzf-danger);
+    }
+
+    .amzf_event_card.amzf_type_shopping {
+        border-left-color: var(--amzf-secondary);
+    }
+
+    .amzf_event_card.amzf_type_cultural {
+        border-left-color: var(--amzf-purple);
+    }
+
+    .amzf_event_card.amzf_type_season {
+        border-left-color: var(--amzf-accent);
+    }
+
+    .amzf_event_header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 12px;
+    }
+
+    .amzf_event_title_wrapper {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* ✅ 优化点 1：增强图标的视觉效果 */
+    .amzf_event_emoji {
+        font-size: 1.6rem;
+        /* 稍微加大一点 */
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff;
+        border-radius: 12px;
+        /* 圆角背景 */
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        /* 轻微的浮起感 */
+        margin-right: 12px;
+        flex-shrink: 0;
+        transition: transform 0.3s ease;
+    }
+
+    /* 鼠标悬停时图标放大 */
+    .amzf_event_card:hover .amzf_event_emoji {
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    /* 图标内部的 i 标签添加滤镜，使其有轻微发光感 */
+    .amzf_event_emoji i {
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+    }
+
+    .amzf_event_title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--amzf-text);
+    }
+
+    .amzf_event_date {
+        font-size: 0.85rem;
+        color: var(--amzf-text-secondary);
+        background: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-weight: 500;
+    }
+
+    .amzf_event_countries {
+        display: flex;
+        gap: 5px;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+    }
+
+    .amzf_country_badge {
+        font-size: 1.1rem;
+        background: white;
+        padding: 3px 8px;
+        border-radius: 6px;
+    }
+
+    .amzf_event_strategy {
+        background: white;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 10px;
+    }
+
+    .amzf_strategy_title {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--amzf-primary);
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .amzf_strategy_content {
+        font-size: 0.9rem;
+        color: var(--amzf-text-secondary);
+        line-height: 1.7;
+    }
+
+    .amzf_strategy_tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+    }
+
+    .amzf_tag {
+        background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+        color: #667eea;
+        padding: 4px 10px;
+        border-radius: 15px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    /* Event View Cards */
+    .amzf_event_view {
+        display: grid;
+        gap: 20px;
+    }
+
+    .amzf_event_comparison {
+        background: var(--amzf-card);
+        border-radius: var(--amzf-radius);
+        overflow: hidden;
+        box-shadow: var(--amzf-shadow);
+    }
+
+    .amzf_comparison_header {
+        padding: 20px 25px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .amzf_comparison_title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    .amzf_comparison_content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .amzf_event_comparison.amzf_expanded .amzf_comparison_content {
+        max-height: 1500px;
+    }
+
+    .amzf_country_list {
+        padding: 20px;
+        display: grid;
+        gap: 10px;
+    }
+
+    .amzf_country_event {
+        display: flex;
+        align-items: flex-start;
+        /* 顶部对齐 */
+        gap: 20px;
+        /* ✅ 设置三列之间的固定间距 */
+        padding: 15px;
+        background: var(--amzf-bg);
+        border-radius: 12px;
+        transition: var(--amzf-transition);
+    }
+
+    /* 增加一点上边距，让单行时图标也能和文字第一行对齐 */
+    .amzf_country_info,
+    .amzf_country_date {
+        margin-top: 2px;
+    }
+
+    .amzf_country_event:hover {
+        background: #e8ecf0;
+    }
+
+    /* 第一列：国家旗帜 (设置固定宽) */
+    .amzf_country_info {
+        flex: 0 0 160px;
+        /* ✅ 关键：固定宽度 160px，确保竖列对齐 */
+        width: 160px;
+        /* 兼容性写法 */
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 2px;
+        /* 微调垂直对齐 */
+    }
+
+    .amzf_country_name {
+        font-weight: 600;
+        color: var(--amzf-text);
+    }
+
+    /* 第二列：日期 (设置固定宽，移除原本的 flex: 1) */
+    .amzf_country_date {
+        flex: 0 0 140px;
+        /* ✅ 关键：固定宽度 100px，紧跟在旗帜后面 */
+        width: 100px;
+        color: var(--amzf-text-secondary);
+        margin-top: 2px;
+        /* 微调垂直对齐 */
+        white-space: nowrap;
+        /* 防止日期换行 */
+    }
+
+    /* 第三列：策略内容 (占据剩余空间) */
+    .amzf_country_strategy_brief {
+        flex: 1;
+        /* ✅ 让内容区域占据剩下的所有空间 */
+        font-size: 0.9rem;
+        color: var(--amzf-text-secondary);
+        /* 如果希望文字不要太宽，可以加 max-width，例如 max-width: 800px; */
+    }
+
+    /* Empty State */
+    .amzf_empty {
+        text-align: center;
+        padding: 60px 20px;
+        background: var(--amzf-card);
+        border-radius: var(--amzf-radius);
+    }
+
+    .amzf_empty_icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+    }
+
+    .amzf_empty_text {
+        font-size: 1.1rem;
+        color: var(--amzf-text-secondary);
+    }
+
+    /* Animations */
+    /* 1. 进场动画：只在列表初次加载或筛选时使用 */
+    @keyframes amzf_fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .amzf_animate {
+        animation: amzf_fadeIn 0.4s ease-out forwards;
+    }
+
+    /* 2. 移除全局通用的 .amzf_animate，改为由 JS 控制 */
+    .amzf_list_entering .amzf_month_section,
+    .amzf_list_entering .amzf_event_comparison {
+        animation: amzf_fadeIn 0.4s ease-out forwards;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+
+        /* 调整断点 */
+        .amzf_title {
+            font-size: 1.8rem;
+        }
+
+        .amzf_controls {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .amzf_view_toggle {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .amzf_country_tabs {
+            justify-content: center;
+        }
+
+        /* .amzf_stats { flex-direction: column; } */
+        .amzf_event_header {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .amzf_country_event {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .amzf_header {
+            flex-direction: column;
+            /* 上下排列 */
+            align-items: flex-start;
+        }
+
+        .amzf_stats {
+            width: 100%;
+            justify-content: flex-start;
+            /* 或者 space-between */
+            margin-top: 15px;
+        }
+    }

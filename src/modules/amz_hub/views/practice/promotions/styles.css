@@ -1,0 +1,358 @@
+    :root {
+        --amzp-primary: #566ce8;
+        --amzp-bg: #f4f6f9;
+        --amzp-card: #ffffff;
+        --amzp-text: #333333;
+        --amzp-text-light: #666;
+        --amzp-border: #eee;
+        --amzp-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        --amzp-radius: 8px;
+        --amzp-nav-width: 260px;
+    }
+
+    .amzp_container {
+        font-family: "Amazon Ember", "Helvetica Neue", Roboto, Arial, sans-serif;
+        background: var(--amzp-bg);
+        color: var(--amzp-text);
+        line-height: 1.6;
+        width: 100%;
+        height: 100%;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        scroll-behavior: smooth;
+    }
+
+    /* Header */
+    .amzp_header {
+        position: relative;
+        padding: 50px 60px 120px 60px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        flex-shrink: 0;
+    }
+
+    .amzp_header::before {
+        content: '';
+        position: absolute;
+        top: -80%;
+        right: -10%;
+        width: 600px;
+        height: 600px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .amzp_title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .amzp_subtitle {
+        font-size: 1.1rem;
+        opacity: 0.95;
+        max-width: 900px;
+        position: relative;
+        z-index: 2;
+        padding-left: 5px;
+    }
+
+    /* 布局容器 */
+    .amzp_layout {
+        display: flex;
+        flex: 1;
+        max-width: 1600px;
+        width: 100%;
+        margin: 0 auto;
+        margin-top: 40px;
+        padding: 0 40px 60px 40px;
+        gap: 40px;
+        z-index: 10;
+        box-sizing: border-box;
+        position: relative;
+    }
+
+    /* 左侧导航 */
+    .amzp_sidebar {
+        width: var(--amzp-nav-width);
+        flex-shrink: 0;
+        position: sticky;
+        top: 20px;
+        height: fit-content;
+        background: var(--amzp-card);
+        border-radius: var(--amzp-radius);
+        box-shadow: var(--amzp-shadow);
+        padding: 25px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    /* 导航组 */
+    .amzp_nav_group {
+        margin-bottom: 5px;
+    }
+
+    .amzp_nav_header {
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: #555;
+        padding: 10px 15px;
+        cursor: pointer;
+        border-radius: 6px;
+        transition: all 0.2s;
+        display: block;
+        text-decoration: none;
+    }
+
+    .amzp_nav_header:hover {
+        background-color: #f6f9fc;
+        color: var(--amzp-primary);
+    }
+
+    .amzp_nav_header.active {
+        font-weight: 700;
+        color: #000;
+        background-color: transparent;
+    }
+
+    /* 二级子菜单容器 */
+    .amzp_nav_children {
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+        transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+        padding-left: 15px;
+        margin-top: 5px;
+        position: relative;
+    }
+
+    .amzp_nav_group.expanded .amzp_nav_children {
+        max-height: 500px;
+        opacity: 1;
+    }
+
+    .amzp_nav_children_track {
+        border-left: 2px solid #f0f0f0;
+        padding-left: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .amzp_sub_link {
+        font-size: 0.85rem;
+        color: #666;
+        padding: 8px 0;
+        cursor: pointer;
+        text-decoration: none;
+        position: relative;
+        transition: color 0.2s;
+        display: block;
+        line-height: 1.4;
+    }
+
+    .amzp_sub_link:hover {
+        color: var(--amzp-primary);
+    }
+
+    .amzp_sub_link.active {
+        color: #000;
+        font-weight: 600;
+    }
+
+    .amzp_sub_link.active::before {
+        content: '';
+        position: absolute;
+        left: -17px;
+        top: 6px;
+        bottom: 6px;
+        width: 2px;
+        background-color: #333;
+    }
+
+    /* 右侧内容区 */
+    .amzp_content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+        min-width: 0;
+    }
+
+    .amzp_card {
+        background: var(--amzp-card);
+        border-radius: var(--amzp-radius);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        padding: 40px;
+        scroll-margin-top: 20px;
+    }
+
+    .amzp_card_header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 25px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .amzp_card_title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--amzp-text);
+    }
+
+    .amzp_text {
+        font-size: 1rem;
+        color: #555;
+        line-height: 1.8;
+        margin-bottom: 20px;
+        text-align: justify;
+    }
+
+    /* 分块标题 (新增) */
+    .amzp_section_header {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #333;
+        margin-top: 30px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .amzp_section_header i {
+        color: #566ce8;
+    }
+
+    /* Grid & Stats Styles */
+    .amzp_grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-top: 15px;
+    }
+
+    .amzp_sub_item {
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        padding: 24px;
+        transition: all 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        box-sizing: border-box;
+    }
+
+    .amzp_sub_item:hover {
+        border-color: var(--amzp-primary);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+        transform: translateY(-2px);
+    }
+
+    .amzp_sub_header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    .amzp_sub_icon {
+        width: 36px;
+        height: 36px;
+        background: #eff2fe;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--amzp-primary);
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    .amzp_sub_title {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: #333;
+    }
+
+    .amzp_sub_desc {
+        font-size: 0.95rem;
+        color: #666;
+        margin-bottom: 15px;
+        flex-grow: 1;
+    }
+
+    .amzp_tag {
+        font-size: 0.8rem;
+        padding: 4px 10px;
+        border-radius: 4px;
+        background: #f0f4f8;
+        color: #555;
+        font-weight: 500;
+        margin-right: 6px;
+    }
+
+    .amzp_highlight_box {
+        background: #fff8e1;
+        padding: 15px 20px;
+        border-radius: 6px;
+        color: #8a6d3b;
+        font-size: 0.95rem;
+        margin-bottom: 20px;
+        border: 1px solid #faebcc;
+    }
+
+    .amzp_stats_box {
+        background: linear-gradient(to right, #f6f8fd, #fff);
+        padding: 20px;
+        border-radius: 8px;
+        display: flex;
+        align-items: flex-start;
+        gap: 15px;
+        border: 1px solid #eef2f7;
+        border-left: 4px solid var(--amzp-primary);
+    }
+
+    .amzp_stats_text {
+        font-size: 0.95rem;
+        color: #333;
+        line-height: 1.6;
+    }
+
+    /* 响应式 */
+    @media (max-width: 900px) {
+        .amzp_layout {
+            flex-direction: column;
+            margin-top: 0;
+            padding-top: 20px;
+        }
+
+        .amzp_sidebar {
+            width: 100%;
+            position: relative;
+            top: 0;
+            padding: 10px;
+            overflow-x: auto;
+            flex-direction: row;
+        }
+
+        .amzp_nav_group {
+            margin-bottom: 0;
+            flex-shrink: 0;
+        }
+
+        .amzp_nav_children {
+            display: none;
+        }
+    }

@@ -1,364 +1,3 @@
-<style>
-    :root {
-        --amzp-primary: #566ce8;
-        --amzp-bg: #f4f6f9;
-        --amzp-card: #ffffff;
-        --amzp-text: #333333;
-        --amzp-text-light: #666;
-        --amzp-border: #eee;
-        --amzp-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        --amzp-radius: 8px;
-        --amzp-nav-width: 260px;
-    }
-
-    .amzp_container {
-        font-family: "Amazon Ember", "Helvetica Neue", Roboto, Arial, sans-serif;
-        background: var(--amzp-bg);
-        color: var(--amzp-text);
-        line-height: 1.6;
-        width: 100%;
-        height: 100%;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-        scroll-behavior: smooth;
-    }
-
-    /* Header */
-    .amzp_header {
-        position: relative;
-        padding: 50px 60px 120px 60px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        flex-shrink: 0;
-    }
-
-    .amzp_header::before {
-        content: '';
-        position: absolute;
-        top: -80%;
-        right: -10%;
-        width: 600px;
-        height: 600px;
-        background: rgba(255, 255, 255, 0.08);
-        border-radius: 50%;
-        pointer-events: none;
-    }
-
-    .amzp_title {
-        font-size: 2.2rem;
-        font-weight: 700;
-        margin-bottom: 12px;
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        position: relative;
-        z-index: 2;
-    }
-
-    .amzp_subtitle {
-        font-size: 1.1rem;
-        opacity: 0.95;
-        max-width: 900px;
-        position: relative;
-        z-index: 2;
-        padding-left: 5px;
-    }
-
-    /* 布局容器 */
-    .amzp_layout {
-        display: flex;
-        flex: 1;
-        max-width: 1600px;
-        width: 100%;
-        margin: 0 auto;
-        margin-top: 40px;
-        padding: 0 40px 60px 40px;
-        gap: 40px;
-        z-index: 10;
-        box-sizing: border-box;
-        position: relative;
-    }
-
-    /* 左侧导航 */
-    .amzp_sidebar {
-        width: var(--amzp-nav-width);
-        flex-shrink: 0;
-        position: sticky;
-        top: 20px;
-        height: fit-content;
-        background: var(--amzp-card);
-        border-radius: var(--amzp-radius);
-        box-shadow: var(--amzp-shadow);
-        padding: 25px 20px;
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-    }
-
-    /* 导航组 */
-    .amzp_nav_group {
-        margin-bottom: 5px;
-    }
-
-    .amzp_nav_header {
-        font-size: 0.95rem;
-        font-weight: 500;
-        color: #555;
-        padding: 10px 15px;
-        cursor: pointer;
-        border-radius: 6px;
-        transition: all 0.2s;
-        display: block;
-        text-decoration: none;
-    }
-
-    .amzp_nav_header:hover {
-        background-color: #f6f9fc;
-        color: var(--amzp-primary);
-    }
-
-    .amzp_nav_header.active {
-        font-weight: 700;
-        color: #000;
-        background-color: transparent;
-    }
-
-    /* 二级子菜单容器 */
-    .amzp_nav_children {
-        max-height: 0;
-        opacity: 0;
-        overflow: hidden;
-        transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
-        padding-left: 15px;
-        margin-top: 5px;
-        position: relative;
-    }
-
-    .amzp_nav_group.expanded .amzp_nav_children {
-        max-height: 500px;
-        opacity: 1;
-    }
-
-    .amzp_nav_children_track {
-        border-left: 2px solid #f0f0f0;
-        padding-left: 15px;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
-
-    .amzp_sub_link {
-        font-size: 0.85rem;
-        color: #666;
-        padding: 8px 0;
-        cursor: pointer;
-        text-decoration: none;
-        position: relative;
-        transition: color 0.2s;
-        display: block;
-        line-height: 1.4;
-    }
-
-    .amzp_sub_link:hover {
-        color: var(--amzp-primary);
-    }
-
-    .amzp_sub_link.active {
-        color: #000;
-        font-weight: 600;
-    }
-
-    .amzp_sub_link.active::before {
-        content: '';
-        position: absolute;
-        left: -17px;
-        top: 6px;
-        bottom: 6px;
-        width: 2px;
-        background-color: #333;
-    }
-
-    /* 右侧内容区 */
-    .amzp_content {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 30px;
-        min-width: 0;
-    }
-
-    .amzp_card {
-        background: var(--amzp-card);
-        border-radius: var(--amzp-radius);
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        padding: 40px;
-        scroll-margin-top: 20px;
-    }
-
-    .amzp_card_header {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 25px;
-        padding-bottom: 20px;
-        border-bottom: 1px solid #f0f0f0;
-    }
-
-    .amzp_card_title {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--amzp-text);
-    }
-
-    .amzp_text {
-        font-size: 1rem;
-        color: #555;
-        line-height: 1.8;
-        margin-bottom: 20px;
-        text-align: justify;
-    }
-
-    /* 分块标题 (新增) */
-    .amzp_section_header {
-        font-size: 1.15rem;
-        font-weight: 700;
-        color: #333;
-        margin-top: 30px;
-        margin-bottom: 10px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .amzp_section_header i {
-        color: #566ce8;
-    }
-
-    /* Grid & Stats Styles */
-    .amzp_grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 20px;
-        margin-top: 15px;
-    }
-
-    .amzp_sub_item {
-        background: #fff;
-        border: 1px solid #eee;
-        border-radius: 8px;
-        padding: 24px;
-        transition: all 0.2s ease;
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        box-sizing: border-box;
-    }
-
-    .amzp_sub_item:hover {
-        border-color: var(--amzp-primary);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
-        transform: translateY(-2px);
-    }
-
-    .amzp_sub_header {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 12px;
-    }
-
-    .amzp_sub_icon {
-        width: 36px;
-        height: 36px;
-        background: #eff2fe;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--amzp-primary);
-        font-size: 1.1rem;
-        flex-shrink: 0;
-    }
-
-    .amzp_sub_title {
-        font-weight: 700;
-        font-size: 1.1rem;
-        color: #333;
-    }
-
-    .amzp_sub_desc {
-        font-size: 0.95rem;
-        color: #666;
-        margin-bottom: 15px;
-        flex-grow: 1;
-    }
-
-    .amzp_tag {
-        font-size: 0.8rem;
-        padding: 4px 10px;
-        border-radius: 4px;
-        background: #f0f4f8;
-        color: #555;
-        font-weight: 500;
-        margin-right: 6px;
-    }
-
-    .amzp_highlight_box {
-        background: #fff8e1;
-        padding: 15px 20px;
-        border-radius: 6px;
-        color: #8a6d3b;
-        font-size: 0.95rem;
-        margin-bottom: 20px;
-        border: 1px solid #faebcc;
-    }
-
-    .amzp_stats_box {
-        background: linear-gradient(to right, #f6f8fd, #fff);
-        padding: 20px;
-        border-radius: 8px;
-        display: flex;
-        align-items: flex-start;
-        gap: 15px;
-        border: 1px solid #eef2f7;
-        border-left: 4px solid var(--amzp-primary);
-    }
-
-    .amzp_stats_text {
-        font-size: 0.95rem;
-        color: #333;
-        line-height: 1.6;
-    }
-
-    /* 响应式 */
-    @media (max-width: 900px) {
-        .amzp_layout {
-            flex-direction: column;
-            margin-top: 0;
-            padding-top: 20px;
-        }
-
-        .amzp_sidebar {
-            width: 100%;
-            position: relative;
-            top: 0;
-            padding: 10px;
-            overflow-x: auto;
-            flex-direction: row;
-        }
-
-        .amzp_nav_group {
-            margin-bottom: 0;
-            flex-shrink: 0;
-        }
-
-        .amzp_nav_children {
-            display: none;
-        }
-    }
-</style>
-
 <div class="module-container">
     <!-- Welcome Banner -->
     <div class="wb-container"
@@ -379,21 +18,324 @@
         <div class="wb-particle wb-particle-8"></div>
         <div class="wb-content">
             <div class="wb-icon">
-                <i class="fas fa-gift"></i>
+                <i class="fas fa-tags"></i>
             </div>
-            <h1 class="wb-title">销售活动/促销工具</h1>
-            <p class="wb-description">Coupon、Lightning Deal、Prime Day等促销工具使用 - 掌握各类促销工具</p>
+            <h1 class="wb-title">促销活动</h1>
+            <p class="wb-description">Prime Day、黑五、网一等重要促销活动策略与准备清单 - 把握大促机会</p>
             <div class="wb-meta">
                 <span><i class="fas fa-tag mr-1"></i>入门实操宝典</span>
-                <span><i class="fas fa-tag mr-1"></i>促销工具</span>
+                <span><i class="fas fa-tag mr-1"></i>促销活动</span>
                 <span><i class="fas fa-tag mr-1"></i>更新日期：2024-01</span>
             </div>
         </div>
     </div>
 
-    <!-- <div class="amzp_layout"> -->
-    <main class="amzp_content" id="amzp_main">
-    </main>
-    <!-- </div> -->
+    <!-- 主体布局 -->
+    <div class="amzp_layout">
+        <!-- 左侧导航 -->
+        <nav class="amzp_sidebar">
+            <div class="amzp_nav_group">
+                <a href="#prime-day" class="amzp_nav_header">Prime Day</a>
+            </div>
+            <div class="amzp_nav_group">
+                <a href="#black-friday" class="amzp_nav_header">黑色星期五</a>
+            </div>
+            <div class="amzp_nav_group">
+                <a href="#cyber-monday" class="amzp_nav_header">网络星期一</a>
+            </div>
+            <div class="amzp_nav_group">
+                <a href="#holiday-season" class="amzp_nav_header">节日季</a>
+            </div>
+        </nav>
+
+        <!-- 右侧内容 -->
+        <div class="amzp_content">
+            <!-- Prime Day -->
+            <section id="prime-day" class="amzp_card">
+                <div class="amzp_card_header">
+                    <i class="fas fa-bolt" style="color: #ff9900; font-size: 1.8rem;"></i>
+                    <h2 class="amzp_card_title">Prime Day</h2>
+                </div>
+
+                <div class="amzp_highlight_box">
+                    <strong>📅 时间：</strong>每年7月中旬，持续48小时<br>
+                    <strong>🎯 特点：</strong>Amazon最大的会员专属购物节，流量巨大，竞争激烈
+                </div>
+
+                <h3 class="amzp_section_header">
+                    <i class="fas fa-clipboard-check"></i>
+                    准备清单
+                </h3>
+
+                <div class="amzp_grid">
+                    <div class="amzp_sub_item">
+                        <div class="amzp_sub_header">
+                            <div class="amzp_sub_icon">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <h4 class="amzp_sub_title">提前6-8周</h4>
+                        </div>
+                        <p class="amzp_sub_desc">
+                            • 提交Lightning Deal申请<br>
+                            • 准备充足库存（建议3-4倍日常销量）<br>
+                            • 优化Listing（标题、图片、A+）<br>
+                            • 设置自动广告预算提升
+                        </p>
+                    </div>
+
+                    <div class="amzp_sub_item">
+                        <div class="amzp_sub_header">
+                            <div class="amzp_sub_icon">
+                                <i class="fas fa-bullhorn"></i>
+                            </div>
+                            <h4 class="amzp_sub_title">提前2-4周</h4>
+                        </div>
+                        <p class="amzp_sub_desc">
+                            • 创建Prime Day专属优惠券<br>
+                            • 准备站外引流（社交媒体、邮件营销）<br>
+                            • 测试价格策略<br>
+                            • 联系红人/Deal网站合作
+                        </p>
+                    </div>
+
+                    <div class="amzp_sub_item">
+                        <div class="amzp_sub_header">
+                            <div class="amzp_sub_icon">
+                                <i class="fas fa-rocket"></i>
+                            </div>
+                            <h4 class="amzp_sub_title">活动期间</h4>
+                        </div>
+                        <p class="amzp_sub_desc">
+                            • 实时监控库存和广告表现<br>
+                            • 快速响应客户问题<br>
+                            • 调整广告竞价（高峰时段提高）<br>
+                            • 记录数据用于复盘
+                        </p>
+                    </div>
+                </div>
+
+                <h3 class="amzp_section_header">
+                    <i class="fas fa-lightbulb"></i>
+                    策略建议
+                </h3>
+
+                <div class="amzp_stats_box">
+                    <i class="fas fa-chart-line" style="color: var(--amzp-primary); font-size: 1.5rem;"></i>
+                    <div class="amzp_stats_text">
+                        <strong>折扣策略：</strong>建议折扣20-30%，过低无吸引力，过高影响利润。可以通过提高原价来保持利润空间。<br>
+                        <strong>广告策略：</strong>提前2周开始提高广告预算，活动期间预算至少提升2-3倍，重点投放品牌词和类目词。
+                    </div>
+                </div>
+            </section>
+
+            <!-- 黑色星期五 -->
+            <section id="black-friday" class="amzp_card">
+                <div class="amzp_card_header">
+                    <i class="fas fa-shopping-cart" style="color: #000; font-size: 1.8rem;"></i>
+                    <h2 class="amzp_card_title">黑色星期五 (Black Friday)</h2>
+                </div>
+
+                <div class="amzp_highlight_box">
+                    <strong>📅 时间：</strong>11月第四个星期五（感恩节后一天）<br>
+                    <strong>🎯 特点：</strong>北美最大购物节，欧洲站也逐渐流行，持续时间长（通常整周）
+                </div>
+
+                <h3 class="amzp_section_header">
+                    <i class="fas fa-tasks"></i>
+                    关键时间节点
+                </h3>
+
+                <div class="amzp_grid">
+                    <div class="amzp_sub_item">
+                        <div class="amzp_sub_header">
+                            <div class="amzp_sub_icon">
+                                <i class="fas fa-calendar-day"></i>
+                            </div>
+                            <h4 class="amzp_sub_title">黑五前一周</h4>
+                        </div>
+                        <p class="amzp_sub_desc">
+                            Early Black Friday Deals开始，流量逐渐上升，可以提前测试价格和广告策略。
+                        </p>
+                        <span class="amzp_tag">预热期</span>
+                    </div>
+
+                    <div class="amzp_sub_item">
+                        <div class="amzp_sub_header">
+                            <div class="amzp_sub_icon">
+                                <i class="fas fa-fire"></i>
+                            </div>
+                            <h4 class="amzp_sub_title">黑五当天</h4>
+                        </div>
+                        <p class="amzp_sub_desc">
+                            流量和转化率最高的一天，需要全天候监控库存和广告，快速响应问题。
+                        </p>
+                        <span class="amzp_tag">高峰期</span>
+                    </div>
+
+                    <div class="amzp_sub_item">
+                        <div class="amzp_sub_header">
+                            <div class="amzp_sub_icon">
+                                <i class="fas fa-laptop"></i>
+                            </div>
+                            <h4 class="amzp_sub_title">网一 (Cyber Monday)</h4>
+                        </div>
+                        <p class="amzp_sub_desc">
+                            黑五后的星期一，电子产品类目表现尤其突出，是第二波销售高峰。
+                        </p>
+                        <span class="amzp_tag">次高峰</span>
+                    </div>
+                </div>
+
+                <h3 class="amzp_section_header">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    常见问题
+                </h3>
+
+                <div class="amzp_text">
+                    <strong>Q: 黑五和Prime Day有什么区别？</strong><br>
+                    A: Prime Day是会员专属，黑五面向所有用户；Prime Day在7月，黑五在11月；Prime Day持续48小时，黑五通常持续一周。
+                </div>
+
+                <div class="amzp_text">
+                    <strong>Q: 需要准备多少库存？</strong><br>
+                    A: 建议准备平时日均销量的5-7倍，考虑到物流时效，最好提前2个月开始备货。
+                </div>
+            </section>
+
+            <!-- 网络星期一 -->
+            <section id="cyber-monday" class="amzp_card">
+                <div class="amzp_card_header">
+                    <i class="fas fa-desktop" style="color: #0066c0; font-size: 1.8rem;"></i>
+                    <h2 class="amzp_card_title">网络星期一 (Cyber Monday)</h2>
+                </div>
+
+                <div class="amzp_highlight_box">
+                    <strong>📅 时间：</strong>黑色星期五后的第一个星期一<br>
+                    <strong>🎯 特点：</strong>电子产品、数码配件、软件类目的主场
+                </div>
+
+                <div class="amzp_text">
+                    网络星期一最初是为了促进在线购物而设立的，现在已经成为仅次于黑五的重要购物节。
+                    对于电子产品卖家来说，这一天的重要性甚至超过黑五。
+                </div>
+
+                <h3 class="amzp_section_header">
+                    <i class="fas fa-star"></i>
+                    适合的产品类目
+                </h3>
+
+                <div class="amzp_grid">
+                    <div class="amzp_sub_item">
+                        <div class="amzp_sub_header">
+                            <div class="amzp_sub_icon">
+                                <i class="fas fa-laptop"></i>
+                            </div>
+                            <h4 class="amzp_sub_title">电子产品</h4>
+                        </div>
+                        <p class="amzp_sub_desc">
+                            笔记本电脑、平板、智能手机、智能手表等数码产品在这一天表现最佳。
+                        </p>
+                    </div>
+
+                    <div class="amzp_sub_item">
+                        <div class="amzp_sub_header">
+                            <div class="amzp_sub_icon">
+                                <i class="fas fa-headphones"></i>
+                            </div>
+                            <h4 class="amzp_sub_title">数码配件</h4>
+                        </div>
+                        <p class="amzp_sub_desc">
+                            耳机、充电器、数据线、保护壳等配件类产品也有很好的销售表现。
+                        </p>
+                    </div>
+
+                    <div class="amzp_sub_item">
+                        <div class="amzp_sub_header">
+                            <div class="amzp_sub_icon">
+                                <i class="fas fa-gamepad"></i>
+                            </div>
+                            <h4 class="amzp_sub_title">游戏相关</h4>
+                        </div>
+                        <p class="amzp_sub_desc">
+                            游戏主机、游戏配件、VR设备等游戏相关产品需求旺盛。
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 节日季 -->
+            <section id="holiday-season" class="amzp_card">
+                <div class="amzp_card_header">
+                    <i class="fas fa-gift" style="color: #c7511f; font-size: 1.8rem;"></i>
+                    <h2 class="amzp_card_title">节日季 (Holiday Season)</h2>
+                </div>
+
+                <div class="amzp_highlight_box">
+                    <strong>📅 时间：</strong>11月-12月（感恩节到圣诞节）<br>
+                    <strong>🎯 特点：</strong>全年销售最旺的时期，礼品类产品需求激增
+                </div>
+
+                <div class="amzp_text">
+                    节日季是Amazon全年销售额最高的时期，通常占全年销售额的30-40%。
+                    这段时间消费者购买意愿强，客单价高，是卖家全年最重要的销售窗口。
+                </div>
+
+                <h3 class="amzp_section_header">
+                    <i class="fas fa-calendar-check"></i>
+                    关键日期
+                </h3>
+
+                <div class="amzp_grid">
+                    <div class="amzp_sub_item">
+                        <div class="amzp_sub_header">
+                            <div class="amzp_sub_icon">
+                                <i class="fas fa-turkey"></i>
+                            </div>
+                            <h4 class="amzp_sub_title">感恩节周</h4>
+                        </div>
+                        <p class="amzp_sub_desc">
+                            11月第四周，包括黑五和网一，是节日季的开端和第一波高峰。
+                        </p>
+                    </div>
+
+                    <div class="amzp_sub_item">
+                        <div class="amzp_sub_header">
+                            <div class="amzp_sub_icon">
+                                <i class="fas fa-shipping-fast"></i>
+                            </div>
+                            <h4 class="amzp_sub_title">12月中旬</h4>
+                        </div>
+                        <p class="amzp_sub_desc">
+                            最后的购物高峰，消费者赶在圣诞节前完成采购，需要关注物流时效。
+                        </p>
+                    </div>
+
+                    <div class="amzp_sub_item">
+                        <div class="amzp_sub_header">
+                            <div class="amzp_sub_icon">
+                                <i class="fas fa-tree"></i>
+                            </div>
+                            <h4 class="amzp_sub_title">圣诞节后</h4>
+                        </div>
+                        <p class="amzp_sub_desc">
+                            退换货高峰期，同时也是礼品卡消费和自用产品购买的小高峰。
+                        </p>
+                    </div>
+                </div>
+
+                <h3 class="amzp_section_header">
+                    <i class="fas fa-gift"></i>
+                    礼品包装建议
+                </h3>
+
+                <div class="amzp_stats_box">
+                    <i class="fas fa-box-open" style="color: var(--amzp-primary); font-size: 1.5rem;"></i>
+                    <div class="amzp_stats_text">
+                        节日季期间，提供礼品包装选项可以显著提升转化率。建议在产品详情页突出"Gift-Ready"、"Perfect Gift"等关键词，
+                        并在图片中展示精美的包装效果。如果使用FBA，可以启用Amazon的Gift Wrap服务。
+                    </div>
+                </div>
+            </section>
+        </div>
     </div>
 </div>

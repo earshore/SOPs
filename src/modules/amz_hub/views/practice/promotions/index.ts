@@ -2,6 +2,7 @@
 // 欧洲站实战版 - 基于头部卖家真实经验
 import BaseModule from "../../../../../common/BaseModule";
 import { loadTemplate } from "../../../../../common/utils/viewLoader";
+import './styles.css';
 
 import { Logger } from '../../../../../services/loggerService';
 // ==================== 类型定义 ====================

@@ -13,6 +13,7 @@ import { configCenter } from '../../../../../common/config/ConfigCenter';
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry';
 import type { MarketingEvent, CountryInfo } from '@/types/modules-business';
+import './styles.css';
 
 import { Logger } from '../../../../../services/loggerService';
 const AMZF_HISTORY_KEY = 'amzf_search_history';
