@@ -5,9 +5,22 @@ import "./styles.css";
 
 import { Logger } from "../../../../../services/loggerService";
 // ==================== 类型定义 ====================
-interface ContentBlock {}
+interface ContentBlock {
+  type: string;
+  text?: string;
+  title?: string;
+  style?: string;
+  headers?: string[];
+  rows?: string[][];
+  items?: Array<Record<string, unknown>>;
+}
 
-interface PromoSection {}
+interface PromoSection {
+  id: string;
+  title: string;
+  icon: string;
+  content: ContentBlock[];
+}
 
 // ==================== 1. 内容数据源 (欧洲站实战版) ====================
 const promoData: PromoSection[] = [
@@ -537,6 +550,7 @@ class PromotionsModule extends BaseModule {
   async render(): Promise<void> {
     // ✅ 安全: 静态HTML模板，无用户输入
     this.container!.innerHTML = templateHTML;
+    this.container!.classList.add("fade-in");
   }
 
   async init(): Promise<void> {
@@ -552,16 +566,16 @@ class PromotionsModule extends BaseModule {
 
   // 渲染内容区 (扁平渲染)
   private renderContent(): void {
-    const contentContainer = document.getElementById("amzp_main");
+    const contentContainer = document.getElementById("amzpt_main");
     if (!contentContainer) return;
 
     contentContainer.innerHTML = promoData
       .map(
         (section) => `
-            <div id="${section.id}" class="amzp_card">
-                <div class="amzp_card_header">
-                    <i class="fas ${section.icon} amzp_card_icon" style="font-size:1.5rem; color: #566ce8;"></i>
-                    <h2 class="amzp_card_title">${section.title}</h2>
+            <div id="${section.id}" class="amzpt_card">
+                <div class="amzpt_card_header">
+                    <i class="fas ${section.icon} amzpt_card_icon" style="font-size:1.5rem; color: #566ce8;"></i>
+                    <h2 class="amzpt_card_title">${section.title}</h2>
                 </div>
                 ${this.renderSectionBody(section.content)}
             </div>
@@ -577,16 +591,16 @@ class PromotionsModule extends BaseModule {
       .map((block) => {
         // 1. 文本
         if (block.type === "text")
-          return `<div class="amzp_text">${block.text}</div>`;
+          return `<div class="amzpt_text">${block.text}</div>`;
 
         // 2. 黄色高亮块 (保留兼容)
         if (block.type === "note")
-          return `<div class="amzp_highlight_box">${block.text}</div>`;
+          return `<div class="amzpt_highlight_box">${block.text}</div>`;
 
         // 3. 分块小标题
         if (block.type === "section_header") {
           return `
-                    <div class="amzp_section_header">
+                    <div class="amzpt_section_header">
                         <i class="fas fa-caret-right"></i> ${block.text}
                     </div>
                 `;
@@ -632,7 +646,7 @@ class PromotionsModule extends BaseModule {
           const styleKey = block.style || "insight";
           const style = styleMap[styleKey]!;
           return `
-                    <div class="amzp_callout" style="background: ${style.bg}; color: ${style.color}; border: ${style.border}; border-radius: 12px; padding: 20px 24px; margin-bottom: 24px;">
+                    <div class="amzpt_callout" style="background: ${style.bg}; color: ${style.color}; border: ${style.border}; border-radius: 12px; padding: 20px 24px; margin-bottom: 24px;">
                         <div style="font-weight: 700; font-size: 1.1rem; margin-bottom: 8px;">${block.title}</div>
                         <div style="font-size: 0.95rem; line-height: 1.7;">${block.text}</div>
                     </div>
@@ -642,35 +656,18 @@ class PromotionsModule extends BaseModule {
         // 5. 快捷入口 Grid
         if (block.type === "grid_links") {
           const gridId = `grid-${Math.random().toString(36).substr(2, 9)}`;
-          setTimeout(() => {
-            const gridContainer = document.getElementById(gridId);
-            if (gridContainer) {
-              gridContainer
-                .querySelectorAll("[data-scroll-to-name]")
-                .forEach((item) => {
-                  item.addEventListener("click", () => {
-                    const targetName = (item as HTMLElement).getAttribute(
-                      "data-scroll-to-name",
-                    );
-                    if (targetName && window.amzp_scrollTo_Name) {
-                      window.amzp_scrollTo_Name(targetName);
-                    }
-                  });
-                });
-            }
-          }, 0);
 
           return `
-                    <div class="amzp_grid" id="${gridId}" style="margin-top: 10px;">
+                    <div class="amzpt_grid" id="${gridId}" style="margin-top: 10px;">
                         ${(block.items || [])
                           .map(
                             (item) => `
-                            <div class="amzp_sub_item" style="cursor: pointer; padding: 20px;" data-scroll-to-name="${item.title}">
-                                <div class="amzp_sub_header" style="margin-bottom: 8px;">
-                                    <div class="amzp_sub_icon"><i class="fas ${item.icon}"></i></div>
-                                    <div class="amzp_sub_title" style="font-size: 1rem;">${item.title}</div>
+                            <div class="amzpt_sub_item" style="cursor: pointer; padding: 20px;" data-scroll-to-name="${item.title}">
+                                <div class="amzpt_sub_header" style="margin-bottom: 8px;">
+                                    <div class="amzpt_sub_icon"><i class="fas ${item.icon}"></i></div>
+                                    <div class="amzpt_sub_title" style="font-size: 1rem;">${item.title}</div>
                                 </div>
-                                <div class="amzp_sub_desc" style="font-size: 0.85rem; margin-bottom: 0;">${item.text}</div>
+                                <div class="amzpt_sub_desc" style="font-size: 0.85rem; margin-bottom: 0;">${item.text}</div>
                             </div>
                         `,
                           )
@@ -682,21 +679,21 @@ class PromotionsModule extends BaseModule {
         // 6. 详细子项目
         if (block.type === "sub_items") {
           return `
-                    <div class="amzp_grid">
+                    <div class="amzpt_grid">
                         ${(block.items || [])
                           .map(
                             (item) => `
-                            <div class="amzp_sub_item">
-                                <div class="amzp_sub_header">
-                                    <div class="amzp_sub_icon"><i class="fas ${item.icon}"></i></div>
-                                    <div class="amzp_sub_title">${item.title}</div>
+                            <div class="amzpt_sub_item">
+                                <div class="amzpt_sub_header">
+                                    <div class="amzpt_sub_icon"><i class="fas ${item.icon}"></i></div>
+                                    <div class="amzpt_sub_title">${item.title}</div>
                                 </div>
-                                <div class="amzp_sub_desc">${item.desc}</div>
+                                <div class="amzpt_sub_desc">${item.desc}</div>
                                 ${
                                   item.tags
                                     ? `
                                     <div style="margin-top:auto">
-                                        ${(item.tags as string[]).map((t: string) => `<span class="amzp_tag">${t}</span>`).join("")}
+                                        ${(item.tags as string[]).map((t: string) => `<span class="amzpt_tag">${t}</span>`).join("")}
                                     </div>
                                 `
                                     : ""
@@ -712,13 +709,13 @@ class PromotionsModule extends BaseModule {
         // 7. 统计数据
         if (block.type === "stats") {
           return `
-                    <div class="amzp_grid">
+                    <div class="amzpt_grid">
                         ${(block.items || [])
                           .map(
                             (item) => `
-                            <div class="amzp_stats_box">
+                            <div class="amzpt_stats_box">
                                 <i class="fas ${item.icon}" style="font-size:1.8rem; color: #566ce8;"></i>
-                                <div class="amzp_stats_text">${item.text}</div>
+                                <div class="amzpt_stats_text">${item.text}</div>
                             </div>
                         `,
                           )
@@ -730,8 +727,8 @@ class PromotionsModule extends BaseModule {
         // 8. 对比表格 (新增)
         if (block.type === "comparison_table") {
           return `
-                    <div class="amzp_table_wrapper" style="overflow-x: auto; margin: 20px 0;">
-                        <table class="amzp_table" style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                    <div class="amzpt_table_wrapper" style="overflow-x: auto; margin: 20px 0;">
+                        <table class="amzpt_table" style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
                             <thead>
                                 <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff;">
                                     ${(block.headers || []).map((h) => `<th style="padding: 12px 15px; text-align: left; font-weight: 600;">${h}</th>`).join("")}
@@ -756,7 +753,7 @@ class PromotionsModule extends BaseModule {
         // 9. 提示列表 (新增)
         if (block.type === "tip_list") {
           return `
-                    <div class="amzp_tip_list" style="margin: 15px 0;">
+                    <div class="amzpt_tip_list" style="margin: 15px 0;">
                         ${(block.items || [])
                           .map((item) => {
                             const color =
@@ -786,7 +783,7 @@ class PromotionsModule extends BaseModule {
         // 10. 键值列表 (新增)
         if (block.type === "key_value_list") {
           return `
-                    <div class="amzp_kv_list" style="margin: 15px 0; background: #f8f9fa; border-radius: 10px; padding: 5px 0;">
+                    <div class="amzpt_kv_list" style="margin: 15px 0; background: #f8f9fa; border-radius: 10px; padding: 5px 0;">
                         ${(block.items || [])
                           .map(
                             (item) => `
@@ -804,7 +801,7 @@ class PromotionsModule extends BaseModule {
         // 11. 时间线 (新增)
         if (block.type === "timeline") {
           return `
-                    <div class="amzp_timeline" style="margin: 20px 0; position: relative; padding-left: 30px;">
+                    <div class="amzpt_timeline" style="margin: 20px 0; position: relative; padding-left: 30px;">
                         <div style="position: absolute; left: 8px; top: 0; bottom: 0; width: 3px; background: linear-gradient(to bottom, #667eea, #764ba2); border-radius: 2px;"></div>
                         ${(block.items || [])
                           .map((item) => {
@@ -833,7 +830,7 @@ class PromotionsModule extends BaseModule {
         // 12. 检查清单 (新增)
         if (block.type === "checklist") {
           return `
-                    <div class="amzp_checklist" style="margin: 15px 0;">
+                    <div class="amzpt_checklist" style="margin: 15px 0;">
                         ${(block.items || [])
                           .map(
                             (item) => `

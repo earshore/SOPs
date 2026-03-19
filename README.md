@@ -270,6 +270,135 @@ npm run lighthouse       # Lighthouse 测试
 
 ---
 
+## 🏗️ amz_hub 模块挂载规范
+
+> 以下规范同样适用于 sops、app_center、more 等其他模块下的子页面开发。
+
+### 标准模式
+
+所有子页面模块统一遵循以下结构：
+
+```typescript
+// 1. 模板用 ?raw 导入 —— 构建期打包，无运行时路径查找
+import BaseModule from '../../../../../common/BaseModule';
+import templateHTML from './template.html?raw';
+import './styles.css'; // 如有独立样式
+
+import { Logger } from '../../../../../services/loggerService';
+
+class MyPageModule extends BaseModule {
+  constructor() {
+    super('route_id'); // 与 routes.ts 中的路由 ID 对应
+  }
+
+  // 2. render() —— 渲染模板，BaseModule.mount() 自动调用
+  async render(): Promise<void> {
+    // ✅ 安全: 静态HTML模板，无用户输入
+    this.container!.innerHTML = templateHTML;
+    this.container!.classList.add('fade-in'); // 统一淡入动画
+  }
+
+  // 3. init() —— 可选，图表初始化、事件绑定等（render 完成后自动调用）
+  async init(): Promise<void> {
+    // 事件绑定、图表初始化等
+    Logger.debug('✅ [MyPage] 模块初始化完成');
+  }
+
+  // 4. onUnmount() —— 可选，资源清理（图表销毁、定时器等）
+  protected onUnmount(): void {
+    // 清理图表实例、取消订阅等
+  }
+}
+
+// 5. 导出 —— ModuleLoader 通过命名导出调用
+const instance = new MyPageModule();
+export const mount = (c: HTMLElement) => instance.mount(c);
+export const unmount = () => instance.unmount();
+```
+
+### 生命周期说明
+
+`BaseModule.mount(container)` 按以下顺序执行，**不要覆盖 `mount()` 或 `unmount()`**：
+
+```
+mount(container)
+  ├── 设置 this.container，标记 _isMounted
+  ├── 调用 render()   ← 子类实现：渲染模板
+  ├── 调用 init()     ← 子类实现（可选）：事件/图表初始化
+  └── 错误由 handleError() 统一处理
+
+unmount()
+  ├── 取消进行中的 AbortController 请求
+  ├── 执行所有注册的 disposables 清理函数
+  ├── 调用 onUnmount()  ← 子类实现（可选）：自定义清理
+  └── 重置 _isMounted 状态
+```
+
+### 模板加载：`?raw` vs `loadTemplate()`
+
+| | `?raw` import | `loadTemplate()` |
+|---|---|---|
+| **路径校验** | ✅ 构建期报错 | ❌ 运行时才发现 |
+| **网络请求** | ✅ 零额外请求，同 chunk | ❌ 独立 chunk，多一次请求 |
+| **生产缓存** | ✅ 由浏览器 HTTP 缓存处理 | ⚠️ 额外占用 localStorage |
+| **适用场景** | 子页面模板 | Shell 级 HTML 注入 |
+
+**`loadTemplate()` 保留场景**：仅用于 `viewLoader` 内部的 Shell 级视图注入（`sops.html`、`amz_hub.html` 等顶层外壳），由 `initViews()` 和 `ensureViewLoaded()` 调用，不应在子页面模块中直接使用。
+
+### 淡入动画
+
+所有页面在 `render()` 中统一加 `fade-in` class：
+
+```typescript
+async render(): Promise<void> {
+  this.container!.innerHTML = templateHTML;
+  this.container!.classList.add('fade-in'); // 对应 CSS: animation: fadeIn ...
+}
+```
+
+CSS 中已定义的动画 class 可按需选用：
+
+| Class | 动画效果 | 时长 |
+|---|---|---|
+| `fade-in` | 标准淡入 | `--duration-normal` |
+| `fade-in-up` | 向上淡入 | `--duration-slow` |
+| `view-fade-in` | 页面级淡入（较慢） | `--duration-slower` |
+
+### 常见反模式
+
+```typescript
+// ❌ 错误：覆盖 mount() 会绕开 BaseModule 的生命周期管理
+async mount(container: HTMLElement): Promise<void> {
+  container.innerHTML = templateHTML;
+}
+
+// ❌ 错误：覆盖 unmount() 会导致 disposables 和 AbortController 不被清理
+unmount(): void {
+  Logger.debug('卸载');
+}
+
+// ❌ 错误：运行时字符串路径，文件改名不报错，可能 miss 注册表
+this.container!.innerHTML = await loadTemplate(
+  'src/modules/amz_hub/views/practice/my_page/template.html'
+);
+
+// ✅ 正确：?raw 导入，构建期校验
+import templateHTML from './template.html?raw';
+this.container!.innerHTML = templateHTML;
+```
+
+### 模块注册流程
+
+新增子页面需要同步更新以下 4 处：
+
+1. **`src/common/constants/routes.ts`** — 在对应模块的 `ROUTES` 常量里添加路由 ID
+2. **`src/common/router/navigo/route-ids.ts`** — 在 `RouteId` 类型和 `ALL_ROUTE_IDS` 数组中添加
+3. **`src/common/config/menuConfig.ts`** — 在 `routes` 中添加菜单配置（label、icon、category 等）
+4. **`src/modules/amz_hub/amz_hub.ts`** — 在 `MODULE_MAP` 中添加动态 import 映射
+
+
+---
+
 ## 🤝 贡献指南
 
 ### 开发流程

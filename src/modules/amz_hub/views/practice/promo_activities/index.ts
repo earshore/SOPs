@@ -13,6 +13,7 @@ class PromoActivitiesModule extends BaseModule {
   async render(): Promise<void> {
     // ✅ 安全: 静态HTML模板，无用户输入
     this.container!.innerHTML = templateHTML;
+    this.container!.classList.add("fade-in");
     Logger.debug("✅ [PromoActivities] 促销活动页面已加载");
   }
 
