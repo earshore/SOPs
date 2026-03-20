@@ -405,7 +405,7 @@
                         <i class="fa-solid fa-code text-indigo-600"></i>
                       </div>
                       <div class="text-left min-w-0">
-                        <h3 class="text-sm font-semibold text-slate-800">提示词预览面板</h3>
+                        <h3 class="text-sm font-semibold text-slate-800">任务预览</h3>
                         <p class="text-xs text-slate-500 mt-0.5">在执行分析前预览各任务 Prompt 内容</p>
                       </div>
                     </div>
@@ -432,11 +432,14 @@
                             class="w-full flex items-center justify-between p-4 hover:bg-slate-800/50 transition-colors">
                             <div class="flex items-center gap-3">
                               <div class="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center">
-                                <i class="fa-solid fa-terminal text-emerald-400"></i>
+                                <!-- <i class="fa-solid fa-terminal text-emerald-400"></i> -->
+                                <span class="text-xs font-mono font-semibold text-emerald-400" x-text="index + 1">TASK</span>
                               </div>
                               <div class="text-left">
-                                <h4 class="text-sm font-semibold text-white">AI 分析提示词</h4>
-                                <p class="text-xs text-slate-400" x-text="analysisTargets.find(t =&gt; t.id === targetId).name">
+                                <!-- <h4 class="text-sm font-semibold text-white">AI 分析提示词</h4>
+                                <p class="text-xs text-slate-400" x-text="analysisTargets.find(t =&gt; t.id === targetId).name"> -->
+                                <h4 class="text-sm font-semibold text-white" x-text="analysisTargets.find(t =&gt; t.id === targetId).name"></h4>
+                                <p class="text-xs text-slate-400" x-text="analysisTargets.find(t =&gt; t.id === targetId).description">
                                 </p>
                               </div>
                             </div>
