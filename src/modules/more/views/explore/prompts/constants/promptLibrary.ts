@@ -1931,14 +1931,33 @@ export function getPromptById(promptId: string): PromptItem | undefined {
 /**
  * 搜索提示词
  */
-export function searchPrompts(keyword: string): PromptItem[] {
+export function searchPrompts(
+    keyword: string,
+    categoryId: PromptCategoryId | 'all' = 'all'
+): PromptItem[] {
     const lowerKeyword = keyword.toLowerCase();
-    return PROMPT_LIBRARY.filter(p =>
-        p.title.toLowerCase().includes(lowerKeyword) ||
-        p.description.toLowerCase().includes(lowerKeyword) ||
-        p.prompt.toLowerCase().includes(lowerKeyword)
-    );
+
+    return getPromptsByCategory(categoryId).filter((p) => {
+        const category = Object.values(PROMPT_CATEGORIES).find((cat) => cat.id === p.category);
+        const model = RECOMMENDED_MODELS[p.recommendedModel] || RECOMMENDED_MODELS.GPT4_TURBO;
+        const searchableText = [
+            p.id,
+            p.title,
+            p.description,
+            p.prompt,
+            p.promptEn,
+            category?.name || '',
+            model.name,
+            model.provider,
+            model.badge,
+        ]
+            .join('\n')
+            .toLowerCase();
+
+        return searchableText.includes(lowerKeyword);
+    });
 }
+
 
 /**
  * 获取推荐模型信息
