@@ -529,9 +529,9 @@ class PromotionsModule extends BaseModule {
             <span class="amzpt_anchor_eyebrow">PROMOTION TOOL MAP</span>
             <h2 class="amzpt_anchor_title">欧洲站促销工具总览（运营工具版）</h2>
             <p class="amzpt_anchor_desc">
-              按“先目标、再工具、再组合”的逻辑重排本页内容，把 Deals、Coupons、Prime 专享折扣、
-              Price Discounts、Promotions、Outlet 等工具全部放回各自该解决的问题里。
+              本页专门解决“用什么工具、什么时候适合用、工具之间能否叠加、哪些场景不要误用”；如果你要看 Prime Day、BFCM 等节点的推进节奏与执行 SOP，请配合“促销活动”页一起使用。
             </p>
+
           </div>
           <div class="amzpt_anchor_tip">
             <i class="fas fa-hand-pointer"></i>
