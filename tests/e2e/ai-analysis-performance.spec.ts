@@ -113,8 +113,7 @@ test.describe('AI 分析模块性能测试', () => {
       
       // 等待关键元素渲染
       await page.waitForSelector('h2:has-text("AI 智能分析")', { state: 'visible' });
-      await page.waitForSelector('h2:has-text("产品 ASIN")', { state: 'visible' });
-      await page.waitForSelector('h2:has-text("选择分析目标")', { state: 'visible' });
+      await page.waitForSelector('[data-selection-panel-toggle]', { state: 'visible' });
       
       const renderTime = performance.now() - startTime;
       

@@ -70,10 +70,14 @@ export class AIAnalysisPage extends BasePage {
     asinClearAll: 'button:has-text("清空")',
     asinCheckbox: (asin: string) => `input[type="checkbox"][value="${asin}"]`,
     asinLabel: (asin: string) => `label:has(input[value="${asin}"])`,
-    selectedAsinCount: '.bg-emerald-50.text-emerald-600',
+    selectedAsinCount: '[data-asin-selected-count]',
     availableAsinsList: '.space-y-2.max-h-48',
     noDataWarning: '.bg-amber-50.border-amber-200',
     navigateToScraperButton: 'a:has-text("前往数据采集")',
+
+    // 统一选择区（折叠/展开）
+    selectionPanelToggle: '[data-selection-panel-toggle]',
+    selectionPanelContent: '[data-selection-panel-content]',
     
     // 分析目标选择区域
     targetCard: '.lg\\:col-span-8 .bg-white',
@@ -82,7 +86,7 @@ export class AIAnalysisPage extends BasePage {
     listingsSection: '.grid.grid-cols-1.md\\:grid-cols-2',
     reviewsSection: '.grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-3',
     targetButton: (targetId: string) => `button[data-target-id="${targetId}"]`,
-    selectedTargetCount: '.font-bold.text-indigo-600',
+    selectedTargetCount: '[data-targets-selected-count]',
     targetSummary: '.flex.-space-x-2',
     
     // 提示词预览面板
@@ -139,9 +143,17 @@ export class AIAnalysisPage extends BasePage {
    */
   async waitForPageReady(): Promise<void> {
     await this.waitForElement(this.selectors.mainContainer);
-    await this.waitForElement(this.selectors.asinCard);
-    await this.waitForElement(this.selectors.targetCard);
+    await this.waitForElement(this.selectors.selectionPanelToggle);
     await this.waitForLoadingToFinish();
+  }
+
+  // ========== 折叠区展开方法 ==========
+
+  async expandSelectionPanelIfNeeded(): Promise<void> {
+    const isExpanded = await this.isVisible(this.selectors.selectionPanelContent, { timeout: 200 });
+    if (isExpanded) return;
+    await this.click(this.selectors.selectionPanelToggle);
+    await this.wait(200);
   }
 
   // ========== ASIN 选择方法 ==========
@@ -150,6 +162,7 @@ export class AIAnalysisPage extends BasePage {
    * 获取可用的 ASIN 列表
    */
   async getAvailableAsins(): Promise<string[]> {
+    await this.expandSelectionPanelIfNeeded();
     const checkboxes = this.page.locator(`${this.selectors.availableAsinsList} input[type="checkbox"]`);
     const count = await checkboxes.count();
     
@@ -165,11 +178,20 @@ export class AIAnalysisPage extends BasePage {
   }
 
   /**
+   * 获取可用的 ASIN 数量（测试兼容别名）
+   */
+  async getAvailableAsinsCount(): Promise<number> {
+    const asins = await this.getAvailableAsins();
+    return asins.length;
+  }
+
+  /**
    * 选择单个 ASIN
    * 
    * @param asin - ASIN 标识符
    */
   async selectAsin(asin: string): Promise<void> {
+    await this.expandSelectionPanelIfNeeded();
     const checkbox = this.page.locator(`input[type="checkbox"][value="${asin}"]`);
     await checkbox.check();
   }
@@ -180,6 +202,7 @@ export class AIAnalysisPage extends BasePage {
    * @param asin - ASIN 标识符
    */
   async unselectAsin(asin: string): Promise<void> {
+    await this.expandSelectionPanelIfNeeded();
     const checkbox = this.page.locator(`input[type="checkbox"][value="${asin}"]`);
     await checkbox.uncheck();
   }
@@ -190,6 +213,7 @@ export class AIAnalysisPage extends BasePage {
    * @param asins - ASIN 列表
    */
   async selectAsins(asins: string[]): Promise<void> {
+    await this.expandSelectionPanelIfNeeded();
     for (const asin of asins) {
       await this.selectAsin(asin);
     }
@@ -199,6 +223,7 @@ export class AIAnalysisPage extends BasePage {
    * 全选 ASIN
    */
   async selectAllAsins(): Promise<void> {
+    await this.expandSelectionPanelIfNeeded();
     await this.click(this.selectors.asinSelectAll);
   }
 
@@ -206,6 +231,7 @@ export class AIAnalysisPage extends BasePage {
    * 清空 ASIN 选择
    */
   async clearAllAsins(): Promise<void> {
+    await this.expandSelectionPanelIfNeeded();
     await this.click(this.selectors.asinClearAll);
   }
 
@@ -216,6 +242,13 @@ export class AIAnalysisPage extends BasePage {
     const text = await this.getText(this.selectors.selectedAsinCount);
     const match = text.match(/已选择\s+(\d+)\s+个产品/);
     return match ? parseInt(match[1], 10) : 0;
+  }
+
+  /**
+   * 获取已选择的 ASIN 数量（测试兼容别名）
+   */
+  async getSelectedAsinsCount(): Promise<number> {
+    return this.getSelectedAsinCount();
   }
 
   /**
@@ -240,6 +273,7 @@ export class AIAnalysisPage extends BasePage {
    * 检查是否有可用数据
    */
   async hasAvailableData(): Promise<boolean> {
+    await this.expandSelectionPanelIfNeeded();
     return !(await this.isVisible(this.selectors.noDataWarning));
   }
 
@@ -249,6 +283,7 @@ export class AIAnalysisPage extends BasePage {
    * @param asin - ASIN 标识符
    */
   async isAsinSelected(asin: string): Promise<boolean> {
+    await this.expandSelectionPanelIfNeeded();
     const checkbox = this.page.locator(`input[type="checkbox"][value="${asin}"]`);
     return await checkbox.isChecked();
   }
@@ -261,6 +296,7 @@ export class AIAnalysisPage extends BasePage {
    * @param targetId - 目标 ID
    */
   async selectTarget(targetId: string): Promise<void> {
+    await this.expandSelectionPanelIfNeeded();
     // 通过文本内容查找按钮（因为模板中没有 data-target-id 属性）
     const buttons = this.page.locator(`${this.selectors.targetCard} button`);
     const count = await buttons.count();
@@ -283,6 +319,7 @@ export class AIAnalysisPage extends BasePage {
    * @param targetIds - 目标 ID 列表
    */
   async selectTargets(targetIds: string[]): Promise<void> {
+    await this.expandSelectionPanelIfNeeded();
     for (const targetId of targetIds) {
       await this.selectTarget(targetId);
     }
@@ -292,6 +329,7 @@ export class AIAnalysisPage extends BasePage {
    * 全选分析目标
    */
   async selectAllTargets(): Promise<void> {
+    await this.expandSelectionPanelIfNeeded();
     const button = this.page.locator(this.selectors.targetCard).locator('button:has-text("全选")');
     await button.click();
   }
@@ -300,6 +338,7 @@ export class AIAnalysisPage extends BasePage {
    * 清空分析目标选择
    */
   async clearAllTargets(): Promise<void> {
+    await this.expandSelectionPanelIfNeeded();
     const button = this.page.locator(this.selectors.targetCard).locator('button:has-text("清空")');
     await button.click();
   }
@@ -313,9 +352,32 @@ export class AIAnalysisPage extends BasePage {
   }
 
   /**
+   * 获取可用的分析目标数量（测试兼容别名）
+   */
+  async getAvailableTargetsCount(): Promise<number> {
+    await this.expandSelectionPanelIfNeeded();
+
+    const listingsButtons = this.page.locator(this.selectors.listingsSection).locator('button');
+    const reviewsButtons = this.page.locator(this.selectors.reviewsSection).locator('button');
+
+    const listingsCount = await listingsButtons.count();
+    const reviewsCount = await reviewsButtons.count();
+
+    return listingsCount + reviewsCount;
+  }
+
+  /**
+   * 获取已选择的分析目标数量（测试兼容别名）
+   */
+  async getSelectedTargetsCount(): Promise<number> {
+    return this.getSelectedTargetCount();
+  }
+
+  /**
    * 选择所有 Listings 分析目标
    */
   async selectAllListingsTargets(): Promise<void> {
+    await this.expandSelectionPanelIfNeeded();
     const buttons = this.page.locator(this.selectors.listingsSection).locator('button');
     const count = await buttons.count();
     
@@ -328,6 +390,7 @@ export class AIAnalysisPage extends BasePage {
    * 选择所有 Reviews 分析目标
    */
   async selectAllReviewsTargets(): Promise<void> {
+    await this.expandSelectionPanelIfNeeded();
     const buttons = this.page.locator(this.selectors.reviewsSection).locator('button');
     const count = await buttons.count();
     

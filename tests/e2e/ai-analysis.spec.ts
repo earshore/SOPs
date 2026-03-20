@@ -28,8 +28,7 @@ test.describe('AI 智能分析模块 E2E 测试', () => {
 
       // 验证：主要元素可见
       await expect(page.locator('h2:has-text("AI 智能分析")')).toBeVisible();
-      await expect(page.locator('h2:has-text("产品 ASIN")')).toBeVisible();
-      await expect(page.locator('h2:has-text("选择分析目标")')).toBeVisible();
+      await expect(page.locator('[data-selection-panel-toggle]')).toBeVisible();
 
       // 验证：无 JavaScript 错误
       const errors = consoleListener.getErrors();
@@ -159,6 +158,8 @@ test.describe('AI 智能分析模块 E2E 测试', () => {
     });
 
     test('应该显示 Listings 和 Reviews 两类分析目标', async ({ page }) => {
+      await aiAnalysis.expandSelectionPanelIfNeeded();
+
       // 验证：Listings 分析标签存在
       await expect(page.locator('div:has-text("Listings 分析")')).toBeVisible();
 
@@ -602,7 +603,7 @@ test.describe('AI 智能分析模块 E2E 测试', () => {
 
       // 验证：主要元素仍然可见
       await expect(page.locator('h2:has-text("AI 智能分析")')).toBeVisible();
-      await expect(page.locator('h2:has-text("产品 ASIN")')).toBeVisible();
+      await expect(page.locator('[data-selection-panel-toggle]')).toBeVisible();
       await expect(page.locator('button:has-text("开始分析")')).toBeVisible();
 
       console.log('✅ 移动端显示正常');
@@ -617,7 +618,7 @@ test.describe('AI 智能分析模块 E2E 测试', () => {
 
       // 验证：主要元素仍然可见
       await expect(page.locator('h2:has-text("AI 智能分析")')).toBeVisible();
-      await expect(page.locator('h2:has-text("选择分析目标")')).toBeVisible();
+      await expect(page.locator('[data-selection-panel-toggle]')).toBeVisible();
 
       console.log('✅ 平板端显示正常');
     });

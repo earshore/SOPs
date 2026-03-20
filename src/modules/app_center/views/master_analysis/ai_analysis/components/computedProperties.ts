@@ -269,13 +269,15 @@ export function createComputedProperties(context: AlpineContext): ComputedProper
 
     /**
      * 所有选中任务的总 token 数
+     * 使用 this 读取响应式状态，确保勾选/取消勾选分析目标时实时更新
      */
     get totalTokenCount(): number {
-      if (context.selectedTargets.length === 0 || this.currentProducts.length === 0) {
+      const ctx = this as unknown as AlpineContext & ComputedProperties;
+      if (ctx.selectedTargets.length === 0 || ctx.currentProducts.length === 0) {
         return 0;
       }
-      return context.selectedTargets.reduce((total, targetId) => {
-        return total + getPromptTokenCount(targetId, this.currentProducts);
+      return ctx.selectedTargets.reduce((total, targetId) => {
+        return total + getPromptTokenCount(targetId, ctx.currentProducts);
       }, 0);
     },
 

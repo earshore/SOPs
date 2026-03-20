@@ -35,6 +35,9 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
     useRealData: true,
     dataSource: 'scraper' as 'sample' | 'scraper',
     showDataSourceBanner: true,
+    // ========== Collapsible UI State ==========
+    // 默认收起选择区：收起只展示一个大标题，展开同时展示 ASIN 与分析目标模块
+    showSelectionPanel: false,
 
     // ========== 订阅清理函数 ==========
     _unsubscribes: [] as Array<() => void>,
@@ -153,6 +156,10 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
     clearAllTargets() {
       const ctx = this as unknown as AlpineContext & ComputedProperties;
       actions.clearAllTargets(ctx);
+    },
+
+    toggleSelectionPanel() {
+      this.showSelectionPanel = !this.showSelectionPanel;
     },
 
     togglePromptPanel() {
