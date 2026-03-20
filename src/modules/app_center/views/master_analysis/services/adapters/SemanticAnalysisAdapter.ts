@@ -55,7 +55,7 @@ export class SemanticAnalysisAdapter implements ReportAdapter {
     return result;
   }
 
-  extractDNA(report: unknown, language: string = "zh"): ExtendedDNA | null {
+  extractDNA(report: unknown, _language: string = "zh"): ExtendedDNA | null {
     if (!this.canHandle(report)) {
       Logger.warn("[SemanticAnalysisAdapter] 报告格式不匹配");
       return null;
@@ -83,6 +83,7 @@ export class SemanticAnalysisAdapter implements ReportAdapter {
         usps: usps.data,
         specs: specs.data,
         keywords: keywords.data,
+        restrictedWords: [],
         highFrequencyPhrases: highFrequencyPhrases.data,
         painPoints: painPoints.data,
         differentiationAngles: differentiation.data,
@@ -91,6 +92,7 @@ export class SemanticAnalysisAdapter implements ReportAdapter {
           usps: usps.confidence,
           specs: specs.confidence,
           keywords: keywords.confidence,
+          restrictedWords: 0,
           highFrequencyPhrases: highFrequencyPhrases.confidence,
           painPoints: painPoints.confidence,
           differentiationAngles: differentiation.confidence,
@@ -114,6 +116,7 @@ export class SemanticAnalysisAdapter implements ReportAdapter {
               keywords.data.core.length +
               keywords.data.longTail.length +
               keywords.data.intent.length,
+            totalRestrictedWords: 0,
             totalPhrases: highFrequencyPhrases.data.length,
             totalPainPoints: painPoints.data.length,
             totalDifferentiationAngles: differentiation.data.length,

@@ -6,12 +6,14 @@
 import { analysisTargets } from '../config/analysisTargets';
 import { checkAndLoadScraperData, checkLoadedReport, loadHistoricalReport } from './dataLoaders';
 import { formatHistoryDate } from '../services/reportGenerator';
+import { parseAnalysisReport } from '../services/analysisService';
 import { getTargetColorClass, getPromptText, getResultIcon, getResultColor } from './helpers';
 import { getPromptTokenCount, getFormattedTokenCount } from './helpers';
 import { highlightJson } from '../services/reportGenerator';
 import * as actions from './actions';
-import { AlpineContext } from '../types';
+import { AlpineContext, FullReportData } from '../types';
 import { createComputedProperties, ComputedProperties } from './computedProperties';
+import type { FullAnalysisReport } from '../config/analysisReportData';
 import { createMultipleStateSyncs, cleanupSubscriptions } from '@common/utils/stateSync';
 import { createPerformanceSettingsPanel } from './PerformanceSettings';
 
@@ -29,6 +31,13 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
     currentStep: '',
     analysisReport: null as unknown,
     hasReport: false,
+    reportResults: [],
+    reportListingsResults: [],
+    reportReviewsResults: [],
+    reportTotalHighlights: 0,
+    reportTotalDetails: 0,
+    reportFullData: null as FullReportData | null,
+    reportRenderVersion: 0,
     expandedPromptIndex: null as number | null,
     showPromptPanel: false,
     showJsonViewer: false,
@@ -80,9 +89,18 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
       (this as any).$watch('analysisReport', (newValue: unknown) => {
         Logger.debug('[Alpine 组件] 📊 analysisReport 变化检测:', !!newValue);
         (this as any).hasReport = !!newValue;
-        if (newValue) {
-          const resultsCount = (this as any).results?.length || 0;
-          Logger.debug('[Alpine 组件] 📊 results 重新计算:', resultsCount, '个结果');
+        (this as any).refreshReportView();
+      });
+
+      (this as any).$watch('selectedTargets', () => {
+        if ((this as any).hasReport) {
+          (this as any).refreshReportView();
+        }
+      });
+
+      (this as any).$watch('selectedAsins', () => {
+        if ((this as any).hasReport) {
+          (this as any).refreshReportView();
         }
       });
 
@@ -97,6 +115,7 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
 
       // 检查是否有已加载的历史报告
       checkLoadedReport(this);
+      (this as any).refreshReportView();
     },
 
     // ========== 清理 ==========
@@ -212,6 +231,67 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
       // 使用正确的路由路径
       if (window.location.hash !== '#/app-center/scraper') {
         window.location.hash = '#/app-center/scraper';
+      }
+    },
+
+    refreshReportView() {
+      const ctx = this as unknown as AlpineContext & ComputedProperties;
+
+      if (!ctx.analysisReport || ctx.selectedTargets.length === 0) {
+        ctx.reportResults = [];
+        ctx.reportListingsResults = [];
+        ctx.reportReviewsResults = [];
+        ctx.reportTotalHighlights = 0;
+        ctx.reportTotalDetails = 0;
+        ctx.reportFullData = null;
+        ctx.reportRenderVersion += 1;
+        return;
+      }
+
+      try {
+        const reportResults = parseAnalysisReport(
+          ctx.analysisReport as FullAnalysisReport,
+          ctx.selectedTargets
+        );
+
+        ctx.reportResults = reportResults;
+        ctx.reportListingsResults = reportResults.filter(result => result.source === 'Listings');
+        ctx.reportReviewsResults = reportResults.filter(result => result.source === 'Reviews');
+        ctx.reportTotalHighlights = reportResults.reduce((acc, result) => acc + result.highlights.length, 0);
+        ctx.reportTotalDetails = reportResults.reduce((acc, result) => acc + result.details.length, 0);
+
+        const productTitle = ctx.currentProducts.length > 0
+          ? ctx.currentProducts.map(product => product.productTitle).join(' | ')
+          : undefined;
+
+        ctx.reportFullData = {
+          metadata: {
+            asins: [...ctx.selectedAsins],
+            targets: [...ctx.selectedTargets],
+            timestamp: new Date().toISOString(),
+            dataSource: ctx.dataSource,
+            marketplace: ctx.dataSourceMarketplace,
+            productTitle
+          },
+          analysisReport: ctx.analysisReport
+        };
+        ctx.reportRenderVersion += 1;
+
+        Logger.debug('[Alpine 组件] 📊 report view 已刷新:', {
+          results: ctx.reportResults.length,
+          listings: ctx.reportListingsResults.length,
+          reviews: ctx.reportReviewsResults.length,
+          renderVersion: ctx.reportRenderVersion
+        });
+      } catch (error) {
+        ctx.reportResults = [];
+        ctx.reportListingsResults = [];
+        ctx.reportReviewsResults = [];
+        ctx.reportTotalHighlights = 0;
+        ctx.reportTotalDetails = 0;
+        ctx.reportFullData = null;
+        ctx.reportRenderVersion += 1;
+        Logger.error('[Alpine 组件] 刷新报告视图失败:', error);
       }
     },
 

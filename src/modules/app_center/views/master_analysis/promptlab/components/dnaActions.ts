@@ -13,11 +13,99 @@ import {
   extractDNAFromDownloadsReport,
   canExtractDNAFromDownloadsReport,
 } from '../../services/UniversalDNAExtractor';
+import type { ExtendedDNA } from '../../types/extendedDNA';
 import type { PromptlabAlpineContext } from './types';
 
-// ==========================================
-// 工具
-// ==========================================
+export type ExtractableFieldName = 'keywordsTier1' | 'keywordsTier2' | 'negative' | 'audience' | 'usps' | 'specs';
+
+interface NormalizedDnaResult {
+  fields: Record<ExtractableFieldName, string>;
+  confidence: {
+    audience: number;
+    usps: number;
+    specs: number;
+    keywords: number;
+    negative: number;
+    overall: number;
+  };
+}
+
+const FIELD_CONFIG: Record<ExtractableFieldName, {
+  inputId: string;
+  label: string;
+  apply: (ctx: PromptlabAlpineContext, normalized: NormalizedDnaResult) => void;
+  getConfidence: (ctx: PromptlabAlpineContext) => number;
+}> = {
+  keywordsTier1: {
+    inputId: 'lab-keywords-tier1',
+    label: 'Tier 1 核心大词',
+    apply: (ctx, normalized) => {
+      ctx.profile.keywordsTier1 = normalized.fields.keywordsTier1;
+      ctx.dnaConfidence.keywords = normalized.confidence.keywords;
+    },
+    getConfidence: (ctx) => ctx.dnaConfidence.keywords,
+  },
+  keywordsTier2: {
+    inputId: 'lab-keywords-tier2',
+    label: 'Tier 2 长尾词',
+    apply: (ctx, normalized) => {
+      ctx.profile.keywordsTier2 = normalized.fields.keywordsTier2;
+      ctx.dnaConfidence.keywords = normalized.confidence.keywords;
+    },
+    getConfidence: (ctx) => ctx.dnaConfidence.keywords,
+  },
+  negative: {
+    inputId: 'negative-keywords',
+    label: '限制词',
+    apply: (ctx, normalized) => {
+      ctx.profile.negative = normalized.fields.negative;
+      ctx.dnaConfidence.negative = normalized.confidence.negative;
+    },
+    getConfidence: (ctx) => ctx.dnaConfidence.negative,
+  },
+  audience: {
+    inputId: 'lab-audience',
+    label: '目标受众',
+    apply: (ctx, normalized) => {
+      ctx.profile.audience = normalized.fields.audience;
+      ctx.dnaConfidence.audience = normalized.confidence.audience;
+    },
+    getConfidence: (ctx) => ctx.dnaConfidence.audience,
+  },
+  usps: {
+    inputId: 'lab-usps',
+    label: '核心卖点',
+    apply: (ctx, normalized) => {
+      ctx.profile.usps = normalized.fields.usps;
+      ctx.dnaConfidence.usps = normalized.confidence.usps;
+    },
+    getConfidence: (ctx) => ctx.dnaConfidence.usps,
+  },
+  specs: {
+    inputId: 'lab-specs',
+    label: '技术参数',
+    apply: (ctx, normalized) => {
+      ctx.profile.specs = normalized.fields.specs;
+      ctx.dnaConfidence.specs = normalized.confidence.specs;
+    },
+    getConfidence: (ctx) => ctx.dnaConfidence.specs,
+  },
+};
+
+const AUTO_POPULATE_CONFIDENCE_THRESHOLD = 70;
+
+const FIELD_CONFIDENCE_KEY_MAP: Record<ExtractableFieldName, keyof NormalizedDnaResult['confidence']> = {
+  keywordsTier1: 'keywords',
+  keywordsTier2: 'keywords',
+  negative: 'negative',
+  audience: 'audience',
+  usps: 'usps',
+  specs: 'specs',
+};
+
+function getNormalizedFieldConfidence(normalized: NormalizedDnaResult, fieldName: ExtractableFieldName): number {
+  return normalized.confidence[FIELD_CONFIDENCE_KEY_MAP[fieldName]];
+}
 
 /**
  * 检查当前报告是否可以执行 DNA 提取
@@ -27,23 +115,14 @@ export function canExtractDNA(): boolean {
   return canExtractDNAFromDownloadsReport(report as any) || canExtractDNALegacy(report as any);
 }
 
-// ==========================================
-// 自动填充所有 DNA 字段
-// ==========================================
-
-/**
- * 从分析报告中提取产品 DNA 并自动填充所有相关字段
- */
-export function autoPopulateDNA(ctx: PromptlabAlpineContext): void {
-  Logger.debug('[dnaActions] 🧬 开始自动填充产品 DNA');
-
+function getRawDna(ctx: PromptlabAlpineContext): ExtendedDNA | Record<string, unknown> | null {
   const report = appStore.getState().analysis.analysisReport;
   if (!report) {
-    showToast('未检测到分析报告', { type: 'warning' });
-    return;
+    return null;
   }
 
   const unwrappedReport = (report as any).analysisReport ?? report;
+  const language = unwrappedReport._metadata?.language ?? ctx.profile.targetMarket ?? 'zh';
 
   Logger.debug('[dnaActions] 报告结构:', {
     hasWrapper: !!(report as any).analysisReport,
@@ -51,141 +130,183 @@ export function autoPopulateDNA(ctx: PromptlabAlpineContext): void {
     unwrappedKeys: Object.keys(unwrappedReport).slice(0, 10),
   });
 
-  const language =
-    unwrappedReport._metadata?.language ?? ctx.profile.targetMarket ?? 'zh';
-
-  let dna: any = extractDNAFromDownloadsReport(unwrappedReport, language);
-  const isNewExtractor = !!dna;
-
-  if (!dna) {
-    Logger.debug('[dnaActions] 新提取器无法提取，尝试旧提取器');
-    dna = extractProductDNA(unwrappedReport);
+  const extracted = extractDNAFromDownloadsReport(unwrappedReport, language);
+  if (extracted) {
+    Logger.debug('[dnaActions] 使用提取器: 新 (universal)');
+    return extracted;
   }
 
+  Logger.debug('[dnaActions] 新提取器无法提取，尝试旧提取器');
+  const legacy = extractProductDNA(unwrappedReport) as Record<string, unknown> | null;
+  if (legacy) {
+    Logger.debug('[dnaActions] 使用提取器: 旧 (legacy)');
+  }
+  return legacy;
+}
+
+function normalizeConfidenceValue(value: unknown): number {
+  if (typeof value !== 'number' || Number.isNaN(value)) {
+    return 0;
+  }
+  return Math.max(0, Math.min(100, Math.round(value * 100)));
+}
+
+function normalizeDnaResult(dna: ExtendedDNA | Record<string, unknown>): NormalizedDnaResult {
+  const dnaRecord = dna as Record<string, any>;
+  const keywords = dnaRecord.keywords ?? {};
+  const confidence = dnaRecord.confidence ?? {};
+
+  const fields: Record<ExtractableFieldName, string> = {
+    keywordsTier1: Array.isArray(keywords.core) ? keywords.core.filter(Boolean).join(', ') : '',
+    keywordsTier2: Array.isArray(keywords.longTail) ? keywords.longTail.filter(Boolean).join(', ') : '',
+    negative: Array.isArray(dnaRecord.restrictedWords) ? dnaRecord.restrictedWords.filter(Boolean).join(', ') : '',
+    audience: typeof dnaRecord.audience === 'string' ? dnaRecord.audience : '',
+    usps: typeof dnaRecord.usps === 'string' ? dnaRecord.usps : '',
+    specs: typeof dnaRecord.specs === 'string' ? dnaRecord.specs : '',
+  };
+
+  const normalizedConfidence = {
+    audience: normalizeConfidenceValue(confidence.audience),
+    usps: normalizeConfidenceValue(confidence.usps),
+    specs: normalizeConfidenceValue(confidence.specs),
+    keywords: normalizeConfidenceValue(confidence.keywords),
+    negative: normalizeConfidenceValue(confidence.restrictedWords),
+    overall: 0,
+  };
+
+  const overallCandidates = Object.values(normalizedConfidence).filter(value => value > 0);
+  normalizedConfidence.overall = overallCandidates.length > 0
+    ? Math.round(overallCandidates.reduce((sum, value) => sum + value, 0) / overallCandidates.length)
+    : 0;
+
+  return {
+    fields,
+    confidence: normalizedConfidence,
+  };
+}
+
+function hasExistingDnaContent(ctx: PromptlabAlpineContext): boolean {
+  return [
+    ctx.profile.keywordsTier1,
+    ctx.profile.keywordsTier2,
+    ctx.profile.negative,
+    ctx.profile.audience,
+    ctx.profile.usps,
+    ctx.profile.specs,
+  ].some(value => value.trim().length > 0);
+}
+
+/**
+ * 从分析报告中提取产品 DNA，并仅自动填充置信度达标的字段
+ */
+export function autoPopulateDNA(ctx: PromptlabAlpineContext): void {
+  Logger.debug('[dnaActions] 🧬 开始自动填充产品 DNA');
+
+  const dna = getRawDna(ctx);
   if (!dna) {
-    showToast('无法从报告中提取产品 DNA', { type: 'warning' });
+    showToast('未检测到分析报告或无法提取产品 DNA', { type: 'warning' });
     return;
   }
 
-  Logger.debug('[dnaActions] 使用提取器:', isNewExtractor ? '新 (universal)' : '旧 (legacy)');
+  const normalized = normalizeDnaResult(dna);
+  const fieldEntries = Object.entries(FIELD_CONFIG) as Array<[ExtractableFieldName, typeof FIELD_CONFIG[ExtractableFieldName]]>;
 
-  // 确认覆盖
-  const hasExistingContent =
-    ctx.profile.audience.trim() ||
-    ctx.profile.usps.trim() ||
-    ctx.profile.specs.trim();
+  const fillableFields = fieldEntries.filter(([fieldName]) => {
+    const value = normalized.fields[fieldName].trim();
+    const confidence = getNormalizedFieldConfidence(normalized, fieldName);
+    return value.length > 0 && confidence >= AUTO_POPULATE_CONFIDENCE_THRESHOLD;
+  });
 
-  if (hasExistingContent && !confirm('检测到已有内容，是否覆盖现有的产品 DNA？')) {
+  const blockedFields = fieldEntries.filter(([fieldName]) => {
+    const value = normalized.fields[fieldName].trim();
+    const confidence = getNormalizedFieldConfidence(normalized, fieldName);
+    return value.length > 0 && confidence < AUTO_POPULATE_CONFIDENCE_THRESHOLD;
+  });
+
+  if (fillableFields.length === 0) {
+    showToast(
+      `当前可提取字段置信度均低于 ${AUTO_POPULATE_CONFIDENCE_THRESHOLD}% ，请使用“仅重新提取此字段”逐项填充`,
+      { type: 'warning' },
+    );
     return;
   }
 
-  // 填充基础字段
-  ctx.profile.audience = dna.audience ?? '';
-  ctx.profile.usps     = dna.usps     ?? '';
-  ctx.profile.specs    = dna.specs    ?? '';
+  if (hasExistingDnaContent(ctx) && !confirm('检测到已有内容，是否覆盖现有的高置信度产品 DNA 字段？')) {
+    return;
+  }
 
-  // 新提取器额外填充关键词
-  if (isNewExtractor && dna.keywords) {
-    if (dna.keywords.core?.length > 0) {
-      ctx.profile.keywordsTier1 = dna.keywords.core.join(', ');
-    }
-    if (dna.keywords.longTail?.length > 0) {
-      ctx.profile.keywordsTier2 = dna.keywords.longTail.join(', ');
-    }
-    Logger.debug('[dnaActions] 已填充关键词:', {
-      tier1: ctx.profile.keywordsTier1.slice(0, 50),
-      tier2: ctx.profile.keywordsTier2.slice(0, 50),
+  fillableFields.forEach(([fieldName, config]) => {
+    config.apply(ctx, normalized);
+    Logger.debug('[dnaActions] 自动填充高置信度字段:', {
+      field: fieldName,
+      confidence: getNormalizedFieldConfidence(normalized, fieldName),
     });
-  }
+  });
 
-  // 更新置信度
   ctx.dnaConfidence = {
-    audience: Math.round(dna.confidence.audience  * 100),
-    usps:     Math.round(dna.confidence.usps      * 100),
-    specs:    Math.round(dna.confidence.specs      * 100),
-    keywords: Math.round(dna.confidence.keywords   * 100),
-    overall:  Math.round(
-      ((dna.confidence.audience + dna.confidence.usps + dna.confidence.specs + dna.confidence.keywords) / 4) * 100,
-    ),
+    audience: normalized.confidence.audience,
+    usps: normalized.confidence.usps,
+    specs: normalized.confidence.specs,
+    keywords: normalized.confidence.keywords,
+    negative: normalized.confidence.negative,
+    overall: normalized.confidence.overall,
   };
 
   ctx.saveState();
 
-  const avg = Math.round(
-    ((dna.confidence.audience + dna.confidence.usps + dna.confidence.specs + dna.confidence.keywords) / 4) * 100,
-  );
+  const filledLabels = fillableFields.map(([, config]) => config.label).join('、');
+  const blockedLabels = blockedFields.map(([, config]) => config.label).join('、');
+  const blockedHint = blockedLabels
+    ? `\n以下字段置信度低于 ${AUTO_POPULATE_CONFIDENCE_THRESHOLD}% ，请使用“仅重新提取此字段”：${blockedLabels}`
+    : '';
+
   showToast(
-    `✅ DNA 提取成功 (总体置信度: ${avg}%)\n` +
-    `受众: ${ctx.dnaConfidence.audience}% | 卖点: ${ctx.dnaConfidence.usps}% | 参数: ${ctx.dnaConfidence.specs}% | 关键词: ${ctx.dnaConfidence.keywords}%`,
+    `✅ 已从报告填充高置信度 DNA 字段：${filledLabels}${blockedHint}`,
     { type: 'success' },
   );
 
-  highlightAutoFilledFields(['lab-audience', 'lab-usps', 'lab-specs']);
+  highlightAutoFilledFields(fillableFields.map(([, config]) => config.inputId));
 
-  Logger.debug('[dnaActions] ✅ DNA 填充完成:', ctx.dnaConfidence);
+  Logger.debug('[dnaActions] ✅ DNA 填充完成:', {
+    confidence: ctx.dnaConfidence,
+    filledFields: fillableFields.map(([fieldName]) => fieldName),
+    blockedFields: blockedFields.map(([fieldName]) => fieldName),
+  });
 }
-
-// ==========================================
-// 提取单个字段
-// ==========================================
 
 /**
  * 只重新提取并覆盖某一个字段的 DNA
  */
 export function extractSingleField(
   ctx: PromptlabAlpineContext,
-  fieldName: 'audience' | 'usps' | 'specs',
+  fieldName: ExtractableFieldName,
 ): void {
   Logger.debug('[dnaActions] 🔄 提取单个字段:', fieldName);
 
-  const report = appStore.getState().analysis.analysisReport;
-  if (!report) {
-    showToast('未检测到分析报告', { type: 'warning' });
-    return;
-  }
-
-  const unwrappedReport = (report as any).analysisReport ?? report;
-  const language =
-    unwrappedReport._metadata?.language ?? ctx.profile.targetMarket ?? 'zh';
-
-  let dna: any = extractDNAFromDownloadsReport(unwrappedReport, language);
-  if (!dna) dna = extractProductDNA(unwrappedReport);
-
+  const dna = getRawDna(ctx);
   if (!dna) {
-    showToast('无法从报告中提取产品 DNA', { type: 'warning' });
+    showToast('未检测到分析报告或无法提取产品 DNA', { type: 'warning' });
     return;
   }
 
-  ctx.profile[fieldName] = dna[fieldName];
-  ctx.dnaConfidence[fieldName] = Math.round(dna.confidence[fieldName] * 100);
+  const normalized = normalizeDnaResult(dna);
+  const config = FIELD_CONFIG[fieldName];
+
+  config.apply(ctx, normalized);
+  ctx.dnaConfidence.overall = normalized.confidence.overall;
   ctx.saveState();
 
-  const fieldIdMap: Record<string, string> = {
-    audience: 'lab-audience',
-    usps:     'lab-usps',
-    specs:    'lab-specs',
-  };
-  highlightAutoFilledFields([fieldIdMap[fieldName]!], 'green');
-
-  const labelMap: Record<string, string> = {
-    audience: '目标受众',
-    usps:     '核心卖点',
-    specs:    '技术参数',
-  };
+  highlightAutoFilledFields([config.inputId], 'green');
   showToast(
-    `✅ 已重新提取${labelMap[fieldName]} (置信度: ${ctx.dnaConfidence[fieldName]}%)`,
+    `✅ 已重新提取${config.label} (置信度: ${config.getConfidence(ctx)}%)`,
     { type: 'success' },
   );
 
   Logger.debug('[dnaActions] ✅ 单字段提取完成:', {
     field: fieldName,
-    confidence: ctx.dnaConfidence[fieldName],
+    confidence: config.getConfidence(ctx),
   });
 }
-
-// ==========================================
-// 视觉反馈
-// ==========================================
 
 /**
  * 短暂高亮自动填充的字段（蓝色或绿色边框 + 背景）
@@ -194,7 +315,7 @@ export function highlightAutoFilledFields(
   fieldIds: string[],
   color: 'blue' | 'green' = 'blue',
 ): void {
-  const bgClass    = color === 'blue' ? 'bg-blue-50'    : 'bg-green-50';
+  const bgClass = color === 'blue' ? 'bg-blue-50' : 'bg-green-50';
   const borderClass = color === 'blue' ? 'border-blue-300' : 'border-green-300';
 
   fieldIds.forEach((id) => {

@@ -22,7 +22,6 @@ import {
   CONFIDENCE_THRESHOLDS,
 } from "../../config/confidenceWeights";
 import { ValidationError } from "../../../../../../common/errors/AppError";
-import { ValidationError } from "../../../../../../common/errors/AppError";
 
 /**
  * Full Analysis Report 适配器实现
@@ -47,12 +46,6 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
     );
     const hasSellingPoints = !!(
       reportObj["selling-points"] || reportObj.selling_points
-    );
-    // 支持三种字段名：title-keywords (新), title_keywords (下划线), title_seo_roots (旧系统)
-    const hasTitleKeywords = !!(
-      reportObj["title-keywords"] ||
-      reportObj.title_keywords ||
-      reportObj.title_seo_roots
     );
 
     // 至少需要有 buyer-profile 或 selling-points 之一
@@ -81,6 +74,7 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
       const usps = this.extractUSPs(fullReport);
       const specs = this.extractSpecs(fullReport, language);
       const keywords = this.extractKeywords(fullReport);
+      const restrictedWords = this.extractRestrictedWords(fullReport);
       const highFrequencyPhrases = this.extractHighFrequencyPhrases(fullReport);
       const painPoints = this.extractPainPoints(fullReport);
       const differentiation = this.extractDifferentiation(fullReport);
@@ -101,6 +95,7 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
         usps: usps.data,
         specs: specs.data,
         keywords: keywords.data,
+        restrictedWords: restrictedWords.data,
         highFrequencyPhrases: highFrequencyPhrases.data,
         painPoints: painPoints.data,
         differentiationAngles: differentiation.data,
@@ -109,6 +104,7 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
           usps: usps.confidence,
           specs: specs.confidence,
           keywords: keywords.confidence,
+          restrictedWords: restrictedWords.confidence,
           highFrequencyPhrases: highFrequencyPhrases.confidence,
           painPoints: painPoints.confidence,
           differentiationAngles: differentiation.confidence,
@@ -122,6 +118,7 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
               ...usps.sourceFields,
               ...specs.sourceFields,
               ...keywords.sourceFields,
+              ...restrictedWords.sourceFields,
               ...highFrequencyPhrases.sourceFields,
               ...painPoints.sourceFields,
               ...differentiation.sourceFields,
@@ -132,6 +129,7 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
               keywords.data.core.length +
               keywords.data.longTail.length +
               keywords.data.intent.length,
+            totalRestrictedWords: restrictedWords.data.length,
             totalPhrases: highFrequencyPhrases.data.length,
             totalPainPoints: painPoints.data.length,
             totalDifferentiationAngles: differentiation.data.length,
@@ -645,6 +643,44 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
     }
 
     return { data, confidence: Math.min(confidence, 1.0), sourceFields };
+  }
+
+  /**
+   * 提取限制词
+   */
+  private extractRestrictedWords(report: FullAnalysisReport): ExtractionResult<string[]> {
+    const titleKeywords = report["title-keywords"];
+    let confidence = 0;
+    const sourceFields: string[] = [];
+    const restrictedWords = new Set<string>();
+
+    if (!titleKeywords) {
+      return { data: [], confidence: 0, sourceFields: [] };
+    }
+
+    if (Array.isArray(titleKeywords.removed_modifiers) && titleKeywords.removed_modifiers.length > 0) {
+      titleKeywords.removed_modifiers
+        .map(word => word?.trim())
+        .filter((word): word is string => !!word)
+        .forEach(word => restrictedWords.add(word));
+      confidence += 0.5;
+      sourceFields.push("title-keywords.removed_modifiers");
+    }
+
+    if (Array.isArray(titleKeywords.removed_brand_terms) && titleKeywords.removed_brand_terms.length > 0) {
+      titleKeywords.removed_brand_terms
+        .map(word => word?.trim())
+        .filter((word): word is string => !!word)
+        .forEach(word => restrictedWords.add(word));
+      confidence += 0.5;
+      sourceFields.push("title-keywords.removed_brand_terms");
+    }
+
+    return {
+      data: Array.from(restrictedWords),
+      confidence: Math.min(confidence, 1.0),
+      sourceFields,
+    };
   }
 
   /**

@@ -7,7 +7,6 @@ import { showToast } from '@common/ui/index';
 import { analysisTargets } from '../config/analysisTargets';
 import { generateAnalysisPrompt } from '../prompts/analysisPrompts';
 import { runAnalysis, getSampleReport, parseAnalysisReport } from '../services/analysisService';
-import { runAIAnalysis } from '../services/aiAnalysisService';
 import { runParallelAIAnalysis } from '../services/parallelAnalysisService';
 import { generateMarkdownReport, generateJsonReportData } from '../services/reportGenerator';
 import { mergeProducts, getProductsByAsins } from '../utils/dataTransformers';
@@ -101,10 +100,7 @@ export function toggleJsonViewer(context: AlpineContext): void {
 export function toggleDataSource(context: AlpineContext): void {
   context.useRealData = !context.useRealData;
 
-  // 清空之前的结果
-  context.analysisReport = null;
-  context.hasReport = false;
-  appStore.getState().setAnalysisReport(null);
+  resetAnalysisReport(context);
 
   showToast(
     context.useRealData ? '已切换到真实数据分析模式' : '已切换到示例数据模式',
@@ -222,6 +218,16 @@ export function downloadJson(context: AlpineContext, dataSourceMarketplace: stri
   showToast('JSON 报告已下载', { type: 'success' });
 }
 
+function syncAnalysisReport(context: AlpineContext, report: FullAnalysisReport | null): void {
+  context.analysisReport = report;
+  context.hasReport = !!report;
+  appStore.getState().setAnalysisReport(report as any);
+}
+
+function resetAnalysisReport(context: AlpineContext): void {
+  syncAnalysisReport(context, null);
+}
+
 /**
  * 执行分析
  */
@@ -230,12 +236,16 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
     return;
   }
 
+  const selectedTargets = [...context.selectedTargets];
+
   context.isAnalyzing = true;
   context.progress = 0;
+  context.currentStep = '正在准备分析...';
+  resetAnalysisReport(context);
   appStore.getState().updateAnalysis({ isAnalyzing: true });
 
   Logger.debug('[用户动作] 开始分析:', {
-    selectedTargets: context.selectedTargets.length,
+    selectedTargets: selectedTargets.length,
     selectedAsins: context.selectedAsins.length,
     currentProducts: currentProducts.length
   });
@@ -244,7 +254,6 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
     let analysisReport: FullAnalysisReport;
 
     if (context.useRealData) {
-      // 使用真实数据进行 AI 分析
       const products = getRealProducts(context.selectedAsins);
 
       if (products.length === 0) {
@@ -257,19 +266,13 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
 
       showToast(`正在调用 AI 分析 ${products.length} 个产品...`, { type: 'info' });
 
-      // 合并多个产品的数据
       const mergedProduct = mergeProducts(products);
-
-      // 获取正确的语言代码
       const language = getMarketLanguage();
-
-      // 获取用户的性能设置
       const { getPerformanceSettings } = await import('./PerformanceSettings');
       const perfSettings = getPerformanceSettings();
 
-      // 使用并行分析服务（最高8倍加速）
       analysisReport = await runParallelAIAnalysis(
-        context.selectedTargets,
+        selectedTargets,
         mergedProduct,
         (progress: number, step: string) => {
           context.progress = progress;
@@ -280,13 +283,21 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
           maxConcurrency: perfSettings.maxConcurrency,
           enableCache: perfSettings.enableCache,
           streamResults: true,
-          failureStrategy: perfSettings.failureStrategy
+          failureStrategy: perfSettings.failureStrategy,
+          onTaskComplete: ({ report, targetId, successCount, totalCount, fromCache }) => {
+            syncAnalysisReport(context, report);
+            Logger.debug('[用户动作] 收到实时分析结果:', {
+              targetId,
+              successCount,
+              totalCount,
+              fromCache: !!fromCache
+            });
+          }
         }
       );
     } else {
-      // 使用示例数据进行模拟分析
       await runAnalysis(
-        context.selectedTargets,
+        selectedTargets,
         context.selectedAsins[0] || 'B0DNMZ2MLG',
         (progress: number, step: string) => {
           context.progress = progress;
@@ -297,38 +308,12 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
       analysisReport = getSampleReport();
     }
 
-    // 先清空旧报告，确保触发响应式更新
-    context.analysisReport = null;
-    context.hasReport = false;
-    appStore.getState().setAnalysisReport(null);
+    syncAnalysisReport(context, analysisReport);
 
-    // 使用 $nextTick 确保清空操作完成后再设置新报告
-    if ((context as any).$nextTick) {
-      (context as any).$nextTick(() => {
-        // 设置新报告
-        context.analysisReport = analysisReport;
-        context.hasReport = true;
+    Logger.debug('[用户动作] 分析报告已设置，selectedTargets:', selectedTargets.length);
+    Logger.debug('[用户动作] analysisReport 已保存:', !!context.analysisReport);
+    Logger.debug('[用户动作] hasReport 标志已设置:', context.hasReport);
 
-        Logger.debug('[用户动作] 分析报告已设置，selectedTargets:', context.selectedTargets.length);
-        Logger.debug('[用户动作] analysisReport 已保存:', !!context.analysisReport);
-        Logger.debug('[用户动作] hasReport 标志已设置:', context.hasReport);
-
-        // 同步到 Zustand store
-        appStore.getState().setAnalysisReport(analysisReport as any);
-
-        // 再次使用 $nextTick 确保视图完全更新
-        (context as any).$nextTick(() => {
-          Logger.debug('[用户动作] 视图更新完成');
-        });
-      });
-    } else {
-      // 如果没有 $nextTick，直接设置
-      context.analysisReport = analysisReport;
-      context.hasReport = true;
-      appStore.getState().setAnalysisReport(analysisReport as any);
-    }
-
-    // 分析成功后自动更新历史快照的分析状态
     const currentHistoryId = appStore.getState().scraper?.currentHistoryId;
     if (analysisReport && currentHistoryId) {
       const { HistoryService } = await import('../../services/historyService');
@@ -339,14 +324,13 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
 
       if (success) {
         Logger.debug('[用户动作] 已自动标记历史快照为"已分析"');
-        // 触发历史记录更新事件
         const eventBus = (await import('@common/EventBus')).default;
         const { APP_EVENTS } = await import('@common/constants/eventConstants');
         eventBus.emit(APP_EVENTS.HISTORY_UPDATED);
       }
     }
 
-    showToast(`分析完成！`, { type: 'success' });
+    showToast('分析完成！', { type: 'success' });
   } catch (error) {
     Logger.error('[用户动作] 分析失败:', error);
     showToast(`分析失败: ${(error as Error).message}`, { type: 'error' });

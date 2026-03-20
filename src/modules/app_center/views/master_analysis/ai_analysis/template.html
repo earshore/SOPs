@@ -967,8 +967,9 @@
 
     <!-- JSON 查看器 - 已移动到分析报告卡片内 -->
     <!-- 分析结果展示 -->
-    <template x-if="hasReport &amp;&amp; results.length &gt; 0">
-      <div class="space-y-10">
+    <template x-if="hasReport &amp;&amp; reportResults.length &gt; 0">
+      <template x-for="renderVersion in [reportRenderVersion]" :key="renderVersion">
+        <div class="space-y-10">
         <!-- 结果 Header -->
         <div class="relative overflow-hidden rounded-2xl">
           <div class="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900"></div>
@@ -989,27 +990,36 @@
                   </div>
                 </div>
                 <div>
-                  <h2 class="text-3xl font-extrabold text-white tracking-tight">分析报告</h2>
-                  <p class="text-slate-400 text-sm mt-1 flex items-center gap-2">
+                  <h2 class="text-3xl font-extrabold text-white tracking-tight"
+                    x-text="isAnalyzing ? '分析结果实时生成中' : '分析报告'"></h2>
+                  <p class="text-slate-400 text-sm mt-1 flex items-center gap-2 flex-wrap">
                     <span class="font-mono bg-slate-700/50 px-2 py-0.5 rounded text-slate-300"
                       x-text="selectedAsins.join(', ')"></span>
                     <span class="w-1 h-1 bg-slate-600 rounded-full"></span>
-                    <span>分析完成于 <span x-text="new Date().toLocaleTimeString('zh-CN')"></span></span>
+                    <span x-show="isAnalyzing">
+                      已输出 <span x-text="reportResults.length"></span> / <span x-text="selectedTargets.length"></span> 个维度，结果会持续追加
+                    </span>
+                    <span x-show="!isAnalyzing">
+                      分析完成于
+                      <span
+                        x-text="analysisReport && typeof analysisReport === 'object' && analysisReport._metadata && analysisReport._metadata.analyzedAt ? new Date(analysisReport._metadata.analyzedAt).toLocaleTimeString('zh-CN') : new Date().toLocaleTimeString('zh-CN')"></span>
+                    </span>
                   </p>
                 </div>
               </div>
               <div class="flex items-center gap-8">
                 <div class="flex items-center gap-6">
                   <div class="text-center">
-                    <div class="text-4xl font-extrabold text-white" x-text="results.length"></div>
+                    <div class="text-4xl font-extrabold text-white" x-text="reportResults.length"></div>
                     <div class="text-slate-400 text-xs uppercase tracking-wider mt-1">分析维度</div>
                   </div>
                   <div class="w-px h-14 bg-slate-700"></div>
                   <div class="text-center">
                     <div
-                      class="inline-flex items-center gap-2 bg-emerald-500/20 text-emerald-400 px-4 py-2 rounded-full border border-emerald-500/30">
-                      <i class="fa-solid fa-circle-check"></i>
-                      <span class="text-sm font-bold">已完成</span>
+                      :class="isAnalyzing ? 'bg-blue-500/20 text-blue-300 border-blue-400/30' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'"
+                      class="inline-flex items-center gap-2 px-4 py-2 rounded-full border">
+                      <i :class="isAnalyzing ? 'fa-solid fa-bolt animate-pulse' : 'fa-solid fa-circle-check'"></i>
+                      <span class="text-sm font-bold" x-text="isAnalyzing ? '实时输出中' : '已完成'"></span>
                     </div>
                   </div>
                 </div>
@@ -1023,7 +1033,7 @@
                     <i class="fa-solid fa-box-open text-blue-400"></i>
                   </div>
                   <div>
-                    <div class="text-xl font-bold text-white" x-text="listingsResults.length"></div>
+                    <div class="text-xl font-bold text-white" x-text="reportListingsResults.length"></div>
                     <div class="text-xs text-slate-400">Listings 维度</div>
                   </div>
                 </div>
@@ -1034,7 +1044,7 @@
                     <i class="fa-solid fa-star text-amber-400"></i>
                   </div>
                   <div>
-                    <div class="text-xl font-bold text-white" x-text="reviewsResults.length"></div>
+                    <div class="text-xl font-bold text-white" x-text="reportReviewsResults.length"></div>
                     <div class="text-xs text-slate-400">Reviews 维度</div>
                   </div>
                 </div>
@@ -1045,7 +1055,7 @@
                     <i class="fa-solid fa-chart-pie text-purple-400"></i>
                   </div>
                   <div>
-                    <div class="text-xl font-bold text-white" x-text="totalHighlights"></div>
+                    <div class="text-xl font-bold text-white" x-text="reportTotalHighlights"></div>
                     <div class="text-xs text-slate-400">核心发现</div>
                   </div>
                 </div>
@@ -1056,7 +1066,7 @@
                     <i class="fa-solid fa-circle-check text-emerald-400"></i>
                   </div>
                   <div>
-                    <div class="text-xl font-bold text-white" x-text="totalDetails"></div>
+                    <div class="text-xl font-bold text-white" x-text="reportTotalDetails"></div>
                     <div class="text-xs text-slate-400">分析维度</div>
                   </div>
                 </div>
@@ -1083,7 +1093,7 @@
               </div>
             </div>
             <!-- AI 分析报告 JSON - 集成到分析报告卡片内 -->
-            <template x-if="fullReportData">
+            <template x-if="reportFullData">
               <div class="mt-6 pt-6 border-t border-slate-700/50">
                 <div class="bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700/50">
                   <div class="flex items-center justify-between p-4 bg-slate-800/70">
@@ -1101,7 +1111,7 @@
                         </h4>
                         <p class="text-xs text-slate-400">
                           <span x-text="selectedTargets.length"></span> 个分析维度 ·
-                          <span x-text="(JSON.stringify(fullReportData).length / 1024).toFixed(1)"></span> KB
+                          <span x-text="(JSON.stringify(reportFullData).length / 1024).toFixed(1)"></span> KB
                         </p>
                       </div>
                     </button>
@@ -1144,13 +1154,13 @@
                         </div>
                         <div class="flex items-center gap-4 text-xs text-slate-500">
                           <span>tokens: <span
-                              x-text="Math.ceil(JSON.stringify(fullReportData).length / 4).toLocaleString()"></span></span>
-                          <span>字符: <span x-text="JSON.stringify(fullReportData).length.toLocaleString()"></span></span>
+                              x-text="Math.ceil(JSON.stringify(reportFullData).length / 4).toLocaleString()"></span></span>
+                          <span>字符: <span x-text="JSON.stringify(reportFullData).length.toLocaleString()"></span></span>
                         </div>
                       </div>
                       <div class="overflow-auto p-4 max-h-96">
                         <pre
-                          class="text-xs font-mono leading-relaxed"><code class="text-slate-300" x-html="highlightJson(JSON.stringify(fullReportData, null, 2))"></code></pre>
+                          class="text-xs font-mono leading-relaxed"><code class="text-slate-300" x-html="highlightJson(JSON.stringify(reportFullData, null, 2))"></code></pre>
                       </div>
                     </div>
                   </template>
@@ -1170,7 +1180,7 @@
           </div>
         </div>
         <!-- Listings 结果 -->
-        <template x-if="listingsResults.length &gt; 0">
+        <template x-if="reportListingsResults.length &gt; 0">
           <div>
             <div class="flex items-center gap-4 mb-6">
               <div
@@ -1180,10 +1190,10 @@
               </div>
               <div class="flex-1 h-px bg-gradient-to-r from-blue-300 via-blue-200 to-transparent"></div>
               <span class="text-sm text-slate-500 font-semibold bg-slate-100 px-3 py-1 rounded-full"
-                x-text="listingsResults.length + ' 项'"></span>
+                x-text="reportListingsResults.length + ' 项'"></span>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <template :key="result.targetId" x-for="(result, index) in listingsResults">
+              <template :key="result.targetId" x-for="(result, index) in reportListingsResults">
                 <div
                   class="group bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden hover:shadow-2xl hover:border-slate-300/60 transition-all duration-500"
                   x-data="{ resultIcon: getResultIcon(result.targetId), resultColor: getResultColor(result.targetId) }">
@@ -1305,7 +1315,7 @@
           </div>
         </template>
         <!-- Reviews 结果 -->
-        <template x-if="reviewsResults.length &gt; 0">
+        <template x-if="reportReviewsResults.length &gt; 0">
           <div>
             <div class="flex items-center gap-4 mb-6">
               <div
@@ -1315,10 +1325,10 @@
               </div>
               <div class="flex-1 h-px bg-gradient-to-r from-amber-300 via-amber-200 to-transparent"></div>
               <span class="text-sm text-slate-500 font-semibold bg-slate-100 px-3 py-1 rounded-full"
-                x-text="reviewsResults.length + ' 项'"></span>
+                x-text="reportReviewsResults.length + ' 项'"></span>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-              <template :key="result.targetId" x-for="(result, index) in reviewsResults">
+              <template :key="result.targetId" x-for="(result, index) in reportReviewsResults">
                 <div
                   class="group bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden hover:shadow-2xl hover:border-slate-300/60 transition-all duration-500"
                   x-data="{ resultIcon: getResultIcon(result.targetId), resultColor: getResultColor(result.targetId), resultColorEnd: (getResultColor(result.targetId) === 'amber' ? 'orange' : getResultColor(result.targetId) === 'orange' ? 'red' : getResultColor(result.targetId) === 'purple' ? 'indigo' : getResultColor(result.targetId) === 'teal' ? 'cyan' : getResultColor(result.targetId) === 'rose' ? 'pink' : 'indigo') }">
@@ -1440,6 +1450,7 @@
           </div>
         </template>
       </div>
+      </template>
     </template>
     <!-- 空状态 -->
     <template x-if="!hasReport &amp;&amp; !isAnalyzing">

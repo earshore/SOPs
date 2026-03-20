@@ -174,13 +174,22 @@ export function getCacheStats(): CacheStats {
  * import: 'default' 仅获取内容字符串
  * eager: false (默认) 保持懒加载，只在需要时请求网络 (在构建后变为分开的 chunk)
  */
-const htmlModules = import.meta.glob([
-    '/src/modules/**/*.html',
-    '/src/components/**/*.html'
+const rawHtmlModules = import.meta.glob([
+    '../../modules/**/*.html',
+    '../../components/**/*.html'
 ], {
     query: '?raw',
     import: 'default'
-}) as HtmlModules;
+}) as Record<string, HtmlModuleLoader>;
+
+const htmlModules = Object.fromEntries(
+    Object.entries(rawHtmlModules).map(([path, loader]) => {
+        const normalizedPath = path.startsWith('../../')
+            ? `/src/${path.replace(/^\.\.\/\.\.\//, '')}`
+            : path;
+        return [normalizedPath, loader];
+    })
+) as HtmlModules;
 
 /**
  * 视图配置注册表 - 仅保留目标容器映射

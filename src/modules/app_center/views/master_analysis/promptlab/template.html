@@ -77,7 +77,7 @@
                             <button @click="autoPopulateDNA" :disabled="!hasReport"
                                 :class="hasReport ? 'bg-blue-500 hover:bg-blue-600 text-white cursor-pointer' : 'bg-slate-200 text-slate-400 cursor-not-allowed'"
                                 class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5"
-                                title="从AI分析报告自动提取产品DNA">
+                                title="从AI分析报告自动提取产品DNA（仅自动填充置信度≥70%的字段）">
                                 <i class="fas fa-magic text-[10px]"></i>
                                 <span>从报告加载</span>
                             </button>
@@ -111,6 +111,12 @@
                                         <i class="fas fa-chart-line text-[8px]"></i>
                                         <span x-text="`${dnaConfidence.keywords}%`"></span>
                                     </span>
+
+                                    <button @click="extractSingleField('keywordsTier1')" :disabled="!hasReport"
+                                        :class="hasReport ? 'text-blue-600 hover:bg-blue-50' : 'text-slate-300 cursor-not-allowed'"
+                                        class="text-[10px] px-2 py-1 rounded transition-all" title="仅重新提取此字段">
+                                        <i class="fas fa-rotate text-[8px]"></i>
+                                    </button>
                                 </label>
                                 <input @input="onInputChange"
                                     class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all placeholder:text-slate-300 font-mono"
@@ -123,6 +129,19 @@
                                     <span class="w-1 h-3.5 bg-slate-300 rounded-full"></span>
                                     <i class="fa-solid fa-ban text-slate-400 text-[10px]"></i>
                                     限制词 <span class="text-slate-400 font-normal">- 不允许出现</span>
+
+                                    <span x-show="dnaConfidence.negative > 0"
+                                        :class="dnaConfidence.negative >= 70 ? 'bg-green-100 text-green-700' : dnaConfidence.negative >= 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-orange-100 text-orange-700'"
+                                        class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold">
+                                        <i class="fas fa-chart-line text-[8px]"></i>
+                                        <span x-text="`${dnaConfidence.negative}%`"></span>
+                                    </span>
+
+                                    <button @click="extractSingleField('negative')" :disabled="!hasReport"
+                                        :class="hasReport ? 'text-blue-600 hover:bg-blue-50' : 'text-slate-300 cursor-not-allowed'"
+                                        class="text-[10px] px-2 py-1 rounded transition-all" title="仅重新提取此字段">
+                                        <i class="fas fa-rotate text-[8px]"></i>
+                                    </button>
                                 </label>
                                 <input @input="onInputChange"
                                     class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all placeholder:text-slate-300"
@@ -142,6 +161,12 @@
                                         <i class="fas fa-chart-line text-[8px]"></i>
                                         <span x-text="`${dnaConfidence.keywords}%`"></span>
                                     </span>
+
+                                    <button @click="extractSingleField('keywordsTier2')" :disabled="!hasReport"
+                                        :class="hasReport ? 'text-blue-600 hover:bg-blue-50' : 'text-slate-300 cursor-not-allowed'"
+                                        class="text-[10px] px-2 py-1 rounded transition-all" title="仅重新提取此字段">
+                                        <i class="fas fa-rotate text-[8px]"></i>
+                                    </button>
                                 </label>
                                 <textarea @input="onInputChange" @focus="expandInput($event)"
                                     @blur="restoreInput($event)"

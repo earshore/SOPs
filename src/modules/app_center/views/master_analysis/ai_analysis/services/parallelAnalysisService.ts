@@ -15,6 +15,7 @@ import { configCenter } from '../../../../../../common/config/ConfigCenter';
 import type { FullAnalysisReport } from '../config/analysisReportData';
 import type { Product } from '../config/sampleData';
 import { generateAnalysisPrompt } from '../prompts/analysisPrompts';
+import { calculateFullReportConfidence, calculateOverallConfidence } from './confidenceCalculator';
 import { Logger } from '../../../../../../services/loggerService';
 
 /**
@@ -37,6 +38,24 @@ interface AnalysisTask {
   error?: string;
   startTime?: number;
   endTime?: number;
+  fromCache?: boolean;
+}
+
+/**
+ * 流式结果更新
+ */
+export interface ParallelAnalysisResultUpdate {
+  targetId: string;
+  status: 'success' | 'failed';
+  completedCount: number;
+  totalCount: number;
+  successCount: number;
+  failedCount: number;
+  currentTasks: string[];
+  report: FullAnalysisReport;
+  result?: unknown;
+  error?: string;
+  fromCache?: boolean;
 }
 
 /**
@@ -47,6 +66,51 @@ interface ParallelAnalysisConfig {
   enableCache: boolean; // 是否启用缓存
   streamResults: boolean; // 是否流式返回结果
   failureStrategy: 'abort' | 'continue'; // 失败策略
+  onTaskComplete?: (update: ParallelAnalysisResultUpdate) => void;
+  onTaskFailed?: (update: ParallelAnalysisResultUpdate) => void;
+}
+
+const TARGET_TO_FIELD: Record<string, keyof FullAnalysisReport> = {
+  'title-keywords': 'title-keywords',
+  'selling-points': 'selling-points',
+  'fatal-flaws': 'fatal-flaws',
+  'wow-moments': 'wow-moments',
+  'hesitation-points': 'hesitation-points',
+  'buyer-profile': 'buyer-profile',
+  'vocab-gap': 'vocab-gap',
+  'promise-reality': 'promise-reality'
+};
+
+function buildReportSnapshot(report: Partial<FullAnalysisReport>, targetIds: string[], language: string): FullAnalysisReport {
+  const reportWithoutMetadata = { ...report } as Partial<FullAnalysisReport>;
+  delete reportWithoutMetadata._metadata;
+
+  const confidence = calculateFullReportConfidence(reportWithoutMetadata as Record<string, unknown>);
+
+  return {
+    ...reportWithoutMetadata,
+    _metadata: {
+      confidence,
+      overallConfidence: calculateOverallConfidence(confidence),
+      analyzedAt: new Date().toISOString(),
+      targetIds: [...targetIds],
+      language
+    }
+  } as FullAnalysisReport;
+}
+
+function appendTaskResultToReport(report: Partial<FullAnalysisReport>, task: AnalysisTask): boolean {
+  if (task.status !== 'success' || !task.result) {
+    return false;
+  }
+
+  const fieldName = TARGET_TO_FIELD[task.targetId];
+  if (!fieldName) {
+    return false;
+  }
+
+  (report as Record<string, unknown>)[fieldName] = task.result;
+  return true;
 }
 
 /**
@@ -155,6 +219,7 @@ async function executeAnalysisTask(
 ): Promise<void> {
   task.status = 'running';
   task.startTime = Date.now();
+  task.fromCache = false;
 
   try {
     // 检查缓存
@@ -165,6 +230,7 @@ async function executeAnalysisTask(
         task.result = cachedResult;
         task.status = 'success';
         task.endTime = Date.now();
+        task.fromCache = true;
         Logger.debug(`[并行分析] ${task.targetId} 使用缓存结果`);
         return;
       }
@@ -237,35 +303,32 @@ async function executeTasksWithConcurrency(
   language: string,
   maxConcurrency: number,
   enableCache: boolean,
-  onProgress?: (completedCount: number, totalCount: number, currentTasks: string[]) => void
+  onTaskSettled?: (task: AnalysisTask, completedCount: number, totalCount: number, currentTasks: string[]) => void
 ): Promise<void> {
   const totalTasks = tasks.length;
   let completedCount = 0;
   const runningTasks = new Set<Promise<void>>();
 
   for (const task of tasks) {
-    // 等待直到有空闲槽位
     while (runningTasks.size >= maxConcurrency) {
       await Promise.race(runningTasks);
     }
 
-    // 启动新任务
     const taskPromise = executeAnalysisTask(task, product, config, language, enableCache)
       .finally(() => {
         runningTasks.delete(taskPromise);
         completedCount++;
-        
-        // 报告进度
+
         const currentRunning = tasks
           .filter(t => t.status === 'running')
           .map(t => t.targetId);
-        onProgress?.(completedCount, totalTasks, currentRunning);
+
+        onTaskSettled?.(task, completedCount, totalTasks, currentRunning);
       });
 
     runningTasks.add(taskPromise);
   }
 
-  // 等待所有任务完成
   await Promise.all(runningTasks);
 }
 
@@ -280,38 +343,27 @@ export async function runParallelAIAnalysis(
   config: Partial<ParallelAnalysisConfig> = {}
 ): Promise<FullAnalysisReport> {
   const {
-    maxConcurrency = 4, // 默认4个并发
+    maxConcurrency = 4,
     enableCache = true,
-    failureStrategy = 'continue'
+    streamResults = false,
+    failureStrategy = 'continue',
+    onTaskComplete,
+    onTaskFailed
   } = config;
 
   Logger.debug(`[并行分析] 开始分析，目标数: ${targetIds.length}，并发数: ${maxConcurrency}`);
 
-  // 获取 LLM 配置
   const llmConfig = await getLLMConfig();
-
-  // 创建任务列表
   const tasks: AnalysisTask[] = targetIds.map(targetId => ({
     targetId,
     status: 'pending' as const
   }));
 
-  // 目标ID到报告字段的映射
-  const targetToField: Record<string, keyof FullAnalysisReport> = {
-    'title-keywords': 'title-keywords',
-    'selling-points': 'selling-points',
-    'fatal-flaws': 'fatal-flaws',
-    'wow-moments': 'wow-moments',
-    'hesitation-points': 'hesitation-points',
-    'buyer-profile': 'buyer-profile',
-    'vocab-gap': 'vocab-gap',
-    'promise-reality': 'promise-reality'
-  };
-
   const report: Partial<FullAnalysisReport> = {};
   const totalTasks = tasks.length;
+  let successCount = 0;
+  let failedCount = 0;
 
-  // 执行并行分析
   await executeTasksWithConcurrency(
     tasks,
     product,
@@ -319,33 +371,59 @@ export async function runParallelAIAnalysis(
     language,
     maxConcurrency,
     enableCache,
-    (completedCount, _totalCount, currentTasks) => {
+    (task, completedCount, _totalCount, currentTasks) => {
+      if (task.status === 'success') {
+        const appended = appendTaskResultToReport(report, task);
+        if (appended) {
+          successCount++;
+          if (streamResults) {
+            onTaskComplete?.({
+              targetId: task.targetId,
+              status: 'success',
+              completedCount,
+              totalCount: totalTasks,
+              successCount,
+              failedCount,
+              currentTasks,
+              report: buildReportSnapshot(report, targetIds, language),
+              result: task.result,
+              fromCache: task.fromCache
+            });
+          }
+        }
+      } else if (task.status === 'failed') {
+        failedCount++;
+        Logger.warn(`[并行分析] ${task.targetId} 失败: ${task.error}`);
+
+        if (streamResults) {
+          onTaskFailed?.({
+            targetId: task.targetId,
+            status: 'failed',
+            completedCount,
+            totalCount: totalTasks,
+            successCount,
+            failedCount,
+            currentTasks,
+            report: buildReportSnapshot(report, targetIds, language),
+            error: task.error,
+            fromCache: task.fromCache
+          });
+        }
+      }
+
       const progress = Math.round((completedCount / totalTasks) * 100);
-      const runningInfo = currentTasks.length > 0 
-        ? `正在分析: ${currentTasks.join(', ')}` 
-        : '准备分析...';
-      onProgress(progress, `${runningInfo} (${completedCount}/${totalTasks})`);
+      const statusText = task.status === 'success'
+        ? `已完成 ${task.targetId}`
+        : `分析失败 ${task.targetId}`;
+      const runningInfo = currentTasks.length > 0
+        ? `，正在分析: ${currentTasks.join(', ')}`
+        : '';
+      onProgress(progress, `${statusText}${runningInfo} (${completedCount}/${totalTasks})`);
     }
   );
 
-  // 收集结果
-  let successCount = 0;
-  let failedCount = 0;
+  const finalReport = buildReportSnapshot(report, targetIds, language);
 
-  for (const task of tasks) {
-    if (task.status === 'success' && task.result) {
-      const fieldName = targetToField[task.targetId];
-      if (fieldName) {
-        (report as any)[fieldName] = task.result;
-        successCount++;
-      }
-    } else if (task.status === 'failed') {
-      failedCount++;
-      Logger.warn(`[并行分析] ${task.targetId} 失败: ${task.error}`);
-    }
-  }
-
-  // 根据失败策略处理
   if (failedCount > 0 && failureStrategy === 'abort') {
     throw new BusinessError(
       `分析失败: ${failedCount}/${totalTasks} 个目标分析失败`,
@@ -358,7 +436,7 @@ export async function runParallelAIAnalysis(
 
   Logger.debug(`[并行分析] 分析完成，成功: ${successCount}, 失败: ${failedCount}`);
 
-  return report as FullAnalysisReport;
+  return finalReport;
 }
 
 /**

@@ -43,7 +43,7 @@ export class ProductOverviewAdapter implements ReportAdapter {
     return result;
   }
 
-  extractDNA(report: unknown, language: string = "zh"): ExtendedDNA | null {
+  extractDNA(report: unknown, _language: string = "zh"): ExtendedDNA | null {
     if (!this.canHandle(report)) {
       Logger.warn("[ProductOverviewAdapter] 报告格式不匹配");
       return null;
@@ -62,6 +62,7 @@ export class ProductOverviewAdapter implements ReportAdapter {
       const audience = this.extractAudience(overviewReport);
       const usps = this.extractUSPs(overviewReport);
       const specs = this.extractSpecs(overviewReport);
+      const restrictedWords = this.extractRestrictedWords(overviewReport);
       const painPoints = this.extractPainPoints(overviewReport);
       const differentiation = this.extractDifferentiation(overviewReport);
 
@@ -71,6 +72,7 @@ export class ProductOverviewAdapter implements ReportAdapter {
         usps: usps.data,
         specs: specs.data,
         keywords: keywords.data,
+        restrictedWords: restrictedWords.data,
         highFrequencyPhrases: highFrequencyPhrases.data,
         painPoints: painPoints.data,
         differentiationAngles: differentiation.data,
@@ -79,6 +81,7 @@ export class ProductOverviewAdapter implements ReportAdapter {
           usps: usps.confidence,
           specs: specs.confidence,
           keywords: keywords.confidence,
+          restrictedWords: restrictedWords.confidence,
           highFrequencyPhrases: highFrequencyPhrases.confidence,
           painPoints: painPoints.confidence,
           differentiationAngles: differentiation.confidence,
@@ -93,6 +96,7 @@ export class ProductOverviewAdapter implements ReportAdapter {
               ...audience.sourceFields,
               ...usps.sourceFields,
               ...specs.sourceFields,
+              ...restrictedWords.sourceFields,
               ...painPoints.sourceFields,
               ...differentiation.sourceFields,
             ]),
@@ -102,6 +106,7 @@ export class ProductOverviewAdapter implements ReportAdapter {
               keywords.data.core.length +
               keywords.data.longTail.length +
               keywords.data.intent.length,
+            totalRestrictedWords: restrictedWords.data.length,
             totalPhrases: highFrequencyPhrases.data.length,
             totalPainPoints: painPoints.data.length,
             totalDifferentiationAngles: differentiation.data.length,
@@ -149,6 +154,31 @@ export class ProductOverviewAdapter implements ReportAdapter {
     }
 
     return { data, confidence: Math.min(confidence, 1.0), sourceFields };
+  }
+
+  /**
+   * 提取限制词
+   */
+  private extractRestrictedWords(report: ProductOverviewReport): ExtractionResult<string[]> {
+    const restrictedWords = new Set<string>();
+    const sourceFields: string[] = [];
+
+    if (Array.isArray(report.complianceRisks) && report.complianceRisks.length > 0) {
+      report.complianceRisks
+        .map(risk => risk.risk?.trim() || risk.type?.trim())
+        .filter((word): word is string => !!word)
+        .forEach(word => restrictedWords.add(word));
+
+      if (restrictedWords.size > 0) {
+        sourceFields.push('complianceRisks');
+      }
+    }
+
+    return {
+      data: Array.from(restrictedWords),
+      confidence: restrictedWords.size > 0 ? 0.8 : 0,
+      sourceFields,
+    };
   }
 
   /**

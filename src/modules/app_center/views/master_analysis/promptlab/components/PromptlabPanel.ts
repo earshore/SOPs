@@ -124,6 +124,7 @@ export function createPromptlabPanel() {
       usps: 0,
       specs: 0,
       keywords: 0,
+      negative: 0,
       overall: 0,
     } as DnaConfidence,
 
@@ -325,7 +326,7 @@ export function createPromptlabPanel() {
       autoPopulateDNA(this as unknown as PromptlabAlpineContext);
     },
 
-    extractSingleField(fieldName: "audience" | "usps" | "specs") {
+    extractSingleField(fieldName: "keywordsTier1" | "keywordsTier2" | "negative" | "audience" | "usps" | "specs") {
       extractSingleField(this as unknown as PromptlabAlpineContext, fieldName);
     },
 

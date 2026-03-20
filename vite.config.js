@@ -39,7 +39,6 @@ export default defineConfig({
             deleteOriginFile: false
         })
     ],
-    root: './',
 
     // ================================================================
     // Vitest 测试配置
@@ -148,9 +147,6 @@ export default defineConfig({
         sourcemap: true, // 生产环境关闭sourcemap减小体积
         // 代码分割优化
         rollupOptions: {
-            input: {
-                main: resolve(__dirname, 'index.html')
-            },
             // 确保.ts文件被正确处理为.js
             external: [],
             output: {

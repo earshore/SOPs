@@ -20,6 +20,9 @@ export interface ExtendedDNA {
     intent: string[];
   };
 
+  // 新增字段：限制词
+  restrictedWords: string[];
+
   // 新增字段：高频短语
   highFrequencyPhrases: string[];
 
@@ -35,6 +38,7 @@ export interface ExtendedDNA {
     usps: number;
     specs: number;
     keywords: number;
+    restrictedWords: number;
     highFrequencyPhrases: number;
     painPoints: number;
     differentiationAngles: number;
@@ -47,6 +51,7 @@ export interface ExtendedDNA {
     sourceFields: string[];
     stats?: {
       totalKeywords: number;
+      totalRestrictedWords: number;
       totalPhrases: number;
       totalPainPoints: number;
       totalDifferentiationAngles: number;

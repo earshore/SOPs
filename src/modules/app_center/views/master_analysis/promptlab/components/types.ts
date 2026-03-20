@@ -18,6 +18,7 @@ export interface DnaConfidence {
   usps: number;
   specs: number;
   keywords: number;
+  negative: number;
   overall: number;
 }
 

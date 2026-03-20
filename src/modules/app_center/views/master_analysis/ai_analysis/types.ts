@@ -85,6 +85,13 @@ export interface AlpineContext {
   currentStep: string;
   analysisReport: unknown;
   hasReport: boolean; // 是否有报告（用于强制触发 UI 更新）
+  reportResults: AnalysisResult[];
+  reportListingsResults: AnalysisResult[];
+  reportReviewsResults: AnalysisResult[];
+  reportTotalHighlights: number;
+  reportTotalDetails: number;
+  reportFullData: FullReportData | null;
+  reportRenderVersion: number;
   expandedPromptIndex: number | null;
   showPromptPanel: boolean;
   showJsonViewer: boolean;
