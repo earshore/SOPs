@@ -140,104 +140,107 @@
         <!-- ========== 主流程 - 三列布局 ========== -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                 <!-- Column 1: 每周流程 -->
-                <div class="lg:col-span-1 bg-white rounded-xl border border-slate-200 p-6">
-                        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                                <i class="fas fa-calendar-week text-blue-500"></i>每周巡检流程（周二）
-                        </h2>
-                        <div class="sop-timeline">
-                                <!-- Step 1 -->
-                                <div class="sop-timeline-item">
-                                        <div class="sop-timeline-dot completed"></div>
-                                        <div class="bg-blue-50/50 rounded-lg p-3 ml-2 border-l-4 border-blue-400">
-                                                <h3 class="font-bold text-slate-800 text-sm mb-1">Step 1: 扫描新问题</h3>
-                                                <p class="text-xs text-blue-600 mb-2">⏱ 5 分钟</p>
-                                                <ul class="text-xs text-slate-600 space-y-1">
-                                                        <li>• 逐个打开核心 ASIN 的产品页面</li>
-                                                        <li>• 滚动到 "Customer Questions &amp; Answers"</li>
-                                                        <li>• 筛选没有官方（Manufacturer）回复的问题</li>
-                                                        <li>• 记录新增问题到 QA 管理表</li>
-                                                        <li class="text-blue-700 font-semibold">• 五站都要检查（DE/UK/FR/IT/ES）
-                                                        </li>
-                                                </ul>
+                <div class="lg:col-span-1 space-y-5">
+                        <div class="bg-white rounded-xl border border-slate-200 p-5">
+                                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                                        <i class="fas fa-calendar-week text-blue-500"></i>每周巡检流程（周二）
+                                </h2>
+                                <div class="sop-timeline">
+                                        <!-- Step 1 -->
+                                        <div class="sop-timeline-item">
+                                                <div class="sop-timeline-dot completed"></div>
+                                                <div class="bg-blue-50/50 rounded-lg p-3 ml-2 border-l-4 border-blue-400 mb-2">
+                                                        
+                                                        <h3 class="font-bold text-slate-800 text-sm mb-1">Step 1: 扫描新问题</h3>
+                                                        <p class="text-xs text-blue-600 mb-2">⏱ 5 分钟</p>
+                                                        <ul class="text-xs text-slate-600 space-y-1">
+                                                                <li>• 逐个打开核心 ASIN 的产品页面</li>
+                                                                <li>• 滚动到 "Customer Questions &amp; Answers"</li>
+                                                                <li>• 筛选没有官方（Manufacturer）回复的问题</li>
+                                                                <li>• 记录新增问题到 QA 管理表</li>
+                                                                <li class="text-blue-700 font-semibold">• 五站都要检查（DE/UK/FR/IT/ES）
+                                                                </li>
+                                                        </ul>
+                                                </div>
                                         </div>
-                                </div>
-                                <!-- Step 2 -->
-                                <div class="sop-timeline-item">
-                                        <div class="sop-timeline-dot"></div>
-                                        <div class="bg-emerald-50/50 rounded-lg p-3 ml-2 border-l-4 border-emerald-400">
-                                                <h3 class="font-bold text-slate-800 text-sm mb-1">Step 2: 分类 + 优先级</h3>
-                                                <p class="text-xs text-emerald-600 mb-2">⏱ 3 分钟</p>
-                                                <ul class="text-xs text-slate-600 space-y-1">
-                                                        <li>• 按类型分类（见右侧分类体系）</li>
-                                                        <li>• 判定是否有投票（votes 多 = 更多人关心）</li>
-                                                        <li>• 优先回复：高票 → 负面倾向 → 产品参数 → 一般</li>
-                                                        <li>• 标记可用于 SEO 布局的问题</li>
-                                                </ul>
+                                        <!-- Step 2 -->
+                                        <div class="sop-timeline-item">
+                                                <div class="sop-timeline-dot"></div>
+                                                <div class="bg-emerald-50/50 rounded-lg p-3 ml-2 border-l-4 border-emerald-400 mb-2">
+                                                        <h3 class="font-bold text-slate-800 text-sm mb-1">Step 2: 分类 + 优先级</h3>
+                                                        <p class="text-xs text-emerald-600 mb-2">⏱ 3 分钟</p>
+                                                        <ul class="text-xs text-slate-600 space-y-1">
+                                                                <li>• 按类型分类（见右侧分类体系）</li>
+                                                                <li>• 判定是否有投票（votes 多 = 更多人关心）</li>
+                                                                <li>• 优先回复：高票 → 负面倾向 → 产品参数 → 一般</li>
+                                                                <li>• 标记可用于 SEO 布局的问题</li>
+                                                        </ul>
+                                                </div>
                                         </div>
-                                </div>
-                                <!-- Step 3 -->
-                                <div class="sop-timeline-item">
-                                        <div class="sop-timeline-dot"></div>
-                                        <div class="bg-purple-50/50 rounded-lg p-3 ml-2 border-l-4 border-purple-400">
-                                                <h3 class="font-bold text-slate-800 text-sm mb-1">Step 3: 撰写 + 发布回答</h3>
-                                                <p class="text-xs text-purple-600 mb-2">⏱ 10-15 分钟</p>
-                                                <ul class="text-xs text-slate-600 space-y-1">
-                                                        <li>• 用对应站点语言撰写</li>
-                                                        <li>• 以品牌官方身份回答</li>
-                                                        <li>• 植入 2-3 个目标关键词（自然！）</li>
-                                                        <li>• 对照模板检查质量</li>
-                                                        <li>• 发布前通读一遍确认无违规</li>
-                                                </ul>
+                                        <!-- Step 3 -->
+                                        <div class="sop-timeline-item">
+                                                <div class="sop-timeline-dot"></div>
+                                                <div class="bg-purple-50/50 rounded-lg p-3 ml-2 border-l-4 border-purple-400 mb-2">
+                                                        <h3 class="font-bold text-slate-800 text-sm mb-1">Step 3: 撰写 + 发布回答</h3>
+                                                        <p class="text-xs text-purple-600 mb-2">⏱ 10-15 分钟</p>
+                                                        <ul class="text-xs text-slate-600 space-y-1">
+                                                                <li>• 用对应站点语言撰写</li>
+                                                                <li>• 以品牌官方身份回答</li>
+                                                                <li>• 植入 2-3 个目标关键词（自然！）</li>
+                                                                <li>• 对照模板检查质量</li>
+                                                                <li>• 发布前通读一遍确认无违规</li>
+                                                        </ul>
+                                                </div>
                                         </div>
-                                </div>
-                                <!-- Step 4 -->
-                                <div class="sop-timeline-item">
-                                        <div class="sop-timeline-dot"></div>
-                                        <div class="bg-amber-50/50 rounded-lg p-3 ml-2 border-l-4 border-amber-400">
-                                                <h3 class="font-bold text-slate-800 text-sm mb-1">Step 4: 处理问题 QA</h3>
-                                                <p class="text-xs text-amber-600 mb-2">⏱ 5 分钟</p>
-                                                <ul class="text-xs text-slate-600 space-y-1">
-                                                        <li>• 负面倾向问题 → 专业化解（见模板）</li>
-                                                        <li>• 错误信息 → 用正确数据纠正</li>
-                                                        <li>• 竞对恶意提问 → 举报 + 正面回答</li>
-                                                        <li>• 涉及安全 → 最高优先级处理</li>
-                                                </ul>
+                                        <!-- Step 4 -->
+                                        <div class="sop-timeline-item">
+                                                <div class="sop-timeline-dot"></div>
+                                                <div class="bg-amber-50/50 rounded-lg p-3 ml-2 border-l-4 border-amber-400 mb-2">
+                                                        <h3 class="font-bold text-slate-800 text-sm mb-1">Step 4: 处理问题 QA</h3>
+                                                        <p class="text-xs text-amber-600 mb-2">⏱ 5 分钟</p>
+                                                        <ul class="text-xs text-slate-600 space-y-1">
+                                                                <li>• 负面倾向问题 → 专业化解（见模板）</li>
+                                                                <li>• 错误信息 → 用正确数据纠正</li>
+                                                                <li>• 竞对恶意提问 → 举报 + 正面回答</li>
+                                                                <li>• 涉及安全 → 最高优先级处理</li>
+                                                        </ul>
+                                                </div>
                                         </div>
-                                </div>
-                                <!-- Step 5 -->
-                                <div class="sop-timeline-item">
-                                        <div class="sop-timeline-dot"></div>
-                                        <div class="bg-teal-50/50 rounded-lg p-3 ml-2 border-l-4 border-teal-400">
-                                                <h3 class="font-bold text-slate-800 text-sm mb-1">Step 5: 反哺 Listing 优化
-                                                </h3>
-                                                <p class="text-xs text-teal-600 mb-2">⏱ 3 分钟</p>
-                                                <ul class="text-xs text-slate-600 space-y-1">
-                                                        <li>• 同一问题被问 3+ 次 → 更新 Listing/A+</li>
-                                                        <li>• 高频参数问题 → 加入 Bullet Points</li>
-                                                        <li>• 使用问题 → 更新说明书/产品卡片</li>
-                                                        <li>• 记录到 VOC 分析表（与差评处理联动）</li>
-                                                </ul>
+                                        <!-- Step 5 -->
+                                        <div class="sop-timeline-item">
+                                                <div class="sop-timeline-dot"></div>
+                                                <div class="bg-teal-50/50 rounded-lg p-3 ml-2 border-l-4 border-teal-400 mb-2">
+                                                        <h3 class="font-bold text-slate-800 text-sm mb-1">Step 5: 反哺 Listing 优化
+                                                        </h3>
+                                                        <p class="text-xs text-teal-600 mb-2">⏱ 3 分钟</p>
+                                                        <ul class="text-xs text-slate-600 space-y-1">
+                                                                <li>• 同一问题被问 3+ 次 → 更新 Listing/A+</li>
+                                                                <li>• 高频参数问题 → 加入 Bullet Points</li>
+                                                                <li>• 使用问题 → 更新说明书/产品卡片</li>
+                                                                <li>• 记录到 VOC 分析表（与差评处理联动）</li>
+                                                        </ul>
+                                                </div>
                                         </div>
-                                </div>
-                                <!-- Step 6 -->
-                                <div class="sop-timeline-item">
-                                        <div class="sop-timeline-dot pending"></div>
-                                        <div class="bg-pink-50/50 rounded-lg p-3 ml-2 border-l-4 border-pink-400">
-                                                <h3 class="font-bold text-slate-800 text-sm mb-1">Step 6: 竞品 QA 挖掘（月度）
-                                                </h3>
-                                                <p class="text-xs text-pink-600 mb-2">⏱ 15 分钟/月</p>
-                                                <ul class="text-xs text-slate-600 space-y-1">
-                                                        <li>• 浏览 TOP 3 竞品的 QA 页面</li>
-                                                        <li>• 提取竞品高频问题 → 预先准备</li>
-                                                        <li>• 发现竞品弱点 → 在你的回答中差异化</li>
-                                                        <li>• 收集买家关心的真实需求点</li>
-                                                </ul>
+                                        <!-- Step 6 -->
+                                        <div class="sop-timeline-item">
+                                                <div class="sop-timeline-dot pending"></div>
+                                                <div class="bg-pink-50/50 rounded-lg p-3 ml-2 border-l-4 border-pink-400 mb-2">
+                                                        <h3 class="font-bold text-slate-800 text-sm mb-1">Step 6: 竞品 QA 挖掘（月度）
+                                                        </h3>
+                                                        <p class="text-xs text-pink-600 mb-2">⏱ 15 分钟/月</p>
+                                                        <ul class="text-xs text-slate-600 space-y-1">
+                                                                <li>• 浏览 TOP 3 竞品的 QA 页面</li>
+                                                                <li>• 提取竞品高频问题 → 预先准备</li>
+                                                                <li>• 发现竞品弱点 → 在你的回答中差异化</li>
+                                                                <li>• 收集买家关心的真实需求点</li>
+                                                        </ul>
+                                                </div>
                                         </div>
+                                </div> 
+                                <div class="mt-4 p-3 bg-blue-50 rounded-lg text-xs text-blue-800 border border-blue-200">
+                                        <i class="fas fa-clock mr-1"></i><strong>总耗时：</strong>每周约 25-30 分钟。竞品挖掘每月追加 15
+                                        分钟。固定在周二上午处理——周一是欧洲下单高峰，周二新问题刚好沉淀出来。
                                 </div>
-                        </div>
-                        <div class="mt-4 p-3 bg-blue-50 rounded-lg text-xs text-blue-800 border border-blue-200">
-                                <i class="fas fa-clock mr-1"></i><strong>总耗时：</strong>每周约 25-30 分钟。竞品挖掘每月追加 15
-                                分钟。固定在周二上午处理——周一是欧洲下单高峰，周二新问题刚好沉淀出来。
                         </div>
                 </div>
                 <!-- Column 2: 问题分类 + 优先级 -->
@@ -539,14 +542,12 @@
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         <!-- 模板1: 产品尺寸/规格 -->
                         <div class="border border-slate-200 rounded-xl overflow-hidden">
-                                <div class="bg-blue-50 px-4 py-3 flex items-center justify-between cursor-pointer"
-                                        onclick="this.nextElementSibling.classList.toggle('hidden')">
+                                <div class="bg-blue-50 px-4 py-3 flex items-center justify-between">
                                         <div class="flex items-center gap-2">
                                                 <span
                                                         class="px-2 py-0.5 bg-blue-500 text-white rounded text-xs font-bold">A类</span>
                                                 <span class="font-bold text-slate-800 text-sm">#1 产品尺寸/规格</span>
                                         </div>
-                                        <i class="fas fa-chevron-down text-slate-400 text-xs"></i>
                                 </div>
                                 <div class="p-3 border-t border-slate-100">
                                         <p class="text-xs text-slate-500 mb-2">Q: "What are the exact dimensions?"</p>
@@ -566,14 +567,12 @@
                         </div>
                         <!-- 模板2: 兼容性 -->
                         <div class="border border-slate-200 rounded-xl overflow-hidden">
-                                <div class="bg-amber-50 px-4 py-3 flex items-center justify-between cursor-pointer"
-                                        onclick="this.nextElementSibling.classList.toggle('hidden')">
+                                <div class="bg-amber-50 px-4 py-3 flex items-center justify-between">
                                         <div class="flex items-center gap-2">
                                                 <span
                                                         class="px-2 py-0.5 bg-amber-500 text-white rounded text-xs font-bold">C类</span>
                                                 <span class="font-bold text-slate-800 text-sm">#2 兼容性/适配</span>
                                         </div>
-                                        <i class="fas fa-chevron-down text-slate-400 text-xs"></i>
                                 </div>
                                 <div class="p-3 border-t border-slate-100">
                                         <p class="text-xs text-slate-500 mb-2">Q: "Does this work with [specific
@@ -594,14 +593,12 @@
                         </div>
                         <!-- 模板3: 使用方法 -->
                         <div class="border border-slate-200 rounded-xl overflow-hidden">
-                                <div class="bg-emerald-50 px-4 py-3 flex items-center justify-between cursor-pointer"
-                                        onclick="this.nextElementSibling.classList.toggle('hidden')">
+                                <div class="bg-emerald-50 px-4 py-3 flex items-center justify-between">
                                         <div class="flex items-center gap-2">
                                                 <span
                                                         class="px-2 py-0.5 bg-emerald-500 text-white rounded text-xs font-bold">B类</span>
                                                 <span class="font-bold text-slate-800 text-sm">#3 使用方法/功能</span>
                                         </div>
-                                        <i class="fas fa-chevron-down text-slate-400 text-xs"></i>
                                 </div>
                                 <div class="p-3 border-t border-slate-100">
                                         <p class="text-xs text-slate-500 mb-2">Q: "How do I set this up?"</p>
@@ -625,14 +622,12 @@
                         </div>
                         <!-- 模板4: 质量/认证 -->
                         <div class="border border-slate-200 rounded-xl overflow-hidden">
-                                <div class="bg-red-50 px-4 py-3 flex items-center justify-between cursor-pointer"
-                                        onclick="this.nextElementSibling.classList.toggle('hidden')">
+                                <div class="bg-red-50 px-4 py-3 flex items-center justify-between">
                                         <div class="flex items-center gap-2">
                                                 <span
                                                         class="px-2 py-0.5 bg-red-500 text-white rounded text-xs font-bold">D类</span>
                                                 <span class="font-bold text-slate-800 text-sm">#4 质量保证/安全认证</span>
                                         </div>
-                                        <i class="fas fa-chevron-down text-slate-400 text-xs"></i>
                                 </div>
                                 <div class="p-3 border-t border-slate-100">
                                         <p class="text-xs text-slate-500 mb-2">Q: "Is this product safe to use? What
@@ -655,14 +650,13 @@
                         </div>
                         <!-- 模板5: 包含内容/配件 -->
                         <div class="border border-slate-200 rounded-xl overflow-hidden">
-                                <div class="bg-purple-50 px-4 py-3 flex items-center justify-between cursor-pointer"
-                                        onclick="this.nextElementSibling.classList.toggle('hidden')">
+                                <div class="bg-purple-50 px-4 py-3 flex items-center justify-between">
                                         <div class="flex items-center gap-2">
                                                 <span
                                                         class="px-2 py-0.5 bg-purple-500 text-white rounded text-xs font-bold">A类</span>
                                                 <span class="font-bold text-slate-800 text-sm">#5 包装内容/配件</span>
                                         </div>
-                                        <i class="fas fa-chevron-down text-slate-400 text-xs"></i>
+
                                 </div>
                                 <div class="p-3 border-t border-slate-100">
                                         <p class="text-xs text-slate-500 mb-2">Q: "What's included in the package?"</p>
@@ -685,14 +679,12 @@
                         </div>
                         <!-- 模板6: 物流/保修 -->
                         <div class="border border-slate-200 rounded-xl overflow-hidden">
-                                <div class="bg-slate-50 px-4 py-3 flex items-center justify-between cursor-pointer"
-                                        onclick="this.nextElementSibling.classList.toggle('hidden')">
-                                        <div class="flex items-center gap-2">
+                                <div class="bg-slate-50 px-4 py-3 flex items-center justify-between">
+                                         <div class="flex items-center gap-2">
                                                 <span
                                                         class="px-2 py-0.5 bg-slate-400 text-white rounded text-xs font-bold">E类</span>
                                                 <span class="font-bold text-slate-800 text-sm">#6 配送/保修/售后</span>
                                         </div>
-                                        <i class="fas fa-chevron-down text-slate-400 text-xs"></i>
                                 </div>
                                 <div class="p-3 border-t border-slate-100">
                                         <p class="text-xs text-slate-500 mb-2">Q: "How long is the warranty?"</p>
