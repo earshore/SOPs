@@ -1,21 +1,19 @@
 <div class="module-container">
-    <!-- Welcome Banner -->
     <div
         class="wb-container"
         style="
-            --wb-gradient-1: rgba(236, 253, 245, 0.95);
-            --wb-gradient-2: rgba(209, 250, 229, 0.9);
-            --wb-orb-1-color: rgba(52, 211, 153, 0.18);
-            --wb-orb-2-color: rgba(16, 185, 129, 0.12);
-            --wb-orb-3-color: rgba(5, 150, 105, 0.08);
-            --wb-particle-color: rgba(16, 185, 129, 0.5);
+            --wb-gradient-1: rgba(239, 253, 248, 0.96);
+            --wb-gradient-2: rgba(220, 252, 231, 0.92);
+            --wb-orb-1-color: rgba(34, 197, 94, 0.16);
+            --wb-orb-2-color: rgba(249, 115, 22, 0.12);
+            --wb-orb-3-color: rgba(16, 185, 129, 0.08);
+            --wb-particle-color: rgba(22, 163, 74, 0.45);
         "
     >
         <div class="wb-orb wb-orb-1"></div>
         <div class="wb-orb wb-orb-2"></div>
         <div class="wb-orb wb-orb-3"></div>
         <div class="wb-grid-pattern"></div>
-
         <div class="wb-particle wb-particle-1"></div>
         <div class="wb-particle wb-particle-2"></div>
         <div class="wb-particle wb-particle-3"></div>
@@ -30,323 +28,691 @@
             </div>
             <div class="wb-title-row">
                 <h1 class="wb-title">促销活动</h1>
-                <span aria-label="促销活动" class="wb-badge wb-badge-hub">
-                    <i class="fa-solid fa-gifts"></i>流量涌入
+                <span aria-label="实战作战手册" class="wb-badge wb-badge-hub">
+                    <i class="fa-solid fa-bullseye"></i>实战作战
                 </span>
             </div>
             <p class="wb-description">
-                Prime Day、黑五、网一等重要促销活动策略与准备清单 - 把握大促机会
+                站在亚马逊欧洲站运营视角，把官方平台招商节奏、促销工具规则与真实业务决策串成一套可直接落地的企业内训教案。
             </p>
             <div class="wb-meta">
                 <span><i class="fas fa-tag mr-1"></i>入门实操宝典</span>
-                <span><i class="fas fa-tag mr-1"></i>促销活动</span>
-                <span><i class="fas fa-tag mr-1"></i>更新日期：2024-01</span>
+                <span><i class="fas fa-graduation-cap mr-1"></i>企业培训课程</span>
+                <span><i class="fas fa-globe-europe mr-1"></i>欧洲站实战</span>
+                <span><i class="fas fa-calendar-alt mr-1"></i>更新日期：2026-03</span>
             </div>
         </div>
     </div>
 
-    <!-- Prime Day -->
-    <section id="prime-day" class="amzpa_card">
+    <div class="amzpa_anchor_nav">
+        <div class="amzpa_anchor_header">
+            <div>
+                <span class="amzpa_anchor_eyebrow">PROMOTION PLAYBOOK</span>
+                <h2 class="amzpa_anchor_title">促销活动作战总览（实战版）</h2>
+                <!-- <p class="amzpa_anchor_desc">
+                    参考“SOP 核心流程总览（实战版）”的流程卡片语言，把本页 8 个关键模块串成一套
+                    “先认知、再筛选、再提报、再执行、最后复盘”的实战导航。
+                </p> -->
+            </div>
+            <div class="amzpa_anchor_tip">
+                <i class="fas fa-hand-pointer"></i>
+                <span>点击卡片可直达对应章节</span>
+            </div>
+        </div>
+        <div class="amzpa_process_nav">
+            <a class="amzpa_nav_step" href="#core-cognition">
+                <span class="amzpa_nav_step_no">01</span>
+                <span class="amzpa_nav_step_meta">战略底层</span>
+                <span class="amzpa_nav_step_title">核心认知</span>
+                <span class="amzpa_nav_step_desc">先定打法，再报活动</span>
+            </a>
+            <a class="amzpa_nav_step" href="#promo-map">
+                <span class="amzpa_nav_step_no">02</span>
+                <span class="amzpa_nav_step_meta">工具选择</span>
+                <span class="amzpa_nav_step_title">工具地图</span>
+                <span class="amzpa_nav_step_desc">Coupon / PED / Deal / Outlet</span>
+            </a>
+            <a class="amzpa_nav_step" href="#asin-gate">
+                <span class="amzpa_nav_step_no">03</span>
+                <span class="amzpa_nav_step_meta">资源筛选</span>
+                <span class="amzpa_nav_step_title">ASIN 选拔</span>
+                <span class="amzpa_nav_step_desc">不是所有产品都适合做促销</span>
+            </a>
+            <a class="amzpa_nav_step" href="#ninety-day-playbook">
+                <span class="amzpa_nav_step_no">04</span>
+                <span class="amzpa_nav_step_meta">倒排排期</span>
+                <span class="amzpa_nav_step_title">90 天节奏</span>
+                <span class="amzpa_nav_step_desc">必须按时间倒推</span>
+            </a>
+            <a class="amzpa_nav_step" href="#campaign-battlecards">
+                <span class="amzpa_nav_step_no">05</span>
+                <span class="amzpa_nav_step_meta">节点打法</span>
+                <span class="amzpa_nav_step_title">战役打法</span>
+                <span class="amzpa_nav_step_desc">Prime Day / BFCM / 节日季</span>
+            </a>
+            <a class="amzpa_nav_step" href="#profit-control">
+                <span class="amzpa_nav_step_no">06</span>
+                <span class="amzpa_nav_step_meta">经营底线</span>
+                <span class="amzpa_nav_step_title">利润与预算</span>
+                <span class="amzpa_nav_step_desc">折后利润、广告、费用一起算</span>
+            </a>
+            <a class="amzpa_nav_step" href="#monitoring-review">
+                <span class="amzpa_nav_step_no">07</span>
+                <span class="amzpa_nav_step_meta">执行监控</span>
+                <span class="amzpa_nav_step_title">监控复盘</span>
+                <span class="amzpa_nav_step_desc">当天盯什么，结束后看什么</span>
+            </a>
+            <a class="amzpa_nav_step" href="#pitfalls-checklist">
+                <span class="amzpa_nav_step_no">08</span>
+                <span class="amzpa_nav_step_meta">风险控制</span>
+                <span class="amzpa_nav_step_title">踩坑清单</span>
+                <span class="amzpa_nav_step_desc">适合企业内部 SOP 固化</span>
+            </a>
+        </div>
+    </div>
+
+
+    <section id="core-cognition" class="amzpa_card">
         <div class="amzpa_card_header">
-            <i
-                class="fas fa-bolt"
-                style="color: #ff9900; font-size: 1.8rem"
-            ></i>
-            <h2 class="amzpa_card_title">Prime Day</h2>
+            <i class="fas fa-chess-queen" style="color: #15803d; font-size: 1.8rem"></i>
+            <h2 class="amzpa_card_title">核心认知：促销不是“便宜卖货”，而是“买排名、买周转、买确定性”</h2>
         </div>
 
         <div class="amzpa_highlight_box">
-            <strong>📅 时间：</strong></strong>每年7月中旬，持续48小时<br />
-            <strong>🎯 特点：</strong>Amazon最大的会员专属购物节，流量巨大，竞争激烈
+            <strong>官方招商经理反复强调的底层逻辑：</strong>
+            大促不是临时起意的价格动作，而是提前排期的流量项目。活动能否真正放量，取决于
+            <strong>可售库存到仓、活动价有效、Listing 转化基础、广告接力、复盘补量</strong>
+            五件事是否同时成立。后台“可提报”不等于“值得报”，以当期活动页和账户实际显示为准。
         </div>
 
-        <h3 class="amzpa_section_header">
-            <i class="fas fa-clipboard-check"></i>
-            准备清单
-        </h3>
+        <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-2xl p-6 text-white mb-5">
+            <div class="flex items-start gap-4">
+                <div class="w-12 h-12 rounded-xl bg-white bg-opacity-10 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-brain text-amber-300 text-xl"></i>
+                </div>
+                <div class="flex-1">
+                    <h3 class="font-bold text-lg mb-2">运营打法：集中、少而精、绝不平均用力</h3>
+                    <p class="text-sm leading-7 opacity-90">
+                        运营最怕“每个 ASIN 都想参加活动”。真正有效的做法，是围绕
+                        <strong class="text-emerald-300">1-3 个主推 ASIN</strong>
+                        设计活动组合：用一支“抢排名”的爆款、一支“保利润”的利润款、一支“补流量”的关联款，完成整场战役。
+                        所有促销动作，都必须服务于三件事：
+                        <strong class="text-amber-300">拉升搜索排序、加速库存周转、放大链接权重</strong>。
+                    </p>
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        <span class="amzpa_badge">先选 ASIN，再选活动</span>
+                        <span class="amzpa_badge">先算底线，再谈折扣</span>
+                        <span class="amzpa_badge">先到仓，再冲流量</span>
+                        <span class="amzpa_badge">活动后 7 天继续吃排名红利</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="amzpa_metric_strip">
+            <div class="amzpa_metric">
+                <span class="amzpa_metric_label">主推 ASIN 数</span>
+                <span class="amzpa_metric_value">1-3 个</span>
+                <p class="amzpa_metric_desc">更容易把库存、广告、客服响应集中到位。</p>
+            </div>
+            <div class="amzpa_metric">
+                <span class="amzpa_metric_label">安全库存</span>
+                <span class="amzpa_metric_value">预估销量 × 1.5-2</span>
+                <p class="amzpa_metric_desc">只看日常销量会失真，大促必须按峰值准备。</p>
+            </div>
+            <div class="amzpa_metric">
+                <span class="amzpa_metric_label">广告预算</span>
+                <span class="amzpa_metric_value">平日 1.5-3 倍</span>
+                <p class="amzpa_metric_desc">促销价本身不能保证曝光，广告负责把人送进来。</p>
+            </div>
+            <div class="amzpa_metric">
+                <span class="amzpa_metric_label">复盘窗口</span>
+                <span class="amzpa_metric_value">活动后 7-14 天</span>
+                <p class="amzpa_metric_desc">看自然排名和 TACOS 是否沉淀，而不是只看当天 GMV。</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="promo-map" class="amzpa_card">
+        <div class="amzpa_card_header">
+            <i class="fas fa-map-marked-alt" style="color: #2563eb; font-size: 1.8rem"></i>
+            <h2 class="amzpa_card_title">欧洲站主流促销工具地图：先理解工具，再选择组合</h2>
+        </div>
+
+        <p class="amzpa_text">
+            欧洲站常用的促销工具很多，但运营只需要掌握“<strong>日常引流</strong>、<strong>节点爆发</strong>、<strong>库存清理</strong>”三类目标。
+            决策顺序不是“后台能报什么就报什么”，而是“我当前最缺什么：流量、转化、排名，还是现金流”。
+        </p>
 
         <div class="amzpa_grid">
             <div class="amzpa_sub_item">
                 <div class="amzpa_sub_header">
-                    <div class="amzpa_sub_icon">
-                        <i class="fas fa-calendar-alt"></i>
-                    </div>
-                    <h4 class="amzpa_sub_title">提前6-8周</h4>
+                    <div class="amzpa_sub_icon"><i class="fas fa-ticket-alt"></i></div>
+                    <h4 class="amzpa_sub_title">Coupon</h4>
                 </div>
                 <p class="amzpa_sub_desc">
-                    • 提交Lightning Deal申请<br />
-                    • 准备充足库存（建议3-4倍日常销量）<br />
-                    • 优化Listing（标题、图片、A+）<br />
-                    • 设置自动广告预算提升
+                    适合日常拉点击率、给新品首波转化、或在竞争激烈关键词下增加价格吸引力。
+                    优势是灵活、上线快、可与广告同时使用；缺点是折后利润和兑换费用要一起核算。
                 </p>
+                <div class="flex flex-wrap gap-2 mt-auto">
+                    <span class="amzpa_tag">适合：新品 / 日常拉 CTR</span>
+                    <span class="amzpa_tag">打法：小折扣 + 广告放大</span>
+                </div>
             </div>
 
             <div class="amzpa_sub_item">
                 <div class="amzpa_sub_header">
-                    <div class="amzpa_sub_icon">
-                        <i class="fas fa-bullhorn"></i>
-                    </div>
-                    <h4 class="amzpa_sub_title">提前2-4周</h4>
+                    <div class="amzpa_sub_icon"><i class="fas fa-crown"></i></div>
+                    <h4 class="amzpa_sub_title">Prime Exclusive Discount</h4>
                 </div>
                 <p class="amzpa_sub_desc">
-                    • 创建Prime Day专属优惠券<br />
-                    • 准备站外引流（社交媒体、邮件营销）<br />
-                    • 测试价格策略<br />
-                    • 联系红人/Deal网站合作
+                    Prime 会员大促的核心工具之一，适合做品牌爆发和排名冲刺。对拥有 Prime 用户基础的大促节点更有效，
+                    常用于 Prime Day、Prime Big Deal Days 这类平台资源倾斜期。
                 </p>
+                <div class="flex flex-wrap gap-2 mt-auto">
+                    <span class="amzpa_tag">适合：Hero ASIN</span>
+                    <span class="amzpa_tag">打法：会员流量放大器</span>
+                </div>
             </div>
 
             <div class="amzpa_sub_item">
                 <div class="amzpa_sub_header">
-                    <div class="amzpa_sub_icon">
-                        <i class="fas fa-rocket"></i>
-                    </div>
-                    <h4 class="amzpa_sub_title">活动期间</h4>
+                    <div class="amzpa_sub_icon"><i class="fas fa-bolt"></i></div>
+                    <h4 class="amzpa_sub_title">Best Deal / 7-Day Deal / Lightning Deal</h4>
                 </div>
                 <p class="amzpa_sub_desc">
-                    • 实时监控库存和广告表现<br />
-                    • 快速响应客户问题<br />
-                    • 调整广告竞价（高峰时段提高）<br />
-                    • 记录数据用于复盘
+                    属于强曝光类 Deal，通常要求更严：价格、库存、历史表现、账户状态都更敏感。
+                    适合已有销量基础的成熟链接，不建议让新链接第一次上场就赌 Deal。
                 </p>
+                <div class="flex flex-wrap gap-2 mt-auto">
+                    <span class="amzpa_tag">适合：成熟链接</span>
+                    <span class="amzpa_tag">打法：用销量摊薄固定费用</span>
+                </div>
+            </div>
+
+            <div class="amzpa_sub_item">
+                <div class="amzpa_sub_header">
+                    <div class="amzpa_sub_icon"><i class="fas fa-percent"></i></div>
+                    <h4 class="amzpa_sub_title">价格折扣 / Sale Price</h4>
+                </div>
+                <p class="amzpa_sub_desc">
+                    成本最低、执行最快，适合给主推 ASIN 造价格锚点，也适合在大促周做基础防守。
+                    它不是最强曝光工具，但经常是最稳的利润保护方案。
+                </p>
+                <div class="flex flex-wrap gap-2 mt-auto">
+                    <span class="amzpa_tag">适合：利润保护</span>
+                    <span class="amzpa_tag">打法：做底价锚点</span>
+                </div>
+            </div>
+
+            <div class="amzpa_sub_item">
+                <div class="amzpa_sub_header">
+                    <div class="amzpa_sub_icon"><i class="fas fa-warehouse"></i></div>
+                    <h4 class="amzpa_sub_title">Outlet / 清库存活动</h4>
+                </div>
+                <p class="amzpa_sub_desc">
+                    目标是回笼现金、处理慢动销和季节尾货，不是拿来冲关键词排名。
+                    如果库存结构失衡，Outlet 往往比硬扛仓储费更理性。
+                </p>
+                <div class="flex flex-wrap gap-2 mt-auto">
+                    <span class="amzpa_tag">适合：尾货 / 慢销</span>
+                    <span class="amzpa_tag">打法：现金流优先</span>
+                </div>
+            </div>
+
+            <div class="amzpa_sub_item">
+                <div class="amzpa_sub_header">
+                    <div class="amzpa_sub_icon"><i class="fas fa-bullhorn"></i></div>
+                    <h4 class="amzpa_sub_title">广告联动</h4>
+                </div>
+                <p class="amzpa_sub_desc">
+                    广告不是可选项，而是所有促销的放大器。促销负责提升转化阈值，广告负责把搜索流量、竞品流量和品牌防守一起打通。
+                    没有广告配合，很多活动只是“折价卖给本来就会买的人”。
+                </p>
+                <div class="flex flex-wrap gap-2 mt-auto">
+                    <span class="amzpa_tag">适合：所有主推活动</span>
+                    <span class="amzpa_tag">打法：SP 守词，SB 守品牌</span>
+                </div>
             </div>
         </div>
-
-        <h3 class="amzpa_section_header">
-            <i class="fas fa-lightbulb"></i>
-            策略建议
-        </h3>
 
         <div class="amzpa_stats_box">
-            <i
-                class="fas fa-chart-line"
-                style="color: var(--amzpa-primary); font-size: 1.5rem"
-            ></i>
+            <i class="fas fa-info-circle" style="color: var(--amzpa-primary); font-size: 1.5rem"></i>
             <div class="amzpa_stats_text">
-                <strong>折扣策略：</strong>建议折扣20-30%，过低无吸引力，过高影响利润。可以通过提高原价来保持利润空间。<br />
-                <strong>广告策略：</strong>提前2周开始提高广告预算，活动期间预算至少提升2-3倍，重点投放品牌词和类目词。
+                <strong>实战判断：</strong>
+                如果你的目标是“稳住利润”，优先考虑 <strong>价格折扣 + SP 精准词</strong>；
+                如果目标是“把爆款打上去”，优先考虑 <strong>PED / Deal + 广告预算扩容</strong>；
+                如果目标是“快速出库存”，就别执着排名，直接转向 <strong>Coupon / Outlet / 清仓包</strong>。
+                活动规则、费用、最低折扣与资格条件会随站点、类目和账号表现变化，始终以后台显示为准。
             </div>
         </div>
     </section>
 
-    <!-- 黑色星期五 -->
-    <section id="black-friday" class="amzpa_card">
+    <section id="asin-gate" class="amzpa_card">
         <div class="amzpa_card_header">
-            <i
-                class="fas fa-shopping-cart"
-                style="color: #000; font-size: 1.8rem"
-            ></i>
-            <h2 class="amzpa_card_title">黑色星期五 (Black Friday)</h2>
+            <i class="fas fa-filter" style="color: #7c3aed; font-size: 1.8rem"></i>
+            <h2 class="amzpa_card_title">ASIN 选拔门槛：活动不是给“差生补课”，而是给“优等生冲刺”</h2>
         </div>
 
-        <div class="amzpa_highlight_box">
-            <strong>📅 时间：</strong>11月第四个星期五（感恩节后一天）<br />
-            <strong>🎯 特点：</strong>北美最大购物节，欧洲站也逐渐流行，持续时间长（通常整周）
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-5">
+            <div class="p-5 bg-emerald-50 rounded-xl border border-emerald-200">
+                <h3 class="font-bold text-emerald-800 mb-3 flex items-center gap-2">
+                    <i class="fas fa-check-circle text-emerald-500"></i>优先参加活动的 ASIN
+                </h3>
+                <ul class="amzpa_list amzpa_list-success">
+                    <li>近 30 天有稳定转化，说明 Listing 已通过市场验证。</li>
+                    <li>评价基础健康，星级稳定，近期没有差评集中爆发。</li>
+                    <li>活动后仍能保住合理利润，或明确属于战略抢排名款。</li>
+                    <li>库存可售天数覆盖活动峰值，并且有在途补货兜底。</li>
+                    <li>主图、标题、五点、A+ 已完成本地化，不让流量白白流失。</li>
+                </ul>
+            </div>
+            <div class="p-5 bg-rose-50 rounded-xl border border-rose-200">
+                <h3 class="font-bold text-rose-800 mb-3 flex items-center gap-2">
+                    <i class="fas fa-ban text-rose-500"></i>谨慎报名或直接放弃的 ASIN
+                </h3>
+                <ul class="amzpa_list amzpa_list-danger">
+                    <li>新品刚起步，还没建立转化基线，先用广告和内容验证。</li>
+                    <li>毛利薄、退货高、体积大，折扣和物流一叠加就亏损。</li>
+                    <li>近 14 天 Buy Box 不稳、价格易失控，活动时最容易掉链子。</li>
+                    <li>评价风险未清理，活动一放量，差评会被快速放大。</li>
+                    <li>依赖远程配送或在途库存，无法承受活动期间时效波动。</li>
+                </ul>
+            </div>
         </div>
 
         <h3 class="amzpa_section_header">
-            <i class="fas fa-tasks"></i>
-            关键时间节点
+            <i class="fas fa-medal"></i>
+            运营建议采用 A / B / C 分层法管理活动资源
         </h3>
-
         <div class="amzpa_grid">
             <div class="amzpa_sub_item">
                 <div class="amzpa_sub_header">
-                    <div class="amzpa_sub_icon">
-                        <i class="fas fa-calendar-day"></i>
-                    </div>
-                    <h4 class="amzpa_sub_title">黑五前一周</h4>
+                    <div class="amzpa_sub_icon"><i class="fas fa-fire"></i></div>
+                    <h4 class="amzpa_sub_title">A 层：Hero 爆款</h4>
                 </div>
                 <p class="amzpa_sub_desc">
-                    Early Black Friday Deals开始，流量逐渐上升，可以提前测试价格和广告策略。
+                    预算、库存、广告都优先倾斜。目标是抢搜索位、抢类目位、抢活动流量红利。
+                    通常只保留 1 个主爆款，避免资源稀释。
                 </p>
-                <span class="amzpa_tag">预热期</span>
+                <span class="amzpa_tag">资源占比：50%-60%</span>
             </div>
-
             <div class="amzpa_sub_item">
                 <div class="amzpa_sub_header">
-                    <div class="amzpa_sub_icon">
-                        <i class="fas fa-fire"></i>
-                    </div>
-                    <h4 class="amzpa_sub_title">黑五当天</h4>
+                    <div class="amzpa_sub_icon"><i class="fas fa-shield-alt"></i></div>
+                    <h4 class="amzpa_sub_title">B 层：利润保护款</h4>
                 </div>
                 <p class="amzpa_sub_desc">
-                    流量和转化率最高的一天，需要全天候监控库存和广告，快速响应问题。
+                    不追求最低价，主要承担利润回收和交叉销售。活动力度可以保守，但要确保链接表现稳定。
                 </p>
-                <span class="amzpa_tag">高峰期</span>
+                <span class="amzpa_tag">资源占比：25%-30%</span>
             </div>
-
             <div class="amzpa_sub_item">
                 <div class="amzpa_sub_header">
-                    <div class="amzpa_sub_icon">
-                        <i class="fas fa-laptop"></i>
-                    </div>
-                    <h4 class="amzpa_sub_title">网一 (Cyber Monday)</h4>
+                    <div class="amzpa_sub_icon"><i class="fas fa-link"></i></div>
+                    <h4 class="amzpa_sub_title">C 层：关联带动款</h4>
                 </div>
                 <p class="amzpa_sub_desc">
-                    黑五后的星期一，电子产品类目表现尤其突出，是第二波销售高峰。
+                    用于捆绑、搭售、老客补购或做品牌店铺联动，不单独承担大促 KPI。
+                    如果活动资源紧张，这一层可以直接退出。
                 </p>
-                <span class="amzpa_tag">次高峰</span>
+                <span class="amzpa_tag">资源占比：10%-20%</span>
             </div>
         </div>
 
-        <h3 class="amzpa_section_header">
-            <i class="fas fa-exclamation-triangle"></i>
-            常见问题
-        </h3>
-
-        <div class="amzpa_text">
-            <strong>Q: 黑五和Prime Day有什么区别？</strong><br />
-            A: Prime Day是会员专属，黑五面向所有用户；Prime Day在7月，黑五在11月；Prime Day持续48小时，黑五通常持续一周。
-        </div>
-
-        <div class="amzpa_text">
-            <strong>Q: 需要准备多少库存？</strong><br />
-            A: 建议准备平时日均销量的5-7倍，考虑到物流时效，最好提前2个月开始备货。
+        <div class="amzpa_callout mt-5">
+            <strong>内部培训口径：</strong>
+            活动报名会放大产品原本的优缺点。一个日常 CVR 就很差的 ASIN，放到大促里大概率只会“花更多广告费，亏更多钱”。
+            先把内容、评价、价格带和履约能力打磨好，再让促销去做加速器。
         </div>
     </section>
 
-    <!-- 网络星期一 -->
-    <section id="cyber-monday" class="amzpa_card">
+    <section id="ninety-day-playbook" class="amzpa_card">
         <div class="amzpa_card_header">
-            <i
-                class="fas fa-desktop"
-                style="color: #0066c0; font-size: 1.8rem"
-            ></i>
-            <h2 class="amzpa_card_title">网络星期一 (Cyber Monday)</h2>
+            <i class="fas fa-calendar-check" style="color: #ea580c; font-size: 1.8rem"></i>
+            <h2 class="amzpa_card_title">大促 90 天推进表：运营必须用倒排法推进，而不是等活动临近再补救</h2>
         </div>
 
-        <div class="amzpa_highlight_box">
-            <strong>📅 时间：</strong>黑色星期五后的第一个星期一<br />
-            <strong>🎯 特点：</strong>电子产品、数码配件、软件类目的主场
+        <div class="amzpa_timeline">
+            <div class="amzpa_timeline_step">
+                <span class="amzpa_timeline_tag">D-90</span>
+                <h4>定目标，定主推，定利润底线</h4>
+                <p>确认本次活动是抢排名、推新品、清库存还是守利润。没有目标，就无法决定折扣和预算。</p>
+                <ul class="amzpa_list">
+                    <li>筛出 A / B / C 层 ASIN。</li>
+                    <li>测算折后净利、广告容忍区间、目标销量。</li>
+                    <li>确定各站点主推国家，避免多国平均发力。</li>
+                </ul>
+            </div>
+            <div class="amzpa_timeline_step">
+                <span class="amzpa_timeline_tag">D-60</span>
+                <h4>锁库存，推到仓，检查供应链</h4>
+                <p>官方经理通常最强调“库存先行”。没有可售库存，任何活动都是纸面计划。</p>
+                <ul class="amzpa_list">
+                    <li>确认 FBA 可售量与在途补货节奏。</li>
+                    <li>盘点是否需要德国/法国本地库存支撑。</li>
+                    <li>预估断货风险，设库存预警线。</li>
+                </ul>
+            </div>
+            <div class="amzpa_timeline_step">
+                <span class="amzpa_timeline_tag">D-45</span>
+                <h4>提报活动，复核价格有效性</h4>
+                <p>Deal、PED、Coupon 的资格和费率都可能变化，建议先看后台可提报页面，再决定具体组合。</p>
+                <ul class="amzpa_list">
+                    <li>检查历史价格与当前参考价。</li>
+                    <li>记录各活动费用和最低折扣要求。</li>
+                    <li>优先锁定主推 ASIN 的核心活动位。</li>
+                </ul>
+            </div>
+            <div class="amzpa_timeline_step">
+                <span class="amzpa_timeline_tag">D-30</span>
+                <h4>做 Listing、广告和转化预热</h4>
+                <p>大促当天临时修标题、换主图，基本来不及验证。真正高转化的页面，必须至少提前 2-4 周上线。</p>
+                <ul class="amzpa_list">
+                    <li>完成主图、标题、五点、A+ 本地化优化。</li>
+                    <li>拆分广告：精准词、类目词、竞品词、品牌词。</li>
+                    <li>准备品牌店铺落地页和组合销售素材。</li>
+                </ul>
+            </div>
+            <div class="amzpa_timeline_step">
+                <span class="amzpa_timeline_tag">D-14</span>
+                <h4>启动预热，测试折扣敏感度</h4>
+                <p>先用小范围 Coupon 或广告测试转化曲线，避免大促当天才发现价格带不对。</p>
+                <ul class="amzpa_list">
+                    <li>跑 7-14 天关键词预热，积累加购和愿望单。</li>
+                    <li>观察不同折扣档位的 CVR 和 TACOS。</li>
+                    <li>同步站外邮件、老客社媒或红人素材。</li>
+                </ul>
+            </div>
+            <div class="amzpa_timeline_step">
+                <span class="amzpa_timeline_tag">D-7</span>
+                <h4>上线前总检查</h4>
+                <p>这一周不是再“做新东西”，而是检查所有链路是否会在当天掉线。</p>
+                <ul class="amzpa_list">
+                    <li>确认活动已生效，截图存档。</li>
+                    <li>核对广告预算上限、竞价规则、分时段策略。</li>
+                    <li>准备客服 Q&amp;A、退货说明和补货预案。</li>
+                </ul>
+            </div>
+            <div class="amzpa_timeline_step">
+                <span class="amzpa_timeline_tag">D-Day</span>
+                <h4>实时监控，不追虚荣 GMV</h4>
+                <p>看的是“流量进来后能否赚钱”，而不是只看订单数暴涨。</p>
+                <ul class="amzpa_list">
+                    <li>每 2-3 小时监控 Sessions、CVR、库存、广告花费。</li>
+                    <li>先调广告结构，再调价格，避免频繁伤害系统稳定性。</li>
+                    <li>如果库存告急，先收窄广泛词，保住精准词和利润词。</li>
+                </ul>
+            </div>
+            <div class="amzpa_timeline_step">
+                <span class="amzpa_timeline_tag">D+7</span>
+                <h4>复盘并吃掉排名红利</h4>
+                <p>活动结束不是收工，而是看能否把当期流量沉淀成后续自然单。</p>
+                <ul class="amzpa_list">
+                    <li>拉出活动前 / 中 / 后 3 段数据做对比。</li>
+                    <li>看自然排名、TACOS、Review、退货率是否改善。</li>
+                    <li>为下一轮活动保留可复用素材与价格结论。</li>
+                </ul>
+            </div>
         </div>
 
-        <div class="amzpa_text">
-            网络星期一最初是为了促进在线购物而设立的，现在已经成为仅次于黑五的重要购物节。
-            对于电子产品卖家来说，这一天的重要性甚至超过黑五。
-        </div>
-
-        <h3 class="amzpa_section_header">
-            <i class="fas fa-star"></i>
-            适合的产品类目
-        </h3>
-
-        <div class="amzpa_grid">
-            <div class="amzpa_sub_item">
-                <div class="amzpa_sub_header">
-                    <div class="amzpa_sub_icon">
-                        <i class="fas fa-laptop"></i>
-                    </div>
-                    <h4 class="amzpa_sub_title">电子产品</h4>
-                </div>
-                <p class="amzpa_sub_desc">
-                    笔记本电脑、平板、智能手机、智能手表等数码产品在这一天表现最佳。
-                </p>
-            </div>
-
-            <div class="amzpa_sub_item">
-                <div class="amzpa_sub_header">
-                    <div class="amzpa_sub_icon">
-                        <i class="fas fa-headphones"></i>
-                    </div>
-                    <h4 class="amzpa_sub_title">数码配件</h4>
-                </div>
-                <p class="amzpa_sub_desc">
-                    耳机、充电器、数据线、保护壳等配件类产品也有很好的销售表现。
-                </p>
-            </div>
-
-            <div class="amzpa_sub_item">
-                <div class="amzpa_sub_header">
-                    <div class="amzpa_sub_icon">
-                        <i class="fas fa-gamepad"></i>
-                    </div>
-                    <h4 class="amzpa_sub_title">游戏相关</h4>
-                </div>
-                <p class="amzpa_sub_desc">
-                    游戏主机、游戏配件、VR设备等游戏相关产品需求旺盛。
-                </p>
-            </div>
+        <div class="amzpa_formula mt-5">
+            <div class="amzpa_formula_title">运营节奏口诀</div>
+            <div class="amzpa_formula_code">先选货 → 再算账 → 先到仓 → 后提报 → 预热流量 → 当天盯盘 → 结束补量</div>
+            <p class="amzpa_formula_note">
+                只要顺序错了，后面每一步都在用更高成本补前面的坑。
+            </p>
         </div>
     </section>
 
-    <!-- 节日季 -->
-    <section id="holiday-season" class="amzpa_card">
+    <section id="campaign-battlecards" class="amzpa_card">
         <div class="amzpa_card_header">
-            <i
-                class="fas fa-gift"
-                style="color: #c7511f; font-size: 1.8rem"
-            ></i>
-            <h2 class="amzpa_card_title">节日季 (Holiday Season)</h2>
+            <i class="fas fa-flag-checkered" style="color: #0f766e; font-size: 1.8rem"></i>
+            <h2 class="amzpa_card_title">三大战役打法：把年度流量大节点做成可复制模板</h2>
         </div>
-
-        <div class="amzpa_highlight_box">
-            <strong>📅 时间：</strong>11月-12月（感恩节到圣诞节）<br />
-            <strong>🎯 特点：</strong>全年销售最旺的时期，礼品类产品需求激增
-        </div>
-
-        <div class="amzpa_text">
-            节日季是Amazon全年销售额最高的时期，通常占全年销售额的30-40%。
-            这段时间消费者购买意愿强，客单价高，是卖家全年最重要的销售窗口。
-        </div>
-
-        <h3 class="amzpa_section_header">
-            <i class="fas fa-calendar-check"></i>
-            关键日期
-        </h3>
 
         <div class="amzpa_grid">
-            <div class="amzpa_sub_item">
+            <div class="amzpa_sub_item amzpa_battle_card">
                 <div class="amzpa_sub_header">
-                    <div class="amzpa_sub_icon">
-                        <i class="fas fa-turkey"></i>
-                    </div>
-                    <h4 class="amzpa_sub_title">感恩节周</h4>
+                    <div class="amzpa_sub_icon"><i class="fas fa-star"></i></div>
+                    <h4 class="amzpa_sub_title">Prime Day / Prime Big Deal Days</h4>
                 </div>
                 <p class="amzpa_sub_desc">
-                    11月第四周，包括黑五和网一，是节日季的开端和第一波高峰。
+                    这是会员型高流量节点，适合已经有评价基础、供应链稳定、目标明确的 Hero ASIN。
+                    不要贪多，1 个主爆款 + 1 个利润守门员足够。
                 </p>
+                <h5 class="amzpa_minor_title">推荐组合</h5>
+                <ul class="amzpa_list">
+                    <li>PED 或核心 Deal 负责活动标签和转化拉升。</li>
+                    <li>SP 精准词 + 竞品词负责抢搜索入口。</li>
+                    <li>Coupon 可作为辅助，不要和主折扣互相蚕食利润。</li>
+                </ul>
+                <h5 class="amzpa_minor_title">运营重点</h5>
+                <ul class="amzpa_list">
+                    <li>预算分配建议：预热 20%，爆发期 60%，余热 20%。</li>
+                    <li>活动结束后至少保留 5-7 天广告，承接自然排名红利。</li>
+                    <li>如果断货风险超过 30%，宁可缩小词包，也不要把爆款打死。</li>
+                </ul>
             </div>
 
-            <div class="amzpa_sub_item">
+            <div class="amzpa_sub_item amzpa_battle_card">
                 <div class="amzpa_sub_header">
-                    <div class="amzpa_sub_icon">
-                        <i class="fas fa-shipping-fast"></i>
-                    </div>
-                    <h4 class="amzpa_sub_title">12月中旬</h4>
+                    <div class="amzpa_sub_icon"><i class="fas fa-shopping-bag"></i></div>
+                    <h4 class="amzpa_sub_title">Black Friday / Cyber Monday</h4>
                 </div>
                 <p class="amzpa_sub_desc">
-                    最后的购物高峰，消费者赶在圣诞节前完成采购，需要关注物流时效。
+                    价格敏感度更强，用户覆盖更广，不仅是 Prime 会员。适合“价格优势明确、礼品属性强、评价基础扎实”的 ASIN。
+                    这一战更考验价格纪律和库存厚度。
                 </p>
+                <h5 class="amzpa_minor_title">推荐组合</h5>
+                <ul class="amzpa_list">
+                    <li>Best Deal / 7-Day Deal 适合成熟链接冲销量。</li>
+                    <li>Sale Price + SP 防守品牌词，避免竞品抢走本该属于你的流量。</li>
+                    <li>店铺首页、A+、主图同步强化“礼品感”和“限时优惠感”。</li>
+                </ul>
+                <h5 class="amzpa_minor_title">运营重点</h5>
+                <ul class="amzpa_list">
+                    <li>提前 6-8 周确认库存，因为 Q4 入仓压力最大。</li>
+                    <li>把客服话术和售后预案提前写好，活动期间减少被动打断。</li>
+                    <li>黑五周看整体周度利润，不要被单日 ACoS 误导。</li>
+                </ul>
             </div>
 
-            <div class="amzpa_sub_item">
+            <div class="amzpa_sub_item amzpa_battle_card">
                 <div class="amzpa_sub_header">
-                    <div class="amzpa_sub_icon">
-                        <i class="fas fa-tree"></i>
-                    </div>
-                    <h4 class="amzpa_sub_title">圣诞节后</h4>
+                    <div class="amzpa_sub_icon"><i class="fas fa-gift"></i></div>
+                    <h4 class="amzpa_sub_title">节日季 / 圣诞礼品季 / 新年补单</h4>
                 </div>
                 <p class="amzpa_sub_desc">
-                    退换货高峰期，同时也是礼品卡消费和自用产品购买的小高峰。
+                    这是一个更长的销售波段，不是一日型爆发。适合礼品属性、家庭属性、组合购买场景明显的品类。
+                    欧洲站要特别注意德国、法国、意大利、西班牙的节日节奏差异。
                 </p>
+                <h5 class="amzpa_minor_title">推荐组合</h5>
+                <ul class="amzpa_list">
+                    <li>持续型 Coupon 或价格折扣，维持转化优势。</li>
+                    <li>Giftable 文案、节日主图氛围、组合包提升客单价。</li>
+                    <li>对西班牙站可额外关注圣诞后到“三王节”前的礼品需求。</li>
+                </ul>
+                <h5 class="amzpa_minor_title">运营重点</h5>
+                <ul class="amzpa_list">
+                    <li>把“最后发货日”前置写入运营日历，避免超卖。</li>
+                    <li>节后重点关注退货、库存回流和一月现金流。</li>
+                    <li>不要把 Q4 最后的利润全部打在折扣里，留给退货和补货空间。</li>
+                </ul>
             </div>
         </div>
 
-        <h3 class="amzpa_section_header">
-            <i class="fas fa-gift"></i>
-            礼品包装建议
-        </h3>
+        <div class="amzpa_callout mt-5">
+            <strong>战役选择建议：</strong>
+            如果团队极小、预算有限，年度只需要重点打透 <strong>Prime Day + BFCM</strong> 两个波峰；
+            节日季更多承担“延长销售周期”和“吃尾波需求”的角色，不必每一段都用最大折扣硬打。
+        </div>
+    </section>
 
-        <div class="amzpa_stats_box">
-            <i
-                class="fas fa-box-open"
-                style="color: var(--amzpa-primary); font-size: 1.5rem"
-            ></i>
+    <section id="profit-control" class="amzpa_card">
+        <div class="amzpa_card_header">
+            <i class="fas fa-calculator" style="color: #dc2626; font-size: 1.8rem"></i>
+            <h2 class="amzpa_card_title">利润、费用、预算必须一起看：促销成败不是折扣深浅，而是最终留了多少价值</h2>
+        </div>
+
+        <div class="amzpa_formula">
+            <div class="amzpa_formula_title">活动净利测算公式</div>
+            <div class="amzpa_formula_code">
+                活动净利 = 活动价 - VAT - 采购成本 - 头程 / FBA 配送费 - 平台佣金 - 广告花费 - Deal / Coupon 费用 - 退货准备金
+            </div>
+            <p class="amzpa_formula_note">
+                运营最容易漏算的是 VAT、Coupon 费用、退货准备金和活动后的补货压力。只算“订单利润”，往往会高估整场活动效果。
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-5">
+            <div class="p-5 bg-white rounded-xl border border-slate-200">
+                <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+                    <i class="fas fa-traffic-light text-amber-500"></i>利润底线建议
+                </h3>
+                <ul class="amzpa_list">
+                    <li><strong>抢排名款：</strong>允许利润变薄，但必须明确活动后要吃回自然单。</li>
+                    <li><strong>利润守门款：</strong>绝不为了陪跑而深折，宁可减少曝光，也要守住现金流。</li>
+                    <li><strong>清库存款：</strong>目标是减少仓储和回笼现金，可以不追求自然排名沉淀。</li>
+                    <li><strong>Deal 固定费用：</strong>只有预计销量足够时才值得做，否则会被单量稀释失败。</li>
+                    <li><strong>预算设置：</strong>先定总预算，再分配到活动费、广告、折扣和复盘补量。</li>
+                </ul>
+            </div>
+            <div class="p-5 bg-white rounded-xl border border-slate-200">
+                <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+                    <i class="fas fa-layer-group text-sky-500"></i>常见活动组合打法
+                </h3>
+                <div class="space-y-3 text-sm text-slate-700">
+                    <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                        <strong class="text-slate-800">保守型：</strong>Sale Price + SP 精准词
+                        <div class="text-slate-500 mt-1">适合利润薄、库存紧张、只想稳住转化的阶段。</div>
+                    </div>
+                    <div class="p-3 rounded-lg bg-emerald-50 border border-emerald-200">
+                        <strong class="text-emerald-800">增长型：</strong>Coupon + SP / SB + 店铺落地页
+                        <div class="text-emerald-700 mt-1">适合需要拉 CTR、做新品起量、强化竞争词点击的阶段。</div>
+                    </div>
+                    <div class="p-3 rounded-lg bg-indigo-50 border border-indigo-200">
+                        <strong class="text-indigo-800">冲榜型：</strong>PED / Deal + SP 扩容 + 复盘补量
+                        <div class="text-indigo-700 mt-1">适合 Prime Day、黑五等流量峰值窗口，但一定要有成熟链接做承接。</div>
+                    </div>
+                    <div class="p-3 rounded-lg bg-amber-50 border border-amber-200">
+                        <strong class="text-amber-800">清仓型：</strong>Coupon / Outlet + 低预算广告
+                        <div class="text-amber-700 mt-1">目标是卖掉而不是做大，避免高 CPC 吃掉本就不多的利润。</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="amzpa_stats_box mt-5">
+            <i class="fas fa-exclamation-triangle" style="color: #ef4444; font-size: 1.5rem"></i>
             <div class="amzpa_stats_text">
-                节日季期间，提供礼品包装选项可以显著提升转化率。建议在产品详情页突出"Gift-Ready"、"Perfect Gift"等关键词，
-                并在图片中展示精美的包装效果。如果使用FBA，可以启用Amazon的Gift Wrap服务。
+                <strong>欧洲站实战提醒：</strong>
+                参考价、历史成交价、活动价有效性会直接影响活动能否展示。不要做“先抬价再打折”的自欺型操作，
+                这种做法既容易影响活动资格，也会伤害转化和长期价格信任。促销一定要让买家感知到真实优惠，而不是只让表格好看。
             </div>
+        </div>
+    </section>
+
+    <section id="monitoring-review" class="amzpa_card">
+        <div class="amzpa_card_header">
+            <i class="fas fa-chart-line" style="color: #0891b2; font-size: 1.8rem"></i>
+            <h2 class="amzpa_card_title">活动当天监控与活动后复盘：决定你能不能把一次爆发变成长期增长</h2>
+        </div>
+
+        <div class="amzpa_metric_strip">
+            <div class="amzpa_metric">
+                <span class="amzpa_metric_label">Sessions</span>
+                <span class="amzpa_metric_value">看流量是否真进来</span>
+                <p class="amzpa_metric_desc">活动生效后流量没起色，先看展示位和广告覆盖，不要急着加深折扣。</p>
+            </div>
+            <div class="amzpa_metric">
+                <span class="amzpa_metric_label">CVR</span>
+                <span class="amzpa_metric_value">看页面是否接得住</span>
+                <p class="amzpa_metric_desc">流量涨、转化不涨，优先排查价格、评价、主图和 A+。</p>
+            </div>
+            <div class="amzpa_metric">
+                <span class="amzpa_metric_label">库存天数</span>
+                <span class="amzpa_metric_value">看是否需要收量</span>
+                <p class="amzpa_metric_desc">当剩余可售天数跌破警戒线，要立刻缩减泛词和低效投放。</p>
+            </div>
+            <div class="amzpa_metric">
+                <span class="amzpa_metric_label">TACOS / ACoS</span>
+                <span class="amzpa_metric_value">看钱花得值不值</span>
+                <p class="amzpa_metric_desc">大促当天 ACoS 高不一定坏，但活动后 TACOS 拉不下来就有问题。</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-5">
+            <div class="p-5 bg-white rounded-xl border border-slate-200">
+                <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+                    <i class="fas fa-satellite-dish text-cyan-500"></i>活动当天盯盘动作
+                </h3>
+                <ul class="amzpa_list">
+                    <li>每 2-3 小时记录流量、转化、广告花费、库存和 Buy Box 状态。</li>
+                    <li>先调广告结构：关掉浪费预算的广泛词，保住高转化精准词。</li>
+                    <li>观察 Coupon 领取和兑换节奏，判断价格感知是否成立。</li>
+                    <li>看站点差异：德国、法国、意大利、西班牙的高峰时间不完全相同。</li>
+                    <li>客服问题集中时，优先处理影响购买决策的 FAQ 和差评苗头。</li>
+                </ul>
+            </div>
+            <div class="p-5 bg-white rounded-xl border border-slate-200">
+                <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+                    <i class="fas fa-clipboard-list text-violet-500"></i>复盘模板（企业内训可直接沿用）
+                </h3>
+                <ul class="amzpa_list">
+                    <li><strong>目标是否达成：</strong>抢排名、清库存、做销售额，究竟完成了哪一个。</li>
+                    <li><strong>投入产出：</strong>折扣、广告、活动费、退货准备金合并后是否赚钱。</li>
+                    <li><strong>流量结构变化：</strong>自然流量占比是否提升，广告是否带来后续免费单。</li>
+                    <li><strong>最优价格带：</strong>哪个折扣档位对 CVR 提升最明显，未来是否可复用。</li>
+                    <li><strong>站点差异：</strong>哪一国表现最好，后续是否应该把库存更集中地放到该国。</li>
+                    <li><strong>下一步动作：</strong>补货、继续投放、恢复利润、还是直接收缩活动。</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="pitfalls-checklist" class="amzpa_card">
+        <div class="amzpa_card_header">
+            <i class="fas fa-shield-alt" style="color: #7c2d12; font-size: 1.8rem"></i>
+            <h2 class="amzpa_card_title">常见踩坑与落地清单：让页面内容直接可用于企业内部教案</h2>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div class="p-5 bg-rose-50 rounded-xl border border-rose-200">
+                <h3 class="font-bold text-rose-800 mb-3 flex items-center gap-2">
+                    <i class="fas fa-triangle-exclamation text-rose-500"></i>最常见的 8 个踩坑点
+                </h3>
+                <ul class="amzpa_list amzpa_list-danger">
+                    <li>把促销当成救命药，差链接也硬做活动。</li>
+                    <li>只看销量，不看折后净利和活动费。</li>
+                    <li>库存还没真正可售，就先开大预算和大促销。</li>
+                    <li>活动前临时改 Listing，大促当天才发现转化掉了。</li>
+                    <li>所有站点一刀切同样折扣，忽略国家差异和利润差异。</li>
+                    <li>广告和促销脱节，折扣给了，但流量没有被有效放大。</li>
+                    <li>活动当天只会加预算，不会收缩低效流量。</li>
+                    <li>活动结束马上关广告，白白浪费刚刚形成的排名红利。</li>
+                </ul>
+            </div>
+            <div class="p-5 bg-emerald-50 rounded-xl border border-emerald-200">
+                <h3 class="font-bold text-emerald-800 mb-3 flex items-center gap-2">
+                    <i class="fas fa-list-check text-emerald-500"></i>可直接纳入企业 SOP 的执行清单
+                </h3>
+                <ul class="amzpa_list amzpa_list-success">
+                    <li>活动前 90 / 60 / 30 / 14 / 7 天分别有明确负责人和检查项。</li>
+                    <li>每个主推 ASIN 必须有利润底线表、库存表、广告计划表。</li>
+                    <li>每次活动都固定做“目标—执行—结果—原因—下次动作”五段复盘。</li>
+                    <li>所有费用统一汇总到活动 P&amp;L，不允许只看后台销售额。</li>
+                    <li>站点差异、节日差异、活动差异沉淀为下一次提报模板。</li>
+                    <li>所有促销规则、提报资格、最终费用均以后台实时展示为准。</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="amzpa_callout mt-5">
+            <strong>结论：</strong>
+            欧洲站促销真正拼的不是“谁更敢打折”，而是谁能把 <strong>选品、库存、价格、广告、履约、复盘</strong> 六件事串成一个闭环。
+            对运营来说，最强优势不是资源多，而是决策快、链路短。只要你每次活动都围绕 1-3 个主推 ASIN 做深做透，
+            促销活动就不只是短期 GMV 工具，而会变成稳定推高类目位置和现金流效率的增长杠杆。
         </div>
     </section>
 </div>
