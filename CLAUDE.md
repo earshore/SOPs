@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-AihangSOP is an Amazon operations management platform built with a modern, event-driven architecture. The codebase emphasizes type safety, dependency injection, and systematic architectural debt elimination.
+SOPs is an Amazon operations management platform built with a modern, event-driven architecture. The codebase emphasizes type safety, dependency injection, and systematic architectural debt elimination.
 
 ## Core Architecture
 

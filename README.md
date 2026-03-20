@@ -1,4 +1,4 @@
-# AihangSOP - 亚马逊运营管理平台
+# SOPs - 亚马逊运营管理平台
 
 > Amazing Amazon Architect - 专业的亚马逊运营管理解决方案
 
@@ -92,7 +92,7 @@ npm run css:migrate
 ## 📦 项目结构
 
 ```
-AihangSOP/
+SOPs/
 ├── src/
 │   ├── common/              # 公共模块
 │   │   ├── config/          # 配置文件
