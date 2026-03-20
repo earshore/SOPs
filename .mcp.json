@@ -2,30 +2,34 @@
   "mcpServers": {
     "brave-search": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-brave-search"
+      ],
       "env": {
         "BRAVE_API_KEY": "YOUR_BRAVE_API_KEY_HERE"
       },
-      "disabled": true,
+      "disabled": false,
       "description": "实时网络搜索 - 搜索最新的前端技术文档、设计趋势、库更新。需要 Brave Search API Key (https://brave.com/search/api/)"
     },
     "github": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
       "env": {
         "GITHUB_PERSONAL_ACCESS_TOKEN": "YOUR_GITHUB_TOKEN_HERE"
       },
-      "disabled": true,
+      "disabled": false,
       "description": "GitHub 集成 - 搜索开源组件、查看 issues、PR 管理。需要 GitHub Personal Access Token"
-    },
-    "fetch": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-fetch"],
-      "description": "HTTP 请求工具 - 获取 API 文档、CDN 资源、设计系统规范"
     },
     "memory": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
       "description": "知识库管理 - 存储项目设计决策、组件使用规范、常用代码片段"
     },
     "filesystem": {
