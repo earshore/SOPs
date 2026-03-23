@@ -1,2 +1,5 @@
-/downloads/*  200
+/assets/*  /assets/:splat  200
+/downloads/*  /downloads/:splat  200
+/logo.svg  /logo.svg  200
+/v1/*  /v1/:splat  200
 /*  /index.html  200
