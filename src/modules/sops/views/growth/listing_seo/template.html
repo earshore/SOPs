@@ -539,6 +539,139 @@
             </div>
         </div>
     </div>
+    <!-- Keyword Index Check -->
+    <div class="bg-gradient-to-br from-emerald-50 via-white to-blue-50 rounded-2xl border border-emerald-200 p-6 mb-6 shadow-sm">
+        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-5">
+            <div>
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold border border-emerald-200 mb-3">
+                    <i class="fas fa-binoculars"></i>关键词是否被正确收录
+                </div>
+                <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fas fa-magnifying-glass text-emerald-500"></i>先查收录，再看排名，最后看转化
+                </h2>
+                <p class="text-sm text-slate-600 mt-2">参考行业实操经验提炼：判断一个词有没有被亚马逊正确收录，核心不是“感觉有埋词”，而是要把“已收录”和“有自然位次”分开验证。</p>
+            </div>
+            <div class="bg-slate-900 rounded-xl px-4 py-3 text-xs text-white max-w-xl">
+                <div class="font-bold mb-1 text-emerald-300">快速判断公式</div>
+                <div class="grid sm:grid-cols-3 gap-2 text-center">
+                    <div class="bg-white/10 rounded-lg px-3 py-2">收录<br /><span class="text-slate-300">搜 <span class="font-mono">ASIN + 关键词</span></span></div>
+                    <div class="bg-white/10 rounded-lg px-3 py-2">排名<br /><span class="text-slate-300">搜纯关键词看位次</span></div>
+                    <div class="bg-white/10 rounded-lg px-3 py-2">转化<br /><span class="text-slate-300">看点击后是否成交</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-[1.2fr_0.8fr] gap-6">
+            <div class="space-y-4">
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="bg-white rounded-xl border border-emerald-200 p-4">
+                        <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2 text-sm">
+                            <i class="fas fa-list-check text-emerald-500"></i>标准检查流程
+                        </h3>
+                        <div class="space-y-3 text-xs text-slate-600">
+                            <div class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold flex-shrink-0">1</span>
+                                <div><strong class="text-slate-800">修改后先等待同步：</strong>新埋词或新文案上线后，建议预留 <span class="text-emerald-700 font-bold">24-72 小时</span> 再做收录判断。</div>
+                            </div>
+                            <div class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold flex-shrink-0">2</span>
+                                <div><strong class="text-slate-800">按词逐个测试：</strong>优先测主词、核心长尾词，不要一上来测试过长组合词，避免误判。</div>
+                            </div>
+                            <div class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold flex-shrink-0">3</span>
+                                <div><strong class="text-slate-800">前台搜 <span class="font-mono text-emerald-700">ASIN + 空格 + 关键词</span>：</strong>能搜到该 ASIN，说明这个词大概率已被系统收录。</div>
+                            </div>
+                            <div class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold flex-shrink-0">4</span>
+                                <div><strong class="text-slate-800">再搜纯关键词：</strong>看 ASIN 是否有自然位置。<span class="text-amber-600 font-semibold">有收录但没排名</span>，通常是权重不够，不等于没收录。</div>
+                            </div>
+                            <div class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold flex-shrink-0">OR</span>
+                            <div><strong class="text-slate-800">看ASIN权威链接：</strong>在listing页面按<span class="text-amber-600 font-semibold"> CTRL+U </span>打开网页代码页，按<span class="text-amber-600 font-semibold"> CTRL+F </span>打开搜索框，<span class="text-amber-600 font-semibold">搜索canonical</span>（后面的链接就是产品的权威链接），在权威来链接里可以看亚马逊是否有收录自己的关键词。</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl border border-blue-200 p-4">
+                        <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2 text-sm">
+                            <i class="fas fa-lightbulb text-blue-500"></i>实操判断口径
+                        </h3>
+                        <div class="space-y-3 text-xs">
+                            <div class="p-3 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-800">
+                                <div class="font-bold mb-1">✅ 已被收录</div>
+                                <div>搜索 <span class="font-mono">ASIN + 关键词</span> 能检索到当前产品。</div>
+                            </div>
+                            <div class="p-3 rounded-lg bg-blue-50 border border-blue-100 text-blue-800">
+                                <div class="font-bold mb-1">📍 有自然排名</div>
+                                <div>单搜关键词时，ASIN 在自然结果里有位置，说明该词不仅收录，还开始拿到曝光。</div>
+                            </div>
+                            <div class="p-3 rounded-lg bg-amber-50 border border-amber-100 text-amber-800">
+                                <div class="font-bold mb-1">⚠️ 常见误判</div>
+                                <div>“纯关键词搜不到”不一定是没收录，也可能只是该词竞争大、相关性弱、历史销量权重不足。</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 rounded-2xl p-4 text-white">
+                    <div class="flex items-center gap-2 mb-3 text-sm font-bold">
+                        <i class="fas fa-crosshairs text-emerald-300"></i>运营执行口诀
+                    </div>
+                    <div class="grid md:grid-cols-3 gap-3 text-xs text-center">
+                        <div class="rounded-xl bg-emerald-500/15 border border-emerald-400/20 p-3">先证明确实被收录<br /><span class="text-slate-300">不要只看文案里有没有写</span></div>
+                        <div class="rounded-xl bg-blue-500/15 border border-blue-400/20 p-3">再判断有没有自然位次<br /><span class="text-slate-300">收录 ≠ 排名</span></div>
+                        <div class="rounded-xl bg-amber-500/15 border border-amber-400/20 p-3">最后结合点击与转化<br /><span class="text-slate-300">排名 ≠ 出单</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div class="bg-white rounded-xl border border-slate-200 p-4">
+                    <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2 text-sm">
+                        <i class="fas fa-triangle-exclamation text-amber-500"></i>搜不到时优先排查
+                    </h3>
+                    <ul class="space-y-2 text-xs text-slate-600 list-disc pl-4">
+                        <li>关键词是否只埋在低权重位置，标题/前 3 点完全没覆盖。</li>
+                        <li>Search Terms 是否被重复词、无关词、品牌词占满，浪费了可收录空间。</li>
+                        <li>词本身是否类目相关性不足，或者表达不符合当地买家真实搜索习惯。</li>
+                        <li>刚改完文案就立刻测试，系统索引尚未刷新。</li>
+                        <li>父子体 / 站点 / 类目切换错误，导致检查口径不一致。</li>
+                    </ul>
+                </div>
+                <div class="bg-amber-50 rounded-xl border border-amber-200 p-4">
+                    <h3 class="font-bold text-amber-900 mb-3 flex items-center gap-2 text-sm">
+                        <i class="fas fa-stopwatch text-amber-500"></i>建议检查节奏
+                    </h3>
+                    <div class="space-y-2 text-xs text-amber-900">
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-circle text-[8px] mt-1.5 text-amber-500"></i>
+                            <span>上新 / 大改文案后，第 2 天先做第一轮收录检查。</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-circle text-[8px] mt-1.5 text-amber-500"></i>
+                            <span>主词先查，随后补查场景词、功能词、长尾词。</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-circle text-[8px] mt-1.5 text-amber-500"></i>
+                            <span>若已收录但没位次，优先从 CTR、转化率、评论质量与价格竞争力补权重。</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-blue-50 rounded-xl border border-blue-200 p-4 text-xs text-blue-900">
+                    <strong class="block mb-1">检查结论写法建议：</strong>
+                    <span>把结果拆成“<span class="font-bold">是否收录</span> / <span class="font-bold">自然排名区间</span> / <span class="font-bold">下一步动作</span>”三列记录，团队复盘时最清晰。</span>
+                </div>
+                <div class="bg-white rounded-xl border border-slate-200 p-4">
+                    <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2 text-sm">
+                        <i class="fa-solid fa-headset text-amber-500"></i>排查后无法解决？
+                        
+                    </h3>
+                    <ul class="space-y-2 text-xs text-slate-600 list-disc pl-4">
+                        <li>开Case联系客服调查，大概率可以解决。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Video Resource -->
     <div class="bg-blue-50 rounded-xl border border-blue-200 p-4">
         <div class="flex items-center gap-3">
