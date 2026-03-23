@@ -247,16 +247,17 @@ export default defineConfig({
     // 路径别名 (与 tsconfig.json 保持一致)
     resolve: {
         alias: {
-            '@': resolve(projectRoot, 'src'),
+            '@router/navigo': resolve(projectRoot, 'src/common/router/navigo'),
+            '@router/legacy': resolve(projectRoot, 'src/common/router/legacy'),
+            '@router': resolve(projectRoot, 'src/common/router'),
             '@common': resolve(projectRoot, 'src/common'),
             '@services': resolve(projectRoot, 'src/services'),
             '@modules': resolve(projectRoot, 'src/modules'),
             '@components': resolve(projectRoot, 'src/components'),
             '@types': resolve(projectRoot, 'src/types'),
-            '@router': resolve(projectRoot, 'src/common/router'),
-            '@router/navigo': resolve(projectRoot, 'src/common/router/navigo'),
-            '@router/legacy': resolve(projectRoot, 'src/common/router/legacy')
+            '@': resolve(projectRoot, 'src')
         },
+
         // 支持 .ts 和 .js 文件扩展名解析
         extensions: ['.ts', '.js', '.json']
     },
