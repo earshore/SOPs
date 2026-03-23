@@ -239,17 +239,17 @@ export default defineConfig({
 
     // 路径别名 (与 tsconfig.json 保持一致)
     resolve: {
-        alias: {
-            '@router/navigo': resolve(__dirname, 'src/common/router/navigo'),
-            '@router/legacy': resolve(__dirname, 'src/common/router/legacy'),
-            '@router': resolve(__dirname, 'src/common/router'),
-            '@common': resolve(__dirname, 'src/common'),
-            '@services': resolve(__dirname, 'src/services'),
-            '@modules': resolve(__dirname, 'src/modules'),
-            '@components': resolve(__dirname, 'src/components'),
-            '@types': resolve(__dirname, 'src/types'),
-            '@': resolve(__dirname, 'src')
-        },
+        alias: [
+            { find: /^@router\/navigo\//, replacement: `${resolve(__dirname, 'src/common/router/navigo')}/` },
+            { find: /^@router\/legacy\//, replacement: `${resolve(__dirname, 'src/common/router/legacy')}/` },
+            { find: /^@router\//, replacement: `${resolve(__dirname, 'src/common/router')}/` },
+            { find: /^@common\//, replacement: `${resolve(__dirname, 'src/common')}/` },
+            { find: /^@services\//, replacement: `${resolve(__dirname, 'src/services')}/` },
+            { find: /^@modules\//, replacement: `${resolve(__dirname, 'src/modules')}/` },
+            { find: /^@components\//, replacement: `${resolve(__dirname, 'src/components')}/` },
+            { find: /^@types\//, replacement: `${resolve(__dirname, 'src/types')}/` },
+            { find: /^@\//, replacement: `${resolve(__dirname, 'src')}/` }
+        ],
         // 支持 .ts 和 .js 文件扩展名解析
         extensions: ['.ts', '.js', '.json']
     },
