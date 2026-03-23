@@ -1,202 +1,88 @@
-name: Deploy to Production
+name: Cloudflare Pages Deploy
 
 on:
   push:
-    branches: [ main ]
-    tags:
-      - 'v*'
+    branches:
+      - b3-24
+  pull_request:
+    branches:
+      - b3-24
   workflow_dispatch:
-    inputs:
-      environment:
-        description: '部署环境'
-        required: true
-        type: choice
-        options:
-          - staging
-          - production
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudflare-pages-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: 20
+  BUILD_OUTPUT_DIR: dist
+  CLOUDFLARE_ACCOUNT_ID: f8557b8acef971d10dddfb3bde91592e
+  CLOUDFLARE_PROJECT_NAME: sops
 
 jobs:
-  # 预检查
-  pre-check:
-    name: 部署前检查
-    runs-on: windows-latest
-    
-    steps:
-      - name: Checkout 代码
-        uses: actions/checkout@v4
-      
-      - name: 设置 Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.x'
-          cache: 'npm'
-      
-      - name: 安装依赖
-        run: npm ci
-      
-      - name: 运行所有检查
-        run: |
-          npm run type-check
-          npm run lint
-          npm run test:coverage
-      
-      - name: 检查版本号
-        run: |
-          $version = (Get-Content package.json | ConvertFrom-Json).version
-          Write-Host "当前版本: $version"
-          echo "VERSION=$version" >> $env:GITHUB_ENV
+  deploy-preview:
+    name: 部署 Preview
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
 
-  # 构建
-  build:
-    name: 构建生产版本
-    runs-on: windows-latest
-    needs: pre-check
-    
     steps:
       - name: Checkout 代码
         uses: actions/checkout@v4
-      
+
       - name: 设置 Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-          cache: 'npm'
-      
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
       - name: 安装依赖
         run: npm ci
-      
-      - name: 构建生产版本
+
+      - name: 构建站点
         run: npm run build
-        env:
-          NODE_ENV: production
-      
-      - name: 压缩构建产物
-        run: |
-          Compress-Archive -Path dist/* -DestinationPath build-${{ github.sha }}.zip
-      
-      - name: 上传构建产物
-        uses: actions/upload-artifact@v4
-        with:
-          name: production-build
-          path: build-${{ github.sha }}.zip
-          retention-days: 90
 
-  # 部署到 Staging
-  deploy-staging:
-    name: 部署到 Staging
-    runs-on: windows-latest
-    needs: build
-    if: github.event.inputs.environment == 'staging' || github.ref == 'refs/heads/main'
-    environment:
-      name: staging
-      url: https://staging.example.com
-    
-    steps:
-      - name: 下载构建产物
-        uses: actions/download-artifact@v4
+      - name: 发布到 Cloudflare Pages Preview
+        uses: cloudflare/wrangler-action@v3
         with:
-          name: production-build
-      
-      - name: 解压构建产物
-        run: |
-          Expand-Archive -Path build-${{ github.sha }}.zip -DestinationPath dist
-      
-      - name: 部署到 Staging
-        run: |
-          Write-Host "部署到 Staging 环境..."
-          # 这里添加实际的部署命令
-          # 例如: rsync, scp, 或云服务 CLI
-      
-      - name: 健康检查
-        run: |
-          Write-Host "执行健康检查..."
-          # 添加健康检查逻辑
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ env.CLOUDFLARE_ACCOUNT_ID }}
+          command: >-
+            pages deploy ${{ env.BUILD_OUTPUT_DIR }}
+            --project-name=${{ env.CLOUDFLARE_PROJECT_NAME }}
+            --branch=${{ github.head_ref }}
 
-  # 部署到 Production
   deploy-production:
-    name: 部署到 Production
-    runs-on: windows-latest
-    needs: [build, deploy-staging]
-    if: github.event.inputs.environment == 'production' || startsWith(github.ref, 'refs/tags/v')
+    name: 部署 Production
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
     environment:
       name: production
-      url: https://example.com
-    
-    steps:
-      - name: 下载构建产物
-        uses: actions/download-artifact@v4
-        with:
-          name: production-build
-      
-      - name: 解压构建产物
-        run: |
-          Expand-Archive -Path build-${{ github.sha }}.zip -DestinationPath dist
-      
-      - name: 备份当前版本
-        run: |
-          Write-Host "备份当前生产版本..."
-          # 添加备份逻辑
-      
-      - name: 部署到 Production
-        run: |
-          Write-Host "部署到 Production 环境..."
-          # 这里添加实际的部署命令
-      
-      - name: 健康检查
-        run: |
-          Write-Host "执行健康检查..."
-          # 添加健康检查逻辑
-      
-      - name: 烟雾测试
-        run: |
-          Write-Host "执行烟雾测试..."
-          # 添加烟雾测试逻辑
+      url: https://sops-3js.pages.dev
 
-  # 回滚
-  rollback:
-    name: 回滚部署
-    runs-on: windows-latest
-    needs: deploy-production
-    if: failure()
-    environment:
-      name: production
-    
     steps:
-      - name: 回滚到上一版本
-        run: |
-          Write-Host "检测到部署失败,开始回滚..."
-          # 添加回滚逻辑
-      
-      - name: 验证回滚
-        run: |
-          Write-Host "验证回滚是否成功..."
-          # 添加验证逻辑
-      
-      - name: 通知团队
-        run: |
-          Write-Host "发送回滚通知..."
-          # 添加通知逻辑
+      - name: Checkout 代码
+        uses: actions/checkout@v4
 
-  # 发布通知
-  notify:
-    name: 发布通知
-    runs-on: windows-latest
-    needs: deploy-production
-    if: success()
-    
-    steps:
-      - name: 创建 Release
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: 设置 Node.js
+        uses: actions/setup-node@v4
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          draft: false
-          prerelease: false
-      
-      - name: 发送成功通知
-        run: |
-          Write-Host "部署成功,发送通知..."
-          # 添加通知逻辑 (Slack, Email, etc.)
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 构建站点
+        run: npm run build
+
+      - name: 发布到 Cloudflare Pages Production
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ env.CLOUDFLARE_ACCOUNT_ID }}
+          command: >-
+            pages deploy ${{ env.BUILD_OUTPUT_DIR }}
+            --project-name=${{ env.CLOUDFLARE_PROJECT_NAME }}
