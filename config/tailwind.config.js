@@ -7,11 +7,25 @@
  * - 修改设计令牌请编辑 src/common/config/design-tokens.ts
  */
 
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
 import generatedConfig from './tailwind.config.generated.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const projectRoot = resolve(__dirname, '..').replace(/\\/g, '/');
+
+const content = [
+  `${projectRoot}/index.html`,
+  `${projectRoot}/src/**/*.{js,ts,jsx,tsx,html}`,
+  `${projectRoot}/src/components/**/*.html`,
+  `${projectRoot}/src/modules/**/*.html`
+];
 
 /** @type {import('tailwindcss').Config} */
 export default {
   ...generatedConfig,
+  content,
   theme: {
     ...generatedConfig.theme,
     extend: {
@@ -47,3 +61,4 @@ export default {
   plugins: [],
   safelist: []
 };
+
