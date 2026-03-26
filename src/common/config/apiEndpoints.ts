@@ -82,6 +82,12 @@ export const API_ENDPOINTS: Record<string, ApiEndpointConfig> = {
     requiresProxy: false,
     displayName: 'LLM Gateway'
   },
+    // cb2api网关
+  cb2api: {
+    domain: 'cb2api.hongecb.store',
+    requiresProxy: false,
+    displayName: 'CB'
+  },
   // 自定义 AI 网关（智能路由）
   customAiGateway: {
     domain: 'ai-gateway.hongecb.store',

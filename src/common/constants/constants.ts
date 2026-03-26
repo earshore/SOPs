@@ -63,6 +63,15 @@ export interface ProviderConfig {
 
 /** LLM提供商映射 */
 export const PROVIDERS: Record<string, ProviderConfig> = {
+    cb2api: {
+    name: "CB",
+    endpoint: "https://cb2api.hongecb.store",
+    models: [
+      { id: "gpt-5.4", context: 400000, features: ["function"] },
+      { id: "gemini-3.0-pro", context: 400000, features: ["function"] },
+      { id: "gemini-3.0-flash", context: 128000, features: ["function"] }
+    ],
+  },
   llmgateway: {
     name: "AI-Gateway",
     endpoint: "https://ai-gateway.hongecb.store",
