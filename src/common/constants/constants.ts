@@ -65,7 +65,8 @@ export interface ProviderConfig {
 export const PROVIDERS: Record<string, ProviderConfig> = {
     cb2api: {
     name: "CB",
-    endpoint: "https://cb2api.hongecb.store",
+    endpoint: "https://cb2api.hongecb.store/v1",
+
     models: [
       { id: "gpt-5.4", context: 400000, features: ["function"] },
       { id: "gemini-3.0-pro", context: 400000, features: ["function"] },
@@ -74,7 +75,7 @@ export const PROVIDERS: Record<string, ProviderConfig> = {
   },
   llmgateway: {
     name: "AI-Gateway",
-    endpoint: "https://ai-gateway.hongecb.store",
+    endpoint: "https://ai-gateway.hongecb.store/v1",
     models: [
       { id: "gpt-5-mini", context: 16385, features: ["function"] },
       { id: "glm-4.5-air", context: 128000, features: ["function"] },

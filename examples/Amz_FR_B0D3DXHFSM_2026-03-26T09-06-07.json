@@ -1,0 +1,95 @@
+{
+  "metadata": {
+    "domain": "www.amazon.fr",
+    "language": "French",
+    "marketplace": "FR",
+    "scrape_timestamp": "2026-03-26T09:06:07.996Z",
+    "total_asins": 1
+  },
+  "products": [
+    {
+      "asin": "B0D3DXHFSM",
+      "customer_reviews": [
+        {
+          "body": "Vraiment nul c’est comme si le produit etait que de l’eau ne protège rien du tout à fuir absolument",
+          "headline": "Pas top du tout",
+          "origin_country": "France",
+          "review_date": "Avis laissé en France le 11 mars 2026",
+          "star_rating": 1
+        },
+        {
+          "body": "Excellent produit",
+          "headline": "Excellent produit",
+          "origin_country": "France",
+          "review_date": "Avis laissé en France le 1 septembre 2025",
+          "star_rating": 5
+        },
+        {
+          "body": "Produit nul = arnaque !",
+          "headline": "dommage",
+          "origin_country": "France",
+          "review_date": "Avis laissé en France le 27 janvier 2026",
+          "star_rating": 1
+        },
+        {
+          "body": "Produit efficace",
+          "headline": "Le prix accessible comparé à d autre magasin",
+          "origin_country": "France",
+          "review_date": "Avis laissé en France le 3 octobre 2025",
+          "star_rating": 5
+        },
+        {
+          "body": "Légère brillance mais sinon inefficace sur les rayures légères",
+          "headline": "Je ne recommande pas",
+          "origin_country": "France",
+          "review_date": "Avis laissé en France le 2 octobre 2025",
+          "star_rating": 2
+        },
+        {
+          "body": "Les bouteilles sont très petites",
+          "headline": "Je n ai pas encore testé le produit",
+          "origin_country": "France",
+          "review_date": "Avis laissé en France le 21 janvier 2026",
+          "star_rating": 4
+        },
+        {
+          "body": "C’est vraiment de la mauvaise qualité.",
+          "headline": "Je ne recommande vraiment pas.",
+          "origin_country": "France",
+          "review_date": "Avis laissé en France le 27 décembre 2025",
+          "star_rating": 1
+        },
+        {
+          "body": "Fait le job",
+          "headline": "Protection peinture auto",
+          "origin_country": "France",
+          "review_date": "Avis laissé en France le 24 mai 2025",
+          "star_rating": 3
+        },
+        {
+          "body": "Pessimo prodotto......acqua colorata non lucida nulla.......",
+          "headline": "Pessimo prodotto",
+          "origin_country": "Italie",
+          "review_date": "Avis laissé en Italie le 25 mars 2025",
+          "star_rating": 1
+        },
+        {
+          "body": "Det ger inte bättre avrinning!Det lagar inte repor!Då det inte fungerar så är väl det enda att det är samma dåliga resultat under lång tid.Lägg pengarna på nåt annat!",
+          "headline": "Fungerar inte enligt anvisning, avråder från köp",
+          "origin_country": "Suède",
+          "review_date": "Avis laissé en Suède le 15 août 2024",
+          "star_rating": 1
+        }
+      ],
+      "feature_bullets": [
+        "PROTECTION EFFICACE : Le spray de scellant 3-en-1 AMISHO offre une protection complète pour la peinture de votre voiture, répare les rayures, redonne de l'éclat et protège contre la pollution, afin que votre véhicule reste comme neuf.",
+        "RÉPARATION EN PROFONDEUR : La formule professionnelle élimine rapidement la saleté et l'oxydation, répare les décolorations et le vieillissement dus aux rayons UV, forme une protection durable et redonne à la peinture de votre voiture l'éclat d'un diamant.",
+        "FACILE À UTILISER : Il suffit de pulvériser, essuyer doucement et restaurer rapidement l'éclat de la surface du véhicule, pour éliminer facilement la saleté et les taches tenaces et éviter les tracas des lavages fréquents.",
+        "APPLICATION POLYVALENTE : Convient à différentes surfaces de véhicules telles que les voitures, les scooters électriques, les bateaux, les motos, etc., offrant une protection longue durée et donnant à votre véhicule une nouvelle apparence.",
+        "GARANTIE DE HAUTE QUALITÉ : Durable et spécialement conçu pour les véhicules et autres surfaces solides nécessitant un excellent éclat et une protection, il forme une couche protectrice sur la surface de peinture de la voiture pour éviter d'autres rayures, frottements et décolorations."
+      ],
+      "productTitle": "High Protection 3 en 1 Voiture, Protection Voiture Crystal Coating Spray, Revêtement en Céramique De Voiture, Auto Coating Spray pour La Protection De La Voiture (Pack de 3 (Plus Populaire))",
+      "scrape_status": "success"
+    }
+  ]
+}
