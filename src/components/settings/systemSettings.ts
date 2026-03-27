@@ -76,9 +76,9 @@ const SettingsPanel = (): SettingsPanelData => ({
 
     // LLM Config State
     llm: {
-        provider: 'cb2api',
-        endpoint: 'https://cb2api.hongecb.store/v1',
-        apiKey: 'admin123',
+        provider: 'llmgateway',
+        endpoint: 'https://ai-gateway.hongecb.store/v1',
+        apiKey: 'null',
         model: '',
         models: [],
         showKey: false,
