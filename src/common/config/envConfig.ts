@@ -82,21 +82,17 @@ export const EnvConfig = {
     normalizeEndpoint(endpoint: string): string {
       // 如果用户配置了完整的 URL (http/https 开头)
       if (endpoint && (endpoint.startsWith('http://') || endpoint.startsWith('https://'))) {
-        let normalizedUrl = endpoint.trim();
-        // 移除末尾的 /v1 (如果存在),避免重复
-        if (normalizedUrl.endsWith('/v1')) {
-          normalizedUrl = normalizedUrl.slice(0, -3);
-        }
-        
-        // 开发环境：使用代理路径（Vite会转发到真实地址）
+        const normalizedUrl = endpoint.trim().replace(/\/+$/, '');
+
+        // 开发环境：使用代理路径（Vite 会转发到真实地址）
         if (EnvConfig.isDevelopment) {
           return this.baseUrl; // 返回 /v1，由 Vite 代理转发
         }
-        
-        // 生产环境：直接使用完整URL
+
+        // 生产环境：保留用户配置的完整路径（如 /v1）
         return normalizedUrl;
       }
-      
+
       // 如果是相对路径或空，使用配置的基础路径
       return this.baseUrl;
     }
