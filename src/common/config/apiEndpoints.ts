@@ -28,24 +28,6 @@ export const API_ENDPOINTS: Record<string, ApiEndpointConfig> = {
     displayName: 'OpenAI',
     isDangerous: true
   },
-  anthropic: {
-    domain: 'api.anthropic.com',
-    requiresProxy: true,
-    displayName: 'Anthropic',
-    isDangerous: true
-  },
-  deepseek: {
-    domain: 'api.deepseek.com',
-    requiresProxy: true,
-    displayName: 'DeepSeek',
-    isDangerous: true
-  },
-  google: {
-    domain: 'generativelanguage.googleapis.com',
-    requiresProxy: true,
-    displayName: 'Google AI',
-    isDangerous: true
-  },
   allorigins: {
     domain: 'api.allorigins.win',
     requiresProxy: false,
@@ -88,19 +70,26 @@ export const API_ENDPOINTS: Record<string, ApiEndpointConfig> = {
     requiresProxy: false,
     displayName: 'CB'
   },
+      // dooo_cn网关
+  dooo_cn: {
+    domain: 'ai.ijunze.cn',
+    requiresProxy: false,
+    displayName: 'Dooong AI(CN)'
+  },
+        // dooo网关
+  dooo: {
+    domain: 'ai.dooo.ng',
+    requiresProxy: false,
+    displayName: 'Dooong AI'
+  },
   // 自定义 AI 网关（智能路由）
-  customAiGateway: {
+  ai_gateway: {
     domain: 'ai-gateway.hongecb.store',
     requiresProxy: false,
-    displayName: 'Custom AI Gateway',
+    displayName: 'AI Gateway',
     isDangerous: false
   },
-  // 腾讯混元
-  hunyuan: {
-    domain: 'api.hunyuan.cloud.tencent.com',
-    requiresProxy: false,
-    displayName: 'Tencent Hunyuan'
-  }
+
 };
 
 /**
