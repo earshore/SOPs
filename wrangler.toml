@@ -1,3 +1,18 @@
-name = "sops"
+name = "sops-c"
 pages_build_output_dir = "dist"
 compatibility_date = "2024-01-01"
+
+# ============================================================
+# 部署前请在 Cloudflare Pages 控制台 → Settings → Environment Variables
+# 添加以下生产环境变量（值与 .env 一致）：
+#
+#   AUTH_PASSWORD              = AI2027
+#   GATEWAY_LLMGATEWAY_BASE_URL = https://ai-gateway.hongecb.store/v1
+#   GATEWAY_LLMGATEWAY_API_KEY  = AI2026
+#   GATEWAY_CB2API_BASE_URL     = https://ai.hongecb.store/v1
+#   GATEWAY_CB2API_API_KEY      = admin123
+#   GATEWAY_DOOO_CN_BASE_URL    = https://ai.ijunze.cn/v1
+#   GATEWAY_DOOO_CN_API_KEY     = <your-key>
+#   GATEWAY_DOOO_BASE_URL       = https://ai.dooo.ng/v1
+#   GATEWAY_DOOO_API_KEY        = <your-key>
+# ============================================================

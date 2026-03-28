@@ -78,7 +78,7 @@ const SettingsPanel = (): SettingsPanelData => ({
     llm: {
         provider: 'llmgateway',
         endpoint: 'https://ai-gateway.hongecb.store/v1',
-        apiKey: 'null',
+        apiKey: '',
         model: '',
         models: [],
         showKey: false,
@@ -248,7 +248,7 @@ const SettingsPanel = (): SettingsPanelData => ({
 
     async fetchModels(): Promise<void> {
         if (!this.llm.apiKey) {
-            showToast('请先输入API Key', { type: 'warning' });
+            showToast('请先输入访问密码 (AUTH_PASSWORD)', { type: 'warning' });
             return;
         }
 
@@ -269,17 +269,10 @@ const SettingsPanel = (): SettingsPanelData => ({
             let models: Array<string | { id: string; name?: string }> = [];
             const provider = this.llm.provider;
 
-            if (['llmgateway', 'openai', 'deepseek', 'moonshot', 'qwen'].includes(provider)) {
-                Logger.debug(`🔄 正在从 ${provider} 获取模型列表...`);
-                models = await fetchModelsFromApi(provider, this.llm.endpoint, this.llm.apiKey);
-                Logger.debug(`📋 从API获取到 ${models.length} 个模型:`, models.slice(0, 5));
-            } else {
-                // Mock delay for static providers
-                const providerConfig = PROVIDERS[provider];
-                models = providerConfig?.models || [];
-                Logger.debug(`📋 使用静态模型列表 (${provider}):`, models);
-                await new Promise(r => setTimeout(r, 600));
-            }
+            // 所有网关均为 OpenAI 兼容接口，统一走 API 拉取
+            Logger.debug(`🔄 正在从 ${provider} 获取模型列表...`);
+            models = await fetchModelsFromApi(provider, this.llm.endpoint, this.llm.apiKey);
+            Logger.debug(`📋 从API获取到 ${models.length} 个模型:`, models.slice(0, 5));
 
             if (models.length === 0) {
                 Logger.warn('⚠️ 模型列表为空，可能是API配置错误或网络问题');
@@ -385,8 +378,8 @@ const SettingsPanel = (): SettingsPanelData => ({
     },
 
     async saveProviderConfig(): Promise<void> {
-        if (!this.llm.apiKey && this.llm.provider !== 'custom') {
-            showToast('请填写 API Key', { type: 'warning' });
+        if (!this.llm.apiKey) {
+            showToast('请填写访问密码 (AUTH_PASSWORD)', { type: 'warning' });
             return;
         }
 
@@ -410,7 +403,7 @@ const SettingsPanel = (): SettingsPanelData => ({
             // Update global status UI
             updateModelStatus();
 
-            showToast('LLM 配置已保存 (API Key 已加密)', { type: 'success' });
+            showToast('LLM 配置已保存', { type: 'success' });
             setTimeout(() => this.close(), 500);
         } catch (error) {
             ErrorService.handle(error as Error, { action: 'saveProviderConfig', module: 'settings' });

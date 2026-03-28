@@ -79,25 +79,9 @@ export const EnvConfig = {
      * @param endpoint - 用户配置的 endpoint
      * @returns 标准化后的 endpoint
      */
-    normalizeEndpoint(endpoint: string): string {
-      // 如果用户配置了完整的 URL (http/https 开头)
-      if (endpoint && (endpoint.startsWith('http://') || endpoint.startsWith('https://'))) {
-        let normalizedUrl = endpoint.trim();
-        // 移除末尾的 /v1 (如果存在),避免重复
-        if (normalizedUrl.endsWith('/v1')) {
-          normalizedUrl = normalizedUrl.slice(0, -3);
-        }
-        
-        // 开发环境：使用代理路径（Vite会转发到真实地址）
-        if (EnvConfig.isDevelopment) {
-          return this.baseUrl; // 返回 /v1，由 Vite 代理转发
-        }
-        
-        // 生产环境：直接使用完整URL
-        return normalizedUrl;
-      }
-      
-      // 如果是相对路径或空，使用配置的基础路径
+    normalizeEndpoint(_endpoint: string): string {
+      // 始终使用相对路径 /v1，由 Vite 代理（开发）或 Cloudflare Functions（生产）处理
+      // 不允许前端直接请求外部 API，避免 CORS 问题和 API Key 泄露
       return this.baseUrl;
     }
   },

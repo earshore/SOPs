@@ -1,14 +1,42 @@
 // functions/v1/models.js
-// 获取模型列表的代理端点
+// 多网关路由分发 - 根据 X-Gateway-Provider 请求头自动选择 baseURL 和 apiKey
+
+/**
+ * 根据 provider 标识解析网关配置
+ * @param {string} provider
+ * @param {object} env
+ * @returns {{ baseUrl: string, apiKey: string } | null}
+ */
+function resolveGateway(provider, env) {
+  const map = {
+    llmgateway: {
+      baseUrl: env.GATEWAY_LLMGATEWAY_BASE_URL || "https://ai-gateway.hongecb.store/v1",
+      apiKey:  env.GATEWAY_LLMGATEWAY_API_KEY  || "",
+    },
+    cb2api: {
+      baseUrl: env.GATEWAY_CB2API_BASE_URL || "https://ai.hongecb.store/v1",
+      apiKey:  env.GATEWAY_CB2API_API_KEY  || "",
+    },
+    dooo_cn: {
+      baseUrl: env.GATEWAY_DOOO_CN_BASE_URL || "https://ai.ijunze.cn/v1",
+      apiKey:  env.GATEWAY_DOOO_CN_API_KEY  || "",
+    },
+    dooo: {
+      baseUrl: env.GATEWAY_DOOO_BASE_URL || "https://ai.dooo.ng/v1",
+      apiKey:  env.GATEWAY_DOOO_API_KEY  || "",
+    },
+  };
+  return map[provider] || null;
+}
 
 export async function onRequest(context) {
-  // 1. 处理预检请求 (CORS)
+  // CORS 预检
   if (context.request.method === "OPTIONS") {
     return new Response(null, {
       headers: {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Gateway-Provider",
       },
     });
   }
@@ -19,87 +47,71 @@ export async function onRequest(context) {
 
   try {
     // ============================================================
-    // 🔒 安全鉴权模块
+    // 🔒 统一鉴权 - 验证 AUTH_PASSWORD
     // ============================================================
-    
     const authHeader = context.request.headers.get("Authorization") || "";
-    const userProvidedPass = authHeader.replace("Bearer ", "").trim();
-    
-    // 获取真实的 API Keys
-    const envKeys = context.env.LLM_API_KEY || "";
-    const keyList = envKeys.split(',').map(k => k.trim()).filter(k => k);
+    const userProvidedPass = authHeader.replace(/^Bearer\s+/i, "").trim();
 
-    let REAL_API_KEY = "";
-
-    // 模式 A: 服务器托管 Key
-    if (keyList.length > 0) {
-       const correctPassword = context.env.AUTH_PASSWORD;
-       if (correctPassword && userProvidedPass !== correctPassword) {
-         return new Response(JSON.stringify({ 
-           error: { message: "⛔ 访问被拒绝：请输入正确的访问密码" } 
-         }), {
-           status: 401,
-           headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
-         });
-       }
-       REAL_API_KEY = keyList[0]; // 使用第一个 Key
-    } 
-    // 模式 B: 用户自带 Key
-    else {
-       if (!userProvidedPass) {
-         return new Response(JSON.stringify({ 
-           error: { message: "⛔ 未配置 API Key" } 
-         }), {
-           status: 401,
-           headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
-         });
-       }
-       REAL_API_KEY = userProvidedPass;
+    const correctPassword = context.env.AUTH_PASSWORD;
+    if (correctPassword && userProvidedPass !== correctPassword) {
+      return new Response(JSON.stringify({
+        error: { message: "⛔ 访问被拒绝：请输入正确的访问密码 (AUTH_PASSWORD)" }
+      }), {
+        status: 401,
+        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      });
     }
 
     // ============================================================
-    // 📡 转发请求
+    // 🚦 网关路由
     // ============================================================
+    const provider = (context.request.headers.get("X-Gateway-Provider") || "llmgateway").toLowerCase();
+    const gateway = resolveGateway(provider, context.env);
 
-    const UPSTREAM_API_URL = context.env.LLM_API_BASE_URL || "https://api.openai.com/v1";
-    
-    console.log(`🌐 [Functions/Models] 使用上游端点: ${UPSTREAM_API_URL}`);
+    if (!gateway) {
+      return new Response(JSON.stringify({
+        error: { message: `⛔ 未知网关标识: ${provider}，支持: llmgateway, cb2api, dooo_cn, dooo` }
+      }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      });
+    }
 
-    const response = await fetch(`${UPSTREAM_API_URL}/models`, {
+    console.log(`🌐 [models] provider=${provider} → ${gateway.baseUrl}`);
+
+    // ============================================================
+    // 📡 转发到上游网关 /models
+    // ============================================================
+    const response = await fetch(`${gateway.baseUrl}/models`, {
       method: "GET",
       headers: {
-        "Authorization": `Bearer ${REAL_API_KEY}`,
+        "Authorization": `Bearer ${gateway.apiKey}`,
       },
     });
 
-    // 错误处理
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`❌ [Functions/Models] 上游 API 错误 ${response.status}:`, errorText);
-      
-      // 特殊处理 403 地理限制错误
-      if (response.status === 403 && errorText.includes('Country, region, or territory not supported')) {
-        return new Response(JSON.stringify({ 
-          error: { 
-            message: "⛔ 地理位置限制：无法获取模型列表。请联系管理员配置不受限制的 API 端点。",
-            status: 403
-          } 
+      console.error(`❌ [models] 上游错误 ${response.status}:`, errorText);
+
+      if (response.status === 403 && errorText.includes("Country") && errorText.includes("not supported")) {
+        return new Response(JSON.stringify({
+          error: {
+            message: `⛔ 地理限制：网关 ${provider} 当前无法访问模型列表。请切换其他网关。`,
+            status: 403,
+          }
         }), {
           status: 403,
-          headers: { 
-            "Content-Type": "application/json", 
+          headers: {
+            "Content-Type": "application/json",
             "Access-Control-Allow-Origin": "*",
-            "X-Error-Type": "GEO_RESTRICTION"
-          }
+            "X-Error-Type": "GEO_RESTRICTION",
+          },
         });
       }
-      
+
       return new Response(errorText, {
         status: response.status,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
+        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
       });
     }
 
@@ -114,10 +126,8 @@ export async function onRequest(context) {
     });
 
   } catch (err) {
-    console.error(`❌ [Functions/Models] 服务器错误:`, err);
-    return new Response(JSON.stringify({ 
-      error: { message: `Server Error: ${err.message}` } 
-    }), {
+    console.error(`❌ [models] 服务器错误:`, err);
+    return new Response(JSON.stringify({ error: { message: `Server Error: ${err.message}` } }), {
       status: 500,
       headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
     });

@@ -76,30 +76,30 @@ export const API_ENDPOINTS: Record<string, ApiEndpointConfig> = {
     requiresProxy: false,
     displayName: 'Bright Data'
   },
-  // 企业网关
-  llmGateway: {
-    domain: 'llm-gateway.hongecb.store',
-    requiresProxy: false,
-    displayName: 'LLM Gateway'
-  },
-    // cb2api网关
-  cb2api: {
-    domain: 'cb2api.hongecb.store',
-    requiresProxy: false,
-    displayName: 'CB'
-  },
-  // 自定义 AI 网关（智能路由）
-  customAiGateway: {
+  // 自定义网关（通过 Cloudflare Functions 代理，不直连）
+  llmgateway: {
     domain: 'ai-gateway.hongecb.store',
     requiresProxy: false,
-    displayName: 'Custom AI Gateway',
+    displayName: 'AI-Gateway',
     isDangerous: false
   },
-  // 腾讯混元
-  hunyuan: {
-    domain: 'api.hunyuan.cloud.tencent.com',
+  cb2api: {
+    domain: 'ai.hongecb.store',
     requiresProxy: false,
-    displayName: 'Tencent Hunyuan'
+    displayName: 'CB Gateway',
+    isDangerous: false
+  },
+  dooo_cn: {
+    domain: 'ai.ijunze.cn',
+    requiresProxy: false,
+    displayName: 'Dooong AI(CN)',
+    isDangerous: false
+  },
+  dooo: {
+    domain: 'ai.dooo.ng',
+    requiresProxy: false,
+    displayName: 'Dooong AI',
+    isDangerous: false
   }
 };
 
