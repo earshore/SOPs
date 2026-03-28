@@ -17,10 +17,21 @@ compatibility_date = "2024-01-01"
 #   GATEWAY_DOOO_CN_API_KEY     = <your-key>
 #   GATEWAY_DOOO_BASE_URL       = https://ai.dooo.ng/v1
 #   GATEWAY_DOOO_API_KEY        = <your-key>
-#   GATEWAY_GPTGOD_BASE_URL     = https://api.gptgod.online/v1
-#   GATEWAY_GPTGOD_API_KEY      = <your-key>
+#   GATEWAY_GPTGOD_BASE_URL         = https://api.gptgod.online/v1
+#   GATEWAY_GPTGOD_API_KEY          = <your-key>
+#   GATEWAY_CHATANYWHERE_BASE_URL   = https://api.chatanywhere.tech/v1
+#   GATEWAY_CHATANYWHERE_API_KEY    = <your-key>
 # ============================================================
-# 手动部署
+# 环境变量一键同步（自动读取 .env，密钥加密、明文明文）
+#
+#   npm run deploy:env          # 同步到生产环境
+#   npm run deploy:env:dry      # 预览，不实际写入
+#   npm run deploy:env:preview  # 同步到预览环境
+#
+# 前提：本机已执行 `npx wrangler login`
+#       或设置环境变量 CLOUDFLARE_API_TOKEN=<your-token>
+# ============================================================
+# 手动构建部署
 #
 # npm run build
 # npx wrangler pages deploy dist --project-name sops --branch main --commit-dirty=true

@@ -112,6 +112,12 @@ export const API_ENDPOINTS: Record<string, ApiEndpointConfig> = {
     requiresProxy: false,
     displayName: 'GPTGod',
     isDangerous: false
+  },
+  chatanywhere: {
+    domain: 'api.chatanywhere.tech',
+    requiresProxy: false,
+    displayName: 'ChatAnywhere',
+    isDangerous: false
   }
 };
 

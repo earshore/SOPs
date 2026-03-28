@@ -2,8 +2,21 @@
 // 多网关路由分发 - 根据 X-Gateway-Provider 请求头自动选择 baseURL 和 apiKey
 
 /**
+ * 从逗号分隔的多个 API Key 中随机选取一个
+ * 支持单 key 和多 key（如 "sk-aaa,sk-bbb,sk-ccc"）
+ * @param {string} raw - 原始 key 字符串
+ * @returns {string}
+ */
+function pickApiKey(raw) {
+  if (!raw) return "";
+  const keys = raw.split(",").map(k => k.trim()).filter(Boolean);
+  if (keys.length <= 1) return keys[0] || "";
+  return keys[Math.floor(Math.random() * keys.length)];
+}
+
+/**
  * 根据 provider 标识解析网关配置
- * @param {string} provider - 网关标识 (llmgateway | cb2api | dooo_cn | dooo)
+ * @param {string} provider - 网关标识 (llmgateway | cb | cb_e | dooo_cn | dooo | gptgod | chatanywhere)
  * @param {object} env - Cloudflare 环境变量
  * @returns {{ baseUrl: string, apiKey: string } | null}
  */
@@ -11,27 +24,31 @@ function resolveGateway(provider, env) {
   const map = {
     llmgateway: {
       baseUrl: env.GATEWAY_LLMGATEWAY_BASE_URL || "https://ai-gateway.hongecb.store/v1",
-      apiKey:  env.GATEWAY_LLMGATEWAY_API_KEY  || "",
+      apiKey:  pickApiKey(env.GATEWAY_LLMGATEWAY_API_KEY),
     },
     cb: {
       baseUrl: env.GATEWAY_CB_BASE_URL || "https://cb.hongecb.store/v1",
-      apiKey:  env.GATEWAY_CB_API_KEY  || "",
+      apiKey:  pickApiKey(env.GATEWAY_CB_API_KEY),
     },
     cb_e: {
       baseUrl: env.GATEWAY_CB_E_BASE_URL || "https://cb-e.cflts.dpdns.org/v1",
-      apiKey:  env.GATEWAY_CB_E_API_KEY  || "",
+      apiKey:  pickApiKey(env.GATEWAY_CB_E_API_KEY),
     },
     dooo_cn: {
       baseUrl: env.GATEWAY_DOOO_CN_BASE_URL || "https://ai.ijunze.cn/v1",
-      apiKey:  env.GATEWAY_DOOO_CN_API_KEY  || "",
+      apiKey:  pickApiKey(env.GATEWAY_DOOO_CN_API_KEY),
     },
     dooo: {
       baseUrl: env.GATEWAY_DOOO_BASE_URL || "https://ai.dooo.ng/v1",
-      apiKey:  env.GATEWAY_DOOO_API_KEY  || "",
+      apiKey:  pickApiKey(env.GATEWAY_DOOO_API_KEY),
     },
     gptgod: {
       baseUrl: env.GATEWAY_GPTGOD_BASE_URL || "https://api.gptgod.online/v1",
-      apiKey:  env.GATEWAY_GPTGOD_API_KEY  || "",
+      apiKey:  pickApiKey(env.GATEWAY_GPTGOD_API_KEY),
+    },
+    chatanywhere: {
+      baseUrl: env.GATEWAY_CHATANYWHERE_BASE_URL || "https://api.chatanywhere.tech/v1",
+      apiKey:  pickApiKey(env.GATEWAY_CHATANYWHERE_API_KEY),
     },
   };
   return map[provider] || null;
@@ -78,7 +95,7 @@ export async function onRequest(context) {
 
     if (!gateway) {
       return new Response(JSON.stringify({
-        error: { message: `⛔ 未知网关标识: ${provider}，支持: llmgateway, cb, cb_e, dooo_cn, dooo` }
+        error: { message: `⛔ 未知网关标识: ${provider}，支持: llmgateway, cb, cb_e, dooo_cn, dooo, gptgod, chatanywhere` }
       }), {
         status: 400,
         headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
