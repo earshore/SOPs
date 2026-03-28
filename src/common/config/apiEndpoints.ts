@@ -106,6 +106,12 @@ export const API_ENDPOINTS: Record<string, ApiEndpointConfig> = {
     requiresProxy: false,
     displayName: 'Dooong AI',
     isDangerous: false
+  },
+  gptgod: {
+    domain: 'api.gptgod.online',
+    requiresProxy: false,
+    displayName: 'GPTGod',
+    isDangerous: false
   }
 };
 

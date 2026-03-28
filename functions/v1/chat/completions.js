@@ -29,6 +29,10 @@ function resolveGateway(provider, env) {
       baseUrl: env.GATEWAY_DOOO_BASE_URL || "https://ai.dooo.ng/v1",
       apiKey:  env.GATEWAY_DOOO_API_KEY  || "",
     },
+    gptgod: {
+      baseUrl: env.GATEWAY_GPTGOD_BASE_URL || "https://api.gptgod.online/v1",
+      apiKey:  env.GATEWAY_GPTGOD_API_KEY  || "",
+    },
   };
   return map[provider] || null;
 }

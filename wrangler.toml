@@ -17,4 +17,12 @@ compatibility_date = "2024-01-01"
 #   GATEWAY_DOOO_CN_API_KEY     = <your-key>
 #   GATEWAY_DOOO_BASE_URL       = https://ai.dooo.ng/v1
 #   GATEWAY_DOOO_API_KEY        = <your-key>
+#   GATEWAY_GPTGOD_BASE_URL     = https://api.gptgod.online/v1
+#   GATEWAY_GPTGOD_API_KEY      = <your-key>
+# ============================================================
+# 手动部署
+#
+# npm run build
+# npx wrangler pages deploy dist --project-name sops --branch main --commit-dirty=true
+#
 # ============================================================

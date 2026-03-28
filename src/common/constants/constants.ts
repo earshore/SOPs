@@ -160,6 +160,13 @@ export const PROVIDERS: Record<string, ProviderConfig> = {
       { id: "gpt-5-pro", context: 400000, features: ["function"] },
     ],
   },
+  gptgod: {
+    name: "GPTGod",
+    endpoint: "https://api.gptgod.online/v1",
+    models: [
+      { id: "gpt-5-mini", context: 16385, features: ["function"] },
+    ],
+  },
 };
 
 // ========================
