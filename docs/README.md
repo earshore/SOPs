@@ -58,13 +58,17 @@
 
 ```
 docs/
-├── api/                # API 详细文档（手动维护）
-├── archive/            # 历史文档归档（过期/阶段性，不作为开发依据）
-├── development/        # AI 开发辅助文档
-├── guides/             # （暂无有效文档）
-├── screenshots/        # 项目截图
-├── troubleshooting/    # （暂无有效文档，相关内容见 troubleshooting-guide.md）
-└── verification/       # （历史验收报告已归档至 archive/）
+├── api/                    # API 详细文档（手动维护）
+├── archive/                # 历史文档归档（过期/阶段性，不作为开发依据）
+│   ├── ai-analysis/        #   AI分析加速方案文档（已上线，4篇）
+│   ├── bug-fix-reports/    #   单次 Bug 修复记录（已修复，2篇）
+│   ├── verification/       #   阶段性验收报告（已完成，4篇）
+│   └── misc/               #   其他过期文档（4篇）
+├── development/            # AI 开发辅助文档
+├── guides/                 # （暂无有效文档）
+├── screenshots/            # 项目截图
+├── troubleshooting/        # （暂无有效文档，相关内容见 troubleshooting-guide.md）
+└── verification/           # （历史验收报告已归档至 archive/verification/）
 ```
 
 ---
