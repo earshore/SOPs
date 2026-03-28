@@ -4,53 +4,51 @@
 
 ---
 
-## 架构与设计
+## 功能使用指南 (`guides/`)
 
-- [CSS 架构快速开始](./CSS-ARCHITECTURE-README.md)
-- [CSS 架构完整指南](./css-architecture-guide.md)
-- [开发最佳实践](./best-practices.md)
+- [LLM 网关接入指南](./guides/llm-gateway-integration-guide.md) — 新增网关的完整步骤
+- [DNA 提取器使用指南](./guides/dna-extractor-guide.md)
+- [Promptlab 置信度用户指南](./guides/promptlab-confidence-user-guide.md)
 
-## LLM 网关
+### CSS 体系 (`guides/css/`)
+- [CSS 架构快速开始](./guides/css/CSS-ARCHITECTURE-README.md)
+- [CSS 架构完整指南](./guides/css/css-architecture-guide.md)
 
-- [网关接入指南](./llm-gateway-integration-guide.md) — 新增网关的完整步骤（4 文件 + 1 命令）
+### 命名验证器 (`guides/naming-validator/`)
+- [README](./guides/naming-validator/naming-validator-README.md) — 功能说明和命名规范
+- [使用指南](./guides/naming-validator/naming-validator-USAGE.md) — CLI 命令和配置
 
-## API 文档
+---
+
+## 开发规范 (`development/`)
+
+- [系统稳定性最佳实践](./development/best-practices.md)
+- [状态同步最佳实践](./development/state-sync-best-practices.md) — Alpine ↔ Zustand 同步规范
+- [Zustand 迁移指南](./development/zustand-migration-guide.md) — 旧 StateManager → Zustand 的迁移参考
+- [AI 辅助开发上下文](./development/CLAUDE.md) — 供 AI 工具使用的项目上下文
+
+---
+
+## 故障排查 (`troubleshooting/`)
+
+- [通用故障排查指南](./troubleshooting/troubleshooting-guide.md)
+- [置信度显示问题排查](./troubleshooting/confidence-troubleshooting.md)
+
+---
+
+## 测试配置 (`testing/`)
+
+- [视觉回归测试](./testing/visual-regression-testing.md)
+- [Playwright 并行执行](./testing/playwright-parallel-execution.md)
+- [Lighthouse CI 指南](./testing/lighthouse-ci-guide.md)
+
+---
+
+## API 文档 (`api/`)
 
 - [AlpineRegistry API](./api/AlpineRegistry.md)
 - [SafeModuleLoader API](./api/SafeModuleLoader.md)
 - [SafeRenderer API](./api/SafeRenderer.md)
-
-> `docs:api` / `docs:serve` 脚本已废弃，以上 API 文档为手动维护版本。
-
-## 功能指南
-
-- [DNA 提取器使用指南](./dna-extractor-guide.md)
-- [Promptlab 置信度用户指南](./promptlab-confidence-user-guide.md)
-- [置信度故障排查](./confidence-troubleshooting.md)
-
-## 状态管理
-
-- [Zustand 迁移指南](./zustand-migration-guide.md) — 旧 StateManager → Zustand 的迁移参考
-- [状态同步最佳实践](./state-sync-best-practices.md) — Alpine ↔ Zustand 同步规范
-
-## 命名验证器（tools/naming-validator）
-
-- [README](./naming-validator-README.md) — 功能说明和命名规范
-- [使用指南](./naming-validator-USAGE.md) — CLI 命令和配置
-
-## 测试与质量
-
-- [视觉回归测试](./visual-regression-testing.md)
-- [Playwright 并行执行](./playwright-parallel-execution.md)
-- [Lighthouse CI 指南](./lighthouse-ci-guide.md)
-
-## 故障排查
-
-- [通用故障排查指南](./troubleshooting-guide.md)
-
-## AI 开发指引
-
-- [development/CLAUDE.md](./development/CLAUDE.md) — AI 辅助开发的项目上下文（供 AI 工具使用）
 
 ---
 
@@ -58,17 +56,20 @@
 
 ```
 docs/
-├── api/                    # API 详细文档（手动维护）
-├── archive/                # 历史文档归档（过期/阶段性，不作为开发依据）
-│   ├── ai-analysis/        #   AI分析加速方案文档（已上线，4篇）
-│   ├── bug-fix-reports/    #   单次 Bug 修复记录（已修复，2篇）
-│   ├── verification/       #   阶段性验收报告（已完成，4篇）
-│   └── misc/               #   其他过期文档（4篇）
-├── development/            # AI 开发辅助文档
-├── guides/                 # （暂无有效文档）
-├── screenshots/            # 项目截图
-├── troubleshooting/        # （暂无有效文档，相关内容见 troubleshooting-guide.md）
-└── verification/           # （历史验收报告已归档至 archive/verification/）
+├── api/                        # API 详细文档（手动维护）
+├── archive/                    # 历史文档归档（过期/阶段性，不作为开发依据）
+│   ├── ai-analysis/            #   AI分析加速方案（4篇）
+│   ├── bug-fix-reports/        #   单次 Bug 修复记录（2篇）
+│   ├── verification/           #   阶段性验收报告（4篇）
+│   └── misc/                   #   其他过期文档（4篇）
+├── development/                # 开发规范、最佳实践、AI辅助上下文
+├── guides/                     # 功能使用指南
+│   ├── css/                    #   CSS 架构体系
+│   └── naming-validator/       #   命名验证工具
+├── screenshots/                # 项目截图
+├── testing/                    # 测试配置与使用指南
+├── troubleshooting/            # 故障排查
+└── verification/               # （历史验收报告已归档至 archive/verification/）
 ```
 
 ---
