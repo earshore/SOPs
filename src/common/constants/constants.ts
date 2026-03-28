@@ -74,9 +74,27 @@ export const PROVIDERS: Record<string, ProviderConfig> = {
       { id: "gemini-2.5-pro", context: 32000, features: ["function"] },
     ],
   },
-  cb2api: {
+  cb: {
     name: "CB Gateway",
-    endpoint: "https://ai.hongecb.store/v1",
+    endpoint: "https://cb.hongecb.store/v1",
+    models: [
+      { id: "auto-chat", context: 400000, features: ["function"] },
+      { id: "glm-5", context: 400000, features: ["function"] },
+      { id: "kimi-k2.5", context: 400000, features: ["function"] },
+      { id: "gpt-5.4", context: 400000, features: ["function"] },
+      { id: "gpt-5.3-codex", context: 400000, features: ["function"] },
+      { id: "gpt-5.2-codex", context: 400000, features: ["function"] },
+      { id: "gpt-5.2", context: 400000, features: ["function"] },
+      { id: "gpt-5.1", context: 400000, features: ["function"] },
+      { id: "gpt-5.1-codex-max", context: 400000, features: ["function"] },
+      { id: "gemini-3.0-pro", context: 400000, features: ["function"] },
+      { id: "gemini-3.0-flash", context: 400000, features: ["function"] },
+      { id: "deepseek-v3.2", context: 400000, features: ["function"] },
+    ],
+  },
+    cb_e: {
+    name: "CB-E Gateway",
+    endpoint: "https://cb-e.hongecb.store/v1",
     models: [
       { id: "auto-chat", context: 400000, features: ["function"] },
       { id: "glm-5", context: 400000, features: ["function"] },
@@ -104,7 +122,7 @@ export const PROVIDERS: Record<string, ProviderConfig> = {
       { id: "gpt-5.2", context: 400000, features: ["function"] },
       { id: "gpt-5.2-chat-latest", context: 400000, features: ["function"] },
       { id: "gpt-5.2-codex", context: 400000, features: ["function"] },
-      { id: "gpt-5.2-pro", context: 400000, features: ["function"] },
+      { id: "gpt-5.2-pro", context: 400000, features: ["function"] }, 
       { id: "gpt-5.1", context: 400000, features: ["function"] },
       { id: "gpt-5.1-chat-latest", context: 400000, features: ["function"] },
       { id: "gpt-5.1-codex", context: 400000, features: ["function"] },

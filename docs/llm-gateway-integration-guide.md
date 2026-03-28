@@ -182,6 +182,7 @@ npx wrangler pages deploy dist --project-name sops-c --branch b-main-copy --comm
 | provider_id | 显示名称 | Endpoint | 环境变量前缀 |
 |-------------|---------|---------|------------|
 | `llmgateway` | AI-Gateway | `https://ai-gateway.hongecb.store/v1` | `GATEWAY_LLMGATEWAY_` |
-| `cb2api` | CB Gateway | `https://ai.hongecb.store/v1` | `GATEWAY_CB2API_` |
+| `cb` | CB Gateway | `https://cb.hongecb.store/v1` | `GATEWAY_CB_` |
+| `cb_e` | CB-E Gateway | `https://cb-e.hongecb.store/v1` | `GATEWAY_CB_E_` |
 | `dooo_cn` | Dooong AI(CN) | `https://ai.ijunze.cn/v1` | `GATEWAY_DOOO_CN_` |
 | `dooo` | Dooong AI | `https://ai.dooo.ng/v1` | `GATEWAY_DOOO_` |

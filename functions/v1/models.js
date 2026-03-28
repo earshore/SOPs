@@ -13,9 +13,13 @@ function resolveGateway(provider, env) {
       baseUrl: env.GATEWAY_LLMGATEWAY_BASE_URL || "https://ai-gateway.hongecb.store/v1",
       apiKey:  env.GATEWAY_LLMGATEWAY_API_KEY  || "",
     },
-    cb2api: {
-      baseUrl: env.GATEWAY_CB2API_BASE_URL || "https://ai.hongecb.store/v1",
-      apiKey:  env.GATEWAY_CB2API_API_KEY  || "",
+    cb: {
+      baseUrl: env.GATEWAY_CB_BASE_URL || "https://cb.hongecb.store/v1",
+      apiKey:  env.GATEWAY_CB_API_KEY  || "",
+    },
+    cb_e: {
+      baseUrl: env.GATEWAY_CB_E_BASE_URL || "https://cb-e.hongecb.store/v1",
+      apiKey:  env.GATEWAY_CB_E_API_KEY  || "",
     },
     dooo_cn: {
       baseUrl: env.GATEWAY_DOOO_CN_BASE_URL || "https://ai.ijunze.cn/v1",
@@ -70,7 +74,7 @@ export async function onRequest(context) {
 
     if (!gateway) {
       return new Response(JSON.stringify({
-        error: { message: `⛔ 未知网关标识: ${provider}，支持: llmgateway, cb2api, dooo_cn, dooo` }
+        error: { message: `⛔ 未知网关标识: ${provider}，支持: llmgateway, cb, cb_e, dooo_cn, dooo` }
       }), {
         status: 400,
         headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },

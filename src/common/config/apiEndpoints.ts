@@ -83,10 +83,16 @@ export const API_ENDPOINTS: Record<string, ApiEndpointConfig> = {
     displayName: 'AI-Gateway',
     isDangerous: false
   },
-  cb2api: {
-    domain: 'ai.hongecb.store',
+  cb: {
+    domain: 'cb.hongecb.store',
     requiresProxy: false,
     displayName: 'CB Gateway',
+    isDangerous: false
+  },
+  cb_e: {
+    domain: 'cb-e.hongecb.store',
+    requiresProxy: false,
+    displayName: 'CB-E Gateway',
     isDangerous: false
   },
   dooo_cn: {
