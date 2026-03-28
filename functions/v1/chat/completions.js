@@ -18,7 +18,7 @@ function resolveGateway(provider, env) {
       apiKey:  env.GATEWAY_CB_API_KEY  || "",
     },
     cb_e: {
-      baseUrl: env.GATEWAY_CB_E_BASE_URL || "https://cb-e.hongecb.store/v1",
+      baseUrl: env.GATEWAY_CB_E_BASE_URL || "https://cb-e.cflts.dpdns.org/v1",
       apiKey:  env.GATEWAY_CB_E_API_KEY  || "",
     },
     dooo_cn: {

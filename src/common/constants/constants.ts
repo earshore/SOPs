@@ -94,7 +94,7 @@ export const PROVIDERS: Record<string, ProviderConfig> = {
   },
     cb_e: {
     name: "CB-E Gateway",
-    endpoint: "https://cb-e.hongecb.store/v1",
+    endpoint: "https://cb-e.cflts.dpdns.org/v1",
     models: [
       { id: "auto-chat", context: 400000, features: ["function"] },
       { id: "glm-5", context: 400000, features: ["function"] },

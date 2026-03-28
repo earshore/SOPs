@@ -183,6 +183,6 @@ npx wrangler pages deploy dist --project-name sops-c --branch b-main-copy --comm
 |-------------|---------|---------|------------|
 | `llmgateway` | AI-Gateway | `https://ai-gateway.hongecb.store/v1` | `GATEWAY_LLMGATEWAY_` |
 | `cb` | CB Gateway | `https://cb.hongecb.store/v1` | `GATEWAY_CB_` |
-| `cb_e` | CB-E Gateway | `https://cb-e.hongecb.store/v1` | `GATEWAY_CB_E_` |
+| `cb_e` | CB-E Gateway | `https://cb-e.cflts.dpdns.org/v1` | `GATEWAY_CB_E_` |
 | `dooo_cn` | Dooong AI(CN) | `https://ai.ijunze.cn/v1` | `GATEWAY_DOOO_CN_` |
 | `dooo` | Dooong AI | `https://ai.dooo.ng/v1` | `GATEWAY_DOOO_` |
