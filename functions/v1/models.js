@@ -54,20 +54,23 @@ function resolveGateway(provider, env) {
   return map[provider] || null;
 }
 
+/** 统一 CORS 响应头，所有响应都附加 */
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Gateway-Provider",
+  "Access-Control-Max-Age": "86400",
+  "Referrer-Policy": "no-referrer",
+};
+
 export async function onRequest(context) {
   // CORS 预检
   if (context.request.method === "OPTIONS") {
-    return new Response(null, {
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Gateway-Provider",
-      },
-    });
+    return new Response(null, { status: 204, headers: CORS_HEADERS });
   }
 
   if (context.request.method !== "GET") {
-    return new Response("Method Not Allowed", { status: 405 });
+    return new Response("Method Not Allowed", { status: 405, headers: CORS_HEADERS });
   }
 
   try {
@@ -83,7 +86,7 @@ export async function onRequest(context) {
         error: { message: "⛔ 访问被拒绝：请输入正确的访问密码 (AUTH_PASSWORD)" }
       }), {
         status: 401,
-        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+        headers: { "Content-Type": "application/json", ...CORS_HEADERS },
       });
     }
 
@@ -98,20 +101,21 @@ export async function onRequest(context) {
         error: { message: `⛔ 未知网关标识: ${provider}，支持: llmgateway, cb, cb_e, dooo_cn, dooo, gptgod, chatanywhere` }
       }), {
         status: 400,
-        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+        headers: { "Content-Type": "application/json", ...CORS_HEADERS },
       });
     }
 
     console.log(`🌐 [models] provider=${provider} → ${gateway.baseUrl}`);
 
     // ============================================================
-    // 📡 转发到上游网关 /models
+    // 📡 转发到上游网关 /models（referrerPolicy: no-referrer 阻止携带 Referer）
     // ============================================================
     const response = await fetch(`${gateway.baseUrl}/models`, {
       method: "GET",
       headers: {
         "Authorization": `Bearer ${gateway.apiKey}`,
       },
+      referrerPolicy: "no-referrer",
     });
 
     if (!response.ok) {
@@ -128,15 +132,15 @@ export async function onRequest(context) {
           status: 403,
           headers: {
             "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*",
             "X-Error-Type": "GEO_RESTRICTION",
+            ...CORS_HEADERS,
           },
         });
       }
 
       return new Response(errorText, {
         status: response.status,
-        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+        headers: { "Content-Type": "application/json", ...CORS_HEADERS },
       });
     }
 
@@ -144,17 +148,14 @@ export async function onRequest(context) {
 
     return new Response(JSON.stringify(data), {
       status: 200,
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-      },
+      headers: { "Content-Type": "application/json", ...CORS_HEADERS },
     });
 
   } catch (err) {
     console.error(`❌ [models] 服务器错误:`, err);
     return new Response(JSON.stringify({ error: { message: `Server Error: ${err.message}` } }), {
       status: 500,
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      headers: { "Content-Type": "application/json", ...CORS_HEADERS },
     });
   }
 }

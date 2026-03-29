@@ -54,20 +54,23 @@ function resolveGateway(provider, env) {
   return map[provider] || null;
 }
 
+/** 统一 CORS 响应头，所有响应都附加 */
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Gateway-Provider",
+  "Access-Control-Max-Age": "86400",
+  "Referrer-Policy": "no-referrer",
+};
+
 export async function onRequest(context) {
   // CORS 预检
   if (context.request.method === "OPTIONS") {
-    return new Response(null, {
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Gateway-Provider",
-      },
-    });
+    return new Response(null, { status: 204, headers: CORS_HEADERS });
   }
 
   if (context.request.method !== "POST") {
-    return new Response("Method Not Allowed", { status: 405 });
+    return new Response("Method Not Allowed", { status: 405, headers: CORS_HEADERS });
   }
 
   try {
@@ -83,7 +86,7 @@ export async function onRequest(context) {
         error: { message: "⛔ 访问被拒绝：请输入正确的访问密码 (AUTH_PASSWORD)" }
       }), {
         status: 401,
-        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+        headers: { "Content-Type": "application/json", ...CORS_HEADERS },
       });
     }
 
@@ -98,7 +101,7 @@ export async function onRequest(context) {
         error: { message: `⛔ 未知网关标识: ${provider}，支持: llmgateway, cb, cb_e, dooo_cn, dooo, gptgod, chatanywhere` }
       }), {
         status: 400,
-        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+        headers: { "Content-Type": "application/json", ...CORS_HEADERS },
       });
     }
 
@@ -107,7 +110,7 @@ export async function onRequest(context) {
         error: { message: `⛔ 网关 ${provider} 未配置 API Key，请检查 Cloudflare 环境变量` }
       }), {
         status: 500,
-        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+        headers: { "Content-Type": "application/json", ...CORS_HEADERS },
       });
     }
 
@@ -134,8 +137,8 @@ export async function onRequest(context) {
           return new Response(cachedData, {
             headers: {
               "Content-Type": "application/json",
-              "Access-Control-Allow-Origin": "*",
               "X-Cache-Status": "HIT",
+              ...CORS_HEADERS,
             },
           });
         }
@@ -145,7 +148,7 @@ export async function onRequest(context) {
     }
 
     // ============================================================
-    // 📡 转发到上游网关
+    // 📡 转发到上游网关（referrerPolicy: no-referrer 阻止携带 Referer）
     // ============================================================
     const response = await fetch(`${gateway.baseUrl}/chat/completions`, {
       method: "POST",
@@ -154,31 +157,33 @@ export async function onRequest(context) {
         "Authorization": `Bearer ${gateway.apiKey}`,
       },
       body: JSON.stringify(requestBody),
+      referrerPolicy: "no-referrer",
     });
 
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`❌ [completions] 上游错误 ${response.status}:`, errorText);
 
-      if (response.status === 403 && errorText.includes("Country") && errorText.includes("not supported")) {
+      if (response.status === 403) {
+        const isGeoBlock = errorText.includes("Country") && errorText.includes("not supported");
+        const msg = isGeoBlock
+          ? `⛔ 地理限制：网关 ${provider} 当前无法访问（Cloudflare 节点 IP 被拦截）。请切换其他网关。`
+          : `⛔ 网关 ${provider} 返回 403 Forbidden（可能是 API Key 无效，或该服务屏蔽了当前节点 IP）。错误详情：${errorText.slice(0, 200)}`;
         return new Response(JSON.stringify({
-          error: {
-            message: `⛔ 地理限制：网关 ${provider} 当前无法访问。请切换其他网关。`,
-            status: 403,
-          }
+          error: { message: msg, status: 403 }
         }), {
           status: 403,
           headers: {
             "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*",
-            "X-Error-Type": "GEO_RESTRICTION",
+            "X-Error-Type": isGeoBlock ? "GEO_RESTRICTION" : "UPSTREAM_FORBIDDEN",
+            ...CORS_HEADERS,
           },
         });
       }
 
       return new Response(errorText, {
         status: response.status,
-        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+        headers: { "Content-Type": "application/json", ...CORS_HEADERS },
       });
     }
 
@@ -198,15 +203,15 @@ export async function onRequest(context) {
       status: response.status,
       headers: {
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
         "X-Cache-Status": "MISS",
+        ...CORS_HEADERS,
       },
     });
 
   } catch (err) {
     return new Response(JSON.stringify({ error: { message: `Server Error: ${err.message}` } }), {
       status: 500,
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      headers: { "Content-Type": "application/json", ...CORS_HEADERS },
     });
   }
 }
