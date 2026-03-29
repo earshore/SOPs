@@ -19,7 +19,7 @@ compatibility_date = "2024-01-01"
 #   GATEWAY_DOOO_API_KEY        = <your-key>
 #   GATEWAY_GPTGOD_BASE_URL         = https://api.gptgod.online/v1
 #   GATEWAY_GPTGOD_API_KEY          = <your-key>
-#   GATEWAY_CHATANYWHERE_BASE_URL   = https://api.chatanywhere.tech/v1
+#   GATEWAY_CHATANYWHERE_BASE_URL   = https://api.chatanywhere.org/v1
 #   GATEWAY_CHATANYWHERE_API_KEY    = <your-key>
 # ============================================================
 # 环境变量一键同步（自动读取 .env，密钥加密、明文明文）

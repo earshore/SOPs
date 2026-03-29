@@ -23,7 +23,7 @@ export interface ApiEndpointConfig {
  */
 export const API_ENDPOINTS: Record<string, ApiEndpointConfig> = {
   openai: {
-    domain: 'api.chatanywhere.org',
+    domain: 'api.openai.com',
     requiresProxy: true,
     displayName: 'OpenAI',
     isDangerous: true
@@ -114,7 +114,7 @@ export const API_ENDPOINTS: Record<string, ApiEndpointConfig> = {
     isDangerous: false
   },
   chatanywhere: {
-    domain: 'api.chatanywhere.tech',
+    domain: 'api.chatanywhere.org',
     requiresProxy: false,
     displayName: 'ChatAnywhere',
     isDangerous: false

@@ -47,7 +47,7 @@ function resolveGateway(provider, env) {
       apiKey:  pickApiKey(env.GATEWAY_GPTGOD_API_KEY),
     },
     chatanywhere: {
-      baseUrl: env.GATEWAY_CHATANYWHERE_BASE_URL || "https://api.chatanywhere.tech/v1",
+      baseUrl: env.GATEWAY_CHATANYWHERE_BASE_URL || "https://api.chatanywhere.org/v1",
       apiKey:  pickApiKey(env.GATEWAY_CHATANYWHERE_API_KEY),
     },
   };

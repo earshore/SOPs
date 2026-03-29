@@ -169,7 +169,7 @@ export const PROVIDERS: Record<string, ProviderConfig> = {
   },
   chatanywhere: {
     name: "ChatAnywhere",
-    endpoint: "https://api.chatanywhere.tech/v1",
+    endpoint: "https://api.chatanywhere.org/v1",
     models: [
       { id: "gpt-5-mini-ca", context: 16385, features: ["function"] },
       { id: "gpt-5.4-mini-ca", context: 16385, features: ["function"] },
