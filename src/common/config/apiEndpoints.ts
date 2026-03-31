@@ -90,7 +90,7 @@ export const API_ENDPOINTS: Record<string, ApiEndpointConfig> = {
     isDangerous: false
   },
   cb_e: {
-    domain: 'cb-e.cflts.dpdns.org',
+    domain: 'sds.dpdns.org',
     requiresProxy: false,
     displayName: 'CB-E Gateway',
     isDangerous: false

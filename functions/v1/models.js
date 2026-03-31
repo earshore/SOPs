@@ -31,7 +31,7 @@ function resolveGateway(provider, env) {
       apiKey:  pickApiKey(env.GATEWAY_CB_API_KEY),
     },
     cb_e: {
-      baseUrl: env.GATEWAY_CB_E_BASE_URL || "https://cb-e.cflts.dpdns.org/v1",
+      baseUrl: env.GATEWAY_CB_E_BASE_URL || "https://sds.dpdns.org/v1",
       apiKey:  pickApiKey(env.GATEWAY_CB_E_API_KEY),
     },
     kr: {
