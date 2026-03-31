@@ -95,16 +95,10 @@ export const API_ENDPOINTS: Record<string, ApiEndpointConfig> = {
     displayName: 'CB-E Gateway',
     isDangerous: false
   },
-  dooo_cn: {
-    domain: 'ai.ijunze.cn',
+  kr: {
+    domain: 'kr.hongecb.store',
     requiresProxy: false,
-    displayName: 'Dooong AI(CN)',
-    isDangerous: false
-  },
-  dooo: {
-    domain: 'ai.dooo.ng',
-    requiresProxy: false,
-    displayName: 'Dooong AI',
+    displayName: 'KR Gateway',
     isDangerous: false
   },
   gptgod: {

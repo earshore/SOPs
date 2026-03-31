@@ -34,13 +34,9 @@ function resolveGateway(provider, env) {
       baseUrl: env.GATEWAY_CB_E_BASE_URL || "https://cb-e.cflts.dpdns.org/v1",
       apiKey:  pickApiKey(env.GATEWAY_CB_E_API_KEY),
     },
-    dooo_cn: {
-      baseUrl: env.GATEWAY_DOOO_CN_BASE_URL || "https://ai.ijunze.cn/v1",
-      apiKey:  pickApiKey(env.GATEWAY_DOOO_CN_API_KEY),
-    },
-    dooo: {
-      baseUrl: env.GATEWAY_DOOO_BASE_URL || "https://ai.dooo.ng/v1",
-      apiKey:  pickApiKey(env.GATEWAY_DOOO_API_KEY),
+    kr: {
+      baseUrl: env.GATEWAY_KR_BASE_URL || "https://kr.hongecb.store/v1",
+      apiKey:  pickApiKey(env.GATEWAY_KR_API_KEY),
     },
     gptgod: {
       baseUrl: env.GATEWAY_GPTGOD_BASE_URL || "https://api.gptgod.online/v1",
@@ -98,7 +94,7 @@ export async function onRequest(context) {
 
     if (!gateway) {
       return new Response(JSON.stringify({
-        error: { message: `⛔ 未知网关标识: ${provider}，支持: llmgateway, cb, cb_e, dooo_cn, dooo, gptgod, chatanywhere` }
+        error: { message: `⛔ 未知网关标识: ${provider}，支持: llmgateway, cb, cb_e, kr, gptgod, chatanywhere` }
       }), {
         status: 400,
         headers: { "Content-Type": "application/json", ...CORS_HEADERS },
