@@ -89,6 +89,12 @@ export const API_ENDPOINTS: Record<string, ApiEndpointConfig> = {
     displayName: 'CB Gateway',
     isDangerous: false
   },
+  cba: {
+    domain: 'cba.hongecb.store',
+    requiresProxy: false,
+    displayName: 'CBA Gateway',
+    isDangerous: false
+  },
   cb_e: {
     domain: 'sds.dpdns.org',
     requiresProxy: false,

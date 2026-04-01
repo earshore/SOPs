@@ -30,6 +30,10 @@ function resolveGateway(provider, env) {
       baseUrl: env.GATEWAY_CB_BASE_URL || "https://cb.hongecb.store/v1",
       apiKey:  pickApiKey(env.GATEWAY_CB_API_KEY),
     },
+    cba: {
+      baseUrl: env.GATEWAY_CBA_BASE_URL || "https://cba.hongecb.store/v1",
+      apiKey:  pickApiKey(env.GATEWAY_CBA_API_KEY),
+    },
     cb_e: {
       baseUrl: env.GATEWAY_CB_E_BASE_URL || "https://sds.dpdns.org/v1",
       apiKey:  pickApiKey(env.GATEWAY_CB_E_API_KEY),
@@ -94,7 +98,7 @@ export async function onRequest(context) {
 
     if (!gateway) {
       return new Response(JSON.stringify({
-        error: { message: `⛔ 未知网关标识: ${provider}，支持: llmgateway, cb, cb_e, kr, gptgod, chatanywhere` }
+        error: { message: `⛔ 未知网关标识: ${provider}，支持: llmgateway, cb, cba, cb_e, kr, gptgod, chatanywhere` }
       }), {
         status: 400,
         headers: { "Content-Type": "application/json", ...CORS_HEADERS },
