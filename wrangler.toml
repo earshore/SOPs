@@ -7,20 +7,12 @@ compatibility_date = "2024-01-01"
 # 添加以下生产环境变量（值与 .env 一致）：
 #
 #   AUTH_PASSWORD               = AI2027
+#   GATEWAY_NEW_BASE_URL         = https://new.hongecb.store/v1
+#   GATEWAY_NEW_API_KEY          = <your-key>
+#   GATEWAY_CPA_BASE_URL         = https://cpa.hongecb.store/v1
+#   GATEWAY_CPA_API_KEY          = <your-key>
 #   GATEWAY_LLMGATEWAY_BASE_URL = https://ai-gateway.hongecb.store/v1
 #   GATEWAY_LLMGATEWAY_API_KEY  = <your-key>
-#   GATEWAY_CB_BASE_URL         = https://cb.hongecb.store/v1
-#   GATEWAY_CB_API_KEY          = <your-key>
-#   GATEWAY_CBA_BASE_URL        = https://cba.hongecb.store/v1
-#   GATEWAY_CBA_API_KEY         = <your-key>
-#   GATEWAY_CB_E_BASE_URL       = https://sds.dpdns.org/v1
-#   GATEWAY_CB_E_API_KEY        = <your-key>
-#   GATEWAY_KR_BASE_URL         = https://kr.hongecb.store/v1
-#   GATEWAY_KR_API_KEY          = <your-key>
-#   GATEWAY_GPTGOD_BASE_URL         = https://api.gptgod.online/v1
-#   GATEWAY_GPTGOD_API_KEY          = <your-key>
-#   GATEWAY_CHATANYWHERE_BASE_URL   = https://api.chatanywhere.org/v1
-#   GATEWAY_CHATANYWHERE_API_KEY    = <your-key>
 # ============================================================
 # 环境变量一键同步（自动读取 .env，密钥加密、明文明文）
 #
