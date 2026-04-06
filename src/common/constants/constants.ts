@@ -45,7 +45,7 @@ export const getRandomUserAgent = (): string => {
 // ========================
 
 /** 模型特性 */
-export type ModelFeature = 'vision' | 'function' | 'audio' | 'code';
+export type ModelFeature = 'vision' | 'function' | 'audio' | 'code' | 'chat';
 
 /** 模型配置 */
 export interface ModelConfig {
@@ -54,7 +54,7 @@ export interface ModelConfig {
   features: ModelFeature[];
 }
 
-/** LLM提供商配置 */
+/** 提供商配置 */
 export interface ProviderConfig {
   name: string;
   endpoint: string;
@@ -63,98 +63,20 @@ export interface ProviderConfig {
 
 /** LLM提供商映射 (收敛为自定义网关，通过 Cloudflare 统一路由) */
 export const PROVIDERS: Record<string, ProviderConfig> = {
-  llmgateway: {
-    name: "AI-Gateway",
-    endpoint: "https://ai-gateway.hongecb.store/v1",
+  new_api: {
+    name: "NEW API",
+    endpoint: "https://new.hongecb.store/v1",
     models: [
-      { id: "gpt-5-mini", context: 16385, features: ["function"] },
-      { id: "glm-4.5-air", context: 128000, features: ["function"] },
-      { id: "z-ai/glm-4.5-air:free", context: 128000, features: ["function"] },
-      { id: "hunyuan-lite", context: 32000, features: ["function"] },
-      { id: "gemini-2.5-pro", context: 32000, features: ["function"] },
+      { id: "gpt-5.4-mini-ca", context: 400000, features: ["chat"] },
+      { id: "gpt-5", context: 400000, features: ["function"] },
+      { id: "kimi-k2.5", context: 400000, features: ["chat"] },
     ],
   },
-  cb: {
-    name: "CB Gateway",
-    endpoint: "https://cb.hongecb.store/v1",
+  cpa: {
+    name: "CPA Gateway",
+    endpoint: "https://cpa.hongecb.store/v1",
     models: [
       { id: "auto-chat", context: 400000, features: ["function"] },
-      { id: "glm-5", context: 400000, features: ["function"] },
-      { id: "kimi-k2.5", context: 400000, features: ["function"] },
-      { id: "gpt-5.4", context: 400000, features: ["function"] },
-      { id: "gpt-5.3-codex", context: 400000, features: ["function"] },
-      { id: "gpt-5.2-codex", context: 400000, features: ["function"] },
-      { id: "gpt-5.2", context: 400000, features: ["function"] },
-      { id: "gpt-5.1", context: 400000, features: ["function"] },
-      { id: "gpt-5.1-codex-max", context: 400000, features: ["function"] },
-      { id: "gemini-3.0-pro", context: 400000, features: ["function"] },
-      { id: "gemini-3.0-flash", context: 400000, features: ["function"] },
-      { id: "deepseek-v3.2", context: 400000, features: ["function"] },
-    ],
-  },
-  cba: {
-    name: "CBA Gateway",
-    endpoint: "https://cba.hongecb.store/v1",
-    models: [
-      { id: "auto-chat", context: 400000, features: ["function"] },
-      { id: "glm-5", context: 400000, features: ["function"] },
-      { id: "kimi-k2.5", context: 400000, features: ["function"] },
-      { id: "gpt-5.4", context: 400000, features: ["function"] },
-      { id: "gpt-5.3-codex", context: 400000, features: ["function"] },
-      { id: "gpt-5.2-codex", context: 400000, features: ["function"] },
-      { id: "gpt-5.2", context: 400000, features: ["function"] },
-      { id: "gpt-5.1", context: 400000, features: ["function"] },
-      { id: "gpt-5.1-codex-max", context: 400000, features: ["function"] },
-      { id: "gemini-3.0-pro", context: 400000, features: ["function"] },
-      { id: "gemini-3.0-flash", context: 400000, features: ["function"] },
-      { id: "deepseek-v3.2", context: 400000, features: ["function"] },
-    ],
-  },
-  cb_e: {
-    name: "CB-E Gateway",
-    endpoint: "https://sds.dpdns.org/v1",
-    models: [
-      { id: "auto-chat", context: 400000, features: ["function"] },
-      { id: "glm-5", context: 400000, features: ["function"] },
-      { id: "kimi-k2.5", context: 400000, features: ["function"] },
-      { id: "gpt-5.4", context: 400000, features: ["function"] },
-      { id: "gpt-5.3-codex", context: 400000, features: ["function"] },
-      { id: "gpt-5.2-codex", context: 400000, features: ["function"] },
-      { id: "gpt-5.2", context: 400000, features: ["function"] },
-      { id: "gpt-5.1", context: 400000, features: ["function"] },
-      { id: "gpt-5.1-codex-max", context: 400000, features: ["function"] },
-      { id: "gemini-3.0-pro", context: 400000, features: ["function"] },
-      { id: "gemini-3.0-flash", context: 400000, features: ["function"] },
-      { id: "deepseek-v3.2", context: 400000, features: ["function"] },
-    ],
-  },
-  kr: {
-    name: "KR Gateway",
-    endpoint: "https://kr.hongecb.store/v1",
-    models: [
-      { id: "auto", context: 32000, features: ["function"] },
-      { id: "claude-sonnet-4.5", context: 32000, features: ["function"] },
-      { id: "claude-sonnet-4", context: 32000, features: ["function"] },
-      { id: "claude-haiku-4.5", context: 32000, features: ["function"] },
-      { id: "deepseek-3.2", context: 32000, features: ["function"] },
-      { id: "minimax-m2.5", context: 32000, features: ["function"] },
-      { id: "minimax-m2.1", context: 32000, features: ["function"] },
-      { id: "qwen3-coder-next", context: 32000, features: ["function"] },
-    ],
-  },
-  gptgod: {
-    name: "GPTGod",
-    endpoint: "https://api.gptgod.online/v1",
-    models: [
-      { id: "gpt-5-mini", context: 16385, features: ["function"] },
-    ],
-  },
-  chatanywhere: {
-    name: "ChatAnywhere",
-    endpoint: "https://api.chatanywhere.org/v1",
-    models: [
-      { id: "gpt-5-mini-ca", context: 16385, features: ["function"] },
-      { id: "gpt-5.4-mini-ca", context: 16385, features: ["function"] },
     ],
   },
 };

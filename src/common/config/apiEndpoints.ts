@@ -77,46 +77,16 @@ export const API_ENDPOINTS: Record<string, ApiEndpointConfig> = {
     displayName: 'Bright Data'
   },
   // 自定义网关（通过 Cloudflare Functions 代理，不直连）
-  llmgateway: {
-    domain: 'ai-gateway.hongecb.store',
+  new_api: {
+    domain: 'new.hongecb.store',
     requiresProxy: false,
-    displayName: 'AI-Gateway',
+    displayName: 'NEW API',
     isDangerous: false
   },
-  cb: {
-    domain: 'cb.hongecb.store',
+  cpa: {
+    domain: 'cpa.hongecb.store',
     requiresProxy: false,
-    displayName: 'CB Gateway',
-    isDangerous: false
-  },
-  cba: {
-    domain: 'cba.hongecb.store',
-    requiresProxy: false,
-    displayName: 'CBA Gateway',
-    isDangerous: false
-  },
-  cb_e: {
-    domain: 'sds.dpdns.org',
-    requiresProxy: false,
-    displayName: 'CB-E Gateway',
-    isDangerous: false
-  },
-  kr: {
-    domain: 'kr.hongecb.store',
-    requiresProxy: false,
-    displayName: 'KR Gateway',
-    isDangerous: false
-  },
-  gptgod: {
-    domain: 'api.gptgod.online',
-    requiresProxy: false,
-    displayName: 'GPTGod',
-    isDangerous: false
-  },
-  chatanywhere: {
-    domain: 'api.chatanywhere.org',
-    requiresProxy: false,
-    displayName: 'ChatAnywhere',
+    displayName: 'CPA Gateway',
     isDangerous: false
   }
 };

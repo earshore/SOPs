@@ -16,39 +16,19 @@ function pickApiKey(raw) {
 
 /**
  * 根据 provider 标识解析网关配置
- * @param {string} provider - 网关标识 (llmgateway | cb | cb_e | kr | gptgod | chatanywhere)
+ * @param {string} provider - 网关标识 (new_api | cpa)
  * @param {object} env - Cloudflare 环境变量
  * @returns {{ baseUrl: string, apiKey: string } | null}
  */
 function resolveGateway(provider, env) {
   const map = {
-    llmgateway: {
-      baseUrl: env.GATEWAY_LLMGATEWAY_BASE_URL || "https://ai-gateway.hongecb.store/v1",
-      apiKey:  pickApiKey(env.GATEWAY_LLMGATEWAY_API_KEY),
+    new_api: {
+      baseUrl: env.GATEWAY_NEW_BASE_URL || "https://new.hongecb.store/v1",
+      apiKey:  pickApiKey(env.GATEWAY_NEW_API_KEY),
     },
-    cb: {
-      baseUrl: env.GATEWAY_CB_BASE_URL || "https://cb.hongecb.store/v1",
-      apiKey:  pickApiKey(env.GATEWAY_CB_API_KEY),
-    },
-    cba: {
-      baseUrl: env.GATEWAY_CBA_BASE_URL || "https://cba.hongecb.store/v1",
-      apiKey:  pickApiKey(env.GATEWAY_CBA_API_KEY),
-    },
-    cb_e: {
-      baseUrl: env.GATEWAY_CB_E_BASE_URL || "https://sds.dpdns.org/v1",
-      apiKey:  pickApiKey(env.GATEWAY_CB_E_API_KEY),
-    },
-    kr: {
-      baseUrl: env.GATEWAY_KR_BASE_URL || "https://kr.hongecb.store/v1",
-      apiKey:  pickApiKey(env.GATEWAY_KR_API_KEY),
-    },
-    gptgod: {
-      baseUrl: env.GATEWAY_GPTGOD_BASE_URL || "https://api.gptgod.online/v1",
-      apiKey:  pickApiKey(env.GATEWAY_GPTGOD_API_KEY),
-    },
-    chatanywhere: {
-      baseUrl: env.GATEWAY_CHATANYWHERE_BASE_URL || "https://api.chatanywhere.org/v1",
-      apiKey:  pickApiKey(env.GATEWAY_CHATANYWHERE_API_KEY),
+    cpa: {
+      baseUrl: env.GATEWAY_CPA_BASE_URL || "https://cpa.hongecb.store/v1",
+      apiKey:  pickApiKey(env.GATEWAY_CPA_API_KEY),
     },
   };
   return map[provider] || null;
@@ -63,52 +43,7 @@ const CORS_HEADERS = {
   "Referrer-Policy": "no-referrer",
 };
 
-function buildAnthropicRequestBody(requestBody) {
-  const rawMessages = Array.isArray(requestBody?.messages) ? requestBody.messages : [];
-  const system = rawMessages
-    .filter(message => message?.role === "system")
-    .map(message => typeof message?.content === "string" ? message.content : "")
-    .filter(Boolean)
-    .join("\n\n");
-
-  const messages = rawMessages
-    .filter(message => message?.role !== "system")
-    .map(message => ({
-      role: message?.role === "assistant" ? "assistant" : "user",
-      content: typeof message?.content === "string" ? message.content : "",
-    }))
-    .filter(message => message.content);
-
-  const maxTokens = Number(
-    requestBody?.max_tokens
-    || requestBody?.max_completion_tokens
-    || requestBody?.max_output_tokens
-    || 4096
-  );
-
-  return {
-    model: requestBody?.model,
-    messages,
-    max_tokens: Number.isFinite(maxTokens) && maxTokens > 0 ? maxTokens : 4096,
-    ...(system ? { system } : {}),
-    ...(typeof requestBody?.temperature === "number" ? { temperature: requestBody.temperature } : {}),
-  };
-}
-
 function getUpstreamRequest(provider, gateway, requestBody) {
-  if (provider === "kr") {
-    return {
-      url: `${gateway.baseUrl}/messages`,
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${gateway.apiKey}`,
-        "x-api-key": gateway.apiKey,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify(buildAnthropicRequestBody(requestBody)),
-    };
-  }
-
   return {
     url: `${gateway.baseUrl}/chat/completions`,
     headers: {
@@ -120,40 +55,8 @@ function getUpstreamRequest(provider, gateway, requestBody) {
 }
 
 function normalizeUpstreamResponse(provider, data, requestBody) {
-  if (provider !== "kr") {
-    return data;
-  }
-
-  const promptTokens = Number(data?.usage?.input_tokens) || 0;
-  const completionTokens = Number(data?.usage?.output_tokens) || 0;
-  const content = Array.isArray(data?.content)
-    ? data.content
-      .filter(item => item?.type === "text")
-      .map(item => item?.text || "")
-      .join("")
-    : "";
-
-  return {
-    id: data?.id || `chatcmpl_${Date.now()}`,
-    object: "chat.completion",
-    created: Math.floor(Date.now() / 1000),
-    model: data?.model || requestBody?.model || "unknown",
-    choices: [{
-      index: 0,
-      message: {
-        role: "assistant",
-        content,
-      },
-      finish_reason: data?.stop_reason === "max_tokens" ? "length" : "stop",
-    }],
-    usage: {
-      prompt_tokens: promptTokens,
-      completion_tokens: completionTokens,
-      total_tokens: promptTokens + completionTokens,
-    },
-  };
+  return data;
 }
-
 export async function onRequest(context) {
   // CORS 预检
   if (context.request.method === "OPTIONS") {
@@ -184,12 +87,12 @@ export async function onRequest(context) {
     // ============================================================
     // 🚦 网关路由 - 根据 X-Gateway-Provider 选择上游
     // ============================================================
-    const provider = (context.request.headers.get("X-Gateway-Provider") || "llmgateway").toLowerCase();
+    const provider = (context.request.headers.get("X-Gateway-Provider") || "new_api").toLowerCase();
     const gateway = resolveGateway(provider, context.env);
 
     if (!gateway) {
       return new Response(JSON.stringify({
-        error: { message: `⛔ 未知网关标识: ${provider}，支持: llmgateway, cb, cba, cb_e, kr, gptgod, chatanywhere` }
+        error: { message: `⛔ 未知网关标识: ${provider}，支持: new_api, cpa` }
       }), {
         status: 400,
         headers: { "Content-Type": "application/json", ...CORS_HEADERS },

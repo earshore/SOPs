@@ -11,8 +11,6 @@ compatibility_date = "2024-01-01"
 #   GATEWAY_NEW_API_KEY          = <your-key>
 #   GATEWAY_CPA_BASE_URL         = https://cpa.hongecb.store/v1
 #   GATEWAY_CPA_API_KEY          = <your-key>
-#   GATEWAY_LLMGATEWAY_BASE_URL = https://ai-gateway.hongecb.store/v1
-#   GATEWAY_LLMGATEWAY_API_KEY  = <your-key>
 # ============================================================
 # 环境变量一键同步（自动读取 .env，密钥加密、明文明文）
 #
@@ -27,5 +25,5 @@ compatibility_date = "2024-01-01"
 #
 # npm run build
 # npx wrangler pages deploy dist --project-name sops --branch main --commit-dirty=true
-#
+# 
 # ============================================================

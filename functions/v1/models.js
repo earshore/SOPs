@@ -22,33 +22,13 @@ function pickApiKey(raw) {
  */
 function resolveGateway(provider, env) {
   const map = {
-    llmgateway: {
-      baseUrl: env.GATEWAY_LLMGATEWAY_BASE_URL || "https://ai-gateway.hongecb.store/v1",
-      apiKey:  pickApiKey(env.GATEWAY_LLMGATEWAY_API_KEY),
+    new_api: {
+      baseUrl: env.GATEWAY_NEW_BASE_URL || "https://new.hongecb.store/v1",
+      apiKey:  pickApiKey(env.GATEWAY_NEW_API_KEY),
     },
-    cb: {
-      baseUrl: env.GATEWAY_CB_BASE_URL || "https://cb.hongecb.store/v1",
-      apiKey:  pickApiKey(env.GATEWAY_CB_API_KEY),
-    },
-    cba: {
-      baseUrl: env.GATEWAY_CBA_BASE_URL || "https://cba.hongecb.store/v1",
-      apiKey:  pickApiKey(env.GATEWAY_CBA_API_KEY),
-    },
-    cb_e: {
-      baseUrl: env.GATEWAY_CB_E_BASE_URL || "https://sds.dpdns.org/v1",
-      apiKey:  pickApiKey(env.GATEWAY_CB_E_API_KEY),
-    },
-    kr: {
-      baseUrl: env.GATEWAY_KR_BASE_URL || "https://kr.hongecb.store/v1",
-      apiKey:  pickApiKey(env.GATEWAY_KR_API_KEY),
-    },
-    gptgod: {
-      baseUrl: env.GATEWAY_GPTGOD_BASE_URL || "https://api.gptgod.online/v1",
-      apiKey:  pickApiKey(env.GATEWAY_GPTGOD_API_KEY),
-    },
-    chatanywhere: {
-      baseUrl: env.GATEWAY_CHATANYWHERE_BASE_URL || "https://api.chatanywhere.org/v1",
-      apiKey:  pickApiKey(env.GATEWAY_CHATANYWHERE_API_KEY),
+    cpa: {
+      baseUrl: env.GATEWAY_CPA_BASE_URL || "https://cpa.hongecb.store/v1",
+      apiKey:  pickApiKey(env.GATEWAY_CPA_API_KEY),
     },
   };
   return map[provider] || null;
@@ -93,12 +73,12 @@ export async function onRequest(context) {
     // ============================================================
     // 🚦 网关路由
     // ============================================================
-    const provider = (context.request.headers.get("X-Gateway-Provider") || "llmgateway").toLowerCase();
+    const provider = (context.request.headers.get("X-Gateway-Provider") || "new_api").toLowerCase();
     const gateway = resolveGateway(provider, context.env);
 
     if (!gateway) {
       return new Response(JSON.stringify({
-        error: { message: `⛔ 未知网关标识: ${provider}，支持: llmgateway, cb, cba, cb_e, kr, gptgod, chatanywhere` }
+        error: { message: `⛔ 未知网关标识: ${provider}，支持: new_api, cpa` }
       }), {
         status: 400,
         headers: { "Content-Type": "application/json", ...CORS_HEADERS },
