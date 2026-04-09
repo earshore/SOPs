@@ -57,6 +57,20 @@ function getUpstreamRequest(provider, gateway, requestBody) {
 function normalizeUpstreamResponse(provider, data, requestBody) {
   return data;
 }
+
+function getProxyResponseHeaders(response, extraHeaders = {}) {
+  const headers = {
+    ...extraHeaders,
+    ...CORS_HEADERS,
+  };
+
+  const upstreamContentType = response.headers.get("Content-Type");
+  if (upstreamContentType) {
+    headers["Content-Type"] = upstreamContentType;
+  }
+
+  return headers;
+}
 export async function onRequest(context) {
   // CORS 预检
   if (context.request.method === "OPTIONS") {
@@ -114,10 +128,11 @@ export async function onRequest(context) {
     // 📦 KV 缓存
     // ============================================================
     const requestBody = await context.request.json();
+    const isStreaming = requestBody && requestBody.stream === true;
     let cacheKey = null;
     const kv = context.env.LLM_CACHE_KV;
 
-    if (kv) {
+    if (kv && !isStreaming) {
       try {
         const bodyStr = JSON.stringify({ provider, ...requestBody });
         const msgBuffer = new TextEncoder().encode(bodyStr);
@@ -176,6 +191,16 @@ export async function onRequest(context) {
       return new Response(errorText, {
         status: response.status,
         headers: { "Content-Type": "application/json", ...CORS_HEADERS },
+      });
+    }
+
+    if (isStreaming) {
+      return new Response(response.body, {
+        status: response.status,
+        headers: getProxyResponseHeaders(response, {
+          "Cache-Control": response.headers.get("Cache-Control") || "no-cache",
+          "X-Cache-Status": "BYPASS",
+        }),
       });
     }
 

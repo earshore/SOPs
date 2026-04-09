@@ -34,6 +34,25 @@ vi.mock('../../src/common/config/envConfig', () => ({
   },
 }));
 
+function createChatCompletionResponse(content: string) {
+  return {
+    id: 'chatcmpl-test',
+    object: 'chat.completion' as const,
+    created: 1234567890,
+    model: 'gpt-4',
+    choices: [
+      {
+        index: 0,
+        message: {
+          role: 'assistant' as const,
+          content,
+        },
+        finish_reason: 'stop' as const,
+      },
+    ],
+  };
+}
+
 describe('LLMService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -47,15 +66,7 @@ describe('LLMService', () => {
 
   describe('基础LLM调用', () => {
     it('应该成功调用LLM API', async () => {
-      const mockResponse = {
-        choices: [
-          {
-            message: {
-              content: 'Test response from LLM',
-            },
-          },
-        ],
-      };
+      const mockResponse = createChatCompletionResponse('Test response from LLM');
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
@@ -88,15 +99,7 @@ describe('LLMService', () => {
     });
 
     it('应该支持JSON模式', async () => {
-      const mockResponse = {
-        choices: [
-          {
-            message: {
-              content: '{"result": "json response"}',
-            },
-          },
-        ],
-      };
+      const mockResponse = createChatCompletionResponse('{"result": "json response"}');
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
@@ -124,9 +127,7 @@ describe('LLMService', () => {
     });
 
     it('应该支持自定义temperature', async () => {
-      const mockResponse = {
-        choices: [{ message: { content: 'response' } }],
-      };
+      const mockResponse = createChatCompletionResponse('response');
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
@@ -188,9 +189,7 @@ describe('LLMService', () => {
         })
         .mockResolvedValueOnce({
           ok: true,
-          json: async () => ({
-            choices: [{ message: { content: 'Success after retry' } }],
-          }),
+          json: async () => createChatCompletionResponse('Success after retry'),
         });
 
       const { callLLM } = await import('../../src/services/llmService');
@@ -217,9 +216,7 @@ describe('LLMService', () => {
         })
         .mockResolvedValueOnce({
           ok: true,
-          json: async () => ({
-            choices: [{ message: { content: 'Success' } }],
-          }),
+          json: async () => createChatCompletionResponse('Success'),
         });
 
       const { callLLM } = await import('../../src/services/llmService');
@@ -280,6 +277,98 @@ describe('LLMService', () => {
         )
       ).rejects.toThrow('API 返回格式异常');
     });
+
+    it('应该在非流式空正文时自动回退到流式响应', async () => {
+      (global.fetch as any)
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: async () => ({
+            id: 'chatcmpl-empty',
+            object: 'chat.completion',
+            created: 1234567890,
+            model: 'gpt-5.4',
+            choices: [
+              {
+                index: 0,
+                message: {
+                  role: 'assistant',
+                  content: null,
+                },
+                finish_reason: 'stop',
+              },
+            ],
+          }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          text: async () => [
+            'data: {"id":"chatcmpl-stream","object":"chat.completion.chunk","created":1234567890,"model":"gpt-5.4","choices":[{"index":0,"delta":{"role":"assistant","content":"OK"},"finish_reason":null}]}',
+            '',
+            'data: {"id":"chatcmpl-stream","object":"chat.completion.chunk","created":1234567890,"model":"gpt-5.4","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}',
+            '',
+            'data: [DONE]',
+          ].join('\n'),
+        });
+
+      const { callLLM } = await import('../../src/services/llmService');
+
+      const result = await callLLM(
+        [{ role: 'user' as const, content: 'Test' }],
+        'openai',
+        'https://api.example.com/v1',
+        'test-key',
+        'gpt-5.4',
+        { retries: 0 }
+      );
+
+      expect(result).toBe('OK');
+      const fallbackCall = (global.fetch as any).mock.calls[1];
+      expect(JSON.parse(fallbackCall[1].body).stream).toBe(true);
+    });
+
+    it('应该在流式回退仍为空时明确报错', async () => {
+      (global.fetch as any)
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: async () => ({
+            id: 'chatcmpl-empty',
+            object: 'chat.completion',
+            created: 1234567890,
+            model: 'gpt-5.4',
+            choices: [
+              {
+                index: 0,
+                message: {
+                  role: 'assistant',
+                  content: null,
+                },
+                finish_reason: 'stop',
+              },
+            ],
+          }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          text: async () => 'data: {"choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}\n\ndata: [DONE]\n',
+        });
+
+      const { callLLM } = await import('../../src/services/llmService');
+
+      await expect(
+        callLLM(
+          [{ role: 'user' as const, content: 'Test' }],
+          'openai',
+          'https://api.example.com/v1',
+          'test-key',
+          'gpt-5.4',
+          { retries: 0 }
+        )
+      ).rejects.toThrow('模型返回空输出');
+    });
   });
 
   describe('重试机制', () => {
@@ -313,9 +402,7 @@ describe('LLMService', () => {
         }
         return Promise.resolve({
           ok: true,
-          json: async () => ({
-            choices: [{ message: { content: 'Success' } }],
-          }),
+          json: async () => createChatCompletionResponse('Success'),
         });
       });
 

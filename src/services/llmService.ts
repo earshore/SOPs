@@ -89,6 +89,169 @@ export interface ModelInfo {
  */
 const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
+type ChatCompletionPayload = {
+  object?: unknown;
+  choices?: Array<{
+    finish_reason?: unknown;
+    message?: {
+      content?: unknown;
+    };
+  }>;
+};
+
+function createLLMRequestBody(
+  messages: ChatMessage[],
+  model: string,
+  temperature: number,
+  jsonMode: boolean,
+  extraBody: Record<string, unknown> = {}
+): Record<string, unknown> {
+  return {
+    model,
+    messages,
+    temperature,
+    ...(jsonMode && { response_format: { type: 'json_object' } }),
+    ...extraBody,
+  };
+}
+
+async function fetchChatCompletion(
+  normalizedEndpoint: string,
+  apiKey: string,
+  provider: string,
+  requestBody: Record<string, unknown>,
+  signal: AbortSignal
+): Promise<Response> {
+  return fetch(`${normalizedEndpoint}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+      'X-Gateway-Provider': provider,
+    },
+    body: JSON.stringify(requestBody),
+    signal,
+  });
+}
+
+function getAssistantContent(data: unknown): string | null {
+  if (!data || typeof data !== 'object') {
+    return null;
+  }
+
+  const payload = data as ChatCompletionPayload;
+  const content = payload.choices?.[0]?.message?.content;
+  return typeof content === 'string' ? content : null;
+}
+
+function shouldRetryWithStreaming(data: unknown): boolean {
+  if (!data || typeof data !== 'object') {
+    return false;
+  }
+
+  const payload = data as ChatCompletionPayload;
+  if (payload.object !== 'chat.completion') {
+    return false;
+  }
+
+  const firstChoice = payload.choices?.[0];
+  if (!firstChoice || !firstChoice.message) {
+    return false;
+  }
+
+  return firstChoice.finish_reason === 'stop'
+    && (firstChoice.message.content === null || firstChoice.message.content === '');
+}
+
+function extractContentFromSse(streamText: string): string {
+  const chunks: string[] = [];
+
+  for (const rawLine of streamText.split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line.startsWith('data:')) {
+      continue;
+    }
+
+    const data = line.slice(5).trim();
+    if (!data || data === '[DONE]') {
+      continue;
+    }
+
+    try {
+      const parsed = JSON.parse(data) as {
+        choices?: Array<{
+          delta?: { content?: unknown };
+          message?: { content?: unknown };
+        }>;
+      };
+
+      const choice = parsed.choices?.[0];
+      const deltaContent = choice?.delta?.content;
+      const messageContent = choice?.message?.content;
+
+      if (typeof deltaContent === 'string' && deltaContent.length > 0) {
+        chunks.push(deltaContent);
+      } else if (typeof messageContent === 'string' && messageContent.length > 0) {
+        chunks.push(messageContent);
+      }
+    } catch {
+      continue;
+    }
+  }
+
+  return chunks.join('');
+}
+
+async function retryWithStreamingFallback(
+  normalizedEndpoint: string,
+  apiKey: string,
+  provider: string,
+  requestBody: Record<string, unknown>,
+  signal: AbortSignal
+): Promise<string> {
+  const streamResponse = await fetchChatCompletion(
+    normalizedEndpoint,
+    apiKey,
+    provider,
+    { ...requestBody, stream: true },
+    signal
+  );
+
+  if (!streamResponse.ok) {
+    const errorText = await streamResponse.text();
+    throw new ApiError(
+      'LLM 流式回退失败',
+      'API_INVALID_RESPONSE',
+      streamResponse.status,
+      errorText,
+      {
+        module: 'LLMService',
+        action: 'retryWithStreamingFallback',
+        endpoint: normalizedEndpoint,
+      }
+    );
+  }
+
+  const streamText = await streamResponse.text();
+  const streamedContent = extractContentFromSse(streamText);
+
+  if (streamedContent) {
+    return streamedContent;
+  }
+
+  throw new ApiError(
+    '模型返回空输出，请检查网关兼容性或切换模型',
+    'API_INVALID_RESPONSE',
+    streamResponse.status,
+    streamText.slice(0, 500),
+    {
+      module: 'LLMService',
+      action: 'retryWithStreamingFallback',
+      endpoint: normalizedEndpoint,
+    }
+  );
+}
+
 // ========================
 // 核心 API 函数
 // ========================
@@ -151,13 +314,7 @@ export async function callLLM(
     (callLLM as any)._configLogged = true;
   }
 
-  const requestBody: Record<string, unknown> = {
-    model: model,
-    messages: messages,
-    temperature: temperature,
-    // 只有部分模型支持 response_format
-    ...(jsonMode && { response_format: { type: 'json_object' } }),
-  };
+  const requestBody = createLLMRequestBody(messages, model, temperature, jsonMode);
 
   let lastError: Error | null = null;
 
@@ -181,17 +338,13 @@ export async function callLLM(
         await sleep(delay);
       }
 
-      const response = await fetch(`${normalizedEndpoint}/chat/completions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`,
-          // 多网关路由：告知 Cloudflare Functions 选择对应网关
-          'X-Gateway-Provider': _provider,
-        },
-        body: JSON.stringify(requestBody),
-        signal: controller.signal,
-      });
+      const response = await fetchChatCompletion(
+        normalizedEndpoint,
+        apiKey,
+        _provider,
+        requestBody,
+        controller.signal
+      );
 
       clearTimeout(timeoutId);
 
@@ -253,7 +406,20 @@ export async function callLLM(
         }
       }
 
-      const data: LLMChatCompletionResponse = await response.json();
+      const rawData: unknown = await response.json();
+
+      if (shouldRetryWithStreaming(rawData)) {
+        Logger.warn('⚠️ LLM 非流式响应正文为空，尝试流式回退...');
+        return await retryWithStreamingFallback(
+          normalizedEndpoint,
+          apiKey,
+          _provider,
+          requestBody,
+          controller.signal
+        );
+      }
+
+      const data = rawData as LLMChatCompletionResponse;
 
       // 🎯 数据边界验证：验证 LLM 响应格式
       if (!isLLMChatCompletionResponse(data)) {
@@ -287,7 +453,23 @@ export async function callLLM(
         );
       }
 
-      return data.choices[0].message.content || '';
+      const assistantContent = getAssistantContent(data);
+      if (!assistantContent) {
+        throw new ApiError(
+          '模型返回空输出，请检查网关兼容性或切换模型',
+          'API_INVALID_RESPONSE',
+          response.status,
+          JSON.stringify(data).substring(0, 500),
+          {
+            module: 'LLMService',
+            action: 'callLLM',
+            model,
+            endpoint: normalizedEndpoint
+          }
+        );
+      }
+
+      return assistantContent;
     } catch (e) {
       clearTimeout(timeoutId);
       lastError = e as Error;
