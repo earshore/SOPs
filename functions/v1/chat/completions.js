@@ -70,6 +70,7 @@ export async function onRequest(context) {
   try {
     // ============================================================
     // 🔒 统一鉴权 - 验证 AUTH_PASSWORD
+    // 注意：前端传递的 Authorization 是用户输入的密码，不是 API Key
     // ============================================================
     const authHeader = context.request.headers.get("Authorization") || "";
     const userProvidedPass = authHeader.replace(/^Bearer\s+/i, "").trim();
@@ -77,7 +78,7 @@ export async function onRequest(context) {
     const correctPassword = context.env.AUTH_PASSWORD;
     if (correctPassword && userProvidedPass !== correctPassword) {
       return new Response(JSON.stringify({
-        error: { message: "⛔ 访问被拒绝：请输入正确的访问密码 (AUTH_PASSWORD)" }
+        error: { message: "Invalid token (request id: " + Date.now() + ")", type: "new_api_error", code: "" }
       }), {
         status: 401,
         headers: { "Content-Type": "application/json", ...CORS_HEADERS },
