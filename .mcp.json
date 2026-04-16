@@ -37,7 +37,7 @@
       "args": [
         "-y",
         "@modelcontextprotocol/server-filesystem",
-        "D:\\Users\\Administrator\\Documents\\GitHub\\AihangSOP"
+        "D:\\Users\\Administrator\\Documents\\GitHub\\sops"
       ],
       "description": "增强文件操作 - 批量文件操作、模板生成"
     }

@@ -30,7 +30,7 @@
     "migrator",
     "bem"
   ],
-  "author": "AihangSOP Team",
+  "author": "sops Team",
   "license": "MIT",
   "dependencies": {
     "jsdom": "^24.0.0",

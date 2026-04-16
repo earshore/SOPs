@@ -1,6 +1,5 @@
-# SOPs - 亚马逊运营管理平台
+# sops - 亚马逊运营管理平台
 
-> Amazing Amazon Architect - 专业的亚马逊运营管理解决方案
 
 ---
 
@@ -25,14 +24,17 @@ npm run preview
 ## 📚 项目文档
 
 ### 核心文档
-- [CSS 架构系统](./docs/CSS-ARCHITECTURE-README.md) - CSS 架构快速开始指南
-- [CSS 架构指南](./docs/css-architecture-guide.md) - 完整的 CSS 架构使用指南
-- [路由系统分析](./docs/routing-system-analysis-2026-02-28.md) - 路由系统架构分析
+- [CLAUDE.md](./CLAUDE.md) - Claude Code 开发指南
+- [CSS 架构系统](./docs/guides/css/CSS-ARCHITECTURE-README.md) - CSS 架构快速开始指南
+- [CSS 架构指南](./docs/guides/css/css-architecture-guide.md) - 完整的 CSS 架构使用指南
+- [最佳实践](./docs/development/best-practices.md) - 开发最佳实践
+- [文档索引](./docs/INDEX.md) - 完整的文档导航
 
 ### 技术文档
-- [最佳实践](./docs/best-practices.md) - 开发最佳实践
-- [性能优化](./docs/promptlab-performance-report.md) - 性能优化报告
-- [安全指南](./docs/security-low-severity-issues.md) - 安全问题处理
+- [API 文档](./docs/api/) - 核心 API 文档
+- [测试指南](./tests/README.md) - 测试文档和指南
+- [故障排查](./docs/troubleshooting/troubleshooting-guide.md) - 常见问题解决方案
+- [变更日志](./CHANGELOG.md) - 项目变更历史
 
 ---
 
@@ -60,7 +62,7 @@ npm run css:audit
 npm run css:migrate
 ```
 
-详细文档: [CSS 架构系统使用指南](./docs/CSS-ARCHITECTURE-README.md)
+详细文档: [CSS 架构系统使用指南](./docs/guides/css/CSS-ARCHITECTURE-README.md)
 
 ---
 
@@ -184,7 +186,7 @@ npm run security:audit   # 安全审计
 - 14 个 Z-index 层级
 - 完整的动画系统
 
-详细文档: [CSS 架构指南](./docs/css-architecture-guide.md)
+详细文档: [CSS 架构指南](./docs/guides/css/css-architecture-guide.md)
 
 ---
 
@@ -266,7 +268,7 @@ npm run lighthouse       # Lighthouse 测试
 - 功能分支开发
 - Code Review 流程
 
-详细文档: [最佳实践](./docs/best-practices.md)
+详细文档: [最佳实践](./docs/development/best-practices.md)
 
 ---
 
@@ -401,10 +403,12 @@ this.container!.innerHTML = templateHTML;
 
 ## 🤝 贡献指南
 
+我们欢迎所有形式的贡献！请查看 [贡献指南](./.kiro/CONTRIBUTING.md) 了解详细信息。
+
 ### 开发流程
 1. Fork 项目
 2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
+3. 提交更改 (`git commit -m 'feat: add some AmazingFeature'`)
 4. 推送到分支 (`git push origin feature/AmazingFeature`)
 5. 创建 Pull Request
 
@@ -412,6 +416,8 @@ this.container!.innerHTML = templateHTML;
 - 确保所有测试通过
 - 遵循代码规范
 - 更新相关文档
+
+详细信息请参考: [贡献指南](./.kiro/CONTRIBUTING.md)
 
 ---
 
@@ -427,5 +433,5 @@ this.container!.innerHTML = templateHTML;
 
 ---
 
-**维护者**: AihangSOP 开发团队  
-**最后更新**: 2026-03-01
+**维护者**: sops 开发团队  
+**最后更新**: 2026-04-17

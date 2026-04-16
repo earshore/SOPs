@@ -1,0 +1,139 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+### Added
+- 新增 CBA 网关提供商支持
+- 新增 KR 网关提供商和 Anthropic 适配器
+- 新增 ChatAnywhere 支持
+- 新增 Cloudflare 环境部署脚本
+- 新增 NEW/CPA 网关占位符到环境文件
+
+### Changed
+- 替换旧版网关为 new_api 和 cpa
+- 更新 CB-E 网关 URL 为 sds.dpdns.org
+- 使用 chatanywhere.org 并修复 OpenAI 域名
+- 集中化 CORS 头部并优化响应
+
+### Fixed
+- 修复 CSS 构建和 API 认证问题（Cloudflare Pages）
+- 修复 Alpine.js `$cleanup` 生命周期钩子错误
+- 修复 Keyword Hunter 路由路径错误
+- 修复最小化按钮不可见问题
+
+## [1.0.0] - 2026-03-22
+
+### Added
+- 完整的设计令牌系统
+  - 300+ 个设计令牌统一管理
+  - 自动生成 CSS 变量、Tailwind 配置和 TypeScript 类型
+  - 17 种颜色方案，11 级梯度
+- 依赖注入容器系统
+  - 核心服务和业务服务的集中管理
+  - 服务生命周期管理
+- 模块化架构
+  - BaseModule 基类提供统一生命周期
+  - 自动资源清理
+  - 模块懒加载支持
+- 路由系统
+  - 基于 Navigo 的现代化路由
+  - 路由预加载
+  - 模块生命周期集成
+- 完整的测试套件
+  - Vitest 单元测试
+  - Playwright E2E 测试
+  - 性能测试
+  - 视觉回归测试
+- 代码质量工具
+  - ESLint 代码检查
+  - Prettier 代码格式化
+  - TypeScript 严格模式
+  - 技术债务扫描工具
+  - CSS 变量审查和迁移工具
+- 安全特性
+  - XSS 防护
+  - CSRF 防护
+  - 内容安全策略（CSP）
+  - 安全审计工具
+
+### Changed
+- 采用 Vite 作为构建工具
+- 使用 Alpine.js 作为响应式框架
+- 使用 Tailwind CSS 作为 CSS 框架
+- 使用 Zustand 进行状态管理
+
+### Architecture
+- 实现事件总线系统（EventBus）
+  - 替代 window.dispatchEvent
+  - 类型安全的事件系统
+  - 内存泄漏检测
+- 实现结构化错误处理
+  - ValidationError - 验证错误
+  - ApiError - API 错误
+  - BusinessError - 业务逻辑错误
+  - SystemError - 系统错误
+- 实现 StorageService
+  - 类型安全的 localStorage 封装
+  - 自动序列化/反序列化
+- 实现 Logger 服务
+  - 统一的日志记录
+  - 日志级别控制
+  - 性能监控集成
+
+### Documentation
+- 添加 CLAUDE.md 开发指南
+- 添加 CSS 架构系统文档
+- 添加最佳实践文档
+- 添加 API 文档
+- 添加测试指南
+- 添加故障排查指南
+
+### Performance
+- CSS 代码分割
+- 模块懒加载
+- 资源压缩（Gzip + Brotli）
+- Tree Shaking
+- 关键 CSS 内联
+- 图片懒加载
+- 路由预加载
+
+### Technical Debt
+- 完成错误处理标准化（100%）
+- 完成内存泄漏修复（100%）
+- 完成事件机制迁移（56%）
+- 架构债务整体完成率：79%
+
+## [0.1.0] - 2025-12-01
+
+### Added
+- 初始项目结构
+- 基础模块系统
+- 基础路由系统
+- 基础样式系统
+
+---
+
+## 版本说明
+
+### 版本号规则
+- **主版本号（Major）**: 不兼容的 API 修改
+- **次版本号（Minor）**: 向下兼容的功能性新增
+- **修订号（Patch）**: 向下兼容的问题修正
+
+### 变更类型
+- **Added**: 新增功能
+- **Changed**: 功能变更
+- **Deprecated**: 即将废弃的功能
+- **Removed**: 已移除的功能
+- **Fixed**: 问题修复
+- **Security**: 安全相关修复
+
+---
+
+**维护者**: sops 开发团队  
+**最后更新**: 2026-04-17

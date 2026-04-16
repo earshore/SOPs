@@ -336,7 +336,7 @@ export class LoggerService implements ILoggerService {
         },
         body: JSON.stringify({
           logs: logsToSend,
-          app: 'AihangSOP',
+          app: 'sops',
           version: '1.0.0',
         }),
       });

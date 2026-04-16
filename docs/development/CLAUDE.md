@@ -4,7 +4,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-AihangSOP (Amazing Amazon Architect) - 亚马逊运营管理平台。基于 Vite + TypeScript + Alpine.js + Tailwind CSS 构建的现代化 SPA 应用。
 
 ## Essential Commands
 

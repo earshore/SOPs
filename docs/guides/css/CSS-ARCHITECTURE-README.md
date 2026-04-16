@@ -424,5 +424,5 @@ A: 运行 `npm run css:migrate:dry` 预览，然后运行 `npm run css:migrate` 
 
 ---
 
-**维护者**: AihangSOP 开发团队  
+**维护者**: sops 开发团队  
 **更新时间**: 2026-03-01

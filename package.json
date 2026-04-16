@@ -1,7 +1,7 @@
 {
     "name": "sops",
     "version": "1.0.0",
-    "description": "Amazing Amazon Architect - 亚马逊运营管理平台",
+    "description": "sops - 亚马逊运营管理平台",
     "type": "module",
     "scripts": {
         "dev": ".\\scripts\\dev.bat",
