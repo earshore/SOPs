@@ -28,6 +28,7 @@ npm run preview
 - [CSS 架构系统](./docs/guides/css/CSS-ARCHITECTURE-README.md) - CSS 架构快速开始指南
 - [CSS 架构指南](./docs/guides/css/css-architecture-guide.md) - 完整的 CSS 架构使用指南
 - [最佳实践](./docs/development/best-practices.md) - 开发最佳实践
+- [网关维护指南](./docs/guides/gateway-maintenance-guide.md) - LLM 网关维护步骤
 - [文档索引](./docs/INDEX.md) - 完整的文档导航
 
 ### 技术文档

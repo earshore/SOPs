@@ -7,6 +7,7 @@
 ## 功能使用指南 (`guides/`)
 
 - [LLM 网关接入指南](./guides/llm-gateway-integration-guide.md) — 新增网关的完整步骤
+- [网关维护步骤指南](./guides/gateway-maintenance-guide.md) — 网关日常维护和故障排查
 - [DNA 提取器使用指南](./guides/dna-extractor-guide.md)
 - [Promptlab 置信度用户指南](./guides/promptlab-confidence-user-guide.md)
 

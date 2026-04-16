@@ -63,6 +63,8 @@
 ### 功能指南
 - [DNA Extractor 指南](./guides/dna-extractor-guide.md) - DNA 提取器使用
 - [Promptlab Confidence 用户指南](./guides/promptlab-confidence-user-guide.md) - Promptlab 置信度功能
+- [LLM 网关接入指南](./guides/llm-gateway-integration-guide.md) - 新增网关的完整步骤
+- [网关维护步骤指南](./guides/gateway-maintenance-guide.md) - 网关日常维护和故障排查
 - [命名验证器 README](./guides/naming-validator/naming-validator-README.md) - 命名验证工具
 - [命名验证器使用](./guides/naming-validator/naming-validator-USAGE.md) - 使用说明
 
