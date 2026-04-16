@@ -1,40 +1,9 @@
-// functions/v1/models.js
-// 多网关路由分发 - 根据 X-Gateway-Provider 请求头自动选择 baseURL 和 apiKey
+// functions/v1/models-optimized.js
+// 模型列表 API - 使用自动发现机制
 
-/**
- * 从逗号分隔的多个 API Key 中随机选取一个
- * 支持单 key 和多 key（如 "sk-aaa,sk-bbb,sk-ccc"）
- * @param {string} raw - 原始 key 字符串
- * @returns {string}
- */
-function pickApiKey(raw) {
-  if (!raw) return "";
-  const keys = raw.split(",").map(k => k.trim()).filter(Boolean);
-  if (keys.length <= 1) return keys[0] || "";
-  return keys[Math.floor(Math.random() * keys.length)];
-}
+import { resolveGateway, validateGateway, listGateways } from './_shared/gateway-resolver.js';
 
-/**
- * 根据 provider 标识解析网关配置
- * @param {string} provider
- * @param {object} env
- * @returns {{ baseUrl: string, apiKey: string } | null}
- */
-function resolveGateway(provider, env) {
-  const map = {
-    new_api: {
-      baseUrl: env.GATEWAY_NEW_BASE_URL || "https://new.hongecb.store/v1",
-      apiKey:  pickApiKey(env.GATEWAY_NEW_API_KEY),
-    },
-    cpa: {
-      baseUrl: env.GATEWAY_CPA_BASE_URL || "https://cpa.hongecb.store/v1",
-      apiKey:  pickApiKey(env.GATEWAY_CPA_API_KEY),
-    },
-  };
-  return map[provider] || null;
-}
-
-/** 统一 CORS 响应头，所有响应都附加 */
+/** 统一 CORS 响应头 */
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
@@ -56,7 +25,6 @@ export async function onRequest(context) {
   try {
     // ============================================================
     // 🔒 统一鉴权 - 验证 AUTH_PASSWORD
-    // 注意：前端传递的 Authorization 是用户输入的密码，不是 API Key
     // ============================================================
     const authHeader = context.request.headers.get("Authorization") || "";
     const userProvidedPass = authHeader.replace(/^Bearer\s+/i, "").trim();
@@ -64,7 +32,7 @@ export async function onRequest(context) {
     const correctPassword = context.env.AUTH_PASSWORD;
     if (correctPassword && userProvidedPass !== correctPassword) {
       return new Response(JSON.stringify({
-        error: { message: "Invalid token (request id: " + Date.now() + ")", type: "new_api_error", code: "" }
+        error: { message: "Invalid token (request id: " + Date.now() + ")", type: "auth_error", code: "" }
       }), {
         status: 401,
         headers: { "Content-Type": "application/json", ...CORS_HEADERS },
@@ -72,24 +40,32 @@ export async function onRequest(context) {
     }
 
     // ============================================================
-    // 🚦 网关路由
+    // 🚦 网关路由 - 自动发现和验证
     // ============================================================
     const provider = (context.request.headers.get("X-Gateway-Provider") || "new_api").toLowerCase();
-    const gateway = resolveGateway(provider, context.env);
 
-    if (!gateway) {
+    // 验证网关
+    const validation = validateGateway(provider, context.env);
+    if (!validation.valid) {
+      const availableGateways = listGateways(context.env).map(g => g.id);
       return new Response(JSON.stringify({
-        error: { message: `⛔ 未知网关标识: ${provider}，支持: new_api, cpa` }
+        error: {
+          message: validation.error,
+          available_gateways: availableGateways,
+        }
       }), {
         status: 400,
         headers: { "Content-Type": "application/json", ...CORS_HEADERS },
       });
     }
 
+    // 解析网关配置
+    const gateway = resolveGateway(provider, context.env);
+
     console.log(`🌐 [models] provider=${provider} → ${gateway.baseUrl}`);
 
     // ============================================================
-    // 📡 转发到上游网关 /models（referrerPolicy: no-referrer 阻止携带 Referer）
+    // 📡 转发到上游网关 /models
     // ============================================================
     const response = await fetch(`${gateway.baseUrl}/models`, {
       method: "GET",
@@ -99,42 +75,27 @@ export async function onRequest(context) {
       referrerPolicy: "no-referrer",
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`❌ [models] 上游错误 ${response.status}:`, errorText);
+    const responseData = await response.text();
 
-      if (response.status === 403 && errorText.includes("Country") && errorText.includes("not supported")) {
-        return new Response(JSON.stringify({
-          error: {
-            message: `⛔ 地理限制：网关 ${provider} 当前无法访问模型列表。请切换其他网关。`,
-            status: 403,
-          }
-        }), {
-          status: 403,
-          headers: {
-            "Content-Type": "application/json",
-            "X-Error-Type": "GEO_RESTRICTION",
-            ...CORS_HEADERS,
-          },
-        });
-      }
-
-      return new Response(errorText, {
-        status: response.status,
-        headers: { "Content-Type": "application/json", ...CORS_HEADERS },
-      });
-    }
-
-    const data = await response.json();
-
-    return new Response(JSON.stringify(data), {
-      status: 200,
-      headers: { "Content-Type": "application/json", ...CORS_HEADERS },
+    return new Response(responseData, {
+      status: response.status,
+      headers: {
+        "Content-Type": "application/json",
+        "X-Gateway-Provider": provider,
+        ...CORS_HEADERS,
+      },
     });
 
-  } catch (err) {
-    console.error(`❌ [models] 服务器错误:`, err);
-    return new Response(JSON.stringify({ error: { message: `Server Error: ${err.message}` } }), {
+  } catch (error) {
+    console.error("❌ [models] Error:", error);
+
+    return new Response(JSON.stringify({
+      error: {
+        message: "Internal server error",
+        type: "server_error",
+        details: error.message,
+      }
+    }), {
       status: 500,
       headers: { "Content-Type": "application/json", ...CORS_HEADERS },
     });
