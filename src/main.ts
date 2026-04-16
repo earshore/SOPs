@@ -38,6 +38,9 @@ import { Logger } from './services/loggerService';
 import { container } from './common/di/Container';
 import { initViews } from './common/utils/viewLoader';
 
+// ✅ 导入网关服务
+import { initGatewayService } from './services/gatewayService';
+
 // ✅ 导入 Web Components
 import './components/modal/AppModal';
 
@@ -167,6 +170,16 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     // ================================================================
     // 初始化成功，继续启动流程
     // ================================================================
+
+    // 🎯 初始化网关服务
+    try {
+      Logger.debug('🌐 Initializing Gateway Service...');
+      await initGatewayService();
+      Logger.debug('✅ Gateway Service initialized');
+    } catch (error) {
+      Logger.error('❌ Gateway Service initialization failed:', error);
+      // 网关服务初始化失败不应阻止应用启动，会使用 fallback 配置
+    }
 
     // 🔧 暴露核心服务到 window (用于测试和调试)
     try {
