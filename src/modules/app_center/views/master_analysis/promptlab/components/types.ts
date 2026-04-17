@@ -42,10 +42,13 @@ export interface PromptlabAlpineContext {
   profile: UserProductProfile;
   dnaConfidence: DnaConfidence;
   hasRenderedReportOnce: boolean;
+  expandedDimensions: Set<string>;
+  expandedSubItems: Set<string>;
   _unsubscribers: Array<() => void>;
   _appStoreUnsubscribe: (() => void) | null;
 
   // ---- 跨模块调用的方法 ----
   saveState(): void;
   renderReportAnalysis(): void;
+  initializeGranularSelections(dimensionId: string): void;
 }

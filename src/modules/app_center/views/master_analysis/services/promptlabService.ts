@@ -530,14 +530,18 @@ const buildContextSection = (
   inputs: PromptInputs,
   analysisReport: AnalysisReport | null,
 ): string => {
-  const { useAnalysisData, selectedReportSections } = inputs;
+  const { useAnalysisData, selectedReportItems, selectedReportSections } = inputs;
 
-  if (
-    !useAnalysisData ||
-    !analysisReport ||
-    !selectedReportSections ||
-    selectedReportSections.length === 0
-  ) {
+  if (!useAnalysisData || !analysisReport) {
+    return "";
+  }
+
+  // 向后兼容：优先使用新格式 selectedReportItems，否则使用旧格式 selectedReportSections
+  const dimensionsToInclude = selectedReportItems
+    ? Object.keys(selectedReportItems).filter(id => selectedReportItems[id]?.enabled)
+    : selectedReportSections || [];
+
+  if (dimensionsToInclude.length === 0) {
     return "";
   }
 
@@ -571,9 +575,15 @@ const buildContextSection = (
 
   const markdownSections: string[] = [];
 
-  selectedReportSections.forEach((targetId) => {
+  dimensionsToInclude.forEach((targetId) => {
     if (!report[targetId]) return;
-    const md = convertSectionToMarkdown(targetId, report[targetId]);
+
+    // 新功能：根据细粒度选择过滤子项
+    const filteredData = selectedReportItems?.[targetId]
+      ? filterSubItems(report[targetId], selectedReportItems[targetId].subItems)
+      : report[targetId]; // 向后兼容：包含所有子项
+
+    const md = convertSectionToMarkdown(targetId, filteredData);
     if (md) markdownSections.push(md);
   });
 
@@ -583,8 +593,68 @@ const buildContextSection = (
 };
 
 /**
- * 构建产品 DNA (Product DNA Section)
+ * 过滤子项数据
+ * 根据用户的细粒度选择，只保留选中的子项和具体内容项
  */
+function filterSubItems(
+  data: unknown,
+  subItemSelections: Record<string, boolean | { enabled: boolean; items?: Record<string, boolean> }> | undefined
+): unknown {
+  if (!data || typeof data !== 'object') return data;
+  if (!subItemSelections) return data; // 无过滤配置，返回全部
+
+  const filtered: Record<string, unknown> = {};
+  const dataObj = data as Record<string, unknown>;
+
+  for (const [key, value] of Object.entries(dataObj)) {
+    const selection = subItemSelections[key];
+
+    // 简单布尔值：直接判断是否选中
+    if (typeof selection === 'boolean') {
+      if (selection !== false) {
+        filtered[key] = value;
+      }
+      continue;
+    }
+
+    // 对象结构：需要检查 enabled 和 items
+    if (typeof selection === 'object') {
+      if (!selection.enabled) continue; // 子项未启用，跳过
+
+      // 如果是数组且有具体项选择配置
+      if (Array.isArray(value) && selection.items) {
+        const items = selection.items;
+        const hasExplicitSelections = Object.keys(items).length > 0;
+
+        if (hasExplicitSelections) {
+          // 过滤数组中的具体项
+          const filteredArray = value.filter((_, index) => {
+            const indexStr = index.toString();
+            // 如果 items 中有该索引，使用其值；否则默认选中
+            return items[indexStr] !== false;
+          });
+          if (filteredArray.length > 0) {
+            filtered[key] = filteredArray;
+          }
+        } else {
+          // 空对象表示全选
+          filtered[key] = value;
+        }
+      } else {
+        // 非数组或无具体项配置，直接包含
+        filtered[key] = value;
+      }
+      continue;
+    }
+
+    // 未在配置中，默认包含
+    if (selection === undefined) {
+      filtered[key] = value;
+    }
+  }
+
+  return filtered;
+}
 const buildProductSection = (inputs: PromptInputs): string => {
   const { audience, usps, specs } = inputs;
   const dnaParts: string[] = [];
@@ -594,7 +664,7 @@ const buildProductSection = (inputs: PromptInputs): string => {
   if (specs) dnaParts.push(`- **Technical Specs**: \n${specs}`);
 
   return dnaParts.length > 0
-    ? `\n## Product DNA\n${dnaParts.join("\n")}\n`
+    ? `\n## Product DNA Supplement\n${dnaParts.join("\n")}\n`
     : "";
 };
 

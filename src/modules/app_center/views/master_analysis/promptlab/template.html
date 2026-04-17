@@ -58,7 +58,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 relative pb-10">
         <!-- ===== Left Column: Config Cards ===== -->
         <div class="lg:col-span-8 space-y-6">
-            <!-- Card 1: Product DNA -->
+            <!-- Card 1: Product DNA Supplement -->
             <div class="rounded-2xl shadow-sm shadow-slate-200/50 border border-slate-200/80 bg-white overflow-hidden"
                 id="card-product-dna">
                 <!-- Card Header -->
@@ -69,8 +69,8 @@
                                 class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-sm shadow-indigo-500/20">
                                 <span class="text-xs font-bold text-white">1</span>
                             </div>
-                            产品 DNA 定义
-                            <span class="text-[10px] text-slate-400 font-normal ml-1">Product DNA</span>
+                            产品 DNA 补充
+                            <span class="text-[10px] text-slate-400 font-normal ml-1">Product DNA Supplement</span>
                         </h3>
                         <div class="flex items-center gap-2">
                             <!-- 从报告加载按钮 -->
@@ -294,34 +294,19 @@
                                 id="lab-analysis-status">
                                 <i class="fas fa-circle-notch fa-spin text-[10px]"></i> 检测中...
                             </div>
+                            <!-- 展开/折叠所有维度按钮 -->
+                            <button @click="expandedDimensions.size > 0 ? collapseAllDimensions() : expandAllDimensions()"
+                                    x-show="hasReport"
+                                    class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all flex items-center justify-center"
+                                    :title="expandedDimensions.size > 0 ? '折叠所有维度' : '展开所有维度'">
+                                <i class="fas text-sm" :class="expandedDimensions.size > 0 ? 'fa-compress' : 'fa-expand'"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
                 <!-- Card Body -->
                 <div class="p-6">
                     <div class="rounded-xl overflow-hidden bg-slate-50/50">
-                        <!-- Toggle Header -->
-                        <div class="flex items-center justify-between px-4 py-3 bg-white">
-                            <div class="text-sm font-semibold text-slate-600">
-                                <i class="fas fa-list-check text-blue-500 mr-1.5"></i>
-                                选择注入的分析维度
-                            </div>
-                            <!-- 全选/清空按钮组 -->
-                            <div class="flex items-center gap-2">
-                                <button @click="selectAllReportSections"
-                                    class="px-2.5 py-1.5 flex items-center gap-1.5 rounded-lg hover:bg-blue-50 text-slate-500 hover:text-blue-600 transition-all cursor-pointer text-xs font-medium"
-                                    title="全选">
-                                    <i class="fas fa-check-double text-[10px]"></i>
-                                    <span>全选</span>
-                                </button>
-                                <button @click="clearReportSections"
-                                    class="px-2.5 py-1.5 flex items-center gap-1.5 rounded-lg hover:bg-slate-50 text-slate-400 hover:text-slate-600 transition-all cursor-pointer text-xs font-medium"
-                                    title="清空">
-                                    <i class="fas fa-times text-[10px]"></i>
-                                    <span>清空</span>
-                                </button>
-                            </div>
-                        </div>
                         <!-- Report Sections -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto custom-scrollbar p-4"
                             id="report-sections-container">

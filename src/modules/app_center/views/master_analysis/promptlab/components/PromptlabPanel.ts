@@ -131,6 +131,12 @@ export function createPromptlabPanel() {
     /** 是否已渲染过报告（用于区分首次加载和用户主动清空） */
     hasRenderedReportOnce: false,
 
+    /** 展开的维度集合（UI状态，不持久化） */
+    expandedDimensions: new Set<string>(),
+
+    /** 展开的子项集合（UI状态，不持久化） */
+    expandedSubItems: new Set<string>(),
+
     _unsubscribers: [] as Array<() => void>,
     _appStoreUnsubscribe: null as (() => void) | null,
 
@@ -358,6 +364,376 @@ export function createPromptlabPanel() {
 
     onInputChange() {
       onInputChange(this as unknown as PromptlabAlpineContext);
+    },
+
+    // ========== Granular Selection Methods ==========
+
+    /**
+     * 初始化维度的细粒度选择
+     * 默认所有子项都选中
+     */
+    initializeGranularSelections(dimensionId: string): void {
+      const report = appStore.getState().analysis.analysisReport;
+
+      // 处理报告可能是字符串的情况
+      if (!report || typeof report === 'string') return;
+
+      const dimensionData = report[dimensionId];
+
+      if (!dimensionData || typeof dimensionData !== 'object') return;
+
+      if (!this.profile.selectedReportItems) {
+        this.profile.selectedReportItems = {};
+      }
+
+      const subItems: Record<string, boolean | { enabled: boolean; items?: Record<string, boolean> }> = {};
+      Object.keys(dimensionData).forEach(key => {
+        const value = (dimensionData as Record<string, unknown>)[key];
+        // 如果是数组，初始化为对象结构以支持具体项选择
+        if (Array.isArray(value) && value.length > 0) {
+          subItems[key] = {
+            enabled: true,
+            items: {} // 空对象表示全选
+          };
+        } else {
+          subItems[key] = true; // 非数组类型保持简单布尔值
+        }
+      });
+
+      this.profile.selectedReportItems[dimensionId] = {
+        enabled: true,
+        subItems
+      };
+    },
+
+    /**
+     * 检查维度是否启用
+     */
+    isDimensionEnabled(dimensionId: string): boolean {
+      return this.profile.selectedReportItems?.[dimensionId]?.enabled ?? false;
+    },
+
+    /**
+     * 检查维度是否部分选中（用于 indeterminate 状态）
+     */
+    isPartiallySelected(dimensionId: string): boolean {
+      const item = this.profile.selectedReportItems?.[dimensionId];
+      if (!item || !item.enabled) return false;
+
+      const subItems = Object.values(item.subItems);
+      const selectedCount = subItems.filter(Boolean).length;
+      return selectedCount > 0 && selectedCount < subItems.length;
+    },
+
+    /**
+     * 检查维度是否展开
+     */
+    isExpanded(dimensionId: string): boolean {
+      return this.expandedDimensions.has(dimensionId);
+    },
+
+    /**
+     * 切换维度展开/折叠
+     */
+    toggleExpansion(dimensionId: string): void {
+      if (this.expandedDimensions.has(dimensionId)) {
+        this.expandedDimensions.delete(dimensionId);
+      } else {
+        this.expandedDimensions.add(dimensionId);
+      }
+    },
+
+    /**
+     * 处理维度复选框切换
+     */
+    onDimensionToggle(dimensionId: string): void {
+      if (!this.profile.selectedReportItems) {
+        this.profile.selectedReportItems = {};
+      }
+
+      if (!this.profile.selectedReportItems[dimensionId]) {
+        this.initializeGranularSelections(dimensionId);
+      } else {
+        const current = this.profile.selectedReportItems[dimensionId].enabled;
+        const newState = !current;
+        this.profile.selectedReportItems[dimensionId].enabled = newState;
+
+        // 级联更新：当维度被选中/取消时，更新所有子项和具体内容项
+        const subItems = this.profile.selectedReportItems[dimensionId].subItems;
+        Object.keys(subItems).forEach(subItemKey => {
+          const subItem = subItems[subItemKey];
+          if (typeof subItem === 'boolean') {
+            subItems[subItemKey] = newState;
+          } else if (typeof subItem === 'object') {
+            subItem.enabled = newState;
+            // 如果有具体内容项，也一并更新
+            if (newState) {
+              // 选中时清空 items（表示全选）
+              subItem.items = {};
+            } else {
+              // 取消选中时，将所有具体项设为 false
+              if (subItem.items) {
+                const report = appStore.getState().analysis.analysisReport;
+                if (report && typeof report !== 'string') {
+                  const dimensionData = report[dimensionId];
+                  if (dimensionData && typeof dimensionData === 'object') {
+                    const dataArray = (dimensionData as Record<string, unknown>)[subItemKey];
+                    if (Array.isArray(dataArray)) {
+                      subItem.items = {};
+                      dataArray.forEach((_, idx) => {
+                        subItem.items![idx.toString()] = false;
+                      });
+                    }
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
+
+      this.saveState();
+    },
+
+    /**
+     * 处理子项复选框切换
+     */
+    onSubItemToggle(dimensionId: string, subItemKey: string): void {
+      if (!this.profile.selectedReportItems?.[dimensionId]) return;
+
+      const subItem = this.profile.selectedReportItems[dimensionId].subItems[subItemKey];
+
+      if (typeof subItem === 'boolean') {
+        const newState = !subItem;
+        this.profile.selectedReportItems[dimensionId].subItems[subItemKey] = newState;
+      } else if (typeof subItem === 'object') {
+        const newState = !subItem.enabled;
+        subItem.enabled = newState;
+
+        // 级联更新：当子项被选中/取消时，更新所有具体内容项
+        if (newState) {
+          // 选中时清空 items（表示全选）
+          subItem.items = {};
+        } else {
+          // 取消选中时，将所有具体项设为 false
+          const report = appStore.getState().analysis.analysisReport;
+          if (report && typeof report !== 'string') {
+            const dimensionData = report[dimensionId];
+            if (dimensionData && typeof dimensionData === 'object') {
+              const dataArray = (dimensionData as Record<string, unknown>)[subItemKey];
+              if (Array.isArray(dataArray)) {
+                subItem.items = {};
+                dataArray.forEach((_, idx) => {
+                  subItem.items![idx.toString()] = false;
+                });
+              }
+            }
+          }
+        }
+      }
+
+      this.saveState();
+    },
+
+    /**
+     * 检查子项是否选中
+     */
+    isSubItemSelected(dimensionId: string, subItemKey: string): boolean {
+      const subItem = this.profile.selectedReportItems?.[dimensionId]?.subItems[subItemKey];
+      if (typeof subItem === 'boolean') return subItem;
+      if (typeof subItem === 'object') return subItem.enabled;
+      return true;
+    },
+
+    /**
+     * 检查子项是否展开
+     */
+    isSubItemExpanded(dimensionId: string, subItemKey: string): boolean {
+      return this.expandedSubItems.has(`${dimensionId}:${subItemKey}`);
+    },
+
+    /**
+     * 切换子项展开/折叠
+     */
+    toggleSubItemExpansion(dimensionId: string, subItemKey: string): void {
+      const key = `${dimensionId}:${subItemKey}`;
+      if (this.expandedSubItems.has(key)) {
+        this.expandedSubItems.delete(key);
+      } else {
+        this.expandedSubItems.add(key);
+      }
+    },
+
+    /**
+     * 检查具体内容项是否选中
+     */
+    isContentItemSelected(dimensionId: string, subItemKey: string, itemIndex: string): boolean {
+      const subItem = this.profile.selectedReportItems?.[dimensionId]?.subItems[subItemKey];
+      if (typeof subItem === 'object' && subItem.items) {
+        // 如果 items 中有该索引，返回其值；否则默认选中
+        return subItem.items[itemIndex] !== false;
+      }
+      return true;
+    },
+
+    /**
+     * 切换具体内容项选中状态
+     */
+    onContentItemToggle(dimensionId: string, subItemKey: string, itemIndex: string): void {
+      const dimension = this.profile.selectedReportItems?.[dimensionId];
+      if (!dimension) return;
+
+      const subItem = dimension.subItems[subItemKey];
+      if (typeof subItem !== 'object') return;
+
+      if (!subItem.items) {
+        subItem.items = {};
+      }
+
+      const current = subItem.items[itemIndex] !== false;
+      subItem.items[itemIndex] = !current;
+
+      this.saveState();
+    },
+
+    /**
+     * 检查子项是否部分选中（用于 indeterminate 状态）
+     */
+    isSubItemPartiallySelected(dimensionId: string, subItemKey: string): boolean {
+      const subItem = this.profile.selectedReportItems?.[dimensionId]?.subItems[subItemKey];
+      if (typeof subItem !== 'object' || !subItem.enabled || !subItem.items) return false;
+
+      const report = appStore.getState().analysis.analysisReport;
+      if (!report || typeof report === 'string') return false;
+
+      const dimensionData = report[dimensionId];
+      if (!dimensionData || typeof dimensionData !== 'object') return false;
+
+      const dataArray = (dimensionData as Record<string, unknown>)[subItemKey];
+      if (!Array.isArray(dataArray)) return false;
+
+      const totalCount = dataArray.length;
+      const selectedCount = dataArray.filter((_, idx) =>
+        subItem.items![idx.toString()] !== false
+      ).length;
+
+      return selectedCount > 0 && selectedCount < totalCount;
+    },
+
+    /**
+     * 展开所有维度
+     */
+    expandAllDimensions(): void {
+      const report = appStore.getState().analysis.analysisReport;
+      if (!report || typeof report === 'string') return;
+
+      Object.keys(report).forEach(dimensionId => {
+        this.expandedDimensions.add(dimensionId);
+      });
+    },
+
+    /**
+     * 折叠所有维度
+     */
+    collapseAllDimensions(): void {
+      this.expandedDimensions.clear();
+    },
+
+    /**
+     * 选中维度内所有子项
+     */
+    selectAllSubItems(dimensionId: string): void {
+      if (!this.profile.selectedReportItems?.[dimensionId]) return;
+
+      const subItems = this.profile.selectedReportItems[dimensionId].subItems;
+      Object.keys(subItems).forEach(key => {
+        const subItem = subItems[key];
+        if (typeof subItem === 'boolean') {
+          subItems[key] = true;
+        } else if (typeof subItem === 'object') {
+          subItem.enabled = true;
+          // 级联更新：同时选中所有具体内容项（清空 items 表示全选）
+          subItem.items = {};
+        }
+      });
+
+      this.saveState();
+    },
+
+    /**
+     * 取消选中维度内所有子项
+     */
+    deselectAllSubItems(dimensionId: string): void {
+      if (!this.profile.selectedReportItems?.[dimensionId]) return;
+
+      const subItems = this.profile.selectedReportItems[dimensionId].subItems;
+      const report = appStore.getState().analysis.analysisReport;
+
+      Object.keys(subItems).forEach(key => {
+        const subItem = subItems[key];
+        if (typeof subItem === 'boolean') {
+          subItems[key] = false;
+        } else if (typeof subItem === 'object') {
+          subItem.enabled = false;
+          // 级联更新：同时取消选中所有具体内容项
+          if (report && typeof report !== 'string') {
+            const dimensionData = report[dimensionId];
+            if (dimensionData && typeof dimensionData === 'object') {
+              const dataArray = (dimensionData as Record<string, unknown>)[key];
+              if (Array.isArray(dataArray)) {
+                subItem.items = {};
+                dataArray.forEach((_, idx) => {
+                  subItem.items![idx.toString()] = false;
+                });
+              }
+            }
+          }
+        }
+      });
+
+      this.saveState();
+    },
+
+    /**
+     * 选中子项内所有具体内容项
+     */
+    selectAllContentItems(dimensionId: string, subItemKey: string): void {
+      const dimension = this.profile.selectedReportItems?.[dimensionId];
+      if (!dimension) return;
+
+      const subItem = dimension.subItems[subItemKey];
+      if (typeof subItem === 'object') {
+        subItem.items = {}; // 空对象表示全选
+        this.saveState();
+      }
+    },
+
+    /**
+     * 取消选中子项内所有具体内容项
+     */
+    deselectAllContentItems(dimensionId: string, subItemKey: string): void {
+      const dimension = this.profile.selectedReportItems?.[dimensionId];
+      if (!dimension) return;
+
+      const subItem = dimension.subItems[subItemKey];
+      if (typeof subItem === 'object') {
+        const report = appStore.getState().analysis.analysisReport;
+        if (!report || typeof report === 'string') return;
+
+        const dimensionData = report[dimensionId];
+        if (!dimensionData || typeof dimensionData !== 'object') return;
+
+        const dataArray = (dimensionData as Record<string, unknown>)[subItemKey];
+        if (!Array.isArray(dataArray)) return;
+
+        // 将所有项设置为 false
+        subItem.items = {};
+        dataArray.forEach((_, idx) => {
+          subItem.items![idx.toString()] = false;
+        });
+
+        this.saveState();
+      }
     },
   };
 }

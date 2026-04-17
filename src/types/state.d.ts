@@ -310,15 +310,56 @@ export interface UserProductProfile {
   /**
    * 选中的报告章节
    * 从分析报告中选择要包含的章节
-   * 
+   *
+   * @deprecated 使用 selectedReportItems 获得更细粒度的控制
    * @example ['features', 'benefits', 'specifications']
    */
   selectedReportSections: string[];
 
   /**
+   * 选中的报告项（细粒度选择）
+   * 支持维度级别、子项级别和具体内容项级别的选择控制
+   *
+   * @example
+   * ```typescript
+   * {
+   *   'title-keywords': {
+   *     enabled: true,
+   *     subItems: {
+   *       'primary_keywords': {
+   *         enabled: true,
+   *         items: {
+   *           '0': true,  // 第一个关键词选中
+   *           '1': false  // 第二个关键词未选中
+   *         }
+   *       },
+   *       'secondary_keywords': {
+   *         enabled: true,
+   *         items: {}  // 空对象表示全选
+   *       }
+   *     }
+   *   }
+   * }
+   * ```
+   */
+  selectedReportItems?: {
+    [dimensionId: string]: {
+      enabled: boolean;
+      subItems: {
+        [subItemKey: string]: boolean | {
+          enabled: boolean;
+          items?: {
+            [itemIndex: string]: boolean;
+          };
+        };
+      };
+    };
+  };
+
+  /**
    * 字符限制
    * 生成内容的最大字符数
-   * 
+   *
    * @default 5000
    * @minimum 100
    * @maximum 10000
@@ -329,11 +370,11 @@ export interface UserProductProfile {
 /**
  * Prompt 输入接口
  * 扩展 UserProductProfile，添加分析数据使用标志
- * 
+ *
  * @remarks
  * 此接口用于 Prompt 生成时的完整输入参数
  * 包含产品配置和是否使用分析数据的标志
- * 
+ *
  * @example
  * ```typescript
  * const inputs: PromptInputs = {
@@ -346,10 +387,28 @@ export interface PromptInputs extends UserProductProfile {
   /**
    * 是否使用分析数据
    * 决定是否将 AI 分析报告的数据整合到 Prompt 中
-   * 
+   *
    * @default false
    */
   useAnalysisData: boolean;
+
+  /**
+   * 选中的报告项（细粒度选择）
+   * 覆盖 UserProductProfile 中的可选字段，确保在 PromptInputs 中可用
+   */
+  selectedReportItems?: {
+    [dimensionId: string]: {
+      enabled: boolean;
+      subItems: {
+        [subItemKey: string]: boolean | {
+          enabled: boolean;
+          items?: {
+            [itemIndex: string]: boolean;
+          };
+        };
+      };
+    };
+  };
 }
 
 /**
