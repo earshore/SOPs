@@ -1,40 +1,64 @@
 # sops - 亚马逊运营管理平台
 
+一个现代化的亚马逊运营管理平台，集成 AI 分析、关键词追踪、数据抓取等功能。
 
 ---
 
 ## 🚀 快速开始
 
+### 本地开发
+
 ```bash
-# 安装依赖
+# 1. 克隆项目
+git clone https://github.com/earshore/SOPs.git
+cd SOPs
+
+# 2. 安装依赖
 npm install
 
-# 开发模式
+# 3. 配置环境变量
+cp .env.example .env
+# 编辑 .env 文件，配置 AUTH_PASSWORD 和网关信息
+
+# 4. 启动开发服务器
 npm run dev
 
-# 构建生产版本
+# 访问 http://localhost:5173
+```
+
+### 部署到 Cloudflare Pages
+
+```bash
+# 1. 构建项目
 npm run build
 
-# 预览生产版本
-npm run preview
+# 2. 部署
+npx wrangler pages deploy dist --project-name sops --branch main
+
+# 3. 配置环境变量（详见部署文档）
 ```
+
+**详细说明**: 查看 [快速开始指南](./docs/GETTING_STARTED.md) 和 [完整部署文档](./docs/DEPLOYMENT.md)
 
 ---
 
 ## 📚 项目文档
 
+### 新手指南
+- [快速开始](./docs/GETTING_STARTED.md) - 5 分钟快速部署指南 ⭐
+- [完整部署文档](./docs/DEPLOYMENT.md) - 详细的部署说明和故障排查 ⭐
+- [快速参考](./docs/QUICK_REFERENCE.md) - 常用命令和配置速查
+
 ### 核心文档
 - [CLAUDE.md](./CLAUDE.md) - Claude Code 开发指南
-- [CSS 架构系统](./docs/guides/css/CSS-ARCHITECTURE-README.md) - CSS 架构快速开始指南
-- [CSS 架构指南](./docs/guides/css/css-architecture-guide.md) - 完整的 CSS 架构使用指南
+- [网关维护指南](./docs/guides/gateway-maintenance-guide.md) - LLM 网关配置和维护
+- [CSS 架构系统](./docs/guides/css/CSS-ARCHITECTURE-README.md) - CSS 架构快速开始
 - [最佳实践](./docs/development/best-practices.md) - 开发最佳实践
-- [网关维护指南](./docs/guides/gateway-maintenance-guide.md) - LLM 网关维护步骤
 - [文档索引](./docs/INDEX.md) - 完整的文档导航
 
 ### 技术文档
 - [API 文档](./docs/api/) - 核心 API 文档
 - [测试指南](./tests/README.md) - 测试文档和指南
-- [故障排查](./docs/troubleshooting/troubleshooting-guide.md) - 常见问题解决方案
 - [变更日志](./CHANGELOG.md) - 项目变更历史
 
 ---
