@@ -4,26 +4,16 @@ compatibility_date = "2024-01-01"
 
 # ============================================================
 # 部署前请在 Cloudflare Pages 控制台 → Settings → Environment Variables
-# 添加以下生产环境变量（值与 .env 一致）：
+# 添加以下生产环境变量：
 #
-#   AUTH_PASSWORD               = AI2027
-#   GATEWAY_NEW_BASE_URL         = https://new.hongecb.store/v1
-#   GATEWAY_NEW_API_KEY          = <your-key>
+#   AUTH_PASSWORD                = <your-secure-password>
+#   GATEWAY_NEW_API_BASE_URL     = https://new.hongecb.store/v1
+#   GATEWAY_NEW_API_API_KEY      = <your-api-key>
 #   GATEWAY_CPA_BASE_URL         = https://cpa.hongecb.store/v1
-#   GATEWAY_CPA_API_KEY          = <your-key>
-# ============================================================
-# 环境变量一键同步（自动读取 .env，密钥加密、明文明文）
+#   GATEWAY_CPA_API_KEY          = <your-api-key>
 #
-#   npm run deploy:env          # 同步到生产环境
-#   npm run deploy:env:dry      # 预览，不实际写入
-#   npm run deploy:env:preview  # 同步到预览环境
+# 或使用 Wrangler CLI 批量上传：
+#   npx wrangler pages secret bulk secrets.json --project-name sops
 #
-# 前提：本机已执行 `npx wrangler login`
-#       或设置环境变量 CLOUDFLARE_API_TOKEN=<your-token>
-# ============================================================
-# 手动构建部署
-#
-# npm run build
-# npx wrangler pages deploy dist --project-name sops --branch main --commit-dirty=true
-# 
+# 详细说明请参考: docs/DEPLOYMENT.md
 # ============================================================
