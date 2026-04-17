@@ -504,13 +504,6 @@ export const MENU_CONFIG: MenuConfig = {
       panelId: "panel-app_center",
       category: "master_analysis",
     },
-    [APP_CENTER_ROUTES.QALAB]: {
-      moduleId: "master_analysis",
-      label: "Q&A 预研",
-      icon: "fas fa-comments",
-      panelId: "panel-app_center",
-      category: "master_analysis",
-    },
 
     // --- Keyword Hunter 应用 ---
     [APP_CENTER_ROUTES.KW_INPUT]: {

@@ -235,7 +235,7 @@ export class NavigoAdapter {
    * @example
    * ```typescript
    * await adapter.navigate('/home');
-   * await adapter.navigate('/qalab/123', { replace: true });
+   * await adapter.navigate('/app-center/scraper', { replace: true });
    * ```
    */
   async navigate(path: string, options: NavigateOptions = {}): Promise<boolean> {

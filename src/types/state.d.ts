@@ -533,37 +533,6 @@ export interface KeywordTrackerState {
   showTranslation?: boolean;
 }
 
-// ==================== QALab状态 ====================
-
-/**
- * Rufus AI 模式（固定为 AI）
- */
-export type RufusMode = 'ai';
-
-/**
- * Rufus 消息
- */
-export interface RufusMessage {
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: number;
-}
-
-/**
- * QALab状态
- */
-export interface QALabState {
-  currentLang: string;
-  currentCategory: string;
-  allExpanded: boolean;
-  reportData: any | null;
-  generatedQAs: any[];
-  // Rufus AI 模拟器状态
-  rufusMessages: RufusMessage[];
-  rufusThinking: boolean;
-  rufusMode: RufusMode;
-}
-
 // ==================== User状态 ====================
 
 /**
@@ -658,7 +627,6 @@ export interface AppState {
   analysis: AnalysisState;
   promptlab: PromptLabState;
   keywordTracker: KeywordTrackerState;
-  qalab: QALabState;
   masterPrompt?: MasterPromptState;
   user?: UserState;
   settings?: SettingsState;

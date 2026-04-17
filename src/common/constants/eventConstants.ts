@@ -68,10 +68,7 @@ export const APP_EVENTS = {
   
   // 历史记录相关
   HISTORY_UPDATED: 'history-updated',
-  
-  // QALab 相关
-  QALAB_DATA_IMPORTED: 'qalab:data-imported',
-  
+
   // 导航相关
   NAVIGATE_TO_SCRAPER: 'navigate-to-scraper',
   NAVIGATE_TO_AI_ANALYSIS: 'navigate-to-ai-analysis',

@@ -47,7 +47,6 @@ export const APP_CENTER_ROUTES = {
   SCRAPER: "scraper",
   AI_ANALYSIS: "ai_analysis",
   PROMPTLAB: "promptlab",
-  QALAB: "qalab",
 
   // Keyword Hunter
   KW_INPUT: "kw_input",
@@ -138,7 +137,6 @@ export function getRouteModule(routeId: RouteId): string {
       "scraper",
       "ai_analysis",
       "promptlab",
-      "qalab",
       "app_center_overview",
     ].includes(routeId)
   ) {

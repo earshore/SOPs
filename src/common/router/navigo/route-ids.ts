@@ -38,7 +38,6 @@ export type RouteId =
   | "kw_process"
   | "app_center_overview"
   | "promptlab"
-  | "qalab"
   | "scraper"
   | "more_agents"
   | "more_overview"
@@ -85,7 +84,6 @@ export const ALL_ROUTE_IDS: readonly RouteId[] = [
   "kw_process",
   "app_center_overview",
   "promptlab",
-  "qalab",
   "scraper",
   "more_agents",
   "more_overview",

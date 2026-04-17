@@ -29,7 +29,6 @@ const MODULE_MAP: ModuleMap = {
   [APP_CENTER_ROUTES.SCRAPER]: () => import('./views/master_analysis/scraper/index'),
   [APP_CENTER_ROUTES.AI_ANALYSIS]: () => import('./views/master_analysis/ai_analysis/index'),
   [APP_CENTER_ROUTES.PROMPTLAB]: () => import('./views/master_analysis/promptlab/index'),
-  [APP_CENTER_ROUTES.QALAB]: () => import('./views/master_analysis/qalab/index'),
 
   // Keyword Hunter 子模块
   [APP_CENTER_ROUTES.KW_INPUT]: () => import('./views/keyword_hunter/input/index'),

@@ -66,7 +66,7 @@ export function initRouter(): NavigoAdapter {
     // 应用中心路由需要 /app-center 前缀
     if (routeId === 'app_center_overview') {
       routePath = '/app-center';
-    } else if (['scraper', 'ai_analysis', 'promptlab', 'qalab'].includes(routeId)) {
+    } else if (['scraper', 'ai_analysis', 'promptlab'].includes(routeId)) {
       routePath = `/app-center/${routeId.replace(/_/g, '-')}`;
     } else if (routeId.startsWith('kw_')) {
       routePath = `/app-center/keyword-hunter/${routeId.replace('kw_', '').replace(/_/g, '-')}`;
@@ -183,8 +183,6 @@ export function initRouter(): NavigoAdapter {
           path = '/app-center/ai-analysis';
         } else if (payload.routeId === 'promptlab') {
           path = '/app-center/promptlab';
-        } else if (payload.routeId === 'qalab') {
-          path = '/app-center/qalab';
         } else if (payload.routeId === 'kw_input') {
           path = '/app-center/keyword-hunter/input';
         } else if (payload.routeId === 'kw_process') {

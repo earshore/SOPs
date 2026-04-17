@@ -99,8 +99,7 @@ const MODULE_UPDATERS: Record<string, string> = {
   scraper: 'updateScraper',
   analysis: 'updateAnalysis',
   promptlab: 'updatePromptLab',
-  keywordTracker: 'updateKeywordTracker',
-  qalab: 'updateQALab'
+  keywordTracker: 'updateKeywordTracker'
 };
 
 /**
@@ -290,13 +289,13 @@ export class StoreCompat {
 
   /**
    * 重置特定模块到初始状态
-   * 
+   *
    * @param module - 模块名称
-   * 
+   *
    * @example
    * storeCompat.reset('scraper'); // 重置scraper模块
    */
-  reset(module: 'ui' | 'scraper' | 'analysis' | 'promptlab' | 'keywordTracker' | 'qalab'): void {
+  reset(module: 'ui' | 'scraper' | 'analysis' | 'promptlab' | 'keywordTracker'): void {
     const state = appStore.getState();
 
     switch (module) {
@@ -311,9 +310,6 @@ export class StoreCompat {
         break;
       case 'keywordTracker':
         state.resetKeywordTracker();
-        break;
-      case 'qalab':
-        state.resetQALab();
         break;
       default:
         Logger.warn(`[StoreCompat] 不支持重置模块: ${module}`);
