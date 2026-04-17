@@ -26,7 +26,7 @@
 **请求**:
 ```bash
 curl https://b-0417.sops-3js.pages.dev/v1/gateways \
-  -H "Authorization: Bearer AI2027"
+  -H "Authorization: Bearer YOUR_PASSWORD"
 ```
 
 **响应**:
@@ -60,7 +60,7 @@ curl https://b-0417.sops-3js.pages.dev/v1/gateways \
 **请求**:
 ```bash
 curl https://b-0417.sops-3js.pages.dev/v1/chat/completions \
-  -H "Authorization: Bearer AI2027" \
+  -H "Authorization: Bearer YOUR_PASSWORD" \
   -H "X-Gateway-Provider: nonexistent" \
   -H "Content-Type: application/json" \
   -d '{"model":"gpt-4","messages":[{"role":"user","content":"test"}]}'
@@ -85,7 +85,7 @@ curl https://b-0417.sops-3js.pages.dev/v1/chat/completions \
 **请求**:
 ```bash
 curl https://b-0417.sops-3js.pages.dev/v1/models \
-  -H "Authorization: Bearer AI2027" \
+  -H "Authorization: Bearer YOUR_PASSWORD" \
   -H "X-Gateway-Provider: new_api"
 ```
 
@@ -140,7 +140,7 @@ curl https://b-0417.sops-3js.pages.dev/v1/models \
 **请求**:
 ```bash
 curl https://b-0417.sops-3js.pages.dev/v1/chat/completions \
-  -H "Authorization: Bearer AI2027" \
+  -H "Authorization: Bearer YOUR_PASSWORD" \
   -H "X-Gateway-Provider: new_api" \
   -H "Content-Type: application/json" \
   -d '{"model":"gpt-5.4-mini","messages":[{"role":"user","content":"Say hello"}]}'
@@ -313,7 +313,7 @@ npx wrangler pages deploy dist --project-name sops --branch b-0417
 
 # 5. 验证
 curl https://b-0417.sops-3js.pages.dev/v1/gateways \
-  -H "Authorization: Bearer AI2027"
+  -H "Authorization: Bearer YOUR_PASSWORD"
 ```
 
 ### 删除网关
@@ -329,7 +329,7 @@ npx wrangler pages deploy dist --project-name sops --branch b-0417
 
 # 3. 验证
 curl https://b-0417.sops-3js.pages.dev/v1/gateways \
-  -H "Authorization: Bearer AI2027"
+  -H "Authorization: Bearer YOUR_PASSWORD"
 ```
 
 ---

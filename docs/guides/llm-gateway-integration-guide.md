@@ -159,7 +159,7 @@ npx wrangler pages deploy dist --project-name sops-c --branch b-main-copy --comm
 ### 401 访问被拒绝
 **症状：** 控制台返回 `⛔ 访问被拒绝：请输入正确的访问密码`  
 **原因：** 前端填写的 API Key 与 CF 环境变量 `AUTH_PASSWORD` 不匹配  
-**解决：** 系统设置中的 API Key 填写 `.env` 中 `AUTH_PASSWORD` 的值（当前为 `AI2027`）
+**解决：** 系统设置中的 API Key 填写 `.env` 中 `AUTH_PASSWORD` 的值
 
 ### 网关 API Key 未配置
 **症状：** 返回 `⛔ 网关 xxx 未配置 API Key，请检查 Cloudflare 环境变量`  

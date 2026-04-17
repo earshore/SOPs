@@ -222,16 +222,16 @@ GATEWAY_{ID}_PROTOCOL=openai
 
 ```bash
 # 统一访问密码
-AUTH_PASSWORD=AI2027
+AUTH_PASSWORD=your-secure-password-here
 
 # NEW API 网关（主网关）
 GATEWAY_NEW_API_BASE_URL=https://new.hongecb.store/v1
-GATEWAY_NEW_API_API_KEY=sk-1ZXVZdYINz22hL70US2UOBiwimwTZwjDrRYLHaFMR9s0ntPA
+GATEWAY_NEW_API_API_KEY=sk-your-api-key-here
 GATEWAY_NEW_API_DISPLAY_NAME=NEW API
 
 # CPA 网关（备用网关）
 GATEWAY_CPA_BASE_URL=https://cpa.hongecb.store/v1
-GATEWAY_CPA_API_KEY=sk-EdUxVJC5gGHRG6g83
+GATEWAY_CPA_API_KEY=sk-your-api-key-here
 GATEWAY_CPA_DISPLAY_NAME=CPA Gateway
 ```
 

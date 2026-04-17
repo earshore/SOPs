@@ -27,7 +27,7 @@
 **请求**:
 ```bash
 curl https://sops-3js.pages.dev/v1/gateways \
-  -H "Authorization: Bearer AI2027"
+  -H "Authorization: Bearer YOUR_PASSWORD"
 ```
 
 **响应**:
@@ -61,7 +61,7 @@ curl https://sops-3js.pages.dev/v1/gateways \
 **请求**:
 ```bash
 curl https://sops-3js.pages.dev/v1/models \
-  -H "Authorization: Bearer AI2027" \
+  -H "Authorization: Bearer YOUR_PASSWORD" \
   -H "X-Gateway-Provider: new_api"
 ```
 
@@ -226,7 +226,7 @@ npx wrangler pages deploy dist --project-name sops --branch main
 
 # 5. 验证
 curl https://sops-3js.pages.dev/v1/gateways \
-  -H "Authorization: Bearer AI2027"
+  -H "Authorization: Bearer YOUR_PASSWORD"
 ```
 
 ### 删除网关
@@ -242,7 +242,7 @@ npx wrangler pages deploy dist --project-name sops --branch main
 
 # 3. 验证
 curl https://sops-3js.pages.dev/v1/gateways \
-  -H "Authorization: Bearer AI2027"
+  -H "Authorization: Bearer YOUR_PASSWORD"
 ```
 
 ---
