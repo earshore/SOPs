@@ -215,7 +215,7 @@ export class ConfigCenter implements IConfigService {
         retryDelay: 1000
       },
       history: {
-        maxItems: 20,
+        maxItems: 50,
         maxEventHistory: 100,
         maxSearchHistory: 10
       },

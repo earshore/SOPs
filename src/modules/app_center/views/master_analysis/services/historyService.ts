@@ -9,7 +9,27 @@ import { configCenter } from '../../../../../common/config/ConfigCenter';
 import type { HistoryItem, ScrapedProduct, ScrapedData, AnalysisReport } from "../../../../../types/modules-business";
 
 import { Logger } from '../../../../../services/loggerService';
-const MAX_HISTORY_ITEMS = configCenter.get<number>('history.maxItems') || 20;
+const MAX_HISTORY_ITEMS =
+  configCenter.get<number>('storage.historyMaxItems') ||
+  configCenter.get<number>('history.maxItems') ||
+  50;
+
+function isSameHistoryId(left: HistoryItem['id'], right: HistoryItem['id']): boolean {
+  return String(left) === String(right);
+}
+
+function createHistoryId(history: HistoryItem[]): number {
+  let id = Date.now();
+  while (history.some((item) => isSameHistoryId(item.id, id))) {
+    id += 1;
+  }
+  return id;
+}
+
+function getHistoryTime(item: HistoryItem): number {
+  const time = new Date(item.timestamp).getTime();
+  return Number.isFinite(time) ? time : 0;
+}
 
 // ----------------------------------------
 // 类型定义
@@ -46,31 +66,40 @@ export const HistoryService = {
   save(data: ScrapedData, report?: AnalysisReport): HistoryItem[] {
     const history = this.getAll();
     const currentState = appStore.getState();
-    // 使用当前 state 中的 ID，如果是新抓取则用时间戳生成新 ID
-    const rawId = currentState.scraper.currentHistoryId || Date.now();
-    const id = typeof rawId === 'number' ? rawId : Number(rawId);
+    // 相同采集时间的当前数据更新原快照，新的采集/导入生成新快照
+    const timestamp = data.metadata?.scrape_timestamp || new Date().toISOString();
+    const currentHistoryId = currentState.scraper.currentHistoryId;
+    const currentHistoryIndex = currentHistoryId !== null
+      ? history.findIndex((h) => isSameHistoryId(h.id, currentHistoryId))
+      : -1;
+    const currentHistoryItem = currentHistoryIndex >= 0 ? history[currentHistoryIndex] : undefined;
+    const shouldUpdateCurrent = !!currentHistoryItem && currentHistoryItem.timestamp === timestamp;
+    const id = shouldUpdateCurrent && currentHistoryItem
+      ? currentHistoryItem.id
+      : createHistoryId(history);
 
     const historyItem: HistoryItem = {
       id: id,
-      timestamp: data.metadata?.scrape_timestamp || new Date().toISOString(),
+      timestamp,
       site: data.metadata?.marketplace || currentState.scraper?.selectedSite || 'US',
       asins: data.products?.map(p => p.asin) || [],
       data,
       report,
     };
 
-    // 检查是更新现有记录还是插入新记录
-    const existingIndex = history.findIndex((h) => h.id === id);
-    if (existingIndex !== -1) {
-      history[existingIndex] = historyItem;
+    // 检查是更新当前快照还是插入新快照
+    if (shouldUpdateCurrent && currentHistoryIndex >= 0) {
+      history[currentHistoryIndex] = historyItem;
     } else {
       // 新记录插到最前面
       history.unshift(historyItem);
-      appStore.getState().setCurrentHistoryId(historyItem.id);
     }
+    appStore.getState().setCurrentHistoryId(historyItem.id);
 
     // 保持存储空间整洁，只留最新的
-    const trimmedHistory = history.slice(0, MAX_HISTORY_ITEMS);
+    const trimmedHistory = history
+      .sort((a, b) => getHistoryTime(b) - getHistoryTime(a))
+      .slice(0, MAX_HISTORY_ITEMS);
     StorageService.setScrapeHistory(trimmedHistory);
 
     return trimmedHistory;
@@ -80,9 +109,9 @@ export const HistoryService = {
    * 根据ID获取单条记录
    * @param id - 历史记录ID
    */
-  getById(id: number): HistoryItem | undefined {
+  getById(id: number | string): HistoryItem | undefined {
     const history = this.getAll();
-    return history.find((h) => h.id === Number(id)); // 确保类型匹配
+    return history.find((h) => isSameHistoryId(h.id, id));
   },
 
   /**
@@ -130,7 +159,7 @@ export const HistoryService = {
   updateAnalysisStatus(id: number | string, analysisReport: AnalysisReport): boolean {
     try {
       const history = this.getAll();
-      const targetIndex = history.findIndex((h) => h.id === Number(id));
+      const targetIndex = history.findIndex((h) => isSameHistoryId(h.id, id));
 
       if (targetIndex === -1) {
         Logger.warn(`[HistoryService] 未找到ID为 ${id} 的历史记录`);

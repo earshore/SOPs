@@ -39,10 +39,10 @@ export class HistoryPanel {
     /**
      * 删除历史记录项
      */
-    deleteHistoryItem(id: string): void {
+    deleteHistoryItem(id: HistoryItem['id']): void {
         if (!confirm("确定要删除这条历史记录吗？")) return;
 
-        const newHistory = this.history.filter(h => h.id !== id);
+        const newHistory = this.history.filter(h => String(h.id) !== String(id));
         StorageService.setScrapeHistory(newHistory);
         this.loadHistory();
         showToast("记录已删除", { type: 'success' });
