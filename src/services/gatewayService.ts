@@ -200,12 +200,6 @@ class GatewayService {
         endpoint: 'https://new.hongecb.store/v1',
         protocol: 'openai',
       },
-      {
-        id: 'cpa',
-        name: 'CPA Gateway',
-        endpoint: 'https://cpa.hongecb.store/v1',
-        protocol: 'openai',
-      },
     ];
   }
 }

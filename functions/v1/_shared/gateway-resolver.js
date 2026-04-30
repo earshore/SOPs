@@ -105,7 +105,7 @@ export function discoverGateways(env) {
 /**
  * 解析指定网关的配置
  *
- * @param {string} provider - 网关标识符（如 'new_api', 'cpa'）
+ * @param {string} provider - 网关标识符（如 'new_api'）
  * @param {object} env - Cloudflare 环境变量对象
  * @returns {GatewayConfig | null} 网关配置，不存在则返回 null
  *
@@ -129,8 +129,7 @@ export function resolveGateway(provider, env) {
  * @example
  * const list = listGateways(env);
  * // [
- * //   { id: 'new_api', name: 'NEW API', endpoint: 'https://...', protocol: 'openai' },
- * //   { id: 'cpa', name: 'CPA Gateway', endpoint: 'https://...', protocol: 'openai' }
+ * //   { id: 'new_api', name: 'NEW API', endpoint: 'https://...', protocol: 'openai' }
  * // ]
  */
 export function listGateways(env) {

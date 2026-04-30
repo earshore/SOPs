@@ -212,8 +212,8 @@ GATEWAY_{ID}_PROTOCOL=openai
 ```
 
 **注意**:
-- `{ID}` 必须全大写，如 `NEW_API`、`CPA`
-- 实际使用时会转换为小写，如 `new_api`、`cpa`
+- `{ID}` 必须全大写，如 `NEW_API`、`MYGATEWAY`
+- 实际使用时会转换为小写，如 `new_api`、`mygateway`
 - 下划线会保留，如 `NEW_API` → `new_api`
 
 ### 配置示例
@@ -229,10 +229,6 @@ GATEWAY_NEW_API_BASE_URL=https://new.hongecb.store/v1
 GATEWAY_NEW_API_API_KEY=sk-your-api-key-here
 GATEWAY_NEW_API_DISPLAY_NAME=NEW API
 
-# CPA 网关（备用网关）
-GATEWAY_CPA_BASE_URL=https://cpa.hongecb.store/v1
-GATEWAY_CPA_API_KEY=sk-your-api-key-here
-GATEWAY_CPA_DISPLAY_NAME=CPA Gateway
 ```
 
 ### 上传到 Cloudflare Pages
@@ -246,10 +242,7 @@ cat > secrets.json << EOF
   "AUTH_PASSWORD": "your-secure-password",
   "GATEWAY_NEW_API_BASE_URL": "https://new.hongecb.store/v1",
   "GATEWAY_NEW_API_API_KEY": "sk-xxx",
-  "GATEWAY_NEW_API_DISPLAY_NAME": "NEW API",
-  "GATEWAY_CPA_BASE_URL": "https://cpa.hongecb.store/v1",
-  "GATEWAY_CPA_API_KEY": "sk-xxx",
-  "GATEWAY_CPA_DISPLAY_NAME": "CPA Gateway"
+  "GATEWAY_NEW_API_DISPLAY_NAME": "NEW API"
 }
 EOF
 
@@ -369,7 +362,7 @@ npx wrangler pages deploy dist --project-name sops --branch main
 
 **示例**:
 - `NEW_API` → `new_api`
-- `CPA` → `cpa`
+- `MYGATEWAY` → `mygateway`
 - `CLAUDE_PROXY` → `claude_proxy`
 - `GPT_GATEWAY` → `gpt_gateway`
 

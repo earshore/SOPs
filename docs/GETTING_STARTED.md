@@ -138,9 +138,9 @@ curl https://your-domain.pages.dev/v1/gateways \
 # 创建新网关配置
 cat > new-gateway.json << EOF
 {
-  "GATEWAY_CPA_BASE_URL": "https://cpa.hongecb.store/v1",
-  "GATEWAY_CPA_API_KEY": "sk-your-key",
-  "GATEWAY_CPA_DISPLAY_NAME": "CPA Gateway"
+  "GATEWAY_MYGATEWAY_BASE_URL": "https://your-gateway.example.com/v1",
+  "GATEWAY_MYGATEWAY_API_KEY": "sk-your-key",
+  "GATEWAY_MYGATEWAY_DISPLAY_NAME": "My Gateway"
 }
 EOF
 

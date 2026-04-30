@@ -9,8 +9,6 @@ compatibility_date = "2024-01-01"
 #   AUTH_PASSWORD                = <your-secure-password>
 #   GATEWAY_NEW_API_BASE_URL     = https://new.hongecb.store/v1
 #   GATEWAY_NEW_API_API_KEY      = <your-api-key>
-#   GATEWAY_CPA_BASE_URL         = https://cpa.hongecb.store/v1
-#   GATEWAY_CPA_API_KEY          = <your-api-key>
 #
 # 或使用 Wrangler CLI 批量上传：
 #   npx wrangler pages secret bulk secrets.json --project-name sops

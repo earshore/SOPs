@@ -82,12 +82,6 @@ export const API_ENDPOINTS: Record<string, ApiEndpointConfig> = {
     requiresProxy: false,
     displayName: 'NEW API',
     isDangerous: false
-  },
-  cpa: {
-    domain: 'cpa.hongecb.store',
-    requiresProxy: false,
-    displayName: 'CPA Gateway',
-    isDangerous: false
   }
 };
 

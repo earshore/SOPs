@@ -628,7 +628,6 @@ Dangerous endpoint detected in production
 | provider_id | 显示名称 | Base URL | 状态 |
 |-------------|---------|----------|------|
 | `new_api` | NEW API | `https://new.hongecb.store/v1` | ✅ 活跃 |
-| `cpa` | CPA Gateway | `https://cpa.hongecb.store/v1` | ✅ 活跃 |
 
 ### 环境变量模板
 

@@ -68,17 +68,11 @@ export const PROVIDERS: Record<string, ProviderConfig> = {
     endpoint: "https://new.hongecb.store/v1",
     models: [
       { id: "gpt-5.4-mini-ca", context: 400000, features: ["chat"] },
-      { id: "gpt-5", context: 400000, features: ["function"] },
-      { id: "kimi-k2.5", context: 400000, features: ["chat"] },
+      { id: "gpt-5.5-ca", context: 400000, features: ["chat"] },
+      { id: "Codex/gpt-5.5", context: 400000, features: ["chat"] },
+      { id: "Codex/gpt-5.4-mini", context: 400000, features: ["chat"] },
     ],
-  },
-  cpa: {
-    name: "CPA Gateway",
-    endpoint: "https://cpa.hongecb.store/v1",
-    models: [
-      { id: "auto-chat", context: 400000, features: ["function"] },
-    ],
-  },
+  }
 };
 
 // ========================
