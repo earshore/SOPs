@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// tools/xss-scanner.js
+// tools/security/xss-scanner.js
 // ================================================================
 // 🔒 P0修复: XSS风险自动扫描工具
 // 扫描所有JS文件中的innerHTML使用,生成风险报告和修复建议
@@ -14,9 +14,9 @@ const __dirname = path.dirname(__filename);
 
 // 配置
 const CONFIG = {
-    srcDir: path.join(__dirname, '../src'),
+    srcDir: path.resolve(__dirname, '../../src'),
     excludeDirs: ['node_modules', 'dist', 'tests', 'test'],
-    outputFile: path.join(__dirname, '../docs/XSS_SCAN_REPORT.md'),
+    outputFile: path.resolve(__dirname, '../../docs/XSS_SCAN_REPORT.md'),
     
     // 风险模式
     patterns: {
@@ -397,13 +397,13 @@ element.textContent = userInput;
 运行以下命令生成修复补丁:
 
 \`\`\`bash
-node tools/xss-fixer.js --auto-fix
+node tools/security/xss-fixer.js --auto-fix
 \`\`\`
 
 ---
 
 **报告生成**: XSS Scanner v1.0  
-**下次扫描**: 修复后重新运行 \`node tools/xss-scanner.js\`
+**下次扫描**: 修复后重新运行 \`node tools/security/xss-scanner.js\`
 `;
 
     return report;

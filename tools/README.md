@@ -14,7 +14,7 @@
 ### 步骤1: 扫描XSS风险
 
 ```bash
-node tools/xss-scanner.js
+node tools/security/xss-scanner.js
 ```
 
 **输出**:
@@ -38,7 +38,7 @@ node tools/xss-scanner.js
 ### 步骤3: 试运行自动修复
 
 ```bash
-node tools/xss-fixer.js --dry-run
+node tools/security/xss-fixer.js --dry-run
 ```
 
 **功能**:
@@ -49,7 +49,7 @@ node tools/xss-fixer.js --dry-run
 ### 步骤4: 应用自动修复
 
 ```bash
-node tools/xss-fixer.js --auto-fix
+node tools/security/xss-fixer.js --auto-fix
 ```
 
 **功能**:
@@ -66,7 +66,7 @@ node tools/xss-fixer.js --auto-fix
 
 ```bash
 # 重新扫描
-node tools/xss-scanner.js
+node tools/security/xss-scanner.js
 
 # 运行测试
 npm test
@@ -184,7 +184,7 @@ npm run dev  # 手动测试功能
 **解决**:
 ```bash
 # 检查配置
-cat tools/xss-scanner.js | grep srcDir
+cat tools/security/xss-scanner.js | grep srcDir
 ```
 
 ### 问题2: 修复后代码报错
@@ -267,16 +267,16 @@ cp tools/backups/filename.js.bak src/path/to/filename.js
 
 ```bash
 # 1. 扫描
-node tools/xss-scanner.js
+node tools/security/xss-scanner.js
 
 # 2. 查看报告
 cat docs/XSS_SCAN_REPORT.md
 
 # 3. 试运行修复
-node tools/xss-fixer.js --dry-run
+node tools/security/xss-fixer.js --dry-run
 
 # 4. 应用修复
-node tools/xss-fixer.js --auto-fix
+node tools/security/xss-fixer.js --auto-fix
 
 # 5. 验证
 npm test

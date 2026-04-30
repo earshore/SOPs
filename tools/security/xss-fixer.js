@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// tools/xss-fixer.js
+// tools/security/xss-fixer.js
 // ================================================================
 // 🔒 P0修复: XSS自动修复工具
 // 根据扫描报告自动生成修复补丁
@@ -14,10 +14,10 @@ const __dirname = path.dirname(__filename);
 
 // 配置
 const CONFIG = {
-    srcDir: path.join(__dirname, '../src'),
-    reportFile: path.join(__dirname, '../docs/XSS_SCAN_REPORT.md'),
-    patchDir: path.join(__dirname, '../tools/patches'),
-    backupDir: path.join(__dirname, '../tools/backups'),
+    srcDir: path.resolve(__dirname, '../../src'),
+    reportFile: path.resolve(__dirname, '../../docs/XSS_SCAN_REPORT.md'),
+    patchDir: path.resolve(__dirname, '../patches'),
+    backupDir: path.resolve(__dirname, '../backups'),
     
     // 修复模式
     mode: process.argv.includes('--auto-fix') ? 'auto' : 'manual',
@@ -79,7 +79,7 @@ function main() {
     
     // 读取扫描报告
     if (!fs.existsSync(CONFIG.reportFile)) {
-        console.error('❌ 未找到扫描报告,请先运行: node tools/xss-scanner.js');
+        console.error('❌ 未找到扫描报告,请先运行: node tools/security/xss-scanner.js');
         process.exit(1);
     }
     

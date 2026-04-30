@@ -31,6 +31,8 @@ src/common/config/design-tokens.generated.ts
 .eslintcache
 *.tsbuildinfo
 .turbo/
+__pycache__/
+*.py[cod]
 
 # ==============================================================================
 # 2. Environment & Configuration
