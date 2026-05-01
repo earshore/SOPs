@@ -345,9 +345,6 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
       Logger.warn('列表交错动画观察器初始化失败:', error);
     });
 
-    // 🎯 微交互动画: Toast管理器已在导入时自动初始化（单例模式）
-    Logger.debug('✅ Toast manager initialized (singleton)');
-
     // 渲染顶部 Mega Menu
     renderMegaMenu();
     renderSopsMegaMenu();

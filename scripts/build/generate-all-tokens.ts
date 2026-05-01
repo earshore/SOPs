@@ -7,9 +7,9 @@
 import { execSync } from 'child_process';
 
 const scripts = [
-  { name: 'CSS 变量', command: 'tsx scripts/generate-css-variables.ts' },
-  { name: 'Tailwind 配置', command: 'tsx scripts/generate-tailwind-config.ts' },
-  { name: 'TypeScript 类型', command: 'tsx scripts/generate-design-token-types.ts' }
+  { name: 'CSS 变量', command: 'tsx scripts/build/generate-css-variables.ts' },
+  { name: 'Tailwind 配置', command: 'tsx scripts/build/generate-tailwind-config.ts' },
+  { name: 'TypeScript 类型', command: 'tsx scripts/build/generate-design-token-types.ts' }
 ];
 
 console.log('🚀 开始生成设计令牌文件...\n');

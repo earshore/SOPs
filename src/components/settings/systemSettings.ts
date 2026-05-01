@@ -209,7 +209,10 @@ const SettingsPanel = (): SettingsPanelData => ({
         const config = PROVIDERS[provider as keyof typeof PROVIDERS];
         const savedConfig = StorageService.getLLMConfig(provider);
 
-        this.llm.endpoint = savedConfig?.endpoint || config?.endpoint || '';
+        const savedEndpoint = savedConfig?.endpoint || '';
+        this.llm.endpoint = provider === 'new_api' && (!savedEndpoint || savedEndpoint === '/v1' || savedEndpoint === '/v1/')
+            ? config?.endpoint || 'https://new.hongecb.store/v1'
+            : savedEndpoint || config?.endpoint || '';
         
         // 🔐 P0优化: 从安全存储读取API密钥
         try {

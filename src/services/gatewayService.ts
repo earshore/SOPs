@@ -6,7 +6,7 @@
  */
 
 import { Logger } from './loggerService';
-import { ApiError, NetworkError } from '@/common/errors/AppError';
+import { ApiError } from '@/common/errors/AppError';
 
 /**
  * 网关信息接口

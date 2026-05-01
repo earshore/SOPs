@@ -5,7 +5,7 @@
  * 运行: npm run generate:css-vars
  */
 
-import { DESIGN_TOKENS } from '../src/common/config/design-tokens';
+import { DESIGN_TOKENS } from '../../src/common/config/design-tokens';
 import { writeFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -216,7 +216,7 @@ function generateCSSVariables(): string {
 
 // 生成并写入文件
 const cssContent = generateCSSVariables();
-const outputPath = resolve(__dirname, '../src/css/foundation/variables.generated.css');
+const outputPath = resolve(__dirname, '../../src/css/foundation/variables.generated.css');
 
 try {
   writeFileSync(outputPath, cssContent, 'utf-8');

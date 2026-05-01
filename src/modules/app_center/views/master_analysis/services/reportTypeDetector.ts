@@ -67,7 +67,6 @@ function isFullAnalysisReport(report: any): report is FullAnalysisReport {
   // 检查是否有 FullAnalysisReport 的特征字段
   const hasBuyerProfile = !!(report['buyer-profile'] || report.buyer_profile);
   const hasSellingPoints = !!(report['selling-points'] || report.selling_points);
-  const hasTitleKeywords = !!(report['title-keywords'] || report.title_keywords);
 
   // 至少需要有 buyer-profile 或 selling-points 之一
   // 并且不应该有 Downloads 格式的特征字段

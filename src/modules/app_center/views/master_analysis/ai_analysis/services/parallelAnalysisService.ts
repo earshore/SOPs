@@ -8,7 +8,7 @@
  * 4. 失败隔离（单个失败不影响整体）
  */
 
-import { callLLM, type ChatMessage } from '../../../../../../services/llmService';
+import { callLLM, type ChatMessage, type LLMStreamMetrics } from '../../../../../../services/llmService';
 import { StorageService, STORAGE_KEYS } from '../../../../../../services/storageService';
 import { ValidationError, BusinessError } from '@common/errors/AppError';
 import { configCenter } from '../../../../../../common/config/ConfigCenter';
@@ -17,6 +17,11 @@ import type { Product } from '../config/sampleData';
 import { generateAnalysisPrompt } from '../prompts/analysisPrompts';
 import { calculateFullReportConfidence, calculateOverallConfidence } from './confidenceCalculator';
 import { Logger } from '../../../../../../services/loggerService';
+import { estimateTokenCount } from '../utils/tokenCounter';
+
+const DEFAULT_ANALYSIS_CONCURRENCY = 8;
+const MAX_ANALYSIS_CONCURRENCY = 8;
+const ANALYSIS_CACHE_VERSION = 'v2';
 
 /**
  * LLM 配置接口
@@ -39,6 +44,11 @@ interface AnalysisTask {
   startTime?: number;
   endTime?: number;
   fromCache?: boolean;
+  promptChars?: number;
+  estimatedInputTokens?: number;
+  firstResponseMs?: number;
+  streamChunks?: number;
+  streamedChars?: number;
 }
 
 /**
@@ -113,12 +123,17 @@ function appendTaskResultToReport(report: Partial<FullAnalysisReport>, task: Ana
   return true;
 }
 
+function normalizeMaxConcurrency(value: number, taskCount: number): number {
+  const requested = Number.isFinite(value) ? Math.floor(value) : DEFAULT_ANALYSIS_CONCURRENCY;
+  return Math.max(1, Math.min(requested, MAX_ANALYSIS_CONCURRENCY, Math.max(1, taskCount)));
+}
+
 /**
  * 缓存键生成
  */
 export function generateCacheKey(targetId: string, product: Product, language: string): string {
   const productHash = `${product.asin}_${product.productTitle?.substring(0, 50)}_${product.customer_reviews?.length || 0}`;
-  return `ai_analysis_${targetId}_${productHash}_${language}`;
+  return `ai_analysis_${ANALYSIS_CACHE_VERSION}_${targetId}_${productHash}_${language}`;
 }
 
 /**
@@ -215,7 +230,8 @@ async function executeAnalysisTask(
   product: Product,
   config: LLMConfig,
   language: string,
-  enableCache: boolean
+  enableCache: boolean,
+  onFirstResponse?: (task: AnalysisTask, metrics: LLMStreamMetrics) => void
 ): Promise<void> {
   task.status = 'running';
   task.startTime = Date.now();
@@ -231,7 +247,10 @@ async function executeAnalysisTask(
         task.status = 'success';
         task.endTime = Date.now();
         task.fromCache = true;
-        Logger.debug(`[并行分析] ${task.targetId} 使用缓存结果`);
+        Logger.debug(`[并行分析] ${task.targetId} 使用缓存结果`, {
+          durationMs: task.endTime - task.startTime,
+          fromCache: true
+        });
         return;
       }
     }
@@ -249,6 +268,8 @@ async function executeAnalysisTask(
         content: prompt
       }
     ];
+    task.promptChars = prompt.length;
+    task.estimatedInputTokens = estimateTokenCount(messages.map(message => message.content).join('\n'));
 
     // 调用 LLM
     const response = await callLLM(
@@ -260,6 +281,15 @@ async function executeAnalysisTask(
       {
         temperature: 0.3,
         jsonMode: true,
+        stream: true,
+        onFirstResponse: (metrics) => {
+          task.firstResponseMs = metrics.elapsedMs;
+          onFirstResponse?.(task, metrics);
+        },
+        onStreamUpdate: (update) => {
+          task.streamChunks = update.chunkCount;
+          task.streamedChars = update.content.length;
+        },
         timeout: configCenter.get<number>('llm.analysisTimeout') || 120000,
         retries: configCenter.get<number>('llm.maxRetries') || 2
       }
@@ -284,7 +314,11 @@ async function executeAnalysisTask(
       await setCachedResult(cacheKey, actualResult);
     }
 
-    Logger.debug(`[并行分析] ${task.targetId} 分析成功，耗时: ${task.endTime - task.startTime}ms`);
+    Logger.debug(`[并行分析] ${task.targetId} 分析成功`, {
+      durationMs: task.endTime - task.startTime,
+      promptChars: task.promptChars,
+      estimatedInputTokens: task.estimatedInputTokens
+    });
   } catch (error) {
     task.status = 'failed';
     task.error = (error as Error).message;
@@ -303,7 +337,8 @@ async function executeTasksWithConcurrency(
   language: string,
   maxConcurrency: number,
   enableCache: boolean,
-  onTaskSettled?: (task: AnalysisTask, completedCount: number, totalCount: number, currentTasks: string[]) => void
+  onTaskSettled?: (task: AnalysisTask, completedCount: number, totalCount: number, currentTasks: string[]) => void,
+  onTaskFirstResponse?: (task: AnalysisTask, completedCount: number, totalCount: number, currentTasks: string[]) => void
 ): Promise<void> {
   const totalTasks = tasks.length;
   let completedCount = 0;
@@ -314,7 +349,13 @@ async function executeTasksWithConcurrency(
       await Promise.race(runningTasks);
     }
 
-    const taskPromise = executeAnalysisTask(task, product, config, language, enableCache)
+    const taskPromise = executeAnalysisTask(task, product, config, language, enableCache, () => {
+      const currentRunning = tasks
+        .filter(t => t.status === 'running')
+        .map(t => t.targetId);
+
+      onTaskFirstResponse?.(task, completedCount, totalTasks, currentRunning);
+    })
       .finally(() => {
         runningTasks.delete(taskPromise);
         completedCount++;
@@ -343,7 +384,7 @@ export async function runParallelAIAnalysis(
   config: Partial<ParallelAnalysisConfig> = {}
 ): Promise<FullAnalysisReport> {
   const {
-    maxConcurrency = 4,
+    maxConcurrency = DEFAULT_ANALYSIS_CONCURRENCY,
     enableCache = true,
     streamResults = false,
     failureStrategy = 'continue',
@@ -351,7 +392,14 @@ export async function runParallelAIAnalysis(
     onTaskFailed
   } = config;
 
-  Logger.debug(`[并行分析] 开始分析，目标数: ${targetIds.length}，并发数: ${maxConcurrency}`);
+  const startedAt = Date.now();
+  const effectiveMaxConcurrency = normalizeMaxConcurrency(maxConcurrency, targetIds.length);
+
+  Logger.debug(`[并行分析] 开始分析`, {
+    targets: targetIds.length,
+    requestedMaxConcurrency: maxConcurrency,
+    effectiveMaxConcurrency
+  });
 
   const llmConfig = await getLLMConfig();
   const tasks: AnalysisTask[] = targetIds.map(targetId => ({
@@ -369,7 +417,7 @@ export async function runParallelAIAnalysis(
     product,
     llmConfig,
     language,
-    maxConcurrency,
+    effectiveMaxConcurrency,
     enableCache,
     (task, completedCount, _totalCount, currentTasks) => {
       if (task.status === 'success') {
@@ -419,6 +467,20 @@ export async function runParallelAIAnalysis(
         ? `，正在分析: ${currentTasks.join(', ')}`
         : '';
       onProgress(progress, `${statusText}${runningInfo} (${completedCount}/${totalTasks})`);
+    },
+    (task, completedCount, _totalCount, currentTasks) => {
+      const progress = Math.max(1, Math.round((completedCount / totalTasks) * 100));
+      const firstResponseSeconds = task.firstResponseMs
+        ? (task.firstResponseMs / 1000).toFixed(1)
+        : '0.0';
+      const runningInfo = currentTasks.length > 0
+        ? `，并行中: ${currentTasks.join(', ')}`
+        : '';
+
+      onProgress(
+        progress,
+        `模型已开始返回 ${task.targetId}，首包 ${firstResponseSeconds}s${runningInfo} (${completedCount}/${totalTasks})`
+      );
     }
   );
 
@@ -434,7 +496,23 @@ export async function runParallelAIAnalysis(
 
   onProgress(100, `分析完成! 成功: ${successCount}, 失败: ${failedCount}`);
 
-  Logger.debug(`[并行分析] 分析完成，成功: ${successCount}, 失败: ${failedCount}`);
+  Logger.debug(`[并行分析] 分析完成`, {
+    durationMs: Date.now() - startedAt,
+    successCount,
+    failedCount,
+    effectiveMaxConcurrency,
+    tasks: tasks.map(task => ({
+      targetId: task.targetId,
+      status: task.status,
+      durationMs: task.startTime && task.endTime ? task.endTime - task.startTime : undefined,
+      fromCache: !!task.fromCache,
+      promptChars: task.promptChars,
+      estimatedInputTokens: task.estimatedInputTokens,
+      firstResponseMs: task.firstResponseMs,
+      streamChunks: task.streamChunks,
+      streamedChars: task.streamedChars
+    }))
+  });
 
   return finalReport;
 }

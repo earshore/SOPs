@@ -79,10 +79,11 @@ export const EnvConfig = {
      * @param endpoint - 用户配置的 endpoint
      * @returns 标准化后的 endpoint
      */
-    normalizeEndpoint(_endpoint: string): string {
-      // 始终使用相对路径 /v1，由 Vite 代理（开发）或 Cloudflare Functions（生产）处理
-      // 不允许前端直接请求外部 API，避免 CORS 问题和 API Key 泄露
-      return this.baseUrl;
+    normalizeEndpoint(endpoint: string): string {
+      // 尊重用户配置的 endpoint；危险上游由调用层统一拦截。
+      const candidate = (endpoint || this.baseUrl || '/v1').trim();
+      if (candidate === '/') return candidate;
+      return candidate.replace(/\/+$/, '');
     }
   },
 

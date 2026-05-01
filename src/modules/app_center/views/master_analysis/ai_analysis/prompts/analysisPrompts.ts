@@ -418,6 +418,99 @@ Customer Reviews:
 /**
  * 生成动态分析提示词
  */
+type PromptReview = Product['customer_reviews'][number];
+
+const REVIEW_LIMITS = {
+  lowStar: { count: 24, bodyChars: 700 },
+  highStar: { count: 24, bodyChars: 700 },
+  general: { count: 40, bodyChars: 520 }
+};
+
+function truncateForPrompt(value: string | undefined, maxChars: number): string {
+  const sanitized = sanitizePromptInput(value || '');
+  if (sanitized.length <= maxChars) {
+    return sanitized;
+  }
+  return `${sanitized.slice(0, maxChars).trimEnd()}...`;
+}
+
+function formatReview(review: PromptReview, bodyChars: number): string {
+  const rating = Number.isFinite(review.star_rating) ? review.star_rating : 'unknown';
+  const country = truncateForPrompt(review.origin_country || 'unknown', 80);
+  const headline = truncateForPrompt(review.headline, 160);
+  const body = truncateForPrompt(review.body, bodyChars);
+
+  return `[${rating} star - ${country}] ${headline}: ${body}`;
+}
+
+function reviewKey(review: PromptReview): string {
+  return `${review.star_rating}|${review.origin_country}|${review.headline}|${review.body}`;
+}
+
+function takeUniqueReviews(
+  source: PromptReview[],
+  limit: number,
+  selected: PromptReview[] = [],
+  seen = new Set<string>()
+): PromptReview[] {
+  for (const review of selected) {
+    seen.add(reviewKey(review));
+  }
+
+  for (const review of source) {
+    if (selected.length >= limit) {
+      break;
+    }
+
+    const key = reviewKey(review);
+    if (!seen.has(key)) {
+      selected.push(review);
+      seen.add(key);
+    }
+  }
+
+  return selected;
+}
+
+function selectRepresentativeReviews(reviews: PromptReview[], limit: number): PromptReview[] {
+  if (reviews.length <= limit) {
+    return reviews;
+  }
+
+  const selected: PromptReview[] = [];
+  const seen = new Set<string>();
+  const lowStarLimit = Math.ceil(limit * 0.35);
+  const highStarLimit = Math.ceil(limit * 0.25);
+
+  takeUniqueReviews(reviews.filter(review => review.star_rating <= 3), lowStarLimit, selected, seen);
+  takeUniqueReviews(reviews.filter(review => review.star_rating === 5), lowStarLimit + highStarLimit, selected, seen);
+  takeUniqueReviews(reviews, limit, selected, seen);
+
+  return selected.slice(0, limit);
+}
+
+function formatReviewsForPrompt(
+  reviews: PromptReview[],
+  limit: number,
+  bodyChars: number,
+  emptyText: string,
+  totalCount: number = reviews.length
+): string {
+  if (reviews.length === 0) {
+    return emptyText;
+  }
+
+  const selected = reviews.length > limit ? reviews.slice(0, limit) : reviews;
+  const omittedCount = Math.max(0, totalCount - selected.length);
+  const lines = selected.map(review => formatReview(review, bodyChars));
+
+  if (omittedCount > 0) {
+    lines.push(`[sample note] ${omittedCount} additional reviews omitted to keep the analysis request fast.`);
+  }
+
+  return lines.join('\n');
+}
+
 export function generateAnalysisPrompt(
   taskId: string,
   product: Product,
@@ -494,19 +587,27 @@ export function generateAnalysisPrompt(
   }
 
   // 准备数据替换（应用 prompt injection 防护）
-  const lowStarReviews = product.customer_reviews
-    .filter(r => r.star_rating <= 3)
-    .map(r => `[${r.star_rating}★] ${sanitizePromptInput(r.headline)}: ${sanitizePromptInput(r.body)}`)
-    .join('\n');
+  const lowStarReviews = formatReviewsForPrompt(
+    product.customer_reviews.filter(r => r.star_rating <= 3),
+    REVIEW_LIMITS.lowStar.count,
+    REVIEW_LIMITS.lowStar.bodyChars,
+    'No 1-3 star reviews available'
+  );
 
-  const highStarReviews = product.customer_reviews
-    .filter(r => r.star_rating === 5)
-    .map(r => `[${r.star_rating}★] ${sanitizePromptInput(r.headline)}: ${sanitizePromptInput(r.body)}`)
-    .join('\n');
+  const highStarReviews = formatReviewsForPrompt(
+    product.customer_reviews.filter(r => r.star_rating === 5),
+    REVIEW_LIMITS.highStar.count,
+    REVIEW_LIMITS.highStar.bodyChars,
+    'No 5 star reviews available'
+  );
 
-  const allReviews = product.customer_reviews
-    .map(r => `[${r.star_rating}★ - ${r.origin_country}] ${sanitizePromptInput(r.headline)}: ${sanitizePromptInput(r.body)}`)
-    .join('\n');
+  const allReviews = formatReviewsForPrompt(
+    selectRepresentativeReviews(product.customer_reviews, REVIEW_LIMITS.general.count),
+    REVIEW_LIMITS.general.count,
+    REVIEW_LIMITS.general.bodyChars,
+    'No reviews available',
+    product.customer_reviews.length
+  );
 
   const reviewerCountries = [...new Set(product.customer_reviews.map(r => r.origin_country))].join(', ');
 
@@ -518,8 +619,8 @@ export function generateAnalysisPrompt(
   let taskPrompt = taskDef.taskPrompt
     .replace('{{productTitle}}', sanitizePromptInput(product.productTitle))
     .replace('{{featureBullets}}', featureBullets)
-    .replace('{{lowStarReviews}}', lowStarReviews || 'No 1-3 star reviews available')
-    .replace('{{highStarReviews}}', highStarReviews || 'No 5 star reviews available')
+    .replace('{{lowStarReviews}}', lowStarReviews)
+    .replace('{{highStarReviews}}', highStarReviews)
     .replace('{{allReviews}}', allReviews)
     .replace('{{reviewerCountries}}', reviewerCountries);
 
@@ -646,19 +747,27 @@ export function generateBatchAnalysisPrompt(
   }
 
   // 准备数据（应用 prompt injection 防护）
-  const lowStarReviews = product.customer_reviews
-    .filter(r => r.star_rating <= 3)
-    .map(r => `[${r.star_rating}★] ${sanitizePromptInput(r.headline)}: ${sanitizePromptInput(r.body)}`)
-    .join('\n');
+  const lowStarReviews = formatReviewsForPrompt(
+    product.customer_reviews.filter(r => r.star_rating <= 3),
+    REVIEW_LIMITS.lowStar.count,
+    REVIEW_LIMITS.lowStar.bodyChars,
+    'No 1-3 star reviews available'
+  );
 
-  const highStarReviews = product.customer_reviews
-    .filter(r => r.star_rating === 5)
-    .map(r => `[${r.star_rating}★] ${sanitizePromptInput(r.headline)}: ${sanitizePromptInput(r.body)}`)
-    .join('\n');
+  const highStarReviews = formatReviewsForPrompt(
+    product.customer_reviews.filter(r => r.star_rating === 5),
+    REVIEW_LIMITS.highStar.count,
+    REVIEW_LIMITS.highStar.bodyChars,
+    'No 5 star reviews available'
+  );
 
-  const allReviews = product.customer_reviews
-    .map(r => `[${r.star_rating}★ - ${r.origin_country}] ${sanitizePromptInput(r.headline)}: ${sanitizePromptInput(r.body)}`)
-    .join('\n');
+  const allReviews = formatReviewsForPrompt(
+    selectRepresentativeReviews(product.customer_reviews, REVIEW_LIMITS.general.count),
+    REVIEW_LIMITS.general.count,
+    REVIEW_LIMITS.general.bodyChars,
+    'No reviews available',
+    product.customer_reviews.length
+  );
 
   const reviewerCountries = [...new Set(product.customer_reviews.map(r => r.origin_country))].join(', ');
 
@@ -672,8 +781,8 @@ export function generateBatchAnalysisPrompt(
     let prompt = task.taskPrompt
       .replace('{{productTitle}}', sanitizePromptInput(product.productTitle))
       .replace('{{featureBullets}}', featureBullets)
-      .replace('{{lowStarReviews}}', lowStarReviews || 'No 1-3 star reviews available')
-      .replace('{{highStarReviews}}', highStarReviews || 'No 5 star reviews available')
+      .replace('{{lowStarReviews}}', lowStarReviews)
+      .replace('{{highStarReviews}}', highStarReviews)
       .replace('{{allReviews}}', allReviews)
       .replace('{{reviewerCountries}}', reviewerCountries);
     return prompt;

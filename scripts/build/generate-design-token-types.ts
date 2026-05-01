@@ -5,7 +5,7 @@
  * 运行: npm run generate:types
  */
 
-import { DESIGN_TOKENS } from '../src/common/config/design-tokens';
+import { DESIGN_TOKENS } from '../../src/common/config/design-tokens';
 import { writeFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -259,7 +259,7 @@ function generateTypes(): string {
 
 // 生成并写入文件
 const typesContent = generateTypes();
-const outputPath = resolve(__dirname, '../src/common/types/design-tokens.generated.ts');
+const outputPath = resolve(__dirname, '../../src/common/types/design-tokens.generated.ts');
 
 try {
   writeFileSync(outputPath, typesContent, 'utf-8');

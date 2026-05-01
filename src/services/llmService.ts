@@ -51,6 +51,20 @@ export interface LLMOptions {
   retryDelay?: number;
   /** 请求取消信号 */
   signal?: AbortSignal;
+  stream?: boolean;
+  onFirstResponse?: (metrics: LLMStreamMetrics) => void;
+  onStreamUpdate?: (update: LLMStreamUpdate) => void;
+}
+
+export interface LLMStreamMetrics {
+  elapsedMs: number;
+  firstChunkMs?: number;
+  chunkCount: number;
+}
+
+export interface LLMStreamUpdate extends LLMStreamMetrics {
+  delta: string;
+  content: string;
 }
 
 /**
@@ -89,6 +103,161 @@ export interface ModelInfo {
  */
 const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
+const DEFAULT_NEW_API_ENDPOINT = 'https://new.hongecb.store/v1';
+
+function resolveProviderEndpoint(provider: string, endpoint: string): string {
+  const trimmedEndpoint = (endpoint || '').trim();
+
+  if (
+    provider === 'new_api' &&
+    (!trimmedEndpoint || trimmedEndpoint === '/v1' || trimmedEndpoint === '/v1/')
+  ) {
+    return DEFAULT_NEW_API_ENDPOINT;
+  }
+
+  return EnvConfig.api.normalizeEndpoint(trimmedEndpoint);
+}
+
+function getStreamDelta(payload: Record<string, unknown>): string {
+  const choices = payload.choices;
+  if (!Array.isArray(choices) || choices.length === 0) {
+    return '';
+  }
+
+  const firstChoice = choices[0] as Record<string, unknown>;
+  const delta = firstChoice.delta as Record<string, unknown> | undefined;
+  const message = firstChoice.message as Record<string, unknown> | undefined;
+
+  const content = delta?.content ?? message?.content;
+  return typeof content === 'string' ? content : '';
+}
+
+function parseBufferedJsonCompletion(rawText: string): LLMChatCompletionResponse | null {
+  const trimmed = rawText.trim();
+  if (!trimmed.startsWith('{')) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(trimmed) as LLMChatCompletionResponse;
+  } catch {
+    return null;
+  }
+}
+
+async function readOpenAIStream(
+  response: Response,
+  requestStartedAt: number,
+  options: Pick<LLMOptions, 'onFirstResponse' | 'onStreamUpdate'>
+): Promise<{ content: string; fallbackJson: LLMChatCompletionResponse | null; firstChunkMs?: number; chunkCount: number }> {
+  const reader = response.body?.getReader();
+
+  if (!reader) {
+    const rawText = await response.text();
+    const fallbackJson = parseBufferedJsonCompletion(rawText);
+    return {
+      content: fallbackJson?.choices?.[0]?.message?.content || rawText,
+      fallbackJson,
+      chunkCount: 0
+    };
+  }
+
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let rawText = '';
+  let content = '';
+  let firstChunkMs: number | undefined;
+  let chunkCount = 0;
+
+  const processLine = (line: string): void => {
+    const trimmedLine = line.trim();
+    if (!trimmedLine.startsWith('data:')) {
+      return;
+    }
+
+    const data = trimmedLine.slice(5).trim();
+    if (!data || data === '[DONE]') {
+      return;
+    }
+
+    chunkCount++;
+
+    if (firstChunkMs === undefined) {
+      firstChunkMs = Date.now() - requestStartedAt;
+      options.onFirstResponse?.({ elapsedMs: firstChunkMs, firstChunkMs, chunkCount });
+    }
+
+    let payload: Record<string, unknown>;
+    try {
+      payload = JSON.parse(data) as Record<string, unknown>;
+    } catch {
+      return;
+    }
+
+    const errorPayload = payload.error as { message?: string } | undefined;
+    if (errorPayload?.message) {
+      throw new ApiError(
+        errorPayload.message,
+        'API_STREAM_ERROR',
+        response.status,
+        data,
+        { module: 'LLMService', action: 'readOpenAIStream' }
+      );
+    }
+
+    const delta = getStreamDelta(payload);
+    if (!delta) {
+      return;
+    }
+
+    content += delta;
+    options.onStreamUpdate?.({
+      delta,
+      content,
+      elapsedMs: Date.now() - requestStartedAt,
+      firstChunkMs,
+      chunkCount
+    });
+  };
+
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) {
+      break;
+    }
+
+    const decoded = decoder.decode(value, { stream: true });
+    rawText += decoded;
+    buffer += decoded;
+
+    const lines = buffer.split(/\r?\n/);
+    buffer = lines.pop() || '';
+    for (const line of lines) {
+      processLine(line);
+    }
+  }
+
+  const tail = decoder.decode();
+  if (tail) {
+    rawText += tail;
+    buffer += tail;
+  }
+
+  if (buffer.trim()) {
+    for (const line of buffer.split(/\r?\n/)) {
+      processLine(line);
+    }
+  }
+
+  const fallbackJson = content ? null : parseBufferedJsonCompletion(rawText);
+  return {
+    content: content || fallbackJson?.choices?.[0]?.message?.content || '',
+    fallbackJson,
+    firstChunkMs,
+    chunkCount
+  };
+}
+
 // ========================
 // 核心 API 函数
 // ========================
@@ -111,6 +280,9 @@ export async function callLLM(
     retries = 2,
     retryDelay = 1000,
     signal,
+    stream = true,
+    onFirstResponse,
+    onStreamUpdate,
   } = options;
 
   // 🔒 P0修复: 生产环境安全检查
@@ -138,7 +310,7 @@ export async function callLLM(
   }
 
   // 标准化 endpoint (开发/生产环境自动适配)
-  const normalizedEndpoint = EnvConfig.api.normalizeEndpoint(endpoint);
+  const normalizedEndpoint = resolveProviderEndpoint(_provider, endpoint);
 
   // 🔍 调试：始终输出配置信息（用于诊断生产环境问题）
   if (!(callLLM as any)._configLogged) {
@@ -147,7 +319,6 @@ export async function callLLM(
     Logger.debug(`🌐 [LLM] api.baseUrl: ${configCenter.get('api.baseUrl')}`);
     Logger.debug(`🌐 [LLM] 标准化 Endpoint: ${normalizedEndpoint}`);
     Logger.debug(`🌐 [LLM] 最终请求 URL: ${normalizedEndpoint}/chat/completions`);
-    Logger.debug(`🌐 [LLM] API Key (前10字符): ${apiKey.substring(0, 10)}...`);
     (callLLM as any)._configLogged = true;
   }
 
@@ -155,6 +326,7 @@ export async function callLLM(
     model: model,
     messages: messages,
     temperature: temperature,
+    ...(stream && { stream: true }),
     // 只有部分模型支持 response_format
     ...(jsonMode && { response_format: { type: 'json_object' } }),
   };
@@ -181,6 +353,7 @@ export async function callLLM(
         await sleep(delay);
       }
 
+      const requestStartedAt = Date.now();
       const response = await fetch(`${normalizedEndpoint}/chat/completions`, {
         method: 'POST',
         headers: {
@@ -193,7 +366,7 @@ export async function callLLM(
         signal: controller.signal,
       });
 
-      clearTimeout(timeoutId);
+      const headersDurationMs = Date.now() - requestStartedAt;
 
       // 处理非 200 响应
       if (!response.ok) {
@@ -253,10 +426,30 @@ export async function callLLM(
         }
       }
 
-      const data: LLMChatCompletionResponse = await response.json();
+      let data: LLMChatCompletionResponse | null = null;
+      let responseContent = '';
+      let streamMetrics: { firstChunkMs?: number; chunkCount: number } | undefined;
+
+      if (stream) {
+        const streamResult = await readOpenAIStream(response, requestStartedAt, {
+          onFirstResponse,
+          onStreamUpdate
+        });
+        data = streamResult.fallbackJson;
+        responseContent = streamResult.content;
+        streamMetrics = {
+          firstChunkMs: streamResult.firstChunkMs,
+          chunkCount: streamResult.chunkCount
+        };
+      } else {
+        data = await response.json();
+      }
+
+      clearTimeout(timeoutId);
+      const requestDurationMs = Date.now() - requestStartedAt;
 
       // 🎯 数据边界验证：验证 LLM 响应格式
-      if (!isLLMChatCompletionResponse(data)) {
+      if (data && !isLLMChatCompletionResponse(data)) {
         throw new ApiError(
           'LLM API 返回格式异常',
           'API_INVALID_RESPONSE',
@@ -272,7 +465,7 @@ export async function callLLM(
       }
 
       // 兼容性检查：某些非标准 API 可能返回结构不同
-      if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      if (data && (!data.choices || !data.choices[0] || !data.choices[0].message)) {
         throw new ApiError(
           `API 返回格式异常: 缺少 choices 或 message 字段`,
           'API_INVALID_RESPONSE',
@@ -287,7 +480,21 @@ export async function callLLM(
         );
       }
 
-      return data.choices[0].message.content || '';
+      Logger.debug('[LLM] 调用完成', {
+        status: response.status,
+        model,
+        attempt: attempt + 1,
+        headersDurationMs,
+        durationMs: requestDurationMs,
+        stream,
+        firstChunkMs: streamMetrics?.firstChunkMs,
+        streamChunks: streamMetrics?.chunkCount,
+        cacheStatus: response.headers.get('X-Cache-Status') || undefined,
+        upstreamDurationMs: response.headers.get('X-Upstream-Duration-Ms') || undefined,
+        functionDurationMs: response.headers.get('X-Function-Duration-Ms') || undefined
+      });
+
+      return responseContent || data?.choices?.[0]?.message?.content || '';
     } catch (e) {
       clearTimeout(timeoutId);
       lastError = e as Error;
@@ -384,7 +591,7 @@ export async function fetchModelsFromApi(
     }
 
     // 标准化 endpoint (开发/生产环境自动适配)
-    const normalizedEndpoint = EnvConfig.api.normalizeEndpoint(endpoint);
+    const normalizedEndpoint = resolveProviderEndpoint(provider, endpoint);
 
     // 🔍 调试：始终输出配置信息（用于诊断生产环境问题）
     if (!(fetchModelsFromApi as any)._configLogged) {

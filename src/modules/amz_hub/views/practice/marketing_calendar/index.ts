@@ -43,7 +43,6 @@ interface MarketingCalendarState {
 class MarketingCalendarModule extends BaseModule {
   private state: MarketingCalendarState;
   private debounceTimer: number | null = null;
-  private dropdownMovedToBody = false; // 标志位：下拉框是否已移到body
 
   constructor() {
     super("amz_marketing_calendar");
@@ -84,9 +83,6 @@ class MarketingCalendarModule extends BaseModule {
     if (container && container.parentElement === document.body) {
       container.remove();
     }
-
-    // 重置标志位
-    this.dropdownMovedToBody = false;
 
     // 清理全局代理
     this.unbindGlobalProxies();

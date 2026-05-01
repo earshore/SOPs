@@ -9,6 +9,7 @@ import { showToast } from '@common/ui/index';
 import { Logger } from '../../../../../../services/loggerService';
 
 const SETTINGS_KEY = 'ai_analysis_performance_settings';
+const SETTINGS_VERSION = 2;
 
 /**
  * 性能设置接口
@@ -17,16 +18,30 @@ export interface PerformanceSettings {
   maxConcurrency: number; // 最大并发数 (1-8)
   enableCache: boolean; // 是否启用缓存
   failureStrategy: 'abort' | 'continue'; // 失败策略
+  settingsVersion?: number;
 }
 
 /**
  * 默认设置
  */
 const DEFAULT_SETTINGS: PerformanceSettings = {
-  maxConcurrency: 4,
+  maxConcurrency: 8,
   enableCache: true,
-  failureStrategy: 'continue'
+  failureStrategy: 'continue',
+  settingsVersion: SETTINGS_VERSION
 };
+
+function normalizeSettings(settings: PerformanceSettings): PerformanceSettings {
+  const maxConcurrency = Number.isFinite(settings.maxConcurrency)
+    ? Math.max(1, Math.min(8, Math.floor(settings.maxConcurrency)))
+    : DEFAULT_SETTINGS.maxConcurrency;
+
+  return {
+    ...settings,
+    maxConcurrency,
+    settingsVersion: SETTINGS_VERSION
+  };
+}
 
 /**
  * 获取性能设置
@@ -35,12 +50,17 @@ export function getPerformanceSettings(): PerformanceSettings {
   try {
     const saved = StorageService.get(SETTINGS_KEY);
     if (saved && typeof saved === 'object') {
-      return { ...DEFAULT_SETTINGS, ...saved };
+      const savedSettings = saved as Partial<PerformanceSettings>;
+      const mergedSettings = { ...DEFAULT_SETTINGS, ...savedSettings };
+      if (!savedSettings.settingsVersion && savedSettings.maxConcurrency === 4) {
+        mergedSettings.maxConcurrency = DEFAULT_SETTINGS.maxConcurrency;
+      }
+      return normalizeSettings(mergedSettings);
     }
   } catch (error) {
     Logger.warn('[性能设置] 读取失败，使用默认值:', error);
   }
-  return DEFAULT_SETTINGS;
+  return { ...DEFAULT_SETTINGS };
 }
 
 /**
@@ -48,7 +68,7 @@ export function getPerformanceSettings(): PerformanceSettings {
  */
 export function savePerformanceSettings(settings: PerformanceSettings): void {
   try {
-    StorageService.set(SETTINGS_KEY, settings);
+    StorageService.set(SETTINGS_KEY, normalizeSettings(settings));
     Logger.debug('[性能设置] 已保存:', settings);
   } catch (error) {
     Logger.error('[性能设置] 保存失败:', error);

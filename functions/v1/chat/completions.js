@@ -8,6 +8,7 @@ const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Gateway-Provider",
+  "Access-Control-Expose-Headers": "X-Cache-Status, X-Gateway-Provider, X-Upstream-Duration-Ms, X-Function-Duration-Ms, Server-Timing",
   "Access-Control-Max-Age": "86400",
   "Referrer-Policy": "no-referrer",
 };
@@ -35,6 +36,8 @@ function normalizeUpstreamResponse(provider, data, requestBody) {
 }
 
 export async function onRequest(context) {
+  const requestStartedAt = Date.now();
+
   // CORS 预检
   if (context.request.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: CORS_HEADERS });
@@ -104,10 +107,13 @@ export async function onRequest(context) {
 
         const cachedData = await kv.get(cacheKey);
         if (cachedData) {
+          const functionDurationMs = Date.now() - requestStartedAt;
           return new Response(cachedData, {
             headers: {
               "Content-Type": "application/json",
               "X-Cache-Status": "HIT",
+              "X-Function-Duration-Ms": String(functionDurationMs),
+              "Server-Timing": `function;dur=${functionDurationMs}`,
               ...CORS_HEADERS,
             },
           });
@@ -121,12 +127,15 @@ export async function onRequest(context) {
     // 📡 转发到上游网关
     // ============================================================
     const upstreamRequest = getUpstreamRequest(provider, gateway, requestBody);
+    const upstreamStartedAt = Date.now();
     const response = await fetch(upstreamRequest.url, {
       method: "POST",
       headers: upstreamRequest.headers,
       body: upstreamRequest.body,
       referrerPolicy: "no-referrer",
     });
+    const upstreamDurationMs = Date.now() - upstreamStartedAt;
+    const functionDurationMs = Date.now() - requestStartedAt;
 
     const responseData = await response.text();
 
@@ -146,6 +155,9 @@ export async function onRequest(context) {
         "Content-Type": "application/json",
         "X-Cache-Status": "MISS",
         "X-Gateway-Provider": provider,
+        "X-Upstream-Duration-Ms": String(upstreamDurationMs),
+        "X-Function-Duration-Ms": String(functionDurationMs),
+        "Server-Timing": `upstream;dur=${upstreamDurationMs}, function;dur=${functionDurationMs}`,
         ...CORS_HEADERS,
       },
     });

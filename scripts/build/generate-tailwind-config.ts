@@ -5,7 +5,7 @@
  * 运行: npm run generate:tailwind
  */
 
-import { DESIGN_TOKENS } from '../src/common/config/design-tokens';
+import { DESIGN_TOKENS } from '../../src/common/config/design-tokens';
 import { writeFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -212,7 +212,7 @@ function generateTailwindConfig(): string {
 
 // 生成并写入文件
 const configContent = generateTailwindConfig();
-const outputPath = resolve(__dirname, '../tailwind.config.generated.js');
+const outputPath = resolve(__dirname, '../../config/tailwind.config.generated.js');
 
 try {
   writeFileSync(outputPath, configContent, 'utf-8');

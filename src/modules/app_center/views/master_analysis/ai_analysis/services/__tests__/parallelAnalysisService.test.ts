@@ -139,12 +139,12 @@ describe('parallelAnalysisService', () => {
   describe('性能设置', () => {
     it('应该使用默认配置', () => {
       const defaultConfig = {
-        maxConcurrency: 4,
+        maxConcurrency: 8,
         enableCache: true,
         failureStrategy: 'continue' as const
       };
 
-      expect(defaultConfig.maxConcurrency).toBe(4);
+      expect(defaultConfig.maxConcurrency).toBe(8);
       expect(defaultConfig.enableCache).toBe(true);
       expect(defaultConfig.failureStrategy).toBe('continue');
     });
