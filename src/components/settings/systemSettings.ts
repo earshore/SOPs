@@ -251,7 +251,7 @@ const SettingsPanel = (): SettingsPanelData => ({
 
     async fetchModels(): Promise<void> {
         if (!this.llm.apiKey) {
-            showToast('请先输入访问密码 (AUTH_PASSWORD)', { type: 'warning' });
+            showToast('请先输入 API Key', { type: 'warning' });
             return;
         }
 
@@ -382,7 +382,7 @@ const SettingsPanel = (): SettingsPanelData => ({
 
     async saveProviderConfig(): Promise<void> {
         if (!this.llm.apiKey) {
-            showToast('请填写访问密码 (AUTH_PASSWORD)', { type: 'warning' });
+            showToast('请填写 API Key', { type: 'warning' });
             return;
         }
 

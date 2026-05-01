@@ -16,9 +16,9 @@ cd SOPs
 # 2. 安装依赖
 npm install
 
-# 3. 配置环境变量
+# 3. 创建本地环境文件
 cp .env.example .env
-# 编辑 .env 文件，配置 AUTH_PASSWORD 和网关信息
+# 如需本地接口验证，编辑 .env 文件中的 new-api 配置
 
 # 4. 启动开发服务器
 npm run dev
@@ -35,7 +35,7 @@ npm run build
 # 2. 部署
 npx wrangler pages deploy dist --project-name sops --branch main
 
-# 3. 配置环境变量（详见部署文档）
+# 3. 验证 CSP 和 new-api 连通性（详见部署文档）
 ```
 
 **详细说明**: 查看 [快速开始指南](./docs/GETTING_STARTED.md) 和 [完整部署文档](./docs/DEPLOYMENT.md)
@@ -51,7 +51,7 @@ npx wrangler pages deploy dist --project-name sops --branch main
 
 ### 核心文档
 - [CLAUDE.md](./CLAUDE.md) - Claude Code 开发指南
-- [网关维护指南](./docs/guides/gateway-maintenance-guide.md) - LLM 网关配置和维护
+- [完整部署文档](./docs/DEPLOYMENT.md) - Cloudflare Pages 部署与 new-api 直连说明
 - [CSS 架构系统](./docs/guides/css/CSS-ARCHITECTURE-README.md) - CSS 架构快速开始
 - [最佳实践](./docs/development/best-practices.md) - 开发最佳实践
 - [文档索引](./docs/INDEX.md) - 完整的文档导航

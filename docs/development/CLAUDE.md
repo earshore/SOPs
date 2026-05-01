@@ -232,6 +232,6 @@ Vite 配置了手动分包策略（`vite.config.js`）：
 ## Notes
 
 - Node.js 版本要求: >=18.0.0
-- 开发服务器代理 `/v1` 路径到 `https://ai-gateway.hongecb.store`
+- LLM 请求由浏览器直接调用 `https://new.hongecb.store/v1`，开发服务器不再配置 `/v1` 代理。
 - TypeScript 检查在 Vite 插件中临时禁用（待修复类型错误后重新启用）
 - 生产构建会移除所有 console 语句

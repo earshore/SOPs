@@ -79,10 +79,7 @@
         "css:analyze": "tsx scripts/quality/analyze-module-css.ts",
         "css:cleanup": "tsx scripts/dev/cleanup-unused-css.ts",
         "docs:api": "node scripts/build/generate-api-docs.js",
-        "docs:serve": "npx http-server docs/api -p 8080 -o",
-        "deploy:env": "node scripts/deploy-cf-env.mjs --project-name sops --env production",
-        "deploy:env:dry": "node scripts/deploy-cf-env.mjs --project-name sops --env production --dry-run",
-        "deploy:env:preview": "node scripts/deploy-cf-env.mjs --project-name sops --env preview"
+        "docs:serve": "npx http-server docs/api -p 8080 -o"
     },
     "devDependencies": {
         "@fullhuman/postcss-purgecss": "^8.0.0",

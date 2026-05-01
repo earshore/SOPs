@@ -76,7 +76,7 @@ export const API_ENDPOINTS: Record<string, ApiEndpointConfig> = {
     requiresProxy: false,
     displayName: 'Bright Data'
   },
-  // 自定义网关（通过 Cloudflare Functions 代理，不直连）
+  // 自部署 OpenAI 兼容网关，浏览器直连。
   new_api: {
     domain: 'new.hongecb.store',
     requiresProxy: false,

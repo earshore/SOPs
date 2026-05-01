@@ -63,8 +63,7 @@
 ### 功能指南
 - [DNA Extractor 指南](./guides/dna-extractor-guide.md) - DNA 提取器使用
 - [Promptlab Confidence 用户指南](./guides/promptlab-confidence-user-guide.md) - Promptlab 置信度功能
-- [LLM 网关接入指南](./guides/llm-gateway-integration-guide.md) - 新增网关的完整步骤
-- [网关维护步骤指南](./guides/gateway-maintenance-guide.md) - 网关日常维护和故障排查
+- [部署指南](./DEPLOYMENT.md) - Cloudflare Pages 静态部署与 new-api 直连说明
 - [命名验证器 README](./guides/naming-validator/naming-validator-README.md) - 命名验证工具
 - [命名验证器使用](./guides/naming-validator/naming-validator-USAGE.md) - 使用说明
 
@@ -124,11 +123,6 @@
   - [最终报告](../.kiro/specs/code-quality-improvement/FINAL-REPORT.md)
   - [总结](../.kiro/specs/code-quality-improvement/SUMMARY.md)
   - 批次总结（6-13）
-
-- **自定义网关提供商**
-  - [需求](../.kiro/specs/custom-gateway-provider/requirements.md)
-  - [设计](../.kiro/specs/custom-gateway-provider/design.md)
-  - [任务](../.kiro/specs/custom-gateway-provider/tasks.md)
 
 - **HTML/CSS 命名优化**
   - [需求](../.kiro/specs/html-css-naming-optimization/requirements.md)

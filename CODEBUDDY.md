@@ -48,7 +48,7 @@
 
 测试与质量工具分散在几层：常用脚本在 `package.json`，Vitest 的实际配置内嵌在根 `vite.config.js` 里，Playwright 顶层配置文件再转发到 `config/playwright.config.ts`。仓库里 `config/vitest.config.ts` 和 `config/playwright.config.ts` 仍保留一些 `test/` 路径写法，而真实目录是 `tests/`；如果你要修测试配置，先确认改的是当前脚本真正使用的那一份配置。
 
-`functions/` 下还有 Cloudflare Pages Functions 风格的 `/v1` 接口实现，配合 `vite.config.js` 里的 `/v1` 代理，用于本地开发和生产环境的模型/API 访问。这意味着它虽是前端仓库，但仍包含少量边缘函数代码与部署配置（`wrangler.toml`）。
+当前生产形态是 Cloudflare Pages 静态站点；LLM 请求由浏览器直接调用 `https://new.hongecb.store/v1`。仓库不再保留边缘 `/v1` 代理，本地开发也不再依赖 Vite `/v1` 代理。
 
 ## 仓库内隐含约束
 

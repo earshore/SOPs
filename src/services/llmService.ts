@@ -359,8 +359,6 @@ export async function callLLM(
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${apiKey}`,
-          // 多网关路由：告知 Cloudflare Functions 选择对应网关
-          'X-Gateway-Provider': _provider,
         },
         body: JSON.stringify(requestBody),
         signal: controller.signal,
@@ -613,8 +611,6 @@ export async function fetchModelsFromApi(
     const res = await fetch(`${normalizedEndpoint}/models`, {
       headers: {
         Authorization: `Bearer ${apiKey}`,
-        // 多网关路由：告知 Cloudflare Functions 选择对应网关
-        'X-Gateway-Provider': provider,
       },
       signal: controller.signal,
     }).finally(() => clearTimeout(timeoutId));

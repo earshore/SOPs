@@ -223,9 +223,6 @@ test-new-llm-service.html
 .wrangler/
 wrangler.toml.local
 
-# Functions build output
-functions/dist/
-
 # Naming Validator
 tools/naming-validator/dist/
 tools/naming-validator/node_modules/

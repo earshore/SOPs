@@ -11,12 +11,12 @@ import { Page } from '@playwright/test';
  *
  * @param page - Playwright Page 对象
  * @param apiKey - API 密钥
- * @param provider - LLM 提供商（默认: llmgateway）
+ * @param provider - LLM 提供商（默认: new_api）
  */
 export async function setupAPIConfig(
   page: Page,
   apiKey: string = 'AI2026',
-  provider: string = 'llmgateway'
+  provider: string = 'new_api'
 ): Promise<void> {
   // 导航到首页
   await page.goto('/', { waitUntil: 'domcontentloaded' });
@@ -29,7 +29,7 @@ export async function setupAPIConfig(
     // 设置 LLM 配置
     const llmConfig = {
       provider: provider,
-      endpoint: 'https://ai-gateway.hongecb.store/v1',
+      endpoint: 'https://new.hongecb.store/v1',
       model: 'gpt-4o-mini',
       apiKey: apiKey
     };
