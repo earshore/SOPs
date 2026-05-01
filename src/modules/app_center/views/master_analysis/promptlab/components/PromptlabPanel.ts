@@ -97,6 +97,52 @@ const DEFAULT_PROFILE: UserProductProfile = {
   charLimit: 5000,
 };
 
+type StructuredSubItemSelection = {
+  enabled: boolean;
+  items?: Record<string, boolean>;
+};
+
+type SubItemSelection = boolean | StructuredSubItemSelection;
+
+const getAnalysisReportRoot = (): Record<string, unknown> | null => {
+  const report = appStore.getState().analysis.analysisReport;
+  if (!report || typeof report === "string") return null;
+
+  const reportObj = report as Record<string, unknown>;
+  return reportObj.analysisReport && typeof reportObj.analysisReport === "object"
+    ? (reportObj.analysisReport as Record<string, unknown>)
+    : reportObj;
+};
+
+const getReportDimensionData = (
+  dimensionId: string,
+): Record<string, unknown> | null => {
+  const report = getAnalysisReportRoot();
+  const dimensionData = report?.[dimensionId];
+  return dimensionData && typeof dimensionData === "object"
+    ? (dimensionData as Record<string, unknown>)
+    : null;
+};
+
+const getContentItemIndexes = (value: unknown): string[] => {
+  if (!value) return [];
+  if (Array.isArray(value)) return value.map((_, index) => index.toString());
+  if (typeof value === "object") {
+    return Object.keys(value as Record<string, unknown>).map((_, index) =>
+      index.toString(),
+    );
+  }
+  return ["0"];
+};
+
+const createDisabledItems = (indexes: string[]): Record<string, boolean> => {
+  const items: Record<string, boolean> = {};
+  indexes.forEach((index) => {
+    items[index] = false;
+  });
+  return items;
+};
+
 /**
  * 创建 Promptlab Panel Alpine 组件
  *
@@ -241,11 +287,13 @@ export function createPromptlabPanel() {
       if (appStore && typeof appStore.subscribe === "function") {
         this._appStoreUnsubscribe = appStore.subscribe((state) => {
           if (state.analysis?.analysisReport) {
-            const self = this;
-            if (typeof (self as any).$nextTick === "function") {
-              (self as any).$nextTick(() => self.renderReportAnalysis());
+            const nextTick = (
+              this as { $nextTick?: (callback: () => void) => void }
+            ).$nextTick;
+            if (typeof nextTick === "function") {
+              nextTick(() => this.renderReportAnalysis());
             } else {
-              setTimeout(() => self.renderReportAnalysis(), 0);
+              setTimeout(() => this.renderReportAnalysis(), 0);
             }
           }
         });
@@ -373,24 +421,20 @@ export function createPromptlabPanel() {
      * 默认所有子项都选中
      */
     initializeGranularSelections(dimensionId: string): void {
-      const report = appStore.getState().analysis.analysisReport;
+      const dimensionData = getReportDimensionData(dimensionId);
 
       // 处理报告可能是字符串的情况
-      if (!report || typeof report === 'string') return;
-
-      const dimensionData = report[dimensionId];
-
-      if (!dimensionData || typeof dimensionData !== 'object') return;
+      if (!dimensionData) return;
 
       if (!this.profile.selectedReportItems) {
         this.profile.selectedReportItems = {};
       }
 
-      const subItems: Record<string, boolean | { enabled: boolean; items?: Record<string, boolean> }> = {};
+      const subItems: Record<string, SubItemSelection> = {};
       Object.keys(dimensionData).forEach(key => {
         const value = (dimensionData as Record<string, unknown>)[key];
         // 如果是数组，初始化为对象结构以支持具体项选择
-        if (Array.isArray(value) && value.length > 0) {
+        if (getContentItemIndexes(value).length > 0) {
           subItems[key] = {
             enabled: true,
             items: {} // 空对象表示全选
@@ -406,11 +450,96 @@ export function createPromptlabPanel() {
       };
     },
 
+    getSubItemData(dimensionId: string, subItemKey: string): unknown {
+      return getReportDimensionData(dimensionId)?.[subItemKey];
+    },
+
+    getContentItemIndexes(dimensionId: string, subItemKey: string): string[] {
+      return getContentItemIndexes(this.getSubItemData(dimensionId, subItemKey));
+    },
+
+    ensureStructuredSubItemSelection(
+      dimensionId: string,
+      subItemKey: string,
+    ): StructuredSubItemSelection | null {
+      const dimension = this.profile.selectedReportItems?.[dimensionId];
+      if (!dimension) return null;
+
+      const current = dimension.subItems[subItemKey];
+      if (typeof current === "object") return current;
+
+      const enabled = current !== false;
+      const indexes = this.getContentItemIndexes(dimensionId, subItemKey);
+      const structured: StructuredSubItemSelection = {
+        enabled,
+        items: enabled ? {} : createDisabledItems(indexes),
+      };
+      dimension.subItems[subItemKey] = structured;
+      return structured;
+    },
+
+    setSubItemAndContentState(
+      dimensionId: string,
+      subItemKey: string,
+      selected: boolean,
+    ): void {
+      const dimension = this.profile.selectedReportItems?.[dimensionId];
+      if (!dimension) return;
+
+      const indexes = this.getContentItemIndexes(dimensionId, subItemKey);
+      if (indexes.length === 0) {
+        dimension.subItems[subItemKey] = selected;
+        this.syncDimensionEnabled(dimensionId);
+        return;
+      }
+
+      const subItem = this.ensureStructuredSubItemSelection(
+        dimensionId,
+        subItemKey,
+      );
+      if (!subItem) return;
+
+      subItem.enabled = selected;
+      subItem.items = selected ? {} : createDisabledItems(indexes);
+      this.syncDimensionEnabled(dimensionId);
+    },
+
+    getSelectedContentCount(dimensionId: string, subItemKey: string): number {
+      const subItem = this.profile.selectedReportItems?.[dimensionId]?.subItems[subItemKey];
+      const indexes = this.getContentItemIndexes(dimensionId, subItemKey);
+      if (indexes.length === 0) return 0;
+      if (typeof subItem === "boolean") return subItem ? indexes.length : 0;
+      if (!subItem?.enabled) return 0;
+      return indexes.filter((index) => subItem.items?.[index] !== false).length;
+    },
+
+    getSelectedSubItemCount(dimensionId: string): number {
+      const dimension = this.profile.selectedReportItems?.[dimensionId];
+      if (!dimension) return 0;
+
+      return Object.keys(dimension.subItems).filter((key) => {
+        const subItem = dimension.subItems[key];
+        if (typeof subItem === "boolean") return subItem;
+        if (typeof subItem === "object") {
+          return subItem.enabled && this.getSelectedContentCount(dimensionId, key) > 0;
+        }
+        return false;
+      }).length;
+    },
+
+    syncDimensionEnabled(dimensionId: string): void {
+      const dimension = this.profile.selectedReportItems?.[dimensionId];
+      if (!dimension) return;
+      dimension.enabled = this.getSelectedSubItemCount(dimensionId) > 0;
+    },
+
     /**
      * 检查维度是否启用
      */
     isDimensionEnabled(dimensionId: string): boolean {
-      return this.profile.selectedReportItems?.[dimensionId]?.enabled ?? false;
+      const dimension = this.profile.selectedReportItems?.[dimensionId];
+      if (!dimension?.enabled) return false;
+      return this.getSelectedSubItemCount(dimensionId) > 0;
     },
 
     /**
@@ -420,9 +549,12 @@ export function createPromptlabPanel() {
       const item = this.profile.selectedReportItems?.[dimensionId];
       if (!item || !item.enabled) return false;
 
-      const subItems = Object.values(item.subItems);
-      const selectedCount = subItems.filter(Boolean).length;
-      return selectedCount > 0 && selectedCount < subItems.length;
+      const subItemKeys = Object.keys(item.subItems);
+      const selectedCount = this.getSelectedSubItemCount(dimensionId);
+      const hasPartialSubItem = subItemKeys.some((key) =>
+        this.isSubItemPartiallySelected(dimensionId, key),
+      );
+      return hasPartialSubItem || (selectedCount > 0 && selectedCount < subItemKeys.length);
     },
 
     /**
@@ -458,37 +590,9 @@ export function createPromptlabPanel() {
         const newState = !current;
         this.profile.selectedReportItems[dimensionId].enabled = newState;
 
-        // 级联更新：当维度被选中/取消时，更新所有子项和具体内容项
         const subItems = this.profile.selectedReportItems[dimensionId].subItems;
         Object.keys(subItems).forEach(subItemKey => {
-          const subItem = subItems[subItemKey];
-          if (typeof subItem === 'boolean') {
-            subItems[subItemKey] = newState;
-          } else if (typeof subItem === 'object') {
-            subItem.enabled = newState;
-            // 如果有具体内容项，也一并更新
-            if (newState) {
-              // 选中时清空 items（表示全选）
-              subItem.items = {};
-            } else {
-              // 取消选中时，将所有具体项设为 false
-              if (subItem.items) {
-                const report = appStore.getState().analysis.analysisReport;
-                if (report && typeof report !== 'string') {
-                  const dimensionData = report[dimensionId];
-                  if (dimensionData && typeof dimensionData === 'object') {
-                    const dataArray = (dimensionData as Record<string, unknown>)[subItemKey];
-                    if (Array.isArray(dataArray)) {
-                      subItem.items = {};
-                      dataArray.forEach((_, idx) => {
-                        subItem.items![idx.toString()] = false;
-                      });
-                    }
-                  }
-                }
-              }
-            }
-          }
+          this.setSubItemAndContentState(dimensionId, subItemKey, newState);
         });
       }
 
@@ -501,37 +605,8 @@ export function createPromptlabPanel() {
     onSubItemToggle(dimensionId: string, subItemKey: string): void {
       if (!this.profile.selectedReportItems?.[dimensionId]) return;
 
-      const subItem = this.profile.selectedReportItems[dimensionId].subItems[subItemKey];
-
-      if (typeof subItem === 'boolean') {
-        const newState = !subItem;
-        this.profile.selectedReportItems[dimensionId].subItems[subItemKey] = newState;
-      } else if (typeof subItem === 'object') {
-        const newState = !subItem.enabled;
-        subItem.enabled = newState;
-
-        // 级联更新：当子项被选中/取消时，更新所有具体内容项
-        if (newState) {
-          // 选中时清空 items（表示全选）
-          subItem.items = {};
-        } else {
-          // 取消选中时，将所有具体项设为 false
-          const report = appStore.getState().analysis.analysisReport;
-          if (report && typeof report !== 'string') {
-            const dimensionData = report[dimensionId];
-            if (dimensionData && typeof dimensionData === 'object') {
-              const dataArray = (dimensionData as Record<string, unknown>)[subItemKey];
-              if (Array.isArray(dataArray)) {
-                subItem.items = {};
-                dataArray.forEach((_, idx) => {
-                  subItem.items![idx.toString()] = false;
-                });
-              }
-            }
-          }
-        }
-      }
-
+      const newState = !this.isSubItemSelected(dimensionId, subItemKey);
+      this.setSubItemAndContentState(dimensionId, subItemKey, newState);
       this.saveState();
     },
 
@@ -541,7 +616,9 @@ export function createPromptlabPanel() {
     isSubItemSelected(dimensionId: string, subItemKey: string): boolean {
       const subItem = this.profile.selectedReportItems?.[dimensionId]?.subItems[subItemKey];
       if (typeof subItem === 'boolean') return subItem;
-      if (typeof subItem === 'object') return subItem.enabled;
+      if (typeof subItem === 'object') {
+        return subItem.enabled && this.getSelectedContentCount(dimensionId, subItemKey) > 0;
+      }
       return true;
     },
 
@@ -569,9 +646,11 @@ export function createPromptlabPanel() {
      */
     isContentItemSelected(dimensionId: string, subItemKey: string, itemIndex: string): boolean {
       const subItem = this.profile.selectedReportItems?.[dimensionId]?.subItems[subItemKey];
-      if (typeof subItem === 'object' && subItem.items) {
+      if (typeof subItem === 'boolean') return subItem;
+      if (typeof subItem === 'object') {
+        if (!subItem.enabled) return false;
         // 如果 items 中有该索引，返回其值；否则默认选中
-        return subItem.items[itemIndex] !== false;
+        return subItem.items?.[itemIndex] !== false;
       }
       return true;
     },
@@ -583,15 +662,22 @@ export function createPromptlabPanel() {
       const dimension = this.profile.selectedReportItems?.[dimensionId];
       if (!dimension) return;
 
-      const subItem = dimension.subItems[subItemKey];
-      if (typeof subItem !== 'object') return;
+      const wasSelected = this.isContentItemSelected(dimensionId, subItemKey, itemIndex);
+      const subItem = this.ensureStructuredSubItemSelection(dimensionId, subItemKey);
+      if (!subItem) return;
 
       if (!subItem.items) {
         subItem.items = {};
       }
 
-      const current = subItem.items[itemIndex] !== false;
-      subItem.items[itemIndex] = !current;
+      if (!subItem.enabled && !wasSelected) {
+        subItem.items = createDisabledItems(this.getContentItemIndexes(dimensionId, subItemKey));
+      }
+
+      subItem.items[itemIndex] = !wasSelected;
+      subItem.enabled = true;
+      subItem.enabled = this.getSelectedContentCount(dimensionId, subItemKey) > 0;
+      this.syncDimensionEnabled(dimensionId);
 
       this.saveState();
     },
@@ -603,19 +689,9 @@ export function createPromptlabPanel() {
       const subItem = this.profile.selectedReportItems?.[dimensionId]?.subItems[subItemKey];
       if (typeof subItem !== 'object' || !subItem.enabled || !subItem.items) return false;
 
-      const report = appStore.getState().analysis.analysisReport;
-      if (!report || typeof report === 'string') return false;
-
-      const dimensionData = report[dimensionId];
-      if (!dimensionData || typeof dimensionData !== 'object') return false;
-
-      const dataArray = (dimensionData as Record<string, unknown>)[subItemKey];
-      if (!Array.isArray(dataArray)) return false;
-
-      const totalCount = dataArray.length;
-      const selectedCount = dataArray.filter((_, idx) =>
-        subItem.items![idx.toString()] !== false
-      ).length;
+      const indexes = this.getContentItemIndexes(dimensionId, subItemKey);
+      const totalCount = indexes.length;
+      const selectedCount = this.getSelectedContentCount(dimensionId, subItemKey);
 
       return selectedCount > 0 && selectedCount < totalCount;
     },
@@ -624,8 +700,8 @@ export function createPromptlabPanel() {
      * 展开所有维度
      */
     expandAllDimensions(): void {
-      const report = appStore.getState().analysis.analysisReport;
-      if (!report || typeof report === 'string') return;
+      const report = getAnalysisReportRoot();
+      if (!report) return;
 
       Object.keys(report).forEach(dimensionId => {
         this.expandedDimensions.add(dimensionId);
@@ -647,14 +723,7 @@ export function createPromptlabPanel() {
 
       const subItems = this.profile.selectedReportItems[dimensionId].subItems;
       Object.keys(subItems).forEach(key => {
-        const subItem = subItems[key];
-        if (typeof subItem === 'boolean') {
-          subItems[key] = true;
-        } else if (typeof subItem === 'object') {
-          subItem.enabled = true;
-          // 级联更新：同时选中所有具体内容项（清空 items 表示全选）
-          subItem.items = {};
-        }
+        this.setSubItemAndContentState(dimensionId, key, true);
       });
 
       this.saveState();
@@ -667,28 +736,8 @@ export function createPromptlabPanel() {
       if (!this.profile.selectedReportItems?.[dimensionId]) return;
 
       const subItems = this.profile.selectedReportItems[dimensionId].subItems;
-      const report = appStore.getState().analysis.analysisReport;
-
       Object.keys(subItems).forEach(key => {
-        const subItem = subItems[key];
-        if (typeof subItem === 'boolean') {
-          subItems[key] = false;
-        } else if (typeof subItem === 'object') {
-          subItem.enabled = false;
-          // 级联更新：同时取消选中所有具体内容项
-          if (report && typeof report !== 'string') {
-            const dimensionData = report[dimensionId];
-            if (dimensionData && typeof dimensionData === 'object') {
-              const dataArray = (dimensionData as Record<string, unknown>)[key];
-              if (Array.isArray(dataArray)) {
-                subItem.items = {};
-                dataArray.forEach((_, idx) => {
-                  subItem.items![idx.toString()] = false;
-                });
-              }
-            }
-          }
-        }
+        this.setSubItemAndContentState(dimensionId, key, false);
       });
 
       this.saveState();
@@ -698,42 +747,20 @@ export function createPromptlabPanel() {
      * 选中子项内所有具体内容项
      */
     selectAllContentItems(dimensionId: string, subItemKey: string): void {
-      const dimension = this.profile.selectedReportItems?.[dimensionId];
-      if (!dimension) return;
+      if (!this.profile.selectedReportItems?.[dimensionId]) return;
 
-      const subItem = dimension.subItems[subItemKey];
-      if (typeof subItem === 'object') {
-        subItem.items = {}; // 空对象表示全选
-        this.saveState();
-      }
+      this.setSubItemAndContentState(dimensionId, subItemKey, true);
+      this.saveState();
     },
 
     /**
      * 取消选中子项内所有具体内容项
      */
     deselectAllContentItems(dimensionId: string, subItemKey: string): void {
-      const dimension = this.profile.selectedReportItems?.[dimensionId];
-      if (!dimension) return;
+      if (!this.profile.selectedReportItems?.[dimensionId]) return;
 
-      const subItem = dimension.subItems[subItemKey];
-      if (typeof subItem === 'object') {
-        const report = appStore.getState().analysis.analysisReport;
-        if (!report || typeof report === 'string') return;
-
-        const dimensionData = report[dimensionId];
-        if (!dimensionData || typeof dimensionData !== 'object') return;
-
-        const dataArray = (dimensionData as Record<string, unknown>)[subItemKey];
-        if (!Array.isArray(dataArray)) return;
-
-        // 将所有项设置为 false
-        subItem.items = {};
-        dataArray.forEach((_, idx) => {
-          subItem.items![idx.toString()] = false;
-        });
-
-        this.saveState();
-      }
+      this.setSubItemAndContentState(dimensionId, subItemKey, false);
+      this.saveState();
     },
   };
 }

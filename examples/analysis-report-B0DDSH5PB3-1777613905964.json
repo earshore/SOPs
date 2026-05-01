@@ -1,0 +1,808 @@
+{
+  "metadata": {
+    "asins": [
+      "B0DDSH5PB3"
+    ],
+    "targets": [
+      "title-keywords",
+      "selling-points",
+      "fatal-flaws",
+      "wow-moments",
+      "hesitation-points",
+      "buyer-profile",
+      "vocab-gap",
+      "promise-reality"
+    ],
+    "timestamp": "2026-05-01T05:38:25.960Z",
+    "dataSource": "scraper",
+    "marketplace": "DE"
+  },
+  "analysisReport": {
+    "fatal-flaws": {
+      "critical_issues": [
+        {
+          "issue": "Socken sind zu dick und beeinträchtigen das Ballgefühl",
+          "frequency": 1,
+          "user_quotes": [
+            "Sind mir ein bisschen zu dick, habe dadurch nicht so viel Ballgefühl"
+          ],
+          "severity": "major",
+          "category": "performance"
+        }
+      ],
+      "return_triggers": [
+        "Zu viel Stoff bzw. zu dickes Material kann Nutzer abschrecken, die ein direktes Ballgefühl erwarten"
+      ],
+      "expectation_gaps": [
+        {
+          "expected": "Dünnere Socken mit gutem, direktem Ballgefühl",
+          "reality": "Die Socken wirken etwas zu dick und reduzieren das Ballgefühl",
+          "disappointment_level": "medium"
+        }
+      ],
+      "actionable_fixes": [
+        "Materialstärke reduzieren oder eine dünnere Variante anbieten",
+        "Produktbeschreibung um Hinweise zur Dicke und Polsterung ergänzen",
+        "Für fußballorientierte Käufer klar kommunizieren, wie stark das Ballgefühl beeinflusst wird"
+      ],
+      "risk_assessment": {
+        "overall_risk_level": "medium",
+        "primary_concern": "Zu dickes Material beeinträchtigt das Ballgefühl"
+      }
+    },
+    "title-keywords": {
+      "primary_keywords": [
+        {
+          "keyword": "Fußballsocken",
+          "weight": "high",
+          "search_volume_estimate": "hoch"
+        },
+        {
+          "keyword": "Sportsocken",
+          "weight": "medium",
+          "search_volume_estimate": "hoch"
+        },
+        {
+          "keyword": "Laufsocken",
+          "weight": "low",
+          "search_volume_estimate": "mittel"
+        }
+      ],
+      "secondary_keywords": [
+        {
+          "keyword": "Anti-Rutsch-Grip",
+          "type": "feature",
+          "importance": "sehr hoch"
+        },
+        {
+          "keyword": "schweißabsorbierend",
+          "type": "feature",
+          "importance": "hoch"
+        },
+        {
+          "keyword": "atmungsaktiv",
+          "type": "feature",
+          "importance": "hoch"
+        },
+        {
+          "keyword": "Größe 39-46",
+          "type": "size",
+          "importance": "mittel"
+        }
+      ],
+      "scene_keywords": [
+        {
+          "keyword": "Fußball",
+          "usage_context": "Training und Spiel auf dem Fußballplatz"
+        },
+        {
+          "keyword": "Sport",
+          "usage_context": "Allgemeine sportliche Aktivitäten"
+        },
+        {
+          "keyword": "Laufen",
+          "usage_context": "Jogging, Lauftraining und Fitness"
+        }
+      ],
+      "audience_keywords": [
+        {
+          "keyword": "Herren",
+          "target_group": "erwachsene Männer"
+        },
+        {
+          "keyword": "Damen",
+          "target_group": "erwachsene Frauen"
+        }
+      ],
+      "removed_modifiers": [],
+      "removed_brand_terms": [],
+      "optimization_suggestions": [
+        "Das wichtigste Kernkeyword „Fußballsocken“ sollte am Titelanfang beibehalten werden, da es die Hauptkategorie klar definiert.",
+        "Die Wiederholung von „Fußballsocken“ kann reduziert werden, um Platz für zusätzliche relevante Suchbegriffe zu schaffen.",
+        "„Anti-Rutsch“ und „Grip“ sollten als zentrale Feature-Begriffe kombiniert werden, z. B. „Anti-Rutsch-Grip-Socken“.",
+        "Die Zielgruppe „Herren Damen“ ist relevant, könnte aber sprachlich sauberer als „für Herren und Damen“ formuliert werden.",
+        "Weitere relevante Begriffe wie „rutschfeste Fußballsocken“, „Trainingssocken“ oder „Grip-Socken“ könnten die Suchabdeckung verbessern."
+      ]
+    },
+    "wow-moments": {
+      "moments": [
+        {
+          "moment_description": "Die Socken sehen selbst nach mehreren Wäschen noch nahezu wie neu aus, ohne sichtbaren Qualitäts- oder Farbverlust.",
+          "user_quote": "Nach mehreren Wäschen immer noch super. Kein wirklicher Unterschied zu den nagelneuen. Selbst die Farben sind noch so frisch wie am ersten Tag.",
+          "emotion_type": "amazement",
+          "aspect": "quality",
+          "marketing_potential": "high"
+        },
+        {
+          "moment_description": "Beim Fußball und Sport bleiben die Socken im Dauereinsatz rutschfest und vermitteln spürbar mehr Grip.",
+          "user_quote": "Im Dauereinsatz beim Fußball und beim Sport machen, verrutschen nicht, halten super, gefühlt mehr Grip.",
+          "emotion_type": "delight",
+          "aspect": "performance",
+          "marketing_potential": "high"
+        },
+        {
+          "moment_description": "Die Socken überzeugen so sehr, dass sie erneut bestellt wurden und bei Kindern besonders gut ankommen.",
+          "user_quote": "Es ist die zweite Bestellung dieser Art von Socken, meine Kinder lieben sie.",
+          "emotion_type": "delight",
+          "aspect": "value",
+          "marketing_potential": "medium"
+        },
+        {
+          "moment_description": "Die Lieferung kam pünktlich an und die Qualität wurde als sehr gut wahrgenommen.",
+          "user_quote": "Pünktlich angekommen und sehr gute Qualität.",
+          "emotion_type": "relief",
+          "aspect": "quality",
+          "marketing_potential": "low"
+        }
+      ],
+      "emotional_triggers": [
+        "Bleibt auch nach mehreren Wäschen wie neu",
+        "Frische Farben wie am ersten Tag",
+        "Verrutscht nicht beim Sport",
+        "Spürbar mehr Grip",
+        "Kinder lieben die Socken",
+        "Sehr gute Qualität bei pünktlicher Lieferung"
+      ],
+      "high_conversion_phrases": [
+        "Nach mehreren Wäschen immer noch wie neu",
+        "Farben frisch wie am ersten Tag",
+        "Verrutscht nicht beim Fußball und Sport",
+        "Gefühlt mehr Grip im Einsatz",
+        "Von Kindern geliebt und erneut bestellt"
+      ],
+      "unexpected_benefits": [
+        "Kaum Unterschied zu nagelneuen Socken nach mehreren Wäschen",
+        "Langanhaltende Farbfrische",
+        "Zusätzlicher Grip beim Sport",
+        "Hohe Alltagstauglichkeit im Dauereinsatz",
+        "Starke Akzeptanz bei Kindern"
+      ],
+      "copywriting_angles": [
+        "Sportliche Socken, die auch nach vielen Wäschen überzeugen",
+        "Frische Farben und stabile Qualität wie am ersten Tag",
+        "Rutschfester Halt und mehr Grip beim Fußball, Tennis und Training",
+        "Ideal für aktive Kinder, die ihre Sportsocken wirklich gerne tragen",
+        "Robuste Sportsocken für den Dauereinsatz"
+      ]
+    },
+    "buyer-profile": {
+      "demographics": {
+        "likely_gender": "mixed",
+        "age_range_estimate": "Kinder bis Erwachsene, wahrscheinlich ca. 10–45 Jahre",
+        "lifestyle_indicators": [
+          "sportlich aktiv",
+          "regelmäßiges Fußballtraining",
+          "Tennis und allgemeiner Sport",
+          "wertorientierter Einkauf",
+          "Interesse an langlebiger Sportbekleidung",
+          "Kauf für Kinder oder Familie"
+        ]
+      },
+      "buyer_types": [
+        {
+          "type": "Fußballspieler und regelmäßige Sporttreibende",
+          "percentage_estimate": "50%",
+          "evidence": "Mehrere Bewertungen erwähnen Fußball, Fußballtraining, Dauereinsatz beim Fußball und Sport; dabei werden Halt, Rutschfestigkeit und Grip hervorgehoben."
+        },
+        {
+          "type": "Eltern, die Sportsocken für ihre Kinder kaufen",
+          "percentage_estimate": "20%",
+          "evidence": "Eine Bewertung aus Spanien erwähnt ausdrücklich, dass die Kinder diese Socken lieben und dass es bereits die zweite Bestellung ist."
+        },
+        {
+          "type": "Tennisspieler und Nutzer für andere Sportarten",
+          "percentage_estimate": "15%",
+          "evidence": "Eine deutsche Bewertung nennt die Nutzung beim Tennis und bewertet die Socken dafür als sehr geeignet."
+        },
+        {
+          "type": "Qualitäts- und Preis-Leistungs-orientierte Käufer",
+          "percentage_estimate": "15%",
+          "evidence": "Bewertungen aus Großbritannien, Belgien und Deutschland betonen gute Qualität, guten Wert, lange Haltbarkeit und gute Verarbeitung."
+        }
+      ],
+      "usage_scenes": [
+        {
+          "scene": "Fußballtraining",
+          "frequency": "weekly",
+          "context": "Die Socken werden beim regelmäßigen Fußballtraining getragen, wobei Passform, Halt und Grip wichtig sind."
+        },
+        {
+          "scene": "Fußballspiel oder intensiver Sporteinsatz",
+          "frequency": "weekly",
+          "context": "Mehrere Nutzer beschreiben die Socken als im Dauereinsatz beim Fußball und beim Sport, besonders wegen Rutschfestigkeit und stabilem Sitz."
+        },
+        {
+          "scene": "Tennis",
+          "frequency": "occasional",
+          "context": "Ein Käufer nutzt die Socken auch beim Tennis und bewertet sie als sehr passend für diese Sportart."
+        },
+        {
+          "scene": "Allgemeines Sportmachen und Training",
+          "frequency": "weekly",
+          "context": "Die Socken werden für verschiedene sportliche Aktivitäten verwendet, bei denen Komfort, Haltbarkeit und sicherer Sitz relevant sind."
+        },
+        {
+          "scene": "Wiederholtes Waschen nach Sporteinsätzen",
+          "frequency": "weekly",
+          "context": "Ein Nutzer hebt hervor, dass die Socken nach mehreren Wäschen weiterhin gut aussehen, die Farben frisch bleiben und kaum Verschleiß sichtbar ist."
+        },
+        {
+          "scene": "Nutzung durch Kinder beim Sport",
+          "frequency": "weekly",
+          "context": "Ein Elternteil kauft die Socken wiederholt für seine Kinder, die sie gerne beim Sport tragen."
+        }
+      ],
+      "purchase_motivations": [
+        "gute Verarbeitung",
+        "lange Haltbarkeit",
+        "frische Farben auch nach mehreren Wäschen",
+        "perfekte Passform",
+        "guter Halt ohne Rutschen",
+        "mehr Grip beim Sport",
+        "geeignet für Fußballtraining",
+        "geeignet für Tennis",
+        "gute Qualität",
+        "gutes Preis-Leistungs-Verhältnis",
+        "Wiederkauf wegen Zufriedenheit",
+        "Beliebtheit bei Kindern"
+      ],
+      "geographic_insights": {
+        "primary_markets": [
+          "Deutschland",
+          "Spanien",
+          "Großbritannien",
+          "Belgien"
+        ],
+        "cultural_considerations": [
+          "In Deutschland liegt der Schwerpunkt stark auf Fußball, Training, Passform und Haltbarkeit.",
+          "In Spanien erscheint der Familien- und Kinderkauf relevant, insbesondere wiederholte Bestellungen für sportaktive Kinder.",
+          "In Großbritannien wird der praktische Nutzen und das Preis-Leistungs-Verhältnis knapp und direkt bewertet.",
+          "In Belgien werden pünktliche Lieferung und gute Qualität positiv hervorgehoben.",
+          "Über mehrere europäische Märkte hinweg wird das Produkt als funktionale Sportsocke für regelmäßige Nutzung wahrgenommen."
+        ]
+      }
+    },
+    "promise-reality": {
+      "gaps": [
+        {
+          "listing_claim": "Die Socken sind leicht, atmungsaktiv und für Fußball sowie andere Sportarten ideal geeignet.",
+          "review_reality": "Ein Kunde empfindet die Socken als etwas zu dick, wodurch beim Fußball weniger Ballgefühl entsteht. Dies widerspricht teilweise dem Eindruck von Leichtigkeit und optimaler Sporteignung für Fußball.",
+          "contradiction_severity": "minor",
+          "evidence_quotes": [
+            "„Coole Socken, aber ein bisschen zu viel Stoff.“",
+            "„Sie sind mir ein bisschen zu dick, dadurch habe ich nicht so viel Ballgefühl.“"
+          ],
+          "false_advertising_risk": "low",
+          "recommended_action": "Die Aussage abschwächen, z. B. „angenehm zu tragen und für viele Sportarten geeignet“ statt stark auf „leicht“ oder optimales Fußballgefühl zu setzen."
+        },
+        {
+          "listing_claim": "Die Socken passen sich den Füßen perfekt an und bieten hohen Komfort.",
+          "review_reality": "Die meisten Bewertungen bestätigen eine gute Passform, jedoch zeigt eine Bewertung, dass die Dicke für manche Nutzer den Komfort bzw. das Ballgefühl beeinträchtigen kann.",
+          "contradiction_severity": "minor",
+          "evidence_quotes": [
+            "„Sitz perfekt, top.“",
+            "„Auch die Passform ist gut.“",
+            "„Sie sind mir ein bisschen zu dick.“"
+          ],
+          "false_advertising_risk": "low",
+          "recommended_action": "„Perfekt“ durch eine realistischere Formulierung ersetzen, z. B. „bietet in der Regel eine gute Passform und angenehmen Tragekomfort“."
+        }
+      ],
+      "verified_claims": [
+        "Die Socken sind gut verarbeitet und langlebig, auch nach mehreren Wäschen.",
+        "Die Farben bleiben auch nach dem Waschen frisch.",
+        "Die Passform wird von Kunden überwiegend positiv bewertet.",
+        "Die Socken eignen sich gut für Fußballtraining und andere Sportarten wie Tennis.",
+        "Das Anti-Rutsch-Design bzw. der Grip wird von Kunden positiv bestätigt.",
+        "Die Qualität wird mehrfach als gut oder sehr gut beschrieben."
+      ],
+      "unverified_claims": [
+        "Die Socken gewährleisten maximale Blutzirkulation.",
+        "Die Socken unterstützen die Muskelregeneration.",
+        "Die Socken reduzieren Verletzungen.",
+        "Die Socken transportieren Feuchtigkeit zuverlässig ab.",
+        "Die Socken verhindern Stürze oder Gleichgewichtsverluste auf glatten Oberflächen.",
+        "Die Socken passen sich den Waden und Beinen sanft an."
+      ],
+      "overall_credibility": {
+        "score": "8",
+        "assessment": "Die Produktversprechen werden durch die Bewertungen insgesamt weitgehend gestützt, besonders in Bezug auf Qualität, Haltbarkeit, Passform und Grip. Es gibt nur eine leichte Diskrepanz zur behaupteten Leichtigkeit und optimalen Fußballtauglichkeit, da ein Kunde die Socken als etwas dick empfindet. Medizinisch oder leistungsbezogen klingende Aussagen zu Blutzirkulation, Regeneration und Verletzungsreduzierung sind jedoch nicht durch Bewertungen belegt und sollten vorsichtiger formuliert werden."
+      },
+      "listing_revision_suggestions": [
+        "Ersetzen Sie absolute Aussagen wie „passen sich perfekt an“ durch „bieten eine gute, elastische Passform“.",
+        "Formulieren Sie „leicht und atmungsaktiv“ vorsichtiger, z. B. „angenehm zu tragen und für Sport geeignet“, da ein Kunde die Socken als etwas dick beschreibt.",
+        "Entfernen oder belegen Sie gesundheitsnahe Aussagen wie „maximale Blutzirkulation“, „Muskelregeneration unterstützen“ und „Verletzungen reduzieren“.",
+        "Schwächen Sie die Anti-Rutsch-Aussage ab: statt „verhindert Stürze“ besser „kann für besseren Halt auf glatten Oberflächen sorgen“.",
+        "Ergänzen Sie einen Hinweis, dass das Material etwas stärker sein kann und dadurch mehr Polsterung bietet, aber nicht jeder Nutzer maximales Ballgefühl empfindet."
+      ]
+    },
+    "vocab-gap": {
+      "seller_terms": [
+        "Fußballsocken",
+        "Anti-Rutsch-Grip",
+        "Herren",
+        "Damen",
+        "Sportsocken",
+        "schweißabsorbierend",
+        "atmungsaktiv",
+        "Laufsocken",
+        "5 Paar",
+        "verschiedene Farben",
+        "Größe 38-46",
+        "gute Elastizität",
+        "rutschfest",
+        "Premium-Qualität",
+        "Nylon",
+        "Elasthan",
+        "hochelastisch",
+        "weich",
+        "Komfort",
+        "schlichtes Design",
+        "Sport",
+        "Alltag",
+        "Anti-Rutsch-Design",
+        "Sohlen",
+        "Halt",
+        "Traktion",
+        "glatte Oberflächen",
+        "Wandern",
+        "Laufen",
+        "Fußball",
+        "Basketball",
+        "Radfahren",
+        "feuchtigkeitstransportierend",
+        "leicht",
+        "langlebig",
+        "Blutzirkulation",
+        "Muskelregeneration",
+        "Verletzungsreduzierung"
+      ],
+      "buyer_terms": [
+        "gut verarbeitet",
+        "halten lange",
+        "nach mehreren Wäschen",
+        "Farben bleiben frisch",
+        "Sitz perfekt",
+        "einwandfrei",
+        "super Socken",
+        "Tennis",
+        "sehr zufrieden",
+        "Fußballtraining",
+        "Passform gut",
+        "Dauereinsatz",
+        "rutschen nicht",
+        "halten super",
+        "mehr Grip",
+        "Top Qualität",
+        "coole Socken",
+        "zu dick",
+        "viel Stoff",
+        "Ballgefühl",
+        "Sportsocken für Kinder",
+        "gutes Preis-Leistungs-Verhältnis",
+        "pünktliche Lieferung",
+        "sehr gute Qualität"
+      ],
+      "uncovered_buyer_terms": [
+        {
+          "term": "Fußballtraining",
+          "frequency": "medium",
+          "context": "Käufer nutzen die Socken konkret im Fußballtraining, nicht nur allgemein beim Fußball.",
+          "recommendation": "add to bullets"
+        },
+        {
+          "term": "Dauereinsatz",
+          "frequency": "medium",
+          "context": "Käufer beschreiben die Socken als regelmäßig und intensiv beim Fußball und Sport genutzt.",
+          "recommendation": "add to bullets"
+        },
+        {
+          "term": "nach mehreren Wäschen form- und farbstabil",
+          "frequency": "medium",
+          "context": "Käufer loben, dass Verarbeitung, Haltbarkeit und Farben auch nach mehreren Wäschen erhalten bleiben.",
+          "recommendation": "add to bullets"
+        },
+        {
+          "term": "Passform gut",
+          "frequency": "medium",
+          "context": "Käufer verwenden natürliche Begriffe wie gute Passform und perfekter Sitz statt technischer Formulierungen.",
+          "recommendation": "add to title"
+        },
+        {
+          "term": "Tennis",
+          "frequency": "low",
+          "context": "Ein Käufer nennt die Nutzung der Socken beim Tennis als sehr gut.",
+          "recommendation": "add to bullets"
+        },
+        {
+          "term": "Ballgefühl",
+          "frequency": "low",
+          "context": "Ein Käufer bemängelt, dass die Socken etwas dick sind und dadurch weniger Ballgefühl entsteht.",
+          "recommendation": "add to description"
+        },
+        {
+          "term": "nicht zu dick",
+          "frequency": "low",
+          "context": "Käufer achten bei Fußballsocken auf Materialdicke und Gefühl im Schuh.",
+          "recommendation": "add to description"
+        },
+        {
+          "term": "gutes Preis-Leistungs-Verhältnis",
+          "frequency": "low",
+          "context": "Internationale Käufer beschreiben die Socken als guten Wert für den Preis.",
+          "recommendation": "add to description"
+        },
+        {
+          "term": "für Kinder",
+          "frequency": "low",
+          "context": "Ein Käufer erwähnt, dass seine Kinder diese Sportsocken mögen.",
+          "recommendation": "add to description"
+        }
+      ],
+      "term_translations": [
+        {
+          "seller_says": "hervorragender Halt und hervorragende Traktion",
+          "buyer_says": "rutschen nicht und haben mehr Grip"
+        },
+        {
+          "seller_says": "passen sich Ihren Füßen perfekt an",
+          "buyer_says": "Sitz perfekt und gute Passform"
+        },
+        {
+          "seller_says": "langlebig",
+          "buyer_says": "halten lange, auch nach mehreren Wäschen"
+        },
+        {
+          "seller_says": "verschiedene Farben",
+          "buyer_says": "Farben bleiben frisch"
+        },
+        {
+          "seller_says": "hochwertige Nylon- und Elasthan-Materialien",
+          "buyer_says": "gut verarbeitet und Top Qualität"
+        },
+        {
+          "seller_says": "eignen sich ideal für den Sport",
+          "buyer_says": "im Dauereinsatz beim Fußballtraining und Tennis"
+        },
+        {
+          "seller_says": "leicht und atmungsaktiv",
+          "buyer_says": "nicht zu dick und gutes Ballgefühl"
+        }
+      ],
+      "listing_optimization": {
+        "title_additions": [
+          "gute Passform",
+          "für Fußballtraining",
+          "rutschen nicht",
+          "langlebig nach mehreren Wäschen"
+        ],
+        "bullet_additions": [
+          "Ideal für Fußballtraining, Tennis und regelmäßigen Sporteinsatz.",
+          "Rutschfeste Sohle für sicheren Halt: Die Socken rutschen nicht und sorgen für spürbar mehr Grip im Schuh.",
+          "Gute Passform mit bequemem Sitz für Herren, Damen und Jugendliche.",
+          "Form- und farbstabil auch nach mehreren Wäschen.",
+          "Angenehmes Tragegefühl für Training und Alltag, mit ausgewogener Materialstärke für Komfort und Ballgefühl."
+        ],
+        "keyword_opportunities": [
+          "Fußballtraining Socken",
+          "Grip Socken Fußball",
+          "rutschfeste Sportsocken",
+          "Socken mit guter Passform",
+          "Tennissocken rutschfest",
+          "Sportsocken für Kinder",
+          "langlebige Fußballsocken",
+          "Socken nach mehreren Wäschen formstabil",
+          "Socken mit Ballgefühl",
+          "gutes Preis-Leistungs-Verhältnis Sportsocken"
+        ]
+      }
+    },
+    "hesitation-points": {
+      "hesitations": [
+        {
+          "pre_purchase_worry": "Sorge, ob die Socken nach mehreren Wäschen ihre Form, Farbe und Qualität behalten.",
+          "post_purchase_resolution": "Die Socken bleiben auch nach mehreren Wäschen gut verarbeitet, langlebig und farblich frisch.",
+          "user_evidence": "„Nach mehreren Wäschen immer noch super. Kein wirklicher Unterschied zu den nagelneuen. Selbst die Farben sind noch so frisch wie am ersten Tag.“",
+          "qa_recommendation": "In der Q&A-Sektion gezielt beantworten, ob die Socken waschbeständig sind und ob Farben sowie Passform langfristig erhalten bleiben."
+        },
+        {
+          "pre_purchase_worry": "Unsicherheit, ob die Socken beim Fußball oder Sport rutschen.",
+          "post_purchase_resolution": "Die Socken halten beim Fußball und Sport gut und rutschen laut Nutzererfahrung nicht.",
+          "user_evidence": "„Im Dauereinsatz beim Fußball und beim Sport ... rutschen nicht, halten super.“",
+          "qa_recommendation": "Eine Frage zur Rutschfestigkeit bei Fußball, Tennis und intensivem Training ergänzen und die stabile Passform hervorheben."
+        },
+        {
+          "pre_purchase_worry": "Zweifel, ob die Passform für Sporttraining bequem und zuverlässig ist.",
+          "post_purchase_resolution": "Die Passform wird als gut beziehungsweise perfekt beschrieben und die Socken werden regelmäßig im Fußballtraining genutzt.",
+          "user_evidence": "„Auch die Passform ist gut“ und „Sitz perfekt“",
+          "qa_recommendation": "Eine Q&A-Antwort zur Passform bei sportlicher Nutzung hinzufügen, insbesondere für Fußballtraining und längere Tragezeiten."
+        },
+        {
+          "pre_purchase_worry": "Bedenken, ob die Qualität dem Preis beziehungsweise der Erwartung entspricht.",
+          "post_purchase_resolution": "Mehrere Käufer bewerten die Qualität als sehr gut und würden die Socken erneut kaufen.",
+          "user_evidence": "„Top Qualität“, „Sehr gute Qualität“ und „Auf jeden Fall wieder“",
+          "qa_recommendation": "In den Fragen und Antworten die Material- und Verarbeitungsqualität sowie den Nutzen für regelmäßigen Sporteinsatz betonen."
+        },
+        {
+          "pre_purchase_worry": "Mögliche Sorge, ob die Socken für Ballsportarten genügend Ballgefühl bieten.",
+          "post_purchase_resolution": "Ein Nutzer empfand die Socken als etwas zu dick und hatte dadurch weniger Ballgefühl; dies bleibt ein relevanter Hinweis für Käufer, die sehr dünne Sportsocken bevorzugen.",
+          "user_evidence": "„Sind mir ein bisschen zu dick, habe dadurch nicht so viel Ballgefühl.“",
+          "qa_recommendation": "Eine ehrliche Q&A-Frage zur Dicke der Socken ergänzen und erklären, für welche Sportarten oder Präferenzen die Polsterung geeignet ist."
+        }
+      ],
+      "common_doubts": [
+        "Halten die Socken auch nach mehreren Wäschen lange?",
+        "Rutschen die Socken beim Fußball, Tennis oder Training?",
+        "Ist die Passform bequem und sporttauglich?",
+        "Ist die Qualität wirklich gut?",
+        "Sind die Socken eher dick oder dünn?",
+        "Beeinträchtigen die Socken das Ballgefühl?"
+      ],
+      "trust_builders": [
+        "Nach mehreren Wäschen weiterhin sehr guter Zustand",
+        "Farben bleiben frisch",
+        "Gute Verarbeitung und lange Haltbarkeit",
+        "Guter bis perfekter Sitz",
+        "Rutschen beim Sport nicht",
+        "Geeignet für Fußballtraining und Tennis",
+        "Mehrfachkauf durch zufriedene Kunden",
+        "Pünktliche Lieferung und sehr gute Qualität"
+      ],
+      "qa_optimization_items": [
+        {
+          "question": "Bleiben die Socken nach mehreren Wäschen in Form und behalten sie ihre Farbe?",
+          "suggested_answer": "Ja, Kunden berichten, dass die Socken auch nach mehreren Wäschen noch sehr gut aussehen, kaum Unterschied zu neuen Socken zeigen und die Farben frisch bleiben."
+        },
+        {
+          "question": "Rutschen die Socken beim Fußball oder beim Training?",
+          "suggested_answer": "Laut Kunden halten die Socken beim Fußball und anderen Sportarten sehr gut und rutschen nicht, auch bei häufigem Einsatz."
+        },
+        {
+          "question": "Sind die Socken für Fußballtraining und Tennis geeignet?",
+          "suggested_answer": "Ja, Käufer nutzen die Socken erfolgreich beim Fußballtraining und Tennis und bewerten sie für Sport als sehr gut."
+        },
+        {
+          "question": "Wie ist die Passform der Socken?",
+          "suggested_answer": "Die Passform wird von Kunden als gut bis perfekt beschrieben und eignet sich für regelmäßige sportliche Nutzung."
+        },
+        {
+          "question": "Sind die Socken dick oder dünn?",
+          "suggested_answer": "Ein Kunde beschreibt die Socken als etwas dicker. Das kann für Komfort und Halt angenehm sein, könnte aber für Käufer, die ein sehr direktes Ballgefühl bevorzugen, weniger ideal sein."
+        },
+        {
+          "question": "Ist die Qualität zuverlässig?",
+          "suggested_answer": "Ja, mehrere Kunden loben die Verarbeitung, Haltbarkeit und insgesamt sehr gute Qualität der Socken."
+        }
+      ]
+    },
+    "selling-points": {
+      "bullet_analysis": [
+        {
+          "bullet_index": 1,
+          "original_text_summary": "5 Paar Fußballsocken in verschiedenen Farben und Größe 38-46 mit Elastizität, Rutschfestigkeit, Atmungsaktivität und guter Passform.",
+          "functions": [
+            "Bietet ein Set aus 5 Paar Socken",
+            "Ermöglicht durch elastisches Material eine flexible Passform",
+            "Reduziert Rutschen durch rutschfeste Eigenschaften",
+            "Unterstützt Atmungsaktivität beim Tragen"
+          ],
+          "scenes": [
+            "Fußball",
+            "Sportliche Aktivitäten",
+            "Alltägliches Tragen"
+          ],
+          "pain_points_addressed": [
+            "Zu wenige Ersatzsocken für regelmäßige Nutzung",
+            "Schlecht sitzende Socken",
+            "Rutschende Socken",
+            "Schwitzige oder unangenehme Füße"
+          ],
+          "differentiation_angle": "Mengenpaket mit mehreren Farben, breitem Größenbereich und kombinierten Komfortfunktionen.",
+          "credibility_score": "medium"
+        },
+        {
+          "bullet_index": 2,
+          "original_text_summary": "Sportsocken aus Nylon und Elasthan, hochelastisch, weich, schlicht gestaltet und für Sport sowie Alltag geeignet.",
+          "functions": [
+            "Bietet weichen Tragekomfort",
+            "Passt sich Waden und Beinen elastisch an",
+            "Kombiniert schlichtes Design mit sportlicher Nutzbarkeit",
+            "Ermöglicht Nutzung im Sport und Alltag"
+          ],
+          "scenes": [
+            "Sport",
+            "Alltag",
+            "Freizeit"
+          ],
+          "pain_points_addressed": [
+            "Unbequeme oder harte Sockenmaterialien",
+            "Einschnürendes Gefühl an Waden und Beinen",
+            "Socken, die nur für einen bestimmten Anlass geeignet sind",
+            "Zu auffälliges oder unpassendes Design"
+          ],
+          "differentiation_angle": "Materialqualität und Vielseitigkeit durch Nylon-Elasthan-Mischung sowie schlichtes, alltagstaugliches Design.",
+          "credibility_score": "high"
+        },
+        {
+          "bullet_index": 3,
+          "original_text_summary": "Rutschfeste Sohlen sollen starken Halt und Traktion auf glatten Oberflächen bieten und Stürze oder Gleichgewichtsverlust beim Gehen oder Laufen verhindern.",
+          "functions": [
+            "Erhöht Grip an der Sohle",
+            "Verbessert Traktion auf glatten Oberflächen",
+            "Unterstützt Stabilität beim Gehen und Laufen"
+          ],
+          "scenes": [
+            "Gehen",
+            "Laufen",
+            "Glatte Böden",
+            "Sportliche Bewegungen"
+          ],
+          "pain_points_addressed": [
+            "Ausrutschen auf glatten Oberflächen",
+            "Gleichgewichtsverlust",
+            "Unsicheres Laufgefühl",
+            "Sturzrisiko"
+          ],
+          "differentiation_angle": "Fokus auf Anti-Rutsch-Sohle als Sicherheits- und Stabilitätsmerkmal.",
+          "credibility_score": "medium"
+        },
+        {
+          "bullet_index": 4,
+          "original_text_summary": "Hochelastische Herrensportsocken für Sport und Alltag, geeignet für Wandern, Laufen, Fußball, Basketball, Radfahren und weitere Aktivitäten.",
+          "functions": [
+            "Unterstützt vielseitige sportliche Nutzung",
+            "Bietet elastischen Sitz bei Bewegung",
+            "Eignet sich für verschiedene Aktivitätsarten"
+          ],
+          "scenes": [
+            "Sport",
+            "Alltag",
+            "Wandern",
+            "Laufen",
+            "Fußball",
+            "Basketball",
+            "Radfahren"
+          ],
+          "pain_points_addressed": [
+            "Bedarf an separaten Socken für unterschiedliche Sportarten",
+            "Eingeschränkte Nutzbarkeit herkömmlicher Socken",
+            "Unzureichende Flexibilität bei Bewegung"
+          ],
+          "differentiation_angle": "Breite Einsatzfähigkeit über viele Sportarten und Alltagssituationen hinweg.",
+          "credibility_score": "high"
+        },
+        {
+          "bullet_index": 5,
+          "original_text_summary": "Fußballsocken für täglichen Gebrauch mit Feuchtigkeitstransport, geringem Gewicht, Atmungsaktivität und Langlebigkeit; zusätzlich werden Blutzirkulation, Muskelregeneration und Verletzungsreduktion beansprucht.",
+          "functions": [
+            "Transportiert Feuchtigkeit ab",
+            "Bietet leichtes und atmungsaktives Tragegefühl",
+            "Unterstützt langlebige Nutzung",
+            "Soll Blutzirkulation fördern",
+            "Soll Muskelregeneration unterstützen",
+            "Soll Verletzungen reduzieren"
+          ],
+          "scenes": [
+            "Täglicher Gebrauch",
+            "Fußball",
+            "Sportliche Belastung",
+            "Regeneration nach Aktivität"
+          ],
+          "pain_points_addressed": [
+            "Schweißbildung und feuchte Füße",
+            "Schwere oder schlecht belüftete Socken",
+            "Schnell verschleißende Socken",
+            "Müde Muskeln",
+            "Sorge vor Verletzungen"
+          ],
+          "differentiation_angle": "Kombination aus Komfort-, Feuchtigkeits- und angeblichen Leistungs- beziehungsweise Regenerationsvorteilen.",
+          "credibility_score": "low"
+        }
+      ],
+      "overall_strategy": {
+        "primary_differentiation": "Das Produkt positioniert sich als vielseitiges 5er-Pack rutschfester, elastischer und atmungsaktiver Sportsocken für Fußball, andere Sportarten und den Alltag.",
+        "target_positioning": "Preis- und nutzungsorientierte Mehrzweck-Sportsocken für Herren beziehungsweise Nutzer mit Größe 38-46, die Komfort, Grip und Alltagstauglichkeit suchen.",
+        "emotional_hooks": [
+          "Mehr Komfort beim Tragen",
+          "Sicheres Gefühl durch besseren Halt",
+          "Praktische Vorratspackung mit mehreren Farben",
+          "Vielseitigkeit für Sport und Alltag",
+          "Leichtes, atmungsaktives Tragegefühl"
+        ],
+        "missing_elements": [
+          "Keine konkreten Angaben zur Materialzusammensetzung in Prozent",
+          "Keine Angaben zur Pflege, Waschbeständigkeit oder Schrumpfung",
+          "Keine Nachweise für Blutzirkulation, Muskelregeneration oder Verletzungsreduktion",
+          "Keine Beschreibung der genauen Anti-Rutsch-Technologie oder des Sohlenmusters",
+          "Keine Informationen zur Polsterung, Kompression oder Dicke",
+          "Keine klare Zielgruppendefinition für Damen, Herren oder Unisex"
+        ]
+      },
+      "function_scene_matrix": {
+        "functions": [
+          "5-Paar-Set bereitstellen",
+          "Elastische Passform bieten",
+          "Rutschhemmung und Traktion verbessern",
+          "Atmungsaktivität unterstützen",
+          "Feuchtigkeit ableiten",
+          "Weichen Tragekomfort bieten",
+          "Vielseitige Nutzung für Sport und Alltag ermöglichen",
+          "Langlebigkeit versprechen",
+          "Blutzirkulation angeblich fördern",
+          "Muskelregeneration angeblich unterstützen",
+          "Verletzungen angeblich reduzieren"
+        ],
+        "scenes": [
+          "Fußball",
+          "Sport allgemein",
+          "Alltag",
+          "Wandern",
+          "Laufen",
+          "Basketball",
+          "Radfahren",
+          "Gehen auf glatten Oberflächen",
+          "Training",
+          "Freizeit"
+        ],
+        "pain_points": [
+          "Rutschende Socken",
+          "Ausrutschgefahr",
+          "Schwitzige Füße",
+          "Unbequemer Sitz",
+          "Einschnürendes Tragegefühl",
+          "Zu geringe Vielseitigkeit",
+          "Schneller Verschleiß",
+          "Mangel an Ersatzsocken",
+          "Unsicherheit bei schnellen Bewegungen",
+          "Müdigkeit oder Belastung der Muskeln",
+          "Sorge vor Verletzungen"
+        ]
+      }
+    },
+    "_metadata": {
+      "confidence": {
+        "title-keywords": 0.9333333333333332,
+        "selling-points": 0.9333333333333332,
+        "fatal-flaws": 0.7000000000000001,
+        "wow-moments": 1,
+        "hesitation-points": 1,
+        "buyer-profile": 0.9,
+        "vocab-gap": 0.9333333333333332,
+        "promise-reality": 0.6555555555555556
+      },
+      "overallConfidence": 0.8819444444444445,
+      "analyzedAt": "2026-05-01T04:24:39.857Z",
+      "targetIds": [
+        "title-keywords",
+        "selling-points",
+        "fatal-flaws",
+        "wow-moments",
+        "hesitation-points",
+        "buyer-profile",
+        "vocab-gap",
+        "promise-reality"
+      ],
+      "language": "de"
+    }
+  }
+}

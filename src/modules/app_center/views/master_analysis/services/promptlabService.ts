@@ -583,6 +583,14 @@ const buildContextSection = (
       ? filterSubItems(report[targetId], selectedReportItems[targetId].subItems)
       : report[targetId]; // 向后兼容：包含所有子项
 
+    if (
+      filteredData &&
+      typeof filteredData === "object" &&
+      Object.keys(filteredData as Record<string, unknown>).length === 0
+    ) {
+      return;
+    }
+
     const md = convertSectionToMarkdown(targetId, filteredData);
     if (md) markdownSections.push(md);
   });
@@ -622,19 +630,35 @@ function filterSubItems(
       if (!selection.enabled) continue; // 子项未启用，跳过
 
       // 如果是数组且有具体项选择配置
-      if (Array.isArray(value) && selection.items) {
+      if (selection.items) {
         const items = selection.items;
         const hasExplicitSelections = Object.keys(items).length > 0;
 
         if (hasExplicitSelections) {
           // 过滤数组中的具体项
-          const filteredArray = value.filter((_, index) => {
-            const indexStr = index.toString();
-            // 如果 items 中有该索引，使用其值；否则默认选中
-            return items[indexStr] !== false;
-          });
-          if (filteredArray.length > 0) {
-            filtered[key] = filteredArray;
+          if (Array.isArray(value)) {
+            const filteredArray = value.filter((_, index) => {
+              const indexStr = index.toString();
+              // 如果 items 中有该索引，使用其值；否则默认选中
+              return items[indexStr] !== false;
+            });
+            if (filteredArray.length > 0) {
+              filtered[key] = filteredArray;
+            }
+          } else if (value && typeof value === 'object') {
+            const filteredObject: Record<string, unknown> = {};
+            Object.entries(value as Record<string, unknown>).forEach(
+              ([objectKey, objectValue], index) => {
+                if (items[index.toString()] !== false) {
+                  filteredObject[objectKey] = objectValue;
+                }
+              },
+            );
+            if (Object.keys(filteredObject).length > 0) {
+              filtered[key] = filteredObject;
+            }
+          } else if (items['0'] !== false) {
+            filtered[key] = value;
           }
         } else {
           // 空对象表示全选
@@ -655,13 +679,54 @@ function filterSubItems(
 
   return filtered;
 }
-const buildProductSection = (inputs: PromptInputs): string => {
-  const { audience, usps, specs } = inputs;
-  const dnaParts: string[] = [];
+const DUPLICATE_TEXT_MIN_LENGTH = 24;
 
-  if (audience) dnaParts.push(`- **Target Audience**: ${audience}`);
-  if (usps) dnaParts.push(`- **Core USPs**: \n${usps}`);
-  if (specs) dnaParts.push(`- **Technical Specs**: \n${specs}`);
+const normalizeForDuplicateCheck = (value: string): string => value
+  .toLowerCase()
+  .replace(/^[\s\-*•]+/gm, '')
+  .replace(/[-*_`#>[\]()"':.,;!?，。；：、（）|/\\]+/g, ' ')
+  .replace(/\s+/g, ' ')
+  .trim();
+
+const isDuplicateAgainstContext = (value: string, contextText: string): boolean => {
+  const normalizedValue = normalizeForDuplicateCheck(value);
+  if (normalizedValue.length < DUPLICATE_TEXT_MIN_LENGTH) {
+    return false;
+  }
+
+  return normalizeForDuplicateCheck(contextText).includes(normalizedValue);
+};
+
+const filterDuplicateInlineParts = (value: string, contextText: string): string => {
+  const parts = value
+    .split(/[,;，；]/)
+    .map(part => part.trim())
+    .filter(Boolean)
+    .filter(part => !isDuplicateAgainstContext(part, contextText));
+
+  return parts.join(', ');
+};
+
+const filterDuplicateListLines = (value: string, contextText: string): string => {
+  const lines = value
+    .split(/\r?\n/)
+    .map(line => line.trim())
+    .filter(Boolean)
+    .filter(line => !isDuplicateAgainstContext(line, contextText));
+
+  return lines.join('\n');
+};
+
+const buildProductSection = (inputs: PromptInputs, contextText = ''): string => {
+  const { audience = '', usps = '', specs = '' } = inputs;
+  const dnaParts: string[] = [];
+  const dedupedAudience = contextText ? filterDuplicateInlineParts(audience, contextText) : audience;
+  const dedupedUsps = contextText ? filterDuplicateListLines(usps, contextText) : usps;
+  const dedupedSpecs = contextText ? filterDuplicateListLines(specs, contextText) : specs;
+
+  if (dedupedAudience) dnaParts.push(`- **Target Audience**: ${dedupedAudience}`);
+  if (dedupedUsps) dnaParts.push(`- **Core USPs**: \n${dedupedUsps}`);
+  if (dedupedSpecs) dnaParts.push(`- **Technical Specs**: \n${dedupedSpecs}`);
 
   return dnaParts.length > 0
     ? `\n## Product DNA Supplement\n${dnaParts.join("\n")}\n`
@@ -727,7 +792,7 @@ export const promptlabService = {
 
     // 复用 Helper 函数生成基础模块
     const contextSection = buildContextSection(inputs, analysisReport);
-    const productSection = buildProductSection(inputs);
+    const productSection = buildProductSection(inputs, contextSection);
     const seoSection = buildSeoSection(inputs, "master");
 
     // 4. Instructions (Listing Prompt 特有的指令逻辑)
@@ -817,7 +882,7 @@ Generate the complete Amazon Listing following the structure below:
 
     // 复用 Helper 函数生成基础模块
     const contextSection = buildContextSection(inputs, analysisReport);
-    const productSection = buildProductSection(inputs);
+    const productSection = buildProductSection(inputs, contextSection);
     const seoSection = buildSeoSection(inputs, "visual");
 
     // 2. 组装 Visual Prompt

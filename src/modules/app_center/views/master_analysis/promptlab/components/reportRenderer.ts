@@ -177,6 +177,49 @@ const TARGET_CONFIG: Record<string, { title: string; icon: string }> = {
   'promise-reality':   { title: '承诺与现实',    icon: '🎯' },
 };
 
+// Display-only labels; raw report keys still drive selection and prompt injection.
+const SUB_ITEM_LABELS: Record<string, string> = {
+  primary_keywords: '核心关键词',
+  secondary_keywords: '次级关键词',
+  scene_keywords: '场景关键词',
+  audience_keywords: '人群关键词',
+  removed_modifiers: '已剔除修饰词',
+  removed_brand_terms: '已剔除品牌词',
+  optimization_suggestions: '优化建议',
+  bullet_analysis: '五点描述分析',
+  overall_strategy: '整体策略',
+  function_scene_matrix: '功能-场景-痛点矩阵',
+  critical_issues: '关键问题',
+  return_triggers: '退货触发点',
+  expectation_gaps: '预期落差',
+  actionable_fixes: '可执行修复',
+  risk_assessment: '风险评估',
+  moments: '惊喜时刻',
+  emotional_triggers: '情绪触发点',
+  high_conversion_phrases: '高转化表达',
+  unexpected_benefits: '意外收益',
+  copywriting_angles: '文案角度',
+  hesitations: '犹豫点',
+  common_doubts: '常见疑虑',
+  trust_builders: '信任背书',
+  qa_optimization_items: 'Q&A 优化项',
+  demographics: '人群特征',
+  buyer_types: '买家类型',
+  usage_scenes: '使用场景',
+  purchase_motivations: '购买动机',
+  geographic_insights: '地域洞察',
+  seller_terms: '商家用词',
+  buyer_terms: '买家用词',
+  uncovered_buyer_terms: '未覆盖买家词',
+  term_translations: '商家/买家用词转换',
+  listing_optimization: 'Listing 优化建议',
+  gaps: '承诺/现实落差',
+  verified_claims: '已验证卖点',
+  unverified_claims: '未验证卖点',
+  overall_credibility: '整体可信度',
+  listing_revision_suggestions: 'Listing 修改建议',
+};
+
 /**
  * 渲染新格式报告（直接对象格式 { 'title-keywords': {...}, ... }）
  */
@@ -334,6 +377,8 @@ export function renderNewFormatModules(
  * 格式化子项键名为可读标签
  */
 function formatSubItemLabel(key: string): string {
+  if (SUB_ITEM_LABELS[key]) return SUB_ITEM_LABELS[key];
+
   return key
     .split('_')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
