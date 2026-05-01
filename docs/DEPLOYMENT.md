@@ -87,4 +87,5 @@ curl.exe https://new.hongecb.store/v1/models `
 
 - 不要重新引入边缘函数作为 LLM 代理，除非有新的安全或合规要求。
 - 不要在 Pages 项目中保存 LLM API key；生产调用凭据由用户配置并由 new-api 侧治理。
+- Cloudflare Pages production secrets 应保持为空；用 `npx wrangler pages secret list --project-name sops` 复查。
 - 新增模型或调整模型权限，应在 new-api 后台完成，不需要修改前端部署链路。

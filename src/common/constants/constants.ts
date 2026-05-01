@@ -67,10 +67,10 @@ export const PROVIDERS: Record<string, ProviderConfig> = {
     name: "NEW API",
     endpoint: "https://new.hongecb.store/v1",
     models: [
+      { id: "gpt-5.4-mini", context: 400000, features: ["chat"] },
       { id: "gpt-5.4-mini-ca", context: 400000, features: ["chat"] },
+      { id: "gpt-5.5", context: 400000, features: ["chat"] },
       { id: "gpt-5.5-ca", context: 400000, features: ["chat"] },
-      { id: "Codex/gpt-5.5", context: 400000, features: ["chat"] },
-      { id: "Codex/gpt-5.4-mini", context: 400000, features: ["chat"] },
     ],
   }
 };
