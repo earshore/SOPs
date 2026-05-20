@@ -75,6 +75,16 @@ const DEEP_CHAT_AUXILIARY_STYLE = `
     padding: 22px 24px 18px;
   }
 
+  :host(.is-empty) #messages {
+    display: none !important;
+  }
+
+  :host(.is-empty) #chat-view {
+    align-content: start !important;
+    align-items: start !important;
+    grid-template-rows: auto !important;
+  }
+
   .outer-message-container {
     margin-bottom: 26px !important;
   }
@@ -221,15 +231,29 @@ const DEEP_CHAT_AUXILIARY_STYLE = `
   }
 
   #input {
+    box-sizing: border-box !important;
+    position: relative !important;
+    min-height: 0 !important;
+    min-width: 0 !important;
+    height: 100% !important;
     width: 100% !important;
+    max-width: 100% !important;
     align-items: flex-end !important;
     justify-content: center !important;
     padding: 0 !important;
     background: transparent !important;
   }
 
+  :host(.is-empty) #input {
+    align-items: flex-start !important;
+    height: auto !important;
+  }
+
   #text-input-container {
+    box-sizing: border-box !important;
     width: min(100%, 768px) !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
     min-height: 58px !important;
     max-height: 150px !important;
     margin: 0 auto !important;
@@ -241,11 +265,29 @@ const DEEP_CHAT_AUXILIARY_STYLE = `
   }
 
   #text-input {
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
     min-height: 24px !important;
     padding: 18px 62px 16px 22px !important;
     color: #111111 !important;
     font-size: 15px !important;
     line-height: 1.45 !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+    white-space: pre-wrap !important;
+  }
+
+  .input-button-container.inner-button-container {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    pointer-events: none !important;
+  }
+
+  .input-button-container.inner-button-container .input-button {
+    pointer-events: auto !important;
   }
 
   #text-input[contenteditable]:empty:before {
@@ -264,6 +306,7 @@ const DEEP_CHAT_AUXILIARY_STYLE = `
     display: none !important;
   }
 
+  .inside-end.input-button,
   .inside-end.submit-button,
   .inside-end.disabled-button,
   .inside-end.loading-button {
@@ -280,8 +323,12 @@ const DEEP_CHAT_AUXILIARY_STYLE = `
     box-shadow: none !important;
   }
 
+  .inside-end.input-button:hover,
+  .inside-end.input-button:focus-visible,
   .inside-end.submit-button:hover,
   .inside-end.submit-button:focus-visible,
+  .inside-end.loading-button:hover,
+  .inside-end.loading-button:focus-visible,
   .inside-end.disabled-button:hover,
   .inside-end.disabled-button:focus-visible {
     background: #111111 !important;
@@ -294,12 +341,21 @@ const DEEP_CHAT_AUXILIARY_STYLE = `
   }
 
   .inside-end #stop-icon {
-    background-color: #ffffff !important;
-    inset-inline-start: 13px !important;
-    inset-block-end: 13px !important;
-    width: 10px !important;
-    height: 10px !important;
+    position: absolute !important;
+    inset: 0 !important;
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 50% !important;
+    background: #050505 !important;
+    pointer-events: none !important;
+  }
+
+  .inside-end #stop-icon::after {
+    content: "" !important;
+    position: absolute !important;
+    inset: 13px !important;
     border-radius: 2px !important;
+    background: #ffffff !important;
   }
 
   @media (max-width: 640px) {
@@ -322,6 +378,7 @@ const DEEP_CHAT_AUXILIARY_STYLE = `
       font-size: 14px !important;
     }
 
+    .inside-end.input-button,
     .inside-end.submit-button,
     .inside-end.disabled-button,
     .inside-end.loading-button {
@@ -524,9 +581,6 @@ function bindControls(container: HTMLElement): void {
   const temperatureValue = container.querySelector<HTMLOutputElement>('#playground-temperature-value');
   const resetTuningButton = container.querySelector<HTMLButtonElement>('#playground-reset-tuning');
   const threadList = container.querySelector<HTMLElement>('#playground-thread-list');
-  const promptButtons = Array.from(
-    container.querySelectorAll<HTMLButtonElement>('[data-playground-prompt]')
-  );
 
   const onModelChange = (): void => {
     selectedModel = modelSelect?.value || selectedModel;
@@ -601,16 +655,6 @@ function bindControls(container: HTMLElement): void {
   resetTuningButton?.addEventListener('click', onResetTuning);
   cleanupCallbacks.push(() => resetTuningButton?.removeEventListener('click', onResetTuning));
 
-  promptButtons.forEach((button) => {
-    const onPromptClick = (): void => {
-      const prompt = button.dataset.playgroundPrompt;
-      if (prompt) {
-        submitPrompt(container, prompt);
-      }
-    };
-    button.addEventListener('click', onPromptClick);
-    cleanupCallbacks.push(() => button.removeEventListener('click', onPromptClick));
-  });
 }
 
 async function handlePlaygroundRequest(
@@ -1191,36 +1235,11 @@ function truncateText(value: string, maxLength: number): string {
   return value.length > maxLength ? `${value.slice(0, maxLength - 1)}…` : value;
 }
 
-function submitPrompt(container: HTMLElement, prompt: string): void {
-  const chat = getChat(container);
-  if (!chat) {
-    return;
-  }
-
-  setConversationActive(container, true);
-
-  if (typeof chat.submitUserMessage === 'function') {
-    chat.submitUserMessage({ text: prompt });
-    return;
-  }
-
-  const textInput = chat.shadowRoot?.querySelector<HTMLElement>('#text-input');
-  if (!textInput) {
-    return;
-  }
-
-  textInput.focus();
-  textInput.textContent = prompt;
-  textInput.dispatchEvent(
-    new InputEvent('input', { bubbles: true, inputType: 'insertText', data: prompt })
-  );
-  textInput.dispatchEvent(
-    new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', bubbles: true, cancelable: true })
-  );
-}
-
 function setConversationActive(container: HTMLElement, isActive: boolean): void {
   container.querySelector('.playground-page')?.classList.toggle('is-chatting', isActive);
+  const chat = getChat(container);
+  chat?.classList.toggle('is-chatting', isActive);
+  chat?.classList.toggle('is-empty', !isActive);
 }
 
 function updateTemperatureTrack(input: HTMLInputElement | null): void {

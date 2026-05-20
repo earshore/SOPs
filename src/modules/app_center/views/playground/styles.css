@@ -425,13 +425,15 @@
 .playground-stage {
   flex: 1 1 auto;
   min-height: 0;
+  min-width: 0;
   width: min(768px, calc(100% - 48px));
+  max-width: calc(100% - 48px);
   margin: 0 auto;
   display: grid;
-  grid-template-rows: minmax(132px, 1fr) auto auto;
-  align-content: end;
+  grid-template-rows: auto auto;
+  align-content: start;
   gap: 16px;
-  padding: 70px 0 32px;
+  padding: 120px 0 32px;
 }
 
 .playground-hero {
@@ -456,58 +458,11 @@
   letter-spacing: 0;
 }
 
-.playground-actions {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.playground-actions button {
-  min-width: 0;
-  height: 70px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 7px;
-  padding: 0 18px;
-  border: 1px solid #dfdfdf;
-  border-radius: 22px;
-  background: #ffffff;
-  color: #111111;
-  cursor: pointer;
-  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
-}
-
-.playground-actions button:hover {
-  border-color: #cfcfcf;
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.06);
-  transform: translateY(-1px);
-}
-
-.playground-actions strong,
-.playground-actions span {
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.playground-actions strong {
-  color: #111111;
-  font-size: 14px;
-  line-height: 1.1;
-  font-weight: 750;
-}
-
-.playground-actions span {
-  color: #5d5d5d;
-  font-size: 14px;
-  line-height: 1.1;
-}
-
 .playground-chat-wrap {
-  height: 100px;
+  height: 168px;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -522,7 +477,9 @@
 
 .playground-chat {
   display: block;
+  min-width: 0;
   width: 100%;
+  max-width: 100%;
   height: 100%;
 }
 
@@ -532,8 +489,7 @@
   padding-top: 24px;
 }
 
-.playground-page.is-chatting .playground-hero,
-.playground-page.is-chatting .playground-actions {
+.playground-page.is-chatting .playground-hero {
   display: none;
 }
 
@@ -581,8 +537,8 @@
 
   .playground-stage {
     width: calc(100% - 32px);
-    grid-template-rows: minmax(88px, 1fr) auto auto;
-    padding: 44px 0 20px;
+    grid-template-rows: auto auto;
+    padding: 84px 0 20px;
   }
 
   .playground-hero {
@@ -597,18 +553,8 @@
     font-size: 18px;
   }
 
-  .playground-actions {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-
-  .playground-actions button {
-    height: 62px;
-    border-radius: 18px;
-  }
-
   .playground-chat-wrap {
-    height: 96px;
+    height: 156px;
   }
 
   .playground-page.is-chatting .playground-chat-wrap {
