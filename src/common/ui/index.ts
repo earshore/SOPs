@@ -120,6 +120,8 @@ registerActions({
       path = '/app-center/ai-analysis';
     } else if (tab === 'promptlab') {
       path = '/app-center/promptlab';
+    } else if (tab === 'playground') {
+      path = '/app-center/playground';
     } else if (tab === 'kw_input') {
       path = '/app-center/keyword-hunter/input';
     } else if (tab === 'kw_process') {

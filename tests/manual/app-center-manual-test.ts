@@ -28,6 +28,7 @@ const TEST_MODULES = [
   { name: 'Scraper - 数据采集', path: '/#/app-center/scraper' },
   { name: 'AI Analysis - 智能分析', path: '/#/app-center/ai-analysis' },
   { name: 'Promptlab - 提示词实验室', path: '/#/app-center/promptlab' },
+  { name: 'Playground - AI 对话试验台', path: '/#/app-center/playground' },
   { name: 'QALab - QA实验室', path: '/#/app-center/qalab' },
   { name: 'Keyword Hunter - 输入', path: '/#/app-center/keyword-hunter/input' },
   { name: 'Keyword Hunter - 处理', path: '/#/app-center/keyword-hunter/process' },

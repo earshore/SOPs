@@ -37,6 +37,7 @@ export type RouteId =
   | "kw_input"
   | "kw_process"
   | "app_center_overview"
+  | "playground"
   | "promptlab"
   | "scraper"
   | "more_agents"
@@ -83,6 +84,7 @@ export const ALL_ROUTE_IDS: readonly RouteId[] = [
   "kw_input",
   "kw_process",
   "app_center_overview",
+  "playground",
   "promptlab",
   "scraper",
   "more_agents",
@@ -156,7 +158,7 @@ export function assertValidRouteId(id: string): asserts id is RouteId {
  */
 export const ROUTE_ID_STATS = {
   /** 路由总数 */
-  total: ALL_ROUTE_IDS.length,
+  total: 42,
   /** 生成时间 */
   generatedAt: "2026-02-27T17:24:09.908Z",
 } as const;

@@ -168,6 +168,18 @@ export const MENU_CONFIG: MenuConfig = {
       themeColor: "fuchsia", // ✅ 紫红色 - 鲜艳醒目的搜索主题
     },
 
+    // Playground 模块配置
+    playground: {
+      id: "playground",
+      contextId: "apps",
+      parentModuleId: "app_center",
+      title: "Playground",
+      version: "v1.0",
+      icon: "fas fa-paper-plane",
+      description: "轻量级 AI 对话试验台，复用系统模型配置进行快速问答与 Prompt 试验。",
+      themeColor: "cyan",
+    },
+
     // [智库] Knowledge Base
     amz_hub_core: {
       id: "amz_hub_core",
@@ -304,6 +316,15 @@ export const MENU_CONFIG: MenuConfig = {
       order: 2,
       version: "v1.0 Pro",
       description: "ASIN 关键词覆盖情况查询，手动补充与 SEO 合规性审查工具。",
+    },
+    playground: {
+      id: "playground",
+      label: "Playground",
+      icon: "fas fa-paper-plane",
+      color: "cyan",
+      order: 3,
+      version: "v1.0",
+      description: "轻量级 AI 对话试验台，复用系统模型配置进行快速问答与 Prompt 试验。",
     },
   },
 
@@ -526,6 +547,15 @@ export const MENU_CONFIG: MenuConfig = {
       icon: "fas fa-chart-pie",
       panelId: "panel-app_center",
       category: "keyword_tracker",
+    },
+
+    // --- Playground 应用 ---
+    [APP_CENTER_ROUTES.PLAYGROUND]: {
+      moduleId: "playground",
+      label: "Playground",
+      icon: "fas fa-paper-plane",
+      panelId: "panel-app_center",
+      category: "playground",
     },
 
     // ==========================================

@@ -1,0 +1,88 @@
+<div class="playground-page">
+  <aside class="playground-thread-rail" aria-label="Playground threads">
+    <div class="playground-rail-brand">
+      <span class="playground-logo">
+        <i class="far fa-comments"></i>
+      </span>
+      <span>assistant-ui</span>
+    </div>
+
+    <button id="playground-clear-chat" class="playground-new-thread" type="button">
+      <i class="fas fa-plus"></i>
+      <span>New Thread</span>
+    </button>
+
+    <p id="playground-provider-status" class="playground-provider-status">读取模型配置中...</p>
+  </aside>
+
+  <section class="playground-main" aria-label="Playground">
+    <header class="playground-topbar">
+      <div class="playground-model-area">
+        <button class="playground-top-icon" type="button" title="Playground">
+          <i class="far fa-window-maximize"></i>
+        </button>
+        <select id="playground-model-select" class="playground-select" disabled>
+          <option value="">default</option>
+        </select>
+      </div>
+
+      <div class="playground-top-actions">
+        <button id="playground-refresh-config" class="playground-top-icon" type="button" title="刷新模型配置">
+          <i class="fas fa-rotate"></i>
+        </button>
+        <details class="playground-tuning-panel">
+          <summary title="调试参数">
+            <i class="fas fa-sliders"></i>
+          </summary>
+          <div class="playground-tuning">
+            <label class="playground-field playground-field-system" for="playground-system-prompt">
+              <span>System</span>
+              <textarea
+                id="playground-system-prompt"
+                rows="3"
+                placeholder="Optional system prompt for this Playground session"
+              ></textarea>
+            </label>
+            <label class="playground-field playground-field-temperature" for="playground-temperature">
+              <span>Temperature <output id="playground-temperature-value">0.3</output></span>
+              <input id="playground-temperature" type="range" min="0" max="1" step="0.1" value="0.3">
+            </label>
+            <button id="playground-reset-tuning" class="playground-reset-tuning" type="button">
+              Reset tuning
+            </button>
+          </div>
+        </details>
+      </div>
+    </header>
+
+    <div class="playground-stage">
+      <div class="playground-hero">
+        <h2>Hello there!</h2>
+        <p>How can I help you today?</p>
+      </div>
+
+      <div class="playground-actions" aria-label="快捷提示">
+        <button type="button" data-playground-prompt="What's the weather in San Francisco?">
+          <strong>What's the weather</strong>
+          <span>in San Francisco?</span>
+        </button>
+        <button type="button" data-playground-prompt="Explain React hooks like useState and useEffect.">
+          <strong>Explain React hooks</strong>
+          <span>like useState and useEffect</span>
+        </button>
+        <button type="button" data-playground-prompt="Analyze this data and identify the most important insight.">
+          <strong>Analyze data</strong>
+          <span>find the most important insight</span>
+        </button>
+        <button type="button" data-playground-prompt="Give me practical advice for this Amazon operations situation: ">
+          <strong>Get advice</strong>
+          <span>for Amazon operations</span>
+        </button>
+      </div>
+
+      <div class="playground-chat-wrap">
+        <deep-chat id="playground-chat" class="playground-chat"></deep-chat>
+      </div>
+    </div>
+  </section>
+</div>

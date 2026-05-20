@@ -191,6 +191,7 @@ export class LegacyAdapter {
       'scraper': '/app-center/scraper',
       'ai_analysis': '/app-center/ai-analysis',
       'promptlab': '/app-center/promptlab',
+      'playground': '/app-center/playground',
       'kw_input': '/app-center/keyword-hunter/input',
       'kw_process': '/app-center/keyword-hunter/process',
       'kw_analysis': '/app-center/keyword-hunter/analysis',

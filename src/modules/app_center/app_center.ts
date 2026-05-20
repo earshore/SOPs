@@ -34,6 +34,9 @@ const MODULE_MAP: ModuleMap = {
   [APP_CENTER_ROUTES.KW_INPUT]: () => import('./views/keyword_hunter/input/index'),
   [APP_CENTER_ROUTES.KW_PROCESS]: () => import('./views/keyword_hunter/process/index'),
   [APP_CENTER_ROUTES.KW_ANALYSIS]: () => import('./views/keyword_hunter/analysis/index'),
+
+  // Playground
+  [APP_CENTER_ROUTES.PLAYGROUND]: () => import('./views/playground/index'),
 };
 
 // ================= 使用通用ModuleLoader =================

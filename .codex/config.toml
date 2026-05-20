@@ -1,0 +1,34 @@
+[mcp_servers.brave-search]
+args = [
+    "-y",
+    "@modelcontextprotocol/server-brave-search",
+]
+command = "npx"
+
+[mcp_servers.brave-search.env]
+BRAVE_API_KEY = "YOUR_BRAVE_API_KEY_HERE"
+
+[mcp_servers.filesystem]
+args = [
+    "-y",
+    "@modelcontextprotocol/server-filesystem",
+    'D:\Users\Administrator\Documents\GitHub\sops',
+]
+command = "npx"
+
+[mcp_servers.github]
+args = [
+    "-y",
+    "@modelcontextprotocol/server-github",
+]
+command = "npx"
+
+[mcp_servers.github.env]
+GITHUB_PERSONAL_ACCESS_TOKEN = "YOUR_GITHUB_TOKEN_HERE"
+
+[mcp_servers.memory]
+args = [
+    "-y",
+    "@modelcontextprotocol/server-memory",
+]
+command = "npx"

@@ -52,6 +52,9 @@ export const APP_CENTER_ROUTES = {
   KW_INPUT: "kw_input",
   KW_PROCESS: "kw_process",
   KW_ANALYSIS: "kw_analysis",
+
+  // Playground
+  PLAYGROUND: "playground",
 } as const;
 
 /**
@@ -137,6 +140,7 @@ export function getRouteModule(routeId: RouteId): string {
       "scraper",
       "ai_analysis",
       "promptlab",
+      "playground",
       "app_center_overview",
     ].includes(routeId)
   ) {
