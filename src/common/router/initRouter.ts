@@ -15,6 +15,7 @@ import {
 import { MENU_CONFIG } from '../config/menuConfig';
 import { updateUIForRoute } from '../ui/navigation';
 import { SystemError } from '@/common/errors/AppError';
+import { normalizeRoutePath, routeIdToPath } from './routePaths';
 
 import { Logger } from '../../services/loggerService';
 // 全局路由实例
@@ -60,25 +61,14 @@ export function initRouter(): NavigoAdapter {
 
   // 注册所有路由
   for (const [routeId, config] of Object.entries(conversionResult.routes)) {
-    // 为应用中心路由添加路径前缀
-    let routePath = routeId;
-    
-    // 应用中心路由需要 /app-center 前缀
-    if (routeId === 'app_center_overview') {
-      routePath = '/app-center';
-    } else if (['scraper', 'ai_analysis', 'promptlab', 'playground'].includes(routeId)) {
-      routePath = `/app-center/${routeId.replace(/_/g, '-')}`;
-    } else if (routeId.startsWith('kw_')) {
-      routePath = `/app-center/keyword-hunter/${routeId.replace('kw_', '').replace(/_/g, '-')}`;
-    }
-    
-    routerInstance.register(routePath, config);
+    routerInstance.register(routeIdToPath(routeId), config);
   }
 
   // 注册别名
   for (const [alias, target] of Object.entries(conversionResult.aliases)) {
-    routerInstance.registerAlias(alias, target);
+    routerInstance.registerAlias(alias, routeIdToPath(target.replace(/^\//, '')));
   }
+  routerInstance.registerAlias('/app-center/playground', routeIdToPath('playground'));
 
   Logger.debug(
     `✓ [initRouter] Registered ${routerInstance.getAllRoutes().length} routes and ${
@@ -155,8 +145,11 @@ export function initRouter(): NavigoAdapter {
   window.addEventListener('popstate', () => {
     const hash = window.location.hash.replace('#', '');
     if (hash && routerInstance) {
-      routerInstance.navigate(`/${hash}`, {
-        updateHistory: false,
+      const normalizedHash = normalizeRoutePath(hash);
+      const isLegacyPlaygroundPath = normalizedHash === '/app-center/playground';
+      routerInstance.navigate(normalizedHash, {
+        updateHistory: isLegacyPlaygroundPath ? true : false,
+        replace: isLegacyPlaygroundPath,
         skipMiddleware: false,
       });
     }
@@ -171,29 +164,7 @@ export function initRouter(): NavigoAdapter {
           Logger.debug(`[initRouter] 📡 Received ROUTE_CHANGE event for routeId: ${payload.routeId}`);
         }
         
-        // 将路由 ID 转换为路径
-        let path = payload.routeId;
-        
-        // 应用中心路由映射
-        if (payload.routeId === 'app_center_overview') {
-          path = '/app-center';
-        } else if (payload.routeId === 'scraper') {
-          path = '/app-center/scraper';
-        } else if (payload.routeId === 'ai_analysis') {
-          path = '/app-center/ai-analysis';
-        } else if (payload.routeId === 'promptlab') {
-          path = '/app-center/promptlab';
-        } else if (payload.routeId === 'playground') {
-          path = '/app-center/playground';
-        } else if (payload.routeId === 'kw_input') {
-          path = '/app-center/keyword-hunter/input';
-        } else if (payload.routeId === 'kw_process') {
-          path = '/app-center/keyword-hunter/process';
-        } else if (payload.routeId === 'kw_analysis') {
-          path = '/app-center/keyword-hunter/analysis';
-        } else if (!payload.routeId.startsWith('/')) {
-          path = `/${payload.routeId}`;
-        }
+        const path = routeIdToPath(payload.routeId);
         
         if (import.meta.env.DEV) {
           Logger.debug(`[initRouter] 🔀 Converting routeId "${payload.routeId}" to path: ${path}`);
@@ -307,7 +278,15 @@ export function triggerInitialNavigation(): void {
     if (import.meta.env.DEV) {
       Logger.debug('[triggerInitialNavigation] 🚀 Resolving current route:', currentHash);
     }
-    routerInstance.resolve();
+    const normalizedHash = normalizeRoutePath(currentHash);
+    if (normalizedHash === '/app-center/playground') {
+      void routerInstance.navigate(normalizedHash, {
+        replace: true,
+        skipMiddleware: false,
+      });
+    } else {
+      routerInstance.resolve();
+    }
   }
 }
 

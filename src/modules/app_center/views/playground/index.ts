@@ -34,6 +34,7 @@ interface DeepChatSignals {
 }
 
 interface DeepChatElement extends HTMLElement {
+  history?: DeepChatMessage[];
   connect?: {
     stream?: boolean;
     handler: (body: DeepChatRequestBody | DeepChatMessage[], signals: DeepChatSignals) => void;
@@ -51,14 +52,32 @@ interface DeepChatElement extends HTMLElement {
   errorMessages?: Record<string, unknown>;
   submitUserMessage?: (content: { text: string }) => void;
   clearMessages?: (isReset?: boolean) => void;
+  getMessages?: () => DeepChatMessage[];
   onRender?: () => void;
 }
+
+interface PlaygroundThread {
+  id: string;
+  title: string;
+  messages: DeepChatMessage[];
+  createdAt: number;
+  updatedAt: number;
+}
+
+interface PlaygroundThreadStore {
+  activeThreadId: string;
+  threads: PlaygroundThread[];
+}
+
+const THREAD_STORAGE_KEY = 'playground_deep_chat_threads_v1';
+const MAX_THREAD_COUNT = 30;
 
 let cleanupCallbacks: Array<() => void> = [];
 let currentConfig: LLMProviderConfig | null = null;
 let selectedModel = '';
 let sessionSystemPrompt = '';
 let sessionTemperature = 0.3;
+let threadStore: PlaygroundThreadStore = createDefaultThreadStore();
 
 const mountInternal = async (container: HTMLElement): Promise<void> => {
   const html = await loadTemplate('src/modules/app_center/views/playground/template.html');
@@ -66,6 +85,8 @@ const mountInternal = async (container: HTMLElement): Promise<void> => {
 
   container.classList.add('fade-in');
   renderer.renderTemplate(container, html);
+  threadStore = loadThreadStore();
+  renderThreadList(container);
 
   await customElements.whenDefined('deep-chat');
   initDeepChat(container);
@@ -73,7 +94,7 @@ const mountInternal = async (container: HTMLElement): Promise<void> => {
   bindControls(container);
 };
 
-export const mount = safeMount(mountInternal, { moduleName: 'Playground' });
+export const mount = safeMount(mountInternal, { moduleName: 'Deep Chat' });
 
 export function unmount(): void {
   cleanupCallbacks.forEach((cleanup) => cleanup());
@@ -82,7 +103,8 @@ export function unmount(): void {
   selectedModel = '';
   sessionSystemPrompt = '';
   sessionTemperature = 0.3;
-  Logger.debug('[Playground] 模块已卸载');
+  threadStore = createDefaultThreadStore();
+  Logger.debug('[Deep Chat] 模块已卸载');
 }
 
 async function refreshLLMConfig(container: HTMLElement): Promise<void> {
@@ -124,6 +146,8 @@ function initDeepChat(container: HTMLElement): void {
     return;
   }
 
+  const activeThread = getActiveThread();
+  chat.history = activeThread.messages;
   chat.stream = true;
   chat.avatars = false;
   chat.names = false;
@@ -146,7 +170,7 @@ function initDeepChat(container: HTMLElement): void {
     alignItems: 'stretch',
   };
   chat.textInput = {
-    placeholder: { text: 'Send a message... (@ to mention, / for commands)' },
+    placeholder: { text: 'Send a message...' },
     styles: {
       container: {
         width: '100%',
@@ -205,6 +229,7 @@ function initDeepChat(container: HTMLElement): void {
     },
   };
   chat.onRender?.();
+  setConversationActive(container, activeThread.messages.length > 0);
 }
 
 function bindControls(container: HTMLElement): void {
@@ -215,6 +240,7 @@ function bindControls(container: HTMLElement): void {
   const temperatureInput = container.querySelector<HTMLInputElement>('#playground-temperature');
   const temperatureValue = container.querySelector<HTMLOutputElement>('#playground-temperature-value');
   const resetTuningButton = container.querySelector<HTMLButtonElement>('#playground-reset-tuning');
+  const threadList = container.querySelector<HTMLElement>('#playground-thread-list');
   const promptButtons = Array.from(
     container.querySelectorAll<HTMLButtonElement>('[data-playground-prompt]')
   );
@@ -228,16 +254,27 @@ function bindControls(container: HTMLElement): void {
 
   const onRefresh = async (): Promise<void> => {
     await refreshLLMConfig(container);
-    showToast('Playground 模型配置已刷新', { type: 'success' });
+    showToast('Deep Chat 模型配置已刷新', { type: 'success' });
   };
   refreshButton?.addEventListener('click', onRefresh);
   cleanupCallbacks.push(() => refreshButton?.removeEventListener('click', onRefresh));
 
   const onClear = (): void => {
-    resetThread(container);
+    createThread(container);
   };
   clearButton?.addEventListener('click', onClear);
   cleanupCallbacks.push(() => clearButton?.removeEventListener('click', onClear));
+
+  const onThreadListClick = (event: MouseEvent): void => {
+    const target = event.target as HTMLElement | null;
+    const button = target?.closest<HTMLButtonElement>('[data-thread-id]');
+    const threadId = button?.dataset.threadId;
+    if (threadId) {
+      switchThread(container, threadId);
+    }
+  };
+  threadList?.addEventListener('click', onThreadListClick);
+  cleanupCallbacks.push(() => threadList?.removeEventListener('click', onThreadListClick));
 
   const onSystemPromptInput = (): void => {
     sessionSystemPrompt = systemPromptInput?.value.trim() || '';
@@ -269,7 +306,7 @@ function bindControls(container: HTMLElement): void {
       temperatureValue.value = '0.3';
     }
     updateTemperatureTrack(temperatureInput);
-    showToast('Playground 调试参数已重置', { type: 'success' });
+    showToast('Deep Chat 调试参数已重置', { type: 'success' });
   };
   resetTuningButton?.addEventListener('click', onResetTuning);
   cleanupCallbacks.push(() => resetTuningButton?.removeEventListener('click', onResetTuning));
@@ -303,8 +340,9 @@ async function handlePlaygroundRequest(
       return;
     }
 
-    const messages = withSessionSystemPrompt(normalizeChatMessages(body));
-    if (messages.length === 0) {
+    const conversationMessages = normalizeChatMessages(body);
+    const messages = withSessionSystemPrompt(conversationMessages);
+    if (conversationMessages.length === 0) {
       await signals.onResponse?.({ error: '请输入要发送的内容。' });
       signals.onClose?.();
       return;
@@ -342,13 +380,19 @@ async function handlePlaygroundRequest(
     if (!streamedText && finalText) {
       await signals.onResponse?.({ text: finalText });
     }
+
+    saveThreadMessages(
+      container,
+      conversationMessages,
+      (finalText || streamedText).trim()
+    );
   } catch (error) {
     if (requestController?.signal.aborted) {
-      Logger.debug('[Playground] LLM 调用已取消');
+      Logger.debug('[Deep Chat] LLM 调用已取消');
       return;
     }
     const message = error instanceof Error ? error.message : '模型调用失败';
-    Logger.error('[Playground] LLM 调用失败:', error);
+    Logger.error('[Deep Chat] LLM 调用失败:', error);
     await signals.onResponse?.({ error: message });
   } finally {
     signals.onClose?.();
@@ -359,7 +403,37 @@ function getChat(container: HTMLElement): DeepChatElement | null {
   return container.querySelector<DeepChatElement>('#playground-chat');
 }
 
-function resetThread(container: HTMLElement): void {
+function createThread(container: HTMLElement): void {
+  const nextThread = createEmptyThread();
+  threadStore = {
+    activeThreadId: nextThread.id,
+    threads: [nextThread, ...threadStore.threads].slice(0, MAX_THREAD_COUNT),
+  };
+  persistThreadStore();
+  renderThreadList(container);
+  replaceChat(container);
+  showToast('已创建新的 Deep Chat 会话', { type: 'success' });
+}
+
+function switchThread(container: HTMLElement, threadId: string): void {
+  if (threadId === threadStore.activeThreadId) {
+    return;
+  }
+
+  if (!threadStore.threads.some((thread) => thread.id === threadId)) {
+    return;
+  }
+
+  threadStore = {
+    ...threadStore,
+    activeThreadId: threadId,
+  };
+  persistThreadStore();
+  renderThreadList(container);
+  replaceChat(container);
+}
+
+function replaceChat(container: HTMLElement): void {
   const chat = getChat(container);
   if (!chat) {
     return;
@@ -374,7 +448,214 @@ function resetThread(container: HTMLElement): void {
   nextChat.className = 'playground-chat';
   chat.replaceWith(nextChat);
   initDeepChat(container);
-  setConversationActive(container, false);
+}
+
+function renderThreadList(container: HTMLElement): void {
+  const list = container.querySelector<HTMLElement>('#playground-thread-list');
+  if (!list) {
+    return;
+  }
+
+  const sortedThreads = [...threadStore.threads].sort((a, b) => b.updatedAt - a.updatedAt);
+  list.innerHTML = sortedThreads.map((thread) => {
+    const isActive = thread.id === threadStore.activeThreadId;
+    const messageCount = thread.messages.length;
+    const meta = messageCount > 0
+      ? `${messageCount} messages · ${formatThreadTime(thread.updatedAt)}`
+      : `Empty · ${formatThreadTime(thread.updatedAt)}`;
+
+    return `
+      <button class="playground-thread-item${isActive ? ' is-active' : ''}" type="button" data-thread-id="${thread.id}">
+        <span class="playground-thread-icon">
+          <i class="far fa-message"></i>
+        </span>
+        <span class="playground-thread-copy">
+          <span class="playground-thread-name">${escapeHTML(thread.title)}</span>
+          <span class="playground-thread-meta">${escapeHTML(meta)}</span>
+        </span>
+      </button>
+    `;
+  }).join('');
+}
+
+function saveThreadMessages(
+  container: HTMLElement,
+  conversationMessages: ChatMessage[],
+  assistantText: string
+): void {
+  const activeThread = getActiveThread();
+  const storedMessages = conversationMessages
+    .filter((message) => message.role !== 'system')
+    .map(toDeepChatMessage);
+
+  if (assistantText) {
+    storedMessages.push({ role: 'ai', text: assistantText });
+  }
+
+  const now = Date.now();
+  const nextThread: PlaygroundThread = {
+    ...activeThread,
+    title: getThreadTitle(storedMessages),
+    messages: storedMessages,
+    updatedAt: now,
+  };
+
+  threadStore = {
+    activeThreadId: nextThread.id,
+    threads: [
+      nextThread,
+      ...threadStore.threads.filter((thread) => thread.id !== nextThread.id),
+    ].slice(0, MAX_THREAD_COUNT),
+  };
+  persistThreadStore();
+  renderThreadList(container);
+}
+
+function loadThreadStore(): PlaygroundThreadStore {
+  const stored = StorageService.get<PlaygroundThreadStore>(THREAD_STORAGE_KEY, null);
+  if (!isValidThreadStore(stored)) {
+    return createDefaultThreadStore();
+  }
+
+  const threads = stored.threads
+    .map(sanitizeThread)
+    .filter((thread): thread is PlaygroundThread => thread !== null)
+    .sort((a, b) => b.updatedAt - a.updatedAt)
+    .slice(0, MAX_THREAD_COUNT);
+
+  if (threads.length === 0) {
+    return createDefaultThreadStore();
+  }
+
+  const activeThreadId = threads.some((thread) => thread.id === stored.activeThreadId)
+    ? stored.activeThreadId
+    : threads[0]?.id || createThreadId();
+
+  return { activeThreadId, threads };
+}
+
+function persistThreadStore(): void {
+  StorageService.set(THREAD_STORAGE_KEY, threadStore);
+}
+
+function createDefaultThreadStore(): PlaygroundThreadStore {
+  const thread = createEmptyThread();
+  return {
+    activeThreadId: thread.id,
+    threads: [thread],
+  };
+}
+
+function createEmptyThread(): PlaygroundThread {
+  const now = Date.now();
+  return {
+    id: createThreadId(),
+    title: 'New Thread',
+    messages: [],
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+function getActiveThread(): PlaygroundThread {
+  const activeThread = threadStore.threads.find(
+    (thread) => thread.id === threadStore.activeThreadId
+  );
+
+  if (activeThread) {
+    return activeThread;
+  }
+
+  const fallbackThread = threadStore.threads[0] || createEmptyThread();
+  threadStore = {
+    activeThreadId: fallbackThread.id,
+    threads: threadStore.threads.length > 0 ? threadStore.threads : [fallbackThread],
+  };
+  persistThreadStore();
+  return fallbackThread;
+}
+
+function sanitizeThread(thread: PlaygroundThread): PlaygroundThread | null {
+  if (!thread || typeof thread.id !== 'string') {
+    return null;
+  }
+
+  const messages = Array.isArray(thread.messages)
+    ? thread.messages.filter(isValidDeepChatMessage)
+    : [];
+  const createdAt = Number.isFinite(thread.createdAt) ? thread.createdAt : Date.now();
+  const updatedAt = Number.isFinite(thread.updatedAt) ? thread.updatedAt : createdAt;
+
+  return {
+    id: thread.id,
+    title: typeof thread.title === 'string' && thread.title.trim()
+      ? thread.title.trim()
+      : getThreadTitle(messages),
+    messages,
+    createdAt,
+    updatedAt,
+  };
+}
+
+function isValidThreadStore(value: PlaygroundThreadStore | null): value is PlaygroundThreadStore {
+  return Boolean(
+    value &&
+    typeof value.activeThreadId === 'string' &&
+    Array.isArray(value.threads)
+  );
+}
+
+function isValidDeepChatMessage(message: DeepChatMessage): boolean {
+  return Boolean(message && typeof getMessageText(message) === 'string' && getMessageText(message));
+}
+
+function toDeepChatMessage(message: ChatMessage): DeepChatMessage {
+  return {
+    role: message.role === 'user' ? 'user' : 'ai',
+    text: message.content,
+  };
+}
+
+function getThreadTitle(messages: DeepChatMessage[]): string {
+  const firstUserMessage = messages.find((message) => message.role === 'user');
+  const title = getMessageText((firstUserMessage || messages[0] || {}) as DeepChatMessage)
+    .replace(/\s+/g, ' ');
+  return title ? truncateText(title, 42) : 'New Thread';
+}
+
+function formatThreadTime(timestamp: number): string {
+  const date = new Date(timestamp);
+  if (Number.isNaN(date.getTime())) {
+    return 'Just now';
+  }
+
+  return date.toLocaleString('zh-CN', {
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+function createThreadId(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+
+  return `thread-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+function escapeHTML(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function truncateText(value: string, maxLength: number): string {
+  return value.length > maxLength ? `${value.slice(0, maxLength - 1)}…` : value;
 }
 
 function submitPrompt(container: HTMLElement, prompt: string): void {

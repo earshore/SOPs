@@ -176,7 +176,7 @@ export const MENU_CONFIG: MenuConfig = {
       title: "Playground",
       version: "v1.0",
       icon: "fas fa-paper-plane",
-      description: "轻量级 AI 对话试验台，复用系统模型配置进行快速问答与 Prompt 试验。",
+      description: "轻量级 AI 对话试验台，当前内置 Deep Chat 页面用于快速问答与 Prompt 试验。",
       themeColor: "cyan",
     },
 
@@ -324,7 +324,7 @@ export const MENU_CONFIG: MenuConfig = {
       color: "cyan",
       order: 3,
       version: "v1.0",
-      description: "轻量级 AI 对话试验台，复用系统模型配置进行快速问答与 Prompt 试验。",
+      description: "轻量级 AI 对话试验台，当前内置 Deep Chat 页面用于快速问答与 Prompt 试验。",
     },
   },
 
@@ -552,8 +552,8 @@ export const MENU_CONFIG: MenuConfig = {
     // --- Playground 应用 ---
     [APP_CENTER_ROUTES.PLAYGROUND]: {
       moduleId: "playground",
-      label: "Playground",
-      icon: "fas fa-paper-plane",
+      label: "Deep Chat",
+      icon: "fa-regular fa-comments",
       panelId: "panel-app_center",
       category: "playground",
     },

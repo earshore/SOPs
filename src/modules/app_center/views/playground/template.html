@@ -1,10 +1,19 @@
 <div class="playground-page">
-  <aside class="playground-thread-rail" aria-label="Playground threads">
+  <aside class="playground-thread-rail" aria-label="Deep Chat threads">
     <div class="playground-rail-brand">
-      <span class="playground-logo">
+      <!-- <span class="playground-logo">
         <i class="far fa-comments"></i>
       </span>
-      <span>assistant-ui</span>
+      <span>Deep Chat</span> -->
+
+      <h2 class="text-base font-bold text-slate-800 flex items-center gap-2.5">
+        <div
+          class="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-sm shadow-purple-500/20">
+          <i class="fa-solid far fa-comments text-white text-xs"></i>
+        </div>
+        Deep Chat
+      </h2>
+
     </div>
 
     <button id="playground-clear-chat" class="playground-new-thread" type="button">
@@ -12,13 +21,19 @@
       <span>New Thread</span>
     </button>
 
+    <div class="playground-thread-list-wrap">
+      <div class="playground-thread-list-title">History</div>
+      <div id="playground-thread-list" class="playground-thread-list" aria-label="历史会话"></div>
+    </div>
+
     <p id="playground-provider-status" class="playground-provider-status">读取模型配置中...</p>
+
   </aside>
 
-  <section class="playground-main" aria-label="Playground">
+  <section class="playground-main" aria-label="Deep Chat">
     <header class="playground-topbar">
       <div class="playground-model-area">
-        <button class="playground-top-icon" type="button" title="Playground">
+        <button class="playground-top-icon" type="button" title="Deep Chat">
           <i class="far fa-window-maximize"></i>
         </button>
         <select id="playground-model-select" class="playground-select" disabled>
@@ -37,11 +52,8 @@
           <div class="playground-tuning">
             <label class="playground-field playground-field-system" for="playground-system-prompt">
               <span>System</span>
-              <textarea
-                id="playground-system-prompt"
-                rows="3"
-                placeholder="Optional system prompt for this Playground session"
-              ></textarea>
+              <textarea id="playground-system-prompt" rows="3"
+                placeholder="Optional system prompt for this Deep Chat session"></textarea>
             </label>
             <label class="playground-field playground-field-temperature" for="playground-temperature">
               <span>Temperature <output id="playground-temperature-value">0.3</output></span>

@@ -14,6 +14,7 @@
 
 import type { NavigoAdapter } from './NavigoAdapter';
 import type { Route } from './types';
+import { routeIdToPath } from '../routePaths';
 
 import { Logger } from '../../../services/loggerService';
 /**
@@ -180,30 +181,7 @@ export class LegacyAdapter {
    * @returns 路径
    */
   private _routeIdToPath(routeId: string): string {
-    // 如果已经是路径格式（以 / 开头），直接返回
-    if (routeId.startsWith('/')) {
-      return routeId;
-    }
-
-    // 应用中心路由映射
-    const appCenterRoutes: Record<string, string> = {
-      'app_center_overview': '/app-center',
-      'scraper': '/app-center/scraper',
-      'ai_analysis': '/app-center/ai-analysis',
-      'promptlab': '/app-center/promptlab',
-      'playground': '/app-center/playground',
-      'kw_input': '/app-center/keyword-hunter/input',
-      'kw_process': '/app-center/keyword-hunter/process',
-      'kw_analysis': '/app-center/keyword-hunter/analysis',
-    };
-
-    // 如果是应用中心路由，返回映射的路径
-    if (appCenterRoutes[routeId]) {
-      return appCenterRoutes[routeId];
-    }
-
-    // 其他路由，转换为路径格式
-    return `/${routeId}`;
+    return routeIdToPath(routeId);
   }
 
   /**

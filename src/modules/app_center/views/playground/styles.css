@@ -76,6 +76,101 @@
   text-overflow: ellipsis;
 }
 
+.playground-thread-list-wrap {
+  min-height: 0;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.playground-thread-list-title {
+  padding: 0 10px;
+  color: #9a9a9a;
+  font-size: 11px;
+  line-height: 1;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.playground-thread-list {
+  min-height: 0;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.playground-thread-item {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: #333333;
+  text-align: left;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.playground-thread-item:hover {
+  background: #ffffff;
+  border-color: #ededed;
+}
+
+.playground-thread-item.is-active {
+  background: #ffffff;
+  border-color: #dedede;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.playground-thread-icon {
+  width: 26px;
+  height: 26px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: #f1f1f1;
+  color: #666666;
+  font-size: 12px;
+}
+
+.playground-thread-copy {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.playground-thread-name,
+.playground-thread-meta {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.playground-thread-name {
+  color: #202020;
+  font-size: 13px;
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.playground-thread-meta {
+  margin-top: 3px;
+  color: #9a9a9a;
+  font-size: 11px;
+  line-height: 1.2;
+}
+
 .playground-main {
   min-width: 0;
   min-height: 0;
