@@ -634,9 +634,13 @@ async function handlePlaygroundRequest(
       return;
     }
 
-    const conversationMessages = normalizeChatMessages(body);
+    const requestMessages = normalizeChatMessages(body);
+    const conversationMessages = mergeThreadHistoryWithRequest(
+      getActiveThread().messages,
+      requestMessages
+    );
     const messages = withSessionSystemPrompt(conversationMessages);
-    if (conversationMessages.length === 0) {
+    if (requestMessages.length === 0) {
       await signals.onResponse?.({ error: '请输入要发送的内容。' });
       signals.onClose?.();
       return;
@@ -1252,6 +1256,53 @@ function normalizeChatMessages(body: DeepChatRequestBody | DeepChatMessage[]): C
       };
     })
     .filter((message): message is ChatMessage => message !== null);
+}
+
+function mergeThreadHistoryWithRequest(
+  threadMessages: DeepChatMessage[],
+  requestMessages: ChatMessage[]
+): ChatMessage[] {
+  if (requestMessages.length === 0) {
+    return [];
+  }
+
+  const historyMessages = threadMessages
+    .map((message): ChatMessage | null => {
+      const content = getMessageText(message);
+      if (!content || message.role === 'system') {
+        return null;
+      }
+
+      return {
+        role: toChatRole(message.role),
+        content,
+      };
+    })
+    .filter((message): message is ChatMessage => message !== null);
+
+  if (historyMessages.length === 0 || requestContainsHistory(requestMessages, historyMessages)) {
+    return requestMessages;
+  }
+
+  return [...historyMessages, ...requestMessages];
+}
+
+function requestContainsHistory(
+  requestMessages: ChatMessage[],
+  historyMessages: ChatMessage[]
+): boolean {
+  if (requestMessages.length < historyMessages.length) {
+    return false;
+  }
+
+  return historyMessages.every((historyMessage, index) => {
+    const requestMessage = requestMessages[index];
+    return Boolean(
+      requestMessage &&
+      requestMessage.role === historyMessage.role &&
+      requestMessage.content === historyMessage.content
+    );
+  });
 }
 
 function withSessionSystemPrompt(messages: ChatMessage[]): ChatMessage[] {
