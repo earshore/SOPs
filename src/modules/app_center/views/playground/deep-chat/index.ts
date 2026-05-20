@@ -9,15 +9,11 @@ import { callLLM, type ChatMessage } from '@/services/llmService';
 import { StorageService } from '@/services/storageService';
 import type { LLMProviderConfig } from '@/types/state';
 import { Logger } from '@/services/loggerService';
-
-type DeepChatRole = 'user' | 'ai' | 'assistant' | 'system';
-
-interface DeepChatMessage {
-  role?: DeepChatRole;
-  text?: string;
-  html?: string;
-  content?: string;
-}
+import {
+  mergeThreadHistoryWithRequest,
+  type DeepChatMessage,
+  type DeepChatRole,
+} from './conversationContext';
 
 interface DeepChatRequestBody {
   messages?: DeepChatMessage[];
@@ -1256,53 +1252,6 @@ function normalizeChatMessages(body: DeepChatRequestBody | DeepChatMessage[]): C
       };
     })
     .filter((message): message is ChatMessage => message !== null);
-}
-
-function mergeThreadHistoryWithRequest(
-  threadMessages: DeepChatMessage[],
-  requestMessages: ChatMessage[]
-): ChatMessage[] {
-  if (requestMessages.length === 0) {
-    return [];
-  }
-
-  const historyMessages = threadMessages
-    .map((message): ChatMessage | null => {
-      const content = getMessageText(message);
-      if (!content || message.role === 'system') {
-        return null;
-      }
-
-      return {
-        role: toChatRole(message.role),
-        content,
-      };
-    })
-    .filter((message): message is ChatMessage => message !== null);
-
-  if (historyMessages.length === 0 || requestContainsHistory(requestMessages, historyMessages)) {
-    return requestMessages;
-  }
-
-  return [...historyMessages, ...requestMessages];
-}
-
-function requestContainsHistory(
-  requestMessages: ChatMessage[],
-  historyMessages: ChatMessage[]
-): boolean {
-  if (requestMessages.length < historyMessages.length) {
-    return false;
-  }
-
-  return historyMessages.every((historyMessage, index) => {
-    const requestMessage = requestMessages[index];
-    return Boolean(
-      requestMessage &&
-      requestMessage.role === historyMessage.role &&
-      requestMessage.content === historyMessage.content
-    );
-  });
 }
 
 function withSessionSystemPrompt(messages: ChatMessage[]): ChatMessage[] {
