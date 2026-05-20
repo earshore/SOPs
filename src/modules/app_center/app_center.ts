@@ -36,7 +36,7 @@ const MODULE_MAP: ModuleMap = {
   [APP_CENTER_ROUTES.KW_ANALYSIS]: () => import('./views/keyword_hunter/analysis/index'),
 
   // Playground
-  [APP_CENTER_ROUTES.PLAYGROUND]: () => import('./views/playground/index'),
+  [APP_CENTER_ROUTES.PLAYGROUND]: () => import('./views/playground/deep-chat/index'),
 };
 
 // ================= 使用通用ModuleLoader =================

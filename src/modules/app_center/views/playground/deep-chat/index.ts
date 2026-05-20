@@ -1,5 +1,5 @@
 import 'deep-chat';
-import './styles.css';
+import '../styles.css';
 
 import { loadTemplate } from '@/common/utils/viewLoader';
 import { safeMount } from '@/common/utils/safeMount';
@@ -35,6 +35,7 @@ interface DeepChatSignals {
 
 interface DeepChatElement extends HTMLElement {
   history?: DeepChatMessage[];
+  auxiliaryStyle?: string;
   connect?: {
     stream?: boolean;
     handler: (body: DeepChatRequestBody | DeepChatMessage[], signals: DeepChatSignals) => void;
@@ -46,6 +47,7 @@ interface DeepChatElement extends HTMLElement {
   submitButtonStyles?: Record<string, unknown>;
   messageStyles?: Record<string, unknown>;
   introMessage?: { text: string };
+  focusInput?: () => void;
   avatars?: boolean;
   names?: boolean;
   displayLoadingBubble?: boolean;
@@ -71,6 +73,167 @@ interface PlaygroundThreadStore {
 
 const THREAD_STORAGE_KEY = 'playground_deep_chat_threads_v1';
 const MAX_THREAD_COUNT = 30;
+const MESSAGE_TOOLBAR_CLASS = 'playground-message-toolbar';
+const DEEP_CHAT_AUXILIARY_STYLE = `
+  #messages {
+    padding: 22px 24px 18px;
+  }
+
+  .outer-message-container {
+    margin-bottom: 26px !important;
+  }
+
+  .inner-message-container {
+    display: flex !important;
+    flex-direction: column !important;
+    min-width: 0 !important;
+  }
+
+  .deep-chat-outer-container-role-user {
+    justify-content: flex-end !important;
+  }
+
+  .deep-chat-outer-container-role-user .inner-message-container {
+    align-items: flex-end !important;
+    max-width: min(78%, 560px) !important;
+  }
+
+  .deep-chat-outer-container-role-ai .inner-message-container {
+    align-items: flex-start !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .message-bubble {
+    box-sizing: border-box !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .message-bubble.user-message {
+    max-width: 100% !important;
+    padding: 10px 14px !important;
+    border: 0 !important;
+    border-radius: 18px !important;
+    background: #f4f4f5 !important;
+    color: #1f2328 !important;
+    box-shadow: none !important;
+  }
+
+  .message-bubble.ai-message {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #24292f !important;
+    box-shadow: none !important;
+  }
+
+  .message-bubble.user-message h1,
+  .message-bubble.user-message h2,
+  .message-bubble.user-message h3,
+  .message-bubble.user-message p,
+  .message-bubble.user-message ul,
+  .message-bubble.user-message ol {
+    margin: 0 0 8px !important;
+    font-size: 14px !important;
+    line-height: 1.55 !important;
+  }
+
+  .message-bubble.user-message > :last-child,
+  .message-bubble.ai-message > :last-child {
+    margin-bottom: 0 !important;
+  }
+
+  .message-bubble.ai-message p,
+  .message-bubble.ai-message li {
+    font-size: 14px !important;
+    line-height: 1.75 !important;
+  }
+
+  .message-bubble.ai-message h1,
+  .message-bubble.ai-message h2,
+  .message-bubble.ai-message h3 {
+    margin: 18px 0 8px !important;
+    color: #111827 !important;
+    font-size: 16px !important;
+    line-height: 1.45 !important;
+  }
+
+  .message-bubble.ai-message ul,
+  .message-bubble.ai-message ol {
+    padding-inline-start: 20px !important;
+  }
+
+  .${MESSAGE_TOOLBAR_CLASS} {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 7px;
+    color: #8a8f98;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 12px;
+    line-height: 1;
+    user-select: none;
+  }
+
+  .${MESSAGE_TOOLBAR_CLASS}[data-role="user"] {
+    justify-content: flex-end;
+    padding-inline-end: 4px;
+  }
+
+  .${MESSAGE_TOOLBAR_CLASS}[data-role="ai"] {
+    justify-content: flex-start;
+    margin-top: 12px;
+  }
+
+  .playground-message-time {
+    color: #9aa0a6;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .playground-message-tool {
+    width: 22px;
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: #8a8f98;
+    cursor: pointer;
+    transition: background 140ms ease, color 140ms ease;
+  }
+
+  .playground-message-tool:hover,
+  .playground-message-tool:focus-visible {
+    background: #f2f3f5;
+    color: #4b5563;
+    outline: none;
+  }
+
+  .playground-message-tool svg {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  @media (max-width: 640px) {
+    #messages {
+      padding-inline: 16px;
+    }
+
+    .deep-chat-outer-container-role-user .inner-message-container {
+      max-width: 88% !important;
+    }
+  }
+`;
 
 let cleanupCallbacks: Array<() => void> = [];
 let currentConfig: LLMProviderConfig | null = null;
@@ -78,9 +241,11 @@ let selectedModel = '';
 let sessionSystemPrompt = '';
 let sessionTemperature = 0.3;
 let threadStore: PlaygroundThreadStore = createDefaultThreadStore();
+let messageToolbarObserver: MutationObserver | null = null;
+let messageToolbarTimer: number | null = null;
 
 const mountInternal = async (container: HTMLElement): Promise<void> => {
-  const html = await loadTemplate('src/modules/app_center/views/playground/template.html');
+  const html = await loadTemplate('src/modules/app_center/views/playground/deep-chat/template.html');
   const renderer = SafeRenderer.getInstance();
 
   container.classList.add('fade-in');
@@ -104,6 +269,7 @@ export function unmount(): void {
   sessionSystemPrompt = '';
   sessionTemperature = 0.3;
   threadStore = createDefaultThreadStore();
+  cleanupMessageToolbars();
   Logger.debug('[Deep Chat] 模块已卸载');
 }
 
@@ -149,6 +315,7 @@ function initDeepChat(container: HTMLElement): void {
   const activeThread = getActiveThread();
   chat.history = activeThread.messages;
   chat.stream = true;
+  chat.auxiliaryStyle = DEEP_CHAT_AUXILIARY_STYLE;
   chat.avatars = false;
   chat.names = false;
   chat.displayLoadingBubble = true;
@@ -201,23 +368,37 @@ function initDeepChat(container: HTMLElement): void {
   chat.messageStyles = {
     default: {
       shared: {
+        outerContainer: {
+          width: '100%',
+          marginBottom: '26px',
+        },
         bubble: {
-          borderRadius: '18px',
           fontSize: '14px',
-          lineHeight: '1.65',
+          lineHeight: '1.7',
         },
       },
       user: {
         bubble: {
-          backgroundColor: '#111111',
-          color: '#ffffff',
+          backgroundColor: '#f4f4f5',
+          color: '#1f2328',
+          border: '0',
+          borderRadius: '18px',
+          padding: '10px 14px',
         },
       },
       ai: {
+        innerContainer: {
+          width: '100%',
+          maxWidth: '100%',
+        },
         bubble: {
-          backgroundColor: '#f7f7f7',
-          color: '#111111',
-          border: '1px solid #eeeeee',
+          width: '100%',
+          maxWidth: '100%',
+          backgroundColor: 'transparent',
+          color: '#24292f',
+          border: '0',
+          borderRadius: '0',
+          padding: '0',
         },
       },
     },
@@ -229,6 +410,7 @@ function initDeepChat(container: HTMLElement): void {
     },
   };
   chat.onRender?.();
+  setupMessageToolbars(chat);
   setConversationActive(container, activeThread.messages.length > 0);
 }
 
@@ -267,8 +449,15 @@ function bindControls(container: HTMLElement): void {
 
   const onThreadListClick = (event: MouseEvent): void => {
     const target = event.target as HTMLElement | null;
-    const button = target?.closest<HTMLButtonElement>('[data-thread-id]');
-    const threadId = button?.dataset.threadId;
+    const deleteButton = target?.closest<HTMLButtonElement>('[data-delete-thread-id]');
+    const deleteThreadId = deleteButton?.dataset.deleteThreadId;
+    if (deleteThreadId) {
+      deleteThread(container, deleteThreadId);
+      return;
+    }
+
+    const switchButton = target?.closest<HTMLButtonElement>('[data-thread-id]');
+    const threadId = switchButton?.dataset.threadId;
     if (threadId) {
       switchThread(container, threadId);
     }
@@ -403,6 +592,209 @@ function getChat(container: HTMLElement): DeepChatElement | null {
   return container.querySelector<DeepChatElement>('#playground-chat');
 }
 
+function setupMessageToolbars(chat: DeepChatElement): void {
+  cleanupMessageToolbars();
+
+  const installToolbars = (): void => {
+    const root = chat.shadowRoot;
+    if (!root) {
+      return;
+    }
+
+    renderMessageToolbars(chat);
+    messageToolbarObserver = new MutationObserver(() => renderMessageToolbars(chat));
+    messageToolbarObserver.observe(root, { childList: true, subtree: true });
+  };
+
+  messageToolbarTimer = window.setTimeout(installToolbars, 0);
+}
+
+function cleanupMessageToolbars(): void {
+  messageToolbarObserver?.disconnect();
+  messageToolbarObserver = null;
+
+  if (messageToolbarTimer !== null) {
+    window.clearTimeout(messageToolbarTimer);
+    messageToolbarTimer = null;
+  }
+}
+
+function renderMessageToolbars(chat: DeepChatElement): void {
+  const root = chat.shadowRoot;
+  if (!root) {
+    return;
+  }
+
+  const messages = Array.from(root.querySelectorAll<HTMLElement>('.outer-message-container'));
+  messages.forEach((message) => {
+    if (message.querySelector(`.${MESSAGE_TOOLBAR_CLASS}`)) {
+      return;
+    }
+
+    const bubble = message.querySelector<HTMLElement>('.message-bubble');
+    const innerContainer = message.querySelector<HTMLElement>('.inner-message-container');
+    const role = getMessageRole(message);
+    if (!bubble || !innerContainer || !role || !getMessageContent(bubble)) {
+      return;
+    }
+
+    innerContainer.appendChild(createMessageToolbar(chat, bubble, role));
+  });
+}
+
+function getMessageRole(message: HTMLElement): 'user' | 'ai' | null {
+  if (message.classList.contains('deep-chat-outer-container-role-user')) {
+    return 'user';
+  }
+
+  if (message.classList.contains('deep-chat-outer-container-role-ai')) {
+    return 'ai';
+  }
+
+  return null;
+}
+
+function createMessageToolbar(
+  chat: DeepChatElement,
+  bubble: HTMLElement,
+  role: 'user' | 'ai'
+): HTMLElement {
+  const toolbar = document.createElement('div');
+  toolbar.className = MESSAGE_TOOLBAR_CLASS;
+  toolbar.dataset.role = role;
+
+  const time = document.createElement('span');
+  time.className = 'playground-message-time';
+  time.textContent = formatToolbarTime(new Date());
+  toolbar.appendChild(time);
+  toolbar.appendChild(createToolbarButton('复制消息', getCopyIcon(), () => copyMessageContent(bubble)));
+
+  if (role === 'user') {
+    toolbar.appendChild(createToolbarButton('编辑消息', getEditIcon(), () => editMessageContent(chat, bubble)));
+  }
+
+  return toolbar;
+}
+
+function createToolbarButton(label: string, icon: string, onClick: () => void): HTMLButtonElement {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'playground-message-tool';
+  button.title = label;
+  button.setAttribute('aria-label', label);
+  button.innerHTML = icon;
+  button.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    onClick();
+  });
+  return button;
+}
+
+function copyMessageContent(bubble: HTMLElement): void {
+  const content = getMessageContent(bubble);
+  if (!content) {
+    return;
+  }
+
+  void writeClipboardText(content)
+    .then(() => showToast('消息已复制', { type: 'success' }))
+    .catch((error) => {
+      Logger.warn('[Deep Chat] 复制消息失败:', error);
+      showToast('复制失败，请手动选择文本复制', { type: 'error' });
+    });
+}
+
+async function writeClipboardText(content: string): Promise<void> {
+  try {
+    const clipboard = window.navigator?.clipboard;
+    if (clipboard?.writeText) {
+      await clipboard.writeText(content);
+      return;
+    }
+  } catch (error) {
+    Logger.warn('[Deep Chat] Clipboard API 不可用，尝试降级复制:', error);
+  }
+
+  copyTextWithSelectionFallback(content);
+}
+
+function copyTextWithSelectionFallback(content: string): void {
+  const textarea = document.createElement('textarea');
+  textarea.value = content;
+  textarea.setAttribute('readonly', 'true');
+  textarea.style.position = 'fixed';
+  textarea.style.top = '0';
+  textarea.style.left = '-9999px';
+  textarea.style.opacity = '0';
+  document.body.appendChild(textarea);
+
+  const selection = document.getSelection();
+  const selectedRanges = selection
+    ? Array.from({ length: selection.rangeCount }, (_, index) => selection.getRangeAt(index))
+    : [];
+
+  textarea.select();
+  const copied = document.execCommand('copy');
+  document.body.removeChild(textarea);
+
+  if (selection) {
+    selection.removeAllRanges();
+    selectedRanges.forEach((range) => selection.addRange(range));
+  }
+
+  if (!copied) {
+    throw new Error('document.execCommand("copy") returned false');
+  }
+}
+
+function editMessageContent(chat: DeepChatElement, bubble: HTMLElement): void {
+  const content = getMessageContent(bubble);
+  const input = chat.shadowRoot?.querySelector<HTMLElement>('#text-input');
+  if (!content || !input) {
+    return;
+  }
+
+  input.textContent = content;
+  input.dispatchEvent(new InputEvent('input', {
+    bubbles: true,
+    inputType: 'insertText',
+    data: content,
+  }));
+  chat.focusInput?.();
+  showToast('已放回输入框，可修改后重新发送', { type: 'success' });
+}
+
+function getMessageContent(bubble: HTMLElement): string {
+  return (bubble.innerText || bubble.textContent || '').trim();
+}
+
+function formatToolbarTime(date: Date): string {
+  return date.toLocaleTimeString('zh-CN', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+}
+
+function getCopyIcon(): string {
+  return `
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="9" y="9" width="10" height="10" rx="2"></rect>
+      <path d="M5 15H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1"></path>
+    </svg>
+  `;
+}
+
+function getEditIcon(): string {
+  return `
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 20h9"></path>
+      <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path>
+    </svg>
+  `;
+}
+
 function createThread(container: HTMLElement): void {
   const nextThread = createEmptyThread();
   threadStore = {
@@ -431,6 +823,37 @@ function switchThread(container: HTMLElement, threadId: string): void {
   persistThreadStore();
   renderThreadList(container);
   replaceChat(container);
+}
+
+function deleteThread(container: HTMLElement, threadId: string): void {
+  const thread = threadStore.threads.find((item) => item.id === threadId);
+  if (!thread) {
+    return;
+  }
+
+  const confirmed = window.confirm('删除后仅移除本地 Deep Chat 历史，无法恢复。确定删除这个会话吗？');
+  if (!confirmed) {
+    return;
+  }
+
+  const remainingThreads = threadStore.threads.filter((item) => item.id !== threadId);
+  const nextStore = remainingThreads.length > 0
+    ? {
+        activeThreadId: threadId === threadStore.activeThreadId
+          ? remainingThreads[0]!.id
+          : threadStore.activeThreadId,
+        threads: remainingThreads,
+      }
+    : createDefaultThreadStore();
+
+  const shouldReplaceChat = threadId === threadStore.activeThreadId;
+  threadStore = nextStore;
+  persistThreadStore();
+  renderThreadList(container);
+  if (shouldReplaceChat) {
+    replaceChat(container);
+  }
+  showToast(`已删除会话：${thread.title}`, { type: 'success' });
 }
 
 function replaceChat(container: HTMLElement): void {
@@ -465,15 +888,20 @@ function renderThreadList(container: HTMLElement): void {
       : `Empty · ${formatThreadTime(thread.updatedAt)}`;
 
     return `
-      <button class="playground-thread-item${isActive ? ' is-active' : ''}" type="button" data-thread-id="${thread.id}">
-        <span class="playground-thread-icon">
-          <i class="far fa-message"></i>
-        </span>
-        <span class="playground-thread-copy">
-          <span class="playground-thread-name">${escapeHTML(thread.title)}</span>
-          <span class="playground-thread-meta">${escapeHTML(meta)}</span>
-        </span>
-      </button>
+      <div class="playground-thread-item${isActive ? ' is-active' : ''}">
+        <button class="playground-thread-select" type="button" data-thread-id="${thread.id}">
+          <span class="playground-thread-icon">
+            <i class="far fa-message"></i>
+          </span>
+          <span class="playground-thread-copy">
+            <span class="playground-thread-name">${escapeHTML(thread.title)}</span>
+            <span class="playground-thread-meta">${escapeHTML(meta)}</span>
+          </span>
+        </button>
+        <button class="playground-thread-delete" type="button" data-delete-thread-id="${thread.id}" aria-label="删除会话 ${escapeHTML(thread.title)}" title="删除会话">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
     `;
   }).join('');
 }

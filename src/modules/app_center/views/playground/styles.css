@@ -4,7 +4,7 @@
   display: grid;
   grid-template-columns: 260px minmax(0, 1fr);
   background: #ffffff;
-  color: #111111;
+  color: hwb(249 2% 69%);
   border: 1px solid #eeeeee;
   border-radius: 16px;
   overflow: hidden;
@@ -108,18 +108,17 @@
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px;
+  gap: 4px;
+  padding: 4px;
   border: 1px solid transparent;
   border-radius: 10px;
   background: transparent;
   color: #333333;
-  text-align: left;
-  cursor: pointer;
   transition: background 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
 
-.playground-thread-item:hover {
+.playground-thread-item:hover,
+.playground-thread-item:focus-within {
   background: #ffffff;
   border-color: #ededed;
 }
@@ -128,6 +127,20 @@
   background: #ffffff;
   border-color: #dedede;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.playground-thread-select {
+  min-width: 0;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 
 .playground-thread-icon {
@@ -169,6 +182,35 @@
   color: #9a9a9a;
   font-size: 11px;
   line-height: 1.2;
+}
+
+.playground-thread-delete {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #9a9a9a;
+  font-size: 11px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 160ms ease, background 160ms ease, color 160ms ease;
+}
+
+.playground-thread-item:hover .playground-thread-delete,
+.playground-thread-item:focus-within .playground-thread-delete {
+  opacity: 1;
+}
+
+.playground-thread-delete:hover,
+.playground-thread-delete:focus-visible {
+  background: #fff1f1;
+  color: #d22f2f;
+  outline: none;
 }
 
 .playground-main {
@@ -317,11 +359,9 @@
 .playground-field-temperature input::-webkit-slider-runnable-track {
   height: 2px;
   border-radius: 999px;
-  background: linear-gradient(
-    90deg,
-    #111111 0 var(--playground-temperature-percent, 30%),
-    #dedede var(--playground-temperature-percent, 30%) 100%
-  );
+  background: linear-gradient(90deg,
+      #111111 0 var(--playground-temperature-percent, 30%),
+      #dedede var(--playground-temperature-percent, 30%) 100%);
 }
 
 .playground-field-temperature input::-webkit-slider-thumb {
