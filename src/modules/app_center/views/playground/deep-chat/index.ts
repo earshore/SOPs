@@ -224,13 +224,113 @@ const DEEP_CHAT_AUXILIARY_STYLE = `
     stroke-linejoin: round;
   }
 
+  #input {
+    width: 100% !important;
+    align-items: flex-end !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  #text-input-container {
+    width: min(100%, 768px) !important;
+    min-height: 58px !important;
+    max-height: 150px !important;
+    margin: 0 auto !important;
+    border: 1px solid #dedede !important;
+    border-radius: 29px !important;
+    background: #ffffff !important;
+    box-shadow: 0 16px 38px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.06) !important;
+    overflow-y: auto !important;
+  }
+
+  #text-input {
+    min-height: 24px !important;
+    padding: 18px 62px 16px 22px !important;
+    color: #111111 !important;
+    font-size: 15px !important;
+    line-height: 1.45 !important;
+  }
+
+  #text-input[contenteditable]:empty:before {
+    color: #9a9a9a !important;
+  }
+
+  #microphone-button,
+  #dropup-button,
+  #upload-images-button,
+  #upload-gifs-button,
+  #upload-audio-button,
+  #upload-mixed-files-button,
+  #camera-button,
+  #file-input,
+  #dropup-menu {
+    display: none !important;
+  }
+
+  .inside-end.submit-button,
+  .inside-end.disabled-button,
+  .inside-end.loading-button {
+    width: 36px !important;
+    height: 36px !important;
+    inset-inline-end: max(11px, calc((100% - 768px) / 2 + 11px)) !important;
+    inset-block-end: 11px !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 50% !important;
+    background: #050505 !important;
+    box-shadow: none !important;
+  }
+
+  .inside-end.submit-button:hover,
+  .inside-end.submit-button:focus-visible,
+  .inside-end.disabled-button:hover,
+  .inside-end.disabled-button:focus-visible {
+    background: #111111 !important;
+  }
+
+  .inside-end #submit-icon {
+    width: 17px !important;
+    height: 17px !important;
+    filter: brightness(0) invert(1) !important;
+  }
+
+  .inside-end #stop-icon {
+    background-color: #ffffff !important;
+    inset-inline-start: 13px !important;
+    inset-block-end: 13px !important;
+    width: 10px !important;
+    height: 10px !important;
+    border-radius: 2px !important;
+  }
+
   @media (max-width: 640px) {
     #messages {
-      padding-inline: 16px;
+      padding: 18px 16px;
     }
 
     .deep-chat-outer-container-role-user .inner-message-container {
       max-width: 88% !important;
+    }
+
+    #text-input-container {
+      width: 100% !important;
+      min-height: 56px !important;
+      border-radius: 28px !important;
+    }
+
+    #text-input {
+      padding: 17px 60px 15px 18px !important;
+      font-size: 14px !important;
+    }
+
+    .inside-end.submit-button,
+    .inside-end.disabled-button,
+    .inside-end.loading-button {
+      inset-inline-end: 10px !important;
+      inset-block-end: 10px !important;
     }
   }
 `;
@@ -331,27 +431,32 @@ function initDeepChat(container: HTMLElement): void {
   };
   Object.assign(chat.style, chat.chatStyle);
   chat.inputAreaStyle = {
-    backgroundColor: '#ffffff',
+    backgroundColor: 'transparent',
     borderTop: '0',
     padding: '0',
-    alignItems: 'stretch',
+    alignItems: 'flex-end',
   };
   chat.textInput = {
-    placeholder: { text: 'Send a message...' },
+    placeholder: {
+      text: '有问题，尽管问',
+      style: { color: '#9a9a9a' },
+    },
     styles: {
       container: {
         width: '100%',
         margin: '0',
-        borderRadius: '0',
-        border: '0',
+        borderRadius: '29px',
+        border: '1px solid #dedede',
         backgroundColor: '#ffffff',
-        boxShadow: 'none',
-        minHeight: '78px',
+        boxShadow: '0 16px 38px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.06)',
+        minHeight: '58px',
+        maxHeight: '150px',
       },
       text: {
         color: '#111111',
-        fontSize: '14px',
-        padding: '18px',
+        fontSize: '15px',
+        lineHeight: '1.45',
+        padding: '18px 62px 16px 22px',
       },
     },
   };
