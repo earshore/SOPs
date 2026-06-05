@@ -151,7 +151,7 @@ export const SecureStorage = {
 /**
  * 向后兼容: 暴露到 window
  */
-if (typeof window !== 'undefined') {
+if (typeof window !== 'undefined' && import.meta.env.DEV) {
   (window as Window & { SecureStorage?: typeof SecureStorage }).SecureStorage = SecureStorage;
 }
 

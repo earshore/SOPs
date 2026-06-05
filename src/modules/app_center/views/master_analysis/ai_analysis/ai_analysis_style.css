@@ -54,18 +54,18 @@
 }
 
 .animate-pulse-glow {
-  animation: pulse-glow var(--duration-var(--duration-var(--duration-2s))) var(--var(--var(--ease-in-out))) infinite;
+  animation: pulse-glow var(--duration-2s) var(--ease-in-out) infinite;
 }
 
 .animate-float {
-  animation: float 3s var(--var(--var(--ease-in-out))) infinite;
+  animation: float 3s var(--ease-in-out) infinite;
 }
 
 /* ========== Shimmer 效果 ========== */
 .shimmer {
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
   background-size: 200% 100%;
-  animation: shimmer var(--duration-var(--duration-var(--duration-2s))) infinite;
+  animation: shimmer var(--duration-2s) infinite;
 }
 
 /* ========== 文本截断 ========== */
@@ -116,7 +116,7 @@
 
 /* ========== 卡片悬停效果 ========== */
 .card-hover {
-  transition: all var(--duration-normal) var(--var(--var(--ease-in-out)));
+  transition: all var(--duration-normal) var(--ease-in-out);
 }
 
 .card-hover:hover {
@@ -179,7 +179,7 @@ pre code {
 
 /* ========== 平滑过渡 ========== */
 .transition-smooth {
-  transition: all var(--duration-normal) var(--var(--var(--ease-in-out)));
+  transition: all var(--duration-normal) var(--ease-in-out);
 }
 
 /* ========== 自定义滚动条 ========== */

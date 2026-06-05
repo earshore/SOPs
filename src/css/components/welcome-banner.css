@@ -1240,3 +1240,158 @@
     align-items: flex-start;
   }
 }
+
+/* PC 自用版：压缩所有欢迎区高度，降低长期使用时的视觉占用 */
+@media (min-width: 769px) {
+  .wb-container,
+  .wb-container:not(:has(.wb-card)) {
+    margin-bottom: var(--spacing-lg, 1.5rem);
+    border-radius: var(--rounded-xl, 16px);
+  }
+
+  .wb-card {
+    border-radius: var(--rounded-xl, 16px);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+  }
+
+  .wb-card:hover {
+    transform: none;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+  }
+
+  .wb-card .wb-content {
+    padding: 1.25rem 1.5rem;
+  }
+
+  .wb-card .wb-header {
+    gap: var(--spacing-md, 1rem);
+  }
+
+  .wb-card .wb-icon-main {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--rounded-lg, 12px);
+    box-shadow: 0 3px 10px rgba(59, 130, 246, 0.16);
+  }
+
+  .wb-card .wb-icon-main i {
+    font-size: 20px;
+  }
+
+  .wb-card .wb-icon-badge {
+    width: 18px;
+    height: 18px;
+    border-width: 2px;
+  }
+
+  .wb-card .wb-icon-badge i {
+    font-size: 7px;
+  }
+
+  .wb-card .wb-title-row {
+    margin-bottom: 0.35rem;
+  }
+
+  .wb-card .wb-title {
+    font-size: 1.125rem;
+    letter-spacing: 0;
+  }
+
+  .wb-card .wb-description {
+    line-height: 1.45;
+  }
+
+  .wb-card .wb-tags {
+    gap: 0.375rem;
+    margin-top: 0.625rem;
+  }
+
+  .wb-card .wb-tag {
+    min-height: 0;
+    padding: 4px 10px;
+    backdrop-filter: none;
+  }
+
+  .wb-card .wb-tag span {
+    font-size: 0.6875rem;
+  }
+
+  .wb-card .wb-orb {
+    filter: blur(28px);
+    opacity: 0.22;
+    animation: none;
+  }
+
+  .wb-card .wb-particle {
+    display: none;
+  }
+
+  .wb-card .wb-icon-wrapper:hover .wb-icon-main,
+  .wb-card .wb-tag:hover {
+    transform: none;
+  }
+
+  .wb-container:not(:has(.wb-card)) {
+    padding: var(--spacing-md, 1rem) var(--spacing-lg, 1.5rem);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+  }
+
+  .wb-container:not(:has(.wb-card)) .wb-content {
+    column-gap: var(--spacing-md, 1rem);
+    padding: var(--spacing-md, 1rem) var(--spacing-lg, 1.5rem);
+  }
+
+  .wb-container:not(:has(.wb-card)) .wb-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--rounded-lg, 12px);
+    box-shadow: 0 3px 10px rgba(59, 130, 246, 0.16);
+  }
+
+  .wb-container:not(:has(.wb-card)) .wb-icon i {
+    font-size: 20px;
+  }
+
+  .wb-container:not(:has(.wb-card)) .wb-title-row {
+    margin-bottom: 0.35rem;
+  }
+
+  .wb-container:not(:has(.wb-card)) .wb-title {
+    font-size: 1.125rem;
+    letter-spacing: 0;
+  }
+
+  .wb-container:not(:has(.wb-card)) .wb-description {
+    margin-bottom: 0.625rem;
+    line-height: 1.45;
+  }
+
+  .wb-container:not(:has(.wb-card)) .wb-tags {
+    gap: 0.375rem;
+    margin-top: 0;
+  }
+
+  .wb-container:not(:has(.wb-card)) .wb-tag,
+  .wb-container:not(:has(.wb-card)) .wb-meta span {
+    min-height: 0;
+    padding: 4px 10px;
+    backdrop-filter: none;
+  }
+
+  .wb-container:not(:has(.wb-card)) .wb-orb {
+    filter: blur(28px);
+    opacity: 0.22;
+    animation: none;
+  }
+
+  .wb-container:not(:has(.wb-card)) .wb-particle {
+    display: none;
+  }
+
+  .wb-container:not(:has(.wb-card)):hover,
+  .wb-container:not(:has(.wb-card)):hover .wb-icon,
+  .wb-container:not(:has(.wb-card)) .wb-tag:hover,
+  .wb-container:not(:has(.wb-card)) .wb-meta span:hover {
+    transform: none;
+  }
+}

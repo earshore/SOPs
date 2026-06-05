@@ -12,14 +12,12 @@ const __dirname = dirname(__filename);
 export default defineConfig({
     publicDir: 'public',
     plugins: [
-        // 临时禁用 TypeScript 检查以允许构建成功
-        // TODO: 修复 TypeScript 类型错误后重新启用
-        // checker({
-        //     typescript: {
-        //         tsconfigPath: 'tsconfig.json',
-        //         buildMode: false // 只在构建时检查,开发时跳过
-        //     }
-        // }),
+        checker({
+            typescript: {
+                tsconfigPath: 'tsconfig.app.json',
+                buildMode: false
+            }
+        }),
         // Gzip 压缩
         viteCompression({
             verbose: true,
@@ -190,10 +188,10 @@ export default defineConfig({
                 dead_code: true,
                 evaluate: true,
                 inline: 3,
-                unsafe: true,
-                unsafe_comps: true,
-                unsafe_math: true,
-                unsafe_proto: true
+                unsafe: false,
+                unsafe_comps: false,
+                unsafe_math: false,
+                unsafe_proto: false
             },
             mangle: {
                 safari10: true,

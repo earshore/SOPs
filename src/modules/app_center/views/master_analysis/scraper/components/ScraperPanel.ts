@@ -40,6 +40,7 @@ export function createScraperPanel() {
 
         // UI State
         configExpanded: false,
+        refineGuideOpen: false,
         tasks: [] as Task[],
 
         // 数据预览组件
@@ -155,6 +156,10 @@ export function createScraperPanel() {
 
         get configChevronClass(): string {
             return this.configExpanded ? 'rotate-180' : '';
+        },
+
+        get refineGuideChevronClass(): string {
+            return this.refineGuideOpen ? 'rotate-180' : '';
         },
 
         get scrapeReviewsToggleClass(): string {
@@ -480,6 +485,15 @@ export function createScraperPanel() {
         selectSite(site: ScraperSite) {
             this.selectedSite = site;
             this.saveState();
+        },
+
+        setInputAsins(event: Event) {
+            this.inputAsins = (event.target as HTMLTextAreaElement).value;
+            this.saveState();
+        },
+
+        toggleRefineGuide() {
+            this.refineGuideOpen = !this.refineGuideOpen;
         },
 
         clearAsins() {

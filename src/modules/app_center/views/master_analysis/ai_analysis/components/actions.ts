@@ -17,6 +17,9 @@ import { appStore } from '@/stores/useAppStore';
 import type { FullAnalysisReport } from '../config/analysisReportData';
 import { BusinessError } from '@common/errors/AppError';
 import { Logger } from '../../../../../../services/loggerService';
+import { getPerformanceSettings } from './PerformanceSettings';
+import eventBus from '@common/EventBus';
+import { APP_EVENTS } from '@common/constants/eventConstants';
 /**
  * 切换 ASIN 选择
  */
@@ -268,7 +271,6 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
 
       const mergedProduct = mergeProducts(products);
       const language = getMarketLanguage();
-      const { getPerformanceSettings } = await import('./PerformanceSettings');
       const perfSettings = getPerformanceSettings();
 
       analysisReport = await runParallelAIAnalysis(
@@ -324,8 +326,6 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
 
       if (success) {
         Logger.debug('[用户动作] 已自动标记历史快照为"已分析"');
-        const eventBus = (await import('@common/EventBus')).default;
-        const { APP_EVENTS } = await import('@common/constants/eventConstants');
         eventBus.emit(APP_EVENTS.HISTORY_UPDATED);
       }
     }

@@ -9,7 +9,6 @@ import { formatHistoryDate } from '../services/reportGenerator';
 import { parseAnalysisReport } from '../services/analysisService';
 import { getTargetColorClass, getPromptText, getResultIcon, getResultColor } from './helpers';
 import { getPromptTokenCount, getFormattedTokenCount } from './helpers';
-import { highlightJson } from '../services/reportGenerator';
 import * as actions from './actions';
 import { AlpineContext, FullReportData } from '../types';
 import { createComputedProperties, ComputedProperties } from './computedProperties';
@@ -581,9 +580,9 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
       return JSON.stringify(ctx.reportFullData).length.toLocaleString();
     },
 
-    getHighlightedReportJson(): string {
+    getReportJsonText(): string {
       const ctx = this as unknown as AlpineContext & ComputedProperties;
-      return this.highlightJson(JSON.stringify(ctx.reportFullData, null, 2));
+      return JSON.stringify(ctx.reportFullData, null, 2);
     },
 
     isPromptExpanded(index: number): boolean {
@@ -710,10 +709,6 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
     getFormattedTokenCount(targetId: string): string {
       const ctx = this as unknown as AlpineContext & ComputedProperties;
       return getFormattedTokenCount(targetId, ctx.currentProducts);
-    },
-
-    highlightJson(json: string): string {
-      return highlightJson(json);
     },
 
     // ========== 置信度相关 ==========

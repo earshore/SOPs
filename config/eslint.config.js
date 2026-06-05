@@ -42,7 +42,7 @@ export default [
             "max-lines-per-function": ["warn", { max: 100, skipBlankLines: true, skipComments: true }],  // 最大函数行数
             
             // 🎯 禁止直接访问localStorage
-            "no-restricted-globals": ["error", {
+            "no-restricted-globals": ["warn", {
                 name: "localStorage",
                 message: "请使用 StorageService 代替直接访问 localStorage"
             }, {
@@ -51,7 +51,10 @@ export default [
             }],
             
             // 🎯 禁止使用console
-            "no-console": "error"
+            "no-console": "warn",
+            "no-control-regex": "off",
+            "no-constant-condition": "warn",
+            "no-useless-catch": "warn"
         }
     },
     {

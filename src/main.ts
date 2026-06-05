@@ -10,9 +10,7 @@ import { marked } from 'marked';
 
 // 🎯 性能优化: 只加载首屏关键CSS，其他CSS延迟加载
 import './css/critical.css';
-// 🎯 阶段3优化: 导入主CSS文件(包含所有组件)
-import './css/main.css';
-// 非关键CSS将在DOMContentLoaded后异步加载
+// 非关键CSS在 DOMContentLoaded 后异步加载
 // 模块特定样式改为按需懒加载,不在启动时导入
 
 // 🎯 CSS性能监控（仅开发环境）
@@ -63,7 +61,6 @@ import { AlpineRegistry } from './common/infrastructure/AlpineRegistry';
 import { triggerInitialNavigation } from './common/router/initRouter';
 import { initEventLogger } from './common/utils/eventLogger';
 import { loadPlugins } from './common/utils/pluginLoader';
-import { performanceService } from './services/performanceService';
 
 // ✅ 全局错误兜底已由GlobalErrorHandler统一处理
 // 见 src/common/errors/GlobalErrorHandler.ts
@@ -102,12 +99,10 @@ import Alpine from '@alpinejs/csp';
 (window as any)['Alpine'] = Alpine;
 (window as any).Alpine = Alpine;
 
-// 🔧 暴露 Zustand Store 到 window (用于调试和测试)
-(window as any)['useAppStore'] = appStore;
-(window as any)['appStore'] = appStore;
-
-// 开发环境额外日志
 if (import.meta.env.DEV) {
+  // 🔧 暴露 Zustand Store 到 window (仅用于开发调试和测试)
+  (window as any)['useAppStore'] = appStore;
+  (window as any)['appStore'] = appStore;
   Logger.debug('[Alpine] ✅ Alpine.js loaded and exposed to window');
   Logger.debug('[Store] ✅ Zustand store exposed to window');
 }
@@ -118,6 +113,13 @@ if (import.meta.env.DEV) {
 
 document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
   Logger.debug("🚀 System: Application Booting...");
+
+  try {
+    await import('./css/main.css');
+    Logger.debug("✅ Main styles loaded");
+  } catch (e) {
+    Logger.warn('主样式加载失败:', e);
+  }
 
   // ================================================================
   // 🎯 DI容器整合: 使用ServiceRegistry统一管理服务
@@ -148,29 +150,29 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     // 初始化成功，继续启动流程
     // ================================================================
 
-    // 🔧 暴露核心服务到 window (用于测试和调试)
-    try {
-      // 服务已经在 bootstrap.initialize() 中初始化并缓存
-      // 🔧 修复: resolve返回Promise时需要await获取实际实例
-      const eventBusResult = container.resolve('eventBus');
-      const actionRegistryResult = container.resolve('actionRegistry');
-      const routerResult = container.resolve('router');
+    if (import.meta.env.DEV) {
+      // 🔧 暴露核心服务到 window (仅用于测试和调试)
+      try {
+        // 服务已经在 bootstrap.initialize() 中初始化并缓存
+        // 🔧 修复: resolve返回Promise时需要await获取实际实例
+        const eventBusResult = container.resolve('eventBus');
+        const actionRegistryResult = container.resolve('actionRegistry');
+        const routerResult = container.resolve('router');
 
-      // await所有可能的Promise
-      const eventBus = eventBusResult instanceof Promise ? await eventBusResult : eventBusResult;
-      const actionRegistry = actionRegistryResult instanceof Promise ? await actionRegistryResult : actionRegistryResult;
-      const router = routerResult instanceof Promise ? await routerResult : routerResult;
+        // await所有可能的Promise
+        const eventBus = eventBusResult instanceof Promise ? await eventBusResult : eventBusResult;
+        const actionRegistry = actionRegistryResult instanceof Promise ? await actionRegistryResult : actionRegistryResult;
+        const router = routerResult instanceof Promise ? await routerResult : routerResult;
 
-      (window as any)['eventBus'] = eventBus;
-      (window as any)['EventBus'] = eventBus;
-      (window as any)['actionRegistry'] = actionRegistry;
-      (window as any)['ActionRegistry'] = actionRegistry;
-      (window as any)['router'] = router;
-      (window as any)['Router'] = router;
-      (window as any)['loadingManager'] = loadingManager;
-      (window as any)['LoadingManager'] = loadingManager;
+        (window as any)['eventBus'] = eventBus;
+        (window as any)['EventBus'] = eventBus;
+        (window as any)['actionRegistry'] = actionRegistry;
+        (window as any)['ActionRegistry'] = actionRegistry;
+        (window as any)['router'] = router;
+        (window as any)['Router'] = router;
+        (window as any)['loadingManager'] = loadingManager;
+        (window as any)['LoadingManager'] = loadingManager;
 
-      if (import.meta.env.DEV) {
         Logger.debug('[Services] ✅ Core services exposed to window');
         Logger.debug('[Services] EventBus:', typeof eventBus);
         Logger.debug('[Services] ActionRegistry:', typeof actionRegistry);
@@ -181,10 +183,9 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
           forward: typeof router?.forward,
           getCurrentRoute: typeof router?.getCurrentRoute
         });
+      } catch (e) {
+        Logger.error('[Services] ❌ Failed to expose some services to window:', e);
       }
-    } catch (e) {
-      Logger.error('[Services] ❌ Failed to expose some services to window:', e);
-      // 即使暴露失败,也继续启动流程
     }
 
     // ✅ 关键修复: 确保 Alpine 组件注册和启动的正确顺序
@@ -401,6 +402,7 @@ registerActionsWithLegacy({
   // 🎯 阶段1: 性能监控
   showPerformanceReport: async () => {
     try {
+      const { performanceService } = await import('./services/performanceService');
       const report = performanceService.getReport();
 
       Logger.debug('📊 性能报告:', report);
