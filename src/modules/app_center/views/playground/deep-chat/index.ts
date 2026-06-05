@@ -7,6 +7,7 @@ import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
 import { showToast } from '@/common/ui/notifications';
 import { callLLM, type ChatMessage } from '@/services/llmService';
 import { StorageService } from '@/services/storageService';
+import { LocalDataStore } from '@/services/localDataStore';
 import type { LLMProviderConfig } from '@/types/state';
 import { Logger } from '@/services/loggerService';
 import {
@@ -403,7 +404,7 @@ const mountInternal = async (container: HTMLElement): Promise<void> => {
 
   container.classList.add('fade-in');
   renderer.renderTemplate(container, html);
-  threadStore = loadThreadStore();
+  threadStore = await loadThreadStore();
   renderThreadList(container);
 
   await customElements.whenDefined('deep-chat');
@@ -1088,8 +1089,13 @@ function saveThreadMessages(
   renderThreadList(container);
 }
 
-function loadThreadStore(): PlaygroundThreadStore {
-  const stored = StorageService.get<PlaygroundThreadStore>(THREAD_STORAGE_KEY, null);
+async function loadThreadStore(): Promise<PlaygroundThreadStore> {
+  const indexedKey = `user:${THREAD_STORAGE_KEY}`;
+  const stored = await LocalDataStore.migrateLocalStorageKey<PlaygroundThreadStore>(
+    THREAD_STORAGE_KEY,
+    indexedKey,
+    'user-data'
+  ) || await LocalDataStore.get<PlaygroundThreadStore>(indexedKey, null);
   if (!isValidThreadStore(stored)) {
     return createDefaultThreadStore();
   }
@@ -1112,7 +1118,11 @@ function loadThreadStore(): PlaygroundThreadStore {
 }
 
 function persistThreadStore(): void {
-  StorageService.set(THREAD_STORAGE_KEY, threadStore);
+  void LocalDataStore.set(`user:${THREAD_STORAGE_KEY}`, threadStore, 'user-data').then((saved) => {
+    if (!saved) {
+      showToast('Deep Chat 会话保存失败：空间不足，请导出备份后清理缓存', { type: 'error' });
+    }
+  });
 }
 
 function createDefaultThreadStore(): PlaygroundThreadStore {

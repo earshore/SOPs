@@ -291,7 +291,66 @@
                 <div class="flex-1 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
             </div>
 
-            <!-- Section 3: Performance Monitor -->
+            <!-- Section 3: Local Data Management -->
+            <section class="space-y-4">
+                <div class="flex items-center gap-2.5 mb-1">
+                    <div class="w-6 h-6 rounded-lg bg-blue-100 flex items-center justify-center">
+                        <i class="fas fa-database text-blue-500 text-[10px]"></i>
+                    </div>
+                    <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-widest">本地数据管理</h3>
+                </div>
+
+                <div class="p-4 bg-gradient-to-br from-blue-50 to-slate-50/60 border border-blue-100/70 rounded-2xl shadow-sm space-y-3">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="p-3 bg-white/80 rounded-xl border border-white shadow-sm">
+                            <span class="block text-[10px] text-slate-400 uppercase tracking-wider font-medium">localStorage</span>
+                            <span class="block text-sm font-bold text-slate-700 mt-1"
+                                x-text="localData.usage ? formatBytes(localData.usage.localStorage.used) : '计算中'"></span>
+                            <span class="block text-[10px] text-slate-400 mt-0.5"
+                                x-text="localData.usage ? localData.usage.localStorage.keys + ' keys' : ''"></span>
+                        </div>
+                        <div class="p-3 bg-white/80 rounded-xl border border-white shadow-sm">
+                            <span class="block text-[10px] text-slate-400 uppercase tracking-wider font-medium">IndexedDB</span>
+                            <span class="block text-sm font-bold text-slate-700 mt-1"
+                                x-text="localData.usage ? formatBytes(localData.usage.indexedDB.used) : '计算中'"></span>
+                            <span class="block text-[10px] text-slate-400 mt-0.5"
+                                x-text="localData.usage ? localData.usage.indexedDB.keys + ' records' : ''"></span>
+                        </div>
+                    </div>
+
+                    <p class="text-[11px] text-slate-500 leading-[1.7]">
+                        配置和密钥保存在 localStorage；采集历史、聊天记录和大体积缓存保存在 IndexedDB。清理缓存不会删除配置、密钥、历史或聊天。
+                    </p>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <button @click="exportLocalData()" :disabled="localData.isBusy"
+                            class="py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium rounded-xl transition-all duration-200 text-xs flex items-center justify-center gap-2 disabled:opacity-50">
+                            <i class="fas fa-file-export text-blue-500"></i> 导出全部
+                        </button>
+                        <button @click="importLocalData()" :disabled="localData.isBusy"
+                            class="py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium rounded-xl transition-all duration-200 text-xs flex items-center justify-center gap-2 disabled:opacity-50">
+                            <i class="fas fa-file-import text-emerald-500"></i> 导入恢复
+                        </button>
+                        <button @click="clearLocalCache()" :disabled="localData.isBusy"
+                            class="py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium rounded-xl transition-all duration-200 text-xs flex items-center justify-center gap-2 disabled:opacity-50">
+                            <i class="fas fa-broom text-amber-500"></i> 清理缓存
+                        </button>
+                        <button @click="clearAllLocalData()" :disabled="localData.isBusy"
+                            class="py-2.5 bg-red-50 border border-red-100 hover:bg-red-100 text-red-700 font-medium rounded-xl transition-all duration-200 text-xs flex items-center justify-center gap-2 disabled:opacity-50">
+                            <i class="fas fa-trash-alt"></i> 清空全部
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Decorative Divider -->
+            <div class="flex items-center gap-3 py-1">
+                <div class="flex-1 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
+                <div class="w-1.5 h-1.5 rounded-full bg-slate-200"></div>
+                <div class="flex-1 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
+            </div>
+
+            <!-- Section 4: Performance Monitor -->
             <section class="space-y-4">
                 <div class="flex items-center gap-2.5 mb-1">
                     <div class="w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center">

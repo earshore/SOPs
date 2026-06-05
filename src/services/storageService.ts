@@ -16,6 +16,7 @@ import {
   isLLMProviderConfig,
   isProxyConfig
 } from '../common/guards/typeGuards';
+import { LocalDataStore } from './localDataStore';
 
 /**
  * 存储键名常量
@@ -42,6 +43,21 @@ export const STORAGE_KEYS = {
   // === 搜索历史 ===
   AMZ_SEARCH_HISTORY: 'amzf_search_history',
 } as const;
+
+export const CACHE_PREFIXES = {
+  VIEW: 'cache:view:',
+  HTTP: 'cache:http:',
+  AI_ANALYSIS: 'cache:ai-analysis:',
+} as const;
+
+const CACHE_KEY_PREFIXES = [
+  CACHE_PREFIXES.VIEW,
+  CACHE_PREFIXES.HTTP,
+  CACHE_PREFIXES.AI_ANALYSIS,
+  'view_cache_',
+  'http-cache:',
+  'ai_analysis_',
+];
 
 /**
  * LRU缓存配置
@@ -392,7 +408,7 @@ class StorageServiceClass implements IStorageService {
       let removedCount = 0;
 
       for (const item of items) {
-        if (this._isProtectedKey(item.key)) {
+        if (this._isProtectedKey(item.key) || !this._isCacheKey(item.key)) {
           continue;
         }
 
@@ -424,9 +440,23 @@ class StorageServiceClass implements IStorageService {
       'proxy_',
       'feature_',
       'layout_config_',
+      'user:',
     ];
 
-    return protectedPrefixes.some(prefix => key.startsWith(prefix));
+    const protectedKeys = [
+      'app-storage',
+      STORAGE_KEYS.SCRAPE_HISTORY,
+      'playground_deep_chat_threads_v1',
+    ];
+
+    return protectedKeys.includes(key) || protectedPrefixes.some(prefix => key.startsWith(prefix));
+  }
+
+  /**
+   * 判断是否为可自动清理的缓存键
+   */
+  private _isCacheKey(key: string): boolean {
+    return CACHE_KEY_PREFIXES.some(prefix => key.startsWith(prefix));
   }
 
   /**
@@ -565,10 +595,43 @@ class StorageServiceClass implements IStorageService {
   /**
    * 保存采集历史
    */
-  setScrapeHistory(history: HistoryItem[]): void {
+  setScrapeHistory(history: HistoryItem[]): boolean {
     const maxItems = 50;
     const trimmed = history.slice(0, maxItems);
-    this.set(STORAGE_KEYS.SCRAPE_HISTORY, trimmed);
+    return this.set(STORAGE_KEYS.SCRAPE_HISTORY, trimmed);
+  }
+
+  /**
+   * 获取采集历史（IndexedDB，大对象层）
+   * 兼容迁移旧 localStorage 数据，迁移后会保留旧键作为安全备份。
+   */
+  async getScrapeHistoryAsync(): Promise<HistoryItem[]> {
+    const indexedKey = `user:${STORAGE_KEYS.SCRAPE_HISTORY}`;
+    const migrated = await LocalDataStore.migrateLocalStorageKey<HistoryItem[]>(
+      STORAGE_KEYS.SCRAPE_HISTORY,
+      indexedKey,
+      'user-data'
+    );
+
+    if (migrated) {
+      return migrated;
+    }
+
+    return (await LocalDataStore.get<HistoryItem[]>(indexedKey, [])) || [];
+  }
+
+  /**
+   * 保存采集历史（IndexedDB，大对象层）
+   */
+  async setScrapeHistoryAsync(history: HistoryItem[]): Promise<boolean> {
+    const maxItems = 50;
+    const trimmed = history.slice(0, maxItems);
+    return await LocalDataStore.set(`user:${STORAGE_KEYS.SCRAPE_HISTORY}`, trimmed, 'user-data');
+  }
+
+  async removeScrapeHistoryAsync(): Promise<void> {
+    await LocalDataStore.remove(`user:${STORAGE_KEYS.SCRAPE_HISTORY}`);
+    this.remove(STORAGE_KEYS.SCRAPE_HISTORY);
   }
 
   /**

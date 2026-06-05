@@ -8,6 +8,7 @@ import { PROVIDERS, type ProviderConfig } from '../../common/constants/constants
 import { fetchModelsFromApi, callLLM } from '../../services/llmService';
 import { showToast } from '../../common/ui';
 import { StorageService, STORAGE_KEYS } from '../../services/storageService';
+import { LocalDataStore, type LocalDataUsage } from '../../services/localDataStore';
 import { ErrorService } from '../../services/errorService';
 import { EnvConfig } from '../../common/config/envConfig';
 import { configCenter } from '../../common/config/ConfigCenter';
@@ -45,6 +46,10 @@ interface SettingsPanelData {
     currentProviderConfig: ProviderConfig | Record<string, never>;
     activeModelInfo: { id: string; name?: string } | null;
     isProduction: boolean;
+    localData: {
+        usage: LocalDataUsage | null;
+        isBusy: boolean;
+    };
     proxyNeedsInput: boolean;
     proxyInputLabel: string;
     proxyInputPlaceholder: string;
@@ -60,6 +65,12 @@ interface SettingsPanelData {
     saveProviderConfig(): Promise<void>;
     loadProxyConfig(): void;
     saveProxyConfig(): void;
+    refreshLocalDataUsage(): Promise<void>;
+    exportLocalData(): Promise<void>;
+    importLocalData(): Promise<void>;
+    clearLocalCache(): Promise<void>;
+    clearAllLocalData(): Promise<void>;
+    formatBytes(bytes: number): string;
     getProxyDisplayName(type: string): string;
     isDangerousEndpoint(endpoint: string): boolean;
 }
@@ -92,6 +103,11 @@ const SettingsPanel = (): SettingsPanelData => ({
         customUrl: '',
         showKey: false,
         savedKeyMap: {}
+    },
+
+    localData: {
+        usage: null,
+        isBusy: false
     },
 
     // Computed / Helpers
@@ -143,6 +159,7 @@ const SettingsPanel = (): SettingsPanelData => ({
     init() {
         this.loadProxyConfig();
         this.loadProviderConfig(this.llm.provider);
+        void this.refreshLocalDataUsage();
 
         // 订阅 EventBus 事件，保存清理函数
         const unsubOpen = eventBus.on(APP_EVENTS.SETTINGS_OPEN, () => {
@@ -170,6 +187,7 @@ const SettingsPanel = (): SettingsPanelData => ({
         this.isOpen = true;
         this.loadProviderConfig(this.llm.provider);
         this.loadProxyConfig();
+        void this.refreshLocalDataUsage();
     },
 
     close() {
@@ -438,6 +456,96 @@ const SettingsPanel = (): SettingsPanelData => ({
         StorageService.set(STORAGE_KEYS.SCRAPER_PROXY_CONFIG, config);
 
         showToast('网络配置已更新', { type: 'success' });
+    },
+
+    async refreshLocalDataUsage(): Promise<void> {
+        try {
+            this.localData.usage = await LocalDataStore.getUsage();
+        } catch (error) {
+            Logger.warn('[Settings] Failed to load local data usage:', error);
+        }
+    },
+
+    async exportLocalData(): Promise<void> {
+        try {
+            this.localData.isBusy = true;
+            const data = await LocalDataStore.exportAll();
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `sops-local-data-${new Date().toISOString().slice(0, 10)}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            showToast('本地数据已导出', { type: 'success' });
+        } catch (error) {
+            ErrorService.handle(error as Error, { action: 'exportLocalData', module: 'settings' });
+        } finally {
+            this.localData.isBusy = false;
+        }
+    },
+
+    async importLocalData(): Promise<void> {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'application/json,.json';
+        input.onchange = async () => {
+            const file = input.files?.[0];
+            if (!file) return;
+
+            try {
+                this.localData.isBusy = true;
+                const text = await file.text();
+                await LocalDataStore.importAll(JSON.parse(text));
+                await this.refreshLocalDataUsage();
+                showToast('本地数据已导入，请刷新页面确认恢复结果', { type: 'success' });
+            } catch (error) {
+                ErrorService.handle(error as Error, { action: 'importLocalData', module: 'settings' });
+            } finally {
+                this.localData.isBusy = false;
+            }
+        };
+        input.click();
+    },
+
+    async clearLocalCache(): Promise<void> {
+        try {
+            this.localData.isBusy = true;
+            const removed = await LocalDataStore.clearCache();
+            await this.refreshLocalDataUsage();
+            showToast(`缓存已清理 (${removed} 项)，配置和用户数据已保留`, { type: 'success' });
+        } catch (error) {
+            ErrorService.handle(error as Error, { action: 'clearLocalCache', module: 'settings' });
+        } finally {
+            this.localData.isBusy = false;
+        }
+    },
+
+    async clearAllLocalData(): Promise<void> {
+        const confirmed = window.confirm('这会删除本浏览器中的配置、密钥、采集历史、聊天记录和缓存。请先导出备份。继续？');
+        if (!confirmed) return;
+        const confirmedAgain = window.confirm('二次确认：清空后无法恢复，除非你已有导出的备份文件。确定清空全部本地数据？');
+        if (!confirmedAgain) return;
+
+        try {
+            this.localData.isBusy = true;
+            await LocalDataStore.clearAll();
+            this.localData.usage = await LocalDataStore.getUsage();
+            showToast('全部本地数据已清空，请刷新页面重新初始化', { type: 'success' });
+        } catch (error) {
+            ErrorService.handle(error as Error, { action: 'clearAllLocalData', module: 'settings' });
+        } finally {
+            this.localData.isBusy = false;
+        }
+    },
+
+    formatBytes(bytes: number): string {
+        if (!Number.isFinite(bytes) || bytes <= 0) return '0 B';
+        const units = ['B', 'KB', 'MB', 'GB'];
+        const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+        return `${(bytes / Math.pow(1024, index)).toFixed(index === 0 ? 0 : 1)} ${units[index]}`;
     },
 
     getProxyDisplayName(type: string): string {

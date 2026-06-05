@@ -6,12 +6,13 @@
 // ================================================================
 
 import { APP_VERSION } from '../constants/constants';
-import { StorageService } from '../../services/storageService';
+import { StorageService, CACHE_PREFIXES } from '../../services/storageService';
 import { getViewPathByRoute } from '../config/menuConfig';
 import { SystemError } from '@/common/errors/AppError';
 
 import { Logger } from '../../services/loggerService';
-const CACHE_PREFIX = 'view_cache_';
+const CACHE_PREFIX = CACHE_PREFIXES.VIEW;
+const LEGACY_CACHE_PREFIX = 'view_cache_';
 
 /**
  * 视图配置接口
@@ -119,7 +120,7 @@ export function clearOldCache(): void {
 
         // 只清除旧版本的缓存，保留当前版本
         for (const key of allKeys) {
-            if (key.startsWith(CACHE_PREFIX) && !key.startsWith(currentVersionPrefix)) {
+            if ((key.startsWith(CACHE_PREFIX) && !key.startsWith(currentVersionPrefix)) || key.startsWith(LEGACY_CACHE_PREFIX)) {
                 keysToRemove.push(key);
             }
         }
@@ -148,7 +149,7 @@ export function getCacheStats(): CacheStats {
         const allKeys = StorageService.keys();
 
         for (const key of allKeys) {
-            if (key.startsWith(CACHE_PREFIX)) {
+            if (key.startsWith(CACHE_PREFIX) || key.startsWith(LEGACY_CACHE_PREFIX)) {
                 const value = StorageService.getRaw(key, null);
                 const itemSize = value ? value.length * 2 : 0; // UTF-16编码，每字符2字节
 

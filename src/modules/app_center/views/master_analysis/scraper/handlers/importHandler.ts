@@ -429,7 +429,7 @@ export async function handleImportFiles(
             products: finalProducts
         };
 
-        HistoryService.save(scrapedData);
+        await HistoryService.saveAsync(scrapedData);
 
         // 触发事件通知其他模块更新
         eventBus.emit(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, scrapedData);

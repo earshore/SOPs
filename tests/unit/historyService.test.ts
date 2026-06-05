@@ -18,6 +18,7 @@ const mocks = vi.hoisted(() => {
 
   mockStore.setScrapeHistory.mockImplementation((history: HistoryItem[]) => {
     mockStore.history = history;
+    return true;
   });
   mockStore.state.setCurrentHistoryId.mockImplementation((id: HistoryItem['id']) => {
     mockStore.state.scraper.currentHistoryId = id;
@@ -32,7 +33,15 @@ vi.mock('@/services/storageService', () => ({
   },
   StorageService: {
     getScrapeHistory: vi.fn(() => mocks.history),
+    getScrapeHistoryAsync: vi.fn(async () => mocks.history),
     setScrapeHistory: mocks.setScrapeHistory,
+    setScrapeHistoryAsync: vi.fn(async (history: HistoryItem[]) => {
+      mocks.history = history;
+      return true;
+    }),
+    removeScrapeHistoryAsync: vi.fn(async () => {
+      mocks.history = [];
+    }),
     remove: mocks.remove
   }
 }));
@@ -86,6 +95,7 @@ describe('HistoryService snapshot storage', () => {
     mocks.history = [];
     mocks.state.scraper.currentHistoryId = null;
     mocks.state.scraper.selectedSite = 'US';
+    HistoryService.clear();
   });
 
   it('creates a new snapshot when scrape timestamp changes', () => {

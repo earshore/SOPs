@@ -312,7 +312,7 @@ export async function scrapeAsin(
 
     // 缓存检查
     try {
-        const cachedItem = HistoryService.getByAsin(asin, site);
+        const cachedItem = await HistoryService.getByAsinAsync(asin, site);
         if (cachedItem && cachedItem.product) {
             const now = Date.now();
             const cachedTime = new Date(cachedItem.timestamp).getTime();

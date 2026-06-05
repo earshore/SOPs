@@ -2,8 +2,10 @@
  * 并行分析服务测试
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { generateCacheKey, getCachedResult, setCachedResult } from '../parallelAnalysisService';
+import { LocalDataStore } from '@/services/localDataStore';
+import type { Product } from '../../config/sampleData';
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -28,16 +30,24 @@ Object.defineProperty(global, 'localStorage', {
 });
 
 describe('parallelAnalysisService', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     localStorageMock.clear();
+    await LocalDataStore.clearAll();
   });
 
   describe('缓存功能', () => {
     it('应该能够生成唯一的缓存键', () => {
-      const product = {
+      const product: Product = {
         asin: 'B0DNMZ2MLG',
         productTitle: 'Test Product Title',
-        customer_reviews: [{ body: 'test' }],
+        customer_reviews: [{
+          body: 'test',
+          headline: 'test',
+          origin_country: 'US',
+          review_date: '2026-01-01',
+          star_rating: 5,
+          _origin_site: 'US'
+        }],
         feature_bullets: [],
         scrape_status: 'success',
         metadata: {}

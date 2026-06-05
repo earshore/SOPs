@@ -29,6 +29,11 @@ export class HistoryPanel {
         this.history = HistoryService.getAll();
     }
 
+    async loadHistoryAsync(): Promise<HistoryItem[]> {
+        this.history = await HistoryService.getAllAsync();
+        return this.history;
+    }
+
     /**
      * 获取历史记录列表
      */
@@ -39,22 +44,26 @@ export class HistoryPanel {
     /**
      * 删除历史记录项
      */
-    deleteHistoryItem(id: HistoryItem['id']): void {
+    async deleteHistoryItem(id: HistoryItem['id']): Promise<void> {
         if (!confirm("确定要删除这条历史记录吗？")) return;
 
         const newHistory = this.history.filter(h => String(h.id) !== String(id));
-        StorageService.setScrapeHistory(newHistory);
-        this.loadHistory();
+        const saved = await StorageService.setScrapeHistoryAsync(newHistory);
+        if (!saved) {
+            showToast("保存失败：空间不足，请导出备份后清理缓存", { type: 'error' });
+            return;
+        }
+        await this.loadHistoryAsync();
         showToast("记录已删除", { type: 'success' });
     }
 
     /**
      * 清空所有历史记录
      */
-    clearAllHistory(): void {
+    async clearAllHistory(): Promise<void> {
         if (!confirm("确定清空所有历史记录？")) return;
-        HistoryService.clear();
-        this.loadHistory();
+        await HistoryService.clearAsync();
+        await this.loadHistoryAsync();
         showToast("历史已清空", { type: 'success' });
     }
 

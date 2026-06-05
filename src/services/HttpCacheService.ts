@@ -4,7 +4,7 @@
 // 提供智能的HTTP请求缓存管理
 // ================================================================
 
-import { StorageService } from './storageService';
+import { StorageService, CACHE_PREFIXES } from './storageService';
 import { Logger } from './loggerService';
 
 /**
@@ -194,10 +194,10 @@ class HttpCacheService {
       this.memoryCache.clear();
       
       try {
-        // 只清空http-cache前缀的项
+        // 只清空 HTTP cache 前缀的项
         const keys = this.getAllStorageKeys();
         for (const key of keys) {
-          if (key.startsWith('http-cache:')) {
+          if (key.startsWith(CACHE_PREFIXES.HTTP) || key.startsWith('http-cache:')) {
             StorageService.remove(key);
           }
         }
@@ -245,7 +245,7 @@ class HttpCacheService {
     try {
       const keys = this.getAllStorageKeys();
       for (const key of keys) {
-        if (key.startsWith('http-cache:')) {
+        if (key.startsWith(CACHE_PREFIXES.HTTP) || key.startsWith('http-cache:')) {
           const item = StorageService.getRaw(key);
           if (item) {
             try {
@@ -281,7 +281,7 @@ class HttpCacheService {
    * 构建缓存键
    */
   private buildKey(key: string, prefix?: string): string {
-    const parts = ['http-cache'];
+    const parts = [CACHE_PREFIXES.HTTP.replace(/:$/, '')];
     if (prefix) {
       parts.push(prefix);
     }

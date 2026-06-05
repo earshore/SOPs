@@ -160,7 +160,9 @@ describe('StorageService', () => {
         provider: 'openai',
         model: 'gpt-4',
         apiKey: 'test-key',
-        baseURL: 'https://api.openai.com'
+        endpoint: 'https://api.openai.com/v1',
+        models: ['gpt-4'],
+        enabled: true
       };
 
       StorageService.setLLMConfig(provider, config);
@@ -176,7 +178,10 @@ describe('StorageService', () => {
       const config = {
         provider: 'openai',
         model: 'gpt-4',
-        apiKey: 'test-key'
+        apiKey: 'test-key',
+        endpoint: 'https://api.openai.com/v1',
+        models: ['gpt-4'],
+        enabled: true
       };
 
       StorageService.setLLMConfig(provider, config);
@@ -197,7 +202,9 @@ describe('StorageService', () => {
         provider: 'openai',
         model: 'gpt-4',
         apiKey: 'secret-key',
-        baseURL: 'https://api.openai.com'
+        endpoint: 'https://api.openai.com/v1',
+        models: ['gpt-4'],
+        enabled: true
       };
 
       StorageService.setLLMConfig(provider, config);
@@ -311,6 +318,24 @@ describe('StorageService', () => {
       expect(usage).toHaveProperty('percent');
       expect(usage.used).toBeGreaterThan(0);
       expect(usage.total).toBe(5 * 1024 * 1024); // 5MB
+    });
+  });
+
+  describe('LRU清理策略', () => {
+    it('应该只自动清理缓存键，不删除用户数据和配置', () => {
+      StorageService.setRaw('cache:view:old', 'cached');
+      StorageService.set('user:scrape_history', [{ id: 1 }]);
+      StorageService.set('app-storage', { ui: { theme: 'dark' } });
+      StorageService.set('secure_llm_key_new_api', { encrypted: true });
+      StorageService.set(STORAGE_KEYS.SCRAPE_HISTORY, [{ id: 'legacy' }]);
+
+      (StorageService as any)._cleanupLRU();
+
+      expect(StorageService.getRaw('cache:view:old')).toBeNull();
+      expect(StorageService.get('user:scrape_history')).toEqual([{ id: 1 }]);
+      expect(StorageService.get('app-storage')).toEqual({ ui: { theme: 'dark' } });
+      expect(StorageService.get('secure_llm_key_new_api')).toEqual({ encrypted: true });
+      expect(StorageService.get(STORAGE_KEYS.SCRAPE_HISTORY)).toEqual([{ id: 'legacy' }]);
     });
   });
 

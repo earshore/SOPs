@@ -46,9 +46,13 @@ export function createScraperPanel() {
 
         // 历史记录组件
         historyPanel: null as HistoryPanel | null,
+        historyItems: [] as HistoryItem[],
+        historyLoading: false,
+        historyLoadError: '',
 
         // 渲染防抖标志
         _isRendering: false,
+        _historyLoadSeq: 0,
 
         // 清理函数数组
         _unsubscribers: [] as Array<() => void>,
@@ -125,7 +129,7 @@ export function createScraperPanel() {
                 analysisReport?: unknown;
             };
         }> {
-            return this.historyPanel?.getHistory() || [];
+            return this.historyItems;
         },
 
         // ========== Lifecycle ==========
@@ -147,6 +151,7 @@ export function createScraperPanel() {
 
             // 初始化历史记录组件
             this.historyPanel = new HistoryPanel();
+            this.loadHistory();
 
             // 从 state 恢复状态
             this.restoreState();
@@ -284,16 +289,40 @@ export function createScraperPanel() {
             this.saveState();
         },
 
-        loadHistory() {
-            this.historyPanel?.loadHistory();
+        loadHistory(): void {
+            if (!this.historyPanel) return;
+
+            this.historyPanel.loadHistory();
+            this.historyItems = [...this.historyPanel.getHistory()];
+            this.historyLoading = true;
+            this.historyLoadError = '';
+            const loadSeq = ++this._historyLoadSeq;
+
+            void this.historyPanel.loadHistoryAsync()
+                .then((history) => {
+                    if (loadSeq !== this._historyLoadSeq) return;
+                    this.historyItems = [...history];
+                })
+                .catch((error) => {
+                    if (loadSeq !== this._historyLoadSeq) return;
+                    Logger.error('[Scraper] 加载历史记录失败:', error);
+                    this.historyLoadError = '历史记录加载失败';
+                    this.historyItems = [...(this.historyPanel?.getHistory() || [])];
+                })
+                .finally(() => {
+                    if (loadSeq !== this._historyLoadSeq) return;
+                    this.historyLoading = false;
+                });
         },
 
-        deleteHistoryItem(id: string) {
-            this.historyPanel?.deleteHistoryItem(id);
+        async deleteHistoryItem(id: string) {
+            await this.historyPanel?.deleteHistoryItem(id);
+            this.loadHistory();
         },
 
-        clearAllHistory() {
-            this.historyPanel?.clearAllHistory();
+        async clearAllHistory() {
+            await this.historyPanel?.clearAllHistory();
+            this.loadHistory();
         },
 
         loadHistoryItem(item: HistoryItem) {

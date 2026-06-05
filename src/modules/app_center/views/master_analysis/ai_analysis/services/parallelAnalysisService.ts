@@ -9,7 +9,8 @@
  */
 
 import { callLLM, type ChatMessage, type LLMStreamMetrics } from '../../../../../../services/llmService';
-import { StorageService, STORAGE_KEYS } from '../../../../../../services/storageService';
+import { LocalDataStore } from '../../../../../../services/localDataStore';
+import { StorageService, STORAGE_KEYS, CACHE_PREFIXES } from '../../../../../../services/storageService';
 import { ValidationError, BusinessError } from '@common/errors/AppError';
 import { configCenter } from '../../../../../../common/config/ConfigCenter';
 import type { FullAnalysisReport } from '../config/analysisReportData';
@@ -22,6 +23,7 @@ import { estimateTokenCount } from '../utils/tokenCounter';
 const DEFAULT_ANALYSIS_CONCURRENCY = 8;
 const MAX_ANALYSIS_CONCURRENCY = 8;
 const ANALYSIS_CACHE_VERSION = 'v2';
+const ANALYSIS_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
 /**
  * LLM 配置接口
@@ -133,7 +135,7 @@ function normalizeMaxConcurrency(value: number, taskCount: number): number {
  */
 export function generateCacheKey(targetId: string, product: Product, language: string): string {
   const productHash = `${product.asin}_${product.productTitle?.substring(0, 50)}_${product.customer_reviews?.length || 0}`;
-  return `ai_analysis_${ANALYSIS_CACHE_VERSION}_${targetId}_${productHash}_${language}`;
+  return `${CACHE_PREFIXES.AI_ANALYSIS}${ANALYSIS_CACHE_VERSION}:${targetId}:${productHash}:${language}`;
 }
 
 /**
@@ -141,14 +143,27 @@ export function generateCacheKey(targetId: string, product: Product, language: s
  */
 export async function getCachedResult(cacheKey: string): Promise<unknown | null> {
   try {
-    const cached = StorageService.getRaw(cacheKey);
-    if (!cached) return null;
-    
-    const parsedCache = JSON.parse(cached);
+    const parsedCache = await LocalDataStore.get<{ data: unknown; timestamp: number }>(cacheKey, null);
+    if (!parsedCache) {
+      const legacyKey = cacheKey.replace(CACHE_PREFIXES.AI_ANALYSIS, 'ai_analysis_').replace(/:/g, '_');
+      const legacyCached = StorageService.getRaw(legacyKey);
+      if (!legacyCached) return null;
+      const legacyParsed = JSON.parse(legacyCached);
+      if (legacyParsed && typeof legacyParsed === 'object' && 'timestamp' in legacyParsed) {
+        const age = Date.now() - (legacyParsed.timestamp as number);
+        if (age < ANALYSIS_CACHE_TTL_MS) {
+          Logger.debug(`[并行分析] 旧缓存命中: ${legacyKey}`);
+          return (legacyParsed as { data: unknown }).data;
+        }
+      }
+      StorageService.remove(legacyKey);
+      return null;
+    }
+
     if (parsedCache && typeof parsedCache === 'object' && 'timestamp' in parsedCache) {
       const age = Date.now() - (parsedCache.timestamp as number);
       // 缓存有效期：24小时
-      if (age < 24 * 60 * 60 * 1000) {
+      if (age < ANALYSIS_CACHE_TTL_MS) {
         Logger.debug(`[并行分析] 缓存命中: ${cacheKey}`);
         return (parsedCache as { data: unknown }).data;
       }
@@ -164,10 +179,10 @@ export async function getCachedResult(cacheKey: string): Promise<unknown | null>
  */
 export async function setCachedResult(cacheKey: string, result: unknown): Promise<void> {
   try {
-    StorageService.set(cacheKey, {
+    await LocalDataStore.set(cacheKey, {
       data: result,
       timestamp: Date.now()
-    });
+    }, 'cache');
     Logger.debug(`[并行分析] 结果已缓存: ${cacheKey}`);
   } catch (error) {
     Logger.warn(`[并行分析] 缓存写入失败:`, error);
@@ -522,13 +537,19 @@ export async function runParallelAIAnalysis(
  */
 export function clearAnalysisCache(): void {
   try {
-    const allKeys = StorageService.keys();
-    const cacheKeys = allKeys.filter(key => key.startsWith('ai_analysis_'));
-    cacheKeys.forEach(key => StorageService.remove(key));
-    Logger.debug(`[并行分析] 已清除 ${cacheKeys.length} 个缓存项`);
+    void clearAnalysisCacheAsync();
   } catch (error) {
     Logger.error('[并行分析] 清除缓存失败:', error);
   }
+}
+
+export async function clearAnalysisCacheAsync(): Promise<void> {
+  const cacheKeys = await LocalDataStore.keys(CACHE_PREFIXES.AI_ANALYSIS);
+  await Promise.all(cacheKeys.map(key => LocalDataStore.remove(key)));
+  StorageService.keys()
+    .filter(key => key.startsWith('ai_analysis_'))
+    .forEach(key => StorageService.remove(key));
+  Logger.debug(`[并行分析] 已清除 ${cacheKeys.length} 个缓存项`);
 }
 
 /**
@@ -554,5 +575,28 @@ export function getCacheStats(): { count: number; totalSize: number } {
   } catch (error) {
     Logger.error('[并行分析] 获取缓存统计失败:', error);
     return { count: 0, totalSize: 0 };
+  }
+}
+
+export async function getCacheStatsAsync(): Promise<{ count: number; totalSize: number }> {
+  try {
+    const indexedKeys = await LocalDataStore.keys(CACHE_PREFIXES.AI_ANALYSIS);
+    let totalSize = 0;
+
+    for (const key of indexedKeys) {
+      const value = await LocalDataStore.get(key, null);
+      if (value) {
+        totalSize += JSON.stringify(value).length;
+      }
+    }
+
+    const legacyStats = getCacheStats();
+    return {
+      count: indexedKeys.length + legacyStats.count,
+      totalSize: totalSize + legacyStats.totalSize
+    };
+  } catch (error) {
+    Logger.error('[并行分析] 获取 IndexedDB 缓存统计失败:', error);
+    return getCacheStats();
   }
 }

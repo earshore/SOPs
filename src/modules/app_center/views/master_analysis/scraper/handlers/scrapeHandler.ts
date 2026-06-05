@@ -91,7 +91,9 @@ export function handleScrapeComplete(
     };
 
     // 保存历史记录
-    HistoryService.save(scrapedData);
+    void HistoryService.saveAsync(scrapedData).catch(() => {
+        HistoryService.save(scrapedData);
+    });
 
     return scrapedData;
 }

@@ -14,6 +14,8 @@ const MAX_HISTORY_ITEMS =
   configCenter.get<number>('history.maxItems') ||
   50;
 
+let historyCache: HistoryItem[] | null = null;
+
 function isSameHistoryId(left: HistoryItem['id'], right: HistoryItem['id']): boolean {
   return String(left) === String(right);
 }
@@ -51,10 +53,24 @@ export const HistoryService = {
    */
   getAll(): HistoryItem[] {
     try {
-      return StorageService.getScrapeHistory();
+      return historyCache || StorageService.getScrapeHistory();
     } catch (e) {
       Logger.error("读取历史记录失败", e);
       return [];
+    }
+  },
+
+  /**
+   * 异步获取历史记录（IndexedDB 主存储）
+   */
+  async getAllAsync(): Promise<HistoryItem[]> {
+    try {
+      historyCache = await StorageService.getScrapeHistoryAsync();
+      return historyCache;
+    } catch (e) {
+      Logger.error("读取 IndexedDB 历史记录失败", e);
+      historyCache = StorageService.getScrapeHistory();
+      return historyCache;
     }
   },
 
@@ -100,8 +116,58 @@ export const HistoryService = {
     const trimmedHistory = history
       .sort((a, b) => getHistoryTime(b) - getHistoryTime(a))
       .slice(0, MAX_HISTORY_ITEMS);
-    StorageService.setScrapeHistory(trimmedHistory);
+    const saved = StorageService.setScrapeHistory(trimmedHistory);
+    if (!saved) {
+      throw new Error('保存历史记录失败：本地存储空间不足');
+    }
+    historyCache = trimmedHistory;
 
+    return trimmedHistory;
+  },
+
+  /**
+   * 异步保存历史记录（IndexedDB 主存储）
+   */
+  async saveAsync(data: ScrapedData, report?: AnalysisReport): Promise<HistoryItem[]> {
+    const history = await this.getAllAsync();
+    const currentState = appStore.getState();
+    const timestamp = data.metadata?.scrape_timestamp || new Date().toISOString();
+    const currentHistoryId = currentState.scraper.currentHistoryId;
+    const currentHistoryIndex = currentHistoryId !== null
+      ? history.findIndex((h) => isSameHistoryId(h.id, currentHistoryId))
+      : -1;
+    const currentHistoryItem = currentHistoryIndex >= 0 ? history[currentHistoryIndex] : undefined;
+    const shouldUpdateCurrent = !!currentHistoryItem && currentHistoryItem.timestamp === timestamp;
+    const id = shouldUpdateCurrent && currentHistoryItem
+      ? currentHistoryItem.id
+      : createHistoryId(history);
+
+    const historyItem: HistoryItem = {
+      id,
+      timestamp,
+      site: data.metadata?.marketplace || currentState.scraper?.selectedSite || 'US',
+      asins: data.products?.map(p => p.asin) || [],
+      data,
+      report,
+    };
+
+    if (shouldUpdateCurrent && currentHistoryIndex >= 0) {
+      history[currentHistoryIndex] = historyItem;
+    } else {
+      history.unshift(historyItem);
+    }
+    appStore.getState().setCurrentHistoryId(historyItem.id);
+
+    const trimmedHistory = history
+      .sort((a, b) => getHistoryTime(b) - getHistoryTime(a))
+      .slice(0, MAX_HISTORY_ITEMS);
+
+    const saved = await StorageService.setScrapeHistoryAsync(trimmedHistory);
+    if (!saved) {
+      throw new Error('保存历史记录失败：本地存储空间不足，请导出备份后清理缓存');
+    }
+
+    historyCache = trimmedHistory;
     return trimmedHistory;
   },
 
@@ -119,6 +185,12 @@ export const HistoryService = {
    */
   clear(): void {
     StorageService.remove(STORAGE_KEYS.SCRAPE_HISTORY);
+    historyCache = [];
+  },
+
+  async clearAsync(): Promise<void> {
+    await StorageService.removeScrapeHistoryAsync();
+    historyCache = [];
   },
 
   /**
@@ -151,6 +223,11 @@ export const HistoryService = {
     return null;
   },
 
+  async getByAsinAsync(asin: string, site: string): Promise<CachedProduct | null> {
+    await this.getAllAsync();
+    return this.getByAsin(asin, site);
+  },
+
   /**
    * ✅ 新增：更新历史记录的分析状态
    * @param id - 历史记录ID
@@ -181,7 +258,43 @@ export const HistoryService = {
       };
 
       // 保存更新后的历史记录
-      StorageService.setScrapeHistory(history);
+      const saved = StorageService.setScrapeHistory(history);
+      if (!saved) return false;
+      historyCache = history;
+
+      Logger.debug(`[HistoryService] 已更新历史记录 ${id} 的分析状态`);
+      return true;
+    } catch (error) {
+      Logger.error(`[HistoryService] 更新分析状态失败:`, error);
+      return false;
+    }
+  },
+
+  async updateAnalysisStatusAsync(id: number | string, analysisReport: AnalysisReport): Promise<boolean> {
+    try {
+      const history = await this.getAllAsync();
+      const targetIndex = history.findIndex((h) => isSameHistoryId(h.id, id));
+
+      if (targetIndex === -1) {
+        Logger.warn(`[HistoryService] 未找到ID为 ${id} 的历史记录`);
+        return false;
+      }
+
+      const targetItem = history[targetIndex];
+      if (!targetItem) {
+        Logger.warn(`[HistoryService] 历史记录项为空`);
+        return false;
+      }
+
+      targetItem.analysisStatus = {
+        isAnalyzed: true,
+        analyzedAt: new Date().toISOString(),
+        analysisReport
+      };
+
+      const saved = await StorageService.setScrapeHistoryAsync(history);
+      if (!saved) return false;
+      historyCache = history;
 
       Logger.debug(`[HistoryService] 已更新历史记录 ${id} 的分析状态`);
       return true;

@@ -317,7 +317,7 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
     const currentHistoryId = appStore.getState().scraper?.currentHistoryId;
     if (analysisReport && currentHistoryId) {
       const { HistoryService } = await import('../../services/historyService');
-      const success = HistoryService.updateAnalysisStatus(
+      const success = await HistoryService.updateAnalysisStatusAsync(
         currentHistoryId,
         analysisReport as any
       );

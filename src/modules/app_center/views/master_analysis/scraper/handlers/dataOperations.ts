@@ -105,7 +105,7 @@ export async function deleteProduct(
 
         // 保存到历史记录
         try {
-            HistoryService.save(scrapedData);
+            await HistoryService.saveAsync(scrapedData);
         } catch (saveError) {
             Logger.error('[Scraper] 保存历史记录失败:', saveError);
             throw new SystemError(
@@ -264,7 +264,7 @@ export async function deleteReview(
 
         // 保存到历史记录
         try {
-            HistoryService.save(scrapedData);
+            await HistoryService.saveAsync(scrapedData);
         } catch (saveError) {
             Logger.error('[Scraper] 保存历史记录失败:', saveError);
             throw new SystemError(

@@ -4,7 +4,7 @@
  */
 
 import { StorageService } from '../../../../../../services/storageService';
-import { getCacheStats, clearAnalysisCache } from '../services/parallelAnalysisService';
+import { getCacheStatsAsync, clearAnalysisCacheAsync } from '../services/parallelAnalysisService';
 import { showToast } from '@common/ui/index';
 import { Logger } from '../../../../../../services/loggerService';
 
@@ -92,15 +92,15 @@ export function createPerformanceSettingsPanel() {
     },
 
     // 更新缓存统计
-    updateCacheStats() {
-      this.cacheStats = getCacheStats();
+    async updateCacheStats() {
+      this.cacheStats = await getCacheStatsAsync();
     },
 
     // 切换设置面板
     toggleSettings() {
       this.showSettings = !this.showSettings;
       if (this.showSettings) {
-        this.updateCacheStats();
+        void this.updateCacheStats();
       }
     },
 
@@ -130,10 +130,10 @@ export function createPerformanceSettingsPanel() {
     },
 
     // 清除缓存
-    clearCache() {
+    async clearCache() {
       try {
-        clearAnalysisCache();
-        this.updateCacheStats();
+        await clearAnalysisCacheAsync();
+        await this.updateCacheStats();
         
         showToast('缓存已清除', { type: 'success' });
       } catch (error) {

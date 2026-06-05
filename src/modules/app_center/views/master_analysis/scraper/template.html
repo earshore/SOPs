@@ -637,11 +637,16 @@ B0EXAMPLE1" rows="5" x-model="inputAsins"></textarea>
                     </span>
                     <button @click="clearAllHistory()"
                         class="clear-btn text-xs text-slate-400 hover:text-rose-500 transition-all flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-rose-50 border border-transparent hover:border-rose-100"
-                        x-show="history.length &gt; 0">
+                        x-show="history.length &gt; 0 && !historyLoading">
                         <i class="fas fa-trash-alt text-[10px]"></i> 清空
                     </button>
                 </div>
                 <div class="p-5 space-y-2.5 max-h-[480px] overflow-y-auto custom-scrollbar">
+                    <div class="flex items-center justify-center py-10 text-slate-400"
+                        x-show="historyLoading && history.length === 0">
+                        <i class="fas fa-circle-notch fa-spin text-sm mr-2"></i>
+                        <span class="text-xs font-medium">正在加载历史快照...</span>
+                    </div>
                     <template :key="item.id" x-for="(item, index) in history">
                         <div :class="item.analysisStatus?.isAnalyzed ? 'analyzed border-emerald-100 bg-gradient-to-br from-emerald-50/30 to-white' : 'border-slate-150'"
                             :style="'animation: cardEnter 0.4s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay:' + (index * 80) + 'ms'"
@@ -732,7 +737,7 @@ B0EXAMPLE1" rows="5" x-model="inputAsins"></textarea>
                     </template>
                     <!-- Empty State -->
                     <div class="empty-state flex flex-col items-center justify-center py-16 text-slate-300 border-2 border-dashed border-slate-100 rounded-2xl bg-gradient-to-b from-slate-50/50 to-white"
-                        x-show="history.length === 0" x-transition:enter="transition ease-out duration-500"
+                        x-show="!historyLoading && history.length === 0" x-transition:enter="transition ease-out duration-500"
                         x-transition:enter-end="opacity-100 scale-100" x-transition:enter-start="opacity-0 scale-95">
                         <div
                             class="empty-state-icon w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center mb-4 border border-slate-100">
