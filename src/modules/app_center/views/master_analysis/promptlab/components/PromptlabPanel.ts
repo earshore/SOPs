@@ -232,6 +232,75 @@ export function createPromptlabPanel() {
       return canExtractDNA();
     },
 
+    get reportActionDisabled(): boolean {
+      return !this.hasReport;
+    },
+
+    get generateButtonDisabled(): boolean {
+      return !this.isReady;
+    },
+
+    get autoPopulateButtonClass(): string {
+      return this.hasReport
+        ? 'bg-blue-500 hover:bg-blue-600 text-white cursor-pointer'
+        : 'bg-slate-200 text-slate-400 cursor-not-allowed';
+    },
+
+    get extractButtonClass(): string {
+      return this.hasReport ? 'text-blue-600 hover:bg-blue-50' : 'text-slate-300 cursor-not-allowed';
+    },
+
+    get hasExpandedDimensions(): boolean {
+      return this.expandedDimensions.size > 0;
+    },
+
+    get toggleAllDimensionsTitle(): string {
+      return this.hasExpandedDimensions ? '折叠所有维度' : '展开所有维度';
+    },
+
+    get toggleAllDimensionsIconClass(): string {
+      return this.hasExpandedDimensions ? 'fa-compress' : 'fa-expand';
+    },
+
+    get listingGenerateButtonClass(): string {
+      return this.isReady
+        ? 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 cursor-pointer'
+        : 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none';
+    },
+
+    get visualGenerateButtonClass(): string {
+      return this.isReady
+        ? 'bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 shadow-lg shadow-pink-700/40 hover:shadow-xl hover:shadow-pink-600/50 cursor-pointer'
+        : 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none opacity-50';
+    },
+
+    get promptTokenCountClass(): string {
+      return this.isOverLimit ? 'font-medium text-red-600 animate-pulse' : 'font-bold text-slate-600';
+    },
+
+    showDnaConfidence(field: keyof DnaConfidence): boolean {
+      return this.dnaConfidence[field] > 0;
+    },
+
+    getDnaConfidenceBadgeClass(field: keyof DnaConfidence): string {
+      const value = this.dnaConfidence[field];
+      if (value >= 70) return 'bg-green-100 text-green-700';
+      if (value >= 50) return 'bg-yellow-100 text-yellow-700';
+      return 'bg-orange-100 text-orange-700';
+    },
+
+    getDnaConfidenceText(field: keyof DnaConfidence): string {
+      return `${this.dnaConfidence[field]}%`;
+    },
+
+    toggleAllDimensions(): void {
+      if (this.hasExpandedDimensions) {
+        this.collapseAllDimensions();
+      } else {
+        this.expandAllDimensions();
+      }
+    },
+
     // ========== Confidence Helpers (called from Alpine template) ==========
 
     getTargetConfidence(targetId: string): number {
@@ -412,6 +481,34 @@ export function createPromptlabPanel() {
 
     onInputChange() {
       onInputChange(this as unknown as PromptlabAlpineContext);
+    },
+
+    setProfileField(field: keyof UserProductProfile, event: Event) {
+      const target = event.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+      this.profile = {
+        ...this.profile,
+        [field]: target.value,
+      };
+      this.onInputChange();
+    },
+
+    setProfileBoolean(field: keyof UserProductProfile, event: Event) {
+      const target = event.target as HTMLInputElement;
+      this.profile = {
+        ...this.profile,
+        [field]: target.checked,
+      };
+      this.onInputChange();
+    },
+
+    setProfileNumber(field: keyof UserProductProfile, event: Event) {
+      const target = event.target as HTMLInputElement;
+      const value = Number(target.value);
+      this.profile = {
+        ...this.profile,
+        [field]: Number.isFinite(value) ? value : 0,
+      };
+      this.onInputChange();
     },
 
     // ========== Granular Selection Methods ==========

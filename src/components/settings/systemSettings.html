@@ -53,7 +53,7 @@
                 </div>
 
                 <!-- 🔒 Security Warning -->
-                <div x-show="isProduction && llm.endpoint && isDangerousEndpoint(llm.endpoint)"
+                <div x-show="showDangerousEndpointWarning"
                      x-transition:enter="transition ease-out duration-300"
                      x-transition:enter-start="opacity-0 -translate-y-2"
                      x-transition:enter-end="opacity-100 translate-y-0"
@@ -84,7 +84,7 @@
                     <div class="group">
                         <label for="llm-provider" class="block text-xs font-semibold text-slate-600 mb-2 group-focus-within:text-blue-600 transition-colors">AI 厂商</label>
                         <div class="relative">
-                            <select id="llm-provider" name="llm-provider" x-model="llm.provider"
+                            <select id="llm-provider" name="llm-provider" :value="llm.provider" @change="setLlmProvider($event)"
                                 class="w-full pl-4 pr-10 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 appearance-none bg-white text-sm transition-all duration-200 shadow-sm hover:border-slate-300 cursor-pointer">
                                 <option value="new_api">✨ NEW API</option>
                             </select>
@@ -101,7 +101,7 @@
                             <div class="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded bg-emerald-100 flex items-center justify-center">
                                 <i class="fas fa-link text-emerald-500 text-[9px]"></i>
                             </div>
-                            <input type="text" id="llm-endpoint" name="llm-endpoint" x-model="llm.endpoint"
+                            <input type="text" id="llm-endpoint" name="llm-endpoint" :value="llm.endpoint" @input="setLlmEndpoint($event)"
                                 class="w-full pl-11 pr-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-sm font-mono text-slate-600 shadow-sm transition-all duration-200 hover:border-slate-300 placeholder:text-slate-300"
                                 placeholder="https://new.hongecb.store/v1" />
                         </div>
@@ -114,12 +114,12 @@
                             <div class="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded bg-amber-100 flex items-center justify-center">
                                 <i class="fas fa-key text-amber-500 text-[9px]"></i>
                             </div>
-                            <input :type="llm.showKey ? 'text' : 'password'" id="llm-api-key" name="llm-api-key" x-model="llm.apiKey"
+                            <input :type="llmApiKeyInputType" id="llm-api-key" name="llm-api-key" :value="llm.apiKey" @input="setLlmApiKey($event)"
                                 class="w-full pl-11 pr-11 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-sm font-mono text-slate-600 shadow-sm transition-all duration-200 hover:border-slate-300 placeholder:text-slate-300"
                                 placeholder="sk-..." />
-                            <button @click="llm.showKey = !llm.showKey"
+                            <button @click="toggleLlmKeyVisibility()"
                                 class="absolute right-2.5 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all duration-200">
-                                <i class="fas text-xs" :class="llm.showKey ? 'fa-eye-slash' : 'fa-eye'"></i>
+                                <i class="fas text-xs" :class="llmApiKeyIconClass"></i>
                             </button>
                         </div>
                     </div>
@@ -129,13 +129,13 @@
                         <label for="llm-model" class="block text-xs font-semibold text-slate-600 mb-2 group-focus-within:text-blue-600 transition-colors">选择模型</label>
                         <div class="flex gap-2">
                             <div class="relative flex-1">
-                                <select id="llm-model" name="llm-model" x-model="llm.model"
+                                <select id="llm-model" name="llm-model" :value="llm.model" @change="setLlmModel($event)"
                                     class="w-full pl-4 pr-10 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 appearance-none bg-white text-sm shadow-sm transition-all duration-200 hover:border-slate-300 disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed cursor-pointer"
-                                    :disabled="llm.models.length === 0">
+                                    :disabled="modelSelectDisabled">
                                     <option value="">-- 请选择 --</option>
                                     <template x-for="(m, index) in llm.models" :key="index">
-                                        <option :value="typeof m === 'string' ? m : m.id"
-                                            x-text="typeof m === 'string' ? m : m.id"></option>
+                                        <option :value="getModelValue(m)"
+                                            x-text="getModelLabel(m)"></option>
                                     </template>
                                 </select>
                                 <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 rounded-md bg-slate-100 flex items-center justify-center">
@@ -144,8 +144,8 @@
                             </div>
                             <button @click="fetchModels()" :disabled="llm.isFetching"
                                 class="px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-600 rounded-xl transition-all duration-200 text-sm font-medium flex items-center gap-2 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed shadow-sm active:scale-[0.97]">
-                                <i class="fas text-xs" :class="llm.isFetching ? 'fa-circle-notch fa-spin text-blue-500' : 'fa-sync-alt'"></i>
-                                <span x-text="llm.isFetching ? '同步中' : '刷新'"></span>
+                                <i class="fas text-xs" :class="fetchModelsIconClass"></i>
+                                <span x-text="fetchModelsText"></span>
                             </button>
                         </div>
                     </div>
@@ -164,7 +164,7 @@
                                 <div>
                                     <span class="text-[10px] text-slate-400 uppercase tracking-wider font-medium block">上下文</span>
                                     <span class="text-sm font-bold text-slate-700"
-                                        x-text="activeModelInfo && (activeModelInfo.context / 1000) + 'K'"></span>
+                                        x-text="activeContextText"></span>
                                 </div>
                             </div>
                             <div class="flex items-center gap-3">
@@ -174,7 +174,7 @@
                                 <div>
                                     <span class="text-[10px] text-slate-400 uppercase tracking-wider font-medium block">特性</span>
                                     <span class="text-sm font-bold text-slate-700"
-                                        x-text="activeModelInfo && (activeModelInfo.features.length ? activeModelInfo.features.join(', ') : '基础')"></span>
+                                        x-text="activeFeaturesText"></span>
                                 </div>
                             </div>
                         </div>
@@ -184,8 +184,8 @@
                     <div class="flex gap-2.5 pt-1">
                         <button @click="testConnection()" :disabled="llm.isTesting"
                             class="flex-1 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-700 font-medium rounded-xl transition-all duration-200 text-sm flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 active:scale-[0.97]">
-                            <i class="fas text-xs" :class="llm.isTesting ? 'fa-circle-notch fa-spin text-blue-500' : 'fa-plug text-emerald-500'"></i>
-                            <span x-text="llm.isTesting ? '测试中...' : '测试连接'"></span>
+                            <i class="fas text-xs" :class="testConnectionIconClass"></i>
+                            <span x-text="testConnectionText"></span>
                         </button>
                         <button @click="saveProviderConfig()"
                             class="flex-[2] py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl transition-all duration-200 text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 active:scale-[0.97]">
@@ -216,17 +216,13 @@
                     <div class="group">
                         <label for="proxy-type" class="block text-xs font-semibold text-slate-600 mb-2 group-focus-within:text-blue-600 transition-colors">连接方式</label>
                         <div class="relative">
-                            <select id="proxy-type" name="proxy-type" x-model="proxy.type"
+                            <select id="proxy-type" name="proxy-type" :value="proxy.type" @change="setProxyType($event)"
                                 class="w-full pl-4 pr-10 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 appearance-none bg-white text-sm shadow-sm transition-all duration-200 hover:border-slate-300 cursor-pointer">
                                 <optgroup label="商业 API (高成功率)">
                                     <option value="scraperapi">ScraperAPI</option>
                                     <option value="zenrows">ZenRows</option>
                                     <option value="brightdata">Bright Data</option>
                                     <option value="custom_api">自定义 API</option>
-                                </optgroup>
-                                <optgroup label="免费代理">
-                                    <option value="allorigins">AllOrigins</option>
-                                    <option value="corsproxy">CORS Proxy</option>
                                 </optgroup>
                                 <optgroup label="直连">
                                     <option value="custom_proxy">自定义 HTTP 代理</option>
@@ -250,12 +246,12 @@
                                 <div class="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded bg-cyan-100 flex items-center justify-center">
                                     <i class="fas fa-globe text-cyan-500 text-[9px]"></i>
                                 </div>
-                                <input :type="proxy.showKey ? 'text' : 'password'" id="proxy-custom-url" name="proxy-custom-url" x-model="proxy.customUrl"
+                                <input :type="proxyInputType" id="proxy-custom-url" name="proxy-custom-url" :value="proxy.customUrl" @input="setProxyCustomUrl($event)"
                                     class="w-full pl-11 pr-11 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-sm font-mono text-slate-600 shadow-sm transition-all duration-200 hover:border-slate-300 placeholder:text-slate-300"
                                     :placeholder="proxyInputPlaceholder" />
-                                <button @click="proxy.showKey = !proxy.showKey"
+                                <button @click="toggleProxyKeyVisibility()"
                                     class="absolute right-2.5 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all duration-200">
-                                    <i class="fas text-xs" :class="proxy.showKey ? 'fa-eye-slash' : 'fa-eye'"></i>
+                                    <i class="fas text-xs" :class="proxyKeyIconClass"></i>
                                 </button>
                             </div>
                             <button @click="saveProxyConfig()"
@@ -268,7 +264,7 @@
                                 <i class="fas fa-info text-slate-400 text-[8px]"></i>
                             </div>
                             <p class="text-[11px] text-slate-400 leading-relaxed"
-                                x-text="proxy.type === 'custom_api' ? '请确保 URL 包含 url= 参数' : '系统将自动托管请求头'"></p>
+                                x-text="proxyHintText"></p>
                         </div>
                     </div>
 
@@ -305,16 +301,16 @@
                         <div class="p-3 bg-white/80 rounded-xl border border-white shadow-sm">
                             <span class="block text-[10px] text-slate-400 uppercase tracking-wider font-medium">localStorage</span>
                             <span class="block text-sm font-bold text-slate-700 mt-1"
-                                x-text="localData.usage ? formatBytes(localData.usage.localStorage.used) : '计算中'"></span>
+                                x-text="localStorageUsedText"></span>
                             <span class="block text-[10px] text-slate-400 mt-0.5"
-                                x-text="localData.usage ? localData.usage.localStorage.keys + ' keys' : ''"></span>
+                                x-text="localStorageKeysText"></span>
                         </div>
                         <div class="p-3 bg-white/80 rounded-xl border border-white shadow-sm">
                             <span class="block text-[10px] text-slate-400 uppercase tracking-wider font-medium">IndexedDB</span>
                             <span class="block text-sm font-bold text-slate-700 mt-1"
-                                x-text="localData.usage ? formatBytes(localData.usage.indexedDB.used) : '计算中'"></span>
+                                x-text="indexedDbUsedText"></span>
                             <span class="block text-[10px] text-slate-400 mt-0.5"
-                                x-text="localData.usage ? localData.usage.indexedDB.keys + ' records' : ''"></span>
+                                x-text="indexedDbKeysText"></span>
                         </div>
                     </div>
 

@@ -565,7 +565,7 @@ class StorageServiceClass implements IStorageService {
     // 🎯 数据边界验证：已在 get() 方法中验证
     // 如果验证失败，返回默认配置
     if (!config) {
-      return { type: 'allorigins', enabled: true };
+      return { type: 'scraperapi', enabled: true };
     }
 
     return config;

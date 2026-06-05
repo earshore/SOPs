@@ -7,3 +7,12 @@ declare module 'alpinejs' {
   const Alpine: Alpine;
   export default Alpine;
 }
+
+declare module '@alpinejs/csp' {
+  interface Alpine {
+    start(): void;
+    [key: string]: any;
+  }
+  const Alpine: Alpine;
+  export default Alpine;
+}

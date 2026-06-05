@@ -39,6 +39,7 @@ export function createScraperPanel() {
         currentDataTab: 'preview' as DataTab, // 添加直接的状态属性
 
         // UI State
+        configExpanded: false,
         tasks: [] as Task[],
 
         // 数据预览组件
@@ -79,14 +80,211 @@ export function createScraperPanel() {
             return (appStore.getState().scraper.scrapedData?.products?.length ?? 0) > 0;
         },
 
+        get hasValidAsins(): boolean {
+            return this.validAsins.length > 0;
+        },
+
+        get hasNoValidAsins(): boolean {
+            return !this.hasValidAsins;
+        },
+
+        get hasInvalidAsins(): boolean {
+            return this.invalidCount > 0;
+        },
+
+        get startDisabled(): boolean {
+            return !this.canStart;
+        },
+
+        get hasTasks(): boolean {
+            return this.tasks.length > 0;
+        },
+
+        get validAsinStatusClass(): string {
+            return this.hasValidAsins ? 'text-emerald-600' : 'text-slate-400';
+        },
+
+        get hasInputAsins(): boolean {
+            return this.inputAsins.length > 0;
+        },
+
+        get scrapingIconClass(): string {
+            return this.isScraping ? 'fa-circle-notch fa-spin' : 'fa-rocket';
+        },
+
+        get scrapingButtonText(): string {
+            return this.isScraping ? '正在采集中...' : '开始采集';
+        },
+
+        get showStartCount(): boolean {
+            return !this.isScraping && this.hasValidAsins;
+        },
+
+        get startCountText(): string {
+            return `${this.validAsins.length} 项`;
+        },
+
+        get successfulTaskCount(): number {
+            return this.tasks.filter(task => task.status === 'success').length;
+        },
+
+        get hasSuccessfulTasks(): boolean {
+            return this.successfulTaskCount > 0;
+        },
+
+        get completedTaskCount(): number {
+            return this.tasks.filter(task => task.status === 'success' || task.status === 'failed').length;
+        },
+
+        get taskProgressStyle(): string {
+            const percent = this.tasks.length > 0 ? (this.completedTaskCount / this.tasks.length) * 100 : 0;
+            return `width: ${percent}%`;
+        },
+
+        get showHistoryClear(): boolean {
+            return this.history.length > 0 && !this.historyLoading;
+        },
+
+        get showHistoryLoadingEmpty(): boolean {
+            return this.historyLoading && this.history.length === 0;
+        },
+
+        get showHistoryEmpty(): boolean {
+            return !this.historyLoading && this.history.length === 0;
+        },
+
+        get configChevronClass(): string {
+            return this.configExpanded ? 'rotate-180' : '';
+        },
+
+        get scrapeReviewsToggleClass(): string {
+            return this.scrapeReviews ? 'active' : '';
+        },
+
+        get configExpandedState(): boolean {
+            return this.configExpanded;
+        },
+
+        getDataTabButtonClass(tab: DataTab): string {
+            return this.currentDataTab === tab ? 'active text-blue-600' : 'text-slate-400 hover:text-slate-600';
+        },
+
+        getDataTabIconWrapClass(tab: DataTab): string {
+            return this.currentDataTab === tab ? 'bg-blue-50' : 'bg-slate-100';
+        },
+
+        getDataTabIconClass(tab: DataTab): string {
+            return this.currentDataTab === tab ? 'text-blue-500' : 'text-slate-400';
+        },
+
+        isDataTab(tab: DataTab): boolean {
+            return this.currentDataTab === tab;
+        },
+
+        isSelectedSite(site: ScraperSite): boolean {
+            return this.selectedSite === site;
+        },
+
+        getSiteButtonClass(site: ScraperSite): string {
+            return this.isSelectedSite(site)
+                ? 'selected border-blue-500 bg-gradient-to-b from-blue-50 to-white ring-2 ring-blue-500/20 shadow-sm shadow-blue-100'
+                : 'border-slate-150 bg-white hover:border-blue-300 hover:bg-blue-50/30';
+        },
+
+        getSiteNameClass(site: ScraperSite): string {
+            return this.isSelectedSite(site) ? 'text-blue-700' : 'text-slate-500 group-hover:text-slate-700';
+        },
+
+        getAnimationDelayStyle(index: number, stepMs: number): string {
+            return `animation-delay: ${index * stepMs}ms`;
+        },
+
+        getTaskCardClass(task: Task): Record<string, boolean> {
+            return {
+                'border-slate-150 bg-slate-50/50': task.status === 'pending',
+                'border-blue-200 bg-gradient-to-br from-blue-50/80 to-white shadow-sm shadow-blue-100/50 scraping-shimmer': task.status === 'scraping',
+                'border-emerald-200 bg-gradient-to-br from-emerald-50/80 to-white shadow-sm shadow-emerald-100/50': task.status === 'success',
+                'border-rose-200 bg-gradient-to-br from-rose-50/80 to-white shadow-sm shadow-rose-100/50': task.status === 'failed'
+            };
+        },
+
+        getTaskIconWrapperClass(task: Task): Record<string, boolean> {
+            return {
+                'bg-slate-100 text-slate-400': task.status === 'pending',
+                'bg-blue-100 text-blue-600': task.status === 'scraping',
+                'bg-emerald-100 text-emerald-600': task.status === 'success',
+                'bg-rose-100 text-rose-600': task.status === 'failed'
+            };
+        },
+
+        getTaskIconClass(task: Task): Record<string, boolean> {
+            return {
+                'fa-hourglass-half': task.status === 'pending',
+                'fa-circle-notch fa-spin': task.status === 'scraping',
+                'fa-check': task.status === 'success',
+                'fa-exclamation': task.status === 'failed'
+            };
+        },
+
+        getTaskMessageClass(task: Task): Record<string, boolean> {
+            return {
+                'text-slate-400': task.status === 'pending',
+                'text-blue-600': task.status === 'scraping',
+                'text-emerald-600': task.status === 'success',
+                'text-rose-500': task.status === 'failed'
+            };
+        },
+
+        isTaskSuccess(task: Task): boolean {
+            return task.status === 'success';
+        },
+
+        isTaskNotSuccess(task: Task): boolean {
+            return task.status !== 'success';
+        },
+
+        getHistoryCardClass(item: HistoryItem): string {
+            return item.analysisStatus?.isAnalyzed
+                ? 'analyzed border-emerald-100 bg-gradient-to-br from-emerald-50/30 to-white'
+                : 'border-slate-150';
+        },
+
+        isHistoryAnalyzed(item: HistoryItem): boolean {
+            return !!item.analysisStatus?.isAnalyzed;
+        },
+
+        showHistoryAnalysisTime(item: HistoryItem): boolean {
+            return !!(item.analysisStatus?.isAnalyzed && item.analysisStatus?.analyzedAt);
+        },
+
+        getHistorySiteText(site: string): string {
+            return `${getSiteName(site as ScraperSite)}站`;
+        },
+
+        hasMoreHistoryAsins(item: HistoryItem): boolean {
+            return item.asins.length > 3;
+        },
+
+        getHistoryOverflowCountText(item: HistoryItem): string {
+            return `+${item.asins.length - 3}`;
+        },
+
+        toggleConfigExpanded(): void {
+            this.configExpanded = !this.configExpanded;
+        },
+
+        toggleScrapeReviews(): void {
+            this.scrapeReviews = !this.scrapeReviews;
+        },
+
         get proxyConfigStatus(): ProxyConfigStatus {
-            const config = StorageService.get(STORAGE_KEYS.PROXY_CONFIG) as ProxyConfig | null || { type: 'allorigins' as const };
+            const config = StorageService.get(STORAGE_KEYS.PROXY_CONFIG) as ProxyConfig | null || { type: 'scraperapi' as const };
             const map: Record<string, string> = {
                 scraperapi: 'ScraperAPI', zenrows: 'ZenRows', brightdata: 'Bright Data',
-                custom_api: 'Custom API', allorigins: '自动托管', custom_proxy: 'HTTP 代理'
+                custom_api: 'Custom API', custom_proxy: 'HTTP 代理'
             };
             const name = map[config.type] || '自动';
-            const ready = config.type === 'allorigins' || !!config.customUrl;
+            const ready = !!config.customUrl;
             return { name, ready, type: config.type };
         },
 

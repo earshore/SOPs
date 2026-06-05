@@ -129,6 +129,33 @@ export function createPerformanceSettingsPanel() {
       this.settings = { ...DEFAULT_SETTINGS };
     },
 
+    setMaxConcurrency(event: Event) {
+      const target = event.target as HTMLInputElement;
+      const value = Number(target.value);
+      this.settings = normalizeSettings({
+        ...this.settings,
+        maxConcurrency: Number.isFinite(value) ? value : this.settings.maxConcurrency
+      });
+      void this.updateCacheStats();
+    },
+
+    setEnableCache(event: Event) {
+      const target = event.target as HTMLInputElement;
+      this.settings = {
+        ...this.settings,
+        enableCache: target.checked
+      };
+    },
+
+    setFailureStrategy(event: Event) {
+      const target = event.target as HTMLInputElement;
+      const value = target.value === 'abort' ? 'abort' : 'continue';
+      this.settings = {
+        ...this.settings,
+        failureStrategy: value
+      };
+    },
+
     // 清除缓存
     async clearCache() {
       try {
@@ -146,6 +173,94 @@ export function createPerformanceSettingsPanel() {
       if (bytes < 1024) return bytes + ' B';
       if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
       return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    },
+
+    get concurrencyTrackStyle(): string {
+      return `width: calc(${((this.settings.maxConcurrency - 1) / 7) * 100}%)`;
+    },
+
+    get slowLabelClass(): string {
+      return this.settings.maxConcurrency <= 2 ? 'text-blue-600' : 'text-slate-400';
+    },
+
+    get standardLabelClass(): string {
+      return this.settings.maxConcurrency >= 3 && this.settings.maxConcurrency <= 4 ? 'text-indigo-600' : 'text-slate-400';
+    },
+
+    get fastLabelClass(): string {
+      return this.settings.maxConcurrency >= 5 && this.settings.maxConcurrency <= 6 ? 'text-purple-600' : 'text-slate-400';
+    },
+
+    get extremeLabelClass(): string {
+      return this.settings.maxConcurrency >= 7 ? 'text-purple-700' : 'text-slate-400';
+    },
+
+    get expectedSpeedText(): string {
+      return `${this.settings.maxConcurrency}x`;
+    },
+
+    get expectedDurationText(): string {
+      return `${Math.round(120 / this.settings.maxConcurrency)}秒`;
+    },
+
+    get concurrencyValueWrapClass(): string {
+      const n = this.settings.maxConcurrency;
+      if (n <= 2) return 'bg-blue-50 border-2 border-blue-200';
+      if (n <= 4) return 'bg-indigo-50 border-2 border-indigo-200';
+      if (n <= 6) return 'bg-purple-50 border-2 border-purple-200';
+      return 'bg-purple-100 border-2 border-purple-300';
+    },
+
+    get concurrencyIconClass(): string {
+      const n = this.settings.maxConcurrency;
+      if (n <= 2) return 'fa-solid fa-hourglass-start text-blue-600';
+      if (n <= 4) return 'fa-solid fa-gauge text-indigo-600';
+      if (n <= 6) return 'fa-solid fa-bolt text-purple-600';
+      return 'fa-solid fa-rocket text-purple-700';
+    },
+
+    get concurrencyTextClass(): string {
+      const n = this.settings.maxConcurrency;
+      if (n <= 2) return 'text-blue-600';
+      if (n <= 4) return 'text-indigo-600';
+      if (n <= 6) return 'text-purple-600';
+      return 'text-purple-700';
+    },
+
+    get concurrencyHintCardClass(): string {
+      const n = this.settings.maxConcurrency;
+      if (n <= 2) return 'bg-blue-50 border-blue-200';
+      if (n <= 4) return 'bg-indigo-50 border-indigo-200';
+      if (n <= 6) return 'bg-purple-50 border-purple-200';
+      return 'bg-purple-100 border-purple-300';
+    },
+
+    get concurrencyHintTextClass(): string {
+      const n = this.settings.maxConcurrency;
+      if (n <= 2) return 'text-blue-800';
+      if (n <= 4) return 'text-indigo-800';
+      if (n <= 6) return 'text-purple-800';
+      return 'text-purple-900';
+    },
+
+    get continueStrategyClass(): string {
+      return this.settings.failureStrategy === 'continue' ? 'border-indigo-600 bg-indigo-50' : 'border-slate-200 hover:border-slate-300';
+    },
+
+    get abortStrategyClass(): string {
+      return this.settings.failureStrategy === 'abort' ? 'border-indigo-600 bg-indigo-50' : 'border-slate-200 hover:border-slate-300';
+    },
+
+    getConcurrencyDotClass(index: number): string {
+      return index <= this.settings.maxConcurrency ? 'bg-white shadow-lg scale-110' : 'bg-slate-300';
+    },
+
+    getSpeedBarClass(index: number): string {
+      return index <= this.settings.maxConcurrency ? 'bg-current opacity-100' : 'bg-current opacity-20';
+    },
+
+    getStabilityBarClass(index: number): string {
+      return index <= (9 - this.settings.maxConcurrency) ? 'bg-current opacity-100' : 'bg-current opacity-20';
     },
 
     // 获取并发数建议

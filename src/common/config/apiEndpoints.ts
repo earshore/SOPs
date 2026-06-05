@@ -46,21 +46,6 @@ export const API_ENDPOINTS: Record<string, ApiEndpointConfig> = {
     displayName: 'Google AI',
     isDangerous: true
   },
-  allorigins: {
-    domain: 'api.allorigins.win',
-    requiresProxy: false,
-    displayName: 'AllOrigins Proxy'
-  },
-  corsproxy: {
-    domain: 'corsproxy.io',
-    requiresProxy: false,
-    displayName: 'CORS Proxy'
-  },
-  corsanywhere: {
-    domain: 'cors-anywhere.herokuapp.com',
-    requiresProxy: false,
-    displayName: 'CORS Anywhere'
-  },
   scraperapi: {
     domain: 'api.scraperapi.com',
     requiresProxy: false,

@@ -50,9 +50,26 @@ interface SettingsPanelData {
         usage: LocalDataUsage | null;
         isBusy: boolean;
     };
+    showDangerousEndpointWarning: boolean;
     proxyNeedsInput: boolean;
     proxyInputLabel: string;
     proxyInputPlaceholder: string;
+    llmApiKeyInputType: string;
+    llmApiKeyIconClass: string;
+    modelSelectDisabled: boolean;
+    fetchModelsIconClass: string;
+    fetchModelsText: string;
+    activeContextText: string;
+    activeFeaturesText: string;
+    testConnectionIconClass: string;
+    testConnectionText: string;
+    proxyInputType: string;
+    proxyKeyIconClass: string;
+    proxyHintText: string;
+    localStorageUsedText: string;
+    localStorageKeysText: string;
+    indexedDbUsedText: string;
+    indexedDbKeysText: string;
     _unsubscribers?: Array<() => void>;  // 新增：存储清理函数
     init(): void;
     open(): void;
@@ -65,6 +82,16 @@ interface SettingsPanelData {
     saveProviderConfig(): Promise<void>;
     loadProxyConfig(): void;
     saveProxyConfig(): void;
+    setLlmProvider(event: Event): void;
+    setLlmEndpoint(event: Event): void;
+    setLlmApiKey(event: Event): void;
+    setLlmModel(event: Event): void;
+    setProxyType(event: Event): void;
+    setProxyCustomUrl(event: Event): void;
+    toggleLlmKeyVisibility(): void;
+    toggleProxyKeyVisibility(): void;
+    getModelValue(model: string | { id: string; name?: string }): string;
+    getModelLabel(model: string | { id: string; name?: string }): string;
     refreshLocalDataUsage(): Promise<void>;
     exportLocalData(): Promise<void>;
     importLocalData(): Promise<void>;
@@ -99,7 +126,7 @@ const SettingsPanel = (): SettingsPanelData => ({
 
     // Proxy Config State
     proxy: {
-        type: 'allorigins',
+        type: 'scraperapi',
         customUrl: '',
         showKey: false,
         savedKeyMap: {}
@@ -139,6 +166,10 @@ const SettingsPanel = (): SettingsPanelData => ({
         return dangerousEndpoints.some(domain => endpoint.includes(domain));
     },
 
+    get showDangerousEndpointWarning(): boolean {
+        return this.isProduction && !!this.llm.endpoint && this.isDangerousEndpoint(this.llm.endpoint);
+    },
+
     get proxyNeedsInput(): boolean {
         return ['scraperapi', 'zenrows', 'brightdata', 'custom_api', 'custom_proxy'].includes(this.proxy.type);
     },
@@ -153,6 +184,78 @@ const SettingsPanel = (): SettingsPanelData => ({
         if (this.proxy.type === 'custom_proxy') return 'http://user:pass@ip:port';
         if (this.proxy.type === 'custom_api') return 'https://api.example.com/?url=';
         return `粘贴 ${this.getProxyDisplayName(this.proxy.type)} Key`;
+    },
+
+    get llmApiKeyInputType(): string {
+        return this.llm.showKey ? 'text' : 'password';
+    },
+
+    get llmApiKeyIconClass(): string {
+        return this.llm.showKey ? 'fa-eye-slash' : 'fa-eye';
+    },
+
+    get modelSelectDisabled(): boolean {
+        return this.llm.models.length === 0;
+    },
+
+    get fetchModelsIconClass(): string {
+        return this.llm.isFetching ? 'fa-circle-notch fa-spin text-blue-500' : 'fa-sync-alt';
+    },
+
+    get fetchModelsText(): string {
+        return this.llm.isFetching ? '同步中' : '刷新';
+    },
+
+    get activeContextText(): string {
+        const context = this.activeModelInfo && 'context' in this.activeModelInfo
+            ? Number((this.activeModelInfo as { context?: unknown }).context)
+            : 0;
+        return context ? `${context / 1000}K` : '';
+    },
+
+    get activeFeaturesText(): string {
+        const features = this.activeModelInfo && 'features' in this.activeModelInfo
+            ? (this.activeModelInfo as { features?: unknown }).features
+            : null;
+        return Array.isArray(features) && features.length > 0 ? features.join(', ') : '基础';
+    },
+
+    get testConnectionIconClass(): string {
+        return this.llm.isTesting ? 'fa-circle-notch fa-spin text-blue-500' : 'fa-plug text-emerald-500';
+    },
+
+    get testConnectionText(): string {
+        return this.llm.isTesting ? '测试中...' : '测试连接';
+    },
+
+    get proxyInputType(): string {
+        return this.proxy.showKey ? 'text' : 'password';
+    },
+
+    get proxyKeyIconClass(): string {
+        return this.proxy.showKey ? 'fa-eye-slash' : 'fa-eye';
+    },
+
+    get proxyHintText(): string {
+        return this.proxy.type === 'custom_api'
+            ? '请确保 URL 包含 url= 参数'
+            : '请填写对应商业 API Key 或自定义代理地址';
+    },
+
+    get localStorageUsedText(): string {
+        return this.localData.usage ? this.formatBytes(this.localData.usage.localStorage.used) : '计算中';
+    },
+
+    get localStorageKeysText(): string {
+        return this.localData.usage ? `${this.localData.usage.localStorage.keys} keys` : '';
+    },
+
+    get indexedDbUsedText(): string {
+        return this.localData.usage ? this.formatBytes(this.localData.usage.indexedDB.used) : '计算中';
+    },
+
+    get indexedDbKeysText(): string {
+        return this.localData.usage ? `${this.localData.usage.indexedDB.keys} records` : '';
     },
 
     // Lifecycle
@@ -437,7 +540,7 @@ const SettingsPanel = (): SettingsPanelData => ({
         const savedConfig = StorageService.get(STORAGE_KEYS.SCRAPER_PROXY_CONFIG, {}) as { type?: string; customUrl?: string } | null;
         this.proxy.savedKeyMap = (StorageService.get(STORAGE_KEYS.PROXY_KEY_MAP, {}) as Record<string, string>) || {};
 
-        this.proxy.type = savedConfig?.type || 'allorigins';
+        this.proxy.type = savedConfig?.type || 'scraperapi';
         // If the saved active type matches current type, use its URL, otherwise fallback to cache
         if (savedConfig?.type === this.proxy.type) {
             this.proxy.customUrl = savedConfig?.customUrl || '';
@@ -456,6 +559,46 @@ const SettingsPanel = (): SettingsPanelData => ({
         StorageService.set(STORAGE_KEYS.SCRAPER_PROXY_CONFIG, config);
 
         showToast('网络配置已更新', { type: 'success' });
+    },
+
+    setLlmProvider(event: Event): void {
+        this.llm.provider = (event.target as HTMLSelectElement).value;
+    },
+
+    setLlmEndpoint(event: Event): void {
+        this.llm.endpoint = (event.target as HTMLInputElement).value;
+    },
+
+    setLlmApiKey(event: Event): void {
+        this.llm.apiKey = (event.target as HTMLInputElement).value;
+    },
+
+    setLlmModel(event: Event): void {
+        this.llm.model = (event.target as HTMLSelectElement).value;
+    },
+
+    setProxyType(event: Event): void {
+        this.proxy.type = (event.target as HTMLSelectElement).value;
+    },
+
+    setProxyCustomUrl(event: Event): void {
+        this.proxy.customUrl = (event.target as HTMLInputElement).value;
+    },
+
+    toggleLlmKeyVisibility(): void {
+        this.llm.showKey = !this.llm.showKey;
+    },
+
+    toggleProxyKeyVisibility(): void {
+        this.proxy.showKey = !this.proxy.showKey;
+    },
+
+    getModelValue(model: string | { id: string; name?: string }): string {
+        return typeof model === 'string' ? model : model.id;
+    },
+
+    getModelLabel(model: string | { id: string; name?: string }): string {
+        return this.getModelValue(model);
     },
 
     async refreshLocalDataUsage(): Promise<void> {
@@ -554,7 +697,6 @@ const SettingsPanel = (): SettingsPanelData => ({
             zenrows: 'ZenRows',
             brightdata: 'Bright Data',
             custom_api: '自定义 API',
-            allorigins: 'AllOrigins',
             custom_proxy: 'HTTP 代理',
         };
         return names[type] || '默认';

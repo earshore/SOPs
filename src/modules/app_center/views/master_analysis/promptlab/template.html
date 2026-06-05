@@ -74,8 +74,8 @@
                         </h3>
                         <div class="flex items-center gap-2">
                             <!-- 从报告加载按钮 -->
-                            <button @click="autoPopulateDNA" :disabled="!hasReport"
-                                :class="hasReport ? 'bg-blue-500 hover:bg-blue-600 text-white cursor-pointer' : 'bg-slate-200 text-slate-400 cursor-not-allowed'"
+                            <button @click="autoPopulateDNA" :disabled="reportActionDisabled"
+                                :class="autoPopulateButtonClass"
                                 class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5"
                                 title="从AI分析报告自动提取产品DNA（仅自动填充置信度≥70%的字段）">
                                 <i class="fas fa-magic text-[10px]"></i>
@@ -86,9 +86,9 @@
                                 <span class="w-1 h-3.5 bg-indigo-400 rounded-full"></span>
                                 目标语言/站点
                             </label>
-                            <select @change="onInputChange"
+                            <select @change="setProfileField('targetMarket', $event)"
                                 class="text-xs border-2 border-slate-200 rounded-xl p-2 w-48 bg-slate-50 text-slate-700 font-semibold transition-all hover:border-slate-300 cursor-pointer appearance-none"
-                                id="lab-target-market" x-model="profile.targetMarket">
+                                id="lab-target-market" :value="profile.targetMarket">
                                 <option selected="" value=""></option>
                             </select>
                         </div>
@@ -105,23 +105,23 @@
                                     Tier 1 核心词（高权重） <span class="text-slate-400 font-normal">- 1-2个</span>
 
                                     <!-- 置信度徽章 -->
-                                    <span x-show="dnaConfidence.keywords > 0"
-                                        :class="dnaConfidence.keywords >= 70 ? 'bg-green-100 text-green-700' : dnaConfidence.keywords >= 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-orange-100 text-orange-700'"
+                                    <span x-show="showDnaConfidence('keywords')"
+                                        :class="getDnaConfidenceBadgeClass('keywords')"
                                         class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold">
                                         <i class="fas fa-chart-line text-[8px]"></i>
-                                        <span x-text="`${dnaConfidence.keywords}%`"></span>
+                                        <span x-text="getDnaConfidenceText('keywords')"></span>
                                     </span>
 
-                                    <button @click="extractSingleField('keywordsTier1')" :disabled="!hasReport"
-                                        :class="hasReport ? 'text-blue-600 hover:bg-blue-50' : 'text-slate-300 cursor-not-allowed'"
+                                    <button @click="extractSingleField('keywordsTier1')" :disabled="reportActionDisabled"
+                                        :class="extractButtonClass"
                                         class="text-[10px] px-2 py-1 rounded transition-all" title="仅重新提取此字段">
                                         <i class="fas fa-rotate text-[8px]"></i>
                                     </button>
                                 </label>
-                                <input @input="onInputChange"
+                                <input @input="setProfileField('keywordsTier1', $event)"
                                     class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all placeholder:text-slate-300 font-mono"
                                     id="lab-keywords-tier1" placeholder="humidifiers for bedroom, cool mist humidifier"
-                                    type="text" x-model="profile.keywordsTier1" />
+                                    type="text" :value="profile.keywordsTier1" />
                             </div>
                             <!-- Negative Keywords -->
                             <div class="group">
@@ -130,23 +130,23 @@
                                     <i class="fa-solid fa-ban text-slate-400 text-[10px]"></i>
                                     限制词 <span class="text-slate-400 font-normal">- 不希望出现</span>
 
-                                    <span x-show="dnaConfidence.negative > 0"
-                                        :class="dnaConfidence.negative >= 70 ? 'bg-green-100 text-green-700' : dnaConfidence.negative >= 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-orange-100 text-orange-700'"
+                                    <span x-show="showDnaConfidence('negative')"
+                                        :class="getDnaConfidenceBadgeClass('negative')"
                                         class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold">
                                         <i class="fas fa-chart-line text-[8px]"></i>
-                                        <span x-text="`${dnaConfidence.negative}%`"></span>
+                                        <span x-text="getDnaConfidenceText('negative')"></span>
                                     </span>
 
-                                    <button @click="extractSingleField('negative')" :disabled="!hasReport"
-                                        :class="hasReport ? 'text-blue-600 hover:bg-blue-50' : 'text-slate-300 cursor-not-allowed'"
+                                    <button @click="extractSingleField('negative')" :disabled="reportActionDisabled"
+                                        :class="extractButtonClass"
                                         class="text-[10px] px-2 py-1 rounded transition-all" title="仅重新提取此字段">
                                         <i class="fas fa-rotate text-[8px]"></i>
                                     </button>
                                 </label>
-                                <input @input="onInputChange"
+                                <input @input="setProfileField('negative', $event)"
                                     class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all placeholder:text-slate-300"
                                     id="negative-keywords" placeholder="例如: bestseller / cure" type="text"
-                                    x-model="profile.negative" />
+                                    :value="profile.negative" />
                             </div>
                             <!-- Tier 2 Keywords -->
                             <div class="group">
@@ -155,25 +155,25 @@
                                     Tier 2 功能词 <span class="text-slate-400 font-normal">- 2-5个</span>
 
                                     <!-- 置信度徽章 -->
-                                    <span x-show="dnaConfidence.keywords > 0"
-                                        :class="dnaConfidence.keywords >= 70 ? 'bg-green-100 text-green-700' : dnaConfidence.keywords >= 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-orange-100 text-orange-700'"
+                                    <span x-show="showDnaConfidence('keywords')"
+                                        :class="getDnaConfidenceBadgeClass('keywords')"
                                         class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold">
                                         <i class="fas fa-chart-line text-[8px]"></i>
-                                        <span x-text="`${dnaConfidence.keywords}%`"></span>
+                                        <span x-text="getDnaConfidenceText('keywords')"></span>
                                     </span>
 
-                                    <button @click="extractSingleField('keywordsTier2')" :disabled="!hasReport"
-                                        :class="hasReport ? 'text-blue-600 hover:bg-blue-50' : 'text-slate-300 cursor-not-allowed'"
+                                    <button @click="extractSingleField('keywordsTier2')" :disabled="reportActionDisabled"
+                                        :class="extractButtonClass"
                                         class="text-[10px] px-2 py-1 rounded transition-all" title="仅重新提取此字段">
                                         <i class="fas fa-rotate text-[8px]"></i>
                                     </button>
                                 </label>
-                                <textarea @input="onInputChange" @focus="expandInput($event)"
+                                <textarea @input="setProfileField('keywordsTier2', $event)" @focus="expandInput($event)"
                                     @blur="restoreInput($event)"
                                     class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all resize-none placeholder:text-slate-300 font-mono"
                                     id="lab-keywords-tier2"
                                     placeholder="baby humidifier, easy to clean, quiet operation" rows="1"
-                                    x-model="profile.keywordsTier2"></textarea>
+                                    :value="profile.keywordsTier2"></textarea>
                             </div>
                             <!-- Target Audience -->
                             <div class="group">
@@ -183,24 +183,24 @@
                                     目标受众 <span class="text-slate-400 font-normal">- 客户特征</span>
 
                                     <!-- 置信度徽章 -->
-                                    <span x-show="dnaConfidence.audience > 0"
-                                        :class="dnaConfidence.audience >= 70 ? 'bg-green-100 text-green-700' : dnaConfidence.audience >= 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-orange-100 text-orange-700'"
+                                    <span x-show="showDnaConfidence('audience')"
+                                        :class="getDnaConfidenceBadgeClass('audience')"
                                         class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold">
                                         <i class="fas fa-chart-line text-[8px]"></i>
-                                        <span x-text="`${dnaConfidence.audience}%`"></span>
+                                        <span x-text="getDnaConfidenceText('audience')"></span>
                                     </span>
 
                                     <!-- 单字段提取按钮 -->
-                                    <button @click="extractSingleField('audience')" :disabled="!hasReport"
-                                        :class="hasReport ? 'text-blue-600 hover:bg-blue-50' : 'text-slate-300 cursor-not-allowed'"
+                                    <button @click="extractSingleField('audience')" :disabled="reportActionDisabled"
+                                        :class="extractButtonClass"
                                         class="text-[10px] px-2 py-1 rounded transition-all" title="仅重新提取此字段">
                                         <i class="fas fa-rotate text-[8px]"></i>
                                     </button>
                                 </label>
-                                <input @input="onInputChange"
+                                <input @input="setProfileField('audience', $event)"
                                     class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all placeholder:text-slate-300"
                                     id="lab-audience" placeholder="e.g. Busy moms, Tech enthusiasts" type="text"
-                                    x-model="profile.audience" />
+                                    :value="profile.audience" />
                             </div>
                             <!-- USPs -->
                             <div class="group">
@@ -210,25 +210,25 @@
                                     核心卖点 (USPs) <span class="text-slate-400 font-normal">- 可补充</span>
 
                                     <!-- 置信度徽章 -->
-                                    <span x-show="dnaConfidence.usps > 0"
-                                        :class="dnaConfidence.usps >= 70 ? 'bg-green-100 text-green-700' : dnaConfidence.usps >= 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-orange-100 text-orange-700'"
+                                    <span x-show="showDnaConfidence('usps')"
+                                        :class="getDnaConfidenceBadgeClass('usps')"
                                         class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold">
                                         <i class="fas fa-chart-line text-[8px]"></i>
-                                        <span x-text="`${dnaConfidence.usps}%`"></span>
+                                        <span x-text="getDnaConfidenceText('usps')"></span>
                                     </span>
 
                                     <!-- 单字段提取按钮 -->
-                                    <button @click="extractSingleField('usps')" :disabled="!hasReport"
-                                        :class="hasReport ? 'text-blue-600 hover:bg-blue-50' : 'text-slate-300 cursor-not-allowed'"
+                                    <button @click="extractSingleField('usps')" :disabled="reportActionDisabled"
+                                        :class="extractButtonClass"
                                         class="text-[10px] px-2 py-1 rounded transition-all" title="仅重新提取此字段">
                                         <i class="fas fa-rotate text-[8px]"></i>
                                     </button>
                                 </label>
-                                <textarea @input="onInputChange" @focus="expandInput($event)"
+                                <textarea @input="setProfileField('usps', $event)" @focus="expandInput($event)"
                                     @blur="restoreInput($event)"
                                     class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all resize-none placeholder:text-slate-300"
                                     id="lab-usps" placeholder="- 专利静音技术 (&lt;28dB)
-- 360度旋转喷嘴" rows="2" x-model="profile.usps"></textarea>
+- 360度旋转喷嘴" rows="2" :value="profile.usps"></textarea>
                             </div>
                             <!-- Specs -->
                             <div class="group">
@@ -238,25 +238,25 @@
                                     详细参数 (Specs) <span class="text-slate-400 font-normal">- 产品特征</span>
 
                                     <!-- 置信度徽章 -->
-                                    <span x-show="dnaConfidence.specs > 0"
-                                        :class="dnaConfidence.specs >= 70 ? 'bg-green-100 text-green-700' : dnaConfidence.specs >= 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-orange-100 text-orange-700'"
+                                    <span x-show="showDnaConfidence('specs')"
+                                        :class="getDnaConfidenceBadgeClass('specs')"
                                         class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold">
                                         <i class="fas fa-chart-line text-[8px]"></i>
-                                        <span x-text="`${dnaConfidence.specs}%`"></span>
+                                        <span x-text="getDnaConfidenceText('specs')"></span>
                                     </span>
 
                                     <!-- 单字段提取按钮 -->
-                                    <button @click="extractSingleField('specs')" :disabled="!hasReport"
-                                        :class="hasReport ? 'text-blue-600 hover:bg-blue-50' : 'text-slate-300 cursor-not-allowed'"
+                                    <button @click="extractSingleField('specs')" :disabled="reportActionDisabled"
+                                        :class="extractButtonClass"
                                         class="text-[10px] px-2 py-1 rounded transition-all" title="仅重新提取此字段">
                                         <i class="fas fa-rotate text-[8px]"></i>
                                     </button>
                                 </label>
-                                <textarea @input="onInputChange" @focus="expandInput($event)"
+                                <textarea @input="setProfileField('specs', $event)" @focus="expandInput($event)"
                                     @blur="restoreInput($event)"
                                     class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all resize-none placeholder:text-slate-300 font-mono"
                                     id="lab-specs" placeholder="材质: ABS + PP
-尺寸: 20x20x30cm" rows="2" x-model="profile.specs"></textarea>
+尺寸: 20x20x30cm" rows="2" :value="profile.specs"></textarea>
                             </div>
                         </div>
                         <!-- Social Hooks -->
@@ -266,10 +266,10 @@
                                 <i class="fab fa-instagram text-purple-400 text-[10px]"></i>
                                 植入社媒 Hook / 节日词 <span class="text-purple-400 font-normal">- 可补充</span>
                             </label>
-                            <input @input="onInputChange"
+                            <input @input="setProfileField('socialHook', $event)"
                                 class="w-full text-sm border-2 border-purple-200 rounded-xl p-3 bg-purple-50/30 text-purple-700 transition-all placeholder:text-purple-300"
                                 id="lab-social-hook" placeholder="例如: 🔥限时半价 / 🎄圣诞特供 / #SummerVibes" type="text"
-                                x-model="profile.socialHook" />
+                                :value="profile.socialHook" />
                         </div>
                     </div>
                 </div>
@@ -295,11 +295,11 @@
                                 <i class="fas fa-circle-notch fa-spin text-[10px]"></i> 检测中...
                             </div>
                             <!-- 展开/折叠所有维度按钮 -->
-                            <button @click="expandedDimensions.size > 0 ? collapseAllDimensions() : expandAllDimensions()"
+                            <button @click="toggleAllDimensions()"
                                     x-show="hasReport"
                                     class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all flex items-center justify-center"
-                                    :title="expandedDimensions.size > 0 ? '折叠所有维度' : '展开所有维度'">
-                                <i class="fas text-sm" :class="expandedDimensions.size > 0 ? 'fa-compress' : 'fa-expand'"></i>
+                                    :title="toggleAllDimensionsTitle">
+                                <i class="fas text-sm" :class="toggleAllDimensionsIconClass"></i>
                             </button>
                         </div>
                     </div>
@@ -345,9 +345,9 @@
                                 <span class="w-1 h-3.5 bg-orange-400 rounded-full"></span>
                                 文案语气 Tone
                             </label>
-                            <select @change="onInputChange"
+                            <select @change="setProfileField('tone', $event)"
                                 class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all hover:border-slate-300 cursor-pointer font-medium text-slate-700"
-                                id="lab-tone" x-model="profile.tone">
+                                id="lab-tone" :value="profile.tone">
                                 <option value="professional">Professional (专业)</option>
                                 <option value="exciting">Exciting (激动人心)</option>
                                 <option value="emotional">Emotional (情感共鸣)</option>
@@ -360,10 +360,10 @@
                                 <span class="w-1 h-3.5 bg-slate-300 rounded-full"></span>
                                 自定义规则 <span class="text-slate-400 font-normal">- 有就填</span>
                             </label>
-                            <textarea @input="onInputChange" @focus="expandInput($event)" @blur="restoreInput($event)"
+                            <textarea @input="setProfileField('customStrategy', $event)" @focus="expandInput($event)" @blur="restoreInput($event)"
                                 class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all resize-none placeholder:text-slate-300"
                                 id="lab-custom-strategy" placeholder="例如: 禁止使用'Best Seller'词汇..." rows="1"
-                                x-model="profile.customStrategy"></textarea>
+                                :value="profile.customStrategy"></textarea>
                         </div>
                     </div>
                     <!-- AI Optimization Toggles -->
@@ -376,9 +376,9 @@
                             <!-- COSMO -->
                             <label
                                 class="flex items-center gap-2.5 text-sm cursor-pointer group px-4 py-2.5 rounded-xl border-2 transition-all duration-200 has-[:checked]:bg-orange-50 has-[:checked]:border-orange-200 has-[:checked]:shadow-sm border-slate-150 hover:border-orange-200 bg-white">
-                                <input @change="onInputChange" checked=""
+                                <input @change="setProfileBoolean('useCosmo', $event)" :checked="profile.useCosmo"
                                     class="rounded text-orange-500 focus:ring-orange-500 w-4 h-4" id="opt-cosmo"
-                                    type="checkbox" x-model="profile.useCosmo" />
+                                    type="checkbox" />
                                 <div class="flex flex-col">
                                     <span
                                         class="text-xs font-semibold text-slate-700 group-hover:text-orange-600 transition-colors">COSMO
@@ -389,9 +389,9 @@
                             <!-- Rufus -->
                             <label
                                 class="flex items-center gap-2.5 text-sm cursor-pointer group px-4 py-2.5 rounded-xl border-2 transition-all duration-200 has-[:checked]:bg-orange-50 has-[:checked]:border-orange-200 has-[:checked]:shadow-sm border-slate-150 hover:border-orange-200 bg-white">
-                                <input @change="onInputChange" checked=""
+                                <input @change="setProfileBoolean('useRufus', $event)" :checked="profile.useRufus"
                                     class="rounded text-orange-500 focus:ring-orange-500 w-4 h-4" id="opt-rufus"
-                                    type="checkbox" x-model="profile.useRufus" />
+                                    type="checkbox" />
                                 <div class="flex flex-col">
                                     <span
                                         class="text-xs font-semibold text-slate-700 group-hover:text-orange-600 transition-colors">Rufus
@@ -402,9 +402,9 @@
                             <!-- Emoji -->
                             <label
                                 class="flex items-center gap-2.5 text-sm cursor-pointer group px-4 py-2.5 rounded-xl border-2 transition-all duration-200 has-[:checked]:bg-orange-50 has-[:checked]:border-orange-200 has-[:checked]:shadow-sm border-slate-150 hover:border-orange-200 bg-white">
-                                <input @change="onInputChange" checked=""
+                                <input @change="setProfileBoolean('useEmoji', $event)" :checked="profile.useEmoji"
                                     class="rounded text-orange-500 focus:ring-orange-500 w-4 h-4" id="opt-emoji"
-                                    type="checkbox" x-model="profile.useEmoji" />
+                                    type="checkbox" />
                                 <div class="flex flex-col">
                                     <span
                                         class="text-xs font-semibold text-slate-700 group-hover:text-orange-600 transition-colors">Emoji
@@ -469,8 +469,8 @@
                                 </div>
                                 <div class="relative z-10">
                                     <button
-                                        :class="isReady ? 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 cursor-pointer' : 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none'"
-                                        :disabled="!isReady" @click="generateListingPrompt"
+                                        :class="listingGenerateButtonClass"
+                                        :disabled="generateButtonDisabled" @click="generateListingPrompt"
                                         class="relative w-full py-3.5 font-bold rounded-xl transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-0.5 flex items-center justify-center gap-2.5 group overflow-hidden"
                                         id="btn-generate-prompt">
                                         <div
@@ -510,8 +510,8 @@
                                 </div>
                                 <div class="relative z-10">
                                     <button
-                                        :class="isReady ? 'bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 shadow-lg shadow-pink-700/40 hover:shadow-xl hover:shadow-pink-600/50 cursor-pointer' : 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none opacity-50'"
-                                        :disabled="!isReady" @click="generateVisualPrompt"
+                                        :class="visualGenerateButtonClass"
+                                        :disabled="generateButtonDisabled" @click="generateVisualPrompt"
                                         class="relative w-full py-3.5 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-0.5 flex items-center justify-center gap-2.5 group border border-pink-400/20 overflow-hidden"
                                         id="btn-generate-visual">
                                         <div
@@ -550,8 +550,8 @@
                                 <i class="fas fa-trash-alt text-xs"></i>
                             </button>
                         </div>
-                        <input @input="onInputChange" class="hidden" id="lab-char-limit" type="number" value="5000"
-                            x-model.number="profile.charLimit" />
+                        <input @input="setProfileNumber('charLimit', $event)" class="hidden" id="lab-char-limit" type="number"
+                            :value="profile.charLimit" />
                     </div>
                     <!-- Output Body -->
                     <div class="relative flex-1 bg-white overflow-hidden">
@@ -562,7 +562,7 @@
 // 3. 复制 Prompt 并发送给 AI 大模型
 
 // 💡 Tip: 填写越详细，生成效果越好" readonly="" style="pointer-events: auto !important; overflow-y: auto !important;"
-                            x-model="currentPrompt"></textarea>
+                            :value="currentPrompt"></textarea>
                         <!-- Footer Status Bar -->
                         <div
                             class="absolute bottom-0 left-0 right-0 px-5 py-2 bg-gradient-to-t from-white via-white to-transparent flex items-center justify-between">
@@ -573,7 +573,7 @@
                             <div
                                 class="flex items-center gap-1.5 text-xs text-slate-400 bg-slate-50 px-2.5 py-1 rounded-full border border-slate-100">
                                 <span
-                                    :class="isOverLimit ? 'font-medium text-red-600 animate-pulse' : 'font-bold text-slate-600'"
+                                    :class="promptTokenCountClass"
                                     id="prompt-word-count" x-text="formattedTokenCount">0</span>
                                 <span class="text-[10px]">tokens</span>
                             </div>

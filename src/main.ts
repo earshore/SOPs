@@ -53,26 +53,6 @@ import { loadingManager } from './common/utils/LoadingManager';
 import { animationManager } from './services/animation-manager';
 import { initializeAnimationStore } from './stores/animation-settings';
 
-// ✅ Import User Guide Modal (Vite Raw Import)
-import userGuideModalHtml from './components/modal/userGuideModal.html?raw';
-
-// Inject Modals
-document.addEventListener('DOMContentLoaded', (): void => {
-  // User Guide Modal
-  const guideContainer = document.getElementById('user-guide-container');
-  if (guideContainer) {
-    // ✅ 安全: 静态HTML模板，无用户输入
-    guideContainer.innerHTML = userGuideModalHtml;
-    Array.from(guideContainer.querySelectorAll('script')).forEach((script: HTMLScriptElement) => {
-      const newScript = document.createElement('script');
-      Array.from(script.attributes).forEach((attr: Attr) => newScript.setAttribute(attr.name, attr.value));
-      newScript.textContent = script.textContent;
-      document.body.appendChild(newScript);
-    });
-  }
-});
-
-
 // ✅ P1: 导入动作注册中心
 import {
   registerActionsWithLegacy,
@@ -114,7 +94,7 @@ import './modules/more/more';
 import './modules/app_center/app_center';
 
 // ✅ Alpine.js
-import Alpine from 'alpinejs';
+import Alpine from '@alpinejs/csp';
 
 // 🔧 关键修复: 确保 Alpine 在所有环境下都可通过 window.Alpine 访问
 // 这对于动态注册组件至关重要

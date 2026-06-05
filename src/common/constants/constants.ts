@@ -11,7 +11,7 @@ import { SystemError } from '@/common/errors/AppError';
 // ========================
 
 /** 应用版本号（用于缓存失效） */
-export const APP_VERSION = '1.0.1';
+export const APP_VERSION = '1.0.2';
 
 // ========================
 // USER AGENT POOL
@@ -191,10 +191,6 @@ export const SITE_DOMAIN_MAP: Record<string, string> = Object.entries(SITE_CONFI
 
 /** 代理服务URL */
 export const PROXY_URLS: Record<string, string> = {
-  allorigins: "https://api.allorigins.win/raw?url=",
-  corsproxy: "https://corsproxy.io/?",
-  corsanywhere: "https://cors-anywhere.herokuapp.com/",
-  thingproxy: "https://thingproxy.freeboard.io/fetch/",
 };
 
 // ========================

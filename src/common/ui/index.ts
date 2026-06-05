@@ -41,13 +41,6 @@ export {
   clearSidebarSearch
 } from './search';
 
-// 用户指南
-export {
-  openUserGuide,
-  closeUserGuide,
-  switchGuideTab
-} from './userGuide';
-
 // 新路由系统（推荐使用）
 export { navigateTo, getRouter, getCurrentRoute, hasRoute } from '../router/initRouter';
 
@@ -96,7 +89,6 @@ window.clearSidebarSearch = clearSidebarSearch;
 
 import { registerActions } from '../utils/actionRegistry';
 import { toggleSOPGroup, scrollToSOPModule, scrollToHubModule, scrollToMoreModule } from './navigation';
-import { openUserGuide, closeUserGuide, switchGuideTab } from './userGuide';
 import { routeIdToPath } from '../router/routePaths';
 
 import { Logger } from '../../services/loggerService';
@@ -117,9 +109,6 @@ registerActions({
   'clear-sop-search': clearSOPSearch,
   'clear-hub-search': clearHubSearch,
   'clear-sidebar-search': clearSidebarSearch,
-  'open-user-guide': openUserGuide,
-  'close-user-guide': closeUserGuide,
-  'switch-guide-tab': (params: Record<string, unknown>) => switchGuideTab({ tab: params.tab as string }),
   'scroll-to-sop-module': (params: Record<string, unknown>) => scrollToSOPModule(params.category as string),
   'scroll-to-hub-module': (params: Record<string, unknown>) => scrollToHubModule(params.category as string),
   'scroll-to-more-module': (params: Record<string, unknown>) => scrollToMoreModule(params.category as string),

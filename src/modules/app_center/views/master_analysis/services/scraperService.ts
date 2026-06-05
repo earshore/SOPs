@@ -4,7 +4,7 @@
 // 🎯 P0优化: 完整类型定义
 // ==========================================
 
-import { LANGUAGE_HEADERS, PROXY_URLS } from '../../../../../common/constants/constants';
+import { LANGUAGE_HEADERS } from '../../../../../common/constants/constants';
 import { parseProductPage, parseReviews } from "./parserService";
 import { sleep, getErrorSummary } from '../../../../../common/ui';
 import { HistoryService } from "./historyService";
@@ -75,7 +75,7 @@ type URLStrategy = (targetUrl: string, key?: string) => string;
 
 const URL_STRATEGIES: Record<string, URLStrategy> = {
     scraperapi: (targetUrl, key) =>
-        `http://api.scraperapi.com?api_key=${key}&url=${encodeURIComponent(targetUrl)}`,
+        `https://api.scraperapi.com?api_key=${key}&url=${encodeURIComponent(targetUrl)}`,
     zenrows: (targetUrl, key) =>
         `https://api.zenrows.com/v1/?apikey=${key}&url=${encodeURIComponent(targetUrl)}&js_render=true`,
     brightdata: (targetUrl, key) =>
@@ -85,18 +85,12 @@ const URL_STRATEGIES: Record<string, URLStrategy> = {
         const finalBase = (baseUrl!.endsWith("url=") || baseUrl!.endsWith("url")) ? baseUrl : `${baseUrl}${separator}`;
         return `${finalBase}${encodeURIComponent(targetUrl)}`;
     },
-    allorigins: (targetUrl) =>
-        `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`,
-    corsproxy: (targetUrl) =>
-        `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
-    corsanywhere: (targetUrl) =>
-        `https://cors-anywhere.herokuapp.com/${targetUrl}`,
     custom_proxy: (targetUrl, proxyUrl) => `${proxyUrl}${encodeURIComponent(targetUrl)}`,
     custom: (targetUrl, proxyUrl) => `${proxyUrl}${encodeURIComponent(targetUrl)}`
 };
 
 function constructFetchUrl(targetUrl: string, proxyConfig: ProxyConfig): string {
-    const { type = "allorigins", customUrl } = proxyConfig;
+    const { type = "custom_api", customUrl } = proxyConfig;
     const strategy = URL_STRATEGIES[type];
 
     if (strategy) {
@@ -114,7 +108,13 @@ function constructFetchUrl(targetUrl: string, proxyConfig: ProxyConfig): string 
         }
         return strategy(targetUrl);
     }
-    return (PROXY_URLS.allorigins || "https://api.allorigins.win/get?url=") + encodeURIComponent(targetUrl);
+    throw new ValidationError(
+        `未支持的采集代理类型`,
+        'SCRAPER_SVC_001',
+        'type',
+        type,
+        { module: 'ScraperService', action: 'constructFetchUrl', proxyType: type }
+    );
 }
 
 // ----------------------------------------
@@ -149,9 +149,8 @@ async function fetchWithProxy(url: string, site: string, options: FetchOptions =
     const separator = url.includes("?") ? "&" : "?";
     const urlWithLang = `${url}${separator}language=${headers.locale}`;
 
-    const isAllOriginsJson = proxyConfig.type === 'allorigins';
-    const isCommercial = ['scraperapi', 'zenrows', 'brightdata', 'custom_api'].includes(proxyConfig.type || '');
-    const isFreeProxy = proxyConfig.type === 'allorigins';
+            const isCommercial = ['scraperapi', 'zenrows', 'brightdata', 'custom_api'].includes(proxyConfig.type || '');
+            const isFreeProxy = false;
 
     let lastError: Error | undefined;
 
@@ -212,13 +211,6 @@ async function fetchWithProxy(url: string, site: string, options: FetchOptions =
             }
 
             let text = await res.text();
-
-            if (isAllOriginsJson) {
-                try {
-                    const json = JSON.parse(text);
-                    text = json.contents;
-                } catch (e) { /* ignore */ }
-            }
 
             if (!text || text.length < 200) {
                 if (!isCommercial) {

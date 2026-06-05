@@ -83,7 +83,7 @@ export interface ScrapedProduct {
  * 代理配置
  */
 export interface ProxyConfig {
-  type?: 'allorigins' | 'corsproxy' | 'corsanywhere' | 'scraperapi' | 'zenrows' | 'brightdata' | 'custom_api' | 'custom_proxy' | 'custom';
+  type?: 'scraperapi' | 'zenrows' | 'brightdata' | 'custom_api' | 'custom_proxy' | 'custom';
   customUrl?: string;
   enabled?: boolean;
 }

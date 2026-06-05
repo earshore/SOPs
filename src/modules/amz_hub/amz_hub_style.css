@@ -4,7 +4,7 @@
 
 /* 使用全局模块高亮动画 - 见 src/css/animations/keyframes.css */
 .hub-module-highlight {
-  animation: moduleHighlight var(--duration-var(--duration-var(--duration-2s))) var(--var(--var(--ease-out)));
+  animation: moduleHighlight var(--duration-2s, 2s) var(--ease-out, ease-out);
 }
 
 /* 确保模块容器允许下拉框溢出 */
@@ -66,7 +66,7 @@
 /* 选中状态的 ASIN 卡片 */
 .asin-card.selected {
   background: var(--color-slate-50);
-  ring: 2px solid var(--color-blue-500);
+  box-shadow: 0 0 0 2px var(--color-blue-500);
   transform: scale(1.01);
 }
 
@@ -100,7 +100,7 @@
 .editing-mode .editable-item {
   background: var(--color-amber-50);
   /* 极淡的黄色背景提示 */
-  animation: pulse var(--duration-var(--duration-var(--duration-2s))) infinite;
+  animation: pulse var(--duration-2s, 2s) infinite;
 }
 
 /* ----------------------------------------
@@ -113,7 +113,7 @@
   color: var(--color-slate-500);
   font-weight: 600;
   font-size: 0.875rem;
-  transition: all var(--duration-normal) var(--var(--var(--ease-in-out)));
+  transition: all var(--duration-normal, 300ms) var(--ease-in-out, ease-in-out);
   border: 1px solid transparent;
 }
 

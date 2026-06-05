@@ -112,7 +112,7 @@ export const LLMRequestOptionsSchema = z.object({
  * 代理配置 Schema
  */
 export const ProxyConfigSchema = z.object({
-  type: z.enum(['allorigins', 'scraperapi', 'zenrows', 'brightdata', 'custom_api', 'custom_proxy']),
+  type: z.enum(['scraperapi', 'zenrows', 'brightdata', 'custom_api', 'custom_proxy']),
   customUrl: z.string().optional()
 });
 

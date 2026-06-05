@@ -88,7 +88,7 @@ export default defineConfig({
     // 依赖优化配置
     optimizeDeps: {
         include: [
-            'alpinejs',
+            '@alpinejs/csp',
             'marked',
             'zod',
             'zustand',
@@ -123,7 +123,7 @@ export default defineConfig({
     build: {
         outDir: 'dist',
         emptyOutDir: true,
-        sourcemap: true, // 生产环境关闭sourcemap减小体积
+        sourcemap: false, // 生产环境关闭sourcemap减小体积
         // 代码分割优化
         rollupOptions: {
             // 确保.ts文件被正确处理为.js
@@ -132,7 +132,7 @@ export default defineConfig({
                 // 手动分包策略 - 回退到简单对象形式避免 Alpine 组件问题
                 manualChunks: {
                     // 核心框架
-                    'vendor-core': ['alpinejs'],
+                    'vendor-core': ['@alpinejs/csp'],
                     // 图表库（懒加载，但构建时仍需分包）
                     'vendor-charts': ['chart.js'],
                     // Markdown渲染

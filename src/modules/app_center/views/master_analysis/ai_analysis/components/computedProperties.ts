@@ -36,6 +36,18 @@ export interface ComputedProperties {
   fullReportData: FullReportData | null;
   totalTokenCount: number;
   formattedTotalTokenCount: string;
+  listingAnalysisTargets: typeof analysisTargets;
+  reviewAnalysisTargets: typeof analysisTargets;
+  totalFeatureBulletCount: number;
+  totalCustomerReviewCount: number;
+  productSummaryText: string;
+  dataSourceMetaText: string;
+  hasNoAvailableAsins: boolean;
+  hasNoScraperData: boolean;
+  hasSelectedAnalysisInput: boolean;
+  hasMissingAnalysisInput: boolean;
+  selectedTaskCountText: string;
+  promptPanelToggleText: string;
 }
 
 /**
@@ -139,6 +151,54 @@ export function createComputedProperties(context: AlpineContext): ComputedProper
      */
     get analysisTargets() {
       return analysisTargets;
+    },
+
+    get listingAnalysisTargets() {
+      return analysisTargets.filter(target => target.source === 'Listings');
+    },
+
+    get reviewAnalysisTargets() {
+      return analysisTargets.filter(target => target.source === 'Reviews');
+    },
+
+    get totalFeatureBulletCount(): number {
+      return this.currentProducts.reduce((sum, product) => sum + product.feature_bullets.length, 0);
+    },
+
+    get totalCustomerReviewCount(): number {
+      return this.currentProducts.reduce((sum, product) => sum + product.customer_reviews.length, 0);
+    },
+
+    get productSummaryText(): string {
+      return `包含 ${this.currentProducts.length} 个产品，共 ${this.totalCustomerReviewCount} 条评论`;
+    },
+
+    get dataSourceMetaText(): string {
+      return `市场: ${this.dataSourceMarketplace} · 抓取时间: ${this.dataSourceTimestamp}`;
+    },
+
+    get hasNoAvailableAsins(): boolean {
+      return this.availableAsins.length === 0;
+    },
+
+    get hasNoScraperData(): boolean {
+      return !this.hasScraperData;
+    },
+
+    get hasSelectedAnalysisInput(): boolean {
+      return context.selectedTargets.length > 0 && this.currentProducts.length > 0;
+    },
+
+    get hasMissingAnalysisInput(): boolean {
+      return context.selectedTargets.length === 0 || context.selectedAsins.length === 0;
+    },
+
+    get selectedTaskCountText(): string {
+      return `${context.selectedTargets.length} 个任务`;
+    },
+
+    get promptPanelToggleText(): string {
+      return `${context.showPromptPanel ? '收起' : '展开'} 预览`;
     },
 
     /**

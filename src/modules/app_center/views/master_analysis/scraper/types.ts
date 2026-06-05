@@ -59,9 +59,6 @@ export type TaskStatusCallback = (asin: string, status: TaskStatus, message: str
  * 代理类型
  */
 export type ProxyType = 
-    | 'allorigins'      // 自动托管
-    | 'corsproxy'       // CORS代理
-    | 'corsanywhere'    // CORS Anywhere
     | 'scraperapi'      // ScraperAPI
     | 'zenrows'         // ZenRows
     | 'brightdata'      // Bright Data

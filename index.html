@@ -13,10 +13,6 @@
     <link rel="preconnect" href="https://cdn.bootcdn.net" crossorigin>
     <link rel="dns-prefetch" href="https://cdn.bootcdn.net">
 
-    <!-- 预加载关键资源 -->
-    <link rel="modulepreload" href="/src/main.ts">
-    <link rel="preload" href="/src/css/main.css" as="style">
-
     <link rel="preconnect" href="https://api.openai.com" crossorigin>
     <link rel="dns-prefetch" href="https://api.openai.com">
     <link rel="preconnect" href="https://generativelanguage.googleapis.com" crossorigin>
@@ -208,14 +204,6 @@
                                                     <span>全局设置</span>
                                                 </button>
                                             </li>
-                                            <li>
-                                                <button data-action="open-user-guide" class="quick-access-item">
-                                                    <div class="quick-access-icon">
-                                                        <i class="fas fa-book"></i>
-                                                    </div>
-                                                    <span>使用指南</span>
-                                                </button>
-                                            </li>
                                         </ul>
                                     </div>
 
@@ -225,7 +213,7 @@
                                             <i class="fas fa-lightbulb"></i>
                                         </div>
                                         <p class="tip-card-text">
-                                            这里包含系统设置和使用指南等实用功能。
+                                            这里包含系统设置等实用功能。
                                         </p>
                                     </div>
                                 </div>
@@ -277,7 +265,6 @@
     <div id="modal-container"></div>
 
     <!-- ========== User Guide Container ========== -->
-    <div id="user-guide-container"></div>
 
     <!-- ========== Global Loading Overlay ========== -->
     <div id="global-loading" class="global-loading hidden">

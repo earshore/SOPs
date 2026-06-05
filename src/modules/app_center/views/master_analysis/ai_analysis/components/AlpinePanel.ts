@@ -44,6 +44,7 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
     useRealData: true,
     dataSource: 'scraper' as 'sample' | 'scraper',
     showDataSourceBanner: true,
+    productSummaryTooltipVisible: false,
     // ========== Collapsible UI State ==========
     // 默认收起选择区：收起只展示一个大标题，展开同时展示 ASIN 与分析目标模块
     showSelectionPanel: false,
@@ -181,6 +182,98 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
       this.showSelectionPanel = !this.showSelectionPanel;
     },
 
+    get selectionPanelButtonClass(): string {
+      return this.showSelectionPanel ? 'bg-slate-50/70 border-b border-slate-200/70' : '';
+    },
+
+    get showSelectionSummary(): boolean {
+      return !this.showSelectionPanel;
+    },
+
+    showProductSummaryTooltip(): void {
+      this.productSummaryTooltipVisible = true;
+    },
+
+    hideProductSummaryTooltip(): void {
+      this.productSummaryTooltipVisible = false;
+    },
+
+    get selectionPanelChevronClass(): string {
+      return `fa-solid fa-chevron-${this.showSelectionPanel ? 'up' : 'down'} text-slate-400 text-base`;
+    },
+
+    get promptPanelChevronClass(): string {
+      return `fa-solid fa-chevron-${this.showPromptPanel ? 'up' : 'down'}`;
+    },
+
+    getPromptItemChevronClass(index: number): string {
+      return `fa-solid fa-chevron-${this.expandedPromptIndex === index ? 'up' : 'down'} text-slate-400`;
+    },
+
+    getTargetById(targetId: string) {
+      return analysisTargets.find(target => target.id === targetId);
+    },
+
+    getTargetName(targetId: string): string {
+      return this.getTargetById(targetId)?.name || targetId;
+    },
+
+    getTargetDescription(targetId: string): string {
+      return this.getTargetById(targetId)?.description || '';
+    },
+
+    getPromptNumber(index: number): number {
+      return index + 1;
+    },
+
+    getPromptTokenCountText(targetId: string): string {
+      return this.getPromptTokenCount(targetId).toLocaleString();
+    },
+
+    getPromptCharCountText(targetId: string): string {
+      return this.getPromptText(targetId).length.toLocaleString();
+    },
+
+    isTargetSelected(targetId: string): boolean {
+      return this.selectedTargets.includes(targetId);
+    },
+
+    getAsinOptionClass(asin: string): string {
+      return this.selectedAsins.includes(asin) ? 'bg-indigo-50 border-indigo-300' : 'bg-slate-50 border-slate-200 hover:border-indigo-200';
+    },
+
+    getAsinTextClass(asin: string): string {
+      return this.selectedAsins.includes(asin) ? 'text-indigo-700' : 'text-slate-700';
+    },
+
+    getListingTargetCardClass(targetId: string): string {
+      return this.isTargetSelected(targetId) ? 'border-blue-300 bg-blue-50 shadow-sm' : 'border-slate-100 bg-slate-50/50 hover:border-slate-200 hover:bg-white';
+    },
+
+    getReviewTargetCardClass(targetId: string): string {
+      return this.isTargetSelected(targetId) ? 'border-amber-300 bg-amber-50 shadow-sm' : 'border-slate-100 bg-slate-50/50 hover:border-slate-200 hover:bg-white';
+    },
+
+    getListingTargetIconWrapClass(targetId: string): string {
+      return this.isTargetSelected(targetId) ? 'bg-blue-50' : 'bg-slate-100 group-hover:bg-slate-200';
+    },
+
+    getListingTargetIconClass(targetId: string): string {
+      return `${this.getTargetById(targetId)?.icon || 'fa-solid fa-circle'} text-blue-600`;
+    },
+
+    getReviewTargetIconWrapClass(targetId: string): string {
+      return this.isTargetSelected(targetId) ? 'bg-amber-50' : 'bg-slate-100 group-hover:bg-slate-200';
+    },
+
+    getReviewTargetIconClass(targetId: string): string {
+      return `${this.getTargetById(targetId)?.icon || 'fa-solid fa-circle'} text-amber-600`;
+    },
+
+    getTargetCheckClass(targetId: string): string {
+      return this.isTargetSelected(targetId) ? 'border-indigo-500 bg-indigo-500' : 'border-slate-300 group-hover:border-slate-400';
+    },
+
     togglePromptPanel() {
       const ctx = this as unknown as AlpineContext & ComputedProperties;
       actions.togglePromptPanel(ctx);
@@ -199,6 +292,302 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
     toggleDataSource() {
       const ctx = this as unknown as AlpineContext & ComputedProperties;
       actions.toggleDataSource(ctx);
+    },
+
+    get hasAvailableAsins(): boolean {
+      const ctx = this as unknown as AlpineContext & ComputedProperties;
+      return ctx.availableAsins.length > 0;
+    },
+
+    get hasCurrentProducts(): boolean {
+      const ctx = this as unknown as AlpineContext & ComputedProperties;
+      return ctx.currentProducts.length > 0;
+    },
+
+    get hasMoreCurrentProducts(): boolean {
+      const ctx = this as unknown as AlpineContext & ComputedProperties;
+      return ctx.currentProducts.length > 2;
+    },
+
+    get hasTotalTokenCount(): boolean {
+      const ctx = this as unknown as AlpineContext & ComputedProperties;
+      return ctx.totalTokenCount > 0;
+    },
+
+    get isUsingSampleData(): boolean {
+      return !this.useRealData;
+    },
+
+    get dataSourceToggleLabelClass(): string {
+      return this.useRealData ? '' : 'font-semibold text-slate-700';
+    },
+
+    get realDataToggleLabelClass(): string {
+      return this.useRealData ? 'font-semibold text-slate-700' : '';
+    },
+
+    get dataSourceToggleTrackClass(): string {
+      return this.useRealData ? 'bg-indigo-600' : 'bg-slate-300';
+    },
+
+    get dataSourceToggleThumbClass(): string {
+      return this.useRealData ? 'translate-x-6' : 'translate-x-1';
+    },
+
+    get showMissingRealDataNotice(): boolean {
+      const ctx = this as unknown as AlpineContext & ComputedProperties;
+      return this.useRealData && !ctx.hasScraperData;
+    },
+
+    get dataSourceLabelText(): string {
+      const ctx = this as unknown as AlpineContext & ComputedProperties;
+      return `数据源: ${ctx.dataSourceLabel}`;
+    },
+
+    get analysisHeroIconWrapClass(): string {
+      return this.isAnalyzing ? 'bg-white/20' : 'bg-white/10';
+    },
+
+    get analysisHeroIconClass(): string {
+      if (this.progress >= 100) return 'fa-solid fa-circle-check';
+      return this.isAnalyzing ? 'fa-solid fa-robot animate-pulse' : 'fa-solid fa-bolt';
+    },
+
+    get isAnalysisComplete(): boolean {
+      return this.progress >= 100;
+    },
+
+    get isAnalysisRunning(): boolean {
+      return this.isAnalyzing && this.progress < 100;
+    },
+
+    get isAnalysisIdle(): boolean {
+      return !this.isAnalyzing && this.progress < 100;
+    },
+
+    get hasAnalysisSelection(): boolean {
+      return this.selectedTargets.length > 0 && this.selectedAsins.length > 0;
+    },
+
+    get needsAnalysisSelection(): boolean {
+      return !this.isAnalyzing && !this.hasAnalysisSelection;
+    },
+
+    get canRunAnalysis(): boolean {
+      const ctx = this as unknown as AlpineContext & ComputedProperties;
+      return this.selectedTargets.length > 0 && ctx.hasData && !this.isAnalyzing;
+    },
+
+    get runAnalysisDisabled(): boolean {
+      return !this.canRunAnalysis;
+    },
+
+    get analysisNotRunning(): boolean {
+      return !this.isAnalyzing;
+    },
+
+    get jsonViewerCollapsed(): boolean {
+      return !this.showJsonViewer;
+    },
+
+    get runAnalysisButtonClass(): string {
+      if (this.isAnalyzing) return 'bg-white/20 text-white cursor-wait backdrop-blur-sm border border-white/30';
+      return this.canRunAnalysis
+        ? 'bg-white text-indigo-600 hover:bg-indigo-50 hover:scale-105 border border-white/50'
+        : 'bg-white/10 text-white/40 cursor-not-allowed border border-white/10';
+    },
+
+    get showRunDisabledHint(): boolean {
+      return !this.canRunAnalysis && !this.isAnalyzing;
+    },
+
+    get isMissingAsinAndTarget(): boolean {
+      return this.selectedTargets.length === 0 && this.selectedAsins.length === 0;
+    },
+
+    get isMissingTargetOnly(): boolean {
+      return this.selectedTargets.length === 0 && this.selectedAsins.length > 0;
+    },
+
+    get isMissingAsinOnly(): boolean {
+      return this.selectedTargets.length > 0 && this.selectedAsins.length === 0;
+    },
+
+    get isMissingLoadedData(): boolean {
+      const ctx = this as unknown as AlpineContext & ComputedProperties;
+      return this.selectedTargets.length > 0 && this.selectedAsins.length > 0 && !ctx.hasData;
+    },
+
+    get progressText(): string {
+      return `${Math.round(this.progress)}%`;
+    },
+
+    get progressStyle(): string {
+      return `width: ${this.progress}%`;
+    },
+
+    get progressDataStepClass(): string {
+      return this.progress >= 0 ? 'text-white/80' : '';
+    },
+
+    get progressNlpStepClass(): string {
+      return this.progress >= 33 ? 'text-white/80' : '';
+    },
+
+    get progressInsightStepClass(): string {
+      return this.progress >= 66 ? 'text-white/80' : '';
+    },
+
+    get progressDoneStepClass(): string {
+      return this.progress >= 100 ? 'text-white/80' : '';
+    },
+
+    get reportStatusText(): string {
+      return this.isAnalyzing ? '分析进行中，结果实时更新' : '分析结果';
+    },
+
+    get reportCompletedAtText(): string {
+      const report = this.analysisReport as { _metadata?: { analyzedAt?: string } } | null;
+      const analyzedAt = report && typeof report === 'object' ? report._metadata?.analyzedAt : undefined;
+      return new Date(analyzedAt || Date.now()).toLocaleTimeString('zh-CN');
+    },
+
+    get reportStatusBadgeClass(): string {
+      return this.isAnalyzing ? 'bg-blue-500/20 text-blue-300 border-blue-400/30' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
+    },
+
+    get reportStatusIconClass(): string {
+      return this.isAnalyzing ? 'fa-solid fa-bolt animate-pulse' : 'fa-solid fa-circle-check';
+    },
+
+    get reportStatusBadgeText(): string {
+      return this.isAnalyzing ? '实时生成' : '已完成';
+    },
+
+    get jsonViewerChevronClass(): string {
+      return `fa-solid fa-chevron-${this.showJsonViewer ? 'up' : 'down'}`;
+    },
+
+    get selectedAsinsJsonText(): string {
+      return `"${this.selectedAsins.join('", "')}"`;
+    },
+
+    get hasReportWithResults(): boolean {
+      return this.hasReport && this.reportResults.length > 0;
+    },
+
+    get hasReportListingsResults(): boolean {
+      return this.reportListingsResults.length > 0;
+    },
+
+    get hasReportReviewsResults(): boolean {
+      return this.reportReviewsResults.length > 0;
+    },
+
+    get hasNoReportIdle(): boolean {
+      return !this.hasReport && !this.isAnalyzing;
+    },
+
+    get overallConfidenceAriaLabel(): string {
+      return `整体置信度 ${this.overallConfidencePercent}%`;
+    },
+
+    get overallConfidenceLevelText(): string {
+      return `置信度等级: ${this.getConfidenceLevel(this.overallConfidencePercent)}`;
+    },
+
+    getListingsResultCountText(): string {
+      return `${this.reportListingsResults.length} 项`;
+    },
+
+    getReviewsResultCountText(): string {
+      return `${this.reportReviewsResults.length} 项`;
+    },
+
+    showTargetConfidence(targetId: string): boolean {
+      return this.hasConfidenceData && this.getTargetConfidence(targetId) > 0;
+    },
+
+    getTargetConfidenceText(targetId: string): string {
+      return `${this.getTargetConfidence(targetId)}%`;
+    },
+
+    getResultColorEnd(targetId: string): string {
+      const color = this.getResultColor(targetId);
+      const colorMap: Record<string, string> = {
+        amber: 'orange',
+        orange: 'red',
+        purple: 'indigo',
+        teal: 'cyan',
+        rose: 'pink'
+      };
+      return colorMap[color] || 'indigo';
+    },
+
+    getListingResultHeaderClass(targetId: string): string {
+      const color = this.getResultColor(targetId);
+      return `bg-gradient-to-r from-${color}-500 via-${color}-600 to-indigo-600`;
+    },
+
+    getReviewResultHeaderClass(targetId: string): string {
+      const color = this.getResultColor(targetId);
+      const end = this.getResultColorEnd(targetId);
+      return `bg-gradient-to-r from-${color}-500 via-${color}-600 to-${end}-600`;
+    },
+
+    getResultIconWrapClass(targetId: string): string {
+      return `bg-${this.getResultColor(targetId)}-500/20`;
+    },
+
+    getResultIconDisplayClass(targetId: string): string {
+      return `${this.getResultIcon(targetId)} text-xl`;
+    },
+
+    getResultCategoryClass(targetId: string): string {
+      const color = this.getResultColor(targetId);
+      return `bg-${color}-50 text-${color}-700`;
+    },
+
+    getHighlightClass(type: string): Record<string, boolean> {
+      return {
+        'bg-gradient-to-r from-red-50 to-rose-50 text-red-700 border-red-200': type === 'danger',
+        'bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 border-emerald-200': type === 'success',
+        'bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 border-amber-200': type === 'warning',
+        'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border-blue-200': type === 'info'
+      };
+    },
+
+    getHighlightIconClass(type: string): Record<string, boolean> {
+      return {
+        'fa-circle-exclamation text-red-500': type === 'danger',
+        'fa-circle-check text-emerald-500': type === 'success',
+        'fa-triangle-exclamation text-amber-500': type === 'warning',
+        'fa-circle-info text-blue-500': type === 'info'
+      };
+    },
+
+    getReportJsonKbText(): string {
+      const ctx = this as unknown as AlpineContext & ComputedProperties;
+      return (JSON.stringify(ctx.reportFullData).length / 1024).toFixed(1);
+    },
+
+    getReportJsonTokenText(): string {
+      const ctx = this as unknown as AlpineContext & ComputedProperties;
+      return Math.ceil(JSON.stringify(ctx.reportFullData).length / 4).toLocaleString();
+    },
+
+    getReportJsonCharText(): string {
+      const ctx = this as unknown as AlpineContext & ComputedProperties;
+      return JSON.stringify(ctx.reportFullData).length.toLocaleString();
+    },
+
+    getHighlightedReportJson(): string {
+      const ctx = this as unknown as AlpineContext & ComputedProperties;
+      return this.highlightJson(JSON.stringify(ctx.reportFullData, null, 2));
+    },
+
+    isPromptExpanded(index: number): boolean {
+      return this.expandedPromptIndex === index;
     },
 
     copyPrompt(index: number) {
