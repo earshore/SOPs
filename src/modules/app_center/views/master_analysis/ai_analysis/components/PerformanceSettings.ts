@@ -25,7 +25,7 @@ export interface PerformanceSettings {
  * 默认设置
  */
 const DEFAULT_SETTINGS: PerformanceSettings = {
-  maxConcurrency: 8,
+  maxConcurrency: 4,
   enableCache: true,
   failureStrategy: 'continue',
   settingsVersion: SETTINGS_VERSION

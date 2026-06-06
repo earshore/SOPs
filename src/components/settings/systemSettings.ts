@@ -308,8 +308,14 @@ const SettingsPanel = (): SettingsPanelData => ({
     async openPerformanceMonitor(): Promise<void> {
         try {
             const { performanceMonitor } = await import('../../common/devtools/PerformanceMonitor');
+
+            // 确保面板已初始化
+            if (!(performanceMonitor as any).container) {
+                performanceMonitor.initialize();
+            }
+
             performanceMonitor.show();
-            showToast('监控面板已打开', { type: 'success' });
+            showToast('监控面板已打开（右上角），快捷键 Ctrl+Shift+P 切换显示。注意：仅在开发模式下可用', { type: 'success', duration: 5000 });
         } catch (error) {
             Logger.error('Failed to open performance monitor:', error);
             showToast('打开监控面板失败', { type: 'error' });
