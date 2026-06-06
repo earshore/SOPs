@@ -9,7 +9,6 @@ import { analysisTargets } from '../config/analysisTargets';
 import { createComputedProperties } from './computedProperties';
 import type { AnalysisReport } from '@/types/modules-business';
 
-import { Logger } from '../../../../../../services/loggerService';
 /**
  * 创建 AI 分析面板组件（优化版）
  * 使用 Zustand 订阅自动同步状态
@@ -63,42 +62,42 @@ export function createAiAnalysisPanelOptimized(): Record<string, unknown> {
     get reportConfidence() {
       const report = appStore.getState().analysis.analysisReport;
       if (!report || typeof report === 'string') {
-        Logger.debug('[置信度] reportConfidence: 报告不存在或为字符串');
+        console.log('[置信度] reportConfidence: 报告不存在或为字符串');
         return null;
       }
       if (!report._metadata) {
-        Logger.warn('[置信度] reportConfidence: 报告缺少 _metadata 字段');
+        console.warn('[置信度] reportConfidence: 报告缺少 _metadata 字段');
         return null;
       }
       const confidence = report._metadata.confidence || null;
-      Logger.debug('[置信度] reportConfidence:', confidence);
+      console.log('[置信度] reportConfidence:', confidence);
       return confidence;
     },
 
     get overallConfidence() {
       const report = appStore.getState().analysis.analysisReport;
       if (!report || typeof report === 'string') {
-        Logger.debug('[置信度] overallConfidence: 报告不存在或为字符串');
+        console.log('[置信度] overallConfidence: 报告不存在或为字符串');
         return 0;
       }
       if (!report._metadata) {
-        Logger.warn('[置信度] overallConfidence: 报告缺少 _metadata 字段');
+        console.warn('[置信度] overallConfidence: 报告缺少 _metadata 字段');
         return 0;
       }
       const overall = report._metadata.overallConfidence || 0;
-      Logger.debug('[置信度] overallConfidence:', overall);
+      console.log('[置信度] overallConfidence:', overall);
       return overall;
     },
 
     get overallConfidencePercent() {
       const percent = Math.round((this.overallConfidence as number) * 100);
-      Logger.debug('[置信度] overallConfidencePercent:', percent + '%');
+      console.log('[置信度] overallConfidencePercent:', percent + '%');
       return percent;
     },
 
     get hasConfidenceData() {
       const hasData = !!this.reportConfidence;
-      Logger.debug('[置信度] hasConfidenceData:', hasData);
+      console.log('[置信度] hasConfidenceData:', hasData);
       return hasData;
     },
 
@@ -166,7 +165,7 @@ export function createAiAnalysisPanelOptimized(): Record<string, unknown> {
 
     // ========== 生命周期 ==========
     init() {
-      Logger.debug('[Alpine 组件] 🚀 初始化 AI 分析面板（优化版）');
+      console.log('[Alpine 组件] 🚀 初始化 AI 分析面板（优化版）');
 
       // 从 Zustand 初始化状态
       const scrapedData = appStore.getState().scraper.scrapedData;
@@ -198,11 +197,11 @@ export function createAiAnalysisPanelOptimized(): Record<string, unknown> {
         }
       });
 
-      Logger.debug('[Alpine 组件] ✅ 初始化完成');
+      console.log('[Alpine 组件] ✅ 初始化完成');
     },
 
     destroy() {
-      Logger.debug('[Alpine 组件] 🔄 销毁组件');
+      console.log('[Alpine 组件] 🔄 销毁组件');
       // 清理订阅
       if (typeof this._unsubscribe === 'function') {
         this._unsubscribe();
@@ -326,12 +325,12 @@ export function createAiAnalysisPanelOptimized(): Record<string, unknown> {
     // ========== 数据加载 ==========
     async startAnalysis() {
       if ((this.selectedAsins as string[]).length === 0) {
-        Logger.warn('[Alpine 组件] ⚠️ 未选择任何 ASIN');
+        console.warn('[Alpine 组件] ⚠️ 未选择任何 ASIN');
         return;
       }
 
       if ((this._selectedTargets as string[]).length === 0) {
-        Logger.warn('[Alpine 组件] ⚠️ 未选择任何分析目标');
+        console.warn('[Alpine 组件] ⚠️ 未选择任何分析目标');
         return;
       }
 
@@ -346,7 +345,7 @@ export function createAiAnalysisPanelOptimized(): Record<string, unknown> {
         this.progress = 100;
         this.currentStep = '分析完成';
       } catch (error) {
-        Logger.error('[Alpine 组件] ❌ 分析失败:', error);
+        console.error('[Alpine 组件] ❌ 分析失败:', error);
       } finally {
         this.isAnalyzing = false;
       }

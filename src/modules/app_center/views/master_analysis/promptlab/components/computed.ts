@@ -7,7 +7,6 @@
 
 import { appStore } from '@/stores/useAppStore';
 import { estimateTokenCount, formatTokenCount } from '../../ai_analysis/utils/tokenCounter';
-import { Logger } from '../../../../../../services/loggerService';
 import type { PromptlabAlpineContext } from './types';
 
 // ==========================================
@@ -19,7 +18,7 @@ import type { PromptlabAlpineContext } from './types';
  */
 export function computeHasReport(): boolean {
   const report = appStore.getState().analysis.analysisReport;
-  Logger.debug('[Promptlab computed] hasReport:', !!report);
+  console.log('[Promptlab computed] hasReport:', !!report);
   return !!report;
 }
 
@@ -77,12 +76,12 @@ export function computeIsOverLimit(prompt: string, charLimit: number): boolean {
 export function computeReportConfidence(): Record<string, number> | null {
   const report = appStore.getState().analysis.analysisReport;
   if (!report || typeof report === 'string') {
-    Logger.debug('[Promptlab computed] reportConfidence: 报告不存在或为字符串');
+    console.log('[Promptlab computed] reportConfidence: 报告不存在或为字符串');
     return null;
   }
   const reportObj = report as Record<string, any>;
   if (!reportObj._metadata) {
-    Logger.warn('[Promptlab computed] reportConfidence: 缺少 _metadata 字段');
+    console.warn('[Promptlab computed] reportConfidence: 缺少 _metadata 字段');
     return null;
   }
   return reportObj._metadata.confidence ?? null;

@@ -16,7 +16,6 @@ import { AlpineContext } from '../types';
 import { appStore } from '@/stores/useAppStore';
 import type { FullAnalysisReport } from '../config/analysisReportData';
 import { BusinessError } from '@common/errors/AppError';
-import { Logger } from '../../../../../../services/loggerService';
 import { getPerformanceSettings } from './PerformanceSettings';
 import eventBus from '@common/EventBus';
 import { APP_EVENTS } from '@common/constants/eventConstants';
@@ -247,7 +246,7 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
   resetAnalysisReport(context);
   appStore.getState().updateAnalysis({ isAnalyzing: true });
 
-  Logger.debug('[用户动作] 开始分析:', {
+  console.log('[用户动作] 开始分析:', {
     selectedTargets: selectedTargets.length,
     selectedAsins: context.selectedAsins.length,
     currentProducts: currentProducts.length
@@ -288,7 +287,7 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
           failureStrategy: perfSettings.failureStrategy,
           onTaskComplete: ({ report, targetId, successCount, totalCount, fromCache }) => {
             syncAnalysisReport(context, report);
-            Logger.debug('[用户动作] 收到实时分析结果:', {
+            console.log('[用户动作] 收到实时分析结果:', {
               targetId,
               successCount,
               totalCount,
@@ -312,9 +311,9 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
 
     syncAnalysisReport(context, analysisReport);
 
-    Logger.debug('[用户动作] 分析报告已设置，selectedTargets:', selectedTargets.length);
-    Logger.debug('[用户动作] analysisReport 已保存:', !!context.analysisReport);
-    Logger.debug('[用户动作] hasReport 标志已设置:', context.hasReport);
+    console.log('[用户动作] 分析报告已设置，selectedTargets:', selectedTargets.length);
+    console.log('[用户动作] analysisReport 已保存:', !!context.analysisReport);
+    console.log('[用户动作] hasReport 标志已设置:', context.hasReport);
 
     const currentHistoryId = appStore.getState().scraper?.currentHistoryId;
     if (analysisReport && currentHistoryId) {
@@ -325,14 +324,14 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
       );
 
       if (success) {
-        Logger.debug('[用户动作] 已自动标记历史快照为"已分析"');
+        console.log('[用户动作] 已自动标记历史快照为"已分析"');
         eventBus.emit(APP_EVENTS.HISTORY_UPDATED);
       }
     }
 
     showToast('分析完成！', { type: 'success' });
   } catch (error) {
-    Logger.error('[用户动作] 分析失败:', error);
+    console.error('[用户动作] 分析失败:', error);
     showToast(`分析失败: ${(error as Error).message}`, { type: 'error' });
   } finally {
     context.isAnalyzing = false;

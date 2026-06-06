@@ -12,7 +12,6 @@
 
 import { appStore } from '@/stores/useAppStore';
 import { showToast } from '../../../../../../common/ui';
-import { Logger } from '../../../../../../services/loggerService';
 import type { PromptlabAlpineContext, ConsoleMode } from './types';
 import type { UserProductProfile } from '@/types/state';
 
@@ -38,7 +37,7 @@ export function initAutoHeightInputs(
         originalHeights.set(el, h);
       }
     });
-    Logger.debug('[uiHelpers] ✅ 已初始化输入框自动高度调整');
+    console.log('[uiHelpers] ✅ 已初始化输入框自动高度调整');
   }, 100);
 }
 
@@ -65,7 +64,7 @@ export function expandInput(
   target.style.height = `${newHeight}px`;
   target.style.transition = 'height 0.2s ease-out';
 
-  Logger.debug('[uiHelpers] 输入框扩展:', { minHeight, newHeight });
+  console.log('[uiHelpers] 输入框扩展:', { minHeight, newHeight });
 }
 
 /**
@@ -81,7 +80,7 @@ export function restoreInput(
   if (originalHeight) {
     target.style.height = `${originalHeight}px`;
     target.style.transition = 'height 0.2s ease-in';
-    Logger.debug('[uiHelpers] 输入框恢复:', { height: originalHeight });
+    console.log('[uiHelpers] 输入框恢复:', { height: originalHeight });
   }
 }
 

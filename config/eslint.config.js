@@ -32,6 +32,7 @@ export default [
             }],
             "@typescript-eslint/no-non-null-assertion": "warn",
             "@typescript-eslint/ban-types": "warn",
+            "@typescript-eslint/no-var-requires": "off",  // Allow require() for dynamic imports to avoid circular deps
             // 禁用no-dupe-class-members，因为TypeScript支持方法重载
             "no-dupe-class-members": "off",
             
@@ -54,7 +55,33 @@ export default [
             "no-console": "warn",
             "no-control-regex": "off",
             "no-constant-condition": "warn",
-            "no-useless-catch": "warn"
+            "no-useless-catch": "warn",
+
+            // 🎯 XSS防护规则 - 禁止不安全的DOM操作
+            "no-restricted-syntax": [
+                "warn",
+                {
+                    selector: "AssignmentExpression[left.property.name='innerHTML']",
+                    message: "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。"
+                },
+                {
+                    selector: "AssignmentExpression[left.property.name='outerHTML']",
+                    message: "避免直接使用outerHTML。请使用更安全的DOM操作方法。"
+                }
+            ],
+
+            // 🎯 防止循环依赖 - 禁止基础设施层导入Logger
+            "no-restricted-imports": [
+                "error",
+                {
+                    patterns: [
+                        {
+                            group: ["**/loggerService"],
+                            message: "基础设施服务（ConfigCenter, typeGuards, menuConfig等）不应依赖Logger，请使用console"
+                        }
+                    ]
+                }
+            ]
         }
     },
     {
@@ -77,13 +104,26 @@ export default [
             "no-console": "off",
             "no-undef": "warn",
             "no-case-declarations": "warn",
-            
+
             // 🎯 代码复杂度检查
             "complexity": ["warn", 10],  // 圈复杂度阈值
             "max-params": ["warn", 5],  // 最大参数数量
             "max-depth": ["warn", 4],  // 最大嵌套深度
             "max-lines-per-function": ["warn", { max: 100, skipBlankLines: true, skipComments: true }],  // 最大函数行数
-            
+
+            // 🎯 XSS防护规则 - 禁止不安全的DOM操作
+            "no-restricted-syntax": [
+                "warn",
+                {
+                    selector: "AssignmentExpression[left.property.name='innerHTML']",
+                    message: "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。"
+                },
+                {
+                    selector: "AssignmentExpression[left.property.name='outerHTML']",
+                    message: "避免直接使用outerHTML。请使用更安全的DOM操作方法。"
+                }
+            ],
+
             // ================================================================
             // 🎯 防止全局变量污染
             // ================================================================
@@ -125,7 +165,8 @@ export default [
         rules: {
             "no-console": "off",
             "@typescript-eslint/no-explicit-any": "off",
-            "no-restricted-globals": "off"
+            "no-restricted-globals": "off",
+            "no-restricted-syntax": "off"
         }
     },
     {
@@ -136,10 +177,40 @@ export default [
         }
     },
     {
+        // 基础设施层可以使用console，禁止导入Logger（避免循环依赖）
+        files: [
+            "**/ConfigCenter.ts",
+            "**/config/schemas/**/*.ts",
+            "**/typeGuards.ts",
+            "**/menuConfig.ts",
+            "**/ColorContext.ts",
+            "**/secureStorage.ts",
+            "**/EventBus.ts",
+            "**/BaseModule.ts",
+            "**/utils/animation-utils.ts"
+        ],
+        rules: {
+            "no-console": "off",
+            "no-restricted-imports": [
+                "error",
+                {
+                    patterns: [
+                        {
+                            group: ["**/loggerService", "@services/loggerService", "../services/loggerService"],
+                            message: "基础设施服务不应依赖Logger以避免循环依赖，请直接使用console"
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    {
         // Logger服务和devtools可以使用console
         files: ["**/loggerService.ts", "**/devtools/**/*.ts", "**/DebugInterface.ts"],
         rules: {
-            "no-console": "off"
+            "no-console": "off",
+            "no-restricted-syntax": "off",
+            "no-restricted-imports": "off"
         }
     },
     {

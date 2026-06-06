@@ -17,7 +17,6 @@ import type { FullAnalysisReport } from '../config/analysisReportData';
 import type { Product } from '../config/sampleData';
 import { generateAnalysisPrompt } from '../prompts/analysisPrompts';
 import { calculateFullReportConfidence, calculateOverallConfidence } from './confidenceCalculator';
-import { Logger } from '../../../../../../services/loggerService';
 import { estimateTokenCount } from '../utils/tokenCounter';
 
 const DEFAULT_ANALYSIS_CONCURRENCY = 8;
@@ -152,7 +151,7 @@ export async function getCachedResult(cacheKey: string): Promise<unknown | null>
       if (legacyParsed && typeof legacyParsed === 'object' && 'timestamp' in legacyParsed) {
         const age = Date.now() - (legacyParsed.timestamp as number);
         if (age < ANALYSIS_CACHE_TTL_MS) {
-          Logger.debug(`[并行分析] 旧缓存命中: ${legacyKey}`);
+          console.log(`[并行分析] 旧缓存命中: ${legacyKey}`);
           return (legacyParsed as { data: unknown }).data;
         }
       }
@@ -164,12 +163,12 @@ export async function getCachedResult(cacheKey: string): Promise<unknown | null>
       const age = Date.now() - (parsedCache.timestamp as number);
       // 缓存有效期：24小时
       if (age < ANALYSIS_CACHE_TTL_MS) {
-        Logger.debug(`[并行分析] 缓存命中: ${cacheKey}`);
+        console.log(`[并行分析] 缓存命中: ${cacheKey}`);
         return (parsedCache as { data: unknown }).data;
       }
     }
   } catch (error) {
-    Logger.warn(`[并行分析] 缓存读取失败:`, error);
+    console.warn(`[并行分析] 缓存读取失败:`, error);
   }
   return null;
 }
@@ -183,9 +182,9 @@ export async function setCachedResult(cacheKey: string, result: unknown): Promis
       data: result,
       timestamp: Date.now()
     }, 'cache');
-    Logger.debug(`[并行分析] 结果已缓存: ${cacheKey}`);
+    console.log(`[并行分析] 结果已缓存: ${cacheKey}`);
   } catch (error) {
-    Logger.warn(`[并行分析] 缓存写入失败:`, error);
+    console.warn(`[并行分析] 缓存写入失败:`, error);
   }
 }
 
@@ -262,7 +261,7 @@ async function executeAnalysisTask(
         task.status = 'success';
         task.endTime = Date.now();
         task.fromCache = true;
-        Logger.debug(`[并行分析] ${task.targetId} 使用缓存结果`, {
+        console.log(`[并行分析] ${task.targetId} 使用缓存结果`, {
           durationMs: task.endTime - task.startTime,
           fromCache: true
         });
@@ -329,7 +328,7 @@ async function executeAnalysisTask(
       await setCachedResult(cacheKey, actualResult);
     }
 
-    Logger.debug(`[并行分析] ${task.targetId} 分析成功`, {
+    console.log(`[并行分析] ${task.targetId} 分析成功`, {
       durationMs: task.endTime - task.startTime,
       promptChars: task.promptChars,
       estimatedInputTokens: task.estimatedInputTokens
@@ -338,7 +337,7 @@ async function executeAnalysisTask(
     task.status = 'failed';
     task.error = (error as Error).message;
     task.endTime = Date.now();
-    Logger.error(`[并行分析] ${task.targetId} 分析失败:`, error);
+    console.error(`[并行分析] ${task.targetId} 分析失败:`, error);
   }
 }
 
@@ -410,7 +409,7 @@ export async function runParallelAIAnalysis(
   const startedAt = Date.now();
   const effectiveMaxConcurrency = normalizeMaxConcurrency(maxConcurrency, targetIds.length);
 
-  Logger.debug(`[并行分析] 开始分析`, {
+  console.log(`[并行分析] 开始分析`, {
     targets: targetIds.length,
     requestedMaxConcurrency: maxConcurrency,
     effectiveMaxConcurrency
@@ -456,7 +455,7 @@ export async function runParallelAIAnalysis(
         }
       } else if (task.status === 'failed') {
         failedCount++;
-        Logger.warn(`[并行分析] ${task.targetId} 失败: ${task.error}`);
+        console.warn(`[并行分析] ${task.targetId} 失败: ${task.error}`);
 
         if (streamResults) {
           onTaskFailed?.({
@@ -511,7 +510,7 @@ export async function runParallelAIAnalysis(
 
   onProgress(100, `分析完成! 成功: ${successCount}, 失败: ${failedCount}`);
 
-  Logger.debug(`[并行分析] 分析完成`, {
+  console.log(`[并行分析] 分析完成`, {
     durationMs: Date.now() - startedAt,
     successCount,
     failedCount,
@@ -539,7 +538,7 @@ export function clearAnalysisCache(): void {
   try {
     void clearAnalysisCacheAsync();
   } catch (error) {
-    Logger.error('[并行分析] 清除缓存失败:', error);
+    console.error('[并行分析] 清除缓存失败:', error);
   }
 }
 
@@ -549,7 +548,7 @@ export async function clearAnalysisCacheAsync(): Promise<void> {
   StorageService.keys()
     .filter(key => key.startsWith('ai_analysis_'))
     .forEach(key => StorageService.remove(key));
-  Logger.debug(`[并行分析] 已清除 ${cacheKeys.length} 个缓存项`);
+  console.log(`[并行分析] 已清除 ${cacheKeys.length} 个缓存项`);
 }
 
 /**
@@ -573,7 +572,7 @@ export function getCacheStats(): { count: number; totalSize: number } {
       totalSize: totalSize
     };
   } catch (error) {
-    Logger.error('[并行分析] 获取缓存统计失败:', error);
+    console.error('[并行分析] 获取缓存统计失败:', error);
     return { count: 0, totalSize: 0 };
   }
 }
@@ -596,7 +595,7 @@ export async function getCacheStatsAsync(): Promise<{ count: number; totalSize: 
       totalSize: totalSize + legacyStats.totalSize
     };
   } catch (error) {
-    Logger.error('[并行分析] 获取 IndexedDB 缓存统计失败:', error);
+    console.error('[并行分析] 获取 IndexedDB 缓存统计失败:', error);
     return getCacheStats();
   }
 }

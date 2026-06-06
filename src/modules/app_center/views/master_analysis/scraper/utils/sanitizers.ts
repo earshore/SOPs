@@ -4,7 +4,6 @@
 
 import type { ProductData } from '../types';
 
-import { Logger } from '../../../../../../services/loggerService';
 /**
  * HTML转义函数 - 防止XSS攻击
  * 将特殊字符转换为HTML实体
@@ -48,7 +47,7 @@ export function sanitizeUrl(url: string): string {
     const lowerUrl = url.toLowerCase();
     for (const protocol of dangerousProtocols) {
         if (lowerUrl.startsWith(protocol)) {
-            Logger.warn('[Scraper] 检测到危险URL协议:', url);
+            console.warn('[Scraper] 检测到危险URL协议:', url);
             return '#';
         }
     }

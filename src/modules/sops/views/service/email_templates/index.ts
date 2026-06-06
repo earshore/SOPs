@@ -6,7 +6,6 @@
 import BaseModule from '../../../../../common/BaseModule';
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
 
-import { Logger } from '../../../../../services/loggerService';
 class EmailTemplatesModule extends BaseModule {
     private removeTemplateToggleListener: (() => void) | null = null;
 
@@ -36,7 +35,7 @@ class EmailTemplatesModule extends BaseModule {
         container.innerHTML = html;
         container.classList.add('fade-in');
         this.bindTemplateToggles(container);
-        Logger.debug('✅ 邮件回复模板 SOP 模块已挂载');
+        console.log('✅ 邮件回复模板 SOP 模块已挂载');
     }
 
     /**
@@ -44,7 +43,7 @@ class EmailTemplatesModule extends BaseModule {
      */
     unmount(): void {
         this.removeTemplateToggleListener?.();
-        Logger.debug('❌ 邮件回复模板 SOP 模块已卸载');
+        console.log('❌ 邮件回复模板 SOP 模块已卸载');
     }
 }
 

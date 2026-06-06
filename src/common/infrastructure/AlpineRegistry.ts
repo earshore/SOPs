@@ -10,7 +10,6 @@
  * @module AlpineRegistry
  */
 
-import { Logger } from '@services/loggerService';
 import { SystemError, ValidationError } from '@/common/errors/AppError';
 
 /**
@@ -512,30 +511,30 @@ export class AlpineRegistry {
     switch (level) {
       case 'debug':
         if (data !== undefined) {
-          Logger.debug(fullMessage, data);
+          console.log(fullMessage, data);
         } else {
-          Logger.debug(fullMessage);
+          console.log(fullMessage);
         }
         break;
       case 'info':
         if (data !== undefined) {
-          Logger.info(fullMessage, data);
+          console.log(fullMessage, data);
         } else {
-          Logger.info(fullMessage);
+          console.log(fullMessage);
         }
         break;
       case 'warn':
         if (data !== undefined) {
-          Logger.warn(fullMessage, data);
+          console.warn(fullMessage, data);
         } else {
-          Logger.warn(fullMessage);
+          console.warn(fullMessage);
         }
         break;
       case 'error':
         if (data !== undefined) {
-          Logger.error(fullMessage, data);
+          console.error(fullMessage, data);
         } else {
-          Logger.error(fullMessage);
+          console.error(fullMessage);
         }
         break;
     }

@@ -6,7 +6,6 @@
 import type { ReportAdapter, ExtractionResult } from "./ReportAdapter";
 import type { ProductOverviewReport } from "../../types/downloadsReportTypes";
 import type { ExtendedDNA } from "../../types/extendedDNA";
-import { Logger } from "../../../../../../services/loggerService";
 import { isTechnicalSpec } from "../../utils/specUtils";
 import { ValidationError } from "../../../../../../common/errors/AppError";
 
@@ -45,7 +44,7 @@ export class ProductOverviewAdapter implements ReportAdapter {
 
   extractDNA(report: unknown, _language: string = "zh"): ExtendedDNA | null {
     if (!this.canHandle(report)) {
-      Logger.warn("[ProductOverviewAdapter] 报告格式不匹配");
+      console.warn("[ProductOverviewAdapter] 报告格式不匹配");
       return null;
     }
 
@@ -114,10 +113,10 @@ export class ProductOverviewAdapter implements ReportAdapter {
         },
       };
 
-      Logger.debug("[ProductOverviewAdapter] DNA 提取完成");
+      console.log("[ProductOverviewAdapter] DNA 提取完成");
       return dna;
     } catch (error) {
-      Logger.error("[ProductOverviewAdapter] 提取失败:", error);
+      console.error("[ProductOverviewAdapter] 提取失败:", error);
       return null;
     }
   }

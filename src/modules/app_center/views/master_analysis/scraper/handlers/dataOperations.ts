@@ -10,7 +10,6 @@ import eventBus from '../../../../../../common/EventBus';
 import { APP_EVENTS } from '../../../../../../common/constants/eventConstants';
 import { SafeRenderer } from '../../../../../../common/infrastructure/SafeRenderer';
 import { ValidationError, BusinessError, SystemError } from '@common/errors/AppError';
-import { Logger } from '../../../../../../services/loggerService';
 /**
  * 删除产品
  */
@@ -41,7 +40,7 @@ export async function deleteProduct(
         );
 
         if (!confirmed) {
-            Logger.debug('[Scraper] 用户取消删除产品操作');
+            console.log('[Scraper] 用户取消删除产品操作');
             return { success: false };
         }
 
@@ -107,7 +106,7 @@ export async function deleteProduct(
         try {
             await HistoryService.saveAsync(scrapedData);
         } catch (saveError) {
-            Logger.error('[Scraper] 保存历史记录失败:', saveError);
+            console.error('[Scraper] 保存历史记录失败:', saveError);
             throw new SystemError(
                 '保存历史记录失败',
                 'SCRAPER_DEL_013',
@@ -121,17 +120,17 @@ export async function deleteProduct(
             eventBus.emit(APP_EVENTS.DATA_UPDATED);
             eventBus.emit(APP_EVENTS.HISTORY_UPDATED);
         } catch (eventError) {
-            Logger.error('[Scraper] 触发事件失败:', eventError);
+            console.error('[Scraper] 触发事件失败:', eventError);
         }
 
         showToast(`ASIN ${asin} 已移除`, { type: 'info' });
-        Logger.debug(`[Scraper] 成功删除产品: ${asin}`);
+        console.log(`[Scraper] 成功删除产品: ${asin}`);
 
         return { success: true, data: scrapedData };
 
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        Logger.error('[Scraper] 删除产品失败:', {
+        console.error('[Scraper] 删除产品失败:', {
             error: error,
             errorMessage: errorMessage,
             asin: asin,
@@ -142,7 +141,7 @@ export async function deleteProduct(
 
         // 回滚数据
         if (originalData) {
-            Logger.warn('[Scraper] 正在回滚数据...');
+            console.warn('[Scraper] 正在回滚数据...');
             return { success: false, data: originalData, error: errorMessage };
         }
 
@@ -191,7 +190,7 @@ export async function deleteReview(
         );
 
         if (!confirmed) {
-            Logger.debug('[Scraper] 用户取消删除评论操作');
+            console.log('[Scraper] 用户取消删除评论操作');
             return { success: false };
         }
 
@@ -266,7 +265,7 @@ export async function deleteReview(
         try {
             await HistoryService.saveAsync(scrapedData);
         } catch (saveError) {
-            Logger.error('[Scraper] 保存历史记录失败:', saveError);
+            console.error('[Scraper] 保存历史记录失败:', saveError);
             throw new SystemError(
                 '保存历史记录失败',
                 'SCRAPER_DEL_013',
@@ -280,17 +279,17 @@ export async function deleteReview(
             eventBus.emit(APP_EVENTS.DATA_UPDATED);
             eventBus.emit(APP_EVENTS.HISTORY_UPDATED);
         } catch (eventError) {
-            Logger.error('[Scraper] 触发事件失败:', eventError);
+            console.error('[Scraper] 触发事件失败:', eventError);
         }
 
         showToast('评论已删除', { type: 'info' });
-        Logger.debug(`[Scraper] 成功删除评论: ASIN=${asin}, index=${index}`);
+        console.log(`[Scraper] 成功删除评论: ASIN=${asin}, index=${index}`);
 
         return { success: true, data: scrapedData };
 
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        Logger.error('[Scraper] 删除评论失败:', {
+        console.error('[Scraper] 删除评论失败:', {
             error: error,
             errorMessage: errorMessage,
             asin: asin,
@@ -302,7 +301,7 @@ export async function deleteReview(
 
         // 回滚数据
         if (originalData) {
-            Logger.warn('[Scraper] 正在回滚数据...');
+            console.warn('[Scraper] 正在回滚数据...');
             return { success: false, data: originalData, error: errorMessage };
         }
 
@@ -375,7 +374,7 @@ export function confirmWithModal(title: string, content: string, storageKey: str
                     document.body.removeChild(backdrop);
                 }
             } catch (error) {
-                Logger.error('[Scraper] 清理确认对话框失败:', error);
+                console.error('[Scraper] 清理确认对话框失败:', error);
             }
         };
 

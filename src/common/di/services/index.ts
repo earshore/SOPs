@@ -10,13 +10,12 @@ import type { ServiceRegistry } from '../ServiceRegistry';
 import { registerCoreServices } from './coreServices';
 import { registerBusinessServices } from './businessServices';
 
-import { Logger } from '../../../services/loggerService';
 /**
  * 注册所有服务到注册表
  * 统一入口函数
  */
 export function registerAllServices(registry: ServiceRegistry): void {
-  Logger.debug('[Services] 开始注册所有服务配置');
+  console.log('[Services] 开始注册所有服务配置');
   
   // 注册核心服务
   registerCoreServices(registry);
@@ -24,5 +23,5 @@ export function registerAllServices(registry: ServiceRegistry): void {
   // 注册业务服务
   registerBusinessServices(registry);
   
-  Logger.debug(`[Services] 所有服务配置注册完成，共 ${registry.size} 个服务`);
+  console.log(`[Services] 所有服务配置注册完成，共 ${registry.size} 个服务`);
 }

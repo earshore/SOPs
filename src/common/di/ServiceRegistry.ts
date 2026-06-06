@@ -6,7 +6,6 @@
 
 import type { DIContainer, ServiceFactory, ServiceLifetime } from './Container';
 
-import { Logger } from '../../services/loggerService';
 /**
  * 服务名称常量
  * 使用常量避免字符串拼写错误
@@ -74,11 +73,11 @@ export class ServiceRegistry {
    */
   register<T = unknown>(config: ServiceConfig<T>): void {
     if (this.configs.has(config.name)) {
-      Logger.warn(`[ServiceRegistry] 服务 "${config.name}" 已注册，将被覆盖`);
+      console.warn(`[ServiceRegistry] 服务 "${config.name}" 已注册，将被覆盖`);
     }
 
     this.configs.set(config.name, config);
-    Logger.debug(`[ServiceRegistry] 已注册服务配置: ${config.name}`);
+    console.log(`[ServiceRegistry] 已注册服务配置: ${config.name}`);
   }
 
   /**
@@ -106,7 +105,7 @@ export class ServiceRegistry {
    * 批量注册所有服务到DI容器
    */
   registerAll(container: DIContainer): void {
-    Logger.debug(`[ServiceRegistry] 开始批量注册 ${this.configs.size} 个服务到容器`);
+    console.log(`[ServiceRegistry] 开始批量注册 ${this.configs.size} 个服务到容器`);
     
     for (const config of this.configs.values()) {
       container.register(
@@ -119,7 +118,7 @@ export class ServiceRegistry {
       );
     }
     
-    Logger.debug(`[ServiceRegistry] 批量注册完成`);
+    console.log(`[ServiceRegistry] 批量注册完成`);
   }
 
   /**
@@ -134,7 +133,7 @@ export class ServiceRegistry {
    */
   clear(): void {
     this.configs.clear();
-    Logger.debug(`[ServiceRegistry] 已清空所有服务配置`);
+    console.log(`[ServiceRegistry] 已清空所有服务配置`);
   }
 }
 

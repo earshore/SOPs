@@ -15,7 +15,6 @@ import * as KeywordService from '../services/trackerService';
 import { appStore } from '../../../../../stores/useAppStore';
 import { registerActionsWithLegacy, unregisterActions } from '../../../../../common/utils/actionRegistry';
 
-import { Logger } from '../../../../../services/loggerService';
 import '../keyword_hunter_style.css';
 
 // ========================================== 
@@ -74,7 +73,7 @@ function cleanup(): void {
     // 清理已注册的动作
     if (registeredActions.length > 0) {
         unregisterActions(registeredActions);
-        Logger.debug(`[Input] 已清理 ${registeredActions.length} 个动作`);
+        console.log(`[Input] 已清理 ${registeredActions.length} 个动作`);
         registeredActions = [];
     }
 }
@@ -381,7 +380,7 @@ async function startAnalysis(): Promise<void> {
     } catch (error) {
         showProgress(false);
         showToast("分析失败: " + (error as Error).message, { type: 'error' });
-        Logger.error('[Input] 分析失败:', error);
+        console.error('[Input] 分析失败:', error);
     }
 }
 
@@ -446,7 +445,7 @@ function setupEventListeners(container: HTMLElement): void {
  * @param {HTMLElement} container - 容器元素
  */
 export async function mount(container: HTMLElement): Promise<void> {
-    Logger.debug('[Input] 🔧 开始挂载子模块');
+    console.log('[Input] 🔧 开始挂载子模块');
 
     try {
         // 1. 使用 SafeModuleLoader 加载模板
@@ -459,7 +458,7 @@ export async function mount(container: HTMLElement): Promise<void> {
                 retryCount: 3,
                 timeout: 5000,
                 onError: (error) => {
-                    Logger.error('[Input] 模板加载失败:', error);
+                    console.error('[Input] 模板加载失败:', error);
                 }
             }
         );
@@ -488,9 +487,9 @@ export async function mount(container: HTMLElement): Promise<void> {
         // 4. 从 state 恢复状态
         restoreInputsFromState();
 
-        Logger.debug('[Input] ✅ 子模块挂载成功');
+        console.log('[Input] ✅ 子模块挂载成功');
     } catch (error) {
-        Logger.error('[Input] ❌ 子模块挂载失败:', error);
+        console.error('[Input] ❌ 子模块挂载失败:', error);
         throw error;
     }
 }
@@ -499,7 +498,7 @@ export async function mount(container: HTMLElement): Promise<void> {
  * 卸载子模块
  */
 export function unmount(): void {
-    Logger.debug('[Input] 🔄 开始卸载子模块');
+    console.log('[Input] 🔄 开始卸载子模块');
 
     try {
         // 1. 保存状态到 state
@@ -508,8 +507,8 @@ export function unmount(): void {
         // 2. 清理事件监听器和定时器
         cleanup();
 
-        Logger.debug('[Input] ✅ 子模块卸载成功');
+        console.log('[Input] ✅ 子模块卸载成功');
     } catch (error) {
-        Logger.error('[Input] ❌ 子模块卸载失败:', error);
+        console.error('[Input] ❌ 子模块卸载失败:', error);
     }
 }

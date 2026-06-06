@@ -14,7 +14,6 @@ import {
   StorageService,
   STORAGE_KEYS,
 } from "../../../../../services/storageService";
-import { Logger } from "../../../../../services/loggerService";
 import type {
   KeywordMatchResult,
   AnalysisResult,
@@ -333,7 +332,7 @@ function parseNumberedTranslations(
   }
 
   if (Object.keys(result).length > 0) {
-    Logger.debug(
+    console.log(
       `[TrackerService] 编号解析成功，命中 ${Object.keys(result).length}/${totalCount} 段`,
     );
     return result;
@@ -350,14 +349,14 @@ function parseNumberedTranslations(
   }
 
   if (Object.keys(result).length > 0) {
-    Logger.debug(
+    console.log(
       `[TrackerService] Fallback A 解析成功（方括号格式），命中 ${Object.keys(result).length}/${totalCount} 段`,
     );
     return result;
   }
 
   // Fallback B：按行分割逐行对应（LLM 未遵守编号格式时）
-  Logger.warn("[TrackerService] LLM 未遵守编号格式，退回行数对齐模式");
+  console.warn("[TrackerService] LLM 未遵守编号格式，退回行数对齐模式");
   const lines = response.split(/\n+/).filter((t) => t.trim());
   lines.forEach((line, i) => {
     if (i + 1 <= totalCount) {
@@ -406,7 +405,7 @@ export async function fetchImmersionTranslation(
     );
   }
 
-  Logger.debug(`[TrackerService] 沉浸式翻译：共 ${paragraphs.length} 段`);
+  console.log(`[TrackerService] 沉浸式翻译：共 ${paragraphs.length} 段`);
 
   // 2. 给每段加编号，构造结构化输入
   const numberedInput = paragraphs
@@ -420,7 +419,7 @@ export async function fetchImmersionTranslation(
   const response = await bridgeCallLLM(systemPrompt, userPrompt, {
     jsonMode: false,
   });
-  Logger.debug(
+  console.log(
     "[TrackerService] LLM 原始响应（前 300 字）:",
     response.slice(0, 300),
   );
@@ -435,7 +434,7 @@ export async function fetchImmersionTranslation(
   }));
 
   const translatedCount = pairs.filter((p) => p.translation).length;
-  Logger.debug(
+  console.log(
     `[TrackerService] 翻译完成：${translatedCount}/${pairs.length} 段有译文`,
   );
 

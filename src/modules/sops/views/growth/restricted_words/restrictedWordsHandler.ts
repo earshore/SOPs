@@ -13,7 +13,6 @@ import { registerActionsWithLegacy } from '../../../../../common/utils/actionReg
 import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
 import { AlpineRegistry } from '../../../../../common/infrastructure/AlpineRegistry';
 
-import { Logger } from '../../../../../services/loggerService';
 type SearchMode = 'fuzzy' | 'exact' | 'fulltext' | 'regex';
 type SiteContext = string;
 
@@ -681,7 +680,7 @@ const restrictedWordsActions: Record<string, (...args: unknown[]) => void> = {
 
 registerActionsWithLegacy(restrictedWordsActions);
 
-Logger.debug(
+console.log(
     '✅ [restrictedWordsHandler] 已注册 ' +
         Object.keys(restrictedWordsActions).length +
         ' 个动作到 ActionRegistry'
@@ -697,7 +696,7 @@ const registry = AlpineRegistry.getInstance();
 registry.register('restrictedWordsPanel', (): RestrictedWordsPanelComponent => ({
     // 初始化
     init() {
-        Logger.debug('✅ [Alpine] Restricted Words 面板组件已初始化');
+        console.log('✅ [Alpine] Restricted Words 面板组件已初始化');
         initRestrictedWordsPanel();
     },
     
@@ -753,4 +752,4 @@ registry.register('restrictedWordsPanel', (): RestrictedWordsPanelComponent => (
     }
 }));
 
-Logger.debug('✅ [restrictedWordsHandler] Restricted Words 组件已注册到 AlpineRegistry');
+console.log('✅ [restrictedWordsHandler] Restricted Words 组件已注册到 AlpineRegistry');

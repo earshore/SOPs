@@ -8,7 +8,6 @@ import { renderProductCard, syntaxHighlight } from '../utils/renderers';
 import { showToast } from '../../../../../../common/ui';
 import { SafeRenderer } from '../../../../../../common/infrastructure/SafeRenderer';
 
-import { Logger } from '../../../../../../services/loggerService';
 export interface DataPreviewState {
     expandedAsin: string | null;
     currentDataTab: DataTab;
@@ -59,12 +58,12 @@ export class DataPreview {
         const productCount = this.totalProducts;
 
         if (productCount > 100) {
-            Logger.warn(`[Scraper] ⚠️ 检测到大数据集: ${productCount} 个产品`);
+            console.warn(`[Scraper] ⚠️ 检测到大数据集: ${productCount} 个产品`);
             showToast(`⚠️ 数据集较大 (${productCount} 个产品)，已启用分页显示以优化性能`, { type: 'info' });
         }
 
         if (productCount > 500) {
-            Logger.warn(`[Scraper] ⚠️ 数据集非常大: ${productCount} 个产品，建议清理历史记录`);
+            console.warn(`[Scraper] ⚠️ 数据集非常大: ${productCount} 个产品，建议清理历史记录`);
             showToast(`⚠️ 数据集非常大 (${productCount} 个产品)，建议定期清理历史记录以释放内存`, { type: 'warning' });
         }
     }
@@ -73,38 +72,38 @@ export class DataPreview {
      * 设置事件委托（性能优化）
      */
     setupEventDelegation(onToggle: (asin: string) => void): void {
-        Logger.debug('[DataPreview] 🎯 setupEventDelegation 被调用');
+        console.log('[DataPreview] 🎯 setupEventDelegation 被调用');
 
         const cardsContainer = document.getElementById('data-cards');
         if (!cardsContainer) {
-            Logger.warn('[DataPreview] ⚠️ data-cards 容器不存在');
+            console.warn('[DataPreview] ⚠️ data-cards 容器不存在');
             return;
         }
 
-        Logger.debug('[DataPreview] 📦 找到 data-cards 容器');
+        console.log('[DataPreview] 📦 找到 data-cards 容器');
 
         // 移除旧的监听器（如果存在）
         if (this._cardClickHandler) {
-            Logger.debug('[DataPreview] 🗑️ 移除旧的事件监听器');
+            console.log('[DataPreview] 🗑️ 移除旧的事件监听器');
             cardsContainer.removeEventListener('click', this._cardClickHandler);
         }
 
         // 创建新的事件处理器
         this._cardClickHandler = (e: Event) => {
             const target = e.target as HTMLElement;
-            Logger.debug('[DataPreview] 🖱️ 点击事件触发:', target.tagName, target.className);
+            console.log('[DataPreview] 🖱️ 点击事件触发:', target.tagName, target.className);
 
             // 检查是否点击了按钮(删除按钮等)
             const button = target.closest('button');
             if (button) {
-                Logger.debug('[DataPreview] 🔘 点击了按钮，由Alpine处理');
+                console.log('[DataPreview] 🔘 点击了按钮，由Alpine处理');
                 return; // 按钮由 Alpine 的 @click 处理
             }
 
             // 检查是否点击了链接
             const link = target.closest('a');
             if (link) {
-                Logger.debug('[DataPreview] 🔗 点击了链接，允许默认行为');
+                console.log('[DataPreview] 🔗 点击了链接，允许默认行为');
                 return; // 链接正常跳转
             }
 
@@ -113,30 +112,30 @@ export class DataPreview {
             if (card) {
                 const asin = card.getAttribute('data-asin');
                 if (asin) {
-                    Logger.debug('[DataPreview] 🎯 找到卡片，ASIN:', asin);
+                    console.log('[DataPreview] 🎯 找到卡片，ASIN:', asin);
 
                     // 检查是否点击了卡片内容区域(已展开的部分)
                     const cardBody = target.closest(`#card-body-${asin}`);
                     if (cardBody) {
-                        Logger.debug('[DataPreview] 📄 点击了卡片内容区域，不触发折叠');
+                        console.log('[DataPreview] 📄 点击了卡片内容区域，不触发折叠');
                         return; // 点击内容区域不触发折叠
                     }
 
                     // 展开/收起卡片
-                    Logger.debug('[DataPreview] 📢 调用 onToggle 回调');
+                    console.log('[DataPreview] 📢 调用 onToggle 回调');
                     onToggle(asin);
                 } else {
-                    Logger.debug('[DataPreview] ⚠️ 卡片缺少 data-asin 属性');
+                    console.log('[DataPreview] ⚠️ 卡片缺少 data-asin 属性');
                 }
             } else {
-                Logger.debug('[DataPreview] ⏭️ 未找到有效的卡片元素');
+                console.log('[DataPreview] ⏭️ 未找到有效的卡片元素');
             }
         };
 
         // 添加事件监听器
         cardsContainer.addEventListener('click', this._cardClickHandler);
 
-        Logger.debug('[DataPreview] ✅ 事件委托已设置');
+        console.log('[DataPreview] ✅ 事件委托已设置');
     }
 
     /**
@@ -169,7 +168,7 @@ export class DataPreview {
         if (cardsContainer && this._cardClickHandler) {
             cardsContainer.removeEventListener('click', this._cardClickHandler);
             this._cardClickHandler = null;
-            Logger.debug('[Scraper] ✅ 事件委托已清理');
+            console.log('[Scraper] ✅ 事件委托已清理');
         }
     }
 
@@ -191,7 +190,7 @@ export class DataPreview {
 
         // 如果 DOM 元素还不存在,延迟渲染
         if (!cardsEl || !cardsWrapper) {
-            Logger.warn('[Scraper] DOM 元素尚未就绪,延迟渲染');
+            console.warn('[Scraper] DOM 元素尚未就绪,延迟渲染');
             return;
         }
 
@@ -207,7 +206,7 @@ export class DataPreview {
         // 使用分页数据而不是全部数据
         const productsToRender = this.shouldUsePagination ? this.paginatedProducts : this.scrapedData.products;
 
-        Logger.debug(`[Scraper] 渲染 ${productsToRender.length}/${this.totalProducts} 个产品 (页码: ${this.state.currentPage}/${this.totalPages})`);
+        console.log(`[Scraper] 渲染 ${productsToRender.length}/${this.totalProducts} 个产品 (页码: ${this.state.currentPage}/${this.totalPages})`);
 
         // 清理旧的DOM元素，释放内存
         this.cleanupOldDOMElements(cardsEl);

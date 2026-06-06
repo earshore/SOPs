@@ -7,7 +7,6 @@
 import { StorageService } from '../../services/storageService';
 import { configCenter } from '../config/ConfigCenter';
 
-import { Logger } from '../../services/loggerService';
 /**
  * 事件日志条目
  */
@@ -72,13 +71,13 @@ function formatEventForLog(event: CustomEvent): EventLogEntry {
  */
 export function initEventLogger(): void {
   if (!isDebugEnabled()) {
-    Logger.debug(
+    console.log(
       '💡 [EventLogger] 调试模式未开启。启用方式: StorageService.set("debug_events", "true")'
     );
     return;
   }
 
-  Logger.debug('🔍 [EventLogger] 事件调试模式已启用');
+  console.log('🔍 [EventLogger] 事件调试模式已启用');
 
   TRACKED_EVENTS.forEach((eventName) => {
     window.addEventListener(eventName, (event) => {
@@ -93,8 +92,8 @@ export function initEventLogger(): void {
 
       // 控制台输出
       console.group(`📡 ${eventName}`);
-      Logger.debug('Detail:', customEvent.detail);
-      Logger.debug('Timestamp:', logEntry.timestamp);
+      console.log('Detail:', customEvent.detail);
+      console.log('Timestamp:', logEntry.timestamp);
       console.trace('Call Stack');
       console.groupEnd();
     });
@@ -113,7 +112,7 @@ export function getEventHistory(limit: number = 20): EventLogEntry[] {
  */
 export function clearEventHistory(): void {
   eventHistory.length = 0;
-  Logger.debug('🗑️ [EventLogger] 事件历史已清空');
+  console.log('🗑️ [EventLogger] 事件历史已清空');
 }
 
 /**
@@ -133,7 +132,7 @@ export function logCustomEvent(eventName: string, detail: unknown = {}): void {
   }
 
   if (isDebugEnabled()) {
-    Logger.debug(`📝 [EventLogger] ${eventName}`, detail);
+    console.log(`📝 [EventLogger] ${eventName}`, detail);
   }
 }
 

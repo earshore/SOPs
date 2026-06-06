@@ -4,7 +4,6 @@
 // 自动检测超时并重试，提升系统鲁棒性
 // ================================================================
 
-import { Logger } from '@/services/loggerService';
 import { SystemError } from '@common/errors/AppError';
 import eventBus from '../EventBus';
 import { APP_EVENTS } from '../constants/eventConstants';
@@ -107,7 +106,7 @@ export class WorkingStateManager {
 
     // 如果任务已存在，先清除
     if (this.states.has(id)) {
-      Logger.warn(`任务 ${id} 已存在，将被覆盖`, {}, 'WorkingStateManager');
+      console.warn(`任务 ${id} 已存在，将被覆盖`, {}, 'WorkingStateManager');
       this.clearWorking(id);
     }
 
@@ -132,7 +131,7 @@ export class WorkingStateManager {
     // 启动超时检查
     this._startTimeoutCheck(id);
 
-    Logger.debug(`工作状态已设置: ${id}`, {
+    console.log(`工作状态已设置: ${id}`, {
       timeout,
       maxRetries
     }, 'WorkingStateManager');
@@ -148,12 +147,12 @@ export class WorkingStateManager {
   setSuccess(id: string): void {
     const state = this.states.get(id);
     if (!state) {
-      Logger.warn(`任务 ${id} 不存在`, {}, 'WorkingStateManager');
+      console.warn(`任务 ${id} 不存在`, {}, 'WorkingStateManager');
       return;
     }
 
     const duration = Date.now() - state.startTime;
-    Logger.info(`任务成功: ${id}`, {
+    console.log(`任务成功: ${id}`, {
       duration: `${duration}ms`,
       retryCount: state.retryCount
     }, 'WorkingStateManager');
@@ -163,7 +162,7 @@ export class WorkingStateManager {
       try {
         state.onSuccess();
       } catch (error) {
-        Logger.error(`成功回调执行失败: ${id}`, error as Error, 'WorkingStateManager');
+        console.error(`成功回调执行失败: ${id}`, error as Error, 'WorkingStateManager');
       }
     }
 
@@ -186,19 +185,19 @@ export class WorkingStateManager {
   setFailure(id: string, error: Error): void {
     const state = this.states.get(id);
     if (!state) {
-      Logger.warn(`任务 ${id} 不存在`, {}, 'WorkingStateManager');
+      console.warn(`任务 ${id} 不存在`, {}, 'WorkingStateManager');
       return;
     }
 
     const duration = Date.now() - state.startTime;
-    Logger.error(`任务失败: ${id}`, error, 'WorkingStateManager');
+    console.error(`任务失败: ${id}`, error, 'WorkingStateManager');
 
     // 执行失败回调
     if (state.onFinalFailure) {
       try {
         state.onFinalFailure(error);
       } catch (callbackError) {
-        Logger.error(`失败回调执行失败: ${id}`, callbackError as Error, 'WorkingStateManager');
+        console.error(`失败回调执行失败: ${id}`, callbackError as Error, 'WorkingStateManager');
       }
     }
 
@@ -229,7 +228,7 @@ export class WorkingStateManager {
     // 删除状态
     this.states.delete(id);
 
-    Logger.debug(`工作状态已清除: ${id}`, {}, 'WorkingStateManager');
+    console.log(`工作状态已清除: ${id}`, {}, 'WorkingStateManager');
   }
 
   /**
@@ -264,7 +263,7 @@ export class WorkingStateManager {
     const elapsed = Date.now() - state.startTime;
     this.stats.timeoutCount++;
 
-    Logger.warn(`任务超时: ${id}`, {
+    console.warn(`任务超时: ${id}`, {
       elapsed: `${elapsed}ms`,
       timeout: `${state.timeout}ms`,
       retryCount: state.retryCount,
@@ -285,7 +284,7 @@ export class WorkingStateManager {
       // 计算重试延迟（指数退避）
       const delay = state.retryDelay * Math.pow(2, state.retryCount - 1);
 
-      Logger.info(`自动重试 (${state.retryCount}/${state.maxRetries}): ${id}`, {
+      console.log(`自动重试 (${state.retryCount}/${state.maxRetries}): ${id}`, {
         delay: `${delay}ms`
       }, 'WorkingStateManager');
 
@@ -311,7 +310,7 @@ export class WorkingStateManager {
           });
 
         } catch (error) {
-          Logger.error(`重试失败: ${id}`, error as Error, 'WorkingStateManager');
+          console.error(`重试失败: ${id}`, error as Error, 'WorkingStateManager');
 
           // 如果还有重试次数，继续重试
           if (currentState.retryCount < currentState.maxRetries) {
@@ -396,7 +395,7 @@ export class WorkingStateManager {
       failureCount: 0,
       timeoutCount: 0
     };
-    Logger.info('统计信息已重置', {}, 'WorkingStateManager');
+    console.log('统计信息已重置', {}, 'WorkingStateManager');
   }
 
   /**
@@ -405,7 +404,7 @@ export class WorkingStateManager {
   clearAll(): void {
     const count = this.states.size;
     this.states.forEach((_, id) => this.clearWorking(id));
-    Logger.info(`已清除所有任务 (${count}个)`, {}, 'WorkingStateManager');
+    console.log(`已清除所有任务 (${count}个)`, {}, 'WorkingStateManager');
   }
 
   /**
@@ -413,8 +412,8 @@ export class WorkingStateManager {
    */
   debug(): void {
     console.group('[WorkingStateManager] 调试信息');
-    Logger.debug('活跃任务:', this.getActiveTasks());
-    Logger.debug('统计信息:', this.getStats());
+    console.log('活跃任务:', this.getActiveTasks());
+    console.log('统计信息:', this.getStats());
     console.table(
       Array.from(this.states.entries()).map(([id, state]) => ({
         任务ID: id,
@@ -436,5 +435,5 @@ export default workingStateManager;
 // 向后兼容：暴露到 window (开发调试用)
 if (typeof window !== 'undefined' && (import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV) {
   (window as unknown as Record<string, unknown>).__WorkingStateManager = workingStateManager;
-  Logger.debug('✅ [WorkingStateManager] 开发模式：管理器已暴露到 window.__WorkingStateManager');
+  console.log('✅ [WorkingStateManager] 开发模式：管理器已暴露到 window.__WorkingStateManager');
 }

@@ -1,7 +1,6 @@
 import { loadTemplate } from "../../../../common/utils/viewLoader";
 import { safeMount } from "../../../../common/utils/safeMount";
 
-import { Logger } from '../../../../services/loggerService';
 // SOPs Overview - 总览页面
 const mountInternal = async (container: HTMLElement): Promise<void> => {
     const html = await loadTemplate('src/modules/sops/views/overview/template.html');
@@ -16,7 +15,7 @@ const mountInternal = async (container: HTMLElement): Promise<void> => {
 export const mount = safeMount(mountInternal, { moduleName: 'SOPs Overview' });
 
 export function unmount(): void {
-    Logger.debug("❌ SOPs 总览模块已卸载");
+    console.log("❌ SOPs 总览模块已卸载");
 }
 
 /**
@@ -41,9 +40,9 @@ export function scrollToModule(categoryId: string): void {
             moduleElement.classList.remove('sop-module-highlight');
         }, 2000);
         
-        Logger.debug(`✅ 滚动到模块: ${categoryId}`);
+        console.log(`✅ 滚动到模块: ${categoryId}`);
     } else {
-        Logger.warn(`⚠️ 未找到模块: ${moduleId}`);
+        console.warn(`⚠️ 未找到模块: ${moduleId}`);
     }
 }
 

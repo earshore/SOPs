@@ -5,7 +5,6 @@
 // ================================================================
 
 import type { ZodSchema } from 'zod';
-import { Logger } from '../../services/loggerService';
 import { ValidationError } from '@/common/errors/AppError';
 import {
   RouteConfigSchema,
@@ -53,7 +52,7 @@ export function validateRouteConfig(config: unknown): boolean {
     return true;
   } catch (error: unknown) {
     const zodError = error as { errors?: unknown[]; message?: string };
-    Logger.error('[TypeGuard] Invalid route config:', zodError.errors);
+    console.error('[TypeGuard] Invalid route config:', zodError.errors);
     throw new ValidationError(
       `Route config validation failed: ${zodError.message || 'Unknown error'}`,
       'ROUTE_CONFIG_VALIDATION_FAILED',
@@ -76,7 +75,7 @@ export function validateModuleConfig(config: unknown): boolean {
     return true;
   } catch (error: unknown) {
     const zodError = error as { errors?: unknown[]; message?: string };
-    Logger.error('[TypeGuard] Invalid module config:', zodError.errors);
+    console.error('[TypeGuard] Invalid module config:', zodError.errors);
     throw new ValidationError(
       `Module config validation failed: ${zodError.message || 'Unknown error'}`,
       'MODULE_CONFIG_VALIDATION_FAILED',
@@ -99,7 +98,7 @@ export function validateLLMConfig(config: unknown): boolean {
     return true;
   } catch (error: unknown) {
     const zodError = error as { errors?: unknown[]; message?: string };
-    Logger.error('[TypeGuard] Invalid LLM config:', zodError.errors);
+    console.error('[TypeGuard] Invalid LLM config:', zodError.errors);
     throw new ValidationError(
       `LLM config validation failed: ${zodError.message || 'Unknown error'}`,
       'LLM_CONFIG_VALIDATION_FAILED',
@@ -122,7 +121,7 @@ export function validateProxyConfig(config: unknown): boolean {
     return true;
   } catch (error: unknown) {
     const zodError = error as { errors?: unknown[]; message?: string };
-    Logger.error('[TypeGuard] Invalid proxy config:', zodError.errors);
+    console.error('[TypeGuard] Invalid proxy config:', zodError.errors);
     throw new ValidationError(
       `Proxy config validation failed: ${zodError.message || 'Unknown error'}`,
       'PROXY_CONFIG_VALIDATION_FAILED',
@@ -151,7 +150,7 @@ export function safeParse<T>(value: unknown, schema: ZodSchema<T>, defaultValue:
   if (result.success) {
     return result.data;
   }
-  Logger.warn('[TypeGuard] Parse failed, using default:', result.error);
+  console.warn('[TypeGuard] Parse failed, using default:', result.error);
   return defaultValue;
 }
 

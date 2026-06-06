@@ -30,10 +30,10 @@
  * const dna = extractor.extractDNA(report, 'zh');
  *
  * if (dna) {
- *   Logger.debug('受众:', dna.audience);
- *   Logger.debug('卖点:', dna.usps);
- *   Logger.debug('规格:', dna.specs);
- *   Logger.debug('置信度:', dna.confidence);
+ *   console.log('受众:', dna.audience);
+ *   console.log('卖点:', dna.usps);
+ *   console.log('规格:', dna.specs);
+ *   console.log('置信度:', dna.confidence);
  * }
  * ```
  *
@@ -60,8 +60,6 @@ import { CompetitorReportAdapter } from './adapters/CompetitorReportAdapter';
 import { ProductOverviewAdapter } from './adapters/ProductOverviewAdapter';
 import { SemanticAnalysisAdapter } from './adapters/SemanticAnalysisAdapter';
 import { detectReportType, isSupportedReport } from './reportTypeDetector';
-import { Logger } from '../../../../../services/loggerService';
-
 /**
  * 通用 DNA 提取器类
  *
@@ -92,7 +90,7 @@ export class UniversalDNAExtractor {
       new SemanticAnalysisAdapter()
     ];
 
-    Logger.debug('[UniversalDNAExtractor] 初始化完成，已注册适配器:',
+    console.log('[UniversalDNAExtractor] 初始化完成，已注册适配器:',
       this.adapters.map(a => a.getName())
     );
   }
@@ -121,10 +119,10 @@ export class UniversalDNAExtractor {
    *
    * // 检查提取结果
    * if (dna) {
-   *   Logger.debug(`受众: ${dna.audience.join(', ')}`);
-   *   Logger.debug(`置信度: ${JSON.stringify(dna.confidence)}`);
+   *   console.log(`受众: ${dna.audience.join(', ')}`);
+   *   console.log(`置信度: ${JSON.stringify(dna.confidence)}`);
    * } else {
-   *   Logger.error('DNA 提取失败');
+   *   console.error('DNA 提取失败');
    * }
    * ```
    *
@@ -132,14 +130,14 @@ export class UniversalDNAExtractor {
    */
   extractDNA(report: unknown, language: string = 'zh'): ExtendedDNA | null {
     if (!report || typeof report !== 'object') {
-      Logger.warn('[UniversalDNAExtractor] 无效的报告对象');
+      console.warn('[UniversalDNAExtractor] 无效的报告对象');
       return null;
     }
 
     const reportObj = report as Record<string, unknown>;
 
     // 详细调试：打印报告结构
-    Logger.debug('[UniversalDNAExtractor] 报告对象结构:', {
+    console.log('[UniversalDNAExtractor] 报告对象结构:', {
       topLevelKeys: Object.keys(reportObj),
       hasCompetitorInsights: !!reportObj.competitor_insights,
       hasFeaturePoints: !!reportObj.feature_points,
@@ -153,17 +151,17 @@ export class UniversalDNAExtractor {
 
     // 检测报告类型
     const reportType = detectReportType(report);
-    Logger.debug('[UniversalDNAExtractor] 检测到报告类型:', reportType);
+    console.log('[UniversalDNAExtractor] 检测到报告类型:', reportType);
 
     // 查找匹配的适配器
     const adapter = this.adapters.find(a => {
       const canHandle = a.canHandle(report);
-      Logger.debug(`[UniversalDNAExtractor] 适配器 ${a.getName()} canHandle:`, canHandle);
+      console.log(`[UniversalDNAExtractor] 适配器 ${a.getName()} canHandle:`, canHandle);
       return canHandle;
     });
 
     if (!adapter) {
-      Logger.warn('[UniversalDNAExtractor] 未找到匹配的适配器', {
+      console.warn('[UniversalDNAExtractor] 未找到匹配的适配器', {
         reportType,
         hasCompetitorInsights: !!reportObj.competitor_insights,
         hasProductOverview: !!reportObj.productOverview,
@@ -172,26 +170,26 @@ export class UniversalDNAExtractor {
       return null;
     }
 
-    Logger.debug('[UniversalDNAExtractor] 使用适配器:', adapter.getName());
+    console.log('[UniversalDNAExtractor] 使用适配器:', adapter.getName());
 
     // 使用适配器提取 DNA
     try {
       const dna = adapter.extractDNA(report, language);
 
       if (dna) {
-        Logger.debug('[UniversalDNAExtractor] DNA 提取成功', {
+        console.log('[UniversalDNAExtractor] DNA 提取成功', {
           reportType: dna.metadata.reportType,
           keywordsCount: dna.metadata.stats?.totalKeywords,
           phrasesCount: dna.metadata.stats?.totalPhrases,
           painPointsCount: dna.metadata.stats?.totalPainPoints
         });
       } else {
-        Logger.warn('[UniversalDNAExtractor] 适配器返回 null');
+        console.warn('[UniversalDNAExtractor] 适配器返回 null');
       }
 
       return dna;
     } catch (error) {
-      Logger.error('[UniversalDNAExtractor] 提取过程出错:', error);
+      console.error('[UniversalDNAExtractor] 提取过程出错:', error);
       return null;
     }
   }
@@ -224,7 +222,7 @@ export class UniversalDNAExtractor {
    */
   registerAdapter(adapter: ReportAdapter): void {
     this.adapters.push(adapter);
-    Logger.debug('[UniversalDNAExtractor] 注册自定义适配器:', adapter.getName());
+    console.log('[UniversalDNAExtractor] 注册自定义适配器:', adapter.getName());
   }
 }
 

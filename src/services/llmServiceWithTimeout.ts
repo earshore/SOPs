@@ -6,7 +6,6 @@
 
 import { callLLM, type ChatMessage, type LLMOptions, type LLMConfig } from './llmService';
 import { workingStateManager } from '../common/utils/WorkingStateManager';
-import { Logger } from './loggerService';
 import { showToast } from '../common/ui/notifications';
 
 /**
@@ -67,7 +66,7 @@ export async function callLLMWithTimeout(
     ...llmOptions
   } = options;
 
-  Logger.info(`开始LLM调用: ${description}`, {
+  console.log(`开始LLM调用: ${description}`, {
     taskId,
     model,
     timeout,
@@ -81,7 +80,7 @@ export async function callLLMWithTimeout(
       maxRetries,
       onTimeout: async () => {
         // 超时后的重试逻辑
-        Logger.warn(`LLM调用超时，正在重试: ${description}`, {
+        console.warn(`LLM调用超时，正在重试: ${description}`, {
           taskId
         }, 'LLMService');
 
@@ -108,13 +107,13 @@ export async function callLLMWithTimeout(
         }
       },
       onSuccess: () => {
-        Logger.info(`LLM调用成功: ${description}`, { taskId }, 'LLMService');
+        console.log(`LLM调用成功: ${description}`, { taskId }, 'LLMService');
         if (showUserNotification) {
           showToast('请求成功', { type: 'success' });
         }
       },
       onFinalFailure: (error) => {
-        Logger.error(`LLM调用最终失败: ${description}`, error, 'LLMService');
+        console.error(`LLM调用最终失败: ${description}`, error, 'LLMService');
         if (showUserNotification) {
           showToast(`请求失败: ${error.message}`, { type: 'error' });
         }
@@ -131,7 +130,7 @@ export async function callLLMWithTimeout(
       })
       .catch(error => {
         // 失败后标记任务失败（会触发重试）
-        Logger.error(`LLM调用失败: ${description}`, error, 'LLMService');
+        console.error(`LLM调用失败: ${description}`, error, 'LLMService');
         // 不立即reject，让WorkingStateManager处理重试
       });
   });
@@ -167,7 +166,7 @@ export async function callLLMWithConfigAndTimeout(
  */
 export function cancelLLMCall(taskId: string): void {
   workingStateManager.clearWorking(taskId);
-  Logger.info(`LLM调用已取消: ${taskId}`, {}, 'LLMService');
+  console.log(`LLM调用已取消: ${taskId}`, {}, 'LLMService');
 }
 
 /**

@@ -11,7 +11,6 @@ import type { IStorageService } from '../types/services';
 import type { LLMProviderConfig } from '../types/state';
 import type { HistoryItem, ProxyConfig } from '../types/modules-business';
 import { handleSystemError } from '../common/errors';
-import { Logger } from './loggerService';
 import {
   isLLMProviderConfig,
   isProxyConfig
@@ -119,13 +118,13 @@ class StorageServiceClass implements IStorageService {
       // 排除 llm_active_provider，它存储的是字符串而不是配置对象
       if (key.startsWith(STORAGE_KEYS.LLM_CONFIG_PREFIX) && key !== STORAGE_KEYS.LLM_ACTIVE_PROVIDER) {
         if (!isLLMProviderConfig(parsed)) {
-          Logger.warn(`[StorageService] LLM配置格式无效，已清除: ${key}`);
+          console.warn(`[StorageService] LLM配置格式无效，已清除: ${key}`);
           this.remove(key);
           return defaultValue;
         }
       } else if (key === STORAGE_KEYS.PROXY_CONFIG || key === STORAGE_KEYS.SCRAPER_PROXY_CONFIG) {
         if (!isProxyConfig(parsed)) {
-          Logger.warn(`[StorageService] 代理配置格式无效，已清除: ${key}`);
+          console.warn(`[StorageService] 代理配置格式无效，已清除: ${key}`);
           this.remove(key);
           return defaultValue;
         }
@@ -347,7 +346,6 @@ class StorageServiceClass implements IStorageService {
 
   /**
    * 获取所有键的访问时间
-   * 🎯 DI改造：移除Logger依赖
    */
   private _getAccessTimes(): AccessTimeRecord[] {
     const items: AccessTimeRecord[] = [];
@@ -370,7 +368,7 @@ class StorageServiceClass implements IStorageService {
         }
       }
     } catch (e) {
-      Logger.warn('[StorageService] 获取访问时间失败', e);
+      console.warn('[StorageService] 获取访问时间失败', e);
     }
 
     return items.sort((a, b) => a.accessTime - b.accessTime);
@@ -378,7 +376,6 @@ class StorageServiceClass implements IStorageService {
 
   /**
    * 检查缓存大小
-   * 🎯 DI改造：移除Logger依赖
    */
   private _checkCacheSize(newItemSize: number): void {
     const usage = this.getUsage();
@@ -386,7 +383,7 @@ class StorageServiceClass implements IStorageService {
     const threshold = this._lruConfig.maxSize * this._lruConfig.warningThreshold;
 
     if (projectedUsage > threshold) {
-      Logger.warn('[StorageService] 缓存使用量接近上限，开始清理', {
+      console.warn('[StorageService] 缓存使用量接近上限，开始清理', {
         current: `${(projectedUsage / 1024 / 1024).toFixed(2)}MB`,
         max: `${(this._lruConfig.maxSize / 1024 / 1024).toFixed(2)}MB`
       });
@@ -396,7 +393,6 @@ class StorageServiceClass implements IStorageService {
 
   /**
    * LRU清理策略
-   * 🎯 DI改造：移除Logger依赖，直接使用console
    */
   private _cleanupLRU(): void {
     try {
@@ -421,12 +417,12 @@ class StorageServiceClass implements IStorageService {
         }
       }
 
-      Logger.info('[StorageService] LRU清理完成', {
+      console.info('[StorageService] LRU清理完成', {
         removedCount,
         freedSpace: `${((usage.used - currentSize) / 1024).toFixed(2)}KB`
       });
     } catch (e) {
-      Logger.error('[StorageService] LRU清理失败', e);
+      console.error('[StorageService] LRU清理失败', e);
     }
   }
 
@@ -478,17 +474,16 @@ class StorageServiceClass implements IStorageService {
 
   /**
    * 处理存储空间超限
-   * 🎯 DI改造：移除Logger依赖
    */
   private _handleQuotaExceeded(): void {
-    Logger.warn('[StorageService] 存储空间不足，尝试清理数据');
+    console.warn('[StorageService] 存储空间不足，尝试清理数据');
 
     this._cleanupLRU();
 
     const history = this.get<unknown[]>(STORAGE_KEYS.SCRAPE_HISTORY, []);
     if (history && history.length > 10) {
       this.set(STORAGE_KEYS.SCRAPE_HISTORY, history.slice(0, 10));
-      Logger.info('[StorageService] 清理了采集历史数据');
+      console.info('[StorageService] 清理了采集历史数据');
     }
   }
 
@@ -498,7 +493,6 @@ class StorageServiceClass implements IStorageService {
 
   /**
    * 获取 LLM 配置（包含加密的API密钥）
-   * 🎯 DI改造：移除Logger依赖
    * 🎯 P0-4.1.8: 在数据边界使用类型守卫
    */
   async getLLMConfigWithKey(provider: string | null = null): Promise<LLMProviderConfig | null> {
@@ -514,13 +508,13 @@ class StorageServiceClass implements IStorageService {
 
       // 🎯 数据边界验证：验证完整配置
       if (!isLLMProviderConfig(fullConfig)) {
-        Logger.warn('[StorageService] LLM完整配置格式无效');
+        console.warn('[StorageService] LLM完整配置格式无效');
         return null;
       }
 
       return fullConfig;
     } catch (error) {
-      Logger.warn('[StorageService] Failed to decrypt API key', error);
+      console.warn('[StorageService] Failed to decrypt API key', error);
       return { ...config, apiKey: '' } as LLMProviderConfig;
     }
   }
@@ -578,7 +572,7 @@ class StorageServiceClass implements IStorageService {
   setProxyConfig(config: ProxyConfig): void {
     // 🎯 数据边界验证：保存前验证
     if (!isProxyConfig(config)) {
-      Logger.error('[StorageService] 无法保存：代理配置格式无效');
+      console.error('[StorageService] 无法保存：代理配置格式无效');
       return;
     }
 

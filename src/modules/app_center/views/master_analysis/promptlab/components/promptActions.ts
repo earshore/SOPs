@@ -8,7 +8,6 @@
 import { appStore } from '@/stores/useAppStore';
 import { promptlabService } from '../../services/promptlabService';
 import { showToast } from '../../../../../../common/ui';
-import { Logger } from '../../../../../../services/loggerService';
 import { computeIsReady, computeHasReport } from './computed';
 import type { PromptlabAlpineContext } from './types';
 import type { AnalysisReport } from '../../../../../../types/modules-business';
@@ -22,7 +21,7 @@ import type { PromptInputs } from '../../../../../../types/state';
  * 生成 Listing Prompt 并写入 ctx.listingPromptCache
  */
 export function generateListingPrompt(ctx: PromptlabAlpineContext): void {
-  Logger.debug('[promptActions] 🎯 生成 Listing Prompt');
+  console.log('[promptActions] 🎯 生成 Listing Prompt');
 
   if (!computeIsReady(ctx)) {
     let msg = '未就绪';
@@ -53,7 +52,7 @@ export function generateListingPrompt(ctx: PromptlabAlpineContext): void {
  * 生成 Visual Prompt 并写入 ctx.visualPromptCache
  */
 export function generateVisualPrompt(ctx: PromptlabAlpineContext): void {
-  Logger.debug('[promptActions] 🎯 生成 Visual Prompt');
+  console.log('[promptActions] 🎯 生成 Visual Prompt');
 
   if (!computeHasReport()) {
     showToast('请先生成 AI 分析报告以获取视觉灵感', { type: 'warning' });

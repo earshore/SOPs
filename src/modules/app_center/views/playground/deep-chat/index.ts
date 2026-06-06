@@ -9,7 +9,6 @@ import { callLLM, type ChatMessage } from '@/services/llmService';
 import { StorageService } from '@/services/storageService';
 import { LocalDataStore } from '@/services/localDataStore';
 import type { LLMProviderConfig } from '@/types/state';
-import { Logger } from '@/services/loggerService';
 import {
   mergeThreadHistoryWithRequest,
   type DeepChatMessage,
@@ -424,7 +423,7 @@ export function unmount(): void {
   sessionTemperature = 0.3;
   threadStore = createDefaultThreadStore();
   cleanupMessageToolbars();
-  Logger.debug('[Deep Chat] 模块已卸载');
+  console.log('[Deep Chat] 模块已卸载');
 }
 
 async function refreshLLMConfig(container: HTMLElement): Promise<void> {
@@ -438,6 +437,7 @@ async function refreshLLMConfig(container: HTMLElement): Promise<void> {
     return;
   }
 
+  // ✅ 安全: 清空下拉列表
   modelSelect.innerHTML = '';
 
   if (!currentConfig || !currentConfig.apiKey || !selectedModel) {
@@ -727,11 +727,11 @@ async function handlePlaygroundRequest(
     );
   } catch (error) {
     if (requestController?.signal.aborted) {
-      Logger.debug('[Deep Chat] LLM 调用已取消');
+      console.log('[Deep Chat] LLM 调用已取消');
       return;
     }
     const message = error instanceof Error ? error.message : '模型调用失败';
-    Logger.error('[Deep Chat] LLM 调用失败:', error);
+    console.error('[Deep Chat] LLM 调用失败:', error);
     await signals.onResponse?.({ error: message });
   } finally {
     signals.onClose?.();
@@ -832,6 +832,7 @@ function createToolbarButton(label: string, icon: string, onClick: () => void): 
   button.className = 'playground-message-tool';
   button.title = label;
   button.setAttribute('aria-label', label);
+  // ✅ 安全: icon来自getCopyIcon/getEditIcon静态SVG模板
   button.innerHTML = icon;
   button.addEventListener('click', (event) => {
     event.preventDefault();
@@ -850,7 +851,7 @@ function copyMessageContent(bubble: HTMLElement): void {
   void writeClipboardText(content)
     .then(() => showToast('消息已复制', { type: 'success' }))
     .catch((error) => {
-      Logger.warn('[Deep Chat] 复制消息失败:', error);
+      console.warn('[Deep Chat] 复制消息失败:', error);
       showToast('复制失败，请手动选择文本复制', { type: 'error' });
     });
 }
@@ -863,7 +864,7 @@ async function writeClipboardText(content: string): Promise<void> {
       return;
     }
   } catch (error) {
-    Logger.warn('[Deep Chat] Clipboard API 不可用，尝试降级复制:', error);
+    console.warn('[Deep Chat] Clipboard API 不可用，尝试降级复制:', error);
   }
 
   copyTextWithSelectionFallback(content);
@@ -1030,6 +1031,7 @@ function renderThreadList(container: HTMLElement): void {
   }
 
   const sortedThreads = [...threadStore.threads].sort((a, b) => b.updatedAt - a.updatedAt);
+  // ✅ 安全: escapeHTML 已转义所有用户输入 (thread.title, meta)
   list.innerHTML = sortedThreads.map((thread) => {
     const isActive = thread.id === threadStore.activeThreadId;
     const messageCount = thread.messages.length;

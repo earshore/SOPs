@@ -7,7 +7,6 @@
 
 import { ANIMATION_CLASSES } from '../config/animation-config';
 
-import { Logger } from '../services/loggerService';
 /**
  * 为元素添加动画类
  * 
@@ -19,7 +18,7 @@ import { Logger } from '../services/loggerService';
  * @example
  * ```typescript
  * await addAnimation(button, 'fade-in', 300);
- * Logger.debug('动画完成');
+ * console.log('动画完成');
  * ```
  */
 export async function addAnimation(
@@ -283,7 +282,7 @@ export function batchRemoveAnimation(elements: HTMLElement[], animationClass: st
  * @example
  * ```typescript
  * const hasClass = toggleAnimation(element, 'active');
- * Logger.debug(hasClass ? '已激活' : '已取消');
+ * console.log(hasClass ? '已激活' : '已取消');
  * ```
  */
 export function toggleAnimation(element: HTMLElement, animationClass: string): boolean {
@@ -303,7 +302,7 @@ export function toggleAnimation(element: HTMLElement, animationClass: string): b
  * safeAnimate(() => {
  *   element.classList.add('complex-animation');
  * }, (error) => {
- *   Logger.warn('动画失败:', error);
+ *   console.warn('动画失败:', error);
  * });
  * ```
  */
@@ -314,7 +313,7 @@ export function safeAnimate(
   try {
     callback();
   } catch (error) {
-    Logger.warn('Animation failed:', error);
+    console.warn('Animation failed:', error);
     if (onError && error instanceof Error) {
       onError(error);
     }
@@ -330,7 +329,7 @@ export function safeAnimate(
  * @example
  * ```typescript
  * const duration = getAnimationDuration(element);
- * Logger.debug(`动画时长: ${duration}ms`);
+ * console.log(`动画时长: ${duration}ms`);
  * ```
  */
 export function getAnimationDuration(element: HTMLElement): number {

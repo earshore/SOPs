@@ -4,8 +4,6 @@
 // 确保用户操作优先执行，后台任务不阻塞交互
 // ================================================================
 
-import { Logger } from '@services/loggerService';
-
 /**
  * 请求优先级枚举
  */
@@ -191,7 +189,7 @@ export class PriorityRequestPool {
 
       // 调试日志
       if (duration > 1000) {
-        Logger.warn(`[RequestPool] 慢请求 (${duration}ms):`, task.meta);
+        console.warn(`[RequestPool] 慢请求 (${duration}ms):`, task.meta);
       }
 
       task.resolve(result);
@@ -202,7 +200,7 @@ export class PriorityRequestPool {
       }
       this.stats.byPriority[task.priority].failed++;
 
-      Logger.error('[RequestPool] 请求失败:', { meta: task.meta, error });
+      console.error('[RequestPool] 请求失败:', { meta: task.meta, error });
       task.reject(error);
     } finally {
       this.running--;
@@ -273,7 +271,7 @@ export class PriorityRequestPool {
       });
       queue.length = 0;
     });
-    Logger.debug('[RequestPool] 已清空所有队列');
+    console.log('[RequestPool] 已清空所有队列');
   }
 
   /**
@@ -286,7 +284,7 @@ export class PriorityRequestPool {
       failed: 0,
       byPriority: {} as Record<RequestPriority, PriorityStats>,
     };
-    Logger.debug('[RequestPool] 统计数据已重置');
+    console.log('[RequestPool] 统计数据已重置');
   }
 }
 

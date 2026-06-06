@@ -6,7 +6,6 @@
 import type { ReportAdapter, ExtractionResult } from "./ReportAdapter";
 import type { CompetitorReport } from "../../types/downloadsReportTypes";
 import type { ExtendedDNA } from "../../types/extendedDNA";
-import { Logger } from "../../../../../../services/loggerService";
 import { isTechnicalSpec } from "../../utils/specUtils";
 import { ValidationError } from "../../../../../../common/errors/AppError";
 
@@ -48,7 +47,7 @@ export class CompetitorReportAdapter implements ReportAdapter {
 
   extractDNA(report: unknown, _language: string = "zh"): ExtendedDNA | null {
     if (!this.canHandle(report)) {
-      Logger.warn("[CompetitorAdapter] 报告格式不匹配");
+      console.warn("[CompetitorAdapter] 报告格式不匹配");
       return null;
     }
 
@@ -124,7 +123,7 @@ export class CompetitorReportAdapter implements ReportAdapter {
         },
       };
 
-      Logger.debug("[CompetitorAdapter] DNA 提取完成", {
+      console.log("[CompetitorAdapter] DNA 提取完成", {
         keywordsCount: dna.metadata.stats?.totalKeywords,
         phrasesCount: dna.metadata.stats?.totalPhrases,
         painPointsCount: dna.metadata.stats?.totalPainPoints,
@@ -132,7 +131,7 @@ export class CompetitorReportAdapter implements ReportAdapter {
 
       return dna;
     } catch (error) {
-      Logger.error("[CompetitorAdapter] 提取失败:", error);
+      console.error("[CompetitorAdapter] 提取失败:", error);
       return null;
     }
   }

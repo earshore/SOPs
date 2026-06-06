@@ -18,7 +18,6 @@ import templateHTML from "./template.html?raw";
 import type { MarketingEvent, CountryInfo } from "@/types/modules-business";
 import "./styles.css";
 
-import { Logger } from "../../../../../services/loggerService";
 const AMZF_HISTORY_KEY = "amzf_search_history";
 const AMZF_MAX_HISTORY =
   configCenter.get<number>("history.maxSearchHistory") || 10;
@@ -70,7 +69,7 @@ class MarketingCalendarModule extends BaseModule {
     this.bindCalendarClickEvents();
     this.bindSearchEvents();
 
-    Logger.debug("✅ Marketing Calendar Loaded");
+    console.log("✅ Marketing Calendar Loaded");
   }
 
   onUnmount(): void {
@@ -81,7 +80,7 @@ class MarketingCalendarModule extends BaseModule {
     }
 
     // 清理全局代理
-    Logger.debug("❌ Marketing Calendar Unmounted");
+    console.log("❌ Marketing Calendar Unmounted");
   }
 
   // ==================== Core Logic ====================
@@ -95,7 +94,7 @@ class MarketingCalendarModule extends BaseModule {
       const saved = storageService.get(AMZF_HISTORY_KEY, []) as string[];
       this.state.searchHistory = saved || [];
     } catch (e) {
-      Logger.warn("Failed to load search history:", e);
+      console.warn("Failed to load search history:", e);
       this.state.searchHistory = [];
     }
   }
@@ -108,7 +107,7 @@ class MarketingCalendarModule extends BaseModule {
       );
       storageService.set(AMZF_HISTORY_KEY, this.state.searchHistory);
     } catch (e) {
-      Logger.warn("Failed to save search history:", e);
+      console.warn("Failed to save search history:", e);
     }
   }
 

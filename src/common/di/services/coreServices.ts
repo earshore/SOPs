@@ -8,7 +8,6 @@ import type { ServiceRegistry } from '../ServiceRegistry';
 import { SERVICE_NAMES } from '../ServiceRegistry';
 import type { IStorageService, IConfigService, ILoggerService } from '@/types/services';
 
-import { Logger } from '../../../services/loggerService';
 import { createStorageService } from '@/services/storageService';
 import eventBus from '@/common/EventBus';
 import { globalErrorHandler } from '@/common/errors/GlobalErrorHandler';
@@ -19,7 +18,7 @@ import { initRouter } from '@/common/router/initRouter';
  * 注册核心服务到注册表
  */
 export function registerCoreServices(registry: ServiceRegistry): void {
-  Logger.debug('[CoreServices] 开始注册核心服务配置');
+  console.log('[CoreServices] 开始注册核心服务配置');
 
   // ================================================================
   // Level 0: 基础服务（无依赖）
@@ -141,5 +140,5 @@ export function registerCoreServices(registry: ServiceRegistry): void {
     dependencies: []
   });
 
-  Logger.debug('[CoreServices] 核心服务配置注册完成');
+  console.log('[CoreServices] 核心服务配置注册完成');
 }

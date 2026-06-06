@@ -4,9 +4,6 @@
 // 提供基于 Web Crypto API 的加密存储功能
 // ================================================================
 
-import { StorageService } from '../../services/storageService';
-
-import { Logger } from '../../services/loggerService';
 /**
  * 加密数据结构
  */
@@ -89,10 +86,11 @@ export const SecureStorage = {
         version: '1.0', // 版本标识,便于未来升级
       };
 
-      // 6. 存储
-      return StorageService.set(`secure_${key}`, encryptedData);
+      // 6. 直接使用 localStorage 存储，避免循环依赖
+      localStorage.setItem(`secure_${key}`, JSON.stringify(encryptedData));
+      return true;
     } catch (error) {
-      Logger.error('[SecureStorage] Encryption failed:', error);
+      console.error('[SecureStorage] Encryption failed:', error);
       return false;
     }
   },
@@ -102,11 +100,13 @@ export const SecureStorage = {
    */
   async getSecure<T = unknown>(key: string, defaultValue: T | null = null): Promise<T | null> {
     try {
-      // 1. 读取加密数据
-      const encryptedData = StorageService.get<EncryptedData>(`secure_${key}`, null);
-      if (!encryptedData) {
+      // 1. 直接从 localStorage 读取加密数据，避免循环依赖
+      const raw = localStorage.getItem(`secure_${key}`);
+      if (!raw) {
         return defaultValue;
       }
+
+      const encryptedData = JSON.parse(raw) as EncryptedData;
 
       // 2. 获取密钥
       const fingerprint = await getDeviceFingerprint();
@@ -124,7 +124,7 @@ export const SecureStorage = {
       const dataString = decoder.decode(decryptedBuffer);
       return JSON.parse(dataString);
     } catch (error) {
-      Logger.error('[SecureStorage] Decryption failed:', error);
+      console.error('[SecureStorage] Decryption failed:', error);
       return defaultValue;
     }
   },
@@ -132,8 +132,9 @@ export const SecureStorage = {
   /**
    * 删除加密数据
    */
-  removeSecure(key: string): void {
-    StorageService.remove(`secure_${key}`);
+  async removeSecure(key: string): Promise<void> {
+    // 直接从 localStorage 删除，避免循环依赖
+    localStorage.removeItem(`secure_${key}`);
   },
 
   /**

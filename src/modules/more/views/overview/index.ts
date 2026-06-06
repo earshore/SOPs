@@ -6,8 +6,7 @@
 import BaseModule from '../../../../common/BaseModule';
 import { loadTemplate } from '../../../../common/utils/viewLoader';
 
-import { Logger } from '../../../../services/loggerService';
-Logger.debug('🧭 更多总览页面加载...');
+console.log('🧭 更多总览页面加载...');
 
 /**
  * 初始化事件监听
@@ -80,9 +79,9 @@ export function scrollToModule(categoryId: string): void {
             moduleElement.classList.remove('more-module-highlight');
         }, 2000);
 
-        Logger.debug(`✅ 滚动到模块: ${categoryId}`);
+        console.log(`✅ 滚动到模块: ${categoryId}`);
     } else {
-        Logger.warn(`⚠️ 未找到模块: ${moduleId}`);
+        console.warn(`⚠️ 未找到模块: ${moduleId}`);
     }
 }
 
@@ -102,9 +101,9 @@ class MoreOverviewModule extends BaseModule {
             // 初始化事件监听
             initOverviewEvents(container);
 
-            Logger.debug('✅ 更多总览页面挂载完成');
+            console.log('✅ 更多总览页面挂载完成');
         } catch (error) {
-            Logger.error('❌ 更多总览页面挂载失败:', error);
+            console.error('❌ 更多总览页面挂载失败:', error);
             // ✅ 安全: 静态HTML模板，无用户输入
             container.innerHTML = `
                 <div class="p-10 text-center text-red-500">
@@ -119,7 +118,7 @@ class MoreOverviewModule extends BaseModule {
      * 卸载模块
      */
     unmount(): void {
-        Logger.debug('🧹 更多总览页面卸载');
+        console.log('🧹 更多总览页面卸载');
     }
 }
 

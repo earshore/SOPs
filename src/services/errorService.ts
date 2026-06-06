@@ -4,7 +4,6 @@
 // 🎯 P0-4: 重构为GlobalErrorHandler的包装器,保持向后兼容
 // ================================================================
 
-import { Logger } from './loggerService';
 import {
   globalErrorHandler,
   toAppError,
@@ -181,7 +180,7 @@ class ErrorServiceClass {
     try {
       return fn();
     } catch (e) {
-      Logger.debug('Silent error', { message: (e as Error).message }, 'ErrorService');
+      console.log('Silent error', { message: (e as Error).message }, 'ErrorService');
       return defaultValue;
     }
   }

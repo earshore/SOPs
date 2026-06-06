@@ -10,7 +10,6 @@ import { appStore } from '@/stores/useAppStore';
 import SITE_CONFIGS from '../../../../../../common/constants/constants';
 import type { TargetMarket } from '@/types/state';
 import { SafeRenderer } from '../../../../../../common/infrastructure/SafeRenderer';
-import { Logger } from '../../../../../../services/loggerService';
 import { getFieldTitle, getPreviewText } from './previewExtractor';
 import { getTargetConfidence, getConfidenceColorClass, getConfidenceAriaLabel, computeHasReport } from './computed';
 import type { PromptlabAlpineContext } from './types';
@@ -46,21 +45,21 @@ export function generateLanguageOptions(): void {
  * 渲染报告分析区域（无报告时显示占位，有报告时渲染模块列表）
  */
 export function renderReportAnalysis(ctx: PromptlabAlpineContext): void {
-  Logger.debug('[reportRenderer] renderReportAnalysis, hasReport:', computeHasReport());
+  console.log('[reportRenderer] renderReportAnalysis, hasReport:', computeHasReport());
 
   const container = document.getElementById('report-sections-container');
   const statusDiv = document.getElementById('lab-analysis-status');
   const marketSelect = document.getElementById('lab-target-market') as HTMLSelectElement | null;
 
   if (!container) {
-    Logger.debug('[reportRenderer] 容器元素未找到');
+    console.log('[reportRenderer] 容器元素未找到');
     return;
   }
 
   const renderer = SafeRenderer.getInstance();
 
   if (!computeHasReport()) {
-    Logger.debug('[reportRenderer] 没有报告，显示提示');
+    console.log('[reportRenderer] 没有报告，显示提示');
     if (statusDiv) {
       statusDiv.className = 'px-2 py-1 bg-slate-100 text-slate-500 rounded text-xs flex items-center gap-1';
       renderer.renderTemplate(statusDiv, '<i class="fas fa-exclamation-circle"></i> 未检测到分析报告');
@@ -108,7 +107,7 @@ export function autoSelectMarket(
   const isMarketplaceChanged = !!currentMarketplace && currentMarketplace !== ctx.lastMarketplace;
 
   if (currentMarketplace && (isFirstLoad || isMarketplaceChanged)) {
-    Logger.debug(`[reportRenderer] 市场变化: ${ctx.lastMarketplace} → ${currentMarketplace}`);
+    console.log(`[reportRenderer] 市场变化: ${ctx.lastMarketplace} → ${currentMarketplace}`);
     const siteConfig = SITE_CONFIGS[currentMarketplace];
     if (siteConfig) {
       const match = Array.from(marketSelect.options).find(
@@ -119,7 +118,7 @@ export function autoSelectMarket(
         ctx.profile.targetMarket = match.value as TargetMarket;
         ctx.saveState();
         ctx.lastMarketplace = currentMarketplace;
-        Logger.debug('[reportRenderer] 已自动选择市场:', match.value);
+        console.log('[reportRenderer] 已自动选择市场:', match.value);
       }
     }
   } else if (currentMarketplace) {
@@ -140,7 +139,7 @@ export function renderReportModules(
 ): void {
   const report = appStore.getState().analysis.analysisReport as Record<string, any> | null;
 
-  Logger.debug('[reportRenderer] renderReportModules, keys:', report ? Object.keys(report) : null);
+  console.log('[reportRenderer] renderReportModules, keys:', report ? Object.keys(report) : null);
 
   const renderer = SafeRenderer.getInstance();
   renderer.renderTemplate(container, '');
@@ -152,10 +151,10 @@ export function renderReportModules(
   const hasMetadata = report?.metadata && report?.analysisReport;
 
   if (hasMetadata) {
-    Logger.debug('[reportRenderer] 包装格式报告');
+    console.log('[reportRenderer] 包装格式报告');
     renderNewFormatModules(ctx, container, report!.analysisReport, isFirstLoad);
   } else if (report && typeof report === 'object') {
-    Logger.debug('[reportRenderer] 直接格式报告');
+    console.log('[reportRenderer] 直接格式报告');
     renderNewFormatModules(ctx, container, report, isFirstLoad);
   } else {
     renderLegacyFormatModules(ctx, container, report, isFirstLoad);
@@ -230,7 +229,7 @@ export function renderNewFormatModules(
   isFirstLoad: boolean,
 ): void {
   if (!analysisReport || typeof analysisReport !== 'object') {
-    Logger.warn('[reportRenderer] analysisReport 不是有效对象');
+    console.warn('[reportRenderer] analysisReport 不是有效对象');
     return;
   }
 
@@ -241,7 +240,7 @@ export function renderNewFormatModules(
     (key) => TARGET_CONFIG[key] && reportObj[key],
   );
 
-  Logger.debug('[reportRenderer] 可用目标:', availableTargets);
+  console.log('[reportRenderer] 可用目标:', availableTargets);
 
   // 首次加载时初始化 selectedReportItems
   if (isFirstLoad) {
@@ -538,7 +537,7 @@ export function renderLegacyFormatModules(
   isFirstLoad: boolean,
 ): void {
   if (!report || typeof report !== 'object') {
-    Logger.warn('[reportRenderer] 旧格式 report 不是有效对象');
+    console.warn('[reportRenderer] 旧格式 report 不是有效对象');
     return;
   }
 

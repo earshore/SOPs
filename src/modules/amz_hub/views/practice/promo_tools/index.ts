@@ -2,8 +2,6 @@ import BaseModule from "../../../../../common/BaseModule";
 import templateHTML from "./template.html?raw";
 import "./styles.css";
 
-import { Logger } from "../../../../../services/loggerService";
-
 interface ContentItem {
   title?: string;
   icon?: string;
@@ -511,11 +509,11 @@ class PromotionsModule extends BaseModule {
   async init(): Promise<void> {
     this.renderNavigation();
     this.renderContent();
-    Logger.debug("✅ [PromoTools] 促销工具页面已加载");
+    console.log("✅ [PromoTools] 促销工具页面已加载");
   }
 
   protected onUnmount(): void {
-    Logger.debug("🗑️ [PromoTools] 模块已卸载");
+    console.log("🗑️ [PromoTools] 模块已卸载");
   }
 
   private renderNavigation(): void {

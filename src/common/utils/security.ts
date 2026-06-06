@@ -4,8 +4,6 @@
 // 提供安全的 HTML 渲染方法
 // ================================================================
 
-import { Logger } from '@services/loggerService';
-
 // ==================== 类型定义 ====================
 
 /**
@@ -171,7 +169,7 @@ export function setSafeHtml(element: HTMLElement | null, html: string): void {
  */
 export function safeMarkdown(markdown: string, markdownParser?: MarkdownParser): string {
   if (!markdownParser) {
-    Logger.warn('[Security] markdownParser not provided, returning escaped text');
+    console.warn('[Security] markdownParser not provided, returning escaped text');
     return escapeHtml(markdown);
   }
 

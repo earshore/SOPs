@@ -9,8 +9,6 @@ import { animationManager } from '../services/animation-manager';
 import { createRipple } from '../utils/animation-utils';
 import eventBus from '@common/EventBus';
 import { APP_EVENTS } from '@common/constants/eventConstants';
-import { Logger } from '../services/loggerService';
-
 // ========== 模块级清理函数存储 ==========
 let animationSettingsUnsubscribe: (() => void) | null = null;
 /**
@@ -20,13 +18,13 @@ let animationSettingsUnsubscribe: (() => void) | null = null;
 export function initButtonRipple(): void {
   // 检查动画是否启用
   if (animationManager.shouldReduceMotion()) {
-    Logger.info('[ButtonRipple] 动画已禁用，跳过涟漪效果初始化');
+    console.log('[ButtonRipple] 动画已禁用，跳过涟漪效果初始化');
     return;
   }
 
   // 检查按钮动画类别是否启用
   if (!animationManager.isCategoryEnabled('button')) {
-    Logger.info('[ButtonRipple] 按钮动画已禁用，跳过涟漪效果初始化');
+    console.log('[ButtonRipple] 按钮动画已禁用，跳过涟漪效果初始化');
     return;
   }
 
@@ -36,7 +34,7 @@ export function initButtonRipple(): void {
     '.btn:not([data-ripple-initialized]):not(.btn-link):not(.btn-link-neutral):not(.btn-link-danger):not([disabled])'
   );
 
-  Logger.info(`[ButtonRipple] 初始化 ${buttons.length} 个按钮的涟漪效果`);
+  console.log(`[ButtonRipple] 初始化 ${buttons.length} 个按钮的涟漪效果`);
 
   buttons.forEach((button) => {
     addRippleToButton(button);
@@ -95,7 +93,7 @@ function handleButtonClick(event: MouseEvent): void {
   try {
     createRipple(button, event);
   } catch (error) {
-    Logger.warn('[ButtonRipple] 创建涟漪效果失败:', error);
+    console.warn('[ButtonRipple] 创建涟漪效果失败:', error);
     // 失败时静默降级，不影响按钮功能
   }
 }
@@ -162,7 +160,7 @@ export function observeButtonChanges(): void {
     subtree: true,
   });
 
-  Logger.info('[ButtonRipple] DOM变化观察器已启动');
+  console.log('[ButtonRipple] DOM变化观察器已启动');
 }
 
 /**
@@ -187,7 +185,7 @@ export function reinitButtonRipple(): void {
 export function observeAnimationSettings(): void {
   // 防止重复订阅
   if (animationSettingsUnsubscribe) {
-    Logger.warn('[ButtonRipple] 动画设置监听器已存在，跳过重复订阅');
+    console.warn('[ButtonRipple] 动画设置监听器已存在，跳过重复订阅');
     return;
   }
   
@@ -206,7 +204,7 @@ export function observeAnimationSettings(): void {
     isReinitializing = true;
     lastReinitTime = now;
     
-    Logger.info('[ButtonRipple] 动画设置已更改，重新初始化涟漪效果');
+    console.log('[ButtonRipple] 动画设置已更改，重新初始化涟漪效果');
     
     // 使用 requestAnimationFrame 延迟执行，避免阻塞主线程
     requestAnimationFrame(() => {
@@ -215,7 +213,7 @@ export function observeAnimationSettings(): void {
     });
   });
   
-  Logger.debug('[ButtonRipple] ✅ 已订阅动画设置变化事件');
+  console.log('[ButtonRipple] ✅ 已订阅动画设置变化事件');
 }
 
 /**
@@ -223,13 +221,13 @@ export function observeAnimationSettings(): void {
  * 包括事件监听器和DOM观察器
  */
 export function cleanupButtonRipple(): void {
-  Logger.debug('[ButtonRipple] 🔄 清理按钮涟漪效果资源');
+  console.log('[ButtonRipple] 🔄 清理按钮涟漪效果资源');
   
   // 清理动画设置监听器
   if (animationSettingsUnsubscribe) {
     animationSettingsUnsubscribe();
     animationSettingsUnsubscribe = null;
-    Logger.debug('[ButtonRipple] ✅ 已清理动画设置监听器');
+    console.log('[ButtonRipple] ✅ 已清理动画设置监听器');
   }
   
   // 移除所有按钮的涟漪效果
@@ -238,5 +236,5 @@ export function cleanupButtonRipple(): void {
     removeRippleFromButton(button);
   });
   
-  Logger.debug('[ButtonRipple] ✅ 按钮涟漪效果资源已清理');
+  console.log('[ButtonRipple] ✅ 按钮涟漪效果资源已清理');
 }

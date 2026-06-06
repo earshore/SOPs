@@ -16,7 +16,6 @@ import type { FullAnalysisReport } from '../config/analysisReportData';
 import { createMultipleStateSyncs, cleanupSubscriptions } from '@common/utils/stateSync';
 import { createPerformanceSettingsPanel } from './PerformanceSettings';
 
-import { Logger } from '../../../../../../services/loggerService';
 /**
  * 创建 Alpine 面板组件
  */
@@ -54,7 +53,7 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
 
     // ========== Lifecycle ==========
     init(this: AlpineContext & Record<string, unknown>) {
-      Logger.debug('[Alpine 组件] 🚀 组件初始化');
+      console.log('[Alpine 组件] 🚀 组件初始化');
 
       // 设置自动状态同步（Zustand → Alpine）
       this._unsubscribes = createMultipleStateSyncs([
@@ -82,12 +81,12 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
       const currentTargets = this.selectedTargets;
       if (currentTargets.length === 0) {
         this.selectedTargets = analysisTargets.map(t => t.id);
-        Logger.debug('[Alpine 组件] ✅ 已默认全选所有分析目标:', this.selectedTargets.length);
+        console.log('[Alpine 组件] ✅ 已默认全选所有分析目标:', this.selectedTargets.length);
       }
 
       // 监听 analysisReport 变化，自动更新 hasReport 标志
       (this as any).$watch('analysisReport', (newValue: unknown) => {
-        Logger.debug('[Alpine 组件] 📊 analysisReport 变化检测:', !!newValue);
+        console.log('[Alpine 组件] 📊 analysisReport 变化检测:', !!newValue);
         (this as any).hasReport = !!newValue;
         (this as any).refreshReportView();
       });
@@ -120,7 +119,7 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
 
     // ========== 清理 ==========
     destroy(this: AlpineContext & Record<string, unknown>) {
-      Logger.debug('[Alpine 组件] 🔄 Alpine 组件销毁，清理资源');
+      console.log('[Alpine 组件] 🔄 Alpine 组件销毁，清理资源');
 
       // 清理状态同步订阅
       if (Array.isArray(this._unsubscribes)) {
@@ -133,7 +132,7 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
         this._navigationHandler = null;
       }
 
-      Logger.debug('[Alpine 组件] ✅ 资源清理完成');
+      console.log('[Alpine 组件] ✅ 资源清理完成');
     },
 
     // ========== Data Loading ==========
@@ -615,7 +614,7 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
     },
 
     navigateToScraper() {
-      Logger.debug('[Alpine 组件] 🔄 导航到数据采集页面');
+      console.log('[Alpine 组件] 🔄 导航到数据采集页面');
       // 使用正确的路由路径
       if (window.location.hash !== '#/app-center/scraper') {
         window.location.hash = '#/app-center/scraper';
@@ -665,7 +664,7 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
         };
         ctx.reportRenderVersion += 1;
 
-        Logger.debug('[Alpine 组件] 📊 report view 已刷新:', {
+        console.log('[Alpine 组件] 📊 report view 已刷新:', {
           results: ctx.reportResults.length,
           listings: ctx.reportListingsResults.length,
           reviews: ctx.reportReviewsResults.length,
@@ -679,7 +678,7 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
         ctx.reportTotalDetails = 0;
         ctx.reportFullData = null;
         ctx.reportRenderVersion += 1;
-        Logger.error('[Alpine 组件] 刷新报告视图失败:', error);
+        console.error('[Alpine 组件] 刷新报告视图失败:', error);
       }
     },
 
@@ -715,44 +714,44 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
     get reportConfidence() {
       const report = this.analysisReport;
       if (!report || typeof report === 'string') {
-        Logger.debug('[置信度] reportConfidence: 报告不存在或为字符串');
+        console.log('[置信度] reportConfidence: 报告不存在或为字符串');
         return null;
       }
       const reportObj = report as any;
       if (!reportObj._metadata) {
-        Logger.warn('[置信度] reportConfidence: 报告缺少 _metadata 字段');
+        console.warn('[置信度] reportConfidence: 报告缺少 _metadata 字段');
         return null;
       }
       const confidence = reportObj._metadata.confidence || null;
-      Logger.debug('[置信度] reportConfidence:', confidence);
+      console.log('[置信度] reportConfidence:', confidence);
       return confidence;
     },
 
     get overallConfidence() {
       const report = this.analysisReport;
       if (!report || typeof report === 'string') {
-        Logger.debug('[置信度] overallConfidence: 报告不存在或为字符串');
+        console.log('[置信度] overallConfidence: 报告不存在或为字符串');
         return 0;
       }
       const reportObj = report as any;
       if (!reportObj._metadata) {
-        Logger.warn('[置信度] overallConfidence: 报告缺少 _metadata 字段');
+        console.warn('[置信度] overallConfidence: 报告缺少 _metadata 字段');
         return 0;
       }
       const overall = reportObj._metadata.overallConfidence || 0;
-      Logger.debug('[置信度] overallConfidence:', overall);
+      console.log('[置信度] overallConfidence:', overall);
       return overall;
     },
 
     get overallConfidencePercent() {
       const percent = Math.round((this.overallConfidence as number) * 100);
-      Logger.debug('[置信度] overallConfidencePercent:', percent + '%');
+      console.log('[置信度] overallConfidencePercent:', percent + '%');
       return percent;
     },
 
     get hasConfidenceData() {
       const hasData = !!this.reportConfidence;
-      Logger.debug('[置信度] hasConfidenceData:', hasData);
+      console.log('[置信度] hasConfidenceData:', hasData);
       return hasData;
     },
 

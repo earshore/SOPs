@@ -4,8 +4,6 @@
 // 使用Intersection Observer API实现高性能图片懒加载
 // ================================================================
 
-import { Logger } from '@services/loggerService';
-
 /**
  * 懒加载配置
  */
@@ -54,7 +52,7 @@ class ImageLazyLoader {
 
     // 检查浏览器支持
     if (!('IntersectionObserver' in window)) {
-      Logger.warn('[ImageLazyLoader] IntersectionObserver不支持，降级为立即加载');
+      console.warn('[ImageLazyLoader] IntersectionObserver不支持，降级为立即加载');
       this.loadAllImages();
       return;
     }
@@ -75,7 +73,7 @@ class ImageLazyLoader {
     // 监听DOM变化，自动观察新图片
     this.setupMutationObserver();
 
-    Logger.debug('✅ [ImageLazyLoader] 图片懒加载器已初始化', this.config);
+    console.log('✅ [ImageLazyLoader] 图片懒加载器已初始化', this.config);
   }
 
   /**
@@ -274,7 +272,7 @@ class ImageLazyLoader {
       this.observer = null;
     }
     
-    Logger.debug('✅ [ImageLazyLoader] 资源已清理');
+    console.log('✅ [ImageLazyLoader] 资源已清理');
   }
 }
 

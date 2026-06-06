@@ -22,8 +22,6 @@ import {
   MODULE_EVENTS,
 } from "../../../../../../common/constants/eventConstants";
 import eventBus from "../../../../../../common/EventBus";
-import { Logger } from "../../../../../../services/loggerService";
-
 // ── 子模块导入 ────────────────────────────────────────────────────────────────
 import type {
   ConsoleMode,
@@ -322,7 +320,7 @@ export function createPromptlabPanel() {
     // ========== Lifecycle ==========
 
     init() {
-      Logger.debug("[Promptlab] 🚀 Alpine 组件初始化");
+      console.log("[Promptlab] 🚀 Alpine 组件初始化");
 
       // 从 store 恢复 profile
       this.restoreState();
@@ -340,13 +338,13 @@ export function createPromptlabPanel() {
       const unsubScrape = eventBus.on(
         MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS,
         () => {
-          Logger.debug("[Promptlab] 检测到数据更新，重新渲染报告分析");
+          console.log("[Promptlab] 检测到数据更新，重新渲染报告分析");
           this.renderReportAnalysis();
         },
       );
 
       const unsubHistory = eventBus.on(APP_EVENTS.HISTORY_UPDATED, () => {
-        Logger.debug("[Promptlab] 检测到历史更新，重新渲染报告分析");
+        console.log("[Promptlab] 检测到历史更新，重新渲染报告分析");
         this.renderReportAnalysis();
       });
 
@@ -366,20 +364,20 @@ export function createPromptlabPanel() {
             }
           }
         });
-        Logger.debug("[Promptlab] ✅ 已订阅 appStore 变化");
+        console.log("[Promptlab] ✅ 已订阅 appStore 变化");
       }
 
-      Logger.debug("[Promptlab] ✅ Alpine 组件初始化完成");
+      console.log("[Promptlab] ✅ Alpine 组件初始化完成");
     },
 
     destroy() {
-      Logger.debug("[Promptlab] 🔄 清理所有订阅");
+      console.log("[Promptlab] 🔄 清理所有订阅");
 
       this._unsubscribers.forEach((unsub) => {
         try {
           unsub();
         } catch (e) {
-          Logger.warn("[Promptlab] 清理订阅时出错:", e);
+          console.warn("[Promptlab] 清理订阅时出错:", e);
         }
       });
       this._unsubscribers = [];
@@ -391,7 +389,7 @@ export function createPromptlabPanel() {
 
       this.originalHeights.clear();
 
-      Logger.debug("[Promptlab] ✅ 资源清理完成");
+      console.log("[Promptlab] ✅ 资源清理完成");
     },
 
     // ========== State Management ==========
@@ -400,13 +398,13 @@ export function createPromptlabPanel() {
       const saved = appStore.getState().promptlab?.userProductProfile;
       if (saved) {
         this.profile = { ...saved };
-        Logger.debug("[Promptlab] ✅ 状态已从 store 恢复");
+        console.log("[Promptlab] ✅ 状态已从 store 恢复");
       }
     },
 
     saveState() {
       appStore.getState().setUserProductProfile(this.profile);
-      Logger.debug("[Promptlab] ✅ 状态已保存到 store");
+      console.log("[Promptlab] ✅ 状态已保存到 store");
     },
 
     // ========== Report Rendering ==========

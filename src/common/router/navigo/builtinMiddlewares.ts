@@ -6,7 +6,6 @@
 
 import type { RouteMiddleware } from './types';
 
-import { Logger } from '../../../services/loggerService';
 import { analyticsService } from '@/services/analyticsService';
 import { loadingManager } from '@/common/utils/LoadingManager';
 // ==================== 日志中间件 ====================
@@ -21,10 +20,10 @@ export function createLoggingMiddleware(verbose: boolean = false): RouteMiddlewa
   return async (context, next) => {
     const { to, from } = context;
 
-    Logger.debug(`[Router] ${from?.path || 'null'} -> ${to.path}`);
+    console.log(`[Router] ${from?.path || 'null'} -> ${to.path}`);
 
     if (verbose) {
-      Logger.debug('[Router] Route details:', {
+      console.log('[Router] Route details:', {
         to: {
           path: to.path,
           moduleId: to.config.moduleId,
@@ -61,7 +60,7 @@ export function createAnalyticsMiddleware(): RouteMiddleware {
       // 记录页面浏览
       analyticsService.trackPageView(to.path, to.config.label || to.path);
     } catch (error) {
-      Logger.warn('[analyticsMiddleware] Failed to track page view:', error);
+      console.warn('[analyticsMiddleware] Failed to track page view:', error);
     }
 
     await next();
@@ -87,7 +86,7 @@ export function createLoadingMiddleware(): RouteMiddleware {
 
       await next();
     } catch (error) {
-      Logger.warn('[loadingMiddleware] Error:', error);
+      console.warn('[loadingMiddleware] Error:', error);
       await next();
     } finally {
       // 隐藏加载指示器
@@ -170,7 +169,7 @@ export function createErrorHandlingMiddleware(): RouteMiddleware {
     try {
       await next();
     } catch (error) {
-      Logger.error('[Router] Middleware error:', error);
+      console.error('[Router] Middleware error:', error);
 
       // 显示错误提示
       const windowWithToast = window as unknown as { 

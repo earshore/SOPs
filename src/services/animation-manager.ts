@@ -6,7 +6,6 @@
  */
 
 import { StorageService } from './storageService';
-import { Logger } from './loggerService';
 import eventBus from '@common/EventBus';
 import { APP_EVENTS } from '@common/constants/eventConstants';
 import type {
@@ -136,7 +135,7 @@ export class AnimationManager {
 
       StorageService.set(STORAGE_KEY, storedSettings);
     } catch (error) {
-      Logger.error('Failed to save animation settings:', error as Error);
+      console.error('Failed to save animation settings:', error as Error);
     }
   }
 
@@ -152,7 +151,7 @@ export class AnimationManager {
 
       // 验证版本号
       if (storedSettings.version !== CONFIG_VERSION) {
-        Logger.info('Animation settings version mismatch, using defaults');
+        console.log('Animation settings version mismatch, using defaults');
         return;
       }
 
@@ -167,7 +166,7 @@ export class AnimationManager {
       this.settings.disabledCategories = new Set(filteredCategories);
       this.settings.respectSystemPreference = storedSettings.respectSystemPreference;
     } catch (error) {
-      Logger.error('Failed to load animation settings:', error as Error);
+      console.error('Failed to load animation settings:', error as Error);
       // 加载失败时使用默认配置
     }
   }

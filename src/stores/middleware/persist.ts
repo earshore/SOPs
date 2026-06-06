@@ -7,7 +7,6 @@
 
 import type { StoreApi } from 'zustand/vanilla';
 
-import { Logger } from '../../services/loggerService';
 /**
  * 持久化配置
  */
@@ -69,7 +68,7 @@ export const persist = <T extends object>(
         });
         storage.setItem(name, item);
       } catch (error) {
-        Logger.error('[Persist] 保存状态失败:', error);
+        console.error('[Persist] 保存状态失败:', error);
       }
     };
 
@@ -90,7 +89,7 @@ export const persist = <T extends object>(
         
         // 🎯 数据边界验证：如果提供了验证函数，验证持久化状态
         if (validate && !validate(persistedState)) {
-          Logger.warn('[Persist] 持久化状态验证失败，使用初始状态:', name);
+          console.warn('[Persist] 持久化状态验证失败，使用初始状态:', name);
           storage.removeItem(name);
           return initialState;
         }
@@ -104,7 +103,7 @@ export const persist = <T extends object>(
         return restoredState;
       }
     } catch (error) {
-      Logger.error('[Persist] 恢复状态失败:', error);
+      console.error('[Persist] 恢复状态失败:', error);
       // 清除损坏的数据
       try {
         storage.removeItem(name);
@@ -123,8 +122,8 @@ export const persist = <T extends object>(
 export const clearPersistedState = (name: string, storage: Storage = localStorage): void => {
   try {
     storage.removeItem(name);
-    Logger.debug(`[Persist] 已清除持久化数据: ${name}`);
+    console.log(`[Persist] 已清除持久化数据: ${name}`);
   } catch (error) {
-    Logger.error('[Persist] 清除持久化数据失败:', error);
+    console.error('[Persist] 清除持久化数据失败:', error);
   }
 };

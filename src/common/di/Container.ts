@@ -4,7 +4,6 @@
 // 解决循环依赖问题，提供标准化的依赖管理
 // ================================================================
 
-import { Logger } from '@services/loggerService';
 import { SystemError } from '@/common/errors/AppError';
 
 /**
@@ -103,7 +102,7 @@ export class DIContainer {
       resolved: 0
     });
     
-    Logger.debug(`[DIContainer] 已注册服务: ${name} (${lifetime})`);
+    console.log(`[DIContainer] 已注册服务: ${name} (${lifetime})`);
   }
 
   /**
@@ -141,7 +140,7 @@ export class DIContainer {
         meta.resolved = Date.now();
       }
       
-      Logger.debug(`[DIContainer] 创建单例: ${name}`);
+      console.log(`[DIContainer] 创建单例: ${name}`);
       return instance as T;
     }
 
@@ -165,10 +164,10 @@ export class DIContainer {
   clearCache(name?: string): void {
     if (name) {
       this.singletons.delete(name);
-      Logger.debug(`[DIContainer] 已清除缓存: ${name}`);
+      console.log(`[DIContainer] 已清除缓存: ${name}`);
     } else {
       this.singletons.clear();
-      Logger.debug(`[DIContainer] 已清除所有缓存`);
+      console.log(`[DIContainer] 已清除所有缓存`);
     }
   }
 
@@ -253,7 +252,7 @@ export class DIContainer {
     this.lifetimes.clear();
     this.dependencies.clear();
     this.metadata.clear();
-    Logger.debug(`[DIContainer] 容器已重置`);
+    console.log(`[DIContainer] 容器已重置`);
   }
 }
 

@@ -6,7 +6,6 @@
 
 import type { Route, RouteGuard, GuardResult } from './types';
 
-import { Logger } from '../../../services/loggerService';
 import { container } from '@/common/di/Container';
 // ==================== 元信息验证守卫 ====================
 
@@ -22,7 +21,7 @@ export const metaValidationGuard: RouteGuard = {
   async check(to: Route, _from: Route | null): Promise<GuardResult> {
     // 检查路由配置是否存在
     if (!to.config) {
-      Logger.error('[metaValidationGuard] Route config missing:', to.path);
+      console.error('[metaValidationGuard] Route config missing:', to.path);
       return {
         allow: false,
         reason: 'invalid_route_config',
@@ -34,7 +33,7 @@ export const metaValidationGuard: RouteGuard = {
     const missing = requiredFields.filter(field => !to.config[field]);
 
     if (missing.length > 0) {
-      Logger.error('[metaValidationGuard] Route config incomplete:', {
+      console.error('[metaValidationGuard] Route config incomplete:', {
         path: to.path,
         missing,
       });
@@ -75,13 +74,13 @@ export const dependencyGuard: RouteGuard = {
           missing.push(dep);
         }
       } catch (error) {
-        Logger.error(`[dependencyGuard] Failed to check dependency "${dep}":`, error);
+        console.error(`[dependencyGuard] Failed to check dependency "${dep}":`, error);
         missing.push(dep);
       }
     }
 
     if (missing.length > 0) {
-      Logger.error('[dependencyGuard] Missing dependencies:', missing);
+      console.error('[dependencyGuard] Missing dependencies:', missing);
       return {
         allow: false,
         redirect: '/home',
@@ -115,7 +114,7 @@ export const authGuard: RouteGuard = {
       const isAuthenticated = await checkAuthentication();
 
       if (!isAuthenticated) {
-        Logger.warn('[authGuard] Unauthorized access attempt:', to.path);
+        console.warn('[authGuard] Unauthorized access attempt:', to.path);
 
         // 显示提示
         const windowWithToast = window as unknown as Record<string, unknown>;
@@ -135,7 +134,7 @@ export const authGuard: RouteGuard = {
         const hasPermission = await checkPermissions(to.config.meta.permissions);
 
         if (!hasPermission) {
-          Logger.warn('[authGuard] Insufficient permissions:', {
+          console.warn('[authGuard] Insufficient permissions:', {
             path: to.path,
             required: to.config.meta.permissions,
           });
@@ -155,7 +154,7 @@ export const authGuard: RouteGuard = {
 
       return true;
     } catch (error) {
-      Logger.error('[authGuard] Authentication check failed:', error);
+      console.error('[authGuard] Authentication check failed:', error);
       return {
         allow: false,
         reason: 'auth_check_failed',
@@ -184,21 +183,21 @@ export const dataPreloadGuard: RouteGuard = {
     }
 
     try {
-      Logger.debug(`[dataPreloadGuard] Preloading data for: ${to.path}`);
+      console.log(`[dataPreloadGuard] Preloading data for: ${to.path}`);
       const startTime = performance.now();
 
       await preloadFn();
 
       const duration = Math.round(performance.now() - startTime);
-      Logger.debug(`[dataPreloadGuard] Preload completed: ${to.path} (${duration}ms)`);
+      console.log(`[dataPreloadGuard] Preload completed: ${to.path} (${duration}ms)`);
 
       return true;
     } catch (error) {
-      Logger.error('[dataPreloadGuard] Preload failed:', error);
+      console.error('[dataPreloadGuard] Preload failed:', error);
 
       // 如果预加载失败，根据配置决定是否继续
       if (to.config.meta?.preloadRequired === false) {
-        Logger.warn('[dataPreloadGuard] Preload failed but not required, continuing');
+        console.warn('[dataPreloadGuard] Preload failed but not required, continuing');
         return true;
       }
 

@@ -60,6 +60,7 @@ export class MemoryDevTools {
     panel.className = 'fixed top-20 right-4 w-96 bg-white border-2 border-purple-500 shadow-2xl z-[10000] rounded-lg hidden';
     panel.style.cssText = 'font-family: monospace; font-size: 12px; max-height: 600px;';
 
+    // ✅ 安全: 静态HTML模板，无用户输入
     panel.innerHTML = `
       <div style="display: flex; flex-direction: column; height: 100%;">
         <!-- Header -->
@@ -214,12 +215,14 @@ export class MemoryDevTools {
     if (!snapshotsEl) return;
 
     const snapshots = memoryLeakDetector.getSnapshots();
-    
+
     if (snapshots.length === 0) {
+      // ✅ 安全: 静态HTML模板
       snapshotsEl.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 20px;">暂无快照</div>';
       return;
     }
 
+    // ✅ 安全: snapshot数据来自内部memoryLeakDetector，timestamp和heapUsed是数值类型
     snapshotsEl.innerHTML = snapshots
       .slice()
       .reverse()
@@ -251,6 +254,7 @@ export class MemoryDevTools {
     }
 
     (warningsEl as HTMLElement).style.display = 'block';
+    // ✅ 安全: leak数据来自eventBus.detectLeaks()内部方法，leak.event/message/severity都是内部生成的字符串
     leakListEl.innerHTML = leaks
       .map(leak => {
         const color = leak.severity === 'critical' ? '#ef4444' : '#f59e0b';

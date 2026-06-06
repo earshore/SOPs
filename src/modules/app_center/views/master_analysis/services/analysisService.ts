@@ -9,7 +9,6 @@ import { callLLM } from "../../../../../services/llmService";
 import { configCenter } from '../../../../../common/config/ConfigCenter';
 import { ApiError, ValidationError } from '@common/errors/AppError';
 import { TRANSLATE_PROMPT_TEMPLATE } from "../constants/prompts";
-import { Logger } from '../../../../../services/loggerService';
 import type {
   ProductData,
   DataOptions,
@@ -138,7 +137,7 @@ export const AnalysisService = {
       return parsed as AnalysisReport;
     } catch (e) {
       const error = e as Error;
-      Logger.warn("Analysis JSON Parse Failed:", error.message);
+      console.warn("Analysis JSON Parse Failed:", error.message);
       
       throw new ApiError(
         'AI分析响应解析失败',
@@ -188,7 +187,7 @@ export const AnalysisService = {
       return parsed as AnalysisReport;
     } catch (e) {
       const error = e as Error;
-      Logger.warn("Translation JSON Parse Failed:", error.message);
+      console.warn("Translation JSON Parse Failed:", error.message);
       
       throw new ApiError(
         '翻译响应解析失败',

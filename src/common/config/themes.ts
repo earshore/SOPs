@@ -4,7 +4,6 @@
 // 统一管理所有颜色主题，支持动态切换和用户自定义
 // ================================================================
 
-import { Logger } from '@services/loggerService';
 import { StorageService } from '@services/storageService';
 
 /**
@@ -265,7 +264,7 @@ export function saveThemeToStorage(themeId: string): void {
   try {
     StorageService.set('app_theme', themeId);
   } catch (e) {
-    Logger.warn('[Theme] 保存主题失败:', e);
+    console.warn('[Theme] 保存主题失败:', e);
   }
 }
 

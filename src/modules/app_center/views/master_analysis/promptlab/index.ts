@@ -13,7 +13,6 @@ import { SafeModuleLoader } from '../../../../../common/infrastructure/SafeModul
 import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
 import { AlpineRegistry } from '../../../../../common/infrastructure/AlpineRegistry';
 import { createPromptlabPanel } from './components/PromptlabPanel';
-import { Logger } from '../../../../../services/loggerService';
 import '../master_analysis_style.css';
 
 // ========================================== 
@@ -25,15 +24,15 @@ import '../master_analysis_style.css';
  * @param {HTMLElement} container - 容器元素
  */
 export async function mount(container: HTMLElement): Promise<void> {
-    Logger.debug('[Promptlab] 🔧 开始挂载子模块');
+    console.log('[Promptlab] 🔧 开始挂载子模块');
 
     // 运行时检查: 确保没有 CSP meta 标签
     const cspMeta = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
     if (cspMeta) {
-        Logger.error('[Promptlab] ❌ 检测到 CSP meta 标签,这不应该存在!', cspMeta);
-        Logger.error('[Promptlab] meta 标签位置:', cspMeta.parentElement?.tagName);
+        console.error('[Promptlab] ❌ 检测到 CSP meta 标签,这不应该存在!', cspMeta);
+        console.error('[Promptlab] meta 标签位置:', cspMeta.parentElement?.tagName);
     } else {
-        Logger.debug('[Promptlab] ✅ 未检测到 CSP meta 标签');
+        console.log('[Promptlab] ✅ 未检测到 CSP meta 标签');
     }
 
     try {
@@ -45,7 +44,7 @@ export async function mount(container: HTMLElement): Promise<void> {
             'src/modules/app_center/views/master_analysis/promptlab/template.html',
             {
                 onError: (error) => {
-                    Logger.error('[Promptlab] 模板加载失败:', error);
+                    console.error('[Promptlab] 模板加载失败:', error);
                 }
             }
         );
@@ -59,10 +58,10 @@ export async function mount(container: HTMLElement): Promise<void> {
         const registry = AlpineRegistry.getInstance();
         registry.register('promptlabPanel', createPromptlabPanel);
 
-        Logger.debug('[Promptlab] ✅ Alpine 组件已通过 AlpineRegistry 注册');
-        Logger.debug('[Promptlab] ✅ 子模块挂载成功');
+        console.log('[Promptlab] ✅ Alpine 组件已通过 AlpineRegistry 注册');
+        console.log('[Promptlab] ✅ 子模块挂载成功');
     } catch (error) {
-        Logger.error('[Promptlab] ❌ 子模块挂载失败:', error);
+        console.error('[Promptlab] ❌ 子模块挂载失败:', error);
         throw error;
     }
 }
@@ -71,15 +70,15 @@ export async function mount(container: HTMLElement): Promise<void> {
  * 卸载子模块
  */
 export function unmount(): void {
-    Logger.debug('[Promptlab] 🔄 开始卸载子模块');
+    console.log('[Promptlab] 🔄 开始卸载子模块');
 
     try {
         // 使用 AlpineRegistry 卸载组件
         const registry = AlpineRegistry.getInstance();
         registry.unregister('promptlabPanel');
 
-        Logger.debug('[Promptlab] ✅ 子模块卸载成功');
+        console.log('[Promptlab] ✅ 子模块卸载成功');
     } catch (error) {
-        Logger.error('[Promptlab] ❌ 子模块卸载失败:', error);
+        console.error('[Promptlab] ❌ 子模块卸载失败:', error);
     }
 }

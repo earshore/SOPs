@@ -7,8 +7,6 @@
 
 import { ANALYSIS_MODULES } from '../../constants/prompts';
 import { PROMPTLAB_DISPLAY_LIMITS } from '../../config/displayLimits';
-import { Logger } from '../../../../../../services/loggerService';
-
 // ==========================================
 // 工具函数
 // ==========================================
@@ -57,7 +55,7 @@ export function findFirstStringValue(
  * @returns        可显示的简短预览字符串
  */
 export function extractPreviewText(targetId: string, data: unknown): string {
-  Logger.debug('[previewExtractor] extractPreviewText:', { targetId, dataType: typeof data });
+  console.log('[previewExtractor] extractPreviewText:', { targetId, dataType: typeof data });
 
   if (!data || typeof data !== 'object') return '数据格式错误';
 
@@ -205,7 +203,7 @@ export function extractPreviewText(targetId: string, data: unknown): string {
 
     return '分析数据已加载';
   } catch (error) {
-    Logger.error('[previewExtractor] extractPreviewText 失败:', error);
+    console.error('[previewExtractor] extractPreviewText 失败:', error);
     return '分析数据已加载';
   }
 }

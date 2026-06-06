@@ -4,8 +4,6 @@
 // 延迟加载大型第三方库以优化初始包大小
 // ================================================================
 
-import { Logger } from '@services/loggerService';
-
 /**
  * Chart.js 类型 (简化版)
  */
@@ -35,15 +33,15 @@ export function loadChartJs(): Promise<ChartJS> {
   if (win.Chart) return Promise.resolve(win.Chart);
 
   if (!chartJsPromise) {
-    Logger.debug('⏳ Loading Chart.js...');
+    console.log('⏳ Loading Chart.js...');
     chartJsPromise = import('chart.js/auto')
       .then((module) => {
         win.Chart = module.default;
-        Logger.debug('✅ Chart.js Loaded');
+        console.log('✅ Chart.js Loaded');
         return win.Chart as ChartJS;
       })
       .catch((err) => {
-        Logger.error('Failed to load Chart.js', err);
+        console.error('Failed to load Chart.js', err);
         chartJsPromise = null; // Allow retry
         throw err;
       });
@@ -59,18 +57,18 @@ export function loadGridStack(): Promise<GridStack> {
   if (win.GridStack) return Promise.resolve(win.GridStack);
 
   if (!gridStackPromise) {
-    Logger.debug('⏳ Loading GridStack...');
+    console.log('⏳ Loading GridStack...');
     // Load CSS first
     import('gridstack/dist/gridstack.min.css');
 
     gridStackPromise = import('gridstack')
       .then((module) => {
         win.GridStack = module.GridStack;
-        Logger.debug('✅ GridStack Loaded');
+        console.log('✅ GridStack Loaded');
         return win.GridStack as GridStack;
       })
       .catch((err) => {
-        Logger.error('Failed to load GridStack', err);
+        console.error('Failed to load GridStack', err);
         gridStackPromise = null;
         throw err;
       });

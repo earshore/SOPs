@@ -6,8 +6,6 @@
 import { StorageService } from '../../../../../../services/storageService';
 import { getCacheStatsAsync, clearAnalysisCacheAsync } from '../services/parallelAnalysisService';
 import { showToast } from '@common/ui/index';
-import { Logger } from '../../../../../../services/loggerService';
-
 const SETTINGS_KEY = 'ai_analysis_performance_settings';
 const SETTINGS_VERSION = 2;
 
@@ -58,7 +56,7 @@ export function getPerformanceSettings(): PerformanceSettings {
       return normalizeSettings(mergedSettings);
     }
   } catch (error) {
-    Logger.warn('[性能设置] 读取失败，使用默认值:', error);
+    console.warn('[性能设置] 读取失败，使用默认值:', error);
   }
   return { ...DEFAULT_SETTINGS };
 }
@@ -69,9 +67,9 @@ export function getPerformanceSettings(): PerformanceSettings {
 export function savePerformanceSettings(settings: PerformanceSettings): void {
   try {
     StorageService.set(SETTINGS_KEY, normalizeSettings(settings));
-    Logger.debug('[性能设置] 已保存:', settings);
+    console.log('[性能设置] 已保存:', settings);
   } catch (error) {
-    Logger.error('[性能设置] 保存失败:', error);
+    console.error('[性能设置] 保存失败:', error);
     throw error;
   }
 }

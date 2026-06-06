@@ -4,10 +4,7 @@
 // 提供统一的模块加载机制，支持错误恢复和降级策略
 // ================================================================
 
-import { createLoggerService } from '@/services/loggerService';
 import { createErrorTracker } from '@/services/errorTracker';
-import type { ILoggerService } from '@/types/services';
-import { Logger } from '@services/loggerService';
 import {
   AppError,
   NetworkError,
@@ -82,7 +79,6 @@ export class SafeModuleLoader {
   private static instance: SafeModuleLoader;
   private loadedModules: Map<string, unknown>;
   private loadingModules: Map<string, Promise<unknown>>;
-  private logger: ILoggerService;
   private errorTrackerInstance: ReturnType<typeof createErrorTracker>;
   private readonly moduleName = 'SafeModuleLoader';
 
@@ -92,12 +88,11 @@ export class SafeModuleLoader {
   private constructor() {
     this.loadedModules = new Map();
     this.loadingModules = new Map();
-    
-    // 使用 DI 容器创建服务实例
-    this.logger = createLoggerService();
-    this.errorTrackerInstance = createErrorTracker(this.logger);
-    
-    this.logger.info('SafeModuleLoader 已初始化', {}, this.moduleName);
+
+    // 使用错误追踪器（不再需要 logger 参数）
+    this.errorTrackerInstance = createErrorTracker();
+
+    console.log('SafeModuleLoader 已初始化', {}, this.moduleName);
   }
 
   /**
@@ -132,7 +127,7 @@ export class SafeModuleLoader {
       loadingText = '加载中...'
     } = options;
 
-      this.logger.info(`开始加载模块: ${modulePath}`, { options }, this.moduleName);
+      console.log(`开始加载模块: ${modulePath}`, { options }, this.moduleName);
 
     // 显示加载指示器
     if (showLoading) {
@@ -143,13 +138,13 @@ export class SafeModuleLoader {
       // 检查是否正在加载
       const existingLoad = this.loadingModules.get(modulePath);
       if (existingLoad) {
-        this.logger.debug(`模块 ${modulePath} 正在加载中，等待完成`, undefined, this.moduleName);
+        console.log(`模块 ${modulePath} 正在加载中，等待完成`, undefined, this.moduleName);
         await existingLoad;
       }
 
       // 检查缓存
       if (this.loadedModules.has(modulePath)) {
-        this.logger.debug(`从缓存加载模块: ${modulePath}`, undefined, this.moduleName);
+        console.log(`从缓存加载模块: ${modulePath}`, undefined, this.moduleName);
         const cachedModule = this.loadedModules.get(modulePath);
         this.renderModule(container, cachedModule);
         
@@ -179,7 +174,7 @@ export class SafeModuleLoader {
       this.renderModule(container, moduleData);
 
       const loadTime = performance.now() - startTime;
-      this.logger.info(`模块加载成功: ${modulePath}`, { loadTime, retryAttempts: loadResult.retryAttempts }, this.moduleName);
+      console.log(`模块加载成功: ${modulePath}`, { loadTime, retryAttempts: loadResult.retryAttempts }, this.moduleName);
 
       return {
         success: true,
@@ -195,7 +190,7 @@ export class SafeModuleLoader {
       // 分类错误
       const classifiedError = this.classifyError(error as Error, modulePath);
       
-      this.logger.error(`模块加载失败: ${modulePath}`, classifiedError, this.moduleName);
+      console.error(`模块加载失败: ${modulePath}`, classifiedError, this.moduleName);
       
       // 上报错误
       this.errorTrackerInstance.captureAppError(classifiedError);
@@ -205,7 +200,7 @@ export class SafeModuleLoader {
         try {
           onError(classifiedError);
         } catch (callbackError) {
-          this.logger.error('错误回调执行失败', callbackError as Error, this.moduleName);
+          console.error('错误回调执行失败', callbackError as Error, this.moduleName);
         }
       }
 
@@ -236,7 +231,7 @@ export class SafeModuleLoader {
       timeout = 5000
     } = options;
 
-    this.logger.info(`加载模板: ${templatePath}`, {}, this.moduleName);
+    console.log(`加载模板: ${templatePath}`, {}, this.moduleName);
 
     try {
       // 开发环境下禁用缓存，确保模板修改后能立即生效
@@ -244,7 +239,7 @@ export class SafeModuleLoader {
       
       // 检查缓存（生产环境）
       if (!isDevelopment && this.loadedModules.has(templatePath)) {
-        this.logger.debug(`从缓存加载模板: ${templatePath}`, undefined, this.moduleName);
+        console.log(`从缓存加载模板: ${templatePath}`, undefined, this.moduleName);
         const cached = this.loadedModules.get(templatePath);
         if (typeof cached === 'string') {
           return cached;
@@ -269,7 +264,7 @@ export class SafeModuleLoader {
         this.loadedModules.set(templatePath, template);
       }
 
-      this.logger.info(`模板加载成功: ${templatePath}`, { 
+      console.log(`模板加载成功: ${templatePath}`, { 
         retryAttempts: loadResult.retryAttempts,
         cached: !isDevelopment 
       }, this.moduleName);
@@ -278,7 +273,7 @@ export class SafeModuleLoader {
     } catch (error) {
       const classifiedError = this.classifyError(error as Error, templatePath);
       
-      this.logger.error(`模板加载失败: ${templatePath}`, classifiedError, this.moduleName);
+      console.error(`模板加载失败: ${templatePath}`, classifiedError, this.moduleName);
       this.errorTrackerInstance.captureAppError(classifiedError);
       
       throw classifiedError;
@@ -427,7 +422,7 @@ export class SafeModuleLoader {
           const jitter = baseDelay * 0.2 * (Math.random() * 2 - 1);
           const delay = Math.round(baseDelay + jitter);
           
-          this.logger.debug(
+          console.log(
             `重试加载，等待 ${delay}ms (尝试 ${attempt}/${retries})`,
             { 
               attempt, 
@@ -447,7 +442,7 @@ export class SafeModuleLoader {
         
         // 如果有重试，记录成功信息
         if (actualRetries > 0) {
-          this.logger.info(
+          console.log(
             `加载成功（经过 ${actualRetries} 次重试）`,
             { actualRetries },
             this.moduleName
@@ -466,7 +461,7 @@ export class SafeModuleLoader {
         const shouldRetry = this.shouldRetryError(error as Error, attempt, retries);
         
         if (shouldRetry) {
-          this.logger.warn(
+          console.warn(
             `加载失败，将进行重试 (尝试 ${attempt + 1}/${retries + 1})`,
             { 
               error: (error as Error).message,
@@ -478,7 +473,7 @@ export class SafeModuleLoader {
             this.moduleName
           );
         } else {
-          this.logger.error(
+          console.error(
             `加载失败，不可重试的错误 (尝试 ${attempt + 1}/${retries + 1})`,
             { 
               error: (error as Error).message,
@@ -492,7 +487,7 @@ export class SafeModuleLoader {
     }
 
     // 所有重试都失败
-    this.logger.error(
+    console.error(
       `加载失败，已达到最大重试次数`,
       { 
         totalAttempts: retries + 1,
@@ -803,7 +798,7 @@ export class SafeModuleLoader {
     // 4. 未知错误
     // ============================================================
     
-    this.logger.warn(
+    console.warn(
       `无法分类的错误类型，归类为未知错误`,
       { 
         errorName: error.name,
@@ -857,9 +852,9 @@ export class SafeModuleLoader {
         return;
       }
 
-      this.logger.warn('模块没有 render 或 mount 方法，且不是字符串', {}, this.moduleName);
+      console.warn('模块没有 render 或 mount 方法，且不是字符串', {}, this.moduleName);
     } catch (error) {
-      this.logger.error('渲染模块失败', error as Error, this.moduleName);
+      console.error('渲染模块失败', error as Error, this.moduleName);
       throw new SystemError(
         '渲染模块失败',
         'RENDER_ERROR',
@@ -1184,7 +1179,7 @@ export class SafeModuleLoader {
         // 重新加载模块
         this.showLoadingIndicator(container, '正在重试...');
         this.loadModule(container, modulePath).catch(err => {
-          Logger.error('重试失败:', err);
+          console.error('重试失败:', err);
         });
         break;
       case 'reload':
@@ -1196,7 +1191,7 @@ export class SafeModuleLoader {
         window.location.href = '/';
         break;
       default:
-        Logger.warn('未知的错误 UI 操作:', action);
+        console.warn('未知的错误 UI 操作:', action);
     }
   }
 
@@ -1279,10 +1274,10 @@ export class SafeModuleLoader {
   clearCache(modulePath?: string): void {
     if (modulePath) {
       this.loadedModules.delete(modulePath);
-      this.logger.info(`已清除模块缓存: ${modulePath}`, {}, this.moduleName);
+      console.log(`已清除模块缓存: ${modulePath}`, {}, this.moduleName);
     } else {
       this.loadedModules.clear();
-      this.logger.info('已清除所有模块缓存', {}, this.moduleName);
+      console.log('已清除所有模块缓存', {}, this.moduleName);
     }
   }
 
@@ -1306,7 +1301,7 @@ export class SafeModuleLoader {
    * @param modulePaths - 模块路径数组
    */
   async preloadModules(modulePaths: string[]): Promise<void> {
-    this.logger.info(`预加载 ${modulePaths.length} 个模块`, {}, this.moduleName);
+    console.log(`预加载 ${modulePaths.length} 个模块`, {}, this.moduleName);
     
     const results = await Promise.allSettled(
       modulePaths.map(path => this.loadModuleInternal(path))
@@ -1318,9 +1313,9 @@ export class SafeModuleLoader {
       
       if (result.status === 'fulfilled') {
         this.loadedModules.set(modulePath, result.value);
-        this.logger.debug(`预加载成功: ${modulePath}`, {}, this.moduleName);
+        console.log(`预加载成功: ${modulePath}`, {}, this.moduleName);
       } else {
-        this.logger.warn(`预加载失败: ${modulePath}`, { error: result.reason }, this.moduleName);
+        console.warn(`预加载失败: ${modulePath}`, { error: result.reason }, this.moduleName);
       }
     });
   }

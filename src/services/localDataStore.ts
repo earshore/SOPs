@@ -5,8 +5,6 @@
 // localStorage remains the small synchronous config/secret layer.
 // ================================================================
 
-import { Logger } from './loggerService';
-
 export type StorageClass = 'config' | 'secret' | 'user-data' | 'cache';
 
 export interface LocalDataRecord<T = unknown> {
@@ -92,7 +90,7 @@ class LocalDataStoreClass {
 
       request.onsuccess = () => resolve(true);
       request.onerror = () => {
-        Logger.error('[LocalDataStore] 写入 IndexedDB 失败:', request.error || undefined);
+        console.error('[LocalDataStore] 写入 IndexedDB 失败:', request.error || undefined);
         resolve(false);
       };
     });
@@ -111,7 +109,7 @@ class LocalDataStoreClass {
       const request = store.delete(key);
       request.onsuccess = () => resolve();
       request.onerror = () => {
-        Logger.warn('[LocalDataStore] 删除 IndexedDB 记录失败:', request.error || undefined);
+        console.warn('[LocalDataStore] 删除 IndexedDB 记录失败:', request.error || undefined);
         resolve();
       };
     });
@@ -159,7 +157,7 @@ class LocalDataStoreClass {
       const request = store.clear();
       request.onsuccess = () => resolve();
       request.onerror = () => {
-        Logger.warn('[LocalDataStore] 清空 IndexedDB 失败:', request.error || undefined);
+        console.warn('[LocalDataStore] 清空 IndexedDB 失败:', request.error || undefined);
         resolve();
       };
     });
@@ -253,7 +251,7 @@ class LocalDataStoreClass {
       }
       return parsed;
     } catch (error) {
-      Logger.warn(`[LocalDataStore] 迁移 localStorage 键失败: ${localStorageKey}`, error);
+      console.warn(`[LocalDataStore] 迁移 localStorage 键失败: ${localStorageKey}`, error);
       return null;
     }
   }
@@ -270,7 +268,7 @@ class LocalDataStoreClass {
       const request = store.get(key);
       request.onsuccess = () => resolve((request.result as LocalDataRecord<T>) || null);
       request.onerror = () => {
-        Logger.warn('[LocalDataStore] 读取 IndexedDB 记录失败:', request.error || undefined);
+        console.warn('[LocalDataStore] 读取 IndexedDB 记录失败:', request.error || undefined);
         resolve(null);
       };
     });
@@ -288,7 +286,7 @@ class LocalDataStoreClass {
       const request = store.getAll();
       request.onsuccess = () => resolve((request.result as Array<LocalDataRecord>) || []);
       request.onerror = () => {
-        Logger.warn('[LocalDataStore] 列出 IndexedDB 记录失败:', request.error || undefined);
+        console.warn('[LocalDataStore] 列出 IndexedDB 记录失败:', request.error || undefined);
         resolve([]);
       };
     });
@@ -314,7 +312,7 @@ class LocalDataStoreClass {
 
         request.onsuccess = () => resolve(request.result);
         request.onerror = () => {
-          Logger.warn('[LocalDataStore] IndexedDB 不可用，降级为内存存储:', request.error || undefined);
+          console.warn('[LocalDataStore] IndexedDB 不可用，降级为内存存储:', request.error || undefined);
           resolve(null);
         };
       });

@@ -18,8 +18,6 @@ import type {
   SellingPointsReport,
   TitleKeywordsReport,
 } from "../ai_analysis/config/analysisReportData";
-import { Logger } from "../../../../../services/loggerService";
-
 /**
  * 提取的产品 DNA 接口
  */
@@ -125,7 +123,7 @@ function extractAudience(report: BuyerProfileReport): {
       confidence: Math.min(confidence, 1.0),
     };
   } catch (error) {
-    Logger.error("[DNA提取器] 提取受众失败:", error);
+    console.error("[DNA提取器] 提取受众失败:", error);
     return { text: "", confidence: 0 };
   }
 }
@@ -197,7 +195,7 @@ function extractUSPs(report: SellingPointsReport): {
       confidence: Math.min(confidence, 1.0),
     };
   } catch (error) {
-    Logger.error("[DNA提取器] 提取卖点失败:", error);
+    console.error("[DNA提取器] 提取卖点失败:", error);
     return { text: "", confidence: 0 };
   }
 }
@@ -420,7 +418,7 @@ function extractSpecs(
       confidence: Math.min(confidence, 1.0),
     };
   } catch (error) {
-    Logger.error("[DNA提取器] 提取规格失败:", error);
+    console.error("[DNA提取器] 提取规格失败:", error);
     return { text: "", confidence: 0 };
   }
 }
@@ -435,11 +433,11 @@ export function extractProductDNA(
   report: FullAnalysisReport | null | undefined,
 ): ExtractedDNA | null {
   if (!report) {
-    Logger.warn("[DNA提取器] 报告为空，无法提取");
+    console.warn("[DNA提取器] 报告为空，无法提取");
     return null;
   }
 
-  Logger.debug("[DNA提取器] 开始提取产品 DNA");
+  console.log("[DNA提取器] 开始提取产品 DNA");
 
   try {
     // 提取各个部分
@@ -465,7 +463,7 @@ export function extractProductDNA(
 
     // 如果总体置信度太低，返回 null
     if (avgConfidence < 0.2) {
-      Logger.warn("[DNA提取器] 提取置信度过低，放弃提取");
+      console.warn("[DNA提取器] 提取置信度过低，放弃提取");
       return null;
     }
 
@@ -488,7 +486,7 @@ export function extractProductDNA(
       },
     };
 
-    Logger.debug("[DNA提取器] 提取完成:", {
+    console.log("[DNA提取器] 提取完成:", {
       audienceLength: dna.audience.length,
       uspsLength: dna.usps.length,
       specsLength: dna.specs.length,
@@ -497,7 +495,7 @@ export function extractProductDNA(
 
     return dna;
   } catch (error) {
-    Logger.error("[DNA提取器] 提取过程出错:", error);
+    console.error("[DNA提取器] 提取过程出错:", error);
     return null;
   }
 }

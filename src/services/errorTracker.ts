@@ -7,7 +7,6 @@
 import type { AppError } from '@/common/errors/AppError';
 import type { ILoggerService } from '../types/services';
 
-import { Logger } from './loggerService';
 /**
  * 错误类型
  */
@@ -364,7 +363,7 @@ export class ErrorTracker {
       });
     } catch (e) {
       // 静默失败,避免递归错误
-      Logger.warn('[ErrorTracker] Failed to report error:', e);
+      console.warn('[ErrorTracker] Failed to report error:', e);
     }
   }
 

@@ -5,8 +5,6 @@
 import BaseModule from "../../../../common/BaseModule";
 import templateHTML from "./template.html?raw";
 
-import { Logger } from "../../../../services/loggerService";
-
 /**
  * 初始化事件监听
  */
@@ -62,7 +60,7 @@ function filterByCategory(container: HTMLElement, category: string): void {
  */
 export function scrollToModule(categoryId: string): void {
   if (!categoryId) {
-    Logger.warn("⚠️ scrollToModule: categoryId 为空");
+    console.warn("⚠️ scrollToModule: categoryId 为空");
     return;
   }
 
@@ -83,9 +81,9 @@ export function scrollToModule(categoryId: string): void {
       moduleElement.classList.remove("hub-module-highlight");
     }, 2000);
 
-    Logger.debug(`✅ 滚动到模块: ${categoryId}`);
+    console.log(`✅ 滚动到模块: ${categoryId}`);
   } else {
-    Logger.warn(`⚠️ 未找到模块元素: ${moduleId}`);
+    console.warn(`⚠️ 未找到模块元素: ${moduleId}`);
   }
 }
 
@@ -103,7 +101,7 @@ class HubOverviewModule extends BaseModule {
 
   protected async init(): Promise<void> {
     initOverviewEvents(this.container!);
-    Logger.debug("✅ [Hub Overview] 模块挂载完成");
+    console.log("✅ [Hub Overview] 模块挂载完成");
   }
 }
 

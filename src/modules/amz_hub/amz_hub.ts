@@ -1,4 +1,4 @@
-Logger.debug("📚 AmzHub Core Module Loading...");
+console.log("📚 AmzHub Core Module Loading...");
 
 import "./amz_hub_style.css";
 import {
@@ -8,7 +8,6 @@ import {
 import type { ModuleMap, ModuleLoaderFn } from "@/types/modules-business";
 import { AMZ_HUB_ROUTES } from "@/common/constants/routes";
 
-import { Logger } from "../../services/loggerService";
 // ================= 路由配置表 =================
 // 使用路由常量，避免硬编码
 const MODULE_MAP: ModuleMap = {
@@ -60,4 +59,4 @@ export function registerHubModule(
   moduleLoader.registerSubModule(routeId, loader);
 }
 
-Logger.debug("✅ AmzHub Module 加载完成");
+console.log("✅ AmzHub Module 加载完成");

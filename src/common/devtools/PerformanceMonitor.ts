@@ -75,6 +75,7 @@ export class PerformanceMonitor {
       overflow: hidden;
     `;
 
+    // ✅ 安全: 静态HTML模板，无用户输入
     this.container.innerHTML = `
       <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #444;">
         <strong style="font-size: 14px;">⚡ Performance Monitor</strong>
@@ -111,8 +112,9 @@ export class PerformanceMonitor {
       { id: 'alerts', label: '告警', icon: '🔔' }
     ];
 
+    // ✅ 安全: tab.id/icon/label来自本地常量数组，this.currentTab是内部状态
     tabsDiv.innerHTML = tabs.map(tab => `
-      <button 
+      <button
         data-tab="${tab.id}"
         style="
           flex: 1;
@@ -145,6 +147,7 @@ export class PerformanceMonitor {
     const contentDiv = this.container?.querySelector('#perf-content');
     if (!contentDiv) return;
 
+    // ✅ 安全: renderXXX方法返回的HTML使用内部数据和统计信息，无用户输入
     switch (this.currentTab) {
       case 'overview':
         contentDiv.innerHTML = this.renderOverview();

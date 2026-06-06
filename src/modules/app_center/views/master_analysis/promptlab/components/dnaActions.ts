@@ -7,7 +7,6 @@
 
 import { appStore } from '@/stores/useAppStore';
 import { showToast } from '../../../../../../common/ui';
-import { Logger } from '../../../../../../services/loggerService';
 import { extractProductDNA, canExtractDNA as canExtractDNALegacy } from '../../services/dnaExtractor';
 import {
   extractDNAFromDownloadsReport,
@@ -124,7 +123,7 @@ function getRawDna(ctx: PromptlabAlpineContext): ExtendedDNA | Record<string, un
   const unwrappedReport = (report as any).analysisReport ?? report;
   const language = unwrappedReport._metadata?.language ?? ctx.profile.targetMarket ?? 'zh';
 
-  Logger.debug('[dnaActions] 报告结构:', {
+  console.log('[dnaActions] 报告结构:', {
     hasWrapper: !!(report as any).analysisReport,
     topKeys: Object.keys(report as any).slice(0, 10),
     unwrappedKeys: Object.keys(unwrappedReport).slice(0, 10),
@@ -132,14 +131,14 @@ function getRawDna(ctx: PromptlabAlpineContext): ExtendedDNA | Record<string, un
 
   const extracted = extractDNAFromDownloadsReport(unwrappedReport, language);
   if (extracted) {
-    Logger.debug('[dnaActions] 使用提取器: 新 (universal)');
+    console.log('[dnaActions] 使用提取器: 新 (universal)');
     return extracted;
   }
 
-  Logger.debug('[dnaActions] 新提取器无法提取，尝试旧提取器');
+  console.log('[dnaActions] 新提取器无法提取，尝试旧提取器');
   const legacy = extractProductDNA(unwrappedReport) as Record<string, unknown> | null;
   if (legacy) {
-    Logger.debug('[dnaActions] 使用提取器: 旧 (legacy)');
+    console.log('[dnaActions] 使用提取器: 旧 (legacy)');
   }
   return legacy;
 }
@@ -200,7 +199,7 @@ function hasExistingDnaContent(ctx: PromptlabAlpineContext): boolean {
  * 从分析报告中提取产品 DNA，并仅自动填充置信度达标的字段
  */
 export function autoPopulateDNA(ctx: PromptlabAlpineContext): void {
-  Logger.debug('[dnaActions] 🧬 开始自动填充产品 DNA');
+  console.log('[dnaActions] 🧬 开始自动填充产品 DNA');
 
   const dna = getRawDna(ctx);
   if (!dna) {
@@ -237,7 +236,7 @@ export function autoPopulateDNA(ctx: PromptlabAlpineContext): void {
 
   fillableFields.forEach(([fieldName, config]) => {
     config.apply(ctx, normalized);
-    Logger.debug('[dnaActions] 自动填充高置信度字段:', {
+    console.log('[dnaActions] 自动填充高置信度字段:', {
       field: fieldName,
       confidence: getNormalizedFieldConfidence(normalized, fieldName),
     });
@@ -267,7 +266,7 @@ export function autoPopulateDNA(ctx: PromptlabAlpineContext): void {
 
   highlightAutoFilledFields(fillableFields.map(([, config]) => config.inputId));
 
-  Logger.debug('[dnaActions] ✅ DNA 填充完成:', {
+  console.log('[dnaActions] ✅ DNA 填充完成:', {
     confidence: ctx.dnaConfidence,
     filledFields: fillableFields.map(([fieldName]) => fieldName),
     blockedFields: blockedFields.map(([fieldName]) => fieldName),
@@ -281,7 +280,7 @@ export function extractSingleField(
   ctx: PromptlabAlpineContext,
   fieldName: ExtractableFieldName,
 ): void {
-  Logger.debug('[dnaActions] 🔄 提取单个字段:', fieldName);
+  console.log('[dnaActions] 🔄 提取单个字段:', fieldName);
 
   const dna = getRawDna(ctx);
   if (!dna) {
@@ -302,7 +301,7 @@ export function extractSingleField(
     { type: 'success' },
   );
 
-  Logger.debug('[dnaActions] ✅ 单字段提取完成:', {
+  console.log('[dnaActions] ✅ 单字段提取完成:', {
     field: fieldName,
     confidence: config.getConfidence(ctx),
   });

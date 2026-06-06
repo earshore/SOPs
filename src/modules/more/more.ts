@@ -1,9 +1,8 @@
-Logger.debug('📋 More Core Module Loading...');
+console.log('📋 More Core Module Loading...');
 import './more_style.css';
 import { createModuleLoader, ModuleLoader } from '../../common/utils/ModuleLoader';
 import type { ModuleMap, ModuleLoaderFn } from '@/types/modules-business';
 
-import { Logger } from '../../services/loggerService';
 // ================= 路由配置表 =================
 const MODULE_MAP: ModuleMap = {
     // 总览
@@ -33,4 +32,4 @@ export function registerSubModule(routeId: string, loader: ModuleLoaderFn): void
     moduleLoader.registerSubModule(routeId, loader);
 }
 
-Logger.debug('✅ More Module 加载完成');
+console.log('✅ More Module 加载完成');

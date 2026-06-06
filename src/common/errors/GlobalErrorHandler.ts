@@ -4,7 +4,6 @@
 // 统一处理和记录所有错误
 // ================================================================
 
-import { Logger } from '@/services/loggerService';
 import eventBus from '../EventBus';
 import { APP_EVENTS } from '../constants/eventConstants';
 import {
@@ -83,7 +82,7 @@ export class GlobalErrorHandler {
       });
     });
 
-    Logger.debug('✅ [GlobalErrorHandler] 全局错误处理器已初始化');
+    console.log('✅ [GlobalErrorHandler] 全局错误处理器已初始化');
   }
 
   /**
@@ -165,19 +164,19 @@ export class GlobalErrorHandler {
 
     switch (error.level) {
       case ErrorLevel.FATAL:
-        Logger.fatal(error.message, logData, error.context.module || 'System');
+        console.error('[FATAL]', error.message, logData, error.context.module || 'System');
         break;
       case ErrorLevel.ERROR:
-        Logger.error(error.message, logData, error.context.module || 'System');
+        console.error(error.message, logData, error.context.module || 'System');
         break;
       case ErrorLevel.WARNING:
-        Logger.warn(error.message, logData, error.context.module || 'System');
+        console.warn(error.message, logData, error.context.module || 'System');
         break;
       case ErrorLevel.INFO:
-        Logger.info(error.message, logData, error.context.module || 'System');
+        console.log(error.message, logData, error.context.module || 'System');
         break;
       case ErrorLevel.DEBUG:
-        Logger.debug(error.message, logData, error.context.module || 'System');
+        console.log(error.message, logData, error.context.module || 'System');
         break;
     }
   }
@@ -219,7 +218,7 @@ export class GlobalErrorHandler {
       });
     } catch (e) {
       // 静默失败,避免监控服务错误影响主流程
-      Logger.warn('[GlobalErrorHandler] 上报错误失败:', e);
+      console.warn('[GlobalErrorHandler] 上报错误失败:', e);
     }
   }
 

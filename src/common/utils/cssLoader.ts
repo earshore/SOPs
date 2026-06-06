@@ -9,8 +9,6 @@
  * - 加载状态管理
  */
 
-import { Logger } from '@services/loggerService';
-
 interface CSSLoadOptions {
   priority?: 'critical' | 'high' | 'normal' | 'low';
   preload?: boolean;
@@ -89,7 +87,7 @@ class CSSLoader {
         link.remove();
         
         if (fallback) {
-          Logger.warn(`CSS加载超时，使用降级方案: ${href}`);
+          console.warn(`CSS加载超时，使用降级方案: ${href}`);
           this.loadCSS(fallback, { ...options, fallback: undefined })
             .then(resolve)
             .catch(() => {
@@ -135,7 +133,7 @@ class CSSLoader {
         link.remove();
         
         if (fallback) {
-          Logger.warn(`CSS加载失败，使用降级方案: ${href}`);
+          console.warn(`CSS加载失败，使用降级方案: ${href}`);
           this.loadCSS(fallback, { ...options, fallback: undefined })
             .then(resolve)
             .catch(() => {

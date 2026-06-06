@@ -6,7 +6,6 @@
 import BaseModule from '../../../../../common/BaseModule';
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
 
-import { Logger } from '../../../../../services/loggerService';
 // Module class
 class WorkflowsModule extends BaseModule {
     /**
@@ -18,14 +17,14 @@ class WorkflowsModule extends BaseModule {
         container.innerHTML = html;
         container.classList.add('fade-in');
 
-        Logger.debug('✅ 工作流模块已挂载');
+        console.log('✅ 工作流模块已挂载');
     }
 
     /**
      * 卸载模块
      */
     unmount(): void {
-        Logger.debug('❌ 工作流模块已卸载');
+        console.log('❌ 工作流模块已卸载');
     }
 }
 

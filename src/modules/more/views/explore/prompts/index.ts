@@ -16,7 +16,6 @@ import {
     type PromptCategoryId,
 } from './constants/promptLibrary';
 import { showToast } from '../../../../../common/ui';
-import { Logger } from '../../../../../services/loggerService';
 import './prompts_style.css';
 
 // 使用导入的类型别名
@@ -503,7 +502,7 @@ class PromptsModule extends BaseModule {
         renderCategories();
         renderPromptList();
 
-        Logger.debug('✅ 提示词模块已挂载');
+        console.log('✅ 提示词模块已挂载');
     }
 
 
@@ -522,7 +521,7 @@ class PromptsModule extends BaseModule {
         currentLang = 'zh';
         currentKeyword = '';
 
-        Logger.debug('❌ 提示词模块已卸载');
+        console.log('❌ 提示词模块已卸载');
     }
 
 

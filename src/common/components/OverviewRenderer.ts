@@ -18,7 +18,6 @@ import { APP_EVENTS } from '../constants/eventConstants';
 import type { CategoryConfig } from './SidebarRenderer';
 import { SystemError } from '@/common/errors/AppError';
 import eventBus from '@common/EventBus';
-import { Logger } from '../../services/loggerService';
 /**
  * 布局类型
  */
@@ -117,7 +116,7 @@ export class OverviewRenderer {
     // 初始化事件监听
     this._initEvents();
     
-    Logger.debug(`✅ ${this.moduleConfig.title} 总览页面已渲染`);
+    console.log(`✅ ${this.moduleConfig.title} 总览页面已渲染`);
   }
 
   /**
@@ -598,6 +597,6 @@ export class OverviewRenderer {
    * 卸载
    */
   unmount(): void {
-    Logger.debug(`🧹 ${this.moduleConfig.title} 总览页面已卸载`);
+    console.log(`🧹 ${this.moduleConfig.title} 总览页面已卸载`);
   }
 }

@@ -5,8 +5,6 @@
 // ================================================================
 
 import { StorageService, CACHE_PREFIXES } from './storageService';
-import { Logger } from './loggerService';
-
 /**
  * 缓存策略
  */
@@ -319,7 +317,7 @@ class HttpCacheService {
       StorageService.setRaw(key, JSON.stringify(entry));
     } catch (e) {
       // 存储失败(可能空间不足),忽略
-      Logger.error('[HttpCache] 持久化缓存失败:', e as Error);
+      console.error('[HttpCache] 持久化缓存失败:', e as Error);
     }
   }
 }

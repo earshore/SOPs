@@ -10,7 +10,6 @@ import { MENU_CONFIG } from '../config/menuConfig';
 import { getEl } from './utils';
 import type { ColorSchemeName } from '../constants/colorSchemes';
 
-import { Logger } from '../../services/loggerService';
 // ═══════════════════════════════════════════════════════════
 // Utilities
 // ═══════════════════════════════════════════════════════════
@@ -483,7 +482,7 @@ function renderCategoryMenu(config: MenuRendererConfig): void {
 
     container.innerHTML = html;
   } catch (e) {
-    Logger.error(`❌ ${config.logLabel} 渲染失败:`, e);
+    console.error(`❌ ${config.logLabel} 渲染失败:`, e);
     container.innerHTML = renderErrorCard();
   }
 }
@@ -516,7 +515,7 @@ export function renderMegaMenu(): void {
 
     container.innerHTML = html;
   } catch (e) {
-    Logger.error('❌ MegaMenu 渲染失败:', e);
+    console.error('❌ MegaMenu 渲染失败:', e);
     container.innerHTML = renderErrorCard();
   }
 }

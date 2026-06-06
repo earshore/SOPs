@@ -15,7 +15,6 @@ import type { ILoggerService, IConfigService, IHttpService } from '../types/serv
 import type { ApiResponse } from '../types/api';
 import { isApiResponse } from '../common/guards/typeGuards';
 
-import { Logger } from './loggerService';
 /**
  * 请求优先级类型
  */
@@ -163,7 +162,7 @@ class HttpServiceClass implements IHttpService {
    */
   setLoggerService(logger: ILoggerService): void {
     this.logger = logger;
-    Logger.debug('[HttpService] LoggerService已注入');
+    console.log('[HttpService] LoggerService已注入');
   }
 
   /**
@@ -292,7 +291,7 @@ class HttpServiceClass implements IHttpService {
 
           // 等待后重试
           await this._delay(retryDelay * (attempt + 1));
-          Logger.debug(`[HttpService] Retry ${attempt + 1}/${retries}: ${url}`);
+          console.log(`[HttpService] Retry ${attempt + 1}/${retries}: ${url}`);
         }
       }
 

@@ -3,7 +3,6 @@
  * 采用 Context -> Module -> Route 三层架构
  */
 
-import { validateRouteConfig, validateModuleConfig } from "../utils/typeGuards";
 import {
   SOPS_ROUTES,
   APP_CENTER_ROUTES,
@@ -11,8 +10,6 @@ import {
   MORE_ROUTES,
   SYSTEM_ROUTES,
 } from "../constants/routes";
-
-import { Logger } from "../../services/loggerService";
 // ==================== 类型定义 ====================
 
 /**
@@ -731,9 +728,11 @@ export function getRouteFullConfig(routeId: string): RouteFullConfig | null {
 export function registerRoute(routeId: string, config: RouteConfig): boolean {
   // 运行时类型校验
   try {
+    // 动态导入避免循环依赖
+    const { validateRouteConfig } = require("../utils/typeGuards");
     validateRouteConfig(config);
   } catch (error) {
-    Logger.error(
+    console.error(
       `[MenuConfig] 路由注册失败 "${routeId}":`,
       (error as Error).message,
     );
@@ -741,12 +740,12 @@ export function registerRoute(routeId: string, config: RouteConfig): boolean {
   }
 
   if (MENU_CONFIG.routes[routeId]) {
-    Logger.warn(`[MenuConfig] 路由 "${routeId}" 已存在，跳过注册`);
+    console.warn(`[MenuConfig] 路由 "${routeId}" 已存在，跳过注册`);
     return false;
   }
 
   MENU_CONFIG.routes[routeId] = config;
-  Logger.debug(`✅ [MenuConfig] 动态注册路由: ${routeId}`);
+  console.debug(`✅ [MenuConfig] 动态注册路由: ${routeId}`);
   return true;
 }
 
@@ -762,12 +761,14 @@ export function registerModule(
 ): boolean {
   // 运行时类型校验
   try {
+    // 动态导入避免循环依赖
+    const { validateModuleConfig } = require("../utils/typeGuards");
     validateModuleConfig({
       id: moduleId,
       ...config,
     });
   } catch (error) {
-    Logger.error(
+    console.error(
       `[MenuConfig] 模块注册失败 "${moduleId}":`,
       (error as Error).message,
     );
@@ -775,7 +776,7 @@ export function registerModule(
   }
 
   if (MENU_CONFIG.modules[moduleId]) {
-    Logger.warn(`[MenuConfig] 模块 "${moduleId}" 已存在，跳过注册`);
+    console.warn(`[MenuConfig] 模块 "${moduleId}" 已存在，跳过注册`);
     return false;
   }
 
@@ -783,7 +784,7 @@ export function registerModule(
     id: moduleId,
     ...config,
   };
-  Logger.debug(`✅ [MenuConfig] 动态注册模块: ${moduleId}`);
+  console.debug(`✅ [MenuConfig] 动态注册模块: ${moduleId}`);
   return true;
 }
 

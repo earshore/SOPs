@@ -7,7 +7,6 @@ import { loadTemplate } from '@/common/utils/viewLoader';
 import { safeMount } from '@/common/utils/safeMount';
 import { APP_EVENTS } from '@/common/constants/eventConstants';
 import eventBus from '@/common/EventBus';
-import { Logger } from '../../../../services/loggerService';
 /**
  * 挂载 App Center 总览模块
  */
@@ -28,7 +27,7 @@ export const mount = safeMount(mountInternal, { moduleName: 'App Center Overview
  * 卸载 App Center 总览模块
  */
 export function unmount(): void {
-  Logger.debug('❌ App Center 总览模块已卸载');
+  console.log('❌ App Center 总览模块已卸载');
 }
 
 /**

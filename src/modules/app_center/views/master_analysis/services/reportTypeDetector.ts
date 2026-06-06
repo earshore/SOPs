@@ -10,8 +10,6 @@ import type {
 } from '../types/downloadsReportTypes';
 import type { FullAnalysisReport } from '../ai_analysis/config/analysisReportData';
 import { ReportType } from '../types/downloadsReportTypes';
-import { Logger } from '../../../../../services/loggerService';
-
 /**
  * 检测报告类型（基于字段特征）
  *
@@ -20,35 +18,35 @@ import { Logger } from '../../../../../services/loggerService';
  */
 export function detectReportType(report: any): ReportType {
   if (!report || typeof report !== 'object') {
-    Logger.warn('[报告检测] 无效的报告对象');
+    console.warn('[报告检测] 无效的报告对象');
     return ReportType.UNKNOWN;
   }
 
   // 优先检测 Full Analysis Report（应用中实际使用的格式）
   if (isFullAnalysisReport(report)) {
-    Logger.debug('[报告检测] 识别为 Full Analysis Report');
+    console.log('[报告检测] 识别为 Full Analysis Report');
     return ReportType.FULL_ANALYSIS;
   }
 
   // 检测 Competitor Report 特征
   if (isCompetitorReport(report)) {
-    Logger.debug('[报告检测] 识别为 Competitor Report');
+    console.log('[报告检测] 识别为 Competitor Report');
     return ReportType.COMPETITOR;
   }
 
   // 检测 Product Overview Report 特征
   if (isProductOverviewReport(report)) {
-    Logger.debug('[报告检测] 识别为 Product Overview Report');
+    console.log('[报告检测] 识别为 Product Overview Report');
     return ReportType.PRODUCT_OVERVIEW;
   }
 
   // 检测 Semantic Analysis Report 特征
   if (isSemanticAnalysisReport(report)) {
-    Logger.debug('[报告检测] 识别为 Semantic Analysis Report');
+    console.log('[报告检测] 识别为 Semantic Analysis Report');
     return ReportType.SEMANTIC_ANALYSIS;
   }
 
-  Logger.warn('[报告检测] 未识别的报告格式', {
+  console.warn('[报告检测] 未识别的报告格式', {
     hasBuyerProfile: !!(report['buyer-profile'] || report.buyer_profile),
     hasSellingPoints: !!(report['selling-points'] || report.selling_points),
     hasCompetitorInsights: !!report.competitor_insights,

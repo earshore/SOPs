@@ -8,7 +8,6 @@ import { StorageService } from '../../services/storageService';
 import eventBus from '../EventBus';
 import { APP_EVENTS } from '../constants/eventConstants';
 
-import { Logger } from '../../services/loggerService';
 /**
  * 动作处理函数类型
  */
@@ -119,7 +118,7 @@ function _validateActionName(actionName: string): boolean {
   );
 
   if (!hasPrefix && !actionName.startsWith('_')) {
-    Logger.warn(
+    console.warn(
       `⚠️ [ActionRegistry] 动作 "${actionName}" 未使用模块前缀。\n` +
         `   推荐格式: <prefix>_<action>，例如: kt_syncToInput\n` +
         `   可用前缀: ${Object.keys(NAMING_CONVENTIONS.prefixes).join(', ')}`
@@ -136,7 +135,7 @@ export function registerAction(actionName: string, handler: ActionHandler): void
   _validateActionName(actionName);
 
   if (ActionRegistry[actionName]) {
-    Logger.warn(`[ActionRegistry] 动作 "${actionName}" 已存在，将被覆盖`);
+    console.warn(`[ActionRegistry] 动作 "${actionName}" 已存在，将被覆盖`);
   }
   ActionRegistry[actionName] = handler;
 }
@@ -178,7 +177,7 @@ export function unregisterActions(actionNames: string[]): void {
 export function executeAction(actionName: string, params: Record<string, unknown>, event: Event): unknown {
   const handler = ActionRegistry[actionName];
   if (!handler) {
-    Logger.warn(`[ActionRegistry] 未注册的动作: "${actionName}"`);
+    console.warn(`[ActionRegistry] 未注册的动作: "${actionName}"`);
     return;
   }
   return handler(params, event);
@@ -216,7 +215,7 @@ export function initGlobalEventDelegation(): void {
     executeAction(actionName, params, event);
   });
 
-  Logger.debug('✅ [ActionRegistry] 全局事件委托已初始化');
+  console.log('✅ [ActionRegistry] 全局事件委托已初始化');
 }
 
 // ================================================================
@@ -255,7 +254,7 @@ export function registerActionWithLegacy(actionName: string, handler: ActionHand
       // 弃用警告 (每个函数只警告一次)
       if (ENABLE_DEPRECATION_WARNINGS() && !warnedFunctions.has(actionName)) {
         warnedFunctions.add(actionName);
-        Logger.warn(
+        console.warn(
           `⚠️ [Deprecated] window.${actionName}() 即将弃用。\n` +
             `   请迁移到: <button data-action="${actionName}">...\n` +
             `   (此警告已手动开启，关闭: StorageService.remove('enable_legacy_warnings'))`
@@ -281,7 +280,7 @@ export function registerActionsWithLegacy(actions: Record<string, ActionHandler>
     registerActionWithLegacy(name, handler);
   });
 
-  Logger.debug(`✅ [ActionRegistry] 已注册 ${actionNames.length} 个动作 (含向后兼容)`);
+  console.log(`✅ [ActionRegistry] 已注册 ${actionNames.length} 个动作 (含向后兼容)`);
 
   return actionNames;
 }
@@ -301,16 +300,16 @@ export function getLegacyCallStats(): string[] {
 eventBus.on(APP_EVENTS.REGISTER_ACTIONS, (payload: unknown) => {
   const { moduleId, actions } = payload as { moduleId: string; actions: ActionMap };
   const actionNames = registerActionsWithLegacy(actions);
-  Logger.debug(`[ActionRegistry] 已注册 ${actionNames.length} 个动作 (模块: ${moduleId})`);
+  console.log(`[ActionRegistry] 已注册 ${actionNames.length} 个动作 (模块: ${moduleId})`);
 });
 
 // 监听清理事件
 eventBus.on('unregisterActions', (payload: unknown) => {
   const { moduleId, actionNames } = payload as { moduleId: string; actionNames: string[] };
   unregisterActions(actionNames);
-  Logger.debug(`[ActionRegistry] 已清理 ${actionNames.length} 个动作 (模块: ${moduleId})`);
+  console.log(`[ActionRegistry] 已清理 ${actionNames.length} 个动作 (模块: ${moduleId})`);
 });
 
-Logger.debug('✅ [ActionRegistry] 事件监听器已初始化 (循环依赖已解决)');
+console.log('✅ [ActionRegistry] 事件监听器已初始化 (循环依赖已解决)');
 
 export default ActionRegistry;

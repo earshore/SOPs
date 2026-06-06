@@ -25,7 +25,6 @@ import type { ScrapedData, ScrapedProduct, HistoryItem } from '@/types/modules-b
 import { DataPreview, DataPreviewState } from './DataPreview';
 import { HistoryPanel } from './HistoryPanel';
 
-import { Logger } from '../../../../../../services/loggerService';
 /**
  * 创建 Scraper Panel Alpine 组件
  */
@@ -338,7 +337,7 @@ export function createScraperPanel() {
         // ========== Lifecycle ==========
 
         init() {
-            Logger.debug("[Scraper] 🚀 Alpine 组件初始化");
+            console.log("[Scraper] 🚀 Alpine 组件初始化");
 
             // 从 state 初始化 currentDataTab
             this.currentDataTab = appStore.getState().scraper.currentDataTab || 'preview';
@@ -361,12 +360,12 @@ export function createScraperPanel() {
 
             // 保存事件处理函数引用
             const historyUpdatedHandler = () => {
-                Logger.debug('[Scraper] 收到标准历史更新事件');
+                console.log('[Scraper] 收到标准历史更新事件');
                 this.loadHistory();
             };
             
             const customHistoryHandler = () => {
-                Logger.debug('[Scraper] 收到自定义历史更新事件');
+                console.log('[Scraper] 收到自定义历史更新事件');
                 this.loadHistory();
             };
             
@@ -380,41 +379,41 @@ export function createScraperPanel() {
                 () => window.removeEventListener('history-updated', customHistoryHandler)
             );
 
-            Logger.debug('[Scraper] ✅ Alpine 组件初始化完成');
+            console.log('[Scraper] ✅ Alpine 组件初始化完成');
         },
 
         // 组件销毁时清理资源
         destroy() {
-            Logger.debug('[Scraper] 🔄 清理事件监听器');
+            console.log('[Scraper] 🔄 清理事件监听器');
             this._unsubscribers.forEach(unsub => {
                 try {
                     unsub();
                 } catch (error) {
-                    Logger.warn('[Scraper] 清理订阅时出错:', error);
+                    console.warn('[Scraper] 清理订阅时出错:', error);
                 }
             });
             this._unsubscribers = [];
-            Logger.debug('[Scraper] ✅ 资源清理完成');
+            console.log('[Scraper] ✅ 资源清理完成');
         },
 
         // 如果有数据则渲染预览（这部分代码应该在 init 方法内）
         _renderInitialData() {
             if (this.hasData && this.dataPreview) {
-                Logger.debug('[Scraper] 📦 检测到数据，准备初始化渲染');
-                Logger.debug('[Scraper] 📊 检查大数据集');
+                console.log('[Scraper] 📦 检测到数据，准备初始化渲染');
+                console.log('[Scraper] 📊 检查大数据集');
                 this.dataPreview.checkLargeDataset();
 
-                Logger.debug('[Scraper] 🎯 设置事件委托');
+                console.log('[Scraper] 🎯 设置事件委托');
                 this.dataPreview.setupEventDelegation((asin) => {
-                    Logger.debug('[Scraper] 🖱️ 事件委托触发，ASIN:', asin);
+                    console.log('[Scraper] 🖱️ 事件委托触发，ASIN:', asin);
                     this.toggleCardExpand(asin);
                 });
 
-                Logger.debug('[Scraper] 🎨 执行初始渲染');
+                console.log('[Scraper] 🎨 执行初始渲染');
                 this.renderDataPanel();
-                Logger.debug('[Scraper] ✅ 初始化渲染完成');
+                console.log('[Scraper] ✅ 初始化渲染完成');
             } else {
-                Logger.debug('[Scraper] ℹ️ 无数据或 dataPreview 不存在，跳过初始渲染', {
+                console.log('[Scraper] ℹ️ 无数据或 dataPreview 不存在，跳过初始渲染', {
                     hasData: this.hasData,
                     hasDataPreview: !!this.dataPreview
                 });
@@ -436,7 +435,7 @@ export function createScraperPanel() {
                 this.inputAsins = currentState.scraper.inputAsins;
             }
 
-            Logger.debug("[Scraper] ✅ 状态已恢复");
+            console.log("[Scraper] ✅ 状态已恢复");
         },
 
         /**
@@ -476,7 +475,7 @@ export function createScraperPanel() {
             }
 
             if (hasChanges) {
-                Logger.debug("[Scraper] 💾 状态已保存");
+                console.log("[Scraper] 💾 状态已保存");
             }
         },
 
@@ -517,7 +516,7 @@ export function createScraperPanel() {
                 })
                 .catch((error) => {
                     if (loadSeq !== this._historyLoadSeq) return;
-                    Logger.error('[Scraper] 加载历史记录失败:', error);
+                    console.error('[Scraper] 加载历史记录失败:', error);
                     this.historyLoadError = '历史记录加载失败';
                     this.historyItems = [...(this.historyPanel?.getHistory() || [])];
                 })
@@ -562,7 +561,7 @@ export function createScraperPanel() {
         async startScrape() {
             if (!this.canStart) return;
 
-            Logger.debug('[Scraper] 开始采集流程', {
+            console.log('[Scraper] 开始采集流程', {
                 asins: this.validAsins,
                 site: this.selectedSite,
                 scrapeReviews: this.scrapeReviews
@@ -581,7 +580,7 @@ export function createScraperPanel() {
             let products: unknown[] = [];
 
             try {
-                Logger.debug('[Scraper] 调用 startScrape 函数');
+                console.log('[Scraper] 调用 startScrape 函数');
                 products = await startScrape(
                     this.validAsins,
                     site,
@@ -589,16 +588,16 @@ export function createScraperPanel() {
                     this.tasks,
                     (asin, status, msg) => updateTask(this.tasks, asin, status, msg)
                 );
-                Logger.debug('[Scraper] startScrape 完成', { productsCount: products.length, products });
+                console.log('[Scraper] startScrape 完成', { productsCount: products.length, products });
             } catch (e) {
-                Logger.error('[Scraper] startScrape 异常:', e);
+                console.error('[Scraper] startScrape 异常:', e);
                 ErrorService.handle(e as Error, { action: 'startScrape', module: 'scraper' });
                 showToast("采集任务异常中断", { type: 'error' });
             } finally {
-                Logger.debug('[Scraper] 进入 finally 块', { productsCount: products.length });
+                console.log('[Scraper] 进入 finally 块', { productsCount: products.length });
                 // 完成采集
                 const scrapedData = handleScrapeComplete(products as ScrapedProduct[], this.validAsins, this.selectedSite);
-                Logger.debug('[Scraper] handleScrapeComplete 完成', scrapedData);
+                console.log('[Scraper] handleScrapeComplete 完成', scrapedData);
 
                 // 更新全局状态
                 appStore.getState().setScrapedData(scrapedData);
@@ -635,19 +634,19 @@ export function createScraperPanel() {
         },
 
         downloadPlugin(): void {
-            Logger.debug('[Scraper] 🔽 下载插件按钮被点击');
+            console.log('[Scraper] 🔽 下载插件按钮被点击');
             const url = 'https://github.com/earshore/Amazon-Scraper/releases';
             try {
-                Logger.debug('[Scraper] 🌐 尝试打开 URL:', url);
+                console.log('[Scraper] 🌐 尝试打开 URL:', url);
                 const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
                 if (newWindow) {
-                    Logger.debug('[Scraper] ✅ 窗口打开成功');
+                    console.log('[Scraper] ✅ 窗口打开成功');
                 } else {
-                    Logger.warn('[Scraper] ⚠️ 窗口被浏览器拦截，请检查弹窗设置');
+                    console.warn('[Scraper] ⚠️ 窗口被浏览器拦截，请检查弹窗设置');
                     showToast('请允许浏览器弹窗以打开下载页面', { type: 'warning' });
                 }
             } catch (error) {
-                Logger.error('[Scraper] ❌ 打开窗口失败:', error);
+                console.error('[Scraper] ❌ 打开窗口失败:', error);
                 showToast('打开下载页面失败', { type: 'error' });
             }
         },
@@ -695,14 +694,14 @@ export function createScraperPanel() {
         updateDataPreview(data: ScrapedData | null): void {
             if (!this.dataPreview) return;
 
-            Logger.debug('[Scraper] 🔄 更新数据预览');
+            console.log('[Scraper] 🔄 更新数据预览');
             this.dataPreview.updateData(data);
             this.dataPreview.checkLargeDataset();
 
             // 重新设置事件委托
-            Logger.debug('[Scraper] 🎯 重新设置事件委托');
+            console.log('[Scraper] 🎯 重新设置事件委托');
             this.dataPreview.setupEventDelegation((asin) => {
-                Logger.debug('[Scraper] 🖱️ 事件委托触发，ASIN:', asin);
+                console.log('[Scraper] 🖱️ 事件委托触发，ASIN:', asin);
                 this.toggleCardExpand(asin);
             });
 
@@ -710,57 +709,57 @@ export function createScraperPanel() {
         },
 
         renderDataPanel(): void {
-            Logger.debug('[Scraper] 🎨 renderDataPanel 被调用');
+            console.log('[Scraper] 🎨 renderDataPanel 被调用');
 
             if (!this.dataPreview) {
-                Logger.warn('[Scraper] ⚠️ dataPreview 不存在，无法渲染');
+                console.warn('[Scraper] ⚠️ dataPreview 不存在，无法渲染');
                 return;
             }
 
             // 防止重复渲染
             if (this._isRendering) {
-                Logger.warn('[Scraper] ⚠️ 渲染已在进行中，跳过本次调用');
+                console.warn('[Scraper] ⚠️ 渲染已在进行中，跳过本次调用');
                 return;
             }
 
             this._isRendering = true;
-            Logger.debug('[Scraper] 🔒 设置渲染锁');
+            console.log('[Scraper] 🔒 设置渲染锁');
 
             try {
-                Logger.debug('[Scraper] 📝 开始渲染数据面板');
+                console.log('[Scraper] 📝 开始渲染数据面板');
                 this.dataPreview.renderDataPanel(
                     (asin) => this.toggleCardExpand(asin),
                     (asin) => this.deleteProduct(asin),
                     (asin, index) => this.deleteReview(asin, index)
                 );
-                Logger.debug('[Scraper] ✅ 数据面板渲染完成');
+                console.log('[Scraper] ✅ 数据面板渲染完成');
             } catch (error) {
-                Logger.error('[Scraper] ❌ 渲染失败:', error);
+                console.error('[Scraper] ❌ 渲染失败:', error);
             } finally {
                 this._isRendering = false;
-                Logger.debug('[Scraper] 🔓 释放渲染锁');
+                console.log('[Scraper] 🔓 释放渲染锁');
             }
         },
 
         toggleCardExpand(asin: string): void {
-            Logger.debug('[Scraper] 🔄 toggleCardExpand 被调用:', asin);
+            console.log('[Scraper] 🔄 toggleCardExpand 被调用:', asin);
 
             if (!this.dataPreview) {
-                Logger.warn('[Scraper] ⚠️ dataPreview 不存在');
+                console.warn('[Scraper] ⚠️ dataPreview 不存在');
                 return;
             }
 
             const oldExpandedAsin = this.dataPreview.getState().expandedAsin;
-            Logger.debug('[Scraper] 📊 当前展开的 ASIN:', oldExpandedAsin);
+            console.log('[Scraper] 📊 当前展开的 ASIN:', oldExpandedAsin);
 
             // 切换展开状态
             this.dataPreview.toggleCardExpand(asin);
 
             const newExpandedAsin = this.dataPreview.getState().expandedAsin;
-            Logger.debug('[Scraper] 📊 新的展开 ASIN:', newExpandedAsin);
+            console.log('[Scraper] 📊 新的展开 ASIN:', newExpandedAsin);
 
             // 重新渲染以更新UI
-            Logger.debug('[Scraper] 🎨 重新渲染数据面板');
+            console.log('[Scraper] 🎨 重新渲染数据面板');
             this.renderDataPanel();
             this.saveState();
         },

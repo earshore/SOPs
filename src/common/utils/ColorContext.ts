@@ -1,6 +1,6 @@
 /**
  * ColorContext.ts - 配色上下文管理器
- * 
+ *
  * 职责:
  * - 管理当前模块的主题配色
  * - 提供配色推断逻辑（模块 → 分类 → 默认）
@@ -10,9 +10,17 @@
 
 import { MENU_CONFIG, getRoutesByModule, type ModuleConfig, type MenuConfig } from '../config/menuConfig';
 import type { ColorSchemeName } from '../constants/colorSchemes';
-import type { CategoryConfig } from '../components/SidebarRenderer';
 
-import { Logger } from '../../services/loggerService';
+// 定义CategoryConfig类型，避免从SidebarRenderer导入造成循环依赖
+interface CategoryConfig {
+  id: string;
+  label: string;
+  icon: string;
+  color: string;
+  order: number;
+  version: string;
+  description: string;
+}
 // ═══════════════════════════════════════════════════════════
 // ColorContext 管理器
 // ═══════════════════════════════════════════════════════════
@@ -59,7 +67,7 @@ export class ColorContext {
 
     const module = MENU_CONFIG.modules[moduleId];
     if (!module) {
-      Logger.warn(`[ColorContext] 模块未找到: ${moduleId}, 使用默认颜色`);
+      console.warn(`[ColorContext] 模块未找到: ${moduleId}, 使用默认颜色`);
       return 'blue';
     }
 
@@ -84,7 +92,9 @@ export class ColorContext {
     // 缓存结果
     this.colorCache.set(moduleId, inferredColor);
 
-    Logger.debug(`[ColorContext] 模块 "${moduleId}" 推断颜色: ${inferredColor}`);
+    if (typeof console !== 'undefined' && console.debug) {
+      console.debug(`[ColorContext] 模块 "${moduleId}" 推断颜色: ${inferredColor}`);
+    }
     return inferredColor;
   }
 
@@ -150,7 +160,7 @@ export class ColorContext {
       return color as ColorSchemeName;
     }
 
-    Logger.warn(`[ColorContext] 无效的颜色名称: ${color}, 使用默认颜色 blue`);
+    console.warn(`[ColorContext] 无效的颜色名称: ${color}, 使用默认颜色 blue`);
     return 'blue';
   }
 
@@ -160,7 +170,9 @@ export class ColorContext {
    */
   static clearCache(): void {
     this.colorCache.clear();
-    Logger.debug('[ColorContext] 颜色缓存已清除');
+    if (typeof console !== 'undefined' && console.debug) {
+      console.debug('[ColorContext] 颜色缓存已清除');
+    }
   }
 
   /**
@@ -224,7 +236,7 @@ export class ColorContext {
       try {
         listener(color);
       } catch (error) {
-        Logger.error('[ColorContext] 主题变化监听器执行失败:', error);
+        console.error('[ColorContext] 主题变化监听器执行失败:', error);
       }
     });
   }

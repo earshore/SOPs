@@ -6,20 +6,19 @@
 import { Product } from '../config/sampleData';
 import { ScraperData, ScraperProduct } from '../types';
 import { ValidationError } from '@common/errors/AppError';
-import { Logger } from '../../../../../../services/loggerService';
 /**
  * 从 Scraper 单个产品数据转换为 Product 格式
  */
 export function convertScraperDataToProduct(productData: unknown): Product | null {
   try {
     if (!productData || typeof productData !== 'object') {
-      Logger.error('[数据转换] 产品数据无效:', productData);
+      console.error('[数据转换] 产品数据无效:', productData);
       return null;
     }
 
     const product = productData as ScraperProduct;
     
-    Logger.debug('[数据转换] 开始转换产品数据:', {
+    console.log('[数据转换] 开始转换产品数据:', {
       asin: product.asin,
       hasTitle: !!(product.productTitle || product.title),
       hasBullets: !!(product.feature_bullets || product.bulletPoints || product.bullet_points),
@@ -57,7 +56,7 @@ export function convertScraperDataToProduct(productData: unknown): Product | nul
       metadata: {}
     };
     
-    Logger.debug('[数据转换] 转换结果:', {
+    console.log('[数据转换] 转换结果:', {
       asin: converted.asin,
       title: converted.productTitle,
       bulletsCount: converted.feature_bullets.length,
@@ -66,7 +65,7 @@ export function convertScraperDataToProduct(productData: unknown): Product | nul
     
     return converted;
   } catch (error) {
-    Logger.error('[数据转换] 转换产品数据失败:', { error, productData });
+    console.error('[数据转换] 转换产品数据失败:', { error, productData });
     return null;
   }
 }
@@ -99,8 +98,8 @@ export function mergeProducts(products: Product[]): Product {
     }
   };
 
-  Logger.debug('[数据转换] 已合并 ' + products.length + ' 个产品的数据');
-  Logger.debug('[数据转换] 合并后数据: ' + mergedProduct.feature_bullets.length + ' 个卖点, ' + mergedProduct.customer_reviews.length + ' 条评论');
+  console.log('[数据转换] 已合并 ' + products.length + ' 个产品的数据');
+  console.log('[数据转换] 合并后数据: ' + mergedProduct.feature_bullets.length + ' 个卖点, ' + mergedProduct.customer_reviews.length + ' 条评论');
 
   return mergedProduct;
 }

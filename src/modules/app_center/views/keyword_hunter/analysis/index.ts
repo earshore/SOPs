@@ -16,7 +16,6 @@ import { showToast } from "../../../../../common/ui";
 import * as KeywordService from "../services/trackerService";
 import { appStore } from "@/stores/useAppStore";
 import { ErrorService } from "../../../../../services/errorService";
-import { Logger } from "../../../../../services/loggerService";
 import "../keyword_hunter_style.css";
 
 // ==========================================
@@ -98,10 +97,10 @@ function parseMarkdownToHtml(markdown: string): string {
       return result;
     }
     // result 是 Promise（不应发生，但做保护）
-    Logger.warn("[Analysis] marked.parse() 返回非字符串，降级展示");
+    console.warn("[Analysis] marked.parse() 返回非字符串，降级展示");
     return `<pre class="whitespace-pre-wrap text-sm text-slate-600 leading-relaxed">${escapeHtml(markdown)}</pre>`;
   } catch (err) {
-    Logger.error("[Analysis] Markdown 解析失败:", err);
+    console.error("[Analysis] Markdown 解析失败:", err);
     return `<pre class="whitespace-pre-wrap text-sm text-slate-600 leading-relaxed">${escapeHtml(markdown)}</pre>`;
   }
 }
@@ -115,7 +114,7 @@ function renderReport(container: HTMLElement, markdown: string): void {
 
   const html = parseMarkdownToHtml(markdown);
   if (!html) {
-    Logger.warn("[Analysis] renderReport: 解析结果为空");
+    console.warn("[Analysis] renderReport: 解析结果为空");
     return;
   }
 
@@ -147,7 +146,7 @@ function saveAnalysisStateToState(): void {
     appStore.getState().updateKeywordTracker({
       llmAnalysisResult: rawMarkdownCache,
     });
-    Logger.debug(
+    console.log(
       "[Analysis] 已保存原始 Markdown 到 state，长度:",
       rawMarkdownCache.length,
     );
@@ -175,7 +174,7 @@ function restoreAnalysisStateFromState(): void {
 
     if (isLikelyHtml) {
       // 旧版本兼容：直接注入 HTML，但不运行 highlightScores（已处理过）
-      Logger.debug("[Analysis] 检测到旧版 HTML 格式，直接注入");
+      console.log("[Analysis] 检测到旧版 HTML 格式，直接注入");
       const renderer = SafeRenderer.getInstance();
       renderer.renderTemplate(resultDiv, savedMarkdown);
     } else {
@@ -322,6 +321,7 @@ function showLoadingState(container: HTMLElement): () => void {
     const loadingEl = document.getElementById("kt-loading-state");
     if (loadingEl) {
       const newContent = document.createElement("div");
+      // ✅ 安全: buildHtml返回静态模板，phase.icon/text/color来自常量数组
       newContent.innerHTML = buildHtml(phases[phaseIndex]!);
       loadingEl.replaceWith(newContent.firstElementChild!);
     }
@@ -432,6 +432,7 @@ function highlightScores(container: HTMLElement): void {
     // —— 违规触发（-10 / 🚨） ——
     if (rawText.includes("-10") || rawText.includes("🚨")) {
       tr.classList.add("row-risk");
+      // ✅ 安全: 清空内容
       td2.innerHTML = "";
       const span = document.createElement("span");
       span.className = "score-badge score-badge-low";
@@ -447,6 +448,7 @@ function highlightScores(container: HTMLElement): void {
       rawText.includes("通过") ||
       rawText === "0"
     ) {
+      // ✅ 安全: 清空内容
       td2.innerHTML = "";
       const span = document.createElement("span");
       span.className = "score-badge score-badge-high";
@@ -479,6 +481,7 @@ function highlightScores(container: HTMLElement): void {
       tr.classList.add("row-low");
     }
 
+    // ✅ 安全: 清空内容
     td2.innerHTML = "";
     const span = document.createElement("span");
     span.className = `score-badge ${badgeClass}`;
@@ -650,6 +653,7 @@ async function runLLMAnalysis(): Promise<void> {
         `inline-flex items-center gap-1.5 px-3 py-1.5 ` +
         `bg-white border border-${colorScheme}-200 text-${colorScheme}-700 ` +
         `text-xs rounded-lg hover:bg-${colorScheme}-50 transition-colors font-medium`;
+      // ✅ 安全: 静态HTML模板，无用户输入
       retryBtn.innerHTML = '<i class="fas fa-redo text-[10px]"></i> 重试';
       addEventListener(retryBtn, "click", () => {
         void runLLMAnalysis();
@@ -659,6 +663,7 @@ async function runLLMAnalysis(): Promise<void> {
       errorDiv.appendChild(msgP);
       errorDiv.appendChild(retryBtn);
 
+      // ✅ 安全: 清空内容
       resultDiv.innerHTML = "";
       resultDiv.appendChild(errorDiv);
     }
@@ -694,7 +699,7 @@ function setupEventListeners(container: HTMLElement): void {
  * 挂载子模块
  */
 export async function mount(container: HTMLElement): Promise<void> {
-  Logger.debug("[Analysis] 🔧 开始挂载子模块");
+  console.log("[Analysis] 🔧 开始挂载子模块");
 
   try {
     const loader = SafeModuleLoader.getInstance();
@@ -706,7 +711,7 @@ export async function mount(container: HTMLElement): Promise<void> {
         retryCount: 3,
         timeout: 5000,
         onError: (error) => {
-          Logger.error("[Analysis] 模板加载失败:", error);
+          console.error("[Analysis] 模板加载失败:", error);
         },
       },
     );
@@ -717,9 +722,9 @@ export async function mount(container: HTMLElement): Promise<void> {
     setupEventListeners(container);
     restoreAnalysisStateFromState();
 
-    Logger.debug("[Analysis] ✅ 子模块挂载成功");
+    console.log("[Analysis] ✅ 子模块挂载成功");
   } catch (error) {
-    Logger.error("[Analysis] ❌ 子模块挂载失败:", error);
+    console.error("[Analysis] ❌ 子模块挂载失败:", error);
     throw error;
   }
 }
@@ -728,13 +733,13 @@ export async function mount(container: HTMLElement): Promise<void> {
  * 卸载子模块
  */
 export function unmount(): void {
-  Logger.debug("[Analysis] 🔄 开始卸载子模块");
+  console.log("[Analysis] 🔄 开始卸载子模块");
 
   try {
     saveAnalysisStateToState();
     cleanup();
-    Logger.debug("[Analysis] ✅ 子模块卸载成功");
+    console.log("[Analysis] ✅ 子模块卸载成功");
   } catch (error) {
-    Logger.error("[Analysis] ❌ 子模块卸载失败:", error);
+    console.error("[Analysis] ❌ 子模块卸载失败:", error);
   }
 }

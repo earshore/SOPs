@@ -9,7 +9,6 @@ import { formatHistoryDate } from '../services/reportGenerator';
 import { AlpineContext, HistoricalReportDetail } from '../types';
 import type { ScrapedData } from '@/types/modules-business';
 
-import { Logger } from '../../../../../../services/loggerService';
 /**
  * 检查并加载 Scraper 数据
  */
@@ -27,14 +26,14 @@ export function checkAndLoadScraperData(context: AlpineContext): void {
       context.dataSource = 'scraper';
       // 同步到 Zustand store
       appStore.getState().setSelectedAsins(asins);
-      Logger.debug('[数据加载] 自动加载 Scraper 数据:', context.selectedAsins);
+      console.log('[数据加载] 自动加载 Scraper 数据:', context.selectedAsins);
       showToast(`已自动加载 ${asins.length} 个产品 ASIN`, { type: 'success' });
     }
 
     // 自动启用真实数据分析模式
     if (!context.useRealData) {
       context.useRealData = true;
-      Logger.debug('[数据加载] 已自动启用真实数据分析模式');
+      console.log('[数据加载] 已自动启用真实数据分析模式');
     }
   }
 }
@@ -65,13 +64,13 @@ export function checkLoadedReport(context: AlpineContext): void {
   ].some(key => reportObj[key]);
 
   if (hasAnalysisData) {
-    Logger.debug('[数据加载] 检测到已加载的分析报告');
+    console.log('[数据加载] 检测到已加载的分析报告');
 
     // 加载报告数据到当前组件
     context.analysisReport = reportObj;
     context.hasReport = true;
 
-    Logger.debug('[数据加载] 已显示历史分析报告');
+    console.log('[数据加载] 已显示历史分析报告');
     showToast('已加载历史分析报告', { type: 'success' });
   }
 }
@@ -96,10 +95,10 @@ export function loadHistoricalReport(
     // 同步到 Zustand store
     appStore.getState().setAnalysisReport(detail.report as any);
 
-    Logger.debug('[数据加载] 已加载历史分析报告:', detail.timestamp);
+    console.log('[数据加载] 已加载历史分析报告:', detail.timestamp);
     showToast(`已加载历史分析报告 (${formatHistoryDate(detail.timestamp)})`, { type: 'success' });
   } catch (error) {
-    Logger.error('[数据加载] 加载历史报告失败:', error);
+    console.error('[数据加载] 加载历史报告失败:', error);
     showToast('加载历史报告失败', { type: 'error' });
   }
 }

@@ -10,7 +10,6 @@ import type {
   TitleKeywordsReport,
 } from "../../ai_analysis/config/analysisReportData";
 import type { ExtendedDNA } from "../../types/extendedDNA";
-import { Logger } from "../../../../../../services/loggerService";
 import { getSpecLabel } from "../../config/specLabels";
 import {
   AUDIENCE_CONFIDENCE_WEIGHTS,
@@ -59,7 +58,7 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
 
   extractDNA(report: unknown, language: string = "zh"): ExtendedDNA | null {
     if (!this.canHandle(report)) {
-      Logger.warn("[FullAnalysisReportAdapter] 报告格式不匹配");
+      console.warn("[FullAnalysisReportAdapter] 报告格式不匹配");
       return null;
     }
 
@@ -85,7 +84,7 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
 
       // 如果总体置信度太低，返回 null
       if (avgConfidence < CONFIDENCE_THRESHOLDS.MINIMUM_ACCEPTABLE) {
-        Logger.warn("[FullAnalysisReportAdapter] 提取置信度过低，放弃提取");
+        console.warn("[FullAnalysisReportAdapter] 提取置信度过低，放弃提取");
         return null;
       }
 
@@ -142,7 +141,7 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
 
       return dna;
     } catch (error) {
-      Logger.error("[FullAnalysisReportAdapter] 提取失败:", error);
+      console.error("[FullAnalysisReportAdapter] 提取失败:", error);
       return null;
     }
   }
@@ -258,7 +257,7 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
         sourceFields,
       };
     } catch (error) {
-      Logger.error("[FullAnalysisReportAdapter] 提取受众失败:", error);
+      console.error("[FullAnalysisReportAdapter] 提取受众失败:", error);
       return { data: "", confidence: 0, sourceFields: [] };
     }
   }
@@ -322,7 +321,7 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
         sourceFields,
       };
     } catch (error) {
-      Logger.error("[FullAnalysisReportAdapter] 提取卖点失败:", error);
+      console.error("[FullAnalysisReportAdapter] 提取卖点失败:", error);
       return { data: "", confidence: 0, sourceFields: [] };
     }
   }
@@ -400,7 +399,7 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
         sourceFields,
       };
     } catch (error) {
-      Logger.error("[FullAnalysisReportAdapter] 提取规格失败:", error);
+      console.error("[FullAnalysisReportAdapter] 提取规格失败:", error);
       return { data: "", confidence: 0, sourceFields: [] };
     }
   }
@@ -416,7 +415,7 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
     try {
       // 输入验证
       if (!keywords || !Array.isArray(keywords) || keywords.length === 0) {
-        Logger.debug(
+        console.log(
           "[FullAnalysisReportAdapter] extractSpecsByType: 无效或空的 keywords 数组",
         );
         return [];
@@ -441,7 +440,7 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
 
       keywords.forEach((k) => {
         if (!k || typeof k !== "object") {
-          Logger.debug(
+          console.log(
             "[FullAnalysisReportAdapter] extractSpecsByType: 跳过无效的 keyword 对象",
           );
           return;
@@ -470,7 +469,7 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
 
       return specs;
     } catch (error) {
-      Logger.error(
+      console.error(
         "[FullAnalysisReportAdapter] extractSpecsByType 失败:",
         error,
       );
@@ -492,7 +491,7 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
         !Array.isArray(bulletAnalysis) ||
         bulletAnalysis.length === 0
       ) {
-        Logger.debug(
+        console.log(
           "[FullAnalysisReportAdapter] extractTechnicalSpecs: 无效或空的 bulletAnalysis",
         );
         return [];
@@ -524,7 +523,7 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
 
       return techSpecs.slice(0, 5);
     } catch (error) {
-      Logger.error(
+      console.error(
         "[FullAnalysisReportAdapter] extractTechnicalSpecs 失败:",
         error,
       );
@@ -556,7 +555,7 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
           }
         }
       } catch (regexError) {
-        Logger.warn(
+        console.warn(
           "[FullAnalysisReportAdapter] unitPattern 正则匹配失败:",
           regexError,
         );
@@ -574,7 +573,7 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
           }
         }
       } catch (regexError) {
-        Logger.warn(
+        console.warn(
           "[FullAnalysisReportAdapter] dimensionPattern 正则匹配失败:",
           regexError,
         );
@@ -582,7 +581,7 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
 
       return patterns;
     } catch (error) {
-      Logger.error(
+      console.error(
         "[FullAnalysisReportAdapter] extractSpecPatterns 失败:",
         error,
       );

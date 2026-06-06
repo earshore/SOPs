@@ -8,7 +8,6 @@ import type { ServiceRegistry } from '../ServiceRegistry';
 import { SERVICE_NAMES } from '../ServiceRegistry';
 import type { ILoggerService } from '@/types/services';
 
-import { Logger } from '../../../services/loggerService';
 import { analyticsService } from '@/services/analyticsService';
 import { createErrorTracker } from '@/services/errorTracker';
 import { createAlertService } from '@/services/alertService';
@@ -17,7 +16,7 @@ import { createPerformanceStorage } from '@/services/performanceStorage';
  * 注册业务服务到注册表
  */
 export function registerBusinessServices(registry: ServiceRegistry): void {
-  Logger.debug('[BusinessServices] 开始注册业务服务配置');
+  console.log('[BusinessServices] 开始注册业务服务配置');
 
   // ================================================================
   // Level 3: 业务服务（依赖应用服务）
@@ -108,5 +107,5 @@ export function registerBusinessServices(registry: ServiceRegistry): void {
     optional: true
   });
 
-  Logger.debug('[BusinessServices] 业务服务配置注册完成');
+  console.log('[BusinessServices] 业务服务配置注册完成');
 }

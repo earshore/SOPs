@@ -16,7 +16,6 @@ import { APP_EVENTS } from '../../common/constants/eventConstants';
 import type { LLMProviderConfig } from '../../types/state';
 import eventBus from '@common/EventBus';
 import { ApiError } from '@common/errors/AppError';
-import { Logger } from '../../services/loggerService';
 // ==========================================
 // 类型定义
 // ==========================================
@@ -299,7 +298,7 @@ const SettingsPanel = (): SettingsPanelData => ({
 
     destroy() {
         // 清理 EventBus 订阅
-        Logger.debug('[Settings] 清理 EventBus 订阅');
+        console.log('[Settings] 清理 EventBus 订阅');
         this._unsubscribers?.forEach(unsub => unsub());
         this._unsubscribers = [];
     },
@@ -317,7 +316,7 @@ const SettingsPanel = (): SettingsPanelData => ({
             performanceMonitor.show();
             showToast('监控面板已打开（右上角），快捷键 Ctrl+Shift+P 切换显示。注意：仅在开发模式下可用', { type: 'success', duration: 5000 });
         } catch (error) {
-            Logger.error('Failed to open performance monitor:', error);
+            console.error('Failed to open performance monitor:', error);
             showToast('打开监控面板失败', { type: 'error' });
         }
     },
@@ -329,7 +328,7 @@ const SettingsPanel = (): SettingsPanelData => ({
         
         // 类型安全检查: 确保provider是有效的key
         if (!(provider in PROVIDERS)) {
-            Logger.warn(`Unknown provider: ${provider}, falling back to OpenAI`);
+            console.warn(`Unknown provider: ${provider}, falling back to OpenAI`);
             return;
         }
         
@@ -346,7 +345,7 @@ const SettingsPanel = (): SettingsPanelData => ({
             const key = await StorageService.getSecure(`llm_key_${provider}`, '');
             this.llm.apiKey = key || '';
         } catch (error) {
-            Logger.warn('[Settings] Failed to load encrypted API key, using fallback:', error);
+            console.warn('[Settings] Failed to load encrypted API key, using fallback:', error);
             // 兼容旧数据: 如果加密读取失败,尝试读取明文(迁移期)
             this.llm.apiKey = (savedConfig && 'apiKey' in savedConfig) ? (savedConfig.apiKey || '') : '';
         }
@@ -388,24 +387,24 @@ const SettingsPanel = (): SettingsPanelData => ({
         }
 
         this.llm.isFetching = true;
-        Logger.debug(`\n${'='.repeat(60)}`);
-        Logger.debug(`🚀 开始获取模型列表`);
-        Logger.debug(`📋 Provider: ${this.llm.provider}`);
-        Logger.debug(`📋 Endpoint: ${this.llm.endpoint}`);
-        Logger.debug(`📋 API Key: ${this.llm.apiKey.substring(0, 10)}...`);
-        Logger.debug(`${'='.repeat(60)}\n`);
+        console.log(`\n${'='.repeat(60)}`);
+        console.log(`🚀 开始获取模型列表`);
+        console.log(`📋 Provider: ${this.llm.provider}`);
+        console.log(`📋 Endpoint: ${this.llm.endpoint}`);
+        console.log(`📋 API Key: ${this.llm.apiKey.substring(0, 10)}...`);
+        console.log(`${'='.repeat(60)}\n`);
 
         try {
             let models: Array<string | { id: string; name?: string }> = [];
             const provider = this.llm.provider;
 
             // 所有网关均为 OpenAI 兼容接口，统一走 API 拉取
-            Logger.debug(`🔄 正在从 ${provider} 获取模型列表...`);
+            console.log(`🔄 正在从 ${provider} 获取模型列表...`);
             models = await fetchModelsFromApi(provider, this.llm.endpoint, this.llm.apiKey);
-            Logger.debug(`📋 从API获取到 ${models.length} 个模型:`, models.slice(0, 5));
+            console.log(`📋 从API获取到 ${models.length} 个模型:`, models.slice(0, 5));
 
             if (models.length === 0) {
-                Logger.warn('⚠️ 模型列表为空，可能是API配置错误或网络问题');
+                console.warn('⚠️ 模型列表为空，可能是API配置错误或网络问题');
                 throw new ApiError(
                     '未能获取到有效模型列表，请检查API配置和网络连接',
                     'SETTINGS_001',
@@ -428,7 +427,7 @@ const SettingsPanel = (): SettingsPanelData => ({
             });
 
             this.llm.models = uniqueModels;
-            Logger.debug(`✅ 去重后保留 ${this.llm.models.length} 个模型`);
+            console.log(`✅ 去重后保留 ${this.llm.models.length} 个模型`);
 
             // 如果当前选中的模型不在新列表中，自动选择第一个
             const currentModelExists = this.llm.models.some(m => {
@@ -440,22 +439,22 @@ const SettingsPanel = (): SettingsPanelData => ({
                 const firstModel = this.llm.models[0];
                 if (firstModel) {
                     this.llm.model = typeof firstModel === 'string' ? firstModel : firstModel.id;
-                    Logger.debug(`🔄 自动选择第一个模型: ${this.llm.model}`);
+                    console.log(`🔄 自动选择第一个模型: ${this.llm.model}`);
                 }
             }
 
-            Logger.debug(`\n${'='.repeat(60)}`);
-            Logger.debug(`✅ 模型列表获取成功！共 ${this.llm.models.length} 个模型`);
-            Logger.debug(`${'='.repeat(60)}\n`);
+            console.log(`\n${'='.repeat(60)}`);
+            console.log(`✅ 模型列表获取成功！共 ${this.llm.models.length} 个模型`);
+            console.log(`${'='.repeat(60)}\n`);
 
             showToast(`成功同步 ${this.llm.models.length} 个模型`, { type: 'success' });
         } catch (e) {
             const error = e as Error;
-            Logger.error(`\n${'='.repeat(60)}`);
-            Logger.error('❌ 获取模型列表失败:', error);
-            Logger.error('❌ 错误详情:', error.message);
-            Logger.error('❌ 错误堆栈:', error.stack);
-            Logger.error(`${'='.repeat(60)}\n`);
+            console.error(`\n${'='.repeat(60)}`);
+            console.error('❌ 获取模型列表失败:', error);
+            console.error('❌ 错误详情:', error.message);
+            console.error('❌ 错误堆栈:', error.stack);
+            console.error(`${'='.repeat(60)}\n`);
             
             // 提供更友好的错误提示
             let errorMsg = error.message;
@@ -498,7 +497,7 @@ const SettingsPanel = (): SettingsPanelData => ({
                 { temperature: 0.1, jsonMode: false, timeout: configCenter.get<number>('llm.testConnectionTimeout') || 15000 }
             );
 
-            Logger.debug('Test Response:', response);
+            console.log('Test Response:', response);
             showToast('连接成功！', { type: 'success' });
         } catch (error) {
             ErrorService.handle(error as Error, { action: 'testConnection', module: 'settings' });
@@ -611,7 +610,7 @@ const SettingsPanel = (): SettingsPanelData => ({
         try {
             this.localData.usage = await LocalDataStore.getUsage();
         } catch (error) {
-            Logger.warn('[Settings] Failed to load local data usage:', error);
+            console.warn('[Settings] Failed to load local data usage:', error);
         }
     },
 
@@ -720,33 +719,33 @@ const SettingsPanel = (): SettingsPanelData => ({
 export function initAlpineSettings(): void {
     // 防御性检查: 确保 Alpine.js 已加载
     if (typeof window.Alpine === 'undefined') {
-        Logger.warn('[Settings] Alpine.js not loaded yet, retrying in 100ms...');
+        console.warn('[Settings] Alpine.js not loaded yet, retrying in 100ms...');
         // 延迟重试,最多重试 10 次
         const retryCount = (window as any).__alpineRetryCount || 0;
         if (retryCount < 10) {
             (window as any).__alpineRetryCount = retryCount + 1;
             setTimeout(initAlpineSettings, 100);
         } else {
-            Logger.error('[Settings] Alpine.js failed to load after 10 retries');
+            console.error('[Settings] Alpine.js failed to load after 10 retries');
         }
         return;
     }
     
     // 确保 Alpine.data 方法可用
     if (typeof window.Alpine.data !== 'function') {
-        Logger.error('[Settings] Alpine.data is not a function');
+        console.error('[Settings] Alpine.data is not a function');
         return;
     }
     
     try {
         // 注册 settingsPanel 组件
         window.Alpine.data('settingsPanel', SettingsPanel);
-        Logger.debug('[Settings] ✅ Alpine component "settingsPanel" registered successfully');
+        console.log('[Settings] ✅ Alpine component "settingsPanel" registered successfully');
         
         // 清理重试计数器
         delete (window as any).__alpineRetryCount;
     } catch (error) {
-        Logger.error('[Settings] Failed to register Alpine component:', error);
+        console.error('[Settings] Failed to register Alpine component:', error);
     }
 }
 
@@ -768,7 +767,7 @@ export async function openPerformanceMonitor(): Promise<void> {
         performanceMonitor.show();
         showToast('监控面板已打开', { type: 'success' });
     } catch (error) {
-        Logger.error('Failed to open performance monitor:', error);
+        console.error('Failed to open performance monitor:', error);
         showToast('打开监控面板失败', { type: 'error' });
     }
 }

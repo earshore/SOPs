@@ -16,7 +16,6 @@ import type { NavigoAdapter } from './NavigoAdapter';
 import type { Route } from './types';
 import { routeIdToPath } from '../routePaths';
 
-import { Logger } from '../../../services/loggerService';
 /**
  * 旧版 switchTab 函数签名
  */
@@ -49,7 +48,7 @@ export class LegacyAdapter {
     
     // 显示移除计划警告
     if (showWarnings && LegacyAdapter.REMOVAL_PHASE === 1) {
-      Logger.warn(
+      console.warn(
         `[LegacyAdapter] 向后兼容层将在 ${LegacyAdapter.REMOVAL_DATE} 移除。` +
         `请尽快迁移到新的路由 API。`
       );
@@ -154,7 +153,7 @@ export class LegacyAdapter {
     // 挂载 router
     windowWithLegacy.router = this.createLegacyRouter();
 
-    Logger.warn(
+    console.warn(
       '[LegacyAdapter] Global APIs installed. ' +
         'Please migrate to ES modules: import { router } from "@router/navigo". ' +
         `These APIs will be removed on ${LegacyAdapter.REMOVAL_DATE}.`
@@ -171,7 +170,7 @@ export class LegacyAdapter {
     delete windowWithLegacy.switchTab;
     delete windowWithLegacy.router;
 
-    Logger.debug('[LegacyAdapter] Global APIs uninstalled');
+    console.log('[LegacyAdapter] Global APIs uninstalled');
   }
 
   /**
@@ -227,7 +226,7 @@ export class LegacyAdapter {
 
     this.deprecationWarnings.add(key);
 
-    Logger.warn(
+    console.warn(
       `[DEPRECATED] "${oldAPI}" is deprecated and will be removed in the next major version. ` +
         `Please use "${newAPI}" instead.`
     );

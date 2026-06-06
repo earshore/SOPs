@@ -5,11 +5,10 @@
 // 🎯 DI改造：支持依赖注入Storage和Config
 // ================================================================
 
-import { configCenter, type LoggerConfig } from '../common/config/ConfigCenter';
 // 从types/services导入统一的类型定义
 import type { IStorageService, IConfigService, ILoggerService, LogEntry as ILogEntry } from '../types/services';
 import { ValidationError } from '../common/errors/AppError';
-// 移除循环导入
+import type { LoggerConfig } from '../common/config/ConfigCenter';
 /**
  * 日志级别（数字枚举，用于内部比较）
  */
@@ -127,8 +126,8 @@ export class LoggerService implements ILoggerService {
         if (this.configService) {
           this._config = this.configService.get<LoggerConfig>('logger') || this._getDefaultConfig();
         } else {
-          // 回退到configCenter
-          this._config = configCenter.get<LoggerConfig>('logger') || this._getDefaultConfig();
+          // 使用默认配置，避免循环依赖
+          this._config = this._getDefaultConfig();
         }
       } catch {
         this._config = this._getDefaultConfig();
@@ -161,9 +160,8 @@ export class LoggerService implements ILoggerService {
       // 优先使用注入的configService
       if (this.configService) {
         this.configService.set('logger.minLevel', newLevel);
-      } else {
-        configCenter.set('logger.minLevel', newLevel);
       }
+      // 不再回退到 configCenter，避免循环依赖
     } catch {
       // ConfigService 未初始化，跳过
     }

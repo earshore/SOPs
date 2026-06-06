@@ -8,7 +8,6 @@ import { StorageService, STORAGE_KEYS } from "../../../../../services/storageSer
 import { configCenter } from '../../../../../common/config/ConfigCenter';
 import type { HistoryItem, ScrapedProduct, ScrapedData, AnalysisReport } from "../../../../../types/modules-business";
 
-import { Logger } from '../../../../../services/loggerService';
 const MAX_HISTORY_ITEMS =
   configCenter.get<number>('storage.historyMaxItems') ||
   configCenter.get<number>('history.maxItems') ||
@@ -55,7 +54,7 @@ export const HistoryService = {
     try {
       return historyCache || StorageService.getScrapeHistory();
     } catch (e) {
-      Logger.error("读取历史记录失败", e);
+      console.error("读取历史记录失败", e);
       return [];
     }
   },
@@ -68,7 +67,7 @@ export const HistoryService = {
       historyCache = await StorageService.getScrapeHistoryAsync();
       return historyCache;
     } catch (e) {
-      Logger.error("读取 IndexedDB 历史记录失败", e);
+      console.error("读取 IndexedDB 历史记录失败", e);
       historyCache = StorageService.getScrapeHistory();
       return historyCache;
     }
@@ -239,14 +238,14 @@ export const HistoryService = {
       const targetIndex = history.findIndex((h) => isSameHistoryId(h.id, id));
 
       if (targetIndex === -1) {
-        Logger.warn(`[HistoryService] 未找到ID为 ${id} 的历史记录`);
+        console.warn(`[HistoryService] 未找到ID为 ${id} 的历史记录`);
         return false;
       }
 
       // 获取目标历史记录
       const targetItem = history[targetIndex];
       if (!targetItem) {
-        Logger.warn(`[HistoryService] 历史记录项为空`);
+        console.warn(`[HistoryService] 历史记录项为空`);
         return false;
       }
 
@@ -262,10 +261,10 @@ export const HistoryService = {
       if (!saved) return false;
       historyCache = history;
 
-      Logger.debug(`[HistoryService] 已更新历史记录 ${id} 的分析状态`);
+      console.log(`[HistoryService] 已更新历史记录 ${id} 的分析状态`);
       return true;
     } catch (error) {
-      Logger.error(`[HistoryService] 更新分析状态失败:`, error);
+      console.error(`[HistoryService] 更新分析状态失败:`, error);
       return false;
     }
   },
@@ -276,13 +275,13 @@ export const HistoryService = {
       const targetIndex = history.findIndex((h) => isSameHistoryId(h.id, id));
 
       if (targetIndex === -1) {
-        Logger.warn(`[HistoryService] 未找到ID为 ${id} 的历史记录`);
+        console.warn(`[HistoryService] 未找到ID为 ${id} 的历史记录`);
         return false;
       }
 
       const targetItem = history[targetIndex];
       if (!targetItem) {
-        Logger.warn(`[HistoryService] 历史记录项为空`);
+        console.warn(`[HistoryService] 历史记录项为空`);
         return false;
       }
 
@@ -296,10 +295,10 @@ export const HistoryService = {
       if (!saved) return false;
       historyCache = history;
 
-      Logger.debug(`[HistoryService] 已更新历史记录 ${id} 的分析状态`);
+      console.log(`[HistoryService] 已更新历史记录 ${id} 的分析状态`);
       return true;
     } catch (error) {
-      Logger.error(`[HistoryService] 更新分析状态失败:`, error);
+      console.error(`[HistoryService] 更新分析状态失败:`, error);
       return false;
     }
   }

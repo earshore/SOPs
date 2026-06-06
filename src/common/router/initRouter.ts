@@ -17,7 +17,6 @@ import { updateUIForRoute } from '../ui/navigation';
 import { SystemError } from '@/common/errors/AppError';
 import { normalizeRoutePath, routeIdToPath } from './routePaths';
 
-import { Logger } from '../../services/loggerService';
 // 全局路由实例
 let routerInstance: NavigoAdapter | null = null;
 let storeInstance: ReturnType<typeof createRouterStore> | null = null;
@@ -29,12 +28,12 @@ let legacyInstance: ReturnType<typeof createLegacyAdapter> | null = null;
 export function initRouter(): NavigoAdapter {
   if (routerInstance) {
     if (import.meta.env.DEV) {
-      Logger.debug('[initRouter] Router already initialized, returning existing instance');
+      console.log('[initRouter] Router already initialized, returning existing instance');
     }
     return routerInstance;
   }
 
-  Logger.debug('🚀 [initRouter] Initializing Navigo router system...');
+  console.log('🚀 [initRouter] Initializing Navigo router system...');
 
   // 1. 创建路由实例
   routerInstance = createRouter({
@@ -51,12 +50,12 @@ export function initRouter(): NavigoAdapter {
     validate: true,
   });
 
-  Logger.debug(
+  console.log(
     `✓ [initRouter] Converted ${conversionResult.stats.success}/${conversionResult.stats.total} routes`
   );
 
   if (conversionResult.errors.length > 0) {
-    Logger.warn('[initRouter] Conversion errors:', conversionResult.errors);
+    console.warn('[initRouter] Conversion errors:', conversionResult.errors);
   }
 
   // 注册所有路由
@@ -70,7 +69,7 @@ export function initRouter(): NavigoAdapter {
   }
   routerInstance.registerAlias('/app-center/playground', routeIdToPath('playground'));
 
-  Logger.debug(
+  console.log(
     `✓ [initRouter] Registered ${routerInstance.getAllRoutes().length} routes and ${
       Object.keys(conversionResult.aliases).length
     } aliases`
@@ -81,7 +80,7 @@ export function initRouter(): NavigoAdapter {
   const storeSync = createRouterStoreSync(storeInstance);
   routerInstance.setStoreSync(storeSync);
 
-  Logger.debug('✓ [initRouter] Store sync enabled');
+  console.log('✓ [initRouter] Store sync enabled');
 
   // 4. 配置守卫
   routerInstance.addGuard({
@@ -89,7 +88,7 @@ export function initRouter(): NavigoAdapter {
     priority: 100,
     check: (to, from) => {
       if (import.meta.env.DEV) {
-        Logger.debug(`[Guard] Navigation: ${from?.path || 'null'} -> ${to.path}`);
+        console.log(`[Guard] Navigation: ${from?.path || 'null'} -> ${to.path}`);
       }
       return true;
     },
@@ -99,7 +98,7 @@ export function initRouter(): NavigoAdapter {
   routerInstance.use(async (context, next) => {
     // Before 中间件：显示加载状态
     if (import.meta.env.DEV) {
-      Logger.debug(`[Middleware Before] Navigating to: ${context.to.path}`);
+      console.log(`[Middleware Before] Navigating to: ${context.to.path}`);
     }
     await next();
   });
@@ -107,7 +106,7 @@ export function initRouter(): NavigoAdapter {
   routerInstance.useAfter(async (context, next) => {
     // After 中间件：更新 UI 状态
     if (import.meta.env.DEV) {
-      Logger.debug(`[Middleware After] 🎯 Navigation complete: ${context.to.path}`);
+      console.log(`[Middleware After] 🎯 Navigation complete: ${context.to.path}`);
     }
     
     // 调用 UI 更新函数
@@ -115,14 +114,14 @@ export function initRouter(): NavigoAdapter {
       // 优先使用路由配置中的 routeId，如果没有则使用 moduleId
       const routeId = context.to.config.routeId || context.to.config.moduleId;
       if (import.meta.env.DEV) {
-        Logger.debug(`[Middleware After] 🔄 Calling updateUIForRoute with routeId: ${routeId}`);
+        console.log(`[Middleware After] 🔄 Calling updateUIForRoute with routeId: ${routeId}`);
       }
       await updateUIForRoute(routeId);
       if (import.meta.env.DEV) {
-        Logger.debug(`[Middleware After] ✓ UI update completed for: ${routeId}`);
+        console.log(`[Middleware After] ✓ UI update completed for: ${routeId}`);
       }
     } catch (error) {
-      Logger.error('[initRouter] ❌ UI update failed:', error);
+      console.error('[initRouter] ❌ UI update failed:', error);
     }
     
     await next();
@@ -132,7 +131,7 @@ export function initRouter(): NavigoAdapter {
   legacyInstance = createLegacyAdapter(routerInstance, true);
   legacyInstance.installGlobalAPI();
 
-  Logger.debug('✓ [initRouter] Legacy compatibility enabled');
+  console.log('✓ [initRouter] Legacy compatibility enabled');
 
   // 7. 监听路由变化，触发兼容事件
   storeSync.subscribe(state => {
@@ -161,20 +160,20 @@ export function initRouter(): NavigoAdapter {
       const payload = data as { routeId: string } | undefined;
       if (payload && payload.routeId && routerInstance) {
         if (import.meta.env.DEV) {
-          Logger.debug(`[initRouter] 📡 Received ROUTE_CHANGE event for routeId: ${payload.routeId}`);
+          console.log(`[initRouter] 📡 Received ROUTE_CHANGE event for routeId: ${payload.routeId}`);
         }
         
         const path = routeIdToPath(payload.routeId);
         
         if (import.meta.env.DEV) {
-          Logger.debug(`[initRouter] 🔀 Converting routeId "${payload.routeId}" to path: ${path}`);
+          console.log(`[initRouter] 🔀 Converting routeId "${payload.routeId}" to path: ${path}`);
         }
         
         routerInstance.navigate(path);
       }
     });
     
-    Logger.debug('✓ [initRouter] EventBus ROUTE_CHANGE listener registered');
+    console.log('✓ [initRouter] EventBus ROUTE_CHANGE listener registered');
   });
 
 
@@ -182,23 +181,23 @@ export function initRouter(): NavigoAdapter {
   const currentHash = window.location.hash.replace('#', '');
   
   if (import.meta.env.DEV) {
-    Logger.debug('[initRouter] 🔍 Current URL hash:', currentHash);
-    Logger.debug('[initRouter] 🔍 Full URL:', window.location.href);
+    console.log('[initRouter] 🔍 Current URL hash:', currentHash);
+    console.log('[initRouter] 🔍 Full URL:', window.location.href);
   }
   
   // 标记路由系统已初始化，但不立即导航
   // 导航将在 main.ts 中 initViews() 完成后触发
   if (!currentHash || currentHash === '/' || currentHash === '') {
     if (import.meta.env.DEV) {
-      Logger.debug('[initRouter] ⚠️ Root path detected, navigation will be triggered after views are loaded');
+      console.log('[initRouter] ⚠️ Root path detected, navigation will be triggered after views are loaded');
     }
   } else {
     if (import.meta.env.DEV) {
-      Logger.debug('[initRouter] ✓ Non-root path detected:', currentHash);
+      console.log('[initRouter] ✓ Non-root path detected:', currentHash);
     }
   }
 
-  Logger.debug('✅ [initRouter] Router system initialized successfully (navigation pending)');
+  console.log('✅ [initRouter] Router system initialized successfully (navigation pending)');
 
   return routerInstance;
 }
@@ -250,7 +249,7 @@ export function destroyRouter(): void {
     storeInstance = null;
   }
 
-  Logger.debug('✓ [destroyRouter] Router system destroyed');
+  console.log('✓ [destroyRouter] Router system destroyed');
 }
 
 /**
@@ -259,7 +258,7 @@ export function destroyRouter(): void {
  */
 export function triggerInitialNavigation(): void {
   if (!routerInstance) {
-    Logger.error('[triggerInitialNavigation] Router not initialized');
+    console.error('[triggerInitialNavigation] Router not initialized');
     return;
   }
 
@@ -267,7 +266,7 @@ export function triggerInitialNavigation(): void {
   
   if (!currentHash || currentHash === '/' || currentHash === '') {
     if (import.meta.env.DEV) {
-      Logger.debug('[triggerInitialNavigation] 🚀 Navigating to default route: /home');
+      console.log('[triggerInitialNavigation] 🚀 Navigating to default route: /home');
     }
     
     routerInstance.navigate('/home', {
@@ -276,7 +275,7 @@ export function triggerInitialNavigation(): void {
     });
   } else {
     if (import.meta.env.DEV) {
-      Logger.debug('[triggerInitialNavigation] 🚀 Resolving current route:', currentHash);
+      console.log('[triggerInitialNavigation] 🚀 Resolving current route:', currentHash);
     }
     const normalizedHash = normalizeRoutePath(currentHash);
     if (normalizedHash === '/app-center/playground') {
