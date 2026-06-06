@@ -33,6 +33,8 @@ interface CalculationResult {
 }
 
 class PromotionSubmissionModule extends BaseModule {
+    private removeCalculatorListeners: (() => void) | null = null;
+
     /**
      * 计算利润
      */
@@ -174,6 +176,40 @@ class PromotionSubmissionModule extends BaseModule {
         }
     }
 
+    private bindCalculatorEvents(container: HTMLElement): void {
+        this.removeCalculatorListeners?.();
+
+        const calculatorInputIds = new Set([
+            'calc-original-price',
+            'calc-cost',
+            'calc-fba-fee',
+            'calc-vat-rate',
+            'promo-coupon',
+            'coupon-percent',
+            'promo-prime',
+            'prime-percent',
+            'promo-ld',
+            'ld-percent',
+            'promo-bd',
+            'bd-percent',
+        ]);
+
+        const handleCalculatorChange = (event: Event): void => {
+            const target = event.target as HTMLElement | null;
+            if (target?.id && calculatorInputIds.has(target.id)) {
+                this.calculateProfit();
+            }
+        };
+
+        container.addEventListener('input', handleCalculatorChange);
+        container.addEventListener('change', handleCalculatorChange);
+        this.removeCalculatorListeners = () => {
+            container.removeEventListener('input', handleCalculatorChange);
+            container.removeEventListener('change', handleCalculatorChange);
+            this.removeCalculatorListeners = null;
+        };
+    }
+
     /**
      * 挂载模块
      */
@@ -182,9 +218,7 @@ class PromotionSubmissionModule extends BaseModule {
         // ✅ 安全: 静态HTML模板，无用户输入
         container.innerHTML = html;
         container.classList.add('fade-in');
-
-        // Expose to global scope for inline event handlers
-        (window as any).calculateProfit = () => this.calculateProfit();
+        this.bindCalculatorEvents(container);
 
         // Initialize calculator after DOM is ready
         setTimeout(() => {
@@ -198,8 +232,7 @@ class PromotionSubmissionModule extends BaseModule {
      * 卸载模块
      */
     unmount(): void {
-        // Clean up global function
-        delete (window as any).calculateProfit;
+        this.removeCalculatorListeners?.();
         Logger.debug('❌ 促销活动提报 SOP 模块已卸载');
     }
 }

@@ -348,7 +348,7 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
 // 🎯 P1: 集中注册全局动作 (替代散落的 window.xxx = xxx)
 // ================================================================
 // 使用 registerActionsWithLegacy 在注册到 ActionRegistry 的同时
-// 也挂载到 window，保持向后兼容现有 onclick="xxx()" 调用
+// 也挂载到 window，保持向后兼容现有旧模板调用
 
 interface ActionParams {
   tab?: string;

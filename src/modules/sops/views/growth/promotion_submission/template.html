@@ -293,25 +293,25 @@
                                         <div>
                                                 <label class="block text-xs text-slate-600 mb-1">原售价 (含税) €</label>
                                                 <input class="w-full px-3 py-2 border rounded-lg text-sm"
-                                                        id="calc-original-price" onchange="calculateProfit()"
+                                                        id="calc-original-price"
                                                         step="0.01" type="number" value="9.99" />
                                         </div>
                                         <div>
                                                 <label class="block text-xs text-slate-600 mb-1">产品成本 (含头程) €</label>
                                                 <input class="w-full px-3 py-2 border rounded-lg text-sm" id="calc-cost"
-                                                        onchange="calculateProfit()" step="0.01" type="number"
+                                                        step="0.01" type="number"
                                                         value="2.50" />
                                         </div>
                                         <div>
                                                 <label class="block text-xs text-slate-600 mb-1">FBA配送费 €</label>
                                                 <input class="w-full px-3 py-2 border rounded-lg text-sm"
-                                                        id="calc-fba-fee" onchange="calculateProfit()" step="0.01"
+                                                        id="calc-fba-fee" step="0.01"
                                                         type="number" value="3.50" />
                                         </div>
                                         <div>
                                                 <label class="block text-xs text-slate-600 mb-1">VAT税率 (按站点选择)</label>
                                                 <select class="w-full px-3 py-2 border rounded-lg text-sm"
-                                                        id="calc-vat-rate" onchange="calculateProfit()">
+                                                        id="calc-vat-rate">
                                                         <optgroup label="核心五国">
                                                                 <option value="19">🇩🇪 德国 (DE) 19%</option>
                                                                 <option value="20">🇫🇷 法国 (FR) 20%</option>
@@ -335,15 +335,14 @@
                                 <div class="space-y-2">
                                         <label
                                                 class="flex items-center gap-2 p-2 bg-amber-50 rounded-lg cursor-pointer hover:bg-amber-100 border border-amber-200">
-                                                <input class="w-4 h-4 rounded" id="promo-coupon"
-                                                        onchange="calculateProfit()" type="checkbox" />
+                                                <input class="w-4 h-4 rounded" id="promo-coupon" type="checkbox" />
                                                 <div class="flex-1">
                                                         <span class="font-medium text-sm text-amber-800">Coupon
                                                                 优惠券</span>
                                                         <div class="flex items-center gap-2 mt-1">
                                                                 <input class="w-16 px-2 py-1 border rounded text-xs"
                                                                         id="coupon-percent" max="50" min="5"
-                                                                        onchange="calculateProfit()" type="number"
+                                                                        type="number"
                                                                         value="10" />
                                                                 <span class="text-xs text-slate-500">% OFF</span>
                                                                 <span class="text-xs text-red-600 ml-auto">费用:
@@ -353,15 +352,14 @@
                                         </label>
                                         <label
                                                 class="flex items-center gap-2 p-2 bg-blue-50 rounded-lg cursor-pointer hover:bg-blue-100 border border-blue-200">
-                                                <input class="w-4 h-4 rounded" id="promo-prime"
-                                                        onchange="calculateProfit()" type="checkbox" />
+                                                <input class="w-4 h-4 rounded" id="promo-prime" type="checkbox" />
                                                 <div class="flex-1">
                                                         <span class="font-medium text-sm text-blue-800">Prime Exclusive
                                                                 Discount</span>
                                                         <div class="flex items-center gap-2 mt-1">
                                                                 <input class="w-16 px-2 py-1 border rounded text-xs"
                                                                         id="prime-percent" max="30" min="10"
-                                                                        onchange="calculateProfit()" type="number"
+                                                                        type="number"
                                                                         value="15" />
                                                                 <span class="text-xs text-slate-500">% OFF</span>
                                                                 <span class="text-xs text-emerald-600 ml-auto">费用:
@@ -371,15 +369,14 @@
                                         </label>
                                         <label
                                                 class="flex items-center gap-2 p-2 bg-yellow-50 rounded-lg cursor-pointer hover:bg-yellow-100 border border-yellow-200">
-                                                <input class="w-4 h-4 rounded" id="promo-ld"
-                                                        onchange="calculateProfit()" type="checkbox" />
+                                                <input class="w-4 h-4 rounded" id="promo-ld" type="checkbox" />
                                                 <div class="flex-1">
                                                         <span class="font-medium text-sm text-yellow-800">Lightning Deal
                                                                 (LD)</span>
                                                         <div class="flex items-center gap-2 mt-1">
                                                                 <input class="w-16 px-2 py-1 border rounded text-xs"
                                                                         id="ld-percent" max="40" min="15"
-                                                                        onchange="calculateProfit()" type="number"
+                                                                        type="number"
                                                                         value="20" />
                                                                 <span class="text-xs text-slate-500">% OFF</span>
                                                                 <span class="text-xs text-red-600 ml-auto">费用:
@@ -389,15 +386,14 @@
                                         </label>
                                         <label
                                                 class="flex items-center gap-2 p-2 bg-purple-50 rounded-lg cursor-pointer hover:bg-purple-100 border border-purple-200">
-                                                <input class="w-4 h-4 rounded" id="promo-bd"
-                                                        onchange="calculateProfit()" type="checkbox" />
+                                                <input class="w-4 h-4 rounded" id="promo-bd" type="checkbox" />
                                                 <div class="flex-1">
                                                         <span class="font-medium text-sm text-purple-800">Best Deal
                                                                 (7DD)</span>
                                                         <div class="flex items-center gap-2 mt-1">
                                                                 <input class="w-16 px-2 py-1 border rounded text-xs"
                                                                         id="bd-percent" max="50" min="15"
-                                                                        onchange="calculateProfit()" type="number"
+                                                                        type="number"
                                                                         value="25" />
                                                                 <span class="text-xs text-slate-500">% OFF</span>
                                                                 <span class="text-xs text-red-600 ml-auto">费用:

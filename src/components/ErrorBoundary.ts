@@ -88,7 +88,7 @@ export function renderErrorBoundary(
         setTimeout(() => {
             const retryBtn = document.getElementById(`btn-retry-${errorId}`);
             if (retryBtn) {
-                retryBtn.onclick = () => onRetry();
+                retryBtn.addEventListener('click', () => onRetry());
             }
         }, 0);
     }

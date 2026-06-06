@@ -47,6 +47,7 @@ const NEXT_STEP_OPTIONS: string[] = [
 // 模块状态
 let tableData: NPIProductRecord[] = [...SAMPLE_DATA];
 let registeredActions: string[] = [];
+let removeFilterListener: (() => void) | null = null;
 
 // Pricing calculation functions
 const calcClearancePrice = (deliveryFee: number): string => (deliveryFee / 0.5).toFixed(2);
@@ -280,14 +281,25 @@ function openNextStepEditor(index: number): void {
     modal.dataset.index = index.toString();
 
     const currentSteps = row.next_step;
-    checkboxes.innerHTML = NEXT_STEP_OPTIONS.map(
-        (option) => `
-        <label class="flex items-center gap-2 p-2 hover:bg-slate-50 rounded cursor-pointer">
-            <input type="checkbox" value="${option}" ${currentSteps.includes(option) ? 'checked' : ''} class="w-4 h-4 rounded">
-            <span class="text-sm">${option}</span>
-        </label>
-    `
-    ).join('');
+    checkboxes.textContent = '';
+    NEXT_STEP_OPTIONS.forEach((option) => {
+        const label = document.createElement('label');
+        label.className = 'flex items-center gap-2 p-2 hover:bg-slate-50 rounded cursor-pointer';
+
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.value = option;
+        input.checked = currentSteps.includes(option);
+        input.className = 'w-4 h-4 rounded';
+
+        const span = document.createElement('span');
+        span.className = 'text-sm';
+        span.textContent = option;
+
+        label.appendChild(input);
+        label.appendChild(span);
+        checkboxes.appendChild(label);
+    });
 
     modal.classList.remove('hidden');
 }
@@ -450,6 +462,7 @@ function exportToExcel(): void {
 // Filter by store
 function filterByStore(store: string): void {
     if (store === 'all') {
+        removeFilterListener?.();
         tableData = [...SAMPLE_DATA];
     } else {
         tableData = SAMPLE_DATA.filter((row: NPIProductRecord) => row.store === store);
@@ -468,6 +481,28 @@ function filterByStage(stage: string): void {
 }
 
 // 扩展 Window 接口以支持全局函数（兼容性）
+function setupFilterEventDelegation(container: HTMLElement): void {
+    removeFilterListener?.();
+
+    const handleFilterChange = (event: Event): void => {
+        const target = event.target as HTMLSelectElement | null;
+        const filterType = target?.dataset?.npiFilter;
+        if (!filterType) return;
+
+        if (filterType === 'store') {
+            filterByStore(target.value);
+        } else if (filterType === 'stage') {
+            filterByStage(target.value);
+        }
+    };
+
+    container.addEventListener('change', handleFilterChange);
+    removeFilterListener = () => {
+        container.removeEventListener('change', handleFilterChange);
+        removeFilterListener = null;
+    };
+}
+
 declare global {
     interface Window {
         updateField?: (index: number, field: keyof NPIProductRecord, value: unknown) => void;
@@ -477,8 +512,6 @@ declare global {
         saveNextSteps?: () => void;
         closeNextStepModal?: () => void;
         exportToExcel?: () => void;
-        filterByStore?: (store: string) => void;
-        filterByStage?: (stage: string) => void;
     }
 }
 
@@ -517,11 +550,10 @@ export async function mount(container: HTMLElement): Promise<void> {
             saveNextSteps: saveNextSteps as (...args: unknown[]) => void,
             closeNextStepModal: closeNextStepModal as (...args: unknown[]) => void,
             exportToExcel: exportToExcel as (...args: unknown[]) => void,
-            filterByStore: filterByStore as (...args: unknown[]) => void,
-            filterByStage: filterByStage as (...args: unknown[]) => void,
         };
 
         registeredActions = registerActionsWithLegacy(npiTrackerActions);
+        setupFilterEventDelegation(container);
         Logger.debug(`[NPITracker] 已注册 ${registeredActions.length} 个动作到 ActionRegistry`);
 
         // 4. 初始化表格（延迟渲染，确保 DOM 就绪）

@@ -78,7 +78,7 @@
                             </span>
                         </div>
                     </div>
-                    <button onclick="window.closePromptModal()"
+                    <button data-prompt-modal-action="close"
                         class="text-white/80 hover:text-white transition-colors">
                         <i class="fas fa-times text-2xl"></i>
                     </button>
@@ -96,11 +96,11 @@
                         </h3>
                         <!-- 语言切换按钮 -->
                         <div class="flex bg-slate-200 rounded-lg p-0.5">
-                            <button onclick="window.switchPromptLang('zh')" data-lang="zh"
+                            <button data-prompt-lang="zh" data-lang="zh"
                                 class="lang-btn active px-3 py-1 text-xs font-medium rounded-md transition-all">
                                 中文
                             </button>
-                            <button onclick="window.switchPromptLang('en')" data-lang="en"
+                            <button data-prompt-lang="en" data-lang="en"
                                 class="lang-btn px-3 py-1 text-xs font-medium rounded-md transition-all">
                                 English
                             </button>
@@ -139,11 +139,11 @@
 
             <!-- Modal Footer -->
             <div class="border-t border-slate-200 p-4 bg-slate-50 flex justify-end gap-3">
-                <button onclick="window.closePromptModal()"
+                <button data-prompt-modal-action="close"
                     class="px-4 py-2 text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors">
                     关闭
                 </button>
-                <button onclick="window.copyModalPrompt()"
+                <button data-prompt-modal-action="copy"
                     class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center gap-2">
                     <i class="fas fa-copy"></i>
                     复制提示词

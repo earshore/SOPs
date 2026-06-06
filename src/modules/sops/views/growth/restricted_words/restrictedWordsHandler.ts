@@ -53,6 +53,43 @@ let activeFilters: ActiveFilters = {
 // 获取 SafeRenderer 实例
 const renderer = SafeRenderer.getInstance();
 
+function clearElement(element: Element): void {
+    element.textContent = '';
+}
+
+function appendIcon(parent: Element, className: string): HTMLElement {
+    const icon = document.createElement('i');
+    icon.className = className;
+    parent.appendChild(icon);
+    return icon;
+}
+
+function appendAffectedSites(container: Element, sites: string[]): void {
+    const maxDisplay = 4;
+
+    if (sites.includes('EU')) {
+        const span = document.createElement('span');
+        span.className = 'px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-[10px] font-bold';
+        span.textContent = '🇪🇺 EU ALL';
+        container.appendChild(span);
+        return;
+    }
+
+    sites.slice(0, maxDisplay).forEach((site) => {
+        const span = document.createElement('span');
+        span.className = 'px-1.5 py-0.5 bg-slate-100 text-slate-600 border border-slate-200 rounded text-[10px]';
+        span.textContent = site;
+        container.appendChild(span);
+    });
+
+    if (sites.length > maxDisplay) {
+        const more = document.createElement('span');
+        more.className = 'text-[10px] text-slate-400 flex items-center';
+        more.textContent = `+${sites.length - maxDisplay}`;
+        container.appendChild(more);
+    }
+}
+
 /**
  * 初始化面板
  */
@@ -336,7 +373,7 @@ function renderResults(): void {
         categoryTd.className = 'px-4 py-3 align-top';
         const categorySpan = document.createElement('span');
         categorySpan.className = `inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium bg-${category.color}-50 text-${category.color}-700 border border-${category.color}-100`;
-        categorySpan.innerHTML = `<i class="fas ${category.icon}"></i>`;
+        appendIcon(categorySpan, `fas ${category.icon}`);
         const categoryText = document.createTextNode(' ' + category.label);
         categorySpan.appendChild(categoryText);
         categoryTd.appendChild(categorySpan);
@@ -368,7 +405,7 @@ function renderResults(): void {
         sitesTd.className = 'px-4 py-3 align-top';
         const sitesDiv = document.createElement('div');
         sitesDiv.className = 'flex flex-wrap gap-1';
-        sitesDiv.innerHTML = renderAffectedSites(word.affectedSites);
+        appendAffectedSites(sitesDiv, word.affectedSites);
         sitesTd.appendChild(sitesDiv);
 
         // 常见产品列
@@ -386,7 +423,7 @@ function renderResults(): void {
         const detailBtn = document.createElement('button');
         detailBtn.className = 'px-3 py-1.5 bg-white border border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 rounded-md text-xs font-medium transition-all shadow-sm';
         detailBtn.textContent = '详情';
-        detailBtn.onclick = () => showWordDetail(word.id);
+        detailBtn.addEventListener('click', () => showWordDetail(word.id));
         actionTd.appendChild(detailBtn);
 
         tr.appendChild(keywordTd);
@@ -400,33 +437,8 @@ function renderResults(): void {
     });
 
     // 清空并添加所有行
-    tbody.innerHTML = '';
+    clearElement(tbody);
     rows.forEach(row => tbody.appendChild(row));
-}
-
-/**
- * 渲染站点标签
- */
-function renderAffectedSites(sites: string[]): string {
-    const maxDisplay = 4;
-
-    if (sites.includes('EU')) {
-        return `<span class="px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-[10px] font-bold">🇪🇺 EU ALL</span>`;
-    }
-
-    let html = sites
-        .slice(0, maxDisplay)
-        .map(
-            (site) =>
-                `<span class="px-1.5 py-0.5 bg-slate-100 text-slate-600 border border-slate-200 rounded text-[10px]">${site}</span>`
-        )
-        .join('');
-
-    if (sites.length > maxDisplay) {
-        html += `<span class="text-[10px] text-slate-400 flex items-center">+${sites.length - maxDisplay}</span>`;
-    }
-
-    return html;
 }
 
 /**
@@ -446,7 +458,7 @@ function showWordDetail(wordId: string): void {
     const category = (WORD_CATEGORIES as any)[word.category];
 
     // 渲染 Header - 使用 DOM 操作
-    header.innerHTML = '';
+    clearElement(header);
     const headerDiv = document.createElement('div');
     headerDiv.className = 'flex items-center gap-4';
     
@@ -485,7 +497,7 @@ function showWordDetail(wordId: string): void {
     header.appendChild(headerDiv);
 
     // 渲染 Content - 使用 DOM 操作
-    content.innerHTML = '';
+    clearElement(content);
     const contentContainer = document.createElement('div');
     contentContainer.className = 'space-y-6';
     
@@ -547,7 +559,8 @@ function showWordDetail(wordId: string): void {
     riskDiv.className = 'border-l-4 border-red-400 bg-red-50 p-4 rounded-r-lg';
     const riskTitle = document.createElement('h4');
     riskTitle.className = 'font-bold text-red-800 mb-1 flex items-center gap-2';
-    riskTitle.innerHTML = '<i class="fas fa-triangle-exclamation"></i> 风险解读';
+    appendIcon(riskTitle, 'fas fa-triangle-exclamation');
+    riskTitle.appendChild(document.createTextNode(' 风险解读'));
     riskDiv.appendChild(riskTitle);
     const riskDesc = document.createElement('p');
     riskDesc.className = 'text-sm text-red-900 leading-relaxed';
@@ -556,7 +569,7 @@ function showWordDetail(wordId: string): void {
     
     const legalDiv = document.createElement('div');
     legalDiv.className = 'mt-3 pt-3 border-t border-red-100 flex items-start gap-2';
-    legalDiv.innerHTML = '<i class="fas fa-gavel text-red-400 mt-0.5 text-xs"></i>';
+    appendIcon(legalDiv, 'fas fa-gavel text-red-400 mt-0.5 text-xs');
     const legalContent = document.createElement('div');
     const legalLabel = document.createElement('span');
     legalLabel.className = 'text-xs font-bold text-red-800';
@@ -579,14 +592,15 @@ function showWordDetail(wordId: string): void {
     const alternativesDiv = document.createElement('div');
     const altTitle = document.createElement('h4');
     altTitle.className = 'font-bold text-slate-800 mb-3 flex items-center gap-2';
-    altTitle.innerHTML = '<i class="fas fa-check-circle text-green-500"></i> 安全替代方案';
+    appendIcon(altTitle, 'fas fa-check-circle text-green-500');
+    altTitle.appendChild(document.createTextNode(' 安全替代方案'));
     alternativesDiv.appendChild(altTitle);
     const altList = document.createElement('ul');
     altList.className = 'space-y-2';
     word.alternatives.forEach(alt => {
         const li = document.createElement('li');
         li.className = 'flex items-start gap-2 text-sm bg-green-50 text-green-800 px-3 py-2 rounded border border-green-100';
-        li.innerHTML = '<i class="fas fa-check mt-0.5 text-xs"></i>';
+        appendIcon(li, 'fas fa-check mt-0.5 text-xs');
         const span = document.createElement('span');
         span.textContent = alt;
         li.appendChild(span);
@@ -598,7 +612,8 @@ function showWordDetail(wordId: string): void {
     const productsDiv = document.createElement('div');
     const prodTitle = document.createElement('h4');
     prodTitle.className = 'font-bold text-slate-800 mb-3 flex items-center gap-2';
-    prodTitle.innerHTML = '<i class="fas fa-bullseye text-blue-500"></i> 常见触雷场景';
+    appendIcon(prodTitle, 'fas fa-bullseye text-blue-500');
+    prodTitle.appendChild(document.createTextNode(' 常见触雷场景'));
     productsDiv.appendChild(prodTitle);
     const prodContainer = document.createElement('div');
     prodContainer.className = 'flex flex-wrap gap-2';
@@ -619,7 +634,8 @@ function showWordDetail(wordId: string): void {
     tipsDiv.className = 'bg-amber-50 border border-amber-200 rounded-lg p-4';
     const tipsTitle = document.createElement('h4');
     tipsTitle.className = 'font-bold text-amber-800 mb-2 flex items-center gap-2';
-    tipsTitle.innerHTML = '<i class="fas fa-lightbulb text-amber-500"></i> 资深运营小贴士';
+    appendIcon(tipsTitle, 'fas fa-lightbulb text-amber-500');
+    tipsTitle.appendChild(document.createTextNode(' 资深运营小贴士'));
     tipsDiv.appendChild(tipsTitle);
     const tipsP = document.createElement('p');
     tipsP.className = 'text-sm text-amber-900';
@@ -650,7 +666,7 @@ function closeWordDetail(): void {
     }, 200); // 等待动画结束
 }
 
-// 暴露给 window 以兼容 onclick (Legacy)
+// 暴露给 window 以兼容旧模板调用 (Legacy)
 (window as any).showWordDetail = showWordDetail;
 (window as any).closeWordDetail = closeWordDetail;
 

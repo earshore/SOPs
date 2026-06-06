@@ -368,7 +368,7 @@ export class SafeRenderer {
    * ```typescript
    * const renderer = SafeRenderer.getInstance();
    * const clean = renderer.sanitizeHtml(
-   *   '<div onclick="alert()">Hello</div>',
+   *   '<div data-action="alert">Hello</div>',
    *   { allowedTags: ['div'], allowedAttrs: ['class'] }
    * );
    * ```

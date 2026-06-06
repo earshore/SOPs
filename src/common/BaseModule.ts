@@ -372,7 +372,7 @@ export default class BaseModule {
             // 绑定重试逻辑
             const btn = this.container.querySelector(`#retry-btn-${this.moduleId}`) as HTMLButtonElement;
             if (btn) {
-                btn.onclick = () => {
+                btn.addEventListener('click', () => {
                     // ✅ 安全: 静态HTML模板，无用户输入
                     this.container!.innerHTML = '<div class="p-10 text-center"><i class="fas fa-spinner fa-spin text-slate-400"></i></div>';
                     // 重新挂载
@@ -380,7 +380,7 @@ export default class BaseModule {
                         Logger.error("Retry failed:", e);
                         this.handleError(e as Error); // 递归处理再次失败的情况
                     });
-                };
+                });
             }
         }
     }

@@ -4,7 +4,6 @@
  */
 
 import BaseModule from '../../../../../common/BaseModule';
-import { escapeHtml } from '../../../../../common/utils/security';
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import {
     PROMPT_CATEGORIES,
@@ -63,6 +62,17 @@ function getVisiblePrompts(): readonly Prompt[] {
     return getPromptsByCategory(currentCategory);
 }
 
+function clearElement(element: Element): void {
+    element.textContent = '';
+}
+
+function appendIcon(parent: Element, className: string): HTMLElement {
+    const icon = document.createElement('i');
+    icon.className = className;
+    parent.appendChild(icon);
+    return icon;
+}
+
 function handleModuleClick(e: Event): void {
     const target = e.target as HTMLElement | null;
     if (!target || !moduleRoot) return;
@@ -107,6 +117,26 @@ function handleModalBackdropClick(e: Event): void {
     if (!modal) return;
 
     const target = e.target as HTMLElement | null;
+    const actionBtn = target?.closest<HTMLElement>('[data-prompt-modal-action]');
+    if (actionBtn && modal.contains(actionBtn)) {
+        const action = actionBtn.dataset.promptModalAction;
+        if (action === 'close') {
+            window.closePromptModal?.();
+        } else if (action === 'copy') {
+            window.copyModalPrompt?.();
+        }
+        return;
+    }
+
+    const langBtn = target?.closest<HTMLElement>('[data-prompt-lang]');
+    if (langBtn && modal.contains(langBtn)) {
+        const lang = langBtn.dataset.promptLang;
+        if (lang === 'zh' || lang === 'en') {
+            window.switchPromptLang?.(lang);
+        }
+        return;
+    }
+
     if (target === modal) {
         window.closePromptModal?.();
     }
@@ -182,26 +212,26 @@ function renderCategories(): void {
 
     if (!container) return;
 
-    const allBtn = `
-        <button class="category-btn active" data-category="all">
-            <i class="fas fa-th"></i>
-            <span>全部</span>
-        </button>
-    `;
+    clearElement(container);
 
-    const categoryBtns = Object.values(PROMPT_CATEGORIES as Record<string, PromptCategory>)
-        .map(
-            (cat) => `
-        <button class="category-btn" data-category="${cat.id}">
-            <i class="fas ${cat.icon}"></i>
-            <span>${cat.name}</span>
-        </button>
-    `
-        )
-        .join('');
+    const createButton = (category: 'all' | PromptCategory): HTMLButtonElement => {
+        const button = document.createElement('button');
+        button.className = category === 'all' ? 'category-btn active' : 'category-btn';
+        button.dataset.category = category === 'all' ? 'all' : category.id;
 
-    // ✅ 安全: 静态HTML模板，无用户输入
-    container.innerHTML = allBtn + categoryBtns;
+        appendIcon(button, category === 'all' ? 'fas fa-th' : `fas ${category.icon}`);
+
+        const label = document.createElement('span');
+        label.textContent = category === 'all' ? '全部' : category.name;
+        button.appendChild(label);
+
+        return button;
+    };
+
+    container.appendChild(createButton('all'));
+    Object.values(PROMPT_CATEGORIES as Record<string, PromptCategory>).forEach((cat) => {
+        container.appendChild(createButton(cat));
+    });
 }
 
 /**
@@ -213,58 +243,95 @@ function renderPromptList(): void {
 
     const promptsToRender = getVisiblePrompts();
 
+    clearElement(container);
+
     if (promptsToRender.length === 0) {
-        container.innerHTML = `
-            <div class="col-span-full text-center py-12">
-                <i class="fas fa-search text-4xl text-slate-300 mb-4"></i>
-                <p class="text-slate-500">未找到匹配的提示词</p>
-            </div>
-        `;
+        const empty = document.createElement('div');
+        empty.className = 'col-span-full text-center py-12';
+        appendIcon(empty, 'fas fa-search text-4xl text-slate-300 mb-4');
+
+        const text = document.createElement('p');
+        text.className = 'text-slate-500';
+        text.textContent = '未找到匹配的提示词';
+        empty.appendChild(text);
+
+        container.appendChild(empty);
         return;
     }
 
-    container.innerHTML = promptsToRender
-        .map((prompt) => {
-            const category = getCategoryById(prompt.category);
-            const model = getModelInfo(prompt.recommendedModel);
+    promptsToRender.forEach((prompt) => {
+        const category = getCategoryById(prompt.category);
+        const model = getModelInfo(prompt.recommendedModel);
 
-            if (!category) return '';
+        if (!category) return;
 
-            return `
-            <div class="prompt-card group" data-prompt-id="${prompt.id}">
-                <div class="flex items-start justify-between mb-3">
-                    <span class="category-badge ${category.color}">
-                        <i class="fas ${category.icon}"></i>
-                        ${category.name}
-                    </span>
-                    <span class="model-badge">
-                        ${model.badge}
-                    </span>
-                </div>
+        const card = document.createElement('div');
+        card.className = 'prompt-card group';
+        card.dataset.promptId = prompt.id;
 
-                <h3 class="prompt-title">${prompt.title}</h3>
-                <p class="prompt-description">${prompt.description}</p>
+        const header = document.createElement('div');
+        header.className = 'flex items-start justify-between mb-3';
 
-                <div class="flex items-center justify-between mt-4 pt-4 border-t border-slate-100">
-                    <div class="flex items-center gap-2 text-xs text-slate-500">
-                        <i class="fas fa-robot"></i>
-                        <span>${model.name}</span>
-                    </div>
-                    <div class="flex gap-2">
-                        <button type="button" data-action="view-prompt" data-prompt-id="${prompt.id}"
-                                class="btn-icon" title="查看详情">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button type="button" data-action="copy-prompt" data-prompt-id="${prompt.id}"
-                                class="btn-icon" title="复制提示词">
-                            <i class="fas fa-copy"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-        })
-        .join('');
+        const categoryBadge = document.createElement('span');
+        categoryBadge.className = `category-badge ${category.color}`;
+        appendIcon(categoryBadge, `fas ${category.icon}`);
+        categoryBadge.appendChild(document.createTextNode(` ${category.name}`));
+
+        const modelBadge = document.createElement('span');
+        modelBadge.className = 'model-badge';
+        modelBadge.textContent = model.badge;
+
+        header.appendChild(categoryBadge);
+        header.appendChild(modelBadge);
+
+        const title = document.createElement('h3');
+        title.className = 'prompt-title';
+        title.textContent = prompt.title;
+
+        const description = document.createElement('p');
+        description.className = 'prompt-description';
+        description.textContent = prompt.description;
+
+        const footer = document.createElement('div');
+        footer.className = 'flex items-center justify-between mt-4 pt-4 border-t border-slate-100';
+
+        const modelInfo = document.createElement('div');
+        modelInfo.className = 'flex items-center gap-2 text-xs text-slate-500';
+        appendIcon(modelInfo, 'fas fa-robot');
+        const modelName = document.createElement('span');
+        modelName.textContent = model.name;
+        modelInfo.appendChild(modelName);
+
+        const actions = document.createElement('div');
+        actions.className = 'flex gap-2';
+
+        const viewBtn = document.createElement('button');
+        viewBtn.type = 'button';
+        viewBtn.dataset.action = 'view-prompt';
+        viewBtn.dataset.promptId = prompt.id;
+        viewBtn.className = 'btn-icon';
+        viewBtn.title = '查看详情';
+        appendIcon(viewBtn, 'fas fa-eye');
+
+        const copyBtn = document.createElement('button');
+        copyBtn.type = 'button';
+        copyBtn.dataset.action = 'copy-prompt';
+        copyBtn.dataset.promptId = prompt.id;
+        copyBtn.className = 'btn-icon';
+        copyBtn.title = '复制提示词';
+        appendIcon(copyBtn, 'fas fa-copy');
+
+        actions.appendChild(viewBtn);
+        actions.appendChild(copyBtn);
+        footer.appendChild(modelInfo);
+        footer.appendChild(actions);
+
+        card.appendChild(header);
+        card.appendChild(title);
+        card.appendChild(description);
+        card.appendChild(footer);
+        container.appendChild(card);
+    });
 }
 
 
@@ -343,9 +410,9 @@ function registerWindowActions(): void {
 
         if (titleEl) titleEl.textContent = prompt.title;
         if (categoryEl) {
-            categoryEl.innerHTML = `
-                <i class="fas ${escapeHtml(category.icon)}"></i> ${escapeHtml(category.name)}
-            `;
+            clearElement(categoryEl);
+            appendIcon(categoryEl, `fas ${category.icon}`);
+            categoryEl.appendChild(document.createTextNode(` ${category.name}`));
         }
         if (modelEl) modelEl.textContent = model.name;
         if (descEl) descEl.textContent = prompt.description;

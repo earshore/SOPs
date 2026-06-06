@@ -83,6 +83,13 @@ window.clearHubSearch = clearHubSearch;
 window.searchSidebar = searchSidebar;
 window.clearSidebarSearch = clearSidebarSearch;
 
+document.addEventListener('input', (event) => {
+  const target = event.target as HTMLInputElement | null;
+  if (target?.id === 'sidebar-search-input') {
+    searchSidebar(target.value);
+  }
+});
+
 // ========================
 // 注册动作到 ActionRegistry
 // ========================

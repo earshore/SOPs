@@ -15,7 +15,7 @@
  *   <div slot="body">Modal Content</div>
  *   <div slot="footer">
  *     <button data-action="close">Cancel</button>
- *     <button onclick="...">Confirm</button>
+ *     <button data-action="confirm">Confirm</button>
  *   </div>
  * </app-modal>
  *

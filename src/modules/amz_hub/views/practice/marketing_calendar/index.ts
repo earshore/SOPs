@@ -15,7 +15,6 @@ import {
 } from "../../../constants/amz_hub_constants";
 import { configCenter } from "../../../../../common/config/ConfigCenter";
 import templateHTML from "./template.html?raw";
-import { registerActionsWithLegacy } from "../../../../../common/utils/actionRegistry";
 import type { MarketingEvent, CountryInfo } from "@/types/modules-business";
 import "./styles.css";
 
@@ -64,14 +63,11 @@ class MarketingCalendarModule extends BaseModule {
   }
 
   async init(): Promise<void> {
-    // 1. 挂载全局代理函数 (因为 HTML 模板里用了 onclick="amzf_xxx")
-    this.bindGlobalProxies();
-
-    // 2. 初始化逻辑
     this.loadSearchHistory();
     this.renderCountryTabs();
     this.renderStats();
     this.renderContent();
+    this.bindCalendarClickEvents();
     this.bindSearchEvents();
 
     Logger.debug("✅ Marketing Calendar Loaded");
@@ -85,67 +81,7 @@ class MarketingCalendarModule extends BaseModule {
     }
 
     // 清理全局代理
-    this.unbindGlobalProxies();
     Logger.debug("❌ Marketing Calendar Unmounted");
-  }
-
-  // ==================== Global Proxies (Bridge for HTML onclicks) ====================
-
-  bindGlobalProxies(): void {
-    // Register actions with ActionRegistry (handles data-param correctly)
-    registerActionsWithLegacy({
-      amzf_selectCountry: (params: Record<string, unknown> | string) => {
-        // 兼容直接调用 amzf_selectCountry('DE') 和 data-action 调用
-        const code =
-          typeof params === "string" ? params : String(params.param || "ALL");
-        this.selectCountry(code);
-      },
-      amzf_switchView: (params: Record<string, unknown> | string) => {
-        const view =
-          typeof params === "string"
-            ? params
-            : String(params.param || "country");
-        this.switchView(view);
-      },
-      amzf_clearSearch: () => this.clearSearch(),
-      amzf_toggleSection: (params: Record<string, unknown> | string) => {
-        const id =
-          typeof params === "string" ? params : String(params.param || "");
-        this.toggleSection(id);
-      },
-      amzf_selectHistoryItem: (params: Record<string, unknown> | string) => {
-        const term =
-          typeof params === "string" ? params : String(params.param || "");
-        this.selectHistoryItem(term);
-      },
-      amzf_deleteHistoryItem: (params: Record<string, unknown> | number) => {
-        const idx =
-          typeof params === "number"
-            ? params
-            : parseInt(String(params.param || "0"));
-        this.deleteHistoryItem(idx);
-      },
-      amzf_clearAllHistory: () => this.clearAllHistory(),
-    });
-  }
-
-  unbindGlobalProxies(): void {
-    const w = window as Window & {
-      amzf_selectCountry?: unknown;
-      amzf_switchView?: unknown;
-      amzf_clearSearch?: unknown;
-      amzf_toggleSection?: unknown;
-      amzf_selectHistoryItem?: unknown;
-      amzf_deleteHistoryItem?: unknown;
-      amzf_clearAllHistory?: unknown;
-    };
-    delete w.amzf_selectCountry;
-    delete w.amzf_switchView;
-    delete w.amzf_clearSearch;
-    delete w.amzf_toggleSection;
-    delete w.amzf_selectHistoryItem;
-    delete w.amzf_deleteHistoryItem;
-    delete w.amzf_clearAllHistory;
   }
 
   // ==================== Core Logic ====================
@@ -397,6 +333,80 @@ class MarketingCalendarModule extends BaseModule {
 
   // ==================== Event Binding ====================
 
+  private bindCalendarClickEvents(): void {
+    this.addEventListener(document, "click", (event) => {
+      const target = event.target as HTMLElement | null;
+      if (!target) return;
+
+      const historyContainer = document.getElementById("amzf_search_history");
+      const isInModule = (element: HTMLElement) =>
+        Boolean(
+          this.container?.contains(element) ||
+            historyContainer?.contains(element),
+        );
+
+      const deleteBtn = target.closest<HTMLElement>(
+        "[data-amzf-delete-history-index]",
+      );
+      if (deleteBtn && isInModule(deleteBtn)) {
+        event.stopPropagation();
+        const index = Number(deleteBtn.dataset.amzfDeleteHistoryIndex);
+        if (Number.isInteger(index)) this.deleteHistoryItem(index);
+        return;
+      }
+
+      const clearHistoryBtn = target.closest<HTMLElement>(
+        "[data-amzf-clear-history]",
+      );
+      if (clearHistoryBtn && isInModule(clearHistoryBtn)) {
+        event.stopPropagation();
+        this.clearAllHistory();
+        return;
+      }
+
+      const countryBtn = target.closest<HTMLElement>("[data-amzf-country]");
+      if (countryBtn && isInModule(countryBtn)) {
+        this.selectCountry(countryBtn.dataset.amzfCountry || "ALL");
+        return;
+      }
+
+      const historyItem = target.closest<HTMLElement>(
+        "[data-amzf-history-item]",
+      );
+      if (historyItem && isInModule(historyItem)) {
+        const term = historyItem.dataset.amzfHistoryItem;
+        if (term) this.selectHistoryItem(term);
+        return;
+      }
+
+      const quickTag = target.closest<HTMLElement>("[data-amzf-quick-tag]");
+      if (quickTag && isInModule(quickTag)) {
+        const term = quickTag.dataset.amzfQuickTag;
+        if (term) this.selectHistoryItem(term);
+        return;
+      }
+
+      const sectionToggle = target.closest<HTMLElement>(
+        "[data-amzf-toggle-section]",
+      );
+      if (sectionToggle && isInModule(sectionToggle)) {
+        const id = sectionToggle.dataset.amzfToggleSection;
+        if (id) this.toggleSection(id);
+        return;
+      }
+
+      const actionEl = target.closest<HTMLElement>("[data-action]");
+      if (!actionEl || !isInModule(actionEl)) return;
+
+      const action = actionEl.dataset.action;
+      if (action === "amzf_switchView") {
+        this.switchView(actionEl.dataset.param || "country");
+      } else if (action === "amzf_clearSearch") {
+        this.clearSearch();
+      }
+    });
+  }
+
   bindSearchEvents(): void {
     const input = document.getElementById("amzf_search") as HTMLInputElement;
     const clearBtn = document.getElementById("amzf_clear");
@@ -478,12 +488,12 @@ class MarketingCalendarModule extends BaseModule {
     const container = document.getElementById("amzf_country_tabs");
     if (!container) return;
 
-    let html = `<button class="amzf_country_tab amzf_active" onclick="amzf_selectCountry('ALL')">
+    let html = `<button class="amzf_country_tab amzf_active" data-amzf-country="ALL">
             <span class="amzf_country_flag"><i class="fas fa-globe"></i></span> 全部
         </button>`;
 
     (amzf_countries as CountryInfo[]).forEach((c) => {
-      html += `<button class="amzf_country_tab" onclick="amzf_selectCountry('${c.code}')">
+      html += `<button class="amzf_country_tab" data-amzf-country="${escapeHtml(c.code)}">
                 <span class="amzf_country_flag">${c.flag}</span> ${c.name}
             </button>`;
     });
@@ -501,17 +511,16 @@ class MarketingCalendarModule extends BaseModule {
       html += `
                 <div class="amzf_history_header">
                     <span class="amzf_history_title"><i class="fas fa-history"></i> 搜索历史</span>
-                    <button class="amzf_history_clear_all" onclick="amzf_clearAllHistory(); event.stopPropagation();">清空</button>
+                    <button class="amzf_history_clear_all" data-amzf-clear-history>清空</button>
                 </div>
             `;
       this.state.searchHistory.forEach((item, index) => {
-        // Escaping for HTML attribute
-        const safeItem = item.replace(/'/g, "\\'");
+        const safeItem = escapeHtml(item);
         html += `
-                    <div class="amzf_history_item" onclick="amzf_selectHistoryItem('${safeItem}')">
+                    <div class="amzf_history_item" data-amzf-history-item="${safeItem}">
                         <span class="amzf_history_item_icon"><i class="fas fa-search"></i></span>
-                        <span class="amzf_history_item_text">${item}</span>
-                        <span class="amzf_history_item_delete" onclick="amzf_deleteHistoryItem(${index}); event.stopPropagation();"><i class="fas fa-times"></i></span>
+                        <span class="amzf_history_item_text">${safeItem}</span>
+                        <span class="amzf_history_item_delete" data-amzf-delete-history-index="${index}"><i class="fas fa-times"></i></span>
                     </div>
                 `;
       });
@@ -528,7 +537,7 @@ class MarketingCalendarModule extends BaseModule {
             <div class="amzf_quick_tags">
                 ${AMZF_QUICK_TAGS.map(
       (tag) => `
-                    <span class="amzf_quick_tag" onclick="amzf_selectHistoryItem('${tag}')">${tag}</span>
+                    <span class="amzf_quick_tag" data-amzf-quick-tag="${escapeHtml(tag)}">${escapeHtml(tag)}</span>
                 `,
     ).join("")}
             </div>
@@ -615,7 +624,7 @@ class MarketingCalendarModule extends BaseModule {
 
       html += `
                 <div id="${sectionId}" class="amzf_month_section ${isExpanded ? "amzf_expanded" : ""}" style="animation-delay: ${(m - 1) * 0.03}s">
-                    <div class="amzf_month_header" onclick="amzf_toggleSection('${sectionId}')">
+                    <div class="amzf_month_header" data-amzf-toggle-section="${escapeHtml(sectionId)}">
                         <div class="amzf_month_info">
                             <span class="amzf_month_name">${(amzf_months as string[])[m - 1]}</span>
                             <span class="amzf_month_badge">${monthEvents.length} 个活动</span>
@@ -675,7 +684,7 @@ class MarketingCalendarModule extends BaseModule {
 
       html += `
                 <div id="${sectionId}" class="amzf_event_comparison ${isExpanded ? "amzf_expanded" : ""}" style="animation-delay: ${idx * 0.03}s">
-                    <div class="amzf_comparison_header" onclick="amzf_toggleSection('${sectionId}')">
+                    <div class="amzf_comparison_header" data-amzf-toggle-section="${escapeHtml(sectionId)}">
                         <div class="amzf_comparison_title">
                             <span>${group.emoji}</span>
                             <span>${displayName}</span>

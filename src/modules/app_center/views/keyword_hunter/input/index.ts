@@ -469,7 +469,7 @@ export async function mount(container: HTMLElement): Promise<void> {
         container.classList.add('fade-in');
         renderer.renderTemplate(container, html);
 
-        // 2. 注册全局操作（用于 HTML onclick 兼容）
+        // 2. 注册全局操作（用于旧模板兼容）
         const actionNames = registerActionsWithLegacy({
             kt_cleanKeywords: () => cleanKeywordsUI(),
             kt_removeDuplicates: () => removeDuplicatesUI(),

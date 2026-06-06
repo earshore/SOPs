@@ -5,7 +5,7 @@
  * 架构说明：
  * - 状态保存到 state.keywordTracker 命名空间
  * - 通过 EventBus 与其他模块通信
- * - 使用 registerActionsWithLegacy 注册全局操作
+ * - 使用模块内事件监听管理交互
  * - 管理浮动关键词窗口的显示和交互
  */
 
@@ -15,11 +15,6 @@ import { showToast } from "../../../../../common/ui";
 import * as KeywordService from "../services/trackerService";
 import { appStore } from "../../../../../stores/useAppStore";
 import { ErrorService } from "../../../../../services/errorService";
-import {
-  registerActionsWithLegacy,
-  unregisterActions,
-} from "../../../../../common/utils/actionRegistry";
-
 import { Logger } from "../../../../../services/loggerService";
 import "../keyword_hunter_style.css";
 
@@ -41,7 +36,6 @@ interface FloatWinState {
 
 let eventListeners: EventListenerRecord[] = []; // 用于清理事件监听器
 let timeouts: number[] = []; // 用于清理定时器
-let registeredActionNames: string[] = []; // 用于清理已注册的动作
 let floatWinState: FloatWinState = {
   isDragging: false,
   offsetX: 0,
@@ -86,13 +80,6 @@ function cleanup(): void {
   // 清理定时器
   timeouts.forEach((id) => clearTimeout(id));
   timeouts = [];
-
-  // 清理已注册的动作
-  if (registeredActionNames.length > 0) {
-    unregisterActions(registeredActionNames);
-    Logger.debug(`[Process] 已清理 ${registeredActionNames.length} 个动作`);
-    registeredActionNames = [];
-  }
 
   // 重置浮动窗口状态
   floatWinState = {
@@ -396,7 +383,7 @@ function renderAnalysisStats(): void {
         span.className =
           "px-2 py-1 bg-red-100 text-red-700 text-xs rounded-md inline-flex items-center gap-1 cursor-pointer hover:bg-red-200 transition-colors";
         span.title = "点击在关键词监控中定位";
-        span.onclick = () => (window as any).kt_locateUnmatchedRoot(root);
+        span.addEventListener("click", () => locateUnmatchedRootInList(root));
 
         const icon = document.createElement("span");
         icon.className = "font-bold";
@@ -718,7 +705,7 @@ function renderFloatingKeywords(): void {
         // 已匹配 - 绿色背景，可点击定位
         div.className +=
           " bg-green-50 border-l-4 border-green-500 rounded p-2 flex justify-between items-center cursor-pointer hover:bg-green-100 transition-colors shadow-sm";
-        div.onclick = () => (window as any).kt_locateKeyword(item.keyword);
+        div.addEventListener("click", () => locateKeywordInCopy(item.keyword));
 
         const span = document.createElement("span");
         span.className =
@@ -1240,6 +1227,34 @@ function setupEventListeners(container: HTMLElement): void {
     });
   }
 
+  const syncBtn = document.getElementById("kt-sync-to-input-btn");
+  if (syncBtn) {
+    addEventListener(syncBtn, "click", () => {
+      void syncToInput();
+    });
+  }
+
+  const translateBtn = document.getElementById("kt-translate-btn");
+  if (translateBtn) {
+    addEventListener(translateBtn, "click", () => {
+      void translateCopyImmersive();
+    });
+  }
+
+  const minimizeBtn = document.getElementById("kt-minimize-keywords-btn");
+  if (minimizeBtn) {
+    addEventListener(minimizeBtn, "click", () => {
+      minimizeKeywordsWindow();
+    });
+  }
+
+  const restoreBtn = document.getElementById("kt-keywords-minimized");
+  if (restoreBtn) {
+    addEventListener(restoreBtn, "click", () => {
+      restoreKeywordsWindow();
+    });
+  }
+
   // 设置浮动窗口拖拽
   setupFloatingWindow();
 }
@@ -1288,35 +1303,13 @@ export async function mount(container: HTMLElement): Promise<void> {
       document.body.appendChild(minBtn);
     }
 
-    // 3. 注册全局操作（用于 HTML onclick 兼容）
-    registeredActionNames = registerActionsWithLegacy({
-      kt_syncToInput: () => syncToInput(),
-      kt_translateCopyImmersive: () => translateCopyImmersive(),
-      kt_locateKeyword: (params: string | Record<string, unknown>) => {
-        const keyword =
-          typeof params === "string"
-            ? params
-            : (params.param as string) || (params.keyword as string) || "";
-        return locateKeywordInCopy(keyword);
-      },
-      kt_locateUnmatchedRoot: (params: string | Record<string, unknown>) => {
-        const root =
-          typeof params === "string"
-            ? params
-            : (params.param as string) || (params.root as string) || "";
-        return locateUnmatchedRootInList(root);
-      },
-      kt_minimizeKeywordsWindow: () => minimizeKeywordsWindow(),
-      kt_restoreKeywordsWindow: () => restoreKeywordsWindow(),
-    });
-
-    // 4. 设置事件监听器
+    // 3. 设置事件监听器
     setupEventListeners(container);
 
-    // 5. 从 state 恢复状态
+    // 4. 从 state 恢复状态
     restoreProcessStateFromState();
 
-    // 6. 管理浮动窗口显示 - 延迟执行确保 DOM 已渲染
+    // 5. 管理浮动窗口显示 - 延迟执行确保 DOM 已渲染
     setTimeout(() => {
       manageFloatingWindowVisibility();
       Logger.debug("[Process] 浮动窗口状态:", {

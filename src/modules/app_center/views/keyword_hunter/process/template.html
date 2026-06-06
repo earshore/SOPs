@@ -89,13 +89,13 @@
                         <!-- Sync Back -->
                         <button
                             class="inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-xs font-semibold transition-all border border-emerald-200 hover:border-emerald-300 hover:shadow-sm active:scale-95"
-                            onclick="window.kt_syncToInput()">
+                            id="kt-sync-to-input-btn">
                             <i class="fas fa-reply text-[10px]"></i> 同步回输入
                         </button>
                         <!-- AI Translate -->
                         <button
                             class="relative overflow-hidden inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm transition-all duration-300 cursor-not-allowed bg-slate-100 text-slate-400 border-2 border-slate-200 disabled:opacity-50"
-                            id="kt-translate-btn" onclick="window.kt_translateCopyImmersive()">
+                            id="kt-translate-btn">
                             <!-- Progress Bar -->
                             <div class="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-violet-500 to-pink-500 opacity-20 hidden transition-all duration-300"
                                 id="kt-translate-progress" style="width:0%"></div>
@@ -285,7 +285,7 @@
         </h3>
         <div class="flex items-center gap-1.5">
             <button class="w-7 h-7 flex items-center justify-center hover:bg-white/20 rounded-lg transition-colors"
-                onclick="window.kt_minimizeKeywordsWindow()" title="最小化">
+                id="kt-minimize-keywords-btn" title="最小化">
                 <i class="fas fa-minus text-xs"></i>
             </button>
         </div>
@@ -314,7 +314,7 @@
 <!-- ========== Minimized Keywords Button ========== -->
 <button
     class="kt-minimized-btn fixed bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-3 rounded-2xl shadow-xl shadow-blue-500/30 hover:shadow-2xl hover:shadow-blue-500/40 hover:scale-105 transition-all duration-300 items-center gap-2.5 border border-blue-400/30"
-    id="kt-keywords-minimized" onclick="window.kt_restoreKeywordsWindow()">
+    id="kt-keywords-minimized">
     <div class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center">
         <i class="fas fa-list text-xs"></i>
     </div>

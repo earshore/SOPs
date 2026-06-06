@@ -634,7 +634,7 @@ const SettingsPanel = (): SettingsPanelData => ({
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = 'application/json,.json';
-        input.onchange = async () => {
+        input.addEventListener('change', async () => {
             const file = input.files?.[0];
             if (!file) return;
 
@@ -649,7 +649,7 @@ const SettingsPanel = (): SettingsPanelData => ({
             } finally {
                 this.localData.isBusy = false;
             }
-        };
+        });
         input.click();
     },
 

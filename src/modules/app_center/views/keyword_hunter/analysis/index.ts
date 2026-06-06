@@ -16,10 +16,6 @@ import { showToast } from "../../../../../common/ui";
 import * as KeywordService from "../services/trackerService";
 import { appStore } from "@/stores/useAppStore";
 import { ErrorService } from "../../../../../services/errorService";
-import {
-  registerActionsWithLegacy,
-  unregisterActions,
-} from "../../../../../common/utils/actionRegistry";
 import { Logger } from "../../../../../services/loggerService";
 import "../keyword_hunter_style.css";
 
@@ -47,7 +43,6 @@ let rawMarkdownCache = "";
 
 let eventListeners: EventListenerRecord[] = [];
 let timeouts: number[] = [];
-let registeredActionNames: string[] = [];
 
 // ==========================================
 // Helper Functions
@@ -77,11 +72,6 @@ function cleanup(): void {
   timeouts.forEach((id) => clearTimeout(id));
   timeouts = [];
 
-  if (registeredActionNames.length > 0) {
-    unregisterActions(registeredActionNames);
-    Logger.debug(`[Analysis] 已清理 ${registeredActionNames.length} 个动作`);
-    registeredActionNames = [];
-  }
 }
 
 function escapeHtml(text: string): string {
@@ -661,7 +651,9 @@ async function runLLMAnalysis(): Promise<void> {
         `bg-white border border-${colorScheme}-200 text-${colorScheme}-700 ` +
         `text-xs rounded-lg hover:bg-${colorScheme}-50 transition-colors font-medium`;
       retryBtn.innerHTML = '<i class="fas fa-redo text-[10px]"></i> 重试';
-      retryBtn.onclick = () => (window as any).kt_runLLMAnalysis();
+      addEventListener(retryBtn, "click", () => {
+        void runLLMAnalysis();
+      });
 
       errorDiv.appendChild(headerDiv);
       errorDiv.appendChild(msgP);
@@ -721,11 +713,6 @@ export async function mount(container: HTMLElement): Promise<void> {
 
     container.classList.add("fade-in");
     renderer.renderTemplate(container, html);
-
-    // 注册全局操作（HTML onclick 兼容）
-    registeredActionNames = registerActionsWithLegacy({
-      kt_runLLMAnalysis: () => runLLMAnalysis(),
-    });
 
     setupEventListeners(container);
     restoreAnalysisStateFromState();

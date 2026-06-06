@@ -10,7 +10,7 @@
 @tailwind base;
 
 :root {
-  --color-primary: #6366f1;
+  --color-primary: var(--color-indigo-500);
   --color-slate-50: #f8fafc;
   --color-slate-700: #334155;
   --gradient-aurora: linear-gradient(135deg, #6366f1 0%, #ec4899 25%, #f59e0b 50%, #10b981 75%, #06b6d4 100%);

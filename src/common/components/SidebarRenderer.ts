@@ -528,8 +528,7 @@ export class SidebarRenderer {
             focus:ring-2 focus:ring-${color}-500/20 focus:border-${color}-400
             hover:border-slate-300
             placeholder:text-slate-300
-            outline-none transition-all duration-200 shadow-sm"
-          oninput="window.searchSidebar(this.value)">
+            outline-none transition-all duration-200 shadow-sm">
 
         <!-- Clear Button -->
         <button id="sidebar-search-clear" data-action="clear-sidebar-search"

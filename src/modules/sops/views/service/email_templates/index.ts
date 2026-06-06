@@ -8,6 +8,26 @@ import { loadTemplate } from '../../../../../common/utils/viewLoader';
 
 import { Logger } from '../../../../../services/loggerService';
 class EmailTemplatesModule extends BaseModule {
+    private removeTemplateToggleListener: (() => void) | null = null;
+
+    private bindTemplateToggles(container: HTMLElement): void {
+        this.removeTemplateToggleListener?.();
+
+        const handleToggleClick = (event: Event): void => {
+            const target = event.target as HTMLElement | null;
+            const toggle = target?.closest<HTMLElement>('[data-email-template-toggle]');
+            if (!toggle || !container.contains(toggle)) return;
+
+            toggle.nextElementSibling?.classList.toggle('hidden');
+        };
+
+        container.addEventListener('click', handleToggleClick);
+        this.removeTemplateToggleListener = () => {
+            container.removeEventListener('click', handleToggleClick);
+            this.removeTemplateToggleListener = null;
+        };
+    }
+
     /**
      * 挂载模块
      */
@@ -15,6 +35,7 @@ class EmailTemplatesModule extends BaseModule {
         const html = await loadTemplate('src/modules/sops/views/service/email_templates/template.html');
         container.innerHTML = html;
         container.classList.add('fade-in');
+        this.bindTemplateToggles(container);
         Logger.debug('✅ 邮件回复模板 SOP 模块已挂载');
     }
 
@@ -22,6 +43,7 @@ class EmailTemplatesModule extends BaseModule {
      * 卸载模块
      */
     unmount(): void {
+        this.removeTemplateToggleListener?.();
         Logger.debug('❌ 邮件回复模板 SOP 模块已卸载');
     }
 }

@@ -8,6 +8,77 @@ import { appStore } from '@/stores/useAppStore';
 import { getEl } from './utils';
 
 import { Logger } from '../../services/loggerService';
+
+type SearchRoute = {
+  id: string;
+  icon?: string;
+  label?: string;
+};
+
+function clearElement(element: Element): void {
+  element.textContent = '';
+}
+
+function appendEmptyResult(container: Element, message: string, withIcon = false): void {
+  clearElement(container);
+
+  const wrapper = document.createElement('div');
+  wrapper.className = withIcon
+    ? 'p-3 text-xs text-slate-400 text-center'
+    : 'text-xs text-slate-400 text-center py-2';
+
+  if (withIcon) {
+    const icon = document.createElement('i');
+    icon.className = 'fas fa-search mb-2';
+    wrapper.appendChild(icon);
+
+    const text = document.createElement('p');
+    text.textContent = message;
+    wrapper.appendChild(text);
+  } else {
+    wrapper.textContent = message;
+  }
+
+  container.appendChild(wrapper);
+}
+
+function appendSearchMatches(
+  container: Element,
+  matches: SearchRoute[],
+  clearSearchKey: 'sop' | 'hub' | 'sidebar',
+): void {
+  clearElement(container);
+
+  matches.forEach((route) => {
+    const button = document.createElement('button');
+    button.dataset.action = 'switch-tab';
+    button.dataset.tab = route.id;
+    button.dataset.clearSearch = clearSearchKey;
+    button.className = 'w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all';
+
+    const icon = document.createElement('i');
+    icon.className = `${route.icon || 'fas fa-circle'} w-4 text-center`;
+    button.appendChild(icon);
+
+    const label = document.createElement('span');
+    label.className = clearSearchKey === 'sidebar' ? 'flex-1 text-left' : 'truncate';
+    label.textContent = route.label || '';
+    button.appendChild(label);
+
+    button.addEventListener('click', () => {
+      if (clearSearchKey === 'sop') {
+        window.clearSOPSearch?.();
+      } else if (clearSearchKey === 'hub') {
+        window.clearHubSearch?.();
+      } else {
+        window.clearSidebarSearch?.();
+      }
+    });
+
+    container.appendChild(button);
+  });
+}
+
 /**
  * 搜索 SOPs
  */
@@ -51,22 +122,9 @@ export function searchSOPs(query: string): void {
   if (!resultsContainer) return;
 
   if (matches.length === 0) {
-    resultsContainer.innerHTML = '<div class="text-xs text-slate-400 text-center py-2">未找到匹配的 SOP</div>';
+    appendEmptyResult(resultsContainer, '未找到匹配的 SOP');
   } else {
-    resultsContainer.innerHTML = matches.map(route => `
-      <button data-action="switch-tab" data-tab="${route.id}" data-clear-search="sop"
-        class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all">
-        <i class="${route.icon} w-4 text-center"></i>
-        <span class="truncate">${route.label}</span>
-      </button>
-    `).join('');
-    
-    // 绑定事件处理器
-    resultsContainer.querySelectorAll('[data-clear-search="sop"]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        window.clearSOPSearch?.();
-      });
-    });
+    appendSearchMatches(resultsContainer, matches, 'sop');
   }
 
   resultsContainer.classList.remove('hidden');
@@ -127,22 +185,9 @@ export function searchHub(query: string): void {
   if (!resultsContainer) return;
 
   if (matches.length === 0) {
-    resultsContainer.innerHTML = '<div class="text-xs text-slate-400 text-center py-2">未找到匹配的内容</div>';
+    appendEmptyResult(resultsContainer, '未找到匹配的内容');
   } else {
-    resultsContainer.innerHTML = matches.map(route => `
-      <button data-action="switch-tab" data-tab="${route.id}" data-clear-search="hub"
-        class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all">
-        <i class="${route.icon} w-4 text-center"></i>
-        <span class="truncate">${route.label}</span>
-      </button>
-    `).join('');
-    
-    // 绑定事件处理器
-    resultsContainer.querySelectorAll('[data-clear-search="hub"]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        window.clearHubSearch?.();
-      });
-    });
+    appendSearchMatches(resultsContainer, matches, 'hub');
   }
 
   resultsContainer.classList.remove('hidden');
@@ -215,29 +260,11 @@ export function searchSidebar(query: string): void {
 
   // 显示结果
   if (matches.length === 0) {
-    resultsContainer.innerHTML = `
-      <div class="p-3 text-xs text-slate-400 text-center">
-        <i class="fas fa-search mb-2"></i>
-        <p>未找到匹配项</p>
-      </div>
-    `;
+    appendEmptyResult(resultsContainer, '未找到匹配项', true);
     resultsContainer.classList.remove('hidden');
     navContainer.classList.add('hidden');
   } else {
-    resultsContainer.innerHTML = matches.map(route => `
-      <button data-action="switch-tab" data-tab="${route.id}" data-clear-search="sidebar"
-        class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all">
-        <i class="${route.icon} w-4 text-center"></i>
-        <span class="flex-1 text-left">${route.label}</span>
-      </button>
-    `).join('');
-    
-    // 绑定事件处理器
-    resultsContainer.querySelectorAll('[data-clear-search="sidebar"]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        window.clearSidebarSearch?.();
-      });
-    });
+    appendSearchMatches(resultsContainer, matches, 'sidebar');
     
     resultsContainer.classList.remove('hidden');
     navContainer.classList.add('hidden');
