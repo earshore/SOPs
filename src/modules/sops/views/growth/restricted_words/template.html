@@ -33,6 +33,59 @@
                         </div>
                 </div>
         </div>
+        <!-- 新人执行清单 -->
+        <section class="bg-white rounded-xl border border-red-200 p-6 mb-6">
+                <div class="flex flex-col lg:flex-row gap-6">
+                        <div class="lg:w-1/2">
+                                <h2 class="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+                                        <i class="fas fa-list-check text-red-500"></i>发布前必查清单
+                                </h2>
+                                <div class="space-y-2 text-sm text-slate-600">
+                                        <label class="flex items-start gap-2">
+                                                <input type="checkbox" class="mt-1 accent-red-600">
+                                                <span>把 Title、Bullets、Description、A+、Search Terms 合并成一份待查文本。</span>
+                                        </label>
+                                        <label class="flex items-start gap-2">
+                                                <input type="checkbox" class="mt-1 accent-red-600">
+                                                <span>逐个搜索核心卖点词、材质词、功能声明词、安全认证词。</span>
+                                        </label>
+                                        <label class="flex items-start gap-2">
+                                                <input type="checkbox" class="mt-1 accent-red-600">
+                                                <span>DE/FR/IT/ES/NL 文案分别检查，不用中文结果替代本地语言结果。</span>
+                                        </label>
+                                        <label class="flex items-start gap-2">
+                                                <input type="checkbox" class="mt-1 accent-red-600">
+                                                <span>命中 5 级词直接删除；命中 4 级词必须确认是否有证书。</span>
+                                        </label>
+                                        <label class="flex items-start gap-2">
+                                                <input type="checkbox" class="mt-1 accent-red-600">
+                                                <span>替换后重新检查一次，避免新词又触发风险。</span>
+                                        </label>
+                                </div>
+                        </div>
+                        <div class="lg:w-1/2 grid grid-cols-1 gap-4">
+                                <div class="bg-red-50 border border-red-100 rounded-xl p-4">
+                                        <h3 class="font-bold text-red-800 mb-2">完成标准</h3>
+                                        <ul class="text-sm text-slate-600 space-y-1.5 list-disc pl-5">
+                                                <li>无 5 级风险词。</li>
+                                                <li>所有 4 级风险词都有证书依据，或已替换。</li>
+                                                <li>输出一份“命中词、风险等级、处理动作、复查结果”记录。</li>
+                                        </ul>
+                                </div>
+                                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                                        <h3 class="font-bold text-slate-800 mb-2">检查记录模板</h3>
+                                        <textarea readonly class="w-full min-h-[120px] text-xs font-mono text-slate-600 bg-white border border-slate-200 rounded-lg p-3">ASIN:
+站点/语言:
+检查范围: Title / Bullets / Description / A+ / Search Terms
+命中词:
+风险等级:
+处理动作: 删除 / 替换 / 保留并附证书
+替换后复查结果:
+需要你复核的问题:</textarea>
+                                </div>
+                        </div>
+                </div>
+        </section>
         <!-- ========== 为什么这是最高优先级 ========== -->
         <div class="bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-xl p-5 mb-6">
                 <h3 class="font-bold text-lg mb-3 flex items-center gap-2">

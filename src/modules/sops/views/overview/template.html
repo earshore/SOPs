@@ -51,6 +51,80 @@
                         </div>
                 </div>
         </div>
+        <!-- 新人常用任务 -->
+        <section class="mb-8" aria-label="新人常用任务">
+                <div class="flex items-center justify-between gap-3 mb-4">
+                        <div>
+                                <h2 class="text-xl font-bold text-slate-800">新人常用任务</h2>
+                                <p class="text-sm text-slate-500">先从这些高频动作开始，不用理解完整系统结构。</p>
+                        </div>
+                        <span class="hidden sm:inline-flex items-center gap-1 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-100">
+                                <i class="fas fa-route"></i>入门路径
+                        </span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
+                        <div class="sop-card border-l-4 border-l-emerald-400" data-action="switch-tab"
+                                data-tab="sops_listing_seo">
+                                <div class="flex items-start justify-between mb-3">
+                                        <div class="sop-icon-container bg-emerald-50 text-emerald-600">
+                                                <i class="fas fa-magnifying-glass-chart"></i>
+                                        </div>
+                                        <span class="sop-status-badge sop-status-active">先做</span>
+                                </div>
+                                <h3 class="font-bold text-lg text-slate-800 mb-2">优化 Listing</h3>
+                                <p class="text-sm text-slate-500 mb-3">标题、五点、A+ 和移动端检查。</p>
+                                <div class="text-xs text-slate-400"><i class="fas fa-arrow-right mr-1"></i>进入 SEO SOP</div>
+                        </div>
+                        <div class="sop-card border-l-4 border-l-red-400" data-action="switch-tab"
+                                data-tab="sops_restricted_words">
+                                <div class="flex items-start justify-between mb-3">
+                                        <div class="sop-icon-container bg-red-50 text-red-600">
+                                                <i class="fas fa-triangle-exclamation"></i>
+                                        </div>
+                                        <span class="sop-status-badge sop-status-active">必查</span>
+                                </div>
+                                <h3 class="font-bold text-lg text-slate-800 mb-2">检查高危词</h3>
+                                <p class="text-sm text-slate-500 mb-3">发布前排除欧洲站合规风险。</p>
+                                <div class="text-xs text-slate-400"><i class="fas fa-arrow-right mr-1"></i>进入词库 SOP</div>
+                        </div>
+                        <div class="sop-card border-l-4 border-l-blue-400" data-action="switch-tab"
+                                data-tab="scraper">
+                                <div class="flex items-start justify-between mb-3">
+                                        <div class="sop-icon-container bg-blue-50 text-blue-600">
+                                                <i class="fas fa-spider"></i>
+                                        </div>
+                                        <span class="sop-status-badge sop-status-active">工具</span>
+                                </div>
+                                <h3 class="font-bold text-lg text-slate-800 mb-2">分析竞品</h3>
+                                <p class="text-sm text-slate-500 mb-3">采集 ASIN 数据，准备 AI 分析素材。</p>
+                                <div class="text-xs text-slate-400"><i class="fas fa-arrow-right mr-1"></i>进入数据采集</div>
+                        </div>
+                        <div class="sop-card border-l-4 border-l-purple-400" data-action="switch-tab"
+                                data-tab="promptlab">
+                                <div class="flex items-start justify-between mb-3">
+                                        <div class="sop-icon-container bg-purple-50 text-purple-600">
+                                                <i class="fas fa-wand-magic-sparkles"></i>
+                                        </div>
+                                        <span class="sop-status-badge sop-status-active">输出</span>
+                                </div>
+                                <h3 class="font-bold text-lg text-slate-800 mb-2">生成 Prompt</h3>
+                                <p class="text-sm text-slate-500 mb-3">把产品 DNA 转成可复制的 Listing 指令。</p>
+                                <div class="text-xs text-slate-400"><i class="fas fa-arrow-right mr-1"></i>进入 Prompt 生成</div>
+                        </div>
+                        <div class="sop-card border-l-4 border-l-blue-400" data-action="switch-tab"
+                                data-tab="sops_negative_review">
+                                <div class="flex items-start justify-between mb-3">
+                                        <div class="sop-icon-container bg-blue-50 text-blue-600">
+                                                <i class="fas fa-comment-dots"></i>
+                                        </div>
+                                        <span class="sop-status-badge sop-status-active">售后</span>
+                                </div>
+                                <h3 class="font-bold text-lg text-slate-800 mb-2">处理差评</h3>
+                                <p class="text-sm text-slate-500 mb-3">分级响应、登记 VOC、反馈供应链。</p>
+                                <div class="text-xs text-slate-400"><i class="fas fa-arrow-right mr-1"></i>进入差评 SOP</div>
+                        </div>
+                </div>
+        </section>
         <!-- 分类筛选器 -->
         <div class="mb-6 flex items-center gap-3 overflow-x-auto pb-2">
                 <button class="category-filter-btn active px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium transition-all whitespace-nowrap hover:bg-blue-600"

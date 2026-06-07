@@ -94,6 +94,23 @@
                         </div>
                     </div>
                 </div>
+                <div x-show="reportActionDisabled" class="mx-6 mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                        <div>
+                            <h4 class="font-bold text-amber-900 flex items-center gap-2 text-sm">
+                                <i class="fas fa-circle-info text-amber-600"></i>
+                                未检测到 AI 分析报告
+                            </h4>
+                            <p class="text-xs text-amber-800/80 mt-1">
+                                可以先去 AI 分析生成报告，也可以直接手动填写下方产品 DNA 字段。
+                            </p>
+                        </div>
+                        <button type="button" data-action="switch-tab" data-tab="ai_analysis"
+                            class="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold transition-colors">
+                            <i class="fas fa-brain mr-1"></i>去 AI 分析
+                        </button>
+                    </div>
+                </div>
                 <!-- Card Body -->
                 <div class="p-6">
                     <div class="space-y-5">

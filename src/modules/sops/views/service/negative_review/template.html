@@ -33,6 +33,64 @@
             </div>
         </div>
     </div>
+    <!-- 新人执行清单 -->
+    <section class="bg-white rounded-xl border border-purple-200 p-6 mb-6">
+        <div class="flex flex-col lg:flex-row gap-6">
+            <div class="lg:w-1/2">
+                <h2 class="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+                    <i class="fas fa-list-check text-purple-500"></i>差评处理照做清单
+                </h2>
+                <div class="space-y-2 text-sm text-slate-600">
+                    <label class="flex items-start gap-2">
+                        <input type="checkbox" class="mt-1 accent-purple-600">
+                        <span>记录 ASIN、站点、星级、评论链接、评论时间、是否带图/视频。</span>
+                    </label>
+                    <label class="flex items-start gap-2">
+                        <input type="checkbox" class="mt-1 accent-purple-600">
+                        <span>按 P0/P1/P2/P3 分级，先处理 1 星、带图视频、主力 ASIN。</span>
+                    </label>
+                    <label class="flex items-start gap-2">
+                        <input type="checkbox" class="mt-1 accent-purple-600">
+                        <span>判断问题类型：质量、物流、描述不符、使用误解、恶意/无关。</span>
+                    </label>
+                    <label class="flex items-start gap-2">
+                        <input type="checkbox" class="mt-1 accent-purple-600">
+                        <span>写 Seller Comment 时只解释事实和解决路径，不提退款换评价。</span>
+                    </label>
+                    <label class="flex items-start gap-2">
+                        <input type="checkbox" class="mt-1 accent-purple-600">
+                        <span>把 VOC 反馈到对应环节：Listing、质检、包装、说明书或供应商。</span>
+                    </label>
+                    <label class="flex items-start gap-2">
+                        <input type="checkbox" class="mt-1 accent-purple-600">
+                        <span>周五汇总本周差评原因和需要你决策的问题。</span>
+                    </label>
+                </div>
+            </div>
+            <div class="lg:w-1/2 grid grid-cols-1 gap-4">
+                <div class="bg-purple-50 border border-purple-100 rounded-xl p-4">
+                    <h3 class="font-bold text-purple-800 mb-2">完成标准</h3>
+                    <ul class="text-sm text-slate-600 space-y-1.5 list-disc pl-5">
+                        <li>每条差评都有优先级、问题类型和处理动作。</li>
+                        <li>P0/P1 已在时效内处理或标记为需你介入。</li>
+                        <li>可复盘的问题进入 VOC 周报，不只停留在客服回复。</li>
+                    </ul>
+                </div>
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                    <h3 class="font-bold text-slate-800 mb-2">VOC 登记模板</h3>
+                    <textarea readonly class="w-full min-h-[120px] text-xs font-mono text-slate-600 bg-white border border-slate-200 rounded-lg p-3">ASIN:
+站点:
+星级/链接:
+优先级: P0 / P1 / P2 / P3
+问题类型:
+处理动作:
+是否可 Report:
+需要供应链/Listing 改进:
+需要你决策的问题:</textarea>
+                </div>
+            </div>
+        </div>
+    </section>
     <!-- ========== 核心指标仪表盘 ========== -->
     <div class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
         <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-center">
