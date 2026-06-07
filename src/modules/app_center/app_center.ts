@@ -6,38 +6,12 @@
 console.log('🎯 App Center Core Module Loading...');
 import './app_center_style.css';
 import { createModuleLoader, ModuleLoader } from '@/common/utils/ModuleLoader';
-import { APP_CENTER_ROUTES } from '@/common/constants/routes';
-import type { IModule } from '@/common/utils/ModuleLoader';
-
-/**
- * 模块加载器函数类型
- */
-type ModuleLoaderFn = () => Promise<IModule>;
-
-/**
- * 模块映射类型
- */
-type ModuleMap = Record<string, ModuleLoaderFn>;
+import { buildModuleMap } from '@/common/config/moduleManifest';
+import type { ModuleMap, ModuleLoaderFn } from '@/types/modules-business';
+import { appCenterManifest } from './module.manifest';
 
 // ================= 路由配置表 =================
-// 使用路由常量，避免硬编码
-const MODULE_MAP: ModuleMap = {
-  // App Center Overview
-  [APP_CENTER_ROUTES.OVERVIEW]: () => import('./views/overview/index'),
-
-  // Master Analysis 子模块
-  [APP_CENTER_ROUTES.SCRAPER]: () => import('./views/master_analysis/scraper/index'),
-  [APP_CENTER_ROUTES.AI_ANALYSIS]: () => import('./views/master_analysis/ai_analysis/index'),
-  [APP_CENTER_ROUTES.PROMPTLAB]: () => import('./views/master_analysis/promptlab/index'),
-
-  // Keyword Hunter 子模块
-  [APP_CENTER_ROUTES.KW_INPUT]: () => import('./views/keyword_hunter/input/index'),
-  [APP_CENTER_ROUTES.KW_PROCESS]: () => import('./views/keyword_hunter/process/index'),
-  [APP_CENTER_ROUTES.KW_ANALYSIS]: () => import('./views/keyword_hunter/analysis/index'),
-
-  // Playground
-  [APP_CENTER_ROUTES.PLAYGROUND]: () => import('./views/playground/deep-chat/index'),
-};
+const MODULE_MAP: ModuleMap = buildModuleMap(appCenterManifest);
 
 // ================= 使用通用ModuleLoader =================
 const moduleLoader: ModuleLoader = createModuleLoader({

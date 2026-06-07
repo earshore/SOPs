@@ -45,7 +45,7 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   // 测试目录
-  testDir: './test',
+  testDir: './tests',
 
   // 测试文件匹配模式
   testMatch: [
@@ -73,10 +73,10 @@ export default defineConfig({
   globalTimeout: 5 * 60 * 1000,
 
   // 全局设置脚本
-  globalSetup: './test/playwright-setup.ts',
+  globalSetup: './tests/playwright-setup.ts',
 
   // 全局清理脚本
-  globalTeardown: './test/playwright-teardown.ts',
+  globalTeardown: './tests/playwright-teardown.ts',
 
   // 期望超时（5秒）
   expect: {
@@ -98,7 +98,7 @@ export default defineConfig({
   reporter: [
     // HTML 报告（主要报告格式）
     ['html', {
-      outputFolder: 'test/playwright-report',
+      outputFolder: 'tests/playwright-report',
       open: 'never',
       host: 'localhost',
       port: 9323
@@ -106,12 +106,12 @@ export default defineConfig({
 
     // JSON 报告（用于自定义处理）
     ['json', {
-      outputFile: 'test/playwright-report/results.json'
+      outputFile: 'tests/playwright-report/results.json'
     }],
 
     // JUnit XML 报告（用于 CI/CD 集成）
     ['junit', {
-      outputFile: 'test/playwright-report/junit.xml',
+      outputFile: 'tests/playwright-report/junit.xml',
       embedAnnotationsAsProperties: true,
       embedAttachmentsAsProperty: 'testrun.attachments'
     }],

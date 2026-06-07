@@ -1,18 +1,12 @@
 console.log('📋 More Core Module Loading...');
 import './more_style.css';
 import { createModuleLoader, ModuleLoader } from '../../common/utils/ModuleLoader';
+import { buildModuleMap } from '@/common/config/moduleManifest';
 import type { ModuleMap, ModuleLoaderFn } from '@/types/modules-business';
+import { moreManifest } from './module.manifest';
 
 // ================= 路由配置表 =================
-const MODULE_MAP: ModuleMap = {
-    // 总览
-    more_overview: () => import('./views/overview/index'),
-
-    // 探索体系
-    more_agents: () => import('./views/explore/agents/index'),
-    more_prompts: () => import('./views/explore/prompts/index'),
-    more_workflows: () => import('./views/explore/workflows/index'),
-};
+const MODULE_MAP: ModuleMap = buildModuleMap(moreManifest);
 
 // ================= 使用通用ModuleLoader =================
 const moduleLoader: ModuleLoader = createModuleLoader({

@@ -1,353 +1,280 @@
-name: CI/CD Pipeline
+name: Quality Gate
 
 on:
   push:
-    branches: [ main, develop, branch2-21 ]
+    branches: [main, develop, branch2-21]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-gate-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  # 代码质量检查
-  quality-check:
-    name: 代码质量检查
+  type-check:
+    name: type-check
     runs-on: windows-latest
-    
+
     steps:
-      - name: Checkout 代码
+      - name: Checkout
         uses: actions/checkout@v4
-      
-      - name: 设置 Node.js
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-          cache: 'npm'
-      
-      - name: 安装依赖
+          cache: npm
+
+      - name: Install dependencies
         run: npm ci
-      
-      - name: 类型检查
+
+      - name: Type check
         run: npm run type-check
-      
-      - name: ESLint 检查
-        run: npm run lint
-        continue-on-error: true
 
-      - name: ESLint warning 基线门禁
-        run: npm run lint:warning-gate
-      
-      - name: 代码格式检查
-        run: npm run format:check
-        continue-on-error: true
-      
-      - name: 技术债务扫描
-        run: npm run tech-debt:scan
-        continue-on-error: true
-      
-      - name: 代码质量监控
-        run: npm run quality:monitor
-        continue-on-error: true
-      
-      - name: 上传质量报告
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: quality-reports
-          path: |
-            *-report.html
-            *-report.json
-          retention-days: 30
-
-  # 单元测试
-  unit-test:
-    name: 单元测试
+  lint-warning-gate:
+    name: lint warning gate
     runs-on: windows-latest
-    needs: quality-check
-    
-    strategy:
-      matrix:
-        node-version: [18.x, 20.x]
-    
-    steps:
-      - name: Checkout 代码
-        uses: actions/checkout@v4
-      
-      - name: 设置 Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-      
-      - name: 安装依赖
-        run: npm ci
-      
-      - name: 运行单元测试
-        id: test
-        run: npm run test:coverage
-      
-      - name: 上传覆盖率报告
-        uses: codecov/codecov-action@v4
-        if: matrix.node-version == '20.x'
-        with:
-          files: ./coverage/lcov.info
-          flags: unittests
-          name: codecov-umbrella
-          fail_ci_if_error: false
-      
-      - name: 上传测试报告
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: test-results-${{ matrix.node-version }}
-          path: |
-            coverage/
-            test-results/
-          retention-days: 30
-      
-      - name: 检查覆盖率阈值
-        if: matrix.node-version == '20.x'
-        run: |
-          node -e "const fs = require('fs'); const coverage = JSON.parse(fs.readFileSync('./coverage/coverage-summary.json', 'utf8')); const total = coverage.total; const threshold = 60; const lines = total.lines.pct; const statements = total.statements.pct; console.log('覆盖率统计:'); console.log('  行覆盖率:', lines + '%'); console.log('  语句覆盖率:', statements + '%'); if (lines < threshold || statements < threshold) { console.error('错误: 覆盖率低于阈值 ' + threshold + '%'); process.exit(1); } console.log('✅ 覆盖率检查通过');"
+    needs: type-check
 
-  # 构建测试
-  build-test:
-    name: 构建测试
-    runs-on: windows-latest
-    needs: quality-check
-    
     steps:
-      - name: Checkout 代码
+      - name: Checkout
         uses: actions/checkout@v4
-      
-      - name: 设置 Node.js
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-          cache: 'npm'
-      
-      - name: 安装依赖
+          cache: npm
+
+      - name: Install dependencies
         run: npm ci
-      
-      - name: 运行构建
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: ESLint warning baseline gate
+        run: npm run lint:warning-gate
+
+  unit:
+    name: unit
+    runs-on: windows-latest
+    needs: lint-warning-gate
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm run test:coverage
+
+      - name: Check coverage threshold
+        shell: pwsh
+        run: |
+          $coverage = Get-Content './coverage/coverage-summary.json' -Raw | ConvertFrom-Json
+          $threshold = 60
+          $lines = $coverage.total.lines.pct
+          $statements = $coverage.total.statements.pct
+          Write-Host "Line coverage: $lines%"
+          Write-Host "Statement coverage: $statements%"
+          if ($lines -lt $threshold -or $statements -lt $threshold) {
+            Write-Error "Coverage is below the $threshold% threshold."
+            exit 1
+          }
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 30
+
+  build:
+    name: build
+    runs-on: windows-latest
+    needs: unit
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
         run: npm run build
-      
-      - name: 检查构建产物
+
+      - name: Check build output
+        shell: pwsh
         run: |
-          if (!(Test-Path "dist/index.html")) { Write-Error "构建产物不完整"; exit 1 }
-          if (!(Test-Path "dist/assets")) { Write-Error "资源文件缺失"; exit 1 }
-          Write-Host "✅ 构建产物检查通过"
-      
-      - name: 检查构建大小
-        run: |
-          $distSize = (Get-ChildItem -Path dist -Recurse | Measure-Object -Property Length -Sum).Sum / 1MB
-          Write-Host "构建大小: $([math]::Round($distSize, 2)) MB"
-          if ($distSize -gt 10) { Write-Warning "构建大小超过 10MB" }
-      
-      - name: 上传构建产物
+          if (!(Test-Path 'dist/index.html')) {
+            Write-Error 'Missing dist/index.html.'
+            exit 1
+          }
+          if (!(Test-Path 'dist/assets')) {
+            Write-Error 'Missing dist/assets.'
+            exit 1
+          }
+
+      - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: build-artifacts
+          name: build-artifact
           path: dist/
           retention-days: 7
 
-  # E2E 测试
-  e2e-test:
-    name: E2E 测试
+  smoke-e2e:
+    name: smoke e2e
     runs-on: windows-latest
-    needs: build-test
-    
+    needs: build
+
     steps:
-      - name: Checkout 代码
+      - name: Checkout
         uses: actions/checkout@v4
-      
-      - name: 设置 Node.js
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-          cache: 'npm'
-      
-      - name: 安装依赖
+          cache: npm
+
+      - name: Install dependencies
         run: npm ci
-      
-      - name: 安装 Playwright
-        run: npx playwright install --with-deps chromium
-      
-      - name: 运行 E2E 测试
-        run: npm run test:e2e:chromium
-        continue-on-error: true
-      
-      - name: 上传测试报告
+
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium
+
+      - name: Run smoke E2E
+        run: npx playwright test tests/startup --project=chromium
+
+      - name: Upload E2E report
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: e2e-test-results
+          name: smoke-e2e-report
           path: |
-            playwright-report/
+            tests/playwright-report/
             test-results/
           retention-days: 30
 
-  # 性能测试
-  performance-test:
-    name: 性能测试
+  performance:
+    name: performance
     runs-on: windows-latest
-    needs: build-test
-    
+    needs: smoke-e2e
+
     steps:
-      - name: Checkout 代码
+      - name: Checkout
         uses: actions/checkout@v4
-      
-      - name: 设置 Node.js
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-          cache: 'npm'
-      
-      - name: 安装依赖
+          cache: npm
+
+      - name: Install dependencies
         run: npm ci
-      
-      - name: 安装 Playwright
-        run: npx playwright install --with-deps chromium
-      
-      - name: 运行性能测试
-        run: npm run test:performance
-        continue-on-error: true
-      
-      - name: 上传性能报告
+
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium
+
+      - name: Run performance tests
+        run: npx playwright test tests/performance/ai-analysis-performance.test.ts tests/performance/promptlab-performance.test.ts tests/performance/scraper-performance.test.ts --project=chromium
+
+      - name: Upload performance report
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: performance-reports
+          name: performance-report
           path: |
+            tests/playwright-report/
+            test-results/
             .lighthouseci/
+            tests/performance/lighthouse-reports/
             performance-*.json
           retention-days: 30
 
-  # 安全审计
-  security-audit:
-    name: 安全审计
+  npm-audit:
+    name: npm audit
     runs-on: windows-latest
-    needs: quality-check
-    
+    needs: performance
+
     steps:
-      - name: Checkout 代码
+      - name: Checkout
         uses: actions/checkout@v4
-      
-      - name: 设置 Node.js
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-          cache: 'npm'
-      
-      - name: 安装依赖
-        run: npm ci
-      
-      - name: npm 安全审计
-        run: npm audit --audit-level=moderate
-        continue-on-error: true
-      
-      - name: 代码安全扫描
-        run: npm run security:audit
-        continue-on-error: true
-      
-      - name: 上传安全报告
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: security-reports
-          path: |
-            security-*.json
-            security-*.html
-          retention-days: 30
+          cache: npm
 
-  # 质量门禁
-  quality-gate:
-    name: 质量门禁
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
+
+  required:
+    name: required
     runs-on: windows-latest
-    needs: [unit-test, build-test, e2e-test, performance-test, security-audit]
+    needs:
+      - type-check
+      - lint-warning-gate
+      - unit
+      - build
+      - smoke-e2e
+      - performance
+      - npm-audit
     if: always()
-    
+
     steps:
-      - name: 检查所有任务状态
+      - name: Check required gate results
+        shell: pwsh
         run: |
-          $unitTest = "${{ needs.unit-test.result }}"
-          $buildTest = "${{ needs.build-test.result }}"
-          $e2eTest = "${{ needs.e2e-test.result }}"
-          $perfTest = "${{ needs.performance-test.result }}"
-          $secAudit = "${{ needs.security-audit.result }}"
-          
-          Write-Host "=== 质量门禁检查 ==="
-          Write-Host "单元测试: $unitTest"
-          Write-Host "构建测试: $buildTest"
-          Write-Host "E2E测试: $e2eTest"
-          Write-Host "性能测试: $perfTest"
-          Write-Host "安全审计: $secAudit"
-          
-          $failed = @()
-          if ($unitTest -eq "failure") { $failed += "单元测试" }
-          if ($buildTest -eq "failure") { $failed += "构建测试" }
-          
+          $results = @{
+            'type-check' = '${{ needs['type-check'].result }}'
+            'lint warning gate' = '${{ needs['lint-warning-gate'].result }}'
+            'unit' = '${{ needs.unit.result }}'
+            'build' = '${{ needs.build.result }}'
+            'smoke e2e' = '${{ needs['smoke-e2e'].result }}'
+            'performance' = '${{ needs.performance.result }}'
+            'npm audit' = '${{ needs['npm-audit'].result }}'
+          }
+
+          Add-Content $env:GITHUB_STEP_SUMMARY '## Quality Gate'
+          Add-Content $env:GITHUB_STEP_SUMMARY ''
+          Add-Content $env:GITHUB_STEP_SUMMARY '| Check | Result |'
+          Add-Content $env:GITHUB_STEP_SUMMARY '| --- | --- |'
+
+          foreach ($entry in ($results.GetEnumerator() | Sort-Object Name)) {
+            Write-Host "$($entry.Name): $($entry.Value)"
+            Add-Content $env:GITHUB_STEP_SUMMARY "| $($entry.Name) | $($entry.Value) |"
+          }
+
+          $failed = @($results.GetEnumerator() | Where-Object { $_.Value -ne 'success' })
           if ($failed.Count -gt 0) {
-            Write-Error "质量门禁失败: $($failed -join ', ')"
+            $failedNames = ($failed | ForEach-Object { $_.Name }) -join ', '
+            Write-Error "Quality gate failed: $failedNames"
             exit 1
           }
-          
-          Write-Host "✅ 质量门禁通过"
-      
-      - name: 生成摘要
-        run: |
-          echo "## 🎯 CI/CD 执行摘要" >> $env:GITHUB_STEP_SUMMARY
-          echo "" >> $env:GITHUB_STEP_SUMMARY
-          echo "| 检查项 | 状态 |" >> $env:GITHUB_STEP_SUMMARY
-          echo "|--------|------|" >> $env:GITHUB_STEP_SUMMARY
-          echo "| 单元测试 | ${{ needs.unit-test.result == 'success' && '✅' || '❌' }} |" >> $env:GITHUB_STEP_SUMMARY
-          echo "| 构建测试 | ${{ needs.build-test.result == 'success' && '✅' || '❌' }} |" >> $env:GITHUB_STEP_SUMMARY
-          echo "| E2E测试 | ${{ needs.e2e-test.result == 'success' && '✅' || '⚠️' }} |" >> $env:GITHUB_STEP_SUMMARY
-          echo "| 性能测试 | ${{ needs.performance-test.result == 'success' && '✅' || '⚠️' }} |" >> $env:GITHUB_STEP_SUMMARY
-          echo "| 安全审计 | ${{ needs.security-audit.result == 'success' && '✅' || '⚠️' }} |" >> $env:GITHUB_STEP_SUMMARY
 
-  # PR 评论
-  pr-comment:
-    name: PR 评论
-    runs-on: windows-latest
-    needs: quality-gate
-    if: github.event_name == 'pull_request' && always()
-    
-    steps:
-      - name: 评论 PR
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const unitTest = '${{ needs.unit-test.result }}';
-            const buildTest = '${{ needs.build-test.result }}';
-            const e2eTest = '${{ needs.e2e-test.result }}';
-            const perfTest = '${{ needs.performance-test.result }}';
-            const secAudit = '${{ needs.security-audit.result }}';
-            const gateResult = '${{ needs.quality-gate.result }}';
-            
-            const statusIcon = (status) => {
-              if (status === 'success') return '✅';
-              if (status === 'failure') return '❌';
-              return '⚠️';
-            };
-            
-            const comment = `## 🤖 CI/CD 执行报告
-            
-            | 检查项 | 状态 | 结果 |
-            |--------|------|------|
-            | 单元测试 | ${statusIcon(unitTest)} | ${unitTest} |
-            | 构建测试 | ${statusIcon(buildTest)} | ${buildTest} |
-            | E2E测试 | ${statusIcon(e2eTest)} | ${e2eTest} |
-            | 性能测试 | ${statusIcon(perfTest)} | ${perfTest} |
-            | 安全审计 | ${statusIcon(secAudit)} | ${secAudit} |
-            | **质量门禁** | ${statusIcon(gateResult)} | **${gateResult}** |
-            
-            ${gateResult === 'success' ? '✅ 所有检查通过,可以合并' : '❌ 存在失败的检查,请修复后重新提交'}
-            
-            **工作流运行**: [查看详情](${context.payload.repository.html_url}/actions/runs/${context.runId})
-            `;
-            
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: comment
-            });
+          Write-Host 'Quality gate passed.'
