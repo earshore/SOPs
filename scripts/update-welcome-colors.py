@@ -117,6 +117,8 @@ MODULE_CATEGORY_MAP: Dict[str, str] = {
     'amz_hub/views/knowledge/seo_strategy': 'knowledge',
     'amz_hub/views/overview': 'knowledge',
     'amz_hub/views/practice/marketing_calendar': 'knowledge',
+    'amz_hub/views/practice/promo_activities': 'knowledge',
+    'amz_hub/views/practice/promo_tools': 'knowledge',
     'amz_hub/views/practice/promotions': 'knowledge',
     'amz_hub/views/practice/quality_listing': 'knowledge',
 
@@ -138,6 +140,40 @@ def get_module_path_from_file(file_path: Path) -> str:
         return '/'.join(module_parts)
     except (ValueError, IndexError):
         return ''
+
+
+def update_style_variables(style: str, updates: Dict[str, str]) -> str:
+    """只更新指定 CSS 变量，保留同一个 style 属性中的其它声明"""
+    declarations = []
+    seen = set()
+
+    for raw_declaration in style.split(';'):
+        declaration = raw_declaration.strip()
+        if not declaration:
+            continue
+
+        if ':' not in declaration:
+            declarations.append((None, declaration))
+            continue
+
+        name, value = declaration.split(':', 1)
+        name = name.strip()
+        value = value.strip()
+
+        if name in updates:
+            value = updates[name]
+            seen.add(name)
+
+        declarations.append((name, value))
+
+    for name, value in updates.items():
+        if name not in seen:
+            declarations.append((name, value))
+
+    return '; '.join(
+        f'{name}: {value}' if name else value
+        for name, value in declarations
+    ) + ';'
 
 
 def update_welcome_banner_colors(file_path: Path, dry_run: bool = False) -> bool:
@@ -170,26 +206,32 @@ def update_welcome_banner_colors(file_path: Path, dry_run: bool = False) -> bool
         print(f"[ERROR] 读取文件失败 {file_path}: {e}")
         return False
 
-    # 匹配 wb-container 的 style 属性（支持额外的 class）
-    pattern = r'(<div class="[^"]*wb-container[^"]*"[^>]*style=")([^"]*)(">)'
+    # 匹配同一个 div 内的 wb-container class 与 style 属性，支持属性换行和顺序变化
+    container_pattern = r'<div\b(?=[^>]*\bclass="[^"]*\bwb-container\b[^"]*")[^>]*>'
+    pattern = r'(<div\b(?=[^>]*\bclass="[^"]*\bwb-container\b[^"]*")[^>]*\bstyle=")([^"]*)(")'
 
     def replace_colors(match):
         prefix = match.group(1)
         old_style = match.group(2)
         suffix = match.group(3)
 
-        # 构建新的 style 属性
-        new_style = f"--wb-gradient-1: {color_scheme[0]}; --wb-gradient-2: {color_scheme[1]};"
+        new_style = update_style_variables(old_style, {
+            '--wb-gradient-1': color_scheme[0],
+            '--wb-gradient-2': color_scheme[1],
+        })
 
         return f"{prefix}{new_style}{suffix}"
 
     # 检查是否有匹配
-    if not re.search(pattern, content):
-        print(f"[WARN] 未找到 wb-container: {file_path}")
+    if not re.search(pattern, content, flags=re.DOTALL):
+        if re.search(container_pattern, content, flags=re.DOTALL):
+            print(f"[WARN] 未找到 wb-container style: {file_path}")
+        else:
+            print(f"[WARN] 未找到 wb-container: {file_path}")
         return False
 
     # 替换配色
-    new_content = re.sub(pattern, replace_colors, content)
+    new_content = re.sub(pattern, replace_colors, content, flags=re.DOTALL)
 
     # 检查是否有变化
     if new_content == content:

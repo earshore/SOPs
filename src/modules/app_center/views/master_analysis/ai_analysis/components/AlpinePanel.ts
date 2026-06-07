@@ -354,8 +354,55 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
       return `数据源: ${ctx.dataSourceLabel}`;
     },
 
+    get analysisHeroIsStrong(): boolean {
+      return this.isAnalyzing || this.canRunAnalysis || this.progress >= 100;
+    },
+
+    get analysisHeroCardClass(): string {
+      return this.analysisHeroIsStrong
+        ? 'shadow-xl shadow-indigo-200/40'
+        : 'bg-white border border-slate-200 shadow-sm shadow-slate-200/60';
+    },
+
+    get analysisHeroBackdropClass(): string {
+      return this.analysisHeroIsStrong
+        ? 'bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600'
+        : 'bg-white';
+    },
+
+    get analysisHeroAmbientClass(): string {
+      return this.analysisHeroIsStrong ? 'opacity-100' : 'opacity-0';
+    },
+
+    get analysisHeroPatternClass(): string {
+      return this.analysisHeroIsStrong ? 'opacity-5' : 'opacity-0';
+    },
+
+    get analysisHeroTextClass(): string {
+      return this.analysisHeroIsStrong ? 'text-white' : 'text-slate-800';
+    },
+
+    get analysisHeroSubtextClass(): string {
+      return this.analysisHeroIsStrong ? 'text-white/70' : 'text-slate-500';
+    },
+
+    get analysisHeroMetricPillClass(): string {
+      return this.analysisHeroIsStrong
+        ? 'bg-white/20 text-white'
+        : 'bg-slate-100 text-slate-700 border border-slate-200';
+    },
+
+    get analysisPerfButtonClass(): string {
+      return this.analysisHeroIsStrong
+        ? 'bg-white/10 text-white hover:bg-white/20 border border-white/20 hover:border-white/30'
+        : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200 hover:border-slate-300';
+    },
+
     get analysisHeroIconWrapClass(): string {
-      return this.isAnalyzing ? 'bg-white/20' : 'bg-white/10';
+      if (!this.analysisHeroIsStrong) return 'bg-slate-100 text-slate-500 border border-slate-200 shadow-sm';
+      return this.isAnalyzing
+        ? 'bg-white/20 text-white border border-white/20 backdrop-blur-sm shadow-lg'
+        : 'bg-white/10 text-white border border-white/20 backdrop-blur-sm shadow-lg';
     },
 
     get analysisHeroIconClass(): string {
@@ -401,10 +448,10 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
     },
 
     get runAnalysisButtonClass(): string {
-      if (this.isAnalyzing) return 'bg-white/20 text-white cursor-wait backdrop-blur-sm border border-white/30';
+      if (this.isAnalyzing) return 'bg-white/20 text-white cursor-wait backdrop-blur-sm border border-white/30 shadow-2xl';
       return this.canRunAnalysis
-        ? 'bg-white text-indigo-600 hover:bg-indigo-50 hover:scale-105 border border-white/50'
-        : 'bg-white/10 text-white/40 cursor-not-allowed border border-white/10';
+        ? 'bg-white text-indigo-600 hover:bg-indigo-50 hover:scale-105 border border-white/50 shadow-2xl'
+        : 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200 shadow-none';
     },
 
     get showRunDisabledHint(): boolean {

@@ -335,7 +335,7 @@ export class SidebarRenderer {
 
           <!-- Category Divider -->
           <div class="flex items-center gap-2 px-2 pt-3 pb-1">
-            <span class="text-[10px] font-semibold text-slate-300 uppercase tracking-widest">分类导航</span>
+            <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-widest">分类导航</span>
             <div class="flex-1 h-px bg-slate-100"></div>
           </div>
 
@@ -347,9 +347,9 @@ export class SidebarRenderer {
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-1.5">
               <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
-              <span class="text-[10px] text-slate-300 font-medium">已就绪</span>
+              <span class="text-[10px] text-slate-500 font-medium">已就绪</span>
             </div>
-            <span class="text-[10px] text-slate-300 font-mono">${categoryTree.reduce((s, c) => s + c.children.length, 0)} 项</span>
+            <span class="text-[10px] text-slate-500 font-mono">${categoryTree.reduce((s, c) => s + c.children.length, 0)} 项</span>
           </div>
         </div>
       </div>
@@ -431,13 +431,13 @@ export class SidebarRenderer {
           </div>
 
           <!-- Count Badge -->
-          <span class="category-count text-[10px] font-medium text-slate-300 bg-slate-100 px-1.5 py-0.5 rounded-md
+          <span class="category-count text-[10px] font-medium text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-md
             transition-opacity duration-200">
             ${childCount}
           </span>
 
           <!-- Chevron -->
-          <i class="fas fa-chevron-down text-[9px] text-slate-300 group-hover:text-slate-500
+          <i class="fas fa-chevron-down text-[9px] text-slate-400 group-hover:text-slate-600
             transition-all duration-300 category-chevron" style="transform: rotate(0deg)"></i>
         </button>
 
@@ -528,7 +528,7 @@ export class SidebarRenderer {
             bg-white/80 backdrop-blur-sm
             focus:ring-2 focus:ring-${color}-500/20 focus:border-${color}-400
             hover:border-slate-300
-            placeholder:text-slate-300
+            placeholder:text-slate-400
             outline-none transition-all duration-200 shadow-sm">
 
         <!-- Clear Button -->

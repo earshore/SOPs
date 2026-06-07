@@ -1,101 +1,153 @@
 <div class="module-container app-overview-container">
-    <section class="mb-6">
-        <div class="flex flex-col xl:flex-row xl:items-end justify-between gap-5">
-            <div class="min-w-0">
-                <div class="flex items-center gap-3 mb-3">
-                    <div class="w-11 h-11 rounded-lg bg-blue-600 text-white flex items-center justify-center">
-                        <i class="fas fa-cubes"></i>
+    <div class="wb-container wb-container--simple app-overview-hero" aria-labelledby="app-overview-title">
+        <div class="wb-orb wb-orb-1" aria-hidden="true"></div>
+        <div class="wb-orb wb-orb-2" aria-hidden="true"></div>
+        <div class="wb-orb wb-orb-3" aria-hidden="true"></div>
+        <div class="wb-particle wb-particle-1" aria-hidden="true"></div>
+        <div class="wb-particle wb-particle-2" aria-hidden="true"></div>
+        <div class="wb-particle wb-particle-3" aria-hidden="true"></div>
+        <div class="wb-particle wb-particle-4" aria-hidden="true"></div>
+        <div class="wb-particle wb-particle-5" aria-hidden="true"></div>
+        <div class="wb-particle wb-particle-6" aria-hidden="true"></div>
+        <div class="wb-particle wb-particle-7" aria-hidden="true"></div>
+        <div class="wb-particle wb-particle-8" aria-hidden="true"></div>
+
+        <div class="wb-content">
+            <div class="app-overview-hero-main">
+                <div class="wb-icon" aria-hidden="true">
+                    <i class="fas fa-cubes"></i>
+                </div>
+                <div class="app-overview-hero-copy">
+                    <div class="wb-title-row">
+                        <h1 id="app-overview-title" class="wb-title">应用中心</h1>
+                        <span aria-label="应用中心工作台" class="wb-badge">
+                            <i class="fas fa-bolt"></i><span>工作台</span>
+                        </span>
                     </div>
+                    <p class="wb-description">面向亚马逊运营的工具工作台，集中承载数据采集、AI 分析、关键词处理、PPC 搜索词分析和对话实验。</p>
+                    <div class="wb-tags" aria-label="应用中心能力标签">
+                        <div class="wb-tag">
+                            <span class="wb-tag-dot app-dot-primary"></span>
+                            <span>数据采集</span>
+                        </div>
+                        <div class="wb-tag">
+                            <span class="wb-tag-dot app-dot-primary"></span>
+                            <span>关键词增长</span>
+                        </div>
+                        <div class="wb-tag">
+                            <span class="wb-tag-dot app-dot-primary"></span>
+                            <span>PPC 优化</span>
+                        </div>
+                        <div class="wb-tag">
+                            <span class="wb-tag-dot app-dot-primary"></span>
+                            <span>AI 对话</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="app-overview-flow" aria-label="核心工作流">
+        <div class="app-overview-section-heading">
+            <div>
+                <h2 class="app-overview-section-title">核心路径</h2>
+                <p class="app-overview-eyebrow">从竞品素材到运营动作，按常用顺序进入工具。</p>
+            </div>
+            <span class="app-overview-mini-badge">建议主线</span>
+        </div>
+        <div class="app-overview-flow-grid">
+            <button class="app-flow-step app-child-link" type="button" data-child-tab="scraper">
+                <span class="app-flow-index">01</span>
+                <span class="app-flow-icon"><i class="fas fa-spider"></i></span>
+                <span class="app-flow-copy">
+                    <strong>数据采集</strong>
+                    <small>抓取竞品素材</small>
+                </span>
+            </button>
+            <button class="app-flow-step app-child-link" type="button" data-child-tab="ai_analysis">
+                <span class="app-flow-index">02</span>
+                <span class="app-flow-icon"><i class="fas fa-brain"></i></span>
+                <span class="app-flow-copy">
+                    <strong>AI 分析</strong>
+                    <small>提炼产品洞察</small>
+                </span>
+            </button>
+            <button class="app-flow-step app-child-link" type="button" data-child-tab="promptlab">
+                <span class="app-flow-index">03</span>
+                <span class="app-flow-icon"><i class="fas fa-wand-magic-sparkles"></i></span>
+                <span class="app-flow-copy">
+                    <strong>Prompt 生成</strong>
+                    <small>输出 Listing 指令</small>
+                </span>
+            </button>
+            <button class="app-flow-step app-child-link" type="button" data-child-tab="ppc_search_terms">
+                <span class="app-flow-index">04</span>
+                <span class="app-flow-icon"><i class="fas fa-magnifying-glass-dollar"></i></span>
+                <span class="app-flow-copy">
+                    <strong>PPC 搜索词</strong>
+                    <small>生成动作清单</small>
+                </span>
+            </button>
+        </div>
+    </section>
+
+    <section class="app-overview-filter-panel" aria-label="分类筛选">
+        <div class="app-overview-section-heading">
+            <div>
+                <h2 class="app-overview-section-title">应用矩阵</h2>
+                <p class="app-overview-eyebrow">按应用类型筛选入口，或直接搜索工具名称。</p>
+            </div>
+            <p id="app-overview-visible-count" class="app-overview-count" aria-live="polite">显示 4 个应用</p>
+        </div>
+        <div class="app-overview-toolbar">
+            <div class="app-overview-filter-row" role="group" aria-label="应用分类">
+                <button class="category-filter-btn active" type="button" data-category="all" aria-pressed="true">
+                    <i class="fas fa-th"></i><span>全部应用</span><em>4</em>
+                </button>
+                <button class="category-filter-btn" type="button" data-category="master_analysis" aria-pressed="false">
+                    <i class="fas fa-robot"></i><span>Master Analysis</span><em>3</em>
+                </button>
+                <button class="category-filter-btn" type="button" data-category="keyword_tracker" aria-pressed="false">
+                    <i class="fas fa-search"></i><span>Keyword Hunter</span><em>3</em>
+                </button>
+                <button class="category-filter-btn" type="button" data-category="ppc_tools" aria-pressed="false">
+                    <i class="fas fa-magnifying-glass-dollar"></i><span>PPC Tools</span><em>1</em>
+                </button>
+                <button class="category-filter-btn" type="button" data-category="playground" aria-pressed="false">
+                    <i class="fas fa-paper-plane"></i><span>Playground</span><em>1</em>
+                </button>
+            </div>
+            <label class="app-overview-search" for="app-overview-search">
+                <i class="fas fa-search" aria-hidden="true"></i>
+                <input id="app-overview-search" type="search" placeholder="搜索采集、AI、PPC、关键词..." autocomplete="off">
+                <button id="app-overview-clear-search" class="app-overview-clear-search hidden" type="button" aria-label="清空搜索">
+                    <i class="fas fa-times"></i>
+                </button>
+            </label>
+        </div>
+    </section>
+
+    <section id="app-module-apps" class="app-overview-apps" data-category="all">
+        <div class="app-center-card-grid app-overview-grid">
+            <article class="app-overview-card app-card-blue" data-action="switch-tab" data-tab="scraper"
+                data-category="master_analysis" data-search="master analysis 数据采集 ai分析 prompt lab prompt 竞品 报告"
+                role="button" tabindex="0">
+                <div class="app-card-head">
+                    <div class="app-card-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <span class="app-card-badge">3 入口</span>
+                </div>
+                <div class="app-card-title-row">
                     <div>
-                        <h1 class="text-2xl font-bold text-slate-900">应用总览</h1>
-                        <p class="text-sm text-slate-500 mt-1">按运营任务进入采集、分析、关键词、广告和对话工具。</p>
+                        <h3>Master Analysis</h3>
+                        <p>采集、分析、Prompt 生成</p>
                     </div>
+                    <i class="fas fa-arrow-right app-card-arrow"></i>
                 </div>
-                <div class="app-overview-stats grid gap-3 max-w-3xl">
-                    <div class="bg-white border border-slate-200 rounded-lg px-4 py-3">
-                        <div class="text-xl font-bold text-slate-900">4</div>
-                        <div class="text-xs text-slate-500">应用分组</div>
-                    </div>
-                    <div class="bg-white border border-slate-200 rounded-lg px-4 py-3">
-                        <div class="text-xl font-bold text-slate-900">8</div>
-                        <div class="text-xs text-slate-500">功能入口</div>
-                    </div>
-                    <div class="bg-white border border-slate-200 rounded-lg px-4 py-3">
-                        <div class="text-xl font-bold text-emerald-600">4</div>
-                        <div class="text-xs text-slate-500">可直接进入</div>
-                    </div>
-                    <div class="bg-white border border-slate-200 rounded-lg px-4 py-3">
-                        <div class="text-xl font-bold text-amber-600">API</div>
-                        <div class="text-xs text-slate-500">分析前确认</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="w-full xl:w-[360px]">
-                <label class="block text-xs font-semibold text-slate-500 mb-2" for="app-overview-search">搜索应用</label>
-                <div class="relative">
-                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                    <input id="app-overview-search" type="search"
-                        class="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-9 pr-9 text-sm text-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                        placeholder="输入采集、AI、PPC、关键词...">
-                    <button id="app-overview-clear-search" type="button"
-                        class="hidden absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded text-slate-400 hover:bg-slate-100 hover:text-slate-700"
-                        aria-label="清空搜索">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="mb-5">
-        <div class="flex items-center justify-between gap-4 mb-3">
-            <h2 class="text-sm font-bold text-slate-700">分类筛选</h2>
-            <p id="app-overview-visible-count" class="text-xs text-slate-500">显示 4 个应用</p>
-        </div>
-        <div class="flex items-center gap-2 overflow-x-auto pb-2">
-            <button class="category-filter-btn active inline-flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold transition-all whitespace-nowrap hover:bg-blue-700"
-                type="button" data-category="all">
-                <i class="fas fa-th"></i><span>全部应用</span><span class="text-xs opacity-80">4</span>
-            </button>
-            <button class="category-filter-btn inline-flex items-center gap-2 px-3 py-2 bg-white text-slate-700 border border-slate-300 rounded-lg text-sm font-semibold transition-all whitespace-nowrap hover:bg-slate-50"
-                type="button" data-category="master_analysis">
-                <i class="fas fa-robot"></i><span>Master Analysis</span><span class="text-xs text-slate-400">3</span>
-            </button>
-            <button class="category-filter-btn inline-flex items-center gap-2 px-3 py-2 bg-white text-slate-700 border border-slate-300 rounded-lg text-sm font-semibold transition-all whitespace-nowrap hover:bg-slate-50"
-                type="button" data-category="keyword_tracker">
-                <i class="fas fa-search"></i><span>Keyword Hunter</span><span class="text-xs text-slate-400">3</span>
-            </button>
-            <button class="category-filter-btn inline-flex items-center gap-2 px-3 py-2 bg-white text-slate-700 border border-slate-300 rounded-lg text-sm font-semibold transition-all whitespace-nowrap hover:bg-slate-50"
-                type="button" data-category="ppc_tools">
-                <i class="fas fa-magnifying-glass-dollar"></i><span>PPC Tools</span><span class="text-xs text-slate-400">1</span>
-            </button>
-            <button class="category-filter-btn inline-flex items-center gap-2 px-3 py-2 bg-white text-slate-700 border border-slate-300 rounded-lg text-sm font-semibold transition-all whitespace-nowrap hover:bg-slate-50"
-                type="button" data-category="playground">
-                <i class="fas fa-paper-plane"></i><span>Playground</span><span class="text-xs text-slate-400">1</span>
-            </button>
-        </div>
-    </section>
-
-    <section id="app-module-apps" class="mb-8" data-category="all">
-        <div class="app-center-card-grid">
-            <article class="bg-white rounded-lg border border-slate-200 border-l-4 border-l-blue-500 shadow-sm hover:shadow-md transition-all duration-200 p-5 cursor-pointer group"
-                data-action="switch-tab" data-tab="scraper" data-category="master_analysis"
-                data-search="master analysis 数据采集 ai分析 prompt lab prompt 竞品 报告">
-                <div class="flex items-start justify-between gap-4 mb-3">
-                    <div class="flex items-center gap-3 min-w-0">
-                        <div class="w-11 h-11 bg-blue-600 rounded-lg flex items-center justify-center text-white shrink-0">
-                            <i class="fas fa-robot"></i>
-                        </div>
-                        <div class="min-w-0">
-                            <h3 class="text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors">Master Analysis</h3>
-                            <p class="text-xs text-slate-500 mt-1">采集、分析、Prompt 生成</p>
-                        </div>
-                    </div>
-                    <i class="fas fa-arrow-right text-slate-400 group-hover:text-blue-500 group-hover:translate-x-1 transition-all mt-1"></i>
-                </div>
-                <p class="text-sm text-slate-600 leading-relaxed mb-4">从竞品数据采集开始，沉淀分析报告，再进入 AI 分析和 Prompt Lab。</p>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <p class="app-card-desc">从竞品数据采集开始，沉淀分析报告，再进入 AI 分析和 Prompt Lab。</p>
+                <div class="app-card-actions">
                     <button class="app-child-link" type="button" data-child-tab="scraper">
                         <i class="fas fa-spider"></i><span>数据采集</span>
                     </button>
@@ -108,23 +160,24 @@
                 </div>
             </article>
 
-            <article class="bg-white rounded-lg border border-slate-200 border-l-4 border-l-purple-500 shadow-sm hover:shadow-md transition-all duration-200 p-5 cursor-pointer group"
-                data-action="switch-tab" data-tab="kw_input" data-category="keyword_tracker"
-                data-search="keyword hunter 关键词 输入 处理 分析 seo 词库">
-                <div class="flex items-start justify-between gap-4 mb-3">
-                    <div class="flex items-center gap-3 min-w-0">
-                        <div class="w-11 h-11 bg-purple-600 rounded-lg flex items-center justify-center text-white shrink-0">
-                            <i class="fas fa-search"></i>
-                        </div>
-                        <div class="min-w-0">
-                            <h3 class="text-lg font-bold text-slate-900 group-hover:text-purple-600 transition-colors">Keyword Hunter</h3>
-                            <p class="text-xs text-slate-500 mt-1">关键词输入、处理、分析</p>
-                        </div>
+            <article class="app-overview-card app-card-violet" data-action="switch-tab" data-tab="kw_input"
+                data-category="keyword_tracker" data-search="keyword hunter 关键词 输入 处理 分析 seo 词库"
+                role="button" tabindex="0">
+                <div class="app-card-head">
+                    <div class="app-card-icon">
+                        <i class="fas fa-search"></i>
                     </div>
-                    <i class="fas fa-arrow-right text-slate-400 group-hover:text-purple-500 group-hover:translate-x-1 transition-all mt-1"></i>
+                    <span class="app-card-badge">3 入口</span>
                 </div>
-                <p class="text-sm text-slate-600 leading-relaxed mb-4">检查 ASIN 关键词覆盖，整理手动补充词，并输出 SEO 复核结果。</p>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div class="app-card-title-row">
+                    <div>
+                        <h3>Keyword Hunter</h3>
+                        <p>关键词输入、处理、分析</p>
+                    </div>
+                    <i class="fas fa-arrow-right app-card-arrow"></i>
+                </div>
+                <p class="app-card-desc">检查 ASIN 关键词覆盖，整理手动补充词，并输出 SEO 复核结果。</p>
+                <div class="app-card-actions">
                     <button class="app-child-link" type="button" data-child-tab="kw_input">
                         <i class="fas fa-keyboard"></i><span>输入模块</span>
                     </button>
@@ -137,46 +190,48 @@
                 </div>
             </article>
 
-            <article class="bg-white rounded-lg border border-slate-200 border-l-4 border-l-emerald-500 shadow-sm hover:shadow-md transition-all duration-200 p-5 cursor-pointer group"
-                data-action="switch-tab" data-tab="ppc_search_terms" data-category="ppc_tools"
-                data-search="ppc tools 搜索词 广告 search term acos 否词 加词 导出">
-                <div class="flex items-start justify-between gap-4 mb-3">
-                    <div class="flex items-center gap-3 min-w-0">
-                        <div class="w-11 h-11 bg-emerald-600 rounded-lg flex items-center justify-center text-white shrink-0">
-                            <i class="fas fa-magnifying-glass-dollar"></i>
-                        </div>
-                        <div class="min-w-0">
-                            <h3 class="text-lg font-bold text-slate-900 group-hover:text-emerald-600 transition-colors">PPC Tools</h3>
-                            <p class="text-xs text-slate-500 mt-1">广告搜索词动作清单</p>
-                        </div>
+            <article class="app-overview-card app-card-emerald" data-action="switch-tab" data-tab="ppc_search_terms"
+                data-category="ppc_tools" data-search="ppc tools 搜索词 广告 search term acos 否词 加词 导出"
+                role="button" tabindex="0">
+                <div class="app-card-head">
+                    <div class="app-card-icon">
+                        <i class="fas fa-magnifying-glass-dollar"></i>
                     </div>
-                    <i class="fas fa-arrow-right text-slate-400 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all mt-1"></i>
+                    <span class="app-card-badge">动作清单</span>
                 </div>
-                <p class="text-sm text-slate-600 leading-relaxed mb-4">导入 Search Term 报表，生成否词、加精准、加预算、降竞价和词池建议。</p>
-                <div class="grid grid-cols-1 gap-2">
+                <div class="app-card-title-row">
+                    <div>
+                        <h3>PPC Tools</h3>
+                        <p>广告搜索词动作清单</p>
+                    </div>
+                    <i class="fas fa-arrow-right app-card-arrow"></i>
+                </div>
+                <p class="app-card-desc">导入 Search Term 报表，生成否词、加精准、加预算、降竞价和词池建议。</p>
+                <div class="app-card-actions app-card-actions-single">
                     <button class="app-child-link" type="button" data-child-tab="ppc_search_terms">
                         <i class="fas fa-magnifying-glass-dollar"></i><span>PPC 搜索词分析器</span>
                     </button>
                 </div>
             </article>
 
-            <article class="bg-white rounded-lg border border-slate-200 border-l-4 border-l-cyan-500 shadow-sm hover:shadow-md transition-all duration-200 p-5 cursor-pointer group"
-                data-action="switch-tab" data-tab="playground" data-category="playground"
-                data-search="playground deep chat ai 对话 prompt 试验">
-                <div class="flex items-start justify-between gap-4 mb-3">
-                    <div class="flex items-center gap-3 min-w-0">
-                        <div class="w-11 h-11 bg-cyan-600 rounded-lg flex items-center justify-center text-white shrink-0">
-                            <i class="fas fa-paper-plane"></i>
-                        </div>
-                        <div class="min-w-0">
-                            <h3 class="text-lg font-bold text-slate-900 group-hover:text-cyan-600 transition-colors">Playground</h3>
-                            <p class="text-xs text-slate-500 mt-1">Deep Chat 与 Prompt 试验</p>
-                        </div>
+            <article class="app-overview-card app-card-cyan" data-action="switch-tab" data-tab="playground"
+                data-category="playground" data-search="playground deep chat ai 对话 prompt 试验"
+                role="button" tabindex="0">
+                <div class="app-card-head">
+                    <div class="app-card-icon">
+                        <i class="fas fa-paper-plane"></i>
                     </div>
-                    <i class="fas fa-arrow-right text-slate-400 group-hover:text-cyan-500 group-hover:translate-x-1 transition-all mt-1"></i>
+                    <span class="app-card-badge">即时对话</span>
                 </div>
-                <p class="text-sm text-slate-600 leading-relaxed mb-4">复用系统模型配置，进行快速问答、Prompt 验证和日常分析。</p>
-                <div class="grid grid-cols-1 gap-2">
+                <div class="app-card-title-row">
+                    <div>
+                        <h3>Playground</h3>
+                        <p>Deep Chat 与 Prompt 试验</p>
+                    </div>
+                    <i class="fas fa-arrow-right app-card-arrow"></i>
+                </div>
+                <p class="app-card-desc">复用系统模型配置，进行快速问答、Prompt 验证和日常分析。</p>
+                <div class="app-card-actions app-card-actions-single">
                     <button class="app-child-link" type="button" data-child-tab="playground">
                         <i class="fa-regular fa-comments"></i><span>Deep Chat</span>
                     </button>
@@ -184,10 +239,10 @@
             </article>
         </div>
 
-        <div id="app-overview-empty" class="hidden mt-6 border border-dashed border-slate-300 rounded-lg p-8 text-center bg-white">
-            <i class="fas fa-search text-3xl text-slate-300 mb-3"></i>
-            <div class="font-bold text-slate-700">没有匹配的应用</div>
-            <p class="text-sm text-slate-500 mt-1">换个关键词或切回全部应用。</p>
+        <div id="app-overview-empty" class="app-overview-empty hidden" aria-live="polite">
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <div class="app-overview-empty-title">没有匹配的应用</div>
+            <p>换个关键词，或切回全部应用查看完整矩阵。</p>
         </div>
     </section>
 </div>

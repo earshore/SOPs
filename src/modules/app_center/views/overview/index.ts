@@ -1,6 +1,6 @@
 // src/modules/app_center/views/overview/index.ts
 // ================================================================
-// 🎯 App Center Overview - 总览页面 (TypeScript版本)
+// App Center Overview - 总览页面 (TypeScript版本)
 // ================================================================
 
 import { loadTemplate } from '@/common/utils/viewLoader';
@@ -45,10 +45,11 @@ function initOverviewEvents(container: HTMLElement): void {
     category: 'all',
     query: ''
   };
+
   const searchInput = container.querySelector<HTMLInputElement>('#app-overview-search');
   const clearSearchBtn = container.querySelector<HTMLButtonElement>('#app-overview-clear-search');
-
   const filterBtns = container.querySelectorAll<HTMLElement>('.category-filter-btn');
+
   filterBtns.forEach((btn) => {
     btn.addEventListener('click', () => {
       const category = btn.dataset.category;
@@ -90,10 +91,18 @@ function initOverviewEvents(container: HTMLElement): void {
   // 应用卡片点击事件
   const appCards = container.querySelectorAll<HTMLElement>('[data-action="switch-tab"]');
   appCards.forEach((card) => {
-    card.addEventListener('click', () => {
+    const switchToTab = () => {
       const targetTab = card.dataset.tab;
       if (targetTab) {
         eventBus.emit(APP_EVENTS.ROUTE_CHANGE, { routeId: targetTab });
+      }
+    };
+
+    card.addEventListener('click', switchToTab);
+    card.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        switchToTab();
       }
     });
   });
@@ -108,14 +117,7 @@ function setActiveCategory(filterBtns: NodeListOf<HTMLElement>, activeBtn: HTMLE
   filterBtns.forEach((btn) => {
     const isActive = btn === activeBtn;
     btn.classList.toggle('active', isActive);
-    btn.classList.toggle('bg-blue-600', isActive);
-    btn.classList.toggle('text-white', isActive);
-    btn.classList.toggle('hover:bg-blue-700', isActive);
-    btn.classList.toggle('bg-white', !isActive);
-    btn.classList.toggle('text-slate-700', !isActive);
-    btn.classList.toggle('border', !isActive);
-    btn.classList.toggle('border-slate-300', !isActive);
-    btn.classList.toggle('hover:bg-slate-50', !isActive);
+    btn.setAttribute('aria-pressed', String(isActive));
   });
 }
 

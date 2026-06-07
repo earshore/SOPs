@@ -240,12 +240,14 @@ export function createPromptlabPanel() {
 
     get autoPopulateButtonClass(): string {
       return this.hasReport
-        ? 'bg-blue-500 hover:bg-blue-600 text-white cursor-pointer'
-        : 'bg-slate-200 text-slate-400 cursor-not-allowed';
+        ? 'bg-blue-600 hover:bg-blue-700 text-white border border-blue-600 shadow-sm shadow-blue-200 cursor-pointer'
+        : 'bg-slate-100 text-slate-500 border border-slate-200 cursor-not-allowed';
     },
 
     get extractButtonClass(): string {
-      return this.hasReport ? 'text-blue-600 hover:bg-blue-50' : 'text-slate-300 cursor-not-allowed';
+      return this.hasReport
+        ? 'text-blue-600 bg-blue-50/70 hover:bg-blue-100 border border-blue-100 hover:border-blue-200 cursor-pointer'
+        : 'text-slate-500 bg-slate-100 border border-slate-200 cursor-not-allowed';
     },
 
     get hasExpandedDimensions(): boolean {

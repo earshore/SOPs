@@ -1,6 +1,6 @@
 <div class="module-container" x-data="aiAnalysisPanel">
   <!-- Welcome Banner -->
-  <div class="wb-container mb-8"
+  <div class="wb-container wb-container--card mb-8"
     style="--wb-gradient-1: rgba(239, 246, 255, 0.95); --wb-gradient-2: rgba(219, 234, 254, 0.90); --wb-orb-1-color: rgba(96, 165, 250, 0.15); --wb-orb-2-color: rgba(147, 197, 253, 0.12); --wb-orb-3-color: rgba(59, 130, 246, 0.08); --wb-particle-color: rgba(59, 130, 246, 0.6);">
     <div class="wb-card">
       <div class="wb-bg-gradient"></div>
@@ -573,26 +573,26 @@
     </template>
     <!-- 分析按钮 -->
     <div class="mb-10">
-      <div class="relative overflow-hidden rounded-2xl shadow-xl">
-        <div class="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600"></div>
-        <div class="absolute inset-0 overflow-hidden">
+      <div :class="analysisHeroCardClass" class="relative overflow-hidden rounded-2xl transition-all duration-300">
+        <div :class="analysisHeroBackdropClass" class="absolute inset-0 transition-colors duration-300"></div>
+        <div :class="analysisHeroAmbientClass" class="absolute inset-0 overflow-hidden transition-opacity duration-300">
           <div class="absolute top-0 left-1/4 w-80 h-80 bg-white/20 rounded-full filter blur-[80px] animate-pulse">
           </div>
           <div class="absolute bottom-0 right-1/4 w-64 h-64 bg-pink-300/20 rounded-full filter blur-[60px]"></div>
         </div>
-        <div class="absolute inset-0 opacity-5"
+        <div :class="analysisHeroPatternClass" class="absolute inset-0 transition-opacity duration-300"
           style="background-image: linear-gradient(rgba(255,255,255,.2) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.2) 1px, transparent 1px); background-size: 30px 30px;">
         </div>
         <div class="relative p-8">
           <div class="flex items-center justify-between gap-8">
-            <div class="flex items-center gap-5 text-white">
+            <div :class="analysisHeroTextClass" class="flex items-center gap-5 transition-colors duration-300">
               <div class="relative">
                 <template x-if="isAnalyzing">
                   <div class="absolute inset-0 bg-white/20 rounded-2xl animate-ping" style="animation-duration: 1.5s;">
                   </div>
                 </template>
                 <div :class="analysisHeroIconWrapClass"
-                  class="w-16 h-16 rounded-2xl flex items-center justify-center border border-white/20 backdrop-blur-sm shadow-lg transition-all">
+                  class="w-16 h-16 rounded-2xl flex items-center justify-center transition-all">
                   <i :class="analysisHeroIconClass"
                     class="text-2xl"></i>
                 </div>
@@ -606,7 +606,7 @@
                     <i class="fa-solid fa-cog animate-spin opacity-60"></i>
                   </template>
                 </h3>
-                <p class="text-white/70 text-sm mt-1.5 flex items-center gap-2">
+                <p :class="analysisHeroSubtextClass" class="text-sm mt-1.5 flex items-center gap-2 transition-colors duration-300">
                   <template x-if="isAnalyzing">
                     <span class="flex items-center gap-2">
                       <span class="relative flex h-2 w-2">
@@ -620,10 +620,10 @@
                   <template
                     x-if="hasAnalysisSelection">
                     <span>
-                      <span class="bg-white/20 px-2 py-0.5 rounded-full text-xs font-semibold"
+                      <span :class="analysisHeroMetricPillClass" class="px-2 py-0.5 rounded-full text-xs font-semibold"
                         x-text="selectedAsins.length"></span>
                       个产品 ×
-                      <span class="bg-white/20 px-2 py-0.5 rounded-full text-xs font-semibold"
+                      <span :class="analysisHeroMetricPillClass" class="px-2 py-0.5 rounded-full text-xs font-semibold"
                         x-text="selectedTargets.length"></span>
                       个维度 = 综合洞察分析
                     </span>
@@ -637,7 +637,8 @@
             <div class="relative flex items-center gap-3">
               <!-- 性能设置按钮 -->
               <button @click="perfSettings.toggleSettings()"
-                class="px-4 py-5 rounded-xl font-medium text-sm transition-all duration-300 flex items-center gap-2 bg-white/10 text-white hover:bg-white/20 border border-white/20 hover:border-white/30"
+                :class="analysisPerfButtonClass"
+                class="px-4 py-5 rounded-xl font-medium text-sm transition-all duration-300 flex items-center gap-2"
                 title="性能设置">
                 <i class="fa-solid fa-sliders"></i>
                 <span class="hidden sm:inline">性能设置</span>
@@ -648,7 +649,7 @@
                 :class="runAnalysisButtonClass"
                 :disabled="runAnalysisDisabled"
                 @click="runAnalysis()"
-                class="relative px-10 py-5 rounded-xl font-bold text-lg transition-all duration-300 flex items-center gap-3 min-w-[200px] justify-center shadow-2xl group">
+                class="relative px-10 py-5 rounded-xl font-bold text-lg transition-all duration-300 flex items-center gap-3 min-w-[200px] justify-center group">
                 <template x-if="isAnalyzing">
                   <span class="flex items-center gap-3">
                     <i class="fa-solid fa-spinner animate-spin"></i>

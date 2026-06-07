@@ -1,6 +1,6 @@
 <div class="module-container" x-data="promptlabPanel">
     <!-- ========== Welcome Banner ========== -->
-    <div class="wb-container mb-8"
+    <div class="wb-container wb-container--card mb-8"
         style="--wb-gradient-1: rgba(239, 246, 255, 0.95); --wb-gradient-2: rgba(219, 234, 254, 0.90);">
         <div class="wb-card">
             <div class="wb-bg-gradient"></div>
@@ -70,7 +70,7 @@
                                 <span class="text-xs font-bold text-white">1</span>
                             </div>
                             产品 DNA 补充
-                            <span class="text-[10px] text-slate-400 font-normal ml-1">Product DNA Supplement</span>
+                            <span class="text-[11px] text-slate-500 font-normal ml-1">Product DNA Supplement</span>
                         </h3>
                         <div class="flex items-center gap-2">
                             <!-- 从报告加载按钮 -->
@@ -131,12 +131,12 @@
 
                                     <button @click="extractSingleField('keywordsTier1')" :disabled="reportActionDisabled"
                                         :class="extractButtonClass"
-                                        class="text-[10px] px-2 py-1 rounded transition-all" title="仅重新提取此字段">
+                                        class="w-7 h-7 flex items-center justify-center rounded-lg transition-all" title="仅重新提取此字段">
                                         <i class="fas fa-rotate text-[8px]"></i>
                                     </button>
                                 </label>
                                 <input @input="setProfileField('keywordsTier1', $event)"
-                                    class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all placeholder:text-slate-300 font-mono"
+                                    class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all placeholder:text-slate-400 font-mono"
                                     id="lab-keywords-tier1" placeholder="humidifiers for bedroom, cool mist humidifier"
                                     type="text" :value="profile.keywordsTier1" />
                             </div>
@@ -156,12 +156,12 @@
 
                                     <button @click="extractSingleField('negative')" :disabled="reportActionDisabled"
                                         :class="extractButtonClass"
-                                        class="text-[10px] px-2 py-1 rounded transition-all" title="仅重新提取此字段">
+                                        class="w-7 h-7 flex items-center justify-center rounded-lg transition-all" title="仅重新提取此字段">
                                         <i class="fas fa-rotate text-[8px]"></i>
                                     </button>
                                 </label>
                                 <input @input="setProfileField('negative', $event)"
-                                    class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all placeholder:text-slate-300"
+                                    class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all placeholder:text-slate-400"
                                     id="negative-keywords" placeholder="例如: bestseller / cure" type="text"
                                     :value="profile.negative" />
                             </div>
@@ -181,13 +181,13 @@
 
                                     <button @click="extractSingleField('keywordsTier2')" :disabled="reportActionDisabled"
                                         :class="extractButtonClass"
-                                        class="text-[10px] px-2 py-1 rounded transition-all" title="仅重新提取此字段">
+                                        class="w-7 h-7 flex items-center justify-center rounded-lg transition-all" title="仅重新提取此字段">
                                         <i class="fas fa-rotate text-[8px]"></i>
                                     </button>
                                 </label>
                                 <textarea @input="setProfileField('keywordsTier2', $event)" @focus="expandInput($event)"
                                     @blur="restoreInput($event)"
-                                    class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all resize-none placeholder:text-slate-300 font-mono"
+                                    class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all resize-none placeholder:text-slate-400 font-mono"
                                     id="lab-keywords-tier2"
                                     placeholder="baby humidifier, easy to clean, quiet operation" rows="1"
                                     :value="profile.keywordsTier2"></textarea>
@@ -210,12 +210,12 @@
                                     <!-- 单字段提取按钮 -->
                                     <button @click="extractSingleField('audience')" :disabled="reportActionDisabled"
                                         :class="extractButtonClass"
-                                        class="text-[10px] px-2 py-1 rounded transition-all" title="仅重新提取此字段">
+                                        class="w-7 h-7 flex items-center justify-center rounded-lg transition-all" title="仅重新提取此字段">
                                         <i class="fas fa-rotate text-[8px]"></i>
                                     </button>
                                 </label>
                                 <input @input="setProfileField('audience', $event)"
-                                    class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all placeholder:text-slate-300"
+                                    class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all placeholder:text-slate-400"
                                     id="lab-audience" placeholder="e.g. Busy moms, Tech enthusiasts" type="text"
                                     :value="profile.audience" />
                             </div>
@@ -237,13 +237,13 @@
                                     <!-- 单字段提取按钮 -->
                                     <button @click="extractSingleField('usps')" :disabled="reportActionDisabled"
                                         :class="extractButtonClass"
-                                        class="text-[10px] px-2 py-1 rounded transition-all" title="仅重新提取此字段">
+                                        class="w-7 h-7 flex items-center justify-center rounded-lg transition-all" title="仅重新提取此字段">
                                         <i class="fas fa-rotate text-[8px]"></i>
                                     </button>
                                 </label>
                                 <textarea @input="setProfileField('usps', $event)" @focus="expandInput($event)"
                                     @blur="restoreInput($event)"
-                                    class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all resize-none placeholder:text-slate-300"
+                                    class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all resize-none placeholder:text-slate-400"
                                     id="lab-usps" placeholder="- 专利静音技术 (&lt;28dB)
 - 360度旋转喷嘴" rows="2" :value="profile.usps"></textarea>
                             </div>
@@ -265,13 +265,13 @@
                                     <!-- 单字段提取按钮 -->
                                     <button @click="extractSingleField('specs')" :disabled="reportActionDisabled"
                                         :class="extractButtonClass"
-                                        class="text-[10px] px-2 py-1 rounded transition-all" title="仅重新提取此字段">
+                                        class="w-7 h-7 flex items-center justify-center rounded-lg transition-all" title="仅重新提取此字段">
                                         <i class="fas fa-rotate text-[8px]"></i>
                                     </button>
                                 </label>
                                 <textarea @input="setProfileField('specs', $event)" @focus="expandInput($event)"
                                     @blur="restoreInput($event)"
-                                    class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all resize-none placeholder:text-slate-300 font-mono"
+                                    class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all resize-none placeholder:text-slate-400 font-mono"
                                     id="lab-specs" placeholder="材质: ABS + PP
 尺寸: 20x20x30cm" rows="2" :value="profile.specs"></textarea>
                             </div>
@@ -303,7 +303,7 @@
                                 <span class="text-xs font-bold text-white">2</span>
                             </div>
                             AI 分析报告
-                            <span class="text-[10px] text-slate-400 font-normal ml-1">Insights Injection</span>
+                            <span class="text-[11px] text-slate-500 font-normal ml-1">Insights Injection</span>
                         </h3>
                         <div class="flex items-center gap-3">
                             <!-- 分析报告状态 -->
@@ -333,7 +333,7 @@
                                     <i class="fas fa-file-circle-xmark text-slate-300 text-sm"></i>
                                 </div>
                                 <p class="text-xs text-slate-400 font-medium">暂无报告数据</p>
-                                <p class="text-[10px] text-slate-300 mt-1">请先在 AI 分析页面生成报告</p>
+                                <p class="text-[10px] text-slate-500 mt-1">请先在 AI 分析页面生成报告</p>
                             </div>
                         </div>
                     </div>
@@ -350,7 +350,7 @@
                             <span class="text-xs font-bold text-white">3</span>
                         </div>
                         生成策略配置
-                        <span class="text-[10px] text-slate-400 font-normal ml-1">Strategy</span>
+                        <span class="text-[11px] text-slate-500 font-normal ml-1">Strategy</span>
                     </h3>
                 </div>
                 <!-- Card Body -->
@@ -378,7 +378,7 @@
                                 自定义规则 <span class="text-slate-400 font-normal">- 有就填</span>
                             </label>
                             <textarea @input="setProfileField('customStrategy', $event)" @focus="expandInput($event)" @blur="restoreInput($event)"
-                                class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all resize-none placeholder:text-slate-300"
+                                class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all resize-none placeholder:text-slate-400"
                                 id="lab-custom-strategy" placeholder="例如: 禁止使用'Best Seller'词汇..." rows="1"
                                 :value="profile.customStrategy"></textarea>
                         </div>
@@ -446,12 +446,12 @@
                             id="mode-toggle-glider">
                         </div>
                         <button @click="toggleConsoleMode('listing')"
-                            class="relative z-10 px-3.5 py-1.5 text-[10px] font-bold rounded-lg transition-colors duration-300 text-blue-600 uppercase tracking-wider cursor-pointer"
+                            class="relative z-10 px-4 py-2 text-[11px] font-bold rounded-lg transition-colors duration-300 text-blue-600 uppercase tracking-wider cursor-pointer"
                             id="btn-mode-listing">
                             Listing
                         </button>
                         <button @click="toggleConsoleMode('visual')"
-                            class="relative z-10 px-3.5 py-1.5 text-[10px] font-bold rounded-lg transition-colors duration-300 text-slate-400 hover:text-pink-500 uppercase tracking-wider cursor-pointer"
+                            class="relative z-10 px-4 py-2 text-[11px] font-bold rounded-lg transition-colors duration-300 text-slate-500 hover:text-pink-500 uppercase tracking-wider cursor-pointer"
                             id="btn-mode-visual">
                             Visual
                         </button>
@@ -480,7 +480,7 @@
                                                 Generation</span>
                                         </div>
                                     </div>
-                                    <p class="text-slate-300/60 text-xs mt-1 leading-relaxed">
+                                    <p class="text-slate-400 text-xs mt-1 leading-relaxed">
                                         基于 A10 算法逻辑生成高转化 Listing 文本
                                     </p>
                                 </div>

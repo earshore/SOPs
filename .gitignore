@@ -72,6 +72,7 @@ tests/test-results/
 playwright-report/
 test-results/
 playwright/.cache/
+output/
 
 # Screenshots (保留目录结构，忽略截图文件)
 tests/screenshots/failures/*.png

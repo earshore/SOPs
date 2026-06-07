@@ -11,67 +11,40 @@
  * HTML 结构示例:
  * ----------------------------------------------------------------------------
  * 
- * <div class="welcome-banner-wrap">
- *   <div class="welcome-banner">
- *     <!-- 背景装饰层 -->
+ * Simple:
+ * <div class="wb-container wb-container--simple">
+ *   <div class="wb-orb wb-orb-1"></div>
+ *   <div class="wb-content">
+ *     <div class="wb-icon"><i class="fa-solid fa-clipboard-list"></i></div>
+ *     <div class="wb-title-row">
+ *       <h1 class="wb-title">标准作业程序</h1>
+ *       <span class="wb-badge wb-badge-hub">WORKFLOW</span>
+ *     </div>
+ *     <p class="wb-description">页面说明文字。</p>
+ *     <div class="wb-tags">
+ *       <div class="wb-tag"><div class="wb-tag-dot"></div><span>标签</span></div>
+ *     </div>
+ *   </div>
+ * </div>
+ *
+ * Card:
+ * <div class="wb-container wb-container--card">
+ *   <div class="wb-card">
  *     <div class="wb-bg-gradient"></div>
- *     <div class="wb-orb wb-orb-1"></div>
- *     <div class="wb-orb wb-orb-2"></div>
- *     <div class="wb-orb wb-orb-3"></div>
- *     <div class="wb-grid-dots"></div>
- *     <div class="wb-particle wb-p1"></div>
- *     <div class="wb-particle wb-p2"></div>
- *     <div class="wb-particle wb-p3"></div>
- *     <div class="wb-particle wb-p4"></div>
- *     <div class="wb-particle wb-p5"></div>
- *     <div class="wb-particle wb-p6"></div>
- *     
- *     <!-- 内容区 -->
  *     <div class="wb-content">
- *       <div class="wb-layout">
- *         <!-- 图标徽章 -->
- *         <div class="wb-icon-badge">
- *           <div class="wb-icon-main">
- *             <i class="fa-solid fa-robot"></i>
- *           </div>
- *           <div class="wb-icon-status">
- *             <i class="fa-solid fa-bolt"></i>
- *           </div>
- *           <div class="wb-icon-ring"></div>
+ *       <div class="wb-header">
+ *         <div class="wb-icon-wrapper">
+ *           <div class="wb-icon-main"><i class="fa-solid fa-robot"></i></div>
+ *           <div class="wb-icon-badge"><i class="fa-solid fa-bolt"></i></div>
  *         </div>
- *         
- *         <!-- 文本内容 -->
- *         <div class="wb-text-content">
+ *         <div class="wb-text">
  *           <div class="wb-title-row">
- *             <h2 class="wb-title">Q&A 预研实验室</h2>
- *             <span class="wb-ai-badge">
- *               <i class="fa-solid fa-sparkles"></i>
- *               <span>AI</span>
- *             </span>
- *             <span class="wb-version-badge">Beta</span>
+ *             <h2 class="wb-title">产品数据采集</h2>
+ *             <span class="wb-badge wb-badge-analytics">LIVE</span>
  *           </div>
- *           <p class="wb-desc">
- *             基于 Rufus AI 的智能问答预研工具,帮助您快速生成高质量的产品 Q&A 内容
- *           </p>
- *           
- *           <!-- 特性标签 -->
- *           <div class="wb-features">
- *             <div class="wb-feature-tag">
- *               <div class="wb-feature-dot dot-emerald"></div>
- *               <span>智能生成</span>
- *             </div>
- *             <div class="wb-feature-tag">
- *               <div class="wb-feature-dot dot-teal"></div>
- *               <span>多维度分析</span>
- *             </div>
- *             <div class="wb-feature-tag">
- *               <div class="wb-feature-dot dot-cyan"></div>
- *               <span>实时预览</span>
- *             </div>
- *             <div class="wb-feature-tag">
- *               <div class="wb-feature-dot dot-amber"></div>
- *               <span>一键导出</span>
- *             </div>
+ *           <p class="wb-description">页面说明文字。</p>
+ *           <div class="wb-tags">
+ *             <div class="wb-tag"><div class="wb-tag-dot"></div><span>标签</span></div>
  *           </div>
  *         </div>
  *       </div>
@@ -84,39 +57,30 @@
  * ----------------------------------------------------------------------------
  * 
  * 1. 图标定制:
- *    修改 .wb-icon-main i 的类名,使用 FontAwesome 图标
+ *    Simple 使用 .wb-icon i; Card 使用 .wb-icon-main i。
  *    示例: <i class="fa-solid fa-chart-line"></i>
  * 
  * 2. 标题和描述定制:
- *    修改 .wb-title 和 .wb-desc 的文本内容
+ *    修改 .wb-title 和 .wb-description 的文本内容。
  * 
  * 3. 徽章定制:
- *    - AI 徽章: 添加/移除 .wb-ai-badge 元素
- *    - 版本徽章: 添加/移除 .wb-version-badge 元素
- *    - 自定义徽章: 参考现有徽章样式创建新的徽章类
+ *    使用 .wb-badge, 并叠加 .wb-badge-ai/growth/safety/service/supply/analytics/pro/hub。
  * 
- * 4. 特性标签定制:
- *    - 添加/移除 .wb-feature-tag 元素
- *    - 圆点颜色: 使用 .dot-emerald, .dot-teal, .dot-cyan, .dot-amber
- *    - 自定义颜色: 参考现有圆点样式创建新的颜色类
+ * 4. 标签定制:
+ *    使用 .wb-tags > .wb-tag; 圆点颜色可通过 --wb-tag-dot-* 或 inline style 覆盖。
  * 
  * 5. 背景配色定制:
  *    通过 CSS 变量覆盖渐变色,在页面特定样式中添加:
  *    
- *    .custom-page .welcome-banner {
- *      --wb-gradient-start: var(--color-purple-100);
- *      --wb-gradient-mid: rgba(255, 255, 255, .95);
- *      --wb-gradient-end: var(--color-pink-100);
- *      --wb-gradient-accent: var(--color-rose-400);
+ *    .custom-page .wb-container {
+ *      --wb-gradient-1: rgba(239, 246, 255, 0.95);
+ *      --wb-gradient-2: rgba(219, 234, 254, 0.90);
+ *      --wb-orb-1-color: rgba(96, 165, 250, 0.15);
+ *      --wb-particle-color: rgba(59, 130, 246, 0.6);
  *    }
  * 
- * 6. 简化版本:
- *    如需简化版本,可省略以下可选元素:
- *    - 背景装饰层 (.wb-orb, .wb-particle, .wb-grid-dots)
- *    - 状态指示器 (.wb-icon-status)
- *    - 脉冲环 (.wb-icon-ring)
- *    - 徽章 (.wb-ai-badge, .wb-version-badge)
- *    - 特性标签 (.wb-features)
+ * 6. Variant:
+ *    必须在 .wb-container 上显式声明 .wb-container--simple 或 .wb-container--card。
  * 
  * ----------------------------------------------------------------------------
  * 依赖说明:
@@ -173,29 +137,36 @@
 
 /* ===== 容器样式 ===== */
 .wb-container {
-  margin-bottom: var(--spacing-2xl, 3rem);
+  margin-bottom: var(--spacing-xl, 2rem);
   /* 6.5 确保流式布局,避免水平滚动 */
   max-width: 100%;
   overflow-x: hidden;
 
   /* 5.6 定义暗色模式 CSS 变量 */
   --wb-text-primary: var(--color-text-primary, #0f172a);
-  --wb-text-secondary: var(--color-text-secondary, #64748b);
-  --wb-border-color: var(--color-border-default, rgba(0, 0, 0, 0.10));
-  --wb-tag-bg: rgba(255, 255, 255, .7);
-  --wb-tag-border: var(--color-border-default, rgba(0, 0, 0, 0.10));
+  --wb-text-secondary: var(--color-slate-600, #475569);
+  --wb-border-color: rgba(148, 163, 184, 0.24);
+  --wb-tag-bg: rgba(255, 255, 255, .78);
+  --wb-tag-border: rgba(148, 163, 184, 0.22);
   --wb-tag-hover-bg: white;
-  --wb-tag-hover-border: var(--color-primary-light, rgba(59, 130, 246, 0.10));
+  --wb-tag-hover-border: rgba(37, 99, 235, 0.18);
+}
+
+.wb-container.mb-8 {
+  margin-bottom: var(--spacing-lg, 1.5rem);
 }
 
 .wb-card {
   position: relative;
-  border-radius: var(--rounded-2xl, 24px);
-  border: 1px solid var(--color-primary-light, rgba(59, 130, 246, 0.10));
+  border-radius: var(--rounded-lg, 12px);
+  border: 1px solid var(--wb-border-color, rgba(148, 163, 184, 0.24));
   overflow: hidden;
-  background: var(--color-bg-primary, #ffffff);
-  box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.07));
-  transition: all var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 10px 28px -24px rgba(15, 23, 42, 0.48);
+  transition:
+    border-color var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    box-shadow var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    background-color var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
   min-height: auto;
   height: auto;
   /* 6.5 确保流式布局,避免水平滚动 */
@@ -206,18 +177,17 @@
 
   /* 5.6 定义暗色模式 CSS 变量 */
   --wb-text-primary: var(--color-text-primary, #0f172a);
-  --wb-text-secondary: var(--color-text-secondary, #64748b);
-  --wb-border-color: var(--color-border-default, rgba(0, 0, 0, 0.10));
-  --wb-tag-bg: rgba(255, 255, 255, .7);
-  --wb-tag-border: var(--color-border-default, rgba(0, 0, 0, 0.10));
+  --wb-text-secondary: var(--color-slate-600, #475569);
+  --wb-border-color: rgba(148, 163, 184, 0.24);
+  --wb-tag-bg: rgba(255, 255, 255, .78);
+  --wb-tag-border: rgba(148, 163, 184, 0.22);
   --wb-tag-hover-bg: white;
-  --wb-tag-hover-border: var(--color-primary-light, rgba(59, 130, 246, 0.10));
+  --wb-tag-hover-border: rgba(37, 99, 235, 0.18);
 }
 
 .wb-card:hover {
-  border-color: var(--color-primary-light, rgba(59, 130, 246, 0.10));
-  box-shadow: var(--shadow-lg, 0 10px 25px -5px rgba(0, 0, 0, 0.08));
-  transform: translateY(-2px);
+  border-color: rgba(37, 99, 235, 0.22);
+  box-shadow: 0 14px 32px -26px rgba(15, 23, 42, 0.55);
 }
 
 
@@ -225,9 +195,9 @@
 .wb-bg-gradient {
   position: absolute;
   inset: 0;
-  /* 扁平化设计：简化为双色渐变 */
   background: linear-gradient(135deg,
       var(--wb-gradient-1, rgba(239, 246, 255, 0.95)) 0%,
+      rgba(255, 255, 255, 0.92) 52%,
       var(--wb-gradient-2, rgba(219, 234, 254, 0.90)) 100%);
   /* 8.1 为装饰元素添加 pointer-events: none */
   pointer-events: none;
@@ -237,11 +207,11 @@
 
 .wb-orb {
   position: absolute;
+  display: none;
   border-radius: 50%;
   /* 扁平化设计：减少模糊程度 */
-  filter: blur(40px);
-  animation: floatSlow 12s var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1)) infinite;
-  will-change: transform;
+  filter: blur(36px);
+  animation: none;
   transform: translateZ(0);
   /* 8.1 为装饰元素添加 pointer-events: none */
   pointer-events: none;
@@ -249,7 +219,7 @@
   contain: layout style paint;
   /* 增强视觉效果：添加混合模式 */
   mix-blend-mode: multiply;
-  opacity: 0.6;
+  opacity: 0.18;
 }
 
 .wb-orb-1 {
@@ -288,9 +258,9 @@
 .wb-grid-pattern {
   position: absolute;
   inset: 0;
-  opacity: .03;
+  opacity: .035;
   background-image: radial-gradient(circle,
-      var(--color-primary, #3b82f6) 1px,
+      rgba(100, 116, 139, 0.45) 1px,
       transparent 1px);
   background-size: 32px 32px;
   /* 8.1 为装饰元素添加 pointer-events: none */
@@ -299,14 +269,15 @@
 
 .wb-particle {
   position: absolute;
+  display: none;
   border-radius: 50%;
   /* 8.1 为装饰元素添加 pointer-events: none */
   pointer-events: none;
   /* 8.3 优化渲染性能 */
   contain: layout style paint;
   /* 增强粒子效果 */
-  background: var(--wb-particle-color, rgba(59, 130, 246, 0.6));
-  box-shadow: 0 0 10px var(--wb-particle-color, rgba(59, 130, 246, 0.4));
+  background: var(--wb-particle-color, rgba(59, 130, 246, 0.28));
+  box-shadow: none;
 }
 
 .wb-particle-1 {
@@ -391,7 +362,7 @@
 .wb-content {
   position: relative;
   z-index: 10;
-  padding: var(--spacing-2xl, 3rem) var(--spacing-3xl, 4rem);
+  padding: var(--spacing-xl, 2rem) var(--spacing-2xl, 3rem);
   min-height: auto;
   height: auto;
 }
@@ -410,26 +381,28 @@
 }
 
 .wb-icon-main {
-  width: 64px;
-  height: 64px;
-  border-radius: var(--rounded-xl, 16px);
-  background: var(--gradient-primary, linear-gradient(135deg, #3b82f6, #6366f1));
+  width: 56px;
+  height: 56px;
+  border-radius: var(--rounded-lg, 12px);
+  background: linear-gradient(135deg, #2563eb, #0891b2);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: var(--shadow-primary-md, 0 4px 14px rgba(59, 130, 246, 0.20));
-  transition: all var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+  box-shadow: 0 8px 18px -14px rgba(37, 99, 235, 0.72);
+  transition:
+    box-shadow var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    filter var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
   position: relative;
   z-index: 2;
 }
 
 .wb-icon-wrapper:hover .wb-icon-main {
-  transform: scale(1.06) rotate(-3deg);
-  box-shadow: var(--shadow-primary-lg, 0 8px 25px rgba(59, 130, 246, 0.25));
+  filter: brightness(1.03);
+  box-shadow: 0 10px 22px -16px rgba(37, 99, 235, 0.78);
 }
 
 .wb-icon-main i {
-  font-size: 26px;
+  font-size: 22px;
   color: white;
 }
 
@@ -437,22 +410,22 @@
   position: absolute;
   bottom: -4px;
   right: -4px;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: linear-gradient(135deg,
       var(--color-amber-400, #fbbf24),
       var(--color-warning, #f59e0b));
-  border: 3px solid white;
+  border: 2px solid white;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 3px 10px var(--color-amber-400, #fbbf24);
+  box-shadow: 0 6px 12px -9px rgba(245, 158, 11, 0.9);
   z-index: 3;
 }
 
 .wb-icon-badge i {
-  font-size: 9px;
+  font-size: 8px;
   color: white;
 }
 
@@ -461,7 +434,8 @@
   inset: -6px;
   border-radius: var(--rounded-2xl, 24px);
   border: 2px solid var(--color-primary-light, rgba(59, 130, 246, 0.10));
-  animation: pulseRing var(--duration-2s, 2000ms) var(--ease-out, cubic-bezier(0, 0, 0.2, 1)) infinite;
+  animation: none;
+  display: none;
   z-index: 1;
   /* 8.1 添加 will-change 属性优化性能 */
   will-change: transform, opacity;
@@ -480,17 +454,17 @@
 .wb-title-row {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm, 0.75rem);
-  margin-bottom: var(--spacing-sm, 0.75rem);
+  gap: var(--spacing-xs, 0.5rem);
+  margin-bottom: var(--spacing-xs, 0.5rem);
   flex-wrap: wrap;
 }
 
 .wb-title {
-  font-size: var(--text-2xl, 1.5rem);
-  font-weight: var(--font-extrabold, 800);
+  font-size: var(--text-xl, 1.25rem);
+  font-weight: var(--font-bold, 700);
   color: var(--wb-text-primary, var(--color-text-primary, #0f172a));
-  letter-spacing: var(--tracking-tight, -0.025em);
-  line-height: var(--leading-tight, 1.25);
+  letter-spacing: 0;
+  line-height: var(--leading-snug, 1.375);
   white-space: normal;
   word-wrap: break-word;
   overflow-wrap: break-word;
@@ -500,16 +474,20 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 4px 12px;
+  padding: 3px 9px;
   border-radius: var(--rounded-full, 9999px);
   font-size: var(--text-2xs, 0.625rem);
   font-weight: var(--font-bold, 700);
-  color: white;
-  background: var(--badge-gradient, linear-gradient(135deg, #3b82f6, #6366f1));
-  box-shadow: var(--badge-shadow, 0 2px 8px rgba(59, 130, 246, 0.15));
-  letter-spacing: var(--tracking-wider, 0.05em);
-  text-transform: uppercase;
-  transition: all 200ms ease;
+  color: var(--badge-color, #1d4ed8);
+  background: var(--badge-bg, rgba(239, 246, 255, 0.82));
+  border: 1px solid var(--badge-border, rgba(37, 99, 235, 0.18));
+  box-shadow: none;
+  letter-spacing: 0;
+  text-transform: none;
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease,
+    color 200ms ease;
   /* 6.4 确保触摸目标尺寸 ≥ 44x44px */
   /* min-height: 44px;
   min-width: 44px; */
@@ -521,8 +499,7 @@
 }
 
 .wb-badge:hover {
-  transform: translateY(-1px);
-  filter: brightness(1.1);
+  filter: none;
 }
 
 /* 7.4 可点击徽章的键盘导航支持 */
@@ -535,55 +512,63 @@
 /* 7.4 移除鼠标点击时的焦点样式 */
 .wb-badge:focus:not(:focus-visible) {
   outline: none;
-  box-shadow: var(--badge-shadow, 0 2px 8px rgba(59, 130, 246, 0.15));
+  box-shadow: none;
 }
 
 /* 徽章主题变体 */
 .wb-badge-ai {
-  --badge-gradient: linear-gradient(135deg, #3b82f6, #6366f1);
-  --badge-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+  --badge-bg: rgba(239, 246, 255, 0.86);
+  --badge-color: #1d4ed8;
+  --badge-border: rgba(37, 99, 235, 0.20);
 }
 
 .wb-badge-growth {
-  --badge-gradient: linear-gradient(135deg, #10b981, #059669);
-  --badge-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+  --badge-bg: rgba(236, 253, 245, 0.88);
+  --badge-color: #047857;
+  --badge-border: rgba(5, 150, 105, 0.22);
 }
 
 .wb-badge-safety {
-  --badge-gradient: linear-gradient(135deg, #f43f5e, #dc2626);
-  --badge-shadow: 0 2px 8px rgba(244, 63, 94, 0.15);
+  --badge-bg: rgba(255, 247, 237, 0.9);
+  --badge-color: #c2410c;
+  --badge-border: rgba(234, 88, 12, 0.24);
 }
 
 .wb-badge-service {
-  --badge-gradient: linear-gradient(135deg, #a855f7, #7c3aed);
-  --badge-shadow: 0 2px 8px rgba(168, 85, 247, 0.15);
+  --badge-bg: rgba(250, 245, 255, 0.88);
+  --badge-color: #7e22ce;
+  --badge-border: rgba(126, 34, 206, 0.20);
 }
 
 .wb-badge-supply {
-  --badge-gradient: linear-gradient(135deg, #f97316, #ea580c);
-  --badge-shadow: 0 2px 8px rgba(249, 115, 22, 0.15);
+  --badge-bg: rgba(255, 251, 235, 0.9);
+  --badge-color: #b45309;
+  --badge-border: rgba(217, 119, 6, 0.22);
 }
 
 .wb-badge-analytics {
-  --badge-gradient: linear-gradient(135deg, #06b6d4, #0891b2);
-  --badge-shadow: 0 2px 8px rgba(6, 182, 212, 0.15);
+  --badge-bg: rgba(236, 254, 255, 0.9);
+  --badge-color: #0e7490;
+  --badge-border: rgba(8, 145, 178, 0.22);
 }
 
 .wb-badge-pro {
-  --badge-gradient: linear-gradient(135deg, #f59e0b, #d97706);
-  --badge-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);
+  --badge-bg: rgba(255, 251, 235, 0.9);
+  --badge-color: #b45309;
+  --badge-border: rgba(217, 119, 6, 0.22);
 }
 
 .wb-badge-hub {
-  --badge-gradient: linear-gradient(135deg, #64748b, #475569);
-  --badge-shadow: 0 2px 8px rgba(100, 116, 139, 0.15);
+  --badge-bg: rgba(248, 250, 252, 0.9);
+  --badge-color: #475569;
+  --badge-border: rgba(100, 116, 139, 0.22);
 }
 
 .wb-description {
   color: var(--wb-text-secondary, var(--color-text-secondary, #64748b));
   font-size: var(--text-base, 0.875rem);
-  line-height: var(--leading-relaxed, 1.625);
-  max-width: 100%;
+  line-height: var(--leading-normal, 1.5);
+  max-width: 74ch;
   white-space: normal;
   word-wrap: break-word;
   overflow-wrap: break-word;
@@ -594,30 +579,29 @@
 .wb-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-sm, 0.75rem);
-  margin-top: var(--spacing-lg, 1.5rem);
+  gap: var(--spacing-xs, 0.5rem);
+  margin-top: var(--spacing-md, 1rem);
 }
 
 .wb-tag {
   display: flex;
   align-items: center;
   gap: var(--spacing-xs, 0.5rem);
-  padding: 7px 16px;
+  padding: 5px 10px;
   border-radius: var(--rounded-full, 9999px);
   background: var(--wb-tag-bg, rgba(255, 255, 255, .7));
   border: 1px solid var(--wb-tag-border, var(--color-border-default, rgba(0, 0, 0, 0.10)));
-  backdrop-filter: blur(10px);
-  transition: all var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+  backdrop-filter: none;
+  transition:
+    background-color var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    border-color var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
   cursor: default;
-  /* 6.4 确保触摸目标尺寸 ≥ 44x44px */
-  min-height: 44px;
+  min-height: 28px;
 }
 
 .wb-tag:hover {
   background: var(--wb-tag-hover-bg, white);
   border-color: var(--wb-tag-hover-border, var(--color-primary-light, rgba(59, 130, 246, 0.10)));
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-xs, 0 1px 2px rgba(0, 0, 0, 0.04));
 }
 
 /* 7.4 标签的键盘导航支持 */
@@ -633,12 +617,15 @@
 }
 
 .wb-tag-dot {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   flex-shrink: 0;
   background: var(--wb-tag-dot-1, var(--color-green-500, #22c55e));
-  box-shadow: 0 0 0 3px var(--color-green-100, #dcfce7);
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  box-shadow: none;
+  filter: saturate(.82);
+  opacity: .9;
 }
 
 .wb-tag span {
@@ -651,25 +638,26 @@
 /* ===== 响应式样式 ===== */
 @media (max-width: 768px) {
   .wb-content {
-    padding: var(--spacing-lg, 1.5rem) var(--spacing-md, 1rem);
+    padding: var(--spacing-md, 1rem);
   }
 
   .wb-header {
     flex-direction: column;
-    gap: var(--spacing-md, 1rem);
+    align-items: flex-start;
+    gap: var(--spacing-sm, 0.75rem);
   }
 
   .wb-icon-main {
-    width: 56px;
-    height: 56px;
+    width: 48px;
+    height: 48px;
   }
 
   .wb-icon-main i {
-    font-size: 24px;
+    font-size: 20px;
   }
 
   .wb-title {
-    font-size: var(--text-xl, 1.25rem);
+    font-size: var(--text-lg, 1.125rem);
   }
 
   /* 6.1 平板断点徽章样式 */
@@ -685,10 +673,11 @@
 
   .wb-tags {
     gap: var(--spacing-xs, 0.5rem);
+    margin-top: var(--spacing-sm, 0.75rem);
   }
 
   .wb-tag {
-    padding: 5px 12px;
+    padding: 5px 10px;
   }
 
   /* 6.1 隐藏浮动光球以提升性能 */
@@ -696,28 +685,20 @@
     display: none;
   }
 
-  /* 6.4 移动端增加内边距以满足触摸目标要求 */
-  .wb-badge {
-    padding: 8px 12px;
-  }
-
-  .wb-tag {
-    padding: 8px 12px;
-  }
+  /* 6.4 banner 内标签为信息展示，不扩大到按钮尺寸，避免移动端高度失衡 */
 }
 
 @media (max-width: 480px) {
 
   /* 6.2 移动端断点样式 */
   .wb-badge {
-    padding: 2px 6px;
-    font-size: 0.5rem;
-    /* 8px */
+    padding: 2px 7px;
+    font-size: 0.5625rem;
   }
 
-  /* 6.2 特性标签垂直排列 */
+  /* 6.2 小屏幕标签自然换行 */
   .wb-tags {
-    flex-direction: column;
+    align-items: flex-start;
   }
 }
 
@@ -731,7 +712,6 @@
 
   .wb-title {
     font-size: 1rem;
-    /* 16px */
   }
 }
 
@@ -752,8 +732,8 @@
 }
 
 .wb-badge-safety {
-  animation: pulse 2s ease-in-out infinite;
-  will-change: transform;
+  animation: none;
+  will-change: auto;
 }
 
 /* 闪烁动画 - 用于 Growth 徽章 */
@@ -770,8 +750,8 @@
 }
 
 .wb-badge-growth {
-  animation: blink 1.5s ease-in-out infinite;
-  will-change: opacity;
+  animation: none;
+  will-change: auto;
 }
 
 /* 渐变背景动画 - 用于支持渐变动画的徽章 */
@@ -792,7 +772,7 @@
 /* 为支持渐变动画的徽章添加背景尺寸 */
 .wb-badge-animated {
   background-size: 200% 200%;
-  animation: gradientShift 3s linear infinite;
+  animation: none;
 }
 
 
@@ -840,32 +820,30 @@
   /* 5.6 使用 CSS 变量覆盖暗色模式样式 */
   .wb-container,
   .wb-card {
-    --wb-text-primary: #f1f5f9;
+    --wb-text-primary: #f8fafc;
     --wb-text-secondary: #cbd5e1;
-    --wb-border-color: rgba(255, 255, 255, 0.1);
-    --wb-tag-bg: rgba(0, 0, 0, 0.3);
-    --wb-tag-border: rgba(255, 255, 255, 0.1);
-    --wb-tag-hover-bg: rgba(0, 0, 0, 0.5);
-    --wb-tag-hover-border: rgba(255, 255, 255, 0.2);
+    --wb-border-color: rgba(148, 163, 184, 0.22);
+    --wb-tag-bg: rgba(30, 41, 59, 0.78);
+    --wb-tag-border: rgba(148, 163, 184, 0.18);
+    --wb-tag-hover-bg: rgba(30, 41, 59, 0.92);
+    --wb-tag-hover-border: rgba(148, 163, 184, 0.30);
   }
 
   /* 5.1 背景适配 */
   .wb-container,
   .wb-card {
     background: linear-gradient(135deg,
-        rgba(30, 58, 138, 0.15) 0%,
-        rgba(17, 24, 39, 0.95) 35%,
-        rgba(6, 78, 59, 0.15) 65%,
-        rgba(120, 53, 15, 0.10) 100%);
+        rgba(15, 23, 42, 0.96) 0%,
+        rgba(30, 41, 59, 0.94) 50%,
+        rgba(15, 23, 42, 0.96) 100%);
     border-color: var(--wb-border-color);
   }
 
   .wb-bg-gradient {
     background: linear-gradient(135deg,
-        rgba(30, 58, 138, 0.15) 0%,
-        rgba(17, 24, 39, 0.95) 35%,
-        rgba(6, 78, 59, 0.15) 65%,
-        rgba(120, 53, 15, 0.10) 100%);
+        rgba(30, 58, 138, 0.16) 0%,
+        rgba(15, 23, 42, 0.94) 52%,
+        rgba(8, 145, 178, 0.12) 100%);
   }
 
   .wb-orb-1 {
@@ -888,43 +866,51 @@
 
   /* 5.2 徽章适配 - 调整为更亮的色调以提高可见度 */
   .wb-badge-ai {
-    --badge-gradient: linear-gradient(135deg, #60a5fa, #818cf8);
-    --badge-shadow: 0 2px 8px rgba(96, 165, 250, 0.25);
+    --badge-bg: rgba(30, 64, 175, 0.28);
+    --badge-color: #bfdbfe;
+    --badge-border: rgba(147, 197, 253, 0.24);
   }
 
   .wb-badge-growth {
-    --badge-gradient: linear-gradient(135deg, #34d399, #10b981);
-    --badge-shadow: 0 2px 8px rgba(52, 211, 153, 0.25);
+    --badge-bg: rgba(6, 95, 70, 0.30);
+    --badge-color: #a7f3d0;
+    --badge-border: rgba(110, 231, 183, 0.24);
   }
 
   .wb-badge-safety {
-    --badge-gradient: linear-gradient(135deg, #fb7185, #f43f5e);
-    --badge-shadow: 0 2px 8px rgba(251, 113, 133, 0.25);
+    --badge-bg: rgba(154, 52, 18, 0.30);
+    --badge-color: #fed7aa;
+    --badge-border: rgba(253, 186, 116, 0.26);
   }
 
   .wb-badge-service {
-    --badge-gradient: linear-gradient(135deg, #c084fc, #a855f7);
-    --badge-shadow: 0 2px 8px rgba(192, 132, 252, 0.25);
+    --badge-bg: rgba(88, 28, 135, 0.30);
+    --badge-color: #e9d5ff;
+    --badge-border: rgba(216, 180, 254, 0.24);
   }
 
   .wb-badge-supply {
-    --badge-gradient: linear-gradient(135deg, #fb923c, #f97316);
-    --badge-shadow: 0 2px 8px rgba(251, 146, 60, 0.25);
+    --badge-bg: rgba(146, 64, 14, 0.30);
+    --badge-color: #fde68a;
+    --badge-border: rgba(252, 211, 77, 0.24);
   }
 
   .wb-badge-analytics {
-    --badge-gradient: linear-gradient(135deg, #22d3ee, #06b6d4);
-    --badge-shadow: 0 2px 8px rgba(34, 211, 238, 0.25);
+    --badge-bg: rgba(21, 94, 117, 0.30);
+    --badge-color: #a5f3fc;
+    --badge-border: rgba(103, 232, 249, 0.24);
   }
 
   .wb-badge-pro {
-    --badge-gradient: linear-gradient(135deg, #fbbf24, #f59e0b);
-    --badge-shadow: 0 2px 8px rgba(251, 191, 36, 0.25);
+    --badge-bg: rgba(146, 64, 14, 0.30);
+    --badge-color: #fde68a;
+    --badge-border: rgba(252, 211, 77, 0.24);
   }
 
   .wb-badge-hub {
-    --badge-gradient: linear-gradient(135deg, #94a3b8, #64748b);
-    --badge-shadow: 0 2px 8px rgba(148, 163, 184, 0.25);
+    --badge-bg: rgba(51, 65, 85, 0.78);
+    --badge-color: #e2e8f0;
+    --badge-border: rgba(148, 163, 184, 0.24);
   }
 
   /* 5.3 和 5.4 的样式现在通过 CSS 变量自动应用 */
@@ -934,11 +920,11 @@
 
 
 /* ----------------------------------------------------------------------------
- * 简化版本样式 (用于 Python 脚本迁移的页面)
+ * 简化版本样式
  * ----------------------------------------------------------------------------
  * 
  * HTML 结构:
- * <div class="wb-container" style="--wb-gradient-1: #color1; --wb-gradient-2: #color2;">
+ * <div class="wb-container wb-container--simple" style="--wb-gradient-1: #color1; --wb-gradient-2: #color2;">
  *   <div class="wb-orb wb-orb-1"></div>
  *   <div class="wb-orb wb-orb-2"></div>
  *   <div class="wb-content">
@@ -954,96 +940,100 @@
  * ----------------------------------------------------------------------------
  */
 
-/* 当 .wb-container 作为直接容器时的样式 */
-.wb-container:not(:has(.wb-card)) {
+/* Simple variant */
+.wb-container--simple {
   position: relative;
-  border-radius: var(--rounded-2xl, 24px);
-  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: var(--rounded-lg, 12px);
+  border: 1px solid var(--wb-border-color, rgba(148, 163, 184, 0.24));
   overflow: hidden;
   background: linear-gradient(135deg,
       var(--wb-gradient-1, rgba(59, 130, 246, 0.08)) 0%,
-      rgba(255, 255, 255, 0.95) 35%,
-      var(--wb-gradient-2, rgba(34, 197, 94, 0.08)) 65%,
-      rgba(251, 191, 36, 0.05) 100%);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-  margin-bottom: var(--spacing-2xl, 3rem);
-  padding: var(--spacing-lg, 1.5rem) var(--spacing-xl, 2rem);
-  transition: all 300ms cubic-bezier(0.22, 1, 0.36, 1);
+      rgba(255, 255, 255, 0.94) 48%,
+      var(--wb-gradient-2, rgba(34, 197, 94, 0.08)) 100%);
+  box-shadow: 0 10px 28px -24px rgba(15, 23, 42, 0.48);
+  margin-bottom: var(--spacing-xl, 2rem);
+  padding: var(--spacing-lg, 1.5rem);
+  transition:
+    border-color 300ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 300ms cubic-bezier(0.22, 1, 0.36, 1);
   min-height: auto;
   height: auto;
 }
 
-.wb-container:not(:has(.wb-card)):hover {
-  border-color: rgba(59, 130, 246, 0.15);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
-  transform: translateY(-2px);
+.wb-container--simple:hover {
+  border-color: rgba(37, 99, 235, 0.22);
+  box-shadow: 0 14px 32px -26px rgba(15, 23, 42, 0.55);
 }
 
 /* 简化版本的内容区 - 使用 CSS Grid 实现横向布局 */
-.wb-container:not(:has(.wb-card)) .wb-content {
+.wb-container--simple .wb-content {
   position: relative;
   z-index: 10;
   display: grid;
   grid-template-columns: auto 1fr;
   grid-template-rows: auto auto auto;
-  column-gap: var(--spacing-lg, 1.5rem);
+  column-gap: var(--spacing-md, 1rem);
   row-gap: 0;
   align-items: start;
+  padding: 0;
 }
 
 /* 图标占据第一列，跨越所有行 */
-.wb-container:not(:has(.wb-card)) .wb-icon {
+.wb-container--simple .wb-icon {
   grid-column: 1;
   grid-row: 1 / -1;
   align-self: start;
 }
 
 /* 标题行在第二列第一行 */
-.wb-container:not(:has(.wb-card)) .wb-title-row {
+.wb-container--simple .wb-title-row {
   grid-column: 2;
   grid-row: 1;
 }
 
 /* 描述在第二列第二行 */
-.wb-container:not(:has(.wb-card)) .wb-description {
+.wb-container--simple .wb-description {
   grid-column: 2;
   grid-row: 2;
 }
 
 /* 标签在第二列第三行 */
-.wb-container:not(:has(.wb-card)) .wb-meta {
+.wb-container--simple .wb-meta {
   grid-column: 2;
   grid-row: 3;
 }
 
-.wb-container:not(:has(.wb-card)) .wb-tags {
+.wb-container--simple .wb-tags {
   grid-column: 2;
   grid-row: 3;
 }
 
-/* 简化版本的图标 - 添加渐变背景和右下角徽章 */
-.wb-container:not(:has(.wb-card)) .wb-icon {
+/* 简化版本的图标 */
+.wb-container--simple .wb-icon {
   position: relative;
-  width: 56px;
-  height: 56px;
+  width: 52px;
+  height: 52px;
   flex-shrink: 0;
-  border-radius: var(--rounded-xl, 16px);
-  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  border-radius: var(--rounded-lg, 12px);
+  background: linear-gradient(135deg, #2563eb, #0891b2);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.20);
-  transition: all 300ms cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 8px 18px -14px rgba(37, 99, 235, 0.72);
+  transition:
+    box-shadow 300ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 300ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.wb-container:not(:has(.wb-card)) .wb-icon i {
-  font-size: 24px;
+.wb-container--simple .wb-icon i {
+  font-size: 21px;
   color: white;
 }
 
 /* 图标右下角的小徽章 - 使用伪元素 */
-.wb-container:not(:has(.wb-card)) .wb-icon::after {
+.wb-container--simple .wb-icon::after {
   content: '\f0e7';
+  display: none;
   font-family: 'Font Awesome 6 Free';
   font-weight: 900;
   position: absolute;
@@ -1063,27 +1053,27 @@
   z-index: 3;
 }
 
-.wb-container:not(:has(.wb-card)):hover .wb-icon {
-  transform: scale(1.06) rotate(-3deg);
-  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.25);
+.wb-container--simple:hover .wb-icon {
+  filter: brightness(1.03);
+  box-shadow: 0 10px 22px -16px rgba(37, 99, 235, 0.78);
 }
 
 /* 简化版本的标题行 - 支持标题+徽章并排 */
-.wb-container:not(:has(.wb-card)) .wb-title-row {
+.wb-container--simple .wb-title-row {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm, 0.75rem);
-  margin-bottom: var(--spacing-xs, 0.5rem);
+  gap: var(--spacing-xs, 0.5rem);
+  margin-bottom: 0.375rem;
   flex-wrap: wrap;
 }
 
 /* 简化版本的标题 */
-.wb-container:not(:has(.wb-card)) .wb-title {
-  font-size: var(--text-xl, 1.25rem);
-  font-weight: var(--font-extrabold, 800);
-  color: var(--color-text-primary, #0f172a);
-  letter-spacing: var(--tracking-tight, -0.025em);
-  line-height: var(--leading-tight, 1.25);
+.wb-container--simple .wb-title {
+  font-size: var(--text-lg, 1.125rem);
+  font-weight: var(--font-bold, 700);
+  color: var(--wb-text-primary, var(--color-text-primary, #0f172a));
+  letter-spacing: 0;
+  line-height: var(--leading-snug, 1.375);
   margin: 0;
   white-space: normal;
   word-wrap: break-word;
@@ -1091,7 +1081,7 @@
 }
 
 /* 简化版本的徽章 */
-.wb-container:not(:has(.wb-card)) .wb-badge {
+.wb-container--simple .wb-badge {
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -1099,144 +1089,146 @@
   border-radius: var(--rounded-full, 9999px);
   font-size: var(--text-2xs, 0.625rem);
   font-weight: var(--font-bold, 700);
-  color: white;
-  background: var(--badge-gradient, linear-gradient(135deg, #3b82f6, #6366f1));
-  box-shadow: var(--badge-shadow, 0 2px 8px rgba(59, 130, 246, 0.15));
-  letter-spacing: var(--tracking-wider, 0.05em);
-  text-transform: uppercase;
-  transition: all 200ms ease;
+  color: var(--badge-color, #1d4ed8);
+  background: var(--badge-bg, rgba(239, 246, 255, 0.82));
+  border: 1px solid var(--badge-border, rgba(37, 99, 235, 0.18));
+  box-shadow: none;
+  letter-spacing: 0;
+  text-transform: none;
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease,
+    color 200ms ease;
 }
 
-.wb-container:not(:has(.wb-card)) .wb-badge i {
+.wb-container--simple .wb-badge i {
   font-size: 8px;
 }
 
-.wb-container:not(:has(.wb-card)) .wb-badge:hover {
-  transform: translateY(-1px);
-  filter: brightness(1.1);
+.wb-container--simple .wb-badge:hover {
+  filter: none;
 }
 
 /* 简化版本的描述 */
-.wb-container:not(:has(.wb-card)) .wb-description {
-  color: var(--color-text-secondary, #64748b);
+.wb-container--simple .wb-description {
+  color: var(--wb-text-secondary, var(--color-text-secondary, #64748b));
   font-size: var(--text-sm, 0.8125rem);
-  line-height: var(--leading-relaxed, 1.625);
-  max-width: 100%;
-  margin: 0 0 var(--spacing-md, 1rem) 0;
+  line-height: var(--leading-normal, 1.5);
+  max-width: 74ch;
+  margin: 0 0 var(--spacing-sm, 0.75rem) 0;
   white-space: normal;
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
 
 /* 简化版本的元数据标签 */
-.wb-container:not(:has(.wb-card)) .wb-meta {
+.wb-container--simple .wb-meta {
   display: flex;
   flex-wrap: wrap;
   gap: var(--spacing-xs, 0.5rem);
   margin: 0;
 }
 
-.wb-container:not(:has(.wb-card)) .wb-meta span {
+.wb-container--simple .wb-meta span {
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-xs, 0.5rem);
   padding: 5px 12px;
   border-radius: var(--rounded-full, 9999px);
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid var(--color-border-default, rgba(0, 0, 0, 0.10));
-  backdrop-filter: blur(10px);
+  background: var(--wb-tag-bg, rgba(255, 255, 255, 0.78));
+  border: 1px solid var(--wb-tag-border, rgba(148, 163, 184, 0.22));
+  backdrop-filter: none;
   font-size: var(--text-2xs, 0.6875rem);
-  color: var(--color-text-secondary, #64748b);
+  color: var(--wb-text-secondary, var(--color-text-secondary, #64748b));
   font-weight: var(--font-medium, 500);
-  transition: all var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+  transition:
+    background-color var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    border-color var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
   cursor: default;
 }
 
-.wb-container:not(:has(.wb-card)) .wb-meta span:hover {
-  background: white;
-  border-color: var(--color-primary-light, rgba(59, 130, 246, 0.10));
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-xs, 0 1px 2px rgba(0, 0, 0, 0.04));
+.wb-container--simple .wb-meta span:hover {
+  background: var(--wb-tag-hover-bg, white);
+  border-color: var(--wb-tag-hover-border, rgba(37, 99, 235, 0.18));
 }
 
-.wb-container:not(:has(.wb-card)) .wb-meta span i {
+.wb-container--simple .wb-meta span i {
   font-size: 9px;
   color: var(--color-primary, #3b82f6);
 }
 
 /* 简化版本的响应式 */
 @media (max-width: 768px) {
-  .wb-container:not(:has(.wb-card)) {
-    padding: var(--spacing-md, 1rem) var(--spacing-lg, 1.5rem);
+  .wb-container--simple {
+    padding: var(--spacing-md, 1rem);
   }
 
-  .wb-container:not(:has(.wb-card)) .wb-content {
+  .wb-container--simple .wb-content {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto auto auto;
-    row-gap: var(--spacing-sm, 0.75rem);
+    row-gap: var(--spacing-xs, 0.5rem);
   }
 
-  .wb-container:not(:has(.wb-card)) .wb-icon {
+  .wb-container--simple .wb-icon {
     grid-column: 1;
     grid-row: 1;
   }
 
-  .wb-container:not(:has(.wb-card)) .wb-title-row {
+  .wb-container--simple .wb-title-row {
     grid-column: 1;
     grid-row: 2;
   }
 
-  .wb-container:not(:has(.wb-card)) .wb-title {
+  .wb-container--simple .wb-title {
     font-size: var(--text-lg, 1.125rem);
   }
 
-  .wb-container:not(:has(.wb-card)) .wb-description {
+  .wb-container--simple .wb-description {
     grid-column: 1;
     grid-row: 3;
   }
 
-  .wb-container:not(:has(.wb-card)) .wb-meta {
+  .wb-container--simple .wb-meta {
     grid-column: 1;
     grid-row: 4;
   }
 
-  .wb-container:not(:has(.wb-card)) .wb-meta span {
-    padding: 4px 10px;
+  .wb-container--simple .wb-meta span {
+    padding: 5px 10px;
     font-size: 0.625rem;
   }
 }
 
 @media (max-width: 480px) {
-  .wb-container:not(:has(.wb-card)) {
-    padding: var(--spacing-sm, 0.75rem) var(--spacing-md, 1rem);
+  .wb-container--simple {
+    padding: var(--spacing-md, 1rem);
   }
 
-  .wb-container:not(:has(.wb-card)) .wb-icon {
-    width: 48px;
-    height: 48px;
+  .wb-container--simple .wb-icon {
+    width: 44px;
+    height: 44px;
   }
 
-  .wb-container:not(:has(.wb-card)) .wb-icon i {
-    font-size: 20px;
+  .wb-container--simple .wb-icon i {
+    font-size: 18px;
   }
 
-  .wb-container:not(:has(.wb-card)) .wb-icon::after {
+  .wb-container--simple .wb-icon::after {
     width: 18px;
     height: 18px;
     font-size: 7px;
   }
 
-  .wb-container:not(:has(.wb-card)) .wb-badge {
-    padding: 2px 8px;
+  .wb-container--simple .wb-badge {
+    padding: 2px 7px;
     font-size: 0.5625rem;
   }
 
-  .wb-container:not(:has(.wb-card)) .wb-badge i {
+  .wb-container--simple .wb-badge i {
     font-size: 7px;
   }
 
-  .wb-container:not(:has(.wb-card)) .wb-meta {
-    flex-direction: column;
+  .wb-container--simple .wb-meta {
     align-items: flex-start;
   }
 }
@@ -1244,23 +1236,22 @@
 /* PC 自用版：压缩所有欢迎区高度，降低长期使用时的视觉占用 */
 @media (min-width: 769px) {
   .wb-container,
-  .wb-container:not(:has(.wb-card)) {
+  .wb-container--simple {
     margin-bottom: var(--spacing-lg, 1.5rem);
-    border-radius: var(--rounded-xl, 16px);
+    border-radius: var(--rounded-lg, 12px);
   }
 
   .wb-card {
-    border-radius: var(--rounded-xl, 16px);
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+    border-radius: var(--rounded-lg, 12px);
+    box-shadow: 0 10px 28px -24px rgba(15, 23, 42, 0.48);
   }
 
   .wb-card:hover {
-    transform: none;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+    box-shadow: 0 14px 32px -26px rgba(15, 23, 42, 0.55);
   }
 
   .wb-card .wb-content {
-    padding: 1.25rem 1.5rem;
+    padding: 1.125rem 1.25rem;
   }
 
   .wb-card .wb-header {
@@ -1268,14 +1259,14 @@
   }
 
   .wb-card .wb-icon-main {
-    width: 48px;
-    height: 48px;
+    width: 46px;
+    height: 46px;
     border-radius: var(--rounded-lg, 12px);
-    box-shadow: 0 3px 10px rgba(59, 130, 246, 0.16);
+    box-shadow: 0 8px 18px -14px rgba(37, 99, 235, 0.72);
   }
 
   .wb-card .wb-icon-main i {
-    font-size: 20px;
+    font-size: 19px;
   }
 
   .wb-card .wb-icon-badge {
@@ -1289,7 +1280,7 @@
   }
 
   .wb-card .wb-title-row {
-    margin-bottom: 0.35rem;
+    margin-bottom: 0.375rem;
   }
 
   .wb-card .wb-title {
@@ -1298,17 +1289,17 @@
   }
 
   .wb-card .wb-description {
-    line-height: 1.45;
+    line-height: 1.5;
   }
 
   .wb-card .wb-tags {
-    gap: 0.375rem;
-    margin-top: 0.625rem;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
   }
 
   .wb-card .wb-tag {
-    min-height: 0;
-    padding: 4px 10px;
+    min-height: 28px;
+    padding: 5px 10px;
     backdrop-filter: none;
   }
 
@@ -1331,67 +1322,83 @@
     transform: none;
   }
 
-  .wb-container:not(:has(.wb-card)) {
-    padding: var(--spacing-md, 1rem) var(--spacing-lg, 1.5rem);
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+  .wb-container--simple {
+    padding: 1rem 1.25rem;
+    box-shadow: 0 10px 28px -24px rgba(15, 23, 42, 0.48);
   }
 
-  .wb-container:not(:has(.wb-card)) .wb-content {
+  .wb-container--simple .wb-content {
     column-gap: var(--spacing-md, 1rem);
-    padding: var(--spacing-md, 1rem) var(--spacing-lg, 1.5rem);
+    padding: 0;
   }
 
-  .wb-container:not(:has(.wb-card)) .wb-icon {
-    width: 48px;
-    height: 48px;
+  .wb-container--simple .wb-icon {
+    width: 46px;
+    height: 46px;
     border-radius: var(--rounded-lg, 12px);
-    box-shadow: 0 3px 10px rgba(59, 130, 246, 0.16);
+    box-shadow: 0 8px 18px -14px rgba(37, 99, 235, 0.72);
   }
 
-  .wb-container:not(:has(.wb-card)) .wb-icon i {
-    font-size: 20px;
+  .wb-container--simple .wb-icon i {
+    font-size: 19px;
   }
 
-  .wb-container:not(:has(.wb-card)) .wb-title-row {
-    margin-bottom: 0.35rem;
+  .wb-container--simple .wb-title-row {
+    margin-bottom: 0.375rem;
   }
 
-  .wb-container:not(:has(.wb-card)) .wb-title {
+  .wb-container--simple .wb-title {
     font-size: 1.125rem;
     letter-spacing: 0;
   }
 
-  .wb-container:not(:has(.wb-card)) .wb-description {
-    margin-bottom: 0.625rem;
-    line-height: 1.45;
+  .wb-container--simple .wb-description {
+    margin-bottom: 0.75rem;
+    line-height: 1.5;
   }
 
-  .wb-container:not(:has(.wb-card)) .wb-tags {
-    gap: 0.375rem;
+  .wb-container--simple .wb-tags {
+    gap: 0.5rem;
     margin-top: 0;
   }
 
-  .wb-container:not(:has(.wb-card)) .wb-tag,
-  .wb-container:not(:has(.wb-card)) .wb-meta span {
-    min-height: 0;
-    padding: 4px 10px;
+  .wb-container--simple .wb-tag,
+  .wb-container--simple .wb-meta span {
+    min-height: 28px;
+    padding: 5px 10px;
     backdrop-filter: none;
   }
 
-  .wb-container:not(:has(.wb-card)) .wb-orb {
+  .wb-container--simple .wb-orb {
     filter: blur(28px);
     opacity: 0.22;
     animation: none;
   }
 
-  .wb-container:not(:has(.wb-card)) .wb-particle {
+  .wb-container--simple .wb-particle {
     display: none;
   }
 
-  .wb-container:not(:has(.wb-card)):hover,
-  .wb-container:not(:has(.wb-card)):hover .wb-icon,
-  .wb-container:not(:has(.wb-card)) .wb-tag:hover,
-  .wb-container:not(:has(.wb-card)) .wb-meta span:hover {
+  .wb-container--simple:hover,
+  .wb-container--simple:hover .wb-icon,
+  .wb-container--simple .wb-tag:hover,
+  .wb-container--simple .wb-meta span:hover {
     transform: none;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .wb-container--simple {
+    background: linear-gradient(135deg,
+        rgba(15, 23, 42, 0.96) 0%,
+        rgba(30, 41, 59, 0.94) 50%,
+        rgba(15, 23, 42, 0.96) 100%);
+    border-color: var(--wb-border-color);
+  }
+
+  .wb-container--simple .wb-meta span {
+    background: var(--wb-tag-bg);
+    border-color: var(--wb-tag-border);
+    color: var(--wb-text-secondary);
   }
 }
