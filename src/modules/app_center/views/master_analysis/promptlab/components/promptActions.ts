@@ -35,12 +35,12 @@ export function generateListingPrompt(ctx: PromptlabAlpineContext): void {
 
   ctx.saveState();
 
-  const inputs: Partial<PromptInputs> = { ...ctx.profile, useAnalysisData: true };
+  const inputs: PromptInputs = { ...ctx.profile, useAnalysisData: true };
   const analysisReport = appStore.getState().analysis.analysisReport;
   const reportToUse: AnalysisReport | null =
     typeof analysisReport === 'string' || !analysisReport ? null : analysisReport;
 
-  ctx.listingPromptCache = promptlabService.generateMasterPrompt(inputs as any, reportToUse);
+  ctx.listingPromptCache = promptlabService.generateMasterPrompt(inputs, reportToUse);
   showToast('Listing Prompt 已生成', { type: 'success' });
 }
 
@@ -70,11 +70,11 @@ export function generateVisualPrompt(ctx: PromptlabAlpineContext): void {
 
   ctx.saveState();
 
-  const inputs: Partial<PromptInputs> = { ...ctx.profile, useAnalysisData: true };
+  const inputs: PromptInputs = { ...ctx.profile, useAnalysisData: true };
   const analysisReport = appStore.getState().analysis.analysisReport;
   const reportToUse: AnalysisReport | null =
     typeof analysisReport === 'string' || !analysisReport ? null : analysisReport;
 
-  ctx.visualPromptCache = promptlabService.generateVisualPrompt(inputs as any, reportToUse);
+  ctx.visualPromptCache = promptlabService.generateVisualPrompt(inputs, reportToUse);
   showToast('Visual Prompt 已生成', { type: 'success' });
 }

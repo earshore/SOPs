@@ -11,6 +11,10 @@ import {
   MODAL_CONFIG,
 } from '../config/animation-config';
 
+type ModalBackdropElement = HTMLElement & {
+  __modalAnimationController?: ModalAnimationController;
+};
+
 /**
  * 模态框动画选项
  */
@@ -261,7 +265,7 @@ export function initializeModalAnimations(): void {
     const controller = createModalAnimationController(backdrop, modal);
 
     // 将控制器附加到元素上，方便外部访问
-    (backdrop as any).__modalAnimationController = controller;
+    (backdrop as ModalBackdropElement).__modalAnimationController = controller;
   });
 }
 
@@ -272,5 +276,5 @@ export function initializeModalAnimations(): void {
 export function getModalAnimationController(
   backdrop: HTMLElement
 ): ModalAnimationController | null {
-  return (backdrop as any).__modalAnimationController || null;
+  return (backdrop as ModalBackdropElement).__modalAnimationController || null;
 }

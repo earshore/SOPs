@@ -9,6 +9,18 @@ import { animationManager } from '../services/animation-manager';
 import { ANIMATION_CLASSES } from '../config/animation-config';
 import { setSafeHtml } from '../common/utils/security';
 
+type PageTransitionElement = HTMLElement & {
+  __pageTransitionController?: PageTransitionController;
+};
+
+type SidebarAnimationElement = HTMLElement & {
+  __sidebarAnimationController?: SidebarAnimationController;
+};
+
+type DropdownAnimationElement = HTMLElement & {
+  __dropdownAnimationController?: DropdownAnimationController;
+};
+
 /**
  * 页面过渡选项
  */
@@ -650,7 +662,7 @@ function initializePageContainers(): void {
   containers.forEach((container) => {
     const controller = createPageTransitionController(container);
     // 将控制器附加到元素上，方便外部访问
-    (container as any).__pageTransitionController = controller;
+    (container as PageTransitionElement).__pageTransitionController = controller;
   });
 }
 
@@ -663,7 +675,7 @@ function initializeSidebars(): void {
   sidebars.forEach((sidebar) => {
     const controller = createSidebarAnimationController(sidebar);
     // 将控制器附加到元素上，方便外部访问
-    (sidebar as any).__sidebarAnimationController = controller;
+    (sidebar as SidebarAnimationElement).__sidebarAnimationController = controller;
 
     // 查找触发按钮
     const toggleButton = document.querySelector<HTMLElement>(
@@ -687,7 +699,7 @@ function initializeDropdowns(): void {
   dropdowns.forEach((dropdown) => {
     const controller = createDropdownAnimationController(dropdown);
     // 将控制器附加到元素上，方便外部访问
-    (dropdown as any).__dropdownAnimationController = controller;
+    (dropdown as DropdownAnimationElement).__dropdownAnimationController = controller;
 
     // 查找触发按钮
     const trigger = dropdown.previousElementSibling as HTMLElement;
@@ -716,7 +728,7 @@ function initializeDropdowns(): void {
 export function getPageTransitionController(
   container: HTMLElement
 ): PageTransitionController | null {
-  return (container as any).__pageTransitionController || null;
+  return (container as PageTransitionElement).__pageTransitionController || null;
 }
 
 /**
@@ -726,7 +738,7 @@ export function getPageTransitionController(
 export function getSidebarAnimationController(
   sidebar: HTMLElement
 ): SidebarAnimationController | null {
-  return (sidebar as any).__sidebarAnimationController || null;
+  return (sidebar as SidebarAnimationElement).__sidebarAnimationController || null;
 }
 
 /**
@@ -736,5 +748,5 @@ export function getSidebarAnimationController(
 export function getDropdownAnimationController(
   dropdown: HTMLElement
 ): DropdownAnimationController | null {
-  return (dropdown as any).__dropdownAnimationController || null;
+  return (dropdown as DropdownAnimationElement).__dropdownAnimationController || null;
 }

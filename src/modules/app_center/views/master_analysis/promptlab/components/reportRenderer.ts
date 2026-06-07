@@ -14,6 +14,20 @@ import { getFieldTitle, getPreviewText } from './previewExtractor';
 import { getTargetConfidence, getConfidenceColorClass, getConfidenceAriaLabel, computeHasReport } from './computed';
 import type { PromptlabAlpineContext } from './types';
 
+type ReportRecord = Record<string, unknown>;
+type WrappedAnalysisReport = ReportRecord & {
+  analysisReport: unknown;
+};
+
+function getStringField(record: ReportRecord | null, key: string): string {
+  const value = record?.[key];
+  return typeof value === 'string' ? value : '';
+}
+
+function isWrappedAnalysisReport(report: ReportRecord | null): report is WrappedAnalysisReport {
+  return !!report?.metadata && !!report.analysisReport;
+}
+
 // ==========================================
 // 语言选项生成
 // ==========================================
@@ -92,15 +106,18 @@ export function autoSelectMarket(
   if (!marketSelect) return;
 
   const currentState = appStore.getState();
-  const analysisReport = currentState.analysis.analysisReport as Record<string, any> | null;
+  const analysisReport = currentState.analysis.analysisReport as ReportRecord | null;
 
   let currentMarketplace = '';
-  if (analysisReport?.marketplace) {
-    currentMarketplace = analysisReport.marketplace;
+  const reportMarketplace = getStringField(analysisReport, 'marketplace');
+  if (reportMarketplace) {
+    currentMarketplace = reportMarketplace;
   } else if (currentState.scraper?.scrapedData?.metadata?.marketplace) {
     currentMarketplace = currentState.scraper.scrapedData.metadata.marketplace;
   } else if (analysisReport) {
-    currentMarketplace = analysisReport.targetMarket || analysisReport.language || '';
+    currentMarketplace =
+      getStringField(analysisReport, 'targetMarket') ||
+      getStringField(analysisReport, 'language');
   }
 
   const isFirstLoad = !ctx.profile.targetMarket;
@@ -137,7 +154,7 @@ export function renderReportModules(
   ctx: PromptlabAlpineContext,
   container: HTMLElement,
 ): void {
-  const report = appStore.getState().analysis.analysisReport as Record<string, any> | null;
+  const report = appStore.getState().analysis.analysisReport as ReportRecord | null;
 
   console.log('[reportRenderer] renderReportModules, keys:', report ? Object.keys(report) : null);
 
@@ -148,11 +165,9 @@ export function renderReportModules(
   const isFirstLoad =
     !ctx.hasRenderedReportOnce && ctx.profile.selectedReportSections.length === 0;
 
-  const hasMetadata = report?.metadata && report?.analysisReport;
-
-  if (hasMetadata) {
+  if (isWrappedAnalysisReport(report)) {
     console.log('[reportRenderer] 包装格式报告');
-    renderNewFormatModules(ctx, container, report!.analysisReport, isFirstLoad);
+    renderNewFormatModules(ctx, container, report.analysisReport, isFirstLoad);
   } else if (report && typeof report === 'object') {
     console.log('[reportRenderer] 直接格式报告');
     renderNewFormatModules(ctx, container, report, isFirstLoad);

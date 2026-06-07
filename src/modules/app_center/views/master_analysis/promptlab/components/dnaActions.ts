@@ -8,12 +8,14 @@
 import { appStore } from '@/stores/useAppStore';
 import { showToast } from '../../../../../../common/ui';
 import { extractProductDNA, canExtractDNA as canExtractDNALegacy } from '../../services/dnaExtractor';
+import type { ExtractedDNA } from '../../services/dnaExtractor';
 import {
   extractDNAFromDownloadsReport,
   canExtractDNAFromDownloadsReport,
 } from '../../services/UniversalDNAExtractor';
 import type { ExtendedDNA } from '../../types/extendedDNA';
 import type { PromptlabAlpineContext } from './types';
+import type { FullAnalysisReport } from '../../ai_analysis/config/analysisReportData';
 
 export type ExtractableFieldName = 'keywordsTier1' | 'keywordsTier2' | 'negative' | 'audience' | 'usps' | 'specs';
 
@@ -106,27 +108,45 @@ function getNormalizedFieldConfidence(normalized: NormalizedDnaResult, fieldName
   return normalized.confidence[FIELD_CONFIDENCE_KEY_MAP[fieldName]];
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === 'object';
+}
+
+function getObjectKeys(value: unknown): string[] {
+  return isRecord(value) ? Object.keys(value) : [];
+}
+
+function getStringArrayField(record: Record<string, unknown>, key: string): string[] {
+  const value = record[key];
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
+}
+
 /**
  * 检查当前报告是否可以执行 DNA 提取
  */
 export function canExtractDNA(): boolean {
   const report = appStore.getState().analysis.analysisReport;
-  return canExtractDNAFromDownloadsReport(report as any) || canExtractDNALegacy(report as any);
+  return canExtractDNAFromDownloadsReport(report) || canExtractDNALegacy(report as FullAnalysisReport | null);
 }
 
-function getRawDna(ctx: PromptlabAlpineContext): ExtendedDNA | Record<string, unknown> | null {
+function getRawDna(ctx: PromptlabAlpineContext): ExtendedDNA | ExtractedDNA | null {
   const report = appStore.getState().analysis.analysisReport;
   if (!report) {
     return null;
   }
 
-  const unwrappedReport = (report as any).analysisReport ?? report;
-  const language = unwrappedReport._metadata?.language ?? ctx.profile.targetMarket ?? 'zh';
+  const reportRecord = report as Record<string, unknown>;
+  const unwrappedReport = reportRecord.analysisReport ?? report;
+  const unwrappedRecord = isRecord(unwrappedReport) ? unwrappedReport : null;
+  const metadata = isRecord(unwrappedRecord?._metadata) ? unwrappedRecord._metadata : null;
+  const metadataLanguage = metadata?.language;
+  const language =
+    typeof metadataLanguage === 'string' ? metadataLanguage : ctx.profile.targetMarket ?? 'zh';
 
   console.log('[dnaActions] 报告结构:', {
-    hasWrapper: !!(report as any).analysisReport,
-    topKeys: Object.keys(report as any).slice(0, 10),
-    unwrappedKeys: Object.keys(unwrappedReport).slice(0, 10),
+    hasWrapper: !!reportRecord.analysisReport,
+    topKeys: getObjectKeys(report).slice(0, 10),
+    unwrappedKeys: getObjectKeys(unwrappedReport).slice(0, 10),
   });
 
   const extracted = extractDNAFromDownloadsReport(unwrappedReport, language);
@@ -136,7 +156,7 @@ function getRawDna(ctx: PromptlabAlpineContext): ExtendedDNA | Record<string, un
   }
 
   console.log('[dnaActions] 新提取器无法提取，尝试旧提取器');
-  const legacy = extractProductDNA(unwrappedReport) as Record<string, unknown> | null;
+  const legacy = extractProductDNA(unwrappedReport as FullAnalysisReport | null);
   if (legacy) {
     console.log('[dnaActions] 使用提取器: 旧 (legacy)');
   }
@@ -150,15 +170,15 @@ function normalizeConfidenceValue(value: unknown): number {
   return Math.max(0, Math.min(100, Math.round(value * 100)));
 }
 
-function normalizeDnaResult(dna: ExtendedDNA | Record<string, unknown>): NormalizedDnaResult {
-  const dnaRecord = dna as Record<string, any>;
-  const keywords = dnaRecord.keywords ?? {};
-  const confidence = dnaRecord.confidence ?? {};
+function normalizeDnaResult(dna: ExtendedDNA | ExtractedDNA): NormalizedDnaResult {
+  const dnaRecord = dna as unknown as Record<string, unknown>;
+  const keywords = isRecord(dnaRecord.keywords) ? dnaRecord.keywords : {};
+  const confidence = isRecord(dnaRecord.confidence) ? dnaRecord.confidence : {};
 
   const fields: Record<ExtractableFieldName, string> = {
-    keywordsTier1: Array.isArray(keywords.core) ? keywords.core.filter(Boolean).join(', ') : '',
-    keywordsTier2: Array.isArray(keywords.longTail) ? keywords.longTail.filter(Boolean).join(', ') : '',
-    negative: Array.isArray(dnaRecord.restrictedWords) ? dnaRecord.restrictedWords.filter(Boolean).join(', ') : '',
+    keywordsTier1: getStringArrayField(keywords, 'core').filter(Boolean).join(', '),
+    keywordsTier2: getStringArrayField(keywords, 'longTail').filter(Boolean).join(', '),
+    negative: getStringArrayField(dnaRecord, 'restrictedWords').filter(Boolean).join(', '),
     audience: typeof dnaRecord.audience === 'string' ? dnaRecord.audience : '',
     usps: typeof dnaRecord.usps === 'string' ? dnaRecord.usps : '',
     specs: typeof dnaRecord.specs === 'string' ? dnaRecord.specs : '',

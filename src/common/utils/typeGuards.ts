@@ -226,7 +226,7 @@ export function isArray(value: unknown): value is Array<unknown> {
  * @param value - 待检查的值
  * @returns 类型守卫结果
  */
-export function isFunction(value: unknown): value is Function {
+export function isFunction(value: unknown): value is (...args: unknown[]) => unknown {
   return typeof value === 'function';
 }
 

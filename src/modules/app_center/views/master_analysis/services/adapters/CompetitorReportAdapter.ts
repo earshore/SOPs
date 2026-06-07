@@ -9,6 +9,17 @@ import type { ExtendedDNA } from "../../types/extendedDNA";
 import { isTechnicalSpec } from "../../utils/specUtils";
 import { ValidationError } from "../../../../../../common/errors/AppError";
 
+type CompetitorReportInput = Partial<CompetitorReport> & {
+  productSummary?: CompetitorReport["product_summary"];
+  featurePoints?: CompetitorReport["feature_points"];
+  competitorInsights?: CompetitorReport["competitor_insights"];
+  keywordClusters?: CompetitorReport["keyword_clusters"];
+  highFrequencyPhrases?: CompetitorReport["high_frequency_phrases"];
+  negativeDrivers?: CompetitorReport["negative_drivers"];
+  complianceRisks?: CompetitorReport["compliance_risks"];
+  qaOpportunities?: CompetitorReport["qa_opportunities"];
+};
+
 /**
  * Competitor Report 适配器实现
  */
@@ -151,7 +162,7 @@ export class CompetitorReportAdapter implements ReportAdapter {
       );
     }
 
-    const reportObj = report as Record<string, unknown>;
+    const reportObj = report as CompetitorReportInput;
 
     return {
       product_summary: (reportObj.product_summary ||
@@ -167,13 +178,13 @@ export class CompetitorReportAdapter implements ReportAdapter {
           weaknesses: [],
           user_profile: [],
           differentiation_angles: [],
-        }) as any,
+        }) as CompetitorReport["competitor_insights"],
       keyword_clusters: (reportObj.keyword_clusters ||
         reportObj.keywordClusters || {
           core: [],
           attribute: [],
           long_tail: [],
-        }) as any,
+        }) as CompetitorReport["keyword_clusters"],
       high_frequency_phrases: (reportObj.high_frequency_phrases ||
         reportObj.highFrequencyPhrases ||
         []) as string[],
@@ -182,11 +193,11 @@ export class CompetitorReportAdapter implements ReportAdapter {
         []) as string[],
       compliance_risks: (reportObj.compliance_risks ||
         reportObj.complianceRisks ||
-        []) as any[],
+        []) as CompetitorReport["compliance_risks"],
       qa_opportunities: (reportObj.qa_opportunities ||
         reportObj.qaOpportunities ||
-        []) as any[],
-      meta: (reportObj.meta || {}) as any,
+        []) as CompetitorReport["qa_opportunities"],
+      meta: (reportObj.meta || {}) as CompetitorReport["meta"],
     };
   }
 

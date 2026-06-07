@@ -66,7 +66,7 @@ function normalizePath(filePath: string): string {
 }
 
 function getWarningKey(entry: Pick<WarningBaselineEntry, "filePath" | "ruleId" | "message">): string {
-  return JSON.stringify([entry.filePath, entry.ruleId, entry.message]);
+  return JSON.stringify([entry.filePath, entry.ruleId]);
 }
 
 function runESLint(): ESLintResult[] {
@@ -142,9 +142,7 @@ function readBaseline(): WarningBaseline {
 }
 
 function getExceededBuckets(warnings: WarningInstance[], baseline: WarningBaseline): WarningBucket[] {
-  const baselineCounts = new Map(
-    baseline.warnings.map((entry) => [getWarningKey(entry), entry.count]),
-  );
+  const baselineCounts = getBaselineCounts(baseline);
 
   return Array.from(bucketWarnings(warnings).values())
     .filter((bucket) => bucket.entry.count > (baselineCounts.get(getWarningKey(bucket.entry)) || 0))
@@ -152,9 +150,7 @@ function getExceededBuckets(warnings: WarningInstance[], baseline: WarningBaseli
 }
 
 function printExceededBuckets(newBuckets: WarningBucket[], baseline: WarningBaseline): void {
-  const baselineCounts = new Map(
-    baseline.warnings.map((entry) => [getWarningKey(entry), entry.count]),
-  );
+  const baselineCounts = getBaselineCounts(baseline);
 
   const newWarningCount = newBuckets.reduce((sum, bucket) => {
     const allowed = baselineCounts.get(getWarningKey(bucket.entry)) || 0;
@@ -173,6 +169,17 @@ function printExceededBuckets(newBuckets: WarningBucket[], baseline: WarningBase
   if (newBuckets.length > 20) {
     console.error(`...and ${newBuckets.length - 20} more warning bucket(s).`);
   }
+}
+
+function getBaselineCounts(baseline: WarningBaseline): Map<string, number> {
+  const counts = new Map<string, number>();
+
+  baseline.warnings.forEach((entry) => {
+    const key = getWarningKey(entry);
+    counts.set(key, (counts.get(key) || 0) + entry.count);
+  });
+
+  return counts;
 }
 
 function writeBaseline(warnings: WarningInstance[]): void {

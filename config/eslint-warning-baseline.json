@@ -1,7 +1,7 @@
 {
   "version": 1,
   "command": "node node_modules/eslint/bin/eslint.js src --ignore-pattern **/*.test.ts --ignore-pattern **/*.test.tsx --ignore-pattern **/*.spec.ts --ignore-pattern **/*.spec.tsx --format json",
-  "totalWarnings": 506,
+  "totalWarnings": 474,
   "warnings": [
     {
       "filePath": "src/common/BaseModule.ts",
@@ -66,14 +66,8 @@
     {
       "filePath": "src/common/errors/AppError.ts",
       "ruleId": "@typescript-eslint/max-params",
-      "message": "Constructor has too many parameters (6). Maximum allowed is 5.",
-      "count": 1
-    },
-    {
-      "filePath": "src/common/errors/AppError.ts",
-      "ruleId": "@typescript-eslint/max-params",
       "message": "Constructor has too many parameters (7). Maximum allowed is 5.",
-      "count": 1
+      "count": 2
     },
     {
       "filePath": "src/common/errors/GlobalErrorHandler.ts",
@@ -97,13 +91,7 @@
       "filePath": "src/common/infrastructure/SafeModuleLoader.ts",
       "ruleId": "complexity",
       "message": "Method 'classifyError' has a complexity of 68. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/common/infrastructure/SafeModuleLoader.ts",
-      "ruleId": "complexity",
-      "message": "Method 'renderModule' has a complexity of 11. Maximum allowed is 10.",
-      "count": 1
+      "count": 2
     },
     {
       "filePath": "src/common/infrastructure/SafeModuleLoader.ts",
@@ -138,26 +126,8 @@
     {
       "filePath": "src/common/router/navigo/guards.ts",
       "ruleId": "complexity",
-      "message": "Function 'isNavigateOptions' has a complexity of 12. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/common/router/navigo/guards.ts",
-      "ruleId": "complexity",
       "message": "Function 'isRouteConfig' has a complexity of 18. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/common/router/navigo/guards.ts",
-      "ruleId": "complexity",
-      "message": "Function 'isRouteMeta' has a complexity of 18. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/common/router/navigo/guards.ts",
-      "ruleId": "complexity",
-      "message": "Function 'isRouterConfig' has a complexity of 16. Maximum allowed is 10.",
-      "count": 1
+      "count": 4
     },
     {
       "filePath": "src/common/router/navigo/NavigoAdapter.ts",
@@ -262,12 +232,6 @@
       "count": 1
     },
     {
-      "filePath": "src/common/utils/typeGuards.ts",
-      "ruleId": "@typescript-eslint/ban-types",
-      "message": "Don't use `Function` as a type. The `Function` type accepts any function-like value.\nIt provides no type safety when calling the function, which can be a common source of bugs.\nIt also accepts things like class declarations, which will throw at runtime as they will not be called with `new`.\nIf you are expecting the function to accept certain arguments, you should explicitly define the function shape.",
-      "count": 1
-    },
-    {
       "filePath": "src/common/utils/validation.ts",
       "ruleId": "complexity",
       "message": "Function 'validateString' has a complexity of 19. Maximum allowed is 10.",
@@ -292,12 +256,6 @@
       "count": 1
     },
     {
-      "filePath": "src/components/modal-animation.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
-      "count": 2
-    },
-    {
       "filePath": "src/components/modal/AppModal.ts",
       "ruleId": "max-lines-per-function",
       "message": "Method 'render' has too many lines (259). Maximum allowed is 100.",
@@ -308,12 +266,6 @@
       "ruleId": "no-restricted-syntax",
       "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
       "count": 1
-    },
-    {
-      "filePath": "src/components/navigation-animation.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
-      "count": 6
     },
     {
       "filePath": "src/components/navigation-animation.ts",
@@ -330,14 +282,8 @@
     {
       "filePath": "src/components/settings/systemSettings.ts",
       "ruleId": "complexity",
-      "message": "Async method 'fetchModels' has a complexity of 18. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/components/settings/systemSettings.ts",
-      "ruleId": "complexity",
       "message": "Async method 'loadProviderConfig' has a complexity of 26. Maximum allowed is 10.",
-      "count": 1
+      "count": 2
     },
     {
       "filePath": "src/components/settings/systemSettings.ts",
@@ -510,14 +456,8 @@
     {
       "filePath": "src/modules/amz_hub/views/practice/promo_tools/index.ts",
       "ruleId": "max-lines-per-function",
-      "message": "Arrow function has too many lines (131). Maximum allowed is 100.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/amz_hub/views/practice/promo_tools/index.ts",
-      "ruleId": "max-lines-per-function",
       "message": "Method 'renderSectionBody' has too many lines (135). Maximum allowed is 100.",
-      "count": 1
+      "count": 2
     },
     {
       "filePath": "src/modules/amz_hub/views/practice/promo_tools/index.ts",
@@ -559,13 +499,7 @@
       "filePath": "src/modules/app_center/views/keyword_hunter/analysis/index.ts",
       "ruleId": "complexity",
       "message": "Arrow function has a complexity of 13. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/keyword_hunter/analysis/index.ts",
-      "ruleId": "complexity",
-      "message": "Async function 'runLLMAnalysis' has a complexity of 24. Maximum allowed is 10.",
-      "count": 1
+      "count": 2
     },
     {
       "filePath": "src/modules/app_center/views/keyword_hunter/analysis/index.ts",
@@ -582,26 +516,8 @@
     {
       "filePath": "src/modules/app_center/views/keyword_hunter/process/index.ts",
       "ruleId": "complexity",
-      "message": "Function 'locateKeywordInCopy' has a complexity of 13. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/keyword_hunter/process/index.ts",
-      "ruleId": "complexity",
       "message": "Function 'renderAnalysisStats' has a complexity of 18. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/keyword_hunter/process/index.ts",
-      "ruleId": "complexity",
-      "message": "Function 'renderFloatingKeywords' has a complexity of 11. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/keyword_hunter/process/index.ts",
-      "ruleId": "complexity",
-      "message": "Function 'updateTranslateButton' has a complexity of 11. Maximum allowed is 10.",
-      "count": 1
+      "count": 4
     },
     {
       "filePath": "src/modules/app_center/views/keyword_hunter/process/index.ts",
@@ -679,13 +595,7 @@
       "filePath": "src/modules/app_center/views/master_analysis/ai_analysis/prompts/analysisPrompts.ts",
       "ruleId": "max-lines-per-function",
       "message": "Function 'generateAnalysisPrompt' has too many lines (116). Maximum allowed is 100.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/ai_analysis/prompts/analysisPrompts.ts",
-      "ruleId": "max-lines-per-function",
-      "message": "Function 'generateBatchAnalysisPrompt' has too many lines (137). Maximum allowed is 100.",
-      "count": 1
+      "count": 2
     },
     {
       "filePath": "src/modules/app_center/views/master_analysis/ai_analysis/services/aiAnalysisService.ts",
@@ -714,38 +624,14 @@
     {
       "filePath": "src/modules/app_center/views/master_analysis/ai_analysis/services/confidenceCalculator.ts",
       "ruleId": "complexity",
-      "message": "Function 'calculateBuyerProfileConfidence' has a complexity of 11. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/ai_analysis/services/confidenceCalculator.ts",
-      "ruleId": "complexity",
-      "message": "Function 'calculateSellingPointsConfidence' has a complexity of 13. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/ai_analysis/services/confidenceCalculator.ts",
-      "ruleId": "complexity",
-      "message": "Function 'calculateVocabGapConfidence' has a complexity of 12. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/ai_analysis/services/confidenceCalculator.ts",
-      "ruleId": "complexity",
       "message": "Function 'checkDataQuality' has a complexity of 14. Maximum allowed is 10.",
-      "count": 1
+      "count": 4
     },
     {
       "filePath": "src/modules/app_center/views/master_analysis/ai_analysis/services/parallelAnalysisService.ts",
       "ruleId": "@typescript-eslint/max-params",
       "message": "Async function 'executeAnalysisTask' has too many parameters (6). Maximum allowed is 5.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/ai_analysis/services/parallelAnalysisService.ts",
-      "ruleId": "@typescript-eslint/max-params",
-      "message": "Async function 'executeTasksWithConcurrency' has too many parameters (8). Maximum allowed is 5.",
-      "count": 1
+      "count": 2
     },
     {
       "filePath": "src/modules/app_center/views/master_analysis/ai_analysis/services/parallelAnalysisService.ts",
@@ -774,26 +660,14 @@
     {
       "filePath": "src/modules/app_center/views/master_analysis/ai_analysis/utils/dataTransformers.ts",
       "ruleId": "complexity",
-      "message": "Arrow function has a complexity of 15. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/ai_analysis/utils/dataTransformers.ts",
-      "ruleId": "complexity",
       "message": "Function 'convertScraperDataToProduct' has a complexity of 16. Maximum allowed is 10.",
-      "count": 1
+      "count": 2
     },
     {
       "filePath": "src/modules/app_center/views/master_analysis/promptlab/components/computed.ts",
       "ruleId": "@typescript-eslint/no-explicit-any",
       "message": "Unexpected any. Specify a different type.",
       "count": 2
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/promptlab/components/dnaActions.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
-      "count": 6
     },
     {
       "filePath": "src/modules/app_center/views/master_analysis/promptlab/components/previewExtractor.ts",
@@ -808,12 +682,6 @@
       "count": 1
     },
     {
-      "filePath": "src/modules/app_center/views/master_analysis/promptlab/components/promptActions.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
-      "count": 2
-    },
-    {
       "filePath": "src/modules/app_center/views/master_analysis/promptlab/components/PromptlabPanel.ts",
       "ruleId": "max-lines-per-function",
       "message": "Function 'createPromptlabPanel' has too many lines (490). Maximum allowed is 100.",
@@ -821,45 +689,15 @@
     },
     {
       "filePath": "src/modules/app_center/views/master_analysis/promptlab/components/reportRenderer.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
-      "count": 2
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/promptlab/components/reportRenderer.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/promptlab/components/reportRenderer.ts",
       "ruleId": "complexity",
-      "message": "Function 'autoSelectMarket' has a complexity of 14. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/promptlab/components/reportRenderer.ts",
-      "ruleId": "complexity",
-      "message": "Function 'formatContentItem' has a complexity of 18. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/promptlab/components/reportRenderer.ts",
-      "ruleId": "complexity",
-      "message": "Function 'formatValue' has a complexity of 11. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/promptlab/components/reportRenderer.ts",
-      "ruleId": "max-lines-per-function",
-      "message": "Arrow function has too many lines (102). Maximum allowed is 100.",
-      "count": 1
+      "message": "Function 'autoSelectMarket' has a complexity of 13. Maximum allowed is 10.",
+      "count": 3
     },
     {
       "filePath": "src/modules/app_center/views/master_analysis/promptlab/components/reportRenderer.ts",
       "ruleId": "max-lines-per-function",
       "message": "Function 'renderNewFormatModules' has too many lines (130). Maximum allowed is 100.",
-      "count": 1
+      "count": 2
     },
     {
       "filePath": "src/modules/app_center/views/master_analysis/scraper/components/DataPreview.ts",
@@ -883,25 +721,13 @@
       "filePath": "src/modules/app_center/views/master_analysis/scraper/handlers/dataOperations.ts",
       "ruleId": "complexity",
       "message": "Async function 'deleteProduct' has a complexity of 17. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/scraper/handlers/dataOperations.ts",
-      "ruleId": "complexity",
-      "message": "Async function 'deleteReview' has a complexity of 21. Maximum allowed is 10.",
-      "count": 1
+      "count": 2
     },
     {
       "filePath": "src/modules/app_center/views/master_analysis/scraper/handlers/dataOperations.ts",
       "ruleId": "max-lines-per-function",
       "message": "Async function 'deleteProduct' has too many lines (106). Maximum allowed is 100.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/scraper/handlers/dataOperations.ts",
-      "ruleId": "max-lines-per-function",
-      "message": "Async function 'deleteReview' has too many lines (125). Maximum allowed is 100.",
-      "count": 1
+      "count": 2
     },
     {
       "filePath": "src/modules/app_center/views/master_analysis/scraper/handlers/importHandler.ts",
@@ -913,19 +739,7 @@
       "filePath": "src/modules/app_center/views/master_analysis/scraper/handlers/importHandler.ts",
       "ruleId": "complexity",
       "message": "Arrow function has a complexity of 11. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/scraper/handlers/importHandler.ts",
-      "ruleId": "complexity",
-      "message": "Arrow function has a complexity of 20. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/scraper/handlers/importHandler.ts",
-      "ruleId": "complexity",
-      "message": "Async function 'handleImportFiles' has a complexity of 25. Maximum allowed is 10.",
-      "count": 1
+      "count": 3
     },
     {
       "filePath": "src/modules/app_center/views/master_analysis/scraper/handlers/importHandler.ts",
@@ -973,25 +787,7 @@
       "filePath": "src/modules/app_center/views/master_analysis/scraper/utils/validators.ts",
       "ruleId": "complexity",
       "message": "Function 'validateMetadata' has a complexity of 13. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/scraper/utils/validators.ts",
-      "ruleId": "complexity",
-      "message": "Function 'validateProduct' has a complexity of 16. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/scraper/utils/validators.ts",
-      "ruleId": "complexity",
-      "message": "Function 'validateScrapedData' has a complexity of 17. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/services/adapters/CompetitorReportAdapter.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
-      "count": 5
+      "count": 3
     },
     {
       "filePath": "src/modules/app_center/views/master_analysis/services/adapters/CompetitorReportAdapter.ts",
@@ -1002,26 +798,8 @@
     {
       "filePath": "src/modules/app_center/views/master_analysis/services/adapters/FullAnalysisReportAdapter.ts",
       "ruleId": "complexity",
-      "message": "Method 'extractAudience' has a complexity of 20. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/services/adapters/FullAnalysisReportAdapter.ts",
-      "ruleId": "complexity",
-      "message": "Method 'extractSpecPatterns' has a complexity of 13. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/services/adapters/FullAnalysisReportAdapter.ts",
-      "ruleId": "complexity",
-      "message": "Method 'extractSpecs' has a complexity of 15. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/services/adapters/FullAnalysisReportAdapter.ts",
-      "ruleId": "complexity",
       "message": "Method 'normalizeReport' has a complexity of 12. Maximum allowed is 10.",
-      "count": 1
+      "count": 4
     },
     {
       "filePath": "src/modules/app_center/views/master_analysis/services/adapters/ProductOverviewAdapter.ts",
@@ -1039,25 +817,13 @@
       "filePath": "src/modules/app_center/views/master_analysis/services/dnaExtractor.ts",
       "ruleId": "complexity",
       "message": "Function 'extractAudience' has a complexity of 19. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/services/dnaExtractor.ts",
-      "ruleId": "complexity",
-      "message": "Function 'extractSpecs' has a complexity of 14. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/services/historyService.ts",
-      "ruleId": "complexity",
-      "message": "Async method 'saveAsync' has a complexity of 13. Maximum allowed is 10.",
-      "count": 1
+      "count": 2
     },
     {
       "filePath": "src/modules/app_center/views/master_analysis/services/historyService.ts",
       "ruleId": "complexity",
       "message": "Method 'save' has a complexity of 13. Maximum allowed is 10.",
-      "count": 1
+      "count": 2
     },
     {
       "filePath": "src/modules/app_center/views/master_analysis/services/parserService.ts",
@@ -1068,62 +834,14 @@
     {
       "filePath": "src/modules/app_center/views/master_analysis/services/promptlabService.ts",
       "ruleId": "complexity",
-      "message": "Arrow function has a complexity of 11. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/services/promptlabService.ts",
-      "ruleId": "complexity",
-      "message": "Arrow function has a complexity of 12. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/services/promptlabService.ts",
-      "ruleId": "complexity",
-      "message": "Arrow function has a complexity of 15. Maximum allowed is 10.",
-      "count": 3
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/services/promptlabService.ts",
-      "ruleId": "complexity",
       "message": "Arrow function has a complexity of 16. Maximum allowed is 10.",
-      "count": 2
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/services/promptlabService.ts",
-      "ruleId": "complexity",
-      "message": "Arrow function has a complexity of 17. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/services/promptlabService.ts",
-      "ruleId": "complexity",
-      "message": "Arrow function has a complexity of 22. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/services/promptlabService.ts",
-      "ruleId": "complexity",
-      "message": "Function 'filterSubItems' has a complexity of 18. Maximum allowed is 10.",
-      "count": 1
+      "count": 10
     },
     {
       "filePath": "src/modules/app_center/views/master_analysis/services/promptlabService.ts",
       "ruleId": "max-depth",
       "message": "Blocks are nested too deeply (5). Maximum allowed is 4.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/services/promptlabService.ts",
-      "ruleId": "max-depth",
-      "message": "Blocks are nested too deeply (6). Maximum allowed is 4.",
-      "count": 2
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/services/reportTypeDetector.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
-      "count": 7
+      "count": 3
     },
     {
       "filePath": "src/modules/app_center/views/master_analysis/services/scraperService.ts",
@@ -1141,13 +859,7 @@
       "filePath": "src/modules/app_center/views/master_analysis/services/scraperService.ts",
       "ruleId": "complexity",
       "message": "Async function 'fetchWithProxy' has a complexity of 21. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/services/scraperService.ts",
-      "ruleId": "complexity",
-      "message": "Async function 'scrapeAsin' has a complexity of 19. Maximum allowed is 10.",
-      "count": 1
+      "count": 2
     },
     {
       "filePath": "src/modules/app_center/views/master_analysis/services/scraperService.ts",
@@ -1170,14 +882,8 @@
     {
       "filePath": "src/modules/app_center/views/playground/deep-chat/index.ts",
       "ruleId": "complexity",
-      "message": "Async function 'handlePlaygroundRequest' has a complexity of 15. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/playground/deep-chat/index.ts",
-      "ruleId": "complexity",
       "message": "Async function 'refreshLLMConfig' has a complexity of 11. Maximum allowed is 10.",
-      "count": 1
+      "count": 2
     },
     {
       "filePath": "src/modules/app_center/views/playground/deep-chat/index.ts",
@@ -1212,14 +918,8 @@
     {
       "filePath": "src/modules/more/views/explore/prompts/index.ts",
       "ruleId": "complexity",
-      "message": "Function 'handleModalBackdropClick' has a complexity of 11. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/more/views/explore/prompts/index.ts",
-      "ruleId": "complexity",
       "message": "Function 'handleModuleClick' has a complexity of 14. Maximum allowed is 10.",
-      "count": 1
+      "count": 2
     },
     {
       "filePath": "src/modules/more/views/explore/prompts/index.ts",
@@ -1278,32 +978,14 @@
     {
       "filePath": "src/modules/sops/views/growth/npi_tracker/index.ts",
       "ruleId": "complexity",
-      "message": "Arrow function has a complexity of 11. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/sops/views/growth/npi_tracker/index.ts",
-      "ruleId": "complexity",
-      "message": "Arrow function has a complexity of 13. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/sops/views/growth/npi_tracker/index.ts",
-      "ruleId": "complexity",
       "message": "Arrow function has a complexity of 19. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/sops/views/growth/npi_tracker/index.ts",
-      "ruleId": "max-lines-per-function",
-      "message": "Function 'exportToExcel' has too many lines (114). Maximum allowed is 100.",
-      "count": 1
+      "count": 3
     },
     {
       "filePath": "src/modules/sops/views/growth/npi_tracker/index.ts",
       "ruleId": "max-lines-per-function",
       "message": "Function 'renderTable' has too many lines (106). Maximum allowed is 100.",
-      "count": 1
+      "count": 2
     },
     {
       "filePath": "src/modules/sops/views/growth/ppc_advertising/index.ts",
@@ -1333,13 +1015,7 @@
       "filePath": "src/modules/sops/views/growth/restricted_words/restrictedWordsHandler.ts",
       "ruleId": "max-lines-per-function",
       "message": "Function 'renderResults' has too many lines (108). Maximum allowed is 100.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/sops/views/growth/restricted_words/restrictedWordsHandler.ts",
-      "ruleId": "max-lines-per-function",
-      "message": "Function 'showWordDetail' has too many lines (169). Maximum allowed is 100.",
-      "count": 1
+      "count": 2
     },
     {
       "filePath": "src/modules/sops/views/overview/index.ts",
@@ -1428,38 +1104,20 @@
     {
       "filePath": "src/services/HttpCacheService.ts",
       "ruleId": "complexity",
-      "message": "Async method 'clear' has a complexity of 11. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/services/HttpCacheService.ts",
-      "ruleId": "complexity",
       "message": "Async method 'get' has a complexity of 11. Maximum allowed is 10.",
-      "count": 1
+      "count": 2
     },
     {
       "filePath": "src/services/HttpCacheService.ts",
       "ruleId": "max-depth",
       "message": "Blocks are nested too deeply (5). Maximum allowed is 4.",
-      "count": 1
-    },
-    {
-      "filePath": "src/services/HttpCacheService.ts",
-      "ruleId": "max-depth",
-      "message": "Blocks are nested too deeply (6). Maximum allowed is 4.",
-      "count": 1
-    },
-    {
-      "filePath": "src/services/httpService.ts",
-      "ruleId": "complexity",
-      "message": "Async arrow function has a complexity of 12. Maximum allowed is 10.",
-      "count": 1
+      "count": 2
     },
     {
       "filePath": "src/services/httpService.ts",
       "ruleId": "complexity",
       "message": "Async method 'request' has a complexity of 15. Maximum allowed is 10.",
-      "count": 1
+      "count": 2
     },
     {
       "filePath": "src/services/httpService.ts",
@@ -1482,20 +1140,8 @@
     {
       "filePath": "src/services/llmService.ts",
       "ruleId": "complexity",
-      "message": "Async function 'callLLM' has a complexity of 45. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/services/llmService.ts",
-      "ruleId": "complexity",
-      "message": "Async function 'fetchModelsFromApi' has a complexity of 17. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/services/llmService.ts",
-      "ruleId": "complexity",
       "message": "Async function 'readOpenAIStream' has a complexity of 13. Maximum allowed is 10.",
-      "count": 1
+      "count": 3
     },
     {
       "filePath": "src/services/llmService.ts",
@@ -1507,13 +1153,7 @@
       "filePath": "src/services/llmService.ts",
       "ruleId": "max-lines-per-function",
       "message": "Async function 'callLLM' has too many lines (252). Maximum allowed is 100.",
-      "count": 1
-    },
-    {
-      "filePath": "src/services/llmService.ts",
-      "ruleId": "max-lines-per-function",
-      "message": "Async function 'fetchModelsFromApi' has too many lines (151). Maximum allowed is 100.",
-      "count": 1
+      "count": 2
     },
     {
       "filePath": "src/services/llmService.ts",

@@ -10,14 +10,26 @@ import type {
 } from '../types/downloadsReportTypes';
 import type { FullAnalysisReport } from '../ai_analysis/config/analysisReportData';
 import { ReportType } from '../types/downloadsReportTypes';
+
+type ReportRecord = Record<string, unknown>;
+
+function isReportRecord(report: unknown): report is ReportRecord {
+  return !!report && typeof report === 'object';
+}
+
+function getRecordField(report: ReportRecord, key: string): ReportRecord | null {
+  const value = report[key];
+  return isReportRecord(value) ? value : null;
+}
+
 /**
  * 检测报告类型（基于字段特征）
  *
  * @param report 待检测的报告对象
  * @returns 报告类型
  */
-export function detectReportType(report: any): ReportType {
-  if (!report || typeof report !== 'object') {
+export function detectReportType(report: unknown): ReportType {
+  if (!isReportRecord(report)) {
     console.warn('[报告检测] 无效的报告对象');
     return ReportType.UNKNOWN;
   }
@@ -46,13 +58,14 @@ export function detectReportType(report: any): ReportType {
     return ReportType.SEMANTIC_ANALYSIS;
   }
 
+  const reportObj = report as ReportRecord;
   console.warn('[报告检测] 未识别的报告格式', {
-    hasBuyerProfile: !!(report['buyer-profile'] || report.buyer_profile),
-    hasSellingPoints: !!(report['selling-points'] || report.selling_points),
-    hasCompetitorInsights: !!report.competitor_insights,
-    hasProductOverview: !!report.productOverview,
-    hasPainPointGaps: !!report.pain_point_gaps,
-    metaTemplateId: report.meta?.templateId
+    hasBuyerProfile: !!(reportObj['buyer-profile'] || reportObj.buyer_profile),
+    hasSellingPoints: !!(reportObj['selling-points'] || reportObj.selling_points),
+    hasCompetitorInsights: !!reportObj.competitor_insights,
+    hasProductOverview: !!reportObj.productOverview,
+    hasPainPointGaps: !!reportObj.pain_point_gaps,
+    metaTemplateId: getRecordField(reportObj, 'meta')?.templateId
   });
 
   return ReportType.UNKNOWN;
@@ -61,7 +74,9 @@ export function detectReportType(report: any): ReportType {
 /**
  * 检测是否为 Full Analysis Report（应用实际使用的格式）
  */
-function isFullAnalysisReport(report: any): report is FullAnalysisReport {
+function isFullAnalysisReport(report: unknown): report is FullAnalysisReport {
+  if (!isReportRecord(report)) return false;
+
   // 检查是否有 FullAnalysisReport 的特征字段
   const hasBuyerProfile = !!(report['buyer-profile'] || report.buyer_profile);
   const hasSellingPoints = !!(report['selling-points'] || report.selling_points);
@@ -80,7 +95,9 @@ function isFullAnalysisReport(report: any): report is FullAnalysisReport {
 /**
  * 检测是否为 Competitor Report
  */
-function isCompetitorReport(report: any): report is CompetitorReport {
+function isCompetitorReport(report: unknown): report is CompetitorReport {
+  if (!isReportRecord(report)) return false;
+
   return !!(
     report.competitor_insights &&
     report.feature_points &&
@@ -92,7 +109,9 @@ function isCompetitorReport(report: any): report is CompetitorReport {
 /**
  * 检测是否为 Product Overview Report
  */
-function isProductOverviewReport(report: any): report is ProductOverviewReport {
+function isProductOverviewReport(report: unknown): report is ProductOverviewReport {
+  if (!isReportRecord(report)) return false;
+
   return !!(
     report.productOverview &&
     report.coreFeatures &&
@@ -104,26 +123,32 @@ function isProductOverviewReport(report: any): report is ProductOverviewReport {
 /**
  * 检测是否为 Semantic Analysis Report
  */
-function isSemanticAnalysisReport(report: any): report is SemanticAnalysisReport {
+function isSemanticAnalysisReport(report: unknown): report is SemanticAnalysisReport {
+  if (!isReportRecord(report)) return false;
+
+  const meta = getRecordField(report, 'meta');
+  const templateUsed = meta?.templateUsed;
+
   return !!(
     report.pain_point_gaps &&
     report.native_voice &&
     report.high_frequency_phrases &&
-    (report.meta?.templateId === 'semantic' || report.meta?.templateUsed?.includes('语义'))
+    (meta?.templateId === 'semantic' ||
+      (typeof templateUsed === 'string' && templateUsed.includes('语义')))
   );
 }
 
 /**
  * 验证报告是否为支持的格式
  */
-export function isSupportedReport(report: any): boolean {
+export function isSupportedReport(report: unknown): boolean {
   return detectReportType(report) !== ReportType.UNKNOWN;
 }
 
 /**
  * 获取报告的元数据信息
  */
-export function getReportMetadata(report: any): {
+export function getReportMetadata(report: unknown): {
   type: ReportType;
   asins: string[];
   market: string;
@@ -135,10 +160,16 @@ export function getReportMetadata(report: any): {
   let market = 'unknown';
   let generatedAt = '';
 
-  if (report.meta) {
-    asins = report.meta.analyzedASINs || report.meta.asins || [];
-    market = report.meta.targetMarket || report.meta.market || 'unknown';
-    generatedAt = report.meta.generatedAt || '';
+  const meta = isReportRecord(report) ? getRecordField(report, 'meta') : null;
+  if (meta) {
+    const metaAsins = meta.analyzedASINs || meta.asins;
+    asins = Array.isArray(metaAsins) ? metaAsins.filter((asin): asin is string => typeof asin === 'string') : [];
+    market = typeof meta.targetMarket === 'string'
+      ? meta.targetMarket
+      : typeof meta.market === 'string'
+        ? meta.market
+        : 'unknown';
+    generatedAt = typeof meta.generatedAt === 'string' ? meta.generatedAt : '';
   }
 
   return { type, asins, market, generatedAt };
