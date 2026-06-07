@@ -3,7 +3,7 @@
  * 测试 Prompt 生成和验证功能
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import {
   generateAnalysisPrompt,
   generateBatchAnalysisPrompt,
@@ -59,17 +59,17 @@ describe('analysisPrompts', () => {
     it('should throw error for invalid task ID', () => {
       expect(() => {
         generateAnalysisPrompt('invalid-task' as any, mockProduct);
-      }).toThrow('Unknown task ID');
+      }).toThrow('未知的任务ID');
     });
 
     it('should throw error for invalid product', () => {
       expect(() => {
         generateAnalysisPrompt('title-keywords', null as any);
-      }).toThrow('Invalid product object');
+      }).toThrow('无效的产品对象');
 
       expect(() => {
         generateAnalysisPrompt('title-keywords', {} as any);
-      }).toThrow('asin is required');
+      }).toThrow('产品对象缺少必需字段: asin');
     });
 
     it('should validate required product fields', () => {
@@ -77,20 +77,22 @@ describe('analysisPrompts', () => {
         asin: 'TEST',
         productTitle: '',
         customer_reviews: [],
-        feature_bullets: []
+        feature_bullets: [],
+        scrape_status: 'failed',
+        metadata: {}
       } as Product;
 
       expect(() => {
         generateAnalysisPrompt('title-keywords', { ...invalidProduct, productTitle: '' } as any);
-      }).toThrow('productTitle is required');
+      }).toThrow('产品对象缺少必需字段: productTitle');
 
       expect(() => {
         generateAnalysisPrompt('title-keywords', { ...invalidProduct, productTitle: 'Test', customer_reviews: 'not-array' } as any);
-      }).toThrow('customer_reviews must be an array');
+      }).toThrow('产品对象的 customer_reviews 必须是数组');
 
       expect(() => {
         generateAnalysisPrompt('title-keywords', { ...invalidProduct, productTitle: 'Test', customer_reviews: [], feature_bullets: 'not-array' } as any);
-      }).toThrow('feature_bullets must be an array');
+      }).toThrow('产品对象的 feature_bullets 必须是数组');
     });
 
     it('should support different languages', () => {
@@ -170,13 +172,13 @@ describe('analysisPrompts', () => {
     it('should throw error for empty task array', () => {
       expect(() => {
         generateBatchAnalysisPrompt([], mockProduct);
-      }).toThrow('must be a non-empty array');
+      }).toThrow('无效的任务ID数组');
     });
 
     it('should throw error for invalid task array', () => {
       expect(() => {
         generateBatchAnalysisPrompt(null as any, mockProduct);
-      }).toThrow('must be a non-empty array');
+      }).toThrow('无效的任务ID数组');
     });
 
     it('should filter out invalid task IDs', () => {
@@ -191,13 +193,13 @@ describe('analysisPrompts', () => {
     it('should throw error if no valid tasks', () => {
       expect(() => {
         generateBatchAnalysisPrompt(['invalid1', 'invalid2'] as any, mockProduct);
-      }).toThrow('No valid tasks provided');
+      }).toThrow('没有有效的任务');
     });
 
     it('should validate product object', () => {
       expect(() => {
         generateBatchAnalysisPrompt(['title-keywords'], null as any);
-      }).toThrow('Invalid product object');
+      }).toThrow('无效的产品对象');
     });
 
     it('should include language requirement', () => {

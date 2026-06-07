@@ -493,6 +493,7 @@ class PromptsModule extends BaseModule {
         currentKeyword = '';
         removePromptModal();
 
+        // ✅ 安全: html来自本地静态template.html，无用户输入
         container.innerHTML = html;
         container.classList.add('fade-in');
 

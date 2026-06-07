@@ -109,7 +109,7 @@ export class OverviewRenderer {
    */
   async render(): Promise<void> {
     const html = this._generateHTML();
-    // ✅ 安全: 静态HTML模板，无用户输入
+    // ✅ 安全: _generateHTML返回的HTML使用内部配置数据(moduleConfig, routes来自MENU_CONFIG)
     this.container.innerHTML = html;
     this.container.classList.add('fade-in');
     

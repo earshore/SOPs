@@ -9,6 +9,7 @@ import { APP_VERSION } from '../constants/constants';
 import { StorageService, CACHE_PREFIXES } from '../../services/storageService';
 import { getViewPathByRoute } from '../config/menuConfig';
 import { SystemError } from '@/common/errors/AppError';
+import { escapeHtml } from '@/common/utils/security';
 
 const CACHE_PREFIX = CACHE_PREFIXES.VIEW;
 const LEGACY_CACHE_PREFIX = 'view_cache_';
@@ -214,14 +215,16 @@ const VIEW_REGISTRY: ViewRegistry = {
  * 渲染错误占位视图
  */
 function renderErrorPlaceholder(container: HTMLElement, key: string, error: Error): void {
+    const safeKey = escapeHtml(key);
+    const safeMessage = escapeHtml(error.message || '未知错误');
     const errorHtml = `
         <div class="view-error-placeholder p-8 flex flex-col items-center justify-center text-center space-y-4 border-2 border-dashed border-red-200 rounded-xl bg-red-50/30 m-4">
             <div class="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center">
                 <i class="fas fa-exclamation-triangle text-2xl"></i>
             </div>
             <div>
-                <h3 class="text-lg font-bold text-gray-800">视图加载失败: ${key}</h3>
-                <p class="text-sm text-gray-500 max-w-md mt-1">${error.message || '未知错误'}</p>
+                <h3 class="text-lg font-bold text-gray-800">视图加载失败: ${safeKey}</h3>
+                <p class="text-sm text-gray-500 max-w-md mt-1">${safeMessage}</p>
             </div>
             <button 
                 data-action="reload-page-viewloader"
@@ -231,6 +234,7 @@ function renderErrorPlaceholder(container: HTMLElement, key: string, error: Erro
             </button>
         </div>
     `;
+    // ✅ 安全: errorHtml仅包含静态模板和已转义的key/error.message
     container.insertAdjacentHTML('beforeend', errorHtml);
     
     // 绑定事件处理器
@@ -285,6 +289,7 @@ async function loadHtml(key: string): Promise<HTMLElement | null> {
             setCache(path, html);
         }
 
+        // ✅ 安全: html来自Vite raw导入的本地静态模板，不包含用户输入
         container.insertAdjacentHTML('beforeend', html);
         config.isLoaded = true;
         console.log(`✅ [ViewLoader] Loaded & Mounted: ${key} -> ${config.target}`);

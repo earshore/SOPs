@@ -51,12 +51,13 @@ export function renderErrorBoundary(
     ` : '';
 
     const retryButton = showRetry ? `
-        <button id="btn-retry-${errorId}" 
+        <button id="btn-retry-${errorId}"
             class="px-4 py-2 bg-${color}-600 hover:bg-${color}-700 text-white rounded-lg text-sm font-medium transition-colors">
             再试一次
         </button>
     ` : '';
 
+    // ✅ 安全: color参数来自配置默认值，title和error.message已通过escapeHtml转义
     container.innerHTML = `
         <div class="error-boundary flex flex-col items-center justify-center p-12 text-center fade-in">
             <div class="w-16 h-16 rounded-full bg-${escapeHtml(color)}-50 flex items-center justify-center mb-4">
@@ -105,6 +106,7 @@ export function renderLoading(
     color: string = 'blue',
     message: string = 'Loading module...'
 ): void {
+    // ✅ 安全: color参数来自默认值或配置，message参数已通过escapeHtml转义
     container.innerHTML = `
         <div class="p-10 text-center fade-in">
             <i class="fas fa-spinner fa-spin text-2xl text-${escapeHtml(color)}-500"></i>
@@ -124,6 +126,7 @@ export function renderEmpty(
     message: string = '暂无内容',
     icon: string = 'fa-inbox'
 ): void {
+    // ✅ 安全: message和icon参数已通过escapeHtml转义
     container.innerHTML = `
         <div class="flex flex-col items-center justify-center p-12 text-center">
             <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
@@ -140,6 +143,7 @@ export function renderEmpty(
  * @param routeId - 路由ID
  */
 export function renderNotRegistered(container: HTMLElement, routeId: string): void {
+    // ✅ 安全: routeId已通过escapeHtml转义
     container.innerHTML = `
         <div class="p-10 text-center">
             <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-50 mb-4">

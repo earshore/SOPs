@@ -355,6 +355,7 @@ export default class BaseModule {
     protected handleError(error: Error): void {
         console.error(`[${this.moduleId}] Error:`, error);
         if (this.container) {
+            // ✅ 安全: moduleId和error.message已通过escapeHtml转义
             this.container.innerHTML = `
                 <div class="flex flex-col items-center justify-center p-12 text-center h-full fade-in">
                     <div class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mb-4">

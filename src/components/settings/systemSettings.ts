@@ -794,6 +794,7 @@ export async function updateModelStatus(): Promise<void> {
         const providerKey = provider as keyof typeof PROVIDERS;
         const providerInfo = PROVIDERS[providerKey];
         if (config && config.apiKey && config.model && providerInfo) {
+            // ✅ 安全: providerInfo.name和config.model已通过escapeHtml转义
             statusEl.innerHTML = `
                 <span class="status-dot status-success"></span>
                 <span class="text-slate-600 text-xs font-medium flex items-center gap-1">

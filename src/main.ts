@@ -319,9 +319,9 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     renderMoreMenu();
 
     // 广播应用初始化完成事件
-    window.dispatchEvent(new CustomEvent(APP_EVENTS.INITIALIZED, {
-      detail: { timestamp: Date.now() }
-    }));
+    const eventBusResult = container.resolve('eventBus');
+    const eventBus = eventBusResult instanceof Promise ? await eventBusResult : eventBusResult;
+    eventBus.emit(APP_EVENTS.INITIALIZED, { timestamp: Date.now() });
 
     // 初始化默认状态
     updateModelStatus();

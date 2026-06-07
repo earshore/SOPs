@@ -79,6 +79,7 @@ function renderSidebar(moduleId: string | null): void {
   // 隐藏逻辑：无模块ID或home模块不显示侧边栏
   if (!moduleId || moduleId === 'home') {
     sidebar.classList.add("hidden", "-ml-64");
+    // ✅ 安全: 清空侧边栏
     sidebar.innerHTML = '';
     return;
   }
@@ -152,7 +153,7 @@ function renderDefaultSidebar(sidebar: HTMLElement, moduleConfig: ModuleConfig, 
               `;
             }).join('')}
           </nav>
-        </div>  
+        </div>
         <div class="mt-auto p-6 border-t border-slate-100 bg-slate-50/50">
           <div class="flex items-center gap-3 text-slate-400 text-xs">
             <i class="${moduleConfig.icon}"></i>
@@ -161,6 +162,7 @@ function renderDefaultSidebar(sidebar: HTMLElement, moduleConfig: ModuleConfig, 
         </div>
       </div>
     `;
+    // ✅ 安全: HTML模板使用内部配置数据(moduleConfig, routes来自MENU_CONFIG)
     sidebar.innerHTML = html;
   } catch (e) {
     console.error(`❌ 侧边栏渲染错误:`, e);

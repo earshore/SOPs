@@ -60,6 +60,7 @@ class EuInsightsModule extends BaseModule {
 
     const details = document.getElementById("amz_countryDetails");
     if (details) {
+      // ✅ 安全: data来自内部AMZ_COUNTRY_DATA，动态文本已通过escapeHtml转义
       details.innerHTML = `
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">

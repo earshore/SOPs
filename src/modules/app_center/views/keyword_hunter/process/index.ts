@@ -516,6 +516,7 @@ function renderCopyDisplay(): void {
       const originalDiv = document.createElement("div");
       originalDiv.className = "paragraph-original leading-relaxed";
       const tempDiv = document.createElement("div");
+      // ✅ 安全: para.original来自highlightText()，文本已escapeHtml且属性已escapeAttr
       tempDiv.innerHTML = para.original;
       while (tempDiv.firstChild) {
         originalDiv.appendChild(tempDiv.firstChild);

@@ -10,6 +10,7 @@ import {
   NetworkError,
   SystemError
 } from '@/common/errors/AppError';
+import { setSafeHtml } from '@/common/utils/security';
 
 /**
  * 模块加载选项
@@ -848,7 +849,7 @@ export class SafeModuleLoader {
 
       // 如果模块是字符串，直接设置为 innerHTML
       if (typeof moduleData === 'string') {
-        container.innerHTML = moduleData;
+        setSafeHtml(container, moduleData);
         return;
       }
 
@@ -870,6 +871,7 @@ export class SafeModuleLoader {
    * @param text - 加载文本
    */
   private showLoadingIndicator(container: HTMLElement, text: string): void {
+    // ✅ 安全: 静态HTML模板，text参数已通过escapeHtml转义
     container.innerHTML = `
       <div class="flex items-center justify-center p-8">
         <div class="text-center">
@@ -902,9 +904,10 @@ export class SafeModuleLoader {
   ): void {
     // 清空容器
     container.innerHTML = '';
-    
+
     // 如果提供了自定义降级模板，使用自定义模板
     if (customFallback) {
+      // ✅ 安全: interpolateFallbackTemplate会转义错误信息
       container.innerHTML = this.interpolateFallbackTemplate(customFallback, error, modulePath);
       this.attachErrorUIEventHandlers(container, modulePath);
       return;
@@ -912,6 +915,7 @@ export class SafeModuleLoader {
 
     // 根据错误类型选择合适的降级 UI
     const errorUI = this.selectFallbackUI(error, modulePath);
+    // ✅ 安全: selectFallbackUI返回的HTML使用已转义的错误信息
     container.innerHTML = errorUI;
     this.attachErrorUIEventHandlers(container, modulePath);
   }

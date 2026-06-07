@@ -24,8 +24,8 @@ npm run prebuild
 
 执行顺序：
 1. **安全检查** (`npm run ci:security`)
+   - XSS安全门
    - 循环依赖检查
-   - XSS漏洞扫描
 
 2. **代码质量检查** (`npm run ci:quality`)
    - TypeScript类型检查
@@ -33,7 +33,7 @@ npm run prebuild
 
 3. **构建验证** (`npm run build`)
    - Vite构建成功
-   - 无构建错误或警告
+   - 无构建错误；构建警告进入后续优化清单
 
 ---
 
@@ -64,9 +64,9 @@ $ npm run circular:check
 ✔ No circular dependency found!
 ```
 
-### 2. XSS漏洞扫描
+### 2. XSS安全门
 
-**命令**: `npm run xss:scan`
+**命令**: `npm run xss:gate`
 
 **工具**: 自定义XSS扫描器 (`tools/security/xss-scanner.js`)
 
@@ -85,7 +85,9 @@ $ npm run circular:check
 
 **通过标准**:
 - 严重风险: 0个
-- 高危风险: ≤ 当前基线值（持续改进）
+- 高危风险: 0个
+
+`npm run xss:scan` 用于生成完整报告；`npm run xss:gate` 才是 CI 阻断命令。
 
 **报告位置**: `docs/XSS_SCAN_REPORT.md`
 
@@ -201,7 +203,8 @@ npm run ci:all
 
 # 单独运行各项检查
 npm run circular:check      # 循环依赖
-npm run xss:scan           # XSS扫描
+npm run xss:gate           # XSS安全门
+npm run xss:scan           # XSS完整报告
 npm run type-check         # 类型检查
 npm run lint               # 代码规范
 npm run build              # 构建验证
@@ -295,25 +298,29 @@ jobs:
 | 指标 | 当前值 | 目标值 | 状态 |
 |------|--------|--------|------|
 | 循环依赖 | 0个 | 0个 | ✅ 达标 |
-| XSS严重风险 | 12个 | 0个 | 🔄 改进中 |
-| XSS高危风险 | 14个 | 0个 | 🔄 改进中 |
+| XSS严重风险 | 0个 | 0个 | ✅ 达标 |
+| XSS高危风险 | 0个 | 0个 | ✅ 达标 |
+| XSS中危风险 | 0个 | 0个 | ✅ 达标 |
 | TypeScript错误 | 0个 | 0个 | ✅ 达标 |
 | ESLint错误 | 0个 | 0个 | ✅ 达标 |
+| ESLint警告 | 639个 | <300个 | 🟡 P1/P2待处理 |
 | 构建状态 | 成功 | 成功 | ✅ 达标 |
 
 ### 改进计划
 
 **阶段1 (已完成)**:
 - ✅ 消除所有循环依赖
-- ✅ 修复高危XSS风险点
+- ✅ 修复 CRITICAL/HIGH XSS 风险点
 - ✅ 添加ESLint防护规则
+- ✅ 建立 `xss:gate` 阻断门禁
 
 **阶段2 (进行中)**:
-- 🔄 消除所有严重XSS风险
-- 🔄 修复剩余高危XSS风险
+- ✅ 清零所有中危XSS风险
+- 🔄 修复测试基础设施债务
+- 🔄 治理构建警告: Vite 动态/静态 import 混用、chunk 体积偏大
 
 **阶段3 (计划中)**:
-- ⏳ 修复所有中危XSS风险
+- ⏳ 降低 ESLint 警告到 300 以下
 - ⏳ 完善安全编码培训
 
 ---

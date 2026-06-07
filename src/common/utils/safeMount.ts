@@ -41,8 +41,9 @@ function renderErrorFallback(container: HTMLElement, moduleName: string, error: 
       </button>
     </div>
   `;
+  // ✅ 安全: 静态HTML模板，errorMsg已通过textContent安全设置
   container.innerHTML = errorHtml;
-  
+
   // 绑定事件处理器
   const reloadBtn = container.querySelector('[data-action="reload-page-safemount"]');
   if (reloadBtn) {

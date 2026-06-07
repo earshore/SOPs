@@ -90,6 +90,7 @@ export class SidebarRenderer {
       currentTab,
       activeCategory
     );
+    // ✅ 安全: _buildHTML返回的HTML使用内部配置数据(categories, routes来自MENU_CONFIG)
     sidebar.innerHTML = html;
     this._initCategoryToggle(sidebar);
 

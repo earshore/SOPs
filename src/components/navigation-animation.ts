@@ -7,6 +7,7 @@
 
 import { animationManager } from '../services/animation-manager';
 import { ANIMATION_CLASSES } from '../config/animation-config';
+import { setSafeHtml } from '../common/utils/security';
 
 /**
  * 页面过渡选项
@@ -137,7 +138,7 @@ export class PageTransitionController {
    */
   private replaceContent(newContent: string | HTMLElement): void {
     if (typeof newContent === 'string') {
-      this.container.innerHTML = newContent;
+      setSafeHtml(this.container, newContent);
     } else {
       this.container.innerHTML = '';
       this.container.appendChild(newContent);

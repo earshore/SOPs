@@ -8,8 +8,8 @@ import { webVitalsService, type Metric } from '../../services/webVitalsService';
 import { errorTracker } from '../../services/errorTracker';
 import { analyticsService } from '../../services/analyticsService';
 import { alertService } from '../../services/alertService';
+import { escapeHtml } from '../utils/security';
 
-import { Logger } from '../../services/loggerService';
 type TabType = 'overview' | 'performance' | 'errors' | 'analytics' | 'alerts';
 
 /**
@@ -27,7 +27,7 @@ export class PerformanceMonitor {
    */
   initialize(): void {
     if (process.env.NODE_ENV !== 'development') {
-      Logger.debug('[PerformanceMonitor] 仅在开发环境启用');
+      console.debug('[PerformanceMonitor] 仅在开发环境启用');
       return;
     }
 
@@ -48,7 +48,7 @@ export class PerformanceMonitor {
       }
     }, 2000);
 
-    Logger.debug('[PerformanceMonitor] ✅ 性能监控面板已初始化 (Ctrl+Shift+P 切换)');
+    console.debug('[PerformanceMonitor] ✅ 性能监控面板已初始化 (Ctrl+Shift+P 切换)');
   }
 
   /**
@@ -150,18 +150,23 @@ export class PerformanceMonitor {
     // ✅ 安全: renderXXX方法返回的HTML使用内部数据和统计信息，无用户输入
     switch (this.currentTab) {
       case 'overview':
+        // ✅ 安全: renderOverview仅使用内部数值统计和静态HTML
         contentDiv.innerHTML = this.renderOverview();
         break;
       case 'performance':
+        // ✅ 安全: renderPerformance会转义动态文本，其他内容为内部指标
         contentDiv.innerHTML = this.renderPerformance();
         break;
       case 'errors':
+        // ✅ 安全: renderErrors会转义错误类型和错误消息
         contentDiv.innerHTML = this.renderErrors();
         break;
       case 'analytics':
+        // ✅ 安全: renderAnalytics会转义页面路径，其他内容为内部统计
         contentDiv.innerHTML = this.renderAnalytics();
         break;
       case 'alerts':
+        // ✅ 安全: renderAlerts会转义告警标题、等级和消息
         contentDiv.innerHTML = this.renderAlerts();
         break;
     }
@@ -255,14 +260,16 @@ export class PerformanceMonitor {
       const severityColor = error.severity === 'critical' ? '#f00' :
                            error.severity === 'high' ? '#f80' :
                            error.severity === 'medium' ? '#ff0' : '#0af';
+      const errorType = escapeHtml(error.type);
+      const errorMessage = escapeHtml(error.message);
 
       return `
         <div style="margin: 8px 0; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; border-left: 3px solid ${severityColor};">
           <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-            <span style="font-weight: bold; font-size: 11px;">${error.type}</span>
+            <span style="font-weight: bold; font-size: 11px;">${errorType}</span>
             <span style="font-size: 10px; color: #888;">${error.count}次</span>
           </div>
-          <div style="font-size: 11px; color: #ccc; margin-bottom: 4px;">${error.message}</div>
+          <div style="font-size: 11px; color: #ccc; margin-bottom: 4px;">${errorMessage}</div>
           <div style="font-size: 10px; color: #888;">${new Date(error.lastOccurrence).toLocaleTimeString()}</div>
         </div>
       `;
@@ -294,12 +301,16 @@ export class PerformanceMonitor {
     const minutes = Math.floor(sessionDuration / 60);
     const seconds = sessionDuration % 60;
 
-    const topPagesHtml = stats.topPages.slice(0, 5).map((page: { path: string; views: number }) => `
-      <div style="display: flex; justify-content: space-between; margin: 4px 0; padding: 4px; background: rgba(255,255,255,0.05); border-radius: 2px;">
-        <span style="font-size: 11px;">${page.path}</span>
-        <span style="color: #0af;">${page.views}</span>
-      </div>
-    `).join('');
+    const topPagesHtml = stats.topPages.slice(0, 5).map((page: { path: string; views: number }) => {
+      const path = escapeHtml(page.path);
+
+      return `
+        <div style="display: flex; justify-content: space-between; margin: 4px 0; padding: 4px; background: rgba(255,255,255,0.05); border-radius: 2px;">
+          <span style="font-size: 11px;">${path}</span>
+          <span style="color: #0af;">${page.views}</span>
+        </div>
+      `;
+    }).join('');
 
     return `
       <div style="margin-bottom: 12px;">
@@ -341,14 +352,17 @@ export class PerformanceMonitor {
       const levelColor = alert.level === 'critical' ? '#f00' :
                         alert.level === 'error' ? '#f80' :
                         alert.level === 'warning' ? '#ff0' : '#0af';
+      const title = escapeHtml(alert.title);
+      const level = escapeHtml(alert.level);
+      const message = escapeHtml(alert.message);
 
       return `
         <div style="margin: 8px 0; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; border-left: 3px solid ${levelColor};">
           <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-            <span style="font-weight: bold; font-size: 11px;">${alert.title}</span>
-            <span style="font-size: 10px; color: ${levelColor};">${alert.level}</span>
+            <span style="font-weight: bold; font-size: 11px;">${title}</span>
+            <span style="font-size: 10px; color: ${levelColor};">${level}</span>
           </div>
-          <div style="font-size: 11px; color: #ccc; margin-bottom: 4px;">${alert.message}</div>
+          <div style="font-size: 11px; color: #ccc; margin-bottom: 4px;">${message}</div>
           <div style="font-size: 10px; color: #888;">${new Date(alert.timestamp).toLocaleTimeString()}</div>
         </div>
       `;

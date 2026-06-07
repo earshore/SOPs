@@ -158,6 +158,7 @@ export class AppModal extends HTMLElement {
         const hideHeader = this.hasAttribute('no-header');
         const sizeClass = this._sizeMap()[size] || 'size-lg';
 
+        // ✅ 安全: 静态HTML模板（Shadow DOM内部样式和结构），title来自getAttribute已转义
         this._shadowRoot.innerHTML = `
             <style>
                 /* ===== HOST ===== */

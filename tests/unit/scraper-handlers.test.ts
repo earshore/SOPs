@@ -15,6 +15,7 @@ import type { ScrapedProduct, ScraperSite } from '@/types/modules-business';
 vi.mock('@/modules/app_center/views/master_analysis/services/historyService', () => ({
   HistoryService: {
     save: vi.fn(),
+    saveAsync: vi.fn(() => Promise.resolve()),
     getAll: vi.fn(() => []),
     clear: vi.fn()
   }

@@ -7,6 +7,7 @@
  */
 
 import { ValidationError } from '@/common/errors/AppError';
+import { setSafeHtml } from '@/common/utils/security';
 
 /**
  * 渲染选项接口
@@ -84,12 +85,12 @@ export class SafeRenderer {
 
   /**
    * 渲染静态模板（已审计，无需转义）
-   * 
+   *
    * 用于渲染已经过安全审计的静态 HTML 模板
-   * 
+   *
    * @param container - 目标容器元素
    * @param template - HTML 模板字符串
-   * 
+   *
    * @example
    * ```typescript
    * const renderer = SafeRenderer.getInstance();
@@ -99,17 +100,17 @@ export class SafeRenderer {
   public renderTemplate(container: HTMLElement, template: string): void {
     if (!container) {
       throw new ValidationError(
-        'container is required',
+        'SafeRenderer: container is required',
         'SAFE_RENDERER_NO_CONTAINER',
         'container',
         container,
         { module: 'SafeRenderer', action: 'renderTemplate' }
       );
     }
-    
+
     if (typeof template !== 'string') {
       throw new ValidationError(
-        'template must be a string',
+        'SafeRenderer: template must be a string',
         'SAFE_RENDERER_INVALID_TEMPLATE',
         'template',
         typeof template,
@@ -117,7 +118,8 @@ export class SafeRenderer {
       );
     }
 
-    container.innerHTML = template;
+    // ✅ 安全: 使用setSafeHtml清理危险标签和事件属性后插入模板
+    setSafeHtml(container, template);
   }
 
   /**
@@ -149,7 +151,7 @@ export class SafeRenderer {
   ): void {
     if (!container) {
       throw new ValidationError(
-        'container is required',
+        'SafeRenderer: container is required',
         'SAFE_RENDERER_NO_CONTAINER',
         'container',
         container,
@@ -159,7 +161,7 @@ export class SafeRenderer {
 
     if (typeof template !== 'string') {
       throw new ValidationError(
-        'template must be a string',
+        'SafeRenderer: template must be a string',
         'SAFE_RENDERER_INVALID_TEMPLATE',
         'template',
         typeof template,
@@ -168,14 +170,16 @@ export class SafeRenderer {
     }
 
     const sanitize = options?.sanitize !== false; // 默认为 true
-    
+
     if (sanitize && options?.allowedTags) {
       // 如果指定了白名单，先插值（不转义），然后使用 sanitizeHtml 清理
       const interpolated = this.interpolate(template, data, false);
+      // ✅ 安全: sanitizeHtml会根据白名单清理HTML
       container.innerHTML = this.sanitizeHtml(interpolated, options);
     } else {
       // 默认行为：插值时转义
       const interpolated = this.interpolate(template, data, sanitize);
+      // ✅ 安全: interpolate已对数据进行转义
       container.innerHTML = interpolated;
     }
   }
@@ -209,7 +213,7 @@ export class SafeRenderer {
   ): void {
     if (!container) {
       throw new ValidationError(
-        'container is required',
+        'SafeRenderer: container is required',
         'SAFE_RENDERER_NO_CONTAINER',
         'container',
         container,
@@ -219,7 +223,7 @@ export class SafeRenderer {
 
     if (!Array.isArray(items)) {
       throw new ValidationError(
-        'items must be an array',
+        'SafeRenderer: items must be an array',
         'SAFE_RENDERER_INVALID_ITEMS',
         'items',
         typeof items,
@@ -229,7 +233,7 @@ export class SafeRenderer {
 
     if (typeof renderer !== 'function') {
       throw new ValidationError(
-        'renderer must be a function',
+        'SafeRenderer: renderer must be a function',
         'SAFE_RENDERER_INVALID_RENDERER',
         'renderer',
         typeof renderer,
@@ -259,18 +263,20 @@ export class SafeRenderer {
     items.forEach((item, index) => {
       const html = renderer(item, index);
       const element = document.createElement(containerTag);
-      
+
       if (sanitize) {
         // 转义 HTML
         element.textContent = html;
       } else if (options?.allowedTags) {
         // 使用白名单清理
+        // ✅ 安全: sanitizeHtml会根据白名单清理HTML
         element.innerHTML = this.sanitizeHtml(html, options);
       } else {
-        // 直接设置（仅用于已审计的内容）
-        element.innerHTML = html;
+        // 宽松模式仍经过基础清理，保留常规HTML结构并移除危险内容
+        // ✅ 安全: 使用setSafeHtml清理危险标签和事件属性后插入列表项HTML
+        setSafeHtml(element, html);
       }
-      
+
       fragment.appendChild(element);
     });
 
@@ -299,7 +305,7 @@ export class SafeRenderer {
   ): void {
     if (!container) {
       throw new ValidationError(
-        'container is required',
+        'SafeRenderer: container is required',
         'SAFE_RENDERER_NO_CONTAINER',
         'container',
         container,
@@ -309,7 +315,7 @@ export class SafeRenderer {
 
     if (!componentName) {
       throw new ValidationError(
-        'componentName is required',
+        'SafeRenderer: componentName is required',
         'SAFE_RENDERER_NO_COMPONENT_NAME',
         'componentName',
         componentName,
@@ -383,6 +389,7 @@ export class SafeRenderer {
 
     // 创建临时 DOM 解析 HTML
     const temp = document.createElement('div');
+    // ✅ 安全: 临时DOM用于解析，后续会通过白名单过滤
     temp.innerHTML = html;
 
     // 递归清理节点

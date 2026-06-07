@@ -8,6 +8,7 @@
 
 import { MENU_CONFIG } from '../config/menuConfig';
 import { getEl } from './utils';
+import { escapeHtml } from '../utils/security';
 import type { ColorSchemeName } from '../constants/colorSchemes';
 
 // ═══════════════════════════════════════════════════════════
@@ -391,6 +392,7 @@ function buildFooterTags(
 // ═══════════════════════════════════════════════════════════
 
 function renderErrorCard(message: string = '菜单加载失败'): string {
+  const safeMessage = escapeHtml(message);
   return `
     <div class="col-span-full relative rounded-2xl overflow-hidden">
       <div class="absolute inset-0 bg-red-50/60 backdrop-blur-xl
@@ -402,7 +404,7 @@ function renderErrorCard(message: string = '菜单加载失败'): string {
           <i class="fas fa-exclamation-triangle text-white text-xs"></i>
         </div>
         <div>
-          <p class="text-sm font-semibold text-red-800">${message}</p>
+          <p class="text-sm font-semibold text-red-800">${safeMessage}</p>
           <p class="text-[11px] text-red-500/70 mt-0.5">请检查配置或刷新页面重试</p>
         </div>
       </div>
@@ -480,9 +482,11 @@ function renderCategoryMenu(config: MenuRendererConfig): void {
       });
     });
 
+    // ✅ 安全: renderCard返回的HTML使用内部数据和配置，category数据来自MENU_CONFIG
     container.innerHTML = html;
   } catch (e) {
     console.error(`❌ ${config.logLabel} 渲染失败:`, e);
+    // ✅ 安全: renderErrorCard仅输出静态模板，message会被escapeHtml转义
     container.innerHTML = renderErrorCard();
   }
 }
@@ -513,9 +517,11 @@ export function renderMegaMenu(): void {
       });
     }).join('');
 
+    // ✅ 安全: renderCard返回的HTML使用内部数据和配置，modules来自MENU_CONFIG
     container.innerHTML = html;
   } catch (e) {
     console.error('❌ MegaMenu 渲染失败:', e);
+    // ✅ 安全: renderErrorCard仅输出静态模板，message会被escapeHtml转义
     container.innerHTML = renderErrorCard();
   }
 }

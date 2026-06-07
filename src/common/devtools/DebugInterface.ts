@@ -4,7 +4,6 @@
 // 仅在开发环境暴露必要的调试接口到window
 // ================================================================
 
-import { Logger } from '@services/loggerService';
 import { StorageService } from '@services/storageService';
 import { appStore } from '@/stores/useAppStore';
 import { MENU_CONFIG } from '../config/menuConfig';
@@ -57,7 +56,7 @@ class DebugInterfaceManager {
    */
   initialize(): void {
     if (this.isInitialized) {
-      Logger.warn('[DebugInterface] 已初始化，跳过');
+      console.warn('[DebugInterface] 已初始化，跳过');
       return;
     }
 
@@ -66,7 +65,7 @@ class DebugInterfaceManager {
       this.setupDebugInterface();
       this.exposeToWindow();
       this.isInitialized = true;
-      Logger.debug('🔧 [DebugInterface] 调试接口已启用，使用 window.__DEBUG__ 访问');
+      console.debug('🔧 [DebugInterface] 调试接口已启用，使用 window.__DEBUG__ 访问');
     }
   }
 
@@ -79,7 +78,7 @@ class DebugInterfaceManager {
       utils: {
         showState: () => {
           console.group('📊 应用状态');
-          Logger.debug('应用状态', appStore.getState());
+          console.debug('应用状态', appStore.getState());
           console.groupEnd();
         },
         
@@ -96,19 +95,19 @@ class DebugInterfaceManager {
         
         showServices: () => {
           console.group('🔧 已注册服务');
-          Logger.debug('已注册服务', { services: container.getRegisteredServices() });
+          console.debug('已注册服务', { services: container.getRegisteredServices() });
           console.groupEnd();
         },
         
         clearStorage: () => {
           if (confirm('确定要清除所有本地存储吗？')) {
             StorageService.clear();
-            Logger.debug('✅ 本地存储已清除');
+            console.debug('✅ 本地存储已清除');
           }
         },
         
         exportLogs: () => {
-          Logger.download('json');
+          console.warn('Logger.download() is deprecated, logs export not available');
         }
       }
     };
@@ -168,7 +167,7 @@ class DebugInterfaceManager {
       delete (window as unknown as Record<string, unknown>).__DEBUG__;
       this.debugInterface = {};
       this.isInitialized = false;
-      Logger.debug('🔧 [DebugInterface] 调试接口已清理');
+      console.debug('🔧 [DebugInterface] 调试接口已清理');
     }
   }
 }

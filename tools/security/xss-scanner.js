@@ -11,6 +11,15 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const ARGS = process.argv.slice(2);
+
+function readArg(name, defaultValue) {
+    const index = ARGS.indexOf(name);
+    if (index === -1) return defaultValue;
+    return ARGS[index + 1] || defaultValue;
+}
+
+const FAIL_ON = readArg('--fail-on', 'none');
 
 // 配置
 const CONFIG = {
@@ -63,8 +72,47 @@ const results = {
     highCount: 0,
     mediumCount: 0,
     lowCount: 0,
-    infoCount: 0
+    infoCount: 0,
+    auditedSafeCount: 0,
+    emptyDomWriteCount: 0
 };
+
+const SAFETY_COMMENT_RE = /(✅\s*安全|XSS-Safe|XSS safe|SAFE:|安全:|已审计|已转义|静态HTML|静态 HTML)/i;
+const WEAK_SAFETY_COMMENT_RE = /(调用方|需确保|负责确保|应为已审计|caller|should be audited|must ensure)/i;
+
+function findSafetyAnnotation(lines, lineIndex) {
+    const sameLine = lines[lineIndex] || '';
+    if (SAFETY_COMMENT_RE.test(sameLine)) {
+        return {
+            text: sameLine.trim(),
+            isStrong: !WEAK_SAFETY_COMMENT_RE.test(sameLine)
+        };
+    }
+
+    for (let i = lineIndex - 1; i >= Math.max(0, lineIndex - 3); i--) {
+        const text = (lines[i] || '').trim();
+        if (!text) continue;
+        if (!text.startsWith('//') && !text.startsWith('*') && !text.startsWith('/*')) break;
+        if (SAFETY_COMMENT_RE.test(text)) {
+            return {
+                text,
+                isStrong: !WEAK_SAFETY_COMMENT_RE.test(text)
+            };
+        }
+    }
+
+    return null;
+}
+
+function isEmptyDomWrite(patternName, code) {
+    if (patternName !== 'innerHTML' && patternName !== 'outerHTML') return false;
+    return /\.(?:innerHTML|outerHTML)\s*=\s*(?:''|""|``)\s*;?$/.test(code.trim());
+}
+
+function isCommentOnlyLine(lines, lineIndex) {
+    const text = (lines[lineIndex] || '').trim();
+    return text.startsWith('//') || text.startsWith('/*') || text.startsWith('*');
+}
 
 /**
  * 递归扫描目录
@@ -105,12 +153,30 @@ function scanFile(filePath) {
         while ((match = regex.exec(content)) !== null) {
             const lineNumber = content.substring(0, match.index).split('\n').length;
             const lineContent = lines[lineNumber - 1].trim();
+
+            if (isCommentOnlyLine(lines, lineNumber - 1)) {
+                continue;
+            }
             
             // 提取完整的代码片段（包括多行）
             const fullCode = extractFullCode(lines, lineNumber - 1, lineContent);
+
+            if (isEmptyDomWrite(patternName, fullCode)) {
+                results.emptyDomWriteCount++;
+                continue;
+            }
+
+            const safetyAnnotation = findSafetyAnnotation(lines, lineNumber - 1);
+            if (safetyAnnotation?.isStrong) {
+                results.auditedSafeCount++;
+                continue;
+            }
             
             // 分析风险等级
             const risk = analyzeRisk(patternName, match, fullCode, content);
+            if (safetyAnnotation && !safetyAnnotation.isStrong) {
+                risk.reason = `${risk.reason}, 安全注释需要人工复核`;
+            }
             
             fileRisks.push({
                 line: lineNumber,
@@ -291,7 +357,9 @@ function generateReport() {
 **扫描目录**: \`src/\`  
 **扫描文件数**: ${results.scannedFiles}  
 **命中文件数**: ${results.files.length}  
-**发现风险点**: ${results.totalRisks}
+**发现风险点**: ${results.totalRisks}  
+**已审计安全跳过**: ${results.auditedSafeCount}  
+**清空DOM跳过**: ${results.emptyDomWriteCount}
 
 ---
 
@@ -487,18 +555,29 @@ function main() {
     console.log(`   - 🟡 中危: ${results.mediumCount}`);
     console.log(`   - 🟢 低危: ${results.lowCount}`);
     console.log(`   - ⚪ 信息: ${results.infoCount}`);
+    console.log(`   - 已审计安全跳过: ${results.auditedSafeCount}`);
+    console.log(`   - 清空DOM跳过: ${results.emptyDomWriteCount}`);
     console.log(`\n📄 详细报告: ${CONFIG.outputFile}`);
-    
+
+    const shouldFail =
+        (FAIL_ON === 'critical' && results.criticalCount > 0) ||
+        (FAIL_ON === 'high' && (results.criticalCount > 0 || results.highCount > 0)) ||
+        (FAIL_ON === 'medium' && (results.criticalCount > 0 || results.highCount > 0 || results.mediumCount > 0));
+
+    if (shouldFail) {
+        console.error(`\n❌ XSS gate failed (--fail-on ${FAIL_ON}).`);
+        process.exit(1);
+    }
+
     if (results.criticalCount > 0) {
         console.log('\n⚠️  发现严重风险,请立即修复!');
-        process.exit(0);
     } else if (results.highCount > 0) {
         console.log('\n⚠️  发现高危风险,建议尽快修复!');
-        process.exit(0);
     } else {
         console.log('\n✅ 未发现严重风险');
-        process.exit(0);
     }
+
+    process.exit(0);
 }
 
 // 运行

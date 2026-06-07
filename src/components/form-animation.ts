@@ -265,6 +265,7 @@ function showSuccessIcon(
     // 创建成功图标
     iconElement = document.createElement('span');
     iconElement.className = ANIMATION_CLASSES.formInputSuccessIcon;
+    // ✅ 安全: createCheckmarkSVG()返回静态SVG模板
     iconElement.innerHTML = createCheckmarkSVG();
     parent.appendChild(iconElement);
   }
@@ -287,6 +288,7 @@ function showSuccessIcon(
  * 创建勾选图标SVG
  */
 function createCheckmarkSVG(): string {
+  // ✅ 安全: 静态SVG模板
   return `
     <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path

@@ -3,9 +3,22 @@
  * 测试多品类产品的 DNA 提取功能
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { extractProductDNA, canExtractDNA } from './dnaExtractor';
-import type { FullAnalysisReport } from '../ai_analysis/config/analysisReportData';
+import { describe, it, expect, vi } from 'vitest';
+import {
+  extractProductDNA as extractStrictProductDNA,
+  canExtractDNA as canExtractStrictDNA
+} from './dnaExtractor';
+import type { FullAnalysisReport as StrictFullAnalysisReport } from '../ai_analysis/config/analysisReportData';
+
+type FullAnalysisReport = Record<string, unknown>;
+
+// These tests intentionally cover legacy/partial AI outputs, so fixtures stay loose
+// while production functions still receive the strict runtime contract.
+const extractProductDNA = (report: FullAnalysisReport | null | undefined) =>
+  extractStrictProductDNA(report as unknown as StrictFullAnalysisReport | null | undefined);
+
+const canExtractDNA = (report: FullAnalysisReport | null | undefined) =>
+  canExtractStrictDNA(report as unknown as StrictFullAnalysisReport | null | undefined);
 
 // Mock Logger
 vi.mock('../../../../../services/loggerService', () => ({

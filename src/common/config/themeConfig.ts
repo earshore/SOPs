@@ -6,6 +6,8 @@
 import type { ColorSchemeName } from '../constants/colorSchemes';
 import { ColorContext } from '../utils/ColorContext';
 import { StorageService } from '../../services/storageService';
+import eventBus from '../EventBus';
+
 export interface ThemeColors {
   primary: string;
   primaryLight: string;
@@ -135,9 +137,7 @@ export class ThemeManager {
     }
     
     // 触发事件
-    window.dispatchEvent(new CustomEvent('theme-changed', {
-      detail: { themeId, theme }
-    }));
+    eventBus.emit('theme-changed', { themeId, theme });
     
     const duration = performance.now() - startTime;
     console.log(`✓ 主题已切换: ${theme.name} (${duration.toFixed(2)}ms)`);

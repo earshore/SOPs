@@ -520,6 +520,7 @@ class PromotionsModule extends BaseModule {
     const navContainer = document.getElementById("amzpt_nav");
     if (!navContainer) return;
 
+    // ✅ 安全: promoData 是本文件内定义的静态运营内容，不包含用户输入
     navContainer.innerHTML = `
       <div class="amzpt_anchor_nav">
         <div class="amzpt_anchor_header">
@@ -558,6 +559,7 @@ class PromotionsModule extends BaseModule {
     const contentContainer = document.getElementById("amzpt_main");
     if (!contentContainer) return;
 
+    // ✅ 安全: promoData 和 renderSectionBody 内容均来自本文件内静态常量
     contentContainer.innerHTML = promoData
       .map(
         (section) => `

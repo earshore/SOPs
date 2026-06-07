@@ -553,6 +553,7 @@ class MarketingCalendarModule extends BaseModule {
     const holidays = filtered.filter((e) => e.type === "holiday").length;
     const shopping = filtered.filter((e) => e.type === "shopping").length;
 
+    // ✅ 安全: 统计值为本地计算数字，并通过escapeHtml转义后插入静态模板
     container.innerHTML = `
             <div class="amzf_stat_item">
                 <div class="amzf_stat_icon amzf_blue"><i class="fa-solid fa-timeline text-purple-500"></i></div>

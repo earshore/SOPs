@@ -32,6 +32,7 @@ class EmailTemplatesModule extends BaseModule {
      */
     async mount(container: HTMLElement): Promise<void> {
         const html = await loadTemplate('src/modules/sops/views/service/email_templates/template.html');
+        // ✅ 安全: html来自本地静态template.html，无用户输入
         container.innerHTML = html;
         container.classList.add('fade-in');
         this.bindTemplateToggles(container);

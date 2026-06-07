@@ -30,8 +30,13 @@ vi.mock('@/common/utils/security', () => ({
             "'": '&#x27;'
         };
         return map[char];
-    })
+    }),
+    setSafeHtml: (element: Element, html: string) => {
+        element.innerHTML = html;
+    }
 }));
+
+const wait = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
 
 describe('Restricted Words Module', () => {
     let container: HTMLElement;
@@ -62,7 +67,9 @@ describe('Restricted Words Module', () => {
                     <option value="UK">英国</option>
                 </select>
                 <div id="rw-stats-display"></div>
-                <tbody id="rw-results-tbody"></tbody>
+                <table>
+                    <tbody id="rw-results-tbody"></tbody>
+                </table>
                 <div id="rw-detail-modal" class="hidden">
                     <div id="rw-modal-header"></div>
                     <div id="rw-detail-content"></div>
@@ -443,7 +450,7 @@ describe('Restricted Words Module', () => {
             });
         });
 
-        it('should close detail modal', () => {
+        it('should close detail modal', async () => {
             const wordId = RESTRICTED_WORDS_DATABASE[0].id;
             (window as any).showWordDetail(wordId);
             
@@ -454,23 +461,21 @@ describe('Restricted Words Module', () => {
             (window as any).closeWordDetail();
             
             // 等待动画完成
-            setTimeout(() => {
-                modal = document.getElementById('rw-detail-modal');
-                expect(modal?.classList.contains('hidden')).toBe(true);
-            }, 300);
+            await wait(250);
+            modal = document.getElementById('rw-detail-modal');
+            expect(modal?.classList.contains('hidden')).toBe(true);
         });
 
-        it('should close modal with ESC key', () => {
+        it('should close modal with ESC key', async () => {
             const wordId = RESTRICTED_WORDS_DATABASE[0].id;
             (window as any).showWordDetail(wordId);
             
             const escEvent = new KeyboardEvent('keydown', { key: 'Escape' });
             document.dispatchEvent(escEvent);
             
-            setTimeout(() => {
-                const modal = document.getElementById('rw-detail-modal');
-                expect(modal?.classList.contains('hidden')).toBe(true);
-            }, 300);
+            await wait(250);
+            const modal = document.getElementById('rw-detail-modal');
+            expect(modal?.classList.contains('hidden')).toBe(true);
         });
 
         it('should handle invalid word ID gracefully', () => {

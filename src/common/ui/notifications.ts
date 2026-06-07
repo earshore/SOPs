@@ -5,7 +5,6 @@
  */
 
 import { getEl } from './utils';
-import { SafeRenderer } from '../infrastructure/SafeRenderer';
 
 /**
  * Toast 类型
@@ -23,9 +22,6 @@ export interface ToastOptions {
   /** 显示时长（毫秒），默认 3500ms */
   duration?: number;
 }
-
-// 获取 SafeRenderer 实例
-const renderer = SafeRenderer.getInstance();
 
 /**
  * 显示 Toast 通知
@@ -54,28 +50,25 @@ export function showToast(title: string, options: ToastOptions = {}): void {
 
   const icon = iconMap[type];
 
-  // 使用 SafeRenderer 转义用户输入
-  const escapedTitle = renderer.escapeHtml(title);
-  const escapedDesc = description ? renderer.escapeHtml(description) : '';
+  const iconEl = document.createElement('i');
+  iconEl.className = `fa-solid ${icon}`;
+  toast.appendChild(iconEl);
 
-  // 构建 Toast 内容
+  const contentEl = document.createElement('div');
+  contentEl.className = 'toast-content';
+
+  const titleEl = document.createElement('strong');
+  titleEl.textContent = title;
+  contentEl.appendChild(titleEl);
+
   if (description) {
-    toast.innerHTML = `
-      <i class="fa-solid ${icon}"></i>
-      <div class="toast-content">
-        <strong>${escapedTitle}</strong>
-        <div class="toast-desc">${escapedDesc}</div>
-      </div>
-    `;
-  } else {
-    toast.innerHTML = `
-      <i class="fa-solid ${icon}"></i>
-      <div class="toast-content">
-        <strong>${escapedTitle}</strong>
-      </div>
-    `;
+    const descEl = document.createElement('div');
+    descEl.className = 'toast-desc';
+    descEl.textContent = description;
+    contentEl.appendChild(descEl);
   }
 
+  toast.appendChild(contentEl);
   container.appendChild(toast);
 
   setTimeout(() => {

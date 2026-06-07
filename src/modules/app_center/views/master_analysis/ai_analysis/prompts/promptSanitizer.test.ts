@@ -126,10 +126,12 @@ describe('promptSanitizer', () => {
       };
 
       const result = sanitizeProductData(product);
-      expect(result.customer_reviews[0].headline).toBe('Great product');
-      expect(result.customer_reviews[0].body).toContain('[FILTERED]');
-      expect(result.customer_reviews[1].headline).toContain('[FILTERED]');
-      expect(result.customer_reviews[1].body).toBe('Normal review');
+      const reviews = result.customer_reviews;
+      expect(reviews).toHaveLength(2);
+      expect(reviews?.[0]?.headline).toBe('Great product');
+      expect(reviews?.[0]?.body).toContain('[FILTERED]');
+      expect(reviews?.[1]?.headline).toContain('[FILTERED]');
+      expect(reviews?.[1]?.body).toBe('Normal review');
     });
 
     it('should handle missing fields gracefully', () => {

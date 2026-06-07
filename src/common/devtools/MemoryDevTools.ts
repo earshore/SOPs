@@ -7,7 +7,6 @@
 import { memoryLeakDetector } from '../utils/MemoryLeakDetector';
 import eventBus from '../EventBus';
 
-import { Logger } from '../../services/loggerService';
 /**
  * 内存开发工具
  */
@@ -34,7 +33,7 @@ export class MemoryDevTools {
     };
     document.addEventListener('keydown', this.keydownHandler);
 
-    Logger.debug('✅ [MemoryDevTools] 已初始化. 按 Ctrl+Shift+M 打开面板');
+    console.debug('✅ [MemoryDevTools] 已初始化. 按 Ctrl+Shift+M 打开面板');
   }
 
   /**
@@ -302,7 +301,7 @@ export class MemoryDevTools {
       this.panel = null;
     }
 
-    Logger.debug('✅ [MemoryDevTools] 已销毁');
+    console.debug('✅ [MemoryDevTools] 已销毁');
   }
 }
 
