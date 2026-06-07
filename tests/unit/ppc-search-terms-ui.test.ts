@@ -3,7 +3,20 @@ import { mount, unmount } from '@/modules/app_center/views/ppc_search_terms/inde
 import { loadTemplate } from '@/common/utils/viewLoader';
 import { showToast } from '@/common/ui/notifications';
 
+interface LlmMockRow {
+  id: string;
+  action: string;
+  reason: string;
+  priority: number;
+}
+
+interface LlmMockInput {
+  rows: LlmMockRow[];
+  onProgress?: (progress: { completedBatches: number; totalBatches: number }) => void;
+}
+
 const mocks = vi.hoisted(() => ({
+  analyzeWithLLM: vi.fn(),
   storageGet: vi.fn(),
   storageSet: vi.fn(),
   showToast: vi.fn(),
@@ -23,6 +36,13 @@ const mocks = vi.hoisted(() => ({
       <input id="ppc-min-spend" value="15" />
       <input id="ppc-min-orders" value="2" />
       <input id="ppc-min-ctr" value="0.35" />
+      <input id="ppc-allow-local-fallback" type="checkbox" />
+      <input id="ppc-use-context" type="checkbox" />
+      <div id="ppc-context-fields" class="hidden">
+        <input id="ppc-context-asin" />
+        <input id="ppc-context-category" />
+        <textarea id="ppc-context-listing"></textarea>
+      </div>
       <button id="ppc-btn-sample" type="button"></button>
       <button id="ppc-btn-parse" type="button"></button>
       <button id="ppc-btn-clear" type="button"></button>
@@ -70,6 +90,16 @@ vi.mock('@/services/storageService', () => ({
   },
 }));
 
+vi.mock('@/modules/app_center/views/ppc_search_terms/services/llmAnalysisService', () => ({
+  analyzePpcSearchTermsWithLLM: mocks.analyzeWithLLM,
+}));
+
+async function flushAnalysis(): Promise<void> {
+  await Promise.resolve();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  await Promise.resolve();
+}
+
 describe('PPC 搜索词分析器 UI 行为', () => {
   let container: HTMLElement;
   let anchorClick: ReturnType<typeof vi.spyOn>;
@@ -80,6 +110,16 @@ describe('PPC 搜索词分析器 UI 行为', () => {
     mocks.storageGet.mockReturnValue({});
     mocks.storageSet.mockClear();
     mocks.showToast.mockClear();
+    mocks.analyzeWithLLM.mockReset();
+    mocks.analyzeWithLLM.mockImplementation(async ({ rows, onProgress }: LlmMockInput) => {
+      onProgress?.({ completedBatches: 1, totalBatches: 1 });
+      return rows.map((row) => ({
+        id: row.id,
+        action: row.action,
+        reason: `模型建议：${row.reason}`,
+        priority: row.priority,
+      }));
+    });
     Object.defineProperty(URL, 'createObjectURL', { configurable: true, value: vi.fn(() => 'blob:test') });
     Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: vi.fn() });
     anchorClick = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
@@ -94,20 +134,23 @@ describe('PPC 搜索词分析器 UI 行为', () => {
     vi.restoreAllMocks();
   });
 
-  it('加载样例后可筛选并导出当前筛选', () => {
+  it('加载样例后可调用模型、筛选并导出当前筛选', async () => {
     container.querySelector<HTMLButtonElement>('#ppc-btn-sample')?.click();
+    await flushAnalysis();
     container.querySelector<HTMLButtonElement>('[data-filter="scale_budget"]')?.click();
     container.querySelector<HTMLButtonElement>('#ppc-export-current')?.click();
 
     expect(loadTemplate).toHaveBeenCalledWith('src/modules/app_center/views/ppc_search_terms/template.html');
+    expect(mocks.analyzeWithLLM).toHaveBeenCalled();
     expect(container.querySelector('#ppc-stat-rows')?.textContent).toBe('10');
     expect(container.querySelector('#ppc-result-count')?.textContent).toBe('共 10 行，当前筛选 2 行。');
     expect(anchorClick).toHaveBeenCalled();
     expect(showToast).toHaveBeenCalledWith('导出完成', { type: 'success', description: '2 行动作已导出' });
   });
 
-  it('清空时重置结果和筛选状态', () => {
+  it('清空时重置结果和筛选状态', async () => {
     container.querySelector<HTMLButtonElement>('#ppc-btn-sample')?.click();
+    await flushAnalysis();
     container.querySelector<HTMLButtonElement>('[data-filter="scale_budget"]')?.click();
     container.querySelector<HTMLButtonElement>('#ppc-btn-clear')?.click();
 
@@ -119,6 +162,7 @@ describe('PPC 搜索词分析器 UI 行为', () => {
 
   it('剪贴板不可用时提示复制失败', async () => {
     container.querySelector<HTMLButtonElement>('#ppc-btn-sample')?.click();
+    await flushAnalysis();
     container.querySelector<HTMLButtonElement>('#ppc-copy-summary')?.click();
     await new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -126,5 +170,58 @@ describe('PPC 搜索词分析器 UI 行为', () => {
       type: 'error',
       description: '当前浏览器没有开放剪贴板写入权限',
     });
+  });
+
+  it('模型失败且未开启降级时不使用本地规则', async () => {
+    mocks.analyzeWithLLM.mockRejectedValueOnce(new Error('LLM unavailable'));
+
+    container.querySelector<HTMLButtonElement>('#ppc-btn-sample')?.click();
+    await flushAnalysis();
+
+    expect(container.querySelector('#ppc-stat-rows')?.textContent).toBe('0');
+    expect(showToast).toHaveBeenCalledWith('分析失败', { type: 'error', description: 'LLM unavailable' });
+  });
+
+  it('模型失败且开启降级时使用本地规则', async () => {
+    mocks.analyzeWithLLM.mockRejectedValueOnce(new Error('LLM unavailable'));
+    const fallback = container.querySelector<HTMLInputElement>('#ppc-allow-local-fallback');
+    if (fallback) {
+      fallback.checked = true;
+      fallback.dispatchEvent(new Event('change'));
+    }
+
+    container.querySelector<HTMLButtonElement>('#ppc-btn-sample')?.click();
+    await flushAnalysis();
+
+    expect(container.querySelector('#ppc-stat-rows')?.textContent).toBe('10');
+    expect(showToast).toHaveBeenCalledWith('模型分析失败，已使用本地规则', {
+      type: 'warning',
+      description: 'LLM unavailable',
+    });
+  });
+
+  it('开启产品上下文时传给模型分析服务', async () => {
+    const useContext = container.querySelector<HTMLInputElement>('#ppc-use-context');
+    if (useContext) {
+      useContext.checked = true;
+      useContext.dispatchEvent(new Event('change'));
+    }
+    const asin = container.querySelector<HTMLInputElement>('#ppc-context-asin');
+    const category = container.querySelector<HTMLInputElement>('#ppc-context-category');
+    const listing = container.querySelector<HTMLTextAreaElement>('#ppc-context-listing');
+    if (asin) asin.value = 'B0TEST1234';
+    if (category) category.value = 'Dog Coats';
+    if (listing) listing.value = 'Waterproof winter dog coat with reflective strips.';
+
+    container.querySelector<HTMLButtonElement>('#ppc-btn-sample')?.click();
+    await flushAnalysis();
+
+    expect(mocks.analyzeWithLLM).toHaveBeenCalledWith(expect.objectContaining({
+      context: {
+        asin: 'B0TEST1234',
+        category: 'Dog Coats',
+        listing: 'Waterproof winter dog coat with reflective strips.',
+      },
+    }));
   });
 });

@@ -3,16 +3,16 @@ import { showToast } from '@/common/ui/notifications';
 import { safeMount } from '@/common/utils/safeMount';
 import { loadTemplate } from '@/common/utils/viewLoader';
 import { StorageService } from '@/services/storageService';
+import {
+  analyzePpcSearchTermsWithLLM,
+  type PpcAnalysisContext,
+  type PpcLlmDecision,
+} from './services/llmAnalysisService';
+import type { ActionType, AnalyzedRow, Thresholds } from './types';
 
 import './style.css';
 
-export type ActionType =
-  | 'negative_exact'
-  | 'harvest_exact'
-  | 'scale_budget'
-  | 'bid_down'
-  | 'listing_term'
-  | 'observe';
+export type { ActionType, AnalyzedRow, Thresholds } from './types';
 
 type FilterType = ActionType | 'all';
 type RawRecord = Record<string, string>;
@@ -28,15 +28,6 @@ type ColumnKey =
   | 'sales'
   | 'orders';
 
-export interface Thresholds {
-  targetAcos: number;
-  highAcos: number;
-  minClicksNoOrder: number;
-  minSpendNoOrder: number;
-  minOrdersHarvest: number;
-  minCtr: number;
-}
-
 export interface ColumnMapping {
   found: Partial<Record<ColumnKey, string>>;
   missing: ColumnKey[];
@@ -45,28 +36,6 @@ export interface ColumnMapping {
 interface ActionDecision {
   type: ActionType;
   label: string;
-  reason: string;
-  priority: number;
-}
-
-export interface AnalyzedRow {
-  id: string;
-  campaign: string;
-  adGroup: string;
-  searchTerm: string;
-  keyword: string;
-  matchType: string;
-  impressions: number;
-  clicks: number;
-  spend: number;
-  sales: number;
-  orders: number;
-  ctr: number;
-  cvr: number;
-  cpc: number;
-  acos: number;
-  action: ActionType;
-  actionLabel: string;
   reason: string;
   priority: number;
 }
@@ -87,6 +56,12 @@ export interface AnalysisResult {
   validRows: number;
 }
 
+interface AnalysisSettings {
+  allowLocalFallback: boolean;
+  useContext: boolean;
+  context: PpcAnalysisContext;
+}
+
 interface ListenerRecord {
   element: EventTarget;
   type: string;
@@ -103,6 +78,7 @@ interface ClassificationRule {
 type RowMetrics = Pick<AnalyzedRow, 'impressions' | 'clicks' | 'spend' | 'sales' | 'orders' | 'ctr' | 'cvr' | 'acos'>;
 
 const STORAGE_KEY = 'ppc_search_terms_thresholds_v1';
+const ANALYSIS_SETTINGS_STORAGE_KEY = 'ppc_search_terms_analysis_settings_v1';
 const MAX_RENDER_ROWS = 300;
 const ACTION_LABELS: Record<ActionType, string> = {
   negative_exact: '否精准',
@@ -222,6 +198,7 @@ const mountInternal = async (container: HTMLElement): Promise<void> => {
   const renderer = SafeRenderer.getInstance();
   renderer.renderTemplate(container, html);
   restoreThresholds(container);
+  restoreAnalysisSettings(container);
   bindEvents(container);
   updateResults(container, []);
 };
@@ -235,7 +212,9 @@ export function unmount(): void {
 
 function bindEvents(container: HTMLElement): void {
   addListener(getElement(container, 'ppc-file-input'), 'change', () => handleFileImport(container));
-  addListener(getElement(container, 'ppc-btn-parse'), 'click', () => analyzeTextarea(container));
+  addListener(getElement(container, 'ppc-btn-parse'), 'click', () => {
+    void analyzeTextarea(container);
+  });
   addListener(getElement(container, 'ppc-btn-sample'), 'click', () => loadSample(container));
   addListener(getElement(container, 'ppc-btn-clear'), 'click', () => clearAnalyzer(container));
   addListener(getElement(container, 'ppc-export-all'), 'click', () => exportRows('all'));
@@ -249,7 +228,11 @@ function bindEvents(container: HTMLElement): void {
   });
 
   getThresholdInputs(container).forEach((input) => {
-    addListener(input, 'change', () => rerunWithThresholds(container));
+    addListener(input, 'change', () => handleThresholdChange(container));
+  });
+
+  getAnalysisSettingInputs(container).forEach((input) => {
+    addListener(input, 'change', () => handleAnalysisSettingsChange(container));
   });
 }
 
@@ -272,19 +255,19 @@ async function handleFileImport(container: HTMLElement): Promise<void> {
   const textarea = getTextarea(container, 'ppc-paste-input');
   if (textarea) textarea.value = text;
   setText(container, 'ppc-file-name', `已选择：${file.name}`);
-  analyzeText(container, text);
+  await analyzeText(container, text);
 }
 
-function analyzeTextarea(container: HTMLElement): void {
+async function analyzeTextarea(container: HTMLElement): Promise<void> {
   const text = getTextarea(container, 'ppc-paste-input')?.value || '';
-  analyzeText(container, text);
+  await analyzeText(container, text);
 }
 
 function loadSample(container: HTMLElement): void {
   const textarea = getTextarea(container, 'ppc-paste-input');
   if (textarea) textarea.value = SAMPLE_REPORT;
   setText(container, 'ppc-file-name', '已加载样例数据');
-  analyzeText(container, SAMPLE_REPORT);
+  void analyzeText(container, SAMPLE_REPORT);
 }
 
 function clearAnalyzer(container: HTMLElement): void {
@@ -299,27 +282,88 @@ function clearAnalyzer(container: HTMLElement): void {
   updateResults(container, []);
 }
 
-function analyzeText(container: HTMLElement, text: string): void {
+async function analyzeText(container: HTMLElement, text: string): Promise<void> {
   const cleanText = text.trim();
   if (!cleanText) {
     showToast('没有可分析的数据', { type: 'warning' });
     return;
   }
 
+  let localResult: AnalysisResult | null = null;
+  setAnalyzeButtonState(container, true);
+
   try {
     const thresholds = readThresholds(container);
-    const result = analyzeSearchTermReport(cleanText, thresholds);
+    const settings = readAnalysisSettings(container);
+    localResult = analyzeSearchTermReport(cleanText, thresholds);
 
     sourceText = cleanText;
-    analyzedRows = result.rows;
+    analyzedRows = [];
     saveThresholds(thresholds);
-    renderMappingStatus(container, result.mapping, result.totalRows, result.validRows);
-    updateResults(container, result.rows);
-    showToast('PPC 搜索词分析完成', { type: 'success', description: `已识别 ${result.validRows} 行有效数据` });
+    saveAnalysisSettings(settings);
+    renderMappingStatus(container, localResult.mapping, localResult.totalRows, localResult.validRows, '正在调用大模型分析...');
+    updateResults(container, []);
+
+    const decisions = await analyzePpcSearchTermsWithLLM({
+      rows: localResult.rows,
+      thresholds,
+      context: settings.useContext ? settings.context : undefined,
+      onProgress: ({ completedBatches, totalBatches }) => {
+        renderMappingStatus(
+          container,
+          localResult?.mapping || { found: {}, missing: [] },
+          localResult?.totalRows || 0,
+          localResult?.validRows || 0,
+          `大模型分析中 ${completedBatches}/${totalBatches}`,
+        );
+      },
+    });
+
+    analyzedRows = applyModelDecisions(localResult.rows, decisions);
+    renderMappingStatus(container, localResult.mapping, localResult.totalRows, localResult.validRows, '大模型分析完成');
+    updateResults(container, analyzedRows);
+    showToast('PPC 搜索词模型分析完成', { type: 'success', description: `已识别 ${localResult.validRows} 行有效数据` });
   } catch (error) {
     const message = error instanceof Error ? error.message : '报表解析失败';
+    const settings = readAnalysisSettings(container);
+
+    if (settings.allowLocalFallback && localResult) {
+      analyzedRows = localResult.rows;
+      renderMappingStatus(container, localResult.mapping, localResult.totalRows, localResult.validRows, '已使用本地规则降级');
+      updateResults(container, analyzedRows);
+      showToast('模型分析失败，已使用本地规则', { type: 'warning', description: message });
+      return;
+    }
+
+    analyzedRows = [];
+    updateResults(container, []);
     showToast('分析失败', { type: 'error', description: message });
+  } finally {
+    setAnalyzeButtonState(container, false);
   }
+}
+
+function applyModelDecisions(rows: AnalyzedRow[], decisions: PpcLlmDecision[]): AnalyzedRow[] {
+  const byId = new Map(decisions.map((decisionItem) => [decisionItem.id, decisionItem]));
+  const missingCount = rows.filter((row) => !byId.has(row.id)).length;
+
+  if (missingCount > 0) {
+    throw new Error(`模型返回结果不完整，缺少 ${missingCount} 行动作`);
+  }
+
+  return rows
+    .map((row) => {
+      const modelDecision = byId.get(row.id);
+      if (!modelDecision) return row;
+      return {
+        ...row,
+        action: modelDecision.action,
+        actionLabel: ACTION_LABELS[modelDecision.action],
+        reason: modelDecision.reason,
+        priority: modelDecision.priority,
+      };
+    })
+    .sort((a, b) => b.priority - a.priority || b.spend - a.spend);
 }
 
 export function analyzeSearchTermReport(text: string, thresholds: Thresholds): AnalysisResult {
@@ -787,10 +831,12 @@ export function buildSummaryText(rows: AnalyzedRow[]): string {
   ].join('\n');
 }
 
-function rerunWithThresholds(container: HTMLElement): void {
+function handleThresholdChange(container: HTMLElement): void {
   const thresholds = readThresholds(container);
   saveThresholds(thresholds);
-  if (sourceText) analyzeText(container, sourceText);
+  if (sourceText) {
+    setText(container, 'ppc-mapping-status', '阈值已更新，请点击“开始分析”重新调用大模型。');
+  }
 }
 
 function readThresholds(container: HTMLElement): Thresholds {
@@ -814,6 +860,50 @@ function restoreThresholds(container: HTMLElement): void {
   setInputValue(container, 'ppc-min-ctr', saved.minCtr, 0.35);
 }
 
+function readAnalysisSettings(container: HTMLElement): AnalysisSettings {
+  const useContext = getInput(container, 'ppc-use-context')?.checked || false;
+
+  return {
+    allowLocalFallback: getInput(container, 'ppc-allow-local-fallback')?.checked || false,
+    useContext,
+    context: {
+      asin: getInput(container, 'ppc-context-asin')?.value || '',
+      category: getInput(container, 'ppc-context-category')?.value || '',
+      listing: getTextarea(container, 'ppc-context-listing')?.value || '',
+    },
+  };
+}
+
+function restoreAnalysisSettings(container: HTMLElement): void {
+  const saved = StorageService.get<Partial<AnalysisSettings>>(ANALYSIS_SETTINGS_STORAGE_KEY, {}) || {};
+  setChecked(container, 'ppc-allow-local-fallback', saved.allowLocalFallback || false);
+  setChecked(container, 'ppc-use-context', saved.useContext || false);
+  updateContextFieldsVisibility(container);
+}
+
+function saveAnalysisSettings(settings: AnalysisSettings): void {
+  StorageService.set(ANALYSIS_SETTINGS_STORAGE_KEY, {
+    allowLocalFallback: settings.allowLocalFallback,
+    useContext: settings.useContext,
+  });
+}
+
+function handleAnalysisSettingsChange(container: HTMLElement): void {
+  updateContextFieldsVisibility(container);
+  saveAnalysisSettings(readAnalysisSettings(container));
+}
+
+function updateContextFieldsVisibility(container: HTMLElement): void {
+  const useContext = getInput(container, 'ppc-use-context')?.checked || false;
+  const fields = getElement(container, 'ppc-context-fields');
+  if (!fields) return;
+
+  fields.classList.toggle('hidden', !useContext);
+  fields.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input, textarea').forEach((field) => {
+    field.disabled = !useContext;
+  });
+}
+
 function saveThresholds(thresholds: Thresholds): void {
   StorageService.set(STORAGE_KEY, thresholds);
 }
@@ -828,9 +918,15 @@ function setInputValue(container: HTMLElement, id: string, value: number | undef
   if (input) input.value = String(value ?? fallback);
 }
 
-function renderMappingStatus(container: HTMLElement, mapping: ColumnMapping, totalRows: number, validRows: number): void {
+function setChecked(container: HTMLElement, id: string, value: boolean): void {
+  const input = getInput(container, id);
+  if (input) input.checked = value;
+}
+
+function renderMappingStatus(container: HTMLElement, mapping: ColumnMapping, totalRows: number, validRows: number, status = ''): void {
   const fields = Object.values(mapping.found).filter(Boolean);
-  setText(container, 'ppc-mapping-status', `已识别 ${fields.length} 个字段，原始 ${totalRows} 行，有效 ${validRows} 行。`);
+  const statusText = status ? ` ${status}` : '';
+  setText(container, 'ppc-mapping-status', `已识别 ${fields.length} 个字段，原始 ${totalRows} 行，有效 ${validRows} 行。${statusText}`);
 }
 
 function labelColumn(key: ColumnKey): string {
@@ -854,12 +950,35 @@ function getThresholdInputs(container: HTMLElement): HTMLInputElement[] {
   return ids.map((id) => getInput(container, id)).filter((input): input is HTMLInputElement => input !== null);
 }
 
+function getAnalysisSettingInputs(container: HTMLElement): HTMLInputElement[] {
+  const ids = ['ppc-allow-local-fallback', 'ppc-use-context'];
+  return ids.map((id) => getInput(container, id)).filter((input): input is HTMLInputElement => input !== null);
+}
+
+function setAnalyzeButtonState(container: HTMLElement, isAnalyzing: boolean): void {
+  const button = getButton(container, 'ppc-btn-parse');
+  if (!button) return;
+
+  button.disabled = isAnalyzing;
+  button.replaceChildren(createIcon(isAnalyzing ? 'fas fa-circle-notch fa-spin' : 'fas fa-chart-line'), document.createTextNode(isAnalyzing ? '分析中' : '开始分析'));
+}
+
+function createIcon(className: string): HTMLElement {
+  const icon = document.createElement('i');
+  icon.className = className;
+  return icon;
+}
+
 function getElement(container: HTMLElement, id: string): HTMLElement | null {
   return container.querySelector<HTMLElement>(`#${id}`);
 }
 
 function getInput(container: HTMLElement, id: string): HTMLInputElement | null {
   return container.querySelector<HTMLInputElement>(`#${id}`);
+}
+
+function getButton(container: HTMLElement, id: string): HTMLButtonElement | null {
+  return container.querySelector<HTMLButtonElement>(`#${id}`);
 }
 
 function getTextarea(container: HTMLElement, id: string): HTMLTextAreaElement | null {
