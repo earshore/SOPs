@@ -1,462 +1,231 @@
 # sops - 亚马逊运营管理平台
 
-一个现代化的亚马逊运营管理平台，集成 AI 分析、关键词追踪、数据抓取等功能。
+sops 是一个 Vite + TypeScript 静态前端项目，面向亚马逊运营团队，提供 SOP 流程、Amazon 智库、应用中心和大模型探索工具。当前部署形态是 Cloudflare Pages 托管静态资源，浏览器端按用户配置调用 LLM 网关；仓库和 Pages 项目不应保存生产 API key。
 
----
+> 本 README 已按当前代码结构、`package.json` 脚本和部署文档重新核对。`docs/archive/` 与 `.kiro/specs/` 中的阶段性文档可作历史参考，不建议直接作为当前开发依据。
 
-## 🚀 快速开始
+## 快速开始
+
+### 环境要求
+
+- Node.js `>=18.0.0`
+- npm
+- Cloudflare 部署时需要 Wrangler 登录权限
 
 ### 本地开发
 
 ```bash
-# 1. 克隆项目
 git clone https://github.com/earshore/SOPs.git
 cd SOPs
-
-# 2. 安装依赖
 npm install
-
-# 3. 创建本地环境文件
-cp .env.example .env
-# 如需本地接口验证，编辑 .env 文件中的 new-api 配置
-
-# 4. 启动开发服务器
-npm run dev
-
-# 访问 http://localhost:5173
 ```
+
+如需本地接口验证，可复制环境模板：
+
+```powershell
+Copy-Item .env.example .env
+```
+
+macOS/Linux 可使用：
+
+```bash
+cp .env.example .env
+```
+
+启动开发服务器：
+
+```bash
+npm run dev
+```
+
+`npm run dev` 会启动 Vite，并尝试用 Chrome 无痕窗口打开本地地址。默认端口是 `5173`；如果端口被占用，以终端输出或自动打开的地址为准。只想启动服务器时可用 `npm run dev:simple`。
+
+### 构建与预览
+
+```bash
+npm run build
+npm run preview
+```
+
+`npm run build` 会先执行 `prebuild`，也就是 `npm run ci:security && npm run ci:quality`。构建产物输出到 `dist/`。
 
 ### 部署到 Cloudflare Pages
 
 ```bash
-# 1. 构建项目
 npm run build
-
-# 2. 部署
 npx wrangler pages deploy dist --project-name sops --branch main
-
-# 3. 验证 CSP 和 new-api 连通性（详见部署文档）
 ```
 
-**详细说明**: 查看 [快速开始指南](./docs/GETTING_STARTED.md) 和 [完整部署文档](./docs/DEPLOYMENT.md)
+当前生产链路由 Cloudflare Pages 托管静态文件，LLM 请求由浏览器直连自部署 new-api 网关。部署细节与排查步骤见 [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md)。
 
----
+## 当前功能入口
 
-## 📚 项目文档
+| 区域 | 主要功能 | 代码入口 |
+| --- | --- | --- |
+| SOPs 流程中心 | 运营推广、供应链物流、账号安全、客服体验相关 SOP 页面 | `src/modules/sops/` |
+| 应用中心 | Master Analysis、Keyword Hunter、Deep Chat Playground | `src/modules/app_center/` |
+| Amazon 智库 | 市场洞察、SEO 策略、运营实践和进阶攻略 | `src/modules/amz_hub/` |
+| 更多 | 智能体、提示词、工作流探索页 | `src/modules/more/` |
 
-### 新手指南
-- [快速开始](./docs/GETTING_STARTED.md) - 5 分钟快速部署指南 ⭐
-- [完整部署文档](./docs/DEPLOYMENT.md) - 详细的部署说明和故障排查 ⭐
-- [快速参考](./docs/QUICK_REFERENCE.md) - 常用命令和配置速查
+路由与菜单的主数据源在 `src/common/constants/routes.ts` 和 `src/common/config/menuConfig.ts`。各核心模块通过自己的 `MODULE_MAP` 懒加载子页面。
 
-### 核心文档
-- [CLAUDE.md](./CLAUDE.md) - Claude Code 开发指南
-- [完整部署文档](./docs/DEPLOYMENT.md) - Cloudflare Pages 部署与 new-api 直连说明
-- [CSS 架构系统](./docs/guides/css/CSS-ARCHITECTURE-README.md) - CSS 架构快速开始
-- [最佳实践](./docs/development/best-practices.md) - 开发最佳实践
-- [文档索引](./docs/INDEX.md) - 完整的文档导航
+## 技术栈
 
-### 技术文档
-- [API 文档](./docs/api/) - 核心 API 文档
-- [测试指南](./tests/README.md) - 测试文档和指南
-- [变更日志](./CHANGELOG.md) - 项目变更历史
+- 构建与语言：Vite、TypeScript
+- UI 与交互：Alpine.js CSP build、Tailwind CSS、Font Awesome
+- 路由与状态：Navigo、Zustand、项目内 `ModuleLoader`
+- AI 与数据处理：Deep Chat、`llmService`、Marked、Zod、jsonrepair
+- 可视化与重型库：Chart.js、GridStack，按需懒加载
+- 质量与测试：Vitest、Playwright、ESLint、Lighthouse CI、Madge
 
----
+## 项目结构
 
-## 🎨 CSS 架构系统
-
-项目采用现代化的 CSS 架构系统，基于设计令牌的单一数据源。
-
-### 核心特性
-- ✅ 300+ 个设计令牌统一管理
-- ✅ 自动生成 CSS 变量、Tailwind 配置和 TypeScript 类型
-- ✅ 完整的类型安全支持
-- ✅ 审查和迁移工具
-- ✅ 17 种颜色方案，11 级梯度
-
-### 快速使用
-
-```bash
-# 生成所有设计令牌配置
-npm run generate:tokens
-
-# 审查 CSS 变量使用
-npm run css:audit
-
-# 迁移已废弃变量
-npm run css:migrate
-```
-
-详细文档: [CSS 架构系统使用指南](./docs/guides/css/CSS-ARCHITECTURE-README.md)
-
----
-
-## 🛠️ 技术栈
-
-### 核心框架
-- **Vite** - 构建工具
-- **TypeScript** - 类型安全
-- **Alpine.js** - 轻量级响应式框架
-- **Tailwind CSS** - 实用优先的 CSS 框架
-
-### 路由和状态管理
-- **Navigo** - 现代化路由系统
-- **Zustand** - 轻量级状态管理
-
-### UI 组件
-- **Chart.js** - 图表库
-- **Marked** - Markdown 解析
-- **GridStack** - 拖拽布局
-
-### 开发工具
-- **ESLint** - 代码检查
-- **Prettier** - 代码格式化
-- **Playwright** - E2E 测试
-- **Vitest** - 单元测试
-
----
-
-## 📦 项目结构
-
-```
+```text
 SOPs/
+├── config/                 # ESLint、Tailwind、Playwright、Vitest 等共享配置
+├── docs/                   # 当前文档、指南、质量报告与归档文档
+├── examples/               # 示例数据和用法样例
+├── public/                 # Cloudflare Pages headers/redirects 与静态资源
+├── scripts/
+│   ├── build/              # 设计令牌、API 文档等生成脚本
+│   ├── dev/                # 开发期维护脚本
+│   └── quality/            # 质量门禁与趋势脚本
 ├── src/
-│   ├── common/              # 公共模块
-│   │   ├── config/          # 配置文件
-│   │   │   └── design-tokens.ts  # 设计令牌（单一数据源）
-│   │   ├── router/          # 路由系统
-│   │   ├── utils/           # 工具函数
-│   │   └── types/           # 类型定义
-│   ├── css/                 # 样式文件
-│   │   ├── foundation/      # 基础层（变量、Reset）
-│   │   ├── components/      # 组件层
-│   │   ├── layouts/         # 布局层
-│   │   ├── animations/      # 动画层
-│   │   └── utilities/       # 工具层
-│   ├── modules/             # 业务模块
-│   └── services/            # 服务层
-├── scripts/                 # 构建和工具脚本
-│   ├── generate-css-variables.ts      # 生成 CSS 变量
-│   ├── generate-tailwind-config.ts    # 生成 Tailwind 配置
-│   ├── generate-design-token-types.ts # 生成 TypeScript 类型
-│   ├── audit-css-variables.ts         # 审查 CSS 变量
-│   └── migrate-deprecated-variables.ts # 迁移已废弃变量
-├── docs/                    # 项目文档
-├── tests/                   # 测试文件
-└── examples/                # 示例代码
+│   ├── common/             # 路由、配置、DI、基础设施、工具函数
+│   ├── components/         # 跨模块组件
+│   ├── css/                # 样式入口、基础层、组件层、工具层
+│   ├── modules/            # sops、app_center、amz_hub、more、home
+│   ├── services/           # LLM、存储、性能、请求等服务
+│   ├── stores/             # Zustand store 与中间件
+│   └── types/              # 全局和业务类型
+├── tests/                  # 单元、集成、E2E、性能、视觉测试
+├── tools/                  # 安全、技术债、命名验证等工具
+└── vite.config.js          # Vite 构建、压缩、分包与别名配置
 ```
 
----
+## 常用命令
 
-## 🔧 可用命令
+### 开发与构建
 
-### 开发命令
 ```bash
-npm run dev              # 启动开发服务器
-npm run build            # 构建生产版本
-npm run preview          # 预览生产版本
+npm run dev              # 启动 Vite，并尝试打开 Chrome
+npm run dev:simple       # 仅启动 Vite
+npm run build            # 运行 prebuild 后构建 dist/
+npm run preview          # 预览 dist/
 ```
 
-### 代码质量
+### 类型、Lint 与 CI 门禁
+
 ```bash
-npm run lint             # 运行 ESLint
-npm run lint:fix         # 自动修复 ESLint 问题
-npm run format           # 格式化代码
-npm run type-check       # TypeScript 类型检查
+npm run type-check       # 检查应用代码
+npm run type-check:tests # 检查应用 + 测试代码
+npm run lint             # ESLint 检查 src/
+npm run lint:fix         # 自动修复可修复问题
+npm run ci:security      # XSS gate + 循环依赖检查
+npm run ci:quality       # 类型、Lint、warning baseline
+npm run ci:all           # 安全 + 质量 + 构建
 ```
 
-### 测试命令
+### 测试
+
 ```bash
-npm run test             # 运行单元测试
-npm run test:e2e         # 运行 E2E 测试
-npm run test:coverage    # 生成测试覆盖率报告
+npm run test             # Vitest
+npm run test:coverage    # 单元测试覆盖率
+npm run test:e2e         # Playwright E2E
+npm run test:performance # Playwright 性能测试
+npm run test:visual      # 视觉回归测试
 ```
 
-### CSS 架构命令
+### CSS 与设计令牌
+
 ```bash
-npm run generate:tokens  # 生成所有设计令牌配置
-npm run css:audit        # 审查 CSS 变量命名规范
-npm run css:migrate      # 迁移已废弃变量
-npm run css:migrate:dry  # 预览迁移（不修改文件）
+npm run generate:tokens  # 从 design-tokens.ts 生成 CSS/Tailwind/类型配置
+npm run css:audit        # 审查 CSS 变量使用
+npm run css:analyze      # 分析模块 CSS
+npm run css:cleanup      # 清理未使用 CSS
 ```
 
-### 性能和质量
+### 安全与质量工具
+
 ```bash
-npm run lighthouse       # 运行 Lighthouse 测试
-npm run quality:check    # 代码质量检查
-npm run security:audit   # 安全审计
+npm run xss:scan         # 生成 docs/XSS_SCAN_REPORT.md
+npm run xss:gate         # 高危 XSS 风险门禁
+npm run security:audit   # AST/正则安全审计
+npm run tech-debt:scan   # 技术债扫描
+npm run quality:track    # 质量趋势跟踪
 ```
 
----
+更多脚本以 [package.json](./package.json) 为准。
 
-## 🎨 设计系统
+## 环境与 LLM 配置
 
-### 颜色系统
-- 17 个颜色色板（slate, blue, purple, emerald 等）
-- 每个色板 11 级梯度（50-950）
-- 完整的语义颜色系统
+`.env.example` 只用于本地接口验证或脚本测试。生产环境不要在 Cloudflare Pages secrets 中保存 LLM API key；模型白名单、额度、过期时间、限流和日志由 new-api 后台管理。
 
-### 间距系统
-- 基于 4px 倍数的 36 个间距值
-- 从 0 到 96 的完整间距系统
+本地页面中的 LLM 配置由系统设置界面写入浏览器侧存储。相关服务位于：
 
-### 字体系统
-- 4 个字体家族（sans, serif, mono, display）
-- 12 个字号（2xs-6xl）
-- 9 个字重（thin-black）
+- `src/services/llmService.ts`
+- `src/services/storageService.ts`
+- `src/common/utils/secureStorage.ts`
 
-### 视觉系统
-- 8 个圆角预设
-- 8 个阴影预设
-- 14 个 Z-index 层级
-- 完整的动画系统
+## 模块开发约定
 
-详细文档: [CSS 架构指南](./docs/guides/css/css-architecture-guide.md)
+新增一条首发路由时，通常需要同步以下位置：
 
----
+1. 在 `src/common/constants/routes.ts` 添加路由 ID。
+2. 在 `src/common/config/menuConfig.ts` 添加菜单和路由元数据。
+3. 在目标模块入口的 `MODULE_MAP` 中添加动态 import，例如 `src/modules/sops/sops.ts` 或 `src/modules/app_center/app_center.ts`。
+4. 新增页面实现和测试；如果页面展示动态数据，动态内容必须经过转义或安全渲染。
 
-## 📈 性能优化
-
-### 构建优化
-- ✅ CSS 代码分割
-- ✅ 模块懒加载
-- ✅ 资源压缩（Gzip + Brotli）
-- ✅ Tree Shaking
-
-### 运行时优化
-- ✅ 关键 CSS 内联
-- ✅ 图片懒加载
-- ✅ 路由预加载
-- ✅ 状态管理优化
-
-### 性能指标
-- LCP < 2.5s
-- FID < 100ms
-- CLS < 0.1
-
----
-
-## 🔒 安全性
-
-### 安全措施
-- ✅ XSS 防护
-- ✅ CSRF 防护
-- ✅ 内容安全策略（CSP）
-- ✅ 安全的存储机制
-
-### 安全审计
-```bash
-npm run security:audit   # 运行安全审计
-npm run xss:scan         # XSS 扫描
-```
-
----
-
-## 🧪 测试
-
-### 单元测试
-```bash
-npm run test             # 运行所有测试
-npm run test:ui          # 测试 UI 界面
-npm run test:coverage    # 生成覆盖率报告
-```
-
-### E2E 测试
-```bash
-npm run test:e2e         # 运行 E2E 测试
-npm run test:e2e:ui      # E2E 测试 UI
-npm run test:e2e:debug   # 调试模式
-```
-
-### 性能测试
-```bash
-npm run test:performance # 性能测试
-npm run lighthouse       # Lighthouse 测试
-```
-
----
-
-## 📝 开发规范
-
-### 代码风格
-- 使用 ESLint 和 Prettier
-- 遵循 TypeScript 最佳实践
-- 使用语义化命名
-
-### CSS 规范
-- 使用设计令牌而非硬编码值
-- 遵循 BEM 命名规范
-- 组件样式模块化
-
-### Git 规范
-- 使用语义化提交信息
-- 功能分支开发
-- Code Review 流程
-
-详细文档: [最佳实践](./docs/development/best-practices.md)
-
----
-
-## 🏗️ amz_hub 模块挂载规范
-
-> 以下规范同样适用于 sops、app_center、more 等其他模块下的子页面开发。
-
-### 标准模式
-
-所有子页面模块统一遵循以下结构：
+多数业务子页面使用 `BaseModule` + `template.html?raw`：
 
 ```typescript
-// 1. 模板用 ?raw 导入 —— 构建期打包，无运行时路径查找
-import BaseModule from '../../../../../common/BaseModule';
+import BaseModule from '@/common/BaseModule';
 import templateHTML from './template.html?raw';
-import './styles.css'; // 如有独立样式
-
-import { Logger } from '../../../../../services/loggerService';
 
 class MyPageModule extends BaseModule {
   constructor() {
-    super('route_id'); // 与 routes.ts 中的路由 ID 对应
+    super('route_id');
   }
 
-  // 2. render() —— 渲染模板，BaseModule.mount() 自动调用
   async render(): Promise<void> {
-    // ✅ 安全: 静态HTML模板，无用户输入
+    // 仅用于已审计的静态模板；动态内容使用 SafeRenderer 或 SecurityUtils。
     this.container!.innerHTML = templateHTML;
-    this.container!.classList.add('fade-in'); // 统一淡入动画
-  }
-
-  // 3. init() —— 可选，图表初始化、事件绑定等（render 完成后自动调用）
-  async init(): Promise<void> {
-    // 事件绑定、图表初始化等
-    Logger.debug('✅ [MyPage] 模块初始化完成');
-  }
-
-  // 4. onUnmount() —— 可选，资源清理（图表销毁、定时器等）
-  protected onUnmount(): void {
-    // 清理图表实例、取消订阅等
+    this.container!.classList.add('fade-in');
   }
 }
 
-// 5. 导出 —— ModuleLoader 通过命名导出调用
 const instance = new MyPageModule();
-export const mount = (c: HTMLElement) => instance.mount(c);
+export const mount = (container: HTMLElement) => instance.mount(container);
 export const unmount = () => instance.unmount();
 ```
 
-### 生命周期说明
+如果页面继承 `BaseModule`，不要覆盖 `mount()` 或 `unmount()`；自定义初始化放在 `init()`，清理逻辑放在 `onUnmount()`。少数 Shell 级视图或特殊页面仍会使用 `loadTemplate()`，修改前先看同目录现有写法。
 
-`BaseModule.mount(container)` 按以下顺序执行，**不要覆盖 `mount()` 或 `unmount()`**：
+## 安全与性能边界
 
-```
-mount(container)
-  ├── 设置 this.container，标记 _isMounted
-  ├── 调用 render()   ← 子类实现：渲染模板
-  ├── 调用 init()     ← 子类实现（可选）：事件/图表初始化
-  └── 错误由 handleError() 统一处理
+安全相关实现集中在：
 
-unmount()
-  ├── 取消进行中的 AbortController 请求
-  ├── 执行所有注册的 disposables 清理函数
-  ├── 调用 onUnmount()  ← 子类实现（可选）：自定义清理
-  └── 重置 _isMounted 状态
-```
+- `public/_headers`：Cloudflare Pages 响应头和 CSP
+- `src/common/utils/security.ts`：HTML 转义、安全片段与 URL 检查
+- `src/common/infrastructure/SafeRenderer.ts`：安全 DOM 渲染封装
+- `tools/security/xss-scanner.js` 与 `tools/security-auditor.ts`：扫描和审计工具
 
-### 模板加载：`?raw` vs `loadTemplate()`
+性能相关配置集中在 `vite.config.js`、`src/common/utils/lazyLibs.ts`、`src/common/utils/ImageLazyLoader.ts` 和 `tests/performance/`。README 不承诺固定线上指标，性能结论以 Lighthouse/Playwright 的实际报告为准。
 
-| | `?raw` import | `loadTemplate()` |
-|---|---|---|
-| **路径校验** | ✅ 构建期报错 | ❌ 运行时才发现 |
-| **网络请求** | ✅ 零额外请求，同 chunk | ❌ 独立 chunk，多一次请求 |
-| **生产缓存** | ✅ 由浏览器 HTTP 缓存处理 | ⚠️ 额外占用 localStorage |
-| **适用场景** | 子页面模板 | Shell 级 HTML 注入 |
+## 文档入口
 
-**`loadTemplate()` 保留场景**：仅用于 `viewLoader` 内部的 Shell 级视图注入（`sops.html`、`amz_hub.html` 等顶层外壳），由 `initViews()` 和 `ensureViewLoaded()` 调用，不应在子页面模块中直接使用。
+- [docs/README.md](./docs/README.md) - 当前文档导航
+- [docs/GETTING_STARTED.md](./docs/GETTING_STARTED.md) - 快速开始
+- [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md) - Cloudflare Pages 与 new-api 部署说明
+- [docs/CI-QUALITY-GATES.md](./docs/CI-QUALITY-GATES.md) - 当前 CI 安全与质量门禁
+- [docs/CHANGELOG.md](./docs/CHANGELOG.md) - 项目变更记录
+- [.kiro/CONTRIBUTING.md](./.kiro/CONTRIBUTING.md) - 贡献指南
 
-### 淡入动画
+## 许可证
 
-所有页面在 `render()` 中统一加 `fade-in` class：
-
-```typescript
-async render(): Promise<void> {
-  this.container!.innerHTML = templateHTML;
-  this.container!.classList.add('fade-in'); // 对应 CSS: animation: fadeIn ...
-}
-```
-
-CSS 中已定义的动画 class 可按需选用：
-
-| Class | 动画效果 | 时长 |
-|---|---|---|
-| `fade-in` | 标准淡入 | `--duration-normal` |
-| `fade-in-up` | 向上淡入 | `--duration-slow` |
-| `view-fade-in` | 页面级淡入（较慢） | `--duration-slower` |
-
-### 常见反模式
-
-```typescript
-// ❌ 错误：覆盖 mount() 会绕开 BaseModule 的生命周期管理
-async mount(container: HTMLElement): Promise<void> {
-  container.innerHTML = templateHTML;
-}
-
-// ❌ 错误：覆盖 unmount() 会导致 disposables 和 AbortController 不被清理
-unmount(): void {
-  Logger.debug('卸载');
-}
-
-// ❌ 错误：运行时字符串路径，文件改名不报错，可能 miss 注册表
-this.container!.innerHTML = await loadTemplate(
-  'src/modules/amz_hub/views/practice/my_page/template.html'
-);
-
-// ✅ 正确：?raw 导入，构建期校验
-import templateHTML from './template.html?raw';
-this.container!.innerHTML = templateHTML;
-```
-
-### 模块注册流程
-
-新增子页面需要同步更新以下 4 处：
-
-1. **`src/common/constants/routes.ts`** — 在对应模块的 `ROUTES` 常量里添加路由 ID
-2. **`src/common/router/navigo/route-ids.ts`** — 在 `RouteId` 类型和 `ALL_ROUTE_IDS` 数组中添加
-3. **`src/common/config/menuConfig.ts`** — 在 `routes` 中添加菜单配置（label、icon、category 等）
-4. **`src/modules/amz_hub/amz_hub.ts`** — 在 `MODULE_MAP` 中添加动态 import 映射
-
-
----
-
-## 🤝 贡献指南
-
-我们欢迎所有形式的贡献！请查看 [贡献指南](./.kiro/CONTRIBUTING.md) 了解详细信息。
-
-### 开发流程
-1. Fork 项目
-2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'feat: add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 创建 Pull Request
-
-### 代码审查
-- 确保所有测试通过
-- 遵循代码规范
-- 更新相关文档
-
-详细信息请参考: [贡献指南](./.kiro/CONTRIBUTING.md)
-
----
-
-## 📄 许可证
-
-本项目采用 MIT 许可证。
-
----
-
-## 📞 联系方式
-
-如有问题或建议，请联系开发团队。
+本项目采用 MIT 许可证，详见 [LICENSE](./LICENSE)。
 
 ---
 
 **维护者**: sops 开发团队  
-**最后更新**: 2026-04-17
+**最后更新**: 2026-06-07

@@ -301,8 +301,23 @@ export class ModuleLoader {
   }
 
   private _prepareContainerForMount(container: HTMLElement): void {
-    container.innerHTML = '';
+    container.replaceChildren();
     void container.offsetHeight;
+  }
+
+  private _renderRetryLoading(container: HTMLElement): void {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'p-10 text-center';
+
+    const icon = document.createElement('i');
+    icon.className = 'fas fa-circle-notch fa-spin text-orange-500';
+
+    const message = document.createElement('span');
+    message.className = 'ml-2 text-slate-500';
+    message.textContent = '连接超时，正在重试...';
+
+    wrapper.append(icon, message);
+    container.replaceChildren(wrapper);
   }
 
   private async _mountLoadedModule(
@@ -348,13 +363,7 @@ export class ModuleLoader {
     }
 
     if (container) {
-      // ✅ 安全: 静态HTML模板，无用户输入
-      container.innerHTML = `
-        <div class="p-10 text-center">
-          <i class="fas fa-circle-notch fa-spin text-orange-500"></i>
-          <span class="ml-2 text-slate-500">连接超时，正在重试...</span>
-        </div>
-      `;
+      this._renderRetryLoading(container);
     }
 
     setTimeout(() => {

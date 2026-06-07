@@ -1,7 +1,7 @@
 {
   "version": 1,
   "command": "node node_modules/eslint/bin/eslint.js src --ignore-pattern **/*.test.ts --ignore-pattern **/*.test.tsx --ignore-pattern **/*.spec.ts --ignore-pattern **/*.spec.tsx --format json",
-  "totalWarnings": 474,
+  "totalWarnings": 383,
   "warnings": [
     {
       "filePath": "src/common/BaseModule.ts",
@@ -14,12 +14,6 @@
       "ruleId": "no-restricted-syntax",
       "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
       "count": 2
-    },
-    {
-      "filePath": "src/common/bootstrap/ServiceBootstrap.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
-      "count": 1
     },
     {
       "filePath": "src/common/components/OverviewRenderer.ts",
@@ -44,12 +38,6 @@
       "ruleId": "@typescript-eslint/no-non-null-assertion",
       "message": "Forbidden non-null assertion.",
       "count": 2
-    },
-    {
-      "filePath": "src/common/config/themes.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
-      "count": 1
     },
     {
       "filePath": "src/common/devtools/MemoryDevTools.ts",
@@ -172,57 +160,9 @@
       "count": 2
     },
     {
-      "filePath": "src/common/utils/ColorContext.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
-      "count": 1
-    },
-    {
-      "filePath": "src/common/utils/cssLoader.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
-      "count": 4
-    },
-    {
-      "filePath": "src/common/utils/LoadingManager.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
-      "count": 1
-    },
-    {
-      "filePath": "src/common/utils/MemoryLeakDetector.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
-      "count": 2
-    },
-    {
-      "filePath": "src/common/utils/moduleCssLoader.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
-      "count": 1
-    },
-    {
-      "filePath": "src/common/utils/ModuleLoader.ts",
-      "ruleId": "complexity",
-      "message": "Async method 'loadModule' has a complexity of 15. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/common/utils/ModuleLoader.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 2
-    },
-    {
       "filePath": "src/common/utils/safeMount.ts",
       "ruleId": "no-restricted-syntax",
       "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
-      "filePath": "src/common/utils/security.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
       "count": 1
     },
     {
@@ -272,12 +212,6 @@
       "ruleId": "no-restricted-syntax",
       "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
       "count": 1
-    },
-    {
-      "filePath": "src/components/settings/systemSettings.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
-      "count": 4
     },
     {
       "filePath": "src/components/settings/systemSettings.ts",
@@ -341,12 +275,6 @@
     },
     {
       "filePath": "src/modules/amz_hub/views/knowledge/ecosystem/index.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
-      "count": 2
-    },
-    {
-      "filePath": "src/modules/amz_hub/views/knowledge/ecosystem/index.ts",
       "ruleId": "@typescript-eslint/no-non-null-assertion",
       "message": "Forbidden non-null assertion.",
       "count": 2
@@ -359,12 +287,6 @@
     },
     {
       "filePath": "src/modules/amz_hub/views/knowledge/eu_insights/index.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
-      "count": 3
-    },
-    {
-      "filePath": "src/modules/amz_hub/views/knowledge/eu_insights/index.ts",
       "ruleId": "@typescript-eslint/no-non-null-assertion",
       "message": "Forbidden non-null assertion.",
       "count": 2
@@ -373,12 +295,6 @@
       "filePath": "src/modules/amz_hub/views/knowledge/eu_insights/index.ts",
       "ruleId": "no-restricted-syntax",
       "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 2
-    },
-    {
-      "filePath": "src/modules/amz_hub/views/knowledge/seo_strategy/index.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
       "count": 2
     },
     {
@@ -403,12 +319,6 @@
       "filePath": "src/modules/amz_hub/views/overview/index.ts",
       "ruleId": "no-restricted-syntax",
       "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/amz_hub/views/practice/marketing_calendar/index.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
       "count": 1
     },
     {
@@ -475,18 +385,6 @@
       "filePath": "src/modules/amz_hub/views/practice/quality_listing/index.ts",
       "ruleId": "no-restricted-syntax",
       "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/app_center.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/keyword_hunter/analysis/index.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
       "count": 1
     },
     {
@@ -714,7 +612,7 @@
     {
       "filePath": "src/modules/app_center/views/master_analysis/scraper/components/ScraperPanel.ts",
       "ruleId": "max-lines-per-function",
-      "message": "Function 'createScraperPanel' has too many lines (610). Maximum allowed is 100.",
+      "message": "Function 'createScraperPanel' has too many lines (612). Maximum allowed is 100.",
       "count": 1
     },
     {
@@ -746,12 +644,6 @@
       "ruleId": "max-lines-per-function",
       "message": "Async function 'handleImportFiles' has too many lines (153). Maximum allowed is 100.",
       "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/scraper/index.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
-      "count": 2
     },
     {
       "filePath": "src/modules/app_center/views/master_analysis/scraper/utils/renderers.ts",
@@ -842,18 +734,6 @@
       "ruleId": "max-depth",
       "message": "Blocks are nested too deeply (5). Maximum allowed is 4.",
       "count": 3
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/services/scraperService.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/services/scraperService.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
-      "count": 4
     },
     {
       "filePath": "src/modules/app_center/views/master_analysis/services/scraperService.ts",
@@ -971,12 +851,6 @@
     },
     {
       "filePath": "src/modules/sops/views/growth/npi_tracker/index.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
-      "count": 2
-    },
-    {
-      "filePath": "src/modules/sops/views/growth/npi_tracker/index.ts",
       "ruleId": "complexity",
       "message": "Arrow function has a complexity of 19. Maximum allowed is 10.",
       "count": 3
@@ -1007,14 +881,8 @@
     },
     {
       "filePath": "src/modules/sops/views/growth/restricted_words/restrictedWordsHandler.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
-      "count": 12
-    },
-    {
-      "filePath": "src/modules/sops/views/growth/restricted_words/restrictedWordsHandler.ts",
       "ruleId": "max-lines-per-function",
-      "message": "Function 'renderResults' has too many lines (108). Maximum allowed is 100.",
+      "message": "Function 'renderResults' has too many lines (106). Maximum allowed is 100.",
       "count": 2
     },
     {
@@ -1081,7 +949,7 @@
       "filePath": "src/services/alertService.ts",
       "ruleId": "@typescript-eslint/no-explicit-any",
       "message": "Unexpected any. Specify a different type.",
-      "count": 3
+      "count": 1
     },
     {
       "filePath": "src/services/analyticsService.ts",
@@ -1094,12 +962,6 @@
       "ruleId": "complexity",
       "message": "Method 'classify' has a complexity of 21. Maximum allowed is 10.",
       "count": 1
-    },
-    {
-      "filePath": "src/services/errorTracker.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
-      "count": 5
     },
     {
       "filePath": "src/services/HttpCacheService.ts",
@@ -1130,12 +992,6 @@
       "ruleId": "@typescript-eslint/max-params",
       "message": "Async function 'callLLM' has too many parameters (6). Maximum allowed is 5.",
       "count": 1
-    },
-    {
-      "filePath": "src/services/llmService.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
-      "count": 6
     },
     {
       "filePath": "src/services/llmService.ts",
@@ -1192,66 +1048,6 @@
       "count": 1
     },
     {
-      "filePath": "src/services/performanceService.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
-      "count": 2
-    },
-    {
-      "filePath": "src/services/performanceService.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
-      "count": 1
-    },
-    {
-      "filePath": "src/services/performanceStorage.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
-      "count": 1
-    },
-    {
-      "filePath": "src/services/performanceStorage.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
-      "count": 7
-    },
-    {
-      "filePath": "src/services/PriorityRequestPool.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
-      "count": 3
-    },
-    {
-      "filePath": "src/services/PriorityRequestPool.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
-      "count": 1
-    },
-    {
-      "filePath": "src/services/RequestManager.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
-      "count": 1
-    },
-    {
-      "filePath": "src/services/RequestManager.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
-      "count": 1
-    },
-    {
-      "filePath": "src/services/storageService.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
-      "count": 1
-    },
-    {
-      "filePath": "src/services/webVitalsService.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
-      "count": 2
-    },
-    {
       "filePath": "src/stores/middleware/devtools.ts",
       "ruleId": "@typescript-eslint/no-explicit-any",
       "message": "Unexpected any. Specify a different type.",
@@ -1262,12 +1058,6 @@
       "ruleId": "@typescript-eslint/no-explicit-any",
       "message": "Unexpected any. Specify a different type.",
       "count": 2
-    },
-    {
-      "filePath": "src/stores/storeCompat.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
-      "count": 8
     },
     {
       "filePath": "src/stores/useAppStore.ts",
