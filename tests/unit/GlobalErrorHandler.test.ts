@@ -19,19 +19,15 @@ import {
   ErrorLevel,
   ErrorCategory
 } from '@/common/errors/AppError';
-import { Logger } from '@/services/loggerService';
 import eventBus from '@/common/EventBus';
 import { APP_EVENTS } from '@/common/constants/eventConstants';
 
-// Mock依赖
-vi.mock('@/services/loggerService', () => ({
-  Logger: {
-    debug: vi.fn(),
-    info: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-    fatal: vi.fn()
-  }
+const mockErrorTracker = vi.hoisted(() => ({
+  captureAppError: vi.fn()
+}));
+
+vi.mock('@/services/errorTracker', () => ({
+  errorTracker: mockErrorTracker
 }));
 
 vi.mock('@/services/monitoringService', () => ({
@@ -49,9 +45,13 @@ describe('GlobalErrorHandler', () => {
     
     // 重置统计
     handler.resetStats();
+    handler.setThrottleMs(2000);
     
     // 清除所有mock
     vi.clearAllMocks();
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.spyOn(console, 'log').mockImplementation(() => {});
     
     // Mock window.showToast
     (window as any).showToast = vi.fn();
@@ -60,6 +60,7 @@ describe('GlobalErrorHandler', () => {
   afterEach(() => {
     // 清理
     delete (window as any).showToast;
+    vi.restoreAllMocks();
   });
 
   // ================================================================
@@ -91,7 +92,7 @@ describe('GlobalErrorHandler', () => {
 
       handler.handle(error);
 
-      expect(Logger.error).toHaveBeenCalledWith(
+      expect(console.error).toHaveBeenCalledWith(
         '测试错误',
         expect.objectContaining({
           code: 'TEST_ERROR',
@@ -106,7 +107,7 @@ describe('GlobalErrorHandler', () => {
 
       handler.handle(error);
 
-      expect(Logger.error).toHaveBeenCalled();
+      expect(console.error).toHaveBeenCalled();
     });
 
     it('应该更新错误计数', () => {
@@ -146,11 +147,9 @@ describe('GlobalErrorHandler', () => {
 
       errors.forEach(error => handler.handle(error));
 
-      expect(Logger.fatal).toHaveBeenCalledTimes(1);
-      expect(Logger.error).toHaveBeenCalledTimes(1);
-      expect(Logger.warn).toHaveBeenCalledTimes(1);
-      expect(Logger.info).toHaveBeenCalledTimes(1);
-      expect(Logger.debug).toHaveBeenCalledTimes(1);
+      expect(console.error).toHaveBeenCalledTimes(2);
+      expect(console.warn).toHaveBeenCalledTimes(1);
+      expect(console.log).toHaveBeenCalledTimes(2);
     });
 
     it('应该包含错误详情在日志中', () => {
@@ -164,7 +163,7 @@ describe('GlobalErrorHandler', () => {
 
       handler.handle(error);
 
-      expect(Logger.error).toHaveBeenCalledWith(
+      expect(console.error).toHaveBeenCalledWith(
         '测试错误',
         expect.objectContaining({
           code: 'TEST_ERROR',
@@ -183,7 +182,7 @@ describe('GlobalErrorHandler', () => {
 
       handler.handle(error);
 
-      expect(Logger.error).toHaveBeenCalledWith(
+      expect(console.error).toHaveBeenCalledWith(
         '测试',
         expect.anything(),
         'System'
@@ -195,7 +194,9 @@ describe('GlobalErrorHandler', () => {
 
       handler.handle(error, { log: false });
 
-      expect(Logger.error).not.toHaveBeenCalled();
+      expect(console.error).not.toHaveBeenCalled();
+      expect(console.warn).not.toHaveBeenCalled();
+      expect(console.log).not.toHaveBeenCalled();
     });
   });
 
@@ -351,7 +352,7 @@ describe('GlobalErrorHandler', () => {
 
       handler.handle(error);
 
-      expect(Logger.error).toHaveBeenCalled();
+      expect(console.error).toHaveBeenCalled();
       expect((window as any).showToast).toHaveBeenCalled();
     });
 
@@ -360,7 +361,7 @@ describe('GlobalErrorHandler', () => {
 
       handler.handle(error);
 
-      expect(Logger.error).toHaveBeenCalled();
+      expect(console.error).toHaveBeenCalled();
     });
 
     it('应该处理ValidationError', () => {
@@ -368,7 +369,7 @@ describe('GlobalErrorHandler', () => {
 
       handler.handle(error);
 
-      expect(Logger.warn).toHaveBeenCalled();
+      expect(console.warn).toHaveBeenCalled();
     });
 
     it('应该处理BusinessError', () => {
@@ -376,7 +377,7 @@ describe('GlobalErrorHandler', () => {
 
       handler.handle(error);
 
-      expect(Logger.warn).toHaveBeenCalled();
+      expect(console.warn).toHaveBeenCalled();
     });
 
     it('应该处理SystemError', () => {
@@ -384,7 +385,12 @@ describe('GlobalErrorHandler', () => {
 
       handler.handle(error);
 
-      expect(Logger.fatal).toHaveBeenCalled();
+      expect(console.error).toHaveBeenCalledWith(
+        '[FATAL]',
+        '系统错误',
+        expect.anything(),
+        'System'
+      );
     });
   });
 
@@ -441,12 +447,18 @@ describe('GlobalErrorHandler', () => {
       handler.resetStats();
 
       // 第一个错误应该被处理
-      handler.handle(new AppError('错误1', 'E1'));
-      expect(Logger.error).toHaveBeenCalledTimes(1);
+      window.dispatchEvent(new ErrorEvent('error', {
+        error: new AppError('错误1', 'E1'),
+        message: '错误1'
+      }));
+      expect(console.error).toHaveBeenCalledTimes(1);
 
       // 立即发生的第二个错误应该被节流
-      handler.handle(new AppError('错误2', 'E2'));
-      expect(Logger.error).toHaveBeenCalledTimes(1); // 仍然是1次
+      window.dispatchEvent(new ErrorEvent('error', {
+        error: new AppError('错误2', 'E2'),
+        message: '错误2'
+      }));
+      expect(console.error).toHaveBeenCalledTimes(1); // 仍然是1次
 
       // 恢复默认节流时间
       handler.setThrottleMs(2000);
@@ -475,9 +487,10 @@ describe('GlobalErrorHandler', () => {
     });
 
     it('应该捕获unhandledrejection', () => {
-      const rejectionEvent = new PromiseRejectionEvent('unhandledrejection', {
-        promise: Promise.reject('Promise错误'),
-        reason: 'Promise错误'
+      const rejectionEvent = new Event('unhandledrejection') as PromiseRejectionEvent;
+      Object.defineProperties(rejectionEvent, {
+        promise: { value: Promise.resolve() },
+        reason: { value: 'Promise错误' }
       });
 
       expect(() => window.dispatchEvent(rejectionEvent)).not.toThrow();
@@ -510,7 +523,7 @@ describe('GlobalErrorHandler', () => {
 
       handler.handle(error, options);
 
-      expect(Logger.error).toHaveBeenCalledWith(
+      expect(console.error).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
           context: expect.objectContaining({

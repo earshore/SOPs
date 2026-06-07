@@ -208,7 +208,7 @@ export class GlobalErrorHandler {
   private async reportError(error: AppError): Promise<void> {
     try {
       const { monitoringService } = await import('@/services/monitoringService');
-      monitoringService.captureException(error, {
+      await monitoringService.captureException(error, {
         module: error.context.module || 'Unknown',
         tags: {
           code: error.code,

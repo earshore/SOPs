@@ -173,8 +173,12 @@ export function renderReportModules(
 
   if (isWrappedAnalysisReport(report)) {
     console.log('[reportRenderer] 包装格式报告');
-    renderNewFormatModules(ctx, container, report.analysisReport, isFirstLoad);
-  } else if (report && typeof report === 'object') {
+    if (hasNewFormatTargets(toReportRecord(report.analysisReport))) {
+      renderNewFormatModules(ctx, container, report.analysisReport, isFirstLoad);
+    } else {
+      renderLegacyFormatModules(ctx, container, report.analysisReport, isFirstLoad);
+    }
+  } else if (hasNewFormatTargets(report)) {
     console.log('[reportRenderer] 直接格式报告');
     renderNewFormatModules(ctx, container, report, isFirstLoad);
   } else {
@@ -196,6 +200,10 @@ const TARGET_CONFIG: Record<string, { title: string; icon: string }> = {
   'vocab-gap':         { title: '词汇缺口',      icon: '📝' },
   'promise-reality':   { title: '承诺与现实',    icon: '🎯' },
 };
+
+function hasNewFormatTargets(report: ReportRecord | null): boolean {
+  return !!report && Object.keys(report).some((key) => TARGET_CONFIG[key] && report[key]);
+}
 
 // Display-only labels; raw report keys still drive selection and prompt injection.
 const SUB_ITEM_LABELS: Record<string, string> = {

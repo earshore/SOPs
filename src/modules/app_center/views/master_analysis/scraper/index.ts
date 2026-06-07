@@ -16,6 +16,15 @@ import { createScraperPanel } from './components/ScraperPanel';
 import '../master_analysis_style.css';
 import './scraper_style.css';
 
+type AlpineWithData = Window['Alpine'] & {
+    $data?: (element: Element | null) => unknown;
+};
+
+function getAlpineData(element: Element | null): unknown {
+    const alpine = window.Alpine as AlpineWithData | undefined;
+    return alpine?.$data?.(element) ?? null;
+}
+
 // ========================================== 
 // Module Exports (统一架构接口)
 // ========================================== 
@@ -69,9 +78,12 @@ export function unmount(): void {
         const cardsContainer = document.getElementById('data-cards');
         if (cardsContainer) {
             // 获取 Alpine 组件实例
-            const alpineData = (window as any).Alpine?.$data(cardsContainer.closest('[x-data="scraperPanel"]'));
-            if (alpineData?.dataPreview) {
-                alpineData.dataPreview.cleanup();
+            const alpineData = getAlpineData(cardsContainer.closest('[x-data="scraperPanel"]'));
+            const dataPreview = alpineData && typeof alpineData === 'object'
+                ? (alpineData as { dataPreview?: { cleanup?: () => void } }).dataPreview
+                : null;
+            if (dataPreview?.cleanup) {
+                dataPreview.cleanup();
             }
         }
 
@@ -98,7 +110,10 @@ function getScraperPanelInstance(): Record<string, unknown> | null {
         console.warn('[Scraper] Alpine 组件实例未找到');
         return null;
     }
-    return (window as any).Alpine?.$data(element);
+    const alpineData = getAlpineData(element);
+    return alpineData && typeof alpineData === 'object'
+        ? alpineData as Record<string, unknown>
+        : null;
 }
 
 /**

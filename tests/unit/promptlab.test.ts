@@ -7,6 +7,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mount, unmount } from '@/modules/app_center/views/master_analysis/promptlab/index';
 import { createPromptlabPanel } from '@/modules/app_center/views/master_analysis/promptlab/components/PromptlabPanel';
+import { generateLanguageOptions } from '@/modules/app_center/views/master_analysis/promptlab/components/reportRenderer';
 import { SafeModuleLoader } from '@/common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
 import { AlpineRegistry } from '@/common/infrastructure/AlpineRegistry';
@@ -259,11 +260,11 @@ describe('Promptlab Module', () => {
       expect(component.currentPrompt).toBe('Visual Prompt Content');
     });
 
-    it('should compute charCount correctly', () => {
+    it('should compute tokenCount correctly', () => {
       component.listingPromptCache = 'Test';
       component.currentConsoleMode = 'listing';
       
-      expect(component.charCount).toBe(4);
+      expect(component.tokenCount).toBeGreaterThan(0);
     });
 
     it('should compute isOverLimit correctly', () => {
@@ -273,6 +274,7 @@ describe('Promptlab Module', () => {
       
       expect(component.isOverLimit).toBe(false);
 
+      component.profile.charLimit = 1;
       component.listingPromptCache = 'This is a very long text';
       expect(component.isOverLimit).toBe(true);
     });
@@ -326,7 +328,7 @@ describe('Promptlab Module', () => {
     it('should generate language options', () => {
       const select = document.getElementById('lab-target-market') as HTMLSelectElement;
       
-      component.generateLanguageOptions();
+      generateLanguageOptions();
 
       expect(select.options.length).toBeGreaterThan(0);
       expect(select.options[0].value).toBe('');
@@ -372,7 +374,7 @@ describe('Promptlab Module', () => {
       expect(promptlabService.generateMasterPrompt).not.toHaveBeenCalled();
       expect(showToast).toHaveBeenCalledWith(
         expect.stringContaining('不能为空'),
-        'warning'
+        { type: 'warning' }
       );
     });
 
@@ -395,7 +397,7 @@ describe('Promptlab Module', () => {
       expect(promptlabService.generateVisualPrompt).not.toHaveBeenCalled();
       expect(showToast).toHaveBeenCalledWith(
         expect.stringContaining('分析报告'),
-        'warning'
+        { type: 'warning' }
       );
     });
   });
@@ -529,7 +531,7 @@ describe('Promptlab Module', () => {
       component.copyPrompt();
 
       expect(execCommandSpy).toHaveBeenCalledWith('copy');
-      expect(showToast).toHaveBeenCalledWith('Prompt 已复制', 'success');
+      expect(showToast).toHaveBeenCalledWith('Prompt 已复制', { type: 'success' });
 
       execCommandSpy.mockRestore();
     });
@@ -576,37 +578,28 @@ describe('Promptlab Module', () => {
     });
 
     it('should select all report sections', () => {
-      const checkbox1 = document.createElement('input');
-      checkbox1.type = 'checkbox';
-      checkbox1.name = 'report-section';
-      checkbox1.value = 'section1';
-
-      const checkbox2 = document.createElement('input');
-      checkbox2.type = 'checkbox';
-      checkbox2.name = 'report-section';
-      checkbox2.value = 'section2';
-
-      container.appendChild(checkbox1);
-      container.appendChild(checkbox2);
+      appStore.getState().updateAnalysis({
+        analysisReport: {
+          'title-keywords': { primary_keywords: ['alpha'] },
+          'selling-points': { bullet_analysis: ['beta'] },
+          _metadata: { marketplace: 'US' }
+        } as any
+      });
 
       component.selectAllReportSections();
 
-      expect(checkbox1.checked).toBe(true);
-      expect(checkbox2.checked).toBe(true);
+      expect(component.profile.selectedReportSections).toEqual([
+        'title-keywords',
+        'selling-points'
+      ]);
     });
 
     it('should clear report sections', () => {
-      const checkbox1 = document.createElement('input');
-      checkbox1.type = 'checkbox';
-      checkbox1.name = 'report-section';
-      checkbox1.value = 'section1';
-      checkbox1.checked = true;
-
-      container.appendChild(checkbox1);
+      component.profile.selectedReportSections = ['title-keywords'];
 
       component.clearReportSections();
 
-      expect(checkbox1.checked).toBe(false);
+      expect(component.profile.selectedReportSections).toEqual([]);
     });
   });
 
@@ -687,22 +680,19 @@ describe('Promptlab Module', () => {
     it('should handle new format report (AI智能分析)', () => {
       appStore.getState().updateAnalysis({
         analysisReport: {
-          marketplace: 'US',
-          results: [
-            {
-              targetId: 'test-id',
-              title: 'Test Title',
-              highlights: [{ text: 'Highlight 1' }],
-              details: [{ category: 'Category 1', items: ['Item 1', 'Item 2'] }],
-            },
-          ],
+          _metadata: { marketplace: 'US' },
+          'title-keywords': {
+            primary_keywords: ['waterproof bag'],
+            optimization_suggestions: ['Lead with durability']
+          },
         } as any
       });
 
       component.renderReportAnalysis();
 
       const container = document.getElementById('report-sections-container');
-      expect(container?.innerHTML).toContain('Test Title');
+      expect(container?.innerHTML).toContain('标题核心词根');
+      expect(container?.innerHTML).toContain('核心关键词');
     });
 
     it('should handle legacy format report (旧版AI分析)', () => {

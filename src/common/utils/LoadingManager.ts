@@ -66,8 +66,8 @@ export class LoadingManager {
   start(taskId: string, options: LoadingTaskOptions = {}): void {
     const task: LoadingTask = {
       id: taskId,
-      message: options.message || this.defaultMessage,
-      priority: options.priority || 0,
+      message: options.message ?? this.defaultMessage,
+      priority: options.priority ?? 0,
       startTime: Date.now()
     };
 

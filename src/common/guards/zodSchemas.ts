@@ -194,7 +194,7 @@ export const LLMChatCompletionResponseSchema = z.object({
         z.null()
       ])
     })
-  )
+  ).min(1)
 });
 
 /**

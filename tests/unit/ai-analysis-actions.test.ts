@@ -28,12 +28,24 @@ import {
   downloadJson
 } from '../../src/modules/app_center/views/master_analysis/ai_analysis/components/actions';
 import { AlpineContext } from '../../src/modules/app_center/views/master_analysis/ai_analysis/types';
-import { ModuleState } from '../../src/modules/app_center/views/master_analysis/ai_analysis/state/moduleState';
 import { Product } from '../../src/modules/app_center/views/master_analysis/ai_analysis/config/sampleData';
 
 // Mock 依赖
 vi.mock('@common/ui/index', () => ({
   showToast: vi.fn()
+}));
+
+const mockAppStoreState = vi.hoisted(() => ({
+  setSelectedAsins: vi.fn(),
+  setAnalysisReport: vi.fn(),
+  updateAnalysis: vi.fn(),
+  scraper: undefined as any
+}));
+
+vi.mock('@/stores/useAppStore', () => ({
+  appStore: {
+    getState: () => mockAppStoreState
+  }
 }));
 
 vi.mock('../../src/modules/app_center/views/master_analysis/ai_analysis/prompts/analysisPrompts', () => ({
@@ -51,7 +63,6 @@ vi.mock('../../src/modules/app_center/views/master_analysis/ai_analysis/utils/da
 
 describe('actions - ASIN 选择操作', () => {
   let mockContext: AlpineContext;
-  let mockModuleState: ModuleState;
   
   beforeEach(() => {
     mockContext = {
@@ -75,22 +86,6 @@ describe('actions - ASIN 选择操作', () => {
       syncToModuleState: vi.fn(),
       $nextTick: vi.fn((cb) => cb())
     } as AlpineContext;
-    
-    mockModuleState = {
-      selectedAsins: [],
-      selectedTargets: [],
-      isAnalyzing: false,
-      progress: 0,
-      currentStep: '',
-      results: [],
-      analysisReport: null,
-      expandedPromptIndex: null,
-      showPromptPanel: false,
-      showJsonViewer: false,
-      useRealData: false,
-      dataSource: 'sample',
-      showDataSourceBanner: false
-    };
   });
   
   afterEach(() => {
@@ -99,25 +94,26 @@ describe('actions - ASIN 选择操作', () => {
   
   describe('toggleAsin', () => {
     it('应该添加未选中的 ASIN', () => {
-      toggleAsin(mockContext, mockModuleState, 'B001');
+      toggleAsin(mockContext, 'B001');
       
       expect(mockContext.selectedAsins).toContain('B001');
-      expect(mockModuleState.selectedAsins).toContain('B001');
+      expect(mockAppStoreState.setSelectedAsins).toHaveBeenCalledWith(['B001']);
     });
     
     it('应该移除已选中的 ASIN', () => {
       mockContext.selectedAsins = ['B001', 'B002'];
       
-      toggleAsin(mockContext, mockModuleState, 'B001');
+      toggleAsin(mockContext, 'B001');
       
       expect(mockContext.selectedAsins).not.toContain('B001');
       expect(mockContext.selectedAsins).toContain('B002');
+      expect(mockAppStoreState.setSelectedAsins).toHaveBeenCalledWith(['B002']);
     });
     
-    it('应该同步状态到模块状态', () => {
-      toggleAsin(mockContext, mockModuleState, 'B001');
+    it('应该同步状态到应用 store', () => {
+      toggleAsin(mockContext, 'B001');
       
-      expect(mockModuleState.selectedAsins).toEqual(mockContext.selectedAsins);
+      expect(mockAppStoreState.setSelectedAsins).toHaveBeenCalledWith(mockContext.selectedAsins);
     });
   });
   
@@ -125,17 +121,17 @@ describe('actions - ASIN 选择操作', () => {
     it('应该选中所有可用的 ASIN', () => {
       const availableAsins = ['B001', 'B002', 'B003'];
       
-      selectAllAsins(mockContext, mockModuleState, availableAsins);
+      selectAllAsins(mockContext, availableAsins);
       
       expect(mockContext.selectedAsins).toEqual(availableAsins);
-      expect(mockModuleState.selectedAsins).toEqual(availableAsins);
+      expect(mockAppStoreState.setSelectedAsins).toHaveBeenCalledWith(availableAsins);
     });
     
     it('应该替换现有的选择', () => {
       mockContext.selectedAsins = ['B001'];
       const availableAsins = ['B002', 'B003'];
       
-      selectAllAsins(mockContext, mockModuleState, availableAsins);
+      selectAllAsins(mockContext, availableAsins);
       
       expect(mockContext.selectedAsins).toEqual(availableAsins);
     });
@@ -145,17 +141,16 @@ describe('actions - ASIN 选择操作', () => {
     it('应该清空所有选中的 ASIN', () => {
       mockContext.selectedAsins = ['B001', 'B002', 'B003'];
       
-      clearAllAsins(mockContext, mockModuleState);
+      clearAllAsins(mockContext);
       
       expect(mockContext.selectedAsins).toEqual([]);
-      expect(mockModuleState.selectedAsins).toEqual([]);
+      expect(mockAppStoreState.setSelectedAsins).toHaveBeenCalledWith([]);
     });
   });
 });
 
 describe('actions - 分析目标选择操作', () => {
   let mockContext: AlpineContext;
-  let mockModuleState: ModuleState;
   
   beforeEach(() => {
     mockContext = {
@@ -179,22 +174,6 @@ describe('actions - 分析目标选择操作', () => {
       syncToModuleState: vi.fn(),
       $nextTick: vi.fn((cb) => cb())
     } as AlpineContext;
-    
-    mockModuleState = {
-      selectedAsins: [],
-      selectedTargets: [],
-      isAnalyzing: false,
-      progress: 0,
-      currentStep: '',
-      results: [],
-      analysisReport: null,
-      expandedPromptIndex: null,
-      showPromptPanel: false,
-      showJsonViewer: false,
-      useRealData: false,
-      dataSource: 'sample',
-      showDataSourceBanner: false
-    };
   });
   
   afterEach(() => {
@@ -203,16 +182,15 @@ describe('actions - 分析目标选择操作', () => {
   
   describe('toggleTarget', () => {
     it('应该添加未选中的目标', () => {
-      toggleTarget(mockContext, mockModuleState, 'target1');
+      toggleTarget(mockContext, 'target1');
       
       expect(mockContext.selectedTargets).toContain('target1');
-      expect(mockModuleState.selectedTargets).toContain('target1');
     });
     
     it('应该移除已选中的目标', () => {
       mockContext.selectedTargets = ['target1', 'target2'];
       
-      toggleTarget(mockContext, mockModuleState, 'target1');
+      toggleTarget(mockContext, 'target1');
       
       expect(mockContext.selectedTargets).not.toContain('target1');
       expect(mockContext.selectedTargets).toContain('target2');
@@ -221,10 +199,9 @@ describe('actions - 分析目标选择操作', () => {
   
   describe('selectAllTargets', () => {
     it('应该选中所有分析目标', () => {
-      selectAllTargets(mockContext, mockModuleState);
+      selectAllTargets(mockContext);
       
       expect(mockContext.selectedTargets.length).toBeGreaterThan(0);
-      expect(mockModuleState.selectedTargets).toEqual(mockContext.selectedTargets);
     });
   });
   
@@ -232,17 +209,15 @@ describe('actions - 分析目标选择操作', () => {
     it('应该清空所有选中的目标', () => {
       mockContext.selectedTargets = ['target1', 'target2'];
       
-      clearAllTargets(mockContext, mockModuleState);
+      clearAllTargets(mockContext);
       
       expect(mockContext.selectedTargets).toEqual([]);
-      expect(mockModuleState.selectedTargets).toEqual([]);
     });
   });
 });
 
 describe('actions - UI 面板切换操作', () => {
   let mockContext: AlpineContext;
-  let mockModuleState: ModuleState;
   
   beforeEach(() => {
     mockContext = {
@@ -266,22 +241,6 @@ describe('actions - UI 面板切换操作', () => {
       syncToModuleState: vi.fn(),
       $nextTick: vi.fn((cb) => cb())
     } as AlpineContext;
-    
-    mockModuleState = {
-      selectedAsins: [],
-      selectedTargets: [],
-      isAnalyzing: false,
-      progress: 0,
-      currentStep: '',
-      results: [],
-      analysisReport: null,
-      expandedPromptIndex: null,
-      showPromptPanel: false,
-      showJsonViewer: false,
-      useRealData: false,
-      dataSource: 'sample',
-      showDataSourceBanner: false
-    };
   });
   
   afterEach(() => {
@@ -292,32 +251,31 @@ describe('actions - UI 面板切换操作', () => {
     it('应该切换提示词面板显示状态', () => {
       expect(mockContext.showPromptPanel).toBe(false);
       
-      togglePromptPanel(mockContext, mockModuleState);
+      togglePromptPanel(mockContext);
       expect(mockContext.showPromptPanel).toBe(true);
       
-      togglePromptPanel(mockContext, mockModuleState);
+      togglePromptPanel(mockContext);
       expect(mockContext.showPromptPanel).toBe(false);
     });
     
-    it('应该同步状态到模块状态', () => {
-      togglePromptPanel(mockContext, mockModuleState);
-      
-      expect(mockModuleState.showPromptPanel).toBe(mockContext.showPromptPanel);
+    it('应该只更新当前上下文状态', () => {
+      togglePromptPanel(mockContext);
+
+      expect(mockContext.showPromptPanel).toBe(true);
     });
   });
   
   describe('togglePromptItem', () => {
     it('应该展开指定的提示词项', () => {
-      togglePromptItem(mockContext, mockModuleState, 0);
+      togglePromptItem(mockContext, 0);
       
       expect(mockContext.expandedPromptIndex).toBe(0);
-      expect(mockModuleState.expandedPromptIndex).toBe(0);
     });
     
     it('应该折叠已展开的提示词项', () => {
       mockContext.expandedPromptIndex = 0;
       
-      togglePromptItem(mockContext, mockModuleState, 0);
+      togglePromptItem(mockContext, 0);
       
       expect(mockContext.expandedPromptIndex).toBe(null);
     });
@@ -325,7 +283,7 @@ describe('actions - UI 面板切换操作', () => {
     it('应该切换到不同的提示词项', () => {
       mockContext.expandedPromptIndex = 0;
       
-      togglePromptItem(mockContext, mockModuleState, 1);
+      togglePromptItem(mockContext, 1);
       
       expect(mockContext.expandedPromptIndex).toBe(1);
     });
@@ -335,10 +293,10 @@ describe('actions - UI 面板切换操作', () => {
     it('应该切换 JSON 查看器显示状态', () => {
       expect(mockContext.showJsonViewer).toBe(false);
       
-      toggleJsonViewer(mockContext, mockModuleState);
+      toggleJsonViewer(mockContext);
       expect(mockContext.showJsonViewer).toBe(true);
       
-      toggleJsonViewer(mockContext, mockModuleState);
+      toggleJsonViewer(mockContext);
       expect(mockContext.showJsonViewer).toBe(false);
     });
   });
@@ -347,23 +305,21 @@ describe('actions - UI 面板切换操作', () => {
     it('应该切换数据源模式', () => {
       expect(mockContext.useRealData).toBe(false);
       
-      toggleDataSource(mockContext, mockModuleState);
+      toggleDataSource(mockContext);
       expect(mockContext.useRealData).toBe(true);
       
-      toggleDataSource(mockContext, mockModuleState);
+      toggleDataSource(mockContext);
       expect(mockContext.useRealData).toBe(false);
     });
     
-    it('应该清空之前的分析结果', () => {
-      mockContext.results = [{ targetId: 'test' } as any];
+    it('应该清空之前的分析报告', () => {
       mockContext.analysisReport = { data: 'test' };
       
-      toggleDataSource(mockContext, mockModuleState);
+      toggleDataSource(mockContext);
       
-      expect(mockContext.results).toEqual([]);
       expect(mockContext.analysisReport).toBe(null);
-      expect(mockModuleState.results).toEqual([]);
-      expect(mockModuleState.analysisReport).toBe(null);
+      expect(mockContext.hasReport).toBe(false);
+      expect(mockAppStoreState.setAnalysisReport).toHaveBeenCalledWith(null);
     });
   });
 });
@@ -478,8 +434,8 @@ describe('actions - 复制操作', () => {
       });
     });
     
-    it('应该在没有结果时不执行复制', () => {
-      mockContext.results = [];
+    it('应该在没有报告时不执行复制', () => {
+      mockContext.analysisReport = null;
       
       copyMarkdown(mockContext, 'US', '数据采集');
       
@@ -525,8 +481,8 @@ describe('actions - 复制操作', () => {
       expect(global.URL.revokeObjectURL).toHaveBeenCalled();
     });
     
-    it('应该在没有结果时不执行下载', () => {
-      mockContext.results = [];
+    it('应该在没有报告时不执行下载', () => {
+      mockContext.analysisReport = null;
       
       downloadJson(mockContext, 'US');
       

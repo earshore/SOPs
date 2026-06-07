@@ -51,6 +51,10 @@ export class PerformanceMonitor {
     console.debug('[PerformanceMonitor] ✅ 性能监控面板已初始化 (Ctrl+Shift+P 切换)');
   }
 
+  isInitialized(): boolean {
+    return this.container !== null;
+  }
+
   /**
    * 创建容器
    */

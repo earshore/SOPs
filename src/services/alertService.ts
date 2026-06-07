@@ -7,6 +7,10 @@
 import type { ILoggerService } from '../types/services';
 import eventBus from '@/common/EventBus';
 
+type WindowWithToast = Window & {
+  showToast?: (message: string, options: { type: 'info' | 'warning' | 'error' }) => void;
+};
+
 /**
  * 告警级别
  */
@@ -321,9 +325,12 @@ export class AlertService {
    */
   private notify(alert: Alert): void {
     // Toast通知
-    if (this.config.showToast && typeof window !== 'undefined' && (window as any).showToast) {
+    const showToast = typeof window !== 'undefined'
+      ? (window as WindowWithToast).showToast
+      : undefined;
+    if (this.config.showToast && typeof showToast === 'function') {
       const toastType = this.getToastType(alert.level);
-      (window as any).showToast(alert.message, toastType);
+      showToast(alert.message, { type: toastType });
     }
 
     // 浏览器通知

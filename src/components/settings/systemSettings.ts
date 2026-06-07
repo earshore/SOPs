@@ -16,6 +16,9 @@ import { APP_EVENTS } from '../../common/constants/eventConstants';
 import type { LLMProviderConfig } from '../../types/state';
 import eventBus from '@common/EventBus';
 import { ApiError } from '@common/errors/AppError';
+
+let alpineRetryCount = 0;
+
 // ==========================================
 // 类型定义
 // ==========================================
@@ -309,7 +312,7 @@ const SettingsPanel = (): SettingsPanelData => ({
             const { performanceMonitor } = await import('../../common/devtools/PerformanceMonitor');
 
             // 确保面板已初始化
-            if (!(performanceMonitor as any).container) {
+            if (!performanceMonitor.isInitialized()) {
                 performanceMonitor.initialize();
             }
 
@@ -721,9 +724,8 @@ export function initAlpineSettings(): void {
     if (typeof window.Alpine === 'undefined') {
         console.warn('[Settings] Alpine.js not loaded yet, retrying in 100ms...');
         // 延迟重试,最多重试 10 次
-        const retryCount = (window as any).__alpineRetryCount || 0;
-        if (retryCount < 10) {
-            (window as any).__alpineRetryCount = retryCount + 1;
+        if (alpineRetryCount < 10) {
+            alpineRetryCount += 1;
             setTimeout(initAlpineSettings, 100);
         } else {
             console.error('[Settings] Alpine.js failed to load after 10 retries');
@@ -743,7 +745,7 @@ export function initAlpineSettings(): void {
         console.log('[Settings] ✅ Alpine component "settingsPanel" registered successfully');
         
         // 清理重试计数器
-        delete (window as any).__alpineRetryCount;
+        alpineRetryCount = 0;
     } catch (error) {
         console.error('[Settings] Failed to register Alpine component:', error);
     }

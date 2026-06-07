@@ -24,7 +24,7 @@ export type RequestPriority = 0 | 1 | 2 | 3 | 4;
  * HTTP 请求配置
  */
 export interface HttpOptions {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
   headers?: Record<string, string>;
   body?: unknown;
   timeout?: number;
@@ -272,7 +272,7 @@ class HttpServiceClass implements IHttpService {
 
             // 🎯 数据边界验证：对于 JSON 响应，进行基本验证
             // 注意：这里只做基本的结构验证，具体的业务类型验证由调用方负责
-            if (data === null || data === undefined) {
+            if (data === undefined) {
               throw new HttpError(response.status, 'API 返回空响应', response);
             }
 
@@ -420,9 +420,13 @@ class HttpServiceClass implements IHttpService {
    */
   async apiRequest<T = unknown>(
     url: string,
-    options?: HttpOptions,
+    options?: HttpOptions | string,
     dataGuard?: (data: unknown) => data is T
   ): Promise<ApiResponse<T>> {
+    if (typeof options === 'string') {
+      return this.apiRequestWithAuth<T>(url, options) as Promise<ApiResponse<T>>;
+    }
+
     const response = await this.request<unknown>(url, options || {});
 
     // 🎯 数据边界验证：验证 API 响应格式

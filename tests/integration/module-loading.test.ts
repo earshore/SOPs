@@ -9,7 +9,7 @@ import { Container } from '@/common/di/Container';
 import { ModuleLoader } from '@/common/utils/ModuleLoader';
 import eventBus from '@/common/EventBus';
 import { APP_EVENTS } from '@/common/constants/eventConstants';
-import { BaseModule } from '@/common/BaseModule';
+import BaseModule from '@/common/BaseModule';
 
 // Mock模块
 class TestModule extends BaseModule {

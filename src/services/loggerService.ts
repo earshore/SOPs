@@ -165,7 +165,6 @@ export class LoggerService implements ILoggerService {
     } catch {
       // ConfigService 未初始化，跳过
     }
-    Logger.debug(`[Logger] 最小日志级别设置为: ${newLevel}`);
   }
 
   /**
@@ -173,7 +172,6 @@ export class LoggerService implements ILoggerService {
    */
   setRemoteEndpoint(endpoint: string): void {
     this.remoteEndpoint = endpoint;
-    Logger.debug(`[Logger] 远程日志端点设置为: ${endpoint}`);
   }
 
   /**
@@ -388,6 +386,11 @@ export class LoggerService implements ILoggerService {
         name: error.name,
         message: error.message,
         stack: error.stack,
+        ...Object.fromEntries(
+          Object.entries(error as Error & Record<string, unknown>).filter(
+            ([key]) => !['name', 'message', 'stack'].includes(key)
+          )
+        ),
       };
     } else if (error && typeof error === 'object' && !Array.isArray(error)) {
       data = error as Record<string, unknown>;
@@ -411,6 +414,11 @@ export class LoggerService implements ILoggerService {
         name: error.name,
         message: error.message,
         stack: error.stack,
+        ...Object.fromEntries(
+          Object.entries(error as Error & Record<string, unknown>).filter(
+            ([key]) => !['name', 'message', 'stack'].includes(key)
+          )
+        ),
       };
     } else if (error && typeof error === 'object' && !Array.isArray(error)) {
       data = error as Record<string, unknown>;
@@ -440,8 +448,8 @@ export class LoggerService implements ILoggerService {
    * 获取所有日志
    * 实现ILoggerService接口
    */
-  getLogs(): LogEntry[] {
-    return [...this.logs];
+  getLogs(level?: LogLevelValue): LogEntry[] {
+    return this._getLogsByLevel(level);
   }
 
   /**
@@ -459,7 +467,7 @@ export class LoggerService implements ILoggerService {
    * 实现ILoggerService接口
    */
   getErrors(): LogEntry[] {
-    return this._getLogsByLevel(LOG_LEVELS.ERROR);
+    return this.logs.filter(log => log.level >= LOG_LEVELS.ERROR);
   }
 
   /**
@@ -467,7 +475,6 @@ export class LoggerService implements ILoggerService {
    */
   clear(): void {
     this.logs = [];
-    Logger.debug('[Logger] 日志已清除');
   }
 
   /**

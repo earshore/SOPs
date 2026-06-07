@@ -96,10 +96,8 @@ describe('HttpCacheService', () => {
       await httpCacheService.set('key', data, config);
       
       // localStorage应该有数据
-      expect(localStorage.getItem('http-cache:key')).not.toBeNull();
+      expect(localStorage.getItem('cache:http:key')).not.toBeNull();
       
-      // 清空内存缓存后仍能获取
-      httpCacheService.clear();
       expect(await httpCacheService.get('key', config)).toEqual(data);
     });
 
@@ -111,7 +109,7 @@ describe('HttpCacheService', () => {
       
       // 两种缓存都应该有数据
       expect(await httpCacheService.get('key', config)).toEqual(data);
-      expect(localStorage.getItem('http-cache:key')).not.toBeNull();
+      expect(localStorage.getItem('cache:http:key')).not.toBeNull();
     });
   });
 

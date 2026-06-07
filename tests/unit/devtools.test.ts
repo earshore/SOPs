@@ -366,20 +366,29 @@ describe('DevTools中间件', () => {
       const consoleSpy = vi.spyOn(console, 'group').mockImplementation(() => {});
       const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
       const consoleGroupEndSpy = vi.spyOn(console, 'groupEnd').mockImplementation(() => {});
+      const originalNodeEnv = process.env.NODE_ENV;
 
       const prevState = { count: 0 };
       const nextState = { count: 1 };
 
-      devtoolsHelper.logStateChange('TestStore', 'increment', prevState, nextState);
+      try {
+        process.env.NODE_ENV = 'development';
+        devtoolsHelper.logStateChange('TestStore', 'increment', prevState, nextState);
 
-      expect(consoleSpy).toHaveBeenCalledWith('[TestStore] increment');
-      expect(consoleLogSpy).toHaveBeenCalledWith('Previous State:', prevState);
-      expect(consoleLogSpy).toHaveBeenCalledWith('Next State:', nextState);
-      expect(consoleGroupEndSpy).toHaveBeenCalled();
-
-      consoleSpy.mockRestore();
-      consoleLogSpy.mockRestore();
-      consoleGroupEndSpy.mockRestore();
+        expect(consoleSpy).toHaveBeenCalledWith('[TestStore] increment');
+        expect(consoleLogSpy).toHaveBeenCalledWith('Previous State:', prevState);
+        expect(consoleLogSpy).toHaveBeenCalledWith('Next State:', nextState);
+        expect(consoleGroupEndSpy).toHaveBeenCalled();
+      } finally {
+        if (originalNodeEnv === undefined) {
+          delete process.env.NODE_ENV;
+        } else {
+          process.env.NODE_ENV = originalNodeEnv;
+        }
+        consoleSpy.mockRestore();
+        consoleLogSpy.mockRestore();
+        consoleGroupEndSpy.mockRestore();
+      }
     });
   });
 

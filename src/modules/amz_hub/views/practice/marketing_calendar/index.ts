@@ -440,7 +440,7 @@ class MarketingCalendarModule extends BaseModule {
         this.state.searchTerm = val.toLowerCase();
         this.renderStats();
         this.renderContent();
-      }, 300) as any;
+      }, 300);
     });
 
     this.addEventListener(input, "keydown", (e) => {

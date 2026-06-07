@@ -137,11 +137,6 @@ function renderReport(container: HTMLElement, markdown: string): void {
  * 以避免恢复时 highlightScores 二次处理产生重复徽章。
  */
 function saveAnalysisStateToState(): void {
-  const currentState = appStore.getState();
-  if (!currentState.keywordTracker) {
-    currentState.updateKeywordTracker({} as any);
-  }
-
   if (rawMarkdownCache) {
     appStore.getState().updateKeywordTracker({
       llmAnalysisResult: rawMarkdownCache,

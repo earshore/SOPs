@@ -236,7 +236,7 @@ describe('StorageService', () => {
       const result = StorageService.getProxyConfig();
 
       expect(result).toEqual({
-        type: 'allorigins',
+        type: 'scraperapi',
         enabled: true
       });
     });

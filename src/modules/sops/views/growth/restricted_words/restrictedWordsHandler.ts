@@ -15,6 +15,10 @@ import { AlpineRegistry } from '../../../../../common/infrastructure/AlpineRegis
 
 type SearchMode = 'fuzzy' | 'exact' | 'fulltext' | 'regex';
 type SiteContext = string;
+type RestrictedWord = (typeof RESTRICTED_WORDS_DATABASE)[number];
+type RiskLevel = keyof typeof RISK_LEVELS;
+type WordCategory = keyof typeof WORD_CATEGORIES;
+type LocalizedKeywords = Partial<Record<string, string>>;
 
 interface ActiveFilters {
     category: string;
@@ -89,6 +93,18 @@ function appendAffectedSites(container: Element, sites: string[]): void {
     }
 }
 
+function getRiskLevelConfig(level: number): (typeof RISK_LEVELS)[RiskLevel] {
+    return RISK_LEVELS[level as RiskLevel] || RISK_LEVELS[1];
+}
+
+function getWordCategoryConfig(category: string): (typeof WORD_CATEGORIES)[WordCategory] {
+    return WORD_CATEGORIES[category as WordCategory] || WORD_CATEGORIES.MAT;
+}
+
+function getLocalizedKeyword(word: RestrictedWord, site: string): string | undefined {
+    return (word.localizedKeywords as LocalizedKeywords | undefined)?.[site];
+}
+
 /**
  * 初始化面板
  */
@@ -118,8 +134,10 @@ function populateFilterDropdowns(): void {
         // 倒序排列，高风险在前
         const options = [5, 4, 3, 2, 1]
             .map(
-                (level) =>
-                    `<option value="${level}">${(RISK_LEVELS as any)[level].icon} ${(RISK_LEVELS as any)[level].label}</option>`
+                (level) => {
+                    const risk = getRiskLevelConfig(level);
+                    return `<option value="${level}">${risk.icon} ${risk.label}</option>`;
+                }
             )
             .join('');
         // ✅ 使用 SafeRenderer 渲染静态模板
@@ -332,19 +350,17 @@ function renderResults(): void {
 
     // ✅ 使用 SafeRenderer 渲染列表
     const rows = currentResults.map((word) => {
-        const risk = (RISK_LEVELS as any)[word.riskLevel];
-        const category = (WORD_CATEGORIES as any)[word.category];
+        const risk = getRiskLevelConfig(word.riskLevel);
+        const category = getWordCategoryConfig(word.category);
 
         // 智能显示关键词：如果有选中站点且有对应的本地化词，优先显示本地化词
         let displayKeyword = word.keyword;
         let subDisplay = word.variants.slice(0, 3).join(', ');
 
-        if (
-            currentSiteContext !== 'ALL' &&
-            word.localizedKeywords &&
-            (word.localizedKeywords as any)[currentSiteContext]
-        ) {
-            const localWord = (word.localizedKeywords as any)[currentSiteContext];
+        const localWord = currentSiteContext !== 'ALL'
+            ? getLocalizedKeyword(word, currentSiteContext)
+            : undefined;
+        if (localWord) {
             displayKeyword = localWord;
             // 在副标显示英文原词
             if (localWord !== word.keyword) {
@@ -453,8 +469,8 @@ function showWordDetail(wordId: string): void {
 
     if (!modal || !header || !content) return;
 
-    const risk = (RISK_LEVELS as any)[word.riskLevel];
-    const category = (WORD_CATEGORIES as any)[word.category];
+    const risk = getRiskLevelConfig(word.riskLevel);
+    const category = getWordCategoryConfig(word.category);
 
     // 渲染 Header - 使用 DOM 操作
     clearElement(header);
@@ -666,16 +682,22 @@ function closeWordDetail(): void {
 }
 
 // 暴露给 window 以兼容旧模板调用 (Legacy)
-(window as any).showWordDetail = showWordDetail;
-(window as any).closeWordDetail = closeWordDetail;
+const legacyWindow = window as Window & {
+    showWordDetail?: (wordId: string) => void;
+    closeWordDetail?: () => void;
+};
+legacyWindow.showWordDetail = showWordDetail;
+legacyWindow.closeWordDetail = closeWordDetail;
 
 // ================================================================
 // Phase 4: 集中注册所有动作到 ActionRegistry
 // ================================================================
 
 const restrictedWordsActions: Record<string, (...args: unknown[]) => void> = {
-    showWordDetail: showWordDetail as any,
-    closeWordDetail: closeWordDetail as any,
+    showWordDetail: (wordId) => {
+        if (typeof wordId === 'string') showWordDetail(wordId);
+    },
+    closeWordDetail: () => closeWordDetail(),
 };
 
 registerActionsWithLegacy(restrictedWordsActions);

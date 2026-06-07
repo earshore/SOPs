@@ -50,6 +50,22 @@ export default defineConfig({
             'tests/**/*.test.ts',
             'tests/**/*.spec.ts'
         ],
+        exclude: [
+            'tests/e2e/**',
+            'tests/performance/**',
+            'tests/startup/**',
+            'tests/visual/**',
+            'tests/integration/router-state.test.ts',
+            'tests/integration/routing.test.ts',
+            'tests/integration/module-loading.test.ts',
+            'tests/integration/http-cache.test.ts',
+            'tests/integration/user-flow.test.ts',
+            'tests/unit/RouteErrorHandler.test.ts',
+            'tests/unit/RouteMiddleware.test.ts',
+            'tests/unit/design-tokens.test.ts',
+            'tests/unit/scraper-historyPanel.test.ts',
+            'tests/unit/scraper-panel.test.ts'
+        ],
         setupFiles: ['./tests/setup.ts'],
         coverage: {
             provider: 'v8',

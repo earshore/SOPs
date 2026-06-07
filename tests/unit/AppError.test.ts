@@ -154,7 +154,7 @@ describe('AppError', () => {
       expect(json.originalError).toBeDefined();
       expect(json.originalError.name).toBe('Error');
       expect(json.originalError.message).toBe('原始错误');
-      expect(json.originalError.stack).toBeDefined();
+      expect(json.originalError).not.toHaveProperty('stack');
     });
 
     it('原始错误为空时应该返回undefined', () => {

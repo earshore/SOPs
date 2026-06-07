@@ -8,6 +8,34 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 // Mock fetch
 global.fetch = vi.fn();
 
+const createJsonResponse = (body: unknown, overrides: Record<string, unknown> = {}) => ({
+  ok: true,
+  status: 200,
+  headers: {
+    get: vi.fn(() => null),
+  },
+  json: async () => body,
+  text: async () => JSON.stringify(body),
+  ...overrides,
+});
+
+const createChatCompletion = (content: string) => ({
+  id: 'chatcmpl-test',
+  object: 'chat.completion' as const,
+  created: 1710000000,
+  model: 'gpt-4',
+  choices: [
+    {
+      index: 0,
+      message: {
+        role: 'assistant' as const,
+        content,
+      },
+      finish_reason: 'stop' as const,
+    },
+  ],
+});
+
 // Mock configCenter
 vi.mock('../../src/common/config/ConfigCenter', () => ({
   configCenter: {
@@ -42,26 +70,14 @@ describe('LLMService', () => {
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('基础LLM调用', () => {
     it('应该成功调用LLM API', async () => {
-      const mockResponse = {
-        choices: [
-          {
-            message: {
-              content: 'Test response from LLM',
-            },
-          },
-        ],
-      };
+      const mockResponse = createChatCompletion('Test response from LLM');
 
-      (global.fetch as any).mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: async () => mockResponse,
-      });
+      (global.fetch as any).mockResolvedValueOnce(createJsonResponse(mockResponse));
 
       // 动态导入以应用mock
       const { callLLM } = await import('../../src/services/llmService');
@@ -72,7 +88,8 @@ describe('LLMService', () => {
         'openai',
         'https://api.example.com/v1',
         'test-api-key',
-        'gpt-4'
+        'gpt-4',
+        { stream: false }
       );
 
       expect(result).toBe('Test response from LLM');
@@ -88,20 +105,9 @@ describe('LLMService', () => {
     });
 
     it('应该支持JSON模式', async () => {
-      const mockResponse = {
-        choices: [
-          {
-            message: {
-              content: '{"result": "json response"}',
-            },
-          },
-        ],
-      };
+      const mockResponse = createChatCompletion('{"result": "json response"}');
 
-      (global.fetch as any).mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockResponse,
-      });
+      (global.fetch as any).mockResolvedValueOnce(createJsonResponse(mockResponse));
 
       const { callLLM } = await import('../../src/services/llmService');
 
@@ -112,7 +118,7 @@ describe('LLMService', () => {
         'https://api.example.com/v1',
         'test-api-key',
         'gpt-4',
-        { jsonMode: true }
+        { jsonMode: true, stream: false }
       );
 
       expect(global.fetch).toHaveBeenCalledWith(
@@ -124,14 +130,9 @@ describe('LLMService', () => {
     });
 
     it('应该支持自定义temperature', async () => {
-      const mockResponse = {
-        choices: [{ message: { content: 'response' } }],
-      };
+      const mockResponse = createChatCompletion('response');
 
-      (global.fetch as any).mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockResponse,
-      });
+      (global.fetch as any).mockResolvedValueOnce(createJsonResponse(mockResponse));
 
       const { callLLM } = await import('../../src/services/llmService');
 
@@ -142,7 +143,7 @@ describe('LLMService', () => {
         'https://api.example.com/v1',
         'test-api-key',
         'gpt-4',
-        { temperature: 0.8 }
+        { temperature: 0.8, stream: false }
       );
 
       const callArgs = (global.fetch as any).mock.calls[0];
@@ -186,12 +187,7 @@ describe('LLMService', () => {
             error: { message: 'Rate limit exceeded' },
           }),
         })
-        .mockResolvedValueOnce({
-          ok: true,
-          json: async () => ({
-            choices: [{ message: { content: 'Success after retry' } }],
-          }),
-        });
+        .mockResolvedValueOnce(createJsonResponse(createChatCompletion('Success after retry')));
 
       const { callLLM } = await import('../../src/services/llmService');
 
@@ -202,7 +198,7 @@ describe('LLMService', () => {
         'https://api.example.com/v1',
         'test-key',
         'gpt-4',
-        { retries: 1, retryDelay: 10 }
+        { retries: 1, retryDelay: 10, stream: false }
       );
 
       expect(result).toBe('Success after retry');
@@ -215,12 +211,7 @@ describe('LLMService', () => {
           status: 500,
           text: async () => 'Internal Server Error',
         })
-        .mockResolvedValueOnce({
-          ok: true,
-          json: async () => ({
-            choices: [{ message: { content: 'Success' } }],
-          }),
-        });
+        .mockResolvedValueOnce(createJsonResponse(createChatCompletion('Success')));
 
       const { callLLM } = await import('../../src/services/llmService');
 
@@ -231,7 +222,7 @@ describe('LLMService', () => {
         'https://api.example.com/v1',
         'test-key',
         'gpt-4',
-        { retries: 1, retryDelay: 10 }
+        { retries: 1, retryDelay: 10, stream: false }
       );
 
       expect(result).toBe('Success');
@@ -257,13 +248,10 @@ describe('LLMService', () => {
     });
 
     it('应该处理异常的API响应格式', async () => {
-      (global.fetch as any).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
+      (global.fetch as any).mockResolvedValueOnce(createJsonResponse({
           // 缺少 choices 字段
           invalid: 'response',
-        }),
-      });
+        }));
 
       const { callLLM } = await import('../../src/services/llmService');
 
@@ -276,7 +264,7 @@ describe('LLMService', () => {
           'https://api.example.com/v1',
           'test-key',
           'gpt-4',
-          { retries: 0 }
+          { retries: 0, stream: false }
         )
       ).rejects.toThrow('API 返回格式异常');
     });
@@ -311,12 +299,7 @@ describe('LLMService', () => {
         if (callCount < 3) {
           return Promise.reject(new Error('Retry'));
         }
-        return Promise.resolve({
-          ok: true,
-          json: async () => ({
-            choices: [{ message: { content: 'Success' } }],
-          }),
-        });
+        return Promise.resolve(createJsonResponse(createChatCompletion('Success')));
       });
 
       const { callLLM } = await import('../../src/services/llmService');
@@ -328,7 +311,7 @@ describe('LLMService', () => {
         'https://api.example.com/v1',
         'test-key',
         'gpt-4',
-        { retries: 2, retryDelay: 10 }
+        { retries: 2, retryDelay: 10, stream: false }
       );
 
       expect(result).toBe('Success');
