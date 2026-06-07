@@ -5,7 +5,7 @@
 
 import BaseModule from '../../../../../common/BaseModule';
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
-import { initRestrictedWordsPanel } from './restrictedWordsHandler';
+import { cleanupRestrictedWordsPanel, initRestrictedWordsPanel } from './restrictedWordsHandler';
 
 class RestrictedWordsModule extends BaseModule {
     /**
@@ -27,6 +27,7 @@ class RestrictedWordsModule extends BaseModule {
      * 卸载模块
      */
     unmount(): void {
+        cleanupRestrictedWordsPanel();
         console.log('❌ 欧洲本土化高危词库 SOP 模块已卸载');
     }
 }

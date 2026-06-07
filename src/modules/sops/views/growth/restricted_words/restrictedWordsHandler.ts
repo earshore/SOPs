@@ -9,7 +9,7 @@ import {
     RISK_LEVELS,
     WORD_CATEGORIES,
 } from './constants/restrictedWordsConstants';
-import { registerActionsWithLegacy } from '../../../../../common/utils/actionRegistry';
+import * as actionRegistry from '../../../../../common/utils/actionRegistry';
 import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
 import { AlpineRegistry } from '../../../../../common/infrastructure/AlpineRegistry';
 
@@ -45,6 +45,8 @@ interface RestrictedWordsPanelComponent {
 
 let currentResults = [...RESTRICTED_WORDS_DATABASE];
 let currentSiteContext: SiteContext = 'ALL';
+let removeEventListeners: (() => void) | null = null;
+let registeredActions: string[] = [];
 
 let activeFilters: ActiveFilters = {
     category: '',
@@ -109,9 +111,24 @@ function getLocalizedKeyword(word: RestrictedWord, site: string): string | undef
  * 初始化面板
  */
 export function initRestrictedWordsPanel(): void {
+    cleanupRestrictedWordsPanel();
     populateFilterDropdowns();
     renderResults();
     bindEventListeners();
+    registerRestrictedWordsActions();
+}
+
+export function cleanupRestrictedWordsPanel(): void {
+    removeEventListeners?.();
+    removeEventListeners = null;
+
+    if (registeredActions.length > 0 && 'unregisterActions' in actionRegistry) {
+        actionRegistry.unregisterActions(registeredActions);
+    }
+    registeredActions = [];
+
+    delete legacyWindow.showWordDetail;
+    delete legacyWindow.closeWordDetail;
 }
 
 /**
@@ -149,65 +166,64 @@ function populateFilterDropdowns(): void {
  * 绑定事件监听
  */
 function bindEventListeners(): void {
+    removeEventListeners?.();
+    const cleanupFns: Array<() => void> = [];
+    const addListener = (target: EventTarget | null, type: string, listener: EventListener): void => {
+        if (!target) return;
+        target.addEventListener(type, listener);
+        cleanupFns.push(() => target.removeEventListener(type, listener));
+    };
+
     // 搜索输入
     const searchInput = document.getElementById('rw-search-input') as HTMLInputElement | null;
     const searchBtn = document.getElementById('rw-search-btn');
     const clearBtn = document.getElementById('rw-clear-btn');
     const searchModeSelect = document.getElementById('rw-search-mode') as HTMLSelectElement | null;
 
-    if (searchBtn) {
-        searchBtn.addEventListener('click', executeSearch);
-    }
-    if (searchInput) {
-        searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') executeSearch();
-        });
-    }
-    if (clearBtn) {
-        clearBtn.addEventListener('click', resetFilters);
-    }
+    addListener(searchBtn, 'click', () => executeSearch());
+    addListener(searchInput, 'keypress', (e) => {
+        if ((e as KeyboardEvent).key === 'Enter') executeSearch();
+    });
+    addListener(clearBtn, 'click', () => resetFilters());
 
     // 过滤器变更
     const catFilter = document.getElementById('rw-filter-category') as HTMLSelectElement | null;
     const riskFilter = document.getElementById('rw-filter-risk') as HTMLSelectElement | null;
     const siteContext = document.getElementById('rw-site-context') as HTMLSelectElement | null;
 
-    if (catFilter) {
-        catFilter.addEventListener('change', (e) => {
-            activeFilters.category = (e.target as HTMLSelectElement).value;
-            executeSearch();
-        });
-    }
+    addListener(catFilter, 'change', (e) => {
+        activeFilters.category = (e.target as HTMLSelectElement).value;
+        executeSearch();
+    });
 
-    if (riskFilter) {
-        riskFilter.addEventListener('change', (e) => {
-            activeFilters.riskLevel = (e.target as HTMLSelectElement).value;
-            executeSearch();
-        });
-    }
+    addListener(riskFilter, 'change', (e) => {
+        activeFilters.riskLevel = (e.target as HTMLSelectElement).value;
+        executeSearch();
+    });
 
-    if (siteContext) {
-        siteContext.addEventListener('change', (e) => {
-            currentSiteContext = (e.target as HTMLSelectElement).value;
-            executeSearch();
-        });
-    }
+    addListener(siteContext, 'change', (e) => {
+        currentSiteContext = (e.target as HTMLSelectElement).value;
+        executeSearch();
+    });
 
-    if (searchModeSelect) {
-        searchModeSelect.addEventListener('change', (e) => {
-            activeFilters.searchMode = (e.target as HTMLSelectElement).value as SearchMode;
-            // 模式切换不自动触发搜索，除非已有输入
-            const input = document.getElementById('rw-search-input') as HTMLInputElement | null;
-            if (input && input.value.trim()) {
-                executeSearch();
-            }
-        });
-    }
+    addListener(searchModeSelect, 'change', (e) => {
+        activeFilters.searchMode = (e.target as HTMLSelectElement).value as SearchMode;
+        // 模式切换不自动触发搜索，除非已有输入
+        const input = document.getElementById('rw-search-input') as HTMLInputElement | null;
+        if (input && input.value.trim()) {
+            executeSearch();
+        }
+    });
 
     // 模态框关闭 (ESC键)
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeWordDetail();
+    addListener(document, 'keydown', (e) => {
+        if ((e as KeyboardEvent).key === 'Escape') closeWordDetail();
     });
+
+    removeEventListeners = () => {
+        cleanupFns.forEach((cleanup) => cleanup());
+        removeEventListeners = null;
+    };
 }
 
 /**
@@ -686,8 +702,6 @@ const legacyWindow = window as Window & {
     showWordDetail?: (wordId: string) => void;
     closeWordDetail?: () => void;
 };
-legacyWindow.showWordDetail = showWordDetail;
-legacyWindow.closeWordDetail = closeWordDetail;
 
 // ================================================================
 // Phase 4: 集中注册所有动作到 ActionRegistry
@@ -700,13 +714,22 @@ const restrictedWordsActions: Record<string, (...args: unknown[]) => void> = {
     closeWordDetail: () => closeWordDetail(),
 };
 
-registerActionsWithLegacy(restrictedWordsActions);
+function registerRestrictedWordsActions(): void {
+    if (registeredActions.length > 0) return;
 
-console.log(
-    '✅ [restrictedWordsHandler] 已注册 ' +
-        Object.keys(restrictedWordsActions).length +
-        ' 个动作到 ActionRegistry'
-);
+    // 暴露给 window 以兼容旧模板调用 (Legacy)
+    legacyWindow.showWordDetail = showWordDetail;
+    legacyWindow.closeWordDetail = closeWordDetail;
+
+    const actionNames = actionRegistry.registerActionsWithLegacy(restrictedWordsActions);
+    registeredActions = Array.isArray(actionNames) ? actionNames : Object.keys(restrictedWordsActions);
+
+    console.log(
+        '✅ [restrictedWordsHandler] 已注册 ' +
+            Object.keys(restrictedWordsActions).length +
+            ' 个动作到 ActionRegistry'
+    );
+}
 
 // ================================================================
 // Phase 5: 使用 AlpineRegistry 注册组件

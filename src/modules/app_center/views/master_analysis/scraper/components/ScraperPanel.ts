@@ -385,6 +385,8 @@ export function createScraperPanel() {
         // 组件销毁时清理资源
         destroy() {
             console.log('[Scraper] 🔄 清理事件监听器');
+            this._historyLoadSeq += 1;
+            this.dataPreview?.cleanup();
             this._unsubscribers.forEach(unsub => {
                 try {
                     unsub();

@@ -7,6 +7,7 @@ import { SafeModuleLoader } from '../../../../../common/infrastructure/SafeModul
 import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
 import { createAiAnalysisPanel } from './components/AlpinePanel';
 import { AlpineRegistry } from '../../../../../common/infrastructure/AlpineRegistry';
+import { destroyAlpineComponent } from '../utils/alpineLifecycle';
 
 import '../master_analysis_style.css';
 import './ai_analysis_style.css';
@@ -55,5 +56,11 @@ export async function mount(container: HTMLElement): Promise<void> {
  */
 export function unmount(): void {
   console.log('[AI智能分析] 🔄 模块卸载');
-  // 状态由 Zustand 管理，无需手动重置
+
+  try {
+    destroyAlpineComponent('[x-data="aiAnalysisPanel"]');
+    AlpineRegistry.getInstance().unregister('aiAnalysisPanel');
+  } catch (error) {
+    console.error('[AI智能分析] ❌ 模块卸载失败:', error);
+  }
 }

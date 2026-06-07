@@ -455,7 +455,7 @@ function exportToExcel(): void {
 
     // Show notification
     alert(
-        '导出成功！Excel文件包含计算公式，打开后公式会自动计算。\n\n提示：清仓红线/动销价格/建议售价列包含Excel公式，修改配送费后会自动更新。'
+        '导出成功！CSV文件包含Excel兼容公式，使用Excel打开后公式会自动计算。\n\n提示：清仓红线/动销价格/建议售价列包含公式，修改配送费后会自动更新。'
     );
 }
 

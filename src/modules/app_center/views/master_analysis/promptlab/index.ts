@@ -13,6 +13,7 @@ import { SafeModuleLoader } from '../../../../../common/infrastructure/SafeModul
 import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
 import { AlpineRegistry } from '../../../../../common/infrastructure/AlpineRegistry';
 import { createPromptlabPanel } from './components/PromptlabPanel';
+import { destroyAlpineComponent } from '../utils/alpineLifecycle';
 import '../master_analysis_style.css';
 
 // ========================================== 
@@ -73,6 +74,8 @@ export function unmount(): void {
     console.log('[Promptlab] 🔄 开始卸载子模块');
 
     try {
+        destroyAlpineComponent('[x-data="promptlabPanel"]');
+
         // 使用 AlpineRegistry 卸载组件
         const registry = AlpineRegistry.getInstance();
         registry.unregister('promptlabPanel');

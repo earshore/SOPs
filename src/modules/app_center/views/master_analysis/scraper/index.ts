@@ -13,17 +13,9 @@ import { SafeModuleLoader } from '../../../../../common/infrastructure/SafeModul
 import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
 import { AlpineRegistry } from '../../../../../common/infrastructure/AlpineRegistry';
 import { createScraperPanel } from './components/ScraperPanel';
+import { destroyAlpineComponent, getAlpineData } from '../utils/alpineLifecycle';
 import '../master_analysis_style.css';
 import './scraper_style.css';
-
-type AlpineWithData = Window['Alpine'] & {
-    $data?: (element: Element | null) => unknown;
-};
-
-function getAlpineData(element: Element | null): unknown {
-    const alpine = window.Alpine as AlpineWithData | undefined;
-    return alpine?.$data?.(element) ?? null;
-}
 
 // ========================================== 
 // Module Exports (统一架构接口)
@@ -74,18 +66,7 @@ export function unmount(): void {
     console.log('[Scraper] 🔄 开始卸载子模块');
 
     try {
-        // 清理事件监听器
-        const cardsContainer = document.getElementById('data-cards');
-        if (cardsContainer) {
-            // 获取 Alpine 组件实例
-            const alpineData = getAlpineData(cardsContainer.closest('[x-data="scraperPanel"]'));
-            const dataPreview = alpineData && typeof alpineData === 'object'
-                ? (alpineData as { dataPreview?: { cleanup?: () => void } }).dataPreview
-                : null;
-            if (dataPreview?.cleanup) {
-                dataPreview.cleanup();
-            }
-        }
+        destroyAlpineComponent('[x-data="scraperPanel"]');
 
         // 使用 AlpineRegistry 卸载组件
         const registry = AlpineRegistry.getInstance();
