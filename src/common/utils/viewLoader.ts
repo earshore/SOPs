@@ -358,12 +358,13 @@ export function registerView(_viewConfig: Partial<ViewConfig>): void {
  * @param options - 加载选项
  * @param options.disableFadeIn - 是否禁用淡入动画（默认false，即启用动画）
  */
-export async function loadTemplate(path: string, options?: { disableFadeIn?: boolean }): Promise<string> {
+export async function loadTemplate(path: string, options?: ViewLoadOptions & { disableFadeIn?: boolean }): Promise<string> {
     // 尝试标准化路径
     if (!path.startsWith('/')) path = '/' + path;
 
     // 1. Check Cache
-    const cachedHtml = checkCache(path);
+    const shouldUseCache = options?.useCache !== false && !options?.forceReload;
+    const cachedHtml = shouldUseCache ? checkCache(path) : null;
     let html: string;
     
     if (cachedHtml) {
@@ -376,7 +377,9 @@ export async function loadTemplate(path: string, options?: { disableFadeIn?: boo
             const altPath = path.substring(1);
             if (htmlModules[altPath]) {
                 html = await htmlModules[altPath]();
-                setCache(path, html); // Cache for original path to avoid retry
+                if (shouldUseCache) {
+                    setCache(path, html); // Cache for original path to avoid retry
+                }
             } else {
                 throw new SystemError(
                     `Template path not found: ${path}`,
@@ -386,7 +389,9 @@ export async function loadTemplate(path: string, options?: { disableFadeIn?: boo
             }
         } else {
             html = await loader();
-            setCache(path, html);
+            if (shouldUseCache) {
+                setCache(path, html);
+            }
         }
     }
     

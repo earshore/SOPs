@@ -279,10 +279,12 @@ function extractSpecsByType(
 
   keywords.forEach((k) => {
     const type = k.type || "other";
-    if (!grouped.has(type)) {
-      grouped.set(type, []);
+    const keywordsForType = grouped.get(type);
+    if (keywordsForType) {
+      keywordsForType.push(k.keyword);
+    } else {
+      grouped.set(type, [k.keyword]);
     }
-    grouped.get(type)!.push(k.keyword);
   });
 
   // 为每个 type 生成一行规格（直接使用原始 type）

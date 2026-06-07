@@ -80,6 +80,8 @@
 ## 🏗️ 架构文档
 
 ### 架构债务
+以下 `.kiro/arch-debt/` 文档是早期架构债务规划和执行快照。当前残留技术债以 [技术债务审计报告](./TECH_DEBT_AUDIT.md) 和实际脚本输出为准。
+
 - [架构债务 README](../.kiro/arch-debt/README.md) - 架构债务管理
 - [债务清单](../.kiro/arch-debt/debt-list.md) - 技术债务列表
 - [修复进度](../.kiro/arch-debt/progress.md) - 修复进度跟踪
@@ -187,7 +189,8 @@
 ## 📊 报告文档
 
 ### 当前质量报告
-- [CI 质量门禁](./CI-QUALITY-GATES.md) - 当前 CI 安全与质量标准，含进行中的 P1/P2 改进计划
+- [CI 质量门禁](./CI-QUALITY-GATES.md) - 当前 CI 安全与质量标准，含 warning gate 基线
+- [技术债务审计报告](./TECH_DEBT_AUDIT.md) - 当前残留债务、验证命令和过期报告校正
 - [XSS 风险扫描报告](./XSS_SCAN_REPORT.md) - 当前安全扫描输出
 
 ### 归档报告

@@ -1,14 +1,8 @@
 {
   "version": 1,
   "command": "node node_modules/eslint/bin/eslint.js src --ignore-pattern **/*.test.ts --ignore-pattern **/*.test.tsx --ignore-pattern **/*.spec.ts --ignore-pattern **/*.spec.tsx --format json",
-  "totalWarnings": 383,
+  "totalWarnings": 342,
   "warnings": [
-    {
-      "filePath": "src/common/BaseModule.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
-      "count": 2
-    },
     {
       "filePath": "src/common/BaseModule.ts",
       "ruleId": "no-restricted-syntax",
@@ -32,24 +26,6 @@
       "ruleId": "complexity",
       "message": "Static method 'createSkeleton' has a complexity of 14. Maximum allowed is 10.",
       "count": 1
-    },
-    {
-      "filePath": "src/common/config/ConfigCenter.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
-      "count": 2
-    },
-    {
-      "filePath": "src/common/devtools/MemoryDevTools.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
-      "count": 3
-    },
-    {
-      "filePath": "src/common/di/Container.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
-      "count": 2
     },
     {
       "filePath": "src/common/errors/AppError.ts",
@@ -222,7 +198,7 @@
     {
       "filePath": "src/components/settings/systemSettings.ts",
       "ruleId": "max-lines-per-function",
-      "message": "Arrow function has too many lines (468). Maximum allowed is 100.",
+      "message": "Arrow function has too many lines (465). Maximum allowed is 100.",
       "count": 1
     },
     {
@@ -437,12 +413,6 @@
     },
     {
       "filePath": "src/modules/app_center/views/master_analysis/ai_analysis/components/actions.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
-      "count": 2
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/ai_analysis/components/actions.ts",
       "ruleId": "complexity",
       "message": "Async function 'runAnalysisAction' has a complexity of 11. Maximum allowed is 10.",
       "count": 1
@@ -472,12 +442,6 @@
       "count": 1
     },
     {
-      "filePath": "src/modules/app_center/views/master_analysis/ai_analysis/components/dataLoaders.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
-      "count": 1
-    },
-    {
       "filePath": "src/modules/app_center/views/master_analysis/ai_analysis/components/PerformanceSettings.ts",
       "ruleId": "max-lines-per-function",
       "message": "Function 'createPerformanceSettingsPanel' has too many lines (153). Maximum allowed is 100.",
@@ -494,12 +458,6 @@
       "ruleId": "max-lines-per-function",
       "message": "Function 'generateAnalysisPrompt' has too many lines (116). Maximum allowed is 100.",
       "count": 2
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/ai_analysis/services/aiAnalysisService.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
-      "count": 1
     },
     {
       "filePath": "src/modules/app_center/views/master_analysis/ai_analysis/services/aiAnalysisService.ts",
@@ -559,12 +517,6 @@
       "filePath": "src/modules/app_center/views/master_analysis/ai_analysis/utils/dataTransformers.ts",
       "ruleId": "complexity",
       "message": "Function 'convertScraperDataToProduct' has a complexity of 16. Maximum allowed is 10.",
-      "count": 2
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/promptlab/components/computed.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
       "count": 2
     },
     {
@@ -629,12 +581,6 @@
     },
     {
       "filePath": "src/modules/app_center/views/master_analysis/scraper/handlers/importHandler.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/scraper/handlers/importHandler.ts",
       "ruleId": "complexity",
       "message": "Arrow function has a complexity of 11. Maximum allowed is 10.",
       "count": 3
@@ -642,19 +588,13 @@
     {
       "filePath": "src/modules/app_center/views/master_analysis/scraper/handlers/importHandler.ts",
       "ruleId": "max-lines-per-function",
-      "message": "Async function 'handleImportFiles' has too many lines (153). Maximum allowed is 100.",
+      "message": "Async function 'handleImportFiles' has too many lines (156). Maximum allowed is 100.",
       "count": 1
     },
     {
       "filePath": "src/modules/app_center/views/master_analysis/scraper/utils/renderers.ts",
       "ruleId": "@typescript-eslint/max-params",
       "message": "Function 'renderProductCard' has too many parameters (6). Maximum allowed is 5.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/scraper/utils/renderers.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
       "count": 1
     },
     {
@@ -666,14 +606,8 @@
     {
       "filePath": "src/modules/app_center/views/master_analysis/scraper/utils/renderers.ts",
       "ruleId": "max-lines-per-function",
-      "message": "Function 'renderProductCard' has too many lines (117). Maximum allowed is 100.",
+      "message": "Function 'renderProductCard' has too many lines (119). Maximum allowed is 100.",
       "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/scraper/utils/sanitizers.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
-      "count": 2
     },
     {
       "filePath": "src/modules/app_center/views/master_analysis/scraper/utils/validators.ts",
@@ -697,12 +631,6 @@
       "filePath": "src/modules/app_center/views/master_analysis/services/adapters/ProductOverviewAdapter.ts",
       "ruleId": "complexity",
       "message": "Method 'normalizeReport' has a complexity of 32. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/services/dnaExtractor.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
       "count": 1
     },
     {
@@ -946,18 +874,6 @@
       "count": 1
     },
     {
-      "filePath": "src/services/alertService.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
-      "count": 1
-    },
-    {
-      "filePath": "src/services/analyticsService.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
-      "count": 1
-    },
-    {
       "filePath": "src/services/errorService.ts",
       "ruleId": "complexity",
       "message": "Method 'classify' has a complexity of 21. Maximum allowed is 10.",
@@ -1036,52 +952,16 @@
       "count": 10
     },
     {
-      "filePath": "src/services/loggerService.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
-      "count": 1
-    },
-    {
       "filePath": "src/services/monitoringService.ts",
       "ruleId": "complexity",
       "message": "Async method 'init' has a complexity of 11. Maximum allowed is 10.",
       "count": 1
     },
     {
-      "filePath": "src/stores/middleware/devtools.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
-      "count": 2
-    },
-    {
-      "filePath": "src/stores/middleware/persist.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
-      "count": 2
-    },
-    {
       "filePath": "src/stores/useAppStore.ts",
       "ruleId": "max-lines-per-function",
       "message": "Arrow function has too many lines (164). Maximum allowed is 100.",
       "count": 1
-    },
-    {
-      "filePath": "src/types/alpinejs.d.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
-      "count": 2
-    },
-    {
-      "filePath": "src/types/api.d.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
-      "count": 7
-    },
-    {
-      "filePath": "src/types/config.d.ts",
-      "ruleId": "@typescript-eslint/no-explicit-any",
-      "message": "Unexpected any. Specify a different type.",
-      "count": 5
     }
   ]
 }

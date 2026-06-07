@@ -1,5 +1,7 @@
 # P0技术债务清零简报
 
+> 归档审计说明（2026-06-07）：本文是 P0 清零阶段的历史总结。当前复核结论见 `docs/TECH_DEBT_AUDIT.md`；P0 清零结论仍成立，但旧文中的 `639` 个 ESLint warning、Logger 139 warning、全量 Vitest OOM、`type-check:tests` 失败等“当前状态/下一步”描述已经过期。
+
 **项目**: SOPs - 亚马逊运营管理平台  
 **执行日期**: 2026年6月7日  
 **执行团队**: Multi-Agent Team (xss-security-fixer, circular-dep-eliminator, ci-gate-builder, build-fixer)
@@ -222,14 +224,14 @@
 ## ⚠️ 已知限制
 
 ### ESLint警告
-**当前状态**: 0个错误 + 639个警告
+**当前状态**: 0个错误 + 342个基线内警告
 
 **原因**: 
-- Logger 分层、`any`、non-null assertion、复杂度等问题仍为计划内技术债
+- `any`、non-null assertion、复杂度、长函数、console、已审计 DOM 写入等问题仍为计划内技术债
 - 这些是架构和可维护性债务，属于P1/P2级别
 
 **影响**: 
-- 不阻塞构建（规则级别为"warn"）
+- 基线内 warning 不阻塞构建；新增或超过基线的 warning 由 `lint:warning-gate` 阻断
 - 不影响运行时功能
 - 已纳入后续重构计划
 
@@ -250,10 +252,9 @@
 ## 🎯 后续建议
 
 ### P1级技术债务 (建议2周内完成)
-1. **消除剩余 Logger 分层重构债务** (139个 warning)
-   - 继续推进基础设施层去Logger化
-   - 更新剩余工具类和组件
-   - 目标: Logger 相关 warning 清零，并将分层规则恢复为 error
+1. **降低 ESLint warning 基线** (当前 342 个)
+   - 继续处理 `any`、non-null assertion、复杂度、长函数、console 和已审计 DOM 写入 warning
+   - 目标: 保持 `lint:warning-gate` 不回退，并逐步降低基线到 300 以下
 
 2. **XSS MEDIUM 风险精细化审查**
    - ✅ 已完成，当前 MEDIUM 风险为 0
@@ -263,7 +264,8 @@
 3. **完善单元测试**
    - 为新增安全工具函数添加测试
    - 循环依赖检测集成到测试流程
-   - 修复全量 Vitest OOM 与 `type-check:tests` 失败
+   - ✅ `npm run type-check:tests` 已复核通过
+   - ✅ `npm test -- --run` 已复核通过
    - 目标: 覆盖率提升至80%
 
 ### P2级优化 (建议1月内完成)

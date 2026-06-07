@@ -7,7 +7,11 @@ import { appStore } from '@/stores/useAppStore';
 import { showToast } from '@common/ui/index';
 import { formatHistoryDate } from '../services/reportGenerator';
 import { AlpineContext, HistoricalReportDetail } from '../types';
-import type { ScrapedData } from '@/types/modules-business';
+import type { AnalysisReport, ScrapedData } from '@/types/modules-business';
+
+function isHistoricalAnalysisReport(report: unknown): report is AnalysisReport | string {
+  return typeof report === 'string' || (typeof report === 'object' && report !== null);
+}
 
 /**
  * 检查并加载 Scraper 数据
@@ -83,7 +87,7 @@ export function loadHistoricalReport(
   detail: HistoricalReportDetail
 ): void {
   try {
-    if (!detail || !detail.report) {
+    if (!detail || !isHistoricalAnalysisReport(detail.report)) {
       showToast('历史报告数据无效', { type: 'error' });
       return;
     }
@@ -93,7 +97,7 @@ export function loadHistoricalReport(
     context.hasReport = true;
 
     // 同步到 Zustand store
-    appStore.getState().setAnalysisReport(detail.report as any);
+    appStore.getState().setAnalysisReport(detail.report);
 
     console.log('[数据加载] 已加载历史分析报告:', detail.timestamp);
     showToast(`已加载历史分析报告 (${formatHistoryDate(detail.timestamp)})`, { type: 'success' });

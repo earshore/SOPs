@@ -374,14 +374,18 @@ export async function handleImportFiles(
 
             list.forEach((p: ScrapedProduct) => {
                 if (!p.asin) return;
-                if (!productPool.has(p.asin)) {
-                    productPool.set(p.asin, []);
-                }
-                productPool.get(p.asin)!.push({
+                const productsForAsin = productPool.get(p.asin);
+                const productWithSource = {
                     ...p,
                     _source_site: site,
                     _filename: filename
-                });
+                };
+
+                if (productsForAsin) {
+                    productsForAsin.push(productWithSource);
+                } else {
+                    productPool.set(p.asin, [productWithSource]);
+                }
             });
         });
 

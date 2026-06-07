@@ -14,6 +14,9 @@ import {
 import type { Product } from '../config/sampleData';
 
 describe('analysisPrompts', () => {
+  type ProductArgument = Parameters<typeof generateAnalysisPrompt>[1];
+  type BatchTaskIdsArgument = Parameters<typeof generateBatchAnalysisPrompt>[0];
+
   const mockProduct: Product = {
     asin: 'B0TEST123',
     productTitle: 'Test Product Title',
@@ -58,17 +61,17 @@ describe('analysisPrompts', () => {
 
     it('should throw error for invalid task ID', () => {
       expect(() => {
-        generateAnalysisPrompt('invalid-task' as any, mockProduct);
+        generateAnalysisPrompt('invalid-task', mockProduct);
       }).toThrow('未知的任务ID');
     });
 
     it('should throw error for invalid product', () => {
       expect(() => {
-        generateAnalysisPrompt('title-keywords', null as any);
+        generateAnalysisPrompt('title-keywords', null as unknown as ProductArgument);
       }).toThrow('无效的产品对象');
 
       expect(() => {
-        generateAnalysisPrompt('title-keywords', {} as any);
+        generateAnalysisPrompt('title-keywords', {} as unknown as ProductArgument);
       }).toThrow('产品对象缺少必需字段: asin');
     });
 
@@ -83,15 +86,21 @@ describe('analysisPrompts', () => {
       } as Product;
 
       expect(() => {
-        generateAnalysisPrompt('title-keywords', { ...invalidProduct, productTitle: '' } as any);
+        generateAnalysisPrompt('title-keywords', { ...invalidProduct, productTitle: '' });
       }).toThrow('产品对象缺少必需字段: productTitle');
 
       expect(() => {
-        generateAnalysisPrompt('title-keywords', { ...invalidProduct, productTitle: 'Test', customer_reviews: 'not-array' } as any);
+        generateAnalysisPrompt(
+          'title-keywords',
+          { ...invalidProduct, productTitle: 'Test', customer_reviews: 'not-array' } as unknown as ProductArgument
+        );
       }).toThrow('产品对象的 customer_reviews 必须是数组');
 
       expect(() => {
-        generateAnalysisPrompt('title-keywords', { ...invalidProduct, productTitle: 'Test', customer_reviews: [], feature_bullets: 'not-array' } as any);
+        generateAnalysisPrompt(
+          'title-keywords',
+          { ...invalidProduct, productTitle: 'Test', customer_reviews: [], feature_bullets: 'not-array' } as unknown as ProductArgument
+        );
       }).toThrow('产品对象的 feature_bullets 必须是数组');
     });
 
@@ -108,7 +117,7 @@ describe('analysisPrompts', () => {
     it('should warn for unusual language codes', () => {
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
-      generateAnalysisPrompt('title-keywords', mockProduct, 'xx' as any);
+      generateAnalysisPrompt('title-keywords', mockProduct, 'xx');
 
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringContaining('Unusual language code: xx')
@@ -177,13 +186,13 @@ describe('analysisPrompts', () => {
 
     it('should throw error for invalid task array', () => {
       expect(() => {
-        generateBatchAnalysisPrompt(null as any, mockProduct);
+        generateBatchAnalysisPrompt(null as unknown as BatchTaskIdsArgument, mockProduct);
       }).toThrow('无效的任务ID数组');
     });
 
     it('should filter out invalid task IDs', () => {
       const taskIds = ['title-keywords', 'invalid-task', 'selling-points'];
-      const prompt = generateBatchAnalysisPrompt(taskIds as any, mockProduct);
+      const prompt = generateBatchAnalysisPrompt(taskIds, mockProduct);
 
       expect(prompt).toContain('title-keywords');
       expect(prompt).toContain('selling-points');
@@ -192,13 +201,13 @@ describe('analysisPrompts', () => {
 
     it('should throw error if no valid tasks', () => {
       expect(() => {
-        generateBatchAnalysisPrompt(['invalid1', 'invalid2'] as any, mockProduct);
+        generateBatchAnalysisPrompt(['invalid1', 'invalid2'], mockProduct);
       }).toThrow('没有有效的任务');
     });
 
     it('should validate product object', () => {
       expect(() => {
-        generateBatchAnalysisPrompt(['title-keywords'], null as any);
+        generateBatchAnalysisPrompt(['title-keywords'], null as unknown as ProductArgument);
       }).toThrow('无效的产品对象');
     });
 

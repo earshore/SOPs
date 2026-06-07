@@ -63,6 +63,7 @@ export function getRouteModule(routeId: RouteId): string {
       APP_CENTER_ROUTES.SCRAPER,
       APP_CENTER_ROUTES.AI_ANALYSIS,
       APP_CENTER_ROUTES.PROMPTLAB,
+      APP_CENTER_ROUTES.PPC_SEARCH_TERMS,
       APP_CENTER_ROUTES.PLAYGROUND,
       APP_CENTER_ROUTES.OVERVIEW,
     ] as readonly string[]).includes(routeId)

@@ -30,6 +30,7 @@ npm run prebuild
 2. **代码质量检查** (`npm run ci:quality`)
    - TypeScript类型检查
    - ESLint代码规范检查
+   - ESLint warning baseline gate
 
 3. **构建验证** (`npm run build`)
    - Vite构建成功
@@ -166,9 +167,25 @@ $ npm run type-check
 
 **通过标准**:
 - 0个错误 (error)
-- 警告 (warning) 不阻塞构建，但应及时修复
+- 已有警告允许保留在 `config/eslint-warning-baseline.json` 基线内
+- 新增或超过基线的 warning 由 `npm run lint:warning-gate` 阻断
 
 **配置文件**: `config/eslint.config.js`
+
+### 3. ESLint warning baseline gate
+
+**命令**: `npm run lint:warning-gate`
+
+**工具**: `scripts/quality/eslint-warning-gate.ts`
+
+**检查内容**:
+- 运行 ESLint JSON 输出
+- 与 `config/eslint-warning-baseline.json` 对比 warning bucket
+- 阻止新增 warning 或已有 bucket 数量回升
+
+**通过标准**:
+- 当前 warning 数量不超过基线
+- 当前结果: `342/342 warning(s)`
 
 ---
 
@@ -303,8 +320,11 @@ jobs:
 | XSS中危风险 | 0个 | 0个 | ✅ 达标 |
 | TypeScript错误 | 0个 | 0个 | ✅ 达标 |
 | ESLint错误 | 0个 | 0个 | ✅ 达标 |
-| ESLint警告 | 639个 | <300个 | 🟡 P1/P2待处理 |
-| 构建状态 | 成功 | 成功 | ✅ 达标 |
+| ESLint警告 | 342/342基线内 | <300个 | 🟡 P1/P2待处理 |
+| 技术债扫描 | 1185项，0 critical / 0 high，297 medium / 888 low | 0 high | 🟡 P1/P2待处理 |
+| 测试类型检查 | 通过 | 通过 | ✅ 达标 |
+| 全量 Vitest | 通过 | 通过 | ✅ 达标 |
+| 构建状态 | 成功，仍有构建 warning | 成功 | ✅ 达标 |
 
 ### 改进计划
 
@@ -316,11 +336,12 @@ jobs:
 
 **阶段2 (进行中)**:
 - ✅ 清零所有中危XSS风险
-- 🔄 修复测试基础设施债务
+- ✅ 复核测试基础设施：`type-check:tests` 和全量 Vitest 通过
 - 🔄 治理构建警告: Vite 动态/静态 import 混用、chunk 体积偏大
 
 **阶段3 (计划中)**:
 - ⏳ 降低 ESLint 警告到 300 以下
+- ⏳ 分批处理技术债扫描中的 medium 项：重复代码、长函数、深嵌套
 - ⏳ 完善安全编码培训
 
 ---
@@ -390,6 +411,7 @@ error  Do not use 'innerHTML' directly  no-restricted-syntax
 ## 📚 相关文档
 
 - [XSS扫描报告](./XSS_SCAN_REPORT.md)
+- [技术债务审计报告](./TECH_DEBT_AUDIT.md)
 - [架构债务清单](../.kiro/arch-debt/debt-list.md)
 - [循环依赖修复记录](../.kiro/arch-debt/progress.md)
 - [ESLint配置](../config/eslint.config.js)

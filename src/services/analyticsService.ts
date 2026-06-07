@@ -121,7 +121,7 @@ export class AnalyticsService {
   private isInitialized: boolean = false;
   private logger: ILoggerService | null = null;
 
-  private constructor(logger?: ILoggerService, _storage?: IStorageService) {
+  constructor(logger?: ILoggerService, _storage?: IStorageService) {
     this.config = {
       enabled: true,
       trackPageViews: true,
@@ -607,6 +607,5 @@ export function createAnalyticsService(
   logger?: ILoggerService,
   storage?: IStorageService
 ): AnalyticsService {
-  const instance = new (AnalyticsService as any)(logger, storage);
-  return instance;
+  return new AnalyticsService(logger, storage);
 }

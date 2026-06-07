@@ -371,8 +371,8 @@ describe('DNA Extractor - Multi-Category Products', () => {
         },
         'title-keywords': {
           secondary_keywords: [
-            { keyword: '150% density', type: null as any }, // type 为 null
-            { keyword: 'body wave' } as any // type 缺失
+            { keyword: '150% density', type: null }, // type 为 null
+            { keyword: 'body wave' } // type 缺失
           ]
         }
       };
@@ -430,7 +430,7 @@ describe('DNA Extractor - Multi-Category Products', () => {
         'buyer-profile': {
           demographics: {
             age_range_estimate: '25-45岁',
-            likely_gender: null as any,
+            likely_gender: null,
             lifestyle_indicators: []
           },
           buyer_types: [],
@@ -479,8 +479,8 @@ describe('DNA Extractor - Multi-Category Products', () => {
       const report: FullAnalysisReport = {
         'buyer-profile': {
           demographics: {
-            age_range_estimate: null as any,
-            likely_gender: null as any,
+            age_range_estimate: null,
+            likely_gender: null,
             lifestyle_indicators: []
           },
           buyer_types: [],
@@ -551,7 +551,7 @@ describe('DNA Extractor - Multi-Category Products', () => {
         'buyer-profile': {
           demographics: {
             age_range_estimate: '25-45岁',
-            likely_gender: null as any,
+            likely_gender: null,
             lifestyle_indicators: []
           },
           buyer_types: [{ type: '日常用户', percentage: 100 }],

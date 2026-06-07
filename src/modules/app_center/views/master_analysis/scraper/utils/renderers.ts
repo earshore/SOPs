@@ -62,12 +62,14 @@ export function renderProductCard(
     };
     const flag = languageFlagMap[siteKey] || "🌐";
 
-    const statusConfig: Record<string, { class: string; icon: string; text: string }> = {
+    type StatusBadgeConfig = { class: string; icon: string; text: string };
+    const defaultStatus: StatusBadgeConfig = { class: "bg-amber-100 text-amber-700 border-amber-200", icon: "fa-exclamation-circle", text: "部分" };
+    const statusConfig: Record<string, StatusBadgeConfig> = {
         success: { class: "bg-emerald-100 text-emerald-700 border-emerald-200", icon: "fa-check-circle", text: "成功" },
-        partial: { class: "bg-amber-100 text-amber-700 border-amber-200", icon: "fa-exclamation-circle", text: "部分" },
+        partial: defaultStatus,
         failed: { class: "bg-red-100 text-red-700 border-red-200", icon: "fa-times-circle", text: "失败" },
     };
-    const status = statusConfig[p.scrape_status || 'partial'] || statusConfig['partial']!;
+    const status = statusConfig[p.scrape_status || 'partial'] || defaultStatus;
 
     return `
         <div id="card-${p.asin}" 

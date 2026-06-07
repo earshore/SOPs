@@ -160,6 +160,18 @@ export const MENU_CONFIG: MenuConfig = {
       themeColor: "fuchsia", // ✅ 紫红色 - 鲜艳醒目的搜索主题
     },
 
+    // PPC Tools 模块配置
+    ppc_tools: {
+      id: "ppc_tools",
+      contextId: "apps",
+      parentModuleId: "app_center",
+      title: "PPC Tools",
+      version: "v1.0",
+      icon: "fas fa-magnifying-glass-dollar",
+      description: "广告搜索词报表分析、否词与加词建议工具。",
+      themeColor: "emerald",
+    },
+
     // Playground 模块配置
     playground: {
       id: "playground",
@@ -309,12 +321,21 @@ export const MENU_CONFIG: MenuConfig = {
       version: "v1.0 Pro",
       description: "ASIN 关键词覆盖情况查询，手动补充与 SEO 合规性审查工具。",
     },
+    ppc_tools: {
+      id: "ppc_tools",
+      label: "PPC Tools",
+      icon: "fas fa-magnifying-glass-dollar",
+      color: "emerald",
+      order: 3,
+      version: "v1.0",
+      description: "广告搜索词报表分析、否词与加词建议工具。",
+    },
     playground: {
       id: "playground",
       label: "Playground",
       icon: "fas fa-paper-plane",
       color: "cyan",
-      order: 3,
+      order: 4,
       version: "v1.0",
       description: "轻量级 AI 对话试验台，当前内置 Deep Chat 页面用于快速问答与 Prompt 试验。",
     },

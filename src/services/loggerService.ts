@@ -324,8 +324,13 @@ export class LoggerService implements ILoggerService {
       this.batchTimer = null;
     }
 
+    const remoteEndpoint = this.remoteEndpoint;
+    if (!remoteEndpoint) {
+      return;
+    }
+
     try {
-      await fetch(this.remoteEndpoint!, {
+      await fetch(remoteEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

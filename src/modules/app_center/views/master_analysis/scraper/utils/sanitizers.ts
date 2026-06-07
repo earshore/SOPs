@@ -2,7 +2,7 @@
  * 安全防护工具 - XSS防护
  */
 
-import type { ProductData } from '../types';
+import type { ProductData, ReviewData } from '../types';
 
 /**
  * HTML转义函数 - 防止XSS攻击
@@ -58,11 +58,7 @@ export function sanitizeUrl(url: string): string {
 /**
  * 清理产品数据 - 对所有用户可控的字段进行HTML转义
  */
-export function sanitizeProductData(product: any): ProductData {
-    if (!product || typeof product !== 'object') {
-        return product;
-    }
-    
+export function sanitizeProductData(product: ProductData): ProductData {
     const sanitized = { ...product };
     
     // 转义产品标题
@@ -79,7 +75,7 @@ export function sanitizeProductData(product: any): ProductData {
     
     // 转义评论内容
     if (Array.isArray(sanitized.customer_reviews)) {
-        sanitized.customer_reviews = sanitized.customer_reviews.map((review: any) => ({
+        sanitized.customer_reviews = sanitized.customer_reviews.map((review: ReviewData) => ({
             ...review,
             headline: review.headline ? escapeHtml(review.headline) : '',
             body: review.body ? escapeHtml(review.body) : '',

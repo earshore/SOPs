@@ -9,6 +9,15 @@ import { appStore } from '@/stores/useAppStore';
 import { estimateTokenCount, formatTokenCount } from '../../ai_analysis/utils/tokenCounter';
 import type { PromptlabAlpineContext } from './types';
 
+type AnalysisReportMetadata = {
+  confidence?: Record<string, number>;
+  overallConfidence?: number;
+};
+
+type AnalysisReportWithMetadata = {
+  _metadata?: AnalysisReportMetadata;
+};
+
 // ==========================================
 // 报告状态
 // ==========================================
@@ -79,7 +88,7 @@ export function computeReportConfidence(): Record<string, number> | null {
     console.log('[Promptlab computed] reportConfidence: 报告不存在或为字符串');
     return null;
   }
-  const reportObj = report as Record<string, any>;
+  const reportObj = report as AnalysisReportWithMetadata;
   if (!reportObj._metadata) {
     console.warn('[Promptlab computed] reportConfidence: 缺少 _metadata 字段');
     return null;
@@ -93,7 +102,7 @@ export function computeReportConfidence(): Record<string, number> | null {
 export function computeOverallConfidence(): number {
   const report = appStore.getState().analysis.analysisReport;
   if (!report || typeof report === 'string') return 0;
-  const reportObj = report as Record<string, any>;
+  const reportObj = report as AnalysisReportWithMetadata;
   if (!reportObj._metadata) return 0;
   return reportObj._metadata.overallConfidence ?? 0;
 }

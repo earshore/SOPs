@@ -15,6 +15,7 @@ import { Product } from '../config/sampleData';
 import { AlpineContext } from '../types';
 import { appStore } from '@/stores/useAppStore';
 import type { FullAnalysisReport } from '../config/analysisReportData';
+import type { AnalysisReport } from '@/types/modules-business';
 import { BusinessError } from '@common/errors/AppError';
 import { getPerformanceSettings } from './PerformanceSettings';
 import eventBus from '@common/EventBus';
@@ -223,7 +224,7 @@ export function downloadJson(context: AlpineContext, dataSourceMarketplace: stri
 function syncAnalysisReport(context: AlpineContext, report: FullAnalysisReport | null): void {
   context.analysisReport = report;
   context.hasReport = !!report;
-  appStore.getState().setAnalysisReport(report as any);
+  appStore.getState().setAnalysisReport(report as AnalysisReport | null);
 }
 
 function resetAnalysisReport(context: AlpineContext): void {
@@ -320,7 +321,7 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
       const { HistoryService } = await import('../../services/historyService');
       const success = await HistoryService.updateAnalysisStatusAsync(
         currentHistoryId,
-        analysisReport as any
+        analysisReport as AnalysisReport
       );
 
       if (success) {

@@ -356,7 +356,10 @@ export class ConfigCenter implements IConfigService {
    */
   public set(path: string, value: unknown): void {
     const keys = path.split('.');
-    const lastKey = keys.pop()!;
+    const lastKey = keys.pop();
+    if (lastKey === undefined) {
+      return;
+    }
     let target: Record<string, unknown> = this.config as unknown as Record<string, unknown>;
     
     // 导航到目标对象
@@ -381,11 +384,13 @@ export class ConfigCenter implements IConfigService {
    * 监听配置变更
    */
   public watch(path: string, listener: ConfigChangeListener): () => void {
-    if (!this.listeners.has(path)) {
-      this.listeners.set(path, new Set());
+    let listeners = this.listeners.get(path);
+    if (!listeners) {
+      listeners = new Set();
+      this.listeners.set(path, listeners);
     }
     
-    this.listeners.get(path)!.add(listener);
+    listeners.add(listener);
     
     // 返回取消监听函数
     return () => {

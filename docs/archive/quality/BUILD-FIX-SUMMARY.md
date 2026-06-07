@@ -1,5 +1,7 @@
 # Build Fix Summary - 2026-06-07
 
+> 归档审计说明（2026-06-07）：本文是构建修复当时的历史记录。当前复核结论见 `docs/TECH_DEBT_AUDIT.md`；旧文中的 `639` 个 warning、全量 Vitest OOM、`type-check:tests` 失败等“当前状态/下一步”描述已经过期。
+
 ## 🎯 问题描述
 
 构建失败，原因是 ESLint 配置中添加了 `no-restricted-imports` 规则，禁止基础设施服务导入 `loggerService`，以避免循环依赖。这导致 139 个 ESLint 错误。
@@ -74,12 +76,12 @@ exportLogs: () => {
 # 修复后（当时快照）
 ✖ 645 problems (0 errors, 645 warnings)
 
-# 最新复核（2026-06-07）
-✖ 639 problems (0 errors, 639 warnings)
+# 当前复核（2026-06-07）
+ESLint warning gate passed: 342/342 warning(s)
 ```
 
 - **消除了所有 139 个 ESLint 错误** ✅
-- 当前剩余 639 个 warnings（主要是架构分层、类型安全、复杂度和风格建议）
+- 当前剩余 342 个 ESLint baseline warnings（主要是非空断言、复杂度、长函数、console 和已审计 DOM 写入）
 - 所有 `no-restricted-imports` 错误已解决
 
 ### 构建成功
@@ -143,14 +145,16 @@ npm run build
 虽然 warnings 不会阻止构建，但建议逐步处理：
 
 **优先级 1 - 测试基础设施债务**
-- 修复全量 Vitest OOM
-- 修复 `type-check:tests` 失败
+- `npm run type-check:tests` 已复核通过
+- `npm test -- --run` 已复核通过
+- 后续只保留测试输出噪音、用例隔离和覆盖率提升类改进
 - 保持 `tests/unit/SafeRenderer.test.ts` 作为安全渲染回归用例
 
-**优先级 2 - ESLint warning 降噪 (当前 639 个)**
-- Logger 分层重构 warning
+**优先级 2 - ESLint warning 降噪 (当前 342 个基线内 warning)**
 - `@typescript-eslint/no-explicit-any`
 - `@typescript-eslint/no-non-null-assertion`
+- `no-console`
+- 已审计 DOM 写入 warning
 
 **优先级 3 - 代码复杂度**
 - 函数复杂度过高 (complexity > 10)

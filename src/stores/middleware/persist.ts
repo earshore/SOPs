@@ -7,6 +7,9 @@
 
 import type { StoreApi } from 'zustand/vanilla';
 
+type StateUpdater<T> = T | Partial<T> | ((state: T) => T | Partial<T>);
+type StateReplacer<T> = T | ((state: T) => T);
+
 /**
  * 持久化配置
  */
@@ -56,7 +59,11 @@ export const persist = <T extends object>(
   return (set: StoreApi<T>['setState'], get: StoreApi<T>['getState']): T => {
     // 包装set方法以自动持久化
     const persistedSet: typeof set = (partial, replace) => {
-      set(partial, replace as any);
+      if (replace) {
+        set(partial as StateReplacer<T>, true);
+      } else {
+        set(partial as StateUpdater<T>, false);
+      }
       
       // 持久化状态
       try {
@@ -98,7 +105,7 @@ export const persist = <T extends object>(
         const restoredState = merge(persistedState, initialState);
         
         // 使用set更新状态（这会触发持久化）
-        persistedSet(restoredState as any, true);
+        persistedSet(restoredState, true);
         
         return restoredState;
       }

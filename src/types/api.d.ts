@@ -40,14 +40,14 @@ export interface ApiError {
   /** HTTP 状态码 */
   statusCode?: number;
   /** 错误上下文 */
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
 }
 
 /**
  * 分页响应
  * @template T - 列表项类型
  */
-export interface PaginatedResponse<T = any> {
+export interface PaginatedResponse<T = unknown> {
   /** 数据列表 */
   items: T[];
   /** 总数 */
@@ -275,7 +275,7 @@ export interface AnalysisSection {
   /** 子章节 */
   subsections?: AnalysisSection[];
   /** 数据 */
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
 }
 
 /**
@@ -303,7 +303,7 @@ export interface AnalysisReportResponse {
     id: string;
     type: 'line' | 'bar' | 'pie' | 'scatter';
     title: string;
-    data: any;
+    data: unknown;
   }>;
   /** 元数据 */
   metadata?: {
@@ -401,7 +401,7 @@ export interface ErrorRecordResponse {
   /** 最后发生时间 */
   lastOccurrence: number;
   /** 上下文信息 */
-  context: Record<string, any>;
+  context: Record<string, unknown>;
   /** 用户代理 */
   userAgent?: string;
   /** URL */
@@ -448,7 +448,7 @@ export interface AnalyticsEventResponse {
   /** 用户ID */
   userId?: string;
   /** 事件属性 */
-  properties: Record<string, any>;
+  properties: Record<string, unknown>;
   /** 上下文信息 */
   context: {
     url: string;
@@ -511,7 +511,7 @@ export interface StorageResponse<T = unknown> {
  */
 export interface ConfigResponse {
   /** 配置数据 */
-  config: Record<string, any>;
+  config: Record<string, unknown>;
   /** 版本 */
   version?: string;
   /** 最后更新时间 */

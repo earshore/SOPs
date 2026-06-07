@@ -12,12 +12,17 @@ import {
 } from './promptSanitizer';
 
 describe('promptSanitizer', () => {
+  type PromptInput = Parameters<typeof sanitizePromptInput>[0];
+  type PromptInputArray = Parameters<typeof sanitizePromptInputArray>[0];
+  type ProductDataInput = Parameters<typeof sanitizeProductData>[0];
+  type AIOutput = Parameters<typeof validateAIOutput>[0];
+
   describe('sanitizePromptInput', () => {
     it('should return empty string for invalid input', () => {
       expect(sanitizePromptInput('')).toBe('');
-      expect(sanitizePromptInput(null as any)).toBe('');
-      expect(sanitizePromptInput(undefined as any)).toBe('');
-      expect(sanitizePromptInput(123 as any)).toBe('');
+      expect(sanitizePromptInput(null as unknown as PromptInput)).toBe('');
+      expect(sanitizePromptInput(undefined as unknown as PromptInput)).toBe('');
+      expect(sanitizePromptInput(123 as unknown as PromptInput)).toBe('');
     });
 
     it('should filter dangerous prompt injection patterns', () => {
@@ -77,9 +82,9 @@ describe('promptSanitizer', () => {
 
   describe('sanitizePromptInputArray', () => {
     it('should return empty array for invalid input', () => {
-      expect(sanitizePromptInputArray(null as any)).toEqual([]);
-      expect(sanitizePromptInputArray(undefined as any)).toEqual([]);
-      expect(sanitizePromptInputArray('not an array' as any)).toEqual([]);
+      expect(sanitizePromptInputArray(null as unknown as PromptInputArray)).toEqual([]);
+      expect(sanitizePromptInputArray(undefined as unknown as PromptInputArray)).toEqual([]);
+      expect(sanitizePromptInputArray('not an array' as unknown as PromptInputArray)).toEqual([]);
     });
 
     it('should sanitize all items in array', () => {
@@ -139,7 +144,7 @@ describe('promptSanitizer', () => {
         productTitle: 'Title'
       };
 
-      const result = sanitizeProductData(product as any);
+      const result = sanitizeProductData(product as unknown as ProductDataInput);
       expect(result.productTitle).toBe('Title');
       expect(result.feature_bullets).toEqual([]);
       expect(result.customer_reviews).toEqual([]);
@@ -149,8 +154,8 @@ describe('promptSanitizer', () => {
   describe('validateAIOutput', () => {
     it('should return invalid for empty output', () => {
       expect(validateAIOutput('').isValid).toBe(false);
-      expect(validateAIOutput(null as any).isValid).toBe(false);
-      expect(validateAIOutput(undefined as any).isValid).toBe(false);
+      expect(validateAIOutput(null as unknown as AIOutput).isValid).toBe(false);
+      expect(validateAIOutput(undefined as unknown as AIOutput).isValid).toBe(false);
     });
 
     it('should detect suspicious patterns in output', () => {

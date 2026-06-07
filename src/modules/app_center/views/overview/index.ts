@@ -7,11 +7,17 @@ import { loadTemplate } from '@/common/utils/viewLoader';
 import { safeMount } from '@/common/utils/safeMount';
 import { APP_EVENTS } from '@/common/constants/eventConstants';
 import eventBus from '@/common/EventBus';
+
+interface OverviewFilterState {
+  category: string;
+  query: string;
+}
+
 /**
  * 挂载 App Center 总览模块
  */
 const mountInternal = async (container: HTMLElement): Promise<void> => {
-  const html = await loadTemplate('src/modules/app_center/views/overview/template.html');
+  const html = await loadTemplate('src/modules/app_center/views/overview/template.html', { useCache: false });
   // ✅ 安全: 静态HTML模板，无用户输入
   // 为overview页面添加淡入动画（在渲染前添加）
   container.classList.add('fade-in');
@@ -35,33 +41,46 @@ export function unmount(): void {
  * 初始化总览页面事件
  */
 function initOverviewEvents(container: HTMLElement): void {
-  // 分类筛选按钮事件
+  const state: OverviewFilterState = {
+    category: 'all',
+    query: ''
+  };
+  const searchInput = container.querySelector<HTMLInputElement>('#app-overview-search');
+  const clearSearchBtn = container.querySelector<HTMLButtonElement>('#app-overview-clear-search');
+
   const filterBtns = container.querySelectorAll<HTMLElement>('.category-filter-btn');
   filterBtns.forEach((btn) => {
     btn.addEventListener('click', () => {
-      // 移除所有按钮的 active 状态
-      filterBtns.forEach((b) => {
-        b.classList.remove('active', 'bg-blue-500', 'text-white');
-        b.classList.add('bg-white', 'text-slate-700', 'border-slate-300');
-      });
-
-      // 添加当前按钮的 active 状态
-      btn.classList.add('active', 'bg-blue-500', 'text-white');
-      btn.classList.remove('bg-white', 'text-slate-700', 'border-slate-300');
-
-      // 执行筛选
       const category = btn.dataset.category;
       if (category) {
-        filterByCategory(container, category);
+        state.category = category;
+        setActiveCategory(filterBtns, btn);
+        applyOverviewFilters(container, state);
       }
     });
   });
 
-  // 快速链接按钮事件
-  const quickLinks = container.querySelectorAll<HTMLElement>('[data-quick-link]');
-  quickLinks.forEach((link) => {
-    link.addEventListener('click', () => {
-      const targetTab = link.dataset.quickLink;
+  searchInput?.addEventListener('input', () => {
+    state.query = searchInput.value.trim().toLowerCase();
+    clearSearchBtn?.classList.toggle('hidden', state.query.length === 0);
+    applyOverviewFilters(container, state);
+  });
+
+  clearSearchBtn?.addEventListener('click', () => {
+    if (searchInput) {
+      searchInput.value = '';
+    }
+    state.query = '';
+    clearSearchBtn.classList.add('hidden');
+    applyOverviewFilters(container, state);
+    searchInput?.focus();
+  });
+
+  const childLinks = container.querySelectorAll<HTMLElement>('.app-child-link[data-child-tab]');
+  childLinks.forEach((link) => {
+    link.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const targetTab = link.dataset.childTab;
       if (targetTab) {
         eventBus.emit(APP_EVENTS.ROUTE_CHANGE, { routeId: targetTab });
       }
@@ -78,39 +97,55 @@ function initOverviewEvents(container: HTMLElement): void {
       }
     });
   });
+
+  applyOverviewFilters(container, state);
 }
 
 /**
- * 按分类筛选应用卡片
+ * 更新分类按钮选中状态
  */
-function filterByCategory(container: HTMLElement, category: string): void {
-  // 获取所有应用卡片（不是 section）
-  const cards = container.querySelectorAll<HTMLElement>('.app-center-card-grid > div[data-category]');
+function setActiveCategory(filterBtns: NodeListOf<HTMLElement>, activeBtn: HTMLElement): void {
+  filterBtns.forEach((btn) => {
+    const isActive = btn === activeBtn;
+    btn.classList.toggle('active', isActive);
+    btn.classList.toggle('bg-blue-600', isActive);
+    btn.classList.toggle('text-white', isActive);
+    btn.classList.toggle('hover:bg-blue-700', isActive);
+    btn.classList.toggle('bg-white', !isActive);
+    btn.classList.toggle('text-slate-700', !isActive);
+    btn.classList.toggle('border', !isActive);
+    btn.classList.toggle('border-slate-300', !isActive);
+    btn.classList.toggle('hover:bg-slate-50', !isActive);
+  });
+}
+
+/**
+ * 按分类和搜索词筛选应用卡片
+ */
+function applyOverviewFilters(container: HTMLElement, state: OverviewFilterState): void {
+  const cards = container.querySelectorAll<HTMLElement>('.app-center-card-grid > [data-action="switch-tab"][data-category]');
+  let visibleCount = 0;
 
   cards.forEach((card) => {
-    if (category === 'all') {
-      card.style.display = '';
+    const categoryMatches = state.category === 'all' || card.dataset.category === state.category;
+    const searchText = `${card.dataset.search ?? ''} ${card.textContent ?? ''}`.toLowerCase();
+    const queryMatches = state.query.length === 0 || searchText.includes(state.query);
+    const isVisible = categoryMatches && queryMatches;
+
+    card.style.display = isVisible ? '' : 'none';
+    if (isVisible) {
+      visibleCount += 1;
       card.classList.add('fade-in');
-    } else {
-      if (card.dataset.category === category) {
-        card.style.display = '';
-        card.classList.add('fade-in');
-      } else {
-        card.style.display = 'none';
-      }
     }
   });
 
-  // 检查是否有可见的卡片，如果没有则隐藏整个 section
-  const section = container.querySelector<HTMLElement>('#app-module-apps');
-  if (section) {
-    const visibleCards = section.querySelectorAll(
-      '.app-center-card-grid > div[data-category]:not([style*="display: none"])'
-    );
-    if (visibleCards.length === 0 && category !== 'all') {
-      section.style.display = 'none';
-    } else {
-      section.style.display = '';
-    }
+  const visibleCountText = container.querySelector<HTMLElement>('#app-overview-visible-count');
+  if (visibleCountText) {
+    visibleCountText.textContent = `显示 ${visibleCount} 个应用`;
+  }
+
+  const emptyState = container.querySelector<HTMLElement>('#app-overview-empty');
+  if (emptyState) {
+    emptyState.classList.toggle('hidden', visibleCount > 0);
   }
 }

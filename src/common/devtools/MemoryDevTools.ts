@@ -130,9 +130,9 @@ export class MemoryDevTools {
     `;
 
     // 绑定事件
-    panel.querySelector('#memory-devtools-close')!.addEventListener('click', () => this.toggle());
-    panel.querySelector('#memory-force-gc')!.addEventListener('click', () => this._forceGC());
-    panel.querySelector('#memory-clear-snapshots')!.addEventListener('click', () => this._clearSnapshots());
+    panel.querySelector('#memory-devtools-close')?.addEventListener('click', () => this.toggle());
+    panel.querySelector('#memory-force-gc')?.addEventListener('click', () => this._forceGC());
+    panel.querySelector('#memory-clear-snapshots')?.addEventListener('click', () => this._clearSnapshots());
 
     return panel;
   }

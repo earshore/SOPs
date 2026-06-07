@@ -5,6 +5,7 @@ const APP_CENTER_ROUTE_PATHS: Record<string, string> = {
   [APP_CENTER_ROUTES.SCRAPER]: '/app-center/scraper',
   [APP_CENTER_ROUTES.AI_ANALYSIS]: '/app-center/ai-analysis',
   [APP_CENTER_ROUTES.PROMPTLAB]: '/app-center/promptlab',
+  [APP_CENTER_ROUTES.PPC_SEARCH_TERMS]: '/app-center/ppc-search-terms',
   [APP_CENTER_ROUTES.KW_INPUT]: '/app-center/keyword-hunter/input',
   [APP_CENTER_ROUTES.KW_PROCESS]: '/app-center/keyword-hunter/process',
   [APP_CENTER_ROUTES.KW_ANALYSIS]: '/app-center/keyword-hunter/analysis',

@@ -71,7 +71,7 @@ export interface RouteMeta {
   preloadRequired?: boolean;
   dependencies?: string[];
   keepAlive?: boolean;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // ==================== Menu配置 ====================
@@ -130,7 +130,7 @@ export interface EnvConfig {
 export interface ServiceConfig {
   name: string;
   enabled: boolean;
-  options?: Record<string, any>;
+  options?: Record<string, unknown>;
 }
 
 /**
@@ -200,7 +200,7 @@ export interface RouterConfig {
 export interface ModuleLoaderConfig {
   containerId: string;
   shellId: string;
-  moduleMap: Record<string, () => Promise<any>>;
+  moduleMap: Record<string, () => Promise<unknown>>;
   loaderColor?: string;
   moduleName?: string;
 }
@@ -352,8 +352,8 @@ export type {
  */
 export interface RouteErrorContext {
   routeId?: string;
-  from?: any;
-  to?: any;
+  from?: unknown;
+  to?: unknown;
   action?: string;
   retryCount?: number;
 }

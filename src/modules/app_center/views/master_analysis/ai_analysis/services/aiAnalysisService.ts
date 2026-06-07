@@ -191,7 +191,7 @@ export async function runAIAnalysis(
             logger.debug('[AI分析] 检测到嵌套结构，已提取内层数据', undefined, 'AIAnalysisService');
           }
 
-          (report as any)[fieldName] = actualResult;
+          (report as Record<string, unknown>)[fieldName] = actualResult;
           logger.debug('[AI分析] 分析成功，数据已添加到报告', undefined, 'AIAnalysisService');
         } else {
           logger.warn('[AI分析] 返回的数据格式无效:', result, 'AIAnalysisService');

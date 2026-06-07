@@ -6,6 +6,9 @@
 
 import type { StoreApi } from 'zustand/vanilla';
 
+type StateUpdater<T> = T | Partial<T> | ((state: T) => T | Partial<T>);
+type StateReplacer<T> = T | ((state: T) => T);
+
 /**
  * DevTools配置
  */
@@ -61,7 +64,11 @@ export const devtools = <T extends object>(
     // 包装set方法以发送action到DevTools
     const devtoolsSet: typeof set = (partial, replace) => {
       // 先调用原始set
-      set(partial, replace as any);
+      if (replace) {
+        set(partial as StateReplacer<T>, true);
+      } else {
+        set(partial as StateUpdater<T>, false);
+      }
       
       // 获取更新后的状态
       const nextState = get();
@@ -87,9 +94,9 @@ export const devtools = <T extends object>(
       const msg = message as { type?: string; state?: string };
       if (msg.type === 'DISPATCH' && msg.state) {
         try {
-          const newState = JSON.parse(msg.state);
+          const newState = JSON.parse(msg.state) as T;
           // 使用replace=true强制替换整个状态
-          set(newState as any, true);
+          set(newState, true);
         } catch (error) {
           console.error('[DevTools] 时间旅行失败:', error);
         }

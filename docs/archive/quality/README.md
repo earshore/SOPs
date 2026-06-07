@@ -6,6 +6,14 @@
 
 **审计日期**: 2026-06-07
 
+### 当前复核结论
+
+- 当前状态以 [技术债务审计报告](../../TECH_DEBT_AUDIT.md) 为准。
+- P0 安全/循环依赖/构建阻断项本次复核仍为清零。
+- 旧报告中的 `639` 个 ESLint warning 已过期；当前 warning gate 为 `342/342`。
+- 旧报告中的全量 Vitest OOM 与 `type-check:tests` 失败已过期；两项本次复核均通过。
+- 归档报告中的“下一步建议”只代表当时计划，不应直接作为当前执行清单。
+
 ### 已过期/已完成
 
 - [Build Fix Summary - 2026-06-07](./BUILD-FIX-SUMMARY.md)
@@ -24,7 +32,7 @@
 
 - [CI质量门禁文档](../../CI-QUALITY-GATES.md)
   - 保留原因: 当前质量门禁标准和改进计划仍在使用。
-  - 当前状态: 阶段 2 进行中，阶段 3 计划中。
+  - 当前状态: warning gate 基线为 342；测试基础设施已复核通过，构建 warning 和 P1/P2 维护性债务仍待治理。
 
 - [XSS风险扫描报告](../../XSS_SCAN_REPORT.md)
   - 保留原因: 由 `tools/security/xss-scanner.js` 生成，并被 CI 质量门禁文档和安全工具说明引用。

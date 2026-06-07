@@ -39,6 +39,15 @@ export const appCenterManifest = defineModuleManifest({
       loader: () => import("./views/master_analysis/promptlab/index"),
     },
     {
+      key: "PPC_SEARCH_TERMS",
+      routeId: "ppc_search_terms",
+      moduleId: "ppc_tools",
+      label: "PPC 搜索词分析器",
+      icon: "fas fa-magnifying-glass-dollar",
+      category: "ppc_tools",
+      loader: () => import("./views/ppc_search_terms/index"),
+    },
+    {
       key: "KW_INPUT",
       routeId: "kw_input",
       moduleId: "keyword_tracker",

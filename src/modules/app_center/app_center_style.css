@@ -88,6 +88,47 @@
   padding: 0;
 }
 
+/* ==================== 应用总览样式 ==================== */
+.app-overview-stats {
+  grid-template-columns: repeat(auto-fit, minmax(min(9rem, 100%), 1fr));
+}
+
+.app-overview-container .app-center-card-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+}
+
+.app-child-link {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px solid var(--color-slate-200);
+  border-radius: var(--rounded-lg);
+  background: var(--color-slate-50);
+  color: var(--color-slate-700);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.25;
+  padding: 0.5rem 0.75rem;
+  text-align: center;
+  transition:
+    background-color var(--duration-150) ease,
+    border-color var(--duration-150) ease,
+    color var(--duration-150) ease;
+}
+
+.app-child-link:hover {
+  border-color: var(--color-slate-400);
+  background: var(--color-white);
+  color: var(--color-slate-900);
+}
+
+.app-child-link i {
+  width: 1rem;
+  text-align: center;
+}
+
 /* ==================== 响应式适配 ==================== */
 @media (max-width: 768px) {
   #app_center_content_area {

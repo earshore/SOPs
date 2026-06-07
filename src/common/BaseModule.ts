@@ -373,10 +373,13 @@ export default class BaseModule {
             const btn = this.container.querySelector(`#retry-btn-${this.moduleId}`) as HTMLButtonElement;
             if (btn) {
                 btn.addEventListener('click', () => {
+                    const container = this.container;
+                    if (!container) return;
+
                     // ✅ 安全: 静态HTML模板，无用户输入
-                    this.container!.innerHTML = '<div class="p-10 text-center"><i class="fas fa-spinner fa-spin text-slate-400"></i></div>';
+                    container.innerHTML = '<div class="p-10 text-center"><i class="fas fa-spinner fa-spin text-slate-400"></i></div>';
                     // 重新挂载
-                    this.mount(this.container!).catch(e => {
+                    this.mount(container).catch(e => {
                         console.error("Retry failed:", e);
                         this.handleError(e as Error); // 递归处理再次失败的情况
                     });

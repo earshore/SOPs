@@ -16,13 +16,20 @@ vi.mock('@/common/EventBus', () => ({
 
 const overviewTemplate = `
   <div class="app-overview-container">
-    <button class="category-filter-btn" data-category="all"></button>
-    <button class="category-filter-btn" data-category="apps"></button>
-    <button data-quick-link="scraper"></button>
+    <input id="app-overview-search" type="search">
+    <button id="app-overview-clear-search" class="hidden" type="button"></button>
+    <p id="app-overview-visible-count"></p>
+    <button class="category-filter-btn active bg-blue-600 text-white" data-category="all"></button>
+    <button class="category-filter-btn bg-white text-slate-700 border border-slate-300" data-category="master_analysis"></button>
+    <button class="category-filter-btn bg-white text-slate-700 border border-slate-300" data-category="ppc_tools"></button>
     <section id="app-module-apps">
       <div class="app-center-card-grid">
-        <div data-category="apps" data-action="switch-tab" data-tab="ai_analysis"></div>
+        <article data-category="master_analysis" data-search="master analysis 数据采集" data-action="switch-tab" data-tab="scraper">
+          <button class="app-child-link" data-child-tab="ai_analysis"></button>
+        </article>
+        <article data-category="ppc_tools" data-search="ppc search term 广告" data-action="switch-tab" data-tab="ppc_search_terms"></article>
       </div>
+      <div id="app-overview-empty" class="hidden"></div>
     </section>
   </div>
 `;
@@ -49,19 +56,79 @@ describe('App Center Overview', () => {
 
     await overviewModule.mount(container);
 
-    expect(loadTemplate).toHaveBeenCalledWith('src/modules/app_center/views/overview/template.html');
+    expect(loadTemplate).toHaveBeenCalledWith('src/modules/app_center/views/overview/template.html', { useCache: false });
     expect(container.classList.contains('fade-in')).toBe(true);
     expect(container.querySelector('.app-overview-container')).not.toBeNull();
   });
 
-  it('emits route changes from quick links and app cards', async () => {
+  it('emits route changes from child links and app cards', async () => {
     const container = document.createElement('div');
 
     await overviewModule.mount(container);
-    container.querySelector<HTMLElement>('[data-quick-link="scraper"]')?.click();
-    container.querySelector<HTMLElement>('[data-action="switch-tab"]')?.click();
+    container.querySelector<HTMLElement>('.app-child-link[data-child-tab="ai_analysis"]')?.click();
+
+    expect(eventBus.emit).toHaveBeenCalledTimes(1);
+    expect(eventBus.emit).toHaveBeenCalledWith(APP_EVENTS.ROUTE_CHANGE, { routeId: 'ai_analysis' });
+
+    vi.mocked(eventBus.emit).mockClear();
+    container.querySelector<HTMLElement>('[data-tab="scraper"]')?.click();
 
     expect(eventBus.emit).toHaveBeenCalledWith(APP_EVENTS.ROUTE_CHANGE, { routeId: 'scraper' });
-    expect(eventBus.emit).toHaveBeenCalledWith(APP_EVENTS.ROUTE_CHANGE, { routeId: 'ai_analysis' });
+  });
+
+  it('filters cards by category and updates the visible count', async () => {
+    const container = document.createElement('div');
+
+    await overviewModule.mount(container);
+    container.querySelector<HTMLElement>('[data-category="ppc_tools"]')?.click();
+
+    expect(container.querySelector<HTMLElement>('[data-tab="scraper"]')?.style.display).toBe('none');
+    expect(container.querySelector<HTMLElement>('[data-tab="ppc_search_terms"]')?.style.display).toBe('');
+    expect(container.querySelector('#app-overview-visible-count')?.textContent).toBe('显示 1 个应用');
+    expect(container.querySelector<HTMLElement>('[data-category="ppc_tools"]')?.classList.contains('active')).toBe(true);
+  });
+
+  it('filters cards by search text and clears the query', async () => {
+    const container = document.createElement('div');
+
+    await overviewModule.mount(container);
+    const searchInput = container.querySelector<HTMLInputElement>('#app-overview-search');
+    const clearSearchBtn = container.querySelector<HTMLButtonElement>('#app-overview-clear-search');
+
+    if (!searchInput || !clearSearchBtn) {
+      throw new Error('Search controls were not rendered');
+    }
+
+    searchInput.value = 'ppc';
+    searchInput.dispatchEvent(new Event('input'));
+
+    expect(container.querySelector<HTMLElement>('[data-tab="scraper"]')?.style.display).toBe('none');
+    expect(container.querySelector<HTMLElement>('[data-tab="ppc_search_terms"]')?.style.display).toBe('');
+    expect(clearSearchBtn.classList.contains('hidden')).toBe(false);
+    expect(container.querySelector('#app-overview-visible-count')?.textContent).toBe('显示 1 个应用');
+
+    clearSearchBtn.click();
+
+    expect(searchInput.value).toBe('');
+    expect(container.querySelector<HTMLElement>('[data-tab="scraper"]')?.style.display).toBe('');
+    expect(container.querySelector<HTMLElement>('[data-tab="ppc_search_terms"]')?.style.display).toBe('');
+    expect(clearSearchBtn.classList.contains('hidden')).toBe(true);
+  });
+
+  it('shows an empty state when no app matches the search', async () => {
+    const container = document.createElement('div');
+
+    await overviewModule.mount(container);
+    const searchInput = container.querySelector<HTMLInputElement>('#app-overview-search');
+
+    if (!searchInput) {
+      throw new Error('Search input was not rendered');
+    }
+
+    searchInput.value = 'not-found';
+    searchInput.dispatchEvent(new Event('input'));
+
+    expect(container.querySelector('#app-overview-visible-count')?.textContent).toBe('显示 0 个应用');
+    expect(container.querySelector<HTMLElement>('#app-overview-empty')?.classList.contains('hidden')).toBe(false);
   });
 });

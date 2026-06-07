@@ -104,6 +104,17 @@ interface SettingsPanelData {
     isDangerousEndpoint(endpoint: string): boolean;
 }
 
+interface AlpineWatchContext {
+    $watch<T = unknown>(property: string, callback: (value: T) => void): void;
+}
+
+function registerSettingsWatchers(panel: SettingsPanelData & AlpineWatchContext): void {
+    panel.$watch('llm.provider', (val: string) => panel.loadProviderConfig(val));
+    panel.$watch('proxy.type', (val: string) => {
+        panel.proxy.customUrl = panel.proxy.savedKeyMap[val] || '';
+    });
+}
+
 // ==========================================
 // Alpine Component Logic
 // ==========================================
@@ -278,14 +289,7 @@ const SettingsPanel = (): SettingsPanelData => ({
         // 保存清理函数
         this._unsubscribers = [unsubOpen, unsubClose];
 
-        // Watch for provider changes to load its config
-        // @ts-expect-error - Alpine.js $watch is injected at runtime
-        this.$watch('llm.provider', (val: string) => this.loadProviderConfig(val));
-        // Watch for proxy type to restore cached key
-        // @ts-expect-error - Alpine.js $watch is injected at runtime
-        this.$watch('proxy.type', (val: string) => {
-            this.proxy.customUrl = this.proxy.savedKeyMap[val] || '';
-        });
+        registerSettingsWatchers(this as SettingsPanelData & AlpineWatchContext);
     },
 
     open() {

@@ -46,7 +46,8 @@
 
 ## 质量门禁与当前报告
 
-- [CI 质量门禁](./CI-QUALITY-GATES.md) — 当前 CI 安全与质量标准，含进行中的 P1/P2 改进计划
+- [CI 质量门禁](./CI-QUALITY-GATES.md) — 当前 CI 安全与质量标准，含 warning gate 基线
+- [技术债务审计报告](./TECH_DEBT_AUDIT.md) — 当前残留债务、验证命令和过期报告校正
 - [XSS 风险扫描报告](./XSS_SCAN_REPORT.md) — 当前安全扫描输出，由安全扫描工具持续更新
 
 历史质量/技术债报告已归档至 [archive/quality/](./archive/quality/)。

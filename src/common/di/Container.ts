@@ -122,6 +122,14 @@ export class DIContainer {
     }
 
     const lifetime = this.lifetimes.get(name);
+    const factory = this.factories.get(name);
+    if (!factory) {
+      throw new SystemError(
+        `服务未注册: ${name}`,
+        'DI_SERVICE_NOT_FOUND',
+        { module: 'DIContainer', action: 'resolve', serviceName: name }
+      );
+    }
 
     // 2. 单例模式：返回缓存的实例
     if (lifetime === 'singleton') {
@@ -130,7 +138,6 @@ export class DIContainer {
       }
 
       // 创建新实例并缓存
-      const factory = this.factories.get(name)!;
       const instance = factory(this);
       this.singletons.set(name, instance);
       
@@ -145,7 +152,6 @@ export class DIContainer {
     }
 
     // 3. 瞬态模式：每次创建新实例
-    const factory = this.factories.get(name)!;
     return factory(this) as T;
   }
 

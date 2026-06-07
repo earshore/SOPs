@@ -84,7 +84,7 @@ export class AlertService {
   private isInitialized: boolean = false;
   private logger: ILoggerService | null = null;
 
-  private constructor(logger?: ILoggerService) {
+  constructor(logger?: ILoggerService) {
     this.config = {
       enabled: true,
       showToast: true,
@@ -519,5 +519,5 @@ export default alertService;
  * @returns AlertService实例
  */
 export function createAlertService(logger?: ILoggerService): AlertService {
-  return new (AlertService as any)(logger);
+  return new AlertService(logger);
 }

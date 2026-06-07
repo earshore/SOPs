@@ -1,0 +1,101 @@
+.ppc-search-app {
+  --ppc-green: #059669;
+  --ppc-blue: #2563eb;
+  --ppc-amber: #d97706;
+  --ppc-red: #dc2626;
+  --ppc-purple: #7c3aed;
+}
+
+.ppc-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 700;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.ppc-filter-btn:hover {
+  background: #f8fafc;
+}
+
+.ppc-filter-btn.active {
+  border-color: var(--ppc-blue);
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.ppc-export-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 700;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.ppc-export-btn:hover {
+  border-color: #94a3b8;
+  background: #f8fafc;
+}
+
+.ppc-action-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.ppc-action-negative_exact {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.ppc-action-harvest_exact,
+.ppc-action-scale_budget {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.ppc-action-bid_down {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.ppc-action-listing_term {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+.ppc-action-observe {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.ppc-results-row {
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.ppc-results-row:hover {
+  background: #f8fafc;
+}
+
+.ppc-results-row td {
+  padding: 10px 12px;
+  vertical-align: top;
+}
