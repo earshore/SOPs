@@ -50,6 +50,10 @@ export class PerformanceStorage {
     this.logger = logger || null;
   }
 
+  static create(logger?: ILoggerService): PerformanceStorage {
+    return new PerformanceStorage(logger);
+  }
+
   /**
    * 获取单例实例
    */
@@ -153,8 +157,10 @@ export class PerformanceStorage {
       ...record
     };
 
+    const db = this.db;
+
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([this.config.storeName], 'readwrite');
+      const transaction = db.transaction([this.config.storeName], 'readwrite');
       const objectStore = transaction.objectStore(this.config.storeName);
       const request = objectStore.add(fullRecord);
 
@@ -182,8 +188,10 @@ export class PerformanceStorage {
 
     const ids: string[] = [];
 
+    const db = this.db;
+
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([this.config.storeName], 'readwrite');
+      const transaction = db.transaction([this.config.storeName], 'readwrite');
       const objectStore = transaction.objectStore(this.config.storeName);
 
       records.forEach(record => {
@@ -215,8 +223,10 @@ export class PerformanceStorage {
       );
     }
 
+    const db = this.db;
+
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([this.config.storeName], 'readonly');
+      const transaction = db.transaction([this.config.storeName], 'readonly');
       const objectStore = transaction.objectStore(this.config.storeName);
       const request = objectStore.get(id);
 
@@ -247,8 +257,10 @@ export class PerformanceStorage {
       );
     }
 
+    const db = this.db;
+
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([this.config.storeName], 'readonly');
+      const transaction = db.transaction([this.config.storeName], 'readonly');
       const objectStore = transaction.objectStore(this.config.storeName);
       
       let request: IDBRequest;
@@ -308,8 +320,10 @@ export class PerformanceStorage {
       );
     }
 
+    const db = this.db;
+
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([this.config.storeName], 'readwrite');
+      const transaction = db.transaction([this.config.storeName], 'readwrite');
       const objectStore = transaction.objectStore(this.config.storeName);
       const request = objectStore.delete(id);
 
@@ -335,8 +349,10 @@ export class PerformanceStorage {
       );
     }
 
+    const db = this.db;
+
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([this.config.storeName], 'readwrite');
+      const transaction = db.transaction([this.config.storeName], 'readwrite');
       const objectStore = transaction.objectStore(this.config.storeName);
       const request = objectStore.clear();
 
@@ -366,8 +382,10 @@ export class PerformanceStorage {
     const cutoffTime = Date.now() - (this.config.retentionDays * 24 * 60 * 60 * 1000);
     let deletedCount = 0;
 
+    const db = this.db;
+
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([this.config.storeName], 'readwrite');
+      const transaction = db.transaction([this.config.storeName], 'readwrite');
       const objectStore = transaction.objectStore(this.config.storeName);
       const index = objectStore.index('timestamp');
       const range = IDBKeyRange.upperBound(cutoffTime);
@@ -495,5 +513,5 @@ export default performanceStorage;
  * @returns PerformanceStorage实例
  */
 export function createPerformanceStorage(logger?: ILoggerService): PerformanceStorage {
-  return new (PerformanceStorage as any)(logger);
+  return PerformanceStorage.create(logger);
 }

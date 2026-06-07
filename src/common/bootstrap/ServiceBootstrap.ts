@@ -129,8 +129,9 @@ export class ServiceBootstrap {
     
     // 计算每个服务的依赖层级
     const calculateLevel = (name: string): number => {
-      if (levelMap.has(name)) {
-        return levelMap.get(name)!;
+      const cachedLevel = levelMap.get(name);
+      if (cachedLevel !== undefined) {
+        return cachedLevel;
       }
       
       const config = this.registry.getConfig(name as ServiceName);

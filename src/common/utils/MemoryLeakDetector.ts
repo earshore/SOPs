@@ -152,8 +152,10 @@ export class MemoryLeakDetector {
     if (this.snapshots.length < 2) return;
 
     // 计算内存增长
-    const first = this.snapshots[0]!;
-    const last = this.snapshots[this.snapshots.length - 1]!;
+    const first = this.snapshots[0];
+    const last = this.snapshots[this.snapshots.length - 1];
+    if (!first || !last) return;
+
     const growth = last.heapUsed - first.heapUsed;
     const duration = (last.timestamp - first.timestamp) / 1000 / 60; // 分钟
 

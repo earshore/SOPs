@@ -27,6 +27,16 @@ export interface Metric {
   navigationType: 'navigate' | 'reload' | 'back-forward' | 'prerender';
 }
 
+type LayoutShiftPerformanceEntry = PerformanceEntry & {
+  hadRecentInput: boolean;
+  value: number;
+};
+
+function isLayoutShiftPerformanceEntry(entry: PerformanceEntry): entry is LayoutShiftPerformanceEntry {
+  return 'hadRecentInput' in entry && typeof entry.hadRecentInput === 'boolean'
+    && 'value' in entry && typeof entry.value === 'number';
+}
+
 /**
  * 性能阈值配置
  */
@@ -181,8 +191,8 @@ class WebVitalsService {
 
     const observer = new PerformanceObserver((list) => {
       for (const entry of list.getEntries()) {
-        if (!(entry as any).hadRecentInput) {
-          clsValue += (entry as any).value;
+        if (isLayoutShiftPerformanceEntry(entry) && !entry.hadRecentInput) {
+          clsValue += entry.value;
           clsEntries.push(entry);
         }
       }

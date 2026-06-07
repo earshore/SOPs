@@ -124,7 +124,7 @@ export class LoadingManager {
     // 返回优先级最高的任务消息
     const tasks = Array.from(this.tasks.values());
     tasks.sort((a, b) => b.priority - a.priority);
-    return tasks[0]!.message;
+    return tasks[0]?.message ?? '';
   }
 
   /**

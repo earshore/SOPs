@@ -56,6 +56,13 @@ export interface MetricSummary {
  */
 export type PerformanceReport = IPerformanceReport;
 
+type LargestContentfulPaintPerformanceEntry = PerformanceEntry & {
+  renderTime?: number;
+  loadTime?: number;
+  element?: Element;
+  url?: string;
+};
+
 /**
  * 性能监控服务类
  * 🎯 DI改造：支持依赖注入Logger
@@ -174,8 +181,10 @@ export class PerformanceService {
     try {
       const observer = new PerformanceObserver((list) => {
         const entries = list.getEntries();
-        const lastEntry = entries[entries.length - 1] as any;
-        const value = Math.round(lastEntry.renderTime || lastEntry.loadTime);
+        const lastEntry = entries[entries.length - 1] as LargestContentfulPaintPerformanceEntry | undefined;
+        if (!lastEntry) return;
+
+        const value = Math.round(lastEntry.renderTime || lastEntry.loadTime || lastEntry.startTime);
 
         console.log('[Performance] LCP:', value, 'ms');
         this.recordMetric(METRIC_TYPES.LCP, value, {
@@ -441,10 +450,9 @@ export class PerformanceService {
     
     // 按名称分组
     this.metrics.forEach(metric => {
-      if (!byCategory[metric.name]) {
-        byCategory[metric.name] = [];
-      }
-      byCategory[metric.name]!.push(metric);
+      const categoryMetrics = byCategory[metric.name] ?? [];
+      categoryMetrics.push(metric);
+      byCategory[metric.name] = categoryMetrics;
     });
 
     const report: PerformanceReport = {
@@ -535,5 +543,5 @@ export function createPerformanceService(logger?: ILoggerService): PerformanceSe
 // 🔄 向后兼容：暴露到 window
 // ================================================================
 if (typeof window !== 'undefined') {
-  (window as any).PerformanceService = performanceService;
+  (window as Window & { PerformanceService?: PerformanceService }).PerformanceService = performanceService;
 }

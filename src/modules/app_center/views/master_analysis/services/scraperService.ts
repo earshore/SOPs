@@ -70,7 +70,7 @@ const requestPool = new RequestPool(configCenter.get<number>('scraper.maxConcurr
 // URL 策略
 // ----------------------------------------
 
-type URLStrategy = (targetUrl: string, key?: string) => string;
+type URLStrategy = (targetUrl: string, key: string) => string;
 
 const URL_STRATEGIES: Record<string, URLStrategy> = {
     scraperapi: (targetUrl, key) =>
@@ -80,8 +80,8 @@ const URL_STRATEGIES: Record<string, URLStrategy> = {
     brightdata: (targetUrl, key) =>
         `https://api.brightdata.com/request?customer=${key}&url=${encodeURIComponent(targetUrl)}`,
     custom_api: (targetUrl, baseUrl) => {
-        const separator = baseUrl!.includes("?") ? (baseUrl!.endsWith("=") ? "" : "&url=") : "?url=";
-        const finalBase = (baseUrl!.endsWith("url=") || baseUrl!.endsWith("url")) ? baseUrl : `${baseUrl}${separator}`;
+        const separator = baseUrl.includes("?") ? (baseUrl.endsWith("=") ? "" : "&url=") : "?url=";
+        const finalBase = (baseUrl.endsWith("url=") || baseUrl.endsWith("url")) ? baseUrl : `${baseUrl}${separator}`;
         return `${finalBase}${encodeURIComponent(targetUrl)}`;
     },
     custom_proxy: (targetUrl, proxyUrl) => `${proxyUrl}${encodeURIComponent(targetUrl)}`,
@@ -93,19 +93,16 @@ function constructFetchUrl(targetUrl: string, proxyConfig: ProxyConfig): string 
     const strategy = URL_STRATEGIES[type];
 
     if (strategy) {
-        if (['scraperapi', 'zenrows', 'brightdata', 'custom_api', 'custom_proxy', 'custom'].includes(type)) {
-            if (!customUrl) {
-                throw new ValidationError(
-                    `未配置 API Key 或 URL`,
-                    'SCRAPER_SVC_001',
-                    'customUrl',
-                    undefined,
-                    { module: 'ScraperService', action: 'constructFetchUrl', proxyType: type }
-                );
-            }
-            return strategy(targetUrl, customUrl);
+        if (!customUrl) {
+            throw new ValidationError(
+                `未配置 API Key 或 URL`,
+                'SCRAPER_SVC_001',
+                'customUrl',
+                undefined,
+                { module: 'ScraperService', action: 'constructFetchUrl', proxyType: type }
+            );
         }
-        return strategy(targetUrl);
+        return strategy(targetUrl, customUrl);
     }
     throw new ValidationError(
         `未支持的采集代理类型`,
@@ -149,7 +146,6 @@ async function fetchWithProxy(url: string, site: string, options: FetchOptions =
     const urlWithLang = `${url}${separator}language=${headers.locale}`;
 
             const isCommercial = ['scraperapi', 'zenrows', 'brightdata', 'custom_api'].includes(proxyConfig.type || '');
-            const isFreeProxy = false;
 
     let lastError: Error | undefined;
 
@@ -164,7 +160,7 @@ async function fetchWithProxy(url: string, site: string, options: FetchOptions =
             const fetchUrl = constructFetchUrl(urlWithLang, proxyConfig);
 
             let reqOptions: RequestInit = {};
-            if (!isCommercial && !isFreeProxy) {
+            if (!isCommercial) {
                 reqOptions = {
                     headers: {
                         "Accept-Language": headers["Accept-Language"],
@@ -226,13 +222,14 @@ async function fetchWithProxy(url: string, site: string, options: FetchOptions =
             return text;
 
         } catch (e) {
-            lastError = e as Error;
+            const error = e instanceof Error ? e : new Error(String(e));
+            lastError = error;
             // 超时错误特殊处理
-            if ((e as any).name === 'AbortError') {
+            if (error.name === 'AbortError') {
                 console.warn(`请求超时 (attempt ${i + 1})`);
                 lastError = new Error(`请求超时 (${timeout}ms)`);
             } else {
-                console.warn(`Fetch attempt ${i + 1} failed:`, (e as Error).message);
+                console.warn(`Fetch attempt ${i + 1} failed:`, error.message);
             }
         }
     }

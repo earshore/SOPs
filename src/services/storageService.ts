@@ -462,7 +462,8 @@ class StorageServiceClass implements IStorageService {
     let used = 0;
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      used += (localStorage.getItem(key!) || '').length * 2;
+      if (!key) continue;
+      used += (localStorage.getItem(key) || '').length * 2;
     }
     const total = 5 * 1024 * 1024; // 5MB
     return {

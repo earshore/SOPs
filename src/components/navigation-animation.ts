@@ -702,9 +702,9 @@ function initializeDropdowns(): void {
     (dropdown as DropdownAnimationElement).__dropdownAnimationController = controller;
 
     // 查找触发按钮
-    const trigger = dropdown.previousElementSibling as HTMLElement;
+    const trigger = dropdown.previousElementSibling;
 
-    if (trigger) {
+    if (trigger instanceof HTMLElement) {
       trigger.addEventListener('click', (e) => {
         e.stopPropagation();
         controller.toggle();
@@ -713,7 +713,9 @@ function initializeDropdowns(): void {
 
     // 点击外部关闭下拉菜单
     document.addEventListener('click', (e) => {
-      const target = e.target as HTMLElement;
+      const target = e.target;
+      if (!(target instanceof Node)) return;
+
       if (!dropdown.contains(target) && controller.getState()) {
         controller.close();
       }

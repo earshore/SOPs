@@ -17,6 +17,12 @@ interface ParsedPath {
   isValid: boolean;
 }
 
+type StoreAction = (value: unknown) => void;
+
+function isStoreAction(value: unknown): value is StoreAction {
+  return typeof value === 'function';
+}
+
 /**
  * 解析状态路径
  * @param path - 点分隔的路径,如 'ui.currentTab'
@@ -136,6 +142,7 @@ export class StoreCompat {
     }
 
     const state = appStore.getState();
+    const stateRecord = state as unknown as Record<string, unknown>;
     const { module, property, isValid } = parsePath(path);
 
     if (!isValid) {
@@ -144,7 +151,7 @@ export class StoreCompat {
     }
 
     // 获取模块状态
-    const moduleState = (state as any)[module];
+    const moduleState = stateRecord[module];
     if (!moduleState) {
       return undefined as T;
     }
@@ -155,7 +162,11 @@ export class StoreCompat {
     }
 
     // 返回属性值
-    return moduleState[property] as T;
+    if (typeof moduleState === 'object') {
+      return (moduleState as Record<string, unknown>)[property] as T;
+    }
+
+    return undefined as T;
   }
 
   /**
@@ -179,13 +190,14 @@ export class StoreCompat {
     }
 
     const state = appStore.getState();
+    const stateRecord = state as unknown as Record<string, unknown>;
 
     // 处理一级路径(整个模块)
     if (!property) {
       if (module in state) {
-        const update: Partial<AppState> = {};
-        (update as any)[module] = value;
-        appStore.setState(update);
+        const update: Record<string, unknown> = {};
+        update[module] = value;
+        appStore.setState(update as Partial<AppState>);
       }
       return;
     }
@@ -193,27 +205,29 @@ export class StoreCompat {
     // 处理二级路径(模块.属性)
     // 1. 尝试使用专用setter
     const setterName = MODULE_SETTERS[module]?.[property];
-    if (setterName && typeof (state as any)[setterName] === 'function') {
-      (state as any)[setterName](value);
+    const setter = setterName ? stateRecord[setterName] : undefined;
+    if (isStoreAction(setter)) {
+      setter(value);
       return;
     }
 
     // 2. 使用通用updater
     const updaterName = MODULE_UPDATERS[module];
-    if (updaterName && typeof (state as any)[updaterName] === 'function') {
+    const updater = updaterName ? stateRecord[updaterName] : undefined;
+    if (isStoreAction(updater)) {
       const updates: Record<string, unknown> = {};
       updates[property] = value;
-      (state as any)[updaterName](updates);
+      updater(updates);
       return;
     }
 
     // 3. 兜底:直接更新(不推荐,但保证兼容性)
     console.warn(`[StoreCompat] 未找到setter: ${module}.${property}, 使用直接更新`);
-    const moduleState = (state as any)[module];
+    const moduleState = stateRecord[module];
     if (moduleState && typeof moduleState === 'object') {
-      const update: Partial<AppState> = {};
-      (update as any)[module] = { ...moduleState, [property]: value };
-      appStore.setState(update);
+      const update: Record<string, unknown> = {};
+      update[module] = { ...moduleState, [property]: value };
+      appStore.setState(update as Partial<AppState>);
     }
   }
 

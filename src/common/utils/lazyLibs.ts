@@ -4,10 +4,7 @@
 // 延迟加载大型第三方库以优化初始包大小
 // ================================================================
 
-/**
- * Chart.js 类型 (简化版)
- */
-type ChartJS = unknown;
+export type ChartJS = typeof import('chart.js/auto').default;
 
 /**
  * GridStack 类型 (简化版)

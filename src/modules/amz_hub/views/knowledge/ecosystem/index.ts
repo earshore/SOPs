@@ -5,12 +5,16 @@
 import BaseModule from "../../../../../common/BaseModule";
 import { A10_CHART_DATA } from "../../../constants/amz_hub_constants";
 import templateHTML from "./template.html?raw";
-import { loadChartJs } from "../../../../../common/utils/lazyLibs";
+import { loadChartJs, type ChartJS } from "../../../../../common/utils/lazyLibs";
 
 // Chart.js 实例类型定义
 interface ChartInstance {
   destroy(): void;
 }
+
+type WindowWithChart = Window & {
+  Chart?: ChartJS;
+};
 
 class EcosystemModule extends BaseModule {
   private chartInstance: ChartInstance | null = null;
@@ -41,10 +45,13 @@ class EcosystemModule extends BaseModule {
     const ctx = document.getElementById("amz_a10Chart") as HTMLCanvasElement;
     if (!ctx) return;
 
-    if (typeof (window as any).Chart === "undefined") return;
+    const Chart = (window as WindowWithChart).Chart;
+    if (!Chart) return;
 
-    const Chart = (window as any).Chart;
-    this.chartInstance = new Chart(ctx.getContext("2d"), {
+    const context = ctx.getContext("2d");
+    if (!context) return;
+
+    this.chartInstance = new Chart(context, {
       type: "doughnut",
       data: A10_CHART_DATA,
       options: {

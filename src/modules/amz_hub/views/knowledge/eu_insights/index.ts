@@ -4,9 +4,9 @@
 
 import { escapeHtml } from "@/common/utils/security";
 import BaseModule from "../../../../../common/BaseModule";
-import { AMZ_COUNTRY_DATA } from "../../../constants/amz_hub_constants";
+import { AMZ_COUNTRY_DATA, type CountryCode } from "../../../constants/amz_hub_constants";
 import templateHTML from "./template.html?raw";
-import { loadChartJs } from "../../../../../common/utils/lazyLibs";
+import { loadChartJs, type ChartJS } from "../../../../../common/utils/lazyLibs";
 
 // Chart.js 实例类型定义
 interface ChartInstance {
@@ -17,6 +17,14 @@ interface ChartInstance {
       data: number[];
     }>;
   };
+}
+
+type WindowWithChart = Window & {
+  Chart?: ChartJS;
+};
+
+function isCountryCode(code: string): code is CountryCode {
+  return code in AMZ_COUNTRY_DATA;
 }
 
 class EuInsightsModule extends BaseModule {
@@ -55,8 +63,8 @@ class EuInsightsModule extends BaseModule {
   }
 
   updateCountryInfo(code: string): void {
-    const data = (AMZ_COUNTRY_DATA as any)[code];
-    if (!data) return;
+    if (!isCountryCode(code)) return;
+    const data = AMZ_COUNTRY_DATA[code];
 
     const details = document.getElementById("amz_countryDetails");
     if (details) {
@@ -99,9 +107,9 @@ class EuInsightsModule extends BaseModule {
         this.radarChart.update();
       }
     } else {
-      if (typeof (window as any).Chart === "undefined") return;
+      const Chart = (window as WindowWithChart).Chart;
+      if (!Chart) return;
 
-      const Chart = (window as any).Chart;
       this.radarChart = new Chart(ctx, {
         type: "radar",
         data: {

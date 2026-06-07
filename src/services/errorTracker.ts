@@ -68,6 +68,18 @@ export interface ErrorTrackerConfig {
   reportEndpoint?: string;
 }
 
+type ResourceElement = HTMLImageElement | HTMLScriptElement | HTMLLinkElement;
+
+function isResourceElement(target: EventTarget | null): target is ResourceElement {
+  return target instanceof HTMLImageElement
+    || target instanceof HTMLScriptElement
+    || target instanceof HTMLLinkElement;
+}
+
+function getResourceUrl(target: ResourceElement): string {
+  return target instanceof HTMLLinkElement ? target.href : target.src;
+}
+
 /**
  * 错误追踪服务
  * 🎯 DI改造：支持依赖注入Logger
@@ -103,6 +115,10 @@ export class ErrorTracker {
       ErrorTracker.instance = new ErrorTracker();
     }
     return ErrorTracker.instance;
+  }
+
+  static create(logger?: ILoggerService): ErrorTracker {
+    return new ErrorTracker(logger);
   }
 
   /**
@@ -172,14 +188,15 @@ export class ErrorTracker {
 
     // 资源加载错误
     window.addEventListener('error', (event: Event) => {
-      const target = event.target as HTMLElement;
-      if (target && (target.tagName === 'IMG' || target.tagName === 'SCRIPT' || target.tagName === 'LINK')) {
+      const target = event.target;
+      if (isResourceElement(target)) {
+        const resourceUrl = getResourceUrl(target);
         this.captureError({
           type: ErrorType.RESOURCE,
-          message: `Failed to load resource: ${(target as any).src || (target as any).href}`,
+          message: `Failed to load resource: ${resourceUrl}`,
           context: {
             tagName: target.tagName,
-            src: (target as any).src || (target as any).href
+            src: resourceUrl
           }
         });
       }
@@ -470,5 +487,5 @@ export default errorTracker;
  * @returns ErrorTracker实例
  */
 export function createErrorTracker(logger?: ILoggerService): ErrorTracker {
-  return new (ErrorTracker as any)(logger);
+  return ErrorTracker.create(logger);
 }

@@ -61,8 +61,9 @@ export class ColorContext {
    */
   static inferColorFromModule(moduleId: string): ColorSchemeName {
     // 检查缓存
-    if (this.colorCache.has(moduleId)) {
-      return this.colorCache.get(moduleId)!;
+    const cachedColor = this.colorCache.get(moduleId);
+    if (cachedColor) {
+      return cachedColor;
     }
 
     const module = MENU_CONFIG.modules[moduleId];

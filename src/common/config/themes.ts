@@ -216,7 +216,11 @@ export function getTheme(themeId: string): ThemeConfig | undefined {
  * 获取主题配置（带默认值）
  */
 export function getThemeOrDefault(themeId: string): ThemeConfig {
-  return THEMES[themeId] || THEMES['default']!;
+  const fallbackTheme = THEMES.blue;
+  if (!fallbackTheme) {
+    throw new Error('[themes] Default blue theme is not configured');
+  }
+  return THEMES[themeId] || fallbackTheme;
 }
 
 /**

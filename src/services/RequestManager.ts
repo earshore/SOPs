@@ -9,7 +9,7 @@
  * 防止相同请求重复发送
  */
 export class RequestDeduplicator {
-  private pending: Map<string, Promise<any>> = new Map();
+  private pending: Map<string, Promise<unknown>> = new Map();
 
   /**
    * 去重执行请求
@@ -19,8 +19,9 @@ export class RequestDeduplicator {
    */
   async deduplicate<T>(key: string, fn: () => Promise<T>): Promise<T> {
     // 如果已有相同请求在进行中,直接返回该Promise
-    if (this.pending.has(key)) {
-      return this.pending.get(key)!;
+    const pending = this.pending.get(key);
+    if (pending) {
+      return pending as Promise<T>;
     }
 
     // 执行新请求

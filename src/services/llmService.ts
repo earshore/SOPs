@@ -80,6 +80,9 @@ export interface LLMConfig {
   model: string;
 }
 
+let hasLoggedLLMConfig = false;
+let hasLoggedModelsConfig = false;
+
 /**
  * 模型信息对象
  * @deprecated 使用 LLMModel 类型代替
@@ -312,13 +315,13 @@ export async function callLLM(
   const normalizedEndpoint = resolveProviderEndpoint(_provider, endpoint);
 
   // 🔍 调试：始终输出配置信息（用于诊断生产环境问题）
-  if (!(callLLM as any)._configLogged) {
+  if (!hasLoggedLLMConfig) {
     console.log(`🌐 [LLM] 环境: ${configCenter.get('environment')}`);
     console.log(`🌐 [LLM] 原始 Endpoint: ${endpoint}`);
     console.log(`🌐 [LLM] api.baseUrl: ${configCenter.get('api.baseUrl')}`);
     console.log(`🌐 [LLM] 标准化 Endpoint: ${normalizedEndpoint}`);
     console.log(`🌐 [LLM] 最终请求 URL: ${normalizedEndpoint}/chat/completions`);
-    (callLLM as any)._configLogged = true;
+    hasLoggedLLMConfig = true;
   }
 
   const requestBody: Record<string, unknown> = {
@@ -591,13 +594,13 @@ export async function fetchModelsFromApi(
     const normalizedEndpoint = resolveProviderEndpoint(provider, endpoint);
 
     // 🔍 调试：始终输出配置信息（用于诊断生产环境问题）
-    if (!(fetchModelsFromApi as any)._configLogged) {
+    if (!hasLoggedModelsConfig) {
       console.log(`🌐 [Models] 环境: ${configCenter.get('environment')}`);
       console.log(`🌐 [Models] 原始 Endpoint: ${endpoint}`);
       console.log(`🌐 [Models] api.baseUrl: ${configCenter.get('api.baseUrl')}`);
       console.log(`🌐 [Models] 标准化 Endpoint: ${normalizedEndpoint}`);
       console.log(`🌐 [Models] 最终请求 URL: ${normalizedEndpoint}/models`);
-      (fetchModelsFromApi as any)._configLogged = true;
+      hasLoggedModelsConfig = true;
     }
 
     // 设置 10秒 超时，避免获取列表卡死
@@ -649,24 +652,27 @@ export async function fetchModelsFromApi(
     }
 
     // 兼容不同厂商的数据结构
-    let list: Array<{ id: string; name?: string;[key: string]: unknown }> = [];
+    let list: unknown[] = [];
     const dataObj = data as Record<string, unknown>;
 
     if (Array.isArray(data)) {
       list = data;
       console.log(`✅ 数据是数组格式，包含 ${list.length} 个元素`);
     } else if (dataObj.data && Array.isArray(dataObj.data)) {
-      list = dataObj.data as Array<{ id: string; name?: string;[key: string]: unknown }>;
+      list = dataObj.data as unknown[];
       console.log(`✅ 数据在 .data 字段中，包含 ${list.length} 个元素`);
     } else if (dataObj.models && Array.isArray(dataObj.models)) {
-      list = dataObj.models as Array<{ id: string; name?: string;[key: string]: unknown }>;
+      list = dataObj.models as unknown[];
       console.log(`✅ 数据在 .models 字段中，包含 ${list.length} 个元素`);
     } else if (typeof data === 'object' && data !== null) {
       console.warn(`⚠️ 未识别的数据结构，对象键:`, Object.keys(data));
       // 尝试从对象中提取可能的模型列表
       const possibleArrays = Object.entries(data)
         .filter(([_key, value]) => Array.isArray(value))
-        .map(([key, value]) => ({ key, value: value as any[], length: (value as any[]).length }));
+        .map(([key, value]) => {
+          const values = value as unknown[];
+          return { key, value: values, length: values.length };
+        });
 
       console.log(
         `🔍 找到的数组字段:`,

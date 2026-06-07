@@ -86,6 +86,12 @@ export interface PoolReport {
   >;
 }
 
+type PriorityRequestPoolWindow = Window & {
+  PriorityRequestPool?: typeof PriorityRequestPool;
+  REQUEST_PRIORITY?: typeof REQUEST_PRIORITY;
+  priorityRequestPool?: PriorityRequestPool;
+};
+
 /**
  * 优先级请求池
  * 按优先级管理并发请求，确保高优先级任务优先执行
@@ -161,7 +167,8 @@ export class PriorityRequestPool {
     for (const priority of priorities) {
       const queue = this.queues[priority];
       if (queue.length > 0) {
-        const task = queue.shift()!;
+        const task = queue.shift();
+        if (!task) return;
         this._execute(task);
         return;
       }
@@ -300,7 +307,8 @@ export default priorityRequestPool;
 // 🔄 向后兼容：暴露到 window
 // ================================================================
 if (typeof window !== 'undefined') {
-  (window as any).PriorityRequestPool = PriorityRequestPool;
-  (window as any).REQUEST_PRIORITY = REQUEST_PRIORITY;
-  (window as any).priorityRequestPool = priorityRequestPool;
+  const requestPoolWindow = window as PriorityRequestPoolWindow;
+  requestPoolWindow.PriorityRequestPool = PriorityRequestPool;
+  requestPoolWindow.REQUEST_PRIORITY = REQUEST_PRIORITY;
+  requestPoolWindow.priorityRequestPool = priorityRequestPool;
 }

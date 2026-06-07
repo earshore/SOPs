@@ -48,8 +48,9 @@ class CSSLoader {
     }
     
     // 检查是否正在加载
-    if (this.loadingPromises.has(href)) {
-      return this.loadingPromises.get(href)!;
+    const pendingLoad = this.loadingPromises.get(href);
+    if (pendingLoad) {
+      return pendingLoad;
     }
     
     // 创建加载Promise
@@ -216,7 +217,7 @@ class CSSLoader {
     this.loadQueue.push({ href, options: { priority } });
     this.loadQueue.sort((a, b) => {
       const priorityMap = { critical: 0, high: 1, normal: 2, low: 3 };
-      return priorityMap[a.options.priority!] - priorityMap[b.options.priority!];
+      return priorityMap[a.options.priority ?? 'normal'] - priorityMap[b.options.priority ?? 'normal'];
     });
     
     if (!this.isProcessingQueue) {
@@ -233,7 +234,9 @@ class CSSLoader {
     this.isProcessingQueue = true;
     
     while (this.loadQueue.length > 0) {
-      const { href, options } = this.loadQueue.shift()!;
+      const next = this.loadQueue.shift();
+      if (!next) continue;
+      const { href, options } = next;
       await this.loadCSS(href, options);
     }
     

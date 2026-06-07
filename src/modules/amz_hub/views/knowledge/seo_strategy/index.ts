@@ -5,12 +5,16 @@
 import BaseModule from "../../../../../common/BaseModule";
 import { SEO_RADAR_DATA } from "../../../constants/amz_hub_constants";
 import templateHTML from "./template.html?raw";
-import { loadChartJs } from "../../../../../common/utils/lazyLibs";
+import { loadChartJs, type ChartJS } from "../../../../../common/utils/lazyLibs";
 
 // Chart.js 实例类型定义
 interface ChartInstance {
   destroy(): void;
 }
+
+type WindowWithChart = Window & {
+  Chart?: ChartJS;
+};
 
 class SeoStrategyModule extends BaseModule {
   private chartInstance: ChartInstance | null = null;
@@ -45,13 +49,16 @@ class SeoStrategyModule extends BaseModule {
 
     if (this.chartInstance) this.chartInstance.destroy();
 
-    if (typeof (window as any).Chart === "undefined") {
+    const Chart = (window as WindowWithChart).Chart;
+    if (!Chart) {
       console.warn("Chart.js missing");
       return;
     }
 
-    const Chart = (window as any).Chart;
-    this.chartInstance = new Chart(ctx.getContext("2d"), {
+    const context = ctx.getContext("2d");
+    if (!context) return;
+
+    this.chartInstance = new Chart(context, {
       type: "radar",
       data: SEO_RADAR_DATA,
       options: {

@@ -19,6 +19,12 @@ type WrappedAnalysisReport = ReportRecord & {
   analysisReport: unknown;
 };
 
+function toReportRecord(value: unknown): ReportRecord | null {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? value as ReportRecord
+    : null;
+}
+
 function getStringField(record: ReportRecord | null, key: string): string {
   const value = record?.[key];
   return typeof value === 'string' ? value : '';
@@ -106,7 +112,7 @@ export function autoSelectMarket(
   if (!marketSelect) return;
 
   const currentState = appStore.getState();
-  const analysisReport = currentState.analysis.analysisReport as ReportRecord | null;
+  const analysisReport = toReportRecord(currentState.analysis.analysisReport);
 
   let currentMarketplace = '';
   const reportMarketplace = getStringField(analysisReport, 'marketplace');
@@ -154,7 +160,7 @@ export function renderReportModules(
   ctx: PromptlabAlpineContext,
   container: HTMLElement,
 ): void {
-  const report = appStore.getState().analysis.analysisReport as ReportRecord | null;
+  const report = toReportRecord(appStore.getState().analysis.analysisReport);
 
   console.log('[reportRenderer] renderReportModules, keys:', report ? Object.keys(report) : null);
 
@@ -243,12 +249,12 @@ export function renderNewFormatModules(
   analysisReport: unknown,
   isFirstLoad: boolean,
 ): void {
-  if (!analysisReport || typeof analysisReport !== 'object') {
+  const reportObj = toReportRecord(analysisReport);
+  if (!reportObj) {
     console.warn('[reportRenderer] analysisReport 不是有效对象');
     return;
   }
 
-  const reportObj = analysisReport as Record<string, unknown>;
   const renderer = SafeRenderer.getInstance();
 
   const availableTargets = Object.keys(reportObj).filter(
@@ -403,8 +409,8 @@ function formatSubItemLabel(key: string): string {
  * 获取子项数量
  */
 function getSubItemCount(data: unknown, key: string): number {
-  if (!data || typeof data !== 'object') return 0;
-  const dataObj = data as Record<string, unknown>;
+  const dataObj = toReportRecord(data);
+  if (!dataObj) return 0;
   const value = dataObj[key];
   return Array.isArray(value) ? value.length : 0;
 }
@@ -551,12 +557,12 @@ export function renderLegacyFormatModules(
   report: unknown,
   isFirstLoad: boolean,
 ): void {
-  if (!report || typeof report !== 'object') {
+  const reportObj = toReportRecord(report);
+  if (!reportObj) {
     console.warn('[reportRenderer] 旧格式 report 不是有效对象');
     return;
   }
 
-  const reportObj = report as Record<string, unknown>;
   const renderer = SafeRenderer.getInstance();
   const ignoreKeys = ['meta', 'generatedByModel', 'generatedAt', 'templateUsed', 'templateId', 'raw_response'];
   const keys = Object.keys(reportObj).filter((k) => !ignoreKeys.includes(k));

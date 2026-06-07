@@ -20,8 +20,9 @@ class ModuleCssLoader {
     }
     
     // 检查是否正在加载
-    if (this.loadingModules.has(moduleId)) {
-      return this.loadingModules.get(moduleId)!;
+    const loadingPromise = this.loadingModules.get(moduleId);
+    if (loadingPromise) {
+      return loadingPromise;
     }
     
     // 获取模块配置

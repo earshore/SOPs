@@ -47,6 +47,7 @@ const NEXT_STEP_OPTIONS: string[] = [
 let tableData: NPIProductRecord[] = [...SAMPLE_DATA];
 let registeredActions: string[] = [];
 let removeFilterListener: (() => void) | null = null;
+const tableEventHandlers = new WeakMap<HTMLElement, EventListener>();
 
 // Pricing calculation functions
 const calcClearancePrice = (deliveryFee: number): string => (deliveryFee / 0.5).toFixed(2);
@@ -203,14 +204,14 @@ function updateField(index: number, field: keyof NPIProductRecord, value: unknow
 // 设置表格事件委托
 function setupTableEventDelegation(tbody: HTMLElement): void {
     // 移除旧的事件监听器（如果存在）
-    const oldHandler = (tbody as any)._eventHandler;
+    const oldHandler = tableEventHandlers.get(tbody);
     if (oldHandler) {
         tbody.removeEventListener('click', oldHandler);
         tbody.removeEventListener('change', oldHandler);
     }
     
     // 创建新的事件处理器
-    const eventHandler = (e: Event) => {
+    const eventHandler: EventListener = (e) => {
         const target = e.target as HTMLElement;
         const row = target.closest('tr[data-index]') as HTMLElement;
         if (!row) return;
@@ -245,7 +246,7 @@ function setupTableEventDelegation(tbody: HTMLElement): void {
     };
     
     // 保存处理器引用以便后续移除
-    (tbody as any)._eventHandler = eventHandler;
+    tableEventHandlers.set(tbody, eventHandler);
     
     // 绑定事件
     tbody.addEventListener('click', eventHandler);

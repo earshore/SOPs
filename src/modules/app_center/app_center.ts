@@ -7,11 +7,12 @@ console.log('🎯 App Center Core Module Loading...');
 import './app_center_style.css';
 import { createModuleLoader, ModuleLoader } from '@/common/utils/ModuleLoader';
 import { APP_CENTER_ROUTES } from '@/common/constants/routes';
+import type { IModule } from '@/common/utils/ModuleLoader';
 
 /**
  * 模块加载器函数类型
  */
-type ModuleLoaderFn = () => Promise<any>;
+type ModuleLoaderFn = () => Promise<IModule>;
 
 /**
  * 模块映射类型
