@@ -140,12 +140,12 @@ export interface RouteChangedEventPayload {
   from?: {
     path: string;
     config: RouteConfig;
-    state?: any;
+    state?: unknown;
   };
   to: {
     path: string;
     config: RouteConfig;
-    state?: any;
+    state?: unknown;
   };
 }
 
@@ -244,7 +244,7 @@ export interface ModuleErrorEventPayload {
 /**
  * 状态变化事件
  */
-export interface StateChangedEventPayload<T = any> {
+export interface StateChangedEventPayload<T = unknown> {
   path: string;
   newValue: T;
   oldValue: T;
@@ -254,7 +254,7 @@ export interface StateChangedEventPayload<T = any> {
 /**
  * 状态更新事件
  */
-export interface StateUpdatedEventPayload<T = any> {
+export interface StateUpdatedEventPayload<T = unknown> {
   path: string;
   value: T;
   oldValue?: T;
@@ -277,7 +277,7 @@ export interface ErrorOccurredEventPayload {
   module?: string;
   action?: string;
   timestamp: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -286,7 +286,7 @@ export interface ErrorOccurredEventPayload {
 export interface ErrorEventPayload {
   error: Error;
   source: string;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
   timestamp: number;
 }
 
@@ -307,13 +307,13 @@ export interface PerformanceMetricEventPayload {
   duration: number;
   timestamp: number;
   type: 'module-load' | 'api-call' | 'render' | 'custom';
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
  * 数据加载事件
  */
-export interface DataLoadedEventPayload<T = any> {
+export interface DataLoadedEventPayload<T = unknown> {
   dataType: string;
   data: T;
   source?: string;
@@ -323,7 +323,7 @@ export interface DataLoadedEventPayload<T = any> {
 /**
  * 数据保存事件
  */
-export interface DataSavedEventPayload<T = any> {
+export interface DataSavedEventPayload<T = unknown> {
   dataType: string;
   data: T;
   destination?: string;
@@ -390,14 +390,14 @@ export interface LLMRequestErrorEventPayload {
  */
 export interface SearchStartEventPayload {
   query: string;
-  filters?: Record<string, any>;
+  filters?: Record<string, unknown>;
   timestamp: number;
 }
 
 /**
  * 搜索完成事件
  */
-export interface SearchCompleteEventPayload<T = any> {
+export interface SearchCompleteEventPayload<T = unknown> {
   query: string;
   results: T[];
   total: number;
@@ -528,7 +528,7 @@ export interface ServiceErrorEventPayload {
  */
 export interface UIModalOpenEventPayload {
   modalId: string;
-  props?: Record<string, any>;
+  props?: Record<string, unknown>;
   timestamp: number;
 }
 
@@ -567,7 +567,7 @@ export interface WorkingStateSuccessEventPayload {
   taskId: string;
   taskName: string;
   duration: number;
-  result?: any;
+  result?: unknown;
   timestamp: number;
 }
 
@@ -622,7 +622,7 @@ export interface NetworkOfflineEventPayload {
 export interface UserActionEventPayload {
   action: string;
   target?: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
   timestamp: number;
 }
 
@@ -632,7 +632,7 @@ export interface UserActionEventPayload {
 export interface RegisterActionsEventPayload {
   actions: Array<{
     id: string;
-    handler: Function;
+    handler: (...args: never[]) => unknown;
   }>;
   timestamp: number;
 }
@@ -675,7 +675,7 @@ export interface ScraperScrapeStartEventPayload {
  * Scraper抓取成功事件
  */
 export interface ScraperScrapeSuccessEventPayload {
-  data: any;
+  data: unknown;
   duration: number;
   timestamp: number;
 }
@@ -702,7 +702,7 @@ export interface AnalysisAnalyzeStartEventPayload {
  * Analysis分析成功事件
  */
 export interface AnalysisAnalyzeSuccessEventPayload {
-  report: any;
+  report: unknown;
   duration: number;
   timestamp: number;
 }
@@ -1055,7 +1055,7 @@ export interface EventMiddleware {
 export interface BatchEvent {
   events: Array<{
     name: string;
-    payload: any;
+    payload: unknown;
   }>;
   timestamp: number;
 }

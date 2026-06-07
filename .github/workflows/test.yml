@@ -31,6 +31,9 @@ jobs:
       - name: ESLint 检查
         run: npm run lint
         continue-on-error: true
+
+      - name: ESLint warning 基线门禁
+        run: npm run lint:warning-gate
       
       - name: 代码格式检查
         run: npm run format:check
@@ -348,4 +351,3 @@ jobs:
               repo: context.repo.repo,
               body: comment
             });
-

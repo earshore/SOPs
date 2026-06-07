@@ -9,6 +9,25 @@ import type { ExtendedDNA } from "../../types/extendedDNA";
 import { isTechnicalSpec } from "../../utils/specUtils";
 import { ValidationError } from "../../../../../../common/errors/AppError";
 
+type ProductOverviewUserProfileInput = Partial<ProductOverviewReport["user_profile"]> & {
+  demographics?: Partial<ProductOverviewReport["user_profile"]["demographics"]> & {
+    ageRanges?: string[];
+  };
+  painPoints?: string[];
+  priceSensitivity?: string;
+  decisionDrivers?: string[];
+};
+
+type ProductOverviewReportInput = Partial<Omit<ProductOverviewReport, "user_profile">> & {
+  product_overview?: ProductOverviewReport["productOverview"];
+  core_features?: ProductOverviewReport["coreFeatures"];
+  user_profile?: ProductOverviewUserProfileInput;
+  userProfile?: ProductOverviewUserProfileInput;
+  differentiation_angles?: ProductOverviewReport["differentiationAngles"];
+  keyword_clusters?: ProductOverviewReport["keywordClusters"];
+  compliance_risks?: ProductOverviewReport["complianceRisks"];
+};
+
 /**
  * Product Overview Report 适配器实现
  */
@@ -376,18 +395,19 @@ export class ProductOverviewAdapter implements ReportAdapter {
       );
     }
 
-    const reportObj = report as Record<string, unknown>;
+    const reportObj = report as ProductOverviewReportInput;
     const userProfile = reportObj.user_profile || reportObj.userProfile || {};
-    const demographics = (userProfile as any).demographics || {};
+    const demographics = (userProfile.demographics ||
+      {}) as NonNullable<ProductOverviewUserProfileInput["demographics"]>;
 
     return {
-      meta: (reportObj.meta || {}) as any,
+      meta: (reportObj.meta || {}) as ProductOverviewReport["meta"],
       productOverview: (reportObj.productOverview ||
         reportObj.product_overview ||
-        {}) as any,
+        {}) as ProductOverviewReport["productOverview"],
       coreFeatures: (reportObj.coreFeatures ||
         reportObj.core_features ||
-        {}) as any,
+        {}) as ProductOverviewReport["coreFeatures"],
       user_profile: {
         demographics: {
           age_ranges: (demographics.age_ranges ||
@@ -396,17 +416,17 @@ export class ProductOverviewAdapter implements ReportAdapter {
           locations: (demographics.locations || []) as string[],
           household: (demographics.household || []) as string[],
         },
-        goals: ((userProfile as any).goals || []) as string[],
-        pain_points: ((userProfile as any).pain_points ||
-          (userProfile as any).painPoints ||
+        goals: (userProfile.goals || []) as string[],
+        pain_points: (userProfile.pain_points ||
+          userProfile.painPoints ||
           []) as string[],
-        scenarios: ((userProfile as any).scenarios || []) as string[],
-        objections: ((userProfile as any).objections || []) as string[],
-        price_sensitivity: ((userProfile as any).price_sensitivity ||
-          (userProfile as any).priceSensitivity ||
+        scenarios: (userProfile.scenarios || []) as string[],
+        objections: (userProfile.objections || []) as string[],
+        price_sensitivity: (userProfile.price_sensitivity ||
+          userProfile.priceSensitivity ||
           "") as string,
-        decision_drivers: ((userProfile as any).decision_drivers ||
-          (userProfile as any).decisionDrivers ||
+        decision_drivers: (userProfile.decision_drivers ||
+          userProfile.decisionDrivers ||
           []) as string[],
       },
       strengths: (reportObj.strengths || []) as string[],
@@ -419,10 +439,10 @@ export class ProductOverviewAdapter implements ReportAdapter {
           core: [],
           longTail: [],
           intent: [],
-        }) as any,
+        }) as ProductOverviewReport["keywordClusters"],
       complianceRisks: (reportObj.complianceRisks ||
         reportObj.compliance_risks ||
-        []) as any[],
+        []) as ProductOverviewReport["complianceRisks"],
     };
   }
 }

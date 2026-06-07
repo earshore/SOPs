@@ -9,6 +9,36 @@ import type { ExtendedDNA } from "../../types/extendedDNA";
 import { isTechnicalSpec } from "../../utils/specUtils";
 import { ValidationError } from "../../../../../../common/errors/AppError";
 
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+}
+
+function stringFrom(value: unknown): string {
+  return typeof value === "string" ? value : "";
+}
+
+function stringArrayFrom(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === "string")
+    : [];
+}
+
+function firstValue(record: Record<string, unknown>, ...keys: string[]): unknown {
+  for (const key of keys) {
+    const value = record[key];
+    if (value !== undefined && value !== null) {
+      return value;
+    }
+  }
+  return undefined;
+}
+
+function isSemanticTemplateMeta(meta: Record<string, unknown>): boolean {
+  const templateId = stringFrom(firstValue(meta, "templateId", "template_id"));
+  const templateUsed = stringFrom(firstValue(meta, "templateUsed", "template_used"));
+  return templateId === "semantic" || templateUsed.includes("语义");
+}
+
 /**
  * Semantic Analysis Report 适配器实现
  */
@@ -33,12 +63,7 @@ export class SemanticAnalysisAdapter implements ReportAdapter {
     const hasHighFrequencyPhrases = !!(
       reportObj.high_frequency_phrases || reportObj.highFrequencyPhrases
     );
-    const isSemanticTemplate = !!(
-      (reportObj.meta as any)?.templateId === "semantic" ||
-      (reportObj.meta as any)?.templateUsed?.includes("语义") ||
-      (reportObj.meta as any)?.template_id === "semantic" ||
-      (reportObj.meta as any)?.template_used?.includes("语义")
-    );
+    const isSemanticTemplate = isSemanticTemplateMeta(asRecord(reportObj.meta));
 
     // 只要有核心字段的任意两个，或者有明确的语义模板标识即可
     const coreFieldsCount = [
@@ -366,40 +391,50 @@ export class SemanticAnalysisAdapter implements ReportAdapter {
     }
 
     const reportObj = report as Record<string, unknown>;
-    const highFrequencyPhrases =
-      reportObj.high_frequency_phrases || reportObj.highFrequencyPhrases || {};
-    const painPointGaps =
-      reportObj.pain_point_gaps || reportObj.painPointGaps || {};
-    const nativeVoice = reportObj.native_voice || reportObj.nativeVoice || {};
+    const highFrequencyPhrases = asRecord(
+      firstValue(reportObj, "high_frequency_phrases", "highFrequencyPhrases"),
+    );
+    const painPointGaps = asRecord(
+      firstValue(reportObj, "pain_point_gaps", "painPointGaps"),
+    );
+    const nativeVoice = asRecord(firstValue(reportObj, "native_voice", "nativeVoice"));
+    const meta = asRecord(reportObj.meta);
 
     return {
       high_frequency_phrases: {
-        attribute: ((highFrequencyPhrases as any).attribute || []) as string[],
-        use_cases: ((highFrequencyPhrases as any).use_cases ||
-          (highFrequencyPhrases as any).useCases ||
-          []) as string[],
+        attribute: stringArrayFrom(highFrequencyPhrases.attribute),
+        use_cases: stringArrayFrom(
+          firstValue(highFrequencyPhrases, "use_cases", "useCases"),
+        ),
       },
       pain_point_gaps: {
-        top_quality_issues: ((painPointGaps as any).top_quality_issues ||
-          (painPointGaps as any).topQualityIssues ||
-          []) as string[],
-        unmet_need: ((painPointGaps as any).unmet_need ||
-          (painPointGaps as any).unmetNeed ||
-          []) as string[],
-        differentiation_angles: ((painPointGaps as any)
-          .differentiation_angles ||
-          (painPointGaps as any).differentiationAngles ||
-          []) as string[],
+        top_quality_issues: stringArrayFrom(
+          firstValue(painPointGaps, "top_quality_issues", "topQualityIssues"),
+        ),
+        unmet_need: stringArrayFrom(
+          firstValue(painPointGaps, "unmet_need", "unmetNeed"),
+        ),
+        differentiation_angles: stringArrayFrom(
+          firstValue(painPointGaps, "differentiation_angles", "differentiationAngles"),
+        ),
       },
       native_voice: {
-        native_phrasing: ((nativeVoice as any).native_phrasing ||
-          (nativeVoice as any).nativePhrasing ||
-          []) as string[],
-        emotional_hook: ((nativeVoice as any).emotional_hook ||
-          (nativeVoice as any).emotionalHook ||
-          []) as string[],
+        native_phrasing: stringArrayFrom(
+          firstValue(nativeVoice, "native_phrasing", "nativePhrasing"),
+        ),
+        emotional_hook: stringArrayFrom(
+          firstValue(nativeVoice, "emotional_hook", "emotionalHook"),
+        ),
       },
-      meta: (reportObj.meta || {}) as any,
+      meta: {
+        targetMarket: stringFrom(meta.targetMarket),
+        analyzedASINs: stringArrayFrom(meta.analyzedASINs),
+        generatedByModel: stringFrom(meta.generatedByModel),
+        generatedAt: stringFrom(meta.generatedAt),
+        templateUsed: stringFrom(firstValue(meta, "templateUsed", "template_used")),
+        templateId: stringFrom(firstValue(meta, "templateId", "template_id")),
+        dataScope: stringArrayFrom(firstValue(meta, "dataScope", "data_scope")),
+      },
     };
   }
 }

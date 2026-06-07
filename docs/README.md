@@ -44,6 +44,15 @@
 
 ---
 
+## 质量门禁与当前报告
+
+- [CI 质量门禁](./CI-QUALITY-GATES.md) — 当前 CI 安全与质量标准，含进行中的 P1/P2 改进计划
+- [XSS 风险扫描报告](./XSS_SCAN_REPORT.md) — 当前安全扫描输出，由安全扫描工具持续更新
+
+历史质量/技术债报告已归档至 [archive/quality/](./archive/quality/)。
+
+---
+
 ## API 文档 (`api/`)
 
 - [AlpineRegistry API](./api/AlpineRegistry.md)
@@ -60,8 +69,9 @@ docs/
 ├── archive/                    # 历史文档归档（过期/阶段性，不作为开发依据）
 │   ├── ai-analysis/            #   AI分析加速方案（4篇）
 │   ├── bug-fix-reports/        #   单次 Bug 修复记录（2篇）
+│   ├── quality/                #   质量门禁、构建修复、技术债报告（3篇）
 │   ├── verification/           #   阶段性验收报告（4篇）
-│   └── misc/                   #   其他过期文档（4篇）
+│   └── misc/                   #   其他过期文档（5篇）
 ├── development/                # 开发规范、最佳实践、AI辅助上下文
 ├── guides/                     # 功能使用指南
 │   ├── css/                    #   CSS 架构体系
@@ -74,4 +84,4 @@ docs/
 
 ---
 
-**最后更新**: 2026-03-28
+**最后更新**: 2026-06-07

@@ -16,6 +16,8 @@
         "lint": "eslint src --ignore-pattern \"**/*.test.ts\" --ignore-pattern \"**/*.test.tsx\" --ignore-pattern \"**/*.spec.ts\" --ignore-pattern \"**/*.spec.tsx\"",
         "lint:tests": "eslint \"src/**/*.{test,spec}.ts\"",
         "lint:fix": "eslint src --fix",
+        "lint:warning-gate": "tsx scripts/quality/eslint-warning-gate.ts",
+        "lint:warning-baseline": "tsx scripts/quality/eslint-warning-gate.ts --update",
         "lint:report": "tsx tools/eslint-fixer.ts",
         "lint:report:dry": "tsx tools/eslint-fixer.ts --dry-run",
         "format": "prettier --write \"src/**/*.{js,ts,jsx,tsx,json,css,md}\"",
@@ -86,7 +88,7 @@
         "docs:serve": "npx http-server docs/api -p 8080 -o",
         "circular:check": "madge --circular --extensions ts src",
         "ci:security": "npm run xss:gate && npm run circular:check",
-        "ci:quality": "npm run type-check && npm run lint",
+        "ci:quality": "npm run type-check && npm run lint && npm run lint:warning-gate",
         "ci:all": "npm run ci:security && npm run ci:quality && npm run build"
     },
     "devDependencies": {

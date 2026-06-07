@@ -118,6 +118,10 @@ function escapeRegex(string: string): string {
   return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+function getKeywordSet(sets: Set<string>[], index: number): Set<string> {
+  return sets[index] ?? new Set<string>();
+}
+
 // ==========================================
 // State Management
 // ==========================================
@@ -579,7 +583,7 @@ function highlightText(text: string): string {
       const start = match.index;
       const end = start + match[0].length;
       for (let i = start; i < end; i++) {
-        charKeywords[i]!.add(kwLower);
+        charKeywords[i]?.add(kwLower);
       }
     }
   });
@@ -595,11 +599,13 @@ function highlightText(text: string): string {
   let segStart = 0;
 
   for (let i = 1; i <= len; i++) {
-    if (i === len || !setsEqual(charKeywords[i]!, charKeywords[i - 1]!)) {
+    const previousKeywords = getKeywordSet(charKeywords, i - 1);
+    if (i === len || !setsEqual(getKeywordSet(charKeywords, i), previousKeywords)) {
+      const segmentKeywords = getKeywordSet(charKeywords, segStart);
       segments.push({
         text: text.substring(segStart, i),
-        keywords: charKeywords[segStart]!,
-        isHighlight: charKeywords[segStart]!.size > 0,
+        keywords: segmentKeywords,
+        isHighlight: segmentKeywords.size > 0,
       });
       segStart = i;
     }
@@ -612,9 +618,9 @@ function highlightText(text: string): string {
     }
 
     const allKw = Array.from(seg.keywords).join(SEP);
-    const prevIsHighlight = idx > 0 && segments[idx - 1]!.isHighlight;
+    const prevIsHighlight = idx > 0 && !!segments[idx - 1]?.isHighlight;
     const nextIsHighlight =
-      idx < segments.length - 1 && segments[idx + 1]!.isHighlight;
+      idx < segments.length - 1 && !!segments[idx + 1]?.isHighlight;
 
     // 确定在连续高亮区域中的位置
     let posClass = "";
@@ -912,11 +918,14 @@ function locateKeywordInCopy(keyword: string): void {
   // 将属于同一次匹配的连续 span 分组
   // 只有 DOM 中直接相邻（nextSibling）才视为同一组
   const groups: Element[][] = [];
-  let currentGroup = [spans[0]!];
+  const firstSpan = spans[0];
+  if (!firstSpan) return;
+  let currentGroup = [firstSpan];
 
   for (let i = 1; i < spans.length; i++) {
-    const prev = spans[i - 1]!;
-    const curr = spans[i]!;
+    const prev = spans[i - 1];
+    const curr = spans[i];
+    if (!prev || !curr) continue;
     // 修复：只用 nextSibling，不用 nextElementSibling
     // nextElementSibling 会跳过文本节点导致误判
     if (prev.nextSibling === curr) {
@@ -944,16 +953,20 @@ function locateKeywordInCopy(keyword: string): void {
     .forEach((el) => el.classList.remove("highlight-focus"));
 
   // 聚焦当前组的所有 span
-  const targetGroup = groups[idx]!;
+  const targetGroup = groups[idx];
+  if (!targetGroup) return;
   targetGroup.forEach((span: Element) => {
-    (span as HTMLElement).classList.add("highlight-focus");
+    span.classList.add("highlight-focus");
   });
 
   // 滚动到第一个 span
-  (targetGroup[0] as HTMLElement).scrollIntoView({
-    behavior: "smooth",
-    block: "center",
-  });
+  const targetElement = targetGroup[0];
+  if (targetElement instanceof HTMLElement) {
+    targetElement.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  }
 
   // 更新索引
   appStore.getState().keywordTracker.keywordLocationIndex[targetKw] =
@@ -1050,7 +1063,7 @@ function highlightRootKeywords(root: string, container: HTMLElement): void {
 
   // 滚动到第一个匹配的关键词
   console.log("[Process] 滚动到第一个匹配的关键词");
-  matchedDivs[0]!.scrollIntoView({ behavior: "smooth", block: "center" });
+  matchedDivs[0]?.scrollIntoView({ behavior: "smooth", block: "center" });
 
   // 显示提示
   showToast(`找到 ${matchedDivs.length} 个包含 "${root}" 的关键词`);

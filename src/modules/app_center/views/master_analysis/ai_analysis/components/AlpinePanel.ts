@@ -16,6 +16,18 @@ import type { FullAnalysisReport } from '../config/analysisReportData';
 import { createMultipleStateSyncs, cleanupSubscriptions } from '@common/utils/stateSync';
 import { createPerformanceSettingsPanel } from './PerformanceSettings';
 
+type AlpineWatchContext = {
+  $watch: (property: string, callback: (newValue: unknown) => void) => void;
+};
+
+type AiAnalysisPanelContext = AlpineContext &
+  ComputedProperties &
+  AlpineWatchContext & {
+    _navigationHandler: EventListener | null;
+    navigateToScraper: () => void;
+    refreshReportView: () => void;
+  };
+
 /**
  * 创建 Alpine 面板组件
  */
@@ -52,7 +64,7 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
     _navigationHandler: null as EventListener | null,
 
     // ========== Lifecycle ==========
-    init(this: AlpineContext & Record<string, unknown>) {
+    init(this: AiAnalysisPanelContext) {
       console.log('[Alpine 组件] 🚀 组件初始化');
 
       // 设置自动状态同步（Zustand → Alpine）
@@ -85,40 +97,40 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
       }
 
       // 监听 analysisReport 变化，自动更新 hasReport 标志
-      (this as any).$watch('analysisReport', (newValue: unknown) => {
+      this.$watch('analysisReport', (newValue: unknown) => {
         console.log('[Alpine 组件] 📊 analysisReport 变化检测:', !!newValue);
-        (this as any).hasReport = !!newValue;
-        (this as any).refreshReportView();
+        this.hasReport = !!newValue;
+        this.refreshReportView();
       });
 
-      (this as any).$watch('selectedTargets', () => {
-        if ((this as any).hasReport) {
-          (this as any).refreshReportView();
+      this.$watch('selectedTargets', () => {
+        if (this.hasReport) {
+          this.refreshReportView();
         }
       });
 
-      (this as any).$watch('selectedAsins', () => {
-        if ((this as any).hasReport) {
-          (this as any).refreshReportView();
+      this.$watch('selectedAsins', () => {
+        if (this.hasReport) {
+          this.refreshReportView();
         }
       });
 
       // 监听导航事件
       this._navigationHandler = (() => {
-        (this as any).navigateToScraper();
+        this.navigateToScraper();
       }) as EventListener;
-      window.addEventListener('navigate-to-scraper' as any, this._navigationHandler as EventListener);
+      window.addEventListener('navigate-to-scraper', this._navigationHandler);
 
       // 检查是否有新的 Scraper 数据
       checkAndLoadScraperData(this);
 
       // 检查是否有已加载的历史报告
       checkLoadedReport(this);
-      (this as any).refreshReportView();
+      this.refreshReportView();
     },
 
     // ========== 清理 ==========
-    destroy(this: AlpineContext & Record<string, unknown>) {
+    destroy(this: AiAnalysisPanelContext) {
       console.log('[Alpine 组件] 🔄 Alpine 组件销毁，清理资源');
 
       // 清理状态同步订阅
@@ -128,7 +140,7 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
 
       // 清理导航事件监听器
       if (this._navigationHandler) {
-        window.removeEventListener('navigate-to-scraper' as any, this._navigationHandler as EventListener);
+        window.removeEventListener('navigate-to-scraper', this._navigationHandler);
         this._navigationHandler = null;
       }
 
@@ -717,7 +729,7 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
         console.log('[置信度] reportConfidence: 报告不存在或为字符串');
         return null;
       }
-      const reportObj = report as any;
+      const reportObj = report as FullAnalysisReport;
       if (!reportObj._metadata) {
         console.warn('[置信度] reportConfidence: 报告缺少 _metadata 字段');
         return null;
@@ -733,7 +745,7 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
         console.log('[置信度] overallConfidence: 报告不存在或为字符串');
         return 0;
       }
-      const reportObj = report as any;
+      const reportObj = report as FullAnalysisReport;
       if (!reportObj._metadata) {
         console.warn('[置信度] overallConfidence: 报告缺少 _metadata 字段');
         return 0;

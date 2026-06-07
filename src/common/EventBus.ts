@@ -50,13 +50,15 @@ interface LeakDetection {
   message: string;
 }
 
+type EventListener = (...args: never[]) => unknown;
+
 /**
  * 事件总线类
  * 提供模块间通信的发布/订阅机制
  */
 class EventBus {
   /** 事件监听器映射 */
-  private events: Record<string, Function[]>;
+  private events: Record<string, EventListener[]>;
   
   /** 配置选项 */
   private _config: EventBusConfig;
@@ -101,7 +103,7 @@ class EventBus {
   /**
    * 订阅事件实现
    */
-  on(event: string, callback: Function): EventUnsubscribe {
+  on(event: string, callback: EventListener): EventUnsubscribe {
     if (!this.events[event]) {
       this.events[event] = [];
       this._stats.eventCounts[event] = 0;
@@ -155,7 +157,7 @@ class EventBus {
   /**
    * 取消订阅实现
    */
-  off(event: string, callback: Function): void {
+  off(event: string, callback: EventListener): void {
     if (!this.events[event]) return;
     
     const initialLength = this.events[event].length;
@@ -193,7 +195,7 @@ class EventBus {
     
     this.events[event].forEach(callback => {
       try {
-        callback(data);
+        (callback as GenericEventHandler)(data);
       } catch (error) {
         console.error(`[EventBus] Error in listener for event "${event}":`, error);
       }

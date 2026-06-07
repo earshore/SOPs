@@ -22,6 +22,18 @@ import {
 } from "../../config/confidenceWeights";
 import { ValidationError } from "../../../../../../common/errors/AppError";
 
+type FullAnalysisReportInput = Partial<FullAnalysisReport> & {
+  buyer_profile?: FullAnalysisReport["buyer-profile"];
+  selling_points?: FullAnalysisReport["selling-points"];
+  title_keywords?: FullAnalysisReport["title-keywords"];
+  title_seo_roots?: FullAnalysisReport["title-keywords"];
+  fatal_flaws?: FullAnalysisReport["fatal-flaws"];
+  wow_moments?: FullAnalysisReport["wow-moments"];
+  hesitation_points?: FullAnalysisReport["hesitation-points"];
+  vocab_gap?: FullAnalysisReport["vocab-gap"];
+  promise_reality?: FullAnalysisReport["promise-reality"];
+};
+
 /**
  * Full Analysis Report 适配器实现
  * 这是应用中实际使用的报告格式
@@ -161,25 +173,25 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
       );
     }
 
-    const reportObj = report as Record<string, unknown>;
+    const reportObj = report as FullAnalysisReportInput;
 
     return {
       "buyer-profile": (reportObj["buyer-profile"] ||
-        reportObj.buyer_profile) as any,
+        reportObj.buyer_profile),
       "selling-points": (reportObj["selling-points"] ||
-        reportObj.selling_points) as any,
+        reportObj.selling_points),
       // 支持新旧两套字段名：title-keywords (新) 和 title_seo_roots (旧)
       "title-keywords": (reportObj["title-keywords"] ||
         reportObj.title_keywords ||
-        reportObj.title_seo_roots) as any,
-      "fatal-flaws": (reportObj["fatal-flaws"] || reportObj.fatal_flaws) as any,
-      "wow-moments": (reportObj["wow-moments"] || reportObj.wow_moments) as any,
+        reportObj.title_seo_roots),
+      "fatal-flaws": (reportObj["fatal-flaws"] || reportObj.fatal_flaws),
+      "wow-moments": (reportObj["wow-moments"] || reportObj.wow_moments),
       "hesitation-points": (reportObj["hesitation-points"] ||
-        reportObj.hesitation_points) as any,
-      "vocab-gap": (reportObj["vocab-gap"] || reportObj.vocab_gap) as any,
+        reportObj.hesitation_points),
+      "vocab-gap": (reportObj["vocab-gap"] || reportObj.vocab_gap),
       "promise-reality": (reportObj["promise-reality"] ||
-        reportObj.promise_reality) as any,
-      _metadata: reportObj._metadata as any,
+        reportObj.promise_reality),
+      _metadata: reportObj._metadata,
     };
   }
 
@@ -450,11 +462,10 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
 
         // 只提取规格类型，排除 feature（功能特性）、scent（香调描述）等
         if (SPEC_TYPES.has(type)) {
-          if (!grouped.has(type)) {
-            grouped.set(type, []);
-          }
+          const keywordsForType = grouped.get(type) || [];
+          grouped.set(type, keywordsForType);
           if (k.keyword && typeof k.keyword === "string") {
-            grouped.get(type)!.push(k.keyword);
+            keywordsForType.push(k.keyword);
           }
         }
       });

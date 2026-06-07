@@ -301,11 +301,11 @@ export interface NavigoMatch {
   route: {
     name: string;
     path: string;
-    handler: Function;
+    handler: (...args: unknown[]) => unknown;
     hooks?: {
-      before?: Function;
-      after?: Function;
-      leave?: Function;
+      before?: (...args: unknown[]) => unknown;
+      after?: (...args: unknown[]) => unknown;
+      leave?: (...args: unknown[]) => unknown;
     };
   };
   data: Record<string, string> | null;

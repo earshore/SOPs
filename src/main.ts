@@ -20,7 +20,7 @@ if (import.meta.env.DEV) {
 
 // Expose to window for legacy compatibility (仅开发环境)
 if (import.meta.env.DEV) {
-  (window as any).marked = marked;
+  (window as unknown as { marked?: typeof marked }).marked = marked;
 }
 
 // 🎯 导入 Zustand Store
@@ -92,16 +92,50 @@ import './modules/app_center/app_center';
 // ✅ Alpine.js
 import Alpine from '@alpinejs/csp';
 
+interface RouterDebugApi {
+  navigate?: unknown;
+  back?: unknown;
+  forward?: unknown;
+  getCurrentRoute?: unknown;
+}
+
+interface EventBusDebugApi {
+  emit: (event: string, payload: unknown) => void;
+}
+
+interface LegacyDebugWindow {
+  Alpine: typeof Alpine;
+  useAppStore?: typeof appStore;
+  appStore?: typeof appStore;
+  eventBus?: unknown;
+  EventBus?: unknown;
+  actionRegistry?: unknown;
+  ActionRegistry?: unknown;
+  router?: unknown;
+  Router?: unknown;
+  loadingManager?: typeof loadingManager;
+  LoadingManager?: typeof loadingManager;
+}
+
+type ClosableModalElement = HTMLElement & {
+  close: () => void;
+};
+
+const legacyWindow = window as unknown as LegacyDebugWindow;
+
+function isClosableModalElement(element: Element | null): element is ClosableModalElement {
+  return element instanceof HTMLElement && typeof (element as { close?: unknown }).close === 'function';
+}
+
 // 🔧 关键修复: 确保 Alpine 在所有环境下都可通过 window.Alpine 访问
 // 这对于动态注册组件至关重要
 // 使用类型断言避免 TypeScript 错误,并确保不被 Terser 优化掉
-(window as any)['Alpine'] = Alpine;
-(window as any).Alpine = Alpine;
+legacyWindow['Alpine'] = Alpine;
 
 if (import.meta.env.DEV) {
   // 🔧 暴露 Zustand Store 到 window (仅用于开发调试和测试)
-  (window as any)['useAppStore'] = appStore;
-  (window as any)['appStore'] = appStore;
+  legacyWindow['useAppStore'] = appStore;
+  legacyWindow['appStore'] = appStore;
   console.log('[Alpine] ✅ Alpine.js loaded and exposed to window');
   console.log('[Store] ✅ Zustand store exposed to window');
 }
@@ -161,16 +195,16 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
         // await所有可能的Promise
         const eventBus = eventBusResult instanceof Promise ? await eventBusResult : eventBusResult;
         const actionRegistry = actionRegistryResult instanceof Promise ? await actionRegistryResult : actionRegistryResult;
-        const router = routerResult instanceof Promise ? await routerResult : routerResult;
+        const router = (routerResult instanceof Promise ? await routerResult : routerResult) as RouterDebugApi;
 
-        (window as any)['eventBus'] = eventBus;
-        (window as any)['EventBus'] = eventBus;
-        (window as any)['actionRegistry'] = actionRegistry;
-        (window as any)['ActionRegistry'] = actionRegistry;
-        (window as any)['router'] = router;
-        (window as any)['Router'] = router;
-        (window as any)['loadingManager'] = loadingManager;
-        (window as any)['LoadingManager'] = loadingManager;
+        legacyWindow['eventBus'] = eventBus;
+        legacyWindow['EventBus'] = eventBus;
+        legacyWindow['actionRegistry'] = actionRegistry;
+        legacyWindow['ActionRegistry'] = actionRegistry;
+        legacyWindow['router'] = router;
+        legacyWindow['Router'] = router;
+        legacyWindow['loadingManager'] = loadingManager;
+        legacyWindow['LoadingManager'] = loadingManager;
 
         console.log('[Services] ✅ Core services exposed to window');
         console.log('[Services] EventBus:', typeof eventBus);
@@ -320,7 +354,7 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
 
     // 广播应用初始化完成事件
     const eventBusResult = container.resolve('eventBus');
-    const eventBus = eventBusResult instanceof Promise ? await eventBusResult : eventBusResult;
+    const eventBus = (eventBusResult instanceof Promise ? await eventBusResult : eventBusResult) as EventBusDebugApi;
     eventBus.emit(APP_EVENTS.INITIALIZED, { timestamp: Date.now() });
 
     // 初始化默认状态
@@ -381,8 +415,8 @@ registerActionsWithLegacy({
     if (!target) return;
 
     // 向上查找最近的 app-modal 元素
-    const modal = target.closest('app-modal') as any;
-    if (modal && typeof modal.close === 'function') {
+    const modal = target.closest('app-modal');
+    if (isClosableModalElement(modal)) {
       modal.close();
     }
   },

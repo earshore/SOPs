@@ -186,6 +186,13 @@
 
 ## 📊 报告文档
 
+### 当前质量报告
+- [CI 质量门禁](./CI-QUALITY-GATES.md) - 当前 CI 安全与质量标准，含进行中的 P1/P2 改进计划
+- [XSS 风险扫描报告](./XSS_SCAN_REPORT.md) - 当前安全扫描输出
+
+### 归档报告
+- [质量与技术债归档](./archive/quality/README.md) - 已完成的构建修复与 P0 技术债报告
+
 ### 修复报告
 - [Alpine 清理修复](../.kiro/fix-reports/alpine-cleanup-fix-2026-03-15.md) - Alpine.js 修复报告
 
@@ -235,5 +242,5 @@
 
 ---
 
-**最后更新**: 2026-04-17  
+**最后更新**: 2026-06-07  
 **维护者**: sops 开发团队

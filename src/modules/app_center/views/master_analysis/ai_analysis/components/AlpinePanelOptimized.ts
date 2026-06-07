@@ -8,6 +8,21 @@ import { appStore } from '@/stores/useAppStore';
 import { analysisTargets } from '../config/analysisTargets';
 import { createComputedProperties } from './computedProperties';
 import type { AnalysisReport } from '@/types/modules-business';
+import type { AlpineContext } from '../types';
+
+type ConfidencePanel = {
+  getTargetConfidence: (targetId: string) => number;
+  getConfidenceLevel: (percent: number) => string;
+};
+
+type AlpineRefreshContext = {
+  $nextTick?: (callback: () => void) => void;
+  $refresh?: () => void;
+};
+
+function getPanelComputedProperties(panel: unknown) {
+  return createComputedProperties(panel as AlpineContext);
+}
 
 /**
  * 创建 AI 分析面板组件（优化版）
@@ -110,7 +125,7 @@ export function createAiAnalysisPanelOptimized(): Record<string, unknown> {
 
     // 获取置信度颜色类（使用设计令牌）
     getConfidenceColorClass(targetId: string): string {
-      const percent = (this as any).getTargetConfidence(targetId);
+      const percent = (this as ConfidencePanel).getTargetConfidence(targetId);
       if (percent >= 70) return 'confidence-high-bg confidence-high-text confidence-high-border';
       if (percent >= 50) return 'confidence-medium-bg confidence-medium-text confidence-medium-border';
       return 'confidence-low-bg confidence-low-text confidence-low-border';
@@ -146,7 +161,7 @@ export function createAiAnalysisPanelOptimized(): Record<string, unknown> {
 
     // 获取置信度 ARIA 标签
     getConfidenceAriaLabel(percent: number): string {
-      const level = (this as any).getConfidenceLevel(percent);
+      const level = (this as ConfidencePanel).getConfidenceLevel(percent);
       return `置信度: ${percent}%, 等级: ${level}`;
     },
 
@@ -187,11 +202,12 @@ export function createAiAnalysisPanelOptimized(): Record<string, unknown> {
       this._unsubscribe = appStore.subscribe(() => {
         // Alpine 会自动检测 getter 的变化并重新渲染
         // 不需要手动同步
-        if (typeof (this as any).$nextTick === 'function') {
-          (this as any).$nextTick(() => {
+        const alpine = this as AlpineRefreshContext;
+        if (typeof alpine.$nextTick === 'function') {
+          alpine.$nextTick(() => {
             // 强制更新计算属性
-            if (typeof (this as any).$refresh === 'function') {
-              (this as any).$refresh();
+            if (typeof alpine.$refresh === 'function') {
+              alpine.$refresh();
             }
           });
         }
@@ -271,55 +287,55 @@ export function createAiAnalysisPanelOptimized(): Record<string, unknown> {
 
     // ========== 计算属性 ==========
     get currentProducts() {
-      return createComputedProperties(this as any).currentProducts;
+      return getPanelComputedProperties(this).currentProducts;
     },
     get availableAsins() {
-      return createComputedProperties(this as any).availableAsins;
+      return getPanelComputedProperties(this).availableAsins;
     },
     get hasData() {
-      return createComputedProperties(this as any).hasData;
+      return getPanelComputedProperties(this).hasData;
     },
     get canAnalyze() {
-      return createComputedProperties(this as any).canAnalyze;
+      return getPanelComputedProperties(this).canAnalyze;
     },
     get analysisTargets() {
-      return createComputedProperties(this as any).analysisTargets;
+      return getPanelComputedProperties(this).analysisTargets;
     },
     get results() {
-      return createComputedProperties(this as any).results;
+      return getPanelComputedProperties(this).results;
     },
     get listingsResults() {
-      return createComputedProperties(this as any).listingsResults;
+      return getPanelComputedProperties(this).listingsResults;
     },
     get reviewsResults() {
-      return createComputedProperties(this as any).reviewsResults;
+      return getPanelComputedProperties(this).reviewsResults;
     },
     get totalHighlights() {
-      return createComputedProperties(this as any).totalHighlights;
+      return getPanelComputedProperties(this).totalHighlights;
     },
     get totalDetails() {
-      return createComputedProperties(this as any).totalDetails;
+      return getPanelComputedProperties(this).totalDetails;
     },
     get hasScraperData() {
-      return createComputedProperties(this as any).hasScraperData;
+      return getPanelComputedProperties(this).hasScraperData;
     },
     get dataSourceLabel() {
-      return createComputedProperties(this as any).dataSourceLabel;
+      return getPanelComputedProperties(this).dataSourceLabel;
     },
     get dataSourceMarketplace() {
-      return createComputedProperties(this as any).dataSourceMarketplace;
+      return getPanelComputedProperties(this).dataSourceMarketplace;
     },
     get dataSourceTimestamp() {
-      return createComputedProperties(this as any).dataSourceTimestamp;
+      return getPanelComputedProperties(this).dataSourceTimestamp;
     },
     get fullReportData() {
-      return createComputedProperties(this as any).fullReportData;
+      return getPanelComputedProperties(this).fullReportData;
     },
     get totalTokenCount() {
-      return createComputedProperties(this as any).totalTokenCount;
+      return getPanelComputedProperties(this).totalTokenCount;
     },
     get formattedTotalTokenCount() {
-      return createComputedProperties(this as any).formattedTotalTokenCount;
+      return getPanelComputedProperties(this).formattedTotalTokenCount;
     },
 
     // ========== 数据加载 ==========
