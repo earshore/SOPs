@@ -4,8 +4,9 @@ import { safeMount } from '@/common/utils/safeMount';
 import { loadTemplate } from '@/common/utils/viewLoader';
 import { StorageService } from '@/services/storageService';
 import {
-  analyzePpcSearchTermsWithLLM,
+  analyzePpcSearchTermsWithAgent,
   type PpcAnalysisContext,
+  type PpcAgentAnalysisResult,
   type PpcLlmDecision,
 } from './services/llmAnalysisService';
 import type { ActionType, AnalyzedRow, ReportSelection, ReportType, Thresholds } from './types';
@@ -434,7 +435,7 @@ async function analyzeText(container: HTMLElement, text: string): Promise<void> 
     localResult = analyzeReport(cleanText, thresholds, reportSelection);
 
     sourceText = cleanText;
-    analyzedRows = [];
+    analyzedRows = localResult.rows;
     activeReportType = localResult.reportType;
     activeFilter = 'all';
     setActionSearchQuery(container, '');
@@ -447,36 +448,39 @@ async function analyzeText(container: HTMLElement, text: string): Promise<void> 
       localResult.mapping,
       localResult.totalRows,
       localResult.validRows,
-      localResult.reportType === 'search_term' ? '正在调用大模型分析...' : '活动级规则分析完成',
+      localResult.reportType === 'search_term' ? '本地工具已生成初判，PPC Agent 正在复核候选...' : '活动级规则分析完成',
     );
-    updateResults(container, []);
+    updateResults(container, analyzedRows);
 
     if (localResult.reportType === 'erp_campaign') {
-      analyzedRows = localResult.rows;
-      updateResults(container, analyzedRows);
       showToast('ERP 广告活动分析完成', { type: 'success', description: `已识别 ${localResult.validRows} 个广告活动` });
       return;
     }
 
-    const decisions = await analyzePpcSearchTermsWithLLM({
+    const agentResult = await analyzePpcSearchTermsWithAgent({
       rows: localResult.rows,
       thresholds,
       context: settings.useContext ? settings.context : undefined,
-      onProgress: ({ completedBatches, totalBatches }) => {
+      onProgress: (progress) => {
+        if (progress.decisions?.length && localResult) {
+          analyzedRows = applyPartialModelDecisions(localResult.rows, progress.decisions);
+          updateResults(container, analyzedRows);
+        }
+
         renderMappingStatus(
           container,
           localResult?.mapping || { reportType: activeReportType, found: {}, missing: [] },
           localResult?.totalRows || 0,
           localResult?.validRows || 0,
-          `大模型分析中 ${completedBatches}/${totalBatches}`,
+          `Agent 语义工具复核中 ${progress.completedBatches}/${progress.totalBatches}`,
         );
       },
     });
 
-    analyzedRows = applyModelDecisions(localResult.rows, decisions);
-    renderMappingStatus(container, localResult.mapping, localResult.totalRows, localResult.validRows, '大模型分析完成');
+    analyzedRows = applyModelDecisions(localResult.rows, agentResult.decisions, new Set(agentResult.modelDecisionIds));
+    renderMappingStatus(container, localResult.mapping, localResult.totalRows, localResult.validRows, formatAgentStatus(agentResult));
     updateResults(container, analyzedRows);
-    showToast('PPC 搜索词模型分析完成', { type: 'success', description: `已识别 ${localResult.validRows} 行有效数据` });
+    showToast('PPC Agent 分析完成', { type: 'success', description: formatAgentToast(agentResult) });
   } catch (error) {
     const message = error instanceof Error ? error.message : '报表解析失败';
     const settings = readAnalysisSettings(container);
@@ -489,15 +493,19 @@ async function analyzeText(container: HTMLElement, text: string): Promise<void> 
       return;
     }
 
-    analyzedRows = [];
-    updateResults(container, []);
+    if (localResult?.reportType === 'search_term' && analyzedRows.length > 0) {
+      renderMappingStatus(container, localResult.mapping, localResult.totalRows, localResult.validRows, 'Agent 复核失败，当前展示本地初判结果');
+    } else {
+      analyzedRows = [];
+      updateResults(container, []);
+    }
     showToast('分析失败', { type: 'error', description: message });
   } finally {
     setAnalyzeButtonState(container, false);
   }
 }
 
-function applyModelDecisions(rows: AnalyzedRow[], decisions: PpcLlmDecision[]): AnalyzedRow[] {
+function applyModelDecisions(rows: AnalyzedRow[], decisions: PpcLlmDecision[], reviewedIds = new Set<string>()): AnalyzedRow[] {
   const byId = new Map(decisions.map((decisionItem) => [decisionItem.id, decisionItem]));
   const missingCount = rows.filter((row) => !byId.has(row.id)).length;
 
@@ -509,15 +517,55 @@ function applyModelDecisions(rows: AnalyzedRow[], decisions: PpcLlmDecision[]): 
     .map((row) => {
       const modelDecision = byId.get(row.id);
       if (!modelDecision) return row;
-      return {
-        ...row,
-        action: modelDecision.action,
-        actionLabel: ACTION_LABELS[modelDecision.action],
-        reason: modelDecision.reason,
-        priority: modelDecision.priority,
-      };
+      return mergeDecisionIntoRow(row, modelDecision, reviewedIds.has(row.id));
     })
     .sort((a, b) => b.priority - a.priority || b.spend - a.spend);
+}
+
+function applyPartialModelDecisions(rows: AnalyzedRow[], decisions: PpcLlmDecision[]): AnalyzedRow[] {
+  const byId = new Map(decisions.map((decisionItem) => [decisionItem.id, decisionItem]));
+
+  return rows
+    .map((row) => {
+      const modelDecision = byId.get(row.id);
+      if (!modelDecision) return row;
+      return mergeDecisionIntoRow(row, modelDecision, true);
+    })
+    .sort((a, b) => b.priority - a.priority || b.spend - a.spend);
+}
+
+function mergeDecisionIntoRow(row: AnalyzedRow, modelDecision: PpcLlmDecision, isReviewed: boolean): AnalyzedRow {
+  const nextRow: AnalyzedRow = {
+    ...row,
+    action: modelDecision.action,
+    actionLabel: ACTION_LABELS[modelDecision.action],
+    reason: modelDecision.reason,
+    priority: modelDecision.priority,
+  };
+
+  if (isReviewed) {
+    nextRow.reviewStatus = 'model_reviewed';
+  } else {
+    delete nextRow.reviewStatus;
+  }
+
+  return nextRow;
+}
+
+function formatAgentStatus(result: PpcAgentAnalysisResult): string {
+  const modelText = result.summary.modelRows > 0
+    ? `模型语义复核 ${result.summary.modelRows} 行`
+    : '无需模型复核';
+  const skippedText = result.summary.skippedModelRows > 0 ? `，已按优先级跳过 ${result.summary.skippedModelRows} 行低影响候选` : '';
+  return `PPC Agent 完成：本地工具全量处理 ${result.summary.totalRows} 行，${modelText}${skippedText}`;
+}
+
+function formatAgentToast(result: PpcAgentAnalysisResult): string {
+  if (result.summary.modelRows === 0) {
+    return `本地工具已完成 ${result.summary.totalRows} 行分析`;
+  }
+
+  return `本地全量 ${result.summary.totalRows} 行，模型复核 ${result.summary.modelRows} 行`;
 }
 
 export function analyzeReport(text: string, thresholds: Thresholds, selection: ReportSelection = 'auto'): AnalysisResult {
@@ -1109,7 +1157,7 @@ function updateEmptyState(container: HTMLElement, hasAnalyzedRows: boolean): voi
 
 function createRow(row: AnalyzedRow): HTMLTableRowElement {
   const tr = document.createElement('tr');
-  tr.className = 'ppc-results-row';
+  tr.className = row.reviewStatus === 'model_reviewed' ? 'ppc-results-row ppc-results-row-reviewed' : 'ppc-results-row';
   tr.appendChild(createSearchTermCell(row));
   tr.appendChild(createActionCell(row));
   tr.appendChild(createCell(formatCurrency(row.spend), 'right'));
@@ -1118,7 +1166,7 @@ function createRow(row: AnalyzedRow): HTMLTableRowElement {
   tr.appendChild(createCell(row.sales > 0 ? formatPercent(row.acos) : '-', 'right'));
   tr.appendChild(createCell(formatPercent(row.ctr), 'right'));
   tr.appendChild(createCell(formatPercent(row.cvr), 'right'));
-  tr.appendChild(createCell(row.reason, 'left'));
+  tr.appendChild(createReasonCell(row));
   return tr;
 }
 
@@ -1148,6 +1196,35 @@ function createActionCell(row: AnalyzedRow): HTMLTableCellElement {
   badge.className = `ppc-action-badge ppc-action-${row.action}`;
   badge.textContent = row.actionLabel;
   cell.appendChild(badge);
+
+  if (row.reviewStatus === 'model_reviewed') {
+    const reviewBadge = document.createElement('span');
+    reviewBadge.className = 'ppc-review-chip';
+    reviewBadge.textContent = 'Agent 复核';
+    cell.appendChild(reviewBadge);
+  }
+
+  return cell;
+}
+
+function createReasonCell(row: AnalyzedRow): HTMLTableCellElement {
+  const cell = createCell('', 'left');
+
+  if (row.reviewStatus !== 'model_reviewed') {
+    cell.textContent = row.reason;
+    return cell;
+  }
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'ppc-review-reason';
+  const label = document.createElement('div');
+  label.className = 'ppc-review-reason-label';
+  label.textContent = '语义复核结论';
+  const text = document.createElement('div');
+  text.className = 'ppc-review-reason-text';
+  text.textContent = row.reason;
+  wrapper.append(label, text);
+  cell.appendChild(wrapper);
   return cell;
 }
 

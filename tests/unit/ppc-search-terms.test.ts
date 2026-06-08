@@ -9,6 +9,7 @@ import {
   type Thresholds,
   xlsxArrayBufferToDelimitedText,
 } from '@/modules/app_center/views/ppc_search_terms/index';
+import { selectPpcAgentModelRows } from '@/modules/app_center/views/ppc_search_terms/services/llmAnalysisService';
 
 const thresholds: Thresholds = {
   targetAcos: 35,
@@ -51,6 +52,27 @@ describe('PPC 搜索词分析器', () => {
     expect(byTerm['harvest term']?.action).toBe('harvest_exact');
     expect(byTerm['bid down term']?.action).toBe('bid_down');
     expect(byTerm['listing term']?.action).toBe('listing_term');
+  });
+
+  it('PPC Agent 只挑选低置信高影响搜索词进入模型复核', () => {
+    const report = [
+      'Campaign,Ad Group,Search Term,Keyword,Match Type,Impressions,Clicks,Spend,Sales,Orders',
+      'DE_Auto,Auto,waste term,dog coat,broad,5000,15,18,0,0',
+      'DE_Auto,Auto,scale term,dog coat,broad,4100,45,54,250,6',
+      'DE_Auto,Auto,semantic listing term,dog coat,broad,100,5,2,0,0',
+      'DE_Auto,Auto,low ctr term,dog coat,broad,2000,1,1,0,0',
+      'DE_Auto,Auto,tiny sample,dog coat,broad,100,1,1,0,0',
+    ].join('\n');
+
+    const result = analyzeSearchTermReport(report, thresholds);
+    const modelRows = selectPpcAgentModelRows(result.rows, thresholds);
+    const modelTerms = modelRows.map((row) => row.searchTerm);
+
+    expect(modelTerms).toContain('semantic listing term');
+    expect(modelTerms).toContain('low ctr term');
+    expect(modelTerms).not.toContain('waste term');
+    expect(modelTerms).not.toContain('scale term');
+    expect(modelTerms).not.toContain('tiny sample');
   });
 
   it('正确解析欧美数字格式', () => {

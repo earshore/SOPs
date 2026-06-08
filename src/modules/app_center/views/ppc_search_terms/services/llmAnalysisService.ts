@@ -20,6 +20,26 @@ export interface PpcLlmDecision {
 export interface PpcLlmAnalysisProgress {
   completedBatches: number;
   totalBatches: number;
+  decisions?: PpcLlmDecision[];
+}
+
+export interface PpcAgentToolCall {
+  tool: 'local_metric_rules' | 'semantic_llm_refiner';
+  inputRows: number;
+  outputRows: number;
+  note: string;
+}
+
+export interface PpcAgentAnalysisResult {
+  decisions: PpcLlmDecision[];
+  modelDecisionIds: string[];
+  toolCalls: PpcAgentToolCall[];
+  summary: {
+    totalRows: number;
+    localRows: number;
+    modelRows: number;
+    skippedModelRows: number;
+  };
 }
 
 interface PpcLlmAnalysisInput {
@@ -37,6 +57,8 @@ interface LLMConfig {
 }
 
 const PPC_BATCH_SIZE = 80;
+const PPC_AGENT_MODEL_ROW_LIMIT = 160;
+const PPC_AGENT_LOW_CONFIDENCE_ACTIONS: ActionType[] = ['listing_term', 'observe'];
 const ACTION_TYPES: ActionType[] = [
   'negative_exact',
   'harvest_exact',
@@ -45,6 +67,87 @@ const ACTION_TYPES: ActionType[] = [
   'listing_term',
   'observe',
 ];
+const PPC_AGENT_PRESET = {
+  name: 'PPC Search Term Optimization Agent',
+  skill: 'Amazon PPC 搜索词动作分析：先用指标规则做确定性判断，再用语义模型复核低置信候选。',
+  mcp: 'local-first-analysis',
+  tools: [
+    {
+      name: 'local_metric_rules',
+      purpose: '基于点击、花费、订单、ACOS、CTR、CVR 等结构化指标批量生成确定性动作。',
+    },
+    {
+      name: 'semantic_llm_refiner',
+      purpose: '只复核样本不足、语义相关性不明确、Listing 词池价值待判断的候选搜索词。',
+    },
+    {
+      name: 'export_action_planner',
+      purpose: '保持动作类型稳定，方便导出否词、加词、降竞价、加预算和词池清单。',
+    },
+  ],
+};
+
+export async function analyzePpcSearchTermsWithAgent(input: PpcLlmAnalysisInput): Promise<PpcAgentAnalysisResult> {
+  const modelRows = selectPpcAgentModelRows(input.rows, input.thresholds, PPC_AGENT_MODEL_ROW_LIMIT);
+  const localDecisions = rowsToDecisions(input.rows);
+  const toolCalls: PpcAgentToolCall[] = [
+    {
+      tool: 'local_metric_rules',
+      inputRows: input.rows.length,
+      outputRows: input.rows.length,
+      note: '本地指标规则已完成全量预判',
+    },
+  ];
+
+  if (modelRows.length === 0) {
+    return {
+      decisions: localDecisions,
+      modelDecisionIds: [],
+      toolCalls,
+      summary: {
+        totalRows: input.rows.length,
+        localRows: input.rows.length,
+        modelRows: 0,
+        skippedModelRows: 0,
+      },
+    };
+  }
+
+  const modelDecisions = await analyzePpcSearchTermsWithLLM({
+    ...input,
+    rows: modelRows,
+  });
+  const mergedDecisions = mergeAgentDecisions(localDecisions, modelDecisions);
+  toolCalls.push({
+    tool: 'semantic_llm_refiner',
+    inputRows: modelRows.length,
+    outputRows: modelDecisions.length,
+    note: '语义模型仅复核低置信候选',
+  });
+
+  return {
+    decisions: mergedDecisions,
+    modelDecisionIds: modelDecisions.map((decision) => decision.id),
+    toolCalls,
+    summary: {
+      totalRows: input.rows.length,
+      localRows: input.rows.length - modelRows.length,
+      modelRows: modelRows.length,
+      skippedModelRows: Math.max(0, countModelCandidateRows(input.rows, input.thresholds) - modelRows.length),
+    },
+  };
+}
+
+export function selectPpcAgentModelRows(
+  rows: AnalyzedRow[],
+  thresholds: Thresholds,
+  limit = PPC_AGENT_MODEL_ROW_LIMIT,
+): AnalyzedRow[] {
+  return rows
+    .filter((row) => shouldRefineWithModel(row, thresholds))
+    .sort((a, b) => scoreModelCandidate(b, thresholds) - scoreModelCandidate(a, thresholds))
+    .slice(0, limit);
+}
 
 export async function analyzePpcSearchTermsWithLLM(input: PpcLlmAnalysisInput): Promise<PpcLlmDecision[]> {
   if (input.rows.length === 0) return [];
@@ -64,7 +167,7 @@ export async function analyzePpcSearchTermsWithLLM(input: PpcLlmAnalysisInput): 
     });
 
     decisions.push(...parsePpcLlmDecisions(response));
-    input.onProgress?.({ completedBatches: index + 1, totalBatches: batches.length });
+    input.onProgress?.({ completedBatches: index + 1, totalBatches: batches.length, decisions: [...decisions] });
   }
 
   ensureCompleteDecisions(input.rows, decisions);
@@ -137,6 +240,7 @@ function buildPrompt(rows: AnalyzedRow[], thresholds: Thresholds, context?: PpcA
   return JSON.stringify(
     {
       task: 'Analyze Amazon PPC search term rows and choose one action for every row.',
+      agentPreset: PPC_AGENT_PRESET,
       rules: {
         actionTypes: ACTION_TYPES,
         definitions: {
@@ -162,6 +266,42 @@ function buildPrompt(rows: AnalyzedRow[], thresholds: Thresholds, context?: PpcA
     null,
     2,
   );
+}
+
+function rowsToDecisions(rows: AnalyzedRow[]): PpcLlmDecision[] {
+  return rows.map((row) => ({
+    id: row.id,
+    action: row.action,
+    priority: row.priority,
+    reason: row.reason,
+  }));
+}
+
+function mergeAgentDecisions(localDecisions: PpcLlmDecision[], modelDecisions: PpcLlmDecision[]): PpcLlmDecision[] {
+  const byId = new Map(localDecisions.map((decision) => [decision.id, decision]));
+  modelDecisions.forEach((decision) => byId.set(decision.id, decision));
+  return localDecisions.map((decision) => byId.get(decision.id) || decision);
+}
+
+function shouldRefineWithModel(row: AnalyzedRow, thresholds: Thresholds): boolean {
+  if (!PPC_AGENT_LOW_CONFIDENCE_ACTIONS.includes(row.action)) return false;
+  if (row.orders > 0) return true;
+  if (row.clicks >= Math.max(3, Math.ceil(thresholds.minClicksNoOrder * 0.35))) return true;
+  if (row.spend >= thresholds.minSpendNoOrder * 0.35) return true;
+  return row.impressions >= 1000;
+}
+
+function countModelCandidateRows(rows: AnalyzedRow[], thresholds: Thresholds): number {
+  return rows.filter((row) => shouldRefineWithModel(row, thresholds)).length;
+}
+
+function scoreModelCandidate(row: AnalyzedRow, thresholds: Thresholds): number {
+  const spendWeight = thresholds.minSpendNoOrder > 0 ? (row.spend / thresholds.minSpendNoOrder) * 35 : row.spend;
+  const clickWeight = thresholds.minClicksNoOrder > 0 ? (row.clicks / thresholds.minClicksNoOrder) * 25 : row.clicks;
+  const orderWeight = row.orders * 18;
+  const impressionWeight = Math.min(row.impressions / 1000, 8);
+  const actionWeight = row.action === 'listing_term' ? 8 : 0;
+  return spendWeight + clickWeight + orderWeight + impressionWeight + actionWeight;
 }
 
 function toPromptRow(row: AnalyzedRow): Record<string, string | number> {

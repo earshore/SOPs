@@ -15,7 +15,7 @@
                 <ul class="ppc-hero-tags" role="list">
                     <li class="ppc-hero-tag"><span class="ppc-tag-dot ppc-tag-dot-blue" aria-hidden="true"></span>Amazon Ads CSV/TSV</li>
                     <li class="ppc-hero-tag"><span class="ppc-tag-dot ppc-tag-dot-green" aria-hidden="true"></span>ERP 导出表</li>
-                    <li class="ppc-hero-tag"><span class="ppc-tag-dot ppc-tag-dot-violet" aria-hidden="true"></span>大模型分析</li>
+                    <li class="ppc-hero-tag"><span class="ppc-tag-dot ppc-tag-dot-violet" aria-hidden="true"></span>Agent 分流分析</li>
                     <li class="ppc-hero-tag"><span class="ppc-tag-dot ppc-tag-dot-orange" aria-hidden="true"></span>可导出动作清单</li>
                 </ul>
             </div>
@@ -148,14 +148,14 @@
                         <input id="ppc-allow-local-fallback" type="checkbox" class="mt-0.5 rounded border-slate-300">
                         <span>
                             <span class="font-semibold">模型失败时使用本地规则</span>
-                            <span class="block text-slate-500 mt-0.5">默认关闭，开启后仅在模型不可用时降级。</span>
+                            <span class="block text-slate-500 mt-0.5">Agent 默认先跑本地工具，仅在语义复核失败时降级。</span>
                         </span>
                     </label>
                     <label class="ppc-check-row">
                         <input id="ppc-use-context" type="checkbox" class="mt-0.5 rounded border-slate-300">
                         <span>
                             <span class="font-semibold">加入产品上下文</span>
-                            <span class="block text-slate-500 mt-0.5">可选，不填时只基于搜索词报表分析。</span>
+                            <span class="block text-slate-500 mt-0.5">可选，Agent 会把产品信息用于少量语义候选复核。</span>
                         </span>
                     </label>
                     <div id="ppc-context-fields" class="ppc-context-fields hidden mt-3 space-y-3">

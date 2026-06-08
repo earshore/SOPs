@@ -12,11 +12,28 @@ interface LlmMockRow {
 
 interface LlmMockInput {
   rows: LlmMockRow[];
-  onProgress?: (progress: { completedBatches: number; totalBatches: number }) => void;
+  onProgress?: (progress: { completedBatches: number; totalBatches: number; decisions?: LlmMockRow[] }) => void;
+}
+
+interface LlmMockAgentResult {
+  decisions: LlmMockRow[];
+  modelDecisionIds: string[];
+  toolCalls: Array<{
+    tool: string;
+    inputRows: number;
+    outputRows: number;
+    note: string;
+  }>;
+  summary: {
+    totalRows: number;
+    localRows: number;
+    modelRows: number;
+    skippedModelRows: number;
+  };
 }
 
 const mocks = vi.hoisted(() => ({
-  analyzeWithLLM: vi.fn(),
+  analyzeWithAgent: vi.fn(),
   storageGet: vi.fn(),
   storageSet: vi.fn(),
   showToast: vi.fn(),
@@ -95,13 +112,24 @@ vi.mock('@/services/storageService', () => ({
 }));
 
 vi.mock('@/modules/app_center/views/ppc_search_terms/services/llmAnalysisService', () => ({
-  analyzePpcSearchTermsWithLLM: mocks.analyzeWithLLM,
+  analyzePpcSearchTermsWithAgent: mocks.analyzeWithAgent,
 }));
 
 async function flushAnalysis(): Promise<void> {
   await Promise.resolve();
   await new Promise((resolve) => setTimeout(resolve, 0));
   await Promise.resolve();
+}
+
+function createDeferred<T>(): { promise: Promise<T>; resolve: (value: T) => void; reject: (reason?: unknown) => void } {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((promiseResolve, promiseReject) => {
+    resolve = promiseResolve;
+    reject = promiseReject;
+  });
+
+  return { promise, resolve, reject };
 }
 
 describe('PPC 搜索词分析器 UI 行为', () => {
@@ -114,15 +142,33 @@ describe('PPC 搜索词分析器 UI 行为', () => {
     mocks.storageGet.mockReturnValue({});
     mocks.storageSet.mockClear();
     mocks.showToast.mockClear();
-    mocks.analyzeWithLLM.mockReset();
-    mocks.analyzeWithLLM.mockImplementation(async ({ rows, onProgress }: LlmMockInput) => {
-      onProgress?.({ completedBatches: 1, totalBatches: 1 });
-      return rows.map((row) => ({
+    mocks.analyzeWithAgent.mockReset();
+    mocks.analyzeWithAgent.mockImplementation(async ({ rows, onProgress }: LlmMockInput) => {
+      const decisions = rows.map((row) => ({
         id: row.id,
         action: row.action,
         reason: `模型建议：${row.reason}`,
         priority: row.priority,
       }));
+      onProgress?.({ completedBatches: 1, totalBatches: 1, decisions });
+      return {
+        decisions,
+        modelDecisionIds: [],
+        toolCalls: [
+          {
+            tool: 'local_metric_rules',
+            inputRows: rows.length,
+            outputRows: rows.length,
+            note: '本地指标规则已完成全量预判',
+          },
+        ],
+        summary: {
+          totalRows: rows.length,
+          localRows: rows.length,
+          modelRows: 0,
+          skippedModelRows: 0,
+        },
+      };
     });
     Object.defineProperty(URL, 'createObjectURL', { configurable: true, value: vi.fn(() => 'blob:test') });
     Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: vi.fn() });
@@ -145,7 +191,7 @@ describe('PPC 搜索词分析器 UI 行为', () => {
     container.querySelector<HTMLButtonElement>('#ppc-export-current')?.click();
 
     expect(loadTemplate).toHaveBeenCalledWith('src/modules/app_center/views/ppc_search_terms/template.html');
-    expect(mocks.analyzeWithLLM).toHaveBeenCalled();
+    expect(mocks.analyzeWithAgent).toHaveBeenCalled();
     expect(container.querySelector('#ppc-stat-rows')?.textContent).toBe('10');
     expect(container.querySelector('#ppc-result-count')?.textContent).toBe('共 10 行，当前筛选 2 行。');
     expect(anchorClick).toHaveBeenCalled();
@@ -196,18 +242,81 @@ describe('PPC 搜索词分析器 UI 行为', () => {
     });
   });
 
-  it('模型失败且未开启降级时不使用本地规则', async () => {
-    mocks.analyzeWithLLM.mockRejectedValueOnce(new Error('LLM unavailable'));
+  it('动作清单先展示本地初判，再增量展示 Agent 复核结果', async () => {
+    const deferred = createDeferred<LlmMockAgentResult>();
+    let progressHandler: LlmMockInput['onProgress'];
+    mocks.analyzeWithAgent.mockImplementationOnce(({ onProgress }: LlmMockInput) => {
+      progressHandler = onProgress;
+      return deferred.promise;
+    });
+
+    container.querySelector<HTMLButtonElement>('#ppc-btn-sample')?.click();
+
+    expect(container.querySelector('#ppc-stat-rows')?.textContent).toBe('10');
+    expect(container.querySelector('#ppc-result-count')?.textContent).toBe('共 10 行，当前筛选 10 行。');
+    expect(container.querySelector('#ppc-mapping-status')?.textContent).toContain('本地工具已生成初判');
+
+    const rows = (mocks.analyzeWithAgent.mock.calls[0]?.[0] as LlmMockInput).rows;
+    progressHandler?.({
+      completedBatches: 1,
+      totalBatches: 2,
+      decisions: [
+        {
+          id: rows[0]?.id || '',
+          action: 'observe',
+          reason: '模型实时建议：先观察',
+          priority: 99,
+        },
+      ],
+    });
+
+    expect(container.querySelector('#ppc-results-body')?.textContent).toContain('模型实时建议：先观察');
+    expect(container.querySelector('.ppc-results-row-reviewed')).not.toBeNull();
+    expect(container.querySelector('#ppc-results-body')?.textContent).toContain('Agent 复核');
+    expect(container.querySelector('#ppc-results-body')?.textContent).toContain('语义复核结论');
+    expect(container.querySelector('#ppc-mapping-status')?.textContent).toContain('Agent 语义工具复核中 1/2');
+
+    deferred.resolve({
+      decisions: rows.map((row) => ({
+        id: row.id,
+        action: row.action,
+        reason: `模型建议：${row.reason}`,
+        priority: row.priority,
+      })),
+      modelDecisionIds: [rows[0]?.id || ''],
+      toolCalls: [
+        {
+          tool: 'local_metric_rules',
+          inputRows: rows.length,
+          outputRows: rows.length,
+          note: '本地指标规则已完成全量预判',
+        },
+      ],
+      summary: {
+        totalRows: rows.length,
+        localRows: rows.length,
+        modelRows: 0,
+        skippedModelRows: 0,
+      },
+    });
+    await flushAnalysis();
+
+    expect(container.querySelector('#ppc-mapping-status')?.textContent).toContain('PPC Agent 完成');
+  });
+
+  it('模型失败且未开启降级时保留本地初判', async () => {
+    mocks.analyzeWithAgent.mockRejectedValueOnce(new Error('LLM unavailable'));
 
     container.querySelector<HTMLButtonElement>('#ppc-btn-sample')?.click();
     await flushAnalysis();
 
-    expect(container.querySelector('#ppc-stat-rows')?.textContent).toBe('0');
+    expect(container.querySelector('#ppc-stat-rows')?.textContent).toBe('10');
+    expect(container.querySelector('#ppc-mapping-status')?.textContent).toContain('Agent 复核失败');
     expect(showToast).toHaveBeenCalledWith('分析失败', { type: 'error', description: 'LLM unavailable' });
   });
 
   it('模型失败且开启降级时使用本地规则', async () => {
-    mocks.analyzeWithLLM.mockRejectedValueOnce(new Error('LLM unavailable'));
+    mocks.analyzeWithAgent.mockRejectedValueOnce(new Error('LLM unavailable'));
     const fallback = container.querySelector<HTMLInputElement>('#ppc-allow-local-fallback');
     if (fallback) {
       fallback.checked = true;
@@ -240,7 +349,7 @@ describe('PPC 搜索词分析器 UI 行为', () => {
     container.querySelector<HTMLButtonElement>('#ppc-btn-sample')?.click();
     await flushAnalysis();
 
-    expect(mocks.analyzeWithLLM).toHaveBeenCalledWith(expect.objectContaining({
+    expect(mocks.analyzeWithAgent).toHaveBeenCalledWith(expect.objectContaining({
       context: {
         asin: 'B0TEST1234',
         category: 'Dog Coats',

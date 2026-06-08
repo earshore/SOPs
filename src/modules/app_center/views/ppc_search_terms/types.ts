@@ -44,6 +44,7 @@ export interface AnalyzedRow {
   actionLabel: string;
   reason: string;
   priority: number;
+  reviewStatus?: 'model_reviewed';
   store?: string;
   serviceStatus?: string;
   targetingType?: string;

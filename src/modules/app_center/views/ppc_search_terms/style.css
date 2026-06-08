@@ -689,11 +689,62 @@
   border-bottom: 1px solid #e2e8f0;
 }
 
+.ppc-results-row-reviewed {
+  background: linear-gradient(90deg, rgba(240, 253, 250, 0.96), rgba(240, 249, 255, 0.72));
+  box-shadow: inset 3px 0 0 #14b8a6;
+}
+
 .ppc-results-row:hover {
   background: #f0f9ff;
+}
+
+.ppc-results-row-reviewed:hover {
+  background: linear-gradient(90deg, rgba(204, 251, 241, 0.72), rgba(224, 242, 254, 0.82));
 }
 
 .ppc-results-row td {
   padding: 10px 12px;
   vertical-align: top;
+}
+
+.ppc-review-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 22px;
+  margin-top: 6px;
+  padding: 0 8px;
+  border: 1px solid rgba(13, 148, 136, 0.28);
+  border-radius: 999px;
+  background: #f0fdfa;
+  color: #0f766e;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.ppc-review-chip::before {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #14b8a6;
+  content: '';
+}
+
+.ppc-review-reason {
+  padding: 8px 10px;
+  border: 1px solid rgba(20, 184, 166, 0.28);
+  border-radius: 8px;
+  background: rgba(240, 253, 250, 0.9);
+}
+
+.ppc-review-reason-label {
+  margin-bottom: 4px;
+  color: #0f766e;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.ppc-review-reason-text {
+  color: #164e63;
 }
