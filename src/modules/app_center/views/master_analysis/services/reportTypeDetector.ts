@@ -22,6 +22,10 @@ function getRecordField(report: ReportRecord, key: string): ReportRecord | null 
   return isReportRecord(value) ? value : null;
 }
 
+function hasAnyField(report: ReportRecord, keys: string[]): boolean {
+  return keys.some(key => !!report[key]);
+}
+
 /**
  * 检测报告类型（基于字段特征）
  *
@@ -62,8 +66,8 @@ export function detectReportType(report: unknown): ReportType {
   console.warn('[报告检测] 未识别的报告格式', {
     hasBuyerProfile: !!(reportObj['buyer-profile'] || reportObj.buyer_profile),
     hasSellingPoints: !!(reportObj['selling-points'] || reportObj.selling_points),
-    hasCompetitorInsights: !!reportObj.competitor_insights,
-    hasProductOverview: !!reportObj.productOverview,
+    hasCompetitorInsights: hasAnyField(reportObj, ['competitor_insights', 'competitorInsights']),
+    hasProductOverview: hasAnyField(reportObj, ['productOverview', 'product_overview']),
     hasPainPointGaps: !!reportObj.pain_point_gaps,
     metaTemplateId: getRecordField(reportObj, 'meta')?.templateId
   });
@@ -85,7 +89,9 @@ function isFullAnalysisReport(report: unknown): report is FullAnalysisReport {
   // 并且不应该有 Downloads 格式的特征字段
   const hasDownloadsFields = !!(
     report.competitor_insights ||
+    report.competitorInsights ||
     report.productOverview ||
+    report.product_overview ||
     report.pain_point_gaps
   );
 
@@ -98,11 +104,12 @@ function isFullAnalysisReport(report: unknown): report is FullAnalysisReport {
 function isCompetitorReport(report: unknown): report is CompetitorReport {
   if (!isReportRecord(report)) return false;
 
+  const featurePoints = report.feature_points || report.featurePoints;
+
   return !!(
-    report.competitor_insights &&
-    report.feature_points &&
-    Array.isArray(report.feature_points) &&
-    report.keyword_clusters
+    hasAnyField(report, ['competitor_insights', 'competitorInsights']) &&
+    Array.isArray(featurePoints) &&
+    hasAnyField(report, ['keyword_clusters', 'keywordClusters'])
   );
 }
 
@@ -112,11 +119,13 @@ function isCompetitorReport(report: unknown): report is CompetitorReport {
 function isProductOverviewReport(report: unknown): report is ProductOverviewReport {
   if (!isReportRecord(report)) return false;
 
+  const coreFeatures = report.coreFeatures || report.core_features;
+
   return !!(
-    report.productOverview &&
-    report.coreFeatures &&
-    report.user_profile &&
-    typeof report.coreFeatures === 'object'
+    hasAnyField(report, ['productOverview', 'product_overview']) &&
+    hasAnyField(report, ['user_profile', 'userProfile']) &&
+    coreFeatures &&
+    typeof coreFeatures === 'object'
   );
 }
 

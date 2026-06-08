@@ -184,6 +184,19 @@ const MODAL_STYLES = `
                     box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #3b82f6;
                 }
 
+                .btn-close-floating {
+                    position: absolute;
+                    top: 0.75rem;
+                    right: 0.75rem;
+                    z-index: 20;
+                    background: rgba(255, 255, 255, 0.92);
+                    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.14);
+                }
+
+                .btn-close-floating:hover {
+                    background: #ffffff;
+                }
+
                 .btn-close svg {
                     width: 1.125rem;
                     height: 1.125rem;
@@ -416,6 +429,13 @@ export class AppModal extends HTMLElement {
         const size = this.getAttribute('size') || 'md';
         const hideHeader = this.hasAttribute('no-header');
         const sizeClass = this._sizeMap()[size] || 'size-lg';
+        const renderCloseButton = (className = 'btn-close') => `
+            <button class="${className}" aria-label="关闭">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        `;
 
         const style = document.createElement('style');
         style.textContent = MODAL_STYLES;
@@ -428,6 +448,7 @@ export class AppModal extends HTMLElement {
 
                 <!-- Panel -->
                 <div class="modal-panel ${sizeClass}">
+                    ${hideHeader ? renderCloseButton('btn-close btn-close-floating') : ''}
 
                     ${hideHeader ? '' : `
                     <!-- Header -->
@@ -441,11 +462,7 @@ export class AppModal extends HTMLElement {
                             <span class="modal-title-text">${safeTitle}</span>
                         </h3>
 
-                        <button class="btn-close" aria-label="关闭">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
+                        ${renderCloseButton()}
                     </div>
                     `}
 

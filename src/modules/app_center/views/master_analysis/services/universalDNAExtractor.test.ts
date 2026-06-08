@@ -49,6 +49,38 @@ describe('UniversalDNAExtractor', () => {
       expect(dna!.differentiationAngles).toContain('Verbesserte Befestigungsqualität');
       expect(dna!.metadata.reportType).toBe('competitor');
     });
+
+    it('should extract DNA from competitor report with camelCase fields', () => {
+      const report = {
+        keywordClusters: {
+          core: ['desk bell'],
+          attribute: ['metal', '11 cm'],
+          long_tail: ['desk bell for service counter'],
+          banned: ['guaranteed']
+        },
+        highFrequencyPhrases: ['clear sound'],
+        featurePoints: ['Compact metal bell'],
+        competitorInsights: {
+          user_profile: ['service counter teams'],
+          strengths: ['clear tone'],
+          weaknesses: ['loose handle'],
+          differentiation_angles: ['reinforced handle']
+        },
+        complianceRisks: [
+          { type: 'claim', examples: ['guaranteed'], suggestion: 'soften claim' }
+        ],
+        qaOpportunities: [],
+        meta: {}
+      };
+
+      const dna = extractor.extractDNA(report);
+
+      expect(dna).not.toBeNull();
+      expect(dna!.keywords.core).toContain('desk bell');
+      expect(dna!.audience).toContain('service counter teams');
+      expect(dna!.restrictedWords).toContain('guaranteed');
+      expect(dna!.metadata.reportType).toBe('competitor');
+    });
   });
 
   describe('Product Overview Report', () => {
@@ -102,6 +134,53 @@ describe('UniversalDNAExtractor', () => {
       expect(dna!.keywords.intent).toContain('purchase_gift: styropor flieger geschenk kinder');
       expect(dna!.audience).toContain('Parents of young children');
       expect(dna!.painPoints).toContain('Products breaking after short period');
+      expect(dna!.metadata.reportType).toBe('product_overview');
+    });
+
+    it('should extract DNA from product overview report with snake_case fields', () => {
+      const report = {
+        product_overview: {
+          itemsAnalyzed: 1,
+          asins: ['B00TEST'],
+          market: 'Amazon.de',
+          category: 'Home',
+          summary: 'Compact organizer'
+        },
+        core_features: {
+          material: 'Bamboo wood',
+          size: '30 cm width'
+        },
+        user_profile: {
+          demographics: {
+            ageRanges: ['Apartment renters'],
+            locations: ['Urban homes'],
+            household: ['Small households']
+          },
+          painPoints: ['Limited storage'],
+          scenarios: ['Kitchen organization'],
+          priceSensitivity: 'medium',
+          decisionDrivers: ['Space saving']
+        },
+        strengths: ['Natural material'],
+        weaknesses: ['Limited capacity'],
+        differentiation_angles: ['Small-space positioning'],
+        keyword_clusters: {
+          core: ['bamboo organizer'],
+          longTail: ['small kitchen bamboo organizer'],
+          intent: ['space saving organizer']
+        },
+        compliance_risks: [
+          { type: 'claim', risk: 'eco friendly', suggestion: 'substantiate' }
+        ],
+        meta: {}
+      };
+
+      const dna = extractor.extractDNA(report);
+
+      expect(dna).not.toBeNull();
+      expect(dna!.keywords.core).toContain('bamboo organizer');
+      expect(dna!.audience).toContain('Apartment renters');
+      expect(dna!.painPoints).toContain('Limited storage');
       expect(dna!.metadata.reportType).toBe('product_overview');
     });
   });

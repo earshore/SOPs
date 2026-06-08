@@ -20,6 +20,37 @@ type CompetitorReportInput = Partial<CompetitorReport> & {
   qaOpportunities?: CompetitorReport["qa_opportunities"];
 };
 
+type CompetitorReportInputKey = keyof CompetitorReportInput;
+
+function pickCompetitorField<T>(
+  reportObj: CompetitorReportInput,
+  keys: CompetitorReportInputKey[],
+  fallback: T,
+): T {
+  for (const key of keys) {
+    const value = reportObj[key];
+    if (value) return value as T;
+  }
+  return fallback;
+}
+
+function createEmptyCompetitorInsights(): CompetitorReport["competitor_insights"] {
+  return {
+    strengths: [],
+    weaknesses: [],
+    user_profile: [],
+    differentiation_angles: [],
+  };
+}
+
+function createEmptyKeywordClusters(): CompetitorReport["keyword_clusters"] {
+  return {
+    core: [],
+    attribute: [],
+    long_tail: [],
+  };
+}
+
 /**
  * Competitor Report 适配器实现
  */
@@ -165,39 +196,28 @@ export class CompetitorReportAdapter implements ReportAdapter {
     const reportObj = report as CompetitorReportInput;
 
     return {
-      product_summary: (reportObj.product_summary ||
-        reportObj.productSummary ||
-        "") as string,
-      feature_points: (reportObj.feature_points ||
-        reportObj.featurePoints ||
-        []) as string[],
-      intents: (reportObj.intents || []) as string[],
-      competitor_insights: (reportObj.competitor_insights ||
-        reportObj.competitorInsights || {
-          strengths: [],
-          weaknesses: [],
-          user_profile: [],
-          differentiation_angles: [],
-        }) as CompetitorReport["competitor_insights"],
-      keyword_clusters: (reportObj.keyword_clusters ||
-        reportObj.keywordClusters || {
-          core: [],
-          attribute: [],
-          long_tail: [],
-        }) as CompetitorReport["keyword_clusters"],
-      high_frequency_phrases: (reportObj.high_frequency_phrases ||
-        reportObj.highFrequencyPhrases ||
-        []) as string[],
-      negative_drivers: (reportObj.negative_drivers ||
-        reportObj.negativeDrivers ||
-        []) as string[],
-      compliance_risks: (reportObj.compliance_risks ||
-        reportObj.complianceRisks ||
-        []) as CompetitorReport["compliance_risks"],
-      qa_opportunities: (reportObj.qa_opportunities ||
-        reportObj.qaOpportunities ||
-        []) as CompetitorReport["qa_opportunities"],
-      meta: (reportObj.meta || {}) as CompetitorReport["meta"],
+      product_summary: pickCompetitorField(reportObj, ["product_summary", "productSummary"], ""),
+      feature_points: pickCompetitorField(reportObj, ["feature_points", "featurePoints"], []),
+      intents: pickCompetitorField(reportObj, ["intents"], []),
+      competitor_insights: pickCompetitorField(
+        reportObj,
+        ["competitor_insights", "competitorInsights"],
+        createEmptyCompetitorInsights(),
+      ),
+      keyword_clusters: pickCompetitorField(
+        reportObj,
+        ["keyword_clusters", "keywordClusters"],
+        createEmptyKeywordClusters(),
+      ),
+      high_frequency_phrases: pickCompetitorField(
+        reportObj,
+        ["high_frequency_phrases", "highFrequencyPhrases"],
+        [],
+      ),
+      negative_drivers: pickCompetitorField(reportObj, ["negative_drivers", "negativeDrivers"], []),
+      compliance_risks: pickCompetitorField(reportObj, ["compliance_risks", "complianceRisks"], []),
+      qa_opportunities: pickCompetitorField(reportObj, ["qa_opportunities", "qaOpportunities"], []),
+      meta: pickCompetitorField(reportObj, ["meta"], {} as CompetitorReport["meta"]),
     };
   }
 

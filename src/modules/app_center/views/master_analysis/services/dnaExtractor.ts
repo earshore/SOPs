@@ -37,6 +37,76 @@ export interface ExtractedDNA {
   };
 }
 
+interface AudienceExtractionState {
+  parts: string[];
+  confidence: number;
+}
+
+interface SpecsExtractionState {
+  specs: string[];
+  keywordsCount: number;
+  techSpecsCount: number;
+}
+
+const GENDER_LABELS: Record<string, string> = {
+  male: "男性",
+  female: "女性",
+};
+
+function createAudienceResult(state: AudienceExtractionState): {
+  text: string;
+  confidence: number;
+} {
+  return {
+    text: state.parts.join(", ") || "",
+    confidence: Math.min(state.confidence, 1.0),
+  };
+}
+
+function appendAudienceDemographics(
+  state: AudienceExtractionState,
+  demographics: BuyerProfileReport["demographics"] | undefined,
+): void {
+  if (!demographics) return;
+
+  const demographic = `${demographics.age_range_estimate || ""}${GENDER_LABELS[demographics.likely_gender] || ""}`;
+  if (demographic) {
+    state.parts.push(demographic);
+    state.confidence += 0.3;
+  }
+
+  const lifestyle = demographics.lifestyle_indicators || [];
+  if (lifestyle.length > 0) {
+    state.parts.push(...lifestyle.slice(0, 3));
+    state.confidence += 0.2;
+  }
+}
+
+function appendAudienceBuyerTypes(
+  state: AudienceExtractionState,
+  buyerTypes: BuyerProfileReport["buyer_types"] | undefined,
+): void {
+  const topTypes = (buyerTypes || [])
+    .slice(0, 2)
+    .map((buyerType) => buyerType.type)
+    .filter(Boolean);
+
+  if (topTypes.length === 0) return;
+
+  state.parts.push(...topTypes);
+  state.confidence += 0.3;
+}
+
+function appendAudienceMotivations(
+  state: AudienceExtractionState,
+  motivations: BuyerProfileReport["purchase_motivations"] | undefined,
+): void {
+  if (!motivations?.length || state.parts.length >= 5) return;
+
+  state.parts.push(...motivations.slice(0, 2));
+  state.confidence += 0.2;
+}
+
 /**
  * 从 buyer-profile 提取目标受众
  *
@@ -65,63 +135,13 @@ function extractAudience(report: BuyerProfileReport): {
   text: string;
   confidence: number;
 } {
-  const parts: string[] = [];
-  let confidence = 0;
-
   try {
-    // 1. 提取人口统计信息
-    const demographics = report.demographics;
-    if (demographics) {
-      const ageRange = demographics.age_range_estimate;
-      const gender = demographics.likely_gender;
-      const lifestyle = demographics.lifestyle_indicators || [];
+    const state: AudienceExtractionState = { parts: [], confidence: 0 };
+    appendAudienceDemographics(state, report.demographics);
+    appendAudienceBuyerTypes(state, report.buyer_types);
+    appendAudienceMotivations(state, report.purchase_motivations);
 
-      if (ageRange || gender) {
-        let demographic = "";
-        if (ageRange) demographic += ageRange;
-        if (gender) {
-          const genderText =
-            gender === "male" ? "男性" : gender === "female" ? "女性" : "";
-          demographic += genderText;
-        }
-        if (demographic) {
-          parts.push(demographic);
-          confidence += 0.3;
-        }
-      }
-
-      // 添加生活方式特征（前3个）
-      if (lifestyle.length > 0) {
-        parts.push(...lifestyle.slice(0, 3));
-        confidence += 0.2;
-      }
-    }
-
-    // 2. 提取买家类型（前2个）
-    const buyerTypes = report.buyer_types || [];
-    if (buyerTypes.length > 0) {
-      const topTypes = buyerTypes
-        .slice(0, 2)
-        .map((t) => t.type)
-        .filter(Boolean);
-      if (topTypes.length > 0) {
-        parts.push(...topTypes);
-        confidence += 0.3;
-      }
-    }
-
-    // 3. 提取购买动机（前2个）
-    const motivations = report.purchase_motivations || [];
-    if (motivations.length > 0 && parts.length < 5) {
-      parts.push(...motivations.slice(0, 2));
-      confidence += 0.2;
-    }
-
-    const text = parts.join(", ");
-    return {
-      text: text || "",
-      confidence: Math.min(confidence, 1.0),
-    };
+    return createAudienceResult(state);
   } catch (error) {
     console.error("[DNA提取器] 提取受众失败:", error);
     return { text: "", confidence: 0 };
@@ -335,6 +355,52 @@ function extractTechnicalSpecs(
   return techSpecs;
 }
 
+function appendKeywordSpecs(
+  state: SpecsExtractionState,
+  titleKeywords: TitleKeywordsReport | undefined,
+): void {
+  const secondaryKeywords = titleKeywords?.secondary_keywords;
+  if (!secondaryKeywords?.length) return;
+
+  const keywordSpecs = extractSpecsByType(secondaryKeywords);
+  state.specs.push(...keywordSpecs);
+  state.keywordsCount = keywordSpecs.length;
+}
+
+function appendTechnicalSpecs(
+  state: SpecsExtractionState,
+  sellingPoints: SellingPointsReport | undefined,
+): void {
+  const bulletAnalysis = sellingPoints?.bullet_analysis;
+  if (!bulletAnalysis || state.specs.length >= 8) return;
+
+  const techSpecs = extractTechnicalSpecs(bulletAnalysis);
+  state.specs.push(...techSpecs);
+  state.techSpecsCount = techSpecs.length;
+}
+
+function calculateSpecsConfidence(state: SpecsExtractionState): number {
+  let confidence = 0;
+
+  if (state.specs.length > 0) {
+    confidence += 0.3;
+  }
+  if (state.specs.length >= 3) {
+    confidence += 0.2;
+  }
+  if (state.specs.length >= 5) {
+    confidence += 0.2;
+  }
+  if (state.keywordsCount > 0) {
+    confidence += 0.15;
+  }
+  if (state.techSpecsCount > 0) {
+    confidence += 0.15;
+  }
+
+  return Math.min(confidence, 1.0);
+}
+
 /**
  * 从 title-keywords 和 selling-points 提取技术参数
  *
@@ -367,57 +433,19 @@ function extractSpecs(
   titleKeywords: TitleKeywordsReport | undefined,
   sellingPoints: SellingPointsReport | undefined,
 ): { text: string; confidence: number } {
-  const specs: string[] = [];
-  let keywordsCount = 0;
-  let techSpecsCount = 0;
-
   try {
-    // 1. 从 title-keywords 动态提取所有规格（按 type 分组）
-    if (
-      titleKeywords &&
-      titleKeywords.secondary_keywords &&
-      titleKeywords.secondary_keywords.length > 0
-    ) {
-      const keywordSpecs = extractSpecsByType(titleKeywords.secondary_keywords);
-      specs.push(...keywordSpecs);
-      keywordsCount = keywordSpecs.length;
-    }
+    const state: SpecsExtractionState = {
+      specs: [],
+      keywordsCount: 0,
+      techSpecsCount: 0,
+    };
+    appendKeywordSpecs(state, titleKeywords);
+    appendTechnicalSpecs(state, sellingPoints);
 
-    // 2. 从 selling-points 智能提取技术规格（如果规格还不够多）
-    if (sellingPoints && sellingPoints.bullet_analysis && specs.length < 8) {
-      const techSpecs = extractTechnicalSpecs(sellingPoints.bullet_analysis);
-      specs.push(...techSpecs);
-      techSpecsCount = techSpecs.length;
-    }
-
-    // 3. 计算置信度（基于提取到的数据量和质量）
-    let confidence = 0;
-
-    // 基础分：有数据就给分
-    if (specs.length > 0) {
-      confidence += 0.3;
-    }
-
-    // 数量分：提取的规格越多，置信度越高
-    if (specs.length >= 3) {
-      confidence += 0.2;
-    }
-    if (specs.length >= 5) {
-      confidence += 0.2;
-    }
-
-    // 来源分：从多个来源提取更可靠
-    if (keywordsCount > 0) {
-      confidence += 0.15;
-    }
-    if (techSpecsCount > 0) {
-      confidence += 0.15;
-    }
-
-    const text = specs.join("\n");
+    const text = state.specs.join("\n");
     return {
       text: text || "",
-      confidence: Math.min(confidence, 1.0),
+      confidence: calculateSpecsConfidence(state),
     };
   } catch (error) {
     console.error("[DNA提取器] 提取规格失败:", error);

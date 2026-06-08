@@ -81,6 +81,46 @@ interface ParallelAnalysisConfig {
   onTaskFailed?: (update: ParallelAnalysisResultUpdate) => void;
 }
 
+interface CachedAnalysisEntry {
+  data: unknown;
+  timestamp: number;
+}
+
+interface AnalysisTaskExecutionOptions {
+  product: Product;
+  config: LLMConfig;
+  language: string;
+  enableCache: boolean;
+  onFirstResponse?: (task: AnalysisTask, metrics: LLMStreamMetrics) => void;
+}
+
+type TaskProgressCallback = (
+  task: AnalysisTask,
+  completedCount: number,
+  totalCount: number,
+  currentTasks: string[]
+) => void;
+
+interface ConcurrencyExecutionOptions extends Omit<AnalysisTaskExecutionOptions, 'onFirstResponse'> {
+  tasks: AnalysisTask[];
+  maxConcurrency: number;
+  onTaskSettled?: TaskProgressCallback;
+  onTaskFirstResponse?: TaskProgressCallback;
+}
+
+interface AnalysisRunContext {
+  report: Partial<FullAnalysisReport>;
+  targetIds: string[];
+  language: string;
+  totalTasks: number;
+  successCount: number;
+  failedCount: number;
+  streamResults: boolean;
+  onProgress: (progress: number, step: string) => void;
+  onTaskComplete?: (update: ParallelAnalysisResultUpdate) => void;
+  onTaskFailed?: (update: ParallelAnalysisResultUpdate) => void;
+}
+
 const TARGET_TO_FIELD: Record<string, keyof FullAnalysisReport> = {
   'title-keywords': 'title-keywords',
   'selling-points': 'selling-points',
@@ -137,36 +177,55 @@ export function generateCacheKey(targetId: string, product: Product, language: s
   return `${CACHE_PREFIXES.AI_ANALYSIS}${ANALYSIS_CACHE_VERSION}:${targetId}:${productHash}:${language}`;
 }
 
+function isCachedAnalysisEntry(value: unknown): value is CachedAnalysisEntry {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'timestamp' in value &&
+    typeof (value as { timestamp: unknown }).timestamp === 'number' &&
+    'data' in value
+  );
+}
+
+function getFreshCachedData(entry: unknown, cacheKey: string, hitLabel: string): unknown | null {
+  if (!isCachedAnalysisEntry(entry)) {
+    return null;
+  }
+
+  if (Date.now() - entry.timestamp >= ANALYSIS_CACHE_TTL_MS) {
+    return null;
+  }
+
+  console.log(`[并行分析] ${hitLabel}: ${cacheKey}`);
+  return entry.data;
+}
+
+function getLegacyCacheKey(cacheKey: string): string {
+  return cacheKey.replace(CACHE_PREFIXES.AI_ANALYSIS, 'ai_analysis_').replace(/:/g, '_');
+}
+
+function getLegacyCachedResult(cacheKey: string): unknown | null {
+  const legacyKey = getLegacyCacheKey(cacheKey);
+  const legacyCached = StorageService.getRaw(legacyKey);
+  if (!legacyCached) return null;
+
+  const cachedData = getFreshCachedData(JSON.parse(legacyCached), legacyKey, '旧缓存命中');
+  if (cachedData === null) {
+    StorageService.remove(legacyKey);
+  }
+  return cachedData;
+}
+
 /**
  * 从缓存获取结果
  */
 export async function getCachedResult(cacheKey: string): Promise<unknown | null> {
   try {
-    const parsedCache = await LocalDataStore.get<{ data: unknown; timestamp: number }>(cacheKey, null);
+    const parsedCache = await LocalDataStore.get<CachedAnalysisEntry>(cacheKey, null);
     if (!parsedCache) {
-      const legacyKey = cacheKey.replace(CACHE_PREFIXES.AI_ANALYSIS, 'ai_analysis_').replace(/:/g, '_');
-      const legacyCached = StorageService.getRaw(legacyKey);
-      if (!legacyCached) return null;
-      const legacyParsed = JSON.parse(legacyCached);
-      if (legacyParsed && typeof legacyParsed === 'object' && 'timestamp' in legacyParsed) {
-        const age = Date.now() - (legacyParsed.timestamp as number);
-        if (age < ANALYSIS_CACHE_TTL_MS) {
-          console.log(`[并行分析] 旧缓存命中: ${legacyKey}`);
-          return (legacyParsed as { data: unknown }).data;
-        }
-      }
-      StorageService.remove(legacyKey);
-      return null;
+      return getLegacyCachedResult(cacheKey);
     }
-
-    if (parsedCache && typeof parsedCache === 'object' && 'timestamp' in parsedCache) {
-      const age = Date.now() - (parsedCache.timestamp as number);
-      // 缓存有效期：24小时
-      if (age < ANALYSIS_CACHE_TTL_MS) {
-        console.log(`[并行分析] 缓存命中: ${cacheKey}`);
-        return (parsedCache as { data: unknown }).data;
-      }
-    }
+    return getFreshCachedData(parsedCache, cacheKey, '缓存命中');
   } catch (error) {
     console.warn(`[并行分析] 缓存读取失败:`, error);
   }
@@ -241,12 +300,9 @@ async function getLLMConfig(): Promise<LLMConfig> {
  */
 async function executeAnalysisTask(
   task: AnalysisTask,
-  product: Product,
-  config: LLMConfig,
-  language: string,
-  enableCache: boolean,
-  onFirstResponse?: (task: AnalysisTask, metrics: LLMStreamMetrics) => void
+  options: AnalysisTaskExecutionOptions
 ): Promise<void> {
+  const { product, config, language, enableCache, onFirstResponse } = options;
   task.status = 'running';
   task.startTime = Date.now();
   task.fromCache = false;
@@ -344,16 +400,14 @@ async function executeAnalysisTask(
 /**
  * 并行执行分析任务（带并发控制）
  */
-async function executeTasksWithConcurrency(
-  tasks: AnalysisTask[],
-  product: Product,
-  config: LLMConfig,
-  language: string,
-  maxConcurrency: number,
-  enableCache: boolean,
-  onTaskSettled?: (task: AnalysisTask, completedCount: number, totalCount: number, currentTasks: string[]) => void,
-  onTaskFirstResponse?: (task: AnalysisTask, completedCount: number, totalCount: number, currentTasks: string[]) => void
-): Promise<void> {
+function getCurrentRunningTaskIds(tasks: AnalysisTask[]): string[] {
+  return tasks
+    .filter(task => task.status === 'running')
+    .map(task => task.targetId);
+}
+
+async function executeTasksWithConcurrency(options: ConcurrencyExecutionOptions): Promise<void> {
+  const { tasks, maxConcurrency, onTaskSettled, onTaskFirstResponse, ...taskOptions } = options;
   const totalTasks = tasks.length;
   let completedCount = 0;
   const runningTasks = new Set<Promise<void>>();
@@ -363,28 +417,151 @@ async function executeTasksWithConcurrency(
       await Promise.race(runningTasks);
     }
 
-    const taskPromise = executeAnalysisTask(task, product, config, language, enableCache, () => {
-      const currentRunning = tasks
-        .filter(t => t.status === 'running')
-        .map(t => t.targetId);
-
-      onTaskFirstResponse?.(task, completedCount, totalTasks, currentRunning);
+    const taskPromise = executeAnalysisTask(task, {
+      ...taskOptions,
+      onFirstResponse: () => {
+        onTaskFirstResponse?.(task, completedCount, totalTasks, getCurrentRunningTaskIds(tasks));
+      }
     })
       .finally(() => {
         runningTasks.delete(taskPromise);
         completedCount++;
 
-        const currentRunning = tasks
-          .filter(t => t.status === 'running')
-          .map(t => t.targetId);
-
-        onTaskSettled?.(task, completedCount, totalTasks, currentRunning);
+        onTaskSettled?.(task, completedCount, totalTasks, getCurrentRunningTaskIds(tasks));
       });
 
     runningTasks.add(taskPromise);
   }
 
   await Promise.all(runningTasks);
+}
+
+function emitSuccessfulTaskUpdate(
+  context: AnalysisRunContext,
+  task: AnalysisTask,
+  completedCount: number,
+  currentTasks: string[]
+): void {
+  const appended = appendTaskResultToReport(context.report, task);
+  if (!appended) return;
+
+  context.successCount++;
+  if (!context.streamResults) return;
+
+  context.onTaskComplete?.({
+    targetId: task.targetId,
+    status: 'success',
+    completedCount,
+    totalCount: context.totalTasks,
+    successCount: context.successCount,
+    failedCount: context.failedCount,
+    currentTasks,
+    report: buildReportSnapshot(context.report, context.targetIds, context.language),
+    result: task.result,
+    fromCache: task.fromCache
+  });
+}
+
+function emitFailedTaskUpdate(
+  context: AnalysisRunContext,
+  task: AnalysisTask,
+  completedCount: number,
+  currentTasks: string[]
+): void {
+  context.failedCount++;
+  console.warn(`[并行分析] ${task.targetId} 失败: ${task.error}`);
+
+  if (!context.streamResults) return;
+
+  context.onTaskFailed?.({
+    targetId: task.targetId,
+    status: 'failed',
+    completedCount,
+    totalCount: context.totalTasks,
+    successCount: context.successCount,
+    failedCount: context.failedCount,
+    currentTasks,
+    report: buildReportSnapshot(context.report, context.targetIds, context.language),
+    error: task.error,
+    fromCache: task.fromCache
+  });
+}
+
+function reportSettledTaskProgress(
+  context: AnalysisRunContext,
+  task: AnalysisTask,
+  completedCount: number,
+  currentTasks: string[]
+): void {
+  const progress = Math.round((completedCount / context.totalTasks) * 100);
+  const statusText = task.status === 'success'
+    ? `已完成 ${task.targetId}`
+    : `分析失败 ${task.targetId}`;
+  const runningInfo = currentTasks.length > 0
+    ? `，正在分析: ${currentTasks.join(', ')}`
+    : '';
+
+  context.onProgress(progress, `${statusText}${runningInfo} (${completedCount}/${context.totalTasks})`);
+}
+
+function handleSettledAnalysisTask(
+  context: AnalysisRunContext,
+  task: AnalysisTask,
+  completedCount: number,
+  currentTasks: string[]
+): void {
+  if (task.status === 'success') {
+    emitSuccessfulTaskUpdate(context, task, completedCount, currentTasks);
+  } else if (task.status === 'failed') {
+    emitFailedTaskUpdate(context, task, completedCount, currentTasks);
+  }
+
+  reportSettledTaskProgress(context, task, completedCount, currentTasks);
+}
+
+function handleFirstAnalysisResponse(
+  context: AnalysisRunContext,
+  task: AnalysisTask,
+  completedCount: number,
+  currentTasks: string[]
+): void {
+  const progress = Math.max(1, Math.round((completedCount / context.totalTasks) * 100));
+  const firstResponseSeconds = task.firstResponseMs
+    ? (task.firstResponseMs / 1000).toFixed(1)
+    : '0.0';
+  const runningInfo = currentTasks.length > 0
+    ? `，并行中: ${currentTasks.join(', ')}`
+    : '';
+
+  context.onProgress(
+    progress,
+    `模型已开始返回 ${task.targetId}，首包 ${firstResponseSeconds}s${runningInfo} (${completedCount}/${context.totalTasks})`
+  );
+}
+
+function logParallelAnalysisSummary(
+  tasks: AnalysisTask[],
+  startedAt: number,
+  context: AnalysisRunContext,
+  effectiveMaxConcurrency: number
+): void {
+  console.log(`[并行分析] 分析完成`, {
+    durationMs: Date.now() - startedAt,
+    successCount: context.successCount,
+    failedCount: context.failedCount,
+    effectiveMaxConcurrency,
+    tasks: tasks.map(task => ({
+      targetId: task.targetId,
+      status: task.status,
+      durationMs: task.startTime && task.endTime ? task.endTime - task.startTime : undefined,
+      fromCache: !!task.fromCache,
+      promptChars: task.promptChars,
+      estimatedInputTokens: task.estimatedInputTokens,
+      firstResponseMs: task.firstResponseMs,
+      streamChunks: task.streamChunks,
+      streamedChars: task.streamedChars
+    }))
+  });
 }
 
 /**
@@ -421,112 +598,51 @@ export async function runParallelAIAnalysis(
     status: 'pending' as const
   }));
 
-  const report: Partial<FullAnalysisReport> = {};
-  const totalTasks = tasks.length;
-  let successCount = 0;
-  let failedCount = 0;
+  const runContext: AnalysisRunContext = {
+    report: {},
+    targetIds,
+    language,
+    totalTasks: tasks.length,
+    successCount: 0,
+    failedCount: 0,
+    streamResults,
+    onProgress,
+    onTaskComplete,
+    onTaskFailed
+  };
 
-  await executeTasksWithConcurrency(
+  await executeTasksWithConcurrency({
     tasks,
     product,
-    llmConfig,
+    config: llmConfig,
     language,
-    effectiveMaxConcurrency,
+    maxConcurrency: effectiveMaxConcurrency,
     enableCache,
-    (task, completedCount, _totalCount, currentTasks) => {
-      if (task.status === 'success') {
-        const appended = appendTaskResultToReport(report, task);
-        if (appended) {
-          successCount++;
-          if (streamResults) {
-            onTaskComplete?.({
-              targetId: task.targetId,
-              status: 'success',
-              completedCount,
-              totalCount: totalTasks,
-              successCount,
-              failedCount,
-              currentTasks,
-              report: buildReportSnapshot(report, targetIds, language),
-              result: task.result,
-              fromCache: task.fromCache
-            });
-          }
-        }
-      } else if (task.status === 'failed') {
-        failedCount++;
-        console.warn(`[并行分析] ${task.targetId} 失败: ${task.error}`);
-
-        if (streamResults) {
-          onTaskFailed?.({
-            targetId: task.targetId,
-            status: 'failed',
-            completedCount,
-            totalCount: totalTasks,
-            successCount,
-            failedCount,
-            currentTasks,
-            report: buildReportSnapshot(report, targetIds, language),
-            error: task.error,
-            fromCache: task.fromCache
-          });
-        }
-      }
-
-      const progress = Math.round((completedCount / totalTasks) * 100);
-      const statusText = task.status === 'success'
-        ? `已完成 ${task.targetId}`
-        : `分析失败 ${task.targetId}`;
-      const runningInfo = currentTasks.length > 0
-        ? `，正在分析: ${currentTasks.join(', ')}`
-        : '';
-      onProgress(progress, `${statusText}${runningInfo} (${completedCount}/${totalTasks})`);
+    onTaskSettled: (task, completedCount, _totalCount, currentTasks) => {
+      handleSettledAnalysisTask(runContext, task, completedCount, currentTasks);
     },
-    (task, completedCount, _totalCount, currentTasks) => {
-      const progress = Math.max(1, Math.round((completedCount / totalTasks) * 100));
-      const firstResponseSeconds = task.firstResponseMs
-        ? (task.firstResponseMs / 1000).toFixed(1)
-        : '0.0';
-      const runningInfo = currentTasks.length > 0
-        ? `，并行中: ${currentTasks.join(', ')}`
-        : '';
-
-      onProgress(
-        progress,
-        `模型已开始返回 ${task.targetId}，首包 ${firstResponseSeconds}s${runningInfo} (${completedCount}/${totalTasks})`
-      );
+    onTaskFirstResponse: (task, completedCount, _totalCount, currentTasks) => {
+      handleFirstAnalysisResponse(runContext, task, completedCount, currentTasks);
     }
-  );
+  });
 
-  const finalReport = buildReportSnapshot(report, targetIds, language);
+  const finalReport = buildReportSnapshot(runContext.report, targetIds, language);
 
-  if (failedCount > 0 && failureStrategy === 'abort') {
+  if (runContext.failedCount > 0 && failureStrategy === 'abort') {
     throw new BusinessError(
-      `分析失败: ${failedCount}/${totalTasks} 个目标分析失败`,
+      `分析失败: ${runContext.failedCount}/${runContext.totalTasks} 个目标分析失败`,
       'PARALLEL_ANALYSIS_001',
-      { module: 'ParallelAnalysisService', action: 'runParallelAnalysis', failedCount, totalTasks }
+      {
+        module: 'ParallelAnalysisService',
+        action: 'runParallelAnalysis',
+        failedCount: runContext.failedCount,
+        totalTasks: runContext.totalTasks
+      }
     );
   }
 
-  onProgress(100, `分析完成! 成功: ${successCount}, 失败: ${failedCount}`);
-
-  console.log(`[并行分析] 分析完成`, {
-    durationMs: Date.now() - startedAt,
-    successCount,
-    failedCount,
-    effectiveMaxConcurrency,
-    tasks: tasks.map(task => ({
-      targetId: task.targetId,
-      status: task.status,
-      durationMs: task.startTime && task.endTime ? task.endTime - task.startTime : undefined,
-      fromCache: !!task.fromCache,
-      promptChars: task.promptChars,
-      estimatedInputTokens: task.estimatedInputTokens,
-      firstResponseMs: task.firstResponseMs,
-      streamChunks: task.streamChunks,
-      streamedChars: task.streamedChars
-    }))
-  });
+  onProgress(100, `分析完成! 成功: ${runContext.successCount}, 失败: ${runContext.failedCount}`);
+  logParallelAnalysisSummary(tasks, startedAt, runContext, effectiveMaxConcurrency);
 
   return finalReport;
 }

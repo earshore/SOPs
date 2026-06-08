@@ -28,6 +28,82 @@ type ProductOverviewReportInput = Partial<Omit<ProductOverviewReport, "user_prof
   compliance_risks?: ProductOverviewReport["complianceRisks"];
 };
 
+type ProductOverviewReportInputKey = keyof ProductOverviewReportInput;
+type ProductOverviewUserProfileKey = keyof ProductOverviewUserProfileInput;
+type ProductOverviewDemographicsInput = Partial<ProductOverviewReport["user_profile"]["demographics"]> & {
+  ageRanges?: string[];
+};
+type ProductOverviewDemographicsKey = keyof ProductOverviewDemographicsInput;
+
+function pickOverviewField<T>(
+  reportObj: ProductOverviewReportInput,
+  keys: ProductOverviewReportInputKey[],
+  fallback: T,
+): T {
+  for (const key of keys) {
+    const value = reportObj[key];
+    if (value) return value as T;
+  }
+  return fallback;
+}
+
+function pickUserProfileField<T>(
+  userProfile: ProductOverviewUserProfileInput,
+  keys: ProductOverviewUserProfileKey[],
+  fallback: T,
+): T {
+  for (const key of keys) {
+    const value = userProfile[key];
+    if (value) return value as T;
+  }
+  return fallback;
+}
+
+function pickDemographicField<T>(
+  demographics: ProductOverviewDemographicsInput,
+  keys: ProductOverviewDemographicsKey[],
+  fallback: T,
+): T {
+  for (const key of keys) {
+    const value = demographics[key];
+    if (value) return value as T;
+  }
+  return fallback;
+}
+
+function normalizeProductOverviewUserProfile(
+  reportObj: ProductOverviewReportInput,
+): ProductOverviewReport["user_profile"] {
+  const userProfile = pickOverviewField<ProductOverviewUserProfileInput>(
+    reportObj,
+    ["user_profile", "userProfile"],
+    {},
+  );
+  const demographics = (userProfile.demographics || {}) as ProductOverviewDemographicsInput;
+
+  return {
+    demographics: {
+      age_ranges: pickDemographicField(demographics, ["age_ranges", "ageRanges"], []),
+      locations: pickDemographicField(demographics, ["locations"], []),
+      household: pickDemographicField(demographics, ["household"], []),
+    },
+    goals: pickUserProfileField(userProfile, ["goals"], []),
+    pain_points: pickUserProfileField(userProfile, ["pain_points", "painPoints"], []),
+    scenarios: pickUserProfileField(userProfile, ["scenarios"], []),
+    objections: pickUserProfileField(userProfile, ["objections"], []),
+    price_sensitivity: pickUserProfileField(userProfile, ["price_sensitivity", "priceSensitivity"], ""),
+    decision_drivers: pickUserProfileField(userProfile, ["decision_drivers", "decisionDrivers"], []),
+  };
+}
+
+function createEmptyKeywordClusters(): ProductOverviewReport["keywordClusters"] {
+  return {
+    core: [],
+    longTail: [],
+    intent: [],
+  };
+}
+
 /**
  * Product Overview Report 适配器实现
  */
@@ -396,53 +472,29 @@ export class ProductOverviewAdapter implements ReportAdapter {
     }
 
     const reportObj = report as ProductOverviewReportInput;
-    const userProfile = reportObj.user_profile || reportObj.userProfile || {};
-    const demographics = (userProfile.demographics ||
-      {}) as NonNullable<ProductOverviewUserProfileInput["demographics"]>;
 
     return {
-      meta: (reportObj.meta || {}) as ProductOverviewReport["meta"],
-      productOverview: (reportObj.productOverview ||
-        reportObj.product_overview ||
-        {}) as ProductOverviewReport["productOverview"],
-      coreFeatures: (reportObj.coreFeatures ||
-        reportObj.core_features ||
-        {}) as ProductOverviewReport["coreFeatures"],
-      user_profile: {
-        demographics: {
-          age_ranges: (demographics.age_ranges ||
-            demographics.ageRanges ||
-            []) as string[],
-          locations: (demographics.locations || []) as string[],
-          household: (demographics.household || []) as string[],
-        },
-        goals: (userProfile.goals || []) as string[],
-        pain_points: (userProfile.pain_points ||
-          userProfile.painPoints ||
-          []) as string[],
-        scenarios: (userProfile.scenarios || []) as string[],
-        objections: (userProfile.objections || []) as string[],
-        price_sensitivity: (userProfile.price_sensitivity ||
-          userProfile.priceSensitivity ||
-          "") as string,
-        decision_drivers: (userProfile.decision_drivers ||
-          userProfile.decisionDrivers ||
-          []) as string[],
-      },
-      strengths: (reportObj.strengths || []) as string[],
-      weaknesses: (reportObj.weaknesses || []) as string[],
-      differentiationAngles: (reportObj.differentiationAngles ||
-        reportObj.differentiation_angles ||
-        []) as string[],
-      keywordClusters: (reportObj.keywordClusters ||
-        reportObj.keyword_clusters || {
-          core: [],
-          longTail: [],
-          intent: [],
-        }) as ProductOverviewReport["keywordClusters"],
-      complianceRisks: (reportObj.complianceRisks ||
-        reportObj.compliance_risks ||
-        []) as ProductOverviewReport["complianceRisks"],
+      meta: pickOverviewField(reportObj, ["meta"], {} as ProductOverviewReport["meta"]),
+      productOverview: pickOverviewField(
+        reportObj,
+        ["productOverview", "product_overview"],
+        {} as ProductOverviewReport["productOverview"],
+      ),
+      coreFeatures: pickOverviewField(reportObj, ["coreFeatures", "core_features"], {}),
+      user_profile: normalizeProductOverviewUserProfile(reportObj),
+      strengths: pickOverviewField(reportObj, ["strengths"], []),
+      weaknesses: pickOverviewField(reportObj, ["weaknesses"], []),
+      differentiationAngles: pickOverviewField(
+        reportObj,
+        ["differentiationAngles", "differentiation_angles"],
+        [],
+      ),
+      keywordClusters: pickOverviewField(
+        reportObj,
+        ["keywordClusters", "keyword_clusters"],
+        createEmptyKeywordClusters(),
+      ),
+      complianceRisks: pickOverviewField(reportObj, ["complianceRisks", "compliance_risks"], []),
     };
   }
 }

@@ -29,6 +29,12 @@ function getModalBackdrop(modal: TestModalElement): HTMLElement {
   return backdrop as HTMLElement;
 }
 
+function getCloseButton(modal: TestModalElement): HTMLButtonElement {
+  const button = modal.shadowRoot?.querySelector('.btn-close');
+  expect(button).toBeInstanceOf(HTMLButtonElement);
+  return button as HTMLButtonElement;
+}
+
 describe('AppModal regression', () => {
   afterEach(() => {
     vi.useRealTimers();
@@ -78,6 +84,22 @@ describe('AppModal regression', () => {
 
     modal.open();
     backdrop.click();
+    vi.advanceTimersByTime(350);
+
+    expect(container.classList.contains('hidden')).toBe(true);
+    expect(container.hasAttribute('hidden')).toBe(true);
+  });
+
+  it('renders an explicit close button for no-header modals', () => {
+    vi.useFakeTimers();
+    const modal = createModal();
+    const container = getModalContainer(modal);
+    const closeButton = getCloseButton(modal);
+
+    expect(closeButton.classList.contains('btn-close-floating')).toBe(true);
+
+    modal.open();
+    closeButton.click();
     vi.advanceTimersByTime(350);
 
     expect(container.classList.contains('hidden')).toBe(true);

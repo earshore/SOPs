@@ -5,6 +5,7 @@
 
 import type { ReportAdapter, ExtractionResult } from "./ReportAdapter";
 import type {
+  BuyerProfileReport,
   FullAnalysisReport,
   SellingPointsReport,
   TitleKeywordsReport,
@@ -33,6 +34,125 @@ type FullAnalysisReportInput = Partial<FullAnalysisReport> & {
   vocab_gap?: FullAnalysisReport["vocab-gap"];
   promise_reality?: FullAnalysisReport["promise-reality"];
 };
+
+type FullAnalysisReportInputKey = keyof FullAnalysisReportInput;
+
+interface AudienceExtractionState {
+  parts: string[];
+  confidence: number;
+  sourceFields: string[];
+}
+
+interface SpecsExtractionState {
+  specs: string[];
+  keywordsCount: number;
+  techSpecsCount: number;
+  sourceFields: string[];
+}
+
+const GENDER_LABELS: Record<string, string> = {
+  male: "男性",
+  female: "女性",
+};
+
+const TECHNICAL_SPEC_TYPES = new Set([
+  "size",
+  "volume",
+  "weight",
+  "dimensions",
+  "quantity",
+  "material",
+  "concentration",
+  "capacity",
+]);
+
+const SPEC_PATTERNS = [
+  /(\d+(?:\.\d+)?)\s*([a-zA-Z]+|小时|克|毫升|厘米|米|千克|分钟)/g,
+  /(\d+\s*[x×]\s*\d+(?:\s*[x×]\s*\d+)?)\s*([a-zA-Z]+|厘米|米)/g,
+];
+
+function pickReportField<T>(
+  reportObj: FullAnalysisReportInput,
+  keys: FullAnalysisReportInputKey[],
+): T | undefined {
+  for (const key of keys) {
+    const value = reportObj[key];
+    if (value) return value as T;
+  }
+  return undefined;
+}
+
+function getDemographicText(
+  demographics: BuyerProfileReport["demographics"],
+): string {
+  const genderText = GENDER_LABELS[demographics.likely_gender] || "";
+  return `${demographics.age_range_estimate || ""}${genderText}`;
+}
+
+function createAudienceResult(
+  state: AudienceExtractionState,
+): ExtractionResult<string> {
+  return {
+    data: state.parts.join(", ") || "",
+    confidence: Math.min(state.confidence, 1.0),
+    sourceFields: state.sourceFields,
+  };
+}
+
+function appendAudienceDemographics(
+  state: AudienceExtractionState,
+  buyerProfile: BuyerProfileReport,
+): void {
+  const demographics = buyerProfile.demographics;
+  if (!demographics) return;
+
+  const demographic = getDemographicText(demographics);
+  if (demographic) {
+    state.parts.push(demographic);
+    state.confidence += AUDIENCE_CONFIDENCE_WEIGHTS.DEMOGRAPHICS;
+    state.sourceFields.push("buyer-profile.demographics");
+  }
+
+  const lifestyle = demographics.lifestyle_indicators || [];
+  if (lifestyle.length > 0) {
+    state.parts.push(...lifestyle.slice(0, 3));
+    state.confidence += AUDIENCE_CONFIDENCE_WEIGHTS.LIFESTYLE;
+  }
+}
+
+function appendAudienceBuyerTypes(
+  state: AudienceExtractionState,
+  buyerProfile: BuyerProfileReport,
+): void {
+  const topTypes = (buyerProfile.buyer_types || [])
+    .slice(0, 2)
+    .map((buyerType) => buyerType.type)
+    .filter(Boolean);
+
+  if (topTypes.length === 0) return;
+
+  state.parts.push(...topTypes);
+  state.confidence += AUDIENCE_CONFIDENCE_WEIGHTS.BUYER_TYPES;
+  state.sourceFields.push("buyer-profile.buyer_types");
+}
+
+function appendAudienceMotivations(
+  state: AudienceExtractionState,
+  buyerProfile: BuyerProfileReport,
+): void {
+  const motivations = buyerProfile.purchase_motivations || [];
+  if (motivations.length === 0 || state.parts.length >= 5) return;
+
+  state.parts.push(...motivations.slice(0, 2));
+  state.confidence += AUDIENCE_CONFIDENCE_WEIGHTS.MOTIVATIONS;
+  state.sourceFields.push("buyer-profile.purchase_motivations");
+}
+
+function collectSpecPatternMatches(text: string, pattern: RegExp): string[] {
+  return Array.from(text.matchAll(pattern))
+    .filter((match) => !!(match[1] && match[2]))
+    .map((match) => `${match[1]}${match[2]}`);
+}
 
 /**
  * Full Analysis Report 适配器实现
@@ -176,21 +296,37 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
     const reportObj = report as FullAnalysisReportInput;
 
     return {
-      "buyer-profile": (reportObj["buyer-profile"] ||
-        reportObj.buyer_profile),
-      "selling-points": (reportObj["selling-points"] ||
-        reportObj.selling_points),
+      "buyer-profile": pickReportField(reportObj, [
+        "buyer-profile",
+        "buyer_profile",
+      ]),
+      "selling-points": pickReportField(reportObj, [
+        "selling-points",
+        "selling_points",
+      ]),
       // 支持新旧两套字段名：title-keywords (新) 和 title_seo_roots (旧)
-      "title-keywords": (reportObj["title-keywords"] ||
-        reportObj.title_keywords ||
-        reportObj.title_seo_roots),
-      "fatal-flaws": (reportObj["fatal-flaws"] || reportObj.fatal_flaws),
-      "wow-moments": (reportObj["wow-moments"] || reportObj.wow_moments),
-      "hesitation-points": (reportObj["hesitation-points"] ||
-        reportObj.hesitation_points),
-      "vocab-gap": (reportObj["vocab-gap"] || reportObj.vocab_gap),
-      "promise-reality": (reportObj["promise-reality"] ||
-        reportObj.promise_reality),
+      "title-keywords": pickReportField(reportObj, [
+        "title-keywords",
+        "title_keywords",
+        "title_seo_roots",
+      ]),
+      "fatal-flaws": pickReportField(reportObj, [
+        "fatal-flaws",
+        "fatal_flaws",
+      ]),
+      "wow-moments": pickReportField(reportObj, [
+        "wow-moments",
+        "wow_moments",
+      ]),
+      "hesitation-points": pickReportField(reportObj, [
+        "hesitation-points",
+        "hesitation_points",
+      ]),
+      "vocab-gap": pickReportField(reportObj, ["vocab-gap", "vocab_gap"]),
+      "promise-reality": pickReportField(reportObj, [
+        "promise-reality",
+        "promise_reality",
+      ]),
       _metadata: reportObj._metadata,
     };
   }
@@ -211,63 +347,12 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
     }
 
     try {
-      // 1. 提取人口统计信息
-      const demographics = buyerProfile.demographics;
-      if (demographics) {
-        const ageRange = demographics.age_range_estimate;
-        const gender = demographics.likely_gender;
-        const lifestyle = demographics.lifestyle_indicators || [];
+      const state = { parts, confidence, sourceFields };
+      appendAudienceDemographics(state, buyerProfile);
+      appendAudienceBuyerTypes(state, buyerProfile);
+      appendAudienceMotivations(state, buyerProfile);
 
-        if (ageRange || gender) {
-          let demographic = "";
-          if (ageRange) demographic += ageRange;
-          if (gender) {
-            const genderText =
-              gender === "male" ? "男性" : gender === "female" ? "女性" : "";
-            demographic += genderText;
-          }
-          if (demographic) {
-            parts.push(demographic);
-            confidence += AUDIENCE_CONFIDENCE_WEIGHTS.DEMOGRAPHICS;
-            sourceFields.push("buyer-profile.demographics");
-          }
-        }
-
-        // 添加生活方式特征（前3个）
-        if (lifestyle.length > 0) {
-          parts.push(...lifestyle.slice(0, 3));
-          confidence += AUDIENCE_CONFIDENCE_WEIGHTS.LIFESTYLE;
-        }
-      }
-
-      // 2. 提取买家类型（前2个）
-      const buyerTypes = buyerProfile.buyer_types || [];
-      if (buyerTypes.length > 0) {
-        const topTypes = buyerTypes
-          .slice(0, 2)
-          .map((t) => t.type)
-          .filter(Boolean);
-        if (topTypes.length > 0) {
-          parts.push(...topTypes);
-          confidence += AUDIENCE_CONFIDENCE_WEIGHTS.BUYER_TYPES;
-          sourceFields.push("buyer-profile.buyer_types");
-        }
-      }
-
-      // 3. 提取购买动机（前2个）
-      const motivations = buyerProfile.purchase_motivations || [];
-      if (motivations.length > 0 && parts.length < 5) {
-        parts.push(...motivations.slice(0, 2));
-        confidence += AUDIENCE_CONFIDENCE_WEIGHTS.MOTIVATIONS;
-        sourceFields.push("buyer-profile.purchase_motivations");
-      }
-
-      const text = parts.join(", ");
-      return {
-        data: text || "",
-        confidence: Math.min(confidence, 1.0),
-        sourceFields,
-      };
+      return createAudienceResult(state);
     } catch (error) {
       console.error("[FullAnalysisReportAdapter] 提取受众失败:", error);
       return { data: "", confidence: 0, sourceFields: [] };
@@ -338,6 +423,57 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
     }
   }
 
+  private appendKeywordSpecs(
+    state: SpecsExtractionState,
+    report: FullAnalysisReport,
+    language: string,
+  ): void {
+    const secondaryKeywords = report["title-keywords"]?.secondary_keywords;
+    if (!secondaryKeywords?.length) return;
+
+    const keywordSpecs = this.extractSpecsByType(secondaryKeywords, language);
+    state.specs.push(...keywordSpecs);
+    state.keywordsCount = keywordSpecs.length;
+    state.sourceFields.push("title-keywords.secondary_keywords");
+  }
+
+  private appendTechnicalSpecs(
+    state: SpecsExtractionState,
+    report: FullAnalysisReport,
+  ): void {
+    const bulletAnalysis = report["selling-points"]?.bullet_analysis;
+    if (!bulletAnalysis || state.specs.length >= 8) return;
+
+    const techSpecs = this.extractTechnicalSpecs(bulletAnalysis);
+    state.specs.push(...techSpecs);
+    state.techSpecsCount = techSpecs.length;
+    if (state.techSpecsCount > 0) {
+      state.sourceFields.push("selling-points.bullet_analysis");
+    }
+  }
+
+  private calculateSpecsConfidence(state: SpecsExtractionState): number {
+    let confidence = 0;
+
+    if (state.specs.length > 0) {
+      confidence += SPECS_CONFIDENCE_WEIGHTS.BASE;
+    }
+    if (state.specs.length >= 3) {
+      confidence += SPECS_CONFIDENCE_WEIGHTS.QUANTITY_THRESHOLD_3;
+    }
+    if (state.specs.length >= 5) {
+      confidence += SPECS_CONFIDENCE_WEIGHTS.QUANTITY_THRESHOLD_5;
+    }
+    if (state.keywordsCount > 0) {
+      confidence += SPECS_CONFIDENCE_WEIGHTS.FROM_KEYWORDS;
+    }
+    if (state.techSpecsCount > 0) {
+      confidence += SPECS_CONFIDENCE_WEIGHTS.FROM_TECH_SPECS;
+    }
+
+    return Math.min(confidence, 1.0);
+  }
+
   /**
    * 提取技术参数
    */
@@ -346,68 +482,17 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
     language: string = "zh",
   ): ExtractionResult<string> {
     const specs: string[] = [];
-    let keywordsCount = 0;
-    let techSpecsCount = 0;
     const sourceFields: string[] = [];
 
     try {
-      // 1. 从 title-keywords 动态提取所有规格（按 type 分组）
-      const titleKeywords = report["title-keywords"];
-      if (
-        titleKeywords &&
-        titleKeywords.secondary_keywords &&
-        titleKeywords.secondary_keywords.length > 0
-      ) {
-        const keywordSpecs = this.extractSpecsByType(
-          titleKeywords.secondary_keywords,
-          language,
-        );
-        specs.push(...keywordSpecs);
-        keywordsCount = keywordSpecs.length;
-        sourceFields.push("title-keywords.secondary_keywords");
-      }
-
-      // 2. 从 selling-points 智能提取技术规格（如果规格还不够多）
-      const sellingPoints = report["selling-points"];
-      if (sellingPoints && sellingPoints.bullet_analysis && specs.length < 8) {
-        const techSpecs = this.extractTechnicalSpecs(
-          sellingPoints.bullet_analysis,
-        );
-        specs.push(...techSpecs);
-        techSpecsCount = techSpecs.length;
-        if (techSpecsCount > 0) {
-          sourceFields.push("selling-points.bullet_analysis");
-        }
-      }
-
-      // 3. 计算置信度（基于提取到的数据量和质量）
-      let confidence = 0;
-
-      // 基础分：有数据就给分
-      if (specs.length > 0) {
-        confidence += SPECS_CONFIDENCE_WEIGHTS.BASE;
-      }
-
-      // 数量分：提取的规格越多，置信度越高
-      if (specs.length >= 3) {
-        confidence += SPECS_CONFIDENCE_WEIGHTS.QUANTITY_THRESHOLD_3;
-      }
-      if (specs.length >= 5) {
-        confidence += SPECS_CONFIDENCE_WEIGHTS.QUANTITY_THRESHOLD_5;
-      }
-
-      // 来源分：从多个来源提取更可靠
-      if (keywordsCount > 0) {
-        confidence += SPECS_CONFIDENCE_WEIGHTS.FROM_KEYWORDS;
-      }
-      if (techSpecsCount > 0) {
-        confidence += SPECS_CONFIDENCE_WEIGHTS.FROM_TECH_SPECS;
-      }
+      const state = { specs, keywordsCount: 0, techSpecsCount: 0, sourceFields };
+      this.appendKeywordSpecs(state, report, language);
+      this.appendTechnicalSpecs(state, report);
 
       const text = specs.join("\n");
       return {
         data: text || "",
-        confidence: Math.min(confidence, 1.0),
+        confidence: this.calculateSpecsConfidence(state),
         sourceFields,
       };
     } catch (error) {
@@ -435,18 +520,6 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
 
       const specs: string[] = [];
 
-      // 定义规格类型白名单（只包含客观、可测量的技术参数）
-      const SPEC_TYPES = new Set([
-        "size", // 尺寸/容量
-        "volume", // 体积
-        "weight", // 重量
-        "dimensions", // 尺寸
-        "quantity", // 数量
-        "material", // 材质
-        "concentration", // 浓度类型
-        "capacity", // 容量
-      ]);
-
       // 按 type 分组，只保留规格类型
       const grouped = new Map<string, string[]>();
 
@@ -461,7 +534,7 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
         const type = k.type?.toLowerCase() || "other";
 
         // 只提取规格类型，排除 feature（功能特性）、scent（香调描述）等
-        if (SPEC_TYPES.has(type)) {
+        if (TECHNICAL_SPEC_TYPES.has(type)) {
           const keywordsForType = grouped.get(type) || [];
           grouped.set(type, keywordsForType);
           if (k.keyword && typeof k.keyword === "string") {
@@ -552,45 +625,9 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
         return [];
       }
 
-      const patterns: string[] = [];
-
-      // 匹配：数字+单位（如 50ml, 1.7oz, 6小时, 100g）
-      try {
-        const unitPattern =
-          /(\d+(?:\.\d+)?)\s*([a-zA-Z]+|小时|克|毫升|厘米|米|千克|分钟)/g;
-        let match;
-
-        while ((match = unitPattern.exec(text)) !== null) {
-          if (match[1] && match[2]) {
-            patterns.push(`${match[1]}${match[2]}`);
-          }
-        }
-      } catch (regexError) {
-        console.warn(
-          "[FullAnalysisReportAdapter] unitPattern 正则匹配失败:",
-          regexError,
-        );
-      }
-
-      // 匹配：尺寸范围（如 10x5x3cm）
-      try {
-        const dimensionPattern =
-          /(\d+\s*[x×]\s*\d+(?:\s*[x×]\s*\d+)?)\s*([a-zA-Z]+|厘米|米)/g;
-        let match;
-
-        while ((match = dimensionPattern.exec(text)) !== null) {
-          if (match[1] && match[2]) {
-            patterns.push(`${match[1]}${match[2]}`);
-          }
-        }
-      } catch (regexError) {
-        console.warn(
-          "[FullAnalysisReportAdapter] dimensionPattern 正则匹配失败:",
-          regexError,
-        );
-      }
-
-      return patterns;
+      return SPEC_PATTERNS.flatMap((pattern) =>
+        collectSpecPatternMatches(text, pattern),
+      );
     } catch (error) {
       console.error(
         "[FullAnalysisReportAdapter] extractSpecPatterns 失败:",
