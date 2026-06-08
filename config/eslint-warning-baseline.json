@@ -1,7 +1,7 @@
 {
   "version": 1,
   "command": "node node_modules/eslint/bin/eslint.js src --ignore-pattern **/*.test.ts --ignore-pattern **/*.test.tsx --ignore-pattern **/*.spec.ts --ignore-pattern **/*.spec.tsx --format json",
-  "totalWarnings": 63,
+  "totalWarnings": 58,
   "warnings": [
     {
       "filePath": "src/common/errors/AppError.ts",
@@ -136,18 +136,6 @@
       "count": 2
     },
     {
-      "filePath": "src/modules/app_center/views/master_analysis/promptlab/components/previewExtractor.ts",
-      "ruleId": "complexity",
-      "message": "Function 'extractPreviewText' has a complexity of 59. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/promptlab/components/previewExtractor.ts",
-      "ruleId": "max-lines-per-function",
-      "message": "Function 'extractPreviewText' has too many lines (140). Maximum allowed is 100.",
-      "count": 1
-    },
-    {
       "filePath": "src/modules/app_center/views/master_analysis/promptlab/components/PromptlabPanel.ts",
       "ruleId": "max-lines-per-function",
       "message": "Function 'createPromptlabPanel' has too many lines (492). Maximum allowed is 100.",
@@ -175,24 +163,6 @@
       "filePath": "src/modules/app_center/views/master_analysis/scraper/handlers/importHandler.ts",
       "ruleId": "complexity",
       "message": "Async function 'handleImportFiles' has a complexity of 21. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/scraper/utils/renderers.ts",
-      "ruleId": "@typescript-eslint/max-params",
-      "message": "Function 'renderProductCard' has too many parameters (6). Maximum allowed is 5.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/scraper/utils/renderers.ts",
-      "ruleId": "complexity",
-      "message": "Function 'renderProductCard' has a complexity of 22. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/scraper/utils/renderers.ts",
-      "ruleId": "max-lines-per-function",
-      "message": "Function 'renderProductCard' has too many lines (119). Maximum allowed is 100.",
       "count": 1
     },
     {

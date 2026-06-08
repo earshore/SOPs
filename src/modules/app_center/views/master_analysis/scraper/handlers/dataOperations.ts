@@ -368,6 +368,8 @@ export function confirmWithModal(title: string, content: string, storageKey: str
         const cleanup = () => {
             if (btnConfirm) btnConfirm.removeEventListener('click', handleConfirm);
             if (btnCancel) btnCancel.removeEventListener('click', handleCancel);
+            backdrop.removeEventListener('click', handleBackdropClick);
+            document.removeEventListener('keydown', handleEscape);
 
             try {
                 if (backdrop && document.body.contains(backdrop)) {
@@ -378,34 +380,49 @@ export function confirmWithModal(title: string, content: string, storageKey: str
             }
         };
 
+        const finish = (result: boolean) => {
+            if (resolved) return;
+            resolved = true;
+            cleanup();
+            resolve(result);
+        };
+
         const handleConfirm = (e: Event) => {
             e.preventDefault();
             e.stopPropagation();
 
             if (resolved) return;
-            resolved = true;
 
             // 保存"不再提示"选项
             if (dontAskCheckbox && dontAskCheckbox.checked) {
                 StorageService.set(ignoreKey, true);
             }
 
-            cleanup();
-            resolve(true);
+            finish(true);
         };
 
         const handleCancel = (e: Event) => {
             e.preventDefault();
             e.stopPropagation();
 
-            if (resolved) return;
-            resolved = true;
+            finish(false);
+        };
 
-            cleanup();
-            resolve(false);
+        const handleBackdropClick = (e: MouseEvent) => {
+            if (e.target === backdrop) {
+                finish(false);
+            }
+        };
+
+        const handleEscape = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                finish(false);
+            }
         };
 
         btnConfirm.addEventListener('click', handleConfirm, { once: true });
         btnCancel.addEventListener('click', handleCancel, { once: true });
+        backdrop.addEventListener('click', handleBackdropClick);
+        document.addEventListener('keydown', handleEscape);
     });
 }

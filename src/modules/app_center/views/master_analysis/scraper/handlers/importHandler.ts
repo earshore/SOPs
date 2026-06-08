@@ -271,6 +271,8 @@ export function showMarketplaceSelectionModal(sites: string[]): Promise<string |
         const cleanup = () => {
             if (btnConfirm) btnConfirm.removeEventListener('click', handleConfirm);
             if (btnCancel) btnCancel.removeEventListener('click', handleCancel);
+            backdrop.removeEventListener('click', handleBackdropClick);
+            document.removeEventListener('keydown', handleEscape);
 
             try {
                 if (backdrop && document.body.contains(backdrop)) {
@@ -281,33 +283,48 @@ export function showMarketplaceSelectionModal(sites: string[]): Promise<string |
             }
         };
 
+        const finish = (selected: string | null) => {
+            if (resolved) return;
+            resolved = true;
+            cleanup();
+            resolve(selected);
+        };
+
         const handleConfirm = (e: Event) => {
             e.preventDefault();
             e.stopPropagation();
 
             if (resolved) return;
-            resolved = true;
 
             const selectedInput = backdrop.querySelector('input[name="site_choice"]:checked') as HTMLInputElement;
             const selected = selectedInput ? selectedInput.value : null;
 
-            cleanup();
-            resolve(selected);
+            finish(selected);
         };
 
         const handleCancel = (e: Event) => {
             e.preventDefault();
             e.stopPropagation();
 
-            if (resolved) return;
-            resolved = true;
+            finish(null);
+        };
 
-            cleanup();
-            resolve(null);
+        const handleBackdropClick = (e: MouseEvent) => {
+            if (e.target === backdrop) {
+                finish(null);
+            }
+        };
+
+        const handleEscape = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                finish(null);
+            }
         };
 
         btnConfirm.addEventListener('click', handleConfirm, { once: true });
         btnCancel.addEventListener('click', handleCancel, { once: true });
+        backdrop.addEventListener('click', handleBackdropClick);
+        document.addEventListener('keydown', handleEscape);
     });
 }
 

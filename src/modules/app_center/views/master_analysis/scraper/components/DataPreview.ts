@@ -249,14 +249,13 @@ export class DataPreview {
         // 渲染产品卡片
         const cardsHtml = productsToRender.map((product: ScrapedProduct) => {
             const isExpanded = this.state.expandedAsin === product.asin;
-            return renderProductCard(
-                product,
+            return renderProductCard({
+                rawProduct: product,
                 isExpanded,
                 globalSiteCode,
-                `toggleCardExpand('${product.asin}')`,
-                `deleteProduct('${product.asin}')`,
-                `deleteReview('${product.asin}', INDEX)`
-            );
+                onDelete: `deleteProduct('${product.asin}')`,
+                onDeleteReview: `deleteReview('${product.asin}', INDEX)`
+            });
         }).join("");
 
         renderer.renderTemplate(cardsEl, cardsHtml);

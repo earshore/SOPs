@@ -47,6 +47,157 @@ export function findFirstStringValue(
 // 新格式报告预览提取
 // ==========================================
 
+type PreviewData = Record<string, unknown>;
+type PreviewHandler = (data: PreviewData) => string | undefined;
+
+function getFieldString(value: unknown, field: string): string | undefined {
+  if (value && typeof value === 'object' && field in value) {
+    return String((value as PreviewData)[field]);
+  }
+  return undefined;
+}
+
+function joinObjectFieldValues(
+  values: unknown[],
+  limit: number,
+  field: string,
+  separator: string,
+): string {
+  return values
+    .slice(0, limit)
+    .map((item: unknown) => getFieldString(item, field) ?? null)
+    .filter(Boolean)
+    .join(separator);
+}
+
+function extractTitleKeywordsPreview(data: PreviewData): string | undefined {
+  if (!Array.isArray(data.primary_keywords)) return undefined;
+
+  const keywords = joinObjectFieldValues(
+    data.primary_keywords,
+    PROMPTLAB_DISPLAY_LIMITS.HIGH_FREQUENCY_PHRASES,
+    'keyword',
+    ', ',
+  );
+  return keywords || '无主要关键词';
+}
+
+function extractSellingPointsPreview(data: PreviewData): string | undefined {
+  const strategyText = getFieldString(data.overall_strategy, 'primary_differentiation');
+  if (strategyText !== undefined) return strategyText;
+
+  if (Array.isArray(data.bullet_analysis) && data.bullet_analysis.length > 0) {
+    const firstBulletText = getFieldString(data.bullet_analysis[0], 'differentiation_angle');
+    if (firstBulletText !== undefined) return firstBulletText || '卖点分析';
+  }
+
+  return undefined;
+}
+
+function extractFatalFlawsPreview(data: PreviewData): string | undefined {
+  if (Array.isArray(data.critical_issues)) {
+    const issues = joinObjectFieldValues(
+      data.critical_issues,
+      PROMPTLAB_DISPLAY_LIMITS.PAIN_POINTS,
+      'issue',
+      '; ',
+    );
+    return issues || '无致命缺陷';
+  }
+
+  return getFieldString(data.risk_assessment, 'primary_concern');
+}
+
+function extractWowMomentsPreview(data: PreviewData): string | undefined {
+  if (Array.isArray(data.moments) && data.moments.length > 0) {
+    const momentText = getFieldString(data.moments[0], 'moment_description');
+    if (momentText !== undefined) return momentText || 'Wow时刻分析';
+  }
+
+  if (Array.isArray(data.emotional_triggers)) {
+    return data.emotional_triggers
+      .slice(0, PROMPTLAB_DISPLAY_LIMITS.EMOTIONAL_TRIGGERS)
+      .map(String)
+      .join(', ');
+  }
+
+  return undefined;
+}
+
+function extractHesitationPointsPreview(data: PreviewData): string | undefined {
+  if (Array.isArray(data.hesitations) && data.hesitations.length > 0) {
+    const worryText = getFieldString(data.hesitations[0], 'pre_purchase_worry');
+    if (worryText !== undefined) return worryText || '犹豫点分析';
+  }
+
+  if (Array.isArray(data.common_doubts)) {
+    return data.common_doubts
+      .slice(0, PROMPTLAB_DISPLAY_LIMITS.COMMON_DOUBTS)
+      .map(String)
+      .join('; ');
+  }
+
+  return undefined;
+}
+
+function extractBuyerProfilePreview(data: PreviewData): string | undefined {
+  if (Array.isArray(data.buyer_types) && data.buyer_types.length > 0) {
+    const types = joinObjectFieldValues(
+      data.buyer_types,
+      PROMPTLAB_DISPLAY_LIMITS.PAIN_POINTS,
+      'type',
+      ', ',
+    );
+    return types || '买家画像分析';
+  }
+
+  const lifestyleIndicators = (data.demographics as PreviewData | undefined)?.lifestyle_indicators;
+  if (Array.isArray(lifestyleIndicators)) {
+    return lifestyleIndicators
+      .slice(0, PROMPTLAB_DISPLAY_LIMITS.LIFESTYLE_INDICATORS)
+      .map(String)
+      .join(', ');
+  }
+
+  return undefined;
+}
+
+function extractVocabGapPreview(data: PreviewData): string | undefined {
+  if (!Array.isArray(data.missing_keywords)) return undefined;
+
+  const keywords = data.missing_keywords
+    .slice(0, 3)
+    .map((keyword: unknown) => {
+      const objectKeyword = getFieldString(keyword, 'keyword');
+      return objectKeyword !== undefined ? objectKeyword : keyword ? String(keyword) : null;
+    })
+    .filter(Boolean)
+    .join(', ');
+
+  return keywords || '词汇缺口分析';
+}
+
+function extractPromiseRealityPreview(data: PreviewData): string | undefined {
+  if (!Array.isArray(data.gaps) || data.gaps.length === 0) return undefined;
+
+  const gap = data.gaps[0];
+  if (!gap || typeof gap !== 'object') return undefined;
+
+  const gapData = gap as PreviewData;
+  return String(gapData.promise ?? gapData.gap_description ?? '承诺与现实分析');
+}
+
+const PREVIEW_HANDLERS: Record<string, PreviewHandler> = {
+  'title-keywords': extractTitleKeywordsPreview,
+  'selling-points': extractSellingPointsPreview,
+  'fatal-flaws': extractFatalFlawsPreview,
+  'wow-moments': extractWowMomentsPreview,
+  'hesitation-points': extractHesitationPointsPreview,
+  'buyer-profile': extractBuyerProfilePreview,
+  'vocab-gap': extractVocabGapPreview,
+  'promise-reality': extractPromiseRealityPreview,
+};
+
 /**
  * 从新格式分析目标数据中智能提取预览文本
  *
@@ -62,137 +213,9 @@ export function extractPreviewText(targetId: string, data: unknown): string {
   const d = data as Record<string, unknown>;
 
   try {
-    switch (targetId) {
-      case 'title-keywords': {
-        if (Array.isArray(d.primary_keywords)) {
-          const kw = d.primary_keywords
-            .slice(0, PROMPTLAB_DISPLAY_LIMITS.HIGH_FREQUENCY_PHRASES)
-            .map((k: unknown) =>
-              k && typeof k === 'object' && 'keyword' in k
-                ? String((k as { keyword: unknown }).keyword)
-                : null,
-            )
-            .filter(Boolean)
-            .join(', ');
-          return kw || '无主要关键词';
-        }
-        break;
-      }
-
-      case 'selling-points': {
-        const os = d.overall_strategy;
-        if (os && typeof os === 'object' && 'primary_differentiation' in os) {
-          return String((os as { primary_differentiation: unknown }).primary_differentiation);
-        }
-        if (Array.isArray(d.bullet_analysis) && d.bullet_analysis.length > 0) {
-          const first = d.bullet_analysis[0];
-          if (first && typeof first === 'object' && 'differentiation_angle' in first) {
-            return String((first as { differentiation_angle: unknown }).differentiation_angle) || '卖点分析';
-          }
-        }
-        break;
-      }
-
-      case 'fatal-flaws': {
-        if (Array.isArray(d.critical_issues)) {
-          const issues = d.critical_issues
-            .slice(0, PROMPTLAB_DISPLAY_LIMITS.PAIN_POINTS)
-            .map((i: unknown) =>
-              i && typeof i === 'object' && 'issue' in i
-                ? String((i as { issue: unknown }).issue)
-                : null,
-            )
-            .filter(Boolean)
-            .join('; ');
-          return issues || '无致命缺陷';
-        }
-        const ra = d.risk_assessment;
-        if (ra && typeof ra === 'object' && 'primary_concern' in ra) {
-          return String((ra as { primary_concern: unknown }).primary_concern);
-        }
-        break;
-      }
-
-      case 'wow-moments': {
-        if (Array.isArray(d.moments) && d.moments.length > 0) {
-          const first = d.moments[0];
-          if (first && typeof first === 'object' && 'moment_description' in first) {
-            return String((first as { moment_description: unknown }).moment_description) || 'Wow时刻分析';
-          }
-        }
-        if (Array.isArray(d.emotional_triggers)) {
-          return d.emotional_triggers
-            .slice(0, PROMPTLAB_DISPLAY_LIMITS.EMOTIONAL_TRIGGERS)
-            .map(String)
-            .join(', ');
-        }
-        break;
-      }
-
-      case 'hesitation-points': {
-        if (Array.isArray(d.hesitations) && d.hesitations.length > 0) {
-          const first = d.hesitations[0];
-          if (first && typeof first === 'object' && 'pre_purchase_worry' in first) {
-            return String((first as { pre_purchase_worry: unknown }).pre_purchase_worry) || '犹豫点分析';
-          }
-        }
-        if (Array.isArray(d.common_doubts)) {
-          return d.common_doubts
-            .slice(0, PROMPTLAB_DISPLAY_LIMITS.COMMON_DOUBTS)
-            .map(String)
-            .join('; ');
-        }
-        break;
-      }
-
-      case 'buyer-profile': {
-        if (Array.isArray(d.buyer_types) && d.buyer_types.length > 0) {
-          const types = d.buyer_types
-            .slice(0, PROMPTLAB_DISPLAY_LIMITS.PAIN_POINTS)
-            .map((t: unknown) =>
-              t && typeof t === 'object' && 'type' in t
-                ? String((t as { type: unknown }).type)
-                : null,
-            )
-            .filter(Boolean)
-            .join(', ');
-          return types || '买家画像分析';
-        }
-        const demo = d.demographics;
-        if (demo && typeof demo === 'object' && 'lifestyle_indicators' in demo) {
-          const li = (demo as { lifestyle_indicators: unknown }).lifestyle_indicators;
-          if (Array.isArray(li)) {
-            return li.slice(0, PROMPTLAB_DISPLAY_LIMITS.LIFESTYLE_INDICATORS).map(String).join(', ');
-          }
-        }
-        break;
-      }
-
-      case 'vocab-gap': {
-        if (Array.isArray(d.missing_keywords)) {
-          const kw = d.missing_keywords
-            .slice(0, 3)
-            .map((k: unknown) => {
-              if (k && typeof k === 'object' && 'keyword' in k) return String((k as { keyword: unknown }).keyword);
-              return k ? String(k) : null;
-            })
-            .filter(Boolean)
-            .join(', ');
-          return kw || '词汇缺口分析';
-        }
-        break;
-      }
-
-      case 'promise-reality': {
-        if (Array.isArray(d.gaps) && d.gaps.length > 0) {
-          const g = d.gaps[0];
-          if (g && typeof g === 'object') {
-            const go = g as Record<string, unknown>;
-            return String(go.promise ?? go.gap_description ?? '承诺与现实分析');
-          }
-        }
-        break;
-      }
+    const preview = PREVIEW_HANDLERS[targetId]?.(d);
+    if (preview !== undefined) {
+      return preview;
     }
 
     // 默认：尝试提取第一个字符串值
