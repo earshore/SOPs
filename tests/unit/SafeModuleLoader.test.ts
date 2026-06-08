@@ -20,6 +20,7 @@ describe('SafeModuleLoader', () => {
   afterEach(() => {
     document.body.removeChild(container);
     loader.clearCache();
+    vi.restoreAllMocks();
   });
 
   describe('单例模式', () => {

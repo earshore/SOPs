@@ -2,7 +2,7 @@
 
 **审计日期**: 2026-06-08
 **审计范围**: 当前 CI 门禁、依赖审计、`src/` 代码质量、CSS 变量与模块样式、技术债扫描、单元/集成测试。
-**结论**: 当前没有仍阻塞 `ci:all` 的 P0 债务；本轮已消除循环依赖门禁、生产依赖漏洞和部分质量脚本失效问题。剩余债务主要集中在开发依赖安全升级、格式化基线、ESLint warning 基线、复杂度热点、CSS 令牌治理和构建性能 warning。
+**结论**: 当前没有仍阻塞 `ci:all` 的 P0 债务；本轮已消除循环依赖门禁、生产依赖漏洞、开发依赖漏洞和部分质量脚本失效问题。剩余债务主要集中在格式化基线、ESLint warning 基线、复杂度热点、CSS 令牌治理和构建性能 warning。
 
 ---
 
@@ -13,6 +13,7 @@
 | 已完成 | 循环依赖门禁 | `circular:check` 改为携带 `tsconfig.json`，模块 manifest 不再持有动态 view loader；真实循环依赖清零。 |
 | 已完成 | Vitest 异步泄漏 | `uiHelpers.ts` 的延迟 DOM 操作增加无 DOM 环境保护，全量 Vitest 不再因测试结束后的回调报错。 |
 | 已完成 | 生产依赖漏洞 | 移除 `xlsx`，用 `fflate` 加最小 XLSX XML 解析替代 PPC 搜索词导入；`npm audit --omit=dev` 为 0 漏洞。 |
+| 已完成 | 开发依赖漏洞 | 升级 `vite`/`vitest`/`@vitest/*`/`vite-plugin-singlefile`，显式引入安全版 `esbuild`，并用 `overrides` 固定 LHCI 链上的 `tmp`/`uuid`；`npm audit` 为 0 漏洞。 |
 | 已完成 | 质量脚本可运行性 | 修复 CSS 审计根目录、CSS 模块分析失效路径、注释代码清理器 `glob` 导入、质量检查 ESLint 输出缓冲和失败处理。 |
 | 已完成 | 审计报告产物 | 生成 `docs/css-module-analysis-report.md`、`tests/quality/tech-debt-2026-06-08.json`、`tests/quality/tech-debt-2026-06-08.html`。 |
 
@@ -26,10 +27,10 @@
 | 应用类型检查 | `npm run type-check` | 通过 |
 | 测试类型检查 | `npm run type-check:tests` | 通过 |
 | ESLint warning gate | `npm run lint:warning-gate` | 340/342 warning，基线内通过 |
-| 全量单元/集成测试 | `npx vitest run --silent --reporter=basic` | 65 个文件，1372 个测试，通过 |
+| 全量单元/集成测试 | `npx vitest run --silent` | 65 个文件，1372 个测试，通过 |
 | 构建 | `npm run build` | 通过，仍有构建 warning |
 | 生产依赖审计 | `npm audit --omit=dev` | 0 vulnerabilities |
-| 全量依赖审计 | `npm audit` | 失败，剩余 11 个开发/传递依赖漏洞 |
+| 全量依赖审计 | `npm audit` | 0 vulnerabilities |
 | 格式化检查 | `npm run format:check` | 失败，308 个既有文件不符合 Prettier |
 | CSS 变量审计 | `npm run css:audit` | 53 个 CSS 文件，3738 次变量使用，2008 次不符合规范 |
 | CSS 模块分析 | `npm run css:analyze` | 10 个模块 CSS 文件，4227 行，3 条优化建议 |
@@ -40,13 +41,12 @@
 
 | ID | 优先级 | 债务 | 当前证据 | 验收条件 |
 |----|--------|------|----------|----------|
-| TD-01 | P1 | 开发依赖安全漏洞 | `npm audit` 剩余 11 项，集中在 `vite`/`vitest`/`esbuild` 和 `@lhci/cli`/`tmp`/`uuid` 链；自动修复需要 breaking/force。 | 在独立升级分支完成 Vite/Vitest/LHCI 兼容升级或替换，`npm audit` 清零，或对 dev-only 风险形成明确例外说明。 |
 | TD-02 | P1 | 格式化基线未收敛 | `npm run format:check` 失败，308 个既有文件不符合 Prettier。 | 选定 Prettier 配置后按目录分批格式化，最终 `format:check` 通过，并避免混入功能改动。 |
 | TD-03 | P2 | ESLint warning 基线仍高 | warning gate 为 340/342；质量报告口径为 437 warning。Top 规则：`no-non-null-assertion` 133、`no-restricted-syntax` 96、`complexity` 90、`no-console` 47、`max-lines-per-function` 41。 | 每个 PR 只压低一个规则或一个模块的 warning 基线，更新 warning baseline，保持 `ci:all` 通过。 |
 | TD-04 | P2 | 复杂度热点 | `quality:check` 显示平均复杂度 26，最大复杂度 207，162 个文件超过阈值。技术债 top 文件包括 `navigation-animation.ts`、`ScraperPanel.ts`、`llmService.ts`、`keyword_hunter/process/index.ts`、`main.ts`。 | 按 top 文件拆分长函数和深嵌套，补回局部测试，复杂度和 warning 数量同步下降。 |
 | TD-05 | P2 | CSS 变量体系不统一 | `css:audit` 显示 2008 次不符合变量命名规范，合规率 46.3%。 | 先建立变量别名/迁移表，再按 foundation、components、modules 分批替换；每批运行 `css:audit` 并记录下降量。 |
 | TD-06 | P2 | 模块 CSS 重复 | `css:analyze` 发现卡片 3 类、按钮 1 类、动画 2 类、图标 2 类、徽章 2 类重复模式。 | 抽取到已有 `src/css/components/*` 和 `src/css/animations/*`，模块样式只保留差异化规则，视觉回归测试通过。 |
-| TD-07 | P2 | 构建性能 warning | Vite 构建仍提示 `EventBus`、`ConfigCenter` 动态/静态 import 混用，且部分 chunk 超过 300 kB。 | 明确共享核心模块的加载策略，调整 manual chunks 或动态加载边界，构建 warning 数量下降且路由懒加载仍正常。 |
+| TD-07 | P2 | 构建性能 warning | Vite 8 构建仍提示 `ConfigCenter` 动态/静态 import 混用、`deep-chat` chunk 超过 300 kB、插件耗时集中在 checker/terser，并保留 Node `DEP0190` warning。 | 明确共享核心模块的加载策略，调整动态加载边界和大 chunk 拆分，构建 warning 数量下降且路由懒加载仍正常。 |
 | TD-08 | P3 | 全量浏览器类验证未纳入本轮 | 本轮未执行 `test:e2e`、`test:visual`、`test:performance`、`lighthouse`。 | 依赖升级、CSS 抽取或路由加载改动后补跑对应浏览器类验证，并归档失败截图/报告。 |
 
 ## 消除计划清单
@@ -62,9 +62,11 @@
 
 ### 第 1 批：安全和工具链
 
-- [ ] 在独立分支评估 Vite/Vitest 升级路径，先运行 `npm audit`、`npm run ci:all`、全量 Vitest。
-- [ ] 评估 `@lhci/cli` 升级、替换或隔离执行方案，避免按 `npm audit fix --force` 降级到不可用版本。
-- [ ] 明确 dev-only 漏洞处理策略：清零优先；无法清零时记录暴露面、触发命令和补偿控制。
+- [x] 升级 Vite/Vitest 工具链到当前安全版本。
+- [x] 将 Vite 8 不再支持的对象式 `manualChunks` 改为函数式分包配置。
+- [x] 显式安装安全版 `esbuild`，满足 `cssMinify: 'esbuild'` 的解析需求。
+- [x] 用 `overrides` 固定 `@lhci/cli` 传递依赖 `tmp` 和 `uuid` 到安全版本。
+- [x] 验证 `npx lhci --version`、`npm audit`、`npm run ci:all` 和全量 Vitest。
 
 ### 第 2 批：格式化基线
 
@@ -97,13 +99,12 @@
 
 ### 第 6 批：构建和浏览器验证
 
-- [ ] 处理 `EventBus`、`ConfigCenter` 的动态/静态 import 混用，确认不会破坏路由懒加载。
-- [ ] 复查 `manualChunks`，优先拆分大模块而不是单纯提高 `chunkSizeWarningLimit`。
+- [ ] 处理 `ConfigCenter` 的动态/静态 import 混用，确认不会破坏路由懒加载。
+- [ ] 复查 Vite 8/Rolldown 下的大 chunk 拆分，优先拆分 `deep-chat` 等大模块而不是单纯提高 `chunkSizeWarningLimit`。
 - [ ] 对依赖升级、CSS 抽取和路由加载改动补跑 `test:e2e`、`test:visual`、`test:performance`、`lighthouse`。
 
 ## 本轮不建议直接执行
 
-- 不建议运行 `npm audit fix --force`：当前建议路径会引入 breaking change，并且 `@lhci/cli` 的建议版本是明显倒退。
 - 不建议一次性格式化 308 个文件并混入功能修复：审查成本过高，也容易掩盖行为变更。
 - 不建议在未补充浏览器验证前大改 CSS 抽象或构建分包：这类改动容易产生视觉和懒加载回归。
 

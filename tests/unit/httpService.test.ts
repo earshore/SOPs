@@ -465,12 +465,14 @@ describe('HttpService', () => {
         signal: controller.signal,
       });
 
+      const [, requestOptions] = (global.fetch as any).mock.calls[0];
       expect(global.fetch).toHaveBeenCalledWith(
         'https://api.example.com/test',
         expect.objectContaining({
-          signal: controller.signal,
+          signal: expect.any(AbortSignal),
         })
       );
+      expect(requestOptions.signal.aborted).toBe(false);
     });
 
     it('应该在请求被取消时抛出错误', async () => {

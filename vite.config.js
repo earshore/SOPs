@@ -168,16 +168,31 @@ export default defineConfig({
             // 确保.ts文件被正确处理为.js
             external: [],
             output: {
-                // 手动分包策略 - 回退到简单对象形式避免 Alpine 组件问题
-                manualChunks: {
-                    // 核心框架
-                    'vendor-core': ['@alpinejs/csp'],
-                    // 图表库（懒加载，但构建时仍需分包）
-                    'vendor-charts': ['chart.js'],
-                    // Markdown渲染
-                    'vendor-markdown': ['marked'],
-                    // 工具库
-                    'vendor-utils': ['clsx', 'tailwind-merge', 'jsonrepair', 'zod']
+                manualChunks(id) {
+                    const normalizedId = id.replace(/\\/g, '/');
+                    if (!normalizedId.includes('/node_modules/')) {
+                        return undefined;
+                    }
+
+                    if (normalizedId.includes('/node_modules/@alpinejs/csp/')) {
+                        return 'vendor-core';
+                    }
+                    if (normalizedId.includes('/node_modules/chart.js/')) {
+                        return 'vendor-charts';
+                    }
+                    if (normalizedId.includes('/node_modules/marked/')) {
+                        return 'vendor-markdown';
+                    }
+                    if (
+                        normalizedId.includes('/node_modules/clsx/') ||
+                        normalizedId.includes('/node_modules/tailwind-merge/') ||
+                        normalizedId.includes('/node_modules/jsonrepair/') ||
+                        normalizedId.includes('/node_modules/zod/')
+                    ) {
+                        return 'vendor-utils';
+                    }
+
+                    return undefined;
                 },
                 // 优化chunk命名
                 chunkFileNames: 'assets/js/[name]-[hash].js',
