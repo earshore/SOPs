@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import * as XLSX from 'xlsx';
+import { strToU8, zipSync } from 'fflate';
 import {
   analyzeReport,
   analyzeSearchTermReport,
@@ -19,6 +19,95 @@ const thresholds: Thresholds = {
   minOrdersHarvest: 2,
   minCtr: 0.35,
 };
+
+type XlsxCell = string | number | boolean | null;
+
+function createXlsxBuffer(rows: XlsxCell[][], sheetName: string): ArrayBuffer {
+  const worksheetXml = [
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
+    '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">',
+    '<sheetData>',
+    ...rows.map((row, rowIndex) => renderXlsxRow(row, rowIndex + 1)),
+    '</sheetData>',
+    '</worksheet>',
+  ].join('');
+
+  const zip = zipSync({
+    '[Content_Types].xml': strToU8(
+      '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+      + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+      + '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+      + '<Default Extension="xml" ContentType="application/xml"/>'
+      + '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
+      + '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
+      + '</Types>',
+    ),
+    '_rels/.rels': strToU8(
+      '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+      + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+      + '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>'
+      + '</Relationships>',
+    ),
+    'xl/workbook.xml': strToU8(
+      '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+      + '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" '
+      + 'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+      + '<sheets>'
+      + `<sheet name="${escapeXml(sheetName)}" sheetId="1" r:id="rId1"/>`
+      + '</sheets>'
+      + '</workbook>',
+    ),
+    'xl/_rels/workbook.xml.rels': strToU8(
+      '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+      + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+      + '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>'
+      + '</Relationships>',
+    ),
+    'xl/worksheets/sheet1.xml': strToU8(worksheetXml),
+  });
+
+  return zip.buffer.slice(zip.byteOffset, zip.byteOffset + zip.byteLength) as ArrayBuffer;
+}
+
+function renderXlsxRow(row: XlsxCell[], rowNumber: number): string {
+  const cells = row
+    .map((cell, index) => renderXlsxCell(cell, `${columnName(index)}${rowNumber}`))
+    .join('');
+  return `<row r="${rowNumber}">${cells}</row>`;
+}
+
+function renderXlsxCell(cell: XlsxCell, ref: string): string {
+  if (cell === null) {
+    return '';
+  }
+  if (typeof cell === 'number') {
+    return `<c r="${ref}"><v>${cell}</v></c>`;
+  }
+  if (typeof cell === 'boolean') {
+    return `<c r="${ref}" t="b"><v>${cell ? 1 : 0}</v></c>`;
+  }
+  return `<c r="${ref}" t="inlineStr"><is><t>${escapeXml(cell)}</t></is></c>`;
+}
+
+function columnName(index: number): string {
+  let value = index + 1;
+  let name = '';
+  while (value > 0) {
+    const remainder = (value - 1) % 26;
+    name = String.fromCharCode(65 + remainder) + name;
+    value = Math.floor((value - 1) / 26);
+  }
+  return name;
+}
+
+function escapeXml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
 
 describe('PPC 搜索词分析器', () => {
   it('兼容 Amazon Ads 常见表头并生成动作建议', () => {
@@ -114,15 +203,13 @@ describe('PPC 搜索词分析器', () => {
   });
 
   it('兼容 xlsx 工作表并复用现有字段识别', async () => {
-    const workbook = XLSX.utils.book_new();
-    const worksheet = XLSX.utils.aoa_to_sheet([
+    const workbook = createXlsxBuffer([
       ['Campaign Name', 'Ad Group Name', 'Customer Search Term', 'Clicks', 'Spend', 'Sales', 'Orders'],
       ['DE_Auto', 'Auto', 'xlsx waste term', 12, 20, 0, 0],
       ['DE_Exact', 'Core', 'xlsx scale term', 20, 20, 100, 2],
-    ]);
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Search Term');
+    ], 'Search Term');
 
-    const reportText = await xlsxArrayBufferToDelimitedText(XLSX.write(workbook, { type: 'array', bookType: 'xlsx' }));
+    const reportText = await xlsxArrayBufferToDelimitedText(workbook);
     const result = analyzeSearchTermReport(reportText, thresholds);
     const byTerm = Object.fromEntries(result.rows.map((row) => [row.searchTerm, row]));
 
@@ -132,8 +219,7 @@ describe('PPC 搜索词分析器', () => {
   });
 
   it('兼容商品推广搜索词报告的中文 xlsx 表头', async () => {
-    const workbook = XLSX.utils.book_new();
-    const worksheet = XLSX.utils.aoa_to_sheet([
+    const workbook = createXlsxBuffer([
       [
         '开始日期',
         '结束日期',
@@ -212,10 +298,9 @@ describe('PPC 搜索词分析器', () => {
         '€26.70',
         '€0.00',
       ],
-    ]);
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sponsored Product Search Term R');
+    ], 'Sponsored Product Search Term R');
 
-    const reportText = await xlsxArrayBufferToDelimitedText(XLSX.write(workbook, { type: 'array', bookType: 'xlsx' }));
+    const reportText = await xlsxArrayBufferToDelimitedText(workbook);
     const result = analyzeReport(reportText, thresholds, 'auto');
     const byTerm = Object.fromEntries(result.rows.map((row) => [row.searchTerm, row]));
 
@@ -228,8 +313,7 @@ describe('PPC 搜索词分析器', () => {
   });
 
   it('自动识别 ERP 广告搜索词报表并保留店铺维度', async () => {
-    const workbook = XLSX.utils.book_new();
-    const worksheet = XLSX.utils.aoa_to_sheet([
+    const workbook = createXlsxBuffer([
       [
         '店铺名称',
         '用户搜索词',
@@ -275,10 +359,9 @@ describe('PPC 搜索词分析器', () => {
         120,
         0.1667,
       ],
-    ]);
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'sheet');
+    ], 'sheet');
 
-    const reportText = await xlsxArrayBufferToDelimitedText(XLSX.write(workbook, { type: 'array', bookType: 'xlsx' }));
+    const reportText = await xlsxArrayBufferToDelimitedText(workbook);
     const result = analyzeReport(reportText, thresholds, 'auto');
     const byTerm = Object.fromEntries(result.rows.map((row) => [row.searchTerm, row]));
     const csv = buildActionCsv(result.rows);

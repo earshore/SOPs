@@ -38,7 +38,7 @@ declare global {
     state: Record<string, unknown>;
     
     // 路由
-    router: import('../common/router/Router').Router;
+    router: import('../common/router/navigo/NavigoAdapter').NavigoAdapter;
     
     // 工具函数
     showToast: (message: string, type?: 'success' | 'error' | 'warning' | 'info') => void;

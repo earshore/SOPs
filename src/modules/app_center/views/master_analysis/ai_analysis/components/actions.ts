@@ -6,12 +6,12 @@
 import { showToast } from '@common/ui/index';
 import { analysisTargets } from '../config/analysisTargets';
 import { generateAnalysisPrompt } from '../prompts/analysisPrompts';
-import { runAnalysis, getSampleReport, parseAnalysisReport } from '../services/analysisService';
+import { parseAnalysisReport } from '../services/analysisService';
 import { runParallelAIAnalysis } from '../services/parallelAnalysisService';
 import { generateMarkdownReport, generateJsonReportData } from '../services/reportGenerator';
 import { mergeProducts, getProductsByAsins } from '../utils/dataTransformers';
 import { getMarketLanguage } from './helpers';
-import { Product } from '../config/sampleData';
+import type { Product } from '../config/sampleData';
 import { AlpineContext } from '../types';
 import { appStore } from '@/stores/useAppStore';
 import type { FullAnalysisReport } from '../config/analysisReportData';
@@ -95,20 +95,6 @@ export function togglePromptItem(context: AlpineContext, index: number): void {
  */
 export function toggleJsonViewer(context: AlpineContext): void {
   context.showJsonViewer = !context.showJsonViewer;
-}
-
-/**
- * 切换数据源
- */
-export function toggleDataSource(context: AlpineContext): void {
-  context.useRealData = !context.useRealData;
-
-  resetAnalysisReport(context);
-
-  showToast(
-    context.useRealData ? '已切换到真实数据分析模式' : '已切换到示例数据模式',
-    { type: 'info' }
-  );
 }
 
 /**
@@ -254,61 +240,46 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
   });
 
   try {
-    let analysisReport: FullAnalysisReport;
+    const products = getRealProducts(context.selectedAsins);
 
-    if (context.useRealData) {
-      const products = getRealProducts(context.selectedAsins);
-
-      if (products.length === 0) {
-        throw new BusinessError(
-          '无法获取产品数据,请确保已从数据采集或数据管理导入数据',
-          'AI_ACTIONS_001',
-          { module: 'AIAnalysisActions', action: 'runAnalysisAction', selectedAsins: context.selectedAsins }
-        );
-      }
-
-      showToast(`正在调用 AI 分析 ${products.length} 个产品...`, { type: 'info' });
-
-      const mergedProduct = mergeProducts(products);
-      const language = getMarketLanguage();
-      const perfSettings = getPerformanceSettings();
-
-      analysisReport = await runParallelAIAnalysis(
-        selectedTargets,
-        mergedProduct,
-        (progress: number, step: string) => {
-          context.progress = progress;
-          context.currentStep = step;
-        },
-        language,
-        {
-          maxConcurrency: perfSettings.maxConcurrency,
-          enableCache: perfSettings.enableCache,
-          streamResults: true,
-          failureStrategy: perfSettings.failureStrategy,
-          onTaskComplete: ({ report, targetId, successCount, totalCount, fromCache }) => {
-            syncAnalysisReport(context, report);
-            console.log('[用户动作] 收到实时分析结果:', {
-              targetId,
-              successCount,
-              totalCount,
-              fromCache: !!fromCache
-            });
-          }
-        }
+    if (products.length === 0) {
+      throw new BusinessError(
+        '无法获取产品数据,请确保已从数据采集或数据管理导入数据',
+        'AI_ACTIONS_001',
+        { module: 'AIAnalysisActions', action: 'runAnalysisAction', selectedAsins: context.selectedAsins }
       );
-    } else {
-      await runAnalysis(
-        selectedTargets,
-        context.selectedAsins[0] || 'B0DNMZ2MLG',
-        (progress: number, step: string) => {
-          context.progress = progress;
-          context.currentStep = step;
-        }
-      );
-
-      analysisReport = getSampleReport();
     }
+
+    showToast(`正在调用 AI 分析 ${products.length} 个产品...`, { type: 'info' });
+
+    const mergedProduct = mergeProducts(products);
+    const language = getMarketLanguage();
+    const perfSettings = getPerformanceSettings();
+
+    const analysisReport = await runParallelAIAnalysis(
+      selectedTargets,
+      mergedProduct,
+      (progress: number, step: string) => {
+        context.progress = progress;
+        context.currentStep = step;
+      },
+      language,
+      {
+        maxConcurrency: perfSettings.maxConcurrency,
+        enableCache: perfSettings.enableCache,
+        streamResults: true,
+        failureStrategy: perfSettings.failureStrategy,
+        onTaskComplete: ({ report, targetId, successCount, totalCount, fromCache }) => {
+          syncAnalysisReport(context, report);
+          console.log('[用户动作] 收到实时分析结果:', {
+            targetId,
+            successCount,
+            totalCount,
+            fromCache: !!fromCache
+          });
+        }
+      }
+    );
 
     syncAnalysisReport(context, analysisReport);
 

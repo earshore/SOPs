@@ -5,12 +5,8 @@ import {
   createModuleLoader,
   ModuleLoader,
 } from "../../common/utils/ModuleLoader";
-import { buildModuleMap } from "@/common/config/moduleManifest";
-import type { ModuleMap, ModuleLoaderFn } from "@/types/modules-business";
-import { amzHubManifest } from "./module.manifest";
-
-// ================= 路由配置表 =================
-const MODULE_MAP: ModuleMap = buildModuleMap(amzHubManifest);
+import type { ModuleLoaderFn } from "@/types/modules-business";
+import { MODULE_MAP } from "./module.loaders";
 
 // ================= 使用通用ModuleLoader =================
 const moduleLoader: ModuleLoader = createModuleLoader({

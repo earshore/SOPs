@@ -9,7 +9,6 @@ export const appCenterManifest = defineModuleManifest({
       routeId: "app_center_overview",
       label: "应用总览",
       icon: "fas fa-th-large",
-      loader: () => import("./views/overview/index"),
     },
     {
       key: "SCRAPER",
@@ -18,7 +17,6 @@ export const appCenterManifest = defineModuleManifest({
       label: "数据采集",
       icon: "fas fa-spider",
       category: "master_analysis",
-      loader: () => import("./views/master_analysis/scraper/index"),
     },
     {
       key: "AI_ANALYSIS",
@@ -27,7 +25,6 @@ export const appCenterManifest = defineModuleManifest({
       label: "AI智能分析",
       icon: "fas fa-brain",
       category: "master_analysis",
-      loader: () => import("./views/master_analysis/ai_analysis/index"),
     },
     {
       key: "PROMPTLAB",
@@ -36,7 +33,6 @@ export const appCenterManifest = defineModuleManifest({
       label: "Prompt 生成",
       icon: "fas fa-wand-magic-sparkles",
       category: "master_analysis",
-      loader: () => import("./views/master_analysis/promptlab/index"),
     },
     {
       key: "PPC_SEARCH_TERMS",
@@ -45,7 +41,6 @@ export const appCenterManifest = defineModuleManifest({
       label: "PPC 搜索词分析器",
       icon: "fas fa-magnifying-glass-dollar",
       category: "ppc_tools",
-      loader: () => import("./views/ppc_search_terms/index"),
     },
     {
       key: "KW_INPUT",
@@ -54,7 +49,6 @@ export const appCenterManifest = defineModuleManifest({
       label: "输入模块",
       icon: "fas fa-keyboard",
       category: "keyword_tracker",
-      loader: () => import("./views/keyword_hunter/input/index"),
     },
     {
       key: "KW_PROCESS",
@@ -63,7 +57,6 @@ export const appCenterManifest = defineModuleManifest({
       label: "处理模块",
       icon: "fas fa-cogs",
       category: "keyword_tracker",
-      loader: () => import("./views/keyword_hunter/process/index"),
     },
     {
       key: "KW_ANALYSIS",
@@ -72,7 +65,6 @@ export const appCenterManifest = defineModuleManifest({
       label: "分析统计",
       icon: "fas fa-chart-pie",
       category: "keyword_tracker",
-      loader: () => import("./views/keyword_hunter/analysis/index"),
     },
     {
       key: "PLAYGROUND",
@@ -81,7 +73,6 @@ export const appCenterManifest = defineModuleManifest({
       label: "Deep Chat",
       icon: "fa-regular fa-comments",
       category: "playground",
-      loader: () => import("./views/playground/deep-chat/index"),
     },
   ],
 } as const);

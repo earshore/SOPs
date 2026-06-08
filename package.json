@@ -86,7 +86,7 @@
         "css:cleanup": "tsx scripts/dev/cleanup-unused-css.ts",
         "docs:api": "node scripts/build/generate-api-docs.js",
         "docs:serve": "npx http-server docs/api -p 8080 -o",
-        "circular:check": "madge --circular --extensions ts src",
+        "circular:check": "madge --circular --extensions ts --ts-config tsconfig.json src",
         "ci:security": "npm run xss:gate && npm run circular:check",
         "ci:quality": "npm run type-check && npm run lint && npm run lint:warning-gate",
         "ci:all": "npm run ci:security && npm run ci:quality && npm run build"
@@ -117,6 +117,7 @@
         "playwright-lighthouse": "^4.0.0",
         "pngjs": "^7.0.0",
         "postcss": "^8.5.6",
+        "prettier": "^3.8.3",
         "tailwindcss": "^3.4.17",
         "terser": "^5.0.0",
         "tsx": "^4.21.0",
@@ -130,18 +131,23 @@
     "engines": {
         "node": ">=18.0.0"
     },
+    "overrides": {
+        "@typescript-eslint/typescript-estree": {
+            "minimatch": "9.0.7"
+        }
+    },
     "dependencies": {
         "@alpinejs/csp": "^3.15.12",
         "@fortawesome/fontawesome-free": "^7.1.0",
         "chart.js": "^4.5.1",
         "clsx": "^2.1.1",
         "deep-chat": "^2.4.2",
+        "fflate": "^0.8.3",
         "gridstack": "^12.4.2",
         "jsonrepair": "^3.13.2",
         "marked": "^17.0.1",
         "navigo": "^8.11.1",
         "tailwind-merge": "^3.4.0",
-        "xlsx": "^0.18.5",
         "zod": "^4.3.6",
         "zustand": "^5.0.11"
     }

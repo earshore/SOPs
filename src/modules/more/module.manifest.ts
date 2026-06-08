@@ -9,7 +9,6 @@ export const moreManifest = defineModuleManifest({
       routeId: "more_overview",
       label: "更多总览",
       icon: "fas fa-th-large",
-      loader: () => import("./views/overview/index"),
     },
     {
       key: "AGENTS",
@@ -17,7 +16,6 @@ export const moreManifest = defineModuleManifest({
       label: "智能体",
       icon: "fas fa-robot",
       category: "explore",
-      loader: () => import("./views/explore/agents/index"),
     },
     {
       key: "PROMPTS",
@@ -25,7 +23,6 @@ export const moreManifest = defineModuleManifest({
       label: "提示词",
       icon: "fas fa-message",
       category: "explore",
-      loader: () => import("./views/explore/prompts/index"),
     },
     {
       key: "WORKFLOWS",
@@ -33,7 +30,6 @@ export const moreManifest = defineModuleManifest({
       label: "工作流",
       icon: "fas fa-diagram-project",
       category: "explore",
-      loader: () => import("./views/explore/workflows/index"),
     },
   ],
 } as const);

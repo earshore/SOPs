@@ -27,6 +27,10 @@ export function initAutoHeightInputs(
   originalHeights: Map<HTMLElement, number>,
 ): void {
   setTimeout(() => {
+    if (typeof document === 'undefined' || typeof window === 'undefined') {
+      return;
+    }
+
     const textareas = document.querySelectorAll(
       '#card-product-dna textarea, #card-strategy textarea',
     );

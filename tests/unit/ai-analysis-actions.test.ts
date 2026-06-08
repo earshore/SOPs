@@ -21,14 +21,13 @@ import {
   togglePromptPanel,
   togglePromptItem,
   toggleJsonViewer,
-  toggleDataSource,
   copyPrompt,
   copyJson,
   copyMarkdown,
   downloadJson
 } from '../../src/modules/app_center/views/master_analysis/ai_analysis/components/actions';
 import { AlpineContext } from '../../src/modules/app_center/views/master_analysis/ai_analysis/types';
-import { Product } from '../../src/modules/app_center/views/master_analysis/ai_analysis/config/sampleData';
+import type { Product } from '../../src/modules/app_center/views/master_analysis/ai_analysis/config/sampleData';
 
 // Mock 依赖
 vi.mock('@common/ui/index', () => ({
@@ -76,9 +75,7 @@ describe('actions - ASIN 选择操作', () => {
       expandedPromptIndex: null,
       showPromptPanel: false,
       showJsonViewer: false,
-      useRealData: false,
-      dataSource: 'sample',
-      showDataSourceBanner: false,
+      dataSource: 'scraper',
       availableAsins: [],
       hasData: false,
       canAnalyze: false,
@@ -164,9 +161,7 @@ describe('actions - 分析目标选择操作', () => {
       expandedPromptIndex: null,
       showPromptPanel: false,
       showJsonViewer: false,
-      useRealData: false,
-      dataSource: 'sample',
-      showDataSourceBanner: false,
+      dataSource: 'scraper',
       availableAsins: [],
       hasData: false,
       canAnalyze: false,
@@ -231,9 +226,7 @@ describe('actions - UI 面板切换操作', () => {
       expandedPromptIndex: null,
       showPromptPanel: false,
       showJsonViewer: false,
-      useRealData: false,
-      dataSource: 'sample',
-      showDataSourceBanner: false,
+      dataSource: 'scraper',
       availableAsins: [],
       hasData: false,
       canAnalyze: false,
@@ -301,27 +294,6 @@ describe('actions - UI 面板切换操作', () => {
     });
   });
   
-  describe('toggleDataSource', () => {
-    it('应该切换数据源模式', () => {
-      expect(mockContext.useRealData).toBe(false);
-      
-      toggleDataSource(mockContext);
-      expect(mockContext.useRealData).toBe(true);
-      
-      toggleDataSource(mockContext);
-      expect(mockContext.useRealData).toBe(false);
-    });
-    
-    it('应该清空之前的分析报告', () => {
-      mockContext.analysisReport = { data: 'test' };
-      
-      toggleDataSource(mockContext);
-      
-      expect(mockContext.analysisReport).toBe(null);
-      expect(mockContext.hasReport).toBe(false);
-      expect(mockAppStoreState.setAnalysisReport).toHaveBeenCalledWith(null);
-    });
-  });
 });
 
 describe('actions - 复制操作', () => {
@@ -351,9 +323,7 @@ describe('actions - 复制操作', () => {
       expandedPromptIndex: null,
       showPromptPanel: false,
       showJsonViewer: false,
-      useRealData: false,
       dataSource: 'scraper',
-      showDataSourceBanner: false,
       availableAsins: [],
       hasData: false,
       canAnalyze: false,

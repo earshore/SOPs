@@ -95,9 +95,7 @@ export interface AlpineContext {
   expandedPromptIndex: number | null;
   showPromptPanel: boolean;
   showJsonViewer: boolean;
-  useRealData: boolean;
-  dataSource: 'sample' | 'scraper';
-  showDataSourceBanner: boolean;
+  dataSource: 'scraper';
   availableAsins: string[];
   hasData: boolean;
   canAnalyze: boolean;

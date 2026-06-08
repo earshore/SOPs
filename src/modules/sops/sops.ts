@@ -1,12 +1,8 @@
 console.log("📋 SOPs Core Module Loading...");
 import './sops_style.css';
 import { createModuleLoader, ModuleLoader } from '../../common/utils/ModuleLoader';
-import { buildModuleMap } from '@/common/config/moduleManifest';
-import type { ModuleMap, ModuleLoaderFn } from '@/types/modules-business';
-import { sopsManifest } from './module.manifest';
-
-// ================= 路由配置表 =================
-const MODULE_MAP: ModuleMap = buildModuleMap(sopsManifest);
+import type { ModuleLoaderFn } from '@/types/modules-business';
+import { MODULE_MAP } from './module.loaders';
 
 // ================= 使用通用ModuleLoader =================
 const moduleLoader: ModuleLoader = createModuleLoader({

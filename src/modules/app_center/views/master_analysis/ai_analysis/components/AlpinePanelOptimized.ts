@@ -171,9 +171,7 @@ export function createAiAnalysisPanelOptimized(): Record<string, unknown> {
     showJsonViewer: false,
 
     // 数据源
-    useRealData: true,
-    dataSource: 'scraper' as 'sample' | 'scraper',
-    showDataSourceBanner: true,
+    dataSource: 'scraper' as const,
 
     // Zustand 订阅清理函数
     _unsubscribe: null as (() => void) | null | undefined,

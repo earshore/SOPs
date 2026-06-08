@@ -77,7 +77,11 @@ class CodeQualityChecker {
       // 运行 ESLint 并输出 JSON 格式
       const output = execSync(
         `npx eslint ${this.srcDir} --format json --max-warnings 999999`,
-        { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] }
+        {
+          encoding: 'utf-8',
+          maxBuffer: 20 * 1024 * 1024,
+          stdio: ['pipe', 'pipe', 'pipe'],
+        }
       );
 
       const results = JSON.parse(output);
@@ -137,13 +141,7 @@ class CodeQualityChecker {
         };
       }
 
-      console.log('  ⚠ ESLint 检查失败\n');
-      return {
-        totalFiles: 0,
-        totalErrors: 0,
-        totalWarnings: 0,
-        errorsByRule: {},
-      };
+      throw error;
     }
   }
 
@@ -421,4 +419,7 @@ class CodeQualityChecker {
 
 // 运行检查
 const checker = new CodeQualityChecker();
-checker.run().catch(console.error);
+checker.run().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

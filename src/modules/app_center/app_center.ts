@@ -6,12 +6,8 @@
 console.log('🎯 App Center Core Module Loading...');
 import './app_center_style.css';
 import { createModuleLoader, ModuleLoader } from '@/common/utils/ModuleLoader';
-import { buildModuleMap } from '@/common/config/moduleManifest';
-import type { ModuleMap, ModuleLoaderFn } from '@/types/modules-business';
-import { appCenterManifest } from './module.manifest';
-
-// ================= 路由配置表 =================
-const MODULE_MAP: ModuleMap = buildModuleMap(appCenterManifest);
+import type { ModuleLoaderFn } from '@/types/modules-business';
+import { MODULE_MAP } from './module.loaders';
 
 // ================= 使用通用ModuleLoader =================
 const moduleLoader: ModuleLoader = createModuleLoader({

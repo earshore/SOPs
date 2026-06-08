@@ -5,7 +5,7 @@
 
 import { appStore } from '@/stores/useAppStore';
 import { analysisTargets } from '../config/analysisTargets';
-import { getProductByAsin, Product } from '../config/sampleData';
+import type { Product } from '../config/sampleData';
 import { convertScraperDataToProduct } from '../utils/dataTransformers';
 import { parseAnalysisReport } from '../services/analysisService';
 import { AnalysisResult, AlpineContext, FullReportData } from '../types';
@@ -85,18 +85,6 @@ export function createComputedProperties(context: AlpineContext): ComputedProper
           hasProducts: !!(scrapedData && scrapedData.products),
           productsLength: scrapedData?.products?.length
         });
-      }
-
-      // 只有显式切换到示例数据时才使用示例产品，避免真实数据为空时误用旧 ASIN。
-      if (products.length === 0 && !context.useRealData) {
-        console.log('[计算属性] 尝试从示例数据获取产品');
-        for (const asin of context.selectedAsins) {
-          const product = getProductByAsin(asin);
-          if (product) {
-            console.log('[计算属性] 从示例数据获取到产品:', asin);
-            products.push(product);
-          }
-        }
       }
 
       console.log('[计算属性] currentProducts 最终结果:', products.length, '个产品');
@@ -272,11 +260,7 @@ export function createComputedProperties(context: AlpineContext): ComputedProper
      * 数据源标签
      */
     get dataSourceLabel(): string {
-      switch (context.dataSource) {
-        case 'scraper': return '数据采集';
-        case 'sample': return '示例数据';
-        default: return '未知';
-      }
+      return '数据采集';
     },
 
     /**

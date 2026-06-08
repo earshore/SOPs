@@ -143,7 +143,7 @@ function isDeprecated(variable: string): boolean {
 }
 
 function auditCSSVariables(): AuditResult {
-  const projectRoot = join(__dirname, '..');
+  const projectRoot = join(__dirname, '..', '..');
   const srcDir = join(projectRoot, 'src');
   
   const cssFiles = getAllCSSFiles(srcDir);

@@ -51,9 +51,7 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
     expandedPromptIndex: null as number | null,
     showPromptPanel: false,
     showJsonViewer: false,
-    useRealData: true,
-    dataSource: 'scraper' as 'sample' | 'scraper',
-    showDataSourceBanner: true,
+    dataSource: 'scraper' as const,
     productSummaryTooltipVisible: false,
     // ========== Collapsible UI State ==========
     // 默认收起选择区：收起只展示一个大标题，展开同时展示 ASIN 与分析目标模块
@@ -299,11 +297,6 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
       actions.toggleJsonViewer(ctx);
     },
 
-    toggleDataSource() {
-      const ctx = this as unknown as AlpineContext & ComputedProperties;
-      actions.toggleDataSource(ctx);
-    },
-
     get hasAvailableAsins(): boolean {
       const ctx = this as unknown as AlpineContext & ComputedProperties;
       return ctx.availableAsins.length > 0;
@@ -324,34 +317,9 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
       return ctx.totalTokenCount > 0;
     },
 
-    get isUsingSampleData(): boolean {
-      return !this.useRealData;
-    },
-
-    get dataSourceToggleLabelClass(): string {
-      return this.useRealData ? '' : 'font-semibold text-slate-700';
-    },
-
-    get realDataToggleLabelClass(): string {
-      return this.useRealData ? 'font-semibold text-slate-700' : '';
-    },
-
-    get dataSourceToggleTrackClass(): string {
-      return this.useRealData ? 'bg-indigo-600' : 'bg-slate-300';
-    },
-
-    get dataSourceToggleThumbClass(): string {
-      return this.useRealData ? 'translate-x-6' : 'translate-x-1';
-    },
-
     get showMissingRealDataNotice(): boolean {
       const ctx = this as unknown as AlpineContext & ComputedProperties;
-      return this.useRealData && !ctx.hasScraperData;
-    },
-
-    get dataSourceLabelText(): string {
-      const ctx = this as unknown as AlpineContext & ComputedProperties;
-      return `数据源: ${ctx.dataSourceLabel}`;
+      return !ctx.hasScraperData;
     },
 
     get analysisHeroIsStrong(): boolean {

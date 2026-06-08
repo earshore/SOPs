@@ -31,9 +31,7 @@ function createContext(overrides: Partial<AlpineContext> = {}): AlpineContext {
     expandedPromptIndex: null,
     showPromptPanel: false,
     showJsonViewer: false,
-    useRealData: true,
     dataSource: 'scraper',
-    showDataSourceBanner: false,
     availableAsins: [],
     hasData: false,
     canAnalyze: false,
@@ -48,10 +46,9 @@ describe('computedProperties - currentProducts', () => {
     mockAppStoreState.scraper = undefined;
   });
 
-  it('真实数据模式下产品数据为空时不回退到示例产品', () => {
+  it('产品数据为空时不回退到示例产品', () => {
     const context = createContext({
       selectedAsins: ['B0DNMZ2MLG'],
-      useRealData: true,
       dataSource: 'scraper'
     });
 
@@ -61,17 +58,15 @@ describe('computedProperties - currentProducts', () => {
     expect(computed.hasData).toBe(false);
   });
 
-  it('示例数据模式下仍可读取示例产品', () => {
+  it('即使 ASIN 命中示例产品，也不会读取示例产品', () => {
     const context = createContext({
       selectedAsins: ['B0DNMZ2MLG'],
-      useRealData: false,
-      dataSource: 'sample'
+      dataSource: 'scraper'
     });
 
     const computed = createComputedProperties(context);
 
-    expect(computed.currentProducts).toHaveLength(1);
-    expect(computed.currentProducts[0].asin).toBe('B0DNMZ2MLG');
-    expect(computed.hasData).toBe(true);
+    expect(computed.currentProducts).toEqual([]);
+    expect(computed.hasData).toBe(false);
   });
 });

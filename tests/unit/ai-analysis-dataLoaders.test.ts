@@ -45,9 +45,7 @@ function createContext(overrides: Partial<AlpineContext> = {}): AlpineContext {
     expandedPromptIndex: null,
     showPromptPanel: false,
     showJsonViewer: false,
-    useRealData: false,
-    dataSource: 'sample',
-    showDataSourceBanner: false,
+    dataSource: 'scraper',
     availableAsins: [],
     hasData: false,
     canAnalyze: false,
@@ -88,7 +86,6 @@ describe('dataLoaders - checkAndLoadScraperData', () => {
 
     expect(mockContext.selectedAsins).toEqual(['B001', 'B002', 'B003']);
     expect(mockContext.dataSource).toBe('scraper');
-    expect(mockContext.useRealData).toBe(true);
     expect(mockAppStoreState.setSelectedAsins).toHaveBeenCalledWith(['B001', 'B002', 'B003']);
   });
 
@@ -130,27 +127,13 @@ describe('dataLoaders - checkAndLoadScraperData', () => {
     expect(mockAppStoreState.setSelectedAsins).not.toHaveBeenCalled();
   });
 
-  it('应该自动启用真实数据分析模式', () => {
-    const scrapedData: ScraperData = {
-      products: [{ asin: 'B001', title: 'Product 1' }],
-      metadata: {}
-    };
-
-    mockAppStoreState.scraper = { scrapedData };
-    mockContext.useRealData = false;
-
-    checkAndLoadScraperData(mockContext);
-
-    expect(mockContext.useRealData).toBe(true);
-  });
-
   it('应该在没有 Scraper 数据时不做任何操作', () => {
     mockAppStoreState.scraper = undefined;
 
     checkAndLoadScraperData(mockContext);
 
     expect(mockContext.selectedAsins).toEqual([]);
-    expect(mockContext.dataSource).toBe('sample');
+    expect(mockContext.dataSource).toBe('scraper');
     expect(mockAppStoreState.setSelectedAsins).not.toHaveBeenCalled();
   });
 
@@ -163,9 +146,8 @@ describe('dataLoaders - checkAndLoadScraperData', () => {
     expect(mockAppStoreState.setSelectedAsins).not.toHaveBeenCalled();
   });
 
-  it('应该在真实数据模式且产品为空时清理过期 ASIN', () => {
+  it('应该在产品为空时清理过期 ASIN', () => {
     mockAppStoreState.scraper = { scrapedData: { products: [] } };
-    mockContext.useRealData = true;
     mockContext.dataSource = 'scraper';
     mockContext.selectedAsins = ['B001'];
 
@@ -175,11 +157,10 @@ describe('dataLoaders - checkAndLoadScraperData', () => {
     expect(mockAppStoreState.setSelectedAsins).toHaveBeenCalledWith([]);
   });
 
-  it('应该在真实数据模式且产品为空时清理过期分析报告', () => {
+  it('应该在产品为空时清理过期分析报告', () => {
     const staleReport = { 'title-keywords': { title: 'Old Report' } };
     mockAppStoreState.scraper = { scrapedData: { products: [] } };
     mockAppStoreState.analysis = { analysisReport: staleReport };
-    mockContext.useRealData = true;
     mockContext.dataSource = 'scraper';
     mockContext.analysisReport = staleReport;
     mockContext.hasReport = true;

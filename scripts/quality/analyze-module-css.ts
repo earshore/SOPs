@@ -41,7 +41,6 @@ const MODULE_CSS_PATHS = [
   'src/modules/home/homeDisplay.css',
   'src/modules/amz_hub/amz_hub_style.css',
   'src/modules/more/more_style.css',
-  'src/modules/app_center/views/master_analysis/qalab/qalab_style.css',
   'src/modules/app_center/views/master_analysis/ai_analysis/ai_analysis_style.css',
   'src/modules/app_center/views/master_analysis/scraper/scraper_style.css',
   'src/modules/app_center/views/master_analysis/master_analysis_style.css',

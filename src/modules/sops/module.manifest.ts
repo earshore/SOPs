@@ -10,7 +10,6 @@ export const sopsManifest = defineModuleManifest({
       label: "SOP 总览",
       icon: "fas fa-th-large",
       viewPath: "/src/modules/sops/sops.html",
-      loader: () => import("./views/overview/index"),
     },
     {
       key: "NPI_TRACKER",
@@ -18,7 +17,6 @@ export const sopsManifest = defineModuleManifest({
       label: "新品生命周期跟踪",
       icon: "fas fa-seedling",
       category: "growth",
-      loader: () => import("./views/growth/npi_tracker/index"),
     },
     {
       key: "LISTING_SEO",
@@ -26,7 +24,6 @@ export const sopsManifest = defineModuleManifest({
       label: "Listing 极致优化 (SEO)",
       icon: "fas fa-magnifying-glass-chart",
       category: "growth",
-      loader: () => import("./views/growth/listing_seo/index"),
     },
     {
       key: "PPC_ADVERTISING",
@@ -34,7 +31,6 @@ export const sopsManifest = defineModuleManifest({
       label: "PPC 广告投放与优化",
       icon: "fas fa-chart-line",
       category: "growth",
-      loader: () => import("./views/growth/ppc_advertising/index"),
     },
     {
       key: "RESTRICTED_WORDS",
@@ -42,7 +38,6 @@ export const sopsManifest = defineModuleManifest({
       label: "欧洲本土化高危词库",
       icon: "fas fa-book-dead",
       category: "growth",
-      loader: () => import("./views/growth/restricted_words/index"),
     },
     {
       key: "PROMOTION_SUBMISSION",
@@ -50,7 +45,6 @@ export const sopsManifest = defineModuleManifest({
       label: "促销活动提报",
       icon: "fas fa-tags",
       category: "growth",
-      loader: () => import("./views/growth/promotion_submission/index"),
     },
     {
       key: "COMPETITOR_MONITORING",
@@ -58,7 +52,6 @@ export const sopsManifest = defineModuleManifest({
       label: "竞品监控与分析",
       icon: "fas fa-binoculars",
       category: "growth",
-      loader: () => import("./views/growth/competitor_monitoring/index"),
     },
     {
       key: "FBA_SHIPPING",
@@ -66,7 +59,6 @@ export const sopsManifest = defineModuleManifest({
       label: "FBA 发货标准操作",
       icon: "fas fa-truck-fast",
       category: "backend",
-      loader: () => import("./views/backend/fba_shipping/index"),
     },
     {
       key: "PROCUREMENT_QC",
@@ -74,7 +66,6 @@ export const sopsManifest = defineModuleManifest({
       label: "采购与质检 (QC)",
       icon: "fas fa-clipboard-check",
       category: "backend",
-      loader: () => import("./views/backend/procurement_qc/index"),
     },
     {
       key: "INVENTORY_REPLENISHMENT",
@@ -82,7 +73,6 @@ export const sopsManifest = defineModuleManifest({
       label: "库存预警与补货",
       icon: "fas fa-cubes",
       category: "backend",
-      loader: () => import("./views/backend/inventory_replenishment/index"),
     },
     {
       key: "ACCOUNT_SECURITY",
@@ -90,7 +80,6 @@ export const sopsManifest = defineModuleManifest({
       label: "账号登录与环境安全",
       icon: "fas fa-shield-halved",
       category: "safety",
-      loader: () => import("./views/safety/account_security/index"),
     },
     {
       key: "PERMISSION_MANAGEMENT",
@@ -98,7 +87,6 @@ export const sopsManifest = defineModuleManifest({
       label: "后台权限管理",
       icon: "fas fa-user-lock",
       category: "safety",
-      loader: () => import("./views/safety/permission_management/index"),
     },
     {
       key: "BRAND_INFRINGEMENT",
@@ -106,7 +94,6 @@ export const sopsManifest = defineModuleManifest({
       label: "品牌与侵权审核",
       icon: "fas fa-trademark",
       category: "safety",
-      loader: () => import("./views/safety/brand_infringement/index"),
     },
     {
       key: "PERFORMANCE_NOTIFICATION",
@@ -114,7 +101,6 @@ export const sopsManifest = defineModuleManifest({
       label: "绩效通知处理",
       icon: "fas fa-bell",
       category: "safety",
-      loader: () => import("./views/safety/performance_notification/index"),
     },
     {
       key: "PRODUCT_COMPLIANCE",
@@ -122,7 +108,6 @@ export const sopsManifest = defineModuleManifest({
       label: "敏感产品合规销售",
       icon: "fas fa-file-shield",
       category: "safety",
-      loader: () => import("./views/safety/product_compliance/index"),
     },
     {
       key: "EU_GPSR_COMPLIANCE",
@@ -130,7 +115,6 @@ export const sopsManifest = defineModuleManifest({
       label: "欧洲GPSR合规",
       icon: "fa-solid fa-shield-dog",
       category: "safety",
-      loader: () => import("./views/safety/eu_gpsr_compliance/index"),
     },
     {
       key: "EMAIL_TEMPLATES",
@@ -138,7 +122,6 @@ export const sopsManifest = defineModuleManifest({
       label: "邮件回复模板",
       icon: "fas fa-envelope-open-text",
       category: "service",
-      loader: () => import("./views/service/email_templates/index"),
     },
     {
       key: "NEGATIVE_REVIEW",
@@ -146,7 +129,6 @@ export const sopsManifest = defineModuleManifest({
       label: "差评处理与分析",
       icon: "fas fa-comment-dots",
       category: "service",
-      loader: () => import("./views/service/negative_review/index"),
     },
     {
       key: "QA_MAINTENANCE",
@@ -154,7 +136,6 @@ export const sopsManifest = defineModuleManifest({
       label: "QA 问答维护",
       icon: "fas fa-comments",
       category: "service",
-      loader: () => import("./views/service/qa_maintenance/index"),
     },
   ],
 } as const);

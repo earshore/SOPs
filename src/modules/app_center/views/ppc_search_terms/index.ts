@@ -3,6 +3,7 @@ import { showToast } from '@/common/ui/notifications';
 import { safeMount } from '@/common/utils/safeMount';
 import { loadTemplate } from '@/common/utils/viewLoader';
 import { StorageService } from '@/services/storageService';
+import { strFromU8, unzipSync } from 'fflate';
 import {
   analyzePpcSearchTermsWithAgent,
   type PpcAnalysisContext,
@@ -443,24 +444,157 @@ function isXlsxFile(file: File): boolean {
 }
 
 export async function xlsxArrayBufferToDelimitedText(buffer: ArrayBuffer): Promise<string> {
-  const XLSX = await import('xlsx');
-  const workbook = XLSX.read(new Uint8Array(buffer), { type: 'array' });
-  const firstSheetName = workbook.SheetNames[0];
-  if (!firstSheetName) {
-    throw new Error('XLSX 文件没有可读取的工作表');
-  }
-
-  const worksheet = workbook.Sheets[firstSheetName];
-  if (!worksheet) {
+  const files = unzipSync(new Uint8Array(buffer));
+  const sheetPath = getFirstWorksheetPath(files);
+  const sheetXml = getZipText(files, sheetPath);
+  if (!sheetXml) {
     throw new Error('XLSX 工作表读取失败');
   }
 
-  const text = XLSX.utils.sheet_to_csv(worksheet, { FS: '\t', blankrows: false });
+  const sharedStrings = parseSharedStrings(files);
+  const rows = parseWorksheetRows(sheetXml, sharedStrings);
+  const text = rowsToDelimitedText(rows);
   if (!text.trim()) {
     throw new Error('XLSX 工作表为空');
   }
 
   return text;
+}
+
+function getZipText(files: Record<string, Uint8Array>, path: string): string | null {
+  const file = files[path];
+  return file ? strFromU8(file) : null;
+}
+
+function parseXml(xml: string, fileName: string): Document {
+  if (typeof DOMParser === 'undefined') {
+    throw new Error('当前环境不支持 XLSX XML 解析');
+  }
+
+  const doc = new DOMParser().parseFromString(xml, 'application/xml');
+  if (doc.getElementsByTagName('parsererror').length > 0) {
+    throw new Error(`XLSX XML 解析失败: ${fileName}`);
+  }
+  return doc;
+}
+
+function getFirstWorksheetPath(files: Record<string, Uint8Array>): string {
+  const workbookXml = getZipText(files, 'xl/workbook.xml');
+  if (!workbookXml) {
+    throw new Error('XLSX 文件没有可读取的工作簿');
+  }
+
+  const workbook = parseXml(workbookXml, 'xl/workbook.xml');
+  const firstSheet = Array.from(workbook.getElementsByTagName('sheet'))[0];
+  if (!firstSheet) {
+    throw new Error('XLSX 文件没有可读取的工作表');
+  }
+
+  const relationId = firstSheet.getAttribute('r:id');
+  if (!relationId) {
+    return 'xl/worksheets/sheet1.xml';
+  }
+
+  const relationsXml = getZipText(files, 'xl/_rels/workbook.xml.rels');
+  if (!relationsXml) {
+    return 'xl/worksheets/sheet1.xml';
+  }
+
+  const relations = parseXml(relationsXml, 'xl/_rels/workbook.xml.rels');
+  const relation = Array.from(relations.getElementsByTagName('Relationship'))
+    .find((item) => item.getAttribute('Id') === relationId);
+  const target = relation?.getAttribute('Target');
+  if (!target) {
+    return 'xl/worksheets/sheet1.xml';
+  }
+
+  return resolveWorkbookTarget(target);
+}
+
+function resolveWorkbookTarget(target: string): string {
+  const normalized = target.replace(/\\/g, '/');
+  if (normalized.startsWith('/')) {
+    return normalized.slice(1);
+  }
+  if (normalized.startsWith('xl/')) {
+    return normalized;
+  }
+  return `xl/${normalized}`;
+}
+
+function parseSharedStrings(files: Record<string, Uint8Array>): string[] {
+  const sharedStringsXml = getZipText(files, 'xl/sharedStrings.xml');
+  if (!sharedStringsXml) {
+    return [];
+  }
+
+  const doc = parseXml(sharedStringsXml, 'xl/sharedStrings.xml');
+  return Array.from(doc.getElementsByTagName('si'))
+    .map((item) => item.textContent ?? '');
+}
+
+function parseWorksheetRows(sheetXml: string, sharedStrings: string[]): string[][] {
+  const doc = parseXml(sheetXml, 'worksheet');
+  return Array.from(doc.getElementsByTagName('row'))
+    .map((row) => parseWorksheetRow(row, sharedStrings))
+    .filter((row) => row.some((cell) => cell.trim()));
+}
+
+function parseWorksheetRow(row: Element, sharedStrings: string[]): string[] {
+  const sparseCells: string[] = [];
+  Array.from(row.getElementsByTagName('c')).forEach((cell) => {
+    const columnIndex = getColumnIndex(cell.getAttribute('r')) ?? sparseCells.length;
+    sparseCells[columnIndex] = getCellText(cell, sharedStrings);
+  });
+
+  return Array.from(
+    { length: sparseCells.length },
+    (_, index) => sparseCells[index] ?? '',
+  );
+}
+
+function getCellText(cell: Element, sharedStrings: string[]): string {
+  const type = cell.getAttribute('t');
+  if (type === 'inlineStr') {
+    return Array.from(cell.getElementsByTagName('t'))
+      .map((item) => item.textContent ?? '')
+      .join('');
+  }
+
+  const rawValue = cell.getElementsByTagName('v')[0]?.textContent ?? '';
+  if (type === 's') {
+    return sharedStrings[Number(rawValue)] ?? '';
+  }
+  if (type === 'b') {
+    return rawValue === '1' ? 'TRUE' : 'FALSE';
+  }
+  return rawValue;
+}
+
+function getColumnIndex(cellRef: string | null): number | null {
+  const letters = cellRef?.match(/^[A-Z]+/i)?.[0];
+  if (!letters) {
+    return null;
+  }
+
+  return letters
+    .toUpperCase()
+    .split('')
+    .reduce((column, letter) => column * 26 + letter.charCodeAt(0) - 64, 0) - 1;
+}
+
+function rowsToDelimitedText(rows: string[][]): string {
+  return rows
+    .map((row) => row.map(formatDelimitedCell).join('\t'))
+    .join('\n');
+}
+
+function formatDelimitedCell(cell: string): string {
+  if (!/[\t\r\n"]/.test(cell)) {
+    return cell;
+  }
+
+  return `"${cell.replace(/"/g, '""')}"`;
 }
 
 async function analyzeTextarea(container: HTMLElement): Promise<void> {

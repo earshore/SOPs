@@ -5,7 +5,6 @@
 import { AnalysisResult } from '../types';
 import {
   FullAnalysisReport,
-  SAMPLE_ANALYSIS_REPORT,
   TitleKeywordsReport,
   SellingPointsReport,
   FatalFlawsReport,
@@ -523,40 +522,4 @@ export function parseAnalysisReport(
 
   console.log('[AI分析] 解析完成，成功解析:', results.length, '个目标');
   return results;
-}
-
-/**
- * 获取示例分析报告
- */
-export function getSampleReport(): FullAnalysisReport {
-  return SAMPLE_ANALYSIS_REPORT;
-}
-
-/**
- * 模拟 AI 分析过程（实际场景中这里会调用 AI API）
- */
-export async function runAnalysis(
-  targetIds: string[],
-  _asin: string,
-  onProgress: (progress: number, step: string) => void
-): Promise<AnalysisResult[]> {
-  const steps = [
-    { progress: 5, step: '正在连接 AI 分析引擎...' },
-    { progress: 15, step: '正在加载产品数据...' },
-    { progress: 25, step: '正在解析 Listings 内容...' },
-    { progress: 40, step: '正在分析用户评论...' },
-    { progress: 55, step: '正在执行自然语言处理...' },
-    { progress: 70, step: '正在生成结构化洞察...' },
-    { progress: 85, step: '正在组装分析报告...' },
-    { progress: 100, step: '分析完成！' }
-  ];
-
-  // 直接报告进度，不使用 setTimeout 延迟
-  for (const { progress, step } of steps) {
-    onProgress(progress, step);
-  }
-
-  // 解析示例报告数据
-  const report = getSampleReport();
-  return parseAnalysisReport(report, targetIds);
 }

@@ -18,10 +18,6 @@ function hasScrapedProducts(scrapedData: ScrapedData | null): scrapedData is Scr
 }
 
 function clearStaleScraperInput(context: AlpineContext): void {
-  if (!context.useRealData && context.dataSource !== 'scraper') {
-    return;
-  }
-
   if (context.selectedAsins.length > 0) {
     context.selectedAsins = [];
     appStore.getState().setSelectedAsins([]);
@@ -59,12 +55,6 @@ export function checkAndLoadScraperData(context: AlpineContext): void {
     appStore.getState().setSelectedAsins(asins);
     console.log('[数据加载] 自动加载 Scraper 数据:', context.selectedAsins);
     showToast(`已自动加载 ${asins.length} 个产品 ASIN`, { type: 'success' });
-  }
-
-  // 自动启用真实数据分析模式
-  if (!context.useRealData) {
-    context.useRealData = true;
-    console.log('[数据加载] 已自动启用真实数据分析模式');
   }
 }
 

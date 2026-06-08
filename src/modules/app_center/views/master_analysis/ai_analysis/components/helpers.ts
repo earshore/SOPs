@@ -5,7 +5,7 @@
 
 import { LANGUAGE_HEADERS } from '@common/constants/constants';
 import { generateAnalysisPrompt } from '../prompts/analysisPrompts';
-import { Product } from '../config/sampleData';
+import type { Product } from '../config/sampleData';
 import { mergeProducts } from '../utils/dataTransformers';
 import { appStore } from '@/stores/useAppStore';
 import { estimateTokenCount, formatTokenCount } from '../utils/tokenCounter';
