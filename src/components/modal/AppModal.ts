@@ -31,6 +31,11 @@ const MODAL_STYLES = `
                     align-items: center;
                     justify-content: center;
                     padding: 1rem;
+                    pointer-events: none;
+                }
+
+                .modal-container.is-open {
+                    pointer-events: auto;
                 }
 
                 /* ===== BACKDROP ===== */
@@ -296,6 +301,11 @@ const MODAL_STYLES = `
 export class AppModal extends HTMLElement {
     private _isOpen: boolean = false;
     private _shadowRoot: ShadowRoot;
+    private _handleEscape = (e: KeyboardEvent): void => {
+        if (this._isOpen && e.key === 'Escape' && this.getAttribute('closable') !== 'false') {
+            this.close();
+        }
+    };
 
     constructor() {
         super();
@@ -309,6 +319,10 @@ export class AppModal extends HTMLElement {
     connectedCallback(): void {
         this.render();
         this._setupEvents();
+    }
+
+    disconnectedCallback(): void {
+        document.removeEventListener('keydown', this._handleEscape);
     }
 
     attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
@@ -331,6 +345,7 @@ export class AppModal extends HTMLElement {
 
         container.hidden = false;
         container.classList.remove('hidden');
+        container.classList.add('is-open');
         // Trigger reflow for transition
         requestAnimationFrame(() => {
             backdrop.classList.add('active');
@@ -348,6 +363,7 @@ export class AppModal extends HTMLElement {
 
         if (!backdrop || !panel) return;
 
+        container?.classList.remove('is-open');
         backdrop.classList.remove('active');
         panel.classList.remove('active');
 
@@ -415,12 +431,8 @@ export class AppModal extends HTMLElement {
         });
 
         // ESC key
-        const handleEscape = (e: KeyboardEvent) => {
-            if (this._isOpen && e.key === 'Escape' && this.getAttribute('closable') !== 'false') {
-                this.close();
-            }
-        };
-        document.addEventListener('keydown', handleEscape);
+        document.removeEventListener('keydown', this._handleEscape);
+        document.addEventListener('keydown', this._handleEscape);
     }
 
     private render(): void {

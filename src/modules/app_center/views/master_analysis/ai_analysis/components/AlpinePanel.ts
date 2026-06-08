@@ -28,12 +28,60 @@ type AiAnalysisPanelContext = AlpineContext &
     refreshReportView: () => void;
   };
 
-/**
- * 创建 Alpine 面板组件
- */
-export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Record<string, unknown> {
-  const panel = {
-    // ========== State (从 Zustand 同步) ==========
+type AiAnalysisPanelState = Pick<
+  AlpineContext,
+  | 'selectedAsins'
+  | 'selectedTargets'
+  | 'isAnalyzing'
+  | 'progress'
+  | 'currentStep'
+  | 'analysisReport'
+  | 'hasReport'
+  | 'reportResults'
+  | 'reportListingsResults'
+  | 'reportReviewsResults'
+  | 'reportTotalHighlights'
+  | 'reportTotalDetails'
+  | 'reportFullData'
+  | 'reportRenderVersion'
+  | 'expandedPromptIndex'
+  | 'showPromptPanel'
+  | 'showJsonViewer'
+  | 'dataSource'
+  | '_unsubscribes'
+> & {
+  productSummaryTooltipVisible: boolean;
+  showSelectionPanel: boolean;
+  _navigationHandler: EventListener | null;
+  perfSettings: ReturnType<typeof createPerformanceSettingsPanel>;
+};
+
+type AiAnalysisPanelThis = AiAnalysisPanelContext & AiAnalysisPanelState & {
+  currentProducts: unknown[];
+  totalTokenCount: number;
+  hasScraperData: boolean;
+  canRunAnalysis: boolean;
+  analysisHeroIsStrong: boolean;
+  hasAnalysisSelection: boolean;
+  reportConfidence: Record<string, number> | null;
+  overallConfidence: number;
+  overallConfidencePercent: number;
+  hasConfidenceData: boolean;
+  getPromptText(targetId: string): string;
+  getPromptTokenCount(targetId: string): number;
+  getResultColor(targetId: string): string;
+  getResultColorEnd(targetId: string): string;
+  getResultIcon(targetId: string): string;
+  getTargetById(targetId: string): (typeof analysisTargets)[number] | undefined;
+  getTargetConfidence(targetId: string): number;
+  getConfidenceLevel(percent: number): string;
+  isTargetSelected(targetId: string): boolean;
+};
+
+type AiAnalysisPanelBehavior = Record<string, unknown> & ThisType<AiAnalysisPanelThis>;
+
+function createAiAnalysisPanelState(): AiAnalysisPanelState {
+  return {
     selectedAsins: [] as string[],
     selectedTargets: [] as string[],
     isAnalyzing: false,
@@ -53,18 +101,25 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
     showJsonViewer: false,
     dataSource: 'scraper' as const,
     productSummaryTooltipVisible: false,
-    // ========== Collapsible UI State ==========
-    // 默认收起选择区：收起只展示一个大标题，展开同时展示 ASIN 与分析目标模块
     showSelectionPanel: false,
-
-    // ========== 订阅清理函数 ==========
     _unsubscribes: [] as Array<() => void>,
-    _navigationHandler: null as EventListener | null,
+    _navigationHandler: null,
+    perfSettings: createPerformanceSettingsPanel()
+  };
+}
 
+function attachAiAnalysisPanelBehavior(panel: AiAnalysisPanelState): AiAnalysisPanelState & Record<string, unknown> {
+  Object.defineProperties(panel, Object.getOwnPropertyDescriptors(aiAnalysisPanelBehavior));
+  return panel;
+}
+
+/**
+ * AI 分析面板行为。
+ * 通过 descriptor 挂载，保留 getter 语义。
+ */
+const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
     // ========== Lifecycle ==========
     init(this: AiAnalysisPanelContext) {
-      console.log('[Alpine 组件] 🚀 组件初始化');
-
       // 设置自动状态同步（Zustand → Alpine）
       this._unsubscribes = createMultipleStateSyncs([
         {
@@ -91,12 +146,10 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
       const currentTargets = this.selectedTargets;
       if (currentTargets.length === 0) {
         this.selectedTargets = analysisTargets.map(t => t.id);
-        console.log('[Alpine 组件] ✅ 已默认全选所有分析目标:', this.selectedTargets.length);
       }
 
       // 监听 analysisReport 变化，自动更新 hasReport 标志
       this.$watch('analysisReport', (newValue: unknown) => {
-        console.log('[Alpine 组件] 📊 analysisReport 变化检测:', !!newValue);
         this.hasReport = !!newValue;
         this.refreshReportView();
       });
@@ -129,8 +182,6 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
 
     // ========== 清理 ==========
     destroy(this: AiAnalysisPanelContext) {
-      console.log('[Alpine 组件] 🔄 Alpine 组件销毁，清理资源');
-
       // 清理状态同步订阅
       if (Array.isArray(this._unsubscribes)) {
         cleanupSubscriptions(this._unsubscribes);
@@ -141,8 +192,6 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
         window.removeEventListener('navigate-to-scraper', this._navigationHandler);
         this._navigationHandler = null;
       }
-
-      console.log('[Alpine 组件] ✅ 资源清理完成');
     },
 
     // ========== Data Loading ==========
@@ -641,7 +690,6 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
     },
 
     navigateToScraper() {
-      console.log('[Alpine 组件] 🔄 导航到数据采集页面');
       // 使用正确的路由路径
       if (window.location.hash !== '#/app-center/scraper') {
         window.location.hash = '#/app-center/scraper';
@@ -690,13 +738,6 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
           analysisReport: ctx.analysisReport
         };
         ctx.reportRenderVersion += 1;
-
-        console.log('[Alpine 组件] 📊 report view 已刷新:', {
-          results: ctx.reportResults.length,
-          listings: ctx.reportListingsResults.length,
-          reviews: ctx.reportReviewsResults.length,
-          renderVersion: ctx.reportRenderVersion
-        });
       } catch (error) {
         ctx.reportResults = [];
         ctx.reportListingsResults = [];
@@ -741,45 +782,33 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
     get reportConfidence() {
       const report = this.analysisReport;
       if (!report || typeof report === 'string') {
-        console.log('[置信度] reportConfidence: 报告不存在或为字符串');
         return null;
       }
       const reportObj = report as FullAnalysisReport;
       if (!reportObj._metadata) {
-        console.warn('[置信度] reportConfidence: 报告缺少 _metadata 字段');
         return null;
       }
-      const confidence = reportObj._metadata.confidence || null;
-      console.log('[置信度] reportConfidence:', confidence);
-      return confidence;
+      return reportObj._metadata.confidence || null;
     },
 
     get overallConfidence() {
       const report = this.analysisReport;
       if (!report || typeof report === 'string') {
-        console.log('[置信度] overallConfidence: 报告不存在或为字符串');
         return 0;
       }
       const reportObj = report as FullAnalysisReport;
       if (!reportObj._metadata) {
-        console.warn('[置信度] overallConfidence: 报告缺少 _metadata 字段');
         return 0;
       }
-      const overall = reportObj._metadata.overallConfidence || 0;
-      console.log('[置信度] overallConfidence:', overall);
-      return overall;
+      return reportObj._metadata.overallConfidence || 0;
     },
 
     get overallConfidencePercent() {
-      const percent = Math.round((this.overallConfidence as number) * 100);
-      console.log('[置信度] overallConfidencePercent:', percent + '%');
-      return percent;
+      return Math.round((this.overallConfidence as number) * 100);
     },
 
     get hasConfidenceData() {
-      const hasData = !!this.reportConfidence;
-      console.log('[置信度] hasConfidenceData:', hasData);
-      return hasData;
+      return !!this.reportConfidence;
     },
 
     getTargetConfidence(targetId: string): number {
@@ -824,9 +853,13 @@ export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Re
       return `置信度: ${percent}%, 等级: ${level}`;
     },
 
-    // ========== 性能设置 ==========
-    perfSettings: createPerformanceSettingsPanel()
-  };
+};
+
+/**
+ * 创建 Alpine 面板组件
+ */
+export function createAiAnalysisPanel(): AlpineContext & ComputedProperties & Record<string, unknown> {
+  const panel = attachAiAnalysisPanelBehavior(createAiAnalysisPanelState());
 
   // 合并计算属性 - 使用 defineProperties 保留 getter 特性
   const computedProps = createComputedProperties(panel as unknown as AlpineContext);

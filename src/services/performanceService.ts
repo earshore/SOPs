@@ -94,8 +94,6 @@ export class PerformanceService {
   private _log(level: 'debug' | 'info' | 'warn' | 'error', message: string, data: Record<string, unknown> = {}): void {
     if (this.logger) {
       this.logger[level](message, data, 'Performance');
-    } else {
-      console[level](`[Performance] ${message}`, data);
     }
   }
 
@@ -104,8 +102,6 @@ export class PerformanceService {
    */
   init(): void {
     if (this.isInitialized) return;
-
-    console.log('[Performance] 初始化性能监控...');
 
     // 监控页面加载
     this.measurePageLoad();
@@ -120,7 +116,6 @@ export class PerformanceService {
     this.measureLongTasks();
 
     this.isInitialized = true;
-    console.log('[Performance] 性能监控已启动');
   }
 
   /**
@@ -143,7 +138,6 @@ export class PerformanceService {
   private _collectPageLoadMetrics(): void {
     const entries = performance.getEntriesByType('navigation');
     if (entries.length === 0) {
-      console.warn('[Performance] Navigation timing not available');
       return;
     }
 
@@ -159,8 +153,6 @@ export class PerformanceService {
       ),
       [METRIC_TYPES.PAGE_LOAD]: Math.round(perfData.loadEventEnd - perfData.fetchStart),
     };
-
-    console.log('[Performance] 页面加载指标:', metrics);
 
     // 记录指标
     Object.entries(metrics).forEach(([type, value]) => {
@@ -186,7 +178,6 @@ export class PerformanceService {
 
         const value = Math.round(lastEntry.renderTime || lastEntry.loadTime || lastEntry.startTime);
 
-        console.log('[Performance] LCP:', value, 'ms');
         this.recordMetric(METRIC_TYPES.LCP, value, {
           element: lastEntry.element?.tagName,
           url: lastEntry.url,
@@ -196,7 +187,7 @@ export class PerformanceService {
       observer.observe({ entryTypes: ['largest-contentful-paint'] });
       this.observers.push(observer);
     } catch (e) {
-      console.warn('[Performance] LCP measurement failed:', e);
+      this._log('debug', 'LCP measurement failed', { error: (e as Error).message });
     }
   }
 
@@ -214,7 +205,6 @@ export class PerformanceService {
           const perfEntry = entry as PerformanceEntry & { processingStart?: number };
           const value = Math.round((perfEntry.processingStart || 0) - perfEntry.startTime);
 
-          console.log('[Performance] FID:', value, 'ms');
           this.recordMetric(METRIC_TYPES.FID, value, {
             eventType: perfEntry.name,
           });
@@ -224,7 +214,7 @@ export class PerformanceService {
       observer.observe({ entryTypes: ['first-input'] });
       this.observers.push(observer);
     } catch (e) {
-      console.warn('[Performance] FID measurement failed:', e);
+      this._log('debug', 'FID measurement failed', { error: (e as Error).message });
     }
   }
 
@@ -237,8 +227,6 @@ export class PerformanceService {
 
     let clsValue = 0;
     let clsEntries: PerformanceEntry[] = [];
-    let lastLoggedValue = 0;
-    const LOG_THRESHOLD = 0.05; // 只在 CLS 变化超过 0.05 时才输出日志
 
     try {
       const observer = new PerformanceObserver((list) => {
@@ -253,12 +241,6 @@ export class PerformanceService {
           }
         });
 
-        // 只在 CLS 值变化显著时才输出日志,避免刷屏
-        if (Math.abs(clsValue - lastLoggedValue) >= LOG_THRESHOLD) {
-          console.log('[Performance] CLS:', clsValue.toFixed(3));
-          lastLoggedValue = clsValue;
-        }
-
         this.recordMetric(METRIC_TYPES.CLS, parseFloat(clsValue.toFixed(3)), {
           entries: clsEntries.length,
         });
@@ -267,7 +249,7 @@ export class PerformanceService {
       observer.observe({ entryTypes: ['layout-shift'] });
       this.observers.push(observer);
     } catch (e) {
-      console.warn('[Performance] CLS measurement failed:', e);
+      this._log('debug', 'CLS measurement failed', { error: (e as Error).message });
     }
   }
 
@@ -285,7 +267,6 @@ export class PerformanceService {
           if (entry.name === 'first-contentful-paint') {
             const value = Math.round(entry.startTime);
 
-            console.log('[Performance] FCP:', value, 'ms');
             this.recordMetric(METRIC_TYPES.FCP, value);
           }
         });
@@ -294,7 +275,7 @@ export class PerformanceService {
       observer.observe({ entryTypes: ['paint'] });
       this.observers.push(observer);
     } catch (e) {
-      console.warn('[Performance] FCP measurement failed:', e);
+      this._log('debug', 'FCP measurement failed', { error: (e as Error).message });
     }
   }
 
@@ -311,7 +292,6 @@ export class PerformanceService {
           const duration = Math.round(entry.duration);
 
           if (duration > 50) {
-            console.warn('[Performance] 长任务检测:', duration, 'ms');
             this.recordMetric('long_task', duration, {
               name: entry.name,
               startTime: Math.round(entry.startTime),
@@ -338,7 +318,6 @@ export class PerformanceService {
       const result = await loader();
       const duration = Math.round(performance.now() - startTime);
 
-      console.log(`[Performance] 模块加载 ${moduleName}:`, duration, 'ms');
       this.recordMetric(METRIC_TYPES.MODULE_LOAD, duration, {
         module: moduleName,
       });
@@ -367,7 +346,6 @@ export class PerformanceService {
       const result = await apiCall();
       const duration = Math.round(performance.now() - startTime);
 
-      console.log(`[Performance] API调用 ${apiName}:`, duration, 'ms');
       this.recordMetric(METRIC_TYPES.API_CALL, duration, {
         api: apiName,
         success: true,
@@ -398,7 +376,6 @@ export class PerformanceService {
       const result = await action();
       const duration = Math.round(performance.now() - startTime);
 
-      console.log(`[Performance] 用户操作 ${actionName}:`, duration, 'ms');
       this.recordMetric(METRIC_TYPES.USER_ACTION, duration, {
         action: actionName,
       });
@@ -481,14 +458,14 @@ export class PerformanceService {
         StorageService.set('performance_metrics', recentMetrics);
       });
     } catch (e) {
-      console.warn('[Performance] 保存指标失败:', e);
+      this._log('debug', 'Failed to save metrics', { error: (e as Error).message });
     }
   }
 
   /**
    * 发送指标到分析服务
    */
-  private _sendMetrics(metrics: Record<string, number>): void {
+  private _sendMetrics(_metrics: Record<string, number>): void {
     // 仅在生产环境发送
     if (!configCenter.isProduction()) {
       this._log('debug', '开发环境，跳过指标上报', {});
@@ -497,8 +474,7 @@ export class PerformanceService {
 
     // 📊 性能指标上报
     // 未来功能: 集成分析服务 (Google Analytics, Sentry, 自建服务等)
-    // 当前: 仅在开发环境输出到控制台
-    console.log('[Performance] 指标上报:', metrics);
+    // 当前: 暂未接入远程上报
 
     // 预留接口: 可通过配置启用远程上报
     // if (configCenter.get('monitoring.performanceEndpoint')) {

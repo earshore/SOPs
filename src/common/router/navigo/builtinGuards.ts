@@ -7,6 +7,30 @@
 import type { Route, RouteGuard, GuardResult } from './types';
 
 import { container } from '@/common/di/Container';
+
+function denyGuard(reason: string): GuardResult {
+  return {
+    allow: false,
+    reason,
+  };
+}
+
+function showGuardToast(message: string): void {
+  const windowWithToast = window as unknown as Record<string, unknown>;
+  if (typeof windowWithToast.showToast === 'function') {
+    (windowWithToast.showToast as (msg: string, opts: { type: string }) => void)(message, { type: 'warning' });
+  }
+}
+
+function denyAuthAccess(message: string, reason: string): GuardResult {
+  showGuardToast(message);
+  return {
+    allow: false,
+    redirect: '/home',
+    reason,
+  };
+}
+
 // ==================== 元信息验证守卫 ====================
 
 /**
@@ -22,10 +46,7 @@ export const metaValidationGuard: RouteGuard = {
     // 检查路由配置是否存在
     if (!to.config) {
       console.error('[metaValidationGuard] Route config missing:', to.path);
-      return {
-        allow: false,
-        reason: 'invalid_route_config',
-      };
+      return denyGuard('invalid_route_config');
     }
 
     // 检查必需的配置项
@@ -37,10 +58,7 @@ export const metaValidationGuard: RouteGuard = {
         path: to.path,
         missing,
       });
-      return {
-        allow: false,
-        reason: 'incomplete_route_config',
-      };
+      return denyGuard('incomplete_route_config');
     }
 
     return true;
@@ -114,19 +132,7 @@ export const authGuard: RouteGuard = {
       const isAuthenticated = await checkAuthentication();
 
       if (!isAuthenticated) {
-        console.warn('[authGuard] Unauthorized access attempt:', to.path);
-
-        // 显示提示
-        const windowWithToast = window as unknown as Record<string, unknown>;
-        if (typeof windowWithToast.showToast === 'function') {
-          (windowWithToast.showToast as (msg: string, opts: { type: string }) => void)('请先登录', { type: 'warning' });
-        }
-
-        return {
-          allow: false,
-          redirect: '/home',
-          reason: 'unauthorized',
-        };
+        return denyAuthAccess('请先登录', 'unauthorized');
       }
 
       // 检查权限
@@ -134,31 +140,14 @@ export const authGuard: RouteGuard = {
         const hasPermission = await checkPermissions(to.config.meta.permissions);
 
         if (!hasPermission) {
-          console.warn('[authGuard] Insufficient permissions:', {
-            path: to.path,
-            required: to.config.meta.permissions,
-          });
-
-          const windowWithToast = window as unknown as Record<string, unknown>;
-          if (typeof windowWithToast.showToast === 'function') {
-            (windowWithToast.showToast as (msg: string, opts: { type: string }) => void)('权限不足', { type: 'warning' });
-          }
-
-          return {
-            allow: false,
-            redirect: '/home',
-            reason: 'insufficient_permissions',
-          };
+          return denyAuthAccess('权限不足', 'insufficient_permissions');
         }
       }
 
       return true;
     } catch (error) {
       console.error('[authGuard] Authentication check failed:', error);
-      return {
-        allow: false,
-        reason: 'auth_check_failed',
-      };
+      return denyGuard('auth_check_failed');
     }
   },
 };
@@ -183,13 +172,7 @@ export const dataPreloadGuard: RouteGuard = {
     }
 
     try {
-      console.log(`[dataPreloadGuard] Preloading data for: ${to.path}`);
-      const startTime = performance.now();
-
       await preloadFn();
-
-      const duration = Math.round(performance.now() - startTime);
-      console.log(`[dataPreloadGuard] Preload completed: ${to.path} (${duration}ms)`);
 
       return true;
     } catch (error) {
@@ -197,7 +180,6 @@ export const dataPreloadGuard: RouteGuard = {
 
       // 如果预加载失败，根据配置决定是否继续
       if (to.config.meta?.preloadRequired === false) {
-        console.warn('[dataPreloadGuard] Preload failed but not required, continuing');
         return true;
       }
 

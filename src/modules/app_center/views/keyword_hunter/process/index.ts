@@ -294,9 +294,6 @@ function renderWordFrequencyStats(tracker: KeywordTrackerStoreState): void {
   const matchedKeywordRoots = collectMatchedKeywordRoots(tracker.matchedKeywords);
   const unmatchedKeywordRoots = collectUnmatchedKeywordRoots(tracker);
 
-  console.log("[Process] 已匹配词根:", Array.from(matchedKeywordRoots));
-  console.log("[Process] 未匹配词根:", Array.from(unmatchedKeywordRoots));
-
   freqList.replaceChildren();
   renderWordCloud(freqList, tracker.wordFrequency, matchedKeywordRoots);
   renderUnmatchedRootSection(freqList, unmatchedKeywordRoots);
@@ -403,12 +400,10 @@ function renderUnmatchedRootSection(
   unmatchedKeywordRoots: Set<string>,
 ): void {
   if (unmatchedKeywordRoots.size === 0) {
-    console.log("[Process] 没有未匹配词根需要显示");
     return;
   }
 
   const unmatchedRootsArray = Array.from(unmatchedKeywordRoots).sort();
-  console.log("[Process] 准备渲染未匹配词根:", unmatchedRootsArray);
 
   const unmatchedSection = document.createElement("div");
   unmatchedSection.className = "mt-4 pt-4 border-t border-slate-200";
@@ -886,24 +881,17 @@ async function syncToInput(): Promise<void> {
       )
       .filter((t) => t && t.trim())
       .join("\n");
-
-    console.log("[Process] 翻译模式：只同步原文，不包含译文");
   } else {
     // 普通模式：直接获取显示区域的文本
     const display = document.getElementById("kt-copy-display");
     text = display ? display.innerText : "";
-
-    console.log("[Process] 普通模式：同步显示区域文本");
   }
 
   // 保存到 state
   if (text && text.trim()) {
     appStore.getState().setProcessedCopy(text);
     appStore.getState().updateKeywordTracker({ copyInputText: text });
-
-    console.log("[Process] 同步的文本长度:", text.length);
   } else {
-    console.warn("[Process] 没有可同步的文本");
     showToast("没有可同步的内容", { type: "warning" });
     return;
   }
@@ -941,11 +929,6 @@ async function translateCopyImmersive(): Promise<void> {
     );
 
     appStore.getState().keywordTracker.paragraphs = pairs;
-
-    const translatedCount = pairs.filter((p) => p.translation).length;
-    console.log(
-      `[Process] 翻译完成：${translatedCount}/${pairs.length} 段有译文`,
-    );
 
     appStore.getState().setTranslationMode(true);
 
@@ -1081,7 +1064,6 @@ function locateUnmatchedRootInList(root: string): void {
   const allKeywordsContainer = document.getElementById("kt-all-keywords");
 
   if (!allKeywordsContainer) {
-    console.error("[Process] 未找到关键词容器");
     return;
   }
 
@@ -1103,63 +1085,44 @@ function highlightRootKeywords(root: string, container: HTMLElement): void {
   const previousHighlights = container.querySelectorAll(
     ".keyword-root-highlight",
   );
-  console.log("[Process] 移除之前的高亮数量:", previousHighlights.length);
   previousHighlights.forEach((el) =>
     el.classList.remove("keyword-root-highlight"),
   );
 
   const rootLower = root.toLowerCase();
-  console.log("[Process] 查找词根:", rootLower);
 
   // 查找所有未匹配的关键词元素
   const unmatchedKeywordDivs = container.querySelectorAll(".keyword-unmatched");
-  console.log(
-    "[Process] 找到未匹配关键词元素数量:",
-    unmatchedKeywordDivs.length,
-  );
 
   const matchedDivs: Element[] = [];
 
-  unmatchedKeywordDivs.forEach((div, index) => {
+  unmatchedKeywordDivs.forEach((div) => {
     const keyword = div.getAttribute("data-keyword");
-    console.log(`[Process] 检查第${index + 1}个关键词:`, keyword);
 
     if (!keyword) {
-      console.warn("[Process] 关键词为空，跳过");
       return;
     }
 
     // 将关键词拆分为单词进行匹配
     const words = keyword.match(/[\p{L}\p{M}]+/gu) || [];
-    console.log("[Process] 拆分的单词:", words);
 
     const hasRoot = words.some((w) => {
       const wordLower = w.toLowerCase();
-      const matched = wordLower === rootLower || wordLower.includes(rootLower);
-      if (matched) {
-        console.log(`[Process] 词根匹配成功: ${w} 包含 ${rootLower}`);
-      }
-      return matched;
+      return wordLower === rootLower || wordLower.includes(rootLower);
     });
 
     if (hasRoot) {
-      console.log("[Process] ✓ 匹配到关键词:", keyword);
       div.classList.add("keyword-root-highlight");
-      console.log("[Process] 已添加高亮类，当前类列表:", div.className);
       matchedDivs.push(div);
     }
   });
 
-  console.log("[Process] 总共匹配到的关键词数量:", matchedDivs.length);
-
   if (matchedDivs.length === 0) {
-    console.warn("[Process] 未找到包含词根的关键词");
     showToast(`未找到包含词根 "${root}" 的关键词`, { type: "warning" });
     return;
   }
 
   // 滚动到第一个匹配的关键词
-  console.log("[Process] 滚动到第一个匹配的关键词");
   matchedDivs[0]?.scrollIntoView({ behavior: "smooth", block: "center" });
 
   // 显示提示
@@ -1167,7 +1130,6 @@ function highlightRootKeywords(root: string, container: HTMLElement): void {
 
   // 3秒后移除高亮效果
   addTimeout(() => {
-    console.log("[Process] 3秒后移除高亮效果");
     matchedDivs.forEach((div) =>
       div.classList.remove("keyword-root-highlight"),
     );
@@ -1378,8 +1340,6 @@ function setupEventListeners(container: HTMLElement): void {
  * @param {HTMLElement} container - 容器元素
  */
 export async function mount(container: HTMLElement): Promise<void> {
-  console.log("[Process] 🔧 开始挂载子模块");
-
   try {
     // 1. 使用 SafeModuleLoader 加载模板
     const loader = SafeModuleLoader.getInstance();
@@ -1391,7 +1351,11 @@ export async function mount(container: HTMLElement): Promise<void> {
         retryCount: 3,
         timeout: 5000,
         onError: (error) => {
-          console.error("[Process] 模板加载失败:", error);
+          ErrorService.handle(error as Error, {
+            action: "loadProcessTemplate",
+            module: "keywordTracker",
+            notify: false,
+          });
         },
       },
     );
@@ -1422,20 +1386,13 @@ export async function mount(container: HTMLElement): Promise<void> {
     // 5. 管理浮动窗口显示 - 延迟执行确保 DOM 已渲染
     setTimeout(() => {
       manageFloatingWindowVisibility();
-      console.log("[Process] 浮动窗口状态:", {
-        hasMatchedKeywords:
-          appStore.getState().keywordTracker.matchedKeywords?.length > 0,
-        isMinimized: appStore.getState().keywordTracker.isWindowMinimized,
-        floatWinExists: !!document.getElementById("kt-keywords-floating"),
-        minBtnExists: !!document.getElementById("kt-keywords-minimized"),
-        floatWinParent: document.getElementById("kt-keywords-floating")
-          ?.parentElement?.tagName,
-      });
     }, 100);
-
-    console.log("[Process] ✅ 子模块挂载成功");
   } catch (error) {
-    console.error("[Process] ❌ 子模块挂载失败:", error);
+    ErrorService.handle(error as Error, {
+      action: "mountProcessModule",
+      module: "keywordTracker",
+      notify: false,
+    });
     throw error;
   }
 }
@@ -1444,8 +1401,6 @@ export async function mount(container: HTMLElement): Promise<void> {
  * 卸载子模块
  */
 export function unmount(): void {
-  console.log("[Process] 🔄 开始卸载子模块");
-
   try {
     // 1. 保存状态到 state
     saveProcessStateToState();
@@ -1462,9 +1417,11 @@ export function unmount(): void {
 
     // 3. 清理事件监听器和定时器
     cleanup();
-
-    console.log("[Process] ✅ 子模块卸载成功");
   } catch (error) {
-    console.error("[Process] ❌ 子模块卸载失败:", error);
+    ErrorService.handle(error as Error, {
+      action: "unmountProcessModule",
+      module: "keywordTracker",
+      notify: false,
+    });
   }
 }

@@ -497,6 +497,170 @@ const promoData: PromoSection[] = [
   },
 ];
 
+function renderTextBlock(block: ContentBlock): string {
+  return `<div class="amzpt_text">${block.text ?? ""}</div>`;
+}
+
+function renderSectionHeaderBlock(block: ContentBlock): string {
+  return `
+    <div class="amzpt_section_header">
+      <i class="fas fa-caret-right"></i>
+      <span>${block.text ?? ""}</span>
+    </div>
+  `;
+}
+
+function renderCalloutBlock(block: ContentBlock): string {
+  return `
+    <div class="amzpt_callout amzpt_callout--${block.style ?? "insight"}">
+      <div class="amzpt_callout__title">${block.title ?? ""}</div>
+      <div class="amzpt_callout__text">${block.text ?? ""}</div>
+    </div>
+  `;
+}
+
+function renderTagRow(tags: string[] | undefined): string {
+  if (!tags?.length) return "";
+
+  return `<div class="amzpt_tag_row">${tags.map((tag) => `<span class="amzpt_tag">${tag}</span>`).join("")}</div>`;
+}
+
+function renderSubItemsBlock(block: ContentBlock): string {
+  return `
+    <div class="amzpt_grid">
+      ${(block.items ?? [])
+        .map(
+          (item) => `
+            <div class="amzpt_sub_item">
+              <div class="amzpt_sub_header">
+                <div class="amzpt_sub_icon"><i class="fas ${item.icon ?? "fa-circle"}"></i></div>
+                <div class="amzpt_sub_title">${item.title ?? ""}</div>
+              </div>
+              <div class="amzpt_sub_desc">${item.desc ?? item.text ?? ""}</div>
+              ${renderTagRow(item.tags)}
+            </div>
+          `,
+        )
+        .join("")}
+    </div>
+  `;
+}
+
+function renderStatsBlock(block: ContentBlock): string {
+  return `
+    <div class="amzpt_stats_grid">
+      ${(block.items ?? [])
+        .map(
+          (item) => `
+            <div class="amzpt_stats_box">
+              <div class="amzpt_stats_icon"><i class="fas ${item.icon ?? "fa-circle"}"></i></div>
+              <div class="amzpt_stats_text">${item.text ?? ""}</div>
+            </div>
+          `,
+        )
+        .join("")}
+    </div>
+  `;
+}
+
+function renderComparisonTableBlock(block: ContentBlock): string {
+  return `
+    <div class="amzpt_table_wrapper">
+      <table class="amzpt_table">
+        <thead>
+          <tr>
+            ${(block.headers ?? []).map((header) => `<th>${header}</th>`).join("")}
+          </tr>
+        </thead>
+        <tbody>
+          ${(block.rows ?? [])
+            .map(
+              (row) => `
+                <tr>
+                  ${row.map((cell) => `<td>${cell}</td>`).join("")}
+                </tr>
+              `,
+            )
+            .join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function getTipVariant(item: ContentItem): "danger" | "success" {
+  return item.tags?.includes("danger") ? "danger" : "success";
+}
+
+function renderTipListBlock(block: ContentBlock): string {
+  return `
+    <div class="amzpt_tip_list">
+      ${(block.items ?? [])
+        .map(
+          (item) => `
+            <div class="amzpt_tip_item amzpt_tip_item--${getTipVariant(item)}">
+              <div class="amzpt_tip_icon"><i class="fas ${item.icon ?? "fa-circle"}"></i></div>
+              <div class="amzpt_tip_text">${item.text ?? ""}</div>
+            </div>
+          `,
+        )
+        .join("")}
+    </div>
+  `;
+}
+
+function renderKeyValueListBlock(block: ContentBlock): string {
+  return `
+    <div class="amzpt_kv_list">
+      ${(block.items ?? [])
+        .map(
+          (item) => `
+            <div class="amzpt_kv_row">
+              <div class="amzpt_kv_key">${item.key ?? ""}</div>
+              <div class="amzpt_kv_value">${item.value ?? ""}</div>
+            </div>
+          `,
+        )
+        .join("")}
+    </div>
+  `;
+}
+
+function renderChecklistBlock(block: ContentBlock): string {
+  return `
+    <div class="amzpt_checklist">
+      ${(block.items ?? [])
+        .map(
+          (item) => `
+            <div class="amzpt_check_item ${item.done ? "amzpt_check_item--done" : ""}">
+              <div class="amzpt_check_icon">
+                <i class="fas ${item.done ? "fa-check-square" : "fa-square"}"></i>
+              </div>
+              <div class="amzpt_check_text">${item.text ?? ""}</div>
+            </div>
+          `,
+        )
+        .join("")}
+    </div>
+  `;
+}
+
+const contentBlockRenderers: Record<ContentBlock["type"], (block: ContentBlock) => string> = {
+  text: renderTextBlock,
+  section_header: renderSectionHeaderBlock,
+  callout: renderCalloutBlock,
+  sub_items: renderSubItemsBlock,
+  stats: renderStatsBlock,
+  comparison_table: renderComparisonTableBlock,
+  tip_list: renderTipListBlock,
+  key_value_list: renderKeyValueListBlock,
+  checklist: renderChecklistBlock,
+};
+
+function renderContentBlock(block: ContentBlock): string {
+  return contentBlockRenderers[block.type](block);
+}
+
 class PromotionsModule extends BaseModule {
   constructor() {
     super("amz_promo_tools");
@@ -581,137 +745,7 @@ class PromotionsModule extends BaseModule {
 
   private renderSectionBody(contentArray: ContentBlock[]): string {
     return contentArray
-      .map((block) => {
-        switch (block.type) {
-          case "text":
-            return `<div class="amzpt_text">${block.text ?? ""}</div>`;
-          case "section_header":
-            return `
-              <div class="amzpt_section_header">
-                <i class="fas fa-caret-right"></i>
-                <span>${block.text ?? ""}</span>
-              </div>
-            `;
-          case "callout":
-            return `
-              <div class="amzpt_callout amzpt_callout--${block.style ?? "insight"}">
-                <div class="amzpt_callout__title">${block.title ?? ""}</div>
-                <div class="amzpt_callout__text">${block.text ?? ""}</div>
-              </div>
-            `;
-          case "sub_items":
-            return `
-              <div class="amzpt_grid">
-                ${(block.items ?? [])
-                  .map(
-                    (item) => `
-                      <div class="amzpt_sub_item">
-                        <div class="amzpt_sub_header">
-                          <div class="amzpt_sub_icon"><i class="fas ${item.icon ?? "fa-circle"}"></i></div>
-                          <div class="amzpt_sub_title">${item.title ?? ""}</div>
-                        </div>
-                        <div class="amzpt_sub_desc">${item.desc ?? item.text ?? ""}</div>
-                        ${
-                          item.tags && item.tags.length
-                            ? `<div class="amzpt_tag_row">${item.tags.map((tag) => `<span class="amzpt_tag">${tag}</span>`).join("")}</div>`
-                            : ""
-                        }
-                      </div>
-                    `,
-                  )
-                  .join("")}
-              </div>
-            `;
-          case "stats":
-            return `
-              <div class="amzpt_stats_grid">
-                ${(block.items ?? [])
-                  .map(
-                    (item) => `
-                      <div class="amzpt_stats_box">
-                        <div class="amzpt_stats_icon"><i class="fas ${item.icon ?? "fa-circle"}"></i></div>
-                        <div class="amzpt_stats_text">${item.text ?? ""}</div>
-                      </div>
-                    `,
-                  )
-                  .join("")}
-              </div>
-            `;
-          case "comparison_table":
-            return `
-              <div class="amzpt_table_wrapper">
-                <table class="amzpt_table">
-                  <thead>
-                    <tr>
-                      ${(block.headers ?? []).map((header) => `<th>${header}</th>`).join("")}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${(block.rows ?? [])
-                      .map(
-                        (row) => `
-                          <tr>
-                            ${row.map((cell) => `<td>${cell}</td>`).join("")}
-                          </tr>
-                        `,
-                      )
-                      .join("")}
-                  </tbody>
-                </table>
-              </div>
-            `;
-          case "tip_list":
-            return `
-              <div class="amzpt_tip_list">
-                ${(block.items ?? [])
-                  .map((item) => {
-                    const variant = item.tags?.includes("danger") ? "danger" : "success";
-                    return `
-                      <div class="amzpt_tip_item amzpt_tip_item--${variant}">
-                        <div class="amzpt_tip_icon"><i class="fas ${item.icon ?? "fa-circle"}"></i></div>
-                        <div class="amzpt_tip_text">${item.text ?? ""}</div>
-                      </div>
-                    `;
-                  })
-                  .join("")}
-              </div>
-            `;
-          case "key_value_list":
-            return `
-              <div class="amzpt_kv_list">
-                ${(block.items ?? [])
-                  .map(
-                    (item) => `
-                      <div class="amzpt_kv_row">
-                        <div class="amzpt_kv_key">${item.key ?? ""}</div>
-                        <div class="amzpt_kv_value">${item.value ?? ""}</div>
-                      </div>
-                    `,
-                  )
-                  .join("")}
-              </div>
-            `;
-          case "checklist":
-            return `
-              <div class="amzpt_checklist">
-                ${(block.items ?? [])
-                  .map(
-                    (item) => `
-                      <div class="amzpt_check_item ${item.done ? "amzpt_check_item--done" : ""}">
-                        <div class="amzpt_check_icon">
-                          <i class="fas ${item.done ? "fa-check-square" : "fa-square"}"></i>
-                        </div>
-                        <div class="amzpt_check_text">${item.text ?? ""}</div>
-                      </div>
-                    `,
-                  )
-                  .join("")}
-              </div>
-            `;
-          default:
-            return "";
-        }
-      })
+      .map((block) => renderContentBlock(block))
       .join("");
   }
 }

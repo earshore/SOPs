@@ -12,7 +12,7 @@ import { generateMarkdownReport, generateJsonReportData } from '../services/repo
 import { mergeProducts, getProductsByAsins } from '../utils/dataTransformers';
 import { getMarketLanguage } from './helpers';
 import type { Product } from '../config/sampleData';
-import { AlpineContext } from '../types';
+import type { AlpineContext, FullReportData } from '../types';
 import { appStore } from '@/stores/useAppStore';
 import type { FullAnalysisReport } from '../config/analysisReportData';
 import type { AnalysisReport } from '@/types/modules-business';
@@ -121,20 +121,23 @@ export function copyPrompt(context: AlpineContext, currentProducts: Product[], i
   });
 }
 
-/**
- * 复制 JSON 报告
- */
-export function copyJson(context: AlpineContext, dataSourceMarketplace: string): void {
-  if (!context.analysisReport) return;
-
-  const reportData = generateJsonReportData(
+function createJsonReportData(context: AlpineContext, dataSourceMarketplace: string): FullReportData {
+  return generateJsonReportData(
     context.selectedAsins,
     context.selectedTargets,
     context.dataSource,
     dataSourceMarketplace,
     context.analysisReport
   );
+}
 
+/**
+ * 复制 JSON 报告
+ */
+export function copyJson(context: AlpineContext, dataSourceMarketplace: string): void {
+  if (!context.analysisReport) return;
+
+  const reportData = createJsonReportData(context, dataSourceMarketplace);
   const json = JSON.stringify(reportData, null, 2);
   navigator.clipboard.writeText(json).then(() => {
     showToast('完整 JSON 报告已复制', { type: 'success' });
@@ -185,14 +188,7 @@ export function downloadJson(context: AlpineContext, dataSourceMarketplace: stri
     return;
   }
 
-  const reportData = generateJsonReportData(
-    context.selectedAsins,
-    context.selectedTargets,
-    context.dataSource,
-    dataSourceMarketplace,
-    context.analysisReport
-  );
-
+  const reportData = createJsonReportData(context, dataSourceMarketplace);
   const json = JSON.stringify(reportData, null, 2);
   const blob = new Blob([json], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -233,12 +229,6 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
   resetAnalysisReport(context);
   appStore.getState().updateAnalysis({ isAnalyzing: true });
 
-  console.log('[用户动作] 开始分析:', {
-    selectedTargets: selectedTargets.length,
-    selectedAsins: context.selectedAsins.length,
-    currentProducts: currentProducts.length
-  });
-
   try {
     const products = getRealProducts(context.selectedAsins);
 
@@ -269,23 +259,13 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
         enableCache: perfSettings.enableCache,
         streamResults: true,
         failureStrategy: perfSettings.failureStrategy,
-        onTaskComplete: ({ report, targetId, successCount, totalCount, fromCache }) => {
+        onTaskComplete: ({ report }) => {
           syncAnalysisReport(context, report);
-          console.log('[用户动作] 收到实时分析结果:', {
-            targetId,
-            successCount,
-            totalCount,
-            fromCache: !!fromCache
-          });
         }
       }
     );
 
     syncAnalysisReport(context, analysisReport);
-
-    console.log('[用户动作] 分析报告已设置，selectedTargets:', selectedTargets.length);
-    console.log('[用户动作] analysisReport 已保存:', !!context.analysisReport);
-    console.log('[用户动作] hasReport 标志已设置:', context.hasReport);
 
     const currentHistoryId = appStore.getState().scraper?.currentHistoryId;
     if (analysisReport && currentHistoryId) {
@@ -296,7 +276,6 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
       );
 
       if (success) {
-        console.log('[用户动作] 已自动标记历史快照为"已分析"');
         eventBus.emit(APP_EVENTS.HISTORY_UPDATED);
       }
     }

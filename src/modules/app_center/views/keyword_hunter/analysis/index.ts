@@ -98,10 +98,13 @@ function parseMarkdownToHtml(markdown: string): string {
       return result;
     }
     // result 是 Promise（不应发生，但做保护）
-    console.warn("[Analysis] marked.parse() 返回非字符串，降级展示");
     return `<pre class="whitespace-pre-wrap text-sm text-slate-600 leading-relaxed">${escapeHtml(markdown)}</pre>`;
   } catch (err) {
-    console.error("[Analysis] Markdown 解析失败:", err);
+    ErrorService.handle(err as Error, {
+      action: "parseMarkdownToHtml",
+      module: "keywordAnalysis",
+      notify: false,
+    });
     return `<pre class="whitespace-pre-wrap text-sm text-slate-600 leading-relaxed">${escapeHtml(markdown)}</pre>`;
   }
 }
@@ -115,7 +118,6 @@ function renderReport(container: HTMLElement, markdown: string): void {
 
   const html = parseMarkdownToHtml(markdown);
   if (!html) {
-    console.warn("[Analysis] renderReport: 解析结果为空");
     return;
   }
 
@@ -142,10 +144,6 @@ function saveAnalysisStateToState(): void {
     appStore.getState().updateKeywordTracker({
       llmAnalysisResult: rawMarkdownCache,
     });
-    console.log(
-      "[Analysis] 已保存原始 Markdown 到 state，长度:",
-      rawMarkdownCache.length,
-    );
   }
 }
 
@@ -170,7 +168,6 @@ function restoreAnalysisStateFromState(): void {
 
     if (isLikelyHtml) {
       // 旧版本兼容：直接注入 HTML，但不运行 highlightScores（已处理过）
-      console.log("[Analysis] 检测到旧版 HTML 格式，直接注入");
       const renderer = SafeRenderer.getInstance();
       renderer.renderTemplate(resultDiv, savedMarkdown);
     } else {
@@ -203,59 +200,7 @@ function updateAnalyzeButtonState(): void {
 
   if (!btn) return;
 
-  if (hasContent) {
-    btn.disabled = false;
-    btn.classList.remove(
-      "bg-slate-100",
-      "text-slate-400",
-      "border-slate-200",
-      "cursor-not-allowed",
-    );
-    btn.classList.add(
-      "bg-gradient-to-r",
-      "from-purple-600",
-      "via-purple-500",
-      "to-pink-600",
-      "hover:from-purple-500",
-      "hover:via-purple-400",
-      "hover:to-pink-500",
-      "text-white",
-      "border-purple-500",
-      "shadow-md",
-      "shadow-purple-500/20",
-      "hover:shadow-lg",
-      "hover:shadow-purple-500/30",
-      "cursor-pointer",
-      "hover:scale-[1.02]",
-      "hover:-translate-y-0.5",
-    );
-  } else {
-    btn.disabled = true;
-    btn.classList.remove(
-      "bg-gradient-to-r",
-      "from-purple-600",
-      "via-purple-500",
-      "to-pink-600",
-      "hover:from-purple-500",
-      "hover:via-purple-400",
-      "hover:to-pink-500",
-      "text-white",
-      "border-purple-500",
-      "shadow-md",
-      "shadow-purple-500/20",
-      "hover:shadow-lg",
-      "hover:shadow-purple-500/30",
-      "cursor-pointer",
-      "hover:scale-[1.02]",
-      "hover:-translate-y-0.5",
-    );
-    btn.classList.add(
-      "bg-slate-100",
-      "text-slate-400",
-      "border-slate-200",
-      "cursor-not-allowed",
-    );
-  }
+  setBtnState(btn, hasContent ? "active" : "disabled");
 }
 
 // ==========================================
@@ -382,6 +327,138 @@ const BTN_CLASSES = {
   ],
 } as const;
 
+function getProcessedCopy(): string {
+  return appStore.getState().keywordTracker?.processedCopy ?? "";
+}
+
+async function fetchListingAnalysis(processedCopy: string): Promise<string> {
+  const keywordTracker = appStore.getState().keywordTracker;
+
+  return KeywordService.fetchListingAnalysis(
+    processedCopy,
+    keywordTracker?.keywords ?? [],
+    keywordTracker?.matchedKeywords ?? [],
+    keywordTracker?.unmatchedKeywords ?? [],
+  );
+}
+
+function handleAnalysisSuccess(
+  response: string,
+  resultDiv: HTMLElement | null,
+  btn: HTMLButtonElement | null,
+): void {
+  if (!response || !response.trim()) {
+    throw new Error("AI 返回内容为空，请重试");
+  }
+
+  // 缓存原始 Markdown
+  rawMarkdownCache = response;
+
+  // 渲染到报告区域
+  if (resultDiv) {
+    renderReport(resultDiv, response);
+  }
+
+  // 更新按钮为"已完成"
+  if (btn) setBtnState(btn, "success", "报告已生成");
+
+  // 保存原始 Markdown 到 state
+  saveAnalysisStateToState();
+
+  showToast("报告生成成功 ✨", { type: "success" });
+}
+
+function isValidationAnalysisError(error: Error): boolean {
+  return (
+    error.message.includes("输入内容过短") ||
+    error.message.includes("文案内容为空")
+  );
+}
+
+function createAnalysisUserMessage(errorMessage: string): string {
+  if (errorMessage.includes("503")) {
+    return "服务暂时不可用 (503)，可能是模型过载，请稍后重试。";
+  }
+
+  if (errorMessage.includes("429")) {
+    return "请求频率超限 (429)，请稍等片刻后重试。";
+  }
+
+  if (errorMessage.includes("timeout") || errorMessage.includes("Timeout")) {
+    return "请求超时，请检查网络后重试。";
+  }
+
+  return errorMessage;
+}
+
+function createAnalysisRetryButton(colorScheme: "yellow" | "red"): HTMLButtonElement {
+  const retryBtn = document.createElement("button");
+  retryBtn.className =
+    `inline-flex items-center gap-1.5 px-3 py-1.5 ` +
+    `bg-white border border-${colorScheme}-200 text-${colorScheme}-700 ` +
+    `text-xs rounded-lg hover:bg-${colorScheme}-50 transition-colors font-medium`;
+  // ✅ 安全: 静态HTML模板，无用户输入
+  setSafeHtml(retryBtn, '<i class="fas fa-redo text-[10px]"></i> 重试');
+  addEventListener(retryBtn, "click", () => {
+    void runLLMAnalysis();
+  });
+
+  return retryBtn;
+}
+
+function renderAnalysisError(resultDiv: HTMLElement, userMsg: string, isValidation: boolean): void {
+  const colorScheme = isValidation ? "yellow" : "red";
+  const icon = isValidation
+    ? "fa-exclamation-circle"
+    : "fa-exclamation-triangle";
+  const title = isValidation ? "无法进行分析" : "分析失败";
+
+  const errorDiv = document.createElement("div");
+  errorDiv.className = `p-5 bg-${colorScheme}-50 border border-${colorScheme}-200 rounded-xl`;
+
+  const headerDiv = document.createElement("div");
+  headerDiv.className = `flex items-center gap-2 text-${colorScheme}-700 font-bold mb-2`;
+  const iconEl = document.createElement("i");
+  iconEl.className = `fas ${icon}`;
+  headerDiv.appendChild(iconEl);
+  headerDiv.appendChild(document.createTextNode(` ${title}`));
+
+  const msgP = document.createElement("p");
+  msgP.className = `text-sm text-${colorScheme}-800 mb-3 leading-relaxed`;
+  msgP.textContent = userMsg;
+
+  errorDiv.appendChild(headerDiv);
+  errorDiv.appendChild(msgP);
+  errorDiv.appendChild(createAnalysisRetryButton(colorScheme));
+
+  // ✅ 安全: 清空内容
+  resultDiv.replaceChildren();
+  resultDiv.appendChild(errorDiv);
+}
+
+function handleAnalysisFailure(
+  error: Error,
+  resultDiv: HTMLElement | null,
+  btn: HTMLButtonElement | null,
+): void {
+  const isValidation = isValidationAnalysisError(error);
+
+  if (!isValidation) {
+    ErrorService.handle(error, {
+      action: "runLLMAnalysis",
+      module: "keywordTracker",
+      notify: false,
+    });
+  }
+
+  if (resultDiv) {
+    renderAnalysisError(resultDiv, createAnalysisUserMessage(error.message), isValidation);
+  }
+
+  // 恢复按钮为可点击
+  if (btn) setBtnState(btn, "active", "生成报告");
+}
+
 function setBtnState(
   btn: HTMLButtonElement,
   state: "active" | "disabled" | "loading" | "success",
@@ -408,121 +485,121 @@ function setBtnState(
 // Score Table Highlighting
 // ==========================================
 
-/**
- * 增强评分表格和总分标题的视觉呈现。
- *
- * 行分类规则（按内容语义，不依赖行位置）：
- *  1. 包含 -10 / 🚨 → 违规触发行（红色）
- *  2. 包含 +0 / ✅ / 通过，或以 "0" 结尾 → 违规通过行（绿色）
- *  3. 包含 N/M 数字比 → 按得分率显示彩色徽章
- */
-function highlightScores(container: HTMLElement): void {
-  if (!container) return;
+interface ScoreRatio {
+  score: number;
+  max: number;
+}
 
-  // ——— 1. 处理评分表格 ———
-  const rows = container.querySelectorAll("tbody tr");
-  rows.forEach((tr) => {
-    const tds = tr.querySelectorAll("td");
-    if (tds.length < 2) return;
+interface ScoreBadgeStyle {
+  badgeClass: string;
+  icon: string;
+  rowClass?: string;
+}
 
-    const td2 = tds[1] as HTMLElement; // 分数列
-    const rawText = td2.textContent?.trim() ?? "";
+function setScoreBadge(td: HTMLElement, badgeClass: string, text: string): void {
+  // ✅ 安全: 清空内容
+  td.replaceChildren();
+  const span = document.createElement("span");
+  span.className = `score-badge ${badgeClass}`;
+  span.textContent = text;
+  td.appendChild(span);
+}
 
-    // 清除旧状态类，防止重复调用时污染
-    tr.classList.remove("row-total", "row-low", "row-risk");
+function parseScoreRatio(rawText: string): ScoreRatio | null {
+  const match = rawText.match(/(\d+)\s*\/\s*(\d+)/);
+  const scoreText = match?.[1];
+  const maxText = match?.[2];
+  if (!scoreText || !maxText) return null;
 
-    // —— 违规触发（-10 / 🚨） ——
-    if (rawText.includes("-10") || rawText.includes("🚨")) {
-      tr.classList.add("row-risk");
-      // ✅ 安全: 清空内容
-      td2.replaceChildren();
-      const span = document.createElement("span");
-      span.className = "score-badge score-badge-low";
-      span.textContent = "🚨 -10";
-      td2.appendChild(span);
-      return;
-    }
+  const score = parseInt(scoreText, 10);
+  const max = parseInt(maxText, 10);
+  return max === 0 ? null : { score, max };
+}
 
-    // —— 违规通过（+0 / ✅ / 通过 / 0） ——
-    if (
-      rawText.includes("+0") ||
-      rawText.includes("✅") ||
-      rawText.includes("通过") ||
-      rawText === "0"
-    ) {
-      // ✅ 安全: 清空内容
-      td2.replaceChildren();
-      const span = document.createElement("span");
-      span.className = "score-badge score-badge-high";
-      span.textContent = "✅ +0";
-      td2.appendChild(span);
-      return;
-    }
-
-    // —— 数字分数 N/M ——
-    const match = rawText.match(/(\d+)\s*\/\s*(\d+)/);
-    if (!match) return;
-
-    const scoreText = match[1];
-    const maxText = match[2];
-    if (!scoreText || !maxText) return;
-
-    const score = parseInt(scoreText, 10);
-    const max = parseInt(maxText, 10);
-    if (max === 0) return;
-
-    const ratio = score / max;
-    let badgeClass: string;
-    let icon: string;
-
-    if (ratio >= 0.75) {
-      badgeClass = "score-badge-high";
-      icon = "🟢";
-    } else if (ratio >= 0.5) {
-      badgeClass = "score-badge-mid";
-      icon = "🟡";
-    } else {
-      badgeClass = "score-badge-low";
-      icon = "🔴";
-      tr.classList.add("row-low");
-    }
-
-    // ✅ 安全: 清空内容
-    td2.replaceChildren();
-    const span = document.createElement("span");
-    span.className = `score-badge ${badgeClass}`;
-    span.textContent = `${icon} ${score}/${max}`;
-    td2.appendChild(span);
-  });
-
-  // ——— 2. 处理总分 H2 标题 ———
-  const h2 = container.querySelector("h2");
-  if (!h2) return;
-
-  const h2Text = h2.textContent ?? "";
-  const totalMatch = h2Text.match(/(\d+)\s*\/\s*100/);
-  if (!totalMatch) return;
-
-  const totalText = totalMatch[1];
-  if (!totalText) return;
-
-  const total = parseInt(totalText, 10);
-
-  // 按分段选色
-  let gradient: string;
-  if (total >= 85) {
-    gradient = "linear-gradient(135deg, #065f46, #059669, #34d399)";
-  } else if (total >= 75) {
-    gradient = "linear-gradient(135deg, #1e1b4b, #4c1d95, #7c3aed)";
-  } else if (total >= 70) {
-    gradient = "linear-gradient(135deg, #78350f, #d97706, #fbbf24)";
-  } else {
-    gradient = "linear-gradient(135deg, #7f1d1d, #dc2626, #f87171)";
+function getScoreBadgeStyle(ratio: number): ScoreBadgeStyle {
+  if (ratio >= 0.75) {
+    return { badgeClass: "score-badge-high", icon: "🟢" };
   }
 
-  h2.style.background = gradient;
-  h2.style.color = "#ffffff";
+  if (ratio >= 0.5) {
+    return { badgeClass: "score-badge-mid", icon: "🟡" };
+  }
 
+  return { badgeClass: "score-badge-low", icon: "🔴", rowClass: "row-low" };
+}
+
+function isRiskScoreText(rawText: string): boolean {
+  return rawText.includes("-10") || rawText.includes("🚨");
+}
+
+function isPassingScoreText(rawText: string): boolean {
+  return (
+    rawText.includes("+0") ||
+    rawText.includes("✅") ||
+    rawText.includes("通过") ||
+    rawText === "0"
+  );
+}
+
+function highlightRatioScore(tr: Element, td: HTMLElement, rawText: string): void {
+  const scoreRatio = parseScoreRatio(rawText);
+  if (!scoreRatio) return;
+
+  const style = getScoreBadgeStyle(scoreRatio.score / scoreRatio.max);
+  if (style.rowClass) {
+    tr.classList.add(style.rowClass);
+  }
+
+  setScoreBadge(
+    td,
+    style.badgeClass,
+    `${style.icon} ${scoreRatio.score}/${scoreRatio.max}`,
+  );
+}
+
+function highlightScoreRow(tr: Element): void {
+  const tds = tr.querySelectorAll("td");
+  if (tds.length < 2) return;
+
+  const td2 = tds[1] as HTMLElement; // 分数列
+  const rawText = td2.textContent?.trim() ?? "";
+
+  // 清除旧状态类，防止重复调用时污染
+  tr.classList.remove("row-total", "row-low", "row-risk");
+
+  // —— 违规触发（-10 / 🚨） ——
+  if (isRiskScoreText(rawText)) {
+    tr.classList.add("row-risk");
+    setScoreBadge(td2, "score-badge-low", "🚨 -10");
+    return;
+  }
+
+  // —— 违规通过（+0 / ✅ / 通过 / 0） ——
+  if (isPassingScoreText(rawText)) {
+    setScoreBadge(td2, "score-badge-high", "✅ +0");
+    return;
+  }
+
+  highlightRatioScore(tr, td2, rawText);
+}
+
+function getTotalScoreGradient(total: number): string {
+  if (total >= 85) {
+    return "linear-gradient(135deg, #065f46, #059669, #34d399)";
+  }
+
+  if (total >= 75) {
+    return "linear-gradient(135deg, #1e1b4b, #4c1d95, #7c3aed)";
+  }
+
+  if (total >= 70) {
+    return "linear-gradient(135deg, #78350f, #d97706, #fbbf24)";
+  }
+
+  return "linear-gradient(135deg, #7f1d1d, #dc2626, #f87171)";
+}
+
+function appendTotalScoreProgressBar(h2: HTMLHeadingElement, total: number): void {
   // 移除旧进度条（防止重复追加）
   h2.querySelector(".score-progress-bar")?.remove();
 
@@ -548,6 +625,39 @@ function highlightScores(container: HTMLElement): void {
   });
 }
 
+function highlightTotalScoreTitle(container: HTMLElement): void {
+  const h2 = container.querySelector("h2");
+  if (!h2) return;
+
+  const totalMatch = (h2.textContent ?? "").match(/(\d+)\s*\/\s*100/);
+  const totalText = totalMatch?.[1];
+  if (!totalText) return;
+
+  const total = parseInt(totalText, 10);
+  h2.style.background = getTotalScoreGradient(total);
+  h2.style.color = "#ffffff";
+  appendTotalScoreProgressBar(h2, total);
+}
+
+/**
+ * 增强评分表格和总分标题的视觉呈现。
+ *
+ * 行分类规则（按内容语义，不依赖行位置）：
+ *  1. 包含 -10 / 🚨 → 违规触发行（红色）
+ *  2. 包含 +0 / ✅ / 通过，或以 "0" 结尾 → 违规通过行（绿色）
+ *  3. 包含 N/M 数字比 → 按得分率显示彩色徽章
+ */
+function highlightScores(container: HTMLElement): void {
+  if (!container) return;
+
+  // ——— 1. 处理评分表格 ———
+  const rows = container.querySelectorAll("tbody tr");
+  rows.forEach((tr) => highlightScoreRow(tr));
+
+  // ——— 2. 处理总分 H2 标题 ———
+  highlightTotalScoreTitle(container);
+}
+
 // ==========================================
 // Action Functions
 // ==========================================
@@ -562,7 +672,7 @@ async function runLLMAnalysis(): Promise<void> {
   const resultDiv = document.getElementById("kt-llm-analysis-result");
 
   // 内容为空时快速失败
-  const processedCopy = appStore.getState().keywordTracker?.processedCopy ?? "";
+  const processedCopy = getProcessedCopy();
   if (!processedCopy.trim()) {
     showToast("文案内容为空，无法进行 AI 分析", { type: "warning" });
     return;
@@ -577,108 +687,19 @@ async function runLLMAnalysis(): Promise<void> {
   }
 
   try {
-    const response = await KeywordService.fetchListingAnalysis(
-      processedCopy,
-      appStore.getState().keywordTracker?.keywords ?? [],
-      appStore.getState().keywordTracker?.matchedKeywords ?? [],
-      appStore.getState().keywordTracker?.unmatchedKeywords ?? [],
-    );
+    const response = await fetchListingAnalysis(processedCopy);
 
     // 停止加载动画
     cancelLoading?.();
     cancelLoading = null;
 
-    if (!response || !response.trim()) {
-      throw new Error("AI 返回内容为空，请重试");
-    }
-
-    // 缓存原始 Markdown
-    rawMarkdownCache = response;
-
-    // 渲染到报告区域
-    if (resultDiv) {
-      renderReport(resultDiv, response);
-    }
-
-    // 更新按钮为"已完成"
-    if (btn) setBtnState(btn, "success", "报告已生成");
-
-    // 保存原始 Markdown 到 state
-    saveAnalysisStateToState();
-
-    showToast("报告生成成功 ✨", { type: "success" });
+    handleAnalysisSuccess(response, resultDiv, btn);
   } catch (e) {
     // 停止加载动画（异常路径）
     cancelLoading?.();
     cancelLoading = null;
 
-    const error = e as Error;
-    const isValidation =
-      error.message.includes("输入内容过短") ||
-      error.message.includes("文案内容为空");
-
-    if (!isValidation) {
-      ErrorService.handle(error, {
-        action: "runLLMAnalysis",
-        module: "keywordTracker",
-        notify: false,
-      });
-    }
-
-    // 友好化错误信息
-    let userMsg = error.message;
-    if (userMsg.includes("503")) {
-      userMsg = "服务暂时不可用 (503)，可能是模型过载，请稍后重试。";
-    } else if (userMsg.includes("429")) {
-      userMsg = "请求频率超限 (429)，请稍等片刻后重试。";
-    } else if (userMsg.includes("timeout") || userMsg.includes("Timeout")) {
-      userMsg = "请求超时，请检查网络后重试。";
-    }
-
-    // 渲染错误卡片
-    if (resultDiv) {
-      const colorScheme = isValidation ? "yellow" : "red";
-      const icon = isValidation
-        ? "fa-exclamation-circle"
-        : "fa-exclamation-triangle";
-      const title = isValidation ? "无法进行分析" : "分析失败";
-
-      const errorDiv = document.createElement("div");
-      errorDiv.className = `p-5 bg-${colorScheme}-50 border border-${colorScheme}-200 rounded-xl`;
-
-      const headerDiv = document.createElement("div");
-      headerDiv.className = `flex items-center gap-2 text-${colorScheme}-700 font-bold mb-2`;
-      const iconEl = document.createElement("i");
-      iconEl.className = `fas ${icon}`;
-      headerDiv.appendChild(iconEl);
-      headerDiv.appendChild(document.createTextNode(` ${title}`));
-
-      const msgP = document.createElement("p");
-      msgP.className = `text-sm text-${colorScheme}-800 mb-3 leading-relaxed`;
-      msgP.textContent = userMsg;
-
-      const retryBtn = document.createElement("button");
-      retryBtn.className =
-        `inline-flex items-center gap-1.5 px-3 py-1.5 ` +
-        `bg-white border border-${colorScheme}-200 text-${colorScheme}-700 ` +
-        `text-xs rounded-lg hover:bg-${colorScheme}-50 transition-colors font-medium`;
-      // ✅ 安全: 静态HTML模板，无用户输入
-      setSafeHtml(retryBtn, '<i class="fas fa-redo text-[10px]"></i> 重试');
-      addEventListener(retryBtn, "click", () => {
-        void runLLMAnalysis();
-      });
-
-      errorDiv.appendChild(headerDiv);
-      errorDiv.appendChild(msgP);
-      errorDiv.appendChild(retryBtn);
-
-      // ✅ 安全: 清空内容
-      resultDiv.replaceChildren();
-      resultDiv.appendChild(errorDiv);
-    }
-
-    // 恢复按钮为可点击
-    if (btn) setBtnState(btn, "active", "生成报告");
+    handleAnalysisFailure(e as Error, resultDiv, btn);
   }
 }
 
@@ -708,8 +729,6 @@ function setupEventListeners(container: HTMLElement): void {
  * 挂载子模块
  */
 export async function mount(container: HTMLElement): Promise<void> {
-  console.log("[Analysis] 🔧 开始挂载子模块");
-
   try {
     const loader = SafeModuleLoader.getInstance();
     const renderer = SafeRenderer.getInstance();
@@ -720,7 +739,11 @@ export async function mount(container: HTMLElement): Promise<void> {
         retryCount: 3,
         timeout: 5000,
         onError: (error) => {
-          console.error("[Analysis] 模板加载失败:", error);
+          ErrorService.handle(error as Error, {
+            action: "loadAnalysisTemplate",
+            module: "keywordAnalysis",
+            notify: false,
+          });
         },
       },
     );
@@ -730,10 +753,12 @@ export async function mount(container: HTMLElement): Promise<void> {
 
     setupEventListeners(container);
     restoreAnalysisStateFromState();
-
-    console.log("[Analysis] ✅ 子模块挂载成功");
   } catch (error) {
-    console.error("[Analysis] ❌ 子模块挂载失败:", error);
+    ErrorService.handle(error as Error, {
+      action: "mountAnalysisModule",
+      module: "keywordAnalysis",
+      notify: false,
+    });
     throw error;
   }
 }
@@ -742,13 +767,14 @@ export async function mount(container: HTMLElement): Promise<void> {
  * 卸载子模块
  */
 export function unmount(): void {
-  console.log("[Analysis] 🔄 开始卸载子模块");
-
   try {
     saveAnalysisStateToState();
     cleanup();
-    console.log("[Analysis] ✅ 子模块卸载成功");
   } catch (error) {
-    console.error("[Analysis] ❌ 子模块卸载失败:", error);
+    ErrorService.handle(error as Error, {
+      action: "unmountAnalysisModule",
+      module: "keywordAnalysis",
+      notify: false,
+    });
   }
 }

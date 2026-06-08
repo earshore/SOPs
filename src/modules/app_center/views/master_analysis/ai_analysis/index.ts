@@ -16,8 +16,6 @@ import './ai_analysis_style.css';
  * 挂载模块
  */
 export async function mount(container: HTMLElement): Promise<void> {
-  console.log('[AI智能分析] 🔧 开始挂载模块');
-
   try {
     // 1. 使用 SafeModuleLoader 加载模板
     const loader = SafeModuleLoader.getInstance();
@@ -43,8 +41,6 @@ export async function mount(container: HTMLElement): Promise<void> {
 
     // 初始化注册器（如果尚未初始化）
     registry.init();
-
-    console.log('[AI智能分析] ✅ 模块挂载成功');
   } catch (error) {
     console.error('[AI智能分析] ❌ 模块挂载失败:', error);
     throw error;
@@ -55,8 +51,6 @@ export async function mount(container: HTMLElement): Promise<void> {
  * 卸载模块
  */
 export function unmount(): void {
-  console.log('[AI智能分析] 🔄 模块卸载');
-
   try {
     destroyAlpineComponent('[x-data="aiAnalysisPanel"]');
     AlpineRegistry.getInstance().unregister('aiAnalysisPanel');

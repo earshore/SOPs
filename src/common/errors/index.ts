@@ -27,7 +27,7 @@ export { GlobalErrorHandler, globalErrorHandler } from './GlobalErrorHandler';
 export type { ErrorHandlerOptions } from './GlobalErrorHandler';
 
 // 导出类型
-export type { ErrorContext } from './AppError';
+export type { ApiErrorOptions, AppErrorOptions, ErrorContext } from './AppError';
 
 // ==================== 便捷函数 ====================
 

@@ -55,6 +55,7 @@ describe('AppModal regression', () => {
     expect(style).toBeInstanceOf(HTMLStyleElement);
     expect(style?.textContent).toContain('.hidden');
     expect(style?.textContent).toContain('.modal-container[hidden]');
+    expect(style?.textContent).toContain('.modal-container.is-open');
     expect(container.classList.contains('hidden')).toBe(true);
     expect(container.hasAttribute('hidden')).toBe(true);
   });
@@ -70,6 +71,27 @@ describe('AppModal regression', () => {
     expect(container.hasAttribute('hidden')).toBe(false);
 
     modal.close();
+    vi.advanceTimersByTime(350);
+
+    expect(container.classList.contains('hidden')).toBe(true);
+    expect(container.hasAttribute('hidden')).toBe(true);
+  });
+
+  it('stops intercepting the page as soon as close starts', () => {
+    vi.useFakeTimers();
+    const modal = createModal();
+    const container = getModalContainer(modal);
+
+    modal.open();
+
+    expect(container.classList.contains('is-open')).toBe(true);
+
+    modal.close();
+
+    expect(container.classList.contains('is-open')).toBe(false);
+    expect(container.classList.contains('hidden')).toBe(false);
+    expect(container.hasAttribute('hidden')).toBe(false);
+
     vi.advanceTimersByTime(350);
 
     expect(container.classList.contains('hidden')).toBe(true);

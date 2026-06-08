@@ -47,22 +47,16 @@ export class ServiceBootstrap {
   constructor(
     private container: DIContainer,
     private registry: ServiceRegistry
-  ) {
-    console.log('[Bootstrap] 服务初始化管理器已创建');
-  }
+  ) {}
 
   /**
    * 按依赖顺序初始化所有服务（支持并行初始化）
    * @returns 初始化结果
    */
   async initialize(): Promise<InitializeResult> {
-    console.log('\n🚀 [Bootstrap] 开始初始化服务...\n');
-    
     try {
       // 0. 初始化监控服务(优先,所有环境) - 异步不阻塞
-      this._initMonitoringServices().catch(err => {
-        console.warn('⚠️ [Bootstrap] 监控服务初始化失败:', err);
-      });
+      void this._initMonitoringServices();
 
       // 1. 验证依赖关系
       const validation = this.container.validateDependencies();
@@ -75,14 +69,10 @@ export class ServiceBootstrap {
           { module: 'ServiceBootstrap', action: 'initialize', errors: validation.errors }
         );
       }
-      console.log('✅ [Bootstrap] 依赖验证通过');
 
       // 2. 按依赖层级分组并初始化
       await this._initServicesInParallel();
-      
-      // 3. 报告初始化结果
-      this._reportStatus();
-      
+
       return {
         success: this.failedServices.length === 0,
         failed: this.failedServices,
@@ -101,16 +91,12 @@ export class ServiceBootstrap {
   private async _initServicesInParallel(): Promise<void> {
     // 按依赖层级分组
     const levels = this._groupByDependencyLevel();
-    
-    console.log(`📊 [Bootstrap] 共 ${levels.length} 个并行层级`);
-    
+
     // 逐层初始化，同层服务并行
     for (let i = 0; i < levels.length; i++) {
       const level = levels[i];
       if (!level || level.length === 0) continue;
-      
-      console.log(`⚡ [Bootstrap] 并行初始化第 ${i + 1} 层 (${level.length} 个服务)`);
-      
+
       // 同层服务并行初始化
       await Promise.all(
         level.map(serviceName => this._initService(serviceName))
@@ -190,7 +176,6 @@ export class ServiceBootstrap {
       return;
     }
 
-    console.log(`⏳ [Bootstrap] 初始化服务: ${name}`);
     const startTime = performance.now();
 
     try {
@@ -201,9 +186,6 @@ export class ServiceBootstrap {
         this._timeout(timeout, name)
       ]);
 
-      const duration = Math.round(performance.now() - startTime);
-      console.log(`✅ [Bootstrap] ${name} 初始化成功 (${duration}ms)`);
-      
       this.initializedServices.add(name);
       return result;
 
@@ -214,7 +196,6 @@ export class ServiceBootstrap {
 
       // 如果是可选服务，记录但不抛出错误
       if (config.optional) {
-        console.warn(`[Bootstrap] ${name} 是可选服务，跳过`);
         return null;
       }
 
@@ -249,34 +230,10 @@ export class ServiceBootstrap {
   }
 
   /**
-   * 报告初始化状态
-   * @private
-   */
-  private _reportStatus(): void {
-    const total = this.registry.size;
-    const failed = this.failedServices.length;
-    const success = total - failed;
-
-    console.log(`\n📊 [Bootstrap] 初始化完成:`);
-    console.log(`   ✅ 成功: ${success}/${total}`);
-    
-    if (failed > 0) {
-      console.log(`   ❌ 失败: ${failed}/${total}`);
-      this.failedServices.forEach(({ name, error, duration }) => {
-        console.log(`      - ${name}: ${error} (${duration}ms)`);
-      });
-    }
-    
-    console.log('');
-  }
-
-  /**
    * 初始化监控服务
    * @private
    */
   private async _initMonitoringServices(): Promise<void> {
-    console.log('📊 [Bootstrap] 初始化监控服务...');
-
     try {
       // 1. 错误追踪
       errorTracker.init({
@@ -306,10 +263,7 @@ export class ServiceBootstrap {
 
       // 5. 连接数据流: webVitals -> storage
       this._connectMonitoringDataFlow();
-
-      console.log('✅ [Bootstrap] 监控服务初始化完成');
-    } catch (error) {
-      console.warn('⚠️ [Bootstrap] 监控服务初始化失败:', error);
+    } catch {
       // 监控服务失败不影响主流程
     }
   }
@@ -345,8 +299,8 @@ export class ServiceBootstrap {
         } else if (metric.name === 'CLS') {
           alertService.check(AlertType.PERFORMANCE, { cls: metric.value });
         }
-      } catch (error) {
-        console.warn('[Bootstrap] 保存性能指标失败:', error);
+      } catch {
+        return;
       }
     });
 
@@ -384,8 +338,6 @@ export class ServiceBootstrap {
         }
       }, 300000);
     }
-
-    console.log('✅ [Bootstrap] 监控数据流已连接');
   }
 
   /**
@@ -411,7 +363,6 @@ export class ServiceBootstrap {
   reset(): void {
     this.failedServices = [];
     this.initializedServices.clear();
-    console.log('✅ [Bootstrap] 已重置');
   }
 }
 

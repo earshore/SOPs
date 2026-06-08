@@ -56,7 +56,6 @@ export function getMarketLanguage(): string {
     if (langConfig && langConfig.locale) {
       // 从 locale (如 "de_DE") 提取语言代码 (如 "de")
       const language = langConfig.locale.split('_')[0];
-      console.log(`[辅助函数] 市场 ${marketplace} 对应语言: ${language}`);
       return language || 'en';
     }
   }

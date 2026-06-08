@@ -54,6 +54,117 @@ export interface ErrorContext {
   [key: string]: unknown;
 }
 
+export interface AppErrorOptions {
+  level?: ErrorLevel;
+  category?: ErrorCategory;
+  context?: ErrorContext;
+  originalError?: Error;
+  notify?: boolean;
+}
+
+type AppErrorConstructorArgs =
+  | [message: string, code: string, options?: AppErrorOptions]
+  | [
+      message: string,
+      code: string,
+      level?: ErrorLevel,
+      category?: ErrorCategory,
+      context?: ErrorContext,
+      originalError?: Error,
+      notify?: boolean
+    ];
+
+interface NormalizedAppErrorArgs {
+  message: string;
+  code: string;
+  level: ErrorLevel;
+  category: ErrorCategory;
+  context: ErrorContext;
+  originalError?: Error;
+  notify: boolean;
+}
+
+function isOptionsObject(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !(value instanceof Error);
+}
+
+function normalizeAppErrorArgs(args: AppErrorConstructorArgs): NormalizedAppErrorArgs {
+  const [message, code, third, category, context, originalError, notify] = args;
+
+  if (isOptionsObject(third)) {
+    const options = third as AppErrorOptions;
+    return {
+      message,
+      code,
+      level: options.level ?? ErrorLevel.ERROR,
+      category: options.category ?? ErrorCategory.UNKNOWN,
+      context: options.context ?? {},
+      originalError: options.originalError,
+      notify: options.notify ?? true
+    };
+  }
+
+  const level = third as ErrorLevel | undefined;
+
+  return {
+    message,
+    code,
+    level: level ?? ErrorLevel.ERROR,
+    category: category ?? ErrorCategory.UNKNOWN,
+    context: context ?? {},
+    originalError,
+    notify: notify ?? true
+  };
+}
+
+export interface ApiErrorOptions {
+  statusCode?: number;
+  response?: unknown;
+  context?: ErrorContext;
+  originalError?: Error;
+}
+
+type ApiErrorConstructorArgs =
+  | [message: string, code: string, options?: ApiErrorOptions]
+  | [
+      message: string,
+      code: string,
+      statusCode?: number,
+      response?: unknown,
+      context?: ErrorContext,
+      originalError?: Error
+    ];
+
+function normalizeApiErrorArgs(args: ApiErrorConstructorArgs): Required<Pick<ApiErrorOptions, 'context'>> & ApiErrorOptions & {
+  message: string;
+  code: string;
+} {
+  const [message, code, third, response, context, originalError] = args;
+
+  if (isOptionsObject(third)) {
+    const options = third as ApiErrorOptions;
+    return {
+      message,
+      code,
+      statusCode: options.statusCode,
+      response: options.response,
+      context: options.context ?? {},
+      originalError: options.originalError
+    };
+  }
+
+  const statusCode = third as number | undefined;
+
+  return {
+    message,
+    code,
+    statusCode,
+    response,
+    context: context ?? {},
+    originalError
+  };
+}
+
 /**
  * 应用错误基类
  */
@@ -73,15 +184,9 @@ export class AppError extends Error {
   /** 是否需要通知用户 */
   public readonly notify: boolean;
 
-  constructor(
-    message: string,
-    code: string,
-    level: ErrorLevel = ErrorLevel.ERROR,
-    category: ErrorCategory = ErrorCategory.UNKNOWN,
-    context: ErrorContext = {},
-    originalError?: Error,
-    notify: boolean = true
-  ) {
+  constructor(...args: AppErrorConstructorArgs) {
+    const { message, code, level, category, context, originalError, notify } = normalizeAppErrorArgs(args);
+
     super(message);
     this.name = 'AppError';
     this.code = code;
@@ -181,14 +286,9 @@ export class ApiError extends AppError {
   public readonly statusCode?: number;
   public readonly response?: unknown;
 
-  constructor(
-    message: string,
-    code: string,
-    statusCode?: number,
-    response?: unknown,
-    context: ErrorContext = {},
-    originalError?: Error
-  ) {
+  constructor(...args: ApiErrorConstructorArgs) {
+    const { message, code, statusCode, response, context, originalError } = normalizeApiErrorArgs(args);
+
     super(
       message,
       code,

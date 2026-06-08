@@ -57,11 +57,6 @@ export class CSSPerformanceMonitor {
       timestamp: Date.now()
     });
     
-    // 警告慢加载
-    if (duration > 500) {
-      console.warn(`⚠️ CSS加载过慢: ${href} (${duration.toFixed(2)}ms)`);
-    }
-    
     // 限制存储数量
     if (this.loadMetrics.length > 100) {
       this.loadMetrics.shift();
@@ -85,11 +80,6 @@ export class CSSPerformanceMonitor {
         duration,
         timestamp: Date.now()
       });
-      
-      // 警告慢切换
-      if (duration > 100) {
-        console.warn(`⚠️ 主题切换过慢: ${fromTheme} → ${toTheme} (${duration.toFixed(2)}ms)`);
-      }
       
       // 限制存储数量
       if (this.themeSwitchMetrics.length > 50) {
@@ -201,38 +191,10 @@ export class CSSPerformanceMonitor {
   }
   
   /**
-   * 打印报告到控制台
+   * 获取性能报告
    */
-  printReport(): void {
-    const report = this.generateReport();
-    
-    console.group('📊 CSS性能报告');
-    
-    console.group('📥 加载性能');
-    console.debug(`总加载次数: ${report.loadMetrics.totalLoaded}`);
-    console.debug(`平均加载时间: ${report.loadMetrics.averageLoadTime.toFixed(2)}ms`);
-    console.debug(`总加载时间: ${report.loadMetrics.totalLoadTime.toFixed(2)}ms`);
-    if (report.loadMetrics.slowestLoad) {
-      console.debug(`最慢加载: ${report.loadMetrics.slowestLoad.href} (${report.loadMetrics.slowestLoad.loadTime.toFixed(2)}ms)`);
-    }
-    console.groupEnd();
-    
-    console.group('🎨 运行时性能');
-    console.debug(`主题切换次数: ${report.runtimeMetrics.themeSwitches}`);
-    if (report.runtimeMetrics.themeSwitches > 0) {
-      console.debug(`平均切换时间: ${report.runtimeMetrics.averageThemeSwitchTime.toFixed(2)}ms`);
-      if (report.runtimeMetrics.slowestThemeSwitch) {
-        const { fromTheme, toTheme, duration } = report.runtimeMetrics.slowestThemeSwitch;
-        console.debug(`最慢切换: ${fromTheme} → ${toTheme} (${duration.toFixed(2)}ms)`);
-      }
-    }
-    console.groupEnd();
-    
-    console.group('💡 优化建议');
-    report.recommendations.forEach(rec => console.debug(rec));
-    console.groupEnd();
-    
-    console.groupEnd();
+  printReport(): CSSPerformanceReport {
+    return this.generateReport();
   }
   
   /**
@@ -241,7 +203,6 @@ export class CSSPerformanceMonitor {
   clear(): void {
     this.loadMetrics = [];
     this.themeSwitchMetrics = [];
-    console.debug('✅ CSS性能指标已清除');
   }
   
   /**
@@ -249,7 +210,6 @@ export class CSSPerformanceMonitor {
    */
   setEnabled(enabled: boolean): void {
     this.enabled = enabled;
-    console.debug(`CSS性能监控已${enabled ? '启用' : '禁用'}`);
   }
 }
 
@@ -261,6 +221,4 @@ if (import.meta.env.DEV && typeof window !== 'undefined') {
   const windowWithPerf = window as unknown as Record<string, unknown>;
   windowWithPerf.__CSS_PERF__ = cssPerformanceMonitor;
   windowWithPerf.printCSSPerf = () => cssPerformanceMonitor.printReport();
-  
-  console.debug('💡 CSS性能监控已启用，使用 printCSSPerf() 查看报告');
 }

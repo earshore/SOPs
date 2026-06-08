@@ -57,6 +57,96 @@ export interface DropdownAnimationOptions {
   skipAnimation?: boolean;
 }
 
+type NavigationAnimationOptions = PageTransitionOptions | SidebarAnimationOptions | DropdownAnimationOptions;
+
+interface NavigationTransitionRunner {
+  isComplete: () => boolean;
+  isBusy: () => boolean;
+  waitForCurrent: () => Promise<void>;
+  applyInstant: () => void;
+  applyAnimated: () => Promise<void>;
+}
+
+function shouldSkipNavigationAnimation(skipAnimation = false): boolean {
+  return skipAnimation ||
+    animationManager.shouldReduceMotion() ||
+    !animationManager.isCategoryEnabled('navigation');
+}
+
+async function runNavigationTransition(
+  options: NavigationAnimationOptions,
+  runner: NavigationTransitionRunner
+): Promise<void> {
+  const { onComplete, onStart, skipAnimation = false } = options;
+
+  if (runner.isComplete()) {
+    onComplete?.();
+    return;
+  }
+
+  if (runner.isBusy()) {
+    await runner.waitForCurrent();
+  }
+
+  onStart?.();
+
+  if (shouldSkipNavigationAnimation(skipAnimation)) {
+    runner.applyInstant();
+    onComplete?.();
+    return;
+  }
+
+  await runner.applyAnimated();
+  onComplete?.();
+}
+
+function waitForAnimationEnd(element: HTMLElement, timeoutMs: number): Promise<void> {
+  return new Promise((resolve) => {
+    const handleAnimationEnd = (event: AnimationEvent) => {
+      if (event.target === element) {
+        element.removeEventListener('animationend', handleAnimationEnd);
+        resolve();
+      }
+    };
+
+    element.addEventListener('animationend', handleAnimationEnd);
+
+    setTimeout(() => {
+      element.removeEventListener('animationend', handleAnimationEnd);
+      resolve();
+    }, timeoutMs);
+  });
+}
+
+function waitForStateIdle(isBusy: () => boolean, timeoutMs: number): Promise<void> {
+  return new Promise((resolve) => {
+    const checkInterval = setInterval(() => {
+      if (!isBusy()) {
+        clearInterval(checkInterval);
+        resolve();
+      }
+    }, 50);
+
+    setTimeout(() => {
+      clearInterval(checkInterval);
+      resolve();
+    }, timeoutMs);
+  });
+}
+
+async function toggleNavigationState<T extends NavigationAnimationOptions>(
+  isOpen: boolean,
+  options: T,
+  open: (options: T) => Promise<void>,
+  close: (options: T) => Promise<void>
+): Promise<void> {
+  if (isOpen) {
+    await close(options);
+    return;
+  }
+  await open(options);
+}
+
 /**
  * 页面过渡控制器
  * Requirements 8.1: 页面切换淡入淡出
@@ -94,10 +184,7 @@ export class PageTransitionController {
     onStart?.();
 
     // 检查是否应该跳过动画
-    const shouldSkip = skipAnimation || animationManager.shouldReduceMotion() || 
-                       !animationManager.isCategoryEnabled('navigation');
-
-    if (shouldSkip) {
+    if (shouldSkipNavigationAnimation(skipAnimation)) {
       // 直接替换内容，不使用动画
       this.replaceContent(newContent);
       onComplete?.();
@@ -161,42 +248,14 @@ export class PageTransitionController {
    * 等待动画结束
    */
   private waitForAnimationEnd(element: HTMLElement): Promise<void> {
-    return new Promise((resolve) => {
-      const handleAnimationEnd = (event: AnimationEvent) => {
-        if (event.target === element) {
-          element.removeEventListener('animationend', handleAnimationEnd);
-          resolve();
-        }
-      };
-
-      element.addEventListener('animationend', handleAnimationEnd);
-
-      // 超时保护
-      setTimeout(() => {
-        element.removeEventListener('animationend', handleAnimationEnd);
-        resolve();
-      }, 500);
-    });
+    return waitForAnimationEnd(element, 500);
   }
 
   /**
    * 等待当前过渡完成
    */
   private waitForTransition(): Promise<void> {
-    return new Promise((resolve) => {
-      const checkInterval = setInterval(() => {
-        if (!this.isTransitioning) {
-          clearInterval(checkInterval);
-          resolve();
-        }
-      }, 50);
-
-      // 最大等待时间
-      setTimeout(() => {
-        clearInterval(checkInterval);
-        resolve();
-      }, 2000);
-    });
+    return waitForStateIdle(() => this.isTransitioning, 2000);
   }
 
   /**
@@ -231,55 +290,13 @@ export class SidebarAnimationController {
    * @param options - 动画选项
    */
   async open(options: SidebarAnimationOptions = {}): Promise<void> {
-    const { onComplete, onStart, skipAnimation = false } = options;
-
-    // 如果已经打开，直接返回
-    if (this.isOpen) {
-      onComplete?.();
-      return;
-    }
-
-    // 如果正在动画中，等待完成
-    if (this.isAnimating) {
-      await this.waitForAnimation();
-    }
-
-    // 触发开始回调
-    onStart?.();
-
-    // 检查是否应该跳过动画
-    const shouldSkip = skipAnimation || animationManager.shouldReduceMotion() || 
-                       !animationManager.isCategoryEnabled('navigation');
-
-    if (shouldSkip) {
-      // 直接显示，不使用动画
-      this.sidebar.classList.remove('sidebar-hidden');
-      this.sidebar.classList.add('sidebar-visible');
-      this.isOpen = true;
-      onComplete?.();
-      return;
-    }
-
-    // 标记动画开始
-    this.isAnimating = true;
-
-    // 移除隐藏类，添加进入动画类
-    this.sidebar.classList.remove('sidebar-hidden');
-    this.sidebar.classList.add(ANIMATION_CLASSES.sidebarEnter);
-
-    // 等待动画完成
-    await this.waitForAnimationEnd();
-
-    // 清理动画类，添加可见类
-    this.sidebar.classList.remove(ANIMATION_CLASSES.sidebarEnter);
-    this.sidebar.classList.add('sidebar-visible');
-
-    // 标记动画结束
-    this.isAnimating = false;
-    this.isOpen = true;
-
-    // 触发完成回调
-    onComplete?.();
+    await runNavigationTransition(options, {
+      isComplete: () => this.isOpen,
+      isBusy: () => this.isAnimating,
+      waitForCurrent: () => waitForStateIdle(() => this.isAnimating, 1000),
+      applyInstant: () => this.showSidebar(),
+      applyAnimated: () => this.animateSidebarOpen(),
+    });
   }
 
   /**
@@ -287,124 +304,56 @@ export class SidebarAnimationController {
    * @param options - 动画选项
    */
   async close(options: SidebarAnimationOptions = {}): Promise<void> {
-    const { onComplete, onStart, skipAnimation = false } = options;
+    await runNavigationTransition(options, {
+      isComplete: () => !this.isOpen,
+      isBusy: () => this.isAnimating,
+      waitForCurrent: () => waitForStateIdle(() => this.isAnimating, 1000),
+      applyInstant: () => this.hideSidebar(),
+      applyAnimated: () => this.animateSidebarClose(),
+    });
+  }
 
-    // 如果已经关闭，直接返回
-    if (!this.isOpen) {
-      onComplete?.();
-      return;
-    }
+  private showSidebar(): void {
+    this.sidebar.classList.remove('sidebar-hidden');
+    this.sidebar.classList.add('sidebar-visible');
+    this.isOpen = true;
+  }
 
-    // 如果正在动画中，等待完成
-    if (this.isAnimating) {
-      await this.waitForAnimation();
-    }
+  private hideSidebar(): void {
+    this.sidebar.classList.remove('sidebar-visible');
+    this.sidebar.classList.add('sidebar-hidden');
+    this.isOpen = false;
+  }
 
-    // 触发开始回调
-    onStart?.();
-
-    // 检查是否应该跳过动画
-    const shouldSkip = skipAnimation || animationManager.shouldReduceMotion() || 
-                       !animationManager.isCategoryEnabled('navigation');
-
-    if (shouldSkip) {
-      // 直接隐藏，不使用动画
-      this.sidebar.classList.remove('sidebar-visible');
-      this.sidebar.classList.add('sidebar-hidden');
-      this.isOpen = false;
-      onComplete?.();
-      return;
-    }
-
-    // 标记动画开始
+  private async animateSidebarOpen(): Promise<void> {
     this.isAnimating = true;
+    this.sidebar.classList.remove('sidebar-hidden');
+    this.sidebar.classList.add(ANIMATION_CLASSES.sidebarEnter);
+    await waitForAnimationEnd(this.sidebar, 400);
+    this.sidebar.classList.remove(ANIMATION_CLASSES.sidebarEnter);
+    this.sidebar.classList.add('sidebar-visible');
+    this.isAnimating = false;
+    this.isOpen = true;
+  }
 
-    // 移除可见类，添加退出动画类
+  private async animateSidebarClose(): Promise<void> {
+    this.isAnimating = true;
     this.sidebar.classList.remove('sidebar-visible');
     this.sidebar.classList.add(ANIMATION_CLASSES.sidebarExit);
-
-    // 等待动画完成
-    await this.waitForAnimationEnd();
-
-    // 清理动画类，添加隐藏类
+    await waitForAnimationEnd(this.sidebar, 400);
     this.sidebar.classList.remove(ANIMATION_CLASSES.sidebarExit);
     this.sidebar.classList.add('sidebar-hidden');
-
-    // 标记动画结束
     this.isAnimating = false;
     this.isOpen = false;
-
-    // 触发完成回调
-    onComplete?.();
   }
 
-  /**
-   * 切换侧边栏状态
-   * @param options - 动画选项
-   */
   async toggle(options: SidebarAnimationOptions = {}): Promise<void> {
-    if (this.isOpen) {
-      await this.close(options);
-    } else {
-      await this.open(options);
-    }
+    await toggleNavigationState(this.isOpen, options, this.open.bind(this), this.close.bind(this));
   }
 
-  /**
-   * 等待动画结束
-   */
-  private waitForAnimationEnd(): Promise<void> {
-    return new Promise((resolve) => {
-      const handleAnimationEnd = (event: AnimationEvent) => {
-        if (event.target === this.sidebar) {
-          this.sidebar.removeEventListener('animationend', handleAnimationEnd);
-          resolve();
-        }
-      };
+  isInProgress(): boolean { return this.isAnimating; }
 
-      this.sidebar.addEventListener('animationend', handleAnimationEnd);
-
-      // 超时保护
-      setTimeout(() => {
-        this.sidebar.removeEventListener('animationend', handleAnimationEnd);
-        resolve();
-      }, 400);
-    });
-  }
-
-  /**
-   * 等待当前动画完成
-   */
-  private waitForAnimation(): Promise<void> {
-    return new Promise((resolve) => {
-      const checkInterval = setInterval(() => {
-        if (!this.isAnimating) {
-          clearInterval(checkInterval);
-          resolve();
-        }
-      }, 50);
-
-      // 最大等待时间
-      setTimeout(() => {
-        clearInterval(checkInterval);
-        resolve();
-      }, 1000);
-    });
-  }
-
-  /**
-   * 检查是否正在动画中
-   */
-  isInProgress(): boolean {
-    return this.isAnimating;
-  }
-
-  /**
-   * 获取当前状态
-   */
-  getState(): boolean {
-    return this.isOpen;
-  }
+  getState(): boolean { return this.isOpen; }
 }
 
 /**
@@ -431,53 +380,13 @@ export class DropdownAnimationController {
    * @param options - 动画选项
    */
   async open(options: DropdownAnimationOptions = {}): Promise<void> {
-    const { onComplete, onStart, skipAnimation = false } = options;
-
-    // 如果已经打开，直接返回
-    if (this.isOpen) {
-      onComplete?.();
-      return;
-    }
-
-    // 如果正在动画中，等待完成
-    if (this.isAnimating) {
-      await this.waitForAnimation();
-    }
-
-    // 触发开始回调
-    onStart?.();
-
-    // 检查是否应该跳过动画
-    const shouldSkip = skipAnimation || animationManager.shouldReduceMotion() || 
-                       !animationManager.isCategoryEnabled('navigation');
-
-    if (shouldSkip) {
-      // 直接显示，不使用动画
-      this.dropdown.classList.add('dropdown-open');
-      this.isOpen = true;
-      onComplete?.();
-      return;
-    }
-
-    // 标记动画开始
-    this.isAnimating = true;
-
-    // 添加进入动画类
-    this.dropdown.classList.add(ANIMATION_CLASSES.dropdownEnter);
-    this.dropdown.classList.add('dropdown-open');
-
-    // 等待动画完成
-    await this.waitForAnimationEnd();
-
-    // 清理动画类
-    this.dropdown.classList.remove(ANIMATION_CLASSES.dropdownEnter);
-
-    // 标记动画结束
-    this.isAnimating = false;
-    this.isOpen = true;
-
-    // 触发完成回调
-    onComplete?.();
+    await runNavigationTransition(options, {
+      isComplete: () => this.isOpen,
+      isBusy: () => this.isAnimating,
+      waitForCurrent: () => waitForStateIdle(() => this.isAnimating, 1000),
+      applyInstant: () => this.showDropdown(),
+      applyAnimated: () => this.animateDropdownOpen(),
+    });
   }
 
   /**
@@ -485,122 +394,52 @@ export class DropdownAnimationController {
    * @param options - 动画选项
    */
   async close(options: DropdownAnimationOptions = {}): Promise<void> {
-    const { onComplete, onStart, skipAnimation = false } = options;
+    await runNavigationTransition(options, {
+      isComplete: () => !this.isOpen,
+      isBusy: () => this.isAnimating,
+      waitForCurrent: () => waitForStateIdle(() => this.isAnimating, 1000),
+      applyInstant: () => this.hideDropdown(),
+      applyAnimated: () => this.animateDropdownClose(),
+    });
+  }
 
-    // 如果已经关闭，直接返回
-    if (!this.isOpen) {
-      onComplete?.();
-      return;
-    }
+  private showDropdown(): void {
+    this.dropdown.classList.add('dropdown-open');
+    this.isOpen = true;
+  }
 
-    // 如果正在动画中，等待完成
-    if (this.isAnimating) {
-      await this.waitForAnimation();
-    }
+  private hideDropdown(): void {
+    this.dropdown.classList.remove('dropdown-open');
+    this.isOpen = false;
+  }
 
-    // 触发开始回调
-    onStart?.();
-
-    // 检查是否应该跳过动画
-    const shouldSkip = skipAnimation || animationManager.shouldReduceMotion() || 
-                       !animationManager.isCategoryEnabled('navigation');
-
-    if (shouldSkip) {
-      // 直接隐藏，不使用动画
-      this.dropdown.classList.remove('dropdown-open');
-      this.isOpen = false;
-      onComplete?.();
-      return;
-    }
-
-    // 标记动画开始
+  private async animateDropdownOpen(): Promise<void> {
     this.isAnimating = true;
+    this.dropdown.classList.add(ANIMATION_CLASSES.dropdownEnter);
+    this.dropdown.classList.add('dropdown-open');
+    await waitForAnimationEnd(this.dropdown, 350);
+    this.dropdown.classList.remove(ANIMATION_CLASSES.dropdownEnter);
+    this.isAnimating = false;
+    this.isOpen = true;
+  }
 
-    // 添加退出动画类
+  private async animateDropdownClose(): Promise<void> {
+    this.isAnimating = true;
     this.dropdown.classList.add(ANIMATION_CLASSES.dropdownExit);
-
-    // 等待动画完成
-    await this.waitForAnimationEnd();
-
-    // 清理动画类和打开状态
+    await waitForAnimationEnd(this.dropdown, 350);
     this.dropdown.classList.remove(ANIMATION_CLASSES.dropdownExit);
     this.dropdown.classList.remove('dropdown-open');
-
-    // 标记动画结束
     this.isAnimating = false;
     this.isOpen = false;
-
-    // 触发完成回调
-    onComplete?.();
   }
 
-  /**
-   * 切换下拉菜单状态
-   * @param options - 动画选项
-   */
   async toggle(options: DropdownAnimationOptions = {}): Promise<void> {
-    if (this.isOpen) {
-      await this.close(options);
-    } else {
-      await this.open(options);
-    }
+    await toggleNavigationState(this.isOpen, options, this.open.bind(this), this.close.bind(this));
   }
 
-  /**
-   * 等待动画结束
-   */
-  private waitForAnimationEnd(): Promise<void> {
-    return new Promise((resolve) => {
-      const handleAnimationEnd = (event: AnimationEvent) => {
-        if (event.target === this.dropdown) {
-          this.dropdown.removeEventListener('animationend', handleAnimationEnd);
-          resolve();
-        }
-      };
+  isInProgress(): boolean { return this.isAnimating; }
 
-      this.dropdown.addEventListener('animationend', handleAnimationEnd);
-
-      // 超时保护
-      setTimeout(() => {
-        this.dropdown.removeEventListener('animationend', handleAnimationEnd);
-        resolve();
-      }, 350);
-    });
-  }
-
-  /**
-   * 等待当前动画完成
-   */
-  private waitForAnimation(): Promise<void> {
-    return new Promise((resolve) => {
-      const checkInterval = setInterval(() => {
-        if (!this.isAnimating) {
-          clearInterval(checkInterval);
-          resolve();
-        }
-      }, 50);
-
-      // 最大等待时间
-      setTimeout(() => {
-        clearInterval(checkInterval);
-        resolve();
-      }, 1000);
-    });
-  }
-
-  /**
-   * 检查是否正在动画中
-   */
-  isInProgress(): boolean {
-    return this.isAnimating;
-  }
-
-  /**
-   * 获取当前状态
-   */
-  getState(): boolean {
-    return this.isOpen;
-  }
+  getState(): boolean { return this.isOpen; }
 }
 
 /**

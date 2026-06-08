@@ -78,13 +78,11 @@ class WebVitalsService {
    */
   async initialize(): Promise<void> {
     if (this.isInitialized) {
-      console.warn('[WebVitals] 已初始化,跳过');
       return;
     }
 
     // 直接使用降级方案(Performance API)
     // web-vitals库为可选依赖,如需使用请安装: npm install web-vitals
-    console.log('[WebVitals] 使用Performance API监控方案');
     this.initializeFallback();
   }
 
@@ -93,7 +91,6 @@ class WebVitalsService {
    */
   private initializeFallback(): void {
     if (typeof window === 'undefined' || !window.performance) {
-      console.warn('[WebVitals] Performance API不可用');
       return;
     }
 
@@ -111,7 +108,6 @@ class WebVitalsService {
     this.collectCLS();
 
     this.isInitialized = true;
-    console.log('[WebVitals] ✅ 性能监控已启动(降级模式)');
   }
 
   /**
@@ -156,8 +152,8 @@ class WebVitalsService {
 
     try {
       observer.observe({ type: 'largest-contentful-paint', buffered: true });
-    } catch (e) {
-      console.warn('[WebVitals] LCP监控不支持');
+    } catch {
+      return;
     }
   }
 
@@ -187,7 +183,7 @@ class WebVitalsService {
     let clsValue = 0;
     let clsEntries: PerformanceEntry[] = [];
     let lastLoggedValue = 0;
-    const LOG_THRESHOLD = 0.05; // 只在 CLS 变化超过 0.05 时才输出日志
+    const LOG_THRESHOLD = 0.05; // 只在 CLS 变化超过 0.05 时才触发回调
 
     const observer = new PerformanceObserver((list) => {
       for (const entry of list.getEntries()) {
@@ -197,7 +193,7 @@ class WebVitalsService {
         }
       }
 
-      // 只在 CLS 值变化显著时才触发回调和日志
+      // 只在 CLS 值变化显著时才触发回调
       if (Math.abs(clsValue - lastLoggedValue) >= LOG_THRESHOLD) {
         this.handleMetric({
           name: 'CLS',
@@ -213,8 +209,8 @@ class WebVitalsService {
 
     try {
       observer.observe({ type: 'layout-shift', buffered: true });
-    } catch (e) {
-      console.warn('[WebVitals] CLS监控不支持');
+    } catch {
+      return;
     }
   }
 
@@ -234,13 +230,6 @@ class WebVitalsService {
       }
     });
 
-    // 输出到控制台(开发环境)
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`[WebVitals] ${metric.name}:`, {
-        value: Math.round(metric.value),
-        rating: metric.rating
-      });
-    }
   }
 
   /**
@@ -299,7 +288,6 @@ class WebVitalsService {
    */
   async reportMetrics(endpoint?: string): Promise<void> {
     if (!endpoint) {
-      console.warn('[WebVitals] 未配置上报端点');
       return;
     }
 
@@ -316,8 +304,6 @@ class WebVitalsService {
           userAgent: navigator.userAgent
         })
       });
-
-      console.log('[WebVitals] 指标已上报');
     } catch (error) {
       console.error('[WebVitals] 指标上报失败:', error);
     }

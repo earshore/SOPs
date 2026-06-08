@@ -26,6 +26,18 @@ import { ErrorHandler } from './ErrorHandler';
 import type { RouterStoreSync } from './RouterStore';
 
 import { ValidationError } from '@/common/errors/AppError';
+
+type NavigationTarget = {
+  normalizedPath: string;
+  to: Route;
+  from: Route | null;
+};
+
+type NavigationGuardOutcome = {
+  allowed: boolean;
+  redirect?: string;
+};
+
 /**
  * Navigo 路由适配器
  *
@@ -238,197 +250,194 @@ export class NavigoAdapter {
    * ```
    */
   async navigate(path: string, options: NavigateOptions = {}): Promise<boolean> {
-    if (this.config.enableLogging) {
-      console.log(`[NavigoAdapter] 🚀 navigate() called with path: ${path}`, options);
-    }
-    
-    // 验证选项
-    if (!isNavigateOptions(options)) {
-      throw new ValidationError(
-        'Invalid navigate options',
-        'INVALID_NAVIGATE_OPTIONS',
-        'options',
-        options
-      );
-    }
+    this._logNavigationRequest(path, options);
+    this._assertNavigateOptions(options);
 
-    // 防止重复导航
-    if (this.isNavigating) {
-      if (this.config.enableLogging) {
-        console.log('[NavigoAdapter] ⚠️ Navigation in progress, skipping');
+    if (!this._startNavigation()) return false;
+
+    try {
+      const target = this._createNavigationTarget(path, options);
+      if (!target) return false;
+
+      const { to, from, normalizedPath } = target;
+      if (!await this._runBeforeNavigation(to, from, options)) return false;
+
+      const guardOutcome = await this._runNavigationGuards(to, from, options);
+      if (!guardOutcome.allowed) {
+        return guardOutcome.redirect
+          ? this.navigate(guardOutcome.redirect, { ...options, skipGuards: false })
+          : false;
       }
+
+      this._commitNavigation(to, normalizedPath, options);
+      await this._runAfterNavigation(to, from, options);
+      this._logNavigationComplete(from, normalizedPath);
+      return true;
+    } catch (error) {
+      return this._handleNavigationError(error);
+    } finally {
+      this._finishNavigation();
+    }
+  }
+
+  private _logNavigationRequest(path: string, options: NavigateOptions): void {
+    this._log(`navigate() called with path: ${path}`, options);
+  }
+
+  private _assertNavigateOptions(options: NavigateOptions): void {
+    if (isNavigateOptions(options)) return;
+    throw new ValidationError(
+      'Invalid navigate options',
+      'INVALID_NAVIGATE_OPTIONS',
+      'options',
+      options
+    );
+  }
+
+  private _startNavigation(): boolean {
+    if (this.isNavigating) {
       this._log('Navigation in progress, skipping');
       return false;
     }
 
     this.isNavigating = true;
-    if (this.config.enableLogging) {
-      console.log('[NavigoAdapter] 🔒 isNavigating set to true');
+    this._log('isNavigating set to true');
+    return true;
+  }
+
+  private _createNavigationTarget(path: string, options: NavigateOptions): NavigationTarget | null {
+    const resolvedPath = this._resolveAlias(path);
+    this._log(`Resolved path: ${resolvedPath}`);
+
+    const normalizedPath = this._normalizePath(resolvedPath);
+    this._log(`Normalized path: ${normalizedPath}`);
+
+    const config = this.routes.get(normalizedPath);
+    if (!config) {
+      this._log(`Route not found: ${normalizedPath}`, undefined, 'error');
+      return null;
+    }
+    this._log('Route config found', config);
+
+    const currentUrl = window.location.href;
+    const parsedParams = this.paramParser.parseUrl(currentUrl, null, config.params);
+    if (parsedParams.errors.length > 0) {
+      this._log(`Parameter validation errors: ${parsedParams.errors.join(', ')}`, undefined, 'error');
     }
 
-    try {
-      // 解析别名
-      const resolvedPath = this._resolveAlias(path);
-      if (this.config.enableLogging) {
-        console.log(`[NavigoAdapter] 🔗 Resolved path: ${resolvedPath}`);
-      }
-
-      // 标准化路径
-      const normalizedPath = this._normalizePath(resolvedPath);
-      if (this.config.enableLogging) {
-        console.log(`[NavigoAdapter] 📝 Normalized path: ${normalizedPath}`);
-      }
-
-      // 获取路由配置
-      const config = this.routes.get(normalizedPath);
-      if (!config) {
-        console.error(`[NavigoAdapter] ❌ Route not found: ${normalizedPath}`);
-        this._log(`Route not found: ${normalizedPath}`, 'error');
-        return false;
-      }
-      if (this.config.enableLogging) {
-        console.log(`[NavigoAdapter] ✓ Route config found:`, config);
-      }
-
-      // 解析 URL 参数
-      const currentUrl = window.location.href;
-      const parsedParams = this.paramParser.parseUrl(
-        currentUrl,
-        null, // Navigo 会在实际路由匹配时提供路径参数
-        config.params
-      );
-
-      // 检查参数解析错误
-      if (parsedParams.errors.length > 0) {
-        this._log(`Parameter validation errors: ${parsedParams.errors.join(', ')}`, 'error');
-        // 可以选择是否阻止导航
-        // return false;
-      }
-
-      // 构建路由对象
-      const to: Route = {
+    return {
+      normalizedPath,
+      from: this.currentRoute,
+      to: {
         path: normalizedPath,
         params: parsedParams.path,
         query: parsedParams.query,
         config,
         state: options.state,
         url: currentUrl,
-      };
+      },
+    };
+  }
 
-      const from = this.currentRoute;
+  private async _runBeforeNavigation(
+    to: Route,
+    from: Route | null,
+    options: NavigateOptions
+  ): Promise<boolean> {
+    if (options.skipMiddleware) return true;
+    this._log('Running before middleware...');
 
-      // 执行 before 中间件
-      if (!options.skipMiddleware) {
-        if (this.config.enableLogging) {
-          console.log('[NavigoAdapter] 🔄 Running before middleware...');
-        }
-        const middlewareResult = await this.middlewareManager.runBefore(to, from);
-        if (!middlewareResult) {
-          console.warn('[NavigoAdapter] ⛔ Navigation blocked by middleware');
-          this._log('Navigation blocked by middleware', 'warn');
-          return false;
-        }
-        if (this.config.enableLogging) {
-          console.log('[NavigoAdapter] ✓ Before middleware passed');
-        }
-      }
-
-      // 执行守卫
-      if (!options.skipGuards) {
-        if (this.config.enableLogging) {
-          console.log('[NavigoAdapter] 🛡️ Running guards...');
-        }
-        const guardResult = await this.guardManager.runGuards(to, from);
-
-        if (!guardResult.allowed) {
-          console.warn(`[NavigoAdapter] ⛔ Navigation blocked by guard: ${guardResult.reason}`);
-          this._log(`Navigation blocked by guard: ${guardResult.reason}`, 'warn');
-
-          // 处理重定向
-          if (guardResult.redirect) {
-            if (this.config.enableLogging) {
-              console.log(`[NavigoAdapter] 🔀 Redirecting to: ${guardResult.redirect}`);
-            }
-            this._log(`Redirecting to: ${guardResult.redirect}`);
-            return this.navigate(guardResult.redirect, { ...options, skipGuards: false });
-          }
-
-          return false;
-        }
-        if (this.config.enableLogging) {
-          console.log('[NavigoAdapter] ✓ Guards passed');
-        }
-      }
-
-      // 更新当前路由
-      if (this.config.enableLogging) {
-        console.log('[NavigoAdapter] 📍 Updating current route');
-      }
-      this.currentRoute = to;
-
-      // 同步到 Store
-      if (this.storeSync) {
-        if (this.config.enableLogging) {
-          console.log('[NavigoAdapter] 💾 Syncing to store');
-        }
-        this.storeSync.syncCurrentRoute(to);
-      }
-
-      // 记录历史
-      if (this.config.enableLogging) {
-        console.log('[NavigoAdapter] 📚 Recording history');
-      }
-      this._recordHistory(to);
-
-      // 更新浏览器历史
-      if (options.updateHistory !== false) {
-        if (this.config.enableLogging) {
-          console.log('[NavigoAdapter] 🌐 Updating browser history');
-        }
-        if (options.replace) {
-          this.navigo.navigate(normalizedPath, { historyAPIMethod: 'replaceState' });
-        } else {
-          this.navigo.navigate(normalizedPath);
-        }
-      }
-
-      // 执行 after 中间件
-      if (!options.skipMiddleware) {
-        if (this.config.enableLogging) {
-          console.log('[NavigoAdapter] 🔄 Running after middleware...');
-        }
-        await this.middlewareManager.runAfter(to, from);
-        if (this.config.enableLogging) {
-          console.log('[NavigoAdapter] ✓ After middleware completed');
-        }
-      }
-
-      if (this.config.enableLogging) {
-        console.log(`[NavigoAdapter] ✅ Navigation completed: ${from?.path || 'null'} -> ${normalizedPath}`);
-      }
-      this._log(`Navigated: ${from?.path || 'null'} -> ${normalizedPath}`);
-
-      return true;
-    } catch (error) {
-      console.error('[NavigoAdapter] ❌ Navigation error:', error);
-      this._log(`Navigation error: ${(error as Error).message}`, 'error');
-
-      // 同步错误到 Store
-      if (this.storeSync) {
-        this.storeSync.syncError(error as Error);
-      }
-
+    const middlewareResult = await this.middlewareManager.runBefore(to, from);
+    if (!middlewareResult) {
+      this._log('Navigation blocked by middleware', undefined, 'warn');
       return false;
-    } finally {
-      if (this.config.enableLogging) {
-        console.log('[NavigoAdapter] 🔓 isNavigating set to false');
-      }
-      this.isNavigating = false;
+    }
 
-      // 同步导航状态到 Store
-      if (this.storeSync) {
-        this.storeSync.syncNavigating(false);
-      }
+    this._log('Before middleware passed');
+    return true;
+  }
+
+  private async _runNavigationGuards(
+    to: Route,
+    from: Route | null,
+    options: NavigateOptions
+  ): Promise<NavigationGuardOutcome> {
+    if (options.skipGuards) return { allowed: true };
+    this._log('Running guards...');
+
+    const guardResult = await this.guardManager.runGuards(to, from);
+    if (guardResult.allowed) {
+      this._log('Guards passed');
+      return { allowed: true };
+    }
+
+    this._log(`Navigation blocked by guard: ${guardResult.reason}`, undefined, 'warn');
+
+    if (guardResult.redirect) {
+      this._log(`Redirecting to: ${guardResult.redirect}`);
+      return { allowed: false, redirect: guardResult.redirect };
+    }
+
+    return { allowed: false };
+  }
+
+  private _commitNavigation(to: Route, normalizedPath: string, options: NavigateOptions): void {
+    this._log('Updating current route');
+    this.currentRoute = to;
+    this._syncCurrentRoute(to);
+    this._recordNavigationHistory(to);
+    this._updateBrowserHistory(normalizedPath, options);
+  }
+
+  private _syncCurrentRoute(to: Route): void {
+    if (!this.storeSync) return;
+    this._log('Syncing to store');
+    this.storeSync.syncCurrentRoute(to);
+  }
+
+  private _recordNavigationHistory(to: Route): void {
+    this._log('Recording history');
+    this._recordHistory(to);
+  }
+
+  private _updateBrowserHistory(normalizedPath: string, options: NavigateOptions): void {
+    if (options.updateHistory === false) return;
+    this._log('Updating browser history');
+
+    if (options.replace) {
+      this.navigo.navigate(normalizedPath, { historyAPIMethod: 'replaceState' });
+      return;
+    }
+    this.navigo.navigate(normalizedPath);
+  }
+
+  private async _runAfterNavigation(to: Route, from: Route | null, options: NavigateOptions): Promise<void> {
+    if (options.skipMiddleware) return;
+    this._log('Running after middleware...');
+    await this.middlewareManager.runAfter(to, from);
+    this._log('After middleware completed');
+  }
+
+  private _logNavigationComplete(from: Route | null, normalizedPath: string): void {
+    this._log(`Navigated: ${from?.path || 'null'} -> ${normalizedPath}`);
+  }
+
+  private _handleNavigationError(error: unknown): boolean {
+    this._log(`Navigation error: ${(error as Error).message}`, error, 'error');
+
+    if (this.storeSync) {
+      this.storeSync.syncError(error as Error);
+    }
+
+    return false;
+  }
+
+  private _finishNavigation(): void {
+    this._log('isNavigating set to false');
+    this.isNavigating = false;
+
+    if (this.storeSync) {
+      this.storeSync.syncNavigating(false);
     }
   }
 
@@ -577,7 +586,7 @@ export class NavigoAdapter {
     const config = this.routes.get(normalizedPath);
 
     if (!config) {
-      this._log(`Cannot preload: route not found: ${normalizedPath}`, 'warn');
+      this._log(`Cannot preload: route not found: ${normalizedPath}`, undefined, 'warn');
       return false;
     }
 

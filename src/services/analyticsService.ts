@@ -158,6 +158,23 @@ export class AnalyticsService {
     }
   }
 
+  private createEvent<TType extends EventType, TProperties extends Record<string, unknown>>(
+    type: TType,
+    name: string,
+    properties: TProperties
+  ): AnalyticsEvent & { type: TType; properties: TProperties } {
+    return {
+      id: this.generateEventId(),
+      type,
+      name,
+      timestamp: Date.now(),
+      sessionId: this.currentSession?.id || '',
+      userId: this.currentSession?.userId,
+      properties,
+      context: this.getContext()
+    };
+  }
+
   /**
    * 初始化分析服务
    */
@@ -345,19 +362,10 @@ export class AnalyticsService {
     }
 
     // 创建新的页面浏览事件
-    const event: PageViewEvent = {
-      id: this.generateEventId(),
-      type: EventType.PAGE_VIEW,
-      name: 'page_view',
-      timestamp: Date.now(),
-      sessionId: this.currentSession?.id || '',
-      userId: this.currentSession?.userId,
-      properties: {
-        path,
-        title
-      },
-      context: this.getContext()
-    };
+    const event: PageViewEvent = this.createEvent(EventType.PAGE_VIEW, 'page_view', {
+      path,
+      title
+    });
 
     this.currentPageView = event;
     this.pageViewStartTime = Date.now();
@@ -383,16 +391,7 @@ export class AnalyticsService {
     if (!this.config.enabled || !this.config.trackUserActions) return;
     if (!this.shouldSample()) return;
 
-    const event: UserActionEvent = {
-      id: this.generateEventId(),
-      type: EventType.USER_ACTION,
-      name: properties.action,
-      timestamp: Date.now(),
-      sessionId: this.currentSession?.id || '',
-      userId: this.currentSession?.userId,
-      properties,
-      context: this.getContext()
-    };
+    const event: UserActionEvent = this.createEvent(EventType.USER_ACTION, properties.action, properties);
 
     this.recordEvent(event);
 
@@ -409,16 +408,7 @@ export class AnalyticsService {
     if (!this.config.enabled) return;
     if (!this.shouldSample()) return;
 
-    const event: AnalyticsEvent = {
-      id: this.generateEventId(),
-      type: EventType.CUSTOM,
-      name,
-      timestamp: Date.now(),
-      sessionId: this.currentSession?.id || '',
-      userId: this.currentSession?.userId,
-      properties,
-      context: this.getContext()
-    };
+    const event: AnalyticsEvent = this.createEvent(EventType.CUSTOM, name, properties);
 
     this.recordEvent(event);
 

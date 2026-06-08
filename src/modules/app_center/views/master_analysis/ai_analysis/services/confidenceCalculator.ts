@@ -91,15 +91,13 @@ function scoreAnyArrayContent(...items: unknown[]): number {
   return items.some(item => Array.isArray(item) && item.length > 0) ? 0.8 : 0;
 }
 
-function finalizeConfidence(label: string, scores: number[]): number {
+function finalizeConfidence(scores: number[]): number {
   if (scores.length === 0) {
-    console.warn(`[置信度] ${label} 无有效评分数据`);
     return 0;
   }
 
   const avgScore = scores.reduce((sum, s) => sum + s, 0) / scores.length;
   const clampedScore = Math.max(0, Math.min(1, avgScore));
-  console.log(`[置信度] ${label}:`, clampedScore.toFixed(2));
   return clampedScore;
 }
 
@@ -135,13 +133,11 @@ export function calculateTitleKeywordsConfidence(report: TitleKeywordsReport | n
     scores.push(checkDataQuality(report.optimization_suggestions));
 
     if (scores.length === 0) {
-      console.warn('[置信度] Title Keywords 无有效评分数据');
       return 0;
     }
 
     const avgScore = scores.reduce((sum, s) => sum + s, 0) / scores.length;
     const clampedScore = Math.max(0, Math.min(1, avgScore));
-    console.log('[置信度] Title Keywords:', clampedScore.toFixed(2));
     return clampedScore;
   } catch (error) {
     console.error('[置信度] Title Keywords 计算失败:', error);
@@ -168,7 +164,7 @@ export function calculateSellingPointsConfidence(report: SellingPointsReport | n
       report.function_scene_matrix?.scenes
     ));
 
-    return finalizeConfidence('Selling Points', scores);
+    return finalizeConfidence(scores);
   } catch (error) {
     console.error('[置信度] Selling Points 计算失败:', error);
     return 0;
@@ -206,13 +202,11 @@ export function calculateFatalFlawsConfidence(report: FatalFlawsReport | null): 
     scores.push(checkDataQuality(report.actionable_fixes));
 
     if (scores.length === 0) {
-      console.warn('[置信度] Fatal Flaws 无有效评分数据');
       return 0;
     }
 
     const avgScore = scores.reduce((sum, s) => sum + s, 0) / scores.length;
     const clampedScore = Math.max(0, Math.min(1, avgScore));
-    console.log('[置信度] Fatal Flaws:', clampedScore.toFixed(2));
     return clampedScore;
   } catch (error) {
     console.error('[置信度] Fatal Flaws 计算失败:', error);
@@ -247,13 +241,11 @@ export function calculateWowMomentsConfidence(report: WowMomentsReport | null): 
     scores.push(checkDataQuality(report.copywriting_angles));
 
     if (scores.length === 0) {
-      console.warn('[置信度] Wow Moments 无有效评分数据');
       return 0;
     }
 
     const avgScore = scores.reduce((sum, s) => sum + s, 0) / scores.length;
     const clampedScore = Math.max(0, Math.min(1, avgScore));
-    console.log('[置信度] Wow Moments:', clampedScore.toFixed(2));
     return clampedScore;
   } catch (error) {
     console.error('[置信度] Wow Moments 计算失败:', error);
@@ -288,13 +280,11 @@ export function calculateHesitationPointsConfidence(report: HesitationPointsRepo
     scores.push(checkDataQuality(report.trust_builders));
 
     if (scores.length === 0) {
-      console.warn('[置信度] Hesitation Points 无有效评分数据');
       return 0;
     }
 
     const avgScore = scores.reduce((sum, s) => sum + s, 0) / scores.length;
     const clampedScore = Math.max(0, Math.min(1, avgScore));
-    console.log('[置信度] Hesitation Points:', clampedScore.toFixed(2));
     return clampedScore;
   } catch (error) {
     console.error('[置信度] Hesitation Points 计算失败:', error);
@@ -319,7 +309,7 @@ export function calculateBuyerProfileConfidence(report: BuyerProfileReport | nul
     scores.push(scoreByArrayLength(report.usage_scenes, 2));
     scores.push(checkDataQuality(report.purchase_motivations));
 
-    return finalizeConfidence('Buyer Profile', scores);
+    return finalizeConfidence(scores);
   } catch (error) {
     console.error('[置信度] Buyer Profile 计算失败:', error);
     return 0;
@@ -346,7 +336,7 @@ export function calculateVocabGapConfidence(report: VocabGapReport | null): numb
       report.listing_optimization?.bullet_additions
     ));
 
-    return finalizeConfidence('Vocab Gap', scores);
+    return finalizeConfidence(scores);
   } catch (error) {
     console.error('[置信度] Vocab Gap 计算失败:', error);
     return 0;
@@ -384,13 +374,11 @@ export function calculatePromiseRealityConfidence(report: PromiseRealityReport |
     scores.push(checkDataQuality(report.verified_claims));
 
     if (scores.length === 0) {
-      console.warn('[置信度] Promise Reality 无有效评分数据');
       return 0;
     }
 
     const avgScore = scores.reduce((sum, s) => sum + s, 0) / scores.length;
     const clampedScore = Math.max(0, Math.min(1, avgScore));
-    console.log('[置信度] Promise Reality:', clampedScore.toFixed(2));
     return clampedScore;
   } catch (error) {
     console.error('[置信度] Promise Reality 计算失败:', error);
@@ -447,7 +435,6 @@ export function calculateOverallConfidence(confidenceScores: Record<string, numb
   if (scores.length === 0) return 0;
 
   const avgScore = scores.reduce((sum, s) => sum + s, 0) / scores.length;
-  console.log('[置信度] 总体置信度:', avgScore.toFixed(2));
   return avgScore;
 }
 

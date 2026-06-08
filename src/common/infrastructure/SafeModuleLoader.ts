@@ -80,6 +80,24 @@ interface ErrorClassificationDetails {
 
 type ModuleRenderFunction = (container: HTMLElement) => void;
 
+interface ErrorUIAction {
+  label: string;
+  action: string;
+  primary: boolean;
+}
+
+const HOME_ERROR_ACTION: ErrorUIAction = { label: '返回首页', action: 'home', primary: false };
+
+const RETRY_ERROR_ACTIONS: ErrorUIAction[] = [
+  { label: '重试', action: 'retry', primary: true },
+  HOME_ERROR_ACTION
+];
+
+const RELOAD_ERROR_ACTIONS: ErrorUIAction[] = [
+  { label: '刷新页面', action: 'reload', primary: true },
+  HOME_ERROR_ACTION
+];
+
 const NETWORK_ERROR_KEYWORDS = [
   'network',
   'fetch',
@@ -1005,10 +1023,7 @@ export class SafeModuleLoader {
       title: '网络连接问题',
       message: '无法加载模块，请检查您的网络连接',
       suggestion: '请确保您的网络连接正常，然后点击重试按钮',
-      actions: [
-        { label: '重试', action: 'retry', primary: true },
-        { label: '返回首页', action: 'home', primary: false }
-      ],
+      actions: RETRY_ERROR_ACTIONS,
       error,
       modulePath
     });
@@ -1024,10 +1039,7 @@ export class SafeModuleLoader {
       title: '模块解析失败',
       message: '模块内容格式错误，无法正常加载',
       suggestion: '这可能是系统更新导致的问题，请刷新页面或联系技术支持',
-      actions: [
-        { label: '刷新页面', action: 'reload', primary: true },
-        { label: '返回首页', action: 'home', primary: false }
-      ],
+      actions: RELOAD_ERROR_ACTIONS,
       error,
       modulePath
     });
@@ -1043,10 +1055,7 @@ export class SafeModuleLoader {
       title: '模块渲染失败',
       message: '模块加载成功，但渲染时出现问题',
       suggestion: '请尝试刷新页面，如果问题持续存在，请联系技术支持',
-      actions: [
-        { label: '刷新页面', action: 'reload', primary: true },
-        { label: '返回首页', action: 'home', primary: false }
-      ],
+      actions: RELOAD_ERROR_ACTIONS,
       error,
       modulePath
     });
@@ -1062,10 +1071,7 @@ export class SafeModuleLoader {
       title: '加载超时',
       message: '模块加载时间过长，已自动取消',
       suggestion: '这可能是网络较慢或服务器响应缓慢导致的，请重试',
-      actions: [
-        { label: '重试', action: 'retry', primary: true },
-        { label: '返回首页', action: 'home', primary: false }
-      ],
+      actions: RETRY_ERROR_ACTIONS,
       error,
       modulePath
     });
@@ -1084,10 +1090,7 @@ export class SafeModuleLoader {
       title: '模块加载失败',
       message: error.toUserMessage(),
       suggestion: '请尝试刷新页面，如果问题持续存在，请联系技术支持',
-      actions: [
-        { label: '刷新页面', action: 'reload', primary: true },
-        { label: '返回首页', action: 'home', primary: false }
-      ],
+      actions: RELOAD_ERROR_ACTIONS,
       error,
       modulePath
     });
@@ -1102,7 +1105,7 @@ export class SafeModuleLoader {
     title: string;
     message: string;
     suggestion: string;
-    actions: Array<{ label: string; action: string; primary: boolean }>;
+    actions: ErrorUIAction[];
     error: AppError;
     modulePath: string;
   }): string {
@@ -1143,7 +1146,7 @@ export class SafeModuleLoader {
    * 获取操作按钮 HTML
    */
   private getActionsHTML(
-    actions: Array<{ label: string; action: string; primary: boolean }>,
+    actions: ErrorUIAction[],
     modulePath: string
   ): string {
     return actions.map(action => {

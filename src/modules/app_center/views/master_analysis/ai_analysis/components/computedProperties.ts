@@ -49,93 +49,71 @@ export interface ComputedProperties {
   promptPanelToggleText: string;
 }
 
-/**
- * 创建计算属性方法
- */
-export function createComputedProperties(context: AlpineContext): ComputedProperties {
-  return {
-    /**
-     * 获取当前选中的产品列表
-     */
-    get currentProducts(): Product[] {
-      const products: Product[] = [];
+type ComputedMixin<T extends object> = T & ThisType<ComputedProperties>;
 
-      // 优先从 Scraper 数据获取
-      const scrapedData = appStore.getState().scraper?.scrapedData as ScrapedData | null;
-      if (scrapedData && scrapedData.products && scrapedData.products.length > 0) {
-        console.log('[计算属性] 开始从 Scraper 数据获取产品, selectedAsins:', context.selectedAsins);
-        for (const asin of context.selectedAsins) {
-          const matchedProduct = scrapedData.products.find(p => p.asin === asin);
-          if (matchedProduct) {
-            console.log('[计算属性] 找到匹配产品:', { asin, matchedProduct });
-            const product = convertScraperDataToProduct(matchedProduct);
-            if (product) {
-              console.log('[计算属性] 产品转换成功:', { asin });
-              products.push(product);
-            } else {
-              console.warn('[计算属性] 产品转换失败:', { asin, matchedProduct });
-            }
-          } else {
-            console.warn('[计算属性] 未找到匹配产品:', { asin });
-          }
+function applyComputedMixin(target: object, mixin: object): void {
+  Object.defineProperties(target, Object.getOwnPropertyDescriptors(mixin));
+}
+
+function getScrapedData(): ScrapedData | null {
+  return appStore.getState().scraper?.scrapedData as ScrapedData | null;
+}
+
+function getCurrentProducts(context: AlpineContext): Product[] {
+  const products: Product[] = [];
+
+  // 优先从 Scraper 数据获取
+  const scrapedData = getScrapedData();
+  if (scrapedData && scrapedData.products && scrapedData.products.length > 0) {
+    for (const asin of context.selectedAsins) {
+      const matchedProduct = scrapedData.products.find(p => p.asin === asin);
+      if (matchedProduct) {
+        const product = convertScraperDataToProduct(matchedProduct);
+        if (product) {
+          products.push(product);
         }
-      } else {
-        console.warn('[计算属性] Scraper 数据不可用:', {
-          hasScrapedData: !!scrapedData,
-          hasProducts: !!(scrapedData && scrapedData.products),
-          productsLength: scrapedData?.products?.length
-        });
       }
+    }
+  }
 
-      console.log('[计算属性] currentProducts 最终结果:', products.length, '个产品');
-      return products;
+  return products;
+}
+
+function createProductComputedProperties(context: AlpineContext): ComputedMixin<Pick<
+  ComputedProperties,
+  | 'currentProducts'
+  | 'availableAsins'
+  | 'hasData'
+  | 'canAnalyze'
+  | 'analysisTargets'
+  | 'listingAnalysisTargets'
+  | 'reviewAnalysisTargets'
+>> {
+  return {
+    get currentProducts(): Product[] {
+      return getCurrentProducts(context);
     },
 
-    /**
-     * 获取可用的 ASIN 列表
-     */
     get availableAsins(): string[] {
-      // 优先从 Scraper 获取 ASIN 列表
-      const scrapedData = appStore.getState().scraper?.scrapedData as ScrapedData | null;
+      const scrapedData = getScrapedData();
       if (scrapedData && scrapedData.products && scrapedData.products.length > 0) {
         return scrapedData.products
           .map(p => p.asin)
           .filter((asin): asin is string => !!asin);
       }
-      // 没有真实数据时返回空数组
       return [];
     },
 
-    /**
-     * 是否有数据
-     */
     get hasData(): boolean {
       return this.currentProducts.length > 0;
     },
 
-    /**
-     * 是否可以开始分析
-     * 注意：这里必须检查 context.selectedTargets，因为它是响应式的
-     * 但由于 Alpine.js 的初始化顺序问题，我们需要确保至少有一个目标被选中
-     */
     get canAnalyze(): boolean {
-      // 如果 selectedTargets 为空但 analysisTargets 有值，说明还没初始化完成
-      // 这种情况下暂时返回 false，等待 init() 完成后会重新计算
       const hasTargets = context.selectedTargets && context.selectedTargets.length > 0;
       const result = hasTargets && this.hasData && !context.isAnalyzing;
-      console.log('[计算属性] canAnalyze 检查:', {
-        selectedTargets: context.selectedTargets?.length || 0,
-        hasData: this.hasData,
-        currentProducts: this.currentProducts.length,
-        isAnalyzing: context.isAnalyzing,
-        canAnalyze: result
-      });
       return result;
     },
 
-    /**
-     * 分析目标配置
-     */
     get analysisTargets() {
       return analysisTargets;
     },
@@ -147,7 +125,23 @@ export function createComputedProperties(context: AlpineContext): ComputedProper
     get reviewAnalysisTargets() {
       return analysisTargets.filter(target => target.source === 'Reviews');
     },
+  };
+}
 
+function createSummaryComputedProperties(context: AlpineContext): ComputedMixin<Pick<
+  ComputedProperties,
+  | 'totalFeatureBulletCount'
+  | 'totalCustomerReviewCount'
+  | 'productSummaryText'
+  | 'dataSourceMetaText'
+  | 'hasNoAvailableAsins'
+  | 'hasNoScraperData'
+  | 'hasSelectedAnalysisInput'
+  | 'hasMissingAnalysisInput'
+  | 'selectedTaskCountText'
+  | 'promptPanelToggleText'
+>> {
+  return {
     get totalFeatureBulletCount(): number {
       return this.currentProducts.reduce((sum, product) => sum + product.feature_bullets.length, 0);
     },
@@ -187,11 +181,14 @@ export function createComputedProperties(context: AlpineContext): ComputedProper
     get promptPanelToggleText(): string {
       return `${context.showPromptPanel ? '收起' : '展开'} 预览`;
     },
+  };
+}
 
-    /**
-     * 实时解析分析结果
-     * 从原始 analysisReport 动态生成展示格式
-     */
+function createResultComputedProperties(context: AlpineContext): ComputedMixin<Pick<
+  ComputedProperties,
+  'results' | 'listingsResults' | 'reviewsResults' | 'totalHighlights' | 'totalDetails'
+>> {
+  return {
     get results(): AnalysisResult[] {
       if (!context.analysisReport || !context.selectedTargets || context.selectedTargets.length === 0) {
         return [];
@@ -202,7 +199,6 @@ export function createComputedProperties(context: AlpineContext): ComputedProper
           context.analysisReport as FullAnalysisReport,
           context.selectedTargets
         );
-        console.log('[计算属性] results 实时解析:', results.length, '个结果');
         return results;
       } catch (error) {
         console.error('[计算属性] results 解析失败:', error);
@@ -210,89 +206,59 @@ export function createComputedProperties(context: AlpineContext): ComputedProper
       }
     },
 
-    /**
-     * Listings 分析结果
-     */
     get listingsResults(): AnalysisResult[] {
       const filtered = this.results.filter(r => r.source === 'Listings');
-      console.log('[计算属性] listingsResults:', {
-        totalResults: this.results.length,
-        listingsCount: filtered.length
-      });
       return filtered;
     },
 
-    /**
-     * Reviews 分析结果
-     */
     get reviewsResults(): AnalysisResult[] {
       const filtered = this.results.filter(r => r.source === 'Reviews');
-      console.log('[计算属性] reviewsResults:', {
-        totalResults: this.results.length,
-        reviewsCount: filtered.length
-      });
       return filtered;
     },
 
-    /**
-     * 总高亮数量
-     */
     get totalHighlights(): number {
       return this.results.reduce((acc, r) => acc + r.highlights.length, 0);
     },
 
-    /**
-     * 总详情数量
-     */
     get totalDetails(): number {
       return this.results.reduce((acc, r) => acc + r.details.length, 0);
     },
+  };
+}
 
-    /**
-     * 是否有 Scraper 数据
-     */
+function createDataSourceComputedProperties(context: AlpineContext): ComputedMixin<Pick<
+  ComputedProperties,
+  'hasScraperData' | 'dataSourceLabel' | 'dataSourceMarketplace' | 'dataSourceTimestamp' | 'fullReportData'
+>> {
+  return {
     get hasScraperData(): boolean {
-      const scrapedData = appStore.getState().scraper?.scrapedData as ScrapedData | null;
+      const scrapedData = getScrapedData();
       return !!(scrapedData && scrapedData.products && scrapedData.products.length > 0);
     },
 
-    /**
-     * 数据源标签
-     */
     get dataSourceLabel(): string {
       return '数据采集';
     },
 
-    /**
-     * 数据源市场
-     */
     get dataSourceMarketplace(): string {
-      const scrapedData = appStore.getState().scraper?.scrapedData as ScrapedData | null;
+      const scrapedData = getScrapedData();
       if (scrapedData?.metadata?.marketplace) {
         return scrapedData.metadata.marketplace;
       }
       return '未知';
     },
 
-    /**
-     * 数据源时间戳
-     */
     get dataSourceTimestamp(): string {
-      const scrapedData = appStore.getState().scraper?.scrapedData as ScrapedData | null;
+      const scrapedData = getScrapedData();
       if (scrapedData?.metadata?.scrape_timestamp) {
         return scrapedData.metadata.scrape_timestamp;
       }
       return '未知';
     },
 
-    /**
-     * 完整报告数据
-     * 只包含原始 analysisReport，不包含转换后的 results
-     */
     get fullReportData(): FullReportData | null {
       if (!context.analysisReport) return null;
 
-      // 获取产品标题（用于显示）
       const productTitle = this.currentProducts.length > 0
         ? this.currentProducts.map(p => p.productTitle).join(' | ')
         : undefined;
@@ -309,11 +275,14 @@ export function createComputedProperties(context: AlpineContext): ComputedProper
         analysisReport: context.analysisReport
       };
     },
+  };
+}
 
-    /**
-     * 所有选中任务的总 token 数
-     * 使用 this 读取响应式状态，确保勾选/取消勾选分析目标时实时更新
-     */
+function createTokenComputedProperties(): ComputedMixin<Pick<
+  ComputedProperties,
+  'totalTokenCount' | 'formattedTotalTokenCount'
+>> {
+  return {
     get totalTokenCount(): number {
       const ctx = this as unknown as AlpineContext & ComputedProperties;
       if (ctx.selectedTargets.length === 0 || ctx.currentProducts.length === 0) {
@@ -324,11 +293,23 @@ export function createComputedProperties(context: AlpineContext): ComputedProper
       }, 0);
     },
 
-    /**
-     * 格式化的总 token 数
-     */
     get formattedTotalTokenCount(): string {
       return formatTokenCount(this.totalTokenCount);
-    }
+    },
   };
+}
+
+/**
+ * 创建计算属性方法
+ */
+export function createComputedProperties(context: AlpineContext): ComputedProperties {
+  const computed = {} as ComputedProperties;
+
+  applyComputedMixin(computed, createProductComputedProperties(context));
+  applyComputedMixin(computed, createSummaryComputedProperties(context));
+  applyComputedMixin(computed, createResultComputedProperties(context));
+  applyComputedMixin(computed, createDataSourceComputedProperties(context));
+  applyComputedMixin(computed, createTokenComputedProperties());
+
+  return computed;
 }

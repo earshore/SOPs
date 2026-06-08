@@ -463,11 +463,8 @@ export function extractProductDNA(
   report: FullAnalysisReport | null | undefined,
 ): ExtractedDNA | null {
   if (!report) {
-    console.warn("[DNA提取器] 报告为空，无法提取");
     return null;
   }
-
-  console.log("[DNA提取器] 开始提取产品 DNA");
 
   try {
     // 提取各个部分
@@ -493,7 +490,6 @@ export function extractProductDNA(
 
     // 如果总体置信度太低，返回 null
     if (avgConfidence < 0.2) {
-      console.warn("[DNA提取器] 提取置信度过低，放弃提取");
       return null;
     }
 
@@ -515,13 +511,6 @@ export function extractProductDNA(
         ].filter(Boolean),
       },
     };
-
-    console.log("[DNA提取器] 提取完成:", {
-      audienceLength: dna.audience.length,
-      uspsLength: dna.usps.length,
-      specsLength: dna.specs.length,
-      confidence: dna.confidence,
-    });
 
     return dna;
   } catch (error) {

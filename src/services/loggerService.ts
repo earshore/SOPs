@@ -58,6 +58,29 @@ export interface ModuleLogger {
   fatal: (message: string, error?: unknown) => void;
 }
 
+function normalizeLogData(data?: unknown): Record<string, unknown> {
+  if (data && typeof data === 'object' && !Array.isArray(data)) {
+    return data as Record<string, unknown>;
+  }
+  return data !== undefined ? { value: data } : {};
+}
+
+function normalizeErrorData(error?: unknown): Record<string, unknown> {
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+      ...Object.fromEntries(
+        Object.entries(error as Error & Record<string, unknown>).filter(
+          ([key]) => !['name', 'message', 'stack'].includes(key)
+        )
+      ),
+    };
+  }
+  return normalizeLogData(error);
+}
+
 /**
  * 统一日志服务
  * 🎯 DI改造：支持依赖注入Storage和Config
@@ -351,89 +374,35 @@ export class LoggerService implements ILoggerService {
    * DEBUG 级别日志
    */
   debug(message: string, data?: unknown, module = 'App'): void {
-    const safeData: Record<string, unknown> =
-      data && typeof data === 'object' && !Array.isArray(data)
-        ? data as Record<string, unknown>
-        : data !== undefined ? { value: data } : {};
-    this._log(LOG_LEVELS.DEBUG, message, safeData, module);
+    this._log(LOG_LEVELS.DEBUG, message, normalizeLogData(data), module);
   }
 
   /**
    * INFO 级别日志
    */
   info(message: string, data?: unknown, module = 'App'): void {
-    const safeData: Record<string, unknown> =
-      data && typeof data === 'object' && !Array.isArray(data)
-        ? data as Record<string, unknown>
-        : data !== undefined ? { value: data } : {};
-    this._log(LOG_LEVELS.INFO, message, safeData, module);
+    this._log(LOG_LEVELS.INFO, message, normalizeLogData(data), module);
   }
 
   /**
    * WARN 级别日志
    */
   warn(message: string, data?: unknown, module = 'App'): void {
-    const safeData: Record<string, unknown> =
-      data && typeof data === 'object' && !Array.isArray(data)
-        ? data as Record<string, unknown>
-        : data !== undefined ? { value: data } : {};
-    this._log(LOG_LEVELS.WARN, message, safeData, module);
+    this._log(LOG_LEVELS.WARN, message, normalizeLogData(data), module);
   }
 
   /**
    * ERROR 级别日志
    */
   error(message: string, error?: unknown, module = 'App'): void {
-    let data: Record<string, unknown>;
-
-    if (error instanceof Error) {
-      data = {
-        name: error.name,
-        message: error.message,
-        stack: error.stack,
-        ...Object.fromEntries(
-          Object.entries(error as Error & Record<string, unknown>).filter(
-            ([key]) => !['name', 'message', 'stack'].includes(key)
-          )
-        ),
-      };
-    } else if (error && typeof error === 'object' && !Array.isArray(error)) {
-      data = error as Record<string, unknown>;
-    } else if (error !== undefined) {
-      data = { value: error };
-    } else {
-      data = {};
-    }
-
-    this._log(LOG_LEVELS.ERROR, message, data, module);
+    this._log(LOG_LEVELS.ERROR, message, normalizeErrorData(error), module);
   }
 
   /**
    * FATAL 级别日志
    */
   fatal(message: string, error?: unknown, module = 'App'): void {
-    let data: Record<string, unknown>;
-
-    if (error instanceof Error) {
-      data = {
-        name: error.name,
-        message: error.message,
-        stack: error.stack,
-        ...Object.fromEntries(
-          Object.entries(error as Error & Record<string, unknown>).filter(
-            ([key]) => !['name', 'message', 'stack'].includes(key)
-          )
-        ),
-      };
-    } else if (error && typeof error === 'object' && !Array.isArray(error)) {
-      data = error as Record<string, unknown>;
-    } else if (error !== undefined) {
-      data = { value: error };
-    } else {
-      data = {};
-    }
-
-    this._log(LOG_LEVELS.FATAL, message, data, module);
+    this._log(LOG_LEVELS.FATAL, message, normalizeErrorData(error), module);
   }
 
   /**

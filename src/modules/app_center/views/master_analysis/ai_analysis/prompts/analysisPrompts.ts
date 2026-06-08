@@ -620,14 +620,8 @@ function applyPromptData(taskPrompt: string, product: Product, promptData: Promp
     .replace('{{reviewerCountries}}', promptData.reviewerCountries);
 }
 
-function buildSingleAnalysisPrompt(
-  taskDef: AnalysisTaskDefinition,
-  taskPrompt: string,
-  product: Product,
-  language: string,
-): string {
-  return `
-You are a Data Extraction Engine specialized in E-commerce Analysis.
+function buildExtractionPromptPreamble(language: string): string {
+  return `You are a Data Extraction Engine specialized in E-commerce Analysis.
 Your sole purpose is to convert unstructured text into a strict JSON object based on the schema provided below.
 
 ## CRITICAL LANGUAGE REQUIREMENT
@@ -635,7 +629,26 @@ Your sole purpose is to convert unstructured text into a strict JSON object base
 - You MUST output ALL analysis results in **${language}** language ONLY
 - Do NOT preserve original language from reviews/listings
 - Translate all extracted terms, phrases, descriptions, and keywords to **${language}**
-- This applies to ALL fields in the JSON output
+- This applies to ALL fields in the JSON output`;
+}
+
+function buildStrictOutputSchema(schemaTemplate: string): string {
+  return `## Strict Output Schema
+You must strictly follow this JSON structure. Do not output markdown code blocks (no \`\`\`json). Output raw JSON only.
+
+{
+${schemaTemplate}
+}`;
+}
+
+function buildSingleAnalysisPrompt(
+  taskDef: AnalysisTaskDefinition,
+  taskPrompt: string,
+  product: Product,
+  language: string,
+): string {
+  return `
+${buildExtractionPromptPreamble(language)}
 
 ## Inputs
 - Market language: **${language}**
@@ -645,12 +658,7 @@ ${taskPrompt}
 
 ${CORE_JSON_RULES}
 
-## Strict Output Schema
-You must strictly follow this JSON structure. Do not output markdown code blocks (no \`\`\`json). Output raw JSON only.
-
-{
-${taskDef.schemaTemplate}
-}
+${buildStrictOutputSchema(taskDef.schemaTemplate)}
 `;
 }
 
@@ -678,15 +686,7 @@ function buildBatchAnalysisPromptTemplate(
   dynamicSchema: string,
 ): string {
   return `
-You are a Data Extraction Engine specialized in E-commerce Analysis.
-Your sole purpose is to convert unstructured text into a strict JSON object based on the schema provided below.
-
-## CRITICAL LANGUAGE REQUIREMENT
-- Input data may contain multiple languages (reviews from different countries)
-- You MUST output ALL analysis results in **${language}** language ONLY
-- Do NOT preserve original language from reviews/listings
-- Translate all extracted terms, phrases, descriptions, and keywords to **${language}**
-- This applies to ALL fields in the JSON output
+${buildExtractionPromptPreamble(language)}
 
 ## Inputs
 - Market language: **${language}**
@@ -701,12 +701,7 @@ ${dynamicTasks}
 
 ${CORE_JSON_RULES}
 
-## Strict Output Schema
-You must strictly follow this JSON structure. Do not output markdown code blocks (no \`\`\`json). Output raw JSON only.
-
-{
-${dynamicSchema}
-}
+${buildStrictOutputSchema(dynamicSchema)}
 `;
 }
 

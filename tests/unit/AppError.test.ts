@@ -96,6 +96,24 @@ describe('AppError', () => {
       expect(error.originalError?.message).toBe('原始错误');
     });
 
+    it('应该支持对象式构造参数', () => {
+      const originalError = new Error('原始错误');
+      const context = { module: 'TestModule' };
+      const error = new AppError('对象参数错误', 'OPTIONS_ERROR', {
+        level: ErrorLevel.INFO,
+        category: ErrorCategory.SYSTEM,
+        context,
+        originalError,
+        notify: false
+      });
+
+      expect(error.level).toBe(ErrorLevel.INFO);
+      expect(error.category).toBe(ErrorCategory.SYSTEM);
+      expect(error.context).toBe(context);
+      expect(error.originalError).toBe(originalError);
+      expect(error.notify).toBe(false);
+    });
+
     it('应该捕获堆栈跟踪', () => {
       const error = new AppError('测试错误', 'TEST_ERROR');
 
@@ -252,6 +270,26 @@ describe('AppError', () => {
 
       expect(error.statusCode).toBeUndefined();
       expect(error.response).toBeUndefined();
+    });
+
+    it('应该支持对象式API错误参数', () => {
+      const originalError = new Error('请求失败');
+      const response = { retryAfter: 30 };
+      const error = new ApiError('限流', 'API_RATE_LIMIT', {
+        statusCode: 429,
+        response,
+        context: { module: 'LLM' },
+        originalError
+      });
+
+      expect(error.statusCode).toBe(429);
+      expect(error.response).toBe(response);
+      expect(error.context).toMatchObject({
+        module: 'LLM',
+        statusCode: 429,
+        response
+      });
+      expect(error.originalError).toBe(originalError);
     });
   });
 

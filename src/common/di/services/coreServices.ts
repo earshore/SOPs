@@ -15,17 +15,8 @@ import { globalErrorHandler } from '@/common/errors/GlobalErrorHandler';
 import { loadingManager } from '@/common/utils/LoadingManager';
 import actionRegistry from '@/common/utils/actionRegistry';
 import { initRouter } from '@/common/router/initRouter';
-/**
- * 注册核心服务到注册表
- */
-export function registerCoreServices(registry: ServiceRegistry): void {
-  console.log('[CoreServices] 开始注册核心服务配置');
 
-  // ================================================================
-  // Level 0: 基础服务（无依赖）
-  // ================================================================
-
-  // ConfigCenter - 配置中心
+function registerBaseServices(registry: ServiceRegistry): void {
   registry.register({
     name: SERVICE_NAMES.CONFIG,
     factory: async () => ConfigCenter.getInstance(),
@@ -52,12 +43,9 @@ export function registerCoreServices(registry: ServiceRegistry): void {
     lifetime: 'singleton',
     dependencies: []
   });
+}
 
-  // ================================================================
-  // Level 1: 核心服务（依赖基础服务）
-  // ================================================================
-
-  // LoggerService - 日志服务
+function registerRuntimeServices(registry: ServiceRegistry): void {
   registry.register({
     name: SERVICE_NAMES.LOGGER,
     factory: async (c) => {
@@ -90,12 +78,9 @@ export function registerCoreServices(registry: ServiceRegistry): void {
     lifetime: 'singleton',
     dependencies: []
   });
+}
 
-  // ================================================================
-  // Level 2: 应用服务（依赖核心服务）
-  // ================================================================
-
-  // HttpService - HTTP请求服务
+function registerApplicationServices(registry: ServiceRegistry): void {
   registry.register({
     name: SERVICE_NAMES.HTTP,
     factory: async (c) => {
@@ -137,6 +122,17 @@ export function registerCoreServices(registry: ServiceRegistry): void {
     lifetime: 'singleton',
     dependencies: []
   });
+}
+
+/**
+ * 注册核心服务到注册表
+ */
+export function registerCoreServices(registry: ServiceRegistry): void {
+  console.log('[CoreServices] 开始注册核心服务配置');
+
+  registerBaseServices(registry);
+  registerRuntimeServices(registry);
+  registerApplicationServices(registry);
 
   console.log('[CoreServices] 核心服务配置注册完成');
 }

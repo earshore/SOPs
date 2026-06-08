@@ -25,13 +25,6 @@ let legacyInstance: ReturnType<typeof createLegacyAdapter> | null = null;
 type ConversionResult = ReturnType<typeof convertMenuConfig>;
 type RouterStoreSyncInstance = ReturnType<typeof createRouterStoreSync>;
 
-function getExistingRouter(router: NavigoAdapter): NavigoAdapter {
-  if (import.meta.env.DEV) {
-    console.log('[initRouter] Router already initialized, returning existing instance');
-  }
-  return router;
-}
-
 function createConfiguredRouter(): NavigoAdapter {
   return createRouter({
     useHash: true,
@@ -48,12 +41,8 @@ function convertRoutes(): ConversionResult {
     validate: true,
   });
 
-  console.log(
-    `✓ [initRouter] Converted ${conversionResult.stats.success}/${conversionResult.stats.total} routes`
-  );
-
   if (conversionResult.errors.length > 0) {
-    console.warn('[initRouter] Conversion errors:', conversionResult.errors);
+    console.error('[initRouter] Conversion errors:', conversionResult.errors);
   }
 
   return conversionResult;
@@ -68,12 +57,6 @@ function registerConvertedRoutes(router: NavigoAdapter, conversionResult: Conver
     router.registerAlias(alias, routeIdToPath(target.replace(/^\//, '')));
   }
   router.registerAlias('/app-center/playground', routeIdToPath('playground'));
-
-  console.log(
-    `✓ [initRouter] Registered ${router.getAllRoutes().length} routes and ${
-      Object.keys(conversionResult.aliases).length
-    } aliases`
-  );
 }
 
 function createAndAttachStoreSync(router: NavigoAdapter): RouterStoreSyncInstance {
@@ -81,45 +64,14 @@ function createAndAttachStoreSync(router: NavigoAdapter): RouterStoreSyncInstanc
   storeInstance = store;
   const storeSync = createRouterStoreSync(store);
   router.setStoreSync(storeSync);
-  console.log('✓ [initRouter] Store sync enabled');
   return storeSync;
 }
 
-function configureNavigationGuard(router: NavigoAdapter): void {
-  router.addGuard({
-    name: 'navigation-logger',
-    priority: 100,
-    check: (to, from) => {
-      if (import.meta.env.DEV) {
-        console.log(`[Guard] Navigation: ${from?.path || 'null'} -> ${to.path}`);
-      }
-      return true;
-    },
-  });
-}
-
 function configureRouteMiddlewares(router: NavigoAdapter): void {
-  router.use(async (context, next) => {
-    if (import.meta.env.DEV) {
-      console.log(`[Middleware Before] Navigating to: ${context.to.path}`);
-    }
-    await next();
-  });
-
   router.useAfter(async (context, next) => {
-    if (import.meta.env.DEV) {
-      console.log(`[Middleware After] 🎯 Navigation complete: ${context.to.path}`);
-    }
-
     try {
       const routeId = context.to.config.routeId || context.to.config.moduleId;
-      if (import.meta.env.DEV) {
-        console.log(`[Middleware After] 🔄 Calling updateUIForRoute with routeId: ${routeId}`);
-      }
       await updateUIForRoute(routeId);
-      if (import.meta.env.DEV) {
-        console.log(`[Middleware After] ✓ UI update completed for: ${routeId}`);
-      }
     } catch (error) {
       console.error('[initRouter] ❌ UI update failed:', error);
     }
@@ -131,7 +83,6 @@ function configureRouteMiddlewares(router: NavigoAdapter): void {
 function installLegacyCompatibility(router: NavigoAdapter): void {
   legacyInstance = createLegacyAdapter(router, true);
   legacyInstance.installGlobalAPI();
-  console.log('✓ [initRouter] Legacy compatibility enabled');
 }
 
 function subscribeLegacyEvents(storeSync: RouterStoreSyncInstance): void {
@@ -162,41 +113,11 @@ function setupRouteChangeListener(): void {
     eventBus.on('route-change', (data: unknown) => {
       const payload = data as { routeId: string } | undefined;
       if (payload && payload.routeId && routerInstance) {
-        if (import.meta.env.DEV) {
-          console.log(`[initRouter] 📡 Received ROUTE_CHANGE event for routeId: ${payload.routeId}`);
-        }
-
         const path = routeIdToPath(payload.routeId);
-
-        if (import.meta.env.DEV) {
-          console.log(`[initRouter] 🔀 Converting routeId "${payload.routeId}" to path: ${path}`);
-        }
-
         routerInstance.navigate(path);
       }
     });
-
-    console.log('✓ [initRouter] EventBus ROUTE_CHANGE listener registered');
   });
-}
-
-function logPendingInitialNavigation(): void {
-  const currentHash = window.location.hash.replace('#', '');
-
-  if (import.meta.env.DEV) {
-    console.log('[initRouter] 🔍 Current URL hash:', currentHash);
-    console.log('[initRouter] 🔍 Full URL:', window.location.href);
-  }
-
-  if (!currentHash || currentHash === '/' || currentHash === '') {
-    if (import.meta.env.DEV) {
-      console.log('[initRouter] ⚠️ Root path detected, navigation will be triggered after views are loaded');
-    }
-  } else {
-    if (import.meta.env.DEV) {
-      console.log('[initRouter] ✓ Non-root path detected:', currentHash);
-    }
-  }
 }
 
 /**
@@ -204,24 +125,18 @@ function logPendingInitialNavigation(): void {
  */
 export function initRouter(): NavigoAdapter {
   if (routerInstance) {
-    return getExistingRouter(routerInstance);
+    return routerInstance;
   }
-
-  console.log('🚀 [initRouter] Initializing Navigo router system...');
 
   routerInstance = createConfiguredRouter();
   const conversionResult = convertRoutes();
   registerConvertedRoutes(routerInstance, conversionResult);
   const storeSync = createAndAttachStoreSync(routerInstance);
-  configureNavigationGuard(routerInstance);
   configureRouteMiddlewares(routerInstance);
   installLegacyCompatibility(routerInstance);
   subscribeLegacyEvents(storeSync);
   setupPopstateNavigation();
   setupRouteChangeListener();
-  logPendingInitialNavigation();
-
-  console.log('✅ [initRouter] Router system initialized successfully (navigation pending)');
 
   return routerInstance;
 }
@@ -272,8 +187,6 @@ export function destroyRouter(): void {
     storeInstance.getState().reset();
     storeInstance = null;
   }
-
-  console.log('✓ [destroyRouter] Router system destroyed');
 }
 
 /**
@@ -289,18 +202,11 @@ export function triggerInitialNavigation(): void {
   const currentHash = window.location.hash.replace('#', '');
   
   if (!currentHash || currentHash === '/' || currentHash === '') {
-    if (import.meta.env.DEV) {
-      console.log('[triggerInitialNavigation] 🚀 Navigating to default route: /home');
-    }
-    
     routerInstance.navigate('/home', {
       updateHistory: true,
       skipMiddleware: false,
     });
   } else {
-    if (import.meta.env.DEV) {
-      console.log('[triggerInitialNavigation] 🚀 Resolving current route:', currentHash);
-    }
     const normalizedHash = normalizeRoutePath(currentHash);
     if (normalizedHash === '/app-center/playground') {
       void routerInstance.navigate(normalizedHash, {

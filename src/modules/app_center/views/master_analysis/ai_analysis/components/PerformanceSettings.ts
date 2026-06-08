@@ -19,6 +19,21 @@ export interface PerformanceSettings {
   settingsVersion?: number;
 }
 
+interface PerformanceSettingsPanelContext {
+  showSettings: boolean;
+  settings: PerformanceSettings;
+  cacheStats: { count: number; totalSize: number };
+  updateCacheStats(): Promise<void>;
+}
+
+type PanelMixin<T extends object> = T & ThisType<PerformanceSettingsPanelContext>;
+type PerformanceSettingsPanel =
+  PerformanceSettingsPanelContext &
+  ReturnType<typeof createPerformanceSettingsActions> &
+  ReturnType<typeof createConcurrencyLabelGetters> &
+  ReturnType<typeof createConcurrencyClassGetters> &
+  ReturnType<typeof createStrategyGetters>;
+
 /**
  * 默认设置
  */
@@ -55,8 +70,8 @@ export function getPerformanceSettings(): PerformanceSettings {
       }
       return normalizeSettings(mergedSettings);
     }
-  } catch (error) {
-    console.warn('[性能设置] 读取失败，使用默认值:', error);
+  } catch {
+    return { ...DEFAULT_SETTINGS };
   }
   return { ...DEFAULT_SETTINGS };
 }
@@ -67,23 +82,25 @@ export function getPerformanceSettings(): PerformanceSettings {
 export function savePerformanceSettings(settings: PerformanceSettings): void {
   try {
     StorageService.set(SETTINGS_KEY, normalizeSettings(settings));
-    console.log('[性能设置] 已保存:', settings);
   } catch (error) {
     console.error('[性能设置] 保存失败:', error);
     throw error;
   }
 }
 
-/**
- * 创建性能设置面板
- */
-export function createPerformanceSettingsPanel() {
+function createPerformanceSettingsActions(): PanelMixin<{
+  init(): void;
+  updateCacheStats(): Promise<void>;
+  toggleSettings(): void;
+  saveSettings(): void;
+  resetSettings(): void;
+  setMaxConcurrency(event: Event): void;
+  setEnableCache(event: Event): void;
+  setFailureStrategy(event: Event): void;
+  clearCache(): Promise<void>;
+  formatSize(bytes: number): string;
+}> {
   return {
-    // 状态
-    showSettings: false,
-    settings: getPerformanceSettings(),
-    cacheStats: { count: 0, totalSize: 0 },
-
     // 初始化
     init() {
       this.updateCacheStats();
@@ -114,7 +131,7 @@ export function createPerformanceSettingsPanel() {
 
         savePerformanceSettings(this.settings);
         this.showSettings = false;
-        
+
         // 显示成功提示
         showToast('性能设置已保存', { type: 'success' });
       } catch (error) {
@@ -159,7 +176,7 @@ export function createPerformanceSettingsPanel() {
       try {
         await clearAnalysisCacheAsync();
         await this.updateCacheStats();
-        
+
         showToast('缓存已清除', { type: 'success' });
       } catch (error) {
         showToast('清除失败: ' + (error as Error).message, { type: 'error' });
@@ -172,7 +189,19 @@ export function createPerformanceSettingsPanel() {
       if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
       return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
     },
+  };
+}
 
+function createConcurrencyLabelGetters(): PanelMixin<{
+  readonly concurrencyTrackStyle: string;
+  readonly slowLabelClass: string;
+  readonly standardLabelClass: string;
+  readonly fastLabelClass: string;
+  readonly extremeLabelClass: string;
+  readonly expectedSpeedText: string;
+  readonly expectedDurationText: string;
+}> {
+  return {
     get concurrencyTrackStyle(): string {
       return `width: calc(${((this.settings.maxConcurrency - 1) / 7) * 100}%)`;
     },
@@ -200,7 +229,17 @@ export function createPerformanceSettingsPanel() {
     get expectedDurationText(): string {
       return `${Math.round(120 / this.settings.maxConcurrency)}秒`;
     },
+  };
+}
 
+function createConcurrencyClassGetters(): PanelMixin<{
+  readonly concurrencyValueWrapClass: string;
+  readonly concurrencyIconClass: string;
+  readonly concurrencyTextClass: string;
+  readonly concurrencyHintCardClass: string;
+  readonly concurrencyHintTextClass: string;
+}> {
+  return {
     get concurrencyValueWrapClass(): string {
       const n = this.settings.maxConcurrency;
       if (n <= 2) return 'bg-blue-50 border-2 border-blue-200';
@@ -240,7 +279,18 @@ export function createPerformanceSettingsPanel() {
       if (n <= 6) return 'text-purple-800';
       return 'text-purple-900';
     },
+  };
+}
 
+function createStrategyGetters(): PanelMixin<{
+  readonly continueStrategyClass: string;
+  readonly abortStrategyClass: string;
+  getConcurrencyDotClass(index: number): string;
+  getSpeedBarClass(index: number): string;
+  getStabilityBarClass(index: number): string;
+  getConcurrencyHint(): string;
+}> {
+  return {
     get continueStrategyClass(): string {
       return this.settings.failureStrategy === 'continue' ? 'border-indigo-600 bg-indigo-50' : 'border-slate-200 hover:border-slate-300';
     },
@@ -269,6 +319,29 @@ export function createPerformanceSettingsPanel() {
       if (n <= 4) return '推荐设置，平衡速度与稳定性';
       if (n <= 6) return '高速模式，需要良好的网络';
       return '极速模式，可能触发API限流';
-    }
+    },
   };
+}
+
+function applyPanelMixin(panel: object, mixin: object): void {
+  Object.defineProperties(panel, Object.getOwnPropertyDescriptors(mixin));
+}
+
+/**
+ * 创建性能设置面板
+ */
+export function createPerformanceSettingsPanel(): PerformanceSettingsPanel {
+  const panel = {
+    // 状态
+    showSettings: false,
+    settings: getPerformanceSettings(),
+    cacheStats: { count: 0, totalSize: 0 },
+  } as PerformanceSettingsPanel;
+
+  applyPanelMixin(panel, createPerformanceSettingsActions());
+  applyPanelMixin(panel, createConcurrencyLabelGetters());
+  applyPanelMixin(panel, createConcurrencyClassGetters());
+  applyPanelMixin(panel, createStrategyGetters());
+
+  return panel;
 }

@@ -74,6 +74,21 @@ async function getLLMConfig(): Promise<LLMConfig> {
   };
 }
 
+function unwrapAnalysisResult(result: unknown, fieldName: keyof FullAnalysisReport): unknown | null {
+  if (typeof result !== 'object' || result === null) {
+    logger.warn('[AI分析] 返回的数据格式无效:', result, 'AIAnalysisService');
+    return null;
+  }
+
+  const resultObj = result as Record<string, unknown>;
+  if (resultObj[fieldName]) {
+    logger.debug('[AI分析] 检测到嵌套结构，已提取内层数据', undefined, 'AIAnalysisService');
+    return resultObj[fieldName];
+  }
+
+  return result;
+}
+
 // 已移除 prepareProductData 和 getPromptTemplate 函数
 // 现在直接使用 analysisPrompts.ts 中的 generateAnalysisPrompt
 
@@ -180,21 +195,10 @@ export async function runAIAnalysis(
       // 验证并添加结果到报告中
       const fieldName = targetToField[targetId];
       if (fieldName && result) {
-        // 确保结果是有效的对象
-        if (typeof result === 'object' && result !== null) {
-          // 检查是否有嵌套的字段名（AI 可能返回 {"title-keywords": {...}} 而不是直接的 {...}）
-          let actualResult = result;
-          const resultObj = result as Record<string, unknown>;
-          if (resultObj[fieldName]) {
-            // 如果存在嵌套，提取内层数据
-            actualResult = resultObj[fieldName];
-            logger.debug('[AI分析] 检测到嵌套结构，已提取内层数据', undefined, 'AIAnalysisService');
-          }
-
+        const actualResult = unwrapAnalysisResult(result, fieldName);
+        if (actualResult) {
           (report as Record<string, unknown>)[fieldName] = actualResult;
           logger.debug('[AI分析] 分析成功，数据已添加到报告', undefined, 'AIAnalysisService');
-        } else {
-          logger.warn('[AI分析] 返回的数据格式无效:', result, 'AIAnalysisService');
         }
       }
 
@@ -252,6 +256,33 @@ export async function runAIAnalysis(
   return reportWithConfidence as FullAnalysisReport;
 }
 
+type AnalysisValidator = (data: Record<string, unknown>) => boolean;
+
+function hasArrays(data: Record<string, unknown>, keys: string[]): boolean {
+  return keys.every((key) => Array.isArray(data[key]));
+}
+
+function hasValues(data: Record<string, unknown>, keys: string[]): boolean {
+  return keys.every((key) => !!data[key]);
+}
+
+const analysisResultValidators: Record<string, AnalysisValidator> = {
+  'title-keywords': (data) => hasArrays(data, ['primary_keywords', 'secondary_keywords']),
+  'selling-points': (data) =>
+    hasArrays(data, ['bullet_analysis']) &&
+    hasValues(data, ['overall_strategy', 'function_scene_matrix']),
+  'fatal-flaws': (data) => hasArrays(data, ['critical_issues', 'return_triggers']),
+  'wow-moments': (data) => hasArrays(data, ['moments', 'emotional_triggers']),
+  'hesitation-points': (data) => hasArrays(data, ['hesitations', 'common_doubts']),
+  'buyer-profile': (data) =>
+    hasValues(data, ['demographics']) &&
+    hasArrays(data, ['buyer_types', 'usage_scenes']),
+  'vocab-gap': (data) => hasArrays(data, ['seller_terms', 'buyer_terms', 'term_translations']),
+  'promise-reality': (data) =>
+    hasArrays(data, ['gaps', 'verified_claims']) &&
+    hasValues(data, ['overall_credibility'])
+};
+
 /**
  * 验证 AI 返回的数据格式
  */
@@ -262,46 +293,6 @@ export function validateAnalysisResult(targetId: string, result: unknown): boole
   }
 
   const data = result as Record<string, unknown>;
-
-  // 根据不同的目标进行特定验证
-  switch (targetId) {
-    case 'title-keywords':
-      return Array.isArray(data.primary_keywords) &&
-        Array.isArray(data.secondary_keywords);
-
-    case 'selling-points':
-      return Array.isArray(data.bullet_analysis) &&
-        !!data.overall_strategy &&
-        !!data.function_scene_matrix;
-
-    case 'fatal-flaws':
-      return Array.isArray(data.critical_issues) &&
-        Array.isArray(data.return_triggers);
-
-    case 'wow-moments':
-      return Array.isArray(data.moments) &&
-        Array.isArray(data.emotional_triggers);
-
-    case 'hesitation-points':
-      return Array.isArray(data.hesitations) &&
-        Array.isArray(data.common_doubts);
-
-    case 'buyer-profile':
-      return !!data.demographics &&
-        Array.isArray(data.buyer_types) &&
-        Array.isArray(data.usage_scenes);
-
-    case 'vocab-gap':
-      return Array.isArray(data.seller_terms) &&
-        Array.isArray(data.buyer_terms) &&
-        Array.isArray(data.term_translations);
-
-    case 'promise-reality':
-      return Array.isArray(data.gaps) &&
-        Array.isArray(data.verified_claims) &&
-        !!data.overall_credibility;
-
-    default:
-      return true;
-  }
+  const validator = analysisResultValidators[targetId];
+  return validator ? validator(data) : true;
 }

@@ -104,6 +104,27 @@ describe('LLMService', () => {
       );
     });
 
+    it('应该支持对象式调用参数', async () => {
+      const mockResponse = createChatCompletion('Object call response');
+      (global.fetch as any).mockResolvedValueOnce(createJsonResponse(mockResponse));
+
+      const { callLLM } = await import('../../src/services/llmService');
+      const result = await callLLM({
+        messages: [{ role: 'user' as const, content: 'Hello' }],
+        provider: 'openai',
+        endpoint: 'https://api.example.com/v1',
+        apiKey: 'test-api-key',
+        model: 'gpt-4',
+        options: { stream: false }
+      });
+
+      expect(result).toBe('Object call response');
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://api.example.com/v1/chat/completions',
+        expect.objectContaining({ method: 'POST' })
+      );
+    });
+
     it('应该支持JSON模式', async () => {
       const mockResponse = createChatCompletion('{"result": "json response"}');
 

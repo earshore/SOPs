@@ -136,6 +136,21 @@ function renderNextStepTags(steps: string[]): string {
         .join('');
 }
 
+function renderTableRows(tbody: HTMLElement, tableHTML: string): void {
+    const scratch = document.createElement('div');
+    const renderer = SafeRenderer.getInstance();
+
+    // Parse rows in a table context; body parsing drops orphaned tr/td elements.
+    renderer.renderTemplate(scratch, `<table><tbody>${tableHTML}</tbody></table>`);
+
+    const parsedBody = scratch.querySelector('tbody');
+    tbody.replaceChildren();
+
+    if (parsedBody) {
+        tbody.append(...Array.from(parsedBody.children));
+    }
+}
+
 function renderTableRow(row: NPIProductRecord, index: number): string {
     const stageConfig: StageConfig = stageConfigMap[row.stage] || stageConfigMap['new-test'];
     const clearancePrice = calcClearancePrice(row.delivery_fee);
@@ -245,12 +260,8 @@ function renderTable(): void {
     const tbody = document.getElementById('npi-table-body');
     if (!tbody) return;
 
-    // 使用 SafeRenderer 渲染表格（静态模板，已审计）
-    const renderer = SafeRenderer.getInstance();
     const tableHTML = tableData.map(renderTableRow).join('');
-    
-    // 使用 SafeRenderer 渲染（静态模板，已审计）
-    renderer.renderTemplate(tbody, tableHTML);
+    renderTableRows(tbody, tableHTML);
     
     // 使用事件委托绑定所有事件
     setupTableEventDelegation(tbody);

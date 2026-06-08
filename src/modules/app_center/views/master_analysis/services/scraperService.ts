@@ -66,6 +66,34 @@ class RequestPool {
 
 const requestPool = new RequestPool(configCenter.get<number>('scraper.maxConcurrent') || 2);
 
+type LanguageHeader = typeof LANGUAGE_HEADERS[keyof typeof LANGUAGE_HEADERS];
+
+interface ProxyFetchContext {
+    url: string;
+    site: string;
+    headers: LanguageHeader;
+    urlWithLang: string;
+    proxyConfig: ProxyConfig;
+    timeout: number;
+    delay: number;
+}
+
+interface ScrapeContext {
+    asin: string;
+    site: ScraperSite;
+    scrapeReviews: boolean;
+    updateStatusCallback: StatusCallback;
+    fetchOptions: FetchOptions;
+    lang: LanguageHeader;
+    baseUrl: string;
+}
+
+interface ScrapedContent {
+    title: string;
+    bullets: string[];
+    reviews: ScrapedProduct['customer_reviews'];
+}
+
 // ----------------------------------------
 // URL 策略
 // ----------------------------------------
@@ -113,24 +141,21 @@ function constructFetchUrl(targetUrl: string, proxyConfig: ProxyConfig): string 
     );
 }
 
-// ----------------------------------------
-// 代理请求
-// ----------------------------------------
-
-async function fetchWithProxy(url: string, site: string, options: FetchOptions = {}): Promise<string> {
-    const scraperConfig = {
-        retries: configCenter.get<number>('scraper.maxRetries') || 3,
-        delay: configCenter.get<number>('scraper.retryDelay') || 500,
-        timeout: configCenter.get<number>('scraper.requestTimeout') || REQUEST_TIMEOUT_MS
+function getScraperRequestConfig(options: FetchOptions): {
+    retries: number;
+    delay: number;
+    proxyConfig: ProxyConfig;
+    timeout: number;
+} {
+    return {
+        retries: options.retries ?? configCenter.get<number>('scraper.maxRetries') ?? 3,
+        delay: options.delay ?? configCenter.get<number>('scraper.retryDelay') ?? 500,
+        proxyConfig: options.proxyConfig ?? {},
+        timeout: options.timeout ?? configCenter.get<number>('scraper.requestTimeout') ?? REQUEST_TIMEOUT_MS
     };
+}
 
-    const {
-        retries = scraperConfig.retries,
-        delay = scraperConfig.delay,
-        proxyConfig = {},
-        timeout = scraperConfig.timeout
-    } = options;
-
+function getLanguageHeader(site: string): LanguageHeader {
     const headers = LANGUAGE_HEADERS[site];
     if (!headers) {
         throw new ValidationError(
@@ -142,95 +167,154 @@ async function fetchWithProxy(url: string, site: string, options: FetchOptions =
         );
     }
 
-    const separator = url.includes("?") ? "&" : "?";
-    const urlWithLang = `${url}${separator}language=${headers.locale}`;
+    return headers;
+}
 
-            const isCommercial = ['scraperapi', 'zenrows', 'brightdata', 'custom_api'].includes(proxyConfig.type || '');
+function addLanguageParameter(url: string, locale: string): string {
+    const separator = url.includes("?") ? "&" : "?";
+    return `${url}${separator}language=${locale}`;
+}
+
+function isCommercialProxy(proxyConfig: ProxyConfig): boolean {
+    return ['scraperapi', 'zenrows', 'brightdata', 'custom_api'].includes(proxyConfig.type || '');
+}
+
+function createProxyRequestOptions(headers: LanguageHeader, proxyConfig: ProxyConfig): RequestInit {
+    if (isCommercialProxy(proxyConfig)) {
+        return {};
+    }
+
+    return {
+        headers: {
+            "Accept-Language": headers["Accept-Language"],
+            "Accept": "text/html,application/xhtml+xml",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+        }
+    };
+}
+
+async function waitBeforeProxyAttempt(attempt: number, delay: number): Promise<void> {
+    if (attempt === 0) {
+        return;
+    }
+
+    const jitter = Math.random() * 300;
+    await sleep(delay * (attempt + 1) + jitter);
+}
+
+async function assertProxyResponseOk(res: Response, context: ProxyFetchContext): Promise<void> {
+    if (res.status === 403 || res.status === 401) {
+        throw new ApiError(
+            "API Key 无效或访问被拒绝",
+            'SCRAPER_SVC_003',
+            res.status,
+            undefined,
+            {
+                module: 'ScraperService',
+                action: 'fetchWithProxy',
+                url: context.url,
+                site: context.site,
+                proxyType: context.proxyConfig.type
+            }
+        );
+    }
+
+    if (res.status === 429) {
+        await sleep(2000 + Math.random() * 1000);
+        throw new ApiError(
+            "请求过于频繁 (429)",
+            'SCRAPER_SVC_004',
+            429,
+            undefined,
+            { module: 'ScraperService', action: 'fetchWithProxy', url: context.url, site: context.site }
+        );
+    }
+
+    if (!res.ok) {
+        throw new ApiError(
+            `HTTP Error ${res.status}`,
+            'SCRAPER_SVC_005',
+            res.status,
+            undefined,
+            { module: 'ScraperService', action: 'fetchWithProxy', url: context.url, site: context.site }
+        );
+    }
+}
+
+function assertProxyTextOk(text: string, context: ProxyFetchContext): void {
+    if (text && text.length >= 200) {
+        return;
+    }
+
+    if (isCommercialProxy(context.proxyConfig)) {
+        return;
+    }
+
+    throw new ApiError(
+        "返回内容过短，可能无效",
+        'SCRAPER_SVC_006',
+        undefined,
+        text,
+        {
+            module: 'ScraperService',
+            action: 'fetchWithProxy',
+            url: context.url,
+            site: context.site,
+            contentLength: text?.length || 0
+        }
+    );
+}
+
+function normalizeProxyAttemptError(errorValue: unknown, attempt: number, timeout: number): Error {
+    const error = errorValue instanceof Error ? errorValue : new Error(String(errorValue));
+
+    if (error.name === 'AbortError') {
+        console.warn(`请求超时 (attempt ${attempt + 1})`);
+        return new Error(`请求超时 (${timeout}ms)`);
+    }
+
+    console.warn(`Fetch attempt ${attempt + 1} failed:`, error.message);
+    return error;
+}
+
+async function fetchProxyAttempt(context: ProxyFetchContext, attempt: number): Promise<string> {
+    await waitBeforeProxyAttempt(attempt, context.delay);
+
+    const fetchUrl = constructFetchUrl(context.urlWithLang, context.proxyConfig);
+    const reqOptions = createProxyRequestOptions(context.headers, context.proxyConfig);
+    const res = await requestPool.add(() => fetchWithTimeout(fetchUrl, reqOptions, context.timeout));
+
+    await assertProxyResponseOk(res, context);
+
+    const text = await res.text();
+    assertProxyTextOk(text, context);
+    return text;
+}
+
+// ----------------------------------------
+// 代理请求
+// ----------------------------------------
+
+async function fetchWithProxy(url: string, site: string, options: FetchOptions = {}): Promise<string> {
+    const { retries, delay, proxyConfig, timeout } = getScraperRequestConfig(options);
+    const headers = getLanguageHeader(site);
+    const context: ProxyFetchContext = {
+        url,
+        site,
+        headers,
+        urlWithLang: addLanguageParameter(url, headers.locale),
+        proxyConfig,
+        timeout,
+        delay
+    };
 
     let lastError: Error | undefined;
 
     for (let i = 0; i < retries; i++) {
         try {
-            // 使用 jitter 随机化延迟，避免被检测为机器人
-            if (i > 0) {
-                const jitter = Math.random() * 300;
-                await sleep(delay * (i + 1) + jitter);
-            }
-
-            const fetchUrl = constructFetchUrl(urlWithLang, proxyConfig);
-
-            let reqOptions: RequestInit = {};
-            if (!isCommercial) {
-                reqOptions = {
-                    headers: {
-                        "Accept-Language": headers["Accept-Language"],
-                        "Accept": "text/html,application/xhtml+xml",
-                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-                    }
-                };
-            }
-
-            // 使用带超时的 fetch + 并发池
-            const res = await requestPool.add(() =>
-                fetchWithTimeout(fetchUrl, reqOptions, timeout)
-            );
-
-            if (res.status === 403 || res.status === 401) {
-                throw new ApiError(
-                    "API Key 无效或访问被拒绝",
-                    'SCRAPER_SVC_003',
-                    res.status,
-                    undefined,
-                    { module: 'ScraperService', action: 'fetchWithProxy', url, site, proxyType: proxyConfig.type }
-                );
-            }
-            if (res.status === 429) {
-                // 处理限流，等待后重试
-                await sleep(2000 + Math.random() * 1000);
-                throw new ApiError(
-                    "请求过于频繁 (429)",
-                    'SCRAPER_SVC_004',
-                    429,
-                    undefined,
-                    { module: 'ScraperService', action: 'fetchWithProxy', url, site }
-                );
-            }
-            if (!res.ok) {
-                throw new ApiError(
-                    `HTTP Error ${res.status}`,
-                    'SCRAPER_SVC_005',
-                    res.status,
-                    undefined,
-                    { module: 'ScraperService', action: 'fetchWithProxy', url, site }
-                );
-            }
-
-            let text = await res.text();
-
-            if (!text || text.length < 200) {
-                if (!isCommercial) {
-                    throw new ApiError(
-                        "返回内容过短，可能无效",
-                        'SCRAPER_SVC_006',
-                        undefined,
-                        text,
-                        { module: 'ScraperService', action: 'fetchWithProxy', url, site, contentLength: text?.length || 0 }
-                    );
-                }
-            }
-
-            return text;
-
+            return await fetchProxyAttempt(context, i);
         } catch (e) {
-            const error = e instanceof Error ? e : new Error(String(e));
-            lastError = error;
-            // 超时错误特殊处理
-            if (error.name === 'AbortError') {
-                console.warn(`请求超时 (attempt ${i + 1})`);
-                lastError = new Error(`请求超时 (${timeout}ms)`);
-            } else {
-                console.warn(`Fetch attempt ${i + 1} failed:`, error.message);
-            }
+            lastError = normalizeProxyAttemptError(e, i, timeout);
         }
     }
     throw lastError;
@@ -266,6 +350,156 @@ async function fetchReviewsParallel(
     return [];
 }
 
+function createFailedScrapedProduct(asin: string, error: string): ScrapedProduct {
+    return {
+        asin,
+        url: '',
+        language: '',
+        productTitle: '',
+        scrape_status: "failed",
+        error,
+        feature_bullets: [],
+        customer_reviews: []
+    };
+}
+
+async function getCachedScrapedProduct(context: ScrapeContext): Promise<ScrapedProduct | null> {
+    try {
+        const cachedItem = await HistoryService.getByAsinAsync(context.asin, context.site);
+        if (!cachedItem?.product) {
+            return null;
+        }
+
+        const now = Date.now();
+        const cachedTime = new Date(cachedItem.timestamp).getTime();
+        if ((now - cachedTime) >= CACHE_DURATION_MS) {
+            return null;
+        }
+
+        const age = ((now - cachedTime) / 3600000).toFixed(1);
+        context.updateStatusCallback(context.asin, "success", `⚡ 命中缓存 (${age}小时前)`);
+        return cachedItem.product;
+    } catch (err) {
+        console.warn("缓存读取失败，转为网络请求");
+        return null;
+    }
+}
+
+function createScrapeFetchOptions(proxyConfig: ProxyConfig): FetchOptions {
+    return {
+        retries: configCenter.get<number>('scraper.maxRetries') || 3,
+        delay: configCenter.get<number>('scraper.retryDelay') || 500,
+        proxyConfig
+    };
+}
+
+function createPendingScrapedProduct(context: ScrapeContext): ScrapedProduct {
+    return {
+        asin: context.asin,
+        url: `${context.baseUrl}?language=${context.lang.locale}`,
+        language: context.lang.name,
+        productTitle: "",
+        feature_bullets: [],
+        customer_reviews: [],
+        scrape_status: "pending",
+        error: "",
+    };
+}
+
+function assertValidProductTitle(title: string, context: ScrapeContext, attempt: number): void {
+    if (title && !title.includes("Robot Check")) {
+        return;
+    }
+
+    throw new SystemError(
+        "触发反爬验证 (Robot Check)",
+        'SCRAPER_SVC_007',
+        { module: 'ScraperService', action: 'scrapeAsin', asin: context.asin, site: context.site, attempt }
+    );
+}
+
+function toCustomerReviews(reviews: unknown[]): ScrapedProduct['customer_reviews'] {
+    return reviews.map(r => {
+        const review = r as { title?: string; content?: string; rating?: number; isVerified?: boolean };
+        return {
+            headline: review.title || "",
+            body: review.content || "",
+            star_rating: review.rating || 0,
+            is_verified: review.isVerified || false,
+            review_date: ""
+        };
+    });
+}
+
+async function scrapeProductReviews(context: ScrapeContext, productHtml: string): Promise<ScrapedProduct['customer_reviews']> {
+    context.updateStatusCallback(context.asin, "scraping", "正在分析评论...");
+
+    let reviews = await fetchReviewsParallel(context.asin, context.site, context.fetchOptions, context.lang);
+    if (reviews.length === 0) {
+        reviews = parseReviews(productHtml);
+    }
+
+    return toCustomerReviews(reviews);
+}
+
+async function scrapeProductContent(context: ScrapeContext, attempt: number): Promise<ScrapedContent> {
+    context.updateStatusCallback(context.asin, "scraping", `正在采集 (第 ${attempt} 次)...`);
+
+    const productHtml = await fetchWithProxy(context.baseUrl, context.site, context.fetchOptions);
+    const { title, bullets } = parseProductPage(productHtml, context.asin, context.site);
+    assertValidProductTitle(title, context, attempt);
+
+    return {
+        title,
+        bullets,
+        reviews: context.scrapeReviews ? await scrapeProductReviews(context, productHtml) : []
+    };
+}
+
+function applyScrapedContent(result: ScrapedProduct, content: ScrapedContent): void {
+    result.productTitle = content.title;
+    result.feature_bullets = content.bullets;
+    result.customer_reviews = content.reviews;
+    result.scrape_status = "success";
+}
+
+async function handleScrapeAttemptFailure(
+    error: unknown,
+    attempt: number,
+    maxRetries: number,
+    result: ScrapedProduct,
+    asin: string
+): Promise<void> {
+    console.error(`Task Error ${asin}:`, error);
+
+    if (attempt === maxRetries) {
+        result.scrape_status = "failed";
+        result.error = (error as Error).message;
+        return;
+    }
+
+    await sleep(1000 * attempt);
+}
+
+async function runScrapeAttempts(context: ScrapeContext, result: ScrapedProduct): Promise<void> {
+    const maxRetries = configCenter.get<number>('scraper.maxRetries') || 3;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            applyScrapedContent(result, await scrapeProductContent(context, attempt));
+            return;
+        } catch (error) {
+            await handleScrapeAttemptFailure(error, attempt, maxRetries, result, context.asin);
+        }
+    }
+}
+
+function createScrapeSummary(result: ScrapedProduct): string {
+    return result.scrape_status === "failed"
+        ? getErrorSummary(result.error)
+        : `标题:✓, 描述:${result.feature_bullets.length}, 评论:${result.customer_reviews.length}`;
+}
+
 /**
  * 主抓取函数
  * @param asin - 产品ASIN
@@ -280,122 +514,33 @@ export async function scrapeAsin(
     scrapeReviews: boolean,
     updateStatusCallback: StatusCallback
 ): Promise<ScrapedProduct> {
-    // 使用 StorageService 获取代理配置
-    const proxyConfig = StorageService.getProxyConfig();
-
     if (!site || !LANGUAGE_HEADERS[site]) {
         const errorMsg = `无效的站点参数: ${site || "为空"}`;
         updateStatusCallback(asin, "failed", errorMsg);
-        return {
-            asin,
-            url: '',
-            language: '',
-            productTitle: '',
-            scrape_status: "failed",
-            error: errorMsg,
-            feature_bullets: [],
-            customer_reviews: []
-        };
+        return createFailedScrapedProduct(asin, errorMsg);
     }
 
-    // 缓存检查
-    try {
-        const cachedItem = await HistoryService.getByAsinAsync(asin, site);
-        if (cachedItem && cachedItem.product) {
-            const now = Date.now();
-            const cachedTime = new Date(cachedItem.timestamp).getTime();
-
-            if ((now - cachedTime) < CACHE_DURATION_MS) {
-                const age = ((now - cachedTime) / 3600000).toFixed(1);
-                updateStatusCallback(asin, "success", `⚡ 命中缓存 (${age}小时前)`);
-                return cachedItem.product;
-            }
-        }
-    } catch (err) {
-        console.warn("缓存读取失败，转为网络请求");
-    }
-
-    const fetchOptions: FetchOptions = {
-        retries: configCenter.get<number>('scraper.maxRetries') || 3,
-        delay: configCenter.get<number>('scraper.retryDelay') || 500,
-        proxyConfig
-    };
-    const lang = LANGUAGE_HEADERS[site];
+    const proxyConfig = StorageService.getProxyConfig();
+    const lang = getLanguageHeader(site);
     const baseUrl = `https://www.${lang.domain}/dp/${asin}`;
-
-    let result: ScrapedProduct = {
+    const context: ScrapeContext = {
         asin,
-        url: `${baseUrl}?language=${lang.locale}`,
-        language: lang.name,
-        productTitle: "",
-        feature_bullets: [],
-        customer_reviews: [],
-        scrape_status: "pending",
-        error: "",
+        site,
+        scrapeReviews,
+        updateStatusCallback,
+        fetchOptions: createScrapeFetchOptions(proxyConfig),
+        lang,
+        baseUrl
     };
 
-    const MAX_TASK_RETRIES = configCenter.get<number>('scraper.maxRetries') || 3;
-
-    for (let attempt = 1; attempt <= MAX_TASK_RETRIES; attempt++) {
-        try {
-            updateStatusCallback(asin, "scraping", `正在采集 (第 ${attempt} 次)...`);
-
-            const productHtml = await fetchWithProxy(baseUrl, site, fetchOptions);
-            const { title, bullets } = parseProductPage(productHtml, asin, site);
-
-            if (!title || title.includes("Robot Check")) {
-                throw new SystemError(
-                    "触发反爬验证 (Robot Check)",
-                    'SCRAPER_SVC_007',
-                    { module: 'ScraperService', action: 'scrapeAsin', asin, site, attempt }
-                );
-            }
-
-            result.productTitle = title;
-            result.feature_bullets = bullets;
-
-            // 并行抓取评论
-            if (scrapeReviews) {
-                updateStatusCallback(asin, "scraping", "正在分析评论...");
-
-                let reviews = await fetchReviewsParallel(asin, site, fetchOptions, lang);
-
-                // 回退: 从商品页解析
-                if (reviews.length === 0) {
-                    reviews = parseReviews(productHtml);
-                }
-
-                result.customer_reviews = reviews.map(r => {
-                    const review = r as { title?: string; content?: string; rating?: number; isVerified?: boolean };
-                    return {
-                        headline: review.title || "",
-                        body: review.content || "",
-                        star_rating: review.rating || 0,
-                        is_verified: review.isVerified || false,
-                        review_date: ""
-                    };
-                });
-            }
-
-            result.scrape_status = "success";
-            break;
-
-        } catch (e) {
-            console.error(`Task Error ${asin}:`, e);
-            if (attempt === MAX_TASK_RETRIES) {
-                result.scrape_status = "failed";
-                result.error = (e as Error).message;
-            } else {
-                await sleep(1000 * attempt);
-            }
-        }
+    const cachedProduct = await getCachedScrapedProduct(context);
+    if (cachedProduct) {
+        return cachedProduct;
     }
 
-    const summary = result.scrape_status === "failed"
-        ? getErrorSummary(result.error)
-        : `标题:✓, 描述:${result.feature_bullets.length}, 评论:${result.customer_reviews.length}`;
-
-    updateStatusCallback(asin, result.scrape_status, summary);
+    const result = createPendingScrapedProduct(context);
+    await runScrapeAttempts(context, result);
+    updateStatusCallback(asin, result.scrape_status, createScrapeSummary(result));
     return result;
 }
 

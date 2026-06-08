@@ -441,6 +441,60 @@ function parsePromiseReality(report: PromiseRealityReport): AnalysisResult {
   };
 }
 
+interface AnalysisReportParser {
+  get: (report: FullAnalysisReport) => unknown;
+  parse: (section: unknown) => AnalysisResult;
+}
+
+const analysisReportParsers: Record<string, AnalysisReportParser> = {
+  'title-keywords': {
+    get: (report) => report['title-keywords'],
+    parse: (section) => parseTitleKeywords(section as TitleKeywordsReport)
+  },
+  'selling-points': {
+    get: (report) => report['selling-points'],
+    parse: (section) => parseSellingPoints(section as SellingPointsReport)
+  },
+  'fatal-flaws': {
+    get: (report) => report['fatal-flaws'],
+    parse: (section) => parseFatalFlaws(section as FatalFlawsReport)
+  },
+  'wow-moments': {
+    get: (report) => report['wow-moments'],
+    parse: (section) => parseWowMoments(section as WowMomentsReport)
+  },
+  'hesitation-points': {
+    get: (report) => report['hesitation-points'],
+    parse: (section) => parseHesitationPoints(section as HesitationPointsReport)
+  },
+  'buyer-profile': {
+    get: (report) => report['buyer-profile'],
+    parse: (section) => parseBuyerProfile(section as BuyerProfileReport)
+  },
+  'vocab-gap': {
+    get: (report) => report['vocab-gap'],
+    parse: (section) => parseVocabGap(section as VocabGapReport)
+  },
+  'promise-reality': {
+    get: (report) => report['promise-reality'],
+    parse: (section) => parsePromiseReality(section as PromiseRealityReport)
+  }
+};
+
+function parseAnalysisTarget(report: FullAnalysisReport, targetId: string): AnalysisResult | null {
+  const parser = analysisReportParsers[targetId];
+  if (!parser) {
+    return null;
+  }
+
+  const section = parser.get(report);
+  if (!section) {
+    return null;
+  }
+
+  return parser.parse(section);
+}
+
 /**
  * 从完整分析报告中解析指定的分析结果
  */
@@ -450,69 +504,11 @@ export function parseAnalysisReport(
 ): AnalysisResult[] {
   const results: AnalysisResult[] = [];
 
-  console.log('[AI分析] 开始解析分析报告，目标数量:', targetIds.length);
-  console.log('[AI分析] 报告对象键:', Object.keys(report));
-
   for (const targetId of targetIds) {
     try {
-      switch (targetId) {
-        case 'title-keywords':
-          if (report['title-keywords']) {
-            console.log('[AI分析] 解析 title-keywords，数据:', report['title-keywords']);
-            results.push(parseTitleKeywords(report['title-keywords']));
-          } else {
-            console.warn('[AI分析] title-keywords 数据不存在');
-          }
-          break;
-        case 'selling-points':
-          if (report['selling-points']) {
-            results.push(parseSellingPoints(report['selling-points']));
-          } else {
-            console.warn('[AI分析] selling-points 数据不存在');
-          }
-          break;
-        case 'fatal-flaws':
-          if (report['fatal-flaws']) {
-            results.push(parseFatalFlaws(report['fatal-flaws']));
-          } else {
-            console.warn('[AI分析] fatal-flaws 数据不存在');
-          }
-          break;
-        case 'wow-moments':
-          if (report['wow-moments']) {
-            results.push(parseWowMoments(report['wow-moments']));
-          } else {
-            console.warn('[AI分析] wow-moments 数据不存在');
-          }
-          break;
-        case 'hesitation-points':
-          if (report['hesitation-points']) {
-            results.push(parseHesitationPoints(report['hesitation-points']));
-          } else {
-            console.warn('[AI分析] hesitation-points 数据不存在');
-          }
-          break;
-        case 'buyer-profile':
-          if (report['buyer-profile']) {
-            results.push(parseBuyerProfile(report['buyer-profile']));
-          } else {
-            console.warn('[AI分析] buyer-profile 数据不存在');
-          }
-          break;
-        case 'vocab-gap':
-          if (report['vocab-gap']) {
-            results.push(parseVocabGap(report['vocab-gap']));
-          } else {
-            console.warn('[AI分析] vocab-gap 数据不存在');
-          }
-          break;
-        case 'promise-reality':
-          if (report['promise-reality']) {
-            results.push(parsePromiseReality(report['promise-reality']));
-          } else {
-            console.warn('[AI分析] promise-reality 数据不存在');
-          }
-          break;
+      const result = parseAnalysisTarget(report, targetId);
+      if (result) {
+        results.push(result);
       }
     } catch (error) {
       console.error(`[AI分析] 解析 ${targetId} 时出错:`, error);
@@ -520,6 +516,5 @@ export function parseAnalysisReport(
     }
   }
 
-  console.log('[AI分析] 解析完成，成功解析:', results.length, '个目标');
   return results;
 }

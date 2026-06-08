@@ -108,6 +108,9 @@ interface AlpineWatchContext {
     $watch<T = unknown>(property: string, callback: (value: T) => void): void;
 }
 
+type ModelOption = string | { id: string; name?: string };
+type SavedLLMConfig = Partial<LLMProviderConfig> | null;
+
 function registerSettingsWatchers(panel: SettingsPanelData & AlpineWatchContext): void {
     panel.$watch('llm.provider', (val: string) => panel.loadProviderConfig(val));
     panel.$watch('proxy.type', (val: string) => {
@@ -115,40 +118,130 @@ function registerSettingsWatchers(panel: SettingsPanelData & AlpineWatchContext)
     });
 }
 
+function getModelId(model: ModelOption): string {
+    return typeof model === 'string' ? model : model.id;
+}
+
+function dedupeModels(models: ModelOption[]): ModelOption[] {
+    const seen = new Set<string>();
+    return models.filter((model) => {
+        const id = getModelId(model);
+        if (seen.has(id)) return false;
+        seen.add(id);
+        return true;
+    });
+}
+
+function getProviderConfig(provider: string): ProviderConfig | null {
+    if (!provider) return null;
+    if (!(provider in PROVIDERS)) {
+        return null;
+    }
+    return PROVIDERS[provider as keyof typeof PROVIDERS] || null;
+}
+
+function resolveProviderEndpoint(provider: string, config: ProviderConfig, savedEndpoint: string): string {
+    const shouldUseNewApiDefault = provider === 'new_api' && (!savedEndpoint || savedEndpoint === '/v1' || savedEndpoint === '/v1/');
+    return shouldUseNewApiDefault ? config.endpoint : savedEndpoint || config.endpoint || '';
+}
+
+async function loadProviderApiKey(provider: string, savedConfig: SavedLLMConfig): Promise<string> {
+    try {
+        const key = await StorageService.getSecure(`llm_key_${provider}`, '');
+        return key || '';
+    } catch {
+        return savedConfig && 'apiKey' in savedConfig ? savedConfig.apiKey || '' : '';
+    }
+}
+
+function getRawProviderModels(savedConfig: SavedLLMConfig, config: ProviderConfig): ModelOption[] {
+    return savedConfig?.models && savedConfig.models.length > 0
+        ? savedConfig.models as ModelOption[]
+        : config.models;
+}
+
+function getInitialModel(savedModel: string | undefined, models: ModelOption[]): string {
+    if (savedModel) return savedModel;
+    const first = models[0];
+    return first ? getModelId(first) : '';
+}
+
+function validateModelFetchInput(llm: LLMState): string | null {
+    if (!llm.apiKey) return '请先输入 API Key';
+    if (!llm.endpoint) return '请先输入API端点地址';
+    return null;
+}
+
+function assertFetchedModels(models: ModelOption[], provider: string): void {
+    if (models.length > 0) return;
+    throw new ApiError('未能获取到有效模型列表，请检查API配置和网络连接', 'SETTINGS_001', {
+        context: { module: 'SystemSettings', action: 'fetchModels', provider }
+    });
+}
+
+function applyFetchedModels(panel: SettingsPanelData, models: ModelOption[]): void {
+    panel.llm.models = dedupeModels(models);
+
+    const currentModelExists = panel.llm.models.some(model => getModelId(model) === panel.llm.model);
+    if (currentModelExists) return;
+
+    const firstModel = panel.llm.models[0];
+    if (firstModel) {
+        panel.llm.model = getModelId(firstModel);
+    }
+}
+
+function getModelFetchErrorMessage(error: Error): string {
+    const message = error.message;
+    if (message.includes('HTTP 401') || message.includes('Unauthorized')) return 'API Key 无效或已过期，请检查配置';
+    if (message.includes('HTTP 403') || message.includes('Forbidden')) return 'API Key 没有访问权限，请检查配置';
+    if (message.includes('HTTP 404')) return 'API端点地址不正确，请检查配置';
+    if (message.includes('Failed to fetch') || message.includes('NetworkError')) return '网络连接失败，请检查网络或端点地址';
+    if (message.includes('timeout') || message.includes('AbortError')) return '请求超时，请检查网络连接';
+    return message;
+}
+
 // ==========================================
 // Alpine Component Logic
 // ==========================================
 
-const SettingsPanel = (): SettingsPanelData => ({
-    isOpen: false,
+type SettingsPanelPart = Partial<SettingsPanelData> & ThisType<SettingsPanelData>;
 
-    // 新增：清理函数数组
-    _unsubscribers: [],
+function createSettingsState(): Pick<SettingsPanelData, 'isOpen' | '_unsubscribers' | 'llm' | 'proxy' | 'localData'> {
+    return {
+        isOpen: false,
 
-    // LLM Config State
-    llm: {
-        provider: 'new_api',
-        endpoint: 'https://new.hongecb.store/v1',
-        apiKey: '',
-        model: '',
-        models: [],
-        showKey: false,
-        isFetching: false,
-        isTesting: false
-    },
+        // 新增：清理函数数组
+        _unsubscribers: [],
 
-    // Proxy Config State
-    proxy: {
-        type: 'scraperapi',
-        customUrl: '',
-        showKey: false,
-        savedKeyMap: {}
-    },
+        // LLM Config State
+        llm: {
+            provider: 'new_api',
+            endpoint: 'https://new.hongecb.store/v1',
+            apiKey: '',
+            model: '',
+            models: [],
+            showKey: false,
+            isFetching: false,
+            isTesting: false
+        },
 
-    localData: {
-        usage: null,
-        isBusy: false
-    },
+        // Proxy Config State
+        proxy: {
+            type: 'scraperapi',
+            customUrl: '',
+            showKey: false,
+            savedKeyMap: {}
+        },
+
+        localData: {
+            usage: null,
+            isBusy: false
+        }
+    };
+}
+
+const settingsPanelBehavior: SettingsPanelPart = {
 
     // Computed / Helpers
     get currentProviderConfig(): ProviderConfig | Record<string, never> {
@@ -305,7 +398,6 @@ const SettingsPanel = (): SettingsPanelData => ({
 
     destroy() {
         // 清理 EventBus 订阅
-        console.log('[Settings] 清理 EventBus 订阅');
         this._unsubscribers?.forEach(unsub => unsub());
         this._unsubscribers = [];
     },
@@ -323,7 +415,7 @@ const SettingsPanel = (): SettingsPanelData => ({
             performanceMonitor.show();
             showToast('监控面板已打开（右上角），快捷键 Ctrl+Shift+P 切换显示。注意：仅在开发模式下可用', { type: 'success', duration: 5000 });
         } catch (error) {
-            console.error('Failed to open performance monitor:', error);
+            ErrorService.handle(error as Error, { action: 'openPerformanceMonitor', module: 'settings', notify: false });
             showToast('打开监控面板失败', { type: 'error' });
         }
     },
@@ -331,153 +423,36 @@ const SettingsPanel = (): SettingsPanelData => ({
     // --- LLM Logic ---
 
     async loadProviderConfig(provider: string): Promise<void> {
-        if (!provider) return;
-        
-        // 类型安全检查: 确保provider是有效的key
-        if (!(provider in PROVIDERS)) {
-            console.warn(`Unknown provider: ${provider}, falling back to OpenAI`);
-            return;
-        }
-        
-        const config = PROVIDERS[provider as keyof typeof PROVIDERS];
+        const config = getProviderConfig(provider);
+        if (!config) return;
+
         const savedConfig = StorageService.getLLMConfig(provider);
-
-        const savedEndpoint = savedConfig?.endpoint || '';
-        this.llm.endpoint = provider === 'new_api' && (!savedEndpoint || savedEndpoint === '/v1' || savedEndpoint === '/v1/')
-            ? config?.endpoint || 'https://new.hongecb.store/v1'
-            : savedEndpoint || config?.endpoint || '';
-        
-        // 🔐 P0优化: 从安全存储读取API密钥
-        try {
-            const key = await StorageService.getSecure(`llm_key_${provider}`, '');
-            this.llm.apiKey = key || '';
-        } catch (error) {
-            console.warn('[Settings] Failed to load encrypted API key, using fallback:', error);
-            // 兼容旧数据: 如果加密读取失败,尝试读取明文(迁移期)
-            this.llm.apiKey = (savedConfig && 'apiKey' in savedConfig) ? (savedConfig.apiKey || '') : '';
-        }
-
-        // Models: Use saved or default
-        const rawModels: Array<string | { id: string }> = (savedConfig && 'models' in savedConfig && savedConfig.models && savedConfig.models.length > 0)
-            ? savedConfig.models
-            : (config?.models || []);
-
-        // Deduplicate models
-        const seen = new Set<string>();
-        this.llm.models = rawModels.filter((m: string | { id: string }) => {
-            const id = typeof m === 'string' ? m : m.id;
-            if (seen.has(id)) return false;
-            seen.add(id);
-            return true;
-        });
-
-        this.llm.model = savedConfig?.model || '';
-
-        // Auto-select first model if none selected and models exist
-        if (!this.llm.model && this.llm.models.length > 0) {
-            const first = this.llm.models[0];
-            if (first) {
-                this.llm.model = typeof first === 'string' ? first : first.id;
-            }
-        }
+        this.llm.endpoint = resolveProviderEndpoint(provider, config, savedConfig?.endpoint || '');
+        this.llm.apiKey = await loadProviderApiKey(provider, savedConfig);
+        this.llm.models = dedupeModels(getRawProviderModels(savedConfig, config));
+        this.llm.model = getInitialModel(savedConfig?.model, this.llm.models);
     },
 
     async fetchModels(): Promise<void> {
-        if (!this.llm.apiKey) {
-            showToast('请先输入 API Key', { type: 'warning' });
-            return;
-        }
-
-        if (!this.llm.endpoint) {
-            showToast('请先输入API端点地址', { type: 'warning' });
+        const validationMessage = validateModelFetchInput(this.llm);
+        if (validationMessage) {
+            showToast(validationMessage, { type: 'warning' });
             return;
         }
 
         this.llm.isFetching = true;
-        console.log(`\n${'='.repeat(60)}`);
-        console.log(`🚀 开始获取模型列表`);
-        console.log(`📋 Provider: ${this.llm.provider}`);
-        console.log(`📋 Endpoint: ${this.llm.endpoint}`);
-        console.log(`📋 API Key: ${this.llm.apiKey.substring(0, 10)}...`);
-        console.log(`${'='.repeat(60)}\n`);
 
         try {
-            let models: Array<string | { id: string; name?: string }> = [];
             const provider = this.llm.provider;
+            const models = await fetchModelsFromApi(provider, this.llm.endpoint, this.llm.apiKey);
 
-            // 所有网关均为 OpenAI 兼容接口，统一走 API 拉取
-            console.log(`🔄 正在从 ${provider} 获取模型列表...`);
-            models = await fetchModelsFromApi(provider, this.llm.endpoint, this.llm.apiKey);
-            console.log(`📋 从API获取到 ${models.length} 个模型:`, models.slice(0, 5));
-
-            if (models.length === 0) {
-                console.warn('⚠️ 模型列表为空，可能是API配置错误或网络问题');
-                throw new ApiError(
-                    '未能获取到有效模型列表，请检查API配置和网络连接',
-                    'SETTINGS_001',
-                    undefined,
-                    undefined,
-                    { module: 'SystemSettings', action: 'fetchModels', provider: this.llm.provider }
-                );
-            }
-
-            // Deduplicate models
-            const seen = new Set<string>();
-            const uniqueModels: Array<string | { id: string; name?: string }> = [];
-            
-            models.forEach(m => {
-                const id = typeof m === 'string' ? m : m.id;
-                if (id && !seen.has(id)) {
-                    seen.add(id);
-                    uniqueModels.push(m);
-                }
-            });
-
-            this.llm.models = uniqueModels;
-            console.log(`✅ 去重后保留 ${this.llm.models.length} 个模型`);
-
-            // 如果当前选中的模型不在新列表中，自动选择第一个
-            const currentModelExists = this.llm.models.some(m => {
-                const id = typeof m === 'string' ? m : m.id;
-                return id === this.llm.model;
-            });
-
-            if (!currentModelExists && this.llm.models.length > 0) {
-                const firstModel = this.llm.models[0];
-                if (firstModel) {
-                    this.llm.model = typeof firstModel === 'string' ? firstModel : firstModel.id;
-                    console.log(`🔄 自动选择第一个模型: ${this.llm.model}`);
-                }
-            }
-
-            console.log(`\n${'='.repeat(60)}`);
-            console.log(`✅ 模型列表获取成功！共 ${this.llm.models.length} 个模型`);
-            console.log(`${'='.repeat(60)}\n`);
+            assertFetchedModels(models, provider);
+            applyFetchedModels(this, models);
 
             showToast(`成功同步 ${this.llm.models.length} 个模型`, { type: 'success' });
         } catch (e) {
             const error = e as Error;
-            console.error(`\n${'='.repeat(60)}`);
-            console.error('❌ 获取模型列表失败:', error);
-            console.error('❌ 错误详情:', error.message);
-            console.error('❌ 错误堆栈:', error.stack);
-            console.error(`${'='.repeat(60)}\n`);
-            
-            // 提供更友好的错误提示
-            let errorMsg = error.message;
-            if (error.message.includes('HTTP 401') || error.message.includes('Unauthorized')) {
-                errorMsg = 'API Key 无效或已过期，请检查配置';
-            } else if (error.message.includes('HTTP 403') || error.message.includes('Forbidden')) {
-                errorMsg = 'API Key 没有访问权限，请检查配置';
-            } else if (error.message.includes('HTTP 404')) {
-                errorMsg = 'API端点地址不正确，请检查配置';
-            } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-                errorMsg = '网络连接失败，请检查网络或端点地址';
-            } else if (error.message.includes('timeout') || error.message.includes('AbortError')) {
-                errorMsg = '请求超时，请检查网络连接';
-            }
-            
-            showToast(`获取模型失败: ${errorMsg}`, { type: 'error' });
+            showToast(`获取模型失败: ${getModelFetchErrorMessage(error)}`, { type: 'error' });
             ErrorService.handle(error, { action: 'fetchModels', module: 'settings' });
         } finally {
             this.llm.isFetching = false;
@@ -495,7 +470,7 @@ const SettingsPanel = (): SettingsPanelData => ({
             showToast('正在发送测试请求...', { type: 'info' });
             const messages = [{ role: 'user' as const, content: "Hello! Reply 'OK'." }];
 
-            const response = await callLLM(
+            await callLLM(
                 messages,
                 this.llm.provider,
                 this.llm.endpoint,
@@ -504,7 +479,6 @@ const SettingsPanel = (): SettingsPanelData => ({
                 { temperature: 0.1, jsonMode: false, timeout: configCenter.get<number>('llm.testConnectionTimeout') || 15000 }
             );
 
-            console.log('Test Response:', response);
             showToast('连接成功！', { type: 'success' });
         } catch (error) {
             ErrorService.handle(error as Error, { action: 'testConnection', module: 'settings' });
@@ -617,7 +591,7 @@ const SettingsPanel = (): SettingsPanelData => ({
         try {
             this.localData.usage = await LocalDataStore.getUsage();
         } catch (error) {
-            console.warn('[Settings] Failed to load local data usage:', error);
+            ErrorService.handle(error as Error, { action: 'refreshLocalDataUsage', module: 'settings', notify: false });
         }
     },
 
@@ -713,7 +687,14 @@ const SettingsPanel = (): SettingsPanelData => ({
         };
         return names[type] || '默认';
     }
-});
+};
+
+function attachSettingsBehavior(panel: SettingsPanelData): SettingsPanelData {
+    Object.defineProperties(panel, Object.getOwnPropertyDescriptors(settingsPanelBehavior));
+    return panel;
+}
+
+const SettingsPanel = (): SettingsPanelData => attachSettingsBehavior(createSettingsState() as SettingsPanelData);
 
 // ==========================================
 // Initialization & Exports
@@ -726,32 +707,27 @@ const SettingsPanel = (): SettingsPanelData => ({
 export function initAlpineSettings(): void {
     // 防御性检查: 确保 Alpine.js 已加载
     if (typeof window.Alpine === 'undefined') {
-        console.warn('[Settings] Alpine.js not loaded yet, retrying in 100ms...');
         // 延迟重试,最多重试 10 次
         if (alpineRetryCount < 10) {
             alpineRetryCount += 1;
             setTimeout(initAlpineSettings, 100);
-        } else {
-            console.error('[Settings] Alpine.js failed to load after 10 retries');
         }
         return;
     }
     
     // 确保 Alpine.data 方法可用
     if (typeof window.Alpine.data !== 'function') {
-        console.error('[Settings] Alpine.data is not a function');
         return;
     }
     
     try {
         // 注册 settingsPanel 组件
         window.Alpine.data('settingsPanel', SettingsPanel);
-        console.log('[Settings] ✅ Alpine component "settingsPanel" registered successfully');
         
         // 清理重试计数器
         alpineRetryCount = 0;
     } catch (error) {
-        console.error('[Settings] Failed to register Alpine component:', error);
+        ErrorService.handle(error as Error, { action: 'initAlpineSettings', module: 'settings', notify: false });
     }
 }
 
@@ -773,7 +749,7 @@ export async function openPerformanceMonitor(): Promise<void> {
         performanceMonitor.show();
         showToast('监控面板已打开', { type: 'success' });
     } catch (error) {
-        console.error('Failed to open performance monitor:', error);
+        ErrorService.handle(error as Error, { action: 'openPerformanceMonitor', module: 'settings', notify: false });
         showToast('打开监控面板失败', { type: 'error' });
     }
 }

@@ -63,16 +63,6 @@ function getCustomerReviews(product: ScraperProduct): Product['customer_reviews'
   return (reviews as unknown[]).map(normalizeReview);
 }
 
-function logConversionStart(product: ScraperProduct): void {
-  console.log('[数据转换] 开始转换产品数据:', {
-    asin: product.asin,
-    hasTitle: Boolean(getProductTitle(product)),
-    hasBullets: getFeatureBullets(product).length > 0,
-    hasReviews: getCustomerReviews(product).length > 0,
-    rawData: product
-  });
-}
-
 /**
  * 从 Scraper 单个产品数据转换为 Product 格式
  */
@@ -84,8 +74,6 @@ export function convertScraperDataToProduct(productData: unknown): Product | nul
     }
 
     const product = productData as ScraperProduct;
-    logConversionStart(product);
-    
     const converted: Product = {
       asin: product.asin || '',
       productTitle: getProductTitle(product),
@@ -94,14 +82,7 @@ export function convertScraperDataToProduct(productData: unknown): Product | nul
       scrape_status: 'success',
       metadata: {}
     };
-    
-    console.log('[数据转换] 转换结果:', {
-      asin: converted.asin,
-      title: converted.productTitle,
-      bulletsCount: converted.feature_bullets.length,
-      reviewsCount: converted.customer_reviews.length
-    });
-    
+
     return converted;
   } catch (error) {
     console.error('[数据转换] 转换产品数据失败:', { error, productData });
@@ -136,9 +117,6 @@ export function mergeProducts(products: Product[]): Product {
       asins: products.map(p => p.asin)
     }
   };
-
-  console.log('[数据转换] 已合并 ' + products.length + ' 个产品的数据');
-  console.log('[数据转换] 合并后数据: ' + mergedProduct.feature_bullets.length + ' 个卖点, ' + mergedProduct.customer_reviews.length + ' 条评论');
 
   return mergedProduct;
 }

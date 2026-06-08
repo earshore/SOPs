@@ -215,7 +215,6 @@ export function initGlobalEventDelegation(): void {
     executeAction(actionName, params, event);
   });
 
-  console.log('✅ [ActionRegistry] 全局事件委托已初始化');
 }
 
 // ================================================================
@@ -280,8 +279,6 @@ export function registerActionsWithLegacy(actions: Record<string, ActionHandler>
     registerActionWithLegacy(name, handler);
   });
 
-  console.log(`✅ [ActionRegistry] 已注册 ${actionNames.length} 个动作 (含向后兼容)`);
-
   return actionNames;
 }
 
@@ -298,18 +295,14 @@ export function getLegacyCallStats(): string[] {
 
 // 监听注册事件
 eventBus.on(APP_EVENTS.REGISTER_ACTIONS, (payload: unknown) => {
-  const { moduleId, actions } = payload as { moduleId: string; actions: ActionMap };
-  const actionNames = registerActionsWithLegacy(actions);
-  console.log(`[ActionRegistry] 已注册 ${actionNames.length} 个动作 (模块: ${moduleId})`);
+  const { actions } = payload as { moduleId: string; actions: ActionMap };
+  registerActionsWithLegacy(actions);
 });
 
 // 监听清理事件
 eventBus.on('unregisterActions', (payload: unknown) => {
-  const { moduleId, actionNames } = payload as { moduleId: string; actionNames: string[] };
+  const { actionNames } = payload as { moduleId: string; actionNames: string[] };
   unregisterActions(actionNames);
-  console.log(`[ActionRegistry] 已清理 ${actionNames.length} 个动作 (模块: ${moduleId})`);
 });
-
-console.log('✅ [ActionRegistry] 事件监听器已初始化 (循环依赖已解决)');
 
 export default ActionRegistry;

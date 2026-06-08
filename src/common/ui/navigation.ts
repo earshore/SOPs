@@ -59,11 +59,7 @@ const SIDEBAR_RENDERER_REGISTRY: Record<string, SidebarRenderer> = {
  * 动态注册侧边栏渲染器
  */
 export function registerSidebarRenderer(moduleId: string, renderer: SidebarRenderer): void {
-  if (SIDEBAR_RENDERER_REGISTRY[moduleId]) {
-    console.warn(`[UI] 覆盖已存在的侧边栏渲染器: ${moduleId}`);
-  }
   SIDEBAR_RENDERER_REGISTRY[moduleId] = renderer;
-  console.log(`[UI] 注册侧边栏渲染器: ${moduleId}`);
 }
 
 // ========================
@@ -92,7 +88,7 @@ function renderSidebar(moduleId: string | null): void {
   // 数据获取与防御
   const effectiveModuleConfig = MENU_CONFIG.modules[effectiveModuleId];
   if (!effectiveModuleConfig) {
-    console.warn(`⚠️ 未找到模块配置: ${effectiveModuleId}`);
+    console.error(`⚠️ 未找到模块配置: ${effectiveModuleId}`);
     sidebar.classList.add("hidden", "-ml-64");
     return;
   }
@@ -227,9 +223,6 @@ function getTargetPanelId(fullConfig: RouteFullConfig | null): string {
 
 function emitPanelUnloadIfNeeded(targetPanelId: string): void {
   if (currentActivePanel && currentActivePanel !== targetPanelId) {
-    if (import.meta.env.DEV) {
-      console.log(`[Navigation] 🔄 主模块切换: ${currentActivePanel} -> ${targetPanelId}`);
-    }
     emitAppEvent(APP_EVENTS.MODULE_UNLOAD, {
       panelId: currentActivePanel,
       nextPanelId: targetPanelId
@@ -246,7 +239,7 @@ function showRoutePanel(targetPanelId: string): void {
     return;
   }
 
-  console.warn(`⚠️ [Navigation] 目标面板 [${targetPanelId}] 未找到，回退至 Home`);
+  console.error(`⚠️ [Navigation] 目标面板 [${targetPanelId}] 未找到，回退至 Home`);
   const home = getEl('panel-home');
   if (home) {
     home.classList.remove("hidden");
@@ -293,10 +286,6 @@ export async function updateUIForRoute(routeId: string): Promise<void> {
     moduleId: targetModuleId,
     config: fullConfig
   });
-
-  if (import.meta.env.DEV) {
-    console.log(`📡 [Navigation] ✅ 路由切换事件已广播: ${cleanTab} (Module: ${targetModuleId})`);
-  }
 }
 
 // ========================
@@ -324,7 +313,6 @@ export function toggleSOPGroup(params: { category: string }): void {
  */
 export function scrollToSOPModule(categoryId: string): void {
   if (!categoryId) {
-    console.warn('⚠️ scrollToSOPModule: categoryId 为空');
     return;
   }
 
@@ -342,10 +330,6 @@ export function scrollToSOPModule(categoryId: string): void {
     setTimeout(() => {
       moduleElement.classList.remove('sop-module-highlight');
     }, 2000);
-
-    console.log(`✅ 滚动到 SOP 模块: ${categoryId}`);
-  } else {
-    console.warn(`⚠️ 未找到模块元素: ${moduleId}`);
   }
 }
 
@@ -354,7 +338,6 @@ export function scrollToSOPModule(categoryId: string): void {
  */
 export function scrollToHubModule(categoryId: string): void {
   if (!categoryId) {
-    console.warn('⚠️ scrollToHubModule: categoryId 为空');
     return;
   }
 
@@ -372,10 +355,6 @@ export function scrollToHubModule(categoryId: string): void {
     setTimeout(() => {
       moduleElement.classList.remove('hub-module-highlight');
     }, 2000);
-
-    console.log(`✅ 滚动到智库模块: ${categoryId}`);
-  } else {
-    console.warn(`⚠️ 未找到模块元素: ${moduleId}`);
   }
 }
 
@@ -384,7 +363,6 @@ export function scrollToHubModule(categoryId: string): void {
  */
 export function scrollToMoreModule(categoryId: string): void {
   if (!categoryId) {
-    console.warn('⚠️ scrollToMoreModule: categoryId 为空');
     return;
   }
 
@@ -402,9 +380,5 @@ export function scrollToMoreModule(categoryId: string): void {
     setTimeout(() => {
       moduleElement.classList.remove('more-module-highlight');
     }, 2000);
-
-    console.log(`✅ 滚动到 More 模块: ${categoryId}`);
-  } else {
-    console.warn(`⚠️ 未找到模块元素: ${moduleId}`);
   }
 }

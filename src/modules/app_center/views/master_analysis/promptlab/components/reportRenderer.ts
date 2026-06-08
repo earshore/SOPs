@@ -73,21 +73,17 @@ export function generateLanguageOptions(): void {
  * 渲染报告分析区域（无报告时显示占位，有报告时渲染模块列表）
  */
 export function renderReportAnalysis(ctx: PromptlabAlpineContext): void {
-  console.log('[reportRenderer] renderReportAnalysis, hasReport:', computeHasReport());
-
   const container = document.getElementById('report-sections-container');
   const statusDiv = document.getElementById('lab-analysis-status');
   const marketSelect = document.getElementById('lab-target-market') as HTMLSelectElement | null;
 
   if (!container) {
-    console.log('[reportRenderer] 容器元素未找到');
     return;
   }
 
   const renderer = SafeRenderer.getInstance();
 
   if (!computeHasReport()) {
-    console.log('[reportRenderer] 没有报告，显示提示');
     if (statusDiv) {
       statusDiv.className = 'px-2 py-1 bg-slate-100 text-slate-500 rounded text-xs flex items-center gap-1';
       renderer.renderTemplate(statusDiv, '<i class="fas fa-exclamation-circle"></i> 未检测到分析报告');
@@ -125,7 +121,6 @@ export function autoSelectMarket(
   const isMarketplaceChanged = !!currentMarketplace && currentMarketplace !== ctx.lastMarketplace;
 
   if (currentMarketplace && (isFirstLoad || isMarketplaceChanged)) {
-    console.log(`[reportRenderer] 市场变化: ${ctx.lastMarketplace} → ${currentMarketplace}`);
     selectMarketplaceOption(ctx, marketSelect, currentMarketplace);
   } else if (currentMarketplace) {
     ctx.lastMarketplace = currentMarketplace;
@@ -160,7 +155,6 @@ function selectMarketplaceOption(
   ctx.profile.targetMarket = match.value as TargetMarket;
   ctx.saveState();
   ctx.lastMarketplace = currentMarketplace;
-  console.log('[reportRenderer] 已自动选择市场:', match.value);
 }
 
 // ==========================================
@@ -176,8 +170,6 @@ export function renderReportModules(
 ): void {
   const report = toReportRecord(appStore.getState().analysis.analysisReport);
 
-  console.log('[reportRenderer] renderReportModules, keys:', report ? Object.keys(report) : null);
-
   const renderer = SafeRenderer.getInstance();
   renderer.renderTemplate(container, '');
   container.className = 'mt-3 grid grid-cols-1 lg:grid-cols-2 gap-3';
@@ -186,14 +178,12 @@ export function renderReportModules(
     !ctx.hasRenderedReportOnce && ctx.profile.selectedReportSections.length === 0;
 
   if (isWrappedAnalysisReport(report)) {
-    console.log('[reportRenderer] 包装格式报告');
     if (hasNewFormatTargets(toReportRecord(report.analysisReport))) {
       renderNewFormatModules(ctx, container, report.analysisReport, isFirstLoad);
     } else {
       renderLegacyFormatModules(ctx, container, report.analysisReport, isFirstLoad);
     }
   } else if (hasNewFormatTargets(report)) {
-    console.log('[reportRenderer] 直接格式报告');
     renderNewFormatModules(ctx, container, report, isFirstLoad);
   } else {
     renderLegacyFormatModules(ctx, container, report, isFirstLoad);
@@ -273,7 +263,6 @@ export function renderNewFormatModules(
 ): void {
   const reportObj = toReportRecord(analysisReport);
   if (!reportObj) {
-    console.warn('[reportRenderer] analysisReport 不是有效对象');
     return;
   }
 
@@ -282,8 +271,6 @@ export function renderNewFormatModules(
   const availableTargets = Object.keys(reportObj).filter(
     (key) => TARGET_CONFIG[key] && reportObj[key],
   );
-
-  console.log('[reportRenderer] 可用目标:', availableTargets);
 
   // 首次加载时初始化 selectedReportItems
   if (isFirstLoad) {
@@ -485,6 +472,29 @@ function hasViewableContent(data: unknown): boolean {
 /**
  * 渲染可选择的内容（支持所有数据类型）
  */
+function renderSelectableContentItem(
+  dimensionId: string,
+  subItemKey: string,
+  index: string | number,
+  displayText: string
+): string {
+  const safeDimensionId = escapeHtml(dimensionId);
+  const safeSubItemKey = escapeHtml(subItemKey);
+  const safeIndex = escapeHtml(String(index));
+
+  return `
+    <div class="content-item flex items-start gap-2 py-1.5 px-2 hover:bg-slate-50 rounded text-xs">
+      <input type="checkbox"
+             class="content-item-checkbox h-3 w-3 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer mt-0.5 shrink-0"
+             :checked="isContentItemSelected('${safeDimensionId}', '${safeSubItemKey}', '${safeIndex}')"
+             @change="onContentItemToggle('${safeDimensionId}', '${safeSubItemKey}', '${safeIndex}')">
+      <label class="flex-1 cursor-pointer select-none text-slate-600 leading-relaxed">
+        ${escapeHtml(displayText)}
+      </label>
+    </div>
+  `;
+}
+
 function renderSelectableContent(data: unknown, dimensionId: string, subItemKey: string): string {
   if (!data) return '<div class="text-xs text-slate-400 py-2">无内容</div>';
 
@@ -494,17 +504,7 @@ function renderSelectableContent(data: unknown, dimensionId: string, subItemKey:
 
     return data.map((item, index) => {
       const displayText = formatContentItem(item);
-      return `
-        <div class="content-item flex items-start gap-2 py-1.5 px-2 hover:bg-slate-50 rounded text-xs">
-          <input type="checkbox"
-                 class="content-item-checkbox h-3 w-3 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer mt-0.5 shrink-0"
-                 :checked="isContentItemSelected('${escapeHtml(dimensionId)}', '${escapeHtml(subItemKey)}', '${index}')"
-                 @change="onContentItemToggle('${escapeHtml(dimensionId)}', '${escapeHtml(subItemKey)}', '${index}')">
-          <label class="flex-1 cursor-pointer select-none text-slate-600 leading-relaxed">
-            ${escapeHtml(displayText)}
-          </label>
-        </div>
-      `;
+      return renderSelectableContentItem(dimensionId, subItemKey, index, displayText);
     }).join('');
   }
 
@@ -516,32 +516,12 @@ function renderSelectableContent(data: unknown, dimensionId: string, subItemKey:
 
     return entries.map(([key, value], index) => {
       const displayText = `${formatSubItemLabel(key)}: ${formatValue(value)}`;
-      return `
-        <div class="content-item flex items-start gap-2 py-1.5 px-2 hover:bg-slate-50 rounded text-xs">
-          <input type="checkbox"
-                 class="content-item-checkbox h-3 w-3 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer mt-0.5 shrink-0"
-                 :checked="isContentItemSelected('${escapeHtml(dimensionId)}', '${escapeHtml(subItemKey)}', '${index}')"
-                 @change="onContentItemToggle('${escapeHtml(dimensionId)}', '${escapeHtml(subItemKey)}', '${index}')">
-          <label class="flex-1 cursor-pointer select-none text-slate-600 leading-relaxed">
-            ${escapeHtml(displayText)}
-          </label>
-        </div>
-      `;
+      return renderSelectableContentItem(dimensionId, subItemKey, index, displayText);
     }).join('');
   }
 
   // 基本类型 - 作为单个可选项
-  return `
-    <div class="content-item flex items-start gap-2 py-1.5 px-2 hover:bg-slate-50 rounded text-xs">
-      <input type="checkbox"
-             class="content-item-checkbox h-3 w-3 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer mt-0.5 shrink-0"
-             :checked="isContentItemSelected('${escapeHtml(dimensionId)}', '${escapeHtml(subItemKey)}', '0')"
-             @change="onContentItemToggle('${escapeHtml(dimensionId)}', '${escapeHtml(subItemKey)}', '0')">
-      <label class="flex-1 cursor-pointer select-none text-slate-600 leading-relaxed">
-        ${escapeHtml(String(data))}
-      </label>
-    </div>
-  `;
+  return renderSelectableContentItem(dimensionId, subItemKey, 0, String(data));
 }
 
 /**
@@ -626,7 +606,6 @@ export function renderLegacyFormatModules(
 ): void {
   const reportObj = toReportRecord(report);
   if (!reportObj) {
-    console.warn('[reportRenderer] 旧格式 report 不是有效对象');
     return;
   }
 

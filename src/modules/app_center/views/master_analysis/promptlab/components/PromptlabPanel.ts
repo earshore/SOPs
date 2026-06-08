@@ -141,28 +141,60 @@ const createDisabledItems = (indexes: string[]): Record<string, boolean> => {
   return items;
 };
 
-/**
- * 创建 Promptlab Panel Alpine 组件
- *
- * 使用方式：x-data="createPromptlabPanel()"
- */
-export function createPromptlabPanel() {
+type PromptlabPanelState = Pick<
+  PromptlabAlpineContext,
+  | 'currentConsoleMode'
+  | 'listingPromptCache'
+  | 'visualPromptCache'
+  | 'lastMarketplace'
+  | 'originalHeights'
+  | 'profile'
+  | 'dnaConfidence'
+  | 'hasRenderedReportOnce'
+  | 'expandedDimensions'
+  | 'expandedSubItems'
+  | '_unsubscribers'
+  | '_appStoreUnsubscribe'
+>;
+
+type PromptlabPanelThis = PromptlabAlpineContext & {
+  $nextTick?: (callback: () => void) => void;
+  currentPrompt: string;
+  isReady: boolean;
+  isOverLimit: boolean;
+  hasReport: boolean;
+  reportConfidence: Record<string, number> | null;
+  overallConfidence: number;
+  hasExpandedDimensions: boolean;
+  restoreState(): void;
+  onInputChange(): void;
+  expandAllDimensions(): void;
+  collapseAllDimensions(): void;
+  getSubItemData(dimensionId: string, subItemKey: string): unknown;
+  getContentItemIndexes(dimensionId: string, subItemKey: string): string[];
+  ensureStructuredSubItemSelection(
+    dimensionId: string,
+    subItemKey: string,
+  ): StructuredSubItemSelection | null;
+  setSubItemAndContentState(dimensionId: string, subItemKey: string, enabled: boolean): void;
+  getSelectedContentCount(dimensionId: string, subItemKey: string): number;
+  getSelectedSubItemCount(dimensionId: string): number;
+  syncDimensionEnabled(dimensionId: string): void;
+  isSubItemSelected(dimensionId: string, subItemKey: string): boolean;
+  isSubItemPartiallySelected(dimensionId: string, subItemKey: string): boolean;
+  isContentItemSelected(dimensionId: string, subItemKey: string, itemIndex: string): boolean;
+};
+
+type PromptlabPanelBehavior = Record<string, unknown> & ThisType<PromptlabPanelThis>;
+
+function createPromptlabPanelState(): PromptlabPanelState {
   return {
-    // ========== State ==========
-
     currentConsoleMode: "listing" as ConsoleMode,
-
     listingPromptCache: "",
     visualPromptCache: "",
-
-    /** 用于检测数据源变化 */
     lastMarketplace: "",
-
-    /** textarea 原始高度缓存，供高度自适应使用 */
     originalHeights: new Map<HTMLElement, number>(),
-
     profile: { ...DEFAULT_PROFILE } as UserProductProfile,
-
     dnaConfidence: {
       audience: 0,
       usps: 0,
@@ -171,19 +203,24 @@ export function createPromptlabPanel() {
       negative: 0,
       overall: 0,
     } as DnaConfidence,
-
-    /** 是否已渲染过报告（用于区分首次加载和用户主动清空） */
     hasRenderedReportOnce: false,
-
-    /** 展开的维度集合（UI状态，不持久化） */
     expandedDimensions: new Set<string>(),
-
-    /** 展开的子项集合（UI状态，不持久化） */
     expandedSubItems: new Set<string>(),
-
     _unsubscribers: [] as Array<() => void>,
-    _appStoreUnsubscribe: null as (() => void) | null,
+    _appStoreUnsubscribe: null,
+  };
+}
 
+function attachPromptlabPanelBehavior(panel: PromptlabPanelState): PromptlabPanelState & Record<string, unknown> {
+  Object.defineProperties(panel, Object.getOwnPropertyDescriptors(promptlabPanelBehavior));
+  return panel;
+}
+
+/**
+ * Promptlab Alpine 组件行为。
+ * 通过 descriptor 挂载，保留 getter 语义。
+ */
+const promptlabPanelBehavior: PromptlabPanelBehavior = {
     // ========== Computed Getters ==========
 
     get hasReport(): boolean {
@@ -322,8 +359,6 @@ export function createPromptlabPanel() {
     // ========== Lifecycle ==========
 
     init() {
-      console.log("[Promptlab] 🚀 Alpine 组件初始化");
-
       // 从 store 恢复 profile
       this.restoreState();
 
@@ -340,13 +375,11 @@ export function createPromptlabPanel() {
       const unsubScrape = eventBus.on(
         MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS,
         () => {
-          console.log("[Promptlab] 检测到数据更新，重新渲染报告分析");
           this.renderReportAnalysis();
         },
       );
 
       const unsubHistory = eventBus.on(APP_EVENTS.HISTORY_UPDATED, () => {
-        console.log("[Promptlab] 检测到历史更新，重新渲染报告分析");
         this.renderReportAnalysis();
       });
 
@@ -366,20 +399,15 @@ export function createPromptlabPanel() {
             }
           }
         });
-        console.log("[Promptlab] ✅ 已订阅 appStore 变化");
       }
-
-      console.log("[Promptlab] ✅ Alpine 组件初始化完成");
     },
 
     destroy() {
-      console.log("[Promptlab] 🔄 清理所有订阅");
-
       this._unsubscribers.forEach((unsub) => {
         try {
           unsub();
-        } catch (e) {
-          console.warn("[Promptlab] 清理订阅时出错:", e);
+        } catch {
+          return;
         }
       });
       this._unsubscribers = [];
@@ -390,8 +418,6 @@ export function createPromptlabPanel() {
       }
 
       this.originalHeights.clear();
-
-      console.log("[Promptlab] ✅ 资源清理完成");
     },
 
     // ========== State Management ==========
@@ -400,13 +426,11 @@ export function createPromptlabPanel() {
       const saved = appStore.getState().promptlab?.userProductProfile;
       if (saved) {
         this.profile = { ...saved };
-        console.log("[Promptlab] ✅ 状态已从 store 恢复");
       }
     },
 
     saveState() {
       appStore.getState().setUserProductProfile(this.profile);
-      console.log("[Promptlab] ✅ 状态已保存到 store");
     },
 
     // ========== Report Rendering ==========
@@ -859,5 +883,13 @@ export function createPromptlabPanel() {
       this.setSubItemAndContentState(dimensionId, subItemKey, false);
       this.saveState();
     },
-  };
+};
+
+/**
+ * 创建 Promptlab Panel Alpine 组件
+ *
+ * 使用方式：x-data="createPromptlabPanel()"
+ */
+export function createPromptlabPanel() {
+  return attachPromptlabPanelBehavior(createPromptlabPanelState());
 }

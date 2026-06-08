@@ -187,7 +187,7 @@ function isCachedAnalysisEntry(value: unknown): value is CachedAnalysisEntry {
   );
 }
 
-function getFreshCachedData(entry: unknown, cacheKey: string, hitLabel: string): unknown | null {
+function getFreshCachedData(entry: unknown): unknown | null {
   if (!isCachedAnalysisEntry(entry)) {
     return null;
   }
@@ -196,7 +196,6 @@ function getFreshCachedData(entry: unknown, cacheKey: string, hitLabel: string):
     return null;
   }
 
-  console.log(`[并行分析] ${hitLabel}: ${cacheKey}`);
   return entry.data;
 }
 
@@ -209,7 +208,7 @@ function getLegacyCachedResult(cacheKey: string): unknown | null {
   const legacyCached = StorageService.getRaw(legacyKey);
   if (!legacyCached) return null;
 
-  const cachedData = getFreshCachedData(JSON.parse(legacyCached), legacyKey, '旧缓存命中');
+  const cachedData = getFreshCachedData(JSON.parse(legacyCached));
   if (cachedData === null) {
     StorageService.remove(legacyKey);
   }
@@ -225,11 +224,10 @@ export async function getCachedResult(cacheKey: string): Promise<unknown | null>
     if (!parsedCache) {
       return getLegacyCachedResult(cacheKey);
     }
-    return getFreshCachedData(parsedCache, cacheKey, '缓存命中');
-  } catch (error) {
-    console.warn(`[并行分析] 缓存读取失败:`, error);
+    return getFreshCachedData(parsedCache);
+  } catch {
+    return null;
   }
-  return null;
 }
 
 /**
@@ -241,9 +239,8 @@ export async function setCachedResult(cacheKey: string, result: unknown): Promis
       data: result,
       timestamp: Date.now()
     }, 'cache');
-    console.log(`[并行分析] 结果已缓存: ${cacheKey}`);
-  } catch (error) {
-    console.warn(`[并行分析] 缓存写入失败:`, error);
+  } catch {
+    return;
   }
 }
 
@@ -317,10 +314,6 @@ async function executeAnalysisTask(
         task.status = 'success';
         task.endTime = Date.now();
         task.fromCache = true;
-        console.log(`[并行分析] ${task.targetId} 使用缓存结果`, {
-          durationMs: task.endTime - task.startTime,
-          fromCache: true
-        });
         return;
       }
     }
@@ -384,11 +377,6 @@ async function executeAnalysisTask(
       await setCachedResult(cacheKey, actualResult);
     }
 
-    console.log(`[并行分析] ${task.targetId} 分析成功`, {
-      durationMs: task.endTime - task.startTime,
-      promptChars: task.promptChars,
-      estimatedInputTokens: task.estimatedInputTokens
-    });
   } catch (error) {
     task.status = 'failed';
     task.error = (error as Error).message;
@@ -469,7 +457,6 @@ function emitFailedTaskUpdate(
   currentTasks: string[]
 ): void {
   context.failedCount++;
-  console.warn(`[并行分析] ${task.targetId} 失败: ${task.error}`);
 
   if (!context.streamResults) return;
 
@@ -539,31 +526,6 @@ function handleFirstAnalysisResponse(
   );
 }
 
-function logParallelAnalysisSummary(
-  tasks: AnalysisTask[],
-  startedAt: number,
-  context: AnalysisRunContext,
-  effectiveMaxConcurrency: number
-): void {
-  console.log(`[并行分析] 分析完成`, {
-    durationMs: Date.now() - startedAt,
-    successCount: context.successCount,
-    failedCount: context.failedCount,
-    effectiveMaxConcurrency,
-    tasks: tasks.map(task => ({
-      targetId: task.targetId,
-      status: task.status,
-      durationMs: task.startTime && task.endTime ? task.endTime - task.startTime : undefined,
-      fromCache: !!task.fromCache,
-      promptChars: task.promptChars,
-      estimatedInputTokens: task.estimatedInputTokens,
-      firstResponseMs: task.firstResponseMs,
-      streamChunks: task.streamChunks,
-      streamedChars: task.streamedChars
-    }))
-  });
-}
-
 /**
  * 并行 AI 分析主函数
  */
@@ -583,14 +545,7 @@ export async function runParallelAIAnalysis(
     onTaskFailed
   } = config;
 
-  const startedAt = Date.now();
   const effectiveMaxConcurrency = normalizeMaxConcurrency(maxConcurrency, targetIds.length);
-
-  console.log(`[并行分析] 开始分析`, {
-    targets: targetIds.length,
-    requestedMaxConcurrency: maxConcurrency,
-    effectiveMaxConcurrency
-  });
 
   const llmConfig = await getLLMConfig();
   const tasks: AnalysisTask[] = targetIds.map(targetId => ({
@@ -642,7 +597,6 @@ export async function runParallelAIAnalysis(
   }
 
   onProgress(100, `分析完成! 成功: ${runContext.successCount}, 失败: ${runContext.failedCount}`);
-  logParallelAnalysisSummary(tasks, startedAt, runContext, effectiveMaxConcurrency);
 
   return finalReport;
 }
@@ -664,7 +618,6 @@ export async function clearAnalysisCacheAsync(): Promise<void> {
   StorageService.keys()
     .filter(key => key.startsWith('ai_analysis_'))
     .forEach(key => StorageService.remove(key));
-  console.log(`[并行分析] 已清除 ${cacheKeys.length} 个缓存项`);
 }
 
 /**

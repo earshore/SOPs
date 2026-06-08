@@ -24,12 +24,44 @@ function getPanelComputedProperties(panel: unknown) {
   return createComputedProperties(panel as AlpineContext);
 }
 
-/**
- * 创建 AI 分析面板组件（优化版）
- * 使用 Zustand 订阅自动同步状态
- */
-export function createAiAnalysisPanelOptimized(): Record<string, unknown> {
+type OptimizedPanelState = Record<string, unknown>;
+type OptimizedPanelBehavior = Record<string, unknown> & ThisType<Record<string, unknown>>;
+
+function createOptimizedPanelState(): OptimizedPanelState {
   return {
+    _selectedTargets: [] as string[],
+    progress: 0,
+    currentStep: '',
+    expandedPromptIndex: null as number | null,
+    showPromptPanel: false,
+    showJsonViewer: false,
+    dataSource: 'scraper' as const,
+    _unsubscribe: null as (() => void) | null | undefined,
+  };
+}
+
+function attachOptimizedPanelBehavior(panel: OptimizedPanelState): Record<string, unknown> {
+  Object.defineProperties(panel, Object.getOwnPropertyDescriptors(optimizedPanelBehavior));
+  return panel;
+}
+
+function getProductAsin(product: unknown): string {
+  if (product && typeof product === 'object' && 'asin' in product) {
+    const asin = (product as { asin?: unknown }).asin;
+    return typeof asin === 'string' ? asin : '';
+  }
+  return '';
+}
+
+function getProductAsins(products: unknown[] | undefined): string[] {
+  return products?.map(getProductAsin).filter((asin): asin is string => !!asin) || [];
+}
+
+/**
+ * AI 分析面板行为（优化版）
+ * 使用 descriptor 挂载，保留 getter/setter 语义。
+ */
+const optimizedPanelBehavior: OptimizedPanelBehavior = {
     // ========== 响应式状态 ==========
     // 这些状态直接从 Zustand 读取，不需要本地副本
     get selectedAsins() {
@@ -45,7 +77,6 @@ export function createAiAnalysisPanelOptimized(): Record<string, unknown> {
     set selectedTargets(value: string[]) {
       this._selectedTargets = value;
     },
-    _selectedTargets: [] as string[],
 
     get isAnalyzing() {
       return appStore.getState().analysis.isAnalyzing || false;
@@ -53,9 +84,6 @@ export function createAiAnalysisPanelOptimized(): Record<string, unknown> {
     set isAnalyzing(value: boolean) {
       appStore.getState().updateAnalysis({ isAnalyzing: value });
     },
-
-    progress: 0,
-    currentStep: '',
 
     get analysisReport() {
       return appStore.getState().analysis.analysisReport;
@@ -77,43 +105,31 @@ export function createAiAnalysisPanelOptimized(): Record<string, unknown> {
     get reportConfidence() {
       const report = appStore.getState().analysis.analysisReport;
       if (!report || typeof report === 'string') {
-        console.log('[置信度] reportConfidence: 报告不存在或为字符串');
         return null;
       }
       if (!report._metadata) {
-        console.warn('[置信度] reportConfidence: 报告缺少 _metadata 字段');
         return null;
       }
-      const confidence = report._metadata.confidence || null;
-      console.log('[置信度] reportConfidence:', confidence);
-      return confidence;
+      return report._metadata.confidence || null;
     },
 
     get overallConfidence() {
       const report = appStore.getState().analysis.analysisReport;
       if (!report || typeof report === 'string') {
-        console.log('[置信度] overallConfidence: 报告不存在或为字符串');
         return 0;
       }
       if (!report._metadata) {
-        console.warn('[置信度] overallConfidence: 报告缺少 _metadata 字段');
         return 0;
       }
-      const overall = report._metadata.overallConfidence || 0;
-      console.log('[置信度] overallConfidence:', overall);
-      return overall;
+      return report._metadata.overallConfidence || 0;
     },
 
     get overallConfidencePercent() {
-      const percent = Math.round((this.overallConfidence as number) * 100);
-      console.log('[置信度] overallConfidencePercent:', percent + '%');
-      return percent;
+      return Math.round((this.overallConfidence as number) * 100);
     },
 
     get hasConfidenceData() {
-      const hasData = !!this.reportConfidence;
-      console.log('[置信度] hasConfidenceData:', hasData);
-      return hasData;
+      return !!this.reportConfidence;
     },
 
     // 获取特定目标的置信度
@@ -166,33 +182,17 @@ export function createAiAnalysisPanelOptimized(): Record<string, unknown> {
     },
 
     // UI 状态
-    expandedPromptIndex: null as number | null,
-    showPromptPanel: false,
-    showJsonViewer: false,
 
     // 数据源
-    dataSource: 'scraper' as const,
 
     // Zustand 订阅清理函数
-    _unsubscribe: null as (() => void) | null | undefined,
 
     // ========== 生命周期 ==========
     init() {
-      console.log('[Alpine 组件] 🚀 初始化 AI 分析面板（优化版）');
-
       // 从 Zustand 初始化状态
       const scrapedData = appStore.getState().scraper.scrapedData;
       if (scrapedData?.products && scrapedData.products.length > 0) {
-        const asins = scrapedData.products
-          .map((p: unknown) => {
-            // 类型守卫：确保 p 是对象且有 asin 属性
-            if (p && typeof p === 'object' && 'asin' in p) {
-              return (p as { asin: string }).asin;
-            }
-            return '';
-          })
-          .filter((asin: string) => !!asin);
-        appStore.getState().setSelectedAsins(asins);
+        appStore.getState().setSelectedAsins(getProductAsins(scrapedData.products));
         this.dataSource = 'scraper';
       }
 
@@ -210,12 +210,9 @@ export function createAiAnalysisPanelOptimized(): Record<string, unknown> {
           });
         }
       });
-
-      console.log('[Alpine 组件] ✅ 初始化完成');
     },
 
     destroy() {
-      console.log('[Alpine 组件] 🔄 销毁组件');
       // 清理订阅
       if (typeof this._unsubscribe === 'function') {
         this._unsubscribe();
@@ -236,16 +233,7 @@ export function createAiAnalysisPanelOptimized(): Record<string, unknown> {
     selectAllAsins() {
       const scrapedData = appStore.getState().scraper.scrapedData;
       if (scrapedData?.products) {
-        const asins = scrapedData.products
-          .map((p: unknown) => {
-            // 类型守卫：确保 p 是对象且有 asin 属性
-            if (p && typeof p === 'object' && 'asin' in p) {
-              return (p as { asin: string }).asin;
-            }
-            return '';
-          })
-          .filter((asin: string) => !!asin);
-        appStore.getState().setSelectedAsins(asins);
+        appStore.getState().setSelectedAsins(getProductAsins(scrapedData.products));
       }
     },
 
@@ -339,12 +327,10 @@ export function createAiAnalysisPanelOptimized(): Record<string, unknown> {
     // ========== 数据加载 ==========
     async startAnalysis() {
       if ((this.selectedAsins as string[]).length === 0) {
-        console.warn('[Alpine 组件] ⚠️ 未选择任何 ASIN');
         return;
       }
 
       if ((this._selectedTargets as string[]).length === 0) {
-        console.warn('[Alpine 组件] ⚠️ 未选择任何分析目标');
         return;
       }
 
@@ -364,5 +350,12 @@ export function createAiAnalysisPanelOptimized(): Record<string, unknown> {
         this.isAnalyzing = false;
       }
     }
-  };
+};
+
+/**
+ * 创建 AI 分析面板组件（优化版）
+ * 使用 Zustand 订阅自动同步状态
+ */
+export function createAiAnalysisPanelOptimized(): Record<string, unknown> {
+  return attachOptimizedPanelBehavior(createOptimizedPanelState());
 }

@@ -34,43 +34,28 @@ function hasAnyField(report: ReportRecord, keys: string[]): boolean {
  */
 export function detectReportType(report: unknown): ReportType {
   if (!isReportRecord(report)) {
-    console.warn('[报告检测] 无效的报告对象');
     return ReportType.UNKNOWN;
   }
 
   // 优先检测 Full Analysis Report（应用中实际使用的格式）
   if (isFullAnalysisReport(report)) {
-    console.log('[报告检测] 识别为 Full Analysis Report');
     return ReportType.FULL_ANALYSIS;
   }
 
   // 检测 Competitor Report 特征
   if (isCompetitorReport(report)) {
-    console.log('[报告检测] 识别为 Competitor Report');
     return ReportType.COMPETITOR;
   }
 
   // 检测 Product Overview Report 特征
   if (isProductOverviewReport(report)) {
-    console.log('[报告检测] 识别为 Product Overview Report');
     return ReportType.PRODUCT_OVERVIEW;
   }
 
   // 检测 Semantic Analysis Report 特征
   if (isSemanticAnalysisReport(report)) {
-    console.log('[报告检测] 识别为 Semantic Analysis Report');
     return ReportType.SEMANTIC_ANALYSIS;
   }
-
-  const reportObj = report as ReportRecord;
-  console.warn('[报告检测] 未识别的报告格式', {
-    hasBuyerProfile: !!(reportObj['buyer-profile'] || reportObj.buyer_profile),
-    hasSellingPoints: !!(reportObj['selling-points'] || reportObj.selling_points),
-    hasCompetitorInsights: hasAnyField(reportObj, ['competitor_insights', 'competitorInsights']),
-    hasProductOverview: hasAnyField(reportObj, ['productOverview', 'product_overview']),
-    hasPainPointGaps: !!reportObj.pain_point_gaps,
-    metaTemplateId: getRecordField(reportObj, 'meta')?.templateId
-  });
 
   return ReportType.UNKNOWN;
 }

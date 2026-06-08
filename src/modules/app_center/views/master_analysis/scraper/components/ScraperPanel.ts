@@ -25,42 +25,81 @@ import type { ScrapedData, ScrapedProduct, HistoryItem } from '@/types/modules-b
 import { DataPreview, DataPreviewState } from './DataPreview';
 import { HistoryPanel } from './HistoryPanel';
 
-/**
- * 创建 Scraper Panel Alpine 组件
- */
-export function createScraperPanel() {
+type ScraperPanelState = {
+    inputAsins: string;
+    selectedSite: ScraperSite;
+    scrapeReviews: boolean;
+    isScraping: boolean;
+    currentDataTab: DataTab;
+    configExpanded: boolean;
+    refineGuideOpen: boolean;
+    tasks: Task[];
+    dataPreview: DataPreview | null;
+    historyPanel: HistoryPanel | null;
+    historyItems: HistoryItem[];
+    historyLoading: boolean;
+    historyLoadError: string;
+    _isRendering: boolean;
+    _historyLoadSeq: number;
+    _unsubscribers: Array<() => void>;
+    sites: ScraperSite[];
+};
+
+type ScraperPanelThis = ScraperPanelState & {
+    validAsins: string[];
+    invalidCount: number;
+    canStart: boolean;
+    hasData: boolean;
+    hasValidAsins: boolean;
+    history: HistoryItem[];
+    successfulTaskCount: number;
+    completedTaskCount: number;
+    isSelectedSite(site: ScraperSite): boolean;
+    loadHistory(): void;
+    restoreState(): void;
+    saveState(): void;
+    updateDataPreview(data: ScrapedData | null): void;
+    renderDataPanel(): void;
+    toggleCardExpand(asin: string): void;
+    handleDeleteResult(result: DeleteResult): void;
+    deleteProduct(asin: string): Promise<void>;
+    deleteReview(asin: string, index: number): Promise<void>;
+};
+
+type ScraperPanelBehavior = Record<string, unknown> & ThisType<ScraperPanelThis>;
+
+function createScraperPanelState(): ScraperPanelState {
     return {
-        // ========== State ==========
         inputAsins: '',
         selectedSite: 'DE' as ScraperSite,
         scrapeReviews: true,
         isScraping: false,
-        currentDataTab: 'preview' as DataTab, // 添加直接的状态属性
-
-        // UI State
+        currentDataTab: 'preview' as DataTab,
         configExpanded: false,
         refineGuideOpen: false,
         tasks: [] as Task[],
-
-        // 数据预览组件
-        dataPreview: null as DataPreview | null,
-
-        // 历史记录组件
-        historyPanel: null as HistoryPanel | null,
+        dataPreview: null,
+        historyPanel: null,
         historyItems: [] as HistoryItem[],
         historyLoading: false,
         historyLoadError: '',
-
-        // 渲染防抖标志
         _isRendering: false,
         _historyLoadSeq: 0,
-
-        // 清理函数数组
         _unsubscribers: [] as Array<() => void>,
-
-        // Constants for View
         sites: ['DE', 'FR', 'IT', 'ES', 'NL', 'SE', 'PL', 'BE', 'IE', 'UK'] as ScraperSite[],
+    };
+}
 
+function attachScraperPanelBehavior(panel: ScraperPanelState): ScraperPanelState & Record<string, unknown> {
+    Object.defineProperties(panel, Object.getOwnPropertyDescriptors(scraperPanelBehavior));
+    return panel;
+}
+
+/**
+ * Scraper Panel 行为。
+ * 通过 descriptor 挂载，保留 getter 语义。
+ */
+const scraperPanelBehavior: ScraperPanelBehavior = {
         // ========== Computed Properties ==========
 
         get validAsins(): string[] {
@@ -337,8 +376,6 @@ export function createScraperPanel() {
         // ========== Lifecycle ==========
 
         init() {
-            console.log("[Scraper] 🚀 Alpine 组件初始化");
-
             // 从 state 初始化 currentDataTab
             this.currentDataTab = appStore.getState().scraper.currentDataTab || 'preview';
 
@@ -360,12 +397,10 @@ export function createScraperPanel() {
 
             // 保存事件处理函数引用
             const historyUpdatedHandler = () => {
-                console.log('[Scraper] 收到标准历史更新事件');
                 this.loadHistory();
             };
             
             const customHistoryHandler = () => {
-                console.log('[Scraper] 收到自定义历史更新事件');
                 this.loadHistory();
             };
             
@@ -378,47 +413,32 @@ export function createScraperPanel() {
                 () => window.removeEventListener(APP_EVENTS.HISTORY_UPDATED, historyUpdatedHandler),
                 () => window.removeEventListener('history-updated', customHistoryHandler)
             );
-
-            console.log('[Scraper] ✅ Alpine 组件初始化完成');
         },
 
         // 组件销毁时清理资源
         destroy() {
-            console.log('[Scraper] 🔄 清理事件监听器');
             this._historyLoadSeq += 1;
             this.dataPreview?.cleanup();
             this._unsubscribers.forEach(unsub => {
                 try {
                     unsub();
-                } catch (error) {
-                    console.warn('[Scraper] 清理订阅时出错:', error);
+                } catch {
+                    // Ignore individual cleanup failures so remaining unsubscribers still run.
                 }
             });
             this._unsubscribers = [];
-            console.log('[Scraper] ✅ 资源清理完成');
         },
 
         // 如果有数据则渲染预览（这部分代码应该在 init 方法内）
         _renderInitialData() {
             if (this.hasData && this.dataPreview) {
-                console.log('[Scraper] 📦 检测到数据，准备初始化渲染');
-                console.log('[Scraper] 📊 检查大数据集');
                 this.dataPreview.checkLargeDataset();
 
-                console.log('[Scraper] 🎯 设置事件委托');
                 this.dataPreview.setupEventDelegation((asin) => {
-                    console.log('[Scraper] 🖱️ 事件委托触发，ASIN:', asin);
                     this.toggleCardExpand(asin);
                 });
 
-                console.log('[Scraper] 🎨 执行初始渲染');
                 this.renderDataPanel();
-                console.log('[Scraper] ✅ 初始化渲染完成');
-            } else {
-                console.log('[Scraper] ℹ️ 无数据或 dataPreview 不存在，跳过初始渲染', {
-                    hasData: this.hasData,
-                    hasDataPreview: !!this.dataPreview
-                });
             }
         },
 
@@ -436,8 +456,6 @@ export function createScraperPanel() {
             if (currentState.scraper.inputAsins) {
                 this.inputAsins = currentState.scraper.inputAsins;
             }
-
-            console.log("[Scraper] ✅ 状态已恢复");
         },
 
         /**
@@ -445,21 +463,16 @@ export function createScraperPanel() {
          */
         saveState() {
             // 只在状态真正改变时才保存，避免触发不必要的响应式更新
-            let hasChanges = false;
-
             if (appStore.getState().scraper.selectedSite !== this.selectedSite) {
                 appStore.getState().scraper.selectedSite = this.selectedSite;
-                hasChanges = true;
             }
 
             if (appStore.getState().scraper.inputAsins !== this.inputAsins) {
                 appStore.getState().scraper.inputAsins = this.inputAsins;
-                hasChanges = true;
             }
 
             if (appStore.getState().scraper.isScraping !== this.isScraping) {
                 appStore.getState().scraper.isScraping = this.isScraping;
-                hasChanges = true;
             }
 
             if (this.dataPreview) {
@@ -467,17 +480,11 @@ export function createScraperPanel() {
 
                 if (appStore.getState().scraper.expandedAsin !== previewState.expandedAsin) {
                     appStore.getState().scraper.expandedAsin = previewState.expandedAsin;
-                    hasChanges = true;
                 }
 
                 if (appStore.getState().scraper.currentDataTab !== previewState.currentDataTab) {
                     appStore.getState().scraper.currentDataTab = previewState.currentDataTab;
-                    hasChanges = true;
                 }
-            }
-
-            if (hasChanges) {
-                console.log("[Scraper] 💾 状态已保存");
             }
         },
 
@@ -563,12 +570,6 @@ export function createScraperPanel() {
         async startScrape() {
             if (!this.canStart) return;
 
-            console.log('[Scraper] 开始采集流程', {
-                asins: this.validAsins,
-                site: this.selectedSite,
-                scrapeReviews: this.scrapeReviews
-            });
-
             this.isScraping = true;
             this.tasks = []; // 清空之前的任务
 
@@ -582,7 +583,6 @@ export function createScraperPanel() {
             let products: unknown[] = [];
 
             try {
-                console.log('[Scraper] 调用 startScrape 函数');
                 products = await startScrape(
                     this.validAsins,
                     site,
@@ -590,16 +590,13 @@ export function createScraperPanel() {
                     this.tasks,
                     (asin, status, msg) => updateTask(this.tasks, asin, status, msg)
                 );
-                console.log('[Scraper] startScrape 完成', { productsCount: products.length, products });
             } catch (e) {
                 console.error('[Scraper] startScrape 异常:', e);
                 ErrorService.handle(e as Error, { action: 'startScrape', module: 'scraper' });
                 showToast("采集任务异常中断", { type: 'error' });
             } finally {
-                console.log('[Scraper] 进入 finally 块', { productsCount: products.length });
                 // 完成采集
                 const scrapedData = handleScrapeComplete(products as ScrapedProduct[], this.validAsins, this.selectedSite);
-                console.log('[Scraper] handleScrapeComplete 完成', scrapedData);
 
                 // 更新全局状态
                 appStore.getState().setScrapedData(scrapedData);
@@ -636,15 +633,10 @@ export function createScraperPanel() {
         },
 
         downloadPlugin(): void {
-            console.log('[Scraper] 🔽 下载插件按钮被点击');
             const url = 'https://github.com/earshore/Amazon-Scraper/releases';
             try {
-                console.log('[Scraper] 🌐 尝试打开 URL:', url);
                 const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
-                if (newWindow) {
-                    console.log('[Scraper] ✅ 窗口打开成功');
-                } else {
-                    console.warn('[Scraper] ⚠️ 窗口被浏览器拦截，请检查弹窗设置');
+                if (!newWindow) {
                     showToast('请允许浏览器弹窗以打开下载页面', { type: 'warning' });
                 }
             } catch (error) {
@@ -696,14 +688,11 @@ export function createScraperPanel() {
         updateDataPreview(data: ScrapedData | null): void {
             if (!this.dataPreview) return;
 
-            console.log('[Scraper] 🔄 更新数据预览');
             this.dataPreview.updateData(data);
             this.dataPreview.checkLargeDataset();
 
             // 重新设置事件委托
-            console.log('[Scraper] 🎯 重新设置事件委托');
             this.dataPreview.setupEventDelegation((asin) => {
-                console.log('[Scraper] 🖱️ 事件委托触发，ASIN:', asin);
                 this.toggleCardExpand(asin);
             });
 
@@ -711,57 +700,39 @@ export function createScraperPanel() {
         },
 
         renderDataPanel(): void {
-            console.log('[Scraper] 🎨 renderDataPanel 被调用');
-
             if (!this.dataPreview) {
-                console.warn('[Scraper] ⚠️ dataPreview 不存在，无法渲染');
                 return;
             }
 
             // 防止重复渲染
             if (this._isRendering) {
-                console.warn('[Scraper] ⚠️ 渲染已在进行中，跳过本次调用');
                 return;
             }
 
             this._isRendering = true;
-            console.log('[Scraper] 🔒 设置渲染锁');
 
             try {
-                console.log('[Scraper] 📝 开始渲染数据面板');
                 this.dataPreview.renderDataPanel(
                     (asin) => this.toggleCardExpand(asin),
                     (asin) => this.deleteProduct(asin),
                     (asin, index) => this.deleteReview(asin, index)
                 );
-                console.log('[Scraper] ✅ 数据面板渲染完成');
             } catch (error) {
                 console.error('[Scraper] ❌ 渲染失败:', error);
             } finally {
                 this._isRendering = false;
-                console.log('[Scraper] 🔓 释放渲染锁');
             }
         },
 
         toggleCardExpand(asin: string): void {
-            console.log('[Scraper] 🔄 toggleCardExpand 被调用:', asin);
-
             if (!this.dataPreview) {
-                console.warn('[Scraper] ⚠️ dataPreview 不存在');
                 return;
             }
-
-            const oldExpandedAsin = this.dataPreview.getState().expandedAsin;
-            console.log('[Scraper] 📊 当前展开的 ASIN:', oldExpandedAsin);
 
             // 切换展开状态
             this.dataPreview.toggleCardExpand(asin);
 
-            const newExpandedAsin = this.dataPreview.getState().expandedAsin;
-            console.log('[Scraper] 📊 新的展开 ASIN:', newExpandedAsin);
-
             // 重新渲染以更新UI
-            console.log('[Scraper] 🎨 重新渲染数据面板');
             this.renderDataPanel();
             this.saveState();
         },
@@ -799,19 +770,7 @@ export function createScraperPanel() {
                 confirmWithModal
             );
 
-            if (result.success && result.data) {
-                appStore.getState().setScrapedData(result.data);
-                if (this.dataPreview) {
-                    this.updateDataPreview(result.data);
-                }
-                this.loadHistory();
-            } else if (result.data) {
-                // 回滚
-                appStore.getState().setScrapedData(result.data);
-                if (this.dataPreview) {
-                    this.updateDataPreview(result.data);
-                }
-            }
+            this.handleDeleteResult(result);
         },
 
         async deleteReview(asin: string, index: number): Promise<void> {
@@ -822,18 +781,19 @@ export function createScraperPanel() {
                 confirmWithModal
             );
 
-            if (result.success && result.data) {
-                appStore.getState().setScrapedData(result.data);
-                if (this.dataPreview) {
-                    this.updateDataPreview(result.data);
-                }
+            this.handleDeleteResult(result);
+        },
+
+        handleDeleteResult(result: DeleteResult): void {
+            if (!result.data) return;
+
+            appStore.getState().setScrapedData(result.data);
+            if (this.dataPreview) {
+                this.updateDataPreview(result.data);
+            }
+
+            if (result.success) {
                 this.loadHistory();
-            } else if (result.data) {
-                // 回滚
-                appStore.getState().setScrapedData(result.data);
-                if (this.dataPreview) {
-                    this.updateDataPreview(result.data);
-                }
             }
         },
 
@@ -842,5 +802,11 @@ export function createScraperPanel() {
         getFlag,
         getSiteName,
         formatDate
-    };
+};
+
+/**
+ * 创建 Scraper Panel Alpine 组件
+ */
+export function createScraperPanel() {
+    return attachScraperPanelBehavior(createScraperPanelState());
 }

@@ -1,4 +1,5 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { SafeRenderer } from '../../src/common/infrastructure/SafeRenderer';
 import { confirmWithModal } from '../../src/modules/app_center/views/master_analysis/scraper/handlers/dataOperations';
 import { showMarketplaceSelectionModal } from '../../src/modules/app_center/views/master_analysis/scraper/handlers/importHandler';
 
@@ -18,6 +19,7 @@ function pressEscape(): void {
 
 describe('scraper runtime modal regression', () => {
   afterEach(() => {
+    vi.restoreAllMocks();
     document.body.replaceChildren();
     localStorage.clear();
   });
@@ -60,5 +62,27 @@ describe('scraper runtime modal regression', () => {
 
     await expect(result).resolves.toBeNull();
     expect(document.body.contains(backdrop)).toBe(false);
+  });
+
+  it('removes delete confirmation backdrop if required controls are missing', async () => {
+    vi.spyOn(SafeRenderer.getInstance(), 'renderTemplate').mockImplementation((container) => {
+      container.textContent = 'stripped modal content';
+    });
+
+    const result = confirmWithModal('确认删除', '确认删除测试内容', 'delete-missing-controls');
+
+    await expect(result).resolves.toBe(false);
+    expect(document.querySelector('[id^="confirm-modal-"]')).toBeNull();
+  });
+
+  it('removes marketplace selection backdrop if required controls are missing', async () => {
+    vi.spyOn(SafeRenderer.getInstance(), 'renderTemplate').mockImplementation((container) => {
+      container.textContent = 'stripped modal content';
+    });
+
+    const result = showMarketplaceSelectionModal(['DE', 'FR']);
+
+    await expect(result).resolves.toBeNull();
+    expect(document.querySelector('[id^="site-select-modal-"]')).toBeNull();
   });
 });

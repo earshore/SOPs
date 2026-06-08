@@ -148,8 +148,10 @@ class StorageServiceClass implements IStorageService {
    * 设置存储值
    */
   set(key: string, value: unknown): boolean {
+    let serialized = '';
+
     try {
-      const serialized = JSON.stringify(value);
+      serialized = JSON.stringify(value);
 
       this._checkCacheSize(serialized.length * 2);
 
@@ -158,48 +160,7 @@ class StorageServiceClass implements IStorageService {
 
       return true;
     } catch (e) {
-      const error = e as Error & { name: string };
-
-      if (error.name === 'QuotaExceededError') {
-        handleSystemError('SYS_STORAGE_FULL', {
-          module: 'StorageService',
-          action: 'set',
-          key,
-          valueSize: JSON.stringify(value).length
-        }, error, {
-          log: true,
-          notify: true
-        });
-
-        // 尝试清理后重试
-        this._handleQuotaExceeded();
-        try {
-          localStorage.setItem(key, JSON.stringify(value));
-          this._updateAccessTime(key);
-          return true;
-        } catch (retryError) {
-          handleSystemError('SYS_STORAGE_ERROR', {
-            module: 'StorageService',
-            action: 'set',
-            key,
-            retry: true
-          }, retryError as Error, {
-            log: true,
-            notify: true
-          });
-          return false;
-        }
-      }
-
-      handleSystemError('SYS_STORAGE_ERROR', {
-        module: 'StorageService',
-        action: 'set',
-        key
-      }, error, {
-        log: true,
-        notify: false
-      });
-      return false;
+      return this._handleStorageWriteError('set', key, serialized, serialized.length, e as Error & { name?: string });
     }
   }
 
@@ -240,48 +201,58 @@ class StorageServiceClass implements IStorageService {
 
       return true;
     } catch (e) {
-      const error = e as Error & { name: string };
+      return this._handleStorageWriteError('setRaw', key, value, value.length, e as Error & { name?: string });
+    }
+  }
 
-      if (error.name === 'QuotaExceededError') {
-        handleSystemError('SYS_STORAGE_FULL', {
-          module: 'StorageService',
-          action: 'setRaw',
-          key,
-          valueSize: value.length
-        }, error, {
-          log: true,
-          notify: true
-        });
-
-        this._handleQuotaExceeded();
-        try {
-          localStorage.setItem(key, value);
-          this._updateAccessTime(key);
-          return true;
-        } catch (retryError) {
-          handleSystemError('SYS_STORAGE_ERROR', {
-            module: 'StorageService',
-            action: 'setRaw',
-            key,
-            retry: true
-          }, retryError as Error, {
-            log: true,
-            notify: true
-          });
-          return false;
-        }
-      }
-
-      handleSystemError('SYS_STORAGE_ERROR', {
+  private _handleStorageWriteError(
+    action: 'set' | 'setRaw',
+    key: string,
+    value: string,
+    valueSize: number,
+    error: Error & { name?: string }
+  ): boolean {
+    if (error.name === 'QuotaExceededError') {
+      handleSystemError('SYS_STORAGE_FULL', {
         module: 'StorageService',
-        action: 'setRaw',
-        key
+        action,
+        key,
+        valueSize
       }, error, {
         log: true,
-        notify: false
+        notify: true
       });
-      return false;
+
+      this._handleQuotaExceeded();
+      try {
+        localStorage.setItem(key, value);
+        this._updateAccessTime(key);
+        return true;
+      } catch (retryError) {
+        this._reportStorageError(action, key, retryError as Error, true);
+        return false;
+      }
     }
+
+    this._reportStorageError(action, key, error, false);
+    return false;
+  }
+
+  private _reportStorageError(
+    action: 'set' | 'setRaw',
+    key: string,
+    error: Error,
+    retry: boolean
+  ): void {
+    handleSystemError('SYS_STORAGE_ERROR', {
+      module: 'StorageService',
+      action,
+      key,
+      ...(retry ? { retry: true } : {})
+    }, error, {
+      log: true,
+      notify: retry
+    });
   }
 
   /**

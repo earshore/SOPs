@@ -110,7 +110,14 @@ interface CampaignClassificationRule {
   reason: (metrics: CampaignMetrics) => string;
 }
 
-type RowMetrics = Pick<AnalyzedRow, 'impressions' | 'clicks' | 'spend' | 'sales' | 'orders' | 'ctr' | 'cvr' | 'acos'>;
+type PerformanceMetrics = Pick<AnalyzedRow, 'impressions' | 'clicks' | 'spend' | 'sales' | 'orders' | 'ctr' | 'cvr' | 'cpc' | 'acos'>;
+type RowMetrics = Omit<PerformanceMetrics, 'cpc'>;
+interface CampaignPerformanceMetrics extends PerformanceMetrics {
+  dailyBudget: number;
+  roas: number;
+  ownSales: number;
+  otherSales: number;
+}
 interface CampaignMetrics extends RowMetrics {
   status: string;
   serviceStatus: string;
@@ -916,20 +923,30 @@ function parseDelimited(text: string, delimiter: string): string[][] {
     if (isEscapedQuote(char, next, inQuotes)) {
       cell += '"';
       index += 1;
-    } else if (isQuote(char)) {
+      continue;
+    }
+
+    if (isQuote(char)) {
       inQuotes = !inQuotes;
-    } else if (isDelimiter(char, delimiter, inQuotes)) {
+      continue;
+    }
+
+    if (isDelimiter(char, delimiter, inQuotes)) {
       row.push(cell);
       cell = '';
-    } else if (isRowBreak(char, next, inQuotes)) {
+      continue;
+    }
+
+    if (isRowBreak(char, next, inQuotes)) {
       row.push(cell);
       rows.push(row);
       row = [];
       cell = '';
       if (char === '\r' && next === '\n') index += 1;
-    } else {
-      cell += char;
+      continue;
     }
+
+    cell += char;
   }
 
   row.push(cell);
@@ -992,6 +1009,44 @@ function normalizeHeader(header: string): string {
   return header.toLowerCase().replace(/[#()]/g, '').replace(/\s+/g, ' ').trim();
 }
 
+function readBasePerformanceMetrics(record: RawRecord, mapping: ColumnMapping): RowMetrics {
+  const impressions = parseMetric(readField(record, mapping, 'impressions'));
+  const clicks = parseMetric(readField(record, mapping, 'clicks'));
+  const spend = parseMetric(readField(record, mapping, 'spend'));
+  const sales = parseMetric(readField(record, mapping, 'sales'));
+  const orders = parseMetric(readField(record, mapping, 'orders'));
+  const ctr = percentage(clicks, impressions);
+  const cvr = percentage(orders, clicks);
+  const acos = percentage(spend, sales);
+
+  return { impressions, clicks, spend, sales, orders, ctr, cvr, acos };
+}
+
+function readSearchTermPerformanceMetrics(record: RawRecord, mapping: ColumnMapping): PerformanceMetrics {
+  const metrics = readBasePerformanceMetrics(record, mapping);
+
+  return {
+    ...metrics,
+    cpc: ratio(metrics.spend, metrics.clicks),
+  };
+}
+
+function readCampaignPerformanceMetrics(record: RawRecord, mapping: ColumnMapping): CampaignPerformanceMetrics {
+  const metrics = readBasePerformanceMetrics(record, mapping);
+
+  return {
+    ...metrics,
+    ctr: readOrCalculatePercentage(record, mapping, 'ctr', metrics.clicks, metrics.impressions),
+    cvr: readOrCalculatePercentage(record, mapping, 'cvr', metrics.orders, metrics.clicks),
+    cpc: parseMetric(readField(record, mapping, 'cpc')) || ratio(metrics.spend, metrics.clicks),
+    acos: parseMetric(readField(record, mapping, 'acos')) || metrics.acos,
+    dailyBudget: parseMetric(readField(record, mapping, 'dailyBudget')),
+    roas: parseMetric(readField(record, mapping, 'roas')) || ratio(metrics.sales, metrics.spend),
+    ownSales: parseMetric(readField(record, mapping, 'ownSales')),
+    otherSales: parseMetric(readField(record, mapping, 'otherSales')),
+  };
+}
+
 function analyzeRecord(
   record: RawRecord,
   mapping: ColumnMapping,
@@ -1003,16 +1058,8 @@ function analyzeRecord(
   if (!searchTerm) return null;
 
   const store = readField(record, mapping, 'shop');
-  const impressions = parseMetric(readField(record, mapping, 'impressions'));
-  const clicks = parseMetric(readField(record, mapping, 'clicks'));
-  const spend = parseMetric(readField(record, mapping, 'spend'));
-  const sales = parseMetric(readField(record, mapping, 'sales'));
-  const orders = parseMetric(readField(record, mapping, 'orders'));
-  const ctr = percentage(clicks, impressions);
-  const cvr = percentage(orders, clicks);
-  const cpc = ratio(spend, clicks);
-  const acos = percentage(spend, sales);
-  const decision = classifyRow({ impressions, clicks, spend, sales, orders, ctr, cvr, acos }, thresholds);
+  const metrics = readSearchTermPerformanceMetrics(record, mapping);
+  const decision = classifyRow(metrics, thresholds);
 
   return {
     id: `${index}-${searchTerm}`,
@@ -1022,15 +1069,7 @@ function analyzeRecord(
     searchTerm,
     keyword: readField(record, mapping, 'keyword'),
     matchType: readField(record, mapping, 'matchType'),
-    impressions,
-    clicks,
-    spend,
-    sales,
-    orders,
-    ctr,
-    cvr,
-    cpc,
-    acos,
+    ...metrics,
     action: decision.type,
     actionLabel: decision.label,
     reason: decision.reason,
@@ -1054,34 +1093,11 @@ function analyzeCampaignRecord(
   const targetingType = readField(record, mapping, 'targetingType');
   const adType = readField(record, mapping, 'adType');
   const bidStrategy = readField(record, mapping, 'bidStrategy');
-  const dailyBudget = parseMetric(readField(record, mapping, 'dailyBudget'));
-  const impressions = parseMetric(readField(record, mapping, 'impressions'));
-  const clicks = parseMetric(readField(record, mapping, 'clicks'));
-  const spend = parseMetric(readField(record, mapping, 'spend'));
-  const sales = parseMetric(readField(record, mapping, 'sales'));
-  const orders = parseMetric(readField(record, mapping, 'orders'));
-  const ctr = readOrCalculatePercentage(record, mapping, 'ctr', clicks, impressions);
-  const cvr = readOrCalculatePercentage(record, mapping, 'cvr', orders, clicks);
-  const cpc = parseMetric(readField(record, mapping, 'cpc')) || ratio(spend, clicks);
-  const acos = parseMetric(readField(record, mapping, 'acos')) || percentage(spend, sales);
-  const roas = parseMetric(readField(record, mapping, 'roas')) || ratio(sales, spend);
-  const ownSales = parseMetric(readField(record, mapping, 'ownSales'));
-  const otherSales = parseMetric(readField(record, mapping, 'otherSales'));
+  const metrics = readCampaignPerformanceMetrics(record, mapping);
   const decision = classifyCampaign({
     status,
     serviceStatus,
-    impressions,
-    clicks,
-    spend,
-    sales,
-    orders,
-    ctr,
-    cvr,
-    acos,
-    roas,
-    ownSales,
-    otherSales,
-    dailyBudget,
+    ...metrics,
   }, thresholds);
 
   return {
@@ -1092,15 +1108,7 @@ function analyzeCampaignRecord(
     searchTerm: campaign,
     keyword: [adType, serviceStatus, bidStrategy].filter(Boolean).join(' / '),
     matchType: targetingType,
-    impressions,
-    clicks,
-    spend,
-    sales,
-    orders,
-    ctr,
-    cvr,
-    cpc,
-    acos,
+    ...metrics,
     action: decision.type,
     actionLabel: decision.label,
     reason: decision.reason,
@@ -1108,10 +1116,6 @@ function analyzeCampaignRecord(
     store: shop,
     serviceStatus,
     targetingType,
-    dailyBudget,
-    roas,
-    ownSales,
-    otherSales,
   };
 }
 

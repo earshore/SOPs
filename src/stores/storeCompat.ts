@@ -120,7 +120,7 @@ const MODULE_UPDATERS: Record<string, string> = {
  * 
  * // 订阅变化
  * const unsubscribe = storeCompat.subscribe('ui.currentTab', (newVal, oldVal) => {
- *   console.log('Tab changed:', oldVal, '->', newVal);
+ *   const changed = { oldVal, newVal };
  * });
  */
 export class StoreCompat {
@@ -146,7 +146,6 @@ export class StoreCompat {
     const { module, property, isValid } = parsePath(path);
 
     if (!isValid) {
-      console.warn(`[StoreCompat] 无效路径: ${path}`);
       return undefined as T;
     }
 
@@ -185,7 +184,6 @@ export class StoreCompat {
     const { module, property, isValid } = parsePath(path);
 
     if (!isValid) {
-      console.warn(`[StoreCompat] 无效路径: ${path}`);
       return;
     }
 
@@ -222,7 +220,6 @@ export class StoreCompat {
     }
 
     // 3. 兜底:直接更新(不推荐,但保证兼容性)
-    console.warn(`[StoreCompat] 未找到setter: ${module}.${property}, 使用直接更新`);
     const moduleState = stateRecord[module];
     if (moduleState && typeof moduleState === 'object') {
       const update: Record<string, unknown> = {};
@@ -238,12 +235,12 @@ export class StoreCompat {
    * @param path - 状态路径
    * @param callback - 变化回调,接收新值和旧值
    * @returns 取消订阅函数
-   * 
-   * @example
-   * const unsubscribe = storeCompat.subscribe('ui.currentTab', (newVal, oldVal) => {
-   *   console.log('Tab changed:', oldVal, '->', newVal);
-   * });
-   * 
+ * 
+ * @example
+ * const unsubscribe = storeCompat.subscribe('ui.currentTab', (newVal, oldVal) => {
+ *   const changed = { oldVal, newVal };
+ * });
+ * 
    * // 取消订阅
    * unsubscribe();
    */
@@ -291,11 +288,11 @@ export class StoreCompat {
    * 获取完整状态快照
    * 
    * @returns 完整状态对象
-   * 
-   * @example
-   * const snapshot = storeCompat.snapshot();
-   * console.log(snapshot.ui.currentTab);
-   */
+ * 
+ * @example
+ * const snapshot = storeCompat.snapshot();
+ * const currentTab = snapshot.ui.currentTab;
+ */
   snapshot(): AppState {
     return appStore.getState();
   }
@@ -325,7 +322,7 @@ export class StoreCompat {
         state.resetKeywordTracker();
         break;
       default:
-        console.warn(`[StoreCompat] 不支持重置模块: ${module}`);
+        break;
     }
   }
 
@@ -375,7 +372,7 @@ export class StoreCompat {
  * 
  * // 订阅变化
  * const unsubscribe = storeCompat.subscribe('ui.currentTab', (newVal) => {
- *   console.log('Tab changed to:', newVal);
+ *   const currentTab = newVal;
  * });
  */
 export const storeCompat = new StoreCompat();

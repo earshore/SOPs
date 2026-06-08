@@ -7,9 +7,14 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import eventBus from '@/common/EventBus';
+import { APP_EVENTS } from '@/common/constants/eventConstants';
+import { showToast } from '@/common/ui';
 import { updateTask, handleScrapeComplete } from '@/modules/app_center/views/master_analysis/scraper/handlers/scrapeHandler';
+import { deleteProduct, deleteReview } from '@/modules/app_center/views/master_analysis/scraper/handlers/dataOperations';
+import { HistoryService } from '@/modules/app_center/views/master_analysis/services/historyService';
 import type { Task } from '@/modules/app_center/views/master_analysis/scraper/types';
-import type { ScrapedProduct, ScraperSite } from '@/types/modules-business';
+import type { CustomerReview, ScrapedData, ScrapedProduct, ScraperSite } from '@/types/modules-business';
 
 // Mock dependencies
 vi.mock('@/modules/app_center/views/master_analysis/services/historyService', () => ({
@@ -18,6 +23,16 @@ vi.mock('@/modules/app_center/views/master_analysis/services/historyService', ()
     saveAsync: vi.fn(() => Promise.resolve()),
     getAll: vi.fn(() => []),
     clear: vi.fn()
+  }
+}));
+
+vi.mock('@/common/ui', () => ({
+  showToast: vi.fn()
+}));
+
+vi.mock('@/common/EventBus', () => ({
+  default: {
+    emit: vi.fn()
   }
 }));
 
@@ -31,6 +46,57 @@ vi.mock('@/common/constants/constants', () => ({
     UK: { domain: 'amazon.co.uk', name: 'English (UK)' }
   }
 }));
+
+function createReview(id: string): CustomerReview {
+  return {
+    id,
+    author: 'Tester',
+    headline: `Review ${id}`,
+    body: `Review body ${id}`,
+    star_rating: 5,
+    is_verified: true,
+    review_date: '2026-01-01'
+  };
+}
+
+function createScrapedData(): ScrapedData {
+  return {
+    metadata: {
+      scrape_timestamp: '2026-01-01T00:00:00.000Z',
+      marketplace: 'US',
+      domain: 'amazon.com',
+      language: 'English',
+      total_asins: 2
+    },
+    products: [
+      {
+        asin: 'B000000001',
+        url: '',
+        language: 'English',
+        productTitle: 'Product 1',
+        feature_bullets: [],
+        customer_reviews: [createReview('R1'), createReview('R2')],
+        scrape_status: 'success',
+        error: ''
+      },
+      {
+        asin: 'B000000002',
+        url: '',
+        language: 'English',
+        productTitle: 'Product 2',
+        feature_bullets: [],
+        customer_reviews: [createReview('R3')],
+        scrape_status: 'success',
+        error: ''
+      }
+    ]
+  };
+}
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  vi.mocked(HistoryService.saveAsync).mockResolvedValue([]);
+});
 
 describe('Scraper 处理器', () => {
   describe('updateTask - 更新任务状态', () => {
@@ -442,6 +508,77 @@ describe('Scraper 处理器', () => {
       expect(result.products[1].scrape_status).toBe('failed');
       expect(tasks[0].status).toBe('success');
       expect(tasks[1].status).toBe('failed');
+    });
+  });
+
+  describe('deleteProduct - 删除产品', () => {
+    it('应该删除产品、更新元数据并保存历史记录', async () => {
+      const data = createScrapedData();
+      const confirmModal = vi.fn().mockResolvedValue(true);
+
+      const result = await deleteProduct('B000000001', data, confirmModal);
+
+      expect(result.success).toBe(true);
+      expect(result.data?.products.map((product) => product.asin)).toEqual(['B000000002']);
+      expect(result.data?.metadata?.total_asins).toBe(1);
+      expect(HistoryService.saveAsync).toHaveBeenCalledWith(data);
+      expect(eventBus.emit).toHaveBeenCalledWith(APP_EVENTS.DATA_UPDATED);
+      expect(eventBus.emit).toHaveBeenCalledWith(APP_EVENTS.HISTORY_UPDATED);
+      expect(showToast).toHaveBeenCalledWith('ASIN B000000001 已移除', { type: 'info' });
+    });
+
+    it('用户取消时不应该修改数据或保存历史记录', async () => {
+      const data = createScrapedData();
+      const originalData = JSON.stringify(data);
+      const confirmModal = vi.fn().mockResolvedValue(false);
+
+      const result = await deleteProduct('B000000001', data, confirmModal);
+
+      expect(result).toEqual({ success: false });
+      expect(JSON.stringify(data)).toBe(originalData);
+      expect(HistoryService.saveAsync).not.toHaveBeenCalled();
+      expect(eventBus.emit).not.toHaveBeenCalled();
+    });
+
+    it('保存失败时应该返回原始数据用于回滚', async () => {
+      const data = createScrapedData();
+      const confirmModal = vi.fn().mockResolvedValue(true);
+      vi.mocked(HistoryService.saveAsync).mockRejectedValueOnce(new Error('disk full'));
+
+      const result = await deleteProduct('B000000001', data, confirmModal);
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('保存历史记录失败');
+      expect(result.data?.products.map((product) => product.asin)).toEqual(['B000000001', 'B000000002']);
+      expect(showToast).toHaveBeenCalledWith('删除操作失败: 保存历史记录失败', { type: 'error' });
+    });
+  });
+
+  describe('deleteReview - 删除评论', () => {
+    it('应该删除指定评论并保存历史记录', async () => {
+      const data = createScrapedData();
+      const confirmModal = vi.fn().mockResolvedValue(true);
+
+      const result = await deleteReview('B000000001', 0, data, confirmModal);
+
+      expect(result.success).toBe(true);
+      expect(result.data?.products[0].customer_reviews.map((review) => review.id)).toEqual(['R2']);
+      expect(HistoryService.saveAsync).toHaveBeenCalledWith(data);
+      expect(eventBus.emit).toHaveBeenCalledWith(APP_EVENTS.DATA_UPDATED);
+      expect(eventBus.emit).toHaveBeenCalledWith(APP_EVENTS.HISTORY_UPDATED);
+      expect(showToast).toHaveBeenCalledWith('评论已删除', { type: 'info' });
+    });
+
+    it('评论索引越界时应该返回原始数据用于回滚', async () => {
+      const data = createScrapedData();
+      const confirmModal = vi.fn().mockResolvedValue(true);
+
+      const result = await deleteReview('B000000001', 5, data, confirmModal);
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('评论索引超出范围：5 >= 2');
+      expect(result.data?.products[0].customer_reviews.map((review) => review.id)).toEqual(['R1', 'R2']);
+      expect(HistoryService.saveAsync).not.toHaveBeenCalled();
     });
   });
 });

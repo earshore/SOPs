@@ -27,6 +27,12 @@ export interface ModalAnimationOptions {
   skipAnimation?: boolean;
 }
 
+function shouldSkipModalAnimation(skipAnimation = false): boolean {
+  return skipAnimation ||
+    animationManager.shouldReduceMotion() ||
+    !animationManager.isCategoryEnabled('modal');
+}
+
 /**
  * 模态框动画控制器
  */
@@ -50,60 +56,11 @@ export class ModalAnimationController {
    * @param options - 动画选项
    */
   async open(options: ModalAnimationOptions = {}): Promise<void> {
-    const { onComplete, onStart, skipAnimation = false } = options;
-
-    // 如果正在动画中，等待完成
-    if (this.isAnimating) {
-      await this.waitForAnimation();
-    }
-
-    // 触发开始回调
-    onStart?.();
-
-    // 检查是否应该跳过动画
-    const shouldSkip = skipAnimation || animationManager.shouldReduceMotion() || 
-                       !animationManager.isCategoryEnabled('modal');
-
-    if (shouldSkip) {
-      // 直接显示，不使用动画
-      this.backdrop.classList.add('show');
-      this.modal.style.pointerEvents = 'auto';
-      onComplete?.();
-      return;
-    }
-
-    // 标记动画开始
-    this.isAnimating = true;
-
-    // 禁用模态框内容的交互
-    this.modal.style.pointerEvents = 'none';
-
-    // 显示遮罩层
-    this.backdrop.style.visibility = 'visible';
-    this.backdrop.style.pointerEvents = 'auto';
-
-    // 应用进入动画类
-    this.backdrop.classList.add(ANIMATION_CLASSES.modalBackdropEnter);
-    this.modal.classList.add(ANIMATION_CLASSES.modalContentEnter);
-
-    // 等待动画完成
-    await Promise.all([
-      this.waitForAnimationEnd(this.backdrop),
-      this.waitForAnimationEnd(this.modal),
-    ]);
-
-    // 清理动画类
-    this.backdrop.classList.remove(ANIMATION_CLASSES.modalBackdropEnter);
-    this.modal.classList.remove(ANIMATION_CLASSES.modalContentEnter);
-
-    // 启用模态框内容的交互
-    this.modal.style.pointerEvents = 'auto';
-
-    // 标记动画结束
-    this.isAnimating = false;
-
-    // 触发完成回调
-    onComplete?.();
+    await this.runTransition(
+      options,
+      () => this.showInstantly(),
+      () => this.animateOpen()
+    );
   }
 
   /**
@@ -111,59 +68,83 @@ export class ModalAnimationController {
    * @param options - 动画选项
    */
   async close(options: ModalAnimationOptions = {}): Promise<void> {
+    await this.runTransition(
+      options,
+      () => this.hideInstantly(),
+      () => this.animateClose()
+    );
+  }
+
+  private async runTransition(
+    options: ModalAnimationOptions,
+    applyInstant: () => void,
+    applyAnimated: () => Promise<void>
+  ): Promise<void> {
     const { onComplete, onStart, skipAnimation = false } = options;
 
-    // 如果正在动画中，等待完成
     if (this.isAnimating) {
       await this.waitForAnimation();
     }
 
-    // 触发开始回调
     onStart?.();
 
-    // 检查是否应该跳过动画
-    const shouldSkip = skipAnimation || animationManager.shouldReduceMotion() || 
-                       !animationManager.isCategoryEnabled('modal');
-
-    if (shouldSkip) {
-      // 直接隐藏，不使用动画
-      this.backdrop.classList.remove('show');
-      this.backdrop.style.visibility = 'hidden';
-      this.backdrop.style.pointerEvents = 'none';
-      this.modal.style.pointerEvents = 'none';
+    if (shouldSkipModalAnimation(skipAnimation)) {
+      applyInstant();
       onComplete?.();
       return;
     }
 
-    // 标记动画开始
-    this.isAnimating = true;
+    await applyAnimated();
+    onComplete?.();
+  }
 
-    // 禁用模态框内容的交互
-    this.modal.style.pointerEvents = 'none';
+  private showInstantly(): void {
+    this.backdrop.classList.add('show');
+    this.modal.style.pointerEvents = 'auto';
+  }
+
+  private hideInstantly(): void {
+    this.backdrop.classList.remove('show');
+    this.backdrop.style.visibility = 'hidden';
     this.backdrop.style.pointerEvents = 'none';
+    this.modal.style.pointerEvents = 'none';
+  }
 
-    // 应用退出动画类
-    this.backdrop.classList.add(ANIMATION_CLASSES.modalBackdropExit);
-    this.modal.classList.add(ANIMATION_CLASSES.modalContentExit);
+  private async animateOpen(): Promise<void> {
+    this.isAnimating = true;
+    this.modal.style.pointerEvents = 'none';
+    this.backdrop.style.visibility = 'visible';
+    this.backdrop.style.pointerEvents = 'auto';
+    this.backdrop.classList.add(ANIMATION_CLASSES.modalBackdropEnter);
+    this.modal.classList.add(ANIMATION_CLASSES.modalContentEnter);
 
-    // 等待动画完成
     await Promise.all([
       this.waitForAnimationEnd(this.backdrop),
       this.waitForAnimationEnd(this.modal),
     ]);
 
-    // 清理动画类
+    this.backdrop.classList.remove(ANIMATION_CLASSES.modalBackdropEnter);
+    this.modal.classList.remove(ANIMATION_CLASSES.modalContentEnter);
+    this.modal.style.pointerEvents = 'auto';
+    this.isAnimating = false;
+  }
+
+  private async animateClose(): Promise<void> {
+    this.isAnimating = true;
+    this.modal.style.pointerEvents = 'none';
+    this.backdrop.style.pointerEvents = 'none';
+    this.backdrop.classList.add(ANIMATION_CLASSES.modalBackdropExit);
+    this.modal.classList.add(ANIMATION_CLASSES.modalContentExit);
+
+    await Promise.all([
+      this.waitForAnimationEnd(this.backdrop),
+      this.waitForAnimationEnd(this.modal),
+    ]);
+
     this.backdrop.classList.remove(ANIMATION_CLASSES.modalBackdropExit);
     this.modal.classList.remove(ANIMATION_CLASSES.modalContentExit);
-
-    // 隐藏遮罩层
     this.backdrop.style.visibility = 'hidden';
-
-    // 标记动画结束
     this.isAnimating = false;
-
-    // 触发完成回调
-    onComplete?.();
   }
 
   /**

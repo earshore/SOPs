@@ -46,6 +46,41 @@ export interface HttpOptions {
   forceRefresh?: boolean; // 强制刷新(跳过缓存)
 }
 
+interface CacheLookup<T> {
+  hit: boolean;
+  value?: T;
+}
+
+interface HttpRequestExecutionOptions {
+  method: NonNullable<HttpOptions['method']>;
+  headers: Record<string, string>;
+  body: unknown;
+  timeout: number;
+  retries: number;
+  retryDelay: number;
+  json: boolean;
+  signal: AbortSignal | null;
+}
+
+interface HttpCacheContext {
+  method: string;
+  cache: CacheStrategy | undefined;
+  cacheKey: string;
+  cacheTTL: number;
+  forceRefresh?: boolean;
+  url?: string;
+}
+
+interface HttpRunContext<T> {
+  url: string;
+  method: string;
+  usePool: boolean;
+  priority: RequestPriority;
+  measurePerformance: boolean;
+  executeRequest: (signal?: AbortSignal) => Promise<T>;
+  signal?: AbortSignal;
+}
+
 /**
  * HTTP 错误类
  */
@@ -176,6 +211,140 @@ class HttpServiceClass implements IHttpService {
     }
   }
 
+  private async _getCachedResponse<T>(
+    context: HttpCacheContext
+  ): Promise<CacheLookup<T>> {
+    if (context.method !== 'GET' || !context.cache || context.forceRefresh) {
+      return { hit: false };
+    }
+
+    const cached = await httpCacheService.get(context.cacheKey, {
+      strategy: context.cache,
+      ttl: context.cacheTTL
+    });
+
+    if (cached === null) {
+      return { hit: false };
+    }
+
+    this._log('debug', '使用缓存响应', { url: context.url, cacheKey: context.cacheKey });
+    return { hit: true, value: cached as T };
+  }
+
+  private async _cacheResponse<T>(
+    context: HttpCacheContext,
+    result: T
+  ): Promise<void> {
+    if (context.method !== 'GET' || !context.cache) {
+      return;
+    }
+
+    await httpCacheService.set(context.cacheKey, result, {
+      strategy: context.cache,
+      ttl: context.cacheTTL
+    });
+  }
+
+  private _attachAbortSignal(signal: AbortSignal | null | undefined, controller: AbortController): void {
+    if (signal) {
+      signal.addEventListener('abort', () => controller.abort(), { once: true });
+    }
+  }
+
+  private _createFetchOptions(options: HttpRequestExecutionOptions, controller: AbortController): RequestInit {
+    const fetchOptions: RequestInit = {
+      method: options.method,
+      headers: options.headers,
+      signal: controller.signal,
+    };
+
+    if (options.body) {
+      fetchOptions.body = typeof options.body === 'string' ? options.body : JSON.stringify(options.body);
+    }
+
+    return fetchOptions;
+  }
+
+  private async _parseResponse<T>(response: Response, json: boolean): Promise<T> {
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new HttpError(response.status, errorText, response);
+    }
+
+    if (!json) {
+      return await response.text() as T;
+    }
+
+    const data = await response.json();
+    if (data === undefined) {
+      throw new HttpError(response.status, 'API 返回空响应', response);
+    }
+
+    return data;
+  }
+
+  private async _executeRequestAttempt<T>(
+    url: string,
+    options: HttpRequestExecutionOptions,
+    abortSignal?: AbortSignal
+  ): Promise<T> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), options.timeout);
+
+    this._attachAbortSignal(options.signal, controller);
+    this._attachAbortSignal(abortSignal, controller);
+
+    try {
+      const response = await fetch(url, this._createFetchOptions(options, controller));
+      clearTimeout(timeoutId);
+      return await this._parseResponse<T>(response, options.json);
+    } catch (error) {
+      clearTimeout(timeoutId);
+      throw error;
+    }
+  }
+
+  private async _executeRequestWithRetries<T>(
+    url: string,
+    options: HttpRequestExecutionOptions,
+    abortSignal?: AbortSignal
+  ): Promise<T> {
+    let lastError: Error | null = null;
+
+    for (let attempt = 0; attempt <= options.retries; attempt++) {
+      try {
+        return await this._executeRequestAttempt<T>(url, options, abortSignal);
+      } catch (error) {
+        lastError = error as Error;
+
+        if (attempt === options.retries) {
+          throw error;
+        }
+
+        await this._delay(options.retryDelay * (attempt + 1));
+        console.log(`[HttpService] Retry ${attempt + 1}/${options.retries}: ${url}`);
+      }
+    }
+
+    throw lastError;
+  }
+
+  private _runRequest<T>(
+    context: HttpRunContext<T>
+  ): Promise<T> {
+    const run = () => context.executeRequest(context.signal);
+
+    if (context.measurePerformance) {
+      return this._executeWithPerformance(context.url, context.method, context.usePool, context.priority, run);
+    }
+
+    if (context.usePool) {
+      return priorityRequestPool.add(run, context.priority, { url: context.url, method: context.method });
+    }
+
+    return run();
+  }
+
   /**
    * 发送 HTTP 请求
    */
@@ -203,153 +372,54 @@ class HttpServiceClass implements IHttpService {
       forceRefresh = false,
     } = options;
 
-    // 生成请求key(用于去重和取消)
     const requestKey = deduplicateKey || `${method}:${url}`;
-
-    // 生成缓存key
     const finalCacheKey = cacheKey || requestKey;
-
-    // 🎯 优化C: 尝试从缓存获取(仅GET请求且未强制刷新)
-    if (method === 'GET' && cache && !forceRefresh) {
-      const cached = await httpCacheService.get(finalCacheKey, {
-        strategy: cache,
-        ttl: cacheTTL
-      });
-
-      if (cached !== null) {
-        this._log('debug', '使用缓存响应', { url, cacheKey: finalCacheKey });
-        return cached as T;
-      }
+    const cacheContext: HttpCacheContext = {
+      method,
+      cache,
+      cacheKey: finalCacheKey,
+      cacheTTL,
+      forceRefresh,
+      url
+    };
+    const cached = await this._getCachedResponse<T>(cacheContext);
+    if (cached.hit) {
+      return cached.value as T;
     }
 
-    // 合并请求头
-    const finalHeaders = { ...this.defaults.headers, ...headers };
-
-    // 执行请求的函数
-    const executeRequest = async (abortSignal?: AbortSignal): Promise<T> => {
-      let lastError: Error | null = null;
-
-      for (let attempt = 0; attempt <= retries; attempt++) {
-        // 创建独立的 AbortController
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-        // 如果提供了外部signal,监听其abort事件
-        if (signal) {
-          signal.addEventListener('abort', () => controller.abort(), { once: true });
-        }
-
-        // 🎯 P1-9: 如果提供了RequestManager的signal,也监听它
-        if (abortSignal) {
-          abortSignal.addEventListener('abort', () => controller.abort(), { once: true });
-        }
-
-        try {
-          // 构建请求配置
-          const fetchOptions: RequestInit = {
-            method,
-            headers: finalHeaders,
-            signal: controller.signal,
-          };
-
-          // 处理请求体
-          if (body) {
-            fetchOptions.body = typeof body === 'string' ? body : JSON.stringify(body);
-          }
-
-          const response = await fetch(url, fetchOptions);
-          clearTimeout(timeoutId);
-
-          // 检查响应状态
-          if (!response.ok) {
-            const errorText = await response.text();
-            throw new HttpError(response.status, errorText, response);
-          }
-
-          // 解析响应
-          if (json) {
-            const data = await response.json();
-
-            // 🎯 数据边界验证：对于 JSON 响应，进行基本验证
-            // 注意：这里只做基本的结构验证，具体的业务类型验证由调用方负责
-            if (data === undefined) {
-              throw new HttpError(response.status, 'API 返回空响应', response);
-            }
-
-            return data;
-          }
-          return await response.text() as T;
-
-        } catch (error) {
-          clearTimeout(timeoutId);
-          lastError = error as Error;
-
-          // 如果是最后一次尝试，抛出错误
-          if (attempt === retries) {
-            throw error;
-          }
-
-          // 等待后重试
-          await this._delay(retryDelay * (attempt + 1));
-          console.log(`[HttpService] Retry ${attempt + 1}/${retries}: ${url}`);
-        }
-      }
-
-      throw lastError;
+    const requestOptions: HttpRequestExecutionOptions = {
+      method,
+      headers: { ...this.defaults.headers, ...headers },
+      body,
+      timeout,
+      retries,
+      retryDelay,
+      json,
+      signal,
     };
+    const executeRequest = (abortSignal?: AbortSignal) =>
+      this._executeRequestWithRetries<T>(url, requestOptions, abortSignal);
 
-    // 🎯 P1-9: 如果启用去重或取消管理,使用RequestManager
+    let result: T;
     if (deduplicate || cancelPrevious) {
-      const result = await requestManager.execute(
+      result = await requestManager.execute(
         requestKey,
-        (signal) => {
-          // 性能监控
-          if (measurePerformance) {
-            return this._executeWithPerformance(url, method, usePool, priority, () => executeRequest(signal));
-          }
-
-          // 使用优先级请求池
-          if (usePool) {
-            return priorityRequestPool.add(() => executeRequest(signal), priority, { url, method });
-          }
-
-          return executeRequest(signal);
-        },
+        (signal) => this._runRequest({
+          url,
+          method,
+          usePool,
+          priority,
+          measurePerformance,
+          executeRequest,
+          signal
+        }),
         { deduplicate, cancelPrevious }
       );
-
-      // 🎯 优化C: 缓存响应(仅GET请求)
-      if (method === 'GET' && cache) {
-        await httpCacheService.set(finalCacheKey, result, {
-          strategy: cache,
-          ttl: cacheTTL
-        });
-      }
-
-      return result;
-    }
-
-    // 执行请求
-    let result: T;
-
-    // 性能监控
-    if (measurePerformance) {
-      result = await this._executeWithPerformance(url, method, usePool, priority, executeRequest);
-    } else if (usePool) {
-      // 使用优先级请求池
-      result = await priorityRequestPool.add(executeRequest, priority, { url, method });
     } else {
-      result = await executeRequest();
+      result = await this._runRequest({ url, method, usePool, priority, measurePerformance, executeRequest });
     }
 
-    // 🎯 优化C: 缓存响应(仅GET请求)
-    if (method === 'GET' && cache) {
-      await httpCacheService.set(finalCacheKey, result, {
-        strategy: cache,
-        ttl: cacheTTL
-      });
-    }
-
+    await this._cacheResponse(cacheContext, result);
     return result;
   }
 

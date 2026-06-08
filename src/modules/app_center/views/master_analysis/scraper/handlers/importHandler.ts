@@ -204,22 +204,13 @@ export function mergeProducts(
     return finalProducts;
 }
 
-/**
- * 显示站点选择弹窗
- */
-export function showMarketplaceSelectionModal(sites: string[]): Promise<string | null> {
-    return new Promise((resolve) => {
-        const modalId = 'site-select-modal-' + Date.now();
-        const backdrop = document.createElement('div');
-        backdrop.id = modalId;
-        backdrop.className = "fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] flex items-center justify-center fade-in";
+const MARKETPLACE_SITE_NAME_MAP: Record<string, string> = {
+    DE: '德国', FR: '法国', IT: '意大利', ES: '西班牙', NL: '荷兰',
+    SE: '瑞典', PL: '波兰', BE: '比利时', IE: '爱尔兰', UK: '英国'
+};
 
-        const SITE_NAME_MAP: Record<string, string> = {
-            DE: '德国', FR: '法国', IT: '意大利', ES: '西班牙', NL: '荷兰',
-            SE: '瑞典', PL: '波兰', BE: '比利时', IE: '爱尔兰', UK: '英国'
-        };
-
-        const content = `
+function createMarketplaceSelectionContent(sites: string[], modalId: string): string {
+    return `
             <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-100 transition-all">
                 <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-5 text-white">
                     <h3 class="text-lg font-bold flex items-center gap-2">
@@ -239,7 +230,7 @@ export function showMarketplaceSelectionModal(sites: string[]): Promise<string |
                             <label class="flex items-center p-3 border border-slate-200 rounded-xl cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all group">
                                 <input type="radio" name="site_choice" value="${site}" ${index === 0 ? 'checked' : ''} 
                                     class="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300">
-                                <span class="ml-3 font-bold text-slate-700 group-hover:text-blue-700"> ${SITE_NAME_MAP[site] || site} - ${site} </span>
+                                <span class="ml-3 font-bold text-slate-700 group-hover:text-blue-700"> ${MARKETPLACE_SITE_NAME_MAP[site] || site} - ${site} </span>
                                 <span class="ml-auto text-xs text-slate-400 bg-white px-2 py-1 rounded border border-slate-100 shadow-sm">
                                     ${getFlag(site)}
                                 </span>
@@ -258,13 +249,25 @@ export function showMarketplaceSelectionModal(sites: string[]): Promise<string |
                 </div>
             </div>
         `;
+}
+
+/**
+ * 显示站点选择弹窗
+ */
+export function showMarketplaceSelectionModal(sites: string[]): Promise<string | null> {
+    return new Promise((resolve) => {
+        const modalId = 'site-select-modal-' + Date.now();
+        const backdrop = document.createElement('div');
+        backdrop.id = modalId;
+        backdrop.className = "fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] flex items-center justify-center fade-in";
+        const content = createMarketplaceSelectionContent(sites, modalId);
 
         const renderer = SafeRenderer.getInstance();
         renderer.renderTemplate(backdrop, content);
         document.body.appendChild(backdrop);
 
-        const btnConfirm = document.getElementById(`btn-confirm-${modalId}`) as HTMLButtonElement;
-        const btnCancel = document.getElementById(`btn-cancel-${modalId}`) as HTMLButtonElement;
+        const btnConfirm = document.getElementById(`btn-confirm-${modalId}`) as HTMLButtonElement | null;
+        const btnCancel = document.getElementById(`btn-cancel-${modalId}`) as HTMLButtonElement | null;
 
         let resolved = false;
 
@@ -320,6 +323,12 @@ export function showMarketplaceSelectionModal(sites: string[]): Promise<string |
                 finish(null);
             }
         };
+
+        if (!btnConfirm || !btnCancel) {
+            console.error('[Scraper] 站点选择弹窗渲染不完整，已自动关闭');
+            finish(null);
+            return;
+        }
 
         btnConfirm.addEventListener('click', handleConfirm, { once: true });
         btnCancel.addEventListener('click', handleCancel, { once: true });
@@ -471,6 +480,73 @@ function validateImportFiles(files: File[]): void {
     validateNonEmptyImportFiles(files);
 }
 
+function hasExistingProducts(scrapedData: ScrapedData | null): boolean {
+    return !!scrapedData?.products?.length;
+}
+
+async function resolveTargetMarketplace(
+    detectedSites: Set<string>,
+    currentScrapedData: ScrapedData | null,
+    selectedSite: ScraperSite
+): Promise<string | null> {
+    if (detectedSites.size > 1) {
+        const selected = await showMarketplaceSelectionModal([...detectedSites]);
+        if (!selected) {
+            showToast("用户取消导入", { type: 'info' });
+            return null;
+        }
+
+        return selected;
+    }
+
+    const singleDetectedSite = [...detectedSites][0];
+    if (singleDetectedSite) {
+        return singleDetectedSite;
+    }
+
+    if (hasExistingProducts(currentScrapedData)) {
+        return currentScrapedData?.metadata?.marketplace || '';
+    }
+
+    return selectedSite || '';
+}
+
+function getMarketplaceHeader(targetMarketplace: string): { domain: string; name: string } | undefined {
+    return (LANGUAGE_HEADERS as Record<string, { domain: string; name: string }>)[targetMarketplace];
+}
+
+function createImportedScrapedData(finalProducts: ProductData[], targetMarketplace: string): ScrapedData {
+    const marketplaceHeader = getMarketplaceHeader(targetMarketplace);
+
+    return {
+        metadata: {
+            marketplace: targetMarketplace,
+            scrape_timestamp: new Date().toISOString(),
+            total_asins: finalProducts.length,
+            last_action: "multi_site_import_merge",
+            domain: marketplaceHeader?.domain || "unknown",
+            language: marketplaceHeader?.name || "unknown"
+        },
+        products: finalProducts
+    };
+}
+
+function createImportUserMessage(errorMessage: string): string {
+    if (errorMessage.includes('格式错误') || errorMessage.includes('JSON')) {
+        return `❌ JSON格式错误: ${errorMessage}`;
+    }
+
+    if (errorMessage.includes('读取文件')) {
+        return `❌ 文件读取失败: ${errorMessage}`;
+    }
+
+    if (errorMessage.includes('未找到有效')) {
+        return `❌ ${errorMessage}`;
+    }
+
+    return `❌ 导入出错: ${errorMessage}`;
+}
+
 /**
  * 处理文件导入主流程
  */
@@ -499,40 +575,15 @@ export async function handleImportFiles(
             );
         }
 
-        let targetMarketplace: string = selectedSite || '';
-        const hasExistingData = currentScrapedData && currentScrapedData.products && currentScrapedData.products.length > 0;
-
-        // 决定基准站点的逻辑
-        if (detectedSites.size > 1) {
-            // 多站点数据，弹窗让用户选择（无论是否有现有数据）
-            const selected = await showMarketplaceSelectionModal([...detectedSites]);
-            if (!selected) {
-                showToast("用户取消导入", { type: 'info' });
-                return { success: false };
-            }
-            targetMarketplace = selected;
-        } else if (detectedSites.size === 1) {
-            // 单站点数据，直接使用新导入的站点（无论是否有现有数据）
-            targetMarketplace = [...detectedSites][0] || '';
-        } else if (hasExistingData && currentScrapedData) {
-            // 新导入的数据没有站点信息，保留旧数据的站点
-            targetMarketplace = currentScrapedData.metadata?.marketplace || '';
+        const targetMarketplace = await resolveTargetMarketplace(detectedSites, currentScrapedData, selectedSite);
+        if (targetMarketplace === null) {
+            return { success: false };
         }
 
         const currentProductsMap = new Map<string, ScrapedProduct>((currentScrapedData?.products || []).map((p: ScrapedProduct) => [p.asin, p]));
         const finalProducts = mergeProducts(productPool, targetMarketplace, currentProductsMap);
 
-        const scrapedData: ScrapedData = {
-            metadata: {
-                marketplace: targetMarketplace,
-                scrape_timestamp: new Date().toISOString(),
-                total_asins: finalProducts.length,
-                last_action: "multi_site_import_merge",
-                domain: (LANGUAGE_HEADERS as Record<string, { domain: string; name: string }>)[targetMarketplace]?.domain || "unknown",
-                language: (LANGUAGE_HEADERS as Record<string, { domain: string; name: string }>)[targetMarketplace]?.name || "unknown"
-            },
-            products: finalProducts
-        };
+        const scrapedData = createImportedScrapedData(finalProducts, targetMarketplace);
 
         await HistoryService.saveAsync(scrapedData);
 
@@ -554,19 +605,7 @@ export async function handleImportFiles(
             fileNames: files.map(f => f.name)
         });
 
-        // 根据错误类型提供友好的错误提示
-        let userMessage = "❌ 导入出错";
-        if (errorMessage.includes('格式错误') || errorMessage.includes('JSON')) {
-            userMessage = `❌ JSON格式错误: ${errorMessage}`;
-        } else if (errorMessage.includes('读取文件')) {
-            userMessage = `❌ 文件读取失败: ${errorMessage}`;
-        } else if (errorMessage.includes('未找到有效')) {
-            userMessage = `❌ ${errorMessage}`;
-        } else {
-            userMessage = `❌ 导入出错: ${errorMessage}`;
-        }
-
-        showToast(userMessage, { type: 'error' });
+        showToast(createImportUserMessage(errorMessage), { type: 'error' });
 
         return { success: false, error: errorMessage };
     }

@@ -13,6 +13,44 @@ import type { PromptlabAlpineContext } from './types';
 import type { AnalysisReport } from '../../../../../../types/modules-business';
 import type { PromptInputs } from '../../../../../../types/state';
 
+type PromptReadinessOptions = {
+  defaultMessage: string;
+  missingReportMessage?: string;
+  missingTargetMarketMessage: string;
+};
+
+function getPromptReadinessMessage(
+  ctx: PromptlabAlpineContext,
+  options: PromptReadinessOptions
+): string {
+  if (options.missingReportMessage && !computeHasReport()) {
+    return options.missingReportMessage;
+  }
+
+  if (!ctx.profile.targetMarket) {
+    return options.missingTargetMarketMessage;
+  }
+
+  if (!ctx.profile.keywordsTier1.trim()) {
+    return 'Tier 1 核心大词不能为空';
+  }
+
+  if (!ctx.profile.keywordsTier2.trim()) {
+    return 'Tier 2 长尾词不能为空';
+  }
+
+  return options.defaultMessage;
+}
+
+function getPromptAnalysisReport(): AnalysisReport | null {
+  const analysisReport = appStore.getState().analysis.analysisReport;
+  return typeof analysisReport === 'string' || !analysisReport ? null : analysisReport;
+}
+
+function createPromptInputs(ctx: PromptlabAlpineContext): PromptInputs {
+  return { ...ctx.profile, useAnalysisData: true };
+}
+
 // ==========================================
 // Listing Prompt 生成
 // ==========================================
@@ -21,26 +59,21 @@ import type { PromptInputs } from '../../../../../../types/state';
  * 生成 Listing Prompt 并写入 ctx.listingPromptCache
  */
 export function generateListingPrompt(ctx: PromptlabAlpineContext): void {
-  console.log('[promptActions] 🎯 生成 Listing Prompt');
-
   if (!computeIsReady(ctx)) {
-    let msg = '未就绪';
-    if (!computeHasReport())                        msg = '请先前往 [AI 分析] 模块生成竞品报告';
-    else if (!ctx.profile.targetMarket)             msg = '请先选择目标语言/站点 (Card 1)';
-    else if (!ctx.profile.keywordsTier1.trim())     msg = 'Tier 1 核心大词不能为空';
-    else if (!ctx.profile.keywordsTier2.trim())     msg = 'Tier 2 长尾词不能为空';
-    showToast(msg, { type: 'warning' });
+    showToast(getPromptReadinessMessage(ctx, {
+      defaultMessage: '未就绪',
+      missingReportMessage: '请先前往 [AI 分析] 模块生成竞品报告',
+      missingTargetMarketMessage: '请先选择目标语言/站点 (Card 1)'
+    }), { type: 'warning' });
     return;
   }
 
   ctx.saveState();
 
-  const inputs: PromptInputs = { ...ctx.profile, useAnalysisData: true };
-  const analysisReport = appStore.getState().analysis.analysisReport;
-  const reportToUse: AnalysisReport | null =
-    typeof analysisReport === 'string' || !analysisReport ? null : analysisReport;
-
-  ctx.listingPromptCache = promptlabService.generateMasterPrompt(inputs, reportToUse);
+  ctx.listingPromptCache = promptlabService.generateMasterPrompt(
+    createPromptInputs(ctx),
+    getPromptAnalysisReport()
+  );
   showToast('Listing Prompt 已生成', { type: 'success' });
 }
 
@@ -52,29 +85,24 @@ export function generateListingPrompt(ctx: PromptlabAlpineContext): void {
  * 生成 Visual Prompt 并写入 ctx.visualPromptCache
  */
 export function generateVisualPrompt(ctx: PromptlabAlpineContext): void {
-  console.log('[promptActions] 🎯 生成 Visual Prompt');
-
   if (!computeHasReport()) {
     showToast('请先生成 AI 分析报告以获取视觉灵感', { type: 'warning' });
     return;
   }
 
   if (!computeIsReady(ctx)) {
-    let msg = '配置信息不完整';
-    if (!ctx.profile.targetMarket)             msg = '请先选择目标语言/站点';
-    else if (!ctx.profile.keywordsTier1.trim()) msg = 'Tier 1 核心大词不能为空';
-    else if (!ctx.profile.keywordsTier2.trim()) msg = 'Tier 2 长尾词不能为空';
-    showToast(msg, { type: 'warning' });
+    showToast(getPromptReadinessMessage(ctx, {
+      defaultMessage: '配置信息不完整',
+      missingTargetMarketMessage: '请先选择目标语言/站点'
+    }), { type: 'warning' });
     return;
   }
 
   ctx.saveState();
 
-  const inputs: PromptInputs = { ...ctx.profile, useAnalysisData: true };
-  const analysisReport = appStore.getState().analysis.analysisReport;
-  const reportToUse: AnalysisReport | null =
-    typeof analysisReport === 'string' || !analysisReport ? null : analysisReport;
-
-  ctx.visualPromptCache = promptlabService.generateVisualPrompt(inputs, reportToUse);
+  ctx.visualPromptCache = promptlabService.generateVisualPrompt(
+    createPromptInputs(ctx),
+    getPromptAnalysisReport()
+  );
   showToast('Visual Prompt 已生成', { type: 'success' });
 }

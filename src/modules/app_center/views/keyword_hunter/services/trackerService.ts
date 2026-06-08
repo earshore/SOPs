@@ -139,6 +139,24 @@ export function calculateWordFrequency(text: string): WordFrequency[] {
 // 3. LLM 服务封装
 // ==========================================
 
+function createLlmConfigValidationError(
+  message: string,
+  code: string,
+  provider: string
+): ValidationError {
+  return new ValidationError(
+    message,
+    code,
+    undefined,
+    undefined,
+    {
+      module: "TrackerService",
+      action: "bridgeCallLLM",
+      provider,
+    },
+  );
+}
+
 async function bridgeCallLLM(
   systemPrompt: string,
   userPrompt: string,
@@ -166,16 +184,10 @@ async function bridgeCallLLM(
   if (!config || !config.apiKey) {
     // 特殊处理：如果是 serverless 模式，允许前端 key 为空或随意值，但为了通过校验建议前端填个占位符
     // 这里抛出错误提示用户去设置里检查
-    throw new ValidationError(
+    throw createLlmConfigValidationError(
       "所选提供商未配置 API Key",
       "ERR_LLM_API_KEY_MISSING",
-      undefined,
-      undefined,
-      {
-        module: "TrackerService",
-        action: "bridgeCallLLM",
-        provider: activeProvider,
-      },
+      activeProvider,
     );
   }
 
@@ -187,16 +199,10 @@ async function bridgeCallLLM(
         : config.models[0].id
       : undefined);
   if (!targetModel) {
-    throw new ValidationError(
+    throw createLlmConfigValidationError(
       "未选择模型，请在设置中同步或选择模型",
       "ERR_LLM_MODEL_NOT_SELECTED",
-      undefined,
-      undefined,
-      {
-        module: "TrackerService",
-        action: "bridgeCallLLM",
-        provider: activeProvider,
-      },
+      activeProvider,
     );
   }
 

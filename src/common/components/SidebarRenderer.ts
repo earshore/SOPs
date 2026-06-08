@@ -359,31 +359,44 @@ export class SidebarRenderer {
 
   // ── Overview Button ──
 
+  private _getRouteItemClasses(
+    isActive: boolean,
+    color: string,
+    inactiveIconContainerCls: string,
+    inactiveIconCls: string
+  ): {
+    containerCls: string;
+    iconContainerCls: string;
+    iconCls: string;
+    labelCls: string;
+    dotCls: string;
+  } {
+    return {
+      containerCls: isActive
+        ? `bg-${color}-50/80 border-l-2 border-${color}-500 shadow-sm`
+        : 'border-l-2 border-transparent hover:bg-slate-50/80 hover:border-slate-200',
+      iconContainerCls: isActive ? `bg-${color}-100 scale-105` : inactiveIconContainerCls,
+      iconCls: isActive ? `text-${color}-500` : inactiveIconCls,
+      labelCls: isActive
+        ? `font-semibold text-${color}-700`
+        : 'font-medium text-slate-600 group-hover:text-slate-800',
+      dotCls: isActive ? 'opacity-100 scale-100' : 'opacity-0 scale-0',
+    };
+  }
+
   private _buildOverviewButton(currentTab: string): string {
     const isActive = currentTab === this.overviewRouteId;
     const overviewRoute = MENU_CONFIG.routes[this.overviewRouteId];
     const label = overviewRoute?.label || '总览';
     const color = this.moduleColor; // ✅ 使用模块颜色
 
-    const containerCls = isActive
-      ? `bg-${color}-50/80 border-l-2 border-${color}-500 shadow-sm`
-      : 'border-l-2 border-transparent hover:bg-slate-50/80 hover:border-slate-200';
-
-    const iconContainerCls = isActive
-      ? `bg-${color}-100 scale-105`
-      : 'bg-slate-100 group-hover:bg-slate-200';
-
-    const iconCls = isActive
-      ? `text-${color}-500`
-      : 'text-slate-400 group-hover:text-slate-600';
-
-    const labelCls = isActive
-      ? `font-semibold text-${color}-700`
-      : 'font-medium text-slate-600 group-hover:text-slate-800';
-
-    const dotCls = isActive
-      ? 'opacity-100 scale-100'
-      : 'opacity-0 scale-0';
+    const { containerCls, iconContainerCls, iconCls, labelCls, dotCls } =
+      this._getRouteItemClasses(
+        isActive,
+        color,
+        'bg-slate-100 group-hover:bg-slate-200',
+        'text-slate-400 group-hover:text-slate-600'
+      );
 
     return `
       <button data-action="switch-tab" data-tab="${this.overviewRouteId}"
@@ -470,25 +483,13 @@ export class SidebarRenderer {
     const isActive = currentTab === route.id;
     const color = this.moduleColor; // ✅ 使用模块主色调
 
-    const containerCls = isActive
-      ? `bg-${color}-50/80 border-l-2 border-${color}-500 shadow-sm`
-      : 'border-l-2 border-transparent hover:bg-slate-50/80 hover:border-slate-200';
-
-    const iconContainerCls = isActive
-      ? `bg-${color}-100 scale-105`
-      : `bg-slate-100 group-hover:bg-${color}-50`;
-
-    const iconCls = isActive
-      ? `text-${color}-500`
-      : 'text-slate-400 group-hover:text-slate-500';
-
-    const labelCls = isActive
-      ? `font-semibold text-${color}-700`
-      : 'font-medium text-slate-600 group-hover:text-slate-800';
-
-    const dotCls = isActive
-      ? 'opacity-100 scale-100'
-      : 'opacity-0 scale-0';
+    const { containerCls, iconContainerCls, iconCls, labelCls, dotCls } =
+      this._getRouteItemClasses(
+        isActive,
+        color,
+        `bg-slate-100 group-hover:bg-${color}-50`,
+        'text-slate-400 group-hover:text-slate-500'
+      );
 
     return `
       <button data-action="switch-tab" data-tab="${route.id}"

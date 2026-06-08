@@ -239,6 +239,7 @@ describe('NPI Tracker Module', () => {
             
             expect(rows).toBeDefined();
             expect(rows!.length).toBeGreaterThan(0);
+            expect(rows![0]?.querySelectorAll('td').length).toBe(29);
         });
 
         it('should display product basic information', () => {

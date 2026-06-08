@@ -21,14 +21,12 @@ function clearStaleScraperInput(context: AlpineContext): void {
   if (context.selectedAsins.length > 0) {
     context.selectedAsins = [];
     appStore.getState().setSelectedAsins([]);
-    console.log('[数据加载] 当前产品数据为空，已清理过期 ASIN 选择');
   }
 
   if (context.analysisReport || appStore.getState().analysis?.analysisReport) {
     context.analysisReport = null;
     context.hasReport = false;
     appStore.getState().setAnalysisReport(null);
-    console.log('[数据加载] 当前产品数据为空，已清理过期分析报告');
   }
 }
 
@@ -53,7 +51,6 @@ export function checkAndLoadScraperData(context: AlpineContext): void {
     context.dataSource = 'scraper';
     // 同步到 Zustand store
     appStore.getState().setSelectedAsins(asins);
-    console.log('[数据加载] 自动加载 Scraper 数据:', context.selectedAsins);
     showToast(`已自动加载 ${asins.length} 个产品 ASIN`, { type: 'success' });
   }
 }
@@ -89,13 +86,10 @@ export function checkLoadedReport(context: AlpineContext): void {
   ].some(key => reportObj[key]);
 
   if (hasAnalysisData) {
-    console.log('[数据加载] 检测到已加载的分析报告');
-
     // 加载报告数据到当前组件
     context.analysisReport = reportObj;
     context.hasReport = true;
 
-    console.log('[数据加载] 已显示历史分析报告');
     showToast('已加载历史分析报告', { type: 'success' });
   }
 }
@@ -120,7 +114,6 @@ export function loadHistoricalReport(
     // 同步到 Zustand store
     appStore.getState().setAnalysisReport(detail.report);
 
-    console.log('[数据加载] 已加载历史分析报告:', detail.timestamp);
     showToast(`已加载历史分析报告 (${formatHistoryDate(detail.timestamp)})`, { type: 'success' });
   } catch (error) {
     console.error('[数据加载] 加载历史报告失败:', error);

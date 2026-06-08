@@ -9,8 +9,18 @@ import { getEl } from './utils';
 
 type SearchRoute = {
   id: string;
+  category?: string;
   icon?: string;
   label?: string;
+};
+
+type MenuSearchConfig = {
+  clearBtnId: string;
+  clearSearchKey: 'sop' | 'hub';
+  emptyMessage: string;
+  moduleId: string;
+  navContainerId: string;
+  resultsContainerId: string;
 };
 
 function clearElement(element: Element): void {
@@ -38,6 +48,16 @@ function appendEmptyResult(container: Element, message: string, withIcon = false
   }
 
   container.appendChild(wrapper);
+}
+
+function resetSearchView(
+  resultsContainer: HTMLElement | null,
+  navContainer: HTMLElement | null,
+  clearBtn: HTMLElement | null,
+): void {
+  resultsContainer?.classList.add('hidden');
+  navContainer?.classList.remove('hidden');
+  clearBtn?.classList.add('hidden');
 }
 
 function appendSearchMatches(
@@ -77,56 +97,64 @@ function appendSearchMatches(
   });
 }
 
-/**
- * 搜索 SOPs
- */
-export function searchSOPs(query: string): void {
-  const resultsContainer = getEl('sop-search-results');
-  const navContainer = getEl('sop-nav-container');
-  const clearBtn = getEl('sop-search-clear');
+function findModuleRoutes(moduleId: string): SearchRoute[] {
+  return Object.entries(MENU_CONFIG.routes)
+    .filter(([_, cfg]) => cfg.moduleId === moduleId)
+    .map(([id, cfg]) => ({ id, ...cfg }));
+}
+
+function routeMatchesQuery(route: SearchRoute, lowerQuery: string): boolean {
+  const label = (route.label || '').toLowerCase();
+  const category = (route.category || '').toLowerCase();
+
+  if (label === lowerQuery) return true;
+  if (label.includes(lowerQuery)) return true;
+
+  const initials = label.split(/[\s-]+/).map(w => w[0]).join('');
+  if (initials.includes(lowerQuery)) return true;
+
+  return category.includes(lowerQuery);
+}
+
+function searchMenuRoutes(query: string, config: MenuSearchConfig): void {
+  const resultsContainer = getEl(config.resultsContainerId);
+  const navContainer = getEl(config.navContainerId);
+  const clearBtn = getEl(config.clearBtnId);
 
   if (!query.trim()) {
-    resultsContainer?.classList.add('hidden');
-    navContainer?.classList.remove('hidden');
-    clearBtn?.classList.add('hidden');
+    resetSearchView(resultsContainer, navContainer, clearBtn);
     return;
   }
 
   clearBtn?.classList.remove('hidden');
   const lowerQuery = query.toLowerCase();
-
-  // 搜索所有 SOP 路由
-  const allRoutes = Object.entries(MENU_CONFIG.routes)
-    .filter(([_, cfg]) => cfg.moduleId === 'sops')
-    .map(([id, cfg]) => ({ id, ...cfg }));
-
-  const matches = allRoutes.filter(route => {
-    const label = (route.label || '').toLowerCase();
-    const category = (route.category || '').toLowerCase();
-
-    // 完全匹配
-    if (label === lowerQuery) return true;
-    // 模糊匹配
-    if (label.includes(lowerQuery)) return true;
-    // 首字母匹配
-    const initials = label.split(/[\s-]+/).map(w => w[0]).join('');
-    if (initials.includes(lowerQuery)) return true;
-    // 分类匹配
-    if (category.includes(lowerQuery)) return true;
-
-    return false;
-  });
+  const matches = findModuleRoutes(config.moduleId)
+    .filter(route => routeMatchesQuery(route, lowerQuery));
 
   if (!resultsContainer) return;
 
   if (matches.length === 0) {
-    appendEmptyResult(resultsContainer, '未找到匹配的 SOP');
+    appendEmptyResult(resultsContainer, config.emptyMessage);
   } else {
-    appendSearchMatches(resultsContainer, matches, 'sop');
+    appendSearchMatches(resultsContainer, matches, config.clearSearchKey);
   }
 
   resultsContainer.classList.remove('hidden');
   navContainer?.classList.add('hidden');
+}
+
+/**
+ * 搜索 SOPs
+ */
+export function searchSOPs(query: string): void {
+  searchMenuRoutes(query, {
+    clearBtnId: 'sop-search-clear',
+    clearSearchKey: 'sop',
+    emptyMessage: '未找到匹配的 SOP',
+    moduleId: 'sops',
+    navContainerId: 'sop-nav-container',
+    resultsContainerId: 'sop-search-results',
+  });
 }
 
 /**
@@ -139,57 +167,21 @@ export function clearSOPSearch(): void {
   const clearBtn = getEl('sop-search-clear');
 
   if (input) input.value = '';
-  resultsContainer?.classList.add('hidden');
-  navContainer?.classList.remove('hidden');
-  clearBtn?.classList.add('hidden');
+  resetSearchView(resultsContainer, navContainer, clearBtn);
 }
 
 /**
  * 搜索智库内容
  */
 export function searchHub(query: string): void {
-  const resultsContainer = getEl('hub-search-results');
-  const navContainer = getEl('hub-nav-container');
-  const clearBtn = getEl('hub-search-clear');
-
-  if (!query.trim()) {
-    resultsContainer?.classList.add('hidden');
-    navContainer?.classList.remove('hidden');
-    clearBtn?.classList.add('hidden');
-    return;
-  }
-
-  clearBtn?.classList.remove('hidden');
-  const lowerQuery = query.toLowerCase();
-
-  // 搜索所有智库路由
-  const allRoutes = Object.entries(MENU_CONFIG.routes)
-    .filter(([_, cfg]) => cfg.moduleId === 'amz_hub_core')
-    .map(([id, cfg]) => ({ id, ...cfg }));
-
-  const matches = allRoutes.filter(route => {
-    const label = (route.label || '').toLowerCase();
-    const category = (route.category || '').toLowerCase();
-
-    if (label === lowerQuery) return true;
-    if (label.includes(lowerQuery)) return true;
-    const initials = label.split(/[\s-]+/).map(w => w[0]).join('');
-    if (initials.includes(lowerQuery)) return true;
-    if (category.includes(lowerQuery)) return true;
-
-    return false;
+  searchMenuRoutes(query, {
+    clearBtnId: 'hub-search-clear',
+    clearSearchKey: 'hub',
+    emptyMessage: '未找到匹配的内容',
+    moduleId: 'amz_hub_core',
+    navContainerId: 'hub-nav-container',
+    resultsContainerId: 'hub-search-results',
   });
-
-  if (!resultsContainer) return;
-
-  if (matches.length === 0) {
-    appendEmptyResult(resultsContainer, '未找到匹配的内容');
-  } else {
-    appendSearchMatches(resultsContainer, matches, 'hub');
-  }
-
-  resultsContainer.classList.remove('hidden');
-  navContainer?.classList.add('hidden');
 }
 
 /**
@@ -202,9 +194,7 @@ export function clearHubSearch(): void {
   const clearBtn = getEl('hub-search-clear');
 
   if (searchInput) searchInput.value = '';
-  resultsContainer?.classList.add('hidden');
-  navContainer?.classList.remove('hidden');
-  clearBtn?.classList.add('hidden');
+  resetSearchView(resultsContainer, navContainer, clearBtn);
 }
 
 /**

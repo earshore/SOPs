@@ -112,10 +112,6 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === 'object';
 }
 
-function getObjectKeys(value: unknown): string[] {
-  return isRecord(value) ? Object.keys(value) : [];
-}
-
 function getStringArrayField(record: Record<string, unknown>, key: string): string[] {
   const value = record[key];
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
@@ -143,23 +139,12 @@ function getRawDna(ctx: PromptlabAlpineContext): ExtendedDNA | ExtractedDNA | nu
   const language =
     typeof metadataLanguage === 'string' ? metadataLanguage : ctx.profile.targetMarket ?? 'zh';
 
-  console.log('[dnaActions] 报告结构:', {
-    hasWrapper: !!reportRecord.analysisReport,
-    topKeys: getObjectKeys(report).slice(0, 10),
-    unwrappedKeys: getObjectKeys(unwrappedReport).slice(0, 10),
-  });
-
   const extracted = extractDNAFromDownloadsReport(unwrappedReport, language);
   if (extracted) {
-    console.log('[dnaActions] 使用提取器: 新 (universal)');
     return extracted;
   }
 
-  console.log('[dnaActions] 新提取器无法提取，尝试旧提取器');
   const legacy = extractProductDNA(unwrappedReport as FullAnalysisReport | null);
-  if (legacy) {
-    console.log('[dnaActions] 使用提取器: 旧 (legacy)');
-  }
   return legacy;
 }
 
@@ -219,8 +204,6 @@ function hasExistingDnaContent(ctx: PromptlabAlpineContext): boolean {
  * 从分析报告中提取产品 DNA，并仅自动填充置信度达标的字段
  */
 export function autoPopulateDNA(ctx: PromptlabAlpineContext): void {
-  console.log('[dnaActions] 🧬 开始自动填充产品 DNA');
-
   const dna = getRawDna(ctx);
   if (!dna) {
     showToast('未检测到分析报告或无法提取产品 DNA', { type: 'warning' });
@@ -254,12 +237,8 @@ export function autoPopulateDNA(ctx: PromptlabAlpineContext): void {
     return;
   }
 
-  fillableFields.forEach(([fieldName, config]) => {
+  fillableFields.forEach(([, config]) => {
     config.apply(ctx, normalized);
-    console.log('[dnaActions] 自动填充高置信度字段:', {
-      field: fieldName,
-      confidence: getNormalizedFieldConfidence(normalized, fieldName),
-    });
   });
 
   ctx.dnaConfidence = {
@@ -285,12 +264,6 @@ export function autoPopulateDNA(ctx: PromptlabAlpineContext): void {
   );
 
   highlightAutoFilledFields(fillableFields.map(([, config]) => config.inputId));
-
-  console.log('[dnaActions] ✅ DNA 填充完成:', {
-    confidence: ctx.dnaConfidence,
-    filledFields: fillableFields.map(([fieldName]) => fieldName),
-    blockedFields: blockedFields.map(([fieldName]) => fieldName),
-  });
 }
 
 /**
@@ -300,8 +273,6 @@ export function extractSingleField(
   ctx: PromptlabAlpineContext,
   fieldName: ExtractableFieldName,
 ): void {
-  console.log('[dnaActions] 🔄 提取单个字段:', fieldName);
-
   const dna = getRawDna(ctx);
   if (!dna) {
     showToast('未检测到分析报告或无法提取产品 DNA', { type: 'warning' });
@@ -320,11 +291,6 @@ export function extractSingleField(
     `✅ 已重新提取${config.label} (置信度: ${config.getConfidence(ctx)}%)`,
     { type: 'success' },
   );
-
-  console.log('[dnaActions] ✅ 单字段提取完成:', {
-    field: fieldName,
-    confidence: config.getConfidence(ctx),
-  });
 }
 
 /**
