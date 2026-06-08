@@ -18,6 +18,98 @@ import eventBus from '../../../../../../common/EventBus';
 import { APP_EVENTS, MODULE_EVENTS } from '../../../../../../common/constants/eventConstants';
 import { SafeRenderer } from '../../../../../../common/infrastructure/SafeRenderer';
 import { ValidationError, BusinessError, SystemError } from '@common/errors/AppError';
+
+type FileReadResolve = (value: FileReadResult) => void;
+type FileReadReject = (reason?: unknown) => void;
+type ImportedProductWithSource = ScrapedProduct & { _source_site?: string; _filename?: string };
+type ImportedProductPool = Map<string, ImportedProductWithSource[]>;
+
+interface ImportCollectionContext {
+    productPool: ImportedProductPool;
+    detectedSites: Set<string>;
+}
+
+const MAX_IMPORT_FILE_SIZE = 10 * 1024 * 1024;
+const LARGE_IMPORT_FILE_SIZE = 5 * 1024 * 1024;
+
+function createEmptyFileError(file: File, content: string): ValidationError {
+    return new ValidationError(
+        `文件 ${file.name} 内容为空`,
+        'SCRAPER_IMP_001',
+        'content',
+        content,
+        { module: 'ScraperImportHandler', action: 'readFileAsJSON', filename: file.name }
+    );
+}
+
+function parseJsonContent(file: File, content: string): unknown {
+    try {
+        return JSON.parse(content);
+    } catch (parseError) {
+        throw new SystemError(
+            `文件 ${file.name} 不是有效的JSON格式: ${parseError instanceof Error ? parseError.message : String(parseError)}`,
+            'SCRAPER_IMP_002',
+            { module: 'ScraperImportHandler', action: 'readFileAsJSON', filename: file.name, contentPreview: content.substring(0, 100) },
+            parseError instanceof Error ? parseError : undefined
+        );
+    }
+}
+
+function createInvalidJsonError(file: File, json: unknown): ValidationError {
+    return new ValidationError(
+        `文件 ${file.name} JSON内容无效`,
+        'SCRAPER_IMP_003',
+        'json',
+        json,
+        { module: 'ScraperImportHandler', action: 'readFileAsJSON', filename: file.name }
+    );
+}
+
+function parseFileReadResult(file: File, content: string): FileReadResult {
+    if (!content || content.trim().length === 0) {
+        throw createEmptyFileError(file, content);
+    }
+
+    const json = parseJsonContent(file, content);
+    if (json === null || json === undefined) {
+        throw createInvalidJsonError(file, json);
+    }
+
+    return { data: json, filename: file.name };
+}
+
+function isExpectedFileReadError(error: unknown): boolean {
+    return error instanceof ValidationError || error instanceof SystemError;
+}
+
+function createUnexpectedFileReadError(file: File, error: unknown): SystemError {
+    return new SystemError(
+        `文件 ${file.name} 解析失败: ${error instanceof Error ? error.message : String(error)}`,
+        'SCRAPER_IMP_004',
+        { module: 'ScraperImportHandler', action: 'readFileAsJSON', filename: file.name },
+        error instanceof Error ? error : undefined
+    );
+}
+
+function handleFileLoad(
+    file: File,
+    event: ProgressEvent<FileReader>,
+    resolve: FileReadResolve,
+    reject: FileReadReject
+): void {
+    try {
+        const content = event.target?.result as string;
+        resolve(parseFileReadResult(file, content));
+    } catch (error) {
+        if (isExpectedFileReadError(error)) {
+            reject(error);
+            return;
+        }
+
+        console.error(`[Scraper] 解析文件 ${file.name} 失败:`, error);
+        reject(createUnexpectedFileReadError(file, error));
+    }
+}
 /**
  * 读取文件为JSON
  */
@@ -26,57 +118,7 @@ export function readFileAsJSON(file: File): Promise<FileReadResult> {
         const reader = new FileReader();
 
         reader.onload = (e) => {
-            try {
-                const content = e.target?.result as string;
-
-                // 验证内容不为空
-                if (!content || content.trim().length === 0) {
-                    reject(new ValidationError(
-                        `文件 ${file.name} 内容为空`,
-                        'SCRAPER_IMP_001',
-                        'content',
-                        content,
-                        { module: 'ScraperImportHandler', action: 'readFileAsJSON', filename: file.name }
-                    ));
-                    return;
-                }
-
-                // 尝试解析JSON
-                let json: unknown;
-                try {
-                    json = JSON.parse(content);
-                } catch (parseError) {
-                    reject(new SystemError(
-                        `文件 ${file.name} 不是有效的JSON格式: ${parseError instanceof Error ? parseError.message : String(parseError)}`,
-                        'SCRAPER_IMP_002',
-                        { module: 'ScraperImportHandler', action: 'readFileAsJSON', filename: file.name, contentPreview: content.substring(0, 100) },
-                        parseError instanceof Error ? parseError : undefined
-                    ));
-                    return;
-                }
-
-                // 验证JSON不为null或undefined
-                if (json === null || json === undefined) {
-                    reject(new ValidationError(
-                        `文件 ${file.name} JSON内容无效`,
-                        'SCRAPER_IMP_003',
-                        'json',
-                        json,
-                        { module: 'ScraperImportHandler', action: 'readFileAsJSON', filename: file.name }
-                    ));
-                    return;
-                }
-
-                resolve({ data: json, filename: file.name });
-            } catch (err) {
-                console.error(`[Scraper] 解析文件 ${file.name} 失败:`, err);
-                reject(new SystemError(
-                    `文件 ${file.name} 解析失败: ${err instanceof Error ? err.message : String(err)}`,
-                    'SCRAPER_IMP_004',
-                    { module: 'ScraperImportHandler', action: 'readFileAsJSON', filename: file.name },
-                    err instanceof Error ? err : undefined
-                ));
-            }
+            handleFileLoad(file, e, resolve, reject);
         };
 
         reader.onerror = () => {
@@ -269,6 +311,149 @@ export function showMarketplaceSelectionModal(sites: string[]): Promise<string |
     });
 }
 
+function createImportValidationError(filename: string, error: string | undefined): ValidationError {
+    return new ValidationError(
+        `文件 ${filename} 数据验证失败`,
+        'SCRAPER_IMP_009',
+        'data',
+        error,
+        { module: 'ScraperImportHandler', action: 'handleImportFiles', filename }
+    );
+}
+
+function isObjectRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function getMetadataMarketplace(value: unknown): string | null {
+    if (!isObjectRecord(value) || !isObjectRecord(value.metadata)) return null;
+    return typeof value.metadata.marketplace === 'string' ? value.metadata.marketplace : null;
+}
+
+function getImportedFileSite(data: unknown): string | null {
+    if (isObjectRecord(data)) {
+        return getMetadataMarketplace(data);
+    }
+
+    if (Array.isArray(data) && data.length > 0) {
+        return getMetadataMarketplace(data[0]);
+    }
+
+    return null;
+}
+
+function addProductToPool(
+    productPool: ImportedProductPool,
+    product: ScrapedProduct,
+    site: string,
+    filename: string
+): void {
+    if (!product.asin) return;
+
+    const productWithSource = {
+        ...product,
+        _source_site: site,
+        _filename: filename
+    };
+    const productsForAsin = productPool.get(product.asin);
+
+    if (productsForAsin) {
+        productsForAsin.push(productWithSource);
+        return;
+    }
+
+    productPool.set(product.asin, [productWithSource]);
+}
+
+function collectImportedFileProducts(
+    fileContent: FileReadResult,
+    context: ImportCollectionContext
+): void {
+    const { data, filename } = fileContent;
+    if (!data) {
+        console.warn(`[Scraper] 文件 ${filename} 数据为空，跳过`);
+        return;
+    }
+
+    // 验证数据结构
+    const validation = validateScrapedData(data);
+    if (!validation.valid) {
+        console.error(`[Scraper] 文件 ${filename} 数据验证失败:`, validation.error);
+        throw createImportValidationError(filename, validation.error);
+    }
+
+    const fileSite = getImportedFileSite(data);
+    const site = fileSite || "Unknown";
+    if (fileSite) context.detectedSites.add(fileSite);
+
+    // 使用验证后的产品列表
+    const list: ScrapedProduct[] = validation.products || [];
+    list.forEach((product: ScrapedProduct) => {
+        addProductToPool(context.productPool, product, site, filename);
+    });
+}
+
+function formatFileSize(file: File): string {
+    return `${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`;
+}
+
+function validateJsonFileExtensions(files: File[]): void {
+    const invalidFiles = files.filter(file => !file.name.toLowerCase().endsWith('.json'));
+    if (invalidFiles.length === 0) return;
+
+    console.error('[Scraper] 文件类型错误:', invalidFiles.map(file => file.name));
+    throw new ValidationError(
+        `只支持JSON文件`,
+        'SCRAPER_IMP_006',
+        'files',
+        invalidFiles.map(file => file.name),
+        { module: 'ScraperImportHandler', action: 'handleImportFiles', invalidFiles: invalidFiles.map(file => file.name) }
+    );
+}
+
+function validateImportFileSizes(files: File[]): void {
+    const oversizedFiles = files.filter(file => file.size > MAX_IMPORT_FILE_SIZE);
+    if (oversizedFiles.length === 0) return;
+
+    console.error('[Scraper] 文件过大:', oversizedFiles.map(formatFileSize));
+    throw new ValidationError(
+        `文件大小不能超过10MB`,
+        'SCRAPER_IMP_007',
+        'files',
+        oversizedFiles.map(file => ({ name: file.name, size: file.size })),
+        { module: 'ScraperImportHandler', action: 'handleImportFiles', maxSize: MAX_IMPORT_FILE_SIZE }
+    );
+}
+
+function warnLargeImportFiles(files: File[]): void {
+    const largeFiles = files.filter(file => file.size > LARGE_IMPORT_FILE_SIZE && file.size <= MAX_IMPORT_FILE_SIZE);
+    if (largeFiles.length === 0) return;
+
+    console.warn('[Scraper] 检测到大文件:', largeFiles.map(formatFileSize));
+    showToast(`⚠️ 检测到大文件，处理可能需要较长时间`, { type: 'warning' });
+}
+
+function validateNonEmptyImportFiles(files: File[]): void {
+    const emptyFiles = files.filter(file => file.size === 0);
+    if (emptyFiles.length === 0) return;
+
+    console.error('[Scraper] 空文件:', emptyFiles.map(file => file.name));
+    throw new ValidationError(
+        `文件内容为空`,
+        'SCRAPER_IMP_008',
+        'files',
+        emptyFiles.map(file => file.name),
+        { module: 'ScraperImportHandler', action: 'handleImportFiles', emptyFiles: emptyFiles.map(file => file.name) }
+    );
+}
+
+function validateImportFiles(files: File[]): void {
+    validateJsonFileExtensions(files);
+    validateImportFileSizes(files);
+    warnLargeImportFiles(files);
+    validateNonEmptyImportFiles(files);
+}
+
 /**
  * 处理文件导入主流程
  */
@@ -278,116 +463,16 @@ export async function handleImportFiles(
     selectedSite: ScraperSite
 ): Promise<ImportResult> {
     try {
-        // 验证文件类型
-        const invalidFiles = files.filter(f => !f.name.toLowerCase().endsWith('.json'));
-        if (invalidFiles.length > 0) {
-            console.error('[Scraper] 文件类型错误:', invalidFiles.map(f => f.name));
-            throw new ValidationError(
-                `只支持JSON文件`,
-                'SCRAPER_IMP_006',
-                'files',
-                invalidFiles.map(f => f.name),
-                { module: 'ScraperImportHandler', action: 'handleImportFiles', invalidFiles: invalidFiles.map(f => f.name) }
-            );
-        }
-
-        // 验证文件大小（最大10MB）
-        const MAX_FILE_SIZE = 10 * 1024 * 1024;
-        const oversizedFiles = files.filter(f => f.size > MAX_FILE_SIZE);
-        if (oversizedFiles.length > 0) {
-            console.error('[Scraper] 文件过大:', oversizedFiles.map(f => `${f.name} (${(f.size / 1024 / 1024).toFixed(2)}MB)`));
-            throw new ValidationError(
-                `文件大小不能超过10MB`,
-                'SCRAPER_IMP_007',
-                'files',
-                oversizedFiles.map(f => ({ name: f.name, size: f.size })),
-                { module: 'ScraperImportHandler', action: 'handleImportFiles', maxSize: MAX_FILE_SIZE }
-            );
-        }
-
-        // 大文件警告（5MB以上）
-        const LARGE_FILE_SIZE = 5 * 1024 * 1024;
-        const largeFiles = files.filter(f => f.size > LARGE_FILE_SIZE && f.size <= MAX_FILE_SIZE);
-        if (largeFiles.length > 0) {
-            console.warn('[Scraper] 检测到大文件:', largeFiles.map(f => `${f.name} (${(f.size / 1024 / 1024).toFixed(2)}MB)`));
-            showToast(`⚠️ 检测到大文件，处理可能需要较长时间`, { type: 'warning' });
-        }
-
-        // 检查空文件
-        const emptyFiles = files.filter(f => f.size === 0);
-        if (emptyFiles.length > 0) {
-            console.error('[Scraper] 空文件:', emptyFiles.map(f => f.name));
-            throw new ValidationError(
-                `文件内容为空`,
-                'SCRAPER_IMP_008',
-                'files',
-                emptyFiles.map(f => f.name),
-                { module: 'ScraperImportHandler', action: 'handleImportFiles', emptyFiles: emptyFiles.map(f => f.name) }
-            );
-        }
+        validateImportFiles(files);
 
         showToast(`📂 正在解析 ${files.length} 个文件...`, { type: 'info' });
 
         const fileContents = await Promise.all(files.map(f => readFileAsJSON(f)));
-        const productPool = new Map<string, Array<ScrapedProduct & { _source_site?: string; _filename?: string }>>();
+        const productPool: ImportedProductPool = new Map();
         const detectedSites = new Set<string>();
+        const collectionContext = { productPool, detectedSites };
 
-        fileContents.forEach(({ data, filename }) => {
-            if (!data) {
-                console.warn(`[Scraper] 文件 ${filename} 数据为空，跳过`);
-                return;
-            }
-
-            // 验证数据结构
-            const validation = validateScrapedData(data);
-            if (!validation.valid) {
-                console.error(`[Scraper] 文件 ${filename} 数据验证失败:`, validation.error);
-                throw new ValidationError(
-                    `文件 ${filename} 数据验证失败`,
-                    'SCRAPER_IMP_009',
-                    'data',
-                    validation.error,
-                    { module: 'ScraperImportHandler', action: 'handleImportFiles', filename }
-                );
-            }
-
-            let fileSite: string | null = null;
-
-            // 类型守卫: 检查是否是包含products的对象
-            if (typeof data === 'object' && data !== null && !Array.isArray(data) && 'products' in data) {
-                const dataWithMeta = data as { products: unknown[]; metadata?: { marketplace?: string } };
-                fileSite = dataWithMeta.metadata?.marketplace || null;
-            } else if (typeof data === 'object' && data !== null && !Array.isArray(data) && 'metadata' in data) {
-                // 单个产品对象
-                fileSite = (data as { metadata?: { marketplace?: string } }).metadata?.marketplace || null;
-            } else if (Array.isArray(data) && data.length > 0 && data[0]) {
-                // 产品数组
-                const firstProduct = data[0] as { metadata?: { marketplace?: string } };
-                fileSite = firstProduct.metadata?.marketplace || null;
-            }
-
-            const site = fileSite || "Unknown";
-            if (fileSite) detectedSites.add(fileSite);
-
-            // 使用验证后的产品列表
-            const list: ScrapedProduct[] = validation.products || [];
-
-            list.forEach((p: ScrapedProduct) => {
-                if (!p.asin) return;
-                const productsForAsin = productPool.get(p.asin);
-                const productWithSource = {
-                    ...p,
-                    _source_site: site,
-                    _filename: filename
-                };
-
-                if (productsForAsin) {
-                    productsForAsin.push(productWithSource);
-                } else {
-                    productPool.set(p.asin, [productWithSource]);
-                }
-            });
-        });
+        fileContents.forEach(fileContent => collectImportedFileProducts(fileContent, collectionContext));
 
         if (productPool.size === 0) {
             throw new BusinessError(

@@ -6,6 +6,73 @@
 import type { Product } from '../config/sampleData';
 import { ScraperData, ScraperProduct } from '../types';
 import { ValidationError } from '@common/errors/AppError';
+
+function pickFirst<T>(...values: T[]): T | undefined {
+  return values.find(value => Boolean(value));
+}
+
+function normalizeReview(reviewData: unknown): Product['customer_reviews'][number] {
+  if (!reviewData || typeof reviewData !== 'object') {
+    return {
+      star_rating: 5,
+      headline: '',
+      body: '',
+      origin_country: '',
+      review_date: '',
+      _origin_site: ''
+    };
+  }
+
+  const review = reviewData as Record<string, unknown>;
+  return {
+    star_rating: pickFirst(
+      review.star_rating as number,
+      review.rating as number
+    ) || 5,
+    headline: pickFirst(
+      review.headline as string,
+      review.review_title as string,
+      review.title as string
+    ) || '',
+    body: pickFirst(
+      review.body as string,
+      review.review_text as string,
+      review.text as string,
+      review.content as string
+    ) || '',
+    origin_country: (review.origin_country as string) || '',
+    review_date: (review.review_date as string) || '',
+    _origin_site: (review._origin_site as string) || ''
+  };
+}
+
+function getProductTitle(product: ScraperProduct): string {
+  return pickFirst(product.productTitle, product.title) || '';
+}
+
+function getFeatureBullets(product: ScraperProduct): Product['feature_bullets'] {
+  return pickFirst(
+    product.feature_bullets,
+    product.bulletPoints,
+    product.bullet_points
+  ) || [];
+}
+
+function getCustomerReviews(product: ScraperProduct): Product['customer_reviews'] {
+  const reviews = pickFirst(product.customer_reviews, product.reviews) || [];
+  return (reviews as unknown[]).map(normalizeReview);
+}
+
+function logConversionStart(product: ScraperProduct): void {
+  console.log('[数据转换] 开始转换产品数据:', {
+    asin: product.asin,
+    hasTitle: Boolean(getProductTitle(product)),
+    hasBullets: getFeatureBullets(product).length > 0,
+    hasReviews: getCustomerReviews(product).length > 0,
+    rawData: product
+  });
+}
+
 /**
  * 从 Scraper 单个产品数据转换为 Product 格式
  */
@@ -17,41 +84,13 @@ export function convertScraperDataToProduct(productData: unknown): Product | nul
     }
 
     const product = productData as ScraperProduct;
-    
-    console.log('[数据转换] 开始转换产品数据:', {
-      asin: product.asin,
-      hasTitle: !!(product.productTitle || product.title),
-      hasBullets: !!(product.feature_bullets || product.bulletPoints || product.bullet_points),
-      hasReviews: !!(product.customer_reviews || product.reviews),
-      rawData: product
-    });
+    logConversionStart(product);
     
     const converted: Product = {
       asin: product.asin || '',
-      productTitle: product.productTitle || product.title || '',
-      feature_bullets: product.feature_bullets || product.bulletPoints || product.bullet_points || [],
-      customer_reviews: ((product.customer_reviews || product.reviews || []) as unknown[]).map((r: unknown) => {
-        if (!r || typeof r !== 'object') {
-          return {
-            star_rating: 5,
-            headline: '',
-            body: '',
-            origin_country: '',
-            review_date: '',
-            _origin_site: ''
-          };
-        }
-        
-        const review = r as Record<string, unknown>;
-        return {
-          star_rating: (review.star_rating as number) || (review.rating as number) || 5,
-          headline: (review.headline as string) || (review.review_title as string) || (review.title as string) || '',
-          body: (review.body as string) || (review.review_text as string) || (review.text as string) || (review.content as string) || '',
-          origin_country: (review.origin_country as string) || '',
-          review_date: (review.review_date as string) || '',
-          _origin_site: (review._origin_site as string) || ''
-        };
-      }),
+      productTitle: getProductTitle(product),
+      feature_bullets: getFeatureBullets(product),
+      customer_reviews: getCustomerReviews(product),
       scrape_status: 'success',
       metadata: {}
     };

@@ -336,77 +336,92 @@ class MarketingCalendarModule extends BaseModule {
   // ==================== Event Binding ====================
 
   private bindCalendarClickEvents(): void {
-    this.addEventListener(document, "click", (event) => {
-      const target = event.target as HTMLElement | null;
-      if (!target) return;
+    this.addEventListener(document, "click", (event) => this.handleCalendarClick(event));
+  }
 
-      const historyContainer = document.getElementById("amzf_search_history");
-      const isInModule = (element: HTMLElement) =>
-        Boolean(
-          this.container?.contains(element) ||
-            historyContainer?.contains(element),
-        );
+  private handleCalendarClick(event: Event): void {
+    const target = event.target as HTMLElement | null;
+    if (!target) return;
 
-      const deleteBtn = target.closest<HTMLElement>(
-        "[data-amzf-delete-history-index]",
-      );
-      if (deleteBtn && isInModule(deleteBtn)) {
-        event.stopPropagation();
-        const index = Number(deleteBtn.dataset.amzfDeleteHistoryIndex);
-        if (Number.isInteger(index)) this.deleteHistoryItem(index);
-        return;
-      }
+    if (this.handleHistoryControlClick(target, event)) return;
+    if (this.handleCalendarSelectionClick(target)) return;
 
-      const clearHistoryBtn = target.closest<HTMLElement>(
-        "[data-amzf-clear-history]",
-      );
-      if (clearHistoryBtn && isInModule(clearHistoryBtn)) {
-        event.stopPropagation();
-        this.clearAllHistory();
-        return;
-      }
+    this.handleCalendarActionClick(target);
+  }
 
-      const countryBtn = target.closest<HTMLElement>("[data-amzf-country]");
-      if (countryBtn && isInModule(countryBtn)) {
-        this.selectCountry(countryBtn.dataset.amzfCountry || "ALL");
-        return;
-      }
+  private findCalendarTarget(target: HTMLElement, selector: string): HTMLElement | null {
+    const element = target.closest<HTMLElement>(selector);
+    return element && this.isCalendarTarget(element) ? element : null;
+  }
 
-      const historyItem = target.closest<HTMLElement>(
-        "[data-amzf-history-item]",
-      );
-      if (historyItem && isInModule(historyItem)) {
-        const term = historyItem.dataset.amzfHistoryItem;
-        if (term) this.selectHistoryItem(term);
-        return;
-      }
+  private isCalendarTarget(element: HTMLElement): boolean {
+    const historyContainer = document.getElementById("amzf_search_history");
+    return Boolean(
+      this.container?.contains(element) ||
+        historyContainer?.contains(element),
+    );
+  }
 
-      const quickTag = target.closest<HTMLElement>("[data-amzf-quick-tag]");
-      if (quickTag && isInModule(quickTag)) {
-        const term = quickTag.dataset.amzfQuickTag;
-        if (term) this.selectHistoryItem(term);
-        return;
-      }
+  private handleHistoryControlClick(target: HTMLElement, event: Event): boolean {
+    const deleteBtn = this.findCalendarTarget(target, "[data-amzf-delete-history-index]");
+    if (deleteBtn) {
+      event.stopPropagation();
+      const index = Number(deleteBtn.dataset.amzfDeleteHistoryIndex);
+      if (Number.isInteger(index)) this.deleteHistoryItem(index);
+      return true;
+    }
 
-      const sectionToggle = target.closest<HTMLElement>(
-        "[data-amzf-toggle-section]",
-      );
-      if (sectionToggle && isInModule(sectionToggle)) {
-        const id = sectionToggle.dataset.amzfToggleSection;
-        if (id) this.toggleSection(id);
-        return;
-      }
+    const clearHistoryBtn = this.findCalendarTarget(target, "[data-amzf-clear-history]");
+    if (clearHistoryBtn) {
+      event.stopPropagation();
+      this.clearAllHistory();
+      return true;
+    }
 
-      const actionEl = target.closest<HTMLElement>("[data-action]");
-      if (!actionEl || !isInModule(actionEl)) return;
+    return false;
+  }
 
-      const action = actionEl.dataset.action;
-      if (action === "amzf_switchView") {
-        this.switchView(actionEl.dataset.param || "country");
-      } else if (action === "amzf_clearSearch") {
-        this.clearSearch();
-      }
-    });
+  private handleCalendarSelectionClick(target: HTMLElement): boolean {
+    const countryBtn = this.findCalendarTarget(target, "[data-amzf-country]");
+    if (countryBtn) {
+      this.selectCountry(countryBtn.dataset.amzfCountry || "ALL");
+      return true;
+    }
+
+    const historyItem = this.findCalendarTarget(target, "[data-amzf-history-item]");
+    if (historyItem) {
+      const term = historyItem.dataset.amzfHistoryItem;
+      if (term) this.selectHistoryItem(term);
+      return true;
+    }
+
+    const quickTag = this.findCalendarTarget(target, "[data-amzf-quick-tag]");
+    if (quickTag) {
+      const term = quickTag.dataset.amzfQuickTag;
+      if (term) this.selectHistoryItem(term);
+      return true;
+    }
+
+    const sectionToggle = this.findCalendarTarget(target, "[data-amzf-toggle-section]");
+    if (sectionToggle) {
+      const id = sectionToggle.dataset.amzfToggleSection;
+      if (id) this.toggleSection(id);
+      return true;
+    }
+
+    return false;
+  }
+
+  private handleCalendarActionClick(target: HTMLElement): void {
+    const actionEl = this.findCalendarTarget(target, "[data-action]");
+    if (!actionEl) return;
+
+    const action = actionEl.dataset.action;
+    if (action === "amzf_switchView") {
+      this.switchView(actionEl.dataset.param || "country");
+    } else if (action === "amzf_clearSearch") {
+      this.clearSearch();
+    }
   }
 
   bindSearchEvents(): void {

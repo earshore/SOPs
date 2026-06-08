@@ -151,6 +151,20 @@ export class MonitoringService {
     }
   }
 
+  private _shouldSkipInitialization(config: MonitoringConfig): boolean {
+    return !configCenter.isProduction() && !config.forceEnable;
+  }
+
+  private _createConfig(config: MonitoringConfig): MonitoringConfig {
+    return {
+      dsn: config.dsn || '',
+      environment: config.environment || configCenter.get('environment'),
+      release: config.release || '1.0.0',
+      tracesSampleRate: config.tracesSampleRate || 0.1,
+      beforeSend: config.beforeSend || this._defaultBeforeSend.bind(this),
+    };
+  }
+
   /**
    * 初始化监控服务
    */
@@ -161,18 +175,12 @@ export class MonitoringService {
     }
 
     // 仅在生产环境启用
-    if (!configCenter.isProduction() && !config.forceEnable) {
+    if (this._shouldSkipInitialization(config)) {
       this._log('info', '开发环境，跳过监控服务初始化', {});
       return;
     }
 
-    this.config = {
-      dsn: config.dsn || '',
-      environment: config.environment || configCenter.get('environment'),
-      release: config.release || '1.0.0',
-      tracesSampleRate: config.tracesSampleRate || 0.1,
-      beforeSend: config.beforeSend || this._defaultBeforeSend.bind(this),
-    };
+    this.config = this._createConfig(config);
 
     // 检查DSN
     if (!this.config.dsn) {

@@ -15,6 +15,7 @@ const CACHE_PREFIX = CACHE_PREFIXES.VIEW;
 const LEGACY_CACHE_PREFIX = 'view_cache_';
 const VIEW_CACHE_SCHEMA_VERSION = 'view-v2';
 const VIEW_CACHE_VERSION = `${APP_VERSION}:${VIEW_CACHE_SCHEMA_VERSION}`;
+let hasCleanedOldViewCache = false;
 
 /**
  * 视图配置接口
@@ -135,6 +136,15 @@ export function clearOldCache(): void {
     } catch (e) {
         console.warn('[ViewLoader] 缓存清理失败:', e);
     }
+}
+
+function clearOldCacheOnce(): void {
+    if (hasCleanedOldViewCache) {
+        return;
+    }
+
+    clearOldCache();
+    hasCleanedOldViewCache = true;
 }
 
 /**
@@ -309,7 +319,7 @@ async function loadHtml(key: string): Promise<HTMLElement | null> {
  * 只加载 Home 和 全局模态框
  */
 export async function initViews(): Promise<void> {
-    clearOldCache();
+    clearOldCacheOnce();
     const startTime = performance.now();
     console.log("🚀 [ViewLoader] Initializing Critical Views (Bundled)...");
 
@@ -321,6 +331,37 @@ export async function initViews(): Promise<void> {
 
     const elapsed = (performance.now() - startTime).toFixed(0);
     console.log(`✅ [ViewLoader] Critical Views Ready (${elapsed}ms)`);
+}
+
+/**
+ * 初始化首页视图。
+ * 用于启动阶段优先挂载首屏内容，避免等待设置/共享弹窗模板。
+ */
+export async function initHomeView(): Promise<void> {
+    clearOldCacheOnce();
+    const startTime = performance.now();
+    console.log("🚀 [ViewLoader] Initializing Home View...");
+
+    await loadHtml('home');
+
+    const elapsed = (performance.now() - startTime).toFixed(0);
+    console.log(`✅ [ViewLoader] Home View Ready (${elapsed}ms)`);
+}
+
+/**
+ * 后台预热非首屏但常用的全局视图。
+ */
+export async function initDeferredViews(): Promise<void> {
+    const startTime = performance.now();
+    console.log("🚀 [ViewLoader] Preloading Deferred Views...");
+
+    await Promise.all([
+        loadHtml('settings'),
+        loadHtml('modals')
+    ]);
+
+    const elapsed = (performance.now() - startTime).toFixed(0);
+    console.log(`✅ [ViewLoader] Deferred Views Ready (${elapsed}ms)`);
 }
 
 /**

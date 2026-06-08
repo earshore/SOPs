@@ -62,6 +62,63 @@ function extractRating(container: Element, selectors: string[]): number {
   return 0; // 默认0分
 }
 
+function getTextLength(element: Element): number {
+  return element.textContent?.length || 0;
+}
+
+function extractLongestSpanText(element: Element): string {
+  const spans = Array.from(element.querySelectorAll("span"));
+  if (spans.length === 0) return "";
+
+  return spans
+    .reduce((longest, current) =>
+      getTextLength(longest) > getTextLength(current) ? longest : current
+    )
+    .textContent?.trim() || "";
+}
+
+function extractReviewContent(container: Element): string {
+  const bodySelectors = SELECTOR_MAP.reviewBody || [];
+  for (const sel of bodySelectors) {
+    const bodyEl = container.querySelector(sel);
+    if (!bodyEl) continue;
+
+    const content = extractLongestSpanText(bodyEl) || bodyEl.textContent?.trim() || "";
+    if (content.length > 10) return content;
+  }
+  return "";
+}
+
+function normalizeReviewTitle(container: Element): string {
+  return safeExtractText(container, SELECTOR_MAP.reviewTitle || []).replace(
+    /^\d+([.,]\d)?\s*(von|out of|sur|su|de)\s*\d+\s*(Sternen?|stars?|étoiles?|stelle|estrellas)?\s*-?\s*/i,
+    ""
+  );
+}
+
+function isVerifiedPurchase(container: Element): boolean {
+  const containerText = container.textContent || "";
+  return VERIFIED_PURCHASE_PATTERNS.some((p) => containerText.includes(p));
+}
+
+function getReviewDedupeKey(content: string): string {
+  return content.substring(0, 50);
+}
+
+function appendUniqueReview(
+  reviews: ParsedReview[],
+  seenContents: Set<string>,
+  review: ParsedReview
+): void {
+  if (!review.content || review.content.length <= 10) return;
+
+  const key = getReviewDedupeKey(review.content);
+  if (seenContents.has(key)) return;
+
+  seenContents.add(key);
+  reviews.push(review);
+}
+
 // ----------------------------------------
 // 3. 主解析逻辑 (Main Logic)
 // ----------------------------------------
@@ -153,58 +210,12 @@ export function parseReviews(html: string): ParsedReview[] {
 
   // 3. 标准解析流程
   reviewContainers.forEach((container) => {
-    // A. 提取内容
-    let content = "";
-    // 优先查找内部 span，因为有时外层包含多余空格
-    const bodySelectors = SELECTOR_MAP.reviewBody || [];
-    for (const sel of bodySelectors) {
-      const bodyEl = container.querySelector(sel);
-      if (!bodyEl) continue;
-
-      // 尝试提取更纯净的文本
-      const spans = bodyEl.querySelectorAll("span");
-      if (spans.length > 0) {
-        // 找出字数最多的那个 span，通常是正文
-        content =
-          Array.from(spans)
-            .reduce((a, b) =>
-              (a.textContent?.length || 0) > (b.textContent?.length || 0)
-                ? a
-                : b
-            )
-            .textContent?.trim() || "";
-      }
-
-      if (!content) content = bodyEl.textContent?.trim() || "";
-      if (content.length > 10) break;
-    }
-
-    // B. 提取标题
-    let title = safeExtractText(container, SELECTOR_MAP.reviewTitle || []);
-    // 清理标题中的杂质 (e.g. "5.0 out of 5 stars Great Product")
-    title = title.replace(
-      /^\d+([.,]\d)?\s*(von|out of|sur|su|de)\s*\d+\s*(Sternen?|stars?|étoiles?|stelle|estrellas)?\s*-?\s*/i,
-      ""
-    );
-
-    // C. 提取评分
+    const content = extractReviewContent(container);
+    const title = normalizeReviewTitle(container);
     const rating = extractRating(container, SELECTOR_MAP.reviewRating || []);
+    const isVerified = isVerifiedPurchase(container);
 
-    // D. 校验是否 VP (Verified Purchase)
-    const containerText = container.textContent || "";
-    const isVerified = VERIFIED_PURCHASE_PATTERNS.some((p) =>
-      containerText.includes(p)
-    );
-
-    // E. 最终组装与去重
-    if (
-      content &&
-      content.length > 10 &&
-      !seenContents.has(content.substring(0, 50))
-    ) {
-      seenContents.add(content.substring(0, 50));
-      reviews.push({ title, content, rating, isVerified });
-    }
+    appendUniqueReview(reviews, seenContents, { title, content, rating, isVerified });
   });
 
   return reviews.slice(0, 20);

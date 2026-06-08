@@ -25,6 +25,54 @@ export interface ValidationRule {
   errorMessage?: string;
 }
 
+type StringRuleValidator = (value: string, rules: ValidationRule) => ValidationResult | null;
+
+function getValidationError(rules: ValidationRule, defaultMessage: string): ValidationResult {
+  return {
+    valid: false,
+    error: rules.errorMessage || defaultMessage
+  };
+}
+
+function isBlankString(value: string | null | undefined): boolean {
+  return !value || value.trim() === '';
+}
+
+function validateMinLength(value: string, rules: ValidationRule): ValidationResult | null {
+  if (rules.minLength !== undefined && value.length < rules.minLength) {
+    return getValidationError(rules, `最少需要 ${rules.minLength} 个字符`);
+  }
+  return null;
+}
+
+function validateMaxLength(value: string, rules: ValidationRule): ValidationResult | null {
+  if (rules.maxLength !== undefined && value.length > rules.maxLength) {
+    return getValidationError(rules, `最多允许 ${rules.maxLength} 个字符`);
+  }
+  return null;
+}
+
+function validatePattern(value: string, rules: ValidationRule): ValidationResult | null {
+  if (rules.pattern && !rules.pattern.test(value)) {
+    return getValidationError(rules, '输入格式不正确');
+  }
+  return null;
+}
+
+function validateCustomRule(value: string, rules: ValidationRule): ValidationResult | null {
+  if (rules.custom && !rules.custom(value)) {
+    return getValidationError(rules, '输入不符合要求');
+  }
+  return null;
+}
+
+const STRING_RULE_VALIDATORS: StringRuleValidator[] = [
+  validateMinLength,
+  validateMaxLength,
+  validatePattern,
+  validateCustomRule
+];
+
 /**
  * 验证字符串输入
  * @param value - 输入值
@@ -33,49 +81,20 @@ export interface ValidationRule {
  */
 export function validateString(value: string, rules: ValidationRule = {}): ValidationResult {
   // 必填检查
-  if (rules.required && (!value || value.trim() === '')) {
-    return {
-      valid: false,
-      error: rules.errorMessage || '此字段为必填项'
-    };
+  if (rules.required && isBlankString(value)) {
+    return getValidationError(rules, '此字段为必填项');
   }
 
   // 如果不是必填且为空,直接返回有效
-  if (!value || value.trim() === '') {
+  if (isBlankString(value)) {
     return { valid: true, sanitized: '' };
   }
 
   const trimmed = value.trim();
 
-  // 长度检查
-  if (rules.minLength !== undefined && trimmed.length < rules.minLength) {
-    return {
-      valid: false,
-      error: rules.errorMessage || `最少需要 ${rules.minLength} 个字符`
-    };
-  }
-
-  if (rules.maxLength !== undefined && trimmed.length > rules.maxLength) {
-    return {
-      valid: false,
-      error: rules.errorMessage || `最多允许 ${rules.maxLength} 个字符`
-    };
-  }
-
-  // 正则验证
-  if (rules.pattern && !rules.pattern.test(trimmed)) {
-    return {
-      valid: false,
-      error: rules.errorMessage || '输入格式不正确'
-    };
-  }
-
-  // 自定义验证
-  if (rules.custom && !rules.custom(trimmed)) {
-    return {
-      valid: false,
-      error: rules.errorMessage || '输入不符合要求'
-    };
+  for (const validateRule of STRING_RULE_VALIDATORS) {
+    const result = validateRule(trimmed, rules);
+    if (result) return result;
   }
 
   return { valid: true, sanitized: trimmed };

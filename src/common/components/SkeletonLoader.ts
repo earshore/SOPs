@@ -33,6 +33,8 @@ export interface SkeletonConfig {
   style?: Partial<CSSStyleDeclaration>; // 自定义样式
 }
 
+type SkeletonBuilder = (element: HTMLElement) => HTMLElement;
+
 /**
  * 骨架屏生成器
  */
@@ -40,6 +42,18 @@ export class SkeletonLoader {
   private static readonly DEFAULT_CONFIG: Partial<SkeletonConfig> = {
     count: 1,
     animated: true
+  };
+
+  private static readonly BUILDERS: Record<SkeletonType, SkeletonBuilder> = {
+    text: element => SkeletonLoader.createTextSkeleton(element),
+    title: element => SkeletonLoader.createTitleSkeleton(element),
+    paragraph: element => SkeletonLoader.createParagraphSkeleton(element),
+    avatar: element => SkeletonLoader.createAvatarSkeleton(element),
+    image: element => SkeletonLoader.createImageSkeleton(element),
+    card: element => SkeletonLoader.createCardSkeleton(element),
+    list: element => SkeletonLoader.createListSkeleton(element),
+    table: element => SkeletonLoader.createTableSkeleton(element),
+    custom: element => element
   };
 
   /**
@@ -80,27 +94,7 @@ export class SkeletonLoader {
       Object.assign(element.style, config.style);
     }
 
-    // 根据类型创建内容
-    switch (config.type) {
-      case 'text':
-        return this.createTextSkeleton(element);
-      case 'title':
-        return this.createTitleSkeleton(element);
-      case 'paragraph':
-        return this.createParagraphSkeleton(element);
-      case 'avatar':
-        return this.createAvatarSkeleton(element);
-      case 'image':
-        return this.createImageSkeleton(element);
-      case 'card':
-        return this.createCardSkeleton(element);
-      case 'list':
-        return this.createListSkeleton(element);
-      case 'table':
-        return this.createTableSkeleton(element);
-      default:
-        return element;
-    }
+    return this.BUILDERS[config.type](element);
   }
 
   /**

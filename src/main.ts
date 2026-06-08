@@ -31,7 +31,7 @@ import { debugInterface } from './common/devtools/DebugInterface';
 import { ThemeManager } from './common/config/themeConfig';
 
 import { container } from './common/di/Container';
-import { initViews } from './common/utils/viewLoader';
+import { initDeferredViews, initHomeView } from './common/utils/viewLoader';
 
 // ✅ 导入 Web Components
 import './components/modal/AppModal';
@@ -148,6 +148,8 @@ const mainLogger = {
   },
 };
 
+let hasInitializedHomeSplash = false;
+
 function isClosableModalElement(element: Element | null): element is ClosableModalElement {
   return element instanceof HTMLElement && typeof (element as { close?: unknown }).close === 'function';
 }
@@ -230,16 +232,66 @@ function initializeAlpineRuntime(): void {
   }
 }
 
-async function loadCriticalViewsAndNavigate(): Promise<void> {
-  mainLogger.info("Loading critical views...");
-  await initViews();
-  mainLogger.info("Critical views loaded");
+function isInitialHomeRoute(): boolean {
+  const currentHash = window.location.hash.replace(/^#/, '').trim();
+  return !currentHash || currentHash === '/' || currentHash === '/home' || currentHash === 'home';
+}
+
+function revealInitialHomeView(): boolean {
+  if (!isInitialHomeRoute()) {
+    return false;
+  }
+
+  const homePanel = document.getElementById('panel-home');
+  if (!homePanel) {
+    return false;
+  }
+
+  document.querySelectorAll('.panel').forEach(panel => panel.classList.add('hidden'));
+  homePanel.classList.remove('hidden');
+  return true;
+}
+
+function initializeHomeSplashOnce(): void {
+  if (hasInitializedHomeSplash) {
+    return;
+  }
+
+  initHomeSplash();
+  hasInitializedHomeSplash = true;
+}
+
+function preloadDeferredViews(): void {
+  initDeferredViews().catch((error) => {
+    mainLogger.warn('Deferred views preload failed', error);
+  });
+}
+
+async function loadCriticalViewsAndNavigate(
+  homeViewReady: Promise<void>,
+  shouldWaitForHomeView: boolean
+): Promise<void> {
+  if (shouldWaitForHomeView) {
+    mainLogger.info("Waiting for initial home view...");
+    await homeViewReady;
+    mainLogger.info("Initial home view ready");
+  }
 
   try {
     triggerInitialNavigation();
     mainLogger.info("Initial navigation triggered");
   } catch (e) {
     mainLogger.error('Initial navigation failed', e);
+  }
+
+  preloadDeferredViews();
+
+  if (!shouldWaitForHomeView) {
+    homeViewReady
+      .then(() => initializeHomeSplashOnce())
+      .catch((error) => {
+        mainLogger.warn('Home splash initialization skipped', error);
+      });
   }
 }
 
@@ -342,12 +394,14 @@ function initializeDebugInterface(): void {
   debugInterface.registerRouter(router);
 }
 
-async function continueStartup(): Promise<void> {
+async function continueStartup(
+  homeViewReady: Promise<void>,
+  shouldWaitForHomeView: boolean
+): Promise<void> {
   await exposeCoreServicesForDebug();
   initializeAlpineRuntime();
-  await loadCriticalViewsAndNavigate();
+  await loadCriticalViewsAndNavigate(homeViewReady, shouldWaitForHomeView);
   initializeStartupUtilities();
-  initHomeSplash();
   ThemeManager.restoreTheme();
   initializeAnimationSystem();
   initializeLazyEnhancements();
@@ -377,7 +431,18 @@ if (import.meta.env.DEV) {
 document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
   mainLogger.info("System: Application Booting...");
 
-  await loadMainStyles();
+  const shouldWaitForHomeView = isInitialHomeRoute();
+  const homeViewReady = initHomeView();
+  const mainStylesReady = loadMainStyles();
+
+  if (shouldWaitForHomeView) {
+    await homeViewReady;
+    if (revealInitialHomeView()) {
+      initializeHomeSplashOnce();
+    }
+  }
+
+  await mainStylesReady;
   updateAppVersionLabel();
   const bootstrap = createServiceBootstrap();
 
@@ -396,7 +461,7 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     // ================================================================
     // 初始化成功，继续启动流程
     // ================================================================
-    await continueStartup();
+    await continueStartup(homeViewReady, shouldWaitForHomeView);
 
     mainLogger.info("System: Ready");
 

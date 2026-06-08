@@ -70,54 +70,85 @@ export class HistoryPanel {
      * 加载历史快照
      */
     loadHistoryItem(item: HistoryItem, isScraping: boolean): boolean {
-        if (isScraping) {
-            if (!confirm("任务进行中，确定覆盖？")) return false;
-        }
+        if (this.shouldCancelSnapshotLoad(isScraping)) return false;
 
-        // 确保历史数据的 metadata 结构完整
-        if (item.data && !item.data.metadata) {
-            item.data.metadata = {
-                scrape_timestamp: item.timestamp || new Date().toISOString(),
-                marketplace: item.site || 'US',
-                domain: (LANGUAGE_HEADERS as Record<string, { domain: string; name: string }>)[item.site]?.domain || 'amazon.com',
-                language: (LANGUAGE_HEADERS as Record<string, { domain: string; name: string }>)[item.site]?.name || 'English (US)',
-                total_asins: item.asins?.length || 0,
-            };
-        } else if (item.data && item.data.metadata && !item.data.metadata.marketplace) {
-            // 如果 metadata 存在但缺少 marketplace 字段
-            item.data.metadata.marketplace = item.site || 'US';
-        }
-
-        // 恢复全局状态（供所有页面使用）
-        appStore.getState().setCurrentHistoryId(item.id);
-        appStore.getState().setScrapedData(item.data);
-
-        // 优先加载"AI智能分析"的报告，如果不存在则回退到旧的"AI分析"报告
-        if (item.analysisStatus?.isAnalyzed && item.analysisStatus?.analysisReport) {
-            appStore.getState().setAnalysisReport(item.analysisStatus.analysisReport);
-            console.log('[Scraper] 已加载"AI智能分析"报告到全局状态');
-        } else if (item.report) {
-            appStore.getState().setAnalysisReport(item.report);
-            console.log('[Scraper] 已加载旧版"AI分析"报告到全局状态');
-        } else {
-            appStore.getState().setAnalysisReport(null);
-            console.log('[Scraper] 该快照无分析报告');
-        }
-
-        appStore.getState().setTranslatedReport(null);
-        appStore.getState().scraper.selectedSite = item.site as ScraperSite;
+        this.ensureSnapshotMetadata(item);
+        this.restoreSnapshotState(item);
 
         // 通知其他模块数据已更新
         eventBus.emit(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, item.data);
 
         // 显示加载成功提示
-        const hasReport = item.analysisStatus?.isAnalyzed || item.report;
-        const message = hasReport
-            ? `历史快照已加载（包含分析报告）`
-            : `历史快照已加载`;
-        showToast(message, { type: 'success' });
+        showToast(this.getSnapshotLoadMessage(item), { type: 'success' });
 
         return true;
+    }
+
+    private shouldCancelSnapshotLoad(isScraping: boolean): boolean {
+        return isScraping && !confirm("任务进行中，确定覆盖？");
+    }
+
+    private ensureSnapshotMetadata(item: HistoryItem): void {
+        if (!item.data) return;
+
+        if (!item.data.metadata) {
+            const languageHeader = this.getLanguageHeader(item.site);
+            item.data.metadata = {
+                scrape_timestamp: item.timestamp || new Date().toISOString(),
+                marketplace: item.site || 'US',
+                domain: languageHeader?.domain || 'amazon.com',
+                language: languageHeader?.name || 'English (US)',
+                total_asins: item.asins?.length || 0,
+            };
+            return;
+        }
+
+        if (!item.data.metadata.marketplace) {
+            // 如果 metadata 存在但缺少 marketplace 字段
+            item.data.metadata.marketplace = item.site || 'US';
+        }
+    }
+
+    private getLanguageHeader(site: string): { domain: string; name: string } | undefined {
+        return (LANGUAGE_HEADERS as Record<string, { domain: string; name: string }>)[site];
+    }
+
+    private restoreSnapshotState(item: HistoryItem): void {
+        const state = appStore.getState();
+
+        // 恢复全局状态（供所有页面使用）
+        state.setCurrentHistoryId(item.id);
+        state.setScrapedData(item.data);
+        this.restoreAnalysisReport(item);
+        state.setTranslatedReport(null);
+        state.scraper.selectedSite = item.site as ScraperSite;
+    }
+
+    private restoreAnalysisReport(item: HistoryItem): void {
+        const state = appStore.getState();
+
+        // 优先加载"AI智能分析"的报告，如果不存在则回退到旧的"AI分析"报告
+        if (item.analysisStatus?.isAnalyzed && item.analysisStatus?.analysisReport) {
+            state.setAnalysisReport(item.analysisStatus.analysisReport);
+            console.log('[Scraper] 已加载"AI智能分析"报告到全局状态');
+            return;
+        }
+
+        if (item.report) {
+            state.setAnalysisReport(item.report);
+            console.log('[Scraper] 已加载旧版"AI分析"报告到全局状态');
+            return;
+        }
+
+        state.setAnalysisReport(null);
+        console.log('[Scraper] 该快照无分析报告');
+    }
+
+    private getSnapshotLoadMessage(item: HistoryItem): string {
+        const hasReport = item.analysisStatus?.isAnalyzed || item.report;
+        return hasReport
+            ? `历史快照已加载（包含分析报告）`
+            : `历史快照已加载`;
     }
 
     /**

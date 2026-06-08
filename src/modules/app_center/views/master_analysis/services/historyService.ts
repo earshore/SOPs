@@ -32,6 +32,72 @@ function getHistoryTime(item: HistoryItem): number {
   return Number.isFinite(time) ? time : 0;
 }
 
+type AppState = ReturnType<typeof appStore.getState>;
+
+interface HistoryDraft {
+  historyItem: HistoryItem;
+  currentHistoryIndex: number;
+  shouldUpdateCurrent: boolean;
+}
+
+function getCurrentHistoryIndex(history: HistoryItem[], currentHistoryId: HistoryItem['id'] | null): number {
+  return currentHistoryId !== null
+    ? history.findIndex((h) => isSameHistoryId(h.id, currentHistoryId))
+    : -1;
+}
+
+function getHistoryItemId(
+  shouldUpdateCurrent: boolean,
+  currentHistoryItem: HistoryItem | undefined,
+  history: HistoryItem[]
+): HistoryItem['id'] {
+  return shouldUpdateCurrent && currentHistoryItem
+    ? currentHistoryItem.id
+    : createHistoryId(history);
+}
+
+function createHistoryDraft(
+  data: ScrapedData,
+  report: AnalysisReport | undefined,
+  history: HistoryItem[],
+  currentState: AppState
+): HistoryDraft {
+  const timestamp = data.metadata?.scrape_timestamp || new Date().toISOString();
+  const currentHistoryId = currentState.scraper.currentHistoryId;
+  const currentHistoryIndex = getCurrentHistoryIndex(history, currentHistoryId);
+  const currentHistoryItem = currentHistoryIndex >= 0 ? history[currentHistoryIndex] : undefined;
+  const shouldUpdateCurrent = !!currentHistoryItem && currentHistoryItem.timestamp === timestamp;
+  const id = getHistoryItemId(shouldUpdateCurrent, currentHistoryItem, history);
+
+  return {
+    currentHistoryIndex,
+    shouldUpdateCurrent,
+    historyItem: {
+      id,
+      timestamp,
+      site: data.metadata?.marketplace || currentState.scraper?.selectedSite || 'US',
+      asins: data.products?.map(p => p.asin) || [],
+      data,
+      report,
+    }
+  };
+}
+
+function upsertHistoryItem(history: HistoryItem[], draft: HistoryDraft): void {
+  if (draft.shouldUpdateCurrent && draft.currentHistoryIndex >= 0) {
+    history[draft.currentHistoryIndex] = draft.historyItem;
+    return;
+  }
+
+  history.unshift(draft.historyItem);
+}
+
+function trimHistory(history: HistoryItem[]): HistoryItem[] {
+  return history
+    .sort((a, b) => getHistoryTime(b) - getHistoryTime(a))
+    .slice(0, MAX_HISTORY_ITEMS);
+}
+
 // ----------------------------------------
 // 类型定义
 // ----------------------------------------
@@ -81,40 +147,13 @@ export const HistoryService = {
   save(data: ScrapedData, report?: AnalysisReport): HistoryItem[] {
     const history = this.getAll();
     const currentState = appStore.getState();
-    // 相同采集时间的当前数据更新原快照，新的采集/导入生成新快照
-    const timestamp = data.metadata?.scrape_timestamp || new Date().toISOString();
-    const currentHistoryId = currentState.scraper.currentHistoryId;
-    const currentHistoryIndex = currentHistoryId !== null
-      ? history.findIndex((h) => isSameHistoryId(h.id, currentHistoryId))
-      : -1;
-    const currentHistoryItem = currentHistoryIndex >= 0 ? history[currentHistoryIndex] : undefined;
-    const shouldUpdateCurrent = !!currentHistoryItem && currentHistoryItem.timestamp === timestamp;
-    const id = shouldUpdateCurrent && currentHistoryItem
-      ? currentHistoryItem.id
-      : createHistoryId(history);
+    const draft = createHistoryDraft(data, report, history, currentState);
 
-    const historyItem: HistoryItem = {
-      id: id,
-      timestamp,
-      site: data.metadata?.marketplace || currentState.scraper?.selectedSite || 'US',
-      asins: data.products?.map(p => p.asin) || [],
-      data,
-      report,
-    };
-
-    // 检查是更新当前快照还是插入新快照
-    if (shouldUpdateCurrent && currentHistoryIndex >= 0) {
-      history[currentHistoryIndex] = historyItem;
-    } else {
-      // 新记录插到最前面
-      history.unshift(historyItem);
-    }
-    appStore.getState().setCurrentHistoryId(historyItem.id);
+    upsertHistoryItem(history, draft);
+    appStore.getState().setCurrentHistoryId(draft.historyItem.id);
 
     // 保持存储空间整洁，只留最新的
-    const trimmedHistory = history
-      .sort((a, b) => getHistoryTime(b) - getHistoryTime(a))
-      .slice(0, MAX_HISTORY_ITEMS);
+    const trimmedHistory = trimHistory(history);
     const saved = StorageService.setScrapeHistory(trimmedHistory);
     if (!saved) {
       throw new Error('保存历史记录失败：本地存储空间不足');
@@ -130,36 +169,12 @@ export const HistoryService = {
   async saveAsync(data: ScrapedData, report?: AnalysisReport): Promise<HistoryItem[]> {
     const history = await this.getAllAsync();
     const currentState = appStore.getState();
-    const timestamp = data.metadata?.scrape_timestamp || new Date().toISOString();
-    const currentHistoryId = currentState.scraper.currentHistoryId;
-    const currentHistoryIndex = currentHistoryId !== null
-      ? history.findIndex((h) => isSameHistoryId(h.id, currentHistoryId))
-      : -1;
-    const currentHistoryItem = currentHistoryIndex >= 0 ? history[currentHistoryIndex] : undefined;
-    const shouldUpdateCurrent = !!currentHistoryItem && currentHistoryItem.timestamp === timestamp;
-    const id = shouldUpdateCurrent && currentHistoryItem
-      ? currentHistoryItem.id
-      : createHistoryId(history);
+    const draft = createHistoryDraft(data, report, history, currentState);
 
-    const historyItem: HistoryItem = {
-      id,
-      timestamp,
-      site: data.metadata?.marketplace || currentState.scraper?.selectedSite || 'US',
-      asins: data.products?.map(p => p.asin) || [],
-      data,
-      report,
-    };
+    upsertHistoryItem(history, draft);
+    appStore.getState().setCurrentHistoryId(draft.historyItem.id);
 
-    if (shouldUpdateCurrent && currentHistoryIndex >= 0) {
-      history[currentHistoryIndex] = historyItem;
-    } else {
-      history.unshift(historyItem);
-    }
-    appStore.getState().setCurrentHistoryId(historyItem.id);
-
-    const trimmedHistory = history
-      .sort((a, b) => getHistoryTime(b) - getHistoryTime(a))
-      .slice(0, MAX_HISTORY_ITEMS);
+    const trimmedHistory = trimHistory(history);
 
     const saved = await StorageService.setScrapeHistoryAsync(trimmedHistory);
     if (!saved) {

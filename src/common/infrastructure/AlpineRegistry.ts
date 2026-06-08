@@ -34,6 +34,9 @@ export interface RegistryOptions {
   logLevel?: 'debug' | 'info' | 'warn' | 'error';
 }
 
+type RegistryLogLevel = NonNullable<RegistryOptions['logLevel']>;
+type RegistryLogMethod = (...data: unknown[]) => void;
+
 /**
  * Alpine.js 组件注册管理器
  * 
@@ -55,6 +58,20 @@ export interface RegistryOptions {
  */
 export class AlpineRegistry {
   private static instance: AlpineRegistry;
+
+  private static readonly LOG_LEVELS: Record<RegistryLogLevel, number> = {
+    debug: 0,
+    info: 1,
+    warn: 2,
+    error: 3
+  };
+
+  private static readonly LOG_METHODS: Record<RegistryLogLevel, RegistryLogMethod> = {
+    debug: (...data: unknown[]) => console.log(...data),
+    info: (...data: unknown[]) => console.log(...data),
+    warn: (...data: unknown[]) => console.warn(...data),
+    error: (...data: unknown[]) => console.error(...data)
+  };
   
   /** 已注册的组件映射 */
   private components: Map<string, AlpineComponent>;
@@ -492,9 +509,8 @@ export class AlpineRegistry {
    * @private
    */
   private log(level: 'debug' | 'info' | 'warn' | 'error', message: string, data?: unknown): void {
-    const levels = { debug: 0, info: 1, warn: 2, error: 3 };
-    const configLevel = levels[this.options.logLevel || 'info'];
-    const currentLevel = levels[level];
+    const configLevel = AlpineRegistry.LOG_LEVELS[this.options.logLevel || 'info'];
+    const currentLevel = AlpineRegistry.LOG_LEVELS[level];
     
     // 只输出大于等于配置级别的日志
     if (currentLevel < configLevel) {
@@ -508,36 +524,8 @@ export class AlpineRegistry {
     const timePrefix = timestamp ? `[${timestamp}] ` : '';
     const fullMessage = `${timePrefix}${prefix} ${message}`;
     
-    switch (level) {
-      case 'debug':
-        if (data !== undefined) {
-          console.log(fullMessage, data);
-        } else {
-          console.log(fullMessage);
-        }
-        break;
-      case 'info':
-        if (data !== undefined) {
-          console.log(fullMessage, data);
-        } else {
-          console.log(fullMessage);
-        }
-        break;
-      case 'warn':
-        if (data !== undefined) {
-          console.warn(fullMessage, data);
-        } else {
-          console.warn(fullMessage);
-        }
-        break;
-      case 'error':
-        if (data !== undefined) {
-          console.error(fullMessage, data);
-        } else {
-          console.error(fullMessage);
-        }
-        break;
-    }
+    const args = data !== undefined ? [fullMessage, data] : [fullMessage];
+    AlpineRegistry.LOG_METHODS[level](...args);
   }
 }
 

@@ -6,163 +6,7 @@
 
 import { createSafeFragment, escapeHtml } from '../../common/utils/security';
 
-/**
- * @class AppModal
- * @extends HTMLElement
- *
- * 标准化模态框组件，使用Shadow DOM封装
- *
- * 用法:
- * <app-modal id="my-modal" title="Modal Title" size="sm|md|lg|xl">
- *   <div slot="body">Modal Content</div>
- *   <div slot="footer">
- *     <button data-action="close">Cancel</button>
- *     <button data-action="confirm">Confirm</button>
- *   </div>
- * </app-modal>
- *
- * API:
- * modal.open()
- * modal.close()
- * modal.setTitle('New Title')
- */
-export class AppModal extends HTMLElement {
-    private _isOpen: boolean = false;
-    private _shadowRoot: ShadowRoot;
-
-    constructor() {
-        super();
-        this._shadowRoot = this.attachShadow({ mode: 'open' });
-    }
-
-    static get observedAttributes(): string[] {
-        return ['title', 'size', 'closable'];
-    }
-
-    connectedCallback(): void {
-        this.render();
-        this._setupEvents();
-    }
-
-    attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
-        if (oldValue === newValue) return;
-        if (name === 'title') {
-            this._updateTitle(newValue || '');
-        }
-        if (name === 'size') {
-            this._updateSize(newValue || 'md');
-        }
-    }
-
-    open(): void {
-        this._isOpen = true;
-        const container = this._shadowRoot.querySelector('.modal-container') as HTMLElement;
-        const backdrop = this._shadowRoot.querySelector('.modal-backdrop') as HTMLElement;
-        const panel = this._shadowRoot.querySelector('.modal-panel') as HTMLElement;
-
-        if (!container || !backdrop || !panel) return;
-
-        container.classList.remove('hidden');
-        // Trigger reflow for transition
-        requestAnimationFrame(() => {
-            backdrop.classList.add('active');
-            panel.classList.add('active');
-        });
-
-        this.dispatchEvent(new CustomEvent('open'));
-    }
-
-    close(): void {
-        this._isOpen = false;
-        const container = this._shadowRoot.querySelector('.modal-container') as HTMLElement;
-        const backdrop = this._shadowRoot.querySelector('.modal-backdrop') as HTMLElement;
-        const panel = this._shadowRoot.querySelector('.modal-panel') as HTMLElement;
-
-        if (!backdrop || !panel) return;
-
-        backdrop.classList.remove('active');
-        panel.classList.remove('active');
-
-        setTimeout(() => {
-            if (!this._isOpen && container) {
-                container.classList.add('hidden');
-            }
-            this.dispatchEvent(new CustomEvent('close'));
-        }, 350);
-    }
-
-    setTitle(title: string): void {
-        this.setAttribute('title', title);
-    }
-
-    private _updateTitle(title: string): void {
-        const el = this._shadowRoot.querySelector('.modal-title-text');
-        if (el) el.textContent = title;
-    }
-
-    private _updateSize(size: string): void {
-        const panel = this._shadowRoot.querySelector('.modal-panel');
-        if (!panel) return;
-
-        // Remove all size classes
-        Object.values(this._sizeMap()).forEach(cls => panel.classList.remove(cls));
-        panel.classList.add(this._sizeMap()[size] || 'size-lg');
-    }
-
-    private _sizeMap(): Record<string, string> {
-        return {
-            'sm': 'size-sm',
-            'md': 'size-md',
-            'lg': 'size-lg',
-            'xl': 'size-xl',
-            '2xl': 'size-2xl',
-            'full': 'size-full'
-        };
-    }
-
-    private _setupEvents(): void {
-        const backdrop = this._shadowRoot.querySelector('.modal-backdrop');
-        const closeBtn = this._shadowRoot.querySelector('.btn-close');
-
-        if (backdrop) {
-            backdrop.addEventListener('click', () => {
-                if (this.getAttribute('closable') !== 'false') this.close();
-            });
-        }
-
-        if (closeBtn) {
-            closeBtn.addEventListener('click', () => this.close());
-        }
-
-        // Handle slot buttons with data-action="close"
-        this._shadowRoot.addEventListener('click', (e: Event) => {
-            const path = e.composedPath();
-            for (const el of path) {
-                if (el instanceof HTMLElement && el.dataset && el.dataset.action === 'close') {
-                    this.close();
-                    break;
-                }
-            }
-        });
-
-        // ESC key
-        const handleEscape = (e: KeyboardEvent) => {
-            if (this._isOpen && e.key === 'Escape' && this.getAttribute('closable') !== 'false') {
-                this.close();
-            }
-        };
-        document.addEventListener('keydown', handleEscape);
-    }
-
-    private render(): void {
-        const title = this.getAttribute('title') || '';
-        const safeTitle = escapeHtml(title);
-        const size = this.getAttribute('size') || 'md';
-        const hideHeader = this.hasAttribute('no-header');
-        const sizeClass = this._sizeMap()[size] || 'size-lg';
-
-        const style = document.createElement('style');
-        style.textContent = `
+const MODAL_STYLES = `
                 /* ===== HOST ===== */
                 :host {
                     display: block;
@@ -171,6 +15,10 @@ export class AppModal extends HTMLElement {
                 }
 
                 .hidden {
+                    display: none !important;
+                }
+
+                .modal-container[hidden] {
                     display: none !important;
                 }
 
@@ -410,11 +258,171 @@ export class AppModal extends HTMLElement {
                         0 12px 24px -4px rgba(0, 0, 0, 0.08),
                         0 32px 64px -8px rgba(0, 0, 0, 0.12);
                 }
-            `;
+`;
+
+/**
+ * @class AppModal
+ * @extends HTMLElement
+ *
+ * 标准化模态框组件，使用Shadow DOM封装
+ *
+ * 用法:
+ * <app-modal id="my-modal" title="Modal Title" size="sm|md|lg|xl">
+ *   <div slot="body">Modal Content</div>
+ *   <div slot="footer">
+ *     <button data-action="close">Cancel</button>
+ *     <button data-action="confirm">Confirm</button>
+ *   </div>
+ * </app-modal>
+ *
+ * API:
+ * modal.open()
+ * modal.close()
+ * modal.setTitle('New Title')
+ */
+export class AppModal extends HTMLElement {
+    private _isOpen: boolean = false;
+    private _shadowRoot: ShadowRoot;
+
+    constructor() {
+        super();
+        this._shadowRoot = this.attachShadow({ mode: 'open' });
+    }
+
+    static get observedAttributes(): string[] {
+        return ['title', 'size', 'closable'];
+    }
+
+    connectedCallback(): void {
+        this.render();
+        this._setupEvents();
+    }
+
+    attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
+        if (oldValue === newValue) return;
+        if (name === 'title') {
+            this._updateTitle(newValue || '');
+        }
+        if (name === 'size') {
+            this._updateSize(newValue || 'md');
+        }
+    }
+
+    open(): void {
+        this._isOpen = true;
+        const container = this._shadowRoot.querySelector('.modal-container') as HTMLElement;
+        const backdrop = this._shadowRoot.querySelector('.modal-backdrop') as HTMLElement;
+        const panel = this._shadowRoot.querySelector('.modal-panel') as HTMLElement;
+
+        if (!container || !backdrop || !panel) return;
+
+        container.hidden = false;
+        container.classList.remove('hidden');
+        // Trigger reflow for transition
+        requestAnimationFrame(() => {
+            backdrop.classList.add('active');
+            panel.classList.add('active');
+        });
+
+        this.dispatchEvent(new CustomEvent('open'));
+    }
+
+    close(): void {
+        this._isOpen = false;
+        const container = this._shadowRoot.querySelector('.modal-container') as HTMLElement;
+        const backdrop = this._shadowRoot.querySelector('.modal-backdrop') as HTMLElement;
+        const panel = this._shadowRoot.querySelector('.modal-panel') as HTMLElement;
+
+        if (!backdrop || !panel) return;
+
+        backdrop.classList.remove('active');
+        panel.classList.remove('active');
+
+        setTimeout(() => {
+            if (!this._isOpen && container) {
+                container.hidden = true;
+                container.classList.add('hidden');
+            }
+            this.dispatchEvent(new CustomEvent('close'));
+        }, 350);
+    }
+
+    setTitle(title: string): void {
+        this.setAttribute('title', title);
+    }
+
+    private _updateTitle(title: string): void {
+        const el = this._shadowRoot.querySelector('.modal-title-text');
+        if (el) el.textContent = title;
+    }
+
+    private _updateSize(size: string): void {
+        const panel = this._shadowRoot.querySelector('.modal-panel');
+        if (!panel) return;
+
+        // Remove all size classes
+        Object.values(this._sizeMap()).forEach(cls => panel.classList.remove(cls));
+        panel.classList.add(this._sizeMap()[size] || 'size-lg');
+    }
+
+    private _sizeMap(): Record<string, string> {
+        return {
+            'sm': 'size-sm',
+            'md': 'size-md',
+            'lg': 'size-lg',
+            'xl': 'size-xl',
+            '2xl': 'size-2xl',
+            'full': 'size-full'
+        };
+    }
+
+    private _setupEvents(): void {
+        const backdrop = this._shadowRoot.querySelector('.modal-backdrop');
+        const closeBtn = this._shadowRoot.querySelector('.btn-close');
+
+        if (backdrop) {
+            backdrop.addEventListener('click', () => {
+                if (this.getAttribute('closable') !== 'false') this.close();
+            });
+        }
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => this.close());
+        }
+
+        // Handle slot buttons with data-action="close"
+        this._shadowRoot.addEventListener('click', (e: Event) => {
+            const path = e.composedPath();
+            for (const el of path) {
+                if (el instanceof HTMLElement && el.dataset && el.dataset.action === 'close') {
+                    this.close();
+                    break;
+                }
+            }
+        });
+
+        // ESC key
+        const handleEscape = (e: KeyboardEvent) => {
+            if (this._isOpen && e.key === 'Escape' && this.getAttribute('closable') !== 'false') {
+                this.close();
+            }
+        };
+        document.addEventListener('keydown', handleEscape);
+    }
+
+    private render(): void {
+        const title = this.getAttribute('title') || '';
+        const safeTitle = escapeHtml(title);
+        const size = this.getAttribute('size') || 'md';
+        const hideHeader = this.hasAttribute('no-header');
+        const sizeClass = this._sizeMap()[size] || 'size-lg';
+
+        const style = document.createElement('style');
+        style.textContent = MODAL_STYLES;
 
         // ✅ 安全: 样式通过textContent注入，HTML结构使用安全片段，title来自getAttribute已转义
         this._shadowRoot.replaceChildren(style, createSafeFragment(`
-            <div class="modal-container hidden">
+            <div class="modal-container hidden" hidden>
                 <!-- Backdrop -->
                 <div class="modal-backdrop"></div>
 

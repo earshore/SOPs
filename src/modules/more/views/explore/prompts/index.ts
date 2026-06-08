@@ -73,69 +73,99 @@ function appendIcon(parent: Element, className: string): HTMLElement {
     return icon;
 }
 
+function findContainedTarget(target: HTMLElement, selector: string, container: HTMLElement): HTMLElement | null {
+    const element = target.closest<HTMLElement>(selector);
+    return element && container.contains(element) ? element : null;
+}
+
+function handlePromptActionButton(target: HTMLElement): boolean {
+    if (!moduleRoot) return false;
+
+    const actionBtn = findContainedTarget(target, '[data-action][data-prompt-id]', moduleRoot);
+    if (!actionBtn) return false;
+
+    const promptId = actionBtn.dataset.promptId;
+    const action = actionBtn.dataset.action;
+
+    if (!promptId) return true;
+
+    if (action === 'view-prompt') {
+        window.viewPrompt?.(promptId);
+    } else if (action === 'copy-prompt') {
+        window.copyPrompt?.(promptId);
+    }
+
+    return true;
+}
+
+function handleCategoryButton(target: HTMLElement): boolean {
+    if (!moduleRoot) return false;
+
+    const categoryBtn = findContainedTarget(target, '.category-btn', moduleRoot);
+    if (!categoryBtn) return false;
+
+    const category = categoryBtn.dataset.category;
+    if (category) {
+        handleCategoryChange(category);
+    }
+
+    return true;
+}
+
+function handlePromptCard(target: HTMLElement): void {
+    if (!moduleRoot) return;
+
+    const promptCard = findContainedTarget(target, '.prompt-card[data-prompt-id]', moduleRoot);
+    const promptId = promptCard?.dataset.promptId;
+
+    if (promptId) {
+        window.viewPrompt?.(promptId);
+    }
+}
+
 function handleModuleClick(e: Event): void {
     const target = e.target as HTMLElement | null;
     if (!target || !moduleRoot) return;
 
-    const actionBtn = target.closest('[data-action][data-prompt-id]') as HTMLElement | null;
-    if (actionBtn && moduleRoot.contains(actionBtn)) {
-        const promptId = actionBtn.dataset.promptId;
-        const action = actionBtn.dataset.action;
+    if (handlePromptActionButton(target)) return;
+    if (handleCategoryButton(target)) return;
 
-        if (!promptId) return;
+    handlePromptCard(target);
+}
 
-        if (action === 'view-prompt') {
-            window.viewPrompt?.(promptId);
-        } else if (action === 'copy-prompt') {
-            window.copyPrompt?.(promptId);
-        }
-        return;
+function handlePromptModalAction(target: HTMLElement, modal: HTMLElement): boolean {
+    const actionBtn = findContainedTarget(target, '[data-prompt-modal-action]', modal);
+    if (!actionBtn) return false;
+
+    const action = actionBtn.dataset.promptModalAction;
+    if (action === 'close') {
+        window.closePromptModal?.();
+    } else if (action === 'copy') {
+        window.copyModalPrompt?.();
     }
 
-    const categoryBtn = target.closest('.category-btn') as HTMLElement | null;
-    if (categoryBtn && moduleRoot.contains(categoryBtn)) {
-        const category = categoryBtn.dataset.category;
-        if (category) {
-            handleCategoryChange(category);
-        }
-        return;
+    return true;
+}
+
+function handlePromptModalLang(target: HTMLElement, modal: HTMLElement): boolean {
+    const langBtn = findContainedTarget(target, '[data-prompt-lang]', modal);
+    if (!langBtn) return false;
+
+    const lang = langBtn.dataset.promptLang;
+    if (lang === 'zh' || lang === 'en') {
+        window.switchPromptLang?.(lang);
     }
 
-
-    const promptCard = target.closest('.prompt-card[data-prompt-id]') as HTMLElement | null;
-
-    if (promptCard && moduleRoot.contains(promptCard)) {
-        const promptId = promptCard.dataset.promptId;
-        if (promptId) {
-            window.viewPrompt?.(promptId);
-        }
-    }
+    return true;
 }
 
 function handleModalBackdropClick(e: Event): void {
     const modal = getPromptModal();
-    if (!modal) return;
-
     const target = e.target as HTMLElement | null;
-    const actionBtn = target?.closest<HTMLElement>('[data-prompt-modal-action]');
-    if (actionBtn && modal.contains(actionBtn)) {
-        const action = actionBtn.dataset.promptModalAction;
-        if (action === 'close') {
-            window.closePromptModal?.();
-        } else if (action === 'copy') {
-            window.copyModalPrompt?.();
-        }
-        return;
-    }
+    if (!modal || !target) return;
 
-    const langBtn = target?.closest<HTMLElement>('[data-prompt-lang]');
-    if (langBtn && modal.contains(langBtn)) {
-        const lang = langBtn.dataset.promptLang;
-        if (lang === 'zh' || lang === 'en') {
-            window.switchPromptLang?.(lang);
-        }
-        return;
-    }
+    if (handlePromptModalAction(target, modal)) return;
+    if (handlePromptModalLang(target, modal)) return;
 
     if (target === modal) {
         window.closePromptModal?.();

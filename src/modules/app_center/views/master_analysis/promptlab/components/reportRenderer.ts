@@ -18,6 +18,14 @@ type ReportRecord = Record<string, unknown>;
 type WrappedAnalysisReport = ReportRecord & {
   analysisReport: unknown;
 };
+type SubItemContentRenderOptions = {
+  hasContent: boolean;
+  subItemData: unknown;
+  targetId: string;
+  key: string;
+  safeTargetId: string;
+  safeKey: string;
+};
 
 function toReportRecord(value: unknown): ReportRecord | null {
   return value && typeof value === 'object' && !Array.isArray(value)
@@ -111,42 +119,48 @@ export function autoSelectMarket(
 ): void {
   if (!marketSelect) return;
 
-  const currentState = appStore.getState();
-  const analysisReport = toReportRecord(currentState.analysis.analysisReport);
-
-  let currentMarketplace = '';
-  const reportMarketplace = getStringField(analysisReport, 'marketplace');
-  if (reportMarketplace) {
-    currentMarketplace = reportMarketplace;
-  } else if (currentState.scraper?.scrapedData?.metadata?.marketplace) {
-    currentMarketplace = currentState.scraper.scrapedData.metadata.marketplace;
-  } else if (analysisReport) {
-    currentMarketplace =
-      getStringField(analysisReport, 'targetMarket') ||
-      getStringField(analysisReport, 'language');
-  }
+  const currentMarketplace = getCurrentMarketplace();
 
   const isFirstLoad = !ctx.profile.targetMarket;
   const isMarketplaceChanged = !!currentMarketplace && currentMarketplace !== ctx.lastMarketplace;
 
   if (currentMarketplace && (isFirstLoad || isMarketplaceChanged)) {
     console.log(`[reportRenderer] 市场变化: ${ctx.lastMarketplace} → ${currentMarketplace}`);
-    const siteConfig = SITE_CONFIGS[currentMarketplace];
-    if (siteConfig) {
-      const match = Array.from(marketSelect.options).find(
-        (opt) => opt.value === siteConfig.name,
-      );
-      if (match) {
-        marketSelect.value = match.value;
-        ctx.profile.targetMarket = match.value as TargetMarket;
-        ctx.saveState();
-        ctx.lastMarketplace = currentMarketplace;
-        console.log('[reportRenderer] 已自动选择市场:', match.value);
-      }
-    }
+    selectMarketplaceOption(ctx, marketSelect, currentMarketplace);
   } else if (currentMarketplace) {
     ctx.lastMarketplace = currentMarketplace;
   }
+}
+
+function getCurrentMarketplace(): string {
+  const currentState = appStore.getState();
+  const analysisReport = toReportRecord(currentState.analysis.analysisReport);
+  const reportMarketplace = getStringField(analysisReport, 'marketplace');
+  const scrapedMarketplace = currentState.scraper?.scrapedData?.metadata?.marketplace;
+  return reportMarketplace
+    || scrapedMarketplace
+    || getStringField(analysisReport, 'targetMarket')
+    || getStringField(analysisReport, 'language');
+}
+
+function selectMarketplaceOption(
+  ctx: PromptlabAlpineContext,
+  marketSelect: HTMLSelectElement,
+  currentMarketplace: string,
+): void {
+  const siteConfig = SITE_CONFIGS[currentMarketplace];
+  if (!siteConfig) return;
+
+  const match = Array.from(marketSelect.options).find(
+    (opt) => opt.value === siteConfig.name,
+  );
+  if (!match) return;
+
+  marketSelect.value = match.value;
+  ctx.profile.targetMarket = match.value as TargetMarket;
+  ctx.saveState();
+  ctx.lastMarketplace = currentMarketplace;
+  console.log('[reportRenderer] 已自动选择市场:', match.value);
 }
 
 // ==========================================
@@ -344,54 +358,7 @@ export function renderNewFormatModules(
           </div>
         </div>
         <div class="px-4 py-2">
-          ${subItemKeys.map(key => {
-            const itemCount = getSubItemCount(data, key);
-            const label = formatSubItemLabel(key);
-            const subItemData = (data as Record<string, unknown>)[key];
-            const hasContent = hasViewableContent(subItemData);
-
-            return `
-              <div class="sub-item-wrapper mb-2">
-                <div class="sub-item flex items-center gap-2 py-2 hover:bg-slate-50 rounded px-2 transition-colors"
-                     ${hasContent ? `@click="toggleSubItemExpansion('${escapeHtml(targetId)}', '${escapeHtml(key)}')"` : ''}>
-                  <input type="checkbox"
-                         class="sub-item-checkbox h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                         :checked="isSubItemSelected('${escapeHtml(targetId)}', '${escapeHtml(key)}')"
-                         :indeterminate.prop="isSubItemPartiallySelected('${escapeHtml(targetId)}', '${escapeHtml(key)}')"
-                         @change="onSubItemToggle('${escapeHtml(targetId)}', '${escapeHtml(key)}')"
-                         @click.stop>
-                  <label class="flex-1 text-sm cursor-pointer select-none text-slate-700">
-                    ${escapeHtml(label)} ${itemCount > 0 ? `<span class="text-slate-400 text-xs">(${itemCount} items)</span>` : ''}
-                  </label>
-                  ${hasContent ? `
-                  <i class="fas text-xs text-slate-400 transition-transform"
-                     :class="isSubItemExpanded('${escapeHtml(targetId)}', '${escapeHtml(key)}') ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
-                  ` : ''}
-                </div>
-
-                ${hasContent ? `
-                <div class="content-items pl-8"
-                     x-show="isSubItemExpanded('${escapeHtml(targetId)}', '${escapeHtml(key)}')"
-                     x-collapse>
-                  <div class="content-items-header flex justify-between py-1 mb-1">
-                    <span class="text-xs text-slate-500">具体内容</span>
-                    <div class="flex gap-2">
-                      <button @click.stop="selectAllContentItems('${escapeHtml(targetId)}', '${escapeHtml(key)}')"
-                              class="text-xs text-blue-600 hover:underline">
-                        全选
-                      </button>
-                      <button @click.stop="deselectAllContentItems('${escapeHtml(targetId)}', '${escapeHtml(key)}')"
-                              class="text-xs text-slate-500 hover:underline">
-                        取消全选
-                      </button>
-                    </div>
-                  </div>
-                  ${renderSelectableContent(subItemData, targetId, key)}
-                </div>
-                ` : ''}
-              </div>
-            `;
-          }).join('')}
+          ${renderSubItems(data, targetId, subItemKeys)}
         </div>
       </div>
     `;
@@ -399,6 +366,87 @@ export function renderNewFormatModules(
     renderer.renderTemplate(div, template);
     container.appendChild(div);
   });
+}
+
+function renderSubItems(data: unknown, targetId: string, subItemKeys: string[]): string {
+  return subItemKeys.map(key => renderSubItem(data, targetId, key)).join('');
+}
+
+function renderSubItem(data: unknown, targetId: string, key: string): string {
+  const itemCount = getSubItemCount(data, key);
+  const label = formatSubItemLabel(key);
+  const subItemData = (data as ReportRecord)[key];
+  const hasContent = hasViewableContent(subItemData);
+  const safeTargetId = escapeHtml(targetId);
+  const safeKey = escapeHtml(key);
+
+  return `
+    <div class="sub-item-wrapper mb-2">
+      <div class="sub-item flex items-center gap-2 py-2 hover:bg-slate-50 rounded px-2 transition-colors"
+           ${hasContent ? `@click="toggleSubItemExpansion('${safeTargetId}', '${safeKey}')"` : ''}>
+        <input type="checkbox"
+               class="sub-item-checkbox h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+               :checked="isSubItemSelected('${safeTargetId}', '${safeKey}')"
+               :indeterminate.prop="isSubItemPartiallySelected('${safeTargetId}', '${safeKey}')"
+               @change="onSubItemToggle('${safeTargetId}', '${safeKey}')"
+               @click.stop>
+        <label class="flex-1 text-sm cursor-pointer select-none text-slate-700">
+          ${escapeHtml(label)} ${renderItemCount(itemCount)}
+        </label>
+        ${renderSubItemChevron(hasContent, safeTargetId, safeKey)}
+      </div>
+
+      ${renderSubItemContent({
+        hasContent,
+        subItemData,
+        targetId,
+        key,
+        safeTargetId,
+        safeKey,
+      })}
+    </div>
+  `;
+}
+
+function renderItemCount(itemCount: number): string {
+  return itemCount > 0
+    ? `<span class="text-slate-400 text-xs">(${itemCount} items)</span>`
+    : '';
+}
+
+function renderSubItemChevron(hasContent: boolean, safeTargetId: string, safeKey: string): string {
+  if (!hasContent) return '';
+
+  return `
+    <i class="fas text-xs text-slate-400 transition-transform"
+       :class="isSubItemExpanded('${safeTargetId}', '${safeKey}') ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
+  `;
+}
+
+function renderSubItemContent(options: SubItemContentRenderOptions): string {
+  const { hasContent, subItemData, targetId, key, safeTargetId, safeKey } = options;
+  if (!hasContent) return '';
+
+  return `
+    <div class="content-items pl-8"
+         x-show="isSubItemExpanded('${safeTargetId}', '${safeKey}')"
+         x-collapse>
+      <div class="content-items-header flex justify-between py-1 mb-1">
+        <span class="text-xs text-slate-500">具体内容</span>
+        <div class="flex gap-2">
+          <button @click.stop="selectAllContentItems('${safeTargetId}', '${safeKey}')"
+                  class="text-xs text-blue-600 hover:underline">
+            全选
+          </button>
+          <button @click.stop="deselectAllContentItems('${safeTargetId}', '${safeKey}')"
+                  class="text-xs text-slate-500 hover:underline">
+            取消全选
+          </button>
+        </div>
+      </div>
+      ${renderSelectableContent(subItemData, targetId, key)}
+    </div>
+  `;
 }
 
 /**
@@ -504,15 +552,15 @@ function formatValue(value: unknown): string {
   if (typeof value === 'string') return value;
   if (typeof value === 'number') return value.toString();
   if (typeof value === 'boolean') return value ? 'Yes' : 'No';
-  if (Array.isArray(value)) {
-    if (value.length === 0) return '[]';
-    if (value.length <= 3) return value.map(v => formatValue(v)).join(', ');
-    return `${value.slice(0, 3).map(v => formatValue(v)).join(', ')}... (${value.length} items)`;
-  }
-  if (typeof value === 'object') {
-    return JSON.stringify(value, null, 2);
-  }
+  if (Array.isArray(value)) return formatArrayValue(value);
+  if (typeof value === 'object') return JSON.stringify(value, null, 2);
   return String(value);
+}
+
+function formatArrayValue(value: unknown[]): string {
+  if (value.length === 0) return '[]';
+  if (value.length <= 3) return value.map(item => formatValue(item)).join(', ');
+  return `${value.slice(0, 3).map(item => formatValue(item)).join(', ')}... (${value.length} items)`;
 }
 
 /**
@@ -524,32 +572,43 @@ function formatContentItem(item: unknown): string {
   if (typeof item === 'boolean') return item ? 'Yes' : 'No';
 
   if (item && typeof item === 'object') {
-    // 尝试提取关键字段
-    const obj = item as Record<string, unknown>;
-
-    // 常见的关键字段
-    if (obj.keyword) return String(obj.keyword);
-    if (obj.issue) return String(obj.issue);
-    if (obj.moment_description) return String(obj.moment_description);
-    if (obj.pre_purchase_worry) return String(obj.pre_purchase_worry);
-    if (obj.type) return String(obj.type);
-    if (obj.question) return String(obj.question);
-
-    // 如果有多个字段，组合显示
-    const parts: string[] = [];
-    if (obj.keyword) parts.push(String(obj.keyword));
-    if (obj.weight) parts.push(`[${obj.weight}]`);
-    if (obj.importance) parts.push(`[${obj.importance}]`);
-    if (obj.search_volume_estimate) parts.push(`(${obj.search_volume_estimate})`);
-
-    if (parts.length > 0) return parts.join(' ');
-
-    // 默认：显示前两个字段
-    const keys = Object.keys(obj).slice(0, 2);
-    return keys.map(k => `${k}: ${obj[k]}`).join(', ');
+    return formatObjectContentItem(item as Record<string, unknown>);
   }
 
   return JSON.stringify(item);
+}
+
+function findPrimaryContentField(item: ReportRecord): string {
+  const primaryFields = [
+    'keyword',
+    'issue',
+    'moment_description',
+    'pre_purchase_worry',
+    'type',
+    'question',
+  ];
+  const field = primaryFields.find(key => item[key]);
+  return field ? String(item[field]) : '';
+}
+
+function formatWeightedContentParts(item: ReportRecord): string {
+  const parts: string[] = [];
+  if (item.keyword) parts.push(String(item.keyword));
+  if (item.weight) parts.push(`[${item.weight}]`);
+  if (item.importance) parts.push(`[${item.importance}]`);
+  if (item.search_volume_estimate) parts.push(`(${item.search_volume_estimate})`);
+  return parts.join(' ');
+}
+
+function formatObjectContentItem(item: ReportRecord): string {
+  const primaryContent = findPrimaryContentField(item);
+  if (primaryContent) return primaryContent;
+
+  const weightedContent = formatWeightedContentParts(item);
+  if (weightedContent) return weightedContent;
+
+  const keys = Object.keys(item).slice(0, 2);
+  return keys.map(key => `${key}: ${item[key]}`).join(', ');
 }
 
 // ==========================================

@@ -418,12 +418,84 @@ Customer Reviews:
  * 生成动态分析提示词
  */
 type PromptReview = Product['customer_reviews'][number];
+type ProductPromptValidationCodes = {
+  invalidProduct: string;
+  missingAsin: string;
+  missingTitle: string;
+  invalidReviews: string;
+  invalidBullets: string;
+};
+type PromptData = {
+  lowStarReviews: string;
+  highStarReviews: string;
+  allReviews: string;
+  reviewerCountries: string;
+  featureBullets: string;
+};
 
 const REVIEW_LIMITS = {
   lowStar: { count: 24, bodyChars: 700 },
   highStar: { count: 24, bodyChars: 700 },
   general: { count: 40, bodyChars: 520 }
 };
+const VALID_LANGUAGES = ['en', 'zh', 'de', 'fr', 'es', 'ja', 'it'];
+
+function createPromptContext(action: string, extraContext: Record<string, unknown> = {}): Record<string, unknown> {
+  return { module: 'AnalysisPrompts', action, ...extraContext };
+}
+
+function assertValidProductForPrompt(
+  product: Product,
+  action: string,
+  codes: ProductPromptValidationCodes,
+  extraContext: Record<string, unknown> = {},
+): void {
+  const context = createPromptContext(action, extraContext);
+
+  if (!product || typeof product !== 'object') {
+    throw new ValidationError('无效的产品对象', codes.invalidProduct, 'product', product, context);
+  }
+
+  if (!product.asin) {
+    throw new ValidationError('产品对象缺少必需字段: asin', codes.missingAsin, 'product.asin', product.asin, context);
+  }
+
+  if (!product.productTitle) {
+    throw new ValidationError(
+      '产品对象缺少必需字段: productTitle',
+      codes.missingTitle,
+      'product.productTitle',
+      product.productTitle,
+      context,
+    );
+  }
+
+  if (!Array.isArray(product.customer_reviews)) {
+    throw new ValidationError(
+      '产品对象的 customer_reviews 必须是数组',
+      codes.invalidReviews,
+      'product.customer_reviews',
+      product.customer_reviews,
+      context,
+    );
+  }
+
+  if (!Array.isArray(product.feature_bullets)) {
+    throw new ValidationError(
+      '产品对象的 feature_bullets 必须是数组',
+      codes.invalidBullets,
+      'product.feature_bullets',
+      product.feature_bullets,
+      context,
+    );
+  }
+}
+
+function warnForUnusualLanguage(action: string, language: string): void {
+  if (language && !VALID_LANGUAGES.includes(language)) {
+    console.warn(`[${action}] Unusual language code: ${language}. Expected one of: ${VALID_LANGUAGES.join(', ')}`);
+  }
+}
 
 function truncateForPrompt(value: string | undefined, maxChars: number): string {
   const sanitized = sanitizePromptInput(value || '');
@@ -510,121 +582,51 @@ function formatReviewsForPrompt(
   return lines.join('\n');
 }
 
-export function generateAnalysisPrompt(
-  taskId: string,
-  product: Product,
-  language: string = 'en'
-): string {
-  // 验证 taskId
-  const taskDef = ANALYSIS_TASK_DEFINITIONS[taskId];
-  if (!taskDef) {
-    throw new ValidationError(
-      `未知的任务ID: ${taskId}`,
-      'ANALYSIS_PROMPT_001',
-      'taskId',
-      taskId,
-      { module: 'AnalysisPrompts', action: 'generateAnalysisPrompt', validTaskIds: Object.keys(ANALYSIS_TASK_DEFINITIONS) }
-    );
-  }
+function createPromptData(product: Product): PromptData {
+  return {
+    lowStarReviews: formatReviewsForPrompt(
+      product.customer_reviews.filter(r => r.star_rating <= 3),
+      REVIEW_LIMITS.lowStar.count,
+      REVIEW_LIMITS.lowStar.bodyChars,
+      'No 1-3 star reviews available'
+    ),
+    highStarReviews: formatReviewsForPrompt(
+      product.customer_reviews.filter(r => r.star_rating === 5),
+      REVIEW_LIMITS.highStar.count,
+      REVIEW_LIMITS.highStar.bodyChars,
+      'No 5 star reviews available'
+    ),
+    allReviews: formatReviewsForPrompt(
+      selectRepresentativeReviews(product.customer_reviews, REVIEW_LIMITS.general.count),
+      REVIEW_LIMITS.general.count,
+      REVIEW_LIMITS.general.bodyChars,
+      'No reviews available',
+      product.customer_reviews.length
+    ),
+    reviewerCountries: [...new Set(product.customer_reviews.map(r => r.origin_country))].join(', '),
+    featureBullets: product.feature_bullets
+      .map((bullet, index) => `${index + 1}. ${sanitizePromptInput(bullet)}`)
+      .join('\n'),
+  };
+}
 
-  // 验证 product 对象
-  if (!product || typeof product !== 'object') {
-    throw new ValidationError(
-      '无效的产品对象',
-      'ANALYSIS_PROMPT_002',
-      'product',
-      product,
-      { module: 'AnalysisPrompts', action: 'generateAnalysisPrompt', taskId }
-    );
-  }
-
-  // 验证必需字段
-  if (!product.asin) {
-    throw new ValidationError(
-      '产品对象缺少必需字段: asin',
-      'ANALYSIS_PROMPT_003',
-      'product.asin',
-      product.asin,
-      { module: 'AnalysisPrompts', action: 'generateAnalysisPrompt', taskId }
-    );
-  }
-
-  if (!product.productTitle) {
-    throw new ValidationError(
-      '产品对象缺少必需字段: productTitle',
-      'ANALYSIS_PROMPT_004',
-      'product.productTitle',
-      product.productTitle,
-      { module: 'AnalysisPrompts', action: 'generateAnalysisPrompt', taskId }
-    );
-  }
-
-  if (!Array.isArray(product.customer_reviews)) {
-    throw new ValidationError(
-      '产品对象的 customer_reviews 必须是数组',
-      'ANALYSIS_PROMPT_005',
-      'product.customer_reviews',
-      product.customer_reviews,
-      { module: 'AnalysisPrompts', action: 'generateAnalysisPrompt', taskId }
-    );
-  }
-
-  if (!Array.isArray(product.feature_bullets)) {
-    throw new ValidationError(
-      '产品对象的 feature_bullets 必须是数组',
-      'ANALYSIS_PROMPT_006',
-      'product.feature_bullets',
-      product.feature_bullets,
-      { module: 'AnalysisPrompts', action: 'generateAnalysisPrompt', taskId }
-    );
-  }
-
-  // 验证 language 参数（可选，但记录警告）
-  const validLanguages = ['en', 'zh', 'de', 'fr', 'es', 'ja', 'it'];
-  if (language && !validLanguages.includes(language)) {
-    console.warn(`[generateAnalysisPrompt] Unusual language code: ${language}. Expected one of: ${validLanguages.join(', ')}`);
-  }
-
-  // 准备数据替换（应用 prompt injection 防护）
-  const lowStarReviews = formatReviewsForPrompt(
-    product.customer_reviews.filter(r => r.star_rating <= 3),
-    REVIEW_LIMITS.lowStar.count,
-    REVIEW_LIMITS.lowStar.bodyChars,
-    'No 1-3 star reviews available'
-  );
-
-  const highStarReviews = formatReviewsForPrompt(
-    product.customer_reviews.filter(r => r.star_rating === 5),
-    REVIEW_LIMITS.highStar.count,
-    REVIEW_LIMITS.highStar.bodyChars,
-    'No 5 star reviews available'
-  );
-
-  const allReviews = formatReviewsForPrompt(
-    selectRepresentativeReviews(product.customer_reviews, REVIEW_LIMITS.general.count),
-    REVIEW_LIMITS.general.count,
-    REVIEW_LIMITS.general.bodyChars,
-    'No reviews available',
-    product.customer_reviews.length
-  );
-
-  const reviewerCountries = [...new Set(product.customer_reviews.map(r => r.origin_country))].join(', ');
-
-  const featureBullets = product.feature_bullets
-    .map((b, i) => `${i + 1}. ${sanitizePromptInput(b)}`)
-    .join('\n');
-
-  // 替换模板变量（清洗后的数据）
-  let taskPrompt = taskDef.taskPrompt
+function applyPromptData(taskPrompt: string, product: Product, promptData: PromptData): string {
+  return taskPrompt
     .replace('{{productTitle}}', sanitizePromptInput(product.productTitle))
-    .replace('{{featureBullets}}', featureBullets)
-    .replace('{{lowStarReviews}}', lowStarReviews)
-    .replace('{{highStarReviews}}', highStarReviews)
-    .replace('{{allReviews}}', allReviews)
-    .replace('{{reviewerCountries}}', reviewerCountries);
+    .replace('{{featureBullets}}', promptData.featureBullets)
+    .replace('{{lowStarReviews}}', promptData.lowStarReviews)
+    .replace('{{highStarReviews}}', promptData.highStarReviews)
+    .replace('{{allReviews}}', promptData.allReviews)
+    .replace('{{reviewerCountries}}', promptData.reviewerCountries);
+}
 
-  // 构建完整提示词
-  const fullPrompt = `
+function buildSingleAnalysisPrompt(
+  taskDef: AnalysisTaskDefinition,
+  taskPrompt: string,
+  product: Product,
+  language: string,
+): string {
+  return `
 You are a Data Extraction Engine specialized in E-commerce Analysis.
 Your sole purpose is to convert unstructured text into a strict JSON object based on the schema provided below.
 
@@ -650,148 +652,32 @@ You must strictly follow this JSON structure. Do not output markdown code blocks
 ${taskDef.schemaTemplate}
 }
 `;
-
-  return fullPrompt;
 }
 
-/**
- * 生成多任务批量分析提示词
- */
-export function generateBatchAnalysisPrompt(
-  taskIds: string[],
-  product: Product,
-  language: string = 'en'
-): string {
-  // 验证 taskIds
-  if (!Array.isArray(taskIds) || taskIds.length === 0) {
-    throw new ValidationError(
-      '无效的任务ID数组',
-      'ANALYSIS_PROMPT_007',
-      'taskIds',
-      taskIds,
-      { module: 'AnalysisPrompts', action: 'generateBatchAnalysisPrompt' }
-    );
-  }
-
-  const tasks = taskIds
+function getValidAnalysisTasks(taskIds: string[]): AnalysisTaskDefinition[] {
+  return taskIds
     .map(id => ANALYSIS_TASK_DEFINITIONS[id])
-    .filter(Boolean);
+    .filter((task): task is AnalysisTaskDefinition => Boolean(task));
+}
 
-  if (tasks.length === 0) {
-    throw new ValidationError(
-      '没有有效的任务',
-      'ANALYSIS_PROMPT_008',
-      'taskIds',
-      taskIds,
-      { module: 'AnalysisPrompts', action: 'generateBatchAnalysisPrompt', validTaskIds: Object.keys(ANALYSIS_TASK_DEFINITIONS) }
-    );
-  }
+function buildDynamicTaskPrompts(
+  tasks: AnalysisTaskDefinition[],
+  product: Product,
+  promptData: PromptData,
+): string {
+  return tasks
+    .map(task => applyPromptData(task.taskPrompt, product, promptData))
+    .join('\n\n---\n\n');
+}
 
-  // 验证 product 对象
-  if (!product || typeof product !== 'object') {
-    throw new ValidationError(
-      '无效的产品对象',
-      'ANALYSIS_PROMPT_009',
-      'product',
-      product,
-      { module: 'AnalysisPrompts', action: 'generateBatchAnalysisPrompt' }
-    );
-  }
-
-  // 验证必需字段
-  if (!product.asin) {
-    throw new ValidationError(
-      '产品对象缺少必需字段: asin',
-      'ANALYSIS_PROMPT_010',
-      'product.asin',
-      product.asin,
-      { module: 'AnalysisPrompts', action: 'generateBatchAnalysisPrompt' }
-    );
-  }
-
-  if (!product.productTitle) {
-    throw new ValidationError(
-      '产品对象缺少必需字段: productTitle',
-      'ANALYSIS_PROMPT_011',
-      'product.productTitle',
-      product.productTitle,
-      { module: 'AnalysisPrompts', action: 'generateBatchAnalysisPrompt' }
-    );
-  }
-
-  if (!Array.isArray(product.customer_reviews)) {
-    throw new ValidationError(
-      '产品对象的 customer_reviews 必须是数组',
-      'ANALYSIS_PROMPT_012',
-      'product.customer_reviews',
-      product.customer_reviews,
-      { module: 'AnalysisPrompts', action: 'generateBatchAnalysisPrompt' }
-    );
-  }
-
-  if (!Array.isArray(product.feature_bullets)) {
-    throw new ValidationError(
-      '产品对象的 feature_bullets 必须是数组',
-      'ANALYSIS_PROMPT_013',
-      'product.feature_bullets',
-      product.feature_bullets,
-      { module: 'AnalysisPrompts', action: 'generateBatchAnalysisPrompt' }
-    );
-  }
-
-  // 验证 language 参数
-  const validLanguages = ['en', 'zh', 'de', 'fr', 'es', 'ja', 'it'];
-  if (language && !validLanguages.includes(language)) {
-    console.warn(`[generateBatchAnalysisPrompt] Unusual language code: ${language}. Expected one of: ${validLanguages.join(', ')}`);
-  }
-
-  // 准备数据（应用 prompt injection 防护）
-  const lowStarReviews = formatReviewsForPrompt(
-    product.customer_reviews.filter(r => r.star_rating <= 3),
-    REVIEW_LIMITS.lowStar.count,
-    REVIEW_LIMITS.lowStar.bodyChars,
-    'No 1-3 star reviews available'
-  );
-
-  const highStarReviews = formatReviewsForPrompt(
-    product.customer_reviews.filter(r => r.star_rating === 5),
-    REVIEW_LIMITS.highStar.count,
-    REVIEW_LIMITS.highStar.bodyChars,
-    'No 5 star reviews available'
-  );
-
-  const allReviews = formatReviewsForPrompt(
-    selectRepresentativeReviews(product.customer_reviews, REVIEW_LIMITS.general.count),
-    REVIEW_LIMITS.general.count,
-    REVIEW_LIMITS.general.bodyChars,
-    'No reviews available',
-    product.customer_reviews.length
-  );
-
-  const reviewerCountries = [...new Set(product.customer_reviews.map(r => r.origin_country))].join(', ');
-
-  const featureBullets = product.feature_bullets
-    .map((b, i) => `${i + 1}. ${sanitizePromptInput(b)}`)
-    .join('\n');
-
-  // 构建动态任务（清洗后的数据）
-  const dynamicTasks = tasks.map(task => {
-    if (!task) return '';
-    let prompt = task.taskPrompt
-      .replace('{{productTitle}}', sanitizePromptInput(product.productTitle))
-      .replace('{{featureBullets}}', featureBullets)
-      .replace('{{lowStarReviews}}', lowStarReviews)
-      .replace('{{highStarReviews}}', highStarReviews)
-      .replace('{{allReviews}}', allReviews)
-      .replace('{{reviewerCountries}}', reviewerCountries);
-    return prompt;
-  }).join('\n\n---\n\n');
-
-  // 构建动态 Schema
-  const dynamicSchema = tasks.map(task => task?.schemaTemplate || '').join(',\n');
-
-  // 完整模板
-  const fullPrompt = `
+function buildBatchAnalysisPromptTemplate(
+  product: Product,
+  language: string,
+  promptData: PromptData,
+  dynamicTasks: string,
+  dynamicSchema: string,
+): string {
+  return `
 You are a Data Extraction Engine specialized in E-commerce Analysis.
 Your sole purpose is to convert unstructured text into a strict JSON object based on the schema provided below.
 
@@ -807,8 +693,8 @@ Your sole purpose is to convert unstructured text into a strict JSON object base
 - Product ASIN: ${product.asin}
 - Raw data:
   - Title: ${product.productTitle}
-  - Bullets: ${featureBullets}
-  - Reviews: ${allReviews}
+  - Bullets: ${promptData.featureBullets}
+  - Reviews: ${promptData.allReviews}
 
 ## Analysis Tasks & Logic
 ${dynamicTasks}
@@ -822,8 +708,94 @@ You must strictly follow this JSON structure. Do not output markdown code blocks
 ${dynamicSchema}
 }
 `;
+}
 
-  return fullPrompt;
+export function generateAnalysisPrompt(
+  taskId: string,
+  product: Product,
+  language: string = 'en'
+): string {
+  const taskDef = ANALYSIS_TASK_DEFINITIONS[taskId];
+  if (!taskDef) {
+    throw new ValidationError(
+      `未知的任务ID: ${taskId}`,
+      'ANALYSIS_PROMPT_001',
+      'taskId',
+      taskId,
+      createPromptContext('generateAnalysisPrompt', {
+        validTaskIds: Object.keys(ANALYSIS_TASK_DEFINITIONS),
+      })
+    );
+  }
+
+  assertValidProductForPrompt(
+    product,
+    'generateAnalysisPrompt',
+    {
+      invalidProduct: 'ANALYSIS_PROMPT_002',
+      missingAsin: 'ANALYSIS_PROMPT_003',
+      missingTitle: 'ANALYSIS_PROMPT_004',
+      invalidReviews: 'ANALYSIS_PROMPT_005',
+      invalidBullets: 'ANALYSIS_PROMPT_006',
+    },
+    { taskId },
+  );
+  warnForUnusualLanguage('generateAnalysisPrompt', language);
+
+  const promptData = createPromptData(product);
+  const taskPrompt = applyPromptData(taskDef.taskPrompt, product, promptData);
+  return buildSingleAnalysisPrompt(taskDef, taskPrompt, product, language);
+}
+
+/**
+ * 生成多任务批量分析提示词
+ */
+export function generateBatchAnalysisPrompt(
+  taskIds: string[],
+  product: Product,
+  language: string = 'en'
+): string {
+  if (!Array.isArray(taskIds) || taskIds.length === 0) {
+    throw new ValidationError(
+      '无效的任务ID数组',
+      'ANALYSIS_PROMPT_007',
+      'taskIds',
+      taskIds,
+      createPromptContext('generateBatchAnalysisPrompt')
+    );
+  }
+
+  const tasks = getValidAnalysisTasks(taskIds);
+
+  if (tasks.length === 0) {
+    throw new ValidationError(
+      '没有有效的任务',
+      'ANALYSIS_PROMPT_008',
+      'taskIds',
+      taskIds,
+      createPromptContext('generateBatchAnalysisPrompt', {
+        validTaskIds: Object.keys(ANALYSIS_TASK_DEFINITIONS),
+      })
+    );
+  }
+
+  assertValidProductForPrompt(
+    product,
+    'generateBatchAnalysisPrompt',
+    {
+      invalidProduct: 'ANALYSIS_PROMPT_009',
+      missingAsin: 'ANALYSIS_PROMPT_010',
+      missingTitle: 'ANALYSIS_PROMPT_011',
+      invalidReviews: 'ANALYSIS_PROMPT_012',
+      invalidBullets: 'ANALYSIS_PROMPT_013',
+    },
+  );
+  warnForUnusualLanguage('generateBatchAnalysisPrompt', language);
+
+  const promptData = createPromptData(product);
+  const dynamicTasks = buildDynamicTaskPrompts(tasks, product, promptData);
+  const dynamicSchema = tasks.map(task => task?.schemaTemplate || '').join(',\n');
+  return buildBatchAnalysisPromptTemplate(product, language, promptData, dynamicTasks, dynamicSchema);
 }
 
 // 导出便捷方法

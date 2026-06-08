@@ -15,6 +15,12 @@ export interface DataPreviewState {
     itemsPerPage: number;
 }
 
+interface DataPanelElements {
+    noDataMsg: HTMLElement | null;
+    cardsWrapper: HTMLElement | null;
+    cardsEl: HTMLElement | null;
+}
+
 /**
  * 数据预览组件类
  */
@@ -184,41 +190,64 @@ export class DataPreview {
     ): void {
         if (!this.scrapedData) return;
 
-        const noDataMsg = document.getElementById("no-data-msg");
-        const cardsWrapper = document.getElementById("data-cards-wrapper");
-        const cardsEl = document.getElementById("data-cards");
+        const elements = this.getDataPanelElements();
 
         // 如果 DOM 元素还不存在,延迟渲染
-        if (!cardsEl || !cardsWrapper) {
+        if (!elements.cardsEl || !elements.cardsWrapper) {
             console.warn('[Scraper] DOM 元素尚未就绪,延迟渲染');
             return;
         }
 
-        if (!this.scrapedData.products || this.scrapedData.products.length === 0) {
-            if (noDataMsg) noDataMsg.classList.remove("hidden");
-            if (cardsWrapper) cardsWrapper.classList.add("hidden");
+        if (this.shouldRenderEmptyState()) {
+            this.setDataPanelVisibility(elements, false);
             return;
         }
 
-        if (noDataMsg) noDataMsg.classList.add("hidden");
-        if (cardsWrapper) cardsWrapper.classList.remove("hidden");
+        this.setDataPanelVisibility(elements, true);
 
         // 使用分页数据而不是全部数据
-        const productsToRender = this.shouldUsePagination ? this.paginatedProducts : this.scrapedData.products;
+        const productsToRender = this.getProductsToRender();
 
         console.log(`[Scraper] 渲染 ${productsToRender.length}/${this.totalProducts} 个产品 (页码: ${this.state.currentPage}/${this.totalPages})`);
 
         // 清理旧的DOM元素，释放内存
-        this.cleanupOldDOMElements(cardsEl);
+        this.cleanupOldDOMElements(elements.cardsEl);
 
-        const globalSiteCode = this.scrapedData.metadata?.marketplace || '';
+        const renderer = SafeRenderer.getInstance();
+        this.renderProductCards(elements.cardsEl, productsToRender, renderer);
+        this.renderJsonView(renderer);
+    }
+
+    private getDataPanelElements(): DataPanelElements {
+        return {
+            noDataMsg: document.getElementById("no-data-msg"),
+            cardsWrapper: document.getElementById("data-cards-wrapper"),
+            cardsEl: document.getElementById("data-cards"),
+        };
+    }
+
+    private shouldRenderEmptyState(): boolean {
+        return !this.scrapedData?.products || this.scrapedData.products.length === 0;
+    }
+
+    private setDataPanelVisibility(elements: DataPanelElements, hasData: boolean): void {
+        elements.noDataMsg?.classList.toggle("hidden", hasData);
+        elements.cardsWrapper?.classList.toggle("hidden", !hasData);
+    }
+
+    private getProductsToRender(): ScrapedProduct[] {
+        return this.shouldUsePagination ? this.paginatedProducts : this.scrapedData?.products || [];
+    }
+
+    private renderProductCards(
+        cardsEl: HTMLElement,
+        productsToRender: ScrapedProduct[],
+        renderer: SafeRenderer
+    ): void {
+        const globalSiteCode = this.scrapedData?.metadata?.marketplace || '';
 
         // 渲染产品卡片
-        const cardsHtml = productsToRender.map((rawProduct: unknown) => {
-            // 类型守卫：确保 rawProduct 是对象
-            if (!rawProduct || typeof rawProduct !== 'object') return '';
-
-            const product = rawProduct as ScrapedProduct;
+        const cardsHtml = productsToRender.map((product: ScrapedProduct) => {
             const isExpanded = this.state.expandedAsin === product.asin;
             return renderProductCard(
                 product,
@@ -230,15 +259,16 @@ export class DataPreview {
             );
         }).join("");
 
-        const renderer = SafeRenderer.getInstance();
         renderer.renderTemplate(cardsEl, cardsHtml);
+    }
 
+    private renderJsonView(renderer: SafeRenderer): void {
         // 渲染JSON视图
         const jsonDisplay = document.getElementById("json-display");
-        if (jsonDisplay) {
-            const jsonHtml = syntaxHighlight(JSON.stringify(this.scrapedData, null, 2));
-            renderer.renderTemplate(jsonDisplay, jsonHtml);
-        }
+        if (!jsonDisplay) return;
+
+        const jsonHtml = syntaxHighlight(JSON.stringify(this.scrapedData, null, 2));
+        renderer.renderTemplate(jsonDisplay, jsonHtml);
     }
 
     // ========== 分页控制 ==========

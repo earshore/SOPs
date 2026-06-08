@@ -38,6 +38,57 @@ const USER_MESSAGES: Record<ErrorType, string> = {
   [ERROR_TYPES.UNKNOWN]: '操作失败，请重试',
 };
 
+interface ErrorSignal {
+  message: string;
+  name: string;
+}
+
+interface ErrorClassifier {
+  matches: (signal: ErrorSignal) => boolean;
+  type: ErrorType;
+}
+
+function normalizeErrorSignal(error: Error | unknown): ErrorSignal {
+  const err = error as Error;
+  return {
+    message: err.message?.toLowerCase() || '',
+    name: err.name || '',
+  };
+}
+
+function isTimeoutError({ message, name }: ErrorSignal): boolean {
+  return name === 'AbortError' || message.includes('timeout') || message.includes('超时');
+}
+
+function isNetworkError({ message, name }: ErrorSignal): boolean {
+  return (name === 'TypeError' && message.includes('fetch')) ||
+    message.includes('network') ||
+    message.includes('网络');
+}
+
+function isAuthError({ message }: ErrorSignal): boolean {
+  return message.includes('401') ||
+    message.includes('403') ||
+    message.includes('unauthorized') ||
+    message.includes('认证');
+}
+
+function isParseError({ message, name }: ErrorSignal): boolean {
+  return name === 'SyntaxError' || message.includes('json') || message.includes('parse');
+}
+
+function isStorageError({ message, name }: ErrorSignal): boolean {
+  return name === 'QuotaExceededError' || message.includes('storage') || message.includes('存储');
+}
+
+const ERROR_CLASSIFIERS: readonly ErrorClassifier[] = [
+  { type: ERROR_TYPES.TIMEOUT, matches: isTimeoutError },
+  { type: ERROR_TYPES.NETWORK, matches: isNetworkError },
+  { type: ERROR_TYPES.AUTH, matches: isAuthError },
+  { type: ERROR_TYPES.PARSE, matches: isParseError },
+  { type: ERROR_TYPES.STORAGE, matches: isStorageError },
+];
+
 /**
  * 错误处理上下文 (向后兼容)
  */
@@ -65,44 +116,8 @@ class ErrorServiceClass {
   classify(error: Error | unknown): ErrorType {
     if (!error) return ERROR_TYPES.UNKNOWN;
 
-    const err = error as Error;
-    const message = err.message?.toLowerCase() || '';
-    const name = err.name || '';
-
-    // 超时错误
-    if (name === 'AbortError' || message.includes('timeout') || message.includes('超时')) {
-      return ERROR_TYPES.TIMEOUT;
-    }
-
-    // 网络错误
-    if (name === 'TypeError' && message.includes('fetch')) {
-      return ERROR_TYPES.NETWORK;
-    }
-    if (message.includes('network') || message.includes('网络')) {
-      return ERROR_TYPES.NETWORK;
-    }
-
-    // 认证错误
-    if (
-      message.includes('401') ||
-      message.includes('403') ||
-      message.includes('unauthorized') ||
-      message.includes('认证')
-    ) {
-      return ERROR_TYPES.AUTH;
-    }
-
-    // 解析错误
-    if (name === 'SyntaxError' || message.includes('json') || message.includes('parse')) {
-      return ERROR_TYPES.PARSE;
-    }
-
-    // 存储错误
-    if (name === 'QuotaExceededError' || message.includes('storage') || message.includes('存储')) {
-      return ERROR_TYPES.STORAGE;
-    }
-
-    return ERROR_TYPES.UNKNOWN;
+    const signal = normalizeErrorSignal(error);
+    return ERROR_CLASSIFIERS.find(({ matches }) => matches(signal))?.type ?? ERROR_TYPES.UNKNOWN;
   }
 
   /**

@@ -31,6 +31,8 @@ export interface ErrorHandlerOptions {
   context?: ErrorContext;
 }
 
+type ErrorLogMethod = (...data: unknown[]) => void;
+
 /**
  * 全局错误处理器
  */
@@ -161,23 +163,27 @@ export class GlobalErrorHandler {
       stack: error.stack,
       originalError: error.originalError
     };
+    const moduleName = error.context.module || 'System';
+    const logMethod = this.getLogMethod(error.level);
 
-    switch (error.level) {
+    if (error.level === ErrorLevel.FATAL) {
+      logMethod('[FATAL]', error.message, logData, moduleName);
+      return;
+    }
+
+    logMethod(error.message, logData, moduleName);
+  }
+
+  private getLogMethod(level: ErrorLevel): ErrorLogMethod {
+    switch (level) {
       case ErrorLevel.FATAL:
-        console.error('[FATAL]', error.message, logData, error.context.module || 'System');
-        break;
       case ErrorLevel.ERROR:
-        console.error(error.message, logData, error.context.module || 'System');
-        break;
+        return (...data: unknown[]) => console.error(...data);
       case ErrorLevel.WARNING:
-        console.warn(error.message, logData, error.context.module || 'System');
-        break;
+        return (...data: unknown[]) => console.warn(...data);
       case ErrorLevel.INFO:
-        console.log(error.message, logData, error.context.module || 'System');
-        break;
       case ErrorLevel.DEBUG:
-        console.log(error.message, logData, error.context.module || 'System');
-        break;
+        return (...data: unknown[]) => console.log(...data);
     }
   }
 

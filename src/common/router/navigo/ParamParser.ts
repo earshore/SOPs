@@ -4,7 +4,14 @@
  * 负责解析和验证路由参数（路径参数和查询参数）
  */
 
-import type { RouteParams } from './types';
+import type { RouteParamConfig, RouteParams } from './types';
+
+type PathParamValue = string | number | boolean;
+
+type ParsedPathParam =
+  | { status: 'set'; value: PathParamValue }
+  | { status: 'error'; error: string }
+  | { status: 'skip' };
 
 /**
  * 解析后的参数结果
@@ -58,42 +65,45 @@ export class ParamParser {
 
     // 验证和转换每个参数
     for (const [key, paramConfig] of Object.entries(config)) {
-      const rawValue = rawParams?.[key];
-
-      // 检查必需参数
-      if (paramConfig.required && !rawValue) {
-        errors.push(`Missing required parameter: ${key}`);
-        continue;
+      const parsed = this._parsePathParam(key, rawParams?.[key], paramConfig);
+      if (parsed.status === 'error') {
+        errors.push(parsed.error);
       }
-
-      // 使用默认值
-      if (!rawValue && paramConfig.default !== undefined) {
-        params[key] = paramConfig.default;
-        continue;
+      if (parsed.status === 'set') {
+        params[key] = parsed.value;
       }
-
-      // 跳过可选的空参数
-      if (!rawValue) {
-        continue;
-      }
-
-      // 类型转换
-      const converted = this._convertType(rawValue, paramConfig.type);
-      if (converted === null) {
-        errors.push(`Invalid type for parameter "${key}": expected ${paramConfig.type}`);
-        continue;
-      }
-
-      // 自定义验证
-      if (paramConfig.validate && !paramConfig.validate(converted)) {
-        errors.push(`Validation failed for parameter: ${key}`);
-        continue;
-      }
-
-      params[key] = converted;
     }
 
     return { params, errors };
+  }
+
+  private _parsePathParam(
+    key: string,
+    rawValue: string | undefined,
+    paramConfig: RouteParamConfig
+  ): ParsedPathParam {
+    if (paramConfig.required && !rawValue) {
+      return { status: 'error', error: `Missing required parameter: ${key}` };
+    }
+
+    if (!rawValue && paramConfig.default !== undefined) {
+      return { status: 'set', value: paramConfig.default };
+    }
+
+    if (!rawValue) {
+      return { status: 'skip' };
+    }
+
+    const converted = this._convertType(rawValue, paramConfig.type);
+    if (converted === null) {
+      return { status: 'error', error: `Invalid type for parameter "${key}": expected ${paramConfig.type}` };
+    }
+
+    if (paramConfig.validate && !paramConfig.validate(converted)) {
+      return { status: 'error', error: `Validation failed for parameter: ${key}` };
+    }
+
+    return { status: 'set', value: converted };
   }
 
   /**

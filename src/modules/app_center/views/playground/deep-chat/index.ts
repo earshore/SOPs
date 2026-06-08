@@ -68,6 +68,17 @@ interface PlaygroundThreadStore {
   threads: PlaygroundThread[];
 }
 
+interface PlaygroundRequestModelConfig {
+  config: LLMProviderConfig | null;
+  model: string;
+}
+
+interface PlaygroundRequestMessages {
+  requestMessages: ChatMessage[];
+  conversationMessages: ChatMessage[];
+  messages: ChatMessage[];
+}
+
 const THREAD_STORAGE_KEY = 'playground_deep_chat_threads_v1';
 const MAX_THREAD_COUNT = 30;
 const MESSAGE_TOOLBAR_CLASS = 'playground-message-toolbar';
@@ -438,6 +449,10 @@ async function refreshLLMConfig(container: HTMLElement): Promise<void> {
     return;
   }
 
+  renderLLMConfigState(statusEl, modelSelect);
+}
+
+function renderLLMConfigState(statusEl: HTMLElement, modelSelect: HTMLSelectElement): void {
   modelSelect.replaceChildren();
 
   if (!currentConfig || !currentConfig.apiKey || !selectedModel) {
@@ -467,6 +482,15 @@ function initDeepChat(container: HTMLElement): void {
   }
 
   const activeThread = getActiveThread();
+  configureDeepChatBase(chat, activeThread);
+  configureDeepChatStyles(chat);
+  configureDeepChatConnection(chat, container);
+  chat.onRender?.();
+  setupMessageToolbars(chat);
+  setConversationActive(container, activeThread.messages.length > 0);
+}
+
+function configureDeepChatBase(chat: DeepChatElement, activeThread: PlaygroundThread): void {
   chat.history = activeThread.messages;
   chat.stream = true;
   chat.auxiliaryStyle = DEEP_CHAT_AUXILIARY_STYLE;
@@ -476,6 +500,9 @@ function initDeepChat(container: HTMLElement): void {
   chat.errorMessages = {
     displayServiceErrorMessages: true,
   };
+}
+
+function configureDeepChatStyles(chat: DeepChatElement): void {
   chat.chatStyle = {
     width: '100%',
     height: '100%',
@@ -562,15 +589,15 @@ function initDeepChat(container: HTMLElement): void {
       },
     },
   };
+}
+
+function configureDeepChatConnection(chat: DeepChatElement, container: HTMLElement): void {
   chat.connect = {
     stream: true,
     handler: (body, signals) => {
       void handlePlaygroundRequest(container, body, signals);
     },
   };
-  chat.onRender?.();
-  setupMessageToolbars(chat);
-  setConversationActive(container, activeThread.messages.length > 0);
 }
 
 function bindControls(container: HTMLElement): void {
@@ -666,8 +693,7 @@ async function handlePlaygroundRequest(
   let requestController: AbortController | null = null;
 
   try {
-    const config = currentConfig || await StorageService.getLLMConfigWithKey();
-    const model = selectedModel || config?.model || getFirstModel(config);
+    const { config, model } = await getPlaygroundRequestModelConfig();
 
     if (!config || !config.apiKey || !model) {
       await signals.onResponse?.({ error: '请先在系统设置中配置可用的 LLM 模型。' });
@@ -675,12 +701,7 @@ async function handlePlaygroundRequest(
       return;
     }
 
-    const requestMessages = normalizeChatMessages(body);
-    const conversationMessages = mergeThreadHistoryWithRequest(
-      getActiveThread().messages,
-      requestMessages
-    );
-    const messages = withSessionSystemPrompt(conversationMessages);
+    const { requestMessages, conversationMessages, messages } = createPlaygroundRequestMessages(body);
     if (requestMessages.length === 0) {
       await signals.onResponse?.({ error: '请输入要发送的内容。' });
       signals.onClose?.();
@@ -689,41 +710,12 @@ async function handlePlaygroundRequest(
 
     setConversationActive(container, true);
     signals.onOpen?.();
-    const controller = new AbortController();
-    requestController = controller;
-    if (signals.stopClicked) {
-      signals.stopClicked.listener = () => controller.abort();
-    }
-    let streamedText = '';
-
-    const finalText = await callLLM(
-      messages,
-      config.provider,
-      config.endpoint,
-      config.apiKey,
-      model,
-      {
-        temperature: sessionTemperature,
-        retries: 0,
-        signal: controller.signal,
-        stream: true,
-        onStreamUpdate: (update) => {
-          streamedText += update.delta;
-          if (update.delta) {
-            void signals.onResponse?.({ text: update.delta });
-          }
-        },
-      }
-    );
-
-    if (!streamedText && finalText) {
-      await signals.onResponse?.({ text: finalText });
-    }
+    requestController = createRequestController(signals);
 
     saveThreadMessages(
       container,
       conversationMessages,
-      (finalText || streamedText).trim()
+      await callPlaygroundLLM(messages, config, model, signals, requestController)
     );
   } catch (error) {
     if (requestController?.signal.aborted) {
@@ -736,6 +728,70 @@ async function handlePlaygroundRequest(
   } finally {
     signals.onClose?.();
   }
+}
+
+async function getPlaygroundRequestModelConfig(): Promise<PlaygroundRequestModelConfig> {
+  const config = currentConfig || await StorageService.getLLMConfigWithKey();
+  const model = selectedModel || config?.model || getFirstModel(config);
+  return { config, model };
+}
+
+function createPlaygroundRequestMessages(
+  body: DeepChatRequestBody | DeepChatMessage[],
+): PlaygroundRequestMessages {
+  const requestMessages = normalizeChatMessages(body);
+  const conversationMessages = mergeThreadHistoryWithRequest(
+    getActiveThread().messages,
+    requestMessages
+  );
+  return {
+    requestMessages,
+    conversationMessages,
+    messages: withSessionSystemPrompt(conversationMessages),
+  };
+}
+
+function createRequestController(signals: DeepChatSignals): AbortController {
+  const controller = new AbortController();
+  if (signals.stopClicked) {
+    signals.stopClicked.listener = () => controller.abort();
+  }
+  return controller;
+}
+
+async function callPlaygroundLLM(
+  messages: ChatMessage[],
+  config: LLMProviderConfig,
+  model: string,
+  signals: DeepChatSignals,
+  controller: AbortController,
+): Promise<string> {
+  let streamedText = '';
+  const finalText = await callLLM(
+    messages,
+    config.provider,
+    config.endpoint,
+    config.apiKey,
+    model,
+    {
+      temperature: sessionTemperature,
+      retries: 0,
+      signal: controller.signal,
+      stream: true,
+      onStreamUpdate: (update) => {
+        streamedText += update.delta;
+        if (update.delta) {
+          void signals.onResponse?.({ text: update.delta });
+        }
+      },
+    }
+  );
+
+  if (!streamedText && finalText) {
+    await signals.onResponse?.({ text: finalText });
+  }
+
+  return (finalText || streamedText).trim();
 }
 
 function getChat(container: HTMLElement): DeepChatElement | null {

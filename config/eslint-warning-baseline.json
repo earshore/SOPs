@@ -1,14 +1,8 @@
 {
   "version": 1,
   "command": "node node_modules/eslint/bin/eslint.js src --ignore-pattern **/*.test.ts --ignore-pattern **/*.test.tsx --ignore-pattern **/*.spec.ts --ignore-pattern **/*.spec.tsx --format json",
-  "totalWarnings": 102,
+  "totalWarnings": 63,
   "warnings": [
-    {
-      "filePath": "src/common/components/SkeletonLoader.ts",
-      "ruleId": "complexity",
-      "message": "Static method 'createSkeleton' has a complexity of 14. Maximum allowed is 10.",
-      "count": 1
-    },
     {
       "filePath": "src/common/errors/AppError.ts",
       "ruleId": "@typescript-eslint/max-params",
@@ -16,33 +10,9 @@
       "count": 2
     },
     {
-      "filePath": "src/common/errors/GlobalErrorHandler.ts",
-      "ruleId": "complexity",
-      "message": "Method 'logError' has a complexity of 11. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
       "filePath": "src/common/errors/index.ts",
       "ruleId": "@typescript-eslint/max-params",
       "message": "Function 'handleApiError' has too many parameters (6). Maximum allowed is 5.",
-      "count": 1
-    },
-    {
-      "filePath": "src/common/infrastructure/AlpineRegistry.ts",
-      "ruleId": "complexity",
-      "message": "Method 'log' has a complexity of 14. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/common/router/initRouter.ts",
-      "ruleId": "complexity",
-      "message": "Function 'initRouter' has a complexity of 12. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/common/router/initRouter.ts",
-      "ruleId": "max-lines-per-function",
-      "message": "Function 'initRouter' has too many lines (128). Maximum allowed is 100.",
       "count": 1
     },
     {
@@ -64,24 +34,6 @@
       "count": 1
     },
     {
-      "filePath": "src/common/router/navigo/ParamParser.ts",
-      "ruleId": "complexity",
-      "message": "Method 'parsePathParams' has a complexity of 12. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/common/utils/validation.ts",
-      "ruleId": "complexity",
-      "message": "Function 'validateString' has a complexity of 19. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/components/modal/AppModal.ts",
-      "ruleId": "max-lines-per-function",
-      "message": "Method 'render' has too many lines (260). Maximum allowed is 100.",
-      "count": 1
-    },
-    {
       "filePath": "src/components/settings/systemSettings.ts",
       "ruleId": "complexity",
       "message": "Async method 'loadProviderConfig' has a complexity of 26. Maximum allowed is 10.",
@@ -91,12 +43,6 @@
       "filePath": "src/components/settings/systemSettings.ts",
       "ruleId": "max-lines-per-function",
       "message": "Arrow function has too many lines (465). Maximum allowed is 100.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/amz_hub/views/practice/marketing_calendar/index.ts",
-      "ruleId": "complexity",
-      "message": "Arrow function has a complexity of 24. Maximum allowed is 10.",
       "count": 1
     },
     {
@@ -140,18 +86,6 @@
       "ruleId": "max-lines-per-function",
       "message": "Function 'createPerformanceSettingsPanel' has too many lines (153). Maximum allowed is 100.",
       "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/ai_analysis/prompts/analysisPrompts.ts",
-      "ruleId": "complexity",
-      "message": "Function 'generateBatchAnalysisPrompt' has a complexity of 12. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/ai_analysis/prompts/analysisPrompts.ts",
-      "ruleId": "max-lines-per-function",
-      "message": "Function 'generateAnalysisPrompt' has too many lines (116). Maximum allowed is 100.",
-      "count": 2
     },
     {
       "filePath": "src/modules/app_center/views/master_analysis/ai_analysis/services/aiAnalysisService.ts",
@@ -202,12 +136,6 @@
       "count": 2
     },
     {
-      "filePath": "src/modules/app_center/views/master_analysis/ai_analysis/utils/dataTransformers.ts",
-      "ruleId": "complexity",
-      "message": "Function 'convertScraperDataToProduct' has a complexity of 16. Maximum allowed is 10.",
-      "count": 2
-    },
-    {
       "filePath": "src/modules/app_center/views/master_analysis/promptlab/components/previewExtractor.ts",
       "ruleId": "complexity",
       "message": "Function 'extractPreviewText' has a complexity of 59. Maximum allowed is 10.",
@@ -223,30 +151,6 @@
       "filePath": "src/modules/app_center/views/master_analysis/promptlab/components/PromptlabPanel.ts",
       "ruleId": "max-lines-per-function",
       "message": "Function 'createPromptlabPanel' has too many lines (492). Maximum allowed is 100.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/promptlab/components/reportRenderer.ts",
-      "ruleId": "complexity",
-      "message": "Function 'autoSelectMarket' has a complexity of 13. Maximum allowed is 10.",
-      "count": 3
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/promptlab/components/reportRenderer.ts",
-      "ruleId": "max-lines-per-function",
-      "message": "Function 'renderNewFormatModules' has too many lines (130). Maximum allowed is 100.",
-      "count": 2
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/scraper/components/DataPreview.ts",
-      "ruleId": "complexity",
-      "message": "Method 'renderDataPanel' has a complexity of 13. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/scraper/components/HistoryPanel.ts",
-      "ruleId": "complexity",
-      "message": "Method 'loadHistoryItem' has a complexity of 19. Maximum allowed is 10.",
       "count": 1
     },
     {
@@ -270,13 +174,7 @@
     {
       "filePath": "src/modules/app_center/views/master_analysis/scraper/handlers/importHandler.ts",
       "ruleId": "complexity",
-      "message": "Arrow function has a complexity of 11. Maximum allowed is 10.",
-      "count": 3
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/scraper/handlers/importHandler.ts",
-      "ruleId": "max-lines-per-function",
-      "message": "Async function 'handleImportFiles' has too many lines (156). Maximum allowed is 100.",
+      "message": "Async function 'handleImportFiles' has a complexity of 21. Maximum allowed is 10.",
       "count": 1
     },
     {
@@ -296,12 +194,6 @@
       "ruleId": "max-lines-per-function",
       "message": "Function 'renderProductCard' has too many lines (119). Maximum allowed is 100.",
       "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/scraper/utils/validators.ts",
-      "ruleId": "complexity",
-      "message": "Function 'validateMetadata' has a complexity of 13. Maximum allowed is 10.",
-      "count": 3
     },
     {
       "filePath": "src/modules/app_center/views/master_analysis/services/adapters/CompetitorReportAdapter.ts",
@@ -328,18 +220,6 @@
       "count": 2
     },
     {
-      "filePath": "src/modules/app_center/views/master_analysis/services/historyService.ts",
-      "ruleId": "complexity",
-      "message": "Method 'save' has a complexity of 13. Maximum allowed is 10.",
-      "count": 2
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/services/parserService.ts",
-      "ruleId": "complexity",
-      "message": "Arrow function has a complexity of 15. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
       "filePath": "src/modules/app_center/views/master_analysis/services/scraperService.ts",
       "ruleId": "complexity",
       "message": "Async function 'fetchWithProxy' has a complexity of 21. Maximum allowed is 10.",
@@ -349,36 +229,6 @@
       "filePath": "src/modules/app_center/views/master_analysis/services/scraperService.ts",
       "ruleId": "max-lines-per-function",
       "message": "Async function 'scrapeAsin' has too many lines (102). Maximum allowed is 100.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/playground/deep-chat/index.ts",
-      "ruleId": "complexity",
-      "message": "Async function 'refreshLLMConfig' has a complexity of 11. Maximum allowed is 10.",
-      "count": 2
-    },
-    {
-      "filePath": "src/modules/app_center/views/playground/deep-chat/index.ts",
-      "ruleId": "max-lines-per-function",
-      "message": "Function 'initDeepChat' has too many lines (111). Maximum allowed is 100.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/more/views/explore/prompts/index.ts",
-      "ruleId": "complexity",
-      "message": "Function 'handleModuleClick' has a complexity of 14. Maximum allowed is 10.",
-      "count": 2
-    },
-    {
-      "filePath": "src/modules/sops/views/growth/restricted_words/restrictedWordsHandler.ts",
-      "ruleId": "max-lines-per-function",
-      "message": "Function 'renderResults' has too many lines (106). Maximum allowed is 100.",
-      "count": 2
-    },
-    {
-      "filePath": "src/services/errorService.ts",
-      "ruleId": "complexity",
-      "message": "Method 'classify' has a complexity of 21. Maximum allowed is 10.",
       "count": 1
     },
     {
@@ -421,12 +271,6 @@
       "filePath": "src/services/llmServiceWithTimeout.ts",
       "ruleId": "@typescript-eslint/max-params",
       "message": "Async function 'callLLMWithTimeout' has too many parameters (6). Maximum allowed is 5.",
-      "count": 1
-    },
-    {
-      "filePath": "src/services/monitoringService.ts",
-      "ruleId": "complexity",
-      "message": "Async method 'init' has a complexity of 11. Maximum allowed is 10.",
       "count": 1
     },
     {
