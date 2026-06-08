@@ -49,6 +49,7 @@ const mocks = vi.hoisted(() => ({
       <select id="ppc-report-type">
         <option value="auto">自动识别</option>
         <option value="search_term">店铺搜索广告报告</option>
+        <option value="erp_search_term">ERP 广告搜索词报表</option>
         <option value="erp_campaign">ERP 广告活动报表</option>
       </select>
       <textarea id="ppc-paste-input"></textarea>
@@ -132,6 +133,12 @@ function createDeferred<T>(): { promise: Promise<T>; resolve: (value: T) => void
   return { promise, resolve, reject };
 }
 
+async function loadSampleAndAnalyze(container: HTMLElement): Promise<void> {
+  container.querySelector<HTMLButtonElement>('#ppc-btn-sample')?.click();
+  container.querySelector<HTMLButtonElement>('#ppc-btn-parse')?.click();
+  await flushAnalysis();
+}
+
 describe('PPC 搜索词分析器 UI 行为', () => {
   let container: HTMLElement;
   let anchorClick: ReturnType<typeof vi.spyOn>;
@@ -185,8 +192,7 @@ describe('PPC 搜索词分析器 UI 行为', () => {
   });
 
   it('加载样例后可调用模型、筛选并导出当前筛选', async () => {
-    container.querySelector<HTMLButtonElement>('#ppc-btn-sample')?.click();
-    await flushAnalysis();
+    await loadSampleAndAnalyze(container);
     container.querySelector<HTMLButtonElement>('[data-filter="scale_budget"]')?.click();
     container.querySelector<HTMLButtonElement>('#ppc-export-current')?.click();
 
@@ -199,8 +205,7 @@ describe('PPC 搜索词分析器 UI 行为', () => {
   });
 
   it('清空时重置结果和筛选状态', async () => {
-    container.querySelector<HTMLButtonElement>('#ppc-btn-sample')?.click();
-    await flushAnalysis();
+    await loadSampleAndAnalyze(container);
     container.querySelector<HTMLButtonElement>('[data-filter="scale_budget"]')?.click();
     container.querySelector<HTMLButtonElement>('#ppc-btn-clear')?.click();
 
@@ -211,8 +216,7 @@ describe('PPC 搜索词分析器 UI 行为', () => {
   });
 
   it('支持动作清单搜索并导出当前搜索结果', async () => {
-    container.querySelector<HTMLButtonElement>('#ppc-btn-sample')?.click();
-    await flushAnalysis();
+    await loadSampleAndAnalyze(container);
 
     const search = container.querySelector<HTMLInputElement>('#ppc-action-search');
     if (search) {
@@ -231,8 +235,7 @@ describe('PPC 搜索词分析器 UI 行为', () => {
   });
 
   it('剪贴板不可用时提示复制失败', async () => {
-    container.querySelector<HTMLButtonElement>('#ppc-btn-sample')?.click();
-    await flushAnalysis();
+    await loadSampleAndAnalyze(container);
     container.querySelector<HTMLButtonElement>('#ppc-copy-summary')?.click();
     await new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -240,6 +243,43 @@ describe('PPC 搜索词分析器 UI 行为', () => {
       type: 'error',
       description: '当前浏览器没有开放剪贴板写入权限',
     });
+  });
+
+  it('导入或加载数据后等待用户主动点击分析', async () => {
+    container.querySelector<HTMLButtonElement>('#ppc-btn-sample')?.click();
+    await flushAnalysis();
+
+    expect(mocks.analyzeWithAgent).not.toHaveBeenCalled();
+    expect(container.querySelector('#ppc-stat-rows')?.textContent).toBe('0');
+    expect(container.querySelector('#ppc-mapping-status')?.textContent).toContain('请点击“分析当前数据”');
+
+    container.querySelector<HTMLButtonElement>('#ppc-btn-parse')?.click();
+    await flushAnalysis();
+
+    expect(mocks.analyzeWithAgent).toHaveBeenCalled();
+    expect(container.querySelector('#ppc-stat-rows')?.textContent).toBe('10');
+  });
+
+  it('选择报表文件后只导入数据，不自动分析', async () => {
+    const csv = 'Search Term,Clicks,Spend,Sales,Orders\nmanual import term,12,20,0,0';
+    const file = new File([csv], 'manual-import.csv', { type: 'text/csv' });
+    Object.defineProperty(file, 'text', { configurable: true, value: () => Promise.resolve(csv) });
+    const input = container.querySelector<HTMLInputElement>('#ppc-file-input');
+    Object.defineProperty(input, 'files', { configurable: true, value: [file] });
+
+    input?.dispatchEvent(new Event('change', { bubbles: true }));
+    await flushAnalysis();
+
+    expect(container.querySelector<HTMLTextAreaElement>('#ppc-paste-input')?.value).toBe(csv);
+    expect(container.querySelector('#ppc-file-name')?.textContent).toContain('manual-import.csv');
+    expect(mocks.analyzeWithAgent).not.toHaveBeenCalled();
+    expect(container.querySelector('#ppc-stat-rows')?.textContent).toBe('0');
+
+    container.querySelector<HTMLButtonElement>('#ppc-btn-parse')?.click();
+    await flushAnalysis();
+
+    expect(mocks.analyzeWithAgent).toHaveBeenCalled();
+    expect(container.querySelector('#ppc-stat-rows')?.textContent).toBe('1');
   });
 
   it('动作清单先展示本地初判，再增量展示 Agent 复核结果', async () => {
@@ -251,6 +291,7 @@ describe('PPC 搜索词分析器 UI 行为', () => {
     });
 
     container.querySelector<HTMLButtonElement>('#ppc-btn-sample')?.click();
+    container.querySelector<HTMLButtonElement>('#ppc-btn-parse')?.click();
 
     expect(container.querySelector('#ppc-stat-rows')?.textContent).toBe('10');
     expect(container.querySelector('#ppc-result-count')?.textContent).toBe('共 10 行，当前筛选 10 行。');
@@ -308,6 +349,7 @@ describe('PPC 搜索词分析器 UI 行为', () => {
     mocks.analyzeWithAgent.mockRejectedValueOnce(new Error('LLM unavailable'));
 
     container.querySelector<HTMLButtonElement>('#ppc-btn-sample')?.click();
+    container.querySelector<HTMLButtonElement>('#ppc-btn-parse')?.click();
     await flushAnalysis();
 
     expect(container.querySelector('#ppc-stat-rows')?.textContent).toBe('10');
@@ -324,6 +366,7 @@ describe('PPC 搜索词分析器 UI 行为', () => {
     }
 
     container.querySelector<HTMLButtonElement>('#ppc-btn-sample')?.click();
+    container.querySelector<HTMLButtonElement>('#ppc-btn-parse')?.click();
     await flushAnalysis();
 
     expect(container.querySelector('#ppc-stat-rows')?.textContent).toBe('10');
@@ -346,8 +389,7 @@ describe('PPC 搜索词分析器 UI 行为', () => {
     if (category) category.value = 'Dog Coats';
     if (listing) listing.value = 'Waterproof winter dog coat with reflective strips.';
 
-    container.querySelector<HTMLButtonElement>('#ppc-btn-sample')?.click();
-    await flushAnalysis();
+    await loadSampleAndAnalyze(container);
 
     expect(mocks.analyzeWithAgent).toHaveBeenCalledWith(expect.objectContaining({
       context: {

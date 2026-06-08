@@ -124,10 +124,12 @@ const ACTION_LABELS: Record<ActionType, string> = {
 };
 const REPORT_LABELS: Record<ReportType, string> = {
   search_term: '店铺搜索广告 / 商品推广搜索词报告',
+  erp_search_term: 'ERP 广告搜索词报表',
   erp_campaign: 'ERP 广告活动报表',
 };
 const REPORT_FILTERS: Record<ReportType, ActionType[]> = {
   search_term: ['negative_exact', 'harvest_exact', 'scale_budget', 'bid_down', 'listing_term', 'observe'],
+  erp_search_term: ['negative_exact', 'harvest_exact', 'scale_budget', 'bid_down', 'listing_term', 'observe'],
   erp_campaign: ['campaign_fix_status', 'campaign_pause', 'campaign_scale', 'campaign_bid_down', 'campaign_structure', 'observe'],
 };
 const ACTION_ICONS: Record<ActionType, string> = {
@@ -184,13 +186,14 @@ const CLASSIFICATION_RULES: ClassificationRule[] = [
 ];
 
 const REQUIRED_FIELDS: MappedColumnKey[] = ['searchTerm', 'clicks', 'spend', 'sales', 'orders'];
+const ERP_SEARCH_TERM_REQUIRED_FIELDS: MappedColumnKey[] = ['shop', 'searchTerm', 'campaign', 'adGroup', 'clicks', 'spend', 'sales', 'orders'];
 const ERP_CAMPAIGN_REQUIRED_FIELDS: MappedColumnKey[] = ['shop', 'campaign', 'clicks', 'spend', 'sales', 'orders'];
 const COLUMN_ALIASES: Record<MappedColumnKey, string[]> = {
   shop: ['店铺名称', '店铺', 'store', 'shop', 'account', 'account name'],
   status: ['有效状态', '状态', 'enabled status'],
   serviceStatus: ['服务状态', '投放状态', 'serving status', 'delivery status'],
-  campaign: ['campaign name', 'campaign name informational only', 'campaign', 'campaigns', '广告活动', '广告活动名称'],
-  adGroup: ['ad group name', 'ad group name informational only', 'ad group', 'adgroup', '广告组', '广告组名称'],
+  campaign: ['campaign name', 'campaign name informational only', 'campaign', 'campaigns', '广告活动', '广告活动名称', '所在广告活动'],
+  adGroup: ['ad group name', 'ad group name informational only', 'ad group', 'adgroup', '广告组', '广告组名称', '所在广告组'],
   bidStrategy: ['广告活动竞价策略', '竞价策略', 'bidding strategy'],
   dailyBudget: ['每日预算', '日预算', 'daily budget', 'budget'],
   adType: ['广告类型', 'ad type', 'campaign type'],
@@ -350,8 +353,9 @@ async function handleFileImport(container: HTMLElement): Promise<void> {
     const text = await readReportFile(file);
     const textarea = getTextarea(container, 'ppc-paste-input');
     if (textarea) textarea.value = text;
+    prepareImportedReport(container, text);
     setText(container, 'ppc-file-name', `已选择：${file.name}`);
-    await analyzeText(container, text);
+    setText(container, 'ppc-mapping-status', '报表已导入，请确认报表类型和阈值后点击“分析当前数据”。');
   } catch (error) {
     const message = error instanceof Error ? error.message : '文件读取失败';
     showToast('文件读取失败', { type: 'error', description: message });
@@ -400,8 +404,19 @@ async function analyzeTextarea(container: HTMLElement): Promise<void> {
 function loadSample(container: HTMLElement): void {
   const textarea = getTextarea(container, 'ppc-paste-input');
   if (textarea) textarea.value = SAMPLE_REPORT;
+  prepareImportedReport(container, SAMPLE_REPORT);
   setText(container, 'ppc-file-name', '已加载样例数据');
-  void analyzeText(container, SAMPLE_REPORT);
+  setText(container, 'ppc-mapping-status', '样例数据已加载，请点击“分析当前数据”开始分析。');
+}
+
+function prepareImportedReport(container: HTMLElement, text: string): void {
+  sourceText = text.trim();
+  analyzedRows = [];
+  activeFilter = 'all';
+  setActionSearchQuery(container, '');
+  activeReportType = inferReportTypeFromText(sourceText, readReportSelection(container));
+  updateReportControls(container, activeReportType);
+  updateResults(container, []);
 }
 
 function clearAnalyzer(container: HTMLElement): void {
@@ -448,7 +463,7 @@ async function analyzeText(container: HTMLElement, text: string): Promise<void> 
       localResult.mapping,
       localResult.totalRows,
       localResult.validRows,
-      localResult.reportType === 'search_term' ? '本地工具已生成初判，PPC Agent 正在复核候选...' : '活动级规则分析完成',
+      isSearchTermReportType(localResult.reportType) ? '本地工具已生成初判，PPC Agent 正在复核候选...' : '活动级规则分析完成',
     );
     updateResults(container, analyzedRows);
 
@@ -493,7 +508,7 @@ async function analyzeText(container: HTMLElement, text: string): Promise<void> 
       return;
     }
 
-    if (localResult?.reportType === 'search_term' && analyzedRows.length > 0) {
+    if (localResult && isSearchTermReportType(localResult.reportType) && analyzedRows.length > 0) {
       renderMappingStatus(container, localResult.mapping, localResult.totalRows, localResult.validRows, 'Agent 复核失败，当前展示本地初判结果');
     } else {
       analyzedRows = [];
@@ -576,24 +591,24 @@ export function analyzeReport(text: string, thresholds: Thresholds, selection: R
     return analyzeErpCampaignReport(report, thresholds);
   }
 
-  return analyzeSearchTermParsedReport(report, thresholds);
+  return analyzeSearchTermParsedReport(report, thresholds, reportType);
 }
 
 export function analyzeSearchTermReport(text: string, thresholds: Thresholds): AnalysisResult {
-  return analyzeSearchTermParsedReport(parseReport(text.trim()), thresholds);
+  return analyzeSearchTermParsedReport(parseReport(text.trim()), thresholds, 'search_term');
 }
 
-function analyzeSearchTermParsedReport(report: ParsedReport, thresholds: Thresholds): AnalysisResult {
-  const mapping = mapColumns(report.headers, 'search_term');
+function analyzeSearchTermParsedReport(report: ParsedReport, thresholds: Thresholds, reportType: Extract<ReportType, 'search_term' | 'erp_search_term'>): AnalysisResult {
+  const mapping = mapColumns(report.headers, reportType);
   const rows = report.records
-    .map((record, index) => analyzeRecord(record, mapping, thresholds, index))
+    .map((record, index) => analyzeRecord(record, mapping, thresholds, index, reportType))
     .filter((row): row is AnalyzedRow => row !== null)
     .sort((a, b) => b.priority - a.priority || b.spend - a.spend);
 
   return {
     rows,
     mapping,
-    reportType: 'search_term',
+    reportType,
     totalRows: report.records.length,
     validRows: rows.length,
   };
@@ -619,13 +634,23 @@ function resolveReportType(headers: string[], selection: ReportSelection): Repor
   if (selection !== 'auto') return selection;
 
   const normalizedHeaders = headers.map(normalizeHeader);
+  const hasErpSearchTermShape = hasAnyHeader(normalizedHeaders, COLUMN_ALIASES.shop)
+    && hasAnyHeader(normalizedHeaders, COLUMN_ALIASES.searchTerm)
+    && hasAnyHeader(normalizedHeaders, COLUMN_ALIASES.campaign)
+    && hasAnyHeader(normalizedHeaders, COLUMN_ALIASES.adGroup)
+    && hasAnyHeader(normalizedHeaders, COLUMN_ALIASES.acos);
   const hasErpCampaignShape = hasAnyHeader(normalizedHeaders, COLUMN_ALIASES.shop)
     && hasAnyHeader(normalizedHeaders, COLUMN_ALIASES.serviceStatus)
     && hasAnyHeader(normalizedHeaders, COLUMN_ALIASES.acos)
     && hasAnyHeader(normalizedHeaders, COLUMN_ALIASES.dailyBudget);
 
+  if (hasErpSearchTermShape) return 'erp_search_term';
   if (hasErpCampaignShape) return 'erp_campaign';
   return 'search_term';
+}
+
+function isSearchTermReportType(reportType: ReportType): boolean {
+  return reportType === 'search_term' || reportType === 'erp_search_term';
 }
 
 function hasAnyHeader(normalizedHeaders: string[], aliases: string[]): boolean {
@@ -724,13 +749,19 @@ function mapColumns(headers: string[], reportType: ReportType): ColumnMapping {
     if (match) found[key as MappedColumnKey] = match;
   });
 
-  const requiredFields = reportType === 'erp_campaign' ? ERP_CAMPAIGN_REQUIRED_FIELDS : REQUIRED_FIELDS;
+  const requiredFields = getRequiredFields(reportType);
   const missing = requiredFields.filter((key) => !found[key]);
   if (missing.length > 0) {
     throw new Error(`缺少必要列：${missing.map((key) => labelColumn(key)).join('、')}`);
   }
 
   return { reportType, found, missing };
+}
+
+function getRequiredFields(reportType: ReportType): MappedColumnKey[] {
+  if (reportType === 'erp_campaign') return ERP_CAMPAIGN_REQUIRED_FIELDS;
+  if (reportType === 'erp_search_term') return ERP_SEARCH_TERM_REQUIRED_FIELDS;
+  return REQUIRED_FIELDS;
 }
 
 function normalizeHeader(header: string): string {
@@ -742,10 +773,12 @@ function analyzeRecord(
   mapping: ColumnMapping,
   thresholds: Thresholds,
   index: number,
+  reportType: Extract<ReportType, 'search_term' | 'erp_search_term'>,
 ): AnalyzedRow | null {
   const searchTerm = readField(record, mapping, 'searchTerm') || readField(record, mapping, 'keyword');
   if (!searchTerm) return null;
 
+  const store = readField(record, mapping, 'shop');
   const impressions = parseMetric(readField(record, mapping, 'impressions'));
   const clicks = parseMetric(readField(record, mapping, 'clicks'));
   const spend = parseMetric(readField(record, mapping, 'spend'));
@@ -759,7 +792,7 @@ function analyzeRecord(
 
   return {
     id: `${index}-${searchTerm}`,
-    reportType: 'search_term',
+    reportType,
     campaign: readField(record, mapping, 'campaign'),
     adGroup: readField(record, mapping, 'adGroup'),
     searchTerm,
@@ -778,6 +811,7 @@ function analyzeRecord(
     actionLabel: decision.label,
     reason: decision.reason,
     priority: decision.priority,
+    store,
   };
 }
 
@@ -1187,6 +1221,10 @@ function getObjectMeta(row: AnalyzedRow): string {
     return [row.store, row.targetingType, row.serviceStatus].filter(Boolean).join(' / ') || '-';
   }
 
+  if (row.reportType === 'erp_search_term') {
+    return [row.store, row.campaign, row.adGroup, row.keyword].filter(Boolean).join(' / ') || '-';
+  }
+
   return [row.campaign, row.adGroup, row.keyword].filter(Boolean).join(' / ') || '-';
 }
 
@@ -1304,6 +1342,10 @@ export function buildActionCsv(rows: AnalyzedRow[]): string {
     return buildCampaignActionCsv(rows);
   }
 
+  if (rows[0]?.reportType === 'erp_search_term') {
+    return buildErpSearchTermActionCsv(rows);
+  }
+
   const headers = ['Action', 'Search Term', 'Campaign', 'Ad Group', 'Keyword', 'Spend', 'Sales', 'Orders', 'ACOS', 'Reason'];
   const lines = rows.map((row) => [
     row.actionLabel,
@@ -1311,6 +1353,25 @@ export function buildActionCsv(rows: AnalyzedRow[]): string {
     row.campaign,
     row.adGroup,
     row.keyword,
+    row.spend.toFixed(2),
+    row.sales.toFixed(2),
+    String(row.orders),
+    row.sales > 0 ? row.acos.toFixed(2) : '',
+    row.reason,
+  ]);
+  return [headers, ...lines].map((line) => line.map(escapeCsv).join(',')).join('\n');
+}
+
+function buildErpSearchTermActionCsv(rows: AnalyzedRow[]): string {
+  const headers = ['Action', 'Store', 'Search Term', 'Campaign', 'Ad Group', 'Targeting', 'Match Type', 'Spend', 'Sales', 'Orders', 'ACOS', 'Reason'];
+  const lines = rows.map((row) => [
+    row.actionLabel,
+    row.store || '',
+    row.searchTerm,
+    row.campaign,
+    row.adGroup,
+    row.keyword,
+    row.matchType,
     row.spend.toFixed(2),
     row.sales.toFixed(2),
     String(row.orders),
@@ -1385,8 +1446,9 @@ export function buildSummaryText(rows: AnalyzedRow[]): string {
 
   const summary = summarize(rows);
   const count = (type: ActionType) => rows.filter((row) => row.action === type).length;
+  const title = rows[0]?.reportType === 'erp_search_term' ? 'ERP 广告搜索词周报摘要' : 'PPC 搜索词周报摘要';
   return [
-    `PPC 搜索词周报摘要 ${today()}`,
+    `${title} ${today()}`,
     `搜索词行数：${summary.rowCount}`,
     `花费：${formatCurrency(summary.spend)}，销售额：${formatCurrency(summary.sales)}，ACOS：${summary.sales > 0 ? formatPercent(summary.acos) : '-'}`,
     `否精准：${count('negative_exact')}，加精准：${count('harvest_exact')}，加预算：${count('scale_budget')}，降竞价：${count('bid_down')}，进词池：${count('listing_term')}`,
@@ -1496,12 +1558,17 @@ function handleReportSelectionChange(container: HTMLElement): void {
 }
 
 function inferCurrentReportType(): ReportType {
-  if (!sourceText) return 'search_term';
+  return inferReportTypeFromText(sourceText, 'auto', activeReportType);
+}
+
+function inferReportTypeFromText(text: string, selection: ReportSelection, fallback: ReportType = 'search_term'): ReportType {
+  if (selection !== 'auto') return selection;
+  if (!text) return fallback;
 
   try {
-    return resolveReportType(parseReport(sourceText).headers, 'auto');
+    return resolveReportType(parseReport(text).headers, 'auto');
   } catch {
-    return activeReportType;
+    return fallback;
   }
 }
 
@@ -1512,9 +1579,7 @@ function updateReportControls(container: HTMLElement, reportType: ReportType): v
 
   const textarea = getTextarea(container, 'ppc-paste-input');
   if (textarea) {
-    textarea.placeholder = reportType === 'erp_campaign'
-      ? '也可以直接粘贴 ERP 广告活动报表内容，首行需要包含列名。'
-      : '也可以直接粘贴 Search Term 报表内容，首行需要包含列名。';
+    textarea.placeholder = getReportPlaceholder(reportType);
   }
 
   if (reportType === 'erp_campaign') {
@@ -1525,6 +1590,18 @@ function updateReportControls(container: HTMLElement, reportType: ReportType): v
 
   setButtonContent(container, 'ppc-export-negative', 'fas fa-ban', '导出否词');
   setButtonContent(container, 'ppc-export-harvest', 'fas fa-bullseye', '导出加词');
+}
+
+function getReportPlaceholder(reportType: ReportType): string {
+  if (reportType === 'erp_campaign') {
+    return '也可以直接粘贴 ERP 广告活动报表内容，首行需要包含列名。';
+  }
+
+  if (reportType === 'erp_search_term') {
+    return '也可以直接粘贴 ERP 广告搜索词报表内容，首行需要包含列名。';
+  }
+
+  return '也可以直接粘贴 Search Term 报表内容，首行需要包含列名。';
 }
 
 function renderFilterButtons(container: HTMLElement, reportType: ReportType): void {
@@ -1563,7 +1640,7 @@ function getGrowthExportFilter(): FilterType {
 }
 
 function isReportSelection(value: unknown): value is ReportSelection {
-  return value === 'auto' || value === 'search_term' || value === 'erp_campaign';
+  return value === 'auto' || value === 'search_term' || value === 'erp_search_term' || value === 'erp_campaign';
 }
 
 function handleAnalysisSettingsChange(container: HTMLElement): void {

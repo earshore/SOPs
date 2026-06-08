@@ -12,7 +12,7 @@ export type ActionType =
   | 'observe';
 
 export type ReportSelection = 'auto' | ReportType;
-export type ReportType = 'search_term' | 'erp_campaign';
+export type ReportType = 'search_term' | 'erp_search_term' | 'erp_campaign';
 
 export interface Thresholds {
   targetAcos: number;

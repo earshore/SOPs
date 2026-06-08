@@ -227,6 +227,72 @@ describe('PPC 搜索词分析器', () => {
     expect(byTerm['einhorn haarreif kinder']?.action).toBe('scale_budget');
   });
 
+  it('自动识别 ERP 广告搜索词报表并保留店铺维度', async () => {
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.aoa_to_sheet([
+      [
+        '店铺名称',
+        '用户搜索词',
+        '用户搜索词翻译',
+        '投放',
+        '匹配类型',
+        '所在广告组',
+        '所在广告活动',
+        '广告花费',
+        '广告曝光量',
+        '广告点击量',
+        '广告订单量',
+        '广告销售额',
+        'ACoS',
+      ],
+      [
+        '3-WAZZM-DE',
+        'styropor flugzeuge für kinder',
+        '儿童聚苯乙烯泡沫塑料飞机',
+        'styropor flugzeuge für kinder',
+        '广泛匹配',
+        'B0C3GH8QKH',
+        'H- B0C3GH8QKH -滑翔机-手动',
+        20,
+        2780,
+        12,
+        0,
+        0,
+        0,
+      ],
+      [
+        '16-phxdance-DE',
+        'einhorn haarreif kinder',
+        '儿童独角兽发箍',
+        'einhorn haarreif für kinder',
+        '精确匹配',
+        'B09TZR4696',
+        'B09TZR4696 -独角兽-手动',
+        20,
+        1200,
+        20,
+        3,
+        120,
+        0.1667,
+      ],
+    ]);
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'sheet');
+
+    const reportText = await xlsxArrayBufferToDelimitedText(XLSX.write(workbook, { type: 'array', bookType: 'xlsx' }));
+    const result = analyzeReport(reportText, thresholds, 'auto');
+    const byTerm = Object.fromEntries(result.rows.map((row) => [row.searchTerm, row]));
+    const csv = buildActionCsv(result.rows);
+
+    expect(result.reportType).toBe('erp_search_term');
+    expect(result.validRows).toBe(2);
+    expect(byTerm['styropor flugzeuge für kinder']?.store).toBe('3-WAZZM-DE');
+    expect(byTerm['styropor flugzeuge für kinder']?.campaign).toBe('H- B0C3GH8QKH -滑翔机-手动');
+    expect(byTerm['styropor flugzeuge für kinder']?.action).toBe('negative_exact');
+    expect(byTerm['einhorn haarreif kinder']?.action).toBe('scale_budget');
+    expect(csv).toContain('Store,Search Term');
+    expect(csv).toContain('16-phxdance-DE');
+  });
+
   it('自动识别 ERP 广告活动报表并生成活动级动作', () => {
     const report = [
       [
