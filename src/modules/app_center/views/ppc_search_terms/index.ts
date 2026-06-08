@@ -102,7 +102,23 @@ interface ClassificationRule {
   matches: (metrics: RowMetrics, thresholds: Thresholds) => boolean;
 }
 
+interface CampaignClassificationRule {
+  type: ActionType;
+  priority: number;
+  matches: (metrics: CampaignMetrics, thresholds: Thresholds) => boolean;
+  reason: (metrics: CampaignMetrics) => string;
+}
+
 type RowMetrics = Pick<AnalyzedRow, 'impressions' | 'clicks' | 'spend' | 'sales' | 'orders' | 'ctr' | 'cvr' | 'acos'>;
+interface CampaignMetrics extends RowMetrics {
+  status: string;
+  serviceStatus: string;
+  roas: number;
+  ownSales: number;
+  otherSales: number;
+  dailyBudget: number;
+}
+
 type ParsedReport = ReturnType<typeof parseReport>;
 
 const STORAGE_KEY = 'ppc_search_terms_thresholds_v1';
@@ -182,6 +198,57 @@ const CLASSIFICATION_RULES: ClassificationRule[] = [
     reason: '曝光高但 CTR 低，优先检查主图、价格和相关性',
     priority: 30,
     matches: isLowCtrCandidate,
+  },
+];
+
+const CAMPAIGN_CLASSIFICATION_RULES: CampaignClassificationRule[] = [
+  {
+    type: 'campaign_fix_status',
+    priority: 95,
+    matches: hasInactiveCampaignStatus,
+    reason: (metrics) => `服务状态为“${metrics.serviceStatus}”，先处理账号/活动状态`,
+  },
+  {
+    type: 'campaign_fix_status',
+    priority: 82,
+    matches: hasCampaignBudgetWithoutExposure,
+    reason: () => '有日预算但 7 天无曝光，检查活动状态、竞价和投放资格',
+  },
+  {
+    type: 'campaign_pause',
+    priority: 90,
+    matches: isCampaignWasteWithoutOrders,
+    reason: (metrics) => `无订单且点击 ${metrics.clicks} / 花费 ${formatMetric(metrics.spend)} 已超过阈值，建议暂停或降预算并下钻搜索词`,
+  },
+  {
+    type: 'campaign_bid_down',
+    priority: 78,
+    matches: isCampaignBidDownCandidate,
+    reason: (metrics) => `有 ${metrics.orders} 单但 ACOS ${formatPercent(metrics.acos)} 偏高，先降竞价或控预算`,
+  },
+  {
+    type: 'campaign_scale',
+    priority: 82,
+    matches: isCampaignStrongScaleCandidate,
+    reason: (metrics) => `${metrics.orders} 单且 ACOS ${formatPercent(metrics.acos)} 明显优于目标，可提高预算或复制放量`,
+  },
+  {
+    type: 'campaign_structure',
+    priority: 66,
+    matches: hasCampaignOtherSalesLeakage,
+    reason: () => '其他产品销售额明显高于本广告产品，建议复盘广告结构和承接 ASIN',
+  },
+  {
+    type: 'campaign_structure',
+    priority: 55,
+    matches: isCampaignLowCtrCandidate,
+    reason: (metrics) => `曝光 ${metrics.impressions} 但 CTR ${formatPercent(metrics.ctr)} 偏低，检查主图、标题和投放相关性`,
+  },
+  {
+    type: 'campaign_scale',
+    priority: 62,
+    matches: isCampaignSteadyScaleCandidate,
+    reason: (metrics) => `${metrics.orders} 单且 ACOS ${formatPercent(metrics.acos)} 达标，可小幅加预算观察`,
   },
 ];
 
@@ -463,7 +530,7 @@ async function analyzeText(container: HTMLElement, text: string): Promise<void> 
       localResult.mapping,
       localResult.totalRows,
       localResult.validRows,
-      isSearchTermReportType(localResult.reportType) ? '本地工具已生成初判，PPC Agent 正在复核候选...' : '活动级规则分析完成',
+      getLocalAnalysisStatus(localResult.reportType),
     );
     updateResults(container, analyzedRows);
 
@@ -477,8 +544,9 @@ async function analyzeText(container: HTMLElement, text: string): Promise<void> 
       thresholds,
       context: settings.useContext ? settings.context : undefined,
       onProgress: (progress) => {
-        if (progress.decisions?.length && localResult) {
-          analyzedRows = applyPartialModelDecisions(localResult.rows, progress.decisions);
+        const progressDecisions = progress.decisions || [];
+        if (hasProgressDecisions(progressDecisions, localResult)) {
+          analyzedRows = applyPartialModelDecisions(localResult.rows, progressDecisions);
           updateResults(container, analyzedRows);
         }
 
@@ -500,15 +568,16 @@ async function analyzeText(container: HTMLElement, text: string): Promise<void> 
     const message = error instanceof Error ? error.message : '报表解析失败';
     const settings = readAnalysisSettings(container);
 
-    if (settings.allowLocalFallback && localResult) {
-      analyzedRows = localResult.rows;
-      renderMappingStatus(container, localResult.mapping, localResult.totalRows, localResult.validRows, '已使用本地规则降级');
+    const fallbackResult = getLocalFallbackResult(settings, localResult);
+    if (fallbackResult) {
+      analyzedRows = fallbackResult.rows;
+      renderMappingStatus(container, fallbackResult.mapping, fallbackResult.totalRows, fallbackResult.validRows, '已使用本地规则降级');
       updateResults(container, analyzedRows);
       showToast('模型分析失败，已使用本地规则', { type: 'warning', description: message });
       return;
     }
 
-    if (localResult && isSearchTermReportType(localResult.reportType) && analyzedRows.length > 0) {
+    if (hasVisibleSearchTermResult(localResult)) {
       renderMappingStatus(container, localResult.mapping, localResult.totalRows, localResult.validRows, 'Agent 复核失败，当前展示本地初判结果');
     } else {
       analyzedRows = [];
@@ -518,6 +587,24 @@ async function analyzeText(container: HTMLElement, text: string): Promise<void> 
   } finally {
     setAnalyzeButtonState(container, false);
   }
+}
+
+function getLocalAnalysisStatus(reportType: ReportType): string {
+  return isSearchTermReportType(reportType)
+    ? '本地工具已生成初判，PPC Agent 正在复核候选...'
+    : '活动级规则分析完成';
+}
+
+function hasProgressDecisions(decisions: PpcLlmDecision[], result: AnalysisResult | null): result is AnalysisResult {
+  return decisions.length > 0 && result !== null;
+}
+
+function getLocalFallbackResult(settings: AnalysisSettings, result: AnalysisResult | null): AnalysisResult | null {
+  return settings.allowLocalFallback ? result : null;
+}
+
+function hasVisibleSearchTermResult(result: AnalysisResult | null): result is AnalysisResult {
+  return result !== null && isSearchTermReportType(result.reportType) && analyzedRows.length > 0;
 }
 
 function applyModelDecisions(rows: AnalyzedRow[], decisions: PpcLlmDecision[], reviewedIds = new Set<string>()): AnalyzedRow[] {
@@ -634,19 +721,22 @@ function resolveReportType(headers: string[], selection: ReportSelection): Repor
   if (selection !== 'auto') return selection;
 
   const normalizedHeaders = headers.map(normalizeHeader);
-  const hasErpSearchTermShape = hasAnyHeader(normalizedHeaders, COLUMN_ALIASES.shop)
-    && hasAnyHeader(normalizedHeaders, COLUMN_ALIASES.searchTerm)
-    && hasAnyHeader(normalizedHeaders, COLUMN_ALIASES.campaign)
-    && hasAnyHeader(normalizedHeaders, COLUMN_ALIASES.adGroup)
-    && hasAnyHeader(normalizedHeaders, COLUMN_ALIASES.acos);
-  const hasErpCampaignShape = hasAnyHeader(normalizedHeaders, COLUMN_ALIASES.shop)
-    && hasAnyHeader(normalizedHeaders, COLUMN_ALIASES.serviceStatus)
-    && hasAnyHeader(normalizedHeaders, COLUMN_ALIASES.acos)
-    && hasAnyHeader(normalizedHeaders, COLUMN_ALIASES.dailyBudget);
 
-  if (hasErpSearchTermShape) return 'erp_search_term';
-  if (hasErpCampaignShape) return 'erp_campaign';
+  if (hasErpSearchTermHeaders(normalizedHeaders)) return 'erp_search_term';
+  if (hasErpCampaignHeaders(normalizedHeaders)) return 'erp_campaign';
   return 'search_term';
+}
+
+function hasErpSearchTermHeaders(normalizedHeaders: string[]): boolean {
+  return hasAllHeaders(normalizedHeaders, ['shop', 'searchTerm', 'campaign', 'adGroup', 'acos']);
+}
+
+function hasErpCampaignHeaders(normalizedHeaders: string[]): boolean {
+  return hasAllHeaders(normalizedHeaders, ['shop', 'serviceStatus', 'acos', 'dailyBudget']);
+}
+
+function hasAllHeaders(normalizedHeaders: string[], keys: MappedColumnKey[]): boolean {
+  return keys.every((key) => hasAnyHeader(normalizedHeaders, COLUMN_ALIASES[key]));
 }
 
 function isSearchTermReportType(reportType: ReportType): boolean {
@@ -891,49 +981,44 @@ function analyzeCampaignRecord(
   };
 }
 
-interface CampaignMetrics extends RowMetrics {
-  status: string;
-  serviceStatus: string;
-  roas: number;
-  ownSales: number;
-  otherSales: number;
-  dailyBudget: number;
+function classifyCampaign(metrics: CampaignMetrics, thresholds: Thresholds): ActionDecision {
+  const matchedRule = CAMPAIGN_CLASSIFICATION_RULES.find((rule) => rule.matches(metrics, thresholds));
+  if (!matchedRule) return decision('observe', '样本或效率未触发明确动作，继续观察', 10);
+  return decision(matchedRule.type, matchedRule.reason(metrics), matchedRule.priority);
 }
 
-function classifyCampaign(metrics: CampaignMetrics, thresholds: Thresholds): ActionDecision {
-  if (metrics.serviceStatus && metrics.serviceStatus !== '正在投放') {
-    return decision('campaign_fix_status', `服务状态为“${metrics.serviceStatus}”，先处理账号/活动状态`, 95);
-  }
+function hasInactiveCampaignStatus(metrics: CampaignMetrics): boolean {
+  return Boolean(metrics.serviceStatus) && metrics.serviceStatus !== '正在投放';
+}
 
-  if (metrics.impressions === 0 && metrics.dailyBudget > 0) {
-    return decision('campaign_fix_status', '有日预算但 7 天无曝光，检查活动状态、竞价和投放资格', 82);
-  }
+function hasCampaignBudgetWithoutExposure(metrics: CampaignMetrics): boolean {
+  return metrics.impressions === 0 && metrics.dailyBudget > 0;
+}
 
-  if (metrics.orders === 0 && (metrics.clicks >= thresholds.minClicksNoOrder || metrics.spend >= thresholds.minSpendNoOrder)) {
-    return decision('campaign_pause', `无订单且点击 ${metrics.clicks} / 花费 ${formatMetric(metrics.spend)} 已超过阈值，建议暂停或降预算并下钻搜索词`, 90);
-  }
+function isCampaignWasteWithoutOrders(metrics: CampaignMetrics, thresholds: Thresholds): boolean {
+  const exceedsClicks = metrics.clicks >= thresholds.minClicksNoOrder;
+  const exceedsSpend = metrics.spend >= thresholds.minSpendNoOrder;
+  return metrics.orders === 0 && (exceedsClicks || exceedsSpend);
+}
 
-  if (metrics.orders > 0 && metrics.acos >= thresholds.highAcos) {
-    return decision('campaign_bid_down', `有 ${metrics.orders} 单但 ACOS ${formatPercent(metrics.acos)} 偏高，先降竞价或控预算`, 78);
-  }
+function isCampaignBidDownCandidate(metrics: CampaignMetrics, thresholds: Thresholds): boolean {
+  return metrics.orders > 0 && metrics.acos >= thresholds.highAcos;
+}
 
-  if (metrics.orders >= thresholds.minOrdersHarvest && metrics.acos > 0 && metrics.acos <= thresholds.targetAcos * 0.65) {
-    return decision('campaign_scale', `${metrics.orders} 单且 ACOS ${formatPercent(metrics.acos)} 明显优于目标，可提高预算或复制放量`, 82);
-  }
+function isCampaignStrongScaleCandidate(metrics: CampaignMetrics, thresholds: Thresholds): boolean {
+  return metrics.orders >= thresholds.minOrdersHarvest && metrics.acos > 0 && metrics.acos <= thresholds.targetAcos * 0.65;
+}
 
-  if (metrics.ownSales > 0 && metrics.otherSales > metrics.ownSales * 1.5) {
-    return decision('campaign_structure', '其他产品销售额明显高于本广告产品，建议复盘广告结构和承接 ASIN', 66);
-  }
+function hasCampaignOtherSalesLeakage(metrics: CampaignMetrics): boolean {
+  return metrics.ownSales > 0 && metrics.otherSales > metrics.ownSales * 1.5;
+}
 
-  if (metrics.impressions >= 1000 && metrics.ctr < thresholds.minCtr) {
-    return decision('campaign_structure', `曝光 ${metrics.impressions} 但 CTR ${formatPercent(metrics.ctr)} 偏低，检查主图、标题和投放相关性`, 55);
-  }
+function isCampaignLowCtrCandidate(metrics: CampaignMetrics, thresholds: Thresholds): boolean {
+  return metrics.impressions >= 1000 && metrics.ctr < thresholds.minCtr;
+}
 
-  if (metrics.orders >= thresholds.minOrdersHarvest && metrics.acos <= thresholds.targetAcos) {
-    return decision('campaign_scale', `${metrics.orders} 单且 ACOS ${formatPercent(metrics.acos)} 达标，可小幅加预算观察`, 62);
-  }
-
-  return decision('observe', '样本或效率未触发明确动作，继续观察', 10);
+function isCampaignSteadyScaleCandidate(metrics: CampaignMetrics, thresholds: Thresholds): boolean {
+  return metrics.orders >= thresholds.minOrdersHarvest && metrics.acos <= thresholds.targetAcos;
 }
 
 function readOrCalculatePercentage(
