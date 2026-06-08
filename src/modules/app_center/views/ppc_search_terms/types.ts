@@ -4,7 +4,15 @@ export type ActionType =
   | 'scale_budget'
   | 'bid_down'
   | 'listing_term'
+  | 'campaign_fix_status'
+  | 'campaign_pause'
+  | 'campaign_scale'
+  | 'campaign_bid_down'
+  | 'campaign_structure'
   | 'observe';
+
+export type ReportSelection = 'auto' | ReportType;
+export type ReportType = 'search_term' | 'erp_campaign';
 
 export interface Thresholds {
   targetAcos: number;
@@ -17,6 +25,7 @@ export interface Thresholds {
 
 export interface AnalyzedRow {
   id: string;
+  reportType: ReportType;
   campaign: string;
   adGroup: string;
   searchTerm: string;
@@ -35,4 +44,11 @@ export interface AnalyzedRow {
   actionLabel: string;
   reason: string;
   priority: number;
+  store?: string;
+  serviceStatus?: string;
+  targetingType?: string;
+  dailyBudget?: number;
+  roas?: number;
+  ownSales?: number;
+  otherSales?: number;
 }

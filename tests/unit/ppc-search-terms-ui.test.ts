@@ -23,11 +23,17 @@ const mocks = vi.hoisted(() => ({
   template: `
     <div>
       <div id="ppc-stat-rows"></div>
+      <div id="ppc-stat-rows-label"></div>
       <div id="ppc-stat-spend"></div>
       <div id="ppc-stat-acos"></div>
       <div id="ppc-stat-actions"></div>
       <p id="ppc-file-name"></p>
       <p id="ppc-mapping-status"></p>
+      <select id="ppc-report-type">
+        <option value="auto">自动识别</option>
+        <option value="search_term">店铺搜索广告报告</option>
+        <option value="erp_campaign">ERP 广告活动报表</option>
+      </select>
       <textarea id="ppc-paste-input"></textarea>
       <input id="ppc-file-input" type="file" />
       <input id="ppc-target-acos" value="35" />
@@ -38,6 +44,8 @@ const mocks = vi.hoisted(() => ({
       <input id="ppc-min-ctr" value="0.35" />
       <input id="ppc-allow-local-fallback" type="checkbox" />
       <input id="ppc-use-context" type="checkbox" />
+      <button id="ppc-analysis-settings-toggle" type="button" aria-expanded="false"></button>
+      <div id="ppc-analysis-settings-body" class="hidden"></div>
       <div id="ppc-context-fields" class="hidden">
         <input id="ppc-context-asin" />
         <input id="ppc-context-category" />
@@ -51,16 +59,12 @@ const mocks = vi.hoisted(() => ({
       <button id="ppc-export-negative" type="button"></button>
       <button id="ppc-export-harvest" type="button"></button>
       <button id="ppc-copy-summary" type="button"></button>
-      <button class="ppc-filter-btn active" type="button" data-filter="all"></button>
-      <button class="ppc-filter-btn" type="button" data-filter="negative_exact"></button>
-      <button class="ppc-filter-btn" type="button" data-filter="harvest_exact"></button>
-      <button class="ppc-filter-btn" type="button" data-filter="scale_budget"></button>
-      <button class="ppc-filter-btn" type="button" data-filter="bid_down"></button>
-      <button class="ppc-filter-btn" type="button" data-filter="listing_term"></button>
-      <button class="ppc-filter-btn" type="button" data-filter="observe"></button>
+      <input id="ppc-action-search" type="search" />
+      <button id="ppc-action-search-clear" type="button"></button>
+      <div id="ppc-filter-buttons"></div>
       <p id="ppc-result-count"></p>
-      <div id="ppc-empty-state"></div>
-      <div id="ppc-table-wrapper" class="hidden"><table><tbody id="ppc-results-body"></tbody></table></div>
+      <div id="ppc-empty-state"><div id="ppc-empty-title"></div><p id="ppc-empty-description"></p></div>
+      <div id="ppc-table-wrapper" class="hidden"><table><thead><tr><th id="ppc-object-header"></th></tr></thead><tbody id="ppc-results-body"></tbody></table></div>
     </div>
   `,
 }));
@@ -158,6 +162,26 @@ describe('PPC 搜索词分析器 UI 行为', () => {
     expect(container.querySelector('#ppc-result-count')?.textContent).toBe('等待导入数据。');
     expect(container.querySelector<HTMLButtonElement>('[data-filter="all"]')?.classList.contains('active')).toBe(true);
     expect(container.querySelector<HTMLTextAreaElement>('#ppc-paste-input')?.value).toBe('');
+  });
+
+  it('支持动作清单搜索并导出当前搜索结果', async () => {
+    container.querySelector<HTMLButtonElement>('#ppc-btn-sample')?.click();
+    await flushAnalysis();
+
+    const search = container.querySelector<HTMLInputElement>('#ppc-action-search');
+    if (search) {
+      search.value = 'waterproof dog jacket';
+      search.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    expect(container.querySelector('#ppc-result-count')?.textContent).toBe('共 10 行，匹配 1 行，当前筛选 1 行。');
+    expect(container.querySelectorAll('#ppc-results-body tr')).toHaveLength(1);
+
+    container.querySelector<HTMLButtonElement>('#ppc-export-current')?.click();
+    expect(showToast).toHaveBeenCalledWith('导出完成', { type: 'success', description: '1 行动作已导出' });
+
+    container.querySelector<HTMLButtonElement>('#ppc-action-search-clear')?.click();
+    expect(container.querySelector('#ppc-result-count')?.textContent).toBe('共 10 行，当前筛选 10 行。');
   });
 
   it('剪贴板不可用时提示复制失败', async () => {

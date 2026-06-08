@@ -8,7 +8,7 @@ import {
   type PpcAnalysisContext,
   type PpcLlmDecision,
 } from './services/llmAnalysisService';
-import type { ActionType, AnalyzedRow, Thresholds } from './types';
+import type { ActionType, AnalyzedRow, ReportSelection, ReportType, Thresholds } from './types';
 
 import './style.css';
 
@@ -27,10 +27,35 @@ type ColumnKey =
   | 'spend'
   | 'sales'
   | 'orders';
+type CampaignOnlyColumnKey =
+  | 'shop'
+  | 'status'
+  | 'serviceStatus'
+  | 'bidStrategy'
+  | 'dailyBudget'
+  | 'adType'
+  | 'targetingType'
+  | 'topPlacement'
+  | 'productPlacement'
+  | 'restPlacement'
+  | 'ctr'
+  | 'cvr'
+  | 'cpc'
+  | 'costPerOrder'
+  | 'acos'
+  | 'roas'
+  | 'acots'
+  | 'asots'
+  | 'ownOrders'
+  | 'otherOrders'
+  | 'ownSales'
+  | 'otherSales';
+type MappedColumnKey = ColumnKey | CampaignOnlyColumnKey;
 
 export interface ColumnMapping {
-  found: Partial<Record<ColumnKey, string>>;
-  missing: ColumnKey[];
+  reportType: ReportType;
+  found: Partial<Record<MappedColumnKey, string>>;
+  missing: MappedColumnKey[];
 }
 
 interface ActionDecision {
@@ -52,6 +77,7 @@ interface AnalysisSummary {
 export interface AnalysisResult {
   rows: AnalyzedRow[];
   mapping: ColumnMapping;
+  reportType: ReportType;
   totalRows: number;
   validRows: number;
 }
@@ -76,9 +102,11 @@ interface ClassificationRule {
 }
 
 type RowMetrics = Pick<AnalyzedRow, 'impressions' | 'clicks' | 'spend' | 'sales' | 'orders' | 'ctr' | 'cvr' | 'acos'>;
+type ParsedReport = ReturnType<typeof parseReport>;
 
 const STORAGE_KEY = 'ppc_search_terms_thresholds_v1';
 const ANALYSIS_SETTINGS_STORAGE_KEY = 'ppc_search_terms_analysis_settings_v1';
+const REPORT_SELECTION_STORAGE_KEY = 'ppc_report_selection_v1';
 const MAX_RENDER_ROWS = 300;
 const ACTION_LABELS: Record<ActionType, string> = {
   negative_exact: '否精准',
@@ -86,7 +114,33 @@ const ACTION_LABELS: Record<ActionType, string> = {
   scale_budget: '加预算',
   bid_down: '降竞价',
   listing_term: '进词池',
+  campaign_fix_status: '处理状态',
+  campaign_pause: '暂停/降预算',
+  campaign_scale: '活动加预算',
+  campaign_bid_down: '控价降竞价',
+  campaign_structure: '结构复盘',
   observe: '观察',
+};
+const REPORT_LABELS: Record<ReportType, string> = {
+  search_term: '店铺搜索广告 / 商品推广搜索词报告',
+  erp_campaign: 'ERP 广告活动报表',
+};
+const REPORT_FILTERS: Record<ReportType, ActionType[]> = {
+  search_term: ['negative_exact', 'harvest_exact', 'scale_budget', 'bid_down', 'listing_term', 'observe'],
+  erp_campaign: ['campaign_fix_status', 'campaign_pause', 'campaign_scale', 'campaign_bid_down', 'campaign_structure', 'observe'],
+};
+const ACTION_ICONS: Record<ActionType, string> = {
+  negative_exact: 'fas fa-ban',
+  harvest_exact: 'fas fa-bullseye',
+  scale_budget: 'fas fa-arrow-trend-up',
+  bid_down: 'fas fa-arrow-down-short-wide',
+  listing_term: 'fas fa-bookmark',
+  campaign_fix_status: 'fas fa-triangle-exclamation',
+  campaign_pause: 'fas fa-pause',
+  campaign_scale: 'fas fa-arrow-trend-up',
+  campaign_bid_down: 'fas fa-gauge-high',
+  campaign_structure: 'fas fa-diagram-project',
+  observe: 'fas fa-eye',
 };
 
 const CLASSIFICATION_RULES: ClassificationRule[] = [
@@ -128,10 +182,21 @@ const CLASSIFICATION_RULES: ClassificationRule[] = [
   },
 ];
 
-const REQUIRED_FIELDS: ColumnKey[] = ['searchTerm', 'clicks', 'spend', 'sales', 'orders'];
-const COLUMN_ALIASES: Record<ColumnKey, string[]> = {
+const REQUIRED_FIELDS: MappedColumnKey[] = ['searchTerm', 'clicks', 'spend', 'sales', 'orders'];
+const ERP_CAMPAIGN_REQUIRED_FIELDS: MappedColumnKey[] = ['shop', 'campaign', 'clicks', 'spend', 'sales', 'orders'];
+const COLUMN_ALIASES: Record<MappedColumnKey, string[]> = {
+  shop: ['店铺名称', '店铺', 'store', 'shop', 'account', 'account name'],
+  status: ['有效状态', '状态', 'enabled status'],
+  serviceStatus: ['服务状态', '投放状态', 'serving status', 'delivery status'],
   campaign: ['campaign name', 'campaign name informational only', 'campaign', 'campaigns', '广告活动', '广告活动名称'],
   adGroup: ['ad group name', 'ad group name informational only', 'ad group', 'adgroup', '广告组', '广告组名称'],
+  bidStrategy: ['广告活动竞价策略', '竞价策略', 'bidding strategy'],
+  dailyBudget: ['每日预算', '日预算', 'daily budget', 'budget'],
+  adType: ['广告类型', 'ad type', 'campaign type'],
+  targetingType: ['投放类型', 'targeting type', 'targeting mode'],
+  topPlacement: ['搜索结果顶部(首页)广告位', '搜索结果顶部首页广告位', 'top of search placement'],
+  productPlacement: ['产品页面广告位', 'product pages placement'],
+  restPlacement: ['搜索结果的其余位置', 'rest of search placement'],
   searchTerm: [
     'customer search term',
     'customer search term informational only',
@@ -139,13 +204,22 @@ const COLUMN_ALIASES: Record<ColumnKey, string[]> = {
     'search terms',
     '用户搜索词',
     '搜索词',
+    '客户搜索词',
     '搜索词条',
   ],
-  keyword: ['keyword', 'targeting', 'targeting informational only', 'targeting expression', '投放词', '关键词', '定向'],
+  keyword: ['keyword', 'targeting', 'targeting informational only', 'targeting expression', '投放', '投放词', '关键词', '定向'],
   matchType: ['match type', 'match type informational only', 'match', '匹配类型'],
-  impressions: ['impressions', 'impression', '展示量', '曝光量', '曝光'],
-  clicks: ['clicks', 'clicks informational only', 'click', '点击量', '点击'],
+  impressions: ['impressions', 'impression', '展示量', '曝光量', '广告曝光量', '曝光'],
+  ctr: ['广告点击率', '点击率(CTR)', 'click-through rate', 'ctr'],
+  clicks: ['clicks', 'clicks informational only', 'click', '点击量', '广告点击量', '点击'],
+  cvr: ['广告转化率', '7天的转化率', 'conversion rate', 'cvr'],
   spend: ['spend', 'spend informational only', 'cost', 'costs', 'ad spend', '花费', '广告花费', '支出'],
+  costPerOrder: ['每笔订单花费', 'cost per order'],
+  cpc: ['平均点击费用', '每次点击成本(CPC)', 'cpc', 'average cpc', 'cost per click'],
+  acos: ['acos', 'ACoS', '广告成本销售比(ACOS)'],
+  roas: ['roas', 'ROAS', '投入产出比(ROAS)'],
+  acots: ['acots', 'ACoTS'],
+  asots: ['asots', 'ASoTS'],
   sales: [
     'sales',
     'total sales',
@@ -157,6 +231,8 @@ const COLUMN_ALIASES: Record<ColumnKey, string[]> = {
     '14 day total sales total',
     'attributed sales',
     '销售额',
+    '7天总销售额',
+    '14天总销售额',
     '广告销售额',
   ],
   orders: [
@@ -172,7 +248,16 @@ const COLUMN_ALIASES: Record<ColumnKey, string[]> = {
     'conversions',
     '订单',
     '订单量',
+    '7天总订单数(#)',
+    '7天总订单数',
+    '14天总订单数(#)',
+    '14天总订单数',
+    '广告订单量',
   ],
+  ownOrders: ['本广告产品订单量', '7天内广告SKU销售量(#)'],
+  otherOrders: ['其他产品广告订单量', '7天内其他SKU销售量(#)'],
+  ownSales: ['本广告产品销售额', '7天内广告SKU销售额'],
+  otherSales: ['其他产品广告销售额', '7天内其他SKU销售额'],
 };
 
 const SAMPLE_REPORT = `Campaign Name,Ad Group Name,Customer Search Term,Keyword,Match Type,Impressions,Clicks,Spend,7 Day Total Sales,7 Day Total Orders (#)
@@ -191,6 +276,8 @@ let listeners: ListenerRecord[] = [];
 let analyzedRows: AnalyzedRow[] = [];
 let sourceText = '';
 let activeFilter: FilterType = 'all';
+let activeReportType: ReportType = 'search_term';
+let activeSearchQuery = '';
 
 const mountInternal = async (container: HTMLElement): Promise<void> => {
   resetAnalyzerState();
@@ -198,8 +285,10 @@ const mountInternal = async (container: HTMLElement): Promise<void> => {
   const renderer = SafeRenderer.getInstance();
   renderer.renderTemplate(container, html);
   restoreThresholds(container);
+  restoreReportSelection(container);
   restoreAnalysisSettings(container);
   bindEvents(container);
+  renderFilterButtons(container, activeReportType);
   updateResults(container, []);
 };
 
@@ -217,14 +306,19 @@ function bindEvents(container: HTMLElement): void {
   });
   addListener(getElement(container, 'ppc-btn-sample'), 'click', () => loadSample(container));
   addListener(getElement(container, 'ppc-btn-clear'), 'click', () => clearAnalyzer(container));
+  addListener(getElement(container, 'ppc-analysis-settings-toggle'), 'click', () => toggleAnalysisSettings(container));
+  addListener(getElement(container, 'ppc-report-type'), 'change', () => handleReportSelectionChange(container));
   addListener(getElement(container, 'ppc-export-all'), 'click', () => exportRows('all'));
-  addListener(getElement(container, 'ppc-export-current'), 'click', () => exportRows(activeFilter));
-  addListener(getElement(container, 'ppc-export-negative'), 'click', () => exportRows('negative_exact'));
-  addListener(getElement(container, 'ppc-export-harvest'), 'click', () => exportRows('harvest_exact'));
+  addListener(getElement(container, 'ppc-export-current'), 'click', () => exportRows(activeFilter, true));
+  addListener(getElement(container, 'ppc-export-negative'), 'click', () => exportRows(getWasteExportFilter()));
+  addListener(getElement(container, 'ppc-export-harvest'), 'click', () => exportRows(getGrowthExportFilter()));
   addListener(getElement(container, 'ppc-copy-summary'), 'click', () => copySummary());
-
-  container.querySelectorAll<HTMLElement>('.ppc-filter-btn').forEach((button) => {
-    addListener(button, 'click', () => setFilter(container, button));
+  addListener(getInput(container, 'ppc-action-search'), 'input', () => handleActionSearch(container));
+  addListener(getInput(container, 'ppc-action-search'), 'keydown', (event) => handleActionSearchKeydown(container, event));
+  addListener(getElement(container, 'ppc-action-search-clear'), 'click', () => clearActionSearch(container));
+  addListener(getElement(container, 'ppc-filter-buttons'), 'click', (event) => {
+    const target = event.target instanceof Element ? event.target.closest<HTMLElement>('.ppc-filter-btn') : null;
+    if (target) setFilter(container, target);
   });
 
   getThresholdInputs(container).forEach((input) => {
@@ -251,11 +345,50 @@ async function handleFileImport(container: HTMLElement): Promise<void> {
   const file = input?.files?.[0];
   if (!file) return;
 
-  const text = await file.text();
-  const textarea = getTextarea(container, 'ppc-paste-input');
-  if (textarea) textarea.value = text;
-  setText(container, 'ppc-file-name', `已选择：${file.name}`);
-  await analyzeText(container, text);
+  try {
+    const text = await readReportFile(file);
+    const textarea = getTextarea(container, 'ppc-paste-input');
+    if (textarea) textarea.value = text;
+    setText(container, 'ppc-file-name', `已选择：${file.name}`);
+    await analyzeText(container, text);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : '文件读取失败';
+    showToast('文件读取失败', { type: 'error', description: message });
+  }
+}
+
+async function readReportFile(file: File): Promise<string> {
+  if (isXlsxFile(file)) {
+    return xlsxArrayBufferToDelimitedText(await file.arrayBuffer());
+  }
+
+  return file.text();
+}
+
+function isXlsxFile(file: File): boolean {
+  return file.name.toLowerCase().endsWith('.xlsx')
+    || file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+}
+
+export async function xlsxArrayBufferToDelimitedText(buffer: ArrayBuffer): Promise<string> {
+  const XLSX = await import('xlsx');
+  const workbook = XLSX.read(new Uint8Array(buffer), { type: 'array' });
+  const firstSheetName = workbook.SheetNames[0];
+  if (!firstSheetName) {
+    throw new Error('XLSX 文件没有可读取的工作表');
+  }
+
+  const worksheet = workbook.Sheets[firstSheetName];
+  if (!worksheet) {
+    throw new Error('XLSX 工作表读取失败');
+  }
+
+  const text = XLSX.utils.sheet_to_csv(worksheet, { FS: '\t', blankrows: false });
+  if (!text.trim()) {
+    throw new Error('XLSX 工作表为空');
+  }
+
+  return text;
 }
 
 async function analyzeTextarea(container: HTMLElement): Promise<void> {
@@ -276,8 +409,9 @@ function clearAnalyzer(container: HTMLElement): void {
   const fileInput = getInput(container, 'ppc-file-input');
   if (fileInput) fileInput.value = '';
   resetAnalyzerState();
+  setActionSearchQuery(container, '');
   setActiveFilterButton(container, activeFilter);
-  setText(container, 'ppc-file-name', '支持 CSV、TSV 或直接粘贴表格内容。');
+  setText(container, 'ppc-file-name', '支持 CSV、TSV、XLSX 或直接粘贴表格内容。');
   setText(container, 'ppc-mapping-status', '');
   updateResults(container, []);
 }
@@ -285,6 +419,7 @@ function clearAnalyzer(container: HTMLElement): void {
 async function analyzeText(container: HTMLElement, text: string): Promise<void> {
   const cleanText = text.trim();
   if (!cleanText) {
+    getTextarea(container, 'ppc-paste-input')?.focus();
     showToast('没有可分析的数据', { type: 'warning' });
     return;
   }
@@ -295,14 +430,33 @@ async function analyzeText(container: HTMLElement, text: string): Promise<void> 
   try {
     const thresholds = readThresholds(container);
     const settings = readAnalysisSettings(container);
-    localResult = analyzeSearchTermReport(cleanText, thresholds);
+    const reportSelection = readReportSelection(container);
+    localResult = analyzeReport(cleanText, thresholds, reportSelection);
 
     sourceText = cleanText;
     analyzedRows = [];
+    activeReportType = localResult.reportType;
+    activeFilter = 'all';
+    setActionSearchQuery(container, '');
+    updateReportControls(container, activeReportType);
     saveThresholds(thresholds);
     saveAnalysisSettings(settings);
-    renderMappingStatus(container, localResult.mapping, localResult.totalRows, localResult.validRows, '正在调用大模型分析...');
+    saveReportSelection(reportSelection);
+    renderMappingStatus(
+      container,
+      localResult.mapping,
+      localResult.totalRows,
+      localResult.validRows,
+      localResult.reportType === 'search_term' ? '正在调用大模型分析...' : '活动级规则分析完成',
+    );
     updateResults(container, []);
+
+    if (localResult.reportType === 'erp_campaign') {
+      analyzedRows = localResult.rows;
+      updateResults(container, analyzedRows);
+      showToast('ERP 广告活动分析完成', { type: 'success', description: `已识别 ${localResult.validRows} 个广告活动` });
+      return;
+    }
 
     const decisions = await analyzePpcSearchTermsWithLLM({
       rows: localResult.rows,
@@ -311,7 +465,7 @@ async function analyzeText(container: HTMLElement, text: string): Promise<void> 
       onProgress: ({ completedBatches, totalBatches }) => {
         renderMappingStatus(
           container,
-          localResult?.mapping || { found: {}, missing: [] },
+          localResult?.mapping || { reportType: activeReportType, found: {}, missing: [] },
           localResult?.totalRows || 0,
           localResult?.validRows || 0,
           `大模型分析中 ${completedBatches}/${totalBatches}`,
@@ -366,9 +520,23 @@ function applyModelDecisions(rows: AnalyzedRow[], decisions: PpcLlmDecision[]): 
     .sort((a, b) => b.priority - a.priority || b.spend - a.spend);
 }
 
-export function analyzeSearchTermReport(text: string, thresholds: Thresholds): AnalysisResult {
+export function analyzeReport(text: string, thresholds: Thresholds, selection: ReportSelection = 'auto'): AnalysisResult {
   const report = parseReport(text.trim());
-  const mapping = mapColumns(report.headers);
+  const reportType = resolveReportType(report.headers, selection);
+
+  if (reportType === 'erp_campaign') {
+    return analyzeErpCampaignReport(report, thresholds);
+  }
+
+  return analyzeSearchTermParsedReport(report, thresholds);
+}
+
+export function analyzeSearchTermReport(text: string, thresholds: Thresholds): AnalysisResult {
+  return analyzeSearchTermParsedReport(parseReport(text.trim()), thresholds);
+}
+
+function analyzeSearchTermParsedReport(report: ParsedReport, thresholds: Thresholds): AnalysisResult {
+  const mapping = mapColumns(report.headers, 'search_term');
   const rows = report.records
     .map((record, index) => analyzeRecord(record, mapping, thresholds, index))
     .filter((row): row is AnalyzedRow => row !== null)
@@ -377,9 +545,44 @@ export function analyzeSearchTermReport(text: string, thresholds: Thresholds): A
   return {
     rows,
     mapping,
+    reportType: 'search_term',
     totalRows: report.records.length,
     validRows: rows.length,
   };
+}
+
+function analyzeErpCampaignReport(report: ParsedReport, thresholds: Thresholds): AnalysisResult {
+  const mapping = mapColumns(report.headers, 'erp_campaign');
+  const rows = report.records
+    .map((record, index) => analyzeCampaignRecord(record, mapping, thresholds, index))
+    .filter((row): row is AnalyzedRow => row !== null)
+    .sort((a, b) => b.priority - a.priority || b.spend - a.spend || b.orders - a.orders);
+
+  return {
+    rows,
+    mapping,
+    reportType: 'erp_campaign',
+    totalRows: report.records.length,
+    validRows: rows.length,
+  };
+}
+
+function resolveReportType(headers: string[], selection: ReportSelection): ReportType {
+  if (selection !== 'auto') return selection;
+
+  const normalizedHeaders = headers.map(normalizeHeader);
+  const hasErpCampaignShape = hasAnyHeader(normalizedHeaders, COLUMN_ALIASES.shop)
+    && hasAnyHeader(normalizedHeaders, COLUMN_ALIASES.serviceStatus)
+    && hasAnyHeader(normalizedHeaders, COLUMN_ALIASES.acos)
+    && hasAnyHeader(normalizedHeaders, COLUMN_ALIASES.dailyBudget);
+
+  if (hasErpCampaignShape) return 'erp_campaign';
+  return 'search_term';
+}
+
+function hasAnyHeader(normalizedHeaders: string[], aliases: string[]): boolean {
+  const normalizedAliases = aliases.map(normalizeHeader);
+  return normalizedHeaders.some((header) => normalizedAliases.includes(header));
 }
 
 export function parseReport(text: string): { headers: string[]; records: RawRecord[] } {
@@ -464,21 +667,22 @@ function rowToRecord(headers: string[], row: string[]): RawRecord {
   }, {});
 }
 
-function mapColumns(headers: string[]): ColumnMapping {
-  const found: Partial<Record<ColumnKey, string>> = {};
+function mapColumns(headers: string[], reportType: ReportType): ColumnMapping {
+  const found: Partial<Record<MappedColumnKey, string>> = {};
 
   Object.entries(COLUMN_ALIASES).forEach(([key, aliases]) => {
     const normalizedAliases = aliases.map(normalizeHeader);
     const match = headers.find((header) => normalizedAliases.includes(normalizeHeader(header)));
-    if (match) found[key as ColumnKey] = match;
+    if (match) found[key as MappedColumnKey] = match;
   });
 
-  const missing = REQUIRED_FIELDS.filter((key) => !found[key]);
+  const requiredFields = reportType === 'erp_campaign' ? ERP_CAMPAIGN_REQUIRED_FIELDS : REQUIRED_FIELDS;
+  const missing = requiredFields.filter((key) => !found[key]);
   if (missing.length > 0) {
     throw new Error(`缺少必要列：${missing.map((key) => labelColumn(key)).join('、')}`);
   }
 
-  return { found, missing };
+  return { reportType, found, missing };
 }
 
 function normalizeHeader(header: string): string {
@@ -507,6 +711,7 @@ function analyzeRecord(
 
   return {
     id: `${index}-${searchTerm}`,
+    reportType: 'search_term',
     campaign: readField(record, mapping, 'campaign'),
     adGroup: readField(record, mapping, 'adGroup'),
     searchTerm,
@@ -526,6 +731,138 @@ function analyzeRecord(
     reason: decision.reason,
     priority: decision.priority,
   };
+}
+
+function analyzeCampaignRecord(
+  record: RawRecord,
+  mapping: ColumnMapping,
+  thresholds: Thresholds,
+  index: number,
+): AnalyzedRow | null {
+  const campaign = readField(record, mapping, 'campaign');
+  if (!campaign) return null;
+
+  const shop = readField(record, mapping, 'shop');
+  const status = readField(record, mapping, 'status');
+  const serviceStatus = readField(record, mapping, 'serviceStatus');
+  const targetingType = readField(record, mapping, 'targetingType');
+  const adType = readField(record, mapping, 'adType');
+  const bidStrategy = readField(record, mapping, 'bidStrategy');
+  const dailyBudget = parseMetric(readField(record, mapping, 'dailyBudget'));
+  const impressions = parseMetric(readField(record, mapping, 'impressions'));
+  const clicks = parseMetric(readField(record, mapping, 'clicks'));
+  const spend = parseMetric(readField(record, mapping, 'spend'));
+  const sales = parseMetric(readField(record, mapping, 'sales'));
+  const orders = parseMetric(readField(record, mapping, 'orders'));
+  const ctr = readOrCalculatePercentage(record, mapping, 'ctr', clicks, impressions);
+  const cvr = readOrCalculatePercentage(record, mapping, 'cvr', orders, clicks);
+  const cpc = parseMetric(readField(record, mapping, 'cpc')) || ratio(spend, clicks);
+  const acos = parseMetric(readField(record, mapping, 'acos')) || percentage(spend, sales);
+  const roas = parseMetric(readField(record, mapping, 'roas')) || ratio(sales, spend);
+  const ownSales = parseMetric(readField(record, mapping, 'ownSales'));
+  const otherSales = parseMetric(readField(record, mapping, 'otherSales'));
+  const decision = classifyCampaign({
+    status,
+    serviceStatus,
+    impressions,
+    clicks,
+    spend,
+    sales,
+    orders,
+    ctr,
+    cvr,
+    acos,
+    roas,
+    ownSales,
+    otherSales,
+    dailyBudget,
+  }, thresholds);
+
+  return {
+    id: `${index}-${shop}-${campaign}`,
+    reportType: 'erp_campaign',
+    campaign: shop,
+    adGroup: targetingType,
+    searchTerm: campaign,
+    keyword: [adType, serviceStatus, bidStrategy].filter(Boolean).join(' / '),
+    matchType: targetingType,
+    impressions,
+    clicks,
+    spend,
+    sales,
+    orders,
+    ctr,
+    cvr,
+    cpc,
+    acos,
+    action: decision.type,
+    actionLabel: decision.label,
+    reason: decision.reason,
+    priority: decision.priority,
+    store: shop,
+    serviceStatus,
+    targetingType,
+    dailyBudget,
+    roas,
+    ownSales,
+    otherSales,
+  };
+}
+
+interface CampaignMetrics extends RowMetrics {
+  status: string;
+  serviceStatus: string;
+  roas: number;
+  ownSales: number;
+  otherSales: number;
+  dailyBudget: number;
+}
+
+function classifyCampaign(metrics: CampaignMetrics, thresholds: Thresholds): ActionDecision {
+  if (metrics.serviceStatus && metrics.serviceStatus !== '正在投放') {
+    return decision('campaign_fix_status', `服务状态为“${metrics.serviceStatus}”，先处理账号/活动状态`, 95);
+  }
+
+  if (metrics.impressions === 0 && metrics.dailyBudget > 0) {
+    return decision('campaign_fix_status', '有日预算但 7 天无曝光，检查活动状态、竞价和投放资格', 82);
+  }
+
+  if (metrics.orders === 0 && (metrics.clicks >= thresholds.minClicksNoOrder || metrics.spend >= thresholds.minSpendNoOrder)) {
+    return decision('campaign_pause', `无订单且点击 ${metrics.clicks} / 花费 ${formatMetric(metrics.spend)} 已超过阈值，建议暂停或降预算并下钻搜索词`, 90);
+  }
+
+  if (metrics.orders > 0 && metrics.acos >= thresholds.highAcos) {
+    return decision('campaign_bid_down', `有 ${metrics.orders} 单但 ACOS ${formatPercent(metrics.acos)} 偏高，先降竞价或控预算`, 78);
+  }
+
+  if (metrics.orders >= thresholds.minOrdersHarvest && metrics.acos > 0 && metrics.acos <= thresholds.targetAcos * 0.65) {
+    return decision('campaign_scale', `${metrics.orders} 单且 ACOS ${formatPercent(metrics.acos)} 明显优于目标，可提高预算或复制放量`, 82);
+  }
+
+  if (metrics.ownSales > 0 && metrics.otherSales > metrics.ownSales * 1.5) {
+    return decision('campaign_structure', '其他产品销售额明显高于本广告产品，建议复盘广告结构和承接 ASIN', 66);
+  }
+
+  if (metrics.impressions >= 1000 && metrics.ctr < thresholds.minCtr) {
+    return decision('campaign_structure', `曝光 ${metrics.impressions} 但 CTR ${formatPercent(metrics.ctr)} 偏低，检查主图、标题和投放相关性`, 55);
+  }
+
+  if (metrics.orders >= thresholds.minOrdersHarvest && metrics.acos <= thresholds.targetAcos) {
+    return decision('campaign_scale', `${metrics.orders} 单且 ACOS ${formatPercent(metrics.acos)} 达标，可小幅加预算观察`, 62);
+  }
+
+  return decision('observe', '样本或效率未触发明确动作，继续观察', 10);
+}
+
+function readOrCalculatePercentage(
+  record: RawRecord,
+  mapping: ColumnMapping,
+  key: MappedColumnKey,
+  numerator: number,
+  denominator: number,
+): number {
+  const parsed = parseMetric(readField(record, mapping, key));
+  return parsed > 0 ? parsed : percentage(numerator, denominator);
 }
 
 function classifyRow(metrics: RowMetrics, thresholds: Thresholds): ActionDecision {
@@ -571,13 +908,13 @@ function decision(type: ActionType, reason: string, priority: number): ActionDec
   };
 }
 
-function readField(record: RawRecord, mapping: ColumnMapping, key: ColumnKey): string {
+function readField(record: RawRecord, mapping: ColumnMapping, key: MappedColumnKey): string {
   const column = mapping.found[key];
   return column ? record[column] || '' : '';
 }
 
 function parseMetric(value: string): number {
-  const cleaned = value.trim().replace(/[%€$£¥\s]/g, '');
+  const cleaned = value.trim().replace(/["'%€$£¥\s]/g, '');
   if (!cleaned) return 0;
 
   const normalized = normalizeNumberString(cleaned);
@@ -628,16 +965,45 @@ function ratio(numerator: number, denominator: number): number {
 }
 
 function updateResults(container: HTMLElement, rows: AnalyzedRow[]): void {
-  const visibleRows = filterRows(rows);
+  const searchedRows = searchRows(rows);
+  const visibleRows = filterRows(searchedRows);
   const summary = summarize(rows);
   updateStats(container, summary);
-  updateResultCount(container, rows, visibleRows);
-  renderRows(container, visibleRows);
+  updateFilterCounts(container, searchedRows);
+  updateExportAvailability(container, rows, visibleRows);
+  updateResultCount(container, rows, searchedRows, visibleRows);
+  updateSearchControls(container);
+  renderRows(container, visibleRows, rows.length > 0);
 }
 
-function filterRows(rows: AnalyzedRow[]): AnalyzedRow[] {
-  if (activeFilter === 'all') return rows;
-  return rows.filter((row) => row.action === activeFilter);
+function filterRows(rows: AnalyzedRow[], filter: FilterType = activeFilter): AnalyzedRow[] {
+  if (filter === 'all') return rows;
+  return rows.filter((row) => row.action === filter);
+}
+
+function searchRows(rows: AnalyzedRow[]): AnalyzedRow[] {
+  const query = normalizeSearchText(activeSearchQuery);
+  if (!query) return rows;
+  return rows.filter((row) => buildSearchText(row).includes(query));
+}
+
+function buildSearchText(row: AnalyzedRow): string {
+  return normalizeSearchText([
+    row.searchTerm,
+    row.campaign,
+    row.adGroup,
+    row.keyword,
+    row.matchType,
+    row.actionLabel,
+    row.reason,
+    row.store,
+    row.serviceStatus,
+    row.targetingType,
+  ].filter(Boolean).join(' '));
+}
+
+function normalizeSearchText(value: string): string {
+  return value.toLowerCase().replace(/\s+/g, ' ').trim();
 }
 
 function summarize(rows: AnalyzedRow[]): AnalysisSummary {
@@ -665,16 +1031,53 @@ function updateStats(container: HTMLElement, summary: AnalysisSummary): void {
   setText(container, 'ppc-stat-actions', String(summary.actionCount));
 }
 
-function updateResultCount(container: HTMLElement, rows: AnalyzedRow[], visibleRows: AnalyzedRow[]): void {
+function updateResultCount(
+  container: HTMLElement,
+  rows: AnalyzedRow[],
+  searchedRows: AnalyzedRow[],
+  visibleRows: AnalyzedRow[],
+): void {
   if (rows.length === 0) {
     setText(container, 'ppc-result-count', '等待导入数据。');
     return;
   }
   const extra = visibleRows.length > MAX_RENDER_ROWS ? `，当前展示前 ${MAX_RENDER_ROWS} 行` : '';
-  setText(container, 'ppc-result-count', `共 ${rows.length} 行，当前筛选 ${visibleRows.length} 行${extra}。`);
+  const searchText = activeSearchQuery ? `，匹配 ${searchedRows.length} 行` : '';
+  setText(container, 'ppc-result-count', `共 ${rows.length} 行${searchText}，当前筛选 ${visibleRows.length} 行${extra}。`);
 }
 
-function renderRows(container: HTMLElement, rows: AnalyzedRow[]): void {
+function updateFilterCounts(container: HTMLElement, rows: AnalyzedRow[]): void {
+  const counts = new Map<FilterType, number>([['all', rows.length]]);
+  (Object.keys(ACTION_LABELS) as ActionType[]).forEach((action) => counts.set(action, 0));
+
+  rows.forEach((row) => {
+    counts.set(row.action, (counts.get(row.action) || 0) + 1);
+  });
+
+  container.querySelectorAll<HTMLElement>('.ppc-filter-btn').forEach((button) => {
+    const filter = button.dataset.filter;
+    if (!isFilterType(filter)) return;
+
+    const count = button.querySelector<HTMLElement>('.ppc-filter-count');
+    if (count) count.textContent = String(counts.get(filter) || 0);
+  });
+}
+
+function updateExportAvailability(container: HTMLElement, rows: AnalyzedRow[], visibleRows: AnalyzedRow[]): void {
+  const hasRows = rows.length > 0;
+  const wasteFilter = getWasteExportFilter();
+  const growthFilter = getGrowthExportFilter();
+  const hasWasteRows = rows.some((row) => row.action === wasteFilter);
+  const hasGrowthRows = rows.some((row) => row.action === growthFilter);
+
+  setButtonDisabled(container, 'ppc-export-all', !hasRows);
+  setButtonDisabled(container, 'ppc-export-current', visibleRows.length === 0);
+  setButtonDisabled(container, 'ppc-export-negative', !hasWasteRows);
+  setButtonDisabled(container, 'ppc-export-harvest', !hasGrowthRows);
+  setButtonDisabled(container, 'ppc-copy-summary', !hasRows);
+}
+
+function renderRows(container: HTMLElement, rows: AnalyzedRow[], hasAnalyzedRows: boolean): void {
   const body = getElement(container, 'ppc-results-body');
   const empty = getElement(container, 'ppc-empty-state');
   const wrapper = getElement(container, 'ppc-table-wrapper');
@@ -682,6 +1085,7 @@ function renderRows(container: HTMLElement, rows: AnalyzedRow[]): void {
 
   body.replaceChildren();
   if (rows.length === 0) {
+    updateEmptyState(container, hasAnalyzedRows);
     empty.classList.remove('hidden');
     wrapper.classList.add('hidden');
     return;
@@ -690,6 +1094,17 @@ function renderRows(container: HTMLElement, rows: AnalyzedRow[]): void {
   rows.slice(0, MAX_RENDER_ROWS).forEach((row) => body.appendChild(createRow(row)));
   empty.classList.add('hidden');
   wrapper.classList.remove('hidden');
+}
+
+function updateEmptyState(container: HTMLElement, hasAnalyzedRows: boolean): void {
+  if (!hasAnalyzedRows) {
+    setText(container, 'ppc-empty-title', '还没有分析结果');
+    setText(container, 'ppc-empty-description', '导入报表或加载样例数据后，会在这里生成可执行动作。');
+    return;
+  }
+
+  setText(container, 'ppc-empty-title', '没有匹配的动作');
+  setText(container, 'ppc-empty-description', activeSearchQuery ? '调整搜索词或切换动作筛选。' : '切换动作筛选后再查看。');
 }
 
 function createRow(row: AnalyzedRow): HTMLTableRowElement {
@@ -714,9 +1129,17 @@ function createSearchTermCell(row: AnalyzedRow): HTMLTableCellElement {
   term.textContent = row.searchTerm;
   const meta = document.createElement('div');
   meta.className = 'text-xs text-slate-500 mt-1';
-  meta.textContent = [row.campaign, row.adGroup, row.keyword].filter(Boolean).join(' / ') || '-';
+  meta.textContent = getObjectMeta(row);
   cell.append(term, meta);
   return cell;
+}
+
+function getObjectMeta(row: AnalyzedRow): string {
+  if (row.reportType === 'erp_campaign') {
+    return [row.store, row.targetingType, row.serviceStatus].filter(Boolean).join(' / ') || '-';
+  }
+
+  return [row.campaign, row.adGroup, row.keyword].filter(Boolean).join(' / ') || '-';
 }
 
 function createActionCell(row: AnalyzedRow): HTMLTableCellElement {
@@ -744,9 +1167,40 @@ function setFilter(container: HTMLElement, button: HTMLElement): void {
   updateResults(container, analyzedRows);
 }
 
+function handleActionSearch(container: HTMLElement): void {
+  activeSearchQuery = getInput(container, 'ppc-action-search')?.value.trim() || '';
+  updateResults(container, analyzedRows);
+}
+
+function handleActionSearchKeydown(container: HTMLElement, event: Event): void {
+  if (!(event instanceof KeyboardEvent) || event.key !== 'Escape') return;
+  clearActionSearch(container);
+}
+
+function clearActionSearch(container: HTMLElement): void {
+  setActionSearchQuery(container, '');
+  updateResults(container, analyzedRows);
+  getInput(container, 'ppc-action-search')?.focus();
+}
+
+function setActionSearchQuery(container: HTMLElement, query: string): void {
+  activeSearchQuery = query.trim();
+  const input = getInput(container, 'ppc-action-search');
+  if (input && input.value !== activeSearchQuery) input.value = activeSearchQuery;
+  updateSearchControls(container);
+}
+
+function updateSearchControls(container: HTMLElement): void {
+  const hasQuery = activeSearchQuery.length > 0;
+  setButtonDisabled(container, 'ppc-action-search-clear', !hasQuery);
+  getElement(container, 'ppc-action-search')?.classList.toggle('has-value', hasQuery);
+}
+
 function setActiveFilterButton(container: HTMLElement, filter: FilterType): void {
   container.querySelectorAll<HTMLElement>('.ppc-filter-btn').forEach((item) => {
-    item.classList.toggle('active', item.dataset.filter === filter);
+    const isActive = item.dataset.filter === filter;
+    item.classList.toggle('active', isActive);
+    item.setAttribute('aria-pressed', String(isActive));
   });
 }
 
@@ -755,19 +1209,24 @@ function isFilterType(value: string | undefined): value is FilterType {
   return value === 'all' || Object.prototype.hasOwnProperty.call(ACTION_LABELS, value);
 }
 
-function exportRows(filter: FilterType): void {
-  const rows = filter === 'all' ? analyzedRows : analyzedRows.filter((row) => row.action === filter);
+function exportRows(filter: FilterType, includeSearch = false): void {
+  const baseRows = includeSearch ? searchRows(analyzedRows) : analyzedRows;
+  const rows = filterRows(baseRows, filter);
   if (rows.length === 0) {
     showToast('没有可导出的数据', { type: 'warning' });
     return;
   }
 
   const csv = buildActionCsv(rows);
-  downloadText(`ppc-search-actions-${filter}-${today()}.csv`, csv);
+  downloadText(`ppc-${activeReportType}-actions-${filter}-${today()}.csv`, csv);
   showToast('导出完成', { type: 'success', description: `${rows.length} 行动作已导出` });
 }
 
 export function buildActionCsv(rows: AnalyzedRow[]): string {
+  if (rows[0]?.reportType === 'erp_campaign') {
+    return buildCampaignActionCsv(rows);
+  }
+
   const headers = ['Action', 'Search Term', 'Campaign', 'Ad Group', 'Keyword', 'Spend', 'Sales', 'Orders', 'ACOS', 'Reason'];
   const lines = rows.map((row) => [
     row.actionLabel,
@@ -782,6 +1241,29 @@ export function buildActionCsv(rows: AnalyzedRow[]): string {
     row.reason,
   ]);
   return [headers, ...lines].map((line) => line.map(escapeCsv).join(',')).join('\n');
+}
+
+function buildCampaignActionCsv(rows: AnalyzedRow[]): string {
+  const headers = ['Action', 'Campaign', 'Store', 'Targeting Type', 'Service Status', 'Daily Budget', 'Spend', 'Sales', 'Orders', 'ACOS', 'ROAS', 'Reason'];
+  const lines = rows.map((row) => [
+    row.actionLabel,
+    row.searchTerm,
+    row.store || '',
+    row.targetingType || '',
+    row.serviceStatus || '',
+    formatOptionalNumber(row.dailyBudget),
+    row.spend.toFixed(2),
+    row.sales.toFixed(2),
+    String(row.orders),
+    row.sales > 0 ? row.acos.toFixed(2) : '',
+    typeof row.roas === 'number' && row.roas > 0 ? row.roas.toFixed(2) : '',
+    row.reason,
+  ]);
+  return [headers, ...lines].map((line) => line.map(escapeCsv).join(',')).join('\n');
+}
+
+function formatOptionalNumber(value: number | undefined): string {
+  return typeof value === 'number' && value > 0 ? value.toFixed(2) : '';
 }
 
 function escapeCsv(value: string): string {
@@ -820,6 +1302,10 @@ async function copySummary(): Promise<void> {
 }
 
 export function buildSummaryText(rows: AnalyzedRow[]): string {
+  if (rows[0]?.reportType === 'erp_campaign') {
+    return buildCampaignSummaryText(rows);
+  }
+
   const summary = summarize(rows);
   const count = (type: ActionType) => rows.filter((row) => row.action === type).length;
   return [
@@ -831,11 +1317,23 @@ export function buildSummaryText(rows: AnalyzedRow[]): string {
   ].join('\n');
 }
 
+function buildCampaignSummaryText(rows: AnalyzedRow[]): string {
+  const summary = summarize(rows);
+  const count = (type: ActionType) => rows.filter((row) => row.action === type).length;
+  return [
+    `PPC 广告活动周报摘要 ${today()}`,
+    `广告活动数：${summary.rowCount}`,
+    `花费：${formatCurrency(summary.spend)}，销售额：${formatCurrency(summary.sales)}，ACOS：${summary.sales > 0 ? formatPercent(summary.acos) : '-'}`,
+    `处理状态：${count('campaign_fix_status')}，暂停/降预算：${count('campaign_pause')}，活动加预算：${count('campaign_scale')}，控价降竞价：${count('campaign_bid_down')}，结构复盘：${count('campaign_structure')}`,
+    `本周优先处理：${rows.filter((row) => row.action !== 'observe').slice(0, 5).map((row) => `${row.searchTerm}(${row.actionLabel})`).join('、') || '无'}`,
+  ].join('\n');
+}
+
 function handleThresholdChange(container: HTMLElement): void {
   const thresholds = readThresholds(container);
   saveThresholds(thresholds);
   if (sourceText) {
-    setText(container, 'ppc-mapping-status', '阈值已更新，请点击“开始分析”重新调用大模型。');
+    setText(container, 'ppc-mapping-status', '阈值已更新，请点击“分析当前数据”重新分析。');
   }
 }
 
@@ -888,9 +1386,122 @@ function saveAnalysisSettings(settings: AnalysisSettings): void {
   });
 }
 
+function restoreReportSelection(container: HTMLElement): void {
+  const saved = StorageService.get<ReportSelection>(REPORT_SELECTION_STORAGE_KEY, 'auto');
+  const selection = isReportSelection(saved) ? saved : 'auto';
+  const select = getSelect(container, 'ppc-report-type');
+  if (select) select.value = selection;
+  activeReportType = selection === 'auto' ? 'search_term' : selection;
+}
+
+function readReportSelection(container: HTMLElement): ReportSelection {
+  const value = getSelect(container, 'ppc-report-type')?.value;
+  return isReportSelection(value) ? value : 'auto';
+}
+
+function saveReportSelection(selection: ReportSelection): void {
+  StorageService.set(REPORT_SELECTION_STORAGE_KEY, selection);
+}
+
+function handleReportSelectionChange(container: HTMLElement): void {
+  const selection = readReportSelection(container);
+  saveReportSelection(selection);
+  activeReportType = selection === 'auto' ? inferCurrentReportType() : selection;
+  activeFilter = 'all';
+  analyzedRows = [];
+  setActionSearchQuery(container, '');
+  updateReportControls(container, activeReportType);
+  updateResults(container, []);
+
+  if (sourceText) {
+    setText(container, 'ppc-mapping-status', '报表类型已更新，请点击“分析当前数据”重新分析。');
+  }
+}
+
+function inferCurrentReportType(): ReportType {
+  if (!sourceText) return 'search_term';
+
+  try {
+    return resolveReportType(parseReport(sourceText).headers, 'auto');
+  } catch {
+    return activeReportType;
+  }
+}
+
+function updateReportControls(container: HTMLElement, reportType: ReportType): void {
+  renderFilterButtons(container, reportType);
+  setText(container, 'ppc-object-header', reportType === 'erp_campaign' ? '广告活动' : '搜索词');
+  setText(container, 'ppc-stat-rows-label', reportType === 'erp_campaign' ? '广告活动' : '搜索词行');
+
+  const textarea = getTextarea(container, 'ppc-paste-input');
+  if (textarea) {
+    textarea.placeholder = reportType === 'erp_campaign'
+      ? '也可以直接粘贴 ERP 广告活动报表内容，首行需要包含列名。'
+      : '也可以直接粘贴 Search Term 报表内容，首行需要包含列名。';
+  }
+
+  if (reportType === 'erp_campaign') {
+    setButtonContent(container, 'ppc-export-negative', 'fas fa-pause', '导出停投/降预算');
+    setButtonContent(container, 'ppc-export-harvest', 'fas fa-arrow-trend-up', '导出加预算');
+    return;
+  }
+
+  setButtonContent(container, 'ppc-export-negative', 'fas fa-ban', '导出否词');
+  setButtonContent(container, 'ppc-export-harvest', 'fas fa-bullseye', '导出加词');
+}
+
+function renderFilterButtons(container: HTMLElement, reportType: ReportType): void {
+  const wrapper = getElement(container, 'ppc-filter-buttons');
+  if (!wrapper) return;
+
+  const filters: FilterType[] = ['all', ...REPORT_FILTERS[reportType]];
+  if (!filters.includes(activeFilter)) activeFilter = 'all';
+
+  wrapper.replaceChildren(...filters.map((filter) => createFilterButton(filter, filter === activeFilter)));
+}
+
+function createFilterButton(filter: FilterType, isActive: boolean): HTMLButtonElement {
+  const button = document.createElement('button');
+  button.className = `ppc-filter-btn${isActive ? ' active' : ''}`;
+  button.type = 'button';
+  button.dataset.filter = filter;
+  button.setAttribute('aria-pressed', String(isActive));
+
+  const icon = createIcon(filter === 'all' ? 'fas fa-layer-group' : ACTION_ICONS[filter]);
+  const label = document.createElement('span');
+  label.textContent = filter === 'all' ? '全部' : ACTION_LABELS[filter];
+  const count = document.createElement('span');
+  count.className = 'ppc-filter-count';
+  count.textContent = '0';
+  button.append(icon, label, count);
+  return button;
+}
+
+function getWasteExportFilter(): FilterType {
+  return activeReportType === 'erp_campaign' ? 'campaign_pause' : 'negative_exact';
+}
+
+function getGrowthExportFilter(): FilterType {
+  return activeReportType === 'erp_campaign' ? 'campaign_scale' : 'harvest_exact';
+}
+
+function isReportSelection(value: unknown): value is ReportSelection {
+  return value === 'auto' || value === 'search_term' || value === 'erp_campaign';
+}
+
 function handleAnalysisSettingsChange(container: HTMLElement): void {
   updateContextFieldsVisibility(container);
   saveAnalysisSettings(readAnalysisSettings(container));
+}
+
+function toggleAnalysisSettings(container: HTMLElement): void {
+  const toggle = getButton(container, 'ppc-analysis-settings-toggle');
+  const body = getElement(container, 'ppc-analysis-settings-body');
+  if (!toggle || !body) return;
+
+  const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
+  toggle.setAttribute('aria-expanded', String(!isExpanded));
+  body.classList.toggle('hidden', isExpanded);
 }
 
 function updateContextFieldsVisibility(container: HTMLElement): void {
@@ -926,21 +1537,43 @@ function setChecked(container: HTMLElement, id: string, value: boolean): void {
 function renderMappingStatus(container: HTMLElement, mapping: ColumnMapping, totalRows: number, validRows: number, status = ''): void {
   const fields = Object.values(mapping.found).filter(Boolean);
   const statusText = status ? ` ${status}` : '';
-  setText(container, 'ppc-mapping-status', `已识别 ${fields.length} 个字段，原始 ${totalRows} 行，有效 ${validRows} 行。${statusText}`);
+  setText(container, 'ppc-mapping-status', `已识别为${REPORT_LABELS[mapping.reportType]}，匹配 ${fields.length} 个字段，原始 ${totalRows} 行，有效 ${validRows} 行。${statusText}`);
 }
 
-function labelColumn(key: ColumnKey): string {
-  const labels: Record<ColumnKey, string> = {
+function labelColumn(key: MappedColumnKey): string {
+  const labels: Record<MappedColumnKey, string> = {
+    shop: '店铺名称',
+    status: '有效状态',
+    serviceStatus: '服务状态',
     campaign: '广告活动',
     adGroup: '广告组',
+    bidStrategy: '广告活动竞价策略',
+    dailyBudget: '每日预算',
+    adType: '广告类型',
+    targetingType: '投放类型',
+    topPlacement: '搜索结果顶部广告位',
+    productPlacement: '产品页面广告位',
+    restPlacement: '搜索结果其余位置',
     searchTerm: '搜索词',
     keyword: '关键词',
     matchType: '匹配类型',
     impressions: '曝光',
+    ctr: 'CTR',
     clicks: '点击',
+    cvr: 'CVR',
     spend: '花费',
+    cpc: 'CPC',
+    costPerOrder: '每笔订单花费',
+    acos: 'ACOS',
+    roas: 'ROAS',
+    acots: 'ACoTS',
+    asots: 'ASoTS',
     sales: '销售额',
     orders: '订单',
+    ownOrders: '本广告产品订单',
+    otherOrders: '其他产品广告订单',
+    ownSales: '本广告产品销售额',
+    otherSales: '其他产品广告销售额',
   };
   return labels[key];
 }
@@ -960,7 +1593,18 @@ function setAnalyzeButtonState(container: HTMLElement, isAnalyzing: boolean): vo
   if (!button) return;
 
   button.disabled = isAnalyzing;
-  button.replaceChildren(createIcon(isAnalyzing ? 'fas fa-circle-notch fa-spin' : 'fas fa-chart-line'), document.createTextNode(isAnalyzing ? '分析中' : '开始分析'));
+  button.replaceChildren(createIcon(isAnalyzing ? 'fas fa-circle-notch fa-spin' : 'fas fa-chart-line'), document.createTextNode(isAnalyzing ? '分析中' : '分析当前数据'));
+}
+
+function setButtonDisabled(container: HTMLElement, id: string, disabled: boolean): void {
+  const button = getButton(container, id);
+  if (button) button.disabled = disabled;
+}
+
+function setButtonContent(container: HTMLElement, id: string, iconClass: string, label: string): void {
+  const button = getButton(container, id);
+  if (!button) return;
+  button.replaceChildren(createIcon(iconClass), document.createTextNode(label));
 }
 
 function createIcon(className: string): HTMLElement {
@@ -981,6 +1625,10 @@ function getButton(container: HTMLElement, id: string): HTMLButtonElement | null
   return container.querySelector<HTMLButtonElement>(`#${id}`);
 }
 
+function getSelect(container: HTMLElement, id: string): HTMLSelectElement | null {
+  return container.querySelector<HTMLSelectElement>(`#${id}`);
+}
+
 function getTextarea(container: HTMLElement, id: string): HTMLTextAreaElement | null {
   return container.querySelector<HTMLTextAreaElement>(`#${id}`);
 }
@@ -992,6 +1640,10 @@ function setText(container: HTMLElement, id: string, text: string): void {
 
 function formatCurrency(value: number): string {
   return value.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function formatMetric(value: number): string {
+  return formatCurrency(value);
 }
 
 function formatPercent(value: number): string {
@@ -1006,4 +1658,5 @@ function resetAnalyzerState(): void {
   sourceText = '';
   analyzedRows = [];
   activeFilter = 'all';
+  activeSearchQuery = '';
 }
