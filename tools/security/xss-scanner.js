@@ -353,12 +353,12 @@ function generateReport() {
     
     let report = `# XSS风险扫描报告
 
-**扫描时间**: ${new Date().toLocaleString('zh-CN')}  
-**扫描目录**: \`src/\`  
-**扫描文件数**: ${results.scannedFiles}  
-**命中文件数**: ${results.files.length}  
-**发现风险点**: ${results.totalRisks}  
-**已审计安全跳过**: ${results.auditedSafeCount}  
+**扫描时间**: ${new Date().toLocaleString('zh-CN')}
+**扫描目录**: \`src/\`
+**扫描文件数**: ${results.scannedFiles}
+**命中文件数**: ${results.files.length}
+**发现风险点**: ${results.totalRisks}
+**已审计安全跳过**: ${results.auditedSafeCount}
 **清空DOM跳过**: ${results.emptyDomWriteCount}
 
 ---

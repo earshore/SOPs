@@ -34,26 +34,6 @@
     justify-content: flex-end;
 }
 
-/* 顶部渐变彩带 */
-.header-gradient-line {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, 
-        #6366f1 0%, 
-        #8b5cf6 20%, 
-        #ec4899 40%, 
-        #f59e0b 60%, 
-        #10b981 80%, 
-        #06b6d4 100%
-    );
-    background-size: 300% 100%;
-    animation: gradient-shift 12s ease infinite;
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
-}
-
 /* ========================================
    Logo 区域
    ======================================== */
@@ -657,7 +637,6 @@
    减少动画偏好
    ======================================== */
 @media (prefers-reduced-motion: reduce) {
-    .header-gradient-line,
     .logo-icon-wrapper,
     .nav-trigger,
     .nav-trigger::after,

@@ -84,6 +84,36 @@ interface AppStore {
   resetKeywordTracker: () => void;
 }
 
+type PersistedAppState = Partial<AppStore> & {
+  scraper?: Partial<ScraperState>;
+  ui?: Partial<UIState>;
+};
+
+function isPersistedAppState(state: unknown): state is PersistedAppState {
+  return !!state && typeof state === 'object';
+}
+
+function mergePersistedAppState(persistedState: unknown, currentState: AppStore): AppStore {
+  if (!isPersistedAppState(persistedState)) {
+    return currentState;
+  }
+
+  return {
+    ...currentState,
+    ui: {
+      ...currentState.ui,
+      ...(persistedState.ui || {})
+    },
+    scraper: {
+      ...currentState.scraper,
+      ...(persistedState.scraper || {}),
+      scrapedData: null,
+      currentHistoryId: null,
+      isScraping: false
+    }
+  };
+}
+
 /**
  * 初始Scraper状态
  */
@@ -381,6 +411,7 @@ export const appStore = createStore<AppStore>()(
       }),
       {
         name: 'app-storage',
+        merge: mergePersistedAppState,
         partialize: (state) => ({
           ui: {
             currentTab: state.ui.currentTab,
@@ -391,11 +422,14 @@ export const appStore = createStore<AppStore>()(
             loading: state.ui.loading
           },
           scraper: {
-            isScraping: state.scraper.isScraping,
+            isScraping: false,
             status: state.scraper.status,
             selectedSite: state.scraper.selectedSite,
-            scrapedData: state.scraper.scrapedData,
-            currentHistoryId: state.scraper.currentHistoryId
+            scrapedData: null,
+            currentHistoryId: null,
+            inputAsins: state.scraper.inputAsins,
+            expandedAsin: state.scraper.expandedAsin,
+            currentDataTab: state.scraper.currentDataTab
           }
         })
       }

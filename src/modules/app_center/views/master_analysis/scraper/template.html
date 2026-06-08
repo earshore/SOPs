@@ -239,39 +239,6 @@
             </div>
         </div>
     </div>
-    <!-- 新人采集最短路径 -->
-    <div class="bg-white rounded-xl border border-blue-200 p-5 mb-6">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-4">
-            <div>
-                <h3 class="font-bold text-slate-800 flex items-center gap-2">
-                    <i class="fas fa-route text-blue-500"></i>新人采集最短路径
-                </h3>
-                <p class="text-sm text-slate-500 mt-1">先完成一组可分析的竞品数据，再进入 AI 分析，不需要一次采全类目。</p>
-            </div>
-            <div class="text-xs text-blue-700 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2">
-                交付物：3-5 个核心 ASIN + 1 份 AI 分析报告
-            </div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-sm">
-            <div class="border border-slate-200 rounded-lg p-3 bg-slate-50">
-                <div class="font-bold text-slate-800 mb-1">1. 选站点</div>
-                <p class="text-xs text-slate-600">按当前 SKU 的主战场选择站点，欧洲站不要混在一张结果里。</p>
-            </div>
-            <div class="border border-slate-200 rounded-lg p-3 bg-slate-50">
-                <div class="font-bold text-slate-800 mb-1">2. 放 ASIN</div>
-                <p class="text-xs text-slate-600">优先放直接竞品、价格相近竞品、类目头部标杆各 1-2 个。</p>
-            </div>
-            <div class="border border-slate-200 rounded-lg p-3 bg-slate-50">
-                <div class="font-bold text-slate-800 mb-1">3. 查完整度</div>
-                <p class="text-xs text-slate-600">确认标题、五点、Review、价格字段都有值，再送去分析。</p>
-            </div>
-            <button type="button" data-action="switch-tab" data-tab="ai_analysis"
-                class="text-left border border-blue-200 rounded-lg p-3 bg-blue-50 hover:bg-blue-100 transition-colors">
-                <div class="font-bold text-blue-800 mb-1">4. 去 AI 分析</div>
-                <p class="text-xs text-blue-700">采集完成后直接生成产品 DNA 和 Listing 改写方向。</p>
-            </button>
-        </div>
-    </div>
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Left: Configuration & Status -->
         <div class="lg:col-span-2 space-y-6">
@@ -438,23 +405,23 @@ B0EXAMPLE1" rows="5" :value="inputAsins" @input="setInputAsins($event)"></textar
                 </div>
             </div>
             <!-- Task Status Panel -->
-            <div class="rounded-2xl shadow-sm shadow-slate-200/50 border border-slate-200/80 bg-white overflow-hidden card-elevated"
+            <div class="task-status-panel rounded-xl shadow-sm shadow-slate-200/40 border border-slate-200/80 bg-white overflow-hidden"
                 x-show="hasTasks" x-transition:enter="transition ease-out duration-500"
                 x-transition:enter-end="opacity-100 translate-y-0 scale-100"
                 x-transition:enter-start="opacity-0 translate-y-6 scale-[0.98]">
                 <!-- Header with Progress -->
-                <div class="px-6 pt-5 pb-4 border-b border-slate-100">
-                    <div class="flex items-center justify-between mb-3">
-                        <h3 class="text-base font-bold text-slate-800 flex items-center gap-2.5 section-header">
-                            <div class="header-icon w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
-                                <i class="fas fa-tasks text-indigo-500 text-sm"></i>
+                <div class="px-4 pt-3 pb-2.5 border-b border-slate-100">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                        <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2 whitespace-nowrap section-header">
+                            <div class="header-icon w-6 h-6 rounded-md bg-indigo-50 flex items-center justify-center">
+                                <i class="fas fa-tasks text-indigo-500 text-xs"></i>
                             </div>
                             采集状态
                         </h3>
                         <div class="flex items-center gap-2">
                             <template x-if="hasSuccessfulTasks">
                                 <span
-                                    class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100"
+                                    class="text-[11px] leading-5 font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100"
                                     x-transition:enter="transition ease-out duration-300"
                                     x-transition:enter-end="opacity-100 scale-100"
                                     x-transition:enter-start="opacity-0 scale-75">
@@ -466,33 +433,37 @@ B0EXAMPLE1" rows="5" :value="inputAsins" @input="setInputAsins($event)"></textar
                         </div>
                     </div>
                     <!-- Progress Bar (Enhanced) -->
-                    <div class="progress-bar-container w-full bg-slate-100 h-1.5">
+                    <div class="progress-bar-container w-full bg-slate-100 h-1">
                         <div :style="taskProgressStyle"
                             class="progress-bar-fill h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-500">
                         </div>
                     </div>
                 </div>
-                <div class="p-6">
-                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-72 overflow-y-auto pr-1 custom-scrollbar">
+                <div class="px-4 py-3">
+                    <div class="task-status-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 max-h-44 overflow-y-auto pr-1 custom-scrollbar">
                         <template :key="task.asin" x-for="(task, index) in tasks">
-                            <div :class="getTaskCardClass(task)" :style="getAnimationDelayStyle(index, 60)"
-                                class="task-card p-3.5 rounded-xl border-2 bg-white">
-                                <!-- ASIN Header -->
-                                <div class="flex items-center justify-between mb-2.5">
-                                    <span class="font-mono font-bold text-sm text-slate-800 tracking-tight"
-                                        x-text="task.asin"></span>
-                                    <div :class="getTaskIconWrapperClass(task)" class="task-icon w-7 h-7 rounded-lg flex items-center justify-center">
-                                        <i :class="getTaskIconClass(task)" class="fas text-xs"></i>
-                                    </div>
+                            <div :class="getTaskCardClass(task)" :style="getAnimationDelayStyle(index, 30)"
+                                class="task-card flex items-center gap-2 px-2.5 py-2 rounded-lg border bg-white min-h-[40px]">
+                                <div :class="getTaskIconWrapperClass(task)"
+                                    class="task-icon w-5 h-5 rounded-md flex items-center justify-center">
+                                    <i :class="getTaskIconClass(task)" class="fas text-[10px]"></i>
                                 </div>
-                                <!-- Status Message -->
-                                <div :class="getTaskMessageClass(task)" class="text-xs min-h-[1.75rem] flex items-center w-full">
-                                    <template x-if="isTaskSuccess(task)">
-                                        <div class="font-medium" x-text="task.message"></div>
-                                    </template>
-                                    <template x-if="isTaskNotSuccess(task)">
-                                        <span class="truncate font-medium" x-text="task.message"></span>
-                                    </template>
+                                <!-- ASIN and Status -->
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <span class="font-mono font-bold text-[12px] leading-4 text-slate-800 tracking-tight truncate"
+                                            x-text="task.asin"></span>
+                                    </div>
+                                    <!-- Status Message -->
+                                    <div :class="getTaskMessageClass(task)"
+                                        class="text-[11px] leading-4 flex items-center w-full">
+                                        <template x-if="isTaskSuccess(task)">
+                                            <div class="font-medium truncate" x-text="task.message"></div>
+                                        </template>
+                                        <template x-if="isTaskNotSuccess(task)">
+                                            <span class="truncate font-medium" x-text="task.message"></span>
+                                        </template>
+                                    </div>
                                 </div>
                             </div>
                         </template>

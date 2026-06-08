@@ -87,8 +87,8 @@ export function createComputedProperties(context: AlpineContext): ComputedProper
         });
       }
 
-      // 如果没有从 Scraper 获取到，从示例数据获取
-      if (products.length === 0) {
+      // 只有显式切换到示例数据时才使用示例产品，避免真实数据为空时误用旧 ASIN。
+      if (products.length === 0 && !context.useRealData) {
         console.log('[计算属性] 尝试从示例数据获取产品');
         for (const asin of context.selectedAsins) {
           const product = getProductByAsin(asin);

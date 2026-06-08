@@ -205,19 +205,19 @@ export function createScraperPanel() {
 
         getTaskCardClass(task: Task): Record<string, boolean> {
             return {
-                'border-slate-150 bg-slate-50/50': task.status === 'pending',
-                'border-blue-200 bg-gradient-to-br from-blue-50/80 to-white shadow-sm shadow-blue-100/50 scraping-shimmer': task.status === 'scraping',
-                'border-emerald-200 bg-gradient-to-br from-emerald-50/80 to-white shadow-sm shadow-emerald-100/50': task.status === 'success',
-                'border-rose-200 bg-gradient-to-br from-rose-50/80 to-white shadow-sm shadow-rose-100/50': task.status === 'failed'
+                'border-slate-200 bg-slate-50/60': task.status === 'pending',
+                'border-blue-200 bg-blue-50/60 scraping-shimmer': task.status === 'scraping',
+                'border-emerald-200 bg-emerald-50/60': task.status === 'success',
+                'border-rose-200 bg-rose-50/60': task.status === 'failed'
             };
         },
 
         getTaskIconWrapperClass(task: Task): Record<string, boolean> {
             return {
                 'bg-slate-100 text-slate-400': task.status === 'pending',
-                'bg-blue-100 text-blue-600': task.status === 'scraping',
-                'bg-emerald-100 text-emerald-600': task.status === 'success',
-                'bg-rose-100 text-rose-600': task.status === 'failed'
+                'bg-blue-100 text-blue-600 ring-1 ring-blue-200/70': task.status === 'scraping',
+                'bg-emerald-100 text-emerald-600 ring-1 ring-emerald-200/70': task.status === 'success',
+                'bg-rose-100 text-rose-600 ring-1 ring-rose-200/70': task.status === 'failed'
             };
         },
 

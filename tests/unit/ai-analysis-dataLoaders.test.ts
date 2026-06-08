@@ -162,6 +162,34 @@ describe('dataLoaders - checkAndLoadScraperData', () => {
     expect(mockContext.selectedAsins).toEqual([]);
     expect(mockAppStoreState.setSelectedAsins).not.toHaveBeenCalled();
   });
+
+  it('应该在真实数据模式且产品为空时清理过期 ASIN', () => {
+    mockAppStoreState.scraper = { scrapedData: { products: [] } };
+    mockContext.useRealData = true;
+    mockContext.dataSource = 'scraper';
+    mockContext.selectedAsins = ['B001'];
+
+    checkAndLoadScraperData(mockContext);
+
+    expect(mockContext.selectedAsins).toEqual([]);
+    expect(mockAppStoreState.setSelectedAsins).toHaveBeenCalledWith([]);
+  });
+
+  it('应该在真实数据模式且产品为空时清理过期分析报告', () => {
+    const staleReport = { 'title-keywords': { title: 'Old Report' } };
+    mockAppStoreState.scraper = { scrapedData: { products: [] } };
+    mockAppStoreState.analysis = { analysisReport: staleReport };
+    mockContext.useRealData = true;
+    mockContext.dataSource = 'scraper';
+    mockContext.analysisReport = staleReport;
+    mockContext.hasReport = true;
+
+    checkAndLoadScraperData(mockContext);
+
+    expect(mockContext.analysisReport).toBe(null);
+    expect(mockContext.hasReport).toBe(false);
+    expect(mockAppStoreState.setAnalysisReport).toHaveBeenCalledWith(null);
+  });
 });
 
 describe('dataLoaders - checkLoadedReport', () => {
@@ -170,6 +198,7 @@ describe('dataLoaders - checkLoadedReport', () => {
   beforeEach(() => {
     mockContext = createContext();
     mockAppStoreState.analysis = {};
+    mockAppStoreState.scraper = undefined;
   });
 
   afterEach(() => {
@@ -183,12 +212,33 @@ describe('dataLoaders - checkLoadedReport', () => {
       }
     };
 
+    mockAppStoreState.scraper = {
+      scrapedData: {
+        products: [{ asin: 'B001', title: 'Product 1' }]
+      }
+    };
     mockAppStoreState.analysis = { analysisReport: mockReport };
 
     checkLoadedReport(mockContext);
 
     expect(mockContext.analysisReport).toEqual(mockReport);
     expect(mockContext.hasReport).toBe(true);
+  });
+
+  it('应该在当前产品数据为空时不加载历史报告', () => {
+    const mockReport = {
+      'title-keywords': {
+        title: 'Test Result'
+      }
+    };
+
+    mockAppStoreState.scraper = { scrapedData: { products: [] } };
+    mockAppStoreState.analysis = { analysisReport: mockReport };
+
+    checkLoadedReport(mockContext);
+
+    expect(mockContext.analysisReport).toBe(null);
+    expect(mockContext.hasReport).toBe(false);
   });
 
   it('应该在报告为 null 时不做任何操作', () => {

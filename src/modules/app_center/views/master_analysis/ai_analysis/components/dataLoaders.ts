@@ -13,32 +13,58 @@ function isHistoricalAnalysisReport(report: unknown): report is AnalysisReport |
   return typeof report === 'string' || (typeof report === 'object' && report !== null);
 }
 
+function hasScrapedProducts(scrapedData: ScrapedData | null): scrapedData is ScrapedData & { products: NonNullable<ScrapedData['products']> } {
+  return Array.isArray(scrapedData?.products) && scrapedData.products.length > 0;
+}
+
+function clearStaleScraperInput(context: AlpineContext): void {
+  if (!context.useRealData && context.dataSource !== 'scraper') {
+    return;
+  }
+
+  if (context.selectedAsins.length > 0) {
+    context.selectedAsins = [];
+    appStore.getState().setSelectedAsins([]);
+    console.log('[数据加载] 当前产品数据为空，已清理过期 ASIN 选择');
+  }
+
+  if (context.analysisReport || appStore.getState().analysis?.analysisReport) {
+    context.analysisReport = null;
+    context.hasReport = false;
+    appStore.getState().setAnalysisReport(null);
+    console.log('[数据加载] 当前产品数据为空，已清理过期分析报告');
+  }
+}
+
 /**
  * 检查并加载 Scraper 数据
  */
 export function checkAndLoadScraperData(context: AlpineContext): void {
   const scrapedData = appStore.getState().scraper?.scrapedData as ScrapedData | null;
 
-  if (scrapedData && scrapedData.products && scrapedData.products.length > 0) {
-    // 如果有 Scraper 数据，自动选中所有产品的 ASIN
-    const asins = scrapedData.products
-      .map(p => p.asin)
-      .filter((asin): asin is string => !!asin);
+  if (!hasScrapedProducts(scrapedData)) {
+    clearStaleScraperInput(context);
+    return;
+  }
 
-    if (asins.length > 0 && JSON.stringify(asins) !== JSON.stringify(context.selectedAsins)) {
-      context.selectedAsins = asins;
-      context.dataSource = 'scraper';
-      // 同步到 Zustand store
-      appStore.getState().setSelectedAsins(asins);
-      console.log('[数据加载] 自动加载 Scraper 数据:', context.selectedAsins);
-      showToast(`已自动加载 ${asins.length} 个产品 ASIN`, { type: 'success' });
-    }
+  // 如果有 Scraper 数据，自动选中所有产品的 ASIN
+  const asins = scrapedData.products
+    .map(p => p.asin)
+    .filter((asin): asin is string => !!asin);
 
-    // 自动启用真实数据分析模式
-    if (!context.useRealData) {
-      context.useRealData = true;
-      console.log('[数据加载] 已自动启用真实数据分析模式');
-    }
+  if (asins.length > 0 && JSON.stringify(asins) !== JSON.stringify(context.selectedAsins)) {
+    context.selectedAsins = asins;
+    context.dataSource = 'scraper';
+    // 同步到 Zustand store
+    appStore.getState().setSelectedAsins(asins);
+    console.log('[数据加载] 自动加载 Scraper 数据:', context.selectedAsins);
+    showToast(`已自动加载 ${asins.length} 个产品 ASIN`, { type: 'success' });
+  }
+
+  // 自动启用真实数据分析模式
+  if (!context.useRealData) {
+    context.useRealData = true;
+    console.log('[数据加载] 已自动启用真实数据分析模式');
   }
 }
 
@@ -46,6 +72,11 @@ export function checkAndLoadScraperData(context: AlpineContext): void {
  * 检查是否有已加载的历史报告（从全局状态）
  */
 export function checkLoadedReport(context: AlpineContext): void {
+  const scrapedData = appStore.getState().scraper?.scrapedData as ScrapedData | null;
+  if (!hasScrapedProducts(scrapedData)) {
+    return;
+  }
+
   const report = appStore.getState().analysis?.analysisReport;
 
   // 类型守卫：确保 report 是对象类型

@@ -1185,8 +1185,7 @@ a {
   .no-print,
   nav,
   aside,
-  .sidebar,
-  .header-gradient-line {
+  .sidebar {
     display: none !important;
   }
 

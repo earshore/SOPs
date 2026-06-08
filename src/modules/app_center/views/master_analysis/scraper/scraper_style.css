@@ -420,18 +420,29 @@
 }
 
 /* ---- Task Cards ---- */
+.task-status-grid {
+  scrollbar-gutter: stable;
+}
+
 .task-card {
   animation: cardEnter var(--duration-slow) var(--ease-smooth) both;
-  transition: all var(--duration-normal) var(--ease-smooth);
+  transition:
+    background-color var(--duration-normal) var(--ease-smooth),
+    border-color var(--duration-normal) var(--ease-smooth),
+    box-shadow var(--duration-normal) var(--ease-smooth),
+    transform var(--duration-normal) var(--ease-smooth);
+  contain: layout paint;
 }
 .task-card:hover {
   transform: translateY(-1px);
+  box-shadow: 0 6px 14px -12px rgba(15, 23, 42, 0.35);
 }
 .task-card .task-icon {
   transition: all var(--duration-normal) ease;
+  flex: 0 0 auto;
 }
 .task-card:hover .task-icon {
-  transform: scale(1.1);
+  transform: scale(1.06);
 }
 
 /* ---- Scraping status shimmer ---- */

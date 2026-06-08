@@ -22,6 +22,7 @@ vi.mock('@/modules/app_center/views/master_analysis/services/historyService', ()
 }));
 
 vi.mock('@/common/constants/constants', () => ({
+  APP_VERSION: 'test',
   LANGUAGE_HEADERS: {
     DE: { domain: 'amazon.de', name: 'German' },
     FR: { domain: 'amazon.fr', name: 'French' },
