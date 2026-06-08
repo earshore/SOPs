@@ -11,7 +11,7 @@ import { SystemError } from '@/common/errors/AppError';
 // ========================
 
 /** 应用版本号（用于缓存失效） */
-export const APP_VERSION = '1.0.2';
+export const APP_VERSION = import.meta.env.VITE_APP_VERSION || '1.0.0';
 
 // ========================
 // USER AGENT POOL

@@ -8,9 +8,7 @@
 import { marked } from 'marked';
 // Chart.js and GridStack are now lazy loaded via src/common/utils/lazyLibs.js
 
-// 🎯 性能优化: 只加载首屏关键CSS，其他CSS延迟加载
-import './css/critical.css';
-// 非关键CSS在 DOMContentLoaded 后异步加载
+// 🎯 性能优化: 首屏关键CSS由 index.html 提前加载，其他CSS在 DOMContentLoaded 后异步加载
 // 模块特定样式改为按需懒加载,不在启动时导入
 
 // 🎯 CSS性能监控（仅开发环境）
@@ -81,6 +79,7 @@ import {
 
 import { renderMegaMenu, renderSopsMegaMenu, renderHubMegaMenu, renderMoreMenu, showToast } from "./common/ui";
 import { APP_EVENTS } from './common/constants/eventConstants';
+import { APP_VERSION } from './common/constants/constants';
 import { initHomeSplash } from "./modules/home/homeDisplay";
 
 // ✅ 自动注册事件监听器的模块 (事件驱动模式)
@@ -127,6 +126,13 @@ function isClosableModalElement(element: Element | null): element is ClosableMod
   return element instanceof HTMLElement && typeof (element as { close?: unknown }).close === 'function';
 }
 
+function updateAppVersionLabel(): void {
+  const versionEl = document.getElementById('app-version-more');
+  if (versionEl) {
+    versionEl.textContent = `V ${APP_VERSION}`;
+  }
+}
+
 // 🔧 关键修复: 确保 Alpine 在所有环境下都可通过 window.Alpine 访问
 // 这对于动态注册组件至关重要
 // 使用类型断言避免 TypeScript 错误,并确保不被 Terser 优化掉
@@ -153,6 +159,8 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
   } catch (e) {
     console.warn('主样式加载失败:', e);
   }
+
+  updateAppVersionLabel();
 
   // ================================================================
   // 🎯 DI容器整合: 使用ServiceRegistry统一管理服务

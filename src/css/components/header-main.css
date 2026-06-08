@@ -457,6 +457,55 @@
     font-weight: 500;
 }
 
+.version-card {
+    align-items: center;
+    gap: 12px;
+    margin-top: 20px;
+    padding: 14px 16px;
+    background: linear-gradient(135deg, rgba(248, 250, 252, 0.96), rgba(240, 253, 244, 0.78));
+    border-color: rgba(148, 163, 184, 0.24);
+}
+
+.version-card .tip-card-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: rgba(132, 204, 22, 0.14);
+    margin-top: 0;
+}
+
+.version-card .tip-card-icon i {
+    font-size: 11px;
+    color: #65a30d;
+}
+
+.version-card-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.version-card-label {
+    font-size: 10px;
+    line-height: 1;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+}
+
+.version-card-value {
+    max-width: 180px;
+    overflow: hidden;
+    color: #0f172a;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.35;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 /* ========================================
    Model Status
    ======================================== */

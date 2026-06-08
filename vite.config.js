@@ -1,6 +1,8 @@
 import { defineConfig } from 'vite';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
+import { execFileSync } from 'child_process';
+import { createRequire } from 'module';
 import checker from 'vite-plugin-checker';
 import viteCompression from 'vite-plugin-compression';
 import os from 'os';
@@ -8,9 +10,32 @@ import os from 'os';
 // ES 模块兼容的 __dirname 定义
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+const require = createRequire(import.meta.url);
+const packageJson = require('./package.json');
+
+function getAppVersion() {
+    try {
+        const tag = execFileSync('git', ['describe', '--tags', '--abbrev=0'], {
+            cwd: __dirname,
+            encoding: 'utf8',
+            stdio: ['ignore', 'pipe', 'ignore']
+        }).trim();
+
+        if (tag) {
+            return tag.replace(/^v/i, '');
+        }
+    } catch {
+        // Fallback for builds without git metadata.
+    }
+
+    return packageJson.version;
+}
 
 export default defineConfig({
     publicDir: 'public',
+    define: {
+        'import.meta.env.VITE_APP_VERSION': JSON.stringify(getAppVersion())
+    },
     plugins: [
         checker({
             typescript: {

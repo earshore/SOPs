@@ -34,7 +34,8 @@
             rel="stylesheet">
     </noscript>
 
-    <!-- 首屏关键样式已迁移到 src/css/critical.css，由 Vite 统一注入 -->
+    <!-- 首屏关键样式：必须在 JS 启动前加载，避免导航骨架首帧闪现 -->
+    <link rel="stylesheet" href="/src/css/critical.css">
 
     <!-- 外部样式由 Vite 通过 /src/main.ts 统一注入 -->
 </head>
@@ -203,14 +204,15 @@
                                         </ul>
                                     </div>
 
-                                    <!-- Tip Card -->
-                                    <div class="tip-card">
+                                    <!-- Version Card -->
+                                    <div class="tip-card version-card" aria-label="当前版本">
                                         <div class="tip-card-icon">
-                                            <i class="fas fa-lightbulb"></i>
+                                            <i class="fas fa-code-branch"></i>
                                         </div>
-                                        <p class="tip-card-text">
-                                            这里包含系统设置等实用功能。
-                                        </p>
+                                        <div class="version-card-copy">
+                                            <span class="version-card-label">当前版本</span>
+                                            <span id="app-version-more" class="version-card-value">V --</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

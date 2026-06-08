@@ -2,7 +2,17 @@
 
 sops 是一个 Vite + TypeScript 静态前端项目，面向亚马逊运营团队，提供 SOP 流程、Amazon 智库、应用中心和大模型探索工具。当前部署形态是 Cloudflare Pages 托管静态资源，浏览器端按用户配置调用 LLM 网关；仓库和 Pages 项目不应保存生产 API key。
 
-> 本 README 已按当前代码结构、`package.json` 脚本和部署文档重新核对。`docs/archive/` 与 `.kiro/specs/` 中的阶段性文档可作历史参考，不建议直接作为当前开发依据。
+> 本 README 已按最新远端 tag `v3.0.1-rc.2`、当前代码结构、`package.json` 脚本和部署文档重新核对。`docs/archive/` 与 `.kiro/specs/` 中的阶段性文档可作历史参考，不建议直接作为当前开发依据。
+
+## 最新发布
+
+当前最新 tag 是 `v3.0.1-rc.2`（2026-06-08，release candidate）；最新稳定 tag 仍是 `v3.0.0`。`v3.0.1-rc.2` 修复了 PPC 搜索词模块的 ESLint warning gate，`v3.0.1` 系列累计带来以下面向运营的变化：
+
+- 新增 App Center 的 `PPC 搜索词分析器`，路由为 `/app-center/ppc-search-terms`。
+- 支持 Amazon Ads 搜索词报表、ERP 广告搜索词报表和 ERP 广告活动报表，支持 CSV、TSV、TXT、XLSX 或直接粘贴表格内容。
+- 输出否精准、加精准、加预算、降竞价、Listing 词池等搜索词动作；ERP 广告活动报表会输出处理状态、暂停/降预算、活动加预算、控价降竞价和结构复盘等活动级动作。
+- 引入 PPC Agent 流程：本地规则先全量初判，模型只复核低置信高影响候选，并合并为最终动作清单。
+- Agent Center 增加 PPC Search Terms Agent 原型，用于沉淀角色、Skill、工具和输出标准。
 
 ## 快速开始
 
@@ -63,11 +73,22 @@ npx wrangler pages deploy dist --project-name sops --branch main
 | 区域 | 主要功能 | 代码入口 |
 | --- | --- | --- |
 | SOPs 流程中心 | 运营推广、供应链物流、账号安全、客服体验相关 SOP 页面 | `src/modules/sops/` |
-| 应用中心 | Master Analysis、Keyword Hunter、Deep Chat Playground | `src/modules/app_center/` |
+| 应用中心 | Master Analysis、PPC Tools、Keyword Hunter、Deep Chat Playground | `src/modules/app_center/` |
 | Amazon 智库 | 市场洞察、SEO 策略、运营实践和进阶攻略 | `src/modules/amz_hub/` |
-| 更多 | 智能体、提示词、工作流探索页 | `src/modules/more/` |
+| 更多 | Agent Center、提示词、工作流探索页 | `src/modules/more/` |
 
 业务页面的路由、菜单元数据和懒加载入口统一声明在各模块的 `module.manifest.ts`。`src/common/constants/routes.ts`、`src/common/config/menuConfig.ts` 和各核心模块的加载映射会从这些 manifest 派生。
+
+### 应用中心入口
+
+| 应用 | 路由 | 说明 |
+| --- | --- | --- |
+| Master Analysis | `/app-center/scraper`、`/app-center/ai-analysis`、`/app-center/promptlab` | 竞品数据采集、AI 分析和 Prompt 生成 |
+| PPC Tools | `/app-center/ppc-search-terms` | 导入广告搜索词或活动报表，生成 PPC 动作清单和周报摘要 |
+| Keyword Hunter | `/app-center/keyword-hunter/input`、`/app-center/keyword-hunter/process`、`/app-center/keyword-hunter/analysis` | 关键词输入、处理与分析统计 |
+| Deep Chat | `/app-center/playground/deep-chat` | LLM 对话与提示词实验 |
+
+PPC 搜索词分析器只输出运营建议，最终否词、加词、改价、预算调整仍在 ERP 或广告后台执行。
 
 ## 技术栈
 
@@ -131,6 +152,7 @@ npm run ci:all           # 安全 + 质量 + 构建
 ```bash
 npm run test             # Vitest
 npm run test:coverage    # 单元测试覆盖率
+npx vitest run tests/unit/ppc-search-terms.test.ts tests/unit/ppc-search-terms-ui.test.ts # PPC 工具专项测试
 npm run test:e2e         # Playwright E2E
 npm run test:performance # Playwright 性能测试
 npm run test:visual      # 视觉回归测试
@@ -228,4 +250,4 @@ export const unmount = () => instance.unmount();
 ---
 
 **维护者**: sops 开发团队  
-**最后更新**: 2026-06-07
+**最后更新**: 2026-06-08

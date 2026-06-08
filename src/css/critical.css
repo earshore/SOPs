@@ -127,8 +127,9 @@ body {
 .header-inner {
   display: flex;
   align-items: center;
-  gap: 2rem;
-  padding: 0 2rem;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0 24px;
   height: 64px;
 }
 
@@ -139,13 +140,172 @@ body {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0.5rem;
+  height: 64px;
+  padding: 0 0.5rem;
   border-radius: 0.5rem;
+  flex-shrink: 0;
   transition: background var(--duration-normal) var(--ease-smooth);
 }
 
 .logo-button:hover {
   background: var(--color-slate-50);
+}
+
+.logo-text-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.logo-text-main {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: #0f172a;
+  white-space: nowrap;
+}
+
+.logo-subtitle {
+  margin-top: 4px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  color: #64748b;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.nav-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 100%;
+  min-width: 0;
+}
+
+.nav-group {
+  position: static;
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.nav-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 100%;
+  padding: 0 20px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.nav-trigger .nav-icon {
+  font-size: 11px;
+  opacity: 0.5;
+}
+
+.nav-trigger .nav-chevron {
+  font-size: 9px;
+  opacity: 0.35;
+}
+
+.mega-menu {
+  position: fixed;
+  top: 67px;
+  left: 0;
+  right: 0;
+  z-index: var(--z-mega-menu);
+  max-height: calc(100dvh - 67px);
+  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.985);
+  border-bottom: 1px solid rgba(203, 213, 225, 0.9);
+  box-shadow: 0 24px 60px -24px rgba(15, 23, 42, 0.32);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition:
+    opacity var(--duration-normal) var(--ease-smooth),
+    transform var(--duration-normal) var(--ease-smooth),
+    visibility 0s linear var(--duration-normal);
+}
+
+.nav-group:hover .mega-menu {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+  transition:
+    opacity var(--duration-normal) var(--ease-smooth),
+    transform var(--duration-normal) var(--ease-smooth),
+    visibility 0s linear 0s;
+}
+
+.mega-menu-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 32px 40px;
+}
+
+.mega-menu-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.mega-menu-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.mega-menu-grid--5 {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.mega-menu-grid--4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.mega-menu-grid--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.more-menu-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 32px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 160px;
+}
+
+.model-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 9999px;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .flex {
@@ -178,5 +338,38 @@ body {
 
   100% {
     background-position: -200% 0;
+  }
+}
+
+@media (max-width: 1024px) {
+  .mega-menu-grid--5 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .more-menu-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-inner {
+    padding: 0 16px;
+  }
+
+  .nav-wrapper {
+    display: none;
+  }
+
+  .header-actions {
+    min-width: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mega-menu,
+  .nav-trigger,
+  .skeleton {
+    animation: none !important;
+    transition: none !important;
   }
 }

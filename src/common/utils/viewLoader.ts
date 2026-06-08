@@ -13,6 +13,8 @@ import { escapeHtml } from '@/common/utils/security';
 
 const CACHE_PREFIX = CACHE_PREFIXES.VIEW;
 const LEGACY_CACHE_PREFIX = 'view_cache_';
+const VIEW_CACHE_SCHEMA_VERSION = 'view-v2';
+const VIEW_CACHE_VERSION = `${APP_VERSION}:${VIEW_CACHE_SCHEMA_VERSION}`;
 
 /**
  * 视图配置接口
@@ -59,7 +61,7 @@ export interface ViewLoadOptions {
  * 获取带版本的缓存键
  */
 function getCacheKey(path: string): string {
-    return `${CACHE_PREFIX}${APP_VERSION}_${path}`;
+    return `${CACHE_PREFIX}${VIEW_CACHE_VERSION}_${path}`;
 }
 
 /**
@@ -113,7 +115,7 @@ function setCache(path: string, content: string): void {
 export function clearOldCache(): void {
     try {
         const keysToRemove: string[] = [];
-        const currentVersionPrefix = `${CACHE_PREFIX}${APP_VERSION}_`;
+        const currentVersionPrefix = `${CACHE_PREFIX}${VIEW_CACHE_VERSION}_`;
 
         // 获取所有存储的键
         const allKeys = StorageService.keys();
