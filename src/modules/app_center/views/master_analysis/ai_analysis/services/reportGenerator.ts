@@ -5,6 +5,70 @@
 
 import { AnalysisResult, ReportMetadata } from '../types';
 
+interface MarkdownSectionConfig {
+  source: AnalysisResult['source'];
+  heading: string;
+}
+
+const MARKDOWN_SECTIONS: MarkdownSectionConfig[] = [
+  { source: 'Listings', heading: '📦 Listings 分析' },
+  { source: 'Reviews', heading: '⭐ Reviews 分析' }
+];
+
+function appendStats(lines: string[], result: AnalysisResult): void {
+  if (result.stats.length === 0) return;
+
+  lines.push('\n**统计数据**:\n');
+  for (const stat of result.stats) {
+    lines.push(`- ${stat.label}: ${stat.value}`);
+  }
+  lines.push('');
+}
+
+function appendHighlights(lines: string[], result: AnalysisResult): void {
+  if (result.highlights.length === 0) return;
+
+  lines.push('\n**核心发现**:\n');
+  for (const highlight of result.highlights) {
+    lines.push(`- ${highlight.text}`);
+  }
+  lines.push('');
+}
+
+function appendDetails(lines: string[], result: AnalysisResult): void {
+  if (result.details.length === 0) return;
+
+  lines.push('\n**详细分析**:\n');
+  for (const detail of result.details) {
+    lines.push(`\n#### ${detail.category}\n`);
+    for (const item of detail.items) {
+      lines.push(`- ${item}`);
+    }
+  }
+  lines.push('');
+}
+
+function appendAnalysisResult(lines: string[], result: AnalysisResult): void {
+  lines.push(`\n### ${result.title}\n`);
+  appendStats(lines, result);
+  appendHighlights(lines, result);
+  appendDetails(lines, result);
+}
+
+function appendAnalysisSection(
+  lines: string[],
+  results: AnalysisResult[],
+  config: MarkdownSectionConfig
+): void {
+  const sectionResults = results.filter(result => result.source === config.source);
+  if (sectionResults.length === 0) return;
+
+  lines.push(`\n## ${config.heading}\n`);
+  for (const result of sectionResults) {
+    appendAnalysisResult(lines, result);
+  }
+}
+
 /**
  * 格式化历史日期
  */
@@ -51,83 +115,7 @@ export function generateMarkdownReport(
   lines.push(`**数据源**: ${dataSourceLabel}\n`);
   lines.push('\n---\n');
 
-  // Listings 分析结果
-  const listingsResults = results.filter(r => r.source === 'Listings');
-  if (listingsResults.length > 0) {
-    lines.push('\n## 📦 Listings 分析\n');
-    for (const result of listingsResults) {
-      lines.push(`\n### ${result.title}\n`);
-
-      // 统计数据
-      if (result.stats && result.stats.length > 0) {
-        lines.push('\n**统计数据**:\n');
-        for (const stat of result.stats) {
-          lines.push(`- ${stat.label}: ${stat.value}`);
-        }
-        lines.push('');
-      }
-
-      // 核心发现
-      if (result.highlights && result.highlights.length > 0) {
-        lines.push('\n**核心发现**:\n');
-        for (const highlight of result.highlights) {
-          lines.push(`- ${highlight.text}`);
-        }
-        lines.push('');
-      }
-
-      // 详细分析
-      if (result.details && result.details.length > 0) {
-        lines.push('\n**详细分析**:\n');
-        for (const detail of result.details) {
-          lines.push(`\n#### ${detail.category}\n`);
-          for (const item of detail.items) {
-            lines.push(`- ${item}`);
-          }
-        }
-        lines.push('');
-      }
-    }
-  }
-
-  // Reviews 分析结果
-  const reviewsResults = results.filter(r => r.source === 'Reviews');
-  if (reviewsResults.length > 0) {
-    lines.push('\n## ⭐ Reviews 分析\n');
-    for (const result of reviewsResults) {
-      lines.push(`\n### ${result.title}\n`);
-
-      // 统计数据
-      if (result.stats && result.stats.length > 0) {
-        lines.push('\n**统计数据**:\n');
-        for (const stat of result.stats) {
-          lines.push(`- ${stat.label}: ${stat.value}`);
-        }
-        lines.push('');
-      }
-
-      // 核心发现
-      if (result.highlights && result.highlights.length > 0) {
-        lines.push('\n**核心发现**:\n');
-        for (const highlight of result.highlights) {
-          lines.push(`- ${highlight.text}`);
-        }
-        lines.push('');
-      }
-
-      // 详细分析
-      if (result.details && result.details.length > 0) {
-        lines.push('\n**详细分析**:\n');
-        for (const detail of result.details) {
-          lines.push(`\n#### ${detail.category}\n`);
-          for (const item of detail.items) {
-            lines.push(`- ${item}`);
-          }
-        }
-        lines.push('');
-      }
-    }
-  }
+  MARKDOWN_SECTIONS.forEach(section => appendAnalysisSection(lines, results, section));
 
   lines.push('\n---\n');
   lines.push(`\n*报告生成于 ${new Date().toLocaleString('zh-CN')}*\n`);

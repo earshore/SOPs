@@ -1,19 +1,13 @@
 {
   "version": 1,
   "command": "node node_modules/eslint/bin/eslint.js src --ignore-pattern **/*.test.ts --ignore-pattern **/*.test.tsx --ignore-pattern **/*.spec.ts --ignore-pattern **/*.spec.tsx --format json",
-  "totalWarnings": 48,
+  "totalWarnings": 41,
   "warnings": [
     {
       "filePath": "src/common/errors/AppError.ts",
       "ruleId": "@typescript-eslint/max-params",
       "message": "Constructor has too many parameters (7). Maximum allowed is 5.",
       "count": 2
-    },
-    {
-      "filePath": "src/common/errors/index.ts",
-      "ruleId": "@typescript-eslint/max-params",
-      "message": "Function 'handleApiError' has too many parameters (6). Maximum allowed is 5.",
-      "count": 1
     },
     {
       "filePath": "src/common/router/navigo/NavigoAdapter.ts",
@@ -106,18 +100,6 @@
       "count": 1
     },
     {
-      "filePath": "src/modules/app_center/views/master_analysis/ai_analysis/services/reportGenerator.ts",
-      "ruleId": "complexity",
-      "message": "Function 'generateMarkdownReport' has a complexity of 25. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/ai_analysis/services/reportGenerator.ts",
-      "ruleId": "max-depth",
-      "message": "Blocks are nested too deeply (5). Maximum allowed is 4.",
-      "count": 2
-    },
-    {
       "filePath": "src/modules/app_center/views/master_analysis/promptlab/components/PromptlabPanel.ts",
       "ruleId": "max-lines-per-function",
       "message": "Function 'createPromptlabPanel' has too many lines (492). Maximum allowed is 100.",
@@ -146,12 +128,6 @@
       "ruleId": "complexity",
       "message": "Async function 'handleImportFiles' has a complexity of 21. Maximum allowed is 10.",
       "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/services/dnaExtractor.ts",
-      "ruleId": "complexity",
-      "message": "Function 'extractAudience' has a complexity of 19. Maximum allowed is 10.",
-      "count": 2
     },
     {
       "filePath": "src/modules/app_center/views/master_analysis/services/scraperService.ts",
@@ -200,12 +176,6 @@
       "ruleId": "max-lines-per-function",
       "message": "Async function 'callLLM' has too many lines (252). Maximum allowed is 100.",
       "count": 2
-    },
-    {
-      "filePath": "src/services/llmServiceWithTimeout.ts",
-      "ruleId": "@typescript-eslint/max-params",
-      "message": "Async function 'callLLMWithTimeout' has too many parameters (6). Maximum allowed is 5.",
-      "count": 1
     },
     {
       "filePath": "src/stores/useAppStore.ts",

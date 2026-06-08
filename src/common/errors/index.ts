@@ -45,6 +45,14 @@ import {
 import { ERROR_CODES } from './errorCodes';
 import type { ErrorCode } from './errorCodes';
 
+export interface HandleApiErrorOptions {
+  statusCode?: number;
+  response?: unknown;
+  context?: ErrorContext;
+  originalError?: Error;
+  handlerOptions?: ErrorHandlerOptions;
+}
+
 /**
  * 处理错误(便捷函数)
  */
@@ -71,15 +79,12 @@ export function handleNetworkError(
  */
 export function handleApiError(
   code: ErrorCode,
-  statusCode?: number,
-  response?: unknown,
-  context?: ErrorContext,
-  originalError?: Error,
-  options?: ErrorHandlerOptions
+  options: HandleApiErrorOptions = {}
 ): void {
+  const { statusCode, response, context, originalError, handlerOptions } = options;
   const errorInfo = ERROR_CODES[code] || ERROR_CODES.API_SERVER_ERROR;
   const error = new ApiError(errorInfo.message, code, statusCode, response, context, originalError);
-  globalErrorHandler.handle(error, options);
+  globalErrorHandler.handle(error, handlerOptions);
 }
 
 /**

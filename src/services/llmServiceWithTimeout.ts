@@ -22,25 +22,41 @@ export interface LLMWithTimeoutOptions extends LLMOptions {
   showUserNotification?: boolean;
 }
 
+export interface LLMWithTimeoutRequest extends LLMConfig {
+  messages: ChatMessage[];
+}
+
+function callLLMFromRequest(
+  request: LLMWithTimeoutRequest,
+  options: LLMOptions
+): Promise<string> {
+  return callLLM(
+    request.messages,
+    request.provider,
+    request.endpoint,
+    request.apiKey,
+    request.model,
+    options
+  );
+}
+
 /**
  * 带超时自动重试的LLM调用
  * 
- * @param messages - 消息列表
- * @param provider - 提供商
- * @param endpoint - API端点
- * @param apiKey - API密钥
- * @param model - 模型名称
+ * @param request - LLM请求配置
  * @param options - 配置选项
  * @returns LLM响应
  * 
  * @example
  * ```typescript
  * const response = await callLLMWithTimeout(
- *   messages,
- *   'openai',
- *   'https://api.openai.com/v1',
- *   'sk-xxx',
- *   'gpt-4',
+ *   {
+ *     messages,
+ *     provider: 'openai',
+ *     endpoint: 'https://api.openai.com/v1',
+ *     apiKey: 'sk-xxx',
+ *     model: 'gpt-4'
+ *   },
  *   {
  *     timeout: 30000,
  *     maxRetries: 3,
@@ -50,11 +66,7 @@ export interface LLMWithTimeoutOptions extends LLMOptions {
  * ```
  */
 export async function callLLMWithTimeout(
-  messages: ChatMessage[],
-  provider: string,
-  endpoint: string,
-  apiKey: string,
-  model: string,
+  request: LLMWithTimeoutRequest,
   options: LLMWithTimeoutOptions = {}
 ): Promise<string> {
   const {
@@ -68,7 +80,7 @@ export async function callLLMWithTimeout(
 
   console.log(`开始LLM调用: ${description}`, {
     taskId,
-    model,
+    model: request.model,
     timeout,
     maxRetries
   }, 'LLMService');
@@ -88,14 +100,7 @@ export async function callLLMWithTimeout(
           showToast('请求超时，正在自动重试...', { type: 'warning' });
         }
 
-        const result = await callLLM(
-          messages,
-          provider,
-          endpoint,
-          apiKey,
-          model,
-          { ...llmOptions, timeout }
-        );
+        const result = await callLLMFromRequest(request, { ...llmOptions, timeout });
 
         // 成功后标记任务成功
         workingStateManager.setSuccess(taskId);
@@ -117,7 +122,7 @@ export async function callLLMWithTimeout(
     });
 
     // 执行初始调用
-    callLLM(messages, provider, endpoint, apiKey, model, { ...llmOptions, timeout })
+    callLLMFromRequest(request, { ...llmOptions, timeout })
       .then(result => {
         // 成功后标记任务成功
         workingStateManager.setSuccess(taskId);
@@ -145,11 +150,7 @@ export async function callLLMWithConfigAndTimeout(
   options: LLMWithTimeoutOptions = {}
 ): Promise<string> {
   return callLLMWithTimeout(
-    messages,
-    config.provider,
-    config.endpoint,
-    config.apiKey,
-    config.model,
+    { ...config, messages },
     options
   );
 }
