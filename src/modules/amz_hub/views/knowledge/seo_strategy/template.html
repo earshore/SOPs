@@ -28,7 +28,7 @@
             <div class="wb-meta">
                 <span><i class="fas fa-tag mr-1"></i>Amazon知识早知道</span>
                 <span><i class="fas fa-tag mr-1"></i>SEO策略</span>
-                <span><i class="fas fa-tag mr-1"></i>更新日期：2024-01</span>
+                <span><i class="fas fa-tag mr-1"></i>更新日期：2026-06</span>
             </div>
         </div>
     </div>
@@ -40,45 +40,251 @@
                 <canvas id="amz_keywordRadarChart"></canvas>
             </div>
             <div class="text-center mt-4 text-xs text-slate-500">
-                图表展示了三种关键词来源在不同维度的表现能力
+                图表展示 Review/Listing 语义词与 Amazon 官方搜索数据在不同维度的表现能力
             </div>
         </div>
 
         <div class="w-full lg:w-1/2 space-y-4">
             <div
                 class="bg-white p-5 rounded-lg border border-slate-200 hover:border-orange-300 transition-colors shadow-sm">
-                <h4 class="font-bold text-lg text-slate-800">1. Listing/Review 扒词 (Mining)</h4>
+                <h4 class="font-bold text-lg text-slate-800">1. Amazon SEO 的官方定义</h4>
                 <div class="flex items-center mt-2 mb-2">
-                    <span class="text-xs font-bold bg-green-100 text-green-800 px-2 py-1 rounded mr-2">语义极强</span>
-                    <span class="text-xs font-bold bg-red-100 text-red-800 px-2 py-1 rounded">流量未知</span>
+                    <span class="text-xs font-bold bg-green-100 text-green-800 px-2 py-1 rounded mr-2">可见性</span>
+                    <span class="text-xs font-bold bg-blue-100 text-blue-800 px-2 py-1 rounded">转化</span>
                 </div>
                 <p class="text-sm text-slate-600">
-                    <span class="font-bold">靠谱吗？</span> 非常靠谱，但仅限于<b>相关性</b>和<b>转化率</b>优化。这是喂给 COSMO 和 Rufus
-                    建立“产品-需求”连接的最佳燃料。Review 里的词往往是用户真实的搜索意图。
+                    <span class="font-bold">核心口径：</span> Amazon 官方把 SEO 定义为提升商品和品牌在 Amazon 搜索结果中可见性的策略集合。关键词不是孤立字段，标题、描述、图片、价格、销售表现、广告和账号健康都会影响搜索表现。
                 </p>
             </div>
 
             <div
                 class="bg-white p-5 rounded-lg border border-slate-200 hover:border-blue-300 transition-colors shadow-sm">
-                <h4 class="font-bold text-lg text-slate-800">2. ABA / 前台下拉框 (Backend Data)</h4>
+                <h4 class="font-bold text-lg text-slate-800">2. 关键词研究：短尾 + 长尾</h4>
                 <div class="flex items-center mt-2 mb-2">
-                    <span class="text-xs font-bold bg-green-100 text-green-800 px-2 py-1 rounded mr-2">流量精准</span>
-                    <span class="text-xs font-bold bg-yellow-100 text-yellow-800 px-2 py-1 rounded">竞争激烈</span>
+                    <span class="text-xs font-bold bg-green-100 text-green-800 px-2 py-1 rounded mr-2">官方数据</span>
+                    <span class="text-xs font-bold bg-yellow-100 text-yellow-800 px-2 py-1 rounded">搜索意图</span>
                 </div>
                 <p class="text-sm text-slate-600">
-                    <span class="font-bold">靠谱吗？</span> 数据绝对真实，但大家都在用。这是<b>红海战场</b>。你必须用它来验证从 Review 扒来的词是否有搜索量。
+                    <span class="font-bold">怎么取词：</span> Amazon 官方建议结合搜索框建议、竞品详情页、Product Opportunity Explorer 和 Brand Analytics。短尾词负责覆盖核心类目，长尾词通常搜索量更低，但购买意图更明确、转化机会更高。
                 </p>
             </div>
 
-            <div class="bg-gradient-to-r from-slate-800 to-slate-900 p-5 rounded-lg text-white shadow-md">
-                <h4 class="font-bold text-lg">🚀 关键词的混合策略</h4>
+            <div class="bg-slate-900 p-5 rounded-lg text-white shadow-md">
+                <h4 class="font-bold text-lg flex items-center gap-2">
+                    <i class="fas fa-route text-orange-300"></i>
+                    官方数据驱动的 SEO 闭环
+                </h4>
                 <p class="text-sm mt-2 opacity-90">
-                    不要二选一。先用 LLM 从 Top竞品 Review 提取“高频场景词”（Scenario Keywords），再将这些词扔进 ABA 或工具反查搜索频率排名（SFR）。
-                    <br><br>
-                    <b>公式：</b> Review 场景词 + ABA 中长尾修饰词 = COSMO 友好型高转化词。
+                    先用 Product Opportunity Explorer / Brand Analytics 判断需求，再把关键词分配到标题、五点、描述和后台 Generic keyword，最后用 Search Query Performance、广告 Search Terms 和 Manage Your Experiments 验证曝光、点击、加购、购买与转化率。
                 </p>
             </div>
         </div>
     </div>
+
+    <section class="mt-8 space-y-6">
+        <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+            <div class="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-4">
+                <div class="min-w-0">
+                    <p class="text-xs font-bold uppercase tracking-wide text-blue-600 mb-2">Amazon official references</p>
+                    <h3 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                        <i class="fas fa-book-open text-blue-500"></i>
+                        引用亚马逊官方信息的 SEO 执行框架
+                    </h3>
+                    <p class="text-sm text-slate-600 mt-2 leading-relaxed max-w-3xl">
+                        把 SEO 拆成 4 个可复盘动作：找词、埋词、测试、放量。每一步都对应 Seller Central、Brand Analytics 或 Amazon Ads 的官方数据入口。
+                    </p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 xl:shrink-0">
+                    <div class="border border-blue-200 bg-blue-50 rounded-lg px-4 py-3">
+                        <div class="text-2xl font-extrabold text-blue-700">60</div>
+                        <div class="text-xs text-blue-900/75 mt-1">Amazon SEO 指南建议标题尽量不超过 60 字符，标题上限为 200 字符</div>
+                    </div>
+                    <div class="border border-purple-200 bg-purple-50 rounded-lg px-4 py-3">
+                        <div class="text-2xl font-extrabold text-purple-700">20%</div>
+                        <div class="text-xs text-purple-900/75 mt-1">Manage Your Experiments 官方说明的内容优化销售提升上限参考</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-5 flex flex-wrap gap-2 text-xs">
+                <a href="https://sell.amazon.com/blog/amazon-seo"
+                    target="_blank" rel="noopener noreferrer"
+                    class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1.5 font-semibold text-slate-700 hover:bg-slate-200">
+                    <i class="fas fa-magnifying-glass-chart text-blue-500"></i>Amazon SEO Guide
+                </a>
+                <a href="https://sell.amazon.com/blog/amazon-keyword-research?mons_sel_locale=en_US"
+                    target="_blank" rel="noopener noreferrer"
+                    class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1.5 font-semibold text-slate-700 hover:bg-slate-200">
+                    <i class="fas fa-key text-orange-500"></i>Keyword Research
+                </a>
+                <a href="https://sell.amazon.com/tools/product-opportunity-explorer?mons_sel_locale=en_US"
+                    target="_blank" rel="noopener noreferrer"
+                    class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1.5 font-semibold text-slate-700 hover:bg-slate-200">
+                    <i class="fas fa-database text-emerald-500"></i>Product Opportunity Explorer
+                </a>
+                <a href="https://developer-docs.amazon.com/sp-api/lang-en_EN/docs/report-type-values-analytics"
+                    target="_blank" rel="noopener noreferrer"
+                    class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1.5 font-semibold text-slate-700 hover:bg-slate-200">
+                    <i class="fas fa-chart-simple text-indigo-500"></i>Brand Analytics Reports
+                </a>
+                <a href="https://advertising.amazon.com/help/GK3MNACNTXG659J9"
+                    target="_blank" rel="noopener noreferrer"
+                    class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1.5 font-semibold text-slate-700 hover:bg-slate-200">
+                    <i class="fas fa-bullhorn text-red-500"></i>Keyword Targeting
+                </a>
+                <a href="https://sell.amazon.com/tools/manage-your-experiments"
+                    target="_blank" rel="noopener noreferrer"
+                    class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1.5 font-semibold text-slate-700 hover:bg-slate-200">
+                    <i class="fas fa-flask text-purple-500"></i>Manage Your Experiments
+                </a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+                <div class="flex items-start gap-3">
+                    <div class="h-10 w-10 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                        <i class="fas fa-filter"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <h4 class="font-bold text-slate-900">1. 找词：先验证需求，再进入文案</h4>
+                        <p class="text-sm text-slate-600 mt-2 leading-relaxed">
+                            官方 SEO 指南建议从 Amazon 搜索框、竞品 Offer、Product Opportunity Explorer 和 Brand Analytics 获取关键词。先把词分成类目短尾词、规格属性词、场景长尾词和品牌防守词，不要直接把所有词塞进标题。
+                        </p>
+                        <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                            <div class="bg-slate-50 rounded-lg p-3">
+                                <span class="block font-bold text-slate-800">数据源</span>
+                                <span class="text-slate-500">POE / SQP / Top Search Terms / 广告搜索词</span>
+                            </div>
+                            <div class="bg-slate-50 rounded-lg p-3">
+                                <span class="block font-bold text-slate-800">动作</span>
+                                <span class="text-slate-500">按搜索量、购买意图、竞争程度给词打优先级</span>
+                            </div>
+                            <div class="bg-slate-50 rounded-lg p-3">
+                                <span class="block font-bold text-slate-800">输出</span>
+                                <span class="text-slate-500">主词 3-5 个，长尾词 10-20 个，后台词一组</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+                <div class="flex items-start gap-3">
+                    <div class="h-10 w-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                        <i class="fas fa-pen-to-square"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <h4 class="font-bold text-slate-900">2. 埋词：标题、五点、描述各司其职</h4>
+                        <p class="text-sm text-slate-600 mt-2 leading-relaxed">
+                            Amazon 官方建议标题突出商品类型、品牌、颜色、尺寸等关键信息；描述用于补充材质、数量、尺寸、保养和保修信息；五点则聚焦最重要的设计、功能和使用场景。关键词要自然融入，避免重复堆砌。
+                        </p>
+                        <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                            <div class="bg-slate-50 rounded-lg p-3">
+                                <span class="block font-bold text-slate-800">标题</span>
+                                <span class="text-slate-500">品牌 + 商品类型 + 核心属性，优先可读性</span>
+                            </div>
+                            <div class="bg-slate-50 rounded-lg p-3">
+                                <span class="block font-bold text-slate-800">五点</span>
+                                <span class="text-slate-500">一词短标题 + 100 字符内解释，突出场景价值</span>
+                            </div>
+                            <div class="bg-slate-50 rounded-lg p-3">
+                                <span class="block font-bold text-slate-800">描述</span>
+                                <span class="text-slate-500">承接长尾词，补齐客户做决定所需信息</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+                <div class="flex items-start gap-3">
+                    <div class="h-10 w-10 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                        <i class="fas fa-keyboard"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <h4 class="font-bold text-slate-900">3. 后台词：只放前台放不下但相关的词</h4>
+                        <p class="text-sm text-slate-600 mt-2 leading-relaxed">
+                            Amazon SEO 指南说明后台 Generic keyword 可放同义词、缩写和替代叫法；避免重复、无关或误导性词。官方还建议使用小写字母、用空格分隔，并跳过冠词和介词，把空间留给真正能补充索引的词。
+                        </p>
+                        <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                            <div class="bg-slate-50 rounded-lg p-3">
+                                <span class="block font-bold text-slate-800">适合放</span>
+                                <span class="text-slate-500">同义词、缩写、别名、当地拼写差异</span>
+                            </div>
+                            <div class="bg-slate-50 rounded-lg p-3">
+                                <span class="block font-bold text-slate-800">不要放</span>
+                                <span class="text-slate-500">竞品品牌、重复词、夸大词、无关词</span>
+                            </div>
+                            <div class="bg-slate-50 rounded-lg p-3">
+                                <span class="block font-bold text-slate-800">维护节奏</span>
+                                <span class="text-slate-500">每月按 SQP 与广告搜索词补缺，不频繁大换</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+                <div class="flex items-start gap-3">
+                    <div class="h-10 w-10 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center shrink-0">
+                        <i class="fas fa-flask"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <h4 class="font-bold text-slate-900">4. 测试：用实验而不是感觉决定改版</h4>
+                        <p class="text-sm text-slate-600 mt-2 leading-relaxed">
+                            Manage Your Experiments 可测试标题、图片、五点、描述和 A+ Content，并用销量、转化率、每独立访客销量、样本量等指标判断版本优劣。高流量 ASIN 应优先测试标题长度、主图角度和五点表达方式。
+                        </p>
+                        <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                            <div class="bg-slate-50 rounded-lg p-3">
+                                <span class="block font-bold text-slate-800">测试项</span>
+                                <span class="text-slate-500">Title / Image / Bullet / Description / A+</span>
+                            </div>
+                            <div class="bg-slate-50 rounded-lg p-3">
+                                <span class="block font-bold text-slate-800">看指标</span>
+                                <span class="text-slate-500">Units sold / CVR / sales / sample size</span>
+                            </div>
+                            <div class="bg-slate-50 rounded-lg p-3">
+                                <span class="block font-bold text-slate-800">周期</span>
+                                <span class="text-slate-500">用官方默认设置跑到显著结果，不看短期波动</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-slate-900 rounded-xl p-6 text-white">
+            <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
+                <div class="min-w-0">
+                    <h4 class="font-bold text-lg flex items-center gap-2">
+                        <i class="fas fa-chart-line"></i>
+                        复盘口径：从搜索漏斗看 SEO 是否有效
+                    </h4>
+                    <p class="text-sm text-slate-300 mt-2">
+                        不只看自然排名。用 Brand Analytics 和 Ads 报告把“展示机会、点击吸引、加购说服、购买转化”拆开判断。
+                    </p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs xl:min-w-[720px]">
+                    <div class="rounded-lg border border-white/10 bg-white/5 p-3">
+                        <span class="block font-bold text-blue-300">曝光</span>
+                        <span class="text-slate-300">SQP impression share / Search query volume</span>
+                    </div>
+                    <div class="rounded-lg border border-white/10 bg-white/5 p-3">
+                        <span class="block font-bold text-emerald-300">点击</span>
+                        <span class="text-slate-300">Click share / CTR / clicked median price</span>
+                    </div>
+                    <div class="rounded-lg border border-white/10 bg-white/5 p-3">
+                        <span class="block font-bold text-amber-300">加购</span>
+                        <span class="text-slate-300">Cart add count / cart add share</span>
+                    </div>
+                    <div class="rounded-lg border border-white/10 bg-white/5 p-3">
+                        <span class="block font-bold text-purple-300">购买</span>
+                        <span class="text-slate-300">Purchase count / CVR / Search traffic sales</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 </div>
 <!-- </div> -->
