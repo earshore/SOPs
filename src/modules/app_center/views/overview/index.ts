@@ -6,6 +6,7 @@
 import { loadTemplate } from '@/common/utils/viewLoader';
 import { safeMount } from '@/common/utils/safeMount';
 import { APP_EVENTS } from '@/common/constants/eventConstants';
+import { setSafeHtml } from '@/common/utils/security';
 import eventBus from '@/common/EventBus';
 
 interface OverviewFilterState {
@@ -22,7 +23,7 @@ const mountInternal = async (container: HTMLElement): Promise<void> => {
   // 为overview页面添加淡入动画（在渲染前添加）
   container.classList.add('fade-in');
   // ✅ 安全: html来自本地静态template.html，无用户输入
-  container.innerHTML = html;
+  setSafeHtml(container, html);
 
   // 初始化事件监听
   initOverviewEvents(container);

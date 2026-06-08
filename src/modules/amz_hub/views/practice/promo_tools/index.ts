@@ -1,4 +1,5 @@
 import BaseModule from "../../../../../common/BaseModule";
+import { setSafeHtml } from "../../../../../common/utils/security";
 import templateHTML from "./template.html?raw";
 import "./styles.css";
 
@@ -502,8 +503,11 @@ class PromotionsModule extends BaseModule {
   }
 
   async render(): Promise<void> {
-    this.container!.innerHTML = templateHTML;
-    this.container!.classList.add("fade-in");
+    const container = this.container;
+    if (!container) return;
+
+    setSafeHtml(container, templateHTML);
+    container.classList.add("fade-in");
   }
 
   async init(): Promise<void> {
@@ -521,7 +525,7 @@ class PromotionsModule extends BaseModule {
     if (!navContainer) return;
 
     // ✅ 安全: promoData 是本文件内定义的静态运营内容，不包含用户输入
-    navContainer.innerHTML = `
+    setSafeHtml(navContainer, `
       <div class="amzpt_anchor_nav">
         <div class="amzpt_anchor_header">
           <div>
@@ -552,7 +556,7 @@ class PromotionsModule extends BaseModule {
             .join("")}
         </div>
       </div>
-    `;
+    `);
   }
 
   private renderContent(): void {
@@ -560,7 +564,7 @@ class PromotionsModule extends BaseModule {
     if (!contentContainer) return;
 
     // ✅ 安全: promoData 和 renderSectionBody 内容均来自本文件内静态常量
-    contentContainer.innerHTML = promoData
+    setSafeHtml(contentContainer, promoData
       .map(
         (section) => `
           <section id="${section.id}" class="amzpt_card">
@@ -572,7 +576,7 @@ class PromotionsModule extends BaseModule {
           </section>
         `,
       )
-      .join("");
+      .join(""));
   }
 
   private renderSectionBody(contentArray: ContentBlock[]): string {

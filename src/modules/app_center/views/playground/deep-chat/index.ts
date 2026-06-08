@@ -4,6 +4,7 @@ import '../styles.css';
 import { loadTemplate } from '@/common/utils/viewLoader';
 import { safeMount } from '@/common/utils/safeMount';
 import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
+import { setSafeHtml } from '@/common/utils/security';
 import { showToast } from '@/common/ui/notifications';
 import { callLLM, type ChatMessage } from '@/services/llmService';
 import { StorageService } from '@/services/storageService';
@@ -437,8 +438,7 @@ async function refreshLLMConfig(container: HTMLElement): Promise<void> {
     return;
   }
 
-  // ✅ 安全: 清空下拉列表
-  modelSelect.innerHTML = '';
+  modelSelect.replaceChildren();
 
   if (!currentConfig || !currentConfig.apiKey || !selectedModel) {
     statusEl.textContent = '未配置模型，请先在系统设置中配置 LLM';
@@ -832,8 +832,7 @@ function createToolbarButton(label: string, icon: string, onClick: () => void): 
   button.className = 'playground-message-tool';
   button.title = label;
   button.setAttribute('aria-label', label);
-  // ✅ 安全: icon来自getCopyIcon/getEditIcon静态SVG模板
-  button.innerHTML = icon;
+  setSafeHtml(button, icon);
   button.addEventListener('click', (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -988,10 +987,11 @@ function deleteThread(container: HTMLElement, threadId: string): void {
   }
 
   const remainingThreads = threadStore.threads.filter((item) => item.id !== threadId);
-  const nextStore = remainingThreads.length > 0
+  const firstRemainingThread = remainingThreads[0];
+  const nextStore = firstRemainingThread
     ? {
         activeThreadId: threadId === threadStore.activeThreadId
-          ? remainingThreads[0]!.id
+          ? firstRemainingThread.id
           : threadStore.activeThreadId,
         threads: remainingThreads,
       }
@@ -1031,8 +1031,7 @@ function renderThreadList(container: HTMLElement): void {
   }
 
   const sortedThreads = [...threadStore.threads].sort((a, b) => b.updatedAt - a.updatedAt);
-  // ✅ 安全: escapeHTML 已转义所有用户输入 (thread.title, meta)
-  list.innerHTML = sortedThreads.map((thread) => {
+  setSafeHtml(list, sortedThreads.map((thread) => {
     const isActive = thread.id === threadStore.activeThreadId;
     const messageCount = thread.messages.length;
     const meta = messageCount > 0
@@ -1055,7 +1054,7 @@ function renderThreadList(container: HTMLElement): void {
         </button>
       </div>
     `;
-  }).join('');
+  }).join(''));
 }
 
 function saveThreadMessages(

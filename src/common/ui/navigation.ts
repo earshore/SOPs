@@ -10,6 +10,7 @@ import { ensureViewLoaded } from '../utils/viewLoader';
 import { APP_EVENTS, emitAppEvent } from '../constants/eventConstants';
 import { getEl } from './utils';
 import { showToast } from './notifications';
+import { setSafeHtml } from '../utils/security';
 
 // ========================
 // 侧边栏渲染器注册表
@@ -80,7 +81,7 @@ function renderSidebar(moduleId: string | null): void {
   if (!moduleId || moduleId === 'home') {
     sidebar.classList.add("hidden", "-ml-64");
     // ✅ 安全: 清空侧边栏
-    sidebar.innerHTML = '';
+    sidebar.replaceChildren();
     return;
   }
 
@@ -163,7 +164,7 @@ function renderDefaultSidebar(sidebar: HTMLElement, moduleConfig: ModuleConfig, 
       </div>
     `;
     // ✅ 安全: HTML模板使用内部配置数据(moduleConfig, routes来自MENU_CONFIG)
-    sidebar.innerHTML = html;
+    setSafeHtml(sidebar, html);
   } catch (e) {
     console.error(`❌ 侧边栏渲染错误:`, e);
   }
@@ -207,18 +208,9 @@ function updateHeaderNav(fullConfig: RouteFullConfig): void {
 // 记录当前激活的主模块 Panel
 let currentActivePanel: string | null = null;
 
-/**
- * 内部 UI 更新函数
- * 由新路由系统的中间件调用，负责更新侧边栏、面板显隐等 UI 状态
- * 
- * @internal 此函数仅供路由系统内部使用
- */
-export async function updateUIForRoute(routeId: string): Promise<void> {
-  const cleanTab = String(routeId).trim();
-
-  // 按需加载视图
+async function loadRouteView(routeId: string): Promise<void> {
   try {
-    await ensureViewLoaded(cleanTab);
+    await ensureViewLoaded(routeId);
     
     // 等待 DOM 更新完成
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -227,6 +219,51 @@ export async function updateUIForRoute(routeId: string): Promise<void> {
     showToast("页面资源加载失败，请重试", { type: 'error' });
     throw err;
   }
+}
+
+function getTargetPanelId(fullConfig: RouteFullConfig | null): string {
+  return fullConfig?.route.panelId || 'panel-home';
+}
+
+function emitPanelUnloadIfNeeded(targetPanelId: string): void {
+  if (currentActivePanel && currentActivePanel !== targetPanelId) {
+    if (import.meta.env.DEV) {
+      console.log(`[Navigation] 🔄 主模块切换: ${currentActivePanel} -> ${targetPanelId}`);
+    }
+    emitAppEvent(APP_EVENTS.MODULE_UNLOAD, {
+      panelId: currentActivePanel,
+      nextPanelId: targetPanelId
+    });
+  }
+}
+
+function showRoutePanel(targetPanelId: string): void {
+  document.querySelectorAll(".panel").forEach(p => p.classList.add("hidden"));
+
+  const targetPanel = getEl(targetPanelId);
+  if (targetPanel) {
+    targetPanel.classList.remove("hidden");
+    return;
+  }
+
+  console.warn(`⚠️ [Navigation] 目标面板 [${targetPanelId}] 未找到，回退至 Home`);
+  const home = getEl('panel-home');
+  if (home) {
+    home.classList.remove("hidden");
+  }
+}
+
+/**
+ * 内部 UI 更新函数
+ * 由新路由系统的中间件调用，负责更新侧边栏、面板显隐等 UI 状态
+ *
+ * @internal 此函数仅供路由系统内部使用
+ */
+export async function updateUIForRoute(routeId: string): Promise<void> {
+  const cleanTab = String(routeId).trim();
+
+  // 按需加载视图
+  await loadRouteView(cleanTab);
 
   // 更新全局状态
   appStore.getState().setCurrentTab(cleanTab);
@@ -237,36 +274,13 @@ export async function updateUIForRoute(routeId: string): Promise<void> {
   renderSidebar(targetModuleId);
 
   // 面板显隐
-  let targetPanelId = 'panel-home';
-  if (fullConfig && fullConfig.route.panelId) {
-    targetPanelId = fullConfig.route.panelId;
-  }
+  const targetPanelId = getTargetPanelId(fullConfig);
 
   // 主模块生命周期管理
-  if (currentActivePanel && currentActivePanel !== targetPanelId) {
-    if (import.meta.env.DEV) {
-      console.log(`[Navigation] 🔄 主模块切换: ${currentActivePanel} -> ${targetPanelId}`);
-    }
-    emitAppEvent(APP_EVENTS.MODULE_UNLOAD, {
-      panelId: currentActivePanel,
-      nextPanelId: targetPanelId
-    });
-  }
+  emitPanelUnloadIfNeeded(targetPanelId);
   currentActivePanel = targetPanelId;
 
-  // 隐藏所有面板
-  document.querySelectorAll(".panel").forEach(p => p.classList.add("hidden"));
-
-  const targetPanel = getEl(targetPanelId);
-  if (targetPanel) {
-    targetPanel.classList.remove("hidden");
-  } else {
-    console.warn(`⚠️ [Navigation] 目标面板 [${targetPanelId}] 未找到，回退至 Home`);
-    const home = getEl('panel-home');
-    if (home) {
-      home.classList.remove("hidden");
-    }
-  }
+  showRoutePanel(targetPanelId);
 
   // 更新导航高亮
   if (fullConfig) {
@@ -394,4 +408,3 @@ export function scrollToMoreModule(categoryId: string): void {
     console.warn(`⚠️ 未找到模块元素: ${moduleId}`);
   }
 }
-

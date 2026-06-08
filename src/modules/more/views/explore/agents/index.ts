@@ -4,6 +4,7 @@
  */
 
 import BaseModule from '../../../../../common/BaseModule';
+import { setSafeHtml } from '../../../../../common/utils/security';
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
 
 // Module class
@@ -14,7 +15,7 @@ class AgentsModule extends BaseModule {
     async mount(container: HTMLElement): Promise<void> {
         const html = await loadTemplate('src/modules/more/views/explore/agents/template.html');
         // ✅ 安全: 静态HTML模板，无用户输入
-        container.innerHTML = html;
+        setSafeHtml(container, html);
         container.classList.add('fade-in');
 
         console.log('✅ Agent Center 模块已挂载');

@@ -1,5 +1,6 @@
 // src/modules/amz_hub/views/practice/promo_activities/index.ts
 import BaseModule from "../../../../../common/BaseModule";
+import { setSafeHtml } from "../../../../../common/utils/security";
 import templateHTML from "./template.html?raw";
 import "./styles.css";
 
@@ -9,9 +10,12 @@ class PromoActivitiesModule extends BaseModule {
   }
 
   async render(): Promise<void> {
+    const container = this.container;
+    if (!container) return;
+
     // ✅ 安全: 静态HTML模板，无用户输入
-    this.container!.innerHTML = templateHTML;
-    this.container!.classList.add("fade-in");
+    setSafeHtml(container, templateHTML);
+    container.classList.add("fade-in");
     console.log("✅ [PromoActivities] 促销活动页面已加载");
   }
 

@@ -4,6 +4,7 @@
  */
 
 import BaseModule from '../../../../../common/BaseModule';
+import { setSafeHtml } from '../../../../../common/utils/security';
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import { cleanupRestrictedWordsPanel, initRestrictedWordsPanel } from './restrictedWordsHandler';
 
@@ -14,7 +15,7 @@ class RestrictedWordsModule extends BaseModule {
     async mount(container: HTMLElement): Promise<void> {
         const html = await loadTemplate('src/modules/sops/views/growth/restricted_words/template.html');
         // ✅ 安全: 静态HTML模板，无用户输入
-        container.innerHTML = html;
+        setSafeHtml(container, html);
         container.classList.add('fade-in');
 
         // 初始化词库面板功能

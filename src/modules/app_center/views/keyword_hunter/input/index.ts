@@ -169,7 +169,7 @@ function highlightDuplicatesInInput(): void {
     const lines = input.value.split('\n');
 
     // 清空容器
-    layer.innerHTML = '';
+    layer.replaceChildren();
     const fragment = document.createDocumentFragment();
 
     lines.forEach((line, i) => {

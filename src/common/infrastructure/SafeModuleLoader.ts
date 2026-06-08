@@ -72,6 +72,51 @@ export enum ModuleErrorType {
   UNKNOWN = 'unknown'
 }
 
+interface ErrorClassificationDetails {
+  message: string;
+  code: string;
+  errorType?: ModuleErrorType;
+}
+
+type ModuleRenderFunction = (container: HTMLElement) => void;
+
+const NETWORK_ERROR_KEYWORDS = [
+  'network',
+  'fetch',
+  'connection',
+  'dns',
+  'cors',
+  'http',
+  'xhr',
+  'ajax',
+  'socket',
+  'offline',
+  'unreachable'
+] as const;
+
+const RENDER_ERROR_KEYWORDS = [
+  'render',
+  'rendering',
+  'dom',
+  'element',
+  'node',
+  'document',
+  'queryselector',
+  'getelementby',
+  'appendchild',
+  'insertbefore',
+  'removechild',
+  'innerhtml',
+  'textcontent'
+] as const;
+
+const ELEMENT_NOT_FOUND_STACK_KEYWORDS = [
+  'queryselector',
+  'getelementby',
+  'appendchild',
+  'innerhtml'
+] as const;
+
 /**
  * 安全模块加载器
  * 提供统一的模块加载、错误处理和降级机制
@@ -397,7 +442,7 @@ export class SafeModuleLoader {
    * @param fn - 要执行的加载函数
    * @param retries - 最大重试次数
    * @returns 加载结果和实际重试次数
-   * 
+   *
    * 重试策略：
    * - 第1次重试：100ms + 抖动
    * - 第2次重试：200ms + 抖动
@@ -546,12 +591,251 @@ export class SafeModuleLoader {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
+  private hasAnyKeyword(text: string, keywords: readonly string[]): boolean {
+    return keywords.some(keyword => text.includes(keyword));
+  }
+
+  private createNetworkClassificationError(
+    details: ErrorClassificationDetails,
+    resourcePath: string,
+    error: Error
+  ): NetworkError {
+    return new NetworkError(
+      details.message,
+      details.code,
+      { resourcePath, originalMessage: error.message },
+      error
+    );
+  }
+
+  private createSystemClassificationError(
+    details: ErrorClassificationDetails,
+    resourcePath: string,
+    error: Error
+  ): SystemError {
+    return new SystemError(
+      details.message,
+      details.code,
+      {
+        resourcePath,
+        originalMessage: error.message,
+        errorType: details.errorType
+      },
+      error
+    );
+  }
+
+  private isTimeoutError(error: Error, errorMessage: string): boolean {
+    return (
+      errorMessage.includes('timeout') ||
+      errorMessage.includes('超时') ||
+      errorMessage.includes('timed out') ||
+      error.name === 'TimeoutError'
+    );
+  }
+
+  private isModuleResolutionError(errorMessage: string): boolean {
+    return (
+      errorMessage.includes('cannot find module') ||
+      errorMessage.includes('module not found') ||
+      errorMessage.includes('failed to resolve') ||
+      (errorMessage.includes('import') && errorMessage.includes('failed')) ||
+      (errorMessage.includes('require') && errorMessage.includes('failed'))
+    );
+  }
+
+  private isJsonParseError(errorMessage: string): boolean {
+    return (
+      (errorMessage.includes('json') && errorMessage.includes('parse')) ||
+      errorMessage.includes('unexpected token') ||
+      errorMessage.includes('unexpected end of json') ||
+      errorMessage.includes('invalid json')
+    );
+  }
+
+  private isGenericParseError(errorMessage: string): boolean {
+    return (
+      errorMessage.includes('parse') ||
+      errorMessage.includes('parsing') ||
+      errorMessage.includes('unexpected') ||
+      errorMessage.includes('invalid syntax')
+    );
+  }
+
+  private isHttpStatusError(errorMessage: string): boolean {
+    return (
+      errorMessage.includes('404') ||
+      errorMessage.includes('500') ||
+      errorMessage.includes('502') ||
+      errorMessage.includes('503') ||
+      /\b[45]\d{2}\b/.test(errorMessage)
+    );
+  }
+
+  private isMissingElementReference(
+    error: Error,
+    errorMessage: string,
+    errorStack: string
+  ): boolean {
+    return (
+      error instanceof TypeError &&
+      (
+        errorMessage.includes('null') ||
+        errorMessage.includes('undefined') ||
+        errorMessage.includes('cannot read property') ||
+        errorMessage.includes('cannot read properties')
+      ) &&
+      this.hasAnyKeyword(errorStack, ELEMENT_NOT_FOUND_STACK_KEYWORDS)
+    );
+  }
+
+  private classifyNetworkError(
+    error: Error,
+    resourcePath: string,
+    errorMessage: string
+  ): AppError | null {
+    if (
+      error instanceof TypeError &&
+      (
+        errorMessage.includes('failed to fetch') ||
+        errorMessage.includes('network request failed')
+      )
+    ) {
+      return this.createNetworkClassificationError({
+        message: `网络请求失败: ${resourcePath}`,
+        code: 'NETWORK_REQUEST_FAILED'
+      }, resourcePath, error);
+    }
+
+    if (this.isTimeoutError(error, errorMessage)) {
+      return this.createNetworkClassificationError({
+        message: `加载超时: ${resourcePath}`,
+        code: 'LOAD_TIMEOUT'
+      }, resourcePath, error);
+    }
+
+    if (this.hasAnyKeyword(errorMessage, NETWORK_ERROR_KEYWORDS)) {
+      return this.createNetworkClassificationError({
+        message: `网络错误: ${error.message}`,
+        code: 'NETWORK_ERROR'
+      }, resourcePath, error);
+    }
+
+    if (this.isHttpStatusError(errorMessage)) {
+      return this.createNetworkClassificationError({
+        message: `HTTP 错误: ${error.message}`,
+        code: 'HTTP_ERROR'
+      }, resourcePath, error);
+    }
+
+    return null;
+  }
+
+  private classifyParseError(
+    error: Error,
+    resourcePath: string,
+    errorMessage: string,
+    errorName: string
+  ): AppError | null {
+    if (error instanceof SyntaxError || errorName === 'syntaxerror') {
+      return this.createSystemClassificationError({
+        message: `JavaScript 语法错误: ${error.message}`,
+        code: 'SYNTAX_ERROR',
+        errorType: ModuleErrorType.PARSE
+      }, resourcePath, error);
+    }
+
+    if (this.isModuleResolutionError(errorMessage)) {
+      return this.createSystemClassificationError({
+        message: `模块解析失败: ${error.message}`,
+        code: 'MODULE_RESOLUTION_ERROR',
+        errorType: ModuleErrorType.PARSE
+      }, resourcePath, error);
+    }
+
+    if (this.isJsonParseError(errorMessage)) {
+      return this.createSystemClassificationError({
+        message: `JSON 解析错误: ${error.message}`,
+        code: 'JSON_PARSE_ERROR',
+        errorType: ModuleErrorType.PARSE
+      }, resourcePath, error);
+    }
+
+    if (this.isGenericParseError(errorMessage)) {
+      return this.createSystemClassificationError({
+        message: `解析错误: ${error.message}`,
+        code: 'PARSE_ERROR',
+        errorType: ModuleErrorType.PARSE
+      }, resourcePath, error);
+    }
+
+    return null;
+  }
+
+  private classifyRenderError(
+    error: Error,
+    resourcePath: string,
+    errorMessage: string,
+    errorName: string,
+    errorStack: string
+  ): AppError | null {
+    if (error instanceof DOMException || errorName === 'domexception') {
+      return this.createSystemClassificationError({
+        message: `DOM 操作错误: ${error.message}`,
+        code: 'DOM_ERROR',
+        errorType: ModuleErrorType.RENDER
+      }, resourcePath, error);
+    }
+
+    if (this.hasAnyKeyword(errorMessage, RENDER_ERROR_KEYWORDS)) {
+      return this.createSystemClassificationError({
+        message: `渲染错误: ${error.message}`,
+        code: 'RENDER_ERROR',
+        errorType: ModuleErrorType.RENDER
+      }, resourcePath, error);
+    }
+
+    if (this.isMissingElementReference(error, errorMessage, errorStack)) {
+      return this.createSystemClassificationError({
+        message: `渲染错误（元素不存在）: ${error.message}`,
+        code: 'ELEMENT_NOT_FOUND',
+        errorType: ModuleErrorType.RENDER
+      }, resourcePath, error);
+    }
+
+    return null;
+  }
+
+  private createUnknownClassificationError(error: Error, resourcePath: string): SystemError {
+    console.warn(
+      `无法分类的错误类型，归类为未知错误`,
+      {
+        errorName: error.name,
+        errorMessage: error.message,
+        resourcePath
+      },
+      this.moduleName
+    );
+
+    return new SystemError(
+      `未知错误: ${error.message}`,
+      'UNKNOWN_ERROR',
+      {
+        resourcePath,
+        originalMessage: error.message,
+        errorName: error.name,
+        errorType: ModuleErrorType.UNKNOWN
+      },
+      error
+    );
+  }
+
   /**
    * 分类错误
    * @param error - 原始错误
    * @param resourcePath - 资源路径
    * @returns 分类后的错误
-   * 
+   *
    * 错误分类策略：
    * 1. 网络错误：连接失败、超时、DNS解析失败、HTTP错误等
    * 2. 解析错误：JavaScript语法错误、JSON解析错误、模块解析失败等
@@ -567,259 +851,33 @@ export class SafeModuleLoader {
     const errorName = error.name.toLowerCase();
     const errorStack = error.stack?.toLowerCase() || '';
 
-    // ============================================================
-    // 1. 网络错误检测
-    // ============================================================
-    
-    // 检查错误类型
-    if (
-      error instanceof TypeError && 
-      (errorMessage.includes('failed to fetch') || errorMessage.includes('network request failed'))
-    ) {
-      return new NetworkError(
-        `网络请求失败: ${resourcePath}`,
-        'NETWORK_REQUEST_FAILED',
-        { resourcePath, originalMessage: error.message },
-        error
-      );
-    }
-
-    // 检查超时错误
-    if (
-      errorMessage.includes('timeout') ||
-      errorMessage.includes('超时') ||
-      errorMessage.includes('timed out') ||
-      error.name === 'TimeoutError'
-    ) {
-      return new NetworkError(
-        `加载超时: ${resourcePath}`,
-        'LOAD_TIMEOUT',
-        { resourcePath, originalMessage: error.message },
-        error
-      );
-    }
-
-    // 检查网络相关关键词
-    if (
-      errorMessage.includes('network') ||
-      errorMessage.includes('fetch') ||
-      errorMessage.includes('connection') ||
-      errorMessage.includes('dns') ||
-      errorMessage.includes('cors') ||
-      errorMessage.includes('http') ||
-      errorMessage.includes('xhr') ||
-      errorMessage.includes('ajax') ||
-      errorMessage.includes('socket') ||
-      errorMessage.includes('offline') ||
-      errorMessage.includes('unreachable')
-    ) {
-      return new NetworkError(
-        `网络错误: ${error.message}`,
-        'NETWORK_ERROR',
-        { resourcePath, originalMessage: error.message },
-        error
-      );
-    }
-
-    // 检查 HTTP 状态码错误
-    if (
-      errorMessage.includes('404') ||
-      errorMessage.includes('500') ||
-      errorMessage.includes('502') ||
-      errorMessage.includes('503') ||
-      /\b[45]\d{2}\b/.test(errorMessage)  // 匹配 4xx 或 5xx 状态码
-    ) {
-      return new NetworkError(
-        `HTTP 错误: ${error.message}`,
-        'HTTP_ERROR',
-        { resourcePath, originalMessage: error.message },
-        error
-      );
-    }
-
-    // ============================================================
-    // 2. 解析错误检测
-    // ============================================================
-    
-    // 检查 JavaScript 语法错误
-    if (
-      error instanceof SyntaxError ||
-      errorName === 'syntaxerror'
-    ) {
-      return new SystemError(
-        `JavaScript 语法错误: ${error.message}`,
-        'SYNTAX_ERROR',
-        { 
-          resourcePath, 
-          originalMessage: error.message,
-          errorType: ModuleErrorType.PARSE
-        },
-        error
-      );
-    }
-
-    // 检查模块解析错误
-    if (
-      errorMessage.includes('cannot find module') ||
-      errorMessage.includes('module not found') ||
-      errorMessage.includes('failed to resolve') ||
-      errorMessage.includes('import') && errorMessage.includes('failed') ||
-      errorMessage.includes('require') && errorMessage.includes('failed')
-    ) {
-      return new SystemError(
-        `模块解析失败: ${error.message}`,
-        'MODULE_RESOLUTION_ERROR',
-        { 
-          resourcePath, 
-          originalMessage: error.message,
-          errorType: ModuleErrorType.PARSE
-        },
-        error
-      );
-    }
-
-    // 检查 JSON 解析错误
-    if (
-      errorMessage.includes('json') && errorMessage.includes('parse') ||
-      errorMessage.includes('unexpected token') ||
-      errorMessage.includes('unexpected end of json') ||
-      errorMessage.includes('invalid json')
-    ) {
-      return new SystemError(
-        `JSON 解析错误: ${error.message}`,
-        'JSON_PARSE_ERROR',
-        { 
-          resourcePath, 
-          originalMessage: error.message,
-          errorType: ModuleErrorType.PARSE
-        },
-        error
-      );
-    }
-
-    // 检查其他解析相关错误
-    if (
-      errorMessage.includes('parse') ||
-      errorMessage.includes('parsing') ||
-      errorMessage.includes('unexpected') ||
-      errorMessage.includes('invalid syntax')
-    ) {
-      return new SystemError(
-        `解析错误: ${error.message}`,
-        'PARSE_ERROR',
-        { 
-          resourcePath, 
-          originalMessage: error.message,
-          errorType: ModuleErrorType.PARSE
-        },
-        error
-      );
-    }
-
-    // ============================================================
-    // 3. 渲染错误检测
-    // ============================================================
-    
-    // 检查 DOM 相关错误
-    if (
-      error instanceof DOMException ||
-      errorName === 'domexception'
-    ) {
-      return new SystemError(
-        `DOM 操作错误: ${error.message}`,
-        'DOM_ERROR',
-        { 
-          resourcePath, 
-          originalMessage: error.message,
-          errorType: ModuleErrorType.RENDER
-        },
-        error
-      );
-    }
-
-    // 检查渲染相关关键词
-    if (
-      errorMessage.includes('render') ||
-      errorMessage.includes('rendering') ||
-      errorMessage.includes('dom') ||
-      errorMessage.includes('element') ||
-      errorMessage.includes('node') ||
-      errorMessage.includes('document') ||
-      errorMessage.includes('queryselector') ||
-      errorMessage.includes('getelementby') ||
-      errorMessage.includes('appendchild') ||
-      errorMessage.includes('insertbefore') ||
-      errorMessage.includes('removechild') ||
-      errorMessage.includes('innerhtml') ||
-      errorMessage.includes('textcontent')
-    ) {
-      return new SystemError(
-        `渲染错误: ${error.message}`,
-        'RENDER_ERROR',
-        { 
-          resourcePath, 
-          originalMessage: error.message,
-          errorType: ModuleErrorType.RENDER
-        },
-        error
-      );
-    }
-
-    // 检查 null/undefined 引用错误（可能是 DOM 元素不存在）
-    if (
-      error instanceof TypeError &&
-      (
-        errorMessage.includes('null') ||
-        errorMessage.includes('undefined') ||
-        errorMessage.includes('cannot read property') ||
-        errorMessage.includes('cannot read properties')
-      )
-    ) {
-      // 如果堆栈中包含 DOM 相关操作，归类为渲染错误
-      if (
-        errorStack.includes('queryselector') ||
-        errorStack.includes('getelementby') ||
-        errorStack.includes('appendchild') ||
-        errorStack.includes('innerhtml')
-      ) {
-        return new SystemError(
-          `渲染错误（元素不存在）: ${error.message}`,
-          'ELEMENT_NOT_FOUND',
-          { 
-            resourcePath, 
-            originalMessage: error.message,
-            errorType: ModuleErrorType.RENDER
-          },
-          error
-        );
-      }
-    }
-
-    // ============================================================
-    // 4. 未知错误
-    // ============================================================
-    
-    console.warn(
-      `无法分类的错误类型，归类为未知错误`,
-      { 
-        errorName: error.name,
-        errorMessage: error.message,
-        resourcePath
-      },
-      this.moduleName
+    return (
+      this.classifyNetworkError(error, resourcePath, errorMessage) ||
+      this.classifyParseError(error, resourcePath, errorMessage, errorName) ||
+      this.classifyRenderError(error, resourcePath, errorMessage, errorName, errorStack) ||
+      this.createUnknownClassificationError(error, resourcePath)
     );
+  }
 
-    return new SystemError(
-      `未知错误: ${error.message}`,
-      'UNKNOWN_ERROR',
-      { 
-        resourcePath, 
-        originalMessage: error.message,
-        errorName: error.name,
-        errorType: ModuleErrorType.UNKNOWN
-      },
-      error
-    );
+  private getModuleRenderFunction(moduleData: unknown): ModuleRenderFunction | null {
+    if (!moduleData || typeof moduleData !== 'object') {
+      return null;
+    }
+
+    const mod = moduleData as {
+      render?: ModuleRenderFunction;
+      mount?: ModuleRenderFunction;
+    };
+
+    if (typeof mod.render === 'function') {
+      return mod.render;
+    }
+
+    if (typeof mod.mount === 'function') {
+      return mod.mount;
+    }
+
+    return null;
   }
 
   /**
@@ -829,22 +887,10 @@ export class SafeModuleLoader {
    */
   private renderModule(container: HTMLElement, moduleData: unknown): void {
     try {
-      // 类型守卫：检查是否有 render 方法
-      if (moduleData && typeof moduleData === 'object' && 'render' in moduleData) {
-        const mod = moduleData as { render?: (container: HTMLElement) => void };
-        if (typeof mod.render === 'function') {
-          mod.render(container);
-          return;
-        }
-      }
-
-      // 类型守卫：检查是否有 mount 方法
-      if (moduleData && typeof moduleData === 'object' && 'mount' in moduleData) {
-        const mod = moduleData as { mount?: (container: HTMLElement) => void };
-        if (typeof mod.mount === 'function') {
-          mod.mount(container);
-          return;
-        }
+      const renderFn = this.getModuleRenderFunction(moduleData);
+      if (renderFn) {
+        renderFn(container);
+        return;
       }
 
       // 如果模块是字符串，直接设置为 innerHTML
@@ -872,14 +918,14 @@ export class SafeModuleLoader {
    */
   private showLoadingIndicator(container: HTMLElement, text: string): void {
     // ✅ 安全: 静态HTML模板，text参数已通过escapeHtml转义
-    container.innerHTML = `
+    setSafeHtml(container, `
       <div class="flex items-center justify-center p-8">
         <div class="text-center">
           <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mb-2"></div>
           <p class="text-gray-600">${this.escapeHtml(text)}</p>
         </div>
       </div>
-    `;
+    `);
   }
 
   /**
@@ -903,12 +949,12 @@ export class SafeModuleLoader {
     customFallback?: string
   ): void {
     // 清空容器
-    container.innerHTML = '';
+    container.replaceChildren();
 
     // 如果提供了自定义降级模板，使用自定义模板
     if (customFallback) {
       // ✅ 安全: interpolateFallbackTemplate会转义错误信息
-      container.innerHTML = this.interpolateFallbackTemplate(customFallback, error, modulePath);
+      setSafeHtml(container, this.interpolateFallbackTemplate(customFallback, error, modulePath));
       this.attachErrorUIEventHandlers(container, modulePath);
       return;
     }
@@ -916,7 +962,7 @@ export class SafeModuleLoader {
     // 根据错误类型选择合适的降级 UI
     const errorUI = this.selectFallbackUI(error, modulePath);
     // ✅ 安全: selectFallbackUI返回的HTML使用已转义的错误信息
-    container.innerHTML = errorUI;
+    setSafeHtml(container, errorUI);
     this.attachErrorUIEventHandlers(container, modulePath);
   }
 

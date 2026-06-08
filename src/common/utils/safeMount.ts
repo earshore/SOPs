@@ -3,6 +3,8 @@
  * 提供统一的错误处理和降级UI渲染
  */
 
+import { escapeHtml, setSafeHtml } from '@/common/utils/security';
+
 /**
  * 模块挂载函数类型
  */
@@ -24,14 +26,16 @@ export interface SafeMountOptions {
  * 渲染错误降级UI
  */
 function renderErrorFallback(container: HTMLElement, moduleName: string, error: Error): void {
+  const safeModuleName = escapeHtml(moduleName);
+  const safeErrorMessage = escapeHtml(error.message || '未知错误');
   const errorHtml = `
     <div class="p-8 flex flex-col items-center justify-center text-center space-y-4 border-2 border-dashed border-red-200 rounded-xl bg-red-50/30 m-4">
       <div class="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center">
         <i class="fas fa-exclamation-triangle text-2xl"></i>
       </div>
       <div>
-        <h3 class="text-lg font-bold text-gray-800">模块加载失败: ${moduleName}</h3>
-        <p class="text-sm text-gray-500 max-w-md mt-1">${error.message || '未知错误'}</p>
+        <h3 class="text-lg font-bold text-gray-800">模块加载失败: ${safeModuleName}</h3>
+        <p class="text-sm text-gray-500 max-w-md mt-1">${safeErrorMessage}</p>
       </div>
       <button 
         data-action="reload-page-safemount"
@@ -41,8 +45,7 @@ function renderErrorFallback(container: HTMLElement, moduleName: string, error: 
       </button>
     </div>
   `;
-  // ✅ 安全: 静态HTML模板，errorMsg已通过textContent安全设置
-  container.innerHTML = errorHtml;
+  setSafeHtml(container, errorHtml);
 
   // 绑定事件处理器
   const reloadBtn = container.querySelector('[data-action="reload-page-safemount"]');

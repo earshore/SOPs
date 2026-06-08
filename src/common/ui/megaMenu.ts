@@ -8,7 +8,7 @@
 
 import { MENU_CONFIG } from '../config/menuConfig';
 import { getEl } from './utils';
-import { escapeHtml } from '../utils/security';
+import { escapeHtml, setSafeHtml } from '../utils/security';
 import type { ColorSchemeName } from '../constants/colorSchemes';
 
 // ═══════════════════════════════════════════════════════════
@@ -483,11 +483,11 @@ function renderCategoryMenu(config: MenuRendererConfig): void {
     });
 
     // ✅ 安全: renderCard返回的HTML使用内部数据和配置，category数据来自MENU_CONFIG
-    container.innerHTML = html;
+    setSafeHtml(container, html);
   } catch (e) {
     console.error(`❌ ${config.logLabel} 渲染失败:`, e);
     // ✅ 安全: renderErrorCard仅输出静态模板，message会被escapeHtml转义
-    container.innerHTML = renderErrorCard();
+    setSafeHtml(container, renderErrorCard());
   }
 }
 
@@ -518,11 +518,11 @@ export function renderMegaMenu(): void {
     }).join('');
 
     // ✅ 安全: renderCard返回的HTML使用内部数据和配置，modules来自MENU_CONFIG
-    container.innerHTML = html;
+    setSafeHtml(container, html);
   } catch (e) {
     console.error('❌ MegaMenu 渲染失败:', e);
     // ✅ 安全: renderErrorCard仅输出静态模板，message会被escapeHtml转义
-    container.innerHTML = renderErrorCard();
+    setSafeHtml(container, renderErrorCard());
   }
 }
 

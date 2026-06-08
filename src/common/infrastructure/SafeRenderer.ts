@@ -175,12 +175,12 @@ export class SafeRenderer {
       // 如果指定了白名单，先插值（不转义），然后使用 sanitizeHtml 清理
       const interpolated = this.interpolate(template, data, false);
       // ✅ 安全: sanitizeHtml会根据白名单清理HTML
-      container.innerHTML = this.sanitizeHtml(interpolated, options);
+      setSafeHtml(container, this.sanitizeHtml(interpolated, options));
     } else {
       // 默认行为：插值时转义
       const interpolated = this.interpolate(template, data, sanitize);
       // ✅ 安全: interpolate已对数据进行转义
-      container.innerHTML = interpolated;
+      setSafeHtml(container, interpolated);
     }
   }
 
@@ -242,7 +242,7 @@ export class SafeRenderer {
     }
 
     // 清空容器
-    container.innerHTML = '';
+    container.replaceChildren();
 
     // 处理空列表
     if (items.length === 0) {
@@ -270,7 +270,7 @@ export class SafeRenderer {
       } else if (options?.allowedTags) {
         // 使用白名单清理
         // ✅ 安全: sanitizeHtml会根据白名单清理HTML
-        element.innerHTML = this.sanitizeHtml(html, options);
+        setSafeHtml(element, this.sanitizeHtml(html, options));
       } else {
         // 宽松模式仍经过基础清理，保留常规HTML结构并移除危险内容
         // ✅ 安全: 使用setSafeHtml清理危险标签和事件属性后插入列表项HTML
@@ -387,10 +387,8 @@ export class SafeRenderer {
     const allowedTags = options?.allowedTags || DEFAULT_ALLOWED_TAGS;
     const allowedAttrs = options?.allowedAttrs || DEFAULT_ALLOWED_ATTRS;
 
-    // 创建临时 DOM 解析 HTML
-    const temp = document.createElement('div');
-    // ✅ 安全: 临时DOM用于解析，后续会通过白名单过滤
-    temp.innerHTML = html;
+    // 创建临时 DOM 解析 HTML，后续会通过白名单过滤
+    const doc = new DOMParser().parseFromString(html, 'text/html');
 
     // 递归清理节点
     const cleanNode = (node: Node): Node | null => {
@@ -441,7 +439,7 @@ export class SafeRenderer {
 
     // 清理所有子节点
     const cleanedFragment = document.createDocumentFragment();
-    Array.from(temp.childNodes).forEach(child => {
+    Array.from(doc.body.childNodes).forEach(child => {
       const cleanedChild = cleanNode(child);
       if (cleanedChild) {
         cleanedFragment.appendChild(cleanedChild);

@@ -20,6 +20,12 @@ import type {
 } from './types';
 import { ValidationError } from '@/common/errors/AppError';
 
+type OptionalTypeName = 'string' | 'number' | 'boolean' | 'function';
+type FieldValidator<T extends object> = readonly [
+  keyof T,
+  (value: unknown) => boolean
+];
+
 // ==================== 基础类型守卫 ====================
 
 /**
@@ -44,6 +50,82 @@ export function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
+function isString(value: unknown): value is string {
+  return typeof value === 'string';
+}
+
+function isNonEmptyString(value: unknown): value is string {
+  return isString(value) && value.length > 0;
+}
+
+function isOptionalType(value: unknown, type: OptionalTypeName): boolean {
+  return value === undefined || typeof value === type;
+}
+
+function isOptionalStringArray(value: unknown): boolean {
+  return value === undefined || (Array.isArray(value) && value.every(isString));
+}
+
+function isOptionalObject(value: unknown): boolean {
+  return value === undefined || isObject(value);
+}
+
+function areNonEmptyStringFieldsValid<T extends object>(
+  target: T,
+  fields: readonly (keyof T)[]
+): boolean {
+  return fields.every(field => isNonEmptyString(target[field]));
+}
+
+function areFieldsValid<T extends object>(
+  target: T,
+  validators: readonly FieldValidator<T>[]
+): boolean {
+  return validators.every(([field, validator]) => validator(target[field]));
+}
+
+const ROUTE_CONFIG_REQUIRED_STRING_FIELDS: readonly (keyof Partial<RouteConfig>)[] = [
+  'moduleId',
+  'label',
+  'icon',
+  'panelId'
+];
+
+const ROUTE_CONFIG_FIELD_VALIDATORS: readonly FieldValidator<Partial<RouteConfig>>[] = [
+  ['category', value => isOptionalType(value, 'string')],
+  ['viewPath', value => isOptionalType(value, 'string')],
+  ['meta', value => value === undefined || isRouteMeta(value)],
+  ['params', value => value === undefined || isRouteParams(value)]
+];
+
+const ROUTE_META_FIELD_VALIDATORS: readonly FieldValidator<Partial<RouteMeta>>[] = [
+  ['title', value => isOptionalType(value, 'string')],
+  ['requiresAuth', value => isOptionalType(value, 'boolean')],
+  ['permissions', isOptionalStringArray],
+  ['preload', value => isOptionalType(value, 'function')],
+  ['preloadRequired', value => isOptionalType(value, 'boolean')],
+  ['dependencies', isOptionalStringArray],
+  ['keepAlive', value => isOptionalType(value, 'boolean')]
+];
+
+const NAVIGATE_OPTIONS_FIELD_VALIDATORS: readonly FieldValidator<Partial<NavigateOptions>>[] = [
+  ['replace', value => isOptionalType(value, 'boolean')],
+  ['updateHistory', value => isOptionalType(value, 'boolean')],
+  ['state', isOptionalObject],
+  ['skipGuards', value => isOptionalType(value, 'boolean')],
+  ['skipMiddleware', value => isOptionalType(value, 'boolean')]
+];
+
+const ROUTER_CONFIG_FIELD_VALIDATORS: readonly FieldValidator<Partial<RouterConfig>>[] = [
+  ['root', value => isOptionalType(value, 'string')],
+  ['useHash', value => isOptionalType(value, 'boolean')],
+  ['hash', value => isOptionalType(value, 'string')],
+  ['enableLogging', value => isOptionalType(value, 'boolean')],
+  ['defaultRoute', value => isOptionalType(value, 'string')],
+  ['notFoundRoute', value => isOptionalType(value, 'string')],
+  ['maxHistorySize', value => isOptionalType(value, 'number')]
+];
+
 // ==================== 路由配置守卫 ====================
 
 /**
@@ -53,42 +135,10 @@ export function isRouteConfig(obj: unknown): obj is RouteConfig {
   if (!isObject(obj)) return false;
 
   const config = obj as Partial<RouteConfig>;
-
-  // 必需字段检查
-  if (typeof config.moduleId !== 'string' || config.moduleId.length === 0) {
-    return false;
-  }
-
-  if (typeof config.label !== 'string' || config.label.length === 0) {
-    return false;
-  }
-
-  if (typeof config.icon !== 'string' || config.icon.length === 0) {
-    return false;
-  }
-
-  if (typeof config.panelId !== 'string' || config.panelId.length === 0) {
-    return false;
-  }
-
-  // 可选字段检查
-  if (config.category !== undefined && typeof config.category !== 'string') {
-    return false;
-  }
-
-  if (config.viewPath !== undefined && typeof config.viewPath !== 'string') {
-    return false;
-  }
-
-  if (config.meta !== undefined && !isRouteMeta(config.meta)) {
-    return false;
-  }
-
-  if (config.params !== undefined && !isRouteParams(config.params)) {
-    return false;
-  }
-
-  return true;
+  return (
+    areNonEmptyStringFieldsValid(config, ROUTE_CONFIG_REQUIRED_STRING_FIELDS) &&
+    areFieldsValid(config, ROUTE_CONFIG_FIELD_VALIDATORS)
+  );
 }
 
 /**
@@ -98,38 +148,7 @@ export function isRouteMeta(obj: unknown): obj is RouteMeta {
   if (!isObject(obj)) return false;
 
   const meta = obj as Partial<RouteMeta>;
-
-  if (meta.title !== undefined && typeof meta.title !== 'string') {
-    return false;
-  }
-
-  if (meta.requiresAuth !== undefined && typeof meta.requiresAuth !== 'boolean') {
-    return false;
-  }
-
-  if (meta.permissions !== undefined) {
-    if (!Array.isArray(meta.permissions)) return false;
-    if (!meta.permissions.every(p => typeof p === 'string')) return false;
-  }
-
-  if (meta.preload !== undefined && typeof meta.preload !== 'function') {
-    return false;
-  }
-
-  if (meta.preloadRequired !== undefined && typeof meta.preloadRequired !== 'boolean') {
-    return false;
-  }
-
-  if (meta.dependencies !== undefined) {
-    if (!Array.isArray(meta.dependencies)) return false;
-    if (!meta.dependencies.every(d => typeof d === 'string')) return false;
-  }
-
-  if (meta.keepAlive !== undefined && typeof meta.keepAlive !== 'boolean') {
-    return false;
-  }
-
-  return true;
+  return areFieldsValid(meta, ROUTE_META_FIELD_VALIDATORS);
 }
 
 /**
@@ -268,28 +287,7 @@ export function isNavigateOptions(obj: unknown): obj is NavigateOptions {
   if (!isObject(obj)) return false;
 
   const options = obj as Partial<NavigateOptions>;
-
-  if (options.replace !== undefined && typeof options.replace !== 'boolean') {
-    return false;
-  }
-
-  if (options.updateHistory !== undefined && typeof options.updateHistory !== 'boolean') {
-    return false;
-  }
-
-  if (options.state !== undefined && !isObject(options.state)) {
-    return false;
-  }
-
-  if (options.skipGuards !== undefined && typeof options.skipGuards !== 'boolean') {
-    return false;
-  }
-
-  if (options.skipMiddleware !== undefined && typeof options.skipMiddleware !== 'boolean') {
-    return false;
-  }
-
-  return true;
+  return areFieldsValid(options, NAVIGATE_OPTIONS_FIELD_VALIDATORS);
 }
 
 /**
@@ -324,36 +322,7 @@ export function isRouterConfig(obj: unknown): obj is RouterConfig {
   if (!isObject(obj)) return false;
 
   const config = obj as Partial<RouterConfig>;
-
-  if (config.root !== undefined && typeof config.root !== 'string') {
-    return false;
-  }
-
-  if (config.useHash !== undefined && typeof config.useHash !== 'boolean') {
-    return false;
-  }
-
-  if (config.hash !== undefined && typeof config.hash !== 'string') {
-    return false;
-  }
-
-  if (config.enableLogging !== undefined && typeof config.enableLogging !== 'boolean') {
-    return false;
-  }
-
-  if (config.defaultRoute !== undefined && typeof config.defaultRoute !== 'string') {
-    return false;
-  }
-
-  if (config.notFoundRoute !== undefined && typeof config.notFoundRoute !== 'string') {
-    return false;
-  }
-
-  if (config.maxHistorySize !== undefined && typeof config.maxHistorySize !== 'number') {
-    return false;
-  }
-
-  return true;
+  return areFieldsValid(config, ROUTER_CONFIG_FIELD_VALIDATORS);
 }
 
 // ==================== 参数验证守卫 ====================

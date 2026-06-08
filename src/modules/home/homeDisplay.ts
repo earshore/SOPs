@@ -4,6 +4,7 @@
 // ================================================================
 
 import BaseModule from '@/common/BaseModule';
+import { setSafeHtml } from '@/common/utils/security';
 import { loadTemplate } from '@/common/utils/viewLoader';
 import './homeDisplay.css';
 
@@ -149,7 +150,7 @@ class HomeModule extends BaseModule {
     if (this.container && !this.container.innerHTML.trim()) {
       const html = await loadTemplate('src/modules/home/homeDisplay.html');
       // ✅ 安全: 静态HTML模板，无用户输入
-      this.container.innerHTML = html;
+      setSafeHtml(this.container, html);
     }
   }
 
@@ -297,10 +298,12 @@ class HomeModule extends BaseModule {
     const gridY = Math.floor(particle.y / this.gridSize);
     const key = `${gridX},${gridY}`;
 
-    if (!this.grid.has(key)) {
-      this.grid.set(key, []);
+    let bucket = this.grid.get(key);
+    if (!bucket) {
+      bucket = [];
+      this.grid.set(key, bucket);
     }
-    this.grid.get(key)!.push(particle);
+    bucket.push(particle);
   }
 
   /**
@@ -315,8 +318,9 @@ class HomeModule extends BaseModule {
     for (let dy = -1; dy <= 1; dy++) {
       for (let dx = -1; dx <= 1; dx++) {
         const key = `${gridX + dx},${gridY + dy}`;
-        if (this.grid.has(key)) {
-          nearby.push(...this.grid.get(key)!);
+        const bucket = this.grid.get(key);
+        if (bucket) {
+          nearby.push(...bucket);
         }
       }
     }
@@ -339,8 +343,9 @@ class HomeModule extends BaseModule {
     this.lastFrameTime = currentTime - (elapsed % this.frameInterval);
 
     if (!this.ctx) return;
+    const ctx = this.ctx;
 
-    this.ctx.clearRect(0, 0, this.width, this.height);
+    ctx.clearRect(0, 0, this.width, this.height);
 
     // 🎯 性能优化: 重建空间网格
     this.grid.clear();
@@ -349,7 +354,7 @@ class HomeModule extends BaseModule {
     this.particles.forEach((p) => {
       p.update(this.mouse);
       this.addToGrid(p);
-      p.draw(this.ctx!);
+      p.draw(ctx);
     });
 
     this.drawConnections();
@@ -362,10 +367,11 @@ class HomeModule extends BaseModule {
    */
   private drawConnections(): void {
     if (!this.ctx) return;
+    const ctx = this.ctx;
 
-    this.ctx.beginPath();
-    this.ctx.strokeStyle = 'rgba(37, 99, 235, 0.15)';
-    this.ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(37, 99, 235, 0.15)';
+    ctx.lineWidth = 0.5;
 
     // 🎯 性能优化: 使用空间分区，避免 O(n²) 复杂度
     const connectDistSq = Math.pow(this.CONFIG.spacing * 1.2, 2);
@@ -389,14 +395,14 @@ class HomeModule extends BaseModule {
 
           const distSq = Math.pow(p.x - p2.x, 2) + Math.pow(p.y - p2.y, 2);
           if (distSq < connectDistSq) {
-            this.ctx!.moveTo(p.x, p.y);
-            this.ctx!.lineTo(p2.x, p2.y);
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p2.x, p2.y);
             drawn.add(pairKey);
           }
         });
       }
     });
-    this.ctx.stroke();
+    ctx.stroke();
   }
 }
 

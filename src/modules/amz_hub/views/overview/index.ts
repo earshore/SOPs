@@ -3,6 +3,7 @@
  */
 
 import BaseModule from "../../../../common/BaseModule";
+import { setSafeHtml } from "../../../../common/utils/security";
 import templateHTML from "./template.html?raw";
 
 /**
@@ -94,13 +95,19 @@ class HubOverviewModule extends BaseModule {
   }
 
   protected async render(): Promise<void> {
+    const container = this.container;
+    if (!container) return;
+
     // ✅ 安全: 静态HTML模板，无用户输入
-    this.container!.innerHTML = templateHTML;
-    this.container!.classList.add("fade-in");
+    setSafeHtml(container, templateHTML);
+    container.classList.add("fade-in");
   }
 
   protected async init(): Promise<void> {
-    initOverviewEvents(this.container!);
+    const container = this.container;
+    if (!container) return;
+
+    initOverviewEvents(container);
     console.log("✅ [Hub Overview] 模块挂载完成");
   }
 }

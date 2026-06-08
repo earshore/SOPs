@@ -84,26 +84,20 @@ class HttpCacheService {
       return null;
     }
 
-    // 从内存缓存获取
-    if (cfg.strategy === 'memory' || cfg.strategy === 'memory-storage') {
-      const entry = this.memoryCache.get(cacheKey);
-      if (entry && !this.isExpired(entry)) {
-        this.stats.hits++;
-        return entry.data as T;
-      }
+    const memoryEntry = this.getFreshMemoryEntry<T>(cacheKey, cfg.strategy);
+    if (memoryEntry) {
+      this.stats.hits++;
+      return memoryEntry.data;
     }
 
-    // 从持久化缓存获取
-    if (cfg.strategy === 'storage' || cfg.strategy === 'memory-storage') {
-      const stored = this.getFromStorage<T>(cacheKey);
-      if (stored && !this.isExpired(stored)) {
-        // 回填到内存缓存
-        if (cfg.strategy === 'memory-storage') {
-          this.memoryCache.set(cacheKey, stored);
-        }
-        this.stats.hits++;
-        return stored.data;
+    const stored = this.getFreshStorageEntry<T>(cacheKey, cfg.strategy);
+    if (stored) {
+      // 回填到内存缓存
+      if (cfg.strategy === 'memory-storage') {
+        this.memoryCache.set(cacheKey, stored);
       }
+      this.stats.hits++;
+      return stored.data;
     }
 
     this.stats.misses++;
@@ -166,43 +160,11 @@ class HttpCacheService {
    */
   async clear(prefix?: string): Promise<void> {
     if (prefix) {
-      // 清空指定前缀的缓存
-      const pattern = this.buildKey('', prefix);
-      
-      // 清空内存缓存
-      for (const key of this.memoryCache.keys()) {
-        if (key.startsWith(pattern)) {
-          this.memoryCache.delete(key);
-        }
-      }
-      
-      // 清空持久化缓存
-      try {
-        const keys = this.getAllStorageKeys();
-        for (const key of keys) {
-          if (key.startsWith(pattern)) {
-            StorageService.remove(key);
-          }
-        }
-      } catch (e) {
-        // 忽略错误
-      }
-    } else {
-      // 清空所有缓存
-      this.memoryCache.clear();
-      
-      try {
-        // 只清空 HTTP cache 前缀的项
-        const keys = this.getAllStorageKeys();
-        for (const key of keys) {
-          if (key.startsWith(CACHE_PREFIXES.HTTP) || key.startsWith('http-cache:')) {
-            StorageService.remove(key);
-          }
-        }
-      } catch (e) {
-        // 忽略错误
-      }
+      this.clearByPrefix(prefix);
+      return;
     }
+
+    this.clearAll();
   }
 
   /**
@@ -231,36 +193,104 @@ class HttpCacheService {
    */
   cleanup(): void {
     const now = Date.now();
-    
+
+    this.cleanupMemory(now);
+    this.cleanupStorage(now);
+  }
+
+  private getFreshMemoryEntry<T>(cacheKey: string, strategy: CacheStrategy): CacheEntry<T> | null {
+    if (strategy !== 'memory' && strategy !== 'memory-storage') {
+      return null;
+    }
+
+    const entry = this.memoryCache.get(cacheKey) as CacheEntry<T> | undefined;
+    return entry && !this.isExpired(entry) ? entry : null;
+  }
+
+  private getFreshStorageEntry<T>(cacheKey: string, strategy: CacheStrategy): CacheEntry<T> | null {
+    if (strategy !== 'storage' && strategy !== 'memory-storage') {
+      return null;
+    }
+
+    const entry = this.getFromStorage<T>(cacheKey);
+    return entry && !this.isExpired(entry) ? entry : null;
+  }
+
+  private clearByPrefix(prefix: string): void {
+    // 清空指定前缀的缓存
+    const pattern = this.buildKey('', prefix);
+
+    this.clearMemoryKeys((key) => key.startsWith(pattern));
+    this.removeStorageKeys((key) => key.startsWith(pattern));
+  }
+
+  private clearAll(): void {
+    // 清空所有缓存
+    this.memoryCache.clear();
+    this.removeStorageKeys((key) => this.isHttpCacheKey(key));
+  }
+
+  private clearMemoryKeys(shouldRemove: (key: string) => boolean): void {
+    for (const key of this.memoryCache.keys()) {
+      if (shouldRemove(key)) {
+        this.memoryCache.delete(key);
+      }
+    }
+  }
+
+  private removeStorageKeys(shouldRemove: (key: string) => boolean): void {
+    try {
+      for (const key of this.getAllStorageKeys()) {
+        if (shouldRemove(key)) {
+          StorageService.remove(key);
+        }
+      }
+    } catch (e) {
+      // 忽略错误
+    }
+  }
+
+  private cleanupMemory(now: number): void {
     // 清理内存缓存
     for (const [key, entry] of this.memoryCache.entries()) {
       if (entry.expiresAt < now) {
         this.memoryCache.delete(key);
       }
     }
-    
+  }
+
+  private cleanupStorage(now: number): void {
     // 清理持久化缓存
     try {
-      const keys = this.getAllStorageKeys();
-      for (const key of keys) {
-        if (key.startsWith(CACHE_PREFIXES.HTTP) || key.startsWith('http-cache:')) {
-          const item = StorageService.getRaw(key);
-          if (item) {
-            try {
-              const entry = JSON.parse(item) as CacheEntry;
-              if (entry.expiresAt < now) {
-                StorageService.remove(key);
-              }
-            } catch (e) {
-              // 解析失败,删除
-              StorageService.remove(key);
-            }
-          }
+      for (const key of this.getAllStorageKeys()) {
+        if (this.isHttpCacheKey(key)) {
+          this.removeExpiredStorageEntry(key, now);
         }
       }
     } catch (e) {
       // 忽略错误
     }
+  }
+
+  private removeExpiredStorageEntry(key: string, now: number): void {
+    const item = StorageService.getRaw(key);
+    if (!item) {
+      return;
+    }
+
+    try {
+      const entry = JSON.parse(item) as CacheEntry;
+      if (entry.expiresAt < now) {
+        StorageService.remove(key);
+      }
+    } catch (e) {
+      // 解析失败,删除
+      StorageService.remove(key);
+    }
+  }
+
+  private isHttpCacheKey(key: string): boolean {
+    return key.startsWith(CACHE_PREFIXES.HTTP) || key.startsWith('http-cache:');
   }
 
   /**

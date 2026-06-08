@@ -222,7 +222,7 @@ async function readOpenAIStream(
     });
   };
 
-  while (true) {
+  for (;;) {
     const { value, done } = await reader.read();
     if (done) {
       break;

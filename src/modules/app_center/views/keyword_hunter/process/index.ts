@@ -15,6 +15,7 @@ import { showToast } from "../../../../../common/ui";
 import * as KeywordService from "../services/trackerService";
 import { appStore } from "../../../../../stores/useAppStore";
 import { ErrorService } from "../../../../../services/errorService";
+import { createSafeFragment } from "../../../../../common/utils/security";
 import "../keyword_hunter_style.css";
 
 // ==========================================
@@ -32,6 +33,31 @@ interface FloatWinState {
   offsetX: number;
   offsetY: number;
 }
+
+interface KeywordItem {
+  keyword: string;
+  count: number;
+  matched: boolean;
+}
+
+interface TranslateButtonState {
+  hasContent: boolean;
+  hasTranslationData: boolean;
+}
+
+interface AnalysisStats {
+  total: number;
+  matched: number;
+  unmatched: number;
+  rate: number;
+}
+
+type KeywordTrackerStoreState = ReturnType<
+  typeof appStore.getState
+>["keywordTracker"];
+type MatchedKeywordEntry =
+  | KeywordTrackerStoreState["matchedKeywords"][number]
+  | string;
 
 let eventListeners: EventListenerRecord[] = []; // 用于清理事件监听器
 let timeouts: number[] = []; // 用于清理定时器
@@ -122,6 +148,36 @@ function getKeywordSet(sets: Set<string>[], index: number): Set<string> {
   return sets[index] ?? new Set<string>();
 }
 
+function getDefaultProcessKeywordTrackerState(): KeywordTrackerStoreState {
+  return {
+    keywords: [],
+    processedCopy: "",
+    formattedCopy: "",
+    matchedKeywords: [],
+    unmatchedKeywords: [],
+    wordFrequency: [],
+    paragraphs: [],
+    translationMode: false,
+    keywordLocationIndex: {},
+    settings: {
+      matchPlural: false,
+      matchStem: false,
+      matchCase: false,
+      matchPartial: false,
+    },
+    isWindowMinimized: false,
+  };
+}
+
+function ensureKeywordTrackerState(): KeywordTrackerStoreState {
+  const currentState = appStore.getState();
+  if (!currentState.keywordTracker) {
+    currentState.updateKeywordTracker(getDefaultProcessKeywordTrackerState());
+  }
+
+  return appStore.getState().keywordTracker;
+}
+
 // ==========================================
 // State Management
 // ==========================================
@@ -130,27 +186,7 @@ function getKeywordSet(sets: Set<string>[], index: number): Set<string> {
  * 保存处理状态到 state
  */
 function saveProcessStateToState(): void {
-  const currentState = appStore.getState();
-  if (!currentState.keywordTracker) {
-    currentState.updateKeywordTracker({
-      keywords: [],
-      processedCopy: "",
-      formattedCopy: "",
-      matchedKeywords: [],
-      unmatchedKeywords: [],
-      wordFrequency: [],
-      paragraphs: [],
-      translationMode: false,
-      keywordLocationIndex: {},
-      settings: {
-        matchPlural: false,
-        matchStem: false,
-        matchCase: false,
-        matchPartial: false,
-      },
-      isWindowMinimized: false,
-    });
-  }
+  ensureKeywordTrackerState();
 
   // 保存文案显示内容
   const displayEl = document.getElementById("kt-copy-display");
@@ -213,200 +249,217 @@ function renderProcessModule(): void {
  * 渲染分析统计数据（从 analysis 模块移动过来）
  */
 function renderAnalysisStats(): void {
-  const currentState = appStore.getState();
-  if (!currentState.keywordTracker) {
-    currentState.updateKeywordTracker({
-      keywords: [],
-      processedCopy: "",
-      formattedCopy: "",
-      matchedKeywords: [],
-      unmatchedKeywords: [],
-      wordFrequency: [],
-      paragraphs: [],
-      translationMode: false,
-      keywordLocationIndex: {},
-      settings: {
-        matchPlural: false,
-        matchStem: false,
-        matchCase: false,
-        matchPartial: false,
-      },
-      isWindowMinimized: false,
-    });
-  }
+  const tracker = ensureKeywordTrackerState();
+  const stats = getAnalysisStats(tracker);
+  renderCoverageStats(stats);
+  renderWordFrequencyStats(tracker);
+}
 
-  const total = appStore.getState().keywordTracker.keywords
-    ? appStore.getState().keywordTracker.keywords.length
-    : 0;
-  const matched = appStore.getState().keywordTracker.matchedKeywords
-    ? appStore.getState().keywordTracker.matchedKeywords.length
+function getAnalysisStats(tracker: KeywordTrackerStoreState): AnalysisStats {
+  const total = tracker.keywords ? tracker.keywords.length : 0;
+  const matched = tracker.matchedKeywords ? tracker.matchedKeywords.length : 0;
+  const unmatched = tracker.unmatchedKeywords
+    ? tracker.unmatchedKeywords.length
     : 0;
   const rate = total === 0 ? 0 : Math.round((matched / total) * 100);
 
+  return { total, matched, unmatched, rate };
+}
+
+function renderCoverageStats(stats: AnalysisStats): void {
   // 更新覆盖率
   const rateEl = document.getElementById("kt-coverage-rate");
-  if (rateEl) rateEl.textContent = rate + "%";
+  if (rateEl) rateEl.textContent = stats.rate + "%";
 
   const barEl = document.getElementById(
     "kt-coverage-bar",
   ) as HTMLElement | null;
-  if (barEl) barEl.style.width = rate + "%";
+  if (barEl) barEl.style.width = stats.rate + "%";
 
   // 更新统计数据
   const matchedEl = document.getElementById("kt-stat-matched");
-  if (matchedEl) matchedEl.textContent = matched.toString();
+  if (matchedEl) matchedEl.textContent = stats.matched.toString();
 
   const unmatchedEl = document.getElementById("kt-stat-unmatched");
-  if (unmatchedEl) {
-    const unmatchedCount = appStore.getState().keywordTracker.unmatchedKeywords
-      ? appStore.getState().keywordTracker.unmatchedKeywords.length
-      : 0;
-    unmatchedEl.textContent = unmatchedCount.toString();
-  }
+  if (unmatchedEl) unmatchedEl.textContent = stats.unmatched.toString();
 
   const totalEl = document.getElementById("kt-stat-total");
-  if (totalEl) totalEl.textContent = total.toString();
+  if (totalEl) totalEl.textContent = stats.total.toString();
+}
 
-  // 渲染高频词云（带关键词命中标注）
+function renderWordFrequencyStats(tracker: KeywordTrackerStoreState): void {
   const freqList = document.getElementById("kt-word-frequency-list");
-  if (freqList && appStore.getState().keywordTracker.wordFrequency) {
-    // 构建已匹配关键词的词根集合
-    const matchedKeywordRoots = new Set<string>();
-    if (
-      appStore.getState().keywordTracker.matchedKeywords &&
-      appStore.getState().keywordTracker.matchedKeywords.length > 0
-    ) {
-      appStore.getState().keywordTracker.matchedKeywords.forEach((item) => {
-        const kw = typeof item === "object" ? item.keyword : item;
-        if (kw) {
-          const words = kw.toLowerCase().match(/[\p{L}\p{M}]+/gu) || [];
-          words.forEach((w: string) => {
-            if (w.length > 2) {
-              matchedKeywordRoots.add(w);
-            }
-          });
-        }
-      });
-    }
+  if (!freqList || !tracker.wordFrequency) return;
 
-    // 构建未匹配关键词的词根集合
-    const unmatchedKeywordRoots = new Set<string>();
-    const highFreqWordsSet = new Set(
-      appStore
-        .getState()
-        .keywordTracker.wordFrequency.map(([w]) => w.toLowerCase()),
+  const matchedKeywordRoots = collectMatchedKeywordRoots(tracker.matchedKeywords);
+  const unmatchedKeywordRoots = collectUnmatchedKeywordRoots(tracker);
+
+  console.log("[Process] 已匹配词根:", Array.from(matchedKeywordRoots));
+  console.log("[Process] 未匹配词根:", Array.from(unmatchedKeywordRoots));
+
+  freqList.replaceChildren();
+  renderWordCloud(freqList, tracker.wordFrequency, matchedKeywordRoots);
+  renderUnmatchedRootSection(freqList, unmatchedKeywordRoots);
+}
+
+function collectMatchedKeywordRoots(
+  matchedKeywords: readonly MatchedKeywordEntry[],
+): Set<string> {
+  const roots = new Set<string>();
+  matchedKeywords.forEach((item) => {
+    addKeywordRoots(roots, getMatchedKeywordText(item));
+  });
+  return roots;
+}
+
+function collectUnmatchedKeywordRoots(
+  tracker: KeywordTrackerStoreState,
+): Set<string> {
+  const roots = new Set<string>();
+  const highFreqWordsSet = new Set(
+    tracker.wordFrequency.map(([word]) => word.toLowerCase()),
+  );
+
+  tracker.unmatchedKeywords.forEach((keyword) => {
+    addKeywordRoots(roots, keyword, highFreqWordsSet);
+  });
+
+  return roots;
+}
+
+function getMatchedKeywordText(item: MatchedKeywordEntry): string {
+  return typeof item === "object" ? item.keyword : item;
+}
+
+function addKeywordRoots(
+  roots: Set<string>,
+  keyword: string,
+  excludedRoots?: Set<string>,
+): void {
+  if (!keyword) return;
+
+  const words = keyword.toLowerCase().match(/[\p{L}\p{M}]+/gu) || [];
+  words.forEach((word: string) => {
+    if (word.length > 2 && !excludedRoots?.has(word)) {
+      roots.add(word);
+    }
+  });
+}
+
+function renderWordCloud(
+  freqList: HTMLElement,
+  wordFrequency: Array<[string, number]>,
+  matchedKeywordRoots: Set<string>,
+): void {
+  const wordCloudDiv = document.createElement("div");
+  wordCloudDiv.className = "flex flex-wrap gap-3";
+  const wordFragment = document.createDocumentFragment();
+
+  wordFrequency.forEach(([word, count]) => {
+    wordFragment.appendChild(
+      createWordFrequencySpan(
+        word,
+        count,
+        matchedKeywordRoots.has(word.toLowerCase()),
+      ),
     );
+  });
 
-    if (
-      appStore.getState().keywordTracker.unmatchedKeywords &&
-      appStore.getState().keywordTracker.unmatchedKeywords.length > 0
-    ) {
-      appStore.getState().keywordTracker.unmatchedKeywords.forEach((kw) => {
-        if (kw) {
-          const words = kw.toLowerCase().match(/[\p{L}\p{M}]+/gu) || [];
-          words.forEach((w: string) => {
-            if (w.length > 2 && !highFreqWordsSet.has(w)) {
-              unmatchedKeywordRoots.add(w);
-            }
-          });
-        }
-      });
-    }
+  wordCloudDiv.appendChild(wordFragment);
+  freqList.appendChild(wordCloudDiv);
+}
 
-    console.log("[Process] 已匹配词根:", Array.from(matchedKeywordRoots));
-    console.log("[Process] 未匹配词根:", Array.from(unmatchedKeywordRoots));
+function createWordFrequencySpan(
+  word: string,
+  count: number,
+  isMatched: boolean,
+): HTMLElement {
+  const span = document.createElement("span");
+  const countSpan = document.createElement("span");
+  countSpan.textContent = `(${count})`;
 
-    // 清空容器
-    freqList.innerHTML = "";
-
-    // 渲染高频词云
-    const wordCloudDiv = document.createElement("div");
-    wordCloudDiv.className = "flex flex-wrap gap-3";
-    const wordFragment = document.createDocumentFragment();
-
-    appStore
-      .getState()
-      .keywordTracker.wordFrequency.forEach(([w, c]: [string, number]) => {
-        const span = document.createElement("span");
-        const isMatched = matchedKeywordRoots.has(w.toLowerCase());
-
-        if (isMatched) {
-          span.className =
-            "px-2 py-1 bg-green-100 text-green-700 text-xs rounded-md flex items-center gap-1";
-          const checkIcon = document.createElement("span");
-          checkIcon.className = "font-bold";
-          checkIcon.textContent = "✓";
-          span.appendChild(checkIcon);
-          span.appendChild(document.createTextNode(` ${w} `));
-          const countSpan = document.createElement("span");
-          countSpan.className = "opacity-60";
-          countSpan.textContent = `(${c})`;
-          span.appendChild(countSpan);
-        } else {
-          span.className =
-            "px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded-md";
-          span.textContent = `${w} `;
-          const countSpan = document.createElement("span");
-          countSpan.className = "text-slate-400";
-          countSpan.textContent = `(${c})`;
-          span.appendChild(countSpan);
-        }
-
-        wordFragment.appendChild(span);
-      });
-
-    wordCloudDiv.appendChild(wordFragment);
-    freqList.appendChild(wordCloudDiv);
-
-    // 如果有未命中的词根，在下方单独展示
-    if (unmatchedKeywordRoots.size > 0) {
-      const unmatchedRootsArray = Array.from(unmatchedKeywordRoots).sort();
-      console.log("[Process] 准备渲染未匹配词根:", unmatchedRootsArray);
-
-      const unmatchedSection = document.createElement("div");
-      unmatchedSection.className = "mt-4 pt-4 border-t border-slate-200";
-
-      const header = document.createElement("div");
-      header.className =
-        "text-xs text-slate-500 mb-2 font-medium flex items-center gap-2";
-      const icon = document.createElement("i");
-      icon.className = "fas fa-exclamation-triangle text-red-500";
-      header.appendChild(icon);
-      const headerText = document.createElement("span");
-      headerText.textContent = `未在文案中出现的关键词词根 (${unmatchedRootsArray.length})`;
-      header.appendChild(headerText);
-      unmatchedSection.appendChild(header);
-
-      const rootsContainer = document.createElement("div");
-      rootsContainer.className = "flex flex-wrap gap-2";
-      const rootsFragment = document.createDocumentFragment();
-
-      unmatchedRootsArray.forEach((root: string) => {
-        const span = document.createElement("span");
-        span.className =
-          "px-2 py-1 bg-red-100 text-red-700 text-xs rounded-md inline-flex items-center gap-1 cursor-pointer hover:bg-red-200 transition-colors";
-        span.title = "点击在关键词监控中定位";
-        span.addEventListener("click", () => locateUnmatchedRootInList(root));
-
-        const icon = document.createElement("span");
-        icon.className = "font-bold";
-        icon.textContent = "✗";
-        span.appendChild(icon);
-
-        const text = document.createElement("span");
-        text.textContent = root;
-        span.appendChild(text);
-
-        rootsFragment.appendChild(span);
-      });
-
-      rootsContainer.appendChild(rootsFragment);
-      unmatchedSection.appendChild(rootsContainer);
-      freqList.appendChild(unmatchedSection);
-    } else {
-      console.log("[Process] 没有未匹配词根需要显示");
-    }
+  if (isMatched) {
+    span.className =
+      "px-2 py-1 bg-green-100 text-green-700 text-xs rounded-md flex items-center gap-1";
+    const checkIcon = document.createElement("span");
+    checkIcon.className = "font-bold";
+    checkIcon.textContent = "✓";
+    span.appendChild(checkIcon);
+    span.appendChild(document.createTextNode(` ${word} `));
+    countSpan.className = "opacity-60";
+    span.appendChild(countSpan);
+    return span;
   }
+
+  span.className = "px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded-md";
+  span.textContent = `${word} `;
+  countSpan.className = "text-slate-400";
+  span.appendChild(countSpan);
+  return span;
+}
+
+function renderUnmatchedRootSection(
+  freqList: HTMLElement,
+  unmatchedKeywordRoots: Set<string>,
+): void {
+  if (unmatchedKeywordRoots.size === 0) {
+    console.log("[Process] 没有未匹配词根需要显示");
+    return;
+  }
+
+  const unmatchedRootsArray = Array.from(unmatchedKeywordRoots).sort();
+  console.log("[Process] 准备渲染未匹配词根:", unmatchedRootsArray);
+
+  const unmatchedSection = document.createElement("div");
+  unmatchedSection.className = "mt-4 pt-4 border-t border-slate-200";
+  unmatchedSection.appendChild(createUnmatchedRootsHeader(unmatchedRootsArray.length));
+  unmatchedSection.appendChild(createUnmatchedRootsContainer(unmatchedRootsArray));
+  freqList.appendChild(unmatchedSection);
+}
+
+function createUnmatchedRootsHeader(rootCount: number): HTMLElement {
+  const header = document.createElement("div");
+  header.className =
+    "text-xs text-slate-500 mb-2 font-medium flex items-center gap-2";
+  const icon = document.createElement("i");
+  icon.className = "fas fa-exclamation-triangle text-red-500";
+  header.appendChild(icon);
+  const headerText = document.createElement("span");
+  headerText.textContent = `未在文案中出现的关键词词根 (${rootCount})`;
+  header.appendChild(headerText);
+  return header;
+}
+
+function createUnmatchedRootsContainer(roots: string[]): HTMLElement {
+  const rootsContainer = document.createElement("div");
+  rootsContainer.className = "flex flex-wrap gap-2";
+  const rootsFragment = document.createDocumentFragment();
+
+  roots.forEach((root: string) => {
+    rootsFragment.appendChild(createUnmatchedRootTag(root));
+  });
+
+  rootsContainer.appendChild(rootsFragment);
+  return rootsContainer;
+}
+
+function createUnmatchedRootTag(root: string): HTMLElement {
+  const span = document.createElement("span");
+  span.className =
+    "px-2 py-1 bg-red-100 text-red-700 text-xs rounded-md inline-flex items-center gap-1 cursor-pointer hover:bg-red-200 transition-colors";
+  span.title = "点击在关键词监控中定位";
+  span.addEventListener("click", () => locateUnmatchedRootInList(root));
+
+  const icon = document.createElement("span");
+  icon.className = "font-bold";
+  icon.textContent = "✗";
+  span.appendChild(icon);
+
+  const text = document.createElement("span");
+  text.textContent = root;
+  span.appendChild(text);
+
+  return span;
 }
 
 /**
@@ -421,63 +474,88 @@ function updateTranslateButton(): void {
     "kt-show-translation",
   ) as HTMLInputElement | null;
 
-  const hasContent =
-    appStore.getState().keywordTracker.processedCopy &&
-    appStore.getState().keywordTracker.processedCopy.trim().length > 0;
-  const hasTranslationData =
-    appStore.getState().keywordTracker.paragraphs &&
-    appStore.getState().keywordTracker.paragraphs.length > 0;
+  const hasContent = hasProcessedCopy();
+  const hasTranslationData = hasTranslationParagraphs();
 
   // A. 翻译按钮
   if (transBtn && transBtnText) {
-    if (hasContent && !hasTranslationData) {
-      transBtn.disabled = false;
-      transBtnText.textContent = "AI 沉浸式翻译";
-      transBtn.classList.remove(
-        "bg-gray-300",
-        "text-gray-500",
-        "cursor-not-allowed",
-      );
-      transBtn.classList.add(
-        "bg-gradient-to-r",
-        "from-purple-500",
-        "to-pink-500",
-        "text-white",
-        "shadow-md",
-        "hover:shadow-lg",
-      );
-    } else {
-      transBtn.disabled = true;
-      transBtnText.textContent = hasTranslationData
-        ? "翻译已完成"
-        : "AI 沉浸式翻译";
-      transBtn.classList.add(
-        "bg-gray-300",
-        "text-gray-500",
-        "cursor-not-allowed",
-      );
-      transBtn.classList.remove(
-        "bg-gradient-to-r",
-        "from-purple-500",
-        "to-pink-500",
-        "text-white",
-        "shadow-md",
-        "hover:shadow-lg",
-      );
-    }
+    updateTranslateActionButton(transBtn, transBtnText, {
+      hasContent,
+      hasTranslationData,
+    });
   }
 
   // B. 复选框
   if (transCheckbox) {
-    if (hasTranslationData) {
-      transCheckbox.disabled = false;
-      if (appStore.getState().keywordTracker.translationMode) {
-        transCheckbox.checked = true;
-      }
-    } else {
-      transCheckbox.disabled = true;
-      transCheckbox.checked = false;
-    }
+    updateTranslationCheckbox(transCheckbox, hasTranslationData);
+  }
+}
+
+function hasProcessedCopy(): boolean {
+  const processedCopy = appStore.getState().keywordTracker.processedCopy;
+  return !!processedCopy && processedCopy.trim().length > 0;
+}
+
+function hasTranslationParagraphs(): boolean {
+  return appStore.getState().keywordTracker.paragraphs.length > 0;
+}
+
+function updateTranslateActionButton(
+  transBtn: HTMLButtonElement,
+  transBtnText: HTMLElement,
+  state: TranslateButtonState,
+): void {
+  if (state.hasContent && !state.hasTranslationData) {
+    transBtn.disabled = false;
+    transBtnText.textContent = "AI 沉浸式翻译";
+    transBtn.classList.remove(
+      "bg-gray-300",
+      "text-gray-500",
+      "cursor-not-allowed",
+    );
+    transBtn.classList.add(
+      "bg-gradient-to-r",
+      "from-purple-500",
+      "to-pink-500",
+      "text-white",
+      "shadow-md",
+      "hover:shadow-lg",
+    );
+    return;
+  }
+
+  transBtn.disabled = true;
+  transBtnText.textContent = state.hasTranslationData
+    ? "翻译已完成"
+    : "AI 沉浸式翻译";
+  transBtn.classList.add(
+    "bg-gray-300",
+    "text-gray-500",
+    "cursor-not-allowed",
+  );
+  transBtn.classList.remove(
+    "bg-gradient-to-r",
+    "from-purple-500",
+    "to-pink-500",
+    "text-white",
+    "shadow-md",
+    "hover:shadow-lg",
+  );
+}
+
+function updateTranslationCheckbox(
+  transCheckbox: HTMLInputElement,
+  hasTranslationData: boolean,
+): void {
+  if (!hasTranslationData) {
+    transCheckbox.disabled = true;
+    transCheckbox.checked = false;
+    return;
+  }
+
+  transCheckbox.disabled = false;
+  if (appStore.getState().keywordTracker.translationMode) {
+    transCheckbox.checked = true;
   }
 }
 
@@ -510,7 +588,7 @@ function renderCopyDisplay(): void {
       }));
 
     // 清空容器
-    display.innerHTML = "";
+    display.replaceChildren();
     const fragment = document.createDocumentFragment();
 
     paragraphs.forEach((para) => {
@@ -521,7 +599,7 @@ function renderCopyDisplay(): void {
       originalDiv.className = "paragraph-original leading-relaxed";
       const tempDiv = document.createElement("div");
       // ✅ 安全: para.original来自highlightText()，文本已escapeHtml且属性已escapeAttr
-      tempDiv.innerHTML = para.original;
+      tempDiv.appendChild(createSafeFragment(para.original));
       while (tempDiv.firstChild) {
         originalDiv.appendChild(tempDiv.firstChild);
       }
@@ -548,7 +626,7 @@ function renderCopyDisplay(): void {
     );
     renderer.renderTemplate(display, highlighted);
   } else {
-    display.innerHTML = "";
+    display.replaceChildren();
   }
 }
 
@@ -659,122 +737,116 @@ function renderFloatingKeywords(): void {
 
   if (!allContainer) return;
 
-  // 合并已匹配和未匹配的关键词
-  interface KeywordItem {
-    keyword: string;
-    count: number;
-    matched: boolean;
-  }
+  const allKeywords = getFloatingKeywordItems();
+  renderFloatingKeywordItems(allContainer, allKeywords);
+  updateFloatingKeywordCounts();
+}
 
-  const allKeywords: KeywordItem[] = [];
+function getFloatingKeywordItems(): KeywordItem[] {
+  const tracker = appStore.getState().keywordTracker;
+  const matchedItems = tracker.matchedKeywords.map((item) => ({
+    keyword: item.keyword,
+    count: item.count,
+    matched: true,
+  }));
+  const unmatchedItems = tracker.unmatchedKeywords.map((kw) => ({
+    keyword: kw,
+    count: 0,
+    matched: false,
+  }));
 
-  // 添加已匹配的关键词
-  if (
-    appStore.getState().keywordTracker.matchedKeywords &&
-    appStore.getState().keywordTracker.matchedKeywords.length > 0
-  ) {
-    appStore.getState().keywordTracker.matchedKeywords.forEach((item) => {
-      allKeywords.push({
-        keyword: item.keyword,
-        count: item.count,
-        matched: true,
-      });
-    });
-  }
+  return [...matchedItems, ...unmatchedItems];
+}
 
-  // 添加未匹配的关键词
-  if (
-    appStore.getState().keywordTracker.unmatchedKeywords &&
-    appStore.getState().keywordTracker.unmatchedKeywords.length > 0
-  ) {
-    appStore.getState().keywordTracker.unmatchedKeywords.forEach((kw) => {
-      allKeywords.push({
-        keyword: kw,
-        count: 0,
-        matched: false,
-      });
-    });
-  }
+function renderFloatingKeywordItems(
+  allContainer: HTMLElement,
+  allKeywords: KeywordItem[],
+): void {
+  allContainer.replaceChildren();
 
-  // 渲染统一列表
   if (allKeywords.length > 0) {
-    // 清空容器
-    allContainer.innerHTML = "";
     const fragment = document.createDocumentFragment();
-
-    allKeywords.forEach((item: KeywordItem) => {
-      const div = document.createElement("div");
-      div.className = "keyword-item";
-      div.dataset.keyword = item.keyword.toLowerCase();
-
-      if (item.matched) {
-        // 已匹配 - 绿色背景，可点击定位
-        div.className +=
-          " bg-green-50 border-l-4 border-green-500 rounded p-2 flex justify-between items-center cursor-pointer hover:bg-green-100 transition-colors shadow-sm";
-        div.addEventListener("click", () => locateKeywordInCopy(item.keyword));
-
-        const span = document.createElement("span");
-        span.className =
-          "text-sm text-green-800 font-medium flex items-center gap-2";
-        const icon = document.createElement("i");
-        icon.className = "fas fa-check-circle text-green-600";
-        span.appendChild(icon);
-        span.appendChild(document.createTextNode(item.keyword));
-
-        const badge = document.createElement("span");
-        badge.className =
-          "text-xs bg-green-600 text-white px-2 py-0.5 rounded-full font-semibold";
-        badge.textContent = item.count.toString();
-
-        div.appendChild(span);
-        div.appendChild(badge);
-      } else {
-        // 未匹配 - 红色背景
-        div.className +=
-          " keyword-unmatched bg-red-50 border-l-4 border-red-500 rounded p-2 flex items-center gap-2 shadow-sm";
-
-        const icon = document.createElement("i");
-        icon.className = "fas fa-times-circle text-red-600";
-
-        const span = document.createElement("span");
-        span.className = "text-sm text-red-800 font-medium";
-        span.textContent = item.keyword;
-
-        div.appendChild(icon);
-        div.appendChild(span);
-      }
-
-      fragment.appendChild(div);
+    allKeywords.forEach((item) => {
+      fragment.appendChild(createFloatingKeywordElement(item));
     });
-
     allContainer.appendChild(fragment);
-  } else {
-    const emptyDiv = document.createElement("div");
-    emptyDiv.className = "text-center text-slate-400 py-8";
-    const icon = document.createElement("i");
-    icon.className = "fas fa-inbox text-3xl mb-2";
-    const text = document.createElement("p");
-    text.className = "text-sm";
-    text.textContent = "暂无关键词数据";
-    emptyDiv.appendChild(icon);
-    emptyDiv.appendChild(text);
-    allContainer.innerHTML = "";
-    allContainer.appendChild(emptyDiv);
+    return;
   }
 
-  // 更新计数显示
+  allContainer.appendChild(createEmptyKeywordsElement());
+}
+
+function createFloatingKeywordElement(item: KeywordItem): HTMLElement {
+  return item.matched
+    ? createMatchedKeywordElement(item)
+    : createUnmatchedKeywordElement(item);
+}
+
+function createMatchedKeywordElement(item: KeywordItem): HTMLElement {
+  const div = document.createElement("div");
+  div.className =
+    "keyword-item bg-green-50 border-l-4 border-green-500 rounded p-2 flex justify-between items-center cursor-pointer hover:bg-green-100 transition-colors shadow-sm";
+  div.dataset.keyword = item.keyword.toLowerCase();
+  div.addEventListener("click", () => locateKeywordInCopy(item.keyword));
+
+  const span = document.createElement("span");
+  span.className = "text-sm text-green-800 font-medium flex items-center gap-2";
+  const icon = document.createElement("i");
+  icon.className = "fas fa-check-circle text-green-600";
+  span.appendChild(icon);
+  span.appendChild(document.createTextNode(item.keyword));
+
+  const badge = document.createElement("span");
+  badge.className =
+    "text-xs bg-green-600 text-white px-2 py-0.5 rounded-full font-semibold";
+  badge.textContent = item.count.toString();
+
+  div.appendChild(span);
+  div.appendChild(badge);
+  return div;
+}
+
+function createUnmatchedKeywordElement(item: KeywordItem): HTMLElement {
+  const div = document.createElement("div");
+  div.className =
+    "keyword-item keyword-unmatched bg-red-50 border-l-4 border-red-500 rounded p-2 flex items-center gap-2 shadow-sm";
+  div.dataset.keyword = item.keyword.toLowerCase();
+
+  const icon = document.createElement("i");
+  icon.className = "fas fa-times-circle text-red-600";
+
+  const span = document.createElement("span");
+  span.className = "text-sm text-red-800 font-medium";
+  span.textContent = item.keyword;
+
+  div.appendChild(icon);
+  div.appendChild(span);
+  return div;
+}
+
+function createEmptyKeywordsElement(): HTMLElement {
+  const emptyDiv = document.createElement("div");
+  emptyDiv.className = "text-center text-slate-400 py-8";
+  const icon = document.createElement("i");
+  icon.className = "fas fa-inbox text-3xl mb-2";
+  const text = document.createElement("p");
+  text.className = "text-sm";
+  text.textContent = "暂无关键词数据";
+  emptyDiv.appendChild(icon);
+  emptyDiv.appendChild(text);
+  return emptyDiv;
+}
+
+function updateFloatingKeywordCounts(): void {
   const matchedCount = document.getElementById("kt-tab-matched-count");
-  if (matchedCount && appStore.getState().keywordTracker.matchedKeywords) {
-    matchedCount.textContent = appStore
-      .getState()
-      .keywordTracker.matchedKeywords.length.toString();
+  const tracker = appStore.getState().keywordTracker;
+  if (matchedCount) {
+    matchedCount.textContent = tracker.matchedKeywords.length.toString();
   }
 
   const unmatchedCount = document.getElementById("kt-tab-unmatched-count");
-  if (unmatchedCount && appStore.getState().keywordTracker.unmatchedKeywords) {
-    unmatchedCount.textContent = appStore
-      .getState()
-      .keywordTracker.unmatchedKeywords.length.toString();
+  if (unmatchedCount) {
+    unmatchedCount.textContent = tracker.unmatchedKeywords.length.toString();
   }
 }
 
@@ -898,68 +970,90 @@ async function translateCopyImmersive(): Promise<void> {
 function locateKeywordInCopy(keyword: string): void {
   const container = document.getElementById("kt-copy-display");
   if (!container) return;
-  const targetKw = keyword.toLowerCase();
-  const SEP = "\x01";
 
-  // 查找所有 data-kw-all 中包含目标关键词的 span
-  const allSpans = Array.from(container.querySelectorAll(".highlightable"));
-  const spans = allSpans.filter((el) => {
-    const kwAll = el.getAttribute("data-kw-all");
-    if (!kwAll) return false;
-    const kwList = kwAll.split(SEP);
-    return kwList.includes(targetKw);
-  });
+  const targetKw = keyword.toLowerCase();
+  const spans = findKeywordHighlightSpans(container, targetKw);
 
   if (spans.length === 0) {
     showToast(`未找到关键词: ${keyword}`, { type: "warning" });
     return;
   }
 
-  // 将属于同一次匹配的连续 span 分组
-  // 只有 DOM 中直接相邻（nextSibling）才视为同一组
-  const groups: Element[][] = [];
+  const groups = groupAdjacentHighlightSpans(spans);
+  const idx = getKeywordLocationIndex(targetKw, groups.length);
+  clearKeywordFocus(container);
+
+  // 聚焦当前组的所有 span
+  const targetGroup = groups[idx];
+  if (!targetGroup) return;
+  focusKeywordGroup(targetGroup);
+  scrollToKeywordGroup(targetGroup);
+
+  // 更新索引
+  updateKeywordLocationIndex(targetKw, idx, groups.length);
+  showToast(`定位: ${keyword} (${idx + 1}/${groups.length})`);
+}
+
+function findKeywordHighlightSpans(
+  container: HTMLElement,
+  targetKw: string,
+): Element[] {
+  const separator = "\x01";
+  return Array.from(container.querySelectorAll(".highlightable")).filter((el) => {
+    const kwAll = el.getAttribute("data-kw-all");
+    if (!kwAll) return false;
+    return kwAll.split(separator).includes(targetKw);
+  });
+}
+
+function groupAdjacentHighlightSpans(spans: Element[]): Element[][] {
   const firstSpan = spans[0];
-  if (!firstSpan) return;
+  if (!firstSpan) return [];
+
+  const groups: Element[][] = [];
   let currentGroup = [firstSpan];
 
   for (let i = 1; i < spans.length; i++) {
     const prev = spans[i - 1];
     const curr = spans[i];
     if (!prev || !curr) continue;
-    // 修复：只用 nextSibling，不用 nextElementSibling
-    // nextElementSibling 会跳过文本节点导致误判
     if (prev.nextSibling === curr) {
       currentGroup.push(curr);
-    } else {
-      groups.push(currentGroup);
-      currentGroup = [curr];
+      continue;
     }
-  }
-  groups.push(currentGroup);
 
-  // 管理循环定位索引
-  if (!appStore.getState().keywordTracker.keywordLocationIndex) {
+    groups.push(currentGroup);
+    currentGroup = [curr];
+  }
+
+  groups.push(currentGroup);
+  return groups;
+}
+
+function getKeywordLocationIndex(targetKw: string, groupCount: number): number {
+  const tracker = appStore.getState().keywordTracker;
+  if (!tracker.keywordLocationIndex) {
     appStore.getState().updateKeywordTracker({ keywordLocationIndex: {} });
   }
-  let idx =
-    (appStore.getState().keywordTracker.keywordLocationIndex[
-      targetKw
-    ] as number) || 0;
-  if (idx >= groups.length) idx = 0;
 
-  // 移除之前的聚焦高亮
+  const rawIndex = appStore.getState().keywordTracker.keywordLocationIndex[targetKw];
+  const idx = typeof rawIndex === "number" ? rawIndex : 0;
+  return idx >= groupCount ? 0 : idx;
+}
+
+function clearKeywordFocus(container: HTMLElement): void {
   container
     .querySelectorAll(".highlight-focus")
     .forEach((el) => el.classList.remove("highlight-focus"));
+}
 
-  // 聚焦当前组的所有 span
-  const targetGroup = groups[idx];
-  if (!targetGroup) return;
+function focusKeywordGroup(targetGroup: Element[]): void {
   targetGroup.forEach((span: Element) => {
     span.classList.add("highlight-focus");
   });
+}
 
-  // 滚动到第一个 span
+function scrollToKeywordGroup(targetGroup: Element[]): void {
   const targetElement = targetGroup[0];
   if (targetElement instanceof HTMLElement) {
     targetElement.scrollIntoView({
@@ -967,12 +1061,15 @@ function locateKeywordInCopy(keyword: string): void {
       block: "center",
     });
   }
+}
 
-  // 更新索引
+function updateKeywordLocationIndex(
+  targetKw: string,
+  idx: number,
+  groupCount: number,
+): void {
   appStore.getState().keywordTracker.keywordLocationIndex[targetKw] =
-    (idx + 1) % groups.length;
-
-  showToast(`定位: ${keyword} (${idx + 1}/${groups.length})`);
+    (idx + 1) % groupCount;
 }
 
 /**

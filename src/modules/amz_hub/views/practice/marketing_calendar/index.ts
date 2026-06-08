@@ -4,7 +4,7 @@
 // 示例：使用 getService() 替代直接导入服务
 // ================================================================
 
-import { escapeHtml } from "@/common/utils/security";
+import { escapeHtml, setSafeHtml } from "@/common/utils/security";
 import BaseModule from "../../../../../common/BaseModule";
 import { SERVICE_NAMES } from "../../../../../common/di/ServiceRegistry";
 import type { IStorageService } from "@/types/services";
@@ -56,9 +56,12 @@ class MarketingCalendarModule extends BaseModule {
   }
 
   async render(): Promise<void> {
+    const container = this.container;
+    if (!container) return;
+
     // ✅ 安全: 静态HTML模板，无用户输入
-    this.container!.innerHTML = templateHTML;
-    this.container!.classList.add("fade-in");
+    setSafeHtml(container, templateHTML);
+    container.classList.add("fade-in");
   }
 
   async init(): Promise<void> {
@@ -182,7 +185,7 @@ class MarketingCalendarModule extends BaseModule {
     this.state.selectedCountry = code;
 
     // Update Tabs UI
-    const tabs = this.container!.querySelectorAll(".amzf_country_tab");
+    const tabs = this.container?.querySelectorAll(".amzf_country_tab") ?? [];
     tabs.forEach((tab) => {
       tab.classList.remove("amzf_active");
       const tabText =
@@ -498,7 +501,7 @@ class MarketingCalendarModule extends BaseModule {
     });
 
     // ✅ 安全: 静态HTML模板，无用户输入
-    container.innerHTML = html;
+    setSafeHtml(container, html);
   }
 
   renderSearchHistory(): void {
@@ -542,7 +545,7 @@ class MarketingCalendarModule extends BaseModule {
             </div>
         `;
     // ✅ 安全: 静态HTML模板，无用户输入
-    container.innerHTML = html;
+    setSafeHtml(container, html);
   }
 
   renderStats(): void {
@@ -554,7 +557,7 @@ class MarketingCalendarModule extends BaseModule {
     const shopping = filtered.filter((e) => e.type === "shopping").length;
 
     // ✅ 安全: 统计值为本地计算数字，并通过escapeHtml转义后插入静态模板
-    container.innerHTML = `
+    setSafeHtml(container, `
             <div class="amzf_stat_item">
                 <div class="amzf_stat_icon amzf_blue"><i class="fa-solid fa-timeline text-purple-500"></i></div>
                 <div>
@@ -576,7 +579,7 @@ class MarketingCalendarModule extends BaseModule {
                     <div class="amzf_stat_label">电商大促</div>
                 </div>
             </div>
-        `;
+        `);
   }
 
   renderContent(): void {
@@ -587,12 +590,12 @@ class MarketingCalendarModule extends BaseModule {
 
     if (filtered.length === 0) {
       // ✅ 安全: 静态HTML模板，无用户输入
-      container.innerHTML = `
+      setSafeHtml(container, `
                 <div class="amzf_empty amzf_animate">
                     <div class="amzf_empty_icon"><i class="fas fa-search"></i></div>
                     <div class="amzf_empty_text">未找到匹配的活动，请尝试关键词如 "圣诞"、"Prime" 或 "德国"</div>
                 </div>
-            `;
+            `);
       return;
     }
 
@@ -607,8 +610,9 @@ class MarketingCalendarModule extends BaseModule {
     container.classList.add("amzf_list_entering");
     const byMonth: Record<number, MarketingEvent[]> = {};
     events.forEach((event) => {
-      if (!byMonth[event.month]) byMonth[event.month] = [];
-      byMonth[event.month]!.push(event);
+      const monthEvents = byMonth[event.month] ?? [];
+      monthEvents.push(event);
+      byMonth[event.month] = monthEvents;
     });
 
     let html = '<div class="amzf_timeline">';
@@ -616,8 +620,8 @@ class MarketingCalendarModule extends BaseModule {
       this.state.searchTerm && this.state.searchTerm.length > 0;
 
     for (let m = 1; m <= 12; m++) {
-      if (!byMonth[m]) continue;
-      const monthEvents = byMonth[m]!;
+      const monthEvents = byMonth[m];
+      if (!monthEvents) continue;
       const sectionId = `amzf_group_month_${m}`;
       const isExpanded =
         isSearchActive || this.state.expandedSections.has(sectionId);
@@ -641,7 +645,7 @@ class MarketingCalendarModule extends BaseModule {
     }
     html += "</div>";
     // ✅ 安全: 静态HTML模板，无用户输入
-    container.innerHTML = html;
+    setSafeHtml(container, html);
     this.setTimeout(
       () => container.classList.remove("amzf_list_entering"),
       500,
@@ -659,15 +663,14 @@ class MarketingCalendarModule extends BaseModule {
     const eventGroups: Record<string, EventGroup> = {};
     events.forEach((event) => {
       let groupKey = event.nameEn.replace(/ (UK|IT|ES|FR|PL|EU)$/i, "").trim();
-      if (!eventGroups[groupKey]) {
-        eventGroups[groupKey] = {
+      const group = eventGroups[groupKey] ?? {
           emoji: event.emoji,
           events: [],
           name: event.name.replace(/\(.*?\)$/, "").trim(), // 提取中文名称（去除国家后缀）
           nameEn: groupKey,
         };
-      }
-      eventGroups[groupKey]!.events.push(event);
+      group.events.push(event);
+      eventGroups[groupKey] = group;
     });
 
     let html = '<div class="amzf_event_view">';
@@ -675,7 +678,8 @@ class MarketingCalendarModule extends BaseModule {
       this.state.searchTerm && this.state.searchTerm.length > 0;
 
     Object.keys(eventGroups).forEach((key, idx) => {
-      const group = eventGroups[key]!;
+      const group = eventGroups[key];
+      if (!group) return;
       const safeKey = key.replace(/[^a-zA-Z0-9]/g, "_");
       const sectionId = `amzf_group_event_${safeKey}`;
       const isExpanded =
@@ -702,7 +706,7 @@ class MarketingCalendarModule extends BaseModule {
     });
     html += "</div>";
     // ✅ 安全: 静态HTML模板，无用户输入
-    container.innerHTML = html;
+    setSafeHtml(container, html);
     this.setTimeout(
       () => container.classList.remove("amzf_list_entering"),
       500,

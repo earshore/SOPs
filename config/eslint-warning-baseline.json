@@ -1,26 +1,8 @@
 {
   "version": 1,
   "command": "node node_modules/eslint/bin/eslint.js src --ignore-pattern **/*.test.ts --ignore-pattern **/*.test.tsx --ignore-pattern **/*.spec.ts --ignore-pattern **/*.spec.tsx --format json",
-  "totalWarnings": 342,
+  "totalWarnings": 102,
   "warnings": [
-    {
-      "filePath": "src/common/BaseModule.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 2
-    },
-    {
-      "filePath": "src/common/components/OverviewRenderer.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
-      "filePath": "src/common/components/SidebarRenderer.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
     {
       "filePath": "src/common/components/SkeletonLoader.ts",
       "ruleId": "complexity",
@@ -52,30 +34,6 @@
       "count": 1
     },
     {
-      "filePath": "src/common/infrastructure/SafeModuleLoader.ts",
-      "ruleId": "complexity",
-      "message": "Method 'classifyError' has a complexity of 68. Maximum allowed is 10.",
-      "count": 2
-    },
-    {
-      "filePath": "src/common/infrastructure/SafeModuleLoader.ts",
-      "ruleId": "max-lines-per-function",
-      "message": "Method 'classifyError' has too many lines (221). Maximum allowed is 100.",
-      "count": 1
-    },
-    {
-      "filePath": "src/common/infrastructure/SafeModuleLoader.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 4
-    },
-    {
-      "filePath": "src/common/infrastructure/SafeRenderer.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 5
-    },
-    {
       "filePath": "src/common/router/initRouter.ts",
       "ruleId": "complexity",
       "message": "Function 'initRouter' has a complexity of 12. Maximum allowed is 10.",
@@ -86,12 +44,6 @@
       "ruleId": "max-lines-per-function",
       "message": "Function 'initRouter' has too many lines (128). Maximum allowed is 100.",
       "count": 1
-    },
-    {
-      "filePath": "src/common/router/navigo/guards.ts",
-      "ruleId": "complexity",
-      "message": "Function 'isRouteConfig' has a complexity of 18. Maximum allowed is 10.",
-      "count": 4
     },
     {
       "filePath": "src/common/router/navigo/NavigoAdapter.ts",
@@ -118,75 +70,15 @@
       "count": 1
     },
     {
-      "filePath": "src/common/ui/megaMenu.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 4
-    },
-    {
-      "filePath": "src/common/ui/navigation.ts",
-      "ruleId": "complexity",
-      "message": "Async function 'updateUIForRoute' has a complexity of 12. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/common/ui/navigation.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 2
-    },
-    {
-      "filePath": "src/common/utils/safeMount.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
-      "filePath": "src/common/utils/security.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
       "filePath": "src/common/utils/validation.ts",
       "ruleId": "complexity",
       "message": "Function 'validateString' has a complexity of 19. Maximum allowed is 10.",
       "count": 1
     },
     {
-      "filePath": "src/common/utils/xssFixer.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 5
-    },
-    {
-      "filePath": "src/components/ErrorBoundary.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 5
-    },
-    {
-      "filePath": "src/components/form-animation.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
       "filePath": "src/components/modal/AppModal.ts",
       "ruleId": "max-lines-per-function",
-      "message": "Method 'render' has too many lines (259). Maximum allowed is 100.",
-      "count": 1
-    },
-    {
-      "filePath": "src/components/modal/AppModal.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
-      "filePath": "src/components/navigation-animation.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
+      "message": "Method 'render' has too many lines (260). Maximum allowed is 100.",
       "count": 1
     },
     {
@@ -202,136 +94,10 @@
       "count": 1
     },
     {
-      "filePath": "src/components/settings/systemSettings.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 2
-    },
-    {
-      "filePath": "src/main.ts",
-      "ruleId": "complexity",
-      "message": "Async arrow function has a complexity of 17. Maximum allowed is 10.",
-      "count": 1
-    },
-    {
-      "filePath": "src/main.ts",
-      "ruleId": "max-lines-per-function",
-      "message": "Async arrow function has too many lines (149). Maximum allowed is 100.",
-      "count": 1
-    },
-    {
-      "filePath": "src/main.ts",
-      "ruleId": "no-console",
-      "message": "Unexpected console statement.",
-      "count": 47
-    },
-    {
-      "filePath": "src/modules/amz_hub/views/advanced/conversion_optimization/index.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
-      "count": 2
-    },
-    {
-      "filePath": "src/modules/amz_hub/views/advanced/conversion_optimization/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/amz_hub/views/advanced/new_product_30days/index.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
-      "count": 2
-    },
-    {
-      "filePath": "src/modules/amz_hub/views/advanced/new_product_30days/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/amz_hub/views/knowledge/ecosystem/index.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
-      "count": 2
-    },
-    {
-      "filePath": "src/modules/amz_hub/views/knowledge/ecosystem/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/amz_hub/views/knowledge/eu_insights/index.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
-      "count": 2
-    },
-    {
-      "filePath": "src/modules/amz_hub/views/knowledge/eu_insights/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 2
-    },
-    {
-      "filePath": "src/modules/amz_hub/views/knowledge/seo_strategy/index.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
-      "count": 2
-    },
-    {
-      "filePath": "src/modules/amz_hub/views/knowledge/seo_strategy/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/amz_hub/views/overview/index.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
-      "count": 3
-    },
-    {
-      "filePath": "src/modules/amz_hub/views/overview/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/amz_hub/views/practice/marketing_calendar/index.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
-      "count": 7
-    },
-    {
       "filePath": "src/modules/amz_hub/views/practice/marketing_calendar/index.ts",
       "ruleId": "complexity",
       "message": "Arrow function has a complexity of 24. Maximum allowed is 10.",
       "count": 1
-    },
-    {
-      "filePath": "src/modules/amz_hub/views/practice/marketing_calendar/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 7
-    },
-    {
-      "filePath": "src/modules/amz_hub/views/practice/promo_activities/index.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
-      "count": 2
-    },
-    {
-      "filePath": "src/modules/amz_hub/views/practice/promo_activities/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/amz_hub/views/practice/promo_tools/index.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
-      "count": 2
     },
     {
       "filePath": "src/modules/amz_hub/views/practice/promo_tools/index.ts",
@@ -346,99 +112,27 @@
       "count": 2
     },
     {
-      "filePath": "src/modules/amz_hub/views/practice/promo_tools/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 3
-    },
-    {
-      "filePath": "src/modules/amz_hub/views/practice/quality_listing/index.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
+      "filePath": "src/modules/app_center/views/keyword_hunter/analysis/index.ts",
+      "ruleId": "complexity",
+      "message": "Arrow function has a complexity of 15. Maximum allowed is 10.",
       "count": 2
-    },
-    {
-      "filePath": "src/modules/amz_hub/views/practice/quality_listing/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/keyword_hunter/analysis/index.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
-      "count": 6
-    },
-    {
-      "filePath": "src/modules/app_center/views/keyword_hunter/analysis/index.ts",
-      "ruleId": "complexity",
-      "message": "Arrow function has a complexity of 13. Maximum allowed is 10.",
-      "count": 2
-    },
-    {
-      "filePath": "src/modules/app_center/views/keyword_hunter/analysis/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 6
-    },
-    {
-      "filePath": "src/modules/app_center/views/keyword_hunter/input/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/keyword_hunter/process/index.ts",
-      "ruleId": "complexity",
-      "message": "Function 'renderAnalysisStats' has a complexity of 18. Maximum allowed is 10.",
-      "count": 4
-    },
-    {
-      "filePath": "src/modules/app_center/views/keyword_hunter/process/index.ts",
-      "ruleId": "max-lines-per-function",
-      "message": "Function 'renderAnalysisStats' has too many lines (163). Maximum allowed is 100.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/keyword_hunter/process/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 6
-    },
-    {
-      "filePath": "src/modules/app_center/views/keyword_hunter/services/trackerService.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
-      "count": 4
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/ai_analysis/components/actions.ts",
-      "ruleId": "complexity",
-      "message": "Async function 'runAnalysisAction' has a complexity of 11. Maximum allowed is 10.",
-      "count": 1
     },
     {
       "filePath": "src/modules/app_center/views/master_analysis/ai_analysis/components/AlpinePanel.ts",
       "ruleId": "max-lines-per-function",
-      "message": "Function 'createAiAnalysisPanel' has too many lines (621). Maximum allowed is 100.",
+      "message": "Function 'createAiAnalysisPanel' has too many lines (634). Maximum allowed is 100.",
       "count": 1
     },
     {
       "filePath": "src/modules/app_center/views/master_analysis/ai_analysis/components/AlpinePanelOptimized.ts",
       "ruleId": "max-lines-per-function",
-      "message": "Function 'createAiAnalysisPanelOptimized' has too many lines (273). Maximum allowed is 100.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/ai_analysis/components/computedProperties.ts",
-      "ruleId": "complexity",
-      "message": "Getter 'currentProducts' has a complexity of 11. Maximum allowed is 10.",
+      "message": "Function 'createAiAnalysisPanelOptimized' has too many lines (271). Maximum allowed is 100.",
       "count": 1
     },
     {
       "filePath": "src/modules/app_center/views/master_analysis/ai_analysis/components/computedProperties.ts",
       "ruleId": "max-lines-per-function",
-      "message": "Function 'createComputedProperties' has too many lines (199). Maximum allowed is 100.",
+      "message": "Function 'createComputedProperties' has too many lines (185). Maximum allowed is 100.",
       "count": 1
     },
     {
@@ -476,12 +170,6 @@
       "ruleId": "complexity",
       "message": "Function 'parseAnalysisReport' has a complexity of 19. Maximum allowed is 10.",
       "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/ai_analysis/services/confidenceCalculator.ts",
-      "ruleId": "complexity",
-      "message": "Function 'checkDataQuality' has a complexity of 14. Maximum allowed is 10.",
-      "count": 4
     },
     {
       "filePath": "src/modules/app_center/views/master_analysis/ai_analysis/services/parallelAnalysisService.ts",
@@ -534,7 +222,7 @@
     {
       "filePath": "src/modules/app_center/views/master_analysis/promptlab/components/PromptlabPanel.ts",
       "ruleId": "max-lines-per-function",
-      "message": "Function 'createPromptlabPanel' has too many lines (490). Maximum allowed is 100.",
+      "message": "Function 'createPromptlabPanel' has too many lines (492). Maximum allowed is 100.",
       "count": 1
     },
     {
@@ -652,18 +340,6 @@
       "count": 1
     },
     {
-      "filePath": "src/modules/app_center/views/master_analysis/services/promptlabService.ts",
-      "ruleId": "complexity",
-      "message": "Arrow function has a complexity of 16. Maximum allowed is 10.",
-      "count": 10
-    },
-    {
-      "filePath": "src/modules/app_center/views/master_analysis/services/promptlabService.ts",
-      "ruleId": "max-depth",
-      "message": "Blocks are nested too deeply (5). Maximum allowed is 4.",
-      "count": 3
-    },
-    {
       "filePath": "src/modules/app_center/views/master_analysis/services/scraperService.ts",
       "ruleId": "complexity",
       "message": "Async function 'fetchWithProxy' has a complexity of 21. Maximum allowed is 10.",
@@ -673,18 +349,6 @@
       "filePath": "src/modules/app_center/views/master_analysis/services/scraperService.ts",
       "ruleId": "max-lines-per-function",
       "message": "Async function 'scrapeAsin' has too many lines (102). Maximum allowed is 100.",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/overview/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/app_center/views/playground/deep-chat/index.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
       "count": 1
     },
     {
@@ -700,112 +364,10 @@
       "count": 1
     },
     {
-      "filePath": "src/modules/app_center/views/playground/deep-chat/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 3
-    },
-    {
-      "filePath": "src/modules/home/homeDisplay.ts",
-      "ruleId": "@typescript-eslint/no-non-null-assertion",
-      "message": "Forbidden non-null assertion.",
-      "count": 5
-    },
-    {
-      "filePath": "src/modules/home/homeDisplay.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/more/views/explore/agents/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
       "filePath": "src/modules/more/views/explore/prompts/index.ts",
       "ruleId": "complexity",
       "message": "Function 'handleModuleClick' has a complexity of 14. Maximum allowed is 10.",
       "count": 2
-    },
-    {
-      "filePath": "src/modules/more/views/explore/prompts/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/more/views/explore/workflows/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/more/views/overview/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 2
-    },
-    {
-      "filePath": "src/modules/sops/views/backend/fba_shipping/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/sops/views/backend/inventory_replenishment/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/sops/views/backend/procurement_qc/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/sops/views/growth/competitor_monitoring/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/sops/views/growth/listing_seo/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/sops/views/growth/npi_tracker/index.ts",
-      "ruleId": "complexity",
-      "message": "Arrow function has a complexity of 19. Maximum allowed is 10.",
-      "count": 3
-    },
-    {
-      "filePath": "src/modules/sops/views/growth/npi_tracker/index.ts",
-      "ruleId": "max-lines-per-function",
-      "message": "Function 'renderTable' has too many lines (106). Maximum allowed is 100.",
-      "count": 2
-    },
-    {
-      "filePath": "src/modules/sops/views/growth/ppc_advertising/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/sops/views/growth/promotion_submission/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/sops/views/growth/restricted_words/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
     },
     {
       "filePath": "src/modules/sops/views/growth/restricted_words/restrictedWordsHandler.ts",
@@ -814,82 +376,10 @@
       "count": 2
     },
     {
-      "filePath": "src/modules/sops/views/overview/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/sops/views/safety/account_security/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/sops/views/safety/brand_infringement/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/sops/views/safety/eu_gpsr_compliance/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/sops/views/safety/performance_notification/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/sops/views/safety/permission_management/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/sops/views/safety/product_compliance/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/sops/views/service/email_templates/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/sops/views/service/negative_review/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
-      "filePath": "src/modules/sops/views/service/qa_maintenance/index.ts",
-      "ruleId": "no-restricted-syntax",
-      "message": "避免直接使用innerHTML。请使用textContent或setSafeHtml()函数，或添加安全注释说明原因。",
-      "count": 1
-    },
-    {
       "filePath": "src/services/errorService.ts",
       "ruleId": "complexity",
       "message": "Method 'classify' has a complexity of 21. Maximum allowed is 10.",
       "count": 1
-    },
-    {
-      "filePath": "src/services/HttpCacheService.ts",
-      "ruleId": "complexity",
-      "message": "Async method 'get' has a complexity of 11. Maximum allowed is 10.",
-      "count": 2
-    },
-    {
-      "filePath": "src/services/HttpCacheService.ts",
-      "ruleId": "max-depth",
-      "message": "Blocks are nested too deeply (5). Maximum allowed is 4.",
-      "count": 2
     },
     {
       "filePath": "src/services/httpService.ts",
@@ -928,28 +418,10 @@
       "count": 2
     },
     {
-      "filePath": "src/services/llmService.ts",
-      "ruleId": "no-constant-condition",
-      "message": "Unexpected constant condition.",
-      "count": 1
-    },
-    {
       "filePath": "src/services/llmServiceWithTimeout.ts",
       "ruleId": "@typescript-eslint/max-params",
       "message": "Async function 'callLLMWithTimeout' has too many parameters (6). Maximum allowed is 5.",
       "count": 1
-    },
-    {
-      "filePath": "src/services/llmServiceWithTimeout.ts",
-      "ruleId": "no-useless-catch",
-      "message": "Unnecessary try/catch wrapper.",
-      "count": 1
-    },
-    {
-      "filePath": "src/services/localDataStore.ts",
-      "ruleId": "no-restricted-globals",
-      "message": "Unexpected use of 'localStorage'. 请使用 StorageService 代替直接访问 localStorage",
-      "count": 10
     },
     {
       "filePath": "src/services/monitoringService.ts",

@@ -152,7 +152,7 @@ export class PageTransitionController {
     if (typeof newContent === 'string') {
       setSafeHtml(this.container, newContent);
     } else {
-      this.container.innerHTML = '';
+      this.container.replaceChildren();
       this.container.appendChild(newContent);
     }
   }

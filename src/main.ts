@@ -120,7 +120,33 @@ type ClosableModalElement = HTMLElement & {
   close: () => void;
 };
 
+type MainConsole = Pick<Console, 'info' | 'warn' | 'error'>;
+
 const legacyWindow = window as unknown as LegacyDebugWindow;
+const nativeConsole: MainConsole = globalThis.console;
+const mainLogger = {
+  info(message: string, data?: unknown): void {
+    if (data === undefined) {
+      nativeConsole.info(`[Main] ${message}`);
+      return;
+    }
+    nativeConsole.info(`[Main] ${message}`, data);
+  },
+  warn(message: string, data?: unknown): void {
+    if (data === undefined) {
+      nativeConsole.warn(`[Main] ${message}`);
+      return;
+    }
+    nativeConsole.warn(`[Main] ${message}`, data);
+  },
+  error(message: string, data?: unknown): void {
+    if (data === undefined) {
+      nativeConsole.error(`[Main] ${message}`);
+      return;
+    }
+    nativeConsole.error(`[Main] ${message}`, data);
+  },
+};
 
 function isClosableModalElement(element: Element | null): element is ClosableModalElement {
   return element instanceof HTMLElement && typeof (element as { close?: unknown }).close === 'function';
@@ -133,6 +159,204 @@ function updateAppVersionLabel(): void {
   }
 }
 
+async function loadMainStyles(): Promise<void> {
+  try {
+    await import('./css/main.css');
+    mainLogger.info("Main styles loaded");
+  } catch (e) {
+    mainLogger.warn('主样式加载失败', e);
+  }
+}
+
+function createServiceBootstrap(): ServiceBootstrap {
+  registerAllServices(serviceRegistry);
+  serviceRegistry.registerAll(container);
+  return new ServiceBootstrap(container, serviceRegistry);
+}
+
+async function exposeCoreServicesForDebug(): Promise<void> {
+  if (!import.meta.env.DEV) {
+    return;
+  }
+
+  try {
+    const eventBusResult = container.resolve('eventBus');
+    const actionRegistryResult = container.resolve('actionRegistry');
+    const routerResult = container.resolve('router');
+
+    const eventBus = eventBusResult instanceof Promise ? await eventBusResult : eventBusResult;
+    const actionRegistry = actionRegistryResult instanceof Promise ? await actionRegistryResult : actionRegistryResult;
+    const router = (routerResult instanceof Promise ? await routerResult : routerResult) as RouterDebugApi;
+
+    legacyWindow['eventBus'] = eventBus;
+    legacyWindow['EventBus'] = eventBus;
+    legacyWindow['actionRegistry'] = actionRegistry;
+    legacyWindow['ActionRegistry'] = actionRegistry;
+    legacyWindow['router'] = router;
+    legacyWindow['Router'] = router;
+    legacyWindow['loadingManager'] = loadingManager;
+    legacyWindow['LoadingManager'] = loadingManager;
+
+    mainLogger.info('[Services] Core services exposed to window', {
+      eventBus: typeof eventBus,
+      actionRegistry: typeof actionRegistry,
+      router: typeof router,
+      routerMethods: {
+        navigate: typeof router?.navigate,
+        back: typeof router?.back,
+        forward: typeof router?.forward,
+        getCurrentRoute: typeof router?.getCurrentRoute
+      }
+    });
+  } catch (e) {
+    mainLogger.error('[Services] Failed to expose some services to window', e);
+  }
+}
+
+function initializeAlpineRuntime(): void {
+  mainLogger.info("Initializing Alpine.js...");
+  initAlpineSettings();
+  mainLogger.info("Alpine components registered");
+
+  Alpine.start();
+  mainLogger.info("Alpine.js started");
+
+  try {
+    const registry = AlpineRegistry.getInstance();
+    registry.init();
+    mainLogger.info("AlpineRegistry initialized");
+  } catch (e) {
+    mainLogger.error('AlpineRegistry initialization failed', e);
+  }
+}
+
+async function loadCriticalViewsAndNavigate(): Promise<void> {
+  mainLogger.info("Loading critical views...");
+  await initViews();
+  mainLogger.info("Critical views loaded");
+
+  try {
+    triggerInitialNavigation();
+    mainLogger.info("Initial navigation triggered");
+  } catch (e) {
+    mainLogger.error('Initial navigation failed', e);
+  }
+}
+
+function initializeStartupUtilities(): void {
+  initGlobalEventDelegation();
+
+  const globalLoading = document.getElementById('global-loading');
+  if (globalLoading) {
+    loadingManager.setGlobalLoadingElement(globalLoading);
+    mainLogger.info("LoadingManager initialized");
+  }
+
+  try {
+    initEventLogger();
+  } catch (e) {
+    mainLogger.warn('事件日志初始化失败', e);
+  }
+
+  try {
+    loadPlugins();
+  } catch (e) {
+    mainLogger.warn('插件加载失败', e);
+  }
+}
+
+function initializeAnimationSystem(): void {
+  try {
+    mainLogger.info('Initializing Animation System...');
+    initializeAnimationStore();
+    mainLogger.info('Animation System initialized', {
+      enabled: animationManager.getSettings().enabled,
+      speed: animationManager.getSettings().speed,
+      respectSystemPreference: animationManager.getSettings().respectSystemPreference,
+      reducedMotion: animationManager.shouldReduceMotion()
+    });
+  } catch (error) {
+    mainLogger.error('Animation System initialization failed', error);
+  }
+}
+
+function initializeLazyEnhancements(): void {
+  import('./common/utils/moduleCssLoader').then(({ moduleCssLoader }) => {
+    moduleCssLoader.preloadHighPriorityModules();
+  });
+
+  import('./common/utils/ImageLazyLoader').then(({ imageLazyLoader }) => {
+    imageLazyLoader.initialize({
+      rootMargin: '50px',
+      threshold: 0.01,
+      fadeIn: true,
+      fadeInDuration: 300
+    });
+  });
+
+  import('./components/button-ripple').then(({ initButtonRipple, observeButtonChanges, observeAnimationSettings }) => {
+    initButtonRipple();
+    observeButtonChanges();
+    observeAnimationSettings();
+    mainLogger.info('Button ripple effects initialized');
+  }).catch((error) => {
+    mainLogger.warn('按钮涟漪效果初始化失败', error);
+  });
+
+  import('./components/form-animation').then(({ initializeFormAnimations }) => {
+    initializeFormAnimations();
+    mainLogger.info('Form input animations initialized');
+  }).catch((error) => {
+    mainLogger.warn('表单输入动画初始化失败', error);
+  });
+
+  import('./utils/animation-utils').then(({ observeListAnimations }) => {
+    observeListAnimations();
+    mainLogger.info('List stagger animations observer initialized');
+  }).catch((error) => {
+    mainLogger.warn('列表交错动画观察器初始化失败', error);
+  });
+}
+
+function renderGlobalMenus(): void {
+  renderMegaMenu();
+  renderSopsMegaMenu();
+  renderHubMegaMenu();
+  renderMoreMenu();
+}
+
+async function emitAppInitialized(): Promise<void> {
+  const eventBusResult = container.resolve('eventBus');
+  const eventBus = (eventBusResult instanceof Promise ? await eventBusResult : eventBusResult) as EventBusDebugApi;
+  eventBus.emit(APP_EVENTS.INITIALIZED, { timestamp: Date.now() });
+}
+
+function initializeDebugInterface(): void {
+  if (!import.meta.env.DEV) {
+    return;
+  }
+
+  debugInterface.initialize();
+  debugInterface.registerContainer(container);
+  const router = container.resolve('router');
+  debugInterface.registerRouter(router);
+}
+
+async function continueStartup(): Promise<void> {
+  await exposeCoreServicesForDebug();
+  initializeAlpineRuntime();
+  await loadCriticalViewsAndNavigate();
+  initializeStartupUtilities();
+  initHomeSplash();
+  ThemeManager.restoreTheme();
+  initializeAnimationSystem();
+  initializeLazyEnhancements();
+  renderGlobalMenus();
+  await emitAppInitialized();
+  updateModelStatus();
+  initializeDebugInterface();
+}
+
 // 🔧 关键修复: 确保 Alpine 在所有环境下都可通过 window.Alpine 访问
 // 这对于动态注册组件至关重要
 // 使用类型断言避免 TypeScript 错误,并确保不被 Terser 优化掉
@@ -142,8 +366,8 @@ if (import.meta.env.DEV) {
   // 🔧 暴露 Zustand Store 到 window (仅用于开发调试和测试)
   legacyWindow['useAppStore'] = appStore;
   legacyWindow['appStore'] = appStore;
-  console.log('[Alpine] ✅ Alpine.js loaded and exposed to window');
-  console.log('[Store] ✅ Zustand store exposed to window');
+  mainLogger.info('[Alpine] Alpine.js loaded and exposed to window');
+  mainLogger.info('[Store] Zustand store exposed to window');
 }
 
 // ========================
@@ -151,29 +375,11 @@ if (import.meta.env.DEV) {
 // ========================
 
 document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
-  console.log("🚀 System: Application Booting...");
+  mainLogger.info("System: Application Booting...");
 
-  try {
-    await import('./css/main.css');
-    console.log("✅ Main styles loaded");
-  } catch (e) {
-    console.warn('主样式加载失败:', e);
-  }
-
+  await loadMainStyles();
   updateAppVersionLabel();
-
-  // ================================================================
-  // 🎯 DI容器整合: 使用ServiceRegistry统一管理服务
-  // ================================================================
-
-  // 1. 注册所有服务配置到注册表
-  registerAllServices(serviceRegistry);
-
-  // 2. 将所有服务注册到DI容器
-  serviceRegistry.registerAll(container);
-
-  // 3. 创建ServiceBootstrap实例（使用容器和注册表）
-  const bootstrap = new ServiceBootstrap(container, serviceRegistry);
+  const bootstrap = createServiceBootstrap();
 
   // ================================================================
   // 执行初始化
@@ -182,7 +388,7 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     const result = await bootstrap.initialize();
 
     if (!result.success) {
-      console.error('❌ 部分服务初始化失败，应用可能无法正常工作');
+      mainLogger.error('部分服务初始化失败，应用可能无法正常工作');
       showToast('应用初始化失败，请刷新页面重试', { type: 'error' });
       return;
     }
@@ -190,197 +396,12 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     // ================================================================
     // 初始化成功，继续启动流程
     // ================================================================
+    await continueStartup();
 
-    if (import.meta.env.DEV) {
-      // 🔧 暴露核心服务到 window (仅用于测试和调试)
-      try {
-        // 服务已经在 bootstrap.initialize() 中初始化并缓存
-        // 🔧 修复: resolve返回Promise时需要await获取实际实例
-        const eventBusResult = container.resolve('eventBus');
-        const actionRegistryResult = container.resolve('actionRegistry');
-        const routerResult = container.resolve('router');
-
-        // await所有可能的Promise
-        const eventBus = eventBusResult instanceof Promise ? await eventBusResult : eventBusResult;
-        const actionRegistry = actionRegistryResult instanceof Promise ? await actionRegistryResult : actionRegistryResult;
-        const router = (routerResult instanceof Promise ? await routerResult : routerResult) as RouterDebugApi;
-
-        legacyWindow['eventBus'] = eventBus;
-        legacyWindow['EventBus'] = eventBus;
-        legacyWindow['actionRegistry'] = actionRegistry;
-        legacyWindow['ActionRegistry'] = actionRegistry;
-        legacyWindow['router'] = router;
-        legacyWindow['Router'] = router;
-        legacyWindow['loadingManager'] = loadingManager;
-        legacyWindow['LoadingManager'] = loadingManager;
-
-        console.log('[Services] ✅ Core services exposed to window');
-        console.log('[Services] EventBus:', typeof eventBus);
-        console.log('[Services] ActionRegistry:', typeof actionRegistry);
-        console.log('[Services] Router:', typeof router);
-        console.log('[Services] Router methods:', {
-          navigate: typeof router?.navigate,
-          back: typeof router?.back,
-          forward: typeof router?.forward,
-          getCurrentRoute: typeof router?.getCurrentRoute
-        });
-      } catch (e) {
-        console.error('[Services] ❌ Failed to expose some services to window:', e);
-      }
-    }
-
-    // ✅ 关键修复: 确保 Alpine 组件注册和启动的正确顺序
-    console.log("🎨 Initializing Alpine.js...");
-
-    // 1. 注册所有 Alpine 组件 (必须在 Alpine.start() 之前)
-    initAlpineSettings();
-    console.log("✅ Alpine components registered");
-
-    // 2. 启动 Alpine.js (此时组件已注册,可以处理任何 HTML)
-    Alpine.start();
-    console.log("✅ Alpine.js started");
-
-    // 🔧 修复: 初始化 AlpineRegistry (处理动态注册的组件)
-    try {
-      const registry = AlpineRegistry.getInstance();
-      registry.init();
-      console.log("✅ AlpineRegistry initialized");
-    } catch (e) {
-      console.error('❌ AlpineRegistry initialization failed:', e);
-    }
-
-    // 3. 现在可以安全地加载包含 Alpine 组件的视图
-    console.log("📦 Loading critical views...");
-    await initViews();
-    console.log("✅ Critical views loaded");
-
-    // 🔧 关键修复: 视图加载完成后，触发路由的初始导航
-    try {
-      triggerInitialNavigation();
-      console.log("✅ Initial navigation triggered");
-    } catch (e) {
-      console.error('❌ Initial navigation failed:', e);
-    }
-
-    // 初始化全局事件委托
-    initGlobalEventDelegation();
-
-    // 初始化LoadingManager
-    const globalLoading = document.getElementById('global-loading');
-    if (globalLoading) {
-      loadingManager.setGlobalLoadingElement(globalLoading);
-      console.log("✅ LoadingManager initialized");
-    }
-
-    // 可选：初始化事件日志
-    try {
-      initEventLogger();
-    } catch (e) {
-      console.warn('事件日志初始化失败:', e);
-    }
-
-    // 可选：加载插件
-    try {
-      loadPlugins();
-    } catch (e) {
-      console.warn('插件加载失败:', e);
-    }
-
-    // 🎯 P1-8: 状态管理已完全切换到Zustand
-    // StateManager和stateAdapter已移除
-
-    // 初始化首页
-    initHomeSplash();
-
-    // 🎯 阶段4: 恢复用户主题设置
-    ThemeManager.restoreTheme();
-
-    // 🎯 微交互动画系统: 初始化动画管理器
-    try {
-      console.log('🎨 Initializing Animation System...');
-
-      // AnimationManager 已在导入时自动初始化（单例模式）
-      // 这里只需要初始化 AnimationStore
-      initializeAnimationStore();
-
-      console.log('✅ Animation System initialized');
-      console.log('   - Animations enabled:', animationManager.getSettings().enabled);
-      console.log('   - Animation speed:', animationManager.getSettings().speed);
-      console.log('   - Respect system preference:', animationManager.getSettings().respectSystemPreference);
-      console.log('   - Reduced motion:', animationManager.shouldReduceMotion());
-    } catch (error) {
-      console.error('❌ Animation System initialization failed:', error);
-      // 动画系统初始化失败不应阻止应用启动
-    }
-
-    // 🎯 阶段5: 预加载高优先级模块CSS
-    import('./common/utils/moduleCssLoader').then(({ moduleCssLoader }) => {
-      moduleCssLoader.preloadHighPriorityModules();
-    });
-
-    // 🎯 性能优化: 初始化图片懒加载
-    import('./common/utils/ImageLazyLoader').then(({ imageLazyLoader }) => {
-      imageLazyLoader.initialize({
-        rootMargin: '50px',
-        threshold: 0.01,
-        fadeIn: true,
-        fadeInDuration: 300
-      });
-    });
-
-    // 🎯 微交互动画: 初始化按钮涟漪效果
-    import('./components/button-ripple').then(({ initButtonRipple, observeButtonChanges, observeAnimationSettings }) => {
-      initButtonRipple();
-      observeButtonChanges();
-      observeAnimationSettings();
-      console.log('✅ Button ripple effects initialized');
-    }).catch((error) => {
-      console.warn('按钮涟漪效果初始化失败:', error);
-    });
-
-    // 🎯 微交互动画: 初始化表单输入动画
-    import('./components/form-animation').then(({ initializeFormAnimations }) => {
-      initializeFormAnimations();
-      console.log('✅ Form input animations initialized');
-    }).catch((error) => {
-      console.warn('表单输入动画初始化失败:', error);
-    });
-
-    // 🎯 微交互动画: 初始化列表交错动画观察器
-    import('./utils/animation-utils').then(({ observeListAnimations }) => {
-      observeListAnimations();
-      console.log('✅ List stagger animations observer initialized');
-    }).catch((error) => {
-      console.warn('列表交错动画观察器初始化失败:', error);
-    });
-
-    // 渲染顶部 Mega Menu
-    renderMegaMenu();
-    renderSopsMegaMenu();
-    renderHubMegaMenu();
-    renderMoreMenu();
-
-    // 广播应用初始化完成事件
-    const eventBusResult = container.resolve('eventBus');
-    const eventBus = (eventBusResult instanceof Promise ? await eventBusResult : eventBusResult) as EventBusDebugApi;
-    eventBus.emit(APP_EVENTS.INITIALIZED, { timestamp: Date.now() });
-
-    // 初始化默认状态
-    updateModelStatus();
-
-    // 🎯 开发环境：初始化调试接口
-    if (import.meta.env.DEV) {
-      debugInterface.initialize();
-      debugInterface.registerContainer(container);
-      // Router 已在 Bootstrap 中初始化
-      const router = container.resolve('router');
-      debugInterface.registerRouter(router);
-    }
-
-    console.log("✅ System: Ready");
+    mainLogger.info("System: Ready");
 
   } catch (error) {
-    console.error('❌ 应用启动失败:', error);
+    mainLogger.error('应用启动失败', error);
     showToast('应用启动失败，请刷新页面重试', { type: 'error' });
   }
 });
@@ -446,8 +467,8 @@ registerActionsWithLegacy({
       const { performanceService } = await import('./services/performanceService');
       const report = performanceService.getReport();
 
-      console.log('📊 性能报告:', report);
-      console.table(report.summary);
+      mainLogger.info('性能报告', report);
+      mainLogger.info('性能报告摘要', report.summary);
 
       if (window.showToast) {
         window.showToast('性能报告已输出到控制台 (F12)', { type: 'info' });
@@ -455,7 +476,7 @@ registerActionsWithLegacy({
 
       return report;
     } catch (e) {
-      console.error('获取性能报告失败:', e);
+      mainLogger.error('获取性能报告失败', e);
       return undefined;
     }
   },
@@ -480,7 +501,7 @@ registerActionsWithLegacy({
 
   // 🎯 阶段1: 日志管理
   showLogs: async () => {
-    console.log('📋 日志功能已移除，请使用浏览器开发者工具查看控制台日志');
+    mainLogger.info('日志功能已移除，请使用浏览器开发者工具查看控制台日志');
 
     if (window.showToast) {
       window.showToast('日志功能已移除，请使用浏览器开发者工具', { type: 'info' });
@@ -490,7 +511,7 @@ registerActionsWithLegacy({
   },
 
   showErrors: async () => {
-    console.log('❌ 错误日志功能已移除，请使用浏览器开发者工具查看控制台');
+    mainLogger.info('错误日志功能已移除，请使用浏览器开发者工具查看控制台');
 
     if (window.showToast) {
       window.showToast('错误日志功能已移除', { type: 'info' });
@@ -500,7 +521,7 @@ registerActionsWithLegacy({
   },
 
   clearLogs: async () => {
-    console.log('日志已清除（实际已移除日志存储）');
+    mainLogger.info('日志已清除（实际已移除日志存储）');
     if (window.showToast) {
       window.showToast('日志已清除', { type: 'success' });
     }
@@ -508,7 +529,7 @@ registerActionsWithLegacy({
 
   downloadLogs: async (params?: ActionParams) => {
     const format = (params?.format || 'json') as 'json' | 'csv';
-    console.log('下载日志功能已移除');
+    mainLogger.info('下载日志功能已移除');
     if (window.showToast) {
       window.showToast(`日志已导出为 ${format.toUpperCase()} 格式`, { type: 'success' });
     }
@@ -517,4 +538,4 @@ registerActionsWithLegacy({
   // Scraper, Data, Analysis actions are now self-registered by their respective modules
 });
 
-console.log("✅ [ActionRegistry] 全局动作已注册");
+mainLogger.info("[ActionRegistry] 全局动作已注册");

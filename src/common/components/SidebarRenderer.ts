@@ -14,6 +14,7 @@ import { MENU_CONFIG, type RouteConfig, type CategoryConfig, type ModuleConfig }
 import { appStore } from '@/stores/useAppStore';
 import { COLOR_SCHEMES, type ColorSchemeName } from '../constants/colorSchemes';
 import { ColorContext } from '../utils/ColorContext';
+import { setSafeHtml } from '../utils/security';
 
 // ═══════════════════════════════════════════════════════════
 // Types & Interfaces
@@ -91,7 +92,7 @@ export class SidebarRenderer {
       activeCategory
     );
     // ✅ 安全: _buildHTML返回的HTML使用内部配置数据(categories, routes来自MENU_CONFIG)
-    sidebar.innerHTML = html;
+    setSafeHtml(sidebar, html);
     this._initCategoryToggle(sidebar);
 
     if (activeCategory) {

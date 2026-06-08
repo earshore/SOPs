@@ -82,6 +82,7 @@ vi.mock('@/modules/sops/views/growth/npi_tracker/data/mockData', () => ({
 describe('NPI Tracker Module', () => {
     let container: HTMLElement;
     let mockTemplate: string;
+    let anchorClick: ReturnType<typeof vi.spyOn>;
 
     beforeEach(() => {
         // 创建测试容器
@@ -134,6 +135,7 @@ describe('NPI Tracker Module', () => {
         // Mock URL.createObjectURL and revokeObjectURL
         global.URL.createObjectURL = vi.fn(() => 'blob:mock-url');
         global.URL.revokeObjectURL = vi.fn();
+        anchorClick = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
 
         // Mock alert
         global.alert = vi.fn();
@@ -144,6 +146,7 @@ describe('NPI Tracker Module', () => {
         if (document.body.contains(container)) {
             document.body.removeChild(container);
         }
+        anchorClick.mockRestore();
         vi.clearAllMocks();
     });
 

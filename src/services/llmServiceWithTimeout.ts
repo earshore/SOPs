@@ -88,23 +88,18 @@ export async function callLLMWithTimeout(
           showToast('请求超时，正在自动重试...', { type: 'warning' });
         }
 
-        try {
-          const result = await callLLM(
-            messages,
-            provider,
-            endpoint,
-            apiKey,
-            model,
-            { ...llmOptions, timeout }
-          );
+        const result = await callLLM(
+          messages,
+          provider,
+          endpoint,
+          apiKey,
+          model,
+          { ...llmOptions, timeout }
+        );
 
-          // 成功后标记任务成功
-          workingStateManager.setSuccess(taskId);
-          resolve(result);
-        } catch (error) {
-          // 重试失败，抛出错误让WorkingStateManager处理
-          throw error;
-        }
+        // 成功后标记任务成功
+        workingStateManager.setSuccess(taskId);
+        resolve(result);
       },
       onSuccess: () => {
         console.log(`LLM调用成功: ${description}`, { taskId }, 'LLMService');

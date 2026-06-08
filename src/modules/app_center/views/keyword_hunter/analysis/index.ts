@@ -16,6 +16,7 @@ import { showToast } from "../../../../../common/ui";
 import * as KeywordService from "../services/trackerService";
 import { appStore } from "@/stores/useAppStore";
 import { ErrorService } from "../../../../../services/errorService";
+import { createSafeFragment, setSafeHtml } from "../../../../../common/utils/security";
 import "../keyword_hunter_style.css";
 
 // ==========================================
@@ -308,17 +309,23 @@ function showLoadingState(container: HTMLElement): () => void {
     `;
 
   const renderer = SafeRenderer.getInstance();
-  renderer.renderTemplate(container, buildHtml(phases[0]!));
+  const initialPhase = phases[0];
+  if (!initialPhase) return () => {};
+  renderer.renderTemplate(container, buildHtml(initialPhase));
 
   // 阶段切换计时器
   const advancePhase = () => {
     phaseIndex = Math.min(phaseIndex + 1, phases.length - 1);
     const loadingEl = document.getElementById("kt-loading-state");
     if (loadingEl) {
-      const newContent = document.createElement("div");
+      const phase = phases[phaseIndex];
+      if (!phase) return;
       // ✅ 安全: buildHtml返回静态模板，phase.icon/text/color来自常量数组
-      newContent.innerHTML = buildHtml(phases[phaseIndex]!);
-      loadingEl.replaceWith(newContent.firstElementChild!);
+      const fragment = createSafeFragment(buildHtml(phase));
+      const nextContent = fragment.firstElementChild;
+      if (nextContent) {
+        loadingEl.replaceWith(nextContent);
+      }
     }
   };
 
@@ -428,7 +435,7 @@ function highlightScores(container: HTMLElement): void {
     if (rawText.includes("-10") || rawText.includes("🚨")) {
       tr.classList.add("row-risk");
       // ✅ 安全: 清空内容
-      td2.innerHTML = "";
+      td2.replaceChildren();
       const span = document.createElement("span");
       span.className = "score-badge score-badge-low";
       span.textContent = "🚨 -10";
@@ -444,7 +451,7 @@ function highlightScores(container: HTMLElement): void {
       rawText === "0"
     ) {
       // ✅ 安全: 清空内容
-      td2.innerHTML = "";
+      td2.replaceChildren();
       const span = document.createElement("span");
       span.className = "score-badge score-badge-high";
       span.textContent = "✅ +0";
@@ -456,8 +463,12 @@ function highlightScores(container: HTMLElement): void {
     const match = rawText.match(/(\d+)\s*\/\s*(\d+)/);
     if (!match) return;
 
-    const score = parseInt(match[1]!, 10);
-    const max = parseInt(match[2]!, 10);
+    const scoreText = match[1];
+    const maxText = match[2];
+    if (!scoreText || !maxText) return;
+
+    const score = parseInt(scoreText, 10);
+    const max = parseInt(maxText, 10);
     if (max === 0) return;
 
     const ratio = score / max;
@@ -477,7 +488,7 @@ function highlightScores(container: HTMLElement): void {
     }
 
     // ✅ 安全: 清空内容
-    td2.innerHTML = "";
+    td2.replaceChildren();
     const span = document.createElement("span");
     span.className = `score-badge ${badgeClass}`;
     span.textContent = `${icon} ${score}/${max}`;
@@ -492,7 +503,10 @@ function highlightScores(container: HTMLElement): void {
   const totalMatch = h2Text.match(/(\d+)\s*\/\s*100/);
   if (!totalMatch) return;
 
-  const total = parseInt(totalMatch[1]!, 10);
+  const totalText = totalMatch[1];
+  if (!totalText) return;
+
+  const total = parseInt(totalText, 10);
 
   // 按分段选色
   let gradient: string;
@@ -649,7 +663,7 @@ async function runLLMAnalysis(): Promise<void> {
         `bg-white border border-${colorScheme}-200 text-${colorScheme}-700 ` +
         `text-xs rounded-lg hover:bg-${colorScheme}-50 transition-colors font-medium`;
       // ✅ 安全: 静态HTML模板，无用户输入
-      retryBtn.innerHTML = '<i class="fas fa-redo text-[10px]"></i> 重试';
+      setSafeHtml(retryBtn, '<i class="fas fa-redo text-[10px]"></i> 重试');
       addEventListener(retryBtn, "click", () => {
         void runLLMAnalysis();
       });
@@ -659,7 +673,7 @@ async function runLLMAnalysis(): Promise<void> {
       errorDiv.appendChild(retryBtn);
 
       // ✅ 安全: 清空内容
-      resultDiv.innerHTML = "";
+      resultDiv.replaceChildren();
       resultDiv.appendChild(errorDiv);
     }
 

@@ -2,7 +2,7 @@
  * 欧洲站市场洞察 - 各国消费者画像雷达图
  */
 
-import { escapeHtml } from "@/common/utils/security";
+import { escapeHtml, setSafeHtml } from "@/common/utils/security";
 import BaseModule from "../../../../../common/BaseModule";
 import { AMZ_COUNTRY_DATA, type CountryCode } from "../../../constants/amz_hub_constants";
 import templateHTML from "./template.html?raw";
@@ -35,9 +35,12 @@ class EuInsightsModule extends BaseModule {
   }
 
   protected async render(): Promise<void> {
+    const container = this.container;
+    if (!container) return;
+
     // ✅ 安全: 静态HTML模板，无用户输入
-    this.container!.innerHTML = templateHTML;
-    this.container!.classList.add("fade-in");
+    setSafeHtml(container, templateHTML);
+    container.classList.add("fade-in");
   }
 
   async init(): Promise<void> {
@@ -69,7 +72,7 @@ class EuInsightsModule extends BaseModule {
     const details = document.getElementById("amz_countryDetails");
     if (details) {
       // ✅ 安全: data来自内部AMZ_COUNTRY_DATA，动态文本已通过escapeHtml转义
-      details.innerHTML = `
+      setSafeHtml(details, `
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
                         <span class="text-3xl">${this.getFlagEmoji(code)}</span> ${escapeHtml(data.name)}
@@ -88,7 +91,7 @@ class EuInsightsModule extends BaseModule {
                         </div>
                     </div>
                 </div>
-            `;
+            `);
     }
 
     this.updateChart(data.radarData);

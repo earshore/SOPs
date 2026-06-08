@@ -3,7 +3,7 @@
 // 🎯 Phase 3: Alpine.js Refactor (TypeScript版本)
 // ================================================================
 
-import { escapeHtml } from '../../common/utils/security';
+import { escapeHtml, setSafeHtml } from '../../common/utils/security';
 import { PROVIDERS, type ProviderConfig } from '../../common/constants/constants';
 import { fetchModelsFromApi, callLLM } from '../../services/llmService';
 import { showToast } from '../../common/ui';
@@ -801,18 +801,18 @@ export async function updateModelStatus(): Promise<void> {
         const providerInfo = PROVIDERS[providerKey];
         if (config && config.apiKey && config.model && providerInfo) {
             // ✅ 安全: providerInfo.name和config.model已通过escapeHtml转义
-            statusEl.innerHTML = `
+            setSafeHtml(statusEl, `
                 <span class="status-dot status-success"></span>
                 <span class="text-slate-600 text-xs font-medium flex items-center gap-1">
                     ${escapeHtml(providerInfo.name)}: <span class="font-mono text-blue-600">${escapeHtml(config.model)}</span>
                 </span>
-            `;
+            `);
             return;
         }
     }
     // ✅ 安全: 静态HTML模板，无用户输入
-    statusEl.innerHTML = `
+    setSafeHtml(statusEl, `
         <span class="status-dot status-pending pulse-dot"></span>
         <span class="text-slate-500 text-xs italic">等待API配置...</span>
-    `;
+    `);
 }

@@ -23,6 +23,29 @@ const CONFIDENCE_THRESHOLDS = {
   MEDIUM_QUALITY: 0.5 // 中等质量阈值
 };
 
+function checkStringQuality(value: string): number {
+  const trimmed = value.trim();
+  if (trimmed.length === 0) return 0;
+  if (trimmed.includes('未能') || trimmed.includes('无法') || trimmed.includes('错误')) return 0.1;
+  if (trimmed.length < 5) return 0.3;
+  if (trimmed.length < 20) return 0.6;
+  return 1.0;
+}
+
+function isNonEmptyRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && Object.keys(value).length > 0;
+}
+
+function isValidArrayItem(item: unknown): boolean {
+  if (typeof item === 'string') return item.trim().length > 0;
+  return isNonEmptyRecord(item);
+}
+
+function checkArrayQuality(value: unknown[]): number {
+  if (value.length === 0) return 0;
+  return value.filter(isValidArrayItem).length / value.length;
+}
+
 /**
  * 通用数据质量检查
  */
@@ -30,32 +53,54 @@ function checkDataQuality(value: unknown): number {
   if (value === null || value === undefined) return 0;
 
   if (typeof value === 'string') {
-    const trimmed = value.trim();
-    if (trimmed.length === 0) return 0;
-    if (trimmed.includes('未能') || trimmed.includes('无法') || trimmed.includes('错误')) return 0.1;
-    if (trimmed.length < 5) return 0.3;
-    if (trimmed.length < 20) return 0.6;
-    return 1.0;
+    return checkStringQuality(value);
   }
 
   if (Array.isArray(value)) {
-    if (value.length === 0) return 0;
-    // 检查数组元素质量
-    const validItems = value.filter(item => {
-      if (typeof item === 'string') return item.trim().length > 0;
-      if (typeof item === 'object' && item !== null) return Object.keys(item).length > 0;
-      return false;
-    });
-    return validItems.length / value.length;
+    return checkArrayQuality(value);
   }
 
   if (typeof value === 'object') {
-    const keys = Object.keys(value);
-    if (keys.length === 0) return 0;
-    return 1.0;
+    return isNonEmptyRecord(value) ? 1.0 : 0;
   }
 
   return 0.5;
+}
+
+function scoreOptionalQuality(value: unknown): number {
+  return value === null || value === undefined ? 0 : checkDataQuality(value);
+}
+
+function scoreByArrayLength(items: unknown, targetCount: number, emptyScore = 0): number {
+  if (!Array.isArray(items)) return 0;
+  if (items.length === 0) return emptyScore;
+  return Math.min(items.length / targetCount, 1.0);
+}
+
+function scoreByValidText<T>(items: T[] | undefined, getText: (item: T) => string | undefined, targetCount: number): number {
+  if (!Array.isArray(items)) return 0;
+
+  const validItems = items.filter(item => {
+    const text = getText(item);
+    return typeof text === 'string' && text.trim().length > 0;
+  });
+  return validItems.length > 0 ? Math.min(validItems.length / targetCount, 1.0) : 0;
+}
+
+function scoreAnyArrayContent(...items: unknown[]): number {
+  return items.some(item => Array.isArray(item) && item.length > 0) ? 0.8 : 0;
+}
+
+function finalizeConfidence(label: string, scores: number[]): number {
+  if (scores.length === 0) {
+    console.warn(`[置信度] ${label} 无有效评分数据`);
+    return 0;
+  }
+
+  const avgScore = scores.reduce((sum, s) => sum + s, 0) / scores.length;
+  const clampedScore = Math.max(0, Math.min(1, avgScore));
+  console.log(`[置信度] ${label}:`, clampedScore.toFixed(2));
+  return clampedScore;
 }
 
 /**
@@ -116,39 +161,14 @@ export function calculateSellingPointsConfidence(report: SellingPointsReport | n
   const scores: number[] = [];
 
   try {
-    // 检查五点描述分析
-    if (report.bullet_analysis && Array.isArray(report.bullet_analysis)) {
-      const validBullets = report.bullet_analysis.filter(b => b.original_text_summary && b.original_text_summary.trim().length > 0);
-      scores.push(validBullets.length > 0 ? Math.min(validBullets.length / 3, 1.0) : 0);
-    } else {
-      scores.push(0);
-    }
+    scores.push(scoreByValidText(report.bullet_analysis, b => b.original_text_summary, 3));
+    scores.push(scoreOptionalQuality(report.overall_strategy?.primary_differentiation));
+    scores.push(scoreAnyArrayContent(
+      report.function_scene_matrix?.functions,
+      report.function_scene_matrix?.scenes
+    ));
 
-    // 检查整体策略
-    if (report.overall_strategy) {
-      scores.push(checkDataQuality(report.overall_strategy.primary_differentiation));
-    } else {
-      scores.push(0);
-    }
-
-    // 检查功能场景矩阵
-    if (report.function_scene_matrix) {
-      const hasContent = (report.function_scene_matrix.functions?.length || 0) > 0 ||
-                        (report.function_scene_matrix.scenes?.length || 0) > 0;
-      scores.push(hasContent ? 0.8 : 0);
-    } else {
-      scores.push(0);
-    }
-
-    if (scores.length === 0) {
-      console.warn('[置信度] Selling Points 无有效评分数据');
-      return 0;
-    }
-
-    const avgScore = scores.reduce((sum, s) => sum + s, 0) / scores.length;
-    const clampedScore = Math.max(0, Math.min(1, avgScore));
-    console.log('[置信度] Selling Points:', clampedScore.toFixed(2));
-    return clampedScore;
+    return finalizeConfidence('Selling Points', scores);
   } catch (error) {
     console.error('[置信度] Selling Points 计算失败:', error);
     return 0;
@@ -294,39 +314,12 @@ export function calculateBuyerProfileConfidence(report: BuyerProfileReport | nul
   const scores: number[] = [];
 
   try {
-    // 检查人口统计
-    if (report.demographics) {
-      scores.push(checkDataQuality(report.demographics.likely_gender));
-    } else {
-      scores.push(0);
-    }
-
-    // 检查买家类型
-    if (report.buyer_types && Array.isArray(report.buyer_types)) {
-      scores.push(report.buyer_types.length > 0 ? Math.min(report.buyer_types.length / 3, 1.0) : 0);
-    } else {
-      scores.push(0);
-    }
-
-    // 检查使用场景
-    if (report.usage_scenes && Array.isArray(report.usage_scenes)) {
-      scores.push(report.usage_scenes.length > 0 ? Math.min(report.usage_scenes.length / 2, 1.0) : 0);
-    } else {
-      scores.push(0);
-    }
-
-    // 检查购买动机
+    scores.push(scoreOptionalQuality(report.demographics?.likely_gender));
+    scores.push(scoreByArrayLength(report.buyer_types, 3));
+    scores.push(scoreByArrayLength(report.usage_scenes, 2));
     scores.push(checkDataQuality(report.purchase_motivations));
 
-    if (scores.length === 0) {
-      console.warn('[置信度] Buyer Profile 无有效评分数据');
-      return 0;
-    }
-
-    const avgScore = scores.reduce((sum, s) => sum + s, 0) / scores.length;
-    const clampedScore = Math.max(0, Math.min(1, avgScore));
-    console.log('[置信度] Buyer Profile:', clampedScore.toFixed(2));
-    return clampedScore;
+    return finalizeConfidence('Buyer Profile', scores);
   } catch (error) {
     console.error('[置信度] Buyer Profile 计算失败:', error);
     return 0;
@@ -345,35 +338,15 @@ export function calculateVocabGapConfidence(report: VocabGapReport | null): numb
   const scores: number[] = [];
 
   try {
-    // 检查未覆盖的买家术语
-    if (report.uncovered_buyer_terms && Array.isArray(report.uncovered_buyer_terms)) {
-      // 未覆盖术语可能为空（词汇很完整），所以空数组也给一定分数
-      scores.push(report.uncovered_buyer_terms.length === 0 ? 0.8 : Math.min(report.uncovered_buyer_terms.length / 5, 1.0));
-    } else {
-      scores.push(0);
-    }
-
-    // 检查术语翻译
+    // 未覆盖术语可能为空（词汇很完整），所以空数组也给一定分数
+    scores.push(scoreByArrayLength(report.uncovered_buyer_terms, 5, 0.8));
     scores.push(checkDataQuality(report.term_translations));
+    scores.push(scoreAnyArrayContent(
+      report.listing_optimization?.title_additions,
+      report.listing_optimization?.bullet_additions
+    ));
 
-    // 检查Listing优化建议
-    if (report.listing_optimization) {
-      const hasContent = (report.listing_optimization.title_additions?.length || 0) > 0 ||
-                        (report.listing_optimization.bullet_additions?.length || 0) > 0;
-      scores.push(hasContent ? 0.8 : 0);
-    } else {
-      scores.push(0);
-    }
-
-    if (scores.length === 0) {
-      console.warn('[置信度] Vocab Gap 无有效评分数据');
-      return 0;
-    }
-
-    const avgScore = scores.reduce((sum, s) => sum + s, 0) / scores.length;
-    const clampedScore = Math.max(0, Math.min(1, avgScore));
-    console.log('[置信度] Vocab Gap:', clampedScore.toFixed(2));
-    return clampedScore;
+    return finalizeConfidence('Vocab Gap', scores);
   } catch (error) {
     console.error('[置信度] Vocab Gap 计算失败:', error);
     return 0;

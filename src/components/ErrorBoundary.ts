@@ -4,7 +4,7 @@
 // 提供一致的错误UI和重试机制
 // ================================================================
 
-import { escapeHtml } from '../common/utils/security';
+import { escapeHtml, setSafeHtml } from '../common/utils/security';
 
 /**
  * 错误边界配置
@@ -58,7 +58,7 @@ export function renderErrorBoundary(
     ` : '';
 
     // ✅ 安全: color参数来自配置默认值，title和error.message已通过escapeHtml转义
-    container.innerHTML = `
+    setSafeHtml(container, `
         <div class="error-boundary flex flex-col items-center justify-center p-12 text-center fade-in">
             <div class="w-16 h-16 rounded-full bg-${escapeHtml(color)}-50 flex items-center justify-center mb-4">
                 <i class="fas fa-exclamation-triangle text-2xl text-${escapeHtml(color)}-500"></i>
@@ -70,7 +70,7 @@ export function renderErrorBoundary(
                 ${retryButton}
             </div>
         </div>
-    `;
+    `);
 
     // 绑定重载按钮
     if (showReload) {
@@ -107,12 +107,12 @@ export function renderLoading(
     message: string = 'Loading module...'
 ): void {
     // ✅ 安全: color参数来自默认值或配置，message参数已通过escapeHtml转义
-    container.innerHTML = `
+    setSafeHtml(container, `
         <div class="p-10 text-center fade-in">
             <i class="fas fa-spinner fa-spin text-2xl text-${escapeHtml(color)}-500"></i>
             <p class="text-slate-400 text-xs mt-2">${escapeHtml(message)}</p>
         </div>
-    `;
+    `);
 }
 
 /**
@@ -127,14 +127,14 @@ export function renderEmpty(
     icon: string = 'fa-inbox'
 ): void {
     // ✅ 安全: message和icon参数已通过escapeHtml转义
-    container.innerHTML = `
+    setSafeHtml(container, `
         <div class="flex flex-col items-center justify-center p-12 text-center">
             <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
                 <i class="fas ${escapeHtml(icon)} text-2xl text-slate-400"></i>
             </div>
             <p class="text-sm text-slate-500">${escapeHtml(message)}</p>
         </div>
-    `;
+    `);
 }
 
 /**
@@ -144,7 +144,7 @@ export function renderEmpty(
  */
 export function renderNotRegistered(container: HTMLElement, routeId: string): void {
     // ✅ 安全: routeId已通过escapeHtml转义
-    container.innerHTML = `
+    setSafeHtml(container, `
         <div class="p-10 text-center">
             <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-50 mb-4">
                 <i class="fas fa-tools text-2xl text-amber-500"></i>
@@ -152,7 +152,7 @@ export function renderNotRegistered(container: HTMLElement, routeId: string): vo
             <h3 class="text-lg font-bold text-slate-800 mb-2">功能开发中</h3>
             <p class="text-sm text-slate-500">模块 [${escapeHtml(routeId)}] 尚未开发或未注册</p>
         </div>
-    `;
+    `);
 }
 
 /**
@@ -161,7 +161,7 @@ export function renderNotRegistered(container: HTMLElement, routeId: string): vo
  */
 export function renderTimeout(container: HTMLElement): void {
     // ✅ 安全: 静态HTML模板，无用户输入
-    container.innerHTML = `
+    setSafeHtml(container, `
         <div class="p-10 text-center">
             <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-orange-50 mb-4">
                 <i class="fas fa-clock text-2xl text-orange-500"></i>
@@ -173,7 +173,7 @@ export function renderTimeout(container: HTMLElement): void {
                 <i class="fas fa-redo mr-2"></i>刷新页面
             </button>
         </div>
-    `;
+    `);
     
     // 绑定事件处理器
     const reloadBtn = container.querySelector('[data-action="reload-page-timeout"]');

@@ -4,6 +4,7 @@
  */
 
 import BaseModule from '../../../../common/BaseModule';
+import { setSafeHtml } from '../../../../common/utils/security';
 import { loadTemplate } from '../../../../common/utils/viewLoader';
 
 console.log('🧭 更多总览页面加载...');
@@ -95,7 +96,7 @@ class MoreOverviewModule extends BaseModule {
             // 加载HTML模板
             const html = await loadTemplate('src/modules/more/views/overview/template.html');
             // ✅ 安全: 静态HTML模板，无用户输入
-            container.innerHTML = html;
+            setSafeHtml(container, html);
             container.classList.add('fade-in');
 
             // 初始化事件监听
@@ -105,12 +106,12 @@ class MoreOverviewModule extends BaseModule {
         } catch (error) {
             console.error('❌ 更多总览页面挂载失败:', error);
             // ✅ 安全: 静态HTML模板，无用户输入
-            container.innerHTML = `
+            setSafeHtml(container, `
                 <div class="p-10 text-center text-red-500">
                     <i class="fas fa-exclamation-triangle text-4xl mb-4"></i>
                     <p>页面加载失败</p>
                 </div>
-            `;
+            `);
         }
     }
 

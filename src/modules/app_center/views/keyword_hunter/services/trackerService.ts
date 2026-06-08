@@ -314,6 +314,21 @@ export async function fetchListingAnalysis(
  * @param totalCount - 原始段落总数（用于越界校验）
  * @returns          - { [段落编号]: 翻译文本 }
  */
+function addNumberedTranslation(
+  result: Record<number, string>,
+  match: RegExpExecArray,
+  totalCount: number,
+): void {
+  const numText = match[1];
+  const rawText = match[2];
+  if (!numText || rawText === undefined) return;
+
+  const num = parseInt(numText, 10);
+  if (num >= 1 && num <= totalCount) {
+    result[num] = rawText.trim();
+  }
+}
+
 function parseNumberedTranslations(
   response: string,
   totalCount: number,
@@ -324,11 +339,7 @@ function parseNumberedTranslations(
   const primaryRegex = /【(\d+)】\s*([\s\S]*?)(?=【\d+】|$)/g;
   let match: RegExpExecArray | null;
   while ((match = primaryRegex.exec(response)) !== null) {
-    const num = parseInt(match[1]!, 10);
-    const text = match[2]!.trim();
-    if (num >= 1 && num <= totalCount) {
-      result[num] = text;
-    }
+    addNumberedTranslation(result, match, totalCount);
   }
 
   if (Object.keys(result).length > 0) {
@@ -341,11 +352,7 @@ function parseNumberedTranslations(
   // Fallback A：尝试方括号格式 [N] 内容
   const fallbackRegexA = /\[(\d+)\]\s*([\s\S]*?)(?=\[\d+\]|$)/g;
   while ((match = fallbackRegexA.exec(response)) !== null) {
-    const num = parseInt(match[1]!, 10);
-    const text = match[2]!.trim();
-    if (num >= 1 && num <= totalCount) {
-      result[num] = text;
-    }
+    addNumberedTranslation(result, match, totalCount);
   }
 
   if (Object.keys(result).length > 0) {

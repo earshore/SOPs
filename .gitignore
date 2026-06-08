@@ -12,17 +12,12 @@ lerna-debug.log*
 .pnpm-store/
 
 # Build Output
-dist/
-dist-ssr/
-build/
-out/
-.output/
-html/
-
-# Generated files
-tailwind.config.generated.js
-src/css/foundation/variables.generated.css
-src/common/config/design-tokens.generated.ts
+/dist/
+/dist-ssr/
+/build/
+/out/
+/.output/
+/html/
 
 # Cache
 .cache/
@@ -39,20 +34,16 @@ __pycache__/
 # ==============================================================================
 # Environment Variables (保留示例文件)
 .env
-.env.local
-.env.development
-.env.production
-.env.test
-.env.*.local
+.env.*
 !.env.example
-!.env.test.example
+!.env.*.example
 
 # ==============================================================================
 # 3. Testing & Coverage
 # ==============================================================================
 coverage/
 .nyc_output/
-reports/
+/reports/
 *.lcov
 test-*.html
 *.test.local.js
@@ -68,15 +59,20 @@ validation-report.json
 
 # Playwright
 tests/playwright-report/
+tests/playwright-report-archive/
 tests/test-results/
-playwright-report/
-test-results/
+/playwright-report/
+/test-results/
 playwright/.cache/
-output/
+/output/
 
 # Screenshots (保留目录结构，忽略截图文件)
-tests/screenshots/failures/*.png
+tests/screenshots/**/*.png
+tests/screenshots/**/*.jpg
+tests/screenshots/**/*.jpeg
+tests/screenshots/**/*.webp
 tests/screenshots/temp/
+tests/screenshots/index.html
 tests/screenshots/index.json
 !tests/screenshots/.gitkeep
 !tests/screenshots/failures/.gitkeep
@@ -88,11 +84,12 @@ tests/screenshots/index.json
 # 临时快照和截图
 tests/**/*-snapshot.txt
 tests/**/*.png
-!tests/screenshots/**/*.png
 
 # ESLint 和代码质量报告
 eslint-report.json
 eslint-unused*.json
+tests/quality/eslint-output.json
+tests/quality/reports/
 unused-imports-report-*.html
 unused-imports-report-*.json
 test-output.txt
@@ -232,11 +229,6 @@ tools/naming-validator/css_report.md
 # Performance test reports
 tests/performance/baseline-reports/
 tests/performance/lighthouse-reports/
+tests/performance/performance-reports/
 tests/performance/performance-score-reports/
 tests/performance/baseline-scores.json
-
-# Screenshots (保留结构，忽略具体截图)
-tests/screenshots/*.png
-tests/screenshots/*.jpg
-tests/screenshots/index.html
-tests/screenshots/index.json

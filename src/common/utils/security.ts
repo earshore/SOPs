@@ -153,7 +153,7 @@ export function createSafeFragment(html: string): DocumentFragment {
 export function setSafeHtml(element: HTMLElement | null, html: string): void {
   if (!element) return;
   // ✅ 安全: 清空元素后使用createSafeFragment安全插入HTML
-  element.innerHTML = '';
+  element.replaceChildren();
   element.appendChild(createSafeFragment(html));
 }
 

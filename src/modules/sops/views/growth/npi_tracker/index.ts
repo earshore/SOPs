@@ -12,6 +12,7 @@
 import { SafeModuleLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
 import { registerActionsWithLegacy, unregisterActions } from '../../../../../common/utils/actionRegistry';
+import { escapeHtml } from '../../../../../common/utils/security';
 import type {
   NPIProductRecord,
   StageConfig,
@@ -43,6 +44,49 @@ const NEXT_STEP_OPTIONS: string[] = [
     '清仓 (扶不起)',
 ];
 
+const EXCEL_COLUMNS = {
+    DELIVERY_FEE: 'O',
+    SUGGESTED: 'S',
+} as const;
+
+const ADS_STRATEGY_LABELS: Record<NPIProductRecord['ads_strategy'], string> = {
+    auto: '自动',
+    manual: '手动',
+    mixed: '混合',
+};
+
+interface ExportRow {
+    阶段: string;
+    SKU: string;
+    中文名: string;
+    店铺: string;
+    ASIN: string;
+    站点: string;
+    发货数量: number;
+    库存周转天数: number;
+    是否泛欧: string;
+    五点Rufus加标题: string;
+    敏感词规避: string;
+    图片加QA: string;
+    A加页面: string;
+    SOP合规状态: string;
+    DE配送费欧元: number;
+    配送占比百分号: string;
+    清仓红线欧元: string;
+    动销价格欧元: string;
+    建议售价欧元: string;
+    盈亏平衡点欧元: string;
+    流量: number;
+    七天CTR百分号: number;
+    七天CVR百分号: number;
+    ACOAS百分号: number;
+    自然单占比百分号: number;
+    Vine进度: string;
+    广告策略: string;
+    是否保留: string;
+    NextStep: string;
+}
+
 // 模块状态
 let tableData: NPIProductRecord[] = [...SAMPLE_DATA];
 let registeredActions: string[] = [];
@@ -68,110 +112,125 @@ const getComplianceStatus = (record: NPIProductRecord): ComplianceStatus => {
     return { completed, total: 4, isComplete: completed === 4 };
 };
 
-// Render the table
-function renderTable(): void {
-    const tbody = document.getElementById('npi-table-body');
-    if (!tbody) return;
+const checkedAttr = (checked: boolean): string => checked ? 'checked' : '';
+const selectedAttr = (current: string, expected: string): string => current === expected ? 'selected' : '';
+const yesNo = (value: boolean): string => value ? '是' : '否';
+const checkMark = (value: boolean): string => value ? '✓' : '';
+const safeText = (value: unknown): string => escapeHtml(String(value ?? ''));
 
-    // 使用 SafeRenderer 渲染表格（静态模板，已审计）
-    const renderer = SafeRenderer.getInstance();
-    const tableHTML = tableData
-        .map((row: NPIProductRecord, index) => {
-            const stageConfig: StageConfig = stageConfigMap[row.stage] || stageConfigMap['new-test'];
-            const clearancePrice = calcClearancePrice(row.delivery_fee);
-            const movingPrice = calcMovingPrice(row.delivery_fee);
-            const suggestedPrice = calcCurrentPrice(row.delivery_fee);
-            const deliveryPercent = calcDeliveryPercent(row.delivery_fee, parseFloat(suggestedPrice));
-            const compliance = getComplianceStatus(row);
-            const isOverstock = row.inventory_days > 60;
-            const isPriceBelowClearance = parseFloat(suggestedPrice) < parseFloat(clearancePrice);
+function renderComplianceStatus(compliance: ComplianceStatus): string {
+    return compliance.isComplete
+        ? '<span class="text-emerald-600"><i class="fas fa-check-circle"></i></span>'
+        : `<span class="text-amber-500 text-xs">${compliance.completed}/${compliance.total}</span>`;
+}
 
-            const domain = siteDomainsMap[row.site] || 'amazon.de';
-            const flag = siteFlagsMap[row.site] || row.site;
+function renderAdsOptions(strategy: NPIProductRecord['ads_strategy']): string {
+    return Object.entries(ADS_STRATEGY_LABELS)
+        .map(([value, label]) => `<option value="${value}" ${selectedAttr(strategy, value)}>${label}</option>`)
+        .join('');
+}
 
-            return `
+function renderNextStepTags(steps: string[]): string {
+    return steps
+        .map((step: string) => `<span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">${safeText(step)}</span>`)
+        .join('');
+}
+
+function renderTableRow(row: NPIProductRecord, index: number): string {
+    const stageConfig: StageConfig = stageConfigMap[row.stage] || stageConfigMap['new-test'];
+    const clearancePrice = calcClearancePrice(row.delivery_fee);
+    const movingPrice = calcMovingPrice(row.delivery_fee);
+    const suggestedPrice = calcCurrentPrice(row.delivery_fee);
+    const deliveryPercent = calcDeliveryPercent(row.delivery_fee, parseFloat(suggestedPrice));
+    const compliance = getComplianceStatus(row);
+    const domain = siteDomainsMap[row.site] || 'amazon.de';
+    const flag = siteFlagsMap[row.site] || row.site;
+    const inventoryClass = row.inventory_days > 60 ? 'text-red-600 font-bold' : '';
+    const suggestedPriceClass = parseFloat(suggestedPrice) < parseFloat(clearancePrice)
+        ? 'text-red-600 font-bold bg-red-50'
+        : 'text-emerald-600 font-bold';
+    const ctrClass = row.ctr_7d < 0.5 ? 'text-amber-600 bg-amber-50' : '';
+    const acoasClass = row.acoas > 50 ? 'text-red-600' : '';
+    const decisionClass = row.decision === 'keep'
+        ? 'bg-emerald-100 text-emerald-700'
+        : 'bg-red-100 text-red-700';
+
+    return `
         <tr class="hover:bg-slate-50 border-b border-slate-100" data-index="${index}">
             <!-- 基础档案 (8列) -->
             <td class="px-3 py-3 sticky left-0 bg-white z-10 border-r">
-                <span class="px-2 py-1 rounded text-xs font-medium ${stageConfig.color}">${stageConfig.label}</span>
+                <span class="px-2 py-1 rounded text-xs font-medium ${safeText(stageConfig.color)}">${safeText(stageConfig.label)}</span>
             </td>
-            <td class="px-3 py-3 text-sm font-mono text-blue-600 cursor-pointer hover:underline" data-action="open-product" data-domain="${domain}" data-asin="${row.asin}">
-                ${row.sku}
+            <td class="px-3 py-3 text-sm font-mono text-blue-600 cursor-pointer hover:underline" data-action="open-product" data-domain="${safeText(domain)}" data-asin="${safeText(row.asin)}">
+                ${safeText(row.sku)}
             </td>
-            <td class="px-3 py-3 text-sm">${row.cn_name}</td>
-            <td class="px-3 py-3 text-sm">${row.store}</td>
+            <td class="px-3 py-3 text-sm">${safeText(row.cn_name)}</td>
+            <td class="px-3 py-3 text-sm">${safeText(row.store)}</td>
             <td class="px-3 py-3 text-sm font-mono">
-                <a href="https://www.${domain}/dp/${row.asin}" target="_blank" class="text-blue-600 hover:underline">${row.asin}</a>
+                <a href="https://www.${safeText(domain)}/dp/${safeText(row.asin)}" target="_blank" class="text-blue-600 hover:underline">${safeText(row.asin)}</a>
             </td>
             <td class="px-3 py-3 text-sm text-center">
-                <span class="inline-flex items-center gap-1" title="${row.site}">
-                    ${flag}
+                <span class="inline-flex items-center gap-1" title="${safeText(row.site)}">
+                    ${safeText(flag)}
                 </span>
             </td>
             <td class="px-3 py-3 text-sm text-center">${row.qty_shipped}</td>
-            <td class="px-3 py-3 text-sm text-center ${isOverstock ? 'text-red-600 font-bold' : ''}">${row.inventory_days}天</td>
-            
+            <td class="px-3 py-3 text-sm text-center ${inventoryClass}">${row.inventory_days}天</td>
+
             <!-- SOP合规 (6列: 泛欧 + 4项检查 + 状态) -->
             <td class="px-3 py-3 text-center border-l">
-                <input type="checkbox" ${row.is_pan_eu ? 'checked' : ''} class="w-4 h-4 rounded" data-action="update-field" data-field="is_pan_eu">
+                <input type="checkbox" ${checkedAttr(row.is_pan_eu)} class="w-4 h-4 rounded" data-action="update-field" data-field="is_pan_eu">
             </td>
             <td class="px-3 py-3 text-center">
-                <input type="checkbox" ${row.check_content ? 'checked' : ''} class="w-4 h-4 rounded text-emerald-600" data-action="update-field" data-field="check_content">
+                <input type="checkbox" ${checkedAttr(row.check_content)} class="w-4 h-4 rounded text-emerald-600" data-action="update-field" data-field="check_content">
             </td>
             <td class="px-3 py-3 text-center">
-                <input type="checkbox" ${row.check_sensitive ? 'checked' : ''} class="w-4 h-4 rounded text-emerald-600" data-action="update-field" data-field="check_sensitive">
+                <input type="checkbox" ${checkedAttr(row.check_sensitive)} class="w-4 h-4 rounded text-emerald-600" data-action="update-field" data-field="check_sensitive">
             </td>
             <td class="px-3 py-3 text-center">
-                <input type="checkbox" ${row.check_creative ? 'checked' : ''} class="w-4 h-4 rounded text-emerald-600" data-action="update-field" data-field="check_creative">
+                <input type="checkbox" ${checkedAttr(row.check_creative)} class="w-4 h-4 rounded text-emerald-600" data-action="update-field" data-field="check_creative">
             </td>
             <td class="px-3 py-3 text-center">
-                <input type="checkbox" ${row.check_ebc ? 'checked' : ''} class="w-4 h-4 rounded text-emerald-600" data-action="update-field" data-field="check_ebc">
+                <input type="checkbox" ${checkedAttr(row.check_ebc)} class="w-4 h-4 rounded text-emerald-600" data-action="update-field" data-field="check_ebc">
             </td>
             <td class="px-3 py-3 text-center">
-                ${
-                    compliance.isComplete
-                        ? '<span class="text-emerald-600"><i class="fas fa-check-circle"></i></span>'
-                        : `<span class="text-amber-500 text-xs">${compliance.completed}/${compliance.total}</span>`
-                }
+                ${renderComplianceStatus(compliance)}
             </td>
 
-            
             <!-- 财务模型 (6列) -->
             <td class="px-3 py-3 border-l">
-                <input type="number" step="0.1" value="${row.delivery_fee}" 
-                    class="w-16 px-2 py-1 border rounded text-sm text-center" 
+                <input type="number" step="0.1" value="${row.delivery_fee}"
+                    class="w-16 px-2 py-1 border rounded text-sm text-center"
                     data-action="update-delivery-fee">
             </td>
             <td class="px-3 py-3 text-center text-sm text-slate-500">${deliveryPercent}%</td>
             <td class="px-3 py-3 text-center text-red-600 font-bold">€${clearancePrice}</td>
             <td class="px-3 py-3 text-center text-amber-600 font-medium">€${movingPrice}</td>
-            <td class="px-3 py-3 text-center ${isPriceBelowClearance ? 'text-red-600 font-bold bg-red-50' : 'text-emerald-600 font-bold'}">€${suggestedPrice}</td>
-            <td class="px-3 py-3 text-center text-sm">€${row.break_even}</td>
-            
+            <td class="px-3 py-3 text-center ${suggestedPriceClass}">€${suggestedPrice}</td>
+            <td class="px-3 py-3 text-center text-sm">€${safeText(row.break_even)}</td>
+
             <!-- 流量转化 (5列) -->
             <td class="px-3 py-3 text-center border-l text-sm">${row.sessions.toLocaleString()}</td>
-            <td class="px-3 py-3 text-center text-sm ${row.ctr_7d < 0.5 ? 'text-amber-600 bg-amber-50' : ''}">${row.ctr_7d}%</td>
+            <td class="px-3 py-3 text-center text-sm ${ctrClass}">${row.ctr_7d}%</td>
             <td class="px-3 py-3 text-center text-sm">${row.cvr_7d}%</td>
-            <td class="px-3 py-3 text-center text-sm ${row.acoas > 50 ? 'text-red-600' : ''}">${row.acoas}%</td>
+            <td class="px-3 py-3 text-center text-sm ${acoasClass}">${row.acoas}%</td>
             <td class="px-3 py-3 text-center text-sm">${row.organic_ratio}%</td>
-            
+
             <!-- 决策 (4列: Vine进度 + 广告 + 保留 + Next Step) -->
-            <td class="px-3 py-3 text-center text-sm border-l">${row.vine_status}</td>
+            <td class="px-3 py-3 text-center text-sm border-l">${safeText(row.vine_status)}</td>
             <td class="px-3 py-3">
                 <select class="px-2 py-1 border rounded text-xs" data-action="update-field" data-field="ads_strategy">
-                    <option value="auto" ${row.ads_strategy === 'auto' ? 'selected' : ''}>自动</option>
-                    <option value="manual" ${row.ads_strategy === 'manual' ? 'selected' : ''}>手动</option>
-                    <option value="mixed" ${row.ads_strategy === 'mixed' ? 'selected' : ''}>混合</option>
+                    ${renderAdsOptions(row.ads_strategy)}
                 </select>
             </td>
             <td class="px-3 py-3 text-center">
-                <button data-action="toggle-decision" class="px-2 py-1 rounded text-xs font-medium ${row.decision === 'keep' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}">
+                <button data-action="toggle-decision" class="px-2 py-1 rounded text-xs font-medium ${decisionClass}">
                     ${row.decision === 'keep' ? '保留' : '放弃'}
                 </button>
             </td>
             <td class="px-3 py-3">
                 <div class="flex flex-wrap gap-1">
-                    ${row.next_step.map((step: string) => `<span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">${step}</span>`).join('')}
+                    ${renderNextStepTags(row.next_step)}
                     <button data-action="open-next-step-editor" class="px-2 py-0.5 border border-dashed border-slate-300 rounded text-xs text-slate-400 hover:border-blue-400 hover:text-blue-500">
                         <i class="fas fa-plus"></i>
                     </button>
@@ -179,8 +238,16 @@ function renderTable(): void {
             </td>
         </tr>
         `;
-        })
-        .join('');
+}
+
+// Render the table
+function renderTable(): void {
+    const tbody = document.getElementById('npi-table-body');
+    if (!tbody) return;
+
+    // 使用 SafeRenderer 渲染表格（静态模板，已审计）
+    const renderer = SafeRenderer.getInstance();
+    const tableHTML = tableData.map(renderTableRow).join('');
     
     // 使用 SafeRenderer 渲染（静态模板，已审计）
     renderer.renderTemplate(tbody, tableHTML);
@@ -220,29 +287,9 @@ function setupTableEventDelegation(tbody: HTMLElement): void {
         if (index < 0) return;
         
         const action = target.getAttribute('data-action');
-        
-        if (action === 'open-product') {
-            const domain = target.getAttribute('data-domain');
-            const asin = target.getAttribute('data-asin');
-            if (domain && asin) {
-                window.open(`https://www.${domain}/dp/${asin}`, '_blank');
-            }
-        } else if (action === 'update-field') {
-            const field = target.getAttribute('data-field') as keyof NPIProductRecord;
-            if (field) {
-                const value = (target as HTMLInputElement).type === 'checkbox' 
-                    ? (target as HTMLInputElement).checked 
-                    : (target as HTMLInputElement).value;
-                updateField(index, field, value);
-            }
-        } else if (action === 'update-delivery-fee') {
-            const value = (target as HTMLInputElement).value;
-            updateDeliveryFee(index, value);
-        } else if (action === 'toggle-decision') {
-            toggleDecision(index);
-        } else if (action === 'open-next-step-editor') {
-            openNextStepEditor(index);
-        }
+        if (!action) return;
+
+        TABLE_ACTION_HANDLERS[action]?.(target, index);
     };
     
     // 保存处理器引用以便后续移除
@@ -320,128 +367,107 @@ function saveNextSteps(): void {
     renderTable();
 }
 
+type TableActionHandler = (target: HTMLElement, index: number) => void;
+
+function handleOpenProduct(target: HTMLElement): void {
+    const domain = target.getAttribute('data-domain');
+    const asin = target.getAttribute('data-asin');
+    if (domain && asin) {
+        window.open(`https://www.${domain}/dp/${asin}`, '_blank');
+    }
+}
+
+function handleUpdateField(target: HTMLElement, index: number): void {
+    const field = target.getAttribute('data-field') as keyof NPIProductRecord;
+    if (!field) return;
+
+    const input = target as HTMLInputElement;
+    const value = input.type === 'checkbox' ? input.checked : input.value;
+    updateField(index, field, value);
+}
+
+const TABLE_ACTION_HANDLERS: Record<string, TableActionHandler> = {
+    'open-product': handleOpenProduct,
+    'update-field': handleUpdateField,
+    'update-delivery-fee': (target, index) => updateDeliveryFee(index, (target as HTMLInputElement).value),
+    'toggle-decision': (_target, index) => toggleDecision(index),
+    'open-next-step-editor': (_target, index) => openNextStepEditor(index),
+};
+
 // Close modal
 function closeNextStepModal(): void {
     const modal = document.getElementById('next-step-modal');
     if (modal) modal.classList.add('hidden');
 }
 
+function getComplianceLabel(record: NPIProductRecord): string {
+    const compliance = getComplianceStatus(record);
+    return compliance.isComplete ? '完成' : `${compliance.completed}/4`;
+}
 
-// Export to Excel with formulas
-function exportToExcel(): void {
-    // Column mapping for Excel formulas (0-indexed becomes 1-indexed in Excel)
-    // Row 1 is header, data starts at row 2
-    const COL = {
-        DELIVERY_FEE: 'O', // Column O = 配送费
-        CLEARANCE: 'Q', // Column Q = 清仓红线
-        MOVING: 'R', // Column R = 动销价格
-        SUGGESTED: 'S', // Column S = 建议售价
+function getDecisionLabel(decision: NPIProductRecord['decision']): string {
+    return decision === 'keep' ? '保留' : '放弃';
+}
+
+function buildExportRow(row: NPIProductRecord, idx: number): ExportRow {
+    const excelRow = idx + 2;
+
+    return {
+        阶段: stageConfigMap[row.stage]?.label || row.stage,
+        SKU: row.sku,
+        中文名: row.cn_name,
+        店铺: row.store,
+        ASIN: row.asin,
+        站点: row.site,
+        发货数量: row.qty_shipped,
+        库存周转天数: row.inventory_days,
+        是否泛欧: yesNo(row.is_pan_eu),
+        五点Rufus加标题: checkMark(row.check_content),
+        敏感词规避: checkMark(row.check_sensitive),
+        图片加QA: checkMark(row.check_creative),
+        A加页面: checkMark(row.check_ebc),
+        SOP合规状态: getComplianceLabel(row),
+        DE配送费欧元: row.delivery_fee,
+        配送占比百分号: `=${EXCEL_COLUMNS.DELIVERY_FEE}${excelRow}/${EXCEL_COLUMNS.SUGGESTED}${excelRow}*100`,
+        清仓红线欧元: `=${EXCEL_COLUMNS.DELIVERY_FEE}${excelRow}/0.5`,
+        动销价格欧元: `=${EXCEL_COLUMNS.DELIVERY_FEE}${excelRow}/0.5+1`,
+        建议售价欧元: `=${EXCEL_COLUMNS.DELIVERY_FEE}${excelRow}/0.5+2`,
+        盈亏平衡点欧元: row.break_even,
+        流量: row.sessions,
+        七天CTR百分号: row.ctr_7d,
+        七天CVR百分号: row.cvr_7d,
+        ACOAS百分号: row.acoas,
+        自然单占比百分号: row.organic_ratio,
+        Vine进度: row.vine_status,
+        广告策略: ADS_STRATEGY_LABELS[row.ads_strategy],
+        是否保留: getDecisionLabel(row.decision),
+        NextStep: row.next_step.join('; '),
     };
+}
 
-    interface ExportRow {
-        阶段: string;
-        SKU: string;
-        中文名: string;
-        店铺: string;
-        ASIN: string;
-        站点: string;
-        发货数量: number;
-        库存周转天数: number;
-        是否泛欧: string;
-        五点Rufus加标题: string;
-        敏感词规避: string;
-        图片加QA: string;
-        A加页面: string;
-        SOP合规状态: string;
-        DE配送费欧元: number;
-        配送占比百分号: string;
-        清仓红线欧元: string;
-        动销价格欧元: string;
-        建议售价欧元: string;
-        盈亏平衡点欧元: string;
-        流量: number;
-        七天CTR百分号: number;
-        七天CVR百分号: number;
-        ACOAS百分号: number;
-        自然单占比百分号: number;
-        Vine进度: string;
-        广告策略: string;
-        是否保留: string;
-        NextStep: string;
+function escapeCsvValue(value: ExportRow[keyof ExportRow]): string | number {
+    if (typeof value === 'string' && (value.includes(',') || value.includes('"') || value.includes('='))) {
+        return `"${value.replace(/"/g, '""')}"`;
     }
+    return value;
+}
 
-    const exportData: ExportRow[] = tableData.map((row, idx) => {
-        const excelRow = idx + 2; // Excel row number (1-indexed, row 1 is header)
-
-        return {
-            阶段: stageConfigMap[row.stage]?.label || row.stage,
-            SKU: row.sku,
-            中文名: row.cn_name,
-            店铺: row.store,
-            ASIN: row.asin,
-            站点: row.site,
-            发货数量: row.qty_shipped,
-            库存周转天数: row.inventory_days,
-            是否泛欧: row.is_pan_eu ? '是' : '否',
-            五点Rufus加标题: row.check_content ? '✓' : '',
-            敏感词规避: row.check_sensitive ? '✓' : '',
-            图片加QA: row.check_creative ? '✓' : '',
-            A加页面: row.check_ebc ? '✓' : '',
-            SOP合规状态: getComplianceStatus(row).isComplete
-                ? '完成'
-                : `${getComplianceStatus(row).completed}/4`,
-            DE配送费欧元: row.delivery_fee,
-            配送占比百分号: `=${COL.DELIVERY_FEE}${excelRow}/${COL.SUGGESTED}${excelRow}*100`,
-            清仓红线欧元: `=${COL.DELIVERY_FEE}${excelRow}/0.5`,
-            动销价格欧元: `=${COL.DELIVERY_FEE}${excelRow}/0.5+1`,
-            建议售价欧元: `=${COL.DELIVERY_FEE}${excelRow}/0.5+2`,
-            盈亏平衡点欧元: row.break_even,
-            流量: row.sessions,
-            七天CTR百分号: row.ctr_7d,
-            七天CVR百分号: row.cvr_7d,
-            ACOAS百分号: row.acoas,
-            自然单占比百分号: row.organic_ratio,
-            Vine进度: row.vine_status,
-            广告策略:
-                row.ads_strategy === 'auto' ? '自动' : row.ads_strategy === 'manual' ? '手动' : '混合',
-            是否保留: row.decision === 'keep' ? '保留' : '放弃',
-            NextStep: row.next_step.join('; '),
-        };
-    });
-
-    // Convert to CSV
-    if (exportData.length === 0) {
-        alert('没有数据可导出');
-        return;
-    }
-
+function buildCsvContent(exportData: ExportRow[]): string | null {
     const firstRow = exportData[0];
-    if (!firstRow) {
-        alert('数据格式错误');
-        return;
-    }
+    if (!firstRow) return null;
 
-    const headers = Object.keys(firstRow);
-    const csvContent = [
+    const headers = Object.keys(firstRow) as Array<keyof ExportRow>;
+    return [
         headers.join(','),
         ...exportData.map((row) =>
             headers
-                .map((h) => {
-                    const val = row[h as keyof ExportRow];
-                    // Escape commas and quotes in values
-                    if (
-                        typeof val === 'string' &&
-                        (val.includes(',') || val.includes('"') || val.includes('='))
-                    ) {
-                        return `"${val.replace(/"/g, '""')}"`;
-                    }
-                    return val;
-                })
+                .map((header) => escapeCsvValue(row[header]))
                 .join(',')
         ),
     ].join('\n');
+}
 
-    // Add BOM for Excel UTF-8 compatibility
+function downloadCsv(csvContent: string): void {
     const BOM = '\uFEFF';
     const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -452,6 +478,23 @@ function exportToExcel(): void {
     link.click();
 
     URL.revokeObjectURL(url);
+}
+
+// Export to Excel with formulas
+function exportToExcel(): void {
+    const exportData = tableData.map(buildExportRow);
+    if (exportData.length === 0) {
+        alert('没有数据可导出');
+        return;
+    }
+
+    const csvContent = buildCsvContent(exportData);
+    if (!csvContent) {
+        alert('数据格式错误');
+        return;
+    }
+
+    downloadCsv(csvContent);
 
     // Show notification
     alert(

@@ -18,6 +18,7 @@ import { APP_EVENTS } from '../constants/eventConstants';
 import type { CategoryConfig } from './SidebarRenderer';
 import { SystemError } from '@/common/errors/AppError';
 import eventBus from '@common/EventBus';
+import { setSafeHtml } from '../utils/security';
 /**
  * 布局类型
  */
@@ -110,7 +111,7 @@ export class OverviewRenderer {
   async render(): Promise<void> {
     const html = this._generateHTML();
     // ✅ 安全: _generateHTML返回的HTML使用内部配置数据(moduleConfig, routes来自MENU_CONFIG)
-    this.container.innerHTML = html;
+    setSafeHtml(this.container, html);
     this.container.classList.add('fade-in');
     
     // 初始化事件监听

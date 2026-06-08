@@ -56,6 +56,10 @@ function estimateBytes(value: unknown): number {
   }
 }
 
+function getBrowserLocalStorage(): Storage {
+  return globalThis.localStorage;
+}
+
 class LocalDataStoreClass {
   private dbPromise: Promise<IDBDatabase | null> | null = null;
   private memoryStore = new Map<string, LocalDataRecord>();
@@ -133,9 +137,10 @@ class LocalDataStoreClass {
     }
 
     const localKeys = this.getLocalStorageKeys();
+    const storage = getBrowserLocalStorage();
     for (const key of localKeys) {
       if (isCacheKey(key)) {
-        localStorage.removeItem(key);
+        storage.removeItem(key);
         removed += 1;
       }
     }
@@ -145,9 +150,10 @@ class LocalDataStoreClass {
 
   async clearAll(): Promise<void> {
     const db = await this.getDb();
+    const storage = getBrowserLocalStorage();
     if (!db) {
       this.memoryStore.clear();
-      localStorage.clear();
+      storage.clear();
       return;
     }
 
@@ -162,13 +168,14 @@ class LocalDataStoreClass {
       };
     });
 
-    localStorage.clear();
+    storage.clear();
   }
 
   async exportAll(): Promise<LocalDataExport> {
     const localStorageData: Record<string, string> = {};
+    const storage = getBrowserLocalStorage();
     for (const key of this.getLocalStorageKeys()) {
-      const value = localStorage.getItem(key);
+      const value = storage.getItem(key);
       if (value !== null) {
         localStorageData[key] = value;
       }
@@ -191,8 +198,9 @@ class LocalDataStoreClass {
       throw new Error('不支持的本地数据备份格式');
     }
 
+    const storage = getBrowserLocalStorage();
     for (const [key, value] of Object.entries(data.localStorage || {})) {
-      localStorage.setItem(key, value);
+      storage.setItem(key, value);
     }
 
     const records = Array.isArray(data.indexedDB) ? data.indexedDB : [];
@@ -206,8 +214,9 @@ class LocalDataStoreClass {
   async getUsage(): Promise<LocalDataUsage> {
     let localStorageUsed = 0;
     let localStorageKeys = 0;
+    const storage = getBrowserLocalStorage();
     for (const key of this.getLocalStorageKeys()) {
-      const value = localStorage.getItem(key) || '';
+      const value = storage.getItem(key) || '';
       localStorageUsed += (key.length + value.length) * 2;
       localStorageKeys += 1;
     }
@@ -238,7 +247,8 @@ class LocalDataStoreClass {
       return existing;
     }
 
-    const raw = localStorage.getItem(localStorageKey);
+    const storage = getBrowserLocalStorage();
+    const raw = storage.getItem(localStorageKey);
     if (raw === null) {
       return null;
     }
@@ -247,7 +257,7 @@ class LocalDataStoreClass {
       const parsed = JSON.parse(raw) as T;
       const saved = await this.set(indexedDBKey, parsed, storageClass);
       if (saved) {
-        localStorage.setItem(`${localStorageKey}_migrated_to_indexeddb`, new Date().toISOString());
+        storage.setItem(`${localStorageKey}_migrated_to_indexeddb`, new Date().toISOString());
       }
       return parsed;
     } catch (error) {
@@ -322,9 +332,10 @@ class LocalDataStoreClass {
   }
 
   private getLocalStorageKeys(): string[] {
+    const storage = getBrowserLocalStorage();
     const keys: string[] = [];
-    for (let index = 0; index < localStorage.length; index += 1) {
-      const key = localStorage.key(index);
+    for (let index = 0; index < storage.length; index += 1) {
+      const key = storage.key(index);
       if (key) {
         keys.push(key);
       }

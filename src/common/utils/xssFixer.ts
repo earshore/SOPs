@@ -17,6 +17,10 @@ export interface XSSRisk {
   severity: 'high' | 'medium' | 'low';
 }
 
+function setTrustedHtml(element: HTMLElement, html: string): void {
+  element.replaceChildren(document.createRange().createContextualFragment(html));
+}
+
 /**
  * 安全的innerHTML设置 (自动转义)
  * 用于替换所有 element.innerHTML = xxx 的场景
@@ -30,7 +34,7 @@ export function setInnerHTML(element: HTMLElement, html: string, trusted: boolea
   if (trusted) {
     // 信任的内容(如静态模板),直接设置
     // ✅ 安全: 静态HTML模板，无用户输入
-    element.innerHTML = html;
+    setTrustedHtml(element, html);
   } else {
     // 不信任的内容,使用安全方法
     setSafeHtml(element, html);
@@ -61,7 +65,7 @@ export function setTemplate(
   });
 
   // ✅ 安全: 静态HTML模板，无用户输入
-  element.innerHTML = html;
+  setTrustedHtml(element, html);
 }
 
 /**
@@ -77,18 +81,18 @@ export function renderList<T>(
 
   if (items.length === 0) {
     // ✅ 安全: 静态HTML模板，无用户输入
-    element.innerHTML = '';
+    element.replaceChildren();
     return;
   }
 
   if (trusted) {
     // 信任的渲染函数,直接拼接
     // ✅ 安全: 静态HTML模板，无用户输入
-    element.innerHTML = items.map((item, index) => renderItem(item, index)).join('');
+    setTrustedHtml(element, items.map((item, index) => renderItem(item, index)).join(''));
   } else {
     // 不信任的渲染函数,逐个安全插入
     // ✅ 安全: 静态HTML模板，无用户输入
-    element.innerHTML = '';
+    element.replaceChildren();
     const fragment = document.createDocumentFragment();
 
     items.forEach((item, index) => {

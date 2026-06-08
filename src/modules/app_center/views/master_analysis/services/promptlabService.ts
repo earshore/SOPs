@@ -3,6 +3,12 @@
 import type { PromptInputs } from "../../../../../types/state";
 import type { AnalysisReport } from "../../../../../types/modules-business";
 
+type SubItemSelection =
+  | boolean
+  | { enabled: boolean; items?: Record<string, boolean> };
+type SubItemSelections = Record<string, SubItemSelection>;
+type SectionMarkdownConverter = (data: Record<string, unknown>) => string;
+
 // ============================================================
 // Markdown 转换工具函数
 // ============================================================
@@ -27,6 +33,71 @@ const arrToListLines = (arr: unknown[] | undefined, max = 8): string => {
     .join("\n");
 };
 
+const hasArrayItems = (value: unknown): value is unknown[] =>
+  Array.isArray(value) && value.length > 0;
+
+const asRecord = (value: unknown): Record<string, unknown> | null =>
+  value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
+
+const pushInlineArrayField = (
+  lines: string[],
+  data: Record<string, unknown>,
+  key: string,
+  label: string,
+  max?: number,
+): void => {
+  const value = data[key];
+  if (!hasArrayItems(value)) return;
+  lines.push(`- **${label}:** ${arrToInline(value, max)}`);
+};
+
+const pushMarkdownListField = (
+  lines: string[],
+  value: unknown,
+  label: string,
+  max?: number,
+): void => {
+  if (!hasArrayItems(value)) return;
+  const list = arrToListLines(value, max);
+  if (list) lines.push(`- **${label}:**\n${list}`);
+};
+
+const pushRecordArrayField = (
+  lines: string[],
+  value: unknown,
+  label: string,
+  formatter: (item: Record<string, unknown>) => string,
+  max: number,
+): void => {
+  if (!hasArrayItems(value)) return;
+
+  const text = (value as Array<Record<string, unknown>>)
+    .slice(0, max)
+    .map(formatter)
+    .filter(Boolean)
+    .join(", ");
+
+  if (text) lines.push(`- **${label}:** ${text}`);
+};
+
+const pushRecordListField = (
+  lines: string[],
+  value: unknown,
+  label: string,
+  max: number,
+  formatter: (item: Record<string, unknown>) => string,
+): void => {
+  if (!hasArrayItems(value)) return;
+
+  const itemLines = (value as Array<Record<string, unknown>>)
+    .slice(0, max)
+    .map(formatter);
+  if (itemLines.length)
+    lines.push(`- **${label}:**\n${itemLines.join("\n")}`);
+};
+
 // ----------------------------------------
 // 各分析模块 → Markdown 转换器
 // ----------------------------------------
@@ -37,52 +108,41 @@ const arrToListLines = (arr: unknown[] | undefined, max = 8): string => {
 const titleKeywordsToMarkdown = (data: Record<string, unknown>): string => {
   const lines: string[] = ["#### 🔑 Title Core Keywords"];
 
-  if (Array.isArray(data.primary_keywords) && data.primary_keywords.length) {
-    const kw = (data.primary_keywords as Array<Record<string, unknown>>)
-      .slice(0, 8)
-      .map((k) => `${k.keyword} [${k.weight ?? ""}]`)
-      .filter(Boolean)
-      .join(", ");
-    if (kw) lines.push(`- **Primary Keywords:** ${kw}`);
-  }
+  pushRecordArrayField(
+    lines,
+    data.primary_keywords,
+    "Primary Keywords",
+    (item) => `${item.keyword} [${item.weight ?? ""}]`,
+    8,
+  );
+  pushRecordArrayField(
+    lines,
+    data.secondary_keywords,
+    "Secondary Keywords",
+    (item) => `${item.keyword} (${item.type ?? ""})`,
+    8,
+  );
+  pushRecordArrayField(
+    lines,
+    data.scene_keywords,
+    "Scene Keywords",
+    (item) => String(item.keyword ?? ""),
+    5,
+  );
+  pushRecordArrayField(
+    lines,
+    data.audience_keywords,
+    "Audience Keywords",
+    (item) => String(item.keyword ?? ""),
+    5,
+  );
 
-  if (
-    Array.isArray(data.secondary_keywords) &&
-    data.secondary_keywords.length
-  ) {
-    const kw = (data.secondary_keywords as Array<Record<string, unknown>>)
-      .slice(0, 8)
-      .map((k) => `${k.keyword} (${k.type ?? ""})`)
-      .filter(Boolean)
-      .join(", ");
-    if (kw) lines.push(`- **Secondary Keywords:** ${kw}`);
-  }
-
-  if (Array.isArray(data.scene_keywords) && data.scene_keywords.length) {
-    const kw = (data.scene_keywords as Array<Record<string, unknown>>)
-      .slice(0, 5)
-      .map((k) => String(k.keyword ?? ""))
-      .filter(Boolean)
-      .join(", ");
-    if (kw) lines.push(`- **Scene Keywords:** ${kw}`);
-  }
-
-  if (Array.isArray(data.audience_keywords) && data.audience_keywords.length) {
-    const kw = (data.audience_keywords as Array<Record<string, unknown>>)
-      .slice(0, 5)
-      .map((k) => String(k.keyword ?? ""))
-      .filter(Boolean)
-      .join(", ");
-    if (kw) lines.push(`- **Audience Keywords:** ${kw}`);
-  }
-
-  if (
-    Array.isArray(data.optimization_suggestions) &&
-    data.optimization_suggestions.length
-  ) {
-    const list = arrToListLines(data.optimization_suggestions as unknown[], 5);
-    if (list) lines.push(`- **Optimization Suggestions:**\n${list}`);
-  }
+  pushMarkdownListField(
+    lines,
+    data.optimization_suggestions,
+    "Optimization Suggestions",
+    5,
+  );
 
   return lines.join("\n");
 };
@@ -93,56 +153,61 @@ const titleKeywordsToMarkdown = (data: Record<string, unknown>): string => {
 const sellingPointsToMarkdown = (data: Record<string, unknown>): string => {
   const lines: string[] = ["#### 💎 Selling Points Structure"];
 
-  if (data.overall_strategy && typeof data.overall_strategy === "object") {
-    const s = data.overall_strategy as Record<string, unknown>;
-    if (s.primary_differentiation)
-      lines.push(`- **Primary Differentiation:** ${s.primary_differentiation}`);
-    if (s.target_positioning)
-      lines.push(`- **Target Positioning:** ${s.target_positioning}`);
-    if (Array.isArray(s.emotional_hooks) && s.emotional_hooks.length)
-      lines.push(
-        `- **Emotional Hooks:** ${arrToInline(s.emotional_hooks as unknown[])}`,
-      );
-    if (Array.isArray(s.missing_elements) && s.missing_elements.length)
-      lines.push(
-        `- **Missing Elements:** ${arrToInline(s.missing_elements as unknown[])}`,
-      );
-  }
-
-  if (
-    data.function_scene_matrix &&
-    typeof data.function_scene_matrix === "object"
-  ) {
-    const m = data.function_scene_matrix as Record<string, unknown>;
-    if (Array.isArray(m.pain_points) && m.pain_points.length)
-      lines.push(
-        `- **Pain Points Addressed:** ${arrToInline(m.pain_points as unknown[])}`,
-      );
-  }
-
-  if (Array.isArray(data.bullet_analysis) && data.bullet_analysis.length) {
-    const bulletLines = (data.bullet_analysis as Array<Record<string, unknown>>)
-      .slice(0, 5)
-      .map((b) => {
-        const parts: string[] = [];
-        if (b.differentiation_angle)
-          parts.push(`Differentiation: ${b.differentiation_angle}`);
-        if (
-          Array.isArray(b.pain_points_addressed) &&
-          (b.pain_points_addressed as unknown[]).length
-        )
-          parts.push(
-            `Pain Points: ${arrToInline(b.pain_points_addressed as unknown[], 3)}`,
-          );
-        if (b.credibility_score)
-          parts.push(`Credibility: ${b.credibility_score}`);
-        return `  - Bullet ${b.bullet_index ?? ""}: ${parts.join(" | ")}`;
-      });
-    if (bulletLines.length)
-      lines.push(`- **Bullet Analysis:**\n${bulletLines.join("\n")}`);
-  }
+  pushSellingStrategyLines(lines, data.overall_strategy);
+  pushSellingSceneMatrixLines(lines, data.function_scene_matrix);
+  pushBulletAnalysisLines(lines, data.bullet_analysis);
 
   return lines.join("\n");
+};
+
+const pushSellingStrategyLines = (
+  lines: string[],
+  strategy: unknown,
+): void => {
+  const s = asRecord(strategy);
+  if (!s) return;
+
+  if (s.primary_differentiation)
+    lines.push(`- **Primary Differentiation:** ${s.primary_differentiation}`);
+  if (s.target_positioning)
+    lines.push(`- **Target Positioning:** ${s.target_positioning}`);
+  pushInlineArrayField(lines, s, "emotional_hooks", "Emotional Hooks");
+  pushInlineArrayField(lines, s, "missing_elements", "Missing Elements");
+};
+
+const pushSellingSceneMatrixLines = (
+  lines: string[],
+  matrix: unknown,
+): void => {
+  const m = asRecord(matrix);
+  if (!m) return;
+  pushInlineArrayField(lines, m, "pain_points", "Pain Points Addressed");
+};
+
+const pushBulletAnalysisLines = (
+  lines: string[],
+  bulletAnalysis: unknown,
+): void => {
+  if (!hasArrayItems(bulletAnalysis)) return;
+
+  const bulletLines = (bulletAnalysis as Array<Record<string, unknown>>)
+    .slice(0, 5)
+    .map(formatBulletAnalysisLine);
+  if (bulletLines.length)
+    lines.push(`- **Bullet Analysis:**\n${bulletLines.join("\n")}`);
+};
+
+const formatBulletAnalysisLine = (bullet: Record<string, unknown>): string => {
+  const parts: string[] = [];
+  if (bullet.differentiation_angle)
+    parts.push(`Differentiation: ${bullet.differentiation_angle}`);
+  if (hasArrayItems(bullet.pain_points_addressed))
+    parts.push(
+      `Pain Points: ${arrToInline(bullet.pain_points_addressed, 3)}`,
+    );
+  if (bullet.credibility_score)
+    parts.push(`Credibility: ${bullet.credibility_score}`);
+  return `  - Bullet ${bullet.bullet_index ?? ""}: ${parts.join(" | ")}`;
 };
 
 /**
@@ -151,49 +216,52 @@ const sellingPointsToMarkdown = (data: Record<string, unknown>): string => {
 const fatalFlawsToMarkdown = (data: Record<string, unknown>): string => {
   const lines: string[] = ["#### ⚠️ Fatal Flaws (Competitor Issues)"];
 
-  if (data.risk_assessment && typeof data.risk_assessment === "object") {
-    const r = data.risk_assessment as Record<string, unknown>;
-    const parts: string[] = [];
-    if (r.overall_risk_level)
-      parts.push(`Risk Level: **${r.overall_risk_level}**`);
-    if (r.primary_concern) parts.push(`Primary Concern: ${r.primary_concern}`);
-    if (parts.length) lines.push(`- ${parts.join(" | ")}`);
-  }
-
-  if (Array.isArray(data.critical_issues) && data.critical_issues.length) {
-    const issueLines = (data.critical_issues as Array<Record<string, unknown>>)
-      .slice(0, 5)
-      .map((i) => {
-        const parts: string[] = [];
-        if (i.issue) parts.push(String(i.issue));
-        if (i.severity) parts.push(`[${i.severity}]`);
-        if (Array.isArray(i.user_quotes) && (i.user_quotes as string[]).length)
-          parts.push(`"${(i.user_quotes as string[])[0]}"`);
-        return `  - ${parts.join(" ")}`;
-      });
-    if (issueLines.length)
-      lines.push(`- **Critical Issues:**\n${issueLines.join("\n")}`);
-  }
-
-  if (Array.isArray(data.return_triggers) && data.return_triggers.length)
-    lines.push(
-      `- **Return Triggers:** ${arrToInline(data.return_triggers as unknown[])}`,
-    );
-
-  if (Array.isArray(data.expectation_gaps) && data.expectation_gaps.length) {
-    const gapLines = (data.expectation_gaps as Array<Record<string, unknown>>)
-      .slice(0, 3)
-      .map((g) => `  - Expected: "${g.expected}" → Reality: "${g.reality}"`);
-    if (gapLines.length)
-      lines.push(`- **Expectation Gaps:**\n${gapLines.join("\n")}`);
-  }
-
-  if (Array.isArray(data.actionable_fixes) && data.actionable_fixes.length) {
-    const list = arrToListLines(data.actionable_fixes as unknown[], 4);
-    if (list) lines.push(`- **Actionable Fixes:**\n${list}`);
-  }
+  pushRiskAssessmentLine(lines, data.risk_assessment);
+  pushCriticalIssueLines(lines, data.critical_issues);
+  pushInlineArrayField(lines, data, "return_triggers", "Return Triggers");
+  pushExpectationGapLines(lines, data.expectation_gaps);
+  pushMarkdownListField(lines, data.actionable_fixes, "Actionable Fixes", 4);
 
   return lines.join("\n");
+};
+
+const pushRiskAssessmentLine = (lines: string[], risk: unknown): void => {
+  const r = asRecord(risk);
+  if (!r) return;
+
+  const parts: string[] = [];
+  if (r.overall_risk_level)
+    parts.push(`Risk Level: **${r.overall_risk_level}**`);
+  if (r.primary_concern) parts.push(`Primary Concern: ${r.primary_concern}`);
+  if (parts.length) lines.push(`- ${parts.join(" | ")}`);
+};
+
+const pushCriticalIssueLines = (lines: string[], issues: unknown): void => {
+  if (!hasArrayItems(issues)) return;
+
+  const issueLines = (issues as Array<Record<string, unknown>>)
+    .slice(0, 5)
+    .map(formatCriticalIssueLine);
+  if (issueLines.length)
+    lines.push(`- **Critical Issues:**\n${issueLines.join("\n")}`);
+};
+
+const formatCriticalIssueLine = (issue: Record<string, unknown>): string => {
+  const parts: string[] = [];
+  if (issue.issue) parts.push(String(issue.issue));
+  if (issue.severity) parts.push(`[${issue.severity}]`);
+  if (hasArrayItems(issue.user_quotes)) parts.push(`"${issue.user_quotes[0]}"`);
+  return `  - ${parts.join(" ")}`;
+};
+
+const pushExpectationGapLines = (lines: string[], gaps: unknown): void => {
+  if (!hasArrayItems(gaps)) return;
+
+  const gapLines = (gaps as Array<Record<string, unknown>>)
+    .slice(0, 3)
+    .map((gap) => `  - Expected: "${gap.expected}" → Reality: "${gap.reality}"`);
+  if (gapLines.length)
+    lines.push(`- **Expectation Gaps:**\n${gapLines.join("\n")}`);
 };
 
 /**
@@ -202,48 +270,30 @@ const fatalFlawsToMarkdown = (data: Record<string, unknown>): string => {
 const wowMomentsToMarkdown = (data: Record<string, unknown>): string => {
   const lines: string[] = ["#### ✨ Wow Moments (Customer Delight)"];
 
-  if (
-    Array.isArray(data.high_conversion_phrases) &&
-    data.high_conversion_phrases.length
-  )
-    lines.push(
-      `- **High Conversion Phrases:** ${arrToInline(data.high_conversion_phrases as unknown[])}`,
-    );
-
-  if (Array.isArray(data.copywriting_angles) && data.copywriting_angles.length)
-    lines.push(
-      `- **Copywriting Angles:** ${arrToInline(data.copywriting_angles as unknown[])}`,
-    );
-
-  if (
-    Array.isArray(data.unexpected_benefits) &&
-    data.unexpected_benefits.length
-  )
-    lines.push(
-      `- **Unexpected Benefits:** ${arrToInline(data.unexpected_benefits as unknown[])}`,
-    );
-
-  if (Array.isArray(data.emotional_triggers) && data.emotional_triggers.length)
-    lines.push(
-      `- **Emotional Triggers:** ${arrToInline(data.emotional_triggers as unknown[])}`,
-    );
-
-  if (Array.isArray(data.moments) && data.moments.length) {
-    const momentLines = (data.moments as Array<Record<string, unknown>>)
-      .slice(0, 4)
-      .map((m) => {
-        const tag = [m.emotion_type, m.aspect].filter(Boolean).join("/");
-        const quote = m.user_quote ? `"${m.user_quote}"` : "";
-        const potential = m.marketing_potential
-          ? `→ Potential: ${m.marketing_potential}`
-          : "";
-        return `  - ${tag ? `[${tag}] ` : ""}${quote}${potential ? " " + potential : ""}`;
-      });
-    if (momentLines.length)
-      lines.push(`- **Key Moments:**\n${momentLines.join("\n")}`);
-  }
+  pushInlineArrayField(lines, data, "high_conversion_phrases", "High Conversion Phrases");
+  pushInlineArrayField(lines, data, "copywriting_angles", "Copywriting Angles");
+  pushInlineArrayField(lines, data, "unexpected_benefits", "Unexpected Benefits");
+  pushInlineArrayField(lines, data, "emotional_triggers", "Emotional Triggers");
+  pushWowMomentLines(lines, data.moments);
 
   return lines.join("\n");
+};
+
+const pushWowMomentLines = (lines: string[], moments: unknown): void => {
+  if (!hasArrayItems(moments)) return;
+
+  const momentLines = (moments as Array<Record<string, unknown>>)
+    .slice(0, 4)
+    .map((moment) => {
+      const tag = [moment.emotion_type, moment.aspect].filter(Boolean).join("/");
+      const quote = moment.user_quote ? `"${moment.user_quote}"` : "";
+      const potential = moment.marketing_potential
+        ? `→ Potential: ${moment.marketing_potential}`
+        : "";
+      return `  - ${tag ? `[${tag}] ` : ""}${quote}${potential ? " " + potential : ""}`;
+    });
+  if (momentLines.length)
+    lines.push(`- **Key Moments:**\n${momentLines.join("\n")}`);
 };
 
 /**
@@ -252,41 +302,35 @@ const wowMomentsToMarkdown = (data: Record<string, unknown>): string => {
 const hesitationPointsToMarkdown = (data: Record<string, unknown>): string => {
   const lines: string[] = ["#### 🤔 Hesitation Points (Pre-Purchase Worries)"];
 
-  if (Array.isArray(data.common_doubts) && data.common_doubts.length)
-    lines.push(
-      `- **Common Doubts:** ${arrToInline(data.common_doubts as unknown[])}`,
-    );
-
-  if (Array.isArray(data.trust_builders) && data.trust_builders.length)
-    lines.push(
-      `- **Trust Builders:** ${arrToInline(data.trust_builders as unknown[])}`,
-    );
-
-  if (Array.isArray(data.hesitations) && data.hesitations.length) {
-    const hesLines = (data.hesitations as Array<Record<string, unknown>>)
-      .slice(0, 4)
-      .map(
-        (h) =>
-          `  - Worry: "${h.pre_purchase_worry}" → Resolution: "${h.post_purchase_resolution}"`,
-      );
-    if (hesLines.length)
-      lines.push(`- **Hesitation Patterns:**\n${hesLines.join("\n")}`);
-  }
-
-  if (
-    Array.isArray(data.qa_optimization_items) &&
-    data.qa_optimization_items.length
-  ) {
-    const qaLines = (
-      data.qa_optimization_items as Array<Record<string, unknown>>
-    )
-      .slice(0, 3)
-      .map((qa) => `  - Q: "${qa.question}" → A: "${qa.suggested_answer}"`);
-    if (qaLines.length)
-      lines.push(`- **Q&A Optimization:**\n${qaLines.join("\n")}`);
-  }
+  pushInlineArrayField(lines, data, "common_doubts", "Common Doubts");
+  pushInlineArrayField(lines, data, "trust_builders", "Trust Builders");
+  pushHesitationLines(lines, data.hesitations);
+  pushQaOptimizationLines(lines, data.qa_optimization_items);
 
   return lines.join("\n");
+};
+
+const pushHesitationLines = (lines: string[], hesitations: unknown): void => {
+  if (!hasArrayItems(hesitations)) return;
+
+  const hesLines = (hesitations as Array<Record<string, unknown>>)
+    .slice(0, 4)
+    .map(
+      (h) =>
+        `  - Worry: "${h.pre_purchase_worry}" → Resolution: "${h.post_purchase_resolution}"`,
+    );
+  if (hesLines.length)
+    lines.push(`- **Hesitation Patterns:**\n${hesLines.join("\n")}`);
+};
+
+const pushQaOptimizationLines = (lines: string[], qaItems: unknown): void => {
+  if (!hasArrayItems(qaItems)) return;
+
+  const qaLines = (qaItems as Array<Record<string, unknown>>)
+    .slice(0, 3)
+    .map((qa) => `  - Q: "${qa.question}" → A: "${qa.suggested_answer}"`);
+  if (qaLines.length)
+    lines.push(`- **Q&A Optimization:**\n${qaLines.join("\n")}`);
 };
 
 /**
@@ -295,70 +339,49 @@ const hesitationPointsToMarkdown = (data: Record<string, unknown>): string => {
 const buyerProfileToMarkdown = (data: Record<string, unknown>): string => {
   const lines: string[] = ["#### 👤 Buyer Profile"];
 
-  if (data.demographics && typeof data.demographics === "object") {
-    const d = data.demographics as Record<string, unknown>;
-    const parts: string[] = [];
-    if (d.likely_gender) parts.push(`Gender: ${d.likely_gender}`);
-    if (d.age_range_estimate) parts.push(`Age: ${d.age_range_estimate}`);
-    if (
-      Array.isArray(d.lifestyle_indicators) &&
-      (d.lifestyle_indicators as unknown[]).length
-    )
-      parts.push(
-        `Lifestyle: ${arrToInline(d.lifestyle_indicators as unknown[], 4)}`,
-      );
-    if (parts.length) lines.push(`- **Demographics:** ${parts.join(" | ")}`);
-  }
-
-  if (
-    data.geographic_insights &&
-    typeof data.geographic_insights === "object"
-  ) {
-    const g = data.geographic_insights as Record<string, unknown>;
-    if (
-      Array.isArray(g.primary_markets) &&
-      (g.primary_markets as unknown[]).length
-    )
-      lines.push(
-        `- **Primary Markets:** ${arrToInline(g.primary_markets as unknown[])}`,
-      );
-    if (
-      Array.isArray(g.cultural_considerations) &&
-      (g.cultural_considerations as unknown[]).length
-    )
-      lines.push(
-        `- **Cultural Considerations:** ${arrToInline(g.cultural_considerations as unknown[], 4)}`,
-      );
-  }
-
-  if (Array.isArray(data.buyer_types) && data.buyer_types.length) {
-    const typeLines = (data.buyer_types as Array<Record<string, unknown>>)
-      .slice(0, 3)
-      .map(
-        (t) =>
-          `  - ${t.type} (${t.percentage_estimate ?? ""}): ${t.evidence ?? ""}`,
-      );
-    if (typeLines.length)
-      lines.push(`- **Buyer Types:**\n${typeLines.join("\n")}`);
-  }
-
-  if (Array.isArray(data.usage_scenes) && data.usage_scenes.length) {
-    const sceneLines = (data.usage_scenes as Array<Record<string, unknown>>)
-      .slice(0, 3)
-      .map((s) => `  - [${s.frequency ?? ""}] ${s.scene}: ${s.context ?? ""}`);
-    if (sceneLines.length)
-      lines.push(`- **Usage Scenes:**\n${sceneLines.join("\n")}`);
-  }
-
-  if (
-    Array.isArray(data.purchase_motivations) &&
-    data.purchase_motivations.length
-  )
-    lines.push(
-      `- **Purchase Motivations:** ${arrToInline(data.purchase_motivations as unknown[])}`,
-    );
+  pushBuyerDemographicsLine(lines, data.demographics);
+  pushBuyerGeographyLines(lines, data.geographic_insights);
+  pushRecordListField(lines, data.buyer_types, "Buyer Types", 3, (type) =>
+    `  - ${type.type} (${type.percentage_estimate ?? ""}): ${type.evidence ?? ""}`,
+  );
+  pushRecordListField(lines, data.usage_scenes, "Usage Scenes", 3, (scene) =>
+    `  - [${scene.frequency ?? ""}] ${scene.scene}: ${scene.context ?? ""}`,
+  );
+  pushInlineArrayField(lines, data, "purchase_motivations", "Purchase Motivations");
 
   return lines.join("\n");
+};
+
+const pushBuyerDemographicsLine = (
+  lines: string[],
+  demographics: unknown,
+): void => {
+  const d = asRecord(demographics);
+  if (!d) return;
+
+  const parts: string[] = [];
+  if (d.likely_gender) parts.push(`Gender: ${d.likely_gender}`);
+  if (d.age_range_estimate) parts.push(`Age: ${d.age_range_estimate}`);
+  if (hasArrayItems(d.lifestyle_indicators))
+    parts.push(`Lifestyle: ${arrToInline(d.lifestyle_indicators, 4)}`);
+  if (parts.length) lines.push(`- **Demographics:** ${parts.join(" | ")}`);
+};
+
+const pushBuyerGeographyLines = (
+  lines: string[],
+  geography: unknown,
+): void => {
+  const g = asRecord(geography);
+  if (!g) return;
+
+  pushInlineArrayField(lines, g, "primary_markets", "Primary Markets");
+  pushInlineArrayField(
+    lines,
+    g,
+    "cultural_considerations",
+    "Cultural Considerations",
+    4,
+  );
 };
 
 /**
@@ -367,63 +390,35 @@ const buyerProfileToMarkdown = (data: Record<string, unknown>): string => {
 const vocabGapToMarkdown = (data: Record<string, unknown>): string => {
   const lines: string[] = ["#### 📝 Vocabulary Gap Analysis"];
 
-  if (
-    Array.isArray(data.uncovered_buyer_terms) &&
-    data.uncovered_buyer_terms.length
-  ) {
-    const termLines = (
-      data.uncovered_buyer_terms as Array<Record<string, unknown>>
-    )
-      .slice(0, 5)
-      .map(
-        (t) =>
-          `  - "${t.term}" [${t.frequency ?? ""}] → ${t.recommendation ?? ""}`,
-      );
-    if (termLines.length)
-      lines.push(
-        `- **Uncovered Buyer Terms (Add to Listing):**\n${termLines.join("\n")}`,
-      );
-  }
-
-  if (Array.isArray(data.term_translations) && data.term_translations.length) {
-    const transLines = (
-      data.term_translations as Array<Record<string, unknown>>
-    )
-      .slice(0, 4)
-      .map((t) => `  - "${t.seller_says}" → "${t.buyer_says}"`);
-    if (transLines.length)
-      lines.push(`- **Seller → Buyer Language:**\n${transLines.join("\n")}`);
-  }
-
-  if (
-    data.listing_optimization &&
-    typeof data.listing_optimization === "object"
-  ) {
-    const opt = data.listing_optimization as Record<string, unknown>;
-    if (
-      Array.isArray(opt.title_additions) &&
-      (opt.title_additions as unknown[]).length
-    )
-      lines.push(
-        `- **Title Additions:** ${arrToInline(opt.title_additions as unknown[])}`,
-      );
-    if (
-      Array.isArray(opt.bullet_additions) &&
-      (opt.bullet_additions as unknown[]).length
-    )
-      lines.push(
-        `- **Bullet Additions:** ${arrToInline(opt.bullet_additions as unknown[])}`,
-      );
-    if (
-      Array.isArray(opt.keyword_opportunities) &&
-      (opt.keyword_opportunities as unknown[]).length
-    )
-      lines.push(
-        `- **Keyword Opportunities:** ${arrToInline(opt.keyword_opportunities as unknown[])}`,
-      );
-  }
+  pushRecordListField(
+    lines,
+    data.uncovered_buyer_terms,
+    "Uncovered Buyer Terms (Add to Listing)",
+    5,
+    (term) => `  - "${term.term}" [${term.frequency ?? ""}] → ${term.recommendation ?? ""}`,
+  );
+  pushRecordListField(
+    lines,
+    data.term_translations,
+    "Seller → Buyer Language",
+    4,
+    (term) => `  - "${term.seller_says}" → "${term.buyer_says}"`,
+  );
+  pushListingOptimizationLines(lines, data.listing_optimization);
 
   return lines.join("\n");
+};
+
+const pushListingOptimizationLines = (
+  lines: string[],
+  listingOptimization: unknown,
+): void => {
+  const opt = asRecord(listingOptimization);
+  if (!opt) return;
+
+  pushInlineArrayField(lines, opt, "title_additions", "Title Additions");
+  pushInlineArrayField(lines, opt, "bullet_additions", "Bullet Additions");
+  pushInlineArrayField(lines, opt, "keyword_opportunities", "Keyword Opportunities");
 };
 
 /**
@@ -432,47 +427,46 @@ const vocabGapToMarkdown = (data: Record<string, unknown>): string => {
 const promiseRealityToMarkdown = (data: Record<string, unknown>): string => {
   const lines: string[] = ["#### 🎯 Promise vs Reality"];
 
-  if (
-    data.overall_credibility &&
-    typeof data.overall_credibility === "object"
-  ) {
-    const c = data.overall_credibility as Record<string, unknown>;
-    if (c.score || c.assessment)
-      lines.push(
-        `- **Overall Credibility:** ${c.score ?? "?"}/10 — ${c.assessment ?? ""}`,
-      );
-  }
-
-  if (Array.isArray(data.gaps) && data.gaps.length) {
-    const gapLines = (data.gaps as Array<Record<string, unknown>>)
-      .slice(0, 4)
-      .map((g) => {
-        const sev = g.contradiction_severity
-          ? `[${g.contradiction_severity}] `
-          : "";
-        return `  - ${sev}Claim: "${g.listing_claim}" vs Reality: "${g.review_reality}"`;
-      });
-    if (gapLines.length)
-      lines.push(`- **Critical Gaps:**\n${gapLines.join("\n")}`);
-  }
-
-  if (Array.isArray(data.verified_claims) && data.verified_claims.length)
-    lines.push(
-      `- **Verified Claims:** ${arrToInline(data.verified_claims as unknown[], 5)}`,
-    );
-
-  if (
-    Array.isArray(data.listing_revision_suggestions) &&
-    data.listing_revision_suggestions.length
-  ) {
-    const list = arrToListLines(
-      data.listing_revision_suggestions as unknown[],
-      4,
-    );
-    if (list) lines.push(`- **Revision Suggestions:**\n${list}`);
-  }
+  pushOverallCredibilityLine(lines, data.overall_credibility);
+  pushRecordListField(lines, data.gaps, "Critical Gaps", 4, formatRealityGapLine);
+  pushInlineArrayField(lines, data, "verified_claims", "Verified Claims", 5);
+  pushMarkdownListField(
+    lines,
+    data.listing_revision_suggestions,
+    "Revision Suggestions",
+    4,
+  );
 
   return lines.join("\n");
+};
+
+const pushOverallCredibilityLine = (
+  lines: string[],
+  credibility: unknown,
+): void => {
+  const c = asRecord(credibility);
+  if (!c || (!c.score && !c.assessment)) return;
+  lines.push(
+    `- **Overall Credibility:** ${c.score ?? "?"}/10 — ${c.assessment ?? ""}`,
+  );
+};
+
+const formatRealityGapLine = (gap: Record<string, unknown>): string => {
+  const severity = gap.contradiction_severity
+    ? `[${gap.contradiction_severity}] `
+    : "";
+  return `  - ${severity}Claim: "${gap.listing_claim}" vs Reality: "${gap.review_reality}"`;
+};
+
+const SECTION_MARKDOWN_CONVERTERS: Record<string, SectionMarkdownConverter> = {
+  "title-keywords": titleKeywordsToMarkdown,
+  "selling-points": sellingPointsToMarkdown,
+  "fatal-flaws": fatalFlawsToMarkdown,
+  "wow-moments": wowMomentsToMarkdown,
+  "hesitation-points": hesitationPointsToMarkdown,
+  "buyer-profile": buyerProfileToMarkdown,
+  "vocab-gap": vocabGapToMarkdown,
+  "promise-reality": promiseRealityToMarkdown,
 };
 
 /**
@@ -482,41 +476,40 @@ const promiseRealityToMarkdown = (data: Record<string, unknown>): string => {
 const convertSectionToMarkdown = (targetId: string, data: unknown): string => {
   if (!data || typeof data !== "object") return "";
   const obj = data as Record<string, unknown>;
+  const converter = SECTION_MARKDOWN_CONVERTERS[targetId];
 
-  switch (targetId) {
-    case "title-keywords":
-      return titleKeywordsToMarkdown(obj);
-    case "selling-points":
-      return sellingPointsToMarkdown(obj);
-    case "fatal-flaws":
-      return fatalFlawsToMarkdown(obj);
-    case "wow-moments":
-      return wowMomentsToMarkdown(obj);
-    case "hesitation-points":
-      return hesitationPointsToMarkdown(obj);
-    case "buyer-profile":
-      return buyerProfileToMarkdown(obj);
-    case "vocab-gap":
-      return vocabGapToMarkdown(obj);
-    case "promise-reality":
-      return promiseRealityToMarkdown(obj);
-    default: {
-      // 通用降级：将对象顶层值以可读文本平铺，不输出原始 JSON
-      const lines: string[] = [`#### ${targetId}`];
-      for (const [k, v] of Object.entries(obj)) {
-        if (v == null) continue;
-        if (Array.isArray(v)) {
-          lines.push(`- **${k}:** ${arrToInline(v as unknown[])}`);
-        } else if (typeof v === "object") {
-          lines.push(`- **${k}:** ${JSON.stringify(v)}`);
-        } else {
-          lines.push(`- **${k}:** ${String(v)}`);
-        }
-      }
-      return lines.join("\n");
-    }
+  if (converter) {
+    return converter(obj);
   }
+
+  return genericSectionToMarkdown(targetId, obj);
 };
+
+function genericSectionToMarkdown(
+  targetId: string,
+  data: Record<string, unknown>,
+): string {
+  const lines: string[] = [`#### ${targetId}`];
+
+  for (const [key, value] of Object.entries(data)) {
+    if (value == null) continue;
+    lines.push(`- **${key}:** ${formatGenericSectionValue(value)}`);
+  }
+
+  return lines.join("\n");
+}
+
+function formatGenericSectionValue(value: unknown): string {
+  if (Array.isArray(value)) {
+    return arrToInline(value);
+  }
+
+  if (typeof value === "object") {
+    return JSON.stringify(value);
+  }
+
+  return String(value);
+}
 
 // ============================================================
 // 内部 Helper 函数
@@ -606,7 +599,7 @@ const buildContextSection = (
  */
 function filterSubItems(
   data: unknown,
-  subItemSelections: Record<string, boolean | { enabled: boolean; items?: Record<string, boolean> }> | undefined
+  subItemSelections: SubItemSelections | undefined
 ): unknown {
   if (!data || typeof data !== 'object') return data;
   if (!subItemSelections) return data; // 无过滤配置，返回全部
@@ -617,67 +610,77 @@ function filterSubItems(
   for (const [key, value] of Object.entries(dataObj)) {
     const selection = subItemSelections[key];
 
-    // 简单布尔值：直接判断是否选中
-    if (typeof selection === 'boolean') {
-      if (selection !== false) {
-        filtered[key] = value;
-      }
-      continue;
-    }
-
-    // 对象结构：需要检查 enabled 和 items
-    if (typeof selection === 'object') {
-      if (!selection.enabled) continue; // 子项未启用，跳过
-
-      // 如果是数组且有具体项选择配置
-      if (selection.items) {
-        const items = selection.items;
-        const hasExplicitSelections = Object.keys(items).length > 0;
-
-        if (hasExplicitSelections) {
-          // 过滤数组中的具体项
-          if (Array.isArray(value)) {
-            const filteredArray = value.filter((_, index) => {
-              const indexStr = index.toString();
-              // 如果 items 中有该索引，使用其值；否则默认选中
-              return items[indexStr] !== false;
-            });
-            if (filteredArray.length > 0) {
-              filtered[key] = filteredArray;
-            }
-          } else if (value && typeof value === 'object') {
-            const filteredObject: Record<string, unknown> = {};
-            Object.entries(value as Record<string, unknown>).forEach(
-              ([objectKey, objectValue], index) => {
-                if (items[index.toString()] !== false) {
-                  filteredObject[objectKey] = objectValue;
-                }
-              },
-            );
-            if (Object.keys(filteredObject).length > 0) {
-              filtered[key] = filteredObject;
-            }
-          } else if (items['0'] !== false) {
-            filtered[key] = value;
-          }
-        } else {
-          // 空对象表示全选
-          filtered[key] = value;
-        }
-      } else {
-        // 非数组或无具体项配置，直接包含
-        filtered[key] = value;
-      }
-      continue;
-    }
-
-    // 未在配置中，默认包含
-    if (selection === undefined) {
-      filtered[key] = value;
+    const filteredValue = filterSubItemValue(value, selection);
+    if (filteredValue !== undefined) {
+      filtered[key] = filteredValue;
     }
   }
 
   return filtered;
+}
+
+function filterSubItemValue(
+  value: unknown,
+  selection: SubItemSelection | undefined,
+): unknown {
+  if (typeof selection === 'boolean') {
+    return selection === false ? undefined : value;
+  }
+
+  if (selection === undefined) {
+    return value;
+  }
+
+  if (selection.enabled === false) {
+    return undefined;
+  }
+
+  if (!selection.items) {
+    return value;
+  }
+
+  return filterValueByItemSelections(value, selection.items);
+}
+
+function filterValueByItemSelections(
+  value: unknown,
+  items: Record<string, boolean>,
+): unknown {
+  if (Object.keys(items).length === 0) {
+    return value;
+  }
+
+  if (Array.isArray(value)) {
+    const filteredArray = value.filter(
+      (_, index) => items[index.toString()] !== false,
+    );
+    return filteredArray.length > 0 ? filteredArray : undefined;
+  }
+
+  if (value && typeof value === 'object') {
+    const filteredObject = filterObjectByItemSelections(
+      value as Record<string, unknown>,
+      items,
+    );
+    return Object.keys(filteredObject).length > 0 ? filteredObject : undefined;
+  }
+
+  return items['0'] !== false ? value : undefined;
+}
+
+function filterObjectByItemSelections(
+  value: Record<string, unknown>,
+  items: Record<string, boolean>,
+): Record<string, unknown> {
+  const filteredObject: Record<string, unknown> = {};
+
+  Object.entries(value).forEach(([objectKey, objectValue], index) => {
+    if (items[index.toString()] !== false) {
+      filteredObject[objectKey] = objectValue;
+    }
+  });
+
+  return filteredObject;
 }
 const DUPLICATE_TEXT_MIN_LENGTH = 24;
 

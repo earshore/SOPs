@@ -4,6 +4,7 @@
  */
 
 import BaseModule from '../../../../../common/BaseModule';
+import { setSafeHtml } from '../../../../../common/utils/security';
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
 
 class EmailTemplatesModule extends BaseModule {
@@ -33,7 +34,7 @@ class EmailTemplatesModule extends BaseModule {
     async mount(container: HTMLElement): Promise<void> {
         const html = await loadTemplate('src/modules/sops/views/service/email_templates/template.html');
         // ✅ 安全: html来自本地静态template.html，无用户输入
-        container.innerHTML = html;
+        setSafeHtml(container, html);
         container.classList.add('fade-in');
         this.bindTemplateToggles(container);
         console.log('✅ 邮件回复模板 SOP 模块已挂载');

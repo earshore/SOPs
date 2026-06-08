@@ -6,7 +6,7 @@
  * 🎯 增强: 支持DI容器注入和服务获取
  */
 
-import { escapeHtml } from '@/common/utils/security';
+import { escapeHtml, setSafeHtml } from '@/common/utils/security';
 import { container as globalContainer } from './di/Container';
 import type { DIContainer } from './di/Container';
 import type { ServiceName } from './di/ServiceRegistry';
@@ -356,7 +356,7 @@ export default class BaseModule {
         console.error(`[${this.moduleId}] Error:`, error);
         if (this.container) {
             // ✅ 安全: moduleId和error.message已通过escapeHtml转义
-            this.container.innerHTML = `
+            setSafeHtml(this.container, `
                 <div class="flex flex-col items-center justify-center p-12 text-center h-full fade-in">
                     <div class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mb-4">
                         <i class="fas fa-exclamation-triangle text-2xl text-red-500"></i>
@@ -367,7 +367,7 @@ export default class BaseModule {
                         <i class="fas fa-redo mr-2"></i>重试
                     </button>
                 </div>
-            `;
+            `);
 
             // 绑定重试逻辑
             const btn = this.container.querySelector(`#retry-btn-${this.moduleId}`) as HTMLButtonElement;
@@ -377,7 +377,7 @@ export default class BaseModule {
                     if (!container) return;
 
                     // ✅ 安全: 静态HTML模板，无用户输入
-                    container.innerHTML = '<div class="p-10 text-center"><i class="fas fa-spinner fa-spin text-slate-400"></i></div>';
+                    setSafeHtml(container, '<div class="p-10 text-center"><i class="fas fa-spinner fa-spin text-slate-400"></i></div>');
                     // 重新挂载
                     this.mount(container).catch(e => {
                         console.error("Retry failed:", e);

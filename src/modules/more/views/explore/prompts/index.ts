@@ -4,6 +4,7 @@
  */
 
 import BaseModule from '../../../../../common/BaseModule';
+import { setSafeHtml } from '../../../../../common/utils/security';
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import {
     PROMPT_CATEGORIES,
@@ -494,7 +495,7 @@ class PromptsModule extends BaseModule {
         removePromptModal();
 
         // ✅ 安全: html来自本地静态template.html，无用户输入
-        container.innerHTML = html;
+        setSafeHtml(container, html);
         container.classList.add('fade-in');
 
         mountPromptModal(container);

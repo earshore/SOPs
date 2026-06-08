@@ -8,6 +8,7 @@ import type { ServiceRegistry } from '../ServiceRegistry';
 import { SERVICE_NAMES } from '../ServiceRegistry';
 import type { IStorageService, IConfigService, ILoggerService } from '@/types/services';
 
+import { ConfigCenter } from '@/common/config/ConfigCenter';
 import { createStorageService } from '@/services/storageService';
 import eventBus from '@/common/EventBus';
 import { globalErrorHandler } from '@/common/errors/GlobalErrorHandler';
@@ -27,10 +28,7 @@ export function registerCoreServices(registry: ServiceRegistry): void {
   // ConfigCenter - 配置中心
   registry.register({
     name: SERVICE_NAMES.CONFIG,
-    factory: async () => {
-      const { ConfigCenter } = await import('@/common/config/ConfigCenter');
-      return ConfigCenter.getInstance();
-    },
+    factory: async () => ConfigCenter.getInstance(),
     lifetime: 'singleton',
     dependencies: []
   });

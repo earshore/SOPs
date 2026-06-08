@@ -7,6 +7,7 @@
 
 import { animationManager } from '../services/animation-manager';
 import { ANIMATION_CLASSES } from '../config/animation-config';
+import { setSafeHtml } from '../common/utils/security';
 
 /**
  * 初始化表单输入动画
@@ -266,7 +267,7 @@ function showSuccessIcon(
     iconElement = document.createElement('span');
     iconElement.className = ANIMATION_CLASSES.formInputSuccessIcon;
     // ✅ 安全: createCheckmarkSVG()返回静态SVG模板
-    iconElement.innerHTML = createCheckmarkSVG();
+    setSafeHtml(iconElement, createCheckmarkSVG());
     parent.appendChild(iconElement);
   }
 

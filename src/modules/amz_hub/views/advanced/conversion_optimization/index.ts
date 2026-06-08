@@ -3,6 +3,7 @@
  */
 
 import BaseModule from "../../../../../common/BaseModule";
+import { setSafeHtml } from "../../../../../common/utils/security";
 import templateHTML from "./template.html?raw";
 
 // Module class
@@ -12,9 +13,12 @@ class ConversionOptimizationModule extends BaseModule {
   }
 
   async render(): Promise<void> {
+    const container = this.container;
+    if (!container) return;
+
     // ✅ 安全: 静态HTML模板，无用户输入
-    this.container!.innerHTML = templateHTML;
-    this.container!.classList.add("fade-in");
+    setSafeHtml(container, templateHTML);
+    container.classList.add("fade-in");
   }
 }
 

@@ -6,6 +6,7 @@ import BaseModule from "../../../../../common/BaseModule";
 import { A10_CHART_DATA } from "../../../constants/amz_hub_constants";
 import templateHTML from "./template.html?raw";
 import { loadChartJs, type ChartJS } from "../../../../../common/utils/lazyLibs";
+import { setSafeHtml } from "../../../../../common/utils/security";
 
 // Chart.js 实例类型定义
 interface ChartInstance {
@@ -24,9 +25,12 @@ class EcosystemModule extends BaseModule {
   }
 
   protected async render(): Promise<void> {
+    const container = this.container;
+    if (!container) return;
+
     // ✅ 安全: 静态HTML模板，无用户输入
-    this.container!.innerHTML = templateHTML;
-    this.container!.classList.add("fade-in");
+    setSafeHtml(container, templateHTML);
+    container.classList.add("fade-in");
   }
 
   async init(): Promise<void> {
