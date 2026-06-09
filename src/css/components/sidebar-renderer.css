@@ -1,0 +1,45 @@
+/**
+ * Sidebar Renderer
+ * 通用模块侧边栏主题。颜色由 SidebarRenderer 注入的 CSS 变量控制。
+ */
+
+.sidebar-shell .sidebar-module-icon {
+  background: linear-gradient(135deg, var(--sidebar-primary), var(--sidebar-accent)) !important;
+  box-shadow: 0 10px 20px -14px var(--sidebar-shadow) !important;
+}
+
+.sidebar-shell .sidebar-btn--active {
+  background:
+    linear-gradient(90deg, var(--sidebar-active-bg-start), var(--sidebar-active-bg-end)) !important;
+  border-left-color: var(--sidebar-accent) !important;
+}
+
+.sidebar-shell .sidebar-icon-container--active {
+  background: linear-gradient(135deg, var(--sidebar-icon-soft), var(--sidebar-icon-soft-end)) !important;
+}
+
+.sidebar-shell .sidebar-icon--active,
+.sidebar-shell .sidebar-search:focus-within .sidebar-search-icon {
+  color: var(--sidebar-accent) !important;
+}
+
+.sidebar-shell .sidebar-label--active {
+  color: var(--sidebar-text) !important;
+}
+
+.sidebar-shell .sidebar-active-dot--active {
+  background: var(--sidebar-accent) !important;
+}
+
+.sidebar-shell .sidebar-search:focus-within .sidebar-search-prefix {
+  background: var(--sidebar-icon-soft-end) !important;
+}
+
+.sidebar-shell .sidebar-search-input:focus {
+  border-color: var(--sidebar-border) !important;
+  box-shadow: 0 0 0 2px var(--sidebar-focus) !important;
+}
+
+.sidebar-shell .sidebar-category-btn:hover {
+  background: var(--sidebar-active-bg-start) !important;
+}

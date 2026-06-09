@@ -8,6 +8,73 @@
  * - 容器样式使用 .module-container 工具类
  */
 
+/* ==================== SOPs 总览主题 ==================== */
+.sops-overview {
+  --sops-primary: #3b82f6;
+  --sops-accent: #4f46e5;
+  --sops-primary-soft: #eff6ff;
+  --sops-accent-soft: #eef2ff;
+  --sops-border: rgba(79, 70, 229, 0.2);
+  --sops-shadow: rgba(59, 130, 246, 0.58);
+}
+
+.sops-overview .wb-container--simple {
+  border: 1px solid rgba(148, 163, 184, 0.24) !important;
+  background:
+    radial-gradient(circle at 82% 18%, rgba(79, 70, 229, 0.08), transparent 32%),
+    linear-gradient(135deg, rgba(239, 246, 255, 0.98), rgba(255, 255, 255, 0.94) 54%, rgba(238, 242, 255, 0.88)) !important;
+  box-shadow: 0 18px 40px -32px rgba(15, 23, 42, 0.42) !important;
+  --wb-orb-1-color: rgba(59, 130, 246, 0.14) !important;
+  --wb-orb-2-color: rgba(99, 102, 241, 0.12) !important;
+  --wb-orb-3-color: rgba(79, 70, 229, 0.08) !important;
+  --wb-particle-color: rgba(59, 130, 246, 0.45) !important;
+  --wb-tag-bg: rgba(255, 255, 255, 0.78) !important;
+  --wb-tag-border: rgba(79, 70, 229, 0.14) !important;
+  --wb-tag-hover-border: rgba(79, 70, 229, 0.24) !important;
+  --wb-icon-shadow: 0 12px 24px -18px var(--sops-shadow);
+  --wb-icon-shadow-hover: 0 14px 28px -20px var(--sops-shadow);
+}
+
+.sops-overview .wb-container--simple .wb-icon {
+  background: linear-gradient(135deg, var(--sops-primary), var(--sops-accent)) !important;
+  box-shadow: 0 12px 24px -18px var(--sops-shadow) !important;
+}
+
+.sops-overview .wb-container--simple:hover .wb-icon {
+  box-shadow: 0 14px 28px -20px var(--sops-shadow) !important;
+}
+
+.sops-overview .wb-badge {
+  border-color: var(--sops-border) !important;
+  background: linear-gradient(135deg, rgba(239, 246, 255, 0.92), rgba(238, 242, 255, 0.86)) !important;
+  color: #1d4ed8 !important;
+}
+
+.sops-overview .category-filter-btn {
+  border-color: rgba(203, 213, 225, 0.82) !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  color: #334155 !important;
+}
+
+.sops-overview .category-filter-btn.active {
+  border-color: transparent !important;
+  background: linear-gradient(135deg, var(--sops-primary), var(--sops-accent)) !important;
+  color: #ffffff !important;
+  box-shadow: 0 12px 22px -18px rgba(59, 130, 246, 0.75);
+}
+
+.sops-overview .category-filter-btn.category-filter-btn.active,
+.sops-overview .category-filter-btn.category-filter-btn.active i,
+.sops-overview .category-filter-btn.category-filter-btn.active span {
+  color: #ffffff !important;
+}
+
+.sops-overview .category-filter-btn:not(.active):hover {
+  border-color: rgba(79, 70, 229, 0.24) !important;
+  background: var(--sops-primary-soft) !important;
+  color: #1d4ed8 !important;
+}
+
 /* ==================== SOP 卡片特有样式 ==================== */
 .sop-card {
   background: white;

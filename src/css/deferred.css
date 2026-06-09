@@ -21,6 +21,7 @@
 @import './components/markdown.css';
 @import './components/mega-menu.css';
 @import './components/modals.css';
+@import './components/sidebar-renderer.css';
 @import './components/stat-cards.css';
 @import './components/tabs.css';
 @import './components/timeline.css';

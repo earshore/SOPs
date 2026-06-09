@@ -1,7 +1,7 @@
-<div class="module-container">
+<div class="module-container amz-hub-overview">
     <!-- Welcome Banner -->
     <div
-        class="wb-container wb-container--simple"
+        class="wb-container wb-container--simple amz-hub-hero"
         style="
             --wb-gradient-1: rgba(248, 250, 252, 0.95);
             --wb-gradient-2: rgba(241, 245, 249, 0.9);
@@ -65,30 +65,40 @@
     </div>
 
     <!-- 分类筛选器 -->
-    <div class="mb-6 flex items-center gap-3 overflow-x-auto pb-2">
+    <div
+        class="amz-hub-filter-panel mb-6 flex items-center gap-3 overflow-x-auto pb-2"
+    >
         <button
             class="category-filter-btn active px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium transition-all whitespace-nowrap hover:bg-blue-600"
             data-category="all"
+            type="button"
+            aria-pressed="true"
         >
-            <i class="fas fa-th mr-2"></i>全部
+            <i class="fas fa-th mr-2"></i><span>全部</span>
         </button>
         <button
             class="category-filter-btn px-4 py-2 bg-white text-slate-700 border border-slate-300 rounded-lg text-sm font-medium transition-all whitespace-nowrap hover:bg-slate-50"
             data-category="knowledge"
+            type="button"
+            aria-pressed="false"
         >
-            <i class="fas fa-lightbulb mr-2"></i>Amazon知识早知道
+            <i class="fas fa-lightbulb mr-2"></i><span>Amazon知识早知道</span>
         </button>
         <button
             class="category-filter-btn px-4 py-2 bg-white text-slate-700 border border-slate-300 rounded-lg text-sm font-medium transition-all whitespace-nowrap hover:bg-slate-50"
             data-category="practice"
+            type="button"
+            aria-pressed="false"
         >
-            <i class="fas fa-hands mr-2"></i>入门实操宝典
+            <i class="fas fa-hands mr-2"></i><span>入门实操宝典</span>
         </button>
         <button
             class="category-filter-btn px-4 py-2 bg-white text-slate-700 border border-slate-300 rounded-lg text-sm font-medium transition-all whitespace-nowrap hover:bg-slate-50"
             data-category="advanced"
+            type="button"
+            aria-pressed="false"
         >
-            <i class="fas fa-chart-line mr-2"></i>运营提升全攻略
+            <i class="fas fa-chart-line mr-2"></i><span>运营提升全攻略</span>
         </button>
     </div>
 

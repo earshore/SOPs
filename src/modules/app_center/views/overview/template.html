@@ -96,7 +96,7 @@
         <div class="app-overview-section-heading">
             <div>
                 <h2 class="app-overview-section-title">应用矩阵</h2>
-                <p class="app-overview-eyebrow">按应用类型筛选入口，或直接搜索工具名称。</p>
+                <p class="app-overview-eyebrow">按应用类型筛选入口，快速定位工具分组。</p>
             </div>
             <p id="app-overview-visible-count" class="app-overview-count" aria-live="polite">显示 4 个应用</p>
         </div>
@@ -118,20 +118,13 @@
                     <i class="fas fa-paper-plane"></i><span>Playground</span><em>1</em>
                 </button>
             </div>
-            <label class="app-overview-search" for="app-overview-search">
-                <i class="fas fa-search" aria-hidden="true"></i>
-                <input id="app-overview-search" type="search" placeholder="搜索采集、AI、PPC、关键词..." autocomplete="off">
-                <button id="app-overview-clear-search" class="app-overview-clear-search hidden" type="button" aria-label="清空搜索">
-                    <i class="fas fa-times"></i>
-                </button>
-            </label>
         </div>
     </section>
 
     <section id="app-module-apps" class="app-overview-apps" data-category="all">
         <div class="app-center-card-grid app-overview-grid">
             <article class="app-overview-card app-card-blue" data-action="switch-tab" data-tab="scraper"
-                data-category="master_analysis" data-search="master analysis 数据采集 ai分析 prompt lab prompt 竞品 报告"
+                data-category="master_analysis"
                 role="button" tabindex="0">
                 <div class="app-card-head">
                     <div class="app-card-icon">
@@ -161,7 +154,7 @@
             </article>
 
             <article class="app-overview-card app-card-violet" data-action="switch-tab" data-tab="kw_input"
-                data-category="keyword_tracker" data-search="keyword hunter 关键词 输入 处理 分析 seo 词库"
+                data-category="keyword_tracker"
                 role="button" tabindex="0">
                 <div class="app-card-head">
                     <div class="app-card-icon">
@@ -191,7 +184,7 @@
             </article>
 
             <article class="app-overview-card app-card-emerald" data-action="switch-tab" data-tab="ppc_search_terms"
-                data-category="ppc_tools" data-search="ppc tools 搜索词 广告 search term acos 否词 加词 导出"
+                data-category="ppc_tools"
                 role="button" tabindex="0">
                 <div class="app-card-head">
                     <div class="app-card-icon">
@@ -215,7 +208,7 @@
             </article>
 
             <article class="app-overview-card app-card-cyan" data-action="switch-tab" data-tab="playground"
-                data-category="playground" data-search="playground deep chat ai 对话 prompt 试验"
+                data-category="playground"
                 role="button" tabindex="0">
                 <div class="app-card-head">
                     <div class="app-card-icon">
@@ -240,9 +233,9 @@
         </div>
 
         <div id="app-overview-empty" class="app-overview-empty hidden" aria-live="polite">
-            <i class="fas fa-search" aria-hidden="true"></i>
-            <div class="app-overview-empty-title">没有匹配的应用</div>
-            <p>换个关键词，或切回全部应用查看完整矩阵。</p>
+            <i class="fas fa-layer-group" aria-hidden="true"></i>
+            <div class="app-overview-empty-title">当前分类暂无应用</div>
+            <p>切回全部应用查看完整矩阵。</p>
         </div>
     </section>
 </div>

@@ -11,7 +11,6 @@ import eventBus from '@/common/EventBus';
 
 interface OverviewFilterState {
   category: string;
-  query: string;
 }
 
 /**
@@ -42,12 +41,9 @@ export function unmount(): void {
  */
 function initOverviewEvents(container: HTMLElement): void {
   const state: OverviewFilterState = {
-    category: 'all',
-    query: ''
+    category: 'all'
   };
 
-  const searchInput = container.querySelector<HTMLInputElement>('#app-overview-search');
-  const clearSearchBtn = container.querySelector<HTMLButtonElement>('#app-overview-clear-search');
   const filterBtns = container.querySelectorAll<HTMLElement>('.category-filter-btn');
 
   filterBtns.forEach((btn) => {
@@ -59,22 +55,6 @@ function initOverviewEvents(container: HTMLElement): void {
         applyOverviewFilters(container, state);
       }
     });
-  });
-
-  searchInput?.addEventListener('input', () => {
-    state.query = searchInput.value.trim().toLowerCase();
-    clearSearchBtn?.classList.toggle('hidden', state.query.length === 0);
-    applyOverviewFilters(container, state);
-  });
-
-  clearSearchBtn?.addEventListener('click', () => {
-    if (searchInput) {
-      searchInput.value = '';
-    }
-    state.query = '';
-    clearSearchBtn.classList.add('hidden');
-    applyOverviewFilters(container, state);
-    searchInput?.focus();
   });
 
   const childLinks = container.querySelectorAll<HTMLElement>('.app-child-link[data-child-tab]');
@@ -122,7 +102,7 @@ function setActiveCategory(filterBtns: NodeListOf<HTMLElement>, activeBtn: HTMLE
 }
 
 /**
- * 按分类和搜索词筛选应用卡片
+ * 按分类筛选应用卡片
  */
 function applyOverviewFilters(container: HTMLElement, state: OverviewFilterState): void {
   const cards = container.querySelectorAll<HTMLElement>('.app-center-card-grid > [data-action="switch-tab"][data-category]');
@@ -130,9 +110,7 @@ function applyOverviewFilters(container: HTMLElement, state: OverviewFilterState
 
   cards.forEach((card) => {
     const categoryMatches = state.category === 'all' || card.dataset.category === state.category;
-    const searchText = `${card.dataset.search ?? ''} ${card.textContent ?? ''}`.toLowerCase();
-    const queryMatches = state.query.length === 0 || searchText.includes(state.query);
-    const isVisible = categoryMatches && queryMatches;
+    const isVisible = categoryMatches;
 
     card.style.display = isVisible ? '' : 'none';
     if (isVisible) {

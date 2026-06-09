@@ -1,4 +1,4 @@
-<div class="module-container">
+<div class="module-container more-overview">
     <!-- Welcome Banner -->
     <div class="wb-container wb-container--simple"
         style="--wb-gradient-1: rgba(238, 242, 255, 0.95); --wb-gradient-2: rgba(224, 231, 255, 0.90); --wb-orb-1-color: rgba(129, 140, 248, 0.15); --wb-orb-2-color: rgba(165, 180, 252, 0.12); --wb-orb-3-color: rgba(99, 102, 241, 0.08); --wb-particle-color: rgba(99, 102, 241, 0.6);">
@@ -45,18 +45,18 @@
     <div class="mb-6 flex items-center gap-3 overflow-x-auto pb-2">
         <button
             class="category-filter-btn active px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-medium transition-all whitespace-nowrap hover:bg-green-600"
-            data-category="all">
-            <i class="fas fa-th mr-2"></i>全部
+            data-category="all" type="button" aria-pressed="true">
+            <i class="fas fa-th mr-2"></i><span>全部</span>
         </button>
         <button
             class="category-filter-btn px-4 py-2 bg-white text-slate-700 border border-slate-300 rounded-lg text-sm font-medium transition-all whitespace-nowrap hover:bg-slate-50"
-            data-category="explore">
-            <i class="fas fa-compass mr-2"></i>探索
+            data-category="explore" type="button" aria-pressed="false">
+            <i class="fas fa-compass mr-2"></i><span>探索</span>
         </button>
         <button
             class="category-filter-btn px-4 py-2 bg-white text-slate-700 border border-slate-300 rounded-lg text-sm font-medium transition-all whitespace-nowrap hover:bg-slate-50"
-            data-category="business_scenarios">
-            <i class="fas fa-briefcase mr-2"></i>示例业务场景
+            data-category="business_scenarios" type="button" aria-pressed="false">
+            <i class="fas fa-briefcase mr-2"></i><span>示例业务场景</span>
         </button>
     </div>
 
