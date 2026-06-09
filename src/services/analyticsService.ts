@@ -452,9 +452,8 @@ export class AnalyticsService {
         },
         body: JSON.stringify(event)
       });
-    } catch (e) {
+    } catch {
       // 静默失败
-      console.warn('[Analytics] Failed to send event:', e);
     }
   }
 

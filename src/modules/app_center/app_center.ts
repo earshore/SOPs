@@ -3,7 +3,6 @@
 // 🎯 App Center 核心模块 (TypeScript版本)
 // ================================================================
 
-console.log('🎯 App Center Core Module Loading...');
 import './app_center_style.css';
 import { createModuleLoader, ModuleLoader } from '@/common/utils/ModuleLoader';
 import type { ModuleLoaderFn } from '@/types/modules-business';
@@ -27,7 +26,6 @@ const moduleLoader: ModuleLoader = createModuleLoader({
 export function registerSubModule(routeId: string, loader: ModuleLoaderFn): boolean {
   // 检查路由ID是否已存在
   if (MODULE_MAP[routeId]) {
-    console.warn(`⚠️ 路由 "${routeId}" 已存在，跳过注册`);
     return false;
   }
 
@@ -43,8 +41,5 @@ export function registerSubModule(routeId: string, loader: ModuleLoaderFn): bool
   // 同时注册到moduleLoader
   moduleLoader.registerSubModule(routeId, loader);
 
-  console.log(`✅ 动态注册子模块: ${routeId}`);
   return true;
 }
-
-console.log('✅ App Center Module 加载完成');

@@ -197,7 +197,6 @@ class HttpServiceClass implements IHttpService {
    */
   setLoggerService(logger: ILoggerService): void {
     this.logger = logger;
-    console.log('[HttpService] LoggerService已注入');
   }
 
   /**
@@ -322,7 +321,7 @@ class HttpServiceClass implements IHttpService {
         }
 
         await this._delay(options.retryDelay * (attempt + 1));
-        console.log(`[HttpService] Retry ${attempt + 1}/${options.retries}: ${url}`);
+        this._log('debug', 'Retry request', { attempt: attempt + 1, retries: options.retries, url });
       }
     }
 

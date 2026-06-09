@@ -30,11 +30,9 @@ export function loadChartJs(): Promise<ChartJS> {
   if (win.Chart) return Promise.resolve(win.Chart);
 
   if (!chartJsPromise) {
-    console.log('⏳ Loading Chart.js...');
     chartJsPromise = import('chart.js/auto')
       .then((module) => {
         win.Chart = module.default;
-        console.log('✅ Chart.js Loaded');
         return win.Chart as ChartJS;
       })
       .catch((err) => {
@@ -54,14 +52,12 @@ export function loadGridStack(): Promise<GridStack> {
   if (win.GridStack) return Promise.resolve(win.GridStack);
 
   if (!gridStackPromise) {
-    console.log('⏳ Loading GridStack...');
     // Load CSS first
     import('gridstack/dist/gridstack.min.css');
 
     gridStackPromise = import('gridstack')
       .then((module) => {
         win.GridStack = module.GridStack;
-        console.log('✅ GridStack Loaded');
         return win.GridStack as GridStack;
       })
       .catch((err) => {

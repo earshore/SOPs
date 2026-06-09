@@ -9,6 +9,27 @@ import { appStore } from '@/stores/useAppStore';
 import { MENU_CONFIG } from '../config/menuConfig';
 import { container } from '../di/Container';
 
+export interface DebugRouteInfo {
+  id: string;
+  label: string;
+  moduleId: string;
+  panelId: string;
+}
+
+export interface DebugServicesInfo {
+  services: string[];
+}
+
+export interface DebugStorageClearResult {
+  cleared: boolean;
+  reason?: 'cancelled';
+}
+
+export interface DebugUnavailableResult {
+  available: false;
+  reason: string;
+}
+
 /**
  * 调试接口类型
  */
@@ -34,11 +55,11 @@ export interface DebugInterface {
   
   // 工具函数
   utils?: {
-    showState?: () => void;
-    showRoutes?: () => void;
-    showServices?: () => void;
-    clearStorage?: () => void;
-    exportLogs?: () => void;
+    showState?: () => unknown;
+    showRoutes?: () => DebugRouteInfo[];
+    showServices?: () => DebugServicesInfo;
+    clearStorage?: () => DebugStorageClearResult;
+    exportLogs?: () => DebugUnavailableResult;
     showMigrationStats?: () => void;
     clearMigrationWarnings?: () => void;
   };
@@ -56,7 +77,6 @@ class DebugInterfaceManager {
    */
   initialize(): void {
     if (this.isInitialized) {
-      console.warn('[DebugInterface] 已初始化，跳过');
       return;
     }
 
@@ -65,7 +85,6 @@ class DebugInterfaceManager {
       this.setupDebugInterface();
       this.exposeToWindow();
       this.isInitialized = true;
-      console.debug('🔧 [DebugInterface] 调试接口已启用，使用 window.__DEBUG__ 访问');
     }
   }
 
@@ -77,37 +96,35 @@ class DebugInterfaceManager {
       // 工具函数
       utils: {
         showState: () => {
-          console.group('📊 应用状态');
-          console.debug('应用状态', appStore.getState());
-          console.groupEnd();
+          return appStore.getState();
         },
         
         showRoutes: () => {
-          console.group('🗺️ 路由配置');
-          console.table(Object.entries(MENU_CONFIG.routes).map(([id, config]) => ({
+          return Object.entries(MENU_CONFIG.routes).map(([id, config]) => ({
             id,
             label: config.label,
             moduleId: config.moduleId,
             panelId: config.panelId
-          })));
-          console.groupEnd();
+          }));
         },
         
         showServices: () => {
-          console.group('🔧 已注册服务');
-          console.debug('已注册服务', { services: container.getRegisteredServices() });
-          console.groupEnd();
+          return { services: container.getRegisteredServices() };
         },
         
         clearStorage: () => {
           if (confirm('确定要清除所有本地存储吗？')) {
             StorageService.clear();
-            console.debug('✅ 本地存储已清除');
+            return { cleared: true };
           }
+          return { cleared: false, reason: 'cancelled' };
         },
         
         exportLogs: () => {
-          console.warn('Logger.download() is deprecated, logs export not available');
+          return {
+            available: false,
+            reason: 'Logger.download() is deprecated, logs export not available'
+          };
         }
       }
     };
@@ -167,7 +184,6 @@ class DebugInterfaceManager {
       delete (window as unknown as Record<string, unknown>).__DEBUG__;
       this.debugInterface = {};
       this.isInitialized = false;
-      console.debug('🔧 [DebugInterface] 调试接口已清理');
     }
   }
 }

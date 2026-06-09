@@ -15,13 +15,9 @@ import { registerBusinessServices } from './businessServices';
  * 统一入口函数
  */
 export function registerAllServices(registry: ServiceRegistry): void {
-  console.log('[Services] 开始注册所有服务配置');
-  
   // 注册核心服务
   registerCoreServices(registry);
   
   // 注册业务服务
   registerBusinessServices(registry);
-  
-  console.log(`[Services] 所有服务配置注册完成，共 ${registry.size} 个服务`);
 }

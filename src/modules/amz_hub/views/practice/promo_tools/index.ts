@@ -677,11 +677,9 @@ class PromotionsModule extends BaseModule {
   async init(): Promise<void> {
     this.renderNavigation();
     this.renderContent();
-    console.log("✅ [PromoTools] 促销工具页面已加载");
   }
 
   protected onUnmount(): void {
-    console.log("🗑️ [PromoTools] 模块已卸载");
   }
 
   private renderNavigation(): void {

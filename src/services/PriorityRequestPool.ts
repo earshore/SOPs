@@ -278,7 +278,6 @@ export class PriorityRequestPool {
       });
       queue.length = 0;
     });
-    console.log('[RequestPool] 已清空所有队列');
   }
 
   /**
@@ -291,7 +290,6 @@ export class PriorityRequestPool {
       failed: 0,
       byPriority: {} as Record<RequestPriority, PriorityStats>,
     };
-    console.log('[RequestPool] 统计数据已重置');
   }
 }
 

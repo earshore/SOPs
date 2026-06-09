@@ -455,7 +455,6 @@ function warnLargeImportFiles(files: File[]): void {
     const largeFiles = files.filter(file => file.size > LARGE_IMPORT_FILE_SIZE && file.size <= MAX_IMPORT_FILE_SIZE);
     if (largeFiles.length === 0) return;
 
-    console.warn('[Scraper] 检测到大文件:', largeFiles.map(formatFileSize));
     showToast(`⚠️ 检测到大文件，处理可能需要较长时间`, { type: 'warning' });
 }
 

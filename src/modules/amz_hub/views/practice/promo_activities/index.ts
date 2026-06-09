@@ -16,11 +16,9 @@ class PromoActivitiesModule extends BaseModule {
     // ✅ 安全: 静态HTML模板，无用户输入
     setSafeHtml(container, templateHTML);
     container.classList.add("fade-in");
-    console.log("✅ [PromoActivities] 促销活动页面已加载");
   }
 
   protected onUnmount(): void {
-    console.log("🗑️ [PromoActivities] 模块已卸载");
   }
 }
 

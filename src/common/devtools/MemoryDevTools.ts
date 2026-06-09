@@ -32,8 +32,6 @@ export class MemoryDevTools {
       }
     };
     document.addEventListener('keydown', this.keydownHandler);
-
-    console.debug('✅ [MemoryDevTools] 已初始化. 按 Ctrl+Shift+M 打开面板');
   }
 
   /**
@@ -300,8 +298,6 @@ export class MemoryDevTools {
       this.panel.parentNode.removeChild(this.panel);
       this.panel = null;
     }
-
-    console.debug('✅ [MemoryDevTools] 已销毁');
   }
 }
 

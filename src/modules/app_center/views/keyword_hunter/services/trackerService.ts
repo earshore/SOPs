@@ -349,9 +349,6 @@ function parseNumberedTranslations(
   }
 
   if (Object.keys(result).length > 0) {
-    console.log(
-      `[TrackerService] 编号解析成功，命中 ${Object.keys(result).length}/${totalCount} 段`,
-    );
     return result;
   }
 
@@ -362,9 +359,6 @@ function parseNumberedTranslations(
   }
 
   if (Object.keys(result).length > 0) {
-    console.log(
-      `[TrackerService] Fallback A 解析成功（方括号格式），命中 ${Object.keys(result).length}/${totalCount} 段`,
-    );
     return result;
   }
 
@@ -418,8 +412,6 @@ export async function fetchImmersionTranslation(
     );
   }
 
-  console.log(`[TrackerService] 沉浸式翻译：共 ${paragraphs.length} 段`);
-
   // 2. 给每段加编号，构造结构化输入
   const numberedInput = paragraphs
     .map((p, i) => `【${i + 1}】 ${p}`)
@@ -432,10 +424,6 @@ export async function fetchImmersionTranslation(
   const response = await bridgeCallLLM(systemPrompt, userPrompt, {
     jsonMode: false,
   });
-  console.log(
-    "[TrackerService] LLM 原始响应（前 300 字）:",
-    response.slice(0, 300),
-  );
 
   // 4. 解析编号格式响应
   const translationMap = parseNumberedTranslations(response, paragraphs.length);
@@ -445,11 +433,6 @@ export async function fetchImmersionTranslation(
     original,
     translation: translationMap[i + 1] ?? "",
   }));
-
-  const translatedCount = pairs.filter((p) => p.translation).length;
-  console.log(
-    `[TrackerService] 翻译完成：${translatedCount}/${pairs.length} 段有译文`,
-  );
 
   return pairs;
 }

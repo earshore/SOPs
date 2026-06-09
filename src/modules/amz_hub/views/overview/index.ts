@@ -61,7 +61,6 @@ function filterByCategory(container: HTMLElement, category: string): void {
  */
 export function scrollToModule(categoryId: string): void {
   if (!categoryId) {
-    console.warn("⚠️ scrollToModule: categoryId 为空");
     return;
   }
 
@@ -82,9 +81,6 @@ export function scrollToModule(categoryId: string): void {
       moduleElement.classList.remove("hub-module-highlight");
     }, 2000);
 
-    console.log(`✅ 滚动到模块: ${categoryId}`);
-  } else {
-    console.warn(`⚠️ 未找到模块元素: ${moduleId}`);
   }
 }
 
@@ -108,7 +104,6 @@ class HubOverviewModule extends BaseModule {
     if (!container) return;
 
     initOverviewEvents(container);
-    console.log("✅ [Hub Overview] 模块挂载完成");
   }
 }
 

@@ -1,9 +1,7 @@
 import { defineConfig } from 'vite';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
-import checker from 'vite-plugin-checker';
 import viteCompression from 'vite-plugin-compression';
-import os from 'os';
 
 // ES 模块兼容的 __dirname 定义 - 使用 new URL() 方式
 const __filename = fileURLToPath(import.meta.url);
@@ -11,18 +9,19 @@ const __dirname = dirname(__filename);
 
 // 项目根目录（config 目录的上一级）
 const projectRoot = resolve(__dirname, '..');
+const devServerForwardConsole = {
+    enabled: true,
+    unhandledErrors: true,
+    logLevels: ['error', 'warn']
+};
 
 export default defineConfig({
     publicDir: 'public',
+    define: {
+        __BUNDLED_DEV__: 'false',
+        __SERVER_FORWARD_CONSOLE__: JSON.stringify(devServerForwardConsole)
+    },
     plugins: [
-        // 临时禁用 TypeScript 检查以允许构建成功
-        // TODO: 修复 TypeScript 类型错误后重新启用
-        // checker({
-        //     typescript: {
-        //         tsconfigPath: 'tsconfig.json',
-        //         buildMode: false // 只在构建时检查,开发时跳过
-        //     }
-        // }),
         // Gzip 压缩
         viteCompression({
             verbose: true,
@@ -92,7 +91,7 @@ export default defineConfig({
     // 依赖优化配置
     optimizeDeps: {
         include: [
-            'alpinejs',
+            '@alpinejs/csp',
             'marked',
             'zod',
             'zustand',
@@ -116,6 +115,7 @@ export default defineConfig({
         // 禁用自动打开浏览器，改用 package.json 脚本控制
         open: false,
         cors: true,
+        forwardConsole: devServerForwardConsole,
         // 静态资源服务
         fs: {
             strict: false,
@@ -139,7 +139,7 @@ export default defineConfig({
                 // 手动分包策略 - 回退到简单对象形式避免 Alpine 组件问题
                 manualChunks: {
                     // 核心框架
-                    'vendor-core': ['alpinejs'],
+                    'vendor-core': ['@alpinejs/csp'],
                     // 图表库（懒加载，但构建时仍需分包）
                     'vendor-charts': ['chart.js'],
                     // Markdown渲染

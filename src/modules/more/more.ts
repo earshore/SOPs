@@ -1,4 +1,3 @@
-console.log('📋 More Core Module Loading...');
 import './more_style.css';
 import { createModuleLoader, ModuleLoader } from '../../common/utils/ModuleLoader';
 import type { ModuleLoaderFn } from '@/types/modules-business';
@@ -21,5 +20,3 @@ const moduleLoader: ModuleLoader = createModuleLoader({
 export function registerSubModule(routeId: string, loader: ModuleLoaderFn): void {
     moduleLoader.registerSubModule(routeId, loader);
 }
-
-console.log('✅ More Module 加载完成');

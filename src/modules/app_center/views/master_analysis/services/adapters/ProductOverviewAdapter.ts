@@ -139,7 +139,6 @@ export class ProductOverviewAdapter implements ReportAdapter {
 
   extractDNA(report: unknown, _language: string = "zh"): ExtendedDNA | null {
     if (!this.canHandle(report)) {
-      console.warn("[ProductOverviewAdapter] 报告格式不匹配");
       return null;
     }
 
@@ -208,7 +207,6 @@ export class ProductOverviewAdapter implements ReportAdapter {
         },
       };
 
-      console.log("[ProductOverviewAdapter] DNA 提取完成");
       return dna;
     } catch (error) {
       console.error("[ProductOverviewAdapter] 提取失败:", error);

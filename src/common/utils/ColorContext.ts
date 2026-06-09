@@ -68,7 +68,6 @@ export class ColorContext {
 
     const module = MENU_CONFIG.modules[moduleId];
     if (!module) {
-      console.warn(`[ColorContext] 模块未找到: ${moduleId}, 使用默认颜色`);
       return 'blue';
     }
 
@@ -93,9 +92,6 @@ export class ColorContext {
     // 缓存结果
     this.colorCache.set(moduleId, inferredColor);
 
-    if (typeof console !== 'undefined' && console.debug) {
-      console.debug(`[ColorContext] 模块 "${moduleId}" 推断颜色: ${inferredColor}`);
-    }
     return inferredColor;
   }
 
@@ -161,7 +157,6 @@ export class ColorContext {
       return color as ColorSchemeName;
     }
 
-    console.warn(`[ColorContext] 无效的颜色名称: ${color}, 使用默认颜色 blue`);
     return 'blue';
   }
 
@@ -171,9 +166,6 @@ export class ColorContext {
    */
   static clearCache(): void {
     this.colorCache.clear();
-    if (typeof console !== 'undefined' && console.debug) {
-      console.debug('[ColorContext] 颜色缓存已清除');
-    }
   }
 
   /**

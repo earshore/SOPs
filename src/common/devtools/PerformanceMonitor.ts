@@ -27,7 +27,6 @@ export class PerformanceMonitor {
    */
   initialize(): void {
     if (process.env.NODE_ENV !== 'development') {
-      console.debug('[PerformanceMonitor] 仅在开发环境启用');
       return;
     }
 
@@ -47,8 +46,6 @@ export class PerformanceMonitor {
         this.renderCurrentTab();
       }
     }, 2000);
-
-    console.debug('[PerformanceMonitor] ✅ 性能监控面板已初始化 (Ctrl+Shift+P 切换)');
   }
 
   isInitialized(): boolean {

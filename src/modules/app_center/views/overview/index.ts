@@ -35,7 +35,6 @@ export const mount = safeMount(mountInternal, { moduleName: 'App Center Overview
  * 卸载 App Center 总览模块
  */
 export function unmount(): void {
-  console.log('❌ App Center 总览模块已卸载');
 }
 
 /**

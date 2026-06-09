@@ -225,7 +225,6 @@ class PromotionSubmissionModule extends BaseModule {
             this.calculateProfit();
         }, 100);
 
-        console.log('✅ 促销活动提报 SOP 模块已挂载');
     }
 
     /**
@@ -233,7 +232,6 @@ class PromotionSubmissionModule extends BaseModule {
      */
     unmount(): void {
         this.removeCalculatorListeners?.();
-        console.log('❌ 促销活动提报 SOP 模块已卸载');
     }
 }
 

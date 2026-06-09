@@ -91,9 +91,6 @@ export class ThemeManager {
     const { animate = true } = options;
     const root = document.documentElement;
     
-    // 性能监控
-    const startTime = performance.now();
-    
     // 添加过渡动画
     if (animate) {
       root.style.setProperty('--theme-transition-duration', '200ms');
@@ -138,9 +135,6 @@ export class ThemeManager {
     
     // 触发事件
     eventBus.emit('theme-changed', { themeId, theme });
-    
-    const duration = performance.now() - startTime;
-    console.log(`✓ 主题已切换: ${theme.name} (${duration.toFixed(2)}ms)`);
   }
   
   /**
@@ -161,7 +155,6 @@ export class ThemeManager {
    */
   static registerTheme(config: ThemeConfig): void {
     this.customThemes.set(config.id, config);
-    console.log(`✓ 自定义主题已注册: ${config.name}`);
   }
   
   /**

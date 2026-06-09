@@ -415,12 +415,10 @@ export function registerRoute(routeId: string, config: RouteConfig): boolean {
   }
 
   if (MENU_CONFIG.routes[routeId]) {
-    console.warn(`[MenuConfig] 路由 "${routeId}" 已存在，跳过注册`);
     return false;
   }
 
   MENU_CONFIG.routes[routeId] = config;
-  console.debug(`✅ [MenuConfig] 动态注册路由: ${routeId}`);
   return true;
 }
 
@@ -451,7 +449,6 @@ export function registerModule(
   }
 
   if (MENU_CONFIG.modules[moduleId]) {
-    console.warn(`[MenuConfig] 模块 "${moduleId}" 已存在，跳过注册`);
     return false;
   }
 
@@ -459,7 +456,6 @@ export function registerModule(
     id: moduleId,
     ...config,
   };
-  console.debug(`✅ [MenuConfig] 动态注册模块: ${moduleId}`);
   return true;
 }
 

@@ -34,6 +34,7 @@ const TRACKED_EVENTS = [
 const eventHistory: EventLogEntry[] = [];
 const MAX_HISTORY = configCenter.get<number>('history.maxEventHistory') || 100;
 const DEBUG_EVENTS_KEY = 'debug_events';
+let isInitialized = false;
 
 /**
  * 获取 localStorage 中的调试开关
@@ -50,11 +51,11 @@ function isDebugEnabled(): boolean {
 /**
  * 格式化事件详情用于控制台输出
  */
-function formatEventForLog(event: CustomEvent): EventLogEntry {
-  let targetStr = 'unknown';
-  if (event.target === window) {
+function formatEventForLog(event: CustomEvent, targetOverride?: string): EventLogEntry {
+  let targetStr = targetOverride || 'unknown';
+  if (!targetOverride && event.target === window) {
     targetStr = 'window';
-  } else if (event.target instanceof HTMLElement) {
+  } else if (!targetOverride && event.target instanceof HTMLElement) {
     targetStr = event.target.id || event.target.tagName;
   }
 
@@ -69,35 +70,30 @@ function formatEventForLog(event: CustomEvent): EventLogEntry {
 /**
  * 初始化事件日志记录器
  */
-export function initEventLogger(): void {
+export function initEventLogger(): boolean {
   if (!isDebugEnabled()) {
-    console.log(
-      '💡 [EventLogger] 调试模式未开启。启用方式: StorageService.set("debug_events", "true")'
-    );
-    return;
+    return false;
   }
 
-  console.log('🔍 [EventLogger] 事件调试模式已启用');
+  if (isInitialized) {
+    return true;
+  }
 
   TRACKED_EVENTS.forEach((eventName) => {
     window.addEventListener(eventName, (event) => {
       const customEvent = event as CustomEvent;
-      const logEntry = formatEventForLog(customEvent);
+      const logEntry = formatEventForLog(customEvent, 'window');
 
       // 保存到历史记录
       eventHistory.push(logEntry);
       if (eventHistory.length > MAX_HISTORY) {
         eventHistory.shift();
       }
-
-      // 控制台输出
-      console.group(`📡 ${eventName}`);
-      console.log('Detail:', customEvent.detail);
-      console.log('Timestamp:', logEntry.timestamp);
-      console.trace('Call Stack');
-      console.groupEnd();
     });
   });
+
+  isInitialized = true;
+  return true;
 }
 
 /**
@@ -109,10 +105,12 @@ export function getEventHistory(limit: number = 20): EventLogEntry[] {
 
 /**
  * 清空事件历史
+ * @returns 清空的事件数量
  */
-export function clearEventHistory(): void {
+export function clearEventHistory(): number {
+  const clearedCount = eventHistory.length;
   eventHistory.length = 0;
-  console.log('🗑️ [EventLogger] 事件历史已清空');
+  return clearedCount;
 }
 
 /**
@@ -129,10 +127,6 @@ export function logCustomEvent(eventName: string, detail: unknown = {}): void {
   eventHistory.push(logEntry);
   if (eventHistory.length > MAX_HISTORY) {
     eventHistory.shift();
-  }
-
-  if (isDebugEnabled()) {
-    console.log(`📝 [EventLogger] ${eventName}`, detail);
   }
 }
 

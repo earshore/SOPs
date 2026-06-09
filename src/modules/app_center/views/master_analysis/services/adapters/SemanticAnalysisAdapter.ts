@@ -81,7 +81,6 @@ export class SemanticAnalysisAdapter implements ReportAdapter {
 
   extractDNA(report: unknown, _language: string = "zh"): ExtendedDNA | null {
     if (!this.canHandle(report)) {
-      console.warn("[SemanticAnalysisAdapter] 报告格式不匹配");
       return null;
     }
 
@@ -148,7 +147,6 @@ export class SemanticAnalysisAdapter implements ReportAdapter {
         },
       };
 
-      console.log("[SemanticAnalysisAdapter] DNA 提取完成");
       return dna;
     } catch (error) {
       console.error("[SemanticAnalysisAdapter] 提取失败:", error);

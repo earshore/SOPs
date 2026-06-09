@@ -7,8 +7,6 @@ import BaseModule from '../../../../common/BaseModule';
 import { setSafeHtml } from '../../../../common/utils/security';
 import { loadTemplate } from '../../../../common/utils/viewLoader';
 
-console.log('🧭 更多总览页面加载...');
-
 /**
  * 初始化事件监听
  */
@@ -80,9 +78,6 @@ export function scrollToModule(categoryId: string): void {
             moduleElement.classList.remove('more-module-highlight');
         }, 2000);
 
-        console.log(`✅ 滚动到模块: ${categoryId}`);
-    } else {
-        console.warn(`⚠️ 未找到模块: ${moduleId}`);
     }
 }
 
@@ -101,8 +96,6 @@ class MoreOverviewModule extends BaseModule {
 
             // 初始化事件监听
             initOverviewEvents(container);
-
-            console.log('✅ 更多总览页面挂载完成');
         } catch (error) {
             console.error('❌ 更多总览页面挂载失败:', error);
             // ✅ 安全: 静态HTML模板，无用户输入
@@ -119,7 +112,6 @@ class MoreOverviewModule extends BaseModule {
      * 卸载模块
      */
     unmount(): void {
-        console.log('🧹 更多总览页面卸载');
     }
 }
 

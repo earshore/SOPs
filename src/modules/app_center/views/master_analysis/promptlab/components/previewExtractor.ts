@@ -206,8 +206,6 @@ const PREVIEW_HANDLERS: Record<string, PreviewHandler> = {
  * @returns        可显示的简短预览字符串
  */
 export function extractPreviewText(targetId: string, data: unknown): string {
-  console.log('[previewExtractor] extractPreviewText:', { targetId, dataType: typeof data });
-
   if (!data || typeof data !== 'object') return '数据格式错误';
 
   const d = data as Record<string, unknown>;

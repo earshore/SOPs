@@ -11,7 +11,7 @@
 | `npm run preview` | 本地预览生产构建产物，用于验证构建后资源、路由和压缩输出。 |
 | `npm run lint` | 对 `src/` 运行 ESLint。适合在提交前检查常见规范问题。 |
 | `npm run lint:fix` | 自动修复可安全修复的 ESLint 问题。执行后仍应复查关键文件。 |
-| `npm run type-check` | 运行 TypeScript 全量检查。因为 Vite 构建里的 `vite-plugin-checker` 被注释掉了，这一步很重要。 |
+| `npm run type-check` | 运行 TypeScript 全量检查。Vite 配置不再内置 checker 插件，类型质量由该脚本和 CI gate 负责。 |
 | `npm run test` | 启动 Vitest。默认进入观察模式，适合本地持续开发。 |
 | `npx vitest run tests/unit/<file>.test.ts` | 运行单个 Vitest 测试文件。定位回归或只验证某个模块时用这个最直接。 |
 | `npm run test:coverage` | 以 run 模式执行单元测试并生成覆盖率报告。 |

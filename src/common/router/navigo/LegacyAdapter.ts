@@ -169,8 +169,6 @@ export class LegacyAdapter {
     const windowWithLegacy = window as unknown as Record<string, unknown>;
     delete windowWithLegacy.switchTab;
     delete windowWithLegacy.router;
-
-    console.log('[LegacyAdapter] Global APIs uninstalled');
   }
 
   /**

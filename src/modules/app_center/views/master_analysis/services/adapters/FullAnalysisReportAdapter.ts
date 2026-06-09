@@ -190,7 +190,6 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
 
   extractDNA(report: unknown, language: string = "zh"): ExtendedDNA | null {
     if (!this.canHandle(report)) {
-      console.warn("[FullAnalysisReportAdapter] 报告格式不匹配");
       return null;
     }
 
@@ -512,9 +511,6 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
     try {
       // 输入验证
       if (!keywords || !Array.isArray(keywords) || keywords.length === 0) {
-        console.log(
-          "[FullAnalysisReportAdapter] extractSpecsByType: 无效或空的 keywords 数组",
-        );
         return [];
       }
 
@@ -525,9 +521,6 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
 
       keywords.forEach((k) => {
         if (!k || typeof k !== "object") {
-          console.log(
-            "[FullAnalysisReportAdapter] extractSpecsByType: 跳过无效的 keyword 对象",
-          );
           return;
         }
 
@@ -575,9 +568,6 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
         !Array.isArray(bulletAnalysis) ||
         bulletAnalysis.length === 0
       ) {
-        console.log(
-          "[FullAnalysisReportAdapter] extractTechnicalSpecs: 无效或空的 bulletAnalysis",
-        );
         return [];
       }
 

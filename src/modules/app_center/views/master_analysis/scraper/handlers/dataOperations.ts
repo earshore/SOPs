@@ -244,7 +244,6 @@ export async function deleteProduct(
 
         const confirmed = await confirmProductDeletion(asin, confirmModal);
         if (!confirmed) {
-            console.log('[Scraper] 用户取消删除产品操作');
             return { success: false };
         }
 
@@ -255,7 +254,6 @@ export async function deleteProduct(
         emitDeletionEvents();
 
         showToast(`ASIN ${asin} 已移除`, { type: 'info' });
-        console.log(`[Scraper] 成功删除产品: ${asin}`);
 
         return { success: true, data: validData };
 
@@ -282,7 +280,6 @@ export async function deleteReview(
 
         const confirmed = await confirmReviewDeletion(confirmModal);
         if (!confirmed) {
-            console.log('[Scraper] 用户取消删除评论操作');
             return { success: false };
         }
 
@@ -296,7 +293,6 @@ export async function deleteReview(
         emitDeletionEvents();
 
         showToast('评论已删除', { type: 'info' });
-        console.log(`[Scraper] 成功删除评论: ASIN=${asin}, index=${index}`);
 
         return { success: true, data: validData };
 

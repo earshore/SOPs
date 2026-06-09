@@ -21,7 +21,6 @@ class RestrictedWordsModule extends BaseModule {
         // 初始化词库面板功能
         initRestrictedWordsPanel();
 
-        console.log('✅ 欧洲本土化高危词库 SOP 模块已挂载');
     }
 
     /**
@@ -29,7 +28,6 @@ class RestrictedWordsModule extends BaseModule {
      */
     unmount(): void {
         cleanupRestrictedWordsPanel();
-        console.log('❌ 欧洲本土化高危词库 SOP 模块已卸载');
     }
 }
 

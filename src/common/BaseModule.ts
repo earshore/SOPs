@@ -81,12 +81,7 @@ export default class BaseModule {
      * @returns 服务实例
      */
     protected getService<T = unknown>(name: ServiceName): T {
-        try {
-            return this.diContainer.resolve<T>(name);
-        } catch (error) {
-            console.error(`[${this.moduleId}] 获取服务失败: ${name}`, error);
-            throw error;
-        }
+        return this.diContainer.resolve<T>(name);
     }
 
 
@@ -136,8 +131,6 @@ export default class BaseModule {
         this._isMounted = true;
         this._disposables = []; // 重置清理列表
 
-        console.log(`[BaseModule] Mounting ${this.moduleId}...`);
-
         try {
             await this.render();
             await this.init();
@@ -153,12 +146,11 @@ export default class BaseModule {
      */
     protected async runAsync<T>(
         asyncFn: () => Promise<T>,
-        errorContext: string = 'Operation failed'
+        _errorContext: string = 'Operation failed'
     ): Promise<T | undefined> {
         try {
             return await asyncFn();
         } catch (error) {
-            console.error(`[${this.moduleId}] ${errorContext}:`, error);
             this.handleError(error as Error);
             return undefined;
         }
@@ -188,8 +180,6 @@ export default class BaseModule {
     unmount(): void {
         if (!this._isMounted) return;
 
-        console.log(`[BaseModule] Unmounting ${this.moduleId}...`);
-
         // 0. 取消所有进行中的请求
         this._abortController.abort();
 
@@ -197,8 +187,8 @@ export default class BaseModule {
         this._disposables.forEach(dispose => {
             try {
                 dispose();
-            } catch (e) {
-                console.warn(`[BaseModule] Error executing disposable in ${this.moduleId}:`, e);
+            } catch {
+                // 继续清理剩余资源。
             }
         });
         this._disposables = [];
@@ -297,7 +287,6 @@ export default class BaseModule {
             moduleId: this.moduleId,
             actions
         });
-        console.log(`[BaseModule] 已发送注册请求: ${this.moduleId}, ${Object.keys(actions).length} 个动作`);
         
         // 保存动作名称用于清理
         this._registeredActions.push(...Object.keys(actions));
@@ -320,10 +309,9 @@ export default class BaseModule {
                 actionRegistry.unregisterAction(actionName);
             });
             
-            console.log(`[BaseModule] 已清理 ${this._registeredActions.length} 个动作: ${this.moduleId}`);
             this._registeredActions = [];
-        } catch (error) {
-            console.warn(`[BaseModule] 清理动作失败:`, error);
+        } catch {
+            // 卸载流程继续进行。
         }
     }
 
@@ -353,7 +341,6 @@ export default class BaseModule {
      * @param error - 错误对象
      */
     protected handleError(error: Error): void {
-        console.error(`[${this.moduleId}] Error:`, error);
         if (this.container) {
             // ✅ 安全: moduleId和error.message已通过escapeHtml转义
             setSafeHtml(this.container, `
@@ -380,7 +367,6 @@ export default class BaseModule {
                     setSafeHtml(container, '<div class="p-10 text-center"><i class="fas fa-spinner fa-spin text-slate-400"></i></div>');
                     // 重新挂载
                     this.mount(container).catch(e => {
-                        console.error("Retry failed:", e);
                         this.handleError(e as Error); // 递归处理再次失败的情况
                     });
                 });

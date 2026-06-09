@@ -85,7 +85,6 @@ export function safeMount(
   return async (container: HTMLElement): Promise<void> => {
     try {
       await mountFn(container);
-      console.log(`✅ ${moduleName} 模块已挂载`);
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
       

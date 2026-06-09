@@ -37,7 +37,6 @@ class EmailTemplatesModule extends BaseModule {
         setSafeHtml(container, html);
         container.classList.add('fade-in');
         this.bindTemplateToggles(container);
-        console.log('✅ 邮件回复模板 SOP 模块已挂载');
     }
 
     /**
@@ -45,7 +44,6 @@ class EmailTemplatesModule extends BaseModule {
      */
     unmount(): void {
         this.removeTemplateToggleListener?.();
-        console.log('❌ 邮件回复模板 SOP 模块已卸载');
     }
 }
 

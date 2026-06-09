@@ -28,7 +28,6 @@ class ModuleCssLoader {
     // 获取模块配置
     const config = MODULE_CSS_REGISTRY[moduleId];
     if (!config) {
-      console.warn(`[ModuleCssLoader] 模块CSS配置未找到: ${moduleId}`);
       return;
     }
     
@@ -53,8 +52,6 @@ class ModuleCssLoader {
     if (allImporters.length === 0) {
       return;
     }
-    
-    console.log(`[ModuleCssLoader] 加载模块CSS: ${config.moduleId}`);
     
     try {
       // 并行加载所有CSS

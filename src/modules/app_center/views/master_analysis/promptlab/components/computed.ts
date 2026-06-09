@@ -27,7 +27,6 @@ type AnalysisReportWithMetadata = {
  */
 export function computeHasReport(): boolean {
   const report = appStore.getState().analysis.analysisReport;
-  console.log('[Promptlab computed] hasReport:', !!report);
   return !!report;
 }
 
@@ -85,12 +84,10 @@ export function computeIsOverLimit(prompt: string, charLimit: number): boolean {
 export function computeReportConfidence(): Record<string, number> | null {
   const report = appStore.getState().analysis.analysisReport;
   if (!report || typeof report === 'string') {
-    console.log('[Promptlab computed] reportConfidence: 报告不存在或为字符串');
     return null;
   }
   const reportObj = report as AnalysisReportWithMetadata;
   if (!reportObj._metadata) {
-    console.warn('[Promptlab computed] reportConfidence: 缺少 _metadata 字段');
     return null;
   }
   return reportObj._metadata.confidence ?? null;

@@ -49,6 +49,7 @@ export class MemoryLeakDetector {
   private snapshots: MemorySnapshot[] = [];
   private checkTimer: number | null = null;
   private reports: LeakReport[] = [];
+  private completedReports: LeakReport[] = [];
   private maxSnapshots: number = 10;
 
   constructor(config: Partial<LeakDetectorConfig> = {}) {
@@ -66,22 +67,13 @@ export class MemoryLeakDetector {
    */
   start(): void {
     if (!this.config.enabled) {
-      console.log('内存泄漏检测已禁用', {}, 'MemoryLeakDetector');
       return;
     }
 
     // 只在支持performance.memory的浏览器中启用
     if (!this._isMemoryAPIAvailable()) {
-      console.warn('浏览器不支持 performance.memory API，内存检测已禁用', {}, 'MemoryLeakDetector');
       return;
     }
-
-    console.log('启动内存泄漏检测', {
-      checkInterval: this.config.checkInterval,
-      memoryGrowthThreshold: this.config.memoryGrowthThreshold,
-      listenerThreshold: this.config.listenerThreshold,
-      enabled: this.config.enabled
-    }, 'MemoryLeakDetector');
 
     // 立即执行一次检测
     this._check();
@@ -100,7 +92,6 @@ export class MemoryLeakDetector {
       clearInterval(this.checkTimer);
       this.checkTimer = null;
     }
-    console.log('停止内存泄漏检测', {}, 'MemoryLeakDetector');
   }
 
   /**
@@ -217,26 +208,7 @@ export class MemoryLeakDetector {
    * 生成报告
    */
   private _generateReport(): void {
-    const criticalReports = this.reports.filter(r => r.severity === 'critical');
-    const warningReports = this.reports.filter(r => r.severity === 'warning');
-
-    if (criticalReports.length > 0) {
-      console.error(
-        `🔴 检测到 ${criticalReports.length} 个严重内存泄漏问题`,
-        { reports: criticalReports },
-        'MemoryLeakDetector'
-      );
-    }
-
-    if (warningReports.length > 0) {
-      console.warn(
-        `⚠️ 检测到 ${warningReports.length} 个潜在内存泄漏问题`,
-        { reports: warningReports },
-        'MemoryLeakDetector'
-      );
-    }
-
-    // 清空报告
+    this.completedReports.push(...this.reports);
     this.reports = [];
   }
 
@@ -282,6 +254,21 @@ export class MemoryLeakDetector {
   }
 
   /**
+   * 获取已生成的泄漏报告
+   */
+  getReports(): LeakReport[] {
+    return [...this.completedReports, ...this.reports];
+  }
+
+  /**
+   * 清除报告
+   */
+  clearReports(): void {
+    this.reports = [];
+    this.completedReports = [];
+  }
+
+  /**
    * 清除快照
    */
   clearSnapshots(): void {
@@ -291,14 +278,13 @@ export class MemoryLeakDetector {
   /**
    * 手动触发垃圾回收（仅在开发环境）
    */
-  forceGC(): void {
+  forceGC(): boolean {
     const windowWithGC = window as unknown as { gc?: () => void };
     if (typeof windowWithGC.gc === 'function') {
       windowWithGC.gc();
-      console.log('已触发垃圾回收', {}, 'MemoryLeakDetector');
-    } else {
-      console.warn('垃圾回收不可用（需要 --expose-gc 标志）', {}, 'MemoryLeakDetector');
+      return true;
     }
+    return false;
   }
 }
 
@@ -311,5 +297,4 @@ export default memoryLeakDetector;
 // 向后兼容：暴露到 window (开发调试用)
 if (typeof window !== 'undefined' && (import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV) {
   (window as unknown as Record<string, unknown>).__MemoryLeakDetector = memoryLeakDetector;
-  console.log('✅ [MemoryLeakDetector] 开发模式：检测器已暴露到 window.__MemoryLeakDetector');
 }

@@ -573,8 +573,6 @@ declare global {
  * 挂载模块
  */
 export async function mount(container: HTMLElement): Promise<void> {
-    console.log('[NPITracker] 🔧 开始挂载模块');
-
     try {
         // 1. 使用 SafeModuleLoader 加载模板
         const loader = SafeModuleLoader.getInstance();
@@ -608,14 +606,11 @@ export async function mount(container: HTMLElement): Promise<void> {
 
         registeredActions = registerActionsWithLegacy(npiTrackerActions);
         setupFilterEventDelegation(container);
-        console.log(`[NPITracker] 已注册 ${registeredActions.length} 个动作到 ActionRegistry`);
 
         // 4. 初始化表格（延迟渲染，确保 DOM 就绪）
         setTimeout(() => {
             renderTable();
         }, 100);
-
-        console.log('[NPITracker] ✅ 模块挂载成功');
     } catch (error) {
         console.error('[NPITracker] ❌ 模块挂载失败:', error);
         throw error;
@@ -626,20 +621,15 @@ export async function mount(container: HTMLElement): Promise<void> {
  * 卸载模块
  */
 export function unmount(): void {
-    console.log('[NPITracker] 🔄 开始卸载模块');
-
     try {
         // 1. 清理注册的动作
         if (registeredActions.length > 0) {
             unregisterActions(registeredActions);
-            console.log(`[NPITracker] 已清理 ${registeredActions.length} 个动作`);
             registeredActions = [];
         }
 
         // 2. 重置表格数据
         tableData = [...SAMPLE_DATA];
-
-        console.log('[NPITracker] ✅ 模块卸载成功');
     } catch (error) {
         console.error('[NPITracker] ❌ 模块卸载失败:', error);
     }

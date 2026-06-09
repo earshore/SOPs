@@ -55,7 +55,6 @@ class SeoStrategyModule extends BaseModule {
 
     const Chart = (window as WindowWithChart).Chart;
     if (!Chart) {
-      console.warn("Chart.js missing");
       return;
     }
 

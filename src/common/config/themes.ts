@@ -267,8 +267,8 @@ export function loadThemeFromStorage(): string {
 export function saveThemeToStorage(themeId: string): void {
   try {
     StorageService.set('app_theme', themeId);
-  } catch (e) {
-    console.warn('[Theme] 保存主题失败:', e);
+  } catch {
+    // Theme persistence is optional; the active theme has already been applied.
   }
 }
 

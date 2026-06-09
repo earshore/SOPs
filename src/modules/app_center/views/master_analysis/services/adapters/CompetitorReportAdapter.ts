@@ -89,7 +89,6 @@ export class CompetitorReportAdapter implements ReportAdapter {
 
   extractDNA(report: unknown, _language: string = "zh"): ExtendedDNA | null {
     if (!this.canHandle(report)) {
-      console.warn("[CompetitorAdapter] 报告格式不匹配");
       return null;
     }
 
@@ -164,12 +163,6 @@ export class CompetitorReportAdapter implements ReportAdapter {
           },
         },
       };
-
-      console.log("[CompetitorAdapter] DNA 提取完成", {
-        keywordsCount: dna.metadata.stats?.totalKeywords,
-        phrasesCount: dna.metadata.stats?.totalPhrases,
-        painPointsCount: dna.metadata.stats?.totalPainPoints,
-      });
 
       return dna;
     } catch (error) {

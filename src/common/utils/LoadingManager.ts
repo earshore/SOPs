@@ -37,7 +37,7 @@ export interface LoadingTaskOptions {
  */
 export interface ScopedLoadingManager {
   start: (taskId: string, options?: LoadingTaskOptions) => void;
-  stop: (taskId: string) => void;
+  stop: (taskId: string) => boolean;
   wrap: <T>(taskId: string, asyncFn: () => Promise<T>, options?: LoadingTaskOptions) => Promise<T>;
 }
 
@@ -76,19 +76,17 @@ export class LoadingManager {
 
     // 触发事件
     emitAppEvent(APP_EVENTS.LOADING_START, { taskId, task });
-
-    console.log(`⏳ [LoadingManager] 开始任务: ${taskId} (${task.message})`);
   }
 
   /**
    * 结束一个加载任务
    * @param taskId - 任务ID
+   * @returns 是否找到并停止了任务
    */
-  stop(taskId: string): void {
+  stop(taskId: string): boolean {
     const task = this.tasks.get(taskId);
     if (!task) {
-      console.warn(`⚠️ [LoadingManager] 任务不存在: ${taskId}`);
-      return;
+      return false;
     }
 
     const duration = Date.now() - task.startTime;
@@ -98,7 +96,7 @@ export class LoadingManager {
     // 触发事件
     emitAppEvent(APP_EVENTS.LOADING_STOP, { taskId, duration });
 
-    console.log(`✅ [LoadingManager] 完成任务: ${taskId} (耗时 ${duration}ms)`);
+    return true;
   }
 
   /**
@@ -136,13 +134,14 @@ export class LoadingManager {
 
   /**
    * 清空所有任务
+   * @returns 清空的任务数量
    */
-  clearAll(): void {
+  clearAll(): number {
     const taskIds = Array.from(this.tasks.keys());
     this.tasks.clear();
     this._updateUI();
 
-    console.log(`🧹 [LoadingManager] 清空所有任务 (${taskIds.length} 个)`);
+    return taskIds.length;
   }
 
   /**

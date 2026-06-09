@@ -129,7 +129,6 @@ export const persist = <T extends object>(
 export const clearPersistedState = (name: string, storage: Storage = localStorage): void => {
   try {
     storage.removeItem(name);
-    console.log(`[Persist] 已清除持久化数据: ${name}`);
   } catch (error) {
     console.error('[Persist] 清除持久化数据失败:', error);
   }

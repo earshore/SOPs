@@ -144,7 +144,6 @@ export class SafeModuleLoader {
   private loadedModules: Map<string, unknown>;
   private loadingModules: Map<string, Promise<unknown>>;
   private errorTrackerInstance: ReturnType<typeof createErrorTracker>;
-  private readonly moduleName = 'SafeModuleLoader';
 
   /**
    * 私有构造函数（单例模式）
@@ -155,8 +154,6 @@ export class SafeModuleLoader {
 
     // 使用错误追踪器（不再需要 logger 参数）
     this.errorTrackerInstance = createErrorTracker();
-
-    console.log('SafeModuleLoader 已初始化', {}, this.moduleName);
   }
 
   /**
@@ -191,8 +188,6 @@ export class SafeModuleLoader {
       loadingText = '加载中...'
     } = options;
 
-      console.log(`开始加载模块: ${modulePath}`, { options }, this.moduleName);
-
     // 显示加载指示器
     if (showLoading) {
       this.showLoadingIndicator(container, loadingText);
@@ -202,13 +197,11 @@ export class SafeModuleLoader {
       // 检查是否正在加载
       const existingLoad = this.loadingModules.get(modulePath);
       if (existingLoad) {
-        console.log(`模块 ${modulePath} 正在加载中，等待完成`, undefined, this.moduleName);
         await existingLoad;
       }
 
       // 检查缓存
       if (this.loadedModules.has(modulePath)) {
-        console.log(`从缓存加载模块: ${modulePath}`, undefined, this.moduleName);
         const cachedModule = this.loadedModules.get(modulePath);
         this.renderModule(container, cachedModule);
         
@@ -238,7 +231,6 @@ export class SafeModuleLoader {
       this.renderModule(container, moduleData);
 
       const loadTime = performance.now() - startTime;
-      console.log(`模块加载成功: ${modulePath}`, { loadTime, retryAttempts: loadResult.retryAttempts }, this.moduleName);
 
       return {
         success: true,
@@ -254,8 +246,6 @@ export class SafeModuleLoader {
       // 分类错误
       const classifiedError = this.classifyError(error as Error, modulePath);
       
-      console.error(`模块加载失败: ${modulePath}`, classifiedError, this.moduleName);
-      
       // 上报错误
       this.errorTrackerInstance.captureAppError(classifiedError);
 
@@ -264,7 +254,12 @@ export class SafeModuleLoader {
         try {
           onError(classifiedError);
         } catch (callbackError) {
-          console.error('错误回调执行失败', callbackError as Error, this.moduleName);
+          this.errorTrackerInstance.captureAppError(new SystemError(
+            '错误回调执行失败',
+            'ERROR_CALLBACK_FAILED',
+            { modulePath },
+            callbackError as Error
+          ));
         }
       }
 
@@ -295,15 +290,12 @@ export class SafeModuleLoader {
       timeout = 5000
     } = options;
 
-    console.log(`加载模板: ${templatePath}`, {}, this.moduleName);
-
     try {
       // 开发环境下禁用缓存，确保模板修改后能立即生效
       const isDevelopment = import.meta.env.DEV;
       
       // 检查缓存（生产环境）
       if (!isDevelopment && this.loadedModules.has(templatePath)) {
-        console.log(`从缓存加载模板: ${templatePath}`, undefined, this.moduleName);
         const cached = this.loadedModules.get(templatePath);
         if (typeof cached === 'string') {
           return cached;
@@ -328,16 +320,11 @@ export class SafeModuleLoader {
         this.loadedModules.set(templatePath, template);
       }
 
-      console.log(`模板加载成功: ${templatePath}`, { 
-        retryAttempts: loadResult.retryAttempts,
-        cached: !isDevelopment 
-      }, this.moduleName);
       return template;
 
     } catch (error) {
       const classifiedError = this.classifyError(error as Error, templatePath);
       
-      console.error(`模板加载失败: ${templatePath}`, classifiedError, this.moduleName);
       this.errorTrackerInstance.captureAppError(classifiedError);
       
       throw classifiedError;
@@ -486,32 +473,11 @@ export class SafeModuleLoader {
           const jitter = baseDelay * 0.2 * (Math.random() * 2 - 1);
           const delay = Math.round(baseDelay + jitter);
           
-          console.log(
-            `重试加载，等待 ${delay}ms (尝试 ${attempt}/${retries})`,
-            { 
-              attempt, 
-              maxRetries: retries, 
-              baseDelay, 
-              jitter: Math.round(jitter),
-              finalDelay: delay 
-            },
-            this.moduleName
-          );
-          
           await this.sleep(delay);
         }
 
         // 执行加载函数
         const result = await fn();
-        
-        // 如果有重试，记录成功信息
-        if (actualRetries > 0) {
-          console.log(
-            `加载成功（经过 ${actualRetries} 次重试）`,
-            { actualRetries },
-            this.moduleName
-          );
-        }
         
         return {
           data: result,
@@ -524,43 +490,13 @@ export class SafeModuleLoader {
         // 判断是否应该重试
         const shouldRetry = this.shouldRetryError(error as Error, attempt, retries);
         
-        if (shouldRetry) {
-          console.warn(
-            `加载失败，将进行重试 (尝试 ${attempt + 1}/${retries + 1})`,
-            { 
-              error: (error as Error).message,
-              errorType: (error as Error).constructor.name,
-              attempt: attempt + 1,
-              maxAttempts: retries + 1,
-              willRetry: attempt < retries
-            },
-            this.moduleName
-          );
-        } else {
-          console.error(
-            `加载失败，不可重试的错误 (尝试 ${attempt + 1}/${retries + 1})`,
-            { 
-              error: (error as Error).message,
-              errorType: (error as Error).constructor.name
-            },
-            this.moduleName
-          );
+        if (!shouldRetry) {
           throw error;
         }
       }
     }
 
     // 所有重试都失败
-    console.error(
-      `加载失败，已达到最大重试次数`,
-      { 
-        totalAttempts: retries + 1,
-        actualRetries,
-        lastError: lastError?.message
-      },
-      this.moduleName
-    );
-    
     throw lastError;
   }
 
@@ -825,16 +761,6 @@ export class SafeModuleLoader {
   }
 
   private createUnknownClassificationError(error: Error, resourcePath: string): SystemError {
-    console.warn(
-      `无法分类的错误类型，归类为未知错误`,
-      {
-        errorName: error.name,
-        errorMessage: error.message,
-        resourcePath
-      },
-      this.moduleName
-    );
-
     return new SystemError(
       `未知错误: ${error.message}`,
       'UNKNOWN_ERROR',
@@ -917,9 +843,7 @@ export class SafeModuleLoader {
         return;
       }
 
-      console.warn('模块没有 render 或 mount 方法，且不是字符串', {}, this.moduleName);
     } catch (error) {
-      console.error('渲染模块失败', error as Error, this.moduleName);
       throw new SystemError(
         '渲染模块失败',
         'RENDER_ERROR',
@@ -1231,9 +1155,7 @@ export class SafeModuleLoader {
       case 'retry':
         // 重新加载模块
         this.showLoadingIndicator(container, '正在重试...');
-        this.loadModule(container, modulePath).catch(err => {
-          console.error('重试失败:', err);
-        });
+        this.loadModule(container, modulePath);
         break;
       case 'reload':
         // 刷新页面
@@ -1244,7 +1166,7 @@ export class SafeModuleLoader {
         window.location.href = '/';
         break;
       default:
-        console.warn('未知的错误 UI 操作:', action);
+        break;
     }
   }
 
@@ -1327,10 +1249,8 @@ export class SafeModuleLoader {
   clearCache(modulePath?: string): void {
     if (modulePath) {
       this.loadedModules.delete(modulePath);
-      console.log(`已清除模块缓存: ${modulePath}`, {}, this.moduleName);
     } else {
       this.loadedModules.clear();
-      console.log('已清除所有模块缓存', {}, this.moduleName);
     }
   }
 
@@ -1354,8 +1274,6 @@ export class SafeModuleLoader {
    * @param modulePaths - 模块路径数组
    */
   async preloadModules(modulePaths: string[]): Promise<void> {
-    console.log(`预加载 ${modulePaths.length} 个模块`, {}, this.moduleName);
-    
     const results = await Promise.allSettled(
       modulePaths.map(path => this.loadModuleInternal(path))
     );
@@ -1366,9 +1284,6 @@ export class SafeModuleLoader {
       
       if (result.status === 'fulfilled') {
         this.loadedModules.set(modulePath, result.value);
-        console.log(`预加载成功: ${modulePath}`, {}, this.moduleName);
-      } else {
-        console.warn(`预加载失败: ${modulePath}`, { error: result.reason }, this.moduleName);
       }
     });
   }

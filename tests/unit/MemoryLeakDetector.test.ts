@@ -157,16 +157,21 @@ describe('MemoryLeakDetector', () => {
         configurable: true
       });
 
-      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-
       detector.start();
       vi.advanceTimersByTime(1000);
 
-      expect(consoleWarnSpy).toHaveBeenCalled();
+      const reports = detector.getReports();
+      expect(reports).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            type: 'listeners',
+            severity: 'warning'
+          })
+        ])
+      );
 
       // 清理
       handlers.forEach(handler => eventBus.off('test-event', handler));
-      consoleWarnSpy.mockRestore();
     });
 
     it('应该检测到EventBus内存泄漏', () => {
@@ -196,8 +201,14 @@ describe('MemoryLeakDetector', () => {
       detector.start();
       vi.advanceTimersByTime(1000);
 
-      // 验证检测器正在运行
-      expect(vi.getTimerCount()).toBeGreaterThan(0);
+      expect(detector.getReports()).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            type: 'listeners',
+            message: expect.stringContaining('EventBus内存泄漏')
+          })
+        ])
+      );
 
       // 清理
       handlers.forEach(handler => eventBus.off('leak-test', handler));
@@ -276,18 +287,20 @@ describe('MemoryLeakDetector', () => {
       const mockGC = vi.fn();
       (window as any).gc = mockGC;
 
-      detector.forceGC();
+      const triggered = detector.forceGC();
 
       expect(mockGC).toHaveBeenCalled();
+      expect(triggered).toBe(true);
 
       delete (window as any).gc;
     });
 
-    it('应该在不支持时显示警告', () => {
+    it('应该在不支持时返回 false', () => {
       delete (window as any).gc;
 
       // 调用forceGC不应该抛出错误
       expect(() => detector.forceGC()).not.toThrow();
+      expect(detector.forceGC()).toBe(false);
     });
   });
 

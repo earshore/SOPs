@@ -253,14 +253,12 @@ export const HistoryService = {
       const targetIndex = history.findIndex((h) => isSameHistoryId(h.id, id));
 
       if (targetIndex === -1) {
-        console.warn(`[HistoryService] 未找到ID为 ${id} 的历史记录`);
         return false;
       }
 
       // 获取目标历史记录
       const targetItem = history[targetIndex];
       if (!targetItem) {
-        console.warn(`[HistoryService] 历史记录项为空`);
         return false;
       }
 
@@ -276,7 +274,6 @@ export const HistoryService = {
       if (!saved) return false;
       historyCache = history;
 
-      console.log(`[HistoryService] 已更新历史记录 ${id} 的分析状态`);
       return true;
     } catch (error) {
       console.error(`[HistoryService] 更新分析状态失败:`, error);
@@ -290,13 +287,11 @@ export const HistoryService = {
       const targetIndex = history.findIndex((h) => isSameHistoryId(h.id, id));
 
       if (targetIndex === -1) {
-        console.warn(`[HistoryService] 未找到ID为 ${id} 的历史记录`);
         return false;
       }
 
       const targetItem = history[targetIndex];
       if (!targetItem) {
-        console.warn(`[HistoryService] 历史记录项为空`);
         return false;
       }
 
@@ -310,7 +305,6 @@ export const HistoryService = {
       if (!saved) return false;
       historyCache = history;
 
-      console.log(`[HistoryService] 已更新历史记录 ${id} 的分析状态`);
       return true;
     } catch (error) {
       console.error(`[HistoryService] 更新分析状态失败:`, error);

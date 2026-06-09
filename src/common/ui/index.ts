@@ -103,7 +103,6 @@ registerActions({
   'switch-tab': async (params: Record<string, unknown>) => {
     const tab = (params.tab as string) || '';
     if (!tab) {
-      console.warn('[ActionRegistry] switch-tab: missing tab parameter');
       return;
     }
     
@@ -119,5 +118,3 @@ registerActions({
   'scroll-to-hub-module': (params: Record<string, unknown>) => scrollToHubModule(params.category as string),
   'scroll-to-more-module': (params: Record<string, unknown>) => scrollToMoreModule(params.category as string),
 });
-
-console.log("✅ [UI] 模块已加载并注册到 ActionRegistry");

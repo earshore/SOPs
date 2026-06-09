@@ -116,8 +116,6 @@ export class OverviewRenderer {
     
     // 初始化事件监听
     this._initEvents();
-    
-    console.log(`✅ ${this.moduleConfig.title} 总览页面已渲染`);
   }
 
   /**
@@ -598,6 +596,5 @@ export class OverviewRenderer {
    * 卸载
    */
   unmount(): void {
-    console.log(`🧹 ${this.moduleConfig.title} 总览页面已卸载`);
   }
 }

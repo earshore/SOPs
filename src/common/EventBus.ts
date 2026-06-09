@@ -50,6 +50,22 @@ interface LeakDetection {
   message: string;
 }
 
+interface EventListenerError {
+  event: string;
+  error: unknown;
+  timestamp: number;
+}
+
+interface EventBusDebugInfo {
+  stats: {
+    totalListeners: number;
+    eventCounts: Record<string, number>;
+    events: EventStatsDetail[];
+  };
+  leaks: LeakDetection[];
+  listenerErrors: EventListenerError[];
+}
+
 type EventListener = (...args: never[]) => unknown;
 
 /**
@@ -66,6 +82,9 @@ class EventBus {
   /** 统计信息 */
   private _stats: EventStats;
 
+  /** 监听器执行错误 */
+  private _listenerErrors: EventListenerError[];
+
   constructor() {
     this.events = {};
     
@@ -79,6 +98,8 @@ class EventBus {
       totalListeners: 0,
       eventCounts: {},
     };
+
+    this._listenerErrors = [];
   }
 
   /**
@@ -113,20 +134,9 @@ class EventBus {
     const currentCount = this.events[event].length;
     
     if (currentCount >= this._config.maxListenersPerEvent) {
-      console.error(
-        `[EventBus] 事件 "${event}" 的监听器数量已达上限 (${this._config.maxListenersPerEvent})，` +
-        `可能存在内存泄漏！请检查是否正确移除了监听器。`
-      );
       return () => {}; // 返回空函数，防止添加更多监听器
     }
-    
-    if (currentCount >= this._config.warningThreshold) {
-      console.warn(
-        `[EventBus] 警告：事件 "${event}" 的监听器数量过多 (${currentCount})，` +
-        `可能存在内存泄漏风险。建议检查监听器是否正确移除。`
-      );
-    }
-    
+
     this.events[event].push(callback);
     this._stats.totalListeners++;
     if (!this._stats.eventCounts[event]) {
@@ -197,7 +207,11 @@ class EventBus {
       try {
         (callback as GenericEventHandler)(data);
       } catch (error) {
-        console.error(`[EventBus] Error in listener for event "${event}":`, error);
+        this._listenerErrors.push({
+          event,
+          error,
+          timestamp: Date.now(),
+        });
       }
     });
   }
@@ -213,8 +227,6 @@ class EventBus {
     this._stats.totalListeners -= count;
     delete this.events[event];
     delete this._stats.eventCounts[event];
-    
-    console.log(`[EventBus] 已移除事件 "${event}" 的所有监听器 (${count} 个)`);
   }
   
   /**
@@ -283,27 +295,30 @@ class EventBus {
     
     return leaks;
   }
+
+  /**
+   * 获取监听器执行错误
+   */
+  getListenerErrors(): EventListenerError[] {
+    return [...this._listenerErrors];
+  }
+
+  /**
+   * 清除监听器执行错误
+   */
+  clearListenerErrors(): void {
+    this._listenerErrors = [];
+  }
   
   /**
-   * 打印调试信息
+   * 获取调试信息
    */
-  debug(): void {
-    const stats = this.getStats();
-    const leaks = this.detectLeaks();
-    
-    console.group('[EventBus] 调试信息');
-    console.log('总监听器数量:', stats.totalListeners);
-    console.log('事件数量:', Object.keys(this.events).length);
-    console.table(stats.events);
-    
-    if (leaks.length > 0) {
-      console.warn('检测到潜在的内存泄漏:');
-      console.table(leaks);
-    } else {
-      console.log('✅ 未检测到内存泄漏');
-    }
-    
-    console.groupEnd();
+  debug(): EventBusDebugInfo {
+    return {
+      stats: this.getStats(),
+      leaks: this.detectLeaks(),
+      listenerErrors: this.getListenerErrors(),
+    };
   }
   
   /**
@@ -312,7 +327,6 @@ class EventBus {
    */
   configure(config: Partial<EventBusConfig>): void {
     this._config = { ...this._config, ...config };
-    console.log('[EventBus] 配置已更新:', this._config);
   }
 }
 
@@ -324,4 +338,4 @@ export default eventBus;
 
 // 命名导出
 export { EventBus };
-export type { EventBusConfig, EventStats, EventStatsDetail, LeakDetection };
+export type { EventBusConfig, EventStats, EventStatsDetail, LeakDetection, EventListenerError, EventBusDebugInfo };

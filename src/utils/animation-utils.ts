@@ -18,7 +18,6 @@ import { ANIMATION_CLASSES } from '../config/animation-config';
  * @example
  * ```typescript
  * await addAnimation(button, 'fade-in', 300);
- * console.log('动画完成');
  * ```
  */
 export async function addAnimation(
@@ -281,8 +280,7 @@ export function batchRemoveAnimation(elements: HTMLElement[], animationClass: st
  * 
  * @example
  * ```typescript
- * const hasClass = toggleAnimation(element, 'active');
- * console.log(hasClass ? '已激活' : '已取消');
+ * const isActive = toggleAnimation(element, 'active');
  * ```
  */
 export function toggleAnimation(element: HTMLElement, animationClass: string): boolean {
@@ -302,7 +300,7 @@ export function toggleAnimation(element: HTMLElement, animationClass: string): b
  * safeAnimate(() => {
  *   element.classList.add('complex-animation');
  * }, (error) => {
- *   console.warn('动画失败:', error);
+ *   handleAnimationError(error);
  * });
  * ```
  */
@@ -313,7 +311,6 @@ export function safeAnimate(
   try {
     callback();
   } catch (error) {
-    console.warn('Animation failed:', error);
     if (onError && error instanceof Error) {
       onError(error);
     }
@@ -329,7 +326,7 @@ export function safeAnimate(
  * @example
  * ```typescript
  * const duration = getAnimationDuration(element);
- * console.log(`动画时长: ${duration}ms`);
+ * element.style.setProperty('--animation-duration', `${duration}ms`);
  * ```
  */
 export function getAnimationDuration(element: HTMLElement): number {
@@ -561,4 +558,3 @@ export function resetListAnimation(
     item.style.removeProperty('--stagger-index');
   });
 }
-

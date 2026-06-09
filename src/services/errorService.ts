@@ -195,7 +195,6 @@ class ErrorServiceClass {
     try {
       return fn();
     } catch (e) {
-      console.log('Silent error', { message: (e as Error).message }, 'ErrorService');
       return defaultValue;
     }
   }

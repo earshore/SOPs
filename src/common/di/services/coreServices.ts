@@ -128,11 +128,7 @@ function registerApplicationServices(registry: ServiceRegistry): void {
  * 注册核心服务到注册表
  */
 export function registerCoreServices(registry: ServiceRegistry): void {
-  console.log('[CoreServices] 开始注册核心服务配置');
-
   registerBaseServices(registry);
   registerRuntimeServices(registry);
   registerApplicationServices(registry);
-
-  console.log('[CoreServices] 核心服务配置注册完成');
 }

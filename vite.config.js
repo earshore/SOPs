@@ -3,15 +3,18 @@ import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
 import { execFileSync } from 'child_process';
 import { createRequire } from 'module';
-import checker from 'vite-plugin-checker';
 import viteCompression from 'vite-plugin-compression';
-import os from 'os';
 
 // ES 模块兼容的 __dirname 定义
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const require = createRequire(import.meta.url);
 const packageJson = require('./package.json');
+const devServerForwardConsole = {
+    enabled: true,
+    unhandledErrors: true,
+    logLevels: ['error', 'warn']
+};
 
 function getAppVersion() {
     try {
@@ -34,15 +37,11 @@ function getAppVersion() {
 export default defineConfig({
     publicDir: 'public',
     define: {
-        'import.meta.env.VITE_APP_VERSION': JSON.stringify(getAppVersion())
+        'import.meta.env.VITE_APP_VERSION': JSON.stringify(getAppVersion()),
+        __BUNDLED_DEV__: 'false',
+        __SERVER_FORWARD_CONSOLE__: JSON.stringify(devServerForwardConsole)
     },
     plugins: [
-        checker({
-            typescript: {
-                tsconfigPath: 'tsconfig.app.json',
-                buildMode: false
-            }
-        }),
         // Gzip 压缩
         viteCompression({
             verbose: true,
@@ -151,6 +150,7 @@ export default defineConfig({
         // 禁用自动打开浏览器，改用 package.json 脚本控制
         open: false,
         cors: true,
+        forwardConsole: devServerForwardConsole,
         // 静态资源服务
         fs: {
             strict: false,

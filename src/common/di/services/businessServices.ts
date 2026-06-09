@@ -16,8 +16,6 @@ import { createPerformanceStorage } from '@/services/performanceStorage';
  * 注册业务服务到注册表
  */
 export function registerBusinessServices(registry: ServiceRegistry): void {
-  console.log('[BusinessServices] 开始注册业务服务配置');
-
   // ================================================================
   // Level 3: 业务服务（依赖应用服务）
   // ================================================================
@@ -106,6 +104,4 @@ export function registerBusinessServices(registry: ServiceRegistry): void {
     dependencies: [SERVICE_NAMES.LOGGER],
     optional: true
   });
-
-  console.log('[BusinessServices] 业务服务配置注册完成');
 }

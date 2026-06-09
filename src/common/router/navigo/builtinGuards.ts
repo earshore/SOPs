@@ -200,10 +200,7 @@ export const dataPreloadGuard: RouteGuard = {
  * @returns 是否已认证
  */
 async function checkAuthentication(): Promise<boolean> {
-  // TODO: 集成实际的认证逻辑
-  // 例如：检查 token、session 等
-
-  // 暂时返回 true（不启用认证）
+  // 当前产品未启用认证服务，路由认证守卫保持放行。
   return true;
 }
 
@@ -214,9 +211,7 @@ async function checkAuthentication(): Promise<boolean> {
  * @returns 是否有权限
  */
 async function checkPermissions(_permissions: string[]): Promise<boolean> {
-  // TODO: 集成实际的权限检查逻辑
-
-  // 暂时返回 true（不启用权限检查）
+  // 当前产品未启用权限服务，路由权限守卫保持放行。
   return true;
 }
 

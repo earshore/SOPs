@@ -534,7 +534,6 @@ class PromptsModule extends BaseModule {
         renderCategories();
         renderPromptList();
 
-        console.log('✅ 提示词模块已挂载');
     }
 
 
@@ -553,7 +552,6 @@ class PromptsModule extends BaseModule {
         currentLang = 'zh';
         currentKeyword = '';
 
-        console.log('❌ 提示词模块已卸载');
     }
 
 

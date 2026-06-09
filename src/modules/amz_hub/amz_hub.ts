@@ -1,5 +1,3 @@
-console.log("📚 AmzHub Core Module Loading...");
-
 import "./amz_hub_style.css";
 import {
   createModuleLoader,
@@ -28,5 +26,3 @@ export function registerHubModule(
 ): void {
   moduleLoader.registerSubModule(routeId, loader);
 }
-
-console.log("✅ AmzHub Module 加载完成");

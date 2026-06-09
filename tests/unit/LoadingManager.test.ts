@@ -100,8 +100,9 @@ describe('LoadingManager', () => {
       manager.start('task2');
       manager.start('task3');
 
-      manager.clearAll();
+      const clearedCount = manager.clearAll();
 
+      expect(clearedCount).toBe(3);
       expect(manager.taskCount).toBe(0);
       expect(manager.isLoading).toBe(false);
     });
@@ -289,12 +290,10 @@ describe('LoadingManager', () => {
 
   describe('错误处理', () => {
     it('应该处理停止不存在的任务', () => {
-      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const stopped = manager.stop('non-existent');
 
-      manager.stop('non-existent');
-
-      expect(consoleSpy).toHaveBeenCalled();
-      consoleSpy.mockRestore();
+      expect(stopped).toBe(false);
+      expect(manager.taskCount).toBe(0);
     });
 
     it('应该处理重复开始同一任务', () => {
@@ -385,9 +384,10 @@ describe('LoadingManager', () => {
       }
 
       const startTime = Date.now();
-      manager.clearAll();
+      const clearedCount = manager.clearAll();
       const elapsed = Date.now() - startTime;
 
+      expect(clearedCount).toBe(1000);
       expect(manager.taskCount).toBe(0);
       expect(elapsed).toBeLessThan(50);
     });

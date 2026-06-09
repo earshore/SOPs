@@ -18,14 +18,12 @@ class WorkflowsModule extends BaseModule {
         setSafeHtml(container, html);
         container.classList.add('fade-in');
 
-        console.log('✅ 工作流模块已挂载');
     }
 
     /**
      * 卸载模块
      */
     unmount(): void {
-        console.log('❌ 工作流模块已卸载');
     }
 }
 

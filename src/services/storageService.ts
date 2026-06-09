@@ -3,7 +3,7 @@
 // 🎯 统一数据持久化服务（TypeScript版本）
 // 替代分散的 localStorage 直接调用
 // 🎯 P0-4: 已迁移到统一错误处理
-// 🎯 DI改造：移除Logger依赖，使用console直接输出
+// 🎯 DI改造：移除Logger依赖
 // 🎯 P0-4.1.8: 在数据边界使用类型守卫
 // ================================================================
 
@@ -118,13 +118,11 @@ class StorageServiceClass implements IStorageService {
       // 排除 llm_active_provider，它存储的是字符串而不是配置对象
       if (key.startsWith(STORAGE_KEYS.LLM_CONFIG_PREFIX) && key !== STORAGE_KEYS.LLM_ACTIVE_PROVIDER) {
         if (!isLLMProviderConfig(parsed)) {
-          console.warn(`[StorageService] LLM配置格式无效，已清除: ${key}`);
           this.remove(key);
           return defaultValue;
         }
       } else if (key === STORAGE_KEYS.PROXY_CONFIG || key === STORAGE_KEYS.SCRAPER_PROXY_CONFIG) {
         if (!isProxyConfig(parsed)) {
-          console.warn(`[StorageService] 代理配置格式无效，已清除: ${key}`);
           this.remove(key);
           return defaultValue;
         }
@@ -339,7 +337,13 @@ class StorageServiceClass implements IStorageService {
         }
       }
     } catch (e) {
-      console.warn('[StorageService] 获取访问时间失败', e);
+      handleSystemError('SYS_STORAGE_ERROR', {
+        module: 'StorageService',
+        action: 'getAccessTimes'
+      }, e as Error, {
+        log: true,
+        notify: false
+      });
     }
 
     return items.sort((a, b) => a.accessTime - b.accessTime);
@@ -354,10 +358,6 @@ class StorageServiceClass implements IStorageService {
     const threshold = this._lruConfig.maxSize * this._lruConfig.warningThreshold;
 
     if (projectedUsage > threshold) {
-      console.warn('[StorageService] 缓存使用量接近上限，开始清理', {
-        current: `${(projectedUsage / 1024 / 1024).toFixed(2)}MB`,
-        max: `${(this._lruConfig.maxSize / 1024 / 1024).toFixed(2)}MB`
-      });
       this._cleanupLRU();
     }
   }
@@ -372,7 +372,6 @@ class StorageServiceClass implements IStorageService {
       const targetSize = usage.used * (1 - this._lruConfig.cleanupRatio);
 
       let currentSize = usage.used;
-      let removedCount = 0;
 
       for (const item of items) {
         if (this._isProtectedKey(item.key) || !this._isCacheKey(item.key)) {
@@ -381,19 +380,19 @@ class StorageServiceClass implements IStorageService {
 
         this.remove(item.key);
         currentSize -= item.size;
-        removedCount++;
 
         if (currentSize <= targetSize) {
           break;
         }
       }
-
-      console.info('[StorageService] LRU清理完成', {
-        removedCount,
-        freedSpace: `${((usage.used - currentSize) / 1024).toFixed(2)}KB`
-      });
     } catch (e) {
-      console.error('[StorageService] LRU清理失败', e);
+      handleSystemError('SYS_STORAGE_ERROR', {
+        module: 'StorageService',
+        action: 'cleanupLRU'
+      }, e as Error, {
+        log: true,
+        notify: false
+      });
     }
   }
 
@@ -448,14 +447,11 @@ class StorageServiceClass implements IStorageService {
    * 处理存储空间超限
    */
   private _handleQuotaExceeded(): void {
-    console.warn('[StorageService] 存储空间不足，尝试清理数据');
-
     this._cleanupLRU();
 
     const history = this.get<unknown[]>(STORAGE_KEYS.SCRAPE_HISTORY, []);
     if (history && history.length > 10) {
       this.set(STORAGE_KEYS.SCRAPE_HISTORY, history.slice(0, 10));
-      console.info('[StorageService] 清理了采集历史数据');
     }
   }
 
@@ -480,13 +476,19 @@ class StorageServiceClass implements IStorageService {
 
       // 🎯 数据边界验证：验证完整配置
       if (!isLLMProviderConfig(fullConfig)) {
-        console.warn('[StorageService] LLM完整配置格式无效');
         return null;
       }
 
       return fullConfig;
     } catch (error) {
-      console.warn('[StorageService] Failed to decrypt API key', error);
+      handleSystemError('SYS_STORAGE_ERROR', {
+        module: 'StorageService',
+        action: 'getLLMConfigWithKey',
+        key: `llm_key_${activeProvider}`
+      }, error as Error, {
+        log: true,
+        notify: false
+      });
       return { ...config, apiKey: '' } as LLMProviderConfig;
     }
   }
@@ -544,7 +546,6 @@ class StorageServiceClass implements IStorageService {
   setProxyConfig(config: ProxyConfig): void {
     // 🎯 数据边界验证：保存前验证
     if (!isProxyConfig(config)) {
-      console.error('[StorageService] 无法保存：代理配置格式无效');
       return;
     }
 

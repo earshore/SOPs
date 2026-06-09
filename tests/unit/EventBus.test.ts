@@ -49,28 +49,31 @@ describe('EventBus', () => {
   });
 
   describe('内存泄漏检测', () => {
-    it('应该在监听器过多时发出警告', () => {
-      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-      
+    it('应该在监听器过多时标记泄漏风险', () => {
       // 添加超过警告阈值的监听器
       for (let i = 0; i < 31; i++) {
         eventBus.on('test-event', () => {});
       }
       
-      expect(consoleSpy).toHaveBeenCalled();
-      consoleSpy.mockRestore();
+      const leaks = eventBus.detectLeaks();
+      expect(leaks).toEqual([
+        expect.objectContaining({
+          event: 'test-event',
+          count: 31,
+          severity: 'warning'
+        })
+      ]);
     });
 
     it('应该在达到最大监听器数量时拒绝添加', () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-      
       // 添加超过最大限制的监听器
       for (let i = 0; i < 51; i++) {
         eventBus.on('test-event', () => {});
       }
       
-      expect(consoleErrorSpy).toHaveBeenCalled();
-      consoleErrorSpy.mockRestore();
+      const stats = eventBus.getStats();
+      expect(stats.eventCounts['test-event']).toBe(50);
+      expect(stats.events[0]?.isError).toBe(true);
     });
   });
 
@@ -102,7 +105,6 @@ describe('EventBus', () => {
 
   describe('错误处理', () => {
     it('应该捕获监听器中的错误', () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       const callback = vi.fn(() => {
         throw new Error('Test error');
       });
@@ -110,12 +112,15 @@ describe('EventBus', () => {
       eventBus.on('test-event', callback);
       eventBus.emit('test-event', {});
       
-      expect(consoleErrorSpy).toHaveBeenCalled();
-      consoleErrorSpy.mockRestore();
+      expect(eventBus.getListenerErrors()).toEqual([
+        expect.objectContaining({
+          event: 'test-event',
+          error: expect.any(Error)
+        })
+      ]);
     });
 
     it('应该继续执行其他监听器即使某个失败', () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       const callback1 = vi.fn(() => {
         throw new Error('Error');
       });
@@ -128,7 +133,7 @@ describe('EventBus', () => {
       
       expect(callback1).toHaveBeenCalled();
       expect(callback2).toHaveBeenCalled();
-      consoleErrorSpy.mockRestore();
+      expect(eventBus.getListenerErrors()).toHaveLength(1);
     });
   });
 

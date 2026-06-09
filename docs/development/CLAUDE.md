@@ -233,5 +233,5 @@ Vite 配置了手动分包策略（`vite.config.js`）：
 
 - Node.js 版本要求: >=18.0.0
 - LLM 请求由浏览器直接调用 `https://new.hongecb.store/v1`，开发服务器不再配置 `/v1` 代理。
-- TypeScript 检查在 Vite 插件中临时禁用（待修复类型错误后重新启用）
+- TypeScript 检查由 `npm run type-check` 和 CI gate 独立执行，Vite 配置不再内置 checker 插件。
 - 生产构建会移除所有 console 语句

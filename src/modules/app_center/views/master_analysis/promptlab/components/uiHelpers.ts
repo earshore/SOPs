@@ -41,7 +41,6 @@ export function initAutoHeightInputs(
         originalHeights.set(el, h);
       }
     });
-    console.log('[uiHelpers] ✅ 已初始化输入框自动高度调整');
   }, 100);
 }
 
@@ -67,8 +66,6 @@ export function expandInput(
 
   target.style.height = `${newHeight}px`;
   target.style.transition = 'height 0.2s ease-out';
-
-  console.log('[uiHelpers] 输入框扩展:', { minHeight, newHeight });
 }
 
 /**
@@ -84,7 +81,6 @@ export function restoreInput(
   if (originalHeight) {
     target.style.height = `${originalHeight}px`;
     target.style.transition = 'height 0.2s ease-in';
-    console.log('[uiHelpers] 输入框恢复:', { height: originalHeight });
   }
 }
 

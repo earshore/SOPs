@@ -72,12 +72,7 @@ export class ServiceRegistry {
    * 注册服务配置
    */
   register<T = unknown>(config: ServiceConfig<T>): void {
-    if (this.configs.has(config.name)) {
-      console.warn(`[ServiceRegistry] 服务 "${config.name}" 已注册，将被覆盖`);
-    }
-
     this.configs.set(config.name, config);
-    console.log(`[ServiceRegistry] 已注册服务配置: ${config.name}`);
   }
 
   /**
@@ -105,8 +100,6 @@ export class ServiceRegistry {
    * 批量注册所有服务到DI容器
    */
   registerAll(container: DIContainer): void {
-    console.log(`[ServiceRegistry] 开始批量注册 ${this.configs.size} 个服务到容器`);
-    
     for (const config of this.configs.values()) {
       container.register(
         config.name,
@@ -117,8 +110,6 @@ export class ServiceRegistry {
         }
       );
     }
-    
-    console.log(`[ServiceRegistry] 批量注册完成`);
   }
 
   /**
@@ -133,7 +124,6 @@ export class ServiceRegistry {
    */
   clear(): void {
     this.configs.clear();
-    console.log(`[ServiceRegistry] 已清空所有服务配置`);
   }
 }
 

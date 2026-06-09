@@ -151,7 +151,6 @@ export class AnimationManager {
 
       // 验证版本号
       if (storedSettings.version !== CONFIG_VERSION) {
-        console.log('Animation settings version mismatch, using defaults');
         return;
       }
 
@@ -331,4 +330,3 @@ export class AnimationManager {
  * 导出单例实例
  */
 export const animationManager = AnimationManager.getInstance();
-

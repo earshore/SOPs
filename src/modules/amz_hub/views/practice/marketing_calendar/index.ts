@@ -72,7 +72,6 @@ class MarketingCalendarModule extends BaseModule {
     this.bindCalendarClickEvents();
     this.bindSearchEvents();
 
-    console.log("✅ Marketing Calendar Loaded");
   }
 
   onUnmount(): void {
@@ -83,7 +82,6 @@ class MarketingCalendarModule extends BaseModule {
     }
 
     // 清理全局代理
-    console.log("❌ Marketing Calendar Unmounted");
   }
 
   // ==================== Core Logic ====================
@@ -96,8 +94,7 @@ class MarketingCalendarModule extends BaseModule {
       );
       const saved = storageService.get(AMZF_HISTORY_KEY, []) as string[];
       this.state.searchHistory = saved || [];
-    } catch (e) {
-      console.warn("Failed to load search history:", e);
+    } catch {
       this.state.searchHistory = [];
     }
   }
@@ -109,8 +106,8 @@ class MarketingCalendarModule extends BaseModule {
         SERVICE_NAMES.STORAGE,
       );
       storageService.set(AMZF_HISTORY_KEY, this.state.searchHistory);
-    } catch (e) {
-      console.warn("Failed to save search history:", e);
+    } catch {
+      // Search history persistence is optional.
     }
   }
 

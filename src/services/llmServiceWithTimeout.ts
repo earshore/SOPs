@@ -78,13 +78,6 @@ export async function callLLMWithTimeout(
     ...llmOptions
   } = options;
 
-  console.log(`开始LLM调用: ${description}`, {
-    taskId,
-    model: request.model,
-    timeout,
-    maxRetries
-  }, 'LLMService');
-
   return new Promise((resolve, reject) => {
     // 设置工作状态
     workingStateManager.setWorking(taskId, {
@@ -107,7 +100,6 @@ export async function callLLMWithTimeout(
         resolve(result);
       },
       onSuccess: () => {
-        console.log(`LLM调用成功: ${description}`, { taskId }, 'LLMService');
         if (showUserNotification) {
           showToast('请求成功', { type: 'success' });
         }
@@ -162,7 +154,6 @@ export async function callLLMWithConfigAndTimeout(
  */
 export function cancelLLMCall(taskId: string): void {
   workingStateManager.clearWorking(taskId);
-  console.log(`LLM调用已取消: ${taskId}`, {}, 'LLMService');
 }
 
 /**

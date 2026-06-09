@@ -1,4 +1,3 @@
-console.log("📋 SOPs Core Module Loading...");
 import './sops_style.css';
 import { createModuleLoader, ModuleLoader } from '../../common/utils/ModuleLoader';
 import type { ModuleLoaderFn } from '@/types/modules-business';

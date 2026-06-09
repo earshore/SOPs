@@ -73,7 +73,6 @@ function cleanup(): void {
     // 清理已注册的动作
     if (registeredActions.length > 0) {
         unregisterActions(registeredActions);
-        console.log(`[Input] 已清理 ${registeredActions.length} 个动作`);
         registeredActions = [];
     }
 }
@@ -445,8 +444,6 @@ function setupEventListeners(container: HTMLElement): void {
  * @param {HTMLElement} container - 容器元素
  */
 export async function mount(container: HTMLElement): Promise<void> {
-    console.log('[Input] 🔧 开始挂载子模块');
-
     try {
         // 1. 使用 SafeModuleLoader 加载模板
         const loader = SafeModuleLoader.getInstance();
@@ -486,8 +483,6 @@ export async function mount(container: HTMLElement): Promise<void> {
 
         // 4. 从 state 恢复状态
         restoreInputsFromState();
-
-        console.log('[Input] ✅ 子模块挂载成功');
     } catch (error) {
         console.error('[Input] ❌ 子模块挂载失败:', error);
         throw error;
@@ -498,16 +493,12 @@ export async function mount(container: HTMLElement): Promise<void> {
  * 卸载子模块
  */
 export function unmount(): void {
-    console.log('[Input] 🔄 开始卸载子模块');
-
     try {
         // 1. 保存状态到 state
         saveInputsToState();
 
         // 2. 清理事件监听器和定时器
         cleanup();
-
-        console.log('[Input] ✅ 子模块卸载成功');
     } catch (error) {
         console.error('[Input] ❌ 子模块卸载失败:', error);
     }

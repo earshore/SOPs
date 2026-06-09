@@ -435,7 +435,6 @@ export function unmount(): void {
   sessionTemperature = 0.3;
   threadStore = createDefaultThreadStore();
   cleanupMessageToolbars();
-  console.log('[Deep Chat] 模块已卸载');
 }
 
 async function refreshLLMConfig(container: HTMLElement): Promise<void> {
@@ -719,7 +718,6 @@ async function handlePlaygroundRequest(
     );
   } catch (error) {
     if (requestController?.signal.aborted) {
-      console.log('[Deep Chat] LLM 调用已取消');
       return;
     }
     const message = error instanceof Error ? error.message : '模型调用失败';
@@ -905,8 +903,7 @@ function copyMessageContent(bubble: HTMLElement): void {
 
   void writeClipboardText(content)
     .then(() => showToast('消息已复制', { type: 'success' }))
-    .catch((error) => {
-      console.warn('[Deep Chat] 复制消息失败:', error);
+    .catch(() => {
       showToast('复制失败，请手动选择文本复制', { type: 'error' });
     });
 }
@@ -918,8 +915,8 @@ async function writeClipboardText(content: string): Promise<void> {
       await clipboard.writeText(content);
       return;
     }
-  } catch (error) {
-    console.warn('[Deep Chat] Clipboard API 不可用，尝试降级复制:', error);
+  } catch {
+    // Continue with the selection-based fallback below.
   }
 
   copyTextWithSelectionFallback(content);

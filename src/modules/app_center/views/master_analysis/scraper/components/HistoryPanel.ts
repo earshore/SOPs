@@ -130,18 +130,15 @@ export class HistoryPanel {
         // 优先加载"AI智能分析"的报告，如果不存在则回退到旧的"AI分析"报告
         if (item.analysisStatus?.isAnalyzed && item.analysisStatus?.analysisReport) {
             state.setAnalysisReport(item.analysisStatus.analysisReport);
-            console.log('[Scraper] 已加载"AI智能分析"报告到全局状态');
             return;
         }
 
         if (item.report) {
             state.setAnalysisReport(item.report);
-            console.log('[Scraper] 已加载旧版"AI分析"报告到全局状态');
             return;
         }
 
         state.setAnalysisReport(null);
-        console.log('[Scraper] 该快照无分析报告');
     }
 
     private getSnapshotLoadMessage(item: HistoryItem): string {
@@ -172,8 +169,6 @@ export class HistoryPanel {
                     { module: 'HistoryPanel', action: 'viewAnalysisReport', itemId: item.id }
                 );
             }
-
-            console.log('[Scraper] 📊 已将"AI智能分析"报告加载到全局状态');
 
             // 3. 跳转到 AI智能分析页面查看报告
             await window.navigateTo('/app-center/ai-analysis');

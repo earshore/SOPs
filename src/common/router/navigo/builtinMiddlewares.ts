@@ -17,28 +17,8 @@ import { loadingManager } from '@/common/utils/LoadingManager';
  * @returns 日志中间件
  */
 export function createLoggingMiddleware(verbose: boolean = false): RouteMiddleware {
-  return async (context, next) => {
-    const { to, from } = context;
-
-    console.log(`[Router] ${from?.path || 'null'} -> ${to.path}`);
-
-    if (verbose) {
-      console.log('[Router] Route details:', {
-        to: {
-          path: to.path,
-          moduleId: to.config.moduleId,
-          params: to.params,
-          query: to.query,
-        },
-        from: from
-          ? {
-              path: from.path,
-              moduleId: from.config.moduleId,
-            }
-          : null,
-      });
-    }
-
+  void verbose;
+  return async (_context, next) => {
     await next();
   };
 }
@@ -59,8 +39,8 @@ export function createAnalyticsMiddleware(): RouteMiddleware {
     try {
       // 记录页面浏览
       analyticsService.trackPageView(to.path, to.config.label || to.path);
-    } catch (error) {
-      console.warn('[analyticsMiddleware] Failed to track page view:', error);
+    } catch {
+      // Analytics failure must not block navigation.
     }
 
     await next();
@@ -85,8 +65,7 @@ export function createLoadingMiddleware(): RouteMiddleware {
       loadingManager.start(taskId, { message: '正在加载...' });
 
       await next();
-    } catch (error) {
-      console.warn('[loadingMiddleware] Error:', error);
+    } catch {
       await next();
     } finally {
       // 隐藏加载指示器

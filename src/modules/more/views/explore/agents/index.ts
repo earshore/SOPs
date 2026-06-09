@@ -18,14 +18,12 @@ class AgentsModule extends BaseModule {
         setSafeHtml(container, html);
         container.classList.add('fade-in');
 
-        console.log('✅ Agent Center 模块已挂载');
     }
 
     /**
      * 卸载模块
      */
     unmount(): void {
-        console.log('❌ Agent Center 模块已卸载');
     }
 }
 
