@@ -1,4 +1,20 @@
 <!-- 系统设置 (Alpine.js Refactored - Visual Enhanced) -->
+<style>
+    .model-feature-tooltip {
+        opacity: 0;
+        visibility: hidden;
+        transform: translate(-50%, 4px);
+        transition: opacity 150ms ease, transform 150ms ease, visibility 150ms ease;
+    }
+
+    .model-feature-icon:hover .model-feature-tooltip,
+    .model-feature-icon:focus .model-feature-tooltip,
+    .model-feature-icon:focus-visible .model-feature-tooltip {
+        opacity: 1;
+        visibility: visible;
+        transform: translate(-50%, 0);
+    }
+</style>
 <div x-data="settingsPanel" @open-settings.window="open()" @close-settings.window="close()"
     @keydown.escape.window="close()" x-show="isOpen" x-transition.opacity.duration.300ms
     class="fixed inset-0 z-50 flex items-center justify-end" style="display: none;">
@@ -155,26 +171,32 @@
                         x-transition:enter="transition ease-out duration-300"
                         x-transition:enter-start="opacity-0 scale-95"
                         x-transition:enter-end="opacity-100 scale-100"
-                        class="p-4 bg-gradient-to-br from-slate-50 to-blue-50/30 rounded-2xl border border-slate-100/80 shadow-sm">
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
-                                    <i class="fas fa-expand-alt text-blue-500 text-xs"></i>
-                                </div>
-                                <div>
-                                    <span class="text-[10px] text-slate-400 uppercase tracking-wider font-medium block">上下文</span>
-                                    <span class="text-sm font-bold text-slate-700"
+                        class="rounded-xl border border-slate-200/80 bg-white/80 px-3 py-2.5 shadow-sm">
+                        <div class="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+                            <div class="flex min-w-0 items-center gap-2.5">
+                                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-500 ring-1 ring-blue-100">
+                                    <i class="fas fa-expand-alt text-[11px]"></i>
+                                </span>
+                                <div class="min-w-0">
+                                    <span class="block text-[10px] font-medium uppercase tracking-wider text-slate-400">上下文</span>
+                                    <span class="block truncate text-sm font-bold leading-tight text-slate-800"
                                         x-text="activeContextText"></span>
                                 </div>
                             </div>
-                            <div class="flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
-                                    <i class="fas fa-star text-amber-500 text-xs"></i>
-                                </div>
-                                <div>
-                                    <span class="text-[10px] text-slate-400 uppercase tracking-wider font-medium block">特性</span>
-                                    <span class="text-sm font-bold text-slate-700"
-                                        x-text="activeFeaturesText"></span>
+                            <div class="flex items-center gap-2 sm:justify-end" :title="activeFeaturesText"
+                                aria-label="模型特性">
+                                <span class="text-[10px] font-medium uppercase tracking-wider text-slate-400">特性</span>
+                                <div class="flex flex-wrap items-center gap-1.5 sm:justify-end">
+                                    <template x-for="feature in activeFeatureBadges" :key="feature.key">
+                                        <span tabindex="0" role="img"
+                                            :aria-label="feature.label"
+                                            :title="feature.label"
+                                            class="model-feature-icon relative flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-500 transition-all duration-200 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:ring-offset-1">
+                                            <i class="fas text-[10px]" :class="feature.icon"></i>
+                                            <span class="model-feature-tooltip pointer-events-none absolute bottom-full left-1/2 z-30 mb-2 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-[10px] font-medium text-white shadow-lg"
+                                                x-text="feature.label"></span>
+                                        </span>
+                                    </template>
                                 </div>
                             </div>
                         </div>

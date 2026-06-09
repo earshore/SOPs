@@ -173,6 +173,32 @@ describe('LLMService', () => {
     });
   });
 
+  describe('模型列表同步', () => {
+    it('应该保留 API 返回模型的上下文和特性信息', async () => {
+      (global.fetch as any).mockResolvedValueOnce(createJsonResponse({
+        data: [
+          {
+            id: 'gpt-5.5',
+            context: 1050000,
+            features: ['vision', 'function', 'structured', 'streaming']
+          }
+        ]
+      }));
+
+      const { fetchModelsFromApi } = await import('../../src/services/llmService');
+
+      const models = await fetchModelsFromApi('new_api', 'https://api.example.com/v1', 'test-api-key');
+
+      expect(models).toEqual([
+        {
+          id: 'gpt-5.5',
+          context: 1050000,
+          features: ['vision', 'function', 'structured', 'streaming']
+        }
+      ]);
+    });
+  });
+
   describe('错误处理', () => {
     it('应该处理401认证错误', async () => {
       (global.fetch as any).mockResolvedValueOnce({

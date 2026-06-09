@@ -20,7 +20,7 @@ const mocks = vi.hoisted(() => {
     mockStore.history = history;
     return true;
   });
-  mockStore.state.setCurrentHistoryId.mockImplementation((id: HistoryItem['id']) => {
+  mockStore.state.setCurrentHistoryId.mockImplementation((id: HistoryItem['id'] | null) => {
     mockStore.state.scraper.currentHistoryId = id;
   });
 
@@ -89,6 +89,16 @@ function createScrapedData(timestamp: string, asins: string[]): ScrapedData {
   };
 }
 
+function createHistoryItem(id: HistoryItem['id'], timestamp: string, asins: string[]): HistoryItem {
+  return {
+    id,
+    timestamp,
+    site: 'US',
+    asins,
+    data: createScrapedData(timestamp, asins)
+  };
+}
+
 describe('HistoryService snapshot storage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -129,5 +139,44 @@ describe('HistoryService snapshot storage', () => {
     expect(mocks.history).toHaveLength(50);
     expect(mocks.history[0]?.timestamp).toBe('2026-01-01T00:54:00.000Z');
     expect(mocks.history[49]?.timestamp).toBe('2026-01-01T00:05:00.000Z');
+  });
+
+  it('deletes one snapshot by id', () => {
+    const first = HistoryService.save(createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001']));
+    const firstId = first[0]!.id;
+    const second = HistoryService.save(createScrapedData('2026-01-01T00:01:00.000Z', ['B000000002']));
+    const latestId = second[0]!.id;
+
+    const deleted = HistoryService.deleteById(firstId);
+
+    expect(deleted).toBe(true);
+    expect(mocks.history).toEqual([
+      expect.objectContaining({ id: latestId })
+    ]);
+  });
+
+  it('clears current history id when deleting the loaded snapshot', async () => {
+    mocks.history = [
+      createHistoryItem('hist-001', '2026-01-01T00:00:00.000Z', ['B000000001'])
+    ];
+    mocks.state.scraper.currentHistoryId = 'hist-001';
+
+    const deleted = await HistoryService.deleteByIdAsync('hist-001');
+
+    expect(deleted).toBe(true);
+    expect(mocks.state.scraper.currentHistoryId).toBeNull();
+    expect(mocks.state.setCurrentHistoryId).toHaveBeenCalledWith(null);
+    expect(mocks.history).toEqual([]);
+  });
+
+  it('does not persist when deleting a missing snapshot id', () => {
+    HistoryService.save(createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001']));
+    mocks.setScrapeHistory.mockClear();
+
+    const deleted = HistoryService.deleteById('missing-id');
+
+    expect(deleted).toBe(false);
+    expect(mocks.setScrapeHistory).not.toHaveBeenCalled();
+    expect(HistoryService.getAll()).toHaveLength(1);
   });
 });

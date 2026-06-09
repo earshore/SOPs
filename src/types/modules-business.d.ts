@@ -130,7 +130,7 @@ export interface LLMConfig {
   endpoint: string;
   apiKey: string;
   model: string;
-  models?: Array<{ id: string; context: number }>;
+  models?: Array<{ id: string; context: number; features?: string[] }>;
 }
 
 /**

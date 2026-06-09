@@ -4,7 +4,7 @@
 // ================================================================
 
 import { escapeHtml, setSafeHtml } from '../../common/utils/security';
-import { PROVIDERS, type ProviderConfig } from '../../common/constants/constants';
+import { PROVIDERS, type ModelFeature, type ProviderConfig } from '../../common/constants/constants';
 import { fetchModelsFromApi, callLLM } from '../../services/llmService';
 import { showToast } from '../../common/ui';
 import { StorageService, STORAGE_KEYS } from '../../services/storageService';
@@ -28,7 +28,7 @@ interface LLMState {
     endpoint: string;
     apiKey: string;
     model: string;
-    models: Array<string | { id: string; name?: string }>;
+    models: ModelOption[];
     showKey: boolean;
     isFetching: boolean;
     isTesting: boolean;
@@ -46,7 +46,7 @@ interface SettingsPanelData {
     llm: LLMState;
     proxy: ProxyState;
     currentProviderConfig: ProviderConfig | Record<string, never>;
-    activeModelInfo: { id: string; name?: string } | null;
+    activeModelInfo: ModelMetadata | null;
     isProduction: boolean;
     localData: {
         usage: LocalDataUsage | null;
@@ -63,6 +63,7 @@ interface SettingsPanelData {
     fetchModelsText: string;
     activeContextText: string;
     activeFeaturesText: string;
+    activeFeatureBadges: ModelFeatureBadge[];
     testConnectionIconClass: string;
     testConnectionText: string;
     proxyInputType: string;
@@ -92,8 +93,8 @@ interface SettingsPanelData {
     setProxyCustomUrl(event: Event): void;
     toggleLlmKeyVisibility(): void;
     toggleProxyKeyVisibility(): void;
-    getModelValue(model: string | { id: string; name?: string }): string;
-    getModelLabel(model: string | { id: string; name?: string }): string;
+    getModelValue(model: ModelOption): string;
+    getModelLabel(model: ModelOption): string;
     refreshLocalDataUsage(): Promise<void>;
     exportLocalData(): Promise<void>;
     importLocalData(): Promise<void>;
@@ -108,8 +109,57 @@ interface AlpineWatchContext {
     $watch<T = unknown>(property: string, callback: (value: T) => void): void;
 }
 
-type ModelOption = string | { id: string; name?: string };
+type ModelMetadata = {
+    id: string;
+    name?: string;
+    context?: number;
+    features?: string[];
+};
+type ModelOption = string | ModelMetadata;
 type SavedLLMConfig = Partial<LLMProviderConfig> | null;
+
+interface ModelFeatureBadge {
+    key: string;
+    label: string;
+    icon: string;
+}
+
+const MODEL_FEATURE_LABELS: Record<ModelFeature, string> = {
+    chat: '对话',
+    vision: '视觉',
+    audio: '音频',
+    video: '视频',
+    function: '函数调用',
+    structured: '结构化输出',
+    streaming: '流式输出',
+    reasoning: '推理',
+    code: '代码',
+    'long-context': '长上下文',
+};
+
+const MODEL_FEATURE_ICONS: Record<ModelFeature, string> = {
+    chat: 'fa-comments',
+    vision: 'fa-eye',
+    audio: 'fa-volume-high',
+    video: 'fa-video',
+    function: 'fa-plug',
+    structured: 'fa-table-cells-large',
+    streaming: 'fa-bolt',
+    reasoning: 'fa-brain',
+    code: 'fa-code',
+    'long-context': 'fa-expand-alt',
+};
+
+const OBSOLETE_PRESET_MODEL_IDS = new Set([
+    'gpt-5.4-mini',
+    'gpt-5.4-mini-ca',
+    'gpt-5.5-ca',
+]);
+
+const OLD_PRESET_MODEL_IDS = new Set([
+    ...OBSOLETE_PRESET_MODEL_IDS,
+    'gpt-5.5',
+]);
 
 function registerSettingsWatchers(panel: SettingsPanelData & AlpineWatchContext): void {
     panel.$watch('llm.provider', (val: string) => panel.loadProviderConfig(val));
@@ -155,15 +205,56 @@ async function loadProviderApiKey(provider: string, savedConfig: SavedLLMConfig)
 }
 
 function getRawProviderModels(savedConfig: SavedLLMConfig, config: ProviderConfig): ModelOption[] {
-    return savedConfig?.models && savedConfig.models.length > 0
-        ? savedConfig.models as ModelOption[]
-        : config.models;
+    const savedModels = savedConfig?.models as ModelOption[] | undefined;
+    if (!savedModels || savedModels.length === 0) return config.models;
+
+    const savedModelIds = savedModels.map(getModelId);
+    const isObsoletePreset =
+        savedModelIds.some(id => OBSOLETE_PRESET_MODEL_IDS.has(id)) &&
+        savedModelIds.every(id => OLD_PRESET_MODEL_IDS.has(id));
+    return isObsoletePreset ? config.models : savedModels;
 }
 
 function getInitialModel(savedModel: string | undefined, models: ModelOption[]): string {
     if (savedModel) return savedModel;
     const first = models[0];
     return first ? getModelId(first) : '';
+}
+
+function formatModelContext(context: number): string {
+    if (!Number.isFinite(context) || context <= 0) return '';
+    if (context >= 1000000) {
+        return `${Number((context / 1000000).toFixed(2))}M`;
+    }
+    return `${Number((context / 1000).toFixed(1))}K`;
+}
+
+function getFeatureLabel(feature: string): string {
+    return MODEL_FEATURE_LABELS[feature as ModelFeature] || feature;
+}
+
+function getFeatureIcon(feature: string): string {
+    return MODEL_FEATURE_ICONS[feature as ModelFeature] || 'fa-star';
+}
+
+function formatModelFeatures(features: unknown): string {
+    if (!Array.isArray(features) || features.length === 0) return '基础';
+    return features.map((feature) => getFeatureLabel(String(feature))).join('、');
+}
+
+function getModelFeatureBadges(features: unknown): ModelFeatureBadge[] {
+    if (!Array.isArray(features) || features.length === 0) {
+        return [{ key: 'basic', label: '基础能力', icon: 'fa-message' }];
+    }
+
+    return features.map((feature) => {
+        const key = String(feature);
+        return {
+            key,
+            label: getFeatureLabel(key),
+            icon: getFeatureIcon(key),
+        };
+    });
 }
 
 function validateModelFetchInput(llm: LLMState): string | null {
@@ -248,7 +339,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
         return PROVIDERS[this.llm.provider] || {};
     },
 
-    get activeModelInfo(): { id: string; name?: string } | null {
+    get activeModelInfo(): ModelMetadata | null {
         if (!this.llm.model) return null;
         const m = this.llm.models.find(x => (typeof x === 'string' ? x : x.id) === this.llm.model);
         if (!m || typeof m === 'string') return null;
@@ -309,21 +400,28 @@ const settingsPanelBehavior: SettingsPanelPart = {
     },
 
     get fetchModelsText(): string {
-        return this.llm.isFetching ? '同步中' : '刷新';
+        return this.llm.isFetching ? '同步中' : '获取模型列表';
     },
 
     get activeContextText(): string {
         const context = this.activeModelInfo && 'context' in this.activeModelInfo
             ? Number((this.activeModelInfo as { context?: unknown }).context)
             : 0;
-        return context ? `${context / 1000}K` : '';
+        return formatModelContext(context);
     },
 
     get activeFeaturesText(): string {
         const features = this.activeModelInfo && 'features' in this.activeModelInfo
             ? (this.activeModelInfo as { features?: unknown }).features
             : null;
-        return Array.isArray(features) && features.length > 0 ? features.join(', ') : '基础';
+        return formatModelFeatures(features);
+    },
+
+    get activeFeatureBadges(): ModelFeatureBadge[] {
+        const features = this.activeModelInfo && 'features' in this.activeModelInfo
+            ? (this.activeModelInfo as { features?: unknown }).features
+            : null;
+        return getModelFeatureBadges(features);
     },
 
     get testConnectionIconClass(): string {
@@ -579,11 +677,11 @@ const settingsPanelBehavior: SettingsPanelPart = {
         this.proxy.showKey = !this.proxy.showKey;
     },
 
-    getModelValue(model: string | { id: string; name?: string }): string {
+    getModelValue(model: ModelOption): string {
         return typeof model === 'string' ? model : model.id;
     },
 
-    getModelLabel(model: string | { id: string; name?: string }): string {
+    getModelLabel(model: ModelOption): string {
         return this.getModelValue(model);
     },
 

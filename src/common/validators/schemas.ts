@@ -80,6 +80,8 @@ export const LLMModelSchema = z.union([
   z.object({
     id: z.string(),
     name: z.string().optional(),
+    context: z.number().positive().optional(),
+    features: z.array(z.string()).optional(),
     description: z.string().optional()
   })
 ]);

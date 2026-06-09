@@ -626,7 +626,7 @@ B0EXAMPLE1" rows="5" :value="inputAsins" @input="setInputAsins($event)"></textar
                     <template :key="item.id" x-for="(item, index) in history">
                         <div :class="getHistoryCardClass(item)"
                             :style="getAnimationDelayStyle(index, 80)"
-                            class="history-card relative p-4 rounded-xl border-2 bg-white">
+                            class="history-card group relative p-4 rounded-xl border-2 bg-white">
                             <!-- ✅ 已分析标签徽章 -->
                             <template x-if="isHistoryAnalyzed(item)">
                                 <div class="absolute -top-2 -right-2 z-10">
@@ -653,9 +653,10 @@ B0EXAMPLE1" rows="5" :value="inputAsins" @input="setInputAsins($event)"></textar
                                     </div>
                                 </div>
                                 <button @click.stop="deleteHistoryItem(item.id)"
-                                    class="delete-btn w-6 h-6 flex items-center justify-center rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 opacity-0 group-hover:opacity-100 border border-transparent hover:border-rose-100"
+                                    class="delete-btn w-7 h-7 flex items-center justify-center rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100 focus-visible:opacity-100 sm:focus:opacity-100 sm:focus-visible:opacity-100 border border-transparent hover:border-rose-100"
                                     style="transition: opacity 0.2s, transform 0.2s, color 0.2s, background 0.2s;"
-                                    title="删除">
+                                    title="删除快照"
+                                    aria-label="删除快照">
                                     <i class="fas fa-times text-[10px]"></i>
                                 </button>
                             </div>

@@ -902,10 +902,17 @@ function normalizeModelInfo(model: unknown): ModelInfo | null {
       return null;
     }
 
+    const context = typeof model.context === 'number' && Number.isFinite(model.context)
+      ? model.context
+      : 128000;
+    const features = Array.isArray(model.features)
+      ? model.features.map(String)
+      : [];
+
     return {
       id: String(id),
-      context: 128000,
-      features: []
+      context,
+      features
     };
   }
 

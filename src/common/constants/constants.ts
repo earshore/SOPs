@@ -45,7 +45,17 @@ export const getRandomUserAgent = (): string => {
 // ========================
 
 /** 模型特性 */
-export type ModelFeature = 'vision' | 'function' | 'audio' | 'code' | 'chat';
+export type ModelFeature =
+  | 'chat'
+  | 'vision'
+  | 'audio'
+  | 'video'
+  | 'function'
+  | 'structured'
+  | 'streaming'
+  | 'reasoning'
+  | 'code'
+  | 'long-context';
 
 /** 模型配置 */
 export interface ModelConfig {
@@ -67,10 +77,16 @@ export const PROVIDERS: Record<string, ProviderConfig> = {
     name: "NEW API",
     endpoint: "https://new.hongecb.store/v1",
     models: [
-      { id: "gpt-5.4-mini", context: 400000, features: ["chat"] },
-      { id: "gpt-5.4-mini-ca", context: 400000, features: ["chat"] },
-      { id: "gpt-5.5", context: 400000, features: ["chat"] },
-      { id: "gpt-5.5-ca", context: 400000, features: ["chat"] },
+      {
+        id: "gpt-5.5",
+        context: 1050000,
+        features: ["chat", "vision", "function", "structured", "streaming", "reasoning", "code", "long-context"],
+      },
+      {
+        id: "gemini-3.5-flash",
+        context: 1000000,
+        features: ["chat", "vision", "audio", "video", "function", "structured", "reasoning", "code", "long-context"],
+      },
     ],
   }
 };

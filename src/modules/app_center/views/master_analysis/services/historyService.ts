@@ -98,6 +98,20 @@ function trimHistory(history: HistoryItem[]): HistoryItem[] {
     .slice(0, MAX_HISTORY_ITEMS);
 }
 
+function removeHistoryItem(history: HistoryItem[], id: HistoryItem['id']): HistoryItem[] | null {
+  const nextHistory = history.filter((item) => !isSameHistoryId(item.id, id));
+  return nextHistory.length === history.length ? null : nextHistory;
+}
+
+function clearCurrentHistoryId(id: HistoryItem['id']): void {
+  const state = appStore.getState();
+  const currentHistoryId = state.scraper.currentHistoryId;
+
+  if (currentHistoryId !== null && isSameHistoryId(currentHistoryId, id)) {
+    state.setCurrentHistoryId(null);
+  }
+}
+
 // ----------------------------------------
 // 类型定义
 // ----------------------------------------
@@ -205,6 +219,45 @@ export const HistoryService = {
   async clearAsync(): Promise<void> {
     await StorageService.removeScrapeHistoryAsync();
     historyCache = [];
+  },
+
+  /**
+   * 根据ID删除单条历史快照
+   */
+  deleteById(id: HistoryItem['id']): boolean {
+    const history = this.getAll();
+    const nextHistory = removeHistoryItem(history, id);
+
+    if (!nextHistory) {
+      return false;
+    }
+
+    const saved = StorageService.setScrapeHistory(nextHistory);
+    if (!saved) {
+      throw new Error('删除历史记录失败：本地存储空间不足，请导出备份后清理缓存');
+    }
+
+    historyCache = nextHistory;
+    clearCurrentHistoryId(id);
+    return true;
+  },
+
+  async deleteByIdAsync(id: HistoryItem['id']): Promise<boolean> {
+    const history = await this.getAllAsync();
+    const nextHistory = removeHistoryItem(history, id);
+
+    if (!nextHistory) {
+      return false;
+    }
+
+    const saved = await StorageService.setScrapeHistoryAsync(nextHistory);
+    if (!saved) {
+      throw new Error('删除历史记录失败：本地存储空间不足，请导出备份后清理缓存');
+    }
+
+    historyCache = nextHistory;
+    clearCurrentHistoryId(id);
+    return true;
   },
 
   /**

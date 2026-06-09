@@ -4,7 +4,6 @@
 
 import type { HistoryItem, ScraperSite } from '@/types/modules-business';
 import { HistoryService } from '../../services/historyService';
-import { StorageService } from '../../../../../../services/storageService';
 import { showToast } from '../../../../../../common/ui';
 import { LANGUAGE_HEADERS } from '../../../../../../common/constants/constants';
 import { appStore } from '@/stores/useAppStore';
@@ -43,17 +42,28 @@ export class HistoryPanel {
     /**
      * 删除历史记录项
      */
-    async deleteHistoryItem(id: HistoryItem['id']): Promise<void> {
-        if (!confirm("确定要删除这条历史记录吗？")) return;
+    async deleteHistoryItem(id: HistoryItem['id']): Promise<boolean> {
+        if (!confirm("确定要删除这个历史快照吗？")) return false;
 
-        const newHistory = this.history.filter(h => String(h.id) !== String(id));
-        const saved = await StorageService.setScrapeHistoryAsync(newHistory);
-        if (!saved) {
-            showToast("保存失败：空间不足，请导出备份后清理缓存", { type: 'error' });
-            return;
+        try {
+            const deleted = await HistoryService.deleteByIdAsync(id);
+            await this.loadHistoryAsync();
+
+            if (!deleted) {
+                showToast("记录不存在或已删除", { type: 'warning' });
+                return false;
+            }
+
+            showToast("快照已删除", { type: 'success' });
+            return true;
+        } catch (error) {
+            console.error('[Scraper] 删除历史快照失败:', error);
+            const message = error instanceof Error
+                ? error.message
+                : "删除历史快照失败";
+            showToast(message, { type: 'error' });
+            return false;
         }
-        await this.loadHistoryAsync();
-        showToast("记录已删除", { type: 'success' });
     }
 
     /**

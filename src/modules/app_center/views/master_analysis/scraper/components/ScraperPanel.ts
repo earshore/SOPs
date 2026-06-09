@@ -535,9 +535,10 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
                 });
         },
 
-        async deleteHistoryItem(id: string) {
-            await this.historyPanel?.deleteHistoryItem(id);
-            this.loadHistory();
+        async deleteHistoryItem(id: HistoryItem['id']) {
+            const deleted = await this.historyPanel?.deleteHistoryItem(id);
+            this.historyItems = [...(this.historyPanel?.getHistory() || [])];
+            return !!deleted;
         },
 
         async clearAllHistory() {

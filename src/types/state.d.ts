@@ -577,7 +577,7 @@ export interface LLMProviderConfig {
   endpoint: string;
   apiKey: string;
   model: string;
-  models?: Array<string | { id: string; name?: string; context?: number }>;
+  models?: Array<string | { id: string; name?: string; context?: number; features?: string[] }>;
   enabled: boolean;
 }
 
