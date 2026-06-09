@@ -4,8 +4,6 @@
 // 🎯 Phase 4: 使用 StorageService 统一数据访问
 // ================================================================
 
-// ✅ Dependency Bundling (Optimization)
-import { marked } from 'marked';
 // Chart.js and GridStack are now lazy loaded via src/common/utils/lazyLibs.js
 
 // 🎯 性能优化: 首屏关键CSS由 index.html 提前加载，其他CSS在 DOMContentLoaded 后异步加载
@@ -18,14 +16,17 @@ if (import.meta.env.DEV) {
 
 // Expose to window for legacy compatibility (仅开发环境)
 if (import.meta.env.DEV) {
-  (window as unknown as { marked?: typeof marked }).marked = marked;
+  import('marked')
+    .then(({ marked }) => {
+      (window as unknown as { marked?: typeof marked }).marked = marked;
+    })
+    .catch((error) => {
+      globalThis.console.warn('[Main] Failed to expose marked', error);
+    });
 }
 
 // 🎯 导入 Zustand Store
 import { appStore } from './stores/useAppStore';
-
-// 🎯 开发环境调试接口
-import { debugInterface } from './common/devtools/DebugInterface';
 
 // 🎯 阶段4: 导入主题管理器
 import { ThemeManager } from './common/config/themeConfig';
@@ -405,10 +406,16 @@ function initializeDebugInterface(): void {
     return;
   }
 
-  debugInterface.initialize();
-  debugInterface.registerContainer(container);
-  const router = container.resolve('router');
-  debugInterface.registerRouter(router);
+  import('./common/devtools/DebugInterface')
+    .then(({ debugInterface }) => {
+      debugInterface.initialize();
+      debugInterface.registerContainer(container);
+      const router = container.resolve('router');
+      debugInterface.registerRouter(router);
+    })
+    .catch((error) => {
+      mainLogger.warn('调试接口初始化失败', error);
+    });
 }
 
 async function continueStartup(
