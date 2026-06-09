@@ -149,6 +149,7 @@ const mainLogger = {
 };
 
 let hasInitializedHomeSplash = false;
+let deferredStylesReady: Promise<void> | null = null;
 
 function isClosableModalElement(element: Element | null): element is ClosableModalElement {
   return element instanceof HTMLElement && typeof (element as { close?: unknown }).close === 'function';
@@ -168,6 +169,20 @@ async function loadMainStyles(): Promise<void> {
   } catch (e) {
     mainLogger.warn('主样式加载失败', e);
   }
+}
+
+function loadDeferredStyles(): void {
+  if (deferredStylesReady) {
+    return;
+  }
+
+  deferredStylesReady = import('./css/deferred.css')
+    .then(() => {
+      mainLogger.info('Deferred styles loaded');
+    })
+    .catch((error) => {
+      mainLogger.warn('延后样式加载失败', error);
+    });
 }
 
 function createServiceBootstrap(): ServiceBootstrap {
@@ -333,6 +348,8 @@ function initializeAnimationSystem(): void {
 }
 
 function initializeLazyEnhancements(): void {
+  loadDeferredStyles();
+
   import('./common/utils/moduleCssLoader').then(({ moduleCssLoader }) => {
     moduleCssLoader.preloadHighPriorityModules();
   });

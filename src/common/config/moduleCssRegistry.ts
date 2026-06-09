@@ -20,7 +20,7 @@ export interface ModuleCssConfig {
 
 /**
  * 通用组件CSS依赖说明
- * 这些组件已在 main.css 中全局导入，模块无需重复导入:
+ * 这些组件由全局 CSS 加载，模块无需重复导入:
  * - src/css/components/timeline.css
  * - src/css/components/icon-container.css
  * - src/css/components/badges.css

@@ -1,0 +1,41 @@
+/**
+ * 非首屏全局 CSS
+ *
+ * 这些组件不参与桌面首页首屏渲染，由 main.ts 在应用启动后后台加载。
+ * 业务模块自己的样式仍优先放在各模块 CSS 中。
+ */
+
+/* ----------------------------------------
+   组件层 - Components
+   ---------------------------------------- */
+@import './components/badges.css';
+@import './components/cards.css';
+@import './components/chat.css';
+@import './components/code-highlight.css';
+@import './components/empty-state.css';
+@import './components/forms.css';
+@import './components/header-main.css';
+@import './components/icon-container.css';
+@import './components/insight-cards.css';
+@import './components/language-selector.css';
+@import './components/markdown.css';
+@import './components/mega-menu.css';
+@import './components/modals.css';
+@import './components/stat-cards.css';
+@import './components/tabs.css';
+@import './components/timeline.css';
+@import './components/welcome-banner.css';
+
+/* ----------------------------------------
+   布局层 - Layouts
+   ---------------------------------------- */
+@import './layouts/container.css';
+
+/* ----------------------------------------
+   工具层 - Utilities
+   ---------------------------------------- */
+@import './utilities/containers.css';
+@import './utilities/transitions.css';
+@import './utilities/animation-controls.css';
+@import './utilities/interactive.css';
+@import './utilities/legacy-compat.css';
