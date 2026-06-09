@@ -221,6 +221,22 @@ function getInitialModel(savedModel: string | undefined, models: ModelOption[]):
     return first ? getModelId(first) : '';
 }
 
+function findPresetModelInfo(provider: string, modelId: string): ModelMetadata | null {
+    const config = getProviderConfig(provider);
+    if (!config) return null;
+    return config.models.find(model => model.id === modelId) || null;
+}
+
+function mergeModelMetadata(model: ModelMetadata | null, preset: ModelMetadata | null): ModelMetadata | null {
+    if (!model) return preset;
+    if (!preset) return model;
+    return {
+        ...model,
+        context: preset.context || model.context,
+        features: preset.features && preset.features.length > 0 ? preset.features : model.features,
+    };
+}
+
 function formatModelContext(context: number): string {
     if (!Number.isFinite(context) || context <= 0) return '';
     if (context >= 1000000) {
@@ -342,8 +358,8 @@ const settingsPanelBehavior: SettingsPanelPart = {
     get activeModelInfo(): ModelMetadata | null {
         if (!this.llm.model) return null;
         const m = this.llm.models.find(x => (typeof x === 'string' ? x : x.id) === this.llm.model);
-        if (!m || typeof m === 'string') return null;
-        return m;
+        const model = m && typeof m !== 'string' ? m : null;
+        return mergeModelMetadata(model, findPresetModelInfo(this.llm.provider, this.llm.model));
     },
 
     // 🔒 P0修复: 检查是否为生产环境

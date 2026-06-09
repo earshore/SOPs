@@ -1,0 +1,223 @@
+<div class="module-container py-6">
+    <div class="wb-container wb-container--simple"
+        style="--wb-gradient-1: rgba(236, 253, 245, 0.95); --wb-gradient-2: rgba(207, 250, 254, 0.90); --wb-particle-color: rgba(6, 182, 212, 0.55);">
+        <div class="wb-grid-pattern"></div>
+        <div class="wb-content">
+            <div class="wb-icon">
+                <i class="fas fa-circle-info"></i>
+            </div>
+            <div class="wb-title-row">
+                <h1 class="wb-title">OpenClaw 控制紫鸟浏览器使用须知</h1>
+                <span aria-label="必读" class="wb-badge wb-badge-hub">
+                    <i class="fa-solid fa-shield-halved"></i>READ FIRST
+                </span>
+            </div>
+            <p class="wb-description">任何自动化流程开始前，先确认模型能力、账号环境、工具权限和人工确认边界；这些示例展示的是方法，不是可直接复制的一句长提示词。</p>
+            <div class="wb-tags">
+                <div class="wb-tag">
+                    <div class="wb-tag-dot" style="background-color: #06b6d4;"></div>
+                    <span>分步引导</span>
+                </div>
+                <div class="wb-tag">
+                    <div class="wb-tag-dot" style="background-color: #10b981;"></div>
+                    <span>SOP 沉淀</span>
+                </div>
+                <div class="wb-tag">
+                    <div class="wb-tag-dot" style="background-color: #f59e0b;"></div>
+                    <span>定时调度前验证</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="mb-8">
+        <div class="bg-white border border-slate-200 rounded-lg p-6">
+            <div class="flex flex-wrap items-center gap-2 mb-4">
+                <span class="px-2.5 py-1 rounded-md bg-cyan-50 text-cyan-700 text-xs font-semibold">紫鸟开放平台</span>
+                <span class="px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-semibold">使用须知</span>
+                <span class="px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-semibold">大模型差异</span>
+                <span class="px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-semibold">分步引导提醒</span>
+            </div>
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-900">使用 OpenClaw 前必读 · 两条关键须知</h2>
+                    <p class="text-sm text-slate-600 mt-3 max-w-4xl">独立页把“模型能力差异”和“不要复制粘贴提示词”放在最前面。它提醒用户：OpenClaw 是大模型与工具链的调度器，效果取决于模型能力、任务拆解方式、工具调用稳定性和每一步是否经过人工验证。</p>
+                    <p class="text-sm text-slate-500 mt-2 max-w-4xl">本页正文按该独立页复刻为普通说明页，作为后续四个业务场景的前置安全说明。</p>
+                </div>
+                <a href="https://open.ziniao.com/ziniao-cases/usage-notice" target="_blank" rel="noopener noreferrer"
+                    class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-cyan-50 border border-cyan-100 text-sm font-medium text-cyan-700 hover:bg-cyan-100 flex-shrink-0">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i>参考页面
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-4 mb-6">
+        <div class="bg-white border border-cyan-100 rounded-lg p-5">
+            <div class="w-10 h-10 rounded-lg bg-cyan-50 text-cyan-600 flex items-center justify-center mb-4">
+                <i class="fa-solid fa-brain"></i>
+            </div>
+            <h2 class="font-bold text-slate-900 mb-2">先看模型档位</h2>
+            <p class="text-sm text-slate-600">任务拆解、工具调用、分类归因、长上下文和多语种话术，都会受底层大模型能力影响。</p>
+        </div>
+        <div class="bg-white border border-emerald-100 rounded-lg p-5">
+            <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4">
+                <i class="fa-solid fa-flask"></i>
+            </div>
+            <h2 class="font-bold text-slate-900 mb-2">先当试跑样例</h2>
+            <p class="text-sm text-slate-600">示例中的店铺、订单、看板数字和对话均为演示数据，用于说明节奏和验收方式。</p>
+        </div>
+        <div class="bg-white border border-amber-100 rounded-lg p-5">
+            <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center mb-4">
+                <i class="fa-solid fa-list-check"></i>
+            </div>
+            <h2 class="font-bold text-slate-900 mb-2">一步一验收</h2>
+            <p class="text-sm text-slate-600">每一步只做一件事，先看产物和数量，再进入下一步；不要把整段流程一次性丢给 OpenClaw。</p>
+        </div>
+        <div class="bg-white border border-rose-100 rounded-lg p-5">
+            <div class="w-10 h-10 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center mb-4">
+                <i class="fa-solid fa-hand"></i>
+            </div>
+            <h2 class="font-bold text-slate-900 mb-2">关键动作留人工</h2>
+            <p class="text-sm text-slate-600">公开回复、广告改价、暂停广告组、合规确认等高风险动作，先生成建议，确认后再执行。</p>
+        </div>
+    </div>
+
+    <section class="mb-8">
+        <div class="flex items-end justify-between gap-4 mb-4">
+            <div>
+                <p class="text-xs font-semibold text-cyan-600 uppercase">Core Notice</p>
+                <h2 class="text-xl font-bold text-slate-900 mt-1">两条关键须知</h2>
+            </div>
+            <a href="https://open.ziniao.com/ziniao-cases/usage-notice" target="_blank" rel="noopener noreferrer"
+                class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-cyan-700 bg-cyan-50 border border-cyan-100 rounded-lg hover:bg-cyan-100">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i>来源页面
+            </a>
+        </div>
+        <div class="grid grid-cols-1 gap-4 xl:grid-cols-2">
+            <article class="bg-white border border-slate-200 rounded-lg p-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                        <i class="fa-solid fa-code-branch"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-900">不同模型会跑出不同质量</h3>
+                </div>
+                <p class="text-sm text-slate-600 mb-4">OpenClaw 本质上是在调度大模型与工具链。底层模型不同，同一套 SOP 在任务规划、等待页面渲染、识别 DOM、生成话术、保留多轮约束上都会出现差距。</p>
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div class="rounded-lg bg-slate-50 border border-slate-100 p-3">
+                        <div class="text-sm font-semibold text-slate-800">计划能力</div>
+                        <p class="text-xs text-slate-500 mt-1">能否把大任务拆成可验证小步，并主动停下来等待确认。</p>
+                    </div>
+                    <div class="rounded-lg bg-slate-50 border border-slate-100 p-3">
+                        <div class="text-sm font-semibold text-slate-800">工具稳定性</div>
+                        <p class="text-xs text-slate-500 mt-1">是否按正确顺序调用浏览器、采集、去重、渲染和推送工具。</p>
+                    </div>
+                    <div class="rounded-lg bg-slate-50 border border-slate-100 p-3">
+                        <div class="text-sm font-semibold text-slate-800">语义判断</div>
+                        <p class="text-xs text-slate-500 mt-1">能否区分产品质量、期望偏差、详情页误导、无关搜索词等细分类别。</p>
+                    </div>
+                    <div class="rounded-lg bg-slate-50 border border-slate-100 p-3">
+                        <div class="text-sm font-semibold text-slate-800">长上下文</div>
+                        <p class="text-xs text-slate-500 mt-1">能否记住会话中被修改过的规则，并写进最终 SOP。</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="bg-white border border-slate-200 rounded-lg p-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+                        <i class="fa-solid fa-copy"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-900">这不是复制粘贴提示词</h3>
+                </div>
+                <p class="text-sm text-slate-600 mb-4">示例对话的价值在于演示如何“教”OpenClaw，而不是提供一段万能指令。直接复制长段需求，常见结果是漏等 SPA、漏抓入口、分类口径跑偏或高风险动作过早自动化。</p>
+                <ol class="space-y-3">
+                    <li class="flex gap-3">
+                        <span class="w-6 h-6 rounded-lg bg-cyan-50 text-cyan-700 text-xs font-bold flex items-center justify-center flex-shrink-0">1</span>
+                        <div>
+                            <div class="text-sm font-semibold text-slate-800">分步引导</div>
+                            <p class="text-xs text-slate-500 mt-1">先让它列计划，再从第一步开始跑。</p>
+                        </div>
+                    </li>
+                    <li class="flex gap-3">
+                        <span class="w-6 h-6 rounded-lg bg-cyan-50 text-cyan-700 text-xs font-bold flex items-center justify-center flex-shrink-0">2</span>
+                        <div>
+                            <div class="text-sm font-semibold text-slate-800">跑通验证</div>
+                            <p class="text-xs text-slate-500 mt-1">确认数量、字段、分类、话术和报告格式。</p>
+                        </div>
+                    </li>
+                    <li class="flex gap-3">
+                        <span class="w-6 h-6 rounded-lg bg-cyan-50 text-cyan-700 text-xs font-bold flex items-center justify-center flex-shrink-0">3</span>
+                        <div>
+                            <div class="text-sm font-semibold text-slate-800">沉淀工作流</div>
+                            <p class="text-xs text-slate-500 mt-1">把已经确认过的步骤、参数和异常兜底写进 SOP。</p>
+                        </div>
+                    </li>
+                    <li class="flex gap-3">
+                        <span class="w-6 h-6 rounded-lg bg-cyan-50 text-cyan-700 text-xs font-bold flex items-center justify-center flex-shrink-0">4</span>
+                        <div>
+                            <div class="text-sm font-semibold text-slate-800">再挂定时</div>
+                            <p class="text-xs text-slate-500 mt-1">定时任务只绑定已验证 SOP，并明确推送、@ 人和失败重试规则。</p>
+                        </div>
+                    </li>
+                </ol>
+            </article>
+        </div>
+    </section>
+
+    <section class="mb-8">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <i class="fa-solid fa-clipboard-check"></i>
+            </div>
+            <div>
+                <p class="text-xs font-semibold text-emerald-600 uppercase">Before Run</p>
+                <h2 class="text-xl font-bold text-slate-900">启动前检查清单</h2>
+            </div>
+        </div>
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <div class="bg-white border border-slate-200 rounded-lg p-5">
+                <h3 class="font-bold text-slate-900 mb-2">环境与凭证</h3>
+                <ul class="space-y-2 text-sm text-slate-600">
+                    <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i>紫鸟浏览器客户端支持 OpenClaw 桥接</li>
+                    <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i>店铺登录态有效，二次验证已处理</li>
+                    <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i>紫鸟助理 API Key 已配置</li>
+                </ul>
+            </div>
+            <div class="bg-white border border-slate-200 rounded-lg p-5">
+                <h3 class="font-bold text-slate-900 mb-2">任务边界</h3>
+                <ul class="space-y-2 text-sm text-slate-600">
+                    <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i>先定义店铺、市场、时区和数据窗口</li>
+                    <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i>高风险动作只生成草稿或手册</li>
+                    <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i>每步要有可核对的数量或样本</li>
+                </ul>
+            </div>
+            <div class="bg-white border border-slate-200 rounded-lg p-5">
+                <h3 class="font-bold text-slate-900 mb-2">沉淀标准</h3>
+                <ul class="space-y-2 text-sm text-slate-600">
+                    <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i>会话中改过的规则写进 SOP</li>
+                    <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i>失败重试、缺失数据、告警方式明确</li>
+                    <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i>换模型或 UI 改版后重新回归</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="bg-slate-900 text-white rounded-lg p-6">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                    <p class="text-xs font-semibold text-cyan-300 uppercase">Navigation</p>
+                    <h2 class="text-xl font-bold mt-1">继续查看 4 个业务场景</h2>
+                    <p class="text-sm text-slate-300 mt-2">从差评、广告、评论到店铺日报，所有场景都遵循同一套“教会后再自动化”的落地方式。</p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button data-action="switch-tab" data-tab="more_bad_review_response" class="px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-sm font-medium">差评响应</button>
+                    <button data-action="switch-tab" data-tab="more_ad_acos_diagnosis" class="px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-sm font-medium">广告诊断</button>
+                    <button data-action="switch-tab" data-tab="more_review_monitor" class="px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-sm font-medium">评论监控</button>
+                    <button data-action="switch-tab" data-tab="more_amazon_daily_report" class="px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-sm font-medium">一键日报</button>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

@@ -33,6 +33,10 @@
                     <div class="wb-tag-dot" style="background-color: var(--wb-tag-dot-2, #6178D3);"></div>
                     <span>大模型探索</span>
                 </div>
+                <div class="wb-tag">
+                    <div class="wb-tag-dot" style="background-color: #06b6d4;"></div>
+                    <span>示例业务场景</span>
+                </div>
             </div>
         </div>
     </div>
@@ -48,6 +52,11 @@
             class="category-filter-btn px-4 py-2 bg-white text-slate-700 border border-slate-300 rounded-lg text-sm font-medium transition-all whitespace-nowrap hover:bg-slate-50"
             data-category="explore">
             <i class="fas fa-compass mr-2"></i>探索
+        </button>
+        <button
+            class="category-filter-btn px-4 py-2 bg-white text-slate-700 border border-slate-300 rounded-lg text-sm font-medium transition-all whitespace-nowrap hover:bg-slate-50"
+            data-category="business_scenarios">
+            <i class="fas fa-briefcase mr-2"></i>示例业务场景
         </button>
     </div>
 
@@ -112,19 +121,105 @@
         </div>
     </section>
 
+    <!-- Module: 示例业务场景 -->
+    <section class="mb-10" data-category="business_scenarios" id="more-module-business_scenarios">
+        <div class="more-module-section">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center text-cyan-600">
+                    <i class="fas fa-briefcase"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800">示例业务场景</h2>
+                    <p class="text-sm text-slate-500">OpenClaw × 紫鸟浏览器 · 使用须知、分步引导、SOP 沉淀与定时调度示例</p>
+                </div>
+            </div>
+            <div class="sop-card-grid">
+                <div class="sop-card border-l-4 border-l-cyan-400" data-action="switch-tab" data-tab="more_ziniao_usage_notice">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="sop-icon-container bg-cyan-50 text-cyan-600">
+                            <i class="fas fa-circle-info"></i>
+                        </div>
+                        <span class="sop-status-badge sop-status-active">必读</span>
+                    </div>
+                    <h3 class="font-bold text-lg text-slate-800 mb-2">使用须知</h3>
+                    <p class="text-sm text-slate-500 mb-3">先明确模型差异、演示数据边界和“分步引导 → 验证 → 沉淀 → 调度”的落地节奏。</p>
+                    <div class="text-xs text-slate-400">
+                        <i class="fas fa-shield-halved mr-1"></i>自动化前置安全说明
+                    </div>
+                </div>
+
+                <div class="sop-card border-l-4 border-l-rose-400" data-action="switch-tab" data-tab="more_bad_review_response">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="sop-icon-container bg-rose-50 text-rose-600">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <span class="sop-status-badge sop-status-active">场景 01</span>
+                    </div>
+                    <h3 class="font-bold text-lg text-slate-800 mb-2">差评响应</h3>
+                    <p class="text-sm text-slate-500 mb-3">抓取差评、分类归因、生成回复草稿和飞书告警看板，强调先试跑再上定时。</p>
+                    <div class="text-xs text-slate-400">
+                        <i class="fas fa-star-half-stroke mr-1"></i>Feedback / Reviews / 看板
+                    </div>
+                </div>
+
+                <div class="sop-card border-l-4 border-l-amber-400" data-action="switch-tab" data-tab="more_ad_acos_diagnosis">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="sop-icon-container bg-amber-50 text-amber-600">
+                            <i class="fas fa-bullseye"></i>
+                        </div>
+                        <span class="sop-status-badge sop-status-active">场景 02</span>
+                    </div>
+                    <h3 class="font-bold text-lg text-slate-800 mb-2">广告诊断</h3>
+                    <p class="text-sm text-slate-500 mb-3">按 Campaign / Ad Group / Targeting 下钻，输出调价手册和否定词清单，不直接自动改价。</p>
+                    <div class="text-xs text-slate-400">
+                        <i class="fas fa-chart-simple mr-1"></i>ACOS / ROAS / 否定词
+                    </div>
+                </div>
+
+                <div class="sop-card border-l-4 border-l-teal-400" data-action="switch-tab" data-tab="more_review_monitor">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="sop-icon-container bg-teal-50 text-teal-600">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <span class="sop-status-badge sop-status-active">场景 03</span>
+                    </div>
+                    <h3 class="font-bold text-lg text-slate-800 mb-2">评论监控</h3>
+                    <p class="text-sm text-slate-500 mb-3">聚合 Feedback、Brand Reviews 与 Product Reviews，保留多语种原文和中文对照。</p>
+                    <div class="text-xs text-slate-400">
+                        <i class="fas fa-language mr-1"></i>多语种分类 / 周报 / 红线预警
+                    </div>
+                </div>
+
+                <div class="sop-card border-l-4 border-l-indigo-400" data-action="switch-tab" data-tab="more_amazon_daily_report">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="sop-icon-container bg-indigo-50 text-indigo-600">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <span class="sop-status-badge sop-status-active">场景 04</span>
+                    </div>
+                    <h3 class="font-bold text-lg text-slate-800 mb-2">一键日报</h3>
+                    <p class="text-sm text-slate-500 mb-3">把销售、库存、FBA、广告、口碑和合规模块汇总为晨会前可用的店铺日报。</p>
+                    <div class="text-xs text-slate-400">
+                        <i class="fas fa-file-lines mr-1"></i>12 模块 / 日报 / 重要提醒
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Quick Stats -->
     <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="bg-white rounded-xl p-4 border border-slate-200 text-center">
-            <div class="text-2xl font-bold text-green-500">3</div>
-            <div class="text-xs text-slate-500 mt-1">探索功能</div>
+            <div class="text-2xl font-bold text-green-500">2</div>
+            <div class="text-xs text-slate-500 mt-1">功能分类</div>
         </div>
         <div class="bg-white rounded-xl p-4 border border-slate-200 text-center">
-            <div class="text-2xl font-bold text-slate-400">0</div>
-            <div class="text-xs text-slate-500 mt-1">已开放功能</div>
+            <div class="text-2xl font-bold text-cyan-500">5</div>
+            <div class="text-xs text-slate-500 mt-1">示例业务场景</div>
         </div>
         <div class="bg-white rounded-xl p-4 border border-slate-200 text-center">
-            <div class="text-2xl font-bold text-slate-400">持续更新</div>
-            <div class="text-xs text-slate-500 mt-1">敬请期待</div>
+            <div class="text-2xl font-bold text-slate-700">8</div>
+            <div class="text-xs text-slate-500 mt-1">导航页面</div>
         </div>
     </div>
 </div>

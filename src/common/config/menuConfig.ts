@@ -296,6 +296,15 @@ export const MENU_CONFIG: MenuConfig = {
       version: "v1.0",
       description: "智能体、提示词、工作流等实用功能。",
     },
+    business_scenarios: {
+      id: "business_scenarios",
+      label: "示例业务场景",
+      icon: "fas fa-briefcase",
+      color: "cyan",
+      order: 2,
+      version: "v1.0",
+      description: "OpenClaw 控制紫鸟浏览器的典型业务场景示例。",
+    },
   },
 
   // ==========================================
