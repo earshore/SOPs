@@ -219,6 +219,11 @@ body {
   opacity: 0.35;
 }
 
+.nav-trigger:focus-visible {
+  outline: 2px solid rgba(99, 102, 241, 0.45);
+  outline-offset: -4px;
+}
+
 .mega-menu {
   position: fixed;
   top: 67px;
@@ -240,7 +245,8 @@ body {
     visibility 0s linear var(--duration-normal);
 }
 
-.nav-group:hover .mega-menu {
+.nav-group:hover .mega-menu,
+.nav-group:focus-within .mega-menu {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;

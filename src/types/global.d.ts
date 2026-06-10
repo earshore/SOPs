@@ -47,6 +47,7 @@ declare global {
     renderSopsMegaMenu: () => void;
     renderHubMegaMenu: () => void;
     renderMoreMenu: () => void;
+    initMegaMenuAccessibility: () => void;
     initRouter: () => void;
     
     // 搜索函数

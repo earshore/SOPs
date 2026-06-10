@@ -62,6 +62,11 @@ export function renderHubMegaMenu(): void;
 export function renderSopsMegaMenu(): void;
 
 /**
+ * 初始化大型菜单可访问交互状态
+ */
+export function initMegaMenuAccessibility(): void;
+
+/**
  * 更新路由对应的 UI 状态
  * @param routeId - 路由ID
  * @internal 此函数仅供路由系统内部使用

@@ -197,33 +197,46 @@
 }
 
 .nav-group:hover .nav-trigger,
-.nav-trigger:hover {
+.nav-group:focus-within .nav-trigger,
+.nav-trigger:hover,
+.nav-trigger:focus-visible {
     color: var(--color-primary, #6366f1);
 }
 
 .nav-group:hover .nav-trigger::after,
-.nav-trigger:hover::after {
+.nav-group:focus-within .nav-trigger::after,
+.nav-trigger:hover::after,
+.nav-trigger:focus-visible::after {
     width: calc(100% - 32px);
 }
 
 .nav-group:hover .nav-trigger .nav-icon,
-.nav-trigger:hover .nav-icon {
+.nav-group:focus-within .nav-trigger .nav-icon,
+.nav-trigger:hover .nav-icon,
+.nav-trigger:focus-visible .nav-icon {
     opacity: 1;
     transform: scale(1.1);
 }
 
 .nav-group:hover .nav-trigger .nav-chevron,
-.nav-trigger:hover .nav-chevron {
+.nav-group:focus-within .nav-trigger .nav-chevron,
+.nav-trigger:hover .nav-chevron,
+.nav-trigger:focus-visible .nav-chevron {
     opacity: 0.7;
     transform: rotate(180deg);
 }
 
+.nav-trigger:focus-visible {
+    outline: 2px solid rgba(99, 102, 241, 0.45);
+    outline-offset: -4px;
+}
+
 /* 确保非 hover 状态下样式被清除 */
-.nav-trigger:not(:hover) {
+.nav-group:not(:hover):not(:focus-within) .nav-trigger:not(:hover):not(:focus-visible) {
     color: var(--color-slate-500, #64748b);
 }
 
-.nav-group:not(:hover) .nav-trigger {
+.nav-group:not(:hover):not(:focus-within) .nav-trigger {
     color: var(--color-slate-500, #64748b);
 }
 
@@ -249,7 +262,8 @@
     transition: all var(--duration-normal, 250ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
-.nav-group:hover .mega-menu {
+.nav-group:hover .mega-menu,
+.nav-group:focus-within .mega-menu {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);

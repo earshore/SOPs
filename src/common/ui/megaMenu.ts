@@ -10,6 +10,7 @@ import { MENU_CONFIG } from '../config/menuConfig';
 import { getEl } from './utils';
 import { escapeHtml, setSafeHtml } from '../utils/security';
 import type { ColorSchemeName } from '../constants/colorSchemes';
+import { routeIdToPath } from '../router/routePaths';
 
 // ═══════════════════════════════════════════════════════════
 // Utilities
@@ -287,13 +288,16 @@ function renderCard(opts: CardOptions): string {
 
   const g = getGlassColor(color);
   const footer = buildFooterTags(childCount, isOverview, g);
+  const href = `#${routeIdToPath(target)}`;
 
   return `
-    <div data-action="switch-tab" data-tab="${target}"
+    <a href="${href}" role="menuitem" data-action="switch-tab" data-tab="${target}"
       class="cursor-pointer group/card relative rounded-2xl overflow-hidden
         h-full flex flex-col
+        text-left no-underline
         transition-all duration-300 ease-out
         hover:-translate-y-0.5
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40
         active:translate-y-0">
 
       <!-- Layer 1: Frosted glass + default border + hover bg -->
@@ -350,7 +354,7 @@ function renderCard(opts: CardOptions): string {
 
         ${footer}
       </div>
-    </div>
+    </a>
   `;
 }
 
@@ -562,5 +566,37 @@ export function renderMoreMenu(): void {
     overviewColor: (moreModule?.themeColor as ColorSchemeName) || 'green',
     categories: MENU_CONFIG.moreCategories || {},
     logLabel: 'More Menu',
+  });
+}
+
+let megaMenuAccessibilityInitialized = false;
+
+export function initMegaMenuAccessibility(): void {
+  if (megaMenuAccessibilityInitialized) return;
+  megaMenuAccessibilityInitialized = true;
+
+  const groups = document.querySelectorAll<HTMLElement>('.nav-group');
+  groups.forEach(group => {
+    const trigger = group.querySelector<HTMLButtonElement>('.nav-trigger');
+    if (!trigger) return;
+
+    const setExpanded = (expanded: boolean): void => {
+      trigger.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    };
+
+    group.addEventListener('mouseenter', () => setExpanded(true));
+    group.addEventListener('mouseleave', () => {
+      if (!group.contains(document.activeElement)) {
+        setExpanded(false);
+      }
+    });
+    group.addEventListener('focusin', () => setExpanded(true));
+    group.addEventListener('focusout', () => {
+      requestAnimationFrame(() => {
+        if (!group.contains(document.activeElement)) {
+          setExpanded(false);
+        }
+      });
+    });
   });
 }

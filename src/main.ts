@@ -78,7 +78,7 @@ import {
   openPerformanceMonitor // [NEW] 性能监控面板
 } from "./components/settings/systemSettings";
 
-import { renderMegaMenu, renderSopsMegaMenu, renderHubMegaMenu, renderMoreMenu, showToast } from "./common/ui";
+import { renderMegaMenu, renderSopsMegaMenu, renderHubMegaMenu, renderMoreMenu, initMegaMenuAccessibility, showToast } from "./common/ui";
 import { APP_EVENTS } from './common/constants/eventConstants';
 import { APP_VERSION } from './common/constants/constants';
 import { initHomeSplash } from "./modules/home/homeDisplay";
@@ -393,6 +393,7 @@ function renderGlobalMenus(): void {
   renderSopsMegaMenu();
   renderHubMegaMenu();
   renderMoreMenu();
+  initMegaMenuAccessibility();
 }
 
 async function emitAppInitialized(): Promise<void> {

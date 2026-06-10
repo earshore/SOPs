@@ -78,25 +78,27 @@
             </button>
 
             <!-- ===== Navigation ===== -->
-            <nav class="nav-wrapper">
+            <nav class="nav-wrapper" aria-label="主导航">
 
                 <!-- SOPs 流程中心 -->
                 <div class="nav-group">
-                    <button id="nav-sops" class="nav-trigger">
+                    <button id="nav-sops" class="nav-trigger" type="button"
+                        aria-haspopup="menu" aria-expanded="false" aria-controls="sops-mega-menu">
                         <i class="fas fa-project-diagram nav-icon"></i>
                         SOPs 流程中心
                         <i class="fas fa-chevron-down nav-chevron"></i>
                     </button>
 
-                    <div class="mega-menu">
+                    <div id="sops-mega-menu" class="mega-menu" role="group" aria-labelledby="nav-sops">
                         <div class="mega-menu-inner">
                             <div class="mega-menu-header">
                                 <div class="mega-menu-icon mega-menu-icon--sky">
                                     <i class="fas fa-layer-group"></i>
                                 </div>
-                                <h3 class="mega-menu-title">核心 SOP 体系</h3>
+                                <h3 id="sops-mega-menu-title" class="mega-menu-title">核心 SOP 体系</h3>
                             </div>
-                            <div id="sops-mega-menu-content" class="mega-menu-grid mega-menu-grid--5">
+                            <div id="sops-mega-menu-content" class="mega-menu-grid mega-menu-grid--5"
+                                role="menu" aria-labelledby="sops-mega-menu-title">
                                 <div class="skeleton" style="height:96px;"></div>
                                 <div class="skeleton" style="height:96px;animation-delay:0.1s;"></div>
                                 <div class="skeleton" style="height:96px;animation-delay:0.2s;"></div>
@@ -109,21 +111,23 @@
 
                 <!-- 应用中心 -->
                 <div class="nav-group">
-                    <button id="nav-apps" class="nav-trigger">
+                    <button id="nav-apps" class="nav-trigger" type="button"
+                        aria-haspopup="menu" aria-expanded="false" aria-controls="apps-mega-menu">
                         <i class="fas fa-th-large nav-icon"></i>
                         应用中心
                         <i class="fas fa-chevron-down nav-chevron"></i>
                     </button>
 
-                    <div class="mega-menu">
+                    <div id="apps-mega-menu" class="mega-menu" role="group" aria-labelledby="nav-apps">
                         <div class="mega-menu-inner">
                             <div class="mega-menu-header">
                                 <div class="mega-menu-icon mega-menu-icon--purple">
                                     <i class="fas fa-rocket"></i>
                                 </div>
-                                <h3 class="mega-menu-title">核心应用模块</h3>
+                                <h3 id="apps-mega-menu-title" class="mega-menu-title">核心应用模块</h3>
                             </div>
-                            <div id="mega-menu-content" class="mega-menu-grid mega-menu-grid--4">
+                            <div id="mega-menu-content" class="mega-menu-grid mega-menu-grid--4"
+                                role="menu" aria-labelledby="apps-mega-menu-title">
                                 <div class="skeleton" style="height:128px;"></div>
                                 <div class="skeleton" style="height:128px;animation-delay:0.1s;"></div>
                                 <div class="skeleton" style="height:128px;animation-delay:0.2s;"></div>
@@ -134,21 +138,23 @@
 
                 <!-- Amazon 智库 -->
                 <div class="nav-group">
-                    <button id="nav-hub" class="nav-trigger">
+                    <button id="nav-hub" class="nav-trigger" type="button"
+                        aria-haspopup="menu" aria-expanded="false" aria-controls="hub-mega-menu">
                         <i class="fas fa-book-open nav-icon"></i>
                         Amazon 智库
                         <i class="fas fa-chevron-down nav-chevron"></i>
                     </button>
 
-                    <div class="mega-menu">
+                    <div id="hub-mega-menu" class="mega-menu" role="group" aria-labelledby="nav-hub">
                         <div class="mega-menu-inner">
                             <div class="mega-menu-header">
                                 <div class="mega-menu-icon mega-menu-icon--orange">
                                     <i class="fas fa-lightbulb"></i>
                                 </div>
-                                <h3 class="mega-menu-title">Amazon 智库体系</h3>
+                                <h3 id="hub-mega-menu-title" class="mega-menu-title">Amazon 智库体系</h3>
                             </div>
-                            <div id="hub-mega-menu-content" class="mega-menu-grid mega-menu-grid--4">
+                            <div id="hub-mega-menu-content" class="mega-menu-grid mega-menu-grid--4"
+                                role="menu" aria-labelledby="hub-mega-menu-title">
                                 <div class="skeleton" style="height:96px;"></div>
                                 <div class="skeleton" style="height:96px;animation-delay:0.1s;"></div>
                                 <div class="skeleton" style="height:96px;animation-delay:0.2s;"></div>
@@ -160,13 +166,14 @@
 
                 <!-- 更多 -->
                 <div class="nav-group">
-                    <button id="nav-more" class="nav-trigger">
+                    <button id="nav-more" class="nav-trigger" type="button"
+                        aria-haspopup="menu" aria-expanded="false" aria-controls="more-mega-menu">
                         <i class="fas fa-ellipsis-h nav-icon"></i>
                         更多
                         <i class="fas fa-chevron-down nav-chevron"></i>
                     </button>
 
-                    <div class="mega-menu">
+                    <div id="more-mega-menu" class="mega-menu" role="group" aria-labelledby="nav-more">
                         <div class="mega-menu-inner">
                             <div class="more-menu-layout">
                                 <!-- Main Content -->
@@ -175,9 +182,10 @@
                                         <div class="mega-menu-icon mega-menu-icon--lime">
                                             <i class="fas fa-compass"></i>
                                         </div>
-                                        <h3 class="mega-menu-title">探索模块</h3>
+                                        <h3 id="more-mega-menu-title" class="mega-menu-title">探索模块</h3>
                                     </div>
-                                    <div id="more-menu-content" class="mega-menu-grid mega-menu-grid--3">
+                                    <div id="more-menu-content" class="mega-menu-grid mega-menu-grid--3"
+                                        role="menu" aria-labelledby="more-mega-menu-title">
                                         <div class="skeleton" style="height:128px;"></div>
                                     </div>
                                 </div>
@@ -191,7 +199,7 @@
                                         </h3>
                                         <ul class="quick-access-list">
                                             <li>
-                                                <button data-action="openSettings" class="quick-access-item">
+                                                <button type="button" data-action="openSettings" class="quick-access-item">
                                                     <div class="quick-access-icon">
                                                         <i class="fas fa-cog"></i>
                                                     </div>

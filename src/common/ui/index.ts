@@ -11,7 +11,8 @@ export {
   renderMegaMenu,
   renderMoreMenu,
   renderHubMegaMenu,
-  renderSopsMegaMenu
+  renderSopsMegaMenu,
+  initMegaMenuAccessibility
 } from './megaMenu';
 
 // 导航和路由
@@ -47,7 +48,7 @@ export { navigateTo, getRouter, getCurrentRoute, hasRoute } from '../router/init
 // 向后兼容：注册到 window
 // ========================
 
-import { renderMegaMenu, renderMoreMenu, renderHubMegaMenu, renderSopsMegaMenu } from './megaMenu';
+import { renderMegaMenu, renderMoreMenu, renderHubMegaMenu, renderSopsMegaMenu, initMegaMenuAccessibility } from './megaMenu';
 import { showToast } from './notifications';
 import { searchSOPs, clearSOPSearch, searchHub, clearHubSearch, searchSidebar, clearSidebarSearch } from './search';
 import { navigateTo } from '../router/initRouter';
@@ -60,6 +61,7 @@ declare global {
     renderSopsMegaMenu: typeof renderSopsMegaMenu;
     renderHubMegaMenu: typeof renderHubMegaMenu;
     renderMoreMenu: typeof renderMoreMenu;
+    initMegaMenuAccessibility: typeof initMegaMenuAccessibility;
     showToast: typeof showToast;
     searchSOPs?: typeof searchSOPs;
     clearSOPSearch?: typeof clearSOPSearch;
@@ -75,6 +77,7 @@ window.renderMegaMenu = renderMegaMenu;
 window.renderSopsMegaMenu = renderSopsMegaMenu;
 window.renderHubMegaMenu = renderHubMegaMenu;
 window.renderMoreMenu = renderMoreMenu;
+window.initMegaMenuAccessibility = initMegaMenuAccessibility;
 window.showToast = showToast;
 window.searchSOPs = searchSOPs;
 window.clearSOPSearch = clearSOPSearch;
@@ -100,7 +103,8 @@ import { routeIdToPath } from '../router/routePaths';
 
 registerActions({
   // 路由导航（通过 data-action="switch-tab" data-tab="xxx" 触发）
-  'switch-tab': async (params: Record<string, unknown>) => {
+  'switch-tab': async (params: Record<string, unknown>, event: Event) => {
+    event.preventDefault();
     const tab = (params.tab as string) || '';
     if (!tab) {
       return;

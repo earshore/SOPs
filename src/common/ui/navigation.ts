@@ -76,6 +76,7 @@ function renderSidebar(moduleId: string | null): void {
   // 隐藏逻辑：无模块ID或home模块不显示侧边栏
   if (!moduleId || moduleId === 'home') {
     sidebar.classList.add("hidden", "-ml-64");
+    sidebar.removeAttribute("aria-label");
     // ✅ 安全: 清空侧边栏
     sidebar.replaceChildren();
     return;
@@ -90,6 +91,7 @@ function renderSidebar(moduleId: string | null): void {
   if (!effectiveModuleConfig) {
     console.error(`⚠️ 未找到模块配置: ${effectiveModuleId}`);
     sidebar.classList.add("hidden", "-ml-64");
+    sidebar.removeAttribute("aria-label");
     return;
   }
 
@@ -97,6 +99,7 @@ function renderSidebar(moduleId: string | null): void {
 
   // 统一渲染：优先使用SidebarRenderer，自动降级到默认渲染
   renderSidebarContent(sidebar, effectiveModuleId, effectiveModuleConfig, routes);
+  sidebar.setAttribute("aria-label", `${effectiveModuleConfig.title} 侧边栏`);
 
   sidebar.classList.remove("hidden", "-ml-64");
 }
@@ -134,7 +137,7 @@ function renderDefaultSidebar(sidebar: HTMLElement, moduleConfig: ModuleConfig, 
           <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
             ${moduleConfig.title}
           </h2>
-          <nav class="space-y-1">
+          <nav class="space-y-1" aria-label="${moduleConfig.title} 导航">
             ${routes.map(route => {
               const isActive = currentTab === route.id;
               const activeClasses = isActive
@@ -142,7 +145,8 @@ function renderDefaultSidebar(sidebar: HTMLElement, moduleConfig: ModuleConfig, 
                 : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900';
 
               return `
-                <button data-action="switch-tab" data-tab="${route.id}" id="sidebar-btn-${route.id}" 
+                <button type="button" data-action="switch-tab" data-tab="${route.id}" id="sidebar-btn-${route.id}"
+                  ${isActive ? 'aria-current="page"' : ''}
                   class="sidebar-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium ${activeClasses} transition-all duration-200">
                   <i class="${route.icon} w-5 text-center"></i> 
                   ${route.label}
