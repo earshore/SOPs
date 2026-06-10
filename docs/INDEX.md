@@ -8,6 +8,7 @@
 
 ### 入门指南
 - [README.md](../README.md) - 项目概览和快速开始
+- [运营作业系统落地计划](./OPERATING_SYSTEM_ROADMAP.md) - 产品收敛、作业闭环和阶段落地计划
 - [CLAUDE.md](../CLAUDE.md) - Claude Code 开发指南
 - [CHANGELOG.md](../CHANGELOG.md) - 项目变更日志
 - [CONTRIBUTING.md](../.kiro/CONTRIBUTING.md) - 贡献指南

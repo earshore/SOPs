@@ -12,7 +12,9 @@
 import { SafeModuleLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
 import { registerActionsWithLegacy, unregisterActions } from '../../../../../common/utils/actionRegistry';
+import { recordOpsMetric } from '../../../../../common/utils/opsMetrics';
 import { escapeHtml } from '../../../../../common/utils/security';
+import { StorageService } from '../../../../../services/storageService';
 import type {
   NPIProductRecord,
   StageConfig,
@@ -48,6 +50,9 @@ const EXCEL_COLUMNS = {
     DELIVERY_FEE: 'O',
     SUGGESTED: 'S',
 } as const;
+
+const REVIEW_OWNER_STORAGE_KEY = 'npi_review_owner_v1';
+const DEFAULT_REVIEW_OWNER = '运营负责人';
 
 const ADS_STRATEGY_LABELS: Record<NPIProductRecord['ads_strategy'], string> = {
     auto: '自动',
@@ -432,11 +437,95 @@ function getDecisionLabel(decision: NPIProductRecord['decision']): string {
     return decision === 'keep' ? '保留' : '放弃';
 }
 
+function getStageLabel(stage: NPIProductRecord['stage']): string {
+    return stageConfigMap[stage]?.label || stage;
+}
+
+function formatReviewLine(row: NPIProductRecord): string {
+    return [
+        `- ${row.sku} / ${row.asin} / ${row.site}`,
+        `阶段：${getStageLabel(row.stage)}`,
+        `库存：${row.inventory_days}天`,
+        `合规：${getComplianceLabel(row)}`,
+        `清仓线：€${calcClearancePrice(row.delivery_fee)}`,
+        `动销价：€${calcMovingPrice(row.delivery_fee)}`,
+        `建议价：€${calcCurrentPrice(row.delivery_fee)}`,
+        `ACOS：${row.acoas}%`,
+        `自然单：${row.organic_ratio}%`,
+        `结论：${getDecisionLabel(row.decision)}`,
+        `下一步：${row.next_step.join('；') || '待补充'}`,
+    ].join(' | ');
+}
+
+function buildStageSummary(rows: NPIProductRecord[]): string {
+    const counts = rows.reduce<Record<string, number>>((summary, row) => {
+        const label = getStageLabel(row.stage);
+        summary[label] = (summary[label] || 0) + 1;
+        return summary;
+    }, {});
+
+    return Object.entries(counts)
+        .map(([label, count]) => `${label} ${count}`)
+        .join('，') || '无';
+}
+
+function buildManualReviewItems(rows: NPIProductRecord[], owner = DEFAULT_REVIEW_OWNER): string[] {
+    return rows
+        .filter((row) => {
+            const compliance = getComplianceStatus(row);
+            return !compliance.isComplete || row.inventory_days > 60 || row.acoas > 60 || row.decision === 'kill';
+        })
+        .map((row) => {
+            const reasons = [
+                !getComplianceStatus(row).isComplete ? `合规未完成(${getComplianceLabel(row)})` : '',
+                row.inventory_days > 60 ? `库存${row.inventory_days}天` : '',
+                row.acoas > 60 ? `ACOS ${row.acoas}%` : '',
+                row.decision === 'kill' ? '当前结论为放弃' : '',
+            ].filter(Boolean);
+
+            return `- ${row.sku}：${reasons.join('；')}，需 ${owner} 确认下一步动作。`;
+        });
+}
+
+export function buildNpiReviewTemplate(rows: NPIProductRecord[], owner = DEFAULT_REVIEW_OWNER): string {
+    const today = new Date().toISOString().split('T')[0];
+    const reviewOwner = normalizeReviewOwner(owner);
+    const keepCount = rows.filter((row) => row.decision === 'keep').length;
+    const killCount = rows.length - keepCount;
+    const reviewItems = buildManualReviewItems(rows, reviewOwner);
+
+    return [
+        `# NPI 周复盘归档 - ${today}`,
+        '',
+        '## 复盘范围',
+        `- 作业负责人：${reviewOwner}`,
+        `- SKU 数：${rows.length}`,
+        `- 阶段分布：${buildStageSummary(rows)}`,
+        `- 当前结论：保留 ${keepCount}，放弃/清仓 ${killCount}`,
+        '',
+        '## SKU 复盘明细',
+        ...(rows.length > 0 ? rows.map(formatReviewLine) : ['- 无当前看板数据']),
+        '',
+        '## 人工确认点',
+        ...(reviewItems.length > 0 ? reviewItems : [`- 暂无高风险项，仍需 ${reviewOwner} 确认价格、广告和库存动作。`]),
+        '',
+        '## 本周动作',
+        '- 已执行：',
+        '- 待执行：',
+        '- 需要升级：',
+        '',
+        '## 下次复盘',
+        '- 复盘日期：',
+        `- 负责人：${reviewOwner}`,
+        '- 需要补充的数据截图或报表路径：',
+    ].join('\n');
+}
+
 function buildExportRow(row: NPIProductRecord, idx: number): ExportRow {
     const excelRow = idx + 2;
 
     return {
-        阶段: stageConfigMap[row.stage]?.label || row.stage,
+        阶段: getStageLabel(row.stage),
         SKU: row.sku,
         中文名: row.cn_name,
         店铺: row.store,
@@ -518,11 +607,47 @@ function exportToExcel(): void {
     }
 
     downloadCsv(csvContent);
+    recordOpsMetric('npi.csv_export');
 
     // Show notification
     alert(
         '导出成功！CSV文件包含Excel兼容公式，使用Excel打开后公式会自动计算。\n\n提示：清仓红线/动销价格/建议售价列包含公式，修改配送费后会自动更新。'
     );
+}
+
+function fallbackCopyText(text: string): boolean {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.setAttribute('readonly', 'true');
+    textarea.style.position = 'fixed';
+    textarea.style.left = '-9999px';
+    document.body.appendChild(textarea);
+    textarea.select();
+
+    try {
+        return document.execCommand('copy');
+    } finally {
+        textarea.remove();
+    }
+}
+
+async function copyNpiReviewTemplate(): Promise<void> {
+    const owner = readReviewOwner();
+    saveReviewOwner(owner);
+    const reviewTemplate = buildNpiReviewTemplate(tableData, owner);
+
+    try {
+        if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(reviewTemplate);
+        } else if (!fallbackCopyText(reviewTemplate)) {
+            throw new Error('clipboard unavailable');
+        }
+
+        recordOpsMetric('npi.review_template_copy');
+        alert('已复制 NPI 复盘模板，可粘贴到周报或归档文档。');
+    } catch {
+        alert('复制失败，请使用导出 CSV 或手动复制复盘模板。');
+    }
 }
 
 // Filter by store
@@ -534,6 +659,24 @@ function filterByStore(store: string): void {
         tableData = SAMPLE_DATA.filter((row: NPIProductRecord) => row.store === store);
     }
     renderTable();
+}
+
+function restoreReviewOwner(): void {
+    const input = document.getElementById('npi-review-owner') as HTMLInputElement | null;
+    if (input) input.value = normalizeReviewOwner(StorageService.get<string>(REVIEW_OWNER_STORAGE_KEY, DEFAULT_REVIEW_OWNER));
+}
+
+function readReviewOwner(): string {
+    const input = document.getElementById('npi-review-owner') as HTMLInputElement | null;
+    return normalizeReviewOwner(input?.value);
+}
+
+function saveReviewOwner(owner: string): void {
+    StorageService.set(REVIEW_OWNER_STORAGE_KEY, normalizeReviewOwner(owner));
+}
+
+function normalizeReviewOwner(owner: unknown): string {
+    return typeof owner === 'string' && owner.trim() ? owner.trim() : DEFAULT_REVIEW_OWNER;
 }
 
 // Filter by stage
@@ -562,9 +705,18 @@ function setupFilterEventDelegation(container: HTMLElement): void {
         }
     };
 
+    const handleOwnerInput = (event: Event): void => {
+        const target = event.target as HTMLInputElement | null;
+        if (target?.id === 'npi-review-owner') {
+            saveReviewOwner(target.value);
+        }
+    };
+
     container.addEventListener('change', handleFilterChange);
+    container.addEventListener('input', handleOwnerInput);
     removeFilterListener = () => {
         container.removeEventListener('change', handleFilterChange);
+        container.removeEventListener('input', handleOwnerInput);
         removeFilterListener = null;
     };
 }
@@ -578,6 +730,7 @@ declare global {
         saveNextSteps?: () => void;
         closeNextStepModal?: () => void;
         exportToExcel?: () => void;
+        copyNpiReviewTemplate?: () => Promise<void>;
     }
 }
 
@@ -604,6 +757,7 @@ export async function mount(container: HTMLElement): Promise<void> {
         // 2. 使用 SafeRenderer 渲染模板（静态模板，已审计）
         renderer.renderTemplate(container, html);
         container.classList.add('fade-in');
+        restoreReviewOwner();
 
         // 3. 注册全局操作
         const npiTrackerActions: Record<string, (...args: unknown[]) => void> = {
@@ -614,6 +768,7 @@ export async function mount(container: HTMLElement): Promise<void> {
             saveNextSteps: saveNextSteps as (...args: unknown[]) => void,
             closeNextStepModal: closeNextStepModal as (...args: unknown[]) => void,
             exportToExcel: exportToExcel as (...args: unknown[]) => void,
+            copyNpiReviewTemplate: copyNpiReviewTemplate as (...args: unknown[]) => void,
         };
 
         registeredActions = registerActionsWithLegacy(npiTrackerActions);

@@ -5,9 +5,10 @@
 // ================================================================
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { mount, unmount } from '@/modules/sops/views/growth/npi_tracker/index';
+import { buildNpiReviewTemplate, mount, unmount } from '@/modules/sops/views/growth/npi_tracker/index';
 import { SafeModuleLoader } from '@/common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
+import { StorageService } from '@/services/storageService';
 
 // Mock 依赖
 vi.mock('@/modules/sops/views/growth/npi_tracker/data/mockData', () => ({
@@ -115,7 +116,9 @@ describe('NPI Tracker Module', () => {
                     </thead>
                     <tbody id="npi-table-body"></tbody>
                 </table>
+                <input id="npi-review-owner" value="运营小李" />
                 <button onclick="exportToExcel()">导出Excel</button>
+                <button data-action="copyNpiReviewTemplate">复制复盘模板</button>
                 <div id="next-step-modal" class="hidden">
                     <div id="next-step-checkboxes"></div>
                     <button onclick="saveNextSteps()">保存</button>
@@ -139,6 +142,8 @@ describe('NPI Tracker Module', () => {
 
         // Mock alert
         global.alert = vi.fn();
+        vi.spyOn(StorageService, 'get').mockReturnValue({});
+        vi.spyOn(StorageService, 'set').mockReturnValue(true);
     });
 
     afterEach(() => {
@@ -191,6 +196,7 @@ describe('NPI Tracker Module', () => {
             expect(window.updateDeliveryFee).toBeDefined();
             expect(window.toggleDecision).toBeDefined();
             expect(window.exportToExcel).toBeDefined();
+            expect(window.copyNpiReviewTemplate).toBeDefined();
         });
 
         it('should render table after mount', async () => {
@@ -524,6 +530,9 @@ describe('NPI Tracker Module', () => {
                 
                 // 验证：显示了成功提示
                 expect(global.alert).toHaveBeenCalled();
+                expect(StorageService.set).toHaveBeenCalledWith('ops_metrics_v1', expect.objectContaining({
+                    'npi.csv_export': expect.objectContaining({ count: 1 }),
+                }));
             }
         });
 
@@ -553,6 +562,75 @@ describe('NPI Tracker Module', () => {
                 // 注意：实际实现中会检查数据是否为空
                 expect(() => window.exportToExcel!()).not.toThrow();
             }
+        });
+    });
+
+    // ========================================
+    // 复盘模板测试
+    // ========================================
+
+    describe('Review Template', () => {
+        it('should build review template with summary and manual review items', () => {
+            const template = buildNpiReviewTemplate([
+                {
+                    stage: 'growth',
+                    sku: 'TEST-SKU-002',
+                    cn_name: '测试产品2',
+                    store: 'Test Store 2',
+                    asin: 'B08TEST002',
+                    site: 'FR',
+                    qty_shipped: 200,
+                    inventory_days: 70,
+                    is_pan_eu: false,
+                    check_content: true,
+                    check_sensitive: true,
+                    check_creative: true,
+                    check_ebc: true,
+                    delivery_fee: 6.0,
+                    break_even: '12.00',
+                    sessions: 2000,
+                    ctr_7d: 2.0,
+                    cvr_7d: 4.0,
+                    acoas: 40,
+                    organic_ratio: 55,
+                    vine_status: '15/30',
+                    ads_strategy: 'manual',
+                    decision: 'kill',
+                    next_step: ['清仓 (扶不起)']
+                }
+            ], '运营小李');
+
+            expect(template).toContain('NPI 周复盘归档');
+            expect(template).toContain('作业负责人：运营小李');
+            expect(template).toContain('SKU 数：1');
+            expect(template).toContain('TEST-SKU-002');
+            expect(template).toContain('清仓线：€12.00');
+            expect(template).toContain('当前结论为放弃');
+            expect(template).toContain('需 运营小李 确认下一步动作');
+            expect(template).toContain('清仓 (扶不起)');
+            expect(template).toContain('负责人：运营小李');
+        });
+
+        it('should copy review template to clipboard', async () => {
+            const writeText = vi.fn().mockResolvedValue(undefined);
+            Object.defineProperty(navigator, 'clipboard', {
+                configurable: true,
+                value: { writeText },
+            });
+
+            await mount(container);
+            await new Promise(resolve => setTimeout(resolve, 200));
+            const ownerInput = document.getElementById('npi-review-owner') as HTMLInputElement | null;
+            if (ownerInput) ownerInput.value = '运营小李';
+            await window.copyNpiReviewTemplate?.();
+
+            expect(writeText).toHaveBeenCalledWith(expect.stringContaining('NPI 周复盘归档'));
+            expect(writeText).toHaveBeenCalledWith(expect.stringContaining('作业负责人：运营小李'));
+            expect(StorageService.set).toHaveBeenCalledWith('npi_review_owner_v1', '运营小李');
+            expect(StorageService.set).toHaveBeenCalledWith('ops_metrics_v1', expect.objectContaining({
+                'npi.review_template_copy': expect.objectContaining({ count: 1 }),
+            }));
+            expect(global.alert).toHaveBeenCalledWith('已复制 NPI 复盘模板，可粘贴到周报或归档文档。');
         });
     });
 

@@ -434,11 +434,33 @@ describe('PPC 搜索词分析器', () => {
     expect(csv).toContain('"dog, ""winter"" coat"');
   });
 
+  it('导出 CSV 时包含 ActionItem 和人工确认字段', () => {
+    const result = analyzeSearchTermReport('Search Term,Clicks,Spend,Sales,Orders\nwaste term,12,20,0,0\nobserve term,1,1,0,0', thresholds);
+    const csv = buildActionCsv(result.rows);
+    const customOwnerCsv = buildActionCsv(result.rows, '广告小张');
+
+    expect(csv).toContain('ActionItem ID,Risk Level,Requires Human Confirmation,Status,Owner');
+    expect(csv).toContain('ppc-search_term-0-waste-term,high,TRUE,pending_human_review,广告负责人');
+    expect(csv).toContain('ppc-search_term-1-observe-term,low,FALSE,monitoring,广告负责人');
+    expect(customOwnerCsv).toContain('ppc-search_term-0-waste-term,high,TRUE,pending_human_review,广告小张');
+  });
+
   it('生成周报摘要动作计数', () => {
     const result = analyzeSearchTermReport('Search Term,Clicks,Spend,Sales,Orders\nwaste term,12,20,0,0\nscale term,20,20,100,2', thresholds);
-    const summary = buildSummaryText(result.rows);
+    const summary = buildSummaryText(result.rows, '广告小张');
 
+    expect(summary).toContain('# PPC 搜索词周复盘');
+    expect(summary).toContain('## 复盘结论');
+    expect(summary).toContain('## 关键证据');
+    expect(summary).toContain('## 建议动作（人工执行）');
+    expect(summary).toContain('## 下周跟进');
+    expect(summary).toContain('## 复盘记录');
     expect(summary).toContain('否精准：1');
     expect(summary).toContain('加预算：1');
+    expect(summary).toContain('人工复核：2 项建议动作需人工执行');
+    expect(summary).toContain('建议动作 Owner：广告小张');
+    expect(summary).toContain('Owner：广告小张');
+    expect(summary).toContain('下次动作负责人：广告小张');
+    expect(summary).toContain('状态：pending_human_review');
   });
 });

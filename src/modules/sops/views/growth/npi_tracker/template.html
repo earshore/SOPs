@@ -20,6 +20,37 @@
                         </div>
                 </div>
         </div>
+        <section class="bg-white rounded-xl border border-slate-200 p-5 mb-6">
+                <h2 class="text-base font-bold text-slate-800 mb-3 flex items-center gap-2">
+                        <i class="fas fa-clipboard-list text-indigo-500"></i>作业元信息
+                </h2>
+                <dl class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-3 text-sm">
+                        <div>
+                                <dt class="font-semibold text-slate-700">Owner</dt>
+                                <dd class="text-slate-600">运营负责人</dd>
+                        </div>
+                        <div>
+                                <dt class="font-semibold text-slate-700">更新时间</dt>
+                                <dd class="text-slate-600">2026-06</dd>
+                        </div>
+                        <div>
+                                <dt class="font-semibold text-slate-700">适用站点</dt>
+                                <dd class="text-slate-600">全站点，新品优先</dd>
+                        </div>
+                        <div>
+                                <dt class="font-semibold text-slate-700">输入</dt>
+                                <dd class="text-slate-600">SKU/ASIN、站点、成本、售价、库存、配送费、上架日期、广告基础数据</dd>
+                        </div>
+                        <div>
+                                <dt class="font-semibold text-slate-700">输出</dt>
+                                <dd class="text-slate-600">阶段状态、财务红线、下一步动作、周复盘模板</dd>
+                        </div>
+                        <div>
+                                <dt class="font-semibold text-slate-700">人工确认点</dt>
+                                <dd class="text-slate-600">合规检查、亏损销售、清仓/继续决策必须人工确认</dd>
+                        </div>
+                </dl>
+        </section>
         <!-- ==================== SOP核心流程总览（实战版） sop-process-section ==================== -->
         <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
                 <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
@@ -754,6 +785,17 @@
                                 </div>
                         </div>
                         <div class="flex items-center gap-2">
+                                <label class="flex items-center gap-2 text-sm text-slate-600">
+                                        <span>复盘负责人：</span>
+                                        <input id="npi-review-owner" type="text" value="运营负责人"
+                                                class="w-32 px-3 py-1.5 border rounded-lg text-sm"
+                                                placeholder="运营负责人">
+                                </label>
+                                <button class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                                        data-action="copyNpiReviewTemplate">
+                                        <i class="fas fa-copy"></i>
+                                        复制复盘模板
+                                </button>
                                 <button class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
                                         data-action="exportToExcel">
                                         <i class="fas fa-file-excel"></i>
@@ -1145,7 +1187,7 @@
                 <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
                         <p class="text-xs text-blue-700">
                                 <i class="fas fa-lightbulb mr-1"></i><strong>复盘建议：</strong>
-                                每个清仓SKU都应完成复盘归档。失败的经验比成功更有价值，避免重复踩坑。建议每季度回顾一次归档记录，总结选品规律。
+                                每个清仓SKU都应完成复盘归档。失败的经验比成功更有价值，避免重复踩坑。可点击上方“复制复盘模板”，把当前看板数据带入周报或归档文档。
                         </p>
                 </div>
         </div>

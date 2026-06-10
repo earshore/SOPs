@@ -1,5 +1,6 @@
 import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
 import { showToast } from '@/common/ui/notifications';
+import { recordOpsMetric } from '@/common/utils/opsMetrics';
 import { safeMount } from '@/common/utils/safeMount';
 import { loadTemplate } from '@/common/utils/viewLoader';
 import { StorageService } from '@/services/storageService';
@@ -132,6 +133,7 @@ type ParsedReport = ReturnType<typeof parseReport>;
 const STORAGE_KEY = 'ppc_search_terms_thresholds_v1';
 const ANALYSIS_SETTINGS_STORAGE_KEY = 'ppc_search_terms_analysis_settings_v1';
 const REPORT_SELECTION_STORAGE_KEY = 'ppc_report_selection_v1';
+const ACTION_OWNER_STORAGE_KEY = 'ppc_action_owner_v1';
 const MAX_RENDER_ROWS = 300;
 const ACTION_LABELS: Record<ActionType, string> = {
   negative_exact: '否精准',
@@ -169,6 +171,8 @@ const ACTION_ICONS: Record<ActionType, string> = {
   campaign_structure: 'fas fa-diagram-project',
   observe: 'fas fa-eye',
 };
+const DEFAULT_ACTION_OWNER = '广告负责人';
+const ACTION_ITEM_COLUMNS = ['ActionItem ID', 'Risk Level', 'Requires Human Confirmation', 'Status', 'Owner'];
 
 const CLASSIFICATION_RULES: ClassificationRule[] = [
   {
@@ -366,6 +370,7 @@ const mountInternal = async (container: HTMLElement): Promise<void> => {
   restoreThresholds(container);
   restoreReportSelection(container);
   restoreAnalysisSettings(container);
+  restoreActionOwner(container);
   bindEvents(container);
   renderFilterButtons(container, activeReportType);
   updateResults(container, []);
@@ -387,11 +392,11 @@ function bindEvents(container: HTMLElement): void {
   addListener(getElement(container, 'ppc-btn-clear'), 'click', () => clearAnalyzer(container));
   addListener(getElement(container, 'ppc-analysis-settings-toggle'), 'click', () => toggleAnalysisSettings(container));
   addListener(getElement(container, 'ppc-report-type'), 'change', () => handleReportSelectionChange(container));
-  addListener(getElement(container, 'ppc-export-all'), 'click', () => exportRows('all'));
-  addListener(getElement(container, 'ppc-export-current'), 'click', () => exportRows(activeFilter, true));
-  addListener(getElement(container, 'ppc-export-negative'), 'click', () => exportRows(getWasteExportFilter()));
-  addListener(getElement(container, 'ppc-export-harvest'), 'click', () => exportRows(getGrowthExportFilter()));
-  addListener(getElement(container, 'ppc-copy-summary'), 'click', () => copySummary());
+  addListener(getElement(container, 'ppc-export-all'), 'click', () => exportRows(container, 'all'));
+  addListener(getElement(container, 'ppc-export-current'), 'click', () => exportRows(container, activeFilter, true));
+  addListener(getElement(container, 'ppc-export-negative'), 'click', () => exportRows(container, getWasteExportFilter()));
+  addListener(getElement(container, 'ppc-export-harvest'), 'click', () => exportRows(container, getGrowthExportFilter()));
+  addListener(getElement(container, 'ppc-copy-summary'), 'click', () => copySummary(container));
   addListener(getInput(container, 'ppc-action-search'), 'input', () => handleActionSearch(container));
   addListener(getInput(container, 'ppc-action-search'), 'keydown', (event) => handleActionSearchKeydown(container, event));
   addListener(getElement(container, 'ppc-action-search-clear'), 'click', () => clearActionSearch(container));
@@ -407,6 +412,8 @@ function bindEvents(container: HTMLElement): void {
   getAnalysisSettingInputs(container).forEach((input) => {
     addListener(input, 'change', () => handleAnalysisSettingsChange(container));
   });
+
+  addListener(getInput(container, 'ppc-action-owner'), 'input', () => saveActionOwner(readActionOwner(container)));
 }
 
 function addListener(
@@ -1547,7 +1554,7 @@ function isFilterType(value: string | undefined): value is FilterType {
   return value === 'all' || Object.prototype.hasOwnProperty.call(ACTION_LABELS, value);
 }
 
-function exportRows(filter: FilterType, includeSearch = false): void {
+function exportRows(container: HTMLElement, filter: FilterType, includeSearch = false): void {
   const baseRows = includeSearch ? searchRows(analyzedRows) : analyzedRows;
   const rows = filterRows(baseRows, filter);
   if (rows.length === 0) {
@@ -1555,21 +1562,25 @@ function exportRows(filter: FilterType, includeSearch = false): void {
     return;
   }
 
-  const csv = buildActionCsv(rows);
+  const owner = readActionOwner(container);
+  saveActionOwner(owner);
+  const csv = buildActionCsv(rows, owner);
   downloadText(`ppc-${activeReportType}-actions-${filter}-${today()}.csv`, csv);
+  recordOpsMetric('ppc.action_export');
   showToast('导出完成', { type: 'success', description: `${rows.length} 行动作已导出` });
 }
 
-export function buildActionCsv(rows: AnalyzedRow[]): string {
+export function buildActionCsv(rows: AnalyzedRow[], owner = DEFAULT_ACTION_OWNER): string {
+  const actionOwner = normalizeActionOwner(owner);
   if (rows[0]?.reportType === 'erp_campaign') {
-    return buildCampaignActionCsv(rows);
+    return buildCampaignActionCsv(rows, actionOwner);
   }
 
   if (rows[0]?.reportType === 'erp_search_term') {
-    return buildErpSearchTermActionCsv(rows);
+    return buildErpSearchTermActionCsv(rows, actionOwner);
   }
 
-  const headers = ['Action', 'Search Term', 'Campaign', 'Ad Group', 'Keyword', 'Spend', 'Sales', 'Orders', 'ACOS', 'Reason'];
+  const headers = ['Action', 'Search Term', 'Campaign', 'Ad Group', 'Keyword', 'Spend', 'Sales', 'Orders', 'ACOS', 'Reason', ...ACTION_ITEM_COLUMNS];
   const lines = rows.map((row) => [
     row.actionLabel,
     row.searchTerm,
@@ -1581,12 +1592,13 @@ export function buildActionCsv(rows: AnalyzedRow[]): string {
     String(row.orders),
     row.sales > 0 ? row.acos.toFixed(2) : '',
     row.reason,
+    ...buildActionItemCsvFields(row, actionOwner),
   ]);
   return [headers, ...lines].map((line) => line.map(escapeCsv).join(',')).join('\n');
 }
 
-function buildErpSearchTermActionCsv(rows: AnalyzedRow[]): string {
-  const headers = ['Action', 'Store', 'Search Term', 'Campaign', 'Ad Group', 'Targeting', 'Match Type', 'Spend', 'Sales', 'Orders', 'ACOS', 'Reason'];
+function buildErpSearchTermActionCsv(rows: AnalyzedRow[], owner: string): string {
+  const headers = ['Action', 'Store', 'Search Term', 'Campaign', 'Ad Group', 'Targeting', 'Match Type', 'Spend', 'Sales', 'Orders', 'ACOS', 'Reason', ...ACTION_ITEM_COLUMNS];
   const lines = rows.map((row) => [
     row.actionLabel,
     row.store || '',
@@ -1600,12 +1612,13 @@ function buildErpSearchTermActionCsv(rows: AnalyzedRow[]): string {
     String(row.orders),
     row.sales > 0 ? row.acos.toFixed(2) : '',
     row.reason,
+    ...buildActionItemCsvFields(row, owner),
   ]);
   return [headers, ...lines].map((line) => line.map(escapeCsv).join(',')).join('\n');
 }
 
-function buildCampaignActionCsv(rows: AnalyzedRow[]): string {
-  const headers = ['Action', 'Campaign', 'Store', 'Targeting Type', 'Service Status', 'Daily Budget', 'Spend', 'Sales', 'Orders', 'ACOS', 'ROAS', 'Reason'];
+function buildCampaignActionCsv(rows: AnalyzedRow[], owner: string): string {
+  const headers = ['Action', 'Campaign', 'Store', 'Targeting Type', 'Service Status', 'Daily Budget', 'Spend', 'Sales', 'Orders', 'ACOS', 'ROAS', 'Reason', ...ACTION_ITEM_COLUMNS];
   const lines = rows.map((row) => [
     row.actionLabel,
     row.searchTerm,
@@ -1619,8 +1632,59 @@ function buildCampaignActionCsv(rows: AnalyzedRow[]): string {
     row.sales > 0 ? row.acos.toFixed(2) : '',
     typeof row.roas === 'number' && row.roas > 0 ? row.roas.toFixed(2) : '',
     row.reason,
+    ...buildActionItemCsvFields(row, owner),
   ]);
   return [headers, ...lines].map((line) => line.map(escapeCsv).join(',')).join('\n');
+}
+
+function buildActionItemCsvFields(row: AnalyzedRow, owner: string): string[] {
+  return [
+    buildActionItemId(row),
+    getActionRiskLevel(row),
+    requiresHumanConfirmation(row) ? 'TRUE' : 'FALSE',
+    getActionStatus(row),
+    owner,
+  ];
+}
+
+function buildActionItemId(row: AnalyzedRow): string {
+  return `ppc-${row.reportType}-${slugForId(row.id)}`;
+}
+
+function slugForId(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80) || 'action';
+}
+
+function getActionRiskLevel(row: AnalyzedRow): string {
+  if ([
+    'negative_exact',
+    'scale_budget',
+    'bid_down',
+    'campaign_fix_status',
+    'campaign_pause',
+    'campaign_scale',
+    'campaign_bid_down',
+  ].includes(row.action)) {
+    return 'high';
+  }
+
+  if (row.action === 'observe') {
+    return 'low';
+  }
+
+  return 'medium';
+}
+
+function requiresHumanConfirmation(row: AnalyzedRow): boolean {
+  return row.action !== 'observe';
+}
+
+function getActionStatus(row: AnalyzedRow): string {
+  return requiresHumanConfirmation(row) ? 'pending_human_review' : 'monitoring';
 }
 
 function formatOptionalNumber(value: number | undefined): string {
@@ -1644,51 +1708,121 @@ function downloadText(filename: string, content: string): void {
   URL.revokeObjectURL(url);
 }
 
-async function copySummary(): Promise<void> {
+async function copySummary(container: HTMLElement): Promise<void> {
   if (analyzedRows.length === 0) {
     showToast('没有可复制的摘要', { type: 'warning' });
     return;
   }
 
-  const summary = buildSummaryText(analyzedRows);
+  const owner = readActionOwner(container);
+  saveActionOwner(owner);
+  const summary = buildSummaryText(analyzedRows, owner);
   try {
     if (!navigator.clipboard?.writeText) {
       throw new Error('Clipboard API unavailable');
     }
     await navigator.clipboard.writeText(summary);
-    showToast('周报摘要已复制', { type: 'success' });
+    recordOpsMetric('ppc.review_template_copy');
+    showToast('复盘模板已复制', { type: 'success' });
   } catch {
     showToast('复制失败', { type: 'error', description: '当前浏览器没有开放剪贴板写入权限' });
   }
 }
 
-export function buildSummaryText(rows: AnalyzedRow[]): string {
+export function buildSummaryText(rows: AnalyzedRow[], owner = DEFAULT_ACTION_OWNER): string {
+  const actionOwner = normalizeActionOwner(owner);
   if (rows[0]?.reportType === 'erp_campaign') {
-    return buildCampaignSummaryText(rows);
+    return buildCampaignSummaryText(rows, actionOwner);
   }
 
   const summary = summarize(rows);
   const count = (type: ActionType) => rows.filter((row) => row.action === type).length;
-  const title = rows[0]?.reportType === 'erp_search_term' ? 'ERP 广告搜索词周报摘要' : 'PPC 搜索词周报摘要';
+  const reviewCount = countHumanReviewRows(rows);
+  const title = rows[0]?.reportType === 'erp_search_term' ? 'ERP 广告搜索词周复盘' : 'PPC 搜索词周复盘';
   return [
-    `${title} ${today()}`,
-    `搜索词行数：${summary.rowCount}`,
-    `花费：${formatCurrency(summary.spend)}，销售额：${formatCurrency(summary.sales)}，ACOS：${summary.sales > 0 ? formatPercent(summary.acos) : '-'}`,
-    `否精准：${count('negative_exact')}，加精准：${count('harvest_exact')}，加预算：${count('scale_budget')}，降竞价：${count('bid_down')}，进词池：${count('listing_term')}`,
-    `本周优先处理：${rows.filter((row) => row.action !== 'observe').slice(0, 5).map((row) => `${row.searchTerm}(${row.actionLabel})`).join('、') || '无'}`,
+    `# ${title} ${today()}`,
+    '',
+    '## 复盘结论',
+    `- 搜索词行数：${summary.rowCount}`,
+    `- 花费：${formatCurrency(summary.spend)}，销售额：${formatCurrency(summary.sales)}，ACOS：${summary.sales > 0 ? formatPercent(summary.acos) : '-'}`,
+    `- 动作计数：否精准：${count('negative_exact')}，加精准：${count('harvest_exact')}，加预算：${count('scale_budget')}，降竞价：${count('bid_down')}，进词池：${count('listing_term')}`,
+    `- 人工复核：${reviewCount} 项建议动作需人工执行；观察项不自动执行。`,
+    `- 建议动作 Owner：${actionOwner}`,
+    '',
+    '## 关键证据',
+    ...buildTopEvidenceLines(rows),
+    '',
+    '## 建议动作（人工执行）',
+    ...buildReviewActionLines(rows, actionOwner),
+    '',
+    '## 下周跟进',
+    '- [ ] 完成高风险动作的人工作业记录。',
+    '- [ ] 复查本周否词/加词/调预算后的花费、订单和 ACOS 变化。',
+    '',
+    '## 复盘记录',
+    '- 复盘人：',
+    '- 复盘时间：',
+    `- 下次动作负责人：${actionOwner}`,
   ].join('\n');
 }
 
-function buildCampaignSummaryText(rows: AnalyzedRow[]): string {
+function buildCampaignSummaryText(rows: AnalyzedRow[], owner: string): string {
   const summary = summarize(rows);
   const count = (type: ActionType) => rows.filter((row) => row.action === type).length;
+  const reviewCount = countHumanReviewRows(rows);
   return [
-    `PPC 广告活动周报摘要 ${today()}`,
-    `广告活动数：${summary.rowCount}`,
-    `花费：${formatCurrency(summary.spend)}，销售额：${formatCurrency(summary.sales)}，ACOS：${summary.sales > 0 ? formatPercent(summary.acos) : '-'}`,
-    `处理状态：${count('campaign_fix_status')}，暂停/降预算：${count('campaign_pause')}，活动加预算：${count('campaign_scale')}，控价降竞价：${count('campaign_bid_down')}，结构复盘：${count('campaign_structure')}`,
-    `本周优先处理：${rows.filter((row) => row.action !== 'observe').slice(0, 5).map((row) => `${row.searchTerm}(${row.actionLabel})`).join('、') || '无'}`,
+    `# PPC 广告活动周复盘 ${today()}`,
+    '',
+    '## 复盘结论',
+    `- 广告活动数：${summary.rowCount}`,
+    `- 花费：${formatCurrency(summary.spend)}，销售额：${formatCurrency(summary.sales)}，ACOS：${summary.sales > 0 ? formatPercent(summary.acos) : '-'}`,
+    `- 动作计数：处理状态：${count('campaign_fix_status')}，暂停/降预算：${count('campaign_pause')}，活动加预算：${count('campaign_scale')}，控价降竞价：${count('campaign_bid_down')}，结构复盘：${count('campaign_structure')}`,
+    `- 人工复核：${reviewCount} 项建议动作需人工执行；观察项不自动执行。`,
+    `- 建议动作 Owner：${owner}`,
+    '',
+    '## 关键证据',
+    ...buildTopEvidenceLines(rows),
+    '',
+    '## 建议动作（人工执行）',
+    ...buildReviewActionLines(rows, owner),
+    '',
+    '## 下周跟进',
+    '- [ ] 完成高风险活动调整的人工作业记录。',
+    '- [ ] 复查本周状态处理、预算调整和结构复盘后的花费、订单和 ACOS 变化。',
+    '',
+    '## 复盘记录',
+    '- 复盘人：',
+    '- 复盘时间：',
+    `- 下次动作负责人：${owner}`,
   ].join('\n');
+}
+
+function countHumanReviewRows(rows: AnalyzedRow[]): number {
+  return rows.filter(requiresHumanConfirmation).length;
+}
+
+function buildTopEvidenceLines(rows: AnalyzedRow[]): string[] {
+  const evidenceRows = rows
+    .filter(requiresHumanConfirmation)
+    .slice(0, 5);
+
+  if (evidenceRows.length === 0) {
+    return ['- 暂无需要人工动作的高优先级证据。'];
+  }
+
+  return evidenceRows.map((row) => `- ${row.searchTerm}：${row.actionLabel}，花费 ${formatCurrency(row.spend)}，销售额 ${formatCurrency(row.sales)}，订单 ${row.orders}，ACOS ${row.sales > 0 ? formatPercent(row.acos) : '-'}。`);
+}
+
+function buildReviewActionLines(rows: AnalyzedRow[], owner: string): string[] {
+  const actionRows = rows
+    .filter(requiresHumanConfirmation)
+    .slice(0, 5);
+
+  if (actionRows.length === 0) {
+    return ['- 暂无需要人工执行的建议动作，继续观察。'];
+  }
+
+  return actionRows.map((row) => `- [ ] ${row.actionLabel}：${row.searchTerm}；原因：${row.reason}；Owner：${owner}；状态：${getActionStatus(row)}。`);
 }
 
 function handleThresholdChange(container: HTMLElement): void {
@@ -1746,6 +1880,24 @@ function saveAnalysisSettings(settings: AnalysisSettings): void {
     allowLocalFallback: settings.allowLocalFallback,
     useContext: settings.useContext,
   });
+}
+
+function restoreActionOwner(container: HTMLElement): void {
+  const saved = StorageService.get<string>(ACTION_OWNER_STORAGE_KEY, DEFAULT_ACTION_OWNER);
+  const input = getInput(container, 'ppc-action-owner');
+  if (input) input.value = normalizeActionOwner(saved);
+}
+
+function readActionOwner(container: HTMLElement): string {
+  return normalizeActionOwner(getInput(container, 'ppc-action-owner')?.value);
+}
+
+function saveActionOwner(owner: string): void {
+  StorageService.set(ACTION_OWNER_STORAGE_KEY, normalizeActionOwner(owner));
+}
+
+function normalizeActionOwner(owner: unknown): string {
+  return typeof owner === 'string' && owner.trim() ? owner.trim() : DEFAULT_ACTION_OWNER;
 }
 
 function restoreReportSelection(container: HTMLElement): void {

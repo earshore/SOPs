@@ -36,6 +36,101 @@
                         </div>
                 </div>
         </div>
+        <!-- 三条运营作业主线 -->
+        <section class="mb-8" aria-label="三条运营作业主线">
+                <div class="flex items-center justify-between gap-3 mb-4">
+                        <div>
+                                <h2 class="text-xl font-bold text-slate-800">三条运营作业主线</h2>
+                                <p class="text-sm text-slate-500">从任务出发串联 SOP、工具、动作和复盘，避免只停留在阅读文档。</p>
+                        </div>
+                        <span class="hidden sm:inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-100">
+                                <i class="fas fa-diagram-project"></i>作业闭环
+                        </span>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                        <div class="sop-card border-l-4 border-l-emerald-400" data-action="switch-tab"
+                                data-tab="sops_npi_tracker">
+                                <div class="flex items-start justify-between mb-3">
+                                        <div class="sop-icon-container bg-emerald-50 text-emerald-600">
+                                                <i class="fas fa-seedling"></i>
+                                        </div>
+                                        <span class="sop-status-badge sop-status-active">新人主线</span>
+                                </div>
+                                <h3 class="font-bold text-lg text-slate-800 mb-2">新品作业流</h3>
+                                <p class="text-sm text-slate-500 mb-3">建档、合规、定价、推广和周复盘，输出继续、观察或清仓结论。</p>
+                                <div class="text-xs text-slate-400">
+                                        <i class="fas fa-arrow-right mr-1"></i>NPI Tracker → Listing SEO → 高危词检查
+                                </div>
+                        </div>
+                        <div class="sop-card border-l-4 border-l-teal-400" data-action="switch-tab"
+                                data-tab="ppc_search_terms">
+                                <div class="flex items-start justify-between mb-3">
+                                        <div class="sop-icon-container bg-teal-50 text-teal-600">
+                                                <i class="fas fa-magnifying-glass-dollar"></i>
+                                        </div>
+                                        <span class="sop-status-badge sop-status-active">动作清单</span>
+                                </div>
+                                <h3 class="font-bold text-lg text-slate-800 mb-2">广告作业流</h3>
+                                <p class="text-sm text-slate-500 mb-3">导入搜索词或活动报表，生成否词、加词、降竞价和复盘建议。</p>
+                                <div class="text-xs text-slate-400">
+                                        <i class="fas fa-arrow-right mr-1"></i>PPC SOP → 搜索词分析器 → 周报摘要
+                                </div>
+                        </div>
+                        <div class="sop-card border-l-4 border-l-indigo-400" data-action="switch-tab"
+                                data-tab="scraper">
+                                <div class="flex items-start justify-between mb-3">
+                                        <div class="sop-icon-container bg-indigo-50 text-indigo-600">
+                                                <i class="fas fa-cubes-stacked"></i>
+                                        </div>
+                                        <span class="sop-status-badge sop-status-active">分析主线</span>
+                                </div>
+                                <h3 class="font-bold text-lg text-slate-800 mb-2">竞品与 Listing 作业流</h3>
+                                <p class="text-sm text-slate-500 mb-3">采集竞品素材，提炼产品洞察，生成 Listing 改写 Prompt 和补词清单。</p>
+                                <div class="text-xs text-slate-400">
+                                        <i class="fas fa-arrow-right mr-1"></i>数据采集 → AI 分析 → Prompt 生成
+                                </div>
+                        </div>
+                </div>
+        </section>
+        <!-- 本地试运行计数 -->
+        <section class="mb-8" aria-label="本地试运行计数">
+                <div class="flex items-center justify-between gap-3 mb-4">
+                        <div>
+                                <h2 class="text-xl font-bold text-slate-800">本地试运行计数</h2>
+                                <p class="text-sm text-slate-500">只统计本机浏览器的核心输出动作，用来判断样板流是否真的被跑过。</p>
+                        </div>
+                        <span class="hidden sm:inline-flex items-center gap-1 px-3 py-1 rounded-full bg-slate-50 text-slate-600 text-xs font-semibold border border-slate-200">
+                                <i class="fas fa-chart-simple"></i>本地记录
+                        </span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
+                        <div class="bg-white rounded-xl border border-slate-200 p-4">
+                                <div class="text-xs font-semibold text-slate-500 mb-2">PPC 动作导出</div>
+                                <div class="text-2xl font-bold text-teal-600" data-ops-metric-count="ppc.action_export">0</div>
+                                <div class="text-xs text-slate-400 mt-1">最后：<span data-ops-metric-last="ppc.action_export">未记录</span></div>
+                        </div>
+                        <div class="bg-white rounded-xl border border-slate-200 p-4">
+                                <div class="text-xs font-semibold text-slate-500 mb-2">PPC 复盘复制</div>
+                                <div class="text-2xl font-bold text-teal-600" data-ops-metric-count="ppc.review_template_copy">0</div>
+                                <div class="text-xs text-slate-400 mt-1">最后：<span data-ops-metric-last="ppc.review_template_copy">未记录</span></div>
+                        </div>
+                        <div class="bg-white rounded-xl border border-slate-200 p-4">
+                                <div class="text-xs font-semibold text-slate-500 mb-2">NPI CSV 导出</div>
+                                <div class="text-2xl font-bold text-emerald-600" data-ops-metric-count="npi.csv_export">0</div>
+                                <div class="text-xs text-slate-400 mt-1">最后：<span data-ops-metric-last="npi.csv_export">未记录</span></div>
+                        </div>
+                        <div class="bg-white rounded-xl border border-slate-200 p-4">
+                                <div class="text-xs font-semibold text-slate-500 mb-2">NPI 复盘复制</div>
+                                <div class="text-2xl font-bold text-emerald-600" data-ops-metric-count="npi.review_template_copy">0</div>
+                                <div class="text-xs text-slate-400 mt-1">最后：<span data-ops-metric-last="npi.review_template_copy">未记录</span></div>
+                        </div>
+                        <div class="bg-white rounded-xl border border-slate-200 p-4">
+                                <div class="text-xs font-semibold text-slate-500 mb-2">Listing 复盘复制</div>
+                                <div class="text-2xl font-bold text-indigo-600" data-ops-metric-count="listing.review_template_copy">0</div>
+                                <div class="text-xs text-slate-400 mt-1">最后：<span data-ops-metric-last="listing.review_template_copy">未记录</span></div>
+                        </div>
+                </div>
+        </section>
         <!-- 新人常用任务 -->
         <section class="mb-8" aria-label="新人常用任务">
                 <div class="flex items-center justify-between gap-3 mb-4">

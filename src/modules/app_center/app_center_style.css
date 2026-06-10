@@ -316,6 +316,10 @@
   gap: 0.75rem;
 }
 
+.app-overview-flow-grid--tasks {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .app-flow-step.app-child-link {
   --flow-accent: var(--app-primary);
   --flow-accent-soft: var(--app-primary-soft);

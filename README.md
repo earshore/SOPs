@@ -4,6 +4,10 @@ sops 是一个 Vite + TypeScript 静态前端项目，面向亚马逊运营团�
 
 > 本 README 已按最新远端 tag `v3.0.1-rc.2`、当前代码结构、`package.json` 脚本和部署文档重新核对。`docs/archive/` 与 `.kiro/specs/` 中的阶段性文档可作历史参考，不建议直接作为当前开发依据。
 
+## 产品收敛方向
+
+本项目下一阶段不追求外部商用平台能力，而是收敛为小团队内部的运营作业系统：新人能独立完成任务，老手能更快生成动作，团队能沉淀复盘。新增页面、工具或 Agent 前，应先对齐 [运营作业系统落地计划](./docs/OPERATING_SYSTEM_ROADMAP.md) 中的主线、闭环标准和不做事项。
+
 ## 最新发布
 
 当前最新 tag 是 `v3.0.1-rc.2`（2026-06-08，release candidate）；最新稳定 tag 仍是 `v3.0.0`。`v3.0.1-rc.2` 修复了 PPC 搜索词模块的 ESLint warning gate，`v3.0.1` 系列累计带来以下面向运营的变化：

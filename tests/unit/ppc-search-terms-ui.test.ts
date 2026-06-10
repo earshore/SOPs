@@ -60,6 +60,7 @@ const mocks = vi.hoisted(() => ({
       <input id="ppc-min-spend" value="15" />
       <input id="ppc-min-orders" value="2" />
       <input id="ppc-min-ctr" value="0.35" />
+      <input id="ppc-action-owner" value="广告负责人" />
       <input id="ppc-allow-local-fallback" type="checkbox" />
       <input id="ppc-use-context" type="checkbox" />
       <button id="ppc-analysis-settings-toggle" type="button" aria-expanded="false"></button>
@@ -201,6 +202,10 @@ describe('PPC 搜索词分析器 UI 行为', () => {
     expect(container.querySelector('#ppc-stat-rows')?.textContent).toBe('10');
     expect(container.querySelector('#ppc-result-count')?.textContent).toBe('共 10 行，当前筛选 2 行。');
     expect(anchorClick).toHaveBeenCalled();
+    expect(mocks.storageSet).toHaveBeenCalledWith('ppc_action_owner_v1', '广告负责人');
+    expect(mocks.storageSet).toHaveBeenCalledWith('ops_metrics_v1', expect.objectContaining({
+      'ppc.action_export': expect.objectContaining({ count: 1 }),
+    }));
     expect(showToast).toHaveBeenCalledWith('导出完成', { type: 'success', description: '2 行动作已导出' });
   });
 
@@ -243,6 +248,28 @@ describe('PPC 搜索词分析器 UI 行为', () => {
       type: 'error',
       description: '当前浏览器没有开放剪贴板写入权限',
     });
+  });
+
+  it('复制复盘模板成功时记录本地使用次数', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    });
+
+    await loadSampleAndAnalyze(container);
+    const ownerInput = container.querySelector<HTMLInputElement>('#ppc-action-owner');
+    if (ownerInput) ownerInput.value = '广告小张';
+    container.querySelector<HTMLButtonElement>('#ppc-copy-summary')?.click();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(writeText).toHaveBeenCalledWith(expect.stringContaining('# PPC 搜索词周复盘'));
+    expect(writeText).toHaveBeenCalledWith(expect.stringContaining('Owner：广告小张'));
+    expect(mocks.storageSet).toHaveBeenCalledWith('ppc_action_owner_v1', '广告小张');
+    expect(mocks.storageSet).toHaveBeenCalledWith('ops_metrics_v1', expect.objectContaining({
+      'ppc.review_template_copy': expect.objectContaining({ count: 1 }),
+    }));
+    expect(showToast).toHaveBeenCalledWith('复盘模板已复制', { type: 'success' });
   });
 
   it('导入或加载数据后等待用户主动点击分析', async () => {

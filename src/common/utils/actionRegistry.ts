@@ -76,6 +76,8 @@ const NAMING_CONVENTIONS: NamingConventions = {
     'saveNextSteps',
     'closeNextStepModal',
     'exportToExcel',
+    'copyNpiReviewTemplate',
+    'copyListingReviewTemplate',
     'filterByStore',
     'filterByStage',
 
