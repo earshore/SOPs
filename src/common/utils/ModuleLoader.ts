@@ -67,6 +67,7 @@ export class ModuleLoader {
   private loaderColor: string;
   private moduleName: string;
   private currentModule: IModule | null;
+  private currentContainer: HTMLElement | null;
   private routePrefixes: Set<string>;
   private currentRouteId: string | null; // 🔧 新增：记录当前加载的路由ID
   private isLoading: boolean; // 🔧 新增：标记是否正在加载
@@ -80,6 +81,7 @@ export class ModuleLoader {
     this.loaderColor = config.loaderColor || 'blue';
     this.moduleName = config.moduleName || 'Module';
     this.currentModule = null;
+    this.currentContainer = null;
     this.currentRouteId = null; // 🔧 初始化
     this.isLoading = false; // 🔧 初始化
     this.pendingRouteId = null;
@@ -175,7 +177,11 @@ export class ModuleLoader {
         console.error(`[${this.moduleName}] 卸载模块时出错:`, unmountErr);
       }
     }
+    if (this.currentContainer) {
+      this.currentContainer.replaceChildren();
+    }
     this.currentModule = null;
+    this.currentContainer = null;
     this.currentRouteId = null; // 🔧 清除路由ID记录
   }
 
@@ -267,6 +273,7 @@ export class ModuleLoader {
       this._unmountCurrentModule();
     }
 
+    this.currentContainer = container;
     this._renderLoading(container);
     return container;
   }

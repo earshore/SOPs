@@ -847,6 +847,35 @@
   height: auto;
 }
 
+.wb-container--simple::before,
+.wb-container--simple::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.wb-container--simple::before {
+  background:
+    radial-gradient(circle 190px at 94% 14%, var(--wb-orb-1-color, rgba(96, 165, 250, 0.15)) 0%, transparent 70%),
+    radial-gradient(circle 150px at 2% 108%, var(--wb-orb-2-color, rgba(147, 197, 253, 0.12)) 0%, transparent 72%),
+    radial-gradient(circle 110px at 70% 42%, var(--wb-orb-3-color, rgba(59, 130, 246, 0.08)) 0%, transparent 74%);
+  mix-blend-mode: multiply;
+  opacity: 0.9;
+}
+
+.wb-container--simple::after {
+  background:
+    radial-gradient(circle at 90% 16%, var(--wb-particle-color, rgba(59, 130, 246, 0.28)) 0 2px, transparent 3px),
+    radial-gradient(circle at 82% 54%, var(--wb-particle-color, rgba(59, 130, 246, 0.28)) 0 2px, transparent 3px),
+    radial-gradient(circle at 64% 72%, var(--wb-particle-color, rgba(59, 130, 246, 0.28)) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 20% 32%, var(--wb-particle-color, rgba(59, 130, 246, 0.28)) 0 2px, transparent 3px),
+    radial-gradient(circle at 36% 46%, var(--wb-particle-color, rgba(59, 130, 246, 0.28)) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 15% 66%, var(--wb-particle-color, rgba(59, 130, 246, 0.28)) 0 2px, transparent 3px);
+  opacity: 0.46;
+}
+
 .wb-container--simple:hover {
   border-color: rgba(37, 99, 235, 0.22);
   box-shadow: 0 14px 32px -26px rgba(15, 23, 42, 0.55);
@@ -1298,4 +1327,90 @@
   --wb-orb-2-color: rgba(147, 197, 253, 0.12);
   --wb-orb-3-color: rgba(59, 130, 246, 0.08);
   --wb-particle-color: rgba(59, 130, 246, 0.6);
+}
+
+.wb-theme-neutral {
+  --wb-gradient-1: rgba(248, 250, 252, 0.95);
+  --wb-gradient-2: rgba(241, 245, 249, 0.90);
+  --wb-orb-1-color: rgba(148, 163, 184, 0.15);
+  --wb-orb-2-color: rgba(203, 213, 225, 0.12);
+  --wb-orb-3-color: rgba(100, 116, 139, 0.08);
+  --wb-particle-color: rgba(100, 116, 139, 0.6);
+}
+
+.wb-theme-cyan {
+  --wb-gradient-1: rgba(236, 254, 255, 0.95);
+  --wb-gradient-2: rgba(207, 250, 254, 0.90);
+}
+
+.wb-theme-growth {
+  --wb-gradient-1: rgba(236, 253, 245, 0.95);
+  --wb-gradient-2: rgba(209, 250, 229, 0.90);
+  --wb-orb-1-color: rgba(52, 211, 153, 0.15);
+  --wb-orb-2-color: rgba(110, 231, 183, 0.12);
+  --wb-orb-3-color: rgba(16, 185, 129, 0.08);
+  --wb-particle-color: rgba(16, 185, 129, 0.6);
+}
+
+.wb-theme-safety {
+  --wb-gradient-1: rgba(255, 247, 237, 0.95);
+  --wb-gradient-2: rgba(255, 237, 213, 0.90);
+  --wb-orb-1-color: rgba(251, 146, 60, 0.15);
+  --wb-orb-2-color: rgba(253, 186, 116, 0.12);
+  --wb-orb-3-color: rgba(249, 115, 22, 0.08);
+  --wb-particle-color: rgba(249, 115, 22, 0.6);
+}
+
+.wb-theme-supply {
+  --wb-gradient-1: rgba(255, 251, 235, 0.95);
+  --wb-gradient-2: rgba(254, 243, 199, 0.90);
+  --wb-orb-1-color: rgba(251, 191, 36, 0.15);
+  --wb-orb-2-color: rgba(252, 211, 77, 0.12);
+  --wb-orb-3-color: rgba(245, 158, 11, 0.08);
+  --wb-particle-color: rgba(245, 158, 11, 0.6);
+}
+
+.wb-theme-service {
+  --wb-gradient-1: rgba(250, 245, 255, 0.95);
+  --wb-gradient-2: rgba(243, 232, 255, 0.90);
+  --wb-orb-1-color: rgba(192, 132, 252, 0.15);
+  --wb-orb-2-color: rgba(216, 180, 254, 0.12);
+  --wb-orb-3-color: rgba(168, 85, 247, 0.08);
+  --wb-particle-color: rgba(168, 85, 247, 0.6);
+}
+
+.wb-theme-indigo {
+  --wb-gradient-1: rgba(238, 242, 255, 0.95);
+  --wb-gradient-2: rgba(224, 231, 255, 0.90);
+  --wb-orb-1-color: rgba(99, 102, 241, 0.15);
+  --wb-orb-2-color: rgba(139, 92, 246, 0.12);
+  --wb-orb-3-color: rgba(168, 85, 247, 0.08);
+  --wb-particle-color: rgba(99, 102, 241, 0.6);
+}
+
+.wb-theme-hub-promo-tools {
+  --wb-gradient-1: rgba(239, 253, 248, 0.96);
+  --wb-gradient-2: rgba(220, 252, 231, 0.92);
+  --wb-orb-1-color: rgba(34, 197, 94, 0.16);
+  --wb-orb-2-color: rgba(59, 130, 246, 0.12);
+  --wb-orb-3-color: rgba(16, 185, 129, 0.08);
+  --wb-particle-color: rgba(16, 185, 129, 0.45);
+}
+
+.wb-theme-hub-promo-activities {
+  --wb-gradient-1: rgba(239, 253, 248, 0.96);
+  --wb-gradient-2: rgba(220, 252, 231, 0.92);
+  --wb-orb-1-color: rgba(34, 197, 94, 0.16);
+  --wb-orb-2-color: rgba(249, 115, 22, 0.12);
+  --wb-orb-3-color: rgba(16, 185, 129, 0.08);
+  --wb-particle-color: rgba(22, 163, 74, 0.45);
+}
+
+.wb-theme-more-agents {
+  --wb-gradient-1: rgba(236, 253, 245, 0.95);
+  --wb-gradient-2: rgba(207, 250, 254, 0.90);
+  --wb-orb-1-color: rgba(16, 185, 129, 0.14);
+  --wb-orb-2-color: rgba(6, 182, 212, 0.12);
+  --wb-orb-3-color: rgba(245, 158, 11, 0.08);
+  --wb-particle-color: rgba(20, 184, 166, 0.55);
 }

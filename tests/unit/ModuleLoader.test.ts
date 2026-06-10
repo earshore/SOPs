@@ -124,4 +124,27 @@ describe('ModuleLoader', () => {
     expect(pluginLoader).toHaveBeenCalledTimes(1);
     expect(pluginModule.mount).toHaveBeenCalledTimes(1);
   });
+
+  it('clears the current container when destroyed', async () => {
+    const content = document.getElementById('content') as HTMLElement;
+    const module = createModule('Mounted');
+    const loaderFn = vi.fn(() => Promise.resolve(module));
+    const loader = new ModuleLoader({
+      containerId: 'content',
+      shellId: 'shell',
+      moduleMap: {
+        cleanup_route: loaderFn
+      },
+      moduleName: 'TestLoader'
+    });
+
+    await loader.loadModule('cleanup_route');
+
+    expect(content.textContent).toBe('Mounted');
+
+    loader.destroy();
+
+    expect(module.unmount).toHaveBeenCalledTimes(1);
+    expect(content.textContent).toBe('');
+  });
 });

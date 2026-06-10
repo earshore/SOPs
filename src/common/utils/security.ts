@@ -4,6 +4,8 @@
 // 提供安全的 HTML 渲染方法
 // ================================================================
 
+import { normalizeWelcomeBanners } from './welcomeBannerA11y';
+
 // ==================== 类型定义 ====================
 
 /**
@@ -155,6 +157,7 @@ export function setSafeHtml(element: HTMLElement | null, html: string): void {
   // ✅ 安全: 清空元素后使用createSafeFragment安全插入HTML
   element.replaceChildren();
   element.appendChild(createSafeFragment(html));
+  normalizeWelcomeBanners(element);
 }
 
 // ==================== Markdown处理 ====================

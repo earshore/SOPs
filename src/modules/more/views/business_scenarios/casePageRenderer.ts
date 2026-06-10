@@ -272,6 +272,11 @@ function renderUsageNotice(): string {
     </div>`;
 }
 
+function renderModuleShell(templateHtml: string): string {
+    const shellMatch = templateHtml.match(/^\s*<div\b[^>]*>/);
+    return shellMatch?.[0].trim() || '<div class="module-container py-6">';
+}
+
 const commonPhases: PhaseItem[] = [
     { title: '分步引导', body: '把大任务拆成最小可验证步骤，每步只让 OpenClaw 做一件事。' },
     { title: '单步验证', body: '看抓取数、样本、草稿、报告或看板，不满意当场改，满意再继续。' },
@@ -614,8 +619,7 @@ const scenarioCases: Record<Exclude<CaseId, 'usage_notice'>, ScenarioCase> = {
 };
 
 export function renderBusinessScenarioPage(templateHtml: string, caseId: CaseId): string {
-    const firstSectionIndex = templateHtml.indexOf('\n\n    <section');
-    const shell = firstSectionIndex >= 0 ? templateHtml.slice(0, firstSectionIndex) : templateHtml.replace(/<\/div>\s*$/, '');
+    const shell = renderModuleShell(templateHtml);
     const body = caseId === 'usage_notice' ? renderUsageNotice() : renderScenario(scenarioCases[caseId]);
 
     return `${shell}
